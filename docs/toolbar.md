@@ -1,6 +1,6 @@
 # SDK toolbar implementation and verification boundary
 
-**The first gaming-PC proof-of-concept package build has passed; simulator loading is still pending.** The user's complete Windows console output confirms installed-header contract compilation, Microsoft's package validation, our nine-file structural validation and script completion. Its SDK-generated package remains on that PC; no Community release download has been published. This Linux environment has no MSFS installation, official Windows package builder or VR headset. No SPB, manifest or layout has been fabricated. See the [evidence record](validation-results.md#successful-gaming-pc-proof-of-concept-build).
+**The first gaming-PC proof-of-concept build and desktop panel loading have passed; CommBus replies remain pending.** The user's complete Windows console output confirms installed-header contract compilation, Microsoft's package validation, our nine-file structural validation and script completion. A subsequent screenshot confirms registration and visible diagnostic-panel rendering in MSFS, with its initial waiting label still shown. Its SDK-generated package remains on that PC; no Community release download has been published. This Linux environment has no MSFS installation, official Windows package builder or VR headset. No SPB, manifest or layout has been fabricated. See the [build](validation-results.md#successful-gaming-pc-proof-of-concept-build) and [panel-loading](validation-results.md#proof-of-concept-panel-opened-in-msfs) evidence records.
 
 ## Research and implementation choice
 
@@ -35,7 +35,7 @@ The panel asks for current state once per second only while visible. The engine 
 
 The SDK produces `manifest.json`, `layout.json`, `InGamePanels/aeroscience_panel.spb`, UI files and icon. The release validator checks versions, layout coverage/sizes/FILETIME, internal expected assets and binary registration presence. The SDK build receipt hashes every file; a POC receipt cannot pass the full-release gate. A structural check alone cannot prove simulator loading.
 
-The script retains `sdk-contract.log` and `build.log`, uses its staged project as the working directory, supports explicit tool/header paths, and normalizes receipt file paths with the platform separator. The Windows receipt separator bug from the initial foundation has been corrected. Portable tests exercise compiler failure/log retention. The real gaming-PC POC build is now user-reported passed; the full toolbar build and simulator registration/transport checks remain pending. See the [Windows workbook](windows-testing.md) for exact commands and the Project Editor fallback.
+The script retains `sdk-contract.log` and `build.log`, uses its staged project as the working directory, supports explicit tool/header paths, and normalizes receipt file paths with the platform separator. The Windows receipt separator bug from the initial foundation has been corrected. Portable tests exercise compiler failure/log retention. The real gaming-PC POC build and visible panel loading have passed; the full toolbar build and transport checks remain pending. See the [Windows workbook](windows-testing.md) for exact commands and the Project Editor fallback.
 
 ## VR / input
 

@@ -60,3 +60,11 @@ The official SDK documentation URL supplied by the user returned a proxy access 
 - Output: `C:\Dev\AeroScience\artifacts\toolbar-poc\output\Packages\aeroscience-toolbar`. SDK root shown in the log: `C:\MSFS 2024 SDK`; game `1.9.18.0`; package validator `1.0.7.0`. The exact SDK installer version remains unreported.
 - Preserve `artifacts/toolbar-poc/sdk-contract.log`, `build.log` and `sdk-build.json` on that PC with the generated package. The cloud has received console text and metadata, not the actual SPB or receipt contents.
 - **Passed, user-reported:** installed-header contract compilation and the complete POC package-build/structural-validation script. **Still pending:** Community folder choice/installation, panel registration/rendering, CommBus replies, full toolbar build, Windows companion/live telemetry, Quest 3 and physical iPad checks. No full release has been published.
+
+## Proof-of-concept panel opened in MSFS
+
+- The next user screenshot shows the native `AEROSCIENCE` panel over an actual MSFS flight, displaying `AeroScience registration & CommBus probe`, the read-only explanation and `Waiting for SDK communication service…`.
+- **Confirmed by screenshot:** simulator registration and visible desktop rendering of the diagnostic panel. The installed folder path, simulator distribution, aircraft identity, icon appearance, resizing/dragging and VR interaction are not established by this image.
+- The waiting label is the probe's initial text. It does not distinguish an uninitialized JavaScript service from an absent companion/reply. CommBus request/reply, runtime DLL loading, Windows companion execution and live aircraft telemetry remain pending.
+- Next: locate/check the SDK's native x64 `SimConnect.dll`, copy it beside the chosen companion executable for personal testing, then run simulated telemetry with the toolbar bridge explicitly enabled. Verify changing JSON replies before advancing to the full panel or live telemetry.
+- The user's SDK file listing identifies `C:\MSFS 2024 SDK\SimConnect SDK\lib\SimConnect.dll` (84,480 bytes). This establishes its presence only; architecture, actual Windows loading, exports and simulator connectivity still need checking.

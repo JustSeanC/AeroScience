@@ -182,7 +182,7 @@ Locate your **configured** Community and Community2024 locations in MSFS Develop
    .\AeroScience.Engine.exe --AeroScience:Telemetry=Simulated --AeroScience:EnableToolbarBridge=true --AeroScience:EnableLan=false
    ```
 
-5. Expect changing JSON replies in the POC panel. Its data is intentionally synthetic; this step tests registration/CommBus, not real aircraft telemetry. The normal simulated launcher disables CommBus and is not the probe launcher.
+5. Expect changing JSON replies in the POC panel. Its data is intentionally synthetic; this step tests registration/CommBus, not real aircraft telemetry. The normal simulated launcher disables CommBus and is not the probe launcher. `Waiting for SDK communication service…` is the panel's initial text and can remain visible with no companion/reply; seeing it confirms static panel rendering, not that the JavaScript service or native bridge is connected. Check the companion console for `MSFS toolbar CommBus connected (SU5+); waiting for panel requests`, then require actual changing replies to establish end-to-end transport.
 6. If registration and transport work, stop MSFS and build the full project:
 
    ```powershell
