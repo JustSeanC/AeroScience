@@ -1,6 +1,6 @@
 # Validation results — 2026-10-16
 
-Current-instance Linux validation. These results do not establish simulator, Windows execution, physical-device or published-environment acceptance.
+Initial cloud validation was performed on Linux. Separately identified gaming-PC results below come from the user's supplied Windows logs. Build results do not establish simulator loading, companion execution, physical-device or published-environment acceptance.
 
 | Check | Outcome | Scope |
 | --- | --- | --- |
@@ -19,7 +19,7 @@ The .NET SDK bootstrap archive was verified against Microsoft's published SHA-51
 
 Generated evidence: `tests/AeroScience.Tests/TestResults/foundation.trx`, `artifacts/web-results.json`, `artifacts/dashboard-desktop.png`, `artifacts/dashboard-tablet.png`, the preview ZIP and SHA-256 sidecar. These are ignored development artifacts, not source commits. The ZIP contains only published companion files and user documentation.
 
-**Unrun/pending:** Windows launch/clean-machine installation; official SDK ABI compilation and toolbar package build; actual Community/Community2024 installation on Store/Steam; real SimConnect flights/lifecycle/units; real CommBus/Coherent panel behavior; Quest 3 PCVR; physical iPad Safari/LAN; full release acceptance. PowerShell/SDK scripts and CI configuration were authored but not executed on their target Windows/GitHub runners here. See `verification.md` for the exact checklist.
+**At the initial Linux review, unrun/pending:** Windows launch/clean-machine installation; official SDK ABI compilation and toolbar package build; actual Community/Community2024 installation on Store/Steam; real SimConnect flights/lifecycle/units; real CommBus/Coherent panel behavior; Quest 3 PCVR; physical iPad Safari/LAN; full release acceptance. PowerShell/SDK scripts and CI configuration were authored but not executed on their target Windows/GitHub runners here. See the later gaming-PC reports below and `verification.md` for current status.
 
 The official SDK documentation URL supplied by the user returned a proxy access denial. A custom domain addition plus tested install/start instructions were saved to the cloud environment draft. Saving did not apply that network change, publish a snapshot or validate restoration in a new task.
 
@@ -53,3 +53,10 @@ The official SDK documentation URL supplied by the user returned a proxy access 
 - Corrected only package path matching to be case-insensitive. Original names and bytes remain intact for SDK build receipt hashes. Missing files, incorrect sizes, layout self-reference, case-only duplicate entries and case-colliding physical files remain rejected. Applied the same matching to required assets and their reads to avoid a subsequent false rejection after layout validation.
 - Python regression discovery with PowerShell available: **18 passed** (13 packaging checks and 5 portable helper checks). Tests reproduce lowercase layout entries against mixed-case files and lowercase output assets, and verify rejection of missing/incorrect/duplicate paths. The SDK-provided HTML/CSS/JS/icon sizes in the user's layout also match the checked-in sources.
 - Full script/receipt completion, package installation and simulator/device behavior still require the gaming-PC checks; this correction does not establish them.
+
+## Successful gaming-PC proof-of-concept build
+
+- The user's subsequent complete PowerShell output confirms `sdk-contract.cpp` compilation, official package-tool `Validation SUCCESS` with zero failed tasks, `Community structural validation passed: 9 files`, and the final `SDK-built output` message. The proof-of-concept build script completed its receipt-writing stage without a reported error.
+- Output: `C:\Dev\AeroScience\artifacts\toolbar-poc\output\Packages\aeroscience-toolbar`. SDK root shown in the log: `C:\MSFS 2024 SDK`; game `1.9.18.0`; package validator `1.0.7.0`. The exact SDK installer version remains unreported.
+- Preserve `artifacts/toolbar-poc/sdk-contract.log`, `build.log` and `sdk-build.json` on that PC with the generated package. The cloud has received console text and metadata, not the actual SPB or receipt contents.
+- **Passed, user-reported:** installed-header contract compilation and the complete POC package-build/structural-validation script. **Still pending:** Community folder choice/installation, panel registration/rendering, CommBus replies, full toolbar build, Windows companion/live telemetry, Quest 3 and physical iPad checks. No full release has been published.
