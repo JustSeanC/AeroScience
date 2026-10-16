@@ -12,7 +12,7 @@ packaging = importlib.util.module_from_spec(spec); spec.loader.exec_module(packa
 
 
 class PackagingTests(unittest.TestCase):
-    def community_fixture(self, root, minimum_game_version):
+    def community_fixture(self, root, minimum_game_version, lowercase_assets=False):
         # Structural test data only; this is not an SDK output or simulator acceptance fixture.
         manifest = {'package_version': '0.1.0', 'content_type': 'MISC', 'title': 'AeroScience',
                     'minimum_game_version': minimum_game_version, 'dependencies': []}
@@ -23,13 +23,77 @@ class PackagingTests(unittest.TestCase):
                 b'<ingame-ui panel-id="PANEL_AEROSCIENCE">AeroScience.js AeroScience.css</ingame-ui>',
             'html_ui/InGamePanels/AeroScience/AeroScience.js': b'// test fixture',
             'html_ui/InGamePanels/AeroScience/AeroScience.css': b'/* test fixture */',
+            'html_ui/InGamePanels/AeroScience/ProofOfConcept.html': b'<p>Diagnostic fixture</p>',
+            'html_ui/InGamePanels/AeroScience/ProofOfConcept.js': b'// diagnostic fixture',
             'html_ui/icons/toolbar/ICON_AEROSCIENCE.svg': b'<svg/>',
         }
+        if lowercase_assets:
+            assets = {name.lower(): content for name, content in assets.items()}
         for name, content in assets.items():
             path = root/name; path.parent.mkdir(parents=True, exist_ok=True); path.write_bytes(content)
         (root/'layout.json').write_text(json.dumps({'content': [
             {'path': name, 'size': len(content), 'date': 1} for name, content in assets.items()
         ]}))
+
+    def test_lowercase_layout_resolves_mixed_case_files_without_changing_them(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp); self.community_fixture(root, '1.9.18')
+            layout = json.loads((root/'layout.json').read_text())
+            for entry in layout['content']:
+                entry['path'] = entry['path'].lower().replace('/', '\\')
+            (root/'layout.json').write_text(json.dumps(layout))
+            before = {name: path.read_bytes() for name, path in packaging.files(root).items()}
+            found = packaging.validate_community(root)
+            self.assertIn('html_ui/icons/toolbar/ICON_AEROSCIENCE.svg', found)
+            self.assertEqual({name: path.read_bytes() for name, path in found.items()}, before)
+
+    def test_expected_assets_resolve_when_sdk_output_names_are_lowercase(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp); self.community_fixture(root, '1.9.18', lowercase_assets=True)
+            found = packaging.validate_community(root)
+            self.assertIn('html_ui/ingamepanels/aeroscience/aeroscience.html', found)
+
+    def test_case_only_duplicate_layout_entries_are_rejected(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp); self.community_fixture(root, '1.9.18')
+            layout = json.loads((root/'layout.json').read_text())
+            alias = dict(layout['content'][0]); alias['path'] = alias['path'].lower()
+            layout['content'].append(alias)
+            (root/'layout.json').write_text(json.dumps(layout))
+            with self.assertRaisesRegex(ValueError, 'Duplicate layout entry'):
+                packaging.validate_community(root)
+
+    def test_case_colliding_files_cannot_share_one_layout_entry(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp); self.community_fixture(root, '1.9.18')
+            alias = root/'html_ui/icons/toolbar/icon_aeroscience.svg'
+            if alias.exists(): self.skipTest('A case-sensitive filesystem is required to create both aliases.')
+            alias.write_text('<svg/>')
+            with self.assertRaisesRegex(ValueError, 'case-colliding'):
+                packaging.validate_community(root)
+
+    def test_case_insensitive_matching_still_rejects_missing_files_and_wrong_sizes(self):
+        for missing in (False, True):
+            with self.subTest(missing=missing), tempfile.TemporaryDirectory() as temp:
+                root = Path(temp); self.community_fixture(root, '1.9.18')
+                layout = json.loads((root/'layout.json').read_text())
+                for entry in layout['content']: entry['path'] = entry['path'].lower()
+                if missing:
+                    (root/'html_ui/icons/toolbar/ICON_AEROSCIENCE.svg').unlink()
+                else:
+                    layout['content'][-1]['size'] += 1
+                (root/'layout.json').write_text(json.dumps(layout))
+                with self.assertRaisesRegex(ValueError, 'missing or invalid file' if missing else 'Incorrect layout size'):
+                    packaging.validate_community(root)
+
+    def test_layout_cannot_reference_itself_using_another_case(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp); self.community_fixture(root, '1.9.18')
+            layout = json.loads((root/'layout.json').read_text())
+            layout['content'].append({'path': 'LAYOUT.JSON', 'size': 1, 'date': 1})
+            (root/'layout.json').write_text(json.dumps(layout))
+            with self.assertRaisesRegex(ValueError, 'missing or invalid file'):
+                packaging.validate_community(root)
 
     def test_three_and_four_component_sdk_game_versions_are_accepted(self):
         for version in ('1.9.18', '1.9.18.0'):

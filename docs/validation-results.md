@@ -45,3 +45,11 @@ The official SDK documentation URL supplied by the user returned a proxy access 
 - Corrected that checker to accept three or four numeric components while retaining missing/malformed-version rejection, layout/asset checks, and the separate release acceptance requirements. The SDK-generated manifest is not modified. Added regression coverage for both accepted forms and invalid/missing values.
 - Packaging regression suite after the correction: **7 passed**, including the reproduced three-component rejection fixed by this change. Test assets are structural fixtures, not official SDK output or simulator evidence.
 - This evidence establishes user-reported SDK contract compilation and Microsoft package validation. Our complete script/receipt, installation, panel loading/transport, live telemetry, VR and iPad acceptance still need their respective checks.
+
+## Reported SDK layout casing
+
+- The next user-supplied build log again reports Microsoft `Validation SUCCESS`, followed by our checker rejecting lowercase `html_ui/icons/toolbar/icon_aeroscience.svg`.
+- The supplied layout and file listing confirm seven lowercase layout paths with corresponding mixed-case physical names, including `ICON_AEROSCIENCE.svg`, `AeroScience.html`, and `InGamePanels/aeroscience_panel.spb`. The package contains nine files in `artifacts/toolbar-poc/output/Packages/aeroscience-toolbar`.
+- Corrected only package path matching to be case-insensitive. Original names and bytes remain intact for SDK build receipt hashes. Missing files, incorrect sizes, layout self-reference, case-only duplicate entries and case-colliding physical files remain rejected. Applied the same matching to required assets and their reads to avoid a subsequent false rejection after layout validation.
+- Python regression discovery with PowerShell available: **18 passed** (13 packaging checks and 5 portable helper checks). Tests reproduce lowercase layout entries against mixed-case files and lowercase output assets, and verify rejection of missing/incorrect/duplicate paths. The SDK-provided HTML/CSS/JS/icon sizes in the user's layout also match the checked-in sources.
+- Full script/receipt completion, package installation and simulator/device behavior still require the gaming-PC checks; this correction does not establish them.

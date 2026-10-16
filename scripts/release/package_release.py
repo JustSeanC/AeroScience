@@ -34,8 +34,15 @@ def files(root):
 
 def validate_community(root):
     found = files(root)
-    require({"manifest.json", "layout.json"} <= found.keys(), "SDK-built manifest.json and layout.json are required.")
-    manifest = json.loads(found["manifest.json"].read_text(encoding="utf-8-sig"))
+    # The Windows SDK can lowercase layout paths independently of the disk names.
+    # Keep original names for the SDK receipt; only matching is case-insensitive.
+    indexed = {}
+    for name, path in found.items():
+        key = name.casefold()
+        require(key not in indexed, f"Package contains case-colliding paths: {name}")
+        indexed[key] = path
+    require({"manifest.json", "layout.json"} <= indexed.keys(), "SDK-built manifest.json and layout.json are required.")
+    manifest = json.loads(indexed["manifest.json"].read_text(encoding="utf-8-sig"))
     require(manifest.get("package_version") == VERSION, "Community package version differs from the release.")
     require(str(manifest.get("content_type", "")).upper() == "MISC", "Expected MISC toolbar content type.")
     require("AeroScience" in manifest.get("title", ""), "Unexpected package title.")
@@ -44,26 +51,27 @@ def validate_community(root):
             and re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+(?:\.[0-9]+)?", minimum_game_version) is not None,
             f"SDK minimum_game_version is missing/invalid: {minimum_game_version!r}; expected three or four numeric components.")
     require(manifest.get("dependencies") == [], "This toolbar must not depend on an aircraft package.")
-    layout = json.loads(found["layout.json"].read_text(encoding="utf-8-sig"))
+    layout = json.loads(indexed["layout.json"].read_text(encoding="utf-8-sig"))
     declared = set()
     for item in layout.get("content", []):
         name = item.get("path", "").replace("\\", "/")
         path = PurePosixPath(name)
         require(name and not path.is_absolute() and not PureWindowsPath(name).drive
                 and ".." not in path.parts and path.as_posix() == name, "Unsafe/noncanonical layout path.")
-        require(name not in declared, "Duplicate layout entry.")
-        require(name in found and name != "layout.json", f"Layout references a missing or invalid file: {name}")
-        require(type(item.get("size")) is int and item["size"] == found[name].stat().st_size, f"Incorrect layout size: {name}")
+        key = name.casefold()
+        require(key not in declared, "Duplicate layout entry.")
+        require(key in indexed and key != "layout.json", f"Layout references a missing or invalid file: {name}")
+        require(type(item.get("size")) is int and item["size"] == indexed[key].stat().st_size, f"Incorrect layout size: {name}")
         require(type(item.get("date")) is int and item["date"] > 0, f"Invalid SDK FILETIME: {name}")
-        declared.add(name)
-    require(set(found) - {"manifest.json", "layout.json"} <= declared, "Package has files absent from layout.json.")
+        declared.add(key)
+    require(set(indexed) - {"manifest.json", "layout.json"} <= declared, "Package has files absent from layout.json.")
     expected = {"InGamePanels/aeroscience_panel.spb", "html_ui/InGamePanels/AeroScience/AeroScience.html",
                 "html_ui/InGamePanels/AeroScience/AeroScience.js", "html_ui/InGamePanels/AeroScience/AeroScience.css",
                 "html_ui/icons/toolbar/ICON_AEROSCIENCE.svg"}
-    require(expected <= found.keys(), "Compiled panel registration or toolbar assets are missing.")
-    binary = found["InGamePanels/aeroscience_panel.spb"].read_bytes()
+    require({name.casefold() for name in expected} <= indexed.keys(), "Compiled panel registration or toolbar assets are missing.")
+    binary = indexed["ingamepanels/aeroscience_panel.spb"].read_bytes()
     require(len(binary) > 32 and not binary.lstrip().startswith((b"<", b"{")), "Panel is source/placeholder content, not an SDK-compiled SPB.")
-    html = found["html_ui/InGamePanels/AeroScience/AeroScience.html"].read_text(encoding="utf-8-sig")
+    html = indexed["html_ui/ingamepanels/aeroscience/aeroscience.html"].read_text(encoding="utf-8-sig")
     require('panel-id="PANEL_AEROSCIENCE"' in html and "AeroScience.js" in html and "AeroScience.css" in html, "Panel references are inconsistent.")
     return found
 
