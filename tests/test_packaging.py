@@ -12,6 +12,44 @@ packaging = importlib.util.module_from_spec(spec); spec.loader.exec_module(packa
 
 
 class PackagingTests(unittest.TestCase):
+    def community_fixture(self, root, minimum_game_version):
+        # Structural test data only; this is not an SDK output or simulator acceptance fixture.
+        manifest = {'package_version': '0.1.0', 'content_type': 'MISC', 'title': 'AeroScience',
+                    'minimum_game_version': minimum_game_version, 'dependencies': []}
+        (root/'manifest.json').write_text(json.dumps(manifest))
+        assets = {
+            'InGamePanels/aeroscience_panel.spb': b'\x00SPB structural test fixture' * 3,
+            'html_ui/InGamePanels/AeroScience/AeroScience.html':
+                b'<ingame-ui panel-id="PANEL_AEROSCIENCE">AeroScience.js AeroScience.css</ingame-ui>',
+            'html_ui/InGamePanels/AeroScience/AeroScience.js': b'// test fixture',
+            'html_ui/InGamePanels/AeroScience/AeroScience.css': b'/* test fixture */',
+            'html_ui/icons/toolbar/ICON_AEROSCIENCE.svg': b'<svg/>',
+        }
+        for name, content in assets.items():
+            path = root/name; path.parent.mkdir(parents=True, exist_ok=True); path.write_bytes(content)
+        (root/'layout.json').write_text(json.dumps({'content': [
+            {'path': name, 'size': len(content), 'date': 1} for name, content in assets.items()
+        ]}))
+
+    def test_three_and_four_component_sdk_game_versions_are_accepted(self):
+        for version in ('1.9.18', '1.9.18.0'):
+            with self.subTest(version=version), tempfile.TemporaryDirectory() as temp:
+                root = Path(temp); self.community_fixture(root, version)
+                self.assertIn('InGamePanels/aeroscience_panel.spb', packaging.validate_community(root))
+
+    def test_missing_or_malformed_sdk_game_versions_are_rejected(self):
+        for version in (None, '', 10918, [], {}, '1.9', '1.9.x', '1.9.18.0.1', 'v1.9.18', '1.9.18\n'):
+            with self.subTest(version=version), tempfile.TemporaryDirectory() as temp:
+                root = Path(temp); self.community_fixture(root, version)
+                with self.assertRaisesRegex(ValueError, 'minimum_game_version'):
+                    packaging.validate_community(root)
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp); self.community_fixture(root, '1.9.18')
+            manifest = json.loads((root/'manifest.json').read_text()); manifest.pop('minimum_game_version')
+            (root/'manifest.json').write_text(json.dumps(manifest))
+            with self.assertRaisesRegex(ValueError, 'minimum_game_version'):
+                packaging.validate_community(root)
+
     def test_companion_preview_refuses_a_proprietary_runtime_in_input(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp); companion = root/'published'; (companion/'wwwroot').mkdir(parents=True)

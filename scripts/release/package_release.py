@@ -39,7 +39,10 @@ def validate_community(root):
     require(manifest.get("package_version") == VERSION, "Community package version differs from the release.")
     require(str(manifest.get("content_type", "")).upper() == "MISC", "Expected MISC toolbar content type.")
     require("AeroScience" in manifest.get("title", ""), "Unexpected package title.")
-    require(bool(re.fullmatch(r"\d+\.\d+\.\d+\.\d+", manifest.get("minimum_game_version", ""))), "SDK minimum_game_version is missing/invalid.")
+    minimum_game_version = manifest.get("minimum_game_version")
+    require(isinstance(minimum_game_version, str)
+            and re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+(?:\.[0-9]+)?", minimum_game_version) is not None,
+            f"SDK minimum_game_version is missing/invalid: {minimum_game_version!r}; expected three or four numeric components.")
     require(manifest.get("dependencies") == [], "This toolbar must not depend on an aircraft package.")
     layout = json.loads(found["layout.json"].read_text(encoding="utf-8-sig"))
     declared = set()
