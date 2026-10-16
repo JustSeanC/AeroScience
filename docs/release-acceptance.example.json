@@ -1,0 +1,13 @@
+{
+  "version": "0.1.0", "tester": "", "tested_utc": "",
+  "checks": {
+    "windows_companion": {"result":"pending","evidence":""},
+    "simulated_recording_recovery": {"result":"pending","evidence":""},
+    "simconnect_live": {"result":"pending","evidence":""},
+    "toolbar_install_load": {"result":"pending","evidence":""},
+    "toolbar_mission_sync": {"result":"pending","evidence":""},
+    "vr_quest3": {"result":"pending","evidence":""},
+    "ipad_safari": {"result":"pending","evidence":""},
+    "release_contents": {"result":"pending","evidence":""}
+  }
+}

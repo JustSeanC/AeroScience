@@ -1,0 +1,42 @@
+name: foundation
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: dotnet restore AeroScience.sln --locked-mode
+      - run: dotnet test AeroScience.sln -c Release --no-restore --logger trx
+      - run: npm ci --ignore-scripts
+      - run: npm run check:web
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:web
+      - run: python3 -m unittest discover -s tests -p 'test_*.py' -v
+      - run: python3 scripts/build/smoke_recovery.py
+  windows-companion:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - shell: pwsh
+        run: ./scripts/build/Build-Companion.ps1
+      - shell: pwsh
+        run: python scripts/build/smoke_recovery.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Windows-Companion-unverified-in-MSFS
+          path: artifacts/Windows-Companion/
