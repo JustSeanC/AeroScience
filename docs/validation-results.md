@@ -129,3 +129,20 @@ The official SDK documentation URL supplied by the user returned a proxy access 
 - The user confirms the buttons are now visible. The supplied console result identifies `WindowProbe.html` with both `buttonTemplateLoaded: true` and `headerTemplateLoaded: true`. This verifies restored button registration/visibility for the corrected probe, not activation of every header control. No new complete SDK build log was supplied with this report.
 - The user still cannot drag from the header and reports mixed resizing/movement at the top and left edges. Header dragging remains user-reported failed. Edge behavior is not yet classified from dimensions: left/top resizing normally changes the left/top position while changing width/height, keeping the opposite edge fixed. Translation alone or an unexpected opposite-edge shift is a separate result.
 - Collect one left-edge before/after capture in the currently installed probe, including actual hit targets and frame/wrapper bounds. No further rebuild or speculative production layout change is needed to obtain this evidence. Native handler call stacks remain the next diagnostic if DOM geometry cannot explain game-owned input/position routing.
+
+## First exported native geometry/input capture
+
+- The user supplied the complete version-1 JSON capture for `WindowProbe.html`: five labeled snapshots, seven input entries and seven delayed observations (19 entries, within the 120-entry limit). The earlier console-history attachment did not include expanded geometry; this exported JSON does.
+- All three captured header presses target `ui-button.wrap.not-highlightable` under `ingame-ui-header`, with normal pointer events. The header's local rectangle is `(4,4,1162,56)` before resizing. Thus the captured presses reach the native header wrapper; this does not prove its movement callback ran or record the game window's screen position. Header movement remains user-reported failed.
+
+| Quantity | Before header drag | After header drag / before left edge | After left edge |
+| --- | --- | --- | --- |
+| Document box width | 2787 | 2787 | 3096 |
+| Document box height | 432 | 432 | 432 |
+| Frame width | 1170 | 1170 | 1300 |
+| Frame height | 360 | 360 | 360 |
+| Frame local x/y | 0/0 | 0/0 | 0/0 |
+
+- Confirmed sizing mismatch: frame widths agree with the source's `42vw` rule to pixel rounding (`2787 × .42 ≈ 1170`, `3096 × .42 ≈ 1300`). The `55vh` height is clamped by the source's 360 px minimum inside the 432 px document. The simulator changes the view/document width while our frame follows at 42 percent. Both the probe and production frame declare these dimensions; native inline styling in this capture contains minimum-size variables, not a width/height override. The earlier assumption that native inline geometry would supersede the fallback is unsupported in this installed template.
+- The left-edge attempt has a frame-targeted `mouseup`, followed by the measured width change; no left-edge `mousedown` was captured. Do not infer an incorrect DOM drag binding from that absence. Native screen coordinates/anchors and callback routing remain unmeasured; frame-local x/y cannot establish which screen edge stayed fixed.
+- Next controlled test: temporarily set only frame width/height to 100 percent in the live debugger, keep existing minimums and native handlers, and compare bounds and behavior while enlarging above the current minimum. A browser-only check reproduces the measured 42-percent scaling and verifies the temporary sizing/restore snippet; it does not verify MSFS input. No package/source behavior change or new build is made pending the live result.
