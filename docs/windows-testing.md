@@ -163,6 +163,8 @@ pwsh -NoProfile -File .\scripts\build\Build-Toolbar.ps1 -SdkRoot $sdk -ProofOfCo
     -HeaderDirectory 'C:\ACTUAL SDK LOCATION\SimConnect headers'
 ```
 
+If an older checkout fails with `error C2607: static assertion failed` at the line `sizeof(SIMCONNECT_RECV_COMM_BUS) == 32` in `scripts/build/sdk-contract.cpp`, update that file from the repository before retrying. The 32-byte value describes the offset of `rgData`, not the size of a struct that includes its variable-length string member. The corrected contract checks the field offsets used by the companion, including `rgData` at byte 32. Keep the checks in place; a failure of the corrected checks requires inspecting the installed header and compiler output.
+
 If the installed package tool requires a simulator-assisted build, use Developer Mode's Project Editor → Open project on `C:\Dev\AeroScience\artifacts\toolbar-poc\AeroScience.xml` and **Build All In Project**, retaining its errors/output. That is a distinct build route; it does not automatically create the command-line script's receipt. Do not fabricate a receipt or copy source files into Community to bypass a failed build.
 
 Locate your **configured** Community and Community2024 locations through MSFS Developer Mode's virtual-filesystem/package-folder tools and the installed package settings. Store and Steam differ, and either can use a custom drive. Select the folder used by the SDK for this legacy `InGamePanels`/SPB package. Community2024 support is pending: test and record the SDK's supported location before settling on it. Use one copy of the package, not duplicates across both folders.
@@ -188,7 +190,7 @@ Locate your **configured** Community and Community2024 locations through MSFS De
 8. Use `Launch-SimConnect.cmd` from your checked companion directory. Its default enables the bridge and keeps LAN off. Verify live aircraft, source, mission mode, telemetry and Mission/Payload navigation. Scientific payloads remain unavailable.
 9. Start a Universal mission in the toolbar. Confirm the browser shows the same active mission; close/reopen the toolbar and confirm recording/sample count continues. End it from the browser and confirm the toolbar returns to standby. Repeat with a Realistic mission started in the browser and ended in the toolbar; verify saved modes/history.
 
-The transport uses simulator-owned `CommBus.js` / `RegisterCommBusListener`, native `SimConnect_SubscribeToCommBusEvent` and `SimConnect_CallCommBusEvent`. It does not embed the dashboard or access localhost sockets in Coherent. Official documentation access remains blocked from the cloud; the gaming-PC header/runtime checks and actual SDK/Coherent tests are required evidence, not implied passes.
+The transport uses simulator-owned `CommBus.js` / `RegisterCommBusListener`, native `SimConnect_SubscribeToCommBusEvent` and `SimConnect_CallCommBusEvent`. It does not embed the dashboard or access localhost sockets in Coherent. Official documentation was accessible during the first Windows build troubleshooting and confirmed the CommBus variable-length data member. The gaming-PC header/runtime checks and actual SDK/Coherent tests remain required evidence, not implied passes.
 
 ## 7. Quest 3 PCVR test
 

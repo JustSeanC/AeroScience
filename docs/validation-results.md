@@ -30,3 +30,10 @@ The official SDK documentation URL supplied by the user returned a proxy access 
 - PowerShell 7.6.0 was installed on Linux from Microsoft's release archive and verified against its SHA-256 manifest. This enables syntax and portable/helper-mock checks; it does **not** establish Windows PowerShell 5.1 execution, real MSVC compilation or SDK behavior.
 - The Windows receipt separator error was fixed; SDK header paths/tool overrides, compiler/package logs, runtime-check reports, clean simulated launcher defaults and feedback helpers were added. No SDK DLL was downloaded or redistributed.
 - Windows launcher execution, real `cl.exe`/installed SDK contract, actual native `SimConnect.dll` loading/exports and all simulator/VR/iPad checks remain **pending on the gaming PC**. See `windows-testing.md`.
+
+## First reported Windows SDK build
+
+- The user's Windows compiler reached `sdk-contract.cpp` and reported `C2607` at the assertion `sizeof(SIMCONNECT_RECV_COMM_BUS) == 32`. This is a failed build, not SDK/package acceptance.
+- Official Microsoft documentation was accessible during troubleshooting: [SIMCONNECT_RECV_COMM_BUS](https://docs.flightsimulator.com/msfs2024/html/6_Programming_APIs/SimConnect/API_Reference/Structures_And_Enumerations/SIMCONNECT_RECV_COMM_BUS.htm) inherits the [list header](https://docs.flightsimulator.com/msfs2024/html/6_Programming_APIs/SimConnect/API_Reference/Structures_And_Enumerations/SIMCONNECT_RECV_LIST_TEMPLATE.htm), adds `uEventID`, then a variable-length `rgData` string. The original check confused the fixed header/payload offset with the complete declared struct size.
+- Replaced that size assumption with checks for the actual fragment, subscription and payload offsets used by the decoder; also asserted the telemetry payload offset. No runtime decoder or companion binary changed. Recompilation against the user's installed SDK and simulator testing remain pending.
+- Re-ran the five portable PowerShell helper tests: **5 passed**, including compiler-failure log retention and refusal to issue a successful build receipt on failure. These do not compile against the Windows SDK.

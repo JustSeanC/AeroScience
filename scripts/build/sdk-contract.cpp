@@ -1,5 +1,6 @@
 #include <Windows.h>
 #include <SimConnect.h>
+#include <cstddef>
 #include <type_traits>
 #include <tuple>
 // Compile against the installed official SDK before compiling/packaging the toolbar.
@@ -12,8 +13,14 @@ static_assert(SIMCONNECT_DATATYPE_STRING256 == 9);
 static_assert(SIMCONNECT_DATATYPE_FLOAT64 == 4);
 static_assert(SIMCONNECT_PERIOD_SECOND == 4);
 static_assert(SIMCONNECT_COMM_BUS_BROADCAST_TO_JS == 1);
-static_assert(sizeof(SIMCONNECT_RECV_COMM_BUS) == 32);
+// rgData is a variable-length string member, so sizeof includes its declaration
+// (and possibly tail padding). The decoder needs the member offsets, not sizeof.
+static_assert(offsetof(SIMCONNECT_RECV_COMM_BUS, dwEntryNumber) == 20, "CommBus fragment index must be at byte 20.");
+static_assert(offsetof(SIMCONNECT_RECV_COMM_BUS, dwOutOf) == 24, "CommBus fragment count must be at byte 24.");
+static_assert(offsetof(SIMCONNECT_RECV_COMM_BUS, uEventID) == 28, "CommBus subscription ID must be at byte 28.");
+static_assert(offsetof(SIMCONNECT_RECV_COMM_BUS, rgData) == 32, "CommBus payload must start at byte 32.");
 static_assert(sizeof(SIMCONNECT_RECV_SIMOBJECT_DATA) == 44);
+static_assert(offsetof(SIMCONNECT_RECV_SIMOBJECT_DATA, dwData) == 40, "Aircraft telemetry payload must start at byte 40.");
 template <typename> struct SdkFunction;
 template <typename R, typename... Args> struct SdkFunction<R (WINAPI*)(Args...)> {
     using Arguments = std::tuple<Args...>;
