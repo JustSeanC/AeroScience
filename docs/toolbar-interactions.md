@@ -18,6 +18,8 @@ Reviewed the four production toolbar files, the POC, build/package checks, Micro
 
 The public official references expose handler APIs, not the installed simulator's complete `ingame-ui` implementation. That implementation and actual rendered rectangles are unavailable in this Linux environment. No proprietary template implementation is copied into source or the package.
 
+Expected edge geometry: a left-edge resize changes x and width while keeping the right edge fixed; a top-edge resize changes y and height while keeping the bottom edge fixed. Right/bottom resizing normally changes width/height while keeping left/top fixed. Title-bar dragging changes position with unchanged dimensions. Compare bounds in the same coordinate system and account for native screen/minimum constraints; movement of the left/top boundary alone is not evidence of a wrong drag handler. The [corrected probe retest](validation-results.md#probe-retest-after-abb8982) confirms button registration/visibility, but header dragging still fails and edge behavior needs measurements.
+
 | Investigation question | Evidence and boundary |
 | --- | --- |
 | Who owns dragging? | The native `ingame-ui` template supplies its outer header. `DragDropHandler` exposes a configurable `dragElement` and `handleByGame`; the actual element bound by this installed template must be inspected. AeroScience's inner AEROSCIENCE app header is not the native title bar. |
