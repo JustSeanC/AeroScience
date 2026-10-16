@@ -8,6 +8,7 @@
 - Added the missing simulator-provided `/JS/dataStorage.js` import to the full toolbar and probe before native template initialization. Native handlers remain owned by the SDK; no manual initializer call, custom movement code, SDK implementation or engine change is shipped.
 - Added regression coverage requiring exactly one storage bootstrap in both pages, after common.js and before the native frame import. The user subsequently confirms dragging/resizing after the `03b06f0` full-toolbar rebuild instructions. Exhaustive controls/edge coverage, startup repeatability and full mission/device acceptance remain pending.
 - Added a v0.1.1 planning handoff prioritizing actual MSFS aircraft telemetry and persisted flight missions, supported by remaining acceptance tests, installable friends-only alpha assets and genuine SDK/release automation. No v0.1.1 features or automation are implemented by that report.
+- Extended that planning brief with explicit v0.1.1 requirements for one user-facing executable, no required PowerShell/terminal commands, graphical first-run setup and removal of production data simulation. The current v0.1.0 app is unchanged by those future requirements.
 
 ### Native window investigation — unresolved v0.1.0 blocker
 

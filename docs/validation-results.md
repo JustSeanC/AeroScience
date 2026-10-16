@@ -195,3 +195,9 @@ The official SDK documentation URL supplied by the user returned a proxy access 
 
 - The user specifies live aircraft data as the primary v0.1.1 release goal. Refocused the handoff on reliable live MSFS telemetry, synchronized display, actual flight recording and retained mission history, using the existing SimConnect implementation. Packaging, distribution and release automation support that workflow.
 - Live aircraft telemetry/recording remains unverified; instructions for the live-source test were supplied, but no result has yet been reported. This planning clarification changes no application behavior and establishes no new hardware pass.
+
+## v0.1.1 user experience and live-only requirements
+
+- The user additionally requires tidy packaging and at most one executable to run for a simulator session, with no PowerShell/terminal commands. Updated the prompt brief to require a single app entry point, automatic engine/bridge/connect behavior, graphical first-run Community/runtime setup, settings and local feedback export. Maintainer build scripts are separate from the tester experience.
+- The user also requests removing data simulation for v0.1.1. The brief now removes the production synthetic provider, demo selection/launchers and user simulation instructions. Actual waiting/disconnected states replace synthetic fallback; Universal/Realistic mission modes remain. Old recordings/source labels must be preserved, and synthetic fixtures stay test-only with adapted automated coverage.
+- These are requirements for the next development prompt. The current v0.1.0 companion still has its existing console/launchers and synthetic mode; no v0.1.1 executable, packaging, runtime installation flow or provider removal has been implemented or tested by this documentation update.
