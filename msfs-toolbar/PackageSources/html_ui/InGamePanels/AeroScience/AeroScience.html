@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html class="as-toolbar-document">
   <head>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="/SCSS/common.css" />
@@ -13,7 +13,7 @@
     <link rel="import" href="/templates/ingameUiHeader/ingameUiHeader.html" />
     <script src="AeroScience.js"></script>
   </head>
-  <body class="border-box">
+  <body class="border-box as-toolbar">
     <ingamepanel-aeroscience
       ><ingame-ui
         id="aeroscience-frame"
@@ -22,22 +22,31 @@
         class="ingameUiFrame panelInvisible"
         content-fit="false"
         resize="both"
+        min-width="320"
+        min-height="360"
         auto-inside=""
         data-input-group="INGAME-UI"
       >
         <div id="as-root" class="as-panel">
           <header>
-            <strong>AEROSCIENCE</strong
-            ><span id="as-source">WAITING FOR ENGINE</span>
+            <div class="as-identity">
+              <strong>AEROSCIENCE</strong>
+              <span id="as-source">WAITING FOR ENGINE</span>
+            </div>
+            <label class="as-layout-toggle" for="as-vr">
+              <input id="as-vr" type="checkbox" aria-label="Compact VR" aria-controls="as-root" />
+              <span>Compact VR: <strong id="as-vr-state">Off</strong></span>
+            </label>
           </header>
-          <nav>
+          <nav aria-label="AeroScience pages">
             <new-push-button id="as-mission-page">Mission</new-push-button
             ><new-push-button id="as-payload-page">Payload</new-push-button
-            ><new-push-button id="as-vr">Compact VR</new-push-button>
+            >
           </nav>
           <p id="as-status" role="status">
             Loading simulator communication service…
           </p>
+          <div id="as-scroll" class="as-scroll" tabindex="0" role="region" aria-label="Mission and payload content">
           <section id="as-mission-view">
             <h2 id="as-aircraft">Awaiting aircraft telemetry</h2>
             <div class="as-metrics">
@@ -102,6 +111,7 @@
               release. Neither mode restricts aircraft selection.
             </p>
           </section>
+          </div>
         </div></ingame-ui
       ></ingamepanel-aeroscience
     >

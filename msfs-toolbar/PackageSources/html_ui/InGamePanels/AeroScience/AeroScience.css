@@ -1,3 +1,10 @@
+html.as-toolbar-document,
+body.as-toolbar {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
 ingamepanel-aeroscience {
   display: block;
   width: 100%;
@@ -5,16 +12,42 @@ ingamepanel-aeroscience {
   color: #edf5fa;
   font-family: "Segoe UI", sans-serif;
 }
-#aeroscience-frame {
+/* Keep the working diagnostic page's original geometry isolated from the full UI. */
+ingamepanel-aeroscience-poc #aeroscience-frame {
   width: 640px;
   height: 720px;
   min-width: 360px;
   min-height: 460px;
 }
-#aeroscience-frame .ingameUiContent,
-#aeroscience-frame .ingameUiWrapper {
+ingamepanel-aeroscience-poc #aeroscience-frame .ingameUiContent,
+ingamepanel-aeroscience-poc #aeroscience-frame .ingameUiWrapper {
   height: 100%;
   width: 100%;
+}
+/* Fallback size only: simulator inline position/size updates take precedence.
+ * Leave the frame/header and native resize handles unclipped and SDK-managed. */
+ingamepanel-aeroscience #aeroscience-frame {
+  display: flex;
+  flex-direction: column;
+  width: 42vw;
+  height: 55vh;
+  min-width: 320px;
+  min-height: 360px;
+}
+ingamepanel-aeroscience #aeroscience-frame ingame-ui-header {
+  flex: 0 0 auto;
+}
+ingamepanel-aeroscience #aeroscience-frame .ingameUiWrapper,
+ingamepanel-aeroscience #aeroscience-frame .ingameUiContent {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+}
+ingamepanel-aeroscience #aeroscience-frame .ingameUiContent {
+  overflow: hidden;
 }
 .as-panel {
   background: #101c27;
@@ -24,27 +57,73 @@ ingamepanel-aeroscience {
   overflow: auto;
   font-size: 18px;
 }
+ingamepanel-aeroscience .as-panel {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  height: auto;
+  min-width: 0;
+  min-height: 0;
+  padding: 16px;
+  overflow: hidden;
+}
+.as-scroll {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+.as-scroll:focus {
+  outline: 1px solid #75ead1;
+  outline-offset: -1px;
+}
 .as-panel header {
   display: flex;
   justify-content: space-between;
-  gap: 12px;
+  gap: 8px;
+  flex-wrap: wrap;
+  flex: 0 0 auto;
   align-items: center;
   border-bottom: 1px solid #395064;
-  padding-bottom: 15px;
+  padding-bottom: 10px;
 }
-.as-panel header strong {
-  letter-spacing: 2px;
-  font-size: 20px;
+.as-panel .as-identity {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 150px;
+  min-width: 150px;
 }
-.as-panel header span {
+.as-panel .as-identity > strong {
+  letter-spacing: 1px;
+  font-size: 18px;
+}
+.as-panel .as-identity > span {
   font-size: 12px;
   color: #efc47e;
-  max-width: 180px;
+  word-wrap: break-word;
+}
+.as-panel .as-layout-toggle {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 8px;
+  box-sizing: border-box;
+  min-height: 48px;
+  padding: 6px;
+  border: 1px solid #476078;
+  border-radius: 4px;
+  background: #213548;
+  color: #edf5fa;
+  cursor: pointer;
+  font-size: 13px;
 }
 .as-panel nav {
   display: flex;
+  flex: 0 0 auto;
   gap: 8px;
-  margin: 16px 0;
+  margin: 12px 0;
 }
 .as-panel new-push-button {
   display: block;
@@ -83,9 +162,11 @@ ingamepanel-aeroscience {
   border-color: #ac6b73;
 }
 .as-panel #as-status {
+  flex: 0 0 auto;
   font-size: 14px;
   color: #a8c0d1;
-  margin: 8px 0 18px;
+  margin: 0 0 12px;
+  word-wrap: break-word;
 }
 .as-panel h2 {
   font-size: 20px;
@@ -96,6 +177,11 @@ ingamepanel-aeroscience {
   font-size: 24px;
   margin: 18px 0 10px;
 }
+.as-panel h2,
+.as-panel h3,
+.as-panel .as-metrics strong {
+  word-wrap: break-word;
+}
 .as-panel .as-metrics {
   display: flex;
   flex-wrap: wrap;
@@ -104,6 +190,8 @@ ingamepanel-aeroscience {
 }
 .as-panel .as-metrics > div {
   width: calc(50% - 6px);
+  min-width: 170px;
+  flex-grow: 1;
   padding: 10px 14px;
   box-sizing: border-box;
   border: 1px solid #354b60;
@@ -136,6 +224,14 @@ ingamepanel-aeroscience {
   font-size: 18px;
   margin: 6px 0 14px;
 }
+.as-panel .as-layout-toggle input {
+  flex: 0 0 22px;
+  width: 22px;
+  height: 22px;
+  min-height: 22px;
+  margin: 0;
+  padding: 0;
+}
 .as-panel label {
   font-size: 15px;
   color: #c2d5e2;
@@ -156,11 +252,13 @@ ingamepanel-aeroscience {
 }
 .as-panel .as-record-meta {
   display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
   justify-content: space-between;
   margin: 15px 0 25px;
   font-family: Consolas, monospace;
 }
-.as-panel.compact {
+ingamepanel-aeroscience .as-panel.compact {
   padding: 14px;
   font-size: 20px;
 }

@@ -4,6 +4,8 @@ An aircraft-independent airborne research foundation for Microsoft Flight Simula
 
 **Status: development foundation / companion preview. Not a verified Community release.** The simulated workflow runs and is tested on Linux. Windows x64 publishing succeeds. The user's gaming-PC logs/screenshots confirm SDK contract/POC package compilation, desktop panel loading and recurring companion CommBus replies. Clean Windows installation, long-duration/reconnection behavior, the full toolbar build/mission controls, live aircraft telemetry, Quest 3, and iPad Safari still require the checks in [verification](docs/verification.md). No installation-ready `AeroScience-v0.1.0.zip` is claimed or supplied.
 
+**Latest desktop update:** the user also built/opened the previous full toolbar with synthetic readings and an active Universal mission display, but reported failed dragging, resizing and scrolling. Focused interaction changes are now implemented and browser-tested; the **updated** SDK package and native desktop/Quest 3 interactions require the [build/retest procedure](docs/toolbar-interactions.md). Keep using the existing companion at `C:\Windows-Companion-unverified-in-MSFS`.
+
 For gaming-PC installation, start with the [Windows installation and live-testing workbook](docs/windows-testing.md): sign in to GitHub and download the **Windows-Companion-unverified-in-MSFS** artifact from a successful [Actions build](https://github.com/JustSeanC/AeroScience/actions/workflows/ci.yml), extract it, run simulated mode, then check the SDK/runtime and build the toolbar proof of concept. GitHub's source ZIP does not include the executable. The three foundation commits are already backed up on `main`.
 
 ## What works in the tested development workflow

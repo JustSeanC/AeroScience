@@ -2,6 +2,14 @@
 
 ## 0.1.0 — development foundation (not yet a verified Community release)
 
+### Toolbar interactions — SDK/desktop/VR retest required
+
+- Declared panel geometry/resize hints as registration attributes, retained simulator-owned movement/resize handling and replaced the full panel's fixed pixel sizing with an overridable viewport fallback.
+- Added shrinkable content wrappers and a bounded, keyboard-focusable vertical scroll region. Kept the native frame/resize chrome unclipped and added no custom drag or wheel handlers.
+- Moved Compact VR from page navigation to an app-header checkbox with visible Off/On state. Layout changes preserve the selected page, mission and CommBus session; mission controls remain available by scrolling.
+- Added browser coverage for smaller host bounds, wheel scrolling, layout/page/state retention and mocked panel reconnection. Recorded the prior full-panel success/interaction failures and separate new desktop/Quest 3 acceptance tables in `docs/toolbar-interactions.md`.
+- Reused the existing engine at `C:\Windows-Companion-unverified-in-MSFS`. No engine/protocol/database, instrument, replay or release-automation changes. This revision's official SDK build and simulator/VR interaction acceptance remain unverified.
+
 ### Windows installation-readiness review
 
 - Added a gaming-PC workbook for preview downloads/extraction, simulated-mode checks, official SDK/runtime checks, toolbar POC/full builds, live aircraft/mission recording, Quest 3, iPad LAN and GitHub backup.

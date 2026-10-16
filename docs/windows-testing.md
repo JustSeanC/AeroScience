@@ -144,6 +144,8 @@ Basic local SimConnect needs no LAN listener, cloud credential or SimConnect net
 
 ## 6. Compile and install the toolbar proof of concept, then full panel
 
+The diagnostic and previous full panel have now loaded on the user's gaming PC, but the full panel's dragging/resizing/scrolling failed. For the latest focused source revision, use the [interaction build/replacement procedure and acceptance tables](toolbar-interactions.md). It reuses the existing engine at `C:\Windows-Companion-unverified-in-MSFS`; the new toolbar package still requires an official SDK build on the PC.
+
 Open **x64 Native Tools Command Prompt** for your installed Visual Studio Build Tools. From that prompt launch `pwsh -NoProfile` so PowerShell inherits the x64 compiler environment. No administrator session is needed for ordinary builds.
 
 ```powershell
