@@ -25,7 +25,7 @@ Do **not** copy `msfs-toolbar/PackageSources` into Community. It is source, not 
 4. Restart MSFS after changing a toolbar package. Start the companion with `Launch-SimConnect.cmd`, load a flight, and wait for initialized aircraft telemetry. Menus/loading are not valid telemetry sessions.
 5. Enable AeroScience in the toolbar customization list and open its floating panel. Start with the read-only proof of concept when developing the package. Then validate the full panel, mission mode, start/end commands, and synchronization with the browser.
 6. Open/close the panel, change aircraft, restart flights, disconnect/reconnect the simulator, and ensure the mission is retained. Do this on representative default, third-party and rotary-wing aircraft.
-7. Complete the [native-window desktop checklist](docs/toolbar-interactions.md). Manual SDK initialization restored probe moving/resizing; the source now includes the missing storage bootstrap. Confirm automatic initialization after a fresh SDK build and MSFS restart before clearing the blocker. No corrected compiled package is supplied from the cloud. Reuse `C:\Windows-Companion-unverified-in-MSFS`. There is one responsive interface and no Compact VR control. VR-specific testing measures performance only.
+7. Continue the [desktop checklist](docs/toolbar-interactions.md). The user confirms rebuilt full-toolbar dragging/resizing after the storage-bootstrap correction. Still verify repeatability, scrolling, header controls and mission workflows. No compiled package is supplied from the cloud. Reuse `C:\Windows-Companion-unverified-in-MSFS`. There is one responsive interface and no Compact VR control. VR-specific testing measures performance only.
 
 ## iPad / private LAN
 

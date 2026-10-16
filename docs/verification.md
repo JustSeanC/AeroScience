@@ -18,7 +18,7 @@ On 2026-10-16 the user's Windows console output confirmed successful SDK contrac
 
 The user's subsequent [MSFS screenshot](validation-results.md#proof-of-concept-panel-opened-in-msfs) confirms registration and visible desktop rendering of the diagnostic panel. A [later screenshot](validation-results.md#first-visible-commbus-reply) shows a companion JSON reply, and the user confirms recurring request-ID updates about once per second. Full reply inspection, long-duration/reconnection behavior, mission commands, live aircraft telemetry and device checks remain pending. See the [testing handoff](v0.1.0-testing-handoff.md) for the next development conversation.
 
-The full panel was built and displayed synthetic metrics and an active Universal mission. The subsequent native probe lacked SDK drag/resize handlers; manual storage-ready initialization restored moving/resizing in the user's live test. The full and probe pages now import the missing `/JS/dataStorage.js` dependency. Automatic startup in the rebuilt/restarted package, individual edge/corner behavior and complete full-toolbar interaction remain **Not yet tested**. Use the [desktop checklist and performance-only VR guidance](toolbar-interactions.md). Compact VR is removed. Reuse the engine at `C:\Windows-Companion-unverified-in-MSFS`.
+The full panel was built and displayed synthetic metrics and an active Universal mission. Native inspection then found missing SDK handlers. Adding `/JS/dataStorage.js` restores their storage-ready initialization path, and the user confirms rebuilt full-toolbar dragging/resizing after the `03b06f0` instructions. This basic native interaction is **Passed, user-reported**. Exhaustive edge/corner/control coverage, repeated startup, full mission workflows and live-aircraft/device checks remain **Not yet tested**. Use the [desktop checklist and performance-only VR guidance](toolbar-interactions.md) and [v0.1.1 planning brief](v0.1.1-prompt-handoff.md). Compact VR is removed. Reuse the engine at `C:\Windows-Companion-unverified-in-MSFS`.
 
 ## Windows, SDK, simulator and device checks
 
@@ -36,7 +36,7 @@ The full panel was built and displayed synthetic metrics and an active Universal
 ## Required v0.1.0 completion before the v0.1.1 closed alpha
 
 1. Validate and harden native SimConnect lifecycle/telemetry across real default and third-party fixed/rotary-wing aircraft.
-2. Resolve native toolbar dragging/resizing/scrolling through desktop MSFS evidence, complete official-SDK packaging/CommBus checks and performance-only VR measurements, and verify Community2024 compatibility separately.
+2. Preserve the now-passed native dragging/resizing correction; complete scrolling/control/mission acceptance, repeated startup, official-SDK packaging/CommBus checks and performance-only VR measurements. Verify Community2024 compatibility separately before claiming it.
 3. Validate clean Windows distribution, permitted runtime bundling and physical iPad LAN pairing, then produce the complete release archive.
 
 Advanced scientific sensors and restrictions follow those reliability/distribution tasks, rather than displacing them.
