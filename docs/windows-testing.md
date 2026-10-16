@@ -4,26 +4,33 @@ This workbook completes v0.1.0 installation/testing before any v0.1.1 closed-alp
 
 ## 1. Download, verify, extract and launch the companion preview
 
-Download the **Windows companion preview ZIP and its `.zip.sha256` sidecar from the chat attachment links**. GitHub's **Code → Download ZIP** contains source; it does not contain the published executable. There is no public GitHub Release asset yet.
+Download the published Windows companion from **GitHub Actions**, not a cloud-workspace file link:
 
-You can download on the work computer and transfer both files to your gaming PC later. Run the Windows application on the gaming PC. The preview is self-contained Windows x64: it includes .NET, the SQLite library and the hosted dashboard. You do not need Visual Studio, a .NET SDK, Node or MSFS to run simulated mode.
+1. Sign in to GitHub in your browser.
+2. Open [successful build #2 for commit `0818a64`](https://github.com/JustSeanC/AeroScience/actions/runs/38923289277#artifacts).
+3. Scroll to **Artifacts**, then click **Windows-Companion-unverified-in-MSFS** (about 49 MB). Your browser downloads `Windows-Companion-unverified-in-MSFS.zip`.
 
-In ordinary Windows PowerShell, verify the downloaded ZIP (adjust the path if your browser renamed it):
+GitHub requires sign-in to download Actions artifacts, even for this public repository. If the artifact is not clickable, check that you are signed in. Artifacts expire according to repository retention settings; if this build has expired, use a newer successful [foundation build](https://github.com/JustSeanC/AeroScience/actions/workflows/ci.yml) with the same artifact. A workspace file link opens the cloud editor and does not attach the ZIP to chat. GitHub's **Code → Download ZIP** contains source; it does not contain the published executable. There is no public GitHub Release asset yet.
+
+You can download on the work computer and transfer the ZIP to your gaming PC later. Run the Windows application on the gaming PC. The preview is self-contained Windows x64: it includes .NET, the SQLite library and the hosted dashboard. You do not need Visual Studio, a .NET SDK, Node or MSFS to run simulated mode.
+
+In ordinary Windows PowerShell, display the downloaded ZIP's checksum (adjust the path if your browser renamed it) and compare it with the **Digest** shown beside that artifact on GitHub. Stop if they differ. The Actions artifact has its own digest; the separately generated cloud-workspace preview ZIP and its sidecar are a different archive.
 
 ```powershell
-$zip = Join-Path $env:USERPROFILE 'Downloads\AeroScience-Companion-Preview-v0.1.0-win-x64.zip'
-$expected = ((Get-Content -LiteralPath ($zip + '.sha256') -Raw).Trim() -split '\s+')[0]
-$actual = (Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash
-if ($actual -ne $expected) { throw 'Checksum mismatch; stop and obtain the matching download.' }
+$zip = Join-Path $env:USERPROFILE 'Downloads\Windows-Companion-unverified-in-MSFS.zip'
+Get-FileHash -LiteralPath $zip -Algorithm SHA256
+```
 
+Then extract and launch:
+
+```powershell
 $destination = Join-Path $env:USERPROFILE 'Games\AeroScience-0.1.0-Test1'
 Expand-Archive -LiteralPath $zip -DestinationPath $destination
-$app = Join-Path $destination 'AeroScience-Companion-Preview-v0.1.0\Windows-Companion'
-Set-Location $app
+Set-Location $destination
 .\Launch-Simulated.cmd
 ```
 
-Use a new extraction folder for each build. Explorer's **Extract All** is also supported. Keep every file in `Windows-Companion` together and run the extracted files, not files still inside the ZIP. Expect `AeroScience.Engine.exe`, runtime DLLs, `wwwroot`, both launch CMDs, `Collect-Feedback.ps1` and `Test-SimConnectRuntime.ps1`.
+Use a new extraction folder for each build. Explorer's **Extract All** is also supported. Keep every extracted file together and run the extracted files, not files still inside the ZIP. Expect `AeroScience.Engine.exe`, runtime DLLs, `wwwroot`, both launch CMDs, `Collect-Feedback.ps1` and `Test-SimConnectRuntime.ps1` directly in the extraction folder. A separately generated `AeroScience-Companion-Preview-v0.1.0-win-x64.zip` has an additional `AeroScience-Companion-Preview-v0.1.0/Windows-Companion` folder; locate its executable and launcher there instead.
 
 Leave the console open. Open `http://127.0.0.1:5080` in Edge or Chrome on the same PC. Expect the version, **SIMULATED TELEMETRY**, an online engine and the synthetic ER-2 trajectory. Its aircraft title is a test fixture, not an aircraft restriction. Altitude, position and sample timestamps should change; synthetic IAS can stay constant. There is no tray application or automatic browser launch yet.
 

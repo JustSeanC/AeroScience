@@ -6,11 +6,12 @@ Use the [Windows installation and live-testing workbook](docs/windows-testing.md
 
 The companion-only preview ZIP is a self-contained Windows x64 publish, not the complete Community release. It includes the engine, dashboard, database library and .NET runtime. It excludes the Community toolbar binary and proprietary SimConnect runtime. Its Windows execution has not been tested in this Linux environment.
 
-1. Extract the entire archive to a writable application folder. Keep all files together; do not run from inside the ZIP.
-2. Open `Windows-Companion/Launch-Simulated.cmd`. No Visual Studio, .NET SDK or compilation is required for this published app. This launcher explicitly disables the simulator bridge and LAN for the initial standalone test.
-3. Open `http://127.0.0.1:5080` on that Windows PC. Verify the **SIMULATED TELEMETRY** label.
-4. Choose Universal or Realistic, name the mission, start recording, wait for samples, and end the mission. Review Mission History and its detail view.
-5. Keep the console running during recording. Closing a browser or toolbar display is safe. Closing the engine interrupts an unfinished mission and preserves committed samples.
+1. Sign in to GitHub, open a successful [Actions build](https://github.com/JustSeanC/AeroScience/actions/workflows/ci.yml), and scroll to **Artifacts**. Click **Windows-Companion-unverified-in-MSFS** to download its ZIP. [Build #2](https://github.com/JustSeanC/AeroScience/actions/runs/38923289277#artifacts) contains the Windows-readiness changes at `0818a64`. Workspace file links open the cloud editor; they are not download attachments. **Code → Download ZIP** contains source only.
+2. Extract the entire archive to a new writable application folder. Keep all files together; do not run from inside the ZIP. GitHub's artifact ZIP places `AeroScience.Engine.exe` and the launchers directly in the extracted folder.
+3. Open `Launch-Simulated.cmd` beside `AeroScience.Engine.exe`. No Visual Studio, .NET SDK or compilation is required for this published app. This launcher explicitly disables the simulator bridge and LAN for the initial standalone test. A separately generated companion-preview archive has an additional `AeroScience-Companion-Preview-v0.1.0/Windows-Companion` folder; locate the launcher there instead.
+4. Open `http://127.0.0.1:5080` on that Windows PC. Verify the **SIMULATED TELEMETRY** label.
+5. Choose Universal or Realistic, name the mission, start recording, wait for samples, and end the mission. Review Mission History and its detail view.
+6. Keep the console running during recording. Closing a browser or toolbar display is safe. Closing the engine interrupts an unfinished mission and preserves committed samples.
 
 New missions default to Universal. Both modes support any aircraft exposing compatible standard telemetry, including helicopters. Realistic Mode's advanced scientific restrictions are not implemented in 0.1.0; the mode is retained for future instrument behavior. Existing records without a mode become Universal during the database migration.
 
