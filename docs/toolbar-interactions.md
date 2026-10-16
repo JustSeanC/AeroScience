@@ -1,10 +1,12 @@
 # Native toolbar interaction investigation and Windows retest
 
-**Blocking v0.1.0 issue: unresolved.** Retesting `9a1946d` did not establish normal title-bar dragging or resizing. The user reports that the left edge shows a resize cursor, but dragging there moves the entire window rather than resizing it. Lower content is clipped; scrolling was not confirmed in that latest retest. Synthetic telemetry still reaches the full panel. These are observations, not a diagnosed hit-testing or CSS cause.
+**Native bootstrap corrected in source; clean-start acceptance pending.** The probe's native drag/resize handlers were absent. Manually running its installed SDK storage-ready initializer created both handlers, supplied full-view geometry and restored moving/resizing in the user's live test. The full and probe pages now load the missing `/JS/dataStorage.js` dependency. Automatic initialization in a freshly built/restarted package and complete full-panel interaction remain unverified.
+
+Earlier `9a1946d` retesting failed normal title-bar dragging/resizing, with a resize cursor but apparent whole-window movement at the left edge. Lower production content was clipped and scrolling unconfirmed; synthetic telemetry still arrived. Keep those historical results distinct from the later manually initialized probe and the upcoming corrected-package test.
 
 The user also confirms that **built-in panels drag and resize normally in the same session**. This narrows the investigation toward AeroScience's integration or the template/configuration path used by this add-on, without establishing a specific cause.
 
-This revision removes Compact VR entirely and supplies a controlled native-window comparison and passive debugger capture. It does **not** claim a new drag/resize correction. The production registration, native host attributes, frame/wrapper geometry and scroll mechanism from `9a1946d` are deliberately unchanged pending native evidence. There is no custom dragging, resizing, wheel interception or replacement window system.
+This revision removes Compact VR entirely and supplies a controlled native-window comparison and passive debugger capture. The only production behavior change in the current bootstrap correction is loading the simulator's storage dependency before native templates. Registration, host attributes, fallback geometry, content scrolling and engine behavior are unchanged. The SDK supplies its handlers and full-view inline bounds; no manual initializer invocation, custom dragging/resizing or wheel interception is shipped.
 
 Keep the existing engine at `C:\Windows-Companion-unverified-in-MSFS`, its runtime files, `wwwroot` and personal official `SimConnect.dll`. No replacement companion is required. Mission data remains in `%LOCALAPPDATA%\AeroScience`.
 
@@ -26,12 +28,12 @@ The [working VSR comparison](validation-results.md#working-weather-and-vsr-windo
 
 The [next constructor/callback capture](validation-results.md#native-dragresize-initializer-located) locates both native handler constructors and full-view inline sizing in `onStorageReady`. Both handlers are absent from the failed probe even though game handling is enabled. The reference template also imports `/JS/dataStorage.js`, which our two pages omit. Next, use a guarded, once-only call to the existing native initializer in the probe and retest, recording exceptions and before/after handler presence, classes and bounds. Reload the view to discard this temporary diagnostic state. This is an explicit initialization experiment, distinct from the passive capture; success and the eventual bootstrap correction remain unverified. Do not call the initializer again if either handler exists or dispatch a document-wide readiness event.
 
-The [manual initialization result](validation-results.md#manual-native-initialization-result) confirms that this callback created both native handlers, enabled dragging and expanded the frame from 907×360 to the full 2160×432 viewport, with no caught exception. The user also saw an unidentified failed-resource line. Next obtain that line's exact URL/status and test title dragging, edge/corner resizing, scrolling and controls in the same initialized view. Do not rerun initialization or reload before this interaction test. No native interaction or permanent fix is marked passed yet.
+The [manual initialization result](validation-results.md#manual-native-initialization-result) confirms that this callback created both native handlers, enabled dragging and expanded the frame from 907×360 to the full 2160×432 viewport, with no caught exception. The user then explicitly confirmed moving and resizing work. This establishes a probe interaction pass after manual initialization; it does not establish automatic bootstrap in the rebuilt package or exhaustive edge/corner/control behavior. The unidentified failed-resource line still needs its exact URL/status. See the [source correction and retest boundary](validation-results.md#probe-movementresize-pass-and-storage-bootstrap-correction).
 
 | Investigation question | Evidence and boundary |
 | --- | --- |
-| Who owns dragging? | The native `ingame-ui` template supplies its outer header. `DragDropHandler` exposes a configurable `dragElement` and `handleByGame`; the actual element bound by this installed template must be inspected. AeroScience's inner AEROSCIENCE app header is not the native title bar. |
-| Who owns resizing? | Native `ResizeHandler` exposes a current handle, direction and game-handling flag. Registration requests `resizeDirections="Both"`; the host requests `resize="both"`. Exact generated handle elements, positions and bindings are not established by public declarations or screenshots. |
+| Who owns dragging? | The installed SDK initializer binds its native `DragDropHandler` to the generated `headerElement` with game handling enabled. Manual initialization restored probe movement. AeroScience's inner app header is separate from the native title bar. |
+| Who owns resizing? | The installed SDK initializer creates `ResizeHandler` with game handling enabled. Manual initialization restored probe resizing. Registration requests `resizeDirections="Both"`; the host requests `resize="both"`. Exact individual edge/corner acceptance remains pending. |
 | Why does the left edge show a resize cursor? | Confirmed user observation. The declarations include separate native cursor APIs. A cursor alone does not establish which handler receives the drag or whether its hit rectangle is correct. |
 | Why does dragging that region move the whole panel? | Unresolved. Need event target/path, native call stack and before/after bounds. A resize on the left normally changes both x and width; translation with unchanged width is a different outcome. |
 | Are handles positioned and receiving input? | Unresolved until actual generated DOM, hit targets and handlers are captured. Browser fixtures intentionally do not manufacture these handlers. |
@@ -41,11 +43,37 @@ The [manual initialization result](validation-results.md#manual-native-initializ
 
 ## Changes in this revision
 
+- Added `/JS/dataStorage.js` after common.js in both full/probe pages, before native template imports. The native bootstrap regression now requires that dependency exactly once and in the correct order. Its absence reproduces a test failure; adding it passes. This restores the intended SDK readiness path; actual automatic initialization still needs a fresh simulator test.
 - Removed the Compact VR header checkbox, layout-switching JavaScript and compact-only CSS. There is one responsive Mission/Payload interface for desktop and VR. No replacement display toggle.
-- Preserved SimConnect, CommBus, mission modes/state, database/history, dashboard, production native-window configuration and the existing read-only POC.
+- Preserved SimConnect, CommBus, mission modes/state, database/history, dashboard, production registration/layout configuration and the existing read-only POC.
 - Added `WindowProbe.html`/`WindowProbe.js`, selected only with `Build-Toolbar.ps1 -WindowProbe`. It uses the same panel ID, registration, native dependencies, host attributes and fallback dimensions, with simple static content and a fixed 160 px scroll box. It omits AeroScience application CSS, flex wrapper overrides, mission code and CommBus. The first version accidentally omitted the button script/template imports; the user's debugger confirmed an unregistered button component, so the probe now includes both imports in the full panel's order. The corrected probe needs a fresh SDK build/restart and readiness/control retest. The [first Windows probe test](validation-results.md#windows-native-window-probe-build-and-first-simulator-test) confirms loading and user-reported scrolling/movement for the earlier version, not correct resizing or complete native controls; it is not a known-working baseline.
 - Added `scripts/debug/capture-toolbar-window.js`, pasted manually into the selected Coherent console. Neither production nor probe loads it automatically. It passively records up to 120 snapshots/input/error entries, actual element bounds/styles, event paths and hit samples. It does not change styles, prevent input, replace handlers, record mission values/CommBus payloads, copy native source or upload anything. Stop it before performance measurements.
 - Updated tests and documentation. Release acceptance now requires `vr_performance` evidence instead of the obsolete `vr_quest3` interaction record. The example remains pending; an older record must receive new measured performance evidence. Diagnostic receipts, including `toolbar-window-probe`, cannot pass the full-release gate.
+
+## Verify automatic initialization after rebuilding
+
+The successful manual initializer call is temporary diagnostic state. Build/install the corrected full package using the instructions below, restart MSFS completely, and test moving/resizing **before running any initializer in the debugger**. The existing companion remains unchanged. A fresh probe build is also available if a minimal comparison is needed; only install one variant.
+
+In the selected new AeroScience view's Coherent Console, this read-only check can confirm automatic setup:
+
+```javascript
+(function () {
+  const frame = document.getElementById('aeroscience-frame');
+  if (!frame) throw new Error('Select the AeroScience view first.');
+  const rect = frame.getBoundingClientRect();
+  return {
+    page: location.href,
+    classes: frame.getAttribute('class'),
+    dragHandlerPresent: !!frame.dragDropHandler,
+    dragEnabled: frame.dragDropHandler ? frame.dragDropHandler.canBeDragged : null,
+    resizeHandlerPresent: !!frame.resizeHandler,
+    viewport: { width: innerWidth, height: innerHeight },
+    frame: { width: rect.width, height: rect.height }
+  };
+})()
+```
+
+Expected: both handlers present, dragging enabled, and the open attached game-managed frame filling its view. Confirm real title dragging and each edge/corner separately; metadata alone is insufficient. Test scrolling/navigation/mission controls on the full interface and close/reopen the panel, then restart MSFS again to check repeatability. If automatic setup fails, preserve the failure and exact console resource URL/status rather than manually initializing to make the acceptance test pass. A `.map` error concerns debugging metadata; a failed runtime script/template needs its own diagnosis.
 
 ## Get the source and build with the official SDK
 
@@ -67,16 +95,16 @@ Close MSFS before replacing Community files. Back up the current installed `aero
 
    This is source, not an executable companion or precompiled Community add-on. The PATH line makes the current PowerShell 7 available to the child `pwsh` calls without changing Windows settings.
 
-3. Build the comparison panel first:
-
-   ```powershell
-   pwsh -NoProfile -ExecutionPolicy RemoteSigned -File .\scripts\build\Build-Toolbar.ps1 -SdkRoot 'C:\MSFS 2024 SDK' -WindowProbe
-   ```
-
-4. Build the full panel from the same source:
+3. Build the full panel for the automatic-startup retest:
 
    ```powershell
    pwsh -NoProfile -ExecutionPolicy RemoteSigned -File .\scripts\build\Build-Toolbar.ps1 -SdkRoot 'C:\MSFS 2024 SDK'
+   ```
+
+4. If a minimal comparison is needed, also build the probe from the same source:
+
+   ```powershell
+   pwsh -NoProfile -ExecutionPolicy RemoteSigned -File .\scripts\build\Build-Toolbar.ps1 -SdkRoot 'C:\MSFS 2024 SDK' -WindowProbe
    ```
 
 Both run the preserved installed-header C++ contract, official `fspackagetool.exe`, structural validation and SHA-256 receipt generation. Expect Microsoft's `Validation SUCCESS`, our structural validation and `SDK-built output`. If a step fails, retain the logs and stop; no successful receipt should be inferred. SDK-generated manifests/layouts must not be hand-edited.
@@ -92,10 +120,10 @@ Use the actual path printed by each build if the SDK differs. Both packages regi
 
 ## Install and compare on desktop
 
-1. While MSFS is closed, replace the entire old installed `aeroscience-toolbar` folder with the **probe** output in the same configured Community folder that previously loaded AeroScience. Do not copy `PackageSources` or merge old/new files. The installed folder must directly contain `manifest.json`, `layout.json`, `InGamePanels` and `html_ui`. Use Developer Mode → Tools → Virtual File System → Packages Folders → Open Community Folder to locate it if needed. Do not install another copy in Community2024; its compatibility remains unverified.
+1. While MSFS is closed, replace the entire old installed `aeroscience-toolbar` folder with the chosen output in the same configured Community folder that previously loaded AeroScience. Start with the **full** output for the current automatic-startup retest; use the probe separately if comparison is needed. Do not copy `PackageSources` or merge old/new files. The installed folder must directly contain `manifest.json`, `layout.json`, `InGamePanels` and `html_ui`. Use Developer Mode → Tools → Virtual File System → Packages Folders → Open Community Folder to locate it if needed. Do not install another copy in Community2024; its compatibility remains unverified.
 2. Restart MSFS and load a desktop flight. The user already confirmed built-in panels move/resize normally; briefly repeat that comparison in the new session to retain a controlled baseline.
-3. Open AeroScience. It must say **NATIVE WINDOW PROBE — NO MISSION CONTROLS**. The engine is unnecessary for this comparison. Try the outer title bar, each supported edge/corner, especially the left edge, then scroll inside the bordered box to END. Record failures and obtain the capture below. Even a collapsed/incorrectly sized probe is useful evidence; do not adjust its CSS before recording that result.
-4. Close MSFS, replace the probe with the **full** output, and restart/load the same flight. The full panel has Mission/Payload only, with no Compact VR control. If old assets appear, verify the copied output and full simulator restart before testing.
+3. Open AeroScience. The full panel has Mission/Payload only, with no Compact VR control. Test the outer title bar, each supported edge/corner and scrolling without the manual initializer. If testing the probe instead, it must say **NATIVE WINDOW PROBE — NO MISSION CONTROLS**; its engine is unnecessary and its bordered scroll box should reach END. Record failures before any diagnostic style/initialization change.
+4. If a full/probe comparison is needed, close MSFS, replace the whole package with the other output, and restart/load the same flight. If old assets appear, verify the copied output and full simulator restart before testing.
 5. For the full panel, keep the existing companion console running:
 
    ```powershell

@@ -144,7 +144,7 @@ Basic local SimConnect needs no LAN listener, cloud credential or SimConnect net
 
 ## 6. Compile and install the toolbar proof of concept, then full panel
 
-Both diagnostic and full panels loaded on the gaming PC. Retesting `9a1946d` still failed normal dragging/resizing; left-edge dragging translates the whole window despite a resize cursor. Latest scrolling is unconfirmed. Use the [native-window probe/full builds, capture and desktop checklist](toolbar-interactions.md) before another speculative correction. Reuse `C:\Windows-Companion-unverified-in-MSFS`. New official SDK compilation and native results are unverified.
+Both diagnostic and full panels loaded on the gaming PC. Native inspection then found missing probe drag/resize handlers; manual SDK initialization restored moving/resizing. The full and probe pages now import the missing SDK storage bootstrap. Build/restart and verify automatic native initialization and the full-panel [desktop checklist](toolbar-interactions.md) without running the manual initializer. Reuse `C:\Windows-Companion-unverified-in-MSFS`. Corrected-package SDK compilation and native acceptance remain pending.
 
 Open **x64 Native Tools Command Prompt** for your installed Visual Studio Build Tools. From that prompt launch `pwsh -NoProfile` so PowerShell inherits the x64 compiler environment. No administrator session is needed for ordinary builds.
 

@@ -2,6 +2,12 @@
 
 ## 0.1.0 — development foundation (not yet a verified Community release)
 
+### Native storage bootstrap correction — clean-start retest pending
+
+- Actual Coherent inspection found both native movement/resize handlers absent. Manually running the installed SDK storage-ready initializer created both, restored full-window sizing, and restored moving/resizing in the user's probe test.
+- Added the missing simulator-provided `/JS/dataStorage.js` import to the full toolbar and probe before native template initialization. Native handlers remain owned by the SDK; no manual initializer call, custom movement code, SDK implementation or engine change is shipped.
+- Added regression coverage requiring exactly one storage bootstrap in both pages, after common.js and before the native frame import. Automatic initialization in a freshly built/restarted package and full-toolbar acceptance remain unverified.
+
 ### Native window investigation — unresolved v0.1.0 blocker
 
 - Recorded the failed `9a1946d` desktop retest: normal title-bar dragging/resizing still fail, and dragging the resize-looking left edge moves the entire window. Latest scrolling is unconfirmed; synthetic telemetry still arrives.

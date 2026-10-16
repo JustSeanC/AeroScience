@@ -36,10 +36,18 @@ class ToolbarBootstrapTests(unittest.TestCase):
         full.feed((PANEL/'AeroScience.html').read_text())
         probe.feed((PANEL/'WindowProbe.html').read_text())
         self.assertTrue(full.app_seen and probe.app_seen)
+        for bootstrap in (full, probe):
+            storage = ('script', '/JS/dataStorage.js')
+            self.assertEqual(bootstrap.native.count(storage), 1,
+                             'Native drag/resize initialization needs the SDK storage-ready bootstrap.')
+            self.assertLess(bootstrap.native.index(('script', '/JS/common.js')),
+                            bootstrap.native.index(storage))
+            self.assertLess(bootstrap.native.index(storage),
+                            bootstrap.native.index(('link', '/templates/ingameUi/ingameUi.html')))
         self.assertIn(('script', '/JS/buttons.js'), full.native)
         self.assertIn(('link', '/templates/NewPushButton/NewPushButton.html'), full.native)
         self.assertEqual(probe.native, full.native,
-                         'A probe missing native button/header dependencies is not a controlled comparison.')
+                         'A probe missing native storage/button/header dependencies is not a controlled comparison.')
 
 
 if __name__ == '__main__':
