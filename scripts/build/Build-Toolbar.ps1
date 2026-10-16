@@ -3,11 +3,13 @@
 param(
     [Parameter(Mandatory)][string]$SdkRoot,
     [switch]$ProofOfConcept,
+    [switch]$WindowProbe,
     [string]$PackageToolPath,
     [string]$HeaderDirectory
 )
 $ErrorActionPreference = 'Stop'
 $PSNativeCommandUseErrorActionPreference = $false
+if ($ProofOfConcept -and $WindowProbe) { throw 'Choose either -ProofOfConcept or -WindowProbe, not both.' }
 $repo = (Resolve-Path "$PSScriptRoot/../..").Path
 $SdkRoot = (Resolve-Path -LiteralPath $SdkRoot).Path
 $tool = if ($PackageToolPath) { [IO.Path]::GetFullPath($PackageToolPath) } else { Join-Path $SdkRoot 'Tools/bin/fspackagetool.exe' }
@@ -16,7 +18,7 @@ if (-not (Test-Path $tool)) { throw "Official SDK package builder missing: $tool
 if (-not (Test-Path "$include/SimConnect.h")) { throw 'Official SimConnect headers are missing.' }
 if (-not (Get-Command cl.exe -ErrorAction SilentlyContinue)) { throw 'Run from an x64 Visual Studio Native Tools shell (cl.exe is required for the SDK contract check).' }
 if (-not (Get-Command python -ErrorAction SilentlyContinue)) { throw 'Python 3 must be installed and available as python on PATH for package validation.' }
-$variant = if ($ProofOfConcept) { 'toolbar-poc' } else { 'toolbar-full' }
+$variant = if ($ProofOfConcept) { 'toolbar-poc' } elseif ($WindowProbe) { 'toolbar-window-probe' } else { 'toolbar-full' }
 $stage = Join-Path $repo "artifacts/$variant"
 # This is an isolated generated build directory. No SDK or checkout sources are modified.
 if (Test-Path $stage) { Remove-Item $stage -Recurse -Force }
@@ -26,9 +28,10 @@ $contractLog = Join-Path $stage 'sdk-contract.log'
 $compileExit = $LASTEXITCODE
 if ($compileExit -ne 0) { throw "Installed SDK differs from the native ABI assumptions or compiler prerequisites failed (exit $compileExit). Inspect sdk-contract.log before packaging." }
 Copy-Item "$repo/msfs-toolbar/*" $stage -Recurse
-if ($ProofOfConcept) {
+if ($ProofOfConcept -or $WindowProbe) {
     $definition = Join-Path $stage 'PackageSources/InGamePanels/aeroscience_panel.xml'
-    (Get-Content $definition -Raw).Replace('AeroScience/AeroScience.html', 'AeroScience/ProofOfConcept.html') | Set-Content $definition -Encoding utf8
+    $entryPage = if ($ProofOfConcept) { 'ProofOfConcept.html' } else { 'WindowProbe.html' }
+    (Get-Content $definition -Raw).Replace('AeroScience/AeroScience.html', "AeroScience/$entryPage") | Set-Content $definition -Encoding utf8
 }
 $output = Join-Path $stage 'output'
 Push-Location $stage

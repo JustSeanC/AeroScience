@@ -2,17 +2,23 @@
 
 ## 0.1.0 — development foundation (not yet a verified Community release)
 
-### Toolbar interactions — SDK/desktop/VR retest required
+### Native window investigation — unresolved v0.1.0 blocker
 
-- Declared panel geometry/resize hints as registration attributes, retained simulator-owned movement/resize handling and replaced the full panel's fixed pixel sizing with an overridable viewport fallback.
-- Added shrinkable content wrappers and a bounded, keyboard-focusable vertical scroll region. Kept the native frame/resize chrome unclipped and added no custom drag or wheel handlers.
-- Moved Compact VR from page navigation to an app-header checkbox with visible Off/On state. Layout changes preserve the selected page, mission and CommBus session; mission controls remain available by scrolling.
-- Added browser coverage for smaller host bounds, wheel scrolling, layout/page/state retention and mocked panel reconnection. Recorded the prior full-panel success/interaction failures and separate new desktop/Quest 3 acceptance tables in `docs/toolbar-interactions.md`.
-- Reused the existing engine at `C:\Windows-Companion-unverified-in-MSFS`. No engine/protocol/database, instrument, replay or release-automation changes. This revision's official SDK build and simulator/VR interaction acceptance remain unverified.
+- Recorded the failed `9a1946d` desktop retest: normal title-bar dragging/resizing still fail, and dragging the resize-looking left edge moves the entire window. Latest scrolling is unconfirmed; synthetic telemetry still arrives.
+- Removed Compact VR entirely: checkbox, switching logic, compact-only CSS and obsolete assertions. Mission/Payload remain in one responsive interface.
+- Added a separate `-WindowProbe` SDK build with native imports/static content and no mission code or application CSS. Preserved production native configuration pending actual handler/geometry evidence; no speculative drag/resize correction is claimed.
+- Added an opt-in passive Coherent capture for native element bounds, event paths, hit targets and errors, plus precise Windows build/replacement and desktop debugging/checklist instructions. Existing read-only CommBus diagnostics and companion are preserved.
+- Replaced headset interaction acceptance with performance-only VR measurements and `vr_performance` release evidence. Diagnostic variants cannot pass the full-toolbar release gate.
+- Updated browser/regression checks. Official Windows SDK builds, native input/call-stack diagnosis and hardware acceptance remain unverified in this Linux cloud. No replacement engine, scientific feature, replay or release automation was added.
+
+### Previous toolbar interaction attempt (`9a1946d`)
+
+- Changed registration geometry/resize hints to attributes and introduced overridable frame sizing and bounded content wrappers/scrolling. Browser tests passed but did not establish native behavior; the subsequent desktop retest failed as recorded above.
+- The temporary header layout control is removed in the current revision. Earlier headset interaction acceptance was superseded by performance-only guidance.
 
 ### Windows installation-readiness review
 
-- Added a gaming-PC workbook for preview downloads/extraction, simulated-mode checks, official SDK/runtime checks, toolbar POC/full builds, live aircraft/mission recording, Quest 3, iPad LAN and GitHub backup.
+- Added a gaming-PC workbook for preview downloads/extraction, simulated-mode checks, official SDK/runtime checks, toolbar POC/full builds, live aircraft/mission recording, VR performance, iPad LAN and GitHub backup.
 - Fixed Windows separator normalization in SDK build receipts. Preserved compiler/package-tool logs and native failure codes; added explicit SDK tool/header overrides and stronger installed-header ABI checks.
 - Corrected the first reported Windows SDK contract failure: verify CommBus member/payload offsets instead of treating the 32-byte fixed header as the size of the variable-length structure. Simulator acceptance remains pending.
 - Accepted SDK-generated three-component minimum game versions (observed `1.9.18`) alongside four-component versions. Missing/malformed versions remain rejected, and diagnostics now include the actual value. Added packaging regression tests.
@@ -31,7 +37,7 @@
 - Added Universal/Realistic selection. Universal is the default; both modes persist across restarts, appear in shared web/toolbar state and history, and accept compatible aircraft without a whitelist. Schema 1 → 2 safely defaults legacy missions to Universal.
 - Added graceful unknown-title and unavailable-AGL fallbacks. NASA aircraft are examples of future research presets, not required aircraft.
 - Added private-LAN pairing, expiring sessions, same-origin/CSRF/Host protections, bounded logs and exclusive database ownership.
-- Added SDK toolbar sources, a read-only registration/CommBus probe, mission controls, mode selection and a compact VR layout.
+- Added SDK toolbar sources, a read-only registration/CommBus probe, mission controls and mode selection.
 - Added self-contained Windows publishing, official-SDK build/ABI checks, package validation and guarded release assembly.
 - Advanced Realistic Mode instrument restrictions, calibration, sensors, mapping, scientific observations and full replay remain future features. Realistic and Universal record identically in this version.
-- Live Windows/MSFS, SDK package compilation/installation, Community2024, VR/Quest 3 and physical iPad Safari checks remain pending. No full release archive is marked installation-ready.
+- Live Windows/MSFS, SDK package compilation/installation, Community2024, VR performance and physical iPad Safari checks remain pending. No full release archive is marked installation-ready.

@@ -18,7 +18,7 @@ On 2026-10-16 the user's Windows console output confirmed successful SDK contrac
 
 The user's subsequent [MSFS screenshot](validation-results.md#proof-of-concept-panel-opened-in-msfs) confirms registration and visible desktop rendering of the diagnostic panel. A [later screenshot](validation-results.md#first-visible-commbus-reply) shows a companion JSON reply, and the user confirms recurring request-ID updates about once per second. Full reply inspection, long-duration/reconnection behavior, mission commands, live aircraft telemetry and device checks remain pending. See the [testing handoff](v0.1.0-testing-handoff.md) for the next development conversation.
 
-The previous **full** panel was subsequently built and displayed synthetic metrics and an active Universal mission. Dragging, resizing and scrolling were reported failed. The latest interaction source has automated regression coverage but requires a fresh SDK build and new native tests. Use the separate [desktop and Quest 3 result tables](toolbar-interactions.md); all new hardware rows start at **Not yet tested**. The existing engine is now at `C:\Windows-Companion-unverified-in-MSFS`.
+The full panel was built and displayed synthetic metrics and an active Universal mission. Retesting `9a1946d` still failed normal dragging/resizing: the left edge displays a resize cursor but dragging translates the whole window. Latest scrolling was not confirmed. The current revision removes Compact VR and adds a native-window probe/capture; it does not establish a correction. Use the [desktop comparison/checklist and performance-only VR guidance](toolbar-interactions.md). All new native results start **Not yet tested**. The existing engine is at `C:\Windows-Companion-unverified-in-MSFS`.
 
 ## Windows, SDK, simulator and device checks
 
@@ -29,14 +29,14 @@ The previous **full** panel was subsequently built and displayed synthetic metri
 5. The toolbar POC package build and structural validation are user-reported passed; screenshots confirm panel registration, visible desktop rendering and a CommBus reply, and the user confirms recurring updates. Retain its generated manifest/layout/SPB and receipt, then verify long-duration replies, icon, floating/resizing and connection lifecycle. Restart MSFS as needed after rebuilds.
 6. Validate Community2024 versus legacy Community behavior and actual Store/Steam package locations. Record the working method; do not assume or install duplicate copies.
 7. Rebuild the full toolbar after the interaction changes and complete its desktop acceptance table, then create/end missions from it and the browser in both modes. Confirm identical mission IDs/modes, retained state after closing/reopening, reconnects and no recording stop when a panel is closed. Test that halted JavaScript causes no unsolicited reply backlog.
-8. In Quest 3 PCVR, verify toolbar appearance, mouse/controller activation, native input focus, name entry, readable metric text, compact layout, resize/position, low obstruction and desktop↔VR transitions.
+8. In a working VR headset session, compare FPS/frame times, stutters and companion/toolbar resource use with the companion stopped, running with the panel closed, and running with the panel open. Keep simulator/headset settings constant and record measurements. VR acceptance is performance only; desktop MSFS verifies toolbar functionality.
 9. On a physical iPad mini 6 with Safari, verify pairing on a trusted private network, incorrect-code rejection, source/mode labels, telemetry, mission controls/history, portrait/landscape layouts and session expiry/re-pairing. Verify localhost-only mode refuses LAN connections and the Private firewall rules are sufficient. Test Edge/Chrome on Windows too.
 10. Assemble the real full release only after these prerequisites pass. Inspect/extract it on another PC and verify the exact files and installation instructions. Signatures/one-click installer remain future work; do not mark the current companion-only preview as the full Community release.
 
 ## Required v0.1.0 completion before the v0.1.1 closed alpha
 
 1. Validate and harden native SimConnect lifecycle/telemetry across real default and third-party fixed/rotary-wing aircraft.
-2. Complete official-SDK toolbar packaging, CommBus/Coherent and Quest 3 testing, including Community2024 compatibility.
+2. Resolve native toolbar dragging/resizing/scrolling through desktop MSFS evidence, complete official-SDK packaging/CommBus checks and performance-only VR measurements, and verify Community2024 compatibility separately.
 3. Validate clean Windows distribution, permitted runtime bundling and physical iPad LAN pairing, then produce the complete release archive.
 
 Advanced scientific sensors and restrictions follow those reliability/distribution tasks, rather than displacing them.

@@ -104,21 +104,6 @@ ingamepanel-aeroscience .as-panel {
   color: #efc47e;
   word-wrap: break-word;
 }
-.as-panel .as-layout-toggle {
-  display: flex;
-  flex: 0 0 auto;
-  align-items: center;
-  gap: 8px;
-  box-sizing: border-box;
-  min-height: 48px;
-  padding: 6px;
-  border: 1px solid #476078;
-  border-radius: 4px;
-  background: #213548;
-  color: #edf5fa;
-  cursor: pointer;
-  font-size: 13px;
-}
 .as-panel nav {
   display: flex;
   flex: 0 0 auto;
@@ -224,14 +209,6 @@ ingamepanel-aeroscience .as-panel {
   font-size: 18px;
   margin: 6px 0 14px;
 }
-.as-panel .as-layout-toggle input {
-  flex: 0 0 22px;
-  width: 22px;
-  height: 22px;
-  min-height: 22px;
-  margin: 0;
-  padding: 0;
-}
 .as-panel label {
   font-size: 15px;
   color: #c2d5e2;
@@ -257,20 +234,6 @@ ingamepanel-aeroscience .as-panel {
   justify-content: space-between;
   margin: 15px 0 25px;
   font-family: Consolas, monospace;
-}
-ingamepanel-aeroscience .as-panel.compact {
-  padding: 14px;
-  font-size: 20px;
-}
-.as-panel.compact .as-metrics {
-  gap: 8px;
-  margin: 10px 0;
-}
-.as-panel.compact .as-metrics strong {
-  font-size: 32px;
-}
-.as-panel.compact .as-note {
-  display: none;
 }
 .as-panel [hidden] {
   display: none !important;

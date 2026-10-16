@@ -1,128 +1,158 @@
-# v0.1.0 toolbar interaction changes and PC retest
+# Native toolbar interaction investigation and Windows retest
 
-This revision changes toolbar source only. Keep using the existing companion at `C:\Windows-Companion-unverified-in-MSFS`, including its official native `SimConnect.dll`, runtime files and `wwwroot`. No replacement engine is required.
+**Blocking v0.1.0 issue: unresolved.** Retesting `9a1946d` did not establish normal title-bar dragging or resizing. The user reports that the left edge shows a resize cursor, but dragging there moves the entire window rather than resizing it. Lower content is clipped; scrolling was not confirmed in that latest retest. Synthetic telemetry still reaches the full panel. These are observations, not a diagnosed hit-testing or CSS cause.
 
-The user built and opened the **previous full panel** in MSFS, received simulated telemetry, and showed an active Universal mission with a timer/sample count. They reported that moving, resizing and scrolling did not work. This supersedes the earlier diagnostic-only milestone. This new revision has automated evidence only; its SDK build and actual desktop/Quest 3 interactions are **not yet tested**.
+The user also confirms that **built-in panels drag and resize normally in the same session**. This narrows the investigation toward AeroScience's integration or the template/configuration path used by this add-on, without establishing a specific cause.
 
-## Investigation and limits of the diagnosis
+This revision removes Compact VR entirely and supplies a controlled native-window comparison and passive debugger capture. It does **not** claim a new drag/resize correction. The production registration, native host attributes, frame/wrapper geometry and scroll mechanism from `9a1946d` are deliberately unchanged pending native evidence. There is no custom dragging, resizing, wheel interception or replacement window system.
 
-Reviewed before editing:
+Keep the existing engine at `C:\Windows-Companion-unverified-in-MSFS`, its runtime files, `wwwroot` and personal official `SimConnect.dll`. No replacement companion is required. Mission data remains in `%LOCALAPPDATA%\AeroScience`.
 
-- Official [MSFS 2024 JavaScript/Coherent guidance](https://docs.flightsimulator.com/msfs2024/html/6_Programming_APIs/JavaScript/JavaScript.htm), [SDK contents](https://docs.flightsimulator.com/msfs2024/html/1_Introduction/SDK_Contents.htm), and [sample catalog](https://docs.flightsimulator.com/msfs2024/html/7_Samples_Tutorials/Samples_And_Tutorials.htm).
-- Microsoft's [native ResizeHandler/DragDropHandler declarations](https://github.com/microsoft/msfs-avionics-mirror/blob/366be5056166c639a2189e09e5af7143174fd910/src/msfstypes/js/common.d.ts) and [toolbar listener declarations](https://github.com/microsoft/msfs-avionics-mirror/blob/366be5056166c639a2189e09e5af7143174fd910/src/msfstypes/js/services/toolbarpanels.d.ts).
-- Secondary toolbar implementation references: the [MSFS 2024 CommBus panel](https://github.com/Dutch-FlightSim-Developer/developing-with-simconnect/tree/2c7163804eeca1484727c36653c23133200ec773/part-13/13-4%20-%20CommBus%20from%20Toolbar), [window template](https://github.com/bymaximus/msfs2020-toolbar-window-template/tree/ee0ca555b894cbd94a5f58f50057b3510c61cb4a), and [Parallel 42 interop example](https://github.com/parallel42/msfs-toolbar-interop/tree/4deb0de5e448e1898cd094b86df4fa146a0ab317).
+## Findings and unresolved questions
 
-The public official pages explain the Coherent environment but do not fully specify the legacy `ingame-ui` template's movement and wheel routing. The external examples establish the attribute form/native-template conventions, not proof of this revision's simulator behavior. No simulator-owned template is copied into the package. Coherent vendor documentation/developer-support search could not be fetched from this environment; no unavailable source is presented as reviewed.
+Reviewed the four production toolbar files, the POC, build/package checks, Microsoft's handler/listener declarations, the official debugger instructions and secondary toolbar templates before editing. Sources:
 
-| Issue | Source finding and change | Remaining uncertainty |
-| --- | --- | --- |
-| Dragging | Keep the existing simulator-owned title bar and native handlers. Express registration size/position settings as definition attributes, as in the toolbar references; remove the full panel's fixed pixel geometry. No custom drag listeners, pointer capture or position-saving code added. | The screenshot does not identify the exact native drag failure. Attribute/layout corrections are a candidate fix; only an MSFS retest can confirm movement. |
-| Resizing | `resizeDirections` and size hints were child elements rather than definition attributes. Supply `resizeDirections="Both"` on the definition; retain `resize="both"` on `ingame-ui`. Use a viewport-relative fallback, let native inline bounds win, and keep the outer frame/resize chrome unclipped. | Current SDK acceptance and actual edge/corner input require recompilation/retest. Correct package generation alone does not prove resize input. |
-| Scrolling | The former wrappers each forced `height:100%`, and the whole app also had full height with overflow. Replace that unbounded chain with shrinkable flex wrappers (`min-height:0`) and a dedicated, bounded `#as-scroll` content region. | Browser wheel scrolling passes; MSFS wheel/touch/controller routing remains unverified. No custom wheel interception added. |
-| Compact VR | It was a button next to Mission/Payload, despite changing only a CSS class. Move it to the app header as a labeled checkbox with visible Off/On state. | Actual simulator checkbox/VR input must be tested. |
+- Official [MSFS 2024 JavaScript guidance](https://docs.flightsimulator.com/msfs2024/html/6_Programming_APIs/JavaScript/JavaScript.htm) and [Coherent GT debugger procedure](https://docs.flightsimulator.com/msfs2024/html/6_Programming_APIs/JavaScript/Coherent_GT_Debugger.htm). The debugger page was accessible for this investigation; initial historical access failures do not describe current access.
+- Microsoft's [ResizeHandler/DragDropHandler declarations](https://github.com/microsoft/msfs-avionics-mirror/blob/366be5056166c639a2189e09e5af7143174fd910/src/msfstypes/js/common.d.ts) and [toolbar listener declarations](https://github.com/microsoft/msfs-avionics-mirror/blob/366be5056166c639a2189e09e5af7143174fd910/src/msfstypes/js/services/toolbarpanels.d.ts).
+- Secondary [window template](https://github.com/bymaximus/msfs2020-toolbar-window-template/tree/ee0ca555b894cbd94a5f58f50057b3510c61cb4a), [Parallel 42 example](https://github.com/parallel42/msfs-toolbar-interop/tree/4deb0de5e448e1898cd094b86df4fa146a0ab317) and [MSFS 2024 CommBus example](https://github.com/Dutch-FlightSim-Developer/developing-with-simconnect/tree/2c7163804eeca1484727c36653c23133200ec773/part-13/13-4%20-%20CommBus%20from%20Toolbar). These are implementation references, not verification of our installed panel.
 
-The native header is distinct from AeroScience's inner app header. Move the window using the **outer simulator title bar**. The content below the status line scrolls; app navigation and the Compact VR switch remain outside that scroll region. The layout switch changes only presentation, without reloading the page, changing the selected page or sending mission mutations.
+The public official references expose handler APIs, not the installed simulator's complete `ingame-ui` implementation. That implementation and actual rendered rectangles are unavailable in this Linux environment. No proprietary template implementation is copied into source or the package.
 
-The full frame has a 320×360 px CSS/HTML fallback minimum plus SDK registration bounds. Native constraints and screen/VR scaling can impose a larger effective minimum. The source uses 42vw/55vh as initial fallback dimensions; native inline resizing takes precedence. The diagnostic HTML/JS is unchanged and retains its previous CSS geometry. Its shared registration now also uses the attribute form.
+| Investigation question | Evidence and boundary |
+| --- | --- |
+| Who owns dragging? | The native `ingame-ui` template supplies its outer header. `DragDropHandler` exposes a configurable `dragElement` and `handleByGame`; the actual element bound by this installed template must be inspected. AeroScience's inner AEROSCIENCE app header is not the native title bar. |
+| Who owns resizing? | Native `ResizeHandler` exposes a current handle, direction and game-handling flag. Registration requests `resizeDirections="Both"`; the host requests `resize="both"`. Exact generated handle elements, positions and bindings are not established by public declarations or screenshots. |
+| Why does the left edge show a resize cursor? | Confirmed user observation. The declarations include separate native cursor APIs. A cursor alone does not establish which handler receives the drag or whether its hit rectangle is correct. |
+| Why does dragging that region move the whole panel? | Unresolved. Need event target/path, native call stack and before/after bounds. A resize on the left normally changes both x and width; translation with unchanged width is a different outcome. |
+| Are handles positioned and receiving input? | Unresolved until actual generated DOM, hit targets and handlers are captured. Browser fixtures intentionally do not manufacture these handlers. |
+| Are layout, clipping, overlap or pointer rules responsible? | Plausible investigation areas only. Compare the minimal panel and inspect computed bounds/styles; do not infer a cause merely from flex declarations. |
+| Is a different 2024 template/configuration required? | No reviewed official source establishes that. Current registration/host conventions agree with secondary toolbar examples. Compare with a built-in panel and inspect the installed implementation before replacing the template. |
+| Does scrolling work? | Browser overflow/wheel checks pass independently. Actual Coherent wheel routing and the clipped production content remain unverified. |
 
-Changed source files: `msfs-toolbar/PackageSources/InGamePanels/aeroscience_panel.xml` and `msfs-toolbar/PackageSources/html_ui/InGamePanels/AeroScience/AeroScience.html`, `AeroScience.css`, `AeroScience.js`. Regression support is in `tests/web/helpers/toolbar.mjs`, `toolbar-layout.spec.js` and the existing `toolbar-contract.spec.js`. The changelog, README, handoff, verification and evidence documents were updated. Companion code, shared protocol, database code, SDK contract C++, build scripts and package validators were not modified.
+## Changes in this revision
 
-## Automated evidence
+- Removed the Compact VR header checkbox, layout-switching JavaScript and compact-only CSS. There is one responsive Mission/Payload interface for desktop and VR. No replacement display toggle.
+- Preserved SimConnect, CommBus, mission modes/state, database/history, dashboard, production native-window configuration and the existing read-only POC.
+- Added `WindowProbe.html`/`WindowProbe.js`, selected only with `Build-Toolbar.ps1 -WindowProbe`. It uses the same panel ID, registration, native imports, host attributes and fallback dimensions, with simple static content and a fixed 160 px scroll box. It omits AeroScience application CSS, flex wrapper overrides, mission code and CommBus. Its display/input behavior is **not yet tested in MSFS**; it is not described as a known-working panel.
+- Added `scripts/debug/capture-toolbar-window.js`, pasted manually into the selected Coherent console. Neither production nor probe loads it automatically. It passively records up to 120 snapshots/input/error entries, actual element bounds/styles, event paths and hit samples. It does not change styles, prevent input, replace handlers, record mission values/CommBus payloads, copy native source or upload anything. Stop it before performance measurements.
+- Updated tests and documentation. Release acceptance now requires `vr_performance` evidence instead of the obsolete `vr_quest3` interaction record. The example remains pending; an older record must receive new measured performance evidence. Diagnostic receipts, including `toolbar-window-probe`, cannot pass the full-release gate.
 
-- .NET: **23 passed**, `tests/AeroScience.Tests/TestResults/toolbar-interactions.trx`.
-- Complete browser suite: **9 passed**, including the unchanged dashboard workflows and toolbar protocol regression. The five toolbar checks also passed after the narrow-header spacing adjustment.
-- Python packaging/helper discovery with PowerShell available: **18 passed**. SDK ABI checks, three/four-part version handling, case-insensitive layout matching, file/receipt validation and compiler-failure behavior are preserved.
-- Toolbar JavaScript syntax and all toolbar XML parsing passed. These are syntax checks, not an official SDK build.
-- Browser tests cover 320×360, 640×720 and 900×900 supplied bounds; standard/compact scrolling and accessible mission controls; page/state retention across layout changes; ongoing mocked replies; and hidden/disconnected/reconnected panel state. They do not implement or prove native movement/resizing, Coherent wheel routing or VR input.
-- Browser fixture screenshots are retained under ignored `artifacts/toolbar-interactions/`. The fixture labels its native-header placeholder; these images are not MSFS captures.
+## Get the source and build with the official SDK
 
-The Windows SDK package build is **Blocked in this Linux cloud environment**: there is no official Windows package tool/simulator here. There is no newly generated Community package, SPB, layout, manifest or successful SDK receipt for this revision. Build those on the configured gaming PC below. Earlier successful SDK logs apply to the previous source revision.
+Close MSFS before replacing Community files. Back up the current installed `aeroscience-toolbar` **outside** all Community folders, retaining its build logs/receipt. Never delete mission data. A clean Git checkout can use `git pull --ff-only origin main`. For a source-ZIP installation, keep the old folder and use a fresh destination:
 
-## Get current source and build on Windows
-
-Stop the companion with Ctrl+C and close MSFS before replacing packages. Preserve the current installed `aeroscience-toolbar` outside Community, and retain its existing build logs/receipt for comparison. Mission data remains in `%LOCALAPPDATA%\AeroScience`; do not delete it.
-
-If `C:\Dev\AeroScience` is a clean Git checkout, update it with `git pull --ff-only origin main`. If it was extracted from a source ZIP, the following fresh-source route preserves it:
-
-1. Open **x64 Native Tools Command Prompt**, then run `pwsh -NoProfile` as before.
-2. In PowerShell, use an empty/new destination:
+1. Open **x64 Native Tools Command Prompt**. Type `pwsh -NoProfile` and press Enter. If `pwsh` is not found there, use `"%ProgramFiles%\PowerShell\7\pwsh.exe" -NoProfile` from that Command Prompt.
+2. In the resulting PowerShell window:
 
    ```powershell
-   $archive = Join-Path $env:USERPROFILE 'Downloads\AeroScience-toolbar-source.zip'
+   $archive = Join-Path $env:USERPROFILE 'Downloads\AeroScience-native-window-source.zip'
    Invoke-WebRequest -Uri 'https://github.com/JustSeanC/AeroScience/archive/refs/heads/main.zip' -OutFile $archive
-   $destination = 'C:\Dev\AeroScience-ToolbarFix'
+   $destination = 'C:\Dev\AeroScience-NativeWindow'
    if (Test-Path -LiteralPath $destination) { throw 'Choose a new empty destination before extracting.' }
+   Unblock-File -LiteralPath $archive
    Expand-Archive -LiteralPath $archive -DestinationPath $destination
-   Set-Location 'C:\Dev\AeroScience-ToolbarFix\AeroScience-main'
+   Set-Location 'C:\Dev\AeroScience-NativeWindow\AeroScience-main'
+   $env:Path = "$PSHOME;$env:Path"
    ```
 
-   This ZIP contains **source**, not a built Community add-on or replacement engine. If Windows shows an Unblock checkbox in the ZIP's Properties, unblock this trusted repository ZIP before extracting. Use your existing Git source folder instead when you updated that checkout.
+   This is source, not an executable companion or precompiled Community add-on. The PATH line makes the current PowerShell 7 available to the child `pwsh` calls without changing Windows settings.
 
-3. Build the full panel with the same SDK/compiler/Python tools already used successfully:
+3. Build the comparison panel first:
+
+   ```powershell
+   pwsh -NoProfile -ExecutionPolicy RemoteSigned -File .\scripts\build\Build-Toolbar.ps1 -SdkRoot 'C:\MSFS 2024 SDK' -WindowProbe
+   ```
+
+4. Build the full panel from the same source:
 
    ```powershell
    pwsh -NoProfile -ExecutionPolicy RemoteSigned -File .\scripts\build\Build-Toolbar.ps1 -SdkRoot 'C:\MSFS 2024 SDK'
    ```
 
-   Do not add `-ProofOfConcept` for this full-panel retest. The script performs the preserved header contract, official package build, structural validation and receipt hashing. Expect Microsoft's `Validation SUCCESS`, our structural pass and `SDK-built output`. The companion executable is not rebuilt.
+Both run the preserved installed-header C++ contract, official `fspackagetool.exe`, structural validation and SHA-256 receipt generation. Expect Microsoft's `Validation SUCCESS`, our structural validation and `SDK-built output`. If a step fails, retain the logs and stop; no successful receipt should be inferred. SDK-generated manifests/layouts must not be hand-edited.
 
-4. Copy the **actual SDK-built** `aeroscience-toolbar` folder printed by the script into the same configured Community location where the previous full panel opened. Replace the entire old folder, with only one variant installed. For the fresh extraction above, the expected source is:
+The two isolated outputs are:
 
-   ```text
-   C:\Dev\AeroScience-ToolbarFix\AeroScience-main\artifacts\toolbar-full\output\Packages\aeroscience-toolbar
-   ```
+```text
+C:\Dev\AeroScience-NativeWindow\AeroScience-main\artifacts\toolbar-window-probe\output\Packages\aeroscience-toolbar
+C:\Dev\AeroScience-NativeWindow\AeroScience-main\artifacts\toolbar-full\output\Packages\aeroscience-toolbar
+```
 
-   The destination must contain `aeroscience-toolbar\manifest.json`, `layout.json`, `InGamePanels` and `html_ui` directly. Do not install `PackageSources`. No tool/header paths or companion protocol settings have changed. Community2024 compatibility remains a separate unverified check.
+Use the actual path printed by each build if the SDK differs. Both packages register the **same** panel ID and package name: install exactly one at a time. `-ProofOfConcept` still builds the unchanged CommBus diagnostic; it cannot be combined with `-WindowProbe`.
 
-5. Restart MSFS, load a flight, and launch the existing engine for synthetic testing:
+## Install and compare on desktop
+
+1. While MSFS is closed, replace the entire old installed `aeroscience-toolbar` folder with the **probe** output in the same configured Community folder that previously loaded AeroScience. Do not copy `PackageSources` or merge old/new files. The installed folder must directly contain `manifest.json`, `layout.json`, `InGamePanels` and `html_ui`. Use Developer Mode → Tools → Virtual File System → Packages Folders → Open Community Folder to locate it if needed. Do not install another copy in Community2024; its compatibility remains unverified.
+2. Restart MSFS and load a desktop flight. The user already confirmed built-in panels move/resize normally; briefly repeat that comparison in the new session to retain a controlled baseline.
+3. Open AeroScience. It must say **NATIVE WINDOW PROBE — NO MISSION CONTROLS**. The engine is unnecessary for this comparison. Try the outer title bar, each supported edge/corner, especially the left edge, then scroll inside the bordered box to END. Record failures and obtain the capture below. Even a collapsed/incorrectly sized probe is useful evidence; do not adjust its CSS before recording that result.
+4. Close MSFS, replace the probe with the **full** output, and restart/load the same flight. The full panel has Mission/Payload only, with no Compact VR control. If old assets appear, verify the copied output and full simulator restart before testing.
+5. For the full panel, keep the existing companion console running:
 
    ```powershell
    Set-Location 'C:\Windows-Companion-unverified-in-MSFS'
    .\AeroScience.Engine.exe --AeroScience:Telemetry=Simulated --AeroScience:EnableToolbarBridge=true --AeroScience:EnableLan=false
    ```
 
-   Keep its console running. Open AeroScience in the simulator and `http://127.0.0.1:5080` in the PC browser. The panel should say **SIMULATED TEST DATA** and have exactly two navigation buttons plus a **Compact VR: Off/On checkbox in the app header**. A third Compact VR navigation button means the old assets are still loaded; verify the copied SDK output and fully restart MSFS. Start with synthetic data so the interaction retest does not imply a real-aircraft telemetry pass.
+   Run only one engine. The standalone `Launch-Simulated.cmd` disables the bridge, so use the command above for toolbar testing. Open `http://127.0.0.1:5080` in the PC browser. **SIMULATED TEST DATA** is expected; this is not a live-aircraft telemetry test.
+6. Repeat the same native interactions and capture on the full panel. Complete the checklist below. If the probe works and the full panel fails, compare the captured wrapper/handle geometry and hit paths. If both fail but built-in panels work, investigate shared registration/native setup and template errors. If built-in panels also fail, establish the broader simulator input behavior before attributing it to AeroScience. These outcomes narrow the investigation; none alone identifies a root cause.
+
+## Capture the actual native targets and geometry
+
+1. Keep the failing AeroScience panel open. Run `C:\MSFS 2024 SDK\Tools\CoherentGT Debugger\Debugger.exe`. Click **Go** with `http://127.0.0.1:19999` as documented by Microsoft. Select the view containing AeroScience/its HTML page; do not assume a VCockpit entry is the toolbar. In its console, `document.getElementById('aeroscience-frame')` must find the frame. If not, choose another UI view. Record a debugger connection/view-discovery failure as **Blocked**.
+2. Check **Ignore Cache** in Network, per the official guide. Copy the entire local `scripts\debug\capture-toolbar-window.js` file into that view's JavaScript console and run it. This code goes into the debugger, **not PowerShell**.
+3. Return to the simulator. Attempt one title-bar drag and one left-edge resize. Hover/cursor appearance must also be recorded manually; the native cursor can differ from CSS `cursor`. Attempt one corner resize and one wheel scroll in the content region. Do not type private mission names during evidence collection.
+4. Back in the same debugger console, run:
+
+   ```javascript
+   AeroScienceWindowDebug.snapshot('after-title-left-corner-wheel');
+   AeroScienceWindowDebug.stop();
+   console.log(AeroScienceWindowDebug.report());
+   ```
+
+   Copy the resulting JSON text to `window-probe-capture.json` or `toolbar-full-capture.json` on your PC. Review it before sharing. The capture has no automatic export/upload. Its ring buffer is intentionally bounded; capture a short reproduction and start a new capture for another scenario. Reloading the view also removes the observer.
+5. In Elements, inspect the **actual generated** `ingame-ui-header`, frame wrappers and resize-looking nodes recorded in the JSON. Check Event Listeners for the title bar and left edge if that debugger version provides it. In Sources, search the installed `common.js`/`ingameUi` scripts for `DragDropHandler`, `ResizeHandler`, `startDrag` and `startResize`. Break at the relevant method or mouse-down event breakpoint if available, reproduce, and record the native file/line, call stack, target/currentTarget, bound drag element/current handle and game-handling flag. Names may differ by installed build: inspect rather than guess. Resume promptly; stopping JavaScript delays panel polling. Do not redistribute the proprietary script implementation.
+6. Compare before/after x/y/width/height. Left-edge resizing can change x **and** width; a whole-window move preserves width/height. Compare capture event paths and `elementFromPoint` hits with the visible title bar/handles, including overlapping nodes and inherited pointer rules. A passive capture cannot reveal every native/game-side binding; the debugger call stack is needed where routing remains ambiguous.
+7. For scrolling, compare `clientHeight`, `scrollHeight` and `scrollTop` before/after real wheel input. If content overflows but the wheel does not change `scrollTop`, test a temporary programmatic scroll in the debugger to separate a scrollable box from wheel delivery. If there is no overflow despite visible clipping, inspect wrapper bounds. Record the actual result; do not treat programmatic scrolling as an input pass or change production styles without evidence.
+
+For a repeat failure, send the two captures, native console errors/call-stack file/line, built-in-panel comparison, source revision, `sdk-build.json`, `sdk-contract.log`, `build.log`, game/SDK installer versions, resolution/UI scaling, aircraft, actual installed path and exact steps. Then choose a targeted correction from that evidence before another build. SDK installer version is not the simulator's reported game version.
 
 ## Desktop acceptance record
 
-For each new result use exactly **Passed**, **Failed**, **Blocked** or **Not yet tested**. Fill in the source revision, MSFS/SDK versions, screen resolution/UI scaling, aircraft, date/time and actual install path. The baseline column is the user's report about the previous build, not this revision.
+Use **Passed**, **Failed**, **Blocked** or **Not yet tested**, with evidence and date. All new-build rows begin **Not yet tested**. The reported failures below concern `9a1946d`, not this source revision.
 
-| Test and reproduction steps | Previous full-panel evidence | This revision | Notes/evidence |
-| --- | --- | --- | --- |
-| Open the full panel; confirm changing synthetic metrics/source | Passed | Not yet tested | |
-| Drag the outer simulator title bar to a new position | Failed | Not yet tested | |
-| Drag supported window edges/corner larger and smaller; watch content follow the bounds | Failed | Not yet tested | |
-| Reduce height; hover content below status; scroll down/up with mouse wheel and reach every mission control | Failed | Not yet tested | |
-| Navigate Mission → Payload → Mission; verify controls remain clickable | Not yet tested | Not yet tested | |
-| On Payload, toggle Compact VR On/Off; confirm the page stays Payload and the switch state is clear | Not yet tested | Not yet tested | |
-| Start an expendable Universal mission; move/resize/scroll/toggle layouts; verify mission ID and increasing sample count in toolbar and browser | Active Universal display only | Not yet tested | |
-| End from one display and confirm the other; repeat with Realistic, retaining its future-features explanation | Not yet tested | Not yet tested | |
-| Close/reopen only the panel; confirm the same active mission and continuing samples | Not yet tested | Not yet tested | |
-| Confirm recorded history/mode/telemetry and browser dashboard still work | Not yet tested on this PC | Not yet tested | |
-
-Any failure: record exact steps, expected/actual behavior, standard/compact layout, window size, current page, last working action, relevant logs and a screenshot. End the expendable test mission when finished. This record does not establish long-session/reconnection or live aircraft compatibility.
-
-## Separate Quest 3 acceptance record
-
-First establish a normal working PCVR session. Record Link/Air Link/Virtual Desktop, active OpenXR runtime, simulator/VR scaling and controller/mouse used. Repeat in standard and compact layouts. Desktop results do not fill in this table.
-
-| Test | This revision | Notes/evidence |
+| Test | Latest reported `9a1946d` result | New full build |
 | --- | --- | --- |
-| Open/position the native panel in VR | Not yet tested | |
-| Resize using the simulator-supported VR interaction; record any limitation | Not yet tested | |
-| Scroll overflowing content with the supported controller interaction and with the mouse | Not yet tested | |
-| Operate navigation, mode/name fields and mission buttons with controller/mouse | Not yet tested | |
-| Read essential telemetry, source/mode and switch state at normal cockpit distance | Not yet tested | |
-| Toggle Compact VR On/Off without changing page, mission ID or recording | Not yet tested | |
-| Reach all critical mission controls in a smaller window | Not yet tested | |
-| Transition desktop → VR → desktop and close/reopen the panel without losing the active mission | Not yet tested | |
+| Open panel and receive changing synthetic metrics | Passed | Not yet tested |
+| Drag the outer simulator title bar | Failed | Not yet tested |
+| Resize supported edges/corners in both directions | Failed | Not yet tested |
+| Left-edge drag changes dimensions instead of only translating window | Failed: resize cursor, whole-window movement | Not yet tested |
+| Scroll clipped content; reach mode/name/start/end controls with header/nav usable | Not confirmed in latest retest; earlier failure | Not yet tested |
+| Mission → Payload → Mission; controls remain clickable | Not yet tested | Not yet tested |
+| Start Universal; compare mission ID/mode/samples with browser during moving/resizing | Earlier full build: active Universal display only | Not yet tested |
+| End from either display; confirm history/mode/telemetry; repeat Realistic | Not yet tested | Not yet tested |
+| Close/reopen panel; recording and samples continue; mission unchanged | Not yet tested | Not yet tested |
+| No new rendering/input regressions; native header controls work | Not yet tested | Not yet tested |
 
-If a particular interaction is not supported by the installed native VR window system, mark that test **Blocked**, describe the limitation and record the supported alternative actually observed. Do not add competing custom drag/controller handlers without new evidence.
+Record probe title-bar, left-edge, other-edge/corner and wheel results separately, along with the built-in-panel comparison. The probe contains no telemetry or mission controls. Desktop simulator testing is the primary functional acceptance; browser layout tests and SDK compilation cannot fill these rows.
 
-## Logs and remaining limits
+## VR performance only
 
-Keep `sdk-contract.log`, `build.log` and `sdk-build.json` from this revision's `artifacts\toolbar-full` beside its generated package. The Windows script generates them; none has been fabricated in the cloud. Preserve console output and relevant `%LOCALAPPDATA%\AeroScience\logs` entries. From the engine directory, the existing `Collect-Feedback.ps1 -BuildLogDirectory 'YOUR UPDATED SOURCE\artifacts\toolbar-full'` collects selected reports for review; it uploads nothing.
+There is one responsive interface. No separate Quest 3 interaction, controller, scrolling, resizing or layout-toggle matrix is required. After desktop functionality works, use a normally working VR headset session and keep aircraft, location/weather, headset connection/OpenXR runtime, graphics/resolution and traffic settings constant.
 
-If native movement/resize/wheel still fails, use the official [Coherent GT debugger procedure](https://docs.flightsimulator.com/msfs2024/html/6_Programming_APIs/JavaScript/Coherent_GT_Debugger.htm) to capture the AeroScience view's console errors and inspect `#aeroscience-frame`, its generated native wrappers/title bar/resize handles and `#as-scroll`. Record actual computed sizes/overflow and inline styles before/after attempted interaction. Browser fixture behavior cannot diagnose the installed native template's hit testing.
+Compare equal observation intervals (for example 60 seconds each), repeating to distinguish ordinary simulator variation:
 
-No new sensors, mapping, mission types, Realistic restrictions, replay or release automation were added. Real aircraft telemetry, aircraft compatibility, full mission mutation/persistence on the PC, reconnect/recovery, clean distribution and physical iPad acceptance remain separate outstanding work.
+1. Companion stopped, AeroScience panel closed.
+2. Companion running/recording the same chosen telemetry source, panel closed.
+3. Companion running/recording, panel open. Close/open it again and watch for spikes.
+
+Record available simulator FPS and frame times (median/high-percentile if the measurement tool supports them), stutters, companion CPU/memory, simulator resource usage and any available Coherent view cost. State the tool, interval, settings and whether measurements include debugger overhead; close the capture/debugger during the comparison. No numerical pass threshold has been measured or invented. Report noticeable degradation and raw measurements before marking `vr_performance` passed. Results remain **Not yet tested**.
+
+## Automated evidence and outstanding work
+
+Current executed results are in [validation-results.md](validation-results.md). Browser fixtures test application layout/scrolling, navigation, modes/protocol and capture utility behavior with mocked SDK services. They supply frame bounds; they do not implement native dragging/resizing or establish Coherent input success.
+
+The official Windows SDK and MSFS are absent from this Linux cloud. New full/probe SDK compilation, SPB/manifest/layout/receipt generation, native target/call-stack inspection and actual desktop/VR measurements are **Blocked here** and **unverified on the PC**. No new precompiled package or successful native correction is claimed.
+
+Keep each variant's build logs/receipt under `artifacts\toolbar-full` or `artifacts\toolbar-window-probe`. The existing `Collect-Feedback.ps1 -BuildLogDirectory 'YOUR SOURCE\artifacts\toolbar-full'` collects selected build/runtime logs but does not automatically include the manually saved debugger JSON; share those separately after review. Engine logs remain in `%LOCALAPPDATA%\AeroScience\logs`.
+
+Native window interaction remains a release blocker. Live aircraft telemetry/compatibility, full PC mission persistence/lifecycle, reconnect/recovery, clean distribution/runtime licensing, Community2024 and physical iPad testing also remain outstanding. No new science, replay or release-automation work is included.

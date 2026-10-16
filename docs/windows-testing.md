@@ -144,7 +144,7 @@ Basic local SimConnect needs no LAN listener, cloud credential or SimConnect net
 
 ## 6. Compile and install the toolbar proof of concept, then full panel
 
-The diagnostic and previous full panel have now loaded on the user's gaming PC, but the full panel's dragging/resizing/scrolling failed. For the latest focused source revision, use the [interaction build/replacement procedure and acceptance tables](toolbar-interactions.md). It reuses the existing engine at `C:\Windows-Companion-unverified-in-MSFS`; the new toolbar package still requires an official SDK build on the PC.
+Both diagnostic and full panels loaded on the gaming PC. Retesting `9a1946d` still failed normal dragging/resizing; left-edge dragging translates the whole window despite a resize cursor. Latest scrolling is unconfirmed. Use the [native-window probe/full builds, capture and desktop checklist](toolbar-interactions.md) before another speculative correction. Reuse `C:\Windows-Companion-unverified-in-MSFS`. New official SDK compilation and native results are unverified.
 
 Open **x64 Native Tools Command Prompt** for your installed Visual Studio Build Tools. From that prompt launch `pwsh -NoProfile` so PowerShell inherits the x64 compiler environment. No administrator session is needed for ordinary builds.
 
@@ -199,11 +199,11 @@ Locate your **configured** Community and Community2024 locations in MSFS Develop
 
 The transport uses simulator-owned `CommBus.js` / `RegisterCommBusListener`, native `SimConnect_SubscribeToCommBusEvent` and `SimConnect_CallCommBusEvent`. It does not embed the dashboard or access localhost sockets in Coherent. Official documentation was accessible during the first Windows build troubleshooting and confirmed the CommBus variable-length data member. The gaming-PC header/runtime checks and actual SDK/Coherent tests remain required evidence, not implied passes.
 
-## 7. Quest 3 PCVR test
+## 7. VR performance test only
 
-After the full toolbar works on desktop, establish your normal working Quest 3 PCVR/OpenXR connection first (record Link/Air Link/Virtual Desktop and active runtime). Keep a short expendable mission running, enter VR through MSFS's configured VR toggle, open the VR toolbar and select AeroScience.
+After the desktop toolbar functionality passes, establish a working VR session and record the headset connection, OpenXR runtime, resolution/graphics and simulator settings. Use one responsive toolbar interface; no dedicated VR display mode exists.
 
-Check: panel appears; native dragging/resizing works; mouse and VR controller can activate Mission/Payload/Compact VR; telemetry and labels are readable at normal cockpit distance; mission-name entry/focus works; start/end activates once; mode/source are clear; panel does not obstruct essential instruments. Close/reopen it and transition desktop → VR → desktop without changing the mission ID or stopping samples. Compare frame rate/stutters with the panel open/closed and report your observed settings/results. This cannot be validated by the Linux browser tests.
+Measure equal intervals with the companion stopped/panel closed, companion running/recording/panel closed, and companion running/recording/panel open. Repeat opening/closing and record simulator FPS/frame times, stutters, companion CPU/memory and available toolbar/Coherent resource cost. Keep the flight/settings constant, stop debugger captures during measurements and note measurement tools. See [performance-only guidance](toolbar-interactions.md#vr-performance-only). No separate Quest 3 controller, resize, scroll or layout-toggle matrix is required; desktop MSFS is the primary functional test. No VR performance result is established by cloud browser tests.
 
 ## 8. iPad mini 6 / trusted private LAN
 

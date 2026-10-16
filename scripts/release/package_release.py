@@ -14,7 +14,7 @@ import zipfile
 VERSION = "0.1.0"
 REPO = Path(__file__).resolve().parents[2]
 ACCEPTANCE = ("windows_companion", "simulated_recording_recovery", "simconnect_live", "toolbar_install_load",
-              "toolbar_mission_sync", "vr_quest3", "ipad_safari", "release_contents")
+              "toolbar_mission_sync", "vr_performance", "ipad_safari", "release_contents")
 
 
 def require(condition, message):
@@ -94,7 +94,7 @@ def validate_companion(root, require_simconnect=False):
 
 def validate_receipt(path, community_files):
     receipt = json.loads(path.read_text(encoding="utf-8-sig"))
-    require(receipt.get("variant") == "toolbar-full", "A full-toolbar SDK build receipt is required; the proof of concept cannot ship as the full toolbar.")
+    require(receipt.get("variant") == "toolbar-full", "A full-toolbar SDK build receipt is required; diagnostic variants cannot ship as the full toolbar.")
     require(receipt.get("built_utc") and receipt.get("builder_sha256"), "SDK build provenance is incomplete.")
     expected = {name: hashlib.sha256(path.read_bytes()).hexdigest() for name, path in community_files.items()}
     require(receipt.get("files") == expected, "Community files differ from the recorded SDK build.")

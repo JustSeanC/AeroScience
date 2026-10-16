@@ -1,6 +1,6 @@
 # Install and launch
 
-Use the [Windows installation and live-testing workbook](docs/windows-testing.md) for the current copy/paste commands, simulated-mode checklist, SDK build, live flights, Quest 3, iPad pairing, GitHub backup and feedback collection. This guide provides the shorter installation reference.
+Use the [Windows installation and live-testing workbook](docs/windows-testing.md) for the current copy/paste commands, simulated-mode checklist, SDK build, live flights, VR performance, iPad pairing, GitHub backup and feedback collection. This guide provides the shorter installation reference.
 
 ## Current companion preview
 
@@ -21,11 +21,11 @@ Do **not** copy `msfs-toolbar/PackageSources` into Community. It is source, not 
 
 1. Obtain the official x64 SimConnect runtime from the MSFS 2024 SDK on a development PC. See [runtime licensing](docs/simconnect.md). The maintainer must confirm redistribution terms before including it in a public release. Do not download a DLL from an unofficial site. End users of a future complete release should receive the permitted runtime with the app; the current preview has no live-runtime dependency installed for them.
 2. Locate your simulator's configured package locations. Microsoft Store and Steam use different settings locations; custom package locations are supported. Use the simulator's installed-package configuration/Developer Mode package tools, rather than assuming a fixed installation drive or username.
-3. The current toolbar project uses legacy `InGamePanels`/SPB packaging. Install the built `aeroscience-toolbar` folder in the **Community** location recognized for this package type. **Community2024 compatibility has not been verified**; do not claim it works there or duplicate the package across both folders. Test Community2024 first on the configured SDK/simulator, and document the result before choosing it for distribution.
+3. The current toolbar project uses legacy `InGamePanels`/SPB packaging. Install the built `aeroscience-toolbar` folder in the **Community** location recognized for this package type. **Community2024 compatibility has not been verified**; do not claim it works there or duplicate the package across both folders. Use the configured Community folder where this panel already loaded; verify Community2024 separately before choosing it for distribution.
 4. Restart MSFS after changing a toolbar package. Start the companion with `Launch-SimConnect.cmd`, load a flight, and wait for initialized aircraft telemetry. Menus/loading are not valid telemetry sessions.
 5. Enable AeroScience in the toolbar customization list and open its floating panel. Start with the read-only proof of concept when developing the package. Then validate the full panel, mission mode, start/end commands, and synchronization with the browser.
 6. Open/close the panel, change aircraft, restart flights, disconnect/reconnect the simulator, and ensure the mission is retained. Do this on representative default, third-party and rotary-wing aircraft.
-7. Enter PCVR, open the same toolbar panel with the VR toolbar controls, select Compact VR, and resize/reposition it. Verify controller/mouse hit areas and Quest 3 text readability. These steps have not been performed here.
+7. Complete the [native-window comparison and desktop checklist](docs/toolbar-interactions.md). The known movement/resize failure remains a blocker; no corrected compiled package is supplied from the cloud. Reuse `C:\Windows-Companion-unverified-in-MSFS`. There is one responsive interface and no Compact VR control. VR-specific testing measures performance only, using the comparison in that guide.
 
 ## iPad / private LAN
 

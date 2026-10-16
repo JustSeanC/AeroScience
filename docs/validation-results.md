@@ -86,3 +86,23 @@ The official SDK documentation URL supplied by the user returned a proxy access 
 - Browser tests exercise supplied bounds at 320×360, 640×720 and 900×900, wheel scrolling to mission controls, layout/page/state retention, recurring mocked data and hidden/reconnected panel behavior. Fixture screenshots are explicitly labeled as browser-only. These tests do not verify native title-bar movement, resize handles, Coherent wheel routing or VR.
 - The cloud has no official Windows SDK package tool/simulator. This revision's SDK package build is **Blocked here** and its desktop/Quest 3 acceptance is **Not yet tested**. No updated SPB/manifest/layout/receipt or Community archive is claimed. The Windows instructions use the existing validated SDK build script to generate them on the PC.
 - Engine location supplied by the user is now `C:\Windows-Companion-unverified-in-MSFS`. No companion engine code or distribution was changed for this interaction revision.
+
+
+## Native interaction retest after `9a1946d`
+
+- The updated full-panel screenshot shows the temporary header layout control and synthetic metrics. The user reports normal dragging/resizing still fail. A resize cursor appears near the left edge, but dragging there moves the entire window instead of changing its dimensions. This is confirmed reported behavior, not a diagnosed native handler/CSS cause.
+- **Passed, user-reported comparison:** built-in panels drag and resize normally in the same MSFS session. This narrows the failure toward the add-on integration/template path; it does not identify the exact target, binding or layout defect.
+- Scrolling was not successfully verified in this latest retest; clipped content alone does not establish whether wheel events arrive. Earlier scrolling failure remains recorded above.
+- Full mission start/end, live-aircraft telemetry and persistence on the gaming PC remain separately unverified. No native interaction pass is inferred from successful package compilation, rendering or browser tests.
+
+## Current native-window investigation and feature removal
+
+- Removed Compact VR and its obsolete assertions/styles/logic. Desktop and VR share one responsive interface. Current VR-specific acceptance is performance only; historical headset-interaction notes above are not current requirements.
+- Preserved production registration/native host geometry and all engine/mission/CommBus code pending actual evidence. Added a separate minimal-window SDK build and a passive debugger capture. Neither is claimed simulator-tested; no root cause or native correction is yet established.
+- .NET: **23 passed**, zero failed/skipped, `tests/AeroScience.Tests/TestResults/native-window-investigation.trx`.
+- Complete browser suite: **11 passed**, zero failed/skipped, `artifacts/web-results.json`. This includes four real-engine dashboard workflows, the retained mode/start/end protocol test, four single-interface layout/lifecycle checks and two passive-capture utility checks. The initial run found one obsolete Compact VR assertion in the protocol test; it was removed while preserving the mode/start/end assertions, then the complete suite passed.
+- Python discovery with PowerShell available: **21 passed**, zero failed/skipped. Coverage includes the existing layout/version/path/receipt gates and helper checks, the window-probe release refusal, performance-evidence requirement and rejection of conflicting diagnostic flags before touching existing generated output.
+- All toolbar JavaScript/capture syntax checks, three HTML pages' local references/unique IDs, matching full/probe native host attributes and three project/registration XML parses passed. These checks do not compile the SDK package or prove native interaction.
+- Actual-process recovery smoke passed: retained Realistic mode and two committed samples after a process interruption; rejected a duplicate engine; preserved Universal defaults and completed history. Dashboard JavaScript syntax, documentation links/code fences and `git diff --check` passed. Companion source, the POC HTML/JS and production panel registration were unchanged.
+- Windows SDK/MSFS are unavailable in this Linux environment. New full/probe package compilation, generated SPB/manifest/layout/receipt and actual native call stacks/input remain **Blocked here / Not yet tested on the PC**.
+- Follow [the current comparison, debugger and desktop checklist](toolbar-interactions.md) before another proposed native fix. Reuse `C:\Windows-Companion-unverified-in-MSFS`; no engine rebuild is needed.

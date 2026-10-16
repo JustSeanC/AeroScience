@@ -1,0 +1,42 @@
+<!doctype html>
+<!-- Controlled native-window comparison. No mission UI, CommBus or app CSS.
+     This page is not a known-working MSFS result; test it on the installed SDK. -->
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="/SCSS/common.css" />
+    <script src="/JS/coherent.js"></script>
+    <script src="/JS/common.js"></script>
+    <script src="/JS/Services/ToolBarPanels.js"></script>
+    <link rel="import" href="/templates/ingameUi/ingameUi.html" />
+    <link rel="import" href="/templates/ingameUiHeader/ingameUiHeader.html" />
+    <style>
+      /* Match the full panel's fallback bounds only. Leave native display,
+         header, wrappers, resize handles and pointer routing untouched. */
+      #aeroscience-frame { width: 42vw; height: 55vh; min-width: 320px; min-height: 360px; }
+      #window-probe-content { padding: 16px; color: white; background: #101c27; font: 18px "Segoe UI", sans-serif; }
+      #window-probe-scroll { height: 160px; overflow-y: auto; border: 1px solid #a8c0d1; }
+      #window-probe-scroll p { margin: 16px; }
+    </style>
+    <script src="WindowProbe.js"></script>
+  </head>
+  <body class="border-box">
+    <ingamepanel-aeroscience-window-probe>
+      <ingame-ui id="aeroscience-frame" panel-id="PANEL_AEROSCIENCE"
+        title="AeroScience window probe" class="ingameUiFrame panelInvisible"
+        content-fit="false" resize="both" min-width="320" min-height="360"
+        auto-inside="" data-input-group="INGAME-UI">
+        <div id="window-probe-content">
+          <h2>NATIVE WINDOW PROBE — NO MISSION CONTROLS</h2>
+          <p>Compare title-bar dragging and edge/corner resizing with the full panel.</p>
+          <div id="window-probe-scroll" tabindex="0" role="region" aria-label="Window probe scrolling">
+            <p>START — scroll down inside this box.</p>
+            <p>Row 2</p><p>Row 3</p><p>Row 4</p><p>Row 5</p><p>Row 6</p>
+            <p>Row 7</p><p>Row 8</p><p>Row 9</p><p>Row 10</p><p>Row 11</p>
+            <p>END — all probe rows reached.</p>
+          </div>
+        </div>
+      </ingame-ui>
+    </ingamepanel-aeroscience-window-probe>
+  </body>
+</html>

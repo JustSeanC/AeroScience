@@ -96,5 +96,17 @@ catch {
             self.assertIn('intentional compiler failure', (stage/'sdk-contract.log').read_text(encoding='utf-8-sig'))
             self.assertFalse((stage/'sdk-build.json').exists())
 
+    def test_conflicting_probe_flags_preserve_existing_generated_output(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp); scripts = root/'scripts/build'; scripts.mkdir(parents=True)
+            shutil.copy2(REPO/'scripts/build/Build-Toolbar.ps1', scripts/'Build-Toolbar.ps1')
+            previous = root/'artifacts/toolbar-poc/sdk-build.json'
+            previous.parent.mkdir(parents=True); previous.write_text('existing build receipt fixture')
+            result = self.invoke(scripts/'Build-Toolbar.ps1', '-SdkRoot', root/'missing SDK',
+                                 '-ProofOfConcept', '-WindowProbe')
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn('Choose either', result.stderr)
+            self.assertEqual(previous.read_text(), 'existing build receipt fixture')
+
 
 if __name__ == '__main__': unittest.main()

@@ -159,5 +159,26 @@ class PackagingTests(unittest.TestCase):
             with packaging.zipfile.ZipFile(output) as archive: self.assertEqual(archive.namelist(), ['AeroScience-fixture/a.txt'])
             with self.assertRaisesRegex(ValueError, 'overwrite'): packaging.zip_tree(root, output)
 
+    def test_window_probe_receipt_cannot_be_released_as_full_toolbar(self):
+        with tempfile.TemporaryDirectory() as temp:
+            receipt = Path(temp)/'receipt.json'
+            receipt.write_text('{"variant":"toolbar-window-probe"}')
+            with self.assertRaisesRegex(ValueError, 'full-toolbar'):
+                packaging.validate_receipt(receipt, {})
+
+    def test_vr_acceptance_requires_performance_evidence(self):
+        with tempfile.TemporaryDirectory() as temp:
+            acceptance = Path(temp)/'acceptance.json'
+            data = {'version': '0.1.0', 'tester': 'test fixture', 'tested_utc': '2026-10-16',
+                    'checks': {name: {'result': 'passed', 'evidence': 'test fixture'} for name in packaging.ACCEPTANCE}}
+            data['checks'].pop('vr_performance')
+            data['checks']['vr_quest3'] = {'result': 'passed', 'evidence': 'obsolete interaction record'}
+            acceptance.write_text(json.dumps(data))
+            with self.assertRaisesRegex(ValueError, 'vr_performance'):
+                packaging.validate_acceptance(acceptance)
+            data['checks']['vr_performance'] = {'result': 'passed', 'evidence': 'frame-time and resource comparison fixture'}
+            acceptance.write_text(json.dumps(data))
+            packaging.validate_acceptance(acceptance)
+
 
 if __name__ == '__main__': unittest.main()

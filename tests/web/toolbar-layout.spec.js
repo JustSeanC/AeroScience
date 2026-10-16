@@ -6,17 +6,11 @@ const activeMission = () => ({
   startedUtc: new Date(Date.now() - 12000).toISOString(), sampleCount: 9
 });
 
-test('Compact VR is a header toggle and keeps the page, mission and mocked CommBus session', async ({ page }) => {
+test('one responsive interface retains navigation, mission and mocked CommBus state', async ({ page }) => {
   await mountToolbar(page, { autoReply: true, activeMission: activeMission() });
-  const toggle = page.getByRole('checkbox', { name: 'Compact VR', exact: true });
-  await expect(page.locator('nav #as-vr')).toHaveCount(0);
-  await expect(page.locator('header #as-vr')).toHaveCount(1);
-  await expect(page.locator('#as-vr-state')).toHaveText('Off');
+  await expect(page.getByRole('checkbox')).toHaveCount(0);
+  await expect(page.locator('nav new-push-button')).toHaveText(['Mission', 'Payload']);
   await page.locator('#as-payload-page').click();
-  await expect(page.locator('#as-payload-view')).toBeVisible();
-  await toggle.check();
-  await expect(page.locator('#as-root')).toHaveClass(/compact/);
-  await expect(page.locator('#as-vr-state')).toHaveText('On');
   await expect(page.locator('#as-payload-view')).toBeVisible();
   await expect(page.locator('#as-mission-view')).toBeHidden();
   await page.evaluate(() => {
@@ -25,8 +19,6 @@ test('Compact VR is a header toggle and keeps the page, mission and mocked CommB
   });
   await expect(page.locator('#as-samples')).toHaveText('12 samples');
   await expect(page.locator('#as-altitude')).toHaveText('60,250');
-  await toggle.uncheck();
-  await expect(page.locator('#as-vr-state')).toHaveText('Off');
   await expect(page.locator('#as-payload-view')).toBeVisible();
   await page.locator('#as-mission-page').click();
   await expect(page.locator('#as-active-name')).toHaveText('Toolbar layout recording');
@@ -35,59 +27,51 @@ test('Compact VR is a header toggle and keeps the page, mission and mocked CommB
   expect(await page.evaluate(() => window.bus.sent.filter(x => x.command.op !== 'state'))).toEqual([]);
 });
 
-test('content follows supplied host bounds in both layouts (browser fixture, not native dragging)', async ({ page }) => {
+test('content follows supplied host bounds (browser fixture, not native dragging)', async ({ page }) => {
   await mountToolbar(page, { autoReply: true });
-  for (const compact of [false, true]) {
-    await page.getByRole('checkbox', { name: 'Compact VR', exact: true }).setChecked(compact);
-    for (const dimensions of [{ width: 320, height: 360 }, { width: 640, height: 720 }, { width: 900, height: 900 }]) {
-      await page.locator('#aeroscience-frame').evaluate((frame, size) => {
-        // Model bounds supplied by the host; do not fake native pointer handlers.
-        Object.assign(frame.style, { left: '30px', top: '20px', width: `${size.width}px`, height: `${size.height}px` });
-      }, dimensions);
-      const geometry = await page.evaluate(() => {
-        const frame = document.getElementById('aeroscience-frame').getBoundingClientRect();
-        const root = document.getElementById('as-root').getBoundingClientRect();
-        const scroll = document.getElementById('as-scroll');
-        const content = scroll.getBoundingClientRect();
-        return { x: frame.x, y: frame.y, width: frame.width, height: frame.height,
-          right: frame.right, bottom: frame.bottom, rootRight: root.right, contentBottom: content.bottom,
-          scrollHeight: scroll.clientHeight, horizontalOverflow: scroll.scrollWidth > scroll.clientWidth };
-      });
-      expect(geometry.x).toBe(30); expect(geometry.y).toBe(20);
-      expect(geometry.width).toBe(dimensions.width); expect(geometry.height).toBe(dimensions.height);
-      expect(geometry.rootRight).toBeLessThanOrEqual(geometry.right + 1);
-      expect(geometry.contentBottom).toBeLessThanOrEqual(geometry.bottom + 1);
-      expect(geometry.scrollHeight).toBeGreaterThanOrEqual(48);
-      expect(geometry.horizontalOverflow).toBe(false);
-    }
+  for (const dimensions of [{ width: 320, height: 360 }, { width: 640, height: 720 }, { width: 900, height: 900 }]) {
+    await page.locator('#aeroscience-frame').evaluate((frame, size) => {
+      // Model bounds supplied by the host; do not fake native pointer handlers.
+      Object.assign(frame.style, { left: '30px', top: '20px', width: `${size.width}px`, height: `${size.height}px` });
+    }, dimensions);
+    const geometry = await page.evaluate(() => {
+      const frame = document.getElementById('aeroscience-frame').getBoundingClientRect();
+      const root = document.getElementById('as-root').getBoundingClientRect();
+      const scroll = document.getElementById('as-scroll');
+      const content = scroll.getBoundingClientRect();
+      return { x: frame.x, y: frame.y, width: frame.width, height: frame.height,
+        right: frame.right, bottom: frame.bottom, rootRight: root.right, contentBottom: content.bottom,
+        scrollHeight: scroll.clientHeight, horizontalOverflow: scroll.scrollWidth > scroll.clientWidth };
+    });
+    expect(geometry.x).toBe(30); expect(geometry.y).toBe(20);
+    expect(geometry.width).toBe(dimensions.width); expect(geometry.height).toBe(dimensions.height);
+    expect(geometry.rootRight).toBeLessThanOrEqual(geometry.right + 1);
+    expect(geometry.contentBottom).toBeLessThanOrEqual(geometry.bottom + 1);
+    expect(geometry.scrollHeight).toBeGreaterThanOrEqual(48);
+    expect(geometry.horizontalOverflow).toBe(false);
   }
 });
 
-test('mouse wheel scrolls bounded content and exposes mission controls in standard and compact layouts', async ({ page }) => {
+test('browser wheel scrolls bounded content and exposes mission controls', async ({ page }) => {
   await mountToolbar(page, { autoReply: true, activeMission: activeMission() });
   await page.locator('#aeroscience-frame').evaluate(frame => {
     Object.assign(frame.style, { width: '320px', height: '360px' });
   });
   const scroll = page.getByRole('region', { name: 'Mission and payload content' });
-  for (const compact of [false, true]) {
-    await page.getByRole('checkbox', { name: 'Compact VR', exact: true }).setChecked(compact);
-    await scroll.evaluate(node => { node.scrollTop = 0; });
-    expect(await scroll.evaluate(node => node.scrollHeight > node.clientHeight)).toBe(true);
-    await scroll.hover(); await page.mouse.wheel(0, 800);
-    await expect.poll(() => scroll.evaluate(node => node.scrollTop)).toBeGreaterThan(0);
-    await page.locator('#as-end').scrollIntoViewIfNeeded();
-    await expect(page.locator('#as-end')).toBeInViewport();
-    await expect(page.locator('header')).toBeInViewport();
-    expect(await page.evaluate(() => window.scrollY)).toBe(0);
-  }
+  expect(await scroll.evaluate(node => node.scrollHeight > node.clientHeight)).toBe(true);
+  await scroll.hover(); await page.mouse.wheel(0, 800);
+  await expect.poll(() => scroll.evaluate(node => node.scrollTop)).toBeGreaterThan(0);
+  await page.locator('#as-end').scrollIntoViewIfNeeded();
+  await expect(page.locator('#as-end')).toBeInViewport();
+  await expect(page.locator('header')).toBeInViewport();
+  expect(await page.evaluate(() => window.scrollY)).toBe(0);
   await page.locator('#as-end').click();
   expect(await page.evaluate(() => window.bus.sent.find(x => x.command.op === 'end').command.missionId))
     .toBe('00000000-0000-4000-8000-000000000002');
 });
 
-test('hiding and reconnecting the mocked panel retains the central mission and layout preference', async ({ page }) => {
+test('hiding and reconnecting the mocked panel retains the central mission', async ({ page }) => {
   await mountToolbar(page, { autoReply: true, activeMission: activeMission() });
-  await page.getByRole('checkbox', { name: 'Compact VR', exact: true }).check();
   await page.locator('#aeroscience-frame').evaluate(frame => frame.classList.add('panelInvisible'));
   const beforeHidden = await page.evaluate(() => window.bus.sent.length);
   await page.waitForTimeout(1100); // Cover one real one-second poll interval while hidden.
@@ -102,8 +86,6 @@ test('hiding and reconnecting the mocked panel retains the central mission and l
   });
   await expect(page.locator('#as-samples')).toHaveText('18 samples');
   await expect(page.locator('#as-active-name')).toHaveText('Toolbar layout recording');
-  await expect(page.getByRole('checkbox', { name: 'Compact VR', exact: true })).toBeChecked();
-  await expect(page.locator('#as-vr-state')).toHaveText('On');
   expect(await page.evaluate(() => window.bus.unregistered)).toBe(1);
   expect(await page.evaluate(() => window.listenerRegistrations)).toBe(2);
   expect(await page.evaluate(() => window.bus.sent.filter(x => x.command.op !== 'state'))).toEqual([]);

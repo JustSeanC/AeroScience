@@ -29,14 +29,14 @@ The preview packager rejects native/managed SimConnect runtime files in any inpu
 
 1. Review official SDK/runtime licensing. Do not add proprietary binaries to source control. Establish the supported runtime distribution route and include the permitted x64 runtime beside the executable for the full release.
 2. Build/test the toolbar POC, then the full SDK project with `Build-Toolbar.ps1`. It writes `sdk-build.json` beside the output, including the builder hash, UTC time, variant and package file hashes.
-3. Run the platform checks in `verification.md`. Copy `release-acceptance.example.json` to a local acceptance record; enter actual tester, UTC date, passed results and concrete evidence. The example intentionally contains pending results and cannot pass packaging.
+3. Run the platform checks in `verification.md`. Copy `release-acceptance.example.json` to a local acceptance record; enter actual tester, UTC date, passed results and concrete evidence. The example intentionally contains pending results and cannot pass packaging. Its `vr_performance` check now requires measured headset performance evidence, not a Quest 3 interaction matrix. An old `vr_quest3` record alone does not satisfy the new check; record actual new measurements rather than renaming an unverified pass.
 4. Assemble:
 
 ```powershell
 pwsh scripts/release/New-Release.ps1 -CommunityPackage 'PATH TO SDK-BUILT aeroscience-toolbar' -SdkReceipt 'PATH TO toolbar-full/sdk-build.json' -AcceptanceRecord 'YOUR COMPLETED ACCEPTANCE RECORD.json' -RuntimeRedistributionConfirmed
 ```
 
-The script validates the self-contained x64 PE executable, required runtime/files, SDK output, full-build hashes and recorded acceptance, then creates `artifacts/AeroScience-v0.1.0.zip` and its SHA-256 sidecar. It refuses POC/source-only packages, missing or mismatched layout files, aircraft dependencies, unsafe paths, altered SDK output, pending acceptance and missing redistribution confirmation. A successful archive contains:
+The script validates the self-contained x64 PE executable, required runtime/files, SDK output, full-build hashes and recorded acceptance, then creates `artifacts/AeroScience-v0.1.0.zip` and its SHA-256 sidecar. It refuses POC/window-probe/source-only packages, missing or mismatched layout files, aircraft dependencies, unsafe paths, altered SDK output, pending acceptance and missing redistribution confirmation. A successful archive contains:
 
 ```text
 AeroScience-v0.1.0/

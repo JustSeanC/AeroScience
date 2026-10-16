@@ -41,8 +41,6 @@ class IngamePanelAeroScience extends TemplateElement {
     };
     this.byId("as-mission-page").onclick = () => this.page(false);
     this.byId("as-payload-page").onclick = () => this.page(true);
-    this.byId("as-vr").onchange = () => this.setCompact(this.byId("as-vr").checked);
-    this.setCompact(this.byId("as-vr").checked);
     this.timer = setInterval(() => this.tick(), 1000);
     try {
       Include.addScript("/JS/Services/CommBus.js", () => this.registerBus());
@@ -81,11 +79,6 @@ class IngamePanelAeroScience extends TemplateElement {
   page(payload) {
     this.byId("as-mission-view").hidden = payload;
     this.byId("as-payload-view").hidden = !payload;
-  }
-  setCompact(enabled) {
-    // A local view preference: leave the selected page, mission and CommBus session intact.
-    this.byId("as-root").classList.toggle("compact", enabled);
-    this.byId("as-vr-state").textContent = enabled ? "On" : "Off";
   }
   status(text) {
     this.byId("as-status").textContent = text;

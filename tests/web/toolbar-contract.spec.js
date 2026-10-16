@@ -25,7 +25,6 @@ test('toolbar sends selected mode through CommBus and renders central state (SDK
   await expect(page.locator('#as-active-mode')).toContainText('Realistic Mode');
   await expect(page.locator('#as-mode')).toHaveValue('universal');
   await expect(page.locator('#as-source')).toHaveText('SIMULATED TEST DATA');
-  await page.locator('#as-vr').click(); await expect(page.locator('#as-root')).toHaveClass(/compact/);
   await page.locator('#as-end').click();
   expect(await page.evaluate(() => window.bus.sent.find(x => x.command.op === 'end').command.missionId)).toBe('00000000-0000-4000-8000-000000000001');
   await page.evaluate(() => document.querySelector('ingamepanel-aeroscience').remove());
