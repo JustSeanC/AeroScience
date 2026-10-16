@@ -33,12 +33,12 @@ The full panel was built and displayed synthetic metrics and an active Universal
 9. On a physical iPad mini 6 with Safari, verify pairing on a trusted private network, incorrect-code rejection, source/mode labels, telemetry, mission controls/history, portrait/landscape layouts and session expiry/re-pairing. Verify localhost-only mode refuses LAN connections and the Private firewall rules are sufficient. Test Edge/Chrome on Windows too.
 10. Assemble the real full release only after these prerequisites pass. Inspect/extract it on another PC and verify the exact files and installation instructions. Signatures/one-click installer remain future work; do not mark the current companion-only preview as the full Community release.
 
-## Required v0.1.0 completion before the v0.1.1 closed alpha
+## Required validation for the v0.1.1 live-flight alpha
 
-1. Validate and harden native SimConnect lifecycle/telemetry across real default and third-party fixed/rotary-wing aircraft.
+1. Primary deliverable: validate and harden the existing native SimConnect integration so actual MSFS aircraft data appears in the toolbar/dashboard, records a flight mission and remains in history after a companion restart. Verify both modes, default/third-party fixed/rotary-wing aircraft and lifecycle behavior with actual hardware evidence.
 2. Preserve the now-passed native dragging/resizing correction; complete scrolling/control/mission acceptance, repeated startup, official-SDK packaging/CommBus checks and performance-only VR measurements. Verify Community2024 compatibility separately before claiming it.
 3. Validate clean Windows distribution, permitted runtime bundling and physical iPad LAN pairing, then produce the complete release archive.
 
 Advanced scientific sensors and restrictions follow those reliability/distribution tasks, rather than displacing them.
 
-Follow the [Windows testing workbook](windows-testing.md) and retain actual results before planning friends-only v0.1.1 distribution or automated GitHub Releases. Those release features have not been added during this review.
+Follow the [Windows testing workbook](windows-testing.md) and [v0.1.1 prompt brief](v0.1.1-prompt-handoff.md). Live telemetry/recording is the primary v0.1.1 outcome; installation and release automation support it. Retain actual results before claiming that workflow verified. Release automation has not been added during this review.
