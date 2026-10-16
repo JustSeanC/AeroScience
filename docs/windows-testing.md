@@ -191,8 +191,9 @@ Locate your **configured** Community and Community2024 locations in MSFS Develop
    ```
 
 7. Preserve the old test package outside Community if you need it, replace the installed POC with the full SDK-built output and restart MSFS. The package ID is the same, so only one variant can be installed at a time.
-8. Use `Launch-SimConnect.cmd` from your checked companion directory. Its default enables the bridge and keeps LAN off. Verify live aircraft, source, mission mode, telemetry and Mission/Payload navigation. Scientific payloads remain unavailable.
+8. First run the companion with `Telemetry=Simulated`, `EnableToolbarBridge=true` and `EnableLan=false` using the explicit executable command above. Verify the full panel shows **SIMULATED TEST DATA**, changing readings, mode selection and Mission/Payload navigation. Scientific payloads remain unavailable.
 9. Start a Universal mission in the toolbar. Confirm the browser shows the same active mission; close/reopen the toolbar and confirm recording/sample count continues. End it from the browser and confirm the toolbar returns to standby. Repeat with a Realistic mission started in the browser and ended in the toolbar; verify saved modes/history.
+10. After simulated full-panel controls/synchronization pass, stop the companion and use `Launch-SimConnect.cmd` from the same checked companion directory. Its default enables the bridge and keeps LAN off. Repeat with real aircraft telemetry, confirming the live source and actual loaded aircraft before recording. Follow section 5's aircraft/lifecycle checks; synthetic success does not establish these.
 
 The transport uses simulator-owned `CommBus.js` / `RegisterCommBusListener`, native `SimConnect_SubscribeToCommBusEvent` and `SimConnect_CallCommBusEvent`. It does not embed the dashboard or access localhost sockets in Coherent. Official documentation was accessible during the first Windows build troubleshooting and confirmed the CommBus variable-length data member. The gaming-PC header/runtime checks and actual SDK/Coherent tests remain required evidence, not implied passes.
 

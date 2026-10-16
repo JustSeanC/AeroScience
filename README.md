@@ -2,7 +2,7 @@
 
 An aircraft-independent airborne research foundation for Microsoft Flight Simulator 2024: a C# science engine, local web dashboard, SQLite mission archive, and a simulator-native toolbar project.
 
-**Status: development foundation / companion preview. Not a verified Community release.** The simulated workflow runs and is tested on Linux. Windows x64 publishing succeeds. The user's gaming-PC log confirms SDK contract compilation and the complete proof-of-concept package build/structural validation passed; a subsequent screenshot confirms the diagnostic panel opens in MSFS. Windows companion execution, CommBus replies, the full toolbar build/operation, live aircraft telemetry, Quest 3, and iPad Safari still require the checks in [verification](docs/verification.md). No installation-ready `AeroScience-v0.1.0.zip` is claimed or supplied.
+**Status: development foundation / companion preview. Not a verified Community release.** The simulated workflow runs and is tested on Linux. Windows x64 publishing succeeds. The user's gaming-PC logs/screenshots confirm SDK contract/POC package compilation, desktop panel loading and recurring companion CommBus replies. Clean Windows installation, long-duration/reconnection behavior, the full toolbar build/mission controls, live aircraft telemetry, Quest 3, and iPad Safari still require the checks in [verification](docs/verification.md). No installation-ready `AeroScience-v0.1.0.zip` is claimed or supplied.
 
 For gaming-PC installation, start with the [Windows installation and live-testing workbook](docs/windows-testing.md): sign in to GitHub and download the **Windows-Companion-unverified-in-MSFS** artifact from a successful [Actions build](https://github.com/JustSeanC/AeroScience/actions/workflows/ci.yml), extract it, run simulated mode, then check the SDK/runtime and build the toolbar proof of concept. GitHub's source ZIP does not include the executable. The three foundation commits are already backed up on `main`.
 
@@ -13,8 +13,8 @@ For gaming-PC installation, start with the [Windows installation and live-testin
 - SQLite transactions, crash recovery, preserved partial recordings, and a single engine owner for each database. Displays can close without stopping recording.
 - **Universal — Fly Anything** (default) and **Realistic — Authentic Research** mission modes, persisted and shared with every interface. Older records migrate to Universal. Both record the same telemetry in 0.1.0. Realistic instrument limits, quality scoring, calibration, and sensors are future features.
 - Localhost by default; optional private-LAN binding, local pairing-code retrieval, expiring sessions, CSRF protection, same-origin commands, and Host validation.
-- A native Windows x64 SimConnect provider and MSFS 2024 SU5+ CommBus toolbar bridge, compiled but **not exercised against the simulator**.
-- SDK toolbar source with a read-only proof of concept, full mission controls, science-mode selector, and compact VR layout. The POC SDK build and visible desktop panel loading are user-reported passed; CommBus, full-build/full-panel and VR checks remain pending.
+- A native Windows x64 SimConnect telemetry provider and MSFS 2024 SU5+ CommBus toolbar bridge. Recurring POC CommBus replies have been observed in MSFS; live aircraft telemetry is still unverified.
+- SDK toolbar source with a read-only proof of concept, full mission controls, science-mode selector, and compact VR layout. The POC SDK build, visible desktop panel loading and recurring CommBus round trips are user-reported passed; long-duration/lifecycle transport, full-build/full-panel and VR checks remain pending.
 
 There is no aircraft whitelist. Default, freeware, payware, fixed-wing and rotary-wing aircraft are intended to use the same standard telemetry path. The NASA aircraft mentioned in planning are future research presets, not compatibility restrictions. No aircraft files are modified. Unknown aircraft titles fall back to “Unknown MSFS aircraft”; unavailable AGL is null. Actual compatibility with individual add-ons remains subject to their standard SimConnect data and simulator testing.
 
@@ -57,6 +57,8 @@ Browser tests need Node 22+ and Chromium (`npx playwright install chromium` on a
 Windows publishing: `pwsh scripts/build/Build-Companion.ps1`. SDK toolbar building: `pwsh scripts/build/Build-Toolbar.ps1 -SdkRoot 'YOUR SDK DIRECTORY' -ProofOfConcept`, then repeat without `-ProofOfConcept` after the in-simulator probe passes. A configured x64 Native Tools shell and the official SDK are required for the latter.
 
 See [installation](INSTALL.md), [architecture/API](docs/architecture.md), [SimConnect](docs/simconnect.md), [toolbar research and packaging](docs/toolbar.md), and [release process](docs/release.md).
+
+For the next development conversation, use the [v0.1.0 testing handoff](docs/v0.1.0-testing-handoff.md), which separates implemented features, automated results, actual gaming-PC evidence and outstanding acceptance work.
 
 Scientific sensors, mapping, full replay, aircraft presets, cloud services, multiplayer, an auto-updater, tray UI and a one-click installer are outside this foundation. A web manifest prepares future PWA work; offline service-worker caching is deliberately not implemented.
 

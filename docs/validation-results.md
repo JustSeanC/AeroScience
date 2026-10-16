@@ -68,3 +68,11 @@ The official SDK documentation URL supplied by the user returned a proxy access 
 - The waiting label is the probe's initial text. It does not distinguish an uninitialized JavaScript service from an absent companion/reply. CommBus request/reply, runtime DLL loading, Windows companion execution and live aircraft telemetry remain pending.
 - Next: locate/check the SDK's native x64 `SimConnect.dll`, copy it beside the chosen companion executable for personal testing, then run simulated telemetry with the toolbar bridge explicitly enabled. Verify changing JSON replies before advancing to the full panel or live telemetry.
 - The user's SDK file listing identifies `C:\MSFS 2024 SDK\SimConnect SDK\lib\SimConnect.dll` (84,480 bytes). This establishes its presence only; architecture, actual Windows loading, exports and simulator connectivity still need checking.
+
+## First visible CommBus reply
+
+- Following the native-DLL/bridge setup instructions, the next MSFS screenshot replaces the initial waiting label with JSON beginning `{"protocol":1,"requestId":"…","ok":…}` in the diagnostic panel. The remaining reply is clipped horizontally in the raw diagnostic view.
+- **Confirmed by screenshot:** a companion protocol reply reached the in-simulator panel, establishing a POC CommBus request/reply round trip in this session. This also demonstrates execution of the companion's reply path and its native CommBus transport; it does not establish the standalone runtime checker's complete export report, clean-machine installation or live aircraft telemetry.
+- The user subsequently confirmed that the JSON request ID keeps changing about once per second while the panel stays open. Recurring POC polling/replies are therefore user-reported passed; the length of this observation was not measured.
+- Full reply contents, long-duration stability, simulator disconnect/reconnect behavior, mission mutations and cross-display synchronization still require their own observations. Real aircraft telemetry, full panel, VR and iPad checks remain pending.
+- Next: build/install the full panel and test Universal/Realistic missions with simulated telemetry and browser synchronization before selecting live SimConnect telemetry. See the [v0.1.0 testing handoff](v0.1.0-testing-handoff.md).

@@ -1,6 +1,6 @@
 # Windows SimConnect integration
 
-The provider uses the **native** `SimConnect.dll` API from the official MSFS 2024 SDK. It avoids the older mixed-mode managed .NET Framework wrapper. This is a compiled implementation; real MSFS operation and runtime loading have **not** been tested here.
+The provider uses the **native** `SimConnect.dll` API from the official MSFS 2024 SDK. It avoids the older mixed-mode managed .NET Framework wrapper. The user's gaming-PC screenshot demonstrates a companion CommBus reply reaching the in-simulator POC panel, and the user confirms recurring request-ID updates about once per second. The aircraft telemetry provider, standalone runtime-checker report and clean-machine distribution remain unverified; see the [evidence record](validation-results.md#first-visible-commbus-reply).
 
 Official starting references:
 
