@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "dependencies": {
+    "net10.0": {
+      "aeroscience.shared": {
+        "type": "Project"
+      },
+      "aeroscience.telemetry": {
+        "type": "Project",
+        "dependencies": {
+          "AeroScience.Shared": "[0.1.0, )"
+        }
+      }
+    }
+  }
+}

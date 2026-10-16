@@ -1,0 +1,15 @@
+**/bin/
+**/obj/
+**/TestResults/
+artifacts/
+.tools/
+node_modules/
+test-results/
+__pycache__/
+*.pyc
+*.db
+*.db-shm
+*.db-wal
+*.log
+.DS_Store
+.vs/

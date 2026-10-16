@@ -1,0 +1,109 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="/SCSS/common.css" />
+    <link rel="stylesheet" href="AeroScience.css" />
+    <script src="/JS/coherent.js"></script>
+    <script src="/JS/common.js"></script>
+    <script src="/JS/buttons.js"></script>
+    <script src="/JS/Services/ToolBarPanels.js"></script>
+    <link rel="import" href="/templates/NewPushButton/NewPushButton.html" />
+    <link rel="import" href="/templates/ingameUi/ingameUi.html" />
+    <link rel="import" href="/templates/ingameUiHeader/ingameUiHeader.html" />
+    <script src="AeroScience.js"></script>
+  </head>
+  <body class="border-box">
+    <ingamepanel-aeroscience
+      ><ingame-ui
+        id="aeroscience-frame"
+        panel-id="PANEL_AEROSCIENCE"
+        title="AeroScience"
+        class="ingameUiFrame panelInvisible"
+        content-fit="false"
+        resize="both"
+        auto-inside=""
+        data-input-group="INGAME-UI"
+      >
+        <div id="as-root" class="as-panel">
+          <header>
+            <strong>AEROSCIENCE</strong
+            ><span id="as-source">WAITING FOR ENGINE</span>
+          </header>
+          <nav>
+            <new-push-button id="as-mission-page">Mission</new-push-button
+            ><new-push-button id="as-payload-page">Payload</new-push-button
+            ><new-push-button id="as-vr">Compact VR</new-push-button>
+          </nav>
+          <p id="as-status" role="status">
+            Loading simulator communication service…
+          </p>
+          <section id="as-mission-view">
+            <h2 id="as-aircraft">Awaiting aircraft telemetry</h2>
+            <div class="as-metrics">
+              <div>
+                <span>MSL / FT</span><strong id="as-altitude">—</strong>
+              </div>
+              <div>
+                <span>IAS / KTS</span><strong id="as-airspeed">—</strong>
+              </div>
+              <div>
+                <span>HEADING / °T</span><strong id="as-heading">—</strong>
+              </div>
+              <div>
+                <span>VS / FT/MIN</span><strong id="as-vspeed">—</strong>
+              </div>
+            </div>
+            <div id="as-idle">
+              <label for="as-mode">Science operating mode</label
+              ><select id="as-mode">
+                <option value="universal">Universal — Fly Anything</option>
+                <option value="realistic">
+                  Realistic — Authentic Research
+                </option>
+              </select>
+              <p id="as-mode-help">
+                All compatible aircraft can record missions.
+              </p>
+              <label for="as-name">Mission name</label
+              ><input
+                id="as-name"
+                maxlength="100"
+                placeholder="Research mission"
+              /><new-push-button id="as-start" class="as-primary" disabled
+                >Start mission</new-push-button
+              >
+            </div>
+            <div id="as-recording" hidden>
+              <h3 id="as-active-name"></h3>
+              <p id="as-active-mode"></p>
+              <div class="as-record-meta">
+                <span id="as-duration">00:00:00</span
+                ><span id="as-samples">0 samples</span>
+              </div>
+              <new-push-button id="as-end" class="as-danger" disabled
+                >End mission</new-push-button
+              >
+            </div>
+            <p class="as-note">
+              Recording continues when this panel closes. Open the companion
+              dashboard for mission history.
+            </p>
+          </section>
+          <section id="as-payload-view" hidden>
+            <h2>Science payload</h2>
+            <p>
+              Scientific instruments, mapping and calibration are not
+              implemented in v0.1.0.
+            </p>
+            <p>
+              Universal Mode allows flexible configurations. Realistic Mode's
+              advanced operating limits and procedures are coming in a future
+              release. Neither mode restricts aircraft selection.
+            </p>
+          </section>
+        </div></ingame-ui
+      ></ingamepanel-aeroscience
+    >
+  </body>
+</html>

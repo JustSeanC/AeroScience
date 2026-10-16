@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#0c131b" />
+    <meta
+      name="description"
+      content="AeroScience airborne research mission control"
+    />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="stylesheet" href="/app.css" />
+    <title>AeroScience · Mission Control</title>
+    <script type="module" src="/app.js"></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <a class="brand" href="#control" aria-label="AeroScience home"
+          ><img src="/icon.svg" width="38" height="38" alt="" /><span
+            >AERO<span class="brand-light">SCIENCE</span
+            ><small>AIRBORNE RESEARCH SYSTEMS</small></span
+          ></a
+        >
+        <p class="nav-label">WORKSPACE</p>
+        <nav aria-label="Main navigation">
+          <a
+            class="nav-link selected"
+            href="#control"
+            aria-label="Mission Control"
+            ><span aria-hidden="true">◈</span>Mission Control</a
+          >
+          <a class="nav-link" href="#history" aria-label="Mission History"
+            ><span aria-hidden="true">◷</span>Mission History</a
+          >
+          <a class="nav-link" href="#instruments" aria-label="Instruments"
+            ><span aria-hidden="true">⌁</span>Instruments</a
+          >
+          <a class="nav-link" href="#settings" aria-label="Settings"
+            ><span aria-hidden="true">⚙</span>Settings</a
+          >
+        </nav>
+        <div class="sidebar-footer">
+          <span class="eyebrow">SCIENCE ENGINE</span>
+          <div>
+            <i class="status-dot" id="engine-dot"></i
+            ><span id="engine-link">Connecting</span>
+          </div>
+          <small>v0.1.0 · Local operations</small>
+        </div>
+      </aside>
+      <main>
+        <header class="topbar">
+          <span
+            >OPERATIONS / <strong id="breadcrumb">MISSION CONTROL</strong></span
+          ><span id="utc-clock" class="mono">— UTC</span>
+        </header>
+        <div id="notice" class="notice" role="status" hidden></div>
+        <section id="pairing" class="pairing panel" hidden>
+          <p class="eyebrow">DEVICE CONNECTION</p>
+          <h1>Pair with the science engine</h1>
+          <p>
+            On the Windows dashboard, open Settings and copy the pairing code.
+            Use this connection only on a trusted private network.
+          </p>
+          <form id="pair-form">
+            <label for="pair-code">Pairing code</label
+            ><input
+              id="pair-code"
+              autocomplete="off"
+              spellcheck="false"
+              maxlength="40"
+              required
+            /><button class="primary" type="submit">Connect device</button>
+          </form>
+        </section>
+        <div id="workspace" hidden>
+          <section id="control" class="view">
+            <div class="page-heading">
+              <div>
+                <p class="eyebrow">AIRBORNE SCIENCE / OPERATIONS</p>
+                <h1>Mission Control</h1>
+                <p class="subtitle">
+                  One aircraft. One mission. Every observation matters.
+                </p>
+              </div>
+              <span id="source-badge" class="badge amber"
+                >WAITING FOR DATA</span
+              >
+            </div>
+            <div class="connection-strip">
+              <div>
+                <i id="connection-dot" class="status-dot"></i
+                ><strong id="aircraft">Awaiting aircraft</strong
+                ><span id="connection-text">Waiting for telemetry</span>
+              </div>
+              <span class="mono" id="sample-time">NO DATA</span>
+            </div>
+            <div class="mission-grid">
+              <section
+                class="panel mission-panel"
+                aria-labelledby="mission-title"
+              >
+                <div class="panel-title">
+                  <h2 id="mission-title">RESEARCH MISSION</h2>
+                  <span id="record-status" class="badge">STANDBY</span>
+                </div>
+                <div id="mission-idle">
+                  <h3>Ready for your next flight.</h3>
+                  <p>
+                    Start recording at any point. Your mission continues when
+                    you close this display.
+                  </p>
+                  <form id="start-form">
+                    <div class="mode-field">
+                      <label for="mission-mode">SCIENCE OPERATING MODE</label
+                      ><select id="mission-mode">
+                        <option value="universal" selected>
+                          Universal — Fly Anything
+                        </option>
+                        <option value="realistic">
+                          Realistic — Authentic Research
+                        </option>
+                      </select>
+                      <p id="mode-help">
+                        Any compatible aircraft. Flexible science missions.
+                      </p>
+                    </div>
+                    <label for="mission-name">MISSION NAME</label>
+                    <div class="input-row">
+                      <input
+                        id="mission-name"
+                        placeholder="e.g. Sierra atmospheric survey"
+                        maxlength="100"
+                        required
+                      /><button class="primary" id="start-button" type="submit">
+                        <span aria-hidden="true">●</span> Start mission
+                      </button>
+                    </div>
+                  </form>
+                </div>
+                <div id="mission-active" hidden>
+                  <h3 id="active-name"></h3>
+                  <p id="active-mode"></p>
+                  <div class="recording-stats">
+                    <div>
+                      <span>ELAPSED</span
+                      ><strong id="active-duration" class="mono"
+                        >00:00:00</strong
+                      >
+                    </div>
+                    <div>
+                      <span>SAMPLES</span
+                      ><strong id="active-samples" class="mono">0</strong>
+                    </div>
+                  </div>
+                  <div class="mission-actions">
+                    <span id="active-hint"
+                      >Recording independently of displays</span
+                    ><button class="danger" id="end-button" type="button">
+                      <span aria-hidden="true">■</span> End mission
+                    </button>
+                  </div>
+                </div>
+              </section>
+              <section
+                class="panel flight-panel"
+                aria-labelledby="flight-title"
+              >
+                <div class="panel-title">
+                  <h2 id="flight-title">FLIGHT STATE</h2>
+                  <span class="muted">TRUE NORTH</span>
+                </div>
+                <div class="attitude">
+                  <svg
+                    viewBox="0 0 220 115"
+                    role="img"
+                    aria-label="Aircraft attitude indicator"
+                  >
+                    <defs>
+                      <clipPath id="horizon-clip">
+                        <rect x="20" y="5" width="180" height="90" rx="12" />
+                      </clipPath>
+                    </defs>
+                    <g clip-path="url(#horizon-clip)">
+                      <rect
+                        x="20"
+                        y="5"
+                        width="180"
+                        height="90"
+                        fill="#112838"
+                      />
+                      <g id="horizon">
+                        <rect
+                          x="-100"
+                          y="50"
+                          width="420"
+                          height="150"
+                          fill="#243128"
+                        />
+                        <path
+                          d="M-100 50H320"
+                          stroke="#71d3c1"
+                          stroke-width="2"
+                        />
+                        <path
+                          d="M85 30h50M95 10h30M85 70h50M95 90h30"
+                          stroke="#75959c"
+                          stroke-width="1"
+                        />
+                      </g>
+                    </g>
+                    <path
+                      d="M60 50h35l15 7 15-7h35"
+                      fill="none"
+                      stroke="#f0f6f7"
+                      stroke-width="3"
+                    />
+                    <path d="M110 0v12" stroke="#51d9c2" stroke-width="2" />
+                    <text
+                      x="110"
+                      y="112"
+                      text-anchor="middle"
+                      fill="#8ca0b2"
+                      font-size="10"
+                    >
+                      ATTITUDE · DEGREES
+                    </text>
+                  </svg>
+                  <div>
+                    <span>PITCH</span><strong id="pitch">—</strong
+                    ><span>BANK</span><strong id="bank">—</strong>
+                  </div>
+                </div>
+              </section>
+            </div>
+            <div class="section-label">
+              <h2>LIVE TELEMETRY</h2>
+              <span id="sampling-label">1 Hz sampling</span>
+            </div>
+            <div class="metrics">
+              <article class="panel metric">
+                <span>ALTITUDE MSL</span>
+                <div><strong id="altitude">—</strong><small>FT</small></div>
+                <p>Above mean sea level</p>
+              </article>
+              <article class="panel metric">
+                <span>INDICATED AIRSPEED</span>
+                <div><strong id="ias">—</strong><small>KTS</small></div>
+                <p id="tas">True airspeed —</p>
+              </article>
+              <article class="panel metric">
+                <span>GROUND SPEED</span>
+                <div><strong id="groundspeed">—</strong><small>KTS</small></div>
+                <p id="track">Track —</p>
+              </article>
+              <article class="panel metric">
+                <span>VERTICAL SPEED</span>
+                <div>
+                  <strong id="vertical-speed">—</strong><small>FT/MIN</small>
+                </div>
+                <p id="agl">Above ground —</p>
+              </article>
+            </div>
+            <div class="lower-grid">
+              <section class="panel profile-panel">
+                <div class="panel-title">
+                  <h2>ALTITUDE PROFILE</h2>
+                  <span>LAST 60 UPDATES · FT MSL</span>
+                </div>
+                <div class="chart">
+                  <div class="chart-range">
+                    <span id="chart-max">—</span><span id="chart-min">—</span>
+                  </div>
+                  <svg
+                    viewBox="0 0 600 130"
+                    preserveAspectRatio="none"
+                    role="img"
+                    aria-label="Recent altitude profile"
+                  >
+                    <path
+                      d="M0 20H600M0 65H600M0 110H600"
+                      stroke="#263340"
+                      stroke-dasharray="4 5"
+                      fill="none"
+                    />
+                    <path
+                      id="altitude-line"
+                      d=""
+                      stroke="#53d3bd"
+                      stroke-width="2.5"
+                      fill="none"
+                    />
+                  </svg>
+                </div>
+                <div class="chart-footer">
+                  <span>60 SECONDS AGO AT 1 Hz</span><span>LIVE</span>
+                </div>
+              </section>
+              <section class="panel position-panel">
+                <div class="panel-title">
+                  <h2>AIRCRAFT POSITION</h2>
+                  <span>WGS 84</span>
+                </div>
+                <dl>
+                  <div>
+                    <dt>LATITUDE</dt>
+                    <dd id="latitude">—</dd>
+                  </div>
+                  <div>
+                    <dt>LONGITUDE</dt>
+                    <dd id="longitude">—</dd>
+                  </div>
+                  <div>
+                    <dt>HEADING</dt>
+                    <dd id="heading">—</dd>
+                  </div>
+                </dl>
+              </section>
+            </div>
+            <p class="footnote" id="source-note">
+              Waiting for a telemetry provider. Scientific instruments and
+              mapping are planned for future releases.
+            </p>
+          </section>
+          <section id="history" class="view" hidden>
+            <div class="page-heading">
+              <div>
+                <p class="eyebrow">RESEARCH ARCHIVE</p>
+                <h1>Mission History</h1>
+                <p class="subtitle">
+                  Flight records stay with your science engine.
+                </p>
+              </div>
+              <button id="refresh-history" class="secondary">
+                Refresh archive
+              </button>
+            </div>
+            <div id="history-list" class="history-list"></div>
+            <div class="pagination">
+              <button id="history-prev" class="secondary">← Newer</button
+              ><span id="history-page"></span
+              ><button id="history-next" class="secondary">Older →</button>
+            </div>
+          </section>
+          <section id="instruments" class="view" hidden>
+            <div class="page-heading">
+              <div>
+                <p class="eyebrow">SCIENCE PAYLOAD</p>
+                <h1>Instruments</h1>
+              </div>
+              <span class="badge">PLANNED</span>
+            </div>
+            <article class="panel future">
+              <h2>A foundation for future observations</h2>
+              <p>
+                Version 0.1.0 records aircraft telemetry. Scientific
+                instruments, mapping, survey planning, and interactive replay
+                are not yet available.
+              </p>
+              <p>
+                Future measurements will identify whether their source is
+                simulator telemetry, external data, or synthetic instrument
+                behavior.
+              </p>
+            </article>
+          </section>
+          <section id="settings" class="view" hidden>
+            <div class="page-heading">
+              <div>
+                <p class="eyebrow">ENGINE CONFIGURATION</p>
+                <h1>Settings &amp; diagnostics</h1>
+                <p class="subtitle">
+                  Configuration takes effect when the engine restarts.
+                </p>
+              </div>
+            </div>
+            <div id="settings-content" class="panel settings-panel"></div>
+          </section>
+        </div>
+        <footer class="app-footer">
+          <span>AEROSCIENCE <b>/</b> AIRBORNE RESEARCH</span
+          ><span>LOCAL-FIRST · NO CLOUD REQUIRED</span>
+        </footer>
+      </main>
+    </div>
+    <dialog id="mission-detail">
+      <div class="dialog-heading">
+        <h2>Mission detail</h2>
+        <button
+          id="close-detail"
+          class="secondary"
+          aria-label="Close mission detail"
+        >
+          ✕
+        </button>
+      </div>
+      <div id="detail-content"></div>
+    </dialog>
+  </body>
+</html>

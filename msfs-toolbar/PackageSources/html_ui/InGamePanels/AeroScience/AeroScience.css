@@ -1,0 +1,179 @@
+ingamepanel-aeroscience {
+  display: block;
+  width: 100%;
+  height: 100%;
+  color: #edf5fa;
+  font-family: "Segoe UI", sans-serif;
+}
+#aeroscience-frame {
+  width: 640px;
+  height: 720px;
+  min-width: 360px;
+  min-height: 460px;
+}
+#aeroscience-frame .ingameUiContent,
+#aeroscience-frame .ingameUiWrapper {
+  height: 100%;
+  width: 100%;
+}
+.as-panel {
+  background: #101c27;
+  padding: 20px;
+  height: 100%;
+  box-sizing: border-box;
+  overflow: auto;
+  font-size: 18px;
+}
+.as-panel header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  border-bottom: 1px solid #395064;
+  padding-bottom: 15px;
+}
+.as-panel header strong {
+  letter-spacing: 2px;
+  font-size: 20px;
+}
+.as-panel header span {
+  font-size: 12px;
+  color: #efc47e;
+  max-width: 180px;
+}
+.as-panel nav {
+  display: flex;
+  gap: 8px;
+  margin: 16px 0;
+}
+.as-panel new-push-button {
+  display: block;
+  box-sizing: border-box;
+  cursor: pointer;
+  min-height: 48px;
+  padding: 12px 16px;
+  border: 1px solid #476078;
+  background: #213548;
+  color: #eff7fc;
+  text-align: center;
+  font-size: 18px;
+  line-height: 24px;
+  border-radius: 4px;
+}
+.as-panel nav new-push-button {
+  flex: 1;
+  padding: 10px 8px;
+  font-size: 16px;
+}
+.as-panel new-push-button[disabled] {
+  opacity: 0.45;
+}
+.as-panel new-push-button:focus {
+  outline: 3px solid #75ead1;
+}
+.as-panel .as-primary {
+  background: #59d5bc;
+  color: #08271f;
+  font-weight: bold;
+  border-color: #59d5bc;
+}
+.as-panel .as-danger {
+  background: #59343c;
+  color: #ffd3ce;
+  border-color: #ac6b73;
+}
+.as-panel #as-status {
+  font-size: 14px;
+  color: #a8c0d1;
+  margin: 8px 0 18px;
+}
+.as-panel h2 {
+  font-size: 20px;
+  margin: 12px 0;
+  line-height: 1.4;
+}
+.as-panel h3 {
+  font-size: 24px;
+  margin: 18px 0 10px;
+}
+.as-panel .as-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 16px 0 22px;
+}
+.as-panel .as-metrics > div {
+  width: calc(50% - 6px);
+  padding: 10px 14px;
+  box-sizing: border-box;
+  border: 1px solid #354b60;
+  background: #162634;
+}
+.as-panel .as-metrics span {
+  display: block;
+  color: #a3bcd0;
+  font-size: 12px;
+  letter-spacing: 1px;
+}
+.as-panel .as-metrics strong {
+  display: block;
+  font-size: 30px;
+  font-weight: 500;
+  font-family: Consolas, monospace;
+  margin-top: 5px;
+}
+.as-panel input,
+.as-panel select {
+  display: block;
+  box-sizing: border-box;
+  background: #0c1721;
+  color: #eef6fa;
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 12px;
+  border: 1px solid #587186;
+  border-radius: 3px;
+  font-size: 18px;
+  margin: 6px 0 14px;
+}
+.as-panel label {
+  font-size: 15px;
+  color: #c2d5e2;
+}
+.as-panel p {
+  line-height: 1.6;
+}
+.as-panel #as-mode-help,
+.as-panel #as-active-mode {
+  font-size: 14px;
+  color: #8ce4d0;
+  margin: 8px 0 15px;
+}
+.as-panel .as-note {
+  font-size: 13px;
+  color: #94aabd;
+  margin-top: 18px;
+}
+.as-panel .as-record-meta {
+  display: flex;
+  justify-content: space-between;
+  margin: 15px 0 25px;
+  font-family: Consolas, monospace;
+}
+.as-panel.compact {
+  padding: 14px;
+  font-size: 20px;
+}
+.as-panel.compact .as-metrics {
+  gap: 8px;
+  margin: 10px 0;
+}
+.as-panel.compact .as-metrics strong {
+  font-size: 32px;
+}
+.as-panel.compact .as-note {
+  display: none;
+}
+.as-panel [hidden] {
+  display: none !important;
+}

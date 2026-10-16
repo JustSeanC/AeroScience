@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<SimBase.Document Type="InGamePanels" version="1,0">
+  <Filename>aeroscience_panel.spb</Filename>
+  <InGamePanels.InGamePanelDefinition id="PANEL_AEROSCIENCE" Name="AeroScience"
+      url="html_ui/InGamePanels/AeroScience/AeroScience.html" icon="ICON_AEROSCIENCE">
+    <minWidth>30</minWidth><minHeight>34</minHeight>
+    <defaultWidth>42</defaultWidth><defaultHeight>55</defaultHeight>
+    <defaultTop>10</defaultTop><defaultRight>2</defaultRight><resizeDirections>Both</resizeDirections>
+  </InGamePanels.InGamePanelDefinition>
+</SimBase.Document>

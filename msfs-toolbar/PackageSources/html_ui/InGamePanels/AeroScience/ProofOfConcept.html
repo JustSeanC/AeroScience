@@ -1,0 +1,34 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="/SCSS/common.css" />
+    <script src="/JS/coherent.js"></script>
+    <script src="/JS/common.js"></script>
+    <script src="/JS/Services/ToolBarPanels.js"></script>
+    <link rel="import" href="/templates/ingameUi/ingameUi.html" />
+    <link rel="import" href="/templates/ingameUiHeader/ingameUiHeader.html" />
+    <link rel="stylesheet" href="AeroScience.css" />
+    <script src="ProofOfConcept.js"></script>
+  </head>
+  <body>
+    <ingamepanel-aeroscience-poc
+      ><ingame-ui
+        id="aeroscience-frame"
+        panel-id="PANEL_AEROSCIENCE"
+        title="AeroScience · SDK proof of concept"
+        class="ingameUiFrame panelInvisible"
+        content-fit="false"
+        resize="both"
+        auto-inside=""
+        data-input-group="INGAME-UI"
+      >
+        <div class="as-panel">
+          <h2>AeroScience registration &amp; CommBus probe</h2>
+          <p>Read-only proof of concept. No mission controls.</p>
+          <pre id="as-probe">Waiting for SDK communication service…</pre>
+        </div></ingame-ui
+      ></ingamepanel-aeroscience-poc
+    >
+  </body>
+</html>

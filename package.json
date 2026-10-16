@@ -1,0 +1,6 @@
+{
+  "name": "aeroscience-development", "version": "0.1.0", "private": true, "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": { "pretest:web": "dotnet build src/AeroScience.Engine -c Release --no-restore --nologo", "test:web": "playwright test", "check:web": "node --check src/AeroScience.Engine/wwwroot/app.js" },
+  "devDependencies": { "@playwright/test": "1.64.1" }
+}
