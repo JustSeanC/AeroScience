@@ -258,6 +258,8 @@ $("start-form").addEventListener("submit", (event) => {
       mode: $("mission-mode").value,
     });
     $("mission-name").value = "";
+    $("mission-mode").value = "universal";
+    $("mode-help").textContent = modeHelp("universal");
     render(await api("/api/state"));
   });
 });

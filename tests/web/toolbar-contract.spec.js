@@ -36,6 +36,7 @@ test('toolbar sends selected mode through CommBus and renders central state (SDK
     } }));
   }, sent.command.requestId);
   await expect(page.locator('#as-active-mode')).toContainText('Realistic Mode');
+  await expect(page.locator('#as-mode')).toHaveValue('universal');
   await expect(page.locator('#as-source')).toHaveText('SIMULATED TEST DATA');
   await page.locator('#as-vr').click(); await expect(page.locator('#as-root')).toHaveClass(/compact/);
   await page.locator('#as-end').click();

@@ -27,6 +27,7 @@ test('two displays share recording, history and safe mission detail', async ({ p
   await expect(second.locator('#active-mode')).toContainText('Realistic Mode');
   await second.getByRole('button', { name: 'End mission', exact: true }).click();
   await expect(page.locator('#mission-idle')).toBeVisible();
+  await expect(page.getByLabel('SCIENCE OPERATING MODE')).toHaveValue('universal');
   await page.getByRole('link', { name: 'Mission History' }).click();
   await expect(page.getByRole('heading', { name, exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'View mission' }).first().click();

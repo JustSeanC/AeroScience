@@ -213,6 +213,10 @@ class IngamePanelAeroScience extends TemplateElement {
     this.byId("as-idle").hidden = !!mission;
     this.byId("as-recording").hidden = !mission;
     if (mission) {
+      // Prepare the next mission with the safe default, independently of the active mission's mode.
+      this.byId("as-mode").value = "universal";
+      this.byId("as-mode-help").textContent = "All compatible aircraft can record missions.";
+      this.byId("as-name").value = "";
       this.byId("as-active-name").textContent = mission.name;
       this.byId("as-active-mode").textContent =
         mission.mode === "realistic"
