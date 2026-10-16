@@ -52,7 +52,9 @@ public sealed class SimConnectTelemetryProvider : ITelemetryProvider
         or EntryPointNotFoundException or COMException or IOException;
     private static string Explain(Exception e) => e switch
     {
-        DllNotFoundException => "The official x64 SimConnect.dll runtime is missing beside AeroScience.Engine.exe.",
+        DllNotFoundException => File.Exists(Path.Combine(AppContext.BaseDirectory, "SimConnect.dll"))
+            ? "SimConnect.dll is present but Windows could not load it or a dependency. Run Test-SimConnectRuntime.ps1; check the official runtime and its Microsoft Visual C++ x64 dependencies."
+            : "The official x64 SimConnect.dll runtime is missing beside AeroScience.Engine.exe.",
         BadImageFormatException => "The SimConnect runtime does not match Windows x64.",
         COMException => $"SimConnect is unavailable (HRESULT 0x{e.HResult:X8}); start MSFS and load a flight.",
         _ => e.Message

@@ -23,6 +23,8 @@ python3 scripts/release/package_release.py companion-preview --companion artifac
 
 The preview is explicitly companion-only, lacks the Community package/SimConnect DLL and does not establish Windows execution. A SHA-256 sidecar accompanies it. Existing archives are never overwritten silently.
 
+The preview packager rejects native/managed SimConnect runtime files in any input subfolder, ignoring filename case. Keep personal SDK-enabled live-test folders separate. It includes the CMD launchers, runtime checker and feedback collector even when the publish was produced directly with `dotnet publish`.
+
 ## Community / full release
 
 1. Review official SDK/runtime licensing. Do not add proprietary binaries to source control. Establish the supported runtime distribution route and include the permitted x64 runtime beside the executable for the full release.

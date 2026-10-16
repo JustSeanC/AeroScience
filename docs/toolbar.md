@@ -26,7 +26,7 @@ The panel asks for current state once per second only while visible. The engine 
 ## Build the proof of concept first
 
 1. On Windows, install the current official MSFS 2024 SDK and use an x64 Native Tools shell with PowerShell 7, Python 3 and the pinned .NET SDK.
-2. Build/run the companion in synthetic mode while the simulator is running; the CommBus worker still connects independently of the selected telemetry source.
+2. Build/run the companion with `AeroScience.Engine.exe --AeroScience:Telemetry=Simulated --AeroScience:EnableToolbarBridge=true --AeroScience:EnableLan=false` while the simulator is running. The normal simulated CMD launcher disables the bridge for standalone testing.
 3. Run `pwsh scripts/build/Build-Toolbar.ps1 -SdkRoot 'YOUR SDK ROOT' -ProofOfConcept`. It stages a copy, compiles the native ABI contract against the official headers, invokes `fspackagetool.exe`, validates generated files and writes an external SHA-256 build receipt.
 4. If tool paths differ in the installed SDK, use its Project Editor to open the staged `AeroScience.xml`, build the package and inspect its report; update the script from the SDK's documented tool paths/arguments. Windows script execution is pending here.
 5. Install only the generated package from the build output. Restart MSFS, load any aircraft, and verify the AeroScience icon, floating/resizable panel, and a changing JSON reply. Use SDK Coherent/dispatcher diagnostics to distinguish registration, script-loading, native connection and protocol problems.
@@ -34,6 +34,8 @@ The panel asks for current state once per second only while visible. The engine 
 7. Build without `-ProofOfConcept`, then check telemetry, both mode selections, browser/toolbar start/end synchronization, close/reopen retention and disconnect/reconnect behavior.
 
 The SDK produces `manifest.json`, `layout.json`, `InGamePanels/aeroscience_panel.spb`, UI files and icon. The release validator checks versions, layout coverage/sizes/FILETIME, internal expected assets and binary registration presence. The SDK build receipt hashes every file; a POC receipt cannot pass the full-release gate. A structural check alone cannot prove simulator loading.
+
+The script retains `sdk-contract.log` and `build.log`, uses its staged project as the working directory, supports explicit tool/header paths, and normalizes receipt file paths with the platform separator. The Windows receipt separator bug from the initial foundation has been corrected. Portable tests exercise compiler failure/log retention; the real Windows SDK build remains pending. See the [Windows workbook](windows-testing.md) for exact commands and the Project Editor fallback.
 
 ## VR / input
 

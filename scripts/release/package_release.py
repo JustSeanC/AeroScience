@@ -124,13 +124,16 @@ def main():
     args = parser.parse_args()
     if args.command == "validate":
         found = validate_community(args.community); print(f"Community structural validation passed: {len(found)} files. Simulator loading remains a separate check."); return
-    validate_companion(args.companion, require_simconnect=args.command == "release")
+    companion_files = validate_companion(args.companion, require_simconnect=args.command == "release")
     if args.command == "release":
         require(args.runtime_redistribution_confirmed, "Confirm Microsoft's runtime redistribution terms before including the official DLL.")
         found = validate_community(args.community); validate_receipt(args.sdk_receipt, found); validate_acceptance(args.acceptance)
         require(args.output.name == f"AeroScience-v{VERSION}.zip", "Use the required versioned release filename.")
         name = f"AeroScience-v{VERSION}"
     else:
+        sdk_runtime_names = {"simconnect.dll", "microsoft.flightsimulator.simconnect.dll"}
+        require(not any(PurePosixPath(name).name.casefold() in sdk_runtime_names for name in companion_files),
+                "Companion previews exclude the proprietary SimConnect runtime; keep personal live-test files in a separate folder.")
         require("Preview" in args.output.name, "Companion-only development archives must be explicitly labeled Preview.")
         name = f"AeroScience-Companion-Preview-v{VERSION}"
     with tempfile.TemporaryDirectory(prefix="aeroscience-package-") as work:
@@ -139,6 +142,12 @@ def main():
         for doc in ("README.md", "INSTALL.md", "CHANGELOG.md", "LICENSE", "THIRD-PARTY-NOTICES.md"):
             shutil.copy2(REPO/doc, root/doc)
         shutil.copytree(REPO/"docs", root/"docs")
+        # These scripts also ship when publishing directly rather than through the PowerShell wrapper.
+        companion_root = root/"Windows-Companion"
+        for launcher in (REPO/"scripts/release").glob("Launch-*.cmd"):
+            shutil.copy2(launcher, companion_root/launcher.name)
+        shutil.copy2(REPO/"scripts/release/Collect-Feedback.ps1", companion_root/"Collect-Feedback.ps1")
+        shutil.copy2(REPO/"scripts/build/Test-SimConnectRuntime.ps1", companion_root/"Test-SimConnectRuntime.ps1")
         if args.command == "release":
             shutil.copytree(args.community, root/"Community"/"aeroscience-toolbar")
             shutil.copy2(args.sdk_receipt, root/"SDK-BUILD.json"); shutil.copy2(args.acceptance, root/"ACCEPTANCE.json")

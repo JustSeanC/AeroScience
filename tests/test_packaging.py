@@ -2,6 +2,9 @@ import importlib.util
 import json
 from pathlib import Path
 import tempfile
+import struct
+import subprocess
+import sys
 import unittest
 
 spec = importlib.util.spec_from_file_location('packaging', Path(__file__).resolve().parents[1]/'scripts/release/package_release.py')
@@ -9,6 +12,21 @@ packaging = importlib.util.module_from_spec(spec); spec.loader.exec_module(packa
 
 
 class PackagingTests(unittest.TestCase):
+    def test_companion_preview_refuses_a_proprietary_runtime_in_input(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp); companion = root/'published'; (companion/'wwwroot').mkdir(parents=True)
+            image = bytearray(256); image[:2] = b'MZ'; struct.pack_into('<I', image, 60, 128)
+            image[128:132] = b'PE\0\0'; struct.pack_into('<H', image, 132, 0x8664)
+            (companion/'AeroScience.Engine.exe').write_bytes(image)
+            for name in ('AeroScience.Engine.dll', 'AeroScience.Engine.deps.json', 'AeroScience.Engine.runtimeconfig.json',
+                         'coreclr.dll', 'hostpolicy.dll', 'wwwroot/index.html', 'wwwroot/app.js', 'wwwroot/app.css', 'SIMCONNECT.DLL'):
+                (companion/name).write_text('test fixture')
+            result = subprocess.run([sys.executable, str(packaging.REPO/'scripts/release/package_release.py'), 'companion-preview',
+                                     '--companion', str(companion), '--output', str(root/'Preview.zip')], capture_output=True, text=True)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn('exclude the proprietary', result.stderr)
+            self.assertFalse((root/'Preview.zip').exists())
+
     def test_source_only_directory_is_rejected(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp); (root/'source.cs').write_text('source')

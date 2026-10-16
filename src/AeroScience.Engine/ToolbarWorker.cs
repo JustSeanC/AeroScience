@@ -30,7 +30,9 @@ public sealed class ToolbarWorker(ToolbarCommandHandler handler, EngineOptions o
             catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested) { break; }
             catch (Exception e) when (e is DllNotFoundException or EntryPointNotFoundException or BadImageFormatException or COMException or IOException or PlatformNotSupportedException)
             {
-                var message = e is DllNotFoundException ? "Official x64 SimConnect runtime not found beside the executable."
+                var message = e is DllNotFoundException ? (File.Exists(Path.Combine(AppContext.BaseDirectory, "SimConnect.dll"))
+                    ? "SimConnect.dll exists but Windows could not load it or a dependency. Run Test-SimConnectRuntime.ps1 and check Microsoft Visual C++ x64 runtime dependencies."
+                    : "Official x64 SimConnect runtime not found beside the executable.")
                     : e is EntryPointNotFoundException ? "Runtime lacks MSFS 2024 SU5+ CommBus exports; update the official SDK runtime."
                     : $"{e.GetType().Name}: {e.Message}";
                 if (lastError != message) logger.LogWarning("Toolbar unavailable: {Reason}. Retrying in 5 seconds.", message);

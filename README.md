@@ -4,6 +4,8 @@ An aircraft-independent airborne research foundation for Microsoft Flight Simula
 
 **Status: development foundation / companion preview. Not a verified Community release.** The simulated workflow runs and is tested on Linux. Windows x64 publishing succeeds. Real Windows execution, official SDK compilation, live MSFS, toolbar loading, Quest 3, and iPad Safari still require the checks in [verification](docs/verification.md). No installation-ready `AeroScience-v0.1.0.zip` is claimed or supplied.
 
+For gaming-PC installation, start with the [Windows installation and live-testing workbook](docs/windows-testing.md): download the binary preview from the chat attachment, verify/extract it, run simulated mode, then check the SDK/runtime and build the toolbar proof of concept. GitHub's source ZIP does not include the executable. The three foundation commits are already backed up on `main`.
+
 ## What works in the tested development workflow
 
 - Explicitly labeled synthetic telemetry, including position, altitude, speeds, heading/track, attitude, and vertical speed.

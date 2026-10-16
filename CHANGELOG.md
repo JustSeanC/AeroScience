@@ -2,6 +2,17 @@
 
 ## 0.1.0 — development foundation (not yet a verified Community release)
 
+### Windows installation-readiness review
+
+- Added a gaming-PC workbook for preview downloads/extraction, simulated-mode checks, official SDK/runtime checks, toolbar POC/full builds, live aircraft/mission recording, Quest 3, iPad LAN and GitHub backup.
+- Fixed Windows separator normalization in SDK build receipts. Preserved compiler/package-tool logs and native failure codes; added explicit SDK tool/header overrides and stronger installed-header ABI checks.
+- Made the simulated launcher explicitly standalone (bridge/LAN disabled), retained launcher exit codes, and improved DLL-present/missing-dependency diagnostics.
+- Added a native runtime architecture/export checker and a local feedback ZIP collector that excludes databases, SDK binaries and credential dumps.
+- Prevented companion preview archives from accidentally bundling SimConnect runtimes, including case variants/nested files. No GitHub Release automation or unrelated science features added.
+- All Windows/MSFS/Community/VR/physical-iPad acceptance remains pending until performed on the actual hardware.
+
+### Initial foundation
+
 - Added .NET 10 engine, native SimConnect telemetry provider with lifecycle/reconnect handling, and explicit synthetic telemetry mode.
 - Added transactional SQLite mission recording, timestamped events, position/altitude summaries, paginated telemetry retrieval, history/detail views and recovery of interrupted missions.
 - Added a responsive local dashboard with live SSE synchronization, mission controls, altitude profile and diagnostics.

@@ -22,3 +22,11 @@ Generated evidence: `tests/AeroScience.Tests/TestResults/foundation.trx`, `artif
 **Unrun/pending:** Windows launch/clean-machine installation; official SDK ABI compilation and toolbar package build; actual Community/Community2024 installation on Store/Steam; real SimConnect flights/lifecycle/units; real CommBus/Coherent panel behavior; Quest 3 PCVR; physical iPad Safari/LAN; full release acceptance. PowerShell/SDK scripts and CI configuration were authored but not executed on their target Windows/GitHub runners here. See `verification.md` for the exact checklist.
 
 The official SDK documentation URL supplied by the user returned a proxy access denial. A custom domain addition plus tested install/start instructions were saved to the cloud environment draft. Saving did not apply that network change, publish a snapshot or validate restoration in a new task.
+
+## Windows installation-readiness review
+
+- Re-ran the .NET suite after loader-diagnostic changes: **23 passed, 0 failed, 0 skipped**, recorded in `windows-readiness.trx`.
+- Python discovery with PowerShell 7 available: **10 passed** (5 packaging tests plus 5 helper checks). Checks cover parsed PowerShell scripts, selected feedback/log collection with database/SDK exclusion, PE rejection/metadata-only boundaries, retained compiler-failure logs without a receipt, and runtime-free companion preview inputs.
+- PowerShell 7.6.0 was installed on Linux from Microsoft's release archive and verified against its SHA-256 manifest. This enables syntax and portable/helper-mock checks; it does **not** establish Windows PowerShell 5.1 execution, real MSVC compilation or SDK behavior.
+- The Windows receipt separator error was fixed; SDK header paths/tool overrides, compiler/package logs, runtime-check reports, clean simulated launcher defaults and feedback helpers were added. No SDK DLL was downloaded or redistributed.
+- Windows launcher execution, real `cl.exe`/installed SDK contract, actual native `SimConnect.dll` loading/exports and all simulator/VR/iPad checks remain **pending on the gaming PC**. See `windows-testing.md`.

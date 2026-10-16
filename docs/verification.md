@@ -25,10 +25,12 @@ Exact current counts/results are recorded in `validation-results.md` after the f
 9. On a physical iPad mini 6 with Safari, verify pairing on a trusted private network, incorrect-code rejection, source/mode labels, telemetry, mission controls/history, portrait/landscape layouts and session expiry/re-pairing. Verify localhost-only mode refuses LAN connections and the Private firewall rules are sufficient. Test Edge/Chrome on Windows too.
 10. Assemble the real full release only after these prerequisites pass. Inspect/extract it on another PC and verify the exact files and installation instructions. Signatures/one-click installer remain future work; do not mark the current companion-only preview as the full Community release.
 
-## Highest-priority 0.1.1 work
+## Required v0.1.0 completion before the v0.1.1 closed alpha
 
 1. Validate and harden native SimConnect lifecycle/telemetry across real default and third-party fixed/rotary-wing aircraft.
 2. Complete official-SDK toolbar packaging, CommBus/Coherent and Quest 3 testing, including Community2024 compatibility.
 3. Validate clean Windows distribution, permitted runtime bundling and physical iPad LAN pairing, then produce the complete release archive.
 
 Advanced scientific sensors and restrictions follow those reliability/distribution tasks, rather than displacing them.
+
+Follow the [Windows testing workbook](windows-testing.md) and retain actual results before planning friends-only v0.1.1 distribution or automated GitHub Releases. Those release features have not been added during this review.

@@ -1,11 +1,13 @@
 # Install and launch
 
+Use the [Windows installation and live-testing workbook](docs/windows-testing.md) for the current copy/paste commands, simulated-mode checklist, SDK build, live flights, Quest 3, iPad pairing, GitHub backup and feedback collection. This guide provides the shorter installation reference.
+
 ## Current companion preview
 
 The companion-only preview ZIP is a self-contained Windows x64 publish, not the complete Community release. It includes the engine, dashboard, database library and .NET runtime. It excludes the Community toolbar binary and proprietary SimConnect runtime. Its Windows execution has not been tested in this Linux environment.
 
 1. Extract the entire archive to a writable application folder. Keep all files together; do not run from inside the ZIP.
-2. Open `Windows-Companion/Launch-Simulated.cmd`. No Visual Studio, .NET SDK or compilation is required for this published app.
+2. Open `Windows-Companion/Launch-Simulated.cmd`. No Visual Studio, .NET SDK or compilation is required for this published app. This launcher explicitly disables the simulator bridge and LAN for the initial standalone test.
 3. Open `http://127.0.0.1:5080` on that Windows PC. Verify the **SIMULATED TELEMETRY** label.
 4. Choose Universal or Realistic, name the mission, start recording, wait for samples, and end the mission. Review Mission History and its detail view.
 5. Keep the console running during recording. Closing a browser or toolbar display is safe. Closing the engine interrupts an unfinished mission and preserves committed samples.
@@ -45,6 +47,8 @@ On the PC's localhost dashboard, open Settings and copy the pairing code. Open t
 Environment variables use the `AeroScience__` prefix: `Telemetry` (`Simulated` or `SimConnect`), `SamplingIntervalMs` (250–60000, default 1000), `Port` (default 5080), `DataDirectory`, `EnableLan` (default false), `LanAddress`, and `EnableToolbarBridge` (default true, Windows only).
 
 The engine reports its source, data directory, connection failures and reconnects to its console. Bounded diagnostic files are in `%LOCALAPPDATA%\AeroScience\logs` on Windows (seven daily logs, at most 5 MB each). No sample-by-sample logging or external reporting is enabled. The default database is `%LOCALAPPDATA%\AeroScience\missions.db`.
+
+The updated preview also includes `Collect-Feedback.ps1` (built-in Windows PowerShell) and `Test-SimConnectRuntime.ps1` (PowerShell 7 x64). The former produces a local feedback ZIP without databases, SDK DLLs or credential dumps; the latter checks native DLL architecture/loading/exports on Windows. Neither uploads anything or establishes simulator acceptance.
 
 - Missing live telemetry: check that MSFS has loaded a flight, the runtime is x64, and the connection message in Mission Control. Missing TITLE uses an explicit unknown-aircraft label; a missing AGL value does not block the other telemetry.
 - Toolbar channel unavailable: verify MSFS 2024 SU5+ / SDK 1.6.4+ CommBus support, matching runtime exports, and SDK contract compilation. Use the simulator's Coherent/debug tools and the read-only probe. Do not “fix” this by embedding the localhost site.
