@@ -43,9 +43,11 @@ try {
     & "$repo/scripts/build/Build-Companion.ps1"
     python -m unittest discover -s tests -p 'test_*.py' -v
     if ($LASTEXITCODE -ne 0) { throw 'Release/helper tests failed.' }
-    dotnet build tests/AeroScience.TestHost -c Release --no-restore --nologo
+    # Native Tools shells can set Platform=x64; use an explicit output for this test.
+    $recoveryHostDirectory = Join-Path $repo 'artifacts/recovery-test-host'
+    dotnet build tests/AeroScience.TestHost -c Release --no-restore --nologo --output $recoveryHostDirectory
     if ($LASTEXITCODE -ne 0) { throw 'Recovery test host build failed.' }
-    python scripts/build/smoke_recovery.py
+    python scripts/build/smoke_recovery.py --host-dll (Join-Path $recoveryHostDirectory 'AeroScience.TestHost.dll')
     if ($LASTEXITCODE -ne 0) { throw 'Recording recovery smoke failed.' }
     & "$repo/scripts/build/Build-Toolbar.ps1" -SdkRoot $SdkRoot
     $runtimeReport = Join-Path $OutputDirectory ("runtime-check-" + [Guid]::NewGuid().ToString('N') + '.json')

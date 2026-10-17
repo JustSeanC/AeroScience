@@ -1,5 +1,10 @@
 # Changelog
 
+### Recovery check output path in Windows builds
+
+- Build the recovery test host into an explicit artifacts directory and pass its exact DLL path to the smoke check. Native Tools shells using `Platform=x64` no longer leave the check looking in the default `bin/Release` folder.
+- Reject missing selected test-host DLLs before launching, and exercise the same explicit-output flow in Windows CI with `Platform=x64`. Crash/restart, sample retention, mission modes and exclusive-writer checks remain required.
+
 ### Windows release-build test cleanup
 
 - Disabled pooling for the two temporary SQLite connections in the schema 2 upgrade test. Disposed test connections now release the archive and backup files so Windows can remove the temporary directory during cleanup.

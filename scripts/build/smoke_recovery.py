@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Real-process crash/restart check using temporary data, no simulator or external services."""
+import argparse
 import http.cookiejar
 import json
 import os
@@ -10,11 +11,16 @@ import time
 import urllib.request
 
 REPO = Path(__file__).resolve().parents[2]
-DLL = REPO/'tests/AeroScience.TestHost/bin/Release/net10.0/AeroScience.TestHost.dll'
+DEFAULT_DLL = REPO/'tests/AeroScience.TestHost/bin/Release/net10.0/AeroScience.TestHost.dll'
 BASE = 'http://127.0.0.1:5081'
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--host-dll', type=Path, default=DEFAULT_DLL, help='Exact built recovery test-host DLL to launch.')
+    dll = parser.parse_args().host_dll.resolve()
+    if not dll.is_file():
+        parser.error(f'Recovery test-host DLL does not exist: {dll}. Build the test host and pass its output with --host-dll.')
     with tempfile.TemporaryDirectory(prefix='aeroscience-recovery-') as work:
         process = None
         log_path = Path(work)/'console.log'
@@ -22,7 +28,7 @@ def main():
                'AeroScience__SamplingIntervalMs': '250', 'AeroScience__EnableLan': 'false'}
 
         def start():
-            proc = subprocess.Popen([os.environ.get('DOTNET', 'dotnet'), str(DLL)], cwd=REPO/'src/AeroScience.Engine', env=env,
+            proc = subprocess.Popen([os.environ.get('DOTNET', 'dotnet'), str(dll)], cwd=REPO/'src/AeroScience.Engine', env=env,
                                     stdout=log, stderr=subprocess.STDOUT)
             for _ in range(100):
                 if proc.poll() is not None: raise RuntimeError(log_path.read_text())
@@ -53,7 +59,7 @@ def main():
                 else: raise AssertionError('No samples recorded.')
                 # A second engine sharing the data directory must fail before it can run recovery.
                 duplicate_env = {**env, 'AeroScience__Port': '5082'}
-                duplicate = subprocess.run([os.environ.get('DOTNET', 'dotnet'), str(DLL)], cwd=REPO/'src/AeroScience.Engine', env=duplicate_env,
+                duplicate = subprocess.run([os.environ.get('DOTNET', 'dotnet'), str(dll)], cwd=REPO/'src/AeroScience.Engine', env=duplicate_env,
                                            stdout=log, stderr=subprocess.STDOUT, timeout=10)
                 assert duplicate.returncode != 0
                 assert api('/api/state')['activeMission']['id'] == mission['id']

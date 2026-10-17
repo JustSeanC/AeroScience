@@ -35,10 +35,12 @@ jobs:
       - shell: pwsh
         run: ./scripts/build/Build-Companion.ps1
       - shell: pwsh
+        env:
+          Platform: x64
         run: |
-          dotnet build tests/AeroScience.TestHost -c Release --no-restore --nologo
+          dotnet build tests/AeroScience.TestHost -c Release --no-restore --nologo --output artifacts/recovery-test-host
           if ($LASTEXITCODE -ne 0) { throw 'Recovery test host build failed.' }
-          python scripts/build/smoke_recovery.py
+          python scripts/build/smoke_recovery.py --host-dll artifacts/recovery-test-host/AeroScience.TestHost.dll
           if ($LASTEXITCODE -ne 0) { throw 'Recovery smoke failed.' }
       # Public-repository CI validates builds without publishing alpha binaries.
       # Release publication is an explicit maintainer action, not a push side effect.
