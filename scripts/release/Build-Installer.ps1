@@ -13,15 +13,11 @@ Push-Location $repo
 try {
     $revision = (git rev-parse HEAD).Trim()
     if ($LASTEXITCODE -ne 0 -or (git status --porcelain)) { throw 'Use clean committed source for the installer.' }
-    if (-not $InnoCompiler) {
-        $locations = @((Join-Path ${env:ProgramFiles(x86)} 'Inno Setup 6/ISCC.exe'), (Join-Path $env:ProgramFiles 'Inno Setup 6/ISCC.exe'), (Join-Path $env:LOCALAPPDATA 'Programs/Inno Setup 6/ISCC.exe'))
-        $InnoCompiler = $locations | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
-        if (-not $InnoCompiler -and (Get-Command ISCC.exe -ErrorAction SilentlyContinue)) { $InnoCompiler = (Get-Command ISCC.exe).Source }
-    }
-    if (-not $InnoCompiler -or -not (Test-Path -LiteralPath $InnoCompiler)) { throw 'Install Inno Setup 6.3 or newer from https://jrsoftware.org/isdl.php (review its license), or provide -InnoCompiler with the full ISCC.exe path.' }
-    $compiler = (Resolve-Path -LiteralPath $InnoCompiler).Path
-    $compilerVersion = [Diagnostics.FileVersionInfo]::GetVersionInfo($compiler)
-    if ($compilerVersion.FileMajorPart -lt 6 -or ($compilerVersion.FileMajorPart -eq 6 -and $compilerVersion.FileMinorPart -lt 3)) { throw 'Inno Setup 6.3 or newer is required.' }
+    . "$PSScriptRoot/InnoSetup.ps1"
+    $compiler = Resolve-InnoSetupCompiler -InnoCompiler $InnoCompiler
+    Write-Host "Inno compiler: $compiler"
+    $compilerVersion = Get-InnoSetupCompilerVersion -CompilerPath $compiler
+    Write-Host "Inno compiler engine: $compilerVersion"
     $metaJson = python scripts/release/package_release.py metadata
     if ($LASTEXITCODE -ne 0) { throw 'Release metadata failed.' }
     $meta = $metaJson | ConvertFrom-Json
@@ -48,7 +44,7 @@ try {
     python scripts/release/installer_release.py stage --candidate $CandidateFolder --destination $payload --expected-commit $revision
     if ($LASTEXITCODE -ne 0) { throw 'Installer payload staging failed.' }
     $toolReport = Join-Path $dependencies 'tools.json'
-    @{ compiler_sha256=(Get-FileHash $compiler -Algorithm SHA256).Hash.ToLowerInvariant(); compiler_version=$compilerVersion.FileVersion;
+    @{ compiler_sha256=(Get-FileHash $compiler -Algorithm SHA256).Hash.ToLowerInvariant(); compiler_version=$compilerVersion.ToString();
        vc_sha256=(Get-FileHash $vc -Algorithm SHA256).Hash.ToLowerInvariant(); vc_version=$vcVersion.FileVersion;
        vc_signature=$signature.Status.ToString(); vc_publisher=$signature.SignerCertificate.Subject; vc_architecture='x64' } | ConvertTo-Json | Set-Content -LiteralPath $toolReport -Encoding utf8
     $arguments = @("/DPayloadDir=$payload", "/DVcRuntime=$vc", "/DReleaseVersion=$($meta.version)", "/DPackageVersion=$($meta.package_version)", "/DOutputDirectory=$destination", "$repo/scripts/installer/AeroScience.iss")

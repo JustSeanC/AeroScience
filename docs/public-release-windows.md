@@ -35,6 +35,10 @@ For a custom Inno location, append `-InnoCompiler 'C:\path\ISCC.exe'`. The build
 
 The script runs locked restore, application/helper/recovery tests, self-contained Windows publishing, installed SDK ABI checks, genuine package compilation/validation, native runtime loading/export checks and permission/hash validation. It stages a validated payload, compiles Inno Setup and writes its SHA-256, compiler/prerequisite receipt and a new acceptance template. Failed stages stop release preparation. Logs include `installer-prerequisites\inno-build.log` under the chosen output directory and the SDK logs under the source checkout's `artifacts\toolbar-full`.
 
+The build prints the selected Inno compiler path and **engine** version before the longer build stages. `ISCC.exe` can legitimately report `0.0.0.0` for its Windows FileVersion/ProductVersion; those fields are not the Inno engine version. Preflight performs a tiny no-output compile and checks its successful engine report against the 6.3 minimum. No test installer is created or launched. Custom/per-user paths are read from Windows installed-program registration; `-InnoCompiler` remains available.
+
+If you reached the old `FileMinorPart`/"6.3 or newer" exception despite having Inno 6.7, pull the correction and build from its new clean source revision into a fresh folder such as `C:\AeroScience-Builds\InstallerAlpha2`. Keep the earlier `InstallerAlpha1` payload. The changed source commit requires a new candidate so that application, SDK and installer evidence continue to match; do not edit out the version check or relabel the earlier payload.
+
 **Run this candidate installer:**
 
 ```text

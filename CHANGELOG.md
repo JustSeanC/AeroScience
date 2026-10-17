@@ -1,5 +1,10 @@
 # Changelog
 
+### Inno Setup compiler engine detection
+
+- Check the loaded compiler engine with a no-output compile instead of rejecting Inno's valid `0.0.0.0` launcher file metadata. Retain the Inno 6.3 minimum and refuse failed or unidentified engines; record the actual engine version in release provenance.
+- Discover custom/per-user installations through Windows installed-program records, show the selected compiler path/version and preflight it before the app/SDK candidate build. Keep runtime signatures, SDK validation and release acceptance unchanged.
+
 ### Isolated toolbar installation tests on simulator-equipped PCs
 
 - Root toolbar test discovery in temporary Steam/Store profiles so an existing real Community installation does not block the build's fixture installs. Application discovery and duplicate-install protection remain enabled.

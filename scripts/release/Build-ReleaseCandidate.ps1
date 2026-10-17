@@ -23,6 +23,11 @@ try {
     $revision = (git rev-parse HEAD).Trim()
     if ($LASTEXITCODE -ne 0 -or $revision -notmatch '^[a-fA-F0-9]{40}$') { throw 'Use a Git checkout of the tested source, not GitHub source ZIP files.' }
     if (git status --porcelain) { throw 'Commit or preserve local source changes before building; releases require a clean checkout.' }
+    . "$PSScriptRoot/InnoSetup.ps1"
+    $InnoCompiler = Resolve-InnoSetupCompiler -InnoCompiler $InnoCompiler
+    Write-Host "Inno compiler: $InnoCompiler"
+    $compilerVersion = Get-InnoSetupCompilerVersion -CompilerPath $InnoCompiler
+    Write-Host "Inno compiler engine: $compilerVersion"
     $metadataJson = python scripts/release/package_release.py metadata
     if ($LASTEXITCODE -ne 0) { throw 'Release metadata is invalid.' }
     $metadata = $metadataJson | ConvertFrom-Json

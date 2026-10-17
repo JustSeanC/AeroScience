@@ -50,8 +50,10 @@ jobs:
       - name: Compile installer recipe with structural fixtures only
         shell: pwsh
         run: |
-          $compiler = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
-          if (-not (Test-Path $compiler)) { throw 'Inno Setup is required on this Windows CI image; no installer check was run.' }
+          . ./scripts/release/InnoSetup.ps1
+          $compiler = Resolve-InnoSetupCompiler
+          $compilerVersion = Get-InnoSetupCompilerVersion -CompilerPath $compiler
+          Write-Host "Compiler engine: $compilerVersion ($compiler)"
           $fixture = Join-Path $env:RUNNER_TEMP 'inno-fixture'
           New-Item $fixture -ItemType Directory | Out-Null
           Set-Content "$fixture\LICENSE" 'STRUCTURAL COMPILER TEST ONLY; NOT A DISTRIBUTION'
