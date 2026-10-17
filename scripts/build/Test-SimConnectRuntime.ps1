@@ -41,7 +41,7 @@ if (-not $MetadataOnly) {
         catch { throw "Windows could not load the DLL or a dependency. Check its official SDK origin and required Microsoft Visual C++ x64 runtime. Loader detail: $($_.Exception.Message)" }
         $exports = @('SimConnect_Open', 'SimConnect_Close', 'SimConnect_CallDispatch', 'SimConnect_AddToDataDefinition',
             'SimConnect_RequestDataOnSimObject', 'SimConnect_SubscribeToSystemEvent', 'SimConnect_RequestSystemState',
-            'SimConnect_SubscribeToCommBusEvent', 'SimConnect_CallCommBusEvent')
+            'SimConnect_SubscribeToCommBusEvent', 'SimConnect_CallCommBusEvent', 'SimConnect_GetLastSentPacketID')
         foreach ($name in $exports) {
             $address = [IntPtr]::Zero
             if (-not [Runtime.InteropServices.NativeLibrary]::TryGetExport($handle, $name, [ref]$address)) {

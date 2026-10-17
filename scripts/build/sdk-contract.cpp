@@ -6,6 +6,14 @@
 #pragma pack(push, 1)
 struct AeroScienceAircraftData { char title[256]; double fields[12]; double mach; };
 #pragma pack(pop)
+struct AeroScienceAtmosphere { double fields[5]; };
+struct AeroScienceGuidance { double flags[18]; double headingSlot; double altitudeSlot; double headings[4]; double altitudes[4]; double verticalSpeed; double ias; double mach; };
+static_assert(sizeof(AeroScienceAtmosphere) == 40);
+static_assert(sizeof(AeroScienceGuidance) == 248);
+static_assert(offsetof(AeroScienceGuidance, headingSlot) == 144);
+static_assert(offsetof(AeroScienceGuidance, headings) == 160);
+static_assert(offsetof(AeroScienceGuidance, altitudes) == 192);
+static_assert(offsetof(AeroScienceGuidance, mach) == 240);
 static_assert(sizeof(AeroScienceAircraftData) == 360, "TITLE plus thirteen FLOAT64 values.");
 static_assert(offsetof(AeroScienceAircraftData, mach) == 352, "Mach follows the unchanged original telemetry fields.");
 // Compile against the installed official SDK before compiling/packaging the toolbar.
@@ -45,3 +53,5 @@ void verify_exports() {
     (void)&SimConnect_CallCommBusEvent;
     (void)&SimConnect_CallDispatch;
 }
+
+static_assert(std::is_same_v<decltype(SimConnect_GetLastSentPacketID(nullptr, static_cast<DWORD*>(nullptr))), HRESULT>);

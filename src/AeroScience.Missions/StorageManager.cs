@@ -299,7 +299,7 @@ public sealed class StorageManager(PreferenceStore preferences, IStorageCapacity
             foreach (var folder in EnumerateDirectories(entry)) yield return folder;
         }
     }
-    public static string DatabaseFingerprint(string path)
+    public static string DatabaseFingerprint(string path, bool science = false)
     {
         if (!File.Exists(path)) throw new IOException("Database copy is missing.");
         using var db = OpenDatabase(path, true);
@@ -310,7 +310,7 @@ public sealed class StorageManager(PreferenceStore preferences, IStorageCapacity
         command.CommandText = "SELECT name,sql FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name";
         var tables = new List<(string, string)>();
         using (var reader = command.ExecuteReader()) while (reader.Read()) tables.Add((reader.GetString(0), reader.GetString(1)));
-        if (!tables.Any(t => t.Item1 == "missions") || !tables.Any(t => t.Item1 == "telemetry")) throw new IOException("Not an AeroScience mission database.");
+        if (!tables.Any(t => t.Item1 == (science ? "datasets" : "missions")) || !tables.Any(t => t.Item1 == (science ? "observations" : "telemetry"))) throw new IOException("Not an AeroScience database of the selected kind.");
         using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
         foreach (var (name, schema) in tables)
         {

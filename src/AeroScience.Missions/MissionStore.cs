@@ -5,7 +5,7 @@ using Microsoft.Data.Sqlite;
 
 namespace AeroScience.Missions;
 
-public sealed class MissionStore
+public sealed partial class MissionStore
 {
     private readonly string connectionString;
     public string DatabasePath { get; }
@@ -13,7 +13,6 @@ public sealed class MissionStore
     public MissionStore(string databasePath)
     {
         DatabasePath = Path.GetFullPath(databasePath);
-        Directory.CreateDirectory(Path.GetDirectoryName(DatabasePath)!);
         connectionString = new SqliteConnectionStringBuilder { DataSource = DatabasePath,
             Mode = SqliteOpenMode.ReadWrite, Pooling = false, DefaultTimeout = 10 }.ToString();
     }
@@ -32,12 +31,13 @@ public sealed class MissionStore
 
     public void Initialize()
     {
+        Directory.CreateDirectory(Path.GetDirectoryName(DatabasePath)!);
         using var db = Open(allowCreate: true);
         using var cmd = db.CreateCommand();
         cmd.CommandText = "PRAGMA user_version;";
         var version = Convert.ToInt32(cmd.ExecuteScalar(), CultureInfo.InvariantCulture);
-        if (version > 3) throw new InvalidOperationException("Database was created by a newer AeroScience version; refusing to modify it.");
-        if (version is 1 or 2)
+        if (version > 4) throw new InvalidOperationException("Database was created by a newer AeroScience version; refusing to modify it.");
+        if (version is 1 or 2 or 3)
         {
             var size = new FileInfo(DatabasePath).Length;
             if (new LocalStorageCapacity().FreeBytes(Path.GetDirectoryName(DatabasePath)!) < size + StorageManager.MinimumFreeBytes)
@@ -51,9 +51,10 @@ public sealed class MissionStore
         }
         cmd.CommandText = "PRAGMA journal_mode=WAL;";
         cmd.ExecuteNonQuery();
-        if (version == 3) return;
-        if (version == 2) { MigrateLibraryReferences(db); return; }
-        if (version == 1) { MigrateMode(db); MigrateLibraryReferences(db); return; }
+        if (version == 4) return;
+        if (version == 3) { MigrateResearch(db); return; }
+        if (version == 2) { MigrateLibraryReferences(db); MigrateResearch(db); return; }
+        if (version == 1) { MigrateMode(db); MigrateLibraryReferences(db); MigrateResearch(db); return; }
         using var transaction = db.BeginTransaction();
         cmd.Transaction = transaction;
         cmd.CommandText = """
@@ -84,6 +85,7 @@ public sealed class MissionStore
         transaction.Commit();
         MigrateMode(db);
         MigrateLibraryReferences(db);
+        MigrateResearch(db);
     }
 
     private static void MigrateLibraryReferences(SqliteConnection db)
@@ -111,10 +113,10 @@ public sealed class MissionStore
     public IReadOnlyList<DatasetReference> DatasetReferences(Guid id)
     {
         using var db = Open(); using var cmd = db.CreateCommand();
-        cmd.CommandText = "SELECT dataset_id,library_id,relative_path,metadata_json FROM dataset_references WHERE mission_id=$id ORDER BY dataset_id";
+        cmd.CommandText = "SELECT dataset_id,library_id,relative_path,metadata_json,available FROM dataset_references WHERE mission_id=$id ORDER BY dataset_id";
         cmd.Parameters.AddWithValue("$id", id.ToString()); using var reader = cmd.ExecuteReader();
         var references = new List<DatasetReference>();
-        while (reader.Read()) references.Add(new(Guid.Parse(reader.GetString(0)), Guid.Parse(reader.GetString(1)), reader.GetString(2), reader.GetString(3)));
+        while (reader.Read()) references.Add(new(Guid.Parse(reader.GetString(0)), Guid.Parse(reader.GetString(1)), reader.GetString(2), reader.GetString(3), reader.GetBoolean(4)));
         return references;
     }
 
@@ -123,7 +125,7 @@ public sealed class MissionStore
         if (Path.IsPathRooted(reference.RelativePath) || reference.RelativePath.Split('/', '\\').Any(p => p is "." or "..") || reference.RelativePath.Contains(':'))
             throw new ArgumentException("Dataset paths must be relative to a stable library identifier.");
         using var db = Open(); using var cmd = db.CreateCommand();
-        cmd.CommandText = "INSERT INTO dataset_references VALUES($dataset,$mission,$library,$path,$metadata)";
+        cmd.CommandText = "INSERT OR IGNORE INTO dataset_references(dataset_id,mission_id,library_id,relative_path,metadata_json) VALUES($dataset,$mission,$library,$path,$metadata)";
         cmd.Parameters.AddWithValue("$dataset", reference.DatasetId.ToString()); cmd.Parameters.AddWithValue("$mission", missionId.ToString());
         cmd.Parameters.AddWithValue("$library", reference.LibraryId.ToString()); cmd.Parameters.AddWithValue("$path", reference.RelativePath);
         cmd.Parameters.AddWithValue("$metadata", reference.MetadataJson); cmd.ExecuteNonQuery();
@@ -140,7 +142,10 @@ public sealed class MissionStore
         {
             writer.Flush(); await output.WriteAsync(buffer.WrittenMemory, cancellationToken); buffer.Clear();
         }
-        writer.WriteStartObject(); writer.WriteNumber("formatVersion", 1);
+        writer.WriteStartObject(); writer.WriteNumber("formatVersion", 2);
+        writer.WriteString("application", "AeroScience Science Mission Operations");
+        writer.WriteString("timestampBasis", "Host UTC at source packet receipt; recorded timestamps are preserved");
+        writer.WritePropertyName("units"); JsonSerializer.Serialize(writer, ResearchExports.TelemetryUnits, WireJson.Options);
         writer.WritePropertyName("mission"); JsonSerializer.Serialize(writer, detail.Mission, WireJson.Options);
         writer.WritePropertyName("events");
         // Export every event, not the detail dialog's bounded preview.
@@ -157,7 +162,7 @@ public sealed class MissionStore
                 if (++eventCount % 256 == 0) await FlushAsync();
             }
         }
-        writer.WriteEndArray(); writer.WritePropertyName("datasets"); JsonSerializer.Serialize(writer, DatasetReferences(id), WireJson.Options);
+        writer.WriteEndArray(); writer.WritePropertyName("datasets"); JsonSerializer.Serialize(writer, ResolvedDatasetReferences(id), WireJson.Options);
         writer.WritePropertyName("telemetry"); writer.WriteStartArray();
         var count = 0;
         foreach (var sample in StreamSamples(id))
@@ -165,7 +170,9 @@ public sealed class MissionStore
             cancellationToken.ThrowIfCancellationRequested(); JsonSerializer.Serialize(writer, sample, WireJson.Options);
             if (++count % 256 == 0) await FlushAsync();
         }
-        writer.WriteEndArray(); writer.WriteEndObject(); await FlushAsync();
+        writer.WriteEndArray();
+        await WriteResearchJsonAsync(id, writer, FlushAsync, cancellationToken);
+        writer.WriteEndObject(); await FlushAsync();
     }
 
     private static void MigrateMode(SqliteConnection db)
@@ -191,7 +198,8 @@ public sealed class MissionStore
         }
     }
 
-    public Guid Create(string name, TelemetryFrame? frame, DateTimeOffset now, ScienceMode mode = ScienceMode.Universal)
+    public Guid Create(string name, TelemetryFrame? frame, DateTimeOffset now, ScienceMode mode = ScienceMode.Universal,
+        MissionPlan? plan = null, InstrumentConfiguration[]? instruments = null, string? objective = null)
     {
         if (!Enum.IsDefined(mode)) throw new ArgumentException("Unknown science operating mode.");
         var id = Guid.NewGuid();
@@ -213,6 +221,7 @@ public sealed class MissionStore
         cmd.Parameters.AddWithValue("$lon", (object?)frame?.Longitude ?? DBNull.Value);
         cmd.ExecuteNonQuery();
         Event(db, tx, id, now, "started", "Mission recording started.");
+        WriteResearch(db, tx, id, plan, instruments, objective);
         tx.Commit();
         return id;
     }

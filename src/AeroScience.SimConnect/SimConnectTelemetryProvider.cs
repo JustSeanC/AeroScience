@@ -73,30 +73,65 @@ public sealed class SimConnectTelemetryProvider : ITelemetryProvider
         private string? sdkError;
         private DateTimeOffset lastFrame = DateTimeOffset.UtcNow;
         private bool reportedStale;
+        private readonly Dictionary<uint, string> packetGroups = [];
+        private readonly HashSet<string> unavailableGroups = [];
+        private readonly List<string> initialUnavailable = [];
 
         public NativeSession()
         {
             callback = OnMessage;
-            Check(Native.Open(out handle, "AeroScience 0.1.1-alpha", IntPtr.Zero, 0, IntPtr.Zero, 0));
+            Check(Native.Open(out handle, "AeroScience 0.2.0", IntPtr.Zero, 0, IntPtr.Zero, 0));
             try
             {
-                Check(Native.AddToDataDefinition(handle, 1, "TITLE", null, 9, 0, uint.MaxValue));
+                Sent(Native.AddToDataDefinition(handle, 1, "TITLE", null, 9, 0, uint.MaxValue), "aircraft");
                 foreach (var variable in VariableDefinitions)
-                    Check(Native.AddToDataDefinition(handle, 1, variable.Name, variable.Unit, 4, 0, uint.MaxValue));
+                    Sent(Native.AddToDataDefinition(handle, 1, variable.Name, variable.Unit, 4, 0, uint.MaxValue), "aircraft");
                 Check(Native.SubscribeToSystemEvent(handle, 10, "SimStart"));
                 Check(Native.SubscribeToSystemEvent(handle, 11, "SimStop"));
                 Check(Native.SubscribeToSystemEvent(handle, 12, "Pause"));
                 Check(Native.SubscribeToSystemEvent(handle, 13, "AircraftLoaded"));
                 Check(Native.SubscribeToSystemEvent(handle, 14, "FlightLoaded"));
                 Check(Native.RequestSystemState(handle, 1, "Sim"));
-                Check(Native.RequestDataOnSimObject(handle, 2, 1, 0, 4, 0, 0, 0, 0));
+                Sent(Native.RequestDataOnSimObject(handle, 2, 1, 0, 4, 0, 0, 0, 0), "aircraft");
+                ConfigureAuxiliary(2, 20, "atmosphere", ResearchTelemetry.AtmosphericVariables);
+                ConfigureAuxiliary(3, 30, "guidance", ResearchTelemetry.GuidanceVariables);
             }
             catch { Dispose(); throw; }
+        }
+
+        private void Sent(int result, string group)
+        {
+            Check(result);
+            Check(Native.GetLastSentPacketId(handle, out var packet));
+            packetGroups[packet] = group;
+        }
+        private void ConfigureAuxiliary(uint definition, uint request, string group, (string Name, string Unit)[] variables)
+        {
+            try
+            {
+                foreach (var variable in variables)
+                    Sent(Native.AddToDataDefinition(handle, definition, variable.Name, variable.Unit, 4, 0, uint.MaxValue), group);
+                Sent(Native.RequestDataOnSimObject(handle, request, definition, 0, 4, 0, 0, 0, 0), group);
+            }
+            catch (COMException) { initialUnavailable.Add(group); }
+        }
+        private void AuxiliaryUnavailable(string group)
+        {
+            if (!unavailableGroups.Add(group)) return;
+            var now = DateTimeOffset.UtcNow;
+            var state = new ConnectionInfo(ConnectionState.Connected, TelemetrySource.Simulator,
+                "MSFS connected; a standard auxiliary data definition is unavailable", now);
+            if (group == "atmosphere") updates.Add(new(state, null, new(now, null, null, null, null, null,
+                ObservationQuality.Unavailable, "The SDK rejected the atmospheric definition; aircraft recording remains available.")));
+            if (group == "guidance") updates.Add(new(state, null, Guidance: new(now, AutopilotEngagement.Unavailable,
+                new(null), new(null), new(null), ObservationQuality.Unavailable)));
         }
 
         public IReadOnlyList<TelemetryUpdate> Poll()
         {
             updates.Clear();
+            foreach (var group in initialUnavailable) AuxiliaryUnavailable(group);
+            initialUnavailable.Clear();
             Check(Native.CallDispatch(handle, callback, IntPtr.Zero));
             if (quit) throw new IOException("MSFS closed its SimConnect session.");
             if (sdkError is not null) throw new IOException(sdkError);
@@ -120,7 +155,9 @@ public sealed class SimConnectTelemetryProvider : ITelemetryProvider
                 switch (id)
                 {
                     case 1 when size >= 24:
-                        sdkError = $"SimConnect SDK exception {Marshal.ReadInt32(data, 12)} (send {Marshal.ReadInt32(data, 16)}).";
+                        var packet = unchecked((uint)Marshal.ReadInt32(data, 16));
+                        if (packetGroups.TryGetValue(packet, out var group) && group != "aircraft") AuxiliaryUnavailable(group);
+                        else sdkError = $"SimConnect SDK exception {Marshal.ReadInt32(data, 12)} (send {packet}).";
                         break;
                     case 3: quit = true; break;
                     case 4 when size >= 24:
@@ -142,15 +179,32 @@ public sealed class SimConnectTelemetryProvider : ITelemetryProvider
                     case 15 when size >= 24: // SYSTEM_STATE
                         if (Marshal.ReadInt32(data, 12) == 1) running = Marshal.ReadInt32(data, 16) == 1;
                         break;
-                    case 8 when running && size >= 40 + 360: // SIMOBJECT_DATA: 40-byte header, TITLE + 13 doubles
-                        if (Marshal.ReadInt32(data, 12) != 2 || Marshal.ReadInt32(data, 20) != 1) break;
-                        var raw = Marshal.PtrToStructure<AircraftData>(IntPtr.Add(data, 40));
-                        var frame = Decode(raw, DateTimeOffset.UtcNow, paused);
-                        if (!frame.IsValid) break;
-                        lastFrame = frame.TimestampUtc;
-                        reportedStale = false;
-                        updates.Add(new(new(ConnectionState.Connected, TelemetrySource.Simulator,
-                            paused ? "MSFS connected · paused" : "MSFS aircraft telemetry connected", frame.TimestampUtc), frame));
+                    case 8 when running && size >= 40:
+                        var request = Marshal.ReadInt32(data, 12);
+                        var definition = Marshal.ReadInt32(data, 20);
+                        var timestamp = DateTimeOffset.UtcNow;
+                        var connection = new ConnectionInfo(ConnectionState.Connected, TelemetrySource.Simulator,
+                            paused ? "MSFS connected · paused" : "MSFS aircraft telemetry connected", timestamp);
+                        if (request == 2 && definition == 1 && size >= 400)
+                        {
+                            var raw = Marshal.PtrToStructure<AircraftData>(IntPtr.Add(data, 40));
+                            var frame = Decode(raw, timestamp, paused);
+                            if (!frame.IsValid) break;
+                            lastFrame = frame.TimestampUtc; reportedStale = false;
+                            updates.Add(new(connection, frame));
+                        }
+                        else if (request == 20 && definition == 2 && !unavailableGroups.Contains("atmosphere")
+                            && size >= 40 + Marshal.SizeOf<ResearchTelemetry.AtmosphericData>())
+                        {
+                            var atmosphere = ResearchTelemetry.DecodeAtmosphere(Marshal.PtrToStructure<ResearchTelemetry.AtmosphericData>(IntPtr.Add(data, 40)), timestamp);
+                            updates.Add(new(connection, null, paused ? atmosphere with { Quality = ObservationQuality.Paused } : atmosphere));
+                        }
+                        else if (request == 30 && definition == 3 && !unavailableGroups.Contains("guidance")
+                            && size >= 40 + Marshal.SizeOf<ResearchTelemetry.GuidanceData>())
+                        {
+                            var guidance = ResearchTelemetry.DecodeGuidance(Marshal.PtrToStructure<ResearchTelemetry.GuidanceData>(IntPtr.Add(data, 40)), timestamp);
+                            updates.Add(new(connection, null, Guidance: paused ? guidance with { Quality = ObservationQuality.Paused } : guidance));
+                        }
                         break;
                 }
             }
@@ -217,6 +271,8 @@ public sealed class SimConnectTelemetryProvider : ITelemetryProvider
         internal static extern int SubscribeToSystemEvent(IntPtr handle, uint eventId, string eventName);
         [DllImport(Library, EntryPoint = "SimConnect_RequestSystemState", CharSet = CharSet.Ansi, ExactSpelling = true)]
         internal static extern int RequestSystemState(IntPtr handle, uint requestId, string state);
+        [DllImport(Library, EntryPoint = "SimConnect_GetLastSentPacketID", ExactSpelling = true)]
+        internal static extern int GetLastSentPacketId(IntPtr handle, out uint packetId);
         [DllImport(Library, EntryPoint = "SimConnect_CallDispatch", ExactSpelling = true)]
         internal static extern int CallDispatch(IntPtr handle, Dispatch callback, IntPtr context);
     }

@@ -1,10 +1,11 @@
 using AeroScience.Shared;
+using System.Text.Json;
 
 namespace AeroScience.Missions;
 
 // All mutations pass through this gate, including telemetry and commands from every display.
 public sealed class MissionCoordinator(MissionStore store, int samplingIntervalMs, bool requireFreshTelemetry = false,
-    Action? ensureRecordingCapacity = null)
+    Action? ensureRecordingCapacity = null, ResearchOperations? research = null)
 {
     private readonly object gate = new();
     private TelemetryFrame? frame;
@@ -27,7 +28,8 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
             return new(connection, frame, active, samplingIntervalMs, Sampling: new(received, count, skipped, missing,
                 count > 1 && seconds > 0 ? (count - 1) / seconds : null, firstRecordedUtc, lastRecordedUtc,
                 active is not null && active.DurationSeconds >= 1 ? count / active.DurationSeconds : null,
-                active is not null && firstRecordedUtc is not null ? Math.Max(0, (firstRecordedUtc.Value-active.StartedUtc).TotalSeconds) : null));
+                active is not null && firstRecordedUtc is not null ? Math.Max(0, (firstRecordedUtc.Value-active.StartedUtc).TotalSeconds) : null),
+                Research: research?.Snapshot(connection, frame));
         }
     }
 
@@ -38,8 +40,10 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
             if (active is not null && connection.State != update.Connection.State)
                 store.AddEvent(active.Id, DateTimeOffset.UtcNow, "connection", update.Connection.Message);
             connection = update.Connection;
-            frame = connection.State == ConnectionState.Connected && update.Frame is { IsValid: true } ? update.Frame : null;
-            if (active is null || frame is null) return;
+            frame = connection.State != ConnectionState.Connected ? null
+                : update.Frame is { IsValid: true } ? update.Frame : update.Frame is not null ? null : frame;
+            research?.Observe(update, frame);
+            if (active is null || frame is null || update.Frame is null) return;
             received++;
             if (frame.IsPaused || lastRecordedUtc is not null && frame.TimestampUtc <= lastRecordedUtc)
             { skipped++; return; }
@@ -63,10 +67,10 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
                 catch (IOException error)
                 {
                     store.Finish(active.Id, MissionStatus.Interrupted, lastRecordedUtc ?? active.StartedUtc, "Recording stopped to protect storage: " + error.Message);
-                    active = null; connection = connection with { Message = error.Message }; return;
+                    research?.End(); active = null; connection = connection with { Message = error.Message }; return;
                 }
             }
-            store.Append(active.Id, frame);
+            store.Append(active.Id, frame with { Guidance = research?.CurrentGuidance(connection, frame) });
             firstRecordedUtc ??= frame.TimestampUtc;
             lastSlot = slot;
             lastRecordedUtc = frame.TimestampUtc;
@@ -82,8 +86,12 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
         }
     }
 
-    public Mission Start(string? name, ScienceMode mode = ScienceMode.Universal)
+    public Mission Start(string? name, ScienceMode mode = ScienceMode.Universal) => Start(new StartMissionRequest(name ?? "", mode));
+
+    public Mission Start(StartMissionRequest request)
     {
+        var name = request.Name;
+        var mode = request.Mode;
         if (!Enum.IsDefined(mode)) throw new ArgumentException("Choose Universal or Realistic mode.");
         if (name?.Any(char.IsControl) == true) throw new ArgumentException("Mission names cannot contain control characters.");
         name = name?.Trim();
@@ -93,20 +101,55 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
         {
             if (maintenance) throw new InvalidOperationException("Storage/settings maintenance is in progress. Try again after it completes.");
             if (active is not null) throw new InvalidOperationException("A mission is already recording.");
+            var plan = request.PlanId is { } planId ? store.Plan(planId) ?? throw new ArgumentException("Saved mission plan not found.") : null;
+            if (plan is not null) mode = plan.Mode;
+            var configurations = ScienceCatalog.Normalize(request.Instruments ?? plan?.Instruments ?? research?.Configurations);
             try { ensureRecordingCapacity?.Invoke(); }
             catch (IOException error) { throw new InvalidOperationException(error.Message, error); }
             if (requireFreshTelemetry && (connection.State != ConnectionState.Connected || frame is null
                 || DateTimeOffset.UtcNow - frame.TimestampUtc > TimeSpan.FromSeconds(6) || frame.IsPaused))
                 throw new InvalidOperationException("Live aircraft telemetry is unavailable. Mission History remains accessible.");
+            research?.EnsureCanStart(configurations);
             var now = DateTimeOffset.UtcNow;
-            var id = store.Create(name, frame, now, mode);
+            var id = store.Create(name, frame, now, mode, plan, configurations, request.Objective);
             active = store.Detail(id)!.Mission;
+            research?.Begin(active, store.Research(id));
             lastRecordedUtc = null;
             firstRecordedUtc = samplingAnchor = null;
             lastSlot = -1; received = skipped = missing = 0;
             lastAircraft = null;
             // Take a fresh sample on the next provider update; do not backdate the first sample.
             return active;
+        }
+    }
+
+    public void ConfigureInstruments(InstrumentConfiguration[] configurations)
+    {
+        lock (gate)
+        {
+            if (maintenance) throw new InvalidOperationException("Storage maintenance is in progress.");
+            if (research is null) throw new InvalidOperationException("Scientific acquisition is unavailable in this host.");
+            research.Configure(configurations);
+        }
+    }
+    public MissionMarker AddMarker(Guid id, MarkerRequest request)
+    {
+        lock (gate)
+        {
+            if (maintenance || active?.Id != id) throw new InvalidOperationException("Observation markers require an active mission.");
+            var available = connection.State == ConnectionState.Connected && frame is { IsPaused: false }
+                && DateTimeOffset.UtcNow - frame.TimestampUtc <= TimeSpan.FromSeconds(6) ? frame : null;
+            return store.AddMarker(id, request, DateTimeOffset.UtcNow, available,
+                JsonSerializer.Serialize(research?.Snapshot(connection, frame), WireJson.Options));
+        }
+    }
+    public MissionNote AddResearchNote(Guid id, NoteRequest request)
+    {
+        lock (gate)
+        {
+            if (maintenance) throw new InvalidOperationException("Data maintenance is in progress.");
+            if (request.Phase == "in-flight" && active?.Id != id) throw new InvalidOperationException("In-flight notes require that active mission.");
+            return store.AddNote(id, request);
         }
     }
 
@@ -131,6 +174,7 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
         {
             if (active?.Id != id) throw new InvalidOperationException("This mission is not currently recording.");
             store.Finish(id, MissionStatus.Completed, DateTimeOffset.UtcNow, "Mission completed by operator.");
+            research?.End();
             active = null;
             return store.Detail(id)!.Mission;
         }
@@ -143,6 +187,7 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
             if (active is null) return;
             store.Finish(active.Id, MissionStatus.Interrupted, lastRecordedUtc ?? active.StartedUtc,
                 "Engine stopped before the mission was completed.");
+            research?.End();
             active = null;
         }
     }

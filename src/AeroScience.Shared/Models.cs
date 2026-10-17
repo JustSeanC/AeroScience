@@ -13,7 +13,8 @@ public sealed record TelemetryFrame(
     double Latitude, double Longitude, double AltitudeMslFeet, double? AltitudeAglFeet,
     double IndicatedAirspeedKnots, double TrueAirspeedKnots, double GroundspeedKnots,
     double HeadingDegrees, double GroundTrackDegrees, double PitchDegrees,
-    double BankDegrees, double VerticalSpeedFeetPerMinute, bool IsPaused = false, double? MachNumber = null)
+    double BankDegrees, double VerticalSpeedFeetPerMinute, bool IsPaused = false, double? MachNumber = null,
+    FlightGuidance? Guidance = null)
 {
     public bool IsValid => TimestampUtc.Offset == TimeSpan.Zero && !string.IsNullOrWhiteSpace(Aircraft)
         && double.IsFinite(Latitude) && Latitude is >= -90 and <= 90
@@ -26,7 +27,8 @@ public sealed record TelemetryFrame(
 
 public sealed record ConnectionInfo(ConnectionState State, TelemetrySource Source, string Message,
     DateTimeOffset ChangedUtc);
-public sealed record TelemetryUpdate(ConnectionInfo Connection, TelemetryFrame? Frame);
+public sealed record TelemetryUpdate(ConnectionInfo Connection, TelemetryFrame? Frame,
+    AtmosphericFrame? Atmosphere = null, FlightGuidance? Guidance = null);
 public sealed record Coordinates(double Latitude, double Longitude);
 public sealed record Mission(Guid Id, string Name, string? Aircraft, TelemetrySource? Source,
     DateTimeOffset StartedUtc, DateTimeOffset? EndedUtc, MissionStatus Status,
@@ -41,18 +43,20 @@ public sealed record SamplingDiagnostics(long ReceivedUpdates, long CommittedSam
     long MissingIntervals, double? AchievedHz, DateTimeOffset? FirstSampleUtc, DateTimeOffset? LastSampleUtc,
     double? MissionAverageHz = null, double? FirstSampleDelaySeconds = null);
 public sealed record EngineSnapshot(ConnectionInfo Connection, TelemetryFrame? Telemetry,
-    Mission? ActiveMission, int SamplingIntervalMs, string Version = "0.1.1-alpha", SamplingDiagnostics? Sampling = null);
-public sealed record StartMissionRequest(string Name, ScienceMode Mode = ScienceMode.Universal);
+    Mission? ActiveMission, int SamplingIntervalMs, string Version = "0.2.0", SamplingDiagnostics? Sampling = null,
+    ResearchState? Research = null);
+public sealed record StartMissionRequest(string Name, ScienceMode Mode = ScienceMode.Universal,
+    Guid? PlanId = null, InstrumentConfiguration[]? Instruments = null, string? Objective = null);
 public sealed record InstrumentMissionContext(Guid MissionId, ScienceMode Mode);
-public sealed record DatasetReference(Guid DatasetId, Guid LibraryId, string RelativePath, string MetadataJson);
+public sealed record DatasetReference(Guid DatasetId, Guid LibraryId, string RelativePath, string MetadataJson,
+    bool Available = true);
 
-// Instruments are contracts only in 0.1.0. No synthetic observation is presented as measured data.
+// Legacy provenance labels remain readable in historical archives.
 public enum ObservationProvenance { SimulatorTelemetry, ExternalDataset, SyntheticMeasurement, SimulatedInstrument }
 public interface IScienceInstrument
 {
-    string Id { get; }
-    string Type { get; }
-    ValueTask SampleAsync(InstrumentMissionContext context, TelemetryFrame telemetry, CancellationToken cancellationToken);
+    InstrumentDefinition Definition { get; }
+    IReadOnlyList<MeasurementReading> Read(AtmosphericFrame source);
 }
 
 public static class WireJson
