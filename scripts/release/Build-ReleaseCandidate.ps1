@@ -5,7 +5,9 @@ param(
     [string]$RuntimePath,
     [Parameter(Mandatory)][string]$RuntimeApprovalRecord,
     [switch]$RuntimeRedistributionConfirmed,
-    [string]$OutputDirectory
+    [string]$OutputDirectory,
+    [string]$InnoCompiler,
+    [string]$VcRuntimePath
 )
 $ErrorActionPreference = 'Stop'
 $repo = (Resolve-Path "$PSScriptRoot/../..").Path
@@ -57,8 +59,10 @@ try {
     if ($package.Count -ne 1) { throw 'Expected exactly one genuine full-toolbar SDK output.' }
     python scripts/release/package_release.py prepare --companion artifacts/Windows-Companion --community $package[0].Directory.FullName --sdk-receipt artifacts/toolbar-full/sdk-build.json --runtime-report $runtimeReport --runtime-approval $approval --destination $candidate --output $candidateZip --runtime-redistribution-confirmed
     if ($LASTEXITCODE -ne 0) { throw 'Candidate validation failed. No final release was produced.' }
+    & "$repo/scripts/release/Build-Installer.ps1" -CandidateFolder $candidate -OutputDirectory $OutputDirectory -InnoCompiler $InnoCompiler -VcRuntimePath $VcRuntimePath
     Write-Host "Source: $revision"
     Write-Host "Candidate ZIP: $candidateZip"
     Write-Host "Candidate files: $candidate"
-    Write-Host 'Extract that ZIP to a separate test folder. Complete the minimum real Windows/MSFS checks and save an acceptance record. Finalize with New-Release.ps1 without rebuilding. Nothing has been uploaded.'
+    Write-Host "Primary installer candidate: $OutputDirectory\installer-candidate\$($metadata.setup_name)"
+    Write-Host 'Run that setup EXE and test the installed application, setup wizard, upgrade, uninstall and live mission. Use installer-candidate/ACCEPTANCE.json. Finalize without rebuilding. The ZIP is an internal/optional portable payload. Nothing has been uploaded.'
 } finally { Pop-Location }

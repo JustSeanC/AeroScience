@@ -33,7 +33,7 @@ The provider opens a local connection, subscribes to `SimStart`, `SimStop`, `Pau
 
 ## Runtime and distribution
 
-On a configured Windows x64 development PC, obtain the native x64 runtime **through the official SDK** and import it through the application’s Settings for personal testing. The native file is placed beside AeroScience.exe. Do not substitute the similarly named managed wrapper or an x86 FSX runtime. The published app has no synthetic provider or fallback. Without the runtime or simulator, the dashboard and local archive remain available in a clear disconnected state.
+The public Windows installer bundles the authorized native x64 runtime beside AeroScience.exe and installs the supported Microsoft Visual C++ prerequisite when needed. The maintainer build validates the official SDK DLL's hash, architecture and required exports. Testers do not import SDK DLLs or copy runtime files manually; run Setup again to repair missing application files. The published app has no synthetic provider or fallback. Without the runtime or simulator, the dashboard and local archive remain available in a clear disconnected state.
 
 This project does not include Microsoft's proprietary DLL, assume redistribution permission, or require end users to install a development SDK. Before a complete public release, the maintainer must review the installed SDK's redistribution/license terms and establish a permitted runtime-delivery method. The full-release packaging validator requires the runtime and explicit redistribution confirmation; the companion-only preview deliberately excludes it. If redistribution is not permitted, that is a full-release blocker that needs a supported Microsoft runtime installation route.
 

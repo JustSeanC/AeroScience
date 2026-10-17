@@ -34,6 +34,11 @@ jobs:
           node-version: '22'
       - shell: pwsh
         run: ./scripts/build/Build-Companion.ps1
+      - name: Check installer packaging and publication on Windows
+        shell: pwsh
+        run: |
+          python -m unittest discover -s tests -p 'test_*.py' -q
+          if ($LASTEXITCODE -ne 0) { throw 'Windows packaging/helper checks failed.' }
       - shell: pwsh
         env:
           Platform: x64
@@ -42,5 +47,18 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Recovery test host build failed.' }
           python scripts/build/smoke_recovery.py --host-dll artifacts/recovery-test-host/AeroScience.TestHost.dll
           if ($LASTEXITCODE -ne 0) { throw 'Recovery smoke failed.' }
+      - name: Compile installer recipe with structural fixtures only
+        shell: pwsh
+        run: |
+          $compiler = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $compiler)) { throw 'Inno Setup is required on this Windows CI image; no installer check was run.' }
+          $fixture = Join-Path $env:RUNNER_TEMP 'inno-fixture'
+          New-Item $fixture -ItemType Directory | Out-Null
+          Set-Content "$fixture\LICENSE" 'STRUCTURAL COMPILER TEST ONLY; NOT A DISTRIBUTION'
+          Set-Content "$fixture\dummy.txt" 'NOT APPLICATION OR SDK OUTPUT'
+          Set-Content "$fixture\VC_redist.x64.exe" 'NOT A RUNTIME; NEVER EXECUTE THIS FIXTURE INSTALLER'
+          & $compiler "/DPayloadDir=$fixture" "/DVcRuntime=$fixture\VC_redist.x64.exe" '/DReleaseVersion=0.1.1-alpha' '/DPackageVersion=0.1.1' "/DOutputDirectory=$fixture\output" scripts/installer/AeroScience.iss
+          if ($LASTEXITCODE -ne 0) { throw 'Installer recipe compilation failed.' }
+          # Compile only: no fake SDK receipt, executable launch, acceptance or artifact publication.
       # Public-repository CI validates builds without publishing alpha binaries.
       # Release publication is an explicit maintainer action, not a push side effect.

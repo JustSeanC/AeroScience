@@ -1,53 +1,43 @@
-# Install and use AeroScience
+# Install AeroScience for Windows
 
-The v0.1.1 graphical app is implemented and cross-published, but the complete public alpha still needs official SDK output, validation of the approved runtime and minimum Windows/MSFS verification. The maintainer has confirmed native runtime redistribution authorization; supporting correspondence remains private. These are the intended user steps for that complete download. Old v0.1.0 console previews and GitHub source ZIPs are different artifacts.
+The recommended public download is **AeroScience-Setup-v0.1.1-alpha.exe** from [GitHub Releases](https://github.com/JustSeanC/AeroScience/releases). Installer implementation is in source; its new Windows installation, first-run, upgrade, uninstall and live-flight acceptance must pass before publication. The earlier ZIP candidate is not evidence for this changed build.
 
-## First launch
+## Install and launch
 
-1. Visit [GitHub Releases](https://github.com/JustSeanC/AeroScience/releases) and download **AeroScience-v0.1.1-alpha-win-x64.zip** from the alpha release’s Assets. Choose the Windows ZIP, not either Source code download. Extract all files to a new writable application folder. Do not launch from inside the ZIP or merge files into an old preview.
-2. Double-click **AeroScience.exe**. Keep its accompanying files together. No .NET SDK, MSFS SDK, Visual Studio, Python, PowerShell, batch launchers or manual localhost setup is required by the completed alpha.
-3. The app initializes the local archive, starts its services, opens the dashboard and attempts to connect to MSFS. It can launch before the simulator. Review the Science Library capacity notice on first run.
-4. Open **Settings → General & Toolbar**. Verify the Community folder, using Browse if automatic discovery is unavailable. With MSFS closed, choose **Install / Update Toolbar** and confirm. Existing AeroScience packages are backed up outside Community; unrelated add-ons are preserved. A complete alpha includes a genuine ready-built package. A developer preview may not include one and will report that clearly.
-5. Start MSFS, load a cockpit and open AeroScience from the simulator toolbar. Require connected status, the loaded aircraft and fresh flight values before recording. Mach uses the simulator's value; missing Mach shows unavailable.
+1. Download the setup EXE under the release's Assets. The `.sha256` sidecar and `.release.json` record identify the exact tested installer. GitHub's Source code downloads are for developers. A portable ZIP, if present, is secondary.
+2. Run the setup EXE. Review Welcome, version, notices and license, then choose an application folder. The default is `%LOCALAPPDATA%\Programs\AeroScience`, separate from your data. Setup shows installation progress, creates a Start menu shortcut and offers a desktop shortcut. It registers AeroScience in Windows Installed Apps.
+3. The self-contained .NET application, authorized native SimConnect.dll, genuine SDK-built toolbar and signed Microsoft Visual C++ x64 prerequisite are bundled. If the shared prerequisite needs installation, Windows may ask for administrator approval. No SDK, Python, PowerShell, terminal, manually copied DLL or server startup is required. An installation error stops setup; do not replace SDK files yourself.
+4. Leave **Launch AeroScience and finish first-run setup** selected at Finish. You can also open **Start → AeroScience** later. No extraction or search for AeroScience.exe is needed.
 
-For a native Visual C++ dependency error, open **Settings → Microsoft Visual C++ prerequisite…**, use Microsoft’s official page to download/run the x64 redistributable, then restart AeroScience. This is a graphical runtime prerequisite, not a developer tool.
+The setup EXE currently has no project Authenticode signing certificate configured; its release checksum identifies the tested bytes. The bundled Microsoft prerequisite is separately signature-checked. Any future installer signing must happen before recording its test hash.
 
-The developer preview does not bundle a proprietary SimConnect runtime. Its graphical official-runtime import is for personal testing using an official existing installation. The complete alpha will bundle the authorized, validated native runtime and document any supported graphical prerequisites; testers must not be directed to build tools or manual DLL-copy commands.
+## Guided first-run setup
 
-## Record a flight
+The four-step AeroScience wizard opens automatically until completed:
 
-Choose Universal or Realistic, enter a mission name and start from the toolbar or dashboard. Universal is the default; advanced Realistic instrument features are not implemented. Both record live MSFS telemetry. Generated demo data is removed.
+- **Welcome:** explains local operation and preservation of existing settings.
+- **Storage:** choose the Mission Database folder (the file is `missions.db`) and independently choose the Scientific Data Library folder, with native Browse buttons, default suggestions and available drive capacity. Defaults are `%LOCALAPPDATA%\AeroScience\missions.db` and `%LOCALAPPDATA%\AeroScience\ScienceLibrary`. Separate internal/external drives are supported; network/junction storage is not supported in this alpha. Future scientific datasets may be very large; no instrument-specific size forecasts are invented.
+- **Toolbar:** review the Community folder discovered from MSFS 2024 Steam/Microsoft Store configuration, including custom packages paths. Browse if necessary. Approve Install / Update or select **Skip for Now**. Close MSFS before allowing Community changes. Previous AeroScience files are backed up outside Community; unrelated add-ons are retained. Known duplicate copies block installation with an explanation.
+- **Review:** **Finish Setup** confirms the selected operations. Changed storage uses the existing verified SQLite backup/library migration services, keeps originals and never overwrites a nonempty destination. To open another existing archive/library, use Settings → Storage and explicitly confirm that switch. Setup does not silently adopt or merge it.
 
-Leave AeroScience running while recording. Closing a browser/toolbar does not stop the mission. End from either display, then open Mission History. **Export complete mission (JSON)** downloads all recorded samples, metadata, timestamps, mode, events, source labels and dataset references without changing the saved mission.
+Existing locations are preselected, including v0.1.0 history. Cancelling the wizard does not silently finish with other choices. Once setup finishes, local services start and the browser dashboard opens automatically. The main window and dashboard show waiting/connected status; synthetic flight data is not substituted.
 
-The rate display separates configured target, sample cadence and mission-wide average. Paused/unavailable data is not replaced with invented samples. An interrupted mission retains committed data. Exiting the app while recording asks for confirmation.
+Settings → General & Toolbar → **Run guided setup…** revisits onboarding. Settings → Storage retains independent Browse, Open Folder, Restore Default, capacity and safe migration controls. End recording before migration. If an external data drive is unavailable, reconnect it or explicitly choose a verified store; the app does not create a replacement archive. An available mission archive remains independent of an unavailable Science Library.
 
-## Open history offline
+## Record and review
 
-Launch AeroScience.exe with MSFS closed, including with no internet connection. Open Mission History, its details and exports normally. Live telemetry remains waiting/unavailable, and the app reconnects when MSFS starts. There is no account, mandatory cloud service or internet dependency for the archive.
+Start MSFS 2024 and load an aircraft. After fresh live telemetry appears, choose Universal or Realistic, name and start a mission, then end it and open Mission History. Both modes currently record identically; instrument-specific Realistic features are future work. Mach is the simulator-provided value; unavailable historical Mach remains empty.
 
-## Storage
+Leave AeroScience running while recording. Closing a browser or toolbar does not stop recording. Mission History, details and **Export complete mission (JSON)** remain available with MSFS closed and the PC offline. Exports retain metadata, timestamps, mode, source and every saved telemetry sample. No account or cloud service is required.
 
-Under **Settings → Storage**, Mission Database and Scientific Data Library have independent paths, Browse/Change, Open Folder, Restore Default, usage and free-space displays. They may be on different internal/external drives.
+For optional iPad use, enable private-LAN access in Settings and choose the PC's private IPv4 address. Pair from the address/code displayed in the PC dashboard Settings. Local-only operation requires no firewall change. Physical iPad and VR results must be reported separately.
 
-Defaults are `%LOCALAPPDATA%\AeroScience` and its `ScienceLibrary` subfolder. The preferences file stays in the fixed local AeroScience directory. Existing v0.1.0 missions, Universal/Realistic modes and historical simulated source labels are retained.
+## Update and uninstall
 
-End recording before changing either location. Confirm copying/switching in the dialog. Services stop, the SQLite backup or library copy is verified, settings switch only after verification, and originals remain intact. No automatic merge/overwrite/cleanup occurs. If a destination already contains a store, explicitly open that existing store or choose another empty folder. Restoring Default can select an older retained copy; the dialog explains the choice and does not merge newer records.
+End recording and exit AeroScience, then run the next version's setup EXE. The stable installer identity reuses the installation folder and shortcuts; existing data locations/settings remain selected. Data lives outside replaceable application files. If the toolbar needs updating, use Settings with MSFS closed. There is no automatic updater in this alpha.
 
-Unavailable external storage produces an error rather than a fresh empty archive. Reconnect it or explicitly select an existing verified store. An unavailable Science Library does not erase the independently available mission archive. Unverified network/junction storage is unsupported. Do not select the application installation folder for data.
+To uninstall, close AeroScience and use **Windows Settings → Apps → Installed apps → AeroScience → Uninstall**. Application files and shortcuts are removed. Mission history, science files, settings and migration backups are retained by default. A separate **Yes/No** prompt asks about the Community toolbar; **No** keeps it. **Yes** moves only the recognized AeroScience package to a backup outside Community. MSFS must be closed. If removal fails or MSFS is running, the toolbar remains and a message explains it; reinstall AeroScience to manage it through Settings later. Other add-ons and the shared Visual C++ runtime remain installed.
 
-Schema upgrades create verified backups in the mission folder's `Backups` directory. Use the original backup for rolling back to v0.1.0; its old executable refuses schema 3. Details and interruption recovery are in [the alpha guide](docs/alpha-testing.md).
+Reinstalling the app reuses retained settings and available archives. Deleting user data is not an uninstall option in this alpha.
 
-## Optional iPad access
-
-In Settings, enable private-LAN access, choose the PC's private IPv4 address and Apply with no recording active. Allow the app on the Windows **Private** profile only if needed. Local-only use needs no firewall changes.
-
-On the PC dashboard, Settings shows the LAN address and pairing code. Open that address in iPad Safari and enter the code. Codes change on app restart and sessions expire. A remote display cannot retrieve the pairing code. Use only a trusted private LAN; do not forward the service through a router. Physical iPad acceptance is pending.
-
-## Feedback, updating and removing the app
-
-Use **Collect Feedback** in the app, add optional notes and choose a ZIP location. Review it before sharing, then report the issue and reproduction steps at [GitHub Issues](https://github.com/JustSeanC/AeroScience/issues). The collection is local and excludes mission databases, SDK DLLs and pairing secrets by default.
-
-To update, end recording, exit AeroScience and extract the new app to a new folder. Preserve the selected data folders and fixed local settings. Use the graphical toolbar update with MSFS closed. No automatic updater is required.
-
-To remove the app, exit it and remove its application folder and own Community package. Keep mission/science folders, verified backups and `%LOCALAPPDATA%\AeroScience` unless you explicitly choose to delete your data. The app never deletes missions/scientific products to reclaim space.
+For problems, use **Collect Feedback**, save and review the local ZIP, and report the error/reproduction steps at [GitHub Issues](https://github.com/JustSeanC/AeroScience/issues). Installer logs are `Setup Log ... .txt` in `%TEMP%`; review paths/private details before sharing. Do not attach mission databases or authorization correspondence by default.

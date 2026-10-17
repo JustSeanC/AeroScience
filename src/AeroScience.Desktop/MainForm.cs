@@ -23,10 +23,10 @@ public sealed class MainForm : Form, IDesktopActions
     public StorageStatus MissionStorage => Storage.Status(StorageKind.Missions);
     public StorageStatus ScienceStorage => Storage.Status(StorageKind.ScienceLibrary);
 
-    public MainForm(string configurationDirectory)
+    public MainForm(string configurationDirectory, bool showSetup = false)
     {
         Preferences = new(configurationDirectory); Storage = new(Preferences);
-        Text = "AeroScience 0.1.1-alpha"; MinimumSize = new(560, 290); Size = new(760, 350);
+        Text = "AeroScience " + Application.ProductVersion.Split('+')[0]; MinimumSize = new(560, 290); Size = new(760, 350);
         AutoScaleMode = AutoScaleMode.Dpi;
         var panel = new FlowLayoutPanel { Dock = DockStyle.Fill, Padding = new(24), FlowDirection = FlowDirection.TopDown, WrapContents = false, AutoScroll = true };
         panel.Controls.Add(new Label { Text = "AeroScience · Live Flight Recording Alpha", AutoSize = true, Font = new(Font.FontFamily, 16) });
@@ -41,10 +41,13 @@ public sealed class MainForm : Form, IDesktopActions
         {
             try
             {
-                var firstRun = !Preferences.Load().Initialized;
                 var recovery = Storage.RecoverInterrupted();
                 if (recovery is not null) MessageBox.Show(this, recovery, "Storage recovery");
-                if (firstRun) MessageBox.Show(this, StorageManager.LargeDataWarning, "Scientific Data Library");
+                if (showSetup || !Preferences.Load().SetupCompleted)
+                {
+                    using var wizard = new SetupWizardForm(this);
+                    if (wizard.ShowDialog(this) != DialogResult.OK) { Close(); return; }
+                }
                 Storage.Initialize(); await StartEngineAsync(); OpenDashboard();
             }
             catch (Exception error) { ShowError(error); }
@@ -68,7 +71,15 @@ public sealed class MainForm : Form, IDesktopActions
     public async Task StartEngineAsync()
     {
         if (engine is not null) return;
-        var preferences = Storage.Initialize();
+        var preferences = Preferences.Load();
+        foreach (var path in new[] { preferences.MissionDirectory, preferences.ScienceLibraryDirectory })
+            SetupCoordinator.ValidateDataLocation(path, AppContext.BaseDirectory, requireAvailable: false);
+        preferences = Storage.Initialize();
+        using (var key = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(@"Software\AeroScience"))
+        {
+            key.SetValue("MissionDirectory", preferences.MissionDirectory);
+            key.SetValue("ScienceLibraryDirectory", preferences.ScienceLibraryDirectory);
+        }
         var args = new[] {
             "--AeroScience:Telemetry=SimConnect",
             "--AeroScience:DataDirectory=" + preferences.MissionDirectory,
@@ -128,6 +139,12 @@ public sealed class MainForm : Form, IDesktopActions
             using var form = new SettingsForm(this, storage); form.ShowDialog(this);
         }
         catch (Exception error) { ShowError(error); }
+    }
+    public void ShowSetup(IWin32Window? owner = null)
+    {
+        if (Busy || Recording) { MessageBox.Show(this, "End recording and wait for current operations before running setup."); return; }
+        using var wizard = new SetupWizardForm(this);
+        if (wizard.ShowDialog(owner ?? this) == DialogResult.OK) OpenDashboard();
     }
     private void Dispatch(Action action)
     { if (!IsDisposed) BeginInvoke(action); }

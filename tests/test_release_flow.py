@@ -170,20 +170,24 @@ class ReleaseFlowTests(unittest.TestCase):
 
     @unittest.skipUnless(shutil.which('pwsh'), 'PowerShell needed for local finalizer check')
     def test_local_finalizer_needs_no_runner_token_or_upload(self):
-        commit, digest = self.prepare(); self.accept(commit, digest)
+        import installer_fixtures
+        candidate = installer_fixtures.candidate(self)
         output = self.root/'local release output'
         result = subprocess.run([shutil.which('pwsh'), '-NoProfile', '-File', str(p.REPO/'scripts/release/New-Release.ps1'),
-            '-AcceptanceRecord', str(self.acceptance), '-CandidateFolder', str(self.candidate), '-OutputDirectory', str(output)],
+            '-AcceptanceRecord', str(self.acceptance), '-CandidateFolder', str(candidate), '-OutputDirectory', str(output)],
             cwd=p.REPO, text=True, capture_output=True, timeout=60)
         self.assertEqual(result.returncode, 0, result.stdout+result.stderr)
         self.assertTrue((output/p.identity()['asset_name']).is_file())
         self.assertTrue((output/(p.identity()['asset_name']+'.sha256')).is_file())
+        self.assertTrue((output/p.identity()['setup_name']).is_file())
         self.assertIn(COMMIT, (output/'RELEASE-NOTES.md').read_text(encoding='utf-8'))
 
     @unittest.skipUnless(shutil.which('pwsh'), 'PowerShell needed for optional publisher control-flow fixture')
     def test_optional_publisher_rerun_does_not_duplicate_or_replace_assets(self):
-        commit, digest = self.prepare(); self.accept(commit, digest)
-        p.finalize_candidate(self.candidate, self.acceptance, self.final)
+        import installer_fixtures
+        candidate = installer_fixtures.candidate(self)
+        installer_fixtures.installer.finalize(candidate, self.acceptance, self.root/'published release')
+        self.final = self.root/'published release'/p.identity()['asset_name']
         harness = self.root/'publish-test.ps1'
         harness.write_text(r'''
 param($Publisher, $Archive, $PythonExecutable, $Revision)
@@ -218,12 +222,12 @@ function global:gh {
 }
 function global:Invoke-WebRequest {
     param($Uri,$OutFile,$TimeoutSec)
-    $source = if ($Uri.EndsWith('.sha256')) { "$Archive.sha256" } else { $Archive }
+    $source = Join-Path ([IO.Path]::GetDirectoryName($Archive)) ([Uri]$Uri).Segments[-1]
     Copy-Item -LiteralPath $source -Destination $OutFile
 }
 & $Publisher -Archive $Archive
 & $Publisher -Archive $Archive
-if ($global:mock.creates -ne 1 -or $global:mock.uploads -ne 2 -or $global:mock.updates -ne 1) { throw 'Rerun duplicated/replaced a release or asset.' }
+if ($global:mock.creates -ne 1 -or $global:mock.uploads -ne 3 -or $global:mock.updates -ne 1) { throw 'Rerun duplicated/replaced a release or asset.' }
 $global:mock.tagSha='b'*40
 try { & $Publisher -Archive $Archive; throw 'Wrong tag was accepted' }
 catch { if ($_.Exception.Message -notlike '*different source revision*') { throw } }
@@ -231,7 +235,7 @@ $global:mock.tagSha=$Revision
 $global:mock.release.assets[0].digest='sha256:'+('0'*64)
 try { & $Publisher -Archive $Archive; throw 'Conflicting asset was accepted' }
 catch { if ($_.Exception.Message -notlike '*Existing asset differs*') { throw } }
-if ($global:mock.creates -ne 1 -or $global:mock.uploads -ne 2) { throw 'Conflict changed release assets' }
+if ($global:mock.creates -ne 1 -or $global:mock.uploads -ne 3) { throw 'Conflict changed release assets' }
 ''')
         result = subprocess.run([shutil.which('pwsh'), '-NoProfile', '-File', str(harness),
             str(p.REPO/'scripts/release/Publish-Release.ps1'), str(self.final), sys.executable, COMMIT],

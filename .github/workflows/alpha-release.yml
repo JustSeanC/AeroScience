@@ -23,11 +23,14 @@ on:
         description: Specific redistribution permission has been established for the included native DLL
         type: boolean
         default: false
+      inno_compiler:
+        description: Optional full ISCC.exe path (Inno Setup 6.3 or newer on the preparation machine)
+        required: false
       candidate_run_id:
         description: Earlier successful prepare-candidate workflow run ID (publishing only)
         required: false
       acceptance_json:
-        description: Completed acceptance JSON for the exact extracted candidate payload (publishing only)
+        description: Completed acceptance JSON bound to the exact setup EXE and payload (publishing only)
         required: false
 permissions:
   contents: read
@@ -44,6 +47,7 @@ jobs:
       RUNTIME_APPROVAL: ${{ inputs.runtime_approval_record }}
       PERMISSION_CONFIRMED: ${{ inputs.redistribution_confirmed }}
       REQUESTED_COMMIT: ${{ inputs.source_commit }}
+      INNO_COMPILER: ${{ inputs.inno_compiler }}
     steps:
       - name: Keep candidate provenance tied to this manually dispatched revision
         shell: pwsh
@@ -63,13 +67,13 @@ jobs:
         shell: pwsh
         run: |
           if ($env:PERMISSION_CONFIRMED -ne 'true') { throw 'Specific runtime permission is unconfirmed.' }
-          ./scripts/release/Build-ReleaseCandidate.ps1 -SdkRoot $env:SDK_ROOT -RuntimePath $env:SDK_RUNTIME -RuntimeApprovalRecord $env:RUNTIME_APPROVAL -RuntimeRedistributionConfirmed
+          ./scripts/release/Build-ReleaseCandidate.ps1 -SdkRoot $env:SDK_ROOT -RuntimePath $env:SDK_RUNTIME -RuntimeApprovalRecord $env:RUNTIME_APPROVAL -RuntimeRedistributionConfirmed -InnoCompiler $env:INNO_COMPILER
           $commit = (git rev-parse HEAD).Trim()
           "source_commit=$commit" >> $env:GITHUB_OUTPUT
       - uses: actions/upload-artifact@v4
         with:
           name: AeroScience-candidate-${{ steps.candidate.outputs.source_commit }}
-          path: artifacts/release-candidate/
+          path: artifacts/installer-candidate/
           if-no-files-found: error
           retention-days: 14
   publish:
@@ -107,7 +111,7 @@ jobs:
           name: AeroScience-candidate-${{ inputs.source_commit }}
           run-id: ${{ inputs.candidate_run_id }}
           github-token: ${{ github.token }}
-          path: artifacts/release-candidate/
+          path: artifacts/installer-candidate/
       - name: Finalize the tested bytes without rebuilding and publish to this repository
         shell: pwsh
         run: |

@@ -1,62 +1,27 @@
-# Public release process
+# Release installation and provenance
 
-**For the first alpha, use [the Windows gaming-PC build and manual GitHub upload guide](public-release-windows.md). No self-hosted runner is required.** Ordinary testers download one complete Windows ZIP from Releases, extract it and open AeroScience.exe.
+The primary asset is **AeroScience-Setup-v0.1.1-alpha.exe**. Follow the [Windows build/test/manual publication guide](public-release-windows.md). No self-hosted runner is required for the first public prerelease. The portable ZIP is optional and secondary.
 
-The user has approved public prerelease distribution in `JustSeanC/AeroScience`. It is no longer restricted to a private destination. No full release has yet been published: the exact approved DLL’s hash/loading and new Windows SDK/GUI/live smoke checks remain outstanding. The maintainer has confirmed redistribution authorization with no additional conditions; original correspondence remains private. See [runtime-distribution.md](runtime-distribution.md).
+## Pipeline
 
-## Prepare, test, finalize, publish
+1. `Build-ReleaseCandidate.ps1` performs the existing locked application/helper/recovery tests, Windows publish, official installed-header ABI checks, genuine SDK compilation/validation, native runtime loading/export checks and private-safe public permission attestation validation.
+2. `Build-Installer.ps1` stages that validated app/toolbar/runtime payload, verifies the full Microsoft Visual C++ x64 prerequisite's signature and identity, invokes an installed official Inno Setup 6.3+ compiler and records hashes of the EXE, payload files, compiler, recipe and prerequisite. No SPB or SDK manifest is synthesized.
+3. Test the exact setup EXE on Windows. `installer-candidate/ACCEPTANCE.json` binds source, payload, setup SHA-256 and build-receipt SHA-256. Eleven minimum checks include fresh install, wizard, upgrade and uninstall preservation. Prior ZIP/simulator evidence cannot count for changed installer bytes.
+4. `New-Release.ps1` calls `installer_release.py finalize`. It validates actual acceptance and copies the identical EXE to the final output; it does not recompile, sign or alter it. It writes `.exe.sha256`, `.release.json`, generated notes and an internally verified optional portable ZIP. An unchanged EXE is essential because its tested hash is the release identity.
+5. Manually tag the tested commit, upload the final EXE/checksum/public evidence on GitHub Releases, mark prerelease and verify signed-out downloads. Optional CLI automation applies identical validation and refuses conflicting tags/assets. Original private correspondence and personal archives/logs are excluded.
 
-1. Use a clean Git checkout and the existing official Windows SDK. `Build-ReleaseCandidate.ps1` builds/tests the app, compiles the installed-header ABI contract, runs Microsoft's package builder and structural checks, validates the approved runtime's actual Windows loading/exports, and prepares a complete **CANDIDATE** ZIP plus checksum.
-2. Extract and test that candidate on the real gaming PC. Its generated `ACCEPTANCE.json` includes version, exact source commit and payload fingerprint. Record genuine passes for the seven minimum checks. Optional extended checks may remain pending for the prerelease and are disclosed; stable releases require extended acceptance.
-3. `New-Release.ps1` finalizes without recompiling. It validates unchanged operational bytes, SDK receipts/source, runtime approval/loading and acceptance, then verifies final ZIP extraction/CRC/SHA-256. It generates concise notes for the exact tested revision. Original candidates, existing ZIPs and checksums are not overwritten.
-4. Use the GitHub Releases website to create **v0.1.1-alpha** at that exact tested commit, mark it **Prerelease**, and upload the final ZIP/checksum. No CLI publication, Actions artifact access or special token is needed by this manual route. Verify downloads signed out before sharing the link.
+The `.release.json` contains the compiler receipt and recorded acceptance. The installer embeds operational files and public runtime/SDK evidence; it does not embed a pending candidate marker or fake a final acceptance result before testing. Final portable archives include the real completed acceptance. The internal ZIP is retained for final payload/SDK/runtime revalidation even if it is not uploaded.
 
-For a checkout at `C:\Dev\AeroScience-release`, final assets are:
+## Installed behavior
 
-```text
-C:\Dev\AeroScience-release\artifacts\AeroScience-v0.1.1-alpha-win-x64.zip
-C:\Dev\AeroScience-release\artifacts\AeroScience-v0.1.1-alpha-win-x64.zip.sha256
-C:\Dev\AeroScience-release\artifacts\RELEASE-NOTES.md
-```
+Inno uses a fixed AppId for future in-place updates, per-user installation, Start/optional desktop shortcuts, Installed Apps registration, a normal uninstaller and a shared desktop mutex to require the app be closed. The default application directory is `%LOCALAPPDATA%\Programs\AeroScience`; the default data/configuration directory remains `%LOCALAPPDATA%\AeroScience`. Setup does not reset settings or create/delete mission records.
 
-The complete ZIP contains one folder:
+The graphical four-step app wizard handles storage and Community integration through the same verified services as Settings. Existing paths are preselected. Location changes are explicit verified copies with retained originals. Community discovery reads 2024 Steam/Store configuration and custom packages roots; confirmation/Browse/Skip remain available. MSFS-running checks, SDK hashes, duplicate detection and safe package backups apply to installation and updates. Uninstall separately asks about removing only AeroScience from Community; files move to a backup rather than deleting unrelated add-ons. User databases, libraries, configuration and shared Visual C++ dependencies remain.
 
-```text
-AeroScience-v0.1.1-alpha-win-x64/
-  AeroScience.exe
-  application DLLs and self-contained .NET/Windows Forms/ASP.NET runtime assets
-  SimConnect.dll                       # Specific permission and validated official native file required
-  wwwroot/                             # Complete dashboard
-  Toolbar/aeroscience-toolbar/          # Genuine SDK-built Community package
-  Toolbar/sdk-build.json
-  Dependencies/runtime-check.json       # Sanitized actual Windows loading/export report
-  Dependencies/runtime-approval.json    # Public summary/conditions/hash; original correspondence stays private
-  build-info.json, DEFAULTS.json, ACCEPTANCE.json
-  README.md, INSTALL.md, CHANGELOG.md, LICENSE, THIRD-PARTY-NOTICES.md
-  docs/alpha-testing.md, docs/runtime-distribution.md
-```
+## Acceptance and limits
 
-`DEFAULTS.json` documents built-in defaults; settings are managed graphically, not by editing it. No personal settings/database/logs/credentials, source trees, PDBs, developer scripts or test executables are included. Storage remains outside the install folder and existing missions are retained. Candidate/final checks compare every operational file; acceptance/status documents alone may change after testing.
+The minimum alpha checks are Windows app/dashboard startup, offline archive/export, toolbar install/load, fresh live SimConnect, completed/restarted mission history, dependencies, installed payload integrity, installer installation, setup wizard, upgrade preservation and uninstall preservation. Extended live recovery, migration edge cases, Mach/cadence/aircraft, iPad and VR may remain explicitly pending for the alpha; stable gates retain extended checks.
 
-## Minimum versus extended acceptance
+Windows hosted CI can compile the recipe using unmistakable structural fixtures without the proprietary SDK/runtime. Such compilation is not installer execution, authentic SDK output, licensing evidence, Windows acceptance or a distributable release. This Linux cloud can cross-publish Windows source but cannot execute the Windows installer or MSFS.
 
-Prereleases require `windows_companion`, `offline_archive_export`, `toolbar_install_load`, `simconnect_live`, `live_mission_smoke`, `runtime_dependencies` and `release_contents` with real evidence. SDK/ABI provenance, version/layout validation, clean matching source, specific runtime permission and actual runtime loading/exports remain mandatory regardless of release tier.
-
-Stable releases additionally require recovery, storage migration, live Mach, toolbar synchronization, VR performance and iPad checks. Alpha notes disclose extended checks left pending. Never relabel portable fixtures/cross-compilation or an old v0.1.0 screenshot as a new hardware pass. The example record deliberately cannot pass.
-
-## Optional future GitHub Actions flow
-
-`.github/workflows/alpha-release.yml` is manual and optional:
-
-- **prepare-candidate:** on an existing trusted Windows x64 SDK runner labeled `msfs2024-sdk`, build the official candidate with documented runtime permission. Upload it as a candidate Actions artifact for maintainer testing. It does not publish a release or mark hardware acceptance passed.
-- **publish-tested-candidate:** provide the earlier candidate's exact source commit, run ID and completed genuine acceptance JSON. A GitHub-hosted Windows runner downloads that same candidate, finalizes without rebuilding, and publishes to this repository. No SDK runner is required for this publication stage. The standard `github.token` has `contents: write` and `actions: read` only in this job; no private repository/token is needed.
-
-A maintainer must test a downloaded candidate before its publication stage; rebuilding and reusing stale evidence is refused by the fingerprint. The publisher checks public repository identity and tag target, starts with a draft, refuses conflicting assets, resumes matching drafts and verifies unauthenticated public downloads. Reruns do not replace published assets. A later fix uses a new version/tag so historical releases remain intact. The optional publisher is covered by mocked control-flow tests, not a claimed live GitHub publication.
-
-No runner is configured during this task, and there is no requirement to register one before the first manual release. Public push/PR CI still runs checks without publishing binaries.
-
-## Future versions and local previews
-
-Version metadata, tag, platform ZIP name and prerelease status derive from `Directory.Build.props`; update the numeric toolbar package version too. App/toolbar source and receipt versions must match. Update changelog/test evidence for the new version. Stable versions have no suffix; alpha/beta/RC versions remain prereleases. Do not move an already published tag or overwrite a historical ZIP. No automatic updater is introduced.
-
-`Build-Companion.ps1` can still produce a companion-only preview. The preview packager rejects the proprietary runtime and clearly labels its ZIP as Preview; it lacks the full toolbar/runtime and cannot be uploaded as the requested complete alpha. Linux cross-builds validate source/build capability, not Windows installation or simulator acceptance.
+Inno Setup and Microsoft runtime licenses remain applicable; see [third-party notices](../THIRD-PARTY-NOTICES.md). The approved SimConnect attestation remains hash-bound and original correspondence stays private. No project signing certificate is configured. Any future signing must precede receipts and acceptance. Versions, setup filenames, source tags and prerelease status derive from `Directory.Build.props`; the numeric SDK package version must match. Never move a published tag or overwrite an existing release.

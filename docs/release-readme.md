@@ -1,17 +1,17 @@
 # AeroScience — Live Flight Recording Alpha
 
-AeroScience is an MSFS 2024 airborne science simulation and flight research recording application. This early alpha provides live aircraft telemetry, Mach, Universal/Realistic mission modes, recording/history, offline archive access, JSON export, a browser dashboard and an MSFS toolbar. Scientific instruments, mapping and research mission planning are planned for later versions.
+Recommended installation: run **AeroScience-Setup-v0.1.1-alpha.exe** from GitHub Releases. Follow the Windows installer, then AeroScience's guided storage and MSFS toolbar setup. Open **Start → AeroScience** whenever you want live recording or your offline archive. No extraction, terminal, PowerShell, manually started server, SDK or manually copied DLL is required.
 
-1. Extract the entire Windows ZIP to a new writable folder.
-2. Double-click **AeroScience.exe**. Its dashboard opens automatically.
-3. With MSFS closed, open **Settings → General & Toolbar**, select the simulator's Community folder and choose **Install / Update Toolbar**.
-4. Start MSFS, load a flight and open AeroScience from the simulator toolbar.
-5. When fresh live aircraft data appears, name and start a mission. End it and inspect Mission History.
+The installer includes the self-contained companion, authorized native SimConnect runtime, genuine SDK-built toolbar and Microsoft Visual C++ x64 prerequisite. Windows may request administrator approval for that shared prerequisite. Choose the application path, Start/optional desktop shortcuts and launch-at-finish normally.
 
-No SDK, developer tools, PowerShell, separate toolbar download, manual DLL copying or manually started server is required by the completed distribution. If Windows reports a missing Visual C++ dependency, use the **Microsoft Visual C++ prerequisite…** button in Settings, install Microsoft's x64 redistributable and restart the app. See INSTALL.md.
+First-run setup independently offers Mission Database and Science Library folders, drive capacity and a large-data notice. It preserves existing locations and uses verified migrations for explicitly changed paths. Review the detected MSFS 2024 Community folder or Browse, then approve installation with MSFS closed, or Skip for Now. Settings can revisit both storage and toolbar setup.
 
-History works without MSFS or internet while its selected data folder is available. Settings → Storage independently controls the Mission Database and Scientific Data Library. Existing data remains outside this application folder. End recording before migrating storage; verified copies retain originals. Do not delete your data folders when updating the app.
+Start MSFS and load a cockpit. Once fresh actual aircraft data appears, name/start a mission, end it and inspect Mission History. The app includes Mach, Universal/Realistic modes, live recording, offline history/details and complete JSON exports. Advanced instruments, scientific observations, mapping and research planning are future work. Both modes currently record identically.
 
-This is an early alpha. See ACCEPTANCE.json and the release page for the exact tested build and remaining device/aircraft limitations. Both mission modes currently record identically; Realistic instrument limits are future work. The Science Library contains storage structure, not generated science products.
+Updates preserve settings and data outside the application folder. Windows Installed Apps provides the uninstaller; user data remains. It separately asks about removing AeroScience's toolbar and preserves unrelated add-ons. Reinstalling reuses retained archives. See INSTALL.md for details.
 
-For problems, choose **Collect Feedback**, add reproduction steps, save the ZIP and review it before sharing. Report issues at https://github.com/JustSeanC/AeroScience/issues. Do not share private observations or mission databases unless you intend to.
+If using the optional portable ZIP, extract all files together and open AeroScience.exe. It shares the same first-run wizard and selected data; exit any installed/other companion instance first. It does not register shortcuts/uninstall itself.
+
+Release-page evidence and `.release.json` identify the exact tested installer and remaining aircraft/device limitations. A build/compile does not establish Windows or simulator acceptance. No scientific data products are generated as placeholders.
+
+Use **Collect Feedback**, save/review the local ZIP and report reproduction steps at https://github.com/JustSeanC/AeroScience/issues. Mission databases and original authorization correspondence do not belong in routine feedback.

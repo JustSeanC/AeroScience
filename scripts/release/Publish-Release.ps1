@@ -1,7 +1,7 @@
 #Requires -Version 7.0
 # Optional automation. The first alpha can be uploaded entirely through GitHub's web UI.
 [CmdletBinding()]
-param([string]$Archive, [string]$Repository = 'JustSeanC/AeroScience')
+param([string]$Archive, [string]$Setup, [switch]$IncludePortableArchive, [string]$Repository = 'JustSeanC/AeroScience')
 $ErrorActionPreference = 'Stop'
 $repo = (Resolve-Path "$PSScriptRoot/../..").Path
 if ($Repository -ne 'JustSeanC/AeroScience') { throw 'This workflow publishes to the existing AeroScience repository only.' }
@@ -25,9 +25,15 @@ try {
         $Archive = Join-Path $repo ('artifacts/' + ($metaJson | ConvertFrom-Json).asset_name)
     }
     $Archive = (Resolve-Path -LiteralPath $Archive).Path
+    $metaJson = python scripts/release/package_release.py metadata
+    if ($LASTEXITCODE -ne 0) { throw 'Invalid version metadata.' }
+    $meta = $metaJson | ConvertFrom-Json
+    if (-not $Setup) { $Setup = Join-Path ([IO.Path]::GetDirectoryName($Archive)) $meta.setup_name }
+    $Setup = (Resolve-Path -LiteralPath $Setup).Path
+    $record = Join-Path ([IO.Path]::GetDirectoryName($Setup)) $meta.setup_record_name
     $notes = Join-Path $temporary 'release-notes.md'
     $commit = (git rev-parse HEAD).Trim()
-    $infoJson = python scripts/release/package_release.py verify-release --archive $Archive --checksum "$Archive.sha256" --notes-output $notes --expected-commit $commit
+    $infoJson = python scripts/release/installer_release.py verify --archive $Archive --setup $Setup --record $record --notes-output $notes --expected-commit $commit
     if ($LASTEXITCODE -ne 0) { throw 'Final archive verification failed; publication stopped.' }
     $info = $infoJson | ConvertFrom-Json
     $remote = Invoke-GitHub @('api', "repos/$Repository") | ConvertFrom-Json
@@ -51,7 +57,9 @@ try {
     }
     $release = (Invoke-GitHub @('api', "repos/$Repository/releases/tags/$tag")) | ConvertFrom-Json
     if ($release.prerelease -ne $info.prerelease) { throw 'Existing release has a conflicting stable/prerelease status. It was not changed.' }
-    foreach ($file in @($Archive, "$Archive.sha256")) {
+    $assets = @($Setup, "$Setup.sha256", $record)
+    if ($IncludePortableArchive) { $assets += @($Archive, "$Archive.sha256") }
+    foreach ($file in $assets) {
         $name = [IO.Path]::GetFileName($file)
         $asset = @($release.assets | Where-Object { $_.name -eq $name })
         if ($asset.Count -gt 1) { throw "Duplicate existing release assets: $name" }
@@ -77,7 +85,7 @@ try {
     $confirmed = (Invoke-GitHub @('api', "repos/$Repository/releases/tags/$tag")) | ConvertFrom-Json
     if ($confirmed.draft -or $confirmed.prerelease -ne $info.prerelease) { throw 'GitHub has not confirmed the intended public release status.' }
     # Verify ordinary unauthenticated public downloads; a successful upload alone is insufficient.
-    foreach ($file in @($Archive, "$Archive.sha256")) {
+    foreach ($file in $assets) {
         $name = [IO.Path]::GetFileName($file)
         $public = Join-Path $temporary ('public-' + $name)
         $url = "https://github.com/$Repository/releases/download/$tag/$name"

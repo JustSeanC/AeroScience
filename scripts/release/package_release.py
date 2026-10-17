@@ -17,20 +17,25 @@ REPO = Path(__file__).resolve().parents[2]
 RELEASE_VERSION = ET.parse(REPO/'Directory.Build.props').findtext('.//Version')
 VERSION = RELEASE_VERSION.split('-')[0]
 ALPHA_ACCEPTANCE = ("windows_companion", "offline_archive_export", "toolbar_install_load", "simconnect_live",
-                    "live_mission_smoke", "runtime_dependencies", "release_contents")
+                    "live_mission_smoke", "runtime_dependencies", "release_contents", "installer_install",
+                    "setup_wizard", "upgrade_preservation", "uninstall_preservation")
 EXTENDED_ACCEPTANCE = ("live_recording_recovery", "storage_migration", "mach_live", "toolbar_mission_sync", "vr_performance", "ipad_safari")
 ACCEPTANCE = ALPHA_ACCEPTANCE + EXTENDED_ACCEPTANCE
 RUNTIME_EXPORTS = ("SimConnect_Open", "SimConnect_Close", "SimConnect_CallDispatch", "SimConnect_AddToDataDefinition",
                    "SimConnect_RequestDataOnSimObject", "SimConnect_SubscribeToSystemEvent", "SimConnect_RequestSystemState",
                    "SimConnect_SubscribeToCommBusEvent", "SimConnect_CallCommBusEvent")
 CHECK_HELP = {
-    "windows_companion": "On real supported Windows: extracted AeroScience.exe launches and automatically opens its dashboard, without a terminal/server command.",
+    "windows_companion": "On real supported Windows: installed AeroScience launches from Start and automatically opens its dashboard, without a terminal/server command.",
     "offline_archive_export": "With MSFS closed: the selected local archive and saved mission details/export are accessible; existing history remains intact.",
     "toolbar_install_load": "With MSFS closed: graphical Settings installs the included genuine SDK package; after starting MSFS its toolbar opens.",
     "simconnect_live": "In MSFS: the loaded aircraft and fresh actual SimConnect telemetry appear; no generated data is substituted.",
     "live_mission_smoke": "Start and end a short actual flight mission, inspect its recorded samples and confirm retained history after restarting AeroScience.",
     "runtime_dependencies": "On real Windows: included licensed native runtime loads with required exports; supported graphical Visual C++ prerequisites work without SDK/manual DLL copying.",
-    "release_contents": "Extract the candidate ZIP, test that extracted app, verify checksum and inspect that package/runtime are complete and no personal data is included."
+    "release_contents": "Verify the exact candidate installer checksum and installed files against its receipt; inspect that package/runtime are complete and no personal data is included.",
+    "installer_install": "Run this exact setup EXE on Windows: branding/path/progress, bundled prerequisites, Start shortcut, optional desktop shortcut, Installed Apps registration and launch-at-finish work. Test a clean Windows account/environment without developer tools.",
+    "setup_wizard": "Test graphical first-run storage paths on separate drives, capacity/warning, Community detection/browse/confirmation, MSFS-running guard, toolbar installation and Skip for Now. Settings can revisit both.",
+    "upgrade_preservation": "Install over an existing application. Confirm existing settings, both storage paths, mission IDs/modes/samples and library files survive; requested changes use verified migrations and keep originals.",
+    "uninstall_preservation": "Use Windows Installed Apps to uninstall. Confirm app/shortcuts are removed, data/configuration remain, and keeping or explicitly removing the toolbar works with unrelated add-ons preserved. Reinstall and confirm archive access."
 }
 
 
@@ -46,7 +51,8 @@ def identity(version=RELEASE_VERSION):
     root = f'AeroScience-v{version}-win-x64'
     title = f'AeroScience v{base}' + (' — Live Flight Recording Alpha' if suffix.startswith('alpha') else ' — Prerelease' if suffix else '')
     return dict(version=version, package_version=base, tag='v'+version, root_name=root,
-                asset_name=root+'.zip', candidate_name=root+'-CANDIDATE.zip', prerelease=bool(suffix), title=title)
+                asset_name=root+'.zip', candidate_name=root+'-CANDIDATE.zip', setup_name=f'AeroScience-Setup-v{version}.exe',
+                setup_record_name=f'AeroScience-Setup-v{version}.release.json', prerelease=bool(suffix), title=title)
 
 
 def read_json(path):
@@ -166,7 +172,7 @@ def validate_acceptance(path, version=RELEASE_VERSION, source_commit=None, paylo
     if source_commit is not None:
         require(acceptance['source_commit'] == source_commit, 'Acceptance identifies a different source commit.')
     if payload_sha256 is not None:
-        require(acceptance.get('payload_sha256') == payload_sha256, 'Acceptance does not match the extracted candidate payload; test this exact build.')
+        require(acceptance.get('payload_sha256') == payload_sha256, 'Acceptance does not match the validated candidate payload; test this exact build.')
     required = ALPHA_ACCEPTANCE if identity(version)['prerelease'] else ACCEPTANCE
     for name in required:
         check = acceptance.get("checks", {}).get(name, {})
@@ -269,7 +275,7 @@ def prepare_candidate(companion, community, receipt_path, runtime_report, runtim
             sampling_interval_ms=1000, enable_lan=False, mission_mode='universal', telemetry='SimConnect'), indent=2)+'\n')
         commit, digest = validate_payload(destination)
         (destination/'ACCEPTANCE.json').write_text(json.dumps(acceptance_template(commit, digest), indent=2)+'\n')
-        (destination/'RELEASE-STATUS.txt').write_text('CANDIDATE: minimum real Windows/MSFS acceptance is pending. Do not upload as the public release. Test the extracted ZIP, then finalize without rebuilding.\n')
+        (destination/'RELEASE-STATUS.txt').write_text('INTERMEDIATE PAYLOAD: real installer/Windows/MSFS acceptance is pending. Build the setup EXE, test that exact installer, then finalize without rebuilding.\n')
     except Exception:
         # Retain partial files for diagnosis; no final archive is produced.
         raise
@@ -278,7 +284,7 @@ def prepare_candidate(companion, community, receipt_path, runtime_report, runtim
 
 def write_checksum(output):
     digest = hashlib.sha256(output.read_bytes()).hexdigest()
-    output.with_suffix('.zip.sha256').write_text(digest+'  '+output.name+'\n')
+    output.with_name(output.name+'.sha256').write_text(digest+'  '+output.name+'\n')
     return digest
 
 
@@ -328,11 +334,13 @@ def verify_archive(archive, checksum):
 def release_notes(info):
     optional = info['acceptance'].get('checks', {})
     limits = [name.replace('_', ' ') for name in EXTENDED_ACCEPTANCE if optional.get(name, {}).get('result') != 'passed']
+    installer = info.get('distribution') == 'installer'
+    instructions = ('Run the setup EXE, follow installation, then the guided storage and MSFS toolbar setup. Launch AeroScience from Start; its dashboard opens automatically. Updates preserve existing storage settings. Windows Installed Apps provides an uninstaller that retains mission/science data and asks before removing the toolbar.' if installer else 'Optional portable download: extract all files and double-click AeroScience.exe. The Windows setup EXE is the recommended installation method.')
     return f'''# {info['title']}
 
 AeroScience is an MSFS 2024 airborne science simulation and flight research recording application.
 
-**Download [{info['asset_name']}](https://github.com/JustSeanC/AeroScience/releases/download/{info['tag']}/{info['asset_name']})** under Assets. Extract all files and double-click **AeroScience.exe**. It opens the dashboard automatically. With MSFS closed, open Settings → General & Toolbar → Install / Update Toolbar. Then start MSFS, load a flight and open AeroScience from its toolbar. No developer tools, PowerShell, separate toolbar download or manual DLL copying is required. See INSTALL.md in the ZIP for graphical prerequisite and setup steps.
+**Download [{info['asset_name']}](https://github.com/JustSeanC/AeroScience/releases/download/{info['tag']}/{info['asset_name']})** under Assets. {instructions} Then start MSFS, load a flight and open AeroScience from its toolbar. No developer tools, PowerShell, separate toolbar download or manual DLL copying is required. The installer bundles the self-contained app, authorized native SimConnect runtime, genuine SDK-compiled toolbar and Microsoft Visual C++ prerequisite. A prerequisite installation may request Windows administrator approval. No internet connection is needed by the installed mission archive.
 
 Implemented features include live aircraft telemetry, simulator-provided Mach, Universal/Realistic recording modes, Mission History, offline archive access, JSON mission exports, independent mission-database/science-library storage, a browser dashboard and an MSFS toolbar. Minimum Windows startup, local archive, graphical toolbar installation and short live-recording acceptance were recorded for the exact included payload. Feature availability does not imply every aircraft/device or edge case was tested.
 
@@ -401,7 +409,7 @@ def main():
         prepare_candidate(args.companion, args.community, args.sdk_receipt, args.runtime_report, args.runtime_approval, args.destination)
         zip_tree(args.destination, args.output.resolve()); digest = write_checksum(args.output)
         with zipfile.ZipFile(args.output) as archive: require(archive.testzip() is None, 'Candidate ZIP extraction/CRC verification failed.')
-        print(f'Prepared {args.output}. SHA-256 {digest}. Test the EXTRACTED candidate on Windows, complete its ACCEPTANCE.json, then finalize without rebuilding.'); return
+        print(f'Validated intermediate payload {args.output}. SHA-256 {digest}. Build-Installer.ps1 creates the primary setup EXE and installer-specific acceptance record.'); return
     if args.command == 'release':
         finalize_candidate(args.candidate, args.acceptance, args.output.resolve())
         print(f'Final release ZIP: {args.output}\nSHA-256: {hashlib.sha256(args.output.read_bytes()).hexdigest()}\nVerified exact tested payload. Nothing has been published.'); return

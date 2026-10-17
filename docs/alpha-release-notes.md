@@ -1,11 +1,11 @@
 # AeroScience v0.1.1 — Live Flight Recording Alpha
 
-This is a source template, not a published release claim. Finalization generates `artifacts/RELEASE-NOTES.md` with the exact tested commit, final ZIP checksum and remaining optional checks from the genuine acceptance record. Paste that generated text into the public GitHub prerelease.
+This is a source template. Finalization generates `RELEASE-NOTES.md` with the exact tested setup EXE, commit, SHA-256 and pending extended checks. Paste the generated text into the GitHub prerelease.
 
-AeroScience is an MSFS 2024 airborne science simulation and flight research recording application. Implemented capabilities include live telemetry, Mach, Universal/Realistic mission modes, Mission History, offline archive access, independent mission and science-library storage, a browser dashboard, an MSFS toolbar and complete JSON exports.
+The primary download is **AeroScience-Setup-v0.1.1-alpha.exe**. Run the conventional Windows installer, then follow guided storage/Community setup. Launch from Start; the local dashboard opens automatically. Shortcuts, Windows Installed Apps and uninstall are provided. Existing data and settings remain outside the app directory and survive updates/uninstall. Toolbar removal asks separately and preserves other add-ons. The portable ZIP is optional and secondary.
 
-Testers download **AeroScience-v0.1.1-alpha-win-x64.zip** under Assets, extract all files, open **AeroScience.exe**, and use Settings to install the included toolbar with MSFS closed. No SDK, developer commands or manually copied DLLs are part of tester installation. See INSTALL.md.
+Implemented: actual MSFS telemetry/Mach, Universal/Realistic recording, persistent local/offline mission archive and JSON exports, independent data/library storage and the genuine SDK toolbar. No new scientific instruments, placeholder observations or v0.2.0 features are introduced.
 
-This early alpha does not claim exhaustive Mach/aircraft/storage/device testing. Actual verification is recorded in ACCEPTANCE.json. Advanced scientific instruments, mapping and research mission planning are future work. Both mission modes currently record identically. The Science Library provides storage structure only.
+Publication requires real Windows install/first-run/upgrade/uninstall and the existing minimum runtime/live-flight acceptance for that exact setup hash. Remaining extended tests must stay visible; earlier ZIP evidence cannot validate this changed installer.
 
-Use **Collect Feedback**, save and review the local ZIP, then report problems at https://github.com/JustSeanC/AeroScience/issues. Avoid attaching personal databases or scientific observations unless you intend to share them.
+Use Collect Feedback and review its local ZIP before reporting an issue. Keep personal archives and original authorization correspondence private.

@@ -8,20 +8,19 @@ namespace AeroScience.Engine;
 
 public static class ToolbarInstaller
 {
-    public static IEnumerable<string> DiscoverCommunityFolders()
+    public static IEnumerable<string> DiscoverCommunityFolders(string? roamingDirectory = null, string? localDirectory = null)
     {
-        var roaming = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-        var local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        var roaming = roamingDirectory ?? Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        var local = localDirectory ?? Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
         var configs = new List<string> {
-            Path.Combine(roaming, "Microsoft Flight Simulator 2024", "UserCfg.opt"),
-            Path.Combine(roaming, "Microsoft Flight Simulator", "UserCfg.opt") };
+            Path.Combine(roaming, "Microsoft Flight Simulator 2024", "UserCfg.opt") };
         var packages = Path.Combine(local, "Packages");
         try
         {
             if (Directory.Exists(packages))
             foreach (var directory in Directory.EnumerateDirectories(packages, "Microsoft.*"))
                 if (Path.GetFileName(directory).Contains("Limitless", StringComparison.OrdinalIgnoreCase)
-                    || Path.GetFileName(directory).Contains("FlightSimulator", StringComparison.OrdinalIgnoreCase))
+                    || Path.GetFileName(directory).Contains("FlightSimulator2024", StringComparison.OrdinalIgnoreCase))
                     configs.Add(Path.Combine(directory, "LocalCache", "UserCfg.opt"));
         }
         catch (Exception error) when (error is IOException or UnauthorizedAccessException) { /* Manual browsing remains available. */ }
@@ -34,8 +33,11 @@ public static class ToolbarInstaller
             var match = Regex.Match(contents, "InstalledPackagesPath\\s+\"([^\"]+)\"");
             if (match.Success)
             {
-                var community = Path.Combine(match.Groups[1].Value, "Community");
-                if (Directory.Exists(community)) found.Add(community);
+                foreach (var name in new[] { "Community", "Community2024" })
+                {
+                    var community = Path.Combine(match.Groups[1].Value, name);
+                    if (Directory.Exists(community)) found.Add(community);
+                }
             }
         }
         return found;
@@ -54,7 +56,7 @@ public static class ToolbarInstaller
         catch (Exception e) when (e is IOException or JsonException or KeyNotFoundException or InvalidOperationException) { return "Installed package needs inspection"; }
     }
 
-    public static void Install(string input, string community, Func<bool>? simulatorRunning = null)
+    public static void Install(string input, string community, Func<bool>? simulatorRunning = null, string? previousCommunity = null)
     {
         simulatorRunning ??= SimulatorRunning;
         if (simulatorRunning()) throw new IOException("Close MSFS before installing/updating the toolbar.");
@@ -80,7 +82,22 @@ public static class ToolbarInstaller
         if (binary.Length <= 32 || binary[0] == '<' || binary[0] == '{') throw new IOException("A genuine SDK-compiled registration is required.");
         if (!Directory.Exists(community)) throw new IOException("Select an existing configured Community folder.");
         StorageManager.ValidateLocalPath(Path.GetFullPath(community));
-        foreach (var candidate in DiscoverCommunityFolders().Append(Path.Combine(Path.GetDirectoryName(community)!, "Community2024")))
+        foreach (var directory in Directory.EnumerateDirectories(community))
+        {
+            if (Path.GetFileName(directory).Equals("aeroscience-toolbar", StringComparison.OrdinalIgnoreCase)) continue;
+            var manifestPath = Path.Combine(directory, "manifest.json");
+            if (!File.Exists(manifestPath)) continue;
+            try
+            {
+                using var manifest = JsonDocument.Parse(File.ReadAllText(manifestPath));
+                if (manifest.RootElement.TryGetProperty("title", out var title) && title.ValueKind == JsonValueKind.String
+                    && string.Equals(title.GetString(), "AeroScience", StringComparison.OrdinalIgnoreCase))
+                    throw new InvalidOperationException("A renamed AeroScience toolbar copy exists at " + directory + ". Move it outside Community before installing another copy.");
+            }
+            catch (Exception error) when (error is IOException or UnauthorizedAccessException or JsonException) { /* Unrelated unreadable manifests are not modified. */ }
+        }
+        foreach (var candidate in DiscoverCommunityFolders().Concat(new[] { Path.Combine(Path.GetDirectoryName(community)!, "Community2024"), Path.Combine(Path.GetDirectoryName(community)!, "Community") })
+            .Concat(previousCommunity is null ? [] : new[] { previousCommunity }))
             if (!string.Equals(Path.GetFullPath(candidate), Path.GetFullPath(community), StringComparison.OrdinalIgnoreCase)
                 && Directory.Exists(Path.Combine(candidate, "aeroscience-toolbar")))
                 throw new IOException("Another AeroScience toolbar copy exists at " + candidate + ". Remove/move that copy outside Community before installing another.");
@@ -101,8 +118,9 @@ public static class ToolbarInstaller
             if (simulatorRunning()) throw new IOException("MSFS started during setup; close it and try again.");
             if (Directory.Exists(target))
             {
+                StorageManager.ValidateLocalPath(target);
                 using var existing = JsonDocument.Parse(File.ReadAllText(Path.Combine(target, "manifest.json")));
-                if (!(existing.RootElement.GetProperty("title").GetString() ?? "").Contains("AeroScience", StringComparison.OrdinalIgnoreCase))
+                if (!string.Equals(existing.RootElement.GetProperty("title").GetString(), "AeroScience", StringComparison.OrdinalIgnoreCase))
                     throw new IOException("The target folder contains an unrecognized add-on; it was not changed.");
                 Directory.CreateDirectory(Path.GetDirectoryName(backup)!); Directory.Move(target, backup); movedOld = true;
             }
@@ -114,6 +132,26 @@ public static class ToolbarInstaller
             throw;
         }
         finally { if (Directory.Exists(stage)) Directory.Delete(stage, true); }
+    }
+
+    public static string? Remove(string community, bool confirmed, Func<bool>? simulatorRunning = null)
+    {
+        if (!confirmed) throw new InvalidOperationException("Confirm removal of the AeroScience toolbar first.");
+        simulatorRunning ??= SimulatorRunning;
+        if (simulatorRunning()) throw new IOException("Close MSFS before removing the AeroScience toolbar.");
+        StorageManager.ValidateLocalPath(Path.GetFullPath(community));
+        var target = Path.Combine(community, "aeroscience-toolbar");
+        if (!Directory.Exists(target)) return null;
+        StorageManager.ValidateLocalPath(target);
+        _ = ValidatedFiles(target);
+        using var manifest = JsonDocument.Parse(File.ReadAllText(Path.Combine(target, "manifest.json")));
+        if (!string.Equals(manifest.RootElement.GetProperty("title").GetString(), "AeroScience", StringComparison.OrdinalIgnoreCase))
+            throw new IOException("The toolbar folder is not recognized as AeroScience. It was preserved.");
+        var backup = Path.Combine(Path.GetDirectoryName(Path.GetFullPath(community))!, ".aeroscience-backups", "removed-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(Path.GetDirectoryName(backup)!);
+        if (simulatorRunning()) throw new IOException("MSFS started during removal. Close it and try again.");
+        Directory.Move(target, backup);
+        return backup;
     }
 
     private static Dictionary<string, string> ValidatedFiles(string root)

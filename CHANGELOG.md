@@ -1,5 +1,14 @@
 # Changelog
 
+### v0.1.1 installer distribution and guided onboarding
+
+- Made `AeroScience-Setup-v0.1.1-alpha.exe` the primary release asset using Inno Setup. Added per-user installation, branding/version/path/progress, Start and optional desktop shortcuts, Installed Apps/uninstall, launch-at-finish, a stable upgrade identity and a running-app guard.
+- Bundle the self-contained application, authorized native SimConnect runtime, genuine SDK-compiled toolbar and unmodified Microsoft Visual C++ x64 prerequisite. Builds require its valid Microsoft signature/product identity and record compiler, recipe, prerequisite, EXE and payload hashes.
+- Added a graphical four-step first-run wizard for independent database/library locations, Browse controls, free capacity/large-data warning and confirmed Community installation or Skip for Now. Existing paths/settings remain selected; requested changes reuse verified migrations with originals retained and conflicts refused.
+- Restrict Community discovery to MSFS 2024 Steam/Store configurations and custom package roots. Retain SDK/hash/version checks, MSFS-running guards, duplicate detection and safe backups. Uninstall separately asks before moving only the recognized AeroScience package outside Community. User archives, libraries, configuration and unrelated add-ons are retained.
+- Installer acceptance now binds the exact setup EXE and build receipt. Fresh installation, wizard, upgrade and uninstall preservation are mandatory alongside existing minimum live/archive checks. Finalization preserves tested installer bytes, writes its checksum/public evidence and keeps the ZIP secondary. Local Windows build/manual GitHub upload remains available without a runner.
+- Updated installation/release notes, Windows/Sandbox testing and optional Actions publication. No instrument, sensor or v0.2.0 science features were added. Actual new Windows installer compilation/execution and MSFS acceptance remain pending; portable cross-builds and structural fixtures are not hardware verification.
+
 ### Recovery check output path in Windows builds
 
 - Build the recovery test host into an explicit artifacts directory and pass its exact DLL path to the smoke check. Native Tools shells using `Platform=x64` no longer leave the check looking in the default `bin/Release` folder.

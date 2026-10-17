@@ -42,5 +42,63 @@ public sealed class ToolbarInstallTests : IDisposable
         Assert.Throws<IOException>(() => ToolbarInstaller.Install(input, community, () => false));
         Assert.Empty(Directory.GetFileSystemEntries(community));
     }
+
+    [Fact]
+    public void RemovalRequiresConsentClosedSimulatorAndPreservesBackupsAndOtherAddons()
+    {
+        var input = Fixture(); var community = Path.Combine(root, "Packages", "Community"); Directory.CreateDirectory(community);
+        ToolbarInstaller.Install(input, community, () => false);
+        File.WriteAllText(Path.Combine(community, "unrelated.txt"), "preserve");
+        Assert.Throws<InvalidOperationException>(() => ToolbarInstaller.Remove(community, false, () => false));
+        Assert.Throws<IOException>(() => ToolbarInstaller.Remove(community, true, () => true));
+        var backup = ToolbarInstaller.Remove(community, true, () => false);
+        Assert.True(File.Exists(Path.Combine(backup!, "manifest.json")));
+        Assert.False(Directory.Exists(Path.Combine(community, "aeroscience-toolbar")));
+        Assert.Equal("preserve", File.ReadAllText(Path.Combine(community, "unrelated.txt")));
+        Assert.Null(ToolbarInstaller.Remove(community, true, () => false));
+    }
+
+    [Fact]
+    public void DiscoveryReads2024SteamAndStoreCustomPathsWithoutSelecting2020()
+    {
+        var roaming = Path.Combine(root, "roaming"); var local = Path.Combine(root, "local");
+        var steamConfig = Path.Combine(roaming, "Microsoft Flight Simulator 2024");
+        var storeConfig = Path.Combine(local, "Packages", "Microsoft.Limitless_8wekyb3d8bbwe", "LocalCache");
+        var legacyConfig = Path.Combine(roaming, "Microsoft Flight Simulator");
+        foreach (var (config, packages) in new[] { (steamConfig, "Steam custom"), (storeConfig, "Store custom"), (legacyConfig, "Legacy 2020") })
+        {
+            Directory.CreateDirectory(config); var path = Path.Combine(root, packages); Directory.CreateDirectory(Path.Combine(path, "Community"));
+            File.WriteAllText(Path.Combine(config, "UserCfg.opt"), "InstalledPackagesPath \"" + path + "\"");
+        }
+        var discovered = ToolbarInstaller.DiscoverCommunityFolders(roaming, local).ToArray();
+        Assert.Equal(2, discovered.Length); Assert.Contains(Path.Combine(root, "Steam custom", "Community"), discovered);
+        Assert.Contains(Path.Combine(root, "Store custom", "Community"), discovered);
+        Assert.DoesNotContain(Path.Combine(root, "Legacy 2020", "Community"), discovered);
+    }
+
+    [Fact]
+    public void PreviousConfiguredCommunityCopyCannotBeSilentlyDuplicated()
+    {
+        var input = Fixture(); var old = Path.Combine(root, "old", "Community"); var next = Path.Combine(root, "next", "Community");
+        Directory.CreateDirectory(old); Directory.CreateDirectory(next); ToolbarInstaller.Install(input, old, () => false);
+        Assert.Throws<IOException>(() => ToolbarInstaller.Install(input, next, () => false, old));
+        Assert.Empty(Directory.GetFileSystemEntries(next)); Assert.True(File.Exists(Path.Combine(old, "aeroscience-toolbar", "manifest.json")));
+    }
+
+    [Fact]
+    public void RenamedCopiesAndUnrecognizedTargetArePreserved()
+    {
+        var input = Fixture(); var community = Path.Combine(root, "Community"); Directory.CreateDirectory(community);
+        ToolbarInstaller.Install(input, community, () => false);
+        var target = Path.Combine(community, "aeroscience-toolbar"); var renamed = Path.Combine(community, "old-copy");
+        Directory.Move(target, renamed);
+        Assert.Throws<InvalidOperationException>(() => ToolbarInstaller.Install(input, community, () => false));
+        Assert.True(File.Exists(Path.Combine(renamed, "manifest.json"))); Assert.False(Directory.Exists(target));
+        Directory.Move(renamed, target);
+        File.WriteAllText(Path.Combine(target, "manifest.json"), "{\"title\":\"Some other add-on\"}");
+        Assert.Throws<IOException>(() => ToolbarInstaller.Install(input, community, () => false));
+        Assert.Throws<IOException>(() => ToolbarInstaller.Remove(community, true, () => false));
+        Assert.Contains("Some other add-on", File.ReadAllText(Path.Combine(target, "manifest.json")));
+    }
     public void Dispose() { if (Directory.Exists(root)) Directory.Delete(root, true); }
 }

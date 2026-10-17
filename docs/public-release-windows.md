@@ -1,127 +1,125 @@
-# First public alpha: build on the gaming PC, upload through the website
+# Build, test and publish the Windows installer
 
-No self-hosted GitHub Actions runner is required. You are the maintainer for the following steps; ordinary testers receive only the final ZIP and use its graphical app. Nothing below bypasses the official SDK, specific runtime permission or actual Windows/MSFS acceptance.
+The primary download is **AeroScience-Setup-v0.1.1-alpha.exe**. A self-hosted GitHub Actions runner is not required. These are maintainer instructions; testers run the installer and use Start → AeroScience without developer commands.
 
-**Current status:** the maintainer confirms native SimConnect redistribution authorization, with no additional conditions reported. Original correspondence stays private. The exact DLL hash/loading, new official SDK build and minimum Windows/MSFS checks still need to be completed on the gaming PC. No complete public release asset or final checksum has been produced here.
+The maintainer already confirmed native SimConnect redistribution authorization with no additional conditions. Keep the correspondence private. Reuse `C:\AeroScience-Release-Records\runtime-approval.json` while it matches the actual SDK DLL. No new authorization request is needed.
 
-## 1. Use a fresh Git checkout and the existing Windows tools
+## 1. Install the additional build tool and update source
 
-Keep `C:\Windows-Companion-unverified-in-MSFS` and your mission data. Do not overwrite the old preview or delete `%LOCALAPPDATA%\AeroScience`. The new app makes verified pre-upgrade database backups; retain a separate personal backup before testing an upgrade.
+Install **Inno Setup 6.3 or newer** from [its official download page](https://jrsoftware.org/isdl.php), reviewing the framework license. A standard Inno Setup 6 installation provides `C:\Program Files (x86)\Inno Setup 6\ISCC.exe`. A custom/newer installation can be supplied with `-InnoCompiler 'full path to ISCC.exe'`.
 
-The maintainer PC needs Git for Windows, PowerShell 7, the .NET SDK pinned in `global.json`, Node 22+, Python 3, Visual Studio C++ x64 build tools and your official SDK at `C:\MSFS 2024 SDK`. The existing toolbar build already used several of these. Install missing maintainer tools from their official sites. Testers need none of them.
+Keep the already installed .NET SDK pinned by `global.json`, Node 22+, Python 3.10+, Git, PowerShell 7, Visual Studio C++ x64 build tools and official MSFS 2024 SDK. The user has built the earlier ZIP candidate successfully; the changed app/wizard/installer requires a new candidate and acceptance. Preserve that earlier candidate and all original mission data.
 
-Open **Start → x64 Native Tools Command Prompt for Visual Studio** (the installed version's name may vary). Type this to enter PowerShell while retaining the compiler environment:
+Open **Start → x64 Native Tools Command Prompt for Visual Studio**, then:
 
 ```powershell
 pwsh -NoProfile
-```
-
-Then, in that PowerShell window:
-
-```powershell
-git clone https://github.com/JustSeanC/AeroScience.git C:\Dev\AeroScience-release
-Set-Location C:\Dev\AeroScience-release
+Set-Location 'C:\Dev\AeroScience-release'
+git pull --ff-only origin main
 git rev-parse HEAD
 ```
 
-Use a new folder if that one already exists. Keep the printed 40-character commit; it is the source revision being built. Source must be clean/committed. GitHub's **Code → Download ZIP** lacks release provenance and is not the tester download.
+Record the printed 40-character commit. Build from clean committed source. Close the old companion before testing an upgrade and retain a separate backup of its data while it is stopped.
 
-## 2. Record the confirmed authorization without sharing correspondence
+If a new checkout is needed, use `git clone https://github.com/JustSeanC/AeroScience.git C:\Dev\AeroScience-release` in an unused folder. A source ZIP has no required Git provenance. If the runtime attestation has not yet been created, [New-RuntimeApproval.ps1](runtime-distribution.md) records only the confirmed public summary/hash; do not copy correspondence into source or distribution folders.
 
-The maintainer has confirmed redistribution is authorized and reports no additional conditions. From the same PowerShell window at `C:\Dev\AeroScience-release`, run:
+## 2. Build a new installer candidate
 
-```powershell
-pwsh -NoProfile -ExecutionPolicy RemoteSigned -File .\scripts\release\New-RuntimeApproval.ps1 -RedistributionAuthorized -ConditionsSummary 'No additional distribution conditions reported by the project maintainer.'
-```
-
-It hashes the actual `C:\MSFS 2024 SDK\SimConnect SDK\lib\SimConnect.dll` and creates `C:\AeroScience-Release-Records\runtime-approval.json` using a public maintainer label and current UTC record timestamp. No manual JSON editing, copied DLL or correspondence upload is needed. The helper does not claim runtime loading or SDK/hardware acceptance; those checks follow in the candidate build.
-
-Keep the original correspondence separately and privately. Only the summary/hash/conditions attestation is packaged. If an approval record already exists, preserve it and choose another `-OutputPath`, then use that new path in the next command. See [runtime-distribution.md](runtime-distribution.md) for the exact public/private separation.
-
-## 3. Build a complete candidate ZIP locally
-
-From the same PowerShell window at `C:\Dev\AeroScience-release`:
+Use a fresh output directory to retain the previous ZIP candidate:
 
 ```powershell
-pwsh -NoProfile -ExecutionPolicy RemoteSigned -File .\scripts\release\Build-ReleaseCandidate.ps1 -SdkRoot 'C:\MSFS 2024 SDK' -RuntimeApprovalRecord 'C:\AeroScience-Release-Records\runtime-approval.json' -RuntimeRedistributionConfirmed
+pwsh -NoProfile -ExecutionPolicy RemoteSigned -File .\scripts\release\Build-ReleaseCandidate.ps1 -SdkRoot 'C:\MSFS 2024 SDK' -RuntimeApprovalRecord 'C:\AeroScience-Release-Records\runtime-approval.json' -RuntimeRedistributionConfirmed -OutputDirectory 'C:\AeroScience-Builds\InstallerAlpha1'
 ```
 
-The script builds/tests the companion, checks packaging helpers and crash recovery, compiles the installed SDK ABI contract, runs Microsoft's package builder/validation, validates the actual native runtime and assembles the app plus toolbar. No SDK binary is invented. A failed command stops the process; keep the reported logs rather than editing manifests/receipts to pass.
+For a custom Inno location, append `-InnoCompiler 'C:\path\ISCC.exe'`. The build downloads the full Microsoft Visual C++ x64 redistributable from Microsoft's official endpoint and requires its valid Microsoft Authenticode signature and x64 product identity. If that download is unavailable, download it through Microsoft's [official page](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist), then append `-VcRuntimePath 'C:\path\VC_redist.x64.exe'`; signature/identity checks remain mandatory.
 
-The candidate is:
+The script runs locked restore, application/helper/recovery tests, self-contained Windows publishing, installed SDK ABI checks, genuine package compilation/validation, native runtime loading/export checks and permission/hash validation. It stages a validated payload, compiles Inno Setup and writes its SHA-256, compiler/prerequisite receipt and a new acceptance template. Failed stages stop release preparation. Logs include `installer-prerequisites\inno-build.log` under the chosen output directory and the SDK logs under the source checkout's `artifacts\toolbar-full`.
+
+**Run this candidate installer:**
 
 ```text
-C:\Dev\AeroScience-release\artifacts\AeroScience-v0.1.1-alpha-win-x64-CANDIDATE.zip
-C:\Dev\AeroScience-release\artifacts\AeroScience-v0.1.1-alpha-win-x64-CANDIDATE.zip.sha256
+C:\AeroScience-Builds\InstallerAlpha1\installer-candidate\AeroScience-Setup-v0.1.1-alpha.exe
 ```
 
-Its working copy is `artifacts\release-candidate\AeroScience-v0.1.1-alpha-win-x64`. Earlier candidates are never overwritten. For a new build, use another output directory with `-OutputDirectory 'C:\AeroScience-Builds\Attempt2'`; use that same directory during finalization. Do not publish a candidate ZIP.
+Beside it are `.exe.sha256`, `build-receipt.json`, `ACCEPTANCE.json` and the exact `payload` directory. The final filename is already used inside this clearly separated candidate directory, allowing publication of the identical tested EXE. Nothing is uploaded. The intermediate ZIP is an internal/optional portable payload, not the recommended download.
 
-## 4. Test the extracted candidate and record minimum acceptance
+## 3. Verify Windows installation and onboarding
 
-Right-click the **CANDIDATE ZIP → Extract All**, choose a new writable test folder such as `C:\AeroScience-Alpha-Test`, and keep all files together. Test the extracted copy, not the source/build directories. The ZIP contains one folder with AeroScience.exe directly inside it.
+A Linux cross-publish or compiler fixture does not count as Windows acceptance. Use a disposable supported Windows test environment for fresh installation/prerequisites/uninstall and the gaming PC for real MSFS integration.
 
-1. With MSFS closed, double-click AeroScience.exe. Confirm the app launches and the dashboard opens automatically. Verify its local mission archive, details and export are available without MSFS/internet. Check existing history is retained.
-2. With MSFS closed, use Settings → General & Toolbar → Browse (if needed) → Install / Update Toolbar. Confirm the included package installs; unrelated add-ons remain intact. If the SDK package builder started MSFS, close it before installing.
-3. Start MSFS 2024, load a cockpit, open AeroScience from the toolbar and confirm fresh actual aircraft values. Do not use the old simulated preview as evidence.
-4. Start a short live mission, fly briefly, end it and inspect saved samples/history. Exit/relaunch AeroScience and confirm the mission remains. Record which aircraft, app/commit, Windows, MSFS and SDK versions were used.
-5. Check native dependencies and the graphical Visual C++ prerequisite route on supported Windows. The end user must need no SDK or manual DLL copying.
-6. Confirm the candidate ZIP extracts, the checksum matches, included files are complete, and it contains no personal databases/logs/secrets. The build already performs structural/CRC/hash checks; record your extracted-app inspection as well.
+For Windows Sandbox where available (Windows Pro/Enterprise with that optional feature enabled): create `C:\AeroScience-Installer-Test` in File Explorer, copy only the candidate setup EXE there, then open [AeroScience.wsb](../scripts/installer/AeroScience.wsb). It maps that folder read-only at `C:\InstallerInput` with internet disabled. In Sandbox run the EXE graphically. Do not map your valuable original archive into the disposable environment. Sandbox is optional; another Windows VM is suitable. Neither requires a GitHub runner.
 
-Copy the tested candidate's `ACCEPTANCE.json` to `C:\AeroScience-Release-Records\acceptance-v0.1.1-alpha.json`. Open the copy in Notepad. Leave its generated `version`, `source_commit` and `payload_sha256` unchanged. Enter a tester label, actual ISO timestamp with timezone, and genuine evidence for each of the seven required checks. The template includes plain-language instructions beside each check. Set `result` to `passed` only for actual passes; otherwise record failed/blocked/pending and stop final publication.
+Record actual OS/app/MSFS/SDK versions and evidence for these tests:
 
-Mach comparison, sustained cadence, aircraft variety, migration edge cases, iPad and VR testing should continue during the alpha. They may remain pending for this prerelease and must remain identified as unverified. Stable releases retain the extended acceptance gates. A cross-build, unit test or old v0.1.0 screenshot cannot count as a new Windows hardware pass.
+1. **Fresh install:** Welcome/version/path/progress, notices, bundled prerequisite route on clean Windows, Start shortcut, optional desktop shortcut, Installed Apps entry and launch-at-finish. Start the app with no SDK/developer tools/server commands. Use an installation folder containing spaces too.
+2. **First-run wizard:** confirm defaults and independently choose data folders (including separate real drives on the gaming PC), available capacity and the large-data notice. Check nonempty destinations are refused, original data remains and application folders cannot be selected for data. Cancel/reopen setup and verify it resumes. In a VM with no MSFS, Skip for Now must work.
+3. **Toolbar:** on the gaming PC review the discovered MSFS 2024 Steam/Store configured folder, or Browse. Approve install with MSFS closed; verify the genuine toolbar opens in MSFS. Retest with MSFS running: Community must remain unchanged and the wizard must offer close/skip. Update an existing AeroScience package, confirm one active copy and preserved unrelated add-ons. An installation on Steam does not establish actual Store acceptance; record untested layouts honestly.
+4. **Live flight:** load an aircraft, require its identity/fresh actual SimConnect values, record a short mission, end it and inspect samples/history. Test current native dragging/resizing/scrolling. Check runtime loading without manually copying a DLL. Mach/cadence and other aircraft remain separate extended tests.
+5. **Offline archive:** close MSFS and internet, reopen from Start, inspect existing and new completed missions/details and download a complete JSON export. Restart the app and confirm modes/samples/history remain.
+6. **Upgrade preservation:** retain a completed mission and a small test note in the Science Library; record both paths and mission ID/mode/count. Close the app and install the same candidate over its existing installation (and test adoption of the earlier preview's archive). Defaults must retain paths/settings/data. Explicit requested moves must use verified migration, retain originals, handle conflicts and block active recording. A same-version reinstall is initial preservation evidence, not a claim that an unbuilt future version was tested.
+7. **Uninstall/reinstall:** use Installed Apps. Test keeping the toolbar and, on a second install, explicitly removing it with MSFS closed. Check app/shortcuts are removed, data/settings remain, only AeroScience leaves Community, its backup exists and other add-ons remain. With MSFS running removal must preserve Community and explain the error. Reinstall and confirm retained archive access.
 
-Do not rebuild after acceptance: the generated payload fingerprint binds your test record to every included operational file. Changes require a new candidate/test record. The app stores test missions outside the installation, so they are not bundled.
-
-## 5. Finalize the exact tested bytes
-
-From `C:\Dev\AeroScience-release`, after minimum checks really pass:
+For file-integrity acceptance, run this maintainer-only check after normal installation (adjust `--installed` if the application path changed):
 
 ```powershell
-pwsh -NoProfile -ExecutionPolicy RemoteSigned -File .\scripts\release\New-Release.ps1 -AcceptanceRecord 'C:\AeroScience-Release-Records\acceptance-v0.1.1-alpha.json'
+python .\scripts\release\installer_release.py verify-installed --folder 'C:\AeroScience-Builds\InstallerAlpha1\installer-candidate' --installed "$env:LOCALAPPDATA\Programs\AeroScience"
 ```
 
-This does not rebuild. It verifies the recorded revision/payload, runtime permission/loading, SDK hashes and minimum acceptance, removes the candidate marker, creates the final ZIP/checksum, re-extracts/verifies them and generates release notes.
+It checks every installed payload file against the compiler receipt, including the native runtime and genuine toolbar. Installer-created uninstall files are expected additional files. The setup log is `%TEMP%\Setup Log ... .txt`; review before sharing. AeroScience's Collect Feedback provides application logs without bundling databases/SDK DLLs by default.
 
-**Upload these two final files:**
+## 4. Complete installer acceptance and finalize without rebuilding
+
+Copy `installer-candidate\ACCEPTANCE.json` to `C:\AeroScience-Release-Records\acceptance-installer-v0.1.1-alpha.json`. Edit the copy in Notepad. Keep its generated `version`, `source_commit`, `payload_sha256`, `installer_sha256` and `installer_receipt_sha256` unchanged. Enter a tester label, actual ISO timestamp with timezone and real evidence for each required check. The eleven minimum checks now include installer installation, first-run wizard, upgrade preservation and uninstall preservation alongside the existing app/archive/SDK-runtime/live checks. Mark only actual passes as passed. Failed/blocked/pending required checks stop finalization.
+
+Extended recovery/migration edge cases, Mach/cadence/aircraft variety, iPad and VR may remain explicitly pending for this alpha; stable gates retain extended acceptance. If a required installer behavior fails, fix it, build a new candidate in another output directory and retest. Never transplant the old ZIP's acceptance or change hashes to pass.
+
+After genuine acceptance:
+
+```powershell
+pwsh -NoProfile -ExecutionPolicy RemoteSigned -File .\scripts\release\New-Release.ps1 -AcceptanceRecord 'C:\AeroScience-Release-Records\acceptance-installer-v0.1.1-alpha.json' -OutputDirectory 'C:\AeroScience-Builds\InstallerAlpha1'
+```
+
+This revalidates the exact EXE/receipt/payload/acceptance and copies the tested EXE without recompilation or alteration. Final application acceptance is external to the installed EXE, avoiding an EXE rebuild just to change its review record. The internal portable archive receives that same final record and is CRC/hash/provenance validated.
+
+**Final primary release files:**
 
 ```text
-C:\Dev\AeroScience-release\artifacts\AeroScience-v0.1.1-alpha-win-x64.zip
-C:\Dev\AeroScience-release\artifacts\AeroScience-v0.1.1-alpha-win-x64.zip.sha256
+C:\AeroScience-Builds\InstallerAlpha1\AeroScience-Setup-v0.1.1-alpha.exe
+C:\AeroScience-Builds\InstallerAlpha1\AeroScience-Setup-v0.1.1-alpha.exe.sha256
+C:\AeroScience-Builds\InstallerAlpha1\AeroScience-Setup-v0.1.1-alpha.release.json
+C:\AeroScience-Builds\InstallerAlpha1\RELEASE-NOTES.md
 ```
 
-Release notes are at `artifacts\RELEASE-NOTES.md`. The printed SHA-256 and sidecar describe this final ZIP, not an older companion preview. Existing releases/checksums are not overwritten. Copy the recorded source commit from `acceptance-v0.1.1-alpha.json` for the tag step.
+The EXE, checksum and public release-evidence JSON are the recommended uploads; paste the Markdown as the release description. The optional secondary `AeroScience-v0.1.1-alpha-win-x64.zip` and its checksum are in the same directory. Keep that internal archive locally even when not uploading it: final verification and optional automated publishing use it to recheck genuine payload/SDK/runtime evidence. Review acceptance text for private information before publication. Original correspondence never belongs in these files.
 
-## 6. Create the public GitHub prerelease manually
+Without `-OutputDirectory`, build/finalization default to `C:\Dev\AeroScience-release\artifacts`. Existing candidates/final assets are not overwritten.
 
-First ensure the tag points to that exact tested commit. In the maintainer checkout, replace the placeholder below with its 40-character `source_commit`:
+## 5. Publish through GitHub's website
+
+Create the source tag at the exact tested `source_commit` from the acceptance record (replace the placeholder):
 
 ```powershell
 git tag v0.1.1-alpha TESTED_40_CHARACTER_COMMIT
 git push origin refs/tags/v0.1.1-alpha
 ```
 
-These commands create only the source tag. They do not upload binaries or publish a release. If the tag already exists, stop and check it points to the tested commit; do not force-move it. Git for Windows may open its normal browser sign-in. No special release token is needed for manual website upload.
+If a tag already exists, stop and verify it; do not force-move it.
 
-1. Visit **https://github.com/JustSeanC/AeroScience/releases** and sign in as a maintainer.
-2. Choose **Draft a new release**. Under **Choose a tag**, select the existing **v0.1.1-alpha** tag just pushed. This avoids publishing whatever happens to be the latest main commit.
-3. Set the title to **AeroScience v0.1.1 — Live Flight Recording Alpha**.
-4. Paste `artifacts\RELEASE-NOTES.md` into the description. Retain known limitations and the checksum. The notes identify the exact source revision.
-5. Drag in the **final ZIP and its .sha256 file**, not CANDIDATE files or a companion-only preview. Wait until both uploads finish.
-6. Check **Set as a pre-release**. Do not mark it stable/latest production. Review the tag, files and notes, then click **Publish release**.
-7. Open the release in a signed-out/incognito browser. Download both assets, extract the ZIP and compare its SHA-256 to the sidecar. Confirm the ordinary public download works. Keep the original ZIP and test/SDK/runtime evidence.
+1. Visit [AeroScience Releases](https://github.com/JustSeanC/AeroScience/releases), sign in and choose **Draft a new release**.
+2. Select the existing **v0.1.1-alpha** tag. Title: **AeroScience v0.1.1 — Live Flight Recording Alpha**.
+3. Paste the generated `RELEASE-NOTES.md`. Its first download link recommends the setup EXE and identifies the tested commit/checksum and remaining limitations.
+4. Attach the final **setup EXE**, **EXE.sha256**, and **.release.json** listed above. Optional: add the portable ZIP/checksum as secondary assets. Do not upload the pending candidate directory, private records or correspondence.
+5. Check **Set as a pre-release**, review the source tag/assets, then **Publish release**.
+6. In a signed-out browser download the setup and sidecar, verify the hash and run that download in your Windows test environment. Confirm ordinary public access before sharing.
 
-After actual successful publication, the intended URLs are:
+Expected URLs only after actual publication:
 
-- Release: https://github.com/JustSeanC/AeroScience/releases/tag/v0.1.1-alpha
-- Windows ZIP: https://github.com/JustSeanC/AeroScience/releases/download/v0.1.1-alpha/AeroScience-v0.1.1-alpha-win-x64.zip
-- Checksum: https://github.com/JustSeanC/AeroScience/releases/download/v0.1.1-alpha/AeroScience-v0.1.1-alpha-win-x64.zip.sha256
+- https://github.com/JustSeanC/AeroScience/releases/tag/v0.1.1-alpha
+- https://github.com/JustSeanC/AeroScience/releases/download/v0.1.1-alpha/AeroScience-Setup-v0.1.1-alpha.exe
+- https://github.com/JustSeanC/AeroScience/releases/download/v0.1.1-alpha/AeroScience-Setup-v0.1.1-alpha.exe.sha256
 
-These are expected destinations, not a claim that files currently exist. Do not create a second conflicting release or overwrite a published asset. Fixes after publication should use a new source version/tag.
+No new installer EXE, final installer hash, successful Windows installation/uninstall or public asset is claimed by this document. Project installer signing is not configured; do not describe this alpha as signed. A future signing step must run before generating the tested EXE receipt.
 
-## Testers and future automation
+## Optional future automation
 
-Send friends the public release page and tell them to download the Windows ZIP under Assets. They extract it, launch AeroScience.exe and install the included toolbar through Settings. They do not use GitHub Actions artifacts or Source code ZIP downloads.
-
-The optional Actions workflow can later prepare candidates on a trusted SDK Windows runner and publish a previously tested candidate from a GitHub-hosted Windows runner using the normal GitHub token. It is not part of this first-release path. Version/tag/asset metadata comes from `Directory.Build.props`; update it and the numeric toolbar definition for future versions. Prior releases remain downloadable; no automatic updater is introduced.
+The manual Actions workflow can prepare installer candidates on a trusted Windows SDK/Inno machine and later finalize/publish that same tested candidate on a GitHub-hosted Windows runner. It uploads the setup EXE/checksum/public evidence by default; portable assets require `-IncludePortableArchive`. Only publication receives `contents: write`. No self-hosted runner or special release token is required for the manual local/web process above. Public push/PR CI may compile the installer recipe with explicit structural fixtures, never publish those fixtures or call them simulator acceptance.

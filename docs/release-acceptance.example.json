@@ -8,7 +8,7 @@
     "windows_companion": {
       "result": "pending",
       "evidence": "",
-      "instructions": "On real supported Windows: extracted AeroScience.exe launches and automatically opens its dashboard, without a terminal/server command."
+      "instructions": "On real supported Windows: installed AeroScience launches from Start and automatically opens its dashboard, without a terminal/server command."
     },
     "offline_archive_export": {
       "result": "pending",
@@ -38,7 +38,27 @@
     "release_contents": {
       "result": "pending",
       "evidence": "",
-      "instructions": "Extract the candidate ZIP, test that extracted app, verify checksum and inspect that package/runtime are complete and no personal data is included."
+      "instructions": "Verify the exact candidate installer checksum and installed files against its receipt; inspect that package/runtime are complete and no personal data is included."
+    },
+    "installer_install": {
+      "result": "pending",
+      "evidence": "",
+      "instructions": "Run this exact setup EXE on Windows: branding/path/progress, bundled prerequisites, Start shortcut, optional desktop shortcut, Installed Apps registration and launch-at-finish work. Test a clean Windows account/environment without developer tools."
+    },
+    "setup_wizard": {
+      "result": "pending",
+      "evidence": "",
+      "instructions": "Test graphical first-run storage paths on separate drives, capacity/warning, Community detection/browse/confirmation, MSFS-running guard, toolbar installation and Skip for Now. Settings can revisit both."
+    },
+    "upgrade_preservation": {
+      "result": "pending",
+      "evidence": "",
+      "instructions": "Install over an existing application. Confirm existing settings, both storage paths, mission IDs/modes/samples and library files survive; requested changes use verified migrations and keep originals."
+    },
+    "uninstall_preservation": {
+      "result": "pending",
+      "evidence": "",
+      "instructions": "Use Windows Installed Apps to uninstall. Confirm app/shortcuts are removed, data/configuration remain, and keeping or explicitly removing the toolbar works with unrelated add-ons preserved. Reinstall and confirm archive access."
     },
     "live_recording_recovery": {
       "result": "pending",
@@ -70,5 +90,7 @@
       "evidence": "",
       "instructions": "Extended acceptance; may remain pending for this prerelease."
     }
-  }
+  },
+  "installer_sha256": "",
+  "installer_receipt_sha256": ""
 }

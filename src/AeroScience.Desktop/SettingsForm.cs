@@ -1,8 +1,6 @@
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
-using System.Reflection.PortableExecutable;
-using System.Runtime.InteropServices;
 using AeroScience.Engine;
 using AeroScience.Missions;
 
@@ -73,10 +71,8 @@ public sealed class SettingsForm : Form
             destination = browse.SelectedPath;
         }
         var settings = app.Preferences.Load();
-        var installed = Path.GetFullPath(AppContext.BaseDirectory).TrimEnd(Path.DirectorySeparatorChar);
-        var selected = Path.GetFullPath(destination).TrimEnd(Path.DirectorySeparatorChar);
-        if (selected.Equals(installed, StringComparison.OrdinalIgnoreCase) || selected.StartsWith(installed + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
-        { MessageBox.Show(this, "Choose a data folder outside the application installation, so updates preserve your archive."); return; }
+        try { SetupCoordinator.ValidateDataLocation(destination, AppContext.BaseDirectory); }
+        catch (Exception error) { app.ShowError(error); return; }
         if (kind == StorageKind.ScienceLibrary)
         {
             try
@@ -118,6 +114,7 @@ public sealed class SettingsForm : Form
     {
         var preferences = app.Preferences.Load();
         Label(panel, "AeroScience " + Application.ProductVersion);
+        Button(panel, "Run guided setup…", (_, _) => app.ShowSetup(this));
         var lan = new CheckBox { Text = "Enable private-LAN / iPad access", Checked = preferences.EnableLan, AutoSize = true }; panel.Controls.Add(lan);
         var addresses = new ComboBox { Width = 400, DropDownStyle = ComboBoxStyle.DropDownList };
         addresses.Items.AddRange(Dns.GetHostAddresses(Dns.GetHostName()).Where(a => a.AddressFamily == AddressFamily.InterNetwork && EngineOptions.IsPrivateV4(a)).Select(a => (object)a.ToString()).ToArray());
@@ -146,34 +143,21 @@ public sealed class SettingsForm : Form
             if (MessageBox.Show(this, "Install/update AeroScience only in this folder? MSFS must be closed. Any previous AeroScience package will be backed up outside Community.\n" + selectedCommunity, "Toolbar installation", MessageBoxButtons.YesNo) != DialogResult.Yes) return;
             await Execute(() => app.RunStoppedAsync(() => Task.Run(() =>
             {
-                ToolbarInstaller.Install(Path.Combine(AppContext.BaseDirectory, "Toolbar"), selectedCommunity);
+                ToolbarInstaller.Install(Path.Combine(AppContext.BaseDirectory, "Toolbar"), selectedCommunity, previousCommunity: app.Preferences.Load().CommunityDirectory);
                 app.Preferences.Save(app.Preferences.Load() with { CommunityDirectory = selectedCommunity });
             })));
         });
-        Button(panel, "Install official SimConnect runtime…", async (_, _) =>
+        Button(panel, "Remove AeroScience toolbar…", (_, _) =>
         {
-            using var browse = new OpenFileDialog { Filter = "Official native runtime (SimConnect.dll)|SimConnect.dll", Title = "Choose SimConnect.dll from an official installation" };
-            if (browse.ShowDialog(this) != DialogResult.OK) return;
-            var selected = browse.FileName;
-            await Execute(() => app.RunStoppedAsync(() => Task.Run(() =>
-            {
-                using (var reader = new PEReader(File.OpenRead(selected)))
-                    if (reader.PEHeaders.CoffHeader.Machine != Machine.Amd64 || reader.HasMetadata) throw new IOException("Select the official native Windows x64 runtime.");
-                var library = NativeLibrary.Load(selected);
-                try
-                {
-                    foreach (var name in new[] { "SimConnect_Open", "SimConnect_Close", "SimConnect_AddToDataDefinition", "SimConnect_RequestDataOnSimObject", "SimConnect_CallDispatch", "SimConnect_RequestSystemState", "SimConnect_SubscribeToSystemEvent", "SimConnect_SubscribeToCommBusEvent", "SimConnect_CallCommBusEvent" })
-                        if (!NativeLibrary.TryGetExport(library, name, out _)) throw new IOException("Official runtime lacks a required export: " + name);
-                }
-                finally { NativeLibrary.Free(library); }
-                var target = Path.Combine(AppContext.BaseDirectory, "SimConnect.dll");
-                if (File.Exists(target)) throw new IOException("A runtime is already installed. Runtime replacement needs an application restart; existing files were preserved.");
-                File.Copy(selected, target, overwrite: false);
-            })));
+            var path = app.Preferences.Load().CommunityDirectory;
+            if (path is null) { MessageBox.Show(this, "No Community folder has been configured."); return; }
+            if (MessageBox.Show(this, "Remove only AeroScience from this Community folder? Its files will be moved to a backup outside Community. Close MSFS first.\n" + path, "Remove toolbar", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) != DialogResult.Yes) return;
+            try { var backup = ToolbarInstaller.Remove(path, true); MessageBox.Show(this, backup is null ? "The toolbar was not installed in that folder." : "Toolbar removed. Backup retained at:\n" + backup); }
+            catch (Exception error) { app.ShowError(error); }
         });
         Label(panel, File.Exists(Path.Combine(AppContext.BaseDirectory, "SimConnect.dll"))
-            ? "SimConnect runtime is installed. Use an official runtime and its supported prerequisites."
-            : "This developer preview has no SimConnect runtime. An installation-ready alpha needs a verified official prerequisite/bundling route.");
+            ? "The native SimConnect runtime is included. Connection status is shown in the main AeroScience window and dashboard."
+            : "The native SimConnect runtime is missing. Run AeroScience Setup again to repair the installation; keep your mission data and settings.");
         Button(panel, "Microsoft Visual C++ prerequisite…", (_, _) => Process.Start(new ProcessStartInfo(
             "https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist") { UseShellExecute = true }));
         Label(panel, "If Windows reports a missing Visual C++ dependency, use Microsoft's official page above to install the x64 redistributable graphically, then restart AeroScience.");
