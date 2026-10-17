@@ -2,7 +2,7 @@
 
 Live MSFS 2024 aircraft telemetry, a local SQLite mission archive and a simulator-native toolbar, operated through one Windows application: **AeroScience.exe**.
 
-**Status: implementation and cross-published Windows developer preview; new Windows/MSFS acceptance pending.** v0.1.0 gaming-PC evidence confirmed initial T-38N live telemetry and native toolbar dragging/resizing. The new Mach field, Windows graphical host, real-drive storage migration, sustained live cadence, iPad and VR performance require their own tests. No installation-ready friends-only release or public binary upload is claimed.
+**Status: implementation and cross-published Windows developer preview; new Windows/MSFS acceptance pending.** v0.1.0 gaming-PC evidence confirmed initial T-38N live telemetry and native toolbar dragging/resizing. The new Mach field, Windows graphical host, real-drive storage migration, sustained live cadence, iPad and VR performance require their own tests. Public alpha distribution is authorized. The complete release remains unpublished until minimum Windows/MSFS acceptance and specific runtime redistribution permission are established.
 
 ## User experience
 
@@ -16,9 +16,11 @@ The recorder targets configurable intervals (default 1 Hz), preserves real obser
 
 ## Installation and release status
 
-Read [INSTALL.md](INSTALL.md) for the graphical flow and [the testing guide](docs/alpha-testing.md) for acceptance. **Code → Download ZIP is source**, not a ready-to-run app. Old Actions artifacts are v0.1.0 previews. Public CI no longer uploads alpha binaries automatically; the explicit [private release workflow](.github/workflows/alpha-release.yml) verifies a private destination and requires genuine SDK output, hardware evidence and permitted native-runtime distribution.
+The first release is built on the Windows gaming PC and uploaded through the **[GitHub Releases website](https://github.com/JustSeanC/AeroScience/releases)**. No self-hosted Actions runner is required. Follow the exact [Windows build, test, finalization and manual upload guide](docs/public-release-windows.md). Testers download **AeroScience-v0.1.1-alpha-win-x64.zip**, extract it and launch AeroScience.exe. **Code → Download ZIP** is source and is not the application.
 
-Release blockers include a new official Windows SDK build/receipt, Windows UI/drive and live Mach/cadence testing, native runtime redistribution evidence and an approved private distribution environment. The Linux build cannot certify them. The [chronological evidence](docs/validation-results.md) separates prior gaming-PC results from new automated checks.
+The local process builds a complete candidate with genuine official-SDK toolbar/runtime evidence, then finalizes the exact tested payload without rebuilding. Minimum alpha acceptance covers real Windows startup, automatic dashboard, offline archive/export, graphical toolbar installation and a short live recording. Extended Mach/cadence/aircraft/storage/iPad/VR checks may remain explicitly pending for the alpha; stable gates retain extended acceptance. The optional [Actions workflow](.github/workflows/alpha-release.yml) supports later candidate preparation/publication with the normal same-repository GitHub token.
+
+Specific native-runtime redistribution permission remains unconfirmed after review of the [official SDK EULA](https://docs.flightsimulator.com/msfs2024/html/1_Introduction/SDK_EULA.htm); see [runtime status](docs/runtime-distribution.md). The Windows app/SDK candidate and minimum hardware checks must be completed on the gaming PC. No full ZIP, final checksum or working public download is claimed before those pass. [INSTALL.md](INSTALL.md) describes the graphical tester experience; [validation results](docs/validation-results.md) distinguish earlier evidence from this build.
 
 ## Development
 

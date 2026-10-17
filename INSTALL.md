@@ -1,14 +1,16 @@
 # Install and use AeroScience
 
-The v0.1.1 graphical app is implemented and cross-published, but a complete friends-only alpha still needs official SDK output, approved runtime distribution and Windows/hardware verification. These are the intended user steps for that complete download. Old v0.1.0 console previews and GitHub source ZIPs are different artifacts.
+The v0.1.1 graphical app is implemented and cross-published, but the complete public alpha still needs official SDK output, specific runtime distribution permission and minimum Windows/MSFS verification. These are the intended user steps for that complete download. Old v0.1.0 console previews and GitHub source ZIPs are different artifacts.
 
 ## First launch
 
-1. Download the approved alpha archive from the private tester location. Extract all files to a new writable application folder. Do not launch from inside the ZIP or merge files into an old preview.
+1. Visit [GitHub Releases](https://github.com/JustSeanC/AeroScience/releases) and download **AeroScience-v0.1.1-alpha-win-x64.zip** from the alpha release’s Assets. Choose the Windows ZIP, not either Source code download. Extract all files to a new writable application folder. Do not launch from inside the ZIP or merge files into an old preview.
 2. Double-click **AeroScience.exe**. Keep its accompanying files together. No .NET SDK, MSFS SDK, Visual Studio, Python, PowerShell, batch launchers or manual localhost setup is required by the completed alpha.
 3. The app initializes the local archive, starts its services, opens the dashboard and attempts to connect to MSFS. It can launch before the simulator. Review the Science Library capacity notice on first run.
 4. Open **Settings → General & Toolbar**. Verify the Community folder, using Browse if automatic discovery is unavailable. With MSFS closed, choose **Install / Update Toolbar** and confirm. Existing AeroScience packages are backed up outside Community; unrelated add-ons are preserved. A complete alpha includes a genuine ready-built package. A developer preview may not include one and will report that clearly.
 5. Start MSFS, load a cockpit and open AeroScience from the simulator toolbar. Require connected status, the loaded aircraft and fresh flight values before recording. Mach uses the simulator's value; missing Mach shows unavailable.
+
+For a native Visual C++ dependency error, open **Settings → Microsoft Visual C++ prerequisite…**, use Microsoft’s official page to download/run the x64 redistributable, then restart AeroScience. This is a graphical runtime prerequisite, not a developer tool.
 
 The developer preview does not bundle a proprietary SimConnect runtime. Its graphical official-runtime import is for personal testing using an official existing installation. The licensed end-user runtime/prerequisite route must be resolved before calling the full alpha installation-ready; testers must not be directed to build tools or manual DLL-copy commands.
 
@@ -44,7 +46,7 @@ On the PC dashboard, Settings shows the LAN address and pairing code. Open that 
 
 ## Feedback, updating and removing the app
 
-Use **Collect Feedback** in the app, add optional notes and choose a ZIP location. Review it before sharing. The collection is local and excludes mission databases, SDK DLLs and pairing secrets by default.
+Use **Collect Feedback** in the app, add optional notes and choose a ZIP location. Review it before sharing, then report the issue and reproduction steps at [GitHub Issues](https://github.com/JustSeanC/AeroScience/issues). The collection is local and excludes mission databases, SDK DLLs and pairing secrets by default.
 
 To update, end recording, exit AeroScience and extract the new app to a new folder. Preserve the selected data folders and fixed local settings. Use the graphical toolbar update with MSFS closed. No automatic updater is required.
 

@@ -1,6 +1,6 @@
 # v0.1.1-alpha implementation and acceptance
 
-The implementation is available in source. The Windows app cross-compiles/publishes on Linux; its graphical execution, real-drive migrations and new Mach reception have not been tested on Windows. No installation-ready friends-only release has been published. Earlier v0.1.0 evidence includes actual T-38N live data and working native toolbar movement/resizing; it does not validate these new changes.
+The implementation is available in source. The Windows app cross-compiles/publishes on Linux; its graphical execution, real-drive migrations and new Mach reception have not been tested on Windows. Public distribution is now authorized, but no complete alpha release is published yet. The first release uses a local Windows build and manual website upload, with no runner required; see [the Windows release guide](public-release-windows.md). Earlier v0.1.0 evidence includes actual T-38N live data and working native toolbar movement/resizing; it does not validate these new changes.
 
 ## Ordinary user workflow
 
@@ -68,10 +68,12 @@ Use Passed/Failed/Blocked/Not yet tested with app/commit/MSFS/SDK versions and a
 7. Verify private-LAN pairing/history/live controls on physical iPad Safari. Measure Quest 3 FPS/frame times/stutters/resources under consistent app-stopped, panel-closed and panel-open conditions. No extra VR interaction matrix or Compact VR is introduced.
 8. Test a clean Windows account/machine and the complete permitted runtime route. Use in-app Collect Feedback; review its local ZIP and confirm no DB, SDK DLL or pairing secret. Report the exact URL/status for the earlier unidentified debugger resource error.
 
-## Developer builds and restricted distribution
+## Local release and minimum acceptance
 
-Maintainers use `scripts/build/Build-Companion.ps1` and the official `Build-Toolbar.ps1` from a configured x64 Windows developer environment. Ordinary users do not. The app root needs `Toolbar/aeroscience-toolbar` plus `Toolbar/sdk-build.json` for graphical installation. No replacement SPB/layout/manifest is invented in the Linux workspace.
+Maintainers use [Build-ReleaseCandidate.ps1](../scripts/release/Build-ReleaseCandidate.ps1) on the gaming PC with its existing official SDK. The app root includes `Toolbar/aeroscience-toolbar` and `Toolbar/sdk-build.json` for graphical installation. Native runtime permission/loading, clean matching source provenance, SDK compilation/structural validation and file hashes remain required.
 
-Public CI tests/cross-builds without uploading alpha binaries. The manually dispatched `private-alpha-package` workflow needs an existing trusted Windows x64 runner labeled `msfs2024-sdk`, official SDK/runtime, compiler/Python/Node/.NET prerequisites and a completed acceptance record. It verifies the runtime, builds both app/package from the same clean commit, validates receipts, and writes a versioned ZIP/checksum. Publication is off by default; an explicit publish action verifies that the destination repository is private and uses `ALPHA_RELEASE_TOKEN`. No repository is created/made private and no collaborators are invited. Source-repository prereleases would be public, so they are refused for this flow.
+Test the **extracted complete candidate ZIP**, then fill its generated acceptance record. The minimum prerelease checks are real Windows app/dashboard startup, offline archive/details/export, graphical toolbar installation/loading, live SimConnect, a short mission retained after restart, supported runtime dependencies and extracted package integrity/privacy. The seven checks require genuine evidence tied to the exact commit and payload fingerprint. The old v0.1.0 screenshots and portable fixtures cannot establish them.
 
-The complete release remains blocked on actual new-build hardware acceptance, a genuine SDK package/receipt, permitted runtime redistribution and an approved private destination/runner. A locally cross-published GUI preview is useful development output, not proof that these gates passed or a downloadable published alpha.
+Extended aircraft variety, migration failures, sustained cadence, live Mach, iPad and VR tests may remain pending for this feedback alpha. Keep those limitations visible. Stable releases require extended checks. Finalization verifies the accepted bytes without rebuilding and produces the final platform-named ZIP, checksum and generated notes. A maintainer uploads those through GitHub Releases; testers need no Actions artifact access.
+
+The optional Actions workflow can later prepare candidates on a trusted SDK Windows runner and publish a tested earlier candidate with the standard same-repository token. It is not needed for this first release. No private destination or special private-release token is required. See [release infrastructure](release.md) and [native runtime permission status](runtime-distribution.md).

@@ -1,72 +1,62 @@
-# Build and private alpha release
+# Public release process
 
-The v0.1.1-alpha deliverable is one extracted application folder. Testers open **AeroScience.exe**; it starts the local engine, dashboard and CommBus services. Settings installs the supplied SDK-built toolbar into the selected Community folder while MSFS is closed. Testers need no developer tools or terminal commands. See [INSTALL.md](../INSTALL.md).
+**For the first alpha, use [the Windows gaming-PC build and manual GitHub upload guide](public-release-windows.md). No self-hosted runner is required.** Ordinary testers download one complete Windows ZIP from Releases, extract it and open AeroScience.exe.
 
-A complete alpha has not been produced in this cloud environment. Windows GUI execution, the extended official-SDK contract/build, live Mach, sustained recording, removable-drive behavior and device acceptance remain pending. Cross-publishing is not Windows execution. The runtime redistribution route must also be established before distributing the native Microsoft DLL.
+The user has approved public prerelease distribution in `JustSeanC/AeroScience`. It is no longer restricted to a private destination. No full release has yet been published: specific native-runtime redistribution permission and the new Windows SDK/GUI/live smoke checks remain outstanding. See [runtime-distribution.md](runtime-distribution.md).
 
-## Maintainer prerequisites
+## Prepare, test, finalize, publish
 
-Use a trusted Windows x64 machine with the pinned .NET SDK from `global.json`, Node 22+, Python 3, PowerShell 7, Visual Studio C++ build tools and the official MSFS 2024 SDK. Run SDK builds from an x64 Native Tools shell so `cl.exe` is available. These are maintainer requirements, not tester installation steps.
+1. Use a clean Git checkout and the existing official Windows SDK. `Build-ReleaseCandidate.ps1` builds/tests the app, compiles the installed-header ABI contract, runs Microsoft's package builder and structural checks, validates the approved runtime's actual Windows loading/exports, and prepares a complete **CANDIDATE** ZIP plus checksum.
+2. Extract and test that candidate on the real gaming PC. Its generated `ACCEPTANCE.json` includes version, exact source commit and payload fingerprint. Record genuine passes for the seven minimum checks. Optional extended checks may remain pending for the prerelease and are disclosed; stable releases require extended acceptance.
+3. `New-Release.ps1` finalizes without recompiling. It validates unchanged operational bytes, SDK receipts/source, runtime approval/loading and acceptance, then verifies final ZIP extraction/CRC/SHA-256. It generates concise notes for the exact tested revision. Original candidates, existing ZIPs and checksums are not overwritten.
+4. Use the GitHub Releases website to create **v0.1.1-alpha** at that exact tested commit, mark it **Prerelease**, and upload the final ZIP/checksum. No CLI publication, Actions artifact access or special token is needed by this manual route. Verify downloads signed out before sharing the link.
 
-Commit the source before building a release. The app and toolbar must identify the same clean source revision. Keep SDK binaries, personal databases, logs and settings outside source control. Review the installed SDK runtime license and supported Visual C++ prerequisites; public API documentation alone does not establish redistribution permission.
-
-## Application and SDK package
-
-From the repository root in PowerShell:
-
-```powershell
-pwsh -NoProfile -File .\scripts\build\Build-Companion.ps1
-pwsh -NoProfile -File .\scripts\build\Build-Toolbar.ps1 -SdkRoot 'C:\MSFS 2024 SDK'
-```
-
-The companion script restores locked dependencies, tests the solution, checks web JavaScript and publishes the self-contained Windows Forms app to `artifacts/Windows-Companion`. It removes legacy developer launchers/extra executable entry points and writes `build-info.json` with version, target, revision and working-tree state. Retain all runtime libraries and notices with AeroScience.exe.
-
-The toolbar script compiles the extended native ABI contract against installed official headers, runs Microsoft's package builder and validates the generated Community files. It retains `sdk-contract.log` and `build.log`, then writes `artifacts/toolbar-full/sdk-build.json` with source revision, header/builder hashes and every output file hash. Diagnostic POC/window-probe variants cannot pass the full release gate. No SPB, layout or manifest is manufactured by our release scripts.
-
-For personal developer testing, Settings can import the official native x64 SimConnect.dll from an official installation after checking architecture and required exports. This is not a substitute for an approved end-user runtime delivery route. The maintainer's checker is:
-
-```powershell
-pwsh -NoProfile -File .\scripts\build\Test-SimConnectRuntime.ps1 -RuntimePath 'C:\MSFS 2024 SDK\SimConnect SDK\lib\SimConnect.dll'
-```
-
-## Acceptance and assembly
-
-Complete [alpha-testing.md](alpha-testing.md) and [verification.md](verification.md) on the actual machines. Copy `docs/release-acceptance.example.json` to a local record and enter real tester/date/evidence for every required check. All example checks intentionally remain pending. Browser fixtures, native header compilation and structural validation do not establish simulator or hardware acceptance.
-
-After the permitted official runtime is present beside the published application, assemble with:
-
-```powershell
-pwsh -NoProfile -File .\scripts\release\New-Release.ps1 -CommunityPackage 'PATH TO SDK-BUILT aeroscience-toolbar' -SdkReceipt '.\artifacts\toolbar-full\sdk-build.json' -AcceptanceRecord 'PATH TO COMPLETED ACCEPTANCE.json' -RuntimeRedistributionConfirmed
-```
-
-The validator requires complete self-contained app files, no test/demo launchers or personal data, matching source provenance, real full-toolbar SDK output and hashes, valid layout coverage, no aircraft dependencies, completed acceptance and runtime permission confirmation. Existing ZIPs are not overwritten. Successful assembly writes `artifacts/AeroScience-v0.1.1-alpha.zip` and its SHA-256 sidecar:
+For a checkout at `C:\Dev\AeroScience-release`, final assets are:
 
 ```text
-AeroScience-v0.1.1-alpha/
+C:\Dev\AeroScience-release\artifacts\AeroScience-v0.1.1-alpha-win-x64.zip
+C:\Dev\AeroScience-release\artifacts\AeroScience-v0.1.1-alpha-win-x64.zip.sha256
+C:\Dev\AeroScience-release\artifacts\RELEASE-NOTES.md
+```
+
+The complete ZIP contains one folder:
+
+```text
+AeroScience-v0.1.1-alpha-win-x64/
   AeroScience.exe
-  AeroScience.dll, AeroScience.Engine.dll, runtime libraries, build-info.json
-  SimConnect.dll                       # Only when distribution is permitted
-  wwwroot/
-  Toolbar/aeroscience-toolbar/          # Genuine SDK output
+  application DLLs and self-contained .NET/Windows Forms/ASP.NET runtime assets
+  SimConnect.dll                       # Specific permission and validated official native file required
+  wwwroot/                             # Complete dashboard
+  Toolbar/aeroscience-toolbar/          # Genuine SDK-built Community package
   Toolbar/sdk-build.json
-  docs/, README.md, INSTALL.md, CHANGELOG.md
-  LICENSE, THIRD-PARTY-NOTICES.md, ACCEPTANCE.json
+  Dependencies/runtime-check.json       # Sanitized actual Windows loading/export report
+  Dependencies/runtime-approval.json    # Public redistribution evidence/attestation
+  build-info.json, DEFAULTS.json, ACCEPTANCE.json
+  README.md, INSTALL.md, CHANGELOG.md, LICENSE, THIRD-PARTY-NOTICES.md
+  docs/alpha-testing.md, docs/runtime-distribution.md
 ```
 
-Data lives separately in the selected storage directories; it is never bundled. Schema upgrades create a verified SQLite backup before changing existing v0.1.0 records. Explain rollback limitations in tester notes: the older executable cannot open the upgraded schema; retain the original/backup and never replace a newer archive blindly.
+`DEFAULTS.json` documents built-in defaults; settings are managed graphically, not by editing it. No personal settings/database/logs/credentials, source trees, PDBs, developer scripts or test executables are included. Storage remains outside the install folder and existing missions are retained. Candidate/final checks compare every operational file; acceptance/status documents alone may change after testing.
 
-## Private release workflow
+## Minimum versus extended acceptance
 
-`.github/workflows/alpha-release.yml` is manual only. Configure an existing trusted self-hosted Windows x64 runner labeled `msfs2024-sdk`, with the official SDK, Python, GitHub CLI and x64 compiler environment. Dispatch from committed source and provide its installed SDK/runtime paths and completed acceptance record. Redistribution confirmation is required and defaults false.
+Prereleases require `windows_companion`, `offline_archive_export`, `toolbar_install_load`, `simconnect_live`, `live_mission_smoke`, `runtime_dependencies` and `release_contents` with real evidence. SDK/ABI provenance, version/layout validation, clean matching source, specific runtime permission and actual runtime loading/exports remain mandatory regardless of release tier.
 
-Publication defaults off. To publish, explicitly select it, supply an existing **private** destination repository and bind an appropriately scoped token as `ALPHA_RELEASE_TOKEN`. The workflow checks the destination's actual private status before creating the prerelease. It does not create repositories, change visibility or invite testers. Ordinary public CI uploads no binaries. The workflow has not run; runner configuration, licensing, acceptance and private publication are still maintainer tasks.
+Stable releases additionally require recovery, storage migration, live Mach, toolbar synchronization, VR performance and iPad checks. Alpha notes disclose extended checks left pending. Never relabel portable fixtures/cross-compilation or an old v0.1.0 screenshot as a new hardware pass. The example record deliberately cannot pass.
 
-## Companion-only developer preview
+## Optional future GitHub Actions flow
 
-A separate preview may be assembled for personal GUI/offline testing. It deliberately excludes the Community package and proprietary runtime and cannot be described as the complete alpha. After `Build-Companion.ps1`, keep any personal runtime-enabled copy separate:
+`.github/workflows/alpha-release.yml` is manual and optional:
 
-```powershell
-python .\scripts\release\package_release.py companion-preview --companion .\artifacts\Windows-Companion --output .\artifacts\AeroScience-Companion-Preview-v0.1.1-alpha-win-x64.zip
-```
+- **prepare-candidate:** on an existing trusted Windows x64 SDK runner labeled `msfs2024-sdk`, build the official candidate with documented runtime permission. Upload it as a candidate Actions artifact for maintainer testing. It does not publish a release or mark hardware acceptance passed.
+- **publish-tested-candidate:** provide the earlier candidate's exact source commit, run ID and completed genuine acceptance JSON. A GitHub-hosted Windows runner downloads that same candidate, finalizes without rebuilding, and publishes to this repository. No SDK runner is required for this publication stage. The standard `github.token` has `contents: write` and `actions: read` only in this job; no private repository/token is needed.
 
-Linux can cross-publish `src/AeroScience.Desktop` for `win-x64`, but must perform the same developer-entry cleanup and metadata generation before packaging. That produces Windows files for inspection, not Windows execution evidence. A workspace path is not a public download; distribute an approved artifact through the agreed private channel after review.
+A maintainer must test a downloaded candidate before its publication stage; rebuilding and reusing stale evidence is refused by the fingerprint. The publisher checks public repository identity and tag target, starts with a draft, refuses conflicting assets, resumes matching drafts and verifies unauthenticated public downloads. Reruns do not replace published assets. A later fix uses a new version/tag so historical releases remain intact. The optional publisher is covered by mocked control-flow tests, not a claimed live GitHub publication.
+
+No runner is configured during this task, and there is no requirement to register one before the first manual release. Public push/PR CI still runs checks without publishing binaries.
+
+## Future versions and local previews
+
+Version metadata, tag, platform ZIP name and prerelease status derive from `Directory.Build.props`; update the numeric toolbar package version too. App/toolbar source and receipt versions must match. Update changelog/test evidence for the new version. Stable versions have no suffix; alpha/beta/RC versions remain prereleases. Do not move an already published tag or overwrite a historical ZIP. No automatic updater is introduced.
+
+`Build-Companion.ps1` can still produce a companion-only preview. The preview packager rejects the proprietary runtime and clearly labels its ZIP as Preview; it lacks the full toolbar/runtime and cannot be uploaded as the requested complete alpha. Linux cross-builds validate source/build capability, not Windows installation or simulator acceptance.

@@ -1,51 +1,74 @@
 {
   "version": "0.1.1-alpha",
+  "source_commit": "",
+  "payload_sha256": "",
   "tester": "",
   "tested_utc": "",
   "checks": {
     "windows_companion": {
       "result": "pending",
-      "evidence": ""
-    },
-    "simconnect_live": {
-      "result": "pending",
-      "evidence": ""
-    },
-    "toolbar_install_load": {
-      "result": "pending",
-      "evidence": ""
-    },
-    "toolbar_mission_sync": {
-      "result": "pending",
-      "evidence": ""
-    },
-    "vr_performance": {
-      "result": "pending",
-      "evidence": ""
-    },
-    "ipad_safari": {
-      "result": "pending",
-      "evidence": ""
-    },
-    "release_contents": {
-      "result": "pending",
-      "evidence": ""
-    },
-    "live_recording_recovery": {
-      "result": "pending",
-      "evidence": ""
+      "evidence": "",
+      "instructions": "On real supported Windows: extracted AeroScience.exe launches and automatically opens its dashboard, without a terminal/server command."
     },
     "offline_archive_export": {
       "result": "pending",
-      "evidence": ""
+      "evidence": "",
+      "instructions": "With MSFS closed: the selected local archive and saved mission details/export are accessible; existing history remains intact."
+    },
+    "toolbar_install_load": {
+      "result": "pending",
+      "evidence": "",
+      "instructions": "With MSFS closed: graphical Settings installs the included genuine SDK package; after starting MSFS its toolbar opens."
+    },
+    "simconnect_live": {
+      "result": "pending",
+      "evidence": "",
+      "instructions": "In MSFS: the loaded aircraft and fresh actual SimConnect telemetry appear; no generated data is substituted."
+    },
+    "live_mission_smoke": {
+      "result": "pending",
+      "evidence": "",
+      "instructions": "Start and end a short actual flight mission, inspect its recorded samples and confirm retained history after restarting AeroScience."
+    },
+    "runtime_dependencies": {
+      "result": "pending",
+      "evidence": "",
+      "instructions": "On real Windows: included licensed native runtime loads with required exports; supported graphical Visual C++ prerequisites work without SDK/manual DLL copying."
+    },
+    "release_contents": {
+      "result": "pending",
+      "evidence": "",
+      "instructions": "Extract the candidate ZIP, test that extracted app, verify checksum and inspect that package/runtime are complete and no personal data is included."
+    },
+    "live_recording_recovery": {
+      "result": "pending",
+      "evidence": "",
+      "instructions": "Extended acceptance; may remain pending for this prerelease."
     },
     "storage_migration": {
       "result": "pending",
-      "evidence": ""
+      "evidence": "",
+      "instructions": "Extended acceptance; may remain pending for this prerelease."
     },
     "mach_live": {
       "result": "pending",
-      "evidence": ""
+      "evidence": "",
+      "instructions": "Extended acceptance; may remain pending for this prerelease."
+    },
+    "toolbar_mission_sync": {
+      "result": "pending",
+      "evidence": "",
+      "instructions": "Extended acceptance; may remain pending for this prerelease."
+    },
+    "vr_performance": {
+      "result": "pending",
+      "evidence": "",
+      "instructions": "Extended acceptance; may remain pending for this prerelease."
+    },
+    "ipad_safari": {
+      "result": "pending",
+      "evidence": "",
+      "instructions": "Extended acceptance; may remain pending for this prerelease."
     }
   }
 }

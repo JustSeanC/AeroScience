@@ -72,7 +72,10 @@ public static class ToolbarInstaller
                 throw new IOException("Toolbar file differs from SDK provenance: " + name);
         }
         using (var manifest = JsonDocument.Parse(File.ReadAllText(files["manifest.json"])))
-            if (manifest.RootElement.GetProperty("package_version").GetString() != "0.1.1") throw new IOException("Toolbar/app package versions do not match.");
+        {
+            var version = typeof(ToolbarInstaller).Assembly.GetName().Version!;
+            if (manifest.RootElement.GetProperty("package_version").GetString() != $"{version.Major}.{version.Minor}.{version.Build}") throw new IOException("Toolbar/app package versions do not match.");
+        }
         var binary = File.ReadAllBytes(files["InGamePanels/aeroscience_panel.spb"]);
         if (binary.Length <= 32 || binary[0] == '<' || binary[0] == '{') throw new IOException("A genuine SDK-compiled registration is required.");
         if (!Directory.Exists(community)) throw new IOException("Select an existing configured Community folder.");

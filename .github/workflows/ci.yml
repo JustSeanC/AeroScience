@@ -41,4 +41,4 @@ jobs:
           python scripts/build/smoke_recovery.py
           if ($LASTEXITCODE -ne 0) { throw 'Recovery smoke failed.' }
       # Public-repository CI validates builds without publishing alpha binaries.
-      # Restricted distribution is an explicit maintainer workflow, not a push side effect.
+      # Release publication is an explicit maintainer action, not a push side effect.

@@ -1,5 +1,15 @@
 # Changelog
 
+### Public alpha release preparation — local Windows build and manual upload
+
+- Authorized public distribution through the existing repository's Releases page; removed the private destination/token requirement. A self-hosted runner is optional and is not needed for the first release.
+- Added a Windows candidate builder reusing the official SDK/compiler, native runtime checker, app build and automated recovery/package checks. Full builds omit probe assets and debugging symbols; no source, test launchers or private data belongs in the final archive.
+- Added candidate testing followed by finalization without rebuilding. Acceptance binds the exact clean source commit and operational payload; altered builds and stale evidence are refused. SDK hashes/ABI proof and runtime permission/loading remain mandatory.
+- Added the required `AeroScience-v0.1.1-alpha-win-x64.zip` name, checksum, concise tester README/defaults and generated release notes. Version metadata supports future alpha/beta/stable releases from the shared version property.
+- Defined seven minimum real Windows/MSFS alpha checks; exhaustive aircraft/Mach/storage/iPad/VR checks may remain explicitly pending for this prerelease. Stable acceptance retains extended gates.
+- Added an optional two-stage public Actions flow using `github.token` with `contents: write` only in publication, plus retry-safe tag/asset checks. Conflicting existing releases/tags/assets are never overwritten; ordinary public downloads are checked after publication.
+- Added official Visual C++ prerequisite guidance in Settings and documented the unresolved SimConnect redistribution designation in Microsoft's public SDK EULA. No proprietary runtime, full release archive or hardware pass is fabricated; publication remains blocked on that permission and the new gaming-PC build/tests.
+
 ## 0.1.1-alpha — Live Flight Recording Alpha (implementation; hardware acceptance pending)
 
 - Added one Windows entry point, `AeroScience.exe`, hosting local services and opening the dashboard. Native settings manage connections, toolbar installation, storage and feedback without tester terminal commands. Offline mission history works without MSFS or internet; live recording requires fresh aircraft data.

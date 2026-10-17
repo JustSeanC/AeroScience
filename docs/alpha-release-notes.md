@@ -1,14 +1,11 @@
-# AeroScience v0.1.1-alpha — Live Flight Recording Alpha
+# AeroScience v0.1.1 — Live Flight Recording Alpha
 
-This alpha uses live MSFS 2024 aircraft telemetry and a single Windows application entry point, AeroScience.exe. The local mission archive can be opened without MSFS or internet access.
+This is a source template, not a published release claim. Finalization generates `artifacts/RELEASE-NOTES.md` with the exact tested commit, final ZIP checksum and remaining optional checks from the genuine acceptance record. Paste that generated text into the public GitHub prerelease.
 
-- Added simulator-provided Mach to the dashboard, toolbar and stored/exported samples, with unavailable values retained as null.
-- Corrected the recording interval gate that could reject alternating jittered 1 Hz observations. The dashboard separates configured target, sample cadence and mission-wide average.
-- Added complete JSON mission exports with metadata, modes, events, source labels and dataset references.
-- Added independent mission-database and scientific-library storage settings, folder selection, capacity information and verified migrations retaining originals.
-- Added graphical status, connection/LAN settings, toolbar installation and local feedback export. No end-user terminal commands are required.
-- Production generated telemetry and demo launchers are removed. Existing simulated recordings remain readable and labeled.
+AeroScience is an MSFS 2024 airborne science simulation and flight research recording application. Implemented capabilities include live telemetry, Mach, Universal/Realistic mission modes, Mission History, offline archive access, independent mission and science-library storage, a browser dashboard, an MSFS toolbar and complete JSON exports.
 
-This document describes implemented behavior. A published installation-ready archive additionally requires the version-matched acceptance record and SDK receipt included in the package. See ACCEPTANCE.json for actual hardware evidence, remaining limitations and the tested configuration. Never infer live Mach, Windows GUI, external-drive, Quest 3 or physical-iPad acceptance from Linux tests.
+Testers download **AeroScience-v0.1.1-alpha-win-x64.zip** under Assets, extract all files, open **AeroScience.exe**, and use Settings to install the included toolbar with MSFS closed. No SDK, developer commands or manually copied DLLs are part of tester installation. See INSTALL.md.
 
-Scientific instruments, remote sensing, replay, cloud synchronization and automatic application updating remain future work.
+This early alpha does not claim exhaustive Mach/aircraft/storage/device testing. Actual verification is recorded in ACCEPTANCE.json. Advanced scientific instruments, mapping and research mission planning are future work. Both mission modes currently record identically. The Science Library provides storage structure only.
+
+Use **Collect Feedback**, save and review the local ZIP, then report problems at https://github.com/JustSeanC/AeroScience/issues. Avoid attaching personal databases or scientific observations unless you intend to share them.

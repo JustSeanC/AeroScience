@@ -28,6 +28,11 @@ $contractLog = Join-Path $stage 'sdk-contract.log'
 $compileExit = $LASTEXITCODE
 if ($compileExit -ne 0) { throw "Installed SDK differs from the native ABI assumptions or compiler prerequisites failed (exit $compileExit). Inspect sdk-contract.log before packaging." }
 Copy-Item "$repo/msfs-toolbar/*" $stage -Recurse
+if (-not $ProofOfConcept -and -not $WindowProbe) {
+    foreach ($name in @('ProofOfConcept.html', 'ProofOfConcept.js', 'WindowProbe.html', 'WindowProbe.js')) {
+        Remove-Item (Join-Path $stage "PackageSources/html_ui/InGamePanels/AeroScience/$name")
+    }
+}
 if ($ProofOfConcept -or $WindowProbe) {
     $definition = Join-Path $stage 'PackageSources/InGamePanels/aeroscience_panel.xml'
     $entryPage = if ($ProofOfConcept) { 'ProofOfConcept.html' } else { 'WindowProbe.html' }
@@ -51,7 +56,8 @@ Get-ChildItem $package -File -Recurse | ForEach-Object {
     $hashes[$relative] = (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
 }
 $sourceCommit = if ((Get-Command git -ErrorAction SilentlyContinue) -and (Test-Path (Join-Path $repo '.git'))) { (git -C $repo rev-parse HEAD).Trim() } else { 'unknown' }
-@{ variant=$variant; source_commit=$sourceCommit; builder_sha256=(Get-FileHash $tool -Algorithm SHA256).Hash;
+$sourceDirty = if ($sourceCommit -ne 'unknown') { [bool](git -C $repo status --porcelain) } else { $true }
+@{ variant=$variant; source_commit=$sourceCommit; source_dirty=$sourceDirty; builder_sha256=(Get-FileHash $tool -Algorithm SHA256).Hash;
     sdk_header_sha256=(Get-FileHash (Join-Path $include 'SimConnect.h') -Algorithm SHA256).Hash;
     sdk_contract='passed'; built_utc=[DateTime]::UtcNow.ToString('o'); files=$hashes } |
     ConvertTo-Json -Depth 5 | Set-Content (Join-Path $stage 'sdk-build.json') -Encoding utf8

@@ -174,5 +174,8 @@ public sealed class SettingsForm : Form
         Label(panel, File.Exists(Path.Combine(AppContext.BaseDirectory, "SimConnect.dll"))
             ? "SimConnect runtime is installed. Use an official runtime and its supported prerequisites."
             : "This developer preview has no SimConnect runtime. An installation-ready alpha needs a verified official prerequisite/bundling route.");
+        Button(panel, "Microsoft Visual C++ prerequisite…", (_, _) => Process.Start(new ProcessStartInfo(
+            "https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist") { UseShellExecute = true }));
+        Label(panel, "If Windows reports a missing Visual C++ dependency, use Microsoft's official page above to install the x64 redistributable graphically, then restart AeroScience.");
     }
 }

@@ -199,7 +199,7 @@ class PackagingTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp); receipt = root/'receipt.json'; receipt.write_text('{"variant":"toolbar-poc"}')
             with self.assertRaisesRegex(ValueError, 'full-toolbar'): packaging.validate_receipt(receipt, {})
-            acceptance = root/'acceptance.json'; acceptance.write_text(json.dumps({'version': packaging.RELEASE_VERSION, 'tester': 'test fixture', 'tested_utc': '2026-10-16', 'checks': {}}))
+            acceptance = root/'acceptance.json'; acceptance.write_text(json.dumps({'version': packaging.RELEASE_VERSION, 'tester': 'test fixture', 'tested_utc': '2026-10-17T00:00:00Z', 'source_commit': 'a'*40, 'checks': {}}))
             with self.assertRaisesRegex(ValueError, 'pending'): packaging.validate_acceptance(acceptance)
 
     def test_archive_has_one_root_and_refuses_overwrite(self):
@@ -216,19 +216,19 @@ class PackagingTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, 'full-toolbar'):
                 packaging.validate_receipt(receipt, {})
 
-    def test_vr_acceptance_requires_performance_evidence(self):
+    def test_stable_acceptance_requires_vr_performance_evidence(self):
         with tempfile.TemporaryDirectory() as temp:
             acceptance = Path(temp)/'acceptance.json'
-            data = {'version': packaging.RELEASE_VERSION, 'tester': 'test fixture', 'tested_utc': '2026-10-16',
+            data = {'version': packaging.VERSION, 'source_commit': 'a'*40, 'tester': 'test fixture', 'tested_utc': '2026-10-17T00:00:00Z',
                     'checks': {name: {'result': 'passed', 'evidence': 'test fixture'} for name in packaging.ACCEPTANCE}}
             data['checks'].pop('vr_performance')
             data['checks']['vr_quest3'] = {'result': 'passed', 'evidence': 'obsolete interaction record'}
             acceptance.write_text(json.dumps(data))
             with self.assertRaisesRegex(ValueError, 'vr_performance'):
-                packaging.validate_acceptance(acceptance)
+                packaging.validate_acceptance(acceptance, version=packaging.VERSION)
             data['checks']['vr_performance'] = {'result': 'passed', 'evidence': 'frame-time and resource comparison fixture'}
             acceptance.write_text(json.dumps(data))
-            packaging.validate_acceptance(acceptance)
+            packaging.validate_acceptance(acceptance, version=packaging.VERSION)
 
 
 if __name__ == '__main__': unittest.main()

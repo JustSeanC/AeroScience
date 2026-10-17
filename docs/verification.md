@@ -4,7 +4,9 @@ Machine: Linux x64 cloud container, .NET SDK 10.0.402 / runtime 10.0.13, Node 24
 
 ## Current v0.1.1 acceptance
 
-Use [the alpha test procedure](alpha-testing.md) for the single Windows application, offline archive/export, Mach, both storage locations and sustained recording. The implementation is available in source; the complete alpha package is gated on genuine Windows SDK output, runtime distribution permission and hardware results. Cross-publishing and portable tests do not verify native Windows dialogs or removable drives.
+Public alpha publication is now authorized. The first release uses [a local Windows SDK build and manual Releases website upload](public-release-windows.md); no self-hosted runner is required. Minimum Windows/MSFS checks and specific native-runtime distribution permission remain mandatory. Extended aircraft/Mach/storage/iPad/VR checks can remain disclosed pending for the alpha; stable release gates retain extended acceptance.
+
+Use [the alpha test procedure](alpha-testing.md) for the single Windows application, offline archive/export, Mach, both storage locations and sustained recording. The implementation is available in source; the complete alpha package is gated on genuine Windows SDK output, specific runtime distribution permission and minimum real Windows/MSFS results. Cross-publishing and portable tests do not verify native Windows dialogs or removable drives.
 
 ## Automated checks
 
@@ -47,4 +49,4 @@ The user's [latest live-source screenshot](validation-results.md#first-live-airc
 
 Advanced scientific sensors and restrictions follow those reliability/distribution tasks, rather than displacing them.
 
-Follow the [Windows testing workbook](windows-testing.md) and [v0.1.1 prompt brief](v0.1.1-prompt-handoff.md). Live telemetry/recording is the primary v0.1.1 outcome; installation and release automation support it. Retain actual results before claiming that workflow verified. The manually dispatched private release workflow is implemented but has not executed; pending evidence cannot pass its packaging gates.
+Follow the [Windows testing workbook](windows-testing.md) and [v0.1.1 prompt brief](v0.1.1-prompt-handoff.md). Live telemetry/recording is the primary v0.1.1 outcome; installation and release automation support it. Retain actual results before claiming that workflow verified. The optional public release workflow is implemented but has not executed; the local Windows/manual upload path is primary. Pending minimum acceptance or runtime permission cannot pass packaging.

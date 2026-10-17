@@ -1,79 +1,118 @@
-name: private-alpha-package
+name: optional-public-release
 on:
   workflow_dispatch:
     inputs:
+      operation:
+        description: Optional automation; the first release can be built locally and uploaded on the Releases website
+        type: choice
+        options: [prepare-candidate, publish-tested-candidate]
+        default: prepare-candidate
+      source_commit:
+        description: Exact 40-character source commit (required when publishing an earlier candidate)
+        required: false
       sdk_root:
-        description: Official SDK root on the trusted Windows runner
-        required: true
+        description: Official SDK root on the optional Windows SDK runner
         default: 'C:\MSFS 2024 SDK'
       runtime_path:
-        description: Official x64 SimConnect.dll on the runner (no unofficial downloads)
-        required: true
-      acceptance_record:
-        description: Path to the completed, evidence-backed alpha acceptance JSON on the runner
-        required: true
+        description: Official native SimConnect.dll path on that runner
+        required: false
+      runtime_approval_record:
+        description: Path to the completed specific runtime redistribution record on that runner
+        required: false
       redistribution_confirmed:
-        description: Official runtime redistribution terms have been reviewed and permit this package
+        description: Specific redistribution permission has been established for the included native DLL
         type: boolean
         default: false
-      publish:
-        description: Publish to the specified PRIVATE release repository (explicit action)
-        type: boolean
-        default: false
-      private_repository:
-        description: Existing owner/private-repository (required only when publishing)
+      candidate_run_id:
+        description: Earlier successful prepare-candidate workflow run ID (publishing only)
+        required: false
+      acceptance_json:
+        description: Completed acceptance JSON for the exact extracted candidate payload (publishing only)
         required: false
 permissions:
   contents: read
+concurrency:
+  group: aeroscience-manual-release
+  cancel-in-progress: false
 jobs:
-  package:
+  prepare:
+    if: inputs.operation == 'prepare-candidate'
     runs-on: [self-hosted, Windows, X64, msfs2024-sdk]
     env:
       SDK_ROOT: ${{ inputs.sdk_root }}
       SDK_RUNTIME: ${{ inputs.runtime_path }}
-      ACCEPTANCE_RECORD: ${{ inputs.acceptance_record }}
-      REDISTRIBUTION_CONFIRMED: ${{ inputs.redistribution_confirmed }}
+      RUNTIME_APPROVAL: ${{ inputs.runtime_approval_record }}
+      PERMISSION_CONFIRMED: ${{ inputs.redistribution_confirmed }}
+      REQUESTED_COMMIT: ${{ inputs.source_commit }}
     steps:
+      - name: Keep candidate provenance tied to this manually dispatched revision
+        shell: pwsh
+        run: |
+          if ($env:REQUESTED_COMMIT -and $env:REQUESTED_COMMIT -ne $env:GITHUB_SHA) { throw 'Dispatch preparation from the intended source revision; do not substitute another commit.' }
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.source_commit || github.sha }}
       - uses: actions/setup-dotnet@v4
         with:
           global-json-file: global.json
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Check required permission evidence and runner tools
+      - name: Build genuine candidate; never mark hardware tests passed
+        id: candidate
         shell: pwsh
         run: |
-          if ($env:REDISTRIBUTION_CONFIRMED -ne 'true') { throw 'Runtime redistribution has not been confirmed.' }
-          foreach ($tool in @('python', 'cl.exe')) {
-            if (-not (Get-Command $tool -ErrorAction SilentlyContinue)) { throw "Configure the trusted SDK runner with $tool before dispatching." }
-          }
-      - name: Build single-entry Windows app and genuine SDK toolbar
+          if ($env:PERMISSION_CONFIRMED -ne 'true') { throw 'Specific runtime permission is unconfirmed.' }
+          ./scripts/release/Build-ReleaseCandidate.ps1 -SdkRoot $env:SDK_ROOT -RuntimePath $env:SDK_RUNTIME -RuntimeApprovalRecord $env:RUNTIME_APPROVAL -RuntimeRedistributionConfirmed
+          $commit = (git rev-parse HEAD).Trim()
+          "source_commit=$commit" >> $env:GITHUB_OUTPUT
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AeroScience-candidate-${{ steps.candidate.outputs.source_commit }}
+          path: artifacts/release-candidate/
+          if-no-files-found: error
+          retention-days: 14
+  publish:
+    if: inputs.operation == 'publish-tested-candidate'
+    runs-on: windows-latest
+    permissions:
+      contents: write
+      actions: read
+    env:
+      SOURCE_COMMIT: ${{ inputs.source_commit }}
+      CANDIDATE_RUN: ${{ inputs.candidate_run_id }}
+      ACCEPTANCE_JSON: ${{ inputs.acceptance_json }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Check required publication inputs
         shell: pwsh
         run: |
-          ./scripts/build/Build-Companion.ps1
-          ./scripts/build/Build-Toolbar.ps1 -SdkRoot $env:SDK_ROOT
-      - name: Validate personal official runtime and assemble gated alpha
+          if ($env:SOURCE_COMMIT -notmatch '^[a-fA-F0-9]{40}$' -or $env:CANDIDATE_RUN -notmatch '^[0-9]+$' -or -not $env:ACCEPTANCE_JSON) { throw 'Provide the tested commit, candidate run ID and genuine acceptance JSON.' }
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.source_commit }}
+      - name: Verify candidate came from successful trusted preparation
         shell: pwsh
         run: |
-          ./scripts/build/Test-SimConnectRuntime.ps1 -RuntimePath $env:SDK_RUNTIME
-          Copy-Item -LiteralPath $env:SDK_RUNTIME -Destination artifacts/Windows-Companion/SimConnect.dll
-          $package = @(Get-ChildItem artifacts/toolbar-full/output -Filter manifest.json -Recurse | Where-Object { $_.Directory.Name -eq 'aeroscience-toolbar' })
-          if ($package.Count -ne 1) { throw 'Expected one genuine full-toolbar package.' }
-          ./scripts/release/New-Release.ps1 -CommunityPackage $package[0].Directory.FullName -SdkReceipt artifacts/toolbar-full/sdk-build.json -AcceptanceRecord $env:ACCEPTANCE_RECORD -RuntimeRedistributionConfirmed
-      - name: Explicit publication to private repository only
-        if: inputs.publish
+          $runJson = gh api "repos/$env:GITHUB_REPOSITORY/actions/runs/$env:CANDIDATE_RUN"
+          if ($LASTEXITCODE -ne 0) { throw 'Cannot verify candidate workflow provenance.' }
+          $run = $runJson | ConvertFrom-Json
+          if ($run.event -ne 'workflow_dispatch' -or $run.conclusion -ne 'success' -or $run.head_sha -ne $env:SOURCE_COMMIT -or $run.path -ne '.github/workflows/alpha-release.yml') { throw 'The candidate is not from the expected successful manual source revision/workflow.' }
+          $jobsJson = gh api "repos/$env:GITHUB_REPOSITORY/actions/runs/$env:CANDIDATE_RUN/jobs"
+          if ($LASTEXITCODE -ne 0) { throw 'Cannot verify trusted SDK preparation job.' }
+          $preparation = @(($jobsJson | ConvertFrom-Json).jobs | Where-Object { $_.name -eq 'prepare' -and $_.conclusion -eq 'success' -and $_.labels -contains 'msfs2024-sdk' })
+          if ($preparation.Count -ne 1) { throw 'Missing successful trusted SDK preparation job.' }
+      - uses: actions/download-artifact@v4
+        with:
+          name: AeroScience-candidate-${{ inputs.source_commit }}
+          run-id: ${{ inputs.candidate_run_id }}
+          github-token: ${{ github.token }}
+          path: artifacts/release-candidate/
+      - name: Finalize the tested bytes without rebuilding and publish to this repository
         shell: pwsh
-        env:
-          GH_TOKEN: ${{ secrets.ALPHA_RELEASE_TOKEN }}
-          PRIVATE_REPOSITORY: ${{ inputs.private_repository }}
         run: |
-          if ($env:PRIVATE_REPOSITORY -notmatch '^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$') { throw 'Select an existing private repository.' }
-          if (-not $env:GH_TOKEN) { throw 'Bind a token for the approved private destination as ALPHA_RELEASE_TOKEN.' }
-          $private = gh api "repos/$env:PRIVATE_REPOSITORY" --jq '.private'
-          if ($LASTEXITCODE -ne 0 -or "$private".Trim() -ne 'true') { throw 'Refusing public or unverified release destination.' }
-          $notes = (Get-Content docs/alpha-release-notes.md -Raw) + "`nSource revision: https://github.com/JustSeanC/AeroScience/commit/$env:GITHUB_SHA`n"
-          $notesFile = Join-Path $env:RUNNER_TEMP 'aeroscience-alpha-notes.md'
-          [IO.File]::WriteAllText($notesFile, $notes)
-          gh release create v0.1.1-alpha artifacts/AeroScience-v0.1.1-alpha.zip artifacts/AeroScience-v0.1.1-alpha.zip.sha256 --repo $env:PRIVATE_REPOSITORY --prerelease --title 'AeroScience v0.1.1 — Live Flight Recording Alpha' --notes-file $notesFile
-          if ($LASTEXITCODE -ne 0) { throw 'Private publication failed.' }
+          if ($env:GITHUB_REPOSITORY -ne 'JustSeanC/AeroScience') { throw 'Unexpected publication repository.' }
+          $acceptance = Join-Path $env:RUNNER_TEMP 'aeroscience-acceptance.json'
+          [IO.File]::WriteAllText($acceptance, $env:ACCEPTANCE_JSON)
+          ./scripts/release/New-Release.ps1 -AcceptanceRecord $acceptance
+          ./scripts/release/Publish-Release.ps1
