@@ -80,11 +80,17 @@ class OfflineAssetsTests(unittest.TestCase):
             git('add','.gitattributes')
             git('commit','-qm','Preserve exact pinned asset bytes')
             git('pull','--ff-only',cwd=legacy)
-            git('restore','--source=HEAD','--worktree','--',
-                (relative/'vendor').as_posix(),(relative/'geography').as_posix(),cwd=legacy)
+            # Reproduce the maintainer's staged CRLF changes: adding converted
+            # files under the new byte-preserving attributes stages their CRLF bytes.
             git('add','--renormalize','--',(relative/'vendor').as_posix(),(relative/'geography').as_posix(),cwd=legacy)
+            self.assertNotEqual(git('diff','--cached','--stat',cwd=legacy).stdout,'')
+            # Restore the index AND worktree, explicitly disabling checkout EOL
+            # conversion for this command only. No global Git setting is changed.
+            git('-c','core.autocrlf=false','restore','--source=HEAD','--staged','--worktree','--',
+                (relative/'vendor').as_posix(),(relative/'geography').as_posix(),cwd=legacy)
             self.assertEqual(web_assets.verify(legacy/relative),len(json.loads((WEB/'assets-manifest.json').read_text())['files']))
             self.assertEqual(git('status','--porcelain',cwd=legacy).stdout,'')
+            self.assertEqual(git('config','core.autocrlf',cwd=legacy).stdout.strip(),'true')
 
             fresh=temp/'fresh-windows-checkout'
             git('-c','core.autocrlf=true','clone','-q','--no-local',str(seed),str(fresh),cwd=temp)
