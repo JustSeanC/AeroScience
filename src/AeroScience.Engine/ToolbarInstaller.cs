@@ -56,7 +56,8 @@ public static class ToolbarInstaller
         catch (Exception e) when (e is IOException or JsonException or KeyNotFoundException or InvalidOperationException) { return "Installed package needs inspection"; }
     }
 
-    public static void Install(string input, string community, Func<bool>? simulatorRunning = null, string? previousCommunity = null)
+    public static void Install(string input, string community, Func<bool>? simulatorRunning = null, string? previousCommunity = null,
+        Func<IEnumerable<string>>? discoverCommunityFolders = null)
     {
         simulatorRunning ??= SimulatorRunning;
         if (simulatorRunning()) throw new IOException("Close MSFS before installing/updating the toolbar.");
@@ -96,7 +97,9 @@ public static class ToolbarInstaller
             }
             catch (Exception error) when (error is IOException or UnauthorizedAccessException or JsonException) { /* Unrelated unreadable manifests are not modified. */ }
         }
-        foreach (var candidate in DiscoverCommunityFolders().Concat(new[] { Path.Combine(Path.GetDirectoryName(community)!, "Community2024"), Path.Combine(Path.GetDirectoryName(community)!, "Community") })
+        // Tests supply discovery rooted in their fixture profile. Application callers retain real 2024 discovery.
+        var discovered = discoverCommunityFolders is null ? DiscoverCommunityFolders() : discoverCommunityFolders();
+        foreach (var candidate in discovered.Concat(new[] { Path.Combine(Path.GetDirectoryName(community)!, "Community2024"), Path.Combine(Path.GetDirectoryName(community)!, "Community") })
             .Concat(previousCommunity is null ? [] : new[] { previousCommunity }))
             if (!string.Equals(Path.GetFullPath(candidate), Path.GetFullPath(community), StringComparison.OrdinalIgnoreCase)
                 && Directory.Exists(Path.Combine(candidate, "aeroscience-toolbar")))

@@ -1,5 +1,10 @@
 # Changelog
 
+### Isolated toolbar installation tests on simulator-equipped PCs
+
+- Root toolbar test discovery in temporary Steam/Store profiles so an existing real Community installation does not block the build's fixture installs. Application discovery and duplicate-install protection remain enabled.
+- Added a regression that detects a toolbar in a separate discovered Community folder, refuses a duplicate installation and preserves both folders. No installed add-on needs to be removed to run the release tests.
+
 ### v0.1.1 installer distribution and guided onboarding
 
 - Made `AeroScience-Setup-v0.1.1-alpha.exe` the primary release asset using Inno Setup. Added per-user installation, branding/version/path/progress, Start and optional desktop shortcuts, Installed Apps/uninstall, launch-at-finish, a stable upgrade identity and a running-app guard.
