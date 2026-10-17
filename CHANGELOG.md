@@ -1,5 +1,10 @@
 # Changelog
 
+### Windows release-build test cleanup
+
+- Disabled pooling for the two temporary SQLite connections in the schema 2 upgrade test. Disposed test connections now release the archive and backup files so Windows can remove the temporary directory during cleanup.
+- Retained all migration, historical Mach and mode assertions and the required release test gate. Production database connections already disable pooling; no application data or runtime behavior was changed.
+
 ### Runtime authorization confirmed; original correspondence remains private
 
 - Recorded the maintainer's confirmation of native MSFS 2024 SimConnect.dll redistribution authorization, with no additional conditions reported. The original correspondence is retained privately and is not requested or published.

@@ -5,6 +5,7 @@ using AeroScience.Missions;
 using AeroScience.Shared;
 using AeroScience.SimConnect;
 using AeroScience.Telemetry;
+using Microsoft.Data.Sqlite;
 using Xunit;
 
 namespace AeroScience.Tests;
@@ -101,7 +102,8 @@ public sealed class AlphaDataTests : IDisposable
         var store = Store(); var now = DateTimeOffset.UtcNow;
         var frame = SimulatedTelemetryProvider.Generate(now, 0);
         var id = store.Create("v0.1.0", frame, now); store.Append(id, frame); store.Finish(id, MissionStatus.Completed, now, "Done");
-        using (var db = new Microsoft.Data.Sqlite.SqliteConnection("Data Source=" + store.DatabasePath))
+        // Release test-owned files on disposal so Windows can delete the temporary archive.
+        using (var db = new SqliteConnection(new SqliteConnectionStringBuilder { DataSource = store.DatabasePath, Pooling = false }.ToString()))
         {
             db.Open(); using var cmd = db.CreateCommand();
             var json = JsonSerializer.SerializeToNode(frame, WireJson.Options)!.AsObject(); json.Remove("machNumber");
@@ -113,7 +115,7 @@ public sealed class AlphaDataTests : IDisposable
         Assert.Equal(ScienceMode.Universal, store.Detail(id)!.Mission.Mode);
         Assert.Empty(store.DatasetReferences(id));
         var backup = Assert.Single(Directory.GetFiles(Path.Combine(root, "Backups"), "*.db"));
-        using var original = new Microsoft.Data.Sqlite.SqliteConnection("Data Source=" + backup);
+        using var original = new SqliteConnection(new SqliteConnectionStringBuilder { DataSource = backup, Pooling = false }.ToString());
         original.Open(); using var version = original.CreateCommand(); version.CommandText = "PRAGMA user_version";
         Assert.Equal(2L, version.ExecuteScalar());
     }
