@@ -529,13 +529,15 @@ function editPlan(plan) {
       areas = value.surveyAreas;
       patternValues = value.patterns || patternValues;
       drawList();
-      if (value.preview?.length)
+      if (value.preview?.length) {
         planMap.set({
           plan: {
             waypoints: [...waypoints, ...value.preview],
             surveyAreas: areas,
           },
         });
+        planMap.fit(value.preview);
+      }
     },
   });
   departure.onchange = drawList;

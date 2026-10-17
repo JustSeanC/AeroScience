@@ -254,7 +254,10 @@ export class ResearchMap {
     const hasPlan =
       (data.plan?.waypoints?.length || data.plan?.surveyAreas?.length || 0) > 0;
     if (!this.initialized && hasPlan) {
-      this.fit();
+      this.fit([
+        ...(data.plan.waypoints || []),
+        ...(data.plan.surveyAreas || []).flatMap((a) => a.vertices),
+      ]);
       this.initialized = true;
     }
     this.resolveDeparture();
@@ -286,14 +289,17 @@ export class ResearchMap {
         8,
       );
       this.initialized = true;
+    } else if (valid(this.data.aircraft)) {
+      this.map.setView(ll(this.data.aircraft), 9);
+      this.initialized = true;
     }
   }
   center(point) {
     if (valid(point))
       this.map.setView(ll(point), Math.max(9, this.map.getZoom()));
   }
-  fit() {
-    const p = this.geometry();
+  fit(points = this.geometry()) {
+    const p = points.filter(valid);
     if (!p.length) {
       this.map.setView([38, -97], 4);
       return;
