@@ -172,6 +172,16 @@ class PackagingTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, 'graphical Windows'):
                 packaging.validate_companion(root)
 
+    def test_published_asset_line_ending_changes_are_rejected_without_normalizing_hashes(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp)
+            self.companion_fixture(root)
+            packaging.validate_companion(root)
+            license_file=root/'wwwroot/vendor/chart.js/LICENSE.txt'
+            license_file.write_bytes(license_file.read_bytes().replace(b'\n',b'\r\n'))
+            with self.assertRaisesRegex(ValueError,'vendor/chart.js/LICENSE.txt'):
+                packaging.validate_companion(root)
+
     def test_full_toolbar_receipt_requires_installed_header_contract_and_matching_files(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp); self.community_fixture(root, '1.9.18'); found = packaging.validate_community(root)

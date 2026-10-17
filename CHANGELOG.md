@@ -2,6 +2,7 @@
 
 ## 0.2.1 — Mission Planning & Science Experience (prerelease)
 
+- Preserve exact bundled geography/library/license bytes on Windows Git checkouts; cover fresh checkout and existing-checkout repair without weakening SHA-256 validation. Correct the Windows guide to enter PowerShell before PowerShell commands.
 - Detect actual installed/bundled SDK toolbar versions at startup; offer Update or Remind Me Later and dedicated Toolbar settings. Reject newer-package downgrades and unsupported protocols.
 - Share one asynchronous graphical copy/verify progress flow across setup, startup and repair, with outside-Community staging/backups, exclusive update leases, final installed-file verification and rollback.
 - Replace the coordinate grid with locally bundled Leaflet/Natural Earth geography, offline airport/city/coordinate search, pan/pinch/wheel/fit/centering, draggable route points and editable survey polygons. Optional online detail tiles require explicit disclosure and consent.

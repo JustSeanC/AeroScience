@@ -1,0 +1,7 @@
+# These upstream assets are SHA-256 pinned. Preserve their exact bytes, including
+# the original CRLF in some Leaflet files, regardless of core.autocrlf/core.eol.
+/src/AeroScience.Engine/wwwroot/vendor/** -text
+/src/AeroScience.Engine/wwwroot/geography/** -text
+
+# Keep the source manifest readable and consistent across maintainer checkouts.
+/src/AeroScience.Engine/wwwroot/assets-manifest.json text eol=lf

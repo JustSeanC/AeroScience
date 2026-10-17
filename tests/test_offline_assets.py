@@ -1,9 +1,16 @@
 import hashlib
+import importlib.util
 import json
 from pathlib import Path
+import shutil
+import subprocess
+import tempfile
 import unittest
 ROOT=Path(__file__).resolve().parents[1]
 WEB=ROOT/'src/AeroScience.Engine/wwwroot'
+spec=importlib.util.spec_from_file_location('web_assets',ROOT/'scripts/build/verify_web_assets.py')
+web_assets=importlib.util.module_from_spec(spec)
+spec.loader.exec_module(web_assets)
 class OfflineAssetsTests(unittest.TestCase):
     def test_committed_bundles_and_license_hashes_match(self):
         manifest=json.loads((WEB/'assets-manifest.json').read_text())
@@ -22,3 +29,66 @@ class OfflineAssetsTests(unittest.TestCase):
         jfk=next(f for f in airports if f['properties']['gps_code']=='KJFK')
         self.assertAlmostEqual(jfk['geometry']['coordinates'][0],-73.78,delta=.1)
         self.assertAlmostEqual(jfk['geometry']['coordinates'][1],40.64,delta=.1)
+
+    def test_modified_or_missing_assets_are_still_rejected(self):
+        with tempfile.TemporaryDirectory(prefix='aeroscience-asset-integrity-') as temp:
+            destination=Path(temp)/'wwwroot'
+            shutil.copytree(WEB,destination)
+            license_file=destination/'vendor/chart.js/LICENSE.txt'
+            original=license_file.read_bytes()
+            license_file.write_bytes(original.replace(b'\n',b'\r\n'))
+            with self.assertRaisesRegex(ValueError,'vendor/chart.js/LICENSE.txt'):
+                web_assets.verify(destination)
+            license_file.write_bytes(original+b'changed')
+            with self.assertRaisesRegex(ValueError,'vendor/chart.js/LICENSE.txt'):
+                web_assets.verify(destination)
+            license_file.unlink()
+            with self.assertRaisesRegex(ValueError,'vendor/chart.js/LICENSE.txt'):
+                web_assets.verify(destination)
+
+    @unittest.skipUnless(shutil.which('git'),'Git is required for Windows checkout regression checks')
+    def test_windows_git_checkout_and_existing_checkout_repair_preserve_all_pinned_bytes(self):
+        with tempfile.TemporaryDirectory(prefix='aeroscience-windows-checkout-') as temp:
+            temp=Path(temp)
+            seed=temp/'seed'
+            relative=Path('src/AeroScience.Engine/wwwroot')
+            seed_web=seed/relative
+            seed_web.mkdir(parents=True)
+            empty_hooks=temp/'no-hooks'
+            empty_hooks.mkdir()
+            def git(*arguments,cwd=seed):
+                return subprocess.run(['git','-c','commit.gpgSign=false',
+                    '-c','core.hooksPath='+str(empty_hooks),*arguments],cwd=cwd,
+                    check=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True)
+            for folder in ('vendor','geography'):
+                shutil.copytree(WEB/folder,seed_web/folder)
+            shutil.copy2(WEB/'assets-manifest.json',seed_web/'assets-manifest.json')
+            git('-c','init.defaultBranch=main','init','-q')
+            git('config','core.autocrlf','false')
+            git('config','user.name','AeroScience checkout fixture')
+            git('config','user.email','fixture@example.invalid')
+            git('add','.')
+            git('commit','-qm','Pinned asset fixture without checkout attributes')
+            legacy=temp/'existing-windows-checkout'
+            git('-c','core.autocrlf=true','clone','-q','--no-local',str(seed),str(legacy),cwd=temp)
+            git('config','core.autocrlf','true',cwd=legacy)
+            with self.assertRaisesRegex(ValueError,'vendor/chart.js/LICENSE.txt'):
+                web_assets.verify(legacy/relative)
+
+            # Pulling new attributes alone does not rewrite already converted files.
+            shutil.copy2(ROOT/'.gitattributes',seed/'.gitattributes')
+            git('add','.gitattributes')
+            git('commit','-qm','Preserve exact pinned asset bytes')
+            git('pull','--ff-only',cwd=legacy)
+            git('restore','--source=HEAD','--worktree','--',
+                (relative/'vendor').as_posix(),(relative/'geography').as_posix(),cwd=legacy)
+            git('add','--renormalize','--',(relative/'vendor').as_posix(),(relative/'geography').as_posix(),cwd=legacy)
+            self.assertEqual(web_assets.verify(legacy/relative),len(json.loads((WEB/'assets-manifest.json').read_text())['files']))
+            self.assertEqual(git('status','--porcelain',cwd=legacy).stdout,'')
+
+            fresh=temp/'fresh-windows-checkout'
+            git('-c','core.autocrlf=true','clone','-q','--no-local',str(seed),str(fresh),cwd=temp)
+            self.assertEqual(web_assets.verify(fresh/relative),web_assets.verify())
+            for name in json.loads((WEB/'assets-manifest.json').read_text())['files']:
+                with self.subTest(asset=name):
+                    self.assertEqual((fresh/relative/name).read_bytes(),(WEB/name).read_bytes())
