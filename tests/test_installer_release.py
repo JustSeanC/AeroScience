@@ -57,6 +57,8 @@ class InstallerReleaseTests(unittest.TestCase):
         recipe.parent.mkdir(parents=True)
         original = (i.p.REPO/'scripts/installer/AeroScience.iss').read_text(encoding='utf-8-sig')
         recipe.write_bytes(original.replace('\n', '\r\n').encode('utf-8'))
+        assets = checkout/'src/AeroScience.Engine/wwwroot/assets-manifest.json'; assets.parent.mkdir(parents=True)
+        assets.write_bytes((i.p.REPO/'src/AeroScience.Engine/wwwroot/assets-manifest.json').read_bytes())
         with patch.object(i.p, 'REPO', checkout): i.validate_candidate(folder, self.flow.acceptance)
 
 

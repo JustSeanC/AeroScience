@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.2.1 — Mission Planning & Science Experience (prerelease)
+
+- Detect actual installed/bundled SDK toolbar versions at startup; offer Update or Remind Me Later and dedicated Toolbar settings. Reject newer-package downgrades and unsupported protocols.
+- Share one asynchronous graphical copy/verify progress flow across setup, startup and repair, with outside-Community staging/backups, exclusive update leases, final installed-file verification and rollback.
+- Replace the coordinate grid with locally bundled Leaflet/Natural Earth geography, offline airport/city/coordinate search, pan/pinch/wheel/fit/centering, draggable route points and editable survey polygons. Optional online detail tiles require explicit disclosure and consent.
+- Add eight WGS84 geodesic patterns with live preview, dimensional controls, editable ordinary waypoints, metadata, regeneration/removal and undo; no simulator writes.
+- Compare recorded tracks with saved plans using ordered waypoint tolerances, gap-aware distances, route deviations, altitude errors and approximate polygon path traversal. Report methods/limitations; do not invent scientific coverage percentages or scores.
+- Save reusable instrument presets independently of plans and mission snapshots; warn about unsupported future instruments rather than enabling them.
+- Add synchronized Pause/Resume Science Collection while flight recording continues, retain datasets/configuration and persist deliberate pause intervals separately from unexpected cadence gaps.
+- Rename Instruments to Science, preserve the old bookmark, and add a Mission Control science summary and direct link with distinct acquisition-set/measurement-value counts.
+- Persist global science display units (C/F/K, inHg/hPa/mbar/kPa, kt/m/s/km/h, degrees true, kg/m³/slug/ft³, ft/m, NM/km/mi) without rewriting canonical observations or default exports.
+- Redesign native Payload cards and browser Science cards, collapse diagnostics, improve all-page typography/responsiveness and introduce local Chart.js scatter/time charts with readable units/ticks/tooltips, selected ranges, expansion, point toggles, PNG and explicit display-unit CSV.
+- Offer explicit permanent deletion without a new backup or recovery-backup-then-delete in native Data Management; separate destination/deletion scope and reject backups within managed data or the replaceable installation.
+- Safely upgrade mission schema 4 to 5 with a verified SQLite backup; preserve telemetry, modes, datasets and source units. Keep real SimConnect ABI, read-only guidance, local archive and installer identity.
+- Require matching v0.2.1 genuine SDK package/receipt and bundled geography/library/license integrity; retain the manual Windows installer/prerelease path and private-safe runtime authorization.
+- Actual Windows/MSFS/native window/iPad/Quest acceptance for this version remains pending until performed against its exact installer. See `docs/v0.2.1-windows-testing.md`.
+
+
 ## 0.2.0 — Science Mission Operations (source; Windows acceptance pending)
 
 - Add optional saved Mission Planner, four editable templates, ordered waypoints/survey polygons, preflight notes and immutable recording snapshots. Retain immediate spontaneous recording and aircraft-agnostic Universal/Realistic modes.

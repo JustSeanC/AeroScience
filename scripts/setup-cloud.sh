@@ -25,3 +25,5 @@ dotnet restore AeroScience.sln --locked-mode
 dotnet build AeroScience.sln -c Release --no-restore --nologo
 npm ci --ignore-scripts
 npm run check:web
+
+python3 scripts/build/verify_web_assets.py

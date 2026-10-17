@@ -1,6 +1,10 @@
 # Install AeroScience for Windows
 
-The recommended public download is **AeroScience-Setup-v0.2.0.exe** from [GitHub Releases](https://github.com/JustSeanC/AeroScience/releases). The new v0.2.0 source requires its own Windows/SDK build, installation, upgrade and live science acceptance before publication. Prior v0.1.1 passes do not verify this changed release.
+For **v0.2.1**, follow [Windows build and acceptance](docs/v0.2.1-windows-testing.md). Testers download and run **AeroScience-Setup-v0.2.1.exe**. The internal candidate ZIP is not the recommended installation method. An older installed Community toolbar is detected at startup; close MSFS and choose Update Toolbar, or postpone and use Settings → Toolbar later.
+
+The installer must be generated and accepted on Windows with the genuine MSFS 2024 SDK. No v0.2.1 setup EXE was generated or hardware-accepted in Linux. Preserve the tested candidate and finalize it without rebuilding.
+
+The recommended public download is **AeroScience-Setup-v0.2.1.exe** from [GitHub Releases](https://github.com/JustSeanC/AeroScience/releases). The new v0.2.1 source requires its own Windows/SDK build, installation, upgrade and live science acceptance before publication. Prior v0.1.1 passes do not verify this changed release.
 
 ## Install and launch
 
@@ -34,7 +38,7 @@ For optional iPad use, enable private-LAN access in Settings and choose the PC's
 
 ## Update and uninstall
 
-End recording and exit AeroScience, then run the next version's setup EXE. The stable installer identity reuses the installation folder and shortcuts; existing data locations/settings remain selected. Data lives outside replaceable application files. If the toolbar needs updating, use Settings with MSFS closed. There is no automatic updater in this alpha.
+End recording and exit AeroScience, then run the next version's setup EXE. The stable installer identity reuses the installation folder and shortcuts; existing data locations/settings remain selected. Data lives outside replaceable application files. If the toolbar needs updating, use Settings with MSFS closed. Startup automatically compares toolbar package versions and offers a confirmed graphical update. Remind Me Later postpones the prompt for that session; Settings → Toolbar can update/repair later. No automatic internet binary download is introduced.
 
 To uninstall, close AeroScience and use **Windows Settings → Apps → Installed apps → AeroScience → Uninstall**. Application files and shortcuts are removed. Mission history, science files, settings and migration backups are retained by default. A separate **Yes/No** prompt asks about the Community toolbar; **No** keeps it. **Yes** moves only the recognized AeroScience package to a backup outside Community. MSFS must be closed. If removal fails or MSFS is running, the toolbar remains and a message explains it; reinstall AeroScience to manage it through Settings later. Other add-ons and the shared Visual C++ runtime remain installed.
 

@@ -3,7 +3,7 @@
 param([string]$Configuration = 'Release')
 $ErrorActionPreference = 'Stop'
 $repo = (Resolve-Path "$PSScriptRoot/../..").Path
-foreach ($command in @('dotnet', 'npm')) {
+foreach ($command in @('dotnet', 'npm', 'python')) {
     if (-not (Get-Command $command -ErrorAction SilentlyContinue)) { throw "Required development tool is missing from PATH: $command" }
 }
 Push-Location $repo
@@ -14,6 +14,8 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'Tests failed.' }
     npm ci --ignore-scripts
     if ($LASTEXITCODE -ne 0) { throw 'Browser tooling restore failed.' }
+    python scripts/build/verify_web_assets.py
+    if ($LASTEXITCODE -ne 0) { throw 'Bundled offline assets failed integrity checks.' }
     npm run check:web
     if ($LASTEXITCODE -ne 0) { throw 'Web JavaScript validation failed.' }
     dotnet publish src/AeroScience.Desktop -c $Configuration -r win-x64 --self-contained true --no-restore -o artifacts/Windows-Companion

@@ -6,6 +6,7 @@ import struct
 import subprocess
 import sys
 import unittest
+import shutil
 
 spec = importlib.util.spec_from_file_location('packaging', Path(__file__).resolve().parents[1]/'scripts/release/package_release.py')
 packaging = importlib.util.module_from_spec(spec); spec.loader.exec_module(packaging)
@@ -15,6 +16,12 @@ class PackagingTests(unittest.TestCase):
     def companion_fixture(self, root):
         # Minimal structural PE fixture; never evidence of Windows execution.
         (root/'wwwroot').mkdir(parents=True)
+        web=packaging.REPO/'src/AeroScience.Engine/wwwroot'
+        for directory in ('vendor','geography'):
+            shutil.copytree(web/directory,root/'wwwroot'/directory)
+        shutil.copy2(web/'assets-manifest.json',root/'wwwroot/assets-manifest.json')
+        for name in ('patterns.js','analysis.js','science-display.js'):
+            shutil.copy2(web/name,root/'wwwroot'/name)
         image = bytearray(512); image[:2] = b'MZ'; struct.pack_into('<I', image, 60, 128)
         image[128:132] = b'PE\0\0'; struct.pack_into('<H', image, 132, 0x8664)
         struct.pack_into('<H', image, 152, 0x20b); struct.pack_into('<H', image, 220, 2)
@@ -29,6 +36,7 @@ class PackagingTests(unittest.TestCase):
                     'minimum_game_version': minimum_game_version, 'dependencies': []}
         (root/'manifest.json').write_text(json.dumps(manifest))
         assets = {
+            'html_ui/InGamePanels/AeroScience/toolbar-compatibility.json': json.dumps({'protocol':1,'applicationVersion':packaging.VERSION}).encode(),
             'InGamePanels/aeroscience_panel.spb': b'\x00SPB structural test fixture' * 3,
             'html_ui/InGamePanels/AeroScience/AeroScience.html':
                 b'<ingame-ui panel-id="PANEL_AEROSCIENCE">AeroScience.js AeroScience.css</ingame-ui>',
