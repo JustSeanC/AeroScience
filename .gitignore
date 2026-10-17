@@ -19,3 +19,6 @@ __pycache__/
 *.[mM][bB][oO][xX]
 *.[pP][sS][tT]
 *.[oO][sS][tT]
+
+# User-specific protected map credentials never belong in source or release inputs.
+**/maps.json

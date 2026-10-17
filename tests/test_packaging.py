@@ -20,7 +20,7 @@ class PackagingTests(unittest.TestCase):
         for directory in ('vendor','geography'):
             shutil.copytree(web/directory,root/'wwwroot'/directory)
         shutil.copy2(web/'assets-manifest.json',root/'wwwroot/assets-manifest.json')
-        for name in ('patterns.js','analysis.js','science-display.js'):
+        for name in ('patterns.js','analysis.js','science-display.js','basemaps.js','geographic-view.js','route-export.js'):
             shutil.copy2(web/name,root/'wwwroot'/name)
         image = bytearray(512); image[:2] = b'MZ'; struct.pack_into('<I', image, 60, 128)
         image[128:132] = b'PE\0\0'; struct.pack_into('<H', image, 132, 0x8664)
@@ -40,6 +40,9 @@ class PackagingTests(unittest.TestCase):
             'InGamePanels/aeroscience_panel.spb': b'\x00SPB structural test fixture' * 3,
             'html_ui/InGamePanels/AeroScience/AeroScience.html':
                 b'<ingame-ui panel-id="PANEL_AEROSCIENCE">AeroScience.js AeroScience.css</ingame-ui>',
+            'html_ui/InGamePanels/AeroScience/AeroScience.Map.js': b'// structural map fixture, not simulator tested',
+            'html_ui/InGamePanels/AeroScience/AeroScience.Geography.js': b'window.AeroScienceCountries={features:[]};',
+            'html_ui/InGamePanels/AeroScience/geography-provenance.json': b'{}',
             'html_ui/InGamePanels/AeroScience/AeroScience.js': b'// test fixture',
             'html_ui/InGamePanels/AeroScience/AeroScience.css': b'/* test fixture */',
             'html_ui/InGamePanels/AeroScience/ProofOfConcept.html': b'<p>Diagnostic fixture</p>',
@@ -159,7 +162,7 @@ class PackagingTests(unittest.TestCase):
             self.assertEqual(output.with_suffix('.zip.sha256').read_text().split()[0], packaging.hashlib.sha256(output.read_bytes()).hexdigest())
 
     def test_companion_rejects_console_entry_test_assemblies_and_personal_data(self):
-        for forbidden in ('nested/AEROSCIENCE.TESTHOST.DLL', 'Launch-Simulated.cmd', 'missions.db', 'settings.json', 'engine.log'):
+        for forbidden in ('nested/AEROSCIENCE.TESTHOST.DLL', 'Launch-Simulated.cmd', 'missions.db', 'settings.json', 'maps.json', 'engine.log'):
             with self.subTest(forbidden=forbidden), tempfile.TemporaryDirectory() as temp:
                 root = Path(temp); self.companion_fixture(root)
                 extra = root/forbidden; extra.parent.mkdir(parents=True, exist_ok=True); extra.write_text('must not ship')
@@ -219,6 +222,21 @@ class PackagingTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, 'full-toolbar'): packaging.validate_receipt(receipt, {})
             acceptance = root/'acceptance.json'; acceptance.write_text(json.dumps({'version': packaging.RELEASE_VERSION, 'tester': 'test fixture', 'tested_utc': '2026-10-17T00:00:00Z', 'source_commit': 'a'*40, 'checks': {}}))
             with self.assertRaisesRegex(ValueError, 'pending'): packaging.validate_acceptance(acceptance)
+
+    def test_acceptance_reports_all_missing_notes_and_results_together(self):
+        with tempfile.TemporaryDirectory() as temp:
+            path=Path(temp)/'acceptance.json'
+            data=packaging.acceptance_template('a'*40,'b'*64)
+            data.update(tester='STRUCTURAL FIXTURE ONLY',tested_utc='2026-10-17T00:00:00Z')
+            for name in packaging.ALPHA_ACCEPTANCE:
+                data['checks'][name].update(result='passed',evidence='STRUCTURAL TEST ONLY')
+            data['checks']['upgrade_preservation']['evidence']=''
+            data['checks']['geographic_maps']['result']='pending'
+            path.write_text(json.dumps(data))
+            with self.assertRaises(ValueError) as captured:packaging.validate_acceptance(path)
+            self.assertIn('upgrade_preservation: passed, but its test note is empty',str(captured.exception))
+            self.assertIn('geographic_maps',str(captured.exception))
+            self.assertIn("result is 'pending'",str(captured.exception))
 
     def test_archive_has_one_root_and_refuses_overwrite(self):
         with tempfile.TemporaryDirectory() as temp:

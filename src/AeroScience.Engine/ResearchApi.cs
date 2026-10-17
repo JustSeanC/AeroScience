@@ -6,10 +6,18 @@ namespace AeroScience.Engine;
 
 public sealed record EstimateRequest(InstrumentConfiguration[]? Instruments, double? DurationMinutes);
 public sealed record SciencePauseRequest(bool Paused);
+public sealed record MapLayerRequest(string Layer);
 public static class ResearchApi
 {
     public static void MapResearchEndpoints(this WebApplication app)
     {
+        app.MapGet("/api/maps/settings", (MapSettings maps, HttpContext c) => new { configuration = maps.Get(), canConfigure = AccessControl.IsLoopback(c), privacy = MapSettings.Privacy });
+        app.MapPost("/api/maps/settings", (MapSettingsRequest request, MapSettings maps, HttpContext c) => AccessControl.IsLoopback(c) ? Results.Ok(maps.Save(request)) : Results.StatusCode(403));
+        app.MapPost("/api/maps/layer", (MapLayerRequest request, MapSettings maps) => maps.SelectLayer(request.Layer));
+        app.MapGet("/api/maps/client", (string? layer, MapSettings maps, HttpContext c) => maps.Client(layer, c.RequestAborted));
+        app.MapPost("/api/maps/test", async (MapSettings maps, HttpContext c) => AccessControl.IsLoopback(c) ? Results.Ok(await maps.Client("satellite", c.RequestAborted)) : Results.StatusCode(403));
+        app.MapPost("/api/routes/export", (RouteExportRequest request) => RouteExports.Generate(request));
+        app.MapGet("/api/maps/active", (RouteMapService maps) => maps.State(null, null, includeTrack: false));
         app.MapGet("/api/display/units", (ScienceUnitSettings settings) => new { preferences = settings.Get(), options = ScienceUnits.Options, aviation = ScienceUnits.Aviation, scientific = ScienceUnits.Scientific, warning = settings.Warning });
         app.MapPost("/api/display/units", (ScienceUnitPreferences preferences, ScienceUnitSettings settings) => settings.Set(preferences));
         app.MapPost("/api/missions/{id:guid}/science/state", (Guid id, SciencePauseRequest request, MissionCoordinator missions) => missions.SetSciencePaused(id, request.Paused));

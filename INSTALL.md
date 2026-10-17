@@ -1,10 +1,10 @@
 # Install AeroScience for Windows
 
-For **v0.2.1**, follow [Windows build and acceptance](docs/v0.2.1-windows-testing.md). Testers download and run **AeroScience-Setup-v0.2.1.exe**. The internal candidate ZIP is not the recommended installation method. An older installed Community toolbar is detected at startup; close MSFS and choose Update Toolbar, or postpone and use Settings → Toolbar later.
+For **v0.2.2**, follow [Windows build and acceptance](docs/v0.2.2-windows-testing.md). Testers download and run **AeroScience-Setup-v0.2.2.exe**. The internal candidate ZIP is not the recommended installation method. An older installed Community toolbar is detected at startup; close MSFS and choose Update Toolbar, or postpone and use Settings → Toolbar later.
 
-The installer must be generated and accepted on Windows with the genuine MSFS 2024 SDK. No v0.2.1 setup EXE was generated or hardware-accepted in Linux. Preserve the tested candidate and finalize it without rebuilding.
+The installer must be generated and accepted on Windows with the genuine MSFS 2024 SDK. No v0.2.2 setup EXE was generated or hardware-accepted in Linux. Preserve the tested candidate and finalize it without rebuilding.
 
-The recommended public download is **AeroScience-Setup-v0.2.1.exe** from [GitHub Releases](https://github.com/JustSeanC/AeroScience/releases). The new v0.2.1 source requires its own Windows/SDK build, installation, upgrade and live science acceptance before publication. Prior v0.1.1 passes do not verify this changed release.
+The recommended public download is **AeroScience-Setup-v0.2.2.exe** from [GitHub Releases](https://github.com/JustSeanC/AeroScience/releases). The new v0.2.2 source requires its own Windows/SDK build, installation, upgrade and live science acceptance before publication. Prior v0.1.1 passes do not verify this changed release.
 
 ## Install and launch
 

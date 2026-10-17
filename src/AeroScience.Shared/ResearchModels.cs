@@ -6,7 +6,7 @@ public enum ScienceCollectionStatus { Collecting, Paused, Stopped, AwaitingSourc
 public enum ScienceProvenance { SimulatorReported, Derived, InstrumentModeled }
 public enum AutopilotEngagement { Unavailable, Disengaged, Engaged }
 public sealed record ResearchWaypoint(string Name, double Latitude, double Longitude, double? TargetAltitudeFeet = null,
-    string? Instructions = null, string? Objective = null, Guid? PatternId = null);
+    string? Instructions = null, string? Objective = null, Guid? PatternId = null, Guid? Id = null, string? NavigationIdentifier = null);
 public sealed record SurveyArea(string Name, Coordinates[] Vertices);
 public sealed record InstrumentConfiguration(string InstrumentId, bool Enabled = false, int IntervalMs = 1000);
 public sealed record MissionPlan(Guid Id, string Name, MissionTemplateKind Template = MissionTemplateKind.GeneralResearch,
@@ -14,7 +14,8 @@ public sealed record MissionPlan(Guid Id, string Name, MissionTemplateKind Templ
     string? IntendedAircraft = null, string? Departure = null, string? Destination = null,
     ResearchWaypoint[]? Waypoints = null, SurveyArea[]? SurveyAreas = null, double? MinimumAltitudeFeet = null,
     double? MaximumAltitudeFeet = null, double? EstimatedDurationMinutes = null,
-    InstrumentConfiguration[]? Instruments = null, string? PreflightNotes = null, DateTimeOffset? UpdatedUtc = null, PatternDefinition[]? Patterns = null);
+    InstrumentConfiguration[]? Instruments = null, string? PreflightNotes = null, DateTimeOffset? UpdatedUtc = null, PatternDefinition[]? Patterns = null,
+    string FlightRules = "VFR", double? CruisingAltitudeFeet = null);
 public sealed record MissionTemplate(MissionTemplateKind Id, string Name, string Objective,
     InstrumentConfiguration[] Instruments, string[] NoteCategories);
 public sealed record MeasurementDefinition(string Id, string Name, string Unit, string SimulatorVariable);
@@ -50,7 +51,7 @@ public sealed record MarkerRequest(string Category = "observation", string? Note
 public sealed record MissionNote(Guid Id, Guid MissionId, string Phase, string Text, DateTimeOffset TimestampUtc);
 public sealed record NoteRequest(string Text, string Phase = "postflight");
 public sealed record TrackPoint(long Sequence, DateTimeOffset TimestampUtc, double Latitude, double Longitude,
-    double AltitudeMslFeet);
+    double AltitudeMslFeet, bool BreakBefore = false);
 public sealed record TrackPage(TrackPoint[] Points, long NextSequence, bool HasMore, long TotalSamples, bool Downsampled);
 public sealed record MeasurementSummary(string MeasurementId, string Unit, long Count, double Minimum,
     double Maximum, double Mean, DateTimeOffset FirstUtc, DateTimeOffset LastUtc);

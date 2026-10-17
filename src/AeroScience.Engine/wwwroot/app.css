@@ -1407,3 +1407,8 @@ dialog {
 .connection-strip { flex-wrap: wrap; }
 .connection-strip > div { min-width: 0; flex-wrap: wrap; }
 #detail-content p, .history-card p, .mission-panel p { font-size: 15px; }
+
+.route-export { max-width: 900px; display:grid; gap:12px; padding:16px; }
+.route-export textarea { width:100%; min-height:200px; box-sizing:border-box; font-family:monospace; }
+.route-export select { max-width:100%; }
+.map-layer-status { min-height:1.4em; }

@@ -43,8 +43,9 @@ public sealed record SamplingDiagnostics(long ReceivedUpdates, long CommittedSam
     long MissingIntervals, double? AchievedHz, DateTimeOffset? FirstSampleUtc, DateTimeOffset? LastSampleUtc,
     double? MissionAverageHz = null, double? FirstSampleDelaySeconds = null);
 public sealed record EngineSnapshot(ConnectionInfo Connection, TelemetryFrame? Telemetry,
-    Mission? ActiveMission, int SamplingIntervalMs, string Version = "0.2.1", SamplingDiagnostics? Sampling = null,
-    ResearchState? Research = null);
+    Mission? ActiveMission, int SamplingIntervalMs, string Version = "0.2.2", SamplingDiagnostics? Sampling = null,
+    ResearchState? Research = null, MapLayerState? Maps = null);
+public sealed record MapLayerState(string Revision, bool OnlineEnabled, string Layer);
 public sealed record StartMissionRequest(string Name, ScienceMode Mode = ScienceMode.Universal,
     Guid? PlanId = null, InstrumentConfiguration[]? Instruments = null, string? Objective = null);
 public sealed record InstrumentMissionContext(Guid MissionId, ScienceMode Mode);

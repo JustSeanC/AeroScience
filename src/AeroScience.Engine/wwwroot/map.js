@@ -1,6 +1,8 @@
+import "./geographic-view.js";
+import { layerSelector } from "./basemaps.js";
 const valid = (p) =>
   Number.isFinite(p?.latitude) && Number.isFinite(p?.longitude);
-const longitude = (x) => ((x + 540) % 360) - 180;
+const longitude = (x) => window.AeroScienceGeo.wrap(x);
 const ll = (p, base = p.longitude) => [
   Math.max(-85.0511, Math.min(85.0511, p.latitude)),
   base + longitude(p.longitude - base),
@@ -19,8 +21,12 @@ const label = (value) => {
   node.textContent = value;
   return node;
 };
+const activeMaps = new Set();
 export class ResearchMap {
   constructor(parent, onPoint, options = {}) {
+    for (const previous of activeMaps)
+      if (!previous.container.isConnected) previous.destroy();
+    activeMaps.add(this);
     this.locations = [];
     this.data = {};
     this.onPoint = onPoint;
@@ -124,35 +130,79 @@ export class ResearchMap {
         find();
       }
     };
-    const online = document.createElement("label"),
-      check = document.createElement("input");
-    check.type = "checkbox";
-    online.append(check, " Optional online detail tiles");
-    tools.append(online);
-    check.onchange = () => {
-      if (check.checked) {
-        if (
-          !confirm(
-            "Online map detail sends the visible map area and your IP address to OpenStreetMap tile servers and needs internet. Attribution and normal browser caching apply. No bulk download or offline tile cache is provided. Enable for this map?",
-          )
-        ) {
-          check.checked = false;
-          return;
+    this.onlineTiles = [];
+    this.applyBasemap = (client) => {
+      this.basemapClient = client;
+      this.basemapVisible = !!(
+        this.container.clientWidth &&
+        this.container.clientHeight &&
+        !document.hidden
+      );
+      for (const tile of this.onlineTiles) this.map.removeLayer(tile);
+      this.onlineTiles = [];
+      if (this.esriLogo) {
+        this.map.removeControl(this.esriLogo);
+        this.esriLogo = null;
+      }
+      this.onlineLayer = client.layer;
+      this.layerError = client.error || null;
+      this.countries?.setStyle({
+        opacity: client.tiles.length ? 0 : 1,
+        fillOpacity: client.tiles.length ? 0 : 0.65,
+      });
+      if (!this.basemapVisible) return;
+      for (const source of client.tiles || []) {
+        const attribution = label(source.attribution);
+        if (client.layer === "streets") {
+          const link = document.createElement("a");
+          link.href = "https://www.openstreetmap.org/copyright";
+          link.textContent = "© OpenStreetMap contributors";
+          link.target = "_blank";
+          link.rel = "noopener noreferrer";
+          attribution.replaceChildren(link);
         }
-        this.tiles = L.tileLayer(
-          "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-          {
-            maxZoom: 19,
-            attribution: "© OpenStreetMap contributors",
-            crossOrigin: true,
-          },
-        ).addTo(this.map);
-        this.tiles.on("tileerror", () => {
-          this.coordinate.textContent =
-            "Online tiles unavailable. Bundled offline geography remains available.";
+        const safe = attribution.outerHTML;
+        const tile = L.tileLayer(source.url, {
+          maxZoom: source.maxZoom,
+          attribution: safe,
+          updateWhenIdle: true,
+          keepBuffer: 1,
+        }).addTo(this.map);
+        tile.once("tileerror", () => {
+          if (!this.onlineTiles.includes(tile)) return;
+          for (const layer of this.onlineTiles) this.map.removeLayer(layer);
+          this.onlineTiles = [];
+          if (this.esriLogo) {
+            this.map.removeControl(this.esriLogo);
+            this.esriLogo = null;
+          }
+          this.countries?.setStyle({ opacity: 1, fillOpacity: 0.65 });
+          this.layerError =
+            "Online provider unavailable or quota/authentication failed. Offline geography remains available; route and recording are unchanged. Select another layer or retry in Settings.";
+          this.coordinate.textContent = this.layerError;
         });
-      } else if (this.tiles) this.map.removeLayer(this.tiles);
+        this.onlineTiles.push(tile);
+      }
+      if (client.layer.startsWith("satellite") && this.onlineTiles.length) {
+        const Logo = L.Control.extend({
+          onAdd() {
+            const a = document.createElement("a");
+            a.href = "https://www.esri.com/";
+            a.target = "_blank";
+            a.rel = "noopener noreferrer";
+            const img = document.createElement("img");
+            img.src = "https://js.arcgis.com/3.46/esri/images/map/logo-med.png";
+            img.alt = "Powered by Esri";
+            img.width = 65;
+            img.style.height = "auto";
+            a.append(img);
+            return a;
+          },
+        });
+        this.esriLogo = new Logo({ position: "bottomleft" }).addTo(this.map);
+      }
     };
+    this.layerCleanup = layerSelector(tools, this.applyBasemap);
     this.map.on("click", (e) => {
       if (onPoint && !this.drawing)
         onPoint({ latitude: e.latlng.lat, longitude: longitude(e.latlng.lng) });
@@ -185,18 +235,31 @@ export class ResearchMap {
       });
       this.map.on("draw:edited draw:deleted", () => this.areaChanges());
     }
-    this.observer = new ResizeObserver(() =>
-      this.map.invalidateSize({ pan: false }),
-    );
+    this.visibilityChanged = () => {
+      const visible = !!(
+        this.container.clientWidth &&
+        this.container.clientHeight &&
+        !document.hidden
+      );
+      if (this.basemapClient && visible !== this.basemapVisible)
+        this.applyBasemap(this.basemapClient);
+    };
+    document.addEventListener("visibilitychange", this.visibilityChanged);
+    this.observer = new ResizeObserver(() => {
+      this.map.invalidateSize({ pan: false });
+      this.visibilityChanged();
+    });
     this.observer.observe(this.container);
     this.ready = loadGeography()
       .then(([countries, places, airports]) => {
-        L.geoJSON(countries, {
+        this.countries = L.geoJSON(countries, {
           style: {
             color: "#567080",
             weight: 1,
             fillColor: "#193039",
-            fillOpacity: 0.65,
+            fillOpacity:
+              this.onlineLayer && this.onlineLayer !== "offline" ? 0 : 0.65,
+            opacity: this.onlineLayer && this.onlineLayer !== "offline" ? 0 : 1,
           },
           onEachFeature: (f, l) =>
             l.bindTooltip(label(f.properties.NAME || f.properties.ADMIN)),
@@ -238,6 +301,13 @@ export class ResearchMap {
       });
     this.map.whenReady(() => this.draw());
   }
+  destroy() {
+    activeMaps.delete(this);
+    this.layerCleanup?.();
+    this.observer?.disconnect();
+    document.removeEventListener("visibilitychange", this.visibilityChanged);
+    this.map.remove();
+  }
   areaChanges() {
     this.options.onAreasChange(
       this.areas.getLayers().map((l) => ({
@@ -249,6 +319,11 @@ export class ResearchMap {
     );
   }
   set(data) {
+    const planId = data.plan?.id || null;
+    if (planId !== this.planId) {
+      this.planId = planId;
+      this.initialized = false;
+    }
     this.data = data;
     this.draw();
     const hasPlan =
@@ -316,9 +391,18 @@ export class ResearchMap {
       d = this.data,
       plan = d.plan || {},
       base = this.geometry()[0]?.longitude ?? 0;
-    this.route.setLatLngs(
-      (plan.waypoints || []).filter(valid).map((p) => ll(p, base)),
-    );
+    const staticKey = JSON.stringify([
+      plan.waypoints,
+      plan.surveyAreas,
+      d.markers,
+      d.samples,
+    ]);
+    const staticChanged = staticKey !== this.staticKey;
+    this.staticKey = staticKey;
+    if (staticChanged)
+      this.route.setLatLngs(
+        (plan.waypoints || []).filter(valid).map((p) => ll(p, base)),
+      );
     this.track.clearLayers();
     // Missing recording intervals remain visibly disconnected. Original telemetry is unchanged.
     let segment = [],
@@ -330,57 +414,67 @@ export class ResearchMap {
     };
     for (const p of (d.track || []).filter(valid)) {
       if (
-        previous &&
-        p.timestampUtc &&
-        previous.timestampUtc &&
-        new Date(p.timestampUtc) - new Date(previous.timestampUtc) >
-          (d.maximumGapSeconds || 5) * 1000
+        p.breakBefore === true ||
+        (p.breakBefore === undefined &&
+          previous &&
+          p.timestampUtc &&
+          previous.timestampUtc &&
+          new Date(p.timestampUtc) - new Date(previous.timestampUtc) >
+            (d.maximumGapSeconds || 5) * 1000)
       )
         flush();
       segment.push(ll(p, base));
       previous = p;
     }
     flush();
-    this.points.clearLayers();
-    for (const [i, p] of (plan.waypoints || []).entries()) {
-      if (!valid(p)) continue;
-      const m = L.marker(ll(p, base), {
-        draggable: !!this.options.onWaypointsChange,
-        icon: L.divIcon({
-          className: "waypoint-pin",
-          html: String(i + 1),
-          iconSize: [28, 28],
-        }),
-      }).addTo(this.points);
-      m.bindTooltip(label(p.name || `Waypoint ${i + 1}`));
-      m.on("dragend", () => {
-        const q = m.getLatLng();
-        const points = structuredClone(plan.waypoints);
-        points[i] = { ...p, latitude: q.lat, longitude: longitude(q.lng) };
-        this.options.onWaypointsChange(points);
-      });
+    if (staticChanged) {
+      this.points.clearLayers();
+      for (const [i, p] of (plan.waypoints || []).entries()) {
+        if (!valid(p)) continue;
+        const m = L.marker(ll(p, base), {
+          draggable: !!this.options.onWaypointsChange,
+          icon: L.divIcon({
+            className: "waypoint-pin",
+            html: String(i + 1),
+            iconSize: [28, 28],
+          }),
+        }).addTo(this.points);
+        m.bindTooltip(label(p.name || `Waypoint ${i + 1}`));
+        m.on("dragend", () => {
+          const q = m.getLatLng();
+          const points = structuredClone(plan.waypoints);
+          points[i] = { ...p, latitude: q.lat, longitude: longitude(q.lng) };
+          this.options.onWaypointsChange(points);
+        });
+      }
+      for (const p of (d.markers || []).filter(valid))
+        L.circleMarker(ll(p, base), { radius: 6, color: "#eb9bbd" })
+          .bindTooltip(
+            label(`${p.category || "Marker"} · ${p.timestampUtc || ""}`),
+          )
+          .addTo(this.points);
+      for (const p of (d.samples || []).filter(valid))
+        L.circleMarker(ll(p, base), { radius: 2, color: "#a4bdf3" }).addTo(
+          this.points,
+        );
     }
-    for (const p of (d.markers || []).filter(valid))
-      L.circleMarker(ll(p, base), { radius: 6, color: "#eb9bbd" })
-        .bindTooltip(
-          label(`${p.category || "Marker"} · ${p.timestampUtc || ""}`),
-        )
-        .addTo(this.points);
-    for (const p of (d.samples || []).filter(valid))
-      L.circleMarker(ll(p, base), { radius: 2, color: "#a4bdf3" }).addTo(
-        this.points,
-      );
-    if (valid(d.aircraft))
-      L.marker(ll(d.aircraft, base), {
-        icon: L.divIcon({
-          className: "aircraft-pin",
-          html: "▲",
-          iconSize: [24, 24],
-        }),
-      })
-        .bindTooltip("Live aircraft")
-        .addTo(this.points);
-    if (!this.drawing) {
+    if (valid(d.aircraft)) {
+      if (!this.aircraftMarker)
+        this.aircraftMarker = L.marker(ll(d.aircraft, base), {
+          icon: L.divIcon({
+            className: "aircraft-pin",
+            html: "▲",
+            iconSize: [24, 24],
+          }),
+        })
+          .bindTooltip("Live aircraft")
+          .addTo(this.map);
+      else this.aircraftMarker.setLatLng(ll(d.aircraft, base));
+    } else if (this.aircraftMarker) {
+      this.map.removeLayer(this.aircraftMarker);
+      this.aircraftMarker = null;
+    }
+    if (staticChanged && !this.drawing) {
       this.areas.clearLayers();
       for (const a of plan.surveyAreas || []) {
         const poly = L.polygon(
@@ -393,7 +487,11 @@ export class ResearchMap {
       }
     }
     this.coordinate.textContent =
-      "Offline Natural Earth geography · Gold: planned · Turquoise: recorded · Pink: markers · Wheel/pinch to zoom. " +
+      (this.layerError ? this.layerError + " " : "") +
+      (this.onlineTiles.length
+        ? "Online basemap with bundled geographic reference"
+        : "Offline Natural Earth geography") +
+      " · Gold: planned · Turquoise: recorded · Pink: markers · Wheel/pinch to zoom. " +
       (this.initialized ? "" : "No location selected: regional default USA. ") +
       (this.onPoint
         ? "Click to add; numbered waypoints can be dragged. "

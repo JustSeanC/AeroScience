@@ -67,7 +67,7 @@ public static class FlightPatterns
         }
         if (points.Count > 1000) throw new ArgumentException("This pattern exceeds 1,000 editable waypoints. Reduce its orbits or legs.");
         var distance = points.Zip(points.Skip(1), (a, b) => Geodesy.Distance(a, b)).Sum();
-        return new(d, points.Select((p, i) => new ResearchWaypoint($"{d.Kind} {i + 1}", p.Latitude, p.Longitude, d.TargetAltitudeFeet, PatternId: d.Id)).ToArray(), distance,
+        return new(d, points.Select((p, i) => new ResearchWaypoint($"{d.Kind} {i + 1}", p.Latitude, p.Longitude, d.TargetAltitudeFeet, PatternId: d.Id, Id: MissionPlanning.StableWaypointId(d.Id, i))).ToArray(), distance,
             "WGS84 ellipsoid / GeographicLib. Curves use 5-degree samples. All generated points remain editable. No aircraft or autopilot commands.");
     }
 }

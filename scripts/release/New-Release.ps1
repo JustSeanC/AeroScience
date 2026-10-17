@@ -13,7 +13,7 @@ try {
     $OutputDirectory = [IO.Path]::GetFullPath($OutputDirectory)
     if (-not $CandidateFolder) { $CandidateFolder = Join-Path $OutputDirectory 'installer-candidate' }
     $result = python scripts/release/installer_release.py finalize --folder $CandidateFolder --acceptance $AcceptanceRecord --output $OutputDirectory
-    if ($LASTEXITCODE -ne 0) { throw 'Installer release validation failed. Complete genuine acceptance for this exact setup EXE; do not publish the candidate.' }
+    if ($LASTEXITCODE -ne 0) { throw 'Release finalization stopped. Read the specific validation message above. The tested candidate and any existing final release files were preserved; no rebuild is required to correct acceptance notes.' }
     $info = $result | ConvertFrom-Json
     Write-Host "Primary installer: $OutputDirectory\$($info.asset_name)"
     Write-Host "Checksum: $OutputDirectory\$($info.asset_name).sha256"

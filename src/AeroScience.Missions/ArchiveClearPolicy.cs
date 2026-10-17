@@ -3,6 +3,11 @@ namespace AeroScience.Missions;
 public sealed record BackupSelection(bool Cancelled, string? Directory);
 public static class ArchiveClearPolicy
 {
+    // A fresh dialog always starts with permanent deletion; this is not a saved preference.
+    public const bool DefaultBackupRequested = false;
+    public static string ConfirmationWarning(string? backupDirectory) => backupDirectory is null
+        ? "No new recovery backup will be created. Permanent deletion may be irreversible. Previously created backups are preserved."
+        : "Recovery backup destination (separate from the data to delete):\n" + backupDirectory + "\nDeletion proceeds only after the recovery backup has been verified. Previously created backups are preserved.";
     public static BackupSelection ChooseBackup(bool requested, Func<string?> browse, Action<string> validate)
     {
         if (!requested) return new(false, null);

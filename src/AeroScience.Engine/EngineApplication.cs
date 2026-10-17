@@ -39,6 +39,7 @@ public static class EngineApplication
             return options;
         });
         builder.Services.AddSingleton<AccessControl>();
+        builder.Services.AddSingleton(sp => new MapSettings(sp.GetRequiredService<EngineOptions>().ConfigurationDirectory ?? sp.GetRequiredService<EngineOptions>().DataDirectory));
         builder.Services.AddSingleton<DataDirectoryLease>();
         builder.Services.AddSingleton(sp =>
         {
@@ -76,6 +77,7 @@ public static class EngineApplication
         configureServices?.Invoke(builder.Services);
         builder.Services.AddHostedService<TelemetryWorker>();
         builder.Services.AddSingleton<ToolbarCommandHandler>();
+        builder.Services.AddSingleton<RouteMapService>();
         builder.Services.AddHostedService<ToolbarWorker>();
 
         var app = builder.Build();
@@ -83,8 +85,8 @@ public static class EngineApplication
         app.Use(async (context, next) =>
         {
             context.Response.Headers["X-Content-Type-Options"] = "nosniff";
-            context.Response.Headers["Referrer-Policy"] = "no-referrer";
-            context.Response.Headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob: https://tile.openstreetmap.org; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'";
+            context.Response.Headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
+            context.Response.Headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob: https://tile.openstreetmap.org https://ibasemaps-api.arcgis.com https://basemaps-api.arcgis.com https://static-map-tiles-api.arcgis.com https://services.arcgisonline.com https://js.arcgis.com; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'";
             if (!AccessControl.ValidHost(context.Request, options))
             {
                 context.Response.StatusCode = 400;
@@ -127,7 +129,7 @@ public static class EngineApplication
         var contentTypes = new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider();
         contentTypes.Mappings[".geojson"] = "application/geo+json";
         app.UseStaticFiles(new StaticFileOptions { ContentTypeProvider = contentTypes });
-        app.MapGet("/api/health", () => Results.Ok(new { status = "ok", version = "0.2.1" }));
+        app.MapGet("/api/health", () => Results.Ok(new { status = "ok", version = "0.2.2" }));
         app.MapGet("/api/access", (HttpContext c) => new { requiresPairing = !AccessControl.IsLoopback(c) });
         app.MapPost("/api/session", (HttpContext c, PairRequest request, AccessControl access) =>
         {
@@ -143,7 +145,12 @@ public static class EngineApplication
             { HttpOnly = true, SameSite = SameSiteMode.Strict, Secure = c.Request.IsHttps, MaxAge = TimeSpan.FromHours(12), IsEssential = true });
             return Results.Ok(new { csrf = session.Csrf, expiresUtc = session.ExpiresUtc });
         });
-        app.MapGet("/api/state", (MissionCoordinator missions) => missions.Snapshot());
+        EngineSnapshot DisplaySnapshot(MissionCoordinator missions)
+        {
+            var map = app.Services.GetRequiredService<MapSettings>().Get();
+            return missions.Snapshot() with { Maps = new(map.Revision, map.Preferences.OnlineEnabled, map.Preferences.Layer) };
+        }
+        app.MapGet("/api/state", (MissionCoordinator missions) => DisplaySnapshot(missions));
         app.MapPost("/api/missions", (StartMissionRequest request, MissionCoordinator missions) =>
         {
             var mission = missions.Start(request);
@@ -166,7 +173,7 @@ public static class EngineApplication
         app.MapResearchEndpoints();
         app.MapGet("/api/settings", (HttpContext c, AccessControl access) => new
         {
-            version = "0.2.1",
+            version = "0.2.2",
             telemetry = options.Telemetry,
             options.SamplingIntervalMs,
             options.EnableLan,
@@ -208,7 +215,7 @@ public static class EngineApplication
                 {
                     var access = context.RequestServices.GetRequiredService<AccessControl>();
                     if (access.Get(context.Request) is null) break;
-                    var json = JsonSerializer.Serialize(missions.Snapshot(), WireJson.Options);
+                    var json = JsonSerializer.Serialize(DisplaySnapshot(missions), WireJson.Options);
                     await context.Response.WriteAsync($"event: state\ndata: {json}\n\n", context.RequestAborted);
                     await context.Response.Body.FlushAsync(context.RequestAborted);
                 } while (await timer.WaitForNextTickAsync(context.RequestAborted));
@@ -216,7 +223,7 @@ public static class EngineApplication
             catch (OperationCanceledException) when (context.RequestAborted.IsCancellationRequested) { }
             catch (IOException) { /* A display disconnected; recording continues in TelemetryWorker. */ }
         });
-        app.Logger.LogInformation("AeroScience 0.2.1 — {Source} telemetry; dashboard http://127.0.0.1:{Port}; data {Directory}", options.Telemetry, options.Port, options.DataDirectory);
+        app.Logger.LogInformation("AeroScience 0.2.2 — {Source} telemetry; dashboard http://127.0.0.1:{Port}; data {Directory}", options.Telemetry, options.Port, options.DataDirectory);
         return app;
     }
 }

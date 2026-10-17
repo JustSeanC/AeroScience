@@ -28,6 +28,14 @@ $contractLog = Join-Path $stage 'sdk-contract.log'
 $compileExit = $LASTEXITCODE
 if ($compileExit -ne 0) { throw "Installed SDK differs from the native ABI assumptions or compiler prerequisites failed (exit $compileExit). Inspect sdk-contract.log before packaging." }
 Copy-Item "$repo/msfs-toolbar/*" $stage -Recurse
+$mapFolder = Join-Path $stage 'PackageSources/html_ui/InGamePanels/AeroScience'
+Copy-Item "$repo/src/AeroScience.Engine/wwwroot/geographic-view.js" (Join-Path $mapFolder 'AeroScience.Map.js')
+$countries = Get-Content "$repo/src/AeroScience.Engine/wwwroot/geography/countries.geojson" -Raw
+$places = Get-Content "$repo/src/AeroScience.Engine/wwwroot/geography/places.geojson" -Raw
+$airports = Get-Content "$repo/src/AeroScience.Engine/wwwroot/geography/airports.geojson" -Raw
+$geographyScript = "window.AeroScienceCountries = " + $countries + ";`nwindow.AeroSciencePlaces = " + $places + ";`nwindow.AeroScienceAirports = " + $airports + ";"
+[IO.File]::WriteAllText((Join-Path $mapFolder 'AeroScience.Geography.js'), $geographyScript, [Text.UTF8Encoding]::new($false))
+Copy-Item "$repo/src/AeroScience.Engine/wwwroot/geography/provenance.json" (Join-Path $mapFolder 'geography-provenance.json')
 if (-not $ProofOfConcept -and -not $WindowProbe) {
     foreach ($name in @('ProofOfConcept.html', 'ProofOfConcept.js', 'WindowProbe.html', 'WindowProbe.js')) {
         Remove-Item (Join-Path $stage "PackageSources/html_ui/InGamePanels/AeroScience/$name")

@@ -1,3 +1,4 @@
+import { mapSettingsUI, syncBasemaps } from "./basemaps.js";
 import {
   initializeResearch,
   loadResearch,
@@ -89,6 +90,7 @@ async function connect(code = null) {
   const session = await api("/api/session", { code });
   csrf = session.csrf;
   authorized = true;
+  window.dispatchEvent(new Event("aeroscience-session"));
   $("pairing").hidden = true;
   $("workspace").hidden = false;
   notice();
@@ -157,6 +159,7 @@ function clearTelemetry() {
   $("connection-dot").classList.remove("live");
 }
 function render(state) {
+  syncBasemaps(state.maps);
   renderResearch(state);
   const wasActive = current?.activeMission?.id;
   current = state;
@@ -452,6 +455,7 @@ async function loadSettings() {
   }
   container.append(rows);
   await unitControls(container, api, loadSettings);
+  await mapSettingsUI(container, api);
   if (s.toolbarStatus) {
     const toolbar = el("section");
     toolbar.append(

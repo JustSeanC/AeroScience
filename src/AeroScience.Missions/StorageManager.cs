@@ -264,8 +264,9 @@ public sealed class StorageManager(PreferenceStore preferences, IStorageCapacity
         for (var current = new DirectoryInfo(Path.GetFullPath(path)); current is not null; current = current.Parent)
             if (current.Exists && (current.Attributes & FileAttributes.ReparsePoint) != 0) throw new IOException("Storage paths cannot contain symbolic links or junctions.");
     }
+    public static long DatabaseBytes(string database) => new[] { database, database + "-wal", database + "-shm" }.Where(File.Exists).Sum(p => new FileInfo(p).Length);
     public static long Usage(string directory, StorageKind kind) => kind == StorageKind.Missions
-        ? new[] { "missions.db", "missions.db-wal", "missions.db-shm" }.Select(n => Path.Combine(directory, n)).Where(File.Exists).Sum(p => new FileInfo(p).Length)
+        ? DatabaseBytes(Path.Combine(directory, "missions.db"))
         : EnumerateFiles(directory).Sum(p => new FileInfo(p).Length);
     private static IEnumerable<string> EnumerateFiles(string directory)
     {

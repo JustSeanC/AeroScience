@@ -5,7 +5,7 @@ const folder = 'msfs-toolbar/PackageSources/html_ui/InGamePanels/AeroScience/';
 
 // Representative bounded wrappers only. This does not implement or verify the
 // simulator's native dragging, resizing, input routing or HTML-import templates.
-export async function mountToolbar(page, { autoReply = false, activeMission = null } = {}) {
+export async function mountToolbar(page, { autoReply = false, activeMission = null, mapFails = false } = {}) {
   const html = readFileSync(folder + 'AeroScience.html', 'utf8')
     .replace(/<script[\s\S]*?<\/script>/g, '').replace(/<link[^>]*>/g, '');
   await page.setViewportSize({ width: 1280, height: 1000 });
@@ -53,6 +53,9 @@ export async function mountToolbar(page, { autoReply = false, activeMission = nu
     };
     frame.classList.remove('panelInvisible');
   }, { autoReply, activeMission });
+  await page.evaluate(data => {window.AeroScienceCountries=data[0];window.AeroSciencePlaces=data[1];window.AeroScienceAirports=data[2];}, ['countries','places','airports'].map(name=>JSON.parse(readFileSync('src/AeroScience.Engine/wwwroot/geography/'+name+'.geojson','utf8'))));
+  await page.addScriptTag({ content: readFileSync('src/AeroScience.Engine/wwwroot/geographic-view.js', 'utf8') });
+  if(mapFails)await page.evaluate(()=>{window.AeroScienceMovingMap=class{constructor(){throw Error('Injected browser fixture renderer failure');}};});
   await page.addScriptTag({ content: readFileSync(folder + 'AeroScience.js', 'utf8') });
   await expect.poll(() => page.evaluate(() => window.bus.sent.length)).toBeGreaterThan(0);
   if (autoReply) await expect(page.locator('#as-source')).toHaveText('SIMULATED TEST DATA');

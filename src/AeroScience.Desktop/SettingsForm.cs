@@ -17,10 +17,13 @@ public sealed class SettingsForm : Form
     {
         this.app = app; Text = "AeroScience Settings"; Width = 840; Height = 690; MinimumSize = new(600, 450); AutoScaleMode = AutoScaleMode.Dpi;
         var tabs = new TabControl { Dock = DockStyle.Fill };
-        var general = new TabPage("General"); var storageTab = new TabPage("Storage"); var toolbarTab = new TabPage("Toolbar");
+        var general = new TabPage("General"); var storageTab = new TabPage("Storage & Data"); var toolbarTab = new TabPage("Toolbar");
         var generalPanel = Panel(); general.Controls.Add(generalPanel); storageTab.Controls.Add(storagePanel);
         tabs.TabPages.Add(general); tabs.TabPages.Add(storageTab); tabs.TabPages.Add(toolbarTab); var toolbarPanel = Panel(); toolbarTab.Controls.Add(toolbarPanel); tabs.SelectedIndex = storage ? 1 : toolbar ? 2 : 0; Controls.Add(tabs);
         BuildGeneral(generalPanel); BuildToolbar(toolbarPanel); RefreshStorage();
+        var mapsTab = new TabPage("Maps & Basemaps"); var mapsPanel = Panel(); mapsTab.Controls.Add(mapsPanel); tabs.TabPages.Add(mapsTab);
+        Label(mapsPanel, "Offline geography is ready without an account. Configure optional Streets and Esri satellite imagery, the preferred layer and your own restricted public client key in dashboard Settings → Maps & Basemaps. Online maps disclose the viewed area and IP address and may incur provider charges. Windows protects the saved key; authorized map browsers can see the public client token.");
+        Button(mapsPanel, "Open Maps & Basemaps settings", (_, _) => app.OpenDashboard(settings: true));
         FormClosing += (_, e) => { if (app.Busy) { e.Cancel = true; MessageBox.Show(this, "Wait for the current operation to finish."); } };
     }
     private static Button Button(Control parent, string text, EventHandler action)

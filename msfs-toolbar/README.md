@@ -13,3 +13,9 @@ The original project uses SDK SPB and Copy asset groups and the `ingame-ui` pane
 ## v0.2.0 changes
 
 The full panel now shows standard read-only guidance/targets and actual Mach, sends instrument enable/interval commands, displays atmospheric acquisition diagnostics, and adds compact observation markers. Native SDK imports and dataStorage bootstrap remain intact. Only the content container focus outline is removed. Rebuild with the official SDK and retest native header/edge/pop-out/scroll behavior; prior hardware results do not establish new acceptance. See ../docs/v0.2.0-windows-testing.md.
+
+## v0.2.2 Map tab
+
+Mission | Payload | Map uses the existing native bootstrap and CommBus protocol. The new map is an offline canvas using the same Natural Earth coordinates and shared geographic display helpers as the companion; online imagery remains in authorized browser views. The official build stages `AeroScience.Map.js`, the countries data script and geographic provenance. Route revisions cache up to 1,000 waypoints plus 1,000 area vertices; bounded chunks carry at most 40 items/6,200 serialized geometry bytes and complete replies stay below 8 KiB. Aircraft, selected-waypoint WGS84 range/bearing, four recent markers and at most 24 recent/incremental track points update separately. Display history is capped at 512 positions; the complete recording stays in SQLite.
+
+Static map content redraws for geometry/view changes; follow keeps the aircraft in the central area rather than repainting every static vertex on each telemetry update. Free Pan retains its viewpoint. No new sockets, autopilot writes, Compact VR mode or frame/header input handlers are introduced. Browser fixtures are not native acceptance; follow [the v0.2.2 gaming-PC checks](../docs/v0.2.2-windows-testing.md).

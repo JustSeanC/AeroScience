@@ -130,10 +130,10 @@ public sealed class MainForm : Form, IDesktopActions
         var snapshot = engine.Services.GetRequiredService<MissionCoordinator>().Snapshot();
         status.Text = $"Engine running · {snapshot.Connection.Message}\n{(snapshot.ActiveMission is null ? "No active mission" : "Mission recording")} · Toolbar: {Toolbar.Message}";
     }
-    public void OpenDashboard()
+    public void OpenDashboard(bool settings = false)
     {
         if (engine is null) { MessageBox.Show(this, "The engine is stopped. Check Storage/Settings."); return; }
-        Process.Start(new ProcessStartInfo("http://127.0.0.1:5080") { UseShellExecute = true });
+        Process.Start(new ProcessStartInfo("http://127.0.0.1:5080" + (settings ? "/#settings" : "")) { UseShellExecute = true });
     }
     private void ShowSettings(bool storage)
     {

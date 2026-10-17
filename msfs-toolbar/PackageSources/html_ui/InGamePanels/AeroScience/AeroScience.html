@@ -12,6 +12,8 @@
     <link rel="import" href="/templates/NewPushButton/NewPushButton.html" />
     <link rel="import" href="/templates/ingameUi/ingameUi.html" />
     <link rel="import" href="/templates/ingameUiHeader/ingameUiHeader.html" />
+    <script src="AeroScience.Geography.js"></script>
+    <script src="AeroScience.Map.js"></script>
     <script src="AeroScience.js"></script>
   </head>
   <body class="border-box as-toolbar">
@@ -38,6 +40,7 @@
           <nav aria-label="AeroScience pages">
             <new-push-button id="as-mission-page">Mission</new-push-button
             ><new-push-button id="as-payload-page">Payload</new-push-button>
+            <new-push-button id="as-map-page">Map</new-push-button>
           </nav>
           <p id="as-status" role="status">
             Loading simulator communication service…
@@ -75,6 +78,10 @@
                   Start recording at any time. Your mission continues if this
                   panel is closed.
                 </p>
+                <p id="as-start-plan" class="as-note">
+                  No saved plan selected. Select a research plan from Map to
+                  record its route and instrument configuration.
+                </p>
                 <label for="as-mode">Science operating mode</label
                 ><select id="as-mode">
                   <option value="universal">Universal — Fly Anything</option>
@@ -111,6 +118,48 @@
               <p class="as-note">
                 Recording continues when this panel closes. Open the companion
                 dashboard for mission history.
+              </p>
+            </section>
+            <section id="as-map-view" hidden>
+              <h2>Research Mission Map</h2>
+              <p id="as-map-status" role="status">
+                Waiting for route synchronization.
+              </p>
+              <details>
+                <summary>Load a saved research plan</summary>
+                <label
+                  >Saved plan (active missions always use their immutable
+                  snapshot)
+                  <select id="as-map-plan">
+                    <option value="">No saved plan selected</option>
+                  </select>
+                </label>
+                <button id="as-map-plans">Load saved plans</button
+                ><button id="as-map-more-plans">Next plans</button>
+              </details>
+              <div class="as-map-actions">
+                <button id="as-map-follow">Follow Aircraft</button
+                ><button id="as-map-free">Free Pan</button>
+                <button id="as-map-fit">Fit Mission</button
+                ><button id="as-map-in">Zoom +</button
+                ><button id="as-map-out">Zoom −</button>
+              </div>
+              <div id="as-map-canvas" class="as-map-canvas"></div>
+              <label
+                >Inspect waypoint
+                <select id="as-map-waypoint"></select
+              ></label>
+              <p id="as-map-waypoint-info"></p>
+              <details>
+                <summary>Progress and map limits</summary>
+                <p id="as-map-progress" class="as-note"></p>
+              </details>
+              <p class="as-note">
+                North up · Gold: planned · Turquoise: recorded · Pink: markers.
+                Recent track display is bounded to 512 points; full recordings
+                remain in Mission History. Offline geography is coarse and
+                Mercator is clipped at ±85.0511°. No aircraft controls are
+                changed.
               </p>
             </section>
             <section id="as-payload-view" hidden>

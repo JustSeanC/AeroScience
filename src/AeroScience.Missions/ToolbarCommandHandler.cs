@@ -1,16 +1,18 @@
 using System.Text.Json;
+using System.Text;
 using AeroScience.Shared;
 
 namespace AeroScience.Missions;
 
 public sealed record ToolbarCommand(int Protocol, Guid RequestId, string Op, string? Name = null, Guid? MissionId = null,
     ScienceMode Mode = ScienceMode.Universal, string? InstrumentId = null, bool? Enabled = null, int? IntervalMs = null,
-    string? Category = null, string? Notes = null);
+    string? Category = null, string? Notes = null, Guid? PlanId = null, string? Revision = null, int Offset = 0, long? After = null, int? WaypointIndex = null);
 public sealed record ToolbarReply(int Protocol, Guid RequestId, bool Ok, string? Error, EngineSnapshot State);
 
 // The simulator-native channel reaches the same coordinator as the authenticated browser API.
-public sealed class ToolbarCommandHandler(MissionCoordinator coordinator)
+public sealed class ToolbarCommandHandler(MissionCoordinator coordinator, RouteMapService? maps = null)
 {
+    private readonly RouteMapService navigation = maps ?? new(coordinator);
     private readonly Dictionary<Guid, (string Request, string Reply)> completed = [];
     private readonly Queue<Guid> order = new();
     private readonly object gate = new();
@@ -26,12 +28,22 @@ public sealed class ToolbarCommandHandler(MissionCoordinator coordinator)
                 command = JsonSerializer.Deserialize<ToolbarCommand>(json, WireJson.Options);
                 if (command is null || command.Protocol != 1 || command.RequestId == Guid.Empty)
                     throw new ArgumentException("Invalid toolbar protocol or request identifier.");
+                if (command.Op is "map-state" or "map-chunk" or "map-plans")
+                {
+                    object value = command.Op switch {
+                        "map-state" => navigation.State(command.PlanId, command.After, waypointIndex: command.WaypointIndex),
+                        "map-chunk" => navigation.Chunk(command.PlanId, command.Revision ?? "", command.Offset),
+                        _ => navigation.Plans(command.Offset) };
+                    var encoded = JsonSerializer.Serialize(new { protocol = 1, command.RequestId, ok = true, map = value }, WireJson.Options);
+                    if (Encoding.UTF8.GetByteCount(encoded) > 8000) throw new InvalidOperationException("Map response exceeds its safe packet bound. Resynchronize the map.");
+                    return encoded;
+                }
                 if (completed.TryGetValue(command.RequestId, out var previous))
                     return previous.Request == json ? previous.Reply : Reply(command.RequestId, false, "Request identifier was already used.");
                 switch (command.Op)
                 {
                     case "state": return Reply(command.RequestId, true, null);
-                    case "start": coordinator.Start(command.Name, command.Mode); break;
+                    case "start": coordinator.Start(new StartMissionRequest(command.Name ?? "", command.Mode, PlanId: command.PlanId)); break;
                     case "end" when command.MissionId is { } id: coordinator.End(id); break;
                     case "science-pause" when command.MissionId is { } pauseMission: coordinator.SetSciencePaused(pauseMission, true); break;
                     case "science-resume" when command.MissionId is { } resumeMission: coordinator.SetSciencePaused(resumeMission, false); break;

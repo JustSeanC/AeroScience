@@ -23,6 +23,7 @@ class IngamePanelAeroScience extends TemplateElement {
         this.send("start", {
           name: this.byId("as-name").value,
           mode: this.byId("as-mode").value,
+          planId: this.mapPlan || null,
         });
     };
     this.byId("as-end").onclick = () => {
@@ -52,6 +53,79 @@ class IngamePanelAeroScience extends TemplateElement {
     };
     this.byId("as-mission-page").onclick = () => this.page(false);
     this.byId("as-payload-page").onclick = () => this.page(true);
+    this.byId("as-map-page").onclick = () => this.page("map");
+    try {
+      this.mapRenderer = new window.AeroScienceMovingMap(
+        this.byId("as-map-canvas"),
+        this.byId("as-map-waypoint-info"),
+      );
+    } catch (error) {
+      this.mapRenderer = null;
+      if (typeof console !== "undefined" && console.warn)
+        console.warn(
+          "AeroScience map initialization failed: " +
+            String((error && error.message) || error),
+        );
+      this.byId("as-map-status").textContent =
+        "The map renderer is unavailable in this UI context. Mission and Payload remain available; report the simulator version and Coherent console error.";
+      for (const control of this.byId("as-map-view").querySelectorAll(
+        "button,select",
+      ))
+        control.disabled = true;
+    }
+    this.mapVisible = !this.byId("as-map-view").hidden;
+    this.lastMapAt = 0;
+    this.routeItems = [];
+    this.routeRevision = null;
+    this.loadingRevision = null;
+    this.mapCursor = null;
+    this.planOffset = 0;
+    this.byId("as-map-follow").onclick = () => {
+      this.mapRenderer.follow = true;
+      if (this.lastMapState) this.mapRenderer.update(this.lastMapState);
+    };
+    this.byId("as-map-free").onclick = () => {
+      this.mapRenderer.follow = false;
+      this.byId("as-map-status").textContent =
+        "Free Pan — drag the map or use arrow keys. Aircraft follow is off.";
+    };
+    this.byId("as-map-fit").onclick = () => this.mapRenderer.fit();
+    this.byId("as-map-in").onclick = () => this.mapRenderer.zoomBy(1.4);
+    this.byId("as-map-out").onclick = () => this.mapRenderer.zoomBy(1 / 1.4);
+    this.byId("as-map-waypoint").onchange = () => {
+      this.mapRenderer.selected = Number(this.byId("as-map-waypoint").value);
+      this.mapRenderer.draw();
+      this.mapRenderer.describe();
+      this.requestMapState();
+    };
+    this.byId("as-map-plan").onchange = () => {
+      const select = this.byId("as-map-plan"),
+        option = select.options[select.selectedIndex];
+      this.mapPlan = select.value || null;
+      this.mapPlanName = this.mapPlan ? option.textContent : null;
+      this.mapPlanMode = this.mapPlan ? option.getAttribute("data-mode") : null;
+      this.byId("as-start-plan").textContent = this.mapPlan
+        ? "Selected research plan: " +
+          this.mapPlanName +
+          ". Recording keeps its route, instruments and science mode."
+        : "No saved plan selected. This will be an unplanned recording.";
+      this.byId("as-mode").disabled = !!this.mapPlan;
+      this.byId("as-mode").value = this.mapPlanMode || "universal";
+      this.byId("as-mode").onchange();
+      if (this.mapPlan) this.byId("as-name").value = this.mapPlanName;
+      this.routeRevision = null;
+      this.loadingRevision = null;
+      this.mapCursor = null;
+      this.requestMapState();
+    };
+    this.byId("as-map-plans").onclick = () => {
+      this.planOffset = 0;
+      this.send("map-plans", { offset: 0 });
+    };
+    this.byId("as-map-more-plans").onclick = () => {
+      this.planOffset += 10;
+      this.send("map-plans", { offset: this.planOffset });
+    };
     this.timer = setInterval(() => this.tick(), 1000);
     try {
       Include.addScript("/JS/Services/CommBus.js", () => this.registerBus());
@@ -69,6 +143,136 @@ class IngamePanelAeroScience extends TemplateElement {
           this.status("CommBus unavailable. MSFS 2024 SU5+ is required.");
       } else this.registerBus();
     }, 100);
+  }
+  requestMapState() {
+    if (
+      !this.mapVisible ||
+      !this.mapRenderer ||
+      Array.from(this.pending.values()).some((p) => p.op === "map-state")
+    )
+      return;
+    if (Date.now() - this.lastMapAt > 5000) {
+      this.mapCursor = null;
+      this.mapRenderer.track = [];
+    }
+    this.send("map-state", {
+      planId: this.mapPlan || null,
+      after: this.mapCursor,
+      waypointIndex:
+        this.byId("as-map-waypoint").value === ""
+          ? null
+          : Number(this.byId("as-map-waypoint").value),
+    });
+  }
+  requestMapChunk() {
+    if (
+      !this.isConnected ||
+      !this.mapRenderer ||
+      !this.mapVisible ||
+      !this.loadingRevision ||
+      Array.from(this.pending.values()).some((p) => p.op === "map-chunk")
+    )
+      return;
+    this.send("map-chunk", {
+      planId: this.mapPlan || null,
+      revision: this.loadingRevision,
+      offset: this.routeItems.length,
+    });
+  }
+  receiveMap(op, map) {
+    if (op === "map-plans") {
+      const select = this.byId("as-map-plan");
+      select.replaceChildren();
+      const empty = document.createElement("option");
+      empty.value = "";
+      empty.textContent = "Active mission / no saved plan";
+      select.appendChild(empty);
+      for (const plan of map) {
+        const option = document.createElement("option");
+        option.value = plan.id;
+        option.textContent = plan.name;
+        option.setAttribute("data-mode", plan.mode);
+        select.appendChild(option);
+      }
+      if (this.mapPlan && !map.some((p) => p.id === this.mapPlan)) {
+        const keep = document.createElement("option");
+        keep.value = this.mapPlan;
+        keep.textContent = this.mapPlanName || "Selected research plan";
+        keep.setAttribute("data-mode", this.mapPlanMode || "universal");
+        select.appendChild(keep);
+      }
+      select.value = this.mapPlan || "";
+      this.byId("as-map-status").textContent =
+        "Saved plans loaded. An active mission always uses its recorded plan snapshot.";
+      return;
+    }
+    if (op === "map-state") {
+      this.lastMapAt = Date.now();
+      this.byId("as-map-plan").disabled = !!map.missionId;
+      const changed =
+        map.revision !== this.routeRevision &&
+        map.revision !== this.loadingRevision;
+      if (changed) {
+        this.loadingRevision = map.revision;
+        this.routeItems = [];
+        this.mapCursor = null;
+        this.mapRenderer.route(map.revision, []);
+        this.byId("as-map-waypoint").replaceChildren();
+        if (map.items === 0) {
+          this.routeRevision = map.revision;
+          this.loadingRevision = null;
+        } else this.requestMapChunk();
+      }
+      this.mapCursor = changed || map.hasMore ? null : map.nextSequence;
+      if (map.hasMore) {
+        this.mapRenderer.track = [];
+        map.track = [];
+      }
+      this.lastMapState = map;
+      this.mapRenderer.update(map);
+      this.byId("as-map-status").textContent =
+        (map.name ||
+          "No active planned mission — select a saved plan or record one from the companion.") +
+        " · " +
+        (this.loadingRevision
+          ? "Loading route " + this.routeItems.length + " / " + map.items
+          : "Route synchronized · " +
+            map.waypoints +
+            " waypoints · next observed target " +
+            (map.nextWaypoint < map.waypoints ? map.nextWaypoint + 1 : "end")) +
+        ".";
+      this.byId("as-map-progress").textContent = map.progressExplanation;
+      return;
+    }
+    if (op === "map-chunk") {
+      if (
+        map.revision !== this.loadingRevision ||
+        map.offset !== this.routeItems.length ||
+        map.items.length > 40 ||
+        map.nextOffset !== map.offset + map.items.length
+      )
+        return;
+      if (this.routeItems.length + map.items.length > 2000) return;
+      this.routeItems.push(...map.items);
+      if (map.complete) {
+        this.routeRevision = map.revision;
+        this.loadingRevision = null;
+        this.mapRenderer.route(map.revision, this.routeItems);
+        if (this.lastMapState) this.mapRenderer.update(this.lastMapState);
+        const select = this.byId("as-map-waypoint");
+        select.replaceChildren();
+        for (const p of this.routeItems.filter((p) => p.kind === "waypoint")) {
+          const o = document.createElement("option");
+          o.value = p.index;
+          o.textContent = p.index + 1 + ". " + p.name;
+          select.appendChild(o);
+        }
+        this.byId("as-map-status").textContent =
+          "Route synchronized: " +
+          select.options.length +
+          " ordered waypoints. Offline geography; no online tile requests.";
+      } else setTimeout(() => this.requestMapChunk(), 100);
+    }
   }
   registerBus() {
     if (
@@ -88,8 +292,14 @@ class IngamePanelAeroScience extends TemplateElement {
     }
   }
   page(payload) {
-    this.byId("as-mission-view").hidden = payload;
-    this.byId("as-payload-view").hidden = !payload;
+    this.mapVisible = payload === "map";
+    this.byId("as-mission-view").hidden = payload !== false;
+    this.byId("as-payload-view").hidden = payload !== true;
+    this.byId("as-map-view").hidden = !this.mapVisible;
+    if (this.mapVisible && this.mapRenderer) {
+      this.mapRenderer.resize();
+      this.requestMapState();
+    }
   }
   status(text) {
     this.byId("as-status").textContent = text;
@@ -108,8 +318,12 @@ class IngamePanelAeroScience extends TemplateElement {
   send(op, fields) {
     if (!this.listener || this.pending.size >= 8) return;
     const requestId = this.requestId();
-    this.pending.set(requestId, { op: op, sent: Date.now() });
-    if (op !== "state") {
+    this.pending.set(requestId, {
+      op: op,
+      sent: Date.now(),
+      planId: (fields && fields.planId) || null,
+    });
+    if (op !== "state" && !op.startsWith("map-")) {
       this.setControls(false);
       this.status("Sending mission command…");
     }
@@ -145,7 +359,10 @@ class IngamePanelAeroScience extends TemplateElement {
     for (const [id, request] of this.pending)
       if (Date.now() - request.sent > 5000) {
         this.pending.delete(id);
-        if (request.op !== "state")
+        if (request.op.startsWith("map-"))
+          this.byId("as-map-status").textContent =
+            "Map reply timed out; retrying with the cached route retained.";
+        else if (request.op !== "state")
           this.status(
             "No command confirmation. Check mission state before retrying.",
           );
@@ -164,8 +381,17 @@ class IngamePanelAeroScience extends TemplateElement {
         this.byId(id).textContent = "—";
       this.byId("as-mach").textContent = "Mach —";
       this.renderResearch(null, false);
+      if (this.mapRenderer) {
+        this.mapRenderer.update({ aircraft: null, track: [], markers: [] });
+        this.byId("as-map-status").textContent =
+          "Companion disconnected — cached route retained; live aircraft unavailable.";
+      }
     }
     this.send("state");
+    if (this.mapVisible) {
+      this.requestMapState();
+      this.requestMapChunk();
+    }
   }
   setControls(enabled) {
     for (const id of ["as-start", "as-end", "as-marker"]) {
@@ -177,6 +403,29 @@ class IngamePanelAeroScience extends TemplateElement {
     try {
       if (typeof data !== "string" || data.length > 8192) return;
       const reply = JSON.parse(data);
+      const pendingRequest = this.pending.get(reply.requestId);
+      if (
+        reply.protocol === 1 &&
+        pendingRequest &&
+        pendingRequest.op.startsWith("map-")
+      ) {
+        this.pending.delete(reply.requestId);
+        if (
+          pendingRequest.op !== "map-plans" &&
+          pendingRequest.planId !== (this.mapPlan || null)
+        ) {
+          this.requestMapState();
+          return;
+        }
+        if (reply.ok && reply.map)
+          this.receiveMap(pendingRequest.op, reply.map);
+        else {
+          this.byId("as-map-status").textContent =
+            reply.error || "Map synchronization failed; waiting to retry.";
+          this.loadingRevision = null;
+        }
+        return;
+      }
       if (
         reply.protocol !== 1 ||
         !this.pending.has(reply.requestId) ||
@@ -187,7 +436,7 @@ class IngamePanelAeroScience extends TemplateElement {
       this.lastReply = Date.now();
       this.state = reply.state;
       const mutationPending = Array.from(this.pending.values()).some(
-        (x) => x.op !== "state",
+        (x) => x.op !== "state" && !x.op.startsWith("map-"),
       );
       this.setControls(!mutationPending);
       this.render(reply.state);
@@ -436,6 +685,7 @@ class IngamePanelAeroScience extends TemplateElement {
     }
   }
   disconnectedCallback() {
+    if (this.mapRenderer) this.mapRenderer.destroy();
     clearInterval(this.timer);
     clearInterval(this.loadTimer);
     if (this.listener) {

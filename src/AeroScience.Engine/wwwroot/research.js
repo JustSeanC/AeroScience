@@ -1,3 +1,4 @@
+import { routeExportButton } from "./route-export.js";
 import { ResearchMap } from "./map.js";
 import { patternEditor } from "./patterns.js";
 import {
@@ -9,6 +10,26 @@ import {
 } from "./science-display.js";
 import { renderAnalysis } from "./analysis.js";
 const $ = (id) => document.getElementById(id);
+const aircraftFor = (s) =>
+  s?.connection?.state === "connected" &&
+  s.telemetry &&
+  Date.now() - Date.parse(s.telemetry.timestampUtc) >= -2000 &&
+  Date.now() - Date.parse(s.telemetry.timestampUtc) < 6000
+    ? s.telemetry
+    : null;
+const samplePositions = (rows) =>
+  Array.from(
+    new Map(
+      rows
+        .filter(
+          (r) => Number.isFinite(r.latitude) && Number.isFinite(r.longitude),
+        )
+        .map((r) => [
+          `${r.positionTimestampUtc || r.timestampUtc}:${r.latitude}:${r.longitude}`,
+          r,
+        ]),
+    ).values(),
+  ).slice(-500);
 const n = (v, d = 2) =>
   Number.isFinite(v)
     ? v.toLocaleString(undefined, { maximumFractionDigits: d })
@@ -51,6 +72,7 @@ let ctx,
   lastFetch = 0,
   planMap,
   liveMap,
+  scienceMap,
   waypoints = [],
   areas = [];
 function input(parent, label, value = "", type = "text") {
@@ -116,6 +138,7 @@ export function initializeResearch(context) {
   guidance.id = "flight-guidance";
   control.append(guidance);
   const mapPanel = text("article", undefined, "panel research-panel");
+  mapPanel.id = "mission-map";
   mapPanel.append(text("h2", "Mission map"));
   liveMap = new ResearchMap(mapPanel);
   control.append(mapPanel);
@@ -212,6 +235,7 @@ async function planner() {
         }
       }),
     );
+    routeExportButton(row, () => plan, ctx.api);
     p.append(row);
   }
   p.append(
@@ -274,6 +298,21 @@ function editPlan(plan) {
     ),
     departure = input(grid, "Departure", plan?.departure),
     destination = input(grid, "Destination", plan?.destination);
+  const flightRules = select(
+    grid,
+    "Flight plan rules",
+    [
+      ["VFR", "VFR"],
+      ["IFR", "IFR"],
+    ],
+    plan?.flightRules || "VFR",
+  );
+  const cruise = input(
+    grid,
+    "Flight plan cruising altitude (ft MSL; required for PLN)",
+    plan?.cruisingAltitudeFeet,
+    "number",
+  );
   const low = input(
       grid,
       "Minimum planned altitude (ft MSL)",
@@ -406,8 +445,7 @@ function editPlan(plan) {
     }
     planMap?.set({
       plan: { waypoints, surveyAreas: areas, departure: departure.value },
-      aircraft:
-        state?.connection?.state === "connected" ? state.telemetry : null,
+      aircraft: aircraftFor(state),
     });
   };
   const editor = text("div", undefined, "research-grid");
@@ -429,12 +467,19 @@ function editPlan(plan) {
         "number",
       ),
       instruction = input(editor, "Instructions", w.instructions),
-      purpose = input(editor, "Waypoint objective", w.objective);
+      purpose = input(editor, "Waypoint objective", w.objective),
+      navigationIdentifier = input(
+        editor,
+        "Published navigation identifier (optional; not the science name)",
+        w.navigationIdentifier,
+      );
     lat.step = lon.step = "any";
     editor.append(
       button("Apply waypoint", () => {
         const value = {
           ...w,
+          id: w.id || crypto.randomUUID(),
+          navigationIdentifier: navigationIdentifier.value || null,
           name: title.value,
           latitude: Number(lat.value),
           longitude: Number(lon.value),
@@ -505,6 +550,7 @@ function editPlan(plan) {
   const map = text("div");
   form.append(map);
   planMap?.observer?.disconnect();
+  planMap?.destroy();
   planMap = new ResearchMap(map, (p) => waypointEditor(-1, p), {
     onWaypointsChange: (value) => {
       pattern.remember();
@@ -521,8 +567,7 @@ function editPlan(plan) {
   const pattern = patternEditor(form, {
     api: ctx.api,
     notice: ctx.notice,
-    aircraft: () =>
-      state?.connection?.state === "connected" ? state.telemetry : null,
+    aircraft: () => aircraftFor(state),
     get: () => ({ waypoints, surveyAreas: areas, patterns: patternValues }),
     set: (value) => {
       waypoints = value.waypoints;
@@ -545,6 +590,26 @@ function editPlan(plan) {
   const save = text("button", "Save mission plan", "primary");
   save.type = "submit";
   form.append(save);
+  routeExportButton(
+    form,
+    () => ({
+      ...plan,
+      id: plan?.id || "00000000-0000-0000-0000-000000000000",
+      name: name.value,
+      template: template.value,
+      mode: mode.value,
+      description: description.value,
+      objective: objective.value,
+      departure: departure.value,
+      destination: destination.value,
+      waypoints,
+      surveyAreas: areas,
+      patterns: pattern.getPatterns(),
+      flightRules: flightRules.value,
+      cruisingAltitudeFeet: cruise.value ? Number(cruise.value) : null,
+    }),
+    ctx.api,
+  );
   form.onsubmit = (event) => {
     event.preventDefault();
     ctx.command(save, async () => {
@@ -567,6 +632,8 @@ function editPlan(plan) {
         waypoints,
         surveyAreas: areas,
         patterns: pattern.getPatterns(),
+        flightRules: flightRules.value,
+        cruisingAltitudeFeet: nullable(cruise),
       });
       await planner();
     });
@@ -682,6 +749,18 @@ async function instruments() {
   const values = text("div");
   values.id = "instrument-values";
   p.append(values);
+  const scienceMapPanel = text("article", undefined, "panel research-panel");
+  scienceMapPanel.append(text("h2", "Science observation map"));
+  p.append(scienceMapPanel);
+  scienceMap?.destroy();
+  scienceMap = new ResearchMap(scienceMapPanel);
+  scienceMap.set({
+    track,
+    markers,
+    plan: livePlan || {},
+    samples: samplePositions(scienceRows),
+    aircraft: aircraftFor(state),
+  });
   const chart = text("div");
   chart.id = "science-charts";
   p.append(chart);
@@ -874,6 +953,29 @@ export function renderResearch(next) {
   const link = text("a", "View Science");
   link.href = "#science";
   summary.append(link);
+  if (next.activeMission && livePlan) {
+    summary.append(
+      text("h3", "Active Research Route"),
+      text(
+        "p",
+        `${livePlan.patterns?.map((p) => p.kind).join(", ") || "Custom route"} · ${livePlan.waypoints?.length || 0} planned waypoints · Current position: ${next.telemetry ? "available" : "unavailable"}`,
+      ),
+    );
+    const mapLink = text("a", "View Mission Map");
+    mapLink.href = "#control";
+    mapLink.onclick = () => {
+      liveMap?.fit();
+      $("mission-map").scrollIntoView({ behavior: "smooth", block: "start" });
+    };
+    summary.append(mapLink);
+    if (activeRouteState?.revision)
+      summary.append(
+        text(
+          "p",
+          `Next observed waypoint: ${livePlan.waypoints?.[activeRouteState.nextWaypoint]?.name || "End of route"} · observed in order within 1,000 m; review full analysis after flight.`,
+        ),
+      );
+  }
   if (liveId !== next.activeMission?.id) {
     liveId = next.activeMission?.id;
     track = [];
@@ -882,6 +984,7 @@ export function renderResearch(next) {
     cursor = 0;
     trackCursor = 0;
     livePlan = null;
+    activeRouteState = null;
     lastFetch = 0;
   }
   const t = next.telemetry,
@@ -889,12 +992,17 @@ export function renderResearch(next) {
       t &&
       next.connection.state === "connected" &&
       Date.now() - Date.parse(t.timestampUtc) < 6000;
+  scienceMap?.set({
+    track,
+    markers,
+    plan: livePlan || {},
+    aircraft: aircraftFor(next),
+    samples: samplePositions(scienceRows),
+  });
   liveMap?.set({
     track,
     markers,
-    samples: scienceRows
-      .filter((v) => v.measurementId === "temperature")
-      .slice(-1000),
+    samples: samplePositions(scienceRows),
     plan: livePlan || {},
     aircraft: fresh ? t : null,
   });
@@ -906,15 +1014,17 @@ export function renderResearch(next) {
       .finally(() => (busy = false));
   }
 }
-let livePlan = null;
+let livePlan = null,
+  activeRouteState = null;
 async function refreshLive(id) {
-  const [points, marks, research, science] = await Promise.all([
+  const [points, marks, research, science, navigation] = await Promise.all([
     ctx.api(
       `/api/missions/${id}/track?limit=1500${trackCursor ? `&after=${trackCursor}` : ""}`,
     ),
     ctx.api(`/api/missions/${id}/markers?limit=200`),
     ctx.api(`/api/missions/${id}/research`),
     ctx.api(`/api/missions/${id}/science?after=${cursor}&limit=1000`),
+    ctx.api("/api/maps/active"),
   ]);
   if (liveId !== id) return;
   track = trackCursor ? [...track, ...points.points] : points.points;
@@ -923,16 +1033,15 @@ async function refreshLive(id) {
   trackCursor = points.nextSequence;
   markers = marks;
   livePlan = research.planSnapshot;
+  activeRouteState = navigation;
   scienceRows = [...scienceRows, ...science.observations].slice(-3000);
   cursor = science.next;
   liveMap?.set({
     track,
     markers,
-    samples: scienceRows
-      .filter((v) => v.measurementId === "temperature")
-      .slice(-1000),
+    samples: samplePositions(scienceRows),
     plan: livePlan || {},
-    aircraft: state.telemetry,
+    aircraft: aircraftFor(state),
   });
   if ($("science-charts") && !document.querySelector(".expanded-chart[open]")) {
     $("science-charts").replaceChildren();
@@ -958,6 +1067,16 @@ function showScience(parent, rows, label) {
 export async function researchDetail(body, id, mission) {
   await initializeUnits(ctx.api);
   const review = await ctx.api(`/api/missions/${id}/review`);
+  if (review.research.planSnapshot) {
+    body.append(text("h3", "Planned Route — immutable recording snapshot"));
+    routeExportButton(body, () => review.research.planSnapshot, ctx.api);
+    body.append(
+      text(
+        "p",
+        "Recorded Flight exports below contain actual saved telemetry; planned-route exports preserve the original mission geometry.",
+      ),
+    );
+  }
   await renderAnalysis(body, id, review.research.planSnapshot, ctx.api);
   body.append(
     text("h3", "Research review"),
@@ -1152,4 +1271,5 @@ export function invalidateResearch() {
       ),
     );
   liveMap?.set({ track, markers, plan: livePlan || {}, aircraft: null });
+  scienceMap?.set({ track, markers, plan: livePlan || {}, aircraft: null });
 }

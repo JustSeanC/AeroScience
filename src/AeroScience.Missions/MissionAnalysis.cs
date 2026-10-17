@@ -3,6 +3,8 @@ namespace AeroScience.Missions;
 
 public static class MissionAnalysis
 {
+    public static int AdvanceWaypoint(ResearchWaypoint[] route, int expected, Coordinates position, double tolerance) =>
+        expected < route.Length && Geodesy.Distance(position, Geodesy.Point(route[expected])) <= tolerance ? expected + 1 : expected;
     public static void Validate(AnalysisSettings s)
     {
         if (!double.IsFinite(s.WaypointToleranceMetres) || s.WaypointToleranceMetres is < 10 or > 50000 || !double.IsFinite(s.MaximumGapSeconds) || s.MaximumGapSeconds is < 1 or > 600
@@ -52,7 +54,7 @@ public static class MissionAnalysis
                 segmentMax[activeSegment] = Math.Max(segmentMax[activeSegment], SegmentDistance(p, route[activeSegment], route[activeSegment + 1], lengths[activeSegment], bearings[activeSegment]));
             }
             // Reaching means an observed, ordered point within tolerance. Never skip an unvisited waypoint.
-            if (expected < route.Length && Geodesy.Distance(p, route[expected]) <= settings.WaypointToleranceMetres)
+            if (AdvanceWaypoint(waypoints, expected, p, settings.WaypointToleranceMetres) > expected)
             { reached[expected] = sample.TimestampUtc; alt[expected] = waypoints[expected].TargetAltitudeFeet is { } target ? sample.AltitudeMslFeet - target : null; expected++; }
             if (route.Length > 1)
             {

@@ -178,7 +178,7 @@ public sealed class ScienceStore(string directory, IStorageCapacity? capacity = 
             using var db = Open(); using var cmd = db.CreateCommand(); cmd.CommandText = "SELECT (SELECT COUNT(*) FROM datasets),(SELECT COUNT(*) FROM observations)";
             using var r = cmd.ExecuteReader(); r.Read(); datasets = r.GetInt64(0); observations = r.GetInt64(1);
         }
-        return new("science", DirectoryPath, 0, 0, datasets, observations, File.Exists(DatabasePath) ? new FileInfo(DatabasePath).Length : 0,
+        return new("science", DirectoryPath, 0, 0, datasets, observations, StorageManager.DatabaseBytes(DatabasePath),
             "AeroScience atmospheric observations and dataset metadata in Observations/science.sqlite. Unregistered files are not removed.",
             "Flight recordings, telemetry, plans, settings, library identity and folders; unrelated files", "DELETE SCIENCE DATA");
     }

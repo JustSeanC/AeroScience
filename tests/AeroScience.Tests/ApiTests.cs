@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using AeroScience.Engine;
+using AeroScience.Missions;
 using AeroScience.Shared;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -35,6 +36,29 @@ public sealed class ApiTests : IDisposable
         var response = await display.PostAsJsonAsync("/api/session", new { code = (string?)null }); response.EnsureSuccessStatusCode();
         var data = await response.Content.ReadFromJsonAsync<JsonElement>();
         display.DefaultRequestHeaders.Add("X-AeroScience-CSRF", data.GetProperty("csrf").GetString());
+    }
+
+    [Fact]
+    public async Task GeographicConfigurationAndDraftExportsRetainSessionAndCsrfProtection()
+    {
+        Assert.Equal(HttpStatusCode.Unauthorized, (await client.GetAsync("/api/maps/client")).StatusCode);
+        await Pair(client);
+        var configuration = await client.GetFromJsonAsync<JsonElement>("/api/maps/settings");
+        Assert.Equal("offline", configuration.GetProperty("configuration").GetProperty("preferences").GetProperty("layer").GetString());
+        Assert.False(configuration.GetProperty("configuration").TryGetProperty("protectedKey", out _));
+        Assert.False(configuration.GetProperty("configuration").TryGetProperty("publicApiKey", out _));
+        var offline = await client.GetFromJsonAsync<JsonElement>("/api/maps/client"); Assert.Equal(0, offline.GetProperty("tiles").GetArrayLength());
+        var plan = new MissionPlan(Guid.NewGuid(), "Draft <&>", Waypoints: [new("Custom", 0, 179.99)], CruisingAltitudeFeet: 7500);
+        var exported = await client.PostAsJsonAsync("/api/routes/export", new RouteExportRequest(plan), WireJson.Options);
+        exported.EnsureSuccessStatusCode();
+        var result = await exported.Content.ReadFromJsonAsync<RouteExportResult>(WireJson.Options);
+        Assert.Contains("<AppVersionMajor>12</AppVersionMajor>", result!.Content);
+        Assert.Contains("Draft &lt;&amp;&gt;", result.Content);
+        Assert.Equal(HttpStatusCode.NotFound, (await client.GetAsync($"/api/plans/{plan.Id}")).StatusCode); // preview never silently saves a draft
+        client.DefaultRequestHeaders.Remove("X-AeroScience-CSRF");
+        Assert.Equal(HttpStatusCode.Forbidden, (await client.PostAsJsonAsync("/api/routes/export", new RouteExportRequest(plan), WireJson.Options)).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, (await client.PostAsJsonAsync("/api/maps/settings", new MapSettingsRequest(false), WireJson.Options)).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, (await client.PostAsJsonAsync("/api/maps/layer", new MapLayerRequest("offline"))).StatusCode);
     }
 
     [Fact]

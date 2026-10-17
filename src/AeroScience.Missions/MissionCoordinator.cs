@@ -7,6 +7,7 @@ namespace AeroScience.Missions;
 public sealed class MissionCoordinator(MissionStore store, int samplingIntervalMs, bool requireFreshTelemetry = false,
     Action? ensureRecordingCapacity = null, ResearchOperations? research = null)
 {
+    internal MissionStore Store => store;
     private readonly object gate = new();
     private TelemetryFrame? frame;
     private Mission? active;

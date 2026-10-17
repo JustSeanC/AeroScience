@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.2 — Geographic Mission Integration (prerelease)
+
+- Add optional user-owned Esri satellite/labels basemaps with Windows-protected key storage, explicit privacy/billing consent, shared layer preferences, attribution, authenticated provider testing and offline fallback. Offline Natural Earth remains the default; no shared quota, bulk imagery cache or mandatory account.
+- Add the native toolbar Map tab with offline geography, full ordered route/pattern/area geometry, numbered/inspectable waypoints, fresh aircraft/heading, bounded recorded track, follow/free-pan/fit/zoom and cached revision/chunk synchronization over existing CommBus. Native controls/bootstrap and read-only aircraft behavior are retained.
+- Add shared planned-route preview and current MSFS 2024 EFB PLN export (AppVersionMajor 12), optional airport IDs, explicit cruising altitude, unique User fixes and omitted unspecified altitudes. Add planned GPX/KML/CSV and deliberate clipboard DD/DDM/DMS/ICAO/SimBrief-format sharing; no automatic external filing or waypoint simplification.
+- Preserve stable waypoint IDs, full WGS84 precision, canonical units, immutable recording snapshots, existing schema-5 data, modes, plans, presets and dual-storage settings.
+- Make permanent deletion without a new backup the default for each independent native Data Management section. Improve source/count/size/scope presentation, backup labeling and irreversible-deletion warnings; retain phrases, final confirmation, cancellation, recording/transaction/lease protections and existing backups/unrelated files.
+- Update installer/manual release metadata and acceptance documentation. Report all missing acceptance results/notes together. Actual authenticated imagery, Windows setup/DPAPI, MSFS/EFB/native-map and hardware performance acceptance remain pending for the changed release.
+
 ## 0.2.1 — Mission Planning & Science Experience (prerelease)
 
 - Preserve exact bundled geography/library/license bytes on Windows Git checkouts; cover fresh checkout and existing-checkout repair without weakening SHA-256 validation. Correct the Windows guide to enter PowerShell before PowerShell commands.

@@ -17,16 +17,20 @@ REPO = Path(__file__).resolve().parents[2]
 RELEASE_VERSION = ET.parse(REPO/'Directory.Build.props').findtext('.//Version')
 VERSION = RELEASE_VERSION.split('-')[0]
 RELEASE_CHANNEL = ET.parse(REPO/'Directory.Build.props').findtext('.//ReleaseChannel')
-ALPHA_ACCEPTANCE = ("windows_companion", "offline_archive_export", "toolbar_install_load", "simconnect_live",
+BASE_ALPHA_ACCEPTANCE = ("windows_companion", "offline_archive_export", "toolbar_install_load", "simconnect_live",
                     "live_mission_smoke", "runtime_dependencies", "release_contents", "installer_install",
                     "setup_wizard", "upgrade_preservation", "uninstall_preservation", "science_operations", "research_archive", "data_management", "toolbar_update_progress", "mission_experience")
+GEOGRAPHIC_ACCEPTANCE = ("geographic_maps", "efb_route_import")
+ALPHA_ACCEPTANCE = BASE_ALPHA_ACCEPTANCE + GEOGRAPHIC_ACCEPTANCE
 EXTENDED_ACCEPTANCE = ("live_recording_recovery", "storage_migration", "mach_live", "toolbar_mission_sync", "vr_performance", "ipad_safari")
 ACCEPTANCE = ALPHA_ACCEPTANCE + EXTENDED_ACCEPTANCE
 RUNTIME_EXPORTS = ("SimConnect_Open", "SimConnect_Close", "SimConnect_CallDispatch", "SimConnect_AddToDataDefinition",
                    "SimConnect_RequestDataOnSimObject", "SimConnect_SubscribeToSystemEvent", "SimConnect_RequestSystemState",
                    "SimConnect_SubscribeToCommBusEvent", "SimConnect_CallCommBusEvent", "SimConnect_GetLastSentPacketID")
 CHECK_HELP = {
-    "toolbar_update_progress": "On this exact Windows candidate: detect a prior toolbar version, exercise startup Update/Remind Later and Settings repair, observe genuine copy/verify progress, MSFS-running guard, matching installed 0.2.1 manifest and failure rollback. Recheck native drag/resize/scroll.",
+    "geographic_maps": "On this exact v0.2.2 Windows/MSFS candidate: offline/Streets/authenticated satellite and labels, provider failure/offline fallback without geometry loss, native Map tab with full generated route, numbered waypoints, fresh aircraft/track, follow/pan/fit/zoom, 1,000-point bounded synchronization/reconnect and native window controls. Verify attribution and user-owned key restrictions; browser fixtures do not establish simulator compatibility.",
+    "efb_route_import": "Import this candidate’s actual exported PLN into the real MSFS 2024 EFB: airport-to-airport, local/no-airport, multiple custom fixes, lawnmower, expanding square, closed return, signed/missing target altitudes and long routes. Confirm count/order/coordinates/altitudes and record actual limits. Preview/copy documented SimBrief/ICAO coordinates without automatic filing. XML parsing alone is insufficient.",
+    "toolbar_update_progress": "On this exact Windows candidate: detect a prior toolbar version, exercise startup Update/Remind Later and Settings repair, observe genuine copy/verify progress, MSFS-running guard, matching installed release-version manifest and failure rollback. Recheck native drag/resize/scroll.",
     "mission_experience": "On this exact Windows candidate: offline geographic search and editable patterns, ordered plan/track analysis with gaps, reusable presets, cross-display science pause while flight recording continues, display-unit conversions, readable charts/history at 125/150% zoom and explicit no-backup data clearing on disposable stores.",
     "science_operations": "On the exact installed candidate in MSFS: planned atmospheric mission, actual supported science variables and timestamps, markers, offline map, read-only guidance/selected targets and cross-display Mach. Unsupported values remain unavailable; no aircraft control is changed.",
     "research_archive": "With MSFS and internet disconnected: verify legacy upgrade and new recordings, science graphs, complete JSON/CSV/GPX/KML/report exports against saved rows, and separate library availability failures.",
@@ -57,6 +61,7 @@ def identity(version=RELEASE_VERSION):
     root = f'AeroScience-v{version}-win-x64'
     preview = bool(suffix) or (version == RELEASE_VERSION and RELEASE_CHANNEL == 'prerelease')
     title = f'AeroScience v{base}' + (' — Live Flight Recording Alpha' if suffix.startswith('alpha') else ' — Science Mission Operations Prerelease' if preview else '')
+    if base == '0.2.2': title = f'AeroScience v{base} — Geographic Mission Integration' + (' Prerelease' if preview else '')
     return dict(version=version, package_version=base, tag='v'+version, root_name=root,
                 asset_name=root+'.zip', candidate_name=root+'-CANDIDATE.zip', setup_name=f'AeroScience-Setup-v{version}.exe',
                 setup_record_name=f'AeroScience-Setup-v{version}.release.json', prerelease=preview, title=title)
@@ -121,7 +126,8 @@ def validate_community(root, package_version=VERSION):
     require(set(indexed) - {"manifest.json", "layout.json"} <= declared, "Package has files absent from layout.json.")
     expected = {"InGamePanels/aeroscience_panel.spb", "html_ui/InGamePanels/AeroScience/AeroScience.html",
                 "html_ui/InGamePanels/AeroScience/AeroScience.js", "html_ui/InGamePanels/AeroScience/AeroScience.css",
-                "html_ui/icons/toolbar/ICON_AEROSCIENCE.svg", "html_ui/InGamePanels/AeroScience/toolbar-compatibility.json"}
+                "html_ui/icons/toolbar/ICON_AEROSCIENCE.svg", "html_ui/InGamePanels/AeroScience/toolbar-compatibility.json",
+                "html_ui/InGamePanels/AeroScience/AeroScience.Map.js", "html_ui/InGamePanels/AeroScience/AeroScience.Geography.js", "html_ui/InGamePanels/AeroScience/geography-provenance.json"}
     require({name.casefold() for name in expected} <= indexed.keys(), "Compiled panel registration or toolbar assets are missing.")
     binary = indexed["ingamepanels/aeroscience_panel.spb"].read_bytes()
     require(len(binary) > 32 and not binary.lstrip().startswith((b"<", b"{")), "Panel is source/placeholder content, not an SDK-compiled SPB.")
@@ -137,7 +143,7 @@ def validate_companion(root, require_simconnect=False):
     expected = {"AeroScience.exe", "AeroScience.dll", "AeroScience.deps.json",
                 "AeroScience.runtimeconfig.json", "AeroScience.Engine.dll", "coreclr.dll", "hostpolicy.dll",
                 "System.Windows.Forms.dll",
-                "wwwroot/index.html", "wwwroot/app.js", "wwwroot/app.css", "wwwroot/research.js", "wwwroot/map.js", "wwwroot/patterns.js", "wwwroot/analysis.js", "wwwroot/science-display.js", "wwwroot/assets-manifest.json"}
+                "wwwroot/index.html", "wwwroot/app.js", "wwwroot/app.css", "wwwroot/research.js", "wwwroot/map.js", "wwwroot/patterns.js", "wwwroot/analysis.js", "wwwroot/science-display.js", "wwwroot/basemaps.js", "wwwroot/geographic-view.js", "wwwroot/route-export.js", "wwwroot/assets-manifest.json"}
     if require_simconnect:
         expected.add("SimConnect.dll")
     require(expected <= found.keys(), "Missing self-contained Windows companion files or official SimConnect runtime.")
@@ -159,7 +165,7 @@ def validate_companion(root, require_simconnect=False):
     require([name for name in found if name.casefold().endswith('.exe')] == ['AeroScience.exe'],
             'Only AeroScience.exe should be included as an executable entry point.')
     require(not any(PurePosixPath(name).suffix.casefold() in {".db", ".sqlite", ".log"}
-                    or PurePosixPath(name).name.casefold() in {"settings.json", "missions.db-wal", "missions.db-shm"}
+                    or PurePosixPath(name).name.casefold() in {"settings.json", "maps.json", "missions.db-wal", "missions.db-shm"}
                     for name in found), "Release contains personal mission data, configuration or logs.")
     require(not any(PurePosixPath(name).suffix.casefold() in {'.pdb', '.obj', '.lib', '.cs', '.cpp', '.py', '.ps1', '.cmd', '.env'}
                     or any(part.casefold() in {'.git', '.github', 'node_modules', 'src', 'obj', 'bin'} for part in PurePosixPath(name).parts)
@@ -187,10 +193,16 @@ def validate_acceptance(path, version=RELEASE_VERSION, source_commit=None, paylo
         require(acceptance['source_commit'] == source_commit, 'Acceptance identifies a different source commit.')
     if payload_sha256 is not None:
         require(acceptance.get('payload_sha256') == payload_sha256, 'Acceptance does not match the validated candidate payload; test this exact build.')
-    required = ALPHA_ACCEPTANCE if identity(version)['prerelease'] else ACCEPTANCE
+    base_checks = BASE_ALPHA_ACCEPTANCE + (GEOGRAPHIC_ACCEPTANCE if tuple(map(int, version.split("-")[0].split("."))) >= (0, 2, 2) else ())
+    required = base_checks if identity(version)["prerelease"] else base_checks + EXTENDED_ACCEPTANCE
+    problems = []
     for name in required:
         check = acceptance.get("checks", {}).get(name, {})
-        require(check.get("result") == "passed" and bool(check.get("evidence", "").strip()), f"Manual release acceptance is pending: {name}")
+        if check.get("result") != "passed":
+            problems.append(f"{name}: result is {check.get('result', 'missing')!r}")
+        elif not isinstance(check.get("evidence"), str) or not check["evidence"].strip():
+            problems.append(f"{name}: passed, but its test note is empty")
+    require(not problems, "Manual release acceptance is pending:\n" + "\n".join(problems))
     return acceptance
 
 
@@ -281,7 +293,7 @@ def prepare_candidate(companion, community, receipt_path, runtime_report, runtim
         for name in ('LICENSE', 'THIRD-PARTY-NOTICES.md', 'CHANGELOG.md', 'INSTALL.md'):
             shutil.copy2(REPO/name, destination/name)
         (destination/'docs').mkdir()
-        for name in ('alpha-testing.md', 'runtime-distribution.md', 'science-operations.md', 'sdk-research-v0.2.0.md', 'v0.2.0-windows-testing.md', 'v0.2.1-windows-testing.md', 'v0.2.1-completion.md'):
+        for name in ('alpha-testing.md', 'runtime-distribution.md', 'science-operations.md', 'sdk-research-v0.2.0.md', 'v0.2.0-windows-testing.md', 'v0.2.1-windows-testing.md', 'v0.2.1-completion.md', 'v0.2.2-windows-testing.md', 'v0.2.2-completion.md', 'map-providers-v0.2.2.md'):
             shutil.copy2(REPO/'docs'/name, destination/'docs'/name)
         shutil.copy2(REPO/'docs'/'release-readme.md', destination/'README.md')
         (destination/'DEFAULTS.json').write_text(json.dumps(dict(description='Built-in defaults; use graphical Settings to change them.',
@@ -358,7 +370,7 @@ AeroScience is an MSFS 2024 airborne science simulation and flight research reco
 
 Implemented features include live aircraft telemetry, simulator-provided Mach, Universal/Realistic recording modes, Mission History, offline archive access, JSON mission exports, independent mission-database/science-library storage, a browser dashboard and an MSFS toolbar. Minimum Windows startup, local archive, graphical toolbar installation and short live-recording acceptance were recorded for the exact included payload. Feature availability does not imply every aircraft/device or edge case was tested.
 
-This is {'an early prerelease' if info['prerelease'] else 'a release'}. Extended checks still awaiting results: {', '.join(limits) if limits else 'none in the recorded checklist'}. See ACCEPTANCE.json for actual evidence. Includes optional saved plans, four editable mission templates, simulator-reported atmospheric instruments, offline Leaflet/Natural Earth geography, eight editable geodesic patterns, ordered planned-versus-recorded analysis, observation markers, read-only flight guidance, reusable instrument presets, independent Science Collection pause/resume, shared science display units, redesigned native/browser science cards and Chart.js plots, explicit optional-backup archive management and complete research exports. Toolbar updates compare actual package versions and show measured copy/verify progress with rollback. Advanced science models, pilot scoring, calibration and remote-sensing instruments remain deferred. Existing history remains local and is not deleted by an upgrade.
+This is {'an early prerelease' if info['prerelease'] else 'a release'}. Extended checks still awaiting results: {', '.join(limits) if limits else 'none in the recorded checklist'}. See ACCEPTANCE.json for actual evidence. v0.2.2 adds optional user-owned Esri satellite/labels basemaps with DPAPI-protected configuration and offline fallback; a native offline Map tab with revision-cached bounded CommBus route transfer; current EFB PLN and planned GPX/KML/CSV exports; explicit ICAO/SimBrief/manual coordinate sharing; and permanent deletion without a new backup as the default. Native/provider/EFB compatibility requires the recorded acceptance for this exact installer. Includes optional saved plans, four editable mission templates, simulator-reported atmospheric instruments, offline Leaflet/Natural Earth geography, eight editable geodesic patterns, ordered planned-versus-recorded analysis, observation markers, read-only flight guidance, reusable instrument presets, independent Science Collection pause/resume, shared science display units, redesigned native/browser science cards and Chart.js plots, explicit optional-backup archive management and complete research exports. Toolbar updates compare actual package versions and show measured copy/verify progress with rollback. Advanced science models, pilot scoring, calibration and remote-sensing instruments remain deferred. Existing history remains local and is not deleted by an upgrade.
 
 Use **Collect Feedback** in AeroScience, add reproduction steps and save the ZIP. Review it for private information, then report the problem at https://github.com/JustSeanC/AeroScience/issues. Do not attach your mission database or personal observations unless you choose to share them.
 

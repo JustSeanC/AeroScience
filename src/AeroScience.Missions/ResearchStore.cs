@@ -79,7 +79,7 @@ public sealed partial class MissionStore
     }
     public MissionPlan SavePlan(MissionPlan input)
     {
-        var plan = MissionPlanning.Validate(input) with { Id = input.Id == Guid.Empty ? Guid.NewGuid() : input.Id };
+        var plan = MissionPlanning.Validate(input with { Id = input.Id == Guid.Empty ? Guid.NewGuid() : input.Id });
         using var db = Open(); using var cmd = db.CreateCommand();
         cmd.CommandText = "INSERT INTO mission_plans VALUES($id,$name,$time,$json) ON CONFLICT(id) DO UPDATE SET name=$name,updated_utc=$time,payload_json=$json";
         cmd.Parameters.AddWithValue("$id", plan.Id.ToString()); cmd.Parameters.AddWithValue("$name", plan.Name);
@@ -167,31 +167,50 @@ public sealed partial class MissionStore
         cmd.Parameters.AddWithValue("$id", id.ToString()); using var reader = cmd.ExecuteReader();
         while (reader.Read()) yield return new(reader.GetInt64(0), Parse(reader.GetString(1)), reader.GetString(2), reader.GetString(3));
     }
-    public TrackPage Track(Guid id, int limit = 1500, long? after = null)
+    public TrackPage Track(Guid id, int limit = 1500, long? after = null, bool recent = false)
     {
         limit = Math.Clamp(limit, 3, 3000);
         using var db = Open(); using var cmd = db.CreateCommand();
         cmd.CommandText = "SELECT COUNT(*),COALESCE(MAX(sequence),0) FROM telemetry WHERE mission_id=$id"; cmd.Parameters.AddWithValue("$id", id.ToString());
         long count, last; using (var reader = cmd.ExecuteReader()) { reader.Read(); count = reader.GetInt64(0); last = reader.GetInt64(1); }
-        cmd.Parameters.AddWithValue("$limit", limit + 1);
+        DateTimeOffset? previousTime = null;
         if (after is not null)
         {
-            cmd.CommandText = "SELECT sequence,timestamp_utc,latitude,longitude,altitude_msl_ft FROM telemetry WHERE mission_id=$id AND sequence>$after ORDER BY sequence LIMIT $limit";
+            cmd.CommandText = "SELECT timestamp_utc FROM telemetry WHERE mission_id=$id AND sequence<=$after ORDER BY sequence DESC LIMIT 1";
             cmd.Parameters.AddWithValue("$after", Math.Max(0, after.Value));
+            if (cmd.ExecuteScalar() is string stamp) previousTime = Parse(stamp);
         }
+        cmd.Parameters.AddWithValue("$limit", limit + 1);
+        if (after is not null)
+            cmd.CommandText = "SELECT sequence,timestamp_utc,latitude,longitude,altitude_msl_ft,0 FROM telemetry WHERE mission_id=$id AND sequence>$after ORDER BY sequence LIMIT $limit";
+        else if (recent)
+            cmd.CommandText = "SELECT sequence,timestamp_utc,latitude,longitude,altitude_msl_ft,0 FROM telemetry WHERE mission_id=$id ORDER BY sequence DESC LIMIT $limit";
         else
         {
+            // Cumulative gap counts preserve real discontinuities between reduced display
+            // vertices, without treating deliberate downsampling as missing telemetry.
             cmd.CommandText = """
-                WITH ranked AS (SELECT sequence,timestamp_utc,latitude,longitude,altitude_msl_ft,
-                  ROW_NUMBER() OVER(ORDER BY sequence) n FROM telemetry WHERE mission_id=$id)
-                SELECT sequence,timestamp_utc,latitude,longitude,altitude_msl_ft FROM ranked
+                WITH samples AS (SELECT sequence,timestamp_utc,latitude,longitude,altitude_msl_ft,
+                  LAG(timestamp_utc) OVER(ORDER BY sequence) previous FROM telemetry WHERE mission_id=$id),
+                ranked AS (SELECT *,ROW_NUMBER() OVER(ORDER BY sequence) n,
+                  SUM(CASE WHEN previous IS NOT NULL AND ((julianday(timestamp_utc)-julianday(previous))*86400>5.001
+                    OR julianday(timestamp_utc)<=julianday(previous)) THEN 1 ELSE 0 END) OVER(ORDER BY sequence) gaps FROM samples)
+                SELECT sequence,timestamp_utc,latitude,longitude,altitude_msl_ft,gaps FROM ranked
                   WHERE n=1 OR sequence=$last OR (n-1)%$stride=0 ORDER BY sequence LIMIT $limit
                 """;
             cmd.Parameters.AddWithValue("$last", last); cmd.Parameters.AddWithValue("$stride", Math.Max(1, (long)Math.Ceiling((count - 2) / (double)(limit - 2))));
         }
-        using var rows = cmd.ExecuteReader(); var points = new List<TrackPoint>();
-        while (rows.Read()) points.Add(new(rows.GetInt64(0), Parse(rows.GetString(1)), rows.GetDouble(2), rows.GetDouble(3), rows.GetDouble(4)));
-        var more = after is not null && points.Count > limit; if (points.Count > limit) points.RemoveAt(points.Count - 1);
+        using var rows = cmd.ExecuteReader(); var found = new List<(TrackPoint Point, long Gaps)>();
+        while (rows.Read()) found.Add((new(rows.GetInt64(0), Parse(rows.GetString(1)), rows.GetDouble(2), rows.GetDouble(3), rows.GetDouble(4)), rows.GetInt64(5)));
+        var more = after is not null && found.Count > limit;
+        if (recent && after is null) found.Reverse();
+        if (found.Count > limit) found.RemoveAt(recent && after is null ? 0 : found.Count - 1);
+        long gaps = 0; var points = new List<TrackPoint>();
+        foreach (var item in found)
+        {
+            var discontinuity = after is null && !recent ? item.Gaps > gaps : previousTime is { } t && (item.Point.TimestampUtc - t).TotalSeconds is > 5.001 or <= 0;
+            points.Add(item.Point with { BreakBefore = discontinuity }); gaps = item.Gaps; previousTime = item.Point.TimestampUtc;
+        }
         return new(points.ToArray(), after is null ? last : points.LastOrDefault()?.Sequence ?? after.Value, more, count, after is null && count > points.Count);
     }
     public FlightStatistics Statistics(Guid id)
@@ -215,7 +234,7 @@ public sealed partial class MissionStore
         using var db = Open(); using var cmd = db.CreateCommand(); cmd.CommandText = "SELECT (SELECT COUNT(*) FROM missions),(SELECT COUNT(*) FROM mission_plans)";
         using var reader = cmd.ExecuteReader(); reader.Read();
         return new("flight", Path.GetDirectoryName(DatabasePath)!, reader.GetInt64(0), includePlans ? reader.GetInt64(1) : 0, 0, 0,
-            new FileInfo(DatabasePath).Length, "Flight recordings, telemetry, events, markers, recording notes and dataset links" + (includePlans ? "; saved plans and preflight notes" : ""),
+            StorageManager.DatabaseBytes(DatabasePath), "Flight recordings, telemetry, events, markers, recording notes and dataset links" + (includePlans ? "; saved plans and preflight notes" : ""),
             "Scientific Data Library products, library identity, application settings, built-in templates" + (includePlans ? "" : ", saved mission plans"), "DELETE FLIGHT DATA");
     }
     public void ClearFlightData(string confirmation, bool includePlans = false)

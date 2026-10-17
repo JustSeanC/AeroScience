@@ -1,6 +1,6 @@
 # AeroScience — Science Mission Operations
 
-Recommended installation: run **AeroScience-Setup-v0.2.1.exe** from GitHub Releases. Follow the Windows installer, then AeroScience's guided storage and MSFS toolbar setup. Open **Start → AeroScience** whenever you want live recording or your offline archive. No extraction, terminal, PowerShell, manually started server, SDK or manually copied DLL is required.
+Recommended installation: run **AeroScience-Setup-v0.2.2.exe** from GitHub Releases. Follow the Windows installer, then AeroScience's guided storage and MSFS toolbar setup. Open **Start → AeroScience** whenever you want live recording or your offline archive. No extraction, terminal, PowerShell, manually started server, SDK or manually copied DLL is required.
 
 The installer includes the self-contained companion, authorized native SimConnect runtime, genuine SDK-built toolbar and Microsoft Visual C++ x64 prerequisite. Windows may request administrator approval for that shared prerequisite. Choose the application path, Start/optional desktop shortcuts and launch-at-finish normally.
 
@@ -16,4 +16,4 @@ Release-page evidence and `.release.json` identify the exact tested installer an
 
 Use **Collect Feedback**, save/review the local ZIP and report reproduction steps at https://github.com/JustSeanC/AeroScience/issues. Mission databases and original authorization correspondence do not belong in routine feedback.
 
-Mission Planner, Science Collection, offline geographic maps, eight editable research patterns, planned/recorded analysis, presets, pause/resume, configurable science units and historical review are available in v0.2.1. See docs/science-operations.md for actual units, provenance, acquisition limits and complete exports. Advanced calibration, scoring and remote sensing remain future scope.
+Mission Planner, Science Collection, offline geographic maps, eight editable research patterns, planned/recorded analysis, presets, pause/resume, configurable science units and historical review are available in v0.2.2. See docs/science-operations.md for actual units, provenance, acquisition limits and complete exports. Advanced calibration, scoring and remote sensing remain future scope.

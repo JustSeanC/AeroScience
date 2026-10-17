@@ -1,5 +1,9 @@
 # Validation results
 
+## v0.2.2 source validation — 2026-10-17
+
+The Linux cloud run passed **124 .NET tests**, **55 packaging/helper tests**, **27 Playwright browser/toolbar-fixture tests**, all **26 bundled-asset hashes**, JavaScript syntax, locked restore, the zero-warning Release solution build, actual-process recovery and self-contained Windows x64 cross-publish. No Windows GUI/DPAPI, genuine SDK toolbar build, authenticated imagery, real EFB import, native map or hardware performance pass is claimed. See the [full v0.2.2 report](v0.2.2-completion.md) and [gaming-PC acceptance](v0.2.2-windows-testing.md).
+
 ## v0.2.0 source validation — 2026-10-17
 
 These results were measured in the Linux cloud checkout. They are source, process and cross-build checks; Windows native GUI, official SDK compilation, MSFS reception, physical devices and the installer remain unverified for v0.2.0. Earlier results below retain their original scope.

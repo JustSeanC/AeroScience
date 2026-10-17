@@ -70,11 +70,13 @@ public static class MissionPlanning
             throw new ArgumentException($"Text must be at most {maximum} characters without non-text control characters.");
         return value.Trim();
     }
+    public static Guid StableWaypointId(Guid route, int index) => new(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes($"AeroScience:{route:N}:{index}"))[..16]);
     public static MissionPlan Validate(MissionPlan plan)
     {
         var name = Text(plan.Name, 100);
         if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Give the mission plan a name.");
         if (!Enum.IsDefined(plan.Template) || !Enum.IsDefined(plan.Mode)) throw new ArgumentException("Unknown template or science mode.");
+        if (plan.FlightRules is not ("VFR" or "IFR") || plan.CruisingAltitudeFeet is { } cruise && (!double.IsFinite(cruise) || cruise is < -2000 or > 100000)) throw new ArgumentException("Choose VFR/IFR and an optional cruising altitude of -2,000 to 100,000 ft MSL.");
         if (new[] { plan.MinimumAltitudeFeet, plan.MaximumAltitudeFeet, plan.EstimatedDurationMinutes }.Any(v => v is { } n && !double.IsFinite(n))
             || plan.EstimatedDurationMinutes is <= 0 or > 43200
             || plan.MinimumAltitudeFeet > plan.MaximumAltitudeFeet) throw new ArgumentException("Use finite altitude limits and a positive mission duration (up to 30 days).");
@@ -82,12 +84,15 @@ public static class MissionPlanning
         var areas = plan.SurveyAreas ?? [];
         if (waypoints.Length > 1000 || areas.Length > 20 || areas.Sum(a => a.Vertices?.Length ?? 0) > 1000)
             throw new ArgumentException("Plans support up to 1,000 waypoints, 20 areas and 1,000 total polygon vertices.");
-        waypoints = waypoints.Select(w =>
+        waypoints = waypoints.Select((w, index) =>
         {
             if (!Position(w.Latitude, w.Longitude) || w.TargetAltitudeFeet is { } altitude && !double.IsFinite(altitude))
                 throw new ArgumentException("Waypoints require valid WGS84 latitude/longitude and a finite optional altitude.");
-            return w with { Name = Text(w.Name, 100) ?? "Waypoint", Instructions = Text(w.Instructions), Objective = Text(w.Objective) };
+            var ident = Text(w.NavigationIdentifier, 8)?.ToUpperInvariant();
+            if (!string.IsNullOrEmpty(ident) && !System.Text.RegularExpressions.Regex.IsMatch(ident, "^[A-Z0-9]{2,8}$")) throw new ArgumentException("A published navigation identifier must be 2–8 letters/digits, or left empty for a custom waypoint.");
+            return w with { Id = w.Id ?? StableWaypointId(plan.Id, index), Name = Text(w.Name, 100) ?? "Waypoint", Instructions = Text(w.Instructions), Objective = Text(w.Objective), NavigationIdentifier = string.IsNullOrEmpty(ident) ? null : ident };
         }).ToArray();
+        if (waypoints.Select(w => w.Id).Distinct().Count() != waypoints.Length) throw new ArgumentException("Each waypoint must have a distinct stable identifier. Duplicate coordinates are permitted; duplicate identifiers are not.");
         areas = areas.Select(a =>
         {
             if (a.Vertices is null || a.Vertices.Length < 3 || a.Vertices.Any(p => !Position(p.Latitude, p.Longitude)))

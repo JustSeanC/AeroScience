@@ -9,7 +9,7 @@ const activeMission = () => ({
 test('one responsive interface retains navigation, mission and mocked CommBus state', async ({ page }) => {
   await mountToolbar(page, { autoReply: true, activeMission: activeMission() });
   await expect(page.getByRole('checkbox')).toHaveCount(0);
-  await expect(page.locator('nav new-push-button')).toHaveText(['Mission', 'Payload']);
+  await expect(page.locator('nav new-push-button')).toHaveText(['Mission', 'Payload', 'Map']);
   await page.locator('#as-payload-page').click();
   await expect(page.locator('#as-payload-view')).toBeVisible();
   await expect(page.locator('#as-mission-view')).toBeHidden();
