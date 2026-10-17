@@ -13,3 +13,9 @@ __pycache__/
 *.log
 .DS_Store
 .vs/
+# Keep authorization correspondence and mail archives out of source control.
+*.[eE][mM][lL]
+*.[mM][sS][gG]
+*.[mM][bB][oO][xX]
+*.[pP][sS][tT]
+*.[oO][sS][tT]

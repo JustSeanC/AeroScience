@@ -2,7 +2,7 @@
 
 Live MSFS 2024 aircraft telemetry, a local SQLite mission archive and a simulator-native toolbar, operated through one Windows application: **AeroScience.exe**.
 
-**Status: implementation and cross-published Windows developer preview; new Windows/MSFS acceptance pending.** v0.1.0 gaming-PC evidence confirmed initial T-38N live telemetry and native toolbar dragging/resizing. The new Mach field, Windows graphical host, real-drive storage migration, sustained live cadence, iPad and VR performance require their own tests. Public alpha distribution is authorized. The complete release remains unpublished until minimum Windows/MSFS acceptance and specific runtime redistribution permission are established.
+**Status: implementation and cross-published Windows developer preview; new Windows/MSFS acceptance pending.** v0.1.0 gaming-PC evidence confirmed initial T-38N live telemetry and native toolbar dragging/resizing. The new Mach field, Windows graphical host, real-drive storage migration, sustained live cadence, iPad and VR performance require their own tests. Public alpha distribution is authorized. The complete release remains unpublished until minimum Windows/MSFS acceptance and validation of the exact approved runtime are complete.
 
 ## User experience
 
@@ -20,7 +20,7 @@ The first release is built on the Windows gaming PC and uploaded through the **[
 
 The local process builds a complete candidate with genuine official-SDK toolbar/runtime evidence, then finalizes the exact tested payload without rebuilding. Minimum alpha acceptance covers real Windows startup, automatic dashboard, offline archive/export, graphical toolbar installation and a short live recording. Extended Mach/cadence/aircraft/storage/iPad/VR checks may remain explicitly pending for the alpha; stable gates retain extended acceptance. The optional [Actions workflow](.github/workflows/alpha-release.yml) supports later candidate preparation/publication with the normal same-repository GitHub token.
 
-Specific native-runtime redistribution permission remains unconfirmed after review of the [official SDK EULA](https://docs.flightsimulator.com/msfs2024/html/1_Introduction/SDK_EULA.htm); see [runtime status](docs/runtime-distribution.md). The Windows app/SDK candidate and minimum hardware checks must be completed on the gaming PC. No full ZIP, final checksum or working public download is claimed before those pass. [INSTALL.md](INSTALL.md) describes the graphical tester experience; [validation results](docs/validation-results.md) distinguish earlier evidence from this build.
+The maintainer has confirmed native SimConnect redistribution authorization with no additional conditions reported. Supporting correspondence stays private; a public summary binds authorization to the actual DLL hash. See [runtime attestation and privacy](docs/runtime-distribution.md). The Windows app/SDK candidate and minimum hardware checks must be completed on the gaming PC. No full ZIP, final checksum or working public download is claimed before those pass. [INSTALL.md](INSTALL.md) describes the graphical tester experience; [validation results](docs/validation-results.md) distinguish earlier evidence from this build.
 
 ## Development
 

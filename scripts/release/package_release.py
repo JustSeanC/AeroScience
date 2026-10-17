@@ -144,6 +144,8 @@ def validate_companion(root, require_simconnect=False):
     require(not any(PurePosixPath(name).suffix.casefold() in {'.pdb', '.obj', '.lib', '.cs', '.cpp', '.py', '.ps1', '.cmd', '.env'}
                     or any(part.casefold() in {'.git', '.github', 'node_modules', 'src', 'obj', 'bin'} for part in PurePosixPath(name).parts)
                     for name in found), 'Release contains source, debugging/build files, credentials or development tools.')
+    require(not any(PurePosixPath(name).suffix.casefold() in {'.eml', '.msg', '.mbox', '.pst', '.ost'} for name in found),
+            'Email/correspondence archives must remain private and outside distribution inputs.')
     return found
 
 
@@ -181,12 +183,24 @@ def validate_runtime(root, report_path, approval_path):
             and set(RUNTIME_EXPORTS) <= set(report.get('exports', [])) and str(report.get('sha256', '')).lower() == digest,
             'A real Windows loading/export report matching the bundled SimConnect.dll is required; MetadataOnly is insufficient.')
     approval = read_json(approval_path)
-    require(approval.get('redistribution_permitted') is True and str(approval.get('runtime_sha256', '')).lower() == digest
+    require(approval.get('format_version') == 2 and approval.get('redistribution_permitted') is True and str(approval.get('runtime_sha256', '')).lower() == digest
             and approval.get('permission_for_file') == 'SimConnect.dll' and approval.get('reviewed_by')
-            and approval.get('permission_source') and approval.get('permission_excerpt'),
-            'Specific redistribution permission for this SimConnect.dll must be documented; the generic SDK EULA/presence of the DLL is not confirmation.')
+            and isinstance(approval.get('permission_summary'), str) and approval['permission_summary'].strip()
+            and approval.get('conditions_reviewed') is True and isinstance(approval.get('conditions_summary'), str)
+            and approval['conditions_summary'].strip() and approval.get('supporting_evidence_private') is True,
+            'A version 2 maintainer permission attestation matching this DLL and its reviewed distribution conditions is required. Use New-RuntimeApproval.ps1; keep original correspondence private.')
     validate_date(approval.get('reviewed_utc'), 'Runtime permission review date')
-    return report, approval
+    return report, public_runtime_approval(approval)
+
+
+def public_runtime_approval(approval):
+    # Only explicitly public summaries belong in the ZIP. Never quote private evidence.
+    public = {key: approval[key] for key in ('format_version', 'redistribution_permitted', 'permission_for_file',
+        'runtime_sha256', 'permission_summary', 'conditions_reviewed', 'conditions_summary', 'supporting_evidence_private',
+        'reviewed_by', 'reviewed_utc')}
+    public['runtime_sha256'] = public['runtime_sha256'].lower()
+    public['permission_source'] = 'Project maintainer confirmation; supporting authorization retained privately.'
+    return public
 
 
 def validate_provenance(root, receipt_path, version=RELEASE_VERSION):
@@ -212,7 +226,10 @@ def validate_payload(root, final=False, version=RELEASE_VERSION):
     receipt = root/'Toolbar'/'sdk-build.json'
     validate_receipt(receipt, community)
     commit = validate_provenance(root, receipt, version)
-    validate_runtime(root, root/'Dependencies'/'runtime-check.json', root/'Dependencies'/'runtime-approval.json')
+    approval_path = root/'Dependencies'/'runtime-approval.json'
+    _, public_approval = validate_runtime(root, root/'Dependencies'/'runtime-check.json', approval_path)
+    require(read_json(approval_path) == public_approval,
+            'The distributable approval record contains non-public or unexpected fields. Keep correspondence/excerpts/private references outside the package.')
     digest = payload_digest(root)
     if final:
         require(not (root/'RELEASE-STATUS.txt').exists(), 'A candidate status marker cannot ship as the final release.')
@@ -240,9 +257,7 @@ def prepare_candidate(companion, community, receipt_path, runtime_report, runtim
         # Do not publish a tester's absolute SDK path or environment details.
         report = {key: report[key] for key in ('checked_utc', 'sha256', 'file_version', 'architecture', 'export_check', 'exports') if key in report}
         (destination/'Dependencies'/'runtime-check.json').write_text(json.dumps(report, indent=2)+'\n')
-        public_approval = {key: approval[key] for key in ('redistribution_permitted', 'permission_for_file', 'runtime_sha256',
-            'permission_source', 'permission_excerpt', 'reviewed_by', 'reviewed_utc')}
-        (destination/'Dependencies'/'runtime-approval.json').write_text(json.dumps(public_approval, indent=2)+'\n')
+        (destination/'Dependencies'/'runtime-approval.json').write_text(json.dumps(approval, indent=2)+'\n')
         for name in ('LICENSE', 'THIRD-PARTY-NOTICES.md', 'CHANGELOG.md', 'INSTALL.md'):
             shutil.copy2(REPO/name, destination/name)
         (destination/'docs').mkdir()

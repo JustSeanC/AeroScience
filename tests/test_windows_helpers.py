@@ -59,6 +59,29 @@ class WindowsHelperTests(unittest.TestCase):
             self.assertNotEqual(result.returncode, 0)
             self.assertIn('Not a Windows PE image', result.stderr)
 
+    def test_approval_helper_records_actual_hash_and_public_summary_without_correspondence(self):
+        # This helper records attestation/hash only. These bytes are not a real runtime.
+        import hashlib
+        with tempfile.TemporaryDirectory(prefix='aeroscience approval ') as temp:
+            root = Path(temp); runtime = root/'SimConnect.dll'; runtime.write_bytes(b'APPROVAL HASH FIXTURE ONLY')
+            (root/'private-original.eml').write_text('PRIVATE CORRESPONDENCE MUST STAY HERE')
+            output = root/'release records/runtime-approval.json'
+            script = REPO/'scripts/release/New-RuntimeApproval.ps1'
+            args = ('-RuntimePath', runtime, '-OutputPath', output, '-ConditionsSummary', 'No additional conditions reported by the maintainer.')
+            rejected = self.invoke(script, *args)
+            self.assertNotEqual(rejected.returncode, 0); self.assertFalse(output.exists())
+            result = self.invoke(script, *args, '-RedistributionAuthorized')
+            self.assertEqual(result.returncode, 0, result.stdout+result.stderr)
+            data = json.loads(output.read_text(encoding='utf-8-sig'))
+            self.assertEqual(data['runtime_sha256'], hashlib.sha256(runtime.read_bytes()).hexdigest())
+            self.assertEqual(data['format_version'], 2); self.assertTrue(data['redistribution_permitted'])
+            self.assertTrue(data['conditions_reviewed']); self.assertTrue(data['supporting_evidence_private'])
+            self.assertEqual(data['reviewed_by'], 'AeroScience maintainer'); self.assertIn('T', data['reviewed_utc'])
+            self.assertNotIn('permission_excerpt', data); self.assertNotIn('PRIVATE CORRESPONDENCE', output.read_text())
+            original = output.read_bytes()
+            duplicate = self.invoke(script, *args, '-RedistributionAuthorized')
+            self.assertNotEqual(duplicate.returncode, 0); self.assertEqual(output.read_bytes(), original)
+
     def test_pe_metadata_check_does_not_claim_runtime_exports_or_simulator_connection(self):
         # A real self-contained publish's native runtime is a useful PE fixture, not a SimConnect DLL.
         native = REPO/'artifacts/Windows-Companion/coreclr.dll'

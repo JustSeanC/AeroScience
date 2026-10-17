@@ -35,8 +35,10 @@ try {
     $approval = (Resolve-Path -LiteralPath $RuntimeApprovalRecord).Path
     $runtime = (Resolve-Path -LiteralPath $RuntimePath).Path
     $review = Get-Content -LiteralPath $approval -Raw | ConvertFrom-Json
-    if ($review.redistribution_permitted -ne $true -or $review.runtime_sha256 -ne (Get-FileHash -LiteralPath $runtime -Algorithm SHA256).Hash.ToLowerInvariant()) {
-        throw 'Runtime permission record is unconfirmed or refers to another DLL. No distributable was created.'
+    if ($review.format_version -ne 2 -or $review.redistribution_permitted -ne $true -or $review.conditions_reviewed -ne $true -or
+        -not $review.conditions_summary -or -not $review.permission_summary -or $review.supporting_evidence_private -ne $true -or
+        $review.runtime_sha256 -ne (Get-FileHash -LiteralPath $runtime -Algorithm SHA256).Hash.ToLowerInvariant()) {
+        throw 'Generate the private-safe version 2 runtime attestation with New-RuntimeApproval.ps1. Record applicable conditions and match the actual DLL; original correspondence remains private.'
     }
     & "$repo/scripts/build/Build-Companion.ps1"
     python -m unittest discover -s tests -p 'test_*.py' -v

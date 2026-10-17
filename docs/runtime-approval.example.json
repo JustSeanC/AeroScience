@@ -1,9 +1,13 @@
 {
+  "format_version": 2,
   "redistribution_permitted": false,
   "permission_for_file": "SimConnect.dll",
   "runtime_sha256": "",
-  "permission_source": "",
-  "permission_excerpt": "",
-  "reviewed_by": "",
+  "permission_source": "Project maintainer confirmation; supporting authorization retained privately.",
+  "permission_summary": "",
+  "conditions_reviewed": false,
+  "conditions_summary": "",
+  "supporting_evidence_private": true,
+  "reviewed_by": "AeroScience maintainer",
   "reviewed_utc": ""
 }

@@ -1,36 +1,39 @@
-# Native runtime distribution status
+# Native runtime distribution status and private evidence
 
-**Current status: specific permission to redistribute the MSFS 2024 native SimConnect.dll has not been established.** A public release is authorized by the project owner, but that does not grant rights in Microsoft's SDK files. Do not mark the example runtime approval record permitted just to pass packaging.
+**Current status: the project maintainer confirms that redistribution of the native MSFS 2024 SimConnect.dll with AeroScience is authorized, with no additional distribution conditions reported.** This supersedes the earlier unresolved-permission status. The original authorization correspondence remains private and is not required in source control, release assets, logs or feedback reports.
 
-## Official evidence reviewed
+The remaining work is technical: bind that confirmed authorization to the actual SDK DLL's SHA-256, validate its native Windows architecture/loading/exports, build the genuine Community package and complete minimum real Windows/MSFS acceptance. This Linux environment has no access to the gaming PC's SDK file, so its hash/version cannot be invented or filled in here. No further identity or correspondence details are needed for the public attestation.
 
-- [SDK Contents](https://docs.flightsimulator.com/msfs2024/html/1_Introduction/SDK_Contents.htm) identifies the installed SDK's `Licences` folder and links its EULA.
-- [Official SDK EULA](https://docs.flightsimulator.com/msfs2024/html/1_Introduction/SDK_EULA.htm), Scope of License, restricts sharing/publishing/distributing the Software, with an exception for “any distributable code, subject to the terms above” or written Microsoft approval. The public page does not identify the current native SimConnect.dll as that distributable code. Its mere presence in `SimConnect SDK\lib` is insufficient evidence.
-- [SimConnect SDK](https://docs.flightsimulator.com/msfs2024/html/6_Programming_APIs/SimConnect/SimConnect_SDK.htm) documents client setup and local library use; that setup guidance does not independently grant redistribution rights.
-- [Managed-client documentation](https://docs.flightsimulator.com/msfs2024/html/6_Programming_APIs/SimConnect/Programming_SimConnect_Clients_Using_Managed_Code.htm) describes a different managed wrapper/GAC setup. AeroScience uses native exports, including MSFS 2024 CommBus. Do not substitute an old FSX/MSFS 2020 MSI or managed wrapper without verifying compatibility and permission.
+## Create the public attestation on the gaming PC
 
-These sources were successfully retrieved during this release review. No current official SDK installer, installed licence notices, runtime DLL or redistribution list is available in this Linux environment. No permitted standalone graphical installer for this exact native CommBus runtime has been verified here.
+In the maintainer Git checkout, run:
 
-## Smallest remaining permission check
+```powershell
+pwsh -NoProfile -ExecutionPolicy RemoteSigned -File .\scripts\release\New-RuntimeApproval.ps1 -RedistributionAuthorized -ConditionsSummary 'No additional distribution conditions reported by the project maintainer.'
+```
 
-On the gaming PC, inspect `C:\MSFS 2024 SDK\Licences` and any SimConnect-specific licence/REDIST notices supplied with that installed SDK. Identify a grant specifically covering distribution of the native `SimConnect.dll` with an add-on. If it is not identified, obtain clarification/permission through [official SDK Dev Support](https://devsupport.flightsimulator.com/). Do not substitute a community download or ask testers to install the development SDK.
+Defaults:
 
-Once permission is established, copy `docs/runtime-approval.example.json` to `C:\AeroScience-Release-Records\runtime-approval.json` (outside the source checkout). Complete:
+- Official runtime: `C:\MSFS 2024 SDK\SimConnect SDK\lib\SimConnect.dll`.
+- Approval record: `C:\AeroScience-Release-Records\runtime-approval.json` (outside the checkout).
+- Public reviewer label: `AeroScience maintainer`; no personal name/email is required.
 
-- `redistribution_permitted`: true only after that specific grant is established.
-- `permission_for_file`: `SimConnect.dll`.
-- `runtime_sha256`: SHA-256 of the actual official native DLL to bundle (either letter case).
-- `permission_source`: identifying official document/section, redistribution list or Microsoft permission reference.
-- `permission_excerpt`: the relevant grant, including its conditions. Do not paste the generic exception alone as proof the DLL is designated distributable.
-- `reviewed_by`: a maintainer name/label suitable for a public release record.
-- `reviewed_utc`: an actual ISO 8601 timestamp with timezone, such as `2026-10-17T00:00:00Z` (replace with the actual review time).
+The helper reads only the specified DLL, calculates its actual SHA-256, records the current UTC attestation timestamp and saves a version 2 public record. The timestamp records when the attestation was created, not the date of private correspondence. It refuses to replace an existing record. If an earlier record exists, retain it and choose a new `-OutputPath`, then pass that path to the candidate builder. Use `-RuntimePath` only if the official SDK is installed elsewhere.
 
-That record is included in the public ZIP. Do not put credentials, private correspondence, usernames/absolute personal paths or confidential information in it. Retain supporting permission evidence locally. The record is an attestation backed by evidence, not an automatic licence determination.
+The public record includes the authorization summary, confirmed conditions, DLL hash, reviewer label and record timestamp. It uses a generic source: “Project maintainer confirmation; supporting authorization retained privately.” It contains no quoted grant, sender details, correspondence filenames or private evidence reference. The generic example JSON remains unapproved/blank so it cannot accidentally authorize an unrelated future file; use the helper for this confirmed release.
 
-The Windows candidate script checks the approved file's hash and runs the existing native x64 architecture/loading/export checker. Metadata-only inspection cannot pass this gate. The report must include all nine used telemetry/CommBus exports. Build receipts, licence approval and the exact tested payload remain separate checks.
+The helper records authorization and hash only. `Build-ReleaseCandidate.ps1` separately verifies the actual Windows DLL loading and all nine telemetry/CommBus exports, plus the official SDK ABI/package build. Creating an approval record is not a hardware/runtime test or release acceptance pass.
 
-## Supported graphical prerequisites
+## Keep original evidence private
 
-.NET/ASP.NET/Windows Forms assets are self-contained. No .NET SDK is needed by testers. When the native DLL requires Microsoft Visual C++ dependencies, use Microsoft's [official supported redistributable page](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist) and its x64 installer. The app's Settings button opens that page; testers download/run the official installer graphically, verify Microsoft as publisher and restart AeroScience. Validate this route on a supported Windows installation during minimum acceptance. The optional Visual C++ route does **not** install or license SimConnect itself.
+Retain the original correspondence separately from the checkout, published companion folder and candidate folder. It need not be uploaded to this chat or GitHub. Do not paste it into a public summary field. The packager uses a strict public-field projection, omits local `permission_excerpt`, private references and extra fields, and replaces the source field with the generic attestation label. Final validation refuses non-public approval fields if reintroduced. Email archives (`.eml`, `.msg`, `.mbox`, `.pst`, `.ost`) are refused in distribution inputs.
 
-If native-runtime permission cannot be established, publication stays blocked until Microsoft supplies a legitimate runtime delivery route that does not require SDK installation/manual DLL copying. Do not distribute an incomplete app as the requested complete alpha.
+Only a non-confidential summary of any required notices/attribution/version restrictions would belong in `conditions_summary`. The maintainer has reported none for this authorization. If scope or conditions change later, create a new record for the appropriate DLL and include only notices specifically intended for public distribution. Never publish the underlying correspondence to satisfy a packaging check.
+
+## Official references and technical prerequisites
+
+The previous review consulted [SDK Contents](https://docs.flightsimulator.com/msfs2024/html/1_Introduction/SDK_Contents.htm), the [public SDK EULA](https://docs.flightsimulator.com/msfs2024/html/1_Introduction/SDK_EULA.htm), [SimConnect SDK](https://docs.flightsimulator.com/msfs2024/html/6_Programming_APIs/SimConnect/SimConnect_SDK.htm) and [managed-client guidance](https://docs.flightsimulator.com/msfs2024/html/6_Programming_APIs/SimConnect/Programming_SimConnect_Clients_Using_Managed_Code.htm). The current permission status relies on the maintainer's confirmed authorization, not on inferring redistribution rights from those generic pages or the DLL's presence.
+
+Use the official native MSFS 2024 DLL with CommBus exports; an old FSX/MSFS 2020 installer or the managed wrapper is not a substitute. .NET/ASP.NET/Windows Forms assets are self-contained, so testers need no development SDK. When Microsoft Visual C++ dependencies are required, the app's Settings button opens Microsoft's [official redistributable page](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist); install the x64 redistributable graphically and restart AeroScience. Validate that end-user route during Windows acceptance.
+
+The first release remains a local gaming-PC build and manual GitHub Releases web upload. No self-hosted runner or private-destination token is required. Follow [the Windows release guide](public-release-windows.md).

@@ -2,7 +2,7 @@
 
 No self-hosted GitHub Actions runner is required. You are the maintainer for the following steps; ordinary testers receive only the final ZIP and use its graphical app. Nothing below bypasses the official SDK, specific runtime permission or actual Windows/MSFS acceptance.
 
-**Current blockers:** native SimConnect redistribution permission is unconfirmed; the new Windows GUI/SDK/Mach build has not been tested on the gaming PC. The scripts are prepared, but no complete public release asset or checksum exists yet.
+**Current status:** the maintainer confirms native SimConnect redistribution authorization, with no additional conditions reported. Original correspondence stays private. The exact DLL hash/loading, new official SDK build and minimum Windows/MSFS checks still need to be completed on the gaming PC. No complete public release asset or final checksum has been produced here.
 
 ## 1. Use a fresh Git checkout and the existing Windows tools
 
@@ -26,17 +26,17 @@ git rev-parse HEAD
 
 Use a new folder if that one already exists. Keep the printed 40-character commit; it is the source revision being built. Source must be clean/committed. GitHub's **Code → Download ZIP** lacks release provenance and is not the tester download.
 
-## 2. Establish the native runtime permission
+## 2. Record the confirmed authorization without sharing correspondence
 
-Follow [runtime-distribution.md](runtime-distribution.md). This is currently unresolved, so do not treat the following build command as executable release approval yet. The installed `Licences`/REDIST notices or Microsoft must specifically identify this native DLL as redistributable.
-
-After obtaining that evidence, create `C:\AeroScience-Release-Records`, copy the example approval JSON there, and complete it in Notepad. The SDK file is normally `C:\MSFS 2024 SDK\SimConnect SDK\lib\SimConnect.dll`. Its hash can be read with:
+The maintainer has confirmed redistribution is authorized and reports no additional conditions. From the same PowerShell window at `C:\Dev\AeroScience-release`, run:
 
 ```powershell
-Get-FileHash 'C:\MSFS 2024 SDK\SimConnect SDK\lib\SimConnect.dll' -Algorithm SHA256
+pwsh -NoProfile -ExecutionPolicy RemoteSigned -File .\scripts\release\New-RuntimeApproval.ps1 -RedistributionAuthorized -ConditionsSummary 'No additional distribution conditions reported by the project maintainer.'
 ```
 
-Copy that hash into the approval record (either letter case is accepted). Do not put the approval file into tracked source or claim permission based only on the file's presence. The build needs the completed `C:\AeroScience-Release-Records\runtime-approval.json`.
+It hashes the actual `C:\MSFS 2024 SDK\SimConnect SDK\lib\SimConnect.dll` and creates `C:\AeroScience-Release-Records\runtime-approval.json` using a public maintainer label and current UTC record timestamp. No manual JSON editing, copied DLL or correspondence upload is needed. The helper does not claim runtime loading or SDK/hardware acceptance; those checks follow in the candidate build.
+
+Keep the original correspondence separately and privately. Only the summary/hash/conditions attestation is packaged. If an approval record already exists, preserve it and choose another `-OutputPath`, then use that new path in the next command. See [runtime-distribution.md](runtime-distribution.md) for the exact public/private separation.
 
 ## 3. Build a complete candidate ZIP locally
 

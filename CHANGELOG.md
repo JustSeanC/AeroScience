@@ -1,5 +1,12 @@
 # Changelog
 
+### Runtime authorization confirmed; original correspondence remains private
+
+- Recorded the maintainer's confirmation of native MSFS 2024 SimConnect.dll redistribution authorization, with no additional conditions reported. The original correspondence is retained privately and is not requested or published.
+- Added `New-RuntimeApproval.ps1` to bind the public attestation to the real SDK DLL's SHA-256, public maintainer label and UTC record timestamp without manual JSON editing or copying correspondence.
+- Version 2 approval records use a public authorization/conditions summary. Packaging strips private excerpts, source details, private references and extra fields; final validation rejects reintroduced private fields. Email archives are refused in distribution inputs.
+- Preserved actual Windows loading/export checks, official SDK compilation/provenance and minimum real simulator acceptance. No complete release ZIP, final checksum or new Windows/MSFS pass is claimed from the authorization confirmation.
+
 ### Public alpha release preparation — local Windows build and manual upload
 
 - Authorized public distribution through the existing repository's Releases page; removed the private destination/token requirement. A self-hosted runner is optional and is not needed for the first release.

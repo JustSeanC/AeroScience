@@ -1,6 +1,6 @@
 # Install and use AeroScience
 
-The v0.1.1 graphical app is implemented and cross-published, but the complete public alpha still needs official SDK output, specific runtime distribution permission and minimum Windows/MSFS verification. These are the intended user steps for that complete download. Old v0.1.0 console previews and GitHub source ZIPs are different artifacts.
+The v0.1.1 graphical app is implemented and cross-published, but the complete public alpha still needs official SDK output, validation of the approved runtime and minimum Windows/MSFS verification. The maintainer has confirmed native runtime redistribution authorization; supporting correspondence remains private. These are the intended user steps for that complete download. Old v0.1.0 console previews and GitHub source ZIPs are different artifacts.
 
 ## First launch
 
@@ -12,7 +12,7 @@ The v0.1.1 graphical app is implemented and cross-published, but the complete pu
 
 For a native Visual C++ dependency error, open **Settings → Microsoft Visual C++ prerequisite…**, use Microsoft’s official page to download/run the x64 redistributable, then restart AeroScience. This is a graphical runtime prerequisite, not a developer tool.
 
-The developer preview does not bundle a proprietary SimConnect runtime. Its graphical official-runtime import is for personal testing using an official existing installation. The licensed end-user runtime/prerequisite route must be resolved before calling the full alpha installation-ready; testers must not be directed to build tools or manual DLL-copy commands.
+The developer preview does not bundle a proprietary SimConnect runtime. Its graphical official-runtime import is for personal testing using an official existing installation. The complete alpha will bundle the authorized, validated native runtime and document any supported graphical prerequisites; testers must not be directed to build tools or manual DLL-copy commands.
 
 ## Record a flight
 

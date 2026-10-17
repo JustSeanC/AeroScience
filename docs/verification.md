@@ -4,7 +4,7 @@ Machine: Linux x64 cloud container, .NET SDK 10.0.402 / runtime 10.0.13, Node 24
 
 ## Current v0.1.1 acceptance
 
-Public alpha publication is now authorized. The first release uses [a local Windows SDK build and manual Releases website upload](public-release-windows.md); no self-hosted runner is required. Minimum Windows/MSFS checks and specific native-runtime distribution permission remain mandatory. Extended aircraft/Mach/storage/iPad/VR checks can remain disclosed pending for the alpha; stable release gates retain extended acceptance.
+Public alpha publication is now authorized. The first release uses [a local Windows SDK build and manual Releases website upload](public-release-windows.md); no self-hosted runner is required. The maintainer has confirmed native runtime distribution authorization with no additional conditions; original correspondence stays private. The exact DLL hash/loading, official SDK build and minimum Windows/MSFS checks remain mandatory. Extended aircraft/Mach/storage/iPad/VR checks can remain disclosed pending for the alpha; stable release gates retain extended acceptance.
 
 Use [the alpha test procedure](alpha-testing.md) for the single Windows application, offline archive/export, Mach, both storage locations and sustained recording. The implementation is available in source; the complete alpha package is gated on genuine Windows SDK output, specific runtime distribution permission and minimum real Windows/MSFS results. Cross-publishing and portable tests do not verify native Windows dialogs or removable drives.
 

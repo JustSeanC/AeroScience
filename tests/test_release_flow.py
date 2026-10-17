@@ -35,8 +35,11 @@ class ReleaseFlowTests(unittest.TestCase):
         self.report.write_text(json.dumps(dict(checked_utc=DATE, architecture='Windows x64', export_check='passed',
             sha256=digest, exports=p.RUNTIME_EXPORTS, runtime_file=r'C:\Users\private\SDK\SimConnect.dll')))
         self.approval = self.root/'runtime-approval.json'
-        self.approval.write_text(json.dumps(dict(redistribution_permitted=True, permission_for_file='SimConnect.dll',
-            runtime_sha256=digest, permission_source='TEST ONLY: not a licence grant', permission_excerpt='TEST ONLY',
+        self.approval.write_text(json.dumps(dict(format_version=2, redistribution_permitted=True, permission_for_file='SimConnect.dll',
+            runtime_sha256=digest, permission_source='PRIVATE SENDER: fixture@example.invalid',
+            permission_excerpt='PRIVATE ORIGINAL CORRESPONDENCE FIXTURE', private_evidence_reference='PRIVATE FILE PATH FIXTURE',
+            permission_summary='TEST ONLY: maintainer attestation fixture, not a licence grant',
+            conditions_reviewed=True, conditions_summary='No additional conditions in this structural fixture.', supporting_evidence_private=True,
             reviewed_by='fixture', reviewed_utc=DATE, private_extra_field='must not be published')))
         self.candidate = self.root/'candidates'/p.identity()['root_name']
         self.final = self.root/p.identity()['asset_name']
@@ -91,6 +94,15 @@ class ReleaseFlowTests(unittest.TestCase):
             report = json.loads(archive.read(prefix+'Dependencies/runtime-check.json'))
             approval = json.loads(archive.read(prefix+'Dependencies/runtime-approval.json'))
             self.assertNotIn('runtime_file', report); self.assertNotIn('private_extra_field', approval)
+            self.assertNotIn('permission_excerpt', approval); self.assertNotIn('private_evidence_reference', approval)
+            self.assertEqual(approval['format_version'], 2)
+            self.assertEqual(approval['conditions_summary'], 'No additional conditions in this structural fixture.')
+            self.assertEqual(approval['permission_source'], 'Project maintainer confirmation; supporting authorization retained privately.')
+            for name in names:
+                content = archive.read(name)
+                self.assertNotIn(b'PRIVATE ORIGINAL CORRESPONDENCE FIXTURE', content)
+                self.assertNotIn(b'fixture@example.invalid', content)
+                self.assertNotIn(b'PRIVATE FILE PATH FIXTURE', content)
         with self.assertRaisesRegex(ValueError, 'overwrite'): p.finalize_candidate(self.candidate, self.acceptance, self.final)
 
     def test_tampered_candidate_or_wrong_source_cannot_use_old_acceptance(self):
@@ -112,6 +124,31 @@ class ReleaseFlowTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'real Windows'): self.prepare()
         report['export_check'] = 'passed'; report['sha256'] = '0'*64; self.report.write_text(json.dumps(report))
         with self.assertRaisesRegex(ValueError, 'matching'): self.prepare()
+
+    def test_conditions_must_be_recorded_without_guessing(self):
+        original = p.read_json(self.approval)
+        for change in ({'conditions_reviewed': False}, {'conditions_summary': ''}, {'supporting_evidence_private': False}):
+            with self.subTest(change=change):
+                self.approval.write_text(json.dumps({**original, **change}))
+                with self.assertRaisesRegex(ValueError, 'conditions'): self.prepare()
+                self.assertFalse(self.candidate.exists())
+
+    def test_correspondence_cannot_be_reintroduced_into_a_staged_public_record(self):
+        commit, digest = self.prepare(); self.accept(commit, digest)
+        public_path = self.candidate/'Dependencies/runtime-approval.json'
+        record = p.read_json(public_path); record['permission_excerpt'] = 'PRIVATE ORIGINAL CORRESPONDENCE FIXTURE'
+        public_path.write_text(json.dumps(record))
+        with self.assertRaisesRegex(ValueError, 'non-public'): p.finalize_candidate(self.candidate, self.acceptance, self.final)
+        self.assertFalse(self.final.exists())
+
+    def test_email_archives_are_refused_in_distribution_inputs(self):
+        for suffix in ('.eml', '.MSG', '.mbox'):
+            with self.subTest(suffix=suffix):
+                mail = self.published/('authorization'+suffix); mail.write_text('PRIVATE ORIGINAL CORRESPONDENCE FIXTURE')
+                try:
+                    with self.assertRaisesRegex(ValueError, 'correspondence'): self.prepare()
+                    self.assertFalse(self.candidate.exists())
+                finally: mail.unlink()
 
     def test_dirty_sdk_source_and_altered_sdk_assets_are_rejected(self):
         receipt = p.read_json(self.receipt); receipt['source_dirty'] = True; self.receipt.write_text(json.dumps(receipt))

@@ -2,7 +2,7 @@
 
 **For the first alpha, use [the Windows gaming-PC build and manual GitHub upload guide](public-release-windows.md). No self-hosted runner is required.** Ordinary testers download one complete Windows ZIP from Releases, extract it and open AeroScience.exe.
 
-The user has approved public prerelease distribution in `JustSeanC/AeroScience`. It is no longer restricted to a private destination. No full release has yet been published: specific native-runtime redistribution permission and the new Windows SDK/GUI/live smoke checks remain outstanding. See [runtime-distribution.md](runtime-distribution.md).
+The user has approved public prerelease distribution in `JustSeanC/AeroScience`. It is no longer restricted to a private destination. No full release has yet been published: the exact approved DLL’s hash/loading and new Windows SDK/GUI/live smoke checks remain outstanding. The maintainer has confirmed redistribution authorization with no additional conditions; original correspondence remains private. See [runtime-distribution.md](runtime-distribution.md).
 
 ## Prepare, test, finalize, publish
 
@@ -30,7 +30,7 @@ AeroScience-v0.1.1-alpha-win-x64/
   Toolbar/aeroscience-toolbar/          # Genuine SDK-built Community package
   Toolbar/sdk-build.json
   Dependencies/runtime-check.json       # Sanitized actual Windows loading/export report
-  Dependencies/runtime-approval.json    # Public redistribution evidence/attestation
+  Dependencies/runtime-approval.json    # Public summary/conditions/hash; original correspondence stays private
   build-info.json, DEFAULTS.json, ACCEPTANCE.json
   README.md, INSTALL.md, CHANGELOG.md, LICENSE, THIRD-PARTY-NOTICES.md
   docs/alpha-testing.md, docs/runtime-distribution.md
