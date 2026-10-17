@@ -14,6 +14,8 @@ test('two displays share recording, history and safe mission detail', async ({ p
   await page.goto('/');
   await expect(page.locator('#source-badge')).toHaveText('SIMULATED TELEMETRY');
   await expect(page.locator('#altitude')).not.toHaveText('—');
+  await expect(page.locator('#mach')).toHaveText('M 0.82');
+  await expect(page.locator('#sampling-label')).toContainText('Target');
   const name = '<img src=x onerror=alert(1)> · Browser survey';
   await page.getByLabel('MISSION NAME', { exact: true }).fill(name);
   await expect(page.getByLabel('SCIENCE OPERATING MODE')).toHaveValue('universal');
@@ -35,6 +37,11 @@ test('two displays share recording, history and safe mission detail', async ({ p
   await expect(page.locator('#detail-content')).toContainText('completed');
   await expect(page.locator('#detail-content')).toContainText('simulated');
   await expect(page.locator('#detail-content')).toContainText('Realistic Mode');
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    page.getByRole('link', { name: 'Export complete mission (JSON)' }).click()
+  ]);
+  expect(download.suggestedFilename()).toMatch(/^AeroScience-mission-.*\.json$/);
   await expect(page.locator('#detail-content img')).toHaveCount(0);
   await page.getByRole('button', { name: 'Close mission detail' }).click();
   await page.reload(); await expect(page.getByRole('heading', { name, exact: true })).toBeVisible();

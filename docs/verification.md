@@ -2,6 +2,10 @@
 
 Machine: Linux x64 cloud container, .NET SDK 10.0.402 / runtime 10.0.13, Node 24, existing Chromium. Automated results concern this environment, not Windows or simulator execution.
 
+## Current v0.1.1 acceptance
+
+Use [the alpha test procedure](alpha-testing.md) for the single Windows application, offline archive/export, Mach, both storage locations and sustained recording. The implementation is available in source; the complete alpha package is gated on genuine Windows SDK output, runtime distribution permission and hardware results. Cross-publishing and portable tests do not verify native Windows dialogs or removable drives.
+
 ## Automated checks
 
 - .NET unit/in-process API tests: creation/completion/conflicts; full telemetry persistence; interrupted recovery; invalid data/names; sampling; aircraft-change events; two authenticated displays; SSE content; CSRF/Origin/Host checks; pairing rate limits; LAN address checks; mode selection/defaults/persistence/legacy migration; toolbar command deduplication; bounded native packet decoding; unknown-aircraft/hover fallback.
@@ -14,7 +18,7 @@ Exact current counts/results are recorded in `validation-results.md` after the f
 
 ## Reported gaming-PC build
 
-On 2026-10-16 the user's Windows console output confirmed successful SDK contract compilation, official package validation, nine-file Community structural validation, and completion of the proof-of-concept build script through its receipt-writing stage. See [the evidence record](validation-results.md#successful-gaming-pc-proof-of-concept-build). The generated package is on that PC; clean-machine installation, live telemetry and device acceptance remain separate pending checks.
+On 2026-10-16 the user's Windows console output confirmed successful SDK contract compilation, official package validation, nine-file Community structural validation, and completion of the proof-of-concept build script through its receipt-writing stage. See [the evidence record](validation-results.md#successful-gaming-pc-proof-of-concept-build). The generated package is on that PC; clean-machine installation, the expanded Mach definition and complete live-recording/device acceptance remain separate pending checks.
 
 The user's subsequent [MSFS screenshot](validation-results.md#proof-of-concept-panel-opened-in-msfs) confirms registration and visible desktop rendering of the diagnostic panel. A [later screenshot](validation-results.md#first-visible-commbus-reply) shows a companion JSON reply, and the user confirms recurring request-ID updates about once per second. Full reply inspection, long-duration/reconnection behavior, mission commands, live aircraft telemetry and device checks remain pending. See the [testing handoff](v0.1.0-testing-handoff.md) for the next development conversation.
 
@@ -24,7 +28,7 @@ The user's [latest live-source screenshot](validation-results.md#first-live-airc
 
 ## Windows, SDK, simulator and device checks
 
-1. Launch the published companion on a clean Windows x64 machine without a development SDK. Verify offline synthetic mode, logs, mission history, both modes and upgrade preservation. Check that application data is outside the installation and retained on uninstall.
+1. Launch the published companion on a clean Windows x64 machine without a development SDK. Verify disconnected startup, logs, offline mission history/export, both storage locations and verified v0.1.0 upgrade preservation. There is no production synthetic mode. Check that application data is outside the installation and retained on uninstall.
 2. Installed-header ABI contract compilation is user-reported passed for the first POC build. Still confirm native DLL version, redistribution terms, data definitions/units/signs, Sim state, pause/loading behavior and lifecycle callbacks.
 3. In actual MSFS, load default, freeware/payware and rotary-wing aircraft. Verify TITLE/fallback, position, MSL/AGL, IAS/TAS/groundspeed, true heading/track, attitude, vertical speed and zero-speed hover. Unknown aircraft in Realistic mode must remain recordable; no advanced restrictions are present.
 4. Record through pause/resume, aircraft changes, flight restarts, temporary simulator disconnect and simulator exit/restart. Ensure gaps are explicit and no old frames are recorded. Inspect the persisted event timeline.
@@ -33,7 +37,7 @@ The user's [latest live-source screenshot](validation-results.md#first-live-airc
 7. Rebuild the full toolbar after the interaction changes and complete its desktop acceptance table, then create/end missions from it and the browser in both modes. Confirm identical mission IDs/modes, retained state after closing/reopening, reconnects and no recording stop when a panel is closed. Test that halted JavaScript causes no unsolicited reply backlog.
 8. In a working VR headset session, compare FPS/frame times, stutters and companion/toolbar resource use with the companion stopped, running with the panel closed, and running with the panel open. Keep simulator/headset settings constant and record measurements. VR acceptance is performance only; desktop MSFS verifies toolbar functionality.
 9. On a physical iPad mini 6 with Safari, verify pairing on a trusted private network, incorrect-code rejection, source/mode labels, telemetry, mission controls/history, portrait/landscape layouts and session expiry/re-pairing. Verify localhost-only mode refuses LAN connections and the Private firewall rules are sufficient. Test Edge/Chrome on Windows too.
-10. Assemble the real full release only after these prerequisites pass. Inspect/extract it on another PC and verify the exact files and installation instructions. Signatures/one-click installer remain future work; do not mark the current companion-only preview as the full Community release.
+10. Assemble the real full release only after these prerequisites pass. Inspect/extract it on another PC and verify the exact files and installation instructions. Verify AeroScience.exe, graphical setup and storage/recovery dialogs; code signing remains future work; do not mark the current companion-only preview as the full Community release.
 
 ## Required validation for the v0.1.1 live-flight alpha
 
@@ -43,4 +47,4 @@ The user's [latest live-source screenshot](validation-results.md#first-live-airc
 
 Advanced scientific sensors and restrictions follow those reliability/distribution tasks, rather than displacing them.
 
-Follow the [Windows testing workbook](windows-testing.md) and [v0.1.1 prompt brief](v0.1.1-prompt-handoff.md). Live telemetry/recording is the primary v0.1.1 outcome; installation and release automation support it. Retain actual results before claiming that workflow verified. Release automation has not been added during this review.
+Follow the [Windows testing workbook](windows-testing.md) and [v0.1.1 prompt brief](v0.1.1-prompt-handoff.md). Live telemetry/recording is the primary v0.1.1 outcome; installation and release automation support it. Retain actual results before claiming that workflow verified. The manually dispatched private release workflow is implemented but has not executed; pending evidence cannot pass its packaging gates.

@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.1.1-alpha — Live Flight Recording Alpha (implementation; hardware acceptance pending)
+
+- Added one Windows entry point, `AeroScience.exe`, hosting local services and opening the dashboard. Native settings manage connections, toolbar installation, storage and feedback without tester terminal commands. Offline mission history works without MSFS or internet; live recording requires fresh aircraft data.
+- Removed production synthetic telemetry and demo launchers. Test fixtures remain separate; historical simulated missions retain their source labels.
+- Added actual `AIRSPEED MACH` telemetry to the native definition, shared model, dashboard, toolbar, SQLite sample JSON and complete JSON exports. Historical samples may omit Mach; invalid Mach does not discard otherwise valid data. Expanded native-layout checks preserve the previous SDK corrections.
+- Reproduced sample loss caused by jitter around the old interval threshold and replaced it with scheduled real-sample selection. Added configured/observed/mission-average cadence and gap diagnostics. Sustained live 1 Hz acceptance remains pending.
+- Added independent Mission Database and Scientific Data Library folders with native browsing, open/default actions, usage/free-space information and the requested large-data warning. Science storage contains an identity manifest and empty organizational folders; no instruments or artificial observations were added.
+- Added confirmed, exclusive migrations using SQLite backup or verified library copies, capacity/permission/conflict checks, durable recovery journals and retained originals. Active recording blocks changes. Unavailable selected stores never silently become empty replacements. Dataset IDs and library-relative references survive library moves.
+- Added schema 3 with verified pre-upgrade SQLite backups, dataset references and compatibility with v0.1.0 modes/history. Export includes all recorded samples, timestamps, source labels, modes, events and dataset references.
+- Preserved the native toolbar movement/resize bootstrap and single responsive Mission/Payload interface. Removed the dashboard marketing slogan and shortened user guidance.
+- Added provenance/checksum gates and a manually dispatched private alpha release workflow. Public CI publishes no binaries. Official SDK output, permitted native runtime delivery and genuine acceptance evidence are required for a complete alpha archive.
+- Added regression coverage for offline startup/history/export, Mach, migration/recovery, storage independence, reference integrity, recording cadence and toolbar installation. See [validation results](docs/validation-results.md) for measured results and remaining Windows/MSFS/device checks.
+
 ## 0.1.0 — development foundation (not yet a verified Community release)
 
 ### Native storage bootstrap correction — moving/resizing passed

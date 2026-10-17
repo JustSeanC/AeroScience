@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <ItemGroup>
+    <ProjectReference Include="../../src/AeroScience.Engine/AeroScience.Engine.csproj" />
+    <Compile Include="../AeroScience.Tests/SyntheticTelemetryFixture.cs" Link="SyntheticTelemetryFixture.cs" />
+  </ItemGroup>
+</Project>

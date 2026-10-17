@@ -10,7 +10,7 @@ import time
 import urllib.request
 
 REPO = Path(__file__).resolve().parents[2]
-DLL = REPO/'src/AeroScience.Engine/bin/Release/net10.0/AeroScience.Engine.dll'
+DLL = REPO/'tests/AeroScience.TestHost/bin/Release/net10.0/AeroScience.TestHost.dll'
 BASE = 'http://127.0.0.1:5081'
 
 
@@ -19,7 +19,7 @@ def main():
         process = None
         log_path = Path(work)/'console.log'
         env = {**os.environ, 'AeroScience__DataDirectory': str(Path(work)/'data'), 'AeroScience__Port': '5081',
-               'AeroScience__Telemetry': 'Simulated', 'AeroScience__SamplingIntervalMs': '250', 'AeroScience__EnableLan': 'false'}
+               'AeroScience__SamplingIntervalMs': '250', 'AeroScience__EnableLan': 'false'}
 
         def start():
             proc = subprocess.Popen([os.environ.get('DOTNET', 'dotnet'), str(DLL)], cwd=REPO/'src/AeroScience.Engine', env=env,

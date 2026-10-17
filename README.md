@@ -1,67 +1,40 @@
-# AeroScience 0.1.0
+# AeroScience 0.1.1-alpha
 
-An aircraft-independent airborne research foundation for Microsoft Flight Simulator 2024: a C# science engine, local web dashboard, SQLite mission archive, and a simulator-native toolbar project.
+Live MSFS 2024 aircraft telemetry, a local SQLite mission archive and a simulator-native toolbar, operated through one Windows application: **AeroScience.exe**.
 
-**Status: development foundation / companion preview. Not a verified Community release.** The simulated workflow is tested on Linux, and Windows x64 publishing succeeds. Gaming-PC evidence confirms official SDK builds, diagnostic/full panel rendering, recurring companion CommBus replies, restored full-toolbar dragging/resizing, and initial live SimConnect dashboard data for `T-38N WSSP Late` with an active Universal recording reporting 16 samples. Completed live-mission history/restart persistence, broader aircraft/lifecycle checks, clean distribution, VR performance and physical iPad Safari remain pending. See [verification](docs/verification.md). No installation-ready `AeroScience-v0.1.0.zip` is claimed or supplied.
+**Status: implementation and cross-published Windows developer preview; new Windows/MSFS acceptance pending.** v0.1.0 gaming-PC evidence confirmed initial T-38N live telemetry and native toolbar dragging/resizing. The new Mach field, Windows graphical host, real-drive storage migration, sustained live cadence, iPad and VR performance require their own tests. No installation-ready friends-only release or public binary upload is claimed.
 
-**Latest desktop update:** the user confirms dragging/resizing now work after the `03b06f0` full-toolbar rebuild instructions. Preserve the missing-bootstrap correction (`/JS/dataStorage.js`) and native handlers. Continue the [desktop checklist](docs/toolbar-interactions.md); the [v0.1.1 prompt brief](docs/v0.1.1-prompt-handoff.md) separates confirmed results from remaining alpha work. Compact VR is removed; VR acceptance measures performance only. Reuse the engine at `C:\Windows-Companion-unverified-in-MSFS`.
+## User experience
 
-For gaming-PC installation, start with the [Windows installation and live-testing workbook](docs/windows-testing.md): sign in to GitHub and download the **Windows-Companion-unverified-in-MSFS** artifact from a successful [Actions build](https://github.com/JustSeanC/AeroScience/actions/workflows/ci.yml), extract it, run simulated mode, then check the SDK/runtime and build the toolbar proof of concept. GitHub's source ZIP does not include the executable. The three foundation commits are already backed up on `main`.
+From a complete validated alpha: extract/install graphically, launch AeroScience.exe and fly. The app starts the engine, local dashboard and toolbar bridge, opens the dashboard and retries MSFS automatically. Mission History and complete JSON exports work without MSFS or internet while the selected archive is available. No terminal commands, batch launchers, developer tools, cloud account or separate server setup are part of normal use.
 
-## What works in the tested development workflow
+Settings includes independent Mission Database and Scientific Data Library folders, native browsing, usage/free space, restore-default choices and verified migrations that retain originals. Defaults preserve `%LOCALAPPDATA%\AeroScience`. The library has organizational folders and stable identity metadata; no scientific observations or placeholder science products are generated.
 
-- Explicitly labeled synthetic telemetry, including position, altitude, speeds, heading/track, attitude, and vertical speed.
-- Named missions, configurable recording frequency, start/end controls, live state synchronization through server-sent events, and history/detail views.
-- SQLite transactions, crash recovery, preserved partial recordings, and a single engine owner for each database. Displays can close without stopping recording.
-- **Universal — Fly Anything** (default) and **Realistic — Authentic Research** mission modes, persisted and shared with every interface. Older records migrate to Universal. Both record the same telemetry in 0.1.0. Realistic instrument limits, quality scoring, calibration, and sensors are future features.
-- Localhost by default; optional private-LAN binding, local pairing-code retrieval, expiring sessions, CSRF protection, same-origin commands, and Host validation.
-- A native Windows x64 SimConnect telemetry provider and MSFS 2024 SU5+ CommBus toolbar bridge. Recurring POC replies and initial live dashboard telemetry have been observed; complete live-mission persistence and broader aircraft/lifecycle checks remain pending.
-- SDK toolbar source with a read-only CommBus proof of concept, a minimal native-window probe, full mission controls and science-mode selection in one responsive interface. Panel rendering and recurring synthetic CommBus data are user-confirmed; native input and complete mission/lifecycle acceptance remain pending.
+Live data includes simulator-provided nullable Mach, displayed as `M 0.82`, persisted with samples and included in exports. Production synthetic telemetry/launchers are removed; old simulated recordings remain readable and labeled. Universal remains the default mission mode; Realistic records identically with advanced science deferred. Compatible aircraft use standard telemetry without a whitelist. Compact VR is removed; there is one responsive Mission/Payload interface.
 
-There is no aircraft whitelist. Default, freeware, payware, fixed-wing and rotary-wing aircraft are intended to use the same standard telemetry path. The NASA aircraft mentioned in planning are future research presets, not compatibility restrictions. No aircraft files are modified. Unknown aircraft titles fall back to “Unknown MSFS aircraft”; unavailable AGL is null. Actual compatibility with individual add-ons remains subject to their standard SimConnect data and simulator testing.
+The recorder targets configurable intervals (default 1 Hz), preserves real observation timestamps/gaps, and distinguishes configured rate, sample cadence and mission-wide average. See the investigation and precise data-safety behavior in [the alpha guide](docs/alpha-testing.md).
 
-## Run from source
+## Installation and release status
 
-Install the SDK pinned in `global.json` (.NET 10 LTS). No Node runtime or cloud account is needed by the application.
+Read [INSTALL.md](INSTALL.md) for the graphical flow and [the testing guide](docs/alpha-testing.md) for acceptance. **Code → Download ZIP is source**, not a ready-to-run app. Old Actions artifacts are v0.1.0 previews. Public CI no longer uploads alpha binaries automatically; the explicit [private release workflow](.github/workflows/alpha-release.yml) verifies a private destination and requires genuine SDK output, hardware evidence and permitted native-runtime distribution.
 
-```powershell
-dotnet restore AeroScience.sln --locked-mode
-dotnet run --project src/AeroScience.Engine -- --AeroScience:Telemetry=Simulated
-```
+Release blockers include a new official Windows SDK build/receipt, Windows UI/drive and live Mach/cadence testing, native runtime redistribution evidence and an approved private distribution environment. The Linux build cannot certify them. The [chronological evidence](docs/validation-results.md) separates prior gaming-PC results from new automated checks.
 
-On the same PC, open `http://127.0.0.1:5080` in your browser. That address is a local application address, not a hosted cloud preview. Leave the engine console running while recording. Use the mode selector, enter a mission name, start recording, then end the mission and review Mission History.
+## Development
 
-For this cloud workspace:
+Existing modules are retained: shared models, provider interface, native SimConnect/CommBus adapter, mission coordinator/SQLite store, ASP.NET local host, browser dashboard and SDK toolbar. A small WinForms host adds status, first-run setup, settings, storage management and feedback. Synthetic providers live only in the separate automated test projects and are never shipped.
+
+In the isolated cloud checkout, reuse `/workspace/AeroSciences` (no new worktree unless requested):
 
 ```bash
 bash scripts/setup-cloud.sh
 source scripts/env.sh
-export AeroScience__DataDirectory="$PWD/artifacts/dev-data"
-dotnet run --project src/AeroScience.Engine --no-launch-profile
-```
-
-Cloud tasks already have isolated checkouts. Reuse `/workspace/AeroSciences`; do not create a worktree unless explicitly requested.
-
-## Verify and build
-
-```bash
-dotnet test AeroScience.sln -c Release --no-restore
-npm ci --ignore-scripts
-npm run check:web
-# Use CHROMIUM_PATH=/usr/bin/chromium when using an existing Linux Chromium.
+dotnet test tests/AeroScience.Tests -c Release --no-restore
 npm run test:web
 python3 -m unittest discover -s tests -p 'test_*.py' -v
 python3 scripts/build/smoke_recovery.py
 ```
 
-Browser tests need Node 22+ and Chromium (`npx playwright install chromium` on a development PC without it). These are development dependencies only. The browser interface is plain HTML/CSS/JavaScript, served entirely from the companion; the .NET build copies it to build and publish outputs.
+Maintainer Windows builds use `scripts/build/Build-Companion.ps1` and the official SDK `Build-Toolbar.ps1`; see [release documentation](docs/release.md). These commands are not tester setup. Never manufacture an SPB, alter SDK manifests to bypass checks, weaken acceptance, or bundle unapproved SDK/runtime files.
 
-Windows publishing: `pwsh scripts/build/Build-Companion.ps1`. SDK toolbar building: `pwsh scripts/build/Build-Toolbar.ps1 -SdkRoot 'YOUR SDK DIRECTORY' -ProofOfConcept`, then repeat without `-ProofOfConcept` after the in-simulator probe passes. A configured x64 Native Tools shell and the official SDK are required for the latter.
-
-See [installation](INSTALL.md), [architecture/API](docs/architecture.md), [SimConnect](docs/simconnect.md), [toolbar research and packaging](docs/toolbar.md), and [release process](docs/release.md).
-
-For the next development conversation, use the [v0.1.0 testing handoff](docs/v0.1.0-testing-handoff.md), which separates implemented features, automated results, actual gaming-PC evidence and outstanding acceptance work.
-
-Scientific sensors, mapping, full replay, aircraft presets, cloud services, multiplayer, an auto-updater, tray UI and a one-click installer are outside this foundation. A web manifest prepares future PWA work; offline service-worker caching is deliberately not implemented.
-
-MSFS and Microsoft marks belong to their owners. AeroScience is not affiliated with Microsoft, Asobo or NASA.
+[Architecture](docs/architecture.md) · [SimConnect](docs/simconnect.md) · [Alpha testing](docs/alpha-testing.md) · [Changelog](CHANGELOG.md)

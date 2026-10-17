@@ -193,7 +193,7 @@ class IngamePanelAeroScience extends TemplateElement {
     this.byId("as-source").textContent =
       state.connection.source === "simulated"
         ? "SIMULATED TEST DATA"
-        : "SIMCONNECT TELEMETRY";
+        : fresh && state.connection.state === "connected" ? "SIMCONNECT TELEMETRY" : "MSFS DISCONNECTED";
     this.status(state.connection.message);
     this.byId("as-aircraft").textContent = fresh
       ? t.aircraft
@@ -204,6 +204,7 @@ class IngamePanelAeroScience extends TemplateElement {
     this.byId("as-airspeed").textContent = fresh
       ? fmt(t.indicatedAirspeedKnots)
       : "—";
+    this.byId("as-mach").textContent = "M " + (fresh && Number.isFinite(t.machNumber) ? t.machNumber.toFixed(2) : "—");
     this.byId("as-heading").textContent = fresh ? fmt(t.headingDegrees) : "—";
     this.byId("as-vspeed").textContent = fresh
       ? fmt(t.verticalSpeedFeetPerMinute)

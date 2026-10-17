@@ -50,7 +50,8 @@ Get-ChildItem $package -File -Recurse | ForEach-Object {
     $relative = [IO.Path]::GetRelativePath($package, $_.FullName).Replace([IO.Path]::DirectorySeparatorChar, [char]'/')
     $hashes[$relative] = (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
 }
-@{ variant=$variant; builder_sha256=(Get-FileHash $tool -Algorithm SHA256).Hash;
+$sourceCommit = if ((Get-Command git -ErrorAction SilentlyContinue) -and (Test-Path (Join-Path $repo '.git'))) { (git -C $repo rev-parse HEAD).Trim() } else { 'unknown' }
+@{ variant=$variant; source_commit=$sourceCommit; builder_sha256=(Get-FileHash $tool -Algorithm SHA256).Hash;
     sdk_header_sha256=(Get-FileHash (Join-Path $include 'SimConnect.h') -Algorithm SHA256).Hash;
     sdk_contract='passed'; built_utc=[DateTime]::UtcNow.ToString('o'); files=$hashes } |
     ConvertTo-Json -Depth 5 | Set-Content (Join-Path $stage 'sdk-build.json') -Encoding utf8

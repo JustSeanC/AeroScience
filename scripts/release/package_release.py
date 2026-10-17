@@ -11,9 +11,10 @@ import struct
 import tempfile
 import zipfile
 
-VERSION = "0.1.0"
+VERSION = "0.1.1"
+RELEASE_VERSION = "0.1.1-alpha"
 REPO = Path(__file__).resolve().parents[2]
-ACCEPTANCE = ("windows_companion", "simulated_recording_recovery", "simconnect_live", "toolbar_install_load",
+ACCEPTANCE = ("windows_companion", "live_recording_recovery", "offline_archive_export", "storage_migration", "mach_live", "simconnect_live", "toolbar_install_load",
               "toolbar_mission_sync", "vr_performance", "ipad_safari", "release_contents")
 
 
@@ -78,17 +79,26 @@ def validate_community(root):
 
 def validate_companion(root, require_simconnect=False):
     found = files(root)
-    expected = {"AeroScience.Engine.exe", "AeroScience.Engine.dll", "AeroScience.Engine.deps.json",
-                "AeroScience.Engine.runtimeconfig.json", "coreclr.dll", "hostpolicy.dll",
+    expected = {"AeroScience.exe", "AeroScience.dll", "AeroScience.deps.json",
+                "AeroScience.runtimeconfig.json", "AeroScience.Engine.dll", "coreclr.dll", "hostpolicy.dll",
+                "System.Windows.Forms.dll",
                 "wwwroot/index.html", "wwwroot/app.js", "wwwroot/app.css"}
     if require_simconnect:
         expected.add("SimConnect.dll")
     require(expected <= found.keys(), "Missing self-contained Windows companion files or official SimConnect runtime.")
-    image = found["AeroScience.Engine.exe"].read_bytes()
+    image = found["AeroScience.exe"].read_bytes()
     require(len(image) >= 64 and image[:2] == b"MZ", "Companion is not a published Windows executable.")
     offset = struct.unpack_from("<I", image, 60)[0]
     require(offset + 6 <= len(image) and image[offset:offset+4] == b"PE\0\0" and struct.unpack_from("<H", image, offset+4)[0] == 0x8664,
             "Companion must target Windows x64.")
+    require(offset + 94 <= len(image) and struct.unpack_from("<H", image, offset+24)[0] == 0x20b
+            and struct.unpack_from("<H", image, offset+92)[0] == 2,
+            "Companion must be a graphical Windows application, not a console launcher.")
+    forbidden = ("Launch-Simulated.cmd", "Launch-SimConnect.cmd", "AeroScience.Engine.exe", "AeroScience.TestHost.dll", "AeroScience.Tests.dll")
+    require(not any(PurePosixPath(name).name.casefold() in {item.casefold() for item in forbidden} for name in found), "Release contains developer/test launchers or test assemblies.")
+    require(not any(PurePosixPath(name).suffix.casefold() in {".db", ".sqlite", ".log"}
+                    or PurePosixPath(name).name.casefold() in {"settings.json", "missions.db-wal", "missions.db-shm"}
+                    for name in found), "Release contains personal mission data, configuration or logs.")
     return found
 
 
@@ -96,13 +106,14 @@ def validate_receipt(path, community_files):
     receipt = json.loads(path.read_text(encoding="utf-8-sig"))
     require(receipt.get("variant") == "toolbar-full", "A full-toolbar SDK build receipt is required; diagnostic variants cannot ship as the full toolbar.")
     require(receipt.get("built_utc") and receipt.get("builder_sha256"), "SDK build provenance is incomplete.")
+    require(receipt.get("sdk_contract") == "passed" and bool(receipt.get("sdk_header_sha256")), "Installed SDK ABI contract evidence is missing.")
     expected = {name: hashlib.sha256(path.read_bytes()).hexdigest() for name, path in community_files.items()}
     require(receipt.get("files") == expected, "Community files differ from the recorded SDK build.")
 
 
 def validate_acceptance(path):
     acceptance = json.loads(path.read_text(encoding="utf-8"))
-    require(acceptance.get("version") == VERSION and acceptance.get("tester") and acceptance.get("tested_utc"), "Release acceptance identity/date/version missing.")
+    require(acceptance.get("version") == RELEASE_VERSION and acceptance.get("tester") and acceptance.get("tested_utc"), "Release acceptance identity/date/version missing.")
     for name in ACCEPTANCE:
         check = acceptance.get("checks", {}).get(name, {})
         require(check.get("result") == "passed" and bool(check.get("evidence", "").strip()), f"Manual release acceptance is pending: {name}")
@@ -139,31 +150,33 @@ def main():
     if args.command == "release":
         require(args.runtime_redistribution_confirmed, "Confirm Microsoft's runtime redistribution terms before including the official DLL.")
         found = validate_community(args.community); validate_receipt(args.sdk_receipt, found); validate_acceptance(args.acceptance)
-        require(args.output.name == f"AeroScience-v{VERSION}.zip", "Use the required versioned release filename.")
-        name = f"AeroScience-v{VERSION}"
+        metadata = json.loads((args.companion/'build-info.json').read_text(encoding='utf-8-sig'))
+        receipt = json.loads(args.sdk_receipt.read_text(encoding='utf-8-sig'))
+        require(metadata.get('version') == RELEASE_VERSION and metadata.get('source_dirty') is False,
+                'Release companion must be built from clean, committed alpha source.')
+        require(isinstance(metadata.get('source_commit'), str) and re.fullmatch(r'[a-fA-F0-9]{40}', metadata['source_commit'])
+                and receipt.get('source_commit') == metadata['source_commit'],
+                'App and SDK toolbar must identify the same committed source revision.')
+        require(args.output.name == f"AeroScience-v{RELEASE_VERSION}.zip", "Use the required versioned release filename.")
+        name = f"AeroScience-v{RELEASE_VERSION}"
     else:
         sdk_runtime_names = {"simconnect.dll", "microsoft.flightsimulator.simconnect.dll"}
         require(not any(PurePosixPath(name).name.casefold() in sdk_runtime_names for name in companion_files),
                 "Companion previews exclude the proprietary SimConnect runtime; keep personal live-test files in a separate folder.")
         require("Preview" in args.output.name, "Companion-only development archives must be explicitly labeled Preview.")
-        name = f"AeroScience-Companion-Preview-v{VERSION}"
+        name = f"AeroScience-Companion-Preview-v{RELEASE_VERSION}"
     with tempfile.TemporaryDirectory(prefix="aeroscience-package-") as work:
         root = Path(work)/name; root.mkdir()
-        shutil.copytree(args.companion, root/"Windows-Companion")
+        shutil.copytree(args.companion, root, dirs_exist_ok=True)
         for doc in ("README.md", "INSTALL.md", "CHANGELOG.md", "LICENSE", "THIRD-PARTY-NOTICES.md"):
             shutil.copy2(REPO/doc, root/doc)
         shutil.copytree(REPO/"docs", root/"docs")
-        # These scripts also ship when publishing directly rather than through the PowerShell wrapper.
-        companion_root = root/"Windows-Companion"
-        for launcher in (REPO/"scripts/release").glob("Launch-*.cmd"):
-            shutil.copy2(launcher, companion_root/launcher.name)
-        shutil.copy2(REPO/"scripts/release/Collect-Feedback.ps1", companion_root/"Collect-Feedback.ps1")
-        shutil.copy2(REPO/"scripts/build/Test-SimConnectRuntime.ps1", companion_root/"Test-SimConnectRuntime.ps1")
+        companion_root = root
         if args.command == "release":
-            shutil.copytree(args.community, root/"Community"/"aeroscience-toolbar")
-            shutil.copy2(args.sdk_receipt, root/"SDK-BUILD.json"); shutil.copy2(args.acceptance, root/"ACCEPTANCE.json")
+            shutil.copytree(args.community, companion_root/"Toolbar"/"aeroscience-toolbar")
+            shutil.copy2(args.sdk_receipt, companion_root/"Toolbar"/"sdk-build.json"); shutil.copy2(args.acceptance, root/"ACCEPTANCE.json")
         else:
-            (root/"PREVIEW.txt").write_text("Companion-only developer preview. Simulated mode can run without MSFS or a .NET installation. No Community add-on or proprietary SimConnect runtime is included. Real Windows execution, MSFS, VR, and iPad validation remain pending. This is not the complete v0.1.0 release.\n")
+            (root/"PREVIEW.txt").write_text("Windows graphical app developer preview. Open AeroScience.exe; the local archive is available without MSFS. No Community toolbar or proprietary SimConnect runtime is bundled. New Windows UI, migration, Mach and hardware checks remain pending. This is not an installation-ready alpha.\n")
         zip_tree(root, args.output.resolve())
     digest = hashlib.sha256(args.output.read_bytes()).hexdigest()
     args.output.with_suffix(".zip.sha256").write_text(digest + "  " + args.output.name + "\n")

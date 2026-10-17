@@ -3,19 +3,32 @@ using AeroScience.Shared;
 namespace AeroScience.Missions;
 
 // All mutations pass through this gate, including telemetry and commands from every display.
-public sealed class MissionCoordinator(MissionStore store, int samplingIntervalMs)
+public sealed class MissionCoordinator(MissionStore store, int samplingIntervalMs, bool requireFreshTelemetry = false,
+    Action? ensureRecordingCapacity = null)
 {
     private readonly object gate = new();
     private TelemetryFrame? frame;
     private Mission? active;
     private DateTimeOffset? lastRecordedUtc;
     private string? lastAircraft;
-    private ConnectionInfo connection = new(ConnectionState.Initializing, TelemetrySource.Simulated,
+    private DateTimeOffset? samplingAnchor;
+    private long lastSlot = -1, received, skipped, missing;
+    private DateTimeOffset? firstRecordedUtc;
+    private bool maintenance;
+    private ConnectionInfo connection = new(ConnectionState.Initializing, TelemetrySource.Simulator,
         "Waiting for telemetry provider", DateTimeOffset.UtcNow);
 
     public EngineSnapshot Snapshot()
     {
-        lock (gate) return new(connection, frame, active, samplingIntervalMs);
+        lock (gate)
+        {
+            var count = active?.SampleCount ?? 0;
+            var seconds = (lastRecordedUtc - firstRecordedUtc)?.TotalSeconds;
+            return new(connection, frame, active, samplingIntervalMs, Sampling: new(received, count, skipped, missing,
+                count > 1 && seconds > 0 ? (count - 1) / seconds : null, firstRecordedUtc, lastRecordedUtc,
+                active is not null && active.DurationSeconds >= 1 ? count / active.DurationSeconds : null,
+                active is not null && firstRecordedUtc is not null ? Math.Max(0, (firstRecordedUtc.Value-active.StartedUtc).TotalSeconds) : null));
+        }
     }
 
     public void Apply(TelemetryUpdate update)
@@ -27,10 +40,35 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
             connection = update.Connection;
             frame = connection.State == ConnectionState.Connected && update.Frame is { IsValid: true } ? update.Frame : null;
             if (active is null || frame is null) return;
-            if (lastRecordedUtc is not null && frame.TimestampUtc - lastRecordedUtc < TimeSpan.FromMilliseconds(samplingIntervalMs)) return;
+            received++;
+            if (frame.IsPaused || lastRecordedUtc is not null && frame.TimestampUtc <= lastRecordedUtc)
+            { skipped++; return; }
+            samplingAnchor ??= frame.TimestampUtc;
+            // Quantize observations to a stable schedule, not the last write's timestamp.
+            // A bounded 10% (at most 100ms) phase tolerance avoids dropping every
+            // other nominal 1Hz observation when delivery jitters just below 1000ms.
+            var tolerance = Math.Min(100, samplingIntervalMs * .1);
+            var slot = (long)Math.Floor(((frame.TimestampUtc - samplingAnchor.Value).TotalMilliseconds + tolerance) / samplingIntervalMs);
+            if (slot <= lastSlot) { skipped++; return; }
+            if (lastSlot >= 0 && slot > lastSlot + 1)
+            {
+                missing += slot - lastSlot - 1;
+                store.AddEvent(active.Id, frame.TimestampUtc, "telemetry-gap", $"No committed observation in {slot-lastSlot-1} configured recording intervals.");
+            }
             if (lastAircraft is not null && lastAircraft != frame.Aircraft)
                 store.AddEvent(active.Id, frame.TimestampUtc, "aircraft-changed", $"Aircraft changed to {frame.Aircraft}.");
+            if (ensureRecordingCapacity is not null)
+            {
+                try { ensureRecordingCapacity(); }
+                catch (IOException error)
+                {
+                    store.Finish(active.Id, MissionStatus.Interrupted, lastRecordedUtc ?? active.StartedUtc, "Recording stopped to protect storage: " + error.Message);
+                    active = null; connection = connection with { Message = error.Message }; return;
+                }
+            }
             store.Append(active.Id, frame);
+            firstRecordedUtc ??= frame.TimestampUtc;
+            lastSlot = slot;
             lastRecordedUtc = frame.TimestampUtc;
             lastAircraft = frame.Aircraft;
             active = active with
@@ -53,15 +91,38 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
             throw new ArgumentException("Use a mission name of 1–100 characters without control characters.");
         lock (gate)
         {
+            if (maintenance) throw new InvalidOperationException("Storage/settings maintenance is in progress. Try again after it completes.");
             if (active is not null) throw new InvalidOperationException("A mission is already recording.");
+            try { ensureRecordingCapacity?.Invoke(); }
+            catch (IOException error) { throw new InvalidOperationException(error.Message, error); }
+            if (requireFreshTelemetry && (connection.State != ConnectionState.Connected || frame is null
+                || DateTimeOffset.UtcNow - frame.TimestampUtc > TimeSpan.FromSeconds(6) || frame.IsPaused))
+                throw new InvalidOperationException("Live aircraft telemetry is unavailable. Mission History remains accessible.");
             var now = DateTimeOffset.UtcNow;
             var id = store.Create(name, frame, now, mode);
             active = store.Detail(id)!.Mission;
             lastRecordedUtc = null;
+            firstRecordedUtc = samplingAnchor = null;
+            lastSlot = -1; received = skipped = missing = 0;
             lastAircraft = null;
             // Take a fresh sample on the next provider update; do not backdate the first sample.
             return active;
         }
+    }
+
+    public IDisposable EnterMaintenance()
+    {
+        lock (gate)
+        {
+            if (active is not null) throw new InvalidOperationException("End the active mission before storage/settings maintenance.");
+            if (maintenance) throw new InvalidOperationException("Storage/settings maintenance is already running.");
+            maintenance = true;
+            return new MaintenanceLease(this);
+        }
+    }
+    private sealed class MaintenanceLease(MissionCoordinator owner) : IDisposable
+    {
+        public void Dispose() { lock (owner.gate) owner.maintenance = false; }
     }
 
     public Mission End(Guid id)

@@ -12,9 +12,20 @@ packaging = importlib.util.module_from_spec(spec); spec.loader.exec_module(packa
 
 
 class PackagingTests(unittest.TestCase):
+    def companion_fixture(self, root):
+        # Minimal structural PE fixture; never evidence of Windows execution.
+        (root/'wwwroot').mkdir(parents=True)
+        image = bytearray(512); image[:2] = b'MZ'; struct.pack_into('<I', image, 60, 128)
+        image[128:132] = b'PE\0\0'; struct.pack_into('<H', image, 132, 0x8664)
+        struct.pack_into('<H', image, 152, 0x20b); struct.pack_into('<H', image, 220, 2)
+        (root/'AeroScience.exe').write_bytes(image)
+        for name in ('AeroScience.Engine.dll', 'AeroScience.dll', 'AeroScience.deps.json', 'AeroScience.runtimeconfig.json',
+                     'coreclr.dll', 'hostpolicy.dll', 'System.Windows.Forms.dll', 'wwwroot/index.html', 'wwwroot/app.js', 'wwwroot/app.css'):
+            (root/name).write_text('test fixture')
+
     def community_fixture(self, root, minimum_game_version, lowercase_assets=False):
         # Structural test data only; this is not an SDK output or simulator acceptance fixture.
-        manifest = {'package_version': '0.1.0', 'content_type': 'MISC', 'title': 'AeroScience',
+        manifest = {'package_version': packaging.VERSION, 'content_type': 'MISC', 'title': 'AeroScience',
                     'minimum_game_version': minimum_game_version, 'dependencies': []}
         (root/'manifest.json').write_text(json.dumps(manifest))
         assets = {
@@ -116,18 +127,57 @@ class PackagingTests(unittest.TestCase):
 
     def test_companion_preview_refuses_a_proprietary_runtime_in_input(self):
         with tempfile.TemporaryDirectory() as temp:
-            root = Path(temp); companion = root/'published'; (companion/'wwwroot').mkdir(parents=True)
-            image = bytearray(256); image[:2] = b'MZ'; struct.pack_into('<I', image, 60, 128)
-            image[128:132] = b'PE\0\0'; struct.pack_into('<H', image, 132, 0x8664)
-            (companion/'AeroScience.Engine.exe').write_bytes(image)
-            for name in ('AeroScience.Engine.dll', 'AeroScience.Engine.deps.json', 'AeroScience.Engine.runtimeconfig.json',
-                         'coreclr.dll', 'hostpolicy.dll', 'wwwroot/index.html', 'wwwroot/app.js', 'wwwroot/app.css', 'SIMCONNECT.DLL'):
-                (companion/name).write_text('test fixture')
+            root = Path(temp); companion = root/'published'; self.companion_fixture(companion)
+            (companion/'SIMCONNECT.DLL').write_text('test fixture')
             result = subprocess.run([sys.executable, str(packaging.REPO/'scripts/release/package_release.py'), 'companion-preview',
                                      '--companion', str(companion), '--output', str(root/'Preview.zip')], capture_output=True, text=True)
             self.assertNotEqual(result.returncode, 0)
             self.assertIn('exclude the proprietary', result.stderr)
             self.assertFalse((root/'Preview.zip').exists())
+
+    def test_preview_has_one_graphical_entry_point_and_checksum_without_terminal_helpers(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp); companion = root/'published'; self.companion_fixture(companion)
+            output = root/'Companion-Preview.zip'
+            subprocess.run([sys.executable, str(packaging.REPO/'scripts/release/package_release.py'), 'companion-preview',
+                            '--companion', str(companion), '--output', str(output)], check=True, capture_output=True, text=True)
+            with packaging.zipfile.ZipFile(output) as archive:
+                names = archive.namelist()
+                executable = f'AeroScience-Companion-Preview-v{packaging.RELEASE_VERSION}/AeroScience.exe'
+                self.assertIn(executable, names)
+                self.assertEqual([name for name in names if name.endswith('.exe')], [executable])
+                self.assertFalse(any(name.endswith(('.cmd', '.ps1')) for name in names))
+                self.assertTrue(any(name.endswith('/PREVIEW.txt') for name in names))
+            self.assertEqual(output.with_suffix('.zip.sha256').read_text().split()[0], packaging.hashlib.sha256(output.read_bytes()).hexdigest())
+
+    def test_companion_rejects_console_entry_test_assemblies_and_personal_data(self):
+        for forbidden in ('nested/AEROSCIENCE.TESTHOST.DLL', 'Launch-Simulated.cmd', 'missions.db', 'settings.json', 'engine.log'):
+            with self.subTest(forbidden=forbidden), tempfile.TemporaryDirectory() as temp:
+                root = Path(temp); self.companion_fixture(root)
+                extra = root/forbidden; extra.parent.mkdir(parents=True, exist_ok=True); extra.write_text('must not ship')
+                with self.assertRaisesRegex(ValueError, 'developer/test|personal mission'):
+                    packaging.validate_companion(root)
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp); self.companion_fixture(root)
+            image = bytearray((root/'AeroScience.exe').read_bytes()); struct.pack_into('<H', image, 220, 3)
+            (root/'AeroScience.exe').write_bytes(image)
+            with self.assertRaisesRegex(ValueError, 'graphical Windows'):
+                packaging.validate_companion(root)
+
+    def test_full_toolbar_receipt_requires_installed_header_contract_and_matching_files(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp); self.community_fixture(root, '1.9.18'); found = packaging.validate_community(root)
+            path = root/'receipt.json'
+            receipt = {'variant': 'toolbar-full', 'built_utc': 'fixture date', 'builder_sha256': 'fixture hash',
+                       'files': {name: packaging.hashlib.sha256(file.read_bytes()).hexdigest() for name, file in found.items()}}
+            path.write_text(json.dumps(receipt))
+            with self.assertRaisesRegex(ValueError, 'ABI contract'):
+                packaging.validate_receipt(path, found)
+            receipt.update(sdk_contract='passed', sdk_header_sha256='structural fixture hash')
+            path.write_text(json.dumps(receipt)); packaging.validate_receipt(path, found)
+            found['html_ui/InGamePanels/AeroScience/AeroScience.js'].write_text('altered after receipt')
+            with self.assertRaisesRegex(ValueError, 'differ'):
+                packaging.validate_receipt(path, found)
 
     def test_source_only_directory_is_rejected(self):
         with tempfile.TemporaryDirectory() as temp:
@@ -138,7 +188,7 @@ class PackagingTests(unittest.TestCase):
     def test_traversal_and_incorrect_file_sizes_are_rejected(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
-            (root/'manifest.json').write_text(json.dumps({'package_version': '0.1.0', 'content_type': 'MISC', 'title': 'AeroScience', 'minimum_game_version': '1.0.0.0', 'dependencies': []}))
+            (root/'manifest.json').write_text(json.dumps({'package_version': packaging.VERSION, 'content_type': 'MISC', 'title': 'AeroScience', 'minimum_game_version': '1.0.0.0', 'dependencies': []}))
             (root/'layout.json').write_text(json.dumps({'content': [{'path': '../escape', 'size': 0, 'date': 1}]}))
             with self.assertRaisesRegex(ValueError, 'Unsafe'): packaging.validate_community(root)
             (root/'asset').write_bytes(b'ab')
@@ -149,7 +199,7 @@ class PackagingTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp); receipt = root/'receipt.json'; receipt.write_text('{"variant":"toolbar-poc"}')
             with self.assertRaisesRegex(ValueError, 'full-toolbar'): packaging.validate_receipt(receipt, {})
-            acceptance = root/'acceptance.json'; acceptance.write_text(json.dumps({'version': '0.1.0', 'tester': 'test fixture', 'tested_utc': '2026-10-16', 'checks': {}}))
+            acceptance = root/'acceptance.json'; acceptance.write_text(json.dumps({'version': packaging.RELEASE_VERSION, 'tester': 'test fixture', 'tested_utc': '2026-10-16', 'checks': {}}))
             with self.assertRaisesRegex(ValueError, 'pending'): packaging.validate_acceptance(acceptance)
 
     def test_archive_has_one_root_and_refuses_overwrite(self):
@@ -169,7 +219,7 @@ class PackagingTests(unittest.TestCase):
     def test_vr_acceptance_requires_performance_evidence(self):
         with tempfile.TemporaryDirectory() as temp:
             acceptance = Path(temp)/'acceptance.json'
-            data = {'version': '0.1.0', 'tester': 'test fixture', 'tested_utc': '2026-10-16',
+            data = {'version': packaging.RELEASE_VERSION, 'tester': 'test fixture', 'tested_utc': '2026-10-16',
                     'checks': {name: {'result': 'passed', 'evidence': 'test fixture'} for name in packaging.ACCEPTANCE}}
             data['checks'].pop('vr_performance')
             data['checks']['vr_quest3'] = {'result': 'passed', 'evidence': 'obsolete interaction record'}

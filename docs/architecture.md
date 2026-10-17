@@ -5,7 +5,8 @@ The engine owns mission state, storage, recording and provider lifecycles. Closi
 ```mermaid
 flowchart LR
   MSFS[MSFS 2024] -->|SimConnect read-only telemetry| Provider
-  Synthetic[Synthetic test provider] --> Provider
+  Desktop[AeroScience.exe Windows host] --> API
+  Coordinator --> Library[Independent scientific library identity / relative references]
   Provider --> Coordinator[Mission coordinator]
   Browser[Desktop / iPad browser] -->|Session + CSRF HTTP commands| API
   API --> Coordinator
@@ -16,22 +17,31 @@ flowchart LR
 ```
 
 - `AeroScience.Shared`: wire models, provenance, operating modes and minimal future instrument contracts.
-- `AeroScience.Telemetry`: independent provider interface and deterministic synthetic trajectory.
+- `AeroScience.Telemetry`: independent provider interface; generated providers exist only in test projects.
 - `AeroScience.SimConnect`: native x64 API bindings, read-only simulator telemetry, and bounded CommBus transport.
 - `AeroScience.Missions`: SQLite schema, transactions, recovery, serialized mission transitions, and shared toolbar command handling.
-- `AeroScience.Engine`: ASP.NET Core host, security, background workers, latest-state API/SSE and static browser assets.
+- `AeroScience.Engine`: reusable ASP.NET Core host, security, workers, API/SSE, exports, desktop actions and static browser assets.
+- `AeroScience.Desktop`: single WinForms entry point, status, settings, setup, native folder dialogs and feedback.
+- `tests/AeroScience.TestHost`: isolated provider injection for deterministic tests; never published.
 
-The provider reads once per second from SimConnect. Recording defaults to 1 Hz and accepts 250–60000 ms configuration; intervals under one second do not increase the native provider's one-second data rate. Synthetic mode follows the configured interval. No data is upsampled or invented to fill simulator gaps. Position is WGS 84 degrees; altitudes are feet, speeds knots, vertical speed feet/minute, headings/track true north. Engine timestamps are UTC wall time for cross-instrument synchronization; a future simulator-time axis may be added independently.
+The native provider requests one observation per second. GUI recording intervals are 1000–60000 ms; lower developer/test intervals do not increase native reception. The stable sampling schedule allows bounded delivery jitter (10%, capped at 100 ms), preserves true received UTC timestamps and never creates/interpolates frames. Snapshot diagnostics separate target, received/skipped/committed counts, sample cadence, mission-wide average, initial delay and missing intervals. See [sampling findings](alpha-testing.md#sampling-investigation).
 
+Position is WGS 84 degrees, altitude feet, airspeed knots, vertical speed feet/minute, heading/track true north. Nullable Mach is requested directly as `AIRSPEED MACH` / `mach`, not derived from IAS. The packed client payload is 360 bytes with Mach at offset 352; the SDK message data offset remains 40. Invalid/missing Mach does not invalidate other fields.
 The coordinator serializes display commands and telemetry updates. SQLite WAL and FULL synchronous transactions retain committed samples on interruption. An OS file lock establishes one owner **before** recovery. Restart marks unfinished missions interrupted, ending them at the last committed sample (or their start if empty), without fabricating data across the gap. A disconnect leaves a mission active, logs an event and records no stale frames until telemetry returns. Aircraft changes are events; the initial aircraft identity stays in the mission, while each sample retains the current identity.
 
 ## Schema and modes
 
-`PRAGMA user_version=2`. Schema 1 is the initial recording schema; migration 1 → 2 transactionally adds `missions.mode TEXT NOT NULL DEFAULT 'Universal'`. Fresh databases run both steps. Existing/incomplete missions keep their IDs/data and default to Universal. Unknown stored mode values read as Universal; a newer schema is refused rather than overwritten.
+`PRAGMA user_version=3`. Schema 1 is the initial recording schema; migration 1 → 2 transactionally adds `missions.mode TEXT NOT NULL DEFAULT 'Universal'`. Schema 2 → 3 adds `dataset_references` with dataset/library GUIDs and relative paths. Existing schema 1/2 databases receive verified SQLite backups before modification. Fresh databases run all steps. Existing/incomplete missions keep their IDs/data and default to Universal. Unknown stored mode values read as Universal; a newer schema is refused rather than overwritten.
 
 Missions contain IDs, names, mode, initial aircraft/source, UTC start/end, status, departure/last positions. Indexed telemetry stores a complete typed JSON frame and queryable position/altitude fields. Events carry UTC timestamps and kinds. Instrument-metadata/observation tables allow future instrument IDs, provenance and payloads without replacing the telemetry timeline. `InstrumentMissionContext` supplies the mission mode to future modules. No advanced instrument behavior is implemented now.
 
-Both modes accept any compatible aircraft. Universal simplifies future restrictions; Realistic will eventually evaluate the configured instrument's operating envelope and report warnings/quality, with fallback choices for unknown configurations. It is not a fixed aircraft whitelist. In 0.1.0 the modes have identical recording behavior and are immutable for a given mission.
+Both modes accept any compatible aircraft. Universal simplifies future restrictions; Realistic will eventually evaluate the configured instrument's operating envelope and report warnings/quality, with fallback choices for unknown configurations. It is not a fixed aircraft whitelist. In 0.1.1 the modes have identical recording behavior and are immutable for a given mission.
+
+## Storage and offline startup
+
+The Windows host always starts local history/dashboard services regardless of simulator availability. Production has no generated provider; unavailable MSFS produces waiting/retry state, not invented data. Archive access/export is independent of live telemetry. Selected missing databases are never recreated by reads.
+
+Preferences remain at the fixed local app-data root and independently select mission and scientific-library locations. Migration obtains exclusive leases after the host atomically blocks new missions and stops services. SQLite backup, integrity/FK/logical-content verification, library hashes, a persistent journal and atomic settings replacement retain originals and permit recovery. Existing destinations require an explicit separate-store choice, never automatic merging. Stable library IDs and relative dataset paths survive library moves. No instruments/products are generated. See [storage workflow](alpha-testing.md#migration-and-recovery).
 
 ## Local API
 
@@ -48,6 +58,8 @@ All POSTs require an exact same Origin and JSON content type; mission POSTs addi
 | `GET /api/missions?limit=50&offset=0` | Newest first, capped at 100 per page |
 | `GET /api/missions/{id}` | Metadata, mode, summary and first 1,000 events |
 | `GET /api/missions/{id}/telemetry?limit=1000&offset=0` | Sequence-ordered frames; capped at 5,000 per page |
+| `GET /api/missions/{id}/export` | Complete, streamed JSON for completed/interrupted missions; all metadata/events/samples/references |
+| `POST /api/desktop/{action}` | Authenticated loopback-only native settings/storage/feedback UI requests |
 | `GET /api/settings` | Configuration/diagnostics; sensitive pairing code and local paths limited to loopback |
 
 Wire enums are camelCase strings: `universal`, `realistic`, `recording`, `completed`, `interrupted`, `simulated`, `simulator`. Omitted creation mode defaults to Universal. Unknown request modes are rejected. Paging permits future replay consumers to retrieve a full mission incrementally; no interactive replay is claimed.

@@ -4,7 +4,9 @@ namespace AeroScience.Engine;
 
 public sealed class EngineOptions
 {
-    public string Telemetry { get; set; } = "Simulated";
+    public string Telemetry { get; set; } = "SimConnect";
+    public bool RequireExistingDatabase { get; set; }
+    public string? ScienceLibraryDirectory { get; set; }
     public int Port { get; set; } = 5080;
     public int SamplingIntervalMs { get; set; } = 1000;
     public bool EnableLan { get; set; }
@@ -15,7 +17,7 @@ public sealed class EngineOptions
 
     public void Validate()
     {
-        if (Telemetry is not ("Simulated" or "SimConnect")) throw new InvalidOperationException("AeroScience:Telemetry must be Simulated or SimConnect.");
+        if (Telemetry != "SimConnect") throw new InvalidOperationException("Production AeroScience uses live SimConnect telemetry only.");
         if (Port is < 1024 or > 65535) throw new InvalidOperationException("AeroScience:Port must be 1024–65535.");
         if (SamplingIntervalMs is < 250 or > 60000) throw new InvalidOperationException("Sampling interval must be 250–60000 ms.");
         if (string.IsNullOrWhiteSpace(DataDirectory)) throw new InvalidOperationException("A data directory is required.");

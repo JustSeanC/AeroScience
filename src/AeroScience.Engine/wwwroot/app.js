@@ -23,7 +23,7 @@ const modeLabel = (mode) =>
 const modeHelp = (mode) =>
   mode === "realistic"
     ? "Realistic Mode · Advanced science limits and procedures are coming in a future release. All compatible aircraft can record missions."
-    : "Universal Mode · Fly any compatible aircraft. Flexible science missions.";
+    : "Universal Mode";
 function el(tag, text, className) {
   const node = document.createElement(tag);
   if (text !== undefined) node.textContent = text;
@@ -137,6 +137,7 @@ function clearTelemetry() {
     "latitude",
     "longitude",
     "heading",
+    "mach",
   ])
     $(id).textContent = "—";
   $("tas").textContent = "True airspeed —";
@@ -151,19 +152,16 @@ function render(state) {
   const t = state.telemetry;
   const fresh = t && Date.now() - Date.parse(t.timestampUtc) < 6000;
   const simulated = state.connection.source === "simulated";
-  $("source-badge").textContent = simulated
-    ? "SIMULATED TELEMETRY"
-    : "SIMCONNECT · LIVE AIRCRAFT";
-  $("source-badge").className = "badge " + (simulated ? "amber" : "green");
-  $("source-note").textContent = simulated
-    ? "TEST MODE · This trajectory is generated, not a real simulator flight or measured Earth science data. Scientific instruments and mapping are not available in v0.1.0."
-    : "Telemetry is supplied by the simulator. No scientific observations are generated in v0.1.0. Heading and ground track reference true north.";
+  const connected = fresh && state.connection.state === "connected";
+  $("source-badge").textContent = simulated ? "SIMULATED TELEMETRY" : connected ? "SIMCONNECT · LIVE AIRCRAFT" : "LIVE TELEMETRY UNAVAILABLE";
+  $("source-badge").className = "badge " + (connected && !simulated ? "green" : "amber");
+  $("source-note").textContent = simulated ? "Test fixture data" : "Heading and ground track use true north. Mission History is available without MSFS.";
   $("connection-text").textContent = state.connection.message;
   $("aircraft").textContent = fresh
     ? t.aircraft
     : "Awaiting fresh aircraft data";
   $("sampling-label").textContent =
-    `${number(1000 / state.samplingIntervalMs, 2)} Hz recording`;
+    `Target ${number(1000 / state.samplingIntervalMs, 2)} Hz · sample cadence ${number(state.sampling?.achievedHz, 2)} Hz · mission average ${number(state.sampling?.missionAverageHz, 2)} Hz · ${number(state.sampling?.missingIntervals ?? 0)} missing intervals`;
   $("connection-dot").classList.toggle(
     "live",
     state.connection.state === "connected" && !!fresh,
@@ -174,6 +172,7 @@ function render(state) {
   if (fresh) {
     $("altitude").textContent = number(t.altitudeMslFeet);
     $("ias").textContent = number(t.indicatedAirspeedKnots);
+    $("mach").textContent = `M ${number(t.machNumber, 2)}`;
     $("groundspeed").textContent = number(t.groundspeedKnots);
     $("vertical-speed").textContent =
       (t.verticalSpeedFeetPerMinute > 0 ? "+" : "") +
@@ -211,6 +210,7 @@ function render(state) {
       );
     }
   } else clearTelemetry();
+  $("start-button").disabled = !fresh || state.connection.state !== "connected" || !!t?.isPaused;
   const mission = state.activeMission;
   $("mission-idle").hidden = !!mission;
   $("mission-active").hidden = !mission;
@@ -221,7 +221,7 @@ function render(state) {
     $("active-samples").textContent = number(mission.sampleCount);
     $("active-mode").textContent = modeHelp(mission.mode);
     $("active-hint").textContent = fresh
-      ? "Recording independently of displays"
+      ? "Mission recording"
       : "Mission active · waiting for fresh telemetry";
     renderDuration();
   }
@@ -399,6 +399,12 @@ async function showDetail(id) {
   download.target = "_blank";
   download.rel = "noopener";
   body.append(download);
+  if (m.status !== "recording") {
+    const complete = el("a", "Export complete mission (JSON)", "secondary");
+    complete.href = `/api/missions/${id}/export`;
+    complete.download = `AeroScience-mission-${id}.json`;
+    body.append(complete);
+  }
   $("mission-detail").showModal();
 }
 async function loadSettings() {
@@ -419,25 +425,25 @@ async function loadSettings() {
     row.append(el("dt", name), el("dd", value));
     rows.append(row);
   }
-  container.append(
-    rows,
-    el(
-      "p",
-      "Set AeroScience__Telemetry=SimConnect to use MSFS, or Simulated for generated test data. Restart the engine after changing configuration. Logs are in the data directory under logs/; mission data is never kept in the installation folder.",
-    ),
-  );
-  container.append(
-    el(
-      "p",
-      "iPad connection: on the Windows PC set AeroScience__EnableLan=true and AeroScience__LanAddress to its private IPv4 address. Restart, allow the chosen port on the Windows Private firewall profile only, then open the LAN address on iPad Safari and enter the code shown here on localhost. Codes and display sessions expire on engine restart; sessions also expire after 12 hours.",
-    ),
-  );
-  container.append(
-    el(
-      "p",
-      "LAN HTTP is intended for a trusted private network. Do not port-forward this service. Keep localhost mode for public or shared networks. Scientific instruments, mapping, full replay, and offline PWA caching are not available in 0.1.0.",
-    ),
-  );
+  container.append(rows);
+  const controls = el("div", undefined, "input-row");
+  for (const [label, action] of [["Application settings", "settings"], ["Storage", "storage"], ["Collect Feedback", "feedback"]]) {
+    const button = el("button", label, "secondary");
+    button.disabled = !s.desktopAvailable;
+    button.addEventListener("click", () => command(button, () => api(`/api/desktop/${action}`, {})));
+    controls.append(button);
+  }
+  container.append(controls);
+  for (const [title, storage] of [["Mission Database", s.missionStorage], ["Scientific Data Library", s.scienceStorage]]) {
+    const section = el("section"); section.append(el("h2", title));
+    if (storage) {
+      section.append(el("p", storage.directory), el("p", storage.available
+        ? `${number(storage.usedBytes / 1048576, 1)} MiB used · ${number(storage.freeBytes / 1073741824, 1)} GiB available`
+        : storage.error));
+    } else section.append(el("p", "Manage local storage in the AeroScience Windows application."));
+    container.append(section);
+  }
+  container.append(el("p", "Mission History and exports work offline while the selected archive is available. LAN access is optional."));
 }
 $("close-detail").addEventListener("click", () => $("mission-detail").close());
 $("refresh-history").addEventListener("click", (event) =>

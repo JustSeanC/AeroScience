@@ -1,0 +1,79 @@
+name: private-alpha-package
+on:
+  workflow_dispatch:
+    inputs:
+      sdk_root:
+        description: Official SDK root on the trusted Windows runner
+        required: true
+        default: 'C:\MSFS 2024 SDK'
+      runtime_path:
+        description: Official x64 SimConnect.dll on the runner (no unofficial downloads)
+        required: true
+      acceptance_record:
+        description: Path to the completed, evidence-backed alpha acceptance JSON on the runner
+        required: true
+      redistribution_confirmed:
+        description: Official runtime redistribution terms have been reviewed and permit this package
+        type: boolean
+        default: false
+      publish:
+        description: Publish to the specified PRIVATE release repository (explicit action)
+        type: boolean
+        default: false
+      private_repository:
+        description: Existing owner/private-repository (required only when publishing)
+        required: false
+permissions:
+  contents: read
+jobs:
+  package:
+    runs-on: [self-hosted, Windows, X64, msfs2024-sdk]
+    env:
+      SDK_ROOT: ${{ inputs.sdk_root }}
+      SDK_RUNTIME: ${{ inputs.runtime_path }}
+      ACCEPTANCE_RECORD: ${{ inputs.acceptance_record }}
+      REDISTRIBUTION_CONFIRMED: ${{ inputs.redistribution_confirmed }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check required permission evidence and runner tools
+        shell: pwsh
+        run: |
+          if ($env:REDISTRIBUTION_CONFIRMED -ne 'true') { throw 'Runtime redistribution has not been confirmed.' }
+          foreach ($tool in @('python', 'cl.exe')) {
+            if (-not (Get-Command $tool -ErrorAction SilentlyContinue)) { throw "Configure the trusted SDK runner with $tool before dispatching." }
+          }
+      - name: Build single-entry Windows app and genuine SDK toolbar
+        shell: pwsh
+        run: |
+          ./scripts/build/Build-Companion.ps1
+          ./scripts/build/Build-Toolbar.ps1 -SdkRoot $env:SDK_ROOT
+      - name: Validate personal official runtime and assemble gated alpha
+        shell: pwsh
+        run: |
+          ./scripts/build/Test-SimConnectRuntime.ps1 -RuntimePath $env:SDK_RUNTIME
+          Copy-Item -LiteralPath $env:SDK_RUNTIME -Destination artifacts/Windows-Companion/SimConnect.dll
+          $package = @(Get-ChildItem artifacts/toolbar-full/output -Filter manifest.json -Recurse | Where-Object { $_.Directory.Name -eq 'aeroscience-toolbar' })
+          if ($package.Count -ne 1) { throw 'Expected one genuine full-toolbar package.' }
+          ./scripts/release/New-Release.ps1 -CommunityPackage $package[0].Directory.FullName -SdkReceipt artifacts/toolbar-full/sdk-build.json -AcceptanceRecord $env:ACCEPTANCE_RECORD -RuntimeRedistributionConfirmed
+      - name: Explicit publication to private repository only
+        if: inputs.publish
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.ALPHA_RELEASE_TOKEN }}
+          PRIVATE_REPOSITORY: ${{ inputs.private_repository }}
+        run: |
+          if ($env:PRIVATE_REPOSITORY -notmatch '^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$') { throw 'Select an existing private repository.' }
+          if (-not $env:GH_TOKEN) { throw 'Bind a token for the approved private destination as ALPHA_RELEASE_TOKEN.' }
+          $private = gh api "repos/$env:PRIVATE_REPOSITORY" --jq '.private'
+          if ($LASTEXITCODE -ne 0 -or "$private".Trim() -ne 'true') { throw 'Refusing public or unverified release destination.' }
+          $notes = (Get-Content docs/alpha-release-notes.md -Raw) + "`nSource revision: https://github.com/JustSeanC/AeroScience/commit/$env:GITHUB_SHA`n"
+          $notesFile = Join-Path $env:RUNNER_TEMP 'aeroscience-alpha-notes.md'
+          [IO.File]::WriteAllText($notesFile, $notes)
+          gh release create v0.1.1-alpha artifacts/AeroScience-v0.1.1-alpha.zip artifacts/AeroScience-v0.1.1-alpha.zip.sha256 --repo $env:PRIVATE_REPOSITORY --prerelease --title 'AeroScience v0.1.1 — Live Flight Recording Alpha' --notes-file $notesFile
+          if ($LASTEXITCODE -ne 0) { throw 'Private publication failed.' }

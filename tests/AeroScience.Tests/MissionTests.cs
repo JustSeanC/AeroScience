@@ -107,8 +107,8 @@ public sealed class MissionTests : IDisposable
     [Fact]
     public void NativePacketLayoutAndUnitsDecodeCorrectly()
     {
-        Assert.Equal(352, Marshal.SizeOf<SimConnectTelemetryProvider.AircraftData>());
-        Assert.Equal(12, SimConnectTelemetryProvider.VariableDefinitions.Length);
+        Assert.Equal(360, Marshal.SizeOf<SimConnectTelemetryProvider.AircraftData>());
+        Assert.Equal(13, SimConnectTelemetryProvider.VariableDefinitions.Length);
         var raw = new SimConnectTelemetryProvider.AircraftData { Title = "ER-2", Latitude = 34, Longitude = -117,
             AltitudeMsl = 60000, AltitudeAgl = 55000, Ias = 200, Tas = 410, Groundspeed = 400, Heading = -10,
             Track = 361, Pitch = -3, Bank = 12, VerticalSpeed = 1000 };

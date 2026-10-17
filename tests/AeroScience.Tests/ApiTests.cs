@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 using Xunit;
+using AeroScience.Telemetry;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.TestHost;
 
 namespace AeroScience.Tests;
 
@@ -20,6 +23,7 @@ public sealed class ApiTests : IDisposable
         factory = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
         {
             builder.UseEnvironment("Testing");
+            builder.ConfigureTestServices(services => services.AddSingleton<ITelemetryProvider>(new SimulatedTelemetryProvider(250)));
             builder.ConfigureAppConfiguration((_, configuration) => configuration.AddInMemoryCollection(new Dictionary<string, string?>
             { ["AeroScience:DataDirectory"] = directory, ["AeroScience:SamplingIntervalMs"] = "250" }));
         });

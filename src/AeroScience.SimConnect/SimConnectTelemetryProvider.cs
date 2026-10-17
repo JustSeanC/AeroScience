@@ -16,7 +16,7 @@ public sealed class SimConnectTelemetryProvider : ITelemetryProvider
     {
         if (!OperatingSystem.IsWindows() || RuntimeInformation.ProcessArchitecture != Architecture.X64)
         {
-            yield return Status(ConnectionState.Unavailable, "SimConnect requires Windows x64. Select Simulated telemetry on this platform.");
+            yield return Status(ConnectionState.Unavailable, "Live telemetry requires Windows x64. The local mission archive remains available.");
             await Task.Delay(Timeout.Infinite, cancellationToken);
             yield break;
         }
@@ -53,8 +53,8 @@ public sealed class SimConnectTelemetryProvider : ITelemetryProvider
     private static string Explain(Exception e) => e switch
     {
         DllNotFoundException => File.Exists(Path.Combine(AppContext.BaseDirectory, "SimConnect.dll"))
-            ? "SimConnect.dll is present but Windows could not load it or a dependency. Run Test-SimConnectRuntime.ps1; check the official runtime and its Microsoft Visual C++ x64 dependencies."
-            : "The official x64 SimConnect.dll runtime is missing beside AeroScience.Engine.exe.",
+            ? "Windows could not load the installed SimConnect runtime or a dependency. Open Settings and check the official runtime and Microsoft Visual C++ x64 prerequisites."
+            : "The official SimConnect runtime is unavailable. Open Settings to install the official x64 runtime. Offline Mission History remains available.",
         BadImageFormatException => "The SimConnect runtime does not match Windows x64.",
         COMException => $"SimConnect is unavailable (HRESULT 0x{e.HResult:X8}); start MSFS and load a flight.",
         _ => e.Message
@@ -77,7 +77,7 @@ public sealed class SimConnectTelemetryProvider : ITelemetryProvider
         public NativeSession()
         {
             callback = OnMessage;
-            Check(Native.Open(out handle, "AeroScience 0.1.0", IntPtr.Zero, 0, IntPtr.Zero, 0));
+            Check(Native.Open(out handle, "AeroScience 0.1.1-alpha", IntPtr.Zero, 0, IntPtr.Zero, 0));
             try
             {
                 Check(Native.AddToDataDefinition(handle, 1, "TITLE", null, 9, 0, uint.MaxValue));
@@ -142,7 +142,7 @@ public sealed class SimConnectTelemetryProvider : ITelemetryProvider
                     case 15 when size >= 24: // SYSTEM_STATE
                         if (Marshal.ReadInt32(data, 12) == 1) running = Marshal.ReadInt32(data, 16) == 1;
                         break;
-                    case 8 when running && size >= 40 + 352: // SIMOBJECT_DATA, fixed header then TITLE + 12 doubles
+                    case 8 when running && size >= 40 + 360: // SIMOBJECT_DATA: 40-byte header, TITLE + 13 doubles
                         if (Marshal.ReadInt32(data, 12) != 2 || Marshal.ReadInt32(data, 20) != 1) break;
                         var raw = Marshal.PtrToStructure<AircraftData>(IntPtr.Add(data, 40));
                         var frame = Decode(raw, DateTimeOffset.UtcNow, paused);
@@ -171,7 +171,8 @@ public sealed class SimConnectTelemetryProvider : ITelemetryProvider
         ("PLANE ALTITUDE", "feet"), ("PLANE ALT ABOVE GROUND", "feet"),
         ("AIRSPEED INDICATED", "knots"), ("AIRSPEED TRUE", "knots"), ("GROUND VELOCITY", "knots"),
         ("PLANE HEADING DEGREES TRUE", "degrees"), ("GPS GROUND TRUE TRACK", "degrees"),
-        ("PLANE PITCH DEGREES", "degrees"), ("PLANE BANK DEGREES", "degrees"), ("VERTICAL SPEED", "feet per minute")
+        ("PLANE PITCH DEGREES", "degrees"), ("PLANE BANK DEGREES", "degrees"), ("VERTICAL SPEED", "feet per minute"),
+        ("AIRSPEED MACH", "mach")
     ];
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi, Pack = 1)]
@@ -179,13 +180,14 @@ public sealed class SimConnectTelemetryProvider : ITelemetryProvider
     {
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 256)] public string Title;
         public double Latitude, Longitude, AltitudeMsl, AltitudeAgl, Ias, Tas, Groundspeed,
-            Heading, Track, Pitch, Bank, VerticalSpeed;
+            Heading, Track, Pitch, Bank, VerticalSpeed, Mach;
     }
 
     public static TelemetryFrame Decode(AircraftData raw, DateTimeOffset now, bool paused) => new(
         now.ToUniversalTime(), TelemetrySource.Simulator, string.IsNullOrWhiteSpace(raw.Title) ? "Unknown MSFS aircraft" : raw.Title.Trim(), raw.Latitude, raw.Longitude,
         raw.AltitudeMsl, double.IsFinite(raw.AltitudeAgl) ? raw.AltitudeAgl : null, raw.Ias, raw.Tas, raw.Groundspeed,
-        NormalizeHeading(raw.Heading), NormalizeHeading(raw.Track), -raw.Pitch, -raw.Bank, raw.VerticalSpeed, paused);
+        NormalizeHeading(raw.Heading), NormalizeHeading(raw.Track), -raw.Pitch, -raw.Bank, raw.VerticalSpeed, paused,
+        double.IsFinite(raw.Mach) && raw.Mach >= 0 ? raw.Mach : null);
     private static double NormalizeHeading(double degrees) => (degrees % 360 + 360) % 360;
     private static void Check(int result) { if (result < 0) Marshal.ThrowExceptionForHR(result); }
 

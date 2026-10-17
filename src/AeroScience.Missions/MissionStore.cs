@@ -15,12 +15,14 @@ public sealed class MissionStore
         DatabasePath = Path.GetFullPath(databasePath);
         Directory.CreateDirectory(Path.GetDirectoryName(DatabasePath)!);
         connectionString = new SqliteConnectionStringBuilder { DataSource = DatabasePath,
-            Mode = SqliteOpenMode.ReadWriteCreate, Pooling = true, DefaultTimeout = 10 }.ToString();
+            Mode = SqliteOpenMode.ReadWrite, Pooling = false, DefaultTimeout = 10 }.ToString();
     }
 
-    private SqliteConnection Open()
+    private SqliteConnection Open(bool allowCreate = false)
     {
-        var connection = new SqliteConnection(connectionString);
+        var selected = new SqliteConnectionStringBuilder(connectionString);
+        if (allowCreate) selected.Mode = SqliteOpenMode.ReadWriteCreate;
+        var connection = new SqliteConnection(selected.ToString());
         connection.Open();
         using var cmd = connection.CreateCommand();
         cmd.CommandText = "PRAGMA foreign_keys=ON; PRAGMA synchronous=FULL;";
@@ -30,15 +32,28 @@ public sealed class MissionStore
 
     public void Initialize()
     {
-        using var db = Open();
+        using var db = Open(allowCreate: true);
         using var cmd = db.CreateCommand();
         cmd.CommandText = "PRAGMA user_version;";
         var version = Convert.ToInt32(cmd.ExecuteScalar(), CultureInfo.InvariantCulture);
-        if (version > 2) throw new InvalidOperationException("Database was created by a newer AeroScience version; refusing to modify it.");
+        if (version > 3) throw new InvalidOperationException("Database was created by a newer AeroScience version; refusing to modify it.");
+        if (version is 1 or 2)
+        {
+            var size = new FileInfo(DatabasePath).Length;
+            if (new LocalStorageCapacity().FreeBytes(Path.GetDirectoryName(DatabasePath)!) < size + StorageManager.MinimumFreeBytes)
+                throw new IOException("Free space is insufficient for the verified upgrade backup. The original archive was not modified.");
+            var backups = Path.Combine(Path.GetDirectoryName(DatabasePath)!, "Backups"); Directory.CreateDirectory(backups);
+            var backup = Path.Combine(backups, $"missions-schema{version}-{DateTime.UtcNow:yyyyMMdd-HHmmss}-{Guid.NewGuid():N}.db");
+            using (var target = new SqliteConnection(new SqliteConnectionStringBuilder { DataSource = backup, Pooling = false }.ToString()))
+            { target.Open(); db.BackupDatabase(target); }
+            if (StorageManager.DatabaseFingerprint(DatabasePath) != StorageManager.DatabaseFingerprint(backup))
+                throw new IOException("Upgrade backup verification failed; the original archive was not modified.");
+        }
         cmd.CommandText = "PRAGMA journal_mode=WAL;";
         cmd.ExecuteNonQuery();
-        if (version == 2) return;
-        if (version == 1) { MigrateMode(db); return; }
+        if (version == 3) return;
+        if (version == 2) { MigrateLibraryReferences(db); return; }
+        if (version == 1) { MigrateMode(db); MigrateLibraryReferences(db); return; }
         using var transaction = db.BeginTransaction();
         cmd.Transaction = transaction;
         cmd.CommandText = """
@@ -68,6 +83,89 @@ public sealed class MissionStore
         cmd.ExecuteNonQuery();
         transaction.Commit();
         MigrateMode(db);
+        MigrateLibraryReferences(db);
+    }
+
+    private static void MigrateLibraryReferences(SqliteConnection db)
+    {
+        using var tx = db.BeginTransaction();
+        using var cmd = db.CreateCommand(); cmd.Transaction = tx;
+        cmd.CommandText = """
+            CREATE TABLE dataset_references (
+              dataset_id TEXT PRIMARY KEY, mission_id TEXT NOT NULL REFERENCES missions(id),
+              library_id TEXT NOT NULL, relative_path TEXT NOT NULL, metadata_json TEXT NOT NULL);
+            PRAGMA user_version=3;
+            """;
+        cmd.ExecuteNonQuery(); tx.Commit();
+    }
+
+    public IEnumerable<TelemetryFrame> StreamSamples(Guid id)
+    {
+        using var db = Open(); using var command = db.CreateCommand();
+        command.CommandText = "SELECT payload_json FROM telemetry WHERE mission_id=$id ORDER BY sequence";
+        command.Parameters.AddWithValue("$id", id.ToString());
+        using var reader = command.ExecuteReader();
+        while (reader.Read()) yield return JsonSerializer.Deserialize<TelemetryFrame>(reader.GetString(0), WireJson.Options)!;
+    }
+
+    public IReadOnlyList<DatasetReference> DatasetReferences(Guid id)
+    {
+        using var db = Open(); using var cmd = db.CreateCommand();
+        cmd.CommandText = "SELECT dataset_id,library_id,relative_path,metadata_json FROM dataset_references WHERE mission_id=$id ORDER BY dataset_id";
+        cmd.Parameters.AddWithValue("$id", id.ToString()); using var reader = cmd.ExecuteReader();
+        var references = new List<DatasetReference>();
+        while (reader.Read()) references.Add(new(Guid.Parse(reader.GetString(0)), Guid.Parse(reader.GetString(1)), reader.GetString(2), reader.GetString(3)));
+        return references;
+    }
+
+    public void AddDatasetReference(Guid missionId, DatasetReference reference)
+    {
+        if (Path.IsPathRooted(reference.RelativePath) || reference.RelativePath.Split('/', '\\').Any(p => p is "." or "..") || reference.RelativePath.Contains(':'))
+            throw new ArgumentException("Dataset paths must be relative to a stable library identifier.");
+        using var db = Open(); using var cmd = db.CreateCommand();
+        cmd.CommandText = "INSERT INTO dataset_references VALUES($dataset,$mission,$library,$path,$metadata)";
+        cmd.Parameters.AddWithValue("$dataset", reference.DatasetId.ToString()); cmd.Parameters.AddWithValue("$mission", missionId.ToString());
+        cmd.Parameters.AddWithValue("$library", reference.LibraryId.ToString()); cmd.Parameters.AddWithValue("$path", reference.RelativePath);
+        cmd.Parameters.AddWithValue("$metadata", reference.MetadataJson); cmd.ExecuteNonQuery();
+    }
+
+    public async Task ExportJsonAsync(Guid id, Stream output, CancellationToken cancellationToken = default)
+    {
+        var detail = Detail(id) ?? throw new ArgumentException("Mission not found.");
+        if (detail.Mission.Status == MissionStatus.Recording) throw new InvalidOperationException("End the mission before exporting its complete archive.");
+        // Buffer JSON tokens, then use asynchronous stream writes (Kestrel forbids sync I/O).
+        var buffer = new System.Buffers.ArrayBufferWriter<byte>();
+        using var writer = new Utf8JsonWriter(buffer);
+        async Task FlushAsync()
+        {
+            writer.Flush(); await output.WriteAsync(buffer.WrittenMemory, cancellationToken); buffer.Clear();
+        }
+        writer.WriteStartObject(); writer.WriteNumber("formatVersion", 1);
+        writer.WritePropertyName("mission"); JsonSerializer.Serialize(writer, detail.Mission, WireJson.Options);
+        writer.WritePropertyName("events");
+        // Export every event, not the detail dialog's bounded preview.
+        writer.WriteStartArray();
+        using (var db = Open())
+        using (var cmd = db.CreateCommand())
+        {
+            cmd.CommandText = "SELECT id,timestamp_utc,kind,message FROM events WHERE mission_id=$id ORDER BY id";
+            cmd.Parameters.AddWithValue("$id", id.ToString()); using var reader = cmd.ExecuteReader();
+            var eventCount = 0;
+            while (reader.Read())
+            {
+                JsonSerializer.Serialize(writer, new MissionEvent(reader.GetInt64(0), Parse(reader.GetString(1)), reader.GetString(2), reader.GetString(3)), WireJson.Options);
+                if (++eventCount % 256 == 0) await FlushAsync();
+            }
+        }
+        writer.WriteEndArray(); writer.WritePropertyName("datasets"); JsonSerializer.Serialize(writer, DatasetReferences(id), WireJson.Options);
+        writer.WritePropertyName("telemetry"); writer.WriteStartArray();
+        var count = 0;
+        foreach (var sample in StreamSamples(id))
+        {
+            cancellationToken.ThrowIfCancellationRequested(); JsonSerializer.Serialize(writer, sample, WireJson.Options);
+            if (++count % 256 == 0) await FlushAsync();
+        }
+        writer.WriteEndArray(); writer.WriteEndObject(); await FlushAsync();
     }
 
     private static void MigrateMode(SqliteConnection db)
@@ -122,6 +220,7 @@ public sealed class MissionStore
     public void Append(Guid id, TelemetryFrame frame)
     {
         if (!frame.IsValid) throw new ArgumentException("Invalid telemetry cannot be recorded.");
+        if (frame.MachNumber is { } mach && (!double.IsFinite(mach) || mach < 0)) frame = frame with { MachNumber = null };
         using var db = Open();
         using var tx = db.BeginTransaction();
         using var cmd = db.CreateCommand();

@@ -50,7 +50,7 @@
             <i class="status-dot" id="engine-dot"></i
             ><span id="engine-link">Connecting</span>
           </div>
-          <small>v0.1.0 · Local operations</small>
+          <small>v0.1.1-alpha · Local operations</small>
         </div>
       </aside>
       <main>
@@ -84,9 +84,6 @@
               <div>
                 <p class="eyebrow">AIRBORNE SCIENCE / OPERATIONS</p>
                 <h1>Mission Control</h1>
-                <p class="subtitle">
-                  One aircraft. One mission. Every observation matters.
-                </p>
               </div>
               <span id="source-badge" class="badge amber"
                 >WAITING FOR DATA</span
@@ -160,7 +157,7 @@
                   </div>
                   <div class="mission-actions">
                     <span id="active-hint"
-                      >Recording independently of displays</span
+                      >Mission recording</span
                     ><button class="danger" id="end-button" type="button">
                       <span aria-hidden="true">■</span> End mission
                     </button>
@@ -240,7 +237,7 @@
             </div>
             <div class="section-label">
               <h2>LIVE TELEMETRY</h2>
-              <span id="sampling-label">1 Hz sampling</span>
+              <span id="sampling-label">Configured target: 1 Hz</span>
             </div>
             <div class="metrics">
               <article class="panel metric">
@@ -251,6 +248,7 @@
               <article class="panel metric">
                 <span>INDICATED AIRSPEED</span>
                 <div><strong id="ias">—</strong><small>KTS</small></div>
+                <p id="mach">Mach —</p>
                 <p id="tas">True airspeed —</p>
               </article>
               <article class="panel metric">
@@ -298,7 +296,7 @@
                   </svg>
                 </div>
                 <div class="chart-footer">
-                  <span>60 SECONDS AGO AT 1 Hz</span><span>LIVE</span>
+                  <span>RECENT RECEIVED UPDATES</span><span>LIVE</span>
                 </div>
               </section>
               <section class="panel position-panel">
@@ -333,7 +331,7 @@
                 <p class="eyebrow">RESEARCH ARCHIVE</p>
                 <h1>Mission History</h1>
                 <p class="subtitle">
-                  Flight records stay with your science engine.
+                  Available offline.
                 </p>
               </div>
               <button id="refresh-history" class="secondary">
@@ -355,19 +353,7 @@
               </div>
               <span class="badge">PLANNED</span>
             </div>
-            <article class="panel future">
-              <h2>A foundation for future observations</h2>
-              <p>
-                Version 0.1.0 records aircraft telemetry. Scientific
-                instruments, mapping, survey planning, and interactive replay
-                are not yet available.
-              </p>
-              <p>
-                Future measurements will identify whether their source is
-                simulator telemetry, external data, or synthetic instrument
-                behavior.
-              </p>
-            </article>
+            <article class="panel future"><h2>Instruments — Coming later</h2><p>Live flight recording is available. Scientific instruments and replay are planned.</p></article>
           </section>
           <section id="settings" class="view" hidden>
             <div class="page-heading">

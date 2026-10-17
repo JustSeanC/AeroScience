@@ -3,6 +3,11 @@
 #include <cstddef>
 #include <type_traits>
 #include <tuple>
+#pragma pack(push, 1)
+struct AeroScienceAircraftData { char title[256]; double fields[12]; double mach; };
+#pragma pack(pop)
+static_assert(sizeof(AeroScienceAircraftData) == 360, "TITLE plus thirteen FLOAT64 values.");
+static_assert(offsetof(AeroScienceAircraftData, mach) == 352, "Mach follows the unchanged original telemetry fields.");
 // Compile against the installed official SDK before compiling/packaging the toolbar.
 static_assert(sizeof(void*) == 8, "Use the x64 Native Tools compiler.");
 static_assert(sizeof(DWORD) == 4);
