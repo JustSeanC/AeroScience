@@ -16,7 +16,7 @@ flowchart LR
   Coordinator --> SQLite[(SQLite mission archive)]
 ```
 
-- `AeroScience.Shared`: wire models, provenance, operating modes and minimal future instrument contracts.
+- `AeroScience.Shared`: wire models, provenance, operating modes and modular instrument definitions, configuration, quality and research contracts.
 - `AeroScience.Telemetry`: independent provider interface; generated providers exist only in test projects.
 - `AeroScience.SimConnect`: native x64 API bindings, read-only simulator telemetry, and bounded CommBus transport.
 - `AeroScience.Missions`: SQLite schema, transactions, recovery, serialized mission transitions, and shared toolbar command handling.
@@ -31,11 +31,11 @@ The coordinator serializes display commands and telemetry updates. SQLite WAL an
 
 ## Schema and modes
 
-`PRAGMA user_version=3`. Schema 1 is the initial recording schema; migration 1 → 2 transactionally adds `missions.mode TEXT NOT NULL DEFAULT 'Universal'`. Schema 2 → 3 adds `dataset_references` with dataset/library GUIDs and relative paths. Existing schema 1/2 databases receive verified SQLite backups before modification. Fresh databases run all steps. Existing/incomplete missions keep their IDs/data and default to Universal. Unknown stored mode values read as Universal; a newer schema is refused rather than overwritten.
+`PRAGMA user_version=4`. Schema 1 is the initial recording schema; migration 1 → 2 transactionally adds `missions.mode TEXT NOT NULL DEFAULT 'Universal'`. Schema 2 → 3 adds `dataset_references` with dataset/library GUIDs and relative paths. Schema 3 → 4 adds saved research plans, immutable mission context, markers, notes and dataset availability. Existing schema 1/2/3 databases receive verified SQLite backups before modification. Fresh databases run all steps. Existing/incomplete missions keep their IDs/data and default to Universal. Unknown stored mode values read as Universal; a newer schema is refused rather than overwritten.
 
-Missions contain IDs, names, mode, initial aircraft/source, UTC start/end, status, departure/last positions. Indexed telemetry stores a complete typed JSON frame and queryable position/altitude fields. Events carry UTC timestamps and kinds. Instrument-metadata/observation tables allow future instrument IDs, provenance and payloads without replacing the telemetry timeline. `InstrumentMissionContext` supplies the mission mode to future modules. No advanced instrument behavior is implemented now.
+Missions contain IDs, names, mode, initial aircraft/source, UTC start/end, status, departure/last positions. Indexed telemetry stores a complete typed JSON frame and queryable position/altitude fields. Events carry UTC timestamps and kinds. Instrument-metadata/observation tables allow future instrument IDs, provenance and payloads without replacing the telemetry timeline. `InstrumentMissionContext` supplies the mission mode to future modules. Basic actual atmospheric acquisition uses the independent Science Library; advanced calibration/modeling remains deferred.
 
-Both modes accept any compatible aircraft. Universal simplifies future restrictions; Realistic will eventually evaluate the configured instrument's operating envelope and report warnings/quality, with fallback choices for unknown configurations. It is not a fixed aircraft whitelist. In 0.1.1 the modes have identical recording behavior and are immutable for a given mission.
+Both modes accept any compatible aircraft. Universal simplifies future restrictions; Realistic will eventually evaluate the configured instrument's operating envelope and report warnings/quality, with fallback choices for unknown configurations. It is not a fixed aircraft whitelist. In 0.2.0 the modes have identical recording/acquisition behavior and are immutable for a given mission.
 
 ## Storage and offline startup
 
@@ -65,3 +65,9 @@ All POSTs require an exact same Origin and JSON content type; mission POSTs addi
 Wire enums are camelCase strings: `universal`, `realistic`, `recording`, `completed`, `interrupted`, `simulated`, `simulator`. Omitted creation mode defaults to Universal. Unknown request modes are rejected. Paging permits future replay consumers to retrieve a full mission incrementally; no interactive replay is claimed.
 
 The toolbar uses a separate simulator-native local trust boundary. Installed simulator add-ons are trusted operators; CommBus is not an internet authentication system. It cannot change LAN settings, access files or invoke arbitrary engine methods. Commands are versioned JSON with request GUIDs; mutating replies are cached (128 entries) to avoid duplicate transitions on retries. This is bounded in-memory retry protection, not a durable exactly-once guarantee across engine restarts. The coordinator independently enforces one active mission.
+
+## v0.2.0 research extension
+
+`ResearchOperations` executes under the existing coordinator gate. Independent atmosphere/guidance provider updates do not count as flight samples. `ResearchStore` extends the mission store with schema-4 plans/snapshots/markers/notes/diagnostics and bounded geographic queries. `ScienceStore` owns the independent library SQLite database, stable identities, source rows and capacity protection; science errors are isolated from flight acquisition. `ScienceCatalog` defines four modular instruments and editable mission templates. `ResearchExports` streams complete records without display limits.
+
+The dashboard modules `research.js` and `map.js` extend existing navigation/state/API flows; they do not own recording. The native toolbar uses the same coordinator for instrument and marker commands with bounded idempotent CommBus replies. Read-only guidance travels in the shared state and recorded flight frames. No SDK write/control API is introduced. Native `DataManagementForm` runs under stopped-service maintenance and exclusive leases; there is no destructive browser API. See [science operations](science-operations.md).

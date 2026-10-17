@@ -1,5 +1,8 @@
 # Verification and remaining acceptance
 
+Current v0.2.0: see [SDK research](sdk-research-v0.2.0.md), [new Windows acceptance](v0.2.0-windows-testing.md) and [completion status](v0.2.0-completion.md). Earlier results below are historical and do not verify the changed release.
+
+
 Machine: Linux x64 cloud container, .NET SDK 10.0.402 / runtime 10.0.13, Node 24, existing Chromium. Automated results concern this environment, not Windows or simulator execution.
 
 ## Current v0.1.1 acceptance

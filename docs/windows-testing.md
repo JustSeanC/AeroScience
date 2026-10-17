@@ -1,5 +1,8 @@
 > Historical v0.1.0 developer workbook. For the v0.1.1 graphical app, offline archive, Mach and dual storage use [alpha-testing.md](alpha-testing.md) and [INSTALL.md](../INSTALL.md). Old simulated launchers/commands are not v0.1.1 user setup.
 
+Current v0.2.0: see [SDK research](sdk-research-v0.2.0.md), [new Windows acceptance](v0.2.0-windows-testing.md) and [completion status](v0.2.0-completion.md). Earlier results below are historical and do not verify the changed release.
+
+
 # AeroScience v0.1.0: Windows installation and live-testing workbook
 
 This workbook completes v0.1.0 installation/testing before any v0.1.1 closed-alpha release automation. No Windows, simulator, headset or physical-iPad result is marked passed by these instructions. The existing three commits are **already pushed** to `https://github.com/JustSeanC/AeroScience`, branch `main`.

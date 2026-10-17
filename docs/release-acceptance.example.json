@@ -1,5 +1,5 @@
 {
-  "version": "0.1.1-alpha",
+  "version": "0.2.0",
   "source_commit": "",
   "payload_sha256": "",
   "tester": "",
@@ -60,6 +60,21 @@
       "evidence": "",
       "instructions": "Use Windows Installed Apps to uninstall. Confirm app/shortcuts are removed, data/configuration remain, and keeping or explicitly removing the toolbar works with unrelated add-ons preserved. Reinstall and confirm archive access."
     },
+    "science_operations": {
+      "result": "pending",
+      "evidence": "",
+      "instructions": "On the exact installed candidate in MSFS: planned atmospheric mission, actual supported science variables and timestamps, markers, offline map, read-only guidance/selected targets and cross-display Mach. Unsupported values remain unavailable; no aircraft control is changed."
+    },
+    "research_archive": {
+      "result": "pending",
+      "evidence": "",
+      "instructions": "With MSFS and internet disconnected: verify legacy upgrade and new recordings, science graphs, complete JSON/CSV/GPX/KML/report exports against saved rows, and separate library availability failures."
+    },
+    "data_management": {
+      "result": "pending",
+      "evidence": "",
+      "instructions": "On disposable archives: native typed confirmation/cancellation/backup, active-mission guards, independent clears, dataset reference availability and unrelated-file/settings preservation."
+    },
     "live_recording_recovery": {
       "result": "pending",
       "evidence": "",
@@ -91,6 +106,5 @@
       "instructions": "Extended acceptance; may remain pending for this prerelease."
     }
   },
-  "installer_sha256": "",
-  "installer_receipt_sha256": ""
+  "notice": "Example only. Use the acceptance record generated for the exact installer, including its installer/receipt hashes; do not substitute this template."
 }

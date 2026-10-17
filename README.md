@@ -1,32 +1,28 @@
-# AeroScience 0.1.1-alpha
+# AeroScience 0.2.0 — Science Mission Operations
 
-Live MSFS 2024 aircraft telemetry, a local SQLite mission archive and a simulator-native toolbar, operated through one Windows application: **AeroScience.exe**.
+Aircraft-agnostic MSFS 2024 research operations, powered by one Windows companion application. Record immediately or prepare a mission plan, acquire simulator-reported atmospheric observations, follow an offline mission map and review/export your research archive without MSFS or internet.
 
-**Status: Windows installer and guided onboarding implemented; new installer/Windows/MSFS acceptance pending.** The previous ZIP candidate built successfully on the gaming PC and its app window opened. That evidence does not validate this changed installer. Public alpha distribution is authorized; a complete setup release remains unpublished until its installation, first-run, upgrade, uninstall and minimum live-flight checks pass.
+**Source implementation and cloud checks are available. The new Windows/SDK installer and live v0.2.0 acceptance are pending.** Earlier v0.1.1 installation/live-recording results do not verify the changed release. No v0.2.0 setup EXE or public binary download is claimed here.
 
-## User experience
+## Install and operate
 
-From a complete validated alpha: run **AeroScience-Setup-v0.1.1-alpha.exe**, follow guided storage/toolbar setup and launch from **Start → AeroScience**. The installer provides shortcuts, bundled prerequisites and Windows Installed Apps/uninstall. The app starts the engine, local dashboard and toolbar bridge, opens the dashboard and retries MSFS automatically. Mission History and complete JSON exports work without MSFS or internet while the selected archive is available. No extraction, terminal commands, developer tools, cloud account or separate server setup are part of normal use.
+After the new Windows candidate passes acceptance, the recommended download will be **AeroScience-Setup-v0.2.0.exe** from [GitHub Releases](https://github.com/JustSeanC/AeroScience/releases). Run Setup, follow graphical storage/toolbar onboarding, then open **Start → AeroScience**. The app starts its services and opens the dashboard automatically. Testers need no SDK, terminal, PowerShell, manual DLL copy or separate server. The installer retains the self-contained Windows application, authorized native SimConnect runtime, genuine SDK-built toolbar, prerequisites, shortcuts and Windows uninstaller. A portable ZIP is secondary.
 
-Settings includes independent Mission Database and Scientific Data Library folders, native browsing, usage/free space, restore-default choices and verified migrations that retain originals. Defaults preserve `%LOCALAPPDATA%\AeroScience`. The library has organizational folders and stable identity metadata; no scientific observations or placeholder science products are generated.
+- **Mission Control:** start spontaneously, see real aircraft telemetry/Mach and read-only standard flight guidance, follow the actual track and add timestamped observation markers/notes.
+- **Mission Planner:** create/edit saved plans using General Research, Atmospheric Profile, Geographic Survey or Observation Flight. Set optional objectives, intended aircraft, departure/destination, ordered waypoints, survey polygons, altitude range, duration, instruments and notes. Each recording keeps its own immutable plan snapshot.
+- **Instruments:** enable ambient temperature, pressure, wind and density channels independently, choose 1–60-second intervals, inspect real values/units, quality, last successful acquisition, saved/rejected counts, missing intervals, cadence and graphs. No modeled science is substituted for missing data.
+- **Mission History:** review flight and science summaries, maps, markers, notes and paged observations; export complete versioned JSON, flight/science/events CSV, GPX, KML and a reproducible text report.
+- **Settings:** independently choose Mission Database and Scientific Data Library folders. Existing verified migrations retain originals. Trusted local Windows **Storage → Data Management** provides separate flight/science clearing, previews, typed confirmations and optional verified backups. No browser deletion API exists.
 
-Live data includes simulator-provided nullable Mach, displayed as `M 0.82`, persisted with samples and included in exports. Production synthetic telemetry/launchers are removed; old simulated recordings remain readable and labeled. Universal remains the default mission mode; Realistic records identically with advanced science deferred. Compatible aircraft use standard telemetry without a whitelist. Compact VR is removed; there is one responsive Mission/Payload interface.
+Universal is the default. Realistic supports the same compatible aircraft and scientific acquisition; advanced operating limits/calibration remain deferred. There is no aircraft whitelist or separate Compact VR interface. Neither mission nor science acquisition controls the aircraft/autopilot/flight plan. Science values are **simulator-reported observations at the user aircraft**, not independent calibrated real-world weather measurements.
 
-The recorder targets configurable intervals (default 1 Hz), preserves real observation timestamps/gaps, and distinguishes configured rate, sample cadence and mission-wide average. See the investigation and precise data-safety behavior in [the alpha guide](docs/alpha-testing.md).
+## Build, validation and release
 
-## Installation and release status
+The [completion report](docs/v0.2.0-completion.md) records implemented scope, checks, limitations and Windows/device tests still needed. [Science operations](docs/science-operations.md) explains storage, provenance, estimates and exports. [SDK research](docs/sdk-research-v0.2.0.md) lists exact variables, units and guidance limitations.
 
-The first release is built on the Windows gaming PC using Inno Setup and uploaded through the **[GitHub Releases website](https://github.com/JustSeanC/AeroScience/releases)**. No self-hosted Actions runner is required. Follow the exact [Windows installer build, test, finalization and manual upload guide](docs/public-release-windows.md). Testers download **AeroScience-Setup-v0.1.1-alpha.exe**. A portable ZIP may be offered as a secondary download. **Code → Download ZIP** is source and is not the application.
+On the gaming PC, use the [Windows installer build/test/manual publication guide](docs/public-release-windows.md). No self-hosted GitHub Actions runner is required. Genuine SDK compilation, runtime loading/export checks, the existing private-safe redistribution attestation and actual release acceptance remain mandatory. Finalization preserves the exact tested setup bytes and generates its SHA-256 checksum. The optional Actions workflow remains available for future automation.
 
-The local process builds a complete installer candidate with genuine official-SDK toolbar/runtime evidence and a signed Microsoft Visual C++ prerequisite, then finalizes the identical tested EXE without rebuilding. Eleven minimum alpha checks include Windows installation, wizard, upgrade/uninstall preservation, automatic dashboard, offline archive/export, toolbar installation and a short live recording. Extended Mach/cadence/aircraft/storage/iPad/VR checks may remain explicitly pending; stable gates retain extended acceptance. The optional [Actions workflow](.github/workflows/alpha-release.yml) supports later candidate preparation/publication with the normal same-repository GitHub token.
-
-The maintainer has confirmed native SimConnect redistribution authorization with no additional conditions reported. Supporting correspondence stays private; a public summary binds authorization to the actual DLL hash. See [runtime attestation and privacy](docs/runtime-distribution.md). The new installer/SDK candidate and acceptance must be completed on Windows. No finished installer, final installer checksum or working public download is claimed before those pass. [INSTALL.md](INSTALL.md) describes the graphical tester experience; [validation results](docs/validation-results.md) distinguish earlier evidence from this build.
-
-## Development
-
-Existing modules are retained: shared models, provider interface, native SimConnect/CommBus adapter, mission coordinator/SQLite store, ASP.NET local host, browser dashboard and SDK toolbar. A small WinForms host adds status, first-run setup, settings, storage management and feedback. Synthetic providers live only in the separate automated test projects and are never shipped.
-
-In the isolated cloud checkout, reuse `/workspace/AeroSciences` (no new worktree unless requested):
+For isolated cloud development, reuse the existing checkout:
 
 ```bash
 bash scripts/setup-cloud.sh
@@ -37,6 +33,6 @@ python3 -m unittest discover -s tests -p 'test_*.py' -v
 python3 scripts/build/smoke_recovery.py
 ```
 
-Maintainer Windows builds use `scripts/build/Build-Companion.ps1` and the official SDK `Build-Toolbar.ps1`; see [release documentation](docs/release.md). These commands are not tester setup. Never manufacture an SPB, alter SDK manifests to bypass checks, weaken acceptance, or bundle unapproved SDK/runtime files.
+Synthetic sources exist only in automated test projects. Native Windows GUI execution, the proprietary official SDK, MSFS, Quest 3 and physical iPad testing require their respective environments; cross-compilation and browser fixtures do not establish those passes.
 
-[Architecture](docs/architecture.md) · [SimConnect](docs/simconnect.md) · [Alpha testing](docs/alpha-testing.md) · [Changelog](CHANGELOG.md)
+[Installation](INSTALL.md) · [Architecture](docs/architecture.md) · [Validation](docs/validation-results.md) · [Changelog](CHANGELOG.md)

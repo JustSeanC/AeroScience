@@ -1,5 +1,8 @@
 # Windows SimConnect integration
 
+Current v0.2.0: see [SDK research](sdk-research-v0.2.0.md), [new Windows acceptance](v0.2.0-windows-testing.md) and [completion status](v0.2.0-completion.md). Earlier results below are historical and do not verify the changed release.
+
+
 The provider uses the **native** `SimConnect.dll` API from the official MSFS 2024 SDK. It avoids the older mixed-mode managed .NET Framework wrapper. The user's gaming-PC screenshot demonstrates a companion CommBus reply reaching the in-simulator POC panel, and the user confirms recurring request-ID updates about once per second. Initial real-aircraft reception/display and an active recording were subsequently observed with T-38N WSSP Late. The new Mach field, completed live-history/export workflow, standalone runtime-checker report and clean-machine distribution remain unverified; see the [evidence record](validation-results.md#first-live-aircraft-telemetry-and-active-recording-evidence).
 
 Official starting references:

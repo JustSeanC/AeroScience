@@ -1,4 +1,32 @@
-# Validation results — 2026-10-16
+# Validation results
+
+## v0.2.0 source validation — 2026-10-17
+
+These results were measured in the Linux cloud checkout. They are source, process and cross-build checks; Windows native GUI, official SDK compilation, MSFS reception, physical devices and the installer remain unverified for v0.2.0. Earlier results below retain their original scope.
+
+| Check | Actual result | Limits / evidence |
+| --- | --- | --- |
+| `bash scripts/setup-cloud.sh` | Passed | Pinned SDK activation, locked restore, Release build, frozen npm install and all browser/toolbar JS syntax checks; reproducible setup retained |
+| `dotnet build AeroScience.sln -c Release --no-restore` | Passed, zero warnings/errors | Includes Windows-targeted source cross-compilation, not Windows execution |
+| .NET tests | **72 passed, 0 failed, 0 skipped** | `tests/AeroScience.Tests/TestResults/science020.trx`; plans/snapshots, native layouts/decoders, science intervals/quality/gaps, guidance/events, protected clearing/rollback/backups, old schemas, populated library migration, full exports, API/security/offline startup and original regressions |
+| Python / PowerShell helper tests | **49 passed, 0 failed, 0 skipped** | Release/SDK receipt/runtime/installer validation, licensing/privacy, prerelease filename policy, compiler preflight, recovery output paths and script parsing; structural fixtures never establish actual SDK/Windows acceptance |
+| Playwright browser tests | **14 passed, 0 failed, 0 skipped** | `artifacts/web-results.json`; two displays, planner→science recording/review, actual stored fixture rows/graphs, map with no external requests, iPad/narrow layouts, focus styling and mocked toolbar bootstrap/protocol/layout/scrolling |
+| Actual-process crash/restart smoke | Passed | 3 committed samples and Realistic mode retained, Universal completion/default and duplicate-owner rejection; separate synthetic test host |
+| Self-contained Windows x64 publish | Passed; **440 files** structurally validated | Actual graphical x64 PE apphost, .NET/SQLite libraries and new research/map web assets; no licensed SDK runtime/full toolbar/installer supplied or executed here |
+| Large-export/map fixture | Passed | 5,101 science rows and 1,601 flight samples fully exported; 100-point bounded track overview; see measurement below |
+
+Research fixture performance: 5,101 scientific rows + 1,601 flight rows; complete JSON/CSV/GPX/KML and bounded 100-point overview: 2.879s. Linux fixture only, not simulator performance.
+
+The recent-preview test additionally exercises more than 200 markers/notes while retaining complete chronological streams. The schema-3 test compares exact old telemetry/mode and a verified pre-upgrade logical fingerprint. Destructive failure tests inject SQLite aborts to establish rollback; these do not substitute for native Windows dialog/external-drive testing.
+
+Visual evidence: [planner](images/research-planner-browser-fixture.png), [instruments/graphs](images/research-instruments-browser-fixture.png), [research review](images/research-review-browser-fixture.png). These are **synthetic browser test fixtures, not actual MSFS measurements**. The instrument screenshot is explicitly labeled; test sources never ship.
+
+Official SDK documentation was read for exact atmosphere/guidance definitions and packet-ID semantics; see [SDK research](sdk-research-v0.2.0.md). Compiling the expanded C++ contract, loading the real DLL's new export, building the genuine Community package, running Inno Setup/Windows installer and performing live/device acceptance all remain pending on the gaming PC. The [Windows procedure](v0.2.0-windows-testing.md) identifies the needed evidence. No v0.2.0 binary release/download or new live acceptance is claimed.
+
+Reusable cloud `start_skill` instructions were updated for the new architecture/checks and pending Windows work. The existing install script, network policy and credential settings were preserved. Saving this draft is not environment snapshot publication.
+
+## Historical validation — earlier releases
+
 
 Initial cloud validation was performed on Linux. Separately identified gaming-PC results below come from the user's supplied Windows logs. Build results do not establish simulator loading, companion execution, physical-device or published-environment acceptance.
 

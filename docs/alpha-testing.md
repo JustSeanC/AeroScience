@@ -1,10 +1,10 @@
-# v0.1.1-alpha implementation and acceptance
+# v0.2.0 implementation and acceptance
 
-The installer and guided app setup are implemented in source. A prior ZIP candidate built on the gaming PC and opened the app window; the new setup EXE, wizard, upgrade/uninstall, real-drive migrations and Mach require their own Windows tests. Public distribution is authorized, but no complete alpha release is published yet. Use the [Windows installer build and manual upload guide](public-release-windows.md), including its clean Windows/Sandbox and gaming-PC acceptance steps. No self-hosted runner is required. Earlier v0.1.0 live/toolbar evidence does not validate this changed build.
+The changed v0.2.0 source requires a new official-SDK/Windows installer and its own live research acceptance. Prior v0.1.1 passes do not establish the new results. Use [Windows build/manual publication](public-release-windows.md) and the [complete v0.2.0 test sequence](v0.2.0-windows-testing.md); no self-hosted runner is required. [Science operations](science-operations.md) describes working instruments/planner/maps and their limits.
 
 ## Ordinary user workflow
 
-Run the validated **AeroScience-Setup-v0.1.1-alpha.exe**, complete guided storage/Community setup and open **Start → AeroScience**. Windows installation provides shortcuts and a normal uninstaller. The app starts the local engine/dashboard, enables the toolbar bridge and opens the browser. Start MSFS before or afterward; the app retries automatically. Leave the app running while recording. Closing a browser/toolbar does not stop recording; exiting during a mission asks for confirmation and preserves it as interrupted. Updates/uninstall retain data and configuration; toolbar removal asks separately.
+Run the validated **AeroScience-Setup-v0.2.0.exe**, complete guided storage/Community setup and open **Start → AeroScience**. Windows installation provides shortcuts and a normal uninstaller. The app starts the local engine/dashboard, enables the toolbar bridge and opens the browser. Start MSFS before or afterward; the app retries automatically. Leave the app running while recording. Closing a browser/toolbar does not stop recording; exiting during a mission asks for confirmation and preserves it as interrupted. Updates/uninstall retain data and configuration; toolbar removal asks separately.
 
 No user PowerShell, batch launchers, environment variables, typed localhost addresses, developer tools or cloud account are required. The source contains maintainer build tools; those are not tester instructions. Production generated telemetry is removed. Legacy simulated missions remain labeled and readable.
 
@@ -39,7 +39,7 @@ The required large-data warning appears at initial setup and library selection. 
 
 Unavailable external storage produces a clear error. The app never silently creates a replacement archive. Reconnect the drive or explicitly select a verified existing archive through Storage. Network drives, UNC paths and symbolic-link/junction storage are unsupported in this alpha. Data belongs outside the application installation folder.
 
-Schema 1/2 archives receive verified SQLite backups under their mission folder's `Backups` before upgrading to schema 3. Schema 3 adds portable dataset references; Mach is an optional field in existing JSON samples. Earlier modes/source labels/IDs/timestamps/payloads are retained. The old v0.1.0 executable refuses schema 3, so use the retained backup to roll back rather than pointing it at the upgraded file.
+Schema 1/2/3 archives receive verified SQLite backups under their mission folder's `Backups` before upgrading to schema 4. Schema 3 adds portable dataset references and schema 4 adds research planning/context, markers, notes and availability; Mach is an optional field in existing JSON samples. Earlier modes/source labels/IDs/timestamps/payloads are retained. Older executables refuse the newer schema, so use the retained backup to roll back rather than pointing it at the upgraded file.
 
 ## Mach and SDK contract
 

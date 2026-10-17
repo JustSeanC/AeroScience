@@ -1,12 +1,12 @@
 # Release installation and provenance
 
-The primary asset is **AeroScience-Setup-v0.1.1-alpha.exe**. Follow the [Windows build/test/manual publication guide](public-release-windows.md). No self-hosted runner is required for the first public prerelease. The portable ZIP is optional and secondary.
+The primary asset is **AeroScience-Setup-v0.2.0.exe**. Follow the [Windows build/test/manual publication guide](public-release-windows.md). No self-hosted runner is required for the first public prerelease. The portable ZIP is optional and secondary.
 
 ## Pipeline
 
 1. `Build-ReleaseCandidate.ps1` performs the existing locked application/helper/recovery tests, Windows publish, official installed-header ABI checks, genuine SDK compilation/validation, native runtime loading/export checks and private-safe public permission attestation validation.
 2. `Build-Installer.ps1` stages that validated app/toolbar/runtime payload, verifies the full Microsoft Visual C++ x64 prerequisite's signature and identity, invokes an installed official Inno Setup 6.3+ compiler and records hashes of the EXE, payload files, compiler, recipe and prerequisite. No SPB or SDK manifest is synthesized.
-3. Test the exact setup EXE on Windows. `installer-candidate/ACCEPTANCE.json` binds source, payload, setup SHA-256 and build-receipt SHA-256. Eleven minimum checks include fresh install, wizard, upgrade and uninstall preservation. Prior ZIP/simulator evidence cannot count for changed installer bytes.
+3. Test the exact setup EXE on Windows. `installer-candidate/ACCEPTANCE.json` binds source, payload, setup SHA-256 and build-receipt SHA-256. Fourteen minimum checks include fresh install, wizard, upgrade/uninstall preservation and the grouped science/archive/data-management checks. Prior ZIP/simulator evidence cannot count for changed installer bytes.
 4. `New-Release.ps1` calls `installer_release.py finalize`. It validates actual acceptance and copies the identical EXE to the final output; it does not recompile, sign or alter it. It writes `.exe.sha256`, `.release.json`, generated notes and an internally verified optional portable ZIP. An unchanged EXE is essential because its tested hash is the release identity.
 5. Manually tag the tested commit, upload the final EXE/checksum/public evidence on GitHub Releases, mark prerelease and verify signed-out downloads. Optional CLI automation applies identical validation and refuses conflicting tags/assets. Original private correspondence and personal archives/logs are excluded.
 

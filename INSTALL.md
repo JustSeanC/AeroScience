@@ -1,6 +1,6 @@
 # Install AeroScience for Windows
 
-The recommended public download is **AeroScience-Setup-v0.1.1-alpha.exe** from [GitHub Releases](https://github.com/JustSeanC/AeroScience/releases). Installer implementation is in source; its new Windows installation, first-run, upgrade, uninstall and live-flight acceptance must pass before publication. The earlier ZIP candidate is not evidence for this changed build.
+The recommended public download is **AeroScience-Setup-v0.2.0.exe** from [GitHub Releases](https://github.com/JustSeanC/AeroScience/releases). The new v0.2.0 source requires its own Windows/SDK build, installation, upgrade and live science acceptance before publication. Prior v0.1.1 passes do not verify this changed release.
 
 ## Install and launch
 

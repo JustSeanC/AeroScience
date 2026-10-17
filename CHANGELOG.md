@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.2.0 — Science Mission Operations (source; Windows acceptance pending)
+
+- Add optional saved Mission Planner, four editable templates, ordered waypoints/survey polygons, preflight notes and immutable recording snapshots. Retain immediate spontaneous recording and aircraft-agnostic Universal/Realistic modes.
+- Add real simulator atmospheric definitions and modular temperature/pressure/wind/density acquisition with independent intervals, source/units/provenance, saved/rejected/gap/cadence diagnostics and an independent scientific SQLite store. Missing readings are unavailable, never synthesized.
+- Add offline WGS84 operations maps, actual/planned overlays, geographic markers/notes, instrument graphs, paged science history and reproducible research review.
+- Add read-only standard AP/lateral/vertical/speed guidance and selected targets, explicit ambiguity/armed handling and deduplicated events; preserve core 360-byte telemetry/Mach ABI and native CommBus layout.
+- Standardize Mach labels and requested mission wording. Remove only the toolbar scroll-region outline while retaining interactive focus/native bootstrap.
+- Add trusted local independent flight/science archive clearing with previews, typed confirmations, optional verified backups, maintenance/active guards and SQLite rollback. Preserve unrelated files, settings and library identity.
+- Add science-only estimates, verified schema-4 upgrades, populated-library migration coverage and complete streamed JSON/CSV/GPX/KML/text exports.
+- Prepare AeroScience-Setup-v0.2.0.exe and explicit GitHub prerelease policy using the existing official-SDK/runtime/Inno/manual Windows process. No separate v0.1.2, new Windows installer/hardware pass or public v0.2.0 binary is claimed. See docs/v0.2.0-completion.md.
+
+
 ### Installer Pascal comment correction
 
 - Corrected the final retention note to use Pascal comment syntax inside `[Code]`, resolving the reported line 179 `'BEGIN' expected` compiler error.
