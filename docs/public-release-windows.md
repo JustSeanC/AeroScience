@@ -39,6 +39,8 @@ The build prints the selected Inno compiler path and **engine** version before t
 
 If you reached the old `FileMinorPart`/"6.3 or newer" exception despite having Inno 6.7, pull the correction and build from its new clean source revision into a fresh folder such as `C:\AeroScience-Builds\InstallerAlpha2`. Keep the earlier `InstallerAlpha1` payload. The changed source commit requires a new candidate so that application, SDK and installer evidence continue to match; do not edit out the version check or relabel the earlier payload.
 
+If `InstallerAlpha2` reached an Inno `[Code]` error on line 179 (`'BEGIN' expected`), pull the Pascal-comment correction and use a fresh output directory such as `C:\AeroScience-Builds\InstallerAlpha3`. Keep the earlier candidate/logs. You may reuse its downloaded prerequisite with `-VcRuntimePath 'C:\AeroScience-Builds\InstallerAlpha2\installer-prerequisites\VC_redist.x64.exe'`; the build still validates its Microsoft signature and product identity. Compiler failures now print their final log lines automatically.
+
 **Run this candidate installer:**
 
 ```text

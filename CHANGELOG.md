@@ -1,5 +1,10 @@
 # Changelog
 
+### Installer Pascal comment correction
+
+- Corrected the final retention note to use Pascal comment syntax inside `[Code]`, resolving the reported line 179 `'BEGIN' expected` compiler error.
+- Print the final compiler log lines and exit code automatically when installer compilation fails, while retaining the full log and required validation gates.
+
 ### Inno Setup compiler engine detection
 
 - Check the loaded compiler engine with a no-output compile instead of rejecting Inno's valid `0.0.0.0` launcher file metadata. Retain the Inno 6.3 minimum and refuse failed or unidentified engines; record the actual engine version in release provenance.

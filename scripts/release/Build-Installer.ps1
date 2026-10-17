@@ -48,8 +48,13 @@ try {
        vc_sha256=(Get-FileHash $vc -Algorithm SHA256).Hash.ToLowerInvariant(); vc_version=$vcVersion.FileVersion;
        vc_signature=$signature.Status.ToString(); vc_publisher=$signature.SignerCertificate.Subject; vc_architecture='x64' } | ConvertTo-Json | Set-Content -LiteralPath $toolReport -Encoding utf8
     $arguments = @("/DPayloadDir=$payload", "/DVcRuntime=$vc", "/DReleaseVersion=$($meta.version)", "/DPackageVersion=$($meta.package_version)", "/DOutputDirectory=$destination", "$repo/scripts/installer/AeroScience.iss")
-    & $compiler @arguments *> (Join-Path $dependencies 'inno-build.log')
-    if ($LASTEXITCODE -ne 0) { throw "Inno Setup compilation failed. Read $dependencies\inno-build.log. No installer is approved." }
+    $compilerLog = Join-Path $dependencies 'inno-build.log'
+    & $compiler @arguments *> $compilerLog
+    if ($LASTEXITCODE -ne 0) {
+        $compilerExitCode = $LASTEXITCODE
+        Get-Content -LiteralPath $compilerLog -Tail 15 | ForEach-Object { Write-Host $_ }
+        throw "Inno Setup compilation failed (exit $compilerExitCode). Full log: $compilerLog. No installer is approved."
+    }
     python scripts/release/installer_release.py record --folder $destination --compiler $compiler --prerequisite $vc --tool-report $toolReport
     if ($LASTEXITCODE -ne 0) { throw 'Installer receipt validation failed.' }
     Write-Host "Installer candidate: $destination\$($meta.setup_name)"

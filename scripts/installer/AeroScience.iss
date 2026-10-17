@@ -176,4 +176,4 @@ begin
   end;
 end;
 
-; No UninstallDelete: user databases, libraries, settings and toolbar backups are retained.
+// No UninstallDelete: user databases, libraries, settings and toolbar backups are retained.

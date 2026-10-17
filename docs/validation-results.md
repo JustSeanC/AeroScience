@@ -324,3 +324,13 @@ The installer stage initially could not locate the compiler. After supplying its
 - Windows CI's structural recipe compilation now uses the same engine preflight; that remote run has not been observed here. Application, telemetry, native ABI and browser code were unchanged; their earlier measured results were not rerun for this release-script correction.
 
 The real corrected compiler preflight, setup EXE compilation and installer/live acceptance remain pending on the gaming PC. Keep `InstallerAlpha1` unchanged and rebuild from the corrected source into `InstallerAlpha2` to preserve matching source provenance. No new installer checksum, final acceptance or public GitHub asset is claimed.
+
+## Inno 6.7.3 preflight passed; final Pascal comment corrected
+
+The maintainer's next Windows build identifies **Inno compiler engine 6.7.3**, confirming the corrected no-output engine preflight runs successfully there. The SDK toolbar again validated seven files; native runtime loading/exports passed with the same reported DLL hash, and simulator connection remained untested. The intermediate `InstallerAlpha2` ZIP has SHA-256 `d4ef4528d616b40cb545e0fb11985843ac1bb23bba3223047f95d221c741c1d0`, source `ab0dfa2f8bb2f1d9dc98a681f39d9d790ff5be97` and operational payload digest `8663c4f030c42cdc075b6a5d84b9ecbe21830a1606fe86df994bff14e824fd52`.
+
+Actual Inno recipe compilation then reached `[Code]` and reported line 179, column 1: `'BEGIN' expected`. The final retention note used an INI-style semicolon comment inside Pascal code. Changed that line to a Pascal `//` comment; no installation/uninstall logic or data-retention rule changed. Compilation failures now print the last fifteen log lines and compiler exit code automatically, retaining the full log.
+
+**48 Python/PowerShell packaging/helper tests passed, 0 failed/skipped**, including script parsing and existing recipe/receipt, SDK/runtime evidence, candidate/finalization and tamper checks. `git diff --check` passed. No new trivial comment assertion was substituted for real compiler acceptance. Application/browser/native telemetry code was unchanged and their earlier tests were not rerun.
+
+The corrected full recipe still requires Windows compilation and the finished installer requires actual installation/first-run/upgrade/uninstall/live acceptance. No successful setup EXE, installer checksum or public binary publication is claimed. Preserve the earlier directories and build the corrected clean source into `InstallerAlpha3`; the existing signed prerequisite can be reused while its signature/product checks remain required.
