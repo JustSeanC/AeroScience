@@ -76,8 +76,7 @@ ingamepanel-aeroscience .as-panel {
   padding-right: 6px;
 }
 .as-scroll:focus {
-  outline: 1px solid #75ead1;
-  outline-offset: -1px;
+  outline: none;
 }
 .as-panel header {
   display: flex;
@@ -238,3 +237,9 @@ ingamepanel-aeroscience .as-panel {
 .as-panel [hidden] {
   display: none !important;
 }
+
+.as-scroll:focus { outline: none; }
+.as-guidance { padding: 10px 0; font-size: 16px; border-top: 1px solid #385465; }
+.as-instrument { margin: 12px 0; padding: 8px; border-bottom: 1px solid #385465; }
+.as-instrument select { max-width: 120px; }
+new-push-button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid #75ead1; outline-offset: 2px; }

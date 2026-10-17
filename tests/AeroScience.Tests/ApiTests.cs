@@ -38,6 +38,28 @@ public sealed class ApiTests : IDisposable
     }
 
     [Fact]
+    public async Task ResearchEndpointsPreserveSnapshotsExportsAndRequestProtection()
+    {
+        await Pair(client);
+        var plan=new MissionPlan(Guid.NewGuid(),"Offline plan",MissionTemplateKind.ObservationFlight,
+            Waypoints:[new("A",34,-117),new("B",35,-118)],Instruments:[]);
+        var saved=await client.PostAsJsonAsync("/api/plans",plan,WireJson.Options);saved.EnsureSuccessStatusCode();
+        var start=await client.PostAsJsonAsync("/api/missions",new StartMissionRequest("Planned",PlanId:plan.Id),WireJson.Options);start.EnsureSuccessStatusCode();
+        var mission=(await start.Content.ReadFromJsonAsync<Mission>(WireJson.Options))!;
+        (await client.PostAsJsonAsync($"/api/missions/{mission.Id}/markers",new MarkerRequest(Notes:"Actual contextual marker"),WireJson.Options)).EnsureSuccessStatusCode();
+        (await client.PostAsJsonAsync($"/api/missions/{mission.Id}/end",new{})).EnsureSuccessStatusCode();
+        var review=await client.GetFromJsonAsync<JsonElement>($"/api/missions/{mission.Id}/review");
+        Assert.Equal("Offline plan",review.GetProperty("research").GetProperty("planSnapshot").GetProperty("name").GetString());
+        foreach(var format in new[]{"flight.csv","events.csv","gpx","kml","report.txt"})
+            (await client.GetAsync($"/api/missions/{mission.Id}/export/{format}")).EnsureSuccessStatusCode();
+        foreach(var route in new[]{"/api/data/clear-flight","/api/science/clear"})
+            Assert.Contains((await client.PostAsJsonAsync(route,new{})).StatusCode,new[]{HttpStatusCode.NotFound,HttpStatusCode.MethodNotAllowed});
+        client.DefaultRequestHeaders.Remove("X-AeroScience-CSRF");
+        Assert.Equal(HttpStatusCode.Forbidden,(await client.PostAsJsonAsync("/api/plans",plan,WireJson.Options)).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden,(await client.PostAsJsonAsync("/api/desktop/data-management",new{})).StatusCode);
+    }
+
+    [Fact]
     public async Task ApiRecordsMissionStreamsStateAndRetainsHistory()
     {
         Assert.Equal(HttpStatusCode.Unauthorized, (await client.GetAsync("/api/state")).StatusCode);

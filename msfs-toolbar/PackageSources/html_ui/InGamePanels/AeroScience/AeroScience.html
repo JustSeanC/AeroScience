@@ -51,7 +51,7 @@
                 <span>MSL / FT</span><strong id="as-altitude">—</strong>
               </div>
               <div>
-                <span>IAS / KTS</span><strong id="as-airspeed">—</strong><small id="as-mach">M —</small>
+                <span>IAS / KTS</span><strong id="as-airspeed">—</strong><small id="as-mach">Mach —</small>
               </div>
               <div>
                 <span>HEADING / °T</span><strong id="as-heading">—</strong>
@@ -60,7 +60,8 @@
                 <span>VS / FT/MIN</span><strong id="as-vspeed">—</strong>
               </div>
             </div>
-            <div id="as-idle">
+            <div id="as-guidance" class="as-guidance">Flight Guidance unavailable</div>
+            <div id="as-idle"><h3>Ready for your next mission.</h3><p>Start recording at any time. Your mission continues if this panel is closed.</p>
               <label for="as-mode">Science operating mode</label
               ><select id="as-mode">
                 <option value="universal">Universal — Fly Anything</option>
@@ -87,6 +88,7 @@
                 <span id="as-duration">00:00:00</span
                 ><span id="as-samples">0 samples</span>
               </div>
+              <new-push-button id="as-marker" disabled>Add observation marker</new-push-button>
               <new-push-button id="as-end" class="as-danger" disabled
                 >End mission</new-push-button
               >
@@ -98,15 +100,9 @@
           </section>
           <section id="as-payload-view" hidden>
             <h2>Science payload</h2>
-            <p>
-              Scientific instruments, mapping and calibration are not
-              implemented in v0.1.0.
-            </p>
-            <p>
-              Universal Mode allows flexible configurations. Realistic Mode's
-              advanced operating limits and procedures are coming in a future
-              release. Neither mode restricts aircraft selection.
-            </p>
+            <p>Simulator-reported atmospheric observations at the user aircraft. Acquisition requires an active mission. No real-world calibration is claimed.</p>
+            <div id="as-instruments"></div>
+            <p>Universal and Realistic modes support all compatible aircraft. Advanced operating limits and calibration procedures are coming in a future release.</p>
           </section>
           </div>
         </div></ingame-ui

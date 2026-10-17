@@ -18,7 +18,7 @@ class InstallerReleaseTests(unittest.TestCase):
         info = i.finalize(folder, self.flow.acceptance, self.flow.root/'final')
         final = self.flow.root/'final'
         self.assertEqual(before, (final/meta['setup_name']).read_bytes())
-        self.assertEqual(info['asset_name'], 'AeroScience-Setup-v0.1.1-alpha.exe')
+        self.assertEqual(info['asset_name'], i.p.identity()['setup_name'])
         self.assertIn('Run the setup EXE', (final/'RELEASE-NOTES.md').read_text())
         self.assertTrue((final/meta['setup_record_name']).is_file())
         with self.assertRaisesRegex(ValueError, 'already exist'): i.finalize(folder, self.flow.acceptance, final)

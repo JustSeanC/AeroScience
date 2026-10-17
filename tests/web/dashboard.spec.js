@@ -14,7 +14,7 @@ test('two displays share recording, history and safe mission detail', async ({ p
   await page.goto('/');
   await expect(page.locator('#source-badge')).toHaveText('SIMULATED TELEMETRY');
   await expect(page.locator('#altitude')).not.toHaveText('—');
-  await expect(page.locator('#mach')).toHaveText('M 0.82');
+  await expect(page.locator('#mach')).toHaveText('Mach 0.82');
   await expect(page.locator('#sampling-label')).toContainText('Target');
   const name = '<img src=x onerror=alert(1)> · Browser survey';
   await page.getByLabel('MISSION NAME', { exact: true }).fill(name);

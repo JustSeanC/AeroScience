@@ -20,7 +20,7 @@ class PackagingTests(unittest.TestCase):
         struct.pack_into('<H', image, 152, 0x20b); struct.pack_into('<H', image, 220, 2)
         (root/'AeroScience.exe').write_bytes(image)
         for name in ('AeroScience.Engine.dll', 'AeroScience.dll', 'AeroScience.deps.json', 'AeroScience.runtimeconfig.json',
-                     'coreclr.dll', 'hostpolicy.dll', 'System.Windows.Forms.dll', 'wwwroot/index.html', 'wwwroot/app.js', 'wwwroot/app.css'):
+                     'coreclr.dll', 'hostpolicy.dll', 'System.Windows.Forms.dll', 'wwwroot/index.html', 'wwwroot/app.js', 'wwwroot/app.css', 'wwwroot/research.js', 'wwwroot/map.js'):
             (root/name).write_text('test fixture')
 
     def community_fixture(self, root, minimum_game_version, lowercase_assets=False):
@@ -219,16 +219,16 @@ class PackagingTests(unittest.TestCase):
     def test_stable_acceptance_requires_vr_performance_evidence(self):
         with tempfile.TemporaryDirectory() as temp:
             acceptance = Path(temp)/'acceptance.json'
-            data = {'version': packaging.VERSION, 'source_commit': 'a'*40, 'tester': 'test fixture', 'tested_utc': '2026-10-17T00:00:00Z',
+            data = {'version': '1.0.0', 'source_commit': 'a'*40, 'tester': 'test fixture', 'tested_utc': '2026-10-17T00:00:00Z',
                     'checks': {name: {'result': 'passed', 'evidence': 'test fixture'} for name in packaging.ACCEPTANCE}}
             data['checks'].pop('vr_performance')
             data['checks']['vr_quest3'] = {'result': 'passed', 'evidence': 'obsolete interaction record'}
             acceptance.write_text(json.dumps(data))
             with self.assertRaisesRegex(ValueError, 'vr_performance'):
-                packaging.validate_acceptance(acceptance, version=packaging.VERSION)
+                packaging.validate_acceptance(acceptance, version='1.0.0')
             data['checks']['vr_performance'] = {'result': 'passed', 'evidence': 'frame-time and resource comparison fixture'}
             acceptance.write_text(json.dumps(data))
-            packaging.validate_acceptance(acceptance, version=packaging.VERSION)
+            packaging.validate_acceptance(acceptance, version='1.0.0')
 
 
 if __name__ == '__main__': unittest.main()

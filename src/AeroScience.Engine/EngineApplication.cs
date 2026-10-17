@@ -23,7 +23,7 @@ public static class EngineApplication
         {
             var options = context.Configuration.GetSection("AeroScience").Get<EngineOptions>() ?? new();
             options.Validate();
-            server.Limits.MaxRequestBodySize = 4096;
+            server.Limits.MaxRequestBodySize = 262144;
             server.Listen(IPAddress.Loopback, options.Port);
             if (options.EnableLan) server.Listen(IPAddress.Parse(options.LanAddress!), options.Port);
         });
@@ -46,13 +46,31 @@ public static class EngineApplication
             var store = new MissionStore(Path.Combine(sp.GetRequiredService<EngineOptions>().DataDirectory, "missions.db"));
             store.Initialize(); store.RecoverInterrupted(); return store;
         });
+        builder.Services.AddSingleton(sp =>
+        {
+            var settings = sp.GetRequiredService<EngineOptions>();
+            var directory = settings.ScienceLibraryDirectory ?? Path.Combine(settings.DataDirectory, "ScienceLibrary");
+            if (settings.ScienceLibraryDirectory is null && !Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+                PreferenceStore.WriteAtomic(Path.Combine(directory, StorageManager.LibraryManifest), new { formatVersion = 1, libraryId = Guid.NewGuid() });
+            }
+            var science = new ScienceStore(directory);
+            var missions = sp.GetRequiredService<MissionStore>(); missions.ScienceLibrary = science;
+            if (science.AvailabilityError() is null)
+                try { missions.ReconcileDatasetReferences(science.LibraryId, science.ContainsDataset); }
+                catch (Exception error) when (error is IOException or Microsoft.Data.Sqlite.SqliteException)
+                { sp.GetRequiredService<ILogger<ScienceStore>>().LogWarning("Science references need review: {Message}", error.Message); }
+            return science;
+        });
+        builder.Services.AddSingleton<ResearchOperations>();
         builder.Services.AddSingleton(sp => new MissionCoordinator(sp.GetRequiredService<MissionStore>(), sp.GetRequiredService<EngineOptions>().SamplingIntervalMs,
             requireFreshTelemetry: true, ensureRecordingCapacity: () =>
             {
                 var path = sp.GetRequiredService<EngineOptions>().DataDirectory;
                 if (new LocalStorageCapacity().FreeBytes(path) < StorageManager.MinimumFreeBytes)
                     throw new IOException("Insufficient disk space for recording. Free space or choose another storage location; existing history is retained.");
-            }));
+            }, research: sp.GetRequiredService<ResearchOperations>()));
         builder.Services.AddSingleton<ITelemetryProvider, SimConnectTelemetryProvider>();
         configureServices?.Invoke(builder.Services);
         builder.Services.AddHostedService<TelemetryWorker>();
@@ -101,10 +119,12 @@ public static class EngineApplication
             { context.Response.StatusCode = 400; await context.Response.WriteAsJsonAsync(new { error = e.Message }); }
             catch (InvalidOperationException e) when (!context.Response.HasStarted)
             { context.Response.StatusCode = 409; await context.Response.WriteAsJsonAsync(new { error = e.Message }); }
+            catch (Exception e) when (!context.Response.HasStarted && e is IOException or UnauthorizedAccessException or Microsoft.Data.Sqlite.SqliteException)
+            { context.Response.StatusCode = 409; await context.Response.WriteAsJsonAsync(new { error = "Storage unavailable. Existing data was not replaced. " + e.Message }); }
         });
         app.UseDefaultFiles();
         app.UseStaticFiles();
-        app.MapGet("/api/health", () => Results.Ok(new { status = "ok", version = "0.1.1-alpha" }));
+        app.MapGet("/api/health", () => Results.Ok(new { status = "ok", version = "0.2.0" }));
         app.MapGet("/api/access", (HttpContext c) => new { requiresPairing = !AccessControl.IsLoopback(c) });
         app.MapPost("/api/session", (HttpContext c, PairRequest request, AccessControl access) =>
         {
@@ -119,7 +139,7 @@ public static class EngineApplication
         app.MapGet("/api/state", (MissionCoordinator missions) => missions.Snapshot());
         app.MapPost("/api/missions", (StartMissionRequest request, MissionCoordinator missions) =>
         {
-            var mission = missions.Start(request.Name, request.Mode);
+            var mission = missions.Start(request);
             return Results.Created($"/api/missions/{mission.Id}", mission);
         });
         app.MapPost("/api/missions/{id:guid}/end", (Guid id, MissionCoordinator missions) => Results.Ok(missions.End(id)));
@@ -136,9 +156,10 @@ public static class EngineApplication
             if (detail.Mission.Status == MissionStatus.Recording) return Results.Conflict(new { error = "End the mission before exporting." });
             return Results.Stream(stream => missions.ExportJsonAsync(id, stream, context.RequestAborted), "application/json", $"AeroScience-mission-{id}.json");
         });
+        app.MapResearchEndpoints();
         app.MapGet("/api/settings", (HttpContext c, AccessControl access) => new
         {
-            version = "0.1.1-alpha",
+            version = "0.2.0",
             telemetry = options.Telemetry,
             options.SamplingIntervalMs,
             options.EnableLan,
@@ -160,6 +181,7 @@ public static class EngineApplication
             {
                 case "settings": desktop.OpenSettings(); break;
                 case "storage": desktop.OpenStorage(); break;
+                case "data-management": desktop.OpenDataManagement(); break;
                 case "feedback": desktop.CollectFeedback(); break;
                 default: return Results.NotFound();
             }
@@ -185,7 +207,7 @@ public static class EngineApplication
             catch (OperationCanceledException) when (context.RequestAborted.IsCancellationRequested) { }
             catch (IOException) { /* A display disconnected; recording continues in TelemetryWorker. */ }
         });
-        app.Logger.LogInformation("AeroScience 0.1.1-alpha — {Source} telemetry; dashboard http://127.0.0.1:{Port}; data {Directory}", options.Telemetry, options.Port, options.DataDirectory);
+        app.Logger.LogInformation("AeroScience 0.2.0 — {Source} telemetry; dashboard http://127.0.0.1:{Port}; data {Directory}", options.Telemetry, options.Port, options.DataDirectory);
         return app;
     }
 }

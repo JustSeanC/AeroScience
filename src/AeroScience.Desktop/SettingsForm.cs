@@ -49,6 +49,7 @@ public sealed class SettingsForm : Form
             storagePanel.Controls.Add(buttons);
         }
         Label(storagePanel, StorageManager.LargeDataWarning);
+        Button(storagePanel, "Data Management…", (_, _) => app.ShowDataManagement());
         Button(storagePanel, "Recover original location from interrupted migration…", async (_, _) =>
         {
             if (!File.Exists(app.Preferences.JournalPath)) { MessageBox.Show(this, "No interrupted migration needs rollback."); return; }

@@ -29,7 +29,7 @@ public sealed class MainForm : Form, IDesktopActions
         Text = "AeroScience " + Application.ProductVersion.Split('+')[0]; MinimumSize = new(560, 290); Size = new(760, 350);
         AutoScaleMode = AutoScaleMode.Dpi;
         var panel = new FlowLayoutPanel { Dock = DockStyle.Fill, Padding = new(24), FlowDirection = FlowDirection.TopDown, WrapContents = false, AutoScroll = true };
-        panel.Controls.Add(new Label { Text = "AeroScience · Live Flight Recording Alpha", AutoSize = true, Font = new(Font.FontFamily, 16) });
+        panel.Controls.Add(new Label { Text = "AeroScience · Science Mission Operations", AutoSize = true, Font = new(Font.FontFamily, 16) });
         panel.Controls.Add(status); panel.Controls.Add(dashboard);
         dashboard.Click += (_, _) => OpenDashboard();
         AddButton(panel, "Settings", () => ShowSettings(false));
@@ -150,6 +150,8 @@ public sealed class MainForm : Form, IDesktopActions
     { if (!IsDisposed) BeginInvoke(action); }
     void IDesktopActions.OpenSettings() => Dispatch(() => ShowSettings(false));
     void IDesktopActions.OpenStorage() => Dispatch(() => ShowSettings(true));
+    void IDesktopActions.OpenDataManagement() => Dispatch(ShowDataManagement);
+    public void ShowDataManagement() { if (!Busy) { using var form = new DataManagementForm(this); form.ShowDialog(this); } }
     void IDesktopActions.CollectFeedback() => Dispatch(ShowFeedback);
     public void ShowError(Exception error) => MessageBox.Show(this, error.Message, "AeroScience", MessageBoxButtons.OK, MessageBoxIcon.Error);
     private void ShowFeedback()

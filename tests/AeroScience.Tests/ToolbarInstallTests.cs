@@ -17,7 +17,7 @@ public sealed class ToolbarInstallTests : IDisposable
     {
         // Structural fixtures only: never an official SDK build or simulator proof.
         var input = Path.Combine(root, "input"); var package = Path.Combine(input, "aeroscience-toolbar"); Directory.CreateDirectory(package);
-        File.WriteAllText(Path.Combine(package, "manifest.json"), "{\"title\":\"AeroScience\",\"package_version\":\"0.1.1\"}");
+        File.WriteAllText(Path.Combine(package, "manifest.json"), JsonSerializer.Serialize(new { title = "AeroScience", package_version = typeof(ToolbarInstaller).Assembly.GetName().Version!.ToString(3) }));
         File.WriteAllText(Path.Combine(package, "layout.json"), "{}");
         Directory.CreateDirectory(Path.Combine(package, "InGamePanels"));
         File.WriteAllBytes(Path.Combine(package, "InGamePanels", "aeroscience_panel.spb"), new byte[64]);

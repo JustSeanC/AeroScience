@@ -3,7 +3,7 @@ using AeroScience.Shared;
 namespace AeroScience.Telemetry;
 
 // Test-only deterministic provider; never referenced by production projects.
-public sealed class SimulatedTelemetryProvider(int intervalMs = 1000) : ITelemetryProvider
+public sealed class SimulatedTelemetryProvider(int intervalMs = 1000, bool includeResearch = false) : ITelemetryProvider
 {
     // Synthetic ER-2 cruise over Southern California. This is not scientific observation data.
     public static TelemetryFrame Generate(DateTimeOffset startUtc, double elapsedSeconds)
@@ -31,7 +31,11 @@ public sealed class SimulatedTelemetryProvider(int intervalMs = 1000) : ITelemet
         var connection = new AeroScience.Shared.ConnectionInfo(ConnectionState.Connected, TelemetrySource.Simulated,
             "Synthetic test telemetry — no simulator connection", start);
         using var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(intervalMs));
-        do { yield return new(connection, Generate(start, clock.Elapsed.TotalSeconds)); }
+        do {
+            var elapsed = clock.Elapsed.TotalSeconds; var frame = Generate(start, elapsed);
+            yield return new(connection, frame, includeResearch ? new(frame.TimestampUtc, 12 + elapsed * .01, 29.3, 9, 270, .0023) : null,
+                includeResearch ? new(frame.TimestampUtc, AutopilotEngagement.Engaged, new("HDG",75,"deg"), new("ALT",60000,"ft"), new("MACH",.82,"mach"), Source:"Synthetic browser test fixture — not an SDK connection") : null);
+        }
         while (await timer.WaitForNextTickAsync(cancellationToken));
     }
 }

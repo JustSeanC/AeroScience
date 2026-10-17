@@ -59,6 +59,11 @@ class ReleaseFlowTests(unittest.TestCase):
         self.acceptance.write_text(json.dumps(acceptance))
         return acceptance
 
+    def test_science_release_is_a_prerelease_with_the_conventional_setup_filename(self):
+        self.assertEqual(p.identity()['setup_name'], f"AeroScience-Setup-v{p.RELEASE_VERSION}.exe")
+        self.assertTrue(p.identity()['prerelease'])
+        self.assertFalse(p.identity('1.0.0')['prerelease'])
+
     def test_version_metadata_supports_future_prerelease_and_stable_versions(self):
         for version in ('0.1.1-alpha', '0.1.2-beta.2', '1.0.0-rc.1', '1.0.0'):
             meta = p.identity(version)

@@ -1,3 +1,10 @@
+import {
+  initializeResearch,
+  loadResearch,
+  renderResearch,
+  researchDetail,
+  invalidateResearch,
+} from "./research.js";
 const $ = (id) => document.getElementById(id);
 const number = (v, digits = 0) =>
   Number.isFinite(v)
@@ -127,6 +134,7 @@ async function connect(code = null) {
   await navigate();
 }
 function clearTelemetry() {
+  invalidateResearch();
   for (const id of [
     "altitude",
     "ias",
@@ -140,6 +148,7 @@ function clearTelemetry() {
     "mach",
   ])
     $(id).textContent = "—";
+  $("mach").textContent = "Mach —";
   $("tas").textContent = "True airspeed —";
   $("track").textContent = "Track —";
   $("agl").textContent = "Above ground —";
@@ -147,15 +156,23 @@ function clearTelemetry() {
   $("connection-dot").classList.remove("live");
 }
 function render(state) {
+  renderResearch(state);
   const wasActive = current?.activeMission?.id;
   current = state;
   const t = state.telemetry;
   const fresh = t && Date.now() - Date.parse(t.timestampUtc) < 6000;
   const simulated = state.connection.source === "simulated";
   const connected = fresh && state.connection.state === "connected";
-  $("source-badge").textContent = simulated ? "SIMULATED TELEMETRY" : connected ? "SIMCONNECT · LIVE AIRCRAFT" : "LIVE TELEMETRY UNAVAILABLE";
-  $("source-badge").className = "badge " + (connected && !simulated ? "green" : "amber");
-  $("source-note").textContent = simulated ? "Test fixture data" : "Heading and ground track use true north. Mission History is available without MSFS.";
+  $("source-badge").textContent = simulated
+    ? "SIMULATED TELEMETRY"
+    : connected
+      ? "SIMCONNECT · LIVE AIRCRAFT"
+      : "LIVE TELEMETRY UNAVAILABLE";
+  $("source-badge").className =
+    "badge " + (connected && !simulated ? "green" : "amber");
+  $("source-note").textContent = simulated
+    ? "Test fixture data"
+    : "Heading and ground track use true north. Mission History is available without MSFS.";
   $("connection-text").textContent = state.connection.message;
   $("aircraft").textContent = fresh
     ? t.aircraft
@@ -172,7 +189,7 @@ function render(state) {
   if (fresh) {
     $("altitude").textContent = number(t.altitudeMslFeet);
     $("ias").textContent = number(t.indicatedAirspeedKnots);
-    $("mach").textContent = `M ${number(t.machNumber, 2)}`;
+    $("mach").textContent = `Mach ${number(t.machNumber, 2)}`;
     $("groundspeed").textContent = number(t.groundspeedKnots);
     $("vertical-speed").textContent =
       (t.verticalSpeedFeetPerMinute > 0 ? "+" : "") +
@@ -210,7 +227,8 @@ function render(state) {
       );
     }
   } else clearTelemetry();
-  $("start-button").disabled = !fresh || state.connection.state !== "connected" || !!t?.isPaused;
+  $("start-button").disabled =
+    !fresh || state.connection.state !== "connected" || !!t?.isPaused;
   const mission = state.activeMission;
   $("mission-idle").hidden = !!mission;
   $("mission-active").hidden = !mission;
@@ -278,7 +296,7 @@ $("pair-form").addEventListener("submit", (event) => {
   command(event.submitter, () => connect($("pair-code").value));
 });
 async function navigate() {
-  const allowed = ["control", "history", "instruments", "settings"];
+  const allowed = ["control", "planner", "history", "instruments", "settings"];
   const page = allowed.includes(location.hash.slice(1))
     ? location.hash.slice(1)
     : "control";
@@ -293,12 +311,14 @@ async function navigate() {
     control: "MISSION CONTROL",
     history: "MISSION HISTORY",
     instruments: "INSTRUMENTS",
+    planner: "MISSION PLANNER",
     settings: "SETTINGS",
   }[page];
   document.title = `AeroScience · ${page === "control" ? "Mission Control" : page[0].toUpperCase() + page.slice(1)}`;
   if (!authorized) return;
   if (page === "history") await loadHistory();
   if (page === "settings") await loadSettings();
+  if (page === "planner" || page === "instruments") await loadResearch(page);
 }
 async function loadHistory() {
   const request = ++historyRequest;
@@ -405,6 +425,7 @@ async function showDetail(id) {
     complete.download = `AeroScience-mission-${id}.json`;
     body.append(complete);
   }
+  await researchDetail(body, id, m);
   $("mission-detail").showModal();
 }
 async function loadSettings() {
@@ -427,23 +448,48 @@ async function loadSettings() {
   }
   container.append(rows);
   const controls = el("div", undefined, "input-row");
-  for (const [label, action] of [["Application settings", "settings"], ["Storage", "storage"], ["Collect Feedback", "feedback"]]) {
+  for (const [label, action] of [
+    ["Application settings", "settings"],
+    ["Storage", "storage"],
+    ["Data Management", "data-management"],
+    ["Collect Feedback", "feedback"],
+  ]) {
     const button = el("button", label, "secondary");
     button.disabled = !s.desktopAvailable;
-    button.addEventListener("click", () => command(button, () => api(`/api/desktop/${action}`, {})));
+    button.addEventListener("click", () =>
+      command(button, () => api(`/api/desktop/${action}`, {})),
+    );
     controls.append(button);
   }
   container.append(controls);
-  for (const [title, storage] of [["Mission Database", s.missionStorage], ["Scientific Data Library", s.scienceStorage]]) {
-    const section = el("section"); section.append(el("h2", title));
+  for (const [title, storage] of [
+    ["Mission Database", s.missionStorage],
+    ["Scientific Data Library", s.scienceStorage],
+  ]) {
+    const section = el("section");
+    section.append(el("h2", title));
     if (storage) {
-      section.append(el("p", storage.directory), el("p", storage.available
-        ? `${number(storage.usedBytes / 1048576, 1)} MiB used · ${number(storage.freeBytes / 1073741824, 1)} GiB available`
-        : storage.error));
-    } else section.append(el("p", "Manage local storage in the AeroScience Windows application."));
+      section.append(
+        el("p", storage.directory),
+        el(
+          "p",
+          storage.available
+            ? `${number(storage.usedBytes / 1048576, 1)} MiB used · ${number(storage.freeBytes / 1073741824, 1)} GiB available`
+            : storage.error,
+        ),
+      );
+    } else
+      section.append(
+        el("p", "Manage local storage in the AeroScience Windows application."),
+      );
     container.append(section);
   }
-  container.append(el("p", "Mission History and exports work offline while the selected archive is available. LAN access is optional."));
+  container.append(
+    el(
+      "p",
+      "Mission History and exports work offline while the selected archive is available. LAN access is optional.",
+    ),
+  );
 }
 $("close-detail").addEventListener("click", () => $("mission-detail").close());
 $("refresh-history").addEventListener("click", (event) =>
@@ -469,6 +515,7 @@ setInterval(() => {
   )
     clearTelemetry();
 }, 1000);
+initializeResearch({ api, notice, command });
 try {
   const access = await api("/api/access");
   if (access.requiresPairing) {

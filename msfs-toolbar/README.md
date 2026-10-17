@@ -9,3 +9,7 @@ The first gaming-PC proof-of-concept build is user-reported passed, including SD
 Open `AeroScience.xml` in the SDK Project Editor, or run `scripts/build/Build-Toolbar.ps1` from PowerShell 7 on a configured Windows PC. Start with `-ProofOfConcept`; this builds the same registration and transport with a minimal diagnostic page before the full interface. See [toolbar integration and pending validation](../docs/toolbar.md).
 
 The original project uses SDK SPB and Copy asset groups and the `ingame-ui` panel system. The transport uses named CommBus messages through the MSFS 2024 SU5+ runtime. It does not embed the companion website or connect to localhost sockets. All recording and operating-mode decisions belong to the central Windows engine.
+
+## v0.2.0 changes
+
+The full panel now shows standard read-only guidance/targets and actual Mach, sends instrument enable/interval commands, displays atmospheric acquisition diagnostics, and adds compact observation markers. Native SDK imports and dataStorage bootstrap remain intact. Only the content container focus outline is removed. Rebuild with the official SDK and retest native header/edge/pop-out/scroll behavior; prior hardware results do not establish new acceptance. See ../docs/v0.2.0-windows-testing.md.

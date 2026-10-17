@@ -59,7 +59,7 @@ jobs:
           Set-Content "$fixture\LICENSE" 'STRUCTURAL COMPILER TEST ONLY; NOT A DISTRIBUTION'
           Set-Content "$fixture\dummy.txt" 'NOT APPLICATION OR SDK OUTPUT'
           Set-Content "$fixture\VC_redist.x64.exe" 'NOT A RUNTIME; NEVER EXECUTE THIS FIXTURE INSTALLER'
-          & $compiler "/DPayloadDir=$fixture" "/DVcRuntime=$fixture\VC_redist.x64.exe" '/DReleaseVersion=0.1.1-alpha' '/DPackageVersion=0.1.1' "/DOutputDirectory=$fixture\output" scripts/installer/AeroScience.iss
+          & $compiler "/DPayloadDir=$fixture" "/DVcRuntime=$fixture\VC_redist.x64.exe" "/DReleaseVersion=$(([xml](Get-Content Directory.Build.props -Raw)).Project.PropertyGroup.Version)" "/DPackageVersion=$(([xml](Get-Content Directory.Build.props -Raw)).Project.PropertyGroup.Version)" "/DOutputDirectory=$fixture\output" scripts/installer/AeroScience.iss
           if ($LASTEXITCODE -ne 0) { throw 'Installer recipe compilation failed.' }
           # Compile only: no fake SDK receipt, executable launch, acceptance or artifact publication.
       # Public-repository CI validates builds without publishing alpha binaries.

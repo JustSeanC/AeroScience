@@ -1,6 +1,6 @@
 {
-  "name": "aeroscience-development", "version": "0.1.1-alpha", "private": true, "type": "module",
+  "name": "aeroscience-development", "version": "0.2.0", "private": true, "type": "module",
   "engines": { "node": ">=22" },
-  "scripts": { "pretest:web": "dotnet build tests/AeroScience.TestHost -c Release --no-restore --nologo", "test:web": "playwright test", "check:web": "node --check src/AeroScience.Engine/wwwroot/app.js" },
+  "scripts": { "pretest:web": "dotnet build tests/AeroScience.TestHost -c Release --no-restore --nologo", "test:web": "playwright test", "check:web": "node scripts/build/check-web.mjs" },
   "devDependencies": { "@playwright/test": "1.64.1" }
 }

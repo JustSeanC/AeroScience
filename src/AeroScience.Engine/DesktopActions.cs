@@ -8,5 +8,6 @@ public interface IDesktopActions
     StorageStatus ScienceStorage { get; }
     void OpenSettings();
     void OpenStorage();
+    void OpenDataManagement();
     void CollectFeedback();
 }

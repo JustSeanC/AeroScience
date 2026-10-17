@@ -33,6 +33,10 @@ class IngamePanelAeroScience extends TemplateElement {
       )
         this.send("end", { missionId: this.state.activeMission.id });
     };
+    this.byId("as-marker").onclick = () => {
+      if (this.state && this.state.activeMission && !this.byId("as-marker").hasAttribute("disabled"))
+        this.send("marker", { missionId: this.state.activeMission.id, category: "observation" });
+    };
     this.byId("as-mode").onchange = () => {
       this.byId("as-mode-help").textContent =
         this.byId("as-mode").value === "realistic"
@@ -151,11 +155,13 @@ class IngamePanelAeroScience extends TemplateElement {
         "as-vspeed",
       ])
         this.byId(id).textContent = "—";
+      this.byId("as-mach").textContent = "Mach —";
+      this.renderResearch(null, false);
     }
     this.send("state");
   }
   setControls(enabled) {
-    for (const id of ["as-start", "as-end"]) {
+    for (const id of ["as-start", "as-end", "as-marker"]) {
       if (enabled) this.byId(id).removeAttribute("disabled");
       else this.byId(id).setAttribute("disabled", "");
     }
@@ -204,11 +210,13 @@ class IngamePanelAeroScience extends TemplateElement {
     this.byId("as-airspeed").textContent = fresh
       ? fmt(t.indicatedAirspeedKnots)
       : "—";
-    this.byId("as-mach").textContent = "M " + (fresh && Number.isFinite(t.machNumber) ? t.machNumber.toFixed(2) : "—");
+    this.byId("as-mach").textContent = "Mach " + (fresh && Number.isFinite(t.machNumber) ? t.machNumber.toFixed(2) : "—");
     this.byId("as-heading").textContent = fresh ? fmt(t.headingDegrees) : "—";
     this.byId("as-vspeed").textContent = fresh
       ? fmt(t.verticalSpeedFeetPerMinute)
       : "—";
+    this.renderResearch(state.research, fresh);
+    if (!mission) this.byId("as-marker").setAttribute("disabled", "");
     this.byId("as-idle").hidden = !!mission;
     this.byId("as-recording").hidden = !mission;
     if (mission) {
@@ -233,6 +241,35 @@ class IngamePanelAeroScience extends TemplateElement {
       ]
         .map((x) => ("0" + x).slice(-2))
         .join(":");
+    }
+  }
+  renderResearch(research, fresh) {
+    const g = research && research.guidance;
+    this.byId("as-guidance").textContent = !fresh || !g || g.quality !== "valid" ? "Flight Guidance unavailable"
+      : "AP: " + g.autopilot + " | " + [g.lateral, g.vertical, g.speed].map(m =>
+        (m.mode || "Unavailable") + (Number.isFinite(m.target) ? " " + m.target.toFixed(m.unit === "mach" ? 2 : 0) + " " + m.unit : "") + (m.armed ? " (Armed: " + m.armed + ")" : "")).join(" | ");
+    const holder = this.byId("as-instruments");
+    if (!research) { holder.textContent = "Scientific source unavailable"; return; }
+    if (!this.instrumentNodes) this.instrumentNodes = {};
+    if (!holder.querySelector(".as-instrument")) holder.textContent = "";
+    for (const instrument of research.instruments || []) {
+      let nodes = this.instrumentNodes[instrument.instrumentId];
+      if (!nodes || !nodes.row.parentNode) {
+        const row = document.createElement("div"); row.className = "as-instrument";
+        const title = document.createElement("strong"); title.textContent = instrument.instrumentId;
+        const toggle = document.createElement("new-push-button");
+        const interval = document.createElement("select");
+        for (const seconds of [1,2,5,10,30,60]) { const option = document.createElement("option"); option.value = seconds * 1000; option.textContent = seconds + " s"; interval.appendChild(option); }
+        const values = document.createElement("p"), status = document.createElement("p");
+        row.appendChild(title); row.appendChild(toggle); row.appendChild(interval); row.appendChild(values); row.appendChild(status); holder.appendChild(row);
+        nodes = { row: row, toggle: toggle, interval: interval, values: values, status: status }; this.instrumentNodes[instrument.instrumentId] = nodes;
+        toggle.onclick = () => { const current = this.state.research.instruments.find(i => i.instrumentId === instrument.instrumentId); this.send("instrument", { instrumentId: instrument.instrumentId, enabled: !current.enabled }); };
+        interval.onchange = () => this.send("instrument", { instrumentId: instrument.instrumentId, intervalMs: Number(interval.value) });
+      }
+      nodes.toggle.textContent = instrument.enabled ? "Disable" : "Enable";
+      if (document.activeElement !== nodes.interval) nodes.interval.value = instrument.intervalMs;
+      nodes.values.textContent = (instrument.measurements || []).map(v => v.measurementId + ": " + (fresh && instrument.quality === "valid" && Number.isFinite(v.value) ? v.value.toFixed(v.measurementId === "density" ? 6 : 2) : "Unavailable") + " " + v.unit).join(" | ");
+      nodes.status.textContent = instrument.quality + " | " + instrument.observationCount + " saved | " + instrument.rejectedObservations + " rejected | " + instrument.missingIntervals + " missing intervals | actual " + (Number.isFinite(instrument.actualAverageIntervalSeconds) ? instrument.actualAverageIntervalSeconds.toFixed(2) + "s" : "unavailable");
     }
   }
   disconnectedCallback() {
