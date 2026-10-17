@@ -5,6 +5,7 @@ import {
   researchDetail,
   invalidateResearch,
 } from "./research.js";
+import { unitControls, initializeUnits } from "./science-display.js";
 const $ = (id) => document.getElementById(id);
 const number = (v, digits = 0) =>
   Number.isFinite(v)
@@ -297,12 +298,15 @@ $("pair-form").addEventListener("submit", (event) => {
 });
 async function navigate() {
   const allowed = ["control", "planner", "history", "instruments", "settings"];
-  const page = allowed.includes(location.hash.slice(1))
-    ? location.hash.slice(1)
-    : "control";
+  const hash =
+    location.hash.slice(1) === "science"
+      ? "instruments"
+      : location.hash.slice(1);
+  const page = allowed.includes(hash) ? hash : "control";
   for (const id of allowed) $(id).hidden = id !== page;
   for (const link of document.querySelectorAll(".nav-link")) {
-    const selected = link.hash === "#" + page;
+    const selected =
+      link.hash === "#" + (page === "instruments" ? "science" : page);
     link.classList.toggle("selected", selected);
     if (selected) link.setAttribute("aria-current", "page");
     else link.removeAttribute("aria-current");
@@ -310,7 +314,7 @@ async function navigate() {
   $("breadcrumb").textContent = {
     control: "MISSION CONTROL",
     history: "MISSION HISTORY",
-    instruments: "INSTRUMENTS",
+    instruments: "SCIENCE COLLECTION",
     planner: "MISSION PLANNER",
     settings: "SETTINGS",
   }[page];
@@ -447,9 +451,23 @@ async function loadSettings() {
     rows.append(row);
   }
   container.append(rows);
+  await unitControls(container, api, loadSettings);
+  if (s.toolbarStatus) {
+    const toolbar = el("section");
+    toolbar.append(
+      el("h2", "MSFS Toolbar"),
+      el(
+        "p",
+        `Installed: ${s.toolbarStatus.installedVersion || "Unknown / missing"} · Bundled: ${s.toolbarStatus.bundledVersion || "Unknown"} · ${s.toolbarStatus.status}`,
+      ),
+      el("p", s.toolbarStatus.message),
+    );
+    container.append(toolbar);
+  }
   const controls = el("div", undefined, "input-row");
   for (const [label, action] of [
     ["Application settings", "settings"],
+    ["Toolbar installation / update", "toolbar"],
     ["Storage", "storage"],
     ["Data Management", "data-management"],
     ["Collect Feedback", "feedback"],

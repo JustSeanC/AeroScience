@@ -1,4 +1,13 @@
 import { ResearchMap } from "./map.js";
+import { patternEditor } from "./patterns.js";
+import {
+  scienceCharts,
+  initializeUnits,
+  unitControls,
+  displayReading,
+  syncUnits,
+} from "./science-display.js";
+import { renderAnalysis } from "./analysis.js";
 const $ = (id) => document.getElementById(id);
 const n = (v, d = 2) =>
   Number.isFinite(v)
@@ -302,6 +311,33 @@ function editPlan(plan) {
   const configuration = text("div");
   form.append(configuration);
   configs(configuration, plan?.instruments || []);
+  const presetSection = text("details");
+  presetSection.append(text("summary", "Apply an instrument preset"));
+  configuration.after(presetSection);
+  ctx
+    .api("/api/presets")
+    .then((rows) => {
+      for (const preset of rows)
+        presetSection.append(
+          button(preset.name, async () => {
+            const resolved = await ctx.api("/api/presets/resolve", preset);
+            if (
+              resolved.warnings.length &&
+              !confirm(
+                resolved.warnings.join("\n") +
+                  "\nApply supported instruments only?",
+              )
+            )
+              return;
+            configs(configuration, resolved.instruments);
+          }),
+        );
+      if (!rows.length)
+        presetSection.append(
+          text("p", "Save a reusable configuration from Science Collection."),
+        );
+    })
+    .catch((e) => ctx.notice(e.message));
   template.onchange = () => {
     const t = templates.find((t) => t.id === template.value);
     objective.value = t.objective;
@@ -331,19 +367,23 @@ function editPlan(plan) {
           `${i + 1}. ${w.name} · ${n(w.latitude, 6)}, ${n(w.longitude, 6)}`,
         ),
         button("Edit", () => waypointEditor(i)),
+        button("Center on map", () => planMap.center(w)),
         button("↑", () => {
           if (i) {
+            pattern.remember();
             [waypoints[i - 1], waypoints[i]] = [waypoints[i], waypoints[i - 1]];
             drawList();
           }
         }),
         button("↓", () => {
           if (i < waypoints.length - 1) {
+            pattern.remember();
             [waypoints[i + 1], waypoints[i]] = [waypoints[i], waypoints[i + 1]];
             drawList();
           }
         }),
         button("Remove", () => {
+          pattern.remember();
           waypoints.splice(i, 1);
           drawList();
         }),
@@ -357,13 +397,18 @@ function editPlan(plan) {
         text("span", `${area.name}: ${area.vertices.length} vertices`),
         button("Edit area", () => areaEditor(i)),
         button("Remove area", () => {
+          pattern.remember();
           areas.splice(i, 1);
           drawList();
         }),
       );
       list.append(row);
     }
-    planMap?.set({ plan: { waypoints, surveyAreas: areas } });
+    planMap?.set({
+      plan: { waypoints, surveyAreas: areas, departure: departure.value },
+      aircraft:
+        state?.connection?.state === "connected" ? state.telemetry : null,
+    });
   };
   const editor = text("div", undefined, "research-grid");
   form.append(editor);
@@ -389,6 +434,7 @@ function editPlan(plan) {
     editor.append(
       button("Apply waypoint", () => {
         const value = {
+          ...w,
           name: title.value,
           latitude: Number(lat.value),
           longitude: Number(lon.value),
@@ -403,6 +449,7 @@ function editPlan(plan) {
           Math.abs(value.longitude) > 180
         )
           throw Error("Enter valid latitude and longitude.");
+        pattern.remember();
         if (index >= 0) waypoints[index] = value;
         else waypoints.push(value);
         editor.replaceChildren();
@@ -443,6 +490,7 @@ function editPlan(plan) {
         )
           throw Error("A polygon needs at least three valid coordinate pairs.");
         const value = { name: title.value, vertices: points };
+        pattern.remember();
         if (index >= 0) areas[index] = value;
         else areas.push(value);
         editor.replaceChildren();
@@ -456,7 +504,41 @@ function editPlan(plan) {
   );
   const map = text("div");
   form.append(map);
-  planMap = new ResearchMap(map, (p) => waypointEditor(-1, p));
+  planMap?.observer?.disconnect();
+  planMap = new ResearchMap(map, (p) => waypointEditor(-1, p), {
+    onWaypointsChange: (value) => {
+      pattern.remember();
+      waypoints = value;
+      drawList();
+    },
+    onAreasChange: (value) => {
+      pattern.remember();
+      areas = value;
+      drawList();
+    },
+  });
+  let patternValues = structuredClone(plan?.patterns || []);
+  const pattern = patternEditor(form, {
+    api: ctx.api,
+    notice: ctx.notice,
+    aircraft: () =>
+      state?.connection?.state === "connected" ? state.telemetry : null,
+    get: () => ({ waypoints, surveyAreas: areas, patterns: patternValues }),
+    set: (value) => {
+      waypoints = value.waypoints;
+      areas = value.surveyAreas;
+      patternValues = value.patterns || patternValues;
+      drawList();
+      if (value.preview?.length)
+        planMap.set({
+          plan: {
+            waypoints: [...waypoints, ...value.preview],
+            surveyAreas: areas,
+          },
+        });
+    },
+  });
+  departure.onchange = drawList;
   drawList();
   const save = text("button", "Save mission plan", "primary");
   save.type = "submit";
@@ -482,12 +564,14 @@ function editPlan(plan) {
         instruments: readConfigs(configuration),
         waypoints,
         surveyAreas: areas,
+        patterns: pattern.getPatterns(),
       });
       await planner();
     });
   };
 }
 async function instruments() {
+  await initializeUnits(ctx.api);
   const p = $("instrument-content");
   p.replaceChildren(
     text(
@@ -503,6 +587,87 @@ async function instruments() {
     "source-notice",
   );
   p.append(sourceLabel);
+  await unitControls(p, ctx.api, () => instruments());
+  const collection = text("div");
+  collection.id = "collection-status";
+  p.append(collection);
+  const presets = text("details");
+  presets.append(text("summary", "Reusable instrument presets"));
+  p.append(presets);
+  const presetList = text("div");
+  presets.append(presetList);
+  const presetName = input(presets, "Preset name", ""),
+    presetDescription = input(presets, "Preset description", "");
+  async function presetRows() {
+    presetList.replaceChildren();
+    const rows = await ctx.api("/api/presets");
+    for (const item of rows) {
+      const row = text("div", undefined, "plan-row");
+      row.append(
+        text("strong", item.name),
+        text("span", item.description || ""),
+      );
+      row.append(
+        button("Apply", async () => {
+          const resolved = await ctx.api("/api/presets/resolve", item);
+          if (
+            resolved.warnings.length &&
+            !confirm(
+              resolved.warnings.join("\n") +
+                "\nApply supported instruments only?",
+            )
+          )
+            return;
+          await ctx.api("/api/instruments", resolved.instruments);
+          configs($("live-instrument-config"), resolved.instruments);
+        }),
+        button("Edit / rename", () => {
+          presetName.value = item.name;
+          presetDescription.value = item.description || "";
+          presetName.dataset.id = item.id;
+          configs($("live-instrument-config"), item.instruments);
+        }),
+        button("Duplicate", async () => {
+          await ctx.api("/api/presets", {
+            ...item,
+            id: crypto.randomUUID(),
+            name: item.name + " copy",
+          });
+          await presetRows();
+        }),
+        button("Delete preset", async () => {
+          if (
+            confirm(
+              "Delete this reusable preset? Saved mission snapshots remain unchanged.",
+            )
+          ) {
+            await ctx.api(`/api/presets/${item.id}/delete`, {});
+            await presetRows();
+          }
+        }),
+      );
+      presetList.append(row);
+    }
+  }
+  presets.append(
+    button("Save current configuration as preset", async () => {
+      await ctx.api("/api/presets", {
+        id: presetName.dataset.id || crypto.randomUUID(),
+        name: presetName.value,
+        description: presetDescription.value,
+        instruments: readConfigs($("live-instrument-config")),
+      });
+      delete presetName.dataset.id;
+      await presetRows();
+    }),
+  );
+  for (const recommendation of templates.filter((t) => t.instruments.length))
+    presets.append(
+      button("Recommended: " + recommendation.name, () =>
+        configs($("live-instrument-config"), recommendation.instruments),
+      ),
+    );
+  await presetRows();
   const configuration = text("div");
   configuration.id = "live-instrument-config";
   p.append(configuration);
@@ -573,6 +738,11 @@ async function instruments() {
     }),
   );
   await datasets();
+  if (scienceRows.length) {
+    chart.replaceChildren();
+    scienceCharts(chart, scienceRows);
+  }
+  lastFetch = 0;
   renderResearch(state);
 }
 function guidance(parent, g) {
@@ -599,34 +769,109 @@ function guidance(parent, g) {
 export function renderResearch(next) {
   if (!next) return;
   state = next;
+  syncUnits(next.research?.units);
   guidance($("flight-guidance"), next.research?.guidance);
   const p = $("instrument-values");
   if (p) {
+    const opened = new Set(
+      [...p.querySelectorAll("details[open]")].map((d) => d.dataset.instrument),
+    );
     p.replaceChildren();
+    p.className = "science-cards";
     for (const i of next.research?.instruments || []) {
-      const card = text("article", undefined, "panel research-panel");
+      const card = text("article", undefined, "panel science-card");
+      const d = definitions.find((d) => d.id === i.instrumentId);
+      card.append(
+        text("h3", d?.name || i.instrumentId),
+        text("span", i.enabled ? i.quality : "Disabled", "science-state"),
+      );
+      for (const v of i.measurements) {
+        const label =
+          d?.measurements.find((m) => m.id === v.measurementId)?.name ||
+          v.measurementId;
+        const reading = displayReading(v.measurementId, v.value, v.unit);
+        card.append(
+          text("p", label, "secondary-label"),
+          text(
+            "div",
+            i.quality === "valid" && v.quality === "valid"
+              ? `${n(reading.value, reading.decimals)} ${reading.unit}`
+              : "Unavailable",
+            "science-value",
+          ),
+        );
+      }
       card.append(
         text(
-          "h3",
-          definitions.find((d) => d.id === i.instrumentId)?.name ||
-            i.instrumentId,
+          "p",
+          `Every ${i.intervalMs / 1000} s · ${i.acquisitionSets} acquisition sets · ${i.observationCount} measurement values`,
+        ),
+      );
+      const details = text("details");
+      details.dataset.instrument = i.instrumentId;
+      details.open = opened.has(i.instrumentId);
+      details.append(
+        text("summary", "Acquisition diagnostics"),
+        text(
+          "p",
+          `Last successful: ${i.lastSuccessfulUtc || "None"} · Actual interval: ${n(i.actualAverageIntervalSeconds)} s · Rejected: ${i.rejectedObservations} · Unexpected missing: ${i.missingIntervals}`,
         ),
         text(
           "p",
-          `${i.enabled ? "Enabled" : "Disabled"} · ${i.quality} · Configured ${i.intervalMs / 1000}s · Actual interval ${n(i.actualAverageIntervalSeconds)}s · Last successful ${i.lastSuccessfulUtc || "none"} · ${i.observationCount} saved · ${i.rejectedObservations} rejected · ${i.missingIntervals} missing intervals`,
+          i.message ||
+            "Simulator-reported values; no independent calibrated measurements.",
         ),
       );
-      for (const v of i.measurements)
-        card.append(
-          text(
-            "p",
-            `${v.measurementId}: ${i.quality === "valid" ? n(v.value, 5) : "Unavailable"} ${v.unit} · ${v.provenance} · ${v.quality}`,
-          ),
-        );
-      if (i.message) card.append(text("p", i.message));
+      card.append(details);
       p.append(card);
     }
   }
+  const collection = $("collection-status");
+  const collectionKey = `${next.activeMission?.id}|${next.research?.collectionStatus}|${next.research?.intentionallyPaused}`;
+  if (collection && collection.dataset.key !== collectionKey) {
+    collection.dataset.key = collectionKey;
+    collection.replaceChildren(
+      text(
+        "strong",
+        `Science collection: ${next.research?.collectionStatus || "stopped"}`,
+      ),
+    );
+    if (next.activeMission)
+      collection.append(
+        button(
+          next.research?.intentionallyPaused
+            ? "Resume science collection"
+            : "Pause science collection",
+          async () =>
+            ctx.api(`/api/missions/${state.activeMission.id}/science/state`, {
+              paused: !state.research?.intentionallyPaused,
+            }),
+        ),
+      );
+    collection.append(
+      text(
+        "p",
+        "Pausing science keeps flight telemetry recording and preserves the current datasets and configuration.",
+      ),
+    );
+  }
+  let summary = $("science-control-summary");
+  if (!summary) {
+    summary = text("article", undefined, "panel research-panel");
+    summary.id = "science-control-summary";
+    $("control").append(summary);
+  }
+  const instruments = next.research?.instruments || [];
+  summary.replaceChildren(
+    text("h2", "Science Collection"),
+    text(
+      "p",
+      `${next.research?.collectionStatus || "stopped"} · ${instruments.filter((i) => i.enabled).length} instruments enabled · ${instruments.reduce((n, i) => n + i.acquisitionSets, 0)} acquisition sets · ${instruments.reduce((n, i) => n + i.observationCount, 0)} measurement values`,
+    ),
+  );
+  const link = text("a", "View Science");
+  link.href = "#science";
+  summary.append(link);
   if (liveId !== next.activeMission?.id) {
     liveId = next.activeMission?.id;
     track = [];
@@ -687,76 +932,17 @@ async function refreshLive(id) {
     plan: livePlan || {},
     aircraft: state.telemetry,
   });
-  if ($("science-charts")) {
+  if ($("science-charts") && !document.querySelector(".expanded-chart[open]")) {
     $("science-charts").replaceChildren();
     scienceCharts($("science-charts"), scienceRows);
-  }
-}
-function scienceCharts(parent, rows) {
-  const specs = [
-    [
-      "temperature",
-      "altitudeMslFeet",
-      "Temperature vs altitude",
-      "degC",
-      "ft MSL",
-    ],
-    ["pressure", "altitudeMslFeet", "Pressure vs altitude", "inHg", "ft MSL"],
-    ["wind-speed", "altitudeMslFeet", "Wind speed vs altitude", "kt", "ft MSL"],
-    ["temperature", "timestampUtc", "Temperature over time", "degC", "UTC"],
-  ];
-  for (const [id, xkey, title, unit, xunit] of specs) {
-    const card = text("article", undefined, "panel research-panel");
-    card.append(text("h3", title));
-    const points = rows
-      .filter((r) => r.measurementId === id && r[xkey] != null)
-      .map((r) => ({
-        x: xkey === "timestampUtc" ? Date.parse(r[xkey]) : r[xkey],
-        y: r.value,
-        t: r.timestampUtc,
-      }))
-      .filter((p) => Number.isFinite(p.x) && Number.isFinite(p.y));
-    if (!points.length) {
-      card.append(
-        text("p", "No valid saved observations in this display page."),
-      );
-      parent.append(card);
-      continue;
-    }
-    const minX = Math.min(...points.map((p) => p.x)),
-      maxX = Math.max(...points.map((p) => p.x)),
-      minY = Math.min(...points.map((p) => p.y)),
-      maxY = Math.max(...points.map((p) => p.y));
-    const ns = "http://www.w3.org/2000/svg",
-      svg = document.createElementNS(ns, "svg");
-    svg.setAttribute("viewBox", "0 0 600 180");
-    svg.setAttribute("role", "img");
-    svg.setAttribute("aria-label", title);
-    for (const p of points) {
-      const c = document.createElementNS(ns, "circle");
-      c.setAttribute("cx", 20 + ((p.x - minX) / (maxX - minX || 1)) * 560);
-      c.setAttribute("cy", 160 - ((p.y - minY) / (maxY - minY || 1)) * 140);
-      c.setAttribute("r", 2);
-      c.setAttribute("fill", "#50dcc7");
-      const tip = document.createElementNS(ns, "title");
-      tip.textContent = `${p.t}: ${p.y} ${unit}`;
-      c.append(tip);
-      svg.append(c);
-    }
-    card.append(
-      svg,
-      text(
-        "p",
-        `Y ${n(minY, 4)} – ${n(maxY, 4)} ${unit} · X ${xkey === "timestampUtc" ? new Date(minX).toISOString() + " – " + new Date(maxX).toISOString() : n(minX) + " – " + n(maxX)} ${xunit} · ${points.length} actual observations in this bounded display. No interpolation.`,
-        "footnote",
-      ),
-    );
-    parent.append(card);
   }
 }
 function showScience(parent, rows, label) {
   parent.replaceChildren(text("p", label));
   scienceCharts(parent, rows);
+  const raw = text("details");
+  raw.append(text("summary", "Original canonical observation rows"));
+  parent.append(raw);
   const list = text("div", undefined, "observation-table");
   for (const r of rows)
     list.append(
@@ -765,10 +951,12 @@ function showScience(parent, rows, label) {
         `${r.timestampUtc} · ${r.measurementId} ${n(r.value, 8)} ${r.unit} · ${r.quality} · ${r.provenance}`,
       ),
     );
-  parent.append(list);
+  raw.append(list);
 }
 export async function researchDetail(body, id, mission) {
+  await initializeUnits(ctx.api);
   const review = await ctx.api(`/api/missions/${id}/review`);
+  await renderAnalysis(body, id, review.research.planSnapshot, ctx.api);
   body.append(
     text("h3", "Research review"),
     text("p", "Recording source: " + (mission.source || "Unavailable")),
@@ -777,6 +965,13 @@ export async function researchDetail(body, id, mission) {
       `${review.research.template} · ${review.research.objective || "No objective supplied"}`,
     ),
   );
+  for (const pause of review.sciencePauses || [])
+    body.append(
+      text(
+        "p",
+        `Science Collection deliberately paused: ${pause.startedUtc} to ${pause.endedUtc || "unknown end"} · ${pause.seconds == null ? "duration unknown" : n(pause.seconds) + " s"}${pause.interrupted ? " · recording interrupted" : ""}. Flight recording remained independent.`,
+      ),
+    );
   const f = review.flight;
   body.append(
     text(
@@ -823,7 +1018,7 @@ export async function researchDetail(body, id, mission) {
     body.append(
       text(
         "p",
-        `${s.measurementId}: n=${s.count}, min ${n(s.minimum, 6)}, max ${n(s.maximum, 6)}, mean ${n(s.mean, 6)} ${s.unit}`,
+        `${s.measurementId}: ${s.count} measurement values · min ${n(displayReading(s.measurementId, s.minimum, s.unit).value, 3)} · max ${n(displayReading(s.measurementId, s.maximum, s.unit).value, 3)} · mean ${n(displayReading(s.measurementId, s.mean, s.unit).value, 3)} ${displayReading(s.measurementId, 0, s.unit).unit}`,
       ),
     );
   const [path, marks] = await Promise.all([

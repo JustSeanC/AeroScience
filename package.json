@@ -1,6 +1,22 @@
 {
-  "name": "aeroscience-development", "version": "0.2.0", "private": true, "type": "module",
-  "engines": { "node": ">=22" },
-  "scripts": { "pretest:web": "dotnet build tests/AeroScience.TestHost -c Release --no-restore --nologo", "test:web": "playwright test", "check:web": "node scripts/build/check-web.mjs" },
-  "devDependencies": { "@playwright/test": "1.64.1" }
+  "name": "aeroscience-development",
+  "version": "0.2.1",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "pretest:web": "dotnet build tests/AeroScience.TestHost -c Release --no-restore --nologo",
+    "test:web": "playwright test",
+    "check:web": "node scripts/build/check-web.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1"
+  },
+  "dependencies": {
+    "chart.js": "4.5.1",
+    "leaflet": "1.9.4",
+    "leaflet-draw": "1.0.4"
+  }
 }

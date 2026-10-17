@@ -1,0 +1,39 @@
+{
+  "dataset": "Natural Earth",
+  "license_url": "https://www.naturalearthdata.com/about/terms-of-use/",
+  "license": "Public domain",
+  "usage": "General geographic context and reference locations; not certified aviation navigation.",
+  "datasets": [
+    {
+      "file": "countries.geojson",
+      "upstream_file": "ne_110m_admin_0_countries.geojson",
+      "upstream_url": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/ca96624a56bd078437bca8184e78163e5039ad19/geojson/ne_110m_admin_0_countries.geojson",
+      "upstream_sha256": "6866c877d39cba9c357620878839b336d569f8c662d3cfab4cb1dbe2d39c977f",
+      "bundled_sha256": "3a0efcdc855417a310e8f402164715f9001f6b8c183d8c8f2835647320102337",
+      "features": 177,
+      "modification": "Selected descriptive properties only; original geographic coordinates retained.",
+      "license": "Natural Earth public domain"
+    },
+    {
+      "file": "places.geojson",
+      "upstream_file": "ne_110m_populated_places.geojson",
+      "upstream_url": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/ca96624a56bd078437bca8184e78163e5039ad19/geojson/ne_110m_populated_places.geojson",
+      "upstream_sha256": "a86028b083182b68c7620fc6e1a8a47ee547cb9cd2fb62ccbb78bea786440899",
+      "bundled_sha256": "6c8c73015fe184139046d5f8fae0c562f5df6637f72be5fb8004e4c220e585fe",
+      "features": 243,
+      "modification": "Selected descriptive properties only; original geographic coordinates retained.",
+      "license": "Natural Earth public domain"
+    },
+    {
+      "file": "airports.geojson",
+      "upstream_file": "ne_10m_airports.geojson",
+      "upstream_url": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/ca96624a56bd078437bca8184e78163e5039ad19/geojson/ne_10m_airports.geojson",
+      "upstream_sha256": "28892a892f670f1cf654c62253c6169fdc2504b92c956addb4ac8224f50cebe0",
+      "bundled_sha256": "269b422404e91649ab45b113ac9f72afcc3c7ecd959934b153e38a9319b09c04",
+      "features": 893,
+      "modification": "Selected descriptive properties only; original geographic coordinates retained.",
+      "license": "Natural Earth public domain"
+    }
+  ],
+  "upstream_commit": "ca96624a56bd078437bca8184e78163e5039ad19"
+}

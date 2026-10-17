@@ -13,7 +13,12 @@
     />
     <link rel="icon" href="/icon.svg" type="image/svg+xml" />
     <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="stylesheet" href="/vendor/leaflet/leaflet.css" />
+    <link rel="stylesheet" href="/vendor/leaflet-draw/leaflet.draw.css" />
     <link rel="stylesheet" href="/app.css" />
+    <script src="/vendor/leaflet/leaflet.js"></script>
+    <script src="/vendor/leaflet-draw/leaflet.draw.js"></script>
+    <script src="/vendor/chart.js/chart.umd.min.js"></script>
     <title>AeroScience · Mission Control</title>
     <script type="module" src="/app.js"></script>
   </head>
@@ -34,12 +39,14 @@
             aria-label="Mission Control"
             ><span aria-hidden="true">◈</span>Mission Control</a
           >
-          <a class="nav-link" href="#planner" aria-label="Mission Planner"><span aria-hidden="true">◇</span>Mission Planner</a>
+          <a class="nav-link" href="#planner" aria-label="Mission Planner"
+            ><span aria-hidden="true">◇</span>Mission Planner</a
+          >
           <a class="nav-link" href="#history" aria-label="Mission History"
             ><span aria-hidden="true">◷</span>Mission History</a
           >
-          <a class="nav-link" href="#instruments" aria-label="Instruments"
-            ><span aria-hidden="true">⌁</span>Instruments</a
+          <a class="nav-link" href="#science" aria-label="Science"
+            ><span aria-hidden="true">⌁</span>Science</a
           >
           <a class="nav-link" href="#settings" aria-label="Settings"
             ><span aria-hidden="true">⚙</span>Settings</a
@@ -51,7 +58,7 @@
             <i class="status-dot" id="engine-dot"></i
             ><span id="engine-link">Connecting</span>
           </div>
-          <small>v0.2.0 · Local operations</small>
+          <small>v0.2.1 · Local operations</small>
         </div>
       </aside>
       <main>
@@ -110,7 +117,8 @@
                 <div id="mission-idle">
                   <h3>Ready for your next mission.</h3>
                   <p>
-                    Start recording at any time. Your mission continues if this panel is closed.
+                    Start recording at any time. Your mission continues if this
+                    panel is closed.
                   </p>
                   <form id="start-form">
                     <div class="mode-field">
@@ -156,8 +164,7 @@
                     </div>
                   </div>
                   <div class="mission-actions">
-                    <span id="active-hint"
-                      >Mission recording</span
+                    <span id="active-hint">Mission recording</span
                     ><button class="danger" id="end-button" type="button">
                       <span aria-hidden="true">■</span> End mission
                     </button>
@@ -325,15 +332,25 @@
               mapping are planned for future releases.
             </p>
           </section>
-          <section id="planner" class="view" hidden><div class="page-heading"><div><p class="eyebrow">SCIENCE OPERATIONS</p><h1>Mission Planner</h1><p>Plans are optional. Record spontaneously from Mission Control at any time.</p></div></div><div id="planner-content"></div></section>
+          <section id="planner" class="view" hidden>
+            <div class="page-heading">
+              <div>
+                <p class="eyebrow">SCIENCE OPERATIONS</p>
+                <h1>Mission Planner</h1>
+                <p>
+                  Plans are optional. Record spontaneously from Mission Control
+                  at any time.
+                </p>
+              </div>
+            </div>
+            <div id="planner-content"></div>
+          </section>
           <section id="history" class="view" hidden>
             <div class="page-heading">
               <div>
                 <p class="eyebrow">RESEARCH ARCHIVE</p>
                 <h1>Mission History</h1>
-                <p class="subtitle">
-                  Available offline.
-                </p>
+                <p class="subtitle">Available offline.</p>
               </div>
               <button id="refresh-history" class="secondary">
                 Refresh archive
@@ -350,11 +367,10 @@
             <div class="page-heading">
               <div>
                 <p class="eyebrow">SCIENCE PAYLOAD</p>
-                <h1>Instruments</h1>
+                <h1>Science Collection</h1>
               </div>
               <span class="badge">SIMULATOR-REPORTED</span>
             </div>
-
           </section>
           <section id="settings" class="view" hidden>
             <div class="page-heading">

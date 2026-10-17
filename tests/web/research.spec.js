@@ -46,7 +46,7 @@ test("planner, actual stored science pages, map and complete exports work togeth
   await page
     .getByRole("button", { name: "Save mission plan", exact: true })
     .click();
-  await expect(page.locator(".plan-row")).toContainText(
+  await expect(page.locator(".plan-row").first()).toContainText(
     "Browser atmospheric plan",
   );
   await page.screenshot({
@@ -55,6 +55,7 @@ test("planner, actual stored science pages, map and complete exports work togeth
   });
   await page
     .getByRole("button", { name: "Record this plan", exact: true })
+    .first()
     .click();
   await expect(page.locator("#active-name")).toHaveText(
     "Browser atmospheric plan",
@@ -63,14 +64,14 @@ test("planner, actual stored science pages, map and complete exports work togeth
   await page
     .getByRole("button", { name: "Add observation marker", exact: true })
     .click();
-  await page.getByRole("link", { name: "Instruments", exact: true }).click();
+  await page.getByRole("link", { name: "Science", exact: true }).click();
   await expect(page.locator("#instrument-values")).toContainText(
-    "simulatorReported",
+    "Simulator-reported",
   );
   await expect
     .poll(async () => await page.locator("#instrument-values").textContent())
-    .toMatch(/[1-9]\d* saved/);
-  await expect(page.locator("#science-charts svg").first()).toBeVisible({
+    .toMatch(/[1-9]\d* measurement values/);
+  await expect(page.locator("#science-charts canvas").first()).toBeVisible({
     timeout: 10000,
   });
   await page.screenshot({
@@ -122,7 +123,7 @@ test("planner remains usable at iPad and narrow browser widths", async ({
         () => document.documentElement.scrollWidth <= innerWidth,
       ),
     ).toBe(true);
-    await page.getByRole("link", { name: "Instruments", exact: true }).click();
+    await page.getByRole("link", { name: "Science", exact: true }).click();
     await expect(page.locator("#live-instrument-config")).toBeVisible();
     expect(
       await page.evaluate(
