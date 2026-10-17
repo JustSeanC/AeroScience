@@ -145,17 +145,19 @@ public sealed partial class MissionStore
         cmd.Parameters.AddWithValue("$id", id.ToString()); cmd.Parameters.AddWithValue("$mission", mission.ToString());
         cmd.Parameters.AddWithValue("$time", Stamp(time)); cmd.Parameters.AddWithValue("$json", JsonSerializer.Serialize(item, WireJson.Options)); cmd.ExecuteNonQuery();
     }
-    private IEnumerable<T> StreamResearch<T>(string table, Guid mission)
+    private IEnumerable<T> StreamResearch<T>(string table, Guid mission, int? limit = null, int offset = 0)
     {
         using var db = Open(); using var cmd = db.CreateCommand();
-        cmd.CommandText = $"SELECT payload_json FROM {table} WHERE mission_id=$id ORDER BY timestamp_utc,rowid";
+        cmd.CommandText = $"SELECT payload_json FROM {table} WHERE mission_id=$id ORDER BY "
+            + (limit is null ? "timestamp_utc,rowid" : "timestamp_utc DESC,rowid DESC LIMIT $limit OFFSET $offset");
+        if (limit is not null) { cmd.Parameters.AddWithValue("$limit",Math.Clamp(limit.Value,1,1000));cmd.Parameters.AddWithValue("$offset",Math.Max(0,offset)); }
         cmd.Parameters.AddWithValue("$id", mission.ToString()); using var reader = cmd.ExecuteReader();
         while (reader.Read()) yield return JsonSerializer.Deserialize<T>(reader.GetString(0), WireJson.Options)!;
     }
     public IEnumerable<MissionMarker> StreamMarkers(Guid id) => StreamResearch<MissionMarker>("research_markers", id);
     public IEnumerable<MissionNote> StreamNotes(Guid id) => StreamResearch<MissionNote>("research_notes", id);
-    public IReadOnlyList<MissionMarker> Markers(Guid id, int limit = 200, int offset = 0) => StreamMarkers(id).Skip(Math.Max(offset, 0)).Take(Math.Clamp(limit, 1, 1000)).ToArray();
-    public IReadOnlyList<MissionNote> Notes(Guid id, int limit = 200, int offset = 0) => StreamNotes(id).Skip(Math.Max(offset, 0)).Take(Math.Clamp(limit, 1, 1000)).ToArray();
+    public IReadOnlyList<MissionMarker> Markers(Guid id, int limit = 200, int offset = 0) => StreamResearch<MissionMarker>("research_markers", id, limit, offset).ToArray();
+    public IReadOnlyList<MissionNote> Notes(Guid id, int limit = 200, int offset = 0) => StreamResearch<MissionNote>("research_notes", id, limit, offset).ToArray();
     public IEnumerable<MissionEvent> StreamEvents(Guid id)
     {
         using var db = Open(); using var cmd = db.CreateCommand();

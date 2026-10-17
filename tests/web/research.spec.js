@@ -70,6 +70,9 @@ test("planner, actual stored science pages, map and complete exports work togeth
   await expect
     .poll(async () => await page.locator("#instrument-values").textContent())
     .toMatch(/[1-9]\d* saved/);
+  await expect(page.locator("#science-charts svg").first()).toBeVisible({
+    timeout: 10000,
+  });
   await page.screenshot({
     path: "artifacts/research-instruments-browser-fixture.png",
     fullPage: true,

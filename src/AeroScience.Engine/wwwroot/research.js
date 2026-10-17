@@ -29,6 +29,7 @@ let ctx,
   definitions = [],
   templates = [],
   plans = [],
+  planOffset = 0,
   editing = null,
   state = null,
   track = [],
@@ -163,7 +164,7 @@ export async function loadResearch(page) {
   if (page === "instruments") await instruments();
 }
 async function planner() {
-  plans = await ctx.api("/api/plans?limit=50");
+  plans = await ctx.api(`/api/plans?limit=50&offset=${planOffset}`);
   const p = $("planner-content");
   p.replaceChildren(text("h2", "Saved mission plans"));
   for (const plan of plans) {
@@ -204,7 +205,20 @@ async function planner() {
     );
     p.append(row);
   }
-  p.append(button("New mission plan", () => editPlan(null)));
+  p.append(
+    button("New mission plan", () => editPlan(null)),
+    button("Newer plans", async () => {
+      planOffset = Math.max(0, planOffset - 50);
+      await planner();
+    }),
+    text("span", `Plan page ${planOffset / 50 + 1}`),
+    button("Older plans", async () => {
+      if (plans.length === 50) {
+        planOffset += 50;
+        await planner();
+      }
+    }),
+  );
   const editor = text("div", undefined, "panel research-panel");
   editor.id = "plan-editor";
   p.append(editor);
@@ -846,11 +860,11 @@ export async function researchDetail(body, id, mission) {
   }
   await markerPage();
   body.append(
-    button("Earlier markers", async () => {
+    button("Newer markers", async () => {
       markerOffset = Math.max(0, markerOffset - 200);
       await markerPage();
     }),
-    button("More markers", async () => {
+    button("Older markers", async () => {
       markerOffset += 200;
       await markerPage();
     }),
@@ -868,11 +882,11 @@ export async function researchDetail(body, id, mission) {
   }
   await loadNotes();
   body.append(
-    button("Earlier notes", async () => {
+    button("Newer notes", async () => {
       offset = Math.max(0, offset - 100);
       await loadNotes();
     }),
-    button("More notes", async () => {
+    button("Older notes", async () => {
       offset += 100;
       await loadNotes();
     }),

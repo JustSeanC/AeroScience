@@ -247,5 +247,12 @@ public sealed class ResearchTests : IDisposable
         { db.Open(); using var cmd = db.CreateCommand(); cmd.CommandText = "CREATE TRIGGER protect_flight BEFORE DELETE ON telemetry BEGIN SELECT RAISE(ABORT,'test interruption'); END;"; cmd.ExecuteNonQuery(); }
         Assert.Throws<SqliteException>(() => store.ClearFlightData("DELETE FLIGHT DATA")); Assert.Single(store.StreamMarkers(m.Id)); Assert.Single(store.StreamNotes(m.Id)); Assert.Single(store.StreamSamples(m.Id)); Assert.NotNull(store.Detail(m.Id));
     }
+    [Fact] public void RecentResearchPagesStayVisibleBeyondPreviewLimitWhileStreamsKeepEveryRow()
+    {
+        var mission=coordinator.Start("Long notes");Apply(0);
+        for(var index=0;index<220;index++){store.AddMarker(mission.Id,new(Notes:index.ToString()),now.AddSeconds(index),null,null);store.AddNote(mission.Id,new(index.ToString(),"in-flight"));}
+        Assert.Equal("219",store.Markers(mission.Id,200).First().Notes);Assert.Equal("219",store.Notes(mission.Id,200).First().Text);
+        Assert.Equal(20,store.Markers(mission.Id,200,200).Count);Assert.Equal(220,store.StreamMarkers(mission.Id).Count());Assert.Equal(220,store.StreamNotes(mission.Id).Count());coordinator.End(mission.Id);
+    }
     public void Dispose() { science.Dispose(); if (Directory.Exists(root)) Directory.Delete(root, true); }
 }
