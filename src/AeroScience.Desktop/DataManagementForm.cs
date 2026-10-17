@@ -10,14 +10,15 @@ public sealed class DataManagementForm : Form
     private readonly MainForm app;
     private readonly FlowLayoutPanel panel = new() { Dock = DockStyle.Fill, AutoScroll = true, FlowDirection = FlowDirection.TopDown, WrapContents = false, Padding = new(18) };
     private readonly CheckBox plans = new() { Text = "Also remove saved mission plans and their preflight notes when clearing flight data", AutoSize = true };
-    private readonly CheckBox backup = new() { Text = "Create and verify a SQLite backup before clearing (recommended)", Checked = true, AutoSize = true };
+    private readonly RadioButton noBackup = new() { Text = "Permanently delete without creating a new backup", AutoSize = true };
+    private readonly RadioButton backup = new() { Text = "Create a recovery backup, then delete (recommended)", Checked = true, AutoSize = true };
     private readonly Label status = new() { AutoSize = true, MaximumSize = new(700, 0) };
     private bool working;
     public DataManagementForm(MainForm app)
     {
         this.app = app; Text = "AeroScience · Storage & Data · Data Management"; Size = new(800, 650); AutoScaleMode = AutoScaleMode.Dpi;
-        Controls.Add(panel); panel.Controls.Add(new Label { Text = "Export individual completed missions from Mission History. These operations clear whole archives independently.", AutoSize = true, MaximumSize = new(700, 0) });
-        panel.Controls.Add(plans); panel.Controls.Add(backup);
+        Font = new Font("Segoe UI", 11); Controls.Add(panel); panel.Controls.Add(new Label { Text = "Export individual completed missions from Mission History. These operations clear whole archives independently.", AutoSize = true, MaximumSize = new(700, 0) });
+        panel.Controls.Add(plans); panel.Controls.Add(noBackup); panel.Controls.Add(backup);
         foreach (var science in new[] { false, true })
         {
             var heading = new Label { Text = science ? "Scientific Data Library" : "Flight / Mission Data", AutoSize = true, Font = new(Font, FontStyle.Bold), Margin = new(3, 20, 3, 3) }; panel.Controls.Add(heading);
@@ -41,7 +42,7 @@ public sealed class DataManagementForm : Form
         if (!science) return new MissionStore(Path.Combine(settings.MissionDirectory, "missions.db")).PreviewFlightClear(plans.Checked);
         using var store = new ScienceStore(settings.ScienceLibraryDirectory); return store.PreviewClear();
     }
-    private static string Describe(DataClearPreview p) => $"Selected location: {p.Directory}\nMissions: {p.Missions} · Plans: {p.Plans} · Datasets: {p.Datasets} · Observations: {p.Observations}\nManaged database size: {p.ApproximateBytes / 1048576d:0.00} MiB (clearing rows may retain SQLite allocation)\nRemoves: {p.Removes}\nPreserves: {p.Preserves}\nRequired confirmation: {p.ConfirmationPhrase}";
+    private static string Describe(DataClearPreview p) => $"Data to delete from: {p.Directory}\nMissions: {p.Missions} · Plans: {p.Plans} · Datasets: {p.Datasets} · Observations: {p.Observations}\nManaged database size: {p.ApproximateBytes / 1048576d:0.00} MiB (clearing rows may retain SQLite allocation)\nRemoves: {p.Removes}\nPreserves: {p.Preserves}\nRequired confirmation: {p.ConfirmationPhrase}";
     private async Task Clear(bool science, string typed)
     {
         if (working || app.Busy || app.Recording) { MessageBox.Show(this, "End recording and wait for other operations first."); return; }
@@ -49,15 +50,26 @@ public sealed class DataManagementForm : Form
         {
             var preview = Preview(science);
             if (typed != preview.ConfirmationPhrase) throw new InvalidOperationException("Type the exact confirmation phrase shown for this archive.");
-            string? backupFolder = null;
-            if (backup.Checked)
+            var selection = ArchiveClearPolicy.ChooseBackup(backup.Checked, () =>
             {
-                using var browse = new FolderBrowserDialog { Description = "Choose a backup folder outside the application installation", UseDescriptionForTitle = true };
-                if (browse.ShowDialog(this) != DialogResult.OK) return; backupFolder = browse.SelectedPath;
-                SetupCoordinator.ValidateDataLocation(backupFolder, AppContext.BaseDirectory);
-            }
-            if (MessageBox.Show(this, Describe(preview) + "\n\nPermanently clear these records? " + (backupFolder is null ? "No backup was requested." : "A verified backup will be retained."), "Confirm archive clearing", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) != DialogResult.Yes) return;
-            working = true; panel.Enabled = false; status.Text = "Stopping services, verifying backup and clearing transactionally…";
+                using var browse = new FolderBrowserDialog
+                {
+                    Description = "Choose a separate recovery backup destination (the archive to delete is shown separately)",
+                    UseDescriptionForTitle = true,
+                    InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                    AutoUpgradeEnabled = true
+                };
+                return browse.ShowDialog(this) == DialogResult.OK ? browse.SelectedPath : null;
+            }, destination =>
+            {
+                SetupCoordinator.ValidateDataLocation(destination, AppContext.BaseDirectory);
+                var locations = app.Preferences.Load();
+                ArchiveClearPolicy.ValidateBackupDestination(destination, locations.MissionDirectory, locations.ScienceLibraryDirectory, AppContext.BaseDirectory);
+            });
+            if (selection.Cancelled) return;
+            var backupFolder = selection.Directory;
+            if (MessageBox.Show(this, Describe(preview) + "\n\nPermanently clear these records? " + (backupFolder is null ? "No backup was requested." : "Recovery backup destination: " + backupFolder + ". A verified backup will be retained."), "Confirm archive clearing", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) != DialogResult.Yes) return;
+            working = true; panel.Enabled = false; status.Text = backupFolder is null ? "Stopping services and clearing transactionally without a new backup…" : "Stopping services, verifying the recovery backup and clearing transactionally…";
             var includePlans = plans.Checked;
             var result = "";
             await app.RunStoppedAsync(() => Task.Run(() =>

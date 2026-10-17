@@ -28,7 +28,7 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
             return new(connection, frame, active, samplingIntervalMs, Sampling: new(received, count, skipped, missing,
                 count > 1 && seconds > 0 ? (count - 1) / seconds : null, firstRecordedUtc, lastRecordedUtc,
                 active is not null && active.DurationSeconds >= 1 ? count / active.DurationSeconds : null,
-                active is not null && firstRecordedUtc is not null ? Math.Max(0, (firstRecordedUtc.Value-active.StartedUtc).TotalSeconds) : null),
+                active is not null && firstRecordedUtc is not null ? Math.Max(0, (firstRecordedUtc.Value - active.StartedUtc).TotalSeconds) : null),
                 Research: research?.Snapshot(connection, frame));
         }
     }
@@ -57,7 +57,7 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
             if (lastSlot >= 0 && slot > lastSlot + 1)
             {
                 missing += slot - lastSlot - 1;
-                store.AddEvent(active.Id, frame.TimestampUtc, "telemetry-gap", $"No committed observation in {slot-lastSlot-1} configured recording intervals.");
+                store.AddEvent(active.Id, frame.TimestampUtc, "telemetry-gap", $"No committed observation in {slot - lastSlot - 1} configured recording intervals.");
             }
             if (lastAircraft is not null && lastAircraft != frame.Aircraft)
                 store.AddEvent(active.Id, frame.TimestampUtc, "aircraft-changed", $"Aircraft changed to {frame.Aircraft}.");
@@ -77,9 +77,11 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
             lastAircraft = frame.Aircraft;
             active = active with
             {
-                Aircraft = active.Aircraft ?? frame.Aircraft, Source = active.Source ?? frame.Source,
+                Aircraft = active.Aircraft ?? frame.Aircraft,
+                Source = active.Source ?? frame.Source,
                 Departure = active.Departure ?? new(frame.Latitude, frame.Longitude),
-                Arrival = new(frame.Latitude, frame.Longitude), SampleCount = active.SampleCount + 1,
+                Arrival = new(frame.Latitude, frame.Longitude),
+                SampleCount = active.SampleCount + 1,
                 MinimumAltitudeFeet = Math.Min(active.MinimumAltitudeFeet ?? frame.AltitudeMslFeet, frame.AltitudeMslFeet),
                 MaximumAltitudeFeet = Math.Max(active.MaximumAltitudeFeet ?? frame.AltitudeMslFeet, frame.AltitudeMslFeet)
             };
@@ -130,6 +132,15 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
             if (maintenance) throw new InvalidOperationException("Storage maintenance is in progress.");
             if (research is null) throw new InvalidOperationException("Scientific acquisition is unavailable in this host.");
             research.Configure(configurations);
+        }
+    }
+    public ResearchState SetSciencePaused(Guid id, bool paused)
+    {
+        lock (gate)
+        {
+            if (maintenance || active?.Id != id) throw new InvalidOperationException("This mission is not currently recording.");
+            if (research is null) throw new InvalidOperationException("Science Collection is unavailable in this host.");
+            research.SetPaused(paused); return research.Snapshot(connection, frame);
         }
     }
     public MissionMarker AddMarker(Guid id, MarkerRequest request)

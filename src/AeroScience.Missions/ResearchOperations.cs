@@ -5,11 +5,12 @@ using Microsoft.Data.Sqlite;
 namespace AeroScience.Missions;
 
 // Invoked under MissionCoordinator's existing command/acquisition gate.
-public sealed class ResearchOperations(MissionStore missions, ScienceStore science)
+public sealed class ResearchOperations(MissionStore missions, ScienceStore science, Func<ScienceUnitPreferences>? displayUnits = null)
 {
     private sealed class Acquisition
     {
-        public DateTimeOffset? Anchor, LastSeen, FirstSuccess, LastSuccess;
+        public DateTimeOffset? Anchor, LastSeen, FirstSuccess, LastSuccess, CadenceReference;
+        public double IntervalSeconds; public long IntervalCount;
         public long Slot = -1, Observations, Rejected, Missing, Acquisitions;
         public ScienceDataset? Dataset;
         public string? Error;
@@ -21,6 +22,9 @@ public sealed class ResearchOperations(MissionStore missions, ScienceStore scien
     private AtmosphericFrame? atmosphere;
     private FlightGuidance? guidance, baseline;
     private string? aircraft;
+    private bool intentionallyPaused;
+    private DateTimeOffset? pauseStarted;
+    private double pauseSeconds;
     public InstrumentConfiguration[] Configurations => configurations.ToArray();
     public void EnsureCanStart(InstrumentConfiguration[] input)
     {
@@ -32,9 +36,14 @@ public sealed class ResearchOperations(MissionStore missions, ScienceStore scien
     public void Begin(Mission active, MissionResearch research)
     {
         mission = active; context = research; configurations = ScienceCatalog.Normalize(research.Instruments);
-        acquisitions.Clear(); baseline = null;
+        acquisitions.Clear(); baseline = null; intentionallyPaused = false; pauseStarted = null; pauseSeconds = 0;
     }
-    public void End() { mission = null; context = null; baseline = null; }
+    public void End()
+    {
+        var now = DateTimeOffset.UtcNow;
+        if (mission is not null) missions.AddEvent(mission.Id, now, "science-stopped", $"Science collection stopped. Intentional pause seconds: {pauseSeconds + (pauseStarted is { } began ? Math.Max(0, (now - began).TotalSeconds) : 0):0.###}. Collection will not resume automatically after a restart.");
+        pauseStarted = null; intentionallyPaused = false; mission = null; context = null; baseline = null;
+    }
     public void Configure(InstrumentConfiguration[] input)
     {
         var next = ScienceCatalog.Normalize(input);
@@ -44,7 +53,7 @@ public sealed class ResearchOperations(MissionStore missions, ScienceStore scien
         {
             var previous = configurations.First(c => c.InstrumentId == config.InstrumentId);
             if (previous != config && acquisitions.TryGetValue(config.InstrumentId, out var run))
-            { run.Anchor = null; run.Slot = -1; run.Error = null; }
+            { run.Anchor = null; run.Slot = -1; run.Error = null; run.CadenceReference = null; }
         }
         configurations = next;
         if (mission is not null)
@@ -52,6 +61,18 @@ public sealed class ResearchOperations(MissionStore missions, ScienceStore scien
             missions.SetInstruments(mission.Id, next);
             missions.AddEvent(mission.Id, DateTimeOffset.UtcNow, "instruments-configured", JsonSerializer.Serialize(next, WireJson.Options));
         }
+    }
+    public bool SetPaused(bool paused, DateTimeOffset? timestamp = null)
+    {
+        if (mission is null) throw new InvalidOperationException("Science Collection controls require an active mission.");
+        if (intentionallyPaused == paused) return false;
+        var now = (timestamp ?? DateTimeOffset.UtcNow).ToUniversalTime();
+        var seconds = !paused && pauseStarted is { } began ? Math.Max(0, (now - began).TotalSeconds) : 0;
+        missions.AddEvent(mission.Id, now, paused ? "science-paused" : "science-resumed", paused ? "Science Collection paused by the user. Flight recording continues." : $"Science Collection resumed after {seconds:0.###} seconds. Intentional slots are excluded from missing counts.");
+        intentionallyPaused = paused;
+        if (paused) pauseStarted = now; else { pauseSeconds += seconds; pauseStarted = null; }
+        foreach (var run in acquisitions.Values) { run.Anchor = null; run.Slot = -1; run.CadenceReference = null; }
+        return true;
     }
     public void Observe(TelemetryUpdate update, TelemetryFrame? position)
     {
@@ -81,7 +102,7 @@ public sealed class ResearchOperations(MissionStore missions, ScienceStore scien
         if (update.Atmosphere is not { } source) return;
         if (atmosphere is not null && source.TimestampUtc <= atmosphere.TimestampUtc) return;
         atmosphere = source;
-        if (mission is null || context is null || position?.IsPaused == true || source.Quality != ObservationQuality.Valid) return;
+        if (mission is null || context is null || intentionallyPaused || position?.IsPaused == true || source.Quality != ObservationQuality.Valid) return;
         var located = position is not null && Math.Abs((source.TimestampUtc - position.TimestampUtc).TotalSeconds) <= 3 ? position : null;
         foreach (var config in configurations.Where(c => c.Enabled))
         {
@@ -106,7 +127,11 @@ public sealed class ResearchOperations(MissionStore missions, ScienceStore scien
                     located?.TimestampUtc)).ToArray();
                 var count = science.Append(values);
                 if (run.Error is not null) missions.AddEvent(mission.Id, source.TimestampUtc, "science-recovered", config.InstrumentId + ": acquisition resumed"); run.Observations += count;
-                if (count > 0) { run.FirstSuccess ??= source.TimestampUtc; run.LastSuccess = source.TimestampUtc; run.Acquisitions++; }
+                if (count > 0)
+                {
+                    if (run.CadenceReference is { } previousSuccess) { run.IntervalSeconds += (source.TimestampUtc - previousSuccess).TotalSeconds; run.IntervalCount++; }
+                    run.CadenceReference = source.TimestampUtc; run.FirstSuccess ??= source.TimestampUtc; run.LastSuccess = source.TimestampUtc; run.Acquisitions++;
+                }
                 run.Error = null;
             }
             catch (Exception error) when (error is IOException or UnauthorizedAccessException or SqliteException)
@@ -118,7 +143,7 @@ public sealed class ResearchOperations(MissionStore missions, ScienceStore scien
     {
         if (mission is null) return;
         missions.SaveInstrumentState(mission.Id, new(config.InstrumentId, config.Enabled, config.IntervalMs, quality, run.LastSuccess,
-            run.Observations, run.Rejected, run.Missing, run.Acquisitions > 1 ? (run.LastSuccess - run.FirstSuccess)?.TotalSeconds / (run.Acquisitions - 1) : null, readings, run.Error));
+            run.Observations, run.Rejected, run.Missing, run.IntervalCount > 0 ? run.IntervalSeconds / run.IntervalCount : null, readings, run.Error, run.Acquisitions));
     }
     public FlightGuidance? CurrentGuidance(ConnectionInfo connection, TelemetryFrame? position)
     {
@@ -141,6 +166,7 @@ public sealed class ResearchOperations(MissionStore missions, ScienceStore scien
         {
             acquisitions.TryGetValue(config.InstrumentId, out var run);
             var quality = !config.Enabled ? ObservationQuality.Disabled
+                : intentionallyPaused ? ObservationQuality.Paused
                 : run?.Error is not null ? ObservationQuality.Unavailable
                 : connection.State != ConnectionState.Connected ? ObservationQuality.SourceDisconnected
                 : position?.IsPaused == true ? ObservationQuality.Paused
@@ -150,10 +176,15 @@ public sealed class ResearchOperations(MissionStore missions, ScienceStore scien
             if (quality == ObservationQuality.Valid && readings.All(v => v.Value is null)) quality = ObservationQuality.Unavailable;
             return new InstrumentState(config.InstrumentId, config.Enabled, config.IntervalMs, quality, run?.LastSuccess,
                 run?.Observations ?? 0, run?.Rejected ?? 0, run?.Missing ?? 0,
-                run is { Acquisitions: > 1, LastSuccess: { } last, FirstSuccess: { } first } ? (last - first).TotalSeconds / (run.Acquisitions - 1) : null,
-                readings, run?.Error);
+                run is { IntervalCount: > 0 } ? run.IntervalSeconds / run.IntervalCount : null,
+                readings.Select(r => ScienceUnits.Display(r, (displayUnits?.Invoke() ?? ScienceUnits.Aviation))).ToArray(), run?.Error, run?.Acquisitions ?? 0);
         }).ToArray();
         return new(CurrentGuidance(connection, position), atmosphere, states, context?.PlanSnapshot?.Id,
-            context?.Template, science.AvailabilityError());
+            context?.Template, science.AvailabilityError(),
+            mission is null ? ScienceCollectionStatus.Stopped : intentionallyPaused ? ScienceCollectionStatus.Paused :
+            !states.Any(i => i.Enabled) ? ScienceCollectionStatus.Stopped :
+            connection.State != ConnectionState.Connected || atmosphere is null || position?.IsPaused == true ? ScienceCollectionStatus.AwaitingSource :
+            states.Where(i => i.Enabled).All(i => i.Quality is ObservationQuality.Unavailable or ObservationQuality.Stale) ? ScienceCollectionStatus.Unavailable : ScienceCollectionStatus.Collecting,
+            intentionallyPaused, pauseStarted, pauseSeconds + (pauseStarted is { } start ? Math.Max(0, (DateTimeOffset.UtcNow - start).TotalSeconds) : 0), displayUnits?.Invoke() ?? ScienceUnits.Aviation);
     }
 }

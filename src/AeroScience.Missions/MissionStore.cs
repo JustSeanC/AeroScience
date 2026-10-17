@@ -13,8 +13,13 @@ public sealed partial class MissionStore
     public MissionStore(string databasePath)
     {
         DatabasePath = Path.GetFullPath(databasePath);
-        connectionString = new SqliteConnectionStringBuilder { DataSource = DatabasePath,
-            Mode = SqliteOpenMode.ReadWrite, Pooling = false, DefaultTimeout = 10 }.ToString();
+        connectionString = new SqliteConnectionStringBuilder
+        {
+            DataSource = DatabasePath,
+            Mode = SqliteOpenMode.ReadWrite,
+            Pooling = false,
+            DefaultTimeout = 10
+        }.ToString();
     }
 
     private SqliteConnection Open(bool allowCreate = false)
@@ -36,8 +41,8 @@ public sealed partial class MissionStore
         using var cmd = db.CreateCommand();
         cmd.CommandText = "PRAGMA user_version;";
         var version = Convert.ToInt32(cmd.ExecuteScalar(), CultureInfo.InvariantCulture);
-        if (version > 4) throw new InvalidOperationException("Database was created by a newer AeroScience version; refusing to modify it.");
-        if (version is 1 or 2 or 3)
+        if (version > 5) throw new InvalidOperationException("Database was created by a newer AeroScience version; refusing to modify it.");
+        if (version is 1 or 2 or 3 or 4)
         {
             var size = new FileInfo(DatabasePath).Length;
             if (new LocalStorageCapacity().FreeBytes(Path.GetDirectoryName(DatabasePath)!) < size + StorageManager.MinimumFreeBytes)
@@ -51,10 +56,11 @@ public sealed partial class MissionStore
         }
         cmd.CommandText = "PRAGMA journal_mode=WAL;";
         cmd.ExecuteNonQuery();
-        if (version == 4) return;
-        if (version == 3) { MigrateResearch(db); return; }
-        if (version == 2) { MigrateLibraryReferences(db); MigrateResearch(db); return; }
-        if (version == 1) { MigrateMode(db); MigrateLibraryReferences(db); MigrateResearch(db); return; }
+        if (version == 5) return;
+        if (version == 4) { MigrateExperience(db); return; }
+        if (version == 3) { MigrateResearch(db); MigrateExperience(db); return; }
+        if (version == 2) { MigrateLibraryReferences(db); MigrateResearch(db); MigrateExperience(db); return; }
+        if (version == 1) { MigrateMode(db); MigrateLibraryReferences(db); MigrateResearch(db); MigrateExperience(db); return; }
         using var transaction = db.BeginTransaction();
         cmd.Transaction = transaction;
         cmd.CommandText = """
@@ -86,6 +92,7 @@ public sealed partial class MissionStore
         MigrateMode(db);
         MigrateLibraryReferences(db);
         MigrateResearch(db);
+        MigrateExperience(db);
     }
 
     private static void MigrateLibraryReferences(SqliteConnection db)

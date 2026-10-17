@@ -141,6 +141,16 @@ public static class ResearchExports
         foreach (var note in store.StreamNotes(id)) { token.ThrowIfCancellationRequested(); await writer.WriteLineAsync($"{note.TimestampUtc:O} [{note.Phase}] {note.Text}".AsMemory(), token); }
         await writer.WriteLineAsync("Complete observation markers:");
         foreach (var marker in store.StreamMarkers(id)) { token.ThrowIfCancellationRequested(); await writer.WriteLineAsync($"{marker.TimestampUtc:O} [{marker.Category}] {marker.Notes}".AsMemory(), token); }
+        await writer.WriteLineAsync("Science collection pause intervals (flight recording is independent):");
+        foreach (var pause in store.SciencePauses(id)) await writer.WriteLineAsync($"{pause.StartedUtc:O} to {pause.EndedUtc:O}; seconds={pause.Seconds}; interrupted={pause.Interrupted}");
+        var plan = store.Research(id).PlanSnapshot;
+        if (plan is not null)
+        {
+            var analysis = MissionAnalysis.Compare(plan, store.StreamSamples(id), store.GetAnalysisSettings(id));
+            await writer.WriteLineAsync($"Planned distance (m): {N(analysis.PlannedDistanceMetres)}; recorded connected distance (m): {N(analysis.RecordedDistanceMetres)}; excluded gaps: {analysis.ExcludedGaps}");
+            foreach (var waypoint in analysis.Waypoints) await writer.WriteLineAsync($"Waypoint {waypoint.Index + 1} {waypoint.Name}: reached-in-order={waypoint.Reached}; closest (m)={N(waypoint.ClosestDistanceMetres)}; observed UTC={waypoint.ReachedUtc:O}; altitude error (ft)={N(waypoint.AltitudeErrorFeet)}");
+            foreach (var limitation in analysis.Limitations) await writer.WriteLineAsync(limitation);
+        }
         await writer.FlushAsync(token);
     }
     public static string Report(MissionStore store, Guid id, bool includeDetails = true)

@@ -25,6 +25,8 @@ public sealed partial class MissionStore
         writer.WritePropertyName("planSnapshot"); JsonSerializer.Serialize(writer, research.PlanSnapshot, WireJson.Options);
         writer.WriteString("template", research.Template); writer.WriteString("objective", research.Objective);
         writer.WritePropertyName("instruments"); JsonSerializer.Serialize(writer, research.Instruments, WireJson.Options);
+        writer.WritePropertyName("analysisSettings"); JsonSerializer.Serialize(writer, GetAnalysisSettings(id), WireJson.Options);
+        writer.WritePropertyName("sciencePauseIntervals"); JsonSerializer.Serialize(writer, SciencePauses(id), WireJson.Options);
         writer.WritePropertyName("instrumentDiagnostics"); JsonSerializer.Serialize(writer, research.Diagnostics, WireJson.Options);
         writer.WritePropertyName("flightStatistics"); JsonSerializer.Serialize(writer, Statistics(id), WireJson.Options);
         writer.WritePropertyName("markers"); writer.WriteStartArray(); var count = 0;
@@ -150,7 +152,7 @@ public sealed partial class MissionStore
         using var db = Open(); using var cmd = db.CreateCommand();
         cmd.CommandText = $"SELECT payload_json FROM {table} WHERE mission_id=$id ORDER BY "
             + (limit is null ? "timestamp_utc,rowid" : "timestamp_utc DESC,rowid DESC LIMIT $limit OFFSET $offset");
-        if (limit is not null) { cmd.Parameters.AddWithValue("$limit",Math.Clamp(limit.Value,1,1000));cmd.Parameters.AddWithValue("$offset",Math.Max(0,offset)); }
+        if (limit is not null) { cmd.Parameters.AddWithValue("$limit", Math.Clamp(limit.Value, 1, 1000)); cmd.Parameters.AddWithValue("$offset", Math.Max(0, offset)); }
         cmd.Parameters.AddWithValue("$id", mission.ToString()); using var reader = cmd.ExecuteReader();
         while (reader.Read()) yield return JsonSerializer.Deserialize<T>(reader.GetString(0), WireJson.Options)!;
     }
@@ -224,7 +226,7 @@ public sealed partial class MissionStore
         if (Convert.ToInt64(cmd.ExecuteScalar(), CultureInfo.InvariantCulture) != 0) throw new InvalidOperationException("End recording before clearing data.");
         cmd.CommandText = "SELECT COUNT(*) FROM observations";
         if (Convert.ToInt64(cmd.ExecuteScalar(), CultureInfo.InvariantCulture) != 0) throw new InvalidOperationException("Legacy scientific rows exist inside this mission database. Export them before clearing flight history.");
-        cmd.CommandText = "DELETE FROM instrument_metadata; DELETE FROM research_markers; DELETE FROM research_notes; DELETE FROM mission_research; DELETE FROM dataset_references; DELETE FROM events; DELETE FROM telemetry; DELETE FROM missions;"
+        cmd.CommandText = "DELETE FROM analysis_settings; DELETE FROM instrument_metadata; DELETE FROM research_markers; DELETE FROM research_notes; DELETE FROM mission_research; DELETE FROM dataset_references; DELETE FROM events; DELETE FROM telemetry; DELETE FROM missions;"
             + (includePlans ? " DELETE FROM mission_plans;" : "");
         cmd.ExecuteNonQuery(); tx.Commit();
     }

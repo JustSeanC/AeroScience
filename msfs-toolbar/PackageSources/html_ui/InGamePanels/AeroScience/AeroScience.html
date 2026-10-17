@@ -37,73 +37,99 @@
           </header>
           <nav aria-label="AeroScience pages">
             <new-push-button id="as-mission-page">Mission</new-push-button
-            ><new-push-button id="as-payload-page">Payload</new-push-button
-            >
+            ><new-push-button id="as-payload-page">Payload</new-push-button>
           </nav>
           <p id="as-status" role="status">
             Loading simulator communication service…
           </p>
-          <div id="as-scroll" class="as-scroll" tabindex="0" role="region" aria-label="Mission and payload content">
-          <section id="as-mission-view">
-            <h2 id="as-aircraft">Awaiting aircraft telemetry</h2>
-            <div class="as-metrics">
-              <div>
-                <span>MSL / FT</span><strong id="as-altitude">—</strong>
+          <div
+            id="as-scroll"
+            class="as-scroll"
+            tabindex="0"
+            role="region"
+            aria-label="Mission and payload content"
+          >
+            <section id="as-mission-view">
+              <h2 id="as-aircraft">Awaiting aircraft telemetry</h2>
+              <div class="as-metrics">
+                <div>
+                  <span>MSL / FT</span><strong id="as-altitude">—</strong>
+                </div>
+                <div>
+                  <span>IAS / KTS</span><strong id="as-airspeed">—</strong
+                  ><small id="as-mach">Mach —</small>
+                </div>
+                <div>
+                  <span>HEADING / °T</span><strong id="as-heading">—</strong>
+                </div>
+                <div>
+                  <span>VS / FT/MIN</span><strong id="as-vspeed">—</strong>
+                </div>
               </div>
-              <div>
-                <span>IAS / KTS</span><strong id="as-airspeed">—</strong><small id="as-mach">Mach —</small>
+              <div id="as-guidance" class="as-guidance">
+                Flight Guidance unavailable
               </div>
-              <div>
-                <span>HEADING / °T</span><strong id="as-heading">—</strong>
+              <div id="as-idle">
+                <h3>Ready for your next mission.</h3>
+                <p>
+                  Start recording at any time. Your mission continues if this
+                  panel is closed.
+                </p>
+                <label for="as-mode">Science operating mode</label
+                ><select id="as-mode">
+                  <option value="universal">Universal — Fly Anything</option>
+                  <option value="realistic">
+                    Realistic — Authentic Research
+                  </option>
+                </select>
+                <p id="as-mode-help">
+                  All compatible aircraft can record missions.
+                </p>
+                <label for="as-name">Mission name</label
+                ><input
+                  id="as-name"
+                  maxlength="100"
+                  placeholder="Research mission"
+                /><new-push-button id="as-start" class="as-primary" disabled
+                  >Start mission</new-push-button
+                >
               </div>
-              <div>
-                <span>VS / FT/MIN</span><strong id="as-vspeed">—</strong>
+              <div id="as-recording" hidden>
+                <h3 id="as-active-name"></h3>
+                <p id="as-active-mode"></p>
+                <div class="as-record-meta">
+                  <span id="as-duration">00:00:00</span
+                  ><span id="as-samples">0 samples</span>
+                </div>
+                <new-push-button id="as-marker" disabled
+                  >Add observation marker</new-push-button
+                >
+                <new-push-button id="as-end" class="as-danger" disabled
+                  >End mission</new-push-button
+                >
               </div>
-            </div>
-            <div id="as-guidance" class="as-guidance">Flight Guidance unavailable</div>
-            <div id="as-idle"><h3>Ready for your next mission.</h3><p>Start recording at any time. Your mission continues if this panel is closed.</p>
-              <label for="as-mode">Science operating mode</label
-              ><select id="as-mode">
-                <option value="universal">Universal — Fly Anything</option>
-                <option value="realistic">
-                  Realistic — Authentic Research
-                </option>
-              </select>
-              <p id="as-mode-help">
-                All compatible aircraft can record missions.
+              <p class="as-note">
+                Recording continues when this panel closes. Open the companion
+                dashboard for mission history.
               </p>
-              <label for="as-name">Mission name</label
-              ><input
-                id="as-name"
-                maxlength="100"
-                placeholder="Research mission"
-              /><new-push-button id="as-start" class="as-primary" disabled
-                >Start mission</new-push-button
+            </section>
+            <section id="as-payload-view" hidden>
+              <h2>Science payload</h2>
+              <p id="as-science-state">Collection: stopped</p>
+              <new-push-button id="as-science-pause"
+                >Pause science collection</new-push-button
               >
-            </div>
-            <div id="as-recording" hidden>
-              <h3 id="as-active-name"></h3>
-              <p id="as-active-mode"></p>
-              <div class="as-record-meta">
-                <span id="as-duration">00:00:00</span
-                ><span id="as-samples">0 samples</span>
-              </div>
-              <new-push-button id="as-marker" disabled>Add observation marker</new-push-button>
-              <new-push-button id="as-end" class="as-danger" disabled
-                >End mission</new-push-button
-              >
-            </div>
-            <p class="as-note">
-              Recording continues when this panel closes. Open the companion
-              dashboard for mission history.
-            </p>
-          </section>
-          <section id="as-payload-view" hidden>
-            <h2>Science payload</h2>
-            <p>Simulator-reported atmospheric observations at the user aircraft. Acquisition requires an active mission. No real-world calibration is claimed.</p>
-            <div id="as-instruments"></div>
-            <p>Universal and Realistic modes support all compatible aircraft. Advanced operating limits and calibration procedures are coming in a future release.</p>
-          </section>
+              <div id="as-instruments"></div>
+              <details>
+                <summary>Source and limitations</summary>
+                <p>
+                  Simulator-reported atmospheric observations. An active mission
+                  is required to save science. Flight telemetry continues when
+                  science collection is paused. Realistic instrument limits and
+                  calibration are future features.
+                </p>
+              </details>
+            </section>
           </div>
         </div></ingame-ui
       ></ingamepanel-aeroscience

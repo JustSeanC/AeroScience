@@ -41,22 +41,22 @@ public sealed class ApiTests : IDisposable
     public async Task ResearchEndpointsPreserveSnapshotsExportsAndRequestProtection()
     {
         await Pair(client);
-        var plan=new MissionPlan(Guid.NewGuid(),"Offline plan",MissionTemplateKind.ObservationFlight,
-            Waypoints:[new("A",34,-117),new("B",35,-118)],Instruments:[]);
-        var saved=await client.PostAsJsonAsync("/api/plans",plan,WireJson.Options);saved.EnsureSuccessStatusCode();
-        var start=await client.PostAsJsonAsync("/api/missions",new StartMissionRequest("Planned",PlanId:plan.Id),WireJson.Options);start.EnsureSuccessStatusCode();
-        var mission=(await start.Content.ReadFromJsonAsync<Mission>(WireJson.Options))!;
-        (await client.PostAsJsonAsync($"/api/missions/{mission.Id}/markers",new MarkerRequest(Notes:"Actual contextual marker"),WireJson.Options)).EnsureSuccessStatusCode();
-        (await client.PostAsJsonAsync($"/api/missions/{mission.Id}/end",new{})).EnsureSuccessStatusCode();
-        var review=await client.GetFromJsonAsync<JsonElement>($"/api/missions/{mission.Id}/review");
-        Assert.Equal("Offline plan",review.GetProperty("research").GetProperty("planSnapshot").GetProperty("name").GetString());
-        foreach(var format in new[]{"flight.csv","events.csv","gpx","kml","report.txt"})
+        var plan = new MissionPlan(Guid.NewGuid(), "Offline plan", MissionTemplateKind.ObservationFlight,
+            Waypoints: [new("A", 34, -117), new("B", 35, -118)], Instruments: []);
+        var saved = await client.PostAsJsonAsync("/api/plans", plan, WireJson.Options); saved.EnsureSuccessStatusCode();
+        var start = await client.PostAsJsonAsync("/api/missions", new StartMissionRequest("Planned", PlanId: plan.Id), WireJson.Options); start.EnsureSuccessStatusCode();
+        var mission = (await start.Content.ReadFromJsonAsync<Mission>(WireJson.Options))!;
+        (await client.PostAsJsonAsync($"/api/missions/{mission.Id}/markers", new MarkerRequest(Notes: "Actual contextual marker"), WireJson.Options)).EnsureSuccessStatusCode();
+        (await client.PostAsJsonAsync($"/api/missions/{mission.Id}/end", new { })).EnsureSuccessStatusCode();
+        var review = await client.GetFromJsonAsync<JsonElement>($"/api/missions/{mission.Id}/review");
+        Assert.Equal("Offline plan", review.GetProperty("research").GetProperty("planSnapshot").GetProperty("name").GetString());
+        foreach (var format in new[] { "flight.csv", "events.csv", "gpx", "kml", "report.txt" })
             (await client.GetAsync($"/api/missions/{mission.Id}/export/{format}")).EnsureSuccessStatusCode();
-        foreach(var route in new[]{"/api/data/clear-flight","/api/science/clear"})
-            Assert.Contains((await client.PostAsJsonAsync(route,new{})).StatusCode,new[]{HttpStatusCode.NotFound,HttpStatusCode.MethodNotAllowed});
+        foreach (var route in new[] { "/api/data/clear-flight", "/api/science/clear" })
+            Assert.Contains((await client.PostAsJsonAsync(route, new { })).StatusCode, new[] { HttpStatusCode.NotFound, HttpStatusCode.MethodNotAllowed });
         client.DefaultRequestHeaders.Remove("X-AeroScience-CSRF");
-        Assert.Equal(HttpStatusCode.Forbidden,(await client.PostAsJsonAsync("/api/plans",plan,WireJson.Options)).StatusCode);
-        Assert.Equal(HttpStatusCode.Forbidden,(await client.PostAsJsonAsync("/api/desktop/data-management",new{})).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, (await client.PostAsJsonAsync("/api/plans", plan, WireJson.Options)).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, (await client.PostAsJsonAsync("/api/desktop/data-management", new { })).StatusCode);
     }
 
     [Fact]
@@ -109,6 +109,21 @@ public sealed class ApiTests : IDisposable
     }
 
     [Fact]
+    public async Task SharedBrowserSessionKeepsExistingCsrfValidAndUnitsPresetsRemainProtected()
+    {
+        await Pair(client);
+        var before = client.DefaultRequestHeaders.GetValues("X-AeroScience-CSRF").Single();
+        var repeated = await client.PostAsJsonAsync("/api/session", new { code = (string?)null });
+        var session = await repeated.Content.ReadFromJsonAsync<JsonElement>(); Assert.Equal(before, session.GetProperty("csrf").GetString());
+        var units = ScienceUnits.Scientific with { Temperature = "kelvin" }; var changed = await client.PostAsJsonAsync("/api/display/units", units, WireJson.Options); changed.EnsureSuccessStatusCode();
+        var settings = await client.GetFromJsonAsync<JsonElement>("/api/display/units"); Assert.Equal("kelvin", settings.GetProperty("preferences").GetProperty("temperature").GetString());
+        var preset = new InstrumentPreset(Guid.Empty, "API independent", null, [new("ambient-wind", true, 2000)]);
+        var created = await client.PostAsJsonAsync("/api/presets", preset, WireJson.Options); created.EnsureSuccessStatusCode(); var saved = await created.Content.ReadFromJsonAsync<InstrumentPreset>(WireJson.Options); Assert.NotEqual(Guid.Empty, saved!.Id);
+        Assert.Single((await client.GetFromJsonAsync<InstrumentPreset[]>("/api/presets", WireJson.Options))!);
+        client.DefaultRequestHeaders.Remove("X-AeroScience-CSRF"); Assert.Equal(HttpStatusCode.Forbidden, (await client.PostAsJsonAsync("/api/presets", preset, WireJson.Options)).StatusCode);
+    }
+
+    [Fact]
     public void RemotePairingRequiresCodeExpiresAcrossRestartAndLimitsAttempts()
     {
         var access = new AccessControl(); Assert.Null(access.Pair(false, "WRONG")); Assert.Null(access.Pair(false, null));
@@ -120,7 +135,9 @@ public sealed class ApiTests : IDisposable
     }
 
     [Theory]
-    [InlineData("0.0.0.0")][InlineData("8.8.8.8")][InlineData("127.0.0.1")]
+    [InlineData("0.0.0.0")]
+    [InlineData("8.8.8.8")]
+    [InlineData("127.0.0.1")]
     public void LanBindingRefusesPublicAndWildcardAddresses(string address) => Assert.Throws<InvalidOperationException>(() =>
         new EngineOptions { EnableLan = true, LanAddress = address }.Validate());
 

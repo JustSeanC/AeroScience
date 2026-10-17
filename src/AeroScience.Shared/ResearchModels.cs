@@ -2,10 +2,11 @@ namespace AeroScience.Shared;
 
 public enum MissionTemplateKind { GeneralResearch, AtmosphericProfile, GeographicSurvey, ObservationFlight }
 public enum ObservationQuality { Valid, Missing, Unavailable, Stale, Paused, Invalid, AcquisitionGap, SourceDisconnected, Disabled, Waiting }
+public enum ScienceCollectionStatus { Collecting, Paused, Stopped, AwaitingSource, Unavailable }
 public enum ScienceProvenance { SimulatorReported, Derived, InstrumentModeled }
 public enum AutopilotEngagement { Unavailable, Disengaged, Engaged }
 public sealed record ResearchWaypoint(string Name, double Latitude, double Longitude, double? TargetAltitudeFeet = null,
-    string? Instructions = null, string? Objective = null);
+    string? Instructions = null, string? Objective = null, Guid? PatternId = null);
 public sealed record SurveyArea(string Name, Coordinates[] Vertices);
 public sealed record InstrumentConfiguration(string InstrumentId, bool Enabled = false, int IntervalMs = 1000);
 public sealed record MissionPlan(Guid Id, string Name, MissionTemplateKind Template = MissionTemplateKind.GeneralResearch,
@@ -13,7 +14,7 @@ public sealed record MissionPlan(Guid Id, string Name, MissionTemplateKind Templ
     string? IntendedAircraft = null, string? Departure = null, string? Destination = null,
     ResearchWaypoint[]? Waypoints = null, SurveyArea[]? SurveyAreas = null, double? MinimumAltitudeFeet = null,
     double? MaximumAltitudeFeet = null, double? EstimatedDurationMinutes = null,
-    InstrumentConfiguration[]? Instruments = null, string? PreflightNotes = null, DateTimeOffset? UpdatedUtc = null);
+    InstrumentConfiguration[]? Instruments = null, string? PreflightNotes = null, DateTimeOffset? UpdatedUtc = null, PatternDefinition[]? Patterns = null);
 public sealed record MissionTemplate(MissionTemplateKind Id, string Name, string Objective,
     InstrumentConfiguration[] Instruments, string[] NoteCategories);
 public sealed record MeasurementDefinition(string Id, string Name, string Unit, string SimulatorVariable);
@@ -23,7 +24,7 @@ public sealed record AtmosphericFrame(DateTimeOffset TimestampUtc, double? Tempe
     double? WindSpeedKnots, double? WindDirectionTrueDegrees, double? DensitySlugsPerCubicFoot,
     ObservationQuality Quality = ObservationQuality.Valid, string? Message = null);
 public sealed record MeasurementReading(string MeasurementId, double? Value, string Unit,
-    ScienceProvenance Provenance = ScienceProvenance.SimulatorReported, ObservationQuality Quality = ObservationQuality.Valid);
+    ScienceProvenance Provenance = ScienceProvenance.SimulatorReported, ObservationQuality Quality = ObservationQuality.Valid, double? DisplayValue = null, string? DisplayUnit = null);
 public sealed record ScienceObservation(long Id, Guid DatasetId, Guid MissionId, string InstrumentId,
     DateTimeOffset TimestampUtc, string MeasurementId, double Value, string Unit, ScienceProvenance Provenance,
     string Source, double? Latitude, double? Longitude, double? AltitudeMslFeet, ObservationQuality Quality,
@@ -32,14 +33,15 @@ public sealed record ScienceDataset(Guid Id, Guid LibraryId, Guid MissionId, str
     DateTimeOffset CreatedUtc, string RelativePath, long ObservationCount, string ProvenanceJson);
 public sealed record InstrumentState(string InstrumentId, bool Enabled, int IntervalMs, ObservationQuality Quality,
     DateTimeOffset? LastSuccessfulUtc, long ObservationCount, long RejectedObservations, long MissingIntervals,
-    double? ActualAverageIntervalSeconds, MeasurementReading[] Measurements, string? Message = null);
+    double? ActualAverageIntervalSeconds, MeasurementReading[] Measurements, string? Message = null, long AcquisitionSets = 0);
 public sealed record GuidanceMode(string? Mode, double? Target = null, string? Unit = null,
     string? Armed = null, string? Status = null);
 public sealed record FlightGuidance(DateTimeOffset TimestampUtc, AutopilotEngagement Autopilot,
     GuidanceMode Lateral, GuidanceMode Vertical, GuidanceMode Speed,
     ObservationQuality Quality = ObservationQuality.Valid, string Source = "MSFS 2024 standard SimConnect variables");
 public sealed record ResearchState(FlightGuidance? Guidance, AtmosphericFrame? Atmosphere, InstrumentState[] Instruments,
-    Guid? PlanId = null, string? Template = null, string? ScienceStorageError = null);
+    Guid? PlanId = null, string? Template = null, string? ScienceStorageError = null, ScienceCollectionStatus CollectionStatus = ScienceCollectionStatus.Stopped,
+    bool IntentionallyPaused = false, DateTimeOffset? CollectionPausedUtc = null, double IntentionalPauseSeconds = 0, ScienceUnitPreferences? Units = null);
 public sealed record MissionResearch(MissionPlan? PlanSnapshot, InstrumentConfiguration[] Instruments,
     string? Objective, string Template, MissionNote[] Notes, InstrumentState[]? Diagnostics = null);
 public sealed record MissionMarker(Guid Id, Guid MissionId, string Category, DateTimeOffset TimestampUtc,
@@ -60,3 +62,21 @@ public sealed record ScienceStorageEstimate(long? EstimatedBytes, long? Availabl
     string Basis, string[] Limitations, Dictionary<string, long> EstimatedObservationCounts);
 public sealed record DataClearPreview(string Kind, string Directory, long Missions, long Plans, long Datasets,
     long Observations, long ApproximateBytes, string Removes, string Preserves, string ConfirmationPhrase);
+
+public enum FlightPatternKind { Lawnmower, CreepingLine, ExpandingSquare, Racetrack, Orbit, Box, RadialSpokes, StraightTransect }
+public sealed record PatternDefinition(Guid Id, FlightPatternKind Kind, Coordinates Center, double HeadingDegrees = 0,
+    double LengthMetres = 10000, double WidthMetres = 5000, double SpacingMetres = 1000, double RadiusMetres = 2500,
+    int Legs = 6, int Orbits = 1, bool Clockwise = true, double? TargetAltitudeFeet = null, string? Notes = null);
+public sealed record PatternPreview(PatternDefinition Definition, ResearchWaypoint[] Waypoints, double DistanceMetres, string Method);
+public sealed record InstrumentPreset(Guid Id, string Name, string? Description, InstrumentConfiguration[] Instruments, DateTimeOffset? UpdatedUtc = null);
+public sealed record PresetResolution(InstrumentConfiguration[] Instruments, string[] Warnings);
+public sealed record AnalysisSettings(double WaypointToleranceMetres = 1000, double MaximumGapSeconds = 5, double? SwathWidthMetres = null);
+public sealed record WaypointComparison(int Index, string Name, bool Reached, double? ClosestDistanceMetres, DateTimeOffset? ReachedUtc, double? AltitudeErrorFeet);
+public sealed record RouteDeviation(DateTimeOffset TimestampUtc, double DistanceMetres, int Segment);
+public sealed record SurveyComparison(string Name, long SamplesInside, double TraversedMetres, string CoverageExplanation);
+public sealed record PlanComparison(AnalysisSettings Settings, double PlannedDistanceMetres, double RecordedDistanceMetres,
+    long ExcludedGaps, WaypointComparison[] Waypoints, RouteDeviation[] Deviations, SurveyComparison[] Surveys, string[] Limitations, RouteDeviationStatistics? DeviationStatistics = null, SegmentComparison[]? Segments = null);
+public sealed record SciencePauseInterval(DateTimeOffset StartedUtc, DateTimeOffset? EndedUtc, double? Seconds, bool Interrupted);
+
+public sealed record RouteDeviationStatistics(long Samples, double? MeanMetres, double? MaximumMetres);
+public sealed record SegmentComparison(int Index, string From, string To, bool ObservedWithinTolerance, long Samples, long ExcludedGaps, double? MaximumDeviationMetres);

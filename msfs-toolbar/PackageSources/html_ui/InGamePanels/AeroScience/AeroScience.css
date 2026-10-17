@@ -238,8 +238,87 @@ ingamepanel-aeroscience .as-panel {
   display: none !important;
 }
 
-.as-scroll:focus { outline: none; }
-.as-guidance { padding: 10px 0; font-size: 16px; border-top: 1px solid #385465; }
-.as-instrument { margin: 12px 0; padding: 8px; border-bottom: 1px solid #385465; }
-.as-instrument select { max-width: 120px; }
-new-push-button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid #75ead1; outline-offset: 2px; }
+.as-scroll:focus {
+  outline: none;
+}
+.as-guidance {
+  padding: 10px 0;
+  font-size: 16px;
+  border-top: 1px solid #385465;
+}
+.as-instrument {
+  margin: 12px 0;
+  padding: 8px;
+  border-bottom: 1px solid #385465;
+}
+.as-instrument select {
+  max-width: 120px;
+}
+new-push-button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid #75ead1;
+  outline-offset: 2px;
+}
+
+/* Science Payload: compact native controls; the SDK owns window dragging and resizing. */
+#as-instruments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.as-instrument {
+  flex: 0 0 calc(50% - 6px);
+  width: calc(50% - 6px);
+  box-sizing: border-box;
+  margin: 0;
+  padding: 12px;
+  border: 0;
+  border-radius: 6px;
+  background: #172b38;
+  min-width: 0;
+}
+.as-instrument strong {
+  display: block;
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+.as-instrument new-push-button {
+  min-width: 48px;
+  padding: 3px 8px;
+  margin: 0 8px 8px 0;
+  font-size: 14px;
+}
+.as-instrument label {
+  display: block;
+  font-size: 14px;
+}
+.as-science-reading {
+  font-size: 22px;
+  line-height: 1.4;
+  margin: 10px 0;
+  overflow-wrap: anywhere;
+}
+.as-instrument details {
+  font-size: 14px;
+}
+.as-instrument[data-state="paused"],
+.as-instrument[data-state="disabled"] {
+  opacity: 0.75;
+}
+@media (max-width: 520px) {
+  .as-instrument { flex-basis: 100%; width: 100%; }
+}
+
+.as-science-state {
+  display: block;
+  color: #83dfce;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+.as-panel .as-instrument new-push-button {
+  display: inline-block;
+  width: 56px;
+  min-width: 56px;
+  min-height: 30px;
+}

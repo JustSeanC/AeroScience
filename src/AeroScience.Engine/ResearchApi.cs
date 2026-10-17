@@ -5,10 +5,22 @@ using AeroScience.Shared;
 namespace AeroScience.Engine;
 
 public sealed record EstimateRequest(InstrumentConfiguration[]? Instruments, double? DurationMinutes);
+public sealed record SciencePauseRequest(bool Paused);
 public static class ResearchApi
 {
     public static void MapResearchEndpoints(this WebApplication app)
     {
+        app.MapGet("/api/display/units", (ScienceUnitSettings settings) => new { preferences = settings.Get(), options = ScienceUnits.Options, aviation = ScienceUnits.Aviation, scientific = ScienceUnits.Scientific, warning = settings.Warning });
+        app.MapPost("/api/display/units", (ScienceUnitPreferences preferences, ScienceUnitSettings settings) => settings.Set(preferences));
+        app.MapPost("/api/missions/{id:guid}/science/state", (Guid id, SciencePauseRequest request, MissionCoordinator missions) => missions.SetSciencePaused(id, request.Paused));
+        app.MapGet("/api/patterns", () => Enum.GetNames<FlightPatternKind>());
+        app.MapPost("/api/patterns/preview", (PatternDefinition definition) => FlightPatterns.Generate(definition));
+        app.MapGet("/api/presets", (MissionStore store) => store.Presets());
+        app.MapPost("/api/presets", (InstrumentPreset preset, MissionStore store) => store.SavePreset(preset));
+        app.MapPost("/api/presets/resolve", (InstrumentPreset preset) => MissionStore.ResolvePreset(preset));
+        app.MapPost("/api/presets/{id:guid}/delete", (Guid id, MissionStore store) => store.DeletePreset(id) ? Results.Ok(new { deleted = true }) : Results.NotFound());
+        app.MapGet("/api/missions/{id:guid}/analysis", (Guid id, MissionStore store) => store.Detail(id) is null ? Results.NotFound() : Results.Ok(MissionAnalysis.Compare(store.Research(id).PlanSnapshot, store.StreamSamples(id), store.GetAnalysisSettings(id))));
+        app.MapPost("/api/missions/{id:guid}/analysis", (Guid id, AnalysisSettings settings, MissionStore store) => store.SaveAnalysisSettings(id, settings));
         app.MapGet("/api/templates", () => ScienceCatalog.Templates);
         app.MapGet("/api/instruments", () => ScienceCatalog.Definitions);
         app.MapPost("/api/instruments", (InstrumentConfiguration[] input, MissionCoordinator missions) =>
@@ -33,6 +45,7 @@ public static class ResearchApi
             return Results.Ok(new
             {
                 flight = missions.Statistics(id),
+                sciencePauses = missions.SciencePauses(id),
                 research = missions.Research(id),
                 datasets = missions.ResolvedDatasetReferences(id),
                 scienceAvailable = error is null,

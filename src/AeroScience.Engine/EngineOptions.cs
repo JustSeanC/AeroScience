@@ -6,6 +6,7 @@ public sealed class EngineOptions
 {
     public string Telemetry { get; set; } = "SimConnect";
     public bool RequireExistingDatabase { get; set; }
+    public string? ConfigurationDirectory { get; set; }
     public string? ScienceLibraryDirectory { get; set; }
     public int Port { get; set; } = 5080;
     public int SamplingIntervalMs { get; set; } = 1000;

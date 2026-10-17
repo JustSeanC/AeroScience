@@ -33,6 +33,8 @@ public sealed class ToolbarCommandHandler(MissionCoordinator coordinator)
                     case "state": return Reply(command.RequestId, true, null);
                     case "start": coordinator.Start(command.Name, command.Mode); break;
                     case "end" when command.MissionId is { } id: coordinator.End(id); break;
+                    case "science-pause" when command.MissionId is { } pauseMission: coordinator.SetSciencePaused(pauseMission, true); break;
+                    case "science-resume" when command.MissionId is { } resumeMission: coordinator.SetSciencePaused(resumeMission, false); break;
                     case "marker" when command.MissionId is { } markerMission:
                         coordinator.AddMarker(markerMission, new(command.Category ?? "observation", command.Notes)); break;
                     case "instrument" when command.InstrumentId is { } instrument:
@@ -57,17 +59,21 @@ public sealed class ToolbarCommandHandler(MissionCoordinator coordinator)
     }
     private string Reply(Guid id, bool ok, string? error)
     {
-        static string? Short(string? value,int length=100) => value?.Length>length ? value[..length]+"…" : value;
-        var state=coordinator.Snapshot();
+        static string? Short(string? value, int length = 100) => value?.Length > length ? value[..length] + "…" : value;
+        var state = coordinator.Snapshot();
         // Display-only text bounds keep native CommBus below 8 KiB; database/export values stay intact.
-        state=state with {
-            Connection=state.Connection with {Message=Short(state.Connection.Message,160)!},
-            Telemetry=state.Telemetry is { } t?t with {Aircraft=Short(t.Aircraft,80)!}:null,
-            ActiveMission=state.ActiveMission is { } m?m with {Name=Short(m.Name,80)!,Aircraft=Short(m.Aircraft,80)}:null,
-            Research=state.Research is { } r?r with {ScienceStorageError=Short(r.ScienceStorageError,120),
-                Instruments=r.Instruments.Select(i=>i with {Message=Short(i.Message,80)}).ToArray()}:null
+        state = state with
+        {
+            Connection = state.Connection with { Message = Short(state.Connection.Message, 160)! },
+            Telemetry = state.Telemetry is { } t ? t with { Aircraft = Short(t.Aircraft, 80)! } : null,
+            ActiveMission = state.ActiveMission is { } m ? m with { Name = Short(m.Name, 80)!, Aircraft = Short(m.Aircraft, 80) } : null,
+            Research = state.Research is { } r ? r with
+            {
+                ScienceStorageError = Short(r.ScienceStorageError, 120),
+                Instruments = r.Instruments.Select(i => i with { Message = Short(i.Message, 80) }).ToArray()
+            } : null
         };
-        return JsonSerializer.Serialize(new ToolbarReply(1,id,ok,Short(error,180),state),WireJson.Options);
+        return JsonSerializer.Serialize(new ToolbarReply(1, id, ok, Short(error, 180), state), WireJson.Options);
     }
     private void Remember(Guid id, string json, string reply)
     {

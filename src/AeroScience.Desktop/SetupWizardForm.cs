@@ -134,14 +134,11 @@ public sealed class SetupWizardForm : Form
             await app.RunStoppedAsync(() => Task.Run(() =>
             {
                 new SetupCoordinator(app.Preferences, app.Storage, AppContext.BaseDirectory).ConfigureStorage(missionFolder, libraryFolder, true, reporter);
-                if (installToolbar)
-                {
-                    reporter.Report("Installing the verified MSFS toolbar…");
-                    ToolbarInstaller.Install(Path.Combine(AppContext.BaseDirectory, "Toolbar"), selectedCommunity, previousCommunity: app.Preferences.Load().CommunityDirectory);
-                }
-                app.Preferences.Save(app.Preferences.Load() with { SetupCompleted = true, CommunityDirectory = installToolbar ? selectedCommunity : app.Preferences.Load().CommunityDirectory });
+                app.Preferences.Save(app.Preferences.Load() with { SetupCompleted = true });
             }));
-            working = false; DialogResult = DialogResult.OK; Close();
+            working = false;
+            if (installToolbar && !app.InstallToolbar(this, selectedCommunity)) { back.Enabled = next.Enabled = cancel.Enabled = true; return; }
+            DialogResult = DialogResult.OK; Close();
         }
         catch (Exception error) { working = false; back.Enabled = page > 0; next.Enabled = cancel.Enabled = true; app.ShowError(error); }
     }

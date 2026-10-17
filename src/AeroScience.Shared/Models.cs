@@ -43,7 +43,7 @@ public sealed record SamplingDiagnostics(long ReceivedUpdates, long CommittedSam
     long MissingIntervals, double? AchievedHz, DateTimeOffset? FirstSampleUtc, DateTimeOffset? LastSampleUtc,
     double? MissionAverageHz = null, double? FirstSampleDelaySeconds = null);
 public sealed record EngineSnapshot(ConnectionInfo Connection, TelemetryFrame? Telemetry,
-    Mission? ActiveMission, int SamplingIntervalMs, string Version = "0.2.0", SamplingDiagnostics? Sampling = null,
+    Mission? ActiveMission, int SamplingIntervalMs, string Version = "0.2.1", SamplingDiagnostics? Sampling = null,
     ResearchState? Research = null);
 public sealed record StartMissionRequest(string Name, ScienceMode Mode = ScienceMode.Universal,
     Guid? PlanId = null, InstrumentConfiguration[]? Instruments = null, string? Objective = null);

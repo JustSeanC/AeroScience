@@ -123,5 +123,44 @@ public sealed class ToolbarInstallTests : IDisposable
         Assert.Throws<IOException>(() => ToolbarInstaller.Remove(community, true, () => false));
         Assert.Contains("Some other add-on", File.ReadAllText(Path.Combine(target, "manifest.json")));
     }
+
+    private sealed class Reporter(List<ToolbarProgress> events) : IProgress<ToolbarProgress>
+    { public void Report(ToolbarProgress progress) => events.Add(progress); }
+    [Fact]
+    public void ActualManifestVersionsDriveStatusesWithoutRepeatedSessionPrompts()
+    {
+        var bundle = Fixture(); var community = Path.Combine(root, "Community"); Directory.CreateDirectory(community);
+        var missing = ToolbarVersions.Inspect(bundle, community); Assert.Equal(ToolbarInstallState.Missing, missing.Status);
+        var policy = new ToolbarPromptPolicy(); Assert.True(policy.ShouldPrompt(missing)); policy.Dismiss(missing); Assert.False(policy.ShouldPrompt(missing));
+        var target = Path.Combine(community, "aeroscience-toolbar"); Directory.CreateDirectory(target);
+        void Manifest(string version) => File.WriteAllText(Path.Combine(target, "manifest.json"), JsonSerializer.Serialize(new { title = "AeroScience", package_version = version }));
+        Manifest("0.1.1"); var old = ToolbarVersions.Inspect(bundle, community); Assert.Equal(ToolbarInstallState.UpdateAvailable, old.Status); Assert.True(policy.ShouldPrompt(old));
+        Manifest(typeof(ToolbarInstaller).Assembly.GetName().Version!.ToString(3)); Assert.Equal(ToolbarInstallState.Current, ToolbarVersions.Inspect(bundle, community).Status);
+        Manifest("9.0.0"); Assert.Equal(ToolbarInstallState.Incompatible, ToolbarVersions.Inspect(bundle, community).Status); Assert.Throws<IOException>(() => InstallFixture(bundle, community, () => false));
+        File.WriteAllText(Path.Combine(target, "manifest.json"), "bad JSON"); Assert.Equal(ToolbarInstallState.Unknown, ToolbarVersions.Inspect(bundle, community).Status);
+        Manifest("0.1.1"); var metadata = Path.Combine(target, "html_ui", "InGamePanels", "AeroScience"); Directory.CreateDirectory(metadata); File.WriteAllText(Path.Combine(metadata, "toolbar-compatibility.json"), "{\"protocol\":99}"); Assert.Equal(ToolbarInstallState.Incompatible, ToolbarVersions.Inspect(bundle, community).Status);
+    }
+    [Fact]
+    public void RealProgressReportsMeasuredFilesAndFinalHashFailureRestoresOriginal()
+    {
+        var bundle = Fixture(); var community = Path.Combine(root, "Packages", "Community"); Directory.CreateDirectory(community); InstallFixture(bundle, community, () => false);
+        var target = Path.Combine(community, "aeroscience-toolbar"); File.WriteAllText(Path.Combine(target, "original.txt"), "keep old");
+        var events = new List<ToolbarProgress>(); var logs = Path.Combine(root, "logs");
+        Assert.Throws<IOException>(() => ToolbarInstaller.Install(bundle, community, () => false, discoverCommunityFolders: DiscoverFixtureCommunityFolders,
+            context: new(new Reporter(events), logs, BeforeVerifyFile: file => File.AppendAllText(file, "changed after activation"))));
+        Assert.Equal("keep old", File.ReadAllText(Path.Combine(target, "original.txt"))); Assert.Contains(events, e => e.Stage == "Recovery completed"); Assert.DoesNotContain(events, e => e.Stage == "Installation completed");
+        events.Clear(); ToolbarInstaller.Install(bundle, community, () => false, discoverCommunityFolders: DiscoverFixtureCommunityFolders, context: new(new Reporter(events), logs));
+        Assert.Contains(events, e => e.Stage == "Installation completed"); Assert.Contains(events, e => e.Stage == "Verifying installed files" && e.Percent == 100);
+        Assert.All(events.Where(e => e.Percent is not null), e => Assert.Equal((int)(e.Completed! * 100 / e.Total!), e.Percent)); Assert.All(events.Where(e => e.Total is null), e => Assert.Null(e.Percent)); Assert.NotEmpty(Directory.GetFiles(logs, "*.log"));
+    }
+    [Fact]
+    public void InterruptedCopyAndConcurrentInstallCannotReplaceExistingToolbar()
+    {
+        var bundle = Fixture(); var community = Path.Combine(root, "Packages", "Community"); Directory.CreateDirectory(community); InstallFixture(bundle, community, () => false);
+        var file = Path.Combine(community, "aeroscience-toolbar", "manifest.json"); var original = File.ReadAllText(file);
+        Assert.Throws<IOException>(() => ToolbarInstaller.Install(bundle, community, () => false, discoverCommunityFolders: DiscoverFixtureCommunityFolders,
+            context: new(CopyFile: (from, to) => { Assert.Throws<IOException>(() => InstallFixture(bundle, community, () => false)); throw new IOException("disk disconnected"); })));
+        Assert.Equal(original, File.ReadAllText(file)); Assert.Empty(Directory.GetDirectories(Path.GetDirectoryName(community)!, ".aeroscience-stage-*"));
+    }
     public void Dispose() { if (Directory.Exists(root)) Directory.Delete(root, true); }
 }

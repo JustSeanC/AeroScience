@@ -80,8 +80,8 @@ public static class MissionPlanning
             || plan.MinimumAltitudeFeet > plan.MaximumAltitudeFeet) throw new ArgumentException("Use finite altitude limits and a positive mission duration (up to 30 days).");
         var waypoints = plan.Waypoints ?? [];
         var areas = plan.SurveyAreas ?? [];
-        if (waypoints.Length > 200 || areas.Length > 20 || areas.Sum(a => a.Vertices?.Length ?? 0) > 1000)
-            throw new ArgumentException("Plans support up to 200 waypoints, 20 areas and 1,000 total polygon vertices.");
+        if (waypoints.Length > 1000 || areas.Length > 20 || areas.Sum(a => a.Vertices?.Length ?? 0) > 1000)
+            throw new ArgumentException("Plans support up to 1,000 waypoints, 20 areas and 1,000 total polygon vertices.");
         waypoints = waypoints.Select(w =>
         {
             if (!Position(w.Latitude, w.Longitude) || w.TargetAltitudeFeet is { } altitude && !double.IsFinite(altitude))
@@ -103,6 +103,7 @@ public static class MissionPlanning
             Departure = Text(plan.Departure, 200),
             Destination = Text(plan.Destination, 200),
             PreflightNotes = Text(plan.PreflightNotes),
+            Patterns = (plan.Patterns ?? []).Select(FlightPatterns.Validate).ToArray(),
             Waypoints = waypoints,
             SurveyAreas = areas,
             Instruments = ScienceCatalog.Normalize(plan.Instruments ?? ScienceCatalog.Templates.Single(t => t.Id == plan.Template).Instruments),

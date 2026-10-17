@@ -20,6 +20,9 @@ public sealed class MainForm : Form, IDesktopActions
     private bool closing;
     public bool Busy { get; private set; }
     public bool Recording => engine?.Services.GetRequiredService<MissionCoordinator>().Snapshot().ActiveMission is not null;
+    private readonly ToolbarPromptPolicy toolbarPrompts = new();
+    public ToolbarVersionStatus Toolbar => ToolbarVersions.Inspect(Path.Combine(AppContext.BaseDirectory, "Toolbar"), PreferredCommunity());
+    private string? PreferredCommunity() => Preferences.Load().CommunityDirectory ?? ToolbarInstaller.DiscoverCommunityFolders().OrderByDescending(p => Directory.Exists(Path.Combine(p, "aeroscience-toolbar"))).FirstOrDefault();
     public StorageStatus MissionStorage => Storage.Status(StorageKind.Missions);
     public StorageStatus ScienceStorage => Storage.Status(StorageKind.ScienceLibrary);
 
@@ -49,6 +52,8 @@ public sealed class MainForm : Form, IDesktopActions
                     if (wizard.ShowDialog(this) != DialogResult.OK) { Close(); return; }
                 }
                 Storage.Initialize(); await StartEngineAsync(); OpenDashboard();
+                var toolbar = Toolbar;
+                if (toolbarPrompts.ShouldPrompt(toolbar)) { toolbarPrompts.Dismiss(toolbar); using var prompt = new ToolbarUpdateForm(this, toolbar); prompt.ShowDialog(this); }
             }
             catch (Exception error) { ShowError(error); }
             timer.Start(); RefreshStatus();
@@ -82,6 +87,7 @@ public sealed class MainForm : Form, IDesktopActions
         }
         var args = new[] {
             "--AeroScience:Telemetry=SimConnect",
+            "--AeroScience:ConfigurationDirectory=" + Preferences.DirectoryPath,
             "--AeroScience:DataDirectory=" + preferences.MissionDirectory,
             "--AeroScience:ScienceLibraryDirectory=" + preferences.ScienceLibraryDirectory,
             "--AeroScience:RequireExistingDatabase=true", "--AeroScience:EnableToolbarBridge=true",
@@ -122,7 +128,7 @@ public sealed class MainForm : Form, IDesktopActions
         if (engine.Lifetime.ApplicationStopped.IsCancellationRequested)
         { status.Text = "The local engine stopped after an error. Collect Feedback and check Storage/Settings; existing records are retained."; dashboard.Enabled = false; return; }
         var snapshot = engine.Services.GetRequiredService<MissionCoordinator>().Snapshot();
-        status.Text = $"Engine running · {snapshot.Connection.Message}\n{(snapshot.ActiveMission is null ? "No active mission" : "Mission recording")} · Toolbar: {ToolbarInstaller.InstalledStatus(Preferences.Load())}";
+        status.Text = $"Engine running · {snapshot.Connection.Message}\n{(snapshot.ActiveMission is null ? "No active mission" : "Mission recording")} · Toolbar: {Toolbar.Message}";
     }
     public void OpenDashboard()
     {
@@ -146,8 +152,23 @@ public sealed class MainForm : Form, IDesktopActions
         using var wizard = new SetupWizardForm(this);
         if (wizard.ShowDialog(owner ?? this) == DialogResult.OK) OpenDashboard();
     }
+    public bool InstallToolbar(IWin32Window owner, string? community)
+    {
+        if (Busy || Recording) { MessageBox.Show(owner, "End recording and wait for other operations before updating the toolbar."); return false; }
+        if (string.IsNullOrWhiteSpace(community) || !Directory.Exists(community))
+        {
+            using var browse = new FolderBrowserDialog { Description = "Choose your MSFS 2024 Community folder", UseDescriptionForTitle = true };
+            if (browse.ShowDialog(owner) != DialogResult.OK) return false; community = browse.SelectedPath;
+        }
+        var toolbarStatus=ToolbarVersions.Inspect(Path.Combine(AppContext.BaseDirectory,"Toolbar"),community);
+        if(!toolbarStatus.CanInstall&&!toolbarStatus.CanRepair){MessageBox.Show(owner,toolbarStatus.Message);return false;}
+        if (ToolbarInstaller.SimulatorRunning()) { MessageBox.Show(owner, "Close MSFS before installing or updating AeroScience's toolbar."); return false; }
+        if (MessageBox.Show(owner, $"Install the bundled AeroScience toolbar in:\n{community}\n\nIts previous files will be backed up outside Community. Unrelated add-ons are preserved.", "Confirm toolbar installation", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return false;
+        using var form = new ToolbarProgressForm(this, community); return form.ShowDialog(owner) == DialogResult.OK;
+    }
     private void Dispatch(Action action)
     { if (!IsDisposed) BeginInvoke(action); }
+    void IDesktopActions.OpenToolbar() => Dispatch(() => { using var form = new SettingsForm(this, false, toolbar: true); form.ShowDialog(this); });
     void IDesktopActions.OpenSettings() => Dispatch(() => ShowSettings(false));
     void IDesktopActions.OpenStorage() => Dispatch(() => ShowSettings(true));
     void IDesktopActions.OpenDataManagement() => Dispatch(ShowDataManagement);
@@ -179,6 +200,10 @@ public sealed class MainForm : Form, IDesktopActions
                     if (Directory.Exists(logDirectory))
                         foreach (var file in Directory.GetFiles(logDirectory, "engine-*.log").OrderDescending().Take(7))
                             if (new FileInfo(file).Length < 5_000_001) Add("logs/" + Path.GetFileName(file), File.ReadAllText(file));
+                    var toolbarLogs=Path.Combine(Preferences.DirectoryPath,"logs");
+                    if(Directory.Exists(toolbarLogs))
+                        foreach(var file in Directory.GetFiles(toolbarLogs,"toolbar-*.log").OrderDescending().Take(7))
+                            if(new FileInfo(file).Length<5_000_001)Add("toolbar-logs/"+Path.GetFileName(file),File.ReadAllText(file));
                 }
                 File.Move(dialog.FileName + ".partial", dialog.FileName, overwrite: true);
                 MessageBox.Show(notes, "Saved locally. Review the ZIP before sharing it."); notes.Close();

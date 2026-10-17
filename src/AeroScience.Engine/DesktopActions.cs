@@ -6,6 +6,8 @@ public interface IDesktopActions
 {
     StorageStatus MissionStorage { get; }
     StorageStatus ScienceStorage { get; }
+    ToolbarVersionStatus Toolbar { get; }
+    void OpenToolbar();
     void OpenSettings();
     void OpenStorage();
     void OpenDataManagement();

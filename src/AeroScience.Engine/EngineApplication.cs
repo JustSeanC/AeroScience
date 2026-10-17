@@ -23,7 +23,7 @@ public static class EngineApplication
         {
             var options = context.Configuration.GetSection("AeroScience").Get<EngineOptions>() ?? new();
             options.Validate();
-            server.Limits.MaxRequestBodySize = 262144;
+            server.Limits.MaxRequestBodySize = 1048576;
             server.Listen(IPAddress.Loopback, options.Port);
             if (options.EnableLan) server.Listen(IPAddress.Parse(options.LanAddress!), options.Port);
         });
@@ -63,7 +63,8 @@ public static class EngineApplication
                 { sp.GetRequiredService<ILogger<ScienceStore>>().LogWarning("Science references need review: {Message}", error.Message); }
             return science;
         });
-        builder.Services.AddSingleton<ResearchOperations>();
+        builder.Services.AddSingleton(sp => new ScienceUnitSettings(sp.GetRequiredService<EngineOptions>().ConfigurationDirectory ?? sp.GetRequiredService<EngineOptions>().DataDirectory));
+        builder.Services.AddSingleton(sp => new ResearchOperations(sp.GetRequiredService<MissionStore>(), sp.GetRequiredService<ScienceStore>(), sp.GetRequiredService<ScienceUnitSettings>().Get));
         builder.Services.AddSingleton(sp => new MissionCoordinator(sp.GetRequiredService<MissionStore>(), sp.GetRequiredService<EngineOptions>().SamplingIntervalMs,
             requireFreshTelemetry: true, ensureRecordingCapacity: () =>
             {
@@ -83,7 +84,7 @@ public static class EngineApplication
         {
             context.Response.Headers["X-Content-Type-Options"] = "nosniff";
             context.Response.Headers["Referrer-Policy"] = "no-referrer";
-            context.Response.Headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'";
+            context.Response.Headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob: https://tile.openstreetmap.org; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'";
             if (!AccessControl.ValidHost(context.Request, options))
             {
                 context.Response.StatusCode = 400;
@@ -123,11 +124,17 @@ public static class EngineApplication
             { context.Response.StatusCode = 409; await context.Response.WriteAsJsonAsync(new { error = "Storage unavailable. Existing data was not replaced. " + e.Message }); }
         });
         app.UseDefaultFiles();
-        app.UseStaticFiles();
-        app.MapGet("/api/health", () => Results.Ok(new { status = "ok", version = "0.2.0" }));
+        var contentTypes = new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider();
+        contentTypes.Mappings[".geojson"] = "application/geo+json";
+        app.UseStaticFiles(new StaticFileOptions { ContentTypeProvider = contentTypes });
+        app.MapGet("/api/health", () => Results.Ok(new { status = "ok", version = "0.2.1" }));
         app.MapGet("/api/access", (HttpContext c) => new { requiresPairing = !AccessControl.IsLoopback(c) });
         app.MapPost("/api/session", (HttpContext c, PairRequest request, AccessControl access) =>
         {
+            // Tabs in the same browser share their HttpOnly session cookie. Reuse its CSRF token
+            // so opening a second display does not invalidate commands in the first display.
+            if (request.Code is null && access.Get(c.Request) is { } existing)
+                return Results.Ok(new { csrf = existing.Csrf, expiresUtc = existing.ExpiresUtc });
             var loopback = AccessControl.IsLoopback(c);
             if (!loopback && !access.AllowAttempt(c.Connection.RemoteIpAddress?.ToString() ?? "unknown")) return Results.StatusCode(429);
             var session = access.Pair(loopback, request.Code);
@@ -159,7 +166,7 @@ public static class EngineApplication
         app.MapResearchEndpoints();
         app.MapGet("/api/settings", (HttpContext c, AccessControl access) => new
         {
-            version = "0.2.0",
+            version = "0.2.1",
             telemetry = options.Telemetry,
             options.SamplingIntervalMs,
             options.EnableLan,
@@ -170,6 +177,7 @@ public static class EngineApplication
             desktopAvailable = AccessControl.IsLoopback(c) && c.RequestServices.GetService<IDesktopActions>() is not null,
             missionStorage = AccessControl.IsLoopback(c) ? c.RequestServices.GetService<IDesktopActions>()?.MissionStorage : null,
             scienceStorage = AccessControl.IsLoopback(c) ? c.RequestServices.GetService<IDesktopActions>()?.ScienceStorage : null,
+            toolbarStatus = AccessControl.IsLoopback(c) ? c.RequestServices.GetService<IDesktopActions>()?.Toolbar : null,
             simConnect = OperatingSystem.IsWindows() ? "Windows x64 native SDK runtime required in SimConnect mode" : "Live telemetry requires Windows x64; offline history remains available",
         });
         app.MapPost("/api/desktop/{action}", (string action, HttpContext context) =>
@@ -180,6 +188,7 @@ public static class EngineApplication
             switch (action)
             {
                 case "settings": desktop.OpenSettings(); break;
+                case "toolbar": desktop.OpenToolbar(); break;
                 case "storage": desktop.OpenStorage(); break;
                 case "data-management": desktop.OpenDataManagement(); break;
                 case "feedback": desktop.CollectFeedback(); break;
@@ -207,7 +216,7 @@ public static class EngineApplication
             catch (OperationCanceledException) when (context.RequestAborted.IsCancellationRequested) { }
             catch (IOException) { /* A display disconnected; recording continues in TelemetryWorker. */ }
         });
-        app.Logger.LogInformation("AeroScience 0.2.0 — {Source} telemetry; dashboard http://127.0.0.1:{Port}; data {Directory}", options.Telemetry, options.Port, options.DataDirectory);
+        app.Logger.LogInformation("AeroScience 0.2.1 — {Source} telemetry; dashboard http://127.0.0.1:{Port}; data {Directory}", options.Telemetry, options.Port, options.DataDirectory);
         return app;
     }
 }

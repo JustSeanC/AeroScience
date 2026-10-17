@@ -34,8 +34,15 @@ class IngamePanelAeroScience extends TemplateElement {
         this.send("end", { missionId: this.state.activeMission.id });
     };
     this.byId("as-marker").onclick = () => {
-      if (this.state && this.state.activeMission && !this.byId("as-marker").hasAttribute("disabled"))
-        this.send("marker", { missionId: this.state.activeMission.id, category: "observation" });
+      if (
+        this.state &&
+        this.state.activeMission &&
+        !this.byId("as-marker").hasAttribute("disabled")
+      )
+        this.send("marker", {
+          missionId: this.state.activeMission.id,
+          category: "observation",
+        });
     };
     this.byId("as-mode").onchange = () => {
       this.byId("as-mode-help").textContent =
@@ -199,7 +206,9 @@ class IngamePanelAeroScience extends TemplateElement {
     this.byId("as-source").textContent =
       state.connection.source === "simulated"
         ? "SIMULATED TEST DATA"
-        : fresh && state.connection.state === "connected" ? "SIMCONNECT TELEMETRY" : "MSFS DISCONNECTED";
+        : fresh && state.connection.state === "connected"
+          ? "SIMCONNECT TELEMETRY"
+          : "MSFS DISCONNECTED";
     this.status(state.connection.message);
     this.byId("as-aircraft").textContent = fresh
       ? t.aircraft
@@ -210,7 +219,9 @@ class IngamePanelAeroScience extends TemplateElement {
     this.byId("as-airspeed").textContent = fresh
       ? fmt(t.indicatedAirspeedKnots)
       : "—";
-    this.byId("as-mach").textContent = "Mach " + (fresh && Number.isFinite(t.machNumber) ? t.machNumber.toFixed(2) : "—");
+    this.byId("as-mach").textContent =
+      "Mach " +
+      (fresh && Number.isFinite(t.machNumber) ? t.machNumber.toFixed(2) : "—");
     this.byId("as-heading").textContent = fresh ? fmt(t.headingDegrees) : "—";
     this.byId("as-vspeed").textContent = fresh
       ? fmt(t.verticalSpeedFeetPerMinute)
@@ -222,7 +233,8 @@ class IngamePanelAeroScience extends TemplateElement {
     if (mission) {
       // Prepare the next mission with the safe default, independently of the active mission's mode.
       this.byId("as-mode").value = "universal";
-      this.byId("as-mode-help").textContent = "All compatible aircraft can record missions.";
+      this.byId("as-mode-help").textContent =
+        "All compatible aircraft can record missions.";
       this.byId("as-name").value = "";
       this.byId("as-active-name").textContent = mission.name;
       this.byId("as-active-mode").textContent =
@@ -245,31 +257,182 @@ class IngamePanelAeroScience extends TemplateElement {
   }
   renderResearch(research, fresh) {
     const g = research && research.guidance;
-    this.byId("as-guidance").textContent = !fresh || !g || g.quality !== "valid" ? "Flight Guidance unavailable"
-      : "AP: " + g.autopilot + " | " + [g.lateral, g.vertical, g.speed].map(m =>
-        (m.mode || "Unavailable") + (Number.isFinite(m.target) ? " " + m.target.toFixed(m.unit === "mach" ? 2 : 0) + " " + m.unit : "") + (m.armed ? " (Armed: " + m.armed + ")" : "")).join(" | ");
+    this.byId("as-guidance").textContent =
+      !fresh || !g || g.quality !== "valid"
+        ? "Flight Guidance unavailable"
+        : "AP: " +
+          g.autopilot +
+          " | " +
+          [g.lateral, g.vertical, g.speed]
+            .map(
+              (m) =>
+                (m.mode || "Unavailable") +
+                (Number.isFinite(m.target)
+                  ? " " +
+                    m.target.toFixed(m.unit === "mach" ? 2 : 0) +
+                    " " +
+                    m.unit
+                  : "") +
+                (m.armed ? " (Armed: " + m.armed + ")" : ""),
+            )
+            .join(" | ");
+    const control = this.byId("as-science-pause");
+    if (control) {
+      control.textContent =
+        research && research.intentionallyPaused
+          ? "Resume science collection"
+          : "Pause science collection";
+      control.disabled = !(this.state && this.state.activeMission);
+      control.onclick = () => {
+        if (!this.state || !this.state.activeMission) return;
+        this.send(
+          research && research.intentionallyPaused
+            ? "science-resume"
+            : "science-pause",
+          { missionId: this.state.activeMission.id },
+        );
+      };
+    }
+    const collection = this.byId("as-science-state");
+    if (collection)
+      collection.textContent = research
+        ? "Collection: " + research.collectionStatus
+        : "Science unavailable";
     const holder = this.byId("as-instruments");
-    if (!research) { holder.textContent = "Scientific source unavailable"; return; }
+    if (!research) {
+      holder.textContent = "Scientific source unavailable";
+      return;
+    }
     if (!this.instrumentNodes) this.instrumentNodes = {};
     if (!holder.querySelector(".as-instrument")) holder.textContent = "";
     for (const instrument of research.instruments || []) {
       let nodes = this.instrumentNodes[instrument.instrumentId];
       if (!nodes || !nodes.row.parentNode) {
-        const row = document.createElement("div"); row.className = "as-instrument";
-        const title = document.createElement("strong"); title.textContent = instrument.instrumentId;
+        const row = document.createElement("div");
+        row.className = "as-instrument";
+        const title = document.createElement("strong");
+        title.textContent =
+          {
+            "ambient-temperature": "Ambient temperature",
+            "ambient-pressure": "Ambient pressure",
+            "ambient-wind": "Ambient wind",
+            "ambient-density": "Air density",
+          }[instrument.instrumentId] || "Science instrument";
+        const stateLabel = document.createElement("span");
+        stateLabel.className = "as-science-state";
         const toggle = document.createElement("new-push-button");
         const interval = document.createElement("select");
-        for (const seconds of [1,2,5,10,30,60]) { const option = document.createElement("option"); option.value = seconds * 1000; option.textContent = seconds + " s"; interval.appendChild(option); }
-        const values = document.createElement("p"), status = document.createElement("p");
-        row.appendChild(title); row.appendChild(toggle); row.appendChild(interval); row.appendChild(values); row.appendChild(status); holder.appendChild(row);
-        nodes = { row: row, toggle: toggle, interval: interval, values: values, status: status }; this.instrumentNodes[instrument.instrumentId] = nodes;
-        toggle.onclick = () => { const current = this.state.research.instruments.find(i => i.instrumentId === instrument.instrumentId); this.send("instrument", { instrumentId: instrument.instrumentId, enabled: !current.enabled }); };
-        interval.onchange = () => this.send("instrument", { instrumentId: instrument.instrumentId, intervalMs: Number(interval.value) });
+        for (const seconds of [1, 2, 5, 10, 30, 60]) {
+          const option = document.createElement("option");
+          option.value = seconds * 1000;
+          option.textContent = seconds + " s";
+          interval.appendChild(option);
+        }
+        const values = document.createElement("div"),
+          status = document.createElement("p");
+        values.className = "as-science-values";
+        const details = document.createElement("details"),
+          summary = document.createElement("summary");
+        summary.textContent = "Diagnostics";
+        details.appendChild(summary);
+        details.appendChild(status);
+        const intervalLabel = document.createElement("label");
+        intervalLabel.textContent = "Collection interval ";
+        intervalLabel.appendChild(interval);
+        row.appendChild(title);
+        row.appendChild(stateLabel);
+        row.appendChild(toggle);
+        row.appendChild(intervalLabel);
+        row.appendChild(values);
+        row.appendChild(details);
+        holder.appendChild(row);
+        nodes = {
+          row: row,
+          state: stateLabel,
+          toggle: toggle,
+          interval: interval,
+          values: values,
+          status: status,
+        };
+        this.instrumentNodes[instrument.instrumentId] = nodes;
+        toggle.onclick = () => {
+          const current = this.state.research.instruments.find(
+            (i) => i.instrumentId === instrument.instrumentId,
+          );
+          this.send("instrument", {
+            instrumentId: instrument.instrumentId,
+            enabled: !current.enabled,
+          });
+        };
+        interval.onchange = () =>
+          this.send("instrument", {
+            instrumentId: instrument.instrumentId,
+            intervalMs: Number(interval.value),
+          });
       }
-      nodes.toggle.textContent = instrument.enabled ? "Disable" : "Enable";
-      if (document.activeElement !== nodes.interval) nodes.interval.value = instrument.intervalMs;
-      nodes.values.textContent = (instrument.measurements || []).map(v => v.measurementId + ": " + (fresh && instrument.quality === "valid" && Number.isFinite(v.value) ? v.value.toFixed(v.measurementId === "density" ? 6 : 2) : "Unavailable") + " " + v.unit).join(" | ");
-      nodes.status.textContent = instrument.quality + " | " + instrument.observationCount + " saved | " + instrument.rejectedObservations + " rejected | " + instrument.missingIntervals + " missing intervals | actual " + (Number.isFinite(instrument.actualAverageIntervalSeconds) ? instrument.actualAverageIntervalSeconds.toFixed(2) + "s" : "unavailable");
+      nodes.toggle.textContent = instrument.enabled ? "On" : "Off";
+      nodes.toggle.setAttribute(
+        "aria-label",
+        instrument.enabled ? "Disable instrument" : "Enable instrument",
+      );
+      if (document.activeElement !== nodes.interval)
+        nodes.interval.value = instrument.intervalMs;
+      nodes.values.textContent = "";
+      for (const v of instrument.measurements || []) {
+        const value = document.createElement("div");
+        value.className = "as-science-reading";
+        const label =
+          {
+            temperature: "Temperature",
+            pressure: "Pressure",
+            "wind-speed": "Wind speed",
+            "wind-direction": "Wind direction",
+            density: "Density",
+          }[v.measurementId] || "Measurement";
+        const display = Number.isFinite(v.displayValue)
+          ? v.displayValue
+          : v.value;
+        value.textContent =
+          label +
+          ": " +
+          (fresh &&
+          instrument.enabled &&
+          instrument.quality === "valid" &&
+          v.quality === "valid" &&
+          Number.isFinite(display)
+            ? display.toFixed(
+                v.measurementId === "density" && v.displayUnit === "slug/ft³"
+                  ? 6
+                  : 2,
+              )
+            : "Unavailable") +
+          " " +
+          (v.displayUnit || v.unit);
+        nodes.values.appendChild(value);
+      }
+      nodes.state.textContent = instrument.enabled
+        ? instrument.quality
+        : "Disabled";
+      nodes.row.setAttribute(
+        "data-state",
+        instrument.enabled ? instrument.quality : "disabled",
+      );
+      nodes.status.textContent =
+        (instrument.enabled ? instrument.quality : "disabled") +
+        " · " +
+        instrument.acquisitionSets +
+        " acquisition sets · " +
+        instrument.observationCount +
+        " measurement values · " +
+        instrument.rejectedObservations +
+        " rejected · " +
+        instrument.missingIntervals +
+        " unexpected missing · actual " +
+        (Number.isFinite(instrument.actualAverageIntervalSeconds)
+          ? instrument.actualAverageIntervalSeconds.toFixed(2) + " s"
+          : "unavailable") +
+        " · last " +
+        (instrument.lastSuccessfulUtc || "none");
     }
   }
   disconnectedCallback() {

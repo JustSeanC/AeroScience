@@ -18,10 +18,10 @@ public static class ToolbarInstaller
         try
         {
             if (Directory.Exists(packages))
-            foreach (var directory in Directory.EnumerateDirectories(packages, "Microsoft.*"))
-                if (Path.GetFileName(directory).Contains("Limitless", StringComparison.OrdinalIgnoreCase)
-                    || Path.GetFileName(directory).Contains("FlightSimulator2024", StringComparison.OrdinalIgnoreCase))
-                    configs.Add(Path.Combine(directory, "LocalCache", "UserCfg.opt"));
+                foreach (var directory in Directory.EnumerateDirectories(packages, "Microsoft.*"))
+                    if (Path.GetFileName(directory).Contains("Limitless", StringComparison.OrdinalIgnoreCase)
+                        || Path.GetFileName(directory).Contains("FlightSimulator2024", StringComparison.OrdinalIgnoreCase))
+                        configs.Add(Path.Combine(directory, "LocalCache", "UserCfg.opt"));
         }
         catch (Exception error) when (error is IOException or UnauthorizedAccessException) { /* Manual browsing remains available. */ }
         var found = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -56,9 +56,20 @@ public static class ToolbarInstaller
         catch (Exception e) when (e is IOException or JsonException or KeyNotFoundException or InvalidOperationException) { return "Installed package needs inspection"; }
     }
 
+    private static readonly SemaphoreSlim InstallationGate = new(1, 1);
     public static void Install(string input, string community, Func<bool>? simulatorRunning = null, string? previousCommunity = null,
-        Func<IEnumerable<string>>? discoverCommunityFolders = null)
+        Func<IEnumerable<string>>? discoverCommunityFolders = null, ToolbarInstallContext? context = null)
     {
+        if (!InstallationGate.Wait(0)) throw new IOException("Another toolbar installation is already running.");
+        try { InstallCore(input, community, simulatorRunning, previousCommunity, discoverCommunityFolders, context ?? new()); }
+        catch (Exception error) { context?.Report(new("Installation stopped", error.Message)); throw; }
+        finally { InstallationGate.Release(); }
+    }
+    private static void InstallCore(string input, string community, Func<bool>? simulatorRunning, string? previousCommunity,
+        Func<IEnumerable<string>>? discoverCommunityFolders, ToolbarInstallContext context)
+    {
+        void Report(string stage, string message, int? completed = null, int? total = null) => context.Report(new(stage, message, completed, total));
+        Report("Checking MSFS installation", "Checking the simulator is closed and validating the selected package.");
         simulatorRunning ??= SimulatorRunning;
         if (simulatorRunning()) throw new IOException("Close MSFS before installing/updating the toolbar.");
         var package = Path.Combine(input, "aeroscience-toolbar");
@@ -67,6 +78,7 @@ public static class ToolbarInstaller
         if (receipt.RootElement.GetProperty("variant").GetString() != "toolbar-full") throw new IOException("Diagnostic toolbar packages cannot be installed as the full release.");
         var expected = receipt.RootElement.GetProperty("files").EnumerateObject().ToDictionary(p => p.Name, p => p.Value.GetString(), StringComparer.OrdinalIgnoreCase);
         var files = ValidatedFiles(package);
+        Report("Checking the existing toolbar", "Validating bundled files against their genuine SDK build receipt.");
         if (expected.Count != files.Count) throw new IOException("Toolbar files differ from the SDK receipt.");
         foreach (var (name, file) in files)
         {
@@ -105,20 +117,33 @@ public static class ToolbarInstaller
                 && Directory.Exists(Path.Combine(candidate, "aeroscience-toolbar")))
                 throw new IOException("Another AeroScience toolbar copy exists at " + candidate + ". Remove/move that copy outside Community before installing another.");
         var target = Path.Combine(community, "aeroscience-toolbar");
+        var targetVersion = ToolbarVersions.ReadVersion(package);
+        var existingVersion = ToolbarVersions.ReadVersion(target);
+        if (targetVersion is null) throw new IOException("The bundled toolbar version is unknown.");
+        var status = ToolbarVersions.Inspect(input, community);
+        if (status.Status == ToolbarInstallState.Incompatible) throw new IOException(status.Message);
+        if (existingVersion is not null && existingVersion > targetVersion) throw new IOException("A newer toolbar is installed. It was not downgraded.");
         var parent = Path.GetDirectoryName(Path.GetFullPath(community))!;
         var stage = Path.Combine(parent, ".aeroscience-stage-" + Guid.NewGuid().ToString("N"));
         var backup = Path.Combine(parent, ".aeroscience-backups", DateTime.UtcNow.ToString("yyyyMMdd-HHmmss") + "-" + Guid.NewGuid().ToString("N"));
+        using var lease = new FileStream(Path.Combine(parent, ".aeroscience-toolbar-install.lock"), FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
         var movedOld = false;
+        var activated = false;
         try
         {
+            var copied = 0;
+            Report("Copying staged files", "Preparing replacement files outside Community.", 0, files.Count);
             foreach (var (name, file) in files)
             {
                 var to = Path.Combine(stage, name.Replace('/', Path.DirectorySeparatorChar));
-                Directory.CreateDirectory(Path.GetDirectoryName(to)!); File.Copy(file, to, false);
+                Directory.CreateDirectory(Path.GetDirectoryName(to)!);
+                if (context.CopyFile is null) File.Copy(file, to, false); else context.CopyFile(file, to);
                 using var stream = File.OpenRead(to);
-                if (!Convert.ToHexString(SHA256.HashData(stream)).Equals(expected[name], StringComparison.OrdinalIgnoreCase)) throw new IOException("Installed copy verification failed.");
+                if (!Convert.ToHexString(SHA256.HashData(stream)).Equals(expected[name], StringComparison.OrdinalIgnoreCase)) throw new IOException("Staged copy verification failed.");
+                Report("Copying staged files", name, ++copied, files.Count);
             }
             if (simulatorRunning()) throw new IOException("MSFS started during setup; close it and try again.");
+            Report("Preparing a backup", "Preserving the previous AeroScience package outside Community.");
             if (Directory.Exists(target))
             {
                 StorageManager.ValidateLocalPath(target);
@@ -127,17 +152,45 @@ public static class ToolbarInstaller
                     throw new IOException("The target folder contains an unrecognized add-on; it was not changed.");
                 Directory.CreateDirectory(Path.GetDirectoryName(backup)!); Directory.Move(target, backup); movedOld = true;
             }
-            Directory.Move(stage, target);
+            Report("Activating the update", "Switching to the staged, verified toolbar package.");
+            Directory.Move(stage, target); activated = true;
+            var checkedFiles = 0;
+            foreach (var (name, _) in files)
+            {
+                var installed = Path.Combine(target, name.Replace('/', Path.DirectorySeparatorChar));
+                context.BeforeVerifyFile?.Invoke(installed);
+                using var stream = File.OpenRead(installed);
+                if (!Convert.ToHexString(SHA256.HashData(stream)).Equals(expected[name], StringComparison.OrdinalIgnoreCase)) throw new IOException("Installed verification failed: " + name);
+                Report("Verifying installed files", name, ++checkedFiles, files.Count);
+            }
+            Report("Confirming the new version", "Reading the installed SDK package manifest.");
+            if (ToolbarVersions.ReadVersion(target) != targetVersion) throw new IOException("Installed toolbar version verification failed.");
+            Report("Installation completed", $"AeroScience Toolbar {targetVersion.ToString(3)} installed successfully. Start or restart MSFS to load it.");
         }
-        catch
+        catch (Exception failure)
         {
+            Report("Installation failed", failure.Message + " Restoring the prior package when safe.");
+            if (activated && Directory.Exists(target))
+                Directory.Move(target, Path.Combine(parent, ".aeroscience-failed-" + Guid.NewGuid().ToString("N")));
             if (movedOld && !Directory.Exists(target)) Directory.Move(backup, target);
+            Report("Recovery completed", movedOld ? "The previous toolbar was restored. The failed replacement is retained outside Community." : "No previous toolbar was replaced. Diagnostic logs are retained.");
             throw;
         }
         finally { if (Directory.Exists(stage)) Directory.Delete(stage, true); }
     }
 
     public static string? Remove(string community, bool confirmed, Func<bool>? simulatorRunning = null)
+    {
+        if (!InstallationGate.Wait(0)) throw new IOException("Another toolbar operation is already running.");
+        try
+        {
+            if (!Directory.Exists(community)) throw new IOException("The configured Community folder is unavailable.");
+            using var lease = new FileStream(Path.Combine(Path.GetDirectoryName(Path.GetFullPath(community))!, ".aeroscience-toolbar-install.lock"), FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
+            return RemoveCore(community, confirmed, simulatorRunning);
+        }
+        finally { InstallationGate.Release(); }
+    }
+    private static string? RemoveCore(string community, bool confirmed, Func<bool>? simulatorRunning)
     {
         if (!confirmed) throw new InvalidOperationException("Confirm removal of the AeroScience toolbar first.");
         simulatorRunning ??= SimulatorRunning;

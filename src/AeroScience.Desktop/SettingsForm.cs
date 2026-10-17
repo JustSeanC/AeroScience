@@ -13,14 +13,14 @@ public sealed class SettingsForm : Form
     private readonly Label progress = new() { AutoSize = true, MaximumSize = new(720, 0) };
     private readonly ProgressBar progressBar = new() { Width = 650, Style = ProgressBarStyle.Marquee, Visible = false };
     private static FlowLayoutPanel Panel() => new() { Dock = DockStyle.Fill, AutoScroll = true, Padding = new(18), FlowDirection = FlowDirection.TopDown, WrapContents = false };
-    public SettingsForm(MainForm app, bool storage)
+    public SettingsForm(MainForm app, bool storage, bool toolbar = false)
     {
         this.app = app; Text = "AeroScience Settings"; Width = 840; Height = 690; MinimumSize = new(600, 450); AutoScaleMode = AutoScaleMode.Dpi;
         var tabs = new TabControl { Dock = DockStyle.Fill };
-        var general = new TabPage("General & Toolbar"); var storageTab = new TabPage("Storage");
+        var general = new TabPage("General"); var storageTab = new TabPage("Storage"); var toolbarTab = new TabPage("Toolbar");
         var generalPanel = Panel(); general.Controls.Add(generalPanel); storageTab.Controls.Add(storagePanel);
-        tabs.TabPages.Add(general); tabs.TabPages.Add(storageTab); tabs.SelectedIndex = storage ? 1 : 0; Controls.Add(tabs);
-        BuildGeneral(generalPanel); RefreshStorage();
+        tabs.TabPages.Add(general); tabs.TabPages.Add(storageTab); tabs.TabPages.Add(toolbarTab); var toolbarPanel = Panel(); toolbarTab.Controls.Add(toolbarPanel); tabs.SelectedIndex = storage ? 1 : toolbar ? 2 : 0; Controls.Add(tabs);
+        BuildGeneral(generalPanel); BuildToolbar(toolbarPanel); RefreshStorage();
         FormClosing += (_, e) => { if (app.Busy) { e.Cancel = true; MessageBox.Show(this, "Wait for the current operation to finish."); } };
     }
     private static Button Button(Control parent, string text, EventHandler action)
@@ -132,22 +132,19 @@ public sealed class SettingsForm : Form
             app.Preferences.Save(next); return Task.CompletedTask;
         })));
         Label(panel, "LAN is optional. Allow AeroScience on the Windows Private network profile only when using iPad/LAN. The pairing code is in dashboard Settings. Local operation requires no firewall change.");
+    }
+    private void BuildToolbar(Control panel)
+    {
+        var preferences = app.Preferences.Load();
         Label(panel, "MSFS Community folder");
         var community = new ComboBox { Width = 700 };
         community.Items.AddRange(ToolbarInstaller.DiscoverCommunityFolders().Select(p => (object)p).ToArray());
         community.Text = preferences.CommunityDirectory ?? (community.Items.Count > 0 ? community.Items[0]?.ToString() ?? "" : ""); panel.Controls.Add(community);
         Button(panel, "Browse Community folder…", (_, _) => { using var browse = new FolderBrowserDialog { Description = "Select the configured MSFS Community folder", UseDescriptionForTitle = true }; if (browse.ShowDialog(this) == DialogResult.OK) community.Text = browse.SelectedPath; });
-        Label(panel, ToolbarInstaller.InstalledStatus(preferences));
-        Button(panel, "Install / Update Toolbar", async (_, _) =>
-        {
-            var selectedCommunity = community.Text;
-            if (MessageBox.Show(this, "Install/update AeroScience only in this folder? MSFS must be closed. Any previous AeroScience package will be backed up outside Community.\n" + selectedCommunity, "Toolbar installation", MessageBoxButtons.YesNo) != DialogResult.Yes) return;
-            await Execute(() => app.RunStoppedAsync(() => Task.Run(() =>
-            {
-                ToolbarInstaller.Install(Path.Combine(AppContext.BaseDirectory, "Toolbar"), selectedCommunity, previousCommunity: app.Preferences.Load().CommunityDirectory);
-                app.Preferences.Save(app.Preferences.Load() with { CommunityDirectory = selectedCommunity });
-            })));
-        });
+        var toolbarStatus = Label(panel, "");
+        void RefreshToolbar() { var value = ToolbarVersions.Inspect(Path.Combine(AppContext.BaseDirectory, "Toolbar"), community.Text); toolbarStatus.Text = $"Installed: {value.InstalledVersion ?? "Unknown / not installed"} · Available: {value.BundledVersion ?? "Unknown"}\nStatus: {value.Status}\n{value.Message}"; }
+        community.TextChanged += (_, _) => RefreshToolbar(); RefreshToolbar();
+        Button(panel, "Install / Update / Repair Toolbar…", (_, _) => { app.InstallToolbar(this, community.Text); RefreshToolbar(); });
         Button(panel, "Remove AeroScience toolbar…", (_, _) =>
         {
             var path = app.Preferences.Load().CommunityDirectory;
@@ -160,7 +157,8 @@ public sealed class SettingsForm : Form
             ? "The native SimConnect runtime is included. Connection status is shown in the main AeroScience window and dashboard."
             : "The native SimConnect runtime is missing. Run AeroScience Setup again to repair the installation; keep your mission data and settings.");
         Button(panel, "Microsoft Visual C++ prerequisite…", (_, _) => Process.Start(new ProcessStartInfo(
-            "https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist") { UseShellExecute = true }));
+            "https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist")
+        { UseShellExecute = true }));
         Label(panel, "If Windows reports a missing Visual C++ dependency, use Microsoft's official page above to install the x64 redistributable graphically, then restart AeroScience.");
     }
 }
