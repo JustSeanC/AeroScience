@@ -48,6 +48,27 @@ class OfflineAssetsTests(unittest.TestCase):
 
     @unittest.skipUnless(shutil.which('git'),'Git is required for Windows checkout regression checks')
     def test_windows_git_checkout_and_existing_checkout_repair_preserve_all_pinned_bytes(self):
+        self.verify_windows_checkout_and_repair(WEB)
+
+    @unittest.skipUnless(shutil.which('git'),'Git is required for Windows checkout regression checks')
+    def test_windows_checkout_repair_with_crlf_maintainer_manifest(self):
+        # An older maintainer checkout can still have a CRLF manifest even
+        # after pulling the LF attribute. Reproduce that input on every OS.
+        with tempfile.TemporaryDirectory(prefix='aeroscience-crlf-source-') as temp:
+            web=Path(temp)/'wwwroot'
+            web.mkdir()
+            for folder in ('vendor','geography'):
+                shutil.copytree(WEB/folder,web/folder)
+            manifest=(WEB/'assets-manifest.json').read_bytes().replace(b'\r\n',b'\n')
+            (web/'assets-manifest.json').write_bytes(manifest.replace(b'\n',b'\r\n'))
+            self.verify_windows_checkout_and_repair(web)
+
+    def verify_windows_checkout_and_repair(self,source_web):
+        # This source JSON is text eol=lf, unlike the byte-pinned upstream
+        # assets. Seed canonical LF regardless of the maintainer's worktree;
+        # committing raw CRLF with autocrlf=false would create a permanently
+        # unnormalized index when the fixture later introduces the LF rule.
+        manifest_bytes=(source_web/'assets-manifest.json').read_text(encoding='utf-8').encode('utf-8')
         with tempfile.TemporaryDirectory(prefix='aeroscience-windows-checkout-') as temp:
             temp=Path(temp)
             seed=temp/'seed'
@@ -61,8 +82,8 @@ class OfflineAssetsTests(unittest.TestCase):
                     '-c','core.hooksPath='+str(empty_hooks),*arguments],cwd=cwd,
                     check=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True)
             for folder in ('vendor','geography'):
-                shutil.copytree(WEB/folder,seed_web/folder)
-            shutil.copy2(WEB/'assets-manifest.json',seed_web/'assets-manifest.json')
+                shutil.copytree(source_web/folder,seed_web/folder)
+            (seed_web/'assets-manifest.json').write_bytes(manifest_bytes)
             git('-c','init.defaultBranch=main','init','-q')
             git('config','core.autocrlf','false')
             git('config','user.name','AeroScience checkout fixture')
@@ -96,19 +117,19 @@ class OfflineAssetsTests(unittest.TestCase):
             git('-c','core.autocrlf=false','restore','--source=HEAD','--staged','--worktree','--',
                 (relative/'vendor').as_posix(),(relative/'geography').as_posix(),
                 (relative/'assets-manifest.json').as_posix(),cwd=legacy)
-            self.assertEqual(web_assets.verify(legacy/relative),len(json.loads((WEB/'assets-manifest.json').read_text())['files']))
+            self.assertEqual(web_assets.verify(legacy/relative),len(json.loads(manifest_bytes)['files']))
             self.assertEqual((legacy/relative/'assets-manifest.json').read_bytes(),
-                (WEB/'assets-manifest.json').read_bytes())
+                manifest_bytes)
             self.assertEqual(git('status','--porcelain',cwd=legacy).stdout,'')
             self.assertEqual(git('config','core.autocrlf',cwd=legacy).stdout.strip(),'true')
 
             fresh=temp/'fresh-windows-checkout'
             git('-c','core.autocrlf=true','clone','-q','--no-local',str(seed),str(fresh),cwd=temp)
             git('config','core.autocrlf','true',cwd=fresh)
-            self.assertEqual(web_assets.verify(fresh/relative),web_assets.verify())
+            self.assertEqual(web_assets.verify(fresh/relative),web_assets.verify(source_web))
             self.assertEqual((fresh/relative/'assets-manifest.json').read_bytes(),
-                (WEB/'assets-manifest.json').read_bytes())
+                manifest_bytes)
             self.assertEqual(git('status','--porcelain',cwd=fresh).stdout,'')
-            for name in json.loads((WEB/'assets-manifest.json').read_text())['files']:
+            for name in json.loads(manifest_bytes)['files']:
                 with self.subTest(asset=name):
-                    self.assertEqual((fresh/relative/name).read_bytes(),(WEB/name).read_bytes())
+                    self.assertEqual((fresh/relative/name).read_bytes(),(source_web/name).read_bytes())
