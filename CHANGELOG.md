@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.0 — Remote Sensing & Research Payloads (public alpha)
+
+- Add bounded, asynchronous real-file Landsat thermal, Sentinel multispectral/NDVI, ENVI hyperspectral and DEM-derived terrain sampling with approximate attitude-aware WGS84 footprints, explicit source/flight/processing dates and genuine units/QA/nodata. No fabricated global sensors, live thermal camera or DEM-as-LiDAR claims.
+- Add graphical local source import, managed source/product identities and hashes, complete historical viewers, scientific exports, compact local evidence and planning-only future self-hosted campaigns documentation.
+- Default fresh installations to OSM/Streets after a privacy/offline-only choice before first external tiles; preserve old map preferences, offline fallback and optional own-key Esri.
+- Add configurable 25 GB flight / 50 GB science defaults, physical usage/free-space warnings, independent safe quota suspension/recording-stop reasons, persistent mission/dataset protection and detailed cache-only cleanup preview/results/history. Preserve originals/backups and count interrupted work; retain verified migrations, deliberate clear safeguards and optional stopped-store compaction.
+- Add optional cached GitHub update/channel/reminder controls; open official release pages without automatic installer execution.
+- Produce the Windows alpha setup/checksum/release record automatically from actual technical evidence, with idempotent verification and no mandatory ACCEPTANCE.json editing. Preserve genuine SDK/ABI/runtime authorization, locked assets, signed prerequisites and installer integrity; hardware acceptance remains explicitly not verified. Manual Windows build/GitHub upload needs no self-hosted runner.
+- Add focused reader/geometry/storage/update/release and browser regression coverage. Document real supported formats, preparation, scientific limits and pending hardware QA.
+
 ## 0.2.2 — Geographic Mission Integration (prerelease)
 
 - Fix the Windows checkout-repair regression fixture and documented repair to restore `assets-manifest.json` along with pinned assets. Check exact LF manifest bytes and clean fresh/repaired checkouts; retain all expected hashes and release checks.

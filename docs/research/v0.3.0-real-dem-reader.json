@@ -1,0 +1,28 @@
+{
+  "genuineData": "USGS 3DEP service subset",
+  "syntheticFlight": true,
+  "msfsTested": false,
+  "productId": "6f30e28a-1626-4876-b0a3-fd793a91fa56",
+  "sourceObservationUtc": null,
+  "validSamples": 576,
+  "minMetres": 11.86951732635498,
+  "maxMetres": 13.173401832580566,
+  "sourceGrid": {
+    "width": 32,
+    "height": 32,
+    "crs": "EPSG:4326",
+    "originX": -75.01,
+    "originY": 40.010000000000005,
+    "pixelWidth": 0.0006250000000003197,
+    "pixelHeight": -0.0006250000000003197
+  },
+  "sourceHash": "2f1f9721dc255edb03dcd8ac62f2d40037a1613e4e30b8ece3d07d7e473c404d",
+  "productHash": "179e7565d36df094227d133eecaecb8fc9667c49ae42e830d4968489938fb63f",
+  "independentComparison": {
+    "tool": "rasterio 1.5.2, development only, not a runtime dependency",
+    "samples": 576,
+    "maxAbsoluteErrorMetres": 0.0
+  },
+  "sourceUrl": "https://elevation.nationalmap.gov/arcgis/rest/services/3DEPElevation/ImageServer",
+  "dataNotBundled": true
+}

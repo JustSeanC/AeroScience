@@ -7,7 +7,8 @@ param(
     [switch]$RuntimeRedistributionConfirmed,
     [string]$OutputDirectory,
     [string]$InnoCompiler,
-    [string]$VcRuntimePath
+    [string]$VcRuntimePath,
+    [switch]$PrepareOnly
 )
 $ErrorActionPreference = 'Stop'
 $repo = (Resolve-Path "$PSScriptRoot/../..").Path
@@ -33,8 +34,22 @@ try {
     $metadata = $metadataJson | ConvertFrom-Json
     if (-not $OutputDirectory) { $OutputDirectory = Join-Path $repo 'artifacts' }
     $OutputDirectory = [IO.Path]::GetFullPath($OutputDirectory)
+    if (-not $PrepareOnly) {
+        $stateJson = python scripts/release/automatic_release.py status --output $OutputDirectory --source-commit $revision
+        if ($LASTEXITCODE -ne 0) { throw 'Existing release output could not be verified.' }
+        $state = $stateJson | ConvertFrom-Json
+        if ($state.state -eq 'finalized') {
+            Write-Host "Already finalized and verified: $OutputDirectory\$($state.info.asset_name)"
+            Write-Host "Source: $revision; SHA-256: $($state.info.sha256)"
+            Write-Host 'Hardware acceptance: Not verified. GitHub publication: Not published by this command.'
+            return
+        }
+        if ($state.state -ne 'empty') { throw "$($state.state): $($state.message)" }
+    }
     # Keep build outputs outside tracked source; preserve every earlier candidate/final ZIP.
     [IO.Directory]::CreateDirectory($OutputDirectory) | Out-Null
+    $evidence = Join-Path $OutputDirectory 'build-evidence'
+    [IO.Directory]::CreateDirectory($evidence) | Out-Null
     $candidate = Join-Path $OutputDirectory ("release-candidate/" + $metadata.root_name)
     $candidateZip = Join-Path $OutputDirectory $metadata.candidate_name
     if ((Test-Path $candidate) -or (Test-Path $candidateZip)) { throw 'An earlier candidate already exists. Keep it, and choose another -OutputDirectory for a new build.' }
@@ -48,14 +63,27 @@ try {
         throw 'Generate the private-safe version 2 runtime attestation with New-RuntimeApproval.ps1. Record applicable conditions and match the actual DLL; original correspondence remains private.'
     }
     & "$repo/scripts/build/Build-Companion.ps1"
-    python -m unittest discover -s tests -p 'test_*.py' -v
+    Copy-Item -LiteralPath 'tests/AeroScience.Tests/TestResults/windows.trx' -Destination (Join-Path $evidence 'dotnet.trx')
+    python scripts/build/run_helper_tests.py --report (Join-Path $evidence 'helpers.json')
     if ($LASTEXITCODE -ne 0) { throw 'Release/helper tests failed.' }
+    if (-not $env:CHROMIUM_PATH) {
+        foreach ($browser in @("${env:ProgramFiles}\Microsoft\Edge\Application\msedge.exe", "${env:ProgramFiles(x86)}\Microsoft\Edge\Application\msedge.exe", "${env:ProgramFiles}\Google\Chrome\Application\chrome.exe")) {
+            if (Test-Path -LiteralPath $browser) { $env:CHROMIUM_PATH = $browser; break }
+        }
+    }
+    if (-not $env:CHROMIUM_PATH) { npx playwright install chromium; if ($LASTEXITCODE -ne 0) { throw 'Browser test tooling unavailable. Install Chromium/Edge/Chrome for the development build; no tests were marked passed.' } }
+    npm run test:web
+    if ($LASTEXITCODE -ne 0) { throw 'Browser tests failed. No final installer was produced.' }
+    Copy-Item -LiteralPath 'artifacts/web-results.json' -Destination (Join-Path $evidence 'browser.json')
     # Native Tools shells can set Platform=x64; use an explicit output for this test.
     $recoveryHostDirectory = Join-Path $repo 'artifacts/recovery-test-host'
     dotnet build tests/AeroScience.TestHost -c Release --no-restore --nologo --output $recoveryHostDirectory
     if ($LASTEXITCODE -ne 0) { throw 'Recovery test host build failed.' }
     python scripts/build/smoke_recovery.py --host-dll (Join-Path $recoveryHostDirectory 'AeroScience.TestHost.dll')
     if ($LASTEXITCODE -ne 0) { throw 'Recording recovery smoke failed.' }
+    @{ result='passed'; check='Actual-process crash/restart, committed samples/modes and exclusive owner' } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $evidence 'recovery.json') -Encoding utf8
+    python scripts/release/automatic_release.py evidence --unit (Join-Path $evidence 'dotnet.trx') --browser (Join-Path $evidence 'browser.json') --helpers (Join-Path $evidence 'helpers.json') --recovery (Join-Path $evidence 'recovery.json') --source-commit $revision --output (Join-Path $evidence 'technical-validation.json')
+    if ($LASTEXITCODE -ne 0) { throw 'Automatic test evidence validation failed.' }
     & "$repo/scripts/build/Build-Toolbar.ps1" -SdkRoot $SdkRoot
     $runtimeReport = Join-Path $OutputDirectory ("runtime-check-" + [Guid]::NewGuid().ToString('N') + '.json')
     & "$repo/scripts/build/Test-SimConnectRuntime.ps1" -RuntimePath $runtime -ReportPath $runtimeReport
@@ -69,5 +97,10 @@ try {
     Write-Host "Candidate ZIP: $candidateZip"
     Write-Host "Candidate files: $candidate"
     Write-Host "Primary installer candidate: $OutputDirectory\installer-candidate\$($metadata.setup_name)"
-    Write-Host 'Run that setup EXE and test the installed application, setup wizard, upgrade, uninstall and live mission. Use installer-candidate/ACCEPTANCE.json. Finalize without rebuilding. The ZIP is an internal/optional portable payload. Nothing has been uploaded.'
+    if (-not $PrepareOnly) {
+        & "$repo/scripts/release/New-Release.ps1" -OutputDirectory $OutputDirectory
+        Write-Host "Version: $($metadata.version); Source: $revision"
+        Write-Host 'Build: Passed. Automated .NET/browser/helper/recovery checks: Passed. Official SDK package/ABI/runtime checks: Passed. Installer compilation/integrity: Passed.'
+        Write-Host 'Hardware acceptance: Not verified. GitHub publication: Not published. Upload the final setup EXE, checksum and public release evidence manually through GitHub Releases.'
+    } else { Write-Host 'Intermediate candidate only (--PrepareOnly). Hardware acceptance is not verified. No manual JSON is required by the default one-command release process.' }
 } finally { Pop-Location }

@@ -1,14 +1,12 @@
 # Install AeroScience for Windows
 
-For **v0.2.2**, follow [Windows build and acceptance](docs/v0.2.2-windows-testing.md). Testers download and run **AeroScience-Setup-v0.2.2.exe**. The internal candidate ZIP is not the recommended installation method. An older installed Community toolbar is detected at startup; close MSFS and choose Update Toolbar, or postpone and use Settings → Toolbar later.
+The recommended v0.3.0 public-alpha download is **AeroScience-Setup-v0.3.0.exe** from [GitHub Releases](https://github.com/JustSeanC/AeroScience/releases), once built and uploaded. GitHub source ZIPs and internal candidate ZIPs are not the pilot installation method.
 
-The installer must be generated and accepted on Windows with the genuine MSFS 2024 SDK. No v0.2.2 setup EXE was generated or hardware-accepted in Linux. Preserve the tested candidate and finalize it without rebuilding.
-
-The recommended public download is **AeroScience-Setup-v0.2.2.exe** from [GitHub Releases](https://github.com/JustSeanC/AeroScience/releases). The new v0.2.2 source requires its own Windows/SDK build, installation, upgrade and live science acceptance before publication. Prior v0.1.1 passes do not verify this changed release.
+Maintainers: [one-command Windows build, recommended real-device testing and exact publication steps](docs/v0.3.0-windows-testing.md). Technical checks finalize automatically with no required acceptance JSON. Windows/MSFS hardware status remains explicitly unverified until actual testing; no finished v0.3.0 EXE is claimed from the cloud.
 
 ## Install and launch
 
-1. Download the setup EXE under the release's Assets. The `.sha256` sidecar and `.release.json` record identify the exact tested installer. GitHub's Source code downloads are for developers. A portable ZIP, if present, is secondary.
+1. Download the setup EXE under the release's Assets. The `.sha256` sidecar and `.release.json` record identify the compiled installer. GitHub's Source code downloads are for developers. A portable ZIP, if present, is secondary.
 2. Run the setup EXE. Review Welcome, version, notices and license, then choose an application folder. The default is `%LOCALAPPDATA%\Programs\AeroScience`, separate from your data. Setup shows installation progress, creates a Start menu shortcut and offers a desktop shortcut. It registers AeroScience in Windows Installed Apps.
 3. The self-contained .NET application, authorized native SimConnect.dll, genuine SDK-built toolbar and signed Microsoft Visual C++ x64 prerequisite are bundled. If the shared prerequisite needs installation, Windows may ask for administrator approval. No SDK, Python, PowerShell, terminal, manually copied DLL or server startup is required. An installation error stops setup; do not replace SDK files yourself.
 4. Leave **Launch AeroScience and finish first-run setup** selected at Finish. You can also open **Start → AeroScience** later. No extraction or search for AeroScience.exe is needed.
@@ -45,3 +43,7 @@ To uninstall, close AeroScience and use **Windows Settings → Apps → Installe
 Reinstalling the app reuses retained settings and available archives. Deleting user data is not an uninstall option in this alpha.
 
 For problems, use **Collect Feedback**, save and review the local ZIP, and report the error/reproduction steps at [GitHub Issues](https://github.com/JustSeanC/AeroScience/issues). Installer logs are `Setup Log ... .txt` in `%TEMP%`; review paths/private details before sharing. Do not attach mission databases or authorization correspondence by default.
+
+## v0.3.0 first use
+
+On a fresh installation choose OpenStreetMap or offline-only in the dashboard privacy prompt **before any tile request**. Existing preferences are preserved. Storage Management defaults to 25 GB flight / 50 GB science, customizable or Unlimited. Offline archives remain usable without MSFS or internet. Import licensed real scientific collections graphically from Settings → Scientific Data Sources using the [remote-sensing guide](docs/remote-sensing/quick-start.md). Data sources are not bundled and may need geographic preparation; OSM/Esri basemaps do not supply scientific instrument data.

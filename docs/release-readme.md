@@ -1,19 +1,9 @@
-# AeroScience — Science Mission Operations
+# AeroScience v0.3.0 — Remote Sensing & Research Payloads Alpha
 
-Recommended installation: run **AeroScience-Setup-v0.2.2.exe** from GitHub Releases. Follow the Windows installer, then AeroScience's guided storage and MSFS toolbar setup. Open **Start → AeroScience** whenever you want live recording or your offline archive. No extraction, terminal, PowerShell, manually started server, SDK or manually copied DLL is required.
+Run **AeroScience-Setup-v0.3.0.exe**, finish the guided storage/toolbar setup and launch AeroScience from Start. The app opens its dashboard automatically. Pilots need no terminal, SDK, separate server or .NET installation. The portable ZIP is optional/secondary.
 
-The installer includes the self-contained companion, authorized native SimConnect runtime, genuine SDK-built toolbar and Microsoft Visual C++ x64 prerequisite. Windows may request administrator approval for that shared prerequisite. Choose the application path, Start/optional desktop shortcuts and launch-at-finish normally.
+New installations offer OpenStreetMap / Streets after a privacy choice; choose offline-only before any tile request if preferred. Existing map/storage preferences survive upgrades. Defaults are 25 GB flight / 50 GB science, customizable or Unlimited. Settings provides independent storage folders, measured usage, safe cache-only cleanup and dataset/mission protection. Original observations and backups are never automatic cleanup targets.
 
-First-run setup independently offers Mission Database and Science Library folders, drive capacity and a large-data notice. It preserves existing locations and uses verified migrations for explicitly changed paths. Review the detected MSFS 2024 Community folder or Browse, then approve installation with MSFS closed, or Skip for Now. Settings can revisit both storage and toolbar setup.
+Read [Remote-sensing quick start](docs/remote-sensing/quick-start.md). Thermal/multispectral/hyperspectral/terrain payloads sample supported real local GeoTIFF/ENVI observations at approximate flight footprints. Reference datasets are not bundled; coverage depends on imported sources. Ambient temperature is not a thermal camera, and DEM samples are not LiDAR returns. Original dates, units, resolution and quality remain visible. Review products/history offline and export data/evidence locally; no automatic research uploads.
 
-Start MSFS and load a cockpit. Once fresh actual aircraft data appears, name/start a mission, end it and inspect Mission History. The app includes Mach, Universal/Realistic modes, live recording, offline history/details and complete JSON exports. Saved research planning, simulator-reported atmospheric instruments, offline maps, read-only flight guidance, markers and complete research exports are included. Advanced calibration/operating limits and remote sensing remain deferred; both modes accept compatible aircraft.
-
-Updates preserve settings and data outside the application folder. Windows Installed Apps provides the uninstaller; user data remains. It separately asks about removing AeroScience's toolbar and preserves unrelated add-ons. Reinstalling reuses retained archives. See INSTALL.md for details.
-
-If using the optional portable ZIP, extract all files together and open AeroScience.exe. It shares the same first-run wizard and selected data; exit any installed/other companion instance first. It does not register shortcuts/uninstall itself.
-
-Release-page evidence and `.release.json` identify the exact tested installer and remaining aircraft/device limitations. A build/compile does not establish Windows or simulator acceptance. No scientific data products are generated as placeholders.
-
-Use **Collect Feedback**, save/review the local ZIP and report reproduction steps at https://github.com/JustSeanC/AeroScience/issues. Mission databases and original authorization correspondence do not belong in routine feedback.
-
-Mission Planner, Science Collection, offline geographic maps, eight editable research patterns, planned/recorded analysis, presets, pause/resume, configurable science units and historical review are available in v0.2.2. See docs/science-operations.md for actual units, provenance, acquisition limits and complete exports. Advanced calibration, scoring and remote sensing remain future scope.
+This is public alpha. Automated technical validation does not establish live MSFS/VR/iPad or Windows GUI acceptance. Release evidence records hardware as not verified unless separately documented actual tests exist. See the included v0.3.0 completion/testing reports, Collect Feedback, and https://github.com/JustSeanC/AeroScience/issues. Never share provider keys, pairing codes or original runtime permission correspondence.

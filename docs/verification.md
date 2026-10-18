@@ -53,3 +53,8 @@ The user's [latest live-source screenshot](validation-results.md#first-live-airc
 Advanced scientific sensors and restrictions follow those reliability/distribution tasks, rather than displacing them.
 
 Follow the [Windows testing workbook](windows-testing.md) and [v0.1.1 prompt brief](v0.1.1-prompt-handoff.md). Live telemetry/recording is the primary v0.1.1 outcome; installation and release automation support it. Retain actual results before claiming that workflow verified. The optional public release workflow is implemented but has not executed; the local Windows/manual upload path is primary. Pending minimum acceptance or runtime permission cannot pass packaging.
+
+
+## Current v0.3.0 alpha
+
+Use [the v0.3.0 Windows guide](v0.3.0-windows-testing.md). The default technical release build has no mandatory manual acceptance JSON. Hardware/device QA remains separately not verified until actually performed. Read [the completion report](v0.3.0-completion.md) for actual source scope, cloud checks, scientific provenance and limitations. Historical checklists below/above describe their named earlier versions.

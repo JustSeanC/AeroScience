@@ -109,6 +109,9 @@ def finalize(folder, acceptance_path, output):
 
 
 def verify(setup, record_path, archive, expected_commit=None):
+    if p.read_json(record_path).get('format_version')==2:
+        from automatic_release import verify as verify_automatic
+        return verify_automatic(setup,record_path,archive,expected_commit)
     info = p.verify_archive(archive, archive.with_name(archive.name+'.sha256'))
     record = p.read_json(record_path); build = record['build']; acceptance = record['acceptance']
     p.require(record.get('format_version') == 1 and setup.name == p.identity()['setup_name']

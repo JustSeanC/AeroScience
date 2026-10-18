@@ -31,5 +31,5 @@ try {
     $version = ([xml](Get-Content Directory.Build.props -Raw)).Project.PropertyGroup.Version
     @{ version=$version; source_commit=$revision; source_dirty=$dirty; target='win-x64'; built_utc=[DateTime]::UtcNow.ToString('o') } |
         ConvertTo-Json | Set-Content artifacts/Windows-Companion/build-info.json -Encoding utf8
-    Write-Host 'Windows app built: artifacts/Windows-Companion/AeroScience.exe. No tester commands are required. A complete alpha still requires genuine SDK toolbar output, approved runtime distribution and hardware acceptance.'
+    Write-Host 'Windows app built: artifacts/Windows-Companion/AeroScience.exe. No tester commands are required. The alpha release pipeline also validates genuine SDK toolbar output, approved runtime distribution and installer integrity; hardware acceptance remains separately not verified.'
 } finally { Pop-Location }

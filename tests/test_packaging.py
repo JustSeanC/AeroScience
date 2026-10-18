@@ -20,13 +20,15 @@ class PackagingTests(unittest.TestCase):
         for directory in ('vendor','geography'):
             shutil.copytree(web/directory,root/'wwwroot'/directory)
         shutil.copy2(web/'assets-manifest.json',root/'wwwroot/assets-manifest.json')
-        for name in ('patterns.js','analysis.js','science-display.js','basemaps.js','geographic-view.js','route-export.js'):
+        for name in ('patterns.js','analysis.js','science-display.js','basemaps.js','geographic-view.js','route-export.js','remote-science.js','application-updates.js','storage-management.js'):
             shutil.copy2(web/name,root/'wwwroot'/name)
+        shutil.copytree(packaging.REPO/'licenses',root/'licenses')
+        shutil.copytree(packaging.REPO/'docs'/'remote-sensing',root/'wwwroot/help/remote-sensing')
         image = bytearray(512); image[:2] = b'MZ'; struct.pack_into('<I', image, 60, 128)
         image[128:132] = b'PE\0\0'; struct.pack_into('<H', image, 132, 0x8664)
         struct.pack_into('<H', image, 152, 0x20b); struct.pack_into('<H', image, 220, 2)
         (root/'AeroScience.exe').write_bytes(image)
-        for name in ('AeroScience.Engine.dll', 'AeroScience.dll', 'AeroScience.deps.json', 'AeroScience.runtimeconfig.json',
+        for name in ('BitMiracle.LibTiff.NET.dll','AeroScience.Engine.dll', 'AeroScience.dll', 'AeroScience.deps.json', 'AeroScience.runtimeconfig.json',
                      'coreclr.dll', 'hostpolicy.dll', 'System.Windows.Forms.dll', 'wwwroot/index.html', 'wwwroot/app.js', 'wwwroot/app.css', 'wwwroot/research.js', 'wwwroot/map.js'):
             (root/name).write_text('test fixture')
 

@@ -5,8 +5,8 @@ on:
       operation:
         description: Optional automation; the first release can be built locally and uploaded on the Releases website
         type: choice
-        options: [prepare-candidate, publish-tested-candidate]
-        default: prepare-candidate
+        options: [build-alpha, publish-built-alpha]
+        default: build-alpha
       source_commit:
         description: Exact 40-character source commit (required when publishing an earlier candidate)
         required: false
@@ -29,9 +29,6 @@ on:
       candidate_run_id:
         description: Earlier successful prepare-candidate workflow run ID (publishing only)
         required: false
-      acceptance_json:
-        description: Completed acceptance JSON bound to the exact setup EXE and payload (publishing only)
-        required: false
 permissions:
   contents: read
 concurrency:
@@ -39,7 +36,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   prepare:
-    if: inputs.operation == 'prepare-candidate'
+    if: inputs.operation == 'build-alpha'
     runs-on: [self-hosted, Windows, X64, msfs2024-sdk]
     env:
       SDK_ROOT: ${{ inputs.sdk_root }}
@@ -62,22 +59,28 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Build genuine candidate; never mark hardware tests passed
+      - name: Build and technically validate alpha; hardware acceptance remains not verified
         id: candidate
         shell: pwsh
         run: |
           if ($env:PERMISSION_CONFIRMED -ne 'true') { throw 'Specific runtime permission is unconfirmed.' }
-          ./scripts/release/Build-ReleaseCandidate.ps1 -SdkRoot $env:SDK_ROOT -RuntimePath $env:SDK_RUNTIME -RuntimeApprovalRecord $env:RUNTIME_APPROVAL -RuntimeRedistributionConfirmed -InnoCompiler $env:INNO_COMPILER
+          ./scripts/release/Build-Release.ps1 -SdkRoot $env:SDK_ROOT -RuntimePath $env:SDK_RUNTIME -RuntimeApprovalRecord $env:RUNTIME_APPROVAL -RuntimeRedistributionConfirmed -InnoCompiler $env:INNO_COMPILER
           $commit = (git rev-parse HEAD).Trim()
           "source_commit=$commit" >> $env:GITHUB_OUTPUT
       - uses: actions/upload-artifact@v4
         with:
-          name: AeroScience-candidate-${{ steps.candidate.outputs.source_commit }}
-          path: artifacts/installer-candidate/
+          name: AeroScience-alpha-${{ steps.candidate.outputs.source_commit }}
+          path: |
+            artifacts/AeroScience-Setup-v*.exe
+            artifacts/AeroScience-Setup-v*.exe.sha256
+            artifacts/AeroScience-Setup-v*.release.json
+            artifacts/AeroScience-v*-win-x64.zip
+            artifacts/AeroScience-v*-win-x64.zip.sha256
+            artifacts/RELEASE-NOTES.md
           if-no-files-found: error
           retention-days: 14
   publish:
-    if: inputs.operation == 'publish-tested-candidate'
+    if: inputs.operation == 'publish-built-alpha'
     runs-on: windows-latest
     permissions:
       contents: write
@@ -85,13 +88,12 @@ jobs:
     env:
       SOURCE_COMMIT: ${{ inputs.source_commit }}
       CANDIDATE_RUN: ${{ inputs.candidate_run_id }}
-      ACCEPTANCE_JSON: ${{ inputs.acceptance_json }}
       GH_TOKEN: ${{ github.token }}
     steps:
       - name: Check required publication inputs
         shell: pwsh
         run: |
-          if ($env:SOURCE_COMMIT -notmatch '^[a-fA-F0-9]{40}$' -or $env:CANDIDATE_RUN -notmatch '^[0-9]+$' -or -not $env:ACCEPTANCE_JSON) { throw 'Provide the tested commit, candidate run ID and genuine acceptance JSON.' }
+          if ($env:SOURCE_COMMIT -notmatch '^[a-fA-F0-9]{40}$' -or $env:CANDIDATE_RUN -notmatch '^[0-9]+$') { throw 'Provide the exact build source commit and successful build run ID.' }
       - uses: actions/checkout@v4
         with:
           ref: ${{ inputs.source_commit }}
@@ -108,15 +110,12 @@ jobs:
           if ($preparation.Count -ne 1) { throw 'Missing successful trusted SDK preparation job.' }
       - uses: actions/download-artifact@v4
         with:
-          name: AeroScience-candidate-${{ inputs.source_commit }}
+          name: AeroScience-alpha-${{ inputs.source_commit }}
           run-id: ${{ inputs.candidate_run_id }}
           github-token: ${{ github.token }}
-          path: artifacts/installer-candidate/
-      - name: Finalize the tested bytes without rebuilding and publish to this repository
+          path: artifacts/
+      - name: Revalidate the exact compiled bytes and publish the alpha to this repository
         shell: pwsh
         run: |
           if ($env:GITHUB_REPOSITORY -ne 'JustSeanC/AeroScience') { throw 'Unexpected publication repository.' }
-          $acceptance = Join-Path $env:RUNNER_TEMP 'aeroscience-acceptance.json'
-          [IO.File]::WriteAllText($acceptance, $env:ACCEPTANCE_JSON)
-          ./scripts/release/New-Release.ps1 -AcceptanceRecord $acceptance
           ./scripts/release/Publish-Release.ps1

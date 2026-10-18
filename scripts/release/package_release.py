@@ -62,6 +62,7 @@ def identity(version=RELEASE_VERSION):
     preview = bool(suffix) or (version == RELEASE_VERSION and RELEASE_CHANNEL == 'prerelease')
     title = f'AeroScience v{base}' + (' — Live Flight Recording Alpha' if suffix.startswith('alpha') else ' — Science Mission Operations Prerelease' if preview else '')
     if base == '0.2.2': title = f'AeroScience v{base} — Geographic Mission Integration' + (' Prerelease' if preview else '')
+    if base == '0.3.0': title = f'AeroScience v{base} — Remote Sensing & Research Payloads' + (' Alpha' if preview else '')
     return dict(version=version, package_version=base, tag='v'+version, root_name=root,
                 asset_name=root+'.zip', candidate_name=root+'-CANDIDATE.zip', setup_name=f'AeroScience-Setup-v{version}.exe',
                 setup_record_name=f'AeroScience-Setup-v{version}.release.json', prerelease=preview, title=title)
@@ -144,6 +145,8 @@ def validate_companion(root, require_simconnect=False):
                 "AeroScience.runtimeconfig.json", "AeroScience.Engine.dll", "coreclr.dll", "hostpolicy.dll",
                 "System.Windows.Forms.dll",
                 "wwwroot/index.html", "wwwroot/app.js", "wwwroot/app.css", "wwwroot/research.js", "wwwroot/map.js", "wwwroot/patterns.js", "wwwroot/analysis.js", "wwwroot/science-display.js", "wwwroot/basemaps.js", "wwwroot/geographic-view.js", "wwwroot/route-export.js", "wwwroot/assets-manifest.json"}
+    expected.update({'BitMiracle.LibTiff.NET.dll','wwwroot/remote-science.js','wwwroot/application-updates.js','wwwroot/storage-management.js'})
+    expected.update({'licenses/LibTiff.NET.txt','wwwroot/help/remote-sensing/quick-start.md','wwwroot/help/remote-sensing/sources.md'})
     if require_simconnect:
         expected.add("SimConnect.dll")
     require(expected <= found.keys(), "Missing self-contained Windows companion files or official SimConnect runtime.")
@@ -165,7 +168,8 @@ def validate_companion(root, require_simconnect=False):
     require([name for name in found if name.casefold().endswith('.exe')] == ['AeroScience.exe'],
             'Only AeroScience.exe should be included as an executable entry point.')
     require(not any(PurePosixPath(name).suffix.casefold() in {".db", ".sqlite", ".log"}
-                    or PurePosixPath(name).name.casefold() in {"settings.json", "maps.json", "missions.db-wal", "missions.db-shm"}
+                    or PurePosixPath(name).name.casefold() in {"settings.json", "maps.json", "updates.json", "storage-limits.json", "library.json", ".science-storage.json", "missions.db-wal", "missions.db-shm"}
+                    or any(part.casefold() in {'sources','products','observations','cache','sciencelibrary'} for part in PurePosixPath(name).parts[:-1])
                     for name in found), "Release contains personal mission data, configuration or logs.")
     require(not any(PurePosixPath(name).suffix.casefold() in {'.pdb', '.obj', '.lib', '.cs', '.cpp', '.py', '.ps1', '.cmd', '.env'}
                     or any(part.casefold() in {'.git', '.github', 'node_modules', 'src', 'obj', 'bin'} for part in PurePosixPath(name).parts)
@@ -247,7 +251,7 @@ def validate_provenance(root, receipt_path, version=RELEASE_VERSION):
 
 def payload_digest(root):
     # These two review documents change after testing; every operational byte remains identical.
-    ignored = {'ACCEPTANCE.json', 'RELEASE-STATUS.txt'}
+    ignored = {'ACCEPTANCE.json', 'RELEASE-STATUS.txt', 'ALPHA-VALIDATION.json'}
     entries = [(name, hashlib.sha256(path.read_bytes()).hexdigest()) for name, path in sorted(files(root).items()) if name not in ignored]
     return hashlib.sha256(json.dumps(entries, separators=(',', ':')).encode()).hexdigest()
 
@@ -265,7 +269,11 @@ def validate_payload(root, final=False, version=RELEASE_VERSION):
     digest = payload_digest(root)
     if final:
         require(not (root/'RELEASE-STATUS.txt').exists(), 'A candidate status marker cannot ship as the final release.')
-        validate_acceptance(root/'ACCEPTANCE.json', version, commit, digest)
+        if (root/'ALPHA-VALIDATION.json').exists():
+            from automatic_release import validate_evidence
+            validate_evidence(read_json(root/'ALPHA-VALIDATION.json'),commit,digest)
+            require(not (root/'ACCEPTANCE.json').exists(),'Automatic alpha payload must not imply manual hardware acceptance.')
+        else:validate_acceptance(root/'ACCEPTANCE.json', version, commit, digest)
     return commit, digest
 
 
@@ -292,16 +300,26 @@ def prepare_candidate(companion, community, receipt_path, runtime_report, runtim
         (destination/'Dependencies'/'runtime-approval.json').write_text(json.dumps(approval, indent=2)+'\n')
         for name in ('LICENSE', 'THIRD-PARTY-NOTICES.md', 'CHANGELOG.md', 'INSTALL.md'):
             shutil.copy2(REPO/name, destination/name)
+        shutil.copytree(REPO/'licenses', destination/'licenses', dirs_exist_ok=True)
         (destination/'docs').mkdir()
         for name in ('alpha-testing.md', 'runtime-distribution.md', 'science-operations.md', 'sdk-research-v0.2.0.md', 'v0.2.0-windows-testing.md', 'v0.2.1-windows-testing.md', 'v0.2.1-completion.md', 'v0.2.2-windows-testing.md', 'v0.2.2-completion.md', 'map-providers-v0.2.2.md'):
             shutil.copy2(REPO/'docs'/name, destination/'docs'/name)
+        for name in ('v0.3.0-completion.md','v0.3.0-windows-testing.md'):
+            shutil.copy2(REPO/'docs'/name,destination/'docs'/name)
+        shutil.copytree(REPO/'docs'/'remote-sensing',destination/'docs'/'remote-sensing')
+        shutil.copytree(REPO/'docs'/'roadmap',destination/'docs'/'roadmap')
+        shutil.copytree(REPO/'docs'/'research',destination/'docs'/'research')
+        (destination/'docs'/'images').mkdir()
+        for image in (REPO/'docs'/'images').glob('remote-*-browser-fixture.png'):
+            shutil.copy2(image,destination/'docs'/'images'/image.name)
         shutil.copy2(REPO/'docs'/'release-readme.md', destination/'README.md')
         (destination/'DEFAULTS.json').write_text(json.dumps(dict(description='Built-in defaults; use graphical Settings to change them.',
             mission_directory=r'%LOCALAPPDATA%\AeroScience', science_library_directory=r'%LOCALAPPDATA%\AeroScience\ScienceLibrary',
-            sampling_interval_ms=1000, enable_lan=False, mission_mode='universal', telemetry='SimConnect'), indent=2)+'\n')
+            sampling_interval_ms=1000, enable_lan=False, mission_mode='universal', telemetry='SimConnect', mission_limit_bytes=25000000000,
+            science_limit_bytes=50000000000, automatic_cleanup='Regenerable caches only', online_map_default='streets', map_privacy_choice_required=True), indent=2)+'\n')
         commit, digest = validate_payload(destination)
         (destination/'ACCEPTANCE.json').write_text(json.dumps(acceptance_template(commit, digest), indent=2)+'\n')
-        (destination/'RELEASE-STATUS.txt').write_text('INTERMEDIATE PAYLOAD: real installer/Windows/MSFS acceptance is pending. Build the setup EXE, test that exact installer, then finalize without rebuilding.\n')
+        (destination/'RELEASE-STATUS.txt').write_text('INTERMEDIATE PAYLOAD. The default Build-Release command continues through Inno compilation and automatic technical finalization with no required manual acceptance JSON. Windows/MSFS hardware remains unverified.\n')
     except Exception:
         # Retain partial files for diagnosis; no final archive is produced.
         raise
@@ -353,11 +371,32 @@ def verify_archive(archive, checksum):
             zip.extractall(work)
         root = Path(work)/meta['root_name']
         commit, digest = validate_payload(root, final=True)
-        acceptance = read_json(root/'ACCEPTANCE.json')
-    return dict(**meta, source_commit=commit, payload_sha256=digest, sha256=actual, acceptance=acceptance)
+        validation=read_json(root/'ALPHA-VALIDATION.json') if (root/'ALPHA-VALIDATION.json').exists() else None
+        acceptance = read_json(root/'ACCEPTANCE.json') if validation is None else None
+    return dict(**meta, source_commit=commit, payload_sha256=digest, sha256=actual, **({'validation':validation} if validation is not None else {'acceptance':acceptance}))
 
 
 def release_notes(info):
+    if 'validation' in info:
+        checks=info['validation']['checks']
+        return f'''# {info['title']}
+
+Download **{info['asset_name']}**, run Setup and launch AeroScience from Start. The app starts its dashboard and local services. No SDK, terminal or separate server is required for users. Upgrades preserve mission history, both data stores and existing preferences.
+
+This is a source-validated public alpha. **Hardware acceptance: NOT VERIFIED.** Windows installer execution, live MSFS telemetry, native toolbar behavior, EFB imports, actual scientific collection, Quest 3 and physical iPad checks remain recommended manual QA. Automated browser fixtures do not establish simulator compatibility. No mandatory ACCEPTANCE.json editing is required.
+
+Automated checks: .NET {checks['dotnet']['passed']} passed; browser {checks['browser']['expected']} passed; helpers {checks['helpers']['passed']} passed ({checks['helpers']['skipped']} skipped); recording recovery passed. Genuine SDK/ABI/package receipt, native runtime loading/exports/authorized hash, locked assets, signed Microsoft prerequisite, Inno compilation and exact installer/payload integrity were validated by the Windows build pipeline.
+
+v0.3.0 adds local real-file thermal, multispectral, hyperspectral and DEM-derived terrain workflows, source metadata/quality masks, approximate attitude-aware footprints, scientific viewers/exports and portable local evidence. Original dataset observation dates are distinct from flight packet/processing times. Scientific reference datasets are not bundled and coverage is limited to valid imported collections; no fabricated sensor readings or live-camera claims are made. See the included remote-sensing guides for supported formats, CRS, source acquisition and limitations.
+
+New installations default to OpenStreetMap Streets after a privacy choice; offline-only is available before any tile request. Existing map choices are retained. Optional Esri imagery uses your own key. Storage defaults are 25 GB flight / 50 GB science (decimal GB), configurable or Unlimited. Only positively registered regenerable caches may be automatically cleaned; pinned research, original data and completed products are protected. Optional GitHub update notifications never execute installers automatically. Calibration, full replay/coverage, organization servers and native satellite mapping remain deferred.
+
+Use Collect Feedback and report issues at https://github.com/JustSeanC/AeroScience/issues. Omit keys, private runtime correspondence and personal research unless you deliberately share it.
+
+Source: https://github.com/JustSeanC/AeroScience/commit/{info['source_commit']}
+
+SHA-256: `{info['sha256']}`
+'''
     optional = info['acceptance'].get('checks', {})
     limits = [name.replace('_', ' ') for name in EXTENDED_ACCEPTANCE if optional.get(name, {}).get('result') != 'passed']
     installer = info.get('distribution') == 'installer'
@@ -435,7 +474,7 @@ def main():
         prepare_candidate(args.companion, args.community, args.sdk_receipt, args.runtime_report, args.runtime_approval, args.destination)
         zip_tree(args.destination, args.output.resolve()); digest = write_checksum(args.output)
         with zipfile.ZipFile(args.output) as archive: require(archive.testzip() is None, 'Candidate ZIP extraction/CRC verification failed.')
-        print(f'Validated intermediate payload {args.output}. SHA-256 {digest}. Build-Installer.ps1 creates the primary setup EXE and installer-specific acceptance record.'); return
+        print(f'Validated intermediate payload {args.output}. SHA-256 {digest}. Build-Installer.ps1 creates the primary setup EXE and build receipt; the default pipeline finalizes automatically.'); return
     if args.command == 'release':
         finalize_candidate(args.candidate, args.acceptance, args.output.resolve())
         print(f'Final release ZIP: {args.output}\nSHA-256: {hashlib.sha256(args.output.read_bytes()).hexdigest()}\nVerified exact tested payload. Nothing has been published.'); return
