@@ -24,6 +24,7 @@ test("planner, actual stored science pages, map and complete exports work togeth
   await page
     .getByLabel("Template", { exact: true })
     .selectOption("atmosphericProfile");
+  await page.getByText("Advanced mission details & export settings", {exact:true}).click();
   await page
     .getByLabel("Estimated duration (minutes)", { exact: true })
     .fill("10");
@@ -41,7 +42,7 @@ test("planner, actual stored science pages, map and complete exports work togeth
     .getByLabel("Longitude (degrees east)", { exact: true })
     .fill("-117.9");
   await page
-    .getByRole("button", { name: "Apply waypoint", exact: true })
+    .getByRole("button", { name: "Save Waypoint", exact: true })
     .click();
   await page
     .getByRole("button", { name: "Save mission plan", exact: true })

@@ -1,3 +1,4 @@
+import { planningDistance, planningText } from "./science-display.js";
 const el = (tag, text) => {
   const e = document.createElement(tag);
   if (text !== undefined) e.textContent = text;
@@ -29,6 +30,9 @@ export function routeExportButton(parent, getPlan, api) {
       o.value = id;
       format.append(o);
     }
+    const plan = getPlan();
+    const orbitCount=(plan.patterns||[]).filter(d=>d.kind==="orbit").length;
+    content.append(el("p",`${plan.waypoints?.length||0} navigation waypoints will be exported unchanged.${orbitCount?` ${orbitCount} orbit(s) use a 5° point-to-point approximation; one revolution normally has 73 points. This is not a native EFB orbit command. Check target route limits.`:""}`));
     content.append(format);
     const coordinate = el("select");
     coordinate.setAttribute("aria-label", "Coordinate format");
@@ -107,7 +111,7 @@ export function routeExportButton(parent, getPlan, api) {
           acknowledgeLongRoute: ack.checked,
         });
         const p = result.preview;
-        summary.textContent = `${p.name} · ${p.departure || "First en-route waypoint"} → ${p.destination || "Last en-route waypoint"} · ${p.waypoints} waypoints · ${(p.distanceMetres / 1852).toFixed(2)} NM · ${p.patterns.join(", ") || "Custom route"} · ${p.format}`;
+        planningText(summary,()=>`${p.name} · ${p.departure || "First en-route waypoint"} → ${p.destination || "Last en-route waypoint"} · ${p.waypoints} waypoints · ${planningDistance(p.distanceMetres)} · ${p.patterns.join(", ") || "Custom route"} · ${p.format}`);
         warnings.textContent = p.warnings.join(" ");
         output.value = result.content;
         action.textContent = ["route", "coordinates"].includes(format.value)

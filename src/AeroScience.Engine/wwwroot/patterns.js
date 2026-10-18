@@ -1,20 +1,23 @@
+import { planningField, planningDistance, planningArea, planningText } from "./science-display.js";
+import { areaSummary } from "./planner-geometry.js";
 const element = (tag, text) => {
   const e = document.createElement(tag);
   if (text) e.textContent = text;
   return e;
 };
-export function patternEditor(parent, { api, notice, get, set, aircraft }) {
+export function patternEditor(parent, { api, notice, get, set, aircraft, pickCenter, fitPreview, changed }) {
   let preview = null,
     patterns = structuredClone(get().patterns || []),
     undo = [];
   const panel = element("details");
-  panel.className = "panel research-panel";
+  panel.className = "panel research-panel pattern-editor";
+  panel.open=false;
   panel.append(element("summary", "Flight pattern generator"));
   const grid = element("div");
   grid.className = "research-grid";
   panel.append(grid);
   parent.append(panel);
-  const field = (name, value, type = "number") => {
+  const field = (name, value, type = "number", quantity = null, suffix="") => {
     const label = element("label", name),
       input = element("input");
     input.type = type;
@@ -22,10 +25,12 @@ export function patternEditor(parent, { api, notice, get, set, aircraft }) {
     if (type === "number") input.step = "any";
     label.append(input);
     grid.append(label);
+    if(quantity)planningField(input,quantity,value,name,suffix);
     return input;
   };
   const label = element("label", "Pattern"),
     kind = element("select");
+  kind.setAttribute("aria-label","Pattern");
   for (const value of [
     "lawnmower",
     "creepingLine",
@@ -45,13 +50,13 @@ export function patternEditor(parent, { api, notice, get, set, aircraft }) {
   const lat = field("Center/start latitude", null),
     lon = field("Center/start longitude", null),
     heading = field("Heading (degrees true)", 0),
-    length = field("Leg length (m)", 10000),
-    width = field("Box width (m)", 5000),
-    spacing = field("Track spacing / square step (m)", 1000),
-    radius = field("Radius (m)", 2500),
-    legs = field("Legs / spokes", 6),
+    spacing = field("Track Spacing", 1000,"number","distance"),
+    length = field("Leg length", 10000,"number","distance"),
+    width = field("Survey width", 5000,"number","distance"),
+    radius = field("Orbit / turn radius", 2500,"number","distance"),
+    legs = field("Survey passes / spokes", 6),
     orbits = field("Orbits", 1),
-    alt = field("Target altitude (ft MSL, optional)", null),
+    alt = field("Target altitude", null,"number","altitude","optional"),
     notes = field("Pattern notes", "", "text");
   const clockwise = element("input");
   clockwise.type = "checkbox";
@@ -62,6 +67,9 @@ export function patternEditor(parent, { api, notice, get, set, aircraft }) {
   const report = element("p"),
     saved = element("div");
   panel.append(report, saved);
+  const explanation=element("p");panel.append(explanation);
+  function describe(){explanation.textContent=kind.value==="lawnmower"?"Lawnmower: long scan legs follow the reference heading; each turn steps sideways across it. Entry and exit are marked green and pink.":kind.value==="creepingLine"?"Creeping line: long scan legs cross the reference heading; the survey steps forward along that heading. Parallel legs are rotated 90° relative to lawnmower for the same reference heading.":kind.value==="orbit"?"Orbit: center, radius, direction and revolutions define the mission. The map shows a smooth circle with entry/exit only. Exports retain the 5° point-to-point approximation (73 points for one revolution); no native EFB orbit command is claimed.":"Preview is dashed white; committed route is gold. Parameter changes update the preview without changing the map view.";}
+  describe();
   const action = (name, fn) => {
     const b = element("button", name);
     b.type = "button";
@@ -77,10 +85,12 @@ export function patternEditor(parent, { api, notice, get, set, aircraft }) {
     return b;
   };
   function remember() {
+    changed?.();
     undo.push(structuredClone({ ...get(), patterns }));
     if (undo.length > 20) undo.shift();
   }
   function apply(data) {
+    clearTimeout(timer);generation++;preview=null;
     patterns = data.patterns || [];
     set(data);
     renderSaved();
@@ -95,14 +105,14 @@ export function patternEditor(parent, { api, notice, get, set, aircraft }) {
       kind: kind.value,
       center: { latitude: Number(lat.value), longitude: Number(lon.value) },
       headingDegrees: Number(heading.value),
-      lengthMetres: Number(length.value),
-      widthMetres: Number(width.value),
-      spacingMetres: Number(spacing.value),
-      radiusMetres: Number(radius.value),
+      lengthMetres: length.planningUnits.read(),
+      widthMetres: width.planningUnits.read(),
+      spacingMetres: spacing.planningUnits.read(),
+      radiusMetres: radius.planningUnits.read(),
       legs: Number(legs.value),
       orbits: Number(orbits.value),
       clockwise: clockwise.checked,
-      targetAltitudeFeet: alt.value === "" ? null : Number(alt.value),
+      targetAltitudeFeet: alt.planningUnits.read(),
       notes: notes.value,
     };
   };
@@ -111,20 +121,56 @@ export function patternEditor(parent, { api, notice, get, set, aircraft }) {
   async function generate() {
     const id = ++generation;
     const result = await api("/api/patterns/preview", definition());
-    if (id !== generation) return result;
+    if (id !== generation || !panel.isConnected) return null;
     preview = result;
-    report.textContent = `Preview: ${result.waypoints.length} editable points · ${(result.distanceMetres / 1000).toFixed(2)} km route distance. ${result.method}`;
+    planningText(report,()=>{
+      const d=result.definition,parallel=["lawnmower","creepingLine"].includes(d.kind);
+      return `Pattern preview only: ${parallel?`${d.legs} survey passes · Track spacing ${planningDistance(d.spacingMetres)} · Approximate survey envelope ${planningArea(d.lengthMetres*(d.legs-1)*d.spacingMetres)} (sensor coverage unvalidated) · `:""}${result.waypoints.length} navigation points · ${planningDistance(result.distanceMetres)} route distance · Reference heading ${d.headingDegrees}° true. ${result.method}`;
+    });
     const current = get();
-    set({ ...current, preview: result.waypoints });
+    set({ ...current, preview: result, previewOnly:true });
     return result;
   }
-  grid.addEventListener("input", () => {
-    clearTimeout(timer);
-    timer = setTimeout(
-      () => generate().catch((e) => (report.textContent = e.message)),
-      250,
-    );
+  function schedule(){
+    changed?.();
+    clearTimeout(timer);generation++;preview=null;describe();set({...get(),preview:null,previewOnly:true});
+    const requested=generation;
+    timer=setTimeout(()=>generate().catch(error=>{if(requested+1===generation)report.textContent=error.message;}),250);
+  }
+  function parametersChanged(event){
+    if(["lawnmower","creepingLine"].includes(kind.value)&&[spacing,width].includes(event.target)){
+      const gap=spacing.planningUnits.read(),extent=width.planningUnits.read();
+      if(gap>0&&extent>0)legs.value=Math.max(2,Math.ceil(extent/gap)+1);
+    }
+    spacing.closest("label").classList.toggle("primary-spacing",["lawnmower","creepingLine"].includes(kind.value));
+    legs.readOnly=["lawnmower","creepingLine"].includes(kind.value);
+    schedule();
+  }
+  spacing.closest("label").classList.add("primary-spacing");legs.readOnly=true;
+  grid.addEventListener("input",parametersChanged);grid.addEventListener("change",parametersChanged);
+  action("Choose center on map",()=>pickCenter?.(point=>{lat.value=point.latitude;lon.value=point.longitude;return generate().catch(e=>report.textContent=e.message);}));
+  const areaChoice=element("select");areaChoice.setAttribute("aria-label","Pattern survey area");panel.append(areaChoice);
+  function refreshAreas(){const previous=areaChoice.value;areaChoice.replaceChildren();for(const [i,area] of (get().surveyAreas||[]).entries()){const option=element("option",area.name);option.value=i;areaChoice.append(option);}if(previous)areaChoice.value=previous;}
+  refreshAreas();panel.addEventListener("toggle",()=>{if(panel.open)refreshAreas();});
+  action("Fit Pattern to Survey Area",async()=>{
+    refreshAreas();const area=get().surveyAreas[Number(areaChoice.value)];if(!area)throw Error("Draw and Save Survey Area first, then select it here.");
+    const summary=areaSummary(area.vertices);if(summary.error)throw Error(summary.error);
+    const id=++generation;clearTimeout(timer);
+    const input=definitionForFit(summary.center);
+    const fitted=await api("/api/patterns/fit-survey",{definition:input,area});
+    if(id!==generation||!panel.isConnected)return;
+    lat.value=fitted.center.latitude;lon.value=fitted.center.longitude;
+    length.planningUnits.set(fitted.lengthMetres);width.planningUnits.set(fitted.widthMetres);legs.value=fitted.legs;
+    changed?.();await generate();
+    explanation.textContent="Fit uses the heading-aligned local geodesic envelope and your entered Track Spacing. Passes may extend beyond the polygon; routes are not clipped. Sensor swath/overlap and complete scientific coverage are unvalidated.";
   });
+  function definitionForFit(center){
+    const previousLat=lat.value,previousLon=lon.value;
+    if(lat.value===""||lon.value===""){lat.value=center.latitude;lon.value=center.longitude;}
+    try{return definition();}finally{lat.value=previousLat;lon.value=previousLon;}
+  }
+  action("Fit Preview",()=>{if(!preview?.waypoints)throw Error("Choose a center and wait for a valid preview.");fitPreview?.(preview.waypoints);});
+  action("Discard Preview",()=>{clearTimeout(timer);generation++;preview=null;set({...get(),preview:null,previewOnly:true});report.textContent="Pattern preview discarded; committed plan geometry is unchanged.";});
   action("Use live aircraft position", () => {
     const p = aircraft();
     if (!Number.isFinite(p?.latitude))
@@ -143,9 +189,10 @@ export function patternEditor(parent, { api, notice, get, set, aircraft }) {
     return generate();
   });
   action("Preview pattern", generate);
-  action("Insert pattern", async () => {
+  action("Add Pattern to Mission", async () => {
     clearTimeout(timer);
     const generated = await generate();
+    if(!generated)throw Error("Parameters changed before the preview completed. Wait for the current preview.");
     generation++;
     remember();
     apply({
@@ -180,15 +227,16 @@ export function patternEditor(parent, { api, notice, get, set, aircraft }) {
             lat.value = d.center.latitude;
             lon.value = d.center.longitude;
             heading.value = d.headingDegrees;
-            length.value = d.lengthMetres;
-            width.value = d.widthMetres;
-            spacing.value = d.spacingMetres;
-            radius.value = d.radiusMetres;
+            length.planningUnits.set(d.lengthMetres);
+            width.planningUnits.set(d.widthMetres);
+            spacing.planningUnits.set(d.spacingMetres);
+            radius.planningUnits.set(d.radiusMetres);
             legs.value = d.legs;
             orbits.value = d.orbits;
-            alt.value = d.targetAltitudeFeet ?? "";
+            alt.planningUnits.set(d.targetAltitudeFeet);
             notes.value = d.notes ?? "";
             clockwise.checked = d.clockwise;
+            describe();generate().catch(e=>report.textContent=e.message);
             report.textContent =
               "Editing saved parameters. Regenerate replaces only this pattern’s tagged points; manual edits to those points will be replaced.";
           },
@@ -196,10 +244,12 @@ export function patternEditor(parent, { api, notice, get, set, aircraft }) {
         [
           "Regenerate",
           async () => {
+            const id=++generation;
             const result = await api(
               "/api/patterns/preview",
               preview?.definition.id === d.id ? definition() : d,
             );
+            if(id!==generation||!panel.isConnected)return;
             remember();
             const w = get().waypoints;
             const at = w.findIndex((p) => p.patternId === d.id);
@@ -241,5 +291,5 @@ export function patternEditor(parent, { api, notice, get, set, aircraft }) {
     }
   }
   renderSaved();
-  return { getPatterns: () => patterns, remember };
+  return { getPatterns: () => patterns, remember, refreshAreas, hasPreview:()=>!!preview?.waypoints };
 }

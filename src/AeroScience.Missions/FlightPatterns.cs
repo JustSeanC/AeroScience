@@ -25,6 +25,30 @@ public static class FlightPatterns
         if (extent > 500000) throw new ArgumentException("Reduce spacing or legs: this local pattern layout supports extents up to 500 km. Long routes can be planned with separate patterns.");
         return d with { Id = d.Id == Guid.Empty ? Guid.NewGuid() : d.Id, HeadingDegrees = (d.HeadingDegrees % 360 + 360) % 360, Notes = MissionPlanning.Text(d.Notes) };
     }
+    public static PatternDefinition FitSurvey(PatternDefinition input, SurveyArea area)
+    {
+        var d=Validate(input);
+        if(d.Kind is not (FlightPatternKind.Lawnmower or FlightPatternKind.CreepingLine))
+            throw new ArgumentException("Fit Pattern to Survey Area supports lawnmower and creeping-line patterns.");
+        if(area.Vertices is null || area.Vertices.Length>1000)throw new ArgumentException("Select a valid survey area with at most 1,000 vertices.");
+        SurveyGeometry.Validate(area.Vertices);
+        var origin=area.Vertices[0];
+        var projected=area.Vertices.Select(p=>
+        {
+            var distance=Geodesy.Distance(origin,p);
+            if(distance>500000)throw new ArgumentException("Use a smaller survey area; this local envelope fit supports extents up to 500 km.");
+            var angle=(Geodesy.Bearing(origin,p)-d.HeadingDegrees)*Math.PI/180;
+            return (Along:distance*Math.Cos(angle),Across:distance*Math.Sin(angle));
+        }).ToArray();
+        var along=projected.Max(p=>p.Along)-projected.Min(p=>p.Along);
+        var across=projected.Max(p=>p.Across)-projected.Min(p=>p.Across);
+        var center=Geodesy.Direct(Geodesy.Direct(origin,d.HeadingDegrees,(projected.Max(p=>p.Along)+projected.Min(p=>p.Along))/2),d.HeadingDegrees+90,(projected.Max(p=>p.Across)+projected.Min(p=>p.Across))/2);
+        var scan=d.Kind==FlightPatternKind.Lawnmower?along:across;
+        var step=d.Kind==FlightPatternKind.Lawnmower?across:along;
+        var legs=Math.Max(2,(int)Math.Ceiling(step/d.SpacingMetres)+1);
+        if(legs>100)throw new ArgumentException("This spacing needs more than 100 survey passes. Increase Track Spacing or select a smaller area.");
+        return Validate(d with {Center=center,LengthMetres=Math.Max(10,scan),WidthMetres=Math.Max(10,step),Legs=legs});
+    }
     public static PatternPreview Generate(PatternDefinition input)
     {
         var d = Validate(input); var points = new List<Coordinates>(); var sign = d.Clockwise ? 1 : -1;

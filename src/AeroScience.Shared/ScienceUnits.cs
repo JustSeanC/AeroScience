@@ -14,7 +14,7 @@ public static class ScienceUnits
         ["windDirection"] = [new("degreesTrue", "° true", 1, 0, 0)],
         ["density"] = [new("kg/m3", "kg/m³", 14.59390293720636 / Math.Pow(.3048, 3), 0, 3), new("slug/ft3", "slug/ft³", 1, 0, 6)],
         ["altitude"] = [new("feet", "ft MSL", 1, 0, 0), new("metres", "m MSL", .3048, 0, 0)],
-        ["distance"] = [new("nauticalMiles", "NM", 1d / 1852), new("kilometres", "km", .001), new("miles", "mi", 1d / 1609.344)]
+        ["distance"] = [new("metres", "m", 1), new("nauticalMiles", "NM", 1d / 1852), new("kilometres", "km", .001), new("miles", "mi", 1d / 1609.344)]
     };
     public static ScienceUnitPreferences Aviation => new();
     public static ScienceUnitPreferences Scientific => new(Pressure: "hPa", WindSpeed: "metresPerSecond", Altitude: "metres", Distance: "kilometres");

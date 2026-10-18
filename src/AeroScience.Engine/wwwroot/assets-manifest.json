@@ -26,6 +26,8 @@
     "geography/airports.geojson": "269b422404e91649ab45b113ac9f72afcc3c7ecd959934b153e38a9319b09c04",
     "geography/countries.geojson": "3a0efcdc855417a310e8f402164715f9001f6b8c183d8c8f2835647320102337",
     "geography/places.geojson": "6c8c73015fe184139046d5f8fae0c562f5df6637f72be5fb8004e4c220e585fe",
-    "geography/provenance.json": "c6d9e047d52c18f0d0106571fd597991ad8dd7d297f00ec142630186fa1dbf0a"
+    "geography/provenance.json": "c6d9e047d52c18f0d0106571fd597991ad8dd7d297f00ec142630186fa1dbf0a",
+    "geography/airport-search.json": "6d8987ec3f4eb9059a2ff47e1b58217cbb43ae1a95d2b48e75abffa4ce5b1cf9",
+    "geography/airport-search-provenance.json": "15878bd62ac0f756f5d3bc8765c5ba25c192edfb40ad0c0d3dcc3691695ac458"
   }
 }

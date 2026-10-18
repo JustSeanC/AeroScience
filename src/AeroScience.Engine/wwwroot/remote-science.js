@@ -233,20 +233,8 @@ export async function viewProduct(parent, data, api = null) {
   const mapHolder = e("div");
   parent.append(mapHolder);
   const map = new ResearchMap(mapHolder,undefined,{fitMaxZoom:19});
-  map.set({
-    plan: {
-      id: p.id,
-      surveyAreas: [
-        {
-          name: "Approximate acquisition footprint",
-          vertices: p.footprint.boundary,
-        },
-      ],
-      waypoints: [],
-    },
-    markers: [],
-    track: [],
-  });
+  map.set({plan:{id:p.id,waypoints:[]},footprints:[{vertices:p.footprint.boundary,label:"Derived acquisition footprint; cloud/nodata cells can be excluded"}],markers:[],track:[]});
+  map.fit(p.footprint.boundary);
   const select = e("select");
   select.setAttribute("aria-label", "Scientific product view");
   for (const v of p.availableViews) {

@@ -144,9 +144,9 @@ def validate_companion(root, require_simconnect=False):
     expected = {"AeroScience.exe", "AeroScience.dll", "AeroScience.deps.json",
                 "AeroScience.runtimeconfig.json", "AeroScience.Engine.dll", "coreclr.dll", "hostpolicy.dll",
                 "System.Windows.Forms.dll",
-                "wwwroot/index.html", "wwwroot/app.js", "wwwroot/app.css", "wwwroot/research.js", "wwwroot/map.js", "wwwroot/patterns.js", "wwwroot/analysis.js", "wwwroot/science-display.js", "wwwroot/basemaps.js", "wwwroot/geographic-view.js", "wwwroot/route-export.js", "wwwroot/assets-manifest.json"}
+                "wwwroot/index.html", "wwwroot/app.js", "wwwroot/app.css", "wwwroot/research.js", "wwwroot/map.js", "wwwroot/patterns.js", "wwwroot/location-search.js", "wwwroot/planner-geometry.js", "wwwroot/analysis.js", "wwwroot/science-display.js", "wwwroot/basemaps.js", "wwwroot/geographic-view.js", "wwwroot/route-export.js", "wwwroot/assets-manifest.json"}
     expected.update({'BitMiracle.LibTiff.NET.dll','wwwroot/remote-science.js','wwwroot/scientific-access.js','wwwroot/application-updates.js','wwwroot/storage-management.js'})
-    expected.update({'licenses/LibTiff.NET.txt','wwwroot/help/remote-sensing/quick-start.md','wwwroot/help/remote-sensing/sources.md'})
+    expected.update({'licenses/OurAirports.txt','wwwroot/help/mission-planner.md','licenses/LibTiff.NET.txt','wwwroot/help/remote-sensing/quick-start.md','wwwroot/help/remote-sensing/sources.md'})
     if require_simconnect:
         expected.add("SimConnect.dll")
     require(expected <= found.keys(), "Missing self-contained Windows companion files or official SimConnect runtime.")

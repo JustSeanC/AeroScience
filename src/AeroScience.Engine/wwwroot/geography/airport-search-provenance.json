@@ -1,0 +1,11 @@
+{
+  "dataset": "OurAirports",
+  "license": "Public domain, no guarantee of accuracy or fitness for use",
+  "licenseUrl": "https://ourairports.com/data/",
+  "sourceCommit": "b529623d2a0b09a9be78d37fc7a7a5e1e16e3451",
+  "sourceUrl": "https://raw.githubusercontent.com/davidmegginson/ourairports-data/b529623d2a0b09a9be78d37fc7a7a5e1e16e3451/airports.csv",
+  "sourceSha256": "0499dbd88de2fc735ac5c09f59796ccc3af544e17ffda807f793c0c6fe6c3d75",
+  "features": 72684,
+  "excluded": "Closed airports and invalid coordinates only; original positions preserved",
+  "bundledSha256": "6d8987ec3f4eb9059a2ff47e1b58217cbb43ae1a95d2b48e75abffa4ce5b1cf9"
+}

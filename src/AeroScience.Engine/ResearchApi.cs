@@ -4,6 +4,7 @@ using AeroScience.Shared;
 
 namespace AeroScience.Engine;
 
+public sealed record PatternSurveyRequest(PatternDefinition Definition, SurveyArea Area);
 public sealed record EstimateRequest(InstrumentConfiguration[]? Instruments, double? DurationMinutes);
 public sealed record SciencePauseRequest(bool Paused);
 public sealed record MapLayerRequest(string Layer);
@@ -58,6 +59,7 @@ public static class ResearchApi
         app.MapPost("/api/display/units", (ScienceUnitPreferences preferences, ScienceUnitSettings settings) => settings.Set(preferences));
         app.MapPost("/api/missions/{id:guid}/science/state", (Guid id, SciencePauseRequest request, MissionCoordinator missions) => missions.SetSciencePaused(id, request.Paused));
         app.MapGet("/api/patterns", () => Enum.GetNames<FlightPatternKind>());
+        app.MapPost("/api/patterns/fit-survey", (PatternSurveyRequest request) => FlightPatterns.FitSurvey(request.Definition,request.Area));
         app.MapPost("/api/patterns/preview", (PatternDefinition definition) => FlightPatterns.Generate(definition));
         app.MapGet("/api/presets", (MissionStore store) => store.Presets());
         app.MapPost("/api/presets", (InstrumentPreset preset, MissionStore store) => store.SavePreset(preset));

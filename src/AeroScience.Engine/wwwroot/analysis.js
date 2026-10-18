@@ -1,4 +1,4 @@
-import { displayReading } from "./science-display.js";
+import { displayReading, planningField, planningDistance } from "./science-display.js";
 const el = (tag, value) => {
   const e = document.createElement(tag);
   if (value !== undefined) e.textContent = value;
@@ -39,7 +39,7 @@ export async function renderAnalysis(parent, id, plan, api) {
       "Maximum connected telemetry gap (s)",
       data.settings.maximumGapSeconds,
     );
-  tolerance.min = 10;
+  planningField(tolerance,"distance",data.settings.waypointToleranceMetres,"Waypoint tolerance");
   gap.min = 1;
   const refresh = el("button", "Recompute comparison");
   refresh.className = "secondary";
@@ -50,7 +50,7 @@ export async function renderAnalysis(parent, id, plan, api) {
     try {
       await api(`/api/missions/${id}/analysis`, {
         ...data.settings,
-        waypointToleranceMetres: Number(tolerance.value),
+        waypointToleranceMetres: tolerance.planningUnits.read(),
         maximumGapSeconds: Number(gap.value),
       });
       const holder = el("div");
@@ -61,10 +61,7 @@ export async function renderAnalysis(parent, id, plan, api) {
       refresh.disabled = false;
     }
   };
-  const distance = (v) => {
-    const d = displayReading("distance", v, "m");
-    return `${d.value.toFixed(2)} ${d.unit}`;
-  };
+  const distance = planningDistance;
   panel.append(
     el(
       "p",

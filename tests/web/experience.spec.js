@@ -60,7 +60,7 @@ test("offline geography, zero coordinates, search, patterns and editable plan pe
   await page.getByLabel("Latitude (degrees north)", { exact: true }).fill("0");
   await page.getByLabel("Longitude (degrees east)", { exact: true }).fill("0");
   await page
-    .getByRole("button", { name: "Apply waypoint", exact: true })
+    .getByRole("button", { name: "Save Waypoint", exact: true })
     .click();
   await expect(page.locator(".waypoint-row")).toHaveCount(1);
   await page.getByText("Flight pattern generator", { exact: true }).click();
@@ -69,7 +69,7 @@ test("offline geography, zero coordinates, search, patterns and editable plan pe
     .getByLabel("Center/start longitude", { exact: true })
     .fill("-117.9");
   await page
-    .getByRole("button", { name: "Insert pattern", exact: true })
+    .getByRole("button", { name: "Add Pattern to Mission", exact: true })
     .click();
   await expect(page.locator(".waypoint-row")).toHaveCount(13);
   await page
@@ -77,7 +77,7 @@ test("offline geography, zero coordinates, search, patterns and editable plan pe
     .click();
   await expect(page.locator(".waypoint-row")).toHaveCount(1);
   await page
-    .getByRole("button", { name: "Insert pattern", exact: true })
+    .getByRole("button", { name: "Add Pattern to Mission", exact: true })
     .click();
   await expect(page.locator(".waypoint-row")).toHaveCount(13);
   await page

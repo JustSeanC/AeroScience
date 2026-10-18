@@ -101,6 +101,7 @@ public static class MissionPlanning
         {
             if (a.Vertices is null || a.Vertices.Length < 3 || a.Vertices.Any(p => !Position(p.Latitude, p.Longitude)))
                 throw new ArgumentException("Survey polygons require at least three valid WGS84 vertices.");
+            SurveyGeometry.Validate(a.Vertices);
             return a with { Name = Text(a.Name, 100) ?? "Survey area", Vertices = a.Vertices.ToArray() };
         }).ToArray();
         return plan with

@@ -41,3 +41,5 @@ python3 scripts/build/smoke_recovery.py
 Synthetic sources exist only in automated test projects. Native Windows GUI execution, the proprietary official SDK, MSFS, Quest 3 and physical iPad testing require their respective environments; cross-compilation and browser fixtures do not establish those passes.
 
 [Installation](INSTALL.md) · [Architecture](docs/architecture.md) · [Validation](docs/validation-results.md) · [Changelog](CHANGELOG.md)
+
+Mission Planner walkthrough and revised draft/map workflows: [first mission guide](docs/mission-planner.md).

@@ -1,0 +1,11 @@
+OurAirports airport search data
+https://ourairports.com/data/
+https://github.com/davidmegginson/ourairports-data
+
+Terms of use published by OurAirports:
+"All data is released to the Public Domain, and comes with no guarantee of accuracy or fitness for use."
+
+AeroScience retains original geographic positions in a compact offline search index,
+excluding closed airports and invalid coordinates. This community dataset is geographic
+reference information, not certified aviation navigation. See the bundled
+geography/airport-search-provenance.json for pinned source identity and checksums.

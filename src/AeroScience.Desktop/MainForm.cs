@@ -18,6 +18,9 @@ public sealed class MainForm : Form, IDesktopActions
     private readonly Button dashboard = new() { Text = "Open Dashboard", AutoSize = true };
     private readonly System.Windows.Forms.Timer timer = new() { Interval = 1000 };
     private bool closing;
+    private readonly DesktopActionGate desktopActions = new();
+    private Form? auxiliary;
+    private int focusQueued;
     public bool Busy { get; private set; }
     public bool Recording => engine?.Services.GetRequiredService<MissionCoordinator>().Snapshot().ActiveMission is not null;
     private readonly ToolbarPromptPolicy toolbarPrompts = new();
@@ -50,11 +53,11 @@ public sealed class MainForm : Form, IDesktopActions
                 if (showSetup || !Preferences.Load().SetupCompleted)
                 {
                     using var wizard = new SetupWizardForm(this);
-                    if (wizard.ShowDialog(this) != DialogResult.OK) { Close(); return; }
+                    if (ShowAuxiliary(wizard) != DialogResult.OK) { Close(); return; }
                 }
                 Storage.Initialize(); await StartEngineAsync(); OpenDashboard();
                 var toolbar = Toolbar;
-                if (toolbarPrompts.ShouldPrompt(toolbar)) { toolbarPrompts.Dismiss(toolbar); using var prompt = new ToolbarUpdateForm(this, toolbar); prompt.ShowDialog(this); }
+                if (toolbarPrompts.ShouldPrompt(toolbar)) { toolbarPrompts.Dismiss(toolbar); using var prompt = new ToolbarUpdateForm(this, toolbar); ShowAuxiliary(prompt); }
             }
             catch (Exception error) { ShowError(error); }
             timer.Start(); RefreshStatus();
@@ -143,7 +146,7 @@ public sealed class MainForm : Form, IDesktopActions
         {
             if (WindowState == FormWindowState.Minimized) WindowState = FormWindowState.Normal;
             Show(); Activate();
-            using var form = new SettingsForm(this, storage); form.ShowDialog(this);
+            using var form = new SettingsForm(this, storage); ShowAuxiliary(form);
         }
         catch (Exception error) { ShowError(error); }
     }
@@ -151,7 +154,7 @@ public sealed class MainForm : Form, IDesktopActions
     {
         if (Busy || Recording) { MessageBox.Show(this, "End recording and wait for current operations before running setup."); return; }
         using var wizard = new SetupWizardForm(this);
-        if (wizard.ShowDialog(owner ?? this) == DialogResult.OK) OpenDashboard();
+        if (ShowAuxiliary(wizard, owner) == DialogResult.OK) OpenDashboard();
     }
     public bool InstallToolbar(IWin32Window owner, string? community)
     {
@@ -165,37 +168,84 @@ public sealed class MainForm : Form, IDesktopActions
         if(!toolbarStatus.CanInstall&&!toolbarStatus.CanRepair){MessageBox.Show(owner,toolbarStatus.Message);return false;}
         if (ToolbarInstaller.SimulatorRunning()) { MessageBox.Show(owner, "Close MSFS before installing or updating AeroScience's toolbar."); return false; }
         if (MessageBox.Show(owner, $"Install the bundled AeroScience toolbar in:\n{community}\n\nIts previous files will be backed up outside Community. Unrelated add-ons are preserved.", "Confirm toolbar installation", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return false;
-        using var form = new ToolbarProgressForm(this, community); return form.ShowDialog(owner) == DialogResult.OK;
+        using var form = new ToolbarProgressForm(this, community); return ShowAuxiliary(form, owner) == DialogResult.OK;
+    }
+    private void FocusAuxiliary()
+    {
+        var target = auxiliary is { IsDisposed: false } ? auxiliary : this;
+        if (target.WindowState == FormWindowState.Minimized) target.WindowState = FormWindowState.Normal;
+        target.Show(); target.Activate(); target.BringToFront();
+    }
+    private DialogResult ShowAuxiliary(Form form, IWin32Window? owner = null)
+    {
+        // Settings may own a legitimate child. Browser requests never supply an owner.
+        if (auxiliary is { IsDisposed: false } && owner != auxiliary) { FocusAuxiliary(); return DialogResult.Cancel; }
+        var previous = auxiliary;
+        auxiliary = form;
+        try { return form.ShowDialog(owner ?? this); }
+        finally { auxiliary = previous is { IsDisposed: false } ? previous : null; }
     }
     private void Dispatch(Action action)
-    { if (!IsDisposed) BeginInvoke(action); }
-    void IDesktopActions.OpenToolbar() => Dispatch(() => { using var form = new SettingsForm(this, false, toolbar: true); form.ShowDialog(this); });
+    {
+        var lease = desktopActions.TryEnter();
+        if (lease is null)
+        {
+            if (Interlocked.Exchange(ref focusQueued, 1) != 0) return;
+            try { if (!IsDisposed && IsHandleCreated) BeginInvoke(() => { try { FocusAuxiliary(); } finally { Interlocked.Exchange(ref focusQueued, 0); } }); else Interlocked.Exchange(ref focusQueued, 0); }
+            catch (InvalidOperationException) { Interlocked.Exchange(ref focusQueued, 0); }
+            return;
+        }
+        try
+        {
+            if (IsDisposed || !IsHandleCreated) { lease.Dispose(); return; }
+            BeginInvoke(() =>
+            {
+                using (lease)
+                {
+                    try
+                    {
+                        if (auxiliary is { IsDisposed: false } || Busy) { FocusAuxiliary(); return; }
+                        action();
+                    }
+                    catch (Exception error) { ShowError(error); }
+                }
+            });
+        }
+        catch (InvalidOperationException) { lease.Dispose(); }
+    }
+    void IDesktopActions.OpenToolbar() => Dispatch(() => { using var form = new SettingsForm(this, false, toolbar: true); ShowAuxiliary(form); });
     void IDesktopActions.OpenSettings() => Dispatch(() => ShowSettings(false));
     void IDesktopActions.OpenStorage() => Dispatch(() => ShowSettings(true));
-    void IDesktopActions.OpenDataManagement() => Dispatch(ShowDataManagement);
-    public void ShowDataManagement() { if (!Busy) { using var form = new DataManagementForm(this); form.ShowDialog(this); } }
+    void IDesktopActions.OpenDataManagement() => Dispatch(() => ShowDataManagement());
+    public void ShowDataManagement(IWin32Window? owner = null) { if (!Busy) { using var form = new DataManagementForm(this); ShowAuxiliary(form, owner); } }
     void IDesktopActions.CollectFeedback() => Dispatch(ShowFeedback);
-    void IDesktopActions.ImportScientificSource() => Dispatch(ImportScientificSource);
+    void IDesktopActions.ImportScientificSource() => Dispatch(() => ImportScientificSource());
     void IDesktopActions.CompactStorage(bool science) => Dispatch(async () =>
     {
         if(Busy||Recording){MessageBox.Show(this,"End recording and wait for active setup/storage work before compacting.");return;}
         if(MessageBox.Show(this,"Compact the "+(science?"science":"flight")+" database? Services will stop temporarily. A verified backup and sufficient temporary space are required. Original observations are retained; actual recovered database bytes will be reported.","Confirm database maintenance",MessageBoxButtons.YesNo,MessageBoxIcon.Question,MessageBoxDefaultButton.Button2)!=DialogResult.Yes)return;
         try{var result="";await RunStoppedAsync(()=>Task.Run(()=>result=Storage.Compact(science?StorageKind.ScienceLibrary:StorageKind.Missions,true,false)));MessageBox.Show(this,result,"Compaction completed");}catch(Exception error){ShowError(error);}
     });
-    public async void ImportScientificSource()
+    public async void ImportScientificSource(IWin32Window? owner = null)
     {
-        if (Busy || engine is null) { MessageBox.Show(this, "Wait for current setup/storage work and start the local engine first."); return; }
+        try { await ImportScientificSourceAsync(owner); }
+        catch (Exception error) { ShowError(error); }
+    }
+    private async Task ImportScientificSourceAsync(IWin32Window? owner)
+    {
+        if (auxiliary is { IsDisposed: false } && owner != auxiliary) { FocusAuxiliary(); return; }
+        if (Busy || engine is null) { MessageBox.Show(owner ?? this, "Wait for current setup/storage work and start the local engine first."); return; }
         using var picker = new OpenFileDialog { Title = "Import a real scientific source collection manifest", Filter = "AeroScience source manifest (*.json)|*.json", CheckFileExists = true };
-        if (picker.ShowDialog(this) != DialogResult.OK) return;
+        if (picker.ShowDialog(owner ?? this) != DialogResult.OK) return;
         try
         {
             var inspection = ScienceStore.InspectImport(picker.FileName);
             var science = engine.Services.GetRequiredService<ScienceStore>();
-            if (MessageBox.Show(this, $"Import {inspection.Manifest.Name}?\n\nSource: {inspection.Manifest.Provider}\nObservation: {inspection.Manifest.ObservationUtc?.ToString("u") ?? "Unknown (not live)"}\nCopy {inspection.Bytes / 1048576d:0.0} MiB into {science.DirectoryPath}\nAvailable: {new LocalStorageCapacity().FreeBytes(science.DirectoryPath) / 1073741824d:0.0} GiB\n\nOriginal files remain untouched. No files are downloaded and no data are uploaded. Review the source license: {inspection.Manifest.License}", "Confirm scientific source import", MessageBoxButtons.YesNo, MessageBoxIcon.Information, MessageBoxDefaultButton.Button2) != DialogResult.Yes) return;
+            if (MessageBox.Show(owner ?? this, $"Import {inspection.Manifest.Name}?\n\nSource: {inspection.Manifest.Provider}\nObservation: {inspection.Manifest.ObservationUtc?.ToString("u") ?? "Unknown (not live)"}\nCopy {inspection.Bytes / 1048576d:0.0} MiB into {science.DirectoryPath}\nAvailable: {new LocalStorageCapacity().FreeBytes(science.DirectoryPath) / 1073741824d:0.0} GiB\n\nOriginal files remain untouched. No files are downloaded and no data are uploaded. Review the source license: {inspection.Manifest.License}", "Confirm scientific source import", MessageBoxButtons.YesNo, MessageBoxIcon.Information, MessageBoxDefaultButton.Button2) != DialogResult.Yes) return;
             Busy = true;
             var progress = new Progress<string>(value => status.Text = value);
             var imported = await Task.Run(() => science.ImportSourceAsync(picker.FileName, progress: progress));
-            MessageBox.Show(this, "Imported " + imported.Manifest.Name + ". Open dashboard Settings → Scientific Data Sources to inspect coverage and metadata.");
+            MessageBox.Show(owner ?? this, "Imported " + imported.Manifest.Name + ". Open dashboard Settings → Scientific Data Sources to inspect coverage and metadata.");
         }
         catch (Exception error) { ShowError(error); }
         finally { Busy = false; RefreshStatus(); }
@@ -236,6 +286,6 @@ public sealed class MainForm : Form, IDesktopActions
             }
             catch (Exception error) { ShowError(error); }
         };
-        notes.ShowDialog(this);
+        ShowAuxiliary(notes);
     }
 }

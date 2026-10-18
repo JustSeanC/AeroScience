@@ -20,10 +20,11 @@ class PackagingTests(unittest.TestCase):
         for directory in ('vendor','geography'):
             shutil.copytree(web/directory,root/'wwwroot'/directory)
         shutil.copy2(web/'assets-manifest.json',root/'wwwroot/assets-manifest.json')
-        for name in ('patterns.js','analysis.js','science-display.js','basemaps.js','geographic-view.js','route-export.js','remote-science.js','scientific-access.js','application-updates.js','storage-management.js'):
+        for name in ('patterns.js','location-search.js','planner-geometry.js','analysis.js','science-display.js','basemaps.js','geographic-view.js','route-export.js','remote-science.js','scientific-access.js','application-updates.js','storage-management.js'):
             shutil.copy2(web/name,root/'wwwroot'/name)
         shutil.copytree(packaging.REPO/'licenses',root/'licenses')
         shutil.copytree(packaging.REPO/'docs'/'remote-sensing',root/'wwwroot/help/remote-sensing')
+        shutil.copy2(packaging.REPO/'docs'/'mission-planner.md',root/'wwwroot/help/mission-planner.md')
         image = bytearray(512); image[:2] = b'MZ'; struct.pack_into('<I', image, 60, 128)
         image[128:132] = b'PE\0\0'; struct.pack_into('<H', image, 132, 0x8664)
         struct.pack_into('<H', image, 152, 0x20b); struct.pack_into('<H', image, 220, 2)

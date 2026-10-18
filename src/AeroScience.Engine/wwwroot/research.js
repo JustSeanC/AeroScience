@@ -1,3 +1,4 @@
+import { areaSummary } from "./planner-geometry.js";
 import { scientificReadiness } from "./scientific-access.js";
 import { routeExportButton } from "./route-export.js";
 import { remoteProducts } from "./remote-science.js";
@@ -9,6 +10,7 @@ import {
   unitControls,
   displayReading,
   syncUnits,
+  planningField, planningUnitControls, planningDistance, planningArea, planningSurvey, planningText,
 } from "./science-display.js";
 import { renderAnalysis } from "./analysis.js";
 const $ = (id) => document.getElementById(id);
@@ -24,7 +26,7 @@ const samplePositions = (rows) =>
     new Map(
       rows
         .filter(
-          (r) => Number.isFinite(r.latitude) && Number.isFinite(r.longitude),
+          (r) => Number.isFinite(r.latitude) && Number.isFinite(r.longitude) && Number.isFinite(r.value) && r.quality === "valid",
         )
         .map((r) => [
           `${r.positionTimestampUtc || r.timestampUtc}:${r.latitude}:${r.longitude}`,
@@ -198,10 +200,14 @@ export async function loadResearch(page) {
   if (page === "planner") await planner();
   if (page === "instruments") await instruments();
 }
+let plannerDirty=false, pendingGeometry=false;
+window.addEventListener("beforeunload",event=>{if(plannerDirty||pendingGeometry){event.preventDefault();event.returnValue="";}});
 async function planner() {
+  if((plannerDirty||pendingGeometry)&&$("plan-form"))return;
   plans = await ctx.api(`/api/plans?limit=50&offset=${planOffset}`);
   const p = $("planner-content");
   p.replaceChildren(text("h2", "Saved mission plans"));
+  await planningUnitControls(p,ctx.api);
   await scientificReadiness(p, ctx.api);
   for (const plan of plans) {
     const row = text("div", undefined, "plan-row");
@@ -266,6 +272,8 @@ async function planner() {
   editPlan(editing);
 }
 function editPlan(plan) {
+  if((plannerDirty||pendingGeometry)&&!confirm("Discard unsaved mission and geometry edits? Cancel keeps the current draft."))return;
+  plannerDirty=false;pendingGeometry=false;
   editing = plan;
   waypoints = structuredClone(plan?.waypoints || []);
   areas = structuredClone(plan?.surveyAreas || []);
@@ -276,6 +284,10 @@ function editPlan(plan) {
   const form = document.createElement("form");
   form.id = "plan-form";
   e.append(form);
+  const draftStatus=text("p","Mission plan draft · Changes are not saved until Save mission plan.","planner-status");draftStatus.setAttribute("role","status");form.append(draftStatus);
+  const dirty=message=>{if(!form.isConnected)return;plannerDirty=true;draftStatus.textContent=message||"Unsaved changes · Save mission plan when ready. Your draft stays here when you switch sections.";};
+  form.addEventListener("input",event=>{if(!event.target.closest(".pattern-editor")&&!event.target.closest(".draft-geometry-editor"))dirty();});
+  form.append(text("h3","1. Mission details"));
   const grid = text("div", undefined, "research-grid");
   form.append(grid);
   const name = input(grid, "Plan name", plan?.name);
@@ -339,6 +351,7 @@ function editPlan(plan) {
       plan?.estimatedDurationMinutes,
       "number",
     );
+  for(const [field,title,suffix] of [[cruise,"Flight plan cruising altitude","required for PLN"],[low,"Minimum planned altitude",""],[high,"Maximum planned altitude",""]])planningField(field,"altitude",field.value===""?null:Number(field.value),title,suffix);
   duration.min = 1;
   duration.max = 43200;
   const notes = input(
@@ -355,6 +368,9 @@ function editPlan(plan) {
       "footnote",
     ),
   );
+  const advanced=text("details");advanced.append(text("summary","Advanced mission details & export settings"));
+  for(const field of [description,aircraft,flightRules,cruise,low,high,duration,notes])advanced.append(field.closest("label"));
+  form.append(advanced);
   const configuration = text("div");
   form.append(configuration);
   configs(configuration, plan?.instruments || []);
@@ -376,7 +392,7 @@ function editPlan(plan) {
               )
             )
               return;
-            configs(configuration, resolved.instruments);
+            configs(configuration, resolved.instruments);dirty();
           }),
         );
       if (!rows.length)
@@ -386,6 +402,7 @@ function editPlan(plan) {
     })
     .catch((e) => ctx.notice(e.message));
   template.onchange = () => {
+    dirty();
     const t = templates.find((t) => t.id === template.value);
     objective.value = t.objective;
     configs(configuration, t.instruments);
@@ -401,9 +418,10 @@ function editPlan(plan) {
     }),
     estimate,
   );
-  form.append(text("h3", "Waypoints & survey areas"));
+  const locationSection=text("section");form.append(locationSection);
+  locationSection.append(text("h3", "2. Location, waypoints and survey areas"));
   const list = text("div");
-  form.append(list);
+  locationSection.append(list);
   const drawList = () => {
     list.replaceChildren();
     waypoints.forEach((w, i) => {
@@ -435,7 +453,12 @@ function editPlan(plan) {
           drawList();
         }),
       );
-      list.append(row);
+      const definition=patternValues?.find(d=>d.id===w.patternId);
+      if(definition?.kind==="orbit") {
+        let group=list.querySelector(`[data-orbit="${w.patternId}"]`);
+        if(!group){group=text("details");group.dataset.orbit=w.patternId;const count=waypoints.filter(p=>p.patternId===w.patternId).length;const description=text("summary");group.append(description);planningText(description,()=>`Orbit · ${planningDistance(definition.radiusMetres)} radius · ${definition.clockwise?"clockwise":"counterclockwise"} · ${definition.orbits} revolution(s) · ${count} navigation points (advanced)`);list.append(group);}
+        group.append(row);
+      }else list.append(row);
     });
     for (let i = 0; i < areas.length; i++) {
       const area = areas[i];
@@ -452,15 +475,24 @@ function editPlan(plan) {
       list.append(row);
     }
     planMap?.set({
-      plan: { waypoints, surveyAreas: areas, departure: departure.value },
+      plan: { waypoints, surveyAreas: areas, patterns: patternValues, departure: departure.value },
       aircraft: aircraftFor(state),
     });
   };
-  const editor = text("div", undefined, "research-grid");
-  form.append(editor);
+  const editor = text("div", undefined, "research-grid draft-geometry-editor");
+  locationSection.append(editor);
+  let clickMode=null, areaVertices=[], selectedArea=null, selectPatternCenter=null, waypointIndex=-1;
+  let patternValues = structuredClone(plan?.patterns || []);
+  function canReplaceGeometry(){return !pendingGeometry||confirm("Discard the current unsaved waypoint or survey area? Cancel keeps editing it.");}
+  function cancelGeometry(){pendingGeometry=false;clickMode=null;areaVertices=[];planMap.interaction(null);planMap.draft();editor.replaceChildren();draftStatus.textContent=plannerDirty?"Unsaved mission draft changes remain.":"Geometry edit cancelled; saved route unchanged.";}
+  function beginWaypoint(){waypointEditor(-1);}
+
   function waypointEditor(index, position = {}) {
-    editor.replaceChildren();
-    const w = waypoints[index] || position;
+    if(pendingGeometry&&!position.fromMap&&!canReplaceGeometry())return;
+    waypointIndex=index;pendingGeometry=true;clickMode="waypoint";planMap?.interaction("waypoint");
+    editor.replaceChildren(text("h4",index>=0?"Edit selected waypoint":"Draft waypoint — click the map to place it, or enter coordinates"));
+    draftStatus.textContent="Draft waypoint only · Save Waypoint commits it to this plan draft; Save mission plan writes the plan.";
+    const w = {...(waypoints[index] || {}),...position};
     const title = input(
         editor,
         "Waypoint name",
@@ -481,9 +513,12 @@ function editPlan(plan) {
         "Published navigation identifier (optional; not the science name)",
         w.navigationIdentifier,
       );
-    lat.step = lon.step = "any";
+    planningField(alt,"altitude",w.targetAltitudeFeet??null,"Target altitude","optional");
+    lat.step = lon.step = "any";lat.min=-90;lat.max=90;lon.min=-180;lon.max=180;
+    const updateMarker=()=>{if(lat.value!==""&&lon.value!==""&&lat.checkValidity()&&lon.checkValidity())planMap.draft([{latitude:Number(lat.value),longitude:Number(lon.value)}]);};
+    lat.addEventListener("input",updateMarker);lon.addEventListener("input",updateMarker);updateMarker();
     editor.append(
-      button("Apply waypoint", () => {
+      button("Save Waypoint", () => {
         const value = {
           ...w,
           id: w.id || crypto.randomUUID(),
@@ -491,7 +526,7 @@ function editPlan(plan) {
           name: title.value,
           latitude: Number(lat.value),
           longitude: Number(lon.value),
-          targetAltitudeFeet: alt.value ? Number(alt.value) : null,
+          targetAltitudeFeet: alt.planningUnits.read(),
           instructions: instruction.value,
           objective: purpose.value,
         };
@@ -505,13 +540,14 @@ function editPlan(plan) {
         pattern.remember();
         if (index >= 0) waypoints[index] = value;
         else waypoints.push(value);
-        editor.replaceChildren();
-        drawList();
+        cancelGeometry();drawList();dirty("Waypoint saved to draft · Save mission plan to keep this route.");
       }),
+      button("Cancel Waypoint",cancelGeometry),
     );
   }
   function areaEditor(index = -1) {
-    editor.replaceChildren();
+    if(!canReplaceGeometry())return;pendingGeometry=true;clickMode=null;planMap.interaction(null);
+    editor.replaceChildren(text("h4","Advanced survey vertex editor"));
     const area = areas[index];
     const title = input(editor, "Area name", area?.name),
       vertices = input(
@@ -542,57 +578,74 @@ function editPlan(plan) {
           )
         )
           throw Error("A polygon needs at least three valid coordinate pairs.");
+        const summary=areaSummary(points);if(summary.error)throw Error(summary.error);
         const value = { name: title.value, vertices: points };
         pattern.remember();
         if (index >= 0) areas[index] = value;
         else areas.push(value);
-        editor.replaceChildren();
-        drawList();
-      }),
+        cancelGeometry();drawList();dirty("Survey area saved to draft.");
+      }),button("Cancel area edit",cancelGeometry),
     );
   }
-  form.append(
-    button("Add waypoint", () => waypointEditor(-1)),
-    button("Add survey polygon", () => areaEditor()),
+  function startSurvey(){
+    if(!canReplaceGeometry())return;pendingGeometry=true;clickMode="survey";areaVertices=[];planMap.interaction("survey");planMap.draft();
+    editor.replaceChildren(text("h4","Draw Survey Area"),text("p","Click at least three points around the survey boundary. Undo removes the last vertex; Finish Area closes it."));
+    const progress=text("p","0 vertices");progress.id="survey-draft-progress";
+    editor.append(progress,button("Undo Last Vertex",()=>{areaVertices.pop();planMap.draft(areaVertices);progress.textContent=`${areaVertices.length} vertices`; }),button("Finish Area",()=>{
+      const result=areaSummary(areaVertices);if(result.error){progress.textContent=result.error;return;}
+      clickMode=null;planMap.interaction(null);planMap.draft(areaVertices,true);
+      const dimensions=text("p");editor.replaceChildren(text("h4","Survey polygon preview — not yet in the plan"),dimensions);planningText(dimensions,()=>planningSurvey(result));
+      const name=input(editor,"Survey area name",`Survey area ${areas.length+1}`);
+      editor.append(button("Save Survey Area",()=>{if(!name.value.trim())throw Error("Give this survey area a name.");pattern.remember();areas.push({name:name.value.trim(),vertices:structuredClone(areaVertices)});selectedArea=areas.length-1;cancelGeometry();drawList();pattern.refreshAreas?.();dirty("Survey area saved to draft · Generate a pattern below, or save the mission plan.");}),button("Cancel Survey Area",cancelGeometry));
+    }),button("Cancel Drawing",cancelGeometry));
+    draftStatus.textContent="Drawing survey area · Click the map to add vertices; the route has not changed.";
+  }
+  locationSection.append(
+    button("Add waypoint", beginWaypoint),
+    button("Draw Survey Area", startSurvey),
   );
   const map = text("div");
-  form.append(map);
+  locationSection.append(map);
   planMap?.observer?.disconnect();
   planMap?.destroy();
-  planMap = new ResearchMap(map, (p) => waypointEditor(-1, p), {
+  planMap = new ResearchMap(map, (p) => {
+    if(clickMode==="waypoint"){
+      const fields=editor.querySelectorAll("input");const draft=fields.length?{name:fields[0].value,targetAltitudeFeet:fields[3].planningUnits.read(),instructions:fields[4].value,objective:fields[5].value,navigationIdentifier:fields[6].value}:{};
+      waypointEditor(waypointIndex,{...draft,...p,fromMap:true});planMap.draft([p]);
+    }
+    else if(clickMode==="survey"){areaVertices.push(p);planMap.draft(areaVertices);$("survey-draft-progress").textContent=`${areaVertices.length} vertices · Finish Area when ready`;}
+    else if(clickMode==="pattern"){planMap.interaction(null);clickMode=null;selectPatternCenter?.(p);}
+  }, {
+    onWaypointSelect:index=>waypointEditor(index),
     onWaypointsChange: (value) => {
       pattern.remember();
-      waypoints = value;
+      waypoints = value;dirty("Waypoint moved in the plan draft.");
       drawList();
     },
     onAreasChange: (value) => {
       pattern.remember();
-      areas = value;
+      areas = value;dirty("Survey geometry changed in the plan draft.");
       drawList();
     },
   });
-  let patternValues = structuredClone(plan?.patterns || []);
-  const pattern = patternEditor(form, {
+  const patternSection=text("section");patternSection.append(text("h3","3. Flight patterns"));form.append(patternSection);
+  const pattern = patternEditor(patternSection, {
+    changed:()=>dirty(),
+    pickCenter:callback=>{if(!canReplaceGeometry())return;cancelGeometry();dirty();selectPatternCenter=callback;clickMode="pattern";planMap.interaction("pattern");draftStatus.textContent="Click the map to choose the pattern center; this does not add a waypoint.";},
+    fitPreview:points=>planMap.fit(points),
     api: ctx.api,
     notice: ctx.notice,
     aircraft: () => aircraftFor(state),
     get: () => ({ waypoints, surveyAreas: areas, patterns: patternValues }),
     set: (value) => {
-      waypoints = value.waypoints;
-      areas = value.surveyAreas;
-      patternValues = value.patterns || patternValues;
-      drawList();
-      if (value.preview?.length) {
-        planMap.set({
-          plan: {
-            waypoints: [...waypoints, ...value.preview],
-            surveyAreas: areas,
-          },
-        });
-        planMap.fit(value.preview);
-      }
+      if(value.previewOnly){planMap.preview(value.preview);draftStatus.textContent="Pattern preview only · Add Pattern to Mission commits it; Fit Preview changes the view deliberately.";return;}
+      waypoints = value.waypoints;areas = value.surveyAreas;patternValues=value.patterns||patternValues;
+      planMap.preview(null);drawList();dirty("Pattern added/changed in the plan draft · Save mission plan to keep it.");
     },
   });
+  const advancedCoordinates=text("details");advancedCoordinates.append(text("summary","Advanced: enter survey vertices manually"),button("Manual survey coordinates",()=>areaEditor()));locationSection.append(advancedCoordinates);
+  const scienceSection=text("section");scienceSection.append(text("h3","4. Scientific instruments and data readiness"),configuration,presetSection);form.append(scienceSection);scientificReadiness(scienceSection,ctx.api).catch(()=>{});
+  form.append(text("h3","5. Review and save"),text("p","Save waypoints and areas to this draft first. A saved mission plan keeps the route, survey geometry, pattern definitions and science configuration together."));
   departure.onchange = drawList;
   drawList();
   const save = text("button", "Save mission plan", "primary");
@@ -614,15 +667,17 @@ function editPlan(plan) {
       surveyAreas: areas,
       patterns: pattern.getPatterns(),
       flightRules: flightRules.value,
-      cruisingAltitudeFeet: cruise.value ? Number(cruise.value) : null,
+      cruisingAltitudeFeet: cruise.planningUnits.read(),
     }),
     ctx.api,
   );
   form.onsubmit = (event) => {
     event.preventDefault();
+    if(pendingGeometry){draftStatus.textContent="Save or cancel the draft waypoint/survey area before saving the mission plan.";editor.scrollIntoView({block:"center"});return;}
+    if(pattern.hasPreview?.()){draftStatus.textContent="Pattern preview only. Add Pattern to Mission or Discard Preview before saving.";return;}
     ctx.command(save, async () => {
-      const nullable = (e) => (e.value ? Number(e.value) : null);
-      editing = await ctx.api("/api/plans", {
+      const nullable = (e) => e.planningUnits?e.planningUnits.read():(e.value ? Number(e.value) : null);
+      const savedPlan = await ctx.api("/api/plans", {
         id: plan?.id || crypto.randomUUID(),
         name: name.value,
         template: template.value,
@@ -643,7 +698,7 @@ function editPlan(plan) {
         flightRules: flightRules.value,
         cruisingAltitudeFeet: nullable(cruise),
       });
-      await planner();
+      if(!form.isConnected)return;editing=savedPlan;plannerDirty=false;pendingGeometry=false;await planner();document.querySelector("#plan-editor .planner-status").textContent="Mission plan saved · Ready to start mission from Mission Control or the saved plan row.";
     });
   };
 }
@@ -758,8 +813,9 @@ async function instruments() {
   const values = text("div");
   values.id = "instrument-values";
   p.append(values);
-  const scienceMapPanel = text("article", undefined, "panel research-panel");
-  scienceMapPanel.append(text("h2", "Science observation map"));
+  const scienceMapPanel = text("details", undefined, "panel research-panel");
+  scienceMapPanel.append(text("summary","Scientific sample locations · expand map and layers"));
+  scienceMapPanel.append(text("h2", "Scientific sample locations"),text("p","Blue dots show successful atmospheric sample positions. Outlined remote-sensing footprints identify saved external-data acquisitions; their full boundary does not guarantee every pixel is valid. Missing coverage and acquisition gaps are reported in collection status; a dot is not a camera image or a continuous swath. Use the map layers to compare samples, footprints, route and recorded track."));
   p.append(scienceMapPanel);
   scienceMap?.destroy();
   scienceMap = new ResearchMap(scienceMapPanel);
@@ -768,6 +824,7 @@ async function instruments() {
     markers,
     plan: livePlan || {},
     samples: samplePositions(scienceRows),
+    footprints: remoteFootprints,
     aircraft: aircraftFor(state),
   });
   const chart = text("div");
@@ -1008,7 +1065,7 @@ export function renderResearch(next) {
       summary.append(
         text(
           "p",
-          `Next observed waypoint: ${livePlan.waypoints?.[activeRouteState.nextWaypoint]?.name || "End of route"} · observed in order within 1,000 m; review full analysis after flight.`,
+          `Next observed waypoint: ${livePlan.waypoints?.[activeRouteState.nextWaypoint]?.name || "End of route"} · observed in order within ${planningDistance(1000)}; review full analysis after flight.`,
         ),
       );
   }
@@ -1020,7 +1077,7 @@ export function renderResearch(next) {
     cursor = 0;
     trackCursor = 0;
     livePlan = null;
-    activeRouteState = null;
+    activeRouteState = null; remoteFootprints = [];
     lastFetch = 0;
   }
   const t = next.telemetry,
@@ -1034,11 +1091,13 @@ export function renderResearch(next) {
     plan: livePlan || {},
     aircraft: aircraftFor(next),
     samples: samplePositions(scienceRows),
+    footprints: remoteFootprints,
   });
   liveMap?.set({
     track,
     markers,
     samples: samplePositions(scienceRows),
+    footprints: remoteFootprints,
     plan: livePlan || {},
     aircraft: fresh ? t : null,
   });
@@ -1051,9 +1110,9 @@ export function renderResearch(next) {
   }
 }
 let livePlan = null,
-  activeRouteState = null;
+  activeRouteState = null, remoteFootprints = [];
 async function refreshLive(id) {
-  const [points, marks, research, science, navigation] = await Promise.all([
+  const [points, marks, research, science, navigation, products] = await Promise.all([
     ctx.api(
       `/api/missions/${id}/track?limit=1500${trackCursor ? `&after=${trackCursor}` : ""}`,
     ),
@@ -1061,6 +1120,7 @@ async function refreshLive(id) {
     ctx.api(`/api/missions/${id}/research`),
     ctx.api(`/api/missions/${id}/science?after=${cursor}&limit=1000`),
     ctx.api("/api/maps/active"),
+    ctx.api(`/api/science/products?limit=30&missionId=${id}`),
   ]);
   if (liveId !== id) return;
   track = trackCursor ? [...track, ...points.points] : points.points;
@@ -1070,12 +1130,14 @@ async function refreshLive(id) {
   markers = marks;
   livePlan = research.planSnapshot;
   activeRouteState = navigation;
+  remoteFootprints=products.filter(p=>p.footprint?.boundary?.length>=3).map(p=>({vertices:p.footprint.boundary,label:`${p.instrumentId} derived footprint · flight ${p.flightPacketUtc} · external source ${p.sourceObservationUtc||"unknown date"}. Coverage may contain excluded cells.`}));
   scienceRows = [...scienceRows, ...science.observations].slice(-3000);
   cursor = science.next;
   liveMap?.set({
     track,
     markers,
     samples: samplePositions(scienceRows),
+    footprints: remoteFootprints,
     plan: livePlan || {},
     aircraft: aircraftFor(state),
   });

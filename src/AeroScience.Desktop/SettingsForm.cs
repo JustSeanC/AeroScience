@@ -26,7 +26,7 @@ public sealed class SettingsForm : Form
         Button(mapsPanel, "Open Maps & Basemaps settings", (_, _) => app.OpenDashboard(settings: true));
         var sourcesTab = new TabPage("Scientific Data Sources"); var sourcesPanel = Panel(); sourcesTab.Controls.Add(sourcesPanel); tabs.TabPages.Add(sourcesTab);
         Label(sourcesPanel, "Automatic preparation discovers and downloads bounded numeric terrain, Landsat thermal and Sentinel-2 multispectral data directly from public providers after your separate scientific-data consent. Use dashboard Settings for access, offline-only, bandwidth/date policy, cancel/retry, coverage and readiness. Advanced manual GeoTIFF/ENVI import remains available below; it is not required for supported automatic workflows.");
-        Button(sourcesPanel, "Import scientific source collection…", (_, _) => app.ImportScientificSource());
+        Button(sourcesPanel, "Import scientific source collection…", (_, _) => app.ImportScientificSource(this));
         Button(sourcesPanel, "Automatic data access / Readiness / Advanced sources", (_, _) => app.OpenDashboard(settings: true));
         var updatesTab = new TabPage("Updates"); var updatesPanel = Panel(); updatesTab.Controls.Add(updatesPanel); tabs.TabPages.Add(updatesTab);
         Label(updatesPanel, "AeroScience " + ApplicationUpdates.CurrentVersion + ". Dashboard Settings → Updates shows your installed version and optional GitHub release notifications. Checks are cached daily, never block offline archives, and never execute an installer automatically. You can disable automatic checks or include/exclude alpha releases there.");
@@ -59,7 +59,7 @@ public sealed class SettingsForm : Form
             storagePanel.Controls.Add(buttons);
         }
         Label(storagePanel, StorageManager.LargeDataWarning);
-        Button(storagePanel, "Data Management…", (_, _) => app.ShowDataManagement());
+        Button(storagePanel, "Data Management…", (_, _) => app.ShowDataManagement(this));
         Button(storagePanel, "Storage Management / Limits / Preview Cleanup", (_, _) => app.OpenDashboard(settings: true));
         Button(storagePanel, "Recover original location from interrupted migration…", async (_, _) =>
         {
