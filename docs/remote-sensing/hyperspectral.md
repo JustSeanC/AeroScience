@@ -1,5 +1,7 @@
 # Hyperspectral Imager
 
+Normal pilot setup: [automatic quick start](quick-start.md) and [provider capabilities](automatic-data.md). Automatic NASA catalog discovery is supported; automated hyperspectral file preparation/authorization is not. The following ENVI workflow remains advanced.
+
 The implemented minimum workflow reads **real georeferenced ENVI cubes** with ≥16 original wavelengths, not a generated spectrum or static graph. Candidate producers include NASA AVIRIS and AVIRIS-NG. Their products vary in format/projection and availability; not every portal item is directly supported. EMIT is a researched source, but its native NetCDF/HDF is not decoded here. No Earthdata token is embedded in the app.
 
 Obtain a licensed radiance or reflectance cube, its original `.hdr`, wavelength list, bad-band mask and geographic metadata. Use WGS84 UTM north-up map info. Unsupported projections/rotation must be explicitly prepared in a scientific GIS; unlocated raw flight-line data cannot simply be assigned coordinates. Keep all real bands together. Wavelength units must be nm or micrometres; the reader converts wavelengths to nm and preserves measured values.

@@ -10,6 +10,7 @@ import xml.etree.ElementTree as xml
 import zipfile
 import package_release as p
 import installer_release as installer
+import verify_scientific_acceptance as scientific
 
 def digest(path):
     with path.open('rb') as file:return hashlib.file_digest(file,'sha256').hexdigest()
@@ -24,8 +25,10 @@ def evidence(unit,browser,helpers,recovery,commit,output):
     p.require(web.get('expected',0)>0 and web.get('unexpected',-1)==0 and web.get('flaky',0)==0,'Actual browser tests failed, were flaky or did not execute.')
     p.require(helper.get('successful') is True and helper.get('passed',0)>0 and helper.get('failed',-1)==helper.get('errors',-1)==0,'Actual helper tests failed or did not execute.')
     smoke=p.read_json(recovery);p.require(smoke.get('result')=='passed','Recording recovery check did not pass.')
+    scientific_report=scientific.verify()
     value=dict(format_version=1,validation_mode='automated-alpha',version=p.RELEASE_VERSION,source_commit=commit,
                completed_utc=datetime.now(timezone.utc).isoformat(),hardware_acceptance='notVerified',github_publication='notPublished',
+               scientific_provider_acceptance=dict(report_sha256=digest(scientific.REPORT),workflows=[r['workflow'] for r in scientific_report['workflows']],windows_msfs='not tested'),
                checks=dict(dotnet={**dotnet,'report_sha256':digest(unit)},browser={**web,'report_sha256':digest(browser)},helpers={**helper,'report_sha256':digest(helpers)},recovery={**smoke,'report_sha256':digest(recovery)}))
     installer.write_json(output,value);return value
 
@@ -33,6 +36,8 @@ def validate_evidence(value,commit,payload=None):
     p.require(value.get('format_version')==1 and value.get('validation_mode')=='automated-alpha' and value.get('version')==p.RELEASE_VERSION
               and value.get('source_commit')==commit and value.get('hardware_acceptance')=='notVerified' and value.get('github_publication')=='notPublished','Automatic validation identity/source/hardware status differs.')
     p.validate_date(value.get('completed_utc'),'Automatic validation timestamp')
+    provider=value.get('scientific_provider_acceptance',{})
+    p.require(set(provider.get('workflows',[]))==scientific.WORKFLOWS and provider.get('windows_msfs')=='not tested' and len(provider.get('report_sha256',''))==64,'Genuine numeric provider evidence is missing; mocks are not online acceptance.')
     checks=value.get('checks',{});net=checks.get('dotnet',{});web=checks.get('browser',{});helper=checks.get('helpers',{})
     p.require(net.get('passed',0)>0 and net.get('failed',-1)==net.get('error',-1)==net.get('aborted',-1)==0,'Required .NET evidence is not passing.')
     p.require(web.get('expected',0)>0 and web.get('unexpected',-1)==0 and web.get('flaky',0)==0,'Required browser evidence is not passing.')

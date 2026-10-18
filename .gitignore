@@ -22,3 +22,6 @@ __pycache__/
 
 # User-specific protected map credentials never belong in source or release inputs.
 **/maps.json
+
+# Local scientific access preferences and downloaded source originals are private runtime data.
+**/scientific-access.json

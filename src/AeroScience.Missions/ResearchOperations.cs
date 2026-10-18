@@ -5,9 +5,9 @@ using Microsoft.Data.Sqlite;
 namespace AeroScience.Missions;
 
 // Invoked under MissionCoordinator's existing command/acquisition gate.
-public sealed class ResearchOperations(MissionStore missions, ScienceStore science, Func<ScienceUnitPreferences>? displayUnits = null) : IDisposable
+public sealed class ResearchOperations(MissionStore missions, ScienceStore science, Func<ScienceUnitPreferences>? displayUnits = null,Func<ScientificAccessPreferences>? sourcePreferences=null) : IDisposable
 {
-    private readonly RemoteAcquisition remote = new(missions, science);
+    private readonly RemoteAcquisition remote = new(missions, science,sourcePreferences);
     public void Dispose() => remote.Dispose();
     private sealed class Acquisition
     {

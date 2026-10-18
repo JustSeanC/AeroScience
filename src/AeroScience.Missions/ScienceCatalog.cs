@@ -14,10 +14,10 @@ public static class ScienceCatalog
             [new("wind-speed", "Wind speed", "kt", "AMBIENT WIND VELOCITY"), new("wind-direction", "Wind direction", "degT", "AMBIENT WIND DIRECTION")]),
         new("ambient-density", "Ambient density", "Simulator ambient density; no independent atmospheric model is substituted.", "MSFS 2024 / SimConnect",
             [new("density", "Ambient density", "slug/ft3", "AMBIENT DENSITY")]),
-        new("thermal-imager", "Thermal Imager", "Landsat Collection 2 surface temperature sampled along the simulated footprint; not ambient air temperature.", "Imported Landsat Collection 2 Level-2 ST_B10 / QA_PIXEL", []),
-        new("multispectral-imager", "Multispectral Imager", "Natural color, infrared and NDVI from a real Sentinel-2 L2A scene.", "Imported Sentinel-2 L2A bands and SCL", []),
-        new("hyperspectral-imager", "Hyperspectral Imager", "Real wavelength profiles from supported geographically referenced ENVI collections; limited source coverage.", "Imported ENVI reflectance/radiance with wavelength metadata", []),
-        new("terrain-scanner", "Terrain Scanner (LiDAR / Elevation)", "DEM-derived elevations with an explicit source vertical datum. These are not airborne LiDAR returns.", "Imported georeferenced elevation raster", [])
+        new("thermal-imager", "Thermal Imager", "Landsat Collection 2 surface temperature sampled along the simulated footprint; not ambient air temperature.", "Automatic Landsat C2 L2SP ST_B10 / QA_PIXEL / QA_RADSAT; advanced import also supported", []),
+        new("multispectral-imager", "Multispectral Imager", "Natural color, infrared and NDVI from a real Sentinel-2 L2A scene.", "Automatic Sentinel-2 L2A reflectance COGs and SCL; advanced import also supported", []),
+        new("hyperspectral-imager", "Hyperspectral Imager", "Real wavelength profiles from supported geographically referenced ENVI collections; limited source coverage.", "NASA catalog discovery only; automatic preparation unsupported. Advanced ENVI reflectance/radiance import", []),
+        new("terrain-scanner", "Terrain Scanner (LiDAR / Elevation)", "DEM-derived elevations with an explicit source vertical datum. These are not airborne LiDAR returns.", "Automatic USGS 3DEP bare-earth / Copernicus DSM fallback; advanced DEM import also supported", [])
     ];
     public static readonly MissionTemplate[] Templates =
     [

@@ -39,6 +39,10 @@ public static class EngineApplication
             return options;
         });
         builder.Services.AddSingleton<AccessControl>();
+        builder.Services.AddSingleton(sp => new ScientificAccessSettings(sp.GetRequiredService<EngineOptions>().ConfigurationDirectory ?? sp.GetRequiredService<EngineOptions>().DataDirectory, NetworkCost.IsUnmetered));
+        builder.Services.AddSingleton(sp => { _ = sp.GetRequiredService<StorageManagement>(); return new AutomaticScientificData(sp.GetRequiredService<ScienceStore>(),sp.GetRequiredService<ScientificAccessSettings>()); });
+        builder.Services.AddSingleton<ScientificPlanData>();
+        builder.Services.AddHostedService<ScientificPreparationWorker>();
         builder.Services.AddSingleton(sp => new MapSettings(sp.GetRequiredService<EngineOptions>().ConfigurationDirectory ?? sp.GetRequiredService<EngineOptions>().DataDirectory));
         builder.Services.AddSingleton(sp => new ApplicationUpdates(sp.GetRequiredService<EngineOptions>().ConfigurationDirectory ?? sp.GetRequiredService<EngineOptions>().DataDirectory));
         builder.Services.AddHostedService<ApplicationUpdateWorker>();
@@ -74,7 +78,7 @@ public static class EngineApplication
             science.Management = management; science.MissionIsProtected = sp.GetRequiredService<MissionStore>().IsProtected; return management;
         });
         builder.Services.AddSingleton(sp=>new ScientificCache(sp.GetRequiredService<ScienceStore>(),sp.GetRequiredService<MissionStore>(),sp.GetRequiredService<StorageManagement>(),log:message=>sp.GetRequiredService<ILogger<ScientificCache>>().LogInformation("{CleanupResult}",message)));
-        builder.Services.AddSingleton(sp => { _ = sp.GetRequiredService<StorageManagement>(); return new ResearchOperations(sp.GetRequiredService<MissionStore>(), sp.GetRequiredService<ScienceStore>(), sp.GetRequiredService<ScienceUnitSettings>().Get); });
+        builder.Services.AddSingleton(sp => { _ = sp.GetRequiredService<StorageManagement>(); return new ResearchOperations(sp.GetRequiredService<MissionStore>(), sp.GetRequiredService<ScienceStore>(), sp.GetRequiredService<ScienceUnitSettings>().Get,()=>sp.GetRequiredService<ScientificAccessSettings>().Get().Preferences); });
         builder.Services.AddSingleton(sp => new MissionCoordinator(sp.GetRequiredService<MissionStore>(), sp.GetRequiredService<EngineOptions>().SamplingIntervalMs,
             requireFreshTelemetry: true, ensureRecordingCapacity: () =>
             {

@@ -145,7 +145,7 @@ def validate_companion(root, require_simconnect=False):
                 "AeroScience.runtimeconfig.json", "AeroScience.Engine.dll", "coreclr.dll", "hostpolicy.dll",
                 "System.Windows.Forms.dll",
                 "wwwroot/index.html", "wwwroot/app.js", "wwwroot/app.css", "wwwroot/research.js", "wwwroot/map.js", "wwwroot/patterns.js", "wwwroot/analysis.js", "wwwroot/science-display.js", "wwwroot/basemaps.js", "wwwroot/geographic-view.js", "wwwroot/route-export.js", "wwwroot/assets-manifest.json"}
-    expected.update({'BitMiracle.LibTiff.NET.dll','wwwroot/remote-science.js','wwwroot/application-updates.js','wwwroot/storage-management.js'})
+    expected.update({'BitMiracle.LibTiff.NET.dll','wwwroot/remote-science.js','wwwroot/scientific-access.js','wwwroot/application-updates.js','wwwroot/storage-management.js'})
     expected.update({'licenses/LibTiff.NET.txt','wwwroot/help/remote-sensing/quick-start.md','wwwroot/help/remote-sensing/sources.md'})
     if require_simconnect:
         expected.add("SimConnect.dll")
@@ -168,7 +168,7 @@ def validate_companion(root, require_simconnect=False):
     require([name for name in found if name.casefold().endswith('.exe')] == ['AeroScience.exe'],
             'Only AeroScience.exe should be included as an executable entry point.')
     require(not any(PurePosixPath(name).suffix.casefold() in {".db", ".sqlite", ".log"}
-                    or PurePosixPath(name).name.casefold() in {"settings.json", "maps.json", "updates.json", "storage-limits.json", "library.json", ".science-storage.json", "missions.db-wal", "missions.db-shm"}
+                    or PurePosixPath(name).name.casefold() in {"settings.json", "maps.json", "scientific-access.json", "updates.json", "storage-limits.json", "library.json", ".science-storage.json", "missions.db-wal", "missions.db-shm"}
                     or any(part.casefold() in {'sources','products','observations','cache','sciencelibrary'} for part in PurePosixPath(name).parts[:-1])
                     for name in found), "Release contains personal mission data, configuration or logs.")
     require(not any(PurePosixPath(name).suffix.casefold() in {'.pdb', '.obj', '.lib', '.cs', '.cpp', '.py', '.ps1', '.cmd', '.env'}

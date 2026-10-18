@@ -30,6 +30,13 @@ public static class ResearchApi
         app.MapPost("/api/updates/preferences", (UpdatePreferences preferences, ApplicationUpdates updates, HttpContext c) => AccessControl.IsLoopback(c) ? Results.Ok(updates.Configure(preferences)) : Results.StatusCode(403));
         app.MapPost("/api/updates/check", (ApplicationUpdates updates, HttpContext c) => updates.Check(true, c.RequestAborted));
         app.MapPost("/api/updates/remind", (ApplicationUpdates updates) => updates.RemindLater());
+        app.MapGet("/api/science/access", (ScientificAccessSettings settings,HttpContext c)=>new{configuration=settings.Get(),canConfigure=AccessControl.IsLoopback(c)});
+        app.MapPost("/api/science/access",(ScientificAccessPreferences preferences,AutomaticScientificData automatic,HttpContext c)=>AccessControl.IsLoopback(c)?Results.Ok(automatic.Configure(preferences)):Results.StatusCode(403));
+        app.MapGet("/api/science/plan-readiness",(ScientificPlanData preparation)=>preparation.Snapshot());
+        app.MapGet("/api/science/readiness",(AutomaticScientificData automatic)=>automatic.Snapshot());
+        app.MapPost("/api/science/prepare",(ScientificPreparationRequest request,AutomaticScientificData automatic)=>automatic.Prepare(GeographicBounds.Around(new(request.Latitude,request.Longitude)),request.Kinds??[RemoteKind.Thermal,RemoteKind.Multispectral,RemoteKind.Terrain],retry:true));
+        app.MapPost("/api/science/prepare/cancel",(AutomaticScientificData automatic)=>{automatic.Cancel();return Results.Ok(new{cancelled=true});});
+        app.MapPost("/api/plans/{id:guid}/prepare",(Guid id,MissionStore store,ScientificPlanData preparation)=>store.Plan(id) is {} plan?Results.Ok(preparation.Prepare(plan,true)):Results.NotFound());
         app.MapGet("/api/science/sources", (double? latitude, double? longitude, ScienceStore science) => science.Availability(latitude is { } lat && longitude is { } lon ? new Coordinates(lat, lon) : null));
         app.MapGet("/api/science/products", (Guid? missionId, int? limit, int? offset, string? instrumentId, ScienceStore science) => science.Products(missionId, limit ?? 50, offset ?? 0,instrumentId));
         app.MapGet("/api/science/products/{id:guid}", (Guid id, ScienceStore science) => science.ReadProduct(id));
@@ -65,7 +72,7 @@ public static class ResearchApi
         app.MapPost("/api/science/estimate", (EstimateRequest request, ScienceStore science) => science.Estimate(request.Instruments, request.DurationMinutes));
         app.MapGet("/api/plans", (int? limit, int? offset, MissionStore missions) => missions.Plans(limit ?? 50, offset ?? 0));
         app.MapGet("/api/plans/{id:guid}", (Guid id, MissionStore missions) => missions.Plan(id) is { } plan ? Results.Ok(plan) : Results.NotFound());
-        app.MapPost("/api/plans", (MissionPlan plan, MissionStore missions) => Results.Ok(missions.SavePlan(plan)));
+        app.MapPost("/api/plans", (MissionPlan plan, MissionStore missions,ScientificPlanData preparation) => {var saved=missions.SavePlan(plan); _=preparation.Prepare(saved);return Results.Ok(saved);});
         app.MapPost("/api/plans/{id:guid}/delete", (Guid id, MissionStore missions) => missions.DeletePlan(id) ? Results.Ok(new { deleted = true }) : Results.NotFound());
         app.MapGet("/api/missions/{id:guid}/research", (Guid id, MissionStore missions) => missions.Detail(id) is null ? Results.NotFound() : Results.Ok(missions.Research(id)));
         app.MapGet("/api/missions/{id:guid}/track", (Guid id, int? limit, long? after, MissionStore missions) =>

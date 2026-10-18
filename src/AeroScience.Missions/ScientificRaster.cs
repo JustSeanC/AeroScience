@@ -39,23 +39,26 @@ public sealed class ScientificRaster : IDisposable
     public double? NativeNoData { get; }
     public double? NativeWavelengthNm { get; }
     private static readonly CultureInfo Inv = CultureInfo.InvariantCulture;
-    public ScientificRaster(string root, SourceBand definition)
+    public ScientificRaster(string root, SourceBand definition) : this(root, definition, null) { }
+    public ScientificRaster(Stream remote, SourceBand definition) : this("", definition, remote) { }
+    private ScientificRaster(string root, SourceBand definition, Stream? remote)
     {
         band = definition;
-        var file = SafeFile(root, band.File);
+        var file = remote is null ? SafeFile(root, band.File) : definition.File;
         try
         {
             if (band.Format == "geotiff")
             {
-                using (var signature = File.OpenRead(file))
+                using (Stream signature = remote is null ? File.OpenRead(file) : new BorrowedStream(remote))
                 {
                     Span<byte> header = stackalloc byte[4]; signature.ReadExactly(header);
                     if (!(header[0] == 73 && header[1] == 73 && header[2] == 42 && header[3] == 0
                         || header[0] == 77 && header[1] == 77 && header[2] == 0 && header[3] == 42))
                         throw new InvalidDataException("Only classic TIFF/COG with a valid TIFF header is supported; BigTIFF is not supported.");
                 }
-                ValidateTiffDirectory(file);
-                tiff = Tiff.Open(file, "r") ?? throw new InvalidDataException("TIFF could not be decoded.");
+                using (Stream directory = remote is null ? File.OpenRead(file) : new BorrowedStream(remote)) ValidateTiffDirectory(directory);
+                if (remote is not null) remote.Position = 0;
+                tiff = (remote is null ? Tiff.Open(file, "r") : Tiff.ClientOpen("provider-numeric-band", "r", remote, new TiffStream())) ?? throw new InvalidDataException("TIFF could not be decoded.");
                 var width = Int(TiffTag.IMAGEWIDTH); var height = Int(TiffTag.IMAGELENGTH);
                 channels = Int(TiffTag.SAMPLESPERPIXEL, 1); bits = Int(TiffTag.BITSPERSAMPLE);
                 sampleFormat = Int(TiffTag.SAMPLEFORMAT, 1);
@@ -135,9 +138,9 @@ public sealed class ScientificRaster : IDisposable
         catch { tiff?.Dispose(); envi?.Dispose(); throw; }
     }
     private int Int(TiffTag tag, int fallback = 0) => tiff!.GetField(tag)?[0].ToInt() ?? fallback;
-    private static void ValidateTiffDirectory(string file)
+    private static void ValidateTiffDirectory(Stream stream)
     {
-        using var stream=File.OpenRead(file);Span<byte> header=stackalloc byte[8];stream.ReadExactly(header);var little=header[0]==73;
+        stream.Position=0;Span<byte> header=stackalloc byte[8];stream.ReadExactly(header);var little=header[0]==73;
         uint U32(ReadOnlySpan<byte> bytes)=>little?BinaryPrimitives.ReadUInt32LittleEndian(bytes):BinaryPrimitives.ReadUInt32BigEndian(bytes);
         ushort U16(ReadOnlySpan<byte> bytes)=>little?BinaryPrimitives.ReadUInt16LittleEndian(bytes):BinaryPrimitives.ReadUInt16BigEndian(bytes);
         var offset=U32(header[4..]);if(offset<8||offset>stream.Length-2)throw new InvalidDataException("Invalid TIFF directory offset.");
@@ -201,7 +204,9 @@ public sealed class ScientificRaster : IDisposable
     {
         if (band.BadBand || !Covers(point)) return null;
         var (x, y) = Project(point, Grid.Crs);
-        var col = (int)Math.Floor((x - Grid.OriginX) / Grid.PixelWidth); var row = (int)Math.Floor((y - Grid.OriginY) / Grid.PixelHeight);
+        // Stabilize exact pixel-boundary ties after a native-grid crop: east/south
+        // within 1e-8 pixel. This is a numerical tie rule, not interpolation.
+        var col = Math.Min(Grid.Width-1,(int)Math.Floor((x - Grid.OriginX) / Grid.PixelWidth + 1e-8)); var row = Math.Min(Grid.Height-1,(int)Math.Floor((y - Grid.OriginY) / Grid.PixelHeight + 1e-8));
         var size = bits / 8; Span<byte> bytes = stackalloc byte[8];
         if (envi is not null)
         {
@@ -230,6 +235,61 @@ public sealed class ScientificRaster : IDisposable
         bool Missing(double? declared) => declared is {} n && (value == n || sampleFormat == 3 && bits == 32 && value == (double)(float)n);
         if (!double.IsFinite(value) || Missing(band.NoData) || Missing(NativeNoData)) return null;
         var scaled = value * band.Scale + band.Offset; return double.IsFinite(scaled) ? scaled : null;
+    }
+    // Copy native samples into a bounded, lossless GeoTIFF. No resampling, RGB rendering,
+    // radiometric scaling or overview substitution occurs during preparation.
+    public RasterGrid CopySubset(GeographicBounds area, string destination, CancellationToken token)
+    {
+        if(tiff is null) throw new InvalidOperationException("Automatic subset preparation requires numeric GeoTIFF.");
+        var corners=area.Corners.Select(p=>Project(p,Grid.Crs)).ToArray();
+        var left=Math.Max(0,(int)Math.Floor((corners.Min(p=>p.X)-Grid.OriginX)/Grid.PixelWidth+1e-8));
+        var right=Math.Min(Grid.Width,(int)Math.Ceiling((corners.Max(p=>p.X)-Grid.OriginX)/Grid.PixelWidth-1e-8));
+        var top=Math.Max(0,(int)Math.Floor((corners.Max(p=>p.Y)-Grid.OriginY)/Grid.PixelHeight+1e-8));
+        var bottom=Math.Min(Grid.Height,(int)Math.Ceiling((corners.Min(p=>p.Y)-Grid.OriginY)/Grid.PixelHeight-1e-8));
+        var width=right-left;var height=bottom-top;
+        if(width<=0||height<=0)throw new InvalidDataException("The numeric asset does not cover the requested area.");
+        if(width>2048||height>2048||(long)width*height*bits/8>33554432)throw new IOException("Select a smaller area: a prepared band is limited to 2048 × 2048 and 32 MiB.");
+        using var output=Tiff.Open(destination,"w")??throw new IOException("Cannot create scientific subset.");
+        output.SetField(TiffTag.IMAGEWIDTH,width);output.SetField(TiffTag.IMAGELENGTH,height);
+        output.SetField(TiffTag.BITSPERSAMPLE,bits);output.SetField(TiffTag.SAMPLESPERPIXEL,1);
+        output.SetField(TiffTag.SAMPLEFORMAT,sampleFormat);output.SetField(TiffTag.PLANARCONFIG,PlanarConfig.CONTIG);
+        output.SetField(TiffTag.PHOTOMETRIC,Photometric.MINISBLACK);output.SetField(TiffTag.COMPRESSION,Compression.DEFLATE);
+        output.SetField(TiffTag.ROWSPERSTRIP,Math.Min(32,height));
+        output.SetField(TiffTag.GEOTIFF_MODELPIXELSCALETAG,3,new double[]{Grid.PixelWidth,-Grid.PixelHeight,0});
+        var subset=Grid with{Width=width,Height=height,OriginX=Grid.OriginX+left*Grid.PixelWidth,OriginY=Grid.OriginY+top*Grid.PixelHeight};
+        output.SetField(TiffTag.GEOTIFF_MODELTIEPOINTTAG,6,new double[]{0,0,0,subset.OriginX,subset.OriginY,0});
+        var code=short.Parse(Grid.Crs[5..],Inv);
+        short[] keys=[1,1,0,3,1024,0,1,(short)(code==4326?2:1),1025,0,1,1,(short)(code==4326?2048:3072),0,1,code];
+        output.SetField(TiffTag.GEOTIFF_GEOKEYDIRECTORYTAG,keys.Length,keys);
+        if(NativeNoData is {} nodata)output.SetField(TiffTag.GDAL_NODATA,nodata.ToString("R",Inv));
+        var size=bits/8;var rowBytes=new byte[width*size];
+        for(var row=top;row<bottom;row++)
+        {
+            token.ThrowIfCancellationRequested();
+            for(var col=left;col<right;)
+            {
+                var index=tiff.IsTiled()?tiff.ComputeTile(col,row,0,0):tiff.ComputeStrip(row,0);
+                if(blockIndex!=index)
+                {
+                    var read=tiff.IsTiled()?tiff.ReadEncodedTile(index,block,0,-1):tiff.ReadEncodedStrip(index,block,0,-1);
+                    var required=tiff.IsTiled()?block!.Length:Math.Min(rowsPerStrip,Grid.Height-index*rowsPerStrip)*Grid.Width*size;
+                    if(read<required)throw new InvalidDataException("Remote numeric TIFF block is truncated or unsupported.");blockIndex=index;
+                }
+                var take=tiff.IsTiled()?Math.Min(right-col,tileWidth-col%tileWidth):right-col;
+                var offset=tiff.IsTiled()?((row%tileHeight)*tileWidth+col%tileWidth)*size:((row%rowsPerStrip)*Grid.Width+col)*size;
+                Buffer.BlockCopy(block!,offset,rowBytes,(col-left)*size,take*size);col+=take;
+            }
+            if(!output.WriteScanline(rowBytes,row-top))throw new IOException("Scientific subset write failed.");
+        }
+        if(!output.WriteDirectory())throw new IOException("Scientific subset directory write failed.");
+        return subset;
+    }
+    private sealed class BorrowedStream(Stream inner):Stream
+    {
+        public override bool CanRead=>true;public override bool CanSeek=>true;public override bool CanWrite=>false;
+        public override long Length=>inner.Length;public override long Position{get=>inner.Position;set=>inner.Position=value;}
+        public override int Read(byte[] b,int o,int c)=>inner.Read(b,o,c);public override long Seek(long o,SeekOrigin s)=>inner.Seek(o,s);
+        public override void Flush(){}public override void Write(byte[] b,int o,int c)=>throw new NotSupportedException();public override void SetLength(long v)=>throw new NotSupportedException();
     }
     public void Dispose() { tiff?.Dispose(); envi?.Dispose(); }
 }

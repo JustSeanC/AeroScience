@@ -62,6 +62,8 @@ try {
         $review.runtime_sha256 -ne (Get-FileHash -LiteralPath $runtime -Algorithm SHA256).Hash.ToLowerInvariant()) {
         throw 'Generate the private-safe version 2 runtime attestation with New-RuntimeApproval.ps1. Record applicable conditions and match the actual DLL; original correspondence remains private.'
     }
+    python scripts/release/verify_scientific_acceptance.py
+    if ($LASTEXITCODE -ne 0) { throw 'Genuine automatic-science acceptance is missing or stale. No effortless remote-sensing claim is approved.' }
     & "$repo/scripts/build/Build-Companion.ps1"
     Copy-Item -LiteralPath 'tests/AeroScience.Tests/TestResults/windows.trx' -Destination (Join-Path $evidence 'dotnet.trx')
     python scripts/build/run_helper_tests.py --report (Join-Path $evidence 'helpers.json')

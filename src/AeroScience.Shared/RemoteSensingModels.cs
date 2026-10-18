@@ -7,7 +7,7 @@ public sealed record SourceBand(string Id, string File, string Format, int Chann
     string? SceneId = null);
 public sealed record ScientificSourceManifest(int FormatVersion, string Name, RemoteKind Kind, string Provider,
     string License, string Citation, string SceneId, DateTimeOffset? ObservationUtc, string VerticalDatum,
-    SourceBand[] Bands, DateTimeOffset? PublicationUtc = null, string? Notes = null);
+    SourceBand[] Bands, DateTimeOffset? PublicationUtc = null, string? Notes = null, AutomaticSourceProvenance? Acquisition = null);
 public sealed record ManagedSourceFile(string RelativePath, long Bytes, string Sha256);
 public sealed record ScientificSource(Guid Id, ScientificSourceManifest Manifest, DateTimeOffset ImportedUtc,
     Dictionary<string, RasterGrid> Grids, ManagedSourceFile[] Files, string ManifestSha256, string RelativeDirectory);

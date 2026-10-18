@@ -1,3 +1,4 @@
+import { scientificReadiness } from "./scientific-access.js";
 import { routeExportButton } from "./route-export.js";
 import { remoteProducts } from "./remote-science.js";
 import { ResearchMap } from "./map.js";
@@ -183,6 +184,7 @@ export function initializeResearch(context) {
     }),
   );
   control.append(markerPanel);
+  scientificReadiness(control, ctx.api).catch(() => {});
   $("instruments").append(text("div", undefined, "research-panel"));
   $("instruments").lastChild.id = "instrument-content";
 }
@@ -200,12 +202,17 @@ async function planner() {
   plans = await ctx.api(`/api/plans?limit=50&offset=${planOffset}`);
   const p = $("planner-content");
   p.replaceChildren(text("h2", "Saved mission plans"));
+  await scientificReadiness(p, ctx.api);
   for (const plan of plans) {
     const row = text("div", undefined, "plan-row");
     row.append(
       text("strong", plan.name),
       text("span", `${plan.template} · ${plan.mode}`),
       button("Edit", () => editPlan(plan)),
+      button("Prepare scientific data", async () => {
+        const result = await ctx.api(`/api/plans/${plan.id}/prepare`, {});
+        alert(result.message);
+      }),
       button("Record this plan", async () => {
         const estimate = await ctx.api("/api/science/estimate", {
           instruments: plan.instruments,
@@ -646,7 +653,7 @@ async function instruments() {
   p.replaceChildren(
     text(
       "p",
-      "Atmospheric instruments use actual MSFS values at the user aircraft; remote instruments sample real imported geographic observations with their original source dates. Acquisition requires a recording mission. Flight telemetry is requested at 1 Hz; no independent calibrated or live-camera measurements are claimed.",
+      "Atmospheric instruments use actual MSFS values at the user aircraft; remote instruments sample real automatically prepared or advanced imported geographic observations with their original source dates. Acquisition requires a recording mission. Flight telemetry is requested at 1 Hz; no independent calibrated or live-camera measurements are claimed.",
     ),
   );
   const sourceLabel = text(
@@ -657,6 +664,7 @@ async function instruments() {
     "source-notice",
   );
   p.append(sourceLabel);
+  await scientificReadiness(p, ctx.api);
   await unitControls(p, ctx.api, () => instruments());
   const collection = text("div");
   collection.id = "collection-status";

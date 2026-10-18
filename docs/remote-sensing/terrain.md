@@ -1,5 +1,7 @@
 # Terrain Scanner (LiDAR / Elevation)
 
+Normal pilot setup: [automatic quick start](quick-start.md) and [provider capabilities](automatic-data.md). This guide retains optional advanced manual-file instructions; normal users do not need to prepare these files themselves.
+
 v0.3.0 implements **DEM-derived terrain samples**, not source LiDAR point-cloud decoding or newly measured laser returns. Import one real elevation-in-metres GeoTIFF, for example a bounded [USGS 3DEP](https://www.usgs.gov/3d-elevation-program) product. Actual source coverage/resolution/quality varies; the United States service is not worldwide elevation coverage. Keep source acquisition/publication metadata and explicitly state its vertical datum. A composite can legitimately have an unknown observation date.
 
 Use the complete terrain manifest template in [sources.md](sources.md). A distributor service export may resample its original source. Record that operation, exported CRS/pixel spacing, original resolution limitations and unknown dates instead of inventing precision or claiming a direct native LiDAR file. No vertical datum transformation is applied. NAVD88, ellipsoid height and simulator MSL cannot be silently combined.

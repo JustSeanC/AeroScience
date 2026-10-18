@@ -1,3 +1,4 @@
+import { scientificAccessSettings } from "./scientific-access.js";
 import { ResearchMap } from "./map.js";
 import { displayReading, onUnitsChanged } from "./science-display.js";
 const e = (tag, text) => {
@@ -37,13 +38,14 @@ function link(parent, title, href) {
   parent.append(a, document.createTextNode(" · "));
 }
 export async function sourceSettings(parent, api) {
+  await scientificAccessSettings(parent, api);
   const section = e("section");
   section.className = "panel research-panel";
   section.append(
-    e("h2", "Scientific Data Sources"),
+    e("h2", "Scientific Data Sources · Advanced Manual Import"),
     e(
       "p",
-      "Import a licensed, real GeoTIFF/ENVI source collection using its metadata manifest. Copies remain local in your Science Library. Source coverage and observation dates vary; basemap imagery is never a scientific sensor source.",
+      "Optional advanced workflow: import a licensed GeoTIFF/ENVI collection with its metadata manifest. Normal pilots can use automatic preparation above. Both workflows use the same validated Scientific Data Library. Basemap images are never scientific sensor sources.",
     ),
   );
   parent.append(section);
@@ -83,7 +85,7 @@ export async function sourceSettings(parent, api) {
       results.append(
         e(
           "p",
-          "No scientific source collections imported. Scientific data unavailable for this location or acquisition. Follow the import guide; no reference datasets are bundled.",
+          "No scientific source collections are prepared yet. Enable automatic access above, enable an instrument and prepare a plan or a small area. Advanced manual import is optional. No fabricated reference datasets are bundled.",
         ),
       );
     for (const entry of sources) {

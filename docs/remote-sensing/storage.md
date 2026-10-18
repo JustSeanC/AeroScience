@@ -23,3 +23,7 @@ Data Management remains the independent deliberate **Clear Flight & Mission Data
 Optional **Compact Flight/Science Database…** stops services, requires confirmation, lease/free-space checks, creates a verified backup, runs SQLite VACUUM and verifies logical fingerprints. It reports actual DB allocation reclaimed; backup bytes are additional. No automatic compaction runs in flight.
 
 Storage location changes use the existing stopped-store SQLite backup/verification/migration journal and keep originals. Science migration retains the library ID, relative product/source references, pins and work ledgers. An existing destination is a conflict to resolve explicitly; nothing is merged/overwritten automatically. Interrupted `.partial` imports/unindexed products remain protected for explicit diagnostic recovery and are counted, not automatically disposed of. Preserve ledgers, original files and both stores when reporting an interruption. Do not manually copy an actively recording SQLite database.
+
+## Automatic scientific access
+
+Prepared provider subsets are retained scientific originals, never regenerable cache entries. Discovery/transfer budgets and conservative staging reservations are separate from actual retained usage. Existing 25/50 GB defaults, pinned protection, verified migrations and deliberate clear remain unchanged. Partial downloads stay ledger-accounted for explicit review; cancellation never discards completed observations/products or a prior source. See [automatic provider limits](automatic-data.md).

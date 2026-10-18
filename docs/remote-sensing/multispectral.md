@@ -1,5 +1,7 @@
 # Multispectral Imager
 
+Normal pilot setup: [automatic quick start](quick-start.md) and [provider capabilities](automatic-data.md). This guide retains optional advanced manual-file instructions; normal users do not need to prepare these files themselves.
+
 Use genuine Sentinel-2 **Level-2A** surface reflectance bands B02 (blue), B03 (green), B04 (red), B08 (near infrared), plus SCL. JP2 distributor files must be exported to numeric single-band classic GeoTIFF before import; this release does not decode JP2. Preserve original native grids, including SCL's coarser spacing.
 
 Set `kind: "multispectral"`, each reflectance band's `unit: "reflectance"`, the actual product scale and additive offset, and `SCL` unit `1`, scale 1/offset 0. **Do not universally assume DN/10000**: processing baselines can contain radiometric offsets; read the source metadata and any transformations already applied by the distributor. Use nodata from the actual file. Record preparation/scaling in citation/notes. B02/B03/B04/B08/SCL must be one scene/date. See [sources.md](sources.md) for the collection manifest.

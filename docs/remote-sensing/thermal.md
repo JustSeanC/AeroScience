@@ -1,5 +1,7 @@
 # Thermal Imager
 
+Normal pilot setup: [automatic quick start](quick-start.md) and [provider capabilities](automatic-data.md). This guide retains optional advanced manual-file instructions; normal users do not need to prepare these files themselves.
+
 Import **Landsat Collection 2 Level-2 Surface Temperature** `ST_B10` and `QA_PIXEL` from the same real scene. ST_B10 DN uses the official conversion `K = DN × 0.00341802 + 149`; a scene without Level-2 ST is unavailable. Use the source nodata value (normally fill DN 0). Optional QA_RADSAT masks saturation. Do not substitute SR_B10, display brightness or aircraft ambient temperature.
 
 In a `kind: "thermal"` manifest use these bands, plus the real provider/citation/license/date/scene metadata described in [sources.md](sources.md):

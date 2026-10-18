@@ -2,6 +2,10 @@
 
 ## 0.3.0 — Remote Sensing & Research Payloads (public alpha)
 
+- Make separately consented, direct automatic scientific discovery/preparation the normal terrain, thermal and multispectral workflow: numeric USGS 3DEP, Copernicus GLO-30 DSM fallback, Landsat C2 L2SP ST_B10/QA, and Sentinel-2 L2A reflectance/SCL COG subsets. Generate manifests internally and retain verified original numeric subsets in the existing Scientific Data Library.
+- Add scientific readiness to Planner, Control and Science, bounded preflight route/survey cells, background aircraft-area retrieval, privacy/offline/unmetered/budget/concurrency/date-quality controls and cancel/retry. Preserve 1 Hz flight recording, original metadata/units/QA, all existing library/import/storage protections and independent map consent.
+- Hold public distribution until the final source network rerun passes; cloud tunnel 503 failures are recorded as pending, never converted into acceptance. Earlier runs validated all four numeric provider workflows against genuine downloaded scientific data and saved/reloaded mission products with explicitly synthetic flight positions. NASA EMIT/AVIRIS/AVIRIS-NG geographic discovery is implemented; protected download/login and automated hyperspectral preparation remain unsupported. No Windows/MSFS acceptance is implied.
+
 - Add bounded, asynchronous real-file Landsat thermal, Sentinel multispectral/NDVI, ENVI hyperspectral and DEM-derived terrain sampling with approximate attitude-aware WGS84 footprints, explicit source/flight/processing dates and genuine units/QA/nodata. No fabricated global sensors, live thermal camera or DEM-as-LiDAR claims.
 - Add graphical local source import, managed source/product identities and hashes, complete historical viewers, scientific exports, compact local evidence and planning-only future self-hosted campaigns documentation.
 - Default fresh installations to OSM/Streets after a privacy/offline-only choice before first external tiles; preserve old map preferences, offline fallback and optional own-key Esri.

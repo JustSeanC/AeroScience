@@ -18,6 +18,7 @@ public sealed class SetupWizardForm : Form
     private readonly Label missionSpace = new() { AutoSize = true };
     private readonly Label librarySpace = new() { AutoSize = true };
     private readonly Label progress = new() { AutoSize = true, MaximumSize = new(690, 0) };
+    private readonly CheckBox scientificOnline = new() { Text = "Allow automatic scientific-data discovery and bounded downloads", AutoSize = true };
     private int page;
     private bool working;
 
@@ -27,6 +28,7 @@ public sealed class SetupWizardForm : Form
         Text = "Welcome to AeroScience · Setup"; Size = new(800, 680); MinimumSize = new(760, 600);
         StartPosition = FormStartPosition.CenterParent; AutoScaleMode = AutoScaleMode.Dpi;
         var settings = app.Preferences.Load();
+        scientificOnline.Checked = new ScientificAccessSettings(app.Preferences.DirectoryPath).Get().Preferences.OnlineEnabled;
         mission.Text = Path.Combine(settings.MissionDirectory, "missions.db"); library.Text = settings.ScienceLibraryDirectory;
         community.Items.AddRange(ToolbarInstaller.DiscoverCommunityFolders().Select(p => (object)p).ToArray());
         community.Text = settings.CommunityDirectory ?? (community.Items.Count > 0 ? community.Items[0]?.ToString() ?? "" : "");
@@ -100,6 +102,9 @@ public sealed class SetupWizardForm : Form
         {
             panel.Controls.Add(TextLabel($"Mission Database: {mission.Text}\n\nScientific Data Library: {library.Text}\n\nToolbar: {(install.Checked ? "Install/update in " + community.Text : "Skipped — configure later in Settings")}"));
             panel.Controls.Add(TextLabel("Finish Setup confirms these choices. Changed storage locations use verified migration with originals retained. Existing destination data is never overwritten or silently merged. You can revisit setup and storage through Settings."));
+            panel.Controls.Add(TextLabel(ScientificAccessSettings.Privacy));
+            panel.Controls.Add(scientificOnline);
+            panel.Controls.Add(TextLabel("Optional and separate from online maps. Leave unchecked for offline-only science. Change bandwidth, date/quality policy and access later in Settings → Scientific Data Sources. Prepared scientific originals are retained within your library storage limits."));
             panel.Controls.Add(progress);
         }
     }
@@ -138,6 +143,7 @@ public sealed class SetupWizardForm : Form
             }));
             working = false;
             if (installToolbar && !app.InstallToolbar(this, selectedCommunity)) { back.Enabled = next.Enabled = cancel.Enabled = true; return; }
+            new ScientificAccessSettings(app.Preferences.DirectoryPath).Save(new ScientificAccessSettings(app.Preferences.DirectoryPath).Get().Preferences with { OnlineEnabled = scientificOnline.Checked, PrivacyAccepted = scientificOnline.Checked });
             DialogResult = DialogResult.OK; Close();
         }
         catch (Exception error) { working = false; back.Enabled = page > 0; next.Enabled = cancel.Enabled = true; app.ShowError(error); }

@@ -1,32 +1,48 @@
-# Remote-sensing quick start — v0.3.0 alpha
+# Automatic remote-sensing quick start — v0.3.0 alpha
 
-AeroScience samples **real, imported geographic observations** at positions calculated from your simulated aircraft. It does not expose a live thermal camera, create satellite observations for today, or turn an elevation model into measured LiDAR returns. There are no reference collections in the installer and no automatic worldwide scientific downloads.
+AeroScience can discover and prepare **real historical Earth data automatically** for terrain, thermal and multispectral instruments. Pilots do not need QGIS, Python, a terminal, a hand-written manifest, or a manual satellite download. Satellite observation time is separate from your simulated flight time. These instruments are not live aircraft cameras or measured aircraft LiDAR.
 
-## Before flying
+## Set up once
 
-1. Install `AeroScience-Setup-v0.3.0.exe`, launch AeroScience from Start and finish its guided storage/Community setup. No terminal or separate server is needed by pilots. Preserve your previous installer and stopped-store backups when testing an alpha upgrade.
-2. The dashboard asks about map privacy before any map-provider tile request on a new installation. Choose **Continue with OpenStreetMap** or **Use offline-only maps**. Changing the basemap never supplies scientific source data. Existing installations keep their map choices.
-3. Open **Settings → Storage & Data → Storage Management**. Defaults are 25 GB flight / 50 GB science, decimal GB. Choose custom values or Unlimited if appropriate. The Mission Database and Scientific Data Library can be on different local/external drives. An unavailable configured drive is an error, not a reason to create an empty replacement archive.
-4. Obtain a bounded, licensed regional collection following [sources.md](sources.md). For a first exercise, use a small WGS84 GeoTIFF elevation subset and [terrain.md](terrain.md). Keep the source's metadata, dates and license. Other supported workflows are [thermal.md](thermal.md), [multispectral.md](multispectral.md) and [hyperspectral.md](hyperspectral.md).
-5. Prepare the collection's `source.json` metadata manifest next to its actual data files. This is scientific input metadata, not an application configuration file. The guides give its schema and examples. Use a text editor if the data distributor does not supply this manifest. A JSON manifest alone contains no scientific pixels.
-6. In the Windows app's **Settings → Scientific Data Sources**, click **Import scientific source collection…**, choose that manifest and review the source/date/license/copy size/free-space confirmation. AeroScience decodes the files, copies and hashes them into its Science Library, and leaves your originals untouched. Wait for completion. No terminal, network credential, or local-server command is required for this import.
-7. In dashboard **Settings → Scientific Data Sources**, refresh and check a latitude/longitude inside the source. Inspect file availability, native band grids, CRS, pixel sizes, scene ID and original observation date. Center coverage is a preliminary check; an entire tilted footprint may extend outside it.
+1. Run `AeroScience-Setup-v0.3.0.exe`, choose your storage and Community toolbar options, and launch AeroScience. It starts the local services and browser dashboard automatically.
+2. During guided setup, review the **separate scientific-data privacy disclosure** and optionally enable automatic scientific-data retrieval. You can instead leave it offline-only. Revisit this choice in **Settings → Scientific Data Sources → Automatic Scientific Data Access**. Public providers receive geographic queries and your IP address; downloads go directly to your PC, without an AeroScience download server, paid shared key or scientific-data account for the supported terrain/thermal/multispectral paths.
+3. Choose basemap privacy independently. Online OpenStreetMap consent does **not** authorize scientific downloads. Offline basemaps can be used with online scientific preparation, and vice versa.
+4. Review **Settings → Storage & Data**. Defaults remain **25 GB Flight/Mission / 50 GB Scientific Library**, cache-only automatic cleanup and pinned protection. Mission history and the Science Library can use separate internal/external drives. Prepared numeric source subsets are retained scientific originals, not disposable caches.
+5. In scientific-access Settings, choose the maximum download budget (default 64 MiB per preparation), 1–2 concurrent preparations (default 1), background retrieval, optional unmetered-only access, search date window and cloud policy. Unknown Windows network cost pauses unmetered-only downloads. Download ceilings and conservative staging bounds are shown; actual transfers and retained file sizes vary.
 
-## Record and inspect
+## Prepare a planned flight
 
-1. Open Mission Planner; create a route/survey area inside that source. Choose Universal (default) or Realistic, enable the matching instrument and select its acquisition interval. Save a preset if useful. Both modes retain existing behavior; advanced calibration and airframe restrictions are deferred.
-2. Use **Estimate scientific storage**. This estimates bounded 24×24 sampled products and JSON/index/temporary overhead from interval, band count and duration. Original import bytes are additional. It is not a prediction for future full-resolution cameras or LAS data.
-3. Start MSFS 2024 and wait for **SimConnect — live aircraft**. Start the mission. The Mission tab records flight data; the toolbar's **Payload** tab exposes the same instrument and science Pause/Resume state. Use your actual aircraft; there is no research-aircraft whitelist.
-4. Fly a short, reasonably level pass over the imported area with valid AGL/attitude. The four remote instruments use approximate nadir geometry (terrain uses a narrow swath). Excessive tilt, missing telemetry, cloud masking, missing source files or out-of-coverage locations produce **Scientific data unavailable for this location or acquisition**, not generated substitute values.
-5. Open **Science Collection → Remote-Sensing Products → View Data**. Check the footprint/sample map, numeric legend/spectrum/profile, source and flight dates, quality exclusions and native resolution. **Science Pause** stops acquisition independently of flight recording; Resume does not manufacture missed observations.
-6. End the mission. In Mission History open that mission's science products after MSFS closes or the internet disconnects. Imported sources and completed products are local. Use **Protect Mission** / **Protect Dataset** to exclude associated previews from cache cleanup.
-7. Export JSON/CSV/GeoJSON/GPX/KML, compact evidence or a labeled PNG preview as appropriate; see [exports.md](exports.md). Keep canonical JSON for reproducible review.
+1. In **Mission Planner**, draw a small survey polygon or route and enable **Terrain Scanner**, **Thermal Imager** and/or **Multispectral Imager**. Choose Universal (default) or Realistic. No aircraft whitelist applies.
+2. Save the plan. When background retrieval is enabled, bounded preflight preparation is queued automatically. **Prepare scientific data** explicitly starts or retries preparation, including when background retrieval is disabled.
+3. Inspect **Scientific Data Readiness**. It shows provider, actual dataset, requested coverage, original observation date, scene quality, transfer/staging bounds and status. Wait for **Ready** before takeoff where practical. **Limited Coverage** is a limitation, not a successful flight observation. Large routes/surveys prepare at most eight small cells per action and explicitly report partial coverage; this is not complete corridor coverage.
+4. If needed, use **Settings → Automatic Scientific Data Access → Prepare a small area** for a specific latitude/longitude. Preparation creates and validates its internal manifest automatically.
+5. Start MSFS and wait for live SimConnect aircraft telemetry. Start the research mission. Fly within prepared coverage with valid AGL and reasonable attitude. Only valid flight-time samples become products.
 
-## Interpret honestly
+## Fly without a plan
 
-- **Simulator reported:** aircraft position, altitude/AGL, attitude, speeds/Mach and supported atmospheric fields from the existing SimConnect provider. Packet timestamps are host UTC at receipt, not a newly claimed simulator clock.
-- **External observation:** original Landsat/Sentinel/ENVI/DEM values and original dates, possibly years before this flight.
-- **Derived:** footprint geometry, scaled temperatures/reflectance, NDVI, profiles and statistics calculated from those inputs.
-- **Modeled:** no modeled scientific sensor generator is supplied in this release. Automated test fixtures are synthetic and identified as such; they are not distributable reference data or MSFS verification.
+Enable a supported remote instrument and scientific access. With background retrieval allowed and fresh aircraft telemetry, AeroScience requests a small approximately 0.02° cell around the current aircraft position. It does not download a complete region or global dataset. Readiness appears in **Mission Control** and **Science Collection** as well as the planner. A mission must be recording to save scientific observations.
 
-The browser-fixture screenshots in the completion report illustrate implemented interfaces only. Windows/MSFS, VR and physical iPad acceptance must be performed on the actual gaming PC. See [troubleshooting.md](troubleshooting.md).
+Downloads run independently of the 1 Hz recorder. While data are downloading or unavailable, flight recording continues and the instrument reports the actual missing-data condition. Newly prepared data are used only for subsequent acquisitions; earlier missing flight-time observations are never backfilled as live measurements.
+
+## Read the status honestly
+
+- **Queued / Downloading:** discovery or numeric preparation is in progress; no successful scientific observation is implied. Cancel through the readiness card or Settings, then Retry when appropriate.
+- **Ready:** a numeric source is validated and retained. Clouds, nodata, saturation, invalid indices or a footprint extending outside the subset can still prevent a particular acquisition.
+- **Limited Coverage:** a prepared subset has no usable preview pixels, a long plan is only partly prepared, or a hyperspectral catalog observation exists whose automatic preparation is unsupported. Read the reason.
+- **Unavailable:** no matching source/date/quality, unsupported format, provider error/rate limit, cancellation, insufficient storage, or a refused oversized/incorrect HTTP response. No imagery or numbers are invented. Try a smaller area, another date/quality policy, Retry, or advanced manual import.
+- **Offline:** scientific online access/background/network policy prevents retrieval. Previously verified local sources and complete historical products remain usable; no internet is required to review the archive.
+
+## Inspect and keep the results
+
+Open **Science Collection → Remote-Sensing Products → View Data**. Check the numeric view and legend, footprint, native resolution, quality exclusions, dataset/provider/license, source observation time, aircraft position/flight receipt UTC, and processing/retrieval UTC. Atmospheric channels remain simulator-reported values. Satellite and elevation values are independent external observations, often older than the flight.
+
+End the mission, close MSFS and disconnect internet: Mission History, saved telemetry, completed science products and exports remain local. Protect missions/datasets as needed. Automatic cache cleanup never removes original source subsets, observations, completed products or backups to make room.
+
+## Current geographic/product limits
+
+- **Thermal:** Landsat 8/9 Collection 2 **L2SP** temperature, `ST_B10` plus `QA_PIXEL` and `QA_RADSAT`. Historical/clear coverage varies; 30 m delivered pixels are not 30 m native TIRS detail (native thermal resolution is 100 m).
+- **Multispectral:** Sentinel-2 L2A B02/B03/B04/B08 and SCL COGs from Earth Search. Exact per-asset scales/additive offsets are preserved; SCL stays on its own grid. No JP2 conversion is required.
+- **Terrain:** numeric USGS 3DEP bare-earth composite where available; Copernicus GLO-30 **DSM** fallback includes vegetation/buildings. 3DEP composite dates/native per-pixel resolution/vertical reference are unspecified by this export; Copernicus uses EGM2008. No silent datum mixing or aircraft-MSL subtraction occurs.
+- **Hyperspectral:** genuine EMIT, AVIRIS-Classic and AVIRIS-NG catalog discovery only. Protected downloads, NASA login and automated spectral preparation are **not implemented**. No worldwide spectral coverage is claimed. Advanced validated ENVI import remains available.
+
+See [provider details and limits](automatic-data.md), [advanced manual import](sources.md), [storage](storage.md), [exports](exports.md) and [troubleshooting](troubleshooting.md). Actual Windows/MSFS, Quest 3 and physical iPad acceptance remains pending on the gaming PC; genuine-provider cloud acceptance is separate.

@@ -5,13 +5,14 @@ using AeroScience.Shared;
 
 namespace AeroScience.Missions;
 
-// One bounded worker, separate from the telemetry/coordinator gate. No network downloads.
+// One bounded worker, separate from the telemetry/coordinator gate. No network downloads on this worker; AutomaticScientificData prepares retained sources independently.
 public sealed class RemoteAcquisition : IDisposable
 {
     public static readonly Dictionary<string, RemoteKind> Instruments = new()
     { ["thermal-imager"] = RemoteKind.Thermal, ["multispectral-imager"] = RemoteKind.Multispectral,
       ["hyperspectral-imager"] = RemoteKind.Hyperspectral, ["terrain-scanner"] = RemoteKind.Terrain };
     private readonly ScienceStore science;
+    private readonly Func<ScientificAccessPreferences>? sourcePreferences;
     private readonly MissionStore missions;
     private readonly Channel<RemoteAcquisitionRequest> queue = Channel.CreateBounded<RemoteAcquisitionRequest>(new BoundedChannelOptions(4) { SingleReader = true, FullMode = BoundedChannelFullMode.Wait });
     private readonly CancellationTokenSource stop = new();
@@ -22,8 +23,8 @@ public sealed class RemoteAcquisition : IDisposable
     private long generation;
     private bool paused;
     private int disposed;
-    public RemoteAcquisition(MissionStore missions, ScienceStore science)
-    { this.missions = missions; this.science = science; worker = Task.Run(Run); }
+    public RemoteAcquisition(MissionStore missions, ScienceStore science,Func<ScientificAccessPreferences>? sourcePreferences=null)
+    { this.missions = missions; this.science = science;this.sourcePreferences=sourcePreferences; worker = Task.Run(Run); }
     public void Reset(bool pause = false)
     {
         Interlocked.Increment(ref generation); paused = pause; schedule.Clear();
@@ -31,7 +32,7 @@ public sealed class RemoteAcquisition : IDisposable
     }
     public void Begin() { Reset(); states.Clear(); }
     public RemoteInstrumentStatus Status(string id) => states.GetValueOrDefault(id) ?? new(id, ObservationQuality.Waiting,
-        "Scientific data unavailable for this location or acquisition. Import a supported real source collection in Settings → Scientific Data Sources.", null, 0, 0, 0);
+        "Scientific data unavailable for this location or acquisition. Check Scientific Data Readiness and automatic scientific access in Settings. Manual source import remains an advanced option.", null, 0, 0, 0);
     public void Offer(Mission mission, MissionResearch research, InstrumentConfiguration[] configs, TelemetryUpdate update)
     {
         if (paused || update.Connection.State != ConnectionState.Connected || update.Frame is not { IsValid: true, IsPaused: false } frame
@@ -87,9 +88,8 @@ public sealed class RemoteAcquisition : IDisposable
         science.Management?.RequireScienceCapacity();
         var mount=Instruments[request.Configuration.InstrumentId] == RemoteKind.Terrain ? new SensorMount(30,3,Swath:true) : new();
         var footprint = SensorGeometry.Footprint(request.Frame, mount);
-        var source = science.Availability(footprint.Center).Where(a => a.FilesAvailable && a.CoversPoint == true && a.Source.Manifest.Kind == Instruments[request.Configuration.InstrumentId])
-            .OrderByDescending(a => a.Source.Manifest.ObservationUtc).Select(a => a.Source).FirstOrDefault()
-            ?? throw new InvalidOperationException("No supported local collection covers the sensor footprint center. Import a licensed geographic subset; no ambient-temperature or basemap substitution is made.");
+        var source = ScientificSourceSelection.Select(science.Availability(footprint.Center),Instruments[request.Configuration.InstrumentId],sourcePreferences?.Invoke())
+            ?? throw new InvalidOperationException("No prepared source covers this footprint yet. Check Scientific Data Readiness (consent, download, coverage or offline status). No observation was recorded; future data will not backfill this interval.");
         var root = StorageManager.ResolveDataset(science.DirectoryPath, science.LibraryId, source.RelativeDirectory);
         foreach (var file in source.Files)
         {
@@ -112,7 +112,7 @@ public sealed class RemoteAcquisition : IDisposable
             bands.Add(new(band.Id, band.Unit, band.WavelengthNm, values, "Nearest original source pixel at each WGS84 footprint sample; no interpolation or improved source resolution is claimed", raster.Grid));
         }
         var derived = RemoteCalculations.Apply(source.Manifest.Kind, bands.ToArray());
-        if (bands.All(b => b.Values.All(v => v is null)) || derived.Count > 0 && derived.All(d => d.Value.All(v => v is null)))
+        if (bands.Where(b=>b.Id is not("QA_PIXEL" or "QA_RADSAT" or "SCL")).All(b => b.Values.All(v => v is null)))
             throw new InvalidOperationException("All sampled pixels were outside coverage, nodata, bad bands, cloud/quality masked or invalid. No complete product was created.");
         Check();
         var dataset = science.EnsureDataset(request.Mission, request.Configuration, request.Research);

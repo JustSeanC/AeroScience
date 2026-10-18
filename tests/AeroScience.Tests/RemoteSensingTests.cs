@@ -44,6 +44,14 @@ public sealed class RemoteSensingTests : IDisposable
         Assert.Contains("not tamper-proof",RemoteExports.Content(data,"evidence.json"));
         coordinator.End(product.MissionId);Assert.Single(science.Products(product.MissionId));Assert.NotEmpty(ResearchExports.Report(missions,product.MissionId));
     }
+    [Fact]public async Task InvalidNdviDoesNotDiscardValidOriginalReflectance()
+    {
+        var path=RemoteFixtureFiles.Create(Path.Combine(root,"negative-reflectance"),RemoteKind.Multispectral);var source=ScienceStore.ReadSourceManifest(path);
+        File.WriteAllText(path,JsonSerializer.Serialize(source with{Bands=source.Bands.Select(b=>b.Id=="B04"?b with{Offset=-.3}:b).ToArray()},WireJson.Options));
+        await science.ImportSourceAsync(path);var mission=coordinator.Start(new("Real numeric reflectance, invalid index",Instruments:[new("multispectral-imager",true)]));Apply(Frame());
+        await Wait(()=>science.Products(mission.Id).Length==1);var data=science.ReadProduct(science.Products(mission.Id).Single().Id);
+        Assert.All(data.Derived["ndvi"],Assert.Null);Assert.All(data.Bands.Single(b=>b.Id=="B04").Values,v=>Assert.Equal(-.1,v!.Value,6));
+    }
     [Fact]public async Task CloudMasksYieldUnavailableRatherThanFabricatedThermalProducts()
     {
         await science.ImportSourceAsync(RemoteFixtureFiles.Create(Path.Combine(root,"cloud"),RemoteKind.Thermal,true));var mission=coordinator.Start(new("Cloud",Instruments:[new("thermal-imager",true)]));Apply(Frame());

@@ -4,6 +4,7 @@ import importlib
 import json
 import unittest
 import zipfile
+from unittest.mock import patch
 import installer_fixtures as fixtures
 import test_release_flow as flow
 
@@ -12,6 +13,12 @@ a = importlib.import_module('automatic_release')
 class AutomaticReleaseTests(unittest.TestCase):
     def setUp(self):
         self.flow = flow.ReleaseFlowTests(); self.flow.setUp(); self.addCleanup(self.flow.tearDown)
+        # Release-control fixtures cannot establish genuine network acceptance.
+        # Preserve recorded numeric evidence structurally while testing this isolated
+        # synthetic finalization flow. Production evidence() still requires a passing final run.
+        actual_verify=a.scientific.verify
+        fixture_proof=patch.object(a.scientific,'verify',lambda:actual_verify(require_current=False))
+        fixture_proof.start();self.addCleanup(fixture_proof.stop)
 
     def evidence(self):
         root=self.flow.root

@@ -1,0 +1,422 @@
+{
+  "formatVersion": 1,
+  "evidenceType": "genuine-public-provider-network",
+  "checkedUtc": "2026-10-18T22:29:43.199491+00:00",
+  "windowsMsfs": "not tested",
+  "description": "Actual public API discovery, bounded numeric retrieval, internal manifest, verified library import, QA-aware sampling and persisted/reloaded mission products. Flight inputs are synthetic and explicitly labeled. Data files and SAS tokens are not bundled.",
+  "finalNetworkRerun": "pending",
+  "finalNetworkRerunReason": "The final rerun was interrupted by the cloud HTTP tunnel returning 503 across providers. Earlier successful genuine-data runs are preserved below; this is not an acceptance pass for the final source.",
+  "canonicalLfSourceSha256": {
+    "src/AeroScience.Missions/AutomaticScientificData.cs": "ef3d1d03cacc948ea9e5091453400069e648e1a21a2fa283aafb0cb71badf3bf",
+    "src/AeroScience.Missions/ScientificHttp.cs": "3fdf9c79b29b1f2525c9973ae85d358ba12aa207dc264acbd5ad126c0f501437",
+    "src/AeroScience.Missions/ScientificProviders.cs": "6a14ac8e14fa5717527dac2f158e49caf2c47bb07079a9e8cb8ccb931fed03c2",
+    "src/AeroScience.Missions/ScientificRaster.cs": "ca0bab8cb27e8f07924efdd424277c3426fdb3d5860c95725f2f4a39ca69f042",
+    "src/AeroScience.Missions/ScientificSourceSelection.cs": "2664985babc15dd2a005939573ad44f99c9f54c4e900384f971350f23c4526d7",
+    "src/AeroScience.Missions/RemoteScienceStore.cs": "145c9eaa220092ea231ce83610f954246ec24cdb670dd05846fc57d577c3c846",
+    "src/AeroScience.Missions/RemoteAcquisition.cs": "c2732d9ab871767fc151988aa02843076138c8d51d18a77965f7888f64c2dfa9",
+    "src/AeroScience.Shared/RemoteSensingModels.cs": "3825d6ac31ebb5ffa6d652d46dc06eebc1e844df7107c869a00692a552ca322a",
+    "src/AeroScience.Shared/ScientificAccessModels.cs": "050c068dfb28a9154ada9d3fb1372f8941a6493f29a31727bb7b723f9c288052",
+    "tests/AeroScience.ProviderAcceptance/Program.cs": "8c01fc4ea0cf1d6953abfa735a058bbf893c66aa78c15afad4c193e7e0bb1d17"
+  },
+  "workflows": [
+    {
+      "workflow": "cop-dem-glo-30",
+      "passed": true,
+      "provider": "Microsoft Planetary Computer / Copernicus DEM",
+      "sceneId": "Copernicus_DSM_COG_10_N46_00_E008_00_DEM",
+      "sourceObservedUtc": null,
+      "publicationUtc": "2021-04-22T00:00:00+00:00",
+      "nativeResolution": "~30 m geographic DSM",
+      "verticalDatum": "EGM2008 geoid (DSM, not bare-earth)",
+      "quality": "Numeric DSM; vertical reference differs from 3DEP and aircraft MSL",
+      "requestedArea": {
+        "west": 8.1,
+        "south": 46.1,
+        "east": 8.12,
+        "north": 46.120000000000005,
+        "corners": [
+          {
+            "latitude": 46.1,
+            "longitude": 8.1
+          },
+          {
+            "latitude": 46.1,
+            "longitude": 8.12
+          },
+          {
+            "latitude": 46.120000000000005,
+            "longitude": 8.12
+          },
+          {
+            "latitude": 46.120000000000005,
+            "longitude": 8.1
+          }
+        ],
+        "center": {
+          "latitude": 46.11,
+          "longitude": 8.11
+        }
+      },
+      "networkBytes": 1445256,
+      "retainedNumericBytes": 18044,
+      "bands": [
+        {
+          "id": "elevation",
+          "file": "elevation.tif",
+          "format": "geotiff",
+          "channel": 0,
+          "unit": "m",
+          "scale": 1,
+          "offset": 0,
+          "noData": null,
+          "wavelengthNm": null,
+          "badBand": false,
+          "headerFile": null,
+          "sceneId": "Copernicus_DSM_COG_10_N46_00_E008_00_DEM"
+        }
+      ],
+      "validDerivedSamples": 576,
+      "sampleCount": 576,
+      "publishedProductVerified": true,
+      "publishedProductSha256": "a566a1c33805f3a9ca0c5d134bb92f4726ed71eef777f88536e166df72deb941",
+      "flightInput": "synthetic test position; not MSFS",
+      "sourceFiles": [
+        {
+          "relativePath": "elevation.tif",
+          "bytes": 18044,
+          "sha256": "f66b92a3a5f914f5c26ec8e5c1395311472f188347e5666d66a513aee4d22a3d"
+        }
+      ],
+      "acceptanceArtifactSha256": "4f500adae9c6c0ebf3dce163ad5a2d4be2f392418414add0e94f8af21111fb0f"
+    },
+    {
+      "workflow": "landsat-c2-l2",
+      "passed": true,
+      "provider": "Microsoft Planetary Computer / USGS Landsat",
+      "sceneId": "LC08_L2SP_014032_20240903_02_T1",
+      "sourceObservedUtc": "2024-09-03T15:39:44.650124+00:00",
+      "publicationUtc": null,
+      "nativeResolution": "30 m delivered grid / 100 m native TIRS",
+      "verticalDatum": "not applicable",
+      "quality": "Scene cloud cover 0.05%; local QA/nodata still determines valid samples",
+      "requestedArea": {
+        "west": -75,
+        "south": 40,
+        "east": -74.98,
+        "north": 40.02,
+        "corners": [
+          {
+            "latitude": 40,
+            "longitude": -75
+          },
+          {
+            "latitude": 40,
+            "longitude": -74.98
+          },
+          {
+            "latitude": 40.02,
+            "longitude": -74.98
+          },
+          {
+            "latitude": 40.02,
+            "longitude": -75
+          }
+        ],
+        "center": {
+          "latitude": 40.010000000000005,
+          "longitude": -74.99000000000001
+        }
+      },
+      "networkBytes": 1259546,
+      "retainedNumericBytes": 8642,
+      "bands": [
+        {
+          "id": "ST_B10",
+          "file": "ST_B10.tif",
+          "format": "geotiff",
+          "channel": 0,
+          "unit": "K",
+          "scale": 0.00341802,
+          "offset": 149,
+          "noData": 0,
+          "wavelengthNm": null,
+          "badBand": false,
+          "headerFile": null,
+          "sceneId": "LC08_L2SP_014032_20240903_02_T1"
+        },
+        {
+          "id": "QA_PIXEL",
+          "file": "QA_PIXEL.tif",
+          "format": "geotiff",
+          "channel": 0,
+          "unit": "1",
+          "scale": 1,
+          "offset": 0,
+          "noData": 1,
+          "wavelengthNm": null,
+          "badBand": false,
+          "headerFile": null,
+          "sceneId": "LC08_L2SP_014032_20240903_02_T1"
+        },
+        {
+          "id": "QA_RADSAT",
+          "file": "QA_RADSAT.tif",
+          "format": "geotiff",
+          "channel": 0,
+          "unit": "1",
+          "scale": 1,
+          "offset": 0,
+          "noData": null,
+          "wavelengthNm": null,
+          "badBand": false,
+          "headerFile": null,
+          "sceneId": "LC08_L2SP_014032_20240903_02_T1"
+        }
+      ],
+      "validDerivedSamples": 576,
+      "sampleCount": 576,
+      "publishedProductVerified": true,
+      "publishedProductSha256": "ce11c3f715be2d3783e79d245bccb4605994b70f9bc64013ed6b49e3d1c6fdff",
+      "flightInput": "synthetic test position; not MSFS",
+      "sourceFiles": [
+        {
+          "relativePath": "ST_B10.tif",
+          "bytes": 7818,
+          "sha256": "05b5e70505ae77243f394049ba2f800a714ce4c55f7e22349f3e3a43462caaa8"
+        },
+        {
+          "relativePath": "QA_PIXEL.tif",
+          "bytes": 436,
+          "sha256": "ba3d6e05277aa9fc9629bced52401b387c8bd7744c6137878177788537a7b996"
+        },
+        {
+          "relativePath": "QA_RADSAT.tif",
+          "bytes": 388,
+          "sha256": "6dcbf2ca051ac9b64c0574a5d61c465aeca0f08df0c9a6c227f5d41225563938"
+        }
+      ],
+      "acceptanceArtifactSha256": "f7494e693dcf7f00583546497a9d6c0ab8cbe50ddbd786bfbf6752c2b7e7e4e7"
+    },
+    {
+      "workflow": "sentinel-2-l2a",
+      "passed": true,
+      "provider": "Copernicus / Element 84 Earth Search",
+      "sceneId": "S2A_18TWK_20240903_0_L2A",
+      "sourceObservedUtc": "2024-09-03T15:52:05.578+00:00",
+      "publicationUtc": null,
+      "nativeResolution": "10 m reflectance / 20 m SCL",
+      "verticalDatum": "not applicable",
+      "quality": "Scene cloud cover 0.01%; local QA/nodata still determines valid samples",
+      "requestedArea": {
+        "west": -75,
+        "south": 40,
+        "east": -74.98,
+        "north": 40.02,
+        "corners": [
+          {
+            "latitude": 40,
+            "longitude": -75
+          },
+          {
+            "latitude": 40,
+            "longitude": -74.98
+          },
+          {
+            "latitude": 40.02,
+            "longitude": -74.98
+          },
+          {
+            "latitude": 40.02,
+            "longitude": -75
+          }
+        ],
+        "center": {
+          "latitude": 40.010000000000005,
+          "longitude": -74.99000000000001
+        }
+      },
+      "networkBytes": 13988984,
+      "retainedNumericBytes": 239498,
+      "bands": [
+        {
+          "id": "B02",
+          "file": "B02.tif",
+          "format": "geotiff",
+          "channel": 0,
+          "unit": "reflectance",
+          "scale": 0.0001,
+          "offset": -0.1,
+          "noData": 0,
+          "wavelengthNm": null,
+          "badBand": false,
+          "headerFile": null,
+          "sceneId": "S2A_18TWK_20240903_0_L2A"
+        },
+        {
+          "id": "B03",
+          "file": "B03.tif",
+          "format": "geotiff",
+          "channel": 0,
+          "unit": "reflectance",
+          "scale": 0.0001,
+          "offset": -0.1,
+          "noData": 0,
+          "wavelengthNm": null,
+          "badBand": false,
+          "headerFile": null,
+          "sceneId": "S2A_18TWK_20240903_0_L2A"
+        },
+        {
+          "id": "B04",
+          "file": "B04.tif",
+          "format": "geotiff",
+          "channel": 0,
+          "unit": "reflectance",
+          "scale": 0.0001,
+          "offset": -0.1,
+          "noData": 0,
+          "wavelengthNm": null,
+          "badBand": false,
+          "headerFile": null,
+          "sceneId": "S2A_18TWK_20240903_0_L2A"
+        },
+        {
+          "id": "B08",
+          "file": "B08.tif",
+          "format": "geotiff",
+          "channel": 0,
+          "unit": "reflectance",
+          "scale": 0.0001,
+          "offset": -0.1,
+          "noData": 0,
+          "wavelengthNm": null,
+          "badBand": false,
+          "headerFile": null,
+          "sceneId": "S2A_18TWK_20240903_0_L2A"
+        },
+        {
+          "id": "SCL",
+          "file": "SCL.tif",
+          "format": "geotiff",
+          "channel": 0,
+          "unit": "1",
+          "scale": 1,
+          "offset": 0,
+          "noData": 0,
+          "wavelengthNm": null,
+          "badBand": false,
+          "headerFile": null,
+          "sceneId": "S2A_18TWK_20240903_0_L2A"
+        }
+      ],
+      "validDerivedSamples": 183,
+      "sampleCount": 576,
+      "publishedProductVerified": true,
+      "publishedProductSha256": "d4976607fb068ed113f6aa841456daf17d20f9c37942b131023c540a7729e023",
+      "flightInput": "synthetic test position; not MSFS",
+      "sourceFiles": [
+        {
+          "relativePath": "B02.tif",
+          "bytes": 58716,
+          "sha256": "3a73bd5220bdf9a756516d4164e050a8584735c96388b913d3f00c79e74e6eee"
+        },
+        {
+          "relativePath": "B03.tif",
+          "bytes": 58692,
+          "sha256": "0b51220f541aac313b81188027efd1db1d0e0d4bf9d6f37266f732f8b519bb0e"
+        },
+        {
+          "relativePath": "B04.tif",
+          "bytes": 59780,
+          "sha256": "18af6015253641f4856d77d87b8283a20eb08d49f83656b5522e22c17d20e15b"
+        },
+        {
+          "relativePath": "B08.tif",
+          "bytes": 60866,
+          "sha256": "2709bf2409ed5aedc3b41663975ce79e3141b7dfd8b1ed5780bcab9d6dd72dc4"
+        },
+        {
+          "relativePath": "SCL.tif",
+          "bytes": 1444,
+          "sha256": "490d03dc11d94fabc5037777b2e8b4af374f4858ce801dfd33cbe7c146ea2fa5"
+        }
+      ],
+      "acceptanceArtifactSha256": "fcf921d948b6696bb4d979f3c23c9537859bc4b2ed9b5d21ee523bbd8806f211"
+    },
+    {
+      "workflow": "usgs-3dep",
+      "passed": true,
+      "provider": "USGS 3DEP National Map",
+      "sceneId": "3DEP--75,40,-74.98,40.02",
+      "sourceObservedUtc": null,
+      "publicationUtc": null,
+      "nativeResolution": "Composite source resolution varies; 256 \u00d7 256 requested geographic grid (not a claim of native resolution)",
+      "verticalDatum": "Source-native vertical reference is unspecified by this composite export; no datum conversion or aircraft MSL comparison",
+      "quality": "USGS numeric composite; actual nodata checked before publishing",
+      "requestedArea": {
+        "west": -75,
+        "south": 40,
+        "east": -74.98,
+        "north": 40.02,
+        "corners": [
+          {
+            "latitude": 40,
+            "longitude": -75
+          },
+          {
+            "latitude": 40,
+            "longitude": -74.98
+          },
+          {
+            "latitude": 40.02,
+            "longitude": -74.98
+          },
+          {
+            "latitude": 40.02,
+            "longitude": -75
+          }
+        ],
+        "center": {
+          "latitude": 40.010000000000005,
+          "longitude": -74.99000000000001
+        }
+      },
+      "networkBytes": 274129,
+      "retainedNumericBytes": 263002,
+      "bands": [
+        {
+          "id": "elevation",
+          "file": "elevation.tif",
+          "format": "geotiff",
+          "channel": 0,
+          "unit": "m",
+          "scale": 1,
+          "offset": 0,
+          "noData": -999999,
+          "wavelengthNm": null,
+          "badBand": false,
+          "headerFile": null,
+          "sceneId": "3DEP--75,40,-74.98,40.02"
+        }
+      ],
+      "validDerivedSamples": 576,
+      "sampleCount": 576,
+      "publishedProductVerified": true,
+      "publishedProductSha256": "a64d608bcf727f24d73c23d41a9c9f4aa13985ac140f5d4b2566d000dab36ba7",
+      "flightInput": "synthetic test position; not MSFS",
+      "sourceFiles": [
+        {
+          "relativePath": "elevation.tif",
+          "bytes": 263002,
+          "sha256": "b25437967ba562cbdb4830d219e6fc65fa0ee0be760c48fce31a1dfa0fee04f5"
+        }
+      ],
+      "acceptanceArtifactSha256": "ed175ab2e0fe12ed7e6419b18cf363e70b7c731d59db6e3ec823c36826bcb38d"
+    }
+  ],
+  "independentComparison": null,
+  "hyperspectral": {
+    "status": "discovery only; automated preparation and NASA authorization unsupported",
+    "details": null
+  }
+}
