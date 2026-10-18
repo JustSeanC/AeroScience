@@ -2,6 +2,7 @@
 
 ## 0.2.2 — Geographic Mission Integration (prerelease)
 
+- Fix the Windows checkout-repair regression fixture and documented repair to restore `assets-manifest.json` along with pinned assets. Check exact LF manifest bytes and clean fresh/repaired checkouts; retain all expected hashes and release checks.
 - Add optional user-owned Esri satellite/labels basemaps with Windows-protected key storage, explicit privacy/billing consent, shared layer preferences, attribution, authenticated provider testing and offline fallback. Offline Natural Earth remains the default; no shared quota, bulk imagery cache or mandatory account.
 - Add the native toolbar Map tab with offline geography, full ordered route/pattern/area geometry, numbered/inspectable waypoints, fresh aircraft/heading, bounded recorded track, follow/free-pan/fit/zoom and cached revision/chunk synchronization over existing CommBus. Native controls/bootstrap and read-only aircraft behavior are retained.
 - Add shared planned-route preview and current MSFS 2024 EFB PLN export (AppVersionMajor 12), optional airport IDs, explicit cruising altitude, unique User fixes and omitted unspecified altitudes. Add planned GPX/KML/CSV and deliberate clipboard DD/DDM/DMS/ICAO/SimBrief-format sharing; no automatic external filing or waypoint simplification.

@@ -72,6 +72,9 @@ class OfflineAssetsTests(unittest.TestCase):
             legacy=temp/'existing-windows-checkout'
             git('-c','core.autocrlf=true','clone','-q','--no-local',str(seed),str(legacy),cwd=temp)
             git('config','core.autocrlf','true',cwd=legacy)
+            # The old checkout converts the source manifest too. Unlike the
+            # pinned upstream files, its new rule requires LF, not -text.
+            self.assertIn(b'\r\n',(legacy/relative/'assets-manifest.json').read_bytes())
             with self.assertRaisesRegex(ValueError,'vendor/chart.js/LICENSE.txt'):
                 web_assets.verify(legacy/relative)
 
@@ -86,15 +89,26 @@ class OfflineAssetsTests(unittest.TestCase):
             self.assertNotEqual(git('diff','--cached','--stat',cwd=legacy).stdout,'')
             # Restore the index AND worktree, explicitly disabling checkout EOL
             # conversion for this command only. No global Git setting is changed.
+            # Git can consider a CRLF manifest clean after normalization and
+            # skip rewriting it. Remove this tracked fixture file first so the
+            # restore must recreate it using the new LF rule.
+            (legacy/relative/'assets-manifest.json').unlink()
             git('-c','core.autocrlf=false','restore','--source=HEAD','--staged','--worktree','--',
-                (relative/'vendor').as_posix(),(relative/'geography').as_posix(),cwd=legacy)
+                (relative/'vendor').as_posix(),(relative/'geography').as_posix(),
+                (relative/'assets-manifest.json').as_posix(),cwd=legacy)
             self.assertEqual(web_assets.verify(legacy/relative),len(json.loads((WEB/'assets-manifest.json').read_text())['files']))
+            self.assertEqual((legacy/relative/'assets-manifest.json').read_bytes(),
+                (WEB/'assets-manifest.json').read_bytes())
             self.assertEqual(git('status','--porcelain',cwd=legacy).stdout,'')
             self.assertEqual(git('config','core.autocrlf',cwd=legacy).stdout.strip(),'true')
 
             fresh=temp/'fresh-windows-checkout'
             git('-c','core.autocrlf=true','clone','-q','--no-local',str(seed),str(fresh),cwd=temp)
+            git('config','core.autocrlf','true',cwd=fresh)
             self.assertEqual(web_assets.verify(fresh/relative),web_assets.verify())
+            self.assertEqual((fresh/relative/'assets-manifest.json').read_bytes(),
+                (WEB/'assets-manifest.json').read_bytes())
+            self.assertEqual(git('status','--porcelain',cwd=fresh).stdout,'')
             for name in json.loads((WEB/'assets-manifest.json').read_text())['files']:
                 with self.subTest(asset=name):
                     self.assertEqual((fresh/relative/name).read_bytes(),(WEB/name).read_bytes())
