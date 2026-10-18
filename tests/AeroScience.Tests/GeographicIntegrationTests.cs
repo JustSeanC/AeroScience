@@ -104,7 +104,7 @@ public sealed class GeographicIntegrationTests : IDisposable
     public async Task OfflineAndMissingKeyNeverContactAProviderAndPreferencesPersist()
     {
         var transport=new ProviderHandler();using var http=new HttpClient(transport);var settings=new MapSettings(root,new TestProtector(),http);
-        Assert.Equal("offline",settings.Get().Preferences.Layer);Assert.Empty((await settings.Client()).Tiles);Assert.Equal(0,transport.Calls);
+        Assert.Equal("streets",settings.Get().Preferences.Layer);Assert.True(settings.Get().RequiresPrivacyChoice);Assert.Empty((await settings.Client()).Tiles);Assert.Equal(0,transport.Calls);
         Assert.Throws<ArgumentException>(()=>settings.Save(new(true,"streets")));
         Assert.Throws<ArgumentException>(()=>settings.Save(new(true,"satellite",PrivacyAccepted:true)));
         settings.Save(new(true,"streets",PrivacyAccepted:true));Assert.Single((await settings.Client()).Tiles);Assert.Equal(0,transport.Calls);

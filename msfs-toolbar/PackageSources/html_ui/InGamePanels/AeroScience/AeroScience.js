@@ -458,7 +458,7 @@ class IngamePanelAeroScience extends TemplateElement {
         : fresh && state.connection.state === "connected"
           ? "SIMCONNECT TELEMETRY"
           : "MSFS DISCONNECTED";
-    this.status(state.connection.message);
+    this.status(state.recordingStop ? "RECORDING STOPPED · " + state.recordingStop.code + ": " + state.recordingStop.message : state.connection.message);
     this.byId("as-aircraft").textContent = fresh
       ? t.aircraft
       : "Awaiting initialized aircraft telemetry";
@@ -566,6 +566,10 @@ class IngamePanelAeroScience extends TemplateElement {
             "ambient-pressure": "Ambient pressure",
             "ambient-wind": "Ambient wind",
             "ambient-density": "Air density",
+            "thermal-imager": "Thermal Imager",
+            "multispectral-imager": "Multispectral Imager",
+            "hyperspectral-imager": "Hyperspectral Imager",
+            "terrain-scanner": "Terrain Scanner (LiDAR / Elevation)",
           }[instrument.instrumentId] || "Science instrument";
         const stateLabel = document.createElement("span");
         stateLabel.className = "as-science-state";
@@ -672,7 +676,7 @@ class IngamePanelAeroScience extends TemplateElement {
         instrument.acquisitionSets +
         " acquisition sets · " +
         instrument.observationCount +
-        " measurement values · " +
+        (instrument.instrumentId.indexOf("imager") >= 0 || instrument.instrumentId === "terrain-scanner" ? " saved products · " : " measurement values · ") +
         instrument.rejectedObservations +
         " rejected · " +
         instrument.missingIntervals +

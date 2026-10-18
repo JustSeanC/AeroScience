@@ -166,7 +166,8 @@ export class ResearchMap {
           maxZoom: source.maxZoom,
           attribution: safe,
           updateWhenIdle: true,
-          keepBuffer: 1,
+          updateWhenZooming: false,
+          keepBuffer: 0,
         }).addTo(this.map);
         tile.once("tileerror", () => {
           if (!this.onlineTiles.includes(tile)) return;
@@ -302,6 +303,8 @@ export class ResearchMap {
     this.map.whenReady(() => this.draw());
   }
   destroy() {
+    if(this.destroyed)return;
+    this.destroyed=true;
     activeMaps.delete(this);
     this.layerCleanup?.();
     this.observer?.disconnect();
@@ -382,7 +385,7 @@ export class ResearchMap {
     const base = p[0].longitude;
     this.map.fitBounds(
       p.map((v) => ll(v, base)),
-      { padding: [28, 28], maxZoom: 12 },
+      { padding: [28, 28], maxZoom: this.options.fitMaxZoom || 12 },
     );
   }
   draw() {

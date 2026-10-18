@@ -7,11 +7,40 @@ namespace AeroScience.Engine;
 public sealed record EstimateRequest(InstrumentConfiguration[]? Instruments, double? DurationMinutes);
 public sealed record SciencePauseRequest(bool Paused);
 public sealed record MapLayerRequest(string Layer);
+public sealed record MapPrivacyRequest(bool Online);
+public sealed record ProtectionRequest(bool Protected);
+public sealed record CleanupRequest(Guid PreviewId,bool Confirmed);
 public static class ResearchApi
 {
     public static void MapResearchEndpoints(this WebApplication app)
     {
+        app.MapGet("/api/storage/management", (StorageManagement storage) => storage.Snapshot());
+        app.MapPost("/api/storage/refresh", (StorageManagement storage, HttpContext c) => AccessControl.IsLoopback(c) ? Results.Ok(storage.Snapshot(true)) : Results.StatusCode(403));
+        app.MapPost("/api/storage/preferences", (StorageLimits preferences, StorageManagement storage, HttpContext c) => AccessControl.IsLoopback(c) ? Results.Ok(storage.Configure(preferences)) : Results.StatusCode(403));
+        app.MapPost("/api/storage/cleanup/preview", (ScientificCache cache, HttpContext c) => AccessControl.IsLoopback(c) ? Results.Ok(new { id=cache.Preview().Id }) : Results.StatusCode(403));
+        app.MapGet("/api/storage/cleanup/{id:guid}", (Guid id,int? offset,string? sort,string? filter,string? status,ScientificCache cache,HttpContext c) => AccessControl.IsLoopback(c) ? Results.Ok(cache.Page(id,offset??0,sort??"created",filter??"",status??"")) : Results.StatusCode(403));
+        app.MapPost("/api/storage/cleanup", (CleanupRequest request,ScientificCache cache,HttpContext c) => AccessControl.IsLoopback(c) ? Results.Ok(cache.Clean(request.PreviewId,request.Confirmed)) : Results.StatusCode(403));
+        app.MapGet("/api/storage/cleanup/history", (ScientificCache cache,HttpContext c) => AccessControl.IsLoopback(c) ? Results.Ok(cache.History()) : Results.StatusCode(403));
+        app.MapGet("/api/missions/{id:guid}/protection", (Guid id,MissionStore store) => new { isProtected=store.IsProtected(id) });
+        app.MapPost("/api/missions/{id:guid}/protection", (Guid id,ProtectionRequest request,MissionStore store) => {store.Protect(id,request.Protected);return new {isProtected=store.IsProtected(id)};});
+        app.MapGet("/api/science/datasets/{id:guid}/protection", (Guid id,ScienceStore science) => new { isProtected=science.DatasetProtected(id) });
+        app.MapPost("/api/science/datasets/{id:guid}/protection", (Guid id,ProtectionRequest request,ScienceStore science) => {science.ProtectDataset(id,request.Protected);return new {isProtected=science.DatasetProtected(id)};});
+        app.MapGet("/api/science/products/{id:guid}/preview.png", (Guid id,ScientificCache cache) => Results.File(cache.PreviewPng(id),"image/png"));
+        app.MapGet("/api/updates", (ApplicationUpdates updates) => updates.Get());
+        app.MapPost("/api/updates/preferences", (UpdatePreferences preferences, ApplicationUpdates updates, HttpContext c) => AccessControl.IsLoopback(c) ? Results.Ok(updates.Configure(preferences)) : Results.StatusCode(403));
+        app.MapPost("/api/updates/check", (ApplicationUpdates updates, HttpContext c) => updates.Check(true, c.RequestAborted));
+        app.MapPost("/api/updates/remind", (ApplicationUpdates updates) => updates.RemindLater());
+        app.MapGet("/api/science/sources", (double? latitude, double? longitude, ScienceStore science) => science.Availability(latitude is { } lat && longitude is { } lon ? new Coordinates(lat, lon) : null));
+        app.MapGet("/api/science/products", (Guid? missionId, int? limit, int? offset, string? instrumentId, ScienceStore science) => science.Products(missionId, limit ?? 50, offset ?? 0,instrumentId));
+        app.MapGet("/api/science/products/{id:guid}", (Guid id, ScienceStore science) => science.ReadProduct(id));
+        app.MapGet("/api/science/products/{id:guid}/export/{format}", (Guid id, string format, ScienceStore science) =>
+        {
+            var content = RemoteExports.Content(science.ReadProduct(id), format);
+            var type = format == "csv" ? "text/csv" : format == "kml" ? "application/vnd.google-earth.kml+xml" : format == "gpx" ? "application/gpx+xml" : "application/json";
+            return Results.File(System.Text.Encoding.UTF8.GetBytes(content), type, $"AeroScience-product-{id}.{format}");
+        });
         app.MapGet("/api/maps/settings", (MapSettings maps, HttpContext c) => new { configuration = maps.Get(), canConfigure = AccessControl.IsLoopback(c), privacy = MapSettings.Privacy });
+        app.MapPost("/api/maps/privacy", (MapPrivacyRequest request, MapSettings maps) => maps.ChoosePrivacy(request.Online));
         app.MapPost("/api/maps/settings", (MapSettingsRequest request, MapSettings maps, HttpContext c) => AccessControl.IsLoopback(c) ? Results.Ok(maps.Save(request)) : Results.StatusCode(403));
         app.MapPost("/api/maps/layer", (MapLayerRequest request, MapSettings maps) => maps.SelectLayer(request.Layer));
         app.MapGet("/api/maps/client", (string? layer, MapSettings maps, HttpContext c) => maps.Client(layer, c.RequestAborted));

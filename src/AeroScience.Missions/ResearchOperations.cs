@@ -5,8 +5,10 @@ using Microsoft.Data.Sqlite;
 namespace AeroScience.Missions;
 
 // Invoked under MissionCoordinator's existing command/acquisition gate.
-public sealed class ResearchOperations(MissionStore missions, ScienceStore science, Func<ScienceUnitPreferences>? displayUnits = null)
+public sealed class ResearchOperations(MissionStore missions, ScienceStore science, Func<ScienceUnitPreferences>? displayUnits = null) : IDisposable
 {
+    private readonly RemoteAcquisition remote = new(missions, science);
+    public void Dispose() => remote.Dispose();
     private sealed class Acquisition
     {
         public DateTimeOffset? Anchor, LastSeen, FirstSuccess, LastSuccess, CadenceReference;
@@ -37,12 +39,14 @@ public sealed class ResearchOperations(MissionStore missions, ScienceStore scien
     {
         mission = active; context = research; configurations = ScienceCatalog.Normalize(research.Instruments);
         acquisitions.Clear(); baseline = null; intentionallyPaused = false; pauseStarted = null; pauseSeconds = 0;
+        remote.Begin();
     }
     public void End()
     {
         var now = DateTimeOffset.UtcNow;
         if (mission is not null) missions.AddEvent(mission.Id, now, "science-stopped", $"Science collection stopped. Intentional pause seconds: {pauseSeconds + (pauseStarted is { } began ? Math.Max(0, (now - began).TotalSeconds) : 0):0.###}. Collection will not resume automatically after a restart.");
         pauseStarted = null; intentionallyPaused = false; mission = null; context = null; baseline = null;
+        remote.Reset(true);
     }
     public void Configure(InstrumentConfiguration[] input)
     {
@@ -56,6 +60,7 @@ public sealed class ResearchOperations(MissionStore missions, ScienceStore scien
             { run.Anchor = null; run.Slot = -1; run.Error = null; run.CadenceReference = null; }
         }
         configurations = next;
+        remote.Reset(intentionallyPaused);
         if (mission is not null)
         {
             missions.SetInstruments(mission.Id, next);
@@ -70,6 +75,7 @@ public sealed class ResearchOperations(MissionStore missions, ScienceStore scien
         var seconds = !paused && pauseStarted is { } began ? Math.Max(0, (now - began).TotalSeconds) : 0;
         missions.AddEvent(mission.Id, now, paused ? "science-paused" : "science-resumed", paused ? "Science Collection paused by the user. Flight recording continues." : $"Science Collection resumed after {seconds:0.###} seconds. Intentional slots are excluded from missing counts.");
         intentionallyPaused = paused;
+        remote.Reset(paused);
         if (paused) pauseStarted = now; else { pauseSeconds += seconds; pauseStarted = null; }
         foreach (var run in acquisitions.Values) { run.Anchor = null; run.Slot = -1; run.CadenceReference = null; }
         return true;
@@ -99,12 +105,13 @@ public sealed class ResearchOperations(MissionStore missions, ScienceStore scien
                 baseline = observed;
             }
         }
+        if (mission is not null && context is not null && !intentionallyPaused) remote.Offer(mission, context, configurations, update);
         if (update.Atmosphere is not { } source) return;
         if (atmosphere is not null && source.TimestampUtc <= atmosphere.TimestampUtc) return;
         atmosphere = source;
         if (mission is null || context is null || intentionallyPaused || position?.IsPaused == true || source.Quality != ObservationQuality.Valid) return;
         var located = position is not null && Math.Abs((source.TimestampUtc - position.TimestampUtc).TotalSeconds) <= 3 ? position : null;
-        foreach (var config in configurations.Where(c => c.Enabled))
+        foreach (var config in configurations.Where(c => c.Enabled && !RemoteAcquisition.Instruments.ContainsKey(c.InstrumentId)))
         {
             if (!acquisitions.TryGetValue(config.InstrumentId, out var run)) acquisitions[config.InstrumentId] = run = new();
             if (run.LastSeen is not null && source.TimestampUtc <= run.LastSeen) continue;
@@ -164,6 +171,14 @@ public sealed class ResearchOperations(MissionStore missions, ScienceStore scien
     {
         var states = configurations.Select(config =>
         {
+            if (RemoteAcquisition.Instruments.ContainsKey(config.InstrumentId))
+            {
+                var r = remote.Status(config.InstrumentId);
+                var q = !config.Enabled ? ObservationQuality.Disabled : intentionallyPaused ? ObservationQuality.Paused
+                    : connection.State != ConnectionState.Connected ? ObservationQuality.SourceDisconnected
+                    : position is null || DateTimeOffset.UtcNow - position.TimestampUtc > TimeSpan.FromSeconds(6) ? ObservationQuality.Stale : r.Quality;
+                return new InstrumentState(config.InstrumentId, config.Enabled, config.IntervalMs, q, r.LastSuccessfulUtc, r.Products, r.Rejected, r.MissingIntervals, null, [], r.Processing ? "Processing a bounded geographic subset; flight recording continues." : r.Message, r.Products);
+            }
             acquisitions.TryGetValue(config.InstrumentId, out var run);
             var quality = !config.Enabled ? ObservationQuality.Disabled
                 : intentionallyPaused ? ObservationQuality.Paused

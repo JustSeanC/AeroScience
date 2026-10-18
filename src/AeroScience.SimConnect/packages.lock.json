@@ -8,7 +8,7 @@
       "aeroscience.telemetry": {
         "type": "Project",
         "dependencies": {
-          "AeroScience.Shared": "[0.1.0, )"
+          "AeroScience.Shared": "[0.3.0, )"
         }
       }
     }

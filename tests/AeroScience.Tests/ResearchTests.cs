@@ -88,7 +88,8 @@ public sealed class ResearchTests : IDisposable
     {
         var plan = store.SavePlan(new(Guid.Empty, "Profile", MissionTemplateKind.AtmosphericProfile, ScienceMode.Realistic,
             Objective: "Survey", Waypoints: [new("A", 12, 34), new("B", 15, 36)], SurveyAreas: [new("Area", [new(1, 2), new(2, 3), new(3, 2)])]));
-        Assert.All(plan.Instruments!, c => Assert.True(c.Enabled));
+        Assert.All(plan.Instruments!.Where(c=>!RemoteAcquisition.Instruments.ContainsKey(c.InstrumentId)), c => Assert.True(c.Enabled));
+        Assert.All(plan.Instruments!.Where(c=>RemoteAcquisition.Instruments.ContainsKey(c.InstrumentId)), c => Assert.False(c.Enabled));
         var m = coordinator.Start(new StartMissionRequest("Recording", PlanId: plan.Id)); Apply(0);
         store.SavePlan(plan with { Name = "Changed", Waypoints = plan.Waypoints!.Reverse().ToArray() });
         Assert.Equal("Profile", store.Research(m.Id).PlanSnapshot!.Name); Assert.Equal("A", store.Research(m.Id).PlanSnapshot!.Waypoints![0].Name);
@@ -215,7 +216,7 @@ public sealed class ResearchTests : IDisposable
         var m = coordinator.Start(new StartMissionRequest(new string('飛', 100), Instruments: ScienceCatalog.Definitions.Select(d => new InstrumentConfiguration(d.Id, true)).ToArray())); Apply(0);
         var handler = new ToolbarCommandHandler(coordinator); var command = JsonSerializer.Serialize(new ToolbarCommand(1, Guid.NewGuid(), "marker", MissionId: m.Id, Notes: "Observation"), WireJson.Options);
         var reply = handler.Handle(command); Assert.Equal(reply, handler.Handle(command)); Assert.Single(store.StreamMarkers(m.Id)); Assert.True(Encoding.UTF8.GetByteCount(reply) < 8192);
-        using var parsed = JsonDocument.Parse(reply); Assert.Equal(4, parsed.RootElement.GetProperty("state").GetProperty("research").GetProperty("instruments").GetArrayLength());
+        using var parsed = JsonDocument.Parse(reply); Assert.Equal(ScienceCatalog.Definitions.Length, parsed.RootElement.GetProperty("state").GetProperty("research").GetProperty("instruments").GetArrayLength());
         coordinator.End(m.Id);
     }
     [Fact]

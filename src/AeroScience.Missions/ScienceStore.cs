@@ -6,7 +6,7 @@ using Microsoft.Data.Sqlite;
 namespace AeroScience.Missions;
 
 // The science database belongs to the independently movable library, not missions.db.
-public sealed class ScienceStore(string directory, IStorageCapacity? capacity = null) : IDisposable
+public sealed partial class ScienceStore(string directory, IStorageCapacity? capacity = null) : IDisposable
 {
     public const string RelativeDatabasePath = "Observations/science.sqlite";
     private const string MarkerName = ".science-storage.json";
@@ -77,6 +77,7 @@ public sealed class ScienceStore(string directory, IStorageCapacity? capacity = 
             if (cmd.ExecuteScalar() as string != id.ToString()) throw new IOException("Science database/library identity mismatch; nothing was replaced.");
             cmd.CommandText = "PRAGMA user_version";
             if (Convert.ToInt32(cmd.ExecuteScalar(), CultureInfo.InvariantCulture) != 1) throw new IOException("Unsupported science schema; preserve this library.");
+            InitializeRemoteTables(db);
             if (!File.Exists(Path.Combine(DirectoryPath, MarkerName)))
                 PreferenceStore.WriteAtomic(Path.Combine(DirectoryPath, MarkerName), new { formatVersion = 1, libraryId = id, database = RelativeDatabasePath });
         }
@@ -95,12 +96,13 @@ public sealed class ScienceStore(string directory, IStorageCapacity? capacity = 
                 research.PlanSnapshot,
                 research.Objective,
                 timestampBasis = "Host UTC when the SimConnect packet was received",
-                disclaimer = "Simulator-reported atmospheric values; not independent calibrated real-world measurements. No modeled instrument output is substituted."
+                disclaimer = RemoteAcquisition.Instruments.ContainsKey(definition.Id) ? "Historical external geographic datasets sampled along a simulator-derived approximate footprint. Source dates, CRS, vertical datum, masks and raw values are retained with each product; not a live airborne sensor." : "Simulator-reported atmospheric values; not independent calibrated real-world measurements. No modeled instrument output is substituted."
             }, WireJson.Options));
         using var db = Open(write: true); using var cmd = db.CreateCommand();
         cmd.CommandText = "INSERT OR IGNORE INTO datasets VALUES($id,$mission,$instrument,$json)";
         cmd.Parameters.AddWithValue("$id", dataset.Id.ToString()); cmd.Parameters.AddWithValue("$mission", mission.Id.ToString());
-        cmd.Parameters.AddWithValue("$instrument", configuration.InstrumentId); cmd.Parameters.AddWithValue("$json", JsonSerializer.Serialize(dataset, WireJson.Options)); cmd.ExecuteNonQuery();
+        cmd.Parameters.AddWithValue("$instrument", configuration.InstrumentId); cmd.Parameters.AddWithValue("$json", JsonSerializer.Serialize(dataset, WireJson.Options));
+        if(cmd.ExecuteNonQuery()>0)Management?.AddedDataset();
         cmd.CommandText = "SELECT payload_json FROM datasets WHERE mission_id=$mission AND instrument_id=$instrument";
         return JsonSerializer.Deserialize<ScienceDataset>((string)cmd.ExecuteScalar()!, WireJson.Options)!;
     }
@@ -109,6 +111,7 @@ public sealed class ScienceStore(string directory, IStorageCapacity? capacity = 
         if (observations.Count == 0) return 0;
         lock (gate)
         {
+            Management?.RequireScienceCapacity(65536);
             if (disk.FreeBytes(DirectoryPath) < StorageManager.MinimumFreeBytes) throw new IOException("Science storage is low. No data was deleted; science acquisition is paused.");
             using var db = Open(write: true); using var tx = db.BeginTransaction(); using var cmd = db.CreateCommand(); cmd.Transaction = tx;
             var inserted = 0;
@@ -178,9 +181,11 @@ public sealed class ScienceStore(string directory, IStorageCapacity? capacity = 
             using var db = Open(); using var cmd = db.CreateCommand(); cmd.CommandText = "SELECT (SELECT COUNT(*) FROM datasets),(SELECT COUNT(*) FROM observations)";
             using var r = cmd.ExecuteReader(); r.Read(); datasets = r.GetInt64(0); observations = r.GetInt64(1);
         }
-        return new("science", DirectoryPath, 0, 0, datasets, observations, StorageManager.DatabaseBytes(DatabasePath),
-            "AeroScience atmospheric observations and dataset metadata in Observations/science.sqlite. Unregistered files are not removed.",
-            "Flight recordings, telemetry, plans, settings, library identity and folders; unrelated files", "DELETE SCIENCE DATA");
+        var managed = ManagedProductSummary();
+        var caches=CacheEntries();
+        return new("science", DirectoryPath, 0, 0, datasets, observations, StorageManager.DatabaseBytes(DatabasePath) + managed.Bytes + caches.Sum(c=>c.Bytes),
+            "AeroScience atmospheric observations, dataset metadata and indexed generated remote-sensing product files. Only unchanged, checksum-matching managed files are removed.",
+            "Original imported Sources, prior backups, flight recordings, telemetry, plans, settings, library identity and unrelated/changed files", "DELETE SCIENCE DATA", managed.Count, managed.Bytes, managed.Paths, ProtectedDatasetCount(),caches.LongLength);
     }
     public void Clear(string confirmation, bool recording)
     {
@@ -189,9 +194,28 @@ public sealed class ScienceStore(string directory, IStorageCapacity? capacity = 
         {
             if (AvailabilityError() is { } error) throw new IOException(error);
             if (!File.Exists(DatabasePath)) return;
-            Initialize(); using var db = Open(write: true); using var tx = db.BeginTransaction(); using var cmd = db.CreateCommand(); cmd.Transaction = tx;
-            cmd.CommandText = "DELETE FROM observations; DELETE FROM datasets; INSERT OR REPLACE INTO metadata VALUES('last_clear_utc',$now)";
+            Initialize(); var products = AllProducts().ToArray();var caches=CacheEntries();
+            var retainedPaths=products.Select(p=>p.RelativePath).Concat(caches.Select(c=>c.RelativePath)).ToArray();
+            var workLedgers=retainedPaths.Chunk(1024).Select(paths=>BeginManagedWrite("Deliberate scientific archive clear",paths)).ToArray();
+            var journalPath = Path.Combine(DirectoryPath, "Metadata", "Clears", Guid.NewGuid().ToString("N") + ".json");
+            PreferenceStore.WriteAtomic(journalPath, new { phase = "prepared", products });
+            using var db = Open(write: true); using var tx = db.BeginTransaction(); using var cmd = db.CreateCommand(); cmd.Transaction = tx;
+            cmd.CommandText = "DELETE FROM observations; DELETE FROM remote_products; DELETE FROM datasets; INSERT OR REPLACE INTO metadata VALUES('last_clear_utc',$now)";
             cmd.Parameters.AddWithValue("$now", DateTimeOffset.UtcNow.ToString("O", CultureInfo.InvariantCulture)); cmd.ExecuteNonQuery(); tx.Commit();
+            PreferenceStore.WriteAtomic(journalPath, new { phase = "records-cleared", products });
+            foreach (var product in products)
+            {
+                var path = StorageManager.ResolveDataset(DirectoryPath, product.LibraryId, product.RelativePath);
+                if (File.Exists(path) && new FileInfo(path).Length == product.Bytes && Digest(path) == product.Sha256) File.Delete(path);
+            }
+            foreach(var cache in caches)
+            {
+                if(cache.RelativePath!=$"Cache/Thumbnails/{cache.Id:N}.png"||cache.Recipe!="remote-preview-v1")continue;
+                var path=StorageManager.ResolveDataset(DirectoryPath,LibraryId,cache.RelativePath);
+                if(File.Exists(path)&&new FileInfo(path).Length==cache.Bytes&&Digest(path)==cache.Sha256)File.Delete(path);
+            }
+            PreferenceStore.WriteAtomic(journalPath, new { phase = "completed", note = "Only checksum-matching managed product files were removed; missing/modified/unrelated files and Sources were preserved.", products });
+            if(!retainedPaths.Any(p=>File.Exists(StorageManager.ResolveDataset(DirectoryPath,LibraryId,p))))foreach(var ledger in workLedgers)File.Delete(ledger);
         }
     }
     public ScienceStorageEstimate Estimate(InstrumentConfiguration[]? input, double? minutes)
@@ -210,14 +234,20 @@ public sealed class ScienceStore(string directory, IStorageCapacity? capacity = 
         long bytes = 4096 * 8;
         foreach (var config in configurations.Where(c => c.Enabled))
         {
+            if (RemoteAcquisition.Instruments.TryGetValue(config.InstrumentId, out var kind))
+            {
+                var bands = Sources().Where(s => s.Manifest.Kind == kind).Select(s => s.Manifest.Bands.Length).DefaultIfEmpty(kind == RemoteKind.Hyperspectral ? 512 : kind == RemoteKind.Multispectral ? 5 : kind == RemoteKind.Thermal ? 2 : 1).Max();
+                var estimate = RemoteEstimate(config, minutes.Value, bands);
+                counts[config.InstrumentId] = estimate.Acquisitions; bytes = checked(bytes + estimate.ConservativeOutputBytes + estimate.TemporaryBytes); continue;
+            }
             var definition = ScienceCatalog.Definitions.Single(d => d.Id == config.InstrumentId);
             var count = checked((long)Math.Ceiling(minutes.Value * 60000 / config.IntervalMs) * definition.Measurements.Length);
             counts[config.InstrumentId] = count; bytes = checked(bytes + count * perRow + 4096 * 2);
         }
         if (counts.Count == 0) bytes = 0;
         return new(bytes, free, free is { } available && bytes + StorageManager.MinimumFreeBytes > available,
-            $"Science only: {perRow} estimated bytes/observation (serialized row, SQL keys/indexes and 2x margin), plus schema/dataset pages.",
-            ["Estimate, not a reservation; actual SQLite allocation and metadata sizes vary.", "Source is at most 1 Hz; no intermediate observations or future remote-sensing rates are assumed."], counts);
+            $"Science only: {perRow} estimated bytes/atmospheric observation, plus 24×24 remote samples × source bands × 32 bytes/value, 256 KiB product metadata/acquisition and 32 MiB temporary reserve per remote instrument. No compression savings assumed.",
+            ["Estimate, not a reservation; allocation/metadata vary. Counts for remote instruments are acquisitions, not pixels.", "Original source imports are additional; their exact bytes/free space are checked before copying. Dense footprint sampling does not improve source resolution."], counts);
     }
     public void Dispose() { lock (gate) { lease?.Dispose(); lease = null; } }
 }

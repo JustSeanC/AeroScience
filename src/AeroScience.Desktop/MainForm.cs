@@ -29,6 +29,7 @@ public sealed class MainForm : Form, IDesktopActions
     public MainForm(string configurationDirectory, bool showSetup = false)
     {
         Preferences = new(configurationDirectory); Storage = new(Preferences);
+        new MapSettings(configurationDirectory).InitializeDefaults(File.Exists(Preferences.SettingsPath) || File.Exists(Path.Combine(configurationDirectory, "missions.db")));
         Text = "AeroScience " + Application.ProductVersion.Split('+')[0]; MinimumSize = new(560, 290); Size = new(760, 350);
         AutoScaleMode = AutoScaleMode.Dpi;
         var panel = new FlowLayoutPanel { Dock = DockStyle.Fill, Padding = new(24), FlowDirection = FlowDirection.TopDown, WrapContents = false, AutoScroll = true };
@@ -174,6 +175,31 @@ public sealed class MainForm : Form, IDesktopActions
     void IDesktopActions.OpenDataManagement() => Dispatch(ShowDataManagement);
     public void ShowDataManagement() { if (!Busy) { using var form = new DataManagementForm(this); form.ShowDialog(this); } }
     void IDesktopActions.CollectFeedback() => Dispatch(ShowFeedback);
+    void IDesktopActions.ImportScientificSource() => Dispatch(ImportScientificSource);
+    void IDesktopActions.CompactStorage(bool science) => Dispatch(async () =>
+    {
+        if(Busy||Recording){MessageBox.Show(this,"End recording and wait for active setup/storage work before compacting.");return;}
+        if(MessageBox.Show(this,"Compact the "+(science?"science":"flight")+" database? Services will stop temporarily. A verified backup and sufficient temporary space are required. Original observations are retained; actual recovered database bytes will be reported.","Confirm database maintenance",MessageBoxButtons.YesNo,MessageBoxIcon.Question,MessageBoxDefaultButton.Button2)!=DialogResult.Yes)return;
+        try{var result="";await RunStoppedAsync(()=>Task.Run(()=>result=Storage.Compact(science?StorageKind.ScienceLibrary:StorageKind.Missions,true,false)));MessageBox.Show(this,result,"Compaction completed");}catch(Exception error){ShowError(error);}
+    });
+    public async void ImportScientificSource()
+    {
+        if (Busy || engine is null) { MessageBox.Show(this, "Wait for current setup/storage work and start the local engine first."); return; }
+        using var picker = new OpenFileDialog { Title = "Import a real scientific source collection manifest", Filter = "AeroScience source manifest (*.json)|*.json", CheckFileExists = true };
+        if (picker.ShowDialog(this) != DialogResult.OK) return;
+        try
+        {
+            var inspection = ScienceStore.InspectImport(picker.FileName);
+            var science = engine.Services.GetRequiredService<ScienceStore>();
+            if (MessageBox.Show(this, $"Import {inspection.Manifest.Name}?\n\nSource: {inspection.Manifest.Provider}\nObservation: {inspection.Manifest.ObservationUtc?.ToString("u") ?? "Unknown (not live)"}\nCopy {inspection.Bytes / 1048576d:0.0} MiB into {science.DirectoryPath}\nAvailable: {new LocalStorageCapacity().FreeBytes(science.DirectoryPath) / 1073741824d:0.0} GiB\n\nOriginal files remain untouched. No files are downloaded and no data are uploaded. Review the source license: {inspection.Manifest.License}", "Confirm scientific source import", MessageBoxButtons.YesNo, MessageBoxIcon.Information, MessageBoxDefaultButton.Button2) != DialogResult.Yes) return;
+            Busy = true;
+            var progress = new Progress<string>(value => status.Text = value);
+            var imported = await Task.Run(() => science.ImportSourceAsync(picker.FileName, progress: progress));
+            MessageBox.Show(this, "Imported " + imported.Manifest.Name + ". Open dashboard Settings → Scientific Data Sources to inspect coverage and metadata.");
+        }
+        catch (Exception error) { ShowError(error); }
+        finally { Busy = false; RefreshStatus(); }
+    }
     public void ShowError(Exception error) => MessageBox.Show(this, error.Message, "AeroScience", MessageBoxButtons.OK, MessageBoxIcon.Error);
     private void ShowFeedback()
     {

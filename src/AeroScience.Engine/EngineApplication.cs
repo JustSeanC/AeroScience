@@ -40,6 +40,8 @@ public static class EngineApplication
         });
         builder.Services.AddSingleton<AccessControl>();
         builder.Services.AddSingleton(sp => new MapSettings(sp.GetRequiredService<EngineOptions>().ConfigurationDirectory ?? sp.GetRequiredService<EngineOptions>().DataDirectory));
+        builder.Services.AddSingleton(sp => new ApplicationUpdates(sp.GetRequiredService<EngineOptions>().ConfigurationDirectory ?? sp.GetRequiredService<EngineOptions>().DataDirectory));
+        builder.Services.AddHostedService<ApplicationUpdateWorker>();
         builder.Services.AddSingleton<DataDirectoryLease>();
         builder.Services.AddSingleton(sp =>
         {
@@ -65,13 +67,18 @@ public static class EngineApplication
             return science;
         });
         builder.Services.AddSingleton(sp => new ScienceUnitSettings(sp.GetRequiredService<EngineOptions>().ConfigurationDirectory ?? sp.GetRequiredService<EngineOptions>().DataDirectory));
-        builder.Services.AddSingleton(sp => new ResearchOperations(sp.GetRequiredService<MissionStore>(), sp.GetRequiredService<ScienceStore>(), sp.GetRequiredService<ScienceUnitSettings>().Get));
+        builder.Services.AddSingleton(sp =>
+        {
+            var o = sp.GetRequiredService<EngineOptions>(); var science = sp.GetRequiredService<ScienceStore>();
+            var management = new StorageManagement(o.ConfigurationDirectory ?? o.DataDirectory, sp.GetRequiredService<MissionStore>(), science);
+            science.Management = management; science.MissionIsProtected = sp.GetRequiredService<MissionStore>().IsProtected; return management;
+        });
+        builder.Services.AddSingleton(sp=>new ScientificCache(sp.GetRequiredService<ScienceStore>(),sp.GetRequiredService<MissionStore>(),sp.GetRequiredService<StorageManagement>(),log:message=>sp.GetRequiredService<ILogger<ScientificCache>>().LogInformation("{CleanupResult}",message)));
+        builder.Services.AddSingleton(sp => { _ = sp.GetRequiredService<StorageManagement>(); return new ResearchOperations(sp.GetRequiredService<MissionStore>(), sp.GetRequiredService<ScienceStore>(), sp.GetRequiredService<ScienceUnitSettings>().Get); });
         builder.Services.AddSingleton(sp => new MissionCoordinator(sp.GetRequiredService<MissionStore>(), sp.GetRequiredService<EngineOptions>().SamplingIntervalMs,
             requireFreshTelemetry: true, ensureRecordingCapacity: () =>
             {
-                var path = sp.GetRequiredService<EngineOptions>().DataDirectory;
-                if (new LocalStorageCapacity().FreeBytes(path) < StorageManager.MinimumFreeBytes)
-                    throw new IOException("Insufficient disk space for recording. Free space or choose another storage location; existing history is retained.");
+                sp.GetRequiredService<StorageManagement>().RequireFlightCapacity();
             }, research: sp.GetRequiredService<ResearchOperations>()));
         builder.Services.AddSingleton<ITelemetryProvider, SimConnectTelemetryProvider>();
         configureServices?.Invoke(builder.Services);
@@ -79,6 +86,7 @@ public static class EngineApplication
         builder.Services.AddSingleton<ToolbarCommandHandler>();
         builder.Services.AddSingleton<RouteMapService>();
         builder.Services.AddHostedService<ToolbarWorker>();
+        builder.Services.AddHostedService<StorageManagementWorker>();
 
         var app = builder.Build();
         var options = app.Services.GetRequiredService<EngineOptions>();
@@ -128,8 +136,15 @@ public static class EngineApplication
         app.UseDefaultFiles();
         var contentTypes = new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider();
         contentTypes.Mappings[".geojson"] = "application/geo+json";
+        contentTypes.Mappings[".md"] = "text/plain; charset=utf-8";
         app.UseStaticFiles(new StaticFileOptions { ContentTypeProvider = contentTypes });
-        app.MapGet("/api/health", () => Results.Ok(new { status = "ok", version = "0.2.2" }));
+        var helpDirectory = Path.Combine(AppContext.BaseDirectory, "wwwroot", "help", "remote-sensing");
+        if (Directory.Exists(helpDirectory)) app.UseStaticFiles(new StaticFileOptions
+        {
+            RequestPath = "/help/remote-sensing", ContentTypeProvider = contentTypes,
+            FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(helpDirectory)
+        });
+        app.MapGet("/api/health", () => Results.Ok(new { status = "ok", version = "0.3.0" }));
         app.MapGet("/api/access", (HttpContext c) => new { requiresPairing = !AccessControl.IsLoopback(c) });
         app.MapPost("/api/session", (HttpContext c, PairRequest request, AccessControl access) =>
         {
@@ -173,7 +188,7 @@ public static class EngineApplication
         app.MapResearchEndpoints();
         app.MapGet("/api/settings", (HttpContext c, AccessControl access) => new
         {
-            version = "0.2.2",
+            version = "0.3.0",
             telemetry = options.Telemetry,
             options.SamplingIntervalMs,
             options.EnableLan,
@@ -199,6 +214,9 @@ public static class EngineApplication
                 case "storage": desktop.OpenStorage(); break;
                 case "data-management": desktop.OpenDataManagement(); break;
                 case "feedback": desktop.CollectFeedback(); break;
+                case "science-import": desktop.ImportScientificSource(); break;
+                case "compact-flight": desktop.CompactStorage(false); break;
+                case "compact-science": desktop.CompactStorage(true); break;
                 default: return Results.NotFound();
             }
             return Results.Accepted(value: new { opened = true });
@@ -223,7 +241,7 @@ public static class EngineApplication
             catch (OperationCanceledException) when (context.RequestAborted.IsCancellationRequested) { }
             catch (IOException) { /* A display disconnected; recording continues in TelemetryWorker. */ }
         });
-        app.Logger.LogInformation("AeroScience 0.2.2 — {Source} telemetry; dashboard http://127.0.0.1:{Port}; data {Directory}", options.Telemetry, options.Port, options.DataDirectory);
+        app.Logger.LogInformation("AeroScience 0.3.0 — {Source} telemetry; dashboard http://127.0.0.1:{Port}; data {Directory}", options.Telemetry, options.Port, options.DataDirectory);
         return app;
     }
 }

@@ -17,6 +17,7 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
     private long lastSlot = -1, received, skipped, missing;
     private DateTimeOffset? firstRecordedUtc;
     private bool maintenance;
+    private RecordingStopInfo? recordingStop = store.LastRecordingStop();
     private ConnectionInfo connection = new(ConnectionState.Initializing, TelemetrySource.Simulator,
         "Waiting for telemetry provider", DateTimeOffset.UtcNow);
 
@@ -30,7 +31,7 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
                 count > 1 && seconds > 0 ? (count - 1) / seconds : null, firstRecordedUtc, lastRecordedUtc,
                 active is not null && active.DurationSeconds >= 1 ? count / active.DurationSeconds : null,
                 active is not null && firstRecordedUtc is not null ? Math.Max(0, (firstRecordedUtc.Value - active.StartedUtc).TotalSeconds) : null),
-                Research: research?.Snapshot(connection, frame));
+                Research: research?.Snapshot(connection, frame), RecordingStop: recordingStop);
         }
     }
 
@@ -67,6 +68,8 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
                 try { ensureRecordingCapacity(); }
                 catch (IOException error)
                 {
+                    recordingStop = new(error is StorageLimitException ? "storageLimitReached" : "storageUnavailable", error.Message, active.Id, DateTimeOffset.UtcNow);
+                    store.AddEvent(active.Id, recordingStop.TimestampUtc, recordingStop.Code, error.Message);
                     store.Finish(active.Id, MissionStatus.Interrupted, lastRecordedUtc ?? active.StartedUtc, "Recording stopped to protect storage: " + error.Message);
                     research?.End(); active = null; connection = connection with { Message = error.Message }; return;
                 }
@@ -116,6 +119,7 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
             var now = DateTimeOffset.UtcNow;
             var id = store.Create(name, frame, now, mode, plan, configurations, request.Objective);
             active = store.Detail(id)!.Mission;
+            recordingStop = null;
             research?.Begin(active, store.Research(id));
             lastRecordedUtc = null;
             firstRecordedUtc = samplingAnchor = null;

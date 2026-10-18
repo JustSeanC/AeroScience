@@ -1,4 +1,5 @@
 import { routeExportButton } from "./route-export.js";
+import { remoteProducts } from "./remote-science.js";
 import { ResearchMap } from "./map.js";
 import { patternEditor } from "./patterns.js";
 import {
@@ -645,7 +646,7 @@ async function instruments() {
   p.replaceChildren(
     text(
       "p",
-      "Actual MSFS atmospheric values at the user aircraft. Simulator-reported, not independent calibrated real-world measurements. Acquisition requires a recording mission. Source currently requested at 1 Hz.",
+      "Atmospheric instruments use actual MSFS values at the user aircraft; remote instruments sample real imported geographic observations with their original source dates. Acquisition requires a recording mission. Flight telemetry is requested at 1 Hz; no independent calibrated or live-camera measurements are claimed.",
     ),
   );
   const sourceLabel = text(
@@ -819,6 +820,14 @@ async function instruments() {
     }),
   );
   await datasets();
+  const remote = text("div");
+  remote.id = "remote-product-browser";
+  p.append(remote);
+  try {
+    await remoteProducts(remote, ctx.api, state?.activeMission?.id || null);
+  } catch (error) {
+    remote.append(text("p", error.message));
+  }
   if (scienceRows.length) {
     chart.replaceChildren();
     scienceCharts(chart, scienceRows);
@@ -859,9 +868,13 @@ export function renderResearch(next) {
     );
     p.replaceChildren();
     p.className = "science-cards";
+    let previousGroup;
     for (const i of next.research?.instruments || []) {
       const card = text("article", undefined, "panel science-card");
       const d = definitions.find((d) => d.id === i.instrumentId);
+      const isRemote = d?.measurements.length === 0;
+      const group=isRemote?"Remote-Sensing Instruments":"Atmospheric Instruments";
+      if(group!==previousGroup){p.append(text("h2",group));previousGroup=group;}
       card.append(
         text("h3", d?.name || i.instrumentId),
         text("span", i.enabled ? i.quality : "Disabled", "science-state"),
@@ -885,7 +898,7 @@ export function renderResearch(next) {
       card.append(
         text(
           "p",
-          `Every ${i.intervalMs / 1000} s · ${i.acquisitionSets} acquisition sets · ${i.observationCount} measurement values`,
+          `Every ${i.intervalMs / 1000} s · ${i.acquisitionSets} acquisition sets · ${i.observationCount} ${isRemote ? "saved products" : "measurement values"}`,
         ),
       );
       const details = text("details");
@@ -904,6 +917,21 @@ export function renderResearch(next) {
         ),
       );
       card.append(details);
+      if (isRemote)
+        card.append(
+          text(
+            "p",
+            i.message || "Import supported real geographic data to collect.",
+          ),
+          button("View Data", async () => {
+            const selector=$("remote-product-browser")?.querySelector('select[aria-label="Product instrument"]');
+            if(selector){selector.value=i.instrumentId;selector.dispatchEvent(new Event("change"));}
+            $("remote-product-browser")?.scrollIntoView({
+              behavior: "smooth",
+              block: "start",
+            });
+          }),
+        );
       p.append(card);
     }
   }
@@ -1067,6 +1095,31 @@ function showScience(parent, rows, label) {
 export async function researchDetail(body, id, mission) {
   await initializeUnits(ctx.api);
   const review = await ctx.api(`/api/missions/${id}/review`);
+  const protection = await ctx.api(`/api/missions/${id}/protection`);
+  const protectedLabel = text(
+    "strong",
+    protection.isProtected ? "Protected mission" : "Mission is not pinned",
+  );
+  const protectMissionButton=button(
+      protection.isProtected ? "Remove Protection" : "Protect Mission",
+      async () => {
+        const result = await ctx.api(`/api/missions/${id}/protection`, {
+          protected: !protection.isProtected,
+        });
+        protection.isProtected = result.isProtected;
+        protectedLabel.textContent = result.isProtected
+          ? "Protected mission"
+          : "Mission is not pinned";
+        protectMissionButton.textContent=result.isProtected?"Remove Protection":"Protect Mission";
+      },
+    );
+  body.append(protectedLabel,protectMissionButton);
+  if (review.scienceAvailable)
+    try {
+      await remoteProducts(body, ctx.api, id);
+    } catch (error) {
+      body.append(text("p", "Remote products unavailable: " + error.message));
+    }
   if (review.research.planSnapshot) {
     body.append(text("h3", "Planned Route — immutable recording snapshot"));
     routeExportButton(body, () => review.research.planSnapshot, ctx.api);

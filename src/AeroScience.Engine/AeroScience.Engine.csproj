@@ -7,4 +7,8 @@
     <ProjectReference Include="../AeroScience.SimConnect/AeroScience.SimConnect.csproj" />
   </ItemGroup>
   <ItemGroup><Content Update="wwwroot/**" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" /></ItemGroup>
+  <ItemGroup>
+    <Content Include="../../docs/remote-sensing/**" Link="wwwroot/help/remote-sensing/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="../../licenses/LibTiff.NET.txt" Link="licenses/LibTiff.NET.txt" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>

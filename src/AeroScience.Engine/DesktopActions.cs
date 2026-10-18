@@ -12,4 +12,6 @@ public interface IDesktopActions
     void OpenStorage();
     void OpenDataManagement();
     void CollectFeedback();
+    void ImportScientificSource();
+    void CompactStorage(bool science);
 }

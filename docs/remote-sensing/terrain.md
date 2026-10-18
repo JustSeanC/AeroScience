@@ -1,0 +1,9 @@
+# Terrain Scanner (LiDAR / Elevation)
+
+v0.3.0 implements **DEM-derived terrain samples**, not source LiDAR point-cloud decoding or newly measured laser returns. Import one real elevation-in-metres GeoTIFF, for example a bounded [USGS 3DEP](https://www.usgs.gov/3d-elevation-program) product. Actual source coverage/resolution/quality varies; the United States service is not worldwide elevation coverage. Keep source acquisition/publication metadata and explicitly state its vertical datum. A composite can legitimately have an unknown observation date.
+
+Use the complete terrain manifest template in [sources.md](sources.md). A distributor service export may resample its original source. Record that operation, exported CRS/pixel spacing, original resolution limitations and unknown dates instead of inventing precision or claiming a direct native LiDAR file. No vertical datum transformation is applied. NAVD88, ellipsoid height and simulator MSL cannot be silently combined.
+
+Enable Terrain Scanner over the imported region. The instrument calculates an approximate 30°×3° swath on the AGL reference plane and samples 24×24 positions from the real elevation raster. It produces retained metre values, a colored footprint sample grid, a center-row elevation profile and valid range/count. The profile x-axis is **sample index**, not uncomputed distance. This is not full terrain ray tracing: off-aircraft relief and geoid/datum alignment remain limitations of approximate footprint placement. Missing AGL/unsupported attitude/source coverage reports unavailable.
+
+Exports: JSON/CSV actual elevation samples; GeoJSON geographic points and footprint; GPX/KML footprint at no invented elevation; PNG color preview. There is **no LAS/LAZ or GeoTIFF export** and no synthetic point-cloud claim. Future true point-cloud support must preserve source returns/classification/vertical CRS and use a genuine point-cloud writer.

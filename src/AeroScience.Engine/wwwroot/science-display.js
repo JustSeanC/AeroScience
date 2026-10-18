@@ -1,5 +1,7 @@
 let settings = null;
 const chartPreferences = new Map();
+const unitListeners = new Set();
+export function onUnitsChanged(listener) { unitListeners.add(listener); return () => unitListeners.delete(listener); }
 const categories = {
   temperature: "temperature",
   pressure: "pressure",
@@ -15,11 +17,15 @@ const e = (tag, value) => {
   return n;
 };
 export async function initializeUnits(api) {
+  const before=JSON.stringify(settings?.preferences);
   settings = await api("/api/display/units");
+  if(before!==JSON.stringify(settings.preferences))for(const listener of unitListeners)listener();
   return settings;
 }
 export function syncUnits(preferences) {
-  if (settings && preferences) settings.preferences = preferences;
+  if (settings && preferences && JSON.stringify(settings.preferences)!==JSON.stringify(preferences)) {
+    settings.preferences = preferences;for(const listener of unitListeners)listener();
+  }
 }
 export function displayReading(id, value, fallback = "") {
   const category = categories[id],

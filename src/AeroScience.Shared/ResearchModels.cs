@@ -3,7 +3,7 @@ namespace AeroScience.Shared;
 public enum MissionTemplateKind { GeneralResearch, AtmosphericProfile, GeographicSurvey, ObservationFlight }
 public enum ObservationQuality { Valid, Missing, Unavailable, Stale, Paused, Invalid, AcquisitionGap, SourceDisconnected, Disabled, Waiting }
 public enum ScienceCollectionStatus { Collecting, Paused, Stopped, AwaitingSource, Unavailable }
-public enum ScienceProvenance { SimulatorReported, Derived, InstrumentModeled }
+public enum ScienceProvenance { SimulatorReported, Derived, InstrumentModeled, ExternalDataset }
 public enum AutopilotEngagement { Unavailable, Disengaged, Engaged }
 public sealed record ResearchWaypoint(string Name, double Latitude, double Longitude, double? TargetAltitudeFeet = null,
     string? Instructions = null, string? Objective = null, Guid? PatternId = null, Guid? Id = null, string? NavigationIdentifier = null);
@@ -62,7 +62,9 @@ public sealed record FlightStatistics(long Samples, double? MinimumAltitudeFeet,
 public sealed record ScienceStorageEstimate(long? EstimatedBytes, long? AvailableBytes, bool CapacityWarning,
     string Basis, string[] Limitations, Dictionary<string, long> EstimatedObservationCounts);
 public sealed record DataClearPreview(string Kind, string Directory, long Missions, long Plans, long Datasets,
-    long Observations, long ApproximateBytes, string Removes, string Preserves, string ConfirmationPhrase);
+    long Observations, long ApproximateBytes, string Removes, string Preserves, string ConfirmationPhrase,
+    long ManagedProductFiles = 0, long ManagedProductBytes = 0, string[]? ProductPathPreview = null,
+    long ProtectedItems = 0, long ManagedCacheFiles = 0);
 
 public enum FlightPatternKind { Lawnmower, CreepingLine, ExpandingSquare, Racetrack, Orbit, Box, RadialSpokes, StraightTransect }
 public sealed record PatternDefinition(Guid Id, FlightPatternKind Kind, Coordinates Center, double HeadingDegrees = 0,

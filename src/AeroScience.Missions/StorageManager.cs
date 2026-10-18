@@ -51,7 +51,7 @@ public sealed class PreferenceStore(string configurationDirectory)
     }
 }
 
-public sealed class StorageManager(PreferenceStore preferences, IStorageCapacity? capacity = null)
+public sealed partial class StorageManager(PreferenceStore preferences, IStorageCapacity? capacity = null)
 {
     public const long MinimumFreeBytes = 64L * 1024 * 1024;
     public const long LibraryLowSpaceWarningBytes = 1024L * 1024 * 1024;

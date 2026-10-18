@@ -7,10 +7,10 @@ using AeroScience.Missions;
 
 namespace AeroScience.Engine;
 
-public sealed record MapPreferences(bool OnlineEnabled = false, string Layer = "offline", string Provider = "esri");
+public sealed record MapPreferences(bool OnlineEnabled = true, string Layer = "streets", string Provider = "esri");
 public sealed record MapSettingsRequest(bool OnlineEnabled, string Layer = "offline", string Provider = "esri", string? PublicApiKey = null, bool RemoveKey = false, bool PrivacyAccepted = false);
-public sealed record MapConfiguration(MapPreferences Preferences, bool KeyConfigured, string? Warning = null, string Revision = "default");
-internal sealed record StoredMapSettings(MapPreferences Preferences, string? ProtectedKey);
+public sealed record MapConfiguration(MapPreferences Preferences, bool KeyConfigured, string? Warning = null, string Revision = "default", bool RequiresPrivacyChoice = false);
+internal sealed record StoredMapSettings(MapPreferences Preferences, string? ProtectedKey, bool? PrivacyAcknowledged = null);
 public sealed record BasemapTiles(string Url, string Attribution, int MaxZoom = 19);
 public sealed record BasemapClient(string Layer, BasemapTiles[] Tiles, string? Error = null);
 public interface IMapKeyProtector { string Protect(string value); string Unprotect(string value); }
@@ -56,13 +56,18 @@ public sealed class MapSettings
         path = Path.Combine(directory, "maps.json"); this.protector = protector ?? new WindowsMapKeyProtector();
         this.http = http ?? new HttpClient(new HttpClientHandler { AllowAutoRedirect = false }) { Timeout = TimeSpan.FromSeconds(12), MaxResponseContentBufferSize = 2097152 };
     }
-    private StoredMapSettings Load() => File.Exists(path) ? JsonSerializer.Deserialize<StoredMapSettings>(File.ReadAllText(path)) ?? throw new IOException("Map settings need repair; offline geography remains available.") : new(new(), null);
+    private StoredMapSettings Load() => File.Exists(path) ? JsonSerializer.Deserialize<StoredMapSettings>(File.ReadAllText(path)) ?? throw new IOException("Map settings need repair; offline geography remains available.") : new(new(), null, false);
+    public void InitializeDefaults(bool existingInstallation)
+    {
+        lock (gate) if (!File.Exists(path)) PreferenceStore.WriteAtomic(path, new StoredMapSettings(
+            existingInstallation ? new(false, "offline") : new(), null, existingInstallation));
+    }
     public MapConfiguration Get()
     {
         lock (gate)
         {
-            try { var s = Load(); return new(s.Preferences, !string.IsNullOrWhiteSpace(s.ProtectedKey), Revision: Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(s))))); }
-            catch (Exception e) when (e is JsonException or IOException or UnauthorizedAccessException) { return new(new(), false, "Map settings unavailable. Offline geography remains available; reconfigure Maps & Basemaps."); }
+            try { var s = Load(); return new(s.Preferences, !string.IsNullOrWhiteSpace(s.ProtectedKey), Revision: Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(s)))), RequiresPrivacyChoice: s.PrivacyAcknowledged == false); }
+            catch (Exception e) when (e is JsonException or IOException or UnauthorizedAccessException) { return new(new(false, "offline"), false, "Map settings unavailable. Offline geography remains available; reconfigure Maps & Basemaps."); }
         }
     }
     public MapConfiguration Save(MapSettingsRequest request)
@@ -80,17 +85,20 @@ public sealed class MapSettings
                 catch (Exception error) when (error is PlatformNotSupportedException or CryptographicException) { throw new InvalidOperationException("The map key could not be protected. Configure it in the Windows companion; no plaintext key was saved."); }
             }
             if (request.Layer.StartsWith("satellite", StringComparison.Ordinal) && key is null) throw new ArgumentException("Configure your own public Esri basemap API key for satellite imagery, or use Offline/Streets.");
-            PreferenceStore.WriteAtomic(path, new StoredMapSettings(new(request.OnlineEnabled, request.Layer, request.Provider), key)); cached = null;
+            PreferenceStore.WriteAtomic(path, new StoredMapSettings(new(request.OnlineEnabled, request.Layer, request.Provider), key, true)); cached = null;
             return Get();
         }
     }
     public MapConfiguration SelectLayer(string layer)
     {
-        var s = Get(); return Save(new(s.Preferences.OnlineEnabled, layer, s.Preferences.Provider, PrivacyAccepted: s.Preferences.OnlineEnabled));
+        var s = Get(); if (s.RequiresPrivacyChoice) throw new InvalidOperationException("Choose online or offline-only maps in the first-run privacy disclosure first.");
+        return Save(new(s.Preferences.OnlineEnabled, layer, s.Preferences.Provider, PrivacyAccepted: s.Preferences.OnlineEnabled));
     }
+    public MapConfiguration ChoosePrivacy(bool online) => Save(new(online, online ? "streets" : "offline", PrivacyAccepted: online));
     public async Task<BasemapClient> Client(string? selected = null, CancellationToken cancellationToken = default)
     {
         var settings = Get(); var layer = selected ?? settings.Preferences.Layer;
+        if (settings.RequiresPrivacyChoice) return new("offline", [], "Choose online Streets or offline-only maps in the privacy disclosure before any provider requests.");
         if (layer == "offline") return new("offline", []);
         if (!settings.Preferences.OnlineEnabled) return new("offline", [], "Online maps are disabled. Bundled offline geography remains available.");
         if (layer == "streets") return new(layer, [new("https://tile.openstreetmap.org/{z}/{x}/{y}.png", "© OpenStreetMap contributors", 19)]);

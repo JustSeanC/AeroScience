@@ -56,9 +56,9 @@ public sealed class DataManagementForm : Form
     {
         var settings = app.Preferences.Load();
         if (!science) return new MissionStore(Path.Combine(settings.MissionDirectory, "missions.db")).PreviewFlightClear(plans.Checked);
-        using var store = new ScienceStore(settings.ScienceLibraryDirectory); return store.PreviewClear();
+        using var store = new ScienceStore(settings.ScienceLibraryDirectory);store.MissionIsProtected=new MissionStore(Path.Combine(settings.MissionDirectory,"missions.db")).IsProtected;return store.PreviewClear();
     }
-    private static string Describe(DataClearPreview p) => (p.Kind == "flight" ? $"{p.Missions} recorded missions will be deleted." : $"{p.Datasets} scientific datasets and {p.Observations} observations will be deleted.") + $"\nData to delete from: {p.Directory}\nSaved plans to delete: {p.Plans}\nApproximate managed database size: {p.ApproximateBytes / 1048576d:0.00} MiB including SQLite companion files (clearing rows may retain allocation)\nRemoves: {p.Removes}\nPreserves: {p.Preserves}";
+    private static string Describe(DataClearPreview p) => (p.Kind == "flight" ? $"{p.Missions} recorded missions will be deleted." : $"{p.Datasets} scientific datasets, {p.Observations} observations and {p.ManagedProductFiles} generated product files will be deleted.") + $"\nData to delete from: {p.Directory}\nProtected missions/datasets included in this deliberate clear: {p.ProtectedItems}\nSaved plans to delete: {p.Plans}\nApproximate managed size: {p.ApproximateBytes / 1048576d:0.00} MiB including SQLite companion files and indexed products (clearing rows may retain allocation)\nGenerated product files: {p.ManagedProductFiles} ({p.ManagedProductBytes / 1048576d:0.00} MiB)\n" + string.Join("\n", p.ProductPathPreview ?? []) + $"\nRemoves: {p.Removes}\nPreserves: {p.Preserves}";
     private async Task Clear(bool science, string typed, bool backupRequested)
     {
         if (working || app.Busy || app.Recording) { MessageBox.Show(this, "End recording and wait for other operations first."); return; }
@@ -66,6 +66,7 @@ public sealed class DataManagementForm : Form
         {
             var preview = Preview(science);
             if (typed != preview.ConfirmationPhrase) throw new InvalidOperationException("Type the exact confirmation phrase shown for this archive.");
+            if(preview.ProtectedItems>0&&MessageBox.Show(this,$"This deliberate archive clear includes {preview.ProtectedItems} protected mission(s)/dataset(s). Protection prevents automatic cleanup; this explicit typed-confirmation operation will delete them. Continue to final confirmation?","Protected research data",MessageBoxButtons.YesNo,MessageBoxIcon.Warning,MessageBoxDefaultButton.Button2)!=DialogResult.Yes)return;
             var selection = ArchiveClearPolicy.ChooseBackup(backupRequested, () =>
             {
                 using var browse = new FolderBrowserDialog
@@ -97,7 +98,7 @@ public sealed class DataManagementForm : Form
                 if (science)
                 {
                     library.Initialize();
-                    if (backupFolder is not null) result = DataBackup.Create(library.DatabasePath, backupFolder, true);
+                    if (backupFolder is not null) result = library.CreateRecoveryBackup(backupFolder);
                     library.Clear(typed, false);
                     missions.ReconcileDatasetReferences(library.LibraryId, library.ContainsDataset);
                 }

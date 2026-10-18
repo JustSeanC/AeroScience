@@ -9,6 +9,43 @@ let csrf = "",
   loading,
   sessionReady = false;
 const listeners = new Set();
+let privacyDialog;
+async function firstRunPrivacy(config) {
+  if (!config.configuration.requiresPrivacyChoice || privacyDialog) return;
+  privacyDialog = element("dialog");
+  privacyDialog.setAttribute("aria-label", "Choose your map privacy");
+  privacyDialog.append(
+    element("h2", "Choose your map privacy"),
+    element(
+      "p",
+      "OpenStreetMap / Streets gives you recognizable maps without an account or API key. Tile requests reveal your viewed geographic region and IP address to the map provider. Offline-only maps send no tile requests.",
+    ),
+  );
+  for (const [text, online] of [
+    ["Continue with OpenStreetMap", true],
+    ["Use offline-only maps", false],
+  ]) {
+    const button = element("button", text);
+    button.className=online?"primary":"secondary";
+    button.onclick = async () => {
+      try {
+        await api("/api/maps/privacy", { online });
+        privacyDialog.close();
+        privacyDialog.remove();
+        privacyDialog = null;
+        configuration = null;
+        await settings();
+        notify();
+      } catch (e) {
+        privacyDialog.append(element("p", e.message));
+      }
+    };
+    privacyDialog.append(button);
+  }
+  privacyDialog.addEventListener("cancel", (e) => e.preventDefault());
+  document.body.append(privacyDialog);
+  privacyDialog.showModal();
+}
 async function api(path, value) {
   if (value !== undefined && !csrf) {
     const response = await fetch("/api/session", {
@@ -42,9 +79,11 @@ const element = (tag, text) => {
   return e;
 };
 async function settings() {
-  return (configuration ||= await (loading ||= api(
+  const result = (configuration ||= await (loading ||= api(
     "/api/maps/settings",
   ).finally(() => (loading = null))));
+  await firstRunPrivacy(result);
+  return result;
 }
 function notify() {
   for (const fn of listeners) fn();

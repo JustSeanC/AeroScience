@@ -10,5 +10,6 @@
   <ItemGroup>
     <ProjectReference Include="../AeroScience.Engine/AeroScience.Engine.csproj" />
     <Content Include="../AeroScience.Engine/wwwroot/**" Link="wwwroot/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="../../docs/remote-sensing/**" Link="wwwroot/help/remote-sensing/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

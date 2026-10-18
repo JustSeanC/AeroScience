@@ -22,8 +22,15 @@ public sealed class SettingsForm : Form
         tabs.TabPages.Add(general); tabs.TabPages.Add(storageTab); tabs.TabPages.Add(toolbarTab); var toolbarPanel = Panel(); toolbarTab.Controls.Add(toolbarPanel); tabs.SelectedIndex = storage ? 1 : toolbar ? 2 : 0; Controls.Add(tabs);
         BuildGeneral(generalPanel); BuildToolbar(toolbarPanel); RefreshStorage();
         var mapsTab = new TabPage("Maps & Basemaps"); var mapsPanel = Panel(); mapsTab.Controls.Add(mapsPanel); tabs.TabPages.Add(mapsTab);
-        Label(mapsPanel, "Offline geography is ready without an account. Configure optional Streets and Esri satellite imagery, the preferred layer and your own restricted public client key in dashboard Settings → Maps & Basemaps. Online maps disclose the viewed area and IP address and may incur provider charges. Windows protects the saved key; authorized map browsers can see the public client token.");
+        Label(mapsPanel, "New installations suggest OpenStreetMap / Streets after a privacy choice before the first tile request. Choose offline-only at that prompt or change Maps & Basemaps in the dashboard. Existing preferences are preserved. Offline geography remains available without an account. Optional Esri satellite imagery requires your own configured credentials.");
         Button(mapsPanel, "Open Maps & Basemaps settings", (_, _) => app.OpenDashboard(settings: true));
+        var sourcesTab = new TabPage("Scientific Data Sources"); var sourcesPanel = Panel(); sourcesTab.Controls.Add(sourcesPanel); tabs.TabPages.Add(sourcesTab);
+        Label(sourcesPanel, "Import real local GeoTIFF/ENVI source collections with their metadata manifest. Coverage, observation dates, bands, CRS, resolution, license and availability appear in dashboard Settings. Original inputs remain untouched and sources are copied to your Scientific Data Library for offline use. No worldwide data coverage is assumed.");
+        Button(sourcesPanel, "Import scientific source collection…", (_, _) => app.ImportScientificSource());
+        Button(sourcesPanel, "View sources and import guide", (_, _) => app.OpenDashboard(settings: true));
+        var updatesTab = new TabPage("Updates"); var updatesPanel = Panel(); updatesTab.Controls.Add(updatesPanel); tabs.TabPages.Add(updatesTab);
+        Label(updatesPanel, "AeroScience " + ApplicationUpdates.CurrentVersion + ". Dashboard Settings → Updates shows your installed version and optional GitHub release notifications. Checks are cached daily, never block offline archives, and never execute an installer automatically. You can disable automatic checks or include/exclude alpha releases there.");
+        Button(updatesPanel, "Open update settings / Check for updates", (_, _) => app.OpenDashboard(settings: true));
         FormClosing += (_, e) => { if (app.Busy) { e.Cancel = true; MessageBox.Show(this, "Wait for the current operation to finish."); } };
     }
     private static Button Button(Control parent, string text, EventHandler action)
@@ -53,6 +60,7 @@ public sealed class SettingsForm : Form
         }
         Label(storagePanel, StorageManager.LargeDataWarning);
         Button(storagePanel, "Data Management…", (_, _) => app.ShowDataManagement());
+        Button(storagePanel, "Storage Management / Limits / Preview Cleanup", (_, _) => app.OpenDashboard(settings: true));
         Button(storagePanel, "Recover original location from interrupted migration…", async (_, _) =>
         {
             if (!File.Exists(app.Preferences.JournalPath)) { MessageBox.Show(this, "No interrupted migration needs rollback."); return; }

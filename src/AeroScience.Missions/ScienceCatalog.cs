@@ -13,13 +13,17 @@ public static class ScienceCatalog
         new("ambient-wind", "Ambient wind", "Simulator wind speed and direction relative to true north.", "MSFS 2024 / SimConnect",
             [new("wind-speed", "Wind speed", "kt", "AMBIENT WIND VELOCITY"), new("wind-direction", "Wind direction", "degT", "AMBIENT WIND DIRECTION")]),
         new("ambient-density", "Ambient density", "Simulator ambient density; no independent atmospheric model is substituted.", "MSFS 2024 / SimConnect",
-            [new("density", "Ambient density", "slug/ft3", "AMBIENT DENSITY")])
+            [new("density", "Ambient density", "slug/ft3", "AMBIENT DENSITY")]),
+        new("thermal-imager", "Thermal Imager", "Landsat Collection 2 surface temperature sampled along the simulated footprint; not ambient air temperature.", "Imported Landsat Collection 2 Level-2 ST_B10 / QA_PIXEL", []),
+        new("multispectral-imager", "Multispectral Imager", "Natural color, infrared and NDVI from a real Sentinel-2 L2A scene.", "Imported Sentinel-2 L2A bands and SCL", []),
+        new("hyperspectral-imager", "Hyperspectral Imager", "Real wavelength profiles from supported geographically referenced ENVI collections; limited source coverage.", "Imported ENVI reflectance/radiance with wavelength metadata", []),
+        new("terrain-scanner", "Terrain Scanner (LiDAR / Elevation)", "DEM-derived elevations with an explicit source vertical datum. These are not airborne LiDAR returns.", "Imported georeferenced elevation raster", [])
     ];
     public static readonly MissionTemplate[] Templates =
     [
         new(MissionTemplateKind.GeneralResearch, "General Research", "Record a flexible aircraft-agnostic research mission.", [], ["observation", "note"]),
         new(MissionTemplateKind.AtmosphericProfile, "Atmospheric Profile", "Observe simulator atmospheric conditions across altitude changes.",
-            Definitions.Select(d => new InstrumentConfiguration(d.Id, true, 1000)).ToArray(), ["interesting-weather", "observation"]),
+            Definitions.Where(d => !RemoteAcquisition.Instruments.ContainsKey(d.Id)).Select(d => new InstrumentConfiguration(d.Id, true, 1000)).ToArray(), ["interesting-weather", "observation"]),
         new(MissionTemplateKind.GeographicSurvey, "Geographic Survey", "Observe a region along a planned route and mark survey activity.",
             [new("ambient-temperature", true, 2000), new("ambient-wind", true, 2000)], ["start-survey", "end-survey", "finding"]),
         new(MissionTemplateKind.ObservationFlight, "Observation Flight", "Visit points of interest and record research notes.",

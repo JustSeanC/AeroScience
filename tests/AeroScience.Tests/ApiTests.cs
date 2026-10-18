@@ -44,7 +44,8 @@ public sealed class ApiTests : IDisposable
         Assert.Equal(HttpStatusCode.Unauthorized, (await client.GetAsync("/api/maps/client")).StatusCode);
         await Pair(client);
         var configuration = await client.GetFromJsonAsync<JsonElement>("/api/maps/settings");
-        Assert.Equal("offline", configuration.GetProperty("configuration").GetProperty("preferences").GetProperty("layer").GetString());
+        Assert.Equal("streets", configuration.GetProperty("configuration").GetProperty("preferences").GetProperty("layer").GetString());
+        Assert.True(configuration.GetProperty("configuration").GetProperty("requiresPrivacyChoice").GetBoolean());
         Assert.False(configuration.GetProperty("configuration").TryGetProperty("protectedKey", out _));
         Assert.False(configuration.GetProperty("configuration").TryGetProperty("publicApiKey", out _));
         var offline = await client.GetFromJsonAsync<JsonElement>("/api/maps/client"); Assert.Equal(0, offline.GetProperty("tiles").GetArrayLength());

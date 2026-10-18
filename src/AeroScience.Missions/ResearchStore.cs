@@ -235,7 +235,7 @@ public sealed partial class MissionStore
         using var reader = cmd.ExecuteReader(); reader.Read();
         return new("flight", Path.GetDirectoryName(DatabasePath)!, reader.GetInt64(0), includePlans ? reader.GetInt64(1) : 0, 0, 0,
             StorageManager.DatabaseBytes(DatabasePath), "Flight recordings, telemetry, events, markers, recording notes and dataset links" + (includePlans ? "; saved plans and preflight notes" : ""),
-            "Scientific Data Library products, library identity, application settings, built-in templates" + (includePlans ? "" : ", saved mission plans"), "DELETE FLIGHT DATA");
+            "Scientific Data Library products, library identity, application settings, built-in templates" + (includePlans ? "" : ", saved mission plans"), "DELETE FLIGHT DATA", ProtectedItems: ProtectedMissionCount());
     }
     public void ClearFlightData(string confirmation, bool includePlans = false)
     {

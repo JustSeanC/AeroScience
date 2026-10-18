@@ -1,4 +1,8 @@
 import { mapSettingsUI, syncBasemaps } from "./basemaps.js";
+import { sourceSettings } from "./remote-science.js";
+import { updateSettings, notifyUpdates } from "./application-updates.js";
+import { storageManagement } from "./storage-management.js";
+setInterval(()=>{if(authorized&&!document.hidden)notifyUpdates(api);},60000);
 import {
   initializeResearch,
   loadResearch,
@@ -93,6 +97,7 @@ async function connect(code = null) {
   window.dispatchEvent(new Event("aeroscience-session"));
   $("pairing").hidden = true;
   $("workspace").hidden = false;
+  notifyUpdates(api);
   notice();
   stream?.close();
   stream = new EventSource("/api/events");
@@ -159,6 +164,15 @@ function clearTelemetry() {
   $("connection-dot").classList.remove("live");
 }
 function render(state) {
+  let stopped = document.getElementById("recording-storage-stop");
+  if (state.recordingStop) {
+    if (!stopped) {
+      stopped = el("aside", undefined, "panel source-notice");
+      stopped.id = "recording-storage-stop";
+      $("control").prepend(stopped);
+    }
+    stopped.textContent = `RECORDING STOPPED · ${state.recordingStop.code}: ${state.recordingStop.message}`;
+  } else stopped?.remove();
   syncBasemaps(state.maps);
   renderResearch(state);
   const wasActive = current?.activeMission?.id;
@@ -456,6 +470,21 @@ async function loadSettings() {
   container.append(rows);
   await unitControls(container, api, loadSettings);
   await mapSettingsUI(container, api);
+  try {
+    await storageManagement(container, api);
+  } catch (error) {
+    container.append(
+      el("p", "Storage management unavailable: " + error.message),
+    );
+  }
+  await updateSettings(container, api);
+  try {
+    await sourceSettings(container, api);
+  } catch (error) {
+    container.append(
+      el("p", "Scientific sources unavailable: " + error.message),
+    );
+  }
   if (s.toolbarStatus) {
     const toolbar = el("section");
     toolbar.append(
