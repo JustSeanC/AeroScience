@@ -13,7 +13,7 @@ class ScientificAcceptanceTests(unittest.TestCase):
     def test_genuine_report_is_complete_and_matches_source(self):
         value=science.verify(require_current=False);self.assertEqual(4,len(value['workflows']));self.assertEqual('not tested',value['windowsMsfs'])
     def test_pending_final_rerun_blocks_distribution(self):
-        value=json.loads(science.REPORT.read_text());value['finalNetworkRerun']='pending'
+        value=json.loads(science.REPORT.read_text());value['finalNetworkRerun']='pending';value['finalNetworkRerunReason']=None
         with tempfile.TemporaryDirectory() as temp:
             path=Path(temp)/'report.json';path.write_text(json.dumps(value))
             with self.assertRaisesRegex(ValueError,'pending'):science.verify(path)

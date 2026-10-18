@@ -1,11 +1,11 @@
 {
   "formatVersion": 1,
   "evidenceType": "genuine-public-provider-network",
-  "checkedUtc": "2026-10-18T22:29:43.199491+00:00",
+  "checkedUtc": "2026-10-18T23:09:37.243411+00:00",
   "windowsMsfs": "not tested",
   "description": "Actual public API discovery, bounded numeric retrieval, internal manifest, verified library import, QA-aware sampling and persisted/reloaded mission products. Flight inputs are synthetic and explicitly labeled. Data files and SAS tokens are not bundled.",
-  "finalNetworkRerun": "pending",
-  "finalNetworkRerunReason": "The final rerun was interrupted by the cloud HTTP tunnel returning 503 across providers. Earlier successful genuine-data runs are preserved below; this is not an acceptance pass for the final source.",
+  "finalNetworkRerun": "passed",
+  "finalNetworkRerunReason": null,
   "canonicalLfSourceSha256": {
     "src/AeroScience.Missions/AutomaticScientificData.cs": "ef3d1d03cacc948ea9e5091453400069e648e1a21a2fa283aafb0cb71badf3bf",
     "src/AeroScience.Missions/ScientificHttp.cs": "3fdf9c79b29b1f2525c9973ae85d358ba12aa207dc264acbd5ad126c0f501437",
@@ -57,7 +57,7 @@
           "longitude": 8.11
         }
       },
-      "networkBytes": 1445256,
+      "networkBytes": 1445258,
       "retainedNumericBytes": 18044,
       "bands": [
         {
@@ -78,7 +78,7 @@
       "validDerivedSamples": 576,
       "sampleCount": 576,
       "publishedProductVerified": true,
-      "publishedProductSha256": "a566a1c33805f3a9ca0c5d134bb92f4726ed71eef777f88536e166df72deb941",
+      "publishedProductSha256": "c41bf1e2fdbcd51a37201abfe435b451ace135c2815b6e47851d183217d0fb54",
       "flightInput": "synthetic test position; not MSFS",
       "sourceFiles": [
         {
@@ -87,7 +87,7 @@
           "sha256": "f66b92a3a5f914f5c26ec8e5c1395311472f188347e5666d66a513aee4d22a3d"
         }
       ],
-      "acceptanceArtifactSha256": "4f500adae9c6c0ebf3dce163ad5a2d4be2f392418414add0e94f8af21111fb0f"
+      "acceptanceArtifactSha256": "b7909759e7c8e76881edbfb686266212d9ab6506a983bfbc079edd1b7731c6be"
     },
     {
       "workflow": "landsat-c2-l2",
@@ -127,7 +127,7 @@
           "longitude": -74.99000000000001
         }
       },
-      "networkBytes": 1259546,
+      "networkBytes": 1259544,
       "retainedNumericBytes": 8642,
       "bands": [
         {
@@ -176,7 +176,7 @@
       "validDerivedSamples": 576,
       "sampleCount": 576,
       "publishedProductVerified": true,
-      "publishedProductSha256": "ce11c3f715be2d3783e79d245bccb4605994b70f9bc64013ed6b49e3d1c6fdff",
+      "publishedProductSha256": "bb4e0d89c04c4365f84f3ee1f3b160808469bf81bfbbb8ea6975f945f8695929",
       "flightInput": "synthetic test position; not MSFS",
       "sourceFiles": [
         {
@@ -195,7 +195,7 @@
           "sha256": "6dcbf2ca051ac9b64c0574a5d61c465aeca0f08df0c9a6c227f5d41225563938"
         }
       ],
-      "acceptanceArtifactSha256": "f7494e693dcf7f00583546497a9d6c0ab8cbe50ddbd786bfbf6752c2b7e7e4e7"
+      "acceptanceArtifactSha256": "ea0755318b25713a9d988fc73b4c77d19999e0a68e53864e81effc134e579498"
     },
     {
       "workflow": "sentinel-2-l2a",
@@ -312,7 +312,7 @@
       "validDerivedSamples": 183,
       "sampleCount": 576,
       "publishedProductVerified": true,
-      "publishedProductSha256": "d4976607fb068ed113f6aa841456daf17d20f9c37942b131023c540a7729e023",
+      "publishedProductSha256": "08a36ece2e7d322c33c1e8f3b8b237f0f371251fb989faa6e44c9969112075e2",
       "flightInput": "synthetic test position; not MSFS",
       "sourceFiles": [
         {
@@ -341,7 +341,7 @@
           "sha256": "490d03dc11d94fabc5037777b2e8b4af374f4858ce801dfd33cbe7c146ea2fa5"
         }
       ],
-      "acceptanceArtifactSha256": "fcf921d948b6696bb4d979f3c23c9537859bc4b2ed9b5d21ee523bbd8806f211"
+      "acceptanceArtifactSha256": "dfaa0d4e252c8a7b8fce73861b3fdba1b34fbb21fa238bceb4ac7bf782a1b14c"
     },
     {
       "workflow": "usgs-3dep",
@@ -402,7 +402,7 @@
       "validDerivedSamples": 576,
       "sampleCount": 576,
       "publishedProductVerified": true,
-      "publishedProductSha256": "a64d608bcf727f24d73c23d41a9c9f4aa13985ac140f5d4b2566d000dab36ba7",
+      "publishedProductSha256": "e220d96b4be0c9ac4cd0482a8bed043118444613cb1a8c8fb2b814d2e92feb0c",
       "flightInput": "synthetic test position; not MSFS",
       "sourceFiles": [
         {
@@ -411,12 +411,116 @@
           "sha256": "b25437967ba562cbdb4830d219e6fc65fa0ee0be760c48fce31a1dfa0fee04f5"
         }
       ],
-      "acceptanceArtifactSha256": "ed175ab2e0fe12ed7e6419b18cf363e70b7c731d59db6e3ec823c36826bcb38d"
+      "acceptanceArtifactSha256": "9bbf227a635f07d041719cf0a2b9cbefbf9b05ca8663008f4aef90d714b07d8d"
     }
   ],
-  "independentComparison": null,
+  "independentComparison": [
+    {
+      "workflow": "cop-dem-glo-30",
+      "band": "elevation",
+      "nativeCropComparedPixels": 5329,
+      "compared": 576,
+      "pixelBoundaryTie": "east/south, GDAL sample nudged 1e-7 native pixel only to stabilize exact ties",
+      "maximumAbsoluteDifference": 0.0,
+      "independentReader": "rasterio/GDAL via validated urllib HTTP ranges",
+      "networkBytes": 1441792
+    }
+  ],
   "hyperspectral": {
     "status": "discovery only; automated preparation and NASA authorization unsupported",
-    "details": null
+    "details": {
+      "key": "Hyperspectral:-118.46000000000001,34.24,-118.44000000000001,34.260000000000005",
+      "kind": "hyperspectral",
+      "status": "Limited Coverage",
+      "message": "Genuine geographically matching hyperspectral catalog observations discovered (all archived dates searched). Automatic spectral preparation is not implemented in v0.3.0. No numerical observations or source downloads were fabricated. Advanced validated ENVI import is available.",
+      "area": {
+        "west": -118.46000000000001,
+        "south": 34.24,
+        "east": -118.44000000000001,
+        "north": 34.260000000000005,
+        "corners": [
+          {
+            "latitude": 34.24,
+            "longitude": -118.46000000000001
+          },
+          {
+            "latitude": 34.24,
+            "longitude": -118.44000000000001
+          },
+          {
+            "latitude": 34.260000000000005,
+            "longitude": -118.44000000000001
+          },
+          {
+            "latitude": 34.260000000000005,
+            "longitude": -118.46000000000001
+          }
+        ],
+        "center": {
+          "latitude": 34.25,
+          "longitude": -118.45000000000002
+        }
+      },
+      "provider": "NASA CMR / LP DAAC / ORNL DAAC",
+      "dataset": "EMIT_L2A_RFL_001_20260809T224459_2622115_011",
+      "observationUtc": "2026-08-09T22:44:59+00:00",
+      "quality": null,
+      "downloadedBytes": 24910,
+      "estimatedDownloadBytes": 67108864,
+      "estimatedStorageBytes": 37748736,
+      "sourceId": null,
+      "authorization": "Individual NASA Earthdata authorization is required for protected downloads; credential handling and automated spectral preparation are not supported in this release.",
+      "updatedUtc": "2026-10-18T23:08:30.3429115+00:00",
+      "discoveries": [
+        {
+          "catalog": "EMITL2ARFL",
+          "dataset": "EMIT_L2A_RFL_001_20260809T224459_2622115_011",
+          "observationUtc": "2026-08-09T22:44:59+00:00",
+          "format": "EMIT L2A reflectance / NetCDF-4 with geolocation and masks",
+          "authorization": "Individual NASA Earthdata authorization required for protected scientific files. No login or download is initiated.",
+          "metadataUrl": "https://cmr.earthdata.nasa.gov/search/granules.json?short_name=EMITL2ARFL&version=001&bounding_box=-118.46000000000001,34.24,-118.44000000000001,34.260000000000005&page_size=2&sort_key=-start_date"
+        },
+        {
+          "catalog": "EMITL2ARFL",
+          "dataset": "EMIT_L2A_RFL_001_20260623T172839_2617411_011",
+          "observationUtc": "2026-06-23T17:28:39+00:00",
+          "format": "EMIT L2A reflectance / NetCDF-4 with geolocation and masks",
+          "authorization": "Individual NASA Earthdata authorization required for protected scientific files. No login or download is initiated.",
+          "metadataUrl": "https://cmr.earthdata.nasa.gov/search/granules.json?short_name=EMITL2ARFL&version=001&bounding_box=-118.46000000000001,34.24,-118.44000000000001,34.260000000000005&page_size=2&sort_key=-start_date"
+        },
+        {
+          "catalog": "AVIRIS-Classic_L2_Reflectance_2154",
+          "dataset": "f250602t01p00r10_L2_reflectance",
+          "observationUtc": "2025-06-02T19:45:00+00:00",
+          "format": "AVIRIS-Classic L2 reflectance / ENVI header + binary",
+          "authorization": "Individual NASA Earthdata authorization required for protected scientific files. No login or download is initiated.",
+          "metadataUrl": "https://cmr.earthdata.nasa.gov/search/granules.json?short_name=AVIRIS-Classic_L2_Reflectance_2154&version=1&bounding_box=-118.46000000000001,34.24,-118.44000000000001,34.260000000000005&page_size=2&sort_key=-start_date"
+        },
+        {
+          "catalog": "AVIRIS-Classic_L2_Reflectance_2154",
+          "dataset": "f230426t01p00r11_L2_reflectance",
+          "observationUtc": "2023-04-26T19:57:00+00:00",
+          "format": "AVIRIS-Classic L2 reflectance / ENVI header + binary",
+          "authorization": "Individual NASA Earthdata authorization required for protected scientific files. No login or download is initiated.",
+          "metadataUrl": "https://cmr.earthdata.nasa.gov/search/granules.json?short_name=AVIRIS-Classic_L2_Reflectance_2154&version=1&bounding_box=-118.46000000000001,34.24,-118.44000000000001,34.260000000000005&page_size=2&sort_key=-start_date"
+        },
+        {
+          "catalog": "AVIRIS-NG_L2_Reflectance_2110",
+          "dataset": "AVIRIS-NG_L2_Reflectance.ang20220916t173120_rfl_v2aa1a_img.bin",
+          "observationUtc": "2022-09-16T17:31:20+00:00",
+          "format": "AVIRIS-NG L2 reflectance / campaign binary + header metadata",
+          "authorization": "Individual NASA Earthdata authorization required for protected scientific files. No login or download is initiated.",
+          "metadataUrl": "https://cmr.earthdata.nasa.gov/search/granules.json?short_name=AVIRIS-NG_L2_Reflectance_2110&version=1&bounding_box=-118.46000000000001,34.24,-118.44000000000001,34.260000000000005&page_size=2&sort_key=-start_date"
+        },
+        {
+          "catalog": "AVIRIS-NG_L2_Reflectance_2110",
+          "dataset": "AVIRIS-NG_L2_Reflectance.ang20220916t173120_rfl_v2aa1a_img.hdr",
+          "observationUtc": "2022-09-16T17:31:20+00:00",
+          "format": "AVIRIS-NG L2 reflectance / campaign binary + header metadata",
+          "authorization": "Individual NASA Earthdata authorization required for protected scientific files. No login or download is initiated.",
+          "metadataUrl": "https://cmr.earthdata.nasa.gov/search/granules.json?short_name=AVIRIS-NG_L2_Reflectance_2110&version=1&bounding_box=-118.46000000000001,34.24,-118.44000000000001,34.260000000000005&page_size=2&sort_key=-start_date"
+        }
+      ]
+    }
   }
 }

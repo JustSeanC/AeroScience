@@ -38,7 +38,7 @@ def verify(report=REPORT,root=ROOT,require_current=True):
         if not(r.get('passed') is True and r.get('networkBytes',0)>0 and r.get('validDerivedSamples',0)>0 and r.get('publishedProductVerified') is True and len(r.get('publishedProductSha256',''))==64 and r.get('sceneId') and r.get('bands') and r.get('flightInput')=='synthetic test position; not MSFS'):
             raise ValueError('Missing genuine discovery/retrieval/preparation/import/sampling/product evidence for '+str(r.get('workflow')))
     if require_current and value.get('finalNetworkRerun')!='passed':
-        raise ValueError('Final automatic-provider network rerun is pending: '+value.get('finalNetworkRerunReason','See genuine provider report.'))
+        raise ValueError('Final automatic-provider network rerun is pending: '+(value.get('finalNetworkRerunReason') or 'See genuine provider report.'))
     return value
 if __name__=='__main__':
     try:

@@ -30,7 +30,7 @@ Conservative source/staging reservations are checked against the Science Library
 
 ## Genuine acceptance versus mocks
 
-**Current release hold:** earlier genuine numeric runs succeeded, but the final source rerun hit cloud tunnel HTTP 503 failures. Its pending status blocks distribution; no effortless remote-sensing release is approved from that incomplete rerun.
+**Final numeric acceptance passed (2026-10-18):** a fresh complete online run validated all four numeric workflows and persisted/reloaded their mission products. USGS, Landsat and GLO-30 each produced 576 valid derived samples; Sentinel produced 183 valid NDVI samples from 576 checked positions. Independent GDAL comparison matched all 5,329 retained GLO-30 pixels and 576 source samples exactly. NASA discovery returned six matching catalog observations. The earlier HTTP 503 interruption is resolved for this run. The release build still checks source hashes and genuine evidence; Windows/MSFS and installer execution remain separate acceptance.
 
 The [genuine provider report](../research/v0.3.0-automatic-provider-acceptance.json) records real discovery, bounded retrieval, automatically generated manifests, existing-library import, QA-aware sampling and persisted/reloaded mission products for all four numeric paths. Flight inputs are explicitly synthetic WGS84 positions, **not MSFS flights**. Independent GDAL/rasterio source comparisons are development checks, not runtime dependencies. Recorded STAC fixtures and synthetic TIFF/HTTP tests exercise parser/failure behavior only and are not counted as online acceptance.
 
