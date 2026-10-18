@@ -2,6 +2,8 @@
 
 ## 0.3.0 — Remote Sensing & Research Payloads (public alpha)
 
+- Fix scientific-product map disposal races that could raise Leaflet `_leaflet_pos` errors during rapid navigation. Use immediate browser zoom to avoid delayed CSS transitions on removed panes, ignore late geography/resize/basemap work after disposal, and register viewer cleanup before asynchronous protection requests. Discard superseded product responses while retaining strict browser error assertions and frozen vendor assets.
+
 - Reuse shared persisted display preferences for Aviation/Metric planning: default NM, feet MSL, knots and NM²; adaptive m/km, meters MSL and metric area when selected. Convert entered values while retaining canonical precision and old explicit preferences. Preserve true headings, meters-based WGS84 geometry, saved patterns and export accuracy.
 - Make Track Spacing the primary parallel-survey control; recalculate passes/route/envelope previews, and add heading-aligned geodesic Fit Pattern to Survey Area using the entered spacing. Label envelope estimates as unvalidated sensor coverage; actual-footprint/overlap recommendations remain v0.4.0 work.
 - Correct Planner search so blank/no-match queries never move the map and Find lists results for explicit selection. Bundle a hash-pinned public-domain OurAirports snapshot with 72,684 open facilities, exact ICAO/IATA priority, readable names and offline city/coordinate search.

@@ -155,7 +155,7 @@ export async function remoteProducts(
     ),
   );
   parent.append(section);
-  let offset = 0;
+  let offset = 0, viewGeneration = 0;
   const list = e("div"),
     viewer = e("div"),
     filter = e("select");
@@ -169,7 +169,7 @@ export async function remoteProducts(
     filter.append(option);
   }
   filter.value = instrumentId || "";
-  filter.onchange = () => { offset=0;load(); };
+  filter.onchange = () => { offset=0;viewGeneration++;viewer.replaceChildren();load(); };
   section.append(filter, action("Refresh products", load), list, viewer);
   section.append(
     action("Previous product page", async () => {
@@ -198,8 +198,11 @@ export async function remoteProducts(
           `Flight: ${p.flightPacketUtc} · Source: ${p.sourceObservationUtc || "Unknown"} · ${number(p.bytes / 1048576)} MiB`,
         ),
         action("View Data", async () => {
+          const own = ++viewGeneration;
           viewer.replaceChildren();
-          await viewProduct(viewer, await api(`/api/science/products/${p.id}`), api);
+          const data = await api(`/api/science/products/${p.id}`);
+          if(own!==viewGeneration||!viewer.isConnected)return;
+          await viewProduct(viewer, data, api);
         }),
       );
       list.append(row);
@@ -233,6 +236,18 @@ export async function viewProduct(parent, data, api = null) {
   const mapHolder = e("div");
   parent.append(mapHolder);
   const map = new ResearchMap(mapHolder,undefined,{fitMaxZoom:19});
+  let chart, pointsLayer, disposed = false, stopUnits = () => {};
+  const dispose = () => {
+    if(disposed)return;
+    disposed=true;
+    removed.disconnect();stopUnits();chart?.destroy();pointsLayer?.remove();map.destroy();
+  };
+  const removed = new MutationObserver(() => {
+    if(!mapHolder.isConnected)dispose();
+  });
+  // Own resources before the first await: navigation may remove this view
+  // while its protection request or geography is still in flight.
+  removed.observe(document.body,{childList:true,subtree:true});
   map.set({plan:{id:p.id,waypoints:[]},footprints:[{vertices:p.footprint.boundary,label:"Derived acquisition footprint; cloud/nodata cells can be excluded"}],markers:[],track:[]});
   map.fit(p.footprint.boundary);
   const select = e("select");
@@ -274,6 +289,7 @@ export async function viewProduct(parent, data, api = null) {
     const protection = await api(
       `/api/science/datasets/${p.datasetId}/protection`,
     );
+    if(disposed||map.destroyed||!mapHolder.isConnected){dispose();return;}
     const protect = action(
       protection.isProtected ? "Remove Dataset Protection" : "Protect Dataset",
       async () => {
@@ -317,8 +333,8 @@ export async function viewProduct(parent, data, api = null) {
       "Evidence stays local. Hashes are integrity aids, not proof of flight authenticity or an objective pass/fail result.",
     ),
   );
-  let chart, pointsLayer;
   const draw = () => {
+    if(disposed||map.destroyed||!mapHolder.isConnected){dispose();return;}
     chart?.destroy();
     chart = null;
     pointsLayer?.remove();
@@ -527,9 +543,5 @@ export async function viewProduct(parent, data, api = null) {
   };
   select.onchange = draw;
   draw();
-  const stopUnits=onUnitsChanged(draw);
-  const removed=new MutationObserver(()=>{
-    if(!mapHolder.isConnected){removed.disconnect();stopUnits();chart?.destroy();map.destroy();}
-  });
-  removed.observe(document.body,{childList:true,subtree:true});
+  if(!disposed)stopUnits=onUnitsChanged(draw);
 }

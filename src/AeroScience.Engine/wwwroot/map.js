@@ -52,8 +52,11 @@ export class ResearchMap {
       worldCopyJump: true,
       preferCanvas: true,
       zoomControl: true,
+      // Leaflet 1.9's delayed CSS zoom completion can outlive remove().
+      // Product maps are replaceable; keep zoom immediate and teardown synchronous.
+      zoomAnimation: false,
     }).setView([38, -97], 4);
-    this.map.on("moveend",()=>{const center=this.map.getCenter();this.container.dataset.center=JSON.stringify([center.lat,center.lng,this.map.getZoom()]);});
+    this.map.on("moveend",()=>{if(this.destroyed)return;const center=this.map.getCenter();this.container.dataset.center=JSON.stringify([center.lat,center.lng,this.map.getZoom()]);});
     this.container.dataset.center=JSON.stringify([38,-97,4]);
     this.map.attributionControl.addAttribution(
       "Leaflet · Natural Earth (public domain) · Geographic reference, not navigation",
@@ -96,7 +99,7 @@ export class ResearchMap {
     results.setAttribute("aria-label", "Search results");results.hidden=true;results.size=5;tools.append(results);
     const searchStatus=document.createElement("p");searchStatus.setAttribute("role","status");tools.append(searchStatus);
     const choose = p => {
-      if(!p)return;
+      if(this.destroyed||!p)return;
       this.center(p);this.initialized=true;
       if(this.searchMarker)this.map.removeLayer(this.searchMarker);
       this.searchMarker=L.circleMarker(ll(p),{radius:8,color:"#ffffff"}).bindTooltip(label(locationLabel(p))).addTo(this.map);
@@ -106,6 +109,7 @@ export class ResearchMap {
       const q=search.value.trim();results.replaceChildren();results.hidden=true;
       if(!q){searchStatus.textContent="Enter an airport code, name, city or latitude, longitude. Your map position has not changed.";return;}
       await this.ready;
+      if(this.destroyed)return;
       const matches=searchLocations(q,this.airportSearch||[],this.places||[]);
       const placeholder=document.createElement("option");placeholder.textContent="Select a result to center the map";placeholder.value="";results.append(placeholder);
       for(const [i,p] of matches.entries()){const option=document.createElement("option");option.value=String(i);option.textContent=locationLabel(p);results.append(option);}
@@ -122,6 +126,7 @@ export class ResearchMap {
     };
     this.onlineTiles = [];
     this.applyBasemap = (client) => {
+      if(this.destroyed)return;
       this.basemapClient = client;
       this.basemapVisible = !!(
         this.container.clientWidth &&
@@ -160,7 +165,7 @@ export class ResearchMap {
           keepBuffer: 0,
         }).addTo(this.map);
         tile.once("tileerror", () => {
-          if (!this.onlineTiles.includes(tile)) return;
+          if (this.destroyed || !this.onlineTiles.includes(tile)) return;
           for (const layer of this.onlineTiles) this.map.removeLayer(layer);
           this.onlineTiles = [];
           if (this.esriLogo) {
@@ -227,6 +232,7 @@ export class ResearchMap {
       this.map.on("draw:edited draw:deleted", () => this.areaChanges());
     }
     this.visibilityChanged = () => {
+      if(this.destroyed)return;
       const visible = !!(
         this.container.clientWidth &&
         this.container.clientHeight &&
@@ -237,12 +243,14 @@ export class ResearchMap {
     };
     document.addEventListener("visibilitychange", this.visibilityChanged);
     this.observer = new ResizeObserver(() => {
+      if(this.destroyed)return;
       this.map.invalidateSize({ pan: false });
       this.visibilityChanged();
     });
     this.observer.observe(this.container);
     this.ready = loadGeography()
       .then(([countries, places, airports, airportSearch]) => {
+        if(this.destroyed)return;
         this.airportSearch=airportSearch;this.places=places.features;
         this.countries = L.geoJSON(countries, {
           style: {
@@ -279,6 +287,7 @@ export class ResearchMap {
           this.context.addLayer(m);
         }
         const context = () => {
+          if(this.destroyed)return;
           if (this.map.getZoom() >= 5) this.context.addTo(this.map);
           else this.map.removeLayer(this.context);
         };
@@ -287,6 +296,7 @@ export class ResearchMap {
         this.resolveDeparture();
       })
       .catch(() => {
+        if(this.destroyed)return;
         this.coordinate.textContent =
           "Bundled geography could not load. Coordinate editing remains available; check installation files.";
         this.locations = [];
@@ -303,6 +313,7 @@ export class ResearchMap {
     this.map.remove();
   }
   areaChanges() {
+    if(this.destroyed)return;
     this.options.onAreasChange(
       this.areas.getLayers().map((l) => ({
         name: l.areaName || "Survey area",
@@ -313,6 +324,7 @@ export class ResearchMap {
     );
   }
   set(data) {
+    if(this.destroyed)return;
     const planId = data.plan?.id || null;
     if (planId !== this.planId) {
       this.planId = planId;
@@ -345,7 +357,7 @@ export class ResearchMap {
     ].filter(valid);
   }
   resolveDeparture() {
-    if (this.initialized || !this.locations?.length) return;
+    if (this.destroyed || this.initialized || !this.locations?.length) return;
     const q = this.data.plan?.departure?.trim().toLowerCase();
     const f =
       q &&
@@ -364,15 +376,18 @@ export class ResearchMap {
     }
   }
   interaction(mode) {
+    if(this.destroyed)return;
     this.interactionMode=mode;
     this.container.classList.toggle("map-placement-mode",!!mode);
   }
   draft(points=[],polygon=false) {
+    if(this.destroyed)return;
     this.draftLayer?.remove();this.draftLayer=this.L.layerGroup().addTo(this.map);
     for(const p of points)this.L.circleMarker(ll(p,points[0]?.longitude),{radius:7,color:"#ffffff",fillColor:"#f5cd79",fillOpacity:1}).addTo(this.draftLayer);
     if(points.length>1)(polygon&&points.length>=3?this.L.polygon(points.map(p=>ll(p,points[0]?.longitude)),{color:"#ffffff",dashArray:"4 6",fillOpacity:.08}):this.L.polyline(points.map(p=>ll(p,points[0]?.longitude)),{color:"#ffffff",dashArray:"4 6"})).addTo(this.draftLayer);
   }
   preview(result) {
+    if(this.destroyed)return;
     this.previewLayer?.remove();this.previewResult=result;
     this.previewLayer=this.L.layerGroup().addTo(this.map);
     if(!result)return;
@@ -390,10 +405,11 @@ export class ResearchMap {
     for(const [p,name] of [[points[0],"Preview entry"],[points.at(-1),"Preview exit"]])if(p)this.L.circleMarker(ll(p),{radius:6,color:name.includes("entry")?"#50dcc7":"#eb9bbd"}).bindTooltip(name).addTo(this.previewLayer);
   }
   center(point) {
-    if (valid(point))
+    if (!this.destroyed && valid(point))
       this.map.setView(ll(point), Math.max(9, this.map.getZoom()));
   }
   fit(points = this.geometry()) {
+    if(this.destroyed)return;
     const p = points.filter(valid);
     if (!p.length) {
       this.map.setView([38, -97], 4);
@@ -406,7 +422,7 @@ export class ResearchMap {
     );
   }
   draw() {
-    if (!this.map) return;
+    if (this.destroyed || !this.map) return;
     const L = this.L,
       d = this.data,
       plan = d.plan || {},
