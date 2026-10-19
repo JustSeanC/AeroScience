@@ -1,3 +1,4 @@
+import { hyperspectralCard } from "./hyperspectral-import.js";
 import { areaSummary } from "./planner-geometry.js";
 import { scientificReadiness } from "./scientific-access.js";
 import { routeExportButton } from "./route-export.js";
@@ -186,7 +187,7 @@ export function initializeResearch(context) {
     }),
   );
   control.append(markerPanel);
-  scientificReadiness(control, ctx.api).catch(() => {});
+  scientificReadiness(control, ctx.api, liveMap).catch(() => {});
   $("instruments").append(text("div", undefined, "research-panel"));
   $("instruments").lastChild.id = "instrument-content";
 }
@@ -720,6 +721,7 @@ async function instruments() {
   );
   p.append(sourceLabel);
   await scientificReadiness(p, ctx.api);
+  await hyperspectralCard(p,ctx.api,state?.telemetry);
   await unitControls(p, ctx.api, () => instruments());
   const collection = text("div");
   collection.id = "collection-status";

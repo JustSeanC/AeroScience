@@ -24,4 +24,12 @@ app.MapPost("/api/testing/remote/{kind}",async (string kind,ScienceStore science
     using var cancel=new CancellationTokenSource(TimeSpan.FromSeconds(10));while(science.Products(mission.Id).Length==0)await Task.Delay(10,cancel.Token);
     coordinator.End(mission.Id);return new{missionId=mission.Id,product=science.Products(mission.Id).Single()};
 });
+app.MapPost("/api/testing/guided/{kind}",async(string kind,ScientificImportSession session)=>
+{
+    var parsed=Enum.Parse<RemoteKind>(kind,true);var folder=Path.Combine(options.DataDirectory,"guided-test-inputs",Guid.NewGuid().ToString("N"));
+    _=RemoteFixtureFiles.Create(folder,parsed);
+    await session.Select(parsed==RemoteKind.Hyperspectral?Path.Combine(folder,"cube.hdr"):parsed==RemoteKind.Terrain?Path.Combine(folder,"elevation.tif"):folder,parsed);
+    await session.Configure(new(Name:"SYNTHETIC UI TEST FIXTURE — "+kind,Provider:"Isolated automated browser fixture",License:"Synthetic test data; not a genuine scientific observation",Notes:"Test-only generated values; no Windows/MSFS acceptance",Unit:parsed==RemoteKind.Terrain?"m":"reflectance",VerticalDatum:"Unknown",SceneId:"synthetic-fixture",Scale:.0001,Offset:0));
+    return session.Snapshot();
+});
 app.Run();

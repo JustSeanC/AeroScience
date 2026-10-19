@@ -20,7 +20,7 @@ class PackagingTests(unittest.TestCase):
         for directory in ('vendor','geography'):
             shutil.copytree(web/directory,root/'wwwroot'/directory)
         shutil.copy2(web/'assets-manifest.json',root/'wwwroot/assets-manifest.json')
-        for name in ('patterns.js','location-search.js','planner-geometry.js','analysis.js','science-display.js','basemaps.js','geographic-view.js','route-export.js','remote-science.js','scientific-access.js','application-updates.js','storage-management.js'):
+        for name in ('patterns.js','location-search.js','planner-geometry.js','analysis.js','science-display.js','basemaps.js','geographic-view.js','route-export.js','hyperspectral-import.js','scientific-sources.js','settings-navigation.js','remote-science.js','scientific-access.js','application-updates.js','storage-management.js'):
             shutil.copy2(web/name,root/'wwwroot'/name)
         shutil.copytree(packaging.REPO/'licenses',root/'licenses')
         shutil.copytree(packaging.REPO/'docs'/'remote-sensing',root/'wwwroot/help/remote-sensing')

@@ -70,6 +70,10 @@ public sealed partial class ScienceStore
         StorageManager.ValidateLocalPath(manifestPath);
         if (new FileInfo(manifestPath).Length > 1048576) throw new InvalidDataException("Source manifest must be under 1 MiB.");
         var source = JsonSerializer.Deserialize<ScientificSourceManifest>(File.ReadAllText(manifestPath), WireJson.Options) ?? throw new InvalidDataException("A source manifest is required.");
+        return ValidateSourceManifest(source);
+    }
+    public static ScientificSourceManifest ValidateSourceManifest(ScientificSourceManifest source)
+    {
         if (source.FormatVersion != 1 || !Enum.IsDefined(source.Kind) || source.Bands is null || source.Bands.Length is < 1 or > 512 || source.Bands.Any(b=>b is null || string.IsNullOrWhiteSpace(b.File))
             || new[] { source.Name, source.Provider, source.License, source.Citation, source.SceneId, source.VerticalDatum }.Any(s => string.IsNullOrWhiteSpace(s) || s.Length > 2000 || s.Any(c => char.IsControl(c)))
             || source.ObservationUtc is { Offset: var zone } && zone != TimeSpan.Zero || source.ObservationUtc>DateTimeOffset.UtcNow.AddDays(1)
@@ -98,9 +102,13 @@ public sealed partial class ScienceStore
     }
     public static (ScientificSourceManifest Manifest, long Bytes) InspectImport(string manifestPath)
     {
-        var source = ReadSourceManifest(manifestPath); var root = Path.GetDirectoryName(Path.GetFullPath(manifestPath))!;
+        return InspectImport(ReadSourceManifest(manifestPath),Path.GetDirectoryName(Path.GetFullPath(manifestPath))!);
+    }
+    public static (ScientificSourceManifest Manifest,long Bytes) InspectImport(ScientificSourceManifest manifest,string root)
+    {
+        var source=ValidateSourceManifest(manifest);
         long bytes = 0;
-        foreach (var name in source.Bands.SelectMany(b => new[] { b.File, b.HeaderFile }).OfType<string>().Distinct(StringComparer.OrdinalIgnoreCase))
+        foreach (var name in source.Bands.SelectMany(b => new[] { b.File, b.HeaderFile }).OfType<string>().Concat(source.OriginalMetadataFiles??[]).Distinct(StringComparer.OrdinalIgnoreCase))
         {
             var file = ScientificRaster.SafeFile(root, name); var size = new FileInfo(file).Length;
             if (size is <= 0 or > 17179869184) throw new InvalidDataException("Each local source file must contain 1 byte to 16 GiB; split larger collections.");
@@ -111,12 +119,31 @@ public sealed partial class ScienceStore
     }
     public async Task<ScientificSource> ImportSourceAsync(string manifestPath, CancellationToken token = default, IProgress<string>? progress = null)
     {
-        var inspected = InspectImport(manifestPath); var manifest = inspected.Manifest;
+        return await ImportSourceAsync(ReadSourceManifest(manifestPath),Path.GetDirectoryName(Path.GetFullPath(manifestPath))!,token,progress);
+    }
+    public async Task<ScientificSource> ImportSourceAsync(ScientificSourceManifest input,string root,CancellationToken token=default,IProgress<string>? progress=null,bool reuseExisting=false)
+    {
+        var inspected = InspectImport(input,root); var manifest = inspected.Manifest;
+        if(reuseExisting)
+        {
+            var identity=JsonSerializer.Serialize(manifest,WireJson.Options);
+            foreach(var existing in Sources().Where(s=>JsonSerializer.Serialize(s.Manifest,WireJson.Options)==identity))
+            {
+                var matches=true;foreach(var file in existing.Files)
+                {
+                    token.ThrowIfCancellationRequested();var original=ScientificRaster.SafeFile(root,file.RelativePath);
+                    var retained=ScientificRaster.SafeFile(Path.Combine(DirectoryPath,existing.RelativeDirectory),file.RelativePath);
+                    foreach(var path in new[]{original,retained}){using var bytes=File.OpenRead(path);if(bytes.Length!=file.Bytes||Convert.ToHexString(await SHA256.HashDataAsync(bytes,token)).ToLowerInvariant()!=file.Sha256){matches=false;break;}}
+                    if(!matches)break;
+                }
+                if(matches){progress?.Report("This verified dataset is already imported; no extra copy was made.");return existing;}
+            }
+        }
         using var reservation=Management?.ReserveScience(inspected.Bytes+1048576);
         if (Sources().Length >= 500) throw new InvalidOperationException("This library supports up to 500 source collections; use bounded regional collections.");
         if (AvailabilityError() is { } unavailable) throw new IOException(unavailable);
         if (disk.FreeBytes(DirectoryPath) < inspected.Bytes + StorageManager.MinimumFreeBytes) throw new IOException("Insufficient Science Library space for the original source files and reserve.");
-        var root = Path.GetDirectoryName(Path.GetFullPath(manifestPath))!; var id = Guid.NewGuid();
+        var id = Guid.NewGuid();
         var relative = "Sources/" + id.ToString("N"); var destination = Path.Combine(DirectoryPath, relative); var temporary = destination + ".partial";
         var grids = new Dictionary<string, RasterGrid>(); var bands = new List<SourceBand>();
         foreach (var band in manifest.Bands)
@@ -133,13 +160,13 @@ public sealed partial class ScienceStore
                 throw new InvalidDataException("Hyperspectral inputs require at least 16 ordered ENVI wavelengths and explicitly distinguished reflectance or radiance units.");
         }
         Initialize();
-        var names = manifest.Bands.SelectMany(b => new[] { b.File, b.HeaderFile }).OfType<string>().Distinct(StringComparer.OrdinalIgnoreCase).Append("source.json").ToArray();
+        var names = manifest.Bands.SelectMany(b => new[] { b.File, b.HeaderFile }).OfType<string>().Concat(manifest.OriginalMetadataFiles??[]).Distinct(StringComparer.OrdinalIgnoreCase).Append("source.json").ToArray();
         var ledger = BeginManagedWrite("Source import", names.SelectMany(name => new[] { relative + ".partial/" + name, relative + "/" + name }));
         Directory.CreateDirectory(temporary);
         try
         {
             var files = new List<ManagedSourceFile>();
-            foreach (var name in manifest.Bands.SelectMany(b => new[] { b.File, b.HeaderFile }).OfType<string>().Distinct(StringComparer.OrdinalIgnoreCase))
+            foreach (var name in manifest.Bands.SelectMany(b => new[] { b.File, b.HeaderFile }).OfType<string>().Concat(manifest.OriginalMetadataFiles??[]).Distinct(StringComparer.OrdinalIgnoreCase))
             {
                 token.ThrowIfCancellationRequested(); var fromPath = ScientificRaster.SafeFile(root, name); var target = Path.Combine(temporary, name);
                 Directory.CreateDirectory(Path.GetDirectoryName(target)!); progress?.Report("Copying " + Path.GetFileName(name));
@@ -152,7 +179,10 @@ public sealed partial class ScienceStore
             var fingerprint = Convert.ToHexString(SHA256.HashData(JsonSerializer.SerializeToUtf8Bytes(new { manifest, files }, WireJson.Options))).ToLowerInvariant();
             var source = new ScientificSource(id, manifest, DateTimeOffset.UtcNow, grids, files.ToArray(), fingerprint, relative);
             PreferenceStore.WriteAtomic(Path.Combine(temporary, "source.json"), source);
-            token.ThrowIfCancellationRequested(); Directory.Move(temporary, destination);
+            token.ThrowIfCancellationRequested();
+            if(reuseExisting&&Sources().FirstOrDefault(s=>s.ManifestSha256==fingerprint) is {} existing)
+            {foreach(var name in files.Select(f=>f.RelativePath).Append("source.json"))File.Delete(Path.Combine(temporary,name));Directory.Delete(temporary);File.Delete(ledger);progress?.Report("This verified dataset is already imported.");return existing;}
+            Directory.Move(temporary, destination);
             lock (gate)
             {
                 using var db = Open(write: true); using var cmd = db.CreateCommand(); cmd.CommandText = "INSERT INTO remote_sources VALUES($id,$sha,$json)";

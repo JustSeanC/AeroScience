@@ -23,5 +23,5 @@ test('meter-based saved pattern retains identical canonical parameters and geogr
  await units(page).selectOption('metric');await page.reload();await expect(units(page)).toHaveValue('metric');
 });
 test('explicit older custom preferences survive planner opening and profile switches preserve other science choices',async({page,request})=>{
- await post(request,'/api/display/units',{...aviation,temperature:'kelvin',pressure:'kPa',distance:'miles'});await page.goto('/#planner');await expect(units(page)).toHaveValue('custom');await units(page).selectOption('metric');const prefs=(await(await request.get('/api/display/units')).json()).preferences;expect(prefs.temperature).toBe('kelvin');expect(prefs.pressure).toBe('kPa');expect(prefs.distance).toBe('kilometres');expect(prefs.altitude).toBe('metres');
+ await post(request,'/api/display/units',{...aviation,temperature:'kelvin',pressure:'kPa',distance:'miles'});await page.goto('/#planner');await expect(units(page)).toHaveValue('aviation');await units(page).selectOption('metric');const prefs=(await(await request.get('/api/display/units')).json()).preferences;expect(prefs.temperature).toBe('kelvin');expect(prefs.pressure).toBe('kPa');expect(prefs.distance).toBe('miles');expect(prefs.altitude).toBe('feet');expect(prefs.planningProfile).toBe('metric');
 });

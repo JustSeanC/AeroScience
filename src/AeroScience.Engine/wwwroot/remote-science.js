@@ -1,3 +1,4 @@
+import { openHyperspectralImport, hyperspectralCard } from "./hyperspectral-import.js";
 import { scientificAccessSettings } from "./scientific-access.js";
 import { ResearchMap } from "./map.js";
 import { displayReading, onUnitsChanged } from "./science-display.js";
@@ -37,108 +38,7 @@ function link(parent, title, href) {
   a.href = href;
   parent.append(a, document.createTextNode(" · "));
 }
-export async function sourceSettings(parent, api) {
-  await scientificAccessSettings(parent, api);
-  const section = e("section");
-  section.className = "panel research-panel";
-  section.append(
-    e("h2", "Scientific Data Sources · Advanced Manual Import"),
-    e(
-      "p",
-      "Optional advanced workflow: import a licensed GeoTIFF/ENVI collection with its metadata manifest. Normal pilots can use automatic preparation above. Both workflows use the same validated Scientific Data Library. Basemap images are never scientific sensor sources.",
-    ),
-  );
-  parent.append(section);
-  section.append(
-    action("Import scientific source collection…", () =>
-      api("/api/desktop/science-import", {}),
-    ),
-  );
-  link(
-    section,
-    "Remote-sensing quick start",
-    "/help/remote-sensing/quick-start.md",
-  );
-  link(
-    section,
-    "Supported files and import walkthrough",
-    "/help/remote-sensing/sources.md",
-  );
-  const lat = e("input"),
-    lon = e("input");
-  lat.type = lon.type = "number";
-  lat.step = lon.step = "any";
-  lat.placeholder = "Latitude";
-  lon.placeholder = "Longitude";
-  lat.setAttribute("aria-label", "Source availability latitude");
-  lon.setAttribute("aria-label", "Source availability longitude");
-  const results = e("div");
-  section.append(lat, lon, action("Check source coverage", load), results);
-  async function load() {
-    results.replaceChildren();
-    const query =
-      lat.value !== "" && lon.value !== ""
-        ? `?latitude=${encodeURIComponent(lat.value)}&longitude=${encodeURIComponent(lon.value)}`
-        : "";
-    const sources = await api("/api/science/sources" + query);
-    if (!sources.length)
-      results.append(
-        e(
-          "p",
-          "No scientific source collections are prepared yet. Enable automatic access above, enable an instrument and prepare a plan or a small area. Advanced manual import is optional. No fabricated reference datasets are bundled.",
-        ),
-      );
-    for (const entry of sources) {
-      const s = entry.source,
-        m = s.manifest,
-        card = e("article");
-      card.className = "panel";
-      card.append(
-        e("h3", m.name),
-        e(
-          "p",
-          `${m.kind} · ${m.provider} · ${entry.filesAvailable ? "Files available" : "Unavailable"}${entry.coversPoint === null ? "" : entry.coversPoint ? " · Covers selected point" : " · Outside coverage"}`,
-        ),
-        e(
-          "p",
-          `Observed: ${m.observationUtc || "Unknown, not live"} · Published: ${m.publicationUtc || "Not supplied"} · Imported: ${s.importedUtc}`,
-        ),
-      );
-      card.append(
-        e(
-          "p",
-          `${m.bands.length} bands · ${number(s.files.reduce((n, f) => n + f.bytes, 0) / 1048576)} MiB · ${m.license} · Vertical datum: ${m.verticalDatum}`,
-        ),
-      );
-      if (entry.error) card.append(e("p", entry.error));
-      const details = e("details");
-      details.append(
-        e("summary", "Bands, grids and source provenance"),
-        e("p", m.citation),
-      );
-      for (const b of m.bands) {
-        const g = s.grids[b.id];
-        details.append(
-          e(
-            "p",
-            `${b.id}: ${b.unit}${b.wavelengthNm ? ` · ${b.wavelengthNm} nm` : ""}${b.badBand ? " · Bad band excluded" : ""} · ${g.crs}, ${g.width}×${g.height}, native pixels ${Math.abs(g.pixelWidth)}×${Math.abs(g.pixelHeight)} ${g.crs === "EPSG:4326" ? "degrees" : "m"}`,
-          ),
-        );
-      }
-      details.append(
-        e(
-          "p",
-          m.notes ||
-            "Original source checksums and metadata are retained with every product.",
-        ),
-      );
-      card.append(details);
-      results.append(card);
-    }
-  }
-  section.append(action("Refresh local sources", load));
-  await load();
-}
+export { scientificSourcesSettings as sourceSettings } from "./scientific-sources.js";
 export async function remoteProducts(
   parent,
   api,
@@ -155,6 +55,8 @@ export async function remoteProducts(
     ),
   );
   parent.append(section);
+  const hyperspectral = e("div");section.append(hyperspectral);
+  async function showHyperspectral(){hyperspectral.replaceChildren();if(filter.value==="hyperspectral-imager")await hyperspectralCard(hyperspectral,api);}
   let offset = 0, viewGeneration = 0;
   const list = e("div"),
     viewer = e("div"),
@@ -169,8 +71,9 @@ export async function remoteProducts(
     filter.append(option);
   }
   filter.value = instrumentId || "";
-  filter.onchange = () => { offset=0;viewGeneration++;viewer.replaceChildren();load(); };
+  filter.onchange = () => { offset=0;viewGeneration++;viewer.replaceChildren();showHyperspectral();load(); };
   section.append(filter, action("Refresh products", load), list, viewer);
+  await showHyperspectral();
   section.append(
     action("Previous product page", async () => {
       offset = Math.max(0, offset - 30);

@@ -20,7 +20,7 @@ export function patternEditor(parent, { api, notice, get, set, aircraft, pickCen
   const field = (name, value, type = "number", quantity = null, suffix="") => {
     const label = element("label", name),
       input = element("input");
-    input.type = type;
+    input.type = type;input.setAttribute("aria-label",name);
     input.value = value ?? "";
     if (type === "number") input.step = "any";
     label.append(input);
@@ -67,9 +67,24 @@ export function patternEditor(parent, { api, notice, get, set, aircraft, pickCen
   const report = element("p"),
     saved = element("div");
   panel.append(report, saved);
-  const explanation=element("p");panel.append(explanation);
+  const help=element("details"),explanation=element("p");help.append(element("summary","Pattern help and limitations"),explanation);panel.append(help);
   function describe(){explanation.textContent=kind.value==="lawnmower"?"Lawnmower: long scan legs follow the reference heading; each turn steps sideways across it. Entry and exit are marked green and pink.":kind.value==="creepingLine"?"Creeping line: long scan legs cross the reference heading; the survey steps forward along that heading. Parallel legs are rotated 90° relative to lawnmower for the same reference heading.":kind.value==="orbit"?"Orbit: center, radius, direction and revolutions define the mission. The map shows a smooth circle with entry/exit only. Exports retain the 5° point-to-point approximation (73 points for one revolution); no native EFB orbit command is claimed.":"Preview is dashed white; committed route is gold. Parameter changes update the preview without changing the map view.";}
-  describe();
+  const fieldErrors=new Map();
+  for(const control of [lat,lon,heading,spacing,length,width,radius,legs,orbits,alt]){const error=element("span");error.className="field-error";error.id="pattern-error-"+Math.random().toString(36).slice(2);control.setAttribute("aria-describedby",error.id);control.closest("label").append(error);fieldErrors.set(control,error);}
+  function visibility(){const parallel=["lawnmower","creepingLine"].includes(kind.value);for(const [control,visible] of [[spacing,parallel||kind.value==="expandingSquare"],[width,parallel||kind.value==="box"],[length,! ["orbit","expandingSquare","radialSpokes"].includes(kind.value)],[radius,["orbit","racetrack","radialSpokes"].includes(kind.value)],[legs,parallel||["expandingSquare","radialSpokes"].includes(kind.value)],[orbits,["orbit","racetrack"].includes(kind.value)]])control.closest("label").hidden=!visible;direction.hidden=!["orbit","racetrack","expandingSquare","radialSpokes","box"].includes(kind.value);}
+  function validate(){let valid=true;for(const [input,error] of fieldErrors){error.textContent="";input.removeAttribute("aria-invalid");}
+    const fail=(input,message)=>{valid=false;input.setAttribute("aria-invalid","true");fieldErrors.get(input).textContent=message;};
+    if(lat.value===""||lon.value===""){report.textContent=preview?"Preview outdated — choose a center on the map.":"Choose a center on the map to preview your pattern.";return false;}
+    if(!Number.isFinite(Number(lat.value))||Number(lat.value)<-90||Number(lat.value)>90)fail(lat,"Latitude must be between −90° and 90°.");
+    if(!Number.isFinite(Number(lon.value))||Number(lon.value)<-180||Number(lon.value)>180)fail(lon,"Longitude must be between −180° and 180°.");
+    if(heading.value===""||!Number.isFinite(Number(heading.value)))fail(heading,"Enter a reference heading in degrees true.");
+    for(const [input,name] of [[spacing,"Track spacing"],[length,"Leg length"],[width,"Survey width"],[radius,"Radius"]])if(!input.closest("label").hidden){const v=input.planningUnits.read();if(!Number.isFinite(v)||v<10||v>500000)fail(input,`${name} must be between ${planningDistance(10)} and ${planningDistance(500000)}.`);}
+    if(!legs.closest("label").hidden&&(!Number.isInteger(Number(legs.value))||Number(legs.value)<2||Number(legs.value)>100))fail(["lawnmower","creepingLine"].includes(kind.value)?width:legs,["lawnmower","creepingLine"].includes(kind.value)?"Survey width is too large for this track spacing and the maximum of 100 passes.":"Passes / spokes must be between 2 and 100.");
+    if(["orbit","racetrack"].includes(kind.value)&&(!Number.isInteger(Number(orbits.value))||Number(orbits.value)<1||Number(orbits.value)>10))fail(orbits,"Orbit count must be between 1 and 10.");
+    if(!valid)report.textContent=preview?"Preview outdated — correct the highlighted fields. The previous valid preview is retained.":"Correct the highlighted fields to preview.";
+    return valid;
+  }
+  describe();visibility();report.textContent="Choose a center on the map to preview your pattern.";
   const action = (name, fn) => {
     const b = element("button", name);
     b.type = "button";
@@ -90,7 +105,7 @@ export function patternEditor(parent, { api, notice, get, set, aircraft, pickCen
     if (undo.length > 20) undo.shift();
   }
   function apply(data) {
-    clearTimeout(timer);generation++;preview=null;
+    clearTimeout(timer);generation++;preview=null;lastAddedSignature=null;
     patterns = data.patterns || [];
     set(data);
     renderSaved();
@@ -105,27 +120,31 @@ export function patternEditor(parent, { api, notice, get, set, aircraft, pickCen
       kind: kind.value,
       center: { latitude: Number(lat.value), longitude: Number(lon.value) },
       headingDegrees: Number(heading.value),
-      lengthMetres: length.planningUnits.read(),
-      widthMetres: width.planningUnits.read(),
-      spacingMetres: spacing.planningUnits.read(),
-      radiusMetres: radius.planningUnits.read(),
-      legs: Number(legs.value),
-      orbits: Number(orbits.value),
+      lengthMetres: length.planningUnits.read()??10000,
+      widthMetres: width.planningUnits.read()??5000,
+      spacingMetres: spacing.planningUnits.read()??1000,
+      radiusMetres: radius.planningUnits.read()??2500,
+      legs: Number(legs.value)||6,
+      orbits: ["orbit","racetrack"].includes(kind.value)?Number(orbits.value):1,
       clockwise: clockwise.checked,
       targetAltitudeFeet: alt.planningUnits.read(),
       notes: notes.value,
     };
   };
+  let previewSignature=null,adding=false,regenerating=false,lastAddedSignature=null;
+  const signature=d=>JSON.stringify({...d,id:null});
   let generation = 0,
     timer;
   async function generate() {
     const id = ++generation;
-    const result = await api("/api/patterns/preview", definition());
+    if(!validate())return null;
+    const input=definition(),requestedSignature=signature(input);
+    const result = await api("/api/patterns/preview", input);
     if (id !== generation || !panel.isConnected) return null;
-    preview = result;
+    preview = result;previewSignature=requestedSignature;
     planningText(report,()=>{
       const d=result.definition,parallel=["lawnmower","creepingLine"].includes(d.kind);
-      return `Pattern preview only: ${parallel?`${d.legs} survey passes · Track spacing ${planningDistance(d.spacingMetres)} · Approximate survey envelope ${planningArea(d.lengthMetres*(d.legs-1)*d.spacingMetres)} (sensor coverage unvalidated) · `:""}${result.waypoints.length} navigation points · ${planningDistance(result.distanceMetres)} route distance · Reference heading ${d.headingDegrees}° true. ${result.method}`;
+      return `Preview Ready. Pattern preview only: ${parallel?`${d.legs} survey passes · Track spacing ${planningDistance(d.spacingMetres)} · Approximate survey envelope ${planningArea(d.lengthMetres*(d.legs-1)*d.spacingMetres)} (sensor coverage unvalidated) · `:""}${result.waypoints.length} navigation points · ${planningDistance(result.distanceMetres)} route distance · Reference heading ${d.headingDegrees}° true. ${result.definition.kind==="orbit"?"Orbit export uses a 5° point-to-point approximation; native EFB orbit support is not claimed.":""}`;
     });
     const current = get();
     set({ ...current, preview: result, previewOnly:true });
@@ -133,11 +152,15 @@ export function patternEditor(parent, { api, notice, get, set, aircraft, pickCen
   }
   function schedule(){
     changed?.();
-    clearTimeout(timer);generation++;preview=null;describe();set({...get(),preview:null,previewOnly:true});
+    clearTimeout(timer);generation++;describe();visibility();
+    if(preview)report.textContent="Preview outdated — recalculating…";
     const requested=generation;
     timer=setTimeout(()=>generate().catch(error=>{if(requested+1===generation)report.textContent=error.message;}),250);
   }
+  let lastEditKey=null;
   function parametersChanged(event){
+    const key=JSON.stringify([kind.value,...[lat,lon,heading,spacing,length,width,radius,legs,orbits,alt,notes,clockwise].map(input=>input.type==="checkbox"?input.checked:input.value)]);
+    if(event.type==="change"&&key===lastEditKey)return;lastEditKey=key;
     if(["lawnmower","creepingLine"].includes(kind.value)&&[spacing,width].includes(event.target)){
       const gap=spacing.planningUnits.read(),extent=width.planningUnits.read();
       if(gap>0&&extent>0)legs.value=Math.max(2,Math.ceil(extent/gap)+1);
@@ -189,19 +212,21 @@ export function patternEditor(parent, { api, notice, get, set, aircraft, pickCen
     return generate();
   });
   action("Preview pattern", generate);
-  action("Add Pattern to Mission", async () => {
-    clearTimeout(timer);
-    const generated = await generate();
-    if(!generated)throw Error("Parameters changed before the preview completed. Wait for the current preview.");
-    generation++;
-    remember();
-    apply({
-      ...get(),
-      waypoints: [...get().waypoints, ...generated.waypoints],
-      patterns: [...patterns, generated.definition],
-      preview: [],
-    });
-    preview = null;
+  const add=action("Add Pattern to Mission",async()=>{
+    if(adding)return;adding=true;add.disabled=true;
+    try{
+      clearTimeout(timer);
+      if(!validate())return;
+      if(lastAddedSignature===signature(definition())){report.textContent="This pattern is already added. Change its parameters or use Edit / Regenerate.";return;}
+      let generated=preview&&previewSignature===signature(definition())?preview:await generate();
+      if(!generated){report.textContent="Parameters changed. Correct the fields and wait for Preview Ready before adding.";return;}
+      if(previewSignature!==signature(definition())){report.textContent="Parameters changed while preparing. Wait for the updated preview before adding.";return;}
+      const committedSignature=signature(definition());generation++;remember();
+      // One validated preview has one pattern ID. Rapid clicks cannot duplicate it.
+      if(patterns.some(p=>p.id===generated.definition.id)){report.textContent="This pattern is already in the draft. Use Edit / Regenerate to update it.";return;}
+      apply({...get(),waypoints:[...get().waypoints,...generated.waypoints],patterns:[...patterns,generated.definition],preview:[]});
+      lastAddedSignature=committedSignature;preview=null;previewSignature=null;report.textContent="Pattern added to mission draft. Save Mission Plan to keep it.";
+    }finally{adding=false;add.disabled=false;}
   });
   action("Undo geometry change", () => {
     const previous = undo.pop();
@@ -236,7 +261,7 @@ export function patternEditor(parent, { api, notice, get, set, aircraft, pickCen
             alt.planningUnits.set(d.targetAltitudeFeet);
             notes.value = d.notes ?? "";
             clockwise.checked = d.clockwise;
-            describe();generate().catch(e=>report.textContent=e.message);
+            describe();visibility();generate().catch(e=>report.textContent=e.message);
             report.textContent =
               "Editing saved parameters. Regenerate replaces only this pattern’s tagged points; manual edits to those points will be replaced.";
           },
@@ -244,25 +269,15 @@ export function patternEditor(parent, { api, notice, get, set, aircraft, pickCen
         [
           "Regenerate",
           async () => {
-            const id=++generation;
-            const result = await api(
-              "/api/patterns/preview",
-              preview?.definition.id === d.id ? definition() : d,
-            );
-            if(id!==generation||!panel.isConnected)return;
-            remember();
-            const w = get().waypoints;
-            const at = w.findIndex((p) => p.patternId === d.id);
-            const kept = w.filter((p) => p.patternId !== d.id);
-            kept.splice(at < 0 ? kept.length : at, 0, ...result.waypoints);
-            apply({
-              ...get(),
-              waypoints: kept,
-              patterns: patterns.map((p) =>
-                p.id === d.id ? result.definition : p,
-              ),
-              preview: [],
-            });
+            if(regenerating)return;regenerating=true;clearTimeout(timer);
+            try{
+              let result;
+              if(preview?.definition.id===d.id){if(!validate())return;result=previewSignature===signature(definition())?preview:await generate();}
+              else{const own=++generation;result=await api("/api/patterns/preview",d);if(own!==generation||!panel.isConnected){report.textContent="Parameters changed; wait for the newest preview before regenerating.";return;}}
+              if(!result){report.textContent="Wait for a valid current preview before regenerating.";return;}
+              generation++;remember();const w=get().waypoints;const at=w.findIndex(p=>p.patternId===d.id);const kept=w.filter(p=>p.patternId!==d.id);kept.splice(at<0?kept.length:at,0,...result.waypoints);
+              apply({...get(),waypoints:kept,patterns:patterns.map(p=>p.id===d.id?result.definition:p),preview:[]});report.textContent="Pattern updated in mission draft. Save Mission Plan to keep it.";
+            }finally{regenerating=false;}
           },
         ],
         [

@@ -51,21 +51,22 @@ test('all four actual implemented viewers display stored synthetic fixture produ
 });
 test('storage defaults limits cleanup cancellation and update settings are usable',async({page,request})=>{
   await post(request,'/api/storage/preferences',{missionLimitBytes:25e9,scienceLimitBytes:50e9,automaticCacheCleanup:false,protectPinned:true});
-  await page.goto('/#settings');const storage=page.locator('#storage-management');
+  await page.goto('/#settings/storage');const storage=page.locator('#storage-management');
   await expect(storage).toContainText('25 GB');await expect(storage).toContainText('50 GB');
   await expect(storage.getByLabel('Flight/Mission maximum preset')).toHaveValue('25');
   await expect(storage.getByLabel('Scientific Library maximum preset')).toHaveValue('50');
   await storage.getByRole('button',{name:'Preview Cleanup',exact:true}).click();
   await expect(storage).toContainText('Regenerable caches only');
   await storage.getByRole('button',{name:'Cancel',exact:true}).click();
+  await page.getByRole("link",{name:"Updates",exact:true}).click();
   await expect(page.getByRole('heading',{name:'Updates',exact:true})).toBeVisible();
   await expect(page.getByRole('button',{name:'Check for Updates',exact:true})).toBeVisible();
-  await storage.screenshot({path:'artifacts/remote-storage-browser-fixture.png'});
+  await page.getByRole('link',{name:'Storage & Data',exact:true}).click();await storage.screenshot({path:'artifacts/remote-storage-browser-fixture.png'});
 });
 test('scientific consent stays separate from maps and pilot readiness needs no manual manifest',async({page,request})=>{
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await post(request,'/api/science/access',{onlineEnabled:false,privacyAccepted:false,maximumDownloadBytes:67108864,concurrentDownloads:1,backgroundRetrieval:true,selectionPolicy:'clear-recent',lookbackDays:730,maximumCloudPercent:30,unmeteredOnly:false});
-  await page.goto('/#settings');
+  await page.goto('/#settings/science?section=access');
   const section=page.getByRole('heading',{name:'Automatic Scientific Data Access',exact:true}).locator('..');
   await expect(section).toContainText('separate from online basemaps');
   await expect(section.getByLabel('Allow automatic scientific-data discovery and downloads')).not.toBeChecked();
@@ -80,7 +81,7 @@ test('scientific consent stays separate from maps and pilot readiness needs no m
   await page.reload();await expect(page.getByLabel('Maximum network transfer per preparation (MiB)')).toHaveValue('8');
   const saved = await post(request, '/api/plans', {id:crypto.randomUUID(),name:'Bounded automatic preflight',waypoints:[{name:'A',latitude:40,longitude:-75},{name:'B',latitude:41,longitude:-74}],instruments:[{instrumentId:'thermal-imager',enabled:true,intervalMs:1000}]});
   await page.goto('/#planner');await expect(page.locator('#planner .scientific-readiness').first()).toBeVisible();
-  await expect(page.locator('#planner .scientific-readiness').first()).toContainText('Limited Coverage: the first eight');
+  await expect(page.locator('#planner .scientific-readiness').first()).toContainText('Progressive bounded batches');
   await page.goto('/#control');await expect(page.locator('#control .scientific-readiness')).toBeVisible();
   await page.goto('/#science');await expect(page.locator('#instrument-content .scientific-readiness')).toBeVisible();
   expect(errors).toEqual([]);

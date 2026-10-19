@@ -13,5 +13,7 @@ public interface IDesktopActions
     void OpenDataManagement();
     void CollectFeedback();
     void ImportScientificSource();
+    void ChooseHyperspectral(bool folder);
+    void ChooseScientificDataset(string kind);
     void CompactStorage(bool science);
 }

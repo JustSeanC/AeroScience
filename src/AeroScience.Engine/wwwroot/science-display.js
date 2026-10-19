@@ -368,7 +368,8 @@ new MutationObserver(() => {
 // Planning reuses the same persisted preferences/conversion table as Science.
 // Canonical distance is metres; canonical altitude remains feet MSL.
 export function planningMeasure(category, canonical, adaptive = true) {
-  const selected=settings?.preferences?.[category] || (category==="distance"?"nauticalMiles":"feet");
+  const profile=settings?.preferences?.planningProfile||(["kilometres","metres"].includes(settings?.preferences?.distance)?"metric":"aviation");
+  const selected=category==="distance"?(profile==="metric"?"kilometres":"nauticalMiles"):(profile==="metric"?"metres":"feet");
   let conversion=settings?.options?.[category]?.find(o=>o.id===selected);
   if(!conversion)conversion=category==="distance"?{scale:1/1852,label:"NM"}:{scale:1,label:"ft MSL"};
   if(category==="distance"&&adaptive&&["kilometres","metres"].includes(selected))
@@ -378,7 +379,7 @@ export function planningMeasure(category, canonical, adaptive = true) {
 const planningNumber=value=>Number.isFinite(value)?value.toLocaleString(undefined,{maximumFractionDigits:Math.abs(value)<1?6:3}):"Unavailable";
 export function planningDistance(metres) {const d=planningMeasure("distance",metres);return `${planningNumber(d.value)} ${d.unit}`;}
 export function planningArea(squareMetres) {
-  const distance=settings?.preferences?.distance||"nauticalMiles";
+  const distance=(settings?.preferences?.planningProfile||(["kilometres","metres"].includes(settings?.preferences?.distance)?"metric":"aviation"))==="metric"?"kilometres":"nauticalMiles";
   const [scale,unit]=distance==="nauticalMiles"?[1/(1852*1852),"NM²"]:distance==="miles"?[1/(1609.344*1609.344),"mi²"]:Math.abs(squareMetres)>=1e6?[1e-6,"km²"]:[1,"m²"];
   return `${planningNumber(squareMetres*scale)} ${unit}`;
 }
@@ -400,6 +401,7 @@ export function planningField(input,category,canonical,title,suffix="") {
     read();const d=planningMeasure(category,value);scale=d.scale;
     const label=input.closest("label");
     if(label?.firstChild?.nodeType===Node.TEXT_NODE)label.firstChild.textContent=`${title} (${d.unit}${suffix?", "+suffix:""})`;
+    input.setAttribute("aria-label",`${title} (${d.unit}${suffix?", "+suffix:""})`);
     input.value=value==null?"":String(Number((value*scale).toFixed(category==="altitude"?3:6)));rendered=input.value;
   };
   const set=canonical=>{value=canonical;rendered=input.value;refresh();};
@@ -412,14 +414,13 @@ export async function planningUnitControls(parent,api) {
   await initializeUnits(api);
   const label=e("label","Planning units"),select=e("select"),status=e("span");
   select.setAttribute("aria-label","Planning units");
-  for(const [id,name] of [["aviation","Aviation — NM / feet / knots"],["metric","Metric — m or km / meters / km/h"],["custom","Custom — existing display preferences"]]){const option=e("option",name);option.value=id;select.append(option);}
-  const refresh=()=>{const p=settings.preferences;select.value=p.distance==="nauticalMiles"&&p.altitude==="feet"&&p.windSpeed==="knots"?"aviation":["kilometres","metres"].includes(p.distance)&&p.altitude==="metres"?"metric":"custom";};
+  for(const [id,name] of [["aviation","Aviation — NM / feet / knots"],["metric","Metric — m or km / meters / km/h"]]){const option=e("option",name);option.value=id;select.append(option);}
+  const refresh=()=>{const p=settings.preferences;select.value=p.planningProfile||(["kilometres","metres"].includes(p.distance)?"metric":"aviation");};
   select.onchange=async()=>{
-    if(select.value==="custom") {refresh();return;}
     select.disabled=true;
     try{
       const metric=select.value==="metric";
-      const next=await api("/api/display/units",{...settings.preferences,distance:metric?"kilometres":"nauticalMiles",altitude:metric?"metres":"feet",windSpeed:metric?"kilometresPerHour":"knots"});
+      const next=await api("/api/display/units",{...settings.preferences,planningProfile:metric?"metric":"aviation"});
       syncUnits(next);status.textContent="Display converted; geographic geometry and stored units are unchanged.";
     }catch(error){status.textContent=error.message;refresh();}finally{select.disabled=false;}
   };

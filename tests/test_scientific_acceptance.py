@@ -29,3 +29,11 @@ class ScientificAcceptanceTests(unittest.TestCase):
             with tempfile.TemporaryDirectory() as temp:
                 path=Path(temp)/'report.json';path.write_text(json.dumps(value))
                 with self.subTest(case=case),self.assertRaises(ValueError):science.verify(path,require_current=False)
+
+    def test_guided_envi_requires_actual_import_product_offline_and_current_source_evidence(self):
+        value=science.verify_guided_envi();self.assertGreaterEqual(value['bands'],16)
+        for key in ('automaticManifest','originalChannelsPreserved','originalFilesPreserved','offlineReopen','duplicateReused'):
+            changed=copy.deepcopy(value);changed['validation'][key]=False
+            with tempfile.TemporaryDirectory() as temp:
+                path=Path(temp)/'envi.json';path.write_text(json.dumps(changed))
+                with self.subTest(key=key),self.assertRaises(ValueError):science.verify_guided_envi(path)

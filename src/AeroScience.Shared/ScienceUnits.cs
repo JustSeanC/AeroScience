@@ -1,7 +1,7 @@
 namespace AeroScience.Shared;
 
 public sealed record ScienceUnitPreferences(string Temperature = "celsius", string Pressure = "inHg", string WindSpeed = "knots",
-    string Density = "kg/m3", string Altitude = "feet", string Distance = "nauticalMiles");
+    string Density = "kg/m3", string Altitude = "feet", string Distance = "nauticalMiles",string? PlanningProfile=null);
 public sealed record UnitConversion(string Id, string Label, double Scale, double Offset = 0, int Decimals = 2);
 public static class ScienceUnits
 {
@@ -23,6 +23,7 @@ public static class ScienceUnits
         foreach (var (category, value) in new[]{("temperature",preferences.Temperature),("pressure",preferences.Pressure),("windSpeed",preferences.WindSpeed),
             ("density",preferences.Density),("altitude",preferences.Altitude),("distance",preferences.Distance)})
             if (!Options[category].Any(option => option.Id == value)) throw new ArgumentException("Choose a supported " + category + " unit.");
+        if(preferences.PlanningProfile is not(null or "aviation" or "metric"))throw new ArgumentException("Choose Aviation or Metric for planning units.");
         return preferences;
     }
     public static UnitConversion Conversion(string measurement, ScienceUnitPreferences preferences)

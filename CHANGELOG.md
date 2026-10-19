@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.1 — Predictive Science & Guided Dataset Import (unreleased)
+
+- Prioritize bounded scientific preparation by observed trajectory, arrival time and measured preparation latency; filter stale/jump/paused telemetry, curve turns, use aligned routes optionally, and progressively prepare long plans. Reuse retained originals, bound queue/concurrency/hourly transfers, expose controls/readiness overlays and retain truthful acquisition gaps.
+- Add graphical file/folder imports for compatible local DEM, Landsat, Sentinel and ENVI collections through the existing verified source library. Generate metadata automatically, request genuinely missing units/scales/datums, retain original metadata/hashes and originals, reuse exact duplicates and preserve cancellation/storage protections.
+- Add a four-step hyperspectral wizard, Dataset Required/Outside Coverage/Invalid guidance, local offline readiness and a verified genuine Cuprite example. Preserve original detector channels while sorting display wavelengths; read explicit rotated ENVI grids without resampling. Existing legacy ENVI records retain their previous coordinate convention; historical products are not rewritten.
+- Reorganize native Scientific Data Sources into four sections with independent persistent source modes, actual catalog/status and precise guided actions. Add browser Settings categories, direct links and back/forward/unsaved-field preservation; retain privacy, attribution and data-loss safeguards.
+- Fix pattern creation: validate applicable dimensions, deduplicate input/blur updates that could move Add during a click, retain outdated previews on invalid edits, suppress stale responses and commit matching previews without another request or duplicate geometry. Exercise all eight real editor flows through save/reopen. Expose only Aviation/Metric planning profiles while preserving customized scientific display units.
+- Preserve the published v0.3.0 release and tag. v0.3.1 Windows installer/MSFS/Quest/iPad and first-time-user acceptance remain outstanding until performed on an installed candidate.
+
 ## 0.3.0 — Remote Sensing & Research Payloads (public alpha)
 
 - Fix scientific-product map disposal races that could raise Leaflet `_leaflet_pos` errors during rapid navigation. Use immediate browser zoom to avoid delayed CSS transitions on removed panes, ignore late geography/resize/basemap work after disposal, and register viewer cleanup before asynchronous protection requests. Discard superseded product responses while retaining strict browser error assertions and frozen vendor assets.

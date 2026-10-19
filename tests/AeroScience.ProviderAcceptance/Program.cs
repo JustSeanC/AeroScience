@@ -11,6 +11,7 @@ PreferenceStore.WriteAtomic(Path.Combine(library,StorageManager.LibraryManifest)
 var missions=new MissionStore(Path.Combine(output,"missions.db"));missions.Initialize();var science=new ScienceStore(library);science.Initialize();
 var management=new StorageManagement(output,missions,science);science.Management=management;
 var settings=new ScientificAccessSettings(output,()=>true);settings.Save(new(true,true,MaximumDownloadBytes:67108864,PreferredDateUtc:DateTimeOffset.Parse("2024-09-10T00:00:00Z"),LookbackDays:120));
+if(args.Contains("--envi")){await GuidedEnviAcceptance.Run(args[Array.IndexOf(args,"--envi")+1],output,science,missions);return;}
 using var auto=new AutomaticScientificData(science,settings);
 var cases=new[]{("usgs-3dep",RemoteKind.Terrain,new Coordinates(40.005,-74.995)),("landsat-c2-l2",RemoteKind.Thermal,new Coordinates(40.005,-74.995)),("sentinel-2-l2a",RemoteKind.Multispectral,new Coordinates(40.005,-74.995)),("cop-dem-glo-30",RemoteKind.Terrain,new Coordinates(46.105,8.105))};
 var results=new List<object>();
@@ -44,7 +45,7 @@ foreach(var (name,kind,point) in cases)
 }
 if(args.Contains("--hyperspectral"))
 {
-    var area=GeographicBounds.Around(new(34.25,-118.45));auto.Prepare(area,[RemoteKind.Hyperspectral],true);
+    var area=GeographicBounds.Around(new(34.25,-118.45));await auto.DiscoverHyperspectralMetadata(area,default);
     ScientificDataReadiness state;do{await Task.Delay(1000);state=auto.Snapshot().First(s=>s.Kind==RemoteKind.Hyperspectral);}while(state.Status is "Queued" or "Downloading");
     if(state.Status is not("Limited Coverage" or "Unavailable"))throw new IOException("Hyperspectral discovery must not advertise automatic preparation as ready.");
     await File.WriteAllTextAsync(Path.Combine(output,"hyperspectral-discovery.json"),JsonSerializer.Serialize(state,WireJson.Options));Console.WriteLine("Hyperspectral discovery (no preparation): "+state.Message);

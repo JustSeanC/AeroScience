@@ -93,11 +93,7 @@ public sealed class ScientificRaster : IDisposable
             else if (band.Format == "envi")
             {
                 var header = SafeFile(root, band.HeaderFile ?? throw new InvalidDataException("ENVI requires its original .hdr file."));
-                if (new FileInfo(header).Length > 1048576) throw new InvalidDataException("ENVI header is too large.");
-                var text = File.ReadAllText(header);
-                if (!text.TrimStart().StartsWith("ENVI", StringComparison.Ordinal)) throw new InvalidDataException("Invalid ENVI header signature.");
-                var fields = Regex.Matches(text, @"(?m)^\s*([\w ]+)\s*=\s*(\{[^}]*\}|[^\r\n]+)",RegexOptions.None,TimeSpan.FromSeconds(2))
-                    .ToDictionary(m => m.Groups[1].Value.Trim().ToLowerInvariant(), m => m.Groups[2].Value.Trim().Trim('{', '}'));
+                var fields = ReadEnviFields(header);
                 string Field(string key) => fields.TryGetValue(key, out var value) ? value : throw new InvalidDataException("Missing ENVI field: " + key);
                 int Number(string key) => int.Parse(Field(key), Inv);
                 var width = Number("samples"); var height = Number("lines"); channels = Number("bands");
@@ -108,12 +104,27 @@ public sealed class ScientificRaster : IDisposable
                 if (interleave is not ("bsq" or "bil" or "bip") || byteOrder is < 0 or > 1 || channels is < 1 or > 512 || band.Channel < 0 || band.Channel >= channels || headerOffset < 0)
                     throw new InvalidDataException("Invalid ENVI layout, channel count, byte order or band index.");
                 var info = Field("map info").Split(',').Select(s => s.Trim()).ToArray();
-                if(info.Skip(10).Any(s=>s.StartsWith("rotation",StringComparison.OrdinalIgnoreCase)&&(!double.TryParse(s.Split('=').Last(),NumberStyles.Float,Inv,out var angle)||angle!=0)))throw new InvalidDataException("Rotated ENVI grids require reprojection before import.");
+                if(band.EnviMapReference!="envi-corner-v2"&&info.Skip(10).Any(s=>s.StartsWith("rotation",StringComparison.OrdinalIgnoreCase)&&(!double.TryParse(s.Split('=').Last(),NumberStyles.Float,Inv,out var angle)||angle!=0)))throw new InvalidDataException("Rotated ENVI grids require reprojection before import.");
                 double Parse(int i) => double.Parse(info[i], Inv);
-                if (info.Length < 10 || !info[0].Equals("UTM", StringComparison.OrdinalIgnoreCase) || !info[9].Replace(" ", "").Equals("WGS-84", StringComparison.OrdinalIgnoreCase))
-                    throw new InvalidDataException("ENVI import currently requires UTM WGS-84 map info. Reproject other CRSs first.");
-                if (!int.TryParse(info[7], out var zone) || zone is < 1 or > 60 || !(info[8].Equals("North", StringComparison.OrdinalIgnoreCase) || info[8].Equals("South", StringComparison.OrdinalIgnoreCase))) throw new InvalidDataException("Invalid UTM zone/hemisphere.");
-                Grid = ValidateGrid(new(width, height, "EPSG:" + ((info[8].Equals("North", StringComparison.OrdinalIgnoreCase) ? 32600 : 32700) + zone), Parse(3) - (Parse(1) - .5) * Parse(5), Parse(4) + (Parse(2) - .5) * Parse(6), Parse(5), -Parse(6)));
+                if(info.Length>=7&&(info[0].Equals("Geographic Lat/Lon",StringComparison.OrdinalIgnoreCase)||info[0].Equals("Lat/Lon",StringComparison.OrdinalIgnoreCase))&&info.Skip(7).Any(s=>s.Replace(" ","").Equals("WGS-84",StringComparison.OrdinalIgnoreCase)))
+                    Grid=ValidateGrid(new(width,height,"EPSG:4326",Parse(3)-(Parse(1)-.5)*Parse(5),Parse(4)+(Parse(2)-.5)*Parse(6),Parse(5),-Parse(6)));
+                else
+                {
+                    if (info.Length < 10 || !info[0].Equals("UTM", StringComparison.OrdinalIgnoreCase) || !info[9].Replace(" ", "").Equals("WGS-84", StringComparison.OrdinalIgnoreCase))
+                        throw new InvalidDataException("ENVI requires north-up WGS-84 geographic or WGS-84 UTM map info. No coordinates/datum are guessed.");
+                    if (!int.TryParse(info[7], out var zone) || zone is < 1 or > 60 || !(info[8].Equals("North", StringComparison.OrdinalIgnoreCase) || info[8].Equals("South", StringComparison.OrdinalIgnoreCase))) throw new InvalidDataException("Invalid UTM zone/hemisphere.");
+                    Grid = ValidateGrid(new(width, height, "EPSG:" + ((info[8].Equals("North", StringComparison.OrdinalIgnoreCase) ? 32600 : 32700) + zone), Parse(3) - (Parse(1) - .5) * Parse(5), Parse(4) + (Parse(2) - .5) * Parse(6), Parse(5), -Parse(6)));
+                }
+                if(band.EnviMapReference=="envi-corner-v2")
+                {
+                    var rotation=info.FirstOrDefault(s=>s.StartsWith("rotation=",StringComparison.OrdinalIgnoreCase));var angle=rotation is null?0:double.Parse(rotation.Split('=').Last(),Inv)*Math.PI/180;
+                    if(!double.IsFinite(angle)||Math.Abs(angle)>=Math.PI/2)throw new InvalidDataException("Guided ENVI import supports rotations smaller than 90 degrees on its existing WGS84 grids.");
+                    var dx=Parse(5);var dy=Parse(6);
+                    // GDAL ENVI driver map-info convention: reference is a pixel corner,
+                    // not the half-pixel-shifted legacy AeroScience convention. No resampling.
+                    Grid=ValidateGrid(new(width,height,Grid.Crs,Parse(3)-(Parse(1)-1)*dx,Parse(4)+(Parse(2)-1)*dy,Math.Cos(angle)*dx,-Math.Cos(angle)*dy,Math.Sin(angle)*dx,Math.Sin(angle)*dy));
+                }
+                else if(band.EnviMapReference!="legacy-pixel-center")throw new InvalidDataException("Unknown ENVI map-reference convention.");
                 if (fields.TryGetValue("data ignore value", out var ignore)) NativeNoData = double.Parse(ignore, Inv);
                 if (fields.TryGetValue("wavelength", out var wavelengths))
                 {
@@ -136,6 +147,29 @@ public sealed class ScientificRaster : IDisposable
             else throw new InvalidDataException("Supported inputs are geotiff and ENVI. NetCDF, HDF, LAS/LAZ and BigTIFF are not implemented.");
         }
         catch { tiff?.Dispose(); envi?.Dispose(); throw; }
+    }
+    public static Dictionary<string,string> ReadEnviFields(string header)
+    {
+        if(new FileInfo(header).Length>1048576)throw new InvalidDataException("ENVI header must be under 1 MiB.");
+        var text=File.ReadAllText(header);if(!text.TrimStart().StartsWith("ENVI",StringComparison.Ordinal))throw new InvalidDataException("Invalid ENVI header signature.");
+        var fields=new Dictionary<string,string>(StringComparer.OrdinalIgnoreCase);
+        foreach(Match m in Regex.Matches(text,@"(?m)^\s*([\w ]+)\s*=\s*(\{[^}]*\}|[^\r\n]+)",RegexOptions.None,TimeSpan.FromSeconds(2)))
+            if(!fields.TryAdd(m.Groups[1].Value.Trim(),m.Groups[2].Value.Trim().Trim('{','}').Trim()))throw new InvalidDataException("Duplicate ENVI metadata field: "+m.Groups[1].Value.Trim());
+        return fields;
+    }
+    public static Coordinates Unproject(double x,double y,string crs)
+    {
+        if(crs=="EPSG:4326")return new(y,x);
+        var code=int.Parse(crs.Replace("EPSG:",""),Inv);var lat=(y-(code>=32700?10000000:0))/111320;var lon=(code%100)*6-183d;
+        // Invert the same supported WGS84 projection with a bounded Newton solve.
+        for(var i=0;i<15;i++)
+        {
+            var p=Project(new(lat,lon),crs);var a=Project(new(lat+.00001,lon),crs);var b=Project(new(lat,lon+.00001),crs);
+            var dx=x-p.X;var dy=y-p.Y;if(Math.Abs(dx)+Math.Abs(dy)<.00001)return new(lat,lon);
+            var ax=(a.X-p.X)/.00001;var ay=(a.Y-p.Y)/.00001;var bx=(b.X-p.X)/.00001;var by=(b.Y-p.Y)/.00001;var determinant=ax*by-ay*bx;
+            if(Math.Abs(determinant)<1e-8)break;lat+=(dx*by-dy*bx)/determinant;lon+=(dy*ax-dx*ay)/determinant;
+        }
+        throw new InvalidDataException("Dataset geographic bounds cannot be resolved safely in the supported WGS84 projection.");
     }
     private int Int(TiffTag tag, int fallback = 0) => tiff!.GetField(tag)?[0].ToInt() ?? fallback;
     private static void ValidateTiffDirectory(Stream stream)
@@ -169,7 +203,7 @@ public sealed class ScientificRaster : IDisposable
     private static RasterGrid ValidateGrid(RasterGrid grid)
     {
         if (grid.Width is < 1 or > 1000000 || grid.Height is < 1 or > 1000000 || (long)grid.Width * grid.Height > 100000000000
-            || new[] { grid.OriginX, grid.OriginY, grid.PixelWidth, grid.PixelHeight }.Any(v => !double.IsFinite(v)) || grid.PixelWidth <= 0 || grid.PixelHeight >= 0)
+            || new[] { grid.OriginX, grid.OriginY, grid.PixelWidth, grid.PixelHeight,grid.RowX,grid.ColumnY }.Any(v => !double.IsFinite(v)) || grid.PixelWidth <= 0 || grid.PixelHeight >= 0)
             throw new InvalidDataException("Invalid/unsupported north-up raster dimensions or transform.");
         var referenceLongitude=int.TryParse(grid.Crs.Replace("EPSG:",""),out var code)&&code is >=32601 and <=32760?(code%100)*6-183:0;
         _ = Project(new(0, referenceLongitude), grid.Crs); return grid;
@@ -195,18 +229,22 @@ public sealed class ScientificRaster : IDisposable
         return (500000 + k * n * (A + (1 - t + c) * Math.Pow(A, 3) / 6 + (5 - 18 * t + t * t + 72 * c - 58 * e2 / (1 - e2)) * Math.Pow(A, 5) / 120),
             (south ? 10000000 : 0) + k * (m + n * Math.Tan(lat) * (A * A / 2 + (5 - t + 9 * c + 4 * c * c) * Math.Pow(A, 4) / 24 + (61 - 58 * t + t * t + 600 * c - 330 * e2 / (1 - e2)) * Math.Pow(A, 6) / 720)));
     }
+    public static Coordinates GridPoint(RasterGrid grid,double column,double row)=>Unproject(grid.OriginX+column*grid.PixelWidth+row*grid.RowX,grid.OriginY+column*grid.ColumnY+row*grid.PixelHeight,grid.Crs);
+    public static Coordinates[] GridCoverage(RasterGrid grid)=>[GridPoint(grid,0,0),GridPoint(grid,grid.Width,0),GridPoint(grid,grid.Width,grid.Height),GridPoint(grid,0,grid.Height)];
+    private (double Column,double Row) Pixel(Coordinates point)
+    {
+        var (x,y)=Project(point,Grid.Crs);var dx=x-Grid.OriginX;var dy=y-Grid.OriginY;var determinant=Grid.PixelWidth*Grid.PixelHeight-Grid.RowX*Grid.ColumnY;
+        return ((dx*Grid.PixelHeight-dy*Grid.RowX)/determinant,(dy*Grid.PixelWidth-dx*Grid.ColumnY)/determinant);
+    }
     public bool Covers(Coordinates p)
     {
-        try { var (x, y) = Project(p, Grid.Crs); return x >= Grid.OriginX && x < Grid.OriginX + Grid.Width * Grid.PixelWidth && y <= Grid.OriginY && y > Grid.OriginY + Grid.Height * Grid.PixelHeight; }
-        catch (InvalidDataException) { return false; }
+        try{var pixel=Pixel(p);return pixel.Column>=0&&pixel.Row>=0&&pixel.Column<Grid.Width&&pixel.Row<Grid.Height;}catch(InvalidDataException){return false;}
     }
     public double? Read(Coordinates point)
     {
-        if (band.BadBand || !Covers(point)) return null;
-        var (x, y) = Project(point, Grid.Crs);
-        // Stabilize exact pixel-boundary ties after a native-grid crop: east/south
-        // within 1e-8 pixel. This is a numerical tie rule, not interpolation.
-        var col = Math.Min(Grid.Width-1,(int)Math.Floor((x - Grid.OriginX) / Grid.PixelWidth + 1e-8)); var row = Math.Min(Grid.Height-1,(int)Math.Floor((y - Grid.OriginY) / Grid.PixelHeight + 1e-8));
+        if(band.BadBand||!Covers(point))return null;
+        var pixel=Pixel(point);
+        var col=Math.Min(Grid.Width-1,(int)Math.Floor(pixel.Column+1e-8));var row=Math.Min(Grid.Height-1,(int)Math.Floor(pixel.Row+1e-8));
         var size = bits / 8; Span<byte> bytes = stackalloc byte[8];
         if (envi is not null)
         {

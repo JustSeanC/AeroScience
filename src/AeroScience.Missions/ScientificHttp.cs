@@ -26,7 +26,7 @@ public sealed class ScientificHttp : IDisposable
     {
         http=handler is null?new(new SocketsHttpHandler{AllowAutoRedirect=false,UseCookies=false,AutomaticDecompression=DecompressionMethods.None,MaxResponseDrainSize=0,MaxConnectionsPerServer=2,ConnectTimeout=TimeSpan.FromSeconds(20)}):new(handler);
         http.Timeout=TimeSpan.FromSeconds(45);
-        http.DefaultRequestHeaders.UserAgent.ParseAdd("AeroScience/0.3.0 (+https://github.com/JustSeanC/AeroScience)");
+        http.DefaultRequestHeaders.UserAgent.ParseAdd("AeroScience/0.3.1 (+https://github.com/JustSeanC/AeroScience)");
     }
     public static void ValidateUrl(Uri uri)
     {

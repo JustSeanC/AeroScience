@@ -1,13 +1,13 @@
 namespace AeroScience.Shared;
 
 public enum RemoteKind { Thermal, Multispectral, Hyperspectral, Terrain }
-public sealed record RasterGrid(int Width, int Height, string Crs, double OriginX, double OriginY, double PixelWidth, double PixelHeight);
+public sealed record RasterGrid(int Width, int Height, string Crs, double OriginX, double OriginY, double PixelWidth, double PixelHeight,double RowX=0,double ColumnY=0);
 public sealed record SourceBand(string Id, string File, string Format, int Channel = 0, string Unit = "1", double Scale = 1,
     double Offset = 0, double? NoData = null, double? WavelengthNm = null, bool BadBand = false, string? HeaderFile = null,
-    string? SceneId = null);
+    string? SceneId = null,string EnviMapReference="legacy-pixel-center");
 public sealed record ScientificSourceManifest(int FormatVersion, string Name, RemoteKind Kind, string Provider,
     string License, string Citation, string SceneId, DateTimeOffset? ObservationUtc, string VerticalDatum,
-    SourceBand[] Bands, DateTimeOffset? PublicationUtc = null, string? Notes = null, AutomaticSourceProvenance? Acquisition = null);
+    SourceBand[] Bands, DateTimeOffset? PublicationUtc = null, string? Notes = null, AutomaticSourceProvenance? Acquisition = null,string[]? OriginalMetadataFiles=null);
 public sealed record ManagedSourceFile(string RelativePath, long Bytes, string Sha256);
 public sealed record ScientificSource(Guid Id, ScientificSourceManifest Manifest, DateTimeOffset ImportedUtc,
     Dictionary<string, RasterGrid> Grids, ManagedSourceFile[] Files, string ManifestSha256, string RelativeDirectory);

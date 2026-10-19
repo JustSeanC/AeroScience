@@ -1433,3 +1433,20 @@ dialog::backdrop { background:#000a; } dialog button { margin:8px; min-height:44
 #plan-form > section { border-top: 1px solid #2c424d; padding: 1rem 0; }
 .pattern-editor .primary-spacing { border: 2px solid #50dcc7; padding: .65rem; font-weight: 700; grid-column: 1 / -1; }
 .pattern-editor .primary-spacing input { max-width: 24rem; font-size: 1.15rem; }
+
+
+.hyperspectral-wizard { color: var(--text, #e6f1f5); background: #101d27; border: 1px solid #52747e; border-radius: 10px; width: min(1100px, 92vw); max-height: 88vh; overflow: auto; padding: 24px; }
+.hyperspectral-wizard::backdrop { background: #000b; }
+.hyperspectral-wizard input { max-width: 90%; }
+.hyperspectral-wizard button { margin: 6px; }
+.hyperspectral-coverage .geographic-map { height: 270px; }
+.hyperspectral-wizard pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+
+.settings-navigation { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 24px; border-bottom: 1px solid #34515e; padding-bottom: 16px; }
+.settings-navigation a { display: block; padding: 10px 14px; border-radius: 6px; background: #142b36; color: #dcebf3; }
+.settings-navigation a[aria-current="page"] { background: #24565d; outline: 2px solid #4edac4; }
+.source-category { scroll-margin-top: 20px; margin: 16px 0; padding: 18px; }
+.source-category select { max-width: 100%; }
+@media(max-width:700px){.settings-navigation a { padding: 10px;flex:1 1 40%; }.hyperspectral-wizard { padding: 14px;width: 94vw; }.source-category{padding:12px;}}
+
+.field-error { display:block;color:#ffabb4;margin-top:5px; }.field-error:empty{display:none;}input[aria-invalid="true"]{outline:2px solid #e97685;}

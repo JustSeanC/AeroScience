@@ -24,10 +24,7 @@ public sealed class SettingsForm : Form
         var mapsTab = new TabPage("Maps & Basemaps"); var mapsPanel = Panel(); mapsTab.Controls.Add(mapsPanel); tabs.TabPages.Add(mapsTab);
         Label(mapsPanel, "New installations suggest OpenStreetMap / Streets after a privacy choice before the first tile request. Choose offline-only at that prompt or change Maps & Basemaps in the dashboard. Existing preferences are preserved. Offline geography remains available without an account. Optional Esri satellite imagery requires your own configured credentials.");
         Button(mapsPanel, "Open Maps & Basemaps settings", (_, _) => app.OpenDashboard(settings: true));
-        var sourcesTab = new TabPage("Scientific Data Sources"); var sourcesPanel = Panel(); sourcesTab.Controls.Add(sourcesPanel); tabs.TabPages.Add(sourcesTab);
-        Label(sourcesPanel, "Automatic preparation discovers and downloads bounded numeric terrain, Landsat thermal and Sentinel-2 multispectral data directly from public providers after your separate scientific-data consent. Use dashboard Settings for access, offline-only, bandwidth/date policy, cancel/retry, coverage and readiness. Advanced manual GeoTIFF/ENVI import remains available below; it is not required for supported automatic workflows.");
-        Button(sourcesPanel, "Import scientific source collection…", (_, _) => app.ImportScientificSource(this));
-        Button(sourcesPanel, "Automatic data access / Readiness / Advanced sources", (_, _) => app.OpenDashboard(settings: true));
+        var sourcesTab=new TabPage("Scientific Data Sources");sourcesTab.Controls.Add(new ScientificSourcesPanel(app,this));tabs.TabPages.Add(sourcesTab);
         var updatesTab = new TabPage("Updates"); var updatesPanel = Panel(); updatesTab.Controls.Add(updatesPanel); tabs.TabPages.Add(updatesTab);
         Label(updatesPanel, "AeroScience " + ApplicationUpdates.CurrentVersion + ". Dashboard Settings → Updates shows your installed version and optional GitHub release notifications. Checks are cached daily, never block offline archives, and never execute an installer automatically. You can disable automatic checks or include/exclude alpha releases there.");
         Button(updatesPanel, "Open update settings / Check for updates", (_, _) => app.OpenDashboard(settings: true));

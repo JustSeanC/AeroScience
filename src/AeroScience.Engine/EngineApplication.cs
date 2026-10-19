@@ -41,7 +41,9 @@ public static class EngineApplication
         builder.Services.AddSingleton<AccessControl>();
         builder.Services.AddSingleton(sp => new ScientificAccessSettings(sp.GetRequiredService<EngineOptions>().ConfigurationDirectory ?? sp.GetRequiredService<EngineOptions>().DataDirectory, NetworkCost.IsUnmetered));
         builder.Services.AddSingleton(sp => { _ = sp.GetRequiredService<StorageManagement>(); return new AutomaticScientificData(sp.GetRequiredService<ScienceStore>(),sp.GetRequiredService<ScientificAccessSettings>()); });
+        builder.Services.AddSingleton(sp=>new ScientificImportSession(sp.GetRequiredService<ScienceStore>(),sp.GetRequiredService<AutomaticScientificData>().RefreshLocalReadiness));
         builder.Services.AddSingleton<ScientificPlanData>();
+        builder.Services.AddSingleton<ScientificFlightPrediction>();
         builder.Services.AddHostedService<ScientificPreparationWorker>();
         builder.Services.AddSingleton(sp => new MapSettings(sp.GetRequiredService<EngineOptions>().ConfigurationDirectory ?? sp.GetRequiredService<EngineOptions>().DataDirectory));
         builder.Services.AddSingleton(sp => new ApplicationUpdates(sp.GetRequiredService<EngineOptions>().ConfigurationDirectory ?? sp.GetRequiredService<EngineOptions>().DataDirectory));
@@ -148,7 +150,7 @@ public static class EngineApplication
             RequestPath = "/help/remote-sensing", ContentTypeProvider = contentTypes,
             FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(helpDirectory)
         });
-        app.MapGet("/api/health", () => Results.Ok(new { status = "ok", version = "0.3.0" }));
+        app.MapGet("/api/health", () => Results.Ok(new { status = "ok", version = "0.3.1" }));
         app.MapGet("/api/access", (HttpContext c) => new { requiresPairing = !AccessControl.IsLoopback(c) });
         app.MapPost("/api/session", (HttpContext c, PairRequest request, AccessControl access) =>
         {
@@ -192,7 +194,7 @@ public static class EngineApplication
         app.MapResearchEndpoints();
         app.MapGet("/api/settings", (HttpContext c, AccessControl access) => new
         {
-            version = "0.3.0",
+            version = "0.3.1",
             telemetry = options.Telemetry,
             options.SamplingIntervalMs,
             options.EnableLan,
@@ -219,6 +221,11 @@ public static class EngineApplication
                 case "data-management": desktop.OpenDataManagement(); break;
                 case "feedback": desktop.CollectFeedback(); break;
                 case "science-import": desktop.ImportScientificSource(); break;
+                case "terrain-import": desktop.ChooseScientificDataset("terrain"); break;
+                case "thermal-import": desktop.ChooseScientificDataset("thermal"); break;
+                case "multispectral-import": desktop.ChooseScientificDataset("multispectral"); break;
+                case "hyperspectral-header": desktop.ChooseHyperspectral(false); break;
+                case "hyperspectral-folder": desktop.ChooseHyperspectral(true); break;
                 case "compact-flight": desktop.CompactStorage(false); break;
                 case "compact-science": desktop.CompactStorage(true); break;
                 default: return Results.NotFound();
@@ -245,7 +252,7 @@ public static class EngineApplication
             catch (OperationCanceledException) when (context.RequestAborted.IsCancellationRequested) { }
             catch (IOException) { /* A display disconnected; recording continues in TelemetryWorker. */ }
         });
-        app.Logger.LogInformation("AeroScience 0.3.0 — {Source} telemetry; dashboard http://127.0.0.1:{Port}; data {Directory}", options.Telemetry, options.Port, options.DataDirectory);
+        app.Logger.LogInformation("AeroScience 0.3.1 — {Source} telemetry; dashboard http://127.0.0.1:{Port}; data {Directory}", options.Telemetry, options.Port, options.DataDirectory);
         return app;
     }
 }

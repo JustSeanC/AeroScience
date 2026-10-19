@@ -10,6 +10,10 @@ public sealed record SciencePauseRequest(bool Paused);
 public sealed record MapLayerRequest(string Layer);
 public sealed record MapPrivacyRequest(bool Online);
 public sealed record ProtectionRequest(bool Protected);
+public sealed record SourceSelectionRequest(Guid SourceId,bool Enabled);
+public sealed record SourceModeRequest(RemoteKind Kind,string Mode);
+public sealed record HyperspectralAssociation(string FileName);
+public sealed record PreparationControl(string Action);
 public sealed record CleanupRequest(Guid PreviewId,bool Confirmed);
 public static class ResearchApi
 {
@@ -33,12 +37,29 @@ public static class ResearchApi
         app.MapPost("/api/updates/remind", (ApplicationUpdates updates) => updates.RemindLater());
         app.MapGet("/api/science/access", (ScientificAccessSettings settings,HttpContext c)=>new{configuration=settings.Get(),canConfigure=AccessControl.IsLoopback(c)});
         app.MapPost("/api/science/access",(ScientificAccessPreferences preferences,AutomaticScientificData automatic,HttpContext c)=>AccessControl.IsLoopback(c)?Results.Ok(automatic.Configure(preferences)):Results.StatusCode(403));
+        app.MapPost("/api/science/source-selection",(SourceSelectionRequest request,ScientificAccessSettings settings,AutomaticScientificData automatic,ScienceStore science,HttpContext c)=>
+        {if(!AccessControl.IsLoopback(c))return Results.StatusCode(403);if(!science.Sources().Any(s=>s.Id==request.SourceId))throw new ArgumentException("Source not found.");var p=settings.Get().Preferences;var excluded=(p.ExcludedSourceIds??[]).ToHashSet();if(request.Enabled)excluded.Remove(request.SourceId);else excluded.Add(request.SourceId);return Results.Ok(automatic.Configure(p with{ExcludedSourceIds=excluded.ToArray()}));});
+        app.MapPost("/api/science/source-mode",(SourceModeRequest request,ScientificAccessSettings settings,AutomaticScientificData automatic,HttpContext c)=>
+        {if(!AccessControl.IsLoopback(c))return Results.StatusCode(403);var p=settings.Get().Preferences;var modes=new Dictionary<RemoteKind,string>(p.SourceModes??[]){[request.Kind]=request.Mode};return Results.Ok(automatic.Configure(p with{SourceModes=modes}));});
         app.MapGet("/api/science/plan-readiness",(ScientificPlanData preparation)=>preparation.Snapshot());
+        app.MapGet("/api/science/prediction",(ScientificFlightPrediction prediction)=>prediction.Snapshot());
+        app.MapPost("/api/science/preparation/control",(PreparationControl request,AutomaticScientificData automatic)=>{if(request.Action is not("pause" or "resume"))throw new ArgumentException("Choose pause or resume.");automatic.Pause(request.Action=="pause");return Results.Ok();});
+        app.MapPost("/api/plans/{id:guid}/preparation/control",(Guid id,PreparationControl request,ScientificPlanData plans)=>{plans.Control(id,request.Action);return Results.Ok();});
         app.MapGet("/api/science/readiness",(AutomaticScientificData automatic)=>automatic.Snapshot());
-        app.MapPost("/api/science/prepare",(ScientificPreparationRequest request,AutomaticScientificData automatic)=>automatic.Prepare(GeographicBounds.Around(new(request.Latitude,request.Longitude)),request.Kinds??[RemoteKind.Thermal,RemoteKind.Multispectral,RemoteKind.Terrain],retry:true));
+        app.MapPost("/api/science/prepare",(ScientificPreparationRequest request,AutomaticScientificData automatic)=>automatic.Prepare(GeographicBounds.Around(new(request.Latitude,request.Longitude)),request.Kinds??[RemoteKind.Thermal,RemoteKind.Multispectral,RemoteKind.Terrain],retry:true,samplePoint:new(request.Latitude,request.Longitude)));
         app.MapPost("/api/science/prepare/cancel",(AutomaticScientificData automatic)=>{automatic.Cancel();return Results.Ok(new{cancelled=true});});
         app.MapPost("/api/plans/{id:guid}/prepare",(Guid id,MissionStore store,ScientificPlanData preparation)=>store.Plan(id) is {} plan?Results.Ok(preparation.Prepare(plan,true)):Results.NotFound());
+        app.MapGet("/api/science/hyperspectral/import",(ScientificImportSession session,HttpContext c)=>AccessControl.IsLoopback(c)?Results.Ok(session.Snapshot()):Results.StatusCode(403));
+        app.MapPost("/api/science/hyperspectral/metadata",async (HyperspectralUserMetadata metadata,ScientificImportSession session,HttpContext c)=>{if(!AccessControl.IsLoopback(c))return Results.StatusCode(403);await session.Configure(metadata);return Results.Ok(session.Snapshot());});
+        app.MapPost("/api/science/hyperspectral/associate",async (HyperspectralAssociation request,ScientificImportSession session,HttpContext c)=>{if(!AccessControl.IsLoopback(c))return Results.StatusCode(403);await session.Associate(request.FileName);return Results.Ok(session.Snapshot());});
+        app.MapPost("/api/science/hyperspectral/import",(ScientificImportSession session,HttpContext c)=>{if(!AccessControl.IsLoopback(c))return Results.StatusCode(403);session.Import();return Results.Accepted();});
+        app.MapPost("/api/science/hyperspectral/cancel",(ScientificImportSession session,HttpContext c)=>{if(!AccessControl.IsLoopback(c))return Results.StatusCode(403);session.Cancel();return Results.Ok();});
         app.MapGet("/api/science/sources", (double? latitude, double? longitude, ScienceStore science) => science.Availability(latitude is { } lat && longitude is { } lon ? new Coordinates(lat, lon) : null));
+        app.MapGet("/api/science/sources/{id:guid}/coverage",(Guid id,ScienceStore science)=>
+        {
+            var source=science.Sources().FirstOrDefault(s=>s.Id==id)??throw new ArgumentException("Source not found.");var g=source.Grids.Values.First();
+            return ScientificRaster.GridCoverage(g);
+        });
         app.MapGet("/api/science/products", (Guid? missionId, int? limit, int? offset, string? instrumentId, ScienceStore science) => science.Products(missionId, limit ?? 50, offset ?? 0,instrumentId));
         app.MapGet("/api/science/products/{id:guid}", (Guid id, ScienceStore science) => science.ReadProduct(id));
         app.MapGet("/api/science/products/{id:guid}/export/{format}", (Guid id, string format, ScienceStore science) =>

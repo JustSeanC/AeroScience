@@ -103,8 +103,8 @@ public sealed class AutomaticScientificDataTests : IDisposable
     [Fact]public async Task OfflineUnknownMeteringCapsOutagesAndCancellationPreserveOriginals()
     {
         var handler=new Handler((_,_)=>throw new InvalidOperationException("No network expected"));var settings=new ScientificAccessSettings(root);using var auto=new AutomaticScientificData(science,settings,new ScientificHttp(handler));
-        auto.Prepare(Area,[RemoteKind.Terrain]);Assert.Equal("Offline",auto.Snapshot().Single().Status);Assert.Equal(0,handler.Count);
-        auto.Configure(Preferences with{UnmeteredOnly=true});auto.Prepare(Area,[RemoteKind.Terrain]);Assert.Equal("Offline",auto.Snapshot().Single().Status);Assert.Equal(0,handler.Count);
+        auto.Prepare(Area,[RemoteKind.Terrain]);await Wait(()=>auto.Snapshot().Single().Status!="Queued");Assert.Equal("Offline",auto.Snapshot().Single().Status);Assert.Equal(0,handler.Count);
+        auto.Configure(Preferences with{UnmeteredOnly=true});auto.Prepare(Area,[RemoteKind.Terrain]);await Wait(()=>auto.Snapshot().Single().Status!="Queued");Assert.Equal("Offline",auto.Snapshot().Single().Status);Assert.Equal(0,handler.Count);
         var input=RemoteFixtureFiles.Create(Path.Combine(root,"fixture"),RemoteKind.Terrain);var original=File.ReadAllBytes(Path.Combine(root,"fixture","elevation.tif"));
         var settings2=new ScientificAccessSettings(Path.Combine(root,"two"));settings2.Save(Preferences);
         var provider=new FixtureProvider(ScienceStore.ReadSourceManifest(input));using var limited=new AutomaticScientificData(science,settings2,new ScientificHttp(handler),[provider]);management.Configure(new(null,100000));limited.Prepare(Area,[RemoteKind.Terrain]);await Wait(()=>limited.Snapshot().Single().Status=="Unavailable");Assert.Equal(0,handler.Count);Assert.Empty(science.Sources());
@@ -159,10 +159,10 @@ public sealed class AutomaticScientificDataTests : IDisposable
             Assert.Equal(row*64+col,source.Read(point));Assert.Equal(source.Read(point),crop.Read(point));
         }
     }
-    [Fact]public void HugePolarOrInvalidAreasAreRejectedAndLargePlansAreExplicitlyPartial()
+    [Fact]public async Task HugePolarOrInvalidAreasAreRejectedAndLargePlansAreExplicitlyPartial()
     {
         Assert.Throws<ArgumentException>(()=>AutomaticScientificData.ValidateArea(new(-180,-80,180,84)));Assert.Throws<ArgumentException>(()=>AutomaticScientificData.ValidateArea(new(0,85,.01,85.01)));
-        using var auto=new AutomaticScientificData(science,new(root));var result=ScientificPlanPreparation.Prepare(auto,new(Guid.NewGuid(),"Long",Waypoints:[new("A",40,-75),new("B",41,-74)],Instruments:[new("thermal-imager",true)]));Assert.True(result.LimitedCoverage);Assert.InRange(result.AreasQueued,1,8);Assert.All(result.Readiness,s=>Assert.Equal("Offline",s.Status));
+        using var auto=new AutomaticScientificData(science,new(root));var result=ScientificPlanPreparation.Prepare(auto,new(Guid.NewGuid(),"Long",Waypoints:[new("A",40,-75),new("B",41,-74)],Instruments:[new("thermal-imager",true)]));Assert.True(result.LimitedCoverage);Assert.InRange(result.AreasQueued,1,8);await Wait(()=>auto.Snapshot().All(s=>s.Status!="Queued"));Assert.All(auto.Snapshot(),s=>Assert.Equal("Offline",s.Status));
     }
     private static async Task Wait(Func<bool> condition){using var c=new CancellationTokenSource(TimeSpan.FromSeconds(10));while(!condition())await Task.Delay(20,c.Token);}
     public void Dispose(){science.Dispose();Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();if(Directory.Exists(root))Directory.Delete(root,true);}

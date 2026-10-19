@@ -91,7 +91,7 @@ test("offline basemap and export preview preserve route precision without extern
 test("provider settings require deliberate consent and a key while offline geometry stays available", async ({
   page,
 }) => {
-  await page.goto("/#settings");
+  await page.goto("/#settings/maps");
   await expect(
     page.getByRole("heading", { name: "Maps & Basemaps" }),
   ).toBeVisible();
@@ -155,8 +155,8 @@ test("online tile failures fall back without changing the saved plan", async ({
   expect(data.waypoints[0].longitude).toBe(179.99);
   await page.getByLabel("Map Layers").last().selectOption("offline");
   await expect(
-    page.getByText("Offline geography · no tile-provider requests").last(),
-  ).toBeVisible();
+    page.getByLabel("Map Layers").last(),
+  ).toHaveValue("offline");
 });
 test("hidden browser maps do not load online tiles", async ({
   page,
@@ -175,7 +175,7 @@ test("hidden browser maps do not load online tiles", async ({
   await page.route("https://tile.openstreetmap.org/**", (route) =>
     route.abort(),
   );
-  await page.goto("/#settings");
+  await page.goto("/#settings/maps");
   await expect(
     page.getByRole("heading", { name: "Maps & Basemaps" }),
   ).toBeVisible();

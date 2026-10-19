@@ -131,11 +131,9 @@ export function layerSelector(parent, changed) {
       );
       if (own !== generation) return;
       changed(client);
-      message.textContent =
-        client.error ||
-        (client.layer === "offline"
-          ? "Offline geography · no tile-provider requests"
-          : "Online maps · provider attribution and billing terms apply");
+      message.replaceChildren();
+      if(client.error){message.append(document.createTextNode(client.error+" "));if(["satellite","satelliteLabels"].includes(select.value)){const a=element("a","Configure Esri API Key");a.href="#settings/maps";message.append(a);}}
+
     } catch (e) {
       if (own === generation) {
         changed({ layer: "offline", tiles: [] });

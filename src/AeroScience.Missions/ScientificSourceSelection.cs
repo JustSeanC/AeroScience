@@ -8,10 +8,13 @@ public static class ScientificSourceSelection
     public static ScientificSource? Select(IEnumerable<SourceAvailability> available,RemoteKind kind,ScientificAccessPreferences? p=null)
     {
         var candidates=available.Where(a=>a.FilesAvailable&&a.CoversPoint==true&&a.Source.Manifest.Kind==kind).Select(a=>a.Source);
+        candidates=candidates.Where(s=>p?.ExcludedSourceIds?.Contains(s.Id)!=true);
+        var mode=p?.SourceModes?.GetValueOrDefault(kind)??"automatic";
+        if(kind==RemoteKind.Hyperspectral||mode=="local")candidates=candidates.Where(s=>s.Manifest.Acquisition is null);
         if(p is null)return candidates.OrderByDescending(s=>s.Manifest.ObservationUtc).FirstOrDefault();
         var latest=p.PreferredDateUtc??DateTimeOffset.UtcNow;
         candidates=candidates.Where(s=>s.Manifest.Acquisition is null||s.Manifest.ObservationUtc is null||s.Manifest.ObservationUtc<=latest&&s.Manifest.ObservationUtc>=latest.AddDays(-p.LookbackDays)).Where(s=>s.Manifest.Acquisition is null||Cloud(s)<=p.MaximumCloudPercent);
-        return p.SelectionPolicy=="newest"?candidates.OrderBy(s=>s.Manifest.Acquisition is null?1:0).ThenByDescending(s=>s.Manifest.ObservationUtc).FirstOrDefault():candidates.OrderBy(s=>s.Manifest.Acquisition is null?1:0).ThenBy(Cloud).ThenByDescending(s=>s.Manifest.ObservationUtc).FirstOrDefault();
+        return mode=="prefer-local"?candidates.OrderBy(s=>s.Manifest.Acquisition is null?0:1).ThenBy(Cloud).ThenByDescending(s=>s.Manifest.ObservationUtc).FirstOrDefault():p.SelectionPolicy=="newest"?candidates.OrderBy(s=>s.Manifest.Acquisition is null?1:0).ThenByDescending(s=>s.Manifest.ObservationUtc).FirstOrDefault():candidates.OrderBy(s=>s.Manifest.Acquisition is null?1:0).ThenBy(Cloud).ThenByDescending(s=>s.Manifest.ObservationUtc).FirstOrDefault();
     }
     private static double Cloud(ScientificSource s)
     {

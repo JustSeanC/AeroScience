@@ -36,7 +36,7 @@ export class ResearchMap {
     this.onPoint = onPoint;
     this.options = options;
     const tools = document.createElement("div");
-    tools.className = "map-tools";
+    tools.className = "map-tools";tools.hidden=Boolean(options.coverageOnly);
     this.container = document.createElement("div");
     this.container.className = "geographic-map";
     this.container.setAttribute(
@@ -72,7 +72,8 @@ export class ResearchMap {
     this.footprints=L.layerGroup().addTo(this.map);
     this.aircraft=L.layerGroup().addTo(this.map);
     this.patterns=L.layerGroup().addTo(this.map);
-    L.control.layers(null, {"Planned route":this.route,"Semantic pattern outlines":this.patterns,"Waypoint markers":this.points,"Recorded track":this.track,"Survey areas":this.areas,"Aircraft":this.aircraft,"Observation markers":this.markers,"Scientific sample locations":this.samples,"Science footprints":this.footprints},{collapsed:true}).addTo(this.map);
+    this.readiness=L.layerGroup().addTo(this.map);
+    L.control.layers(null, {"Planned route":this.route,"Semantic pattern outlines":this.patterns,"Waypoint markers":this.points,"Recorded track":this.track,"Survey areas":this.areas,"Aircraft":this.aircraft,"Observation markers":this.markers,"Scientific sample locations":this.samples,"Scientific data readiness":this.readiness,"Science footprints":this.footprints},{collapsed:true}).addTo(this.map);
     const action = (name, fn) => {
       const b = document.createElement("button");
       b.type = "button";
@@ -323,6 +324,12 @@ export class ResearchMap {
       })),
     );
   }
+  setReadiness(states) {
+    if(this.destroyed)return;
+    const key=JSON.stringify(states.map(s=>[s.key,s.status]));if(key===this.readinessKey)return;this.readinessKey=key;this.readiness.clearLayers();
+    const colors={Ready:"#3adbb0","Dataset Ready":"#3adbb0",Downloading:"#62bbff",Queued:"#e9ce70","Partially usable":"#e6a453","Limited Coverage":"#e6a453",Unavailable:"#df6975","Dataset Required":"#df6975","Dataset Outside Coverage":"#a08ab8",Offline:"#a0aab8"};
+    for(const s of states.slice(0,128)){const a=s.area;if(!a||s.status==="Superseded")continue;(s.sourceCoverage?.length?this.L.polygon(s.sourceCoverage.map(p=>[p.latitude,p.longitude]),{color:colors[s.status]||"#a0aab8",weight:1,fillOpacity:.08}):this.L.rectangle([[a.south,a.west],[a.north,a.east]],{color:colors[s.status]||"#a0aab8",weight:1,fillOpacity:.08})).bindTooltip(label(`${s.kind}: ${s.status} · Requested preparation envelope; per-pixel masks and actual source coverage still apply`)).addTo(this.readiness);}
+  }
   set(data) {
     if(this.destroyed)return;
     const planId = data.plan?.id || null;
@@ -389,6 +396,7 @@ export class ResearchMap {
   preview(result) {
     if(this.destroyed)return;
     this.previewLayer?.remove();this.previewResult=result;
+    this.container.dataset.previewPoints=String(result?.waypoints?.length||0);
     this.previewLayer=this.L.layerGroup().addTo(this.map);
     if(!result)return;
     const points=result.waypoints||[];const d=result.definition;
@@ -397,7 +405,8 @@ export class ResearchMap {
       const bearing=d.headingDegrees*Math.PI/180,distance=Math.min(d.lengthMetres/3,20000),R=6371008.8;
       const start=ll(d.center),end=[start[0]+distance*Math.cos(bearing)/R*180/Math.PI,start[1]+distance*Math.sin(bearing)/(R*Math.max(.02,Math.cos(start[0]*Math.PI/180)))*180/Math.PI];
       this.L.polyline([start,end],{color:"#72b8f1",weight:4}).bindTooltip(`Reference heading ${d.headingDegrees}° true (approximate display arrow)`).addTo(this.previewLayer);
-      this.L.marker(end,{interactive:false,icon:this.L.divIcon({className:"pattern-arrow",html:`<span style="display:block;transform:rotate(${d.headingDegrees-90}deg)">➤</span>`,iconSize:[20,20]})}).addTo(this.previewLayer);
+      const arrow=document.createElement("span");arrow.textContent="➤";arrow.style.display="block";arrow.style.transform=`rotate(${d.headingDegrees-90}deg)`;
+      this.L.marker(end,{interactive:false,icon:this.L.divIcon({className:"pattern-arrow",html:arrow,iconSize:[20,20]})}).addTo(this.previewLayer);
       this.L.polyline([ll(points[1]),ll(points[2])],{color:"#eb9bbd",weight:5}).bindTooltip("Step direction between long scan legs").addTo(this.previewLayer);
       this.L.rectangle(this.L.latLngBounds(points.map(p=>ll(p,points[0]?.longitude))),{color:"#8aa1b0",weight:1,dashArray:"2 8",fill:false}).bindTooltip("Pattern extent; not guaranteed sensor coverage or polygon clipping").addTo(this.previewLayer);
     }

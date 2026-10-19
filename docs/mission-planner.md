@@ -35,3 +35,9 @@ Larger semantic export changes, additional online geocoders and a wider dashboar
 For lawnmower and creeping line, **Track Spacing (NM)** is the highlighted primary field. For example **0.25 NM = 463 m**. Change spacing or survey width to recalculate passes, the live map preview, route distance and approximate survey envelope. The pass count is calculated for parallel surveys; waypoint count remains an export detail. **Fit Pattern to Survey Area** uses the selected polygon, heading and entered spacing to initialize parallel legs. Its displayed envelope is not a claim of complete scientific coverage.
 
 Future **v0.4.0** work may recommend spacing from a configured sensor's actual or defensibly calculated ground footprint and user-selected overlap. No invented swath width, automatic overlap recommendation or speculative coverage score is implemented in v0.3.0.
+
+## v0.3.1 planning corrections
+
+Planning exposes Aviation and Metric only. Existing custom scientific display preferences are retained separately. Canonical route/pattern geometry is unchanged by profile switches. Pattern-specific controls validate near the relevant field in current display units; an invalid edit retains the previous preview as outdated. Add Pattern to Mission commits the matching validated preview once, preserving manual waypoints; Save Mission Plan persists the resulting draft. Fit Preview changes the viewport deliberately.
+
+Scientific preflight advances in bounded batches beyond the initial window. During flight, actual geographic motion takes priority over the optional saved route. Readiness is preparation status, not proof of complete sensor coverage. See [scientific flying](remote-sensing/quick-start.md).

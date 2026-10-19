@@ -69,7 +69,7 @@ public sealed class RemoteAcquisition : IDisposable
                 catch (Exception e) when (e is not OutOfMemoryException)
                 {
                     if (request.Generation != Volatile.Read(ref generation)) continue;
-                    states.AddOrUpdate(id, Status(id), (_, s) => s with { Quality = ObservationQuality.Unavailable, Message = "Scientific data unavailable for this location or acquisition. " + e.Message, Rejected = s.Rejected + 1, Processing = false });
+                    states.AddOrUpdate(id, Status(id), (_, s) => s with { Quality = ObservationQuality.Unavailable, Message = "Scientific data unavailable for this location or acquisition. " + e.Message, Rejected = s.Rejected + 1, MissingIntervals=s.MissingIntervals+1, Processing = false });
                 }
                 if (request.Generation == Volatile.Read(ref generation))
                 {
@@ -89,7 +89,7 @@ public sealed class RemoteAcquisition : IDisposable
         var mount=Instruments[request.Configuration.InstrumentId] == RemoteKind.Terrain ? new SensorMount(30,3,Swath:true) : new();
         var footprint = SensorGeometry.Footprint(request.Frame, mount);
         var source = ScientificSourceSelection.Select(science.Availability(footprint.Center),Instruments[request.Configuration.InstrumentId],sourcePreferences?.Invoke())
-            ?? throw new InvalidOperationException("No prepared source covers this footprint yet. Check Scientific Data Readiness (consent, download, coverage or offline status). No observation was recorded; future data will not backfill this interval.");
+            ?? throw new InvalidOperationException("No prepared source covers this footprint yet. Check Scientific Data Readiness (source mode, consent, download, coverage or offline status). No observation was recorded; future data will not backfill this interval.");
         var root = StorageManager.ResolveDataset(science.DirectoryPath, science.LibraryId, source.RelativeDirectory);
         foreach (var file in source.Files)
         {

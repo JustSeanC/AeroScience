@@ -17,10 +17,17 @@ public static class FlightPatterns
 {
     public static PatternDefinition Validate(PatternDefinition d)
     {
-        if (!Enum.IsDefined(d.Kind) || d.Center is null || !MissionPlanning.Position(d.Center.Latitude, d.Center.Longitude)
-            || !double.IsFinite(d.HeadingDegrees) || new[] { d.LengthMetres, d.WidthMetres, d.SpacingMetres, d.RadiusMetres }.Any(x => !double.IsFinite(x) || x < 10 || x > 500000)
-            || d.Legs is < 2 or > 100 || d.Orbits is < 1 or > 10 || d.TargetAltitudeFeet is { } alt && !double.IsFinite(alt))
-            throw new ArgumentException("Use valid coordinates, dimensions of 10–500,000 metres, 2–100 legs and 1–10 orbits.");
+        if(!Enum.IsDefined(d.Kind))throw new ArgumentException("Choose a supported pattern type.");
+        if(d.Center is null||!MissionPlanning.Position(d.Center.Latitude,d.Center.Longitude))throw new ArgumentException("Choose a valid WGS84 pattern center.");
+        if(!double.IsFinite(d.HeadingDegrees))throw new ArgumentException("Enter a finite reference heading in degrees true.");
+        void Dimension(double value,string field){if(!double.IsFinite(value)||value<10||value>500000)throw new ArgumentException(field+" is outside the supported planning range.");}
+        if(d.Kind is FlightPatternKind.Lawnmower or FlightPatternKind.CreepingLine or FlightPatternKind.Racetrack or FlightPatternKind.Box or FlightPatternKind.StraightTransect)Dimension(d.LengthMetres,"Leg length");
+        if(d.Kind is FlightPatternKind.Lawnmower or FlightPatternKind.CreepingLine or FlightPatternKind.Box)Dimension(d.WidthMetres,"Survey width");
+        if(d.Kind is FlightPatternKind.Lawnmower or FlightPatternKind.CreepingLine or FlightPatternKind.ExpandingSquare)Dimension(d.SpacingMetres,"Track spacing");
+        if(d.Kind is FlightPatternKind.Orbit or FlightPatternKind.Racetrack or FlightPatternKind.RadialSpokes)Dimension(d.RadiusMetres,"Radius");
+        if(d.Kind is FlightPatternKind.Lawnmower or FlightPatternKind.CreepingLine or FlightPatternKind.ExpandingSquare or FlightPatternKind.RadialSpokes&&d.Legs is <2 or >100)throw new ArgumentException("Survey passes / spokes must be between 2 and 100.");
+        if(d.Kind is FlightPatternKind.Orbit or FlightPatternKind.Racetrack&&d.Orbits is <1 or >10)throw new ArgumentException("Orbit count must be between 1 and 10.");
+        if(d.TargetAltitudeFeet is {} altitude&&!double.IsFinite(altitude))throw new ArgumentException("Enter a finite target altitude or leave it blank.");
         var extent = d.Kind is FlightPatternKind.Lawnmower or FlightPatternKind.CreepingLine ? (d.Legs - 1) * d.SpacingMetres / 2 : d.Kind == FlightPatternKind.ExpandingSquare ? Math.Ceiling(d.Legs / 2d) * d.SpacingMetres : 0;
         if (extent > 500000) throw new ArgumentException("Reduce spacing or legs: this local pattern layout supports extents up to 500 km. Long routes can be planned with separate patterns.");
         return d with { Id = d.Id == Guid.Empty ? Guid.NewGuid() : d.Id, HeadingDegrees = (d.HeadingDegrees % 360 + 360) % 360, Notes = MissionPlanning.Text(d.Notes) };

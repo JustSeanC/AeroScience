@@ -4,6 +4,7 @@ using System.Text;
 using System.IO.Compression;
 using AeroScience.Engine;
 using AeroScience.Missions;
+using AeroScience.Shared;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -21,7 +22,8 @@ public sealed class MainForm : Form, IDesktopActions
     private readonly DesktopActionGate desktopActions = new();
     private Form? auxiliary;
     private int focusQueued;
-    public bool Busy { get; private set; }
+    private bool busy,choosingSource;
+    public bool Busy { get => busy || choosingSource || (engine?.Services.GetService<ScientificImportSession>()?.IsBusy ?? false); private set => busy=value; }
     public bool Recording => engine?.Services.GetRequiredService<MissionCoordinator>().Snapshot().ActiveMission is not null;
     private readonly ToolbarPromptPolicy toolbarPrompts = new();
     public ToolbarVersionStatus Toolbar => ToolbarVersions.Inspect(Path.Combine(AppContext.BaseDirectory, "Toolbar"), PreferredCommunity());
@@ -219,6 +221,50 @@ public sealed class MainForm : Form, IDesktopActions
     void IDesktopActions.OpenDataManagement() => Dispatch(() => ShowDataManagement());
     public void ShowDataManagement(IWin32Window? owner = null) { if (!Busy) { using var form = new DataManagementForm(this); ShowAuxiliary(form, owner); } }
     void IDesktopActions.CollectFeedback() => Dispatch(ShowFeedback);
+    public ScientificAccessConfiguration ScientificAccess => engine?.Services.GetRequiredService<ScientificAccessSettings>().Get()??new(new(),ScientificAccessSettings.Privacy);
+    public SourceAvailability[] ScientificSources() => (engine??throw new InvalidOperationException("The local engine is stopped; source storage has not been read. Start it or review Storage Settings. Existing data was not replaced.")).Services.GetRequiredService<ScienceStore>().Availability();
+    public void SetScientificSourceMode(RemoteKind kind,string mode)
+    {
+        var automatic=engine?.Services.GetRequiredService<AutomaticScientificData>()??throw new InvalidOperationException("Start the companion first.");
+        var p=ScientificAccess.Preferences;var modes=new Dictionary<RemoteKind,string>(p.SourceModes??[]){[kind]=mode};automatic.Configure(p with{SourceModes=modes});
+    }
+    public void OpenScientificSources(string kind,bool import=false,Guid? dataset=null)
+    {if(engine is not null)Process.Start(new ProcessStartInfo("http://127.0.0.1:5080/#settings/science?"+(kind=="access"?"section=access":"source="+kind)+(import?"&import=1":"")+(dataset is null?"":"&dataset="+dataset)){UseShellExecute=true});}
+    private void DispatchSourcePicker(Func<IWin32Window,Task> action)
+    {
+        var lease=desktopActions.TryEnter();if(lease is null){Dispatch(()=>{});return;}
+        try
+        {
+            if(IsDisposed||!IsHandleCreated){lease.Dispose();return;}
+            BeginInvoke(async()=>
+            {
+                using(lease)
+                {
+                    // A picker may be a legitimate child of Settings, never of migration/deletion dialogs.
+                    if(Busy||auxiliary is {IsDisposed:false} and not SettingsForm){FocusAuxiliary();return;}
+                    choosingSource=true;
+                    try{await action(auxiliary is {IsDisposed:false}?auxiliary:this);}
+                    catch(Exception error){ShowError(error);}
+                    finally{choosingSource=false;RefreshStatus();}
+                }
+            });
+        }catch(InvalidOperationException){lease.Dispose();}
+    }
+    void IDesktopActions.ChooseScientificDataset(string kind)=>DispatchSourcePicker(owner=>ChooseScientificDataset(kind,owner));
+    private async Task ChooseScientificDataset(string kind,IWin32Window owner)
+    {
+        if(engine is null)return;string path;var type=Enum.Parse<RemoteKind>(kind,true);
+        if(type==RemoteKind.Terrain){using var picker=new OpenFileDialog{Title="Choose a numeric elevation DEM GeoTIFF",Filter="Numeric GeoTIFF (*.tif;*.tiff)|*.tif;*.tiff"};if(picker.ShowDialog(owner)!=DialogResult.OK)return;path=picker.FileName;}
+        else{using var picker=new FolderBrowserDialog{Description="Choose the "+kind+" collection folder",UseDescriptionForTitle=true};if(picker.ShowDialog(owner)!=DialogResult.OK)return;path=picker.SelectedPath;}
+        await engine.Services.GetRequiredService<ScientificImportSession>().Select(path,type);
+    }
+    void IDesktopActions.ChooseHyperspectral(bool folder)=>DispatchSourcePicker(async owner=>
+    {
+        if(engine is null)return;string path;
+        if(folder){using var picker=new FolderBrowserDialog{Description="Choose the folder containing an ENVI .hdr and its original hyperspectral binary",UseDescriptionForTitle=true};if(picker.ShowDialog(owner)!=DialogResult.OK)return;path=picker.SelectedPath;}
+        else{using var picker=new OpenFileDialog{Title="Choose the original hyperspectral ENVI header",Filter="ENVI header (*.hdr)|*.hdr",CheckFileExists=true};if(picker.ShowDialog(owner)!=DialogResult.OK)return;path=picker.FileName;}
+        await engine.Services.GetRequiredService<ScientificImportSession>().Select(path);
+    });
     void IDesktopActions.ImportScientificSource() => Dispatch(() => ImportScientificSource());
     void IDesktopActions.CompactStorage(bool science) => Dispatch(async () =>
     {

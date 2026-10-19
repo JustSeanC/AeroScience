@@ -1,3 +1,4 @@
+import { settingsLocation,settingsNavigation } from "./settings-navigation.js";
 import { mapSettingsUI, syncBasemaps } from "./basemaps.js";
 import { sourceSettings } from "./remote-science.js";
 import { updateSettings, notifyUpdates } from "./application-updates.js";
@@ -316,9 +317,9 @@ $("pair-form").addEventListener("submit", (event) => {
 async function navigate() {
   const allowed = ["control", "planner", "history", "instruments", "settings"];
   const hash =
-    location.hash.slice(1) === "science"
+    settingsLocation().page === "science"
       ? "instruments"
-      : location.hash.slice(1);
+      : settingsLocation().page;
   const page = allowed.includes(hash) ? hash : "control";
   for (const id of allowed) $(id).hidden = id !== page;
   for (const link of document.querySelectorAll(".nav-link")) {
@@ -449,98 +450,31 @@ async function showDetail(id) {
   await researchDetail(body, id, m);
   $("mission-detail").showModal();
 }
+let settingsView=null;
 async function loadSettings() {
-  const s = await api("/api/settings"),
-    container = $("settings-content");
-  container.replaceChildren();
-  const rows = el("dl");
-  for (const [name, value] of [
-    ["Application", `AeroScience ${s.version}`],
-    ["Telemetry source", s.telemetry],
-    ["Sampling interval", `${s.samplingIntervalMs} ms`],
-    ["SimConnect", s.simConnect],
-    ["LAN access", s.enableLan ? s.lanUrl : "Disabled — localhost only"],
-    ["User data", s.dataDirectory || "Stored on the Windows engine"],
-    ...(s.pairingCode ? [["Pairing code", s.pairingCode]] : []),
-  ]) {
-    const row = el("div");
-    row.append(el("dt", name), el("dd", value));
-    rows.append(row);
+  const container=$("settings-content");
+  if(settingsView){settingsView.show();return;}
+  const s=await api("/api/settings");container.replaceChildren();
+  const view=settingsNavigation(container),panels=view.panels;settingsView=view;view.show();
+  function paragraph(category,value){panels.get(category).append(el("p",value));}
+  function desktop(category,label,action){const b=el("button",label,"secondary");b.disabled=!s.desktopAvailable;b.onclick=()=>command(b,()=>api(`/api/desktop/${action}`,{}));panels.get(category).append(b);}
+  paragraph("general",`AeroScience ${s.version}`);paragraph("general",`Live connection: ${current?.connection?.message||s.telemetry}`);
+  paragraph("general","Mission History and exports remain available without MSFS while your selected storage is connected.");desktop("general","Open application settings","settings");
+  await unitControls(panels.get("units"),api,()=>{});
+  await mapSettingsUI(panels.get("maps"),api);
+  try{await storageManagement(panels.get("storage"),api);}catch(error){paragraph("storage",error.message);}
+  for(const [title,storage] of [["Mission Database",s.missionStorage],["Scientific Data Library",s.scienceStorage]]){
+    const section=el("article");section.append(el("h3",title));panels.get("storage").append(section);
+    if(storage)section.append(el("p",storage.directory),el("p",storage.available?`${number(storage.usedBytes/1048576,1)} MiB used · ${number(storage.freeBytes/1073741824,1)} GiB free`:storage.error));
   }
-  container.append(rows);
-  await unitControls(container, api, loadSettings);
-  await mapSettingsUI(container, api);
-  try {
-    await storageManagement(container, api);
-  } catch (error) {
-    container.append(
-      el("p", "Storage management unavailable: " + error.message),
-    );
-  }
-  await updateSettings(container, api);
-  try {
-    await sourceSettings(container, api);
-  } catch (error) {
-    container.append(
-      el("p", "Scientific sources unavailable: " + error.message),
-    );
-  }
-  if (s.toolbarStatus) {
-    const toolbar = el("section");
-    toolbar.append(
-      el("h2", "MSFS Toolbar"),
-      el(
-        "p",
-        `Installed: ${s.toolbarStatus.installedVersion || "Unknown / missing"} · Bundled: ${s.toolbarStatus.bundledVersion || "Unknown"} · ${s.toolbarStatus.status}`,
-      ),
-      el("p", s.toolbarStatus.message),
-    );
-    container.append(toolbar);
-  }
-  const controls = el("div", undefined, "input-row");
-  for (const [label, action] of [
-    ["Application settings", "settings"],
-    ["Toolbar installation / update", "toolbar"],
-    ["Storage", "storage"],
-    ["Data Management", "data-management"],
-    ["Collect Feedback", "feedback"],
-  ]) {
-    const button = el("button", label, "secondary");
-    button.disabled = !s.desktopAvailable;
-    button.addEventListener("click", () =>
-      command(button, () => api(`/api/desktop/${action}`, {})),
-    );
-    controls.append(button);
-  }
-  container.append(controls);
-  for (const [title, storage] of [
-    ["Mission Database", s.missionStorage],
-    ["Scientific Data Library", s.scienceStorage],
-  ]) {
-    const section = el("section");
-    section.append(el("h2", title));
-    if (storage) {
-      section.append(
-        el("p", storage.directory),
-        el(
-          "p",
-          storage.available
-            ? `${number(storage.usedBytes / 1048576, 1)} MiB used · ${number(storage.freeBytes / 1073741824, 1)} GiB available`
-            : storage.error,
-        ),
-      );
-    } else
-      section.append(
-        el("p", "Manage local storage in the AeroScience Windows application."),
-      );
-    container.append(section);
-  }
-  container.append(
-    el(
-      "p",
-      "Mission History and exports work offline while the selected archive is available. LAN access is optional.",
-    ),
-  );
+  desktop("storage","Change storage locations","storage");desktop("storage","Data Management / Backups","data-management");
+  await updateSettings(panels.get("updates"),api);
+  try{await sourceSettings(panels.get("science"),api);}catch(error){paragraph("science","Scientific sources unavailable: "+error.message);}
+  if(s.toolbarStatus){paragraph("toolbar",`Installed: ${s.toolbarStatus.installedVersion||"Missing / unknown"} · Bundled: ${s.toolbarStatus.bundledVersion||"Unknown"} · ${s.toolbarStatus.status}`);paragraph("toolbar",s.toolbarStatus.message);}
+  desktop("toolbar","Install / Update / Repair Toolbar","toolbar");
+  for(const [name,value] of [["Telemetry",s.telemetry],["Sampling interval",`${s.samplingIntervalMs} ms`],["SimConnect",s.simConnect],["LAN access",s.enableLan?s.lanUrl:"Disabled — localhost only"],["Data directory",s.dataDirectory||"Managed by companion"],...(s.pairingCode?[["Pairing code",s.pairingCode]]:[])])paragraph("advanced",`${name}: ${value}`);
+  desktop("advanced","LAN and desktop configuration","settings");desktop("advanced","Collect Feedback / Logs","feedback");
+  paragraph("advanced","LAN and native runtime configuration may require an engine restart; each desktop setting explains when. Display, source and map preferences apply immediately.");
 }
 $("close-detail").addEventListener("click", () => $("mission-detail").close());
 $("refresh-history").addEventListener("click", (event) =>
