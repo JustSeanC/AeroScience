@@ -41,8 +41,8 @@ public sealed partial class MissionStore
         using var cmd = db.CreateCommand();
         cmd.CommandText = "PRAGMA user_version;";
         var version = Convert.ToInt32(cmd.ExecuteScalar(), CultureInfo.InvariantCulture);
-        if (version > 5) throw new InvalidOperationException("Database was created by a newer AeroScience version; refusing to modify it.");
-        if (version is 1 or 2 or 3 or 4)
+        if (version > 6) throw new InvalidOperationException("Database was created by a newer AeroScience version; refusing to modify it.");
+        if (version is 1 or 2 or 3 or 4 or 5)
         {
             var size = new FileInfo(DatabasePath).Length;
             if (new LocalStorageCapacity().FreeBytes(Path.GetDirectoryName(DatabasePath)!) < size + StorageManager.MinimumFreeBytes)
@@ -56,11 +56,16 @@ public sealed partial class MissionStore
         }
         cmd.CommandText = "PRAGMA journal_mode=WAL;";
         cmd.ExecuteNonQuery();
-        if (version == 5) return;
-        if (version == 4) { MigrateExperience(db); return; }
-        if (version == 3) { MigrateResearch(db); MigrateExperience(db); return; }
-        if (version == 2) { MigrateLibraryReferences(db); MigrateResearch(db); MigrateExperience(db); return; }
-        if (version == 1) { MigrateMode(db); MigrateLibraryReferences(db); MigrateResearch(db); MigrateExperience(db); return; }
+        if (version == 6)
+        {
+            // Additive read index only: no JSON or historical sample is rewritten.
+            return;
+        }
+        if (version == 5) { MigrateMissionScience(db); return; }
+        if (version == 4) { MigrateExperience(db); MigrateMissionScience(db); return; }
+        if (version == 3) { MigrateResearch(db); MigrateExperience(db); MigrateMissionScience(db); return; }
+        if (version == 2) { MigrateLibraryReferences(db); MigrateResearch(db); MigrateExperience(db); MigrateMissionScience(db); return; }
+        if (version == 1) { MigrateMode(db); MigrateLibraryReferences(db); MigrateResearch(db); MigrateExperience(db); MigrateMissionScience(db); return; }
         using var transaction = db.BeginTransaction();
         cmd.Transaction = transaction;
         cmd.CommandText = """
@@ -74,6 +79,7 @@ public sealed partial class MissionStore
               timestamp_utc TEXT NOT NULL, latitude REAL NOT NULL, longitude REAL NOT NULL,
               altitude_msl_ft REAL NOT NULL, payload_json TEXT NOT NULL);
             CREATE INDEX telemetry_timeline ON telemetry(mission_id,sequence);
+            CREATE INDEX telemetry_receipt_time ON telemetry(mission_id,timestamp_utc,sequence);
             CREATE TABLE events (
               id INTEGER PRIMARY KEY AUTOINCREMENT, mission_id TEXT NOT NULL REFERENCES missions(id),
               timestamp_utc TEXT NOT NULL, kind TEXT NOT NULL, message TEXT NOT NULL);
@@ -93,6 +99,7 @@ public sealed partial class MissionStore
         MigrateLibraryReferences(db);
         MigrateResearch(db);
         MigrateExperience(db);
+        MigrateMissionScience(db);
     }
 
     private static void MigrateLibraryReferences(SqliteConnection db)
@@ -229,6 +236,7 @@ public sealed partial class MissionStore
         cmd.ExecuteNonQuery();
         Event(db, tx, id, now, "started", "Mission recording started.");
         WriteResearch(db, tx, id, plan, instruments, objective);
+        Event(db,tx,id,now,"payload-snapshot",JsonSerializer.Serialize(instruments??plan?.Instruments??[],WireJson.Options));
         tx.Commit();
         return id;
     }

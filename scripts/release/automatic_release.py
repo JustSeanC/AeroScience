@@ -48,6 +48,7 @@ def validate_evidence(value,commit,payload=None):
     return value
 
 def finalize(folder,output,evidence_path):
+    p.require(not p.requires_manual_acceptance(), 'v0.4.0 requires actual Windows/MSFS acceptance for the exact installer. Use the candidate and Complete-ReleaseAcceptance.ps1, then New-Release.ps1 -AcceptanceRecord. No rebuild is required.')
     receipt=installer.validate_candidate(folder);meta=p.identity();validation=validate_evidence(p.read_json(evidence_path),receipt['source_commit'])
     validation={**validation,'payload_sha256':receipt['payload_sha256']}
     output.mkdir(parents=True,exist_ok=True)
@@ -69,6 +70,7 @@ def finalize(folder,output,evidence_path):
     return info
 
 def verify(setup,record_path,archive,expected_commit=None):
+    p.require(not p.requires_manual_acceptance(), 'This version requires recorded manual Windows/MSFS acceptance; automatic technical evidence alone cannot finalize a release.')
     info=p.verify_archive(archive,archive.with_name(archive.name+'.sha256'));record=p.read_json(record_path);build=record.get('build',{})
     p.require(record.get('format_version')==2 and record.get('validation')==info.get('validation'),'Automatic release record/archive evidence mismatch.')
     validate_evidence(record['validation'],info['source_commit'],info['payload_sha256']);installer.pe(setup)
@@ -92,7 +94,9 @@ def status(output,commit):
     meta=p.identity();setup=output/meta['setup_name'];record=output/meta['setup_record_name'];archive=output/meta['asset_name']
     if any(path.exists() for path in (setup,record,archive)):
         if not all(path.exists() for path in (setup,record,archive,output/'RELEASE-NOTES.md',setup.with_name(setup.name+'.sha256'),archive.with_name(archive.name+'.sha256'))):return dict(state='incomplete',message='Partial final output exists. Preserve it and choose another output directory.')
-        try:return dict(state='finalized',info=verify(setup,record,archive,commit))
+        try:
+            result=installer.verify(setup,record,archive,commit) if p.read_json(record).get('format_version')==1 else verify(setup,record,archive,commit)
+            return dict(state='finalized',info=result)
         except (ValueError,OSError,KeyError,json.JSONDecodeError) as error:return dict(state='changedSource' if 'Changed source' in str(error) else 'corruptOrConflicting',message=str(error))
     if (output/'installer-candidate').exists() or (output/'release-candidate').exists():return dict(state='incomplete',message='An incomplete candidate exists; preserve it and choose another output directory. No existing artifact was overwritten.')
     if list(output.glob('AeroScience-Setup-v*.exe')):return dict(state='conflictingVersion',message='Another version exists in this output directory; choose a separate versioned folder.')

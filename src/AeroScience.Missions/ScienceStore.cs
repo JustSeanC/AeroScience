@@ -82,8 +82,12 @@ public sealed partial class ScienceStore(string directory, IStorageCapacity? cap
             cmd.CommandText = "SELECT value FROM metadata WHERE key='library_id'";
             if (cmd.ExecuteScalar() as string != id.ToString()) throw new IOException("Science database/library identity mismatch; nothing was replaced.");
             cmd.CommandText = "PRAGMA user_version";
-            if (Convert.ToInt32(cmd.ExecuteScalar(), CultureInfo.InvariantCulture) != 1) throw new IOException("Unsupported science schema; preserve this library.");
+            var schema=Convert.ToInt32(cmd.ExecuteScalar(), CultureInfo.InvariantCulture);
+            if (schema is not(1 or 2)) throw new IOException("Unsupported science schema; preserve this library.");
+            if(schema==1&&existed){var backups=Path.Combine(DirectoryPath,"Metadata","Backups");Directory.CreateDirectory(backups);_=DataBackup.Create(DatabasePath,backups,true);}
             InitializeRemoteTables(db);
+            InitializeArtifactTable(db);
+            cmd.CommandText="PRAGMA user_version=2";cmd.ExecuteNonQuery();
             if (!File.Exists(Path.Combine(DirectoryPath, MarkerName)))
                 PreferenceStore.WriteAtomic(Path.Combine(DirectoryPath, MarkerName), new { formatVersion = 1, libraryId = id, database = RelativeDatabasePath });
         }
@@ -199,17 +203,18 @@ public sealed partial class ScienceStore(string directory, IStorageCapacity? cap
         if (confirmation != "DELETE SCIENCE DATA" || recording) throw new InvalidOperationException("End recording and type DELETE SCIENCE DATA to confirm.");
         lock (gate)
         {
+            if(activeAnalyses>0)throw new InvalidOperationException("Cancel or finish scientific analysis before clearing the library.");
             if (AvailabilityError() is { } error) throw new IOException(error);
             if (!File.Exists(DatabasePath)) return;
-            Initialize(); var products = AllProducts().ToArray();var caches=CacheEntries();
-            var retainedPaths=products.Select(p=>p.RelativePath).Concat(caches.Select(c=>c.RelativePath)).ToArray();
+            Initialize(); var products = AllProducts().ToArray();var caches=CacheEntries();var artifacts=Artifacts().ToArray();
+            var retainedPaths=products.Select(p=>p.RelativePath).Concat(caches.Select(c=>c.RelativePath)).Concat(artifacts.Select(a=>a.RelativePath)).ToArray();
             var workLedgers=retainedPaths.Chunk(1024).Select(paths=>BeginManagedWrite("Deliberate scientific archive clear",paths)).ToArray();
             var journalPath = Path.Combine(DirectoryPath, "Metadata", "Clears", Guid.NewGuid().ToString("N") + ".json");
-            PreferenceStore.WriteAtomic(journalPath, new { phase = "prepared", products });
+            PreferenceStore.WriteAtomic(journalPath, new { phase = "prepared", products,artifacts });
             using var db = Open(write: true); using var tx = db.BeginTransaction(); using var cmd = db.CreateCommand(); cmd.Transaction = tx;
-            cmd.CommandText = "DELETE FROM observations; DELETE FROM remote_products; DELETE FROM datasets; INSERT OR REPLACE INTO metadata VALUES('last_clear_utc',$now)";
+            cmd.CommandText = "DELETE FROM observations; DELETE FROM remote_products; DELETE FROM scientific_artifacts; DELETE FROM datasets; INSERT OR REPLACE INTO metadata VALUES('last_clear_utc',$now)";
             cmd.Parameters.AddWithValue("$now", DateTimeOffset.UtcNow.ToString("O", CultureInfo.InvariantCulture)); cmd.ExecuteNonQuery(); tx.Commit();
-            PreferenceStore.WriteAtomic(journalPath, new { phase = "records-cleared", products });
+            PreferenceStore.WriteAtomic(journalPath, new { phase = "records-cleared", products,artifacts });
             foreach (var product in products)
             {
                 var path = StorageManager.ResolveDataset(DirectoryPath, product.LibraryId, product.RelativePath);
@@ -221,7 +226,12 @@ public sealed partial class ScienceStore(string directory, IStorageCapacity? cap
                 var path=StorageManager.ResolveDataset(DirectoryPath,LibraryId,cache.RelativePath);
                 if(File.Exists(path)&&new FileInfo(path).Length==cache.Bytes&&Digest(path)==cache.Sha256)File.Delete(path);
             }
-            PreferenceStore.WriteAtomic(journalPath, new { phase = "completed", note = "Only checksum-matching managed product files were removed; missing/modified/unrelated files and Sources were preserved.", products });
+            foreach(var artifact in artifacts)
+            {
+                var path=StorageManager.ResolveDataset(DirectoryPath,LibraryId,artifact.RelativePath);
+                if(File.Exists(path)&&new FileInfo(path).Length==artifact.Bytes&&Digest(path)==artifact.Sha256)File.Delete(path);
+            }
+            PreferenceStore.WriteAtomic(journalPath, new { phase = "completed", note = "Only checksum-matching managed product files were removed; missing/modified/unrelated files and Sources were preserved.", products,artifacts });
             if(!retainedPaths.Any(p=>File.Exists(StorageManager.ResolveDataset(DirectoryPath,LibraryId,p))))foreach(var ledger in workLedgers)File.Delete(ledger);
         }
     }

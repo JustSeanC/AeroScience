@@ -80,7 +80,7 @@ public sealed class SimConnectTelemetryProvider : ITelemetryProvider
         public NativeSession()
         {
             callback = OnMessage;
-            Check(Native.Open(out handle, "AeroScience 0.3.2", IntPtr.Zero, 0, IntPtr.Zero, 0));
+            Check(Native.Open(out handle, "AeroScience 0.4.0", IntPtr.Zero, 0, IntPtr.Zero, 0));
             try
             {
                 Sent(Native.AddToDataDefinition(handle, 1, "TITLE", null, 9, 0, uint.MaxValue), "aircraft");
@@ -95,6 +95,11 @@ public sealed class SimConnectTelemetryProvider : ITelemetryProvider
                 Sent(Native.RequestDataOnSimObject(handle, 2, 1, 0, 4, 0, 0, 0, 0), "aircraft");
                 ConfigureAuxiliary(2, 20, "atmosphere", ResearchTelemetry.AtmosphericVariables);
                 ConfigureAuxiliary(3, 30, "guidance", ResearchTelemetry.GuidanceVariables);
+                for(var i=0;i<EnvironmentalTelemetry.Variables.Length;i++)
+                {
+                    var variable=EnvironmentalTelemetry.Variables[i];
+                    ConfigureAuxiliary((uint)(100+i),(uint)(1000+i),$"environment:{i}",[(variable.Name,variable.Unit)]);
+                }
             }
             catch { Dispose(); throw; }
         }
@@ -125,6 +130,8 @@ public sealed class SimConnectTelemetryProvider : ITelemetryProvider
                 ObservationQuality.Unavailable, "The SDK rejected the atmospheric definition; aircraft recording remains available.")));
             if (group == "guidance") updates.Add(new(state, null, Guidance: new(now, AutopilotEngagement.Unavailable,
                 new(null), new(null), new(null), ObservationQuality.Unavailable)));
+            if(group.StartsWith("environment:",StringComparison.Ordinal)&&int.TryParse(group[12..],out var index)&&index>=0&&index<EnvironmentalTelemetry.Variables.Length)
+                updates.Add(new(state,null,Environment:EnvironmentalTelemetry.Unavailable(index,now)));
         }
 
         public IReadOnlyList<TelemetryUpdate> Poll()
@@ -205,6 +212,10 @@ public sealed class SimConnectTelemetryProvider : ITelemetryProvider
                             var guidance = ResearchTelemetry.DecodeGuidance(Marshal.PtrToStructure<ResearchTelemetry.GuidanceData>(IntPtr.Add(data, 40)), timestamp);
                             updates.Add(new(connection, null, Guidance: paused ? guidance with { Quality = ObservationQuality.Paused } : guidance));
                         }
+                        else if(request>=1000&&request<1000+EnvironmentalTelemetry.Variables.Length&&definition==request-900
+                            &&size>=48&&!unavailableGroups.Contains($"environment:{request-1000}"))
+                            updates.Add(new(connection,null,Environment:EnvironmentalTelemetry.Decode(request-1000,
+                                BitConverter.Int64BitsToDouble(Marshal.ReadInt64(data,40)),timestamp,paused)));
                         break;
                 }
             }

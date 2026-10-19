@@ -645,6 +645,7 @@ class IngamePanelAeroScience extends TemplateElement {
       if (document.activeElement !== nodes.interval)
         nodes.interval.value = instrument.intervalMs;
       nodes.values.textContent = "";
+      if(instrument.payloadProfileName){const profile=document.createElement('div');profile.className='as-science-reading';profile.textContent=instrument.payloadProfileName;nodes.values.appendChild(profile);}
       for (const v of instrument.measurements || []) {
         const value = document.createElement("div");
         value.className = "as-science-reading";

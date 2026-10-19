@@ -14,7 +14,7 @@ export async function scientificSourcesSettings(parent,api){
   const categories=el("div"),checked=el("p");root.append(categories,checked);let maps=[];
   async function refreshCategories(){
   for(const map of maps)map.destroy();maps=[];categories.replaceChildren();
-  const [access,sources,state]=await Promise.all([api("/api/science/access"),api("/api/science/sources"),api("/api/state")]);
+  const [access,sources,state,capabilities]=await Promise.all([api("/api/science/access"),api("/api/science/sources"),api("/api/state"),api('/api/science/source-capabilities')]);
   online.textContent="Online scientific data access: "+(access.configuration.preferences.onlineEnabled?"Enabled":"Disabled (local datasets remain available)");configure.textContent=access.configuration.preferences.onlineEnabled?"Configure Online Scientific Data Access":"Enable Online Scientific Data Access";
   const age=Date.now()-Date.parse(state.telemetry?.timestampUtc);const point=state.connection?.state==="connected"&&age>=-2000&&age<6000?state.telemetry:null;let local=sources;
   if(point)local=await api(`/api/science/sources?latitude=${point.latitude}&longitude=${point.longitude}`);
@@ -39,6 +39,7 @@ export async function scientificSourcesSettings(parent,api){
 const s=entry.source,m=s.manifest;const row=el("article");row.className="source-notice";holder.append(row);row.append(el("h4",m.name),el("p",`${m.provider} · Observed: ${m.observationUtc||"Unknown / composite"} · ${entry.filesAvailable?"Available":"Dataset Invalid"} · ${point?(entry.coversPoint?"Covers current aircraft point; masks still apply":"Outside aircraft coverage"):"Mission-area suitability: select a position to check"}`));if(entry.error)row.append(el("p",entry.error));
       const details=el("details");details.append(el("summary","View Dataset Details"),el("p",`${m.license} · ${m.citation} · ${m.bands.length} bands · ${m.verticalDatum}`));for(const [id,g] of Object.entries(s.grids))details.append(el("p",`${id}: ${g.crs} · ${g.width}×${g.height} · ${g.pixelWidth}×${g.pixelHeight} native grid units`));details.append(el("p",m.notes||"Original file hashes and source metadata retained."));row.append(details);
       let map;
+      const capability=capabilities.find(c=>c.sourceId===s.id);if(capability)row.append(el('p','Scientific capabilities: '+capability.capabilities.join(', ')+' · Independent of the selected sensor profile.'));
       const coverage=action("View Coverage",async()=>{if(map){map.fit();return;}const vertices=await api(`/api/science/sources/${s.id}/coverage`);const panel=el("div");row.append(panel);map=new ResearchMap(panel);maps.push(map);map.set({plan:{surveyAreas:[{name:m.name,vertices}]}});});row.append(coverage);
       const active=!(access.configuration.preferences.excludedSourceIds||[]).includes(s.id);row.append(action(active?"Exclude from active selection":"Use for active selection",async()=>{await api("/api/science/source-selection",{sourceId:s.id,enabled:!active});row.append(el("p",active?"Excluded from active selection. Original files and products retained.":"Included in source selection. Original files unchanged."));}));
       if(query.get("dataset")===s.id)coverage.click();

@@ -143,7 +143,8 @@ public sealed class ResearchTests : IDisposable
         science.Clear("DELETE SCIENCE DATA", false); Assert.Single(store.StreamSamples(m.Id)); Assert.Empty(science.StreamObservations(m.Id));
         Assert.False(store.ResolvedDatasetReferences(m.Id).Single().Available); Assert.Equal(libraryId, science.LibraryId); Assert.Equal("keep", File.ReadAllText(unrelated));
         var m2 = coordinator.Start(new StartMissionRequest("Second", Instruments: [new("ambient-temperature", true)])); Apply(1); coordinator.End(m2.Id);
-        store.ClearFlightData("DELETE FLIGHT DATA"); Assert.Empty(store.List(20, 0)); Assert.Single(science.StreamObservations(m2.Id)); Assert.NotNull(store.Plan(plan.Id)); Assert.Equal(4, ScienceCatalog.Templates.Length);
+        store.ClearFlightData("DELETE FLIGHT DATA"); Assert.Empty(store.List(20, 0)); Assert.Single(science.StreamObservations(m2.Id)); Assert.NotNull(store.Plan(plan.Id));
+        Assert.All(Enum.GetValues<MissionTemplateKind>(),kind=>Assert.Single(ScienceCatalog.Templates,t=>t.Id==kind));
     }
     [Fact]
     public void ScienceDeletionRollbackAndMissingDatabaseDoNotCreateFalseEmptyArchive()

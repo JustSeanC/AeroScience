@@ -9,3 +9,5 @@
 - [Scientific exports](exports.md)
 - [Advanced source-manifest reference](sources.md)
 - [Troubleshooting](troubleshooting.md)
+
+For sensor planning, atmospheric missions and offline analysis, see the [v0.4.0 pilot walkthrough](../v0.4.0-pilot-guide.md). The [source-expansion report](../v0.4.0-scientific-source-expansion.md) distinguishes available workflows from NOAA/Hyperion/WorldCover/NASA/GOES investigations.

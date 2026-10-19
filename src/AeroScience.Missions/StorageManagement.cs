@@ -55,6 +55,7 @@ public sealed class StorageManagement
         foreach (var group in originals.GroupBy(v => v.Source.RelativeDirectory + "/" + v.File.RelativePath, StringComparer.Ordinal)) { var file=StorageManager.ResolveDataset(science.DirectoryPath, science.LibraryId, group.Key); catalogued.Add(file); sources += Size(file); }
         long products = 0, count = 0;
         foreach (var product in science.AllProducts()) { var file=StorageManager.ResolveDataset(science.DirectoryPath, product.LibraryId, product.RelativePath); catalogued.Add(file); products += Size(file); count++; }
+        foreach(var artifact in science.Artifacts()){var file=StorageManager.ResolveDataset(science.DirectoryPath,artifact.LibraryId,artifact.RelativePath);catalogued.Add(file);products+=Size(file);count++;}
         var caches = science.CacheEntries().Sum(c => Size(StorageManager.ResolveDataset(science.DirectoryPath, science.LibraryId, c.RelativePath)));
         var metadata = Size(Path.Combine(science.DirectoryPath, StorageManager.LibraryManifest)) + Size(Path.Combine(science.DirectoryPath, ".science-storage.json"));
         foreach (var source in science.Sources()) { var file=StorageManager.ResolveDataset(science.DirectoryPath, science.LibraryId, source.RelativeDirectory + "/source.json"); catalogued.Add(file); metadata += Size(file); }

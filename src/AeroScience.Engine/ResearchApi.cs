@@ -104,6 +104,28 @@ public static class ResearchApi
         app.MapPost("/api/missions/{id:guid}/analysis", (Guid id, AnalysisSettings settings, MissionStore store) => store.SaveAnalysisSettings(id, settings));
         app.MapGet("/api/templates", () => ScienceCatalog.Templates);
         app.MapGet("/api/instruments", () => ScienceCatalog.Definitions);
+        app.MapGet("/api/instruments/configuration", (ResearchOperations research) => research.Configurations);
+        app.MapGet("/api/instrument-profiles", () => new { profiles=InstrumentProfiles.Catalog, generic=RemoteAcquisition.Instruments.Keys.Select(InstrumentProfiles.Generic) });
+        app.MapPost("/api/sensor-planning", (SensorPlanningRequest request,ScienceStore science,HttpContext context) => TerrainPlanning.Apply(request,InstrumentProfiles.Plan(request),science,context.RequestAborted));
+        app.MapGet("/api/science/source-capabilities", (ScienceStore science) => science.Sources().Select(ScientificCapabilities.Describe));
+        app.MapGet("/api/missions/{id:guid}/replay", (Guid id,long? after,DateTimeOffset? at,int? limit,MissionStore store) => store.Replay(id,after??0,at,limit??200));
+        app.MapGet("/api/missions/{id:guid}/replay/events", (Guid id,long? after,MissionStore store) => store.ReplayEvents(id,after??0));
+        app.MapGet("/api/missions/{id:guid}/replay/acquisitions", (Guid id,DateTimeOffset at,ScienceStore science) => science.ReplayAcquisitions(id,at));
+        app.MapGet("/api/missions/{id:guid}/replay/context",(Guid id,DateTimeOffset at,MissionStore missions,ScienceStore science)=>
+        {
+            var instruments=missions.ReplayInstruments(id,at);
+            try{return Results.Ok(new{instruments,observations=science.ReplayObservations(id,at),error=(string?)null});}
+            catch(Exception e)when(e is IOException or UnauthorizedAccessException or Microsoft.Data.Sqlite.SqliteException){return Results.Ok(new{instruments,observations=(ScienceObservation[]?)null,error=e.Message});}
+        });
+        app.MapGet("/api/missions/{id:guid}/atmospheric-analysis", (Guid id,MissionStore store,HttpContext context) => AtmosphericAnalysis.Calculate(store.StreamSamples(id),store.Research(id).PlanSnapshot?.AtmosphericSettings,token:context.RequestAborted));
+        app.MapPost("/api/missions/{id:guid}/coverage",(Guid id,ScientificCoverageRequest request,ScientificAnalysisJobs jobs)=>jobs.Enqueue(id,coverage:request));
+        app.MapPost("/api/missions/{id:guid}/composites",(Guid id,CompositeRequest request,ScientificAnalysisJobs jobs)=>jobs.Enqueue(id,composite:request));
+        app.MapGet("/api/analysis/jobs/{id:guid}",(Guid id,ScientificAnalysisJobs jobs)=>jobs.Get(id));
+        app.MapPost("/api/analysis/jobs/{id:guid}/cancel",(Guid id,ScientificAnalysisJobs jobs)=>jobs.Cancel(id));
+        app.MapGet("/api/missions/{id:guid}/artifacts",(Guid id,ScienceStore science)=>science.Artifacts(id).Take(1000).Select(a=>new{a.Id,a.Kind,a.Format,a.Bytes,a.CreatedUtc,a.InputIdentity}));
+        app.MapGet("/api/science/artifacts/{id:guid}/metadata",(Guid id,ScienceStore science)=>Results.Content(science.Artifact(id).MetadataJson,"application/json"));
+        app.MapGet("/api/science/artifacts/{id:guid}/preview",(Guid id,ScienceStore science,HttpContext context)=>{var preview=ScientificArtifactPreview.Create(science,science.Artifact(id),context.RequestAborted);return new{image="data:image/png;base64,"+Convert.ToBase64String(preview.Png),preview.Bounds,preview.Minimum,preview.Maximum,preview.Units,preview.Bands,preview.Method};});
+        app.MapGet("/api/science/artifacts/{id:guid}",(Guid id,ScienceStore science)=>{var artifact=science.Artifact(id);return Results.File(science.VerifiedArtifactPath(artifact),artifact.Format=="tif"?"image/tiff":"application/json",$"AeroScience-{artifact.Kind}-{id:N}.{artifact.Format}");});
         app.MapPost("/api/instruments", (InstrumentConfiguration[] input, MissionCoordinator missions) =>
         { missions.ConfigureInstruments(input); return Results.Ok(missions.Snapshot().Research); });
         app.MapPost("/api/science/estimate", (EstimateRequest request, ScienceStore science) => science.Estimate(request.Instruments, request.DurationMinutes));
@@ -164,6 +186,7 @@ public static class ResearchApi
                 "gpx" => Results.Stream(stream => ResearchExports.GpxAsync(missions, id, stream, token), "application/gpx+xml", $"AeroScience-{id}.gpx"),
                 "kml" => Results.Stream(stream => ResearchExports.KmlAsync(missions, id, stream, token), "application/vnd.google-earth.kml+xml", $"AeroScience-{id}.kml"),
                 "report.txt" => Results.Stream(stream => ResearchExports.ReportAsync(missions, id, stream, token), "text/plain; charset=utf-8", $"AeroScience-{id}-research-summary.txt"),
+                "research.zip" => Results.Stream(stream=>ResearchPackage.WriteAsync(missions,science,id,stream,token),"application/zip",$"AeroScience-{id}-research.zip"),
                 _ => Results.NotFound()
             };
         });

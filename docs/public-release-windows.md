@@ -1,7 +1,9 @@
-# Public Windows alpha release
+# Public Windows release preparation
 
-The current release process is [v0.3.0 one-command Windows build, testing and GitHub publication](v0.3.0-windows-testing.md).
+Use the current [v0.4.0 Windows build, installed testing and publication guide](v0.4.0-windows-testing.md). Build locally with the official MSFS 2024 SDK, existing hash-bound runtime authorization and Inno Setup; no self-hosted runner is required.
 
-Use `scripts/release/Build-Release.ps1` with the existing official SDK, hash-bound runtime authorization and Inno compiler. It validates actual automated tests, SDK/ABI/runtime/licensing/prerequisites and installer integrity, then produces the final setup EXE, SHA-256 and sanitized release evidence automatically. **No mandatory ACCEPTANCE.json editing or self-hosted runner.** Hardware QA remains recommended and explicitly not verified until actually performed. Upload the final files through the GitHub Releases website and mark the release as a prerelease.
+The current scientific release stops at a genuine SDK-built installer candidate. Actual installed missions A–E, archive/upgrade/storage/installer and relevant device checks must be recorded for those exact bytes. Use the graphical `Complete-ReleaseAcceptance.ps1` checklist, then finalize with `New-Release.ps1 -AcceptanceRecord`. It preserves the tested EXE and produces its checksum/public evidence. Ordinary pilots only run the setup EXE and launch AeroScience normally.
 
-Historical manual-candidate procedures remain in version-specific v0.1.1/v0.2.x documents for those artifacts; they are not prerequisites for v0.3.0.
+Upload the finalized setup EXE, checksum and sanitized release evidence manually through GitHub Releases, selecting the exact tested source and prerelease status. The portable ZIP is optional. Older version-specific automatic-alpha procedures remain historical documentation for their own artifacts; they do not establish v0.4.0 hardware acceptance.
+
+Release notes include the optional [official Discord community](https://discord.gg/mpYyazCqvJ) alongside existing feedback and GitHub support. No account or membership is required to use the application.

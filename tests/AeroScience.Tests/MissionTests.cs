@@ -30,7 +30,7 @@ public sealed class MissionTests : IDisposable
         var detail = reopened.Detail(mission.Id)!;
         Assert.Equal("High-altitude survey", detail.Mission.Name);
         Assert.Equal(TelemetrySource.Simulated, detail.Mission.Source);
-        Assert.Equal(["started", "completed"], detail.Events.Select(x => x.Kind));
+        Assert.Equal(["started", "payload-snapshot", "completed"], detail.Events.Select(x => x.Kind));
         var samples = reopened.Samples(mission.Id, 10, 0);
         Assert.Equal(3, samples.Count); Assert.All(samples, x => Assert.True(x.IsValid));
         Assert.Equal(samples[1], reopened.Samples(mission.Id, 1, 1).Single());
@@ -49,7 +49,7 @@ public sealed class MissionTests : IDisposable
         Assert.Equal(time.AddSeconds(5), recovered.Mission.EndedUtc);
         Assert.Equal(1, recovered.Mission.SampleCount);
         Assert.Equal(MissionStatus.Completed, store.Detail(completed)!.Mission.Status);
-        store.RecoverInterrupted(); Assert.Equal(2, store.Detail(id)!.Events.Count);
+        store.RecoverInterrupted(); Assert.Equal(["started","payload-snapshot","interrupted"],store.Detail(id)!.Events.Select(e=>e.Kind));
     }
 
     [Fact]

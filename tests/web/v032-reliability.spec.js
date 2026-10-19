@@ -8,6 +8,9 @@ test('independent finite and Unlimited policies persist with the privacy and per
  await post(request,'/api/science/access',{...before,onlineEnabled:false,prefetchHourlyBytes:800*1048576,preflightTransferBytes:100*1048576});
  await page.goto('/#settings/science');await expect(page.getByRole('button',{name:'Enable Online Scientific Data Access',exact:true})).toBeVisible();await page.getByRole('button',{name:'Enable Online Scientific Data Access',exact:true}).click();
  await expect(page.getByLabel('Overall scientific transfer budget per rolling hour (MiB)')).toHaveValue('800');await page.getByLabel('Unlimited in-flight hourly transfer allowance',{exact:true}).check();await expect(page.getByLabel('Overall scientific transfer budget per rolling hour (MiB)')).toBeDisabled();await page.getByRole('button',{name:'Save scientific access preferences',exact:true}).click();
+ // A click dispatches an asynchronous save. Wait for its actual success
+ // acknowledgement before navigating; otherwise reload can cancel the request.
+ await expect(page.getByText('Offline-only scientific operation saved. Retained sources and mission history remain available.',{exact:true})).toBeVisible();
  await page.reload();await expect(page.getByLabel('Unlimited in-flight hourly transfer allowance',{exact:true})).toBeChecked();await expect(page.getByLabel('Preflight transfer allowance (MiB per application session)',{exact:true})).toHaveValue('100');const saved=(await(await request.get('/api/science/access')).json()).configuration.preferences;expect(saved.prefetchHourlyBytes).toBeNull();expect(saved.preflightTransferBytes).toBe(100*1048576);expect(saved.maximumDownloadBytes).toBe(before.maximumDownloadBytes);expect(saved.onlineEnabled).toBe(false);
  await post(request,'/api/science/access',before);
 });

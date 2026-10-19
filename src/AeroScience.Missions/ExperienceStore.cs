@@ -11,6 +11,7 @@ public sealed partial class MissionStore
         cmd.CommandText = """
             CREATE TABLE IF NOT EXISTS instrument_presets(id TEXT PRIMARY KEY,name TEXT NOT NULL,updated_utc TEXT NOT NULL,payload_json TEXT NOT NULL);
             CREATE TABLE IF NOT EXISTS analysis_settings(mission_id TEXT PRIMARY KEY REFERENCES missions(id),payload_json TEXT NOT NULL);
+            CREATE INDEX IF NOT EXISTS telemetry_receipt_time ON telemetry(mission_id,timestamp_utc,sequence);
             PRAGMA user_version=5;
             """; cmd.ExecuteNonQuery(); tx.Commit();
     }

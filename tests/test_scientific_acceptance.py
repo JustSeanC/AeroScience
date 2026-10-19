@@ -50,3 +50,16 @@ class ScientificAcceptanceTests(unittest.TestCase):
             with tempfile.TemporaryDirectory() as temp:
                 path=Path(temp)/'envi.json';path.write_text(json.dumps(changed))
                 with self.subTest(key=key),self.assertRaises(ValueError):science.verify_guided_envi(path)
+
+    def test_workspace_requires_current_genuine_numeric_support_and_distinct_mission_packages(self):
+        actual=science.verify_workspace()
+        for change in ('stale','nodata','regions','packages','hardware'):
+            value=copy.deepcopy(actual)
+            if change=='stale':value['canonicalLfSourceSha256'][science.SOURCES[0]]='0'*64
+            if change=='nodata':value['independentRasterResults'][0]['nodataSupportMatches']=False
+            if change=='regions':value['regionalSourcesCombined']=1
+            if change=='packages':value['researchPackagesVerified']=0
+            if change=='hardware':value['windowsMsfs']='passed'
+            with tempfile.TemporaryDirectory() as temp:
+                path=Path(temp)/'workspace.json';path.write_text(json.dumps(value))
+                with self.subTest(change=change),self.assertRaises(ValueError):science.verify_workspace(path)

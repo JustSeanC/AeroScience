@@ -50,11 +50,7 @@ public sealed class ToolbarCommandHandler(MissionCoordinator coordinator, RouteM
                     case "marker" when command.MissionId is { } markerMission:
                         coordinator.AddMarker(markerMission, new(command.Category ?? "observation", command.Notes)); break;
                     case "instrument" when command.InstrumentId is { } instrument:
-                        var selected = coordinator.Snapshot().Research?.Instruments ?? [];
-                        if (!selected.Any(c => c.InstrumentId == instrument)) throw new ArgumentException("Unknown instrument.");
-                        coordinator.ConfigureInstruments(selected.Select(c => new InstrumentConfiguration(c.InstrumentId,
-                            c.InstrumentId == instrument ? command.Enabled ?? c.Enabled : c.Enabled,
-                            c.InstrumentId == instrument ? command.IntervalMs ?? c.IntervalMs : c.IntervalMs)).ToArray()); break;
+                        coordinator.ConfigureInstrument(instrument,command.Enabled,command.IntervalMs);break;
                     default: throw new ArgumentException("Unknown toolbar command or missing mission ID.");
                 }
                 var reply = Reply(command.RequestId, true, null);

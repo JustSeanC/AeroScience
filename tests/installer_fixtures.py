@@ -29,7 +29,7 @@ def candidate(flow, vc_signature='Valid'):
     installer.record(folder, compiler, vc, report)
     acceptance = installer.p.read_json(folder/'ACCEPTANCE.json')
     acceptance.update(tester='UNIT FIXTURE ONLY', tested_utc='2026-10-17T00:00:00Z')
-    for name in installer.p.ALPHA_ACCEPTANCE:
+    for name in installer.p.ACCEPTANCE:
         acceptance['checks'][name].update(result='passed', evidence='STRUCTURAL FIXTURE ONLY; NOT WINDOWS ACCEPTANCE')
     installer.write_json(flow.acceptance, acceptance)
     return folder

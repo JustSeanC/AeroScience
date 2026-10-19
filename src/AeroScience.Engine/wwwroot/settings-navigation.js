@@ -1,7 +1,7 @@
 export const settingsCategories = [
   ["general","General"],["maps","Maps & Basemaps"],["science","Scientific Data Sources"],
   ["units","Units & Display"],["storage","Storage & Data"],["toolbar","MSFS Toolbar"],
-  ["updates","Updates"],["advanced","Advanced & Diagnostics"]
+  ["updates","Updates"],["advanced","Advanced & Diagnostics"],["support","Help & Support"]
 ];
 export function settingsLocation(hash=location.hash){
   const [path,query=""]=hash.replace(/^#/,"").split("?");

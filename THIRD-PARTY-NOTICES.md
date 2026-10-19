@@ -1,5 +1,9 @@
 # Third-party components
 
+## v0.4.0 geometric analysis
+
+NetTopologySuite **2.6.0**, BSD 3-Clause, NetTopologySuite team and contributors. NuGet lock files pin the unmodified managed assembly. Its complete upstream license is bundled in [licenses/NetTopologySuite.txt](licenses/NetTopologySuite.txt). Source: <https://github.com/NetTopologySuite/NetTopologySuite/tree/v2.6.0>. Used for bounded vector polygon intersections/unions in scientific coverage; GeographicLib.NET continues to supply WGS84 geodesics. No external GIS executable is required.
+
 The AeroScience license covers original project code, not Microsoft SDK files or third-party runtimes.
 
 - .NET / ASP.NET Core and Microsoft.Data.Sqlite: Microsoft / .NET Foundation, MIT and associated runtime notices. A self-contained publish retains its runtime `LICENSE.txt` and `ThirdPartyNotices.txt` when supplied by the runtime pack.

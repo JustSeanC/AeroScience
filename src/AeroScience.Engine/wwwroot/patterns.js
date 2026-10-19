@@ -1,11 +1,12 @@
 import { planningField, planningDistance, planningArea, planningText } from "./science-display.js";
 import { areaSummary } from "./planner-geometry.js";
+import { sensorPlanning } from "./sensor-planning.js";
 const element = (tag, text) => {
   const e = document.createElement(tag);
   if (text) e.textContent = text;
   return e;
 };
-export function patternEditor(parent, { api, notice, get, set, aircraft, pickCenter, fitPreview, changed }) {
+export function patternEditor(parent, { api, notice, get, set, aircraft, pickCenter, fitPreview, changed, instruments, sensorSettings }) {
   let fitMode="envelope",clippingPolygon=null;
   let preview = null,
     patterns = structuredClone(get().patterns || []),
@@ -311,5 +312,6 @@ export function patternEditor(parent, { api, notice, get, set, aircraft, pickCen
     }
   }
   renderSaved();
-  return { getPatterns: () => patterns, remember, refreshAreas, hasPreview:()=>!!preview?.waypoints };
+  const sensor=instruments?sensorPlanning(panel,{api,instruments,definition,savedSettings:sensorSettings,apply:value=>{spacing.planningUnits.set(value);schedule();},preview:result=>{if(result.pattern)set({...get(),preview:{...result.pattern,modeledSwaths:result.modeledSwaths,terrainPlanningFootprint:result.terrainPlanningFootprint},previewOnly:true});}}):null;
+  return { getPatterns: () => patterns, getSensorPlanning:()=>sensor?.settings()??sensorSettings??null,remember, refreshAreas, hasPreview:()=>!!preview?.waypoints };
 }

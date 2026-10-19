@@ -1,0 +1,87 @@
+{
+  "formatVersion": 1,
+  "version": "0.4.0",
+  "evidenceType": "development-validation-not-windows-acceptance",
+  "checkedUtc": "2026-10-19T21:54:26.920284+00:00",
+  "environment": "Linux x64 cloud workspace",
+  "windowsMsfs": "not tested",
+  "githubPublication": "not published",
+  "checks": {
+    "dotnet": {
+      "total": 232,
+      "passed": 232,
+      "failed": 0,
+      "error": 0,
+      "aborted": 0,
+      "notExecuted": 0,
+      "reportSha256": "fe5f7d4eace45f5b2e2c872a610e4e38c273241546d309ef676a3ae73691a941"
+    },
+    "browser": {
+      "startTime": "2026-10-19T21:51:30.099Z",
+      "duration": 130317.72499999999,
+      "expected": 67,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0,
+      "reportSha256": "9e93c39ac6ca30ddcf24572652c1fc4a858cb5d0953854e6bddb38583f6fc8ac"
+    },
+    "helpers": {
+      "format_version": 1,
+      "completed_utc": "2026-10-19T21:53:18.281495+00:00",
+      "total": 69,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "passed": 69,
+      "successful": true,
+      "reportSha256": "ee9139c6153753eb27cb564d8dd8a88343cb3275c948a09c4a156c7ba22c5306"
+    },
+    "recovery": {
+      "result": "passed",
+      "evidence": "PASS: actual-process crash/restart retained 3 samples and Realistic mode; Universal default/completion persisted; duplicate engine refused."
+    },
+    "webAssets": {
+      "result": "passed",
+      "pinnedFiles": 28
+    },
+    "crossPublish": {
+      "result": "passed",
+      "target": "win-x64 self-contained",
+      "execution": "not executed; cross-compilation only",
+      "included": [
+        "NetTopologySuite.dll",
+        "licenses/NetTopologySuite.txt",
+        "wwwroot/help/v0.4.0-pilot-guide.md"
+      ]
+    },
+    "powerShell": {
+      "result": "syntax passed",
+      "execution": "Windows GUI/SDK/Inno execution not tested"
+    },
+    "communitySupport": {
+      "invitation": "https://discord.gg/mpYyazCqvJ",
+      "messageAndExternalPopup": "checked in Chromium",
+      "discordNetwork": "navigation intercepted locally; no Discord request or membership action",
+      "pairedInterface": "desktop-availability flag simulated; no physical iPad acceptance"
+    }
+  },
+  "requiredGamingPc": [
+    "Official SDK build and ABI/runtime check",
+    "Inno setup and first-run execution",
+    "Missions A\u2013E including 30\u201360 minute recording",
+    "Actual auxiliary SimVar support and live Mach",
+    "Toolbar controls/synchronization",
+    "Upgrade, offline archive, storage migration and uninstall/reinstall",
+    "Quest 3 and physical iPad"
+  ],
+  "scientificEvidence": {
+    "providerReportSha256": "a71c0f414a689dbd6f93134e7fab18a643c1266bd97a5eec0914d09b9bda7939",
+    "guidedReportSha256": "10ef7517911e4f53e62919711bff34306dc3fa46ceb8ad83a37acec07d35bf64",
+    "workspaceReportSha256": "30f7458080aad457fc9718ff5d242b54177aecebef67fa9ed7f4df787ef7db91",
+    "providers": 4,
+    "independentlyComparedRasters": 14,
+    "maximumAbsoluteDifference": 0,
+    "researchPackages": 6,
+    "flightInputs": "synthetic positions; actual external source data"
+  }
+}

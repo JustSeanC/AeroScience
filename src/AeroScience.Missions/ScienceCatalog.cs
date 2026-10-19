@@ -22,12 +22,16 @@ public static class ScienceCatalog
     public static readonly MissionTemplate[] Templates =
     [
         new(MissionTemplateKind.GeneralResearch, "General Research", "Record a flexible aircraft-agnostic research mission.", [], ["observation", "note"]),
-        new(MissionTemplateKind.AtmosphericProfile, "Atmospheric Profile", "Observe simulator atmospheric conditions across altitude changes.",
+        new(MissionTemplateKind.AtmosphericProfile, "Vertical Profile", "Observe simulator atmospheric conditions across altitude changes.",
             Definitions.Where(d => !RemoteAcquisition.Instruments.ContainsKey(d.Id)).Select(d => new InstrumentConfiguration(d.Id, true, 1000)).ToArray(), ["interesting-weather", "observation"]),
         new(MissionTemplateKind.GeographicSurvey, "Geographic Survey", "Observe a region along a planned route and mark survey activity.",
             [new("ambient-temperature", true, 2000), new("ambient-wind", true, 2000)], ["start-survey", "end-survey", "finding"]),
         new(MissionTemplateKind.ObservationFlight, "Observation Flight", "Visit points of interest and record research notes.",
-            [new("ambient-temperature", true, 5000)], ["observation", "finding", "equipment-note"])
+            [new("ambient-temperature", true, 5000)], ["observation", "finding", "equipment-note"]),
+        new(MissionTemplateKind.CloudStructureSurvey,"Cloud Structure Survey","Observe cloud entries, exits and local density along the actual aircraft path.",
+            [new("ambient-temperature",true),new("ambient-wind",true),new("ambient-pressure",true)], ["interesting-weather","observation"]),
+        new(MissionTemplateKind.AtmosphericTransect,"Atmospheric Transect","Compare local atmospheric observations along a geographic transect.",
+            [new("ambient-temperature",true),new("ambient-wind",true),new("ambient-pressure",true),new("ambient-density",true)], ["interesting-weather","observation"])
     ];
     public static readonly string[] MarkerCategories = ["observation", "start-survey", "end-survey", "interesting-weather", "finding", "equipment-note", "note"];
     public static InstrumentConfiguration[] Normalize(IEnumerable<InstrumentConfiguration>? configurations)
@@ -36,8 +40,11 @@ public static class ScienceCatalog
         if (selected.Select(c => c.InstrumentId).Distinct(StringComparer.Ordinal).Count() != selected.Length)
             throw new ArgumentException("An instrument can be configured only once per mission.");
         foreach (var config in selected)
+        {
             if (!Definitions.Any(d => d.Id == config.InstrumentId) || config.IntervalMs is < 1000 or > 60000)
                 throw new ArgumentException("Select a known instrument and an acquisition interval of 1–60 seconds. The SDK source currently supplies at most 1 Hz.");
+            if(config.Payload is {} payload)InstrumentProfiles.Validate(payload,config.InstrumentId);
+        }
         return Definitions.Select(d => selected.FirstOrDefault(c => c.InstrumentId == d.Id) ?? new(d.Id)).ToArray();
     }
     public static IScienceInstrument Instrument(string id) => new AtmosphericInstrument(
@@ -114,9 +121,11 @@ public static class MissionPlanning
             Destination = Text(plan.Destination, 200),
             PreflightNotes = Text(plan.PreflightNotes),
             Patterns = (plan.Patterns ?? []).Select(FlightPatterns.Validate).ToArray(),
+            AtmosphericSettings = plan.AtmosphericSettings is {} settings ? AtmosphericAnalysis.Validate(settings) : null,
+            SensorPlanning=plan.SensorPlanning is {} sensor?InstrumentProfiles.ValidateSettings(sensor):null,
             Waypoints = waypoints,
             SurveyAreas = areas,
-            Instruments = ScienceCatalog.Normalize(plan.Instruments ?? ScienceCatalog.Templates.Single(t => t.Id == plan.Template).Instruments),
+            Instruments = InstrumentProfiles.Freeze(ScienceCatalog.Normalize(plan.Instruments ?? ScienceCatalog.Templates.Single(t => t.Id == plan.Template).Instruments)),
             UpdatedUtc = DateTimeOffset.UtcNow
         };
     }

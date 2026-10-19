@@ -399,6 +399,8 @@ export class ResearchMap {
     this.container.dataset.previewPoints=String(result?.waypoints?.length||0);
     this.previewLayer=this.L.layerGroup().addTo(this.map);
     if(!result)return;
+    for(const vertices of result.modeledSwaths||[])this.L.polygon(vertices.map(p=>ll(p)),{color:'#6ce4b9',weight:1,fillOpacity:.08}).bindTooltip('Modeled nadir flat-ground swath; source validity, relief and continuous acquisition are unverified.').addTo(this.previewLayer);
+    if(result.terrainPlanningFootprint)this.L.polygon(result.terrainPlanningFootprint.boundary.map(p=>ll(p)),{color:'#efb96b',weight:2,fillOpacity:.15}).bindTooltip('Relative-AGL terrain-aware centre footprint; no simulator vertical-datum correction.').addTo(this.previewLayer);
     const points=result.waypoints||[];const d=result.definition;
     if(result.segments?.length){for(const segment of result.segments)this.L.polyline(points.slice(segment.start,segment.end+1).map(p=>ll(p,points[0]?.longitude)),{color:segment.role==="scan"?"#50dcc7":"#f0ad70",dashArray:segment.role==="scan"?null:"6 6",weight:3}).bindTooltip(segment.role==="scan"?"In-area scan leg":"Transition: may leave survey polygon; turning feasibility unvalidated").addTo(this.previewLayer);}
     else this.L.polyline(points.map(p=>ll(p,points[0]?.longitude)),{color:"#ffffff",dashArray:"3 7",weight:3}).addTo(this.previewLayer);
@@ -519,7 +521,7 @@ export class ResearchMap {
             iconSize: [24, 24],
           }),
         })
-          .bindTooltip("Live aircraft")
+          .bindTooltip(this.options.aircraftLabel||"Live aircraft")
           .addTo(this.aircraft);
       else this.aircraftMarker.setLatLng(ll(d.aircraft, base));
     } else if (this.aircraftMarker) {

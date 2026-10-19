@@ -7,7 +7,7 @@ using BitMiracle.LibTiff.Classic;
 namespace AeroScience.Missions;
 
 // Narrow, explicit readers. No file extension is treated as proof of format.
-public sealed class ScientificRaster : IDisposable
+public sealed partial class ScientificRaster : IDisposable
 {
     private static readonly Tiff.TiffExtendProc? previousExtender;
     static ScientificRaster()
@@ -70,12 +70,14 @@ public sealed class ScientificRaster : IDisposable
                 var width = Int(TiffTag.IMAGEWIDTH); var height = Int(TiffTag.IMAGELENGTH);
                 channels = Int(TiffTag.SAMPLESPERPIXEL, 1); bits = Int(TiffTag.BITSPERSAMPLE);
                 sampleFormat = Int(TiffTag.SAMPLEFORMAT, 1);
-                if (channels != 1 || band.Channel != 0 || bits is not (8 or 16 or 32 or 64) || sampleFormat is < 1 or > 3
+                if (channels is <1 or >512 || band.Channel < 0 || band.Channel >= channels || bits is not (8 or 16 or 32 or 64) || sampleFormat is < 1 or > 3
                     || sampleFormat == 3 && bits is 8 or 16 || sampleFormat != 3 && bits == 64 || Int(TiffTag.PLANARCONFIG, 1) != 1)
-                    throw new InvalidDataException("GeoTIFF supports single-band UInt8/Int8/UInt16/Int16/UInt32/Int32/Float32/Float64 rasters, with channel 0.");
+                    throw new InvalidDataException("GeoTIFF requires a valid channel in a contiguous numeric UInt8/Int8/UInt16/Int16/UInt32/Int32/Float32/Float64 raster.");
                 var scale = Doubles(TiffTag.GEOTIFF_MODELPIXELSCALETAG); var tie = Doubles(TiffTag.GEOTIFF_MODELTIEPOINTTAG);
-                if (scale.Length < 2 || tie.Length < 6 || tiff.GetField(TiffTag.GEOTIFF_MODELTRANSFORMATIONTAG) is not null)
-                    throw new InvalidDataException("A north-up GeoTIFF scale/tiepoint transform is required; rotated grids must be reprojected first.");
+                var transform=Doubles(TiffTag.GEOTIFF_MODELTRANSFORMATIONTAG);
+                if(transform.Length!=0&&(transform.Length!=16||transform.Any(v=>!double.IsFinite(v))||transform[2]!=0||transform[6]!=0||transform[8]!=0||transform[9]!=0||transform[12]!=0||transform[13]!=0||transform[14]!=0||transform[15]!=1))
+                    throw new InvalidDataException("Only a finite two-dimensional affine GeoTIFF transform is supported.");
+                if(transform.Length==0&&(scale.Length<2||tie.Length<6))throw new InvalidDataException("A GeoTIFF affine transform or scale/tiepoint is required.");
                 var keys = tiff.GetField(TiffTag.GEOTIFF_GEOKEYDIRECTORYTAG);
                 var shorts = keys?[^1].ToShortArray() ?? throw new InvalidDataException("GeoTIFF CRS keys are required.");
                 var crs = 0;var model=0;var geographic=0;var projected=0; var pixelPoint = false;
@@ -89,8 +91,9 @@ public sealed class ScientificRaster : IDisposable
                 }
                 crs=model switch{1=>projected,2=>geographic,_=>throw new InvalidDataException("An explicit supported projected/geographic GeoTIFF model is required.")};
                 if(model==1&&projected is 0 or 32767||model==2&&projected is >0 and not 32767)throw new InvalidDataException("Contradictory or user-defined GeoTIFF projection is unsupported.");
-                var dx = scale[0]; var dy = -scale[1]; var shift = pixelPoint ? .5 : 0;
-                Grid = ValidateGrid(new(width, height, "EPSG:" + crs, tie[3] - (tie[0] + shift) * dx, tie[4] - (tie[1] + shift) * dy, dx, dy));
+                var shift = pixelPoint ? .5 : 0;
+                if(transform.Length==16)Grid=ValidateGrid(new(width,height,"EPSG:"+crs,transform[3]-shift*(transform[0]+transform[1]),transform[7]-shift*(transform[4]+transform[5]),transform[0],transform[5],transform[1],transform[4]));
+                else{var dx=scale[0];var dy=-scale[1];Grid=ValidateGrid(new(width,height,"EPSG:"+crs,tie[3]-(tie[0]+shift)*dx,tie[4]-(tie[1]+shift)*dy,dx,dy));}
                 if (double.TryParse(tiff.GetField(TiffTag.GDAL_NODATA)?[0].ToString(), NumberStyles.Float, Inv, out var nodata)) NativeNoData = nodata;
                 if (tiff.IsTiled()) { tileWidth = Int(TiffTag.TILEWIDTH); tileHeight = Int(TiffTag.TILELENGTH); }
                 else rowsPerStrip = Math.Min(height, Int(TiffTag.ROWSPERSTRIP, height));
@@ -267,11 +270,12 @@ public sealed class ScientificRaster : IDisposable
             if (blockIndex != index)
             {
                 var read = tiff.IsTiled() ? tiff.ReadEncodedTile(index, block, 0, -1) : tiff.ReadEncodedStrip(index, block, 0, -1);
-                var required = tiff.IsTiled() ? block!.Length : Math.Min(rowsPerStrip, Grid.Height - index * rowsPerStrip) * Grid.Width * size;
+                var required = tiff.IsTiled() ? block!.Length : Math.Min(rowsPerStrip, Grid.Height - index * rowsPerStrip) * Grid.Width * size * channels;
                 if (read < required) throw new InvalidDataException("TIFF block was truncated or could not be decoded.");
                 blockIndex = index;
             }
-            var offset = tiff.IsTiled() ? ((row % tileHeight) * tileWidth + col % tileWidth) * size : ((row % rowsPerStrip) * Grid.Width + col) * size;
+            var pixelOffset=tiff.IsTiled()?((row%tileHeight)*tileWidth+col%tileWidth):((row%rowsPerStrip)*Grid.Width+col);
+            var offset=(pixelOffset*channels+band.Channel)*size;
             block!.AsSpan(offset, size).CopyTo(bytes);
             if (!BitConverter.IsLittleEndian) bytes[..size].Reverse(); // LibTiff decodes into host order.
         }
@@ -286,6 +290,7 @@ public sealed class ScientificRaster : IDisposable
     // radiometric scaling or overview substitution occurs during preparation.
     public RasterGrid CopySubset(GeographicBounds area, string destination, CancellationToken token)
     {
+        if(channels!=1||Grid.RowX!=0||Grid.ColumnY!=0)throw new InvalidDataException("Remote native subset copying requires a north-up single-band asset; no silent reprojection is performed.");
         if(tiff is null) throw new InvalidOperationException("Automatic subset preparation requires numeric GeoTIFF.");
         var corners=area.Corners.Select(p=>Project(p,Grid.Crs)).ToArray();
         var left=Math.Max(0,(int)Math.Floor((corners.Min(p=>p.X)-Grid.OriginX)/Grid.PixelWidth+1e-8));

@@ -30,6 +30,11 @@
           "SQLitePCLRaw.core": "2.1.13"
         }
       },
+      "NetTopologySuite": {
+        "type": "Transitive",
+        "resolved": "2.6.0",
+        "contentHash": "1B1OTacTd4QtFyBeuIOcThwSSLUdRZU3bSFIwM8vk36XiZlBMi3K36u74e4OqwwHRHUuJC1PhbDx4hyI266X1Q=="
+      },
       "SQLite": {
         "type": "Transitive",
         "resolved": "3.53.4",
@@ -68,10 +73,11 @@
       "aeroscience.missions": {
         "type": "Project",
         "dependencies": {
-          "AeroScience.Shared": "[0.3.0, )",
+          "AeroScience.Shared": "[0.3.2, )",
           "BitMiracle.LibTiff.NET": "[2.4.660, )",
           "GeographicLib.NET": "[2.3.2, )",
           "Microsoft.Data.Sqlite": "[10.0.13, )",
+          "NetTopologySuite": "[2.6.0, )",
           "SQLitePCLRaw.bundle_e_sqlite3": "[3.0.5, )"
         }
       },
@@ -81,13 +87,13 @@
       "aeroscience.simconnect": {
         "type": "Project",
         "dependencies": {
-          "AeroScience.Telemetry": "[0.3.0, )"
+          "AeroScience.Telemetry": "[0.3.2, )"
         }
       },
       "aeroscience.telemetry": {
         "type": "Project",
         "dependencies": {
-          "AeroScience.Shared": "[0.3.0, )"
+          "AeroScience.Shared": "[0.3.2, )"
         }
       }
     },

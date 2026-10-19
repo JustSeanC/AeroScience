@@ -23,7 +23,8 @@ BASE_ALPHA_ACCEPTANCE = ("windows_companion", "offline_archive_export", "toolbar
 GEOGRAPHIC_ACCEPTANCE = ("geographic_maps", "efb_route_import")
 ALPHA_ACCEPTANCE = BASE_ALPHA_ACCEPTANCE + GEOGRAPHIC_ACCEPTANCE
 EXTENDED_ACCEPTANCE = ("live_recording_recovery", "storage_migration", "mach_live", "toolbar_mission_sync", "vr_performance", "ipad_safari")
-ACCEPTANCE = ALPHA_ACCEPTANCE + EXTENDED_ACCEPTANCE
+SCIENCE040_ACCEPTANCE = ("science040_multispectral", "science040_terrain", "science040_vertical_profile", "science040_cloud_survey", "science040_long_recording")
+ACCEPTANCE = ALPHA_ACCEPTANCE + EXTENDED_ACCEPTANCE + SCIENCE040_ACCEPTANCE
 RUNTIME_EXPORTS = ("SimConnect_Open", "SimConnect_Close", "SimConnect_CallDispatch", "SimConnect_AddToDataDefinition",
                    "SimConnect_RequestDataOnSimObject", "SimConnect_SubscribeToSystemEvent", "SimConnect_RequestSystemState",
                    "SimConnect_SubscribeToCommBusEvent", "SimConnect_CallCommBusEvent", "SimConnect_GetLastSentPacketID")
@@ -48,10 +49,22 @@ CHECK_HELP = {
     "uninstall_preservation": "Use Windows Installed Apps to uninstall. Confirm app/shortcuts are removed, data/configuration remain, and keeping or explicitly removing the toolbar works with unrelated add-ons preserved. Reinstall and confirm archive access."
 }
 
+CHECK_HELP.update({
+    "science040_multispectral": "Mission A: real camera profile, polygon/AGL/overlap/scan lines, genuine preparation, live acquisition, offline replay/valid-versus-geometric coverage, NDVI GeoTIFF and research ZIP.",
+    "science040_terrain": "Mission B: RIEGL reference geometry, varied terrain, independent GROUND ALTITUDE/AGL/attitude, truthful external DEM datum/source distinctions; no manufactured laser returns.",
+    "science040_vertical_profile": "Mission C: actual climb/descent temperature/pressure/density/wind, optional cloud/visibility, altitude bins and observed gaps; offline replay/export.",
+    "science040_cloud_survey": "Mission D: MSFS local cloud transitions, visibility/precipitation, observed/unknown boundaries and timestamped replay; no regional cloud reconstruction.",
+    "science040_long_recording": "Mission E: 30–60 minutes with science enabled and concurrent archive analysis; inspect cadence/gaps, reconnect/restart, product hashes and offline reopening. Record measured duration and any gaps."
+})
+
 
 def require(condition, message):
     if not condition:
         raise ValueError(message)
+
+
+def requires_manual_acceptance(version=RELEASE_VERSION):
+    return tuple(map(int, version.split('-')[0].split('.'))) >= (0, 4, 0)
 
 
 def identity(version=RELEASE_VERSION):
@@ -65,6 +78,7 @@ def identity(version=RELEASE_VERSION):
     if base == '0.3.2': title = f'AeroScience v{base} — Scientific Reliability & Performance' + (' Prerelease' if preview else '')
     if base == '0.3.1': title = f'AeroScience v{base} — Predictive Science & Guided Dataset Import' + (' Prerelease' if preview else '')
     if base == '0.3.0': title = f'AeroScience v{base} — Remote Sensing & Research Payloads' + (' Alpha' if preview else '')
+    if base == '0.4.0': title = f'AeroScience v{base} — Scientific Mission Planning, Sensor Modeling & Analysis' + (' Prerelease' if preview else '')
     return dict(version=version, package_version=base, tag='v'+version, root_name=root,
                 asset_name=root+'.zip', candidate_name=root+'-CANDIDATE.zip', setup_name=f'AeroScience-Setup-v{version}.exe',
                 setup_record_name=f'AeroScience-Setup-v{version}.release.json', prerelease=preview, title=title)
@@ -203,6 +217,8 @@ def validate_acceptance(path, version=RELEASE_VERSION, source_commit=None, paylo
         require(acceptance.get('payload_sha256') == payload_sha256, 'Acceptance does not match the validated candidate payload; test this exact build.')
     base_checks = BASE_ALPHA_ACCEPTANCE + (GEOGRAPHIC_ACCEPTANCE if tuple(map(int, version.split("-")[0].split("."))) >= (0, 2, 2) else ())
     required = base_checks if identity(version)["prerelease"] else base_checks + EXTENDED_ACCEPTANCE
+    if requires_manual_acceptance(version):
+        required = base_checks + EXTENDED_ACCEPTANCE + SCIENCE040_ACCEPTANCE
     problems = []
     for name in required:
         check = acceptance.get("checks", {}).get(name, {})
@@ -308,7 +324,7 @@ def prepare_candidate(companion, community, receipt_path, runtime_report, runtim
         (destination/'docs').mkdir()
         for name in ('alpha-testing.md', 'runtime-distribution.md', 'science-operations.md', 'sdk-research-v0.2.0.md', 'v0.2.0-windows-testing.md', 'v0.2.1-windows-testing.md', 'v0.2.1-completion.md', 'v0.2.2-windows-testing.md', 'v0.2.2-completion.md', 'map-providers-v0.2.2.md'):
             shutil.copy2(REPO/'docs'/name, destination/'docs'/name)
-        for name in ('v0.3.0-completion.md','v0.3.0-windows-testing.md','v0.3.1-completion.md','v0.3.1-windows-testing.md','v0.3.2-completion.md','v0.3.2-windows-testing.md'):
+        for name in ('v0.3.0-completion.md','v0.3.0-windows-testing.md','v0.3.1-completion.md','v0.3.1-windows-testing.md','v0.3.2-completion.md','v0.3.2-windows-testing.md','v0.4.0-completion.md','v0.4.0-windows-testing.md','v0.4.0-scientific-methods.md','v0.4.0-instrument-profiles.md','v0.4.0-replay-and-coverage.md','v0.4.0-scientific-composites.md','v0.4.0-scientific-source-expansion.md','v0.4.0-pilot-guide.md'):
             shutil.copy2(REPO/'docs'/name,destination/'docs'/name)
         shutil.copytree(REPO/'docs'/'remote-sensing',destination/'docs'/'remote-sensing')
         shutil.copytree(REPO/'docs'/'roadmap',destination/'docs'/'roadmap')
@@ -381,6 +397,23 @@ def verify_archive(archive, checksum):
 
 
 def release_notes(info):
+    if requires_manual_acceptance(info['version']) and 'acceptance' in info:
+        return f'''# {info['title']}
+
+Download **{info['asset_name']}**. Run the setup EXE, then launch AeroScience from Start. The guided setup retains separate storage locations and offers the genuine SDK-built MSFS toolbar. Ordinary users need no SDK, terminal, Python/GDAL or manual server.
+
+v0.4.0 adds versioned AVIRIS-NG, RedEdge-P, FLIR and RIEGL reference geometries; sensor-based AGL/overlap planning; optional timestamped simulator ground/weather observations; vertical/cloud/transect mission templates; offline replay; separate geometric and valid-source coverage; native-grid mission sample composites and retained-source mosaics; and GeoTIFF/research ZIP export.
+
+External observations retain their original dates, calibration, masks, resolution and datums. They are not live aircraft camera or LiDAR returns. Compatible regional windows of one scene can be combined; incompatible scenes, dates and datums remain separate. Hyperspectral uses supported ENVI imports. NOAA point clouds, direct Hyperion products, WorldCover, GIBS and GOES were investigated; they are not integrated providers in this release. See the included v0.4.0 support and scientific-methods reports.
+
+Installed Windows/MSFS acceptance for this exact installer is recorded in the release evidence, including missions A–E, upgrade/offline archive, toolbar, VR and iPad checks. This does not establish compatibility with every aircraft or device. Automated fixtures and genuine external-data tests remain separate evidence. Existing archives receive verified backups before additive schema upgrades; user data is retained during updates/uninstall.
+
+Need help with AeroScience? Join our Discord community for support, troubleshooting, questions, feature requests, and discussions with other pilots. [Join our Discord](https://discord.gg/mpYyazCqvJ). Membership is optional; Collect Feedback and GitHub issues remain available.
+
+Source: https://github.com/JustSeanC/AeroScience/commit/{info['source_commit']}
+
+SHA-256: `{info['sha256']}`
+'''
     if 'validation' in info:
         checks=info['validation']['checks']
         return f'''# {info['title']}
@@ -396,6 +429,8 @@ v0.3.2 fixes transient SQLite sidecar accounting, separates preflight and in-fli
 New installations default to OpenStreetMap Streets after a privacy choice; offline-only is available before any tile request. Existing map choices are retained. Optional Esri imagery uses your own key. Storage defaults are 25 GB flight / 50 GB science (decimal GB), configurable or Unlimited. Only positively registered regenerable caches may be automatically cleaned; pinned research, original data and completed products are protected. Optional GitHub update notifications never execute installers automatically. Calibration, full replay/coverage, organization servers and native satellite mapping remain deferred.
 
 Use Collect Feedback and report issues at https://github.com/JustSeanC/AeroScience/issues. Omit keys, private runtime correspondence and personal research unless you deliberately share it.
+
+Need help with AeroScience? Join our Discord community for support, troubleshooting, questions, feature requests, and discussions with other pilots. [Join our Discord](https://discord.gg/mpYyazCqvJ). Membership is optional; Collect Feedback and GitHub issues remain available.
 
 Source: https://github.com/JustSeanC/AeroScience/commit/{info['source_commit']}
 
@@ -416,6 +451,8 @@ Implemented features include live aircraft telemetry, simulator-provided Mach, U
 This is {'an early prerelease' if info['prerelease'] else 'a release'}. Extended checks still awaiting results: {', '.join(limits) if limits else 'none in the recorded checklist'}. See ACCEPTANCE.json for actual evidence. v0.2.2 adds optional user-owned Esri satellite/labels basemaps with DPAPI-protected configuration and offline fallback; a native offline Map tab with revision-cached bounded CommBus route transfer; current EFB PLN and planned GPX/KML/CSV exports; explicit ICAO/SimBrief/manual coordinate sharing; and permanent deletion without a new backup as the default. Native/provider/EFB compatibility requires the recorded acceptance for this exact installer. Includes optional saved plans, four editable mission templates, simulator-reported atmospheric instruments, offline Leaflet/Natural Earth geography, eight editable geodesic patterns, ordered planned-versus-recorded analysis, observation markers, read-only flight guidance, reusable instrument presets, independent Science Collection pause/resume, shared science display units, redesigned native/browser science cards and Chart.js plots, explicit optional-backup archive management and complete research exports. Toolbar updates compare actual package versions and show measured copy/verify progress with rollback. Advanced science models, pilot scoring, calibration and remote-sensing instruments remain deferred. Existing history remains local and is not deleted by an upgrade.
 
 Use **Collect Feedback** in AeroScience, add reproduction steps and save the ZIP. Review it for private information, then report the problem at https://github.com/JustSeanC/AeroScience/issues. Do not attach your mission database or personal observations unless you choose to share them.
+
+Need help with AeroScience? Join our Discord community for support, troubleshooting, questions, feature requests, and discussions with other pilots. [Join our Discord](https://discord.gg/mpYyazCqvJ). Membership is optional; Collect Feedback and GitHub issues remain available.
 
 Source: https://github.com/JustSeanC/AeroScience/commit/{info['source_commit']}
 

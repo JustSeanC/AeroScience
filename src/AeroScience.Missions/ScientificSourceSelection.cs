@@ -6,9 +6,10 @@ namespace AeroScience.Missions;
 public static class ScientificSourceSelection
 {
     public static bool CoversArea(ScientificSource source,GeographicBounds area)=>area.Corners.All(p=>source.Grids.Values.All(g=>ScientificRaster.GridCovers(g,new(p.Latitude+(area.Center.Latitude-p.Latitude)*.000001,p.Longitude+(area.Center.Longitude-p.Longitude)*.000001))));
-    public static ScientificSource? Select(IEnumerable<SourceAvailability> available,RemoteKind kind,ScientificAccessPreferences? p=null)
+    public static ScientificSource? Select(IEnumerable<SourceAvailability> available,RemoteKind kind,ScientificAccessPreferences? p=null,PayloadConfiguration? payload=null)
     {
         var candidates=available.Where(a=>a.FilesAvailable&&a.CoversPoint==true&&a.Source.Manifest.Kind==kind).Select(a=>a.Source);
+        if(payload is not null)candidates=candidates.Where(s=>ScientificCapabilities.Supports(payload,s));
         candidates=candidates.Where(s=>p?.ExcludedSourceIds?.Contains(s.Id)!=true);
         var mode=p?.SourceModes?.GetValueOrDefault(kind)??"automatic";
         if(kind==RemoteKind.Hyperspectral||mode=="local")candidates=candidates.Where(s=>s.Manifest.Acquisition is null);

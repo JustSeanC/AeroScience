@@ -30,6 +30,21 @@ SOURCES=[
  'src/AeroScience.Missions/ScientificPrediction.cs',
  'src/AeroScience.Engine/ScientificPreparationWorker.cs',
 ]
+if tuple(map(int, VERSION.split('-')[0].split('.'))) >= (0, 4, 0):
+    SOURCES += [
+        'src/AeroScience.Shared/MissionScienceModels.cs', 'src/AeroScience.Shared/Models.cs', 'src/AeroScience.Shared/ResearchModels.cs',
+        'src/AeroScience.Missions/InstrumentProfiles.cs', 'src/AeroScience.Missions/ScientificCapabilities.cs',
+        'src/AeroScience.Missions/SensorGeometry.cs', 'src/AeroScience.Missions/TerrainPlanning.cs',
+        'src/AeroScience.Missions/ScientificCoverage.cs', 'src/AeroScience.Missions/ScientificComposites.cs',
+        'src/AeroScience.Missions/ScientificSampleIndex.cs', 'src/AeroScience.Missions/ScientificArtifacts.cs',
+        'src/AeroScience.Missions/ScientificGeoTiff.cs', 'src/AeroScience.Missions/ScientificArtifactPreview.cs',
+        'src/AeroScience.Missions/ScientificCache.cs', 'src/AeroScience.Missions/ResearchPackage.cs',
+        'src/AeroScience.Missions/ResearchOperations.cs', 'src/AeroScience.Missions/MissionCoordinator.cs',
+        'src/AeroScience.Missions/AtmosphericAnalysis.cs', 'src/AeroScience.Missions/EnvironmentTelemetryCache.cs',
+        'tests/AeroScience.ProviderAcceptance/WorkspaceAcceptance.cs', 'tests/AeroScience.ProviderAcceptance/RegionalWorkspaceAcceptance.cs',
+        'scripts/research/verify_workspace_rasters.py', 'scripts/research/verify_envi_originals.py',
+    ]
+
 def source_digest(path):
     return hashlib.sha256(path.read_text(encoding='utf-8').replace('\r\n','\n').encode()).hexdigest()
 def verify_guided_envi(report=None,root=ROOT):
@@ -62,7 +77,21 @@ def verify(report=REPORT,root=ROOT,require_current=True):
     if require_current and value.get('finalNetworkRerun')!='passed':
         raise ValueError('Final automatic-provider network rerun is pending: '+(value.get('finalNetworkRerunReason') or 'See genuine provider report.'))
     verify_guided_envi(root=root)
+    if tuple(map(int,VERSION.split("-")[0].split("."))) >= (0,4,0): verify_workspace(root=root)
     return value
+def verify_workspace(report=None,root=ROOT):
+    path=report or root/f'docs/research/v{VERSION}-workspace-acceptance.json'
+    value=json.loads(path.read_text(encoding='utf-8'))
+    hashes=value.get('canonicalLfSourceSha256',{})
+    if value.get('evidenceType')!='genuine-scientific-workspace' or value.get('windowsMsfs')!='not tested' or set(hashes)!=set(SOURCES) or any(source_digest(root/n)!=h for n,h in hashes.items()):
+        raise ValueError('Current-source genuine workspace/composite evidence is missing or stale.')
+    results=value.get('independentRasterResults',[])
+    if len(results)<12 or any(r.get('nodataSupportMatches') is not True or r.get('nativeAffineAndCrsMatch') is not True or r.get('maximumAbsoluteDifference',1)>1e-9 for r in results):
+        raise ValueError('Independent genuine raster value/grid/nodata comparisons are incomplete.')
+    if value.get('regionalSourcesCombined',0)<2 or value.get('originalIntegrityVerified') is not True or value.get('researchPackagesVerified',0)<5:
+        raise ValueError('Genuine regional combination, original integrity and research-package evidence are incomplete.')
+    return value
+
 if __name__=='__main__':
     try:
         value=verify();print('Genuine numeric provider acceptance passed for four workflows. Windows/MSFS acceptance remains separate.')

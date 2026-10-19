@@ -369,8 +369,9 @@ new MutationObserver(() => {
 // Canonical distance is metres; canonical altitude remains feet MSL.
 export function planningMeasure(category, canonical, adaptive = true) {
   const profile=settings?.preferences?.planningProfile||(["kilometres","metres"].includes(settings?.preferences?.distance)?"metric":"aviation");
-  const selected=category==="distance"?(profile==="metric"?"kilometres":"nauticalMiles"):(profile==="metric"?"metres":"feet");
-  let conversion=settings?.options?.[category]?.find(o=>o.id===selected);
+  const selected=category==="distance"?(profile==="metric"?"kilometres":"nauticalMiles"):category==="speed"?(profile==="metric"?"kilometresPerHour":"knots"):(profile==="metric"?"metres":"feet");
+  let conversion=settings?.options?.[category==="speed"?"windSpeed":category]?.find(o=>o.id===selected);
+  if(!conversion&&category==="speed")conversion={scale:profile==="metric"?1.852:1,label:profile==="metric"?"km/h":"kt"};
   if(!conversion)conversion=category==="distance"?{scale:1/1852,label:"NM"}:{scale:1,label:"ft MSL"};
   if(category==="distance"&&adaptive&&["kilometres","metres"].includes(selected))
     conversion=Math.abs(canonical||0)>=1000?{scale:.001,label:"km"}:{scale:1,label:"m"};
@@ -379,6 +380,7 @@ export function planningMeasure(category, canonical, adaptive = true) {
 const planningNumber=value=>Number.isFinite(value)?value.toLocaleString(undefined,{maximumFractionDigits:Math.abs(value)<1?6:3}):"Unavailable";
 export function planningDistance(metres) {const d=planningMeasure("distance",metres);return `${planningNumber(d.value)} ${d.unit}`;}
 export function planningArea(squareMetres) {
+  if(!Number.isFinite(squareMetres))return "Unavailable";
   const distance=(settings?.preferences?.planningProfile||(["kilometres","metres"].includes(settings?.preferences?.distance)?"metric":"aviation"))==="metric"?"kilometres":"nauticalMiles";
   const [scale,unit]=distance==="nauticalMiles"?[1/(1852*1852),"NM²"]:distance==="miles"?[1/(1609.344*1609.344),"mi²"]:Math.abs(squareMetres)>=1e6?[1e-6,"km²"]:[1,"m²"];
   return `${planningNumber(squareMetres*scale)} ${unit}`;
@@ -400,8 +402,9 @@ export function planningField(input,category,canonical,title,suffix="") {
   const refresh=()=>{
     read();const d=planningMeasure(category,value);scale=d.scale;
     const label=input.closest("label");
-    if(label?.firstChild?.nodeType===Node.TEXT_NODE)label.firstChild.textContent=`${title} (${d.unit}${suffix?", "+suffix:""})`;
-    input.setAttribute("aria-label",`${title} (${d.unit}${suffix?", "+suffix:""})`);
+    const units=suffix==="AGL"?d.unit.replace('MSL','AGL'):suffix==='interval'?d.unit.replace(' MSL',''):d.unit,reference=suffix&&!['AGL','interval'].includes(suffix)?", "+suffix:"";
+    if(label?.firstChild?.nodeType===Node.TEXT_NODE)label.firstChild.textContent=`${title} (${units}${reference})`;
+    input.setAttribute("aria-label",`${title} (${units}${reference})`);
     input.value=value==null?"":String(Number((value*scale).toFixed(category==="altitude"?3:6)));rendered=input.value;
   };
   const set=canonical=>{value=canonical;rendered=input.value;refresh();};

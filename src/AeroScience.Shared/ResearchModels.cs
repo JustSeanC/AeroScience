@@ -1,6 +1,6 @@
 namespace AeroScience.Shared;
 
-public enum MissionTemplateKind { GeneralResearch, AtmosphericProfile, GeographicSurvey, ObservationFlight }
+public enum MissionTemplateKind { GeneralResearch, AtmosphericProfile, GeographicSurvey, ObservationFlight, CloudStructureSurvey, AtmosphericTransect }
 public enum ObservationQuality { Valid, Missing, Unavailable, Stale, Paused, Invalid, AcquisitionGap, SourceDisconnected, Disabled, Waiting }
 public enum ScienceCollectionStatus { Collecting, Paused, Stopped, AwaitingSource, Unavailable }
 public enum ScienceProvenance { SimulatorReported, Derived, InstrumentModeled, ExternalDataset }
@@ -8,14 +8,14 @@ public enum AutopilotEngagement { Unavailable, Disengaged, Engaged }
 public sealed record ResearchWaypoint(string Name, double Latitude, double Longitude, double? TargetAltitudeFeet = null,
     string? Instructions = null, string? Objective = null, Guid? PatternId = null, Guid? Id = null, string? NavigationIdentifier = null);
 public sealed record SurveyArea(string Name, Coordinates[] Vertices);
-public sealed record InstrumentConfiguration(string InstrumentId, bool Enabled = false, int IntervalMs = 1000);
+public sealed record InstrumentConfiguration(string InstrumentId, bool Enabled = false, int IntervalMs = 1000, PayloadConfiguration? Payload = null);
 public sealed record MissionPlan(Guid Id, string Name, MissionTemplateKind Template = MissionTemplateKind.GeneralResearch,
     ScienceMode Mode = ScienceMode.Universal, string? Description = null, string? Objective = null,
     string? IntendedAircraft = null, string? Departure = null, string? Destination = null,
     ResearchWaypoint[]? Waypoints = null, SurveyArea[]? SurveyAreas = null, double? MinimumAltitudeFeet = null,
     double? MaximumAltitudeFeet = null, double? EstimatedDurationMinutes = null,
     InstrumentConfiguration[]? Instruments = null, string? PreflightNotes = null, DateTimeOffset? UpdatedUtc = null, PatternDefinition[]? Patterns = null,
-    string FlightRules = "VFR", double? CruisingAltitudeFeet = null);
+    string FlightRules = "VFR", double? CruisingAltitudeFeet = null, AtmosphericMissionSettings? AtmosphericSettings = null,SensorPlanningSettings? SensorPlanning=null);
 public sealed record MissionTemplate(MissionTemplateKind Id, string Name, string Objective,
     InstrumentConfiguration[] Instruments, string[] NoteCategories);
 public sealed record MeasurementDefinition(string Id, string Name, string Unit, string SimulatorVariable);
@@ -34,7 +34,7 @@ public sealed record ScienceDataset(Guid Id, Guid LibraryId, Guid MissionId, str
     DateTimeOffset CreatedUtc, string RelativePath, long ObservationCount, string ProvenanceJson);
 public sealed record InstrumentState(string InstrumentId, bool Enabled, int IntervalMs, ObservationQuality Quality,
     DateTimeOffset? LastSuccessfulUtc, long ObservationCount, long RejectedObservations, long MissingIntervals,
-    double? ActualAverageIntervalSeconds, MeasurementReading[] Measurements, string? Message = null, long AcquisitionSets = 0);
+    double? ActualAverageIntervalSeconds, MeasurementReading[] Measurements, string? Message = null, long AcquisitionSets = 0,string? PayloadProfileName=null,string? PayloadProfileId=null);
 public sealed record GuidanceMode(string? Mode, double? Target = null, string? Unit = null,
     string? Armed = null, string? Status = null);
 public sealed record FlightGuidance(DateTimeOffset TimestampUtc, AutopilotEngagement Autopilot,

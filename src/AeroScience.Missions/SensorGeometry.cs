@@ -4,6 +4,24 @@ namespace AeroScience.Missions;
 
 public static class SensorGeometry
 {
+    public static (double X,double Y,double Z) Direction(SensorMount mount,double pitch,double bank,double forward,double right)
+    {
+        static (double X,double Y,double Z) Rotate(double x,double y,double z,double pitch,double roll)
+        {pitch*=Math.PI/180;roll*=Math.PI/180;var yr=y*Math.Cos(roll)-z*Math.Sin(roll);var zr=y*Math.Sin(roll)+z*Math.Cos(roll);return(x*Math.Cos(pitch)+zr*Math.Sin(pitch),yr,-x*Math.Sin(pitch)+zr*Math.Cos(pitch));}
+        var sensor=Rotate(forward,right,1,mount.ForwardDegrees,-mount.RightDegrees);return Rotate(sensor.X,sensor.Y,sensor.Z,pitch,bank);
+    }
+    public static ObservationFootprint ForInstrument(TelemetryFrame frame,InstrumentConfiguration configuration)
+    {
+        var footprint=Footprint(frame,InstrumentProfiles.Mount(configuration));
+        if(configuration.Payload is not {} payload)return footprint;
+        var description=payload.Profile.Geometry switch
+        {
+            SensorGeometryKind.Pushbroom=>"Nominal instantaneous pushbroom sampling strip; sparse saved packets do not imply a continuous swept image.",
+            SensorGeometryKind.ScanningLidar=>"Approximate scanner angular envelope; no laser pulses, individual returns or measured point density are generated.",
+            _=>"Frame-camera angular geometry; original external-source pixels and radiometry remain authoritative."
+        };
+        return footprint with{Method=$"{payload.GeometryAlgorithm} · {payload.Profile.Geometry} · "+footprint.Method,Limitations=footprint.Limitations.Concat([description]).Concat(payload.Profile.Limitations).ToArray()};
+    }
     public static ObservationFootprint Footprint(TelemetryFrame frame, SensorMount? mount = null)
     {
         mount ??= new();
@@ -17,17 +35,9 @@ public static class SensorGeometry
         var v = Math.Tan(mount.VerticalFovDegrees * Math.PI / 360);
         // Body axes: forward, right, down. The existing SimConnect decoder
         // normalizes SDK angles to nose-up pitch and right-wing-down bank.
-        (double X, double Y, double Z) Rotate(double x, double y, double z, double pitch, double roll)
-        {
-            pitch *= Math.PI / 180; roll *= Math.PI / 180;
-            var yr = y * Math.Cos(roll) - z * Math.Sin(roll);
-            var zr = y * Math.Sin(roll) + z * Math.Cos(roll);
-            return (x * Math.Cos(pitch) + zr * Math.Sin(pitch), yr, -x * Math.Sin(pitch) + zr * Math.Cos(pitch));
-        }
         Coordinates Ray(double x, double y)
         {
-            var sensor = Rotate(x, y, 1, mount.ForwardDegrees, -mount.RightDegrees);
-            var body = Rotate(sensor.X, sensor.Y, sensor.Z, frame.PitchDegrees, frame.BankDegrees);
+            var body = Direction(mount,frame.PitchDegrees,frame.BankDegrees,x,y);
             if (body.Z < .15) throw new InvalidOperationException("Sensor rays approach/point above the horizon; finite ground intersection is unavailable.");
             var forward = body.X * height / body.Z; var right = body.Y * height / body.Z;
             var distance = Math.Sqrt(forward * forward + right * right);

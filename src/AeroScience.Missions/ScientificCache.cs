@@ -200,13 +200,18 @@ public static class ScientificPreview
                 raw.Write([r,g,b,a]);
             }
         }
+        return EncodePng(p.Width,p.Height,raw.ToArray());
+    }
+    public static byte[] EncodePng(int width,int height,byte[] filteredRgba)
+    {
+        if(width is <1 or >2048||height is <1 or >2048||filteredRgba.Length!=(long)height*(1+width*4))throw new ArgumentException("PNG preview exceeds its bounded RGBA dimensions.");
         using var output=new MemoryStream();output.Write([137,80,78,71,13,10,26,10]);
         void Chunk(string name,byte[] bytes)
         {
             var header=new byte[4];System.Buffers.Binary.BinaryPrimitives.WriteInt32BigEndian(header,bytes.Length);output.Write(header);var type=Encoding.ASCII.GetBytes(name);output.Write(type);output.Write(bytes);
             uint crc=0xffffffff;foreach(var value in type.Concat(bytes)){crc^=value;for(var bit=0;bit<8;bit++)crc=(crc&1)!=0?(crc>>1)^0xedb88320:crc>>1;}System.Buffers.Binary.BinaryPrimitives.WriteUInt32BigEndian(header,crc^0xffffffff);output.Write(header);
         }
-        var ihdr=new byte[13];System.Buffers.Binary.BinaryPrimitives.WriteInt32BigEndian(ihdr,p.Width);System.Buffers.Binary.BinaryPrimitives.WriteInt32BigEndian(ihdr.AsSpan(4),p.Height);ihdr[8]=8;ihdr[9]=6;Chunk("IHDR",ihdr);
-        using var compressed=new MemoryStream();using(var zip=new ZLibStream(compressed,CompressionLevel.Fastest,true))zip.Write(raw.ToArray());Chunk("IDAT",compressed.ToArray());Chunk("IEND",[]);return output.ToArray();
+        var ihdr=new byte[13];System.Buffers.Binary.BinaryPrimitives.WriteInt32BigEndian(ihdr,width);System.Buffers.Binary.BinaryPrimitives.WriteInt32BigEndian(ihdr.AsSpan(4),height);ihdr[8]=8;ihdr[9]=6;Chunk("IHDR",ihdr);
+        using var compressed=new MemoryStream();using(var zip=new ZLibStream(compressed,CompressionLevel.Fastest,true))zip.Write(filteredRgba);Chunk("IDAT",compressed.ToArray());Chunk("IEND",[]);return output.ToArray();
     }
 }

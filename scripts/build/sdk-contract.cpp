@@ -7,6 +7,9 @@
 struct AeroScienceAircraftData { char title[256]; double fields[12]; double mach; };
 #pragma pack(pop)
 struct AeroScienceAtmosphere { double fields[5]; };
+// Every optional ground/environment request contains exactly one independent FLOAT64.
+struct AeroScienceEnvironmentalScalar { double value; };
+static_assert(sizeof(AeroScienceEnvironmentalScalar) == 8);
 struct AeroScienceGuidance { double flags[18]; double headingSlot; double altitudeSlot; double headings[4]; double altitudes[4]; double verticalSpeed; double ias; double mach; };
 static_assert(sizeof(AeroScienceAtmosphere) == 40);
 static_assert(sizeof(AeroScienceGuidance) == 248);

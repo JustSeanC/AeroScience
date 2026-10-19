@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.4.0 — Scientific Mission Planning, Sensor Modeling & Analysis (development; Windows acceptance pending)
+
+- Add the optional official Discord invitation to README Community & Support, dashboard/paired-device Help & Support and generated release notes; retain feedback/log collection and GitHub issues.
+
+- Add versioned AVIRIS-NG, RedEdge-P, FLIR lens and RIEGL reference geometries, bounded generic/custom configurations, immutable effective payload snapshots and retained-source capability checks.
+- Integrate sensor-based AGL/groundspeed/overlap/swath/spacing/GSD/cadence/ideal-density planning with existing geodesic polygon fitting and Aviation/Metric geometry preservation; optional relative-terrain center footprint has explicit datum/fallback limits.
+- Add nine independently optional timestamped MSFS ground/cloud/visibility/precipitation/wind scalars without changing core aircraft/atmosphere/guidance layouts. Add vertical/cloud/transect workflows, gap-aware local atmospheric/terrain analysis and qualitative environmental cautions.
+- Add indexed offline actual-sample replay and the six-tab Mission History workspace; separate exact-vector geometric footprints, saved valid native-pixel support and their survey gaps. Preserve missing historical fields and original source times/QA.
+- Add bounded background native-grid mission sample composites and retained-source mosaics, compatible same-scene regional reuse, disk-backed pixel indexing, complete-operation caching, cancellation/progress, geographic previews, GeoTIFF and hashed research packages.
+- Make verified backups before additive mission schema 6 / science schema 2 upgrades; preserve original payloads and integrate derived-product storage accounting, migration/deletion coordination and protected originals.
+- Validate genuine existing automatic providers and guided ENVI separately from fixtures. Investigate NOAA EPT/LAZ, Hyperion, WorldCover/GIBS/GOES; these expanded providers are not implemented application workflows. Do not claim point-cloud, Hyperion or hardware acceptance from reference research.
+- Retain official SDK/runtime/installer validation and manual Windows builds. Science release candidates require actual installed missions A–E/device/upgrade acceptance before finalization; provide a graphical results checklist without handwritten JSON. No release/tag/publication or issue closure is performed by this source update.
+
 ## 0.3.2 — Scientific Reliability & Performance (development; acceptance pending)
 
 - Correct Windows test-fixture cleanup: dispose and join research acquisition workers before releasing science storage and deleting temporary databases, including locally restarted/low-capacity fixtures. Preserve strict cleanup assertions and release test gates.

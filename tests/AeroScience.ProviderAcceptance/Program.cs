@@ -5,14 +5,29 @@ using AeroScience.Shared;
 // Explicit opt-in network acceptance. These are real provider downloads, never
 // replaced with synthetic rasters or mocked catalogs when a provider fails.
 if(!args.Contains("--network"))throw new ArgumentException("Pass --network to authorize bounded real provider queries/downloads for public test areas.");
+if(args.Contains("--workspace-from"))
+{
+    var retainedRoot=Path.GetFullPath(args[Array.IndexOf(args,"--workspace-from")+1]);
+    var retainedMissions=new MissionStore(Path.Combine(retainedRoot,"missions.db"));retainedMissions.Initialize();
+    using var retainedScience=new ScienceStore(Path.Combine(retainedRoot,"ScienceLibrary"));retainedScience.Initialize();retainedMissions.ScienceLibrary=retainedScience;
+    Console.WriteLine("Workspace analysis from genuine retained sources only; this mode does not establish a new network-provider pass.");
+    if(args.Contains("--regional-mosaic"))
+    {
+        var retainedSettings=new ScientificAccessSettings(retainedRoot,()=>true);
+        using var retainedAuto=new AutomaticScientificData(retainedScience,retainedSettings);
+        await RegionalWorkspaceAcceptance.Run(retainedRoot,retainedAuto,retainedScience,retainedMissions);
+    }
+    await WorkspaceAcceptance.Run(retainedRoot,retainedScience,retainedMissions);return;
+}
 var output=Path.GetFullPath(args.SkipWhile(a=>a!="--output").Skip(1).FirstOrDefault()??Path.Combine(Path.GetTempPath(),"aeroscience-provider-acceptance-"+Guid.NewGuid().ToString("N")));
 if(Directory.Exists(output)&&Directory.EnumerateFileSystemEntries(output).Any())throw new IOException("Use a new empty acceptance output directory; existing data was not changed.");
 Directory.CreateDirectory(output);var library=Path.Combine(output,"ScienceLibrary");Directory.CreateDirectory(library);
 PreferenceStore.WriteAtomic(Path.Combine(library,StorageManager.LibraryManifest),new{formatVersion=1,libraryId=Guid.NewGuid()});
 var missions=new MissionStore(Path.Combine(output,"missions.db"));missions.Initialize();var science=new ScienceStore(library);science.Initialize();
+missions.ScienceLibrary=science;
 var management=new StorageManagement(output,missions,science);science.Management=management;
 var settings=new ScientificAccessSettings(output,()=>true);settings.Save(new(true,true,MaximumDownloadBytes:67108864,PreferredDateUtc:DateTimeOffset.Parse("2024-09-10T00:00:00Z"),LookbackDays:120));
-if(args.Contains("--envi")){await GuidedEnviAcceptance.Run(args[Array.IndexOf(args,"--envi")+1],output,science,missions);return;}
+if(args.Contains("--envi")){await GuidedEnviAcceptance.Run(args[Array.IndexOf(args,"--envi")+1],output,science,missions);if(args.Contains("--workspace"))await WorkspaceAcceptance.Run(output,science,missions,true);return;}
 if(args.Contains("--benchmark")){await RegionalBenchmark.Run(output,args);return;}
 if(args.Contains("--offline-from")){await OfflineScientificAcceptance.Run(args[Array.IndexOf(args,"--offline-from")+1],output,science,missions,settings);return;}
 if(args.Contains("--trace-from")){ScientificTraceBenchmark.Run(args[Array.IndexOf(args,"--trace-from")+1],output);return;}
@@ -55,4 +70,6 @@ if(args.Contains("--hyperspectral"))
     await File.WriteAllTextAsync(Path.Combine(output,"hyperspectral-discovery.json"),JsonSerializer.Serialize(state,WireJson.Options));Console.WriteLine("Hyperspectral discovery (no preparation): "+state.Message);
 }
 await File.WriteAllTextAsync(Path.Combine(output,"provider-acceptance.json"),JsonSerializer.Serialize(new{formatVersion=1,checkedUtc=DateTimeOffset.UtcNow,windowsMsfs="not tested",results},WireJson.Options));
+if(args.Contains("--regional-mosaic"))await RegionalWorkspaceAcceptance.Run(output,auto,science,missions);
+if(args.Contains("--workspace"))await WorkspaceAcceptance.Run(output,science,missions);
 Console.WriteLine("Genuine source acceptance saved: "+output);

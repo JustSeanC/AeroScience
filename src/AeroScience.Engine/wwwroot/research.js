@@ -6,6 +6,8 @@ import { routeExportButton } from "./route-export.js";
 import { remoteProducts } from "./remote-science.js";
 import { ResearchMap } from "./map.js";
 import { patternEditor } from "./patterns.js";
+import { payloadSettings } from "./payload-settings.js";
+import { missionWorkspace } from "./mission-workspace.js";
 import {
   scienceCharts,
   initializeUnits,
@@ -126,6 +128,9 @@ function configs(parent, selected = []) {
     interval.step = 1;
     interval.dataset.interval = d.id;
     row.prepend(label);
+    const config=selected.find(c=>c.instrumentId===d.id)??{instrumentId:d.id};
+    row.readPayload=payloadSettings(row,config,payloadCatalog);
+    row.dataset.payloadInstrument=d.id;
     parent.append(row);
   }
 }
@@ -135,6 +140,7 @@ function readConfigs(parent) {
     enabled: parent.querySelector(`[data-instrument="${d.id}"]`).checked,
     intervalMs:
       Number(parent.querySelector(`[data-interval="${d.id}"]`).value) * 1000,
+    payload: parent.querySelector(`[data-payload-instrument="${d.id}"]`)?.readPayload?.()??null,
   }));
 }
 export function initializeResearch(context) {
@@ -143,6 +149,7 @@ export function initializeResearch(context) {
     guidance = text("article", undefined, "panel research-panel");
   guidance.id = "flight-guidance";
   control.append(guidance);
+  const environment=text('article',undefined,'panel research-panel');environment.id='environment-readings';control.append(environment);
   const mapPanel = text("article", undefined, "panel research-panel");
   mapPanel.id = "mission-map";
   mapPanel.append(text("h2", "Mission map"));
@@ -193,6 +200,7 @@ export function initializeResearch(context) {
   $("instruments").lastChild.id = "instrument-content";
 }
 export async function loadResearch(page) {
+  payloadCatalog ??= await ctx.api('/api/instrument-profiles');
   if (!definitions.length) {
     [definitions, templates] = await Promise.all([
       ctx.api("/api/instruments"),
@@ -202,6 +210,7 @@ export async function loadResearch(page) {
   if (page === "planner") await planner();
   if (page === "instruments") await instruments();
 }
+let payloadCatalog;
 let plannerDirty=false, pendingGeometry=false;
 window.addEventListener("beforeunload",event=>{if(plannerDirty||pendingGeometry){event.preventDefault();event.returnValue="";}});
 async function planner() {
@@ -365,7 +374,7 @@ function editPlan(plan) {
   form.append(
     text(
       "p",
-      "Realistic Mode has no aircraft whitelist. Advanced instrument limits and calibration procedures are reserved for a future release.",
+      "Realistic Mode supports documented sensor geometry and operating advisories with any compatible aircraft. Advanced calibration and failure simulation remain future work.",
       "footnote",
     ),
   );
@@ -631,6 +640,8 @@ function editPlan(plan) {
   });
   const patternSection=text("section");patternSection.append(text("h3","3. Flight patterns"));form.append(patternSection);
   const pattern = patternEditor(patternSection, {
+    instruments:()=>readConfigs(configuration),
+    sensorSettings:plan?.sensorPlanning,
     changed:()=>dirty(),
     pickCenter:callback=>{if(!canReplaceGeometry())return;cancelGeometry();dirty();selectPatternCenter=callback;clickMode="pattern";planMap.interaction("pattern");draftStatus.textContent="Click the map to choose the pattern center; this does not add a waypoint.";},
     fitPreview:points=>planMap.fit(points),
@@ -646,6 +657,13 @@ function editPlan(plan) {
   });
   const advancedCoordinates=text("details");advancedCoordinates.append(text("summary","Advanced: enter survey vertices manually"),button("Manual survey coordinates",()=>areaEditor()));locationSection.append(advancedCoordinates);
   const scienceSection=text("section");scienceSection.append(text("h3","4. Scientific instruments and data readiness"),configuration,presetSection);form.append(scienceSection);scientificReadiness(scienceSection,ctx.api).catch(()=>{});
+  const atmosphericSection=text('section');atmosphericSection.append(text('h3','Atmospheric research settings'));
+  const profileDirection=select(atmosphericSection,'Profile direction',[['both','Ascent and descent'],['ascent','Ascent'],['descent','Descent']],plan?.atmosphericSettings?.direction??'both');
+  const profileInterval=input(atmosphericSection,'Altitude interval', (plan?.atmosphericSettings?.altitudeIntervalMetres??100)/.3048,'number');planningField(profileInterval,'altitude',(plan?.atmosphericSettings?.altitudeIntervalMetres??100)/.3048,'Altitude interval','interval');
+  const profileGap=input(atmosphericSection,'Maximum contiguous gap (seconds)',plan?.atmosphericSettings?.maximumGapSeconds??5,'number');
+  atmosphericSection.append(text('p','Profiles preserve actual observation times. Clouds are sampled only along your aircraft path; gaps never become inferred cloud boundaries.'));
+  scienceSection.prepend(atmosphericSection);
+  const atmosphericVisibility=()=>{atmosphericSection.hidden=!['atmosphericProfile','cloudStructureSurvey','atmosphericTransect'].includes(template.value);};template.addEventListener('change',atmosphericVisibility);atmosphericVisibility();
   form.append(text("h3","5. Review and save"),text("p","Save waypoints and areas to this draft first. A saved mission plan keeps the route, survey geometry, pattern definitions and science configuration together."));
   departure.onchange = drawList;
   drawList();
@@ -698,6 +716,8 @@ function editPlan(plan) {
         patterns: pattern.getPatterns(),
         flightRules: flightRules.value,
         cruisingAltitudeFeet: nullable(cruise),
+        atmosphericSettings:atmosphericSection.hidden?(plan?.atmosphericSettings??null):{direction:profileDirection.value,altitudeIntervalMetres:profileInterval.planningUnits.read()*.3048,maximumGapSeconds:Number(profileGap.value),minimumAltitudeFeet:nullable(low),maximumAltitudeFeet:nullable(high)},
+        sensorPlanning:pattern.getSensorPlanning(),
       });
       if(!form.isConnected)return;editing=savedPlan;plannerDirty=false;pendingGeometry=false;await planner();document.querySelector("#plan-editor .planner-status").textContent="Mission plan saved · Ready to start mission from Mission Control or the saved plan row.";
     });
@@ -806,7 +826,7 @@ async function instruments() {
   const configuration = text("div");
   configuration.id = "live-instrument-config";
   p.append(configuration);
-  configs(configuration, state?.research?.instruments || []);
+  configs(configuration, await ctx.api('/api/instruments/configuration'));
   p.append(
     button("Apply instrument configuration", async () => {
       await ctx.api("/api/instruments", readConfigs(configuration));
@@ -921,6 +941,12 @@ export function renderResearch(next) {
   state = next;
   syncUnits(next.research?.units);
   guidance($("flight-guidance"), next.research?.guidance);
+  const environment=$('environment-readings');
+  if(environment){environment.replaceChildren(text('h2','Terrain & local environment'));
+    for(const r of next.telemetry?.environment?.readings??[])environment.append(text('p',`${r.simulatorVariable}: ${n(r.value,3)} ${r.unit} · ${r.quality}`));
+    if(!next.telemetry?.environment)environment.append(text('p','Awaiting optional simulator ground/weather observations. Flight recording remains independent.'));
+    const details=text('details');details.append(text('summary','Timing and reference information'),text('p','Optional fields retain independent packet receipt times. Surface altitude has no declared geodetic datum. Precipitation is not labeled mm/h; local cloud/visibility are not regional volumes or historical satellite QA.'));environment.append(details);
+  }
   const p = $("instrument-values");
   if (p) {
     const opened = new Set(
@@ -939,6 +965,7 @@ export function renderResearch(next) {
         text("h3", d?.name || i.instrumentId),
         text("span", i.enabled ? i.quality : "Disabled", "science-state"),
       );
+      if(i.payloadProfileName)card.append(text('p',i.payloadProfileName));
       for (const v of i.measurements) {
         const label =
           d?.measurements.find((m) => m.id === v.measurementId)?.name ||
@@ -1160,6 +1187,7 @@ function showScience(parent, rows, label) {
 export async function researchDetail(body, id, mission) {
   await initializeUnits(ctx.api);
   const review = await ctx.api(`/api/missions/${id}/review`);
+  const workspace=missionWorkspace(body,id,mission,ctx.api,review);body=workspace.overview;
   const protection = await ctx.api(`/api/missions/${id}/protection`);
   const protectedLabel = text(
     "strong",
@@ -1181,7 +1209,7 @@ export async function researchDetail(body, id, mission) {
   body.append(protectedLabel,protectMissionButton);
   if (review.scienceAvailable)
     try {
-      await remoteProducts(body, ctx.api, id);
+      await remoteProducts(workspace.overview, ctx.api, id);
     } catch (error) {
       body.append(text("p", "Remote products unavailable: " + error.message));
     }
@@ -1195,7 +1223,7 @@ export async function researchDetail(body, id, mission) {
       ),
     );
   }
-  await renderAnalysis(body, id, review.research.planSnapshot, ctx.api);
+  await renderAnalysis(workspace.analysis, id, review.research.planSnapshot, ctx.api);
   body.append(
     text("h3", "Research review"),
     text("p", "Recording source: " + (mission.source || "Unavailable")),

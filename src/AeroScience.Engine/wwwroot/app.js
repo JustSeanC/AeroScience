@@ -475,6 +475,14 @@ async function loadSettings() {
   for(const [name,value] of [["Telemetry",s.telemetry],["Sampling interval",`${s.samplingIntervalMs} ms`],["SimConnect",s.simConnect],["LAN access",s.enableLan?s.lanUrl:"Disabled — localhost only"],["Data directory",s.dataDirectory||"Managed by companion"],...(s.pairingCode?[["Pairing code",s.pairingCode]]:[])])paragraph("advanced",`${name}: ${value}`);
   desktop("advanced","LAN and desktop configuration","settings");desktop("advanced","Collect Feedback / Logs","feedback");
   paragraph("advanced","LAN and native runtime configuration may require an engine restart; each desktop setting explains when. Display, source and map preferences apply immediately.");
+  const support=panels.get("support");
+  support.append(el("h2","Help & Support"),el("p","Need help with AeroScience? Join our Discord community for support, troubleshooting, questions, feature requests, and discussions with other pilots."));
+  for(const [label,url] of [["Join our Discord","https://discord.gg/mpYyazCqvJ"],["Report an issue on GitHub","https://github.com/JustSeanC/AeroScience/issues"],["Read the pilot guides","/help/remote-sensing/index.md"]]){
+    const link=el("a",label,"secondary");link.href=url;link.target="_blank";link.rel="noopener noreferrer";support.append(link);
+  }
+  paragraph("support","Discord membership is optional. AeroScience and your local mission archive work without it. Review logs for private information before sharing them.");
+  desktop("support","Collect Feedback / Logs","feedback");
+  paragraph("support","Feedback/log collection runs on the Windows companion. Paired-device users can open this support page and report issues, or collect logs from the gaming PC.");
 }
 $("close-detail").addEventListener("click", () => $("mission-detail").close());
 $("refresh-history").addEventListener("click", (event) =>

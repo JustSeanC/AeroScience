@@ -47,7 +47,7 @@ public sealed class RemoteAcquisition : IDisposable
             var missed = run.Slot < 0 ? 0 : Math.Max(0, slot - run.Slot - 1);
             schedule[config.InstrumentId] = (run.Anchor, slot, frame.TimestampUtc);
             states.AddOrUpdate(config.InstrumentId, existing with { MissingIntervals = missed }, (_, s) => s with { MissingIntervals = s.MissingIntervals + missed });
-            if (!queues[config.InstrumentId].Writer.TryWrite(new(mission, research, config, frame, Volatile.Read(ref generation), update.Atmosphere)))
+            if (!queues[config.InstrumentId].Writer.TryWrite(new(mission, research, config, frame, Volatile.Read(ref generation), frame.Atmosphere??update.Atmosphere)))
                 states.AddOrUpdate(config.InstrumentId, existing, (_, s) => s with { Quality = ObservationQuality.AcquisitionGap, Message = "Processing delayed: this instrument queue is full; flight recording continues.", Status="Processing delayed", MissingIntervals = s.MissingIntervals + 1 });
         }
     }
@@ -88,9 +88,9 @@ public sealed class RemoteAcquisition : IDisposable
         void Check() { stop.Token.ThrowIfCancellationRequested(); if (request.Generation != Volatile.Read(ref generation)) throw new OperationCanceledException("Science paused/stopped or configuration changed."); }
         Check();
         science.Management?.RequireScienceCapacity();
-        var mount=Instruments[request.Configuration.InstrumentId] == RemoteKind.Terrain ? new SensorMount(30,3,Swath:true) : new();
-        var footprint = SensorGeometry.Footprint(request.Frame, mount);
-        var source = ScientificSourceSelection.Select(science.Availability(footprint.Center),Instruments[request.Configuration.InstrumentId],sourcePreferences?.Invoke())
+        var mount=InstrumentProfiles.Mount(request.Configuration);
+        var footprint = SensorGeometry.ForInstrument(request.Frame,request.Configuration);
+        var source = ScientificSourceSelection.Select(science.Availability(footprint.Center),Instruments[request.Configuration.InstrumentId],sourcePreferences?.Invoke(),request.Configuration.Payload)
             ?? throw new ScientificObservationUnavailableException(science.Sources().Any(s=>s.Manifest.Kind==Instruments[request.Configuration.InstrumentId])?"Outside coverage":"Preparing data","No compatible retained source covers this acquisition location. Check data preparation and source selection; this interval is not backfilled.");
         var root = StorageManager.ResolveDataset(science.DirectoryPath, science.LibraryId, source.RelativeDirectory);
         foreach (var file in source.Files)
@@ -122,9 +122,10 @@ public sealed class RemoteAcquisition : IDisposable
         var productId = Guid.NewGuid();
         var views = source.Manifest.Kind switch { RemoteKind.Thermal => new[] { "temperature" }, RemoteKind.Multispectral => ["natural-color", "false-color", "ndvi"], RemoteKind.Hyperspectral => ["spectrum"], _ => ["elevation"] };
         var warnings = footprint.Limitations.Concat(new[] { "Source observation date is not the simulator flight time. FlightPacketUtc is host UTC when the simulator packet was received, not the simulator world clock.",
-            "A 24×24 sample grid represents this approximate footprint; dense samples do not improve the original source resolution. No survey coverage percentage is computed.",
+            "A 24×24 sample grid represents this approximate footprint; dense samples do not improve the original source resolution. This acquisition alone does not establish survey coverage; use the separate saved native-pixel coverage analysis.",
             "Source identity/license/date are supplied with the imported collection; AeroScience validates files/geometry but does not authenticate a provider signature." })
-            .Concat(source.Manifest.ObservationUtc is null ? ["Original observation date is unknown; see source publication metadata."] : Array.Empty<string>()).ToArray();
+            .Concat(source.Manifest.ObservationUtc is null ? ["Original observation date is unknown; see source publication metadata."] : Array.Empty<string>())
+            .Concat(AtmosphericAnalysis.SensorCautions(request.Frame,request.Configuration.Payload)).ToArray();
         var provenance = source.Manifest.Kind == RemoteKind.Terrain ? "DEM-derived terrain samples, not measured LiDAR returns; source vertical datum retained without conversion"
             : "Historical external geographic dataset sampled along simulated aircraft footprint; not a live airborne camera";
         var product = new RemoteProduct(productId, dataset.Id, science.LibraryId, request.Mission.Id, request.Configuration.InstrumentId, source.Id,

@@ -22,7 +22,8 @@ public sealed partial class ScienceStore
         cmd.CommandText = "SELECT COUNT(*),COALESCE(SUM(json_extract(payload_json,'$.bytes')),0) FROM remote_products";
         long count, bytes; using (var reader = cmd.ExecuteReader()) { reader.Read(); count = reader.GetInt64(0); bytes = reader.GetInt64(1); }
         cmd.CommandText = "SELECT json_extract(payload_json,'$.relativePath') FROM remote_products LIMIT 10";
-        using var paths = cmd.ExecuteReader(); var list = new List<string>(); while (paths.Read()) list.Add(paths.GetString(0)); return (count, bytes, list.ToArray());
+        var list = new List<string>(); using(var paths = cmd.ExecuteReader())while (paths.Read()) list.Add(paths.GetString(0));
+        foreach(var artifact in Artifacts()){count++;bytes+=artifact.Bytes;if(list.Count<10)list.Add(artifact.RelativePath);}return (count, bytes, list.ToArray());
     }
     public IEnumerable<RemoteProduct> AllProducts(Guid? mission = null)
     {
@@ -41,6 +42,11 @@ public sealed partial class ScienceStore
             if (!File.Exists(from) || Digest(from) != product.Sha256) throw new IOException("A managed product is missing/changed; a complete verified backup could not be made. No data was cleared.");
             var to = Path.Combine(destination, product.RelativePath); Directory.CreateDirectory(Path.GetDirectoryName(to)!); File.Copy(from, to);
             if (Digest(to) != product.Sha256) throw new IOException("Product backup failed verification. No data was cleared.");
+        }
+        foreach(var artifact in Artifacts())
+        {
+            var from=VerifiedArtifactPath(artifact);var to=Path.Combine(destination,artifact.RelativePath);Directory.CreateDirectory(Path.GetDirectoryName(to)!);File.Copy(from,to);
+            if(Digest(to)!=artifact.Sha256)throw new IOException("Analysis product backup failed verification. No data was cleared.");
         }
         PreferenceStore.WriteAtomic(Path.Combine(destination, "recovery.json"), new { formatVersion = 1, libraryId = LibraryId, database = Path.GetFileName(database), sourceDirectory = DirectoryPath, products = summary.Count,
             note = "Original imported Sources are preserved by clear and are not duplicated here. Restore the verified database and listed Products into the same library identity; retain originals until verification." });

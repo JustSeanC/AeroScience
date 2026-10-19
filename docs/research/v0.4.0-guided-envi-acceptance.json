@@ -1,0 +1,124 @@
+{
+  "formatVersion": 1,
+  "version": "0.4.0",
+  "evidenceType": "genuine-downloaded-envi",
+  "checkedUtc": "2026-10-19T21:45:58.3593578+00:00",
+  "windowsMsfs": "not tested",
+  "firstTimeUser": "not tested",
+  "flightInput": "synthetic test position; not MSFS",
+  "provider": "NASA AVIRIS / NV5 Cuprite reflectance tutorial",
+  "downloadUrl": "https://vis-webcontent.s3.amazonaws.com/tutorials/hyperspectral.zip",
+  "downloadArchiveBytes": 302629552,
+  "dataset": "CupriteReflectance",
+  "sourceObservedUtc": null,
+  "sourceFiles": [
+    {
+      "relativePath": "CupriteReflectance.dat",
+      "bytes": 140547456,
+      "sha256": "4cd54e7ef001bb7bcacde51712d2d1d69a338893403303f7d1d1e0da98eb1666"
+    },
+    {
+      "relativePath": "CupriteReflectance.hdr",
+      "bytes": 17526,
+      "sha256": "095d7cd9d3221b15eca9da0050688de3480a1321d560925c02ac58e114f87d0b"
+    }
+  ],
+  "bands": 224,
+  "wavelengthMinimumNm": 365.92981,
+  "wavelengthMaximumNm": 2497.035889,
+  "badBands": 54,
+  "unit": "reflectance",
+  "grid": {
+    "width": 601,
+    "height": 522,
+    "crs": "EPSG:32611",
+    "originX": 478277.713,
+    "originY": 4159251.903,
+    "pixelWidth": 15.264520171689224,
+    "pixelHeight": -15.264520171689224,
+    "rowX": 2.6915467538374203,
+    "columnY": 2.6915467538374203
+  },
+  "coverage": [
+    {
+      "latitude": 37.58005991917013,
+      "longitude": -117.24601753273365
+    },
+    {
+      "latitude": 37.594811154196876,
+      "longitude": -117.14214503646147
+    },
+    {
+      "latitude": 37.5230085279739,
+      "longitude": -117.12610852400795
+    },
+    {
+      "latitude": 37.50827151473653,
+      "longitude": -117.22988471499124
+    }
+  ],
+  "validation": {
+    "automaticManifest": true,
+    "originalChannelsPreserved": true,
+    "originalFilesPreserved": true,
+    "offlineReopen": true,
+    "duplicateReused": true,
+    "publishedProductSha256": "f259f96d7c6b4205e902ab84839d4acaba4f6276d606addbf455d730bcee1263",
+    "validSamples": 97920
+  },
+  "independentComparison": {
+    "evidenceType": "independent-genuine-envi-comparison",
+    "checkedUtc": "2026-10-19T21:48:43.680980+00:00",
+    "tool": "rasterio 1.4.3 / GDAL 3.9.3",
+    "checkedGoodBands": 170,
+    "excludedBadBands": 54,
+    "maximumAbsoluteDifference": 0.0,
+    "windowsMsfs": "not tested",
+    "sourceObservedUtc": null
+  },
+  "canonicalLfSourceSha256": {
+    "src/AeroScience.Missions/AutomaticScientificData.cs": "ea404ccc145653aa71d6aefd6073b6dae245c993ae8754863434b8f39a3ffbbb",
+    "src/AeroScience.Missions/ScientificTransferLedger.cs": "f87df5d69a7aae632f8ee0912da1f6b40ee9648b2755771efc550e3a59625636",
+    "src/AeroScience.Missions/ScientificHttp.cs": "7c88d92db6d0a72f25f450f2793890df1f88cfb174afb3f7803a916c6e79fc85",
+    "src/AeroScience.Missions/ScientificProviders.cs": "decd83e9b321496c44652a3c9890a7ad47df528a42996901f8bd5ec28345987c",
+    "src/AeroScience.Missions/ScientificRaster.cs": "652707335e754dadef4dd07ba0d15ae0a7944bbbdb97b0a973833b7a7aa7d524",
+    "src/AeroScience.Missions/ScientificSourceSelection.cs": "1a44a3d1848dc48de5693403918de4307f35cf50a473091981b51c22b8bc9be0",
+    "src/AeroScience.Missions/RemoteScienceStore.cs": "7fd48df2889a5d6eeead2e82f70e184fd886e7faf28e5813f10a13432714f1d5",
+    "src/AeroScience.Missions/RemoteAcquisition.cs": "883b5d7a8c4830a739f6e72201fa068f68eba09fb17042ad38d830c8838ee546",
+    "src/AeroScience.Shared/RemoteSensingModels.cs": "a6335edc4c6a1ef229525c6b59c586b4e5f0ad8cf669c2f647b4f85f3224e938",
+    "src/AeroScience.Shared/ScientificAccessModels.cs": "3c29185586228c26d7ce525925d1651fb3fa91b9abd75b940037d92969025cdb",
+    "tests/AeroScience.ProviderAcceptance/Program.cs": "c6f89b5fedb9b5e945594668eb551c8c00a42df2f916944c0f92e76592cfd264",
+    "tests/AeroScience.ProviderAcceptance/GuidedEnviAcceptance.cs": "2684c9e4b0245447cd4f294cd19d7fe409b8b7360fa151e9a5ab9e202bc28155",
+    "src/AeroScience.Missions/HyperspectralImport.cs": "33e394c5325c2fc98d68ef2ea2240be52abe85809e729cf75d4c3372d037ac64",
+    "src/AeroScience.Missions/GuidedScientificImport.cs": "236524e6eef0c86b77316d4a262ba2186e0aa69f2f8b3ebeac22575be6c196a7",
+    "src/AeroScience.Missions/ScientificPrediction.cs": "a497a0772873b97fd4e5b785a5d8df856b2bac096ef225baa074720c963909ee",
+    "src/AeroScience.Engine/ScientificPreparationWorker.cs": "f2243da37f21b904273c404083f60ed228ae091f0d520e31cecaea62612d645e",
+    "src/AeroScience.Shared/MissionScienceModels.cs": "bdf45c21ca1f796f7d84e94028084285b19f4f6537eb18084193e756121b3438",
+    "src/AeroScience.Shared/Models.cs": "7aef0595c494bd220793d0c0b7b2933e1120451022dcedaf8064293839243ba5",
+    "src/AeroScience.Shared/ResearchModels.cs": "99f53b1107a6b58dde4e3d93107451833688ac2232a2891dc28bcc947f8f9e10",
+    "src/AeroScience.Missions/InstrumentProfiles.cs": "02e2e5ef5ae041642c9e45a2c19e037e5fc9dea9c933d43b4055326bbd0cbfa7",
+    "src/AeroScience.Missions/ScientificCapabilities.cs": "661c920b2219ce3bbecdab178c6ff68cdca21fe75a5483f7d62a15fa436fac1f",
+    "src/AeroScience.Missions/SensorGeometry.cs": "927bc1d1865262f4eba8a37fd54b69516212f60667f0f894fd7d3b4baf163405",
+    "src/AeroScience.Missions/TerrainPlanning.cs": "9b54c9e2165de30413fe03f5ade83e2f2168094bdbb85dccdaebc7380cbb026a",
+    "src/AeroScience.Missions/ScientificCoverage.cs": "8d286991e05adc032b39e32460b309e10953eb4d0c257f00b2bfed6a7d7731b9",
+    "src/AeroScience.Missions/ScientificComposites.cs": "dea4a74a70b9e01e88fe6dce649e07327aa3f94bedc2abb78d04992866ef94c6",
+    "src/AeroScience.Missions/ScientificSampleIndex.cs": "10d1bee47994b0d330aa4f93b1bf4bcdd031a791f1c6286beb29a0ebe36dff55",
+    "src/AeroScience.Missions/ScientificArtifacts.cs": "618af99dea87484b6326c2eaf90046b873a113f090d40e6a3cce8f824404fce6",
+    "src/AeroScience.Missions/ScientificGeoTiff.cs": "dc2aa86ada800756524e8394d288a23241c632b27106e8a184b9d3b7458cc0de",
+    "src/AeroScience.Missions/ScientificArtifactPreview.cs": "0dc68f923a2c92943f37c093df75cb50bb4000b5a9346ebf2479324013eb007f",
+    "src/AeroScience.Missions/ScientificCache.cs": "77782af8c85820bf33f04b3f8fe8fdbde5735755871c06f85ae84a34a049697b",
+    "src/AeroScience.Missions/ResearchPackage.cs": "138d9b96e6677509844ea4111f803e0073a56d045aeca57a7b6fe3abf644f7ec",
+    "src/AeroScience.Missions/ResearchOperations.cs": "f73d4eeed3e2a7dab1ec76dc35c277ff37387d42933074f5949b72e4d67d6df0",
+    "src/AeroScience.Missions/MissionCoordinator.cs": "000e27928bab704433c2efb196448704572b3af5cf63158d7cee4b578251515a",
+    "src/AeroScience.Missions/AtmosphericAnalysis.cs": "97f6f766fe0a9ddec1971ec69fdcd4b98d9c7e76bdeed15612c306b0aa8f7ca9",
+    "src/AeroScience.Missions/EnvironmentTelemetryCache.cs": "0f4727441b8a562d8dda05d8529f64154896e6b9e5887adbd73ac59454fcf686",
+    "tests/AeroScience.ProviderAcceptance/WorkspaceAcceptance.cs": "6876c250506824e864cb76036b6926453d9853973505467f903a4c7639305474",
+    "tests/AeroScience.ProviderAcceptance/RegionalWorkspaceAcceptance.cs": "9f8c2b6cc6d75eede961b53463cd5f903429949d383c807451f6c4607099b3b5",
+    "scripts/research/verify_workspace_rasters.py": "1b95e1924fc1684cf963854ae5f6e6dce32d5aded8c3aa810fc2a552dea4cffb",
+    "scripts/research/verify_envi_originals.py": "943b8cb85880c653dd2f45fc119508506ef7f245670200d08f576d1f79225c89"
+  },
+  "notes": "Actual public ENVI originals imported and sampled through production source/product pipeline. Original detector channels retained; 54 original bad bands excluded. Unknown acquisition date retained. No Windows/MSFS flight or uncoached-user acceptance asserted. Data files are not redistributed.",
+  "artifactSha256": "0644e0d29f59f9aa63c8e5d7d91548fb38a658cb3fa99e55c7d65fc63a51bbfe",
+  "downloadedRangeBytes": 98717996,
+  "downloadReceiptSha256": "77cb21eb5db2cfbd49f10a6066980b5c32a621af3642819707d060e2d3928cb1"
+}

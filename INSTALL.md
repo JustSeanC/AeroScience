@@ -1,8 +1,8 @@
 # Install AeroScience for Windows
 
-The recommended v0.3.2 prerelease download is **AeroScience-Setup-v0.3.2.exe** from [GitHub Releases](https://github.com/JustSeanC/AeroScience/releases), once built and uploaded. GitHub source ZIPs and internal candidate ZIPs are not the pilot installation method.
+The primary v0.4.0 download will be **AeroScience-Setup-v0.4.0.exe** from [GitHub Releases](https://github.com/JustSeanC/AeroScience/releases) after genuine installed acceptance and publication. Source/internal ZIPs are not the pilot installation method. No finished v0.4.0 installer is claimed from this cloud environment.
 
-Maintainers: [one-command Windows build, recommended real-device testing and exact publication steps](docs/v0.3.2-windows-testing.md). Technical checks finalize automatically with no required acceptance JSON. Windows/MSFS hardware status remains explicitly unverified until actual testing; no finished v0.3.2 EXE is claimed from the cloud.
+Maintainers: [exact Windows build, testing and publication guide](docs/v0.4.0-windows-testing.md). The build retains official SDK/runtime/licensing checks and stops at the candidate for actual installed missions A–E. Record results using the graphical checklist; hand-editing JSON is unnecessary. No self-hosted runner is required.
 
 ## Install and launch
 
@@ -44,10 +44,12 @@ Reinstalling the app reuses retained settings and available archives. Deleting u
 
 For problems, use **Collect Feedback**, save and review the local ZIP, and report the error/reproduction steps at [GitHub Issues](https://github.com/JustSeanC/AeroScience/issues). Installer logs are `Setup Log ... .txt` in `%TEMP%`; review paths/private details before sharing. Do not attach mission databases or authorization correspondence by default.
 
-## v0.3.2 first use
+## Scientific preparation and first use
 
 On a fresh installation choose OpenStreetMap or offline-only in the dashboard privacy prompt **before any tile request**. Existing preferences are preserved. Storage Management defaults to 25 GB flight / 50 GB science, customizable or Unlimited. Offline archives remain usable without MSFS or internet. Import licensed real scientific collections graphically from Settings → Scientific Data Sources using the [remote-sensing guide](docs/remote-sensing/quick-start.md). Data sources are not bundled and may need geographic preparation; OSM/Esri basemaps do not supply scientific instrument data.
 
 ## Scientific data without manual preparation
 
 Follow the [automatic remote-sensing quick start](docs/remote-sensing/quick-start.md). After separate consent, AeroScience prepares real terrain, Landsat thermal and Sentinel-2 multispectral subsets directly from public providers, generates metadata internally and validates them in the existing local library. No GIS, JSON editing, terminal or manual satellite download is required for these supported paths. NASA hyperspectral discovery is available, while automated protected spectral download/preparation is unsupported. Readiness, date/quality, bandwidth, offline and storage controls explain actual availability.
+
+For the new sensor planning, atmospheric missions, replay, coverage and geographic products, follow [the v0.4.0 pilot walkthrough](docs/v0.4.0-pilot-guide.md). NOAA point clouds and raw Hyperion products are not supported import workflows; see [source support](docs/v0.4.0-scientific-source-expansion.md).

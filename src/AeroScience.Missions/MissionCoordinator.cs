@@ -9,6 +9,7 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
 {
     internal MissionStore Store => store;
     private readonly object gate = new();
+    private readonly EnvironmentTelemetryCache environment = new();
     private TelemetryFrame? frame;
     private Mission? active;
     private DateTimeOffset? lastRecordedUtc;
@@ -42,6 +43,8 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
             if (active is not null && connection.State != update.Connection.State)
                 store.AddEvent(active.Id, DateTimeOffset.UtcNow, "connection", update.Connection.Message);
             connection = update.Connection;
+            environment.Apply(update);
+            if(update.Frame is {IsValid:true} incoming)update=update with{Frame=environment.Enrich(incoming)};
             frame = connection.State != ConnectionState.Connected ? null
                 : update.Frame is { IsValid: true } ? update.Frame : update.Frame is not null ? null : frame;
             try { research?.Observe(update, frame); }
@@ -111,7 +114,7 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
             if (active is not null) throw new InvalidOperationException("A mission is already recording.");
             var plan = request.PlanId is { } planId ? store.Plan(planId) ?? throw new ArgumentException("Saved mission plan not found.") : null;
             if (plan is not null) mode = plan.Mode;
-            var configurations = ScienceCatalog.Normalize(request.Instruments ?? plan?.Instruments ?? research?.Configurations);
+            var configurations = InstrumentProfiles.Freeze(ScienceCatalog.Normalize(request.Instruments ?? plan?.Instruments ?? research?.Configurations));
             try { ensureRecordingCapacity?.Invoke(); }
             catch (Exception error) when(error is IOException or UnauthorizedAccessException or Microsoft.Data.Sqlite.SqliteException) { throw new InvalidOperationException(error.Message, error); }
             if (requireFreshTelemetry && (connection.State != ConnectionState.Connected || frame is null
@@ -139,6 +142,15 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
             if (maintenance) throw new InvalidOperationException("Storage maintenance is in progress.");
             if (research is null) throw new InvalidOperationException("Scientific acquisition is unavailable in this host.");
             research.Configure(configurations);
+        }
+    }
+    public void ConfigureInstrument(string id,bool? enabled,int? intervalMs)
+    {
+        lock(gate)
+        {
+            if(research is null)throw new InvalidOperationException("Scientific acquisition is unavailable in this host.");
+            var current=research.Configurations;if(!current.Any(c=>c.InstrumentId==id))throw new ArgumentException("Unknown instrument.");
+            ConfigureInstruments(current.Select(c=>c.InstrumentId==id?c with{Enabled=enabled??c.Enabled,IntervalMs=intervalMs??c.IntervalMs}:c).ToArray());
         }
     }
     public ResearchState SetSciencePaused(Guid id, bool paused)

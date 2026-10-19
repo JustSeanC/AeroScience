@@ -17,7 +17,7 @@ try {
     } else {
         $result = python scripts/release/automatic_release.py finalize --folder $CandidateFolder --evidence (Join-Path $OutputDirectory 'build-evidence/technical-validation.json') --output $OutputDirectory
     }
-    if ($LASTEXITCODE -ne 0) { throw 'Release finalization stopped. Read the specific technical validation message above. Existing candidates and final artifacts were preserved; no manual acceptance JSON is required by the automatic alpha path.' }
+    if ($LASTEXITCODE -ne 0) { throw 'Release finalization stopped. Read the validation message above. Existing candidates and final artifacts were preserved. For v0.4.0, record genuine installed testing using Complete-ReleaseAcceptance.ps1 and supply -AcceptanceRecord.' }
     $info = $result | ConvertFrom-Json
     Write-Host "Primary installer: $OutputDirectory\$($info.asset_name)"
     Write-Host "Checksum: $OutputDirectory\$($info.asset_name).sha256"

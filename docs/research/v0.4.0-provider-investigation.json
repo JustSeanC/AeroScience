@@ -1,0 +1,142 @@
+{
+  "formatVersion": 1,
+  "evidenceType": "official-reference-and-bounded-genuine-node-investigation",
+  "checkedUtc": "2026-10-19T21:45:28.310012+00:00",
+  "windowsMsfs": "not tested",
+  "references": {
+    "aviris": {
+      "url": "https://avirisng.jpl.nasa.gov/aviris-ng.html",
+      "finalUrl": "https://avirisng.jpl.nasa.gov/aviris-ng.html",
+      "status": 200,
+      "bytes": 12956,
+      "sha256": "c0f28f007554ab23cf386f21b0c946ef6734f05a16e35af32805ffa0597e517c",
+      "checkedUtc": "2026-10-19T20:21:35.274558+00:00"
+    },
+    "rededge": {
+      "url": "https://support.micasense.com/hc/en-us/articles/4410824602903-RedEdge-P-Integration-Guide",
+      "finalUrl": "https://support.micasense.com/hc/en-us/articles/4410824602903-RedEdge-P-Integration-Guide",
+      "status": 200,
+      "bytes": 63561,
+      "sha256": "f62bb12b7902d78618fec5848708c6e4918f4ca48216614fe43c437a82cd27fc",
+      "checkedUtc": "2026-10-19T20:21:35.216805+00:00"
+    },
+    "flir": {
+      "url": "https://www.flir.com/products/a655sc/",
+      "finalUrl": "https://www.flir.com/products/a655sc/",
+      "status": 200,
+      "bytes": 512307,
+      "sha256": "2634d59fcfbbab3dd757ab6221ce44b546559a20ed273e91d98c7daff0efc46f",
+      "checkedUtc": "2026-10-19T20:21:44.167375+00:00"
+    },
+    "riegl": {
+      "url": "https://www.riegl.com/fileadmin/media/Products/03_Airborne_Scanning/RIEGL_VQ-1560II-S_Datasheet_2024-03-22.pdf",
+      "bytes": 9226139,
+      "sha256": "9739f85193dc3cb2955d2f74ac6c729d8617dc5864ab9a33c3383ee9e7b424e3",
+      "complete": true
+    },
+    "noaa": {
+      "url": "https://coast.noaa.gov/digitalcoast/data/coastallidar.html",
+      "finalUrl": "https://coast.noaa.gov/digitalcoast/data/coastallidar.html",
+      "status": 200,
+      "bytes": 387192,
+      "sha256": "aba114652a7e65170ba6dd7fb7b9b49cfe2da7949fec550e88ab39a55dbde6de",
+      "checkedUtc": "2026-10-19T20:21:35.368833+00:00"
+    },
+    "hyperion": {
+      "url": "https://www.usgs.gov/centers/eros/science/usgs-eros-archive-earth-observing-one-eo-1-hyperion",
+      "finalUrl": "https://www.usgs.gov/centers/eros/science/usgs-eros-archive-earth-observing-one-eo-1-hyperion",
+      "status": 200,
+      "bytes": 143200,
+      "sha256": "48686539f2549299f2bb2e025a32593f9b461ec7d22e28a7be73d88e0ec3a9ff",
+      "checkedUtc": "2026-10-19T20:21:37.509298+00:00"
+    },
+    "worldcover": {
+      "url": "https://esa-worldcover.org/en/data-access",
+      "finalUrl": "https://esa-worldcover.org/en/data-access",
+      "status": 200,
+      "bytes": 49873,
+      "sha256": "def33d117ab9e401d26d28a6554354e1969291c90f7fd6e1c520cd3a909899ef",
+      "checkedUtc": "2026-10-19T20:21:37.577097+00:00"
+    },
+    "gibs": {
+      "url": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/1.0.0/WMTSCapabilities.xml",
+      "finalUrl": "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/1.0.0/WMTSCapabilities.xml",
+      "status": 200,
+      "bytes": 5000000,
+      "sha256": "7dae20a16dc4e459400d624405b12531c96f37e6c853ff00c8de26c711a2a3ec",
+      "checkedUtc": "2026-10-19T20:21:44.618410+00:00",
+      "completeResponse": false,
+      "limitation": "Bounded 5 MB prefix, not a complete WMTS catalog acceptance."
+    },
+    "sdk": {
+      "url": "https://docs.flightsimulator.com/msfs2024/html/6_Programming_APIs/SimVars/Miscellaneous_Variables.htm",
+      "finalUrl": "https://docs.flightsimulator.com/msfs2024/html/6_Programming_APIs/SimVars/Miscellaneous_Variables.htm",
+      "status": 200,
+      "bytes": 89547,
+      "sha256": "fa57937084199d62650ecf632fa252a4ec3cf6825e741c0638109b15556e2ae3",
+      "checkedUtc": "2026-10-19T20:21:35.774223+00:00"
+    },
+    "aviris-specs": {
+      "url": "https://avirisng.jpl.nasa.gov/specifications.html",
+      "bytes": 14504,
+      "sha256": "777708b937e6fdae9ef1c42c1a2d3483a74f1d96e82a304eeda2541edf451c79",
+      "complete": true
+    }
+  },
+  "noaa": {
+    "evidenceType": "genuine-noaa-ept-node-investigation-not-application-acceptance",
+    "points": 410,
+    "pointFormat": 1,
+    "nativeBounds": {
+      "x": [
+        12482.339999999997,
+        495908.2
+      ],
+      "y": [
+        3613227.48,
+        4293891.79
+      ],
+      "z": [
+        -454.58000000000004,
+        683.5600000000001
+      ]
+    },
+    "classes": [
+      0,
+      7
+    ],
+    "firstPoints": [
+      {
+        "x": 469764.6,
+        "y": 4192540.58,
+        "z": 191.10000000000002,
+        "classification": 7
+      },
+      {
+        "x": 469860.18,
+        "y": 4192557.2,
+        "z": -1.4000000000000057,
+        "classification": 7
+      },
+      {
+        "x": 471728.80000000005,
+        "y": 4196927.94,
+        "z": 195.4,
+        "classification": 7
+      }
+    ],
+    "independentTool": "laspy 2.6.1 / lazrs 0.7.0",
+    "windowsMsfs": "not tested",
+    "nodeUrl": "https://noaa-nos-coastal-lidar-pds.s3.amazonaws.com/entwine/geoid18/1/ept-data/0-0-0-0.laz",
+    "nodeBytes": 7578,
+    "nodeSha256": "f6b3dbb09b23d55a3451944e9f8c7cdadf1cd4837e7a34e72ca696f6efc78ada",
+    "horizontalCrs": "EPSG:6347",
+    "verticalCrs": "EPSG:5703",
+    "applicationGuidedImport": "not implemented",
+    "limitations": "Sparse hierarchy root includes unclassified/noise points; not a validated ground cloud or terrain product."
+  },
+  "goes": {
+    "reference": "https://registry.opendata.aws/noaa-goes/",
+    "finding": "Public anonymous GOES-16/18/19 buckets; product-specific NetCDF/projection/quality processing is not implemented."
+  }
+}

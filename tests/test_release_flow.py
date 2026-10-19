@@ -54,7 +54,7 @@ class ReleaseFlowTests(unittest.TestCase):
     def accept(self, commit, digest):
         acceptance = p.acceptance_template(commit, digest)
         acceptance.update(tester='STRUCTURAL TEST FIXTURE ONLY', tested_utc=DATE)
-        for name in p.ALPHA_ACCEPTANCE:
+        for name in p.ACCEPTANCE:
             acceptance['checks'][name].update(result='passed', evidence='UNIT FIXTURE, NOT WINDOWS ACCEPTANCE')
         self.acceptance.write_text(json.dumps(acceptance))
         return acceptance
@@ -72,11 +72,15 @@ class ReleaseFlowTests(unittest.TestCase):
         for invalid in ('v0.1.1-alpha', '../bad', '0.1', '1.0.0\n', '1.0.0+local'):
             with self.assertRaises(ValueError): p.identity(invalid)
 
-    def test_alpha_requires_minimum_windows_checks_but_keeps_extended_tests_pending(self):
+    def test_science_prerelease_requires_installed_extended_and_scientific_checks(self):
         commit, digest = self.prepare(); data = self.accept(commit, digest)
         p.validate_acceptance(self.acceptance, source_commit=COMMIT, payload_sha256=digest)
-        self.assertEqual(data['checks']['vr_performance']['result'], 'pending')
-        self.assertEqual(data['checks']['mach_live']['result'], 'pending')
+        self.assertEqual(data['checks']['vr_performance']['result'], 'passed')
+        self.assertEqual(data['checks']['science040_long_recording']['result'], 'passed')
+        data['checks']['science040_long_recording']['result']='pending'
+        self.acceptance.write_text(json.dumps(data))
+        with self.assertRaisesRegex(ValueError,'science040_long_recording'):p.validate_acceptance(self.acceptance)
+        data['checks']['science040_long_recording']['result']='passed'
         data['checks']['live_mission_smoke']['result'] = 'blocked'
         self.acceptance.write_text(json.dumps(data))
         with self.assertRaisesRegex(ValueError, 'live_mission_smoke'): p.finalize_candidate(self.candidate, self.acceptance, self.final)
@@ -87,7 +91,7 @@ class ReleaseFlowTests(unittest.TestCase):
         p.finalize_candidate(self.candidate, self.acceptance, self.final)
         info = p.verify_archive(self.final, self.final.with_suffix('.zip.sha256'))
         self.assertEqual(info['source_commit'], COMMIT); self.assertEqual(info['payload_sha256'], digest)
-        self.assertIn('Mach', p.release_notes(info)); self.assertIn('mach live', p.release_notes(info))
+        self.assertIn('native-grid', p.release_notes(info)); self.assertIn('Windows/MSFS acceptance', p.release_notes(info))
         self.assertIn(p.identity()['asset_name'], p.release_notes(info))
         with zipfile.ZipFile(self.final) as archive:
             names = archive.namelist(); prefix = p.identity()['root_name']+'/'
