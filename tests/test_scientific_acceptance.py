@@ -10,15 +10,28 @@ ROOT=Path(__file__).resolve().parents[1]
 spec=importlib.util.spec_from_file_location('science_acceptance',ROOT/'scripts/release/verify_scientific_acceptance.py')
 science=importlib.util.module_from_spec(spec);spec.loader.exec_module(science)
 class ScientificAcceptanceTests(unittest.TestCase):
-    def test_genuine_report_is_complete_and_matches_source(self):
-        value=science.verify(require_current=False);self.assertEqual(4,len(value['workflows']));self.assertEqual('not tested',value['windowsMsfs'])
+    def validation_fixture(self):
+        # Historical genuine metadata used ONLY as temporary validator-unit input.
+        # Updated identities here do not create/publish current network evidence.
+        value=json.loads((ROOT/'docs/research/v0.3.1-automatic-provider-acceptance.json').read_text())
+        value['test_only']='Validator fixture; not a current-source acceptance run'
+        value['canonicalLfSourceSha256']={n:science.source_digest(ROOT/n) for n in science.SOURCES}
+        return value
+
+    def test_current_report_cannot_promote_pending_development_into_release_acceptance(self):
+        value=json.loads(science.REPORT.read_text())
+        if value.get('evidenceType')=='pending-genuine-provider-network':
+            with self.assertRaisesRegex(ValueError,'pending'):science.verify()
+            self.assertEqual([],value['workflows']);self.assertEqual('not tested',value['windowsMsfs'])
+        else:
+            accepted=science.verify();self.assertEqual(4,len(accepted['workflows']));self.assertEqual('not tested',accepted['windowsMsfs'])
     def test_pending_final_rerun_blocks_distribution(self):
-        value=json.loads(science.REPORT.read_text());value['finalNetworkRerun']='pending';value['finalNetworkRerunReason']=None
+        value=self.validation_fixture();value['finalNetworkRerun']='pending';value['finalNetworkRerunReason']=None
         with tempfile.TemporaryDirectory() as temp:
             path=Path(temp)/'report.json';path.write_text(json.dumps(value))
             with self.assertRaisesRegex(ValueError,'pending'):science.verify(path)
     def test_mock_pass_hardware_claim_missing_numeric_workflow_or_stale_source_is_refused(self):
-        actual=json.loads(science.REPORT.read_text())
+        actual=self.validation_fixture()
         for case in ('mock','hardware','missing','samples','source'):
             value=copy.deepcopy(actual)
             if case=='mock':value['evidenceType']='synthetic fixtures'

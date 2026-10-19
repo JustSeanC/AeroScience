@@ -7,7 +7,7 @@ const e = (tag, text) => {
   if (text !== undefined) node.textContent = text;
   return node;
 };
-const action = (text, run) => {
+const action = (text, run, disabled = () => false) => {
   const b = e("button", text);
   b.type = "button";
   b.className = "secondary";
@@ -18,7 +18,7 @@ const action = (text, run) => {
     } catch (error) {
       alert(error.message);
     } finally {
-      b.disabled = false;
+      b.disabled = disabled();
     }
   };
   return b;
@@ -39,87 +39,48 @@ function link(parent, title, href) {
   parent.append(a, document.createTextNode(" · "));
 }
 export { scientificSourcesSettings as sourceSettings } from "./scientific-sources.js";
-export async function remoteProducts(
-  parent,
-  api,
-  missionId = null,
-  instrumentId = null,
-) {
-  const section = e("section");
-  section.className = "panel research-panel remote-products";
-  section.append(
-    e("h2", "Remote-Sensing Products"),
-    e(
-      "p",
-      "Historical geographic observations sampled along a simulated flight footprint. Original observation, flight-packet and processing times remain distinct.",
-    ),
-  );
-  parent.append(section);
-  const hyperspectral = e("div");section.append(hyperspectral);
-  async function showHyperspectral(){hyperspectral.replaceChildren();if(filter.value==="hyperspectral-imager")await hyperspectralCard(hyperspectral,api);}
-  let offset = 0, viewGeneration = 0;
-  const list = e("div"),
-    viewer = e("div"),
-    filter = e("select");
-  filter.setAttribute("aria-label", "Product instrument");
-  for (const [id, name] of [
-    ["", "All remote instruments"],
-    ...Object.entries(names),
-  ]) {
-    const option = e("option", name);
-    option.value = id;
-    filter.append(option);
-  }
-  filter.value = instrumentId || "";
-  filter.onchange = () => { offset=0;viewGeneration++;viewer.replaceChildren();showHyperspectral();load(); };
-  section.append(filter, action("Refresh products", load), list, viewer);
-  await showHyperspectral();
-  section.append(
-    action("Previous product page", async () => {
-      offset = Math.max(0, offset - 30);
-      await load();
-    }),
-    action("Next product page", async () => {
-      offset += 30;
-      await load();
-    }),
-  );
-  async function load() {
-    const products = await api(
-      `/api/science/products?limit=30&offset=${offset}${missionId ? "&missionId=" + encodeURIComponent(missionId) : ""}${filter.value?"&instrumentId="+encodeURIComponent(filter.value):""}`,
-    );
-    list.replaceChildren();
-    for (const p of products.filter(
-      (p) => !filter.value || filter.value === p.instrumentId,
-    )) {
-      const row = e("article");
-      row.className = "plan-row";
-      row.append(
-        e("strong", names[p.instrumentId] || p.instrumentId),
-        e(
-          "span",
-          `Flight: ${p.flightPacketUtc} · Source: ${p.sourceObservationUtc || "Unknown"} · ${number(p.bytes / 1048576)} MiB`,
-        ),
-        action("View Data", async () => {
-          const own = ++viewGeneration;
-          viewer.replaceChildren();
-          const data = await api(`/api/science/products/${p.id}`);
-          if(own!==viewGeneration||!viewer.isConnected)return;
-          await viewProduct(viewer, data, api);
-        }),
-      );
-      list.append(row);
+export async function remoteProducts(parent,api,missionId=null,instrumentId=null){
+ const section=e("section");section.className="panel research-panel remote-products";section.append(e("h2","Scientific Results"));parent.append(section);
+ const missionTitle=e("h3"),summary=e("p"),datasetSummary=e("div"),list=e("div"),viewer=e("div"),range=e("p"),mapHolder=e("div");section.append(missionTitle);
+ const atmosphericRows=new Map();
+ let offset=0,total=0,pageCount=0,requestGeneration=0,viewGeneration=0,timer,signature="",map=null,mapOffset=0,atmosAfter=0,atmosShown=0,mapAreas=[],mapSamples=[];
+ if(!missionId){const label=e("label","Recent mission "),missions=e("select");missions.setAttribute("aria-label","Results mission");const empty=e("option","Choose a mission (all older missions remain in Mission History)");empty.value="";missions.append(empty);for(const m of await api('/api/missions?limit=100')){const option=e("option",m.name);option.value=m.id;missions.append(option);}label.append(missions);section.append(label);missions.onchange=()=>{missionId=missions.value||null;reset();};}
+ const label=e("label","Instrument "),filter=e("select");filter.setAttribute("aria-label","Product instrument");
+ const catalog=await api("/api/instruments"),displayNames=Object.fromEntries(catalog.map(i=>[i.id,i.name]));
+ for(const [id,name] of [["","All instruments"],...Object.entries(displayNames)]){const option=e("option",name);option.value=id;filter.append(option);}filter.value=instrumentId||"";label.append(filter);
+ const hyperspectral=e("div");section.append(label,summary,datasetSummary,hyperspectral);
+ const previous=action("Browse Previous",async()=>{offset=Math.max(0,offset-30);await load();},()=>offset===0),next=action("View More Acquisitions",async()=>{offset+=30;await load();},()=>offset+pageCount>=total);
+ const mapMore=action("View More Acquisition Locations",loadLocations);mapMore.hidden=true;
+ section.append(action("Refresh Results",load),action("View Acquisitions on Map",async()=>{if(!missionId){summary.textContent="Select a mission first.";return;}if(!map)map=new ResearchMap(mapHolder,null,{coverageOnly:true});await loadLocations();}),mapHolder,mapMore,range,previous,next,list,viewer);
+ function reset(){atmosphericRows.clear();datasetSummary.replaceChildren();offset=0;signature="";requestGeneration++;viewGeneration++;viewer.replaceChildren();map?.destroy();map=null;mapOffset=0;atmosAfter=0;atmosShown=0;mapAreas=[];mapSamples=[];mapHolder.replaceChildren();delete mapHolder.dataset.fitted;mapMore.hidden=true;hyperspectral.replaceChildren();if(filter.value==='hyperspectral-imager')hyperspectralCard(hyperspectral,api);load();}
+ filter.onchange=reset;
+ async function loadLocations(){
+  const own=missionId+"|"+filter.value;if(!map||!missionId)return;let more=false;
+  if(!filter.value||names[filter.value]){const page=await api(`/api/missions/${missionId}/scientific-locations?offset=${mapOffset}${filter.value?'&instrumentId='+encodeURIComponent(filter.value):''}`);if(own!==missionId+"|"+filter.value||!section.isConnected)return;for(const item of page.items){mapAreas.push({vertices:item.footprint.boundary,label:`${item.instrumentId} / flight ${item.flightPacketUtc} / source ${item.sourceObservationUtc||'unknown'}. Footprint envelope; masked gaps remain.`});mapSamples.push(...item.locations.map(p=>({...p,instrumentId:item.instrumentId,timestampUtc:item.flightPacketUtc})));}mapOffset+=page.items.length;more=page.hasMore;}
+  if(!filter.value||!names[filter.value]){const page=await api(`/api/missions/${missionId}/scientific-atmosphere-locations?after=${atmosAfter}${filter.value?'&instrumentId='+encodeURIComponent(filter.value):''}`);if(own!==missionId+"|"+filter.value||!section.isConnected)return;mapSamples.push(...page.items.filter(p=>Number.isFinite(p.latitude)&&Number.isFinite(p.longitude)));atmosAfter=page.next;atmosShown+=page.items.length;more||=page.hasMore;}
+  map.set({footprints:mapAreas,samples:mapSamples});if(!mapHolder.dataset.fitted){map.fit();mapHolder.dataset.fitted='true';}mapMore.hidden=!more||mapSamples.length>=60000;range.textContent=`Map shows ${mapOffset} external acquisitions / ${atmosShown} atmospheric values and ${mapSamples.length} valid sample locations. Footprints overlap independently; no imagery composite or continuous coverage is implied.${mapSamples.length>=60000?' Map memory bound reached; filter by instrument or browse individual acquisitions.':''}`;
+ }
+
+ async function load(){const own=++requestGeneration;const query=`${missionId?'&missionId='+missionId:''}${filter.value?'&instrumentId='+encodeURIComponent(filter.value):''}`;
+  const page=await api(`/api/science/products/page?offset=${offset}${query}`);if(own!==requestGeneration||!section.isConnected)return;
+  if(offset>0&&offset>=page.total){offset=Math.max(0,Math.floor(Math.max(0,page.total-1)/30)*30);return load();}
+  total=page.total;pageCount=page.items.length;previous.disabled=offset===0;next.disabled=offset+pageCount>=total;range.textContent=page.total?`Showing ${offset+1}–${offset+page.items.length} of ${page.total} acquisitions`:'No completed acquisitions yet.';
+  if(missionId){const overview=await api(`/api/missions/${missionId}/scientific-results`);if(own!==requestGeneration||!section.isConnected)return;missionTitle.textContent=overview.mission.name;summary.textContent=(overview.diagnostics||[]).filter(d=>!filter.value||d.instrumentId===filter.value).map(d=>`${displayNames[d.instrumentId]||d.instrumentId}: ${d.acquisitionSets} successful acquisitions / ${d.observationCount} saved values or products / ${d.rejectedObservations} unavailable / ${d.missingIntervals} missing intervals`).join(' · ');if(filter.value&&!names[filter.value])range.textContent="Recorded atmospheric measurement values are listed below; no external imagery is expected for this instrument.";for(const row of atmosphericRows.values())row.box.hidden=true;
+    for(const d of overview.datasets.filter(d=>!names[d.instrumentId]&&(!filter.value||filter.value===d.instrumentId))){
+      let row=atmosphericRows.get(d.id);
+      if(!row){const box=e('details'),title=e('summary'),values=e('pre'),label=e('p');let after=0,hasMore=true;
+        const more=action('View More Measurements',async()=>{const page=await api(`/api/science/datasets/${d.id}/observations?after=${after}&limit=1000`);after=page.next;hasMore=page.hasMore;values.textContent=page.observations.map(o=>`${o.timestampUtc} ${o.measurementId}: ${o.value} ${o.unit} (${o.provenance})`).join('\n');label.textContent=`${page.observations.length} recorded values shown. Source labels appear beside each value; these are not archived satellite measurements.`;},()=>!hasMore);
+        box.append(title,more,label,values,e('p','Export the full mission for all recorded observations.'));row={box,title};atmosphericRows.set(d.id,row);datasetSummary.append(box);
+      }
+      row.box.hidden=false;row.title.textContent=`${displayNames[d.instrumentId]||d.instrumentId} — ${d.observationCount} atmospheric measurement values`;
     }
-    if (!list.children.length)
-      list.append(
-        e(
-          "p",
-          "No saved products on this page. Scientific data unavailable for this location or acquisition until a supported source and a valid recording footprint are available.",
-        ),
-      );
   }
-  await load();
-  return section;
+
+  const key=JSON.stringify(page.items.map(p=>[p.id,p.bytes]));if(key===signature)return;signature=key;list.replaceChildren();
+  for(const p of page.items){const row=e('article');row.className='plan-row';row.append(e('strong',names[p.instrumentId]||p.instrumentId),e('span',`Flight ${p.flightPacketUtc} · Source ${p.sourceObservationUtc||'Unknown / composite'} · ${p.validSampleCount==null?'Historical valid sample count not indexed':p.validSampleCount+' valid sample positions'} · ${number(p.bytes/1048576)} MiB`),action('View Data',async()=>{const current=++viewGeneration;const data=await api(`/api/science/products/${p.id}`);if(current!==viewGeneration||!viewer.isConnected)return;viewer.replaceChildren();await viewProduct(viewer,data,api);}));list.append(row);}
+ }
+ async function poll(){if(!section.isConnected)return;if(!document.hidden&&!section.closest('[hidden]'))try{await load();}catch(error){summary.textContent=error.message;}timer=setTimeout(poll,5000);}
+ await load();timer=setTimeout(poll,5000);return section;
 }
 export async function viewProduct(parent, data, api = null) {
   const p = data.product,

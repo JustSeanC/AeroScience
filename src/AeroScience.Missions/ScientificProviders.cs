@@ -17,6 +17,8 @@ public interface IScientificDataProvider
 public sealed class StacScientificProvider(ScientificHttp http,string id):IScientificDataProvider
 {
     public string Id=>id;
+    private readonly Dictionary<string,(DateTimeOffset At,JsonElement Features)> scenes=[];
+
     public bool Supports(RemoteKind kind)=>id switch{"earth-search"=>kind==RemoteKind.Multispectral,"planetary-computer"=>kind is RemoteKind.Thermal or RemoteKind.Terrain,_=>false};
     private static string QueryDate(ScientificAccessPreferences p)
     {
@@ -30,8 +32,15 @@ public sealed class StacScientificProvider(ScientificHttp http,string id):IScien
         var collection=kind switch{RemoteKind.Thermal=>"landsat-c2-l2",RemoteKind.Multispectral=>"sentinel-2-l2a",_=>"cop-dem-glo-30"};
         var query="?collections="+collection+"&bbox="+Bounds(area)+"&limit=60";
         if(kind!=RemoteKind.Terrain)query+="&datetime="+Uri.EscapeDataString(QueryDate(p))+"&sortby="+(p.SelectionPolicy=="newest"?(id=="earth-search"?"-properties.datetime":"-datetime"):(id=="earth-search"?"properties.eo:cloud_cover":"eo:cloud_cover"))+"&query="+Uri.EscapeDataString(JsonSerializer.Serialize(new Dictionary<string,object>{{"eo:cloud_cover",new{lte=p.MaximumCloudPercent}}}));
-        using var json=await http.Json(root+"/search"+query,budget,token);
-        if(!json.RootElement.TryGetProperty("features",out var features)||features.ValueKind!=JsonValueKind.Array)throw new IOException("Provider returned an invalid STAC search response.");
+        var profile=kind+"|"+p.SelectionPolicy+"|"+p.MaximumCloudPercent+"|"+p.LookbackDays+"|"+(p.PreferredDateUtc?.ToString("O")??DateTimeOffset.UtcNow.ToString("yyyy-MM-dd"));
+        JsonElement features;
+        lock(scenes)features=http.CacheEnabled&&scenes.TryGetValue(profile,out var cached)&&DateTimeOffset.UtcNow-cached.At<TimeSpan.FromMinutes(5)&&cached.Features.EnumerateArray().Any(f=>Matches(f,kind,area,p))?cached.Features:default;
+        if(features.ValueKind==JsonValueKind.Undefined)
+        {
+            using var json=await http.Json(root+"/search"+query,budget,token);
+            if(!json.RootElement.TryGetProperty("features",out features)||features.ValueKind!=JsonValueKind.Array)throw new IOException("Provider returned an invalid STAC search response.");
+            features=features.Clone();lock(scenes){if(scenes.Count>=4)scenes.Remove(scenes.Keys.First());scenes[profile]=(DateTimeOffset.UtcNow,features);}
+        }
         var candidates=features.EnumerateArray().Take(60).Where(f=>Matches(f,kind,area,p));
         candidates=p.SelectionPolicy=="newest"?candidates.OrderByDescending(f=>Date(f.GetProperty("properties"))):candidates.OrderBy(f=>Cloud(f.GetProperty("properties"))).ThenByDescending(f=>Date(f.GetProperty("properties")));
         foreach(var feature in candidates)
@@ -111,10 +120,11 @@ public sealed class UsgsElevationProvider(ScientificHttp http):IScientificDataPr
         if(!Supports(kind)||area.West< -170||area.East> -64||area.South<17||area.North>72)return null;
         using var metadata=await http.Json(Endpoint+"?f=json",budget,token);
         if(metadata.RootElement.GetProperty("pixelType").GetString()!="F32"||metadata.RootElement.GetProperty("bandCount").GetInt32()!=1)throw new IOException("USGS no longer exposes the supported single numeric elevation band.");
-        var url=Endpoint+"/exportImage?bbox="+StacScientificProvider.Bounds(area)+"&bboxSR=4326&imageSR=4326&size=256,256&format=tiff&pixelType=F32&interpolation=RSP_NearestNeighbor&noData=-999999&f=image";
+        var pixels=(int)Math.Clamp(Math.Ceiling(Math.Max(area.East-area.West,area.North-area.South)/.02*256-1e-7),256,768);
+        var url=Endpoint+"/exportImage?bbox="+StacScientificProvider.Bounds(area)+"&bboxSR=4326&imageSR=4326&size="+pixels+","+pixels+"&format=tiff&pixelType=F32&interpolation=RSP_NearestNeighbor&noData=-999999&f=image";
         var scene="3DEP-"+StacScientificProvider.Bounds(area);
         var manifest=new ScientificSourceManifest(1,"USGS 3DEP bare-earth numeric elevation subset",kind,"USGS 3DEP National Map","USGS public domain; https://www.usgs.gov/information-policies-and-instructions/copyrights-and-credits",Endpoint,scene,null,
             "Source-native vertical reference is unspecified by this composite export; no datum conversion or aircraft MSL comparison",[new("elevation","elevation.tif","geotiff",Unit:"m",NoData:-999999,SceneId:scene)],Notes:"USGS multi-resolution composite bare-earth DEM, nearest-neighbor numeric export. Original survey dates, per-pixel native resolution and vertical datum are not supplied by this endpoint; they remain unknown. Not live aircraft LiDAR.");
-        return new(manifest,[],Endpoint,Endpoint,"USGS numeric composite; actual nodata checked before publishing","Composite source resolution varies; 256 × 256 requested geographic grid (not a claim of native resolution)",area,url,[manifest.Notes!],JsonSerializer.Serialize(new{pixelType="F32",bandCount=1,description=metadata.RootElement.GetProperty("description").GetString(),export=url}));
+        return new(manifest,[],Endpoint,Endpoint,"USGS numeric composite; actual nodata checked before publishing","Composite source resolution varies; "+pixels+" × "+pixels+" requested geographic grid (not a claim of native resolution)",area,url,[manifest.Notes!],JsonSerializer.Serialize(new{pixelType="F32",bandCount=1,description=metadata.RootElement.GetProperty("description").GetString(),export=url}));
     }
 }

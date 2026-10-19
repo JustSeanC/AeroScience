@@ -15,18 +15,18 @@ public sealed record GeographicBounds(double West,double South,double East,doubl
 public sealed record ScientificAccessPreferences(bool OnlineEnabled=false,bool PrivacyAccepted=false,
     bool UnmeteredOnly=false,long MaximumDownloadBytes=67108864,int ConcurrentDownloads=1,
     bool BackgroundRetrieval=true,string SelectionPolicy="clear-recent",int LookbackDays=730,double MaximumCloudPercent=30,
-    DateTimeOffset? PreferredDateUtc=null,int LookaheadSeconds=0,long PrefetchHourlyBytes=268435456,Dictionary<RemoteKind,string>? SourceModes=null,Guid[]? ExcludedSourceIds=null);
+    DateTimeOffset? PreferredDateUtc=null,int LookaheadSeconds=0,long? PrefetchHourlyBytes=268435456,Dictionary<RemoteKind,string>? SourceModes=null,Guid[]? ExcludedSourceIds=null,long? PreflightTransferBytes=1073741824);
 public sealed record ScientificAccessConfiguration(ScientificAccessPreferences Preferences,string Privacy,string? Warning=null,string? NetworkCost=null);
 public sealed record ScientificDataReadiness(string Key,RemoteKind Kind,string Status,string Message,GeographicBounds Area,
     string? Provider=null,string? Dataset=null,DateTimeOffset? ObservationUtc=null,string? Quality=null,
     long DownloadedBytes=0,long? EstimatedDownloadBytes=null,long? EstimatedStorageBytes=null,
-    Guid? SourceId=null,string? Authorization=null,DateTimeOffset? UpdatedUtc=null,HyperspectralDiscovery[]? Discoveries=null,Coordinates? SamplePoint=null,Coordinates[]? SourceCoverage=null);
+    Guid? SourceId=null,string? Authorization=null,DateTimeOffset? UpdatedUtc=null,HyperspectralDiscovery[]? Discoveries=null,Coordinates? SamplePoint=null,Coordinates[]? SourceCoverage=null,string Scope="manual",string Stage="Queued",double? Seconds=null,long ReusedBytes=0);
 public sealed record HyperspectralDiscovery(string Catalog,string Dataset,DateTimeOffset? ObservationUtc,string Format,string Authorization,string MetadataUrl);
 public sealed record ScientificPreparationRequest(double Latitude,double Longitude,RemoteKind[]? Kinds=null);
 public sealed record AutomaticSourceProvenance(string Workflow,string Catalog,string Item,string[] UnsignedAssets,
     GeographicBounds RequestedArea,DateTimeOffset RetrievedUtc,string Preparation,string Quality,string NativeResolution,
     long NetworkBytes,string[] Limitations,string? ProviderMetadataJson=null,int? CheckedPixels=null,int? UsablePixels=null);
 
-public sealed record ScientificQueueSummary(int Queued,int Downloading,bool Paused,long HourlyBytes,long HourlyLimit,double EstimatedPreparationSeconds);
+public sealed record ScientificQueueSummary(int Queued,int Downloading,bool Paused,long HourlyBytes,long? HourlyLimit,double EstimatedPreparationSeconds,long ReservedBytes=0,long? AvailableBytes=null,long PreflightBytes=0,long PreflightReservedBytes=0,long? PreflightLimit=null,long? PreflightAvailableBytes=null,long CombinedNetworkBytes=0);
 public sealed record ScientificPredictionSnapshot(string Status,string Message,double LookaheadSeconds,double DistanceMetres,
     bool RouteConsistent,bool Limited,double? ReadyAheadSeconds,ScientificDataReadiness[] Areas,ScientificQueueSummary Queue);

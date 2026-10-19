@@ -195,7 +195,7 @@
         p = route[this.selected],
         a = this.aircraft;
       let detail = p
-        ? `${p.index + 1}. ${p.name} · ${p.latitude.toFixed(7)}, ${p.longitude.toFixed(7)} · ${p.targetAltitudeFeet == null ? "Altitude unspecified" : p.targetAltitudeFeet + " ft MSL"} · ${p.instructions || ""}`
+        ? `${p.index + 1}. ${p.name}  /  ${p.latitude.toFixed(7)}, ${p.longitude.toFixed(7)}  /  ${p.targetAltitudeFeet == null ? "Altitude unspecified" : p.targetAltitudeFeet + " ft MSL"}  /  ${p.instructions || ""}`
         : "No planned waypoint selected.";
       if (
         p &&
@@ -204,10 +204,11 @@
         this.state.selectedWaypoint === this.selected &&
         Number.isFinite(this.state.distanceMetres)
       )
-        detail += ` · WGS84 ${(this.state.distanceMetres / 1852).toFixed(2)} NM / ${this.state.bearingDegrees.toFixed(1)}° true`;
+        detail += `  /  WGS84 ${(this.state.distanceMetres / 1852).toFixed(2)} NM / ${this.state.bearingDegrees.toFixed(1)} deg true`;
+      if(a)detail+=` / Ground track ${Number.isFinite(a.groundTrackDegrees)?a.groundTrackDegrees.toFixed(1)+" deg true":"unavailable"} / GS ${Number.isFinite(a.groundspeedKnots)?a.groundspeedKnots.toFixed(0)+" kt":"unavailable"}`;
       this.info.textContent =
         detail +
-        (a ? "" : " · Live position unavailable/stale.") +
+        (a ? "" : "  /  Live position unavailable/stale.") +
         " Display labels and instructions may be abbreviated; full values remain in the companion plan.";
     }
     path(ctx, points, color, width) {
@@ -284,7 +285,7 @@
             airport = !!(p.gps_code || p.iata_code);
           c.fillStyle = airport ? "#acc7ee" : "#9caeb8";
           c.fillRect(q[0] - 2, q[1] - 2, 4, 4);
-          if (labels++ < 50)
+          if (labels++ < Math.max(8,Math.floor(this.width/70)))
             c.fillText(
               (p.gps_code || p.NAME || p.name || "").slice(0, 28),
               q[0] + 5,
@@ -301,6 +302,7 @@
       for (const a of Object.keys(areas).map((key) => areas[key]))
         this.path(c, a.concat(a[0]), "#bf9af0", 2);
       c.font = "12px sans-serif";
+      let lastLabel=null;
       for (const p of waypoints) {
         const q = this.pixel(p);
         if (q[0] < 0 || q[0] > this.width || q[1] < 0 || q[1] > this.height)
@@ -309,11 +311,11 @@
         c.beginPath();
         c.arc(q[0], q[1], p.index === this.selected ? 5 : 3, 0, Math.PI * 2);
         c.fill();
-        if (waypoints.length < 80 || p.index === this.selected)
-          c.fillText(String(p.index + 1), q[0] + 5, q[1] - 5);
+        const important=p.index===this.selected||p.index===this.state?.nextWaypoint||p.index===0||p.index===waypoints.length-1;
+        if(important||!lastLabel||Math.hypot(q[0]-lastLabel[0],q[1]-lastLabel[1])>65){c.fillText(String(p.index+1),q[0]+7,q[1]-7);lastLabel=q;}
       }
       c.fillStyle = "#c8d9e3";
-      c.fillText("N ↑ · Offline Natural Earth · Geographic reference", 8, 17);
+      c.fillText("N ^ / Offline Natural Earth / Geographic reference", 8, 17);
       const lat =
           ((2 * Math.atan(Math.exp((-this.center[1] * Math.PI) / 180)) -
             Math.PI / 2) *
@@ -363,7 +365,7 @@
         const q = this.pixel(this.aircraft);
         c.save();
         c.translate(...q);
-        c.rotate((this.aircraft.headingDegrees * Math.PI) / 180);
+        c.rotate(((this.aircraft.groundTrackDegrees??this.aircraft.headingDegrees) * Math.PI) / 180);
         c.beginPath();
         c.moveTo(0, -11);
         c.lineTo(7, 8);

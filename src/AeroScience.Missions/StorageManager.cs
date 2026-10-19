@@ -264,7 +264,17 @@ public sealed partial class StorageManager(PreferenceStore preferences, IStorage
         for (var current = new DirectoryInfo(Path.GetFullPath(path)); current is not null; current = current.Parent)
             if (current.Exists && (current.Attributes & FileAttributes.ReparsePoint) != 0) throw new IOException("Storage paths cannot contain symbolic links or junctions.");
     }
-    public static long DatabaseBytes(string database) => new[] { database, database + "-wal", database + "-shm" }.Where(File.Exists).Sum(p => new FileInfo(p).Length);
+    // The primary database is mandatory. SQLite sidecars can disappear between any
+    // metadata calls as the last connection closes/checkpoints; only that absence is benign.
+    public static long DatabaseBytes(string database, Func<string,long>? readLength = null)
+    {
+        readLength ??= path => new FileInfo(path).Length;
+        var bytes = readLength(database);
+        foreach(var suffix in new[]{"-wal","-shm"})
+            try { bytes = checked(bytes + readLength(database + suffix)); }
+            catch(FileNotFoundException) { }
+        return bytes;
+    }
     public static long Usage(string directory, StorageKind kind) => kind == StorageKind.Missions
         ? DatabaseBytes(Path.Combine(directory, "missions.db"))
         : EnumerateFiles(directory).Sum(p => new FileInfo(p).Length);

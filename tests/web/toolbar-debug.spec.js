@@ -29,7 +29,7 @@ test('opt-in capture observes targets, bounds and scrolling without consuming in
   expect(wheel.frame).toEqual({ x: 0, y: 0, width: 320, height: 360 });
   const last = report.entries.at(-1);
   expect(last.elements.find(e => e.element === 'div#as-scroll.as-scroll').scrollTop).toBeGreaterThan(0);
-  expect(await page.evaluate(() => window.bus.sent.filter(x => x.command.op !== 'state'))).toEqual([]);
+  expect(await page.evaluate(() => window.bus.sent.filter(x => x.command.op !== 'state' && !x.command.op.startsWith('map-')))).toEqual([]);
   // Fixture observations verify the capture utility, not simulator title-bar/resize handlers.
 });
 

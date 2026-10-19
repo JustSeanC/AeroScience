@@ -55,7 +55,7 @@ public sealed class AutomaticScientificDataTests : IDisposable
     }
     [Fact]public async Task DateQualityGeographyMissingThermalProductAndMissingScaleAreEnforced()
     {
-        var feature=Metadata("landsat");var handler=new Handler((_,_)=>Json(new{features=new[]{feature}}));using var http=new ScientificHttp(handler);var provider=new StacScientificProvider(http,"planetary-computer");
+        var feature=Metadata("landsat");var handler=new Handler((_,_)=>Json(new{features=new[]{feature}}));using var http=new ScientificHttp(handler,cacheEnabled:false);var provider=new StacScientificProvider(http,"planetary-computer");
         Assert.Null(await provider.Discover(RemoteKind.Thermal,new(10,45,10.01,45.01),Preferences,new(1048576),default));
         feature["properties"]!["landsat:correction"]="L2SR";Assert.Null(await provider.Discover(RemoteKind.Thermal,Area,Preferences,new(1048576),default));
         feature["properties"]!["landsat:correction"]="L2SP";feature["properties"]!["eo:cloud_cover"]=80;Assert.Null(await provider.Discover(RemoteKind.Thermal,Area,Preferences,new(1048576),default));
@@ -74,6 +74,28 @@ public sealed class AutomaticScientificDataTests : IDisposable
         using var changed=new ScientificHttp(new Handler((r,n)=>Range(r,bytes,n==1?"\"one\"":"\"two\"")));using var rs=new ScientificRangeStream(changed,new("https://sentinel-cogs.s3.us-west-2.amazonaws.com/test.tif"),new(200000),default);rs.Position=70000;Assert.Throws<IOException>(()=>rs.ReadByte());
         using var small=new ScientificHttp(new Handler((r,_)=>Range(r,bytes)));Assert.Throws<IOException>(()=>new ScientificRangeStream(small,new("https://sentinel-cogs.s3.us-west-2.amazonaws.com/test.tif"),new(1000),default));
         Assert.Throws<IOException>(()=>ScientificHttp.ValidateUrl(new("https://127.0.0.1/private")));
+    }
+    [Fact]public async Task KnownLengthResponseCanExactlyUseItsRemainingDownloadBudget()
+    {
+        var bytes=new byte[1000];using var http=new ScientificHttp(new Handler((_,_)=>new(HttpStatusCode.OK){Content=new ByteArrayContent(bytes)}));var budget=new ScientificDownloadBudget(1000);
+        var actual=await http.Bytes(new("https://earth-search.aws.element84.com/v1/exact-fixture"),1000,budget,default);Assert.Equal(bytes,actual);Assert.Equal(1000,budget.Bytes);
+    }
+    [Fact]public void NeighboringReadsReuseOnlyVersionMatchedNativeScientificBlocks()
+    {
+        var bytes=Enumerable.Range(0,150000).Select(i=>(byte)i).ToArray();var version="\"one\"";
+        var now=DateTimeOffset.UtcNow;var handler=new Handler((r,_)=>Range(r,bytes,version));using var http=new ScientificHttp(handler,cacheClock:()=>now);var uri=new Uri("https://sentinel-cogs.s3.us-west-2.amazonaws.com/regional-scene.tif");
+        using(var first=new ScientificRangeStream(http,uri,new(1000000),default)){first.Position=70000;Assert.Equal(bytes[70000],first.ReadByte());}
+        Assert.Equal(2,handler.Count);
+        using(var adjacent=new ScientificRangeStream(http,uri,new(1000000),default)){adjacent.Position=70000;Assert.Equal(bytes[70000],adjacent.ReadByte());}
+        Assert.Equal(3,handler.Count); // Fresh header/ETag; existing numeric block reused.
+        now=now.AddMinutes(11);
+        using(var expired=new ScientificRangeStream(http,uri,new(1000000),default)){expired.Position=70000;Assert.Equal(bytes[70000],expired.ReadByte());}
+        Assert.Equal(5,handler.Count); // Expired block must be fetched and retained again.
+        using(var refreshed=new ScientificRangeStream(http,uri,new(1000000),default)){refreshed.Position=70000;Assert.Equal(bytes[70000],refreshed.ReadByte());}
+        Assert.Equal(6,handler.Count); // The refreshed block works for subsequent neighboring reads.
+        version="\"two\"";
+        using(var changed=new ScientificRangeStream(http,uri,new(1000000),default)){changed.Position=70000;Assert.Equal(bytes[70000],changed.ReadByte());}
+        Assert.Equal(8,handler.Count); // Different original version cannot reuse the old bytes.
     }
     [Fact]public async Task RateLimitsRetryAndExpiredAnonymousProviderSignaturesAreRenewedInMemory()
     {

@@ -47,7 +47,7 @@ public class PlanningUnitTests
     {
         var origin=new Coordinates(0,0);var area=new SurveyArea("Known rectangle",[origin,Geodesy.Direct(origin,90,1852),Geodesy.Direct(Geodesy.Direct(origin,90,1852),0,3704),Geodesy.Direct(origin,0,3704)]);
         var definition=new PatternDefinition(Guid.NewGuid(),kind,origin,SpacingMetres:463);
-        var fitted=FlightPatterns.FitSurvey(definition,area);
+        var fitted=FlightPatterns.FitSurvey(definition,area,"envelope");
         Assert.Equal(463,fitted.SpacingMetres);
         Assert.InRange(fitted.LengthMetres,kind==FlightPatternKind.Lawnmower?3703:1851,kind==FlightPatternKind.Lawnmower?3705:1853);
         Assert.InRange((fitted.Legs-1)*fitted.SpacingMetres,fitted.WidthMetres,fitted.WidthMetres+463.001);

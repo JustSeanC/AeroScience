@@ -14,17 +14,17 @@ public sealed class RemoteAcquisition : IDisposable
     private readonly ScienceStore science;
     private readonly Func<ScientificAccessPreferences>? sourcePreferences;
     private readonly MissionStore missions;
-    private readonly Channel<RemoteAcquisitionRequest> queue = Channel.CreateBounded<RemoteAcquisitionRequest>(new BoundedChannelOptions(4) { SingleReader = true, FullMode = BoundedChannelFullMode.Wait });
+    private readonly Dictionary<string,Channel<RemoteAcquisitionRequest>> queues = Instruments.Keys.ToDictionary(id=>id,_=>Channel.CreateBounded<RemoteAcquisitionRequest>(new BoundedChannelOptions(2) {SingleReader=true,FullMode=BoundedChannelFullMode.Wait}));
     private readonly CancellationTokenSource stop = new();
     private readonly Task worker;
     private readonly ConcurrentDictionary<string, RemoteInstrumentStatus> states = new();
     private readonly Dictionary<string, (DateTimeOffset Anchor, long Slot, DateTimeOffset Last)> schedule = [];
-    private readonly Dictionary<string, (long Size, DateTime Modified)> verifiedFiles = [];
+    private readonly ConcurrentDictionary<string, (long Size, DateTime Modified)> verifiedFiles = new();
     private long generation;
     private bool paused;
     private int disposed;
     public RemoteAcquisition(MissionStore missions, ScienceStore science,Func<ScientificAccessPreferences>? sourcePreferences=null)
-    { this.missions = missions; this.science = science;this.sourcePreferences=sourcePreferences; worker = Task.Run(Run); }
+    { this.missions = missions; this.science = science;this.sourcePreferences=sourcePreferences; worker = Task.WhenAll(queues.Values.Select(q=>Task.Run(()=>Run(q)))); }
     public void Reset(bool pause = false)
     {
         Interlocked.Increment(ref generation); paused = pause; schedule.Clear();
@@ -47,11 +47,11 @@ public sealed class RemoteAcquisition : IDisposable
             var missed = run.Slot < 0 ? 0 : Math.Max(0, slot - run.Slot - 1);
             schedule[config.InstrumentId] = (run.Anchor, slot, frame.TimestampUtc);
             states.AddOrUpdate(config.InstrumentId, existing with { MissingIntervals = missed }, (_, s) => s with { MissingIntervals = s.MissingIntervals + missed });
-            if (!queue.Writer.TryWrite(new(mission, research, config, frame, Volatile.Read(ref generation), update.Atmosphere)))
-                states.AddOrUpdate(config.InstrumentId, existing, (_, s) => s with { Quality = ObservationQuality.AcquisitionGap, Message = "Scientific processing queue is full; acquisition missed, flight recording continues.", MissingIntervals = s.MissingIntervals + 1 });
+            if (!queues[config.InstrumentId].Writer.TryWrite(new(mission, research, config, frame, Volatile.Read(ref generation), update.Atmosphere)))
+                states.AddOrUpdate(config.InstrumentId, existing, (_, s) => s with { Quality = ObservationQuality.AcquisitionGap, Message = "Processing delayed: this instrument queue is full; flight recording continues.", Status="Processing delayed", MissingIntervals = s.MissingIntervals + 1 });
         }
     }
-    private async Task Run()
+    private async Task Run(Channel<RemoteAcquisitionRequest> queue)
     {
         try
         {
@@ -60,16 +60,18 @@ public sealed class RemoteAcquisition : IDisposable
                 if (request.Generation != Volatile.Read(ref generation)) continue;
                 var id = request.Configuration.InstrumentId;
                 states.AddOrUpdate(id, Status(id), (_, s) => s with { Processing = true });
+                var began=System.Diagnostics.Stopwatch.StartNew();
                 try
                 {
                     var product = Process(request);
                     if (request.Generation != Volatile.Read(ref generation)) continue;
-                    states.AddOrUpdate(id, Status(id), (_, s) => s with { Quality = ObservationQuality.Valid, Message = "Historical geographic source sampled along simulated flight; open View Data for source date, quality and units.", LastSuccessfulUtc = product.FlightPacketUtc, Products = s.Products + 1, Processing = false });
+                    states.AddOrUpdate(id, Status(id), (_, s) => s with { Quality = ObservationQuality.Valid, Message = "Historical geographic source sampled along simulated flight; open View Data for source date, quality and units.", LastSuccessfulUtc = product.FlightPacketUtc, Products = s.Products + 1, Processing = false,Status="Ready",ProcessingSeconds=began.Elapsed.TotalSeconds,ValidMeasurements=s.ValidMeasurements+(product.ValidSampleCount??0) });
                 }
                 catch (Exception e) when (e is not OutOfMemoryException)
                 {
                     if (request.Generation != Volatile.Read(ref generation)) continue;
-                    states.AddOrUpdate(id, Status(id), (_, s) => s with { Quality = ObservationQuality.Unavailable, Message = "Scientific data unavailable for this location or acquisition. " + e.Message, Rejected = s.Rejected + 1, MissingIntervals=s.MissingIntervals+1, Processing = false });
+                    ScientificDiagnostics.Record("acquisition-unavailable",request.Mission.Id.ToString(),"flight",Instruments[id],result:e is ScientificObservationUnavailableException u?u.Status+": "+u.Message:e.GetType().Name+": "+e.Message);
+                    states.AddOrUpdate(id, Status(id), (_, s) => s with { Quality = ObservationQuality.Unavailable, Message = e.Message,Status=e is ScientificObservationUnavailableException unavailable?unavailable.Status:"Error",ProcessingSeconds=began.Elapsed.TotalSeconds, Rejected = s.Rejected + 1, MissingIntervals=s.MissingIntervals+1, Processing = false });
                 }
                 if (request.Generation == Volatile.Read(ref generation))
                 {
@@ -89,7 +91,7 @@ public sealed class RemoteAcquisition : IDisposable
         var mount=Instruments[request.Configuration.InstrumentId] == RemoteKind.Terrain ? new SensorMount(30,3,Swath:true) : new();
         var footprint = SensorGeometry.Footprint(request.Frame, mount);
         var source = ScientificSourceSelection.Select(science.Availability(footprint.Center),Instruments[request.Configuration.InstrumentId],sourcePreferences?.Invoke())
-            ?? throw new InvalidOperationException("No prepared source covers this footprint yet. Check Scientific Data Readiness (source mode, consent, download, coverage or offline status). No observation was recorded; future data will not backfill this interval.");
+            ?? throw new ScientificObservationUnavailableException(science.Sources().Any(s=>s.Manifest.Kind==Instruments[request.Configuration.InstrumentId])?"Outside coverage":"Preparing data","No compatible retained source covers this acquisition location. Check data preparation and source selection; this interval is not backfilled.");
         var root = StorageManager.ResolveDataset(science.DirectoryPath, science.LibraryId, source.RelativeDirectory);
         foreach (var file in source.Files)
         {
@@ -113,7 +115,7 @@ public sealed class RemoteAcquisition : IDisposable
         }
         var derived = RemoteCalculations.Apply(source.Manifest.Kind, bands.ToArray());
         if (bands.Where(b=>b.Id is not("QA_PIXEL" or "QA_RADSAT" or "SCL")).All(b => b.Values.All(v => v is null)))
-            throw new InvalidOperationException("All sampled pixels were outside coverage, nodata, bad bands, cloud/quality masked or invalid. No complete product was created.");
+            throw new ScientificObservationUnavailableException("No valid pixels","All sampled pixels were outside coverage, nodata, bad bands or quality masked. No observation was fabricated.");
         Check();
         var dataset = science.EnsureDataset(request.Mission, request.Configuration, request.Research);
         missions.AddDatasetReference(request.Mission.Id, new(dataset.Id, dataset.LibraryId, dataset.RelativePath, dataset.ProvenanceJson));
@@ -127,6 +129,7 @@ public sealed class RemoteAcquisition : IDisposable
             : "Historical external geographic dataset sampled along simulated aircraft footprint; not a live airborne camera";
         var product = new RemoteProduct(productId, dataset.Id, science.LibraryId, request.Mission.Id, request.Configuration.InstrumentId, source.Id,
             request.Frame.TimestampUtc, DateTimeOffset.UtcNow, source.Manifest.ObservationUtc, footprint, $"Products/{request.Mission.Id:N}/{productId:N}.json", 0, "", 24, 24, views, provenance, "Valid pixels only; per-band nulls preserve nodata/quality exclusions", warnings);
+        product=product with{ValidSampleCount=Enumerable.Range(0,locations.Length).LongCount(i=>bands.Where(b=>b.Id is not("QA_PIXEL" or "QA_RADSAT" or "SCL")).Any(b=>b.Values[i].HasValue))};
         Check(); return science.Publish(new(1, product, source, locations, bands.ToArray(), derived,
             ["AeroScience remote sampling algorithm 1.0", "Original scaled numeric values retained; no scientific values inferred from display imagery", "Nearest-source-pixel resampling at each sampled position; thermal cloud/fill/shadow/snow masks and Sentinel SCL exclusions applied where required"],
             new(1, request.Frame, request.Atmosphere, request.Configuration, request.Research.PlanSnapshot, request.Mission.Mode,
@@ -135,11 +138,14 @@ public sealed class RemoteAcquisition : IDisposable
     public void Dispose()
     {
         if(Interlocked.Exchange(ref disposed,1)!=0)return;
-        Interlocked.Increment(ref generation); queue.Writer.TryComplete(); stop.Cancel();
+        Interlocked.Increment(ref generation); foreach(var q in queues.Values)q.Writer.TryComplete(); stop.Cancel();
         try { worker.GetAwaiter().GetResult(); } catch (OperationCanceledException) { }
         stop.Dispose();
     }
 }
+
+public sealed class ScientificObservationUnavailableException(string status,string message):InvalidOperationException(message)
+{public string Status {get;}=status;}
 
 public static class RemoteCalculations
 {

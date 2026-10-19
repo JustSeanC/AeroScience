@@ -1,5 +1,6 @@
 import { scientificAccessSettings } from "./scientific-access.js";
 import { openHyperspectralImport } from "./hyperspectral-import.js";
+import {openDownloadActivity} from "./download-activity.js";
 import { ResearchMap } from "./map.js";
 const el=(tag,text)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=text;return e;};
 const kinds={terrain:["Terrain & Elevation","USGS 3DEP / Copernicus GLO-30","Numeric geographic heights; DEM/DSM distinctions and vertical datums are retained. These are not aircraft laser returns.","Single-band numeric elevation DEM GeoTIFF"],thermal:["Thermal Imaging","Landsat 8/9 Collection 2 Level-2 surface temperature","Historical satellite temperature with original quality masks.","Same-scene ST_B10 + QA_PIXEL GeoTIFFs; QA_RADSAT when supplied; original MTL JSON preferred"],multispectral:["Multispectral Imaging","Copernicus Sentinel-2 Level-2A","Historical reflectance supporting RGB and NDVI, with scene classification masks.","B02/B03/B04/B08 + SCL numeric GeoTIFFs, with original reflectance scaling metadata"],hyperspectral:["Hyperspectral Imaging","Your compatible ENVI dataset","User-supplied historical spectra. Automatic hyperspectral downloading is not required or supported.","Georeferenced ENVI .hdr + binary, 16–512 spectral channels"]};
@@ -8,11 +9,13 @@ function link(parent,label,url){const a=el("a",label);a.href=url;a.target="_blan
 export async function scientificSourcesSettings(parent,api){
   const root=el("section");root.id="scientific-data-sources";parent.append(root);
   root.append(el("h2","Scientific Data Sources"),el("p","Automatic sources contact public providers only with your separate science-data permission. Imported datasets work offline within their actual coverage. Source selection does not enable or disable recording."));
+  const online=el("p"),configure=action("Enable Online Scientific Data Access",async()=>{document.getElementById("scientific-access-controls").open=true;document.getElementById("scientific-access-controls").scrollIntoView({block:"start"});});root.append(online,configure,action("View Download Activity",()=>openDownloadActivity(api)));
   let query=new URLSearchParams(location.hash.split("?")[1]||"");
   const categories=el("div"),checked=el("p");root.append(categories,checked);let maps=[];
   async function refreshCategories(){
   for(const map of maps)map.destroy();maps=[];categories.replaceChildren();
   const [access,sources,state]=await Promise.all([api("/api/science/access"),api("/api/science/sources"),api("/api/state")]);
+  online.textContent="Online scientific data access: "+(access.configuration.preferences.onlineEnabled?"Enabled":"Disabled (local datasets remain available)");configure.textContent=access.configuration.preferences.onlineEnabled?"Configure Online Scientific Data Access":"Enable Online Scientific Data Access";
   const age=Date.now()-Date.parse(state.telemetry?.timestampUtc);const point=state.connection?.state==="connected"&&age>=-2000&&age<6000?state.telemetry:null;let local=sources;
   if(point)local=await api(`/api/science/sources?latitude=${point.latitude}&longitude=${point.longitude}`);
   for(const [kind,[title,provider,description,formats]] of Object.entries(kinds)){
@@ -27,12 +30,32 @@ export async function scientificSourcesSettings(parent,api){
     if(!entries.length)section.append(el("strong",kind==="hyperspectral"?"Dataset Required":"No local datasets"),el("p",kind==="hyperspectral"?"Import a compatible dataset covering your research area. No account or automatic download is required.":"Choose Automatic with scientific-data access enabled, or import compatible local data."));
     if(kind!=="hyperspectral"&&!access.configuration.preferences.onlineEnabled){const a=el("a","Enable Scientific Data Access");a.href="#settings/science?section=access";section.append(a);}
     const list=el("div");section.append(list);
-    for(const entry of entries){const s=entry.source,m=s.manifest;const row=el("article");row.className="source-notice";list.append(row);row.append(el("h4",m.name),el("p",`${m.provider} · Observed: ${m.observationUtc||"Unknown / composite"} · ${entry.filesAvailable?"Available":"Dataset Invalid"} · ${point?(entry.coversPoint?"Covers current aircraft point; masks still apply":"Outside aircraft coverage"):"Mission-area suitability: select a position to check"}`));if(entry.error)row.append(el("p",entry.error));
+    const groups=new Map();
+    for(const entry of entries){const m=entry.source.manifest,a=m.acquisition;
+      const identity=JSON.stringify([a?null:m.name,m.provider,a?.catalog||m.citation,a?.workflow==="usgs-3dep-numeric"?"3DEP composite collection (individual regions retain identity)":m.sceneId,m.observationUtc,m.verticalDatum,m.license,a?.nativeResolution,m.bands.map(b=>[b.id,b.unit,b.scale,b.offset,b.wavelengthNm,b.badBand])]);
+      if(!groups.has(identity))groups.set(identity,[]);groups.get(identity).push(entry);
+    }
+    function renderRegion(entry,holder){
+const s=entry.source,m=s.manifest;const row=el("article");row.className="source-notice";holder.append(row);row.append(el("h4",m.name),el("p",`${m.provider} · Observed: ${m.observationUtc||"Unknown / composite"} · ${entry.filesAvailable?"Available":"Dataset Invalid"} · ${point?(entry.coversPoint?"Covers current aircraft point; masks still apply":"Outside aircraft coverage"):"Mission-area suitability: select a position to check"}`));if(entry.error)row.append(el("p",entry.error));
       const details=el("details");details.append(el("summary","View Dataset Details"),el("p",`${m.license} · ${m.citation} · ${m.bands.length} bands · ${m.verticalDatum}`));for(const [id,g] of Object.entries(s.grids))details.append(el("p",`${id}: ${g.crs} · ${g.width}×${g.height} · ${g.pixelWidth}×${g.pixelHeight} native grid units`));details.append(el("p",m.notes||"Original file hashes and source metadata retained."));row.append(details);
       let map;
       const coverage=action("View Coverage",async()=>{if(map){map.fit();return;}const vertices=await api(`/api/science/sources/${s.id}/coverage`);const panel=el("div");row.append(panel);map=new ResearchMap(panel);maps.push(map);map.set({plan:{surveyAreas:[{name:m.name,vertices}]}});});row.append(coverage);
       const active=!(access.configuration.preferences.excludedSourceIds||[]).includes(s.id);row.append(action(active?"Exclude from active selection":"Use for active selection",async()=>{await api("/api/science/source-selection",{sourceId:s.id,enabled:!active});row.append(el("p",active?"Excluded from active selection. Original files and products retained.":"Included in source selection. Original files unchanged."));}));
       if(query.get("dataset")===s.id)coverage.click();
+
+    }
+    for(const group of groups.values()){
+      const m=group[0].source.manifest,box=el("details");box.className="source-collection";
+      const total=group.reduce((n,e)=>n+e.source.files.reduce((n,f)=>n+f.bytes,0),0);
+      box.append(el("summary",`${m.provider} — ${group.length} prepared region${group.length===1?"":"s"} — ${(total/1048576).toFixed(1)} MiB`));
+      box.append(el("p",`${m.name} · Individual original identities, dates, calibration and masks are preserved. Georeferenced boundaries do not guarantee valid pixels throughout.`));
+      let collectionMap;
+      box.append(action("View Collection Coverage",async()=>{if(collectionMap){collectionMap.fit();return;}const holder=el("div");box.append(holder);collectionMap=new ResearchMap(holder,null,{coverageOnly:true});maps.push(collectionMap);const areas=[];for(const entry of group){const vertices=await api(`/api/science/sources/${entry.source.id}/coverage`);if(!holder.isConnected)return;areas.push({name:entry.source.manifest.name+" · "+entry.source.id,vertices});}collectionMap.set({plan:{surveyAreas:areas}});collectionMap.fit();}));
+      const regions=el("details"),holder=el("div"),range=el("p");regions.append(el("summary",`View Individual Regions (${group.length}) / Manage Selection`),range,holder);let offset=0;
+      const previous=action("Previous Regions",()=>{offset=Math.max(0,offset-20);render();}),next=action("More Regions",()=>{offset+=20;render();});regions.append(previous,next);
+      function render(){holder.replaceChildren();range.textContent=`Showing ${offset+1}–${Math.min(offset+20,group.length)} of ${group.length} regions`;previous.disabled=offset===0;next.disabled=offset+20>=group.length;for(const entry of group.slice(offset,offset+20))renderRegion(entry,holder);}
+      regions.addEventListener("toggle",()=>{if(regions.open&&!holder.children.length)render();});box.append(regions);list.append(box);
+      if(group.some(e=>e.source.id===query.get("dataset"))){box.open=true;regions.open=true;offset=Math.floor(group.findIndex(e=>e.source.id===query.get("dataset"))/20)*20;render();}
     }
     section.append(action("Manage Datasets",async()=>{list.hidden=!list.hidden;}));
   }

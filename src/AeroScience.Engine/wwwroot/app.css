@@ -1450,3 +1450,5 @@ dialog::backdrop { background:#000a; } dialog button { margin:8px; min-height:44
 @media(max-width:700px){.settings-navigation a { padding: 10px;flex:1 1 40%; }.hyperspectral-wizard { padding: 14px;width: 94vw; }.source-category{padding:12px;}}
 
 .field-error { display:block;color:#ffabb4;margin-top:5px; }.field-error:empty{display:none;}input[aria-invalid="true"]{outline:2px solid #e97685;}
+
+.download-activity{width:min(950px,94vw);max-height:90vh;overflow:auto}.download-activity details{margin:0.6rem 0;padding:0.6rem;border:1px solid var(--line)}.download-activity pre{white-space:pre-wrap;overflow-wrap:anywhere}.scientific-readiness p{font-size:.85rem}.source-collection{margin:1rem 0}.source-collection>summary{font-size:1rem;font-weight:600;cursor:pointer}

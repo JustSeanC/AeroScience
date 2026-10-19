@@ -1,8 +1,8 @@
 # Install AeroScience for Windows
 
-The recommended v0.3.1 prerelease download is **AeroScience-Setup-v0.3.1.exe** from [GitHub Releases](https://github.com/JustSeanC/AeroScience/releases), once built and uploaded. GitHub source ZIPs and internal candidate ZIPs are not the pilot installation method.
+The recommended v0.3.2 prerelease download is **AeroScience-Setup-v0.3.2.exe** from [GitHub Releases](https://github.com/JustSeanC/AeroScience/releases), once built and uploaded. GitHub source ZIPs and internal candidate ZIPs are not the pilot installation method.
 
-Maintainers: [one-command Windows build, recommended real-device testing and exact publication steps](docs/v0.3.1-windows-testing.md). Technical checks finalize automatically with no required acceptance JSON. Windows/MSFS hardware status remains explicitly unverified until actual testing; no finished v0.3.1 EXE is claimed from the cloud.
+Maintainers: [one-command Windows build, recommended real-device testing and exact publication steps](docs/v0.3.2-windows-testing.md). Technical checks finalize automatically with no required acceptance JSON. Windows/MSFS hardware status remains explicitly unverified until actual testing; no finished v0.3.2 EXE is claimed from the cloud.
 
 ## Install and launch
 
@@ -44,7 +44,7 @@ Reinstalling the app reuses retained settings and available archives. Deleting u
 
 For problems, use **Collect Feedback**, save and review the local ZIP, and report the error/reproduction steps at [GitHub Issues](https://github.com/JustSeanC/AeroScience/issues). Installer logs are `Setup Log ... .txt` in `%TEMP%`; review paths/private details before sharing. Do not attach mission databases or authorization correspondence by default.
 
-## v0.3.1 first use
+## v0.3.2 first use
 
 On a fresh installation choose OpenStreetMap or offline-only in the dashboard privacy prompt **before any tile request**. Existing preferences are preserved. Storage Management defaults to 25 GB flight / 50 GB science, customizable or Unlimited. Offline archives remain usable without MSFS or internet. Import licensed real scientific collections graphically from Settings → Scientific Data Sources using the [remote-sensing guide](docs/remote-sensing/quick-start.md). Data sources are not bundled and may need geographic preparation; OSM/Esri basemaps do not supply scientific instrument data.
 

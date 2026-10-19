@@ -24,7 +24,7 @@ test('one responsive interface retains navigation, mission and mocked CommBus st
   await expect(page.locator('#as-active-name')).toHaveText('Toolbar layout recording');
   await expect(page.locator('#as-active-mode')).toContainText('Universal');
   expect(await page.evaluate(() => window.listenerRegistrations)).toBe(1);
-  expect(await page.evaluate(() => window.bus.sent.filter(x => x.command.op !== 'state'))).toEqual([]);
+  expect(await page.evaluate(() => window.bus.sent.filter(x => x.command.op !== 'state' && !x.command.op.startsWith('map-')))).toEqual([]);
 });
 
 test('content follows supplied host bounds (browser fixture, not native dragging)', async ({ page }) => {
@@ -88,5 +88,5 @@ test('hiding and reconnecting the mocked panel retains the central mission', asy
   await expect(page.locator('#as-active-name')).toHaveText('Toolbar layout recording');
   expect(await page.evaluate(() => window.bus.unregistered)).toBe(1);
   expect(await page.evaluate(() => window.listenerRegistrations)).toBe(2);
-  expect(await page.evaluate(() => window.bus.sent.filter(x => x.command.op !== 'state'))).toEqual([]);
+  expect(await page.evaluate(() => window.bus.sent.filter(x => x.command.op !== 'state' && !x.command.op.startsWith('map-')))).toEqual([]);
 });

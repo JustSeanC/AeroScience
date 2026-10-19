@@ -16,9 +16,11 @@ class AutomaticReleaseTests(unittest.TestCase):
         # Release-control fixtures cannot establish genuine network acceptance.
         # Preserve recorded numeric evidence structurally while testing this isolated
         # synthetic finalization flow. Production evidence() still requires a passing final run.
-        actual_verify=a.scientific.verify
-        fixture_proof=patch.object(a.scientific,'verify',lambda:actual_verify(require_current=False))
-        fixture_proof.start();self.addCleanup(fixture_proof.stop)
+        control_fixture={'workflows':[{'workflow':name} for name in sorted(a.scientific.WORKFLOWS)],'test_only':'Synthetic release-control fixture; never provider acceptance.'}
+        fixture_report=self.flow.root/'provider-control-fixture.json';fixture_report.write_text(json.dumps(control_fixture))
+        fixture_proof=patch.object(a.scientific,'verify',lambda:control_fixture)
+        fixture_path=patch.object(a.scientific,'REPORT',fixture_report)
+        fixture_proof.start();self.addCleanup(fixture_proof.stop);fixture_path.start();self.addCleanup(fixture_path.stop)
 
     def evidence(self):
         root=self.flow.root

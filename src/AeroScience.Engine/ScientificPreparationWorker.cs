@@ -16,10 +16,10 @@ public static class ScientificPlanPreparation
         return inside;
     }
     // Lazy, geodesic corridor traversal. The session advances bounded windows instead of stopping at eight cells.
-    public static IEnumerable<GeographicBounds> Cells(MissionPlan plan)
+    public static IEnumerable<GeographicBounds> Cells(MissionPlan plan,double step=.02)
     {
         var seen=new HashSet<GeographicBounds>();var inspected=0;
-        GeographicBounds? Cell(Coordinates p){try{var a=GeographicBounds.Around(p);AutomaticScientificData.ValidateArea(a);return a;}catch(ArgumentException){return null;}}
+        GeographicBounds? Cell(Coordinates p){try{var a=new GeographicBounds(Math.Floor(p.Longitude/step)*step,Math.Floor(p.Latitude/step)*step,Math.Floor(p.Longitude/step)*step+step,Math.Floor(p.Latitude/step)*step+step);AutomaticScientificData.ValidateArea(a);return a;}catch(ArgumentException){return null;}}
         var points=(plan.Waypoints??[]).Select(w=>new Coordinates(w.Latitude,w.Longitude)).ToArray();
         foreach(var (a,b) in points.Zip(points.Skip(1)))
         {
@@ -31,10 +31,12 @@ public static class ScientificPlanPreparation
         foreach(var survey in plan.SurveyAreas??[])
         {
             var vertices=survey.Vertices??[];if(vertices.Length<3)continue;
+            foreach(var (a,b) in vertices.Zip(vertices.Skip(1).Append(vertices[0])))
+            {var length=Geodesy.Distance(a,b);var bearing=Geodesy.Bearing(a,b);var count=(int)Math.Min(20000,Math.Ceiling(length/700));for(var n=0;n<=count;n++){if(++inspected>100000||seen.Count>=4096)yield break;var edgeCell=Cell(Geodesy.Direct(a,bearing,count==0?0:length*n/count));if(edgeCell is not null&&seen.Add(edgeCell))yield return edgeCell;}}
             var south=vertices.Min(p=>p.Latitude);var north=vertices.Max(p=>p.Latitude);var west=vertices.Min(p=>p.Longitude);var east=vertices.Max(p=>p.Longitude);
-            for(var lat=Math.Floor(south/.02)*.02;lat<=north;lat+=.02)
-            for(var lon=Math.Floor(west/.02)*.02;lon<=east;lon+=.02)
-            {if(++inspected>100000||seen.Count>=4096)yield break;var center=new Coordinates(lat+.01,lon+.01);var cell=Cell(center);if(cell is not null&&InPolygon(center,vertices)&&seen.Add(cell))yield return cell;}
+            for(var lat=Math.Floor(south/step)*step;lat<=north;lat+=step)
+            for(var lon=Math.Floor(west/step)*step;lon<=east;lon+=step)
+            {if(++inspected>100000||seen.Count>=4096)yield break;var center=new Coordinates(lat+step/2,lon+step/2);var cell=Cell(center);if(cell is not null&&(InPolygon(center,vertices)||cell.Corners.Any(c=>InPolygon(c,vertices))||vertices.Any(cell.Contains))&&seen.Add(cell))yield return cell;}
         }
     }
     public static RemoteKind[] Kinds(MissionPlan plan)=>(plan.Instruments??[]).Where(c=>c.Enabled&&RemoteAcquisition.Instruments.ContainsKey(c.InstrumentId)).Select(c=>RemoteAcquisition.Instruments[c.InstrumentId]).Distinct().ToArray();
@@ -50,10 +52,10 @@ public sealed class ScientificPlanData(AutomaticScientificData automatic,Scienti
     private sealed class Session(MissionPlan plan)
     {
         public readonly MissionPlan Plan=plan;
-        public readonly IEnumerator<GeographicBounds> Cells=ScientificPlanPreparation.Cells(plan).GetEnumerator();
+        public readonly IEnumerator<GeographicBounds> Cells=ScientificPlanPreparation.Cells(plan,.04).GetEnumerator();
         public readonly Dictionary<string,GeographicBounds> Pending=[];
         public readonly HashSet<string> Counted=[];
-        public int Areas,Ready,Unavailable;public long Bytes;public bool Exhausted,Paused,Cancelled;
+        public int Areas,Ready,Unavailable;public long Bytes;public bool Exhausted,Paused,Cancelled,Explicit;
     }
     private readonly Dictionary<Guid,Session> sessions=[];private readonly object gate=new();
     public PlanDataPreparation Prepare(MissionPlan plan,bool retry=false)
@@ -61,14 +63,14 @@ public sealed class ScientificPlanData(AutomaticScientificData automatic,Scienti
         lock(gate)
         {
             if(!sessions.TryGetValue(plan.Id,out var s)||s.Plan.UpdatedUtc!=plan.UpdatedUtc||s.Cancelled)
-            {if(sessions.Count>=16){var first=sessions.First();first.Value.Cells.Dispose();sessions.Remove(first.Key);}if(s is not null)s.Cells.Dispose();sessions[plan.Id]=s=new(plan);}
-            s.Paused=false;Pump(s,explicitAction:retry);return new(s.Areas,!s.Exhausted,"Progressive preflight started. It pauses at network/storage limits; live aircraft work has higher priority.",automatic.Snapshot());
+            {if(sessions.Count>=16){var first=sessions.First();automatic.CancelScope("plan:"+first.Value.Plan.Id);first.Value.Cells.Dispose();sessions.Remove(first.Key);}if(s is not null){automatic.CancelScope("plan:"+s.Plan.Id);s.Cells.Dispose();}sessions[plan.Id]=s=new(plan);}
+            s.Explicit|=retry;s.Paused=false;automatic.PauseScope("plan:"+s.Plan.Id,false);Pump(s,explicitAction:retry);return new(s.Areas,!s.Exhausted,"Progressive preflight started. It pauses at network/storage limits; live aircraft work has higher priority.",automatic.Snapshot());
         }
     }
     public void Control(Guid id,string action)
     {
         lock(gate){if(!sessions.TryGetValue(id,out var s))throw new ArgumentException("No preparation session exists for this plan.");
-            if(action=="pause")s.Paused=true;else if(action=="resume"){s.Paused=false;s.Cancelled=false;}else if(action=="cancel"){s.Cancelled=true;s.Paused=true;automatic.CancelScope("plan:"+s.Plan.Id);}else throw new ArgumentException("Choose pause, resume or cancel.");}
+            if(action=="pause"){s.Paused=true;automatic.PauseScope("plan:"+s.Plan.Id,true);}else if(action=="resume"){s.Paused=false;s.Cancelled=false;s.Explicit=true;automatic.PauseScope("plan:"+s.Plan.Id,false);}else if(action=="cancel"){s.Cancelled=true;s.Paused=true;automatic.CancelScope("plan:"+s.Plan.Id);}else throw new ArgumentException("Choose pause, resume or cancel.");}
     }
     private void Pump(Session s,bool explicitAction=false)
     {
@@ -76,26 +78,26 @@ public sealed class ScientificPlanData(AutomaticScientificData automatic,Scienti
         foreach(var item in s.Pending.ToArray())
         {
             if(!states.TryGetValue(item.Key,out var state)||state.Status=="Superseded")continue;
-            if(state.Status is "Queued" or "Downloading")continue;
+            if(state.Status is "Queued" or "Downloading" or "Waiting for download allowance")continue;
             if(state.Status=="Offline")continue;
             if(s.Counted.Add(item.Key)){if(state.Status is "Ready" or "Dataset Ready")s.Ready++;else s.Unavailable++;s.Bytes+=state.DownloadedBytes;}
             s.Pending.Remove(item.Key);
         }
-        if(s.Paused||s.Cancelled||(!explicitAction&&!settings.Get().Preferences.BackgroundRetrieval))return;
-        var budget=automatic.QueueSummary();if(budget.HourlyBytes>=budget.HourlyLimit)return;
+        if(s.Paused||s.Cancelled||(!explicitAction&&!s.Explicit&&!settings.Get().Preferences.BackgroundRetrieval))return;
+        var budget=automatic.QueueSummary();if(budget.PreflightLimit is {} limit&&budget.PreflightBytes>=limit)return;
         var kinds=ScientificPlanPreparation.Kinds(s.Plan);if(kinds.Length==0){s.Exhausted=true;return;}
         var allowance=Math.Max(0,24-s.Pending.Count);
         foreach(var pending in s.Pending.Take(allowance).ToArray())
-            if(!states.TryGetValue(pending.Key,out var state)||state.Status is "Superseded" or "Offline")automatic.Prepare(pending.Value,kinds,background:!explicitAction,priority:10000+s.Areas,scope:"plan:"+s.Plan.Id);
+            if(!states.TryGetValue(pending.Key,out var state)||state.Status is "Superseded" or "Offline")automatic.Prepare(pending.Value,kinds,background:!explicitAction&&!s.Explicit,priority:10000+s.Areas,scope:"plan:"+s.Plan.Id);
         while(!s.Exhausted&&s.Pending.Count+kinds.Length<=24&&automatic.QueueSummary().Queued<48)
         {
             if(!s.Cells.MoveNext()){s.Exhausted=true;break;}
             var area=s.Cells.Current;s.Areas++;
-            automatic.Prepare(area,kinds,background:!explicitAction,priority:10000+s.Areas,scope:"plan:"+s.Plan.Id);
+            automatic.Prepare(area,kinds,background:!explicitAction&&!s.Explicit,priority:10000+s.Areas,scope:"plan:"+s.Plan.Id);
             foreach(var kind in kinds){var key=AutomaticScientificData.AreaKey(kind,area);if(!s.Counted.Contains(key))s.Pending[key]=area;}
         }
     }
-    public void Tick(){lock(gate)foreach(var s in sessions.Values)Pump(s);}
+    public void Tick(bool flightActive=false){automatic.FlightActive(flightActive);lock(gate)foreach(var s in sessions.Values){if(flightActive){s.Paused=true;automatic.PauseScope("plan:"+s.Plan.Id,true);}else Pump(s);}}
     public ScientificPlanReadiness[] Snapshot()
     {
         lock(gate)return sessions.Values.Select(s=>new ScientificPlanReadiness(s.Plan.Id,s.Plan.Name,s.Areas,!s.Exhausted||s.Unavailable>0,
@@ -108,13 +110,15 @@ public sealed class ScientificPlanData(AutomaticScientificData automatic,Scienti
 public sealed class ScientificFlightPrediction(AutomaticScientificData automatic,ScientificAccessSettings settings)
 {
     private readonly ScientificMotionPredictor predictor=new();private ScientificPredictionResult? last;private RemoteKind[] kinds=[];private readonly object gate=new();
-    public void Reset(){lock(gate){predictor.Reset();last=null;kinds=[];}automatic.ReprioritizeFlight(new Dictionary<string,double>());}
+    public void Reset(){lock(gate){predictor.Reset();last=null;kinds=[];automatic.SetTrajectoryRegionHint(false);}automatic.ReprioritizeFlight(new Dictionary<string,double>());}
     public void Observe(TelemetryFrame frame,RemoteKind[] enabled,MissionPlan? plan)
     {
         lock(gate)
         {
-            if(enabled.Length==0){predictor.Reset();last=null;kinds=[];automatic.ReprioritizeFlight(new Dictionary<string,double>());return;}
+            if(enabled.Length==0){predictor.Reset();last=null;kinds=[];automatic.SetTrajectoryRegionHint(false);automatic.ReprioritizeFlight(new Dictionary<string,double>());return;}
             kinds=enabled;last=predictor.Predict(frame,DateTimeOffset.UtcNow,enabled,settings.Get().Preferences,automatic.EstimatedPreparationSeconds,plan);
+            var observedKnots=last.LookaheadSeconds>0?last.DistanceMetres/last.LookaheadSeconds/.514444444:0;
+            automatic.SetTrajectoryRegionHint(last.Status=="Predicting"&&observedKnots>=160&&Math.Abs(last.TurnDegreesPerSecond)<.5);
             if(last.Status=="Waiting")return;
             var priorities=last.Areas.SelectMany(a=>enabled.Select(k=>(Key:AutomaticScientificData.AreaKey(k,a.Area),Priority:a.ArrivalSeconds-automatic.EstimatedPreparationSeconds))).ToDictionary(x=>x.Key,x=>x.Priority);
             automatic.ReprioritizeFlight(priorities);
@@ -144,7 +148,7 @@ public sealed class ScientificPreparationWorker(ScientificFlightPrediction predi
         {
             try
             {
-                plans.Tick();var state=missions.Snapshot();
+                var state=missions.Snapshot();plans.Tick(state.ActiveMission is not null);
                 if(state.Connection.State!=ConnectionState.Connected||state.Research?.IntentionallyPaused==true||state.Telemetry is not{IsValid:true,IsPaused:false} frame||DateTimeOffset.UtcNow-frame.TimestampUtc>TimeSpan.FromSeconds(6)){prediction.Reset();continue;}
                 var kinds=state.Research?.Instruments.Where(c=>c.Enabled&&RemoteAcquisition.Instruments.ContainsKey(c.InstrumentId)).Select(c=>RemoteAcquisition.Instruments[c.InstrumentId]).ToArray()??[];
                 var plan=state.ActiveMission is {} mission?store.Research(mission.Id).PlanSnapshot:null;

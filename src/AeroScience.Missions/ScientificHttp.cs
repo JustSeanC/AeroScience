@@ -4,16 +4,21 @@ using System.Text.Json;
 
 namespace AeroScience.Missions;
 
-public sealed class ScientificDownloadBudget(long maximum,Action<long>? progress=null)
+public sealed class ScientificDownloadBudget(long maximum,Action<long>? progress=null,Action<long>? ensureCapacity=null)
 {
-    private long consumed;
+    private long consumed,authorized;
     public long Bytes=>Interlocked.Read(ref consumed);
     public long Maximum=>maximum;
+    public void EnsureCapacity(long bytes)
+    {
+        if(bytes<0||bytes>maximum-Bytes)throw new IOException("Scientific per-download limit reached. Select a smaller supported subset or change the per-download limit; other protections remain enabled.");
+        ensureCapacity?.Invoke(checked(Bytes+bytes));authorized=Math.Max(authorized,Bytes+bytes);
+    }
     public void Charge(long bytes)
     {
-        if(bytes<0||Interlocked.Add(ref consumed,bytes)>maximum)throw new IOException("Scientific download limit reached. Select a smaller area or raise the per-download limit in Settings; no observations were fabricated.");
-        progress?.Invoke(Bytes);
+        if(bytes<0)throw new ArgumentOutOfRangeException(nameof(bytes));if(bytes>authorized-Bytes)EnsureCapacity(bytes);Interlocked.Add(ref consumed,bytes);progress?.Invoke(Bytes);
     }
+
 }
 // Provider endpoints are fixed and HTTPS-only. Catalog-supplied URLs cannot become
 // arbitrary local/network fetches; redirects and cookies are disabled.
@@ -22,11 +27,33 @@ public sealed class ScientificHttp : IDisposable
     private readonly HttpClient http;
     private readonly SemaphoreSlim pace=new(1);
     private DateTimeOffset last;
-    public ScientificHttp(HttpMessageHandler? handler=null)
+    private readonly object metricsGate=new();
+    private readonly Dictionary<string,(long Requests,long Metadata,long Numeric,long Retries,long Hits,long Reused)> counters=[];
+    private readonly Dictionary<string,(DateTimeOffset At,byte[] Bytes)> ranges=[];
+    private readonly Dictionary<string,(DateTimeOffset At,byte[] Bytes)> metadata=[];
+    private readonly Func<DateTimeOffset> cacheClock;
+    private long cacheBytes,metadataBytes;
+    private void Count(string host,long requests=0,long meta=0,long numeric=0,long retries=0,long hits=0,long reused=0)
+    {lock(metricsGate){var c=counters.GetValueOrDefault(host);counters[host]=(c.Requests+requests,c.Metadata+meta,c.Numeric+numeric,c.Retries+retries,c.Hits+hits,c.Reused+reused);}}
+    public object Diagnostics(){lock(metricsGate)return counters.Select(c=>new{providerHost=c.Key,requests=c.Value.Requests,metadataBytes=c.Value.Metadata,numericBytes=c.Value.Numeric,retries=c.Value.Retries,cacheHits=c.Value.Hits,reusedBytes=c.Value.Reused}).ToArray();}
+    internal void Received(Uri uri,int bytes,bool range)=>Count(uri.Host,meta:range?0:bytes,numeric:range?bytes:0);
+    internal byte[]? CachedRange(Uri uri,string? etag,long index)
     {
+        if(!CacheEnabled||etag is null)return null;
+        lock(metricsGate){if(ranges.TryGetValue(uri.GetLeftPart(UriPartial.Path)+"|"+etag+"|"+index,out var c)&&cacheClock()-c.At<TimeSpan.FromMinutes(10)){Count(uri.Host,hits:1,reused:c.Bytes.Length);return c.Bytes;}return null;}
+    }
+    internal void CacheRange(Uri uri,string? etag,long index,byte[] bytes)
+    {
+        if(!CacheEnabled||etag is null)return;lock(metricsGate){var key=uri.GetLeftPart(UriPartial.Path)+"|"+etag+"|"+index;if(ranges.Remove(key,out var old))cacheBytes-=old.Bytes.Length;while(cacheBytes+bytes.Length>67108864&&ranges.Count>0){var first=ranges.First();cacheBytes-=first.Value.Bytes.Length;ranges.Remove(first.Key);}ranges[key]=(cacheClock(),bytes);cacheBytes+=bytes.Length;}
+    }
+
+    public bool CacheEnabled {get;}
+    public ScientificHttp(HttpMessageHandler? handler=null,bool cacheEnabled=true,Func<DateTimeOffset>? cacheClock=null)
+    {
+        CacheEnabled=cacheEnabled;this.cacheClock=cacheClock??(()=>DateTimeOffset.UtcNow);
         http=handler is null?new(new SocketsHttpHandler{AllowAutoRedirect=false,UseCookies=false,AutomaticDecompression=DecompressionMethods.None,MaxResponseDrainSize=0,MaxConnectionsPerServer=2,ConnectTimeout=TimeSpan.FromSeconds(20)}):new(handler);
         http.Timeout=TimeSpan.FromSeconds(45);
-        http.DefaultRequestHeaders.UserAgent.ParseAdd("AeroScience/0.3.1 (+https://github.com/JustSeanC/AeroScience)");
+        http.DefaultRequestHeaders.UserAgent.ParseAdd("AeroScience/0.3.2 (+https://github.com/JustSeanC/AeroScience)");
     }
     public static void ValidateUrl(Uri uri)
     {
@@ -48,6 +75,7 @@ public sealed class ScientificHttp : IDisposable
             request.Headers.AcceptEncoding.ParseAdd("identity");
             if(start is {} from)request.Headers.Range=new RangeHeaderValue(from,end);
             if(etag is not null)request.Headers.TryAddWithoutValidation("If-Match",etag);
+            Count(uri.Host,requests:1,retries:attempt>0?1:0);
             HttpResponseMessage response;
             try{response=await http.SendAsync(request,HttpCompletionOption.ResponseHeadersRead,token);}
             catch(HttpRequestException) when(attempt<2){await Task.Delay(TimeSpan.FromSeconds(2*(attempt+1)),token);continue;}
@@ -64,14 +92,36 @@ public sealed class ScientificHttp : IDisposable
     }
     public async Task<byte[]> Bytes(Uri uri,int maximum,ScientificDownloadBudget budget,CancellationToken token)
     {
+        budget.EnsureCapacity(1);budget.EnsureCapacity(Math.Min(65536,Math.Min(maximum,budget.Maximum-budget.Bytes)));
         using var response=await Send(uri,null,null,null,token);
         if(!response.IsSuccessStatusCode)throw new IOException($"Scientific provider request failed (HTTP {(int)response.StatusCode}). Retry later; local history remains available.");
         if(response.Content.Headers.ContentLength>maximum)throw new IOException("Provider response exceeds the supported bounded size.");
         using var stream=await response.Content.ReadAsStreamAsync(token);using var output=new MemoryStream();var buffer=new byte[65536];
-        while(true){var n=await stream.ReadAsync(buffer,token);if(n==0)break;budget.Charge(n);if(output.Length+n>maximum)throw new IOException("Provider response exceeded its size bound.");output.Write(buffer,0,n);}
+        var declared=response.Content.Headers.ContentLength;
+        while(true)
+        {
+            if(declared is {} total&&output.Length==total)break;
+            var remaining=Math.Min((long)maximum-output.Length,budget.Maximum-budget.Bytes);
+            var count=(int)Math.Min(buffer.Length,remaining);
+            if(declared is {} expected)count=(int)Math.Min(count,expected-output.Length);
+            if(count<=0){budget.EnsureCapacity(1);count=1;}
+            budget.EnsureCapacity(count);var n=await stream.ReadAsync(buffer.AsMemory(0,count),token);if(n==0)break;
+            budget.Charge(n);Received(uri,n,false);if(output.Length+n>maximum)throw new IOException("Provider response exceeded its size bound.");output.Write(buffer,0,n);
+        }
+        if(declared is {} length&&output.Length!=length)throw new EndOfStreamException("Provider response ended before its declared size; received bytes remain accounted.");
         return output.ToArray();
     }
-    public async Task<JsonDocument> Json(string uri,ScientificDownloadBudget budget,CancellationToken token)=>JsonDocument.Parse(await Bytes(new(uri),8388608,budget,token),new JsonDocumentOptions{MaxDepth=64});
+    public async Task<JsonDocument> Json(string uri,ScientificDownloadBudget budget,CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested();ValidateUrl(new(uri));
+        // Authentication responses are never cached. Catalog/search responses have a short TTL.
+        var cacheable=CacheEnabled&&!uri.Contains("/sas/",StringComparison.Ordinal);
+        lock(metricsGate)if(cacheable&&metadata.TryGetValue(uri,out var c)&&cacheClock()-c.At<TimeSpan.FromMinutes(5)){Count(new Uri(uri).Host,hits:1,reused:c.Bytes.Length);return JsonDocument.Parse(c.Bytes);}
+        var bytes=await Bytes(new(uri),8388608,budget,token);
+        using(var parsed=JsonDocument.Parse(bytes,new JsonDocumentOptions{MaxDepth=64})){}
+        if(cacheable)lock(metricsGate){if(metadata.Remove(uri,out var old))metadataBytes-=old.Bytes.Length;while((metadata.Count>=32||metadataBytes+bytes.Length>16777216)&&metadata.Count>0){var first=metadata.First();metadataBytes-=first.Value.Bytes.Length;metadata.Remove(first.Key);}metadata[uri]=(cacheClock(),bytes);metadataBytes+=bytes.Length;}
+        return JsonDocument.Parse(bytes,new JsonDocumentOptions{MaxDepth=64});
+    }
     public async Task<Uri> Authorize(Uri unsigned,ScientificDownloadBudget budget,CancellationToken token)
     {
         ValidateUrl(unsigned);
@@ -97,10 +147,13 @@ public sealed class ScientificRangeStream : Stream
     private byte[] Fetch(long index)
     {
         token.ThrowIfCancellationRequested();if(cache.TryGetValue(index,out var existing))return existing;
+        // Each new stream first obtains a fresh exact range/ETag; only matching versions share blocks.
+        if(index!=0&&http.CachedRange(original,etag,index) is {} shared){cache[index]=shared;return shared;}
         var start=index*65536;var end=length<0?start+65535:Math.Min(length-1,start+65535);
         for(var auth=0;auth<2;auth++)
         {
             if(++Requests>2048)throw new IOException("The remote asset requires too many requests. Select a smaller subset.");
+            budget.EnsureCapacity(end-start+1);
             using var response=http.Send(current,start,end,etag,token).GetAwaiter().GetResult();
             if((response.StatusCode is HttpStatusCode.Forbidden or HttpStatusCode.Unauthorized)&&auth==0&&original.Host.EndsWith(".blob.core.windows.net",StringComparison.Ordinal))
             {current=http.Authorize(original,budget,token).GetAwaiter().GetResult();continue;}
@@ -109,10 +162,11 @@ public sealed class ScientificRangeStream : Stream
                 throw new IOException($"Provider did not honor the exact bounded HTTP byte range (HTTP {(int)response.StatusCode}; requested {start}–{end}, returned {range?.From}–{range?.To}/{range?.Length}). The asset was refused; retry later.");
             if(length>=0&&range.Length!=length||etag is not null&&response.Headers.ETag?.ToString()!=etag)throw new IOException("Scientific asset changed during retrieval. Retry as a new acquisition.");
             length=range.Length.Value;etag??=response.Headers.ETag?.ToString();
-            var count=checked((int)(range.To!.Value-start+1));budget.Charge(count);
-            var bytes=new byte[count];using var stream=response.Content.ReadAsStream(token);stream.ReadExactly(bytes);
+            var count=checked((int)(range.To!.Value-start+1));budget.EnsureCapacity(count);
+            var bytes=new byte[count];using var stream=response.Content.ReadAsStream(token);var received=0;
+            while(received<count){var n=stream.Read(bytes,received,count-received);if(n==0)throw new EndOfStreamException("Provider range ended early; actual received bytes remain accounted.");budget.Charge(n);http.Received(original,n,true);received+=n;}
             if(stream.ReadByte()!=-1)throw new IOException("Provider returned more bytes than the approved range.");
-            if(cache.Count>=256)cache.Remove(cache.Keys.First());cache[index]=bytes;return bytes;
+            http.CacheRange(original,etag,index,bytes);if(cache.Count>=256)cache.Remove(cache.Keys.First());cache[index]=bytes;return bytes;
         }
         throw new IOException("Scientific asset authorization expired. Retry when the provider is available.");
     }

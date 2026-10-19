@@ -6,6 +6,7 @@ const element = (tag, text) => {
   return e;
 };
 export function patternEditor(parent, { api, notice, get, set, aircraft, pickCenter, fitPreview, changed }) {
+  let fitMode="envelope",clippingPolygon=null;
   let preview = null,
     patterns = structuredClone(get().patterns || []),
     undo = [];
@@ -129,6 +130,7 @@ export function patternEditor(parent, { api, notice, get, set, aircraft, pickCen
       clockwise: clockwise.checked,
       targetAltitudeFeet: alt.planningUnits.read(),
       notes: notes.value,
+      fitMode:["lawnmower","creepingLine"].includes(kind.value)?fitMode:"envelope",clippingPolygon:["lawnmower","creepingLine"].includes(kind.value)?clippingPolygon:null,
     };
   };
   let previewSignature=null,adding=false,regenerating=false,lastAddedSignature=null;
@@ -144,7 +146,7 @@ export function patternEditor(parent, { api, notice, get, set, aircraft, pickCen
     preview = result;previewSignature=requestedSignature;
     planningText(report,()=>{
       const d=result.definition,parallel=["lawnmower","creepingLine"].includes(d.kind);
-      return `Preview Ready. Pattern preview only: ${parallel?`${d.legs} survey passes · Track spacing ${planningDistance(d.spacingMetres)} · Approximate survey envelope ${planningArea(d.lengthMetres*(d.legs-1)*d.spacingMetres)} (sensor coverage unvalidated) · `:""}${result.waypoints.length} navigation points · ${planningDistance(result.distanceMetres)} route distance · Reference heading ${d.headingDegrees}° true. ${result.definition.kind==="orbit"?"Orbit export uses a 5° point-to-point approximation; native EFB orbit support is not claimed.":""}`;
+      return `Preview Ready. Pattern preview only: ${parallel&&d.fitMode==="polygon"?`${result.segments.filter(s=>s.role==="scan").length} in-area scan segments / ${result.segments.filter(s=>s.role==="transition").length} transitions · ${planningDistance(result.scanDistanceMetres)} in-area scan / ${planningDistance(result.transitionDistanceMetres)} transition distance (may leave area; turning feasibility unvalidated) · `:parallel?`${d.legs} survey passes · Track spacing ${planningDistance(d.spacingMetres)} · Approximate survey envelope ${planningArea(d.lengthMetres*(d.legs-1)*d.spacingMetres)} (sensor coverage unvalidated) · `:""}${result.waypoints.length} navigation points · ${planningDistance(result.distanceMetres)} route distance · Reference heading ${d.headingDegrees}° true. ${result.definition.kind==="orbit"?"Orbit export uses a 5° point-to-point approximation; native EFB orbit support is not claimed.":""}`;
     });
     const current = get();
     set({ ...current, preview: result, previewOnly:true });
@@ -175,17 +177,19 @@ export function patternEditor(parent, { api, notice, get, set, aircraft, pickCen
   const areaChoice=element("select");areaChoice.setAttribute("aria-label","Pattern survey area");panel.append(areaChoice);
   function refreshAreas(){const previous=areaChoice.value;areaChoice.replaceChildren();for(const [i,area] of (get().surveyAreas||[]).entries()){const option=element("option",area.name);option.value=i;areaChoice.append(option);}if(previous)areaChoice.value=previous;}
   refreshAreas();panel.addEventListener("toggle",()=>{if(panel.open)refreshAreas();});
+  const fitChoice=element("select");fitChoice.setAttribute("aria-label","Survey fit method");for(const [value,title] of [["polygon","Polygon scan legs (default)"],["envelope","Rectangular envelope overscan"]]){const option=element("option",title);option.value=value;fitChoice.append(option);}panel.append(fitChoice);
   action("Fit Pattern to Survey Area",async()=>{
     refreshAreas();const area=get().surveyAreas[Number(areaChoice.value)];if(!area)throw Error("Draw and Save Survey Area first, then select it here.");
     const summary=areaSummary(area.vertices);if(summary.error)throw Error(summary.error);
     const id=++generation;clearTimeout(timer);
     const input=definitionForFit(summary.center);
-    const fitted=await api("/api/patterns/fit-survey",{definition:input,area});
+    const fitted=await api("/api/patterns/fit-survey",{definition:input,area,fitMode:fitChoice.value});
     if(id!==generation||!panel.isConnected)return;
+    fitMode=fitted.fitMode;clippingPolygon=fitted.clippingPolygon;
     lat.value=fitted.center.latitude;lon.value=fitted.center.longitude;
     length.planningUnits.set(fitted.lengthMetres);width.planningUnits.set(fitted.widthMetres);legs.value=fitted.legs;
     changed?.();await generate();
-    explanation.textContent="Fit uses the heading-aligned local geodesic envelope and your entered Track Spacing. Passes may extend beyond the polygon; routes are not clipped. Sensor swath/overlap and complete scientific coverage are unvalidated.";
+    explanation.textContent=fitMode==="polygon"?"Green scan segments are clipped to the survey boundary. Orange dashed transitions can leave concave areas; no aircraft turning radius or complete sensor coverage is claimed.":"Rectangular envelope overscan is selected. Scan legs can extend outside the polygon; sensor coverage remains unvalidated.";
   });
   function definitionForFit(center){
     const previousLat=lat.value,previousLon=lon.value;
@@ -247,6 +251,7 @@ export function patternEditor(parent, { api, notice, get, set, aircraft, pickCen
         [
           "Edit parameters",
           () => {
+            fitMode=d.fitMode||"envelope";clippingPolygon=d.clippingPolygon||null;fitChoice.value=fitMode;
             preview = { definition: d };
             kind.value = d.kind;
             lat.value = d.center.latitude;

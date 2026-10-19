@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.3.2 — Scientific Reliability & Performance (development; acceptance pending)
+
+- Handle disappearing SQLite WAL/SHM files without stopping a valid recording; keep primary database, permission, disk and quota failures strict. Add bounded local recording/science diagnostics and privacy-reviewed feedback export.
+- Separate preflight session volume from the in-flight rolling-hour allowance. Preserve the 256 MiB/hour default and explicit existing values; allow independently selected Unlimited policies while retaining per-preparation, concurrency, consent, provider and storage constraints.
+- Replace speculative full-job reservations with read-sized leases, accurate actual-byte charging, visible consumed/reserved/available figures and retriable allowance waits. Release reservations on failure, cancellation and configuration changes.
+- Give remote instruments independent bounded processing queues, meaningful unavailable/error reasons, processing timings and automatically refreshed results. Preserve scientific gaps without backfilling.
+- Reuse georeferenced retained regions, cache short-lived scene metadata and share version-matched native COG ranges. Prepare bounded 0.04° preflight regions and steady-flight optical crops with smaller-region fallback at scene boundaries; preserve native optical grids and original QA/scaling/provenance.
+- Make preflight explicit, reviewable and cancellable; pause unfinished sessions for an active mission. Add compact readiness, a stable Download Activity viewer, source collection grouping and paged region controls.
+- Move saved-plan selection to the native Mission tab, automatically load plans, clarify active snapshots, reduce moving-map labels and add practical waypoint controls without removing route geometry.
+- Clip new parallel-pattern scan legs to actual survey polygons, separate scan/transit segments and retain explicit legacy envelope overscan. Preserve old saved patterns, units and WGS84 exports.
+- Organize mission scientific results by instrument with bounded navigation, valid-position/footprint maps, original source dates and existing detailed exports.
+- Preserve a genuine intermediate four-provider run and independent GDAL checks with their original source identity. Final online validation after the cache-expiry correction remains pending because the cloud tunnel returned 503 again; the release gate refuses that pending state. Current genuine retained-source and guided Cuprite import checks pass independently.
+- No issue is closed solely on automated results. Installed Windows/MSFS acceptance remains required; see the issue-by-issue completion report and regional benchmark limitations. Published older tags/installers are unchanged.
+
 ## 0.3.1 — Predictive Science & Guided Dataset Import (unreleased)
 
 - Prioritize bounded scientific preparation by observed trajectory, arrival time and measured preparation latency; filter stale/jump/paused telemetry, curve turns, use aligned routes optionally, and progressively prepare long plans. Reuse retained originals, bound queue/concurrency/hourly transfers, expose controls/readiness overlays and retain truthful acquisition gaps.

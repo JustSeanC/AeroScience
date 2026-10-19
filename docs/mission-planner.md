@@ -41,3 +41,10 @@ Future **v0.4.0** work may recommend spacing from a configured sensor's actual o
 Planning exposes Aviation and Metric only. Existing custom scientific display preferences are retained separately. Canonical route/pattern geometry is unchanged by profile switches. Pattern-specific controls validate near the relevant field in current display units; an invalid edit retains the previous preview as outdated. Add Pattern to Mission commits the matching validated preview once, preserving manual waypoints; Save Mission Plan persists the resulting draft. Fit Preview changes the viewport deliberately.
 
 Scientific preflight advances in bounded batches beyond the initial window. During flight, actual geographic motion takes priority over the optional saved route. Readiness is preparation status, not proof of complete sensor coverage. See [scientific flying](remote-sensing/quick-start.md).
+
+
+## v0.3.2 polygon scan fitting
+
+Fit Pattern to Survey Area now defaults to **Polygon scan legs** for lawnmower/creeping-line patterns. Green scans intersect the actual local survey ring; orange dashed connectors can leave concave boundaries. Aircraft turning radius, terrain clearance and complete sensor coverage are not validated. **Rectangular envelope overscan** remains an explicit alternative. Existing saved patterns keep their old envelope behavior until deliberately edited. True headings, NM/Metric conversions, WGS84 coordinates and full route exports remain.
+
+Preflight preparation is a separate deliberate review/download action; saving a plan does not contact scientific providers. See Download Activity for session controls and separate preflight/flight allowance figures.

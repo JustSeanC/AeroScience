@@ -400,8 +400,9 @@ export class ResearchMap {
     this.previewLayer=this.L.layerGroup().addTo(this.map);
     if(!result)return;
     const points=result.waypoints||[];const d=result.definition;
-    this.L.polyline(points.map(p=>ll(p,points[0]?.longitude)),{color:"#ffffff",dashArray:"3 7",weight:3}).addTo(this.previewLayer);
-    if(d&&["lawnmower","creepingLine"].includes(d.kind)&&points.length>=4){
+    if(result.segments?.length){for(const segment of result.segments)this.L.polyline(points.slice(segment.start,segment.end+1).map(p=>ll(p,points[0]?.longitude)),{color:segment.role==="scan"?"#50dcc7":"#f0ad70",dashArray:segment.role==="scan"?null:"6 6",weight:3}).bindTooltip(segment.role==="scan"?"In-area scan leg":"Transition: may leave survey polygon; turning feasibility unvalidated").addTo(this.previewLayer);}
+    else this.L.polyline(points.map(p=>ll(p,points[0]?.longitude)),{color:"#ffffff",dashArray:"3 7",weight:3}).addTo(this.previewLayer);
+    if(d&&d.fitMode!=="polygon"&&["lawnmower","creepingLine"].includes(d.kind)&&points.length>=4){
       const bearing=d.headingDegrees*Math.PI/180,distance=Math.min(d.lengthMetres/3,20000),R=6371008.8;
       const start=ll(d.center),end=[start[0]+distance*Math.cos(bearing)/R*180/Math.PI,start[1]+distance*Math.sin(bearing)/(R*Math.max(.02,Math.cos(start[0]*Math.PI/180)))*180/Math.PI];
       this.L.polyline([start,end],{color:"#72b8f1",weight:4}).bindTooltip(`Reference heading ${d.headingDegrees}° true (approximate display arrow)`).addTo(this.previewLayer);

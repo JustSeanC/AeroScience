@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.Json;
 using System.IO.Compression;
 using AeroScience.Engine;
 using AeroScience.Missions;
@@ -305,6 +306,7 @@ public sealed class MainForm : Form, IDesktopActions
         notes.Controls.Add(text); notes.Controls.Add(save);
         save.Click += (_, _) =>
         {
+            if(MessageBox.Show(notes,"The bundle includes geographic preparation areas, instrument/provider timing, errors and local logs. Review it before sharing. No scientific originals, databases or credentials are included. Continue?","Diagnostic privacy",MessageBoxButtons.OKCancel)!=DialogResult.OK)return;
             using var dialog = new SaveFileDialog { Filter = "Feedback ZIP (*.zip)|*.zip", FileName = $"AeroScience-feedback-{DateTime.UtcNow:yyyyMMdd-HHmmss}.zip", OverwritePrompt = true };
             if (dialog.ShowDialog(notes) != DialogResult.OK) return;
             try
@@ -317,11 +319,13 @@ public sealed class MainForm : Form, IDesktopActions
                         using var writer = new StreamWriter(zip.CreateEntry(name).Open(), Encoding.UTF8);
                         writer.Write(value.Replace(profile, "[USERPROFILE]", StringComparison.OrdinalIgnoreCase));
                     }
+                    Add("scientific-diagnostics.json", JsonSerializer.Serialize(ScientificDiagnostics.Snapshot(), WireJson.Options));
                     Add("REPORT.txt", $"AeroScience {Application.ProductVersion}\n{RuntimeInformation.OSDescription}\n{RuntimeInformation.FrameworkDescription}\nUTC {DateTimeOffset.UtcNow:O}\n{status.Text}\n\n{text.Text}\n\nLocal report only. Review before sharing; no mission database or pairing secrets included.");
                     var logDirectory = Path.Combine(Preferences.Load().MissionDirectory, "logs");
                     if (Directory.Exists(logDirectory))
                         foreach (var file in Directory.GetFiles(logDirectory, "engine-*.log").OrderDescending().Take(7))
                             if (new FileInfo(file).Length < 5_000_001) Add("logs/" + Path.GetFileName(file), File.ReadAllText(file));
+                    var scientificLog=Path.Combine(Preferences.DirectoryPath,"logs","scientific-diagnostics.json");if(File.Exists(scientificLog)&&new FileInfo(scientificLog).Length<5000001)Add("previous-scientific-diagnostics.json",File.ReadAllText(scientificLog));
                     var toolbarLogs=Path.Combine(Preferences.DirectoryPath,"logs");
                     if(Directory.Exists(toolbarLogs))
                         foreach(var file in Directory.GetFiles(toolbarLogs,"toolbar-*.log").OrderDescending().Take(7))

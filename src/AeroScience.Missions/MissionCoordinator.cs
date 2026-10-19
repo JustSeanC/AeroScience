@@ -44,7 +44,9 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
             connection = update.Connection;
             frame = connection.State != ConnectionState.Connected ? null
                 : update.Frame is { IsValid: true } ? update.Frame : update.Frame is not null ? null : frame;
-            research?.Observe(update, frame);
+            try { research?.Observe(update, frame); }
+            catch(Exception error) when(error is IOException or UnauthorizedAccessException or Microsoft.Data.Sqlite.SqliteException)
+            { ScientificDiagnostics.Record("science-processing-error",active?.Id.ToString()??"none","flight",RemoteKind.Terrain,result:error.GetType().Name+": "+error.Message); }
             if (active is null || frame is null || update.Frame is null) return;
             received++;
             if (frame.IsPaused || lastRecordedUtc is not null && frame.TimestampUtc <= lastRecordedUtc)
@@ -63,18 +65,18 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
             }
             if (lastAircraft is not null && lastAircraft != frame.Aircraft)
                 store.AddEvent(active.Id, frame.TimestampUtc, "aircraft-changed", $"Aircraft changed to {frame.Aircraft}.");
-            if (ensureRecordingCapacity is not null)
             {
-                try { ensureRecordingCapacity(); }
-                catch (IOException error)
+                try { ensureRecordingCapacity?.Invoke(); store.Append(active.Id, frame with { Guidance = research?.CurrentGuidance(connection, frame) }); }
+                catch (Exception error) when(error is IOException or UnauthorizedAccessException or Microsoft.Data.Sqlite.SqliteException)
                 {
                     recordingStop = new(error is StorageLimitException ? "storageLimitReached" : "storageUnavailable", error.Message, active.Id, DateTimeOffset.UtcNow);
-                    store.AddEvent(active.Id, recordingStop.TimestampUtc, recordingStop.Code, error.Message);
-                    store.Finish(active.Id, MissionStatus.Interrupted, lastRecordedUtc ?? active.StartedUtc, "Recording stopped to protect storage: " + error.Message);
-                    research?.End(); active = null; connection = connection with { Message = error.Message }; return;
+                    ScientificDiagnostics.Record("recording-storage-error",active.Id.ToString(),"flight",RemoteKind.Terrain,result:error.GetType().Name+": "+error.Message);
+                    try { store.AddEvent(active.Id, recordingStop.TimestampUtc, recordingStop.Code, error.Message);store.Finish(active.Id, MissionStatus.Interrupted,lastRecordedUtc??active.StartedUtc,"Recording stopped to protect storage: "+error.Message); }
+                    catch(Exception finalization)when(finalization is IOException or UnauthorizedAccessException or Microsoft.Data.Sqlite.SqliteException){ScientificDiagnostics.Record("recording-finalization-error",active.Id.ToString(),"flight",RemoteKind.Terrain,result:finalization.GetType().Name+": "+finalization.Message);}
+                    try{research?.End();}catch(Exception endError)when(endError is IOException or UnauthorizedAccessException or Microsoft.Data.Sqlite.SqliteException){ScientificDiagnostics.Record("science-stop-error",active.Id.ToString(),"flight",RemoteKind.Terrain,result:endError.Message);}
+                    active = null; connection = connection with { Message = error.Message }; return;
                 }
             }
-            store.Append(active.Id, frame with { Guidance = research?.CurrentGuidance(connection, frame) });
             firstRecordedUtc ??= frame.TimestampUtc;
             lastSlot = slot;
             lastRecordedUtc = frame.TimestampUtc;
@@ -111,7 +113,7 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
             if (plan is not null) mode = plan.Mode;
             var configurations = ScienceCatalog.Normalize(request.Instruments ?? plan?.Instruments ?? research?.Configurations);
             try { ensureRecordingCapacity?.Invoke(); }
-            catch (IOException error) { throw new InvalidOperationException(error.Message, error); }
+            catch (Exception error) when(error is IOException or UnauthorizedAccessException or Microsoft.Data.Sqlite.SqliteException) { throw new InvalidOperationException(error.Message, error); }
             if (requireFreshTelemetry && (connection.State != ConnectionState.Connected || frame is null
                 || DateTimeOffset.UtcNow - frame.TimestampUtc > TimeSpan.FromSeconds(6) || frame.IsPaused))
                 throw new InvalidOperationException("Live aircraft telemetry is unavailable. Mission History remains accessible.");

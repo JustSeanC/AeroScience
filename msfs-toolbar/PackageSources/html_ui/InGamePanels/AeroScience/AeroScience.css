@@ -328,3 +328,5 @@ select:focus-visible {
 .as-map-actions { display:flex; flex-wrap:wrap; gap:6px; margin:8px 0; }
 .as-map-actions button { padding:8px; color:#e7f0f5; background:#203747; border:1px solid #526d7e; }
 #as-map-waypoint-info, #as-map-status { overflow-wrap:break-word; }
+
+.as-plan-selector{padding:10px;border:1px solid #34515f;margin:8px 0}.as-map-actions button,#as-plan-map,.as-plan-selector button{min-height:38px;min-width:64px;padding:7px}.as-map-canvas{min-height:280px;height:48vh;max-height:650px}.as-note{font-size:14px;line-height:1.35}.as-map-actions{display:flex;flex-wrap:wrap;gap:5px}

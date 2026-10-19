@@ -35,6 +35,14 @@ public sealed class ScientificRaster : IDisposable
     private byte[]? block;
     private int blockIndex = -1;
     private readonly int tileWidth, tileHeight, rowsPerStrip;
+    public static bool GridCovers(RasterGrid grid,Coordinates point)
+    {
+        try{
+        var p=Project(point,grid.Crs);var dx=p.X-grid.OriginX;var dy=p.Y-grid.OriginY;var determinant=grid.PixelWidth*grid.PixelHeight-grid.RowX*grid.ColumnY;
+        var col=(dx*grid.PixelHeight-dy*grid.RowX)/determinant;var row=(dy*grid.PixelWidth-dx*grid.ColumnY)/determinant;
+        return double.IsFinite(col)&&double.IsFinite(row)&&col>=0&&row>=0&&col<grid.Width&&row<grid.Height;
+        }catch(InvalidDataException){return false;}
+    }
     public RasterGrid Grid { get; }
     public double? NativeNoData { get; }
     public double? NativeWavelengthNm { get; }

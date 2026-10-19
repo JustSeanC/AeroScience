@@ -33,3 +33,10 @@ Use [Using Your Own Hyperspectral Dataset in AeroScience](using-your-own-hypersp
 ## After import
 
 Check **Dataset Ready**, **View Coverage**, original date, source units, native grids and warnings. Within a recording, valid samples appear in Science Collection. Missing science never stops normal flight recording, blocks other instruments or becomes invented/backfilled data. Both import routes publish through the existing atomic verified source library. Experts retain the optional [JSON-manifest import](sources.md).
+
+
+## v0.3.2 collections and download controls
+
+Online scientific access has a primary control at the top. Each compatible original source collection can be expanded into pages of twenty retained regions. Collection coverage shows individual georeferenced outlines, preserving gaps and source identities; an outline does not prove valid pixels throughout. Excluding a source changes future selection and does not delete its originals or rewrite old products.
+
+Download Activity separates actual consumed bytes, currently reserved reads and available allowance. In-flight defaults to 256 MiB per rolling application hour; preflight has a separate 1 GiB session-volume default. Existing explicit settings are preserved. Either aggregate policy may be explicitly Unlimited, with substantial-data-use warning; per-preparation, concurrency, provider, consent and storage restrictions remain. Counters measure application payload and exclude network-adapter overhead. Preferences persist; usage ledgers are application-session state.

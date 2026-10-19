@@ -14,6 +14,7 @@ REPORT=ROOT/f'docs/research/v{VERSION}-automatic-provider-acceptance.json'
 WORKFLOWS={'usgs-3dep','landsat-c2-l2','sentinel-2-l2a','cop-dem-glo-30'}
 SOURCES=[
  'src/AeroScience.Missions/AutomaticScientificData.cs',
+ 'src/AeroScience.Missions/ScientificTransferLedger.cs',
  'src/AeroScience.Missions/ScientificHttp.cs',
  'src/AeroScience.Missions/ScientificProviders.cs',
  'src/AeroScience.Missions/ScientificRaster.cs',
@@ -45,6 +46,8 @@ def verify_guided_envi(report=None,root=ROOT):
     return value
 def verify(report=REPORT,root=ROOT,require_current=True):
     value=json.loads(report.read_text(encoding='utf-8'))
+    if value.get('evidenceType')=='pending-genuine-provider-network':
+        raise ValueError('Current '+VERSION+' genuine online-provider acceptance is pending: '+str(value.get('finalNetworkRerunReason') or 'Run the bounded provider harness and record its actual results.'))
     if value.get('formatVersion')!=1 or value.get('evidenceType')!='genuine-public-provider-network' or value.get('windowsMsfs')!='not tested':
         raise ValueError('Genuine provider acceptance identity/status is invalid; no Windows/MSFS pass may be inferred.')
     hashes=value.get('canonicalLfSourceSha256',{})

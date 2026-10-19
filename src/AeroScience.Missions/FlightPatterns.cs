@@ -30,9 +30,16 @@ public static class FlightPatterns
         if(d.TargetAltitudeFeet is {} altitude&&!double.IsFinite(altitude))throw new ArgumentException("Enter a finite target altitude or leave it blank.");
         var extent = d.Kind is FlightPatternKind.Lawnmower or FlightPatternKind.CreepingLine ? (d.Legs - 1) * d.SpacingMetres / 2 : d.Kind == FlightPatternKind.ExpandingSquare ? Math.Ceiling(d.Legs / 2d) * d.SpacingMetres : 0;
         if (extent > 500000) throw new ArgumentException("Reduce spacing or legs: this local pattern layout supports extents up to 500 km. Long routes can be planned with separate patterns.");
+        if(d.FitMode is not("envelope" or "polygon"))throw new ArgumentException("Unsupported survey fit mode.");
+        if(d.FitMode=="polygon")
+        {
+            if(d.Kind is not(FlightPatternKind.Lawnmower or FlightPatternKind.CreepingLine)||d.ClippingPolygon is not{Length:>=3 and <=1000})throw new ArgumentException("Polygon fitting requires a supported parallel pattern and 3–1000 boundary vertices.");
+            SurveyGeometry.Validate(d.ClippingPolygon);
+            if(d.ClippingPolygon.Any(p=>Math.Abs(p.Latitude)>80||Math.Abs(p.Longitude-d.Center.Longitude)>180||Geodesy.Distance(d.Center,p)>100000))throw new ArgumentException("Polygon scan fitting supports local areas within 100 km of the center, below 80° latitude, without crossing the dateline. Split this survey.");
+        }
         return d with { Id = d.Id == Guid.Empty ? Guid.NewGuid() : d.Id, HeadingDegrees = (d.HeadingDegrees % 360 + 360) % 360, Notes = MissionPlanning.Text(d.Notes) };
     }
-    public static PatternDefinition FitSurvey(PatternDefinition input, SurveyArea area)
+    public static PatternDefinition FitSurvey(PatternDefinition input, SurveyArea area,string fitMode="polygon")
     {
         var d=Validate(input);
         if(d.Kind is not (FlightPatternKind.Lawnmower or FlightPatternKind.CreepingLine))
@@ -54,11 +61,12 @@ public static class FlightPatterns
         var step=d.Kind==FlightPatternKind.Lawnmower?across:along;
         var legs=Math.Max(2,(int)Math.Ceiling(step/d.SpacingMetres)+1);
         if(legs>100)throw new ArgumentException("This spacing needs more than 100 survey passes. Increase Track Spacing or select a smaller area.");
-        return Validate(d with {Center=center,LengthMetres=Math.Max(10,scan),WidthMetres=Math.Max(10,step),Legs=legs});
+        if(fitMode is not("polygon" or "envelope"))throw new ArgumentException("Choose polygon scan fitting or rectangular envelope overscan.");
+        return Validate(d with {Center=center,LengthMetres=Math.Max(10,scan),WidthMetres=Math.Max(10,step),Legs=legs,FitMode=fitMode,ClippingPolygon=fitMode=="polygon"?area.Vertices:null});
     }
     public static PatternPreview Generate(PatternDefinition input)
     {
-        var d = Validate(input); var points = new List<Coordinates>(); var sign = d.Clockwise ? 1 : -1;
+        var d = Validate(input);if(d.FitMode=="polygon"&&d.Kind is FlightPatternKind.Lawnmower or FlightPatternKind.CreepingLine)return PolygonSurveyPattern.Generate(d); var points = new List<Coordinates>(); var sign = d.Clockwise ? 1 : -1;
         Coordinates Offset(double along, double across) => Geodesy.Direct(Geodesy.Direct(d.Center, d.HeadingDegrees + 90, across), d.HeadingDegrees, along);
         void Add(double along, double across) => points.Add(Offset(along, across));
         switch (d.Kind)

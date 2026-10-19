@@ -22,7 +22,7 @@ public sealed record RemoteProduct(Guid Id, Guid DatasetId, Guid LibraryId, Guid
     DateTimeOffset FlightPacketUtc, DateTimeOffset ProcessedUtc, DateTimeOffset? SourceObservationUtc,
     ObservationFootprint Footprint, string RelativePath, long Bytes, string Sha256, int Width, int Height,
     string[] AvailableViews, string Provenance, string Quality, string[] Warnings,
-    ScienceProvenance SourceClass = ScienceProvenance.ExternalDataset);
+    ScienceProvenance SourceClass = ScienceProvenance.ExternalDataset,long? ValidSampleCount=null);
 public sealed record RemoteBandValues(string Id, string Unit, double? WavelengthNm, double?[] Values,
     string SamplingMethod, RasterGrid OriginalGrid);
 public sealed record RemoteProductData(int FormatVersion, RemoteProduct Product, ScientificSource Source,
@@ -31,6 +31,6 @@ public sealed record RemoteProductData(int FormatVersion, RemoteProduct Product,
 public sealed record ScientificEvidenceContext(int FormatVersion, TelemetryFrame Aircraft, AtmosphericFrame? Atmosphere,
     InstrumentConfiguration AcquisitionSettings, MissionPlan? PlanSnapshot, ScienceMode Mode, string TimestampBasis, SensorMount? Mount = null);
 public sealed record RemoteInstrumentStatus(string InstrumentId, ObservationQuality Quality, string Message,
-    DateTimeOffset? LastSuccessfulUtc, long Products, long Rejected, long MissingIntervals, bool Processing = false);
+    DateTimeOffset? LastSuccessfulUtc, long Products, long Rejected, long MissingIntervals, bool Processing = false,string Status="Preparing data",double ProcessingSeconds=0,long ValidMeasurements=0);
 public sealed record RemoteStorageEstimate(long Acquisitions, int Width, int Height, int Bands, int BytesPerValue,
     long RawBytesPerAcquisition, long ConservativeOutputBytes, long TemporaryBytes, string Basis);

@@ -62,6 +62,7 @@ def identity(version=RELEASE_VERSION):
     preview = bool(suffix) or (version == RELEASE_VERSION and RELEASE_CHANNEL == 'prerelease')
     title = f'AeroScience v{base}' + (' — Live Flight Recording Alpha' if suffix.startswith('alpha') else ' — Science Mission Operations Prerelease' if preview else '')
     if base == '0.2.2': title = f'AeroScience v{base} — Geographic Mission Integration' + (' Prerelease' if preview else '')
+    if base == '0.3.2': title = f'AeroScience v{base} — Scientific Reliability & Performance' + (' Prerelease' if preview else '')
     if base == '0.3.1': title = f'AeroScience v{base} — Predictive Science & Guided Dataset Import' + (' Prerelease' if preview else '')
     if base == '0.3.0': title = f'AeroScience v{base} — Remote Sensing & Research Payloads' + (' Alpha' if preview else '')
     return dict(version=version, package_version=base, tag='v'+version, root_name=root,
@@ -148,7 +149,7 @@ def validate_companion(root, require_simconnect=False):
                 "wwwroot/index.html", "wwwroot/app.js", "wwwroot/app.css", "wwwroot/research.js", "wwwroot/map.js", "wwwroot/patterns.js", "wwwroot/location-search.js", "wwwroot/planner-geometry.js", "wwwroot/analysis.js", "wwwroot/science-display.js", "wwwroot/basemaps.js", "wwwroot/geographic-view.js", "wwwroot/route-export.js", "wwwroot/assets-manifest.json"}
     expected.update({'BitMiracle.LibTiff.NET.dll','wwwroot/remote-science.js','wwwroot/scientific-access.js','wwwroot/application-updates.js','wwwroot/storage-management.js'})
     expected.update({'licenses/OurAirports.txt','wwwroot/help/mission-planner.md','licenses/LibTiff.NET.txt','wwwroot/help/remote-sensing/quick-start.md','wwwroot/help/remote-sensing/sources.md'})
-    expected.update({'wwwroot/hyperspectral-import.js','wwwroot/scientific-sources.js','wwwroot/settings-navigation.js','wwwroot/help/remote-sensing/index.md','wwwroot/help/remote-sensing/scientific-data-sources.md','wwwroot/help/remote-sensing/using-your-own-hyperspectral-dataset.md'})
+    expected.update({'wwwroot/hyperspectral-import.js','wwwroot/scientific-sources.js','wwwroot/settings-navigation.js','wwwroot/download-activity.js','wwwroot/help/remote-sensing/index.md','wwwroot/help/remote-sensing/scientific-data-sources.md','wwwroot/help/remote-sensing/using-your-own-hyperspectral-dataset.md'})
     expected.update({f'wwwroot/help/remote-sensing/images/v031-import-step{i}-synthetic-ui.png' for i in range(1,5)})
     if require_simconnect:
         expected.add("SimConnect.dll")
@@ -307,7 +308,7 @@ def prepare_candidate(companion, community, receipt_path, runtime_report, runtim
         (destination/'docs').mkdir()
         for name in ('alpha-testing.md', 'runtime-distribution.md', 'science-operations.md', 'sdk-research-v0.2.0.md', 'v0.2.0-windows-testing.md', 'v0.2.1-windows-testing.md', 'v0.2.1-completion.md', 'v0.2.2-windows-testing.md', 'v0.2.2-completion.md', 'map-providers-v0.2.2.md'):
             shutil.copy2(REPO/'docs'/name, destination/'docs'/name)
-        for name in ('v0.3.0-completion.md','v0.3.0-windows-testing.md','v0.3.1-completion.md','v0.3.1-windows-testing.md'):
+        for name in ('v0.3.0-completion.md','v0.3.0-windows-testing.md','v0.3.1-completion.md','v0.3.1-windows-testing.md','v0.3.2-completion.md','v0.3.2-windows-testing.md'):
             shutil.copy2(REPO/'docs'/name,destination/'docs'/name)
         shutil.copytree(REPO/'docs'/'remote-sensing',destination/'docs'/'remote-sensing')
         shutil.copytree(REPO/'docs'/'roadmap',destination/'docs'/'roadmap')
@@ -390,7 +391,7 @@ This is a source-validated public alpha. **Hardware acceptance: NOT VERIFIED.** 
 
 Automated checks: .NET {checks['dotnet']['passed']} passed; browser {checks['browser']['expected']} passed; helpers {checks['helpers']['passed']} passed ({checks['helpers']['skipped']} skipped); recording recovery passed. Genuine SDK/ABI/package receipt, native runtime loading/exports/authorized hash, locked assets, signed Microsoft prerequisite, Inno compilation and exact installer/payload integrity were validated by the Windows build pipeline.
 
-v0.3.1 adds predictive scientific preparation, progressive preflight, graphical compatible dataset imports, guided local hyperspectral use, source selection and Settings navigation, plus a release-blocking pattern-editor repair. Terrain, thermal and multispectral can prepare real external data automatically with separate consent; hyperspectral uses user-supplied ENVI. Original dataset observation dates are distinct from flight packet/processing times. Scientific reference datasets are not bundled and coverage depends on valid prepared or imported collections; no fabricated sensor readings or live-camera claims are made. See the included remote-sensing guides for supported formats, CRS, source acquisition and limitations.
+v0.3.2 fixes transient SQLite sidecar accounting, separates preflight and in-flight transfer allowances, adds optional Unlimited aggregate policies, a dedicated Download Activity viewer, bounded source collections, version-validated regional reads, explicit preflight review, Mission-tab toolbar plans, clearer moving-map labels, polygon-clipped scan legs and mission-first scientific results. Installed Windows/MSFS and final genuine-provider validation must be checked separately; no older binary release is replaced. Terrain, thermal and multispectral can prepare real external data automatically with separate consent; hyperspectral uses user-supplied ENVI. Original dataset observation dates are distinct from flight packet/processing times. Scientific reference datasets are not bundled and coverage depends on valid prepared or imported collections; no fabricated sensor readings or live-camera claims are made. See the included remote-sensing guides for supported formats, CRS, source acquisition and limitations.
 
 New installations default to OpenStreetMap Streets after a privacy choice; offline-only is available before any tile request. Existing map choices are retained. Optional Esri imagery uses your own key. Storage defaults are 25 GB flight / 50 GB science (decimal GB), configurable or Unlimited. Only positively registered regenerable caches may be automatically cleaned; pinned research, original data and completed products are protected. Optional GitHub update notifications never execute installers automatically. Calibration, full replay/coverage, organization servers and native satellite mapping remain deferred.
 

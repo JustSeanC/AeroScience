@@ -28,6 +28,12 @@ public sealed partial class ScienceStore(string directory, IStorageCapacity? cap
         }
         catch (Exception error) when (error is IOException or UnauthorizedAccessException or JsonException) { return error.Message; }
     }
+    public long DatabaseUsageBytes()
+    {
+        if(AvailabilityError() is {} error)throw new IOException(error);
+        try{return StorageManager.DatabaseBytes(DatabasePath);}
+        catch(FileNotFoundException)when(!File.Exists(Path.Combine(DirectoryPath,MarkerName))){return 0;} // A verified library that has never initialized its science DB.
+    }
     private SqliteConnection Open(bool write = false, bool create = false)
     {
         if (AvailabilityError() is { } error) throw new IOException(error);
@@ -149,15 +155,16 @@ public sealed partial class ScienceStore(string directory, IStorageCapacity? cap
         using var db = Open(); using var cmd = db.CreateCommand(); cmd.CommandText = "SELECT COUNT(*) FROM datasets WHERE id=$id";
         cmd.Parameters.AddWithValue("$id", id.ToString()); return Convert.ToInt64(cmd.ExecuteScalar(), CultureInfo.InvariantCulture) == 1;
     }
-    public IEnumerable<ScienceObservation> StreamObservations(Guid? missionId = null, Guid? datasetId = null, long after = 0, int? limit = null)
+    public IEnumerable<ScienceObservation> StreamObservations(Guid? missionId = null, Guid? datasetId = null, long after = 0, int? limit = null,string? instrumentId=null)
     {
         if (AvailabilityError() is { } error) throw new IOException(error);
         if (!File.Exists(DatabasePath)) yield break;
         using var db = Open(); using var cmd = db.CreateCommand();
         cmd.CommandText = "SELECT id,payload_json FROM observations WHERE id>$after"
             + (missionId is null ? "" : " AND mission_id=$mission") + (datasetId is null ? "" : " AND dataset_id=$dataset")
+            + (instrumentId is null?"":" AND dataset_id IN (SELECT id FROM datasets WHERE instrument_id=$instrument)")
             + " ORDER BY id" + (limit is null ? "" : " LIMIT $limit");
-        cmd.Parameters.AddWithValue("$after", Math.Max(after, 0)); cmd.Parameters.AddWithValue("$mission", missionId?.ToString() ?? ""); cmd.Parameters.AddWithValue("$dataset", datasetId?.ToString() ?? "");
+        cmd.Parameters.AddWithValue("$instrument",instrumentId??"");cmd.Parameters.AddWithValue("$after", Math.Max(after, 0)); cmd.Parameters.AddWithValue("$mission", missionId?.ToString() ?? ""); cmd.Parameters.AddWithValue("$dataset", datasetId?.ToString() ?? "");
         if (limit is not null) cmd.Parameters.AddWithValue("$limit", Math.Clamp(limit.Value, 1, 5000));
         using var reader = cmd.ExecuteReader();
         while (reader.Read()) yield return JsonSerializer.Deserialize<ScienceObservation>(reader.GetString(1), WireJson.Options)! with { Id = reader.GetInt64(0) };

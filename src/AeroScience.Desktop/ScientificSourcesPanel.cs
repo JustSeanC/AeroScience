@@ -26,6 +26,7 @@ public sealed class ScientificSourcesPanel:FlowLayoutPanel
         SourceAvailability[] sources=[];string? error=null;try{sources=app.ScientificSources();}catch(Exception e)when(e is IOException or InvalidOperationException or UnauthorizedAccessException){error=e.Message;}
         if(error is not null)AddLabel(this,error);
         var preferences=app.ScientificAccess.Preferences;
+        AddLabel(this,"Online Scientific Data Access: "+(preferences.OnlineEnabled?"Enabled":"Disabled — local datasets remain available"),true);AddButton(this,"Enable / Configure Online Scientific Data Access",()=>app.OpenScientificSources("access"));
         foreach(var (kind,title,provider,description) in categories)
         {
             var group=new GroupBox{Text=title,AutoSize=true,AutoSizeMode=AutoSizeMode.GrowAndShrink,Width=710,Padding=new(14),Margin=new(0,10,0,14)};
@@ -38,16 +39,22 @@ public sealed class ScientificSourcesPanel:FlowLayoutPanel
             var modeStatus=AddLabel(content,"Source mode applies to selection, not the recording switch.");content.Controls.Add(modes);modes.SelectedIndexChanged+=(_,_)=>{try{app.SetScientificSourceMode(kind,values[modes.SelectedIndex]);modeStatus.Text="Saved. Existing data and products are retained.";}catch(Exception e){app.ShowError(e);}};
             var entries=sources.Where(s=>s.Source.Manifest.Kind==kind).ToArray();var bytes=entries.Sum(e=>e.Source.Files.Sum(f=>f.Bytes));
             AddLabel(content,$"{entries.Length} imported/prepared datasets · {bytes/1048576d:0.0} MiB retained"+(entries.Length==0&&kind==RemoteKind.Hyperspectral?" · Dataset Required":""),true);
-            foreach(var entry in entries.Take(20))
+            foreach(var collection in entries.GroupBy(e=>new{e.Source.Manifest.Provider,Identity=e.Source.Manifest.Acquisition?.Workflow=="usgs-3dep-numeric"?"USGS composite regions":e.Source.Manifest.SceneId,e.Source.Manifest.ObservationUtc,e.Source.Manifest.VerticalDatum,e.Source.Manifest.License,Resolution=e.Source.Manifest.Acquisition?.NativeResolution,Name=e.Source.Manifest.Acquisition is null?e.Source.Manifest.Name:null,Calibration=System.Text.Json.JsonSerializer.Serialize(e.Source.Manifest.Bands.Select(b=>new{b.Id,b.Unit,b.Scale,b.Offset,b.WavelengthNm,b.BadBand}),WireJson.Options)}))
             {
-                var source=entry.Source;AddLabel(content,$"{source.Manifest.Name}\n{source.Manifest.Provider} · {source.Manifest.ObservationUtc?.ToString("u")??"Observation date unknown / composite"}\n{(entry.FilesAvailable?"Available; use View Coverage for mission-area suitability":"Dataset Invalid: "+entry.Error)}");
-                var actions=new FlowLayoutPanel{AutoSize=true,WrapContents=true,MaximumSize=new(660,0)};content.Controls.Add(actions);
+            var regional=new FlowLayoutPanel{AutoSize=true,FlowDirection=FlowDirection.TopDown,WrapContents=false,Visible=false};content.Controls.Add(regional);
+            AddButton(content,$"{collection.Key.Provider} — {collection.Count()} prepared regions — {collection.Sum(e=>e.Source.Files.Sum(f=>f.Bytes))/1048576d:0.0} MiB (expand)",()=>regional.Visible=!regional.Visible);
+            foreach(var entry in collection.Take(20))
+            {
+                var source=entry.Source;AddLabel(regional,$"{source.Manifest.Name}\n{source.Manifest.Provider} · {source.Manifest.ObservationUtc?.ToString("u")??"Observation date unknown / composite"}\n{(entry.FilesAvailable?"Available; use View Coverage for mission-area suitability":"Dataset Invalid: "+entry.Error)}");
+                var actions=new FlowLayoutPanel{AutoSize=true,WrapContents=true,MaximumSize=new(660,0)};regional.Controls.Add(actions);
                 AddButton(actions,"View Coverage",()=>app.OpenScientificSources(kind.ToString().ToLowerInvariant(),dataset:source.Id));
                 AddButton(actions,"View Dataset Details",()=>
                 {
                     using var detail=new Form{Text=source.Manifest.Name,Width=680,Height=520,AutoScaleMode=AutoScaleMode.Dpi,StartPosition=FormStartPosition.CenterParent};
                     detail.Controls.Add(new TextBox{ReadOnly=true,Multiline=true,ScrollBars=ScrollBars.Both,Dock=DockStyle.Fill,Text=System.Text.Json.JsonSerializer.Serialize(source,WireJson.Options),WordWrap=true});detail.ShowDialog(owner);
                 });
+            }
+            if(collection.Count()>20)AddButton(regional,"View All Regions and Collection Coverage",()=>app.OpenScientificSources(kind.ToString().ToLowerInvariant()));
             }
             var buttons=new FlowLayoutPanel{AutoSize=true,MaximumSize=new(660,0),WrapContents=true};content.Controls.Add(buttons);
             AddButton(buttons,kind==RemoteKind.Hyperspectral?"Import Hyperspectral Dataset…":"Import Dataset…",()=>app.OpenScientificSources(kind.ToString().ToLowerInvariant(),import:true));

@@ -216,8 +216,7 @@ public sealed partial class ScienceStore
         {
             var root = StorageManager.ResolveDataset(DirectoryPath, LibraryId, source.RelativeDirectory);
             foreach (var file in source.Files) if (new FileInfo(ScientificRaster.SafeFile(root, file.RelativePath)).Length != file.Bytes) throw new IOException("A source file is missing or changed; reimport a verified collection.");
-            using var raster = new ScientificRaster(root, source.Manifest.Bands.First(b => !b.BadBand));
-            return new SourceAvailability(source, true, point is null ? null : raster.Covers(point), null);
+            return new SourceAvailability(source, true, point is null ? null : source.Grids.Values.All(g=>ScientificRaster.GridCovers(g,point)), null);
         }
         catch (Exception e) when (e is IOException or ArgumentException or InvalidOperationException or UnauthorizedAccessException)
         { return new SourceAvailability(source, false, false, e.Message); }

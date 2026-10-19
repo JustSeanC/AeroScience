@@ -1,0 +1,55 @@
+import {test,expect} from '@playwright/test';
+import {mountToolbar} from './helpers/toolbar.mjs';
+const origin='http://127.0.0.1:5080';
+test.beforeEach(async({request})=>{const response=await request.post('/api/session',{data:{},headers:{Origin:origin}});expect(response.ok()).toBeTruthy();});
+async function post(request,path,data={}){const {csrf}=await(await request.post('/api/session',{data:{},headers:{Origin:origin}})).json();const response=await request.post(path,{data,headers:{Origin:origin,'X-AeroScience-CSRF':csrf}});expect(response.ok(),await response.text()).toBeTruthy();return response.json();}
+test('independent finite and Unlimited policies persist with the privacy and per-download controls',async({page,request})=>{
+ const before=(await(await request.get('/api/science/access')).json()).configuration.preferences;
+ await post(request,'/api/science/access',{...before,onlineEnabled:false,prefetchHourlyBytes:800*1048576,preflightTransferBytes:100*1048576});
+ await page.goto('/#settings/science');await expect(page.getByRole('button',{name:'Enable Online Scientific Data Access',exact:true})).toBeVisible();await page.getByRole('button',{name:'Enable Online Scientific Data Access',exact:true}).click();
+ await expect(page.getByLabel('Overall scientific transfer budget per rolling hour (MiB)')).toHaveValue('800');await page.getByLabel('Unlimited in-flight hourly transfer allowance',{exact:true}).check();await expect(page.getByLabel('Overall scientific transfer budget per rolling hour (MiB)')).toBeDisabled();await page.getByRole('button',{name:'Save scientific access preferences',exact:true}).click();
+ await page.reload();await expect(page.getByLabel('Unlimited in-flight hourly transfer allowance',{exact:true})).toBeChecked();await expect(page.getByLabel('Preflight transfer allowance (MiB per application session)',{exact:true})).toHaveValue('100');const saved=(await(await request.get('/api/science/access')).json()).configuration.preferences;expect(saved.prefetchHourlyBytes).toBeNull();expect(saved.preflightTransferBytes).toBe(100*1048576);expect(saved.maximumDownloadBytes).toBe(before.maximumDownloadBytes);expect(saved.onlineEnabled).toBe(false);
+ await post(request,'/api/science/access',before);
+});
+test('download activity filters and expanded rows remain stable across live updates',async({page,request})=>{
+ const preferences=(await(await request.get('/api/science/access')).json()).configuration.preferences;await post(request,'/api/science/access',{...preferences,onlineEnabled:false});await post(request,'/api/science/prepare',{latitude:10,longitude:30});
+ await page.goto('/#planner');const readiness=page.locator('#planner .scientific-readiness').first();await expect(readiness.locator('.source-notice')).toHaveCount(0);await readiness.getByRole('button',{name:'View Download Activity',exact:true}).click();const dialog=page.getByRole('dialog',{name:'Scientific Download Activity',exact:true});await dialog.getByLabel('Activity',{exact:true}).selectOption('all');await expect(dialog.locator('.download-jobs > details').first()).toBeVisible();const row=dialog.locator('.download-jobs > details').first();await row.locator('summary').click();await expect(row).toHaveAttribute('open','');await page.waitForResponse(r=>r.url().endsWith('/api/science/activity'));await expect(row).toHaveAttribute('open','');await expect(dialog).toContainText('reserved');await expect(dialog).toContainText('Combined actual network');await dialog.getByRole('button',{name:'Close Download Activity',exact:true}).click();await expect(dialog).toHaveCount(0);
+});
+test('regional source collections expand only a bounded page and retain original identities',async({page,request})=>{
+ await post(request,'/api/testing/sources/regions');await page.goto('/#settings/science');const section=page.locator('#source-terrain');const collection=section.locator('details.source-collection').filter({hasText:'SYNTHETIC TEST FIXTURE'}).first();await expect(collection).toBeVisible();await expect(collection).not.toHaveAttribute('open','');await collection.locator(':scope > summary').click();await collection.getByText(/View Individual Regions/).click();await expect(collection.locator('.source-notice')).toHaveCount(20);await collection.getByRole('button',{name:'More Regions',exact:true}).click();expect(await collection.locator('.source-notice').count()).toBeLessThanOrEqual(20);await expect(collection.getByRole('button',{name:'Previous Regions',exact:true})).toBeEnabled();
+});
+test('preflight review is deliberate and never starts when saving a plan',async({page,request})=>{
+ const id=crypto.randomUUID(),name='032 preflight '+id;const prior=(await(await request.get('/api/science/plan-readiness')).json()).length;
+ await post(request,'/api/plans',{id,name,waypoints:[{name:'A',latitude:40,longitude:-75},{name:'B',latitude:40.05,longitude:-74.95}],instruments:[{instrumentId:'terrain-scanner',enabled:true,intervalMs:1000}]});expect((await(await request.get('/api/science/plan-readiness')).json()).length).toBe(prior);
+ await page.goto('/#planner');const row=page.locator('.plan-row').filter({hasText:name});await row.getByRole('button',{name:'Prepare scientific data',exact:true}).click();const dialog=page.getByRole('dialog',{name:'Prepare Scientific Data',exact:true});await expect(dialog).toContainText('In-flight allowance is separate');await expect(dialog).toContainText('Transfer size: unknown');await dialog.getByRole('button',{name:'Cancel',exact:true}).click();expect((await(await request.get('/api/science/plan-readiness')).json()).length).toBe(prior);
+});
+test('native Mission tab automatically requests saved plans without opening Map',async({page})=>{
+ await mountToolbar(page,{autoReply:true});await expect(page.locator('#as-mission-view #as-map-plan')).toBeVisible();await expect(page.locator('#as-map-plan option')).toHaveText(['Unplanned Mission']);await expect.poll(()=>page.evaluate(()=>window.bus.sent.filter(x=>x.command.op==='map-plans').length)).toBeGreaterThan(0);await expect(page.locator('#as-map-view')).toBeHidden();
+});
+test('mission results show bounded navigation and real acquisition locations without empty next pages',async({page,request})=>{
+ const seeded=await post(request,'/api/testing/remote/terrain');await page.goto('/#science');const section=page.locator('.remote-products');await section.getByLabel('Results mission').selectOption(seeded.missionId);await section.getByLabel('Product instrument').selectOption('terrain-scanner');await expect(section).toContainText('Showing 1–1 of 1 acquisitions');await expect(section.getByRole('button',{name:'Browse Previous',exact:true})).toBeDisabled();await expect(section.getByRole('button',{name:'View More Acquisitions',exact:true})).toBeDisabled();await section.getByRole('button',{name:'View Acquisitions on Map',exact:true}).click();await expect(section).toContainText('valid sample locations');await expect(section.locator('.geographic-map')).toBeVisible();
+});
+test('atmospheric result pages preserve open values across refresh and stop at the last page',async({page,request})=>{
+ const seeded=await post(request,'/api/testing/remote/terrain');
+ const instrument=(await(await request.get('/api/instruments')).json()).find(i=>!['thermal-imager','multispectral-imager','hyperspectral-imager','terrain-scanner'].includes(i.id));
+ const datasetId=crypto.randomUUID();
+ await page.route(`**/api/missions/${seeded.missionId}/scientific-results`,async route=>{const response=await route.fetch();const overview=await response.json();overview.datasets.push({id:datasetId,instrumentId:instrument.id,observationCount:4});await route.fulfill({response,json:overview});});
+ await page.route(`**/api/science/datasets/${datasetId}/observations?**`,async route=>{const after=Number(new URL(route.request().url()).searchParams.get('after'));await route.fulfill({json:{observations:[{timestampUtc:'2026-10-19T00:00:00Z',measurementId:'SYNTHETIC browser paging fixture',value:after?4:1,unit:'test',provenance:'Synthetic UI fixture; not scientific acceptance'}],next:after?4:1,hasMore:!after}});});
+ await page.goto('/#science');const section=page.locator('.remote-products');await section.getByLabel('Results mission').selectOption(seeded.missionId);await section.getByLabel('Product instrument').selectOption(instrument.id);
+ const row=section.locator('details').filter({hasText:instrument.name+' — 4 atmospheric measurement values'});await row.locator('summary').click();const more=row.getByRole('button',{name:'View More Measurements',exact:true});await more.click();await expect(row.locator('pre')).toContainText(': 1 test');
+ const refreshed=page.waitForResponse(r=>r.url().endsWith(`/api/missions/${seeded.missionId}/scientific-results`));await section.getByRole('button',{name:'Refresh Results',exact:true}).click();await refreshed;await expect(row).toHaveAttribute('open','');await expect(row.locator('pre')).toContainText(': 1 test');
+ await more.click();await expect(row.locator('pre')).toContainText(': 4 test');await expect(more).toBeDisabled();
+});
+test('acquisition navigation respects 0, 1, 30, 31, 100 and 101 result boundaries',async({page,request})=>{
+ const seeded=await post(request,'/api/testing/remote/terrain');const actual=(await(await request.get(`/api/science/products/page?missionId=${seeded.missionId}`)).json()).items[0];let total=0;
+ const fixtures=Array.from({length:101},()=>({...actual,id:crypto.randomUUID(),provenance:'SYNTHETIC pagination UI fixture; not provider acceptance'}));
+ await page.route('**/api/science/products/page?**',async route=>{const query=new URL(route.request().url()).searchParams;if(query.get('missionId')!==seeded.missionId)return route.continue();const offset=Number(query.get('offset')||0);await route.fulfill({json:{items:fixtures.slice(offset,Math.min(offset+30,total)),total,offset}});});
+ await page.goto('/#science');const section=page.locator('.remote-products');await section.getByLabel('Results mission').selectOption(seeded.missionId);const filter=section.getByLabel('Product instrument'),next=section.getByRole('button',{name:'View More Acquisitions',exact:true}),previous=section.getByRole('button',{name:'Browse Previous',exact:true});
+ for(const count of [0,1,30,31,100,101]){
+  total=count;await filter.selectOption('terrain-scanner');await expect(previous).toBeDisabled();await expect(section).toContainText(count?`Showing 1–${Math.min(30,count)} of ${count} acquisitions`:'No completed acquisitions yet.');
+  for(let offset=30;offset<count;offset+=30){await expect(next).toBeEnabled();await next.click();await expect(section).toContainText(`Showing ${offset+1}–${Math.min(offset+30,count)} of ${count} acquisitions`);}
+  await expect(next).toBeDisabled();
+  if(count>30){for(let offset=Math.floor((count-1)/30)*30-30;offset>=0;offset-=30){await previous.click();await expect(section).toContainText(`Showing ${offset+1}–${Math.min(offset+30,count)} of ${count} acquisitions`);}await expect(previous).toBeDisabled();}
+  await filter.selectOption('');
+ }
+});

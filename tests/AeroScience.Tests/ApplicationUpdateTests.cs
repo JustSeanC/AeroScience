@@ -13,7 +13,7 @@ public sealed class ApplicationUpdateTests : IDisposable
     [Fact]public async Task SafeReleaseSelectionCachesChecksSupportsChannelsAndNeverDownloadsAnInstaller()
     {
         var handler=new Handler();using var http=new HttpClient(handler);var service=new ApplicationUpdates(root,http);
-        var update=await service.Check();Assert.Equal("v0.3.2-alpha.10",update.Available!.Version);Assert.Equal(1,handler.Calls);Assert.Equal("api.github.com",handler.LastHost);Assert.Equal("/repos/JustSeanC/AeroScience/releases",handler.LastPath);
+        var update=await service.Check();Assert.Equal("v0.3.3-alpha.10",update.Available!.Version);Assert.Equal(1,handler.Calls);Assert.Equal("api.github.com",handler.LastHost);Assert.Equal("/repos/JustSeanC/AeroScience/releases",handler.LastPath);
         await service.Check();Assert.Equal(1,handler.Calls);Assert.NotNull(new ApplicationUpdates(root,http).Get().Available);
         service.RemindLater();Assert.True(service.Get().RemindAfterUtc>DateTimeOffset.UtcNow);
         service.Configure(new(true,false));Assert.Null((await service.Check()).Available);Assert.Equal(2,handler.Calls);
@@ -41,7 +41,7 @@ public sealed class ApplicationUpdateTests : IDisposable
             Calls++;LastHost=request.RequestUri!.Host;LastPath=request.RequestUri.AbsolutePath;Assert.Contains("AeroScience/",request.Headers.UserAgent.ToString());
             object Release(string tag)=>new{draft=false,prerelease=true,tag_name=tag,html_url="https://github.com/JustSeanC/AeroScience/releases/tag/"+tag,
                 assets=BadAssets?Array.Empty<object>():new[]{new{name="AeroScience-Setup-"+tag+".exe",browser_download_url="https://github.com/JustSeanC/AeroScience/releases/download/"+tag+"/AeroScience-Setup-"+tag+".exe"},new{name="AeroScience-Setup-"+tag+".exe.sha256",browser_download_url="https://github.com/JustSeanC/AeroScience/releases/download/"+tag+"/AeroScience-Setup-"+tag+".exe.sha256"}}};
-            return Task.FromResult(new HttpResponseMessage((HttpStatusCode)Code){Content=new StringContent(Malformed?"not json":JsonSerializer.Serialize(new[]{Release("v0.3.2-alpha.2"),Release("v0.3.2-alpha.10")}))});
+            return Task.FromResult(new HttpResponseMessage((HttpStatusCode)Code){Content=new StringContent(Malformed?"not json":JsonSerializer.Serialize(new[]{Release("v0.3.3-alpha.2"),Release("v0.3.3-alpha.10")}))});
         }
     }
     public void Dispose(){if(Directory.Exists(root))Directory.Delete(root,true);}

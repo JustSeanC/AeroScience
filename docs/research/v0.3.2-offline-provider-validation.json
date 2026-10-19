@@ -1,0 +1,621 @@
+{
+  "formatVersion": 1,
+  "checkedUtc": "2026-10-19T03:37:05.4862472+00:00",
+  "evidenceType": "genuine-retained-public-data-offline",
+  "networkAcceptance": "not established by this run",
+  "windowsMsfs": "not tested",
+  "flightInput": "synthetic test position",
+  "results": [
+    {
+      "provider": "Microsoft Planetary Computer / Copernicus DEM",
+      "scene": "Copernicus_DSM_COG_10_N46_00_E008_00_DEM",
+      "sourceObservedUtc": null,
+      "originalFiles": [
+        {
+          "relativePath": "elevation.tif",
+          "bytes": 18044,
+          "sha256": "f66b92a3a5f914f5c26ec8e5c1395311472f188347e5666d66a513aee4d22a3d"
+        }
+      ],
+      "validSamples": 576,
+      "networkBytes": 0,
+      "product": {
+        "id": "ba849c67-435d-4fd3-b1b9-d91d12e7a04e",
+        "datasetId": "d832ae93-95b4-41d0-b5bf-b5640c743fff",
+        "libraryId": "8ccffd50-8ec7-4b33-b34b-93201e3f93f7",
+        "missionId": "6ac03e2a-76c5-4c99-bb8a-1c06e32c3cbd",
+        "instrumentId": "terrain-scanner",
+        "sourceId": "6177d998-02f4-4f23-9a87-64481e746b6e",
+        "flightPacketUtc": "2026-10-19T03:37:04.8946148+00:00",
+        "processedUtc": "2026-10-19T03:37:04.9819497+00:00",
+        "sourceObservationUtc": null,
+        "footprint": {
+          "center": {
+            "latitude": 46.10041666666667,
+            "longitude": 8.100416666666666
+          },
+          "boundary": [
+            {
+              "latitude": 46.10042384721467,
+              "longitude": 8.100311043666284
+            },
+            {
+              "latitude": 46.10042384721467,
+              "longitude": 8.100522289667047
+            },
+            {
+              "latitude": 46.100409486021036,
+              "longitude": 8.100522289639624
+            },
+            {
+              "latitude": 46.100409486021036,
+              "longitude": 8.100311043693708
+            }
+          ],
+          "heightAbovePlaneMetres": 30.48,
+          "horizontalCrs": "EPSG:4326",
+          "verticalReference": "Local horizontal plane at simulator surface beneath aircraft; not an external DEM datum",
+          "method": "Body/mount rotation, ray-plane intersection and WGS84 geodesic displacement",
+          "limitations": [
+            "Approximate constant-height plane; off-aircraft relief, Earth curvature and occlusion are not ray-traced.",
+            "External terrain datums are retained separately. No NAVD88/ellipsoid/MSFS vertical transformation is assumed."
+          ]
+        },
+        "relativePath": "Products/6ac03e2a76c54c99bb8a1c06e32c3cbd/ba849c67435d4fd3b1b9d91d12e7a04e.json",
+        "bytes": 64923,
+        "sha256": "8c2938d11e2b80e646a9ba0a4fe1943bd1cf3b1fcc0efaa662652886aa0888d9",
+        "width": 24,
+        "height": 24,
+        "availableViews": [
+          "elevation"
+        ],
+        "provenance": "DEM-derived terrain samples, not measured LiDAR returns; source vertical datum retained without conversion",
+        "quality": "Valid pixels only; per-band nulls preserve nodata/quality exclusions",
+        "warnings": [
+          "Approximate constant-height plane; off-aircraft relief, Earth curvature and occlusion are not ray-traced.",
+          "External terrain datums are retained separately. No NAVD88/ellipsoid/MSFS vertical transformation is assumed.",
+          "Source observation date is not the simulator flight time. FlightPacketUtc is host UTC when the simulator packet was received, not the simulator world clock.",
+          "A 24\u00d724 sample grid represents this approximate footprint; dense samples do not improve the original source resolution. No survey coverage percentage is computed.",
+          "Source identity/license/date are supplied with the imported collection; AeroScience validates files/geometry but does not authenticate a provider signature.",
+          "Original observation date is unknown; see source publication metadata."
+        ],
+        "sourceClass": "externalDataset",
+        "validSampleCount": 576
+      },
+      "readiness": {
+        "key": "Terrain:8.1,46.1,8.12,46.120000000000005",
+        "kind": "terrain",
+        "status": "Ready",
+        "message": "Verified retained source available offline; actual per-pixel masks still apply.",
+        "area": {
+          "west": 8.1,
+          "south": 46.1,
+          "east": 8.12,
+          "north": 46.120000000000005,
+          "corners": [
+            {
+              "latitude": 46.1,
+              "longitude": 8.1
+            },
+            {
+              "latitude": 46.1,
+              "longitude": 8.12
+            },
+            {
+              "latitude": 46.120000000000005,
+              "longitude": 8.12
+            },
+            {
+              "latitude": 46.120000000000005,
+              "longitude": 8.1
+            }
+          ],
+          "center": {
+            "latitude": 46.11,
+            "longitude": 8.11
+          }
+        },
+        "provider": "Microsoft Planetary Computer / Copernicus DEM",
+        "dataset": "cop-dem-glo-30 / Copernicus_DSM_COG_10_N46_00_E008_00_DEM",
+        "observationUtc": null,
+        "quality": "Numeric DSM; vertical reference differs from 3DEP and aircraft MSL",
+        "downloadedBytes": 0,
+        "estimatedDownloadBytes": null,
+        "estimatedStorageBytes": 37748736,
+        "sourceId": "6177d998-02f4-4f23-9a87-64481e746b6e",
+        "authorization": null,
+        "updatedUtc": "2026-10-19T03:37:04.8148724+00:00",
+        "discoveries": null,
+        "samplePoint": null,
+        "sourceCoverage": [
+          {
+            "latitude": 46.12013888888889,
+            "longitude": 8.099861111111112
+          },
+          {
+            "latitude": 46.12013888888889,
+            "longitude": 8.12013888888889
+          },
+          {
+            "latitude": 46.09986111111111,
+            "longitude": 8.12013888888889
+          },
+          {
+            "latitude": 46.09986111111111,
+            "longitude": 8.099861111111112
+          }
+        ],
+        "scope": "manual",
+        "stage": "Ready",
+        "seconds": null,
+        "reusedBytes": 18044
+      }
+    },
+    {
+      "provider": "Copernicus / Element 84 Earth Search",
+      "scene": "S2A_18TWK_20240903_0_L2A",
+      "sourceObservedUtc": "2024-09-03T15:52:05.578+00:00",
+      "originalFiles": [
+        {
+          "relativePath": "B02.tif",
+          "bytes": 58716,
+          "sha256": "3a73bd5220bdf9a756516d4164e050a8584735c96388b913d3f00c79e74e6eee"
+        },
+        {
+          "relativePath": "B03.tif",
+          "bytes": 58692,
+          "sha256": "0b51220f541aac313b81188027efd1db1d0e0d4bf9d6f37266f732f8b519bb0e"
+        },
+        {
+          "relativePath": "B04.tif",
+          "bytes": 59780,
+          "sha256": "18af6015253641f4856d77d87b8283a20eb08d49f83656b5522e22c17d20e15b"
+        },
+        {
+          "relativePath": "B08.tif",
+          "bytes": 60866,
+          "sha256": "2709bf2409ed5aedc3b41663975ce79e3141b7dfd8b1ed5780bcab9d6dd72dc4"
+        },
+        {
+          "relativePath": "SCL.tif",
+          "bytes": 1444,
+          "sha256": "490d03dc11d94fabc5037777b2e8b4af374f4858ce801dfd33cbe7c146ea2fa5"
+        }
+      ],
+      "validSamples": 183,
+      "networkBytes": 0,
+      "product": {
+        "id": "717d7642-8dee-4c03-b50c-6bd8501d6cf2",
+        "datasetId": "683424e5-606c-4e8a-8dc2-c48eaa4d4bd6",
+        "libraryId": "8ccffd50-8ec7-4b33-b34b-93201e3f93f7",
+        "missionId": "d6f4016e-f1bd-48a5-8b94-254918bf39ae",
+        "instrumentId": "multispectral-imager",
+        "sourceId": "2d04cabd-b144-404b-bafa-fe3aae104865",
+        "flightPacketUtc": "2026-10-19T03:37:05.1668919+00:00",
+        "processedUtc": "2026-10-19T03:37:05.1811019+00:00",
+        "sourceObservationUtc": "2024-09-03T15:52:05.578+00:00",
+        "footprint": {
+          "center": {
+            "latitude": 40.000416666666666,
+            "longitude": -74.98625
+          },
+          "boundary": [
+            {
+              "latitude": 40.00046506997959,
+              "longitude": -74.98631293758152
+            },
+            {
+              "latitude": 40.00046506997959,
+              "longitude": -74.98618706241848
+            },
+            {
+              "latitude": 40.000368263319174,
+              "longitude": -74.98618706250735
+            },
+            {
+              "latitude": 40.000368263319174,
+              "longitude": -74.98631293749264
+            }
+          ],
+          "heightAbovePlaneMetres": 30.48,
+          "horizontalCrs": "EPSG:4326",
+          "verticalReference": "Local horizontal plane at simulator surface beneath aircraft; not an external DEM datum",
+          "method": "Body/mount rotation, ray-plane intersection and WGS84 geodesic displacement",
+          "limitations": [
+            "Approximate constant-height plane; off-aircraft relief, Earth curvature and occlusion are not ray-traced.",
+            "External terrain datums are retained separately. No NAVD88/ellipsoid/MSFS vertical transformation is assumed."
+          ]
+        },
+        "relativePath": "Products/d6f4016ef1bd48a58b94254918bf39ae/717d76428dee4c03b50c6bd8501d6cf2.json",
+        "bytes": 113225,
+        "sha256": "91e33504363b629869383f704d12dec7c8d721bde9f13292a2efa492710cb188",
+        "width": 24,
+        "height": 24,
+        "availableViews": [
+          "natural-color",
+          "false-color",
+          "ndvi"
+        ],
+        "provenance": "Historical external geographic dataset sampled along simulated aircraft footprint; not a live airborne camera",
+        "quality": "Valid pixels only; per-band nulls preserve nodata/quality exclusions",
+        "warnings": [
+          "Approximate constant-height plane; off-aircraft relief, Earth curvature and occlusion are not ray-traced.",
+          "External terrain datums are retained separately. No NAVD88/ellipsoid/MSFS vertical transformation is assumed.",
+          "Source observation date is not the simulator flight time. FlightPacketUtc is host UTC when the simulator packet was received, not the simulator world clock.",
+          "A 24\u00d724 sample grid represents this approximate footprint; dense samples do not improve the original source resolution. No survey coverage percentage is computed.",
+          "Source identity/license/date are supplied with the imported collection; AeroScience validates files/geometry but does not authenticate a provider signature."
+        ],
+        "sourceClass": "externalDataset",
+        "validSampleCount": 576
+      },
+      "readiness": {
+        "key": "Multispectral:-75,40,-74.98,40.02",
+        "kind": "multispectral",
+        "status": "Ready",
+        "message": "Verified retained source available offline; actual per-pixel masks still apply.",
+        "area": {
+          "west": -75,
+          "south": 40,
+          "east": -74.98,
+          "north": 40.02,
+          "corners": [
+            {
+              "latitude": 40,
+              "longitude": -75
+            },
+            {
+              "latitude": 40,
+              "longitude": -74.98
+            },
+            {
+              "latitude": 40.02,
+              "longitude": -74.98
+            },
+            {
+              "latitude": 40.02,
+              "longitude": -75
+            }
+          ],
+          "center": {
+            "latitude": 40.010000000000005,
+            "longitude": -74.99000000000001
+          }
+        },
+        "provider": "Copernicus / Element 84 Earth Search",
+        "dataset": "sentinel-2-l2a / S2A_18TWK_20240903_0_L2A",
+        "observationUtc": "2024-09-03T15:52:05.578+00:00",
+        "quality": "Scene cloud cover 0.01%; local QA/nodata still determines valid samples",
+        "downloadedBytes": 0,
+        "estimatedDownloadBytes": null,
+        "estimatedStorageBytes": 176160768,
+        "sourceId": "2d04cabd-b144-404b-bafa-fe3aae104865",
+        "authorization": null,
+        "updatedUtc": "2026-10-19T03:37:05.08595+00:00",
+        "discoveries": null,
+        "samplePoint": null,
+        "sourceCoverage": [
+          {
+            "latitude": 40.02002678518733,
+            "longitude": -75
+          },
+          {
+            "latitude": 40.020025052693,
+            "longitude": -74.97996127247852
+          },
+          {
+            "latitude": 39.99993322805347,
+            "longitude": -74.97996714678608
+          },
+          {
+            "latitude": 39.99993495932257,
+            "longitude": -75
+          }
+        ],
+        "scope": "manual",
+        "stage": "Ready",
+        "seconds": null,
+        "reusedBytes": 239498
+      }
+    },
+    {
+      "provider": "Microsoft Planetary Computer / USGS Landsat",
+      "scene": "LC08_L2SP_014032_20240903_02_T1",
+      "sourceObservedUtc": "2024-09-03T15:39:44.650124+00:00",
+      "originalFiles": [
+        {
+          "relativePath": "ST_B10.tif",
+          "bytes": 7818,
+          "sha256": "05b5e70505ae77243f394049ba2f800a714ce4c55f7e22349f3e3a43462caaa8"
+        },
+        {
+          "relativePath": "QA_PIXEL.tif",
+          "bytes": 436,
+          "sha256": "ba3d6e05277aa9fc9629bced52401b387c8bd7744c6137878177788537a7b996"
+        },
+        {
+          "relativePath": "QA_RADSAT.tif",
+          "bytes": 388,
+          "sha256": "6dcbf2ca051ac9b64c0574a5d61c465aeca0f08df0c9a6c227f5d41225563938"
+        }
+      ],
+      "validSamples": 576,
+      "networkBytes": 0,
+      "product": {
+        "id": "95fbd29f-a9b3-48a2-a16b-de9e68c0aa1f",
+        "datasetId": "49152006-9787-47d4-805f-858b52327e09",
+        "libraryId": "8ccffd50-8ec7-4b33-b34b-93201e3f93f7",
+        "missionId": "cee84cb6-e91f-41d7-a3cf-e3893acc8f89",
+        "instrumentId": "thermal-imager",
+        "sourceId": "4d3b8e12-52ee-4517-ad9a-9d45cc12674d",
+        "flightPacketUtc": "2026-10-19T03:37:05.3094362+00:00",
+        "processedUtc": "2026-10-19T03:37:05.3207139+00:00",
+        "sourceObservationUtc": "2024-09-03T15:39:44.650124+00:00",
+        "footprint": {
+          "center": {
+            "latitude": 40.000416666666666,
+            "longitude": -74.99958333333333
+          },
+          "boundary": [
+            {
+              "latitude": 40.00046506997959,
+              "longitude": -74.99964627091485
+            },
+            {
+              "latitude": 40.00046506997959,
+              "longitude": -74.99952039575182
+            },
+            {
+              "latitude": 40.000368263319174,
+              "longitude": -74.99952039584069
+            },
+            {
+              "latitude": 40.000368263319174,
+              "longitude": -74.99964627082598
+            }
+          ],
+          "heightAbovePlaneMetres": 30.48,
+          "horizontalCrs": "EPSG:4326",
+          "verticalReference": "Local horizontal plane at simulator surface beneath aircraft; not an external DEM datum",
+          "method": "Body/mount rotation, ray-plane intersection and WGS84 geodesic displacement",
+          "limitations": [
+            "Approximate constant-height plane; off-aircraft relief, Earth curvature and occlusion are not ray-traced.",
+            "External terrain datums are retained separately. No NAVD88/ellipsoid/MSFS vertical transformation is assumed."
+          ]
+        },
+        "relativePath": "Products/cee84cb6e91f41d7a3cfe3893acc8f89/95fbd29fa9b348a2a16bde9e68c0aa1f.json",
+        "bytes": 78135,
+        "sha256": "30167400f708f5afcf107b2ff0de68e012b2078f9fd213d2809d5ffab479b67f",
+        "width": 24,
+        "height": 24,
+        "availableViews": [
+          "temperature"
+        ],
+        "provenance": "Historical external geographic dataset sampled along simulated aircraft footprint; not a live airborne camera",
+        "quality": "Valid pixels only; per-band nulls preserve nodata/quality exclusions",
+        "warnings": [
+          "Approximate constant-height plane; off-aircraft relief, Earth curvature and occlusion are not ray-traced.",
+          "External terrain datums are retained separately. No NAVD88/ellipsoid/MSFS vertical transformation is assumed.",
+          "Source observation date is not the simulator flight time. FlightPacketUtc is host UTC when the simulator packet was received, not the simulator world clock.",
+          "A 24\u00d724 sample grid represents this approximate footprint; dense samples do not improve the original source resolution. No survey coverage percentage is computed.",
+          "Source identity/license/date are supplied with the imported collection; AeroScience validates files/geometry but does not authenticate a provider signature."
+        ],
+        "sourceClass": "externalDataset",
+        "validSampleCount": 576
+      },
+      "readiness": {
+        "key": "Thermal:-75,40,-74.98,40.02",
+        "kind": "thermal",
+        "status": "Ready",
+        "message": "Verified retained source available offline; actual per-pixel masks still apply.",
+        "area": {
+          "west": -75,
+          "south": 40,
+          "east": -74.98,
+          "north": 40.02,
+          "corners": [
+            {
+              "latitude": 40,
+              "longitude": -75
+            },
+            {
+              "latitude": 40,
+              "longitude": -74.98
+            },
+            {
+              "latitude": 40.02,
+              "longitude": -74.98
+            },
+            {
+              "latitude": 40.02,
+              "longitude": -75
+            }
+          ],
+          "center": {
+            "latitude": 40.010000000000005,
+            "longitude": -74.99000000000001
+          }
+        },
+        "provider": "Microsoft Planetary Computer / USGS Landsat",
+        "dataset": "landsat-c2-l2 / LC08_L2SP_014032_20240903_02_T1",
+        "observationUtc": "2024-09-03T15:39:44.650124+00:00",
+        "quality": "Scene cloud cover 0.05%; local QA/nodata still determines valid samples",
+        "downloadedBytes": 0,
+        "estimatedDownloadBytes": null,
+        "estimatedStorageBytes": 109051904,
+        "sourceId": "4d3b8e12-52ee-4517-ad9a-9d45cc12674d",
+        "authorization": null,
+        "updatedUtc": "2026-10-19T03:37:05.2518808+00:00",
+        "discoveries": null,
+        "samplePoint": null,
+        "sourceCoverage": [
+          {
+            "latitude": 40.02016193174669,
+            "longitude": -75.00005859288783
+          },
+          {
+            "latitude": 40.020160148230666,
+            "longitude": -74.9796682685318
+          },
+          {
+            "latitude": 39.99988812804895,
+            "longitude": -74.97967428218925
+          },
+          {
+            "latitude": 39.99988991029238,
+            "longitude": -75.00005857555738
+          }
+        ],
+        "scope": "manual",
+        "stage": "Ready",
+        "seconds": null,
+        "reusedBytes": 8642
+      }
+    },
+    {
+      "provider": "USGS 3DEP National Map",
+      "scene": "3DEP--75,40,-74.98,40.02",
+      "sourceObservedUtc": null,
+      "originalFiles": [
+        {
+          "relativePath": "elevation.tif",
+          "bytes": 263002,
+          "sha256": "b25437967ba562cbdb4830d219e6fc65fa0ee0be760c48fce31a1dfa0fee04f5"
+        }
+      ],
+      "validSamples": 576,
+      "networkBytes": 0,
+      "product": {
+        "id": "4ed8a70d-f182-4dbc-8098-7456649fe050",
+        "datasetId": "a9e7423f-bc3e-497d-b387-faac723fa0fa",
+        "libraryId": "8ccffd50-8ec7-4b33-b34b-93201e3f93f7",
+        "missionId": "15639769-6e4d-4b0f-b11c-38764433d1a6",
+        "instrumentId": "terrain-scanner",
+        "sourceId": "d442a81e-ca00-461e-80dd-43a554f08939",
+        "flightPacketUtc": "2026-10-19T03:37:05.4302437+00:00",
+        "processedUtc": "2026-10-19T03:37:05.4374155+00:00",
+        "sourceObservationUtc": null,
+        "footprint": {
+          "center": {
+            "latitude": 40.000416666666666,
+            "longitude": -74.99958333333333
+          },
+          "boundary": [
+            {
+              "latitude": 40.000423854896425,
+              "longitude": -74.99967897419292
+            },
+            {
+              "latitude": 40.000423854896425,
+              "longitude": -74.99948769247375
+            },
+            {
+              "latitude": 40.00040947835798,
+              "longitude": -74.99948769249382
+            },
+            {
+              "latitude": 40.00040947835798,
+              "longitude": -74.99967897417285
+            }
+          ],
+          "heightAbovePlaneMetres": 30.48,
+          "horizontalCrs": "EPSG:4326",
+          "verticalReference": "Local horizontal plane at simulator surface beneath aircraft; not an external DEM datum",
+          "method": "Body/mount rotation, ray-plane intersection and WGS84 geodesic displacement",
+          "limitations": [
+            "Approximate constant-height plane; off-aircraft relief, Earth curvature and occlusion are not ray-traced.",
+            "External terrain datums are retained separately. No NAVD88/ellipsoid/MSFS vertical transformation is assumed."
+          ]
+        },
+        "relativePath": "Products/156397696e4d4b0fb11c38764433d1a6/4ed8a70df1824dbc80987456649fe050.json",
+        "bytes": 65609,
+        "sha256": "d91e2fa9ec6052e14bbafc566bae7231ebca1e9a95e5b4dbdc432a966503ea1d",
+        "width": 24,
+        "height": 24,
+        "availableViews": [
+          "elevation"
+        ],
+        "provenance": "DEM-derived terrain samples, not measured LiDAR returns; source vertical datum retained without conversion",
+        "quality": "Valid pixels only; per-band nulls preserve nodata/quality exclusions",
+        "warnings": [
+          "Approximate constant-height plane; off-aircraft relief, Earth curvature and occlusion are not ray-traced.",
+          "External terrain datums are retained separately. No NAVD88/ellipsoid/MSFS vertical transformation is assumed.",
+          "Source observation date is not the simulator flight time. FlightPacketUtc is host UTC when the simulator packet was received, not the simulator world clock.",
+          "A 24\u00d724 sample grid represents this approximate footprint; dense samples do not improve the original source resolution. No survey coverage percentage is computed.",
+          "Source identity/license/date are supplied with the imported collection; AeroScience validates files/geometry but does not authenticate a provider signature.",
+          "Original observation date is unknown; see source publication metadata."
+        ],
+        "sourceClass": "externalDataset",
+        "validSampleCount": 576
+      },
+      "readiness": {
+        "key": "Terrain:-75,40,-74.98,40.02",
+        "kind": "terrain",
+        "status": "Ready",
+        "message": "Verified retained source available offline; actual per-pixel masks still apply.",
+        "area": {
+          "west": -75,
+          "south": 40,
+          "east": -74.98,
+          "north": 40.02,
+          "corners": [
+            {
+              "latitude": 40,
+              "longitude": -75
+            },
+            {
+              "latitude": 40,
+              "longitude": -74.98
+            },
+            {
+              "latitude": 40.02,
+              "longitude": -74.98
+            },
+            {
+              "latitude": 40.02,
+              "longitude": -75
+            }
+          ],
+          "center": {
+            "latitude": 40.010000000000005,
+            "longitude": -74.99000000000001
+          }
+        },
+        "provider": "USGS 3DEP National Map",
+        "dataset": "USGS 3DEP bare-earth numeric elevation subset",
+        "observationUtc": null,
+        "quality": "USGS numeric composite; actual nodata checked before publishing",
+        "downloadedBytes": 0,
+        "estimatedDownloadBytes": null,
+        "estimatedStorageBytes": 37748736,
+        "sourceId": "d442a81e-ca00-461e-80dd-43a554f08939",
+        "authorization": null,
+        "updatedUtc": "2026-10-19T03:37:05.3772534+00:00",
+        "discoveries": null,
+        "samplePoint": null,
+        "sourceCoverage": [
+          {
+            "latitude": 40.02000000000001,
+            "longitude": -75.00000000000001
+          },
+          {
+            "latitude": 40.02000000000001,
+            "longitude": -74.98000000000002
+          },
+          {
+            "latitude": 40.000000000000014,
+            "longitude": -74.98000000000002
+          },
+          {
+            "latitude": 40.000000000000014,
+            "longitude": -75.00000000000001
+          }
+        ],
+        "scope": "manual",
+        "stage": "Ready",
+        "seconds": null,
+        "reusedBytes": 263002
+      }
+    }
+  ],
+  "sourceVersion": "0.3.2 final development source"
+}

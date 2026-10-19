@@ -42,8 +42,8 @@ public sealed class StorageManagement
         if (value.MissionLimitBytes is <= 0 || value.ScienceLimitBytes is <= 0 || !value.ProtectPinned) throw new ArgumentException("Storage limits must be positive byte values or Unlimited (null). Pinned-item protection remains enabled.");
     }
     public StorageLimits Configure(StorageLimits value)
-    { Validate(value); lock (gate) { if(reservedBytes>0&&value.ScienceLimitBytes is {} cap&&scienceFiles+StorageManager.DatabaseBytes(science.DatabasePath)+reservedBytes>=cap)throw new InvalidOperationException("Wait for the active scientific import/acquisition budget to finish before lowering the limit below its reserved space.");PreferenceStore.WriteAtomic(path, value); limits = value; ConfigurationError = null; return limits; } }
-    private static long Size(string path) => File.Exists(path) ? new FileInfo(path).Length : 0;
+    { Validate(value); lock (gate) { if(reservedBytes>0&&value.ScienceLimitBytes is {} cap&&scienceFiles+science.DatabaseUsageBytes()+reservedBytes>=cap)throw new InvalidOperationException("Wait for the active scientific import/acquisition budget to finish before lowering the limit below its reserved space.");PreferenceStore.WriteAtomic(path, value); limits = value; ConfigurationError = null; return limits; } }
+    private static long Size(string path) {try{return new FileInfo(path).Length;}catch(FileNotFoundException){return 0;}catch(DirectoryNotFoundException){return 0;}}
     private static long BackupBytes(string path) => Directory.Exists(path) ? Directory.EnumerateFiles(path, "*", SearchOption.TopDirectoryOnly).Where(p => (File.GetAttributes(p) & FileAttributes.ReparsePoint) == 0).Sum(Size) : 0;
     public void RefreshScience()
     {
@@ -81,7 +81,7 @@ public sealed class StorageManagement
             var free = disk.FreeBytes(science.DirectoryPath);
             long reserved;lock(gate)reserved=reservedBytes;
             if (free < expectedBytes + reserved + StorageManager.MinimumFreeBytes) throw new StorageLimitException("Scientific drive has insufficient unreserved free space; new science writes are suspended. Completed research is preserved; flight recording is independent.");
-            lock (gate) if (limits.ScienceLimitBytes is { } cap && scienceFiles + StorageManager.DatabaseBytes(science.DatabasePath) + reservedBytes + expectedBytes >= cap)
+            lock (gate) if (limits.ScienceLimitBytes is { } cap && scienceFiles + science.DatabaseUsageBytes() + reservedBytes + expectedBytes >= cap)
                 throw new StorageLimitException("Scientific storage limit reached. New science writes are suspended; change the limit or clean regenerable caches. Completed data and flight telemetry are preserved.");
         }
         try { Check(); }
@@ -94,7 +94,7 @@ public sealed class StorageManagement
         RequireScienceCapacity(expectedBytes);
         lock(gate)
         {
-            if(limits.ScienceLimitBytes is {} cap&&scienceFiles+StorageManager.DatabaseBytes(science.DatabasePath)+reservedBytes+expectedBytes>=cap)throw new StorageLimitException("Scientific capacity was reserved by another import/acquisition. New science writes are suspended; flight recording continues.");
+            if(limits.ScienceLimitBytes is {} cap&&scienceFiles+science.DatabaseUsageBytes()+reservedBytes+expectedBytes>=cap)throw new StorageLimitException("Scientific capacity was reserved by another import/acquisition. New science writes are suspended; flight recording continues.");
             reservedBytes=checked(reservedBytes+expectedBytes);
         }
         return new Reservation(()=>{lock(gate)reservedBytes=Math.Max(0,reservedBytes-expectedBytes);});
@@ -129,7 +129,7 @@ public sealed class StorageManagement
         }
         lock (gate)
         {
-            var flightDb = StorageManager.DatabaseBytes(missions.DatabasePath); var scienceDb = StorageManager.DatabaseBytes(science.DatabasePath);
+            var flightDb = StorageManager.DatabaseBytes(missions.DatabasePath); var scienceDb = science.DatabaseUsageBytes();
             long missionCount=0; try { StorageManager.RequireMissionDatabase(Path.GetDirectoryName(missions.DatabasePath)!); missionCount=missions.MissionCount(); } catch(Exception e) when(e is IOException or Microsoft.Data.Sqlite.SqliteException or UnauthorizedAccessException) { }
             return new(limits, Status("flight", Path.GetDirectoryName(missions.DatabasePath)!, flightDb, limits.MissionLimitBytes, flightDb, missionCount),
                 Status("science", science.DirectoryPath, scienceFiles + scienceDb, limits.ScienceLimitBytes, scienceDb), checkedUtc);

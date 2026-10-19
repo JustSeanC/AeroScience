@@ -7,7 +7,7 @@ namespace AeroScience.Missions;
 
 public sealed record RouteMapItem(string Kind, int Index, string Id, string Name, double Latitude, double Longitude,
     double? TargetAltitudeFeet = null, string? Instructions = null, Guid? PatternId = null, int? Area = null);
-public sealed record RouteMapAircraft(double Latitude, double Longitude, double HeadingDegrees, DateTimeOffset TimestampUtc);
+public sealed record RouteMapAircraft(double Latitude, double Longitude, double HeadingDegrees, DateTimeOffset TimestampUtc,double? GroundTrackDegrees=null,double? GroundspeedKnots=null);
 public sealed record RouteMapState(string Revision, string Name, Guid? MissionId, int Items, int Waypoints, int NextWaypoint,
     RouteMapAircraft? Aircraft, TrackPoint[] Track, long NextSequence, bool HasMore, bool Downsampled, MissionMarker[] Markers, string ProgressExplanation, int? SelectedWaypoint = null, double? DistanceMetres = null, double? BearingDegrees = null);
 public sealed record RouteMapChunk(string Revision, int Offset, RouteMapItem[] Items, int NextOffset, bool Complete);
@@ -58,7 +58,7 @@ public sealed class RouteMapService(MissionCoordinator coordinator)
             var target = fresh && selectedIndex >= 0 && selectedIndex < route.Length ? Geodesy.Point(route[selectedIndex]) : null;
             var position = fresh ? new Coordinates(frame!.Latitude, frame.Longitude) : null;
             return new(revision, Short(plan?.Name, 80), mission, items.Length, route.Length, nextWaypoint,
-                fresh ? new(frame!.Latitude, frame.Longitude, frame.HeadingDegrees, frame.TimestampUtc) : null,
+                fresh ? new(frame!.Latitude, frame.Longitude, frame.HeadingDegrees, frame.TimestampUtc,frame.GroundTrackDegrees,frame.GroundspeedKnots) : null,
                 track.Points, track.NextSequence, track.HasMore, track.Downsampled, markers,
                 "Next waypoint uses observed positions in route order within 1,000 m while this map is open. It is approximate, may miss crossings and is not a completed-flight analysis or aircraft guidance command.",
                 selectedIndex >= 0 ? selectedIndex : null, target is not null ? Geodesy.Distance(position!, target) : null, target is not null ? (Geodesy.Bearing(position!, target) + 360) % 360 : null);
@@ -80,5 +80,5 @@ public sealed class RouteMapService(MissionCoordinator coordinator)
             return new(revision, offset, page.ToArray(), offset + page.Count, offset + page.Count == items.Length);
         }
     }
-    public object Plans(int offset) => coordinator.Store.Plans(10, Math.Max(0, offset)).Select(p => new { p.Id, p.Name, p.Mode }).ToArray();
+    public object Plans(int offset) => coordinator.Store.Plans(10, Math.Max(0, offset)).Select(p => new { p.Id, p.Name, p.Mode,Waypoints=p.Waypoints?.Length??0,Patterns=p.Patterns?.Length??0,Instruments=Short(string.Join(", ",(p.Instruments??[]).Where(i=>i.Enabled).Select(i=>i.InstrumentId)),100) }).ToArray();
 }

@@ -43,10 +43,12 @@ public sealed class ResearchOperations(MissionStore missions, ScienceStore scien
     }
     public void End()
     {
-        var now = DateTimeOffset.UtcNow;
-        if (mission is not null) missions.AddEvent(mission.Id, now, "science-stopped", $"Science collection stopped. Intentional pause seconds: {pauseSeconds + (pauseStarted is { } began ? Math.Max(0, (now - began).TotalSeconds) : 0):0.###}. Collection will not resume automatically after a restart.");
-        pauseStarted = null; intentionallyPaused = false; mission = null; context = null; baseline = null;
-        remote.Reset(true);
+        var now=DateTimeOffset.UtcNow;
+        try
+        {
+            if(mission is not null)missions.AddEvent(mission.Id,now,"science-stopped",$"Science collection stopped. Intentional pause seconds: {pauseSeconds+(pauseStarted is {} began?Math.Max(0,(now-began).TotalSeconds):0):0.###}. Collection will not resume automatically after a restart.");
+        }
+        finally{pauseStarted=null;intentionallyPaused=false;mission=null;context=null;baseline=null;remote.Reset(true);}
     }
     public void Configure(InstrumentConfiguration[] input)
     {
@@ -177,7 +179,7 @@ public sealed class ResearchOperations(MissionStore missions, ScienceStore scien
                 var q = !config.Enabled ? ObservationQuality.Disabled : intentionallyPaused ? ObservationQuality.Paused
                     : connection.State != ConnectionState.Connected ? ObservationQuality.SourceDisconnected
                     : position is null || DateTimeOffset.UtcNow - position.TimestampUtc > TimeSpan.FromSeconds(6) ? ObservationQuality.Stale : r.Quality;
-                return new InstrumentState(config.InstrumentId, config.Enabled, config.IntervalMs, q, r.LastSuccessfulUtc, r.Products, r.Rejected, r.MissingIntervals, null, [], r.Processing ? "Processing a bounded geographic subset; flight recording continues." : r.Message, r.Products);
+                return new InstrumentState(config.InstrumentId, config.Enabled, config.IntervalMs, q, r.LastSuccessfulUtc, r.Products, r.Rejected, r.MissingIntervals, null, [], r.Processing ? "Processing a bounded geographic subset; flight recording continues." : r.Status+" · "+r.Message+" Processing: "+r.ProcessingSeconds.ToString("0.000")+" s", r.Products);
             }
             acquisitions.TryGetValue(config.InstrumentId, out var run);
             var quality = !config.Enabled ? ObservationQuality.Disabled

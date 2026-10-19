@@ -43,7 +43,7 @@
             <new-push-button id="as-map-page">Map</new-push-button>
           </nav>
           <p id="as-status" role="status">
-            Loading simulator communication service…
+            Loading simulator communication service...
           </p>
           <div
             id="as-scroll"
@@ -56,17 +56,17 @@
               <h2 id="as-aircraft">Awaiting aircraft telemetry</h2>
               <div class="as-metrics">
                 <div>
-                  <span>MSL / FT</span><strong id="as-altitude">—</strong>
+                  <span>MSL / FT</span><strong id="as-altitude"> - </strong>
                 </div>
                 <div>
-                  <span>IAS / KTS</span><strong id="as-airspeed">—</strong
-                  ><small id="as-mach">Mach —</small>
+                  <span>IAS / KTS</span><strong id="as-airspeed"> - </strong
+                  ><small id="as-mach">Mach  - </small>
                 </div>
                 <div>
-                  <span>HEADING / °T</span><strong id="as-heading">—</strong>
+                  <span>HEADING /  degT</span><strong id="as-heading"> - </strong>
                 </div>
                 <div>
-                  <span>VS / FT/MIN</span><strong id="as-vspeed">—</strong>
+                  <span>VS / FT/MIN</span><strong id="as-vspeed"> - </strong>
                 </div>
               </div>
               <div id="as-guidance" class="as-guidance">
@@ -78,15 +78,27 @@
                   Start recording at any time. Your mission continues if this
                   panel is closed.
                 </p>
+              <div class="as-plan-selector">
+                <h3>Saved Mission Plan</h3>
+                <label
+                  >Saved Mission Plan
+                  <select id="as-map-plan">
+                    <option value="">Unplanned Mission</option>
+                  </select>
+                </label>
+                <button id="as-map-plans">Refresh Plans</button
+                ><button id="as-map-more-plans">Next plans</button>
+              </div>
+                <button id="as-plan-map">View Route on Map</button>
+                <p class="as-note">Save a plan in the dashboard, select it here, start recording, fly and review Mission History. Use the moving map or an exported compatible flight plan; AeroScience does not command aircraft navigation.</p>
                 <p id="as-start-plan" class="as-note">
-                  No saved plan selected. Select a research plan from Map to
-                  record its route and instrument configuration.
+                  Unplanned Mission: record wherever you fly.
                 </p>
                 <label for="as-mode">Science operating mode</label
                 ><select id="as-mode">
-                  <option value="universal">Universal — Fly Anything</option>
+                  <option value="universal">Universal  -  Fly Anything</option>
                   <option value="realistic">
-                    Realistic — Authentic Research
+                    Realistic  -  Authentic Research
                   </option>
                 </select>
                 <p id="as-mode-help">
@@ -98,12 +110,12 @@
                   maxlength="100"
                   placeholder="Research mission"
                 /><new-push-button id="as-start" class="as-primary" disabled
-                  >Start mission</new-push-button
+                  >Start Recording</new-push-button
                 >
               </div>
               <div id="as-recording" hidden>
                 <h3 id="as-active-name"></h3>
-                <p id="as-active-mode"></p>
+                <p id="as-active-mode"></p><p id="as-active-plan" class="as-note"></p>
                 <div class="as-record-meta">
                   <span id="as-duration">00:00:00</span
                   ><span id="as-samples">0 samples</span>
@@ -125,40 +137,28 @@
               <p id="as-map-status" role="status">
                 Waiting for route synchronization.
               </p>
-              <details>
-                <summary>Load a saved research plan</summary>
-                <label
-                  >Saved plan (active missions always use their immutable
-                  snapshot)
-                  <select id="as-map-plan">
-                    <option value="">No saved plan selected</option>
-                  </select>
-                </label>
-                <button id="as-map-plans">Load saved plans</button
-                ><button id="as-map-more-plans">Next plans</button>
-              </details>
               <div class="as-map-actions">
                 <button id="as-map-follow">Follow Aircraft</button
                 ><button id="as-map-free">Free Pan</button>
                 <button id="as-map-fit">Fit Mission</button
                 ><button id="as-map-in">Zoom +</button
-                ><button id="as-map-out">Zoom −</button>
+                ><button id="as-map-out">Zoom -</button>
               </div>
               <div id="as-map-canvas" class="as-map-canvas"></div>
               <label
                 >Inspect waypoint
                 <select id="as-map-waypoint"></select
               ></label>
-              <p id="as-map-waypoint-info"></p>
+              <button id="as-waypoint-prev">Previous Waypoint</button><button id="as-waypoint-next">Next Waypoint</button><button id="as-waypoint-target">Next Observed Target</button><p id="as-map-waypoint-info"></p>
               <details>
                 <summary>Progress and map limits</summary>
                 <p id="as-map-progress" class="as-note"></p>
               </details>
               <p class="as-note">
-                North up · Gold: planned · Turquoise: recorded · Pink: markers.
+                North up  /  Gold: planned  /  Turquoise: recorded  /  Pink: markers.
                 Recent track display is bounded to 512 points; full recordings
                 remain in Mission History. Offline geography is coarse and
-                Mercator is clipped at ±85.0511°. No aircraft controls are
+                Mercator is clipped at ±85.0511 deg. No aircraft controls are
                 changed.
               </p>
             </section>

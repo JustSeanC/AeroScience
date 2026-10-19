@@ -1,3 +1,4 @@
+import {reviewPreflight} from "./download-activity.js";
 import { hyperspectralCard } from "./hyperspectral-import.js";
 import { areaSummary } from "./planner-geometry.js";
 import { scientificReadiness } from "./scientific-access.js";
@@ -217,8 +218,7 @@ async function planner() {
       text("span", `${plan.template} · ${plan.mode}`),
       button("Edit", () => editPlan(plan)),
       button("Prepare scientific data", async () => {
-        const result = await ctx.api(`/api/plans/${plan.id}/prepare`, {});
-        alert(result.message);
+        await reviewPreflight(ctx.api,plan.id);
       }),
       button("Record this plan", async () => {
         const estimate = await ctx.api("/api/science/estimate", {
@@ -832,17 +832,18 @@ async function instruments() {
   const chart = text("div");
   chart.id = "science-charts";
   p.append(chart);
-  p.append(text("h2", "Saved scientific datasets"));
+  const advancedDatasets=text("details");advancedDatasets.append(text("summary","Advanced: Saved Datasets"));p.append(advancedDatasets);
   const datasetList = text("div");
-  p.append(datasetList);
+  advancedDatasets.append(datasetList);
   let offset = 0;
   async function datasets() {
     const data = await ctx.api(
-      `/api/science/datasets?limit=20&offset=${offset}`,
+      `/api/science/datasets?limit=21&offset=${offset}`,
     );
     datasetList.replaceChildren();
     if (!data.available) datasetList.append(text("p", data.error));
-    for (const d of data.datasets) {
+    previousDatasets.disabled=offset===0;nextDatasets.disabled=data.datasets.length<=20;
+    for (const d of data.datasets.slice(0,20)) {
       const row = text("article", undefined, "panel research-panel");
       row.append(
         text("h3", `${d.missionName} · ${d.instrumentId}`),
@@ -859,34 +860,26 @@ async function instruments() {
             "First 1,000 observations; continue through pages for all saved values.",
           );
           let after = result.next;
-          const more = button("Next observation page", async () => {
+          const more = button("View More Measurements", async () => {
             const next = await ctx.api(
               `/api/science/datasets/${d.id}/observations?after=${after}&limit=1000`,
             );
-            after = next.next;
+            after = next.next;more.disabled=!next.hasMore;
             showScience(
               holder,
               next.observations,
               "Next page · full saved values",
             );
           });
-          row.append(more);
+          more.disabled=!result.hasMore;row.append(more);
         }),
       );
       datasetList.append(row);
     }
   }
-  p.append(
-    button("Previous dataset page", async () => {
-      offset = Math.max(0, offset - 20);
-      await datasets();
-    }),
-    button("Next dataset page", async () => {
-      offset += 20;
-      await datasets();
-    }),
-  );
-  await datasets();
+  const previousDatasets=button("Browse Previous Datasets",async()=>{offset=Math.max(0,offset-20);await datasets();});
+  const nextDatasets=button("View More Datasets",async()=>{offset+=20;await datasets();});
+  advancedDatasets.append(previousDatasets,nextDatasets);await datasets();
   const remote = text("div");
   remote.id = "remote-product-browser";
   p.append(remote);

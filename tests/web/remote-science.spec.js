@@ -33,7 +33,7 @@ test('all four actual implemented viewers display stored synthetic fixture produ
     const seeded=await post(request,'/api/testing/remote/'+kind);
     await page.goto('/#science');const section=page.locator('.remote-products');
     await section.getByLabel('Product instrument').selectOption(seeded.product.instrumentId);
-    await section.getByRole('button',{name:'Refresh products',exact:true}).click();
+    await section.getByRole('button',{name:'Refresh Results',exact:true}).click();
     await section.getByRole('button',{name:'View Data',exact:true}).first().click();
     await expect(section).toContainText('SYNTHETIC TEST FIXTURE');
     await expect(section).toContainText('Source observation:');
@@ -81,7 +81,7 @@ test('scientific consent stays separate from maps and pilot readiness needs no m
   await page.reload();await expect(page.getByLabel('Maximum network transfer per preparation (MiB)')).toHaveValue('8');
   const saved = await post(request, '/api/plans', {id:crypto.randomUUID(),name:'Bounded automatic preflight',waypoints:[{name:'A',latitude:40,longitude:-75},{name:'B',latitude:41,longitude:-74}],instruments:[{instrumentId:'thermal-imager',enabled:true,intervalMs:1000}]});
   await page.goto('/#planner');await expect(page.locator('#planner .scientific-readiness').first()).toBeVisible();
-  await expect(page.locator('#planner .scientific-readiness').first()).toContainText('Progressive bounded batches');
+  await expect(page.locator('#planner .scientific-readiness').first().getByRole('button',{name:'View Download Activity'})).toBeVisible();
   await page.goto('/#control');await expect(page.locator('#control .scientific-readiness')).toBeVisible();
   await page.goto('/#science');await expect(page.locator('#instrument-content .scientific-readiness')).toBeVisible();
   expect(errors).toEqual([]);

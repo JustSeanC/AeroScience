@@ -80,6 +80,8 @@ class IngamePanelAeroScience extends TemplateElement {
     this.loadingRevision = null;
     this.mapCursor = null;
     this.planOffset = 0;
+    this.plansLoaded=false;
+    this.byId("as-plan-map").onclick=()=>this.page("map");
     this.byId("as-map-follow").onclick = () => {
       this.mapRenderer.follow = true;
       if (this.lastMapState) this.mapRenderer.update(this.lastMapState);
@@ -87,7 +89,7 @@ class IngamePanelAeroScience extends TemplateElement {
     this.byId("as-map-free").onclick = () => {
       this.mapRenderer.follow = false;
       this.byId("as-map-status").textContent =
-        "Free Pan — drag the map or use arrow keys. Aircraft follow is off.";
+        "Free Pan  -  drag the map or use arrow keys. Aircraft follow is off.";
     };
     this.byId("as-map-fit").onclick = () => this.mapRenderer.fit();
     this.byId("as-map-in").onclick = () => this.mapRenderer.zoomBy(1.4);
@@ -98,16 +100,19 @@ class IngamePanelAeroScience extends TemplateElement {
       this.mapRenderer.describe();
       this.requestMapState();
     };
+    const inspect=delta=>{const select=this.byId("as-map-waypoint");if(!select.options.length)return;select.selectedIndex=Math.max(0,Math.min(select.options.length-1,select.selectedIndex+delta));select.onchange();};
+    this.byId("as-waypoint-prev").onclick=()=>inspect(-1);this.byId("as-waypoint-next").onclick=()=>inspect(1);this.byId("as-waypoint-target").onclick=()=>{const s=this.byId("as-map-waypoint");if(s.options.length){s.selectedIndex=Math.min(s.options.length-1,this.lastMapState?.nextWaypoint||0);s.onchange();}};
     this.byId("as-map-plan").onchange = () => {
       const select = this.byId("as-map-plan"),
         option = select.options[select.selectedIndex];
       this.mapPlan = select.value || null;
+      try{sessionStorage.setItem("aeroscience-selected-plan",JSON.stringify({id:this.mapPlan,name:option.textContent,mode:option.getAttribute("data-mode")}));}catch(e){}
       this.mapPlanName = this.mapPlan ? option.textContent : null;
       this.mapPlanMode = this.mapPlan ? option.getAttribute("data-mode") : null;
       this.byId("as-start-plan").textContent = this.mapPlan
         ? "Selected research plan: " +
           this.mapPlanName +
-          ". Recording keeps its route, instruments and science mode."
+          ". "+(option.getAttribute("data-summary")||"Recording keeps its route, instruments and science mode.")
         : "No saved plan selected. This will be an unplanned recording.";
       this.byId("as-mode").disabled = !!this.mapPlan;
       this.byId("as-mode").value = this.mapPlanMode || "universal";
@@ -118,6 +123,7 @@ class IngamePanelAeroScience extends TemplateElement {
       this.mapCursor = null;
       this.requestMapState();
     };
+    try{const saved=JSON.parse(sessionStorage.getItem("aeroscience-selected-plan")||"null");if(saved?.id){this.mapPlan=saved.id;this.mapPlanName=saved.name;this.mapPlanMode=saved.mode;}}catch(e){}
     this.byId("as-map-plans").onclick = () => {
       this.planOffset = 0;
       this.send("map-plans", { offset: 0 });
@@ -185,13 +191,14 @@ class IngamePanelAeroScience extends TemplateElement {
       select.replaceChildren();
       const empty = document.createElement("option");
       empty.value = "";
-      empty.textContent = "Active mission / no saved plan";
+      empty.textContent = "Unplanned Mission";
       select.appendChild(empty);
       for (const plan of map) {
         const option = document.createElement("option");
         option.value = plan.id;
         option.textContent = plan.name;
         option.setAttribute("data-mode", plan.mode);
+        option.setAttribute("data-summary",(Number.isFinite(plan.waypoints)?plan.waypoints+" waypoints":"Route count unavailable")+" / "+(Number.isFinite(plan.patterns)?plan.patterns+" patterns":"pattern count unavailable")+". Instruments: "+(plan.instruments??"Not provided by this companion"));
         select.appendChild(option);
       }
       if (this.mapPlan && !map.some((p) => p.id === this.mapPlan)) {
@@ -202,7 +209,10 @@ class IngamePanelAeroScience extends TemplateElement {
         select.appendChild(keep);
       }
       select.value = this.mapPlan || "";
-      this.byId("as-map-status").textContent =
+      this.byId("as-map-more-plans").disabled=map.length<10;
+      this.plansLoaded=true;
+      if(this.mapPlan&&!this.state?.activeMission)select.onchange();
+      if(this.mapRenderer)this.byId("as-map-status").textContent =
         "Saved plans loaded. An active mission always uses its recorded plan snapshot.";
       return;
     }
@@ -232,13 +242,13 @@ class IngamePanelAeroScience extends TemplateElement {
       this.mapRenderer.update(map);
       this.byId("as-map-status").textContent =
         (map.name ||
-          "No active planned mission — select a saved plan or record one from the companion.") +
-        " · " +
+          "No active planned mission  -  select a saved plan or record one from the companion.") +
+        "  /  " +
         (this.loadingRevision
           ? "Loading route " + this.routeItems.length + " / " + map.items
-          : "Route synchronized · " +
+          : "Route synchronized  /  " +
             map.waypoints +
-            " waypoints · next observed target " +
+            " waypoints  /  next observed target " +
             (map.nextWaypoint < map.waypoints ? map.nextWaypoint + 1 : "end")) +
         ".";
       this.byId("as-map-progress").textContent = map.progressExplanation;
@@ -325,7 +335,7 @@ class IngamePanelAeroScience extends TemplateElement {
     });
     if (op !== "state" && !op.startsWith("map-")) {
       this.setControls(false);
-      this.status("Sending mission command…");
+      this.status("Sending mission command...");
     }
     try {
       const result = this.listener.callSimConnect(
@@ -378,13 +388,13 @@ class IngamePanelAeroScience extends TemplateElement {
         "as-heading",
         "as-vspeed",
       ])
-        this.byId(id).textContent = "—";
-      this.byId("as-mach").textContent = "Mach —";
+        this.byId(id).textContent = " - ";
+      this.byId("as-mach").textContent = "Mach  - ";
       this.renderResearch(null, false);
       if (this.mapRenderer) {
         this.mapRenderer.update({ aircraft: null, track: [], markers: [] });
         this.byId("as-map-status").textContent =
-          "Companion disconnected — cached route retained; live aircraft unavailable.";
+          "Companion disconnected  -  cached route retained; live aircraft unavailable.";
       }
     }
     this.send("state");
@@ -440,6 +450,7 @@ class IngamePanelAeroScience extends TemplateElement {
       );
       this.setControls(!mutationPending);
       this.render(reply.state);
+      if(!this.plansLoaded&&!Array.from(this.pending.values()).some(p=>p.op==="map-plans")){this.planOffset=0;this.send("map-plans",{offset:0});}
       if (!reply.ok)
         this.status(reply.error || "Mission command was rejected.");
     } catch (error) {
@@ -451,6 +462,8 @@ class IngamePanelAeroScience extends TemplateElement {
   render(state) {
     const t = state.telemetry,
       mission = state.activeMission;
+    if(mission){this.byId("as-start-plan").textContent="Active recording: its saved plan snapshot is fixed. Plan selection for the next recording is separate.";}
+
     const fresh = t && Date.now() - Date.parse(t.timestampUtc) < 6000;
     this.byId("as-source").textContent =
       state.connection.source === "simulated"
@@ -458,23 +471,23 @@ class IngamePanelAeroScience extends TemplateElement {
         : fresh && state.connection.state === "connected"
           ? "SIMCONNECT TELEMETRY"
           : "MSFS DISCONNECTED";
-    this.status(state.recordingStop ? "RECORDING STOPPED · " + state.recordingStop.code + ": " + state.recordingStop.message : state.connection.message);
+    this.status(state.recordingStop ? "RECORDING STOPPED  /  " + state.recordingStop.code + ": " + state.recordingStop.message : state.connection.message);
     this.byId("as-aircraft").textContent = fresh
       ? t.aircraft
       : "Awaiting initialized aircraft telemetry";
     const fmt = (v) =>
-      Number.isFinite(v) ? Math.round(v).toLocaleString("en-US") : "—";
-    this.byId("as-altitude").textContent = fresh ? fmt(t.altitudeMslFeet) : "—";
+      Number.isFinite(v) ? Math.round(v).toLocaleString("en-US") : " - ";
+    this.byId("as-altitude").textContent = fresh ? fmt(t.altitudeMslFeet) : " - ";
     this.byId("as-airspeed").textContent = fresh
       ? fmt(t.indicatedAirspeedKnots)
-      : "—";
+      : " - ";
     this.byId("as-mach").textContent =
       "Mach " +
-      (fresh && Number.isFinite(t.machNumber) ? t.machNumber.toFixed(2) : "—");
-    this.byId("as-heading").textContent = fresh ? fmt(t.headingDegrees) : "—";
+      (fresh && Number.isFinite(t.machNumber) ? t.machNumber.toFixed(2) : " - ");
+    this.byId("as-heading").textContent = fresh ? fmt(t.headingDegrees) : " - ";
     this.byId("as-vspeed").textContent = fresh
       ? fmt(t.verticalSpeedFeetPerMinute)
-      : "—";
+      : " - ";
     this.renderResearch(state.research, fresh);
     if (!mission) this.byId("as-marker").setAttribute("disabled", "");
     this.byId("as-idle").hidden = !!mission;
@@ -486,10 +499,11 @@ class IngamePanelAeroScience extends TemplateElement {
         "All compatible aircraft can record missions.";
       this.byId("as-name").value = "";
       this.byId("as-active-name").textContent = mission.name;
+      this.byId("as-active-plan").textContent=state.research?.planId?"Active saved-plan snapshot (fixed for this recording). Fly the route reference on Map.":"Active unplanned mission: scientific preparation follows actual aircraft movement.";
       this.byId("as-active-mode").textContent =
         mission.mode === "realistic"
-          ? "Realistic Mode · advanced science features coming in a future release"
-          : "Universal Mode · Fly Anything";
+          ? "Realistic Mode  /  advanced science features coming in a future release"
+          : "Universal Mode  /  Fly Anything";
       this.byId("as-samples").textContent = mission.sampleCount + " samples";
       const seconds = Math.max(
         0,
@@ -672,19 +686,19 @@ class IngamePanelAeroScience extends TemplateElement {
       );
       nodes.status.textContent =
         (instrument.enabled ? instrument.quality : "disabled") +
-        " · " +
+        "  /  " +
         instrument.acquisitionSets +
-        " acquisition sets · " +
+        " acquisition sets  /  " +
         instrument.observationCount +
-        (instrument.instrumentId.indexOf("imager") >= 0 || instrument.instrumentId === "terrain-scanner" ? " saved products · " : " measurement values · ") +
+        (instrument.instrumentId.indexOf("imager") >= 0 || instrument.instrumentId === "terrain-scanner" ? " saved products  /  " : " measurement values  /  ") +
         instrument.rejectedObservations +
-        " rejected · " +
+        " rejected  /  " +
         instrument.missingIntervals +
-        " unexpected missing · actual " +
+        " unexpected missing  /  actual " +
         (Number.isFinite(instrument.actualAverageIntervalSeconds)
           ? instrument.actualAverageIntervalSeconds.toFixed(2) + " s"
           : "unavailable") +
-        " · last " +
+        "  /  last " +
         (instrument.lastSuccessfulUtc || "none");
     }
   }

@@ -381,7 +381,7 @@ test("selected native saved plan is included in Start mission", async ({
     };
   });
   await page.locator("#as-map-page").click();
-  await page.getByText("Load a saved research plan", { exact: true }).click();
+  await page.locator("#as-mission-page").click();
   await page.locator("#as-map-plans").click();
   await expect(page.locator("#as-map-plan option")).toHaveCount(2);
   await page
