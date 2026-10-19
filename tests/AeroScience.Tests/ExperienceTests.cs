@@ -42,7 +42,8 @@ public sealed class ExperienceTests : IDisposable
         var state = coordinator.Snapshot().Research!.Instruments.Single(i => i.InstrumentId == "ambient-wind"); Assert.Equal(0, state.MissingIntervals); Assert.Equal(1, state.ActualAverageIntervalSeconds); Assert.Equal(8, state.ObservationCount); Assert.Equal(4, state.AcquisitionSets); Assert.Single(science.Datasets(m.Id));
         Assert.Equal(10, store.SciencePauses(m.Id).Single().Seconds);
         coordinator.End(m.Id); Assert.Single(store.StreamEvents(m.Id), e => e.Kind == "science-paused"); Assert.Single(store.StreamEvents(m.Id), e => e.Kind == "science-resumed"); Assert.Equal(ScienceCollectionStatus.Stopped, coordinator.Snapshot().Research!.CollectionStatus);
-        var restarted = new MissionCoordinator(store, 1000, research: new ResearchOperations(store, science)); Assert.False(restarted.Snapshot().Research!.IntentionallyPaused); Assert.Null(restarted.Snapshot().ActiveMission);
+        using var restartedResearch = new ResearchOperations(store, science);
+        var restarted = new MissionCoordinator(store, 1000, research: restartedResearch); Assert.False(restarted.Snapshot().Research!.IntentionallyPaused); Assert.Null(restarted.Snapshot().ActiveMission);
     }
     [Fact]
     public void SimultaneousPauseCommandsAndCommBusShareOneStateAndAreBounded()
@@ -133,5 +134,5 @@ public sealed class ExperienceTests : IDisposable
         var gap = MissionAnalysis.Compare(plan, [Frame(0, 0, 0), Frame(10, 0, .01)], new(100, 5)); Assert.False(gap.Segments!.Single().ObservedWithinTolerance);
         var detour = MissionAnalysis.Compare(plan, [Frame(0, 0, 0), Frame(1, .1, .005), Frame(2, 0, .01)], new(100, 5)); Assert.False(detour.Segments!.Single().ObservedWithinTolerance); Assert.True(detour.DeviationStatistics!.MaximumMetres > 10000);
     }
-    public void Dispose() { science.Dispose(); if (Directory.Exists(root)) Directory.Delete(root, true); }
+    public void Dispose() { research.Dispose(); science.Dispose(); if (Directory.Exists(root)) Directory.Delete(root, true); }
 }

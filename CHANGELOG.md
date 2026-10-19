@@ -2,6 +2,7 @@
 
 ## 0.3.2 — Scientific Reliability & Performance (development; acceptance pending)
 
+- Correct Windows test-fixture cleanup: dispose and join research acquisition workers before releasing science storage and deleting temporary databases, including locally restarted/low-capacity fixtures. Preserve strict cleanup assertions and release test gates.
 - Handle disappearing SQLite WAL/SHM files without stopping a valid recording; keep primary database, permission, disk and quota failures strict. Add bounded local recording/science diagnostics and privacy-reviewed feedback export.
 - Separate preflight session volume from the in-flight rolling-hour allowance. Preserve the 256 MiB/hour default and explicit existing values; allow independently selected Unlimited policies while retaining per-preparation, concurrency, consent, provider and storage constraints.
 - Replace speculative full-job reservations with read-sized leases, accurate actual-byte charging, visible consumed/reserved/available figures and retriable allowance waits. Release reservations on failure, cancellation and configuration changes.

@@ -17,6 +17,7 @@ public sealed class ResearchTests : IDisposable
     private readonly string root = Path.Combine(Path.GetTempPath(), "aeroscience-research-" + Guid.NewGuid());
     private readonly MissionStore store;
     private readonly ScienceStore science;
+    private readonly ResearchOperations research;
     private readonly MissionCoordinator coordinator;
     private readonly DateTimeOffset now = DateTimeOffset.UtcNow;
     private readonly ITestOutputHelper output;
@@ -26,7 +27,8 @@ public sealed class ResearchTests : IDisposable
         var p = new PreferenceStore(root); var settings = new StorageManager(p).Initialize();
         store = new(Path.Combine(settings.MissionDirectory, "missions.db")); store.Initialize();
         science = new(settings.ScienceLibraryDirectory); store.ScienceLibrary = science;
-        coordinator = new(store, 1000, research: new ResearchOperations(store, science));
+        research = new(store, science);
+        coordinator = new(store, 1000, research: research);
     }
     private void Apply(int second, double? temperature = 12, bool paused = false)
     {
@@ -222,7 +224,7 @@ public sealed class ResearchTests : IDisposable
     [Fact]
     public void ScienceLowCapacityDoesNotStopFlightAndRejectedReadingsAreRetainedAsDiagnostics()
     {
-        using var low = new ScienceStore(science.DirectoryPath, new Capacity(100)); var research = new ResearchOperations(store, low); var c = new MissionCoordinator(store, 1000, research: research);
+        using var low = new ScienceStore(science.DirectoryPath, new Capacity(100)); using var research = new ResearchOperations(store, low); var c = new MissionCoordinator(store, 1000, research: research);
         var m = c.Start(new StartMissionRequest("Low science disk", Instruments: [new("ambient-temperature", true)])); var frame = SimulatedTelemetryProvider.Generate(now, 0);
         var connection = new ConnectionInfo(ConnectionState.Connected, TelemetrySource.Simulated, "fixture", now);
         c.Apply(new(connection, frame, new(now, 12, 29, 10, 270, .0023))); Assert.Single(store.StreamSamples(m.Id)); Assert.Empty(low.StreamObservations(m.Id));
@@ -255,5 +257,12 @@ public sealed class ResearchTests : IDisposable
         Assert.Equal("219",store.Markers(mission.Id,200).First().Notes);Assert.Equal("219",store.Notes(mission.Id,200).First().Text);
         Assert.Equal(20,store.Markers(mission.Id,200,200).Count);Assert.Equal(220,store.StreamMarkers(mission.Id).Count());Assert.Equal(220,store.StreamNotes(mission.Id).Count());coordinator.End(mission.Id);
     }
-    public void Dispose() { science.Dispose(); if (Directory.Exists(root)) Directory.Delete(root, true); }
+    public void Dispose()
+    {
+        // Remote acquisition may still be finishing a database write after End().
+        // Stop and join its workers before releasing storage or deleting test files.
+        research.Dispose();
+        science.Dispose();
+        if (Directory.Exists(root)) Directory.Delete(root, true);
+    }
 }
