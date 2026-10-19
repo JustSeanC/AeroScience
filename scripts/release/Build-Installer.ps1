@@ -58,5 +58,5 @@ try {
     python scripts/release/installer_release.py record --folder $destination --compiler $compiler --prerequisite $vc --tool-report $toolReport
     if ($LASTEXITCODE -ne 0) { throw 'Installer receipt validation failed.' }
     Write-Host "Installer candidate: $destination\$($meta.setup_name)"
-    Write-Host 'Compiler/payload receipt saved. The one-command release pipeline finalizes using automatic technical evidence; no manual acceptance JSON is required. Windows/MSFS hardware tests remain recommended and unverified. Nothing was published.'
+    Write-Host 'Compiler/payload receipt saved. Candidate compilation does not verify installed Windows/MSFS operation. Follow the release pipeline next-step instructions. Nothing was published.'
 } finally { Pop-Location }

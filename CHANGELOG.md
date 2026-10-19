@@ -2,6 +2,7 @@
 
 ## 0.4.0 — Scientific Mission Planning, Sensor Modeling & Analysis (development; Windows acceptance pending)
 
+- Correct release completion so v0.4.0 stops successfully after building its installer candidate instead of calling the intentionally blocked automatic finalizer. Remove contradictory installer status text. Existing compiled candidates remain usable without rebuilding; installed acceptance is still required before finalization.
 - Add the optional official Discord invitation to README Community & Support, dashboard/paired-device Help & Support and generated release notes; retain feedback/log collection and GitHub issues.
 
 - Add versioned AVIRIS-NG, RedEdge-P, FLIR lens and RIEGL reference geometries, bounded generic/custom configurations, immutable effective payload snapshots and retained-source capability checks.
