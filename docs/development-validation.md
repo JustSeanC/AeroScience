@@ -78,3 +78,9 @@ small raster's geographic coverage before the fixture's explicit packet arrived.
 scoped test provider now holds the correct synthetic location, and failed fixtures close
 their temporary flight in `finally`. The deadline, one-product assertion and scientific
 checks are unchanged. This test-host correction is not a production science workaround.
+
+Shared browser-host changes and previously unmapped browser modules/styles expand to the
+whole browser family. The targeted tier still avoids the Windows/full integration jobs;
+its reported scope may grow when a dependency is shared. Preserve Playwright JSON and
+failure screenshots/context alongside TRX/sequence diagnostics so failures can be diagnosed
+without immediately rerunning them.

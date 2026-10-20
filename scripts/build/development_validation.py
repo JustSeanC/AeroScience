@@ -44,12 +44,16 @@ def plan(paths, uncertain=False):
                 full_dotnet = True  # Unknown/shared dependencies get the complete .NET suite.
         if name.startswith('tests/web/') and name.endswith('.spec.js'):
             web.add(name)
+        if name.startswith('tests/AeroScience.TestHost/'):
+            web = {'tests/web'}  # Shared test-host behavior can affect every browser fixture.
         if name.endswith('help-center.js'):
             web.add('tests/web/science-review-041.spec.js')
         elif name.endswith('.js') and ('planner' in name or 'pattern' in name):
             web.update({'tests/web/planner-units.spec.js', 'tests/web/planner-ux.spec.js'})
         elif name.endswith('.js') and ('science' in name or 'source' in name):
             web.add('tests/web/remote-science.spec.js')
+        elif name.startswith('src/AeroScience.Engine/wwwroot/') and name.endswith(('.js', '.css', '.html')):
+            web = {'tests/web'}  # Unknown shared browser dependency: expand rather than guess.
         if name.startswith('tests/test_') and name.endswith('.py'):
             helpers.add(path.stem)
         elif name == 'scripts/build/development_validation.py' or name == '.github/workflows/ci.yml':
@@ -58,6 +62,8 @@ def plan(paths, uncertain=False):
             helpers.add('*')  # Packaging/release/build scripts have transitive consumers.
     if uncertain:
         helpers.add('*')
+        web = {'tests/web'}
+    if 'tests/web' in web:
         web = {'tests/web'}
     return {'scope': 'development-only; not full integration, genuine science or hardware acceptance',
             'changed': sorted(paths), 'dotnetFilter': None if full_dotnet else '|'.join('FullyQualifiedName~'+n for n in sorted(dotnet)),

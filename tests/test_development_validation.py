@@ -46,6 +46,11 @@ class DevelopmentValidationTests(unittest.TestCase):
         self.assertNotIn('test_scientific_acceptance', ci.PORTABLE_ONLY)
         self.assertNotIn('test_offline_assets', ci.PORTABLE_ONLY)
 
+    def test_shared_browser_host_or_unknown_ui_dependencies_expand_browser_coverage(self):
+        for path in ('tests/AeroScience.TestHost/Program.cs', 'tests/AeroScience.TestHost/BrowserTelemetryProvider.cs',
+                     'src/AeroScience.Engine/wwwroot/shared-new-module.js', 'src/AeroScience.Engine/wwwroot/app.css'):
+            self.assertEqual(['tests/web'], ci.plan([path])['browserSpecs'])
+
     def test_lock_changes_keep_owner_shutdown_and_offline_tests(self):
         selected = ci.plan(['src/AeroScience.Engine/DataDirectoryLease.cs'])
         for name in ('ApiTests', 'OfflineApiTests', 'StorageTests'):

@@ -68,6 +68,7 @@ jobs:
           path: |
             artifacts/development-plan.json
             artifacts/web-results.json
+            artifacts/browser-tests/**
             tests/AeroScience.Tests/TestResults/**/*.trx
             tests/AeroScience.Tests/TestResults/**/Sequence_*.xml
           if-no-files-found: ignore
@@ -101,6 +102,16 @@ jobs:
       - run: npm run check:web
       - run: npx playwright install --with-deps chromium
       - run: npm run test:web
+      - name: Retain browser diagnostics
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: linux-browser-diagnostics
+          path: |
+            artifacts/web-results.json
+            artifacts/browser-tests/**
+          if-no-files-found: ignore
+          retention-days: 7
       - run: python3 -m unittest discover -s tests -p 'test_*.py' -v
       - name: Build and exercise real recovery test host
         run: |
