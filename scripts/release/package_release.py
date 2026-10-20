@@ -315,6 +315,22 @@ def acceptance_template(commit, digest):
                 checks={name: dict(result='pending', evidence='', instructions=CHECK_HELP.get(name, 'Extended acceptance; may remain pending for this prerelease.')) for name in ACCEPTANCE})
 
 
+def distribution_readme():
+    """Render source-valid docs links for the distribution-root README context."""
+    source = REPO/'docs'/'release-readme.md'
+    def link(match):
+        target = match.group(2)
+        if re.match(r'^[a-zA-Z][a-zA-Z0-9+.-]*:', target) or target.startswith(('#', '/')):
+            return match.group(0)
+        path, separator, fragment = target.partition('#')
+        resolved = (source.parent/path).resolve()
+        relative = resolved.relative_to(REPO.resolve()).as_posix()
+        if not resolved.exists():
+            raise ValueError('Distribution README target is missing: '+relative)
+        return match.group(1)+relative+(separator+fragment if separator else '')+match.group(3)
+    return re.sub(r'(\]\()([^\s)]+)(\))', link, source.read_text(encoding='utf-8'))
+
+
 def prepare_candidate(companion, community, receipt_path, runtime_report, runtime_approval, destination):
     require(not destination.exists(), f'Refusing to overwrite an existing candidate: {destination}. Keep tested candidates separate.')
     validate_companion(companion, require_simconnect=True)
@@ -334,25 +350,10 @@ def prepare_candidate(companion, community, receipt_path, runtime_report, runtim
         for name in ('LICENSE', 'THIRD-PARTY-NOTICES.md', 'CHANGELOG.md', 'INSTALL.md'):
             shutil.copy2(REPO/name, destination/name)
         shutil.copytree(REPO/'licenses', destination/'licenses', dirs_exist_ok=True)
-        (destination/'docs').mkdir()
-        for name in ('alpha-testing.md', 'runtime-distribution.md', 'science-operations.md', 'sdk-research-v0.2.0.md', 'v0.2.0-windows-testing.md', 'v0.2.1-windows-testing.md', 'v0.2.1-completion.md', 'v0.2.2-windows-testing.md', 'v0.2.2-completion.md', 'map-providers-v0.2.2.md'):
-            shutil.copy2(REPO/'docs'/name, destination/'docs'/name)
-        for name in ('v0.3.0-completion.md','v0.3.0-windows-testing.md','v0.3.1-completion.md','v0.3.1-windows-testing.md','v0.3.2-completion.md','v0.3.2-windows-testing.md','v0.4.0-completion.md','v0.4.0-windows-testing.md','v0.4.0-scientific-methods.md','v0.4.0-instrument-profiles.md','v0.4.0-replay-and-coverage.md','v0.4.0-scientific-composites.md','v0.4.0-scientific-source-expansion.md','v0.4.0-pilot-guide.md'):
-            shutil.copy2(REPO/'docs'/name,destination/'docs'/name)
-        for guide in list((REPO/'docs').glob('v0.4.1-*.md'))+list((REPO/'docs').glob('v0.4.2-*.md')):
-            shutil.copy2(guide,destination/'docs'/guide.name)
-        shutil.copytree(REPO/'docs'/'remote-sensing',destination/'docs'/'remote-sensing')
-        shutil.copytree(REPO/'docs'/'roadmap',destination/'docs'/'roadmap')
-        shutil.copytree(REPO/'docs'/'research',destination/'docs'/'research')
-        (destination/'docs'/'images').mkdir()
-        for image in (REPO/'docs'/'images').glob('remote-*-browser-fixture.png'):
-            shutil.copy2(image,destination/'docs'/'images'/image.name)
-        for image in (REPO/'docs'/'images').glob('v041-*-browser-fixture.png'):
-            shutil.copy2(image,destination/'docs'/'images'/image.name)
-        for folder in ('v042-before','v042-after'):
-            if (REPO/'docs'/'images'/folder).is_dir():
-                shutil.copytree(REPO/'docs'/'images'/folder,destination/'docs'/'images'/folder)
-        shutil.copy2(REPO/'docs'/'release-readme.md', destination/'README.md')
+        # The maintained tree is the manifest; keep current QA/scientific/legal links
+        # together rather than hardcoding retired alpha workbooks or unused fixtures.
+        shutil.copytree(REPO/'docs', destination/'docs', ignore=shutil.ignore_patterns('release-readme.md'))
+        (destination/'README.md').write_text(distribution_readme(), encoding='utf-8')
         (destination/'DEFAULTS.json').write_text(json.dumps(dict(description='Built-in defaults; use graphical Settings to change them.',
             mission_directory=r'%LOCALAPPDATA%\AeroScience', science_library_directory=r'%LOCALAPPDATA%\AeroScience\ScienceLibrary',
             sampling_interval_ms=1000, enable_lan=False, mission_mode='universal', telemetry='SimConnect', mission_limit_bytes=25000000000,

@@ -1,9 +1,12 @@
 # Windows SimConnect integration
 
-Current v0.2.0: see [SDK research](sdk-research-v0.2.0.md), [new Windows acceptance](v0.2.0-windows-testing.md) and [completion status](v0.2.0-completion.md). Earlier results below are historical and do not verify the changed release.
-
-
-The provider uses the **native** `SimConnect.dll` API from the official MSFS 2024 SDK. It avoids the older mixed-mode managed .NET Framework wrapper. The user's gaming-PC screenshot demonstrates a companion CommBus reply reaching the in-simulator POC panel, and the user confirms recurring request-ID updates about once per second. Initial real-aircraft reception/display and an active recording were subsequently observed with T-38N WSSP Late. The new Mach field, completed live-history/export workflow, standalone runtime-checker report and clean-machine distribution remain unverified; see the [evidence record](validation-results.md#first-live-aircraft-telemetry-and-active-recording-evidence).
+Current build/acceptance instructions are in the [Windows release procedure](public-release-windows.md)
+and [verification guide](verification.md). This technical reference retains the original
+native payload/SDK findings; old reported POC replies and initial aircraft reception do
+not establish acceptance for a changed installer, current device or aircraft configuration.
+The provider uses the native official MSFS 2024 SimConnect runtime, with no managed
+.NET Framework wrapper. Redistribution uses the documented hash-bound approval process;
+original authorization correspondence remains private.
 
 Official starting references:
 
@@ -11,7 +14,7 @@ Official starting references:
 - [SimConnect SDK](https://docs.flightsimulator.com/msfs2024/html/6_Programming_APIs/SimConnect/SimConnect_SDK.htm)
 - [Communication API](https://docs.flightsimulator.com/msfs2024/html/6_Programming_APIs/SimConnect/API_Reference/Communication/Communication_API.htm)
 
-The official documentation host was blocked by this cloud environment's egress proxy during initial development; it became accessible during gaming-PC build troubleshooting. API constants/signatures were initially cross-checked against the public reference implementations listed in `toolbar.md`; the **installed official SDK remains the authority**. `scripts/build/sdk-contract.cpp` checks native member/payload offsets, struct sizes, receive IDs, datatypes, period, broadcast flag and available function declarations against that SDK on Windows. The user's complete POC build log now confirms that installed-header compilation passed. The extended v0.1.1 contract requires a fresh installed-SDK compilation; runtime export inspection and complete lifecycle acceptance remain separate checks; see the [evidence record](validation-results.md).
+The official documentation host was blocked by this cloud environment's egress proxy during initial development; it became accessible during gaming-PC build troubleshooting. API constants/signatures were initially cross-checked against the public reference implementations listed in `toolbar.md`; the **installed official SDK remains the authority**. `scripts/build/sdk-contract.cpp` checks native member/payload offsets, struct sizes, receive IDs, datatypes, period, broadcast flag and available function declarations against that SDK on Windows. The user's complete POC build log now confirms that installed-header compilation passed. The extended v0.1.1 contract requires a fresh installed-SDK compilation; runtime export inspection and complete lifecycle acceptance remain separate checks; see the [evidence record](https://github.com/JustSeanC/AeroScience/blob/8f510f02f4d9b41fba4e55fefa950b82e48c132d/docs/validation-results.md).
 
 ## Telemetry definition
 
@@ -48,4 +51,4 @@ If a DLL exists but its dependent Microsoft Visual C++ runtime is missing, loade
 
 ## Recording cadence
 
-The provider requests actual observations at `SIMCONNECT_PERIOD_SECOND`. The coordinator schedules recording slots from the first sample and tolerates timestamp jitter by 10% of the configured interval, capped at 100 ms. It accepts at most one real observation per slot, preserves its original timestamp, rejects duplicates/backwards timestamps and paused frames, and records missing intervals when observations resume. It never generates replacement observations. Diagnostics separate configured interval, observed sample cadence, mission-wide average and gaps. The reproduced old threshold behavior and automated regression are described in [alpha testing](alpha-testing.md); sustained live cadence remains unverified.
+The provider requests actual observations at `SIMCONNECT_PERIOD_SECOND`. The coordinator schedules recording slots from the first sample and tolerates timestamp jitter by 10% of the configured interval, capped at 100 ms. It accepts at most one real observation per slot, preserves its original timestamp, rejects duplicates/backwards timestamps and paused frames, and records missing intervals when observations resume. It never generates replacement observations. Diagnostics separate configured interval, observed sample cadence, mission-wide average and gaps. The reproduced old threshold behavior and automated regression are described in [alpha testing](https://github.com/JustSeanC/AeroScience/blob/8f510f02f4d9b41fba4e55fefa950b82e48c132d/docs/alpha-testing.md); sustained live cadence remains unverified.

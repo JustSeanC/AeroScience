@@ -1,8 +1,14 @@
 # SDK toolbar implementation and verification boundary
 
-**Latest native-window result:** the user confirms dragging/resizing after the `03b06f0` full-toolbar rebuild instructions. The full and probe pages load `/JS/dataStorage.js`, restoring the native storage-ready initialization path that creates movement/resize handlers. Complete control/edge coverage, repeatability and mission workflows remain pending. Compact VR is removed. See [findings, Windows builds and desktop acceptance](toolbar-interactions.md). Reuse the engine at `C:\Windows-Companion-unverified-in-MSFS`.
+The official MSFS 2024 SDK builds the Community package; source XML is not a compiled
+add-on. Follow [Windows build/installed acceptance](public-release-windows.md). The
+existing Mission/Payload/Map interface uses native SDK window controls and request/reply
+CommBus, with no simulator write-control or localhost browser embedding.
 
-**The gaming-PC proof-of-concept build, desktop panel loading and recurring CommBus replies have passed.** The user's complete Windows console output confirms installed-header contract compilation, Microsoft's package validation, our nine-file structural validation and script completion. Subsequent screenshots confirm registration, visible diagnostic-panel rendering in MSFS and receipt of companion JSON; the user confirms recurring request-ID updates about once per second. Long-duration/reconnection behavior and complete mission commands still need testing. Initial live T-38 dashboard reception is recorded separately; the new Mach field needs a fresh live test. The full panel also subsequently rendered synthetic readings; its native movement/resizing were subsequently restored as described above. Its SDK-generated package remains on that PC; no Community release download has been published. This Linux environment has no MSFS installation, official Windows package builder or VR headset. No SPB, manifest or layout has been fabricated. See the [build](validation-results.md#successful-gaming-pc-proof-of-concept-build), [panel-loading](validation-results.md#proof-of-concept-panel-opened-in-msfs) and [reply](validation-results.md#first-visible-commbus-reply) evidence records.
+Historical diagnosis established that `/JS/dataStorage.js` must load before the native
+templates initialize drag/resize handlers. Preserve that bootstrap and the
+[debugging record](toolbar-interactions.md). Earlier user-reported POC panel loading,
+replies and dragging are historical evidence, not new MSFS/Quest acceptance.
 
 ## Research and implementation choice
 
@@ -25,7 +31,7 @@ Each request has `protocol:1`, a GUID `requestId`, and `op:'state'|'start'|'end'
 
 The panel asks for current state once per second only while visible. The engine sends **only responses**, avoiding an unsolicited event backlog while simulator JavaScript is suspended/debugged. Callbacks copy bounded packet data; mission/database processing happens after dispatch. Commands must fit one CommBus message (maximum 4 KB wire input, 1,024 JSON characters); fragmented commands are rejected. Replies are bounded at 8 KB. There are no sockets, HTTP requests, extra WASM module or per-aircraft scripts in the toolbar. Simulator-local add-ons are trusted operators; the LAN pairing boundary is separate.
 
-## Build the proof of concept first
+## Maintainer SDK builds
 
 1. On Windows, install the current official MSFS 2024 SDK and use an x64 Native Tools shell with PowerShell 7, Python 3 and the pinned .NET SDK.
 2. Build the v0.1.1 Windows app with `Build-Companion.ps1`, then launch `AeroScience.exe` while the simulator is running. Import the official native runtime through Settings for personal testing if necessary. Production simulation and CMD launchers have been removed; an offline dashboard/archive does not require MSFS.
@@ -37,7 +43,7 @@ The panel asks for current state once per second only while visible. The engine 
 
 The SDK produces `manifest.json`, `layout.json`, `InGamePanels/aeroscience_panel.spb`, UI files and icon. The release validator checks versions, layout coverage/sizes/FILETIME, internal expected assets and binary registration presence. The SDK build receipt hashes every file; neither a POC nor window-probe receipt can pass the full-release gate. A structural check alone cannot prove simulator loading.
 
-The script retains `sdk-contract.log` and `build.log`, uses its staged project as the working directory, supports explicit tool/header paths, and normalizes receipt file paths with the platform separator. The Windows receipt separator bug from the initial foundation has been corrected. Portable tests exercise compiler failure/log retention. The gaming-PC POC and previous full panel loaded with recurring replies/synthetic data; the v0.1.1 revision's SDK build, native input retest, mission-command and long-duration/lifecycle checks remain pending. See the [Windows workbook](windows-testing.md) and the [interaction retest](toolbar-interactions.md).
+The script retains `sdk-contract.log` and `build.log`, uses its staged project as the working directory, supports explicit tool/header paths, and normalizes receipt file paths with the platform separator. The Windows receipt separator bug from the initial foundation has been corrected. Portable tests exercise compiler failure/log retention. The gaming-PC POC and previous full panel loaded with recurring replies/synthetic data; the v0.1.1 revision's SDK build, native input retest, mission-command and long-duration/lifecycle checks remain pending. See the [Windows workbook](https://github.com/JustSeanC/AeroScience/blob/8f510f02f4d9b41fba4e55fefa950b82e48c132d/docs/windows-testing.md) and the [interaction retest](toolbar-interactions.md).
 
 ## VR / input
 

@@ -1,5 +1,19 @@
 # Changelog
 
+## Unreleased — v0.5.0 development
+
+- P01/P02 add versioned scientific-evidence contracts and an additive mission schema 8
+  foundation for multiple collection sessions, immutable obligations, atomic decisions,
+  exact input/command receipts, acquisition intents, recovery and offline evidence export.
+  Runtime session controls/calibration/grading are not activated by this foundation.
+- Development CI separates targeted pushes from complete milestone/manual integration;
+  full release/scientific/SDK/runtime/hardware acceptance requirements remain.
+- Consolidate current documentation, retire superseded alpha workbooks/unused synthetic
+  illustrations, and preserve scientific evidence and active v0.4.2 QA paths.
+- This is development status, not a published installer, new genuine-source acceptance or
+  Windows/MSFS/device pass. Follow the [tracker](docs/roadmap/v0.5.0-development-tracker.md).
+
+
 ## 0.4.2 — Research Workstation & Scientific Visualization (development; acceptance pending)
 
 - Add complete-scope geographic science overviews with independent terrain, thermal, multispectral, hyperspectral and recorded atmospheric layers. Remove the former 120-acquisition viewing ceiling; automatically traverse bounded pages, aggregate dense views, cancel stale requests and expose any saved record in a keyboard-accessible browser.
@@ -189,7 +203,7 @@
 - Added schema 3 with verified pre-upgrade SQLite backups, dataset references and compatibility with v0.1.0 modes/history. Export includes all recorded samples, timestamps, source labels, modes, events and dataset references.
 - Preserved the native toolbar movement/resize bootstrap and single responsive Mission/Payload interface. Removed the dashboard marketing slogan and shortened user guidance.
 - Added provenance/checksum gates and a manually dispatched private alpha release workflow. Public CI publishes no binaries. Official SDK output, permitted native runtime delivery and genuine acceptance evidence are required for a complete alpha archive.
-- Added regression coverage for offline startup/history/export, Mach, migration/recovery, storage independence, reference integrity, recording cadence and toolbar installation. See [validation results](docs/validation-results.md) for measured results and remaining Windows/MSFS/device checks.
+- Added regression coverage for offline startup/history/export, Mach, migration/recovery, storage independence, reference integrity, recording cadence and toolbar installation. See [validation results](https://github.com/JustSeanC/AeroScience/blob/8f510f02f4d9b41fba4e55fefa950b82e48c132d/docs/validation-results.md) for measured results and remaining Windows/MSFS/device checks.
 
 ## 0.1.0 — development foundation (not yet a verified Community release)
 

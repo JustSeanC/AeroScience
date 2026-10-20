@@ -21,7 +21,7 @@ Dashboard Settings actions share one auxiliary native dialog. Repeated requests 
 
 Browser regressions exercise searching, point commit/cancel, two-point saving/export, polygon validation, live pattern changes, stale-response rejection, orbit display/export and saved-plan/toolbar fixtures. These are automated checks with synthetic flight inputs. They do not establish that an uncoached person completed the workflow.
 
-On Windows, ask a first-time tester to perform the five scenarios in the [v0.3.0 Windows guide](v0.3.0-windows-testing.md): simple two-point flight, geographic survey, orbit, live route/collection and repeated native Settings actions from two browsers. Record where coaching was needed. Genuine MSFS window ownership/focus, toolbar route, EFB import, installation/upgrade, Quest and physical iPad acceptance remain pending.
+On Windows, ask a first-time tester to perform the five scenarios in the [v0.3.0 Windows guide](https://github.com/JustSeanC/AeroScience/blob/8f510f02f4d9b41fba4e55fefa950b82e48c132d/docs/v0.3.0-windows-testing.md): simple two-point flight, geographic survey, orbit, live route/collection and repeated native Settings actions from two browsers. Record where coaching was needed. Genuine MSFS window ownership/focus, toolbar route, EFB import, installation/upgrade, Quest and physical iPad acceptance remain pending.
 
 Larger semantic export changes, additional online geocoders and a wider dashboard redesign are P2 backlog. Existing export precision, saved snapshots, modes, map preferences and native SDK window handling remain intact.
 

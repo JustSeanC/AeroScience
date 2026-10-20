@@ -1,9 +1,25 @@
 import {select,link,disclosure} from './workstation-ui.js';
 const node=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
 const guides=[['v0.4.2-pilot-guide.md','First mission & results'],['v0.4.2-science-visualization.md','Reading scientific maps'],['v0.4.1-pilot-guide.md','Getting started'],['mission-planner.md','Mission planning'],['remote-sensing/index.md','Instruments & scientific data'],['v0.4.1-science-workspace.md','Science Workspace'],['v0.4.1-scientific-comparison.md','Comparisons'],['v0.4.1-scientific-downlink.md','Preparation & downlink'],['v0.4.1-windows-testing.md','Troubleshooting & testing']];
+guides.push(['README.md','Documentation index']);
+export function documentationUrl(target,guide){
+ const source=guide.startsWith('_root/')?'/'+guide.slice(6):'/docs/'+guide;
+ const url=new URL(target,location.origin+source);
+ if(url.origin!==location.origin)return ['https:','http:'].includes(url.protocol)?url.href:null;
+ let local;
+ if(url.pathname.startsWith('/help/'))local=url.pathname.slice(6);
+ else if(url.pathname.startsWith('/docs/'))local=url.pathname.slice(6);
+ else if(['/README.md','/INSTALL.md','/CHANGELOG.md','/THIRD-PARTY-NOTICES.md','/LICENSE'].includes(url.pathname)||url.pathname.startsWith('/licenses/'))local='_root/'+url.pathname.slice(1);
+ if(local){
+  if(local==='_root/LICENSE')local+='.txt';
+  return local.endsWith('.md')?'#help?guide='+encodeURIComponent(local)+(url.hash?'&anchor='+encodeURIComponent(url.hash.slice(1)):''):'/help/'+local+url.hash;
+ }
+ // Code/branding references remain source links rather than nonexistent offline files.
+ return 'https://github.com/JustSeanC/AeroScience/blob/develop/v0.5.0'+url.pathname+url.hash;
+}
 export function markdown(parent,source,guide){
  const toc=node('nav');toc.setAttribute('aria-label','In this guide');parent.append(toc);let code=null,list=null,table=null;
- function inline(target,value){const regex=/\[([^\]]+)\]\(([^)]+)\)|\*\*([^*]+)\*\*|`([^`]+)`/g;let last=0;for(const m of value.matchAll(regex)){target.append(document.createTextNode(value.slice(last,m.index)));if(m[1]){const a=node('a',m[1]);try{const url=new URL(m[2],location.origin+'/help/'+guide);if(url.origin===location.origin&&url.pathname.startsWith('/help/')&&url.pathname.endsWith('.md'))a.href='#help?guide='+encodeURIComponent(url.pathname.slice(6))+(url.hash?'&anchor='+encodeURIComponent(url.hash.slice(1)):'');else if(m[2].startsWith('#'))a.href='#help?guide='+encodeURIComponent(guide)+'&anchor='+encodeURIComponent(m[2].slice(1));else if(['https:','http:'].includes(url.protocol)){a.href=url.href;a.target='_blank';a.rel='noopener noreferrer';}else a.removeAttribute('href');}catch{}target.append(a);}else target.append(node(m[3]?'strong':'code',m[3]||m[4]));last=m.index+m[0].length;}target.append(document.createTextNode(value.slice(last)));}
+ function inline(target,value){const regex=/\[([^\]]+)\]\(([^)]+)\)|\*\*([^*]+)\*\*|`([^`]+)`/g;let last=0;for(const m of value.matchAll(regex)){target.append(document.createTextNode(value.slice(last,m.index)));if(m[1]){const a=node('a',m[1]);try{const href=documentationUrl(m[2],guide);if(href){a.href=href;if(!href.startsWith('#help?')){a.target='_blank';a.rel='noopener noreferrer';}}}catch{}target.append(a);}else target.append(node(m[3]?'strong':'code',m[3]||m[4]));last=m.index+m[0].length;}target.append(document.createTextNode(value.slice(last)));}
  for(const line of source.split(/\r?\n/)){
   if(line.startsWith('```')){if(code)code=null;else{const pre=node('pre');code=node('code');pre.append(code);parent.append(pre);}continue;}
   if(code){code.append(document.createTextNode(line+'\n'));continue;}

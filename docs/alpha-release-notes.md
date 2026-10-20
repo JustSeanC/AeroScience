@@ -1,9 +1,0 @@
-# AeroScience v0.2.0 — Science Mission Operations Prerelease
-
-Release-note draft for the changed source. **A new Windows/official-SDK candidate and acceptance are pending; no finished v0.2.0 installer or public binary is claimed.** The primary asset after acceptance is AeroScience-Setup-v0.2.0.exe. The portable ZIP is secondary; no runner is needed for the manual Windows build/upload.
-
-Includes optional saved mission plans/four editable templates, immutable recording snapshots, actual atmospheric instruments with independent acquisition intervals/quality/provenance, offline WGS84 mission maps, observation markers/notes, read-only standard flight guidance, consistent Mach, historical research review and complete JSON/CSV/GPX/KML/text exports. Native Settings offers independently protected flight/science clearing and verified backups. Schema-4 upgrades preserve old records with verified backups; separate storage paths/library identities remain.
-
-No aircraft whitelist, advanced calibration, named preset library, scoring, remote sensing, mandatory cloud/account, flight-control writes or full replay. The offline map is a coordinate grid rather than satellite imagery. Custom avionics may not publish standard guidance flags; unavailable data is not inferred or synthesized. Atmospheric values describe the simulator, not independent calibrated real-world weather.
-
-Retains Inno setup, guided storage/Community onboarding, authorized native runtime, genuine SDK toolbar, shortcuts/uninstaller and preservation of user data/settings. See [build/publication](public-release-windows.md), [completion report](v0.2.0-completion.md), [scientific behavior](science-operations.md) and [pending Windows tests](v0.2.0-windows-testing.md). Final release notes must identify the actual tested commit/checksum and disclose pending extended aircraft/device/performance checks.

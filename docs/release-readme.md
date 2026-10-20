@@ -1,11 +1,11 @@
-# AeroScience v0.4.2 — Research Workstation & Scientific Visualization
+# AeroScience — Windows distribution
 
-The primary installation is **AeroScience-Setup-v0.4.2.exe**. Run Setup, finish guided
+The primary installation is the versioned **AeroScience-Setup** EXE named in this release. Run Setup, finish guided
 storage/toolbar onboarding and launch AeroScience from Start. The local services and
 browser dashboard start automatically. Pilots need no SDK, terminal, Python/GDAL,
 manual DLL copy or separate server. Portable ZIPs are secondary.
 
-Use [the pilot guide](docs/v0.4.2-pilot-guide.md) for Plan → Prepare → Fly → Review →
+Use [the pilot guide](v0.4.2-pilot-guide.md) for Plan → Prepare → Fly → Review →
 Compare → Export. Automatic, bounded terrain/Landsat/Sentinel preparation is the normal
 supported workflow after separate scientific-data consent. Hyperspectral uses supported
 graphical ENVI import; global automatic hyperspectral coverage is not claimed. Science
@@ -38,3 +38,5 @@ questions, feature requests, and discussions with other pilots.
 also retains Collect Feedback / Logs and GitHub issue reporting. Review private
 geographic information before sharing logs; never share keys, pairing codes or original
 runtime permission correspondence.
+
+[Documentation index](README.md) · [Installation](../INSTALL.md). Version-specific completion records describe their original source and limitations; inspect this installer’s own release evidence for actual acceptance.

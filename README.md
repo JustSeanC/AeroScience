@@ -34,7 +34,7 @@ Need help with AeroScience? Join our Discord community for support, troubleshoot
 
 The [completion report](docs/v0.4.2-completion.md) records implemented scope, checks, limitations and Windows/device tests still needed. The [CI repair report](docs/v0.4.1-ci-repair.md) separates local results from actual hosted [GitHub Actions runs](https://github.com/JustSeanC/AeroScience/actions/workflows/ci.yml). [Science operations](docs/science-operations.md) explains storage, provenance, estimates and exports. [SDK research](docs/sdk-research-v0.2.0.md) lists exact variables, units and guidance limitations.
 
-On the gaming PC, use the [v0.4.2 Windows checklist](docs/v0.4.2-windows-testing.md) and [installer build/test/manual publication guide](docs/public-release-windows.md). No self-hosted GitHub Actions runner is required. Genuine SDK compilation, runtime loading/export checks, private-safe redistribution attestation and automated technical tests remain mandatory. Finalization preserves the exact tested setup bytes and generates a SHA-256 checksum. Current genuine scientific reports pass the source-bound verifier. v0.4.2 stops at an installer candidate until actual installed tests A–H and device/upgrade checks are recorded. A graphical maintainer checklist avoids handwritten JSON. The optional Actions preparation workflow remains available; its unaccepted science-release publication path is blocked.
+On the gaming PC, use the [v0.4.2 Windows checklist](docs/v0.4.2-windows-testing.md) and [installer build/test/manual publication guide](docs/public-release-windows.md). No self-hosted GitHub Actions runner is required. Genuine SDK compilation, runtime loading/export checks, private-safe redistribution attestation and automated technical tests remain mandatory. Finalization preserves the exact tested setup bytes and generates a SHA-256 checksum. v0.4.2 genuine reports retain their original source-bound evidence. The v0.5.0 development reports are pending; no new scientific acceptance or release is claimed. v0.4.2 stops at an installer candidate until actual installed tests A–H and device/upgrade checks are recorded. A graphical maintainer checklist avoids handwritten JSON. The optional Actions preparation workflow remains available; its unaccepted science-release publication path is blocked.
 
 For isolated cloud development, reuse the existing checkout:
 
@@ -50,6 +50,8 @@ python3 scripts/build/smoke_recovery.py --host-dll artifacts/recovery-test-host/
 
 Synthetic sources exist only in automated test projects. Native Windows GUI execution, the proprietary official SDK, MSFS, Quest 3 and physical iPad testing require their respective environments; cross-compilation and browser fixtures do not establish those passes.
 
-[Installation](INSTALL.md) · [Architecture](docs/architecture.md) · [Validation](docs/validation-results.md) · [Changelog](CHANGELOG.md)
+[Installation](INSTALL.md) · [Architecture](docs/architecture.md) · [Validation](docs/verification.md) · [Changelog](CHANGELOG.md)
 
 Mission Planner walkthrough and revised draft/map workflows: [first mission guide](docs/mission-planner.md).
+
+Development documentation: [central index](docs/README.md) · [v0.5.0 implementation tracker](docs/roadmap/v0.5.0-development-tracker.md). Main remains the v0.4.2 external-QA baseline; development is not a published release.
