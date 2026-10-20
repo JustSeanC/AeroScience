@@ -10,7 +10,7 @@ Push-Location $repo
 try {
     dotnet restore AeroScience.sln --locked-mode
     if ($LASTEXITCODE -ne 0) { throw 'Dependency restore failed.' }
-    dotnet test AeroScience.sln -c $Configuration --no-restore --logger 'trx;LogFileName=windows.trx'
+    dotnet test AeroScience.sln -c $Configuration --no-restore --logger 'trx;LogFileName=windows.trx' --logger 'console;verbosity=normal' --blame-hang-timeout 2m --blame-hang-dump-type none
     if ($LASTEXITCODE -ne 0) { throw 'Tests failed.' }
     npm ci --ignore-scripts
     if ($LASTEXITCODE -ne 0) { throw 'Browser tooling restore failed.' }
