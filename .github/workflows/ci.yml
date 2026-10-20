@@ -44,6 +44,7 @@ jobs:
         run: |
           dotnet build tests/AeroScience.TestHost -c Release --no-restore --nologo --output artifacts/recovery-test-host
           python3 scripts/build/smoke_recovery.py --host-dll artifacts/recovery-test-host/AeroScience.TestHost.dll
+          python3 scripts/build/smoke_evidence_recovery.py --host-dll artifacts/recovery-test-host/AeroScience.TestHost.dll
   windows-companion:
     runs-on: windows-latest
     steps:
@@ -79,6 +80,8 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Recovery test host build failed.' }
           python scripts/build/smoke_recovery.py --host-dll artifacts/recovery-test-host/AeroScience.TestHost.dll
           if ($LASTEXITCODE -ne 0) { throw 'Recovery smoke failed.' }
+          python scripts/build/smoke_evidence_recovery.py --host-dll artifacts/recovery-test-host/AeroScience.TestHost.dll
+          if ($LASTEXITCODE -ne 0) { throw 'Science session evidence recovery smoke failed.' }
       - name: Compile installer recipe with structural fixtures only
         shell: pwsh
         run: |

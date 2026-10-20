@@ -196,6 +196,7 @@ public sealed class ResearchTests : IDisposable
     {
         var id = store.Create("Legacy realistic", null, now, ScienceMode.Realistic); var frame = SimulatedTelemetryProvider.Generate(now, 0);
         store.Append(id, frame); store.Finish(id, MissionStatus.Completed, now, "Done");
+        EvidenceTestDatabase.RemoveSchemaEight(store.DatabasePath);
         using (var db = new SqliteConnection(new SqliteConnectionStringBuilder { DataSource = store.DatabasePath, Pooling = false }.ToString()))
         { db.Open(); using var cmd = db.CreateCommand(); cmd.CommandText = "DROP TABLE mission_plans; DROP TABLE mission_research; DROP TABLE research_markers; DROP TABLE research_notes; ALTER TABLE dataset_references DROP COLUMN available; PRAGMA user_version=3;"; cmd.ExecuteNonQuery(); }
         var fingerprint = StorageManager.DatabaseFingerprint(store.DatabasePath); store.Initialize();

@@ -285,7 +285,7 @@ public sealed class EvidenceContractsTests
             Assert.Equal(binding.Id, EvidenceContracts.Snapshot(collection).SurveyAreas!.Single().Id);
             EvidenceContracts.ValidatePlan(collection, saved);
             using var verify = new SqliteConnection($"Data Source={path};Pooling=False"); verify.Open(); using var check = verify.CreateCommand();
-            check.CommandText = "PRAGMA user_version"; Assert.Equal(7L, check.ExecuteScalar());
+            check.CommandText = "PRAGMA user_version"; Assert.Equal((long)MissionStore.CurrentSchemaVersion, check.ExecuteScalar());
             var handler = new ToolbarCommandHandler(new MissionCoordinator(store, 1000));
             var reply = handler.Handle(JsonSerializer.Serialize(new ToolbarCommand(1, Guid.NewGuid(), "state"), WireJson.Options));
             Assert.InRange(Encoding.UTF8.GetByteCount(reply), 1, 8000);

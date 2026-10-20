@@ -98,6 +98,7 @@ public sealed class ExperienceTests : IDisposable
     public void VersionFourUpgradeBacksUpAndRetainsOriginalSamplesModesAndReferences()
     {
         var m = coordinator.Start(new StartMissionRequest("Legacy", ScienceMode.Realistic, Instruments: [new("ambient-temperature", true)])); Apply(0); coordinator.End(m.Id); var original = store.StreamSamples(m.Id).Single();
+        EvidenceTestDatabase.RemoveSchemaEight(store.DatabasePath);
         using (var db = new SqliteConnection(new SqliteConnectionStringBuilder { DataSource = store.DatabasePath, Pooling = false }.ToString())) { db.Open(); using var cmd = db.CreateCommand(); cmd.CommandText = "DROP TABLE instrument_presets;DROP TABLE analysis_settings;PRAGMA user_version=4"; cmd.ExecuteNonQuery(); }
         var hash = StorageManager.DatabaseFingerprint(store.DatabasePath); store.Initialize(); Assert.Equal(original, store.StreamSamples(m.Id).Single()); Assert.Equal(ScienceMode.Realistic, store.Detail(m.Id)!.Mission.Mode); Assert.True(store.ResolvedDatasetReferences(m.Id).Single().Available);
         var backup = Directory.GetFiles(Path.Combine(root, "Backups"), "missions-schema4-*.db").Single(); Assert.Equal(hash, StorageManager.DatabaseFingerprint(backup)); Assert.Empty(store.Presets());

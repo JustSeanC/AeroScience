@@ -7,6 +7,7 @@ namespace AeroScience.Missions;
 
 public sealed partial class MissionStore
 {
+    public const int CurrentSchemaVersion = 8;
     private readonly string connectionString;
     public string DatabasePath { get; }
 
@@ -41,11 +42,11 @@ public sealed partial class MissionStore
         using var cmd = db.CreateCommand();
         cmd.CommandText = "PRAGMA user_version;";
         var version = Convert.ToInt32(cmd.ExecuteScalar(), CultureInfo.InvariantCulture);
-        if (version > 7) throw new InvalidOperationException("Database was created by a newer AeroScience version; refusing to modify it.");
-        if (version is 1 or 2 or 3 or 4 or 5 or 6)
+        if (version > CurrentSchemaVersion) throw new InvalidOperationException("Database was created by a newer AeroScience version; refusing to modify it.");
+        if (version is >= 1 and < CurrentSchemaVersion)
         {
-            var size = new FileInfo(DatabasePath).Length;
-            if (new LocalStorageCapacity().FreeBytes(Path.GetDirectoryName(DatabasePath)!) < size + StorageManager.MinimumFreeBytes)
+            var size = StorageManager.DatabaseBytes(DatabasePath);
+            if ((EvidenceFreeBytes?.Invoke() ?? new LocalStorageCapacity().FreeBytes(Path.GetDirectoryName(DatabasePath)!)) < size + StorageManager.MinimumFreeBytes)
                 throw new IOException("Free space is insufficient for the verified upgrade backup. The original archive was not modified.");
             var backups = Path.Combine(Path.GetDirectoryName(DatabasePath)!, "Backups"); Directory.CreateDirectory(backups);
             var backup = Path.Combine(backups, $"missions-schema{version}-{DateTime.UtcNow:yyyyMMdd-HHmmss}-{Guid.NewGuid():N}.db");
@@ -56,17 +57,18 @@ public sealed partial class MissionStore
         }
         cmd.CommandText = "PRAGMA journal_mode=WAL;";
         cmd.ExecuteNonQuery();
-        if (version == 7)
+        if (version == CurrentSchemaVersion)
         {
-            // Additive read index only: no JSON or historical sample is rewritten.
+            // Already current: no JSON or historical sample is rewritten.
             return;
         }
-        if (version == 6) { MigrateScientificReview(db); return; }
-        if (version == 5) { MigrateMissionScience(db); return; }
-        if (version == 4) { MigrateExperience(db); MigrateMissionScience(db); return; }
-        if (version == 3) { MigrateResearch(db); MigrateExperience(db); MigrateMissionScience(db); return; }
-        if (version == 2) { MigrateLibraryReferences(db); MigrateResearch(db); MigrateExperience(db); MigrateMissionScience(db); return; }
-        if (version == 1) { MigrateMode(db); MigrateLibraryReferences(db); MigrateResearch(db); MigrateExperience(db); MigrateMissionScience(db); return; }
+        if (version == 7) { MigrateCollectionEvidence(db); return; }
+        if (version == 6) { MigrateScientificReview(db); MigrateCollectionEvidence(db); return; }
+        if (version == 5) { MigrateMissionScience(db); MigrateCollectionEvidence(db); return; }
+        if (version == 4) { MigrateExperience(db); MigrateMissionScience(db); MigrateCollectionEvidence(db); return; }
+        if (version == 3) { MigrateResearch(db); MigrateExperience(db); MigrateMissionScience(db); MigrateCollectionEvidence(db); return; }
+        if (version == 2) { MigrateLibraryReferences(db); MigrateResearch(db); MigrateExperience(db); MigrateMissionScience(db); MigrateCollectionEvidence(db); return; }
+        if (version == 1) { MigrateMode(db); MigrateLibraryReferences(db); MigrateResearch(db); MigrateExperience(db); MigrateMissionScience(db); MigrateCollectionEvidence(db); return; }
         using var transaction = db.BeginTransaction();
         cmd.Transaction = transaction;
         cmd.CommandText = """
@@ -101,6 +103,7 @@ public sealed partial class MissionStore
         MigrateResearch(db);
         MigrateExperience(db);
         MigrateMissionScience(db);
+        MigrateCollectionEvidence(db);
     }
 
     private static void MigrateLibraryReferences(SqliteConnection db)
@@ -187,6 +190,7 @@ public sealed partial class MissionStore
         }
         writer.WriteEndArray();
         await WriteResearchJsonAsync(id, writer, FlushAsync, cancellationToken);
+        await WriteCollectionEvidenceJsonAsync(id, writer, FlushAsync, cancellationToken);
         writer.WriteEndObject(); await FlushAsync();
     }
 
@@ -244,10 +248,16 @@ public sealed partial class MissionStore
 
     public void Append(Guid id, TelemetryFrame frame)
     {
-        if (!frame.IsValid) throw new ArgumentException("Invalid telemetry cannot be recorded.");
-        if (frame.MachNumber is { } mach && (!double.IsFinite(mach) || mach < 0)) frame = frame with { MachNumber = null };
         using var db = Open();
         using var tx = db.BeginTransaction();
+        Append(db, tx, id, frame);
+        tx.Commit();
+    }
+
+    private static void Append(SqliteConnection db, SqliteTransaction tx, Guid id, TelemetryFrame frame)
+    {
+        if (!frame.IsValid) throw new ArgumentException("Invalid telemetry cannot be recorded.");
+        if (frame.MachNumber is { } mach && (!double.IsFinite(mach) || mach < 0)) frame = frame with { MachNumber = null };
         using var cmd = db.CreateCommand();
         cmd.Transaction = tx;
         cmd.CommandText = "SELECT status,aircraft,source FROM missions WHERE id=$id";
@@ -271,7 +281,6 @@ public sealed partial class MissionStore
         cmd.Parameters.AddWithValue("$aircraft", frame.Aircraft);
         cmd.Parameters.AddWithValue("$source", frame.Source.ToString());
         cmd.ExecuteNonQuery();
-        tx.Commit();
     }
 
     public void AddEvent(Guid id, DateTimeOffset now, string kind, string message)
@@ -293,6 +302,7 @@ public sealed partial class MissionStore
         cmd.Parameters.AddWithValue("$id", id.ToString());
         if (cmd.ExecuteNonQuery() != 1) throw new InvalidOperationException("Mission is not recording.");
         Event(db, tx, id, now, status.ToString().ToLowerInvariant(), message);
+        CloseEvidenceForFlight(db, tx, id, status, now);
         tx.Commit();
     }
 

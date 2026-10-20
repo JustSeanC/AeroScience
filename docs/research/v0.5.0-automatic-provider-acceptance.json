@@ -1,0 +1,10 @@
+{
+  "formatVersion": 1,
+  "version": "0.5.0",
+  "evidenceType": "pending-genuine-provider-network",
+  "windowsMsfs": "not tested",
+  "finalNetworkRerun": "pending",
+  "finalNetworkRerunReason": "Development implementation is in progress. Genuine provider discovery, numeric retrieval, preparation, import and sampling must be rerun against the final 0.5.0 source before release claims.",
+  "workflows": [],
+  "previousEvidence": "v0.4.2-automatic-provider-acceptance.json"
+}

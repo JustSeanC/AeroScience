@@ -1,0 +1,8 @@
+{
+  "formatVersion": 1,
+  "version": "0.5.0",
+  "evidenceType": "pending-genuine-workspace",
+  "windowsMsfs": "not tested",
+  "reason": "Genuine numeric workspace, source-grid/QA support, regional combination and research-package evidence must be refreshed against final 0.5.0 source before release claims.",
+  "previousEvidence": "v0.4.2-workspace-acceptance.json"
+}

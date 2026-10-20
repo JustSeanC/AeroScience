@@ -80,7 +80,7 @@ public sealed class SimConnectTelemetryProvider : ITelemetryProvider
         public NativeSession()
         {
             callback = OnMessage;
-            Check(Native.Open(out handle, "AeroScience 0.4.2", IntPtr.Zero, 0, IntPtr.Zero, 0));
+            Check(Native.Open(out handle, "AeroScience 0.5.0", IntPtr.Zero, 0, IntPtr.Zero, 0));
             try
             {
                 Sent(Native.AddToDataDefinition(handle, 1, "TITLE", null, 9, 0, uint.MaxValue), "aircraft");

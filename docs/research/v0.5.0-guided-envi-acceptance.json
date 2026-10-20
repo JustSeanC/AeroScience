@@ -1,0 +1,8 @@
+{
+  "formatVersion": 1,
+  "version": "0.5.0",
+  "evidenceType": "pending-genuine-guided-envi",
+  "windowsMsfs": "not tested",
+  "reason": "Actual retained-original ENVI import, product, offline and independently verified numeric evidence must be refreshed for final 0.5.0 source. Classic and NG assistance remain separate implementation/acceptance workstreams.",
+  "previousEvidence": "v0.4.2-guided-envi-acceptance.json"
+}

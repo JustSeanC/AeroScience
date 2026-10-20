@@ -87,7 +87,9 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'Recovery test host build failed.' }
     python scripts/build/smoke_recovery.py --host-dll (Join-Path $recoveryHostDirectory 'AeroScience.TestHost.dll')
     if ($LASTEXITCODE -ne 0) { throw 'Recording recovery smoke failed.' }
-    @{ result='passed'; check='Actual-process crash/restart, committed samples/modes and exclusive owner' } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $evidence 'recovery.json') -Encoding utf8
+    python scripts/build/smoke_evidence_recovery.py --host-dll (Join-Path $recoveryHostDirectory 'AeroScience.TestHost.dll')
+    if ($LASTEXITCODE -ne 0) { throw 'Science session evidence recovery smoke failed.' }
+    @{ result='passed'; check='Actual-process crash/restart, committed samples/modes, exclusive owner and atomic multi-session evidence kill points' } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $evidence 'recovery.json') -Encoding utf8
     python scripts/release/automatic_release.py evidence --unit (Join-Path $evidence 'dotnet.trx') --browser (Join-Path $evidence 'browser.json') --helpers (Join-Path $evidence 'helpers.json') --recovery (Join-Path $evidence 'recovery.json') --source-commit $revision --output (Join-Path $evidence 'technical-validation.json')
     if ($LASTEXITCODE -ne 0) { throw 'Automatic test evidence validation failed.' }
     & "$repo/scripts/build/Build-Toolbar.ps1" -SdkRoot $SdkRoot

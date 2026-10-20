@@ -103,6 +103,7 @@ public sealed class AlphaDataTests : IDisposable
         var frame = SimulatedTelemetryProvider.Generate(now, 0);
         var id = store.Create("v0.1.0", frame, now); store.Append(id, frame); store.Finish(id, MissionStatus.Completed, now, "Done");
         // Release test-owned files on disposal so Windows can delete the temporary archive.
+        EvidenceTestDatabase.RemoveSchemaEight(store.DatabasePath);
         using (var db = new SqliteConnection(new SqliteConnectionStringBuilder { DataSource = store.DatabasePath, Pooling = false }.ToString()))
         {
             db.Open(); using var cmd = db.CreateCommand();

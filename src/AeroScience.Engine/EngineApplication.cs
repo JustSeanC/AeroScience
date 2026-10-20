@@ -158,7 +158,7 @@ public static class EngineApplication
             FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(helpDirectory)
         });
         app.MapGet("/api/toolbar/bridge",(ToolbarBridgeStatus status)=>status.Snapshot());
-        app.MapGet("/api/health", () => Results.Ok(new { status = "ok", version = "0.4.2" }));
+        app.MapGet("/api/health", () => Results.Ok(new { status = "ok", version = "0.5.0" }));
         app.MapGet("/api/access", (HttpContext c) => new { requiresPairing = !AccessControl.IsLoopback(c) });
         app.MapPost("/api/session", (HttpContext c, PairRequest request, AccessControl access) =>
         {
@@ -202,7 +202,7 @@ public static class EngineApplication
         app.MapResearchEndpoints();
         app.MapGet("/api/settings", (HttpContext c, AccessControl access) => new
         {
-            version = "0.4.2",
+            version = "0.5.0",
             telemetry = options.Telemetry,
             options.SamplingIntervalMs,
             options.EnableLan,
@@ -260,7 +260,7 @@ public static class EngineApplication
             catch (OperationCanceledException) when (context.RequestAborted.IsCancellationRequested) { }
             catch (IOException) { /* A display disconnected; recording continues in TelemetryWorker. */ }
         });
-        app.Logger.LogInformation("AeroScience 0.4.2 — {Source} telemetry; dashboard http://127.0.0.1:{Port}; data {Directory}", options.Telemetry, options.Port, options.DataDirectory);
+        app.Logger.LogInformation("AeroScience 0.5.0 — {Source} telemetry; dashboard http://127.0.0.1:{Port}; data {Directory}", options.Telemetry, options.Port, options.DataDirectory);
         return app;
     }
 }
