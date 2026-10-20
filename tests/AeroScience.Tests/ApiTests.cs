@@ -163,7 +163,10 @@ public sealed class ApiTests : IAsyncLifetime
     {
         var lifetime=factory.Services.GetRequiredService<IHostApplicationLifetime>();
         stoppedRegistration=lifetime.ApplicationStopped.Register(()=>stopped.TrySetResult());
+        var started=new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        using var startedRegistration=lifetime.ApplicationStarted.Register(()=>started.TrySetResult());
         using var response=await client.GetAsync("/api/health");response.EnsureSuccessStatusCode();
+        await started.Task.WaitAsync(TimeSpan.FromSeconds(10));
         Assert.True(lifetime.ApplicationStarted.IsCancellationRequested);
     }
     public async Task DisposeAsync()
