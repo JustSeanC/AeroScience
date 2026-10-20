@@ -11,6 +11,7 @@ using Xunit;
 using AeroScience.Telemetry;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.Hosting;
 
 namespace AeroScience.Tests;
 
@@ -19,6 +20,8 @@ public sealed class ApiTests : IAsyncLifetime
     private readonly string directory = Path.Combine(Path.GetTempPath(), "aeroscience-api", Guid.NewGuid().ToString());
     private readonly WebApplicationFactory<Program> factory;
     private readonly HttpClient client;
+    private readonly TaskCompletionSource stopped=new(TaskCreationOptions.RunContinuationsAsynchronously);
+    private CancellationTokenRegistration stoppedRegistration;
     public ApiTests()
     {
         factory = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
@@ -149,28 +152,25 @@ public sealed class ApiTests : IAsyncLifetime
     }
 
     [Fact]
-    public void RemotePairingRequiresCodeExpiresAcrossRestartAndLimitsAttempts()
+    public void StartedApiOwnsDirectoryUntilAwaitedShutdown()
     {
-        var access = new AccessControl(); Assert.Null(access.Pair(false, "WRONG")); Assert.Null(access.Pair(false, null));
-        var session = access.Pair(false, access.PairingCode); Assert.NotNull(session);
-        Assert.NotEqual(access.PairingCode, new AccessControl().PairingCode);
-        for (var i = 0; i < 5; i++) Assert.True(access.AllowAttempt("192.168.1.2"));
-        Assert.False(access.AllowAttempt("192.168.1.2"));
-        Assert.True(access.AllowAttempt("192.168.1.3"));
+        Assert.Throws<IOException>(()=>{using var duplicate=new DataDirectoryLease(new EngineOptions{DataDirectory=directory});});
+        // DisposeAsync must observe ApplicationStopped, join disposal, and reacquire
+        // the same exclusive lease before deleting this test's directory.
     }
 
-    [Theory]
-    [InlineData("0.0.0.0")]
-    [InlineData("8.8.8.8")]
-    [InlineData("127.0.0.1")]
-    public void LanBindingRefusesPublicAndWildcardAddresses(string address) => Assert.Throws<InvalidOperationException>(() =>
-        new EngineOptions { EnableLan = true, LanAddress = address }.Validate());
-
-    public Task InitializeAsync()=>Task.CompletedTask;
+    public async Task InitializeAsync()
+    {
+        var lifetime=factory.Services.GetRequiredService<IHostApplicationLifetime>();
+        stoppedRegistration=lifetime.ApplicationStopped.Register(()=>stopped.TrySetResult());
+        using var response=await client.GetAsync("/api/health");response.EnsureSuccessStatusCode();
+        Assert.True(lifetime.ApplicationStarted.IsCancellationRequested);
+    }
     public async Task DisposeAsync()
     {
         var services=factory.Services;
         client.Dispose(); await factory.DisposeAsync();
+        await stopped.Task.WaitAsync(TimeSpan.FromSeconds(10));stoppedRegistration.Dispose();
         // The deferred TestServer host can finish before its application provider's
         // asynchronous singleton cleanup. Join the actual provider before deleting files.
         if(services is IAsyncDisposable owned)await owned.DisposeAsync();

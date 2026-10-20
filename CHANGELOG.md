@@ -11,7 +11,7 @@
 - Bound native CommBus replies, synchronize selected plans and expose connection diagnostics. Installed Windows/MSFS confirmation remains outstanding.
 - Offer up to eight configurable preparations while preserving explicit settings. Retain the conservative single-slot default: genuine 1/2/4/8 tests encountered rate limits and tunnel failures at higher settings; four is not claimed validated.
 - Repair foundation recovery-host build paths, migration backup selection, fixture timing/release and asynchronous engine cleanup. Keep scientific release evidence separate from validator fixtures, preserve strict SDK/runtime/installer gates and add v0.4.1 hardware checks.
-- No release, tag, GitHub issue or hardware acceptance is created by these changes. Current-source online/guided/full-workspace evidence remains pending; retained genuine-data review is a separately labeled result.
+- Record fresh genuine four-provider retrieval, guided 224-band ENVI import, 14 independent native-grid raster checks and six verified research ZIPs. Retained-data reconstruction remains separately labeled. No release, tag, GitHub issue or Windows/MSFS hardware acceptance is created by these changes.
 
 ## 0.4.0 — Scientific Mission Planning, Sensor Modeling & Analysis (development; Windows acceptance pending)
 
