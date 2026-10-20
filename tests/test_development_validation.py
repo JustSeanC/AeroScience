@@ -17,6 +17,7 @@ class DevelopmentValidationTests(unittest.TestCase):
         self.assertEqual('full', ci.validation_tier('push', 'refs/heads/develop/v0.5.0', message='P02 completed [full-validation]'))
         self.assertEqual('full', ci.validation_tier('workflow_dispatch', 'refs/heads/develop/v0.5.0', requested='full'))
         self.assertEqual('fast', ci.validation_tier('workflow_dispatch', 'refs/heads/develop/v0.5.0', requested='fast'))
+        self.assertEqual('full', ci.validation_tier('workflow_dispatch', 'refs/heads/main', requested='fast'))
         with self.assertRaises(ValueError):
             ci.validation_tier('workflow_dispatch', 'refs/heads/develop/v0.5.0', requested='none')
 

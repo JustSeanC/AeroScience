@@ -16,7 +16,7 @@ def validation_tier(event, ref, base='', requested='full', message=''):
     if event == 'workflow_dispatch':
         if requested not in {'fast', 'full'}:
             raise ValueError('Unknown validation tier; refusing an empty validation run.')
-        return requested
+        return requested if ref == 'refs/heads/develop/v0.5.0' else 'full'
     development = ref == 'refs/heads/develop/v0.5.0' or base == 'develop/v0.5.0'
     return 'fast' if development and '[full-validation]' not in message else 'full'
 
