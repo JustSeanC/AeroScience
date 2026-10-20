@@ -5,9 +5,13 @@ using AeroScience.Engine;
 using AeroScience.Missions;
 using AeroScience.Shared;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace AeroScience.Tests;
 
+// A bounded acquisition deadline must not measure unrelated parallel SQLite/raster
+// fixture contention. Explicit worker/recorder concurrency remains covered separately.
+[Collection(ScientificIoCollection.Name)]
 public sealed class RemoteSensingTests : IDisposable
 {
     private readonly string root=Path.Combine(Path.GetTempPath(),"aeroscience-remote-"+Guid.NewGuid().ToString("N"));
@@ -15,21 +19,35 @@ public sealed class RemoteSensingTests : IDisposable
     private readonly ScienceStore science;
     private readonly ResearchOperations research;
     private readonly MissionCoordinator coordinator;
-    public RemoteSensingTests()
+    private readonly ITestOutputHelper output;
+    public RemoteSensingTests(ITestOutputHelper output)
     {
+        this.output = output;
         var settings=new StorageManager(new PreferenceStore(root)).Initialize();missions=new(Path.Combine(settings.MissionDirectory,"missions.db"));missions.Initialize();science=new(settings.ScienceLibraryDirectory);science.Initialize();missions.ScienceLibrary=science;research=new(missions,science);coordinator=new(missions,1000,research:research);
     }
     private static TelemetryFrame Frame(DateTimeOffset? time=null)=>new(time??DateTimeOffset.UtcNow,TelemetrySource.Simulator,"Fixture aircraft",40,-75,1000,328.0839895,140,150,160,0,0,0,0,0,MachNumber:.25);
     private void Apply(TelemetryFrame frame)=>coordinator.Apply(new(new(ConnectionState.Connected,TelemetrySource.Simulator,"Isolated fixture; no MSFS connection",frame.TimestampUtc),frame,new(frame.TimestampUtc,15,29,5,90,.002)));
     private async Task<RemoteProduct> Acquire(RemoteKind kind,bool cloudy=false)
     {
+        var clock = System.Diagnostics.Stopwatch.StartNew();
         var manifest=RemoteFixtureFiles.Create(Path.Combine(root,"input-"+Guid.NewGuid()),kind,cloudy);await science.ImportSourceAsync(manifest);
+        output.WriteLine($"{kind}: fixture import completed at {clock.Elapsed}.");
         var id=RemoteAcquisition.Instruments.Single(p=>p.Value==kind).Key;var mission=coordinator.Start(new("Remote fixture",ScienceMode.Realistic,Instruments:[new(id,true)]));Apply(Frame());
+        output.WriteLine($"{kind}: Apply returned at {clock.Elapsed}; waiting for actual publication.");
         await Wait(()=>science.Products(mission.Id).Length>0||coordinator.Snapshot().Research!.Instruments.Single(i=>i.InstrumentId==id).Quality==ObservationQuality.Unavailable);
+        output.WriteLine($"{kind}: publication completed at {clock.Elapsed}.");
         return science.Products(mission.Id).Single();
     }
-    private static async Task Wait(Func<bool> predicate)
-    {using var timeout=new CancellationTokenSource(TimeSpan.FromSeconds(10));while(!predicate())await Task.Delay(10,timeout.Token);}
+    private async Task Wait(Func<bool> predicate)
+    {
+        using var timeout=new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        try { while(!predicate())await Task.Delay(10,timeout.Token); }
+        catch (OperationCanceledException)
+        {
+            throw new TimeoutException("The 10-second synthetic acquisition deadline elapsed. Worker state: "
+                + JsonSerializer.Serialize(coordinator.Snapshot().Research?.Instruments, WireJson.Options));
+        }
+    }
     [Theory][InlineData(RemoteKind.Thermal)][InlineData(RemoteKind.Multispectral)][InlineData(RemoteKind.Hyperspectral)][InlineData(RemoteKind.Terrain)]
     public async Task ActualFileReadersProduceReproducibleProductsWithSeparateDatesAndPortableEvidence(RemoteKind kind)
     {

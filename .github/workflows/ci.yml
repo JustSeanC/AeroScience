@@ -1,5 +1,13 @@
 name: foundation
 on:
+  workflow_dispatch:
+    inputs:
+      validation:
+        description: 'Validation scope (full is required at milestones and before release integration)'
+        required: true
+        default: full
+        type: choice
+        options: [fast, full]
   push:
     paths-ignore:
       - 'docs/roadmap/**'
@@ -7,12 +15,66 @@ on:
     paths-ignore:
       - 'docs/roadmap/**'
 concurrency:
-  group: foundation-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  # Routine development pushes cannot cancel a manually requested or milestone full run.
+  group: foundation-${{ github.event.pull_request.number || github.ref }}-${{ github.event_name }}-${{ inputs.validation || (contains(github.event.head_commit.message, '[full-validation]') && 'milestone-full' || 'routine') }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' && !contains(github.event.head_commit.message, '[full-validation]') }}
 permissions:
   contents: read
 jobs:
+  validation-scope:
+    runs-on: ubuntu-latest
+    outputs:
+      tier: ${{ steps.scope.outputs.tier }}
+    steps:
+      - uses: actions/checkout@v7
+      - id: scope
+        env:
+          REQUESTED: ${{ inputs.validation }}
+          BASE_REF: ${{ github.base_ref }}
+        run: python3 scripts/build/development_validation.py tier
+  development:
+    needs: validation-scope
+    if: needs.validation-scope.outputs.tier == 'fast'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Select conservative affected checks
+        env:
+          CHANGE_BASE: ${{ github.event.before || github.event.pull_request.base.sha }}
+        run: python3 scripts/build/development_validation.py plan --base "$CHANGE_BASE"
+      - run: dotnet restore AeroScience.sln --locked-mode
+      - run: dotnet build AeroScience.sln -c Release --no-restore --nologo
+      - run: python3 scripts/build/development_validation.py dotnet
+      - run: npm ci --ignore-scripts
+      - run: npm run check:web
+      - run: python3 scripts/build/verify_web_assets.py
+      - run: npx playwright install --with-deps chromium
+      - run: python3 scripts/build/development_validation.py browser
+      - run: python3 scripts/build/development_validation.py helpers
+      - name: Retain development scope and diagnostics
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: development-validation
+          path: |
+            artifacts/development-plan.json
+            artifacts/web-results.json
+            tests/AeroScience.Tests/TestResults/**/*.trx
+            tests/AeroScience.Tests/TestResults/**/Sequence_*.xml
+          if-no-files-found: ignore
+          retention-days: 7
   linux:
+    needs: validation-scope
+    if: needs.validation-scope.outputs.tier == 'full'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -46,6 +108,8 @@ jobs:
           python3 scripts/build/smoke_recovery.py --host-dll artifacts/recovery-test-host/AeroScience.TestHost.dll
           python3 scripts/build/smoke_evidence_recovery.py --host-dll artifacts/recovery-test-host/AeroScience.TestHost.dll
   windows-companion:
+    needs: validation-scope
+    if: needs.validation-scope.outputs.tier == 'full'
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v7
@@ -67,10 +131,10 @@ jobs:
             tests/AeroScience.Tests/TestResults/**/Sequence_*.xml
           if-no-files-found: ignore
           retention-days: 7
-      - name: Check installer packaging and publication on Windows
+      - name: Check Windows-sensitive helpers and installer packaging
         shell: pwsh
         run: |
-          python -m unittest discover -s tests -p 'test_*.py' -q
+          python scripts/build/development_validation.py windows-helpers
           if ($LASTEXITCODE -ne 0) { throw 'Windows packaging/helper checks failed.' }
       - shell: pwsh
         env:
