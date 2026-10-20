@@ -162,3 +162,7 @@ test('a delayed comparison reload cannot duplicate or replace the current acquis
  await expect(acquisition.locator('option')).toHaveCount(30);expect(await acquisition.locator('option').evaluateAll(options=>options.map(option=>option.value))).toEqual(current);
  const fallback=await page.evaluate(async()=>{const {select}=await import('/workstation-ui.js');const parent=document.createElement('div');return select(parent,'Restored wavelength',[['good-band','Good retained band']], 'unsupported-old-band').value;});expect(fallback).toBe('good-band');
 });
+test('All Missions clears additional mission selections and queries the whole archive',async({page,request})=>{
+ const entire=await post(request,'/api/science/workspace/overview',{});await page.goto('/#workspace/map?missions='+fixture.missionIds.join(','));await expect(page.locator('.map-overview-counts')).toHaveAttribute('data-total-acquisitions','144');
+ await page.getByLabel('Mission scope',{exact:true}).selectOption('');await expect(page).not.toHaveURL(/missions=/);await expect(page.locator('.map-overview-counts')).toHaveAttribute('data-total-acquisitions',String(entire.acquisitions));expect(await page.getByLabel('Additional missions',{exact:true}).locator('option:checked').count()).toBe(0);
+});

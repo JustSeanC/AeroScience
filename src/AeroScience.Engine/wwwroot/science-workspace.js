@@ -28,7 +28,7 @@ export async function scienceWorkspace(parent,api){
     const multiple=disclosure(controls,'Multiple missions / older archive'),additional=el('select');additional.multiple=true;additional.size=4;additional.setAttribute('aria-label','Additional missions');
     for(const mission of missions){const option=el('option',mission.name);option.value=mission.id;option.selected=ids.slice(1).includes(mission.id);additional.append(option);}multiple.append(el('p','The picker lists recent flights. Open older missions directly from the searchable Mission History.'),additional);link(multiple,'Search Mission History','#history');
     const change=()=>{const query=new URLSearchParams(params),list=[choice.value,...[...additional.selectedOptions].map(option=>option.value)].filter(Boolean);if(list.length)query.set('missions',[...new Set(list)].join(','));else query.delete('missions');if(sensor.value)query.set('instrument',sensor.value);else query.delete('instrument');query.delete('measurement');location.hash='#workspace/'+path+(query.size?'?'+query:'');};
-    choice.onchange=sensor.onchange=additional.onchange=change;
+    choice.onchange=()=>{if(!choice.value)for(const option of additional.options)option.selected=false;change();};sensor.onchange=additional.onchange=change;
     feedback.remove();const body=el('section',undefined,'science-page');parent.append(body);
     if(path==='map'){await scienceMap(body,safeApi,params,ids,instrument,disposals,catalog);return;}
     if(path==='compare'){await comparison(body,safeApi,missions,ids,disposals,catalog);return;}
