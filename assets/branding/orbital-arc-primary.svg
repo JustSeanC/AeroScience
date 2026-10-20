@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1254 1254" role="img" aria-labelledby="title desc">
   <title id="title">AeroScience Orbital Arc — primary logo</title>
-  <desc id="desc">A faceted teal letter A intersected by a graceful flight-path arc, on a transparent background.</desc>
+  <desc id="desc">A thicker-stroked faceted teal letter A intersected by a graceful flight-path arc, on a transparent background.</desc>
   <defs>
     <linearGradient id="left" x1=".14" y1="1" x2=".70" y2="0" objectBoundingBox="true">
       <stop offset="0" stop-color="#03506d"/><stop offset=".53" stop-color="#0cbbbd"/><stop offset="1" stop-color="#62ffed"/>
@@ -15,13 +15,13 @@
       <stop offset="0" stop-color="#003448"/><stop offset=".6" stop-color="#005870"/><stop offset="1" stop-color="#053e55"/>
     </linearGradient>
   </defs>
-  <!-- Scalable vector adaptation of the approved clean Orbital Arc concept. -->
-  <path d="M626 227 207 1020h171l242-526h13l249 528h175L626 227Z" fill="#06c9c5"/>
-  <path d="M626 227 207 1020h171l242-526 13-1Z" fill="url(#left)"/>
-  <path d="M626 227 633 493l249 529h175Z" fill="url(#right)"/>
-  <path d="M626 227 557 356l66 137h10l169 57Z" fill="#b2fff6" opacity=".48"/>
-  <path d="M207 1020h171l130-276-106 46Z" fill="#003e56" opacity=".45"/>
-  <path d="M882 1022h175L831 596l-126 55Z" fill="#00b7b3" opacity=".34"/>
+  <!-- Original outer footprint preserved; thicker A legs and narrower central opening. -->
+  <path d="M626 227 207 1020h218l200-458h6l204 460h222L626 227Z" fill="#06c9c5"/>
+  <path d="M626 227 207 1020h218l200-458 6-2Z" fill="url(#left)"/>
+  <path d="M626 227 631 560l204 462h222Z" fill="url(#right)"/>
+  <path d="M626 227 548 375l77 187h6l171 52Z" fill="#b2fff6" opacity=".48"/>
+  <path d="M207 1020h218l125-286-103 45Z" fill="#003e56" opacity=".45"/>
+  <path d="M835 1022h222L838 622l-129 57Z" fill="#00b7b3" opacity=".34"/>
   <path d="M93 955 C112 852 640 571 1202 485 C935 521 512 701 232 873 C146 928 154 969 228 990 C159 1014 88 991 93 955Z" fill="url(#arcShade)"/>
   <path d="M93 947 C124 847 648 564 1202 485 C953 514 517 699 240 867 C144 925 163 963 224 983 C151 997 88 980 93 947Z" fill="url(#arc)"/>
   <path d="M93 947 C124 847 648 564 1202 485 C1002 500 550 686 240 859 C160 904 119 956 111 972 C97 962 92 955 93 947Z" fill="#d2ffff" opacity=".55"/>
