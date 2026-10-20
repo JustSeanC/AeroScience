@@ -5,11 +5,11 @@ These are **scalable SVG redraws of the approved Orbital Arc logo concept**. The
 ## Files
 
 - `orbital-arc-primary.svg` — teal, transparent-background logo for the dashboard/header, app icon, browser favicon, documentation, and Windows icon derivations.
-- `orbital-arc-toolbar-white.svg` — simplified flat-white transparent mark intended for the Microsoft Flight Simulator toolbar and other small monochrome icon uses.
+- `orbital-arc-toolbar-white.svg` — simplified white A with a black flight arc and a thin white edge, on transparency intended for the Microsoft Flight Simulator toolbar and other small monochrome icon uses.
 
 ## Design rules
 
-- Use the **clean A with sweeping flight arc** consistently.
+- Use the **clean A with sweeping flight arc** consistently; **thicken the strokes of the A** without making its overall silhouette wider.
 - **Do not** use the Earth/terrain-background Discord server icon in the AeroScience app. That artwork is reserved for Discord.
 - No outer-space, stars, globe, or scenery elements in the application icon assets.
 - Keep branding modifications scoped to appropriate UI and packaging assets; preserve functional code.
@@ -22,7 +22,7 @@ Current live assets as of creation:
 
 When implementing:
 1. Use the primary vector for the main UI and generate suitable PNG/ICO derivatives if needed by Windows/installer packaging.
-2. Use the white version for the sim toolbar. **Check simulator SVG limitations, raster sizes and legibility in-sim**, and simplify further if required.
+2. Use the white A / black arc version for the sim toolbar; validate that the black swoosh remains visible on the dark UI (thin light edge provided). **Check simulator SVG limitations, raster sizes and legibility in-sim**, and simplify further if required.
 3. Search for old brand/icon references in active pages, help/about surfaces, shortcuts, manifests, installers, and packaging.
 4. Verify readability at 16/24/32/64/256 px; check both light and dark backgrounds where applicable.
 5. Do not change mission, telemetry, scientific workflow, or toolbar functionality as part of this branding pass.
