@@ -1,6 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1254 1254" role="img" aria-labelledby="title desc">
-  <title id="title">AeroScience Orbital Arc — monochrome toolbar icon</title>
-  <desc id="desc">Simplified white letter A with an intersecting flight arc on transparency, for MSFS toolbar use.</desc>
-  <path fill="#fff" d="M626 227 207 1020h171l242-526h13l249 528h175L626 227Z"/>
-  <path fill="#fff" d="M93 947 C124 847 648 564 1202 485 C953 514 517 699 240 867 C144 925 163 963 224 983 C151 997 88 980 93 947Z"/>
+  <title id="title">AeroScience Orbital Arc — white A with black arc</title>
+  <desc id="desc">Simplified white A with thicker legs, intersected by a black flight arc with a fine white edge for legibility on dark MSFS toolbar backgrounds.</desc>
+  <!-- Retains existing A outer footprint; its legs are thicker. -->
+  <path fill="#fff" d="M626 227 207 1020h218l200-458h6l204 460h222L626 227Z"/>
+  <!-- Small white keyline preserves contrast where the black arc passes over transparent/dark toolbar UI. -->
+  <path fill="#000" stroke="#fff" stroke-width="14" stroke-linejoin="round" d="M98 959 C121 853 648 574 1196 485 C951 515 517 701 240 867 C147 922 157 968 227 986 C157 1004 90 990 98 959Z"/>
 </svg>
