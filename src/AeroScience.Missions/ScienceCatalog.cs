@@ -45,7 +45,7 @@ public static class ScienceCatalog
                 throw new ArgumentException("Select a known instrument and an acquisition interval of 1–60 seconds. The SDK source currently supplies at most 1 Hz.");
             if(config.Payload is {} payload)InstrumentProfiles.Validate(payload,config.InstrumentId);
         }
-        return Definitions.Select(d => selected.FirstOrDefault(c => c.InstrumentId == d.Id) ?? new(d.Id)).ToArray();
+        return Definitions.Select(d => InstrumentCalibration.Freeze(selected.FirstOrDefault(c => c.InstrumentId == d.Id) ?? new(d.Id))).ToArray();
     }
     public static IScienceInstrument Instrument(string id) => new AtmosphericInstrument(
         Definitions.SingleOrDefault(d => d.Id == id) ?? throw new ArgumentException("Unknown instrument."));

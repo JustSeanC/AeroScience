@@ -6,6 +6,10 @@
   foundation for multiple collection sessions, immutable obligations, atomic decisions,
   exact input/command receipts, acquisition intents, recovery and offline evidence export.
   Runtime session controls/calibration/grading are not activated by this foundation.
+- P03 extends existing instrument configurations with immutable, attributed calibration
+  revisions and reference specifications. Optional user affine scalar derivations retain
+  originals and independent provenance/snapshots; external scientific pixels are unchanged.
+  Add focused plan/preset/instrument controls and offline replay/export support.
 - Development CI separates targeted pushes from complete milestone/manual integration;
   full release/scientific/SDK/runtime/hardware acceptance requirements remain.
 - Consolidate current documentation, retire superseded alpha workbooks/unused synthetic

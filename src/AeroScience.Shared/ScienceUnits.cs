@@ -28,7 +28,8 @@ public static class ScienceUnits
     }
     public static UnitConversion Conversion(string measurement, ScienceUnitPreferences preferences)
     {
-        var (category, id) = measurement switch
+        var original = measurement.EndsWith(".user-adjusted", StringComparison.Ordinal) ? measurement[..^14] : measurement;
+        var (category, id) = original switch
         {
             "temperature" => ("temperature", preferences.Temperature),
             "pressure" => ("pressure", preferences.Pressure),

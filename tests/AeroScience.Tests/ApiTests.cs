@@ -42,6 +42,29 @@ public sealed class ApiTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task CalibrationDefinitionsUseExistingSessionCsrfAndValidationWithoutChangingRawContracts()
+    {
+        Assert.Equal(HttpStatusCode.Unauthorized, (await client.GetAsync("/api/instruments/calibration")).StatusCode);
+        await Pair(client);
+        var catalog = await client.GetFromJsonAsync<JsonElement>("/api/instruments/calibration");
+        Assert.Equal(ScienceCatalog.Definitions.Length, catalog.GetProperty("instruments").GetArrayLength());
+        Assert.True(catalog.GetProperty("canConfigure").GetBoolean());
+        var definition = CalibrationTests.Definition();
+        var saved = await client.PostAsJsonAsync("/api/instruments/calibration", definition, WireJson.Options); saved.EnsureSuccessStatusCode();
+        var result = (await saved.Content.ReadFromJsonAsync<CalibrationDefinitionRevision>(WireJson.Options))!;
+        Assert.Equal(EvidenceContracts.ContentHash(definition), result.Sha256);
+        Assert.Equal(HttpStatusCode.BadRequest, (await client.PostAsJsonAsync("/api/instruments/calibration", definition with { Version = 99 }, WireJson.Options)).StatusCode);
+        Assert.Equal(HttpStatusCode.Conflict, (await client.PostAsJsonAsync("/api/instruments/calibration", definition with { Limitations = ["Replace old revision"] }, WireJson.Options)).StatusCode);
+        var invalid = definition with { InstrumentId = "thermal-imager" };
+        Assert.Equal(HttpStatusCode.BadRequest, (await client.PostAsJsonAsync("/api/instruments/calibration", invalid, WireJson.Options)).StatusCode);
+        (await client.PostAsJsonAsync("/api/instruments", new[] { new InstrumentConfiguration("ambient-temperature", true, Calibration: definition) }, WireJson.Options)).EnsureSuccessStatusCode();
+        var configuration = await client.GetFromJsonAsync<InstrumentConfiguration[]>("/api/instruments/configuration", WireJson.Options);
+        Assert.Equal(result.Sha256, EvidenceContracts.ContentHash(configuration!.Single(c => c.Enabled).Calibration!));
+        client.DefaultRequestHeaders.Remove("X-AeroScience-CSRF");
+        Assert.Equal(HttpStatusCode.Forbidden, (await client.PostAsJsonAsync("/api/instruments/calibration", definition with { Revision = 2 }, WireJson.Options)).StatusCode);
+    }
+
+    [Fact]
     public async Task GeographicConfigurationAndDraftExportsRetainSessionAndCsrfProtection()
     {
         Assert.Equal(HttpStatusCode.Unauthorized, (await client.GetAsync("/api/maps/client")).StatusCode);

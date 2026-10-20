@@ -1,7 +1,8 @@
 # Scientific mission operations
 
 These instructions describe the implemented v0.4.2 workflow. The v0.5.0 session,
-calibration, operating-assessment and grading contracts are under development; consult
+operating-assessment and grading lifecycles remain under development. P03 adds optional
+[user-defined scalar derivations and calibration provenance](instrument-calibration.md); consult
 the [tracker](roadmap/v0.5.0-development-tracker.md) before treating them as usable controls.
 
 ## Plan, prepare and fly

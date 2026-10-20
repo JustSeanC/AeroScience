@@ -7,6 +7,7 @@ import { remoteProducts } from "./remote-science.js";
 import { ResearchMap } from "./map.js";
 import { patternEditor } from "./patterns.js";
 import { payloadSettings } from "./payload-settings.js";
+import { calibrationSettings } from "./calibration-settings.js";
 import { missionWorkspace } from "./mission-workspace.js";
 import {
   scienceCharts,
@@ -130,6 +131,7 @@ function configs(parent, selected = []) {
     row.prepend(label);
     const config=selected.find(c=>c.instrumentId===d.id)??{instrumentId:d.id};
     row.readPayload=payloadSettings(row,config,payloadCatalog);
+    row.readCalibration=calibrationSettings(row,config,calibrationCatalog,ctx.api);
     row.dataset.payloadInstrument=d.id;
     parent.append(row);
   }
@@ -141,6 +143,7 @@ function readConfigs(parent) {
     intervalMs:
       Number(parent.querySelector(`[data-interval="${d.id}"]`).value) * 1000,
     payload: parent.querySelector(`[data-payload-instrument="${d.id}"]`)?.readPayload?.()??null,
+    calibration: parent.querySelector(`[data-payload-instrument="${d.id}"]`)?.readCalibration?.()??null,
   }));
 }
 export function initializeResearch(context) {
@@ -202,6 +205,7 @@ export function initializeResearch(context) {
 }
 export async function loadResearch(page) {
   payloadCatalog ??= await ctx.api('/api/instrument-profiles');
+  calibrationCatalog = await ctx.api('/api/instruments/calibration');
   if (!definitions.length) {
     [definitions, templates] = await Promise.all([
       ctx.api("/api/instruments"),
@@ -212,6 +216,7 @@ export async function loadResearch(page) {
   if (page === "instruments") await instruments();
 }
 let payloadCatalog;
+let calibrationCatalog;
 let plannerDirty=false, pendingGeometry=false;
 window.addEventListener("beforeunload",event=>{if(plannerDirty||pendingGeometry){event.preventDefault();event.returnValue="";}});
 async function planner() {
@@ -956,7 +961,7 @@ export function renderResearch(next) {
       for (const v of i.measurements) {
         const label =
           d?.measurements.find((m) => m.id === v.measurementId)?.name ||
-          v.measurementId;
+          (v.measurementId.endsWith('.user-adjusted')?v.measurementId.replace('.user-adjusted','')+' · User-adjusted derivation':v.measurementId);
         const reading = displayReading(v.measurementId, v.value, v.unit);
         card.append(
           text("p", label, "secondary-label"),

@@ -241,6 +241,7 @@ public static class EvidenceContracts
         if (calibration.Status == CalibrationInformationStatus.UserDefined) Require(!string.IsNullOrWhiteSpace(calibration.Author), "User-defined calibration needs attribution.");
         if (calibration.Status is CalibrationInformationStatus.Unknown or CalibrationInformationStatus.Unavailable)
             Require(parameters.Length == 0, "Unknown/unavailable calibration cannot supply invented parameters.");
+        InstrumentCalibration.ValidateAdjustment(calibration);
     }
 
     private static void Configurations(EffectiveInstrumentConfiguration[] configurations)
@@ -251,7 +252,11 @@ public static class EvidenceContracts
             Id(configuration.Id); Require(configuration.Revision > 0, "Configuration revision must be positive."); Utc(configuration.EffectiveUtc);
             ArgumentNullException.ThrowIfNull(configuration.Settings); _ = ScienceCatalog.Normalize([configuration.Settings]);
             if (configuration.Calibration is { } calibration)
-            { Validate(calibration); Require(calibration.InstrumentId == configuration.Settings.InstrumentId, "Calibration belongs to another instrument."); }
+            {
+                Validate(calibration); Require(calibration.InstrumentId == configuration.Settings.InstrumentId, "Calibration belongs to another instrument.");
+                if (configuration.Settings.Calibration is {} selected)
+                    Require(ContentHash(calibration) == ContentHash(selected), "Effective calibration differs from the complete selected settings.");
+            }
             if (configuration.OperatingPolicy is { } policy) Reference(policy);
             if (configuration.Specification is { } specification)
             { Validate(specification); Require(specification.Definition.Id == configuration.Settings.InstrumentId, "Instrument specification belongs to another instrument."); }

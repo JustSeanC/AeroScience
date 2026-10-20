@@ -2,6 +2,7 @@ import {select,link,disclosure} from './workstation-ui.js';
 const node=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
 const guides=[['v0.4.2-pilot-guide.md','First mission & results'],['v0.4.2-science-visualization.md','Reading scientific maps'],['v0.4.1-pilot-guide.md','Getting started'],['mission-planner.md','Mission planning'],['remote-sensing/index.md','Instruments & scientific data'],['v0.4.1-science-workspace.md','Science Workspace'],['v0.4.1-scientific-comparison.md','Comparisons'],['v0.4.1-scientific-downlink.md','Preparation & downlink'],['v0.4.1-windows-testing.md','Troubleshooting & testing']];
 guides.push(['README.md','Documentation index']);
+guides.push(['instrument-calibration.md','Calibration & provenance (development)']);
 export function documentationUrl(target,guide){
  const source=guide.startsWith('_root/')?'/'+guide.slice(6):'/docs/'+guide;
  const url=new URL(target,location.origin+source);

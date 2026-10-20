@@ -270,11 +270,22 @@ public sealed partial class ScienceStore(string directory, IStorageCapacity? cap
             var definition = ScienceCatalog.Definitions.Single(d => d.Id == config.InstrumentId);
             var count = checked((long)Math.Ceiling(minutes.Value * 60000 / config.IntervalMs) * definition.Measurements.Length);
             counts[config.InstrumentId] = count; bytes = checked(bytes + count * perRow + 4096 * 2);
+            if (config.Calibration is {} calibration)
+            {
+                var metadata = JsonSerializer.SerializeToUtf8Bytes(calibration, WireJson.Options).Length;
+                bytes = checked(bytes + metadata * 2L);
+                if (calibration.Adjustment is not null)
+                {
+                    var derivedCount = checked((long)Math.Ceiling(minutes.Value * 60000 / config.IntervalMs));
+                    counts[config.InstrumentId] += derivedCount;
+                    bytes = checked(bytes + derivedCount * (perRow + (metadata + 512L) * 2));
+                }
+            }
         }
         if (counts.Count == 0) bytes = 0;
         return new(bytes, free, free is { } available && bytes + StorageManager.MinimumFreeBytes > available,
             $"Science only: {perRow} estimated bytes/atmospheric observation, plus 24×24 remote samples × source bands × 32 bytes/value, 256 KiB product metadata/acquisition and 32 MiB temporary reserve per remote instrument. No compression savings assumed.",
-            ["Estimate, not a reservation; allocation/metadata vary. Counts for remote instruments are acquisitions, not pixels.", "Original source imports are additional; their exact bytes/free space are checked before copying. Dense footprint sampling does not improve source resolution."], counts);
+            ["Estimate, not a reservation; allocation/metadata vary. Counts include configured optional derived scalar channels and their retained calibration metadata; invalid/missing inputs may produce fewer derived rows. Counts for remote instruments are acquisitions, not pixels.", "Original source imports are additional; their exact bytes/free space are checked before copying. Dense footprint sampling does not improve source resolution."], counts);
     }
     public void Dispose() { lock (gate) { lease?.Dispose(); lease = null; } }
 }

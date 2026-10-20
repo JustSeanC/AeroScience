@@ -1,5 +1,9 @@
 # AeroScience documentation
 
+Development additions: [instrument calibration and provenance](instrument-calibration.md)
+describes P03; use the [development tracker](roadmap/v0.5.0-development-tracker.md) for
+implementation and outstanding acceptance. Stable 0.4.2 QA material remains below.
+
 Stable software and active external QA use **v0.4.2**. Version **0.5.0 is in development**
 on `develop/v0.5.0`; planned contracts do not establish implemented or accepted features.
 

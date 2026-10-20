@@ -75,6 +75,7 @@ public static class EngineApplication
             return science;
         });
         builder.Services.AddSingleton(sp => new ScienceUnitSettings(sp.GetRequiredService<EngineOptions>().ConfigurationDirectory ?? sp.GetRequiredService<EngineOptions>().DataDirectory));
+        builder.Services.AddSingleton(sp => new InstrumentCalibrationSettings(sp.GetRequiredService<EngineOptions>().ConfigurationDirectory ?? sp.GetRequiredService<EngineOptions>().DataDirectory));
         builder.Services.AddSingleton(sp =>
         {
             var o = sp.GetRequiredService<EngineOptions>(); var science = sp.GetRequiredService<ScienceStore>();

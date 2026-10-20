@@ -27,7 +27,7 @@ public sealed class ResearchOperations(MissionStore missions, ScienceStore scien
     private bool intentionallyPaused;
     private DateTimeOffset? pauseStarted;
     private double pauseSeconds;
-    public InstrumentConfiguration[] Configurations => configurations.ToArray();
+    public InstrumentConfiguration[] Configurations => configurations.Select(InstrumentCalibration.Freeze).ToArray();
     public void EnsureCanStart(InstrumentConfiguration[] input)
     {
         if (!ScienceCatalog.Normalize(input).Any(c => c.Enabled)) return;
@@ -129,11 +129,12 @@ public sealed class ResearchOperations(MissionStore missions, ScienceStore scien
             {
                 run.Dataset ??= science.EnsureDataset(mission, config, context);
                 missions.AddDatasetReference(mission.Id, new(run.Dataset.Id, run.Dataset.LibraryId, run.Dataset.RelativePath, run.Dataset.ProvenanceJson));
-                var values = valid.Select(v => new ScienceObservation(0, run.Dataset.Id, mission.Id, config.InstrumentId,
+                var originalValues = valid.Select(v => new ScienceObservation(0, run.Dataset.Id, mission.Id, config.InstrumentId,
                     source.TimestampUtc, v.MeasurementId, v.Value!.Value, v.Unit, v.Provenance,
                     (update.Connection.Source == TelemetrySource.Simulated ? "Synthetic test fixture / " : "MSFS 2024 / SimConnect ") + instrument.Definition.Measurements.Single(m => m.Id == v.MeasurementId).SimulatorVariable,
                     located?.Latitude, located?.Longitude, located?.AltitudeMslFeet, gap > 0 ? ObservationQuality.AcquisitionGap : ObservationQuality.Valid,
                     located?.TimestampUtc)).ToArray();
+                var values = originalValues.Concat(originalValues.Select(v => InstrumentCalibration.Derive(config, v)).OfType<ScienceObservation>()).ToArray();
                 var count = science.Append(values);
                 if (run.Error is not null) missions.AddEvent(mission.Id, source.TimestampUtc, "science-recovered", config.InstrumentId + ": acquisition resumed"); run.Observations += count;
                 if (count > 0)
@@ -145,7 +146,8 @@ public sealed class ResearchOperations(MissionStore missions, ScienceStore scien
             }
             catch (Exception error) when (error is IOException or UnauthorizedAccessException or SqliteException)
             { if (run.Error != error.Message) missions.AddEvent(mission.Id, source.TimestampUtc, "science-error", config.InstrumentId + ": " + error.Message); run.Error = error.Message; run.Rejected += valid.Length; }
-            Persist(config, run, readings.ToArray(), run.Error is null ? gap > 0 ? ObservationQuality.AcquisitionGap : ObservationQuality.Valid : ObservationQuality.Unavailable);
+            var displayed = readings.Concat(readings.Select(v => InstrumentCalibration.Derive(config, v, source.TimestampUtc)).OfType<MeasurementReading>()).ToArray();
+            Persist(config, run, displayed, run.Error is null ? gap > 0 ? ObservationQuality.AcquisitionGap : ObservationQuality.Valid : ObservationQuality.Unavailable);
         }
     }
     private void Persist(InstrumentConfiguration config, Acquisition run, MeasurementReading[] readings, ObservationQuality quality)
@@ -191,6 +193,8 @@ public sealed class ResearchOperations(MissionStore missions, ScienceStore scien
                 : atmosphere is null ? ObservationQuality.Waiting
                 : DateTimeOffset.UtcNow - atmosphere.TimestampUtc > TimeSpan.FromSeconds(6) ? ObservationQuality.Stale : atmosphere.Quality;
             var readings = atmosphere is null ? [] : ScienceCatalog.Instrument(config.InstrumentId).Read(atmosphere).ToArray();
+            if (atmosphere is not null)
+                readings = readings.Concat(readings.Select(r => InstrumentCalibration.Derive(config, r, atmosphere.TimestampUtc)).OfType<MeasurementReading>()).ToArray();
             if (quality == ObservationQuality.Valid && readings.All(v => v.Value is null)) quality = ObservationQuality.Unavailable;
             return new InstrumentState(config.InstrumentId, config.Enabled, config.IntervalMs, quality, run?.LastSuccess,
                 run?.Observations ?? 0, run?.Rejected ?? 0, run?.Missing ?? 0,

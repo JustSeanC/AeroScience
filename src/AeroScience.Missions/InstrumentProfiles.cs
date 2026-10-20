@@ -67,7 +67,7 @@ public static class InstrumentProfiles
         return payload;
     }
     public static InstrumentConfiguration[] Freeze(IEnumerable<InstrumentConfiguration> configurations) => configurations.Select(c=>RemoteAcquisition.Instruments.ContainsKey(c.InstrumentId)
-        ? c with {Payload=Validate(c.Payload??new(Generic(c.InstrumentId)),c.InstrumentId)} : c).ToArray();
+        ? c with {Payload=Validate(c.Payload??new(Generic(c.InstrumentId)),c.InstrumentId)} : c).Select(InstrumentCalibration.Freeze).ToArray();
     public static SensorMount Mount(InstrumentConfiguration c) => c.Payload is {} p
         ? new(p.Profile.HorizontalFovDegrees,p.Profile.VerticalFovDegrees,p.ForwardDegrees,p.RightDegrees,p.Profile.Geometry!=SensorGeometryKind.FrameCamera)
         : c.InstrumentId=="terrain-scanner" ? new(30,3,Swath:true) : new();

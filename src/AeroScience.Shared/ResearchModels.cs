@@ -8,7 +8,8 @@ public enum AutopilotEngagement { Unavailable, Disengaged, Engaged }
 public sealed record ResearchWaypoint(string Name, double Latitude, double Longitude, double? TargetAltitudeFeet = null,
     string? Instructions = null, string? Objective = null, Guid? PatternId = null, Guid? Id = null, string? NavigationIdentifier = null);
 public sealed record SurveyArea(string Name, Coordinates[] Vertices);
-public sealed record InstrumentConfiguration(string InstrumentId, bool Enabled = false, int IntervalMs = 1000, PayloadConfiguration? Payload = null);
+public sealed record InstrumentConfiguration(string InstrumentId, bool Enabled = false, int IntervalMs = 1000, PayloadConfiguration? Payload = null,
+    [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] CalibrationDefinition? Calibration = null);
 public sealed record MissionPlan(Guid Id, string Name, MissionTemplateKind Template = MissionTemplateKind.GeneralResearch,
     ScienceMode Mode = ScienceMode.Universal, string? Description = null, string? Objective = null,
     string? IntendedAircraft = null, string? Departure = null, string? Destination = null,
@@ -29,7 +30,8 @@ public sealed record MeasurementReading(string MeasurementId, double? Value, str
 public sealed record ScienceObservation(long Id, Guid DatasetId, Guid MissionId, string InstrumentId,
     DateTimeOffset TimestampUtc, string MeasurementId, double Value, string Unit, ScienceProvenance Provenance,
     string Source, double? Latitude, double? Longitude, double? AltitudeMslFeet, ObservationQuality Quality,
-    DateTimeOffset? PositionTimestampUtc = null);
+    DateTimeOffset? PositionTimestampUtc = null,
+    [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] CalibrationDerivation? Calibration = null);
 public sealed record ScienceDataset(Guid Id, Guid LibraryId, Guid MissionId, string MissionName, string InstrumentId,
     DateTimeOffset CreatedUtc, string RelativePath, long ObservationCount, string ProvenanceJson);
 public sealed record InstrumentState(string InstrumentId, bool Enabled, int IntervalMs, ObservationQuality Quality,

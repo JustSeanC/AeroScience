@@ -29,7 +29,7 @@ export function syncUnits(preferences) {
   }
 }
 export function displayReading(id, value, fallback = "") {
-  const category = categories[id],
+  const category = categories[id.replace(/\.user-adjusted$/, '')],
     options = settings?.options[category],
     choice =
       category === "windDirection"

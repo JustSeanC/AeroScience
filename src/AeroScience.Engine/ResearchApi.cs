@@ -116,6 +116,19 @@ public static class ResearchApi
         app.MapGet("/api/templates", () => ScienceCatalog.Templates);
         app.MapGet("/api/instruments", () => ScienceCatalog.Definitions);
         app.MapGet("/api/instruments/configuration", (ResearchOperations research) => research.Configurations);
+        app.MapGet("/api/instruments/calibration", (InstrumentCalibrationSettings settings, HttpContext context) =>
+        {
+            var definitions = settings.Get();
+            return new { instruments = ScienceCatalog.Definitions.Select(d => InstrumentCalibration.Describe(d.Id)), definitions,
+                warning = settings.Warning, canConfigure = AccessControl.IsLoopback(context) };
+        });
+        app.MapPost("/api/instruments/calibration", (CalibrationDefinition definition, InstrumentCalibrationSettings settings, HttpContext context) =>
+        {
+            if (!AccessControl.IsLoopback(context)) return Results.StatusCode(403);
+            try { return Results.Ok(settings.Save(definition)); }
+            catch (NotSupportedException error) { return Results.BadRequest(new { error = error.Message }); }
+            catch (System.Text.Json.JsonException error) { return Results.Conflict(new { error = "Saved calibration settings are invalid and were preserved. " + error.Message }); }
+        });
         app.MapGet("/api/instrument-profiles", () => new { profiles=InstrumentProfiles.Catalog, generic=RemoteAcquisition.Instruments.Keys.Select(InstrumentProfiles.Generic) });
         app.MapPost("/api/sensor-planning", (SensorPlanningRequest request,ScienceStore science,HttpContext context) => TerrainPlanning.Apply(request,InstrumentProfiles.Plan(request),science,context.RequestAborted));
         app.MapGet("/api/science/source-capabilities", (ScienceStore science) => science.Sources().Select(ScientificCapabilities.Describe));
