@@ -49,7 +49,7 @@ public sealed class AlphaDataTests : IDisposable
         oldJson.AsObject().Remove("machNumber");
         Assert.Null(JsonSerializer.Deserialize<TelemetryFrame>(oldJson.ToJsonString(), WireJson.Options)!.MachNumber);
         var id = store.Create("Export", frame, time, ScienceMode.Realistic);
-        for (var i = 0; i < 5100; i++) store.Append(id, frame with { TimestampUtc = time.AddSeconds(i), MachNumber = i == 0 ? null : .82 });
+        ArchiveFixture.Telemetry(store, id, Enumerable.Range(0, 5100).Select(i => frame with { TimestampUtc = time.AddSeconds(i), MachNumber = i == 0 ? null : .82 }));
         store.Finish(id, MissionStatus.Completed, time.AddSeconds(5100), "Done");
         using var output = new MemoryStream(); await store.ExportJsonAsync(id, output);
         using var export = JsonDocument.Parse(output.ToArray());

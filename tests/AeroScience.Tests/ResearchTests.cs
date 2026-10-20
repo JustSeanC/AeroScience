@@ -180,7 +180,7 @@ public sealed class ResearchTests : IDisposable
         var m = coordinator.Start(new StartMissionRequest("Exports", Instruments: [new("ambient-temperature", true)])); Apply(0);
         var dataset = science.Datasets(m.Id).Single(); var first = science.StreamObservations(m.Id).Single();
         science.Append(Enumerable.Range(1, 5100).Select(i => first with { TimestampUtc = now.AddSeconds(i), Value = 10 + i * .001 }).ToArray());
-        for (var i = 1; i <= 1600; i++) store.Append(m.Id, SimulatedTelemetryProvider.Generate(now, i) with { MachNumber = i % 2 == 0 ? .82 : null });
+        ArchiveFixture.Telemetry(store, m.Id, Enumerable.Range(1, 1600).Select(i => SimulatedTelemetryProvider.Generate(now, i) with { MachNumber = i % 2 == 0 ? .82 : null }));
         coordinator.End(m.Id);
         var points = store.Track(m.Id, 100); Assert.True(points.Downsampled); Assert.InRange(points.Points.Length, 2, 100); Assert.Equal(1601, points.TotalSamples);
         using var json = new MemoryStream(); await store.ExportJsonAsync(m.Id, json); using var parsed = JsonDocument.Parse(json.ToArray());
