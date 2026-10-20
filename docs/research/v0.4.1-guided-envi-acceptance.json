@@ -1,0 +1,11 @@
+{
+  "formatVersion": 1,
+  "version": "0.4.1",
+  "evidenceType": "pending-genuine-guided-envi",
+  "checkedUtc": "2026-10-20T00:16:03.861150+00:00",
+  "windowsMsfs": "not tested",
+  "finalNetworkRerun": "pending",
+  "finalNetworkRerunReason": "The cloud HTTP tunnel returns HTTP 503 across GitHub, NuGet and scientific providers. Current-source online acceptance is not established. Earlier v0.4.0 reports remain unchanged. Prior temporary genuine source files are unavailable in this environment; synthetic fixtures are not a replacement.",
+  "workflows": [],
+  "previousEvidence": "v0.4.0-guided-envi-acceptance.json"
+}

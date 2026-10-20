@@ -81,6 +81,7 @@ export class ResearchMap {
       b.textContent = name;
       b.onclick = fn;
       tools.append(b);
+      return b;
     };
     action("Fit route & track", () => this.fit());
     action("Center aircraft", () => {
@@ -118,7 +119,9 @@ export class ResearchMap {
       results.onchange=()=>{if(results.value!=="")choose(matches[Number(results.value)]);};
       searchStatus.textContent=matches.length?`${matches.length} results. Select one to center the map. Search alone does not move it.`:"No results. Try an ICAO/IATA code, airport name, city or explicit latitude, longitude. Map position unchanged.";
     };
-    action("Find", find);
+    const findButton=action("Find", find);
+    const searchGroup=document.createElement("div");searchGroup.className="map-search";
+    searchGroup.append(search,findButton);tools.append(searchGroup);
     search.onkeydown = (e) => {
       if (e.key === "Enter") {
         e.preventDefault();
@@ -200,6 +203,7 @@ export class ResearchMap {
       }
     };
     this.layerCleanup = layerSelector(tools, this.applyBasemap);
+    tools.append(results,searchStatus);
     this.map.on("click", (e) => {
       if (onPoint && this.interactionMode && !this.drawing)
         onPoint({ latitude: e.latlng.lat, longitude: longitude(e.latlng.lng) });

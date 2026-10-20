@@ -109,19 +109,28 @@ public sealed class ScientificWorkspaceTests : IDisposable
     }
     [Fact] public async Task BlockedBackgroundOutputDoesNotHoldRecorderOrAtmosphericObservationGate()
     {
-        using var began=new ManualResetEventSlim();using var release=new ManualResetEventSlim();
-        var worker=Task.Run(()=>science.PublishArtifact(mission.Id,"concurrency-fixture","json","fixture",new{fixture=true},1048576,path=>{began.Set();if(!release.Wait(TimeSpan.FromSeconds(20)))throw new TimeoutException("Test fixture release missing");File.WriteAllText(path,"{\"fixture\":true}");}));
+        var began=new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        using var release=new ManualResetEventSlim();
+        // Dedicated thread: a deliberately blocked writer must not consume an xUnit/thread-pool continuation slot.
+        var worker=Task.Factory.StartNew(()=>science.PublishArtifact(mission.Id,"concurrency-fixture","json","fixture",new{fixture=true},1048576,path=>
+        {began.SetResult();release.Wait();File.WriteAllText(path,"{\"fixture\":true}");}),CancellationToken.None,TaskCreationOptions.LongRunning,TaskScheduler.Default);
         try
         {
-            Assert.True(began.Wait(TimeSpan.FromSeconds(10)));using var research=new ResearchOperations(missions,science);var recorder=new MissionCoordinator(missions,1000,research:research);
-            var active=recorder.Start(new StartMissionRequest("Concurrent logical 1 Hz fixture",Instruments:[new("ambient-temperature",true)]));
-            for(var i=0;i<120;i++)
+            await began.Task.WaitAsync(TimeSpan.FromSeconds(10));
+            var recording=Task.Factory.StartNew(()=>
             {
-                var f=SimulatedTelemetryProvider.Generate(utc,i);var connection=new ConnectionInfo(ConnectionState.Connected,TelemetrySource.Simulated,"Logical-clock test fixture",f.TimestampUtc);
-                recorder.Apply(new(connection,f,new(f.TimestampUtc,10,29,2,90,.002)));
-            }
-            Assert.False(worker.IsCompleted);Assert.Equal(120,recorder.Snapshot().ActiveMission!.SampleCount);Assert.Equal(0,recorder.Snapshot().Sampling!.MissingIntervals);
-            Assert.Equal(120,science.StreamObservations(active.Id).Count());recorder.End(active.Id);
+                using var research=new ResearchOperations(missions,science);var recorder=new MissionCoordinator(missions,1000,research:research);
+                var active=recorder.Start(new StartMissionRequest("Concurrent logical 1 Hz fixture",Instruments:[new("ambient-temperature",true)]));
+                for(var i=0;i<120;i++)
+                {
+                    var f=SimulatedTelemetryProvider.Generate(utc,i);var connection=new ConnectionInfo(ConnectionState.Connected,TelemetrySource.Simulated,"Logical-clock test fixture",f.TimestampUtc);
+                    recorder.Apply(new(connection,f,new(f.TimestampUtc,10,29,2,90,.002)));
+                }
+                Assert.False(worker.IsCompleted);Assert.Equal(120,recorder.Snapshot().ActiveMission!.SampleCount);Assert.Equal(0,recorder.Snapshot().Sampling!.MissingIntervals);
+                Assert.Equal(120,science.StreamObservations(active.Id).Count());recorder.End(active.Id);
+            },CancellationToken.None,TaskCreationOptions.LongRunning,TaskScheduler.Default);
+            try { await recording.WaitAsync(TimeSpan.FromSeconds(60)); }
+            finally { release.Set();await recording; }
         }
         finally{release.Set();await worker;}
     }
@@ -134,13 +143,18 @@ public sealed class ScientificWorkspaceTests : IDisposable
         Sql(science.DatabasePath,"PRAGMA user_version=1; DROP TABLE scientific_artifacts; DROP INDEX observations_receipt_time");
         var telemetry=Sql(missions.DatabasePath,"SELECT payload_json FROM telemetry LIMIT 1");var product=Sql(science.DatabasePath,"SELECT payload_json FROM remote_products LIMIT 1");
         missions.Initialize();science.Initialize();
-        Assert.Equal(6L,Sql(missions.DatabasePath,"PRAGMA user_version"));Assert.Equal(2L,Sql(science.DatabasePath,"PRAGMA user_version"));
+        Assert.Equal(7L,Sql(missions.DatabasePath,"PRAGMA user_version"));Assert.Equal(2L,Sql(science.DatabasePath,"PRAGMA user_version"));
         Assert.Equal(telemetry,Sql(missions.DatabasePath,"SELECT payload_json FROM telemetry LIMIT 1"));Assert.Equal(product,Sql(science.DatabasePath,"SELECT payload_json FROM remote_products LIMIT 1"));
         Assert.Equal(ScienceMode.Realistic,missions.Detail(mission.Id)!.Mission.Mode);Assert.Equal(TelemetrySource.Simulated,missions.StreamSamples(mission.Id).Single().Source);
         var missionBackup=Assert.Single(Directory.GetFiles(Path.Combine(Path.GetDirectoryName(missions.DatabasePath)!,"Backups"),"missions-schema5-*.db"));
         Assert.Equal(5L,Sql(missionBackup,"PRAGMA user_version"));Assert.Equal(telemetry,Sql(missionBackup,"SELECT payload_json FROM telemetry LIMIT 1"));
         var backups=Directory.GetFiles(Path.Combine(science.DirectoryPath,"Metadata","Backups"),"*.sqlite");
-        Assert.Contains(backups,b=>Equals(1L,Sql(b,"PRAGMA user_version"))&&Equals(product,Sql(b,"SELECT payload_json FROM remote_products LIMIT 1")));
+        Assert.All(backups,b=>Assert.Equal("ok",Sql(b,"PRAGMA integrity_check")));
+        // Earlier schema-1 backups legitimately precede the remote-source extension.
+        // Select the actual pre-upgrade scientific archive, without querying a nonexistent table.
+        Assert.Contains(backups,b=>Equals(1L,Sql(b,"PRAGMA user_version"))
+            && Equals(1L,Sql(b,"SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='remote_products'"))
+            && Equals(product,Sql(b,"SELECT payload_json FROM remote_products LIMIT 1")));
         Assert.Single(science.AllProducts(mission.Id));Assert.Single(missions.Replay(mission.Id).Samples);
     }
     [Fact] public void RegionalCoverageExportsSplitAntimeridianAndPreserveConcaveSurveyGeometry()

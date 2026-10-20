@@ -155,7 +155,7 @@ public sealed class AutomaticScientificDataTests : IDisposable
     }
     [Fact]public async Task QueuedDownloadsCanBeCancelledWithoutFallingThroughToNetworkOrMissingObservationsBackfilled()
     {
-        var settings=new ScientificAccessSettings(root);settings.Save(Preferences);var waiting=new WaitingProvider();
+        var settings=new ScientificAccessSettings(root);settings.Save(Preferences with{ConcurrentDownloads=1});var waiting=new WaitingProvider();
         using(var auto=new AutomaticScientificData(science,settings,providers:[waiting]))
         {
             auto.Prepare(Area,[RemoteKind.Thermal,RemoteKind.Multispectral]);await Wait(()=>waiting.Started==1);

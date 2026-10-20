@@ -1,4 +1,4 @@
-import { planningField, planningDistance, planningArea, planningText } from "./science-display.js";
+import { planningField, planningDistance, planningArea, planningText,planningMeasure,onUnitsChanged } from "./science-display.js";
 import { areaSummary } from "./planner-geometry.js";
 import { sensorPlanning } from "./sensor-planning.js";
 const element = (tag, text) => {
@@ -60,6 +60,14 @@ export function patternEditor(parent, { api, notice, get, set, aircraft, pickCen
     orbits = field("Orbits", 1),
     alt = field("Target altitude", null,"number","altitude","optional"),
     notes = field("Pattern notes", "", "text");
+  const passes=field("Number of identical transect passes",1);passes.min=1;passes.max=20;passes.step=1;
+  const passAltitudes=field("Per-pass target altitudes (comma-separated; optional)","","text");
+  const targetSpeed=field("Transect target groundspeed",null,"number","speed","optional");
+  let passAltitudeValues=null,passAltitudeScale=1,renderedPassAltitudes="";
+  function readPassAltitudes(){if(passAltitudes.value!==renderedPassAltitudes){passAltitudeValues=passAltitudes.value.trim()?passAltitudes.value.split(",").map(v=>v.trim()?Number(v)/passAltitudeScale:null):null;renderedPassAltitudes=passAltitudes.value;}return passAltitudeValues;}
+  function refreshPassAltitudes(){readPassAltitudes();const units=planningMeasure("altitude",0);passAltitudeScale=units.scale;const title=`Per-pass target altitudes (${units.unit}; comma-separated; optional)`;passAltitudes.closest("label").firstChild.textContent=title;passAltitudes.setAttribute("aria-label",title);passAltitudes.value=(passAltitudeValues||[]).map(v=>v==null?"":String(Number((v*passAltitudeScale).toFixed(6)))).join(", ");renderedPassAltitudes=passAltitudes.value;}
+  refreshPassAltitudes();const stopPassUnits=onUnitsChanged(refreshPassAltitudes);const passObserver=new MutationObserver(()=>{if(!panel.isConnected){stopPassUnits();passObserver.disconnect();}});passObserver.observe(document.body,{childList:true,subtree:true});
+
   const clockwise = element("input");
   clockwise.type = "checkbox";
   clockwise.checked = true;
@@ -73,7 +81,7 @@ export function patternEditor(parent, { api, notice, get, set, aircraft, pickCen
   function describe(){explanation.textContent=kind.value==="lawnmower"?"Lawnmower: long scan legs follow the reference heading; each turn steps sideways across it. Entry and exit are marked green and pink.":kind.value==="creepingLine"?"Creeping line: long scan legs cross the reference heading; the survey steps forward along that heading. Parallel legs are rotated 90° relative to lawnmower for the same reference heading.":kind.value==="orbit"?"Orbit: center, radius, direction and revolutions define the mission. The map shows a smooth circle with entry/exit only. Exports retain the 5° point-to-point approximation (73 points for one revolution); no native EFB orbit command is claimed.":"Preview is dashed white; committed route is gold. Parameter changes update the preview without changing the map view.";}
   const fieldErrors=new Map();
   for(const control of [lat,lon,heading,spacing,length,width,radius,legs,orbits,alt]){const error=element("span");error.className="field-error";error.id="pattern-error-"+Math.random().toString(36).slice(2);control.setAttribute("aria-describedby",error.id);control.closest("label").append(error);fieldErrors.set(control,error);}
-  function visibility(){const parallel=["lawnmower","creepingLine"].includes(kind.value);for(const [control,visible] of [[spacing,parallel||kind.value==="expandingSquare"],[width,parallel||kind.value==="box"],[length,! ["orbit","expandingSquare","radialSpokes"].includes(kind.value)],[radius,["orbit","racetrack","radialSpokes"].includes(kind.value)],[legs,parallel||["expandingSquare","radialSpokes"].includes(kind.value)],[orbits,["orbit","racetrack"].includes(kind.value)]])control.closest("label").hidden=!visible;direction.hidden=!["orbit","racetrack","expandingSquare","radialSpokes","box"].includes(kind.value);}
+  function visibility(){targetSpeed.closest("label").hidden=passes.closest("label").hidden=passAltitudes.closest("label").hidden=kind.value!=="straightTransect";const parallel=["lawnmower","creepingLine"].includes(kind.value);for(const [control,visible] of [[spacing,parallel||kind.value==="expandingSquare"],[width,parallel||kind.value==="box"],[length,! ["orbit","expandingSquare","radialSpokes"].includes(kind.value)],[radius,["orbit","racetrack","radialSpokes"].includes(kind.value)],[legs,parallel||["expandingSquare","radialSpokes"].includes(kind.value)],[orbits,["orbit","racetrack"].includes(kind.value)]])control.closest("label").hidden=!visible;direction.hidden=!["orbit","racetrack","expandingSquare","radialSpokes","box"].includes(kind.value);}
   function validate(){let valid=true;for(const [input,error] of fieldErrors){error.textContent="";input.removeAttribute("aria-invalid");}
     const fail=(input,message)=>{valid=false;input.setAttribute("aria-invalid","true");fieldErrors.get(input).textContent=message;};
     if(lat.value===""||lon.value===""){report.textContent=preview?"Preview outdated — choose a center on the map.":"Choose a center on the map to preview your pattern.";return false;}
@@ -120,6 +128,9 @@ export function patternEditor(parent, { api, notice, get, set, aircraft, pickCen
     return {
       id: preview?.definition.id || crypto.randomUUID(),
       kind: kind.value,
+      passes:kind.value==="straightTransect"?Number(passes.value):1,
+      passAltitudesFeet:kind.value==="straightTransect"?readPassAltitudes():null,
+      targetGroundspeedKnots:kind.value==="straightTransect"?targetSpeed.planningUnits.read():null,
       center: { latitude: Number(lat.value), longitude: Number(lon.value) },
       headingDegrees: Number(heading.value),
       lengthMetres: length.planningUnits.read()??10000,
@@ -147,7 +158,7 @@ export function patternEditor(parent, { api, notice, get, set, aircraft, pickCen
     preview = result;previewSignature=requestedSignature;
     planningText(report,()=>{
       const d=result.definition,parallel=["lawnmower","creepingLine"].includes(d.kind);
-      return `Preview Ready. Pattern preview only: ${parallel&&d.fitMode==="polygon"?`${result.segments.filter(s=>s.role==="scan").length} in-area scan segments / ${result.segments.filter(s=>s.role==="transition").length} transitions · ${planningDistance(result.scanDistanceMetres)} in-area scan / ${planningDistance(result.transitionDistanceMetres)} transition distance (may leave area; turning feasibility unvalidated) · `:parallel?`${d.legs} survey passes · Track spacing ${planningDistance(d.spacingMetres)} · Approximate survey envelope ${planningArea(d.lengthMetres*(d.legs-1)*d.spacingMetres)} (sensor coverage unvalidated) · `:""}${result.waypoints.length} navigation points · ${planningDistance(result.distanceMetres)} route distance · Reference heading ${d.headingDegrees}° true. ${result.definition.kind==="orbit"?"Orbit export uses a 5° point-to-point approximation; native EFB orbit support is not claimed.":""}`;
+      return `Preview Ready. Pattern preview only: ${parallel&&d.fitMode==="polygon"?`${result.segments.filter(s=>s.role==="scan").length} in-area scan segments / ${result.segments.filter(s=>s.role==="transition").length} transitions · ${planningDistance(result.scanDistanceMetres)} in-area scan / ${planningDistance(result.transitionDistanceMetres)} transition distance (may leave area; turning feasibility unvalidated) · `:parallel?`${d.legs} survey passes · Track spacing ${planningDistance(d.spacingMetres)} · Approximate survey envelope ${planningArea(d.lengthMetres*(d.legs-1)*d.spacingMetres)} (sensor coverage unvalidated) · `:""}${d.kind==="straightTransect"?`${d.passes||1} exact same-line passes · pilot-managed turnaround distance/time unknown · `:""}${result.waypoints.length} navigation points · ${planningDistance(result.distanceMetres)} route distance · Reference heading ${d.headingDegrees}° true. ${result.definition.kind==="orbit"?"Orbit export uses a 5° point-to-point approximation; native EFB orbit support is not claimed.":""}`;
     });
     const current = get();
     set({ ...current, preview: result, previewOnly:true });
@@ -162,7 +173,7 @@ export function patternEditor(parent, { api, notice, get, set, aircraft, pickCen
   }
   let lastEditKey=null;
   function parametersChanged(event){
-    const key=JSON.stringify([kind.value,...[lat,lon,heading,spacing,length,width,radius,legs,orbits,alt,notes,clockwise].map(input=>input.type==="checkbox"?input.checked:input.value)]);
+    const key=JSON.stringify([kind.value,...[lat,lon,heading,spacing,length,width,radius,legs,orbits,alt,notes,passes,passAltitudes,targetSpeed,clockwise].map(input=>input.type==="checkbox"?input.checked:input.value)]);
     if(event.type==="change"&&key===lastEditKey)return;lastEditKey=key;
     if(["lawnmower","creepingLine"].includes(kind.value)&&[spacing,width].includes(event.target)){
       const gap=spacing.planningUnits.read(),extent=width.planningUnits.read();
@@ -255,6 +266,7 @@ export function patternEditor(parent, { api, notice, get, set, aircraft, pickCen
             fitMode=d.fitMode||"envelope";clippingPolygon=d.clippingPolygon||null;fitChoice.value=fitMode;
             preview = { definition: d };
             kind.value = d.kind;
+            passes.value=d.passes||1;passAltitudeValues=d.passAltitudesFeet||null;renderedPassAltitudes=passAltitudes.value;refreshPassAltitudes();targetSpeed.planningUnits.set(d.targetGroundspeedKnots);
             lat.value = d.center.latitude;
             lon.value = d.center.longitude;
             heading.value = d.headingDegrees;

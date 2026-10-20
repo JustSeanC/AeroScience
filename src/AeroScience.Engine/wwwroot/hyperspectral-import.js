@@ -1,6 +1,6 @@
 import { ResearchMap } from "./map.js";
 const el=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
-const help="/help/remote-sensing/using-your-own-hyperspectral-dataset.md";
+const help="#help?guide=remote-sensing/using-your-own-hyperspectral-dataset.md";
 function link(parent,label,url){const a=el("a",label);a.href=url;a.target="_blank";a.rel="noopener";parent.append(a,document.createTextNode(" · "));}
 function button(label,run){const b=el("button",label);b.type="button";b.className="secondary";b.onclick=async()=>{b.disabled=true;try{await run();}catch(error){alert(error.message);}finally{b.disabled=false;}};return b;}
 const mib=n=>`${(n/1048576).toFixed(1)} MiB`;

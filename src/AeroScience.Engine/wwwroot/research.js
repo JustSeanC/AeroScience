@@ -154,7 +154,7 @@ export function initializeResearch(context) {
   mapPanel.id = "mission-map";
   mapPanel.append(text("h2", "Mission map"));
   liveMap = new ResearchMap(mapPanel);
-  control.append(mapPanel);
+  control.querySelector(".mission-grid").after(mapPanel);
   const markerPanel = text("article", undefined, "panel research-panel");
   markerPanel.append(text("h2", "Observation markers & in-flight notes"));
   const category = select(
@@ -229,23 +229,9 @@ async function planner() {
       button("Prepare scientific data", async () => {
         await reviewPreflight(ctx.api,plan.id);
       }),
-      button("Record this plan", async () => {
-        const estimate = await ctx.api("/api/science/estimate", {
-          instruments: plan.instruments,
-          durationMinutes: plan.estimatedDurationMinutes,
-        });
-        if (
-          estimate.capacityWarning &&
-          !confirm(
-            "Estimated science data plus safety reserve exceed free capacity. Review storage or continue with this estimate?",
-          )
-        )
-          return;
-        await ctx.api("/api/missions", {
-          name: plan.name,
-          mode: plan.mode,
-          planId: plan.id,
-        });
+      button("Select for Flight", async () => {
+        await ctx.api("/api/mission-selection", {planId:plan.id});
+        window.dispatchEvent(new Event("aeroscience-selection"));
         location.hash = "#control";
       }),
       button("Delete plan", async () => {
@@ -1102,6 +1088,10 @@ export function renderResearch(next) {
     activeRouteState = null; remoteFootprints = [];
     lastFetch = 0;
   }
+  if(!next.activeMission && next.selectedPlanId && selectedPreview!==next.selectedPlanId && !selectingPreview){
+    selectingPreview=true;const selected=next.selectedPlanId;
+    ctx.api(`/api/plans/${selected}`).then(plan=>{if(state?.selectedPlanId===selected&&!state.activeMission){livePlan=plan;selectedPreview=selected;liveMap?.set({plan,aircraft:aircraftFor(next)});liveMap?.fit();}}).catch(e=>ctx.notice(e.message)).finally(()=>selectingPreview=false);
+  }else if(!next.activeMission&&!next.selectedPlanId){livePlan=null;selectedPreview=null;}
   const t = next.telemetry,
     fresh =
       t &&
@@ -1131,6 +1121,8 @@ export function renderResearch(next) {
       .finally(() => (busy = false));
   }
 }
+window.addEventListener("aeroscience-selection",()=>{selectedPreview=null;});
+let selectedPreview=null,selectingPreview=false;
 let livePlan = null,
   activeRouteState = null, remoteFootprints = [];
 async function refreshLive(id) {

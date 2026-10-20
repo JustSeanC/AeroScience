@@ -9,6 +9,21 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
 {
     internal MissionStore Store => store;
     private readonly object gate = new();
+    private string SelectionPath => Path.Combine(Path.GetDirectoryName(store.DatabasePath)!, "selected-plan.json");
+    private Guid? SelectedPlan()
+    {
+        if (!File.Exists(SelectionPath)) return null;
+        return JsonSerializer.Deserialize<Guid?>(File.ReadAllText(SelectionPath), WireJson.Options);
+    }
+    public Guid? SelectPlan(Guid? id)
+    {
+        lock (gate)
+        {
+            if (active is not null || maintenance) throw new InvalidOperationException("Finish recording or maintenance before selecting a plan.");
+            if (id is {} plan && store.Plan(plan) is null) throw new ArgumentException("Saved plan no longer exists. Refresh missions; no unplanned flight was selected.");
+            PreferenceStore.WriteAtomic(SelectionPath, id); return id;
+        }
+    }
     private readonly EnvironmentTelemetryCache environment = new();
     private TelemetryFrame? frame;
     private Mission? active;
@@ -32,7 +47,7 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
                 count > 1 && seconds > 0 ? (count - 1) / seconds : null, firstRecordedUtc, lastRecordedUtc,
                 active is not null && active.DurationSeconds >= 1 ? count / active.DurationSeconds : null,
                 active is not null && firstRecordedUtc is not null ? Math.Max(0, (firstRecordedUtc.Value - active.StartedUtc).TotalSeconds) : null),
-                Research: research?.Snapshot(connection, frame), RecordingStop: recordingStop);
+                Research: research?.Snapshot(connection, frame), RecordingStop: recordingStop, SelectedPlanId: SelectedPlan());
         }
     }
 

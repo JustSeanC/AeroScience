@@ -11,7 +11,7 @@ public sealed partial class MissionStore
     private static void MigrateMissionScience(Microsoft.Data.Sqlite.SqliteConnection db)
     {
         using var tx=db.BeginTransaction();using var cmd=db.CreateCommand();cmd.Transaction=tx;
-        cmd.CommandText="CREATE INDEX IF NOT EXISTS telemetry_receipt_time ON telemetry(mission_id,timestamp_utc,sequence); CREATE INDEX IF NOT EXISTS events_receipt_time ON events(mission_id,timestamp_utc,id); PRAGMA user_version=6";cmd.ExecuteNonQuery();tx.Commit();
+        cmd.CommandText="CREATE INDEX IF NOT EXISTS telemetry_receipt_time ON telemetry(mission_id,timestamp_utc,sequence); CREATE INDEX IF NOT EXISTS events_receipt_time ON events(mission_id,timestamp_utc,id); PRAGMA user_version=6";cmd.ExecuteNonQuery();tx.Commit();MigrateScientificReview(db);
     }
     public ReplayInstrumentContext ReplayInstruments(Guid mission,DateTimeOffset at)
     {

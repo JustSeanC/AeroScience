@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.4.1 — Scientific Review & Mission Readiness (development; acceptance pending)
+
+- Add dedicated Science Map, Compare, Research Analysis, Results/Export and Replay routes with shared mission context; separate the provider/collection source library from flight results and render offline Markdown in one Help & Support page.
+- Stage saved plans without recording or downloading; preview the route before explicit Start Mission and retain the immutable plan/payload snapshot. Add searchable archive navigation.
+- Replace default region-job walls with per-instrument preparation summaries, logical instrument × region counts and scoped controls. Fix successful empty-response parsing, persist preparation sessions and distinguish user pause from flight preemption.
+- Persist exact missed remote-source acquisition evidence, reject absent/paused/unknown packets, reconstruct eligible historical geographic samples idempotently, preserve original products and refresh bounded derived results. Separate flight completion from provisional scientific review.
+- Add exact repeated A/B transects, actual flown-pass recognition and conservative PLN fallback; preserve meters-based WGS84 geometry and native pass intent.
+- Add source-specific measurement ranges, distinct measurement/timestamp counts and deterministic descriptive atmosphere interpretation. Legacy statistics are derived into a SHA-bound cache without rewriting originals.
+- Bound native CommBus replies, synchronize selected plans and expose connection diagnostics. Installed Windows/MSFS confirmation remains outstanding.
+- Offer up to eight configurable preparations while preserving explicit settings. Retain the conservative single-slot default: genuine 1/2/4/8 tests encountered rate limits and tunnel failures at higher settings; four is not claimed validated.
+- Repair foundation recovery-host build paths, migration backup selection, fixture timing/release and asynchronous engine cleanup. Keep scientific release evidence separate from validator fixtures, preserve strict SDK/runtime/installer gates and add v0.4.1 hardware checks.
+- No release, tag, GitHub issue or hardware acceptance is created by these changes. Current-source online/guided/full-workspace evidence remains pending; retained genuine-data review is a separately labeled result.
+
 ## 0.4.0 — Scientific Mission Planning, Sensor Modeling & Analysis (development; Windows acceptance pending)
 
 - Correct release completion so v0.4.0 stops successfully after building its installer candidate instead of calling the intentionally blocked automatic finalizer. Remove contradictory installer status text. Existing compiled candidates remain usable without rebuilding; installed acceptance is still required before finalization.

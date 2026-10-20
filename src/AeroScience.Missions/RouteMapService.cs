@@ -44,7 +44,7 @@ public sealed class RouteMapService(MissionCoordinator coordinator)
     {
         lock (gate)
         {
-            Load(selected); var snapshot = coordinator.Snapshot(); var mission = snapshot.ActiveMission?.Id;
+            Load(selected ?? coordinator.Snapshot().SelectedPlanId); var snapshot = coordinator.Snapshot(); var mission = snapshot.ActiveMission?.Id;
             var frame = snapshot.Telemetry;
             var fresh = snapshot.Connection.State == ConnectionState.Connected && frame is not null && (DateTimeOffset.UtcNow - frame.TimestampUtc).TotalSeconds is >= -2 and < 6;
             var route = plan?.Waypoints ?? [];
@@ -68,7 +68,7 @@ public sealed class RouteMapService(MissionCoordinator coordinator)
     {
         lock (gate)
         {
-            Load(selected);
+            Load(selected ?? coordinator.Snapshot().SelectedPlanId);
             if (expectedRevision != revision) throw new InvalidOperationException("Route revision changed. Request map state again.");
             if (offset < 0 || offset > items.Length) throw new ArgumentException("Invalid route chunk offset.");
             var page = new List<RouteMapItem>();

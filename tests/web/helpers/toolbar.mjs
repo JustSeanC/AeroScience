@@ -40,6 +40,7 @@ export async function mountToolbar(page, { autoReply = false, activeMission = nu
       unregister() { this.unregistered++; },
       callSimConnect(event, payload) {
         const command = JSON.parse(payload); this.sent.push({ event, command });
+        if(autoReply && command.op==='select-plan'){this.state.selectedPlanId=command.planId||null;setTimeout(()=>this.handlers['AeroScience.Reply.v1']?.(JSON.stringify({protocol:1,requestId:command.requestId,ok:true,state:this.state})),0);}
         if(autoReply && command.op==='map-plans')setTimeout(()=>this.handlers['AeroScience.Reply.v1']?.(JSON.stringify({protocol:1,requestId:command.requestId,ok:true,map:[]})),0);
         if (autoReply && command.op === 'state') setTimeout(() => {
           this.state.telemetry.timestampUtc = new Date().toISOString();

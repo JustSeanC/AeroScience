@@ -1,0 +1,76 @@
+{
+  "formatVersion": 1,
+  "version": "0.4.1",
+  "evidenceType": "genuine-provider-concurrency-development-experiment",
+  "windowsMsfs": "not tested",
+  "sourceScope": "Executed during v0.4.1 development before final source freeze; not acceptance of the final source.",
+  "input": "Eight bounded instrument/area jobs per slot count, empty library for each run; synthetic locations, not MSFS.",
+  "rawReportSha256": "d3c2a713c23ffd94b87a03513c59ec9a7c1608a65faa4413eb60cb14a6c14ae0",
+  "results": [
+    {
+      "slots": 1,
+      "seconds": 122.1016593,
+      "cpuSeconds": 6.089809,
+      "peakWorkingSetBytes": 136564736,
+      "retainedBytes": 2728872,
+      "networkBytes": 16904163,
+      "completed": 8,
+      "requested": 8,
+      "validSamples": 545,
+      "allPassed": true,
+      "finishedUtc": "2026-10-20T00:04:49.5434892+00:00",
+      "limitations": []
+    },
+    {
+      "slots": 2,
+      "seconds": 102.1127249,
+      "cpuSeconds": 3.715471,
+      "peakWorkingSetBytes": 159932416,
+      "retainedBytes": 2698642,
+      "networkBytes": 28699462,
+      "completed": 7,
+      "requested": 8,
+      "validSamples": 464,
+      "allPassed": false,
+      "finishedUtc": "2026-10-20T00:06:31.4907164+00:00",
+      "limitations": [
+        "Provider rate limit: retry later. The provider requested a long pause."
+      ]
+    },
+    {
+      "slots": 4,
+      "seconds": 104.7959283,
+      "cpuSeconds": 2.958932,
+      "peakWorkingSetBytes": 165629952,
+      "retainedBytes": 849312,
+      "networkBytes": 29181940,
+      "completed": 5,
+      "requested": 8,
+      "validSamples": 405,
+      "allPassed": false,
+      "finishedUtc": "2026-10-20T00:08:16.4615181+00:00",
+      "limitations": [
+        "Provider did not honor the exact bounded HTTP byte range (HTTP 503; requested 159514624\u2013159580159, returned \u2013/). The asset was refused; retry later.",
+        "Provider did not honor the exact bounded HTTP byte range (HTTP 503; requested 159580160\u2013159645695, returned \u2013/). The asset was refused; retry later.",
+        "Provider rate limit: retry later. The provider requested a long pause."
+      ]
+    },
+    {
+      "slots": 8,
+      "seconds": 14.1337526,
+      "cpuSeconds": 0.256819,
+      "peakWorkingSetBytes": 158015488,
+      "retainedBytes": 0,
+      "networkBytes": 0,
+      "completed": 0,
+      "requested": 8,
+      "validSamples": 0,
+      "allPassed": false,
+      "finishedUtc": "2026-10-20T00:08:30.42739+00:00",
+      "limitations": [
+        "Scientific provider request failed (HTTP 503). Retry later; local history remains available."
+      ]
+    }
+  ],
+  "decision": "Retain default 1. Permit explicit 1\u20138. A measured reliable default of 4 was not established. Later slot counts were confounded by provider throttling and the cloud tunnel returning 503, so these are not controlled speedup measurements."
+}

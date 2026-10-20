@@ -14,6 +14,7 @@ public sealed record SourceSelectionRequest(Guid SourceId,bool Enabled);
 public sealed record SourceModeRequest(RemoteKind Kind,string Mode);
 public sealed record HyperspectralAssociation(string FileName);
 public sealed record PreparationControl(string Action);
+public sealed record MissionSelection(Guid? PlanId);
 public sealed record PreparationCancel(string? Key=null);
 public sealed record CleanupRequest(Guid PreviewId,bool Confirmed);
 public static class ResearchApi
@@ -42,11 +43,13 @@ public static class ResearchApi
         {if(!AccessControl.IsLoopback(c))return Results.StatusCode(403);if(!science.Sources().Any(s=>s.Id==request.SourceId))throw new ArgumentException("Source not found.");var p=settings.Get().Preferences;var excluded=(p.ExcludedSourceIds??[]).ToHashSet();if(request.Enabled)excluded.Remove(request.SourceId);else excluded.Add(request.SourceId);return Results.Ok(automatic.Configure(p with{ExcludedSourceIds=excluded.ToArray()}));});
         app.MapPost("/api/science/source-mode",(SourceModeRequest request,ScientificAccessSettings settings,AutomaticScientificData automatic,HttpContext c)=>
         {if(!AccessControl.IsLoopback(c))return Results.StatusCode(403);var p=settings.Get().Preferences;var modes=new Dictionary<RemoteKind,string>(p.SourceModes??[]){[request.Kind]=request.Mode};return Results.Ok(automatic.Configure(p with{SourceModes=modes}));});
+        app.MapGet("/api/plans/{id:guid}/preparation/instruments",(Guid id,ScientificPlanData plans)=>plans.Instruments(id));
+        app.MapGet("/api/plans/{id:guid}/preparation/regions",(Guid id,int? offset,ScientificPlanData plans)=>plans.Regions(id,offset??0));
         app.MapGet("/api/science/plan-readiness",(ScientificPlanData preparation)=>preparation.Snapshot());
         app.MapGet("/api/science/prediction",(ScientificFlightPrediction prediction)=>prediction.Snapshot());
-        app.MapPost("/api/science/preparation/control",(PreparationControl request,AutomaticScientificData automatic)=>{if(request.Action is not("pause" or "resume"))throw new ArgumentException("Choose pause or resume.");automatic.Pause(request.Action=="pause");return Results.Ok();});
-        app.MapPost("/api/plans/{id:guid}/preparation/control",(Guid id,PreparationControl request,ScientificPlanData plans)=>{plans.Control(id,request.Action);return Results.Ok();});
-        app.MapGet("/api/science/activity",(AutomaticScientificData automatic,ScientificPlanData plans)=>new{jobs=automatic.Snapshot(),queue=automatic.QueueSummary(),plans=plans.Snapshot(),network=automatic.NetworkDiagnostics()});
+        app.MapPost("/api/science/preparation/control",(PreparationControl request,AutomaticScientificData automatic)=>{if(request.Action is not("pause" or "resume"))throw new ArgumentException("Choose pause or resume.");automatic.Pause(request.Action=="pause");return Results.Ok(new { action=request.Action,queue=automatic.QueueSummary() });});
+        app.MapPost("/api/plans/{id:guid}/preparation/control",(Guid id,PreparationControl request,ScientificPlanData plans)=>{plans.Control(id,request.Action);return Results.Ok(plans.Snapshot().Single(s=>s.PlanId==id));});
+        app.MapGet("/api/science/activity",(AutomaticScientificData automatic,ScientificPlanData plans)=>new{jobs=automatic.Snapshot(),queue=automatic.QueueSummary(),plans=plans.Snapshot(),plansWarning=plans.Warning,network=automatic.NetworkDiagnostics()});
         app.MapGet("/api/science/diagnostics",(AutomaticScientificData automatic,HttpContext c)=>AccessControl.IsLoopback(c)?Results.Ok(new{privacy="Geographic regions and provider/instrument activity are included. Review before sharing. No credentials or original scientific files.",events=ScientificDiagnostics.Snapshot(),network=automatic.NetworkDiagnostics(),queue=automatic.QueueSummary()}):Results.StatusCode(403));
         app.MapGet("/api/science/readiness",(AutomaticScientificData automatic)=>automatic.Snapshot());
         app.MapPost("/api/science/prepare",(ScientificPreparationRequest request,AutomaticScientificData automatic)=>automatic.Prepare(GeographicBounds.Around(new(request.Latitude,request.Longitude)),request.Kinds??[RemoteKind.Thermal,RemoteKind.Multispectral,RemoteKind.Terrain],retry:true,samplePoint:new(request.Latitude,request.Longitude)));
@@ -69,12 +72,18 @@ public static class ResearchApi
             var source=science.Sources().FirstOrDefault(s=>s.Id==id)??throw new ArgumentException("Source not found.");var g=source.Grids.Values.First();
             return ScientificRaster.GridCoverage(g);
         });
+        app.MapPost("/api/science/workspace/atmosphere",(ScienceMapQuery query,ScienceStore science)=>science.AtmosphereMap(query));
+        app.MapPost("/api/science/workspace/map",(ScienceMapQuery query,ScienceStore science)=>science.MapPage(query));
+        app.MapPost("/api/science/workspace/compare",(ScientificComparisonRequest request,ScienceStore science)=>science.Compare(request));
+        app.MapGet("/api/missions/{id:guid}/science-interpretation",(Guid id,MissionStore missions)=>ScientificInterpretation.Describe(missions.StreamSamples(id)));
+        app.MapGet("/api/missions/{id:guid}/science-summary",(Guid id,MissionStore missions,ScienceStore science)=>ScientificResearchSummary.Build(missions,science,id));
         app.MapGet("/api/science/products/page",(Guid? missionId,int? offset,string? instrumentId,ScienceStore science)=>new{items=science.Products(missionId,30,offset??0,instrumentId),total=science.ProductCount(missionId,instrumentId),offset=offset??0});
         app.MapGet("/api/missions/{id:guid}/scientific-results",(Guid id,MissionStore store,ScienceStore science)=>store.Detail(id) is {} detail?Results.Ok(new{mission=detail.Mission,diagnostics=store.Research(id).Diagnostics,datasets=science.Datasets(id,200)}):Results.NotFound());
         app.MapGet("/api/missions/{id:guid}/scientific-atmosphere-locations",(Guid id,string? instrumentId,long? after,ScienceStore science)=>
         {var all=science.StreamObservations(id,after:after??0,limit:1001,instrumentId:instrumentId).ToArray();var rows=all.Take(1000).ToArray();return new{items=rows,next=rows.LastOrDefault()?.Id??after??0,hasMore=all.Length>1000};});
         app.MapGet("/api/missions/{id:guid}/scientific-locations",(Guid id,string? instrumentId,int? offset,ScienceStore science)=>science.ProductLocations(id,instrumentId,Math.Max(0,offset??0)));
         app.MapGet("/api/science/products", (Guid? missionId, int? limit, int? offset, string? instrumentId, ScienceStore science) => science.Products(missionId, limit ?? 50, offset ?? 0,instrumentId));
+        app.MapGet("/api/science/products/{id:guid}/map-layer",(Guid id,string measurement,ScienceStore science)=>ScientificMapLayer.Create(science.ReadProduct(id),measurement));
         app.MapGet("/api/science/products/{id:guid}", (Guid id, ScienceStore science) => science.ReadProduct(id));
         app.MapGet("/api/science/products/{id:guid}/export/{format}", (Guid id, string format, ScienceStore science) =>
         {
@@ -108,6 +117,9 @@ public static class ResearchApi
         app.MapGet("/api/instrument-profiles", () => new { profiles=InstrumentProfiles.Catalog, generic=RemoteAcquisition.Instruments.Keys.Select(InstrumentProfiles.Generic) });
         app.MapPost("/api/sensor-planning", (SensorPlanningRequest request,ScienceStore science,HttpContext context) => TerrainPlanning.Apply(request,InstrumentProfiles.Plan(request),science,context.RequestAborted));
         app.MapGet("/api/science/source-capabilities", (ScienceStore science) => science.Sources().Select(ScientificCapabilities.Describe));
+        app.MapGet("/api/missions/{id:guid}/science-review",(Guid id,MissionStore store)=>store.ScientificReview(id));
+        app.MapGet("/api/missions/{id:guid}/downlink",(Guid id,int? offset,MissionStore store)=>new {review=store.ScientificReview(id),items=store.Recovery(id,100,offset??0)});
+        app.MapPost("/api/missions/{id:guid}/downlink/control",(Guid id,PreparationControl request,MissionStore store,AutomaticScientificData automatic,ScientificDownlinkSignals signals)=>{store.ControlRecovery(id,request.Action);if(request.Action!="resume")signals.Cancel(id);automatic.PauseScope("plan:downlink:"+id,request.Action!="resume");if(request.Action=="cancel")automatic.CancelScope("plan:downlink:"+id);return store.ScientificReview(id);});
         app.MapGet("/api/missions/{id:guid}/replay", (Guid id,long? after,DateTimeOffset? at,int? limit,MissionStore store) => store.Replay(id,after??0,at,limit??200));
         app.MapGet("/api/missions/{id:guid}/replay/events", (Guid id,long? after,MissionStore store) => store.ReplayEvents(id,after??0));
         app.MapGet("/api/missions/{id:guid}/replay/acquisitions", (Guid id,DateTimeOffset at,ScienceStore science) => science.ReplayAcquisitions(id,at));
@@ -117,6 +129,7 @@ public static class ResearchApi
             try{return Results.Ok(new{instruments,observations=science.ReplayObservations(id,at),error=(string?)null});}
             catch(Exception e)when(e is IOException or UnauthorizedAccessException or Microsoft.Data.Sqlite.SqliteException){return Results.Ok(new{instruments,observations=(ScienceObservation[]?)null,error=e.Message});}
         });
+        app.MapGet("/api/missions/{id:guid}/transect-passes",(Guid id,MissionStore store)=>store.Research(id).PlanSnapshot?.Patterns?.Where(p=>p.Kind==FlightPatternKind.StraightTransect).Select(p=>new{p.Id,passes=TransectPasses.Recognize(p,store.StreamSamples(id))}).ToArray()??[]);
         app.MapGet("/api/missions/{id:guid}/atmospheric-analysis", (Guid id,MissionStore store,HttpContext context) => AtmosphericAnalysis.Calculate(store.StreamSamples(id),store.Research(id).PlanSnapshot?.AtmosphericSettings,token:context.RequestAborted));
         app.MapPost("/api/missions/{id:guid}/coverage",(Guid id,ScientificCoverageRequest request,ScientificAnalysisJobs jobs)=>jobs.Enqueue(id,coverage:request));
         app.MapPost("/api/missions/{id:guid}/composites",(Guid id,CompositeRequest request,ScientificAnalysisJobs jobs)=>jobs.Enqueue(id,composite:request));
@@ -129,6 +142,7 @@ public static class ResearchApi
         app.MapPost("/api/instruments", (InstrumentConfiguration[] input, MissionCoordinator missions) =>
         { missions.ConfigureInstruments(input); return Results.Ok(missions.Snapshot().Research); });
         app.MapPost("/api/science/estimate", (EstimateRequest request, ScienceStore science) => science.Estimate(request.Instruments, request.DurationMinutes));
+        app.MapPost("/api/mission-selection", (MissionSelection request, MissionCoordinator missions) => new { planId=missions.SelectPlan(request.PlanId) });
         app.MapGet("/api/plans", (int? limit, int? offset, MissionStore missions) => missions.Plans(limit ?? 50, offset ?? 0));
         app.MapGet("/api/plans/{id:guid}", (Guid id, MissionStore missions) => missions.Plan(id) is { } plan ? Results.Ok(plan) : Results.NotFound());
         app.MapPost("/api/plans", (MissionPlan plan, MissionStore missions,ScientificPlanData preparation) => {var saved=missions.SavePlan(plan);return Results.Ok(saved);});

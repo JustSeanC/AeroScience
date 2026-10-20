@@ -1,3 +1,4 @@
+import {renderInstrumentSummaries,instrumentSummaries} from './preparation-summary.js';
 import {openDownloadActivity,allowanceText} from "./download-activity.js";
 import { openHyperspectralImport } from "./hyperspectral-import.js";
 import { planningDistance } from "./science-display.js";
@@ -27,13 +28,14 @@ export async function scientificAccessSettings(parent, api) {
   const preUnlimited=checkbox("Unlimited preflight transfer allowance",p.preflightTransferBytes===null);
   const toggle=()=>{hourly.disabled=!canConfigure||unlimited.checked;preflight.disabled=!canConfigure||preUnlimited.checked;};unlimited.onchange=preUnlimited.onchange=toggle;toggle();
   form.append(node("p","Unlimited can use substantial network data. These are transfer-volume allowances, not connection speed. Per-preparation, provider, consent and storage limits remain in force. Preflight does not debit the in-flight hourly allowance."));
-  const concurrent = input("Concurrent preparations", p.concurrentDownloads); concurrent.min = 1; concurrent.max = 2;
+  const concurrent = input("Concurrent preparations", p.concurrentDownloads); concurrent.min = 1; concurrent.max = 8;
+  form.append(node("p","One preparation slot is the conservative default; up to eight are configurable. Multi-provider benchmarks encountered rate limits and HTTP 503 at higher settings. Higher limits can saturate the network or trigger provider throttling. Each provider connection remains bounded; existing saved limits are preserved."));
   const days = input("Search lookback days", p.lookbackDays); days.min = 1; days.max = 3650;
   const cloud = input("Maximum scene cloud cover (%) — local quality masks still apply", p.maximumCloudPercent); cloud.min = 0; cloud.max = 100;
   const date = input("Preferred latest observation date (blank = now)", p.preferredDateUtc?.slice(0, 10), "date");
   const policy = node("select"); for (const [value, label] of [["clear-recent", "Clearest scenes within the date window"], ["newest", "Newest acceptable scene"]]) { const o = node("option", label); o.value = value; o.selected = value === p.selectionPolicy; policy.append(o); } policy.disabled = !canConfigure; form.append(node("label", "Source date / quality policy "), policy);
   const result = node("p");
-  form.append(node("br"), button("Save scientific access preferences", async () => { if (!form.reportValidity()) return; await api("/api/science/access", { ...(await api("/api/science/access")).configuration.preferences, onlineEnabled: enabled.checked, privacyAccepted: consent.checked, unmeteredOnly: unmetered.checked, backgroundRetrieval: background.checked, maximumDownloadBytes: Math.round(Number(maximum.value) * 1048576), concurrentDownloads: Number(concurrent.value), lookaheadSeconds:Number(lookahead.value),prefetchHourlyBytes:unlimited.checked?null:Math.round(Number(hourly.value)*1048576),preflightTransferBytes:preUnlimited.checked?null:Math.round(Number(preflight.value)*1048576), lookbackDays: Number(days.value), maximumCloudPercent: Number(cloud.value), preferredDateUtc: date.value ? date.value + "T23:59:59Z" : null, selectionPolicy: policy.value }); result.textContent = enabled.checked ? "Saved. Enable an instrument and prepare a plan, or fly for bounded background discovery. No past missing observations will be backfilled." : "Offline-only scientific operation saved. Retained sources and mission history remain available."; }), button("Cancel current downloads", () => api("/api/science/prepare/cancel", {})), result);
+  form.append(node("br"), button("Save scientific access preferences", async () => { if (!form.reportValidity()) return; await api("/api/science/access", { ...(await api("/api/science/access")).configuration.preferences, onlineEnabled: enabled.checked, privacyAccepted: consent.checked, unmeteredOnly: unmetered.checked, backgroundRetrieval: background.checked, maximumDownloadBytes: Math.round(Number(maximum.value) * 1048576), concurrentDownloads: Number(concurrent.value), lookaheadSeconds:Number(lookahead.value),prefetchHourlyBytes:unlimited.checked?null:Math.round(Number(hourly.value)*1048576),preflightTransferBytes:preUnlimited.checked?null:Math.round(Number(preflight.value)*1048576), lookbackDays: Number(days.value), maximumCloudPercent: Number(cloud.value), preferredDateUtc: date.value ? date.value + "T23:59:59Z" : null, selectionPolicy: policy.value }); result.textContent = enabled.checked ? "Saved. Enable an instrument and prepare a plan, or fly for bounded background discovery. Eligible archived remote-source attempts can be reconstructed after flight; absent atmospheric measurements remain missing." : "Offline-only scientific operation saved. Retained sources and mission history remain available."; }), button("Cancel current downloads", () => api("/api/science/prepare/cancel", {})), result);
   if (!canConfigure) form.append(node("p", "Change scientific access controls in the companion PC's Settings. Paired clients share its saved preferences and readiness."));
   section.append(form, node("p", "Prepared source subsets are retained scientific originals and count toward your Science Library limit. Cleanup removes only eligible regenerable caches. Download/storage figures shown before preparation are conservative limits, not guaranteed file sizes."));
   const lat = input("Prepare latitude", "", "number"), lon = input("Prepare longitude", "", "number"); lat.step = lon.step = "any"; lat.min = -80; lat.max = 84; lon.min = -180; lon.max = 179.9999;
@@ -42,14 +44,24 @@ export async function scientificAccessSettings(parent, api) {
 }
 export async function scientificReadiness(parent, api, map = null) {
   const section=node("section");section.className="panel research-panel scientific-readiness";
-  const status=node("p"),warning=node("p"),help=node("a","Enable Online Scientific Data Access");help.href="#settings/science?section=access";
-  section.append(node("h3","Scientific Data Readiness"),status,warning,help,button("View Download Activity",()=>openDownloadActivity(api)));parent.append(section);
+  const heading=node("h3","Scientific Data Preparation"),status=node("p"),warning=node("p"),summaries=node("div"),help=node("a","Configure Scientific Data Access"),advanced=node("details");help.href="#settings/science?section=access";
+  advanced.append(node("summary","Advanced — individual regions & diagnostics"),button("View Download Activity",()=>openDownloadActivity(api)));
+  section.append(heading,status,summaries,warning,help,advanced);parent.append(section);
   let timer;
   async function refresh(){if(!section.isConnected){clearTimeout(timer);return;}
-    if(!document.hidden&&!section.closest("[hidden]")){try{const [prediction,access]=await Promise.all([api("/api/science/prediction"),api("/api/science/access")]);if(!section.isConnected)return;map?.setReadiness(prediction.areas);
-      const q=prediction.queue;const ready=prediction.areas.filter(s=>["Ready","Dataset Ready"].includes(s.status)).length;const unavailable=prediction.areas.filter(s=>["Unavailable","Offline","Limited Coverage","Dataset Outside Coverage"].includes(s.status)).length;
-      status.textContent=`Automatic retrieval: ${access.configuration.preferences.onlineEnabled?"Enabled":"Offline-only"} · ${prediction.areas.length?ready+" ready / "+unavailable+" unavailable instrument regions in the current flight corridor":"No current flight corridor; review preflight coverage in Download Activity"} · ${q.downloading} active downloads · ${q.queued} jobs queued · Ready ahead: ${prediction.readyAheadSeconds==null?"Not established":Math.round(prediction.readyAheadSeconds)+" s (source envelopes, masks apply)"}. ${allowanceText(q)}`;
-      warning.textContent=prediction.lookaheadSeconds>0&&(prediction.readyAheadSeconds??0)<q.estimatedPreparationSeconds?"Aircraft may outrun preparation. Flight recording continues; missing science is not backfilled.":prediction.message;help.hidden=access.configuration.preferences.onlineEnabled;
+    if(!document.hidden&&!section.closest("[hidden]")){try{
+      const [state,prediction,access,plans]=await Promise.all([api("/api/state"),api("/api/science/prediction"),api("/api/science/access"),api("/api/science/plan-readiness")]);if(!section.isConnected)return;
+      const selected=state.activeMission?state.research?.planId:state.selectedPlanId;
+      const plan=plans.find(p=>p.planId===selected);
+      if(selected){
+        const definition=await api(`/api/plans/${selected}`);heading.textContent="Data Preparation — "+definition.name;
+        const items=await api(`/api/plans/${selected}/preparation/instruments`);
+        renderInstrumentSummaries(summaries,items.length?items:(definition.instruments||[]).filter(c=>c.enabled).map(c=>({instrumentId:c.instrumentId,name:c.instrumentId,status:["terrain-scanner","thermal-imager","multispectral-imager","hyperspectral-imager"].includes(c.instrumentId)?"Not Prepared":"Live simulator telemetry required; no remote preparation",total:0,ready:0,awaiting:0,unavailable:0})));
+        status.textContent=plan?`${plan.status} · ${plan.ready} ready / ${plan.awaiting} awaiting / ${plan.unavailable} unavailable logical instrument × region units`:'Plan selected · Not Prepared. Selecting a plan does not queue downloads.';
+        if(map&&plan){const regions=await api(`/api/plans/${selected}/preparation/regions`);map.setReadiness(regions);}
+      }else{heading.textContent=state.activeMission?"Data Preparation — Active Flight":"Scientific Data Preparation";renderInstrumentSummaries(summaries,instrumentSummaries(prediction.areas));status.textContent=prediction.areas.length?'Active flight corridor; source readiness does not establish valid-pixel survey coverage.':'No flight corridor or mission preparation selected.';map?.setReadiness(prediction.areas);}
+      warning.textContent=prediction.lookaheadSeconds>0&&(prediction.readyAheadSeconds??0)<prediction.queue.estimatedPreparationSeconds?"Aircraft may outrun source preparation. Flight recording continues; eligible saved packets can be reviewed for post-flight reconstruction.":"Ready sources retain their actual dates, cloud/nodata masks and coverage limits.";
+      help.hidden=access.configuration.preferences.onlineEnabled;
     }catch(e){warning.textContent=e.message;}}
     timer=setTimeout(refresh,3000);
   }await refresh();return section;

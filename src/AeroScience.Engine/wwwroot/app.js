@@ -1,3 +1,8 @@
+import {readSuccessResponse} from './http-response.js';
+import {scienceWorkspace,disposeScienceWorkspace} from './science-workspace.js';
+import {helpCenter} from './help-center.js';
+import {missionSelection} from './mission-selection.js';
+import {scientificLibrary} from './scientific-library.js';
 import { settingsLocation,settingsNavigation } from "./settings-navigation.js";
 import { mapSettingsUI, syncBasemaps } from "./basemaps.js";
 import { sourceSettings } from "./remote-science.js";
@@ -30,8 +35,7 @@ const date = (value) =>
   new Date(value).toLocaleString(undefined, {
     dateStyle: "medium",
     timeStyle: "short",
-    timeZone: "UTC",
-  }) + " UTC";
+  });
 const modeLabel = (mode) =>
   mode === "realistic" ? "Realistic Mode" : "Universal Mode";
 const modeHelp = (mode) =>
@@ -89,7 +93,7 @@ async function api(path, body) {
         `Request failed (${response.status}).`,
     );
   }
-  return response.json();
+  return readSuccessResponse(response);
 }
 async function connect(code = null) {
   const session = await api("/api/session", { code });
@@ -140,6 +144,7 @@ async function connect(code = null) {
       /* EventSource retries a transient network failure without creating another stream. */
     }
   };
+  await initializeUnits(api);
   await navigate();
 }
 function clearTelemetry() {
@@ -293,6 +298,7 @@ $("start-form").addEventListener("submit", (event) => {
     await api("/api/missions", {
       name: $("mission-name").value,
       mode: $("mission-mode").value,
+      planId: $("selected-plan")?.value || null,
     });
     $("mission-name").value = "";
     $("mission-mode").value = "universal";
@@ -315,16 +321,19 @@ $("pair-form").addEventListener("submit", (event) => {
   command(event.submitter, () => connect($("pair-code").value));
 });
 async function navigate() {
-  const allowed = ["control", "planner", "history", "instruments", "settings"];
+  const allowed = ["control", "planner", "history", "instruments", "settings", "science-workspace", "library", "help"];
+  if(location.hash.startsWith("#settings/support")){location.replace("#help");return;}
+  const routePage=settingsLocation().page;
   const hash =
     settingsLocation().page === "science"
       ? "instruments"
       : settingsLocation().page;
-  const page = allowed.includes(hash) ? hash : "control";
+  const page = routePage === "workspace" ? "science-workspace" : allowed.includes(hash) ? hash : "control";
+  if(page!=="science-workspace")disposeScienceWorkspace();
   for (const id of allowed) $(id).hidden = id !== page;
   for (const link of document.querySelectorAll(".nav-link")) {
     const selected =
-      link.hash === "#" + (page === "instruments" ? "science" : page);
+      link.hash === "#" + (page === "instruments" ? "science" : page) || page === "science-workspace" && link.hash.startsWith("#workspace/");
     link.classList.toggle("selected", selected);
     if (selected) link.setAttribute("aria-current", "page");
     else link.removeAttribute("aria-current");
@@ -335,9 +344,14 @@ async function navigate() {
     instruments: "SCIENCE COLLECTION",
     planner: "MISSION PLANNER",
     settings: "SETTINGS",
+    "science-workspace": "SCIENCE WORKSPACE",library:"SCIENTIFIC DATA LIBRARY",help:"HELP & SUPPORT",
   }[page];
   document.title = `AeroScience · ${page === "control" ? "Mission Control" : page[0].toUpperCase() + page.slice(1)}`;
   if (!authorized) return;
+  if (page === "science-workspace") await scienceWorkspace($("science-workspace"),api);
+  if (page === "help") await helpCenter($("help"),api);
+  if (page === "library") await scientificLibrary($("library"),api);
+  if (page === "control") selection?.refresh();
   if (page === "history") await loadHistory();
   if (page === "settings") await loadSettings();
   if (page === "planner" || page === "instruments") await loadResearch(page);
@@ -345,7 +359,7 @@ async function navigate() {
 async function loadHistory() {
   const request = ++historyRequest;
   const missions = await api(
-    `/api/missions?limit=20&offset=${historyPage * 20}`,
+    `/api/missions?limit=20&offset=${historyPage * 20}&search=${encodeURIComponent($("history-search").value)}&status=${encodeURIComponent($("history-status").value)}`,
   );
   if (request !== historyRequest) return;
   const list = $("history-list");
@@ -383,7 +397,9 @@ async function loadHistory() {
     );
     const open = el("button", "View mission", "secondary");
     open.addEventListener("click", () => command(open, () => showDetail(m.id)));
-    meta.append(open);
+    const science=el("a","Open Science Review","button secondary");science.href=`#workspace/analysis?missions=${m.id}`;
+    const replayLink=el("a","Replay Flight","button secondary");replayLink.href=`#workspace/replay?missions=${m.id}`;
+    meta.append(science,replayLink,open);
     card.append(info, meta);
     list.append(card);
   }
@@ -471,13 +487,16 @@ async function loadSettings() {
   await updateSettings(panels.get("updates"),api);
   try{await sourceSettings(panels.get("science"),api);}catch(error){paragraph("science","Scientific sources unavailable: "+error.message);}
   if(s.toolbarStatus){paragraph("toolbar",`Installed: ${s.toolbarStatus.installedVersion||"Missing / unknown"} · Bundled: ${s.toolbarStatus.bundledVersion||"Unknown"} · ${s.toolbarStatus.status}`);paragraph("toolbar",s.toolbarStatus.message);}
+  const bridgeStatus=el("p");panels.get("toolbar").append(bridgeStatus);
+  async function refreshBridge(){const status=await api("/api/toolbar/bridge");bridgeStatus.textContent=`CommBus ${status.state} · engine ${status.engineVersion} / protocol ${status.protocol} · ${status.requests} requests / ${status.replies} replies · last ${status.lastOperation||"none"}. ${status.message}`;}
+  const refreshBridgeButton=el("button","Refresh Bridge Diagnostics","secondary");refreshBridgeButton.onclick=()=>command(refreshBridgeButton,refreshBridge);panels.get("toolbar").append(refreshBridgeButton);await refreshBridge();
   desktop("toolbar","Install / Update / Repair Toolbar","toolbar");
   for(const [name,value] of [["Telemetry",s.telemetry],["Sampling interval",`${s.samplingIntervalMs} ms`],["SimConnect",s.simConnect],["LAN access",s.enableLan?s.lanUrl:"Disabled — localhost only"],["Data directory",s.dataDirectory||"Managed by companion"],...(s.pairingCode?[["Pairing code",s.pairingCode]]:[])])paragraph("advanced",`${name}: ${value}`);
   desktop("advanced","LAN and desktop configuration","settings");desktop("advanced","Collect Feedback / Logs","feedback");
   paragraph("advanced","LAN and native runtime configuration may require an engine restart; each desktop setting explains when. Display, source and map preferences apply immediately.");
   const support=panels.get("support");
   support.append(el("h2","Help & Support"),el("p","Need help with AeroScience? Join our Discord community for support, troubleshooting, questions, feature requests, and discussions with other pilots."));
-  for(const [label,url] of [["Join our Discord","https://discord.gg/mpYyazCqvJ"],["Report an issue on GitHub","https://github.com/JustSeanC/AeroScience/issues"],["Read the pilot guides","/help/remote-sensing/index.md"]]){
+  for(const [label,url] of [["Join our Discord","https://discord.gg/mpYyazCqvJ"],["Report an issue on GitHub","https://github.com/JustSeanC/AeroScience/issues"],["Read the pilot guides","#help"]]){
     const link=el("a",label,"secondary");link.href=url;link.target="_blank";link.rel="noopener noreferrer";support.append(link);
   }
   paragraph("support","Discord membership is optional. AeroScience and your local mission archive work without it. Review logs for private information before sharing them.");
@@ -485,6 +504,7 @@ async function loadSettings() {
   paragraph("support","Feedback/log collection runs on the Windows companion. Paired-device users can open this support page and report issues, or collect logs from the gaming PC.");
 }
 $("close-detail").addEventListener("click", () => $("mission-detail").close());
+$("history-search-form").addEventListener("submit",event=>{event.preventDefault();historyPage=0;loadHistory().catch(e=>notice(e.message));});
 $("refresh-history").addEventListener("click", (event) =>
   command(event.target, loadHistory),
 );
@@ -509,6 +529,7 @@ setInterval(() => {
     clearTelemetry();
 }, 1000);
 initializeResearch({ api, notice, command });
+const selection=missionSelection($("mission-idle"),api);
 try {
   const access = await api("/api/access");
   if (access.requiresPairing) {

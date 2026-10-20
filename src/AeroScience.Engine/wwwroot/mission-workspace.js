@@ -114,7 +114,7 @@ export function missionWorkspace(parent, id, mission, api, review) {
   panels.overview.append(...existing);
   return panels;
 }
-async function replay(parent, id, mission, api, review, setStop) {
+export async function replay(parent, id, mission, api, review, setStop) {
   parent.append(
     el("h3", "Recorded mission replay"),
     el(
@@ -433,7 +433,7 @@ async function runJob(parent, job, api, done) {
     await new Promise((resolve) => setTimeout(resolve, 700));
   }
 }
-async function coverage(parent, id, api, review) {
+export async function coverage(parent, id, api, review) {
   parent.append(
     el("h3", "Scientific coverage"),
     el(
@@ -535,7 +535,7 @@ async function coverage(parent, id, api, review) {
     });
   });
 }
-async function imagery(parent, id, api) {
+export async function imagery(parent, id, api) {
   parent.append(
     el("h3", "Geographic scientific imagery"),
     el(
@@ -681,7 +681,7 @@ async function imagery(parent, id, api) {
   action(parent, "Refresh completed products", refresh);
   await refresh();
 }
-async function atmosphere(parent, id, api) {
+export async function atmosphere(parent, id, api) {
   parent.append(el("h3", "Atmospheric and terrain analysis"));
   const result = await api(`/api/missions/${id}/atmospheric-analysis`);
   parent.append(
@@ -770,28 +770,29 @@ async function atmosphere(parent, id, api) {
           },
         },
       });
-    description.textContent = result.methods.join(" ");
+    description.textContent = "Actual recorded packets; no interpolation across gaps. Separate aircraft and auxiliary timestamps appear in chart tooltips.";
   }
   x.onchange = y.onchange = draw;
   draw();
-  parent.append(el("h4", "Observed cloud encounters"));
+  const advanced=el("details");advanced.append(el("summary","Advanced — observed cloud encounters, altitude bins & methods"));for(const method of result.methods)advanced.append(el("p",method));parent.append(advanced);
+  advanced.append(el("h4", "Observed cloud encounters"));
   for (const c of result.clouds)
-    parent.append(
+    advanced.append(
       el(
         "p",
         `${c.entryObserved ? "Observed entry" : "Cloud present / entry unknown"} ${c.entryUtc} · ${format(convert("altitudeMetres",c.entryAltitudeMetres).value)} ${convert("altitudeMetres",0).unit} → ${c.exitObserved ? "observed exit" : "exit not established"} ${c.exitUtc ?? ""} ${format(convert("altitudeMetres",c.exitAltitudeMetres).value)} ${convert("altitudeMetres",0).unit}`,
       ),
     );
-  parent.append(el("h4", "Altitude interval summaries"));
+  advanced.append(el("h4", "Altitude interval summaries"));
   for (const b of result.altitudeBins || [])
-    parent.append(
+    advanced.append(
       el(
         "p",
         `${b.direction} · ${format(convert("altitudeMetres",b.minimumAltitudeMetres).value)}–${format(convert("altitudeMetres",b.maximumAltitudeMetres).value)} ${convert("altitudeMetres",0).unit} · ${b.samples} independent packets · mean temperature ${format(convert("temperatureCelsius",b.temperatureMeanCelsius).value)} ${convert("temperatureCelsius",0).unit} · mean wind ${format(convert("windKnots",b.windMeanKnots).value)} ${convert("windKnots",0).unit}`,
       ),
     );
 }
-function exports(parent, id) {
+export function exports(parent, id) {
   parent.append(
     el("h3", "Export research"),
     el(

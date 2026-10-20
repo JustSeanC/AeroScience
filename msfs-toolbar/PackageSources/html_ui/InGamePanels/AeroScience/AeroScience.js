@@ -106,6 +106,7 @@ class IngamePanelAeroScience extends TemplateElement {
       const select = this.byId("as-map-plan"),
         option = select.options[select.selectedIndex];
       this.mapPlan = select.value || null;
+      this.send("select-plan",{planId:this.mapPlan});
       try{sessionStorage.setItem("aeroscience-selected-plan",JSON.stringify({id:this.mapPlan,name:option.textContent,mode:option.getAttribute("data-mode")}));}catch(e){}
       this.mapPlanName = this.mapPlan ? option.textContent : null;
       this.mapPlanMode = this.mapPlan ? option.getAttribute("data-mode") : null;
@@ -213,7 +214,7 @@ class IngamePanelAeroScience extends TemplateElement {
       this.plansLoaded=true;
       if(this.mapPlan&&!this.state?.activeMission)select.onchange();
       if(this.mapRenderer)this.byId("as-map-status").textContent =
-        "Saved plans loaded. An active mission always uses its recorded plan snapshot.";
+        "Saved plans loaded via CommBus protocol 1; engine "+(this.state?.version||"unknown")+". An active mission uses its recorded plan snapshot.";
       return;
     }
     if (op === "map-state") {
@@ -360,8 +361,8 @@ class IngamePanelAeroScience extends TemplateElement {
     }
   }
   tick() {
+    if(!this.listener){this.registerBus();return;}
     if (
-      !this.listener ||
       document.hidden ||
       this.byId("aeroscience-frame").classList.contains("panelInvisible")
     )
@@ -444,7 +445,12 @@ class IngamePanelAeroScience extends TemplateElement {
         return;
       this.pending.delete(reply.requestId);
       this.lastReply = Date.now();
+      const engineChanged=this.state&&this.state.version!==reply.state.version;
       this.state = reply.state;
+      if(engineChanged)this.plansLoaded=false;
+      if("selectedPlanId" in reply.state && !reply.state.activeMission && reply.state.selectedPlanId!==this.mapPlan){
+        this.mapPlan=reply.state.selectedPlanId||null;this.plansLoaded=false;
+      }
       const mutationPending = Array.from(this.pending.values()).some(
         (x) => x.op !== "state" && !x.op.startsWith("map-"),
       );

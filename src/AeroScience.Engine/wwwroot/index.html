@@ -45,14 +45,14 @@
           <a class="nav-link" href="#history" aria-label="Mission History"
             ><span aria-hidden="true">◷</span>Mission History</a
           >
-          <a class="nav-link" href="#science" aria-label="Science"
-            ><span aria-hidden="true">⌁</span>Science</a
+          <a class="nav-link" href="#workspace/map" aria-label="Science Workspace"
+            ><span aria-hidden="true">⌁</span>Science Workspace</a
           >
           <a class="nav-link" href="#settings" aria-label="Settings"
             ><span aria-hidden="true">⚙</span>Settings</a
           >
-        <a class="nav-link" href="#settings/support">Help &amp; Support</a>
-        <a class="nav-link" href="/help/remote-sensing/index.md" target="_blank" rel="noopener">Help &amp; Guides</a>
+        <a class="nav-link" href="#library">Scientific Data Library</a>
+        <a class="nav-link" href="#help">Help &amp; Support</a>
           </nav>
         <div class="sidebar-footer">
           <span class="eyebrow">SCIENCE ENGINE</span>
@@ -60,7 +60,7 @@
             <i class="status-dot" id="engine-dot"></i
             ><span id="engine-link">Connecting</span>
           </div>
-          <small>v0.4.0 · Local operations</small>
+          <small>v0.4.1 · Local operations</small>
         </div>
       </aside>
       <main>
@@ -341,7 +341,7 @@
                 <p class="eyebrow">SCIENCE OPERATIONS</p>
                 <h1>Mission Planner</h1>
                 <p>
-                  Prepare routes, survey areas, patterns and planned instruments. Plans are optional; start recording from Mission Control at any time. <a href="/help/mission-planner.md" target="_blank" rel="noopener">First mission walkthrough</a>
+                  Prepare routes, survey areas, patterns and planned instruments. Plans are optional; start recording from Mission Control at any time. <a href="#help?guide=mission-planner.md">First mission walkthrough</a>
                 </p>
               </div>
             </div>
@@ -358,6 +358,7 @@
                 Refresh archive
               </button>
             </div>
+            <form id="history-search-form" class="workspace-controls"><label>Search archive<input id="history-search" type="search" placeholder="Mission name or aircraft" /></label><label>Flight status<select id="history-status"><option value="">All statuses</option><option value="completed">Completed</option><option value="interrupted">Interrupted</option><option value="recording">Recording</option></select></label><button class="secondary">Search Missions</button></form>
             <div id="history-list" class="history-list"></div>
             <div class="pagination">
               <button id="history-prev" class="secondary">← Newer</button
@@ -375,6 +376,9 @@
               <span class="badge">SIMULATOR &amp; EXTERNAL DATA</span>
             </div>
           </section>
+          <section id="science-workspace" class="view" hidden></section>
+          <section id="library" class="view" hidden></section>
+          <section id="help" class="view" hidden></section>
           <section id="settings" class="view" hidden>
             <div class="page-heading">
               <div>

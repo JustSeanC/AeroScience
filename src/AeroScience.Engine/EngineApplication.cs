@@ -45,6 +45,8 @@ public static class EngineApplication
         builder.Services.AddSingleton<ScientificPlanData>();
         builder.Services.AddSingleton<ScientificFlightPrediction>();
         builder.Services.AddHostedService<ScientificPreparationWorker>();
+        builder.Services.AddSingleton<ScientificDownlinkSignals>();
+        builder.Services.AddHostedService<ScientificDownlinkWorker>();
         builder.Services.AddSingleton(sp => new MapSettings(sp.GetRequiredService<EngineOptions>().ConfigurationDirectory ?? sp.GetRequiredService<EngineOptions>().DataDirectory));
         builder.Services.AddSingleton(sp => new ApplicationUpdates(sp.GetRequiredService<EngineOptions>().ConfigurationDirectory ?? sp.GetRequiredService<EngineOptions>().DataDirectory));
         builder.Services.AddHostedService<ApplicationUpdateWorker>();
@@ -91,6 +93,7 @@ public static class EngineApplication
         builder.Services.AddHostedService<TelemetryWorker>();
         builder.Services.AddSingleton<ToolbarCommandHandler>();
         builder.Services.AddSingleton<RouteMapService>();
+        builder.Services.AddSingleton<ToolbarBridgeStatus>();
         builder.Services.AddHostedService<ToolbarWorker>();
         builder.Services.AddHostedService<StorageManagementWorker>();
         builder.Services.AddSingleton<ScientificAnalysisJobs>();
@@ -147,14 +150,15 @@ public static class EngineApplication
         var contentTypes = new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider();
         contentTypes.Mappings[".geojson"] = "application/geo+json";
         contentTypes.Mappings[".md"] = "text/plain; charset=utf-8";
-        app.UseStaticFiles(new StaticFileOptions { ContentTypeProvider = contentTypes });
+        app.UseStaticFiles(new StaticFileOptions { ContentTypeProvider = contentTypes, OnPrepareResponse = context => context.Context.Response.Headers.CacheControl = "no-cache" });
         var helpDirectory = Path.Combine(AppContext.BaseDirectory, "wwwroot", "help", "remote-sensing");
         if (Directory.Exists(helpDirectory)) app.UseStaticFiles(new StaticFileOptions
         {
             RequestPath = "/help/remote-sensing", ContentTypeProvider = contentTypes,
             FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(helpDirectory)
         });
-        app.MapGet("/api/health", () => Results.Ok(new { status = "ok", version = "0.4.0" }));
+        app.MapGet("/api/toolbar/bridge",(ToolbarBridgeStatus status)=>status.Snapshot());
+        app.MapGet("/api/health", () => Results.Ok(new { status = "ok", version = "0.4.1" }));
         app.MapGet("/api/access", (HttpContext c) => new { requiresPairing = !AccessControl.IsLoopback(c) });
         app.MapPost("/api/session", (HttpContext c, PairRequest request, AccessControl access) =>
         {
@@ -182,8 +186,8 @@ public static class EngineApplication
             return Results.Created($"/api/missions/{mission.Id}", mission);
         });
         app.MapPost("/api/missions/{id:guid}/end", (Guid id, MissionCoordinator missions) => Results.Ok(missions.End(id)));
-        app.MapGet("/api/missions", (int? limit, int? offset, MissionStore missions) =>
-            missions.List(Math.Clamp(limit ?? 50, 1, 100), Math.Max(offset ?? 0, 0)));
+        app.MapGet("/api/missions", (int? limit, int? offset, string? search, string? status, MissionStore missions) =>
+            missions.List(Math.Clamp(limit ?? 50, 1, 100), Math.Max(offset ?? 0, 0), search:search,status:status));
         app.MapGet("/api/missions/{id:guid}", (Guid id, MissionStore missions) =>
             missions.Detail(id) is { } detail ? Results.Ok(detail) : Results.NotFound());
         app.MapGet("/api/missions/{id:guid}/telemetry", (Guid id, int? limit, int? offset, MissionStore missions) =>
@@ -198,7 +202,7 @@ public static class EngineApplication
         app.MapResearchEndpoints();
         app.MapGet("/api/settings", (HttpContext c, AccessControl access) => new
         {
-            version = "0.4.0",
+            version = "0.4.1",
             telemetry = options.Telemetry,
             options.SamplingIntervalMs,
             options.EnableLan,
@@ -256,7 +260,7 @@ public static class EngineApplication
             catch (OperationCanceledException) when (context.RequestAborted.IsCancellationRequested) { }
             catch (IOException) { /* A display disconnected; recording continues in TelemetryWorker. */ }
         });
-        app.Logger.LogInformation("AeroScience 0.4.0 — {Source} telemetry; dashboard http://127.0.0.1:{Port}; data {Directory}", options.Telemetry, options.Port, options.DataDirectory);
+        app.Logger.LogInformation("AeroScience 0.4.1 — {Source} telemetry; dashboard http://127.0.0.1:{Port}; data {Directory}", options.Telemetry, options.Port, options.DataDirectory);
         return app;
     }
 }

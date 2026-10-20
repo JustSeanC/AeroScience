@@ -45,11 +45,16 @@ if tuple(map(int, VERSION.split('-')[0].split('.'))) >= (0, 4, 0):
         'scripts/research/verify_workspace_rasters.py', 'scripts/research/verify_envi_originals.py',
     ]
 
+if tuple(map(int, VERSION.split('-')[0].split('.'))) >= (0,4,1):
+    SOURCES += ['src/AeroScience.Missions/ScienceStore.cs','src/AeroScience.Missions/MissionStore.cs','src/AeroScience.Missions/MissionReplay.cs','src/AeroScience.Missions/FlightPatterns.cs','src/AeroScience.Missions/RouteExports.cs','src/AeroScience.Engine/ResearchApi.cs','src/AeroScience.Missions/ScientificDownlink.cs','src/AeroScience.Missions/ScientificWorkspace.cs',
+                'tests/AeroScience.ProviderAcceptance/ReviewAcceptance.cs','src/AeroScience.Missions/ScientificStatisticsCache.cs','src/AeroScience.Missions/ScientificInterpretation.cs','src/AeroScience.Missions/ScientificAtmosphereMap.cs','src/AeroScience.Missions/TransectPasses.cs','src/AeroScience.Engine/ScientificDownlinkWorker.cs','src/AeroScience.Engine/ScientificDownlinkSignals.cs']
+
 def source_digest(path):
     return hashlib.sha256(path.read_text(encoding='utf-8').replace('\r\n','\n').encode()).hexdigest()
 def verify_guided_envi(report=None,root=ROOT):
     report=report or root/f'docs/research/v{VERSION}-guided-envi-acceptance.json'
     value=json.loads(report.read_text(encoding='utf-8'))
+    if value.get('evidenceType')=='pending-genuine-guided-envi':raise ValueError('Current-source genuine guided ENVI acceptance is pending; no import/sampling pass is approved.')
     if value.get('evidenceType')!='genuine-downloaded-envi' or value.get('windowsMsfs')!='not tested' or value.get('flightInput')!='synthetic test position; not MSFS' or 'SYNTHETIC' in value.get('dataset','').upper():
         raise ValueError('Genuine guided ENVI evidence is missing or mislabeled; no hardware acceptance can be inferred.')
     hashes=value.get('canonicalLfSourceSha256',{})
@@ -82,6 +87,7 @@ def verify(report=REPORT,root=ROOT,require_current=True):
 def verify_workspace(report=None,root=ROOT):
     path=report or root/f'docs/research/v{VERSION}-workspace-acceptance.json'
     value=json.loads(path.read_text(encoding='utf-8'))
+    if value.get('evidenceType')=='pending-genuine-workspace':raise ValueError('Current-source genuine workspace acceptance is pending; no numeric-support pass is approved.')
     hashes=value.get('canonicalLfSourceSha256',{})
     if value.get('evidenceType')!='genuine-scientific-workspace' or value.get('windowsMsfs')!='not tested' or set(hashes)!=set(SOURCES) or any(source_digest(root/n)!=h for n,h in hashes.items()):
         raise ValueError('Current-source genuine workspace/composite evidence is missing or stale.')

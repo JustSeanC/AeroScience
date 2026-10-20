@@ -392,6 +392,7 @@ test("selected native saved plan is included in Start mission", async ({
     "Saved native survey",
   );
   await expect(page.locator("#as-mode")).toHaveValue("realistic");
+  await expect(page.locator("#as-start")).not.toHaveAttribute("disabled", "");
   await page.locator("#as-start").click();
   const command = await page.evaluate(
     () => window.bus.sent.find((s) => s.command.op === "start").command,

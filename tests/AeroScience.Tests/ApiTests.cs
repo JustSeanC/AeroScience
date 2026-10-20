@@ -14,7 +14,7 @@ using Microsoft.AspNetCore.TestHost;
 
 namespace AeroScience.Tests;
 
-public sealed class ApiTests : IDisposable
+public sealed class ApiTests : IAsyncLifetime
 {
     private readonly string directory = Path.Combine(Path.GetTempPath(), "aeroscience-api", Guid.NewGuid().ToString());
     private readonly WebApplicationFactory<Program> factory;
@@ -166,9 +166,16 @@ public sealed class ApiTests : IDisposable
     public void LanBindingRefusesPublicAndWildcardAddresses(string address) => Assert.Throws<InvalidOperationException>(() =>
         new EngineOptions { EnableLan = true, LanAddress = address }.Validate());
 
-    public void Dispose()
+    public Task InitializeAsync()=>Task.CompletedTask;
+    public async Task DisposeAsync()
     {
-        client.Dispose(); factory.Dispose(); Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();
+        var services=factory.Services;
+        client.Dispose(); await factory.DisposeAsync();
+        // The deferred TestServer host can finish before its application provider's
+        // asynchronous singleton cleanup. Join the actual provider before deleting files.
+        if(services is IAsyncDisposable owned)await owned.DisposeAsync();
+        // Ownership is released before cleanup; do not mask a live engine with delete retries.
+        using(var lease=new DataDirectoryLease(new EngineOptions{DataDirectory=directory})) { }
         if (Directory.Exists(directory)) Directory.Delete(directory, true);
     }
 }

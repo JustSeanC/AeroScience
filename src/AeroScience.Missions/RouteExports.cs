@@ -73,13 +73,19 @@ public static class RouteExports
         var plan = MissionPlanning.Validate(request.Plan); var points = plan.Waypoints!;
         if (points.Length == 0) throw new ArgumentException("Add at least one waypoint before exporting the planned route.");
         var warnings = new List<string> { "Planned route only. Science configuration, notes, observations and survey metadata remain in AeroScience; this does not file a flight plan or control the aircraft." };
-        if ((plan.Patterns?.Length ?? 0) > 0) warnings.Add("Pattern geometry is exported as saved ordered waypoints. No simplification or densification is performed.");
+        if ((plan.Patterns?.Length ?? 0) > 0 && !(request.Format=="pln"&&plan.Patterns!.Any(p=>p.Kind==FlightPatternKind.StraightTransect&&p.Passes>1))) warnings.Add("Pattern geometry is exported as saved ordered waypoints. No simplification or densification is performed.");
         if (points.Length > 100) warnings.Add("Large route: all waypoints are retained without simplification. EFB/FMS/import limits vary; real MSFS import testing is pending. Coordinate route fields may exceed external application limits.");
         if (request.Format == "pln" && points.Length > 100 && !request.AcknowledgeLongRoute) throw new ArgumentException("This route has more than 100 waypoints. Acknowledge the large-route warning to export every point unchanged; the EFB's practical limit has not been established.");
         if (points.Any(w => w.TargetAltitudeFeet is null)) warnings.Add("Unspecified waypoint altitudes are omitted; they are not replaced by zero or by the cruising altitude.");
         if (plan.Departure is null or "" || plan.Destination is null or "") warnings.Add("No airport is invented: the EFB permits omitted departure/destination IDs and uses the first/last en-route waypoint.");
         if (request.CoordinateFormat == "icao") warnings.Add("ICAO degrees/minutes rounds to one minute (up to about 0.5 NM per axis). Use decimal, DDM or DMS for precise surveys.");
         if (request.CoordinateFormat == "simbrief") warnings.Add("SimBrief documents DDMMSSNDDDMMSSW custom coordinates. Values round to whole arcseconds (up to about 15.5 m per axis); use decimal/DDM/DMS lists or PLN for precise surveys. Route acceptance and aircraft/FMS behavior still require testing in the target application; no automatic submission occurs.");
+        if(request.Format=="pln" && plan.Patterns?.Any(p=>p.Kind==FlightPatternKind.StraightTransect&&p.Passes>1)==true)
+        {
+            warnings.Add("Repeated endpoints are not validated in MSFS EFB/FMS. Navigation export includes the first A/B for each repeated transect only. Fly the native/CSV pass instructions with pilot-managed turnarounds.");
+            points=points.Where(w=>w.PatternId is not {} id || plan.Patterns.FirstOrDefault(p=>p.Id==id) is not {Kind:FlightPatternKind.StraightTransect,Passes:>1} || Array.IndexOf(plan.Waypoints!,w)==Array.FindIndex(plan.Waypoints!,p=>p.PatternId==id) || Array.IndexOf(plan.Waypoints!,w)==Array.FindIndex(plan.Waypoints!,p=>p.PatternId==id)+1).ToArray();
+            plan=plan with{Waypoints=points};
+        }
         var distance = points.Zip(points.Skip(1), (a, b) => Geodesy.Distance(Geodesy.Point(a), Geodesy.Point(b))).Sum();
         var preview = new RouteExportPreview(plan.Name, plan.Departure, plan.Destination, points.Length, distance,
             (plan.Patterns ?? []).Select(p => p.Kind.ToString()).Distinct().ToArray(), request.Format, warnings.ToArray());

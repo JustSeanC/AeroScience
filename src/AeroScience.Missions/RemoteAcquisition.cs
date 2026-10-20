@@ -69,6 +69,11 @@ public sealed class RemoteAcquisition : IDisposable
                 }
                 catch (Exception e) when (e is not OutOfMemoryException)
                 {
+                    if(e is not OperationCanceledException)
+                    {
+                        try { missions.SaveRecovery(request,e.Message,e is ScientificObservationUnavailableException unavailableSource&&unavailableSource.Status is "Preparing data" or "Outside coverage"); }
+                        catch(Exception persist)when(persist is IOException or Microsoft.Data.Sqlite.SqliteException){ScientificDiagnostics.Record("recovery-evidence-not-saved",request.Mission.Id.ToString(),"flight",Instruments[id],result:persist.Message);}
+                    }
                     if (request.Generation != Volatile.Read(ref generation)) continue;
                     ScientificDiagnostics.Record("acquisition-unavailable",request.Mission.Id.ToString(),"flight",Instruments[id],result:e is ScientificObservationUnavailableException u?u.Status+": "+u.Message:e.GetType().Name+": "+e.Message);
                     states.AddOrUpdate(id, Status(id), (_, s) => s with { Quality = ObservationQuality.Unavailable, Message = e.Message,Status=e is ScientificObservationUnavailableException unavailable?unavailable.Status:"Error",ProcessingSeconds=began.Elapsed.TotalSeconds, Rejected = s.Rejected + 1, MissingIntervals=s.MissingIntervals+1, Processing = false });
@@ -83,15 +88,21 @@ public sealed class RemoteAcquisition : IDisposable
         }
         catch (OperationCanceledException) when (stop.IsCancellationRequested) { }
     }
-    private RemoteProduct Process(RemoteAcquisitionRequest request)
+    public RemoteProduct Reconstruct(ScientificRecoverySlot slot,CancellationToken token)
     {
-        void Check() { stop.Token.ThrowIfCancellationRequested(); if (request.Generation != Volatile.Read(ref generation)) throw new OperationCanceledException("Science paused/stopped or configuration changed."); }
+        if(!missions.VerifyRecoveryEvidence(slot))throw new ScientificObservationUnavailableException("Evidence gap","Exact recorded packet/configuration is missing, disabled or paused. No reconstruction is permitted.");
+        var existing=science.ReplayAcquisitions(slot.MissionId,slot.FlightUtc,0).FirstOrDefault(p=>p.InstrumentId==slot.InstrumentId);
+        return existing??Process(slot.Evidence with{Research=missions.Research(slot.MissionId)},true,token,()=>{if(missions.RecoveryById(slot.Id)?.State is "Paused" or "Cancelled")throw new OperationCanceledException("Post-flight work paused/cancelled; no mutation was retried.");});
+    }
+    private RemoteProduct Process(RemoteAcquisitionRequest request,bool reconstruction=false,CancellationToken token=default,Action? authorize=null)
+    {
+        void Check() { authorize?.Invoke();token.ThrowIfCancellationRequested(); if (!reconstruction)stop.Token.ThrowIfCancellationRequested(); if (!reconstruction && request.Generation != Volatile.Read(ref generation)) throw new OperationCanceledException("Science paused/stopped or configuration changed."); }
         Check();
         science.Management?.RequireScienceCapacity();
         var mount=InstrumentProfiles.Mount(request.Configuration);
         var footprint = SensorGeometry.ForInstrument(request.Frame,request.Configuration);
         var source = ScientificSourceSelection.Select(science.Availability(footprint.Center),Instruments[request.Configuration.InstrumentId],sourcePreferences?.Invoke(),request.Configuration.Payload)
-            ?? throw new ScientificObservationUnavailableException(science.Sources().Any(s=>s.Manifest.Kind==Instruments[request.Configuration.InstrumentId])?"Outside coverage":"Preparing data","No compatible retained source covers this acquisition location. Check data preparation and source selection; this interval is not backfilled.");
+            ?? throw new ScientificObservationUnavailableException(science.Sources().Any(s=>s.Manifest.Kind==Instruments[request.Configuration.InstrumentId])?"Outside coverage":"Preparing data","No compatible retained source covers this acquisition location. Check data preparation and source selection; eligible archived packets may be recovered after flight.");
         var root = StorageManager.ResolveDataset(science.DirectoryPath, science.LibraryId, source.RelativeDirectory);
         foreach (var file in source.Files)
         {
@@ -128,9 +139,11 @@ public sealed class RemoteAcquisition : IDisposable
             .Concat(AtmosphericAnalysis.SensorCautions(request.Frame,request.Configuration.Payload)).ToArray();
         var provenance = source.Manifest.Kind == RemoteKind.Terrain ? "DEM-derived terrain samples, not measured LiDAR returns; source vertical datum retained without conversion"
             : "Historical external geographic dataset sampled along simulated aircraft footprint; not a live airborne camera";
+        if(reconstruction) { provenance="Post-flight derived reconstruction: "+provenance;warnings=warnings.Append("Reconstructed after flight from an exact saved scheduled aircraft/configuration packet. No original in-flight measurement was replaced.").ToArray(); }
         var product = new RemoteProduct(productId, dataset.Id, science.LibraryId, request.Mission.Id, request.Configuration.InstrumentId, source.Id,
             request.Frame.TimestampUtc, DateTimeOffset.UtcNow, source.Manifest.ObservationUtc, footprint, $"Products/{request.Mission.Id:N}/{productId:N}.json", 0, "", 24, 24, views, provenance, "Valid pixels only; per-band nulls preserve nodata/quality exclusions", warnings);
         product=product with{ValidSampleCount=Enumerable.Range(0,locations.Length).LongCount(i=>bands.Where(b=>b.Id is not("QA_PIXEL" or "QA_RADSAT" or "SCL")).Any(b=>b.Values[i].HasValue))};
+        product=product with{Statistics=RemoteCalculations.Summarize(bands,derived)};
         Check(); return science.Publish(new(1, product, source, locations, bands.ToArray(), derived,
             ["AeroScience remote sampling algorithm 1.0", "Original scaled numeric values retained; no scientific values inferred from display imagery", "Nearest-source-pixel resampling at each sampled position; thermal cloud/fill/shadow/snow masks and Sentinel SCL exclusions applied where required"],
             new(1, request.Frame, request.Atmosphere, request.Configuration, request.Research.PlanSnapshot, request.Mission.Mode,
@@ -150,6 +163,11 @@ public sealed class ScientificObservationUnavailableException(string status,stri
 
 public static class RemoteCalculations
 {
+    public static RemoteBandStatistics[] Summarize(IEnumerable<RemoteBandValues> bands,Dictionary<string,double?[]> derived)=>
+        bands.Where(b=>b.Id is not("QA_PIXEL" or "QA_RADSAT" or "SCL")).Select(b=>(b.Id,b.Unit,b.Values))
+            .Concat(derived.Select(d=>(d.Key,d.Key=="temperature"?"K":d.Key=="elevation"?"m":"1",d.Value)))
+            .Where(b=>b.Item3.Any(v=>v is {} number&&double.IsFinite(number)))
+            .Select(b=>{var values=b.Item3.OfType<double>().Where(double.IsFinite).ToArray();return new RemoteBandStatistics(b.Item1,b.Item2,values.LongLength,values.Min(),values.Max(),values.Average());}).ToArray();
     public static Dictionary<string, double?[]> Apply(RemoteKind kind, RemoteBandValues[] bands)
     {
         var output = new Dictionary<string, double?[]>();

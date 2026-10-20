@@ -1,5 +1,14 @@
 name: foundation
-on: [push, pull_request]
+on:
+  push:
+    paths-ignore:
+      - 'docs/roadmap/**'
+  pull_request:
+    paths-ignore:
+      - 'docs/roadmap/**'
+concurrency:
+  group: foundation-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 permissions:
   contents: read
 jobs:
@@ -21,7 +30,10 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: npm run test:web
       - run: python3 -m unittest discover -s tests -p 'test_*.py' -v
-      - run: python3 scripts/build/smoke_recovery.py
+      - name: Build and exercise real recovery test host
+        run: |
+          dotnet build tests/AeroScience.TestHost -c Release --no-restore --nologo --output artifacts/recovery-test-host
+          python3 scripts/build/smoke_recovery.py --host-dll artifacts/recovery-test-host/AeroScience.TestHost.dll
   windows-companion:
     runs-on: windows-latest
     steps:

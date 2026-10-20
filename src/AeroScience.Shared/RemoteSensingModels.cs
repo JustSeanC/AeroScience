@@ -22,7 +22,8 @@ public sealed record RemoteProduct(Guid Id, Guid DatasetId, Guid LibraryId, Guid
     DateTimeOffset FlightPacketUtc, DateTimeOffset ProcessedUtc, DateTimeOffset? SourceObservationUtc,
     ObservationFootprint Footprint, string RelativePath, long Bytes, string Sha256, int Width, int Height,
     string[] AvailableViews, string Provenance, string Quality, string[] Warnings,
-    ScienceProvenance SourceClass = ScienceProvenance.ExternalDataset,long? ValidSampleCount=null);
+    ScienceProvenance SourceClass = ScienceProvenance.ExternalDataset,long? ValidSampleCount=null,RemoteBandStatistics[]? Statistics=null);
+public sealed record RemoteBandStatistics(string Id,string Unit,long Count,double Minimum,double Maximum,double Mean);
 public sealed record RemoteBandValues(string Id, string Unit, double? WavelengthNm, double?[] Values,
     string SamplingMethod, RasterGrid OriginalGrid);
 public sealed record RemoteProductData(int FormatVersion, RemoteProduct Product, ScientificSource Source,

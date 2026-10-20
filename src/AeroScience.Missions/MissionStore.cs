@@ -41,8 +41,8 @@ public sealed partial class MissionStore
         using var cmd = db.CreateCommand();
         cmd.CommandText = "PRAGMA user_version;";
         var version = Convert.ToInt32(cmd.ExecuteScalar(), CultureInfo.InvariantCulture);
-        if (version > 6) throw new InvalidOperationException("Database was created by a newer AeroScience version; refusing to modify it.");
-        if (version is 1 or 2 or 3 or 4 or 5)
+        if (version > 7) throw new InvalidOperationException("Database was created by a newer AeroScience version; refusing to modify it.");
+        if (version is 1 or 2 or 3 or 4 or 5 or 6)
         {
             var size = new FileInfo(DatabasePath).Length;
             if (new LocalStorageCapacity().FreeBytes(Path.GetDirectoryName(DatabasePath)!) < size + StorageManager.MinimumFreeBytes)
@@ -56,11 +56,12 @@ public sealed partial class MissionStore
         }
         cmd.CommandText = "PRAGMA journal_mode=WAL;";
         cmd.ExecuteNonQuery();
-        if (version == 6)
+        if (version == 7)
         {
             // Additive read index only: no JSON or historical sample is rewritten.
             return;
         }
+        if (version == 6) { MigrateScientificReview(db); return; }
         if (version == 5) { MigrateMissionScience(db); return; }
         if (version == 4) { MigrateExperience(db); MigrateMissionScience(db); return; }
         if (version == 3) { MigrateResearch(db); MigrateExperience(db); MigrateMissionScience(db); return; }
@@ -303,12 +304,13 @@ public sealed partial class MissionStore
         FROM missions m LEFT JOIN telemetry t ON t.mission_id=m.id
         """;
 
-    public IReadOnlyList<Mission> List(int limit = 50, int offset = 0, bool recordingOnly = false)
+    public IReadOnlyList<Mission> List(int limit = 50, int offset = 0, bool recordingOnly = false, string? search = null, string? status = null)
     {
         using var db = Open();
         using var cmd = db.CreateCommand();
-        cmd.CommandText = Selection + (recordingOnly ? " WHERE m.status='Recording'" : "")
+        cmd.CommandText = Selection + " WHERE ($recording=0 OR m.status='Recording') AND ($search='' OR instr(lower(m.name || ' ' || COALESCE(m.aircraft,'')),lower($search))>0) AND ($status='' OR lower(m.status)=lower($status))"
             + " GROUP BY m.id ORDER BY m.started_utc DESC LIMIT $limit OFFSET $offset";
+        cmd.Parameters.AddWithValue("$recording", recordingOnly?1:0);cmd.Parameters.AddWithValue("$search",search?.Trim()??"");cmd.Parameters.AddWithValue("$status",status??"");
         cmd.Parameters.AddWithValue("$limit", limit);
         cmd.Parameters.AddWithValue("$offset", offset);
         using var reader = cmd.ExecuteReader();

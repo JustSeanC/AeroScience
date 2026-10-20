@@ -47,63 +47,122 @@ public static class ScientificPlanPreparation
     }
 }
 
-public sealed class ScientificPlanData(AutomaticScientificData automatic,ScientificAccessSettings settings)
+public sealed record PreparationInstrument(string InstrumentId,string Name,string? Profile,string Status,int Total,int Ready,int Awaiting,int Unavailable,long DownloadedBytes,long ReusedBytes,string Eta,string[] Reasons);
+public sealed record PreparationRegion(string Key,RemoteKind Kind,GeographicBounds Area,string Status="Queued",string Message="Waiting for preparation",long DownloadedBytes=0,long ReusedBytes=0,string Stage="Queued",DateTimeOffset? UpdatedUtc=null,long PreviousAttemptBytes=0);
+public sealed class ScientificPlanData
 {
-    private sealed class Session(MissionPlan plan)
+    private sealed record SavedSession(MissionPlan Plan,bool Paused,bool Cancelled,bool Explicit,PreparationRegion[] Regions);
+    private sealed class Session(SavedSession saved)
     {
-        public readonly MissionPlan Plan=plan;
-        public readonly IEnumerator<GeographicBounds> Cells=ScientificPlanPreparation.Cells(plan,.04).GetEnumerator();
-        public readonly Dictionary<string,GeographicBounds> Pending=[];
-        public readonly HashSet<string> Counted=[];
-        public int Areas,Ready,Unavailable;public long Bytes;public bool Exhausted,Paused,Cancelled,Explicit;
+        public MissionPlan Plan=saved.Plan;
+        public bool Paused=saved.Paused,Cancelled=saved.Cancelled,Explicit=saved.Explicit,Preempted;
+        public readonly Dictionary<string,PreparationRegion> Regions=saved.Regions.ToDictionary(r=>r.Key);
     }
-    private readonly Dictionary<Guid,Session> sessions=[];private readonly object gate=new();
+    public string? Warning {get;private set;}
+    private readonly AutomaticScientificData automatic;private readonly ScientificAccessSettings settings;
+    private readonly Dictionary<Guid,Session> sessions=[];private readonly object gate=new();private long configurationRevision;private string Path => System.IO.Path.Combine(settings.ConfigurationDirectory,"preparation-sessions.json");
+    public ScientificPlanData(AutomaticScientificData automatic,ScientificAccessSettings settings)
+    {
+        this.automatic=automatic;this.settings=settings;configurationRevision=automatic.ConfigurationRevision;
+        if(File.Exists(Path))try
+        {
+            var saved=System.Text.Json.JsonSerializer.Deserialize<SavedSession[]>(File.ReadAllText(Path),WireJson.Options)??[];
+            foreach(var item in saved.Take(16))
+            {
+                // Ready originals must be reverified, not trusted from a prior process.
+                var restored=item with{Regions=item.Regions.Select(r=>r with{Status="Queued",Message="Rechecking retained data after restart"}).ToArray()};
+                sessions[item.Plan.Id]=new(restored);
+                automatic.PauseScope("plan:"+item.Plan.Id,item.Paused||item.Cancelled);
+            }
+        }
+        catch(Exception error)when(error is System.Text.Json.JsonException or IOException or UnauthorizedAccessException or ArgumentException)
+        {Warning="Saved preparation sessions could not be read. Their file was preserved. Prepare a saved plan again to recover its session and reverify retained originals. "+error.Message;sessions.Clear();}
+    }
+    private void Save()=>PreferenceStore.WriteAtomic(Path,sessions.Values.Select(s=>new SavedSession(s.Plan,s.Paused,s.Cancelled,s.Explicit,s.Regions.Values.ToArray())).ToArray());
     public PlanDataPreparation Prepare(MissionPlan plan,bool retry=false)
     {
         lock(gate)
         {
+            if(Warning is not null){if(File.Exists(Path))File.Copy(Path,Path+".preserved-"+Guid.NewGuid().ToString("N"));Warning=null;}
             if(!sessions.TryGetValue(plan.Id,out var s)||s.Plan.UpdatedUtc!=plan.UpdatedUtc||s.Cancelled)
-            {if(sessions.Count>=16){var first=sessions.First();automatic.CancelScope("plan:"+first.Value.Plan.Id);first.Value.Cells.Dispose();sessions.Remove(first.Key);}if(s is not null){automatic.CancelScope("plan:"+s.Plan.Id);s.Cells.Dispose();}sessions[plan.Id]=s=new(plan);}
-            s.Explicit|=retry;s.Paused=false;automatic.PauseScope("plan:"+s.Plan.Id,false);Pump(s,explicitAction:retry);return new(s.Areas,!s.Exhausted,"Progressive preflight started. It pauses at network/storage limits; live aircraft work has higher priority.",automatic.Snapshot());
+            {
+                if(sessions.Count>=16&&!sessions.ContainsKey(plan.Id))
+                {
+                    var retired=sessions.FirstOrDefault(pair=>pair.Value.Cancelled);
+                    if(retired.Value is null)throw new InvalidOperationException("16 preparation sessions are retained. Cancel an old session before preparing another.");
+                    sessions.Remove(retired.Key); // Session metadata only; original sources and science are preserved.
+                }
+                if(s is not null)automatic.CancelScope("plan:"+plan.Id);
+                var kinds=ScientificPlanPreparation.Kinds(plan);
+                var regions=ScientificPlanPreparation.Cells(plan,.04).SelectMany(area=>kinds.Select(k=>new PreparationRegion(AutomaticScientificData.AreaKey(k,area),k,area))).ToArray();
+                sessions[plan.Id]=s=new(new(plan,false,false,retry,regions));
+            }
+            s.Explicit|=retry;s.Paused=false;s.Cancelled=false;
+            if(retry)foreach(var r in s.Regions.Values.Where(r=>r.Status is not("Ready" or "Dataset Ready")).ToArray())s.Regions[r.Key]=r with{Status="Queued"};
+            Pump(s);Save();return new(s.Regions.Values.Select(r=>r.Area).Distinct().Count(),false,"Preparation requested explicitly; valid-pixel coverage remains independent of source readiness.",automatic.Snapshot());
         }
     }
     public void Control(Guid id,string action)
     {
-        lock(gate){if(!sessions.TryGetValue(id,out var s))throw new ArgumentException("No preparation session exists for this plan.");
-            if(action=="pause"){s.Paused=true;automatic.PauseScope("plan:"+s.Plan.Id,true);}else if(action=="resume"){s.Paused=false;s.Cancelled=false;s.Explicit=true;automatic.PauseScope("plan:"+s.Plan.Id,false);}else if(action=="cancel"){s.Cancelled=true;s.Paused=true;automatic.CancelScope("plan:"+s.Plan.Id);}else throw new ArgumentException("Choose pause, resume or cancel.");}
+        lock(gate)
+        {
+            if(!sessions.TryGetValue(id,out var s))throw new ArgumentException("This preparation session is no longer active. Restart data preparation for this saved mission; retained originals will be reused.");
+            if(action=="pause")s.Paused=true;
+            else if(action=="resume"){s.Paused=false;s.Cancelled=false;s.Explicit=true;foreach(var r in s.Regions.Values.Where(r=>r.Status is "Cancelled" or "Offline").ToArray())s.Regions[r.Key]=r with{Status="Queued"};}
+            else if(action=="cancel"){s.Cancelled=true;automatic.CancelScope("plan:"+id);foreach(var r in s.Regions.Values.Where(r=>!Terminal(r.Status)).ToArray())s.Regions[r.Key]=r with{Status="Cancelled"};}
+            else throw new ArgumentException("Choose pause, resume or cancel.");
+            automatic.PauseScope("plan:"+id,s.Paused||s.Cancelled||s.Preempted);Save();
+        }
     }
-    private void Pump(Session s,bool explicitAction=false)
+    private static bool Ready(string state)=>state is "Ready" or "Dataset Ready";
+    private static bool Terminal(string state)=>Ready(state)||state is "Unavailable" or "Limited Coverage" or "Partially usable" or "Dataset Required" or "Dataset Invalid" or "Dataset Outside Coverage" or "Failed" or "Cancelled";
+    private void Pump(Session s)
     {
+        var scope="plan:"+s.Plan.Id;automatic.PauseScope(scope,s.Paused||s.Cancelled||s.Preempted);
         var states=automatic.Snapshot().ToDictionary(r=>r.Key);
-        foreach(var item in s.Pending.ToArray())
+        foreach(var region in s.Regions.Values.ToArray())
+            if(states.TryGetValue(region.Key,out var row))
+                s.Regions[region.Key]=region with{Status=row.Status,Message=row.Message,DownloadedBytes=row.Scope==scope?row.DownloadedBytes:0,PreviousAttemptBytes=region.PreviousAttemptBytes+(row.Scope==scope&&row.DownloadedBytes<region.DownloadedBytes?region.DownloadedBytes:0),ReusedBytes=row.ReusedBytes,Stage=row.Stage,UpdatedUtc=row.UpdatedUtc};
+        if(s.Paused||s.Cancelled||s.Preempted||!s.Explicit&&!settings.Get().Preferences.BackgroundRetrieval)return;
+        var active=s.Regions.Values.Count(r=>states.TryGetValue(r.Key,out var row)&&row.Scope==scope&&row.Status is "Queued" or "Downloading" or "Waiting for download allowance");
+        foreach(var region in s.Regions.Values.Where(r=>!Terminal(r.Status)).Take(24).ToArray())
         {
-            if(!states.TryGetValue(item.Key,out var state)||state.Status=="Superseded")continue;
-            if(state.Status is "Queued" or "Downloading" or "Waiting for download allowance")continue;
-            if(state.Status=="Offline")continue;
-            if(s.Counted.Add(item.Key)){if(state.Status is "Ready" or "Dataset Ready")s.Ready++;else s.Unavailable++;s.Bytes+=state.DownloadedBytes;}
-            s.Pending.Remove(item.Key);
-        }
-        if(s.Paused||s.Cancelled||(!explicitAction&&!s.Explicit&&!settings.Get().Preferences.BackgroundRetrieval))return;
-        var budget=automatic.QueueSummary();if(budget.PreflightLimit is {} limit&&budget.PreflightBytes>=limit)return;
-        var kinds=ScientificPlanPreparation.Kinds(s.Plan);if(kinds.Length==0){s.Exhausted=true;return;}
-        var allowance=Math.Max(0,24-s.Pending.Count);
-        foreach(var pending in s.Pending.Take(allowance).ToArray())
-            if(!states.TryGetValue(pending.Key,out var state)||state.Status is "Superseded" or "Offline")automatic.Prepare(pending.Value,kinds,background:!explicitAction&&!s.Explicit,priority:10000+s.Areas,scope:"plan:"+s.Plan.Id);
-        while(!s.Exhausted&&s.Pending.Count+kinds.Length<=24&&automatic.QueueSummary().Queued<48)
-        {
-            if(!s.Cells.MoveNext()){s.Exhausted=true;break;}
-            var area=s.Cells.Current;s.Areas++;
-            automatic.Prepare(area,kinds,background:!explicitAction&&!s.Explicit,priority:10000+s.Areas,scope:"plan:"+s.Plan.Id);
-            foreach(var kind in kinds){var key=AutomaticScientificData.AreaKey(kind,area);if(!s.Counted.Contains(key))s.Pending[key]=area;}
+            if(active>=24)break;
+            if(states.TryGetValue(region.Key,out var row)&&row.Scope==scope&&row.Status is not("Offline" or "Superseded"))continue;
+            automatic.Prepare(region.Area,[region.Kind],background:!s.Explicit,priority:10000,scope:scope);active++;
         }
     }
-    public void Tick(bool flightActive=false){automatic.FlightActive(flightActive);lock(gate)foreach(var s in sessions.Values){if(flightActive){s.Paused=true;automatic.PauseScope("plan:"+s.Plan.Id,true);}else Pump(s);}}
+    public void Tick(bool flightActive=false)
+    {
+        automatic.FlightActive(flightActive);
+        lock(gate)
+        {
+            if(configurationRevision!=automatic.ConfigurationRevision)
+            {
+                configurationRevision=automatic.ConfigurationRevision;
+                foreach(var session in sessions.Values.Where(s=>!s.Cancelled))
+                    foreach(var row in session.Regions.Values.ToArray())session.Regions[row.Key]=row with{Status="Queued",Message="Rechecking retained data under the updated source preferences"};
+            }
+            foreach(var s in sessions.Values){s.Preempted=flightActive;Pump(s);}if(sessions.Count>0)Save();
+        }
+    }
+    public PreparationRegion[] Regions(Guid id,int offset=0){lock(gate)return sessions.TryGetValue(id,out var s)?s.Regions.Values.Skip(Math.Max(0,offset)).Take(100).ToArray():[];}
+    public PreparationInstrument[] Instruments(Guid id)
+    {
+        lock(gate)
+        {
+            if(!sessions.TryGetValue(id,out var s))return [];
+            return (s.Plan.Instruments??[]).Where(c=>c.Enabled&&RemoteAcquisition.Instruments.ContainsKey(c.InstrumentId)).Select(c=>
+            {
+                var rows=s.Regions.Values.Where(r=>r.Kind==RemoteAcquisition.Instruments[c.InstrumentId]).ToArray();var ready=automatic.AvailabilityError is null?rows.Count(r=>Ready(r.Status)):0;var unavailable=automatic.AvailabilityError is null?rows.Count(r=>Terminal(r.Status)&&!Ready(r.Status)):rows.Length;
+                var status=rows.Length==0?"Unavailable":automatic.AvailabilityError is not null?"Storage unavailable":s.Cancelled?"Cancelled":s.Paused?"Paused":s.Preempted?"Waiting for active flight":ready==rows.Length&&rows.Length>0?s.Regions.Values.Select(r=>r.Area).Distinct().Count()>=4096?"Partially Ready":"Ready":ready>0?"Partially Ready":rows.Any(r=>r.Status=="Downloading"&&r.Stage is "Validating" or "Saving")?"Validating / Processing":rows.Any(r=>r.Status=="Downloading"&&r.Stage=="Downloading"&&r.DownloadedBytes>0&&DateTimeOffset.UtcNow-r.UpdatedUtc<TimeSpan.FromSeconds(6))?"Downloading":rows.Any(r=>r.Status=="Downloading")?"Finding Source":rows.Any(r=>r.Status=="Offline")?"Waiting for Network":unavailable==rows.Length&&rows.Length>0?"Unavailable":"Queued";
+                return new PreparationInstrument(c.InstrumentId,ScienceCatalog.Definitions.Single(d=>d.Id==c.InstrumentId).Name,c.Payload?.Profile.Name,status,rows.Length,ready,rows.Length-ready-unavailable,unavailable,rows.Sum(r=>r.DownloadedBytes+r.PreviousAttemptBytes),rows.Sum(r=>r.ReusedBytes),"Time remaining unknown",rows.Where(r=>!Ready(r.Status)).Select(r=>r.Message).Distinct().Take(3).ToArray());
+            }).ToArray();
+        }
+    }
     public ScientificPlanReadiness[] Snapshot()
     {
-        lock(gate)return sessions.Values.Select(s=>new ScientificPlanReadiness(s.Plan.Id,s.Plan.Name,s.Areas,!s.Exhausted||s.Unavailable>0,
-            "Progressive bounded batches; additional unsurveyed areas may remain. Limits: 4096 distinct areas / 100000 geometry checks per session, hourly transfer and library capacity. Counts describe preparation, not scientific coverage scoring.",
-            s.Cancelled?"Cancelled":s.Paused?"Paused":s.Exhausted&&s.Pending.Count==0?"Complete":"Preparing",s.Ready,s.Unavailable,s.Pending.Count,s.Bytes,
-            s.Pending.Count*settings.Get().Preferences.MaximumDownloadBytes)).ToArray();
+        lock(gate)return sessions.Values.Select(s=>{var instruments=Instruments(s.Plan.Id);var ready=instruments.Sum(i=>i.Ready);var awaiting=instruments.Sum(i=>i.Awaiting);var unavailable=instruments.Sum(i=>i.Unavailable);return new ScientificPlanReadiness(s.Plan.Id,s.Plan.Name,s.Regions.Values.Select(r=>r.Area).Distinct().Count(),unavailable>0||s.Regions.Values.Select(r=>r.Area).Distinct().Count()>=4096,"Logical instrument × region counts, not provider attempts. At most 4096 distinct regions are reviewed; split larger plans. Ready sources do not establish cloud-free pixel coverage.",s.Cancelled?"Cancelled":s.Paused?"Paused":s.Preempted?"Waiting for active flight":awaiting==0?(s.Regions.Count==0?"No supported remote-data regions":unavailable>0||s.Regions.Values.Select(r=>r.Area).Distinct().Count()>=4096?"Partially Ready":"Ready"):"Preparing",ready,unavailable,awaiting,instruments.Sum(i=>i.DownloadedBytes));}).ToArray();
     }
 }
 

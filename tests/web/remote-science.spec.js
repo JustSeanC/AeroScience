@@ -77,11 +77,11 @@ test('scientific consent stays separate from maps and pilot readiness needs no m
   await section.getByLabel('Prepare latitude').fill('40.005');await section.getByLabel('Prepare longitude').fill('-74.995');
   await section.getByRole('button',{name:'Prepare a small area',exact:true}).click();
   await expect.poll(async()=> (await (await request.get('/api/science/readiness')).json()).length).toBeGreaterThan(0);
-  await expect(section.locator('.scientific-readiness')).toContainText('Offline');
+  await expect(section.locator('.scientific-readiness')).toContainText('Configure Scientific Data Access');
   await page.reload();await expect(page.getByLabel('Maximum network transfer per preparation (MiB)')).toHaveValue('8');
   const saved = await post(request, '/api/plans', {id:crypto.randomUUID(),name:'Bounded automatic preflight',waypoints:[{name:'A',latitude:40,longitude:-75},{name:'B',latitude:41,longitude:-74}],instruments:[{instrumentId:'thermal-imager',enabled:true,intervalMs:1000}]});
   await page.goto('/#planner');await expect(page.locator('#planner .scientific-readiness').first()).toBeVisible();
-  await expect(page.locator('#planner .scientific-readiness').first().getByRole('button',{name:'View Download Activity'})).toBeVisible();
+  await page.locator('#planner .scientific-readiness').first().getByText('Advanced — individual regions & diagnostics',{exact:true}).click();await expect(page.locator('#planner .scientific-readiness').first().getByRole('button',{name:'View Download Activity'})).toBeVisible();
   await page.goto('/#control');await expect(page.locator('#control .scientific-readiness')).toBeVisible();
   await page.goto('/#science');await expect(page.locator('#instrument-content .scientific-readiness')).toBeVisible();
   expect(errors).toEqual([]);

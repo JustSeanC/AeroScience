@@ -142,7 +142,7 @@ public static class ScientificComposites
         if(artifacts.Count==0)throw new InvalidOperationException("No valid selected values exist in this region; no empty scientific raster was accepted.");return artifacts.ToArray();
     }
     private static (double X,double Y) PixelOrigin(RasterGrid g,int x,int y)=>(g.OriginX+x*g.PixelWidth+y*g.RowX,g.OriginY+x*g.ColumnY+y*g.PixelHeight);
-    private static bool Aligned(RasterGrid first,RasterGrid next)
+    public static bool Aligned(RasterGrid first,RasterGrid next)
     {
         if(first.Crs!=next.Crs||first.PixelWidth!=next.PixelWidth||first.PixelHeight!=next.PixelHeight||first.RowX!=next.RowX||first.ColumnY!=next.ColumnY)return false;
         var dx=next.OriginX-first.OriginX;var dy=next.OriginY-first.OriginY;var det=first.PixelWidth*first.PixelHeight-first.RowX*first.ColumnY;

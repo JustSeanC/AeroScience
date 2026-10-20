@@ -43,6 +43,7 @@ public sealed class ToolbarCommandHandler(MissionCoordinator coordinator, RouteM
                 switch (command.Op)
                 {
                     case "state": return Reply(command.RequestId, true, null);
+                    case "select-plan": coordinator.SelectPlan(command.PlanId); break;
                     case "start": coordinator.Start(new StartMissionRequest(command.Name ?? "", command.Mode, PlanId: command.PlanId)); break;
                     case "end" when command.MissionId is { } id: coordinator.End(id); break;
                     case "science-pause" when command.MissionId is { } pauseMission: coordinator.SetSciencePaused(pauseMission, true); break;
@@ -73,7 +74,7 @@ public sealed class ToolbarCommandHandler(MissionCoordinator coordinator, RouteM
         state = state with
         {
             Connection = state.Connection with { Message = Short(state.Connection.Message, 160)! },
-            Telemetry = state.Telemetry is { } t ? t with { Aircraft = Short(t.Aircraft, 80)! } : null,
+            Telemetry = state.Telemetry is { } t ? t with { Aircraft = Short(t.Aircraft, 80)!, Environment=null, Atmosphere=null, Guidance=null } : null,
             ActiveMission = state.ActiveMission is { } m ? m with { Name = Short(m.Name, 80)!, Aircraft = Short(m.Aircraft, 80) } : null,
             Research = state.Research is { } r ? r with
             {
@@ -81,7 +82,15 @@ public sealed class ToolbarCommandHandler(MissionCoordinator coordinator, RouteM
                 Instruments = r.Instruments.Select(i => i with { Message = Short(i.Message, 80) }).ToArray()
             } : null
         };
-        return JsonSerializer.Serialize(new ToolbarReply(1, id, ok, Short(error, 180), state), WireJson.Options);
+        var encoded=JsonSerializer.Serialize(new ToolbarReply(1,id,ok,Short(error,180),state),WireJson.Options);
+        if(Encoding.UTF8.GetByteCount(encoded)>8000)
+        {
+            // Scientific diagnostics remain on the dashboard; avoid losing the entire native bridge.
+            state=state with{Research=state.Research is {} research?research with{Units=null,Instruments=research.Instruments.Select(i=>i with{Measurements=[],Message=Short(i.Message,40)}).ToArray()}:null};
+            encoded=JsonSerializer.Serialize(new ToolbarReply(1,id,ok,Short(error,180),state),WireJson.Options);
+        }
+        if(Encoding.UTF8.GetByteCount(encoded)>8000)throw new InvalidOperationException("Native reply exceeds 8 KiB even after display-only reduction. Open bridge diagnostics.");
+        return encoded;
     }
     private void Remember(Guid id, string json, string reply)
     {

@@ -43,8 +43,27 @@ class ScientificAcceptanceTests(unittest.TestCase):
                 path=Path(temp)/'report.json';path.write_text(json.dumps(value))
                 with self.subTest(case=case),self.assertRaises(ValueError):science.verify(path,require_current=False)
 
+    def current_identity_fixture(self, name):
+        # Historical genuine metadata exercises validator rules in a temporary unit
+        # fixture only. It cannot become current release evidence or a network pass.
+        value=json.loads((ROOT/'docs/research'/('v0.4.0-'+name+'-acceptance.json')).read_text())
+        value['test_only']='Temporary validator-unit input, not current-source scientific acceptance'
+        value['canonicalLfSourceSha256']={n:science.source_digest(ROOT/n) for n in science.SOURCES}
+        return value
+
+    def test_current_guided_and_workspace_pending_evidence_cannot_approve_release(self):
+        for name,validate in [('guided-envi',science.verify_guided_envi),('workspace',science.verify_workspace)]:
+            path=ROOT/'docs/research'/('v'+science.VERSION+'-'+name+'-acceptance.json')
+            value=json.loads(path.read_text())
+            with self.subTest(name=name):
+                if value.get('evidenceType','').startswith('pending-'):
+                    with self.assertRaisesRegex(ValueError,'pending'):validate()
+                else:validate()
+
     def test_guided_envi_requires_actual_import_product_offline_and_current_source_evidence(self):
-        value=science.verify_guided_envi();self.assertGreaterEqual(value['bands'],16)
+        value=self.current_identity_fixture('guided-envi')
+        with tempfile.TemporaryDirectory() as temp:
+            path=Path(temp)/'envi.json';path.write_text(json.dumps(value));self.assertGreaterEqual(science.verify_guided_envi(path)['bands'],16)
         for key in ('automaticManifest','originalChannelsPreserved','originalFilesPreserved','offlineReopen','duplicateReused'):
             changed=copy.deepcopy(value);changed['validation'][key]=False
             with tempfile.TemporaryDirectory() as temp:
@@ -52,7 +71,9 @@ class ScientificAcceptanceTests(unittest.TestCase):
                 with self.subTest(key=key),self.assertRaises(ValueError):science.verify_guided_envi(path)
 
     def test_workspace_requires_current_genuine_numeric_support_and_distinct_mission_packages(self):
-        actual=science.verify_workspace()
+        actual=self.current_identity_fixture('workspace')
+        with tempfile.TemporaryDirectory() as temp:
+            path=Path(temp)/'workspace.json';path.write_text(json.dumps(actual));science.verify_workspace(path)
         for change in ('stale','nodata','regions','packages','hardware'):
             value=copy.deepcopy(actual)
             if change=='stale':value['canonicalLfSourceSha256'][science.SOURCES[0]]='0'*64

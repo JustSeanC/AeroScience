@@ -87,6 +87,9 @@ public sealed partial class ScienceStore(string directory, IStorageCapacity? cap
             if(schema==1&&existed){var backups=Path.Combine(DirectoryPath,"Metadata","Backups");Directory.CreateDirectory(backups);_=DataBackup.Create(DatabasePath,backups,true);}
             InitializeRemoteTables(db);
             InitializeArtifactTable(db);
+            InitializeSpatialIndex(db);
+            InitializeAtmosphereIndex(db);
+            InitializeStatisticsCache(db);
             cmd.CommandText="PRAGMA user_version=2";cmd.ExecuteNonQuery();
             if (!File.Exists(Path.Combine(DirectoryPath, MarkerName)))
                 PreferenceStore.WriteAtomic(Path.Combine(DirectoryPath, MarkerName), new { formatVersion = 1, libraryId = id, database = RelativeDatabasePath });
@@ -94,6 +97,13 @@ public sealed partial class ScienceStore(string directory, IStorageCapacity? cap
     }
     public ScienceDataset EnsureDataset(Mission mission, InstrumentConfiguration configuration, MissionResearch research)
     {
+        if(File.Exists(DatabasePath))
+        {
+            using var existingDb=Open();using var query=existingDb.CreateCommand();
+            query.CommandText="SELECT payload_json FROM datasets WHERE mission_id=$mission AND instrument_id=$instrument";
+            query.Parameters.AddWithValue("$mission",mission.Id.ToString());query.Parameters.AddWithValue("$instrument",configuration.InstrumentId);
+            if(query.ExecuteScalar() is string saved)return ReadCatalog<ScienceDataset>(saved);
+        }
         Initialize();
         var definition = ScienceCatalog.Definitions.Single(d => d.Id == configuration.InstrumentId);
         var dataset = new ScienceDataset(Guid.NewGuid(), LibraryId, mission.Id, mission.Name, definition.Id, DateTimeOffset.UtcNow,

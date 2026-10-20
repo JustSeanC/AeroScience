@@ -55,9 +55,10 @@ test("planner, actual stored science pages, map and complete exports work togeth
     fullPage: true,
   });
   await page
-    .getByRole("button", { name: "Record this plan", exact: true })
+    .getByRole("button", { name: "Select for Flight", exact: true })
     .first()
     .click();
+  await page.getByRole("button",{name:"Start mission",exact:true}).click();
   await expect(page.locator("#active-name")).toHaveText(
     "Browser atmospheric plan",
   );
@@ -65,7 +66,7 @@ test("planner, actual stored science pages, map and complete exports work togeth
   await page
     .getByRole("button", { name: "Add observation marker", exact: true })
     .click();
-  await page.getByRole("link", { name: "Science", exact: true }).click();
+  await page.goto("/#science");
   await expect(page.locator("#instrument-values")).toContainText(
     "Simulator-reported",
   );
@@ -124,7 +125,7 @@ test("planner remains usable at iPad and narrow browser widths", async ({
         () => document.documentElement.scrollWidth <= innerWidth,
       ),
     ).toBe(true);
-    await page.getByRole("link", { name: "Science", exact: true }).click();
+    await page.goto("/#science");
     await expect(page.locator("#live-instrument-config")).toBeVisible();
     expect(
       await page.evaluate(

@@ -14,8 +14,8 @@ public sealed class PredictiveScienceTests:IDisposable
     private static (ScientificPredictionResult Result,ScientificMotionPredictor Predictor,TelemetryFrame Frame) Predict(double knots,MissionPlan? plan=null)
     {
         var predictor=new ScientificMotionPredictor();var time=DateTimeOffset.UtcNow;var p=new Coordinates(40,-75);var f=Frame(time,p,knots);
-        predictor.Predict(f,time,[RemoteKind.Terrain],new(),45,plan);var q=Geodesy.Direct(p,90,knots*.514444444444*2);f=Frame(time.AddSeconds(2),q,knots);
-        return(predictor.Predict(f,f.TimestampUtc,[RemoteKind.Terrain],new(),45,plan),predictor,f);
+        predictor.Predict(f,time,[RemoteKind.Terrain],new(ConcurrentDownloads:1),45,plan);var q=Geodesy.Direct(p,90,knots*.514444444444*2);f=Frame(time.AddSeconds(2),q,knots);
+        return(predictor.Predict(f,f.TimestampUtc,[RemoteKind.Terrain],new(ConcurrentDownloads:1),45,plan),predictor,f);
     }
     [Fact]public void FastUnplannedAircraftPrepareAheadUsingGroundMovementAndNotWindDriftHeading()
     {
@@ -29,33 +29,33 @@ public sealed class PredictiveScienceTests:IDisposable
         var plan=new MissionPlan(Guid.NewGuid(),"East route",Waypoints:[new("A",40,-75.1),new("B",40,-74)]);
         var (prediction,predictor,frame)=Predict(450,plan);Assert.True(prediction.RouteConsistent);
         var north=Geodesy.Direct(new(frame.Latitude,frame.Longitude),0,450*.514444444444*2);frame=Frame(frame.TimestampUtc.AddSeconds(2),north,450,90,0);
-        var turned=predictor.Predict(frame,frame.TimestampUtc,[RemoteKind.Terrain],new(),45,plan);
+        var turned=predictor.Predict(frame,frame.TimestampUtc,[RemoteKind.Terrain],new(ConcurrentDownloads:1),45,plan);
         Assert.False(turned.RouteConsistent);Assert.InRange(turned.TrackTrueDegrees,0,1);Assert.Contains(turned.Areas,a=>a.Area.North>40.02);
     }
     [Fact]public void SustainedTurnsBoundTheCorridorAndReversalsReuseGeographicCells()
     {
         var (_,predictor,f)=Predict(150);var point=new Coordinates(f.Latitude,f.Longitude);ScientificPredictionResult? result=null;
-        for(var i=1;i<=14;i++){point=Geodesy.Direct(point,90+i*10,150*.514444444444*2);f=Frame(f.TimestampUtc.AddSeconds(2),point,150,0,90+i*10);result=predictor.Predict(f,f.TimestampUtc,[RemoteKind.Terrain],new(),120);}
+        for(var i=1;i<=14;i++){point=Geodesy.Direct(point,90+i*10,150*.514444444444*2);f=Frame(f.TimestampUtc.AddSeconds(2),point,150,0,90+i*10);result=predictor.Predict(f,f.TimestampUtc,[RemoteKind.Terrain],new(ConcurrentDownloads:1),120);}
         Assert.NotNull(result);Assert.InRange(result.TurnDegreesPerSecond,4,6);Assert.InRange(result.Areas.Length,1,128);
         Assert.True(result.Areas.Max(a=>Geodesy.Distance(point,a.Area.Center))<result.DistanceMetres);Assert.Contains(result.Areas,a=>a.Basis=="Turn uncertainty");
     }
     [Fact]public void StalePausedGapsTeleportationAndStationaryTelemetryDoNotProjectFalseFastFlights()
     {
-        var (_,predictor,f)=Predict(450);var paused=predictor.Predict(f with{IsPaused=true},f.TimestampUtc,[RemoteKind.Terrain],new(),45);Assert.Equal("Suspended",paused.Status);Assert.Empty(paused.Areas);
-        Assert.Equal("Stabilizing",predictor.Predict(f,f.TimestampUtc,[RemoteKind.Terrain],new(),45).Status);
-        var stationary=f with{TimestampUtc=f.TimestampUtc.AddSeconds(2)};var still=predictor.Predict(stationary,stationary.TimestampUtc,[RemoteKind.Terrain],new(),45);Assert.Equal(0,still.DistanceMetres);
-        var jump=stationary with{TimestampUtc=stationary.TimestampUtc.AddSeconds(2),Latitude=50};Assert.Equal("Stabilizing",predictor.Predict(jump,jump.TimestampUtc,[RemoteKind.Terrain],new(),45).Status);
-        Assert.Equal("Suspended",predictor.Predict(jump,jump.TimestampUtc.AddSeconds(10),[RemoteKind.Terrain],new(),45).Status);
+        var (_,predictor,f)=Predict(450);var paused=predictor.Predict(f with{IsPaused=true},f.TimestampUtc,[RemoteKind.Terrain],new(ConcurrentDownloads:1),45);Assert.Equal("Suspended",paused.Status);Assert.Empty(paused.Areas);
+        Assert.Equal("Stabilizing",predictor.Predict(f,f.TimestampUtc,[RemoteKind.Terrain],new(ConcurrentDownloads:1),45).Status);
+        var stationary=f with{TimestampUtc=f.TimestampUtc.AddSeconds(2)};var still=predictor.Predict(stationary,stationary.TimestampUtc,[RemoteKind.Terrain],new(ConcurrentDownloads:1),45);Assert.Equal(0,still.DistanceMetres);
+        var jump=stationary with{TimestampUtc=stationary.TimestampUtc.AddSeconds(2),Latitude=50};Assert.Equal("Stabilizing",predictor.Predict(jump,jump.TimestampUtc,[RemoteKind.Terrain],new(ConcurrentDownloads:1),45).Status);
+        Assert.Equal("Suspended",predictor.Predict(jump,jump.TimestampUtc.AddSeconds(10),[RemoteKind.Terrain],new(ConcurrentDownloads:1),45).Status);
     }
     [Fact]public void PositionSlewingWithStationaryGroundspeedDoesNotScheduleAFalseFastCorridor()
     {
-        var time=DateTimeOffset.UtcNow;var p=new Coordinates(40,-75);var predictor=new ScientificMotionPredictor();var first=Frame(time,p,0);predictor.Predict(first,time,[RemoteKind.Terrain],new(),45);
-        var moved=Geodesy.Direct(p,90,500);var next=Frame(time.AddSeconds(2),moved,0);var result=predictor.Predict(next,next.TimestampUtc,[RemoteKind.Terrain],new(),45);Assert.Equal("Stabilizing",result.Status);Assert.Empty(result.Areas);Assert.Contains("possible slew",result.Message);
+        var time=DateTimeOffset.UtcNow;var p=new Coordinates(40,-75);var predictor=new ScientificMotionPredictor();var first=Frame(time,p,0);predictor.Predict(first,time,[RemoteKind.Terrain],new(ConcurrentDownloads:1),45);
+        var moved=Geodesy.Direct(p,90,500);var next=Frame(time.AddSeconds(2),moved,0);var result=predictor.Predict(next,next.TimestampUtc,[RemoteKind.Terrain],new(ConcurrentDownloads:1),45);Assert.Equal("Stabilizing",result.Status);Assert.Empty(result.Areas);Assert.Contains("possible slew",result.Message);
     }
     [Fact]public void SensorFootprintAndLatencyExtendReadinessWithinExplicitBounds()
     {
-        var time=DateTimeOffset.UtcNow;var predictor=new ScientificMotionPredictor();var p=new Coordinates(40,-75);var a=Frame(time,p,450) with{AltitudeAglFeet=60000};predictor.Predict(a,time,[RemoteKind.Thermal,RemoteKind.Multispectral,RemoteKind.Terrain],new(),120);
-        var q=Geodesy.Direct(p,90,450*.514444444444*2);var f=a with{TimestampUtc=time.AddSeconds(2),Latitude=q.Latitude,Longitude=q.Longitude};var result=predictor.Predict(f,f.TimestampUtc,[RemoteKind.Thermal,RemoteKind.Multispectral,RemoteKind.Terrain],new(),120);
+        var time=DateTimeOffset.UtcNow;var predictor=new ScientificMotionPredictor();var p=new Coordinates(40,-75);var a=Frame(time,p,450) with{AltitudeAglFeet=60000};predictor.Predict(a,time,[RemoteKind.Thermal,RemoteKind.Multispectral,RemoteKind.Terrain],new(ConcurrentDownloads:1),120);
+        var q=Geodesy.Direct(p,90,450*.514444444444*2);var f=a with{TimestampUtc=time.AddSeconds(2),Latitude=q.Latitude,Longitude=q.Longitude};var result=predictor.Predict(f,f.TimestampUtc,[RemoteKind.Thermal,RemoteKind.Multispectral,RemoteKind.Terrain],new(ConcurrentDownloads:1),120);
         Assert.InRange(result.LookaheadSeconds,518,519);Assert.InRange(result.DistanceMetres,119999,120001);Assert.InRange(result.Areas.Length,2,128);Assert.Contains(result.Areas,a=>a.Basis.Contains("footprint"));Assert.Contains(result.Areas,a=>a.Area.South<39.98);Assert.True(result.Limited);
     }
     [Fact]public void LongPreflightEnumerationProgressesBeyondEightWithoutAContinentBoundingBox()
@@ -73,7 +73,7 @@ public sealed class PredictiveScienceTests:IDisposable
     }
     [Fact]public async Task UrgentFlightDataBypassesDistantPreflightAndRepeatedUpdatesDeduplicate()
     {
-        var settings=new ScientificAccessSettings(root);settings.Save(new(true,true));var provider=new Blocking();using var automatic=new AutomaticScientificData(science,settings,providers:[provider]);
+        var settings=new ScientificAccessSettings(root);settings.Save(new(true,true,ConcurrentDownloads:1));var provider=new Blocking();using var automatic=new AutomaticScientificData(science,settings,providers:[provider]);
         var a=new GeographicBounds(-75,40,-74.98,40.02);automatic.Prepare(a,[RemoteKind.Terrain],priority:10000,scope:"plan:test");await provider.First.Task.WaitAsync(TimeSpan.FromSeconds(3));
         var distant=a with{West=-74,East=-73.98};automatic.Prepare(distant,[RemoteKind.Terrain],priority:10001,scope:"plan:test");var urgent=a with{West=-76,East=-75.98};
         automatic.ReprioritizeFlight(new Dictionary<string,double>{{AutomaticScientificData.AreaKey(RemoteKind.Terrain,urgent),-90}});

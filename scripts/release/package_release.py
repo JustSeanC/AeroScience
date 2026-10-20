@@ -24,7 +24,8 @@ GEOGRAPHIC_ACCEPTANCE = ("geographic_maps", "efb_route_import")
 ALPHA_ACCEPTANCE = BASE_ALPHA_ACCEPTANCE + GEOGRAPHIC_ACCEPTANCE
 EXTENDED_ACCEPTANCE = ("live_recording_recovery", "storage_migration", "mach_live", "toolbar_mission_sync", "vr_performance", "ipad_safari")
 SCIENCE040_ACCEPTANCE = ("science040_multispectral", "science040_terrain", "science040_vertical_profile", "science040_cloud_survey", "science040_long_recording")
-ACCEPTANCE = ALPHA_ACCEPTANCE + EXTENDED_ACCEPTANCE + SCIENCE040_ACCEPTANCE
+SCIENCE041_ACCEPTANCE = ("science041_select_prepare_fly", "science041_workspace_compare", "science041_downlink", "science041_repeated_transect", "science041_long_flight", "science041_pilot_ui", "science041_native_toolbar_vr")
+ACCEPTANCE = ALPHA_ACCEPTANCE + EXTENDED_ACCEPTANCE + SCIENCE040_ACCEPTANCE + SCIENCE041_ACCEPTANCE
 RUNTIME_EXPORTS = ("SimConnect_Open", "SimConnect_Close", "SimConnect_CallDispatch", "SimConnect_AddToDataDefinition",
                    "SimConnect_RequestDataOnSimObject", "SimConnect_SubscribeToSystemEvent", "SimConnect_RequestSystemState",
                    "SimConnect_SubscribeToCommBusEvent", "SimConnect_CallCommBusEvent", "SimConnect_GetLastSentPacketID")
@@ -56,6 +57,15 @@ CHECK_HELP.update({
     "science040_cloud_survey": "Mission D: MSFS local cloud transitions, visibility/precipitation, observed/unknown boundaries and timestamped replay; no regional cloud reconstruction.",
     "science040_long_recording": "Mission E: 30–60 minutes with science enabled and concurrent archive analysis; inspect cadence/gaps, reconnect/restart, product hashes and offline reopening. Record measured duration and any gaps."
 })
+CHECK_HELP.update({
+    "science041_select_prepare_fly": "Test A: select a saved plan without recording/downloading, explicitly prepare real sources, start the selected snapshot, finish and inspect valid multispectral numeric maps/composites and exports.",
+    "science041_workspace_compare": "Tests B/C: inspect genuine terrain and actual atmospheric charts in full-page science review; compare compatible native values and refuse incompatible arithmetic, retaining original dates and datums.",
+    "science041_downlink": "Test E: create eligible missed remote-source requests, finish, pause/resume/restart/cancel downlink, verify exact archived evidence, idempotence, refreshed derived artifacts and honest permanent gaps.",
+    "science041_repeated_transect": "Test D: fly repeated exact A/B passes with pilot-managed turns; verify direction/continuity, actual pass results and conservative real EFB route import.",
+    "science041_long_flight": "Test F: record 30–60 minutes in MSFS with multiple instruments and concurrent downloads/review; record measured cadence, gaps and resource usage.",
+    "science041_pilot_ui": "Test G: an ordinary pilot completes selection/preparation/flight/review/export on installed Windows and physical iPad; test touch, keyboard, zoom and back/forward. Emulation is separate.",
+    "science041_native_toolbar_vr": "Test H: official installed toolbar/engine versions, CommBus diagnostics, saved-plan sync/selection/recording, reopen/reconnect and Quest 3 controls/performance. Telemetry alone is not CommBus acceptance."
+})
 
 
 def require(condition, message):
@@ -78,6 +88,7 @@ def identity(version=RELEASE_VERSION):
     if base == '0.3.2': title = f'AeroScience v{base} — Scientific Reliability & Performance' + (' Prerelease' if preview else '')
     if base == '0.3.1': title = f'AeroScience v{base} — Predictive Science & Guided Dataset Import' + (' Prerelease' if preview else '')
     if base == '0.3.0': title = f'AeroScience v{base} — Remote Sensing & Research Payloads' + (' Alpha' if preview else '')
+    if base == '0.4.1': title = f'AeroScience v{base} — Scientific Review & Mission Readiness' + (' Prerelease' if preview else '')
     if base == '0.4.0': title = f'AeroScience v{base} — Scientific Mission Planning, Sensor Modeling & Analysis' + (' Prerelease' if preview else '')
     return dict(version=version, package_version=base, tag='v'+version, root_name=root,
                 asset_name=root+'.zip', candidate_name=root+'-CANDIDATE.zip', setup_name=f'AeroScience-Setup-v{version}.exe',
@@ -219,6 +230,7 @@ def validate_acceptance(path, version=RELEASE_VERSION, source_commit=None, paylo
     required = base_checks if identity(version)["prerelease"] else base_checks + EXTENDED_ACCEPTANCE
     if requires_manual_acceptance(version):
         required = base_checks + EXTENDED_ACCEPTANCE + SCIENCE040_ACCEPTANCE
+        if tuple(map(int,version.split("-")[0].split("."))) >= (0,4,1): required += SCIENCE041_ACCEPTANCE
     problems = []
     for name in required:
         check = acceptance.get("checks", {}).get(name, {})
@@ -326,11 +338,15 @@ def prepare_candidate(companion, community, receipt_path, runtime_report, runtim
             shutil.copy2(REPO/'docs'/name, destination/'docs'/name)
         for name in ('v0.3.0-completion.md','v0.3.0-windows-testing.md','v0.3.1-completion.md','v0.3.1-windows-testing.md','v0.3.2-completion.md','v0.3.2-windows-testing.md','v0.4.0-completion.md','v0.4.0-windows-testing.md','v0.4.0-scientific-methods.md','v0.4.0-instrument-profiles.md','v0.4.0-replay-and-coverage.md','v0.4.0-scientific-composites.md','v0.4.0-scientific-source-expansion.md','v0.4.0-pilot-guide.md'):
             shutil.copy2(REPO/'docs'/name,destination/'docs'/name)
+        for guide in (REPO/'docs').glob('v0.4.1-*.md'):
+            shutil.copy2(guide,destination/'docs'/guide.name)
         shutil.copytree(REPO/'docs'/'remote-sensing',destination/'docs'/'remote-sensing')
         shutil.copytree(REPO/'docs'/'roadmap',destination/'docs'/'roadmap')
         shutil.copytree(REPO/'docs'/'research',destination/'docs'/'research')
         (destination/'docs'/'images').mkdir()
         for image in (REPO/'docs'/'images').glob('remote-*-browser-fixture.png'):
+            shutil.copy2(image,destination/'docs'/'images'/image.name)
+        for image in (REPO/'docs'/'images').glob('v041-*-browser-fixture.png'):
             shutil.copy2(image,destination/'docs'/'images'/image.name)
         shutil.copy2(REPO/'docs'/'release-readme.md', destination/'README.md')
         (destination/'DEFAULTS.json').write_text(json.dumps(dict(description='Built-in defaults; use graphical Settings to change them.',
@@ -339,7 +355,8 @@ def prepare_candidate(companion, community, receipt_path, runtime_report, runtim
             science_limit_bytes=50000000000, automatic_cleanup='Regenerable caches only', online_map_default='streets', map_privacy_choice_required=True), indent=2)+'\n')
         commit, digest = validate_payload(destination)
         (destination/'ACCEPTANCE.json').write_text(json.dumps(acceptance_template(commit, digest), indent=2)+'\n')
-        (destination/'RELEASE-STATUS.txt').write_text('INTERMEDIATE PAYLOAD. The default Build-Release command continues through Inno compilation and automatic technical finalization with no required manual acceptance JSON. Windows/MSFS hardware remains unverified.\n')
+        status = ('INTERMEDIATE PAYLOAD. Build the installer, then record genuine Windows/MSFS acceptance for that exact candidate before finalization. Technical evidence alone cannot approve this version.\n' if requires_manual_acceptance() else 'INTERMEDIATE PAYLOAD. The default Build-Release command continues through Inno compilation and automatic technical finalization. Windows/MSFS hardware remains unverified.\n')
+        (destination/'RELEASE-STATUS.txt').write_text(status)
     except Exception:
         # Retain partial files for diagnosis; no final archive is produced.
         raise
@@ -398,15 +415,19 @@ def verify_archive(archive, checksum):
 
 def release_notes(info):
     if requires_manual_acceptance(info['version']) and 'acceptance' in info:
+        changes = ('v0.4.1 adds explicit saved-plan selection before flight, instrument-first preparation, full-page Science Map / Compare / Analysis / Results / Replay, a grouped reusable source library, evidence-bound post-flight reconstruction, repeated straight transects and integrated offline Help. External-source QA, native-grid composites, original timestamps and immutable products remain authoritative. Download concurrency stays at one by default; up to eight is configurable, subject to provider/resource limits.'
+                   if tuple(map(int, info['version'].split('-')[0].split('.'))) >= (0,4,1) else
+                   'v0.4.0 adds versioned AVIRIS-NG, RedEdge-P, FLIR and RIEGL reference geometries; sensor-based AGL/overlap planning; optional timestamped simulator ground/weather observations; vertical/cloud/transect mission templates; offline replay; separate geometric and valid-source coverage; native-grid mission sample composites and retained-source mosaics; and GeoTIFF/research ZIP export.')
+        missions = 'A–H' if tuple(map(int, info['version'].split('-')[0].split('.'))) >= (0,4,1) else 'A–E'
         return f'''# {info['title']}
 
 Download **{info['asset_name']}**. Run the setup EXE, then launch AeroScience from Start. The guided setup retains separate storage locations and offers the genuine SDK-built MSFS toolbar. Ordinary users need no SDK, terminal, Python/GDAL or manual server.
 
-v0.4.0 adds versioned AVIRIS-NG, RedEdge-P, FLIR and RIEGL reference geometries; sensor-based AGL/overlap planning; optional timestamped simulator ground/weather observations; vertical/cloud/transect mission templates; offline replay; separate geometric and valid-source coverage; native-grid mission sample composites and retained-source mosaics; and GeoTIFF/research ZIP export.
+{changes}
 
 External observations retain their original dates, calibration, masks, resolution and datums. They are not live aircraft camera or LiDAR returns. Compatible regional windows of one scene can be combined; incompatible scenes, dates and datums remain separate. Hyperspectral uses supported ENVI imports. NOAA point clouds, direct Hyperion products, WorldCover, GIBS and GOES were investigated; they are not integrated providers in this release. See the included v0.4.0 support and scientific-methods reports.
 
-Installed Windows/MSFS acceptance for this exact installer is recorded in the release evidence, including missions A–E, upgrade/offline archive, toolbar, VR and iPad checks. This does not establish compatibility with every aircraft or device. Automated fixtures and genuine external-data tests remain separate evidence. Existing archives receive verified backups before additive schema upgrades; user data is retained during updates/uninstall.
+Installed Windows/MSFS acceptance for this exact installer is recorded in the release evidence, including missions {missions}, upgrade/offline archive, toolbar, VR and iPad checks. This does not establish compatibility with every aircraft or device. Automated fixtures and genuine external-data tests remain separate evidence. Existing archives receive verified backups before additive schema upgrades; user data is retained during updates/uninstall.
 
 Need help with AeroScience? Join our Discord community for support, troubleshooting, questions, feature requests, and discussions with other pilots. [Join our Discord](https://discord.gg/mpYyazCqvJ). Membership is optional; Collect Feedback and GitHub issues remain available.
 

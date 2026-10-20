@@ -245,7 +245,7 @@ public sealed partial class MissionStore
         if (Convert.ToInt64(cmd.ExecuteScalar(), CultureInfo.InvariantCulture) != 0) throw new InvalidOperationException("End recording before clearing data.");
         cmd.CommandText = "SELECT COUNT(*) FROM observations";
         if (Convert.ToInt64(cmd.ExecuteScalar(), CultureInfo.InvariantCulture) != 0) throw new InvalidOperationException("Legacy scientific rows exist inside this mission database. Export them before clearing flight history.");
-        cmd.CommandText = "DELETE FROM analysis_settings; DELETE FROM instrument_metadata; DELETE FROM research_markers; DELETE FROM research_notes; DELETE FROM mission_research; DELETE FROM dataset_references; DELETE FROM events; DELETE FROM telemetry; DELETE FROM missions;"
+        cmd.CommandText = "DELETE FROM scientific_recovery; DELETE FROM analysis_settings; DELETE FROM instrument_metadata; DELETE FROM research_markers; DELETE FROM research_notes; DELETE FROM mission_research; DELETE FROM dataset_references; DELETE FROM events; DELETE FROM telemetry; DELETE FROM missions;"
             + (includePlans ? " DELETE FROM mission_plans;" : "");
         cmd.ExecuteNonQuery(); tx.Commit();
     }

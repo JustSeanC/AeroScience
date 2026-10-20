@@ -6,6 +6,7 @@ namespace AeroScience.Missions;
 public sealed class ScientificAccessSettings(string directory,Func<bool?>? unmetered=null)
 {
     public const string Privacy="Automatic scientific data access sends geographic search areas and your IP address to public scientific-data providers (USGS, Microsoft Planetary Computer, Element 84 and NASA). Historical numeric datasets are downloaded directly to your PC. Mission notes and flight recordings are not uploaded. This permission is separate from online basemaps. You can choose offline-only before any scientific query.";
+    public string ConfigurationDirectory => directory;
     private readonly string path=Path.Combine(directory,"scientific-access.json");private readonly object gate=new();
     public bool? IsUnmetered()=>unmetered?.Invoke();
     public ScientificAccessConfiguration Get()
@@ -24,20 +25,30 @@ public sealed class ScientificAccessSettings(string directory,Func<bool?>? unmet
     {Validate(p);if(p.OnlineEnabled&&!p.PrivacyAccepted)throw new ArgumentException("Review the separate scientific-data privacy disclosure before enabling retrieval.");lock(gate)PreferenceStore.WriteAtomic(path,p);return Get();}
     private static void Validate(ScientificAccessPreferences p)
     {
-        if(p.MaximumDownloadBytes is <1048576 or >536870912||p.ConcurrentDownloads is <1 or >2||p.LookbackDays is <1 or >3650||!double.IsFinite(p.MaximumCloudPercent)||p.MaximumCloudPercent is <0 or >100||p.SelectionPolicy is not("clear-recent" or "newest")||p.PreferredDateUtc>DateTimeOffset.UtcNow.AddDays(1)||p.LookaheadSeconds is <0 or >900||p.PrefetchHourlyBytes is <1048576 or >21474836480||p.PreflightTransferBytes is <1048576 or >21474836480||p.SourceModes?.Any(kv=>!Enum.IsDefined(kv.Key)||kv.Value is not("automatic" or "local" or "prefer-local")||kv.Key==RemoteKind.Hyperspectral&&kv.Value!="local")==true)
-            throw new ArgumentException("Choose 1–512 MiB per download, 1–2 concurrent preparations, 1–3650 lookback days, 0–100% scene cloud, and a supported selection policy/date.");
+        if(p.MaximumDownloadBytes is <1048576 or >536870912||p.ConcurrentDownloads is <1 or >8||p.LookbackDays is <1 or >3650||!double.IsFinite(p.MaximumCloudPercent)||p.MaximumCloudPercent is <0 or >100||p.SelectionPolicy is not("clear-recent" or "newest")||p.PreferredDateUtc>DateTimeOffset.UtcNow.AddDays(1)||p.LookaheadSeconds is <0 or >900||p.PrefetchHourlyBytes is <1048576 or >21474836480||p.PreflightTransferBytes is <1048576 or >21474836480||p.SourceModes?.Any(kv=>!Enum.IsDefined(kv.Key)||kv.Value is not("automatic" or "local" or "prefer-local")||kv.Key==RemoteKind.Hyperspectral&&kv.Value!="local")==true)
+            throw new ArgumentException("Choose 1–512 MiB per download, 1–8 concurrent preparations, 1–3650 lookback days, 0–100% scene cloud, and a supported selection policy/date.");
     }
 }
 
 public sealed class AutomaticScientificData : IDisposable
 {
+    private long configurationRevision;
+    public long ConfigurationRevision => Interlocked.Read(ref configurationRevision);
     private sealed record Job(string Key,RemoteKind Kind,GeographicBounds Area,Guid Ticket,double Priority,string Scope,bool Background=false,Coordinates? Point=null);
     private readonly ScienceStore science;private readonly ScientificAccessSettings settings;private readonly ScientificHttp http;
     private readonly IScientificDataProvider[] providers;
     private readonly Dictionary<string,Job> queue=[];
     private readonly Dictionary<string,DateTimeOffset> retryAfter=[];
     private readonly HashSet<string> pausedScopes=[];
-    public void PauseScope(string scope,bool value){lock(gate){if(value)pausedScopes.Add(scope);else pausedScopes.Remove(scope);}Wake();}
+    public void PauseScope(string scope,bool value)
+    {
+        lock(gate)
+        {
+            if(value){pausedScopes.Add(scope);foreach(var pair in cancellations.Where(p=>scopes.GetValueOrDefault(p.Key)==scope)){preempted.Add(pair.Key);pair.Value.Cancel();}}
+            else pausedScopes.Remove(scope);
+        }
+        Wake();
+    }
     private readonly SemaphoreSlim wake=new(0,1);
     private bool steadyFastFlight;
     public void SetTrajectoryRegionHint(bool steadyFast){lock(gate)steadyFastFlight=steadyFast;}
@@ -50,6 +61,7 @@ public sealed class AutomaticScientificData : IDisposable
     private readonly ScientificTransferLedger preflightTransfers=new(rolling:false);
     private readonly Dictionary<string,string> scopes=[];
     private readonly System.Collections.Concurrent.ConcurrentDictionary<string,(long Length,DateTime Modified)> verified=new();
+    public string? AvailabilityError => science.AvailabilityError();
     public object NetworkDiagnostics()=>http.Diagnostics();
     public double EstimatedPreparationSeconds {get{lock(gate)return preparationSeconds;}}
     public static string AreaKey(RemoteKind kind,GeographicBounds area)=>kind+":"+StacScientificProvider.Bounds(area);
@@ -92,7 +104,7 @@ public sealed class AutomaticScientificData : IDisposable
     public void CancelScope(string scope)
     {lock(gate)foreach(var key in scopes.Where(p=>p.Value==scope).Select(p=>p.Key).ToArray())Cancel(key);}
     public ScientificAccessConfiguration Configure(ScientificAccessPreferences preferences)
-    {var saved=settings.Save(preferences);Cancel();lock(gate){foreach(var key in states.Keys.Where(k=>!cancellations.ContainsKey(k)).ToArray())states.Remove(key);}return saved;}
+    {var saved=settings.Save(preferences);Interlocked.Increment(ref configurationRevision);Cancel();lock(gate){foreach(var key in states.Keys.Where(k=>!cancellations.ContainsKey(k)).ToArray())states.Remove(key);}return saved;}
     public ScientificDataReadiness[] Prepare(GeographicBounds area,IEnumerable<RemoteKind> kinds,bool retry=false,bool background=false,double priority=10000,string scope="manual",Coordinates? samplePoint=null)
     {
         ValidateArea(area);var p=settings.Get().Preferences;
@@ -160,6 +172,7 @@ public sealed class AutomaticScientificData : IDisposable
     }
     private async Task Execute(Job job)
     {
+        var revision = ConfigurationRevision;
         using var cancel=CancellationTokenSource.CreateLinkedTokenSource(stopping.Token);cancel.CancelAfter(TimeSpan.FromMinutes(12));
         lock(gate)cancellations[job.Key]=cancel;
         ScientificDataReadiness state;lock(gate){if(!tickets.TryGetValue(job.Key,out var ticket)||ticket!=job.Ticket||!states.TryGetValue(job.Key,out state!)||state.Status is not("Queued" or "Waiting for download allowance")){cancellations.Remove(job.Key);return;}}
@@ -234,14 +247,14 @@ public sealed class AutomaticScientificData : IDisposable
             Set(state with{Status="Waiting for download allowance",Stage="Waiting",Message=e.Message});
             lock(gate){if(!stopping.IsCancellationRequested&&!cancel.IsCancellationRequested){queue[job.Key]=job;retryAfter[job.Key]=DateTimeOffset.UtcNow.AddSeconds(5);}}
         }
-        catch(OperationCanceledException){bool yielded;lock(gate)yielded=preempted.Contains(job.Key);Set(state with{Status=yielded?"Superseded":"Unavailable",Message=yielded?"Distant preflight yielded to urgent aircraft data. Partial staging is retained/accounted; progressive preparation can retry later.":"Preparation cancelled or timed out. No partial source was advertised as ready. Retained staging is visible in Storage Management."});}
+        catch(OperationCanceledException){bool yielded;lock(gate)yielded=preempted.Contains(job.Key);Set(state with{Status=yielded?"Superseded":"Unavailable",Message=yielded?"Preparation paused or preempted. Partial staging remains accounted; Resume can reuse verified originals and retry bounded work.":"Preparation cancelled or timed out. No partial source was advertised as ready. Retained staging is visible in Storage Management."});}
         catch(Exception e)when(e is IOException or HttpRequestException or JsonException or ArgumentException or InvalidOperationException or UnauthorizedAccessException or Microsoft.Data.Sqlite.SqliteException or KeyNotFoundException or FormatException or NotSupportedException)
         {Set(state with{Status="Unavailable",Message=e is HttpRequestException?"Scientific provider is unreachable. Retry later or use verified offline sources.":e is JsonException or KeyNotFoundException?"Provider metadata is incompatible; no scientific values were guessed.":e.Message});}
         finally
         {
             if(transfer is not null)ScientificDiagnostics.Record("allowance-released",job.Key,job.Scope,job.Kind,bytes:transfer.HeldBytes,result:"Unused reservation released; actual transferred bytes remain charged.");
             transfer?.Dispose();
-            lock(gate){cancellations.Remove(job.Key);preempted.Remove(job.Key);if(state.DownloadedBytes>0)preparationSeconds=Math.Clamp(.7*preparationSeconds+.3*(DateTimeOffset.UtcNow-started).TotalSeconds,5,300);}
+            lock(gate){cancellations.Remove(job.Key);preempted.Remove(job.Key);if(revision!=ConfigurationRevision&&tickets.GetValueOrDefault(job.Key)==job.Ticket){states.Remove(job.Key);tickets.Remove(job.Key);}if(state.DownloadedBytes>0)preparationSeconds=Math.Clamp(.7*preparationSeconds+.3*(DateTimeOffset.UtcNow-started).TotalSeconds,5,300);}
             ScientificDiagnostics.Record("finish",job.Key,job.Scope,job.Kind,state.Provider,state.DownloadedBytes,Snapshot().FirstOrDefault(x=>x.Key==job.Key)?.Status);
             Wake();
         }

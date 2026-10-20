@@ -28,6 +28,9 @@ public static class FlightPatterns
         if(d.Kind is FlightPatternKind.Lawnmower or FlightPatternKind.CreepingLine or FlightPatternKind.ExpandingSquare or FlightPatternKind.RadialSpokes&&d.Legs is <2 or >100)throw new ArgumentException("Survey passes / spokes must be between 2 and 100.");
         if(d.Kind is FlightPatternKind.Orbit or FlightPatternKind.Racetrack&&d.Orbits is <1 or >10)throw new ArgumentException("Orbit count must be between 1 and 10.");
         if(d.TargetAltitudeFeet is {} altitude&&!double.IsFinite(altitude))throw new ArgumentException("Enter a finite target altitude or leave it blank.");
+        if(d.Passes is <1 or >20 || d.PassAltitudesFeet is {} altitudes && (altitudes.Length!=d.Passes || altitudes.Any(a=>a is {} v&&!double.IsFinite(v))))
+            throw new ArgumentException("Choose 1–20 passes and one optional finite altitude per pass.");
+        if(d.TargetGroundspeedKnots is {} targetSpeed&&(!double.IsFinite(targetSpeed)||targetSpeed<=0||targetSpeed>1600))throw new ArgumentException("Optional target groundspeed must be greater than zero and at most 1600 knots.");
         var extent = d.Kind is FlightPatternKind.Lawnmower or FlightPatternKind.CreepingLine ? (d.Legs - 1) * d.SpacingMetres / 2 : d.Kind == FlightPatternKind.ExpandingSquare ? Math.Ceiling(d.Legs / 2d) * d.SpacingMetres : 0;
         if (extent > 500000) throw new ArgumentException("Reduce spacing or legs: this local pattern layout supports extents up to 500 km. Long routes can be planned with separate patterns.");
         if(d.FitMode is not("envelope" or "polygon"))throw new ArgumentException("Unsupported survey fit mode.");
@@ -102,11 +105,17 @@ public static class FlightPatterns
             case FlightPatternKind.RadialSpokes:
                 for (var i = 0; i < d.Legs; i++) { points.Add(d.Center); points.Add(Geodesy.Direct(d.Center, d.HeadingDegrees + sign * i * 360d / d.Legs, d.RadiusMetres)); points.Add(d.Center); }
                 break;
-            case FlightPatternKind.StraightTransect: Add(-d.LengthMetres / 2, 0); Add(d.LengthMetres / 2, 0); break;
+            case FlightPatternKind.StraightTransect:
+                var endpointA=Offset(-d.LengthMetres/2,0); var endpointB=Offset(d.LengthMetres/2,0);
+                points.Add(endpointA);
+                for(var pass=0;pass<d.Passes;pass++) points.Add(pass%2==0?endpointB:endpointA);
+                break;
         }
         if (points.Count > 1000) throw new ArgumentException("This pattern exceeds 1,000 editable waypoints. Reduce its orbits or legs.");
         var distance = points.Zip(points.Skip(1), (a, b) => Geodesy.Distance(a, b)).Sum();
-        return new(d, points.Select((p, i) => new ResearchWaypoint($"{d.Kind} {i + 1}", p.Latitude, p.Longitude, d.TargetAltitudeFeet, PatternId: d.Id, Id: MissionPlanning.StableWaypointId(d.Id, i))).ToArray(), distance,
-            "WGS84 ellipsoid / GeographicLib. Curves use 5-degree samples. All generated points remain editable. No aircraft or autopilot commands.");
+        return new(d, points.Select((p, i) => new ResearchWaypoint($"{d.Kind} {i + 1}", p.Latitude, p.Longitude, d.Kind==FlightPatternKind.StraightTransect?d.PassAltitudesFeet?[Math.Max(0,i-1)]??d.TargetAltitudeFeet:d.TargetAltitudeFeet, Instructions:d.Kind==FlightPatternKind.StraightTransect?$"Pass {Math.Max(1,i)} ({((Math.Max(1,i)-1)%2==0?"A to B":"B to A")}); pass ID {d.Id:N}:{Math.Max(1,i)}; pilot-managed turnaround and rejoin. {(d.TargetGroundspeedKnots is {} gs?$"Target groundspeed {gs:0.###} kt. ":"")}No aircraft command.":null, PatternId: d.Id, Id: MissionPlanning.StableWaypointId(d.Id, i))).ToArray(), distance,
+            d.Kind==FlightPatternKind.StraightTransect?"Exact repeated WGS84 endpoints. Science distance only; pilot-managed turnaround distance/time are unknown. No aircraft commands.":"WGS84 ellipsoid / GeographicLib. Curves use 5-degree samples. All generated points remain editable. No aircraft or autopilot commands.",
+            d.Kind==FlightPatternKind.StraightTransect?Enumerable.Range(0,d.Passes).Select(i=>new PatternRouteSegment(i,i+1,"science-pass")).ToArray():null,
+            d.Kind==FlightPatternKind.StraightTransect?distance:null,null);
     }
 }

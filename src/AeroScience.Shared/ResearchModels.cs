@@ -69,7 +69,7 @@ public sealed record DataClearPreview(string Kind, string Directory, long Missio
 public enum FlightPatternKind { Lawnmower, CreepingLine, ExpandingSquare, Racetrack, Orbit, Box, RadialSpokes, StraightTransect }
 public sealed record PatternDefinition(Guid Id, FlightPatternKind Kind, Coordinates Center, double HeadingDegrees = 0,
     double LengthMetres = 10000, double WidthMetres = 5000, double SpacingMetres = 1000, double RadiusMetres = 2500,
-    int Legs = 6, int Orbits = 1, bool Clockwise = true, double? TargetAltitudeFeet = null, string? Notes = null,string FitMode="envelope",Coordinates[]? ClippingPolygon=null);
+    int Legs = 6, int Orbits = 1, bool Clockwise = true, double? TargetAltitudeFeet = null, string? Notes = null,string FitMode="envelope",Coordinates[]? ClippingPolygon=null,int Passes=1,double?[]? PassAltitudesFeet=null,double? TargetGroundspeedKnots=null);
 public sealed record PatternRouteSegment(int Start,int End,string Role);
 public sealed record PatternPreview(PatternDefinition Definition, ResearchWaypoint[] Waypoints, double DistanceMetres, string Method,PatternRouteSegment[]? Segments=null,double? ScanDistanceMetres=null,double? TransitionDistanceMetres=null);
 public sealed record InstrumentPreset(Guid Id, string Name, string? Description, InstrumentConfiguration[] Instruments, DateTimeOffset? UpdatedUtc = null);

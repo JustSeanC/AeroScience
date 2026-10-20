@@ -1470,3 +1470,24 @@ dialog::backdrop { background:#000a; } dialog button { margin:8px; min-height:44
 
 /* The archive workspace needs a full research view, independent of small setup dialogs. */
 #mission-detail { width:min(1200px,96vw); max-width:96vw; max-height:94vh; }
+/* v0.4.1 full-page research navigation reuses the dashboard palette. */
+.workspace-subnav,.workspace-controls,.mission-selection>div {display:flex;flex-wrap:wrap;align-items:end;gap:.7rem;margin:1rem 0}
+.workspace-subnav a[aria-current=page] {background:var(--accent,#53d3bd);color:#071a21}
+.workspace-controls label {display:grid;gap:.4rem;min-width:12rem;flex:1}
+.workspace-controls select,.workspace-controls input {max-width:100%;min-width:0}
+.science-page {min-width:0}.workspace-map .geographic-map {height:58vh;min-height:380px}
+.review-kpis,.instrument-results,.comparison-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem;margin:1rem 0}
+.review-kpis {grid-template-columns:repeat(4,minmax(0,1fr))}.review-kpis strong {font-size:1.7rem}
+.instrument-result,.science-review-status,.library-collection {padding:1.2rem}.science-page pre,.help-guide pre,.library-collection pre {white-space:pre-wrap;overflow-wrap:anywhere;max-height:28rem;overflow:auto}
+.help-guide {max-width:80ch;margin:2rem auto;line-height:1.7}.help-guide nav {display:flex;flex-wrap:wrap;gap:.5rem 1rem}.help-guide table {width:100%;display:block;overflow:auto}.help-guide th,.help-guide td {padding:.5rem;border-bottom:1px solid #304554;text-align:left}
+.help-guide h2,.help-guide h3 {scroll-margin-top:2rem}.help-guide pre {background:#142632;padding:1rem}.help-guide a {text-decoration:underline}
+.map-tools {display:flex;flex-wrap:wrap;align-items:center;gap:.5rem}.map-tools input {flex:1;min-width:8rem}
+.instrument-preparation {display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.8rem}.preparation-row {padding:1rem;border:1px solid #304554;border-radius:6px}.preparation-row p {margin:.4rem 0}
+@media(max-width:900px){.comparison-grid,.instrument-results{grid-template-columns:1fr}.review-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.workspace-map .geographic-map{min-height:340px}.workspace-controls>*{max-width:100%}}
+
+.workspace-subnav {flex-direction:row;align-items:center;justify-content:flex-start;border-bottom:1px solid var(--line);padding-bottom:.8rem}
+.workspace-subnav a,.button {display:inline-flex;align-items:center;justify-content:center;min-height:44px;border:1px solid #314154;border-radius:7px;padding:.65rem .9rem;font-size:.9rem}
+.help-guide nav {flex-direction:row;justify-content:flex-start}.help-guide p,.science-page>p {margin:.75rem 0}
+.science-page h2 {font-size:1.5rem}.science-page h3 {font-size:1.15rem}.instrument-result p,.science-review-status p {margin:.55rem 0}
+.map-tools {align-items:end}.map-tools label {margin-bottom:0;min-width:200px;flex:1 1 200px}.map-search {display:flex;gap:.5rem;flex:2 1 260px}.map-search input {flex:1;min-width:0;width:100%}
+.map-tools>p:empty {display:none}.help-guide td,.help-guide th {white-space:normal}
