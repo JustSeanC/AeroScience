@@ -7,5 +7,27 @@
   "finalNetworkRerun": "pending",
   "finalNetworkRerunReason": "The cloud HTTP tunnel returns HTTP 503 across GitHub, NuGet and scientific providers. Current-source online acceptance is not established. Earlier v0.4.0 reports remain unchanged. Prior temporary genuine source files are unavailable in this environment; synthetic fixtures are not a replacement.",
   "workflows": [],
-  "previousEvidence": "v0.4.0-automatic-provider-acceptance.json"
+  "previousEvidence": "v0.4.0-automatic-provider-acceptance.json",
+  "lastCurrentSourceAttempt": {
+    "sourceCommit": "eb37723907dc521dc9804d989020002908e97ee5",
+    "workflow": "usgs-3dep",
+    "checkedUtc": "2026-10-20T00:49:51.5593854+00:00",
+    "status": "Unavailable",
+    "httpStatus": 503,
+    "downloadedBytes": 0,
+    "passed": false,
+    "genuineNetworkRerun": "Stopped on first failed workflow; no remaining-provider pass inferred"
+  },
+  "additionalCurrentSourceAttempt": {
+    "sourceCommit": "eb37723907dc521dc9804d989020002908e97ee5",
+    "workflow": "sentinel-2-l2a",
+    "checkedUtc": "2026-10-20T00:51:09.6686954+00:00",
+    "catalog": "Copernicus / Element 84 Earth Search",
+    "scene": "S2A_18TWK_20240903_0_L2A",
+    "status": "Unavailable",
+    "downloadedBytes": 816248,
+    "httpStatus": 503,
+    "passed": false,
+    "reason": "Discovery succeeded, but a required exact bounded asset range returned 503. Partial data was refused; no validated source/product or acceptance pass."
+  }
 }

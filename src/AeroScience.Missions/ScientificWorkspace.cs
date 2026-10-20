@@ -113,7 +113,9 @@ public static class ScientificResearchSummary
             foreach(var p in science.AllProducts(id).Where(p=>p.InstrumentId==instrument))
             {
                 products++;samples+=p.ValidSampleCount??0;used.Add(p.SourceId);
-                foreach(var statistic in science.ProductStatistics(p)){var key=(p.SourceId,statistic.Id,statistic.Unit);var value=ranges.GetValueOrDefault(key,(0,double.PositiveInfinity,double.NegativeInfinity,0));ranges[key]=(value.Item1+statistic.Count,Math.Min(value.Item2,statistic.Minimum),Math.Max(value.Item3,statistic.Maximum),value.Item4+statistic.Mean*statistic.Count);}
+                // Terrain's derived elevation aliases its native elevation band. Count one
+                // physical quantity per acquisition, including legacy cached statistics.
+                foreach(var statistic in science.ProductStatistics(p).DistinctBy(s=>(s.Id,s.Unit))){var key=(p.SourceId,statistic.Id,statistic.Unit);var value=ranges.GetValueOrDefault(key,(0,double.PositiveInfinity,double.NegativeInfinity,0));ranges[key]=(value.Item1+statistic.Count,Math.Min(value.Item2,statistic.Minimum),Math.Max(value.Item3,statistic.Maximum),value.Item4+statistic.Mean*statistic.Count);}
             }
             var ids = ScienceCatalog.Definitions.FirstOrDefault(d => d.Id == instrument); var measurements = stats.Where(s => ids?.Measurements.Any(m => m.Id == s.MeasurementId) == true).ToArray();
             return new InstrumentReview(instrument, ids?.Name ?? instrument, count.Values, count.Times, products, samples, measurements, research.Diagnostics?.FirstOrDefault(d => d.InstrumentId == instrument), RemoteAcquisition.Instruments.ContainsKey(instrument) ? "Geographic samples from independently observed historical source data. Source dates and masks remain distinct from aircraft time." : "Simulator-reported environmental measurement values. Several fields can share one timestamp; stored values are not additional sampling instants.",

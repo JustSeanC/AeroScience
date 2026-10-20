@@ -81,6 +81,8 @@ public sealed class ScientificReview041Tests : IDisposable
         var data = science.ReadProduct(first.Products[0].Id); var layer = JsonSerializer.SerializeToElement(ScientificMapLayer.Create(data, "elevation"), WireJson.Options); Assert.True(layer.GetProperty("features").GetArrayLength() > 0);
         var comparison = science.Compare(new([first.Products[0].Id, second.Products[0].Id], "elevation")); Assert.True(comparison.Comparable); Assert.Equal(0, comparison.MeanDelta); Assert.Contains(comparison.Reasons, r => r.Contains("not independently"));
         var summary = ScientificResearchSummary.Build(missions, science, ids[0]); Assert.Single(summary.Instruments); Assert.Equal(1, summary.Instruments[0].RemoteProducts);
+        var elevation=JsonSerializer.SerializeToElement(summary.Instruments[0].RemoteStatistics,WireJson.Options).EnumerateArray().Single(s=>s.GetProperty("measurement").GetString()=="elevation");
+        Assert.Equal(science.Products(ids[0]).Single().ValidSampleCount,elevation.GetProperty("count").GetInt64());
         var legacy=first.Products[0] with{Statistics=null};var originalSha=legacy.Sha256;
         var stats=science.ProductStatistics(legacy);Assert.Contains(stats,s=>s.Minimum==123.25&&s.Maximum==123.25);
         Assert.Equal(JsonSerializer.Serialize(stats),JsonSerializer.Serialize(science.ProductStatistics(legacy)));Assert.Equal(originalSha,science.ReadProduct(legacy.Id).Product.Sha256);

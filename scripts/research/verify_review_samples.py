@@ -88,6 +88,12 @@ def verify(folder):
             maximum = max(maximum, difference)
         if report['originalFlight']['timestampUtc'] != report['product']['flightPacketUtc'] or not report['idempotent'] or report['mapCount'] != 1:
             raise ValueError('Flight identity or idempotent recovery proof mismatch')
+        for instrument in report['summary']['instruments']:
+            for statistic in instrument['remoteStatistics']:
+                name = statistic['measurement']
+                oracle = derived[name] if name in derived else expected[name]
+                if statistic['count'] != int(np.isfinite(oracle).sum()):
+                    raise ValueError('Instrument summary counted a native/derived alias twice: ' + name)
         results.append(dict(kind=kind,sourceId=source['id'],sourceScene=source['manifest']['sceneId'],sourceObservedUtc=source['manifest']['observationUtc'],productSha256=report['product']['sha256'],samplePositions=len(points),bands=len(expected),maximumAbsoluteDifference=maximum,qaAndNodataSupportMatches=True,nativeAffineAndCrsMatch=True,originalIntegrityVerified=True,idempotent=True))
     return dict(formatVersion=1,evidenceType='independent-genuine-retained-review-comparison',checkedUtc=datetime.now(timezone.utc).isoformat(),windowsMsfs='not tested',newProviderNetworkAcceptance=False,results=results)
 

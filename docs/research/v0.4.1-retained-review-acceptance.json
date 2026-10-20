@@ -1,17 +1,17 @@
 {
   "formatVersion": 1,
   "evidenceType": "genuine-retained-data-scientific-review",
-  "checkedUtc": "2026-10-20T00:42:39.747331+00:00",
+  "checkedUtc": "2026-10-20T00:54:32.7017353+00:00",
   "network": "No new provider requests; retained benchmark originals",
   "flightInput": "synthetic scheduled position; not MSFS",
   "windowsMsfs": "not tested",
   "results": [
     {
       "kind": "thermal",
-      "sha256": "59104745d7525f4028d9f3a3f6c65485638ebeecd8b1556bb3c33ecac82c44f1",
-      "flightPacketUtc": "2026-10-20T00:42:36.4677184+00:00",
+      "sha256": "39be6da1a560e327eb13fed1ea7b3d02774e311bec84e7544d8233758a00348e",
+      "flightPacketUtc": "2026-10-20T00:54:29.6003283+00:00",
       "sourceObservationUtc": "2024-09-03T15:39:44.650124+00:00",
-      "processedUtc": "2026-10-20T00:42:37.3760401+00:00",
+      "processedUtc": "2026-10-20T00:54:30.5539307+00:00",
       "idempotent": true,
       "mapCount": 1,
       "sourceFiles": [
@@ -34,10 +34,10 @@
     },
     {
       "kind": "terrain",
-      "sha256": "32f61f9802f1f5372ea9c2e4d458705ebc389e1620a7449ac032283528300458",
-      "flightPacketUtc": "2026-10-20T00:42:37.5853393+00:00",
+      "sha256": "f9bdeb45692092dfc1380f49b013bfe22baf611b199275dae95035e5b534f9e6",
+      "flightPacketUtc": "2026-10-20T00:54:31.0909645+00:00",
       "sourceObservationUtc": null,
-      "processedUtc": "2026-10-20T00:42:37.9307583+00:00",
+      "processedUtc": "2026-10-20T00:54:31.4164725+00:00",
       "idempotent": true,
       "mapCount": 1,
       "sourceFiles": [
@@ -50,10 +50,10 @@
     },
     {
       "kind": "multispectral",
-      "sha256": "46e54ae97112012bd3bb4cc0fbd05670e19afae3c1c975d403cb977bcb5b859a",
-      "flightPacketUtc": "2026-10-20T00:42:38.0322165+00:00",
+      "sha256": "f2f4c5a2c9f11243a26735ff96eec5befe45b81b20aa692196c0d420cf5b32e1",
+      "flightPacketUtc": "2026-10-20T00:54:31.4687451+00:00",
       "sourceObservationUtc": "2024-09-03T15:52:05.578+00:00",
-      "processedUtc": "2026-10-20T00:42:39.7042635+00:00",
+      "processedUtc": "2026-10-20T00:54:32.6547142+00:00",
       "idempotent": true,
       "mapCount": 1,
       "sourceFiles": [
@@ -90,16 +90,16 @@
   "independentOracle": {
     "formatVersion": 1,
     "evidenceType": "independent-genuine-retained-review-comparison",
-    "checkedUtc": "2026-10-20T00:43:20.677783+00:00",
+    "checkedUtc": "2026-10-20T00:54:51.133110+00:00",
     "windowsMsfs": "not tested",
     "newProviderNetworkAcceptance": false,
     "results": [
       {
         "kind": "thermal",
-        "sourceId": "701ae7a6-b8ef-49d9-b0d3-17d85b6a2a12",
+        "sourceId": "26f1ad22-c4bf-45a3-8ce5-35a78c05d89a",
         "sourceScene": "LC08_L2SP_014032_20240903_02_T1",
         "sourceObservedUtc": "2024-09-03T15:39:44.650124+00:00",
-        "productSha256": "59104745d7525f4028d9f3a3f6c65485638ebeecd8b1556bb3c33ecac82c44f1",
+        "productSha256": "39be6da1a560e327eb13fed1ea7b3d02774e311bec84e7544d8233758a00348e",
         "samplePositions": 576,
         "bands": 3,
         "maximumAbsoluteDifference": 0.0,
@@ -110,10 +110,10 @@
       },
       {
         "kind": "terrain",
-        "sourceId": "ae3ef39a-e2d4-4b2d-a34d-811f04a261ec",
+        "sourceId": "4865b370-1b8a-41f0-b5fc-ad72aff3146b",
         "sourceScene": "3DEP--74.92,40,-74.9,40.02",
         "sourceObservedUtc": null,
-        "productSha256": "32f61f9802f1f5372ea9c2e4d458705ebc389e1620a7449ac032283528300458",
+        "productSha256": "f9bdeb45692092dfc1380f49b013bfe22baf611b199275dae95035e5b534f9e6",
         "samplePositions": 576,
         "bands": 1,
         "maximumAbsoluteDifference": 0.0,
@@ -124,10 +124,10 @@
       },
       {
         "kind": "multispectral",
-        "sourceId": "a43e361e-2ed9-4038-8eee-2094fb9337d4",
+        "sourceId": "1a855d14-f633-4411-ab7b-3a250cefa400",
         "sourceScene": "S2A_18TWK_20240903_0_L2A",
         "sourceObservedUtc": "2024-09-03T15:52:05.578+00:00",
-        "productSha256": "46e54ae97112012bd3bb4cc0fbd05670e19afae3c1c975d403cb977bcb5b859a",
+        "productSha256": "f2f4c5a2c9f11243a26735ff96eec5befe45b81b20aa692196c0d420cf5b32e1",
         "samplePositions": 576,
         "bands": 5,
         "maximumAbsoluteDifference": 0.0,
@@ -138,6 +138,7 @@
       }
     ]
   },
+  "independentOracleScriptSha256": "c7208cc5fe950ffe2dd846ffddd36df6dc459c57a241d1ae82bb813a83510f5c",
   "canonicalLfSourceSha256": {
     "src/AeroScience.Missions/AutomaticScientificData.cs": "38af01eb7c51b03ea0bbf64d4982ca5ad0eab9efc15f8722eea7c98867182ef3",
     "src/AeroScience.Missions/ScientificTransferLedger.cs": "f87df5d69a7aae632f8ee0912da1f6b40ee9648b2755771efc550e3a59625636",
@@ -185,7 +186,7 @@
     "src/AeroScience.Missions/RouteExports.cs": "06860cc0fc990c3bc2a61d846f7ab20109ea685ce4b767f02673ab6031a7ed49",
     "src/AeroScience.Engine/ResearchApi.cs": "537676a3825616e0c6541333048f9b368737a456bb0945ffdb4865eec0d9b05d",
     "src/AeroScience.Missions/ScientificDownlink.cs": "4ec368feea38fe9589fd48927ee3c98f6facca0d4096ee9d4f177c6359dabb4b",
-    "src/AeroScience.Missions/ScientificWorkspace.cs": "14e61e5fa4e6c234e0294e91c6e2278ebbab75817a6f5c45f4a4ef4521d0c4ea",
+    "src/AeroScience.Missions/ScientificWorkspace.cs": "c06eef696ad638faa52042e2dc0e60c94c813e579c6e400e05a7152dca4baab4",
     "tests/AeroScience.ProviderAcceptance/ReviewAcceptance.cs": "5d5ba4c125c8f9a56b9cd3d1cd6c30013bb1a29049970cdee371de4678784721",
     "src/AeroScience.Missions/ScientificStatisticsCache.cs": "427676b9e8997678d9728a8a2e3a604568a7f350c5cf47785e4828ead73a46f5",
     "src/AeroScience.Missions/ScientificInterpretation.cs": "84642cc7f7a87d7f2d491199b69f473125f972756f6ca9021a34f27da70c6733",
