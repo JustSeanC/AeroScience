@@ -1,8 +1,8 @@
 # Install AeroScience for Windows
 
-The primary v0.4.0 download will be **AeroScience-Setup-v0.4.0.exe** from [GitHub Releases](https://github.com/JustSeanC/AeroScience/releases) after genuine installed acceptance and publication. Source/internal ZIPs are not the pilot installation method. No finished v0.4.0 installer is claimed from this cloud environment.
+The primary v0.4.2 download will be **AeroScience-Setup-v0.4.2.exe** from [GitHub Releases](https://github.com/JustSeanC/AeroScience/releases) after genuine installed acceptance and publication. Source/internal ZIPs are not the pilot installation method. No finished v0.4.2 installer is claimed from this cloud environment.
 
-Maintainers: [exact Windows build, testing and publication guide](docs/v0.4.0-windows-testing.md). The build retains official SDK/runtime/licensing checks and stops at the candidate for actual installed missions A–E. Record results using the graphical checklist; hand-editing JSON is unnecessary. No self-hosted runner is required.
+Maintainers: [exact Windows build, testing and publication guide](docs/v0.4.2-windows-testing.md). The build retains official SDK/runtime/licensing checks and stops at the candidate for actual installed missions A–H and the v0.4.2 UX scenarios. Record results using the graphical checklist; hand-editing JSON is unnecessary. No self-hosted runner is required.
 
 ## Install and launch
 
@@ -52,4 +52,4 @@ On a fresh installation choose OpenStreetMap or offline-only in the dashboard pr
 
 Follow the [automatic remote-sensing quick start](docs/remote-sensing/quick-start.md). After separate consent, AeroScience prepares real terrain, Landsat thermal and Sentinel-2 multispectral subsets directly from public providers, generates metadata internally and validates them in the existing local library. No GIS, JSON editing, terminal or manual satellite download is required for these supported paths. NASA hyperspectral discovery is available, while automated protected spectral download/preparation is unsupported. Readiness, date/quality, bandwidth, offline and storage controls explain actual availability.
 
-For the new sensor planning, atmospheric missions, replay, coverage and geographic products, follow [the v0.4.0 pilot walkthrough](docs/v0.4.0-pilot-guide.md). NOAA point clouds and raw Hyperion products are not supported import workflows; see [source support](docs/v0.4.0-scientific-source-expansion.md).
+For the new sensor planning, atmospheric missions, replay, coverage and geographic products, follow [the v0.4.2 pilot walkthrough](docs/v0.4.2-pilot-guide.md). NOAA point clouds and raw Hyperion products are not supported import workflows; see [source support](docs/v0.4.2-scientific-source-expansion.md).

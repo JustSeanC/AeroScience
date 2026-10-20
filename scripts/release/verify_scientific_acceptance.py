@@ -49,6 +49,9 @@ if tuple(map(int, VERSION.split('-')[0].split('.'))) >= (0,4,1):
     SOURCES += ['src/AeroScience.Missions/ScienceStore.cs','src/AeroScience.Missions/MissionStore.cs','src/AeroScience.Missions/MissionReplay.cs','src/AeroScience.Missions/FlightPatterns.cs','src/AeroScience.Missions/RouteExports.cs','src/AeroScience.Engine/ResearchApi.cs','src/AeroScience.Missions/ScientificDownlink.cs','src/AeroScience.Missions/ScientificWorkspace.cs',
                 'tests/AeroScience.ProviderAcceptance/ReviewAcceptance.cs','src/AeroScience.Missions/ScientificStatisticsCache.cs','src/AeroScience.Missions/ScientificInterpretation.cs','src/AeroScience.Missions/ScientificAtmosphereMap.cs','src/AeroScience.Missions/TransectPasses.cs','src/AeroScience.Engine/ScientificDownlinkWorker.cs','src/AeroScience.Engine/ScientificDownlinkSignals.cs']
 
+if tuple(map(int, VERSION.split('-')[0].split('.'))) >= (0,4,2):
+    SOURCES += ['src/AeroScience.Missions/ScientificMapOverview.cs']
+
 def source_digest(path):
     return hashlib.sha256(path.read_text(encoding='utf-8').replace('\r\n','\n').encode()).hexdigest()
 def verify_guided_envi(report=None,root=ROOT):

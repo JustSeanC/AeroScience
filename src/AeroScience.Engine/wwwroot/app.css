@@ -150,7 +150,7 @@ h3 {
   font-weight: 400;
 }
 .brand small {
-  font-size: 7px;
+  font-size: 14px;
   display: block;
   color: var(--muted);
   letter-spacing: 1.4px;
@@ -392,7 +392,7 @@ main {
   flex-direction: column;
 }
 .attitude span {
-  font-size: 8px;
+  font-size: 14px;
   letter-spacing: 1px;
   color: var(--muted);
 }
@@ -447,7 +447,7 @@ main {
   font-weight: 400;
 }
 .metric small {
-  font-size: 8px;
+  font-size: 14px;
   color: #7f97ab;
 }
 .metric p {
@@ -490,7 +490,7 @@ main {
   display: flex;
   justify-content: space-between;
   color: #627f92;
-  font-size: 8px;
+  font-size: 14px;
   letter-spacing: 0.7px;
   margin-top: 15px;
 }
@@ -537,8 +537,8 @@ dd {
   border-top: 1px solid var(--line);
   margin-top: 30px;
   padding: 20px 0;
-  color: #597184;
-  font-size: 8px;
+  color: var(--muted);
+  font-size: 14px;
   letter-spacing: 1px;
 }
 .app-footer b {
@@ -795,12 +795,11 @@ dialog::backdrop {
   }
   .brand > span,
   .nav-label,
-  .nav-link:not(.selected) span ~ span,
   .sidebar-footer {
     display: none;
   }
   .nav-link {
-    font-size: 0;
+    font-size: 14px;
     justify-content: center;
     padding: 12px;
   }
@@ -820,13 +819,13 @@ dialog::backdrop {
     padding: 0 22px;
   }
   .metric > span {
-    font-size: 8px;
+    font-size: 14px;
   }
   .metric strong {
     font-size: 25px;
   }
   .metric small {
-    font-size: 7px;
+    font-size: 14px;
   }
   .mission-panel {
     padding: 21px;
@@ -883,7 +882,7 @@ dialog::backdrop {
     padding: 0 17px;
   }
   .topbar {
-    font-size: 8px;
+    font-size: 14px;
     height: 48px;
     letter-spacing: 0.5px;
   }
@@ -900,7 +899,7 @@ dialog::backdrop {
     font-size: 15px;
   }
   .badge {
-    font-size: 8px;
+    font-size: 14px;
   }
   .connection-strip {
     padding: 12px;
@@ -953,7 +952,7 @@ dialog::backdrop {
     padding: 18px;
   }
   .metric > span {
-    font-size: 8px;
+    font-size: 14px;
   }
   .metric strong {
     font-size: 30px;
@@ -963,7 +962,7 @@ dialog::backdrop {
     gap: 15px;
   }
   .app-footer {
-    font-size: 7px;
+    font-size: 14px;
     gap: 15px;
     flex-wrap: wrap;
   }
@@ -1004,7 +1003,7 @@ dialog::backdrop {
     font-size: 15px;
   }
   .panel-title > span {
-    font-size: 8px;
+    font-size: 14px;
   }
 }
 @media (prefers-reduced-motion: reduce) {

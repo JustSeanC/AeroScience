@@ -73,7 +73,7 @@
       "aeroscience.missions": {
         "type": "Project",
         "dependencies": {
-          "AeroScience.Shared": "[0.4.1, )",
+          "AeroScience.Shared": "[0.4.2, )",
           "BitMiracle.LibTiff.NET": "[2.4.660, )",
           "GeographicLib.NET": "[2.3.2, )",
           "Microsoft.Data.Sqlite": "[10.0.13, )",
@@ -87,13 +87,13 @@
       "aeroscience.simconnect": {
         "type": "Project",
         "dependencies": {
-          "AeroScience.Telemetry": "[0.4.1, )"
+          "AeroScience.Telemetry": "[0.4.2, )"
         }
       },
       "aeroscience.telemetry": {
         "type": "Project",
         "dependencies": {
-          "AeroScience.Shared": "[0.4.1, )"
+          "AeroScience.Shared": "[0.4.2, )"
         }
       }
     },

@@ -88,6 +88,7 @@ def identity(version=RELEASE_VERSION):
     if base == '0.3.2': title = f'AeroScience v{base} — Scientific Reliability & Performance' + (' Prerelease' if preview else '')
     if base == '0.3.1': title = f'AeroScience v{base} — Predictive Science & Guided Dataset Import' + (' Prerelease' if preview else '')
     if base == '0.3.0': title = f'AeroScience v{base} — Remote Sensing & Research Payloads' + (' Alpha' if preview else '')
+    if base == '0.4.2': title = f'AeroScience v{base} — Research Workstation & Scientific Visualization' + (' Prerelease' if preview else '')
     if base == '0.4.1': title = f'AeroScience v{base} — Scientific Review & Mission Readiness' + (' Prerelease' if preview else '')
     if base == '0.4.0': title = f'AeroScience v{base} — Scientific Mission Planning, Sensor Modeling & Analysis' + (' Prerelease' if preview else '')
     return dict(version=version, package_version=base, tag='v'+version, root_name=root,
@@ -338,7 +339,7 @@ def prepare_candidate(companion, community, receipt_path, runtime_report, runtim
             shutil.copy2(REPO/'docs'/name, destination/'docs'/name)
         for name in ('v0.3.0-completion.md','v0.3.0-windows-testing.md','v0.3.1-completion.md','v0.3.1-windows-testing.md','v0.3.2-completion.md','v0.3.2-windows-testing.md','v0.4.0-completion.md','v0.4.0-windows-testing.md','v0.4.0-scientific-methods.md','v0.4.0-instrument-profiles.md','v0.4.0-replay-and-coverage.md','v0.4.0-scientific-composites.md','v0.4.0-scientific-source-expansion.md','v0.4.0-pilot-guide.md'):
             shutil.copy2(REPO/'docs'/name,destination/'docs'/name)
-        for guide in (REPO/'docs').glob('v0.4.1-*.md'):
+        for guide in list((REPO/'docs').glob('v0.4.1-*.md'))+list((REPO/'docs').glob('v0.4.2-*.md')):
             shutil.copy2(guide,destination/'docs'/guide.name)
         shutil.copytree(REPO/'docs'/'remote-sensing',destination/'docs'/'remote-sensing')
         shutil.copytree(REPO/'docs'/'roadmap',destination/'docs'/'roadmap')
@@ -348,6 +349,9 @@ def prepare_candidate(companion, community, receipt_path, runtime_report, runtim
             shutil.copy2(image,destination/'docs'/'images'/image.name)
         for image in (REPO/'docs'/'images').glob('v041-*-browser-fixture.png'):
             shutil.copy2(image,destination/'docs'/'images'/image.name)
+        for folder in ('v042-before','v042-after'):
+            if (REPO/'docs'/'images'/folder).is_dir():
+                shutil.copytree(REPO/'docs'/'images'/folder,destination/'docs'/'images'/folder)
         shutil.copy2(REPO/'docs'/'release-readme.md', destination/'README.md')
         (destination/'DEFAULTS.json').write_text(json.dumps(dict(description='Built-in defaults; use graphical Settings to change them.',
             mission_directory=r'%LOCALAPPDATA%\AeroScience', science_library_directory=r'%LOCALAPPDATA%\AeroScience\ScienceLibrary',
@@ -415,7 +419,8 @@ def verify_archive(archive, checksum):
 
 def release_notes(info):
     if requires_manual_acceptance(info['version']) and 'acceptance' in info:
-        changes = ('v0.4.1 adds explicit saved-plan selection before flight, instrument-first preparation, full-page Science Map / Compare / Analysis / Results / Replay, a grouped reusable source library, evidence-bound post-flight reconstruction, repeated straight transects and integrated offline Help. External-source QA, native-grid composites, original timestamps and immutable products remain authoritative. Download concurrency stays at one by default; up to eight is configurable, subject to provider/resource limits.'
+        changes = ('v0.4.2 improves the research workstation, complete-scope Science Map with independent instrument layers, native-grid value comparison, instrument findings, download activity, offline help and responsive navigation. Scientific values, source dates, masks, units and original files remain authoritative. Human usability scores and broad accessibility conformance are not established by automated checks.'
+                   if tuple(map(int, info['version'].split('-')[0].split('.'))) >= (0,4,2) else 'v0.4.1 adds explicit saved-plan selection before flight, instrument-first preparation, full-page Science Map / Compare / Analysis / Results / Replay, a grouped reusable source library, evidence-bound post-flight reconstruction, repeated straight transects and integrated offline Help. External-source QA, native-grid composites, original timestamps and immutable products remain authoritative. Download concurrency stays at one by default; up to eight is configurable, subject to provider/resource limits.'
                    if tuple(map(int, info['version'].split('-')[0].split('.'))) >= (0,4,1) else
                    'v0.4.0 adds versioned AVIRIS-NG, RedEdge-P, FLIR and RIEGL reference geometries; sensor-based AGL/overlap planning; optional timestamped simulator ground/weather observations; vertical/cloud/transect mission templates; offline replay; separate geometric and valid-source coverage; native-grid mission sample composites and retained-source mosaics; and GeoTIFF/research ZIP export.')
         missions = 'A–H' if tuple(map(int, info['version'].split('-')[0].split('.'))) >= (0,4,1) else 'A–E'

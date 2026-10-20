@@ -74,9 +74,11 @@ public static class ResearchApi
         });
         app.MapPost("/api/science/workspace/atmosphere",(ScienceMapQuery query,ScienceStore science)=>science.AtmosphereMap(query));
         app.MapPost("/api/science/workspace/map",(ScienceMapQuery query,ScienceStore science)=>science.MapPage(query));
+        app.MapPost("/api/science/workspace/overview",(ScienceMapQuery query,ScienceStore science,HttpContext context)=>Task.Run(()=>science.MapOverview(query,context.RequestAborted),context.RequestAborted));
         app.MapPost("/api/science/workspace/compare",(ScientificComparisonRequest request,ScienceStore science)=>science.Compare(request));
         app.MapGet("/api/missions/{id:guid}/science-interpretation",(Guid id,MissionStore missions)=>ScientificInterpretation.Describe(missions.StreamSamples(id)));
         app.MapGet("/api/missions/{id:guid}/science-summary",(Guid id,MissionStore missions,ScienceStore science)=>ScientificResearchSummary.Build(missions,science,id));
+        app.MapGet("/api/missions/{id:guid}/archive-summary",(Guid id,MissionStore missions)=>new { instruments=missions.Research(id).Instruments.Where(i=>i.Enabled).Select(i=>i.InstrumentId).ToArray(),review=missions.ScientificReview(id) });
         app.MapGet("/api/science/products/page",(Guid? missionId,int? offset,string? instrumentId,ScienceStore science)=>new{items=science.Products(missionId,30,offset??0,instrumentId),total=science.ProductCount(missionId,instrumentId),offset=offset??0});
         app.MapGet("/api/missions/{id:guid}/scientific-results",(Guid id,MissionStore store,ScienceStore science)=>store.Detail(id) is {} detail?Results.Ok(new{mission=detail.Mission,diagnostics=store.Research(id).Diagnostics,datasets=science.Datasets(id,200)}):Results.NotFound());
         app.MapGet("/api/missions/{id:guid}/scientific-atmosphere-locations",(Guid id,string? instrumentId,long? after,ScienceStore science)=>

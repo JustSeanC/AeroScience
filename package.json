@@ -1,10 +1,10 @@
 {
   "name": "aeroscience-development",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "private": true,
   "type": "module",
   "engines": {
-    "node": ">=22"
+    "node": ">=22.12.0"
   },
   "scripts": {
     "pretest:web": "dotnet build tests/AeroScience.TestHost -c Release --no-restore --nologo --output artifacts/browser-test-host",
@@ -12,6 +12,7 @@
     "check:web": "node scripts/build/check-web.mjs"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.14.0",
     "@playwright/test": "1.64.1"
   },
   "dependencies": {

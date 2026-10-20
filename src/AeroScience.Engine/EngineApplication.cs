@@ -158,7 +158,7 @@ public static class EngineApplication
             FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(helpDirectory)
         });
         app.MapGet("/api/toolbar/bridge",(ToolbarBridgeStatus status)=>status.Snapshot());
-        app.MapGet("/api/health", () => Results.Ok(new { status = "ok", version = "0.4.1" }));
+        app.MapGet("/api/health", () => Results.Ok(new { status = "ok", version = "0.4.2" }));
         app.MapGet("/api/access", (HttpContext c) => new { requiresPairing = !AccessControl.IsLoopback(c) });
         app.MapPost("/api/session", (HttpContext c, PairRequest request, AccessControl access) =>
         {
@@ -186,8 +186,8 @@ public static class EngineApplication
             return Results.Created($"/api/missions/{mission.Id}", mission);
         });
         app.MapPost("/api/missions/{id:guid}/end", (Guid id, MissionCoordinator missions) => Results.Ok(missions.End(id)));
-        app.MapGet("/api/missions", (int? limit, int? offset, string? search, string? status, MissionStore missions) =>
-            missions.List(Math.Clamp(limit ?? 50, 1, 100), Math.Max(offset ?? 0, 0), search:search,status:status));
+        app.MapGet("/api/missions", (int? limit, int? offset, string? search, string? status, string? sort, MissionStore missions) =>
+            missions.List(Math.Clamp(limit ?? 50, 1, 100), Math.Max(offset ?? 0, 0), search:search,status:status,sort:sort));
         app.MapGet("/api/missions/{id:guid}", (Guid id, MissionStore missions) =>
             missions.Detail(id) is { } detail ? Results.Ok(detail) : Results.NotFound());
         app.MapGet("/api/missions/{id:guid}/telemetry", (Guid id, int? limit, int? offset, MissionStore missions) =>
@@ -202,7 +202,7 @@ public static class EngineApplication
         app.MapResearchEndpoints();
         app.MapGet("/api/settings", (HttpContext c, AccessControl access) => new
         {
-            version = "0.4.1",
+            version = "0.4.2",
             telemetry = options.Telemetry,
             options.SamplingIntervalMs,
             options.EnableLan,
@@ -260,7 +260,7 @@ public static class EngineApplication
             catch (OperationCanceledException) when (context.RequestAborted.IsCancellationRequested) { }
             catch (IOException) { /* A display disconnected; recording continues in TelemetryWorker. */ }
         });
-        app.Logger.LogInformation("AeroScience 0.4.1 — {Source} telemetry; dashboard http://127.0.0.1:{Port}; data {Directory}", options.Telemetry, options.Port, options.DataDirectory);
+        app.Logger.LogInformation("AeroScience 0.4.2 — {Source} telemetry; dashboard http://127.0.0.1:{Port}; data {Directory}", options.Telemetry, options.Port, options.DataDirectory);
         return app;
     }
 }

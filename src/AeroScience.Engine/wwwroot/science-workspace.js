@@ -1,137 +1,68 @@
-import {ResearchMap} from './map.js';
-import {atmosphere,coverage,imagery,replay,exports as researchExports} from './mission-workspace.js';
-import {displayReading} from './science-display.js';
-const el=(tag,value)=>{const n=document.createElement(tag);if(value!==undefined)n.textContent=value;return n;};
-const number=n=>Number.isFinite(n)?n.toLocaleString(undefined,{maximumFractionDigits:3}):'Unavailable';
-const local=v=>v?new Date(v).toLocaleString():'Unknown';
-function link(p,text,url){const n=el('a',text);n.href=url;n.className='button secondary';p.append(n);return n;}
-function button(p,text,fn){const b=el('button',text);b.type='button';b.className='secondary';b.onclick=async()=>{b.disabled=true;try{await fn();}catch(e){const error=el('p',e.message);error.setAttribute('role','alert');p.append(error);}finally{b.disabled=false;}};p.append(b);return b;}
-function select(p,label,options,value){const wrap=el('label',label),s=el('select');s.setAttribute('aria-label',label);for(const [v,t] of options){const o=el('option',t);o.value=v;s.append(o);}s.value=value||'';wrap.append(s);p.append(wrap);return s;}
-let cleanup=()=>{},renderGeneration=0;
+import {scienceMap} from './science-map.js';
+import {comparison} from './science-compare.js';
+import {summaryView} from './science-analysis.js';
+import {coverage,imagery,replay,exports as researchExports} from './mission-workspace.js';
+import {node as el,numeric as number,dateTime as local,select,button,link,disclosure,status,errorMessage,readableName} from './workstation-ui.js';
+let cleanup=()=>{},generation=0;
+const pages=[['map','Science Map'],['compare','Compare'],['analysis','Research Analysis'],['results','Results & Exports'],['replay','Replay Flight']];
 export async function scienceWorkspace(parent,api){
- const ownGeneration=++renderGeneration;cleanup();const disposals=[];cleanup=()=>disposals.splice(0).forEach(f=>f());
- const path=location.hash.split('?')[0].split('/')[1]||'map',params=new URLSearchParams(location.hash.split('?')[1]||''),ids=(params.get('missions')||'').split(',').filter(Boolean),instrument=params.get('instrument')||'';
- parent.replaceChildren(el('h1','Science Workspace'));const nav=el('nav');nav.className='workspace-subnav';nav.setAttribute('aria-label','Science Workspace pages');for(const [key,title] of [['map','Science Map'],['compare','Compare'],['analysis','Research Analysis'],['results','Results & Exports'],['replay','Replay Flight']]){const a=link(nav,title,'#workspace/'+key+(params.size?'?'+params:''));if(path===key)a.setAttribute('aria-current','page');}parent.append(nav);
- const controls=el('div');controls.className='workspace-controls';parent.append(controls);const missions=await api('/api/missions?limit=100'),catalog=await api('/api/instruments');if(ownGeneration!==renderGeneration||!parent.isConnected||!location.hash.startsWith('#workspace'))return;
- const choice=select(controls,path==='map'?'Mission scope':'Review mission',[['','All Missions / choose mission'],...missions.map(m=>[m.id,m.name+' · '+local(m.startedUtc)])],ids[0]);
- const sensor=select(controls,'Instrument',[['','All instruments'],...catalog.map(d=>[d.id,d.name])],instrument);
- const additional=el('select');additional.multiple=true;additional.size=4;additional.setAttribute('aria-label','Additional missions');for(const mission of missions){const option=el('option',mission.name);option.value=mission.id;option.selected=ids.slice(1).includes(mission.id);additional.append(option);}const advanced=el('details');advanced.append(el('summary','Select multiple missions / older archive'),el('p','Choose additional recorded missions. Blank scope searches all indexed mission products; the picker lists 100 recent missions.'),additional);controls.append(advanced);
- const change=()=>{const query=new URLSearchParams(params);const list=[choice.value,...[...additional.selectedOptions].map(option=>option.value)].filter(Boolean);if(list.length)query.set('missions',list.join(','));else query.delete('missions');if(sensor.value)query.set('instrument',sensor.value);else query.delete('instrument');location.hash='#workspace/'+path+(query.size?'?'+query:'');};choice.onchange=sensor.onchange=additional.onchange=change;
- const body=el('section');body.className='science-page';parent.append(body);
- const ownHash=location.hash;const safeApi=async(...args)=>{const value=await api(...args);if(ownGeneration!==renderGeneration||location.hash!==ownHash)throw Error('View changed.');return value;};
- if(path==='map'){await scienceMap(body,safeApi,params,ids,instrument,disposals);return;}
- if(path==='compare'){await comparison(body,safeApi,missions,ids,disposals);return;}
- const id=choice.value;if(!id){body.append(el('p','Choose a mission to review its recorded science. Live telemetry and Internet are not required.'));return;}
- const summary=await safeApi('/api/missions/'+id+'/science-summary');
- body.append(el('h2',summary.mission.name),el('p',`${summary.mission.aircraft||'Aircraft unavailable'} · ${local(summary.mission.startedUtc)} · ${summary.mission.mode} · Flight ${summary.mission.status} / Science ${summary.review.status}`));
- await downlink(body,id,summary.review,safeApi,disposals);
- if(path==='analysis'){await summaryView(body,summary,safeApi,instrument);const interpretation=await safeApi(`/api/missions/${id}/science-interpretation`);if(summary.instruments.some(i=>i.measurementValues>0)||interpretation.some(i=>i.independentPackets>0)){for(const item of interpretation)body.append(el('p',item.explanation));await atmosphere(body,id,safeApi);}else body.append(el('p','No recorded atmospheric readings for this flight. Review geographic values in the instrument summary or Science Map.'));const passes=await safeApi(`/api/missions/${id}/transect-passes`);if(passes.length){const section=el('section');section.className='panel';section.append(el('h3','Actually flown transect passes'));for(const pattern of passes)for(const pass of pattern.passes)section.append(el('p',`Pass ${pass.number} ${pass.direction}: ${pass.completed?'Observed':'Incomplete'} · ${pass.samples} packets · ${number(pass.meanAltitudeFeet)} ft MSL · ${number(pass.meanTemperatureCelsius)} °C · ${number(pass.meanWindSpeedKnots)} kt · ${pass.quality}`));body.append(section);}return;}
- if(path==='replay'){await replay(body,id,summary.mission,safeApi,{},stop=>disposals.push(stop));return;}
- await summaryView(body,summary,safeApi,instrument);if(summary.mission.status!=="recording")researchExports(body,id);else body.append(el("p","End the mission before exporting a completed research package."));
- const technical=el('details');technical.append(el('summary','Advanced — coverage, native-grid composites and retained imagery'));body.append(technical);let built=false;technical.addEventListener('toggle',async()=>{if(technical.open&&!built){built=true;try{await coverage(technical,id,safeApi,{});await imagery(technical,id,safeApi);}catch(e){technical.append(el('p',e.message));}}});
+  const own=++generation;cleanup();const disposals=[],controller=new AbortController();
+  cleanup=()=>{controller.abort();disposals.splice(0).forEach(dispose=>dispose());};
+  const path=location.hash.split('?')[0].split('/')[1]||'map';
+  const params=new URLSearchParams(location.hash.split('?')[1]||'');
+  const ids=(params.get('missions')||'').split(',').filter(Boolean),instrument=params.get('instrument')||'';
+  const title=pages.find(([id])=>id===path)?.[1]||'Science Map';
+  parent.replaceChildren();const heading=el('div',undefined,'page-heading');heading.append(el('div'));heading.firstChild.append(el('p','SCIENCE WORKSPACE','eyebrow'),el('h1',title));parent.append(heading);
+  const nav=el('nav',undefined,'workspace-subnav');nav.setAttribute('aria-label','Science Workspace pages');
+  for(const [key,label] of pages){const a=link(nav,label,'#workspace/'+key+(params.size?'?'+params:''));if(path===key)a.setAttribute('aria-current','page');}parent.append(nav);
+  const feedback=status(parent,'Loading the local research archive…');
+  const ownHash=location.hash;
+  const safeApi=async(path,body,options={})=>{const value=await api(path,body,{...options,signal:options.signal||controller.signal});if(own!==generation||location.hash!==ownHash)throw Error('View changed.');return value;};
+  try{
+    const [missions,catalog]=await Promise.all([safeApi('/api/missions?limit=100'),safeApi('/api/instruments')]);
+    for(const id of ids.filter(id=>!missions.some(m=>m.id===id)).slice(0,10)){const detail=await safeApi('/api/missions/'+id);missions.push(detail.mission);}
+    if(own!==generation)return;
+    const controls=el('div',undefined,'workspace-controls workspace-context');if(path==='compare')disclosure(parent,'Mission archive scope & older flights').append(controls);else parent.append(controls);
+    const choice=select(controls,path==='map'?'Mission scope':'Review mission',[["",path==='map'?'All Missions / choose mission':'Choose a mission'],...missions.map(m=>[m.id,m.name+' · '+local(m.startedUtc)])],ids[0]||'');
+    const sensor=select(controls,'Instrument',[['','All instruments'],...catalog.map(item=>[item.id,item.name])],instrument);
+    const multiple=disclosure(controls,'Multiple missions / older archive'),additional=el('select');additional.multiple=true;additional.size=4;additional.setAttribute('aria-label','Additional missions');
+    for(const mission of missions){const option=el('option',mission.name);option.value=mission.id;option.selected=ids.slice(1).includes(mission.id);additional.append(option);}multiple.append(el('p','The picker lists recent flights. Open older missions directly from the searchable Mission History.'),additional);link(multiple,'Search Mission History','#history');
+    const change=()=>{const query=new URLSearchParams(params),list=[choice.value,...[...additional.selectedOptions].map(option=>option.value)].filter(Boolean);if(list.length)query.set('missions',[...new Set(list)].join(','));else query.delete('missions');if(sensor.value)query.set('instrument',sensor.value);else query.delete('instrument');query.delete('measurement');location.hash='#workspace/'+path+(query.size?'?'+query:'');};
+    choice.onchange=sensor.onchange=additional.onchange=change;
+    feedback.remove();const body=el('section',undefined,'science-page');parent.append(body);
+    if(path==='map'){await scienceMap(body,safeApi,params,ids,instrument,disposals,catalog);return;}
+    if(path==='compare'){await comparison(body,safeApi,missions,ids,disposals,catalog);return;}
+    if(!choice.value){const empty=el('div',undefined,'panel empty-state');empty.append(el('h2','Choose a recorded mission'),el('p','Review saved scientific measurements, replay the flight or export its research. MSFS and Internet access are not required.'));link(empty,'Find a mission','#history','button primary');body.append(empty);return;}
+    const id=choice.value,summary=await safeApi(`/api/missions/${id}/science-summary`);
+    body.append(el('h2',summary.mission.name));await downlink(body,id,safeApi,disposals,catalog);
+    if(path==='replay'){await replay(body,id,summary.mission,safeApi,{},stop=>disposals.push(stop));return;}
+    if(path==='analysis'){await summaryView(body,summary,safeApi,instrument,{disposals,catalog,analysis:true});return;}
+    const exports=el('section',undefined,'panel export-workspace');body.append(exports);
+    exports.append(el('h3','Take your research with you'),el('p',summary.review.provisional?'Science processing is incomplete. Exports are labeled provisional; export again after review finishes to include the later derived results.':'Export recorded flight and science without changing your archive. Historical source dates remain independent of flight time.'));
+    if(summary.mission.status!=='recording')researchExports(exports,id);else exports.append(el('p','End the mission before exporting a completed research package.'));
+    const review=disclosure(body,'Recorded instruments and source quality');await summaryView(review,summary,safeApi,instrument,{disposals,catalog});
+    const technical=disclosure(body,'Advanced — coverage, native-grid composites and retained imagery');let built=false;
+    technical.addEventListener('toggle',async()=>{if(technical.open&&!built){built=true;try{await coverage(technical,id,safeApi,{});await imagery(technical,id,safeApi);}catch(error){built=false;errorMessage(technical,error);}}});
+  }catch(error){if(error.name==='AbortError'||error.message==='View changed.')return;feedback.remove();errorMessage(parent,error,()=>scienceWorkspace(parent,api));}
 }
-async function summaryView(parent,summary,api,instrument){
- const kpis=el('div');kpis.className='review-kpis';for(const [name,value] of [['Recorded packets',summary.flight.samples],['Flight gaps',summary.flight.gapEvents],['Instruments',summary.instruments.length],['Recovered science',summary.review.recovered]]){const card=el('article');card.className='panel';card.append(el('strong',number(value)),el('p',name));kpis.append(card);}parent.append(kpis);
- if(summary.objective)parent.append(el('p',summary.objective));
- const cards=el('div');cards.className='instrument-results';parent.append(cards);
- for(const instrumentReview of summary.instruments.filter(i=>!instrument||i.instrumentId===instrument)){
-  const card=el('article');card.className='panel instrument-result';card.append(el('h3',instrumentReview.name),el('p',instrumentReview.explanation),el('p',`${number(instrumentReview.measurementValues)} measurement values at ${number(instrumentReview.acquisitionTimestamps)} timestamps · ${number(instrumentReview.remoteProducts)} geographic acquisitions · ${number(instrumentReview.validGeographicSamples)} saved valid sample positions`));
-  for(const m of instrumentReview.measurements){const format=value=>displayReading(m.measurementId,value,m.unit);const low=format(m.minimum),high=format(m.maximum);card.append(el('p',`${m.measurementId.replaceAll('-',' ')}: ${number(low.value)}–${number(high.value)} ${low.unit} · ${m.count} values`));}
-  for(const source of instrumentReview.sources||[])card.append(el('p',`${source.provider} · external observation ${local(source.observedUtc)} · ${source.verticalDatum}`));
-  for(const statistic of (instrumentReview.remoteStatistics||[]).filter(s=>['elevation','temperature','ndvi'].includes(s.measurement)))card.append(el('p',`${statistic.measurement}: ${number(statistic.minimum)}–${number(statistic.maximum)} ${statistic.unit} · ${statistic.count} saved sample values (source ${statistic.sourceId.slice(0,8)})`));
-  const diagnostic=instrumentReview.diagnostics;if(diagnostic)card.append(el('p',`Quality: ${diagnostic.quality} · ${diagnostic.rejectedObservations} rejected · ${diagnostic.missingIntervals} missing intervals`));
-  const advanced=el('details');advanced.append(el('summary','Advanced — provenance, measurements & exact UTC'),el('pre',JSON.stringify(instrumentReview,null,2)));card.append(advanced);link(card,'View on Science Map',`#workspace/map?missions=${summary.mission.id}&instrument=${instrumentReview.instrumentId}`);cards.append(card);
- }
- if(!summary.instruments.length)cards.append(el('p','No scientific measurements were recorded. Flight telemetry is still available in Replay and exports.'));
-}
-async function downlink(parent,id,review,api,disposals){
- const box=el('section');box.className='panel science-review-status';box.setAttribute('aria-label','Scientific review status');parent.append(box);let stopped=false,timer;disposals.push(()=>{stopped=true;clearTimeout(timer);});
- async function render(){if(stopped||!box.isConnected)return;const data=await api(`/api/missions/${id}/downlink`);box.replaceChildren(el('h3',data.review.provisional?(data.review.flightStatus==='Recording'?'Flight Recording / Science Pending':'Flight Complete / Downlinking Science Data'):'Scientific Review — '+data.review.status),el('p',`${data.review.pending} pending · ${data.review.recovered} recovered · ${data.review.permanentGaps} permanent gaps · ${data.review.cancelled} cancelled. ${data.review.provisional?'Maps, statistics, composites and exports are provisional.':'Source dates and flight dates remain distinct.'}`));
-  const groups=new Map();for(const slot of data.items){if(!groups.has(slot.instrumentId))groups.set(slot.instrumentId,[]);groups.get(slot.instrumentId).push(slot);}for(const [instrument,slots] of groups)box.append(el('p',`${instrument}: ${slots.length} acquisition slots on this page · ${[...new Set(slots.map(s=>s.state))].join(', ')} · Time remaining unknown`));
-  if(data.review.pending||data.review.cancelled){for(const action of ['pause','resume','cancel'])button(box,action[0].toUpperCase()+action.slice(1)+' Downlink',async()=>{await api(`/api/missions/${id}/downlink/control`,{action});await render();});}
-  const advanced=el('details');advanced.append(el('summary','Advanced — recovery evidence and limitations'),el('p',data.review.message),el('pre',JSON.stringify(data.items.map(s=>({id:s.id,instrument:s.instrumentId,flightUtc:s.flightUtc,state:s.state,reason:s.reason})),null,2)));box.append(advanced);
-  if(!stopped)timer=setTimeout(()=>render().catch(e=>box.append(el('p',e.message))),5000);
- }await render();
-}
-const measurements=[['natural-color','Natural RGB (reflectance)'],['false-color','False-color NIR / red / green'],['elevation','Terrain elevation'],['temperature','Thermal temperature (K)'],['temperature-celsius','Thermal temperature (°C)'],['ndvi','NDVI'],['B04','Red reflectance'],['B08','Near-infrared reflectance']];
-async function scienceMap(parent,api,params,ids,instrument,disposals){
- const toolbar=el('div');toolbar.className='workspace-controls';parent.append(toolbar);const measurement=select(toolbar,'Map measurement',measurements,params.get('measurement')|| (instrument==='thermal-imager'?'temperature':instrument==='multispectral-imager'?'ndvi':'elevation'));
- const filters=el('details');filters.append(el('summary','Date, source & quality filters'));const filterControls=el('div');filterControls.className='workspace-controls';filters.append(filterControls);parent.append(filters);if(['from','to','sourceFrom','sourceTo','source','quality'].some(key=>params.has(key)))filters.open=true;
- function dateField(title,key){const label=el('label',title),input=el('input');input.type='date';input.setAttribute('aria-label',title);input.value=params.get(key)||'';label.append(input);filterControls.append(label);return input;}
- const from=dateField('Flight date from (UTC)','from'),to=dateField('Flight date to (UTC)','to');
- const sourceFrom=dateField('Source observation from (UTC)','sourceFrom'),sourceTo=dateField('Source observation to (UTC)','sourceTo');
- const retained=await api('/api/science/sources');
- const source=select(filterControls,'Source / scene',[['','All compatible sources'],...retained.map(item=>[item.source.id,item.source.manifest.provider+' · '+item.source.manifest.sceneId])],params.get('source')||'');
- const quality=select(filterControls,'Acquisition quality',[['','All saved valid support'],['gaps','Known incomplete acquisitions'],['complete','Known full sample grids']],params.get('quality')||'');
- if(instrument==='hyperspectral-imager')for(const item of retained.filter(i=>i.source.manifest.kind==='hyperspectral'))for(const band of item.source.manifest.bands.filter(b=>!b.badBand)){if([...measurement.options].some(o=>o.value===band.id))continue;const option=el('option',`${band.id} · ${band.wavelengthNm} nm · ${band.unit}`);option.value=band.id;measurement.append(option);}if(params.get('measurement'))measurement.value=params.get('measurement');
- function context(){const q=new URLSearchParams(params);for(const [key,value] of [['from',from.value],['to',to.value],['sourceFrom',sourceFrom.value],['sourceTo',sourceTo.value],['source',source.value],['quality',quality.value],['measurement',measurement.value]]){if(value)q.set(key,value);else q.delete(key);}return q;}
-
- const opacity=el('input');opacity.type='range';opacity.min='0';opacity.max='1';opacity.step='.05';opacity.value='.8';opacity.setAttribute('aria-label','Science layer opacity');const opacityLabel=el('label','Science layer opacity');opacityLabel.append(opacity);toolbar.append(opacityLabel);
- const status=el('p');status.setAttribute('role','status');const holder=el('div');holder.className='workspace-map';const legend=el('p');legend.className='raster-legend';parent.append(status,holder,legend);const map=new ResearchMap(holder,null,{coverageOnly:false});disposals.push(()=>map.destroy());const layers=window.L.layerGroup().addTo(map.map);let after=0,count=0,sourceRows=[],globalMin=Infinity,globalMax=-Infinity,displayUnit=null,displayDatum=null,displayWavelength=null;
- opacity.oninput=()=>layers.eachLayer(layer=>layer.setStyle?.({fillOpacity:Number(opacity.value)}));
- const metadata=el('details');metadata.append(el('summary','Sources, dates & sampled support'));const records=el('div');metadata.append(records);parent.append(metadata);
- const inspect=el('section');inspect.className='panel';inspect.setAttribute('aria-label','Science sample inspection');inspect.append(el('p','Select a colored native pixel to inspect its real value, source date and mission.'));parent.append(inspect);
- async function load(reset=false,viewport=false){if(reset){after=0;count=0;layers.clearLayers();records.replaceChildren();globalMin=Infinity;globalMax=-Infinity;displayUnit=displayDatum=displayWavelength=null;sourceRows=[];}
-  const bounds=map.map.getBounds();const page=await api('/api/science/workspace/map',{missions:ids.length?ids:null,instrument:instrument||null,from:from.value?from.value+'T00:00:00Z':null,to:to.value?to.value+'T23:59:59.9999999Z':null,area:viewport?{west:Math.max(-180,bounds.getWest()),south:Math.max(-90,bounds.getSouth()),east:Math.min(180,bounds.getEast()),north:Math.min(90,bounds.getNorth())}:null,source:source.value||null,sourceFrom:sourceFrom.value?sourceFrom.value+"T00:00:00Z":null,sourceTo:sourceTo.value?sourceTo.value+"T23:59:59.9999999Z":null,hasGaps:quality.value?quality.value==="gaps":null,after,limit:12});after=page.next;sourceRows.push(...page.products);let valid=0;
-  for(const p of page.products){try{const layer=await api(`/api/science/products/${p.id}/map-layer?measurement=${encodeURIComponent(measurement.value)}`);if(!holder.isConnected)return;if(displayUnit&&layer.unit!==displayUnit||displayDatum&&layer.source.verticalDatum!==displayDatum||displayWavelength&&layer.wavelengthNm!==displayWavelength){records.append(el('p',`${layer.source.name}: separate unit/datum. Select this source or use Compare; no shared color scale was applied.`));continue;}displayUnit=layer.unit;displayDatum=layer.source.verticalDatum;displayWavelength=layer.wavelengthNm;if(layer.minimum!=null){globalMin=Math.min(globalMin,layer.minimum);globalMax=Math.max(globalMax,layer.maximum);}const geo=window.L.geoJSON(layer,{style:()=>({stroke:false,fillColor:'#5ce0bf',fillOpacity:Number(opacity.value)}),onEachFeature:(feature,path)=>{path.feature=feature;path.on('click',()=>{inspect.replaceChildren(el('h3',`${number(feature.properties.value)} ${feature.properties.unit}`),el('p',`${layer.source.provider} · ${layer.source.name}`),el('p',`Flight ${local(feature.properties.flightUtc)} · External observation ${local(feature.properties.sourceUtc)}`),el('p',layer.provenance));link(inspect,'Open mission research',`#workspace/analysis?missions=${p.missionId}`);link(inspect,'Export acquisition CSV',`/api/science/products/${p.id}/export/csv`);link(inspect,'Advanced acquisition JSON',`/api/science/products/${p.id}/export/json`);});}});geo.eachLayer(l=>layers.addLayer(l));valid+=layer.features.length;records.append(el('p',`${layer.source.provider} · ${layer.source.sceneId} · source ${local(layer.source.observationUtc)} · flight ${local(p.flightPacketUtc)} · ${layer.features.length} native cells · ${layer.source.verticalDatum}`));}catch(e){records.append(el('p',`${p.instrumentId}: ${e.message}`));}}
-  count+=page.products.length;
-  layers.eachLayer(layer=>{
-    const fraction=Number.isFinite(globalMin)?Math.max(0,Math.min(1,(layer.feature.properties.value-globalMin)/(globalMax-globalMin||1))):0;
-    layer.setStyle({fillColor:layer.feature.properties.rgb?`rgb(${layer.feature.properties.rgb.map(v=>Math.round(255*Math.max(0,Math.min(1,v/.3)))).join(",")})`:`rgb(${Math.round(255*fraction)},${Math.round(210*(1-Math.abs(fraction-.5)*2))},${Math.round(255*(1-fraction))})`});
-  });
-  legend.textContent=`${measurement.selectedOptions[0].text}: ${number(globalMin)} (blue) → ${number(globalMax)} (red). ${["natural-color","false-color"].includes(measurement.value)?"RGB display stretch 0–0.3 reflectance. ":""}Actual sampled native cells only; transparent unqueried, unsampled or masked areas. Full-cell display is source support, not proof the whole pixel was sensed. No cross-source scientific blending. Flight and original observation dates are separate.`;
-  status.textContent=`${count} geographically indexed acquisitions reviewed · ${valid} valid native cells added. ${count>=120?'Display bound reached: narrow instrument, dates, source or visible region.':page.hasMore?'More results available.':'End of selected results.'} Provisional recovery state is available in each mission review.`;more.disabled=!page.hasMore||count>=120; if(reset&&layers.getLayers().length){const group=window.L.featureGroup(layers.getLayers());map.map.fitBounds(group.getBounds());}
- }
- const more=button(toolbar,'Load More Acquired Science',()=>load());button(toolbar,'Apply Filters / Fit Data',()=>{const q=context();const target='#workspace/map?'+q;if(location.hash===target)return load(true);location.hash=target;});button(toolbar,'Search Visible Region',()=>load(true,true));
- const fits=button(toolbar,'Fit Mission Track',async()=>{if(ids.length!==1)throw Error('Choose one mission.');const [research,track]=await Promise.all([api(`/api/missions/${ids[0]}/research`),api(`/api/missions/${ids[0]}/track?limit=1500`)]);map.set({plan:research.planSnapshot,track:track.points});map.fit();});
- button(toolbar,'Build Native Composite',async()=>{const groups=new Map();for(const p of sourceRows)groups.set(p.missionId+'|'+p.sourceId,p);if(!groups.size)throw Error('Choose a measurement with recorded geographic data.');for(const p of [...groups.values()].slice(0,8)){let job=await api(`/api/missions/${p.missionId}/composites`,{sourceId:p.sourceId,bandId:measurement.value,mode:'mission-samples'});while(['Queued','Running'].includes(job.state)&&holder.isConnected){status.textContent=`Native composite ${job.state}: ${job.completed}/${job.total??'unknown'}`;await new Promise(resolve=>setTimeout(resolve,600));job=await api('/api/analysis/jobs/'+job.id);}if(job.state!=='Completed')throw Error(job.message);for(const id of job.artifacts){const preview=await api(`/api/science/artifacts/${id}/preview`);const overlay=window.L.imageOverlay(preview.image,[[preview.bounds.south,preview.bounds.west],[preview.bounds.north,preview.bounds.east]],{opacity:Number(opacity.value)}).addTo(map.map);disposals.push(()=>overlay.remove());records.append(el('p',preview.method));link(records,'Download exact numeric GeoTIFF',`/api/science/artifacts/${id}`);}}status.textContent='Verified native-grid composites displayed. Source dates, QA/nodata and numeric exports retained.';});
- measurement.onchange=()=>{const q=context();location.hash='#workspace/map?'+q;};
- let atmosphereAfter=0,atmosphereCount=0;
- const atmosphereLayers=window.L.layerGroup().addTo(map.map);
- button(toolbar,'Load Atmospheric Positions',async()=>{
-   const page=await api('/api/science/workspace/atmosphere',{missions:ids.length?ids:null,instrument:instrument||null,after:atmosphereAfter,limit:500});atmosphereAfter=page.next;
-   for(const observation of page.items){const marker=window.L.circleMarker([observation.latitude,observation.longitude],{radius:5,color:'#f4cd78'}).addTo(atmosphereLayers);marker.on('click',()=>{inspect.replaceChildren(el('h3',`${observation.measurementId}: ${number(observation.value)} ${observation.unit}`),el('p',`Simulator packet ${local(observation.timestampUtc)} · ${observation.quality}`));link(inspect,'Open mission research',`#workspace/analysis?missions=${observation.missionId}`);});}atmosphereCount+=page.items.length;status.textContent=`${atmosphereCount} actual geolocated atmospheric values. ${page.hasMore?'More available.':'End of selected atmospheric results.'}`;if(page.items.length){const group=window.L.featureGroup(atmosphereLayers.getLayers());map.map.fitBounds(group.getBounds());}
- });
- if(instrument&&!['terrain-scanner','thermal-imager','multispectral-imager','hyperspectral-imager'].includes(instrument))toolbar.lastChild.click();else await load(true);
-
-}
-async function comparison(parent,api,missions,ids,disposals){
- parent.append(el('h2','Compare Scientific Results'),el('p','Compare saved support, units, quality and source dates. Different aircraft visits to the same historical satellite scene are not Earth change observations.'));
- const grid=el('div');grid.className='comparison-grid';parent.append(grid);const choices=[],maps=[],columns=[];
- let synchronizing=false;
- async function addColumn(){
-  const index=columns.length;if(index>=8)throw Error('Choose up to eight acquisitions for a bounded comparison.');
-  const column=el('section');columns.push(column);grid.append(column);
-  const mission=select(column,'Comparison mission '+(index+1),missions.map(m=>[m.id,m.name]),ids[index]||missions[index]?.id||missions[0]?.id);
-  const acquisition=select(column,'Acquisition '+(index+1),[['','Choose an actual acquisition']]);choices.push(acquisition);
-  const quantity=select(column,'Visual measurement '+(index+1),measurements,'elevation');
-  const holder=el('div'),description=el('p');column.append(holder,description);const map=new ResearchMap(holder,null,{coverageOnly:true});maps.push(map);disposals.push(()=>map.destroy());let overlay;
-  map.map.on('moveend',()=>{if(synchronizing)return;synchronizing=true;for(const other of maps)if(other!==map&&!other.destroyed)other.map.setView(map.map.getCenter(),map.map.getZoom(),{animate:false});synchronizing=false;});
-  async function show(){
-   overlay?.remove();if(!acquisition.value)return;
-   try{const layer=await api(`/api/science/products/${acquisition.value}/map-layer?measurement=${encodeURIComponent(quantity.value)}`);if(!holder.isConnected)return;
-    overlay=window.L.geoJSON(layer,{style:feature=>{const t=Number.isFinite(layer.minimum)?Math.max(0,Math.min(1,(feature.properties.value-layer.minimum)/(layer.maximum-layer.minimum||1))):0;return {stroke:false,fillOpacity:.85,fillColor:feature.properties.rgb?`rgb(${feature.properties.rgb.map(v=>Math.round(Math.max(0,Math.min(1,v/.3))*255)).join(',')})`:`rgb(${Math.round(t*255)},90,${Math.round((1-t)*255)})`};},onEachFeature:(feature,path)=>path.on('click',()=>{description.textContent=`${number(feature.properties.value)} ${feature.properties.unit} · flight ${local(feature.properties.flightUtc)} · external source ${local(feature.properties.sourceUtc)}`;})}).addTo(map.map);
-    if(layer.features.length)map.map.fitBounds(overlay.getBounds());description.textContent=`${layer.features.length} valid native cells · ${number(layer.minimum)}–${number(layer.maximum)} ${layer.unit} · ${layer.source.provider} · source ${local(layer.source.observationUtc)}. Independent color scales; select identical units for arithmetic.`;
-   }catch(error){description.textContent=error.message;}
+async function downlink(parent,id,api,disposals,catalog){
+  const box=el('section',undefined,'panel science-review-status');box.setAttribute('aria-label','Scientific review status');parent.append(box);
+  const title=el('h3'),summary=el('p'),actions=el('div',undefined,'action-row'),advanced=disclosure(box,'Advanced — recovery evidence and limitations');box.prepend(title,summary,actions);
+  let stopped=false,timer,lastAnnouncement='';const announcement=status(box,'');announcement.classList.add('sr-only');disposals.push(()=>{stopped=true;clearTimeout(timer);});
+  async function render(){
+    if(stopped||!box.isConnected)return;const data=await api(`/api/missions/${id}/downlink`);if(stopped)return;
+    title.textContent=data.review.provisional?(data.review.flightStatus==='Recording'?'Flight Recording / Science Pending':'Flight Complete / Downlinking Science Data'):'Scientific Review — '+data.review.status;
+    summary.textContent=data.review.provisional?`${data.review.recovered} recovered · ${data.review.pending} still pending. Maps, statistics and exports are provisional.`:`${data.review.recovered} recovered · ${data.review.permanentGaps} permanent gaps · ${data.review.cancelled} cancelled. Missing observations were not invented.`;
+    if(title.textContent!==lastAnnouncement){lastAnnouncement=title.textContent;announcement.textContent=lastAnnouncement;}actions.replaceChildren();
+    const states=data.items.map(item=>item.state);
+    const control=async action=>{if(action==='cancel'&&!confirm('Cancel remaining post-flight science processing? Recorded flight data and existing scientific products will be preserved.'))return;await api(`/api/missions/${id}/downlink/control`,{action});await render();};
+    if(data.review.pending||data.review.cancelled){if(states.includes('Paused'))button(actions,'Resume Downlink',()=>control('resume'));else button(actions,'Pause Downlink',()=>control('pause'));button(actions,'Cancel Downlink',()=>control('cancel'),'danger');}
+    advanced.replaceChildren(el('summary','Advanced — recovery evidence and limitations'),el('p',data.review.message));
+    const groups=new Map();for(const item of data.items){if(!groups.has(item.instrumentId))groups.set(item.instrumentId,[]);groups.get(item.instrumentId).push(item);}
+    for(const [instrument,slots] of groups)advanced.append(el('p',`${readableName(instrument,catalog)}: ${slots.length} acquisition slots on this page · ${[...new Set(slots.map(item=>item.state))].join(', ')} · Time remaining unknown`));
+    advanced.append(el('pre',JSON.stringify(data.items.map(item=>({id:item.id,instrument:item.instrumentId,flightUtc:item.flightUtc,state:item.state,reason:item.reason})),null,2)));
+    if(!stopped)timer=setTimeout(()=>render().catch(error=>{if(error.name!=='AbortError')errorMessage(box,error,render);}),5000);
   }
-  async function load(){
-   const page=await api(`/api/science/products/page?missionId=${mission.value}`);acquisition.replaceChildren();
-   for(const p of page.items){const o=el('option',`${p.instrumentId} · ${local(p.flightPacketUtc)} · source ${local(p.sourceObservationUtc)}`);o.value=p.id;acquisition.append(o);}
-   if(!page.items.length)description.textContent='No geographic acquisitions. Use the actual atmospheric profiles below.';
-   else{const p=page.items[0];quantity.value=p.instrumentId==='thermal-imager'?'temperature':p.instrumentId==='multispectral-imager'?'ndvi':'elevation';await show();}
-  }
-  mission.onchange=load;acquisition.onchange=quantity.onchange=show;
-  await load();link(column,'Atmospheric / pass analysis',`#workspace/analysis?missions=${mission.value}`);
-  button(column,'Show actual atmospheric profile',()=>atmosphere(column,mission.value,api));
- }
- await addColumn();await addColumn();button(parent,'Add Comparison',addColumn);
- const field=select(parent,'Comparison measurement',measurements,'elevation'),result=el('section');result.className='panel';result.setAttribute('aria-label','Scientific comparison result');parent.append(result);
- button(parent,'Compare Recorded Values',async()=>{
-  result.replaceChildren();const selected=choices.map(c=>c.value);if(selected.some(v=>!v))throw Error('Choose actual scientific acquisitions in each column.');
-  const comparison=await api('/api/science/workspace/compare',{products:selected,measurement:field.value});
-  result.append(el('h3',comparison.comparable?'Common native-pixel comparison':'Visual comparison only'),...comparison.reasons.map(r=>el('p',r)));
-  if(comparison.comparable)result.append(el('p',`${comparison.matchedNativeCells} common native cells · Δ ${number(comparison.minimumDelta)} to ${number(comparison.maximumDelta)} ${comparison.units.join(', ')} · mean ${number(comparison.meanDelta)}`));
-  const advanced=el('details');advanced.append(el('summary','Source, dates, quality and native resolution'),el('pre',JSON.stringify(comparison.sources,null,2)));result.append(advanced);
- });
+  await render();
 }
-export function disposeScienceWorkspace(){renderGeneration++;cleanup();}
+export function disposeScienceWorkspace(){generation++;cleanup();}

@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.4.2 — Research Workstation & Scientific Visualization (development; acceptance pending)
+
+- Add complete-scope geographic science overviews with independent terrain, thermal, multispectral, hyperspectral and recorded atmospheric layers. Remove the former 120-acquisition viewing ceiling; automatically traverse bounded pages, aggregate dense views, cancel stale requests and expose any saved record in a keyboard-accessible browser.
+- Distinguish indexed records, viewport counts, loaded native-cell support, environmental values and missing/invalid positions. Keep incompatible quantities separate; share colors only for compatible numeric scales, use perceptual scalar colors and honest constant-value/RGB legends, and apply opacity to vectors and derived imagery.
+- Refine two-dataset comparison with current-mission links, synchronized location inspection, compatible shared scales, exact matched-native-cell differences, a difference map, chart and values table. Add instrument-specific analysis findings, scientific charts, source dates and textual explanations.
+- Add full-page Download Activity, truthful partial/download states, stable polling, scoped controls, precise file sizes, source-library filtering/sorting, archive review status/sorting and task-based offline Help. Preserve optional Discord, GitHub reporting and feedback collection.
+- Add readable shared components, labeled tablet navigation, focus restoration, non-map inspection, profile tables and responsive layouts. Preserve scientific originals, recording, storage safety, exports and existing release gates.
+- Record fresh genuine-data regression evidence and labeled before/after browser captures. Independent human usability, assistive technology, installed Windows/MSFS and physical devices remain separate acceptance; no 9/10 score or release publication is claimed.
+
 ## 0.4.1 — Scientific Review & Mission Readiness (development; acceptance pending)
 
 - Add dedicated Science Map, Compare, Research Analysis, Results/Export and Replay routes with shared mission context; separate the provider/collection source library from flight results and render offline Markdown in one Help & Support page.

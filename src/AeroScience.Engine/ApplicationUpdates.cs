@@ -35,7 +35,7 @@ public static class ReleaseVersions
 }
 public sealed class ApplicationUpdates
 {
-    public const string CurrentVersion = "0.4.1";
+    public const string CurrentVersion = "0.4.2";
     private readonly string path;
     private readonly HttpClient http;
     private readonly SemaphoreSlim check = new(1, 1);

@@ -304,12 +304,13 @@ public sealed partial class MissionStore
         FROM missions m LEFT JOIN telemetry t ON t.mission_id=m.id
         """;
 
-    public IReadOnlyList<Mission> List(int limit = 50, int offset = 0, bool recordingOnly = false, string? search = null, string? status = null)
+    public IReadOnlyList<Mission> List(int limit = 50, int offset = 0, bool recordingOnly = false, string? search = null, string? status = null, string? sort = null)
     {
         using var db = Open();
         using var cmd = db.CreateCommand();
+        var ordering=sort switch { "oldest"=>"m.started_utc ASC,m.id", "name"=>"m.name COLLATE NOCASE ASC,m.started_utc DESC,m.id", _=>"m.started_utc DESC,m.id" };
         cmd.CommandText = Selection + " WHERE ($recording=0 OR m.status='Recording') AND ($search='' OR instr(lower(m.name || ' ' || COALESCE(m.aircraft,'')),lower($search))>0) AND ($status='' OR lower(m.status)=lower($status))"
-            + " GROUP BY m.id ORDER BY m.started_utc DESC LIMIT $limit OFFSET $offset";
+            + " GROUP BY m.id ORDER BY " + ordering + " LIMIT $limit OFFSET $offset";
         cmd.Parameters.AddWithValue("$recording", recordingOnly?1:0);cmd.Parameters.AddWithValue("$search",search?.Trim()??"");cmd.Parameters.AddWithValue("$status",status??"");
         cmd.Parameters.AddWithValue("$limit", limit);
         cmd.Parameters.AddWithValue("$offset", offset);

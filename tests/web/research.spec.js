@@ -62,6 +62,7 @@ test("planner, actual stored science pages, map and complete exports work togeth
   await expect(page.locator("#active-name")).toHaveText(
     "Browser atmospheric plan",
   );
+  await page.locator("#flight-tools > summary").click();
   await page.getByLabel("Notes", { exact: true }).fill("Weather observation");
   await page
     .getByRole("button", { name: "Add observation marker", exact: true })

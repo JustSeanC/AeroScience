@@ -47,7 +47,7 @@ public static class ScientificPlanPreparation
     }
 }
 
-public sealed record PreparationInstrument(string InstrumentId,string Name,string? Profile,string Status,int Total,int Ready,int Awaiting,int Unavailable,long DownloadedBytes,long ReusedBytes,string Eta,string[] Reasons);
+public sealed record PreparationInstrument(string InstrumentId,string Name,string? Profile,string Status,int Total,int Ready,int Awaiting,int Unavailable,long DownloadedBytes,long ReusedBytes,string Eta,string[] Reasons,bool ActivelyDownloading=false);
 public sealed record PreparationRegion(string Key,RemoteKind Kind,GeographicBounds Area,string Status="Queued",string Message="Waiting for preparation",long DownloadedBytes=0,long ReusedBytes=0,string Stage="Queued",DateTimeOffset? UpdatedUtc=null,long PreviousAttemptBytes=0);
 public sealed class ScientificPlanData
 {
@@ -156,7 +156,8 @@ public sealed class ScientificPlanData
             {
                 var rows=s.Regions.Values.Where(r=>r.Kind==RemoteAcquisition.Instruments[c.InstrumentId]).ToArray();var ready=automatic.AvailabilityError is null?rows.Count(r=>Ready(r.Status)):0;var unavailable=automatic.AvailabilityError is null?rows.Count(r=>Terminal(r.Status)&&!Ready(r.Status)):rows.Length;
                 var status=rows.Length==0?"Unavailable":automatic.AvailabilityError is not null?"Storage unavailable":s.Cancelled?"Cancelled":s.Paused?"Paused":s.Preempted?"Waiting for active flight":ready==rows.Length&&rows.Length>0?s.Regions.Values.Select(r=>r.Area).Distinct().Count()>=4096?"Partially Ready":"Ready":ready>0?"Partially Ready":rows.Any(r=>r.Status=="Downloading"&&r.Stage is "Validating" or "Saving")?"Validating / Processing":rows.Any(r=>r.Status=="Downloading"&&r.Stage=="Downloading"&&r.DownloadedBytes>0&&DateTimeOffset.UtcNow-r.UpdatedUtc<TimeSpan.FromSeconds(6))?"Downloading":rows.Any(r=>r.Status=="Downloading")?"Finding Source":rows.Any(r=>r.Status=="Offline")?"Waiting for Network":unavailable==rows.Length&&rows.Length>0?"Unavailable":"Queued";
-                return new PreparationInstrument(c.InstrumentId,ScienceCatalog.Definitions.Single(d=>d.Id==c.InstrumentId).Name,c.Payload?.Profile.Name,status,rows.Length,ready,rows.Length-ready-unavailable,unavailable,rows.Sum(r=>r.DownloadedBytes+r.PreviousAttemptBytes),rows.Sum(r=>r.ReusedBytes),"Time remaining unknown",rows.Where(r=>!Ready(r.Status)).Select(r=>r.Message).Distinct().Take(3).ToArray());
+                var transferring=!s.Paused&&!s.Cancelled&&!s.Preempted&&rows.Any(r=>r.Status=="Downloading"&&r.Stage=="Downloading"&&r.DownloadedBytes>0&&DateTimeOffset.UtcNow-r.UpdatedUtc<TimeSpan.FromSeconds(6));
+                return new PreparationInstrument(c.InstrumentId,ScienceCatalog.Definitions.Single(d=>d.Id==c.InstrumentId).Name,c.Payload?.Profile.Name,status,rows.Length,ready,rows.Length-ready-unavailable,unavailable,rows.Sum(r=>r.DownloadedBytes+r.PreviousAttemptBytes),rows.Sum(r=>r.ReusedBytes),"Time remaining unknown",rows.Where(r=>!Ready(r.Status)).Select(r=>r.Message).Distinct().Take(3).ToArray(),transferring);
             }).ToArray();
         }
     }

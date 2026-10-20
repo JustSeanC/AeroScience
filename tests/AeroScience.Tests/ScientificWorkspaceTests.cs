@@ -26,11 +26,11 @@ public sealed class ScientificWorkspaceTests : IDisposable
         var id=missions.Create("Workspace",f,utc,ScienceMode.Realistic);mission=missions.Detail(id)!.Mission;missions.Append(id,f);missions.Finish(id,MissionStatus.Completed,utc.AddSeconds(1),"Fixture end");
         dataset=science.EnsureDataset(mission,new("terrain-scanner",true),missions.Research(id));
     }
-    private RemoteProduct Add(int second,double? first=101,double? secondValue=null)
+    private RemoteProduct Add(int second,double? first=101,double? secondValue=null,bool withEvidence=false)
     {
         var id=Guid.NewGuid();var boundary=ScientificRaster.GridCoverage(grid);var footprint=new ObservationFootprint(ScientificRaster.GridPoint(grid,2,2),boundary,100,"EPSG:4326","fixture datum","fixture",[]);
         var p=new RemoteProduct(id,dataset.Id,science.LibraryId,mission.Id,"terrain-scanner",source.Id,utc.AddSeconds(second),utc,source.Manifest.ObservationUtc,footprint,$"Products/{mission.Id:N}/{id:N}.json",0,"",2,1,["elevation"],"numeric fixture","fixture",[]);
-        var values=new double?[]{first,secondValue};return science.Publish(new(1,p,source,[ScientificRaster.GridPoint(grid,.5,.5),ScientificRaster.GridPoint(grid,1.5,.5)],[new("elevation","m",null,values,"nearest native pixel",grid)],new(){["elevation"]=values},["fixture"]));
+        var values=new double?[]{first,secondValue};return science.Publish(new(1,p,source,[ScientificRaster.GridPoint(grid,.5,.5),ScientificRaster.GridPoint(grid,1.5,.5)],[new("elevation","m",null,values,"nearest native pixel",grid)],new(){["elevation"]=values},["fixture"],withEvidence?new(1,SimulatedTelemetryProvider.Generate(utc.AddSeconds(second),0),null,new("terrain-scanner",true),null,ScienceMode.Realistic,"Synthetic fixture time"):null));
     }
     [Fact] public void CoverageUsesOnlySavedValidNativePixelsAndDuplicateAcquisitionsDoNotInflateArea()
     {
@@ -138,6 +138,69 @@ public sealed class ScientificWorkspaceTests : IDisposable
         var parts=data.RootElement.GetProperty("coordinates");Assert.Equal(2,parts.GetArrayLength());
         foreach(var part in parts.EnumerateArray())foreach(var ring in part.EnumerateArray())
         {double? before=null;foreach(var p in ring.EnumerateArray()){var longitude=p[0].GetDouble();Assert.InRange(longitude,-180,180);if(before is {} last)Assert.InRange(Math.Abs(longitude-last),0,1);before=longitude;}}
+    }
+    [Fact] public void CompleteMapOverviewTraversesBeyondBothOldPageLimitsWithoutChangingOriginals()
+    {
+        var first=Add(0);var originalHash=first.Sha256;
+        using(var db=new SqliteConnection(new SqliteConnectionStringBuilder{DataSource=science.DatabasePath,Pooling=false}.ToString()))
+        {
+            db.Open();using var tx=db.BeginTransaction();using var cmd=db.CreateCommand();cmd.Transaction=tx;
+            // Catalog-query load fixture. Every row references the same unchanged
+            // small numeric file; this is not acquisition/durability acceptance.
+            for(var i=1;i<143;i++)
+            {
+                var product=first with{Id=Guid.NewGuid(),FlightPacketUtc=utc.AddSeconds(i)};
+                cmd.CommandText="INSERT INTO remote_products VALUES($id,$dataset,$mission,$instrument,$utc,$json)";cmd.Parameters.Clear();
+                foreach(var (key,value) in new[]{("$id",product.Id.ToString()),("$dataset",product.DatasetId.ToString()),("$mission",product.MissionId.ToString()),("$instrument",product.InstrumentId),("$utc",product.FlightPacketUtc.ToString("O")),("$json",JsonSerializer.Serialize(product,WireJson.Options))})cmd.Parameters.AddWithValue(key,value);
+                cmd.ExecuteNonQuery();
+            }
+            tx.Commit();
+        }
+        var temperature=science.EnsureDataset(mission,new("ambient-temperature",true),missions.Research(mission.Id));
+        science.Append(Enumerable.Range(0,721).Select(i=>new ScienceObservation(0,temperature.Id,mission.Id,"ambient-temperature",utc.AddSeconds(i),"temperature",10+i*.01,"degC",ScienceProvenance.SimulatorReported,"synthetic catalog fixture",35+i*.000001,-110,1000,i%17==0?ObservationQuality.Stale:ObservationQuality.Valid)).ToArray());
+        var overview=science.MapOverview(new(Missions:[mission.Id]));
+        Assert.Equal(143,overview.Acquisitions);Assert.Equal(721,overview.AtmosphericValues);
+        Assert.Equal(143,overview.Bins.Where(b=>b.Measurement is null).Sum(b=>b.Records));
+        Assert.Equal(721,overview.Bins.Where(b=>b.Measurement is not null).Sum(b=>b.Records));
+        Assert.InRange(overview.Bins.Length,1,96*overview.Categories.Length);
+        Assert.Equal(721-Enumerable.Range(0,721).Count(i=>i%17==0),overview.Categories.Single(c=>c.Measurement=="temperature").ValidAtmosphericValues);
+        Assert.Equal(10,science.MapPage(new(Missions:[mission.Id],Limit:10,Offset:130)).Products.Length);
+        Assert.Equal(21,science.AtmosphereMap(new(Missions:[mission.Id],Limit:30,Offset:700,Measurement:"temperature")).Items.Length);
+        Assert.Empty(science.AtmosphereMap(new(Missions:[mission.Id],Measurement:"pressure")).Items);
+        Assert.Equal(Enumerable.Range(0,721).Count(i=>i%17==0),science.MapOverview(new(Missions:[mission.Id],Search:"stale")).AtmosphericValues);
+        Assert.Equal(0,science.MapOverview(new(Missions:[mission.Id],Search:"' OR 1=1 --")).AtmosphericValues);
+        Assert.Empty(science.MapOverview(new(Missions:[Guid.NewGuid()])).Categories);
+        Assert.Equal(0,science.MapOverview(new(Missions:[mission.Id],Area:new(0,0,1,1))).Acquisitions);
+        Assert.Equal(originalHash,science.ReadProduct(first.Id).Product.Sha256);Assert.Equal(2,science.ReadProduct(first.Id).SampleLocations.Length);
+        using var cancel=new CancellationTokenSource();cancel.Cancel();Assert.Throws<OperationCanceledException>(()=>science.MapOverview(new(),cancel.Token));
+    }
+    [Fact] public void OverviewClusterCentroidStaysAtTheDateLineRatherThanAveragingToGreenwich()
+    {
+        var temperature=science.EnsureDataset(mission,new("ambient-temperature",true),missions.Research(mission.Id));
+        science.Append(new[]{179.999,-179.999}.Select((longitude,index)=>new ScienceObservation(0,temperature.Id,mission.Id,"ambient-temperature",utc.AddSeconds(index),"temperature",10+index,"degC",ScienceProvenance.SimulatorReported,"synthetic date-line fixture",10,longitude,1000,ObservationQuality.Valid)).ToArray());
+        var overview=science.MapOverview(new(Missions:[mission.Id],Area:new(179.94,9,-179.9,11)));
+        Assert.Equal(2,overview.AtmosphericValues);Assert.All(overview.Bins,bin=>Assert.True(Math.Abs(bin.Center.Longitude)>179));
+    }
+    [Fact] public void DifferenceMapContainsExactMatchedNativeCellsAndPreservesOriginalAcquisitions()
+    {
+        var first=Add(0,100,200,true);var second=Add(1,102,195,true);
+        var comparison=science.Compare(new([first.Id,second.Id],"elevation"));
+        Assert.True(comparison.Comparable);Assert.Equal(2,comparison.MatchedNativeCells);Assert.Equal(-1.5,comparison.MeanDelta);
+        Assert.Equal(new[]{-5d,2d},comparison.DifferenceCells!.Select(cell=>cell.Delta).Order().ToArray());
+        Assert.All(comparison.DifferenceCells!,cell=>{Assert.Equal(first.Id,cell.BaselineProductId);Assert.Equal(second.Id,cell.ProductId);Assert.Equal(cell.Compared-cell.Baseline,cell.Delta);Assert.Equal(5,cell.Boundary.Length);});
+        Assert.Empty(science.Compare(new([first.Id,second.Id],"temperature")).DifferenceCells??[]);
+        Assert.Equal(first.Sha256,science.ReadProduct(first.Id).Product.Sha256);Assert.Equal(second.Sha256,science.ReadProduct(second.Id).Product.Sha256);
+    }
+    [Fact] public void ConstantPreviewUsesOneColorWithTransparentMissingCellsAndUnchangedNumericRaster()
+    {
+        Add(0,222);var artifact=Assert.Single(ScientificComposites.Build(science,missions,mission.Id,new(source.Id,"elevation")));
+        var path=science.VerifiedArtifactPath(artifact);var original=SHA256.HashData(File.ReadAllBytes(path));
+        var preview=ScientificArtifactPreview.Create(science,artifact);Assert.Equal(222,preview.Minimum);Assert.Equal(222,preview.Maximum);
+        using var compressed=new MemoryStream();var index=8;
+        while(index<preview.Png.Length){var length=System.Buffers.Binary.BinaryPrimitives.ReadInt32BigEndian(preview.Png.AsSpan(index,4));var type=System.Text.Encoding.ASCII.GetString(preview.Png,index+4,4);if(type=="IDAT")compressed.Write(preview.Png,index+8,length);index+=length+12;}
+        compressed.Position=0;using var zlib=new ZLibStream(compressed,CompressionMode.Decompress);using var pixels=new MemoryStream();zlib.CopyTo(pixels);var raw=pixels.ToArray();var visible=0;var transparent=0;
+        for(var y=0;y<384;y++)for(var x=0;x<384;x++){var offset=y*(384*4+1)+1+x*4;if(raw[offset+3]==0){transparent++;continue;}visible++;Assert.Equal(new byte[]{33,145,140,255},raw.AsSpan(offset,4).ToArray());}
+        Assert.True(visible>0&&transparent>0);Assert.Equal(original,SHA256.HashData(File.ReadAllBytes(path)));using var raster=new ScientificRaster(Path.GetDirectoryName(path)!,new("value",Path.GetFileName(path),"geotiff"));Assert.Equal(222,raster.Read(ScientificRaster.GridPoint(grid,.5,.5)));Assert.Null(raster.Read(ScientificRaster.GridPoint(grid,1.5,.5)));
     }
     public void Dispose(){science.Dispose();Directory.Delete(root,true);}
     private sealed class AsyncOnlyOutput(Stream output):Stream

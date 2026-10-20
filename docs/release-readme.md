@@ -1,9 +1,40 @@
-# AeroScience v0.3.0 — Remote Sensing & Research Payloads Alpha
+# AeroScience v0.4.2 — Research Workstation & Scientific Visualization
 
-Run **AeroScience-Setup-v0.3.0.exe**, finish the guided storage/toolbar setup and launch AeroScience from Start. The app opens its dashboard automatically. Pilots need no terminal, SDK, separate server or .NET installation. The portable ZIP is optional/secondary.
+The primary installation is **AeroScience-Setup-v0.4.2.exe**. Run Setup, finish guided
+storage/toolbar onboarding and launch AeroScience from Start. The local services and
+browser dashboard start automatically. Pilots need no SDK, terminal, Python/GDAL,
+manual DLL copy or separate server. Portable ZIPs are secondary.
 
-New installations offer OpenStreetMap / Streets after a privacy choice; choose offline-only before any tile request if preferred. Existing map/storage preferences survive upgrades. Defaults are 25 GB flight / 50 GB science, customizable or Unlimited. Settings provides independent storage folders, measured usage, safe cache-only cleanup and dataset/mission protection. Original observations and backups are never automatic cleanup targets.
+Use [the pilot guide](docs/v0.4.2-pilot-guide.md) for Plan → Prepare → Fly → Review →
+Compare → Export. Automatic, bounded terrain/Landsat/Sentinel preparation is the normal
+supported workflow after separate scientific-data consent. Hyperspectral uses supported
+graphical ENVI import; global automatic hyperspectral coverage is not claimed. Science
+Map represents the complete selected indexed archive with independent instrument
+layers, bounded aggregation and accessible exact values. A location overview is not a
+continuous raster or a scientific value measured at its centroid.
 
-Read [Remote-sensing quick start](docs/remote-sensing/quick-start.md). Thermal/multispectral/hyperspectral/terrain payloads sample supported real local GeoTIFF/ENVI observations at approximate flight footprints. Reference datasets are not bundled; coverage depends on imported sources. Ambient temperature is not a thermal camera, and DEM samples are not LiDAR returns. Original dates, units, resolution and quality remain visible. Review products/history offline and export data/evidence locally; no automatic research uploads.
+New installations offer OpenStreetMap after a privacy choice; choose offline-only
+before any tile request if preferred. Scientific retrieval has a separate geographic
+query/IP disclosure. Existing map/storage preferences survive upgrades. Default caps
+remain 25 GB flight / 50 GB science; user originals, completed observations and protected
+sources are never automatically deleted for cache cleanup. Independent drives and safe
+migration remain available in graphical Settings.
 
-This is public alpha. Automated technical validation does not establish live MSFS/VR/iPad or Windows GUI acceptance. Release evidence records hardware as not verified unless separately documented actual tests exist. See the included v0.3.0 completion/testing reports, Collect Feedback, and https://github.com/JustSeanC/AeroScience/issues. Never share provider keys, pairing codes or original runtime permission correspondence.
+External satellite/elevation observations retain their original dates, numeric units,
+resolution, datums, quality masks and provenance. They are not live aircraft cameras or
+LiDAR returns. Mission History, retained measurements and exports remain available
+offline while the selected drives are available. Missing science is never invented.
+
+Development-source tests and genuine-data regression do not establish installed
+Windows/MSFS, physical iPad Safari, Quest 3, representative-user usability or WCAG
+conformance. For a published installer, consult its exact-hash release evidence rather
+than inferring acceptance from this document. See the included completion, scientific
+visualization, accessibility and Windows testing guides. No release is authorized by
+the v0.4.2 implementation prompt alone.
+
+Need help with AeroScience? Join our Discord community for support, troubleshooting,
+questions, feature requests, and discussions with other pilots.
+[Join our Discord](https://discord.gg/mpYyazCqvJ). Membership is optional. Help & Support
+also retains Collect Feedback / Logs and GitHub issue reporting. Review private
+geographic information before sharing logs; never share keys, pairing codes or original
+runtime permission correspondence.

@@ -11,6 +11,7 @@ var options=app.Services.GetRequiredService<EngineOptions>();
 app.Services.GetRequiredService<MapSettings>().InitializeDefaults(true); // Existing offline browser fixtures; new-install tests reset explicitly.
 app.Services.GetRequiredService<ApplicationUpdates>().Configure(new(false)); // No real update traffic in synthetic browser tests.
 app.MapPost("/api/testing/maps/new-install",()=>{File.Delete(Path.Combine(options.ConfigurationDirectory??options.DataDirectory,"maps.json"));return new {reset=true};});
+app.MapPost("/api/testing/workstation",(WorkstationFixtureRequest request,ScienceStore science,MissionStore missions,MissionCoordinator coordinator)=>WorkstationFixtures.Create(request,science,missions,coordinator,new(options.DataDirectory)));
 app.MapPost("/api/testing/remote/{kind}",async (string kind,ScienceStore science,MissionCoordinator coordinator)=>
 {
     var parsed=Enum.Parse<RemoteKind>(kind,true);

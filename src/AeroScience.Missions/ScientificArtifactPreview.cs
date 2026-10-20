@@ -5,6 +5,7 @@ namespace AeroScience.Missions;
 public sealed record RasterDisplayPreview(byte[] Png,GeographicBounds Bounds,double? Minimum,double? Maximum,string[] Units,string[] Bands,string Method);
 public static class ScientificArtifactPreview
 {
+    private static readonly int[][] Ramp = [[68,1,84],[59,82,139],[33,145,140],[94,201,98],[253,231,37]];
     public static RasterDisplayPreview Create(ScienceStore science,ScientificArtifact artifact,CancellationToken token=default)
     {
         if(artifact.Format!="tif")throw new ArgumentException("Select a geographic raster product.");
@@ -26,10 +27,15 @@ public static class ScientificArtifactPreview
         {
             var i=y*size+x;var offset=y*(size*4+1)+1+x*4;if(values.Any(v=>v[i] is null))continue;
             if(values.Length>=3){for(var b=0;b<3;b++)rgba[offset+b]=(byte)(Math.Clamp(values[b][i]!.Value/.3,0,1)*255);}
-            else{var t=Math.Clamp((values[0][i]!.Value-min!.Value)/(max==min?1:max!.Value-min.Value),0,1);rgba[offset]=(byte)(255*t);rgba[offset+1]=(byte)(210*(1-Math.Abs(t-.5)*2));rgba[offset+2]=(byte)(255*(1-t));}
+            else
+            {
+                var t = max == min ? .5 : Math.Clamp((values[0][i]!.Value-min!.Value)/(max!.Value-min.Value),0,1);
+                var position=t*(Ramp.Length-1);var stop=Math.Min(Ramp.Length-2,(int)Math.Floor(position));var fraction=position-stop;
+                for(var channel=0;channel<3;channel++)rgba[offset+channel]=(byte)Math.Round(Ramp[stop][channel]+(Ramp[stop+1][channel]-Ramp[stop][channel])*fraction);
+            }
             rgba[offset+3]=255;
         }
         return new(ScientificPreview.EncodePng(size,size,rgba),bounds,min,max,metadata.Units,metadata.Bands,
-            "Display-only nearest-pixel reprojection to WGS84; transparent nodata. Scalar blue-to-red uses the displayed minimum/maximum; RGB uses a stated 0–0.3 reflectance stretch. This preview never changes numeric scientific products or improves native resolution.");
+            "Display-only nearest-pixel reprojection to WGS84; transparent nodata. Scalar viridis uses the displayed minimum/maximum; constant values use one color without a numeric gradient. RGB uses a stated 0–0.3 reflectance stretch. This preview never changes numeric scientific products or improves native resolution.");
     }
 }

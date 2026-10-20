@@ -3,10 +3,11 @@ using AeroScience.Shared;
 using Microsoft.Data.Sqlite;
 namespace AeroScience.Missions;
 
-public sealed record ScienceMapQuery(Guid[]? Missions = null, string? Instrument = null, DateTimeOffset? From = null, DateTimeOffset? To = null, GeographicBounds? Area = null, long After = 0, int Limit = 40, Guid? Source = null, DateTimeOffset? SourceFrom = null, DateTimeOffset? SourceTo = null,bool? HasGaps=null);
+public sealed record ScienceMapQuery(Guid[]? Missions = null, string? Instrument = null, DateTimeOffset? From = null, DateTimeOffset? To = null, GeographicBounds? Area = null, long After = 0, int Limit = 40, Guid? Source = null, DateTimeOffset? SourceFrom = null, DateTimeOffset? SourceTo = null,bool? HasGaps=null,string? Measurement=null,int Offset=0,string? Search=null);
 public sealed record ScienceMapPage(RemoteProduct[] Products, long Next, bool HasMore, string Method);
 public sealed record ScientificComparisonRequest(Guid[] Products, string Measurement);
-public sealed record ScientificComparison(bool Comparable, string[] Reasons, string Measurement, string[] Units, long MatchedNativeCells, double? MinimumDelta, double? MaximumDelta, double? MeanDelta, object[] Sources);
+public sealed record ScientificDifferenceCell(Coordinates[] Boundary, double Baseline, double Compared, double Delta, Guid BaselineProductId, Guid ProductId);
+public sealed record ScientificComparison(bool Comparable, string[] Reasons, string Measurement, string[] Units, long MatchedNativeCells, double? MinimumDelta, double? MaximumDelta, double? MeanDelta, object[] Sources, ScientificDifferenceCell[]? DifferenceCells = null, long TotalDifferenceValues = 0);
 public sealed record InstrumentReview(string InstrumentId, string Name, long MeasurementValues, long AcquisitionTimestamps, long RemoteProducts, long ValidGeographicSamples, MeasurementSummary[] Measurements, InstrumentState? Diagnostics, string Explanation,object[]? Sources=null,object[]? RemoteStatistics=null);
 public sealed record MissionScientificSummary(Mission Mission, string? Objective, ScientificReviewStatus Review, InstrumentReview[] Instruments, FlightStatistics Flight);
 public sealed partial class ScienceStore
@@ -32,6 +33,7 @@ public sealed partial class ScienceStore
     }
     public ScienceMapPage MapPage(ScienceMapQuery query)
     {
+        if(query.Search?.Length>128)throw new ArgumentException("Use at most 128 characters to search saved metadata.");
         if (query.Missions?.Length > 100) throw new ArgumentException("Select at most 100 specific missions, or use All Missions.");
         if (query.Area is { } bounds && (bounds.West < -180 || bounds.East > 180 || bounds.South < -90 || bounds.North > 90 || bounds.South >= bounds.North || new[] { bounds.West, bounds.East, bounds.South, bounds.North }.Any(v => !double.IsFinite(v)))) throw new ArgumentException("Invalid map bounds.");
         if (!File.Exists(DatabasePath)) return new([], query.After, false, "No recorded scientific products.");
@@ -44,11 +46,14 @@ public sealed partial class ScienceStore
               AND ($sourceFrom='' OR json_extract(p.payload_json,'$.sourceObservationUtc')>=$sourceFrom)
               AND ($sourceTo='' OR json_extract(p.payload_json,'$.sourceObservationUtc')<=$sourceTo)
               AND ($gaps=-1 OR (json_extract(p.payload_json,'$.validSampleCount') < json_extract(p.payload_json,'$.width') * json_extract(p.payload_json,'$.height'))=$gaps)
+              AND ($search='' OR instr(lower(p.payload_json),lower($search))>0)
               AND ($area=0 OR (geo.north>=$south AND geo.south<=$north AND
                    (($west<=$east AND geo.east>=$west AND geo.west<=$east) OR ($west>$east AND (geo.east>=$west OR geo.west<=$east)))))
             """;
         if (query.Missions is { Length: > 0 }) { var names = query.Missions.Select((id, i) => { var name = "$mission" + i; cmd.Parameters.AddWithValue(name, id.ToString()); return name; }); cmd.CommandText += " AND mission_id IN (" + string.Join(',', names) + ")"; }
-        var limit = Math.Clamp(query.Limit, 1, 100); cmd.CommandText += " ORDER BY p.rowid LIMIT $limit";
+        var limit = Math.Clamp(query.Limit, 1, 100); cmd.CommandText += " ORDER BY p.rowid LIMIT $limit OFFSET $offset";
+        cmd.Parameters.AddWithValue("$offset",Math.Max(0,query.Offset));
+        cmd.Parameters.AddWithValue("$search",query.Search?.Trim()??"");
         cmd.Parameters.AddWithValue("$after", Math.Max(0, query.After)); cmd.Parameters.AddWithValue("$limit", limit + 1); cmd.Parameters.AddWithValue("$instrument", query.Instrument ?? "");
         cmd.Parameters.AddWithValue("$from", query.From?.ToUniversalTime().ToString("O") ?? ""); cmd.Parameters.AddWithValue("$to", query.To?.ToUniversalTime().ToString("O") ?? "");
         cmd.Parameters.AddWithValue("$gaps",query.HasGaps is null?-1:query.HasGaps.Value?1:0);
@@ -97,7 +102,22 @@ public sealed partial class ScienceStore
         var deltas = common.SelectMany(p => lookups.Skip(1).Select(l => l[p.Key] - p.Value)).ToArray();
         if (deltas.Length == 0) return new(false, ["No common valid native cells; cloud/nodata gaps are not filled."], request.Measurement, [bands[0].Unit], 0, null, null, null, sources);
         var sameScene = data.Select(d => (d.Source.Manifest.Provider, d.Source.Manifest.SceneId, d.Source.Manifest.ObservationUtc)).Distinct().Count() == 1;
-        return new(true, [sameScene ? "Same historical scene: these differences describe sampled support/reprocessing, not independently observed Earth change." : "Different source dates: differences are descriptive, not causal or simultaneous airborne measurements.", "Each common native pixel counted once per acquisition; no averaging of incompatible quantities."], request.Measurement, [bands[0].Unit], common.Length, deltas.Min(), deltas.Max(), deltas.Average(), sources);
+        // Display exact common native cells. This is a bounded view of the existing
+        // comparison, not a new resampling, interpolation or scientific calculation.
+        var display = new List<ScientificDifferenceCell>();
+        foreach (var cell in common)
+        {
+            var (x, y) = cell.Key;
+            var boundary = new[] { ScientificRaster.GridPoint(grid,x,y), ScientificRaster.GridPoint(grid,x+1,y), ScientificRaster.GridPoint(grid,x+1,y+1), ScientificRaster.GridPoint(grid,x,y+1), ScientificRaster.GridPoint(grid,x,y) };
+            if (boundary.Max(p=>p.Longitude)-boundary.Min(p=>p.Longitude)>180) continue;
+            for (var index=1;index<lookups.Length && display.Count<2048;index++)
+            {
+                var compared=lookups[index][cell.Key];
+                display.Add(new(boundary,cell.Value,compared,compared-cell.Value,data[0].Product.Id,data[index].Product.Id));
+            }
+            if(display.Count>=2048)break;
+        }
+        return new(true, [sameScene ? "Same historical scene: these differences describe sampled support/reprocessing, not independently observed Earth change." : "Different source dates: differences are descriptive, not causal or simultaneous airborne measurements.", "Each common native pixel counted once per acquisition; no averaging of incompatible quantities."], request.Measurement, [bands[0].Unit], common.Length, deltas.Min(), deltas.Max(), deltas.Average(), sources, display.ToArray(), deltas.LongLength);
     }
 }
 public static class ScientificResearchSummary

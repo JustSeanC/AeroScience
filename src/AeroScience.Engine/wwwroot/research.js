@@ -156,6 +156,7 @@ export function initializeResearch(context) {
   liveMap = new ResearchMap(mapPanel);
   control.querySelector(".mission-grid").after(mapPanel);
   const markerPanel = text("article", undefined, "panel research-panel");
+  markerPanel.id = "observation-notes";
   markerPanel.append(text("h2", "Observation markers & in-flight notes"));
   const category = select(
     markerPanel,
@@ -1155,7 +1156,7 @@ async function refreshLive(id) {
     plan: livePlan || {},
     aircraft: aircraftFor(state),
   });
-  if ($("science-charts") && !document.querySelector(".expanded-chart[open]")) {
+  if ($("science-charts") && !document.querySelector(".expanded-chart[open], .chart-values[open]")) {
     $("science-charts").replaceChildren();
     scienceCharts($("science-charts"), scienceRows);
   }

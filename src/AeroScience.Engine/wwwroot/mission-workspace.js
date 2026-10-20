@@ -1,5 +1,6 @@
 import { ResearchMap } from "./map.js";
 import { planningArea, planningDistance, displayReading } from "./science-display.js";
+import {table as scientificTable} from './workstation-ui.js';
 const el = (tag, text) => {
   const n = document.createElement(tag);
   if (text !== undefined) n.textContent = text;
@@ -693,7 +694,7 @@ export async function atmosphere(parent, id, api) {
   const controls = el("div"),
     canvas = el("canvas"),
     description = el("p");
-  parent.append(controls, canvas, description);
+  const figure=el('figure');figure.className='scientific-chart';figure.append(el('figcaption','Recorded atmospheric and terrain profile'),canvas);const accessibleValues=el('div');parent.append(controls, figure, description, accessibleValues);
   canvas.setAttribute("aria-label", "Recorded atmospheric and terrain profile");
   canvas.setAttribute("role", "img");
   const convert = (property, value) => {
@@ -770,10 +771,12 @@ export async function atmosphere(parent, id, api) {
           },
         },
       });
-    description.textContent = "Actual recorded packets; no interpolation across gaps. Separate aircraft and auxiliary timestamps appear in chart tooltips.";
+    description.textContent = "Actual recorded packets; no interpolation across gaps. Separate aircraft and auxiliary timestamps appear in chart tooltips and the accessible values table.";
+    accessibleValues.replaceChildren();scientificTable(accessibleValues,'Recorded profile values',[x.selectedOptions[0].textContent,y.selectedOptions[0].textContent,'Aircraft UTC','Atmosphere UTC','Ground UTC','Gap before'],result.profile.map(p=>[format(convert(x.value,p[x.value]).value),format(convert(y.value,p[y.value]).value),p.utc,p.atmosphereUtc??'Unavailable',p.groundUtc??'Unavailable',p.breakBefore?'Yes':'No']));
   }
   x.onchange = y.onchange = draw;
   draw();
+  const observer=new MutationObserver(()=>{if(!canvas.isConnected){chart?.destroy();observer.disconnect();}});observer.observe(document.body,{childList:true,subtree:true});
   const advanced=el("details");advanced.append(el("summary","Advanced — observed cloud encounters, altitude bins & methods"));for(const method of result.methods)advanced.append(el("p",method));parent.append(advanced);
   advanced.append(el("h4", "Observed cloud encounters"));
   for (const c of result.clouds)

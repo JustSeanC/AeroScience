@@ -1,8 +1,11 @@
+import {readableName} from './workstation-ui.js';
 import {readSuccessResponse} from './http-response.js';
 import {scienceWorkspace,disposeScienceWorkspace} from './science-workspace.js';
-import {helpCenter} from './help-center.js';
+import {helpCenter,disposeHelpCenter} from './help-center.js';
 import {missionSelection} from './mission-selection.js';
-import {scientificLibrary} from './scientific-library.js';
+import {scientificLibrary,disposeScientificLibrary} from './scientific-library.js';
+import {downloadWorkspace,disposeDownloadWorkspace} from './download-workspace.js';
+import {initializeWorkstationShell,streamlineMissionControl} from './workstation-shell.js';
 import { settingsLocation,settingsNavigation } from "./settings-navigation.js";
 import { mapSettingsUI, syncBasemaps } from "./basemaps.js";
 import { sourceSettings } from "./remote-science.js";
@@ -18,6 +21,7 @@ import {
 } from "./research.js";
 import { unitControls, initializeUnits } from "./science-display.js";
 const $ = (id) => document.getElementById(id);
+const workstationShell=initializeWorkstationShell();
 const number = (v, digits = 0) =>
   Number.isFinite(v)
     ? v.toLocaleString("en-US", {
@@ -61,12 +65,13 @@ function notice(message = "") {
   $("notice").textContent = message;
   $("notice").hidden = !message;
 }
-async function api(path, body) {
+async function api(path, body, options = {}) {
   const response = await fetch(
     path,
     body === undefined
-      ? {}
+      ? options
       : {
+          ...options,
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -321,7 +326,7 @@ $("pair-form").addEventListener("submit", (event) => {
   command(event.submitter, () => connect($("pair-code").value));
 });
 async function navigate() {
-  const allowed = ["control", "planner", "history", "instruments", "settings", "science-workspace", "library", "help"];
+  const allowed = ["control", "planner", "history", "instruments", "settings", "science-workspace", "library", "help", "downloads"];
   if(location.hash.startsWith("#settings/support")){location.replace("#help");return;}
   const routePage=settingsLocation().page;
   const hash =
@@ -330,6 +335,9 @@ async function navigate() {
       : settingsLocation().page;
   const page = routePage === "workspace" ? "science-workspace" : allowed.includes(hash) ? hash : "control";
   if(page!=="science-workspace")disposeScienceWorkspace();
+  if(page!=="downloads")disposeDownloadWorkspace();
+  if(page!=="library")disposeScientificLibrary();
+  if(page!=="help")disposeHelpCenter();
   for (const id of allowed) $(id).hidden = id !== page;
   for (const link of document.querySelectorAll(".nav-link")) {
     const selected =
@@ -344,22 +352,24 @@ async function navigate() {
     instruments: "SCIENCE COLLECTION",
     planner: "MISSION PLANNER",
     settings: "SETTINGS",
-    "science-workspace": "SCIENCE WORKSPACE",library:"SCIENTIFIC DATA LIBRARY",help:"HELP & SUPPORT",
+    "science-workspace": "SCIENCE WORKSPACE",library:"SCIENTIFIC DATA LIBRARY",help:"HELP & SUPPORT",downloads:"DOWNLOAD ACTIVITY",
   }[page];
   document.title = `AeroScience · ${page === "control" ? "Mission Control" : page[0].toUpperCase() + page.slice(1)}`;
   if (!authorized) return;
   if (page === "science-workspace") await scienceWorkspace($("science-workspace"),api);
   if (page === "help") await helpCenter($("help"),api);
   if (page === "library") await scientificLibrary($("library"),api);
+  if (page === "downloads") await downloadWorkspace($("downloads"),api);
   if (page === "control") selection?.refresh();
   if (page === "history") await loadHistory();
   if (page === "settings") await loadSettings();
   if (page === "planner" || page === "instruments") await loadResearch(page);
+  workstationShell.afterNavigation($(page));
 }
 async function loadHistory() {
   const request = ++historyRequest;
   const missions = await api(
-    `/api/missions?limit=20&offset=${historyPage * 20}&search=${encodeURIComponent($("history-search").value)}&status=${encodeURIComponent($("history-status").value)}`,
+    `/api/missions?limit=20&offset=${historyPage * 20}&search=${encodeURIComponent($("history-search").value)}&status=${encodeURIComponent($("history-status").value)}&sort=${encodeURIComponent($("history-sort").value)}`,
   );
   if (request !== historyRequest) return;
   const list = $("history-list");
@@ -399,6 +409,9 @@ async function loadHistory() {
     open.addEventListener("click", () => command(open, () => showDetail(m.id)));
     const science=el("a","Open Science Review","button secondary");science.href=`#workspace/analysis?missions=${m.id}`;
     const replayLink=el("a","Replay Flight","button secondary");replayLink.href=`#workspace/replay?missions=${m.id}`;
+    science.className="button primary";open.className="tertiary";
+    const researchStatus=el("p","Scientific review status loading…","history-science-status");info.append(researchStatus);
+    api(`/api/missions/${m.id}/archive-summary`).then(summary=>{if(request!==historyRequest)return;researchStatus.textContent=`Science: ${summary.review.status} · ${summary.instruments.map(id=>readableName(id)).join(", ")||"No enabled instruments in archived configuration"}`;}).catch(()=>{if(request===historyRequest)researchStatus.textContent="Scientific status unavailable; recorded flight details remain accessible.";});
     meta.append(science,replayLink,open);
     card.append(info, meta);
     list.append(card);
@@ -504,6 +517,7 @@ async function loadSettings() {
   paragraph("support","Feedback/log collection runs on the Windows companion. Paired-device users can open this support page and report issues, or collect logs from the gaming PC.");
 }
 $("close-detail").addEventListener("click", () => $("mission-detail").close());
+$("history-sort").addEventListener("change",()=>{historyPage=0;loadHistory().catch(error=>notice(error.message));});
 $("history-search-form").addEventListener("submit",event=>{event.preventDefault();historyPage=0;loadHistory().catch(e=>notice(e.message));});
 $("refresh-history").addEventListener("click", (event) =>
   command(event.target, loadHistory),
@@ -529,6 +543,7 @@ setInterval(() => {
     clearTelemetry();
 }, 1000);
 initializeResearch({ api, notice, command });
+streamlineMissionControl();
 const selection=missionSelection($("mission-idle"),api);
 try {
   const access = await api("/api/access");

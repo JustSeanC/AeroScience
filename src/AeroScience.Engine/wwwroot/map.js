@@ -2,6 +2,7 @@ import { planningDistance, onUnitsChanged } from "./science-display.js";
 import { airportLocations, searchLocations, locationLabel } from "./location-search.js";
 import "./geographic-view.js";
 import { layerSelector } from "./basemaps.js";
+import {table as geographicTable} from './workstation-ui.js';
 const valid = (p) =>
   Number.isFinite(p?.latitude) && Number.isFinite(p?.longitude);
 const longitude = (x) => window.AeroScienceGeo.wrap(x);
@@ -46,6 +47,8 @@ export class ResearchMap {
     this.coordinate = document.createElement("p");
     this.coordinate.className = "footnote";
     parent.append(tools, this.container, this.coordinate);
+    this.routeValues=document.createElement('details');this.routeValues.className='advanced-details';this.routeValues.hidden=true;this.routeValues.append(document.createElement('summary'));this.routeValues.firstChild.textContent='Route waypoints — accessible values and selection';this.routeRows=document.createElement('div');this.routeValues.append(this.routeRows);parent.append(this.routeValues);
+    this.routeValues.addEventListener('toggle',()=>{if(this.routeValues.open)this.showRouteValues();});
     const L = window.L;
     this.L = L;
     this.map = L.map(this.container, {
@@ -437,6 +440,10 @@ export class ResearchMap {
       { padding: [28, 28], maxZoom: this.options.fitMaxZoom || 12 },
     );
   }
+  showRouteValues(){
+    if(this.destroyed||!this.routeValues.open)return;const waypoints=this.data.plan?.waypoints||[];this.routeRows.replaceChildren();
+    geographicTable(this.routeRows,'Planned waypoint coordinates',['Waypoint','Latitude (degrees north)','Longitude (degrees east)'],waypoints.map((point,index)=>[point.name||`Waypoint ${index+1}`,point.latitude,point.longitude]),{onSelect:index=>{this.center(waypoints[index]);this.options.onWaypointSelect?.(index);}});
+  }
   draw() {
     if (this.destroyed || !this.map) return;
     const L = this.L,
@@ -453,6 +460,7 @@ export class ResearchMap {
     ]);
     const staticChanged = staticKey !== this.staticKey;
     this.staticKey = staticKey;
+    if(staticChanged){this.routeValues.hidden=!plan.waypoints?.length;if(this.routeValues.open)this.showRouteValues();}
     if (staticChanged)
       this.route.setLatLngs(
         (plan.waypoints || []).filter(valid).map((p) => ll(p, base)),
@@ -489,6 +497,9 @@ export class ResearchMap {
         if(p.patternId&&(plan.patterns||[]).some(d=>d.id===p.patternId&&d.kind==="orbit")&&i>0&&i<plan.waypoints.length-1&&plan.waypoints[i-1]?.patternId===p.patternId&&plan.waypoints[i+1]?.patternId===p.patternId)continue;
         const m = L.marker(ll(p, base), {
           draggable: !!this.options.onWaypointsChange,
+          keyboard:false, // Equivalent, non-overlapping selection is in the route table.
+          title:p.name||`Waypoint ${i+1}`,
+          alt:p.name||`Waypoint ${i+1}`,
           icon: L.divIcon({
             className: "waypoint-pin",
             html: String(i + 1),

@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="/vendor/leaflet/leaflet.css" />
     <link rel="stylesheet" href="/vendor/leaflet-draw/leaflet.draw.css" />
     <link rel="stylesheet" href="/app.css" />
+    <link rel="stylesheet" href="/workstation.css" />
     <script src="/vendor/leaflet/leaflet.js"></script>
     <script src="/vendor/leaflet-draw/leaflet.draw.js"></script>
     <script src="/vendor/chart.js/chart.umd.min.js"></script>
@@ -52,6 +53,8 @@
             ><span aria-hidden="true">⚙</span>Settings</a
           >
         <a class="nav-link" href="#library">Scientific Data Library</a>
+        <a class="nav-link" href="#downloads"><span aria-hidden="true">↓</span>Download Activity</a>
+        <a class="nav-link" href="#science"><span aria-hidden="true">◉</span>Science Collection</a>
         <a class="nav-link" href="#help">Help &amp; Support</a>
           </nav>
         <div class="sidebar-footer">
@@ -60,7 +63,7 @@
             <i class="status-dot" id="engine-dot"></i
             ><span id="engine-link">Connecting</span>
           </div>
-          <small>v0.4.1 · Local operations</small>
+          <small>v0.4.2 · Local operations</small>
         </div>
       </aside>
       <main>
@@ -358,7 +361,7 @@
                 Refresh archive
               </button>
             </div>
-            <form id="history-search-form" class="workspace-controls"><label>Search archive<input id="history-search" type="search" placeholder="Mission name or aircraft" /></label><label>Flight status<select id="history-status"><option value="">All statuses</option><option value="completed">Completed</option><option value="interrupted">Interrupted</option><option value="recording">Recording</option></select></label><button class="secondary">Search Missions</button></form>
+            <form id="history-search-form" class="workspace-controls"><label>Search archive<input id="history-search" type="search" placeholder="Mission name or aircraft" /></label><label>Flight status<select id="history-status"><option value="">All statuses</option><option value="completed">Completed</option><option value="interrupted">Interrupted</option><option value="recording">Recording</option></select></label><label>Sort missions<select id="history-sort"><option value="newest">Newest first</option><option value="oldest">Oldest first</option><option value="name">Mission name (A–Z)</option></select></label><button class="secondary">Search Missions</button></form>
             <div id="history-list" class="history-list"></div>
             <div class="pagination">
               <button id="history-prev" class="secondary">← Newer</button
@@ -378,6 +381,7 @@
           </section>
           <section id="science-workspace" class="view" hidden></section>
           <section id="library" class="view" hidden></section>
+          <section id="downloads" class="view" hidden></section>
           <section id="help" class="view" hidden></section>
           <section id="settings" class="view" hidden>
             <div class="page-heading">

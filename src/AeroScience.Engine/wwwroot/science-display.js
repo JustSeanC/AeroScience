@@ -1,3 +1,4 @@
+import {table as scientificTable,numeric} from './workstation-ui.js';
 let settings = null;
 const chartPreferences = new Map();
 const unitListeners = new Set();
@@ -186,6 +187,7 @@ export function scienceCharts(parent, rows) {
     const summary = e("p");
     summary.className = "chart-summary";
     card.append(summary);
+    const values=e('details');values.className='chart-values advanced-details';values.append(e('summary','Inspect recorded chart values'));const valueRows=e('div');values.append(valueRows);card.append(values);let displayed=points;
     let chart;
     const render = () => {
       let selected =
@@ -197,6 +199,7 @@ export function scienceCharts(parent, rows) {
                 Date.parse(points.at(-1).row.timestampUtc) -
                   Number(select.value) * 1000,
             );
+      displayed=selected;valueRows.replaceChildren();scientificTable(valueRows,title+' recorded values',[xunit,unit,'Observation UTC','Quality','Provenance'],selected.map(p=>[xkey==='timestampUtc'?p.row.timestampUtc:numeric(p.x),numeric(p.y),p.row.timestampUtc,p.row.quality,p.row.provenance]));
       const reduced = reduceExtrema(selected);
       const min = Math.min(...selected.map((p) => p.y)),
         max = Math.max(...selected.map((p) => p.y));
@@ -311,7 +314,7 @@ export function scienceCharts(parent, rows) {
       tools.append(b);
     };
     action("Expand", () => {
-      const dialog = e("dialog");
+      const launch=document.activeElement;const dialog = e("dialog");
       dialog.className = "expanded-chart";
       const close = e("button", "Close expanded chart");
       close.type = "button";
@@ -327,6 +330,7 @@ export function scienceCharts(parent, rows) {
         original.insertBefore(card, next);
         dialog.remove();
         chart.resize();
+        launch?.focus({preventScroll:true});
       };
     });
     action("Save PNG", () => {
@@ -338,7 +342,7 @@ export function scienceCharts(parent, rows) {
     action("Export displayed CSV", () => {
       const csv = [
         "timestamp_utc,value,unit,altitude_msl_ft,quality,provenance",
-        ...points.map((p) =>
+        ...displayed.map((p) =>
           [
             p.row.timestampUtc,
             p.y,
