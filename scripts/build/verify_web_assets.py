@@ -6,7 +6,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 WEB = ROOT/'src/AeroScience.Engine/wwwroot'
 def verify(web=WEB):
-    manifest = json.loads((web/'assets-manifest.json').read_text())
+    manifest = json.loads((web/'assets-manifest.json').read_text(encoding='utf-8'))
     for name, digest in manifest['files'].items():
         path=web/name
         if not path.is_file() or hashlib.sha256(path.read_bytes()).hexdigest()!=digest:

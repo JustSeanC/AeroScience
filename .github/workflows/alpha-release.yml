@@ -50,13 +50,13 @@ jobs:
         shell: pwsh
         run: |
           if ($env:REQUESTED_COMMIT -and $env:REQUESTED_COMMIT -ne $env:GITHUB_SHA) { throw 'Dispatch preparation from the intended source revision; do not substitute another commit.' }
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ inputs.source_commit || github.sha }}
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v6
         with:
           global-json-file: global.json
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: '22'
       - name: Build and technically validate alpha; hardware acceptance remains not verified
@@ -67,7 +67,7 @@ jobs:
           ./scripts/release/Build-Release.ps1 -SdkRoot $env:SDK_ROOT -RuntimePath $env:SDK_RUNTIME -RuntimeApprovalRecord $env:RUNTIME_APPROVAL -RuntimeRedistributionConfirmed -InnoCompiler $env:INNO_COMPILER
           $commit = (git rev-parse HEAD).Trim()
           "source_commit=$commit" >> $env:GITHUB_OUTPUT
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: AeroScience-alpha-${{ steps.candidate.outputs.source_commit }}
           path: |
@@ -96,7 +96,7 @@ jobs:
         shell: pwsh
         run: |
           if ($env:SOURCE_COMMIT -notmatch '^[a-fA-F0-9]{40}$' -or $env:CANDIDATE_RUN -notmatch '^[0-9]+$') { throw 'Provide the exact build source commit and successful build run ID.' }
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ inputs.source_commit }}
       - name: Verify candidate came from successful trusted preparation
@@ -110,7 +110,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Cannot verify trusted SDK preparation job.' }
           $preparation = @(($jobsJson | ConvertFrom-Json).jobs | Where-Object { $_.name -eq 'prepare' -and $_.conclusion -eq 'success' -and $_.labels -contains 'msfs2024-sdk' })
           if ($preparation.Count -ne 1) { throw 'Missing successful trusted SDK preparation job.' }
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: AeroScience-alpha-${{ inputs.source_commit }}
           run-id: ${{ inputs.candidate_run_id }}

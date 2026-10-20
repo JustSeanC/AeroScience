@@ -328,8 +328,8 @@ def prepare_candidate(companion, community, receipt_path, runtime_report, runtim
         (destination/'Dependencies').mkdir()
         # Do not publish a tester's absolute SDK path or environment details.
         report = {key: report[key] for key in ('checked_utc', 'sha256', 'file_version', 'architecture', 'export_check', 'exports') if key in report}
-        (destination/'Dependencies'/'runtime-check.json').write_text(json.dumps(report, indent=2)+'\n')
-        (destination/'Dependencies'/'runtime-approval.json').write_text(json.dumps(approval, indent=2)+'\n')
+        (destination/'Dependencies'/'runtime-check.json').write_text(json.dumps(report, indent=2)+'\n', encoding='utf-8')
+        (destination/'Dependencies'/'runtime-approval.json').write_text(json.dumps(approval, indent=2)+'\n', encoding='utf-8')
         for name in ('LICENSE', 'THIRD-PARTY-NOTICES.md', 'CHANGELOG.md', 'INSTALL.md'):
             shutil.copy2(REPO/name, destination/name)
         shutil.copytree(REPO/'licenses', destination/'licenses', dirs_exist_ok=True)
@@ -352,11 +352,11 @@ def prepare_candidate(companion, community, receipt_path, runtime_report, runtim
         (destination/'DEFAULTS.json').write_text(json.dumps(dict(description='Built-in defaults; use graphical Settings to change them.',
             mission_directory=r'%LOCALAPPDATA%\AeroScience', science_library_directory=r'%LOCALAPPDATA%\AeroScience\ScienceLibrary',
             sampling_interval_ms=1000, enable_lan=False, mission_mode='universal', telemetry='SimConnect', mission_limit_bytes=25000000000,
-            science_limit_bytes=50000000000, automatic_cleanup='Regenerable caches only', online_map_default='streets', map_privacy_choice_required=True), indent=2)+'\n')
+            science_limit_bytes=50000000000, automatic_cleanup='Regenerable caches only', online_map_default='streets', map_privacy_choice_required=True), indent=2)+'\n', encoding='utf-8')
         commit, digest = validate_payload(destination)
-        (destination/'ACCEPTANCE.json').write_text(json.dumps(acceptance_template(commit, digest), indent=2)+'\n')
+        (destination/'ACCEPTANCE.json').write_text(json.dumps(acceptance_template(commit, digest), indent=2)+'\n', encoding='utf-8')
         status = ('INTERMEDIATE PAYLOAD. Build the installer, then record genuine Windows/MSFS acceptance for that exact candidate before finalization. Technical evidence alone cannot approve this version.\n' if requires_manual_acceptance() else 'INTERMEDIATE PAYLOAD. The default Build-Release command continues through Inno compilation and automatic technical finalization. Windows/MSFS hardware remains unverified.\n')
-        (destination/'RELEASE-STATUS.txt').write_text(status)
+        (destination/'RELEASE-STATUS.txt').write_text(status, encoding='utf-8')
     except Exception:
         # Retain partial files for diagnosis; no final archive is produced.
         raise
@@ -365,7 +365,7 @@ def prepare_candidate(companion, community, receipt_path, runtime_report, runtim
 
 def write_checksum(output):
     digest = hashlib.sha256(output.read_bytes()).hexdigest()
-    output.with_name(output.name+'.sha256').write_text(digest+'  '+output.name+'\n')
+    output.with_name(output.name+'.sha256').write_text(digest+'  '+output.name+'\n', encoding='utf-8')
     return digest
 
 
@@ -393,7 +393,7 @@ def verify_archive(archive, checksum):
     meta = identity()
     require(archive.name == meta['asset_name'], 'Unexpected release ZIP name.')
     actual = hashlib.sha256(archive.read_bytes()).hexdigest()
-    require(checksum.read_text().strip() == actual+'  '+archive.name, 'ZIP checksum does not match its SHA-256 sidecar.')
+    require(checksum.read_text(encoding='utf-8').strip() == actual+'  '+archive.name, 'ZIP checksum does not match its SHA-256 sidecar.')
     with tempfile.TemporaryDirectory(prefix='aeroscience-inspect-') as work:
         with zipfile.ZipFile(archive) as zip:
             require(zip.testzip() is None, 'Release ZIP CRC verification failed.')
@@ -517,7 +517,7 @@ def main():
     meta = identity()
     if args.command == 'metadata':
         if args.github_output:
-            with args.github_output.open('a') as file:
+            with args.github_output.open('a', encoding='utf-8') as file:
                 for key, value in meta.items(): file.write(f'{key}={str(value).lower() if isinstance(value, bool) else value}\n')
         print(json.dumps(meta)); return
     if args.command == "validate":
@@ -551,7 +551,7 @@ def main():
         for doc in ("README.md", "INSTALL.md", "CHANGELOG.md", "LICENSE", "THIRD-PARTY-NOTICES.md"):
             shutil.copy2(REPO/doc, root/doc)
         shutil.copytree(REPO/"docs", root/"docs")
-        (root/"PREVIEW.txt").write_text("Windows graphical app developer preview. Open AeroScience.exe; the local archive is available without MSFS. No Community toolbar or proprietary SimConnect runtime is bundled. New Windows UI, migration, Mach and hardware checks remain pending. This is not an installation-ready alpha.\n")
+        (root/"PREVIEW.txt").write_text("Windows graphical app developer preview. Open AeroScience.exe; the local archive is available without MSFS. No Community toolbar or proprietary SimConnect runtime is bundled. New Windows UI, migration, Mach and hardware checks remain pending. This is not an installation-ready alpha.\n", encoding='utf-8')
         zip_tree(root, args.output.resolve())
     write_checksum(args.output)
     print(f"Created {args.output} ({args.output.stat().st_size:,} bytes); SHA-256 sidecar written.")

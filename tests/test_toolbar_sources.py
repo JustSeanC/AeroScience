@@ -33,8 +33,8 @@ class BootstrapParser(HTMLParser):
 class ToolbarBootstrapTests(unittest.TestCase):
     def test_window_probe_loads_the_full_panels_native_dependencies_in_order(self):
         full, probe = BootstrapParser(), BootstrapParser()
-        full.feed((PANEL/'AeroScience.html').read_text())
-        probe.feed((PANEL/'WindowProbe.html').read_text())
+        full.feed((PANEL/'AeroScience.html').read_text(encoding='utf-8'))
+        probe.feed((PANEL/'WindowProbe.html').read_text(encoding='utf-8'))
         self.assertTrue(full.app_seen and probe.app_seen)
         for bootstrap in (full, probe):
             storage = ('script', '/JS/dataStorage.js')

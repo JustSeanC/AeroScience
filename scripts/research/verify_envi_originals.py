@@ -11,7 +11,7 @@ from rasterio.warp import transform
 
 def verify(folder):
     folder = Path(folder)
-    actual = json.loads((folder / 'guided-envi-acceptance.json').read_text())
+    actual = json.loads((folder / 'guided-envi-acceptance.json').read_text(encoding='utf-8'))
     if actual['evidenceType'] != 'genuine-downloaded-envi' or actual['windowsMsfs'] != 'not tested':
         raise ValueError('Expected explicitly genuine source / synthetic flight evidence')
     source = actual['source']
@@ -52,5 +52,5 @@ if __name__ == '__main__':
     parser.add_argument('--folder', type=Path, required=True)
     args = parser.parse_args()
     result = verify(args.folder)
-    (args.folder / 'independent-envi-comparison.json').write_text(json.dumps(result, indent=2) + '\n')
+    (args.folder / 'independent-envi-comparison.json').write_text(json.dumps(result, indent=2) + '\n', encoding='utf-8')
     print('170 actual source bands match independent GDAL reads; 54 bad bands excluded. No Windows/MSFS claim.')

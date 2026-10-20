@@ -1,0 +1,4 @@
+# Optional manual release preparation uses this real SDK-runner label.
+self-hosted-runner:
+  labels:
+    - msfs2024-sdk

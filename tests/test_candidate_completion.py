@@ -18,7 +18,7 @@ class CandidateCompletionTests(unittest.TestCase):
             finalizer.parent.mkdir(parents=True)
             finalizer.write_text('''param([string]$OutputDirectory)
 [IO.File]::WriteAllText((Join-Path $OutputDirectory 'automatic-finalizer.called'), 'CONTROL FIXTURE ONLY')
-''')
+''', encoding='utf-8')
             harness = fixture / 'complete.ps1'
             harness.write_text(r'''
 param($BuildScript, $FixtureRoot, $ReleaseVersion, $PrepareFlag)
@@ -38,7 +38,7 @@ $repo = $FixtureRoot
 $OutputDirectory = $FixtureRoot
 $revision = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
 & ([scriptblock]::Create($branches[0].Extent.Text))
-''')
+''', encoding='utf-8')
             result = subprocess.run([PWSH, '-NoProfile', '-File', str(harness),
                                      str(ROOT / 'scripts/release/Build-ReleaseCandidate.ps1'),
                                      str(fixture), version, 'yes' if prepare_only else 'no'],

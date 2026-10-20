@@ -22,7 +22,7 @@ def digest(path):
 
 def verify(folder):
     folder = Path(folder)
-    report = json.loads((folder / "workspace-acceptance.json").read_text())
+    report = json.loads((folder / "workspace-acceptance.json").read_text(encoding='utf-8'))
     if report["evidenceType"] != "genuine-external-data-and-synthetic-flight-input" or report["windowsMsfs"] != "not tested":
         raise ValueError("Expected genuine source / explicitly synthetic flight evidence")
     library = folder / "ScienceLibrary"
@@ -110,7 +110,7 @@ def verify(folder):
                             files = list((library / "Products" / metadata["missionId"].replace("-", "")).glob(acquisition.replace("-", "") + ".json"))
                             if len(files) != 1:
                                 raise ValueError("Saved acquisition referenced by composite is missing")
-                            inputs.append(json.loads(files[0].read_text()))
+                            inputs.append(json.loads(files[0].read_text(encoding='utf-8')))
                         inputs.sort(key=lambda d: (d["product"]["flightPacketUtc"], d["product"]["id"]))
                         occupied = set()
                         for data in inputs:
@@ -145,5 +145,5 @@ if __name__ == "__main__":
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     result = verify(args.folder)
-    args.output.write_text(json.dumps(result, indent=2) + "\n")
+    args.output.write_text(json.dumps(result, indent=2) + "\n", encoding='utf-8')
     print(f"Independently verified {len(result['results'])} genuine native-grid scientific rasters; Windows/MSFS not tested.")

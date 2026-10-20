@@ -11,13 +11,13 @@ EXPECTED = {
     'CupriteReflectance.hdr': ('095d7cd9d3221b15eca9da0050688de3480a1321d560925c02ac58e114f87d0b', 17526),
 }
 def record(folder,output):
-    path=folder/'guided-envi-acceptance.json';value=json.loads(path.read_text())
+    path=folder/'guided-envi-acceptance.json';value=json.loads(path.read_text(encoding='utf-8'))
     source=value['source'];inspection=value['inspection'];files={f['relativePath']:(f['sha256'],f['bytes']) for f in source['files']}
     if files!=EXPECTED or value.get('evidenceType')!='genuine-downloaded-envi' or value.get('flightInput')!='synthetic test position; not MSFS' or value.get('windowsMsfs')!='not tested':
         raise ValueError('Expected actual import/product acceptance of the hash-identified public Cuprite originals; mocks and hardware claims are refused.')
     validation=dict(automaticManifest=True,originalChannelsPreserved=True,originalFilesPreserved=value['externalOriginalsPreserved'],offlineReopen=value['offlineReopen'],duplicateReused=value['duplicateReused'],publishedProductSha256=value['publishedProduct']['sha256'],validSamples=value['validSamples'])
-    comparison=json.loads((folder/'independent-envi-comparison.json').read_text())
-    receipt=json.loads((folder/'download-receipt.json').read_text())
+    comparison=json.loads((folder/'independent-envi-comparison.json').read_text(encoding='utf-8'))
+    receipt=json.loads((folder/'download-receipt.json').read_text(encoding='utf-8'))
     if receipt.get('url')!='https://vis-webcontent.s3.amazonaws.com/tutorials/hyperspectral.zip' or receipt.get('networkBytes',0)<=0:raise ValueError('The actual public-data download receipt is required.')
     channels=[b['channel'] for b in source['manifest']['bands']]
     if set(channels)!=set(range(224)) or len(channels)!=224 or inspection['manifest'] is None or comparison.get('maximumAbsoluteDifference')!=0 or comparison.get('checkedGoodBands')!=170:raise ValueError('Original spectral channels or independent numeric checks are incomplete.')

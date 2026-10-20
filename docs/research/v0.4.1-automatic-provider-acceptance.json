@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "version": "0.4.1",
   "evidenceType": "genuine-public-provider-network",
-  "checkedUtc": "2026-10-20T01:23:03.0067182+00:00",
+  "checkedUtc": "2026-10-20T02:01:09.7636554+00:00",
   "windowsMsfs": "not tested",
   "description": "Actual current-source public discovery, bounded numeric retrieval, automatic manifests, QA-aware scientific sampling and verified products. Synthetic flight inputs; no hardware acceptance or bundled scientific originals.",
   "finalNetworkRerun": "passed",
@@ -68,7 +68,7 @@
       "validDerivedSamples": 576,
       "sampleCount": 576,
       "publishedProductVerified": true,
-      "publishedProductSha256": "d9797e601f0ea7bd07afeac7435c7455e852ca2389f45d795b7f507b70985603",
+      "publishedProductSha256": "adc696ef1d5f7872703f391cdb87f837c1bbb02426725e1ba92fa5e5efceba49",
       "flightInput": "synthetic test position; not MSFS",
       "sourceFiles": [
         {
@@ -77,7 +77,7 @@
           "sha256": "b25437967ba562cbdb4830d219e6fc65fa0ee0be760c48fce31a1dfa0fee04f5"
         }
       ],
-      "acceptanceArtifactSha256": "f06deb9fdfb85a39a24ef5ca4bbc634f309f6a70e21abf1eee2fc43a9585e372"
+      "acceptanceArtifactSha256": "71e8068fdf5411d5228d4f35d24d7d8bc7d0f874ab74bbe11aea0fe4eff64b11"
     },
     {
       "workflow": "landsat-c2-l2",
@@ -117,7 +117,7 @@
           "longitude": -74.99000000000001
         }
       },
-      "networkBytes": 1259542,
+      "networkBytes": 1259548,
       "retainedNumericBytes": 8642,
       "bands": [
         {
@@ -169,7 +169,7 @@
       "validDerivedSamples": 576,
       "sampleCount": 576,
       "publishedProductVerified": true,
-      "publishedProductSha256": "a2685bb26b5003727e879021ebba755367a90c574a920c038e6922db50b9ad96",
+      "publishedProductSha256": "566f07bac709dbc97b8a6dd3071ee195d1f007f3df5cb0d861af5ce95da3fe5c",
       "flightInput": "synthetic test position; not MSFS",
       "sourceFiles": [
         {
@@ -188,7 +188,7 @@
           "sha256": "6dcbf2ca051ac9b64c0574a5d61c465aeca0f08df0c9a6c227f5d41225563938"
         }
       ],
-      "acceptanceArtifactSha256": "2f183054207d43651a1f3e76914d2a3fe7877fb51c63e3cbcf80633cfc716167"
+      "acceptanceArtifactSha256": "9576dee78bdc2b191f6d8b275dd2456c430eece80b4e8ed004328d9aa4facf6d"
     },
     {
       "workflow": "sentinel-2-l2a",
@@ -310,7 +310,7 @@
       "validDerivedSamples": 183,
       "sampleCount": 576,
       "publishedProductVerified": true,
-      "publishedProductSha256": "9308baf410fc83a226bae8ab63265d8452e2d82ddd8e86a53e890d12107352af",
+      "publishedProductSha256": "b0602e54a09e598c3e6aac51d75fa2e6d78c0959f4be8261f152fbe8b35c6550",
       "flightInput": "synthetic test position; not MSFS",
       "sourceFiles": [
         {
@@ -339,7 +339,7 @@
           "sha256": "490d03dc11d94fabc5037777b2e8b4af374f4858ce801dfd33cbe7c146ea2fa5"
         }
       ],
-      "acceptanceArtifactSha256": "84357704bfc4236ab0bae87fa0f495792a39499fb078cad1da9e6e596a2a9dd1"
+      "acceptanceArtifactSha256": "98e57b937c9f50df807eb606ca77d26be101e7d9a1683dbeb5f9e5049f5d66a5"
     },
     {
       "workflow": "cop-dem-glo-30",
@@ -379,7 +379,7 @@
           "longitude": 8.11
         }
       },
-      "networkBytes": 1445258,
+      "networkBytes": 1445256,
       "retainedNumericBytes": 18044,
       "bands": [
         {
@@ -401,7 +401,7 @@
       "validDerivedSamples": 576,
       "sampleCount": 576,
       "publishedProductVerified": true,
-      "publishedProductSha256": "b3630366361c9a100544d6864f2b10074926523467e3db67fe064e52d00972f5",
+      "publishedProductSha256": "530145835bb931b61670a913b5967a31251a65103a7de9916ec049aede1973a5",
       "flightInput": "synthetic test position; not MSFS",
       "sourceFiles": [
         {
@@ -410,7 +410,7 @@
           "sha256": "f66b92a3a5f914f5c26ec8e5c1395311472f188347e5666d66a513aee4d22a3d"
         }
       ],
-      "acceptanceArtifactSha256": "f2c324442eb3262ba3c138cc5eeb957dcf3e40d664db70c0b5be05a854086570"
+      "acceptanceArtifactSha256": "7c584463b702b2dde7bc0860bd6560705259960f9144edc227d03fcaa176e040"
     }
   ],
   "independentComparison": {
@@ -443,6 +443,10 @@
       "reason": "Discovery succeeded, but a required exact bounded asset range returned 503. Partial data was refused; no validated source/product or acceptance pass."
     }
   ],
+  "previousSuccessfulNetworkRun": {
+    "checkedUtc": "2026-10-20T01:23:03.0067182+00:00",
+    "reportSha256": "f1625a435ae2477cf3c593c53a53947231af4817e5c9c7cb008e6a44930d6b43"
+  },
   "canonicalLfSourceSha256": {
     "src/AeroScience.Missions/AutomaticScientificData.cs": "38af01eb7c51b03ea0bbf64d4982ca5ad0eab9efc15f8722eea7c98867182ef3",
     "src/AeroScience.Missions/ScientificTransferLedger.cs": "f87df5d69a7aae632f8ee0912da1f6b40ee9648b2755771efc550e3a59625636",
@@ -481,8 +485,8 @@
     "src/AeroScience.Missions/EnvironmentTelemetryCache.cs": "0f4727441b8a562d8dda05d8529f64154896e6b9e5887adbd73ac59454fcf686",
     "tests/AeroScience.ProviderAcceptance/WorkspaceAcceptance.cs": "6876c250506824e864cb76036b6926453d9853973505467f903a4c7639305474",
     "tests/AeroScience.ProviderAcceptance/RegionalWorkspaceAcceptance.cs": "9f8c2b6cc6d75eede961b53463cd5f903429949d383c807451f6c4607099b3b5",
-    "scripts/research/verify_workspace_rasters.py": "1b95e1924fc1684cf963854ae5f6e6dce32d5aded8c3aa810fc2a552dea4cffb",
-    "scripts/research/verify_envi_originals.py": "943b8cb85880c653dd2f45fc119508506ef7f245670200d08f576d1f79225c89",
+    "scripts/research/verify_workspace_rasters.py": "4cddf23841da336ffb327cacf964b0df355a2e360a7ef6f8a8328a3d0e885236",
+    "scripts/research/verify_envi_originals.py": "ae1f8a5e15a7ce855ac64be79da50792c4648bf95dfd3e451611590f9cecaf10",
     "src/AeroScience.Missions/ScienceStore.cs": "7f7a79b763a6b084a261cb12011b13f49df4cbc3f94536566a89c212a7bfc5e9",
     "src/AeroScience.Missions/MissionStore.cs": "ae5f859ddc247cb16561934e690343f78025430cf6ae1a978b8c25304d31f590",
     "src/AeroScience.Missions/MissionReplay.cs": "ab519ff24cc09d0e5c2faf540d3e30eef67195d5fdb1f6ac7a52aded86fb9435",

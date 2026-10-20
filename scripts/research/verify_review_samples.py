@@ -19,13 +19,13 @@ def digest(path):
 
 
 def verify(folder):
-    summary = json.loads((folder / 'review-acceptance.json').read_text())
+    summary = json.loads((folder / 'review-acceptance.json').read_text(encoding='utf-8'))
     if summary['evidenceType'] != 'genuine-retained-data-scientific-review' or summary['windowsMsfs'] != 'not tested':
         raise ValueError('Expected retained genuine data, synthetic flight and no hardware claim')
     results = []
     for item in summary['results']:
         root = folder / item['kind'].capitalize()
-        report = json.loads((root / 'review-acceptance.json').read_text())
+        report = json.loads((root / 'review-acceptance.json').read_text(encoding='utf-8'))
         source = report['source']
         library = root / 'ScienceLibrary'
         original_root = library / source['relativeDirectory']
@@ -104,5 +104,5 @@ if __name__ == '__main__':
     parser.add_argument('--output', type=Path, required=True)
     args = parser.parse_args()
     result = verify(args.folder)
-    args.output.write_text(json.dumps(result, indent=2) + '\n')
+    args.output.write_text(json.dumps(result, indent=2) + '\n', encoding='utf-8')
     print('Independent genuine retained-data review passed:', len(result['results']), 'kinds; no Windows/MSFS or new network claim.')

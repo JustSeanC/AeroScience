@@ -104,7 +104,7 @@ def download(output):
         files.append({"relativePath": name, "bytes": written, "sha256": expected_hash})
         print("Verified actual original: " + name, flush=True)
     receipt = {"formatVersion": 1, "url": URL, "checkedUtc": datetime.now(timezone.utc).isoformat(), "archiveBytes": archive.length, "networkBytes": archive.network_bytes, "method": "validated HTTP member ranges; original ZIP CRC and pinned file SHA-256; no other tutorial scenes downloaded", "files": files}
-    (output / "download-receipt.json").write_text(json.dumps(receipt, indent=2) + "\n")
+    (output / "download-receipt.json").write_text(json.dumps(receipt, indent=2) + "\n", encoding='utf-8')
     return receipt
 
 

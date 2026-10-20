@@ -25,7 +25,7 @@ if ($source -notmatch 'Output=no' -or $source -notmatch 'CreateAppDir=no' -or $s
     throw 'Probe must not create an installation or application output.'
 }
 Set-Content -LiteralPath (Join-Path $PSScriptRoot 'probe-path.txt') -Value $probe
-''' + "Write-Output '" + output.replace("'", "''") + "'\nexit " + str(exit_code) + '\n')
+''' + "Write-Output '" + output.replace("'", "''") + "'\nexit " + str(exit_code) + '\n', encoding='utf-8')
         harness = root/'test.ps1'
         harness.write_text('''
 param($Helper, $Compiler)
@@ -34,7 +34,7 @@ $ErrorActionPreference = 'Stop'
 $selected = Resolve-InnoSetupCompiler -InnoCompiler $Compiler
 $version = Get-InnoSetupCompilerVersion -CompilerPath $selected
 Write-Output ("ENGINE=" + $version.ToString())
-''')
+''', encoding='utf-8')
         result = subprocess.run([PWSH, '-NoLogo', '-NoProfile', '-File', str(harness),
                                  str(REPO/'scripts/release/InnoSetup.ps1'), str(compiler)],
                                 text=True, capture_output=True, timeout=30)

@@ -28,19 +28,19 @@ class ReleaseFlowTests(unittest.TestCase):
         self.receipt = self.root/'sdk-build.json'
         self.receipt.write_text(json.dumps(dict(variant='toolbar-full', source_commit=COMMIT, source_dirty=False,
             built_utc=DATE, builder_sha256='fixture-only', sdk_contract='passed', sdk_header_sha256='fixture-only',
-            files={name: hashlib.sha256(path.read_bytes()).hexdigest() for name, path in p.files(self.sdk).items()})))
-        (self.published/'build-info.json').write_text(json.dumps(dict(version=p.RELEASE_VERSION, source_commit=COMMIT, source_dirty=False, target='win-x64')))
+            files={name: hashlib.sha256(path.read_bytes()).hexdigest() for name, path in p.files(self.sdk).items()})), encoding='utf-8')
+        (self.published/'build-info.json').write_text(json.dumps(dict(version=p.RELEASE_VERSION, source_commit=COMMIT, source_dirty=False, target='win-x64')), encoding='utf-8')
         digest = hashlib.sha256((self.published/'SimConnect.dll').read_bytes()).hexdigest()
         self.report = self.root/'runtime-report.json'
         self.report.write_text(json.dumps(dict(checked_utc=DATE, architecture='Windows x64', export_check='passed',
-            sha256=digest, exports=p.RUNTIME_EXPORTS, runtime_file=r'C:\Users\private\SDK\SimConnect.dll')))
+            sha256=digest, exports=p.RUNTIME_EXPORTS, runtime_file=r'C:\Users\private\SDK\SimConnect.dll')), encoding='utf-8')
         self.approval = self.root/'runtime-approval.json'
         self.approval.write_text(json.dumps(dict(format_version=2, redistribution_permitted=True, permission_for_file='SimConnect.dll',
             runtime_sha256=digest, permission_source='PRIVATE SENDER: fixture@example.invalid',
             permission_excerpt='PRIVATE ORIGINAL CORRESPONDENCE FIXTURE', private_evidence_reference='PRIVATE FILE PATH FIXTURE',
             permission_summary='TEST ONLY: maintainer attestation fixture, not a licence grant',
             conditions_reviewed=True, conditions_summary='No additional conditions in this structural fixture.', supporting_evidence_private=True,
-            reviewed_by='fixture', reviewed_utc=DATE, private_extra_field='must not be published')))
+            reviewed_by='fixture', reviewed_utc=DATE, private_extra_field='must not be published')), encoding='utf-8')
         self.candidate = self.root/'candidates'/p.identity()['root_name']
         self.final = self.root/p.identity()['asset_name']
         self.acceptance = self.root/'acceptance.json'
@@ -56,7 +56,7 @@ class ReleaseFlowTests(unittest.TestCase):
         acceptance.update(tester='STRUCTURAL TEST FIXTURE ONLY', tested_utc=DATE)
         for name in p.ACCEPTANCE:
             acceptance['checks'][name].update(result='passed', evidence='UNIT FIXTURE, NOT WINDOWS ACCEPTANCE')
-        self.acceptance.write_text(json.dumps(acceptance))
+        self.acceptance.write_text(json.dumps(acceptance), encoding='utf-8')
         return acceptance
 
     def test_science_release_is_a_prerelease_with_the_conventional_setup_filename(self):
@@ -78,11 +78,11 @@ class ReleaseFlowTests(unittest.TestCase):
         self.assertEqual(data['checks']['vr_performance']['result'], 'passed')
         self.assertEqual(data['checks']['science040_long_recording']['result'], 'passed')
         data['checks']['science040_long_recording']['result']='pending'
-        self.acceptance.write_text(json.dumps(data))
+        self.acceptance.write_text(json.dumps(data), encoding='utf-8')
         with self.assertRaisesRegex(ValueError,'science040_long_recording'):p.validate_acceptance(self.acceptance)
         data['checks']['science040_long_recording']['result']='passed'
         data['checks']['live_mission_smoke']['result'] = 'blocked'
-        self.acceptance.write_text(json.dumps(data))
+        self.acceptance.write_text(json.dumps(data), encoding='utf-8')
         with self.assertRaisesRegex(ValueError, 'live_mission_smoke'): p.finalize_candidate(self.candidate, self.acceptance, self.final)
         self.assertFalse(self.final.exists())
 
@@ -116,29 +116,29 @@ class ReleaseFlowTests(unittest.TestCase):
 
     def test_tampered_candidate_or_wrong_source_cannot_use_old_acceptance(self):
         commit, digest = self.prepare(); data = self.accept(commit, digest)
-        data['source_commit'] = 'b'*40; self.acceptance.write_text(json.dumps(data))
+        data['source_commit'] = 'b'*40; self.acceptance.write_text(json.dumps(data), encoding='utf-8')
         with self.assertRaisesRegex(ValueError, 'different source'): p.finalize_candidate(self.candidate, self.acceptance, self.final)
         self.accept(commit, digest)
-        (self.candidate/'AeroScience.dll').write_text('modified after testing')
+        (self.candidate/'AeroScience.dll').write_text('modified after testing', encoding='utf-8')
         with self.assertRaisesRegex(ValueError, 'candidate payload'): p.finalize_candidate(self.candidate, self.acceptance, self.final)
         self.assertFalse(self.final.exists())
 
     def test_unconfirmed_permission_wrong_runtime_or_metadata_only_report_blocks_preparation(self):
         data = p.read_json(self.approval); data['redistribution_permitted'] = False
-        self.approval.write_text(json.dumps(data))
+        self.approval.write_text(json.dumps(data), encoding='utf-8')
         with self.assertRaisesRegex(ValueError, 'permission'): self.prepare()
         self.assertFalse(self.candidate.exists())
-        data['redistribution_permitted'] = True; self.approval.write_text(json.dumps(data))
-        report = p.read_json(self.report); report['export_check'] = 'not run'; self.report.write_text(json.dumps(report))
+        data['redistribution_permitted'] = True; self.approval.write_text(json.dumps(data), encoding='utf-8')
+        report = p.read_json(self.report); report['export_check'] = 'not run'; self.report.write_text(json.dumps(report), encoding='utf-8')
         with self.assertRaisesRegex(ValueError, 'real Windows'): self.prepare()
-        report['export_check'] = 'passed'; report['sha256'] = '0'*64; self.report.write_text(json.dumps(report))
+        report['export_check'] = 'passed'; report['sha256'] = '0'*64; self.report.write_text(json.dumps(report), encoding='utf-8')
         with self.assertRaisesRegex(ValueError, 'matching'): self.prepare()
 
     def test_conditions_must_be_recorded_without_guessing(self):
         original = p.read_json(self.approval)
         for change in ({'conditions_reviewed': False}, {'conditions_summary': ''}, {'supporting_evidence_private': False}):
             with self.subTest(change=change):
-                self.approval.write_text(json.dumps({**original, **change}))
+                self.approval.write_text(json.dumps({**original, **change}), encoding='utf-8')
                 with self.assertRaisesRegex(ValueError, 'conditions'): self.prepare()
                 self.assertFalse(self.candidate.exists())
 
@@ -146,31 +146,31 @@ class ReleaseFlowTests(unittest.TestCase):
         commit, digest = self.prepare(); self.accept(commit, digest)
         public_path = self.candidate/'Dependencies/runtime-approval.json'
         record = p.read_json(public_path); record['permission_excerpt'] = 'PRIVATE ORIGINAL CORRESPONDENCE FIXTURE'
-        public_path.write_text(json.dumps(record))
+        public_path.write_text(json.dumps(record), encoding='utf-8')
         with self.assertRaisesRegex(ValueError, 'non-public'): p.finalize_candidate(self.candidate, self.acceptance, self.final)
         self.assertFalse(self.final.exists())
 
     def test_email_archives_are_refused_in_distribution_inputs(self):
         for suffix in ('.eml', '.MSG', '.mbox'):
             with self.subTest(suffix=suffix):
-                mail = self.published/('authorization'+suffix); mail.write_text('PRIVATE ORIGINAL CORRESPONDENCE FIXTURE')
+                mail = self.published/('authorization'+suffix); mail.write_text('PRIVATE ORIGINAL CORRESPONDENCE FIXTURE', encoding='utf-8')
                 try:
                     with self.assertRaisesRegex(ValueError, 'correspondence'): self.prepare()
                     self.assertFalse(self.candidate.exists())
                 finally: mail.unlink()
 
     def test_dirty_sdk_source_and_altered_sdk_assets_are_rejected(self):
-        receipt = p.read_json(self.receipt); receipt['source_dirty'] = True; self.receipt.write_text(json.dumps(receipt))
+        receipt = p.read_json(self.receipt); receipt['source_dirty'] = True; self.receipt.write_text(json.dumps(receipt), encoding='utf-8')
         with self.assertRaisesRegex(ValueError, 'clean committed'): self.prepare()
-        receipt['source_dirty'] = False; self.receipt.write_text(json.dumps(receipt))
-        (self.sdk/'html_ui/InGamePanels/AeroScience/AeroScience.js').write_text('changed')
+        receipt['source_dirty'] = False; self.receipt.write_text(json.dumps(receipt), encoding='utf-8')
+        (self.sdk/'html_ui/InGamePanels/AeroScience/AeroScience.js').write_text('changed', encoding='utf-8')
         with self.assertRaisesRegex(ValueError, 'size|differ'): self.prepare()
 
     def test_final_verification_rejects_checksum_changes_and_zip_traversal(self):
         commit, digest = self.prepare(); self.accept(commit, digest)
         p.finalize_candidate(self.candidate, self.acceptance, self.final)
         checksum = self.final.with_suffix('.zip.sha256')
-        checksum.write_text('0'*64+'  '+self.final.name+'\n')
+        checksum.write_text('0'*64+'  '+self.final.name+'\n', encoding='utf-8')
         with self.assertRaisesRegex(ValueError, 'checksum'): p.verify_archive(self.final, checksum)
         with zipfile.ZipFile(self.final, 'a') as archive: archive.writestr('../outside.txt', 'must not extract')
         p.write_checksum(self.final)
@@ -245,7 +245,7 @@ $global:mock.release.assets[0].digest='sha256:'+('0'*64)
 try { & $Publisher -Archive $Archive; throw 'Conflicting asset was accepted' }
 catch { if ($_.Exception.Message -notlike '*Existing asset differs*') { throw } }
 if ($global:mock.creates -ne 1 -or $global:mock.uploads -ne 3) { throw 'Conflict changed release assets' }
-''')
+''', encoding='utf-8')
         result = subprocess.run([shutil.which('pwsh'), '-NoProfile', '-File', str(harness),
             str(p.REPO/'scripts/release/Publish-Release.ps1'), str(self.final), sys.executable, COMMIT],
             cwd=p.REPO, text=True, capture_output=True, timeout=60)

@@ -34,10 +34,10 @@ class WindowsHelperTests(unittest.TestCase):
     def test_feedback_excludes_database_credentials_and_sdk_binaries(self):
         with tempfile.TemporaryDirectory(prefix='aeroscience feedback ') as temp:
             root = Path(temp); data = root/'data'; (data/'logs').mkdir(parents=True)
-            (data/'logs/engine-20261016.log').write_text('Test connection failure HRESULT 0x80004005\n')
-            (data/'missions.db').write_text('private recording fixture')
-            (data/'credentials.env').write_text('private fixture')
-            build = root/'build'; build.mkdir(); (build/'build.log').write_text('SDK build test fixture\n')
+            (data/'logs/engine-20261016.log').write_text('Test connection failure HRESULT 0x80004005\n', encoding='utf-8')
+            (data/'missions.db').write_text('private recording fixture', encoding='utf-8')
+            (data/'credentials.env').write_text('private fixture', encoding='utf-8')
+            build = root/'build'; build.mkdir(); (build/'build.log').write_text('SDK build test fixture\n', encoding='utf-8')
             (build/'SimConnect.dll').write_bytes(b'proprietary fixture excluded')
             output = root/'reports'
             result = self.invoke(REPO/'scripts/release/Collect-Feedback.ps1', '-DataDirectory', data,
@@ -50,7 +50,7 @@ class WindowsHelperTests(unittest.TestCase):
                 self.assertTrue(any(name.endswith('/build/build.log') for name in names))
                 self.assertTrue(any(name.endswith('/FEEDBACK.txt') for name in names))
                 self.assertFalse(any(name.endswith(('.db', '.env', '.dll')) for name in names))
-            self.assertEqual((data/'missions.db').read_text(), 'private recording fixture')
+            self.assertEqual((data/'missions.db').read_text(encoding='utf-8'), 'private recording fixture')
 
     def test_runtime_checker_rejects_non_pe_files(self):
         with tempfile.TemporaryDirectory() as temp:
@@ -64,7 +64,7 @@ class WindowsHelperTests(unittest.TestCase):
         import hashlib
         with tempfile.TemporaryDirectory(prefix='aeroscience approval ') as temp:
             root = Path(temp); runtime = root/'SimConnect.dll'; runtime.write_bytes(b'APPROVAL HASH FIXTURE ONLY')
-            (root/'private-original.eml').write_text('PRIVATE CORRESPONDENCE MUST STAY HERE')
+            (root/'private-original.eml').write_text('PRIVATE CORRESPONDENCE MUST STAY HERE', encoding='utf-8')
             output = root/'release records/runtime-approval.json'
             script = REPO/'scripts/release/New-RuntimeApproval.ps1'
             args = ('-RuntimePath', runtime, '-OutputPath', output, '-ConditionsSummary', 'No additional conditions reported by the maintainer.')
@@ -77,7 +77,7 @@ class WindowsHelperTests(unittest.TestCase):
             self.assertEqual(data['format_version'], 2); self.assertTrue(data['redistribution_permitted'])
             self.assertTrue(data['conditions_reviewed']); self.assertTrue(data['supporting_evidence_private'])
             self.assertEqual(data['reviewed_by'], 'AeroScience maintainer'); self.assertIn('T', data['reviewed_utc'])
-            self.assertNotIn('permission_excerpt', data); self.assertNotIn('PRIVATE CORRESPONDENCE', output.read_text())
+            self.assertNotIn('permission_excerpt', data); self.assertNotIn('PRIVATE CORRESPONDENCE', output.read_text(encoding='utf-8'))
             original = output.read_bytes()
             duplicate = self.invoke(script, *args, '-RedistributionAuthorized')
             self.assertNotEqual(duplicate.returncode, 0); self.assertEqual(output.read_bytes(), original)
@@ -101,7 +101,7 @@ class WindowsHelperTests(unittest.TestCase):
             shutil.copy2(REPO/'scripts/build/sdk-contract.cpp', scripts/'sdk-contract.cpp')
             sdk = root/'SDK with spaces'; (sdk/'Tools/bin').mkdir(parents=True); (sdk/'SimConnect SDK/include').mkdir(parents=True)
             (sdk/'Tools/bin/fspackagetool.exe').write_bytes(b'not invoked')
-            (sdk/'SimConnect SDK/include/SimConnect.h').write_text('// not compiled by the mocked compiler')
+            (sdk/'SimConnect SDK/include/SimConnect.h').write_text('// not compiled by the mocked compiler', encoding='utf-8')
             harness = root/'test.ps1'
             harness.write_text('''
 param($BuildScript, $SdkPath)
@@ -112,7 +112,7 @@ catch {
  if ($_.Exception.Message -notlike '*Installed SDK differs*') { throw }
  if ($global:LASTEXITCODE -ne 17) { throw 'Compiler exit status lost' }
 }
-''')
+''', encoding='utf-8')
             result = self.invoke(harness, scripts/'Build-Toolbar.ps1', sdk)
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             stage = root/'artifacts/toolbar-full'
@@ -124,12 +124,12 @@ catch {
             root = Path(temp); scripts = root/'scripts/build'; scripts.mkdir(parents=True)
             shutil.copy2(REPO/'scripts/build/Build-Toolbar.ps1', scripts/'Build-Toolbar.ps1')
             previous = root/'artifacts/toolbar-poc/sdk-build.json'
-            previous.parent.mkdir(parents=True); previous.write_text('existing build receipt fixture')
+            previous.parent.mkdir(parents=True); previous.write_text('existing build receipt fixture', encoding='utf-8')
             result = self.invoke(scripts/'Build-Toolbar.ps1', '-SdkRoot', root/'missing SDK',
                                  '-ProofOfConcept', '-WindowProbe')
             self.assertNotEqual(result.returncode, 0)
             self.assertIn('Choose either', result.stderr)
-            self.assertEqual(previous.read_text(), 'existing build receipt fixture')
+            self.assertEqual(previous.read_text(encoding='utf-8'), 'existing build receipt fixture')
 
 
 if __name__ == '__main__': unittest.main()

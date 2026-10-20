@@ -25,7 +25,7 @@ def candidate(flow, vc_signature='Valid'):
     report = flow.root/'tool-report.json'
     report.write_text(json.dumps(dict(compiler_sha256=installer.sha(compiler), compiler_version='UNIT FIXTURE ONLY',
         vc_sha256=installer.sha(vc), vc_version='UNIT FIXTURE ONLY', vc_signature=vc_signature, vc_architecture='x64',
-        vc_publisher='Microsoft Corporation - SYNTHETIC UNIT FIXTURE, NOT SIGNATURE EVIDENCE')))
+        vc_publisher='Microsoft Corporation - SYNTHETIC UNIT FIXTURE, NOT SIGNATURE EVIDENCE')), encoding='utf-8')
     installer.record(folder, compiler, vc, report)
     acceptance = installer.p.read_json(folder/'ACCEPTANCE.json')
     acceptance.update(tester='UNIT FIXTURE ONLY', tested_utc='2026-10-17T00:00:00Z')

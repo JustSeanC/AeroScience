@@ -23,7 +23,7 @@ def prepare(source):
     path.write_text(json.dumps(value,ensure_ascii=False,separators=(',',':'))+'\n',encoding='utf-8',newline='\n')
     proof=dict(dataset='OurAirports',license='Public domain, no guarantee of accuracy or fitness for use',licenseUrl='https://ourairports.com/data/',sourceCommit=COMMIT,sourceUrl=f'https://raw.githubusercontent.com/davidmegginson/ourairports-data/{COMMIT}/airports.csv',sourceSha256=hashlib.sha256(raw).hexdigest(),features=len(rows),excluded='Closed airports and invalid coordinates only; original positions preserved',bundledSha256=hashlib.sha256(path.read_bytes()).hexdigest())
     provenance=web/'geography/airport-search-provenance.json';provenance.write_text(json.dumps(proof,indent=2)+'\n',encoding='utf-8',newline='\n')
-    manifest=web/'assets-manifest.json';v=json.loads(manifest.read_text())
+    manifest=web/'assets-manifest.json';v=json.loads(manifest.read_text(encoding='utf-8'))
     for p in (path,provenance):v['files'][str(p.relative_to(web))]=hashlib.sha256(p.read_bytes()).hexdigest()
     manifest.write_text(json.dumps(v,indent=2)+'\n',encoding='utf-8',newline='\n');return proof
 if __name__=='__main__':

@@ -9,7 +9,7 @@ import verify_scientific_acceptance as verification
 def record(folder,output,pending=False):
     results=[]
     for name in sorted(verification.WORKFLOWS):
-        source=folder/(name+'-acceptance.json');value=json.loads(source.read_text())
+        source=folder/(name+'-acceptance.json');value=json.loads(source.read_text(encoding='utf-8'))
         state=value['state'];catalog=value['source'];manifest=catalog['manifest'];product=value['publishedProduct']
         acquisition=manifest['acquisition']
         if not(state['status']=='Ready' and state['downloadedBytes']>0 and value['valid']>0 and product['sourceId']==catalog['id'] and product['sourceClass']=='externalDataset' and product['sha256'] and acquisition['unsignedAssets'] and 'SYNTHETIC' not in manifest['name'].upper()):
@@ -28,8 +28,8 @@ def record(folder,output,pending=False):
         description='Actual public API discovery, bounded numeric retrieval, internal manifest, verified library import, QA-aware sampling and persisted/reloaded mission products. Flight inputs are synthetic and explicitly labeled. Data files and SAS tokens are not bundled.',
         finalNetworkRerun='pending' if pending else 'passed',finalNetworkRerunReason='The final rerun was interrupted by the cloud HTTP tunnel returning 503 across providers. Earlier successful genuine-data runs are preserved below; this is not an acceptance pass for the final source.' if pending else None,
         canonicalLfSourceSha256={name:verification.source_digest(verification.ROOT/name) for name in verification.SOURCES},workflows=results,
-        independentComparison=json.loads(comparison.read_text()) if comparison.exists() else None,
-        hyperspectral=dict(status='discovery only; automated preparation and NASA authorization unsupported',details=json.loads((folder/'hyperspectral-discovery.json').read_text()) if (folder/'hyperspectral-discovery.json').exists() else None))
+        independentComparison=json.loads(comparison.read_text(encoding='utf-8')) if comparison.exists() else None,
+        hyperspectral=dict(status='discovery only; automated preparation and NASA authorization unsupported',details=json.loads((folder/'hyperspectral-discovery.json').read_text(encoding='utf-8')) if (folder/'hyperspectral-discovery.json').exists() else None))
     output.parent.mkdir(parents=True,exist_ok=True);output.write_text(json.dumps(value,indent=2)+'\n',encoding='utf-8',newline='\n');verification.verify(output,require_current=not pending)
     return value
 if __name__=='__main__':

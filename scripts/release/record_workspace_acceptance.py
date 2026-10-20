@@ -21,8 +21,8 @@ def record(providers, envi, output):
     for folder in (providers, envi):
         workspace_path = folder / 'workspace-acceptance.json'
         comparison_path = folder / 'independent-workspace-comparison.json'
-        workspace = json.loads(workspace_path.read_text())
-        comparison = json.loads(comparison_path.read_text())
+        workspace = json.loads(workspace_path.read_text(encoding='utf-8'))
+        comparison = json.loads(comparison_path.read_text(encoding='utf-8'))
         if workspace['evidenceType'] != 'genuine-external-data-and-synthetic-flight-input' or workspace['windowsMsfs'] != 'not tested' or comparison['evidenceType'] != 'independent-genuine-raster-comparison':
             raise ValueError('Actual genuine-source runs and independent numeric comparisons are required')
         checked = {r['artifactId']: r for r in comparison['results']}

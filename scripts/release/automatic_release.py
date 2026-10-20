@@ -76,7 +76,7 @@ def verify(setup,record_path,archive,expected_commit=None):
     validate_evidence(record['validation'],info['source_commit'],info['payload_sha256']);installer.pe(setup)
     p.require(build.get('source_commit')==info['source_commit'] and build.get('payload_sha256')==info['payload_sha256'] and build.get('version')==p.RELEASE_VERSION,'Installer source/version/payload mismatch.')
     p.require(build.get('setup_name')==setup.name==p.identity()['setup_name'] and build.get('setup_sha256')==digest(setup),'Installer bytes differ from compiler receipt.')
-    p.require(setup.with_name(setup.name+'.sha256').read_text().strip()==digest(setup)+'  '+setup.name,'Installer checksum mismatch.')
+    p.require(setup.with_name(setup.name+'.sha256').read_text(encoding='utf-8').strip()==digest(setup)+'  '+setup.name,'Installer checksum mismatch.')
     p.require(hashlib.sha256((json.dumps(build,sort_keys=True,indent=2)+'\n').encode()).hexdigest()==record.get('installer_receipt_sha256'),'Installer build receipt fingerprint differs.')
     p.require(build.get('recipe_sha256')==installer.recipe_sha(),'Installer recipe changed; select the original source revision.')
     if expected_commit:p.require(expected_commit==info['source_commit'],'Changed source: existing finalized output belongs to another commit; nothing was overwritten.')

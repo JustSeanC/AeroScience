@@ -19,7 +19,7 @@ class InstallerReleaseTests(unittest.TestCase):
         final = self.flow.root/'final'
         self.assertEqual(before, (final/meta['setup_name']).read_bytes())
         self.assertEqual(info['asset_name'], i.p.identity()['setup_name'])
-        self.assertIn('Run the setup EXE', (final/'RELEASE-NOTES.md').read_text())
+        self.assertIn('Run the setup EXE', (final/'RELEASE-NOTES.md').read_text(encoding='utf-8'))
         self.assertTrue((final/meta['setup_record_name']).is_file())
         with self.assertRaisesRegex(ValueError, 'already exist'): i.finalize(folder, self.flow.acceptance, final)
 
@@ -46,9 +46,9 @@ class InstallerReleaseTests(unittest.TestCase):
         folder = fixture.candidate(self.flow); installed = self.flow.root/'installed'
         shutil.copytree(folder/'payload', installed)
         i.verify_installed(folder, installed)
-        (installed/'AeroScience.Engine.dll').write_text('changed')
+        (installed/'AeroScience.Engine.dll').write_text('changed', encoding='utf-8')
         with self.assertRaisesRegex(ValueError, 'Installed file'): i.verify_installed(folder, installed)
-        (folder/'payload'/'SimConnect.dll').write_text('changed')
+        (folder/'payload'/'SimConnect.dll').write_text('changed', encoding='utf-8')
         with self.assertRaisesRegex(ValueError, 'loading/export|differ'): i.validate_candidate(folder)
 
     def test_same_recipe_in_a_crlf_checkout_keeps_tested_installer_valid(self):

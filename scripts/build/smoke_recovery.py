@@ -31,7 +31,7 @@ def main():
             proc = subprocess.Popen([os.environ.get('DOTNET', 'dotnet'), str(dll)], cwd=REPO/'src/AeroScience.Engine', env=env,
                                     stdout=log, stderr=subprocess.STDOUT)
             for _ in range(100):
-                if proc.poll() is not None: raise RuntimeError(log_path.read_text())
+                if proc.poll() is not None: raise RuntimeError(log_path.read_text(encoding='utf-8'))
                 try:
                     with urllib.request.urlopen(BASE+'/api/health', timeout=1) as response:
                         if response.status == 200: return proc

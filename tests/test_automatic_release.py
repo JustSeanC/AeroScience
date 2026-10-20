@@ -21,17 +21,17 @@ class AutomaticReleaseTests(unittest.TestCase):
         # Preserve recorded numeric evidence structurally while testing this isolated
         # synthetic finalization flow. Production evidence() still requires a passing final run.
         control_fixture={'workflows':[{'workflow':name} for name in sorted(a.scientific.WORKFLOWS)],'test_only':'Synthetic release-control fixture; never provider acceptance.'}
-        fixture_report=self.flow.root/'provider-control-fixture.json';fixture_report.write_text(json.dumps(control_fixture))
+        fixture_report=self.flow.root/'provider-control-fixture.json';fixture_report.write_text(json.dumps(control_fixture), encoding='utf-8')
         fixture_proof=patch.object(a.scientific,'verify',lambda:control_fixture)
         fixture_path=patch.object(a.scientific,'REPORT',fixture_report)
         fixture_proof.start();self.addCleanup(fixture_proof.stop);fixture_path.start();self.addCleanup(fixture_path.stop)
 
     def evidence(self):
         root=self.flow.root
-        unit=root/'unit.trx';unit.write_text('<TestRun><ResultSummary><Counters total="3" passed="3" failed="0" error="0" aborted="0" notExecuted="0"/></ResultSummary></TestRun>')
-        browser=root/'browser.json';browser.write_text(json.dumps(dict(stats=dict(expected=2,unexpected=0,flaky=0,skipped=1))))
-        helper=root/'helpers.json';helper.write_text(json.dumps(dict(successful=True,passed=5,failed=0,errors=0,skipped=1)))
-        recovery=root/'recovery.json';recovery.write_text('{"result":"passed"}')
+        unit=root/'unit.trx';unit.write_text('<TestRun><ResultSummary><Counters total="3" passed="3" failed="0" error="0" aborted="0" notExecuted="0"/></ResultSummary></TestRun>', encoding='utf-8')
+        browser=root/'browser.json';browser.write_text(json.dumps(dict(stats=dict(expected=2,unexpected=0,flaky=0,skipped=1))), encoding='utf-8')
+        helper=root/'helpers.json';helper.write_text(json.dumps(dict(successful=True,passed=5,failed=0,errors=0,skipped=1)), encoding='utf-8')
+        recovery=root/'recovery.json';recovery.write_text('{"result":"passed"}', encoding='utf-8')
         output=root/'technical.json';a.evidence(unit,browser,helper,recovery,flow.COMMIT,output)
         return output
 
@@ -45,7 +45,7 @@ class AutomaticReleaseTests(unittest.TestCase):
         with zipfile.ZipFile(output/a.p.identity()['asset_name']) as archive:
             self.assertFalse(any(n.endswith('ACCEPTANCE.json') for n in archive.namelist()))
             self.assertTrue(any(n.endswith('ALPHA-VALIDATION.json') for n in archive.namelist()))
-        self.assertIn('NOT VERIFIED', (output/'RELEASE-NOTES.md').read_text())
+        self.assertIn('NOT VERIFIED', (output/'RELEASE-NOTES.md').read_text(encoding='utf-8'))
 
     def test_science_release_requires_genuine_installed_acceptance(self):
         with patch.object(a.p,'requires_manual_acceptance',lambda *args:True):
@@ -74,12 +74,12 @@ class AutomaticReleaseTests(unittest.TestCase):
 
     def test_existing_notes_and_partial_final_files_are_not_overwritten(self):
         folder=fixtures.candidate(self.flow);output=self.flow.root/'final';proof=self.evidence()
-        a.finalize(folder,output,proof);(output/'RELEASE-NOTES.md').write_text('wrong notes')
+        a.finalize(folder,output,proof);(output/'RELEASE-NOTES.md').write_text('wrong notes', encoding='utf-8')
         with self.assertRaisesRegex(ValueError,'notes differ'):a.finalize(folder,output,proof)
         (output/'RELEASE-NOTES.md').unlink()
         self.assertEqual('incomplete',a.status(output,flow.COMMIT)['state'])
         with self.assertRaisesRegex(ValueError,'Incomplete'):a.finalize(folder,output,proof)
 
     def test_actual_evidence_parser_rejects_failing_or_missing_reports(self):
-        root=self.flow.root;self.evidence();(root/'helpers.json').write_text('{"successful":false,"passed":5,"failed":1,"errors":0}')
+        root=self.flow.root;self.evidence();(root/'helpers.json').write_text('{"successful":false,"passed":5,"failed":1,"errors":0}', encoding='utf-8')
         with self.assertRaisesRegex(ValueError,'helper tests failed'):a.evidence(root/'unit.trx',root/'browser.json',root/'helpers.json',root/'recovery.json',flow.COMMIT,root/'bad.json')

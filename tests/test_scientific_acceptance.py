@@ -13,13 +13,13 @@ class ScientificAcceptanceTests(unittest.TestCase):
     def validation_fixture(self):
         # Historical genuine metadata used ONLY as temporary validator-unit input.
         # Updated identities here do not create/publish current network evidence.
-        value=json.loads((ROOT/'docs/research/v0.3.1-automatic-provider-acceptance.json').read_text())
+        value=json.loads((ROOT/'docs/research/v0.3.1-automatic-provider-acceptance.json').read_text(encoding='utf-8'))
         value['test_only']='Validator fixture; not a current-source acceptance run'
         value['canonicalLfSourceSha256']={n:science.source_digest(ROOT/n) for n in science.SOURCES}
         return value
 
     def test_current_report_cannot_promote_pending_development_into_release_acceptance(self):
-        value=json.loads(science.REPORT.read_text())
+        value=json.loads(science.REPORT.read_text(encoding='utf-8'))
         if value.get('evidenceType')=='pending-genuine-provider-network':
             with self.assertRaisesRegex(ValueError,'pending'):science.verify()
             self.assertEqual([],value['workflows']);self.assertEqual('not tested',value['windowsMsfs'])
@@ -28,7 +28,7 @@ class ScientificAcceptanceTests(unittest.TestCase):
     def test_pending_final_rerun_blocks_distribution(self):
         value=self.validation_fixture();value['finalNetworkRerun']='pending';value['finalNetworkRerunReason']=None
         with tempfile.TemporaryDirectory() as temp:
-            path=Path(temp)/'report.json';path.write_text(json.dumps(value))
+            path=Path(temp)/'report.json';path.write_text(json.dumps(value), encoding='utf-8')
             with self.assertRaisesRegex(ValueError,'pending'):science.verify(path)
     def test_mock_pass_hardware_claim_missing_numeric_workflow_or_stale_source_is_refused(self):
         actual=self.validation_fixture()
@@ -40,13 +40,13 @@ class ScientificAcceptanceTests(unittest.TestCase):
             if case=='samples':value['workflows'][0]['validDerivedSamples']=0
             if case=='source':value['canonicalLfSourceSha256'][science.SOURCES[0]]='0'*64
             with tempfile.TemporaryDirectory() as temp:
-                path=Path(temp)/'report.json';path.write_text(json.dumps(value))
+                path=Path(temp)/'report.json';path.write_text(json.dumps(value), encoding='utf-8')
                 with self.subTest(case=case),self.assertRaises(ValueError):science.verify(path,require_current=False)
 
     def current_identity_fixture(self, name):
         # Historical genuine metadata exercises validator rules in a temporary unit
         # fixture only. It cannot become current release evidence or a network pass.
-        value=json.loads((ROOT/'docs/research'/('v0.4.0-'+name+'-acceptance.json')).read_text())
+        value=json.loads((ROOT/'docs/research'/('v0.4.0-'+name+'-acceptance.json')).read_text(encoding='utf-8'))
         value['test_only']='Temporary validator-unit input, not current-source scientific acceptance'
         value['canonicalLfSourceSha256']={n:science.source_digest(ROOT/n) for n in science.SOURCES}
         return value
@@ -54,7 +54,7 @@ class ScientificAcceptanceTests(unittest.TestCase):
     def test_current_guided_and_workspace_pending_evidence_cannot_approve_release(self):
         for name,validate in [('guided-envi',science.verify_guided_envi),('workspace',science.verify_workspace)]:
             path=ROOT/'docs/research'/('v'+science.VERSION+'-'+name+'-acceptance.json')
-            value=json.loads(path.read_text())
+            value=json.loads(path.read_text(encoding='utf-8'))
             with self.subTest(name=name):
                 if value.get('evidenceType','').startswith('pending-'):
                     with self.assertRaisesRegex(ValueError,'pending'):validate()
@@ -63,17 +63,17 @@ class ScientificAcceptanceTests(unittest.TestCase):
     def test_guided_envi_requires_actual_import_product_offline_and_current_source_evidence(self):
         value=self.current_identity_fixture('guided-envi')
         with tempfile.TemporaryDirectory() as temp:
-            path=Path(temp)/'envi.json';path.write_text(json.dumps(value));self.assertGreaterEqual(science.verify_guided_envi(path)['bands'],16)
+            path=Path(temp)/'envi.json';path.write_text(json.dumps(value), encoding='utf-8');self.assertGreaterEqual(science.verify_guided_envi(path)['bands'],16)
         for key in ('automaticManifest','originalChannelsPreserved','originalFilesPreserved','offlineReopen','duplicateReused'):
             changed=copy.deepcopy(value);changed['validation'][key]=False
             with tempfile.TemporaryDirectory() as temp:
-                path=Path(temp)/'envi.json';path.write_text(json.dumps(changed))
+                path=Path(temp)/'envi.json';path.write_text(json.dumps(changed), encoding='utf-8')
                 with self.subTest(key=key),self.assertRaises(ValueError):science.verify_guided_envi(path)
 
     def test_workspace_requires_current_genuine_numeric_support_and_distinct_mission_packages(self):
         actual=self.current_identity_fixture('workspace')
         with tempfile.TemporaryDirectory() as temp:
-            path=Path(temp)/'workspace.json';path.write_text(json.dumps(actual));science.verify_workspace(path)
+            path=Path(temp)/'workspace.json';path.write_text(json.dumps(actual), encoding='utf-8');science.verify_workspace(path)
         for change in ('stale','nodata','regions','packages','hardware'):
             value=copy.deepcopy(actual)
             if change=='stale':value['canonicalLfSourceSha256'][science.SOURCES[0]]='0'*64
@@ -82,5 +82,5 @@ class ScientificAcceptanceTests(unittest.TestCase):
             if change=='packages':value['researchPackagesVerified']=0
             if change=='hardware':value['windowsMsfs']='passed'
             with tempfile.TemporaryDirectory() as temp:
-                path=Path(temp)/'workspace.json';path.write_text(json.dumps(value))
+                path=Path(temp)/'workspace.json';path.write_text(json.dumps(value), encoding='utf-8')
                 with self.subTest(change=change),self.assertRaises(ValueError):science.verify_workspace(path)

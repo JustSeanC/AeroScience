@@ -68,7 +68,7 @@ def validate_candidate(folder, acceptance_path=None):
     receipt = p.read_json(receipt_path); pe(setup)
     p.require(receipt.get('format_version') == 1 and receipt.get('version') == meta['version']
               and receipt.get('setup_name') == setup.name and receipt.get('setup_sha256') == sha(setup), 'Installer differs from its build receipt.')
-    p.require(setup.with_name(setup.name+'.sha256').read_text().strip() == sha(setup)+'  '+setup.name, 'Installer checksum mismatch.')
+    p.require(setup.with_name(setup.name+'.sha256').read_text(encoding='utf-8').strip() == sha(setup)+'  '+setup.name, 'Installer checksum mismatch.')
     payload = folder/'payload'; commit, digest = p.validate_payload(payload)
     p.require(receipt.get('source_commit') == commit and receipt.get('payload_sha256') == digest
               and receipt.get('files') == {name: sha(path) for name, path in sorted(p.files(payload).items())}, 'Installer payload or provenance changed after compilation.')
@@ -118,7 +118,7 @@ def verify(setup, record_path, archive, expected_commit=None):
               and build.get('setup_name') == setup.name and build.get('version') == info['version'], 'Unexpected installer release identity.')
     pe(setup)
     p.require(build.get('setup_sha256') == sha(setup) == acceptance.get('installer_sha256'), 'Installer bytes differ from tested acceptance.')
-    p.require(setup.with_name(setup.name+'.sha256').read_text().strip() == sha(setup)+'  '+setup.name, 'Installer SHA-256 sidecar mismatch.')
+    p.require(setup.with_name(setup.name+'.sha256').read_text(encoding='utf-8').strip() == sha(setup)+'  '+setup.name, 'Installer SHA-256 sidecar mismatch.')
     p.require(build.get('source_commit') == info['source_commit'] and build.get('payload_sha256') == info['payload_sha256']
               and acceptance == info['acceptance'] and record.get('installer_receipt_sha256') == acceptance.get('installer_receipt_sha256')
               and hashlib.sha256((json.dumps(build, sort_keys=True, indent=2)+'\n').encode()).hexdigest() == record['installer_receipt_sha256'], 'Installer receipt, source or acceptance binding differs.')
