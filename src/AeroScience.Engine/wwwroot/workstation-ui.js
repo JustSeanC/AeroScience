@@ -42,7 +42,7 @@ export function button(parent, title, run, className = 'secondary') {
 export function select(parent, title, options, value) {
   const label = node('label', title), control = node('select'); control.setAttribute('aria-label', title);
   for (const [id, text] of options) { const option = node('option', text); option.value = id; control.append(option); }
-  if (value !== undefined) control.value = value; label.append(control); parent.append(label); return control;
+  if (value !== undefined && [...control.options].some(option=>option.value===String(value))) control.value = value; label.append(control); parent.append(label); return control;
 }
 export function disclosure(parent, title, text) {
   const details = node('details', undefined, 'advanced-details'); details.append(node('summary', title));

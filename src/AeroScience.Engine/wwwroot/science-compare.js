@@ -40,7 +40,7 @@ export async function comparison(parent,api,missions,ids,disposals,catalog){
     const quantity=select(card,'Visual measurement '+(index+1),measurements,'elevation');
     const subtitle=el('p',undefined,'comparison-source'),holder=el('div'),scale=el('section'),inspector=el('section');inspector.className='sample-inspector';inspector.setAttribute('aria-label',`Dataset ${String.fromCharCode(65+index)} selected value`);card.append(subtitle,holder,scale,inspector);
     const map=new ResearchMap(holder,null,{coverageOnly:true});window.L.control.scale({imperial:false,metric:true}).addTo(map.map);disposals.push(()=>map.destroy());
-    const column={card,mission,acquisition,quantity,subtitle,map,legend:scale,inspector,layer:null,overlay:null,items:[],offset:0,generation:0};columns.push(column);
+    const column={card,mission,acquisition,quantity,subtitle,map,legend:scale,inspector,layer:null,overlay:null,items:[],offset:0,generation:0,loadVersion:0};columns.push(column);
     map.map.on('moveend',()=>{if(syncing||stopped)return;syncing=true;for(const other of columns){if(other===column||other.map.destroyed)continue;const center=map.map.getCenter();if(other.map.map.getCenter().distanceTo(center)>.1||other.map.map.getZoom()!==map.map.getZoom())other.map.map.setView(center,map.map.getZoom(),{animate:false});}syncing=false;});
     map.map.on('click',event=>findPoint(event.latlng));
     const actions=el('div',undefined,'action-row');card.append(actions);
@@ -49,6 +49,7 @@ export async function comparison(parent,api,missions,ids,disposals,catalog){
     async function chooseAcquisition(){
       const product=column.items.find(p=>p.id===acquisition.value);if(!product)return;
       if(product.instrumentId==='hyperspectral-imager')sources??=await api('/api/science/sources');
+      if(stopped||acquisition.value!==product.id)return;
       const source=sources?.find(item=>item.source.id===product.sourceId)?.source,previous=quantity.value,options=measurementsFor(product.instrumentId,source);
       quantity.replaceChildren(...options.map(([value,label])=>{const option=el('option',label);option.value=value;return option;}));
       quantity.value=options.some(([value])=>value===previous)?previous:initialMeasurement(product.instrumentId,source);
@@ -70,10 +71,10 @@ export async function comparison(parent,api,missions,ids,disposals,catalog){
       }catch(error){if(!stopped&&generation===column.generation){subtitle.textContent=`This layer is unavailable: ${error.message} Choose a supported measurement; the recorded data is unchanged.`;scales();}}
     }
     async function load(append=false){
-      column.generation++;if(!mission.value){subtitle.textContent='Choose a mission with recorded science.';return;}
+      const ownLoad=++column.loadVersion;column.generation++;if(!mission.value){subtitle.textContent='Choose a mission with recorded science.';return;}
       analysis.href=`#workspace/analysis?missions=${mission.value}`;exports.href=`#workspace/results?missions=${mission.value}`;
       if(!append){column.items=[];column.offset=0;acquisition.replaceChildren();}
-      const selectedMission=mission.value,page=await api(`/api/science/products/page?missionId=${selectedMission}&offset=${column.offset}&limit=40`);if(stopped||selectedMission!==mission.value)return;
+      const selectedMission=mission.value,page=await api(`/api/science/products/page?missionId=${selectedMission}&offset=${column.offset}&limit=40`);if(stopped||selectedMission!==mission.value||ownLoad!==column.loadVersion)return;
       column.items.push(...page.items);column.offset+=page.items.length;
       for(const product of page.items){const option=el('option',`${readableName(product.instrumentId,catalog)} · Flight ${local(product.flightPacketUtc)} · Source ${local(product.sourceObservationUtc)}`);option.value=product.id;acquisition.append(option);}
       more.hidden=column.offset>=page.total;
