@@ -22,14 +22,17 @@ internal static class ArchiveFixture
         cmd.CommandText = "INSERT INTO telemetry(mission_id,timestamp_utc,latitude,longitude,altitude_msl_ft,payload_json) VALUES($mission,$time,$lat,$lon,$alt,$json)";
         cmd.Parameters.AddWithValue("$mission", mission.ToString());
         foreach (var name in new[] { "$time", "$lat", "$lon", "$alt", "$json" }) cmd.Parameters.AddWithValue(name, DBNull.Value);
+        var last = input.Current;
         while (input.MoveNext())
         {
             var frame = input.Current; if (!frame.IsValid) throw new ArgumentException("Invalid synthetic archive fixture.");
             cmd.Parameters["$time"].Value = frame.TimestampUtc.ToString("O", CultureInfo.InvariantCulture);
             cmd.Parameters["$lat"].Value = frame.Latitude; cmd.Parameters["$lon"].Value = frame.Longitude;
             cmd.Parameters["$alt"].Value = frame.AltitudeMslFeet; cmd.Parameters["$json"].Value = JsonSerializer.Serialize(frame, WireJson.Options);
-            cmd.ExecuteNonQuery();
+            cmd.ExecuteNonQuery(); last = frame;
         }
+        cmd.CommandText = "UPDATE missions SET arrival_lat=$lat,arrival_lon=$lon WHERE id=$mission";
+        cmd.Parameters["$lat"].Value = last.Latitude; cmd.Parameters["$lon"].Value = last.Longitude; cmd.ExecuteNonQuery();
         tx.Commit();
     }
 }

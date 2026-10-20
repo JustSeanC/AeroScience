@@ -172,11 +172,16 @@ public sealed class ApiTests : IAsyncLifetime
     public async Task DisposeAsync()
     {
         var services=factory.Services;
+        var ownership=services.GetRequiredService<DataDirectoryLease>();
         client.Dispose(); await factory.DisposeAsync();
         await stopped.Task.WaitAsync(TimeSpan.FromSeconds(10));stoppedRegistration.Dispose();
         // The deferred TestServer host can finish before its application provider's
         // asynchronous singleton cleanup. Join the actual provider before deleting files.
         if(services is IAsyncDisposable owned)await owned.DisposeAsync();
+        // DeferredHost/provider disposal can already be in progress: a second provider
+        // DisposeAsync may return before the first cleanup completes. Observe the actual
+        // lease's release, without releasing it early or retrying around a live writer.
+        await ownership.Released.WaitAsync(TimeSpan.FromSeconds(10));
         // Ownership is released before cleanup; do not mask a live engine with delete retries.
         using(var lease=new DataDirectoryLease(new EngineOptions{DataDirectory=directory})) { }
         if (Directory.Exists(directory)) Directory.Delete(directory, true);
