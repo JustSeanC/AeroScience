@@ -71,3 +71,10 @@ SQLite/raster fixtures ran concurrently. It now shares the existing scientific-I
 isolation collection and records import/Apply/publication timing plus worker state on
 timeout. Explicit scientific-worker concurrency tests remain intact. Only a subsequent
 passing full run can resolve that milestone's failed Windows result.
+
+The first DOC-01 targeted combination also exposed a browser-fixture dependency: the
+periodic synthetic provider could claim the first remote acquisition slot outside the
+small raster's geographic coverage before the fixture's explicit packet arrived. Its
+scoped test provider now holds the correct synthetic location, and failed fixtures close
+their temporary flight in `finally`. The deadline, one-product assertion and scientific
+checks are unchanged. This test-host correction is not a production science workaround.

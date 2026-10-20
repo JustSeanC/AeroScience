@@ -7,14 +7,17 @@ using AeroScience.Tests;
 if (args.Length > 0 && args[0] == "--evidence-probe") { EvidenceProbe.Run(args[1..]); return; }
 
 // This executable is built only for automated tests and never published with the app.
-var app = EngineApplication.Create(args, services => services.AddSingleton<ITelemetryProvider>(sp =>
-    new SimulatedTelemetryProvider(sp.GetRequiredService<EngineOptions>().SamplingIntervalMs, includeResearch: true)));
+var app = EngineApplication.Create(args, services =>
+{
+    services.AddSingleton(sp => new BrowserTelemetryProvider(sp.GetRequiredService<EngineOptions>().SamplingIntervalMs));
+    services.AddSingleton<ITelemetryProvider>(sp => sp.GetRequiredService<BrowserTelemetryProvider>());
+});
 var options=app.Services.GetRequiredService<EngineOptions>();
 app.Services.GetRequiredService<MapSettings>().InitializeDefaults(true); // Existing offline browser fixtures; new-install tests reset explicitly.
 app.Services.GetRequiredService<ApplicationUpdates>().Configure(new(false)); // No real update traffic in synthetic browser tests.
 app.MapPost("/api/testing/maps/new-install",()=>{File.Delete(Path.Combine(options.ConfigurationDirectory??options.DataDirectory,"maps.json"));return new {reset=true};});
 app.MapPost("/api/testing/workstation",(WorkstationFixtureRequest request,ScienceStore science,MissionStore missions,MissionCoordinator coordinator)=>WorkstationFixtures.Create(request,science,missions,coordinator,new(options.DataDirectory)));
-app.MapPost("/api/testing/remote/{kind}",async (string kind,ScienceStore science,MissionCoordinator coordinator)=>
+app.MapPost("/api/testing/remote/{kind}",async (string kind,ScienceStore science,MissionCoordinator coordinator,BrowserTelemetryProvider provider)=>
 {
     var parsed=Enum.Parse<RemoteKind>(kind,true);
     if(coordinator.Snapshot().ActiveMission is {} active)coordinator.End(active.Id);
@@ -22,11 +25,21 @@ app.MapPost("/api/testing/remote/{kind}",async (string kind,ScienceStore science
     var manifestPath=RemoteFixtureFiles.Create(folder,parsed);var manifest=System.Text.Json.JsonSerializer.Deserialize<ScientificSourceManifest>(File.ReadAllText(manifestPath),WireJson.Options)!;
     await science.ImportSourceAsync(manifest,folder,reuseExisting:true);
     var id=RemoteAcquisition.Instruments.Single(p=>p.Value==parsed).Key;
+    using var location = provider.UseRemoteFixtureLocation();
     var mission=coordinator.Start(new StartMissionRequest("SYNTHETIC BROWSER FIXTURE — "+kind,Instruments:[new(id,true)]));
+    try
+    {
     var time=DateTimeOffset.UtcNow;var frame=new TelemetryFrame(time,TelemetrySource.Simulated,"SYNTHETIC browser fixture, no MSFS",40,-75,1000,328.0839895,140,150,160,0,0,0,0,0);
     coordinator.Apply(new(new(ConnectionState.Connected,TelemetrySource.Simulated,"Synthetic browser fixture",time),frame));
-    using var cancel=new CancellationTokenSource(TimeSpan.FromSeconds(10));while(science.Products(mission.Id).Length==0)await Task.Delay(10,cancel.Token);
-    coordinator.End(mission.Id);return new{missionId=mission.Id,product=science.Products(mission.Id).Single()};
+    var deadline = System.Diagnostics.Stopwatch.StartNew();
+    while(science.Products(mission.Id).Length==0)
+    {
+        if(deadline.Elapsed > TimeSpan.FromSeconds(10)) throw new TimeoutException("Synthetic remote fixture did not publish: " + System.Text.Json.JsonSerializer.Serialize(coordinator.Snapshot().Research, WireJson.Options));
+        await Task.Delay(10);
+    }
+    return new{missionId=mission.Id,product=science.Products(mission.Id).Single()};
+    }
+    finally { if(coordinator.Snapshot().ActiveMission?.Id == mission.Id) coordinator.End(mission.Id); }
 });
 app.MapPost("/api/testing/guided/{kind}",async(string kind,ScientificImportSession session)=>
 {
