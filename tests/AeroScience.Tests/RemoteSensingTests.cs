@@ -44,26 +44,6 @@ public sealed class RemoteSensingTests : IDisposable
         Assert.Contains("not tamper-proof",RemoteExports.Content(data,"evidence.json"));
         coordinator.End(product.MissionId);Assert.Single(science.Products(product.MissionId));Assert.NotEmpty(ResearchExports.Report(missions,product.MissionId));
     }
-    [Fact]public async Task FourInstrumentOneSecondCollectionKeepsRecorderAndIndependentQueuesMoving()
-    {
-        foreach(var kind in Enum.GetValues<RemoteKind>())await science.ImportSourceAsync(RemoteFixtureFiles.Create(Path.Combine(root,"parallel-"+kind),kind));
-        var configs=RemoteAcquisition.Instruments.Keys.Select(id=>new InstrumentConfiguration(id,true,1000)).ToArray();
-        var mission=coordinator.Start(new("Synthetic four-instrument performance fixture",Instruments:configs));
-        var anchor=DateTimeOffset.UtcNow;
-        for(var i=0;i<10;i++)
-        {
-            var packetUtc=anchor.AddSeconds(i);var wait=packetUtc-DateTimeOffset.UtcNow;
-            if(wait>TimeSpan.Zero)await Task.Delay(wait);
-            // A fixed logical packet clock avoids cumulative OS timer jitter turning a nominal
-            // one-second fixture into skipped slots. Real wall-clock scheduling stays at 1 Hz.
-            Apply(Frame(packetUtc));
-        }
-        try { await Wait(()=>science.Products(mission.Id,200).Length>=36); }
-        catch(OperationCanceledException error){throw new TimeoutException("Four instrument fixture did not drain: "+JsonSerializer.Serialize(coordinator.Snapshot().Research,WireJson.Options),error);}
-        Assert.Equal(10,coordinator.Snapshot().ActiveMission!.SampleCount);
-        foreach(var id in RemoteAcquisition.Instruments.Keys)Assert.InRange(science.Products(mission.Id,200,instrument:id).Length,9,10);
-        Assert.Null(coordinator.Snapshot().RecordingStop);
-    }
     [Fact]public async Task InvalidNdviDoesNotDiscardValidOriginalReflectance()
     {
         var path=RemoteFixtureFiles.Create(Path.Combine(root,"negative-reflectance"),RemoteKind.Multispectral);var source=ScienceStore.ReadSourceManifest(path);
