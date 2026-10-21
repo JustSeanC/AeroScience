@@ -9,36 +9,7 @@ public sealed record ScientificPlanReadiness(Guid PlanId,string PlanName,int Are
 
 public static class ScientificPlanPreparation
 {
-    private static bool InPolygon(Coordinates p,Coordinates[] vertices)
-    {
-        var inside=false;for(int i=0,j=vertices.Length-1;i<vertices.Length;j=i++)
-            if((vertices[i].Latitude>p.Latitude)!=(vertices[j].Latitude>p.Latitude)&&p.Longitude<(vertices[j].Longitude-vertices[i].Longitude)*(p.Latitude-vertices[i].Latitude)/(vertices[j].Latitude-vertices[i].Latitude)+vertices[i].Longitude)inside=!inside;
-        return inside;
-    }
-    // Lazy, geodesic corridor traversal. The session advances bounded windows instead of stopping at eight cells.
-    public static IEnumerable<GeographicBounds> Cells(MissionPlan plan,double step=.02)
-    {
-        var seen=new HashSet<GeographicBounds>();var inspected=0;
-        GeographicBounds? Cell(Coordinates p){try{var a=new GeographicBounds(Math.Floor(p.Longitude/step)*step,Math.Floor(p.Latitude/step)*step,Math.Floor(p.Longitude/step)*step+step,Math.Floor(p.Latitude/step)*step+step);AutomaticScientificData.ValidateArea(a);return a;}catch(ArgumentException){return null;}}
-        var points=(plan.Waypoints??[]).Select(w=>new Coordinates(w.Latitude,w.Longitude)).ToArray();
-        foreach(var (a,b) in points.Zip(points.Skip(1)))
-        {
-            var distance=Geodesy.Distance(a,b);var bearing=Geodesy.Bearing(a,b);var steps=(int)Math.Min(20000,Math.Ceiling(distance/700));
-            for(var i=0;i<=steps;i++)
-            {if(++inspected>100000||seen.Count>=4096)yield break;var cell=Cell(Geodesy.Direct(a,bearing,steps==0?0:distance*i/steps));if(cell is not null&&seen.Add(cell))yield return cell;}
-        }
-        foreach(var p in points){var cell=Cell(p);if(cell is not null&&seen.Add(cell))yield return cell;}
-        foreach(var survey in plan.SurveyAreas??[])
-        {
-            var vertices=survey.Vertices??[];if(vertices.Length<3)continue;
-            foreach(var (a,b) in vertices.Zip(vertices.Skip(1).Append(vertices[0])))
-            {var length=Geodesy.Distance(a,b);var bearing=Geodesy.Bearing(a,b);var count=(int)Math.Min(20000,Math.Ceiling(length/700));for(var n=0;n<=count;n++){if(++inspected>100000||seen.Count>=4096)yield break;var edgeCell=Cell(Geodesy.Direct(a,bearing,count==0?0:length*n/count));if(edgeCell is not null&&seen.Add(edgeCell))yield return edgeCell;}}
-            var south=vertices.Min(p=>p.Latitude);var north=vertices.Max(p=>p.Latitude);var west=vertices.Min(p=>p.Longitude);var east=vertices.Max(p=>p.Longitude);
-            for(var lat=Math.Floor(south/step)*step;lat<=north;lat+=step)
-            for(var lon=Math.Floor(west/step)*step;lon<=east;lon+=step)
-            {if(++inspected>100000||seen.Count>=4096)yield break;var center=new Coordinates(lat+step/2,lon+step/2);var cell=Cell(center);if(cell is not null&&(InPolygon(center,vertices)||cell.Corners.Any(c=>InPolygon(c,vertices))||vertices.Any(cell.Contains))&&seen.Add(cell))yield return cell;}
-        }
-    }
+    public static IEnumerable<GeographicBounds> Cells(MissionPlan plan,double step=.02)=>ScientificGeographicWork.Cells((plan.Waypoints??[]).Select(w=>new Coordinates(w.Latitude,w.Longitude)).ToArray(),(plan.SurveyAreas??[]).Select(s=>s.Vertices).ToArray(),step);
     public static RemoteKind[] Kinds(MissionPlan plan)=>(plan.Instruments??[]).Where(c=>c.Enabled&&RemoteAcquisition.Instruments.ContainsKey(c.InstrumentId)).Select(c=>RemoteAcquisition.Instruments[c.InstrumentId]).Distinct().ToArray();
     public static PlanDataPreparation Prepare(AutomaticScientificData automatic,MissionPlan plan,bool retry=false)
     {

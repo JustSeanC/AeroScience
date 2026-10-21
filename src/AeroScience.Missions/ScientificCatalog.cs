@@ -100,7 +100,7 @@ public sealed class ScientificCatalog(AutomaticScientificData automatic,ScienceS
         finally{gate.Release();}
     }
     private StacScientificProvider Stac(string provider)=>(StacScientificProvider)automatic.Provider(provider=="sentinel-2"?"earth-search":"planetary-computer");
-    internal async Task<(ScientificCatalogItem Item,ScientificDiscovery Discovery)> Resolve(ScientificSceneSelection selection,GeographicBounds area,ScientificDownloadBudget budget,CancellationToken token)
+    internal async Task<(ScientificCatalogItem Item,ScientificDiscovery Discovery)> Resolve(ScientificSceneSelection selection,GeographicBounds area,ScientificDownloadBudget budget,CancellationToken token,bool requireCoverage=true)
     {
         var provider=Provider(selection.Provider);AutomaticScientificData.ValidateArea(area);Consent();
         if(!selection.Bands.Order().SequenceEqual(provider.RequiredBands.Order())||selection.Scene.Length>300||selection.Scene.Any(c=>!(char.IsAsciiLetterOrDigit(c)||c is '_' or '-' or '.' or ',')))throw new ArgumentException("Choose supported numeric measurements and mandatory quality bands.");
@@ -111,10 +111,10 @@ public sealed class ScientificCatalog(AutomaticScientificData automatic,ScienceS
         {
             using var json=await automatic.Http.Json(Root(provider.Id)+"/collections/"+Collection(provider.Id)+"/items/"+Uri.EscapeDataString(selection.Scene),budget,token);var f=json.RootElement;
             if(f.GetProperty("id").GetString()!=selection.Scene||provider.Id=="landsat"&&f.GetProperty("properties").GetProperty("landsat:correction").GetString()!="L2SP")throw new IOException("Provider returned a different or unsupported product.");
-            if(!area.Corners.Append(area.Center).All(p=>StacScientificProvider.Contains(f.GetProperty("geometry"),p)))throw new ArgumentException("Selected scene does not cover this work unit. Select cells inside its footprint.");
+            if(requireCoverage&&!area.Corners.Append(area.Center).All(p=>StacScientificProvider.Contains(f.GetProperty("geometry"),p)))throw new ArgumentException("Selected scene does not cover this work unit. Select cells inside its footprint.");
             d=Stac(provider.Id).Describe(f,provider.Kind,area)??throw new IOException("Selected scene lacks required numeric bands.");item=Describe(provider,d,f);
         }
-        if(item.Revision!=selection.Revision)throw new InvalidOperationException("Source revision changed. Search, preview and approve again; no alternate scene was selected.");return(item,d);
+        if(item.Revision!=selection.Revision)throw new InvalidOperationException("Source revision changed. Search, preview and approve again; no alternate scene was selected.");return(item,d with{CatalogRevision=item.Revision});
     }
     internal static ScientificCatalogItem Describe(ScientificCatalogProvider provider,ScientificDiscovery d,JsonElement? feature)
     {

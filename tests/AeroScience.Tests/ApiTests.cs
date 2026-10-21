@@ -34,6 +34,15 @@ public sealed class ApiTests : IAsyncLifetime
         client = factory.CreateClient(new WebApplicationFactoryClientOptions { BaseAddress = new Uri("http://localhost:5080") });
         client.DefaultRequestHeaders.Add("Origin", "http://localhost:5080");
     }
+    [Fact]public async Task LibraryCatalogAndJobControlsRetainSessionCsrfAndInputBoundaries()
+    {
+        Assert.Equal(HttpStatusCode.Unauthorized,(await client.GetAsync("/api/science/library/jobs")).StatusCode);await Pair(client);
+        Assert.Equal(4,(await client.GetFromJsonAsync<JsonElement>("/api/science/library/providers")).GetArrayLength());
+        var q=new ScientificCatalogQuery("landsat",new(-75,40,-74.98,40.02),CachedOnly:true);
+        var page=await client.PostAsJsonAsync("/api/science/library/catalog",q,WireJson.Options);page.EnsureSuccessStatusCode();Assert.Equal("Not searched",(await page.Content.ReadFromJsonAsync<ScientificCatalogPage>(WireJson.Options))!.Status);
+        Assert.Equal(HttpStatusCode.BadRequest,(await client.PostAsJsonAsync("/api/science/library/preview",new ScientificLibrarySelection(99,[],[]),WireJson.Options)).StatusCode);
+        client.DefaultRequestHeaders.Remove("X-AeroScience-CSRF");Assert.Equal(HttpStatusCode.Forbidden,(await client.PostAsJsonAsync("/api/science/library/catalog",q,WireJson.Options)).StatusCode);
+    }
     private async Task Pair(HttpClient display)
     {
         var response = await display.PostAsJsonAsync("/api/session", new { code = (string?)null }); response.EnsureSuccessStatusCode();

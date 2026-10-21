@@ -117,7 +117,7 @@ public sealed class ScientificWorkspaceTests : IDisposable
         Sql(science.DatabasePath,"PRAGMA user_version=1; DROP TABLE scientific_artifacts; DROP INDEX observations_receipt_time");
         var telemetry=Sql(missions.DatabasePath,"SELECT payload_json FROM telemetry LIMIT 1");var product=Sql(science.DatabasePath,"SELECT payload_json FROM remote_products LIMIT 1");
         missions.Initialize();science.Initialize();
-        Assert.Equal((long)MissionStore.CurrentSchemaVersion,Sql(missions.DatabasePath,"PRAGMA user_version"));Assert.Equal(2L,Sql(science.DatabasePath,"PRAGMA user_version"));
+        Assert.Equal((long)MissionStore.CurrentSchemaVersion,Sql(missions.DatabasePath,"PRAGMA user_version"));Assert.Equal((long)ScienceStore.CurrentSchemaVersion,Sql(science.DatabasePath,"PRAGMA user_version"));
         Assert.Equal(telemetry,Sql(missions.DatabasePath,"SELECT payload_json FROM telemetry LIMIT 1"));Assert.Equal(product,Sql(science.DatabasePath,"SELECT payload_json FROM remote_products LIMIT 1"));
         Assert.Equal(ScienceMode.Realistic,missions.Detail(mission.Id)!.Mission.Mode);Assert.Equal(TelemetrySource.Simulated,missions.StreamSamples(mission.Id).Single().Source);
         var missionBackup=Assert.Single(Directory.GetFiles(Path.Combine(Path.GetDirectoryName(missions.DatabasePath)!,"Backups"),"missions-schema5-*.db"));

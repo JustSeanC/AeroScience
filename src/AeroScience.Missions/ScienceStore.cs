@@ -83,14 +83,14 @@ public sealed partial class ScienceStore(string directory, IStorageCapacity? cap
             if (cmd.ExecuteScalar() as string != id.ToString()) throw new IOException("Science database/library identity mismatch; nothing was replaced.");
             cmd.CommandText = "PRAGMA user_version";
             var schema=Convert.ToInt32(cmd.ExecuteScalar(), CultureInfo.InvariantCulture);
-            if (schema is not(1 or 2)) throw new IOException("Unsupported science schema; preserve this library.");
-            if(schema==1&&existed){var backups=Path.Combine(DirectoryPath,"Metadata","Backups");Directory.CreateDirectory(backups);_=DataBackup.Create(DatabasePath,backups,true);}
+            if (schema is not(1 or 2 or 3)) throw new IOException("Unsupported science schema; preserve this library.");
+            if(schema<CurrentSchemaVersion&&existed){var backups=Path.Combine(DirectoryPath,"Metadata","Backups");Directory.CreateDirectory(backups);_=DataBackup.Create(DatabasePath,backups,true);}
             InitializeRemoteTables(db);
             InitializeArtifactTable(db);
             InitializeSpatialIndex(db);
             InitializeAtmosphereIndex(db);
             InitializeStatisticsCache(db);
-            cmd.CommandText="PRAGMA user_version=2";cmd.ExecuteNonQuery();
+            if(schema<CurrentSchemaVersion)InitializeLibraryJobs(db);
             if (!File.Exists(Path.Combine(DirectoryPath, MarkerName)))
                 PreferenceStore.WriteAtomic(Path.Combine(DirectoryPath, MarkerName), new { formatVersion = 1, libraryId = id, database = RelativeDatabasePath });
         }

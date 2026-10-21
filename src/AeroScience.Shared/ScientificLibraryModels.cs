@@ -17,3 +17,20 @@ public sealed record ScientificCatalogProvider(string Id,string Name,string Prod
 public sealed record ScientificSceneSelection(string Provider,string Scene,string Revision,string[] Bands);
 public sealed record ScientificLibrarySelection(int Version,GeographicBounds[] Areas,ScientificSceneSelection[] Scenes,
     Coordinates[]? Polygon=null,long? MaximumTransferBytes=null);
+
+public sealed record LibraryWorkUnit(int Index,ScientificSceneSelection Scene,GeographicBounds Area,Guid? ReuseSourceId,long StorageAllowanceBytes);
+public sealed record LibraryDownloadPreview(int Version,Guid Id,ScientificLibrarySelection Selection,string SelectionHash,
+    string SettingsHash,DateTimeOffset CreatedUtc,DateTimeOffset ExpiresUtc,LibraryWorkUnit[] Work,
+    ScientificCatalogItem[] Products,long MaximumTransferBytes,long PerItemTransferLimit,long TemporaryStorageAllowanceBytes,
+    long ReusableBytes,long? EstimatedTransferBytes,long? EstimatedRetainedBytes,string[] Warnings,int UncoveredCells=0);
+public sealed record LibraryDownloadItem(int Index,string State,long DownloadedBytes,long UncertainBytes,long ReservedBytes,
+    int Attempts,Guid? SourceId,long VerifiedBytes,string? Error,DateTimeOffset UpdatedUtc);
+public sealed record LibraryDownloadJob(Guid Id,string State,LibraryDownloadPreview Preview,Guid? ApprovalId,
+    DateTimeOffset UpdatedUtc,LibraryDownloadItem[] Items,string? Error=null)
+{
+    public long DownloadedBytes=>Items.Sum(i=>i.DownloadedBytes);
+    public long UncertainBytes=>Items.Sum(i=>i.UncertainBytes);
+    public int CompletedItems=>Items.Count(i=>i.State=="Completed");
+}
+public sealed record LibraryApprovalRequest(string SelectionHash);
+public sealed record LibraryJobControl(string Action);

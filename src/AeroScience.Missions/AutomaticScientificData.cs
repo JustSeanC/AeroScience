@@ -34,7 +34,7 @@ public sealed class AutomaticScientificData : IDisposable
 {
     private long configurationRevision;
     public long ConfigurationRevision => Interlocked.Read(ref configurationRevision);
-    private sealed record Job(string Key,RemoteKind Kind,GeographicBounds Area,Guid Ticket,double Priority,string Scope,bool Background=false,Coordinates? Point=null);
+    private sealed record Job(string Key,RemoteKind Kind,GeographicBounds Area,Guid Ticket,double Priority,string Scope,bool Background=false,Coordinates? Point=null,Func<CancellationToken,Task>? LibraryWork=null,TaskCompletionSource? Completion=null);
     private readonly ScienceStore science;private readonly ScientificAccessSettings settings;private readonly ScientificHttp http;
     private readonly IScientificDataProvider[] providers;
     private readonly Dictionary<string,Job> queue=[];
@@ -53,7 +53,7 @@ public sealed class AutomaticScientificData : IDisposable
     private bool steadyFastFlight;
     public void SetTrajectoryRegionHint(bool steadyFast){lock(gate)steadyFastFlight=steadyFast;}
     private bool paused,flightActive;
-    public void FlightActive(bool value){lock(gate){if(value&&!flightActive){foreach(var p in cancellations.Where(x=>scopes.GetValueOrDefault(x.Key)?.StartsWith("plan:")==true)){preempted.Add(p.Key);p.Value.Cancel();}}flightActive=value;}Wake();}
+    public void FlightActive(bool value){lock(gate){if(value&&!flightActive){foreach(var p in cancellations.Where(x=>(scopes.GetValueOrDefault(x.Key)?.StartsWith("plan:")==true||scopes.GetValueOrDefault(x.Key)?.StartsWith("library:")==true))){preempted.Add(p.Key);p.Value.Cancel();}}flightActive=value;}Wake();}
     private readonly HashSet<string> flightKeys=[],preempted=[];
     private DateTimeOffset lastPreemption;
     private double preparationSeconds=45;
@@ -98,7 +98,7 @@ public sealed class AutomaticScientificData : IDisposable
         lock(gate)
         {
             foreach(var pair in cancellations.Where(p=>key is null||p.Key==key).ToArray())pair.Value.Cancel();
-            foreach(var job in queue.Values.Where(j=>key is null||j.Key==key).ToArray()){queue.Remove(job.Key);retryAfter.Remove(job.Key);}
+            foreach(var job in queue.Values.Where(j=>key is null||j.Key==key).ToArray()){queue.Remove(job.Key);retryAfter.Remove(job.Key);job.Completion?.TrySetCanceled();}
             foreach(var s in states.Values.Where(s=>s.Status is ("Queued" or "Waiting for download allowance")&&(key is null||key==s.Key)).ToArray())
                 states[s.Key]=s with{Status="Unavailable",Message="Queued preparation cancelled; no download was started.",UpdatedUtc=DateTimeOffset.UtcNow};
         }
@@ -153,7 +153,7 @@ public sealed class AutomaticScientificData : IDisposable
         if(new[]{a.West,a.South,a.East,a.North}.Any(v=>!double.IsFinite(v))||a.West< -180||a.East>180||a.South< -80||a.North>84||a.East<=a.West||a.North<=a.South||a.East-a.West>.061||a.North-a.South>.061)
             throw new ArgumentException("Automatic preparation supports bounded areas up to 0.06° per side within 80°S–84°N; split large or dateline-crossing surveys. No global scenes will be downloaded.");
     }
-    private static long StorageBound(RemoteKind kind)=>kind switch{RemoteKind.Multispectral=>176160768,RemoteKind.Thermal=>109051904,_=>37748736};
+    internal static long StorageBound(RemoteKind kind)=>kind switch{RemoteKind.Multispectral=>176160768,RemoteKind.Thermal=>109051904,_=>37748736};
     private async Task Run()
     {
         var active=new List<Task>();
@@ -164,7 +164,7 @@ public sealed class AutomaticScientificData : IDisposable
                 active.RemoveAll(t=>t.IsCompleted);
                 Job? job=null;
                 lock(gate)if(!paused&&active.Count<settings.Get().Preferences.ConcurrentDownloads&&queue.Count>0)
-                {job=queue.Values.Where(j=>!pausedScopes.Contains(j.Scope)).Where(j=>!(flightActive&&j.Scope.StartsWith("plan:"))).Where(j=>!retryAfter.TryGetValue(j.Key,out var after)||after<=DateTimeOffset.UtcNow).MinBy(j=>j.Priority);if(job is not null)queue.Remove(job.Key);}
+                {job=queue.Values.Where(j=>!pausedScopes.Contains(j.Scope)).Where(j=>!(flightActive&&(j.Scope.StartsWith("plan:")||j.Scope.StartsWith("library:")))).Where(j=>!retryAfter.TryGetValue(j.Key,out var after)||after<=DateTimeOffset.UtcNow).MinBy(j=>j.Priority);if(job is not null)queue.Remove(job.Key);}
                 if(job is not null){active.Add(Task.Run(()=>Execute(job),stopping.Token));continue;}
                 await wake.WaitAsync(TimeSpan.FromMilliseconds(200),stopping.Token);
             }
@@ -172,8 +172,26 @@ public sealed class AutomaticScientificData : IDisposable
         catch(OperationCanceledException){}
         finally{try{await Task.WhenAll(active);}catch(OperationCanceledException){}}
     }
+    internal Task ScheduleLibrary(string key,RemoteKind kind,GeographicBounds area,Func<CancellationToken,Task> action)
+    {
+        lock(gate)
+        {
+            if(queue.Count>=64)throw new IOException("Scientific preparation queue is busy; resume this job later.");
+            var completion=new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);var scope="library:"+key.Split('/')[0];
+            queue[key]=new(key,kind,area,Guid.NewGuid(),100000,scope,LibraryWork:action,Completion:completion);scopes[key]=scope;Wake();return completion.Task;
+        }
+    }
+    internal bool LibraryAllowed=>!flightActive&&!paused&&settings.Get().Preferences.BackgroundRetrieval;
     private async Task Execute(Job job)
     {
+        if(job.LibraryWork is not null)
+        {
+            using var lifetime=CancellationTokenSource.CreateLinkedTokenSource(stopping.Token);lifetime.CancelAfter(TimeSpan.FromMinutes(12));lock(gate)cancellations[job.Key]=lifetime;
+            try{await job.LibraryWork(lifetime.Token);job.Completion!.TrySetResult();}
+            catch(OperationCanceledException){job.Completion!.TrySetCanceled();}
+            catch(Exception error){job.Completion!.TrySetException(error);}
+            finally{lock(gate){cancellations.Remove(job.Key);scopes.Remove(job.Key);preempted.Remove(job.Key);}Wake();}return;
+        }
         var revision = ConfigurationRevision;
         using var cancel=CancellationTokenSource.CreateLinkedTokenSource(stopping.Token);cancel.CancelAfter(TimeSpan.FromMinutes(12));
         lock(gate)cancellations[job.Key]=cancel;
@@ -261,13 +279,14 @@ public sealed class AutomaticScientificData : IDisposable
             Wake();
         }
     }
-    private async Task<ScientificSource?> PrepareSource(ScientificDiscovery d,ScientificDownloadBudget budget,CancellationToken token,Action<string>? stage=null)
+    internal async Task<ScientificSource?> PrepareSource(ScientificDiscovery d,ScientificDownloadBudget budget,CancellationToken token,Action<string>? stage=null,string? checkpointRoot=null)
     {
         science.Initialize();
-        using var reservation=science.Management?.ReserveScience(StorageBound(d.Manifest.Kind));
+        using var reservation=science.Management?.ReserveScience(StorageBound(d.Manifest.Kind)+(checkpointRoot is null?0:budget.Maximum));
         var relative="Downloads/"+Guid.NewGuid().ToString("N");var folder=StorageManager.ResolveDataset(science.DirectoryPath,science.LibraryId,relative);
         var names=d.Manifest.Bands.Select(b=>b.File).Append("source.json").ToArray();
         var ledger=science.BeginManagedWrite("Automatic numeric source preparation",names.Select(n=>relative+"/"+n));Directory.CreateDirectory(folder);
+        var checkpoints=new List<ScientificRangeCheckpoint>();
         var manifest=d.Manifest;
         if(d.NumericExport is {} export)
         {
@@ -281,7 +300,9 @@ public sealed class AutomaticScientificData : IDisposable
         else foreach(var asset in d.Assets)
         {
             token.ThrowIfCancellationRequested();
-            using var remote=new ScientificRangeStream(http,asset.Url,budget,token);using var raster=new ScientificRaster(remote,asset.Band);
+            var checkpoint=checkpointRoot is null?null:new ScientificRangeCheckpoint(science,checkpointRoot+"/"+asset.Band.Id);
+            if(checkpoint is not null)checkpoints.Add(checkpoint);
+            using var remote=checkpoint is null?new ScientificRangeStream(http,asset.Url,budget,token):new ScientificRangeStream(http,asset.Url,budget,token,checkpoint);using var raster=new ScientificRaster(remote,asset.Band);
             raster.CopySubset(d.Area,Path.Combine(folder,asset.Band.File),token);
         }
         stage?.Invoke("Validating");
@@ -291,7 +312,7 @@ public sealed class AutomaticScientificData : IDisposable
         var numeric=checkedBands.Where(b=>b.Id is not("QA_PIXEL" or "QA_RADSAT" or "SCL")).ToArray();
         var usable=Enumerable.Range(0,81).Count(i=>numeric.Any(b=>b.Values[i].HasValue));
         var provenance=new AutomaticSourceProvenance(d.Manifest.Kind==RemoteKind.Terrain&&d.NumericExport is not null?"usgs-3dep-numeric":"stac-cog-native-subset",d.Catalog,d.Item,d.Assets.Select(a=>a.Url.AbsoluteUri).Concat(d.NumericExport is null?[]:new[]{d.NumericExport}).ToArray(),d.Area,DateTimeOffset.UtcNow,
-            d.NumericExport is null?"Lossless native-grid, native-DN GeoTIFF crop via validated HTTP 206 ranges; no overview substitution or interpolation.":"Provider numeric F32 nearest-neighbor export in WGS84; composite native resolution and datum remain unspecified.",d.Quality,d.Resolution,budget.Bytes,d.Limitations??[],d.ProviderMetadataJson,81,usable);
+            d.NumericExport is null?"Lossless native-grid, native-DN GeoTIFF crop via validated HTTP 206 ranges; no overview substitution or interpolation.":"Provider numeric F32 nearest-neighbor export in WGS84; composite native resolution and datum remain unspecified.",d.Quality,d.Resolution,budget.Bytes,d.Limitations??[],d.ProviderMetadataJson,81,usable,d.CatalogRevision);
         manifest=manifest with{Acquisition=provenance};
         PreferenceStore.WriteAtomic(Path.Combine(folder,"source.json"),manifest);
         stage?.Invoke("Saving");
@@ -299,6 +320,7 @@ public sealed class AutomaticScientificData : IDisposable
         // ImportSourceAsync hashed and verified every copied numeric file. Remove only
         // this owned, duplicated preparation folder; the imported originals stay retained.
         foreach(var name in names)File.Delete(Path.Combine(folder,name));Directory.Delete(folder);File.Delete(ledger);
+        foreach(var checkpoint in checkpoints)checkpoint.Complete();
         science.Management?.RefreshScience();return imported;
     }
     public async Task DiscoverHyperspectralMetadata(GeographicBounds area,CancellationToken token)

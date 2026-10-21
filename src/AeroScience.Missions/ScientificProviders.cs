@@ -6,7 +6,7 @@ namespace AeroScience.Missions;
 
 public sealed record ProviderAsset(SourceBand Band,Uri Url);
 public sealed record ScientificDiscovery(ScientificSourceManifest Manifest,ProviderAsset[] Assets,string Catalog,string Item,
-    string Quality,string Resolution,GeographicBounds Area,string? NumericExport=null,string[]? Limitations=null,string? ProviderMetadataJson=null);
+    string Quality,string Resolution,GeographicBounds Area,string? NumericExport=null,string[]? Limitations=null,string? ProviderMetadataJson=null,string? CatalogRevision=null);
 public interface IScientificDataProvider
 {
     string Id {get;}

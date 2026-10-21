@@ -25,7 +25,7 @@ public sealed record HyperspectralDiscovery(string Catalog,string Dataset,DateTi
 public sealed record ScientificPreparationRequest(double Latitude,double Longitude,RemoteKind[]? Kinds=null);
 public sealed record AutomaticSourceProvenance(string Workflow,string Catalog,string Item,string[] UnsignedAssets,
     GeographicBounds RequestedArea,DateTimeOffset RetrievedUtc,string Preparation,string Quality,string NativeResolution,
-    long NetworkBytes,string[] Limitations,string? ProviderMetadataJson=null,int? CheckedPixels=null,int? UsablePixels=null);
+    long NetworkBytes,string[] Limitations,string? ProviderMetadataJson=null,int? CheckedPixels=null,int? UsablePixels=null,string? CatalogRevision=null);
 
 public sealed record ScientificQueueSummary(int Queued,int Downloading,bool Paused,long HourlyBytes,long? HourlyLimit,double EstimatedPreparationSeconds,long ReservedBytes=0,long? AvailableBytes=null,long PreflightBytes=0,long PreflightReservedBytes=0,long? PreflightLimit=null,long? PreflightAvailableBytes=null,long CombinedNetworkBytes=0);
 public sealed record ScientificPredictionSnapshot(string Status,string Message,double LookaheadSeconds,double DistanceMetres,

@@ -122,6 +122,7 @@ jobs:
           dotnet build tests/AeroScience.TestHost -c Release --no-restore --nologo --output artifacts/recovery-test-host
           python3 scripts/build/smoke_recovery.py --host-dll artifacts/recovery-test-host/AeroScience.TestHost.dll
           python3 scripts/build/smoke_evidence_recovery.py --host-dll artifacts/recovery-test-host/AeroScience.TestHost.dll
+          python3 scripts/build/smoke_library_recovery.py --host-dll artifacts/recovery-test-host/AeroScience.TestHost.dll
   windows-companion:
     needs: validation-scope
     if: needs.validation-scope.outputs.tier == 'full'
@@ -160,6 +161,7 @@ jobs:
           python scripts/build/smoke_recovery.py --host-dll artifacts/recovery-test-host/AeroScience.TestHost.dll
           if ($LASTEXITCODE -ne 0) { throw 'Recovery smoke failed.' }
           python scripts/build/smoke_evidence_recovery.py --host-dll artifacts/recovery-test-host/AeroScience.TestHost.dll
+          python scripts/build/smoke_library_recovery.py --host-dll artifacts/recovery-test-host/AeroScience.TestHost.dll
           if ($LASTEXITCODE -ne 0) { throw 'Science session evidence recovery smoke failed.' }
       - name: Compile installer recipe with structural fixtures only
         shell: pwsh

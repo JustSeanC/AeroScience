@@ -4,6 +4,7 @@ using AeroScience.Missions;
 using AeroScience.Shared;
 using AeroScience.Tests;
 
+if (args.Length > 0 && args[0] == "--library-probe") { LibraryProbe.Run(args[1..]); return; }
 if (args.Length > 0 && args[0] == "--evidence-probe") { EvidenceProbe.Run(args[1..]); return; }
 
 // This executable is built only for automated tests and never published with the app.

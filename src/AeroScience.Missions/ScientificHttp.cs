@@ -140,15 +140,19 @@ public sealed class ScientificRangeStream : Stream
 {
     private readonly ScientificHttp http;private readonly Uri original;private Uri current;
     private readonly ScientificDownloadBudget budget;private readonly CancellationToken token;
+    private readonly ScientificRangeCheckpoint? checkpoint;
     private readonly Dictionary<long,byte[]> cache=[];private long length=-1,position;private string? etag;
     public int Requests {get;private set;}
     public ScientificRangeStream(ScientificHttp http,Uri original,ScientificDownloadBudget budget,CancellationToken token)
     {this.http=http;this.original=original;this.budget=budget;this.token=token;current=http.Authorize(original,budget,token).GetAwaiter().GetResult();Fetch(0);}
+    internal ScientificRangeStream(ScientificHttp http,Uri original,ScientificDownloadBudget budget,CancellationToken token,ScientificRangeCheckpoint checkpoint)
+    {this.http=http;this.original=original;this.budget=budget;this.token=token;this.checkpoint=checkpoint;current=http.Authorize(original,budget,token).GetAwaiter().GetResult();Fetch(0);}
     private byte[] Fetch(long index)
     {
         token.ThrowIfCancellationRequested();if(cache.TryGetValue(index,out var existing))return existing;
         // Each new stream first obtains a fresh exact range/ETag; only matching versions share blocks.
         if(index!=0&&http.CachedRange(original,etag,index) is {} shared){cache[index]=shared;return shared;}
+        if(index!=0&&checkpoint?.Read(index) is {} retained){cache[index]=retained;return retained;}
         var start=index*65536;var end=length<0?start+65535:Math.Min(length-1,start+65535);
         for(var auth=0;auth<2;auth++)
         {
@@ -162,11 +166,12 @@ public sealed class ScientificRangeStream : Stream
                 throw new IOException($"Provider did not honor the exact bounded HTTP byte range (HTTP {(int)response.StatusCode}; requested {start}–{end}, returned {range?.From}–{range?.To}/{range?.Length}). The asset was refused; retry later.");
             if(length>=0&&range.Length!=length||etag is not null&&response.Headers.ETag?.ToString()!=etag)throw new IOException("Scientific asset changed during retrieval. Retry as a new acquisition.");
             length=range.Length.Value;etag??=response.Headers.ETag?.ToString();
+            if(index==0)checkpoint?.Establish(etag,length);
             var count=checked((int)(range.To!.Value-start+1));budget.EnsureCapacity(count);
             var bytes=new byte[count];using var stream=response.Content.ReadAsStream(token);var received=0;
             while(received<count){var n=stream.Read(bytes,received,count-received);if(n==0)throw new EndOfStreamException("Provider range ended early; actual received bytes remain accounted.");budget.Charge(n);http.Received(original,n,true);received+=n;}
             if(stream.ReadByte()!=-1)throw new IOException("Provider returned more bytes than the approved range.");
-            http.CacheRange(original,etag,index,bytes);if(cache.Count>=256)cache.Remove(cache.Keys.First());cache[index]=bytes;return bytes;
+            checkpoint?.Save(index,bytes);http.CacheRange(original,etag,index,bytes);if(cache.Count>=256)cache.Remove(cache.Keys.First());cache[index]=bytes;return bytes;
         }
         throw new IOException("Scientific asset authorization expired. Retry when the provider is available.");
     }

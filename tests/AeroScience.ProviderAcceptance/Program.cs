@@ -34,6 +34,7 @@ if(args.Contains("--benchmark")){await RegionalBenchmark.Run(output,args);return
 if(args.Contains("--offline-from")){await OfflineScientificAcceptance.Run(args[Array.IndexOf(args,"--offline-from")+1],output,science,missions,settings);return;}
 if(args.Contains("--trace-from")){ScientificTraceBenchmark.Run(args[Array.IndexOf(args,"--trace-from")+1],output);return;}
 using var auto=new AutomaticScientificData(science,settings);
+if(args.Contains("--library")){await LibraryAcceptance.Run(output,science,settings,auto);return;}
 if(args.Contains("--library-catalog"))
 {
     var catalog=new ScientificCatalog(auto,science,settings);var pages=new List<object>();
