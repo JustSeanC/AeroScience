@@ -78,9 +78,12 @@ test('scientific consent stays separate from maps and pilot readiness needs no m
   await section.getByRole('button',{name:'Prepare a small area',exact:true}).click();
   await expect.poll(async()=> (await (await request.get('/api/science/readiness')).json()).length).toBeGreaterThan(0);
   await expect(section.locator('.scientific-readiness')).toContainText('Configure Scientific Data Access');
-  // Assert the persisted control after a new document starts; unrelated async startup
-  // work must not turn the browser's full load event into the persistence criterion.
-  await page.reload({waitUntil:'domcontentloaded'});
+  // Verify persisted settings in a new document after releasing the old page's SSE
+  // and preparation reads. Chromium can stall a reload with those requests alive;
+  // a timeout there is not evidence about the stored preference.
+  const context=page.context();await page.close();page=await context.newPage();
+  page.on('pageerror',e=>errors.push(e.message));
+  await page.goto('/#settings/science?section=access',{waitUntil:'domcontentloaded'});
   await expect(page.getByLabel('Maximum network transfer per preparation (MiB)')).toHaveValue('8');
   const saved = await post(request, '/api/plans', {id:crypto.randomUUID(),name:'Bounded automatic preflight',waypoints:[{name:'A',latitude:40,longitude:-75},{name:'B',latitude:41,longitude:-74}],instruments:[{instrumentId:'thermal-imager',enabled:true,intervalMs:1000}]});
   await page.goto('/#planner');await expect(page.locator('#planner .scientific-readiness').first()).toBeVisible();

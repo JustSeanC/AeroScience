@@ -75,7 +75,10 @@ public sealed class RemoteSensingTests : IDisposable
         Control(CollectionAction.EndData);var b=Control(CollectionAction.StartData).Session!;Assert.NotEqual(a,b.Id);
         release.Set();await Task.Delay(150);Assert.Empty(science.Products(flight.Id));Assert.Equal(b.Id,missions.CollectionCheckpoint(flight.Id)!.CurrentSessionId);
         Assert.All(missions.ScienceIntents(flight.Id),i=>Assert.Equal("Cancelled",i.State));
-        research.PublicationLease=eligibility;Apply(Frame(DateTimeOffset.UtcNow.AddSeconds(1)));await Wait(()=>science.Products(flight.Id).Length==1);
+        research.PublicationLease=eligibility;Apply(Frame(DateTimeOffset.UtcNow.AddSeconds(1)));
+        // Library commit precedes mission acknowledgement across the two stores. Wait
+        // for the actual worker completion, not just visibility of its first commit.
+        await Wait(()=>science.Products(flight.Id).Length==1&&missions.ScienceIntents(flight.Id).Any(i=>i.Intent.SessionId==b.Id&&i.State=="Published"));
         var product=science.Products(flight.Id).Single();Assert.Equal(b.Id,product.SessionId);Assert.Equal(product.Id,product.IntentId);
         Assert.Equal("Published",missions.ScienceIntent(product.Id)!.State);Assert.Equal(b.Id,science.ReadProduct(product.Id).Product.SessionId);
     }
