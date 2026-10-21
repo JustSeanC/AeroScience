@@ -135,6 +135,30 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: '22'
+      - name: Use runner scratch for durable Windows test fixtures
+        shell: pwsh
+        run: |
+          $systemTemp = [IO.Path]::GetTempPath()
+          $testScratch = Join-Path $env:RUNNER_TEMP 'aeroscience-test-storage'
+          [IO.Directory]::CreateDirectory($testScratch) | Out-Null
+          foreach ($base in @($systemTemp, $testScratch)) {
+            $probe = Join-Path $base ('aeroscience-flush-' + [Guid]::NewGuid().ToString('N'))
+            $stream = $null
+            try {
+              $stream = [IO.File]::Open($probe, [IO.FileMode]::CreateNew, [IO.FileAccess]::Write, [IO.FileShare]::None)
+              $buffer = [byte[]]::new(4096)
+              $timer = [Diagnostics.Stopwatch]::StartNew()
+              for ($i = 0; $i -lt 16; $i++) { $stream.Write($buffer, 0, $buffer.Length); $stream.Flush($true) }
+              $drive = [IO.DriveInfo]::new([IO.Path]::GetPathRoot($base))
+              Write-Host ('Durable scratch probe: {0}; format={1}; 16 flushed 4-KiB writes={2:N1} ms' -f $base, $drive.DriveFormat, $timer.Elapsed.TotalMilliseconds)
+            } finally {
+              if ($null -ne $stream) { $stream.Dispose() }
+              if ([IO.File]::Exists($probe)) { [IO.File]::Delete($probe) }
+            }
+          }
+          # Test fixtures use the runner's intended scratch volume, not its busy OS disk.
+          # No production storage setting, SQLite durability or deadline changes.
+          Add-Content -LiteralPath $env:GITHUB_ENV -Value @("TEMP=$testScratch", "TMP=$testScratch") -Encoding utf8
       - shell: pwsh
         run: ./scripts/build/Build-Companion.ps1
       - name: Retain Windows test diagnostics

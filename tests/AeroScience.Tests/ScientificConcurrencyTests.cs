@@ -77,7 +77,9 @@ public sealed class ScientificConcurrencyTests : IDisposable
                 // Keep output blocked until every durable packet has actually progressed.
                 for(var packet=0;packet<120;packet++)
                 {
-                    Assert.True(await progress.WaitAsync(TimeSpan.FromSeconds(5)),$"Recorder made no progress at packet {packet+1} while scientific output was blocked.");
+                    var packetTimer=System.Diagnostics.Stopwatch.StartNew();var advanced=await progress.WaitAsync(TimeSpan.FromSeconds(5));
+                    if(!advanced||packet%20==19)Console.WriteLine($"Blocked-output durable progress: packet {packet+1}/120; advanced={advanced}; wait={packetTimer.Elapsed.TotalMilliseconds:F1} ms; test temp={Path.GetTempPath()}");
+                    Assert.True(advanced,$"Recorder made no progress at packet {packet+1} while scientific output was blocked.");
                     Assert.False(worker.IsCompleted);
                 }
                 await recording;

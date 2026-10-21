@@ -57,6 +57,16 @@ the same source already has the required full result.
 
 ## Failure handling
 
+Windows full CI places temporary fixtures on the runner's dedicated scratch volume
+(`RUNNER_TEMP/aeroscience-test-storage`) and logs a small, explicitly flushed write probe
+for both the default system temp and selected scratch. SQLite FULL durability, scientific
+queues, the ten-second drain, five-second per-packet progress and two-minute inactivity
+collector remain unchanged. This isolates CI fixture storage from OS-disk contention;
+it does not change application storage defaults or establish gaming-PC throughput.
+The blocked-writer probe logs actual durable progress, including before a failed
+per-packet assertion, so an inactivity-collector termination is distinguishable from
+an unexplained native crash. Do not count an aborted test host as passing remaining tests.
+
 Read the failing test, error, TRX/sequence and source delta first. Allow at most one
 diagnostic rerun for a suspected intermittent failure. Recurrence requires a root-cause
 investigation before further retries. There are no automatic test retries or
