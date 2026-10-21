@@ -11,6 +11,7 @@ public sealed partial class ScientificLibraryJobs:IDisposable
     public string? Warning {get;private set;}
     private string? initialized;
     private readonly IEarthdataCredentials earthdata;
+    private readonly System.Collections.Concurrent.ConcurrentDictionary<Guid,byte> activeNasa=[];
     public ScientificLibraryJobs(ScienceStore science,ScientificCatalog catalog,AutomaticScientificData automatic,ScientificAccessSettings settings,IEarthdataCredentials? earthdata=null)
     {this.science=science;this.catalog=catalog;this.automatic=automatic;this.settings=settings;this.earthdata=earthdata??new UnavailableEarthdataCredentials();worker=Task.Run(Run);}
     private string SettingsHash(bool nasa=false)=>nasa?ScientificCatalog.Hash(new{general=SettingsHash(),settings.Get().Preferences.NasaOriginalMaximumBytes}):ScientificCatalog.Hash(new{settings.Get().Preferences.OnlineEnabled,settings.Get().Preferences.PrivacyAccepted,settings.Get().Preferences.MaximumDownloadBytes,settings.Get().Preferences.PreflightTransferBytes,settings.Get().Preferences.UnmeteredOnly,settings.Get().Preferences.BackgroundRetrieval});
@@ -147,6 +148,7 @@ public sealed partial class ScientificLibraryJobs:IDisposable
     }
     private async Task Execute(LibraryDownloadJob job,LibraryWorkUnit work,LibraryDownloadItem previous,CancellationToken token)
     {
+        if(job.Preview.Nasa is not null)activeNasa.TryAdd(job.Id,0);
         ScientificDownloadBudget? budget=null;ScientificTransferLedger.Lease? transfer=null;var initial=previous.DownloadedBytes;
         try
         {
@@ -186,7 +188,7 @@ public sealed partial class ScientificLibraryJobs:IDisposable
             var error=e is HttpRequestException?"Provider network unavailable. Retry when connectivity returns.":e is System.Text.Json.JsonException?"Provider metadata is incompatible; no scientific values were guessed.":e.Message;
             science.SetLibraryItem(job.Id,work.Index,"Failed",error);if(science.LibraryJob(job.Id).State is not("Paused" or "Cancelled"))science.SetLibraryState(job.Id,"Failed",error);
         }
-        finally{transfer?.Dispose();if(budget is not null)science.LibraryBudget(job.Id,work.Index,initial+budget.Bytes,initial+budget.Bytes,finish:true);science.Management?.RefreshScience();}
+        finally{activeNasa.TryRemove(job.Id,out _);transfer?.Dispose();if(budget is not null)science.LibraryBudget(job.Id,work.Index,initial+budget.Bytes,initial+budget.Bytes,finish:true);science.Management?.RefreshScience();}
     }
     public void Dispose(){stopping.Cancel();foreach(var job in science.AvailabilityError() is null?science.LibraryJobs():[])automatic.CancelScope("library:"+job.Id);try{worker.GetAwaiter().GetResult();}catch(OperationCanceledException){}stopping.Dispose();commands.Dispose();}
 }

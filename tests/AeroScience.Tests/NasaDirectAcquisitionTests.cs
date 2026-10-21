@@ -73,7 +73,7 @@ public sealed class NasaDirectAcquisitionTests:IDisposable
         using(var jobs=new ScientificLibraryJobs(science,catalog,auto,settings,vault))
         {
             var preview=await jobs.PreviewNasa(new(new(item.Provider,item.Scene,item.Revision),10485760));id=preview.Id;auto.FlightActive(true);await jobs.Approve(id,preview.Preview.SelectionHash);await Task.Delay(350);Assert.Equal(0,handler.Numeric);
-            auto.FlightActive(false);await handler.Started.Task.WaitAsync(TimeSpan.FromSeconds(10));await jobs.Control(id,"pause");Assert.Equal("Paused",science.LibraryJob(id).State);Assert.Empty(science.Sources());
+            auto.FlightActive(false);await handler.Started.Task.WaitAsync(TimeSpan.FromSeconds(10));await jobs.DisconnectEarthdata();Assert.Null(vault.ReadToken());Assert.Equal("Paused",science.LibraryJob(id).State);Assert.Empty(science.Sources());vault.Value=Token;
         }
         science.RecoverLibraryJobs();handler.Block=false;using(var recovered=new ScientificLibraryJobs(science,catalog,auto,settings,vault)){await recovered.Control(id,"resume");Assert.Equal("Completed",(await Terminal(science,id)).State);}
         Assert.Single(science.Sources());Assert.Empty(science.Datasets());
@@ -103,6 +103,22 @@ public sealed class NasaDirectAcquisitionTests:IDisposable
     {
         Assert.Throws<ArgumentException>(()=>EarthdataConnection.ValidateToken("not a token\r\nAuthorization: secret"));var vault=new Credentials();var status=EarthdataConnection.Status(vault);Assert.True(status.Connected);Assert.DoesNotContain(Token,JsonSerializer.Serialize(status));vault.Clear();Assert.False(EarthdataConnection.Status(vault).Connected);
         var old=JsonSerializer.Deserialize<ScientificAccessPreferences>("{}",WireJson.Options)!;Assert.Equal(67108864,old.MaximumDownloadBytes);Assert.Equal(1073741824,old.NasaOriginalMaximumBytes);
+    }
+    [Fact]public async Task DisconnectStillPausesOldPendingJobsBehindMoreThanOnePageOfFailedHistory()
+    {
+        var item=NasaFixtureFiles.Item("classic");var folder=Path.Combine(root,"originals");NasaFixtureFiles.Cube(folder,item);using var auto=new AutomaticScientificData(science,settings,new(new Handler(folder,"classic"),cacheEnabled:false));auto.FlightActive(true);var catalog=new ScientificCatalog(auto,science,settings);var vault=new Credentials();using var jobs=new ScientificLibraryJobs(science,catalog,auto,settings,vault);
+        var pending=await jobs.PreviewNasa(new(new(item.Provider,item.Scene,item.Revision),10485760));
+        for(var i=0;i<70;i++){var failed=science.SaveLibraryPreview(pending.Preview with{Id=Guid.NewGuid()});science.SetLibraryState(failed.Id,"Failed","Synthetic historical failure");}
+        Assert.DoesNotContain(science.LibraryJobs(),j=>j.Id==pending.Id);await jobs.DisconnectEarthdata();Assert.Null(vault.ReadToken());Assert.Equal("Paused",science.LibraryJob(pending.Id).State);Assert.Empty(science.Sources());
+    }
+    [Fact]public async Task DisconnectRemovesCredentialWhenExternalLibraryIsUnavailableWithoutReplacingIt()
+    {
+        var manifest=Path.Combine(science.DirectoryPath,StorageManager.LibraryManifest);var saved=manifest+".offline";File.Move(manifest,saved);
+        try
+        {
+            var vault=new Credentials();using var auto=new AutomaticScientificData(science,settings);var catalog=new ScientificCatalog(auto,science,settings);using var jobs=new ScientificLibraryJobs(science,catalog,auto,settings,vault);
+            await jobs.DisconnectEarthdata();Assert.Null(vault.ReadToken());Assert.False(File.Exists(manifest));Assert.NotNull(science.AvailabilityError());
+        }finally{File.Move(saved,manifest);}
     }
     public void Dispose(){science.Dispose();Directory.Delete(root,true);}
 }

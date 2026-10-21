@@ -114,7 +114,19 @@ public sealed partial class ScientificLibraryJobs
     }
     public async Task DisconnectEarthdata(CancellationToken token=default)
     {
-        foreach(var job in science.LibraryJobs().Where(j=>j.Preview.Nasa is not null&&j.State is not("Completed" or "Cancelled")))await Control(job.Id,"pause",token);
-        earthdata.Clear();
+        await commands.WaitAsync(token);
+        try
+        {
+            // Clear first, so concurrent approvals cannot obtain another bearer.
+            // Active transfers can be cancelled even with the Library drive offline.
+            earthdata.Clear();var active=activeNasa.Keys.ToArray();
+            foreach(var id in active)automatic.CancelScope("library:"+id);
+            if(science.AvailabilityError() is null)
+                foreach(var id in science.UnfinishedNasaJobs())
+                {
+                    science.SetLibraryState(id,"Paused");automatic.CancelScope("library:"+id);
+                }
+            foreach(var id in active)await automatic.WaitForLibraryScope("library:"+id,token);
+        }finally{commands.Release();}
     }
 }

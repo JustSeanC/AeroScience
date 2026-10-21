@@ -33,7 +33,9 @@ unsupported. Current collection `C4079844428-LPCLOUD` V002 was verified directly
 
 Subsequent scenes reuse the saved connection until NASA expires/revokes it. NASA currently
 documents a 60-day User Token lifetime, not permanent login. **Disconnect Earthdata on this
-PC** pauses its unfinished NASA jobs before removing this profile's local credential.
+PC** removes this profile's local credential immediately, then cancels/drains active NASA
+work and pauses its unfinished jobs. Credential removal still works with the Library drive
+offline; unrelated provider transfers and retained science are preserved.
 Revoke the token on NASA's profile page if required; local disconnection does not revoke
 it server-side. AeroScience never asks for NASA passwords, collects browser cookies,
 registers an invented OAuth client, operates an authentication proxy, or exports the token.

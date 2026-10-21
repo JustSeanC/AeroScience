@@ -54,6 +54,15 @@ public sealed partial class ScienceStore
         using var db=Open();using var cmd=db.CreateCommand();cmd.CommandText="SELECT id FROM library_jobs WHERE state='Queued' ORDER BY updated_utc LIMIT 1";
         return cmd.ExecuteScalar() is string id?LibraryJob(Guid.Parse(id)):null;
     }
+    internal Guid[] UnfinishedNasaJobs()
+    {
+        if(!File.Exists(DatabasePath))return [];
+        using var db=Open();using var cmd=db.CreateCommand();cmd.CommandText="""
+            SELECT id FROM library_jobs WHERE state IN ('Awaiting Approval','Queued','Preparing','Downloading','Verifying','Paused','Interrupted')
+                AND json_extract(preview_json,'$.version')=1 AND json_type(preview_json,'$.nasa')='object'
+            """;
+        using var rows=cmd.ExecuteReader();var ids=new List<Guid>();while(rows.Read())ids.Add(Guid.Parse(rows.GetString(0)));return ids.ToArray();
+    }
     internal LibraryDownloadJob SetLibraryState(Guid id,string state,string? error=null,bool approve=false)
     {
         lock(gate)
