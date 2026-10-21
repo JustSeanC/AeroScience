@@ -68,6 +68,11 @@ public sealed class ValidationIsolationTests : IDisposable
         Assert.Equal(before,StorageManager.DatabaseFingerprint(Path.Combine(copied.MissionDirectory,"missions.db")));
         Assert.Equal(StorageManager.LibraryId(settings.ScienceLibraryDirectory),StorageManager.LibraryId(copied.ScienceLibraryDirectory));
         Assert.Equal(File.ReadAllBytes(sourceFile),File.ReadAllBytes(Path.Combine(copied.ScienceLibraryDirectory,"Imagery","protected-original.bin")));
+        new ScientificAccessSettings(store.DirectoryPath).Save(new(true,true));
+        ValidationArchiveCopy.Select(store,copied);
+        Assert.False(new ScientificAccessSettings(store.DirectoryPath).Get().Preferences.OnlineEnabled);
+        Assert.Equal(copied.MissionDirectory,store.Load().MissionDirectory);
+        Assert.Equal(settings.MissionDirectory,original.Load().MissionDirectory);
         Assert.Throws<IOException>(()=>ValidationArchiveCopy.Create(store,settings.MissionDirectory,settings.ScienceLibraryDirectory,destination));
         Directory.Delete(destination,true);
         Assert.True(File.Exists(originalDb));Assert.True(File.Exists(sourceFile));Assert.True(File.Exists(original.SettingsPath));

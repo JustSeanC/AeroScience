@@ -35,6 +35,7 @@ public sealed class MainForm : BrandedForm, IDesktopActions
     public MainForm(string configurationDirectory, bool showSetup = false)
     {
         Preferences = new(configurationDirectory, ApplicationProfile.Current.Validation ? ApplicationProfile.Current.ConfigurationDirectory : null); Storage = new(Preferences);
+        Preferences.ValidateDirectory(configurationDirectory);
         new MapSettings(configurationDirectory).InitializeDefaults(File.Exists(Preferences.SettingsPath) || File.Exists(Path.Combine(configurationDirectory, "missions.db")));
         Text = ApplicationProfile.Current.Name + " " + Application.ProductVersion.Split('+')[0]; MinimumSize = new(560, 290); Size = new(760, 350);
         AutoScaleMode = AutoScaleMode.Dpi;
@@ -54,12 +55,12 @@ public sealed class MainForm : BrandedForm, IDesktopActions
                 if(mission.ShowDialog(this)!=DialogResult.OK)return;
                 using var science = new FolderBrowserDialog { Description="Choose the ORIGINAL Science Library folder to COPY. Originals will be preserved.", UseDescriptionForTitle=true };
                 if(science.ShowDialog(this)!=DialogResult.OK)return;
-                if(MessageBox.Show(this,"Create a verified disposable copy of both archives inside the Validation profile, then select that copy? Originals and production settings are retained. Close other applications using these archives first.","Copy archives for validation",MessageBoxButtons.YesNo,MessageBoxIcon.Question,MessageBoxDefaultButton.Button2)!=DialogResult.Yes)return;
+                if(MessageBox.Show(this,"Create a verified disposable copy of both archives inside the Validation profile, then open it with online scientific access disabled? Enable access later in Settings when ready. Originals and production settings are retained. Close other applications using these archives first.","Copy archives for validation",MessageBoxButtons.YesNo,MessageBoxIcon.Question,MessageBoxDefaultButton.Button2)!=DialogResult.Yes)return;
                 try { await RunStoppedAsync(()=>Task.Run(()=>
                 {
                     var destination=Path.Combine(Preferences.DirectoryPath,"Copies",DateTime.UtcNow.ToString("yyyyMMdd-HHmmss")+"-"+Guid.NewGuid().ToString("N"));
                     var copy=ValidationArchiveCopy.Create(Preferences,mission.SelectedPath,science.SelectedPath,destination);
-                    Preferences.Save(Preferences.Load() with {MissionDirectory=copy.MissionDirectory,ScienceLibraryDirectory=copy.ScienceLibraryDirectory,Initialized=true});
+                    ValidationArchiveCopy.Select(Preferences,copy);
                 })); }catch(Exception error){ShowError(error);}
             });
         AddButton(panel, "Exit", Close); Controls.Add(panel);

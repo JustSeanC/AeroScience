@@ -6,6 +6,15 @@ namespace AeroScience.Engine;
 
 public static class ValidationArchiveCopy
 {
+    public static void Select(PreferenceStore preferences, AppPreferences copy)
+    {
+        if(!preferences.IsConfined)throw new IOException("A confined validation profile is required.");
+        var current=preferences.Load();preferences.ValidateDirectory(copy.MissionDirectory);preferences.ValidateDirectory(copy.ScienceLibraryDirectory);
+        // Copied approved jobs are evidence, not new network consent for this test.
+        var access=new ScientificAccessSettings(preferences.DirectoryPath);
+        access.Save(access.Get().Preferences with{OnlineEnabled=false});
+        preferences.Save(current with{MissionDirectory=copy.MissionDirectory,ScienceLibraryDirectory=copy.ScienceLibraryDirectory,Initialized=true});
+    }
     // Explicit local-UI operation only. Never initialize/migrate the source stores.
     public static AppPreferences Create(PreferenceStore confinedPreferences, string missionFolder, string scienceFolder, string destination)
     {
