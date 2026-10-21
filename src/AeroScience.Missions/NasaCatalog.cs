@@ -55,7 +55,15 @@ public sealed partial class ScientificCatalog
         var items=new List<ScientificCatalogItem>();var warnings=new List<string>{"NASA footprints are catalog geometry, not QA-valid pixel coverage. Browser transfers are not controlled or measured by AeroScience.","Granule size, when supplied by CMR, is the original distribution total, not a subset estimate. Spectral details are verified from original files before import."};
         foreach(var entry in entries.EnumerateArray())
         {
-            try{var item=DescribeNasa(q.Provider,collection,entry);if(!items.Any(i=>i.Scene==item.Scene))items.Add(item);}
+            try
+            {
+                var item=DescribeNasa(q.Provider,collection,entry);
+                if(!uri.Query.Contains("concept_id=",StringComparison.Ordinal)&&
+                    (item.Bounds.East<q.Area.West||item.Bounds.West>q.Area.East||item.Bounds.North<q.Area.South||item.Bounds.South>q.Area.North||
+                     q.FromUtc is {} from&&(item.ObservationUtc is not {} observed||observed<from||observed>q.ToUtc)))
+                {warnings.Add("A returned NASA record did not match the requested bounds/date interval and was excluded.");continue;}
+                if(!items.Any(i=>i.Scene==item.Scene))items.Add(item);
+            }
             catch(Exception e)when(e is ArgumentException or InvalidDataException or FormatException or KeyNotFoundException or InvalidOperationException or OverflowException)
             {warnings.Add("A NASA record had missing, invalid or unsupported geometry/identity and was excluded. Split antimeridian searches; no footprint was invented.");}
         }
@@ -85,6 +93,7 @@ public sealed partial class ScientificCatalog
         }
         if(polygons.Count==0)throw new InvalidDataException("No supported original polygon footprint.");
         var all=polygons.SelectMany(r=>r).ToArray();var bounds=new GeographicBounds(all.Min(v=>v[0]),all.Min(v=>v[1]),all.Max(v=>v[0]),all.Max(v=>v[1]));
+        if(bounds.East<=bounds.West||bounds.North<=bounds.South||bounds.East-bounds.West>180)throw new InvalidDataException("Degenerate or unsupported NASA footprint.");
         var geometry=JsonSerializer.SerializeToElement(new{type="MultiPolygon",coordinates=polygons.Select(r=>new[]{r}).ToArray()});
         var assets=new List<NasaAsset>();
         if(entry.TryGetProperty("links",out var links))foreach(var link in links.EnumerateArray())
@@ -98,7 +107,8 @@ public sealed partial class ScientificCatalog
         long? bytes=null;if(double.TryParse(Text(entry,"granule_size"),NumberStyles.Float,CultureInfo.InvariantCulture,out var mb)&&double.IsFinite(mb)&&mb>0&&mb<long.MaxValue/1048576d)bytes=(long)Math.Ceiling(mb*1048576);
         var reference="https://search.earthdata.nasa.gov/search/granules?p="+cid+"&g="+id;
         var format=provider=="nasa-emit"?"NetCDF-4 (not imported)":assets.Any(a=>a.Role is "ENVI header" or "Original numeric binary")?"ENVI (individual companions; verify original header)":"Unknown; inspect official distribution";
-        var capability=provider=="nasa-emit"?"Discovery / official access only — native scientific import not yet supported":"Guided import — compatible original ENVI reflectance only; verify files before use";
+        var reflectance=provider=="nasa-classic"||assets.Any(a=>a.Role is "ENVI header" or "Original numeric binary"&&System.Text.RegularExpressions.Regex.IsMatch(a.Name,@"_(corr|rfl|refl)_"));
+        var capability=provider=="nasa-emit"?"Discovery / official access only — native scientific import not yet supported":reflectance?"Guided import — compatible original ENVI reflectance only; verify files before use":"Download only — auxiliary or unknown product; no supported hyperspectral reflectance import";
         var details=new NasaGranuleMetadata(p.Family,cid,p.Name,p.Version,id,title,provider=="nasa-emit"?"2A":"2",format,capability,
             "Individual NASA Earthdata authorization may be required; official browser handles login",bytes,null,null,null,assets.DistinctBy(a=>a.Url).ToArray(),Hash(collection),
             "https://cmr.earthdata.nasa.gov/search/concepts/"+id+".umm_json",Time(entry,"time_end"));

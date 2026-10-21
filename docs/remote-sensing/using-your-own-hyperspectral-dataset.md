@@ -4,6 +4,11 @@ Hyperspectral data records many adjacent colors, including wavelengths your eyes
 
 These are historical external Earth observations. Your simulated aircraft selects the geographic footprint to sample; it does not create a new physical measurement. Source observation time, simulated-flight packet time and processing time stay separate. Imported data work offline inside their real coverage.
 
+For official NASA Classic/NG scenes, use the [NASA Hyperspectral Assistant](hyperspectral.md)
+inside **Library → Browse & Download Data**. It binds the selected product's metadata to
+this same local-file verification/import workflow. NASA handles protected downloads in
+your external browser; AeroScience never asks for your password. EMIT stays discovery-only.
+
 ## Supported files
 
 Choose an **ENVI `.hdr` header** and keep its original image/binary beside it. The small header describes the larger numeric file, often named `.dat`, `.img`, `.bsq`, `.bil`, or with no extension. Do not choose a photograph, RGB preview or spectral-library-only file.

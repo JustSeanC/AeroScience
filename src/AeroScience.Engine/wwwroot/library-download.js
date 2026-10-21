@@ -507,8 +507,13 @@ export async function libraryDownload(parent, api, isDisposed = () => false) {
         more.append(el("p", `Collection revision: ${n.collectionRevision}. Granule metadata: ${n.metadataUrl}`));
         for (const asset of n.assets) { const a = link(more, `${asset.role}: ${asset.name}`, asset.url); a.target="_blank"; a.rel="noopener noreferrer"; }
         const official = link(row, "Open official NASA access / Earthdata", item.reference); official.target="_blank"; official.rel="noopener noreferrer";
+        if(item.provider === "nasa-ng") button(row,"Find matching header / binary granules",async()=>{
+          const original = n.assets.find(a=>a.role === "Original numeric binary" || a.role === "ENVI header");
+          if(!original) throw Error("No verified original companion name is available. Inspect the official product.");
+          sceneFilter.value = original.name.replace(/\.(bin|hdr)$/i, ""); filtersChanged(); await search();
+        });
         row.append(el("p", "1. Open official access. NASA handles login, terms and download. 2. Keep the original reflectance header and matching binary together. 3. Verify and import on the companion PC. Browser progress is external; canceling login/download leaves the Library unchanged. On a paired device, browse here and finish local-file import on the PC."));
-        if (item.provider !== "nasa-emit") button(row, "Verify downloaded AVIRIS files on this PC", async () => {
+        if (item.nasa.capability.startsWith("Guided import")) button(row, "Verify downloaded AVIRIS files on this PC", async () => {
           await api("/api/science/hyperspectral/nasa", {provider:item.provider, granuleId:item.scene, revision:item.revision});
           openHyperspectralImport(api);
         });

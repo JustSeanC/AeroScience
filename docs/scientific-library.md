@@ -77,7 +77,18 @@ searches with their original as-of time. Cached results are not a new live avail
 Exact verified local content can be reused without scientific network consent. An unavailable
 external Library drive produces an error; an empty replacement database is never created.
 
-Advanced manual source import and existing NASA discovery/guided ENVI import remain
-available. The new Library does not add NASA authorization, AVIRIS download automation or
-native EMIT decoding; those are separate later workstreams. Windows/MSFS and physical
+## NASA hyperspectral assistant
+
+Choose **Data family → Hyperspectral** in the same Browse & Download page. Search actual
+NASA CMR flightlines by product, original date, bounds and optional scene identifier.
+Footprints are catalog outlines, not guaranteed valid pixels. Classic and NG compatible
+original ENVI reflectance use an explicitly labeled **official browser handoff**, followed
+by **Verify downloaded AVIRIS files on this PC**. NASA handles individual login and browser
+transfer; AeroScience handles bounded original-file validation and atomic Library import.
+Companions/checksums stay with the header; no manual JSON or terminal is required.
+Paired browsers can browse/open official access; local selection remains on the companion PC.
+EMIT is **discovery / official access only**, with no native NetCDF-4 import.
+Read the [supported formats, steps and acceptance limits](remote-sensing/hyperspectral.md).
+
+Advanced manual source import remains available. Windows/MSFS and physical
 paired-device acceptance remain separate from browser and provider tests.

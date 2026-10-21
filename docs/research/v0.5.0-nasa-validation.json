@@ -501,5 +501,28 @@
     "numericHashes": null,
     "independentNumericComparison": "Not performed: no authorized original cube available. Deterministic synthetic tests are not genuine numeric acceptance.",
     "installedAcceptance": "Pending Windows user-authorized browser transfer, native file selection, MSFS/iPad/Quest"
+  },
+  "ngOriginalAcceptance": {
+    "status": "Pending genuine protected originals and independent numerical comparison",
+    "collection": "C2659129205-ORNL_CLOUD",
+    "version": "1",
+    "binaryGranule": "G2663871321-ORNL_CLOUD",
+    "headerGranule": "G2663884932-ORNL_CLOUD",
+    "flightline": "ang20140621t190550",
+    "observationUtc": "2014-06-21T19:05:50Z",
+    "headerAnonymousHttpStatus": 401,
+    "access": "Official user-authorized browser download; no credentials in AeroScience",
+    "officialGuide": "https://daac.ornl.gov/AVIRIS/guides/AVIRIS-NG_L2_Reflectance.html",
+    "supportedFormat": "425-band or documented early 2014 432-band corr reflectance Float32/Float64 ENVI header + bin; actual native wavelengths/grid required",
+    "publicChecksum": {
+      "url": "https://data.ornldaac.earthdata.nasa.gov/public/aviris/AVIRIS-NG_L2_Reflectance/data/ang20140621t190550_corr_v1g_img.bin.sha256",
+      "httpStatus": 200,
+      "sha256": "857c24ef7971c5dff2389448b9cb806e55c3edb589f1a6f4346d72ffa8bac8e7",
+      "limitation": "Authoritative expected checksum obtained, not a downloaded-binary hash or numeric verification"
+    },
+    "originalFilesDownloaded": false,
+    "independentNumericComparison": null,
+    "deterministicTests": "Separate NG synthetic fixtures, not genuine NASA acceptance",
+    "remaining": "Authorized original header/binary, actual spectral/grid/units/mask comparison, offline genuine reopening; installed Windows/Earthdata and physical devices"
   }
 }

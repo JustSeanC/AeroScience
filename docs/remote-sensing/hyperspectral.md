@@ -65,6 +65,35 @@ acceptance is pending**: the selected official header returned HTTP 401 without 
 Earthdata authorization. The existing NV5 Cuprite validation is retained as its own baseline,
 not evidence that this official collection or every Classic distribution passed.
 
+## AVIRIS-NG original-file verification
+
+NG is validated as a separate family, not renamed Classic. Collection
+`AVIRIS-NG_L2_Reflectance_2110` V1 uses `angYYYYMMDDtHHMMSS_corr/rfl…_img.hdr`
+and its matching `.bin`. Supported layouts are the documented **425-band reflectance**
+and **432-band corr from early 2014**, Float32/Float64, with actual header wavelengths,
+scale/offset, nodata/bad bands and supported original WGS84 geographic/rotated UTM grid.
+A Classic cube, water-vapor `h2o` companion, radiance, missing metadata or other revision
+cannot be relabeled as NG reflectance.
+
+NG headers and binaries can have **separate CMR granule IDs**. Use **Find matching header /
+binary granules** on the selected product to search its exact original product stem.
+Follow the actual official links and download both companions plus advertised checksum(s).
+The assistant never constructs a guessed download URL. Auxiliary water-vapor products
+are labeled **Download only**; EMIT is **Discovery / official access only**.
+
+Independent NG synthetic tests cover 425/432 channels, BSQ/BIL/BIP, both byte orders,
+Float32/Float64, original spectral/channel alignment, bad bands/nodata, checksums,
+truncation, cancellation, exact retained reuse and offline reopening. The browser workflow
+verifies and imports through production APIs and Library persistence using explicitly
+synthetic local input, not NASA numeric acceptance.
+
+**Genuine NG numerical acceptance remains pending**: the official original header returned
+HTTP 401 without individual authorization. The official public SHA-256 for
+`ang20140621t190550_corr_v1g_img.bin` was retrieved successfully; it does not establish that
+the protected binary was downloaded or numerically validated. See the consolidated
+[NASA evidence record](../research/v0.5.0-nasa-validation.json). Actual user-authorized
+Windows browser download, native picker, physical iPad, MSFS and Quest checks remain open.
+
 ## Advanced local import reference
 
 Normal pilot setup: [automatic quick start](quick-start.md) and [provider capabilities](automatic-data.md). Automatic NASA catalog discovery is supported; automated hyperspectral file preparation/authorization is not. The following ENVI workflow remains advanced.

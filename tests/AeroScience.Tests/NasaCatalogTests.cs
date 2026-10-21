@@ -17,7 +17,7 @@ public sealed class NasaCatalogTests:IDisposable
     public async Task RecordedOfficialMetadataPreservesIdentityTimesFootprintsAndUnknownSpectra(string family,string name,string version)
     {
         var handler=new Handler(r=>Metadata(family,r.RequestUri!.AbsolutePath.Contains("collections")?"collections":"granules"));using var auto=new AutomaticScientificData(science,settings,new(handler));var catalog=new ScientificCatalog(auto,science,settings);
-        var q=new ScientificCatalogQuery("nasa-"+family,new(-119,33,-117,35),PageSize:2);var page=await catalog.Search(q);Assert.Equal("Available",page.Status);Assert.NotNull(page.NextCursor);
+        var q=new ScientificCatalogQuery("nasa-"+family,family=="ng"?new(-116,35,-115,36):family=="emit"?new(73,21,75,23):new(-119,33,-117,35),PageSize:2);var page=await catalog.Search(q);Assert.Equal("Available",page.Status);Assert.NotNull(page.NextCursor);
         var item=page.Items[0];Assert.Equal(name,item.Nasa!.Family);Assert.Equal(version,item.Nasa.CollectionVersion);Assert.NotNull(item.ObservationUtc);Assert.NotNull(item.Geometry);Assert.Null(item.Nasa.WavelengthsNm);Assert.Null(item.Nasa.BandCount);Assert.Empty(item.Bands);Assert.True(item.Nasa.OriginalBytes>0);
         Assert.All(item.Nasa.Assets,a=>Assert.True(ScientificCatalog.OfficialNasaLink(a.Url)));Assert.Contains(family=="emit"?"not yet supported":"Guided import",item.Nasa.Capability);
         settings.Save(new());var cached=await catalog.Search(q with{CachedOnly=true});Assert.True(cached.Cached);Assert.Equal(page.AsOfUtc,cached.AsOfUtc);Assert.Equal(2,handler.Count);

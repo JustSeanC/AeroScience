@@ -127,7 +127,7 @@ public sealed partial class ScienceStore
     {
         return await ImportSourceAsync(ReadSourceManifest(manifestPath),Path.GetDirectoryName(Path.GetFullPath(manifestPath))!,token,progress);
     }
-    public async Task<ScientificSource> ImportSourceAsync(ScientificSourceManifest input,string root,CancellationToken token=default,IProgress<string>? progress=null,bool reuseExisting=false)
+    public async Task<ScientificSource> ImportSourceAsync(ScientificSourceManifest input,string root,CancellationToken token=default,IProgress<string>? progress=null,bool reuseExisting=false,Action<string>? verifyStaged=null)
     {
         var inspected = InspectImport(input,root); var manifest = inspected.Manifest;
         if(reuseExisting)
@@ -182,6 +182,9 @@ public sealed partial class ScienceStore
                 if (Digest(fromPath) != Digest(target)) throw new IOException("Source changed during import; no source was published.");
                 files.Add(new(name.Replace('\\', '/'), new FileInfo(target).Length, Digest(target)));
             }
+            // Product adapters may verify copied originals before atomic publication.
+            verifyStaged?.Invoke(temporary);
+            token.ThrowIfCancellationRequested();
             var fingerprint = Convert.ToHexString(SHA256.HashData(JsonSerializer.SerializeToUtf8Bytes(new { manifest, files }, WireJson.Options))).ToLowerInvariant();
             var source = new ScientificSource(id, manifest, DateTimeOffset.UtcNow, grids, files.ToArray(), fingerprint, relative);
             PreferenceStore.WriteAtomic(Path.Combine(temporary, "source.json"), source);

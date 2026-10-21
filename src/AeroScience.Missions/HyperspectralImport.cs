@@ -90,7 +90,7 @@ public sealed class ScientificImportSession(ScienceStore science,Action? importe
     public HyperspectralImportState Snapshot(){lock(gate)return state with{NasaSelection=nasa};}
     public void BeginNasa(ScientificCatalogItem item)
     {
-        if(item.Nasa is null||item.Provider is not("nasa-classic" or "nasa-ng"))throw new ArgumentException("EMIT and unknown NASA products cannot be imported. Choose a compatible AVIRIS reflectance granule.");
+        if(item.Nasa is null||!item.Nasa.Capability.StartsWith("Guided import",StringComparison.Ordinal)||item.Provider is not("nasa-classic" or "nasa-ng"))throw new ArgumentException("EMIT and unknown NASA products cannot be imported. Choose a compatible AVIRIS reflectance granule.");
         lock(gate){if(state.Busy)throw new InvalidOperationException("Finish or cancel the active import before selecting another NASA scene.");generation++;selected=associated=null;nasa=item;kind=RemoteKind.Hyperspectral;metadata=new();state=new("Choose","NASA browser acquisition is external. Download the original matching reflectance .hdr and numeric binary, then choose the header on the companion PC. No NASA password is requested here.");}
     }
     private void Set(HyperspectralImportState value){lock(gate)state=value;}
@@ -126,11 +126,15 @@ lock(gate){if(state.Busy||selected is null)throw new InvalidOperationException("
             try
             {
                 if(nasa is not null)inspection=NasaGuidedImport.Inspect(selected!,nasa,metadata,associated,token);
-                var source=await science.ImportSourceAsync(inspection.Manifest!,inspection.Root,token,new Progress<string>(message=>{lock(gate)state=state with{Message=message};}),reuseExisting:true);
+                var source=await science.ImportSourceAsync(inspection.Manifest!,inspection.Root,token,new Progress<string>(message=>{lock(gate)state=state with{Message=message};}),reuseExisting:true,verifyStaged:nasa is null?null:staged=>
+                {
+                    var verified=NasaGuidedImport.Inspect(Path.Combine(staged,Path.GetFileName(inspection.Header)),nasa,metadata,associated,token);
+                    if(ScientificCatalog.Hash(verified.Manifest)!=ScientificCatalog.Hash(inspection.Manifest))throw new InvalidDataException("NASA metadata changed during import; no source was published.");
+                });
                 imported?.Invoke();
                 Set(new("Ready","Dataset Ready. It can be sampled only inside its real coverage; original external files are retained.",inspection,source,science.DirectoryPath));
             }
-            catch(OperationCanceledException){Set(new("Cancelled","Import cancelled. No partial source is advertised as ready. Original files are unchanged; interrupted staging is available in Storage Management."));}
+            catch(OperationCanceledException){lock(gate)nasa=null;Set(new("Cancelled","Import cancelled. No partial source is advertised as ready. Original files are unchanged; interrupted staging is available in Storage Management."));}
             catch(Exception e)when(e is IOException or InvalidDataException or ArgumentException or InvalidOperationException or UnauthorizedAccessException or Microsoft.Data.Sqlite.SqliteException){Set(new("Invalid",e.Message));}
         });
     }

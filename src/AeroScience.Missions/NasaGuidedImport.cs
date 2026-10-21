@@ -13,7 +13,7 @@ public static class NasaGuidedImport
     public static HyperspectralInspection Inspect(string selected,ScientificCatalogItem item,HyperspectralUserMetadata? additions=null,string? associated=null,CancellationToken token=default)
     {
         var n=item.Nasa??throw new InvalidDataException("Missing selected NASA granule.");
-        if(item.Provider is not("nasa-classic" or "nasa-ng"))throw new InvalidDataException("EMIT native import is not supported.");
+        if(!n.Capability.StartsWith("Guided import",StringComparison.Ordinal)||item.Provider is not("nasa-classic" or "nasa-ng"))throw new InvalidDataException("EMIT native import is not supported.");
         var header=GuidedHyperspectralImport.FindHeader(selected);_=ScientificRaster.SafeFile(Path.GetDirectoryName(header)!,Path.GetFileName(header));var stem=Path.GetFileNameWithoutExtension(header);
         var prefix=Regex.Match(n.Flightline,item.Provider=="nasa-classic"?@"f\d{6}t\d{2}p\d{2}r\d{2}":@"ang\d{8}t\d{6}").Value;
         if(prefix.Length==0||!stem.StartsWith(prefix+"_",StringComparison.Ordinal)||!Regex.IsMatch(stem,@"_(corr|rfl|refl)(_|$)"))throw new InvalidDataException("The selected header is not the selected NASA reflectance flightline. Do not select h2o, radiance, RGB, another scene or an incomplete download.");
@@ -24,6 +24,14 @@ public static class NasaGuidedImport
         {
             if(!fields.TryGetValue("bands",out var count)||count.Trim()!="224")throw new InvalidDataException("This Classic adapter supports documented 224-band Level-2 reflectance only. Other distributions remain advanced/future formats.");
             if(fields.GetValueOrDefault("data type") is not("4" or "5"))throw new InvalidDataException("NASA Classic Level-2 reflectance requires documented Float32/Float64 original numeric values.");
+        }
+        if(item.Provider=="nasa-ng")
+        {
+            // ORNL 2110 V1 guide, Table 1: 425 channels, with 432 for some 2014 corr
+            // distributions. No extrapolated wavelengths or Classic calibration assumptions.
+            if(fields.GetValueOrDefault("bands") is not("425" or "432"))throw new InvalidDataException("Supported NG Level-2 reflectance has 425 bands, or the documented early 432-band corr layout. Other distributions require separate verification.");
+            if(fields.GetValueOrDefault("bands")=="432"&&(!stem.Contains("_corr_",StringComparison.Ordinal)||!stem.StartsWith("ang2014",StringComparison.Ordinal)))throw new InvalidDataException("The 432-band NG exception is documented only for early 2014 corr products.");
+            if(fields.GetValueOrDefault("data type") is not("4" or "5"))throw new InvalidDataException("NG reflectance requires original documented Float32/Float64 values.");
         }
         if(fields.TryGetValue("acquisition time",out var date)&&DateTimeOffset.TryParse(date,CultureInfo.InvariantCulture,DateTimeStyles.None,out var original)&&
             (date.EndsWith('Z')||Regex.IsMatch(date,@"[+-]\d{2}:\d{2}$"))&&item.ObservationUtc is {} start&&
@@ -55,6 +63,7 @@ public static class NasaGuidedImport
         }
         _=ScienceStore.InspectImport(inspection.Manifest,inspection.Root);
         var notes=JsonSerializer.Serialize(new{workflow="NASA official-browser acquisition followed by local ENVI verification",catalog=item,checksumVerification=checksums,headerInspection=JsonSerializer.Deserialize<JsonElement>(inspection.Manifest.Notes!),identityLimitation="Matching metadata and filenames are not proof of NASA origin without an authoritative provider checksum. Retained file hashes establish local integrity.",userNotes=additions?.Notes},WireJson.Options);
-        return inspection with{Manifest=inspection.Manifest with{SceneId=n.GranuleId,PublicationUtc=item.PublishedUtc,Notes=notes,OriginalMetadataFiles=companions.ToArray()},Warnings=[..inspection.Warnings,"Original NASA observations; browser download progress/authentication is external. No new aircraft observations are created."]};
+        var companionBytes=companions.Sum(name=>new FileInfo(Path.Combine(inspection.Root,name)).Length);
+        return inspection with{FileBytes=inspection.FileBytes+companionBytes,EstimatedImportBytes=inspection.EstimatedImportBytes+companionBytes,Manifest=inspection.Manifest with{SceneId=n.GranuleId,PublicationUtc=item.PublishedUtc,Notes=notes,OriginalMetadataFiles=companions.ToArray()},Warnings=[..inspection.Warnings,"Original NASA observations; browser download progress/authentication is external. No new aircraft observations are created."]};
     }
 }
