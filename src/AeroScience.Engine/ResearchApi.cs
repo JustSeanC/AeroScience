@@ -112,6 +112,9 @@ public static class ResearchApi
             var result=missions.ControlScience(request);
             return result.Event.Outcome==CollectionEventOutcome.Conflict?Results.Conflict(result):Results.Ok(result);
         });
+        app.MapPost("/api/plans/readiness", (MissionPlan draft, PreflightReadinessService readiness) => readiness.Assess(draft));
+        app.MapGet("/api/plans/readiness/context", (PreflightReadinessService readiness) => new { contextSha256=PreflightReadiness.Hash(readiness.Environment()) });
+        app.MapGet("/api/plans/{id:guid}/readiness", (Guid id, MissionStore store, PreflightReadinessService readiness) => readiness.Assess(store.Plan(id)??throw new ArgumentException("Plan not found.")));
         app.MapPost("/api/plans/collection/bind",(MissionPlan draft)=>CollectionPlanning.Bind(draft));
         app.MapGet("/api/patterns", () => Enum.GetNames<FlightPatternKind>());
         app.MapPost("/api/patterns/fit-survey", (PatternSurveyRequest request) => FlightPatterns.FitSurvey(request.Definition,request.Area,request.FitMode));

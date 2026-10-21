@@ -40,6 +40,6 @@ public sealed record OperatingAssessment([property: JsonRequired] int Version, G
 public sealed record InstrumentOperatingReport(ScienceMode Mode, EffectiveInstrumentConfiguration Configuration,
     OperatingAssessment Assessment, TelemetryUpdate Input, string Policy = "hybrid-realistic-1",
     string Limitation = "Operating compliance, modeled geometry and source QA are separate; this is not measurement accuracy certification.");
-public sealed record ReadinessCheck(string Id, ReadinessStatus Status, string[] Reasons, string[] Actions);
+public sealed record ReadinessCheck(string Id, ReadinessStatus Status, string[] Reasons, string[] Actions, string Category = "General", string[]? Inputs = null);
 public sealed record ReadinessAssessment([property: JsonRequired] int Version, string PlanSha256,
-    DateTimeOffset AssessedUtc, ReadinessCheck[] Checks, string[] Limitations) : IVersionedEvidence;
+    DateTimeOffset AssessedUtc, ReadinessCheck[] Checks, string[] Limitations, string? ContextSha256 = null, DateTimeOffset? ExpiresUtc = null) : IVersionedEvidence;

@@ -1,4 +1,5 @@
 import { newIdentity } from "./workstation-ui.js";
+import { preflightReadiness } from "./preflight-readiness.js";
 import { collectionPlanner } from "./collection-planner.js";
 import { initializeScienceSessions } from "./science-sessions.js";
 import {reviewPreflight} from "./download-activity.js";
@@ -293,7 +294,8 @@ function editPlan(plan) {
   form.id = "plan-form";
   e.append(form);
   const draftStatus=text("p","Mission plan draft · Changes are not saved until Save mission plan.","planner-status");draftStatus.setAttribute("role","status");form.append(draftStatus);
-  const dirty=message=>{if(!form.isConnected)return;plannerDirty=true;draftStatus.textContent=message||"Unsaved changes · Save mission plan when ready. Your draft stays here when you switch sections.";};
+  let readinessView;
+  const dirty=message=>{if(!form.isConnected)return;plannerDirty=true;readinessView?.invalidate();draftStatus.textContent=message||"Unsaved changes · Save mission plan when ready. Your draft stays here when you switch sections.";};
   form.addEventListener("input",event=>{if(!event.target.closest(".pattern-editor")&&!event.target.closest(".draft-geometry-editor"))dirty();});
   form.append(text("h3","1. Mission details"));
   const grid = text("div", undefined, "research-grid");
@@ -689,13 +691,8 @@ function editPlan(plan) {
     }),
     ctx.api,
   );
-  form.onsubmit = (event) => {
-    event.preventDefault();
-    if(pendingGeometry){draftStatus.textContent="Save or cancel the draft waypoint/survey area before saving the mission plan.";editor.scrollIntoView({block:"center"});return;}
-    if(pattern.hasPreview?.()){draftStatus.textContent="Pattern preview only. Add Pattern to Mission or Discard Preview before saving.";return;}
-    ctx.command(save, async () => {
-      const nullable = (e) => e.planningUnits?e.planningUnits.read():(e.value ? Number(e.value) : null);
-      const savedPlan = await ctx.api("/api/plans", {
+  const nullable = (e) => e.planningUnits?e.planningUnits.read():(e.value ? Number(e.value) : null);
+  const readDraft = () => ({
         id: draftPlanId,
         collection: automation.read(),
         name: name.value,
@@ -719,6 +716,13 @@ function editPlan(plan) {
         atmosphericSettings:atmosphericSection.hidden?(plan?.atmosphericSettings??null):{direction:profileDirection.value,altitudeIntervalMetres:profileInterval.planningUnits.read()*.3048,maximumGapSeconds:Number(profileGap.value),minimumAltitudeFeet:nullable(low),maximumAltitudeFeet:nullable(high)},
         sensorPlanning:pattern.getSensorPlanning(),
       });
+  readinessView = preflightReadiness(form,readDraft,ctx.api);
+  form.onsubmit = (event) => {
+    event.preventDefault();
+    if(pendingGeometry){draftStatus.textContent="Save or cancel the draft waypoint/survey area before saving the mission plan.";editor.scrollIntoView({block:"center"});return;}
+    if(pattern.hasPreview?.()){draftStatus.textContent="Pattern preview only. Add Pattern to Mission or Discard Preview before saving.";return;}
+    ctx.command(save, async () => {
+      const savedPlan = await ctx.api("/api/plans", readDraft());
       if(!form.isConnected)return;editing=savedPlan;plannerDirty=false;pendingGeometry=false;await planner();document.querySelector("#plan-editor .planner-status").textContent="Mission plan saved · Ready to start mission from Mission Control or the saved plan row.";
     });
   };

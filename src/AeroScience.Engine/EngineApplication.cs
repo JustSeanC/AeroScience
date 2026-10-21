@@ -98,6 +98,7 @@ public static class EngineApplication
         builder.Services.AddHostedService<ToolbarWorker>();
         builder.Services.AddHostedService<StorageManagementWorker>();
         builder.Services.AddSingleton<ScientificAnalysisJobs>();
+        builder.Services.AddSingleton<PreflightReadinessService>();
         builder.Services.AddHostedService(sp=>sp.GetRequiredService<ScientificAnalysisJobs>());
 
         var app = builder.Build();
