@@ -9,7 +9,7 @@ test('pilot arms, collects two science sessions and keeps one continuous flight'
  await page.waitForTimeout(1100);expect((await(await request.get(`/api/missions/${flight.id}/science`)).json()).observations).toHaveLength(0);
  await panel.getByRole('button',{name:'Start new science session',exact:true}).click();await expect(panel).toContainText('collecting');
  await expect.poll(async()=>((await(await request.get(`/api/missions/${flight.id}/science`)).json()).observations).length).toBeGreaterThan(0);
- await panel.getByRole('button',{name:'Pause data',exact:true}).click();await expect(panel).toContainText('paused');await panel.getByRole('button',{name:'Resume data',exact:true}).click();await expect(panel).toContainText('collecting');
+ await panel.getByRole('button',{name:'Pause science collection',exact:true}).click();await expect(panel).toContainText('paused');await panel.getByRole('button',{name:'Resume science collection',exact:true}).click();await expect(panel).toContainText('collecting');
  const a=(await(await request.get(`/api/missions/${flight.id}/collection`)).json()).state.currentSessionId;
  await panel.getByRole('button',{name:'End current science session',exact:true}).click();await expect(panel).toContainText('betweenSessions');
  await panel.getByRole('button',{name:'Start new science session',exact:true}).click();await expect(panel).toContainText('Session 2');
@@ -29,7 +29,7 @@ test('Planner configures and preserves bounded collection actions without JSON e
  await panel.getByRole('button',{name:'Refresh and review automation targets',exact:true}).click();await expect(panel.getByRole('status')).toContainText('Reviewed 2 actions');
  await page.getByRole('button',{name:'Save mission plan',exact:true}).click();await expect(page.getByText('Mission plan saved · Ready to start mission',{exact:false})).toBeVisible();
  const saved=await(await request.get('/api/plans/'+id)).json();expect(saved.collection.initialPolicy).toBe('armed');expect(saved.collection.triggers).toHaveLength(2);expect(saved.collection.triggers[1].targetId).toBe(b);expect(saved.collection.surveyAreas[0].geometrySha256).toHaveLength(64);
- await page.reload({waitUntil:'domcontentloaded'});await page.locator('.plan-row').filter({hasText:'Automation GUI fixture'}).getByRole('button',{name:'Edit',exact:true}).click();await page.locator('#collection-planner summary').click();await expect(page.locator('#collection-planner')).toContainText(saved.collection.triggers[0].targetId);
+ await page.reload({waitUntil:'domcontentloaded'});await page.locator('.plan-row').filter({hasText:'Automation GUI fixture'}).getByRole('button',{name:'Edit',exact:true}).click();await page.locator('#collection-planner summary').click();await expect(page.locator('#collection-planner')).toContainText('Start Data · Research region');await expect(page.locator('#collection-planner')).toContainText('End current science session · End gate');
 });
 test('a rejected session start leaves flight recording active and explains missing instruments',async({page,request})=>{
  await post(request,'/api/instruments',[]);await post(request,'/api/mission-selection',{planId:null});

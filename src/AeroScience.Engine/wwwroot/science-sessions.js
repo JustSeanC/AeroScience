@@ -13,7 +13,7 @@ export function initializeScienceSessions({api},parent) {
       const result=await api(`/api/missions/${flight}/collection`);const state=result.state;
       live.replaceChildren(element('h2',`Science: ${state.phase}`),element('p',state.currentSessionId?`Current session: ${state.currentSessionId}`:'No open science session. Flight recording continues.'));
       live.append(element('p',`Automation: ${state.authority}${state.manualAutomationHold?' · pilot override — rearm required':''}${state.continuityHold?' · continuity hold':''}${result.fault?' · storage hold; resolve storage and rearm':''}`));
-      const actions=[['StartData','Start new science session',!state.currentSessionId],['PauseData','Pause data',state.phase==='collecting'],['ResumeData','Resume data',state.phase==='paused'],['EndData','End current science session',!!state.currentSessionId],['RearmAutomation','Rearm automatic collection',true]];
+      const actions=[['StartData','Start new science session',!state.currentSessionId],['PauseData','Pause science collection',state.phase==='collecting'],['ResumeData','Resume science collection',state.phase==='paused'],['EndData','End current science session',!!state.currentSessionId],['RearmAutomation','Rearm automatic collection',true]];
       for(const [action,label,enabled] of actions){
         const button=element('button',label);button.type='button';button.disabled=!enabled;
         button.onclick=async()=>{if(busy)return;busy=true;button.disabled=true;

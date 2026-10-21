@@ -95,5 +95,15 @@ public sealed class ScienceSessionTests:IDisposable
         coordinator.Apply(new(connection,null,new(clock,20,29,5,90,.002)));
         Assert.Empty(store.ScienceIntents(flight.Id));Assert.Empty(science.StreamObservations(flight.Id));
     }
+    [Fact] public void PreStartPacketCannotPhaseShiftTheCommittedAtmosphericCadence()
+    {
+        var flight=Start();Do(flight.Id,CollectionAction.StartData);var anchor=clock;
+        void Packet(DateTimeOffset utc){var frame=SimulatedTelemetryProvider.Generate(utc,0);coordinator.Apply(new(new(ConnectionState.Connected,TelemetrySource.Simulated,"Synthetic queued-start packet",utc),frame,new(utc,17,29,5,90,.002)));}
+        Packet(anchor.AddMilliseconds(-100));
+        for(var i=1;i<=10;i++)Packet(anchor.AddMilliseconds(i*250));
+        var rows=science.StreamObservations(flight.Id).ToArray();Assert.Equal(3,rows.Length);
+        Assert.Equal(new[]{250d,1250d,2250d},rows.Select(r=>(r.TimestampUtc-anchor).TotalMilliseconds));
+        Assert.All(store.ScienceIntents(flight.Id),i=>Assert.Equal("Published",i.State));
+    }
     public void Dispose(){coordinator.Interrupt();research.Dispose();science.Dispose();Directory.Delete(root,true);}
 }

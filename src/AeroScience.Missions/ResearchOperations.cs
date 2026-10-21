@@ -166,13 +166,15 @@ public sealed class ResearchOperations : IDisposable
         foreach (var config in configurations.Where(c => c.Enabled && !RemoteAcquisition.Instruments.ContainsKey(c.InstrumentId)))
         {
             if (!acquisitions.TryGetValue(config.InstrumentId, out var run)) acquisitions[config.InstrumentId] = run = new();
-            if (run.LastSeen is not null && source.TimestampUtc <= run.LastSeen) continue;
-            run.LastSeen = source.TimestampUtc; run.Anchor ??= source.TimestampUtc;
-            var slot = (long)Math.Floor(((source.TimestampUtc - run.Anchor.Value).TotalMilliseconds + Math.Min(100, config.IntervalMs * .1)) / config.IntervalMs);
-            if (slot <= run.Slot) continue;
-            var gap = run.Slot >= 0 ? Math.Max(0, slot - run.Slot - 1) : 0; run.Missing += gap; run.Slot = slot;
             var intent=ingressIntents.SingleOrDefault(i=>i.InstrumentId==config.InstrumentId&&i.ExposureUtc==source.TimestampUtc);
             if(collectionManaged&&intent is null)continue;
+            if (run.LastSeen is not null && source.TimestampUtc <= run.LastSeen) continue;
+            run.LastSeen = source.TimestampUtc; run.Anchor ??= source.TimestampUtc;
+            // The controller owns managed cadence. A rejected pre-Start/paused packet
+            // must not establish a second, phase-shifted acquisition schedule here.
+            var slot = intent?.Slot??(long)Math.Floor(((source.TimestampUtc - run.Anchor.Value).TotalMilliseconds + Math.Min(100, config.IntervalMs * .1)) / config.IntervalMs);
+            if (slot <= run.Slot) continue;
+            var gap = run.Slot >= 0 ? Math.Max(0, slot - run.Slot - 1) : 0; run.Missing += gap; run.Slot = slot;
             var instrument = ScienceCatalog.Instrument(config.InstrumentId);
             var readings = instrument.Read(source); run.Rejected += readings.Count(v => v.Value is null || v.Quality != ObservationQuality.Valid);
             var valid = readings.Where(v => v.Value is not null && v.Quality == ObservationQuality.Valid).ToArray();

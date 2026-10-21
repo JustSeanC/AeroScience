@@ -13,7 +13,7 @@ test.afterEach(async({request})=>{
  await post(request,'/api/instruments',[]);await post(request,'/api/mission-selection',{planId:null});
 });
 
-test('user calibration revisions persist, preserve originals and require explicit application',async({page,request})=>{
+test('user calibration revisions persist, preserve originals and require explicit application',async({page,request},testInfo)=>{
  await post(request,'/api/mission-selection',{planId:null});await post(request,'/api/instruments',[]);
  await page.goto('/#science');
  const instrument=page.locator('[data-payload-instrument="ambient-temperature"]');
@@ -34,7 +34,12 @@ test('user calibration revisions persist, preserve originals and require explici
  await page.locator('[data-calibration-instrument="ambient-temperature"] > summary').click();
  await expect(page.locator('[data-calibration-instrument="ambient-temperature"]')).toContainText('revision 1');
  const response=await post(request,'/api/missions',{name:'Synthetic calibrated browser flight',mode:'realistic'});const mission=await response.json();
- await expect.poll(async()=>{const rows=(await(await request.get(`/api/missions/${mission.id}/science`)).json()).observations;return rows.some(r=>r.measurementId==='temperature.user-adjusted');}).toBeTruthy();
+ try{
+  await expect.poll(async()=>{const rows=(await(await request.get(`/api/missions/${mission.id}/science`)).json()).observations;return rows.some(r=>r.measurementId==='temperature.user-adjusted');}).toBeTruthy();
+ }catch(error){
+  const diagnostic={state:await(await request.get('/api/state')).json(),collection:await(await request.get(`/api/missions/${mission.id}/collection`)).json(),science:await(await request.get(`/api/missions/${mission.id}/science`)).json()};
+  await testInfo.attach('synthetic-acquisition-state',{body:JSON.stringify(diagnostic,null,2),contentType:'application/json'});throw error;
+ }
  await post(request,`/api/missions/${mission.id}/end`);
  const rows=(await(await request.get(`/api/missions/${mission.id}/science`)).json()).observations;
  const derived=rows.find(r=>r.calibration),original=rows.find(r=>r.timestampUtc===derived.timestampUtc&&r.measurementId==='temperature');

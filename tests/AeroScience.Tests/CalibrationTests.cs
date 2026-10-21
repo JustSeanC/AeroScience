@@ -192,11 +192,12 @@ public sealed class CalibrationTests
         var preferences = new PreferenceStore(files.Root); var paths = new StorageManager(preferences).Initialize();
         var store = new MissionStore(Path.Combine(paths.MissionDirectory, "missions.db")); store.Initialize();
         using var science = new ScienceStore(paths.ScienceLibraryDirectory); store.ScienceLibrary = science;
-        using var operations = new ResearchOperations(store, science); var coordinator = new MissionCoordinator(store, 1000, research: operations);
+        using var operations = new ResearchOperations(store, science);
         var definition = Definition(); var originalHash = EvidenceContracts.ContentHash(definition);
+        var clock=DateTimeOffset.UtcNow;var coordinator = new MissionCoordinator(store, 1000, research: operations,utcNow:()=>clock);
         var flight = coordinator.Start(new StartMissionRequest("Synthetic calibration archive", mode,
             Instruments: [new("ambient-temperature", true, Calibration: definition)]));
-        var at = DateTimeOffset.UtcNow;
+        var at = clock;
         definition.Parameters[1] = definition.Parameters[1] with { Value = 99 }; // caller mutation after acceptance
         void Apply(DateTimeOffset utc)
         {
@@ -206,6 +207,7 @@ public sealed class CalibrationTests
         }
         Apply(at);
         Assert.Equal(.25, store.ReplayInstruments(flight.Id, at).Instruments!.Single(c => c.Enabled).Calibration!.Parameters[1].Value);
+        clock=at.AddSeconds(1);
         coordinator.ConfigureInstruments([new("ambient-temperature", true, Calibration: Definition(1, 2))]);
         Apply(at.AddSeconds(1)); coordinator.End(flight.Id);
         var rows = science.StreamObservations(flight.Id).ToArray(); Assert.Equal(4, rows.Length);

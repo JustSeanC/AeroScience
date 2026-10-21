@@ -131,3 +131,9 @@ If that technical receipt budget is reached, automation holds visibly and manual
 remain available. Automatic End takes priority over coincident Start/Resume, and Pause over
 coincident Resume. A later distinct Start can create another session after an automatic
 End. No autopilot/aircraft control is sent to MSFS.
+
+The current archived telemetry has no separate slew-active flag. Paused positions and
+implausible jumps are detected; a slow repositioning that looks continuous cannot be
+identified as slew from position evidence alone. Use manual Pause before simulator slew
+and explicitly rearm afterward. Actual MSFS pause/slew/reconnect behavior remains a required
+installed acceptance check.

@@ -13,7 +13,7 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
     private GeographicCollectionEngine? geographicCollection;
     private bool collectionFault;
     private DateTimeOffset Now => utcNow?.Invoke()??DateTimeOffset.UtcNow;
-    private DateTimeOffset ControlTime => !requireFreshTelemetry&&frame is {} f&&f.TimestampUtc>DateTimeOffset.UtcNow?f.TimestampUtc:Now;
+    private DateTimeOffset ControlTime => !requireFreshTelemetry&&frame is {} f&&f.TimestampUtc>Now?f.TimestampUtc:Now;
     private string SelectionPath => Path.Combine(Path.GetDirectoryName(store.DatabasePath)!, "selected-plan.json");
     private Guid? SelectedPlan()
     {

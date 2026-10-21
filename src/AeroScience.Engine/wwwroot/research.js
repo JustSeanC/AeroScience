@@ -1034,20 +1034,9 @@ export function renderResearch(next) {
     collection.replaceChildren(
       text(
         "strong",
-        `Science collection: ${next.research?.collectionStatus || "stopped"}`,
+        `Source availability: ${next.research?.collectionStatus || "stopped"}`,
       ),
     );
-    collection.append(
-        button(
-          next.research?.intentionallyPaused
-            ? "Resume science collection"
-            : "Pause science collection",
-          async () =>
-            ctx.api(`/api/missions/${state.activeMission.id}/science/state`, {
-              paused: !state.research?.intentionallyPaused,
-            }),
-        ),
-      );
     collection.append(
       text(
         "p",
