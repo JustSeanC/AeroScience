@@ -28,5 +28,12 @@ test('NG independently guided files verify and atomically import through the exi
  const wizard=page.getByRole('dialog');await expect(wizard).toContainText('Step 1');await post(request,'/api/testing/nasa/files/ng');await expect(wizard).toContainText('425 bands');
  await wizard.getByRole('button',{name:'Continue to Import',exact:true}).click();await expect(wizard).toContainText('Step 3');await wizard.getByRole('button',{name:'Import Dataset',exact:true}).click();await expect(wizard).toContainText('Dataset Ready');
  const state=await (await request.get('/api/science/hyperspectral/import')).json();expect(state.source.manifest.sceneId).toBe('G2663871321-ORNL_CLOUD');expect(state.source.manifest.bands).toHaveLength(425);expect(state.source.files.every(f=>f.sha256.length===64)).toBeTruthy();
+ const calibrationCatalog=await(await request.get('/api/instruments/calibration')).json();const reference=calibrationCatalog.instruments.find(i=>i.specification.definition.id==='hyperspectral-imager').reference;
+ const profileCatalog=await(await request.get('/api/instrument-profiles')).json();const profile=profileCatalog.generic.find(p=>p.instrumentId==='hyperspectral-imager');
+ await post(request,'/api/instruments',[{instrumentId:'hyperspectral-imager',enabled:false,intervalMs:2000,payload:{profile,forwardDegrees:4},calibration:reference}]);
+ const before=await(await request.get('/api/instruments/configuration')).json();await wizard.getByRole('button',{name:'Enable Hyperspectral Imager',exact:true}).click();
+ await expect.poll(async()=>await(await request.get('/api/instruments/configuration')).json()).toEqual(before.map(c=>({...c,enabled:c.instrumentId==='hyperspectral-imager'?true:c.enabled})));
+ await post(request,'/api/instruments',[]);
+
  await wizard.getByRole('button',{name:'Close wizard',exact:true}).click();await post(request,'/api/science/hyperspectral/cancel');await post(request,'/api/science/access',{onlineEnabled:false,privacyAccepted:false});await page.goto('/#library');await expect(page.locator('main')).toContainText('SYNTHETIC NASA browser test');
 });

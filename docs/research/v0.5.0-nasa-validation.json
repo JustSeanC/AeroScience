@@ -524,5 +524,46 @@
     "independentNumericComparison": null,
     "deterministicTests": "Separate NG synthetic fixtures, not genuine NASA acceptance",
     "remaining": "Authorized original header/binary, actual spectral/grid/units/mask comparison, offline genuine reopening; installed Windows/Earthdata and physical devices"
+  },
+  "finalCatalogRerun": {
+    "scientificSourceCommit": "e1b8c9b557ff3e931568f97fdf52399341c4b5c4",
+    "checkedUtc": "2026-10-21T13:03:48.0724661+00:00",
+    "results": [
+      {
+        "provider": "nasa-classic",
+        "granule": "G3477024884-ORNL_CLOUD",
+        "status": "Available",
+        "nextStatus": "Available",
+        "emptyStatus": "No match",
+        "offlineCachedAsOf": "2026-10-21T13:03:29.4760521+00:00"
+      },
+      {
+        "provider": "nasa-ng",
+        "granule": "G2663871321-ORNL_CLOUD",
+        "status": "Available",
+        "nextStatus": "Available",
+        "emptyStatus": "No match",
+        "offlineCachedAsOf": "2026-10-21T13:03:35.2298047+00:00"
+      },
+      {
+        "provider": "nasa-emit",
+        "granule": "G2596854797-LPCLOUD",
+        "status": "Available",
+        "nextStatus": "Available",
+        "emptyStatus": "No match",
+        "offlineCachedAsOf": "2026-10-21T13:03:37.4861176+00:00"
+      }
+    ],
+    "canonicalLfSourceSha256": {
+      "src/AeroScience.Missions/ScientificCatalog.cs": "d660810d89fe66e08bbb07cff93905d1098ef3c49aa544e444775a135f7bcc4c",
+      "src/AeroScience.Missions/NasaCatalog.cs": "5cf2676f10d1e1ff945f44d26dd913ad52cb74e4fca42ea091c02b37a1898168",
+      "src/AeroScience.Missions/ScientificHttp.cs": "a458b324f456fe299d9b60ba53fc454336eb0bb0b90f95329db9407434d6f00e",
+      "src/AeroScience.Missions/NasaGuidedImport.cs": "605542b76d4efff99ecb750cab71ef4b2ccb9617fa17069a2c82474c8eb5d3d2",
+      "src/AeroScience.Missions/HyperspectralImport.cs": "a7423a2f10059dce039382e196b91375f96f5d52471dd005853f91758387d928",
+      "src/AeroScience.Missions/RemoteScienceStore.cs": "0c4dd5e92f0b75a28128dac3ae8fa4ccbcaa302962d0e8e6c2dfeab792741e3f",
+      "src/AeroScience.Shared/ScientificLibraryModels.cs": "33616f9782940d827549b4ecdbfcbe2d18bf579722456719ed3dc0e6d521ce81",
+      "tests/AeroScience.ProviderAcceptance/NasaAcceptance.cs": "25d62329e682b1a8814f582113fd13b54dee59a6825581885b8d0f152fac77c8"
+    },
+    "scope": "Final scientific source genuine catalog rerun only; later importer UI configuration-preservation correction does not change these source files. No numeric or hardware acceptance inferred."
   }
 }
