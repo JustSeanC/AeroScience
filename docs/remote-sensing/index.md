@@ -2,6 +2,7 @@
 
 - [Start a scientific flight](quick-start.md)
 - [Scientific Data Sources: terrain, thermal, multispectral and hyperspectral](scientific-data-sources.md)
+- [NASA Hyperspectral Assistant: discovery, official access and verified AVIRIS import](hyperspectral.md)
 - [Using Your Own Hyperspectral Dataset in AeroScience](using-your-own-hyperspectral-dataset.md)
 - [Mission Planner](../mission-planner.md)
 - [Automatic providers and limitations](automatic-data.md)

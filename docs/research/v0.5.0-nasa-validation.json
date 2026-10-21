@@ -525,7 +525,7 @@
     "deterministicTests": "Separate NG synthetic fixtures, not genuine NASA acceptance",
     "remaining": "Authorized original header/binary, actual spectral/grid/units/mask comparison, offline genuine reopening; installed Windows/Earthdata and physical devices"
   },
-  "finalCatalogRerun": {
+  "priorCatalogRerun": {
     "scientificSourceCommit": "e1b8c9b557ff3e931568f97fdf52399341c4b5c4",
     "checkedUtc": "2026-10-21T13:03:48.0724661+00:00",
     "results": [
@@ -565,5 +565,551 @@
       "tests/AeroScience.ProviderAcceptance/NasaAcceptance.cs": "25d62329e682b1a8814f582113fd13b54dee59a6825581885b8d0f152fac77c8"
     },
     "scope": "Final scientific source genuine catalog rerun only; later importer UI configuration-preservation correction does not change these source files. No numeric or hardware acceptance inferred."
+  },
+  "finalCatalogRerun": {
+    "scientificSourceCommit": "8ae5531fce3d04369f9284bde6a1f1a37162ca62",
+    "results": [
+      {
+        "provider": "nasa-classic",
+        "query": {
+          "provider": "nasa-classic",
+          "area": {
+            "west": -118.8,
+            "south": 34,
+            "east": -118.1,
+            "north": 34.6,
+            "corners": [
+              {
+                "latitude": 34,
+                "longitude": -118.8
+              },
+              {
+                "latitude": 34,
+                "longitude": -118.1
+              },
+              {
+                "latitude": 34.6,
+                "longitude": -118.1
+              },
+              {
+                "latitude": 34.6,
+                "longitude": -118.8
+              }
+            ],
+            "center": {
+              "latitude": 34.3,
+              "longitude": -118.44999999999999
+            }
+          },
+          "fromUtc": null,
+          "toUtc": null,
+          "maximumCloudPercent": 100,
+          "pageSize": 1,
+          "cursor": null,
+          "cachedOnly": false,
+          "refresh": false,
+          "sceneFilter": null
+        },
+        "firstItem": {
+          "provider": "nasa-classic",
+          "product": "AVIRIS-Classic: L2 Calibrated Reflectance, Facility Instrument Collection, V1",
+          "scene": "G3477024884-ORNL_CLOUD",
+          "revision": "2f6aa47136b14e36a135bf7c8365a335b0202c4fc296de6a4e6a37c8226d5cc4",
+          "kind": 2,
+          "bounds": {
+            "west": -118.7215,
+            "south": 34.023,
+            "east": -118.1574,
+            "north": 34.5663,
+            "corners": [
+              {
+                "latitude": 34.023,
+                "longitude": -118.7215
+              },
+              {
+                "latitude": 34.023,
+                "longitude": -118.1574
+              },
+              {
+                "latitude": 34.5663,
+                "longitude": -118.1574
+              },
+              {
+                "latitude": 34.5663,
+                "longitude": -118.7215
+              }
+            ],
+            "center": {
+              "latitude": 34.294650000000004,
+              "longitude": -118.43945
+            }
+          },
+          "geometry": {
+            "type": "MultiPolygon",
+            "coordinates": [
+              [
+                [
+                  [
+                    -118.7215,
+                    34.4952
+                  ],
+                  [
+                    -118.2636,
+                    34.023
+                  ],
+                  [
+                    -118.1574,
+                    34.0937
+                  ],
+                  [
+                    -118.6152,
+                    34.5663
+                  ],
+                  [
+                    -118.7215,
+                    34.4952
+                  ]
+                ]
+              ]
+            ]
+          },
+          "observationUtc": "2008-06-11T21:38:00+00:00",
+          "publishedUtc": null,
+          "bands": [],
+          "crs": null,
+          "verticalDatum": "Unknown / not inferred",
+          "quality": "Catalog footprint; source nodata, bad bands and per-pixel quality remain unverified.",
+          "resolution": "Unknown at granule discovery; verify original grid",
+          "license": "Review NASA collection terms and citation at the official source before acquisition.",
+          "reference": "https://search.earthdata.nasa.gov/search/granules?p=C2711871294-ORNL_CLOUD&g=G3477024884-ORNL_CLOUD",
+          "acquisitionMethod": "Official browser handoff",
+          "limitations": [
+            "Historical NASA reflectance, not simulated-aircraft measurements.",
+            "No missing wavelengths, units or QA values were inferred.",
+            "Guided import \u2014 compatible original ENVI reflectance only; verify files before use"
+          ],
+          "nasa": {
+            "family": "AVIRIS-Classic",
+            "collectionId": "C2711871294-ORNL_CLOUD",
+            "collectionShortName": "AVIRIS-Classic_L2_Reflectance_2154",
+            "collectionVersion": "1",
+            "granuleId": "G3477024884-ORNL_CLOUD",
+            "flightline": "f080611t01p00r13_L2_reflectance",
+            "processingLevel": "2",
+            "format": "ENVI (individual companions; verify original header)",
+            "capability": "Guided import \u2014 compatible original ENVI reflectance only; verify files before use",
+            "authorization": "Individual NASA Earthdata authorization may be required; official browser handles login",
+            "originalBytes": 2820183091,
+            "bandCount": null,
+            "wavelengthsNm": null,
+            "units": null,
+            "assets": [
+              {
+                "name": "f080611t01p00r13_corr_v1h_img.hdr",
+                "url": "https://data.ornldaac.earthdata.nasa.gov/protected/aviris/AVIRIS-Classic_L2_Reflectance/data/f080611t01p00r13_corr_v1h_img.hdr",
+                "role": "ENVI header"
+              },
+              {
+                "name": "f080611t01p00r13_h2o_v1h_img.bin",
+                "url": "https://data.ornldaac.earthdata.nasa.gov/protected/aviris/AVIRIS-Classic_L2_Reflectance/data/f080611t01p00r13_h2o_v1h_img.bin",
+                "role": "Original numeric binary"
+              },
+              {
+                "name": "f080611t01p00r13_h2o_v1h_img.hdr",
+                "url": "https://data.ornldaac.earthdata.nasa.gov/protected/aviris/AVIRIS-Classic_L2_Reflectance/data/f080611t01p00r13_h2o_v1h_img.hdr",
+                "role": "ENVI header"
+              },
+              {
+                "name": "f080611t01p00r13_corr_v1h_img.bin",
+                "url": "https://data.ornldaac.earthdata.nasa.gov/protected/aviris/AVIRIS-Classic_L2_Reflectance/data/f080611t01p00r13_corr_v1h_img.bin",
+                "role": "Original numeric binary"
+              }
+            ],
+            "collectionRevision": "2a3c7d328d2c15d23aa36af11f2770b01bda01cfd43389239eb3ed14b35c0875",
+            "metadataUrl": "https://cmr.earthdata.nasa.gov/search/concepts/G3477024884-ORNL_CLOUD.umm_json",
+            "observationEndUtc": "2008-06-11T21:44:00+00:00",
+            "updatedUtc": null
+          }
+        },
+        "originalSearchUtc": "2026-10-21T13:16:41.5018743+00:00",
+        "nextStatus": "Available",
+        "nextScene": "G3477025011-ORNL_CLOUD",
+        "emptyStatus": "No match",
+        "cacheCheck": "Production cached-only query retained first-page as-of; not newly verified live availability"
+      },
+      {
+        "provider": "nasa-ng",
+        "query": {
+          "provider": "nasa-ng",
+          "area": {
+            "west": -115.6,
+            "south": 35.4,
+            "east": -115.4,
+            "north": 35.6,
+            "corners": [
+              {
+                "latitude": 35.4,
+                "longitude": -115.6
+              },
+              {
+                "latitude": 35.4,
+                "longitude": -115.4
+              },
+              {
+                "latitude": 35.6,
+                "longitude": -115.4
+              },
+              {
+                "latitude": 35.6,
+                "longitude": -115.6
+              }
+            ],
+            "center": {
+              "latitude": 35.5,
+              "longitude": -115.5
+            }
+          },
+          "fromUtc": null,
+          "toUtc": null,
+          "maximumCloudPercent": 100,
+          "pageSize": 1,
+          "cursor": null,
+          "cachedOnly": false,
+          "refresh": false,
+          "sceneFilter": null
+        },
+        "firstItem": {
+          "provider": "nasa-ng",
+          "product": "AVIRIS-NG L2 Surface Reflectance, Facility Instrument Collection, V1",
+          "scene": "G2663871321-ORNL_CLOUD",
+          "revision": "53872e8870d74d0145dfd632ec595b9d9b99e28a48fbded30b31c4c053045bc5",
+          "kind": 2,
+          "bounds": {
+            "west": -115.5680084,
+            "south": 35.4193878,
+            "east": -115.4906311,
+            "north": 35.4959831,
+            "corners": [
+              {
+                "latitude": 35.4193878,
+                "longitude": -115.5680084
+              },
+              {
+                "latitude": 35.4193878,
+                "longitude": -115.4906311
+              },
+              {
+                "latitude": 35.4959831,
+                "longitude": -115.4906311
+              },
+              {
+                "latitude": 35.4959831,
+                "longitude": -115.5680084
+              }
+            ],
+            "center": {
+              "latitude": 35.45768545,
+              "longitude": -115.52931975
+            }
+          },
+          "geometry": {
+            "type": "MultiPolygon",
+            "coordinates": [
+              [
+                [
+                  [
+                    -115.5133667,
+                    35.4193878
+                  ],
+                  [
+                    -115.4906311,
+                    35.432476
+                  ],
+                  [
+                    -115.5452728,
+                    35.4959831
+                  ],
+                  [
+                    -115.5680084,
+                    35.4828835
+                  ],
+                  [
+                    -115.5133667,
+                    35.4193878
+                  ]
+                ]
+              ]
+            ]
+          },
+          "observationUtc": "2014-06-21T19:05:50+00:00",
+          "publishedUtc": null,
+          "bands": [],
+          "crs": null,
+          "verticalDatum": "Unknown / not inferred",
+          "quality": "Catalog footprint; source nodata, bad bands and per-pixel quality remain unverified.",
+          "resolution": "Unknown at granule discovery; verify original grid",
+          "license": "Review NASA collection terms and citation at the official source before acquisition.",
+          "reference": "https://search.earthdata.nasa.gov/search/granules?p=C2659129205-ORNL_CLOUD&g=G2663871321-ORNL_CLOUD",
+          "acquisitionMethod": "Official browser handoff",
+          "limitations": [
+            "Historical NASA reflectance, not simulated-aircraft measurements.",
+            "No missing wavelengths, units or QA values were inferred.",
+            "Guided import \u2014 compatible original ENVI reflectance only; verify files before use"
+          ],
+          "nasa": {
+            "family": "AVIRIS-NG",
+            "collectionId": "C2659129205-ORNL_CLOUD",
+            "collectionShortName": "AVIRIS-NG_L2_Reflectance_2110",
+            "collectionVersion": "1",
+            "granuleId": "G2663871321-ORNL_CLOUD",
+            "flightline": "AVIRIS-NG_L2_Reflectance.ang20140621t190550_corr_v1g_img.bin",
+            "processingLevel": "2",
+            "format": "ENVI (individual companions; verify original header)",
+            "capability": "Guided import \u2014 compatible original ENVI reflectance only; verify files before use",
+            "authorization": "Individual NASA Earthdata authorization may be required; official browser handles login",
+            "originalBytes": 3217946265,
+            "bandCount": null,
+            "wavelengthsNm": null,
+            "units": null,
+            "assets": [
+              {
+                "name": "ang20140621t190550_corr_v1g_img.bin",
+                "url": "https://data.ornldaac.earthdata.nasa.gov/protected/aviris/AVIRIS-NG_L2_Reflectance/data/ang20140621t190550_corr_v1g_img.bin",
+                "role": "Original numeric binary"
+              },
+              {
+                "name": "ang20140621t190550_corr_v1g_img.bin.sha256",
+                "url": "https://data.ornldaac.earthdata.nasa.gov/public/aviris/AVIRIS-NG_L2_Reflectance/data/ang20140621t190550_corr_v1g_img.bin.sha256",
+                "role": "Provider SHA-256"
+              }
+            ],
+            "collectionRevision": "08ae10f6ca268bbd9b040d1acedccaac39dc735862fd47c5899c54b1bc84ef7a",
+            "metadataUrl": "https://cmr.earthdata.nasa.gov/search/concepts/G2663871321-ORNL_CLOUD.umm_json",
+            "observationEndUtc": "2014-06-21T19:07:50+00:00",
+            "updatedUtc": "2023-09-28T20:44:07+00:00"
+          }
+        },
+        "originalSearchUtc": "2026-10-21T13:16:44.7691+00:00",
+        "nextStatus": "Available",
+        "nextScene": "G2663884932-ORNL_CLOUD",
+        "emptyStatus": "No match",
+        "cacheCheck": "Production cached-only query retained first-page as-of; not newly verified live availability"
+      },
+      {
+        "provider": "nasa-emit",
+        "query": {
+          "provider": "nasa-emit",
+          "area": {
+            "west": 73,
+            "south": 21,
+            "east": 74.5,
+            "north": 23,
+            "corners": [
+              {
+                "latitude": 21,
+                "longitude": 73
+              },
+              {
+                "latitude": 21,
+                "longitude": 74.5
+              },
+              {
+                "latitude": 23,
+                "longitude": 74.5
+              },
+              {
+                "latitude": 23,
+                "longitude": 73
+              }
+            ],
+            "center": {
+              "latitude": 22,
+              "longitude": 73.75
+            }
+          },
+          "fromUtc": null,
+          "toUtc": null,
+          "maximumCloudPercent": 100,
+          "pageSize": 1,
+          "cursor": null,
+          "cachedOnly": false,
+          "refresh": false,
+          "sceneFilter": null
+        },
+        "firstItem": {
+          "provider": "nasa-emit",
+          "product": "EMIT L2A Surface Reflectance and Uncertainty 60 m V002",
+          "scene": "G4319225918-LPCLOUD",
+          "revision": "98b4b9a16afcd24115f4d3e3a9016fe822ea686d1e1a4b5521ee97a41cc433f8",
+          "kind": 2,
+          "bounds": {
+            "west": 73.1546848,
+            "south": 21.3186311,
+            "east": 74.2713586,
+            "north": 22.3422854,
+            "corners": [
+              {
+                "latitude": 21.3186311,
+                "longitude": 73.1546848
+              },
+              {
+                "latitude": 21.3186311,
+                "longitude": 74.2713586
+              },
+              {
+                "latitude": 22.3422854,
+                "longitude": 74.2713586
+              },
+              {
+                "latitude": 22.3422854,
+                "longitude": 73.1546848
+              }
+            ],
+            "center": {
+              "latitude": 21.83045825,
+              "longitude": 73.7130217
+            }
+          },
+          "geometry": {
+            "type": "MultiPolygon",
+            "coordinates": [
+              [
+                [
+                  [
+                    74.2713586,
+                    21.8902877
+                  ],
+                  [
+                    73.6548655,
+                    22.3422854
+                  ],
+                  [
+                    73.1546848,
+                    21.76889
+                  ],
+                  [
+                    73.7705811,
+                    21.3186311
+                  ],
+                  [
+                    74.2713586,
+                    21.8902877
+                  ]
+                ]
+              ]
+            ]
+          },
+          "observationUtc": "2022-08-10T03:41:03+00:00",
+          "publishedUtc": null,
+          "bands": [],
+          "crs": null,
+          "verticalDatum": "Unknown / not inferred",
+          "quality": "Catalog footprint; source nodata, bad bands and per-pixel quality remain unverified.",
+          "resolution": "Unknown at granule discovery; verify original grid",
+          "license": "Review NASA collection terms and citation at the official source before acquisition.",
+          "reference": "https://search.earthdata.nasa.gov/search/granules?p=C4079844428-LPCLOUD&g=G4319225918-LPCLOUD",
+          "acquisitionMethod": "Official browser handoff",
+          "limitations": [
+            "Historical NASA reflectance, not simulated-aircraft measurements.",
+            "No missing wavelengths, units or QA values were inferred.",
+            "Discovery / official access only \u2014 native scientific import not yet supported"
+          ],
+          "nasa": {
+            "family": "EMIT",
+            "collectionId": "C4079844428-LPCLOUD",
+            "collectionShortName": "EMITL2ARFL",
+            "collectionVersion": "002",
+            "granuleId": "G4319225918-LPCLOUD",
+            "flightline": "EMIT_L2A_RFL_002_20220810T034103",
+            "processingLevel": "2A",
+            "format": "NetCDF-4 (not imported)",
+            "capability": "Discovery / official access only \u2014 native scientific import not yet supported",
+            "authorization": "Individual NASA Earthdata authorization may be required; official browser handles login",
+            "originalBytes": 3728613195,
+            "bandCount": null,
+            "wavelengthsNm": null,
+            "units": null,
+            "assets": [
+              {
+                "name": "EMIT_L2A_RFL_002_20220810T034103.nc",
+                "url": "https://data.lpdaac.earthdatacloud.nasa.gov/lp-prod-protected/EMITL2ARFL.002/EMIT_L2A_RFL_002_20220810T034103/EMIT_L2A_RFL_002_20220810T034103.nc",
+                "role": "Unsupported NetCDF-4"
+              },
+              {
+                "name": "EMIT_L2A_RFLUNCERT_002_20220810T034103.nc",
+                "url": "https://data.lpdaac.earthdatacloud.nasa.gov/lp-prod-protected/EMITL2ARFL.002/EMIT_L2A_RFL_002_20220810T034103/EMIT_L2A_RFLUNCERT_002_20220810T034103.nc",
+                "role": "Unsupported NetCDF-4"
+              }
+            ],
+            "collectionRevision": "de6daa94cf7975d6486797d461553565c083c9288b6f0de47d38bd2b56dfe7d4",
+            "metadataUrl": "https://cmr.earthdata.nasa.gov/search/concepts/G4319225918-LPCLOUD.umm_json",
+            "observationEndUtc": "2022-08-10T03:41:15+00:00",
+            "updatedUtc": "2026-09-22T02:58:56+00:00"
+          }
+        },
+        "originalSearchUtc": "2026-10-21T13:17:37.6230278+00:00",
+        "nextStatus": "Available",
+        "nextScene": "G4319225944-LPCLOUD",
+        "emptyStatus": "No match",
+        "cacheCheck": "Production cached-only query retained first-page as-of; not newly verified live availability"
+      }
+    ],
+    "canonicalLfSourceSha256": {
+      "src/AeroScience.Missions/ScientificCatalog.cs": "917c795a132ac7582662ef285f854fa733837676a151b4b2442a8c670400231f",
+      "src/AeroScience.Missions/NasaCatalog.cs": "fc18b819c19e1025864dd20d2e5df7a4648bdf6051bfc6fde04e922d57da0dcf",
+      "src/AeroScience.Missions/ScientificHttp.cs": "a458b324f456fe299d9b60ba53fc454336eb0bb0b90f95329db9407434d6f00e",
+      "src/AeroScience.Missions/NasaGuidedImport.cs": "605542b76d4efff99ecb750cab71ef4b2ccb9617fa17069a2c82474c8eb5d3d2",
+      "src/AeroScience.Missions/HyperspectralImport.cs": "a7423a2f10059dce039382e196b91375f96f5d52471dd005853f91758387d928",
+      "src/AeroScience.Missions/RemoteScienceStore.cs": "0c4dd5e92f0b75a28128dac3ae8fa4ccbcaa302962d0e8e6c2dfeab792741e3f",
+      "src/AeroScience.Shared/ScientificLibraryModels.cs": "59b26447a05e9214e8dd0d90793ae5933de9a7677d519a15b08d2033c3a3f60e",
+      "tests/AeroScience.ProviderAcceptance/NasaAcceptance.cs": "25d62329e682b1a8814f582113fd13b54dee59a6825581885b8d0f152fac77c8"
+    },
+    "diagnostic": {
+      "initialResult": "Classic and NG completed. Final-source EMIT first page succeeded; pagination returned an unacceptable status and the runner stopped. The original error body was not retained, so its exact external cause is unproven.",
+      "continuation": "One diagnostic continuation used the same stored query-bound EMIT cursor through production ScientificCatalog. Page 2 Available, explicit empty search No match, cached first page retained original as-of.",
+      "checkedUtc": "2026-10-21T13:20:41.8538571+00:00"
+    },
+    "scope": "Genuine official CMR metadata only. Not NASA numeric-file, user-authorized download or installed-device acceptance."
+  },
+  "accessVerification": {
+    "officialEarthdataHandoff": "https://search.earthdata.nasa.gov/search/granules?p=C2711871294-ORNL_CLOUD&g=G3477024884-ORNL_CLOUD",
+    "anonymousHttpStatus": 200,
+    "finalHost": "search.earthdata.nasa.gov",
+    "limitation": "Public search HTML reachable, not a completed individual login/authorization/download."
+  },
+  "technicalValidation": {
+    "sourceCommit": "8ae5531fce3d04369f9284bde6a1f1a37162ca62",
+    "githubActions": "https://github.com/JustSeanC/AeroScience/actions/runs/39606484084",
+    "conclusion": "success",
+    "linuxDotnet": {
+      "passed": 451,
+      "skipped": 0
+    },
+    "windowsDotnet": {
+      "passed": 451,
+      "skipped": 0
+    },
+    "browser": {
+      "passed": 112,
+      "skipped": 0
+    },
+    "linuxPython": {
+      "passed": 93,
+      "skipped": 1,
+      "reason": "Native PE fixture requires Windows companion publish"
+    },
+    "windowsPython": {
+      "passed": 90,
+      "skipped": 1,
+      "reason": "Case-collision fixture requires case-sensitive filesystem"
+    },
+    "recoveryEachPlatform": "Recorder crash/restart; 10 session/evidence process kills; 2 Library approval/budget kills",
+    "packaging": "Windows companion publish and Inno 6.7.1 structural fixture compilation, not installed Windows/MSFS acceptance",
+    "limitations": [
+      "Original AVIRIS-Classic and AVIRIS-NG numeric acceptance pending individually authorized files",
+      "Official browser login/download and native file selection require installed Windows acceptance",
+      "Physical iPad, MSFS and Quest 3 not tested",
+      "EMIT discovery/access only; no native NetCDF-4 import"
+    ]
   }
 }

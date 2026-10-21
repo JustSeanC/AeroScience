@@ -9,7 +9,7 @@
 
 Historical original sources and completed products are retained in your configured Scientific Data Library. Use grouped **View Collection Coverage** and **View Individual Regions** to inspect their real extents and provenance. Repeated prepared areas can reuse these originals across missions; there is no guarantee of worldwide/cloud-free coverage.
 
-Terrain, thermal and multispectral use supported genuine public numeric datasets. Hyperspectral uses your compatible ENVI originals through the [guided import](using-your-own-hyperspectral-dataset.md); no automatic NASA spectral download is promised. No QGIS, Python, terminal or hand-written manifest is required for ordinary pilot operation.
+Terrain, thermal and multispectral use supported genuine public numeric datasets. For NASA hyperspectral data, use **Library → Browse & Download Data → Hyperspectral** and the [NASA assistant](hyperspectral.md): discover actual scenes, follow official browser access, then verify/import compatible original ENVI files. [Advanced local import](using-your-own-hyperspectral-dataset.md) remains available. Browser acquisition is not automatic app downloading; EMIT is discovery-only. No QGIS, Python, terminal or hand-written manifest is required for ordinary pilot operation.
 
 Provider/network/storage limits and masks can prevent preparation. Choose offline operation with retained valid data, change the area/date/quality policy or use the optional advanced import. Do not interpret a status or map outline as a fabricated measurement or continuous image. Calibrated sensor overlap and stitched mission imagery are future work.
 

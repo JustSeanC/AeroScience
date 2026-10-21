@@ -1,5 +1,15 @@
 # Automatic scientific-data providers and limits
 
+For the **0.5.0 Geographic Library NASA assistant**, see [Hyperspectral](hyperspectral.md).
+It adds real paginated Classic/NG and current EMIT V002 catalog browsing, explicit official
+browser access and product-bound compatible AVIRIS ENVI verification/import. Direct protected
+NASA downloading and native EMIT decoding are not implemented. The existing automatic
+flight-area summary described below remains metadata-only; it does not start protected
+NASA transfers. Classic/NG genuine numeric acceptance remains pending authorized original
+files; [current evidence and limitations](../research/v0.5.0-nasa-validation.json) are separate
+from the historical numeric-provider results below.
+
+
 ## Implemented direct provider paths
 
 | Workflow | Discovery / retrieval | Numeric content and integrity |
@@ -44,7 +54,7 @@ Maintainers can reproduce the explicit opt-in network check with `dotnet run --p
 - [Copernicus DEM](https://spacedata.copernicus.eu/collections/copernicus-digital-elevation-model), [Planetary Computer GLO-30 metadata/license](https://planetarycomputer.microsoft.com/api/stac/v1/collections/cop-dem-glo-30).
 - [NASA CMR API](https://cmr.earthdata.nasa.gov/search/site/docs/search/api.html), [EMIT access](https://lpdaac.usgs.gov/products/emitl2arflv001/), [AVIRIS-Classic reflectance](https://doi.org/10.3334/ORNLDAAC/2154), [AVIRIS-NG reflectance](https://doi.org/10.3334/ORNLDAAC/2110), [official Earthdata authorization](https://urs.earthdata.nasa.gov/documentation/for_users/user_token).
 
-Hyperspectral now uses the [guided local ENVI workflow](using-your-own-hyperspectral-dataset.md). NASA catalog discovery remains optional information only and never starts a protected spectral download. Scientific source modes, per-preparation and rolling-hour budgets are described in [Scientific Data Sources](scientific-data-sources.md).
+Advanced/local hyperspectral import uses the [guided local ENVI workflow](using-your-own-hyperspectral-dataset.md). NASA catalog discovery remains optional information only and never starts a protected spectral download. Scientific source modes, per-preparation and rolling-hour budgets are described in [Scientific Data Sources](scientific-data-sources.md).
 
 
 ## v0.3.2 evidence and download policies
