@@ -15,7 +15,7 @@ public sealed partial class ScientificCatalog
     public static bool IsNasa(string id)=>id is "nasa-classic" or "nasa-ng" or "nasa-emit";
     public async Task<ScientificCatalogItem> ResolveNasa(NasaSelectionRequest request,CancellationToken token=default)
     {
-        if(!IsNasa(request.Provider)||request.GranuleId.Length>100||!System.Text.RegularExpressions.Regex.IsMatch(request.GranuleId,@"^G[0-9]+-[A-Z0-9_]+$")||request.Revision.Length!=64||!request.Revision.All(char.IsAsciiHexDigit))throw new ArgumentException("Select an exact NASA catalog granule and revision.");
+        if(!IsNasa(request.Provider)||string.IsNullOrWhiteSpace(request.GranuleId)||string.IsNullOrWhiteSpace(request.Revision)||request.GranuleId.Length>100||!System.Text.RegularExpressions.Regex.IsMatch(request.GranuleId,@"^G[0-9]+-[A-Z0-9_]+$")||request.Revision.Length!=64||!request.Revision.All(char.IsAsciiHexDigit))throw new ArgumentException("Select an exact NASA catalog granule and revision.");
         Consent();
         var q=new ScientificCatalogQuery(request.Provider,new(0,0,.01,.01),PageSize:1,Refresh:true);
         var result=await SearchNasa(q,"https://cmr.earthdata.nasa.gov/search/granules.json?concept_id="+Uri.EscapeDataString(request.GranuleId)+"&page_size=1&page_num=1",new(Math.Min(settings.Get().Preferences.MaximumDownloadBytes,8388608)),token);

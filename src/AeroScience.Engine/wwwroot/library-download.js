@@ -1,3 +1,4 @@
+import { openHyperspectralImport } from "./hyperspectral-import.js";
 import { ResearchMap } from "./map.js";
 import {
   node as el,
@@ -505,7 +506,12 @@ export async function libraryDownload(parent, api, isDisposed = () => false) {
         row.append(el("p", `${n.family} · ${n.capability}`), el("p", `Flightline: ${n.flightline} · collection ${n.collectionId} / ${n.collectionVersion} · ${n.processingLevel} reflectance · ${n.format}`), el("p", `${n.authorization}. Original distribution: ${bytes(n.originalBytes)}. Wavelengths / band count / units: ${n.bandCount ?? "Unknown until original-file verification"}.`));
         more.append(el("p", `Collection revision: ${n.collectionRevision}. Granule metadata: ${n.metadataUrl}`));
         for (const asset of n.assets) { const a = link(more, `${asset.role}: ${asset.name}`, asset.url); a.target="_blank"; a.rel="noopener noreferrer"; }
-        row.append(el("p", "Use official NASA access in your browser. No AeroScience-controlled download or EMIT import is offered."));
+        const official = link(row, "Open official NASA access / Earthdata", item.reference); official.target="_blank"; official.rel="noopener noreferrer";
+        row.append(el("p", "1. Open official access. NASA handles login, terms and download. 2. Keep the original reflectance header and matching binary together. 3. Verify and import on the companion PC. Browser progress is external; canceling login/download leaves the Library unchanged. On a paired device, browse here and finish local-file import on the PC."));
+        if (item.provider !== "nasa-emit") button(row, "Verify downloaded AVIRIS files on this PC", async () => {
+          await api("/api/science/hyperspectral/nasa", {provider:item.provider, granuleId:item.scene, revision:item.revision});
+          openHyperspectralImport(api);
+        });
       }
       const reference = link(more, "Authoritative source", item.reference);
       reference.target = "_blank";

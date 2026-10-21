@@ -13,7 +13,20 @@ Classic Collection `AVIRIS-Classic_L2_Reflectance_2154` V1 and NG
 `AVIRIS-NG_L2_Reflectance_2110` V1 use family-specific original ENVI companions.
 `EMITL2ARFL` V001 is **discovery / official access only**: native NetCDF-4 import is
 unsupported. Missing spectral/grid metadata stays Unknown until original-file inspection.
-Official access links open externally; browser transfers are not managed Library jobs.
+Choose **Open official NASA access / Earthdata**. NASA handles account login, permissions,
+terms and original-file download in the external browser. AeroScience does not request
+passwords, register an undocumented OAuth client, collect browser cookies or store tokens.
+Protected original Classic and NG header requests returned HTTP 401 without individual
+Earthdata authorization in development. No direct authenticated app-download claim is made.
+
+After downloading, keep the matching reflectance `.hdr` and binary together and choose
+**Verify downloaded AVIRIS files on this PC**. The exact granule/collection revision is
+rechecked before opening the existing import wizard. Canceling NASA login/download or the
+file picker leaves the Library unchanged. Removed/revised scenes require a new search.
+Paired browsers can discover and open official access; trusted local-file selection remains
+on the companion PC. Browser transfers are not managed Library jobs, so their budgets,
+pause/resume and progress are controlled by the browser/provider. Check disk space before
+downloading; AeroScience enforces Library limits again at import. No flight is created.
 The catalog revalidates the official collection version and never substitutes another product.
 
 [Live catalog evidence](../research/v0.5.0-nasa-validation.json) distinguishes metadata

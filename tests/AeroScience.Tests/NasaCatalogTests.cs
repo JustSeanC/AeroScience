@@ -40,5 +40,26 @@ public sealed class NasaCatalogTests:IDisposable
     }
     [Theory][InlineData("https://data.ornldaac.earthdata.nasa.gov/protected/data.bin?token=secret")][InlineData("https://data.ornldaac.earthdata.nasa.gov.evil.example/data.bin")][InlineData("http://data.ornldaac.earthdata.nasa.gov/data.bin")][InlineData("https://user@data.ornldaac.earthdata.nasa.gov/data.bin")]
     public void UntrustedOrSecretBearingLinksAreRejected(string url)=>Assert.False(ScientificCatalog.OfficialNasaLink(url));
+    [Fact]public async Task ExactHandoffRevalidatesRevisionAndRefusesRemovedGranule()
+    {
+        var collection=Metadata("classic","collections");var granules=Metadata("classic","granules");
+        var handler=new Handler(r=>r.RequestUri!.AbsolutePath.Contains("collections")?collection:granules);using var auto=new AutomaticScientificData(science,settings,new(handler,cacheEnabled:false));var catalog=new ScientificCatalog(auto,science,settings);
+        var item=(await catalog.Search(new("nasa-classic",new(-119,33,-117,35),PageSize:2))).Items[0];
+        // Exact granule lookup returns only that authoritative entry.
+        granules["feed"]!["entry"]=new JsonArray(granules["feed"]!["entry"]![0]!.DeepClone());
+        var request=new NasaSelectionRequest(item.Provider,item.Scene,item.Revision);Assert.Equal(item.Scene,(await catalog.ResolveNasa(request)).Scene);
+        granules["feed"]!["entry"]![0]!["updated"]="2026-10-21T10:00:00Z";
+        await Assert.ThrowsAsync<InvalidOperationException>(()=>catalog.ResolveNasa(request));
+        granules["feed"]!["entry"]=new JsonArray();await Assert.ThrowsAsync<IOException>(()=>catalog.ResolveNasa(request));
+        settings.Save(new());await Assert.ThrowsAsync<InvalidOperationException>(()=>catalog.ResolveNasa(request));
+    }
+    [Fact]public void GuidedContextNeverAllowsEmitOrBusyReplacementAndCancellationIsNonDestructive()
+    {
+        var c=Metadata("classic","collections")["feed"]!["entry"]![0]!;var e=Metadata("classic","granules")["feed"]!["entry"]![0]!;
+        var item=ScientificCatalog.DescribeNasa("nasa-classic",JsonSerializer.SerializeToElement(c),JsonSerializer.SerializeToElement(e));
+        using var session=new ScientificImportSession(science);session.BeginNasa(item);Assert.Equal(item.Scene,session.Snapshot().NasaSelection!.Scene);Assert.Equal("Choose",session.Snapshot().Stage);
+        session.Cancel();Assert.Null(session.Snapshot().NasaSelection);Assert.Empty(science.Sources());
+        Assert.Throws<ArgumentException>(()=>session.BeginNasa(item with{Provider="nasa-emit"}));
+    }
     public void Dispose(){science.Dispose();Directory.Delete(root,true);}
 }

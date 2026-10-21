@@ -10,7 +10,7 @@ public sealed record HyperspectralInspection(string Header,string? Binary,string
     double? MaximumWavelengthNm,string? Unit,RasterGrid? Grid,Coordinates[] Coverage,long FileBytes,long EstimatedImportBytes,
     DateTimeOffset? ObservationUtc,int BadBands,string[] Warnings,ScientificSourceManifest? Manifest,string Root,RemoteKind Kind=RemoteKind.Hyperspectral);
 public sealed record HyperspectralImportState(string Stage,string Message,HyperspectralInspection? Inspection=null,
-    ScientificSource? Source=null,string? Destination=null,long? FreeBytes=null,bool Busy=false);
+    ScientificSource? Source=null,string? Destination=null,long? FreeBytes=null,bool Busy=false,ScientificCatalogItem? NasaSelection=null);
 
 public static class GuidedHyperspectralImport
 {
@@ -84,9 +84,15 @@ public static class GuidedHyperspectralImport
 public sealed class ScientificImportSession(ScienceStore science,Action? imported=null):IDisposable
 {
     private readonly object gate=new();private CancellationTokenSource? cancel;private Task? active;private int generation;private RemoteKind kind=RemoteKind.Hyperspectral;private string? selected,associated;private HyperspectralUserMetadata metadata=new();
+    private ScientificCatalogItem? nasa;
     private HyperspectralImportState state=new("Choose","Choose an ENVI header or dataset folder. Original files remain untouched.");
     public bool IsBusy {get{lock(gate)return state.Busy;}}
-    public HyperspectralImportState Snapshot(){lock(gate)return state;}
+    public HyperspectralImportState Snapshot(){lock(gate)return state with{NasaSelection=nasa};}
+    public void BeginNasa(ScientificCatalogItem item)
+    {
+        if(item.Nasa is null||item.Provider is not("nasa-classic" or "nasa-ng"))throw new ArgumentException("EMIT and unknown NASA products cannot be imported. Choose a compatible AVIRIS reflectance granule.");
+        lock(gate){if(state.Busy)throw new InvalidOperationException("Finish or cancel the active import before selecting another NASA scene.");generation++;selected=associated=null;nasa=item;kind=RemoteKind.Hyperspectral;metadata=new();state=new("Choose","NASA browser acquisition is external. Download the original matching reflectance .hdr and numeric binary, then choose the header on the companion PC. No NASA password is requested here.");}
+    }
     private void Set(HyperspectralImportState value){lock(gate)state=value;}
     public async Task Select(string path,RemoteKind type=RemoteKind.Hyperspectral)
     {
@@ -98,13 +104,13 @@ public sealed class ScientificImportSession(ScienceStore science,Action? importe
     public async Task Configure(HyperspectralUserMetadata value)
     {
         if(new[]{value.Name,value.Provider,value.Source,value.License,value.Notes,value.SceneId,value.VerticalDatum}.Any(s=>s?.Length>2000))throw new ArgumentException("Keep each source-information field under 2000 characters.");
-lock(gate){if(state.Busy||selected is null)throw new InvalidOperationException("Choose a header and wait for inspection first.");metadata=value;state=state with{Busy=true};}await Verify();}
+lock(gate){if(state.Busy||selected is null)throw new InvalidOperationException("Choose a header and wait for inspection first.");if(nasa is not null&&new[]{value.Provider,value.Source,value.License,value.Unit,value.SceneId,value.VerticalDatum}.Any(v=>v is not null)||nasa is not null&&(value.ObservationUtc is not null||value.Scale is not null||value.Offset is not null))throw new ArgumentException("NASA source identity, time and scientific units are verified from the selected product and original files; they cannot be overridden. Cancel for advanced manual import.");metadata=value;state=state with{Busy=true};}await Verify();}
     private async Task Verify()
     {
         var own=generation;
         try
         {
-            var inspection=await Task.Run(()=>kind==RemoteKind.Hyperspectral?GuidedHyperspectralImport.Inspect(selected!,metadata,associated):GuidedScientificImport.Inspect(selected!,kind,metadata));
+            var inspection=await Task.Run(()=>kind==RemoteKind.Hyperspectral?nasa is not null?NasaGuidedImport.Inspect(selected!,nasa,metadata,associated):GuidedHyperspectralImport.Inspect(selected!,metadata,associated):GuidedScientificImport.Inspect(selected!,kind,metadata));
             var free=new LocalStorageCapacity().FreeBytes(science.DirectoryPath);
             if(own!=generation)return;
             Set(new("Verify",inspection.Manifest is null?"Select the associated binary or original documented scientific units before importing.":"Compatible ENVI dataset. Review its actual geographic coverage and metadata.",inspection,Destination:science.DirectoryPath,FreeBytes:free));
@@ -119,6 +125,7 @@ lock(gate){if(state.Busy||selected is null)throw new InvalidOperationException("
         {
             try
             {
+                if(nasa is not null)inspection=NasaGuidedImport.Inspect(selected!,nasa,metadata,associated);
                 var source=await science.ImportSourceAsync(inspection.Manifest!,inspection.Root,token,new Progress<string>(message=>{lock(gate)state=state with{Message=message};}),reuseExisting:true);
                 imported?.Invoke();
                 Set(new("Ready","Dataset Ready. It can be sampled only inside its real coverage; original external files are retained.",inspection,source,science.DirectoryPath));
@@ -127,6 +134,6 @@ lock(gate){if(state.Busy||selected is null)throw new InvalidOperationException("
             catch(Exception e)when(e is IOException or ArgumentException or InvalidOperationException or UnauthorizedAccessException or Microsoft.Data.Sqlite.SqliteException){Set(new("Invalid",e.Message));}
         });
     }
-    public void Cancel(){lock(gate){cancel?.Cancel();generation++;if(state.Stage!="Importing")state=new("Choose","Import cancelled. Original files are unchanged.");}}
+    public void Cancel(){lock(gate){cancel?.Cancel();generation++;if(state.Stage!="Importing"){nasa=null;state=new("Choose","Import cancelled. Original files are unchanged.");}}}
     public void Dispose(){Cancel();active?.GetAwaiter().GetResult();}
 }

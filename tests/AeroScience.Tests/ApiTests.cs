@@ -37,11 +37,12 @@ public sealed class ApiTests : IAsyncLifetime
     [Fact]public async Task LibraryCatalogAndJobControlsRetainSessionCsrfAndInputBoundaries()
     {
         Assert.Equal(HttpStatusCode.Unauthorized,(await client.GetAsync("/api/science/library/jobs")).StatusCode);await Pair(client);
-        Assert.Equal(4,(await client.GetFromJsonAsync<JsonElement>("/api/science/library/providers")).GetArrayLength());
+        var providers=await client.GetFromJsonAsync<ScientificCatalogProvider[]>("/api/science/library/providers",WireJson.Options);Assert.Equal(new[]{"copernicus","landsat","nasa-classic","nasa-emit","nasa-ng","sentinel-2","usgs-3dep"},providers!.Select(p=>p.Id).Order().ToArray());
         var q=new ScientificCatalogQuery("landsat",new(-75,40,-74.98,40.02),CachedOnly:true);
         var page=await client.PostAsJsonAsync("/api/science/library/catalog",q,WireJson.Options);page.EnsureSuccessStatusCode();Assert.Equal("Not searched",(await page.Content.ReadFromJsonAsync<ScientificCatalogPage>(WireJson.Options))!.Status);
         Assert.Equal(HttpStatusCode.BadRequest,(await client.PostAsJsonAsync("/api/science/library/preview",new ScientificLibrarySelection(99,[],[]),WireJson.Options)).StatusCode);
         client.DefaultRequestHeaders.Remove("X-AeroScience-CSRF");Assert.Equal(HttpStatusCode.Forbidden,(await client.PostAsJsonAsync("/api/science/library/catalog",q,WireJson.Options)).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden,(await client.PostAsJsonAsync("/api/science/hyperspectral/nasa",new NasaSelectionRequest("nasa-classic","G1-ORNL_CLOUD",new string('a',64)),WireJson.Options)).StatusCode);
     }
     private async Task Pair(HttpClient display)
     {

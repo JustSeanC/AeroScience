@@ -72,6 +72,11 @@ public static class ResearchApi
             return new{planName=plan.Name,areas,reviewedRegions=Math.Min(128,areas.Length),instruments=kinds,retained,allowance=p.PreflightTransferBytes,estimatedBytes=(long?)null,limitations="Native source grids and masks remain authoritative. Local footprint candidates are checked again before use. Transfer size is unknown before provider selection. Up to 4096 bounded regions; no whole-scene download.",plan};
         });
         app.MapPost("/api/plans/{id:guid}/prepare",(Guid id,MissionStore store,ScientificPlanData preparation)=>store.Plan(id) is {} plan?Results.Ok(preparation.Prepare(plan,true)):Results.NotFound());
+        app.MapPost("/api/science/hyperspectral/nasa",async(NasaSelectionRequest request,ScientificCatalog catalog,ScientificImportSession session,HttpContext c)=>
+        {
+            if(!AccessControl.IsLoopback(c))return Results.StatusCode(403);
+            var item=await catalog.ResolveNasa(request,c.RequestAborted);session.BeginNasa(item);return Results.Ok(session.Snapshot());
+        });
         app.MapGet("/api/science/hyperspectral/import",(ScientificImportSession session,HttpContext c)=>AccessControl.IsLoopback(c)?Results.Ok(session.Snapshot()):Results.StatusCode(403));
         app.MapPost("/api/science/hyperspectral/metadata",async (HyperspectralUserMetadata metadata,ScientificImportSession session,HttpContext c)=>{if(!AccessControl.IsLoopback(c))return Results.StatusCode(403);await session.Configure(metadata);return Results.Ok(session.Snapshot());});
         app.MapPost("/api/science/hyperspectral/associate",async (HyperspectralAssociation request,ScientificImportSession session,HttpContext c)=>{if(!AccessControl.IsLoopback(c))return Results.StatusCode(403);await session.Associate(request.FileName);return Results.Ok(session.Snapshot());});

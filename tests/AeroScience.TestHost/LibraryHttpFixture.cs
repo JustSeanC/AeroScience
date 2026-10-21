@@ -26,9 +26,11 @@ internal sealed class LibraryHttpFixture(string root):HttpMessageHandler
         HttpResponseMessage Json(string value)=>new(HttpStatusCode.OK){Content=new StringContent(value,System.Text.Encoding.UTF8,"application/json")};
         if(uri.Host=="cmr.earthdata.nasa.gov")
         {
-            var family=uri.Query.Contains("Classic")?"classic":uri.Query.Contains("AVIRIS-NG")?"ng":"emit";
+            var family=uri.Query.Contains("Classic")||uri.Query.Contains("G347702")?"classic":uri.Query.Contains("AVIRIS-NG")||uri.Query.Contains("G26638")?"ng":"emit";
             var type=uri.AbsolutePath.Contains("collections")?"collections":"granules";
-            return Json(File.ReadAllText(Path.Combine(AppContext.BaseDirectory,"ProviderMetadata",$"nasa-{family}-{type}.json")));
+            var nasa=JsonNode.Parse(File.ReadAllText(Path.Combine(AppContext.BaseDirectory,"ProviderMetadata",$"nasa-{family}-{type}.json")))!;
+            if(uri.Query.Contains("concept_id=")){var id=System.Web.HttpUtility.ParseQueryString(uri.Query)["concept_id"];var entries=nasa["feed"]!["entry"]!.AsArray();nasa["feed"]!["entry"]=new JsonArray(entries.Where(e=>e!["id"]!.GetValue<string>()==id).Select(e=>e!.DeepClone()).ToArray());}
+            return Json(nasa.ToJsonString());
         }
         if(uri.Host=="tigerweb.geo.census.gov")return Json(File.ReadAllText(Path.Combine(AppContext.BaseDirectory,"ProviderMetadata","census-county.json")));
         if(uri.AbsolutePath.Contains("/sas/"))return Json(System.Text.Json.JsonSerializer.Serialize(new{href=System.Web.HttpUtility.ParseQueryString(uri.Query)["href"]}));
