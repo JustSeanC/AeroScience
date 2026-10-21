@@ -44,6 +44,12 @@ public sealed class PreflightReadinessTests
         Assert.Contains(r.Checks,c=>c.Id=="automation.references"&&c.Status==ReadinessStatus.Unavailable);
         Assert.Contains(r.Checks,c=>c.Id.StartsWith("automation.sequence."));Assert.Contains(r.Checks,c=>c.Id=="automation.sessions"&&c.Reasons[0].Contains("never imply End"));
     }
+    [Fact] public void KnownRouteContradictionsAndRepeatedPassReachabilityHaveSpecificFindings()
+    {
+        var p=Plan();var route=p.Waypoints!;var start=new CollectionTrigger(Guid.NewGuid(),Guid.NewGuid(),CollectionAction.StartData,CollectionTriggerKind.Waypoint,route[1].Id!.Value,1,20,PlannedSessionKey:"A");var end=new CollectionTrigger(Guid.NewGuid(),Guid.NewGuid(),CollectionAction.EndData,CollectionTriggerKind.Waypoint,route[0].Id!.Value,1,20,PlannedSessionKey:"A");var repeat=new CollectionTrigger(Guid.NewGuid(),Guid.NewGuid(),CollectionAction.StartData,CollectionTriggerKind.Waypoint,route[1].Id!.Value,2,20,PlannedSessionKey:"B");
+        p=p with{Waypoints=[route[0] with{TargetAltitudeFeet=10000},route[1]],Collection=new(1,p.Id,InitialCollectionPolicy.Armed,[start,end,repeat],new(5,6))};var result=PreflightReadiness.Evaluate(p,Environment(),At);
+        Assert.Contains(result.Checks,c=>c.Id.StartsWith("automation.order.")&&c.Status==ReadinessStatus.Caution);Assert.Contains(result.Checks,c=>c.Id.StartsWith("automation.reachability.")&&c.Reasons[0].Contains("pass 2"));Assert.Contains(result.Checks,c=>c.Id=="design.altitude-targets"&&c.Status==ReadinessStatus.Caution);
+    }
     [Fact] public async Task DraftApiUsesRealServicesAndNeverPersistsOrStartsWork()
     {
         var root=Path.Combine(Path.GetTempPath(),"aeroscience-preflight-"+Guid.NewGuid());

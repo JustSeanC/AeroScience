@@ -35,6 +35,8 @@ public static class PreflightReadiness
         var validArea=areas.Length>0&&areas.All(a=>a.Vertices.Length>=3&&a.Vertices.All(p=>MissionPlanning.Position(p.Latitude,p.Longitude)));
         Add("design.survey","Mission design",geographic&&!validArea?ReadinessStatus.Caution:ReadinessStatus.Ready,
             geographic? $"{areas.Length} planned research regions; source-valid coverage is not inferred from polygons.":"This template does not require polygon overlap.",geographic?"Define a bounded, valid survey polygon.":"","regions="+areas.Length);
+        var outside=route.Where(w=>w.TargetAltitudeFeet is {} altitude&&(altitude<draft.MinimumAltitudeFeet||altitude>draft.MaximumAltitudeFeet)).ToArray();
+        if(outside.Length>0)Add("design.altitude-targets","Mission design",ReadinessStatus.Caution,"Waypoint altitude targets contradict the stated mission MSL range.","Reconcile waypoint targets with the research altitude profile.","waypoints="+string.Join(",",outside.Take(20).Select(w=>w.Name))+"; total="+outside.Length);
         Add("design.altitude","Mission design",draft.MinimumAltitudeFeet>draft.MaximumAltitudeFeet?ReadinessStatus.Caution:
             draft.MinimumAltitudeFeet is null&&draft.MaximumAltitudeFeet is null&&draft.CruisingAltitudeFeet is null&&route.All(w=>w.TargetAltitudeFeet is null)?ReadinessStatus.NotYetAssessed:ReadinessStatus.Ready,
             "Planned MSL limits and waypoint targets are not AGL or terrain-clearance guarantees.","Resolve reversed limits and specify the research altitude profile.",
@@ -88,13 +90,25 @@ public static class PreflightReadiness
         {
             try{CollectionPlanning.Validate(draft,collection);Add("automation.references","Collection automation",ReadinessStatus.Ready,$"{collection.Triggers.Length} explicit actions; geometry, stable targets and occurrence identities validate.");}
             catch(Exception e)when(e is ArgumentException or InvalidOperationException or NotSupportedException){Add("automation.references","Collection automation",ReadinessStatus.Unavailable,e.Message,"Refresh/review automation targets or use manual collection.");}
+            var pointActions=collection.Triggers.Where(t=>t.Kind is CollectionTriggerKind.Waypoint or CollectionTriggerKind.DirectionalGate).ToArray();
+            foreach(var trigger in pointActions.Where(t=>t.Pass>1))
+            {
+                var target=route.FirstOrDefault(w=>w.Id==trigger.TargetId);
+                var occurrences=target is null?0:route.Count(w=>MissionPlanning.Position(w.Latitude,w.Longitude)&&Geodesy.Distance(new(w.Latitude,w.Longitude),new(target.Latitude,target.Longitude))<=trigger.ToleranceMetres);
+                if(occurrences<trigger.Pass)Add("automation.reachability."+trigger.Id,"Collection automation",ReadinessStatus.Caution,$"Configured pass {trigger.Pass} has only {occurrences} explicit nearby route occurrences; additional gate/route crossings are unverified.","Add the intended return/repeated pass or review this as a manual/conditional action.","trigger="+trigger.Id);
+            }
+            foreach(var group in pointActions.Where(t=>t.PlannedSessionKey is not null&&t.Pass==1).GroupBy(t=>t.PlannedSessionKey))
+            {
+                var start=group.FirstOrDefault(t=>t.Action==CollectionAction.StartData);var end=group.FirstOrDefault(t=>t.Action==CollectionAction.EndData);
+                var startIndex=start is null?-1:Array.FindIndex(route,w=>w.Id==start.TargetId);var endIndex=end is null?-1:Array.FindIndex(route,w=>w.Id==end.TargetId);
+                if(startIndex>=0&&endIndex>=0&&endIndex<=startIndex)Add("automation.order."+start!.Id,"Collection automation",ReadinessStatus.Caution,"Configured End is at or before Start in the planned waypoint order for session "+group.Key,"Move the explicit End after Start or document the intended repeated/directional crossing; execution is not assumed.","startIndex="+startIndex,"endIndex="+endIndex);
+            }
             var starts=collection.Triggers.Count(t=>t.Action==CollectionAction.StartData);var ends=collection.Triggers.Count(t=>t.Action==CollectionAction.EndData);
             Add("automation.sessions","Collection automation",ReadinessStatus.Caution,
                 $"{starts} configured Starts and {ends} optional explicit Ends. Last waypoint and polygon exit never imply End. Route order, repeated passes, entry direction and actual reachability require pilot review; boundary re-entry resumes the same session.",
                 "Review each planned session key/action in flight order. Manual End suspends automatic Starts until explicit rearm; manual Start remains available.");
-            foreach(var group in collection.Triggers.Where(t=>t.PlannedSessionKey is not null).GroupBy(t=>t.PlannedSessionKey))
-                if(!group.Any(t=>t.Action==CollectionAction.StartData)&&group.Any(t=>t.Action==CollectionAction.EndData))
-                    Add("automation.sequence."+group.First().Id,"Collection automation",ReadinessStatus.Caution,"End has no configured Start for planned session "+group.Key,"Add an explicit Start or document the intended manual Start.");
+            var missingStarts=collection.Triggers.Where(t=>t.PlannedSessionKey is not null).GroupBy(t=>t.PlannedSessionKey).Where(g=>!g.Any(t=>t.Action==CollectionAction.StartData)&&g.Any(t=>t.Action==CollectionAction.EndData)).ToArray();
+            if(missingStarts.Length>0)Add("automation.sequence.missing-starts","Collection automation",ReadinessStatus.Caution,$"{missingStarts.Length} planned session keys have End without a configured Start.","Add an explicit Start or document intended manual Starts; inspect the referenced action IDs.",missingStarts.Select(g=>"endTrigger="+g.First().Id).ToArray());
         }
         else Add("automation.manual","Collection automation",ReadinessStatus.Ready,"Manual collection selected. Start/End science and End Flight remain independent actions.");
         var meaningful=!string.IsNullOrWhiteSpace(draft.Objective)&&configurations.Length>0&&(route.Length>0||validArea||draft.EstimatedDurationMinutes>0||draft.MinimumAltitudeFeet<draft.MaximumAltitudeFeet);
