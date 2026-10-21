@@ -60,11 +60,11 @@ public sealed class StorageManagement
         var metadata = Size(Path.Combine(science.DirectoryPath, StorageManager.LibraryManifest)) + Size(Path.Combine(science.DirectoryPath, ".science-storage.json"));
         foreach (var source in science.Sources()) { var file=StorageManager.ResolveDataset(science.DirectoryPath, science.LibraryId, source.RelativeDirectory + "/source.json"); catalogued.Add(file); metadata += Size(file); }
         var pending=science.PendingArtifacts(); var retained=pending.Artifacts.Where(p=>!catalogued.Contains(p)).Sum(Size); metadata+=pending.Ledgers.Sum(Size);
-        foreach(var category in new[]{"CleanupHistory","Clears"})
+        foreach(var category in new[]{"CleanupHistory","Clears","Catalog"})
         {
             var folder=StorageManager.ResolveDataset(science.DirectoryPath,science.LibraryId,"Metadata/"+category);
             if(Directory.Exists(folder))foreach(var file in Directory.EnumerateFiles(folder,"*.json").Take(10000))
-                if(Guid.TryParseExact(Path.GetFileNameWithoutExtension(file),"N",out _)){StorageManager.ValidateLocalPath(file);metadata+=Size(file);}
+                if(category=="Catalog"||Guid.TryParseExact(Path.GetFileNameWithoutExtension(file),"N",out _)){StorageManager.ValidateLocalPath(file);metadata+=Size(file);}
         }
         long datasets = 0; for (var offset = 0; ; offset += 100) { var page = science.Datasets(limit: 100, offset: offset); datasets += page.Count; if (page.Count < 100) break; }
         lock (gate) { if(version!=mutationVersion)return;scienceFiles = sources + products + caches + metadata + retained; sourceBytes = sources; cacheBytes = caches; productCount = count; datasetCount = datasets; pendingBytes=retained; pendingOperations=pending.Ledgers.Length; backups = BackupBytes(Path.Combine(science.DirectoryPath, "Metadata", "Backups")); checkedUtc = DateTimeOffset.UtcNow; }

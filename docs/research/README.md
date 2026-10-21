@@ -20,3 +20,8 @@ Use the [scientific methods](../v0.4.0-scientific-methods.md),
 Synthetic aircraft positions and test rasters are never proof of real MSFS measurements.
 Release verification still requires the current genuine-source evidence and separately
 applicable installed Windows/MSFS/device acceptance.
+
+- [v0.5.0 Geographic Library validation](v0.5.0-library-validation.json): genuine bounded
+  catalog/scene selection, approved persisted jobs, four numeric products, retained reuse,
+  actual Census geometry and STAC pagination, plus independent GDAL/numeric/QA comparisons.
+  Includes source fingerprints and limitations. No MSFS/installed Windows/device claim.

@@ -1,6 +1,7 @@
 import {select,link,disclosure} from './workstation-ui.js';
 const node=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
 const guides=[['v0.4.2-pilot-guide.md','First mission & results'],['v0.4.2-science-visualization.md','Reading scientific maps'],['v0.4.1-pilot-guide.md','Getting started'],['mission-planner.md','Mission planning'],['remote-sensing/index.md','Instruments & scientific data'],['v0.4.1-science-workspace.md','Science Workspace'],['v0.4.1-scientific-comparison.md','Comparisons'],['v0.4.1-scientific-downlink.md','Preparation & downlink'],['v0.4.1-windows-testing.md','Troubleshooting & testing']];
+guides.push(['scientific-library.md','Browse & download scientific data']);
 guides.push(['README.md','Documentation index']);
 guides.push(['instrument-calibration.md','Calibration & provenance (development)']);
 export function documentationUrl(target,guide){
@@ -34,6 +35,7 @@ export function markdown(parent,source,guide){
 let generation=0,controller;
 export function disposeHelpCenter(){generation++;controller?.abort();}
 const tasks=[
+ ['How do I download and reuse scientific data without a flight?','scientific-library.md','library catalog scenes source date bands polygon region download approval queue offline reuse'],
  ['How do I create my first mission?','v0.4.2-pilot-guide.md','plan select start first flight'],
  ['How do I configure scientific instruments?','remote-sensing/index.md','instruments payload source thermal terrain multispectral hyperspectral'],
  ['Why is my scientific data still downloading?','v0.4.2-pilot-guide.md','preparation download partial offline allowance budget'],

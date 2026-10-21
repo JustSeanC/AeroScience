@@ -18,6 +18,7 @@ on `develop/v0.5.0`; planned contracts do not establish implemented or accepted 
   [source availability and limits](v0.4.0-scientific-source-expansion.md),
   [troubleshooting](remote-sensing/troubleshooting.md), and
   [advanced manual import](remote-sensing/sources.md).
+- [Geographic Scientific Data Library — browse, approve, download and reuse](scientific-library.md) (v0.5.0 development).
 - [Storage, capacity and safe cleanup](remote-sensing/storage.md).
 
 ## Develop, verify and release

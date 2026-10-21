@@ -15,7 +15,7 @@ public sealed class ScientificLibraryJobs:IDisposable
     private string SettingsHash()=>ScientificCatalog.Hash(new{settings.Get().Preferences.OnlineEnabled,settings.Get().Preferences.PrivacyAccepted,settings.Get().Preferences.MaximumDownloadBytes,settings.Get().Preferences.PreflightTransferBytes,settings.Get().Preferences.UnmeteredOnly,settings.Get().Preferences.BackgroundRetrieval});
     public static GeographicBounds[] Expand(ScientificLibrarySelection selection)
     {
-        if(selection.Version!=1||selection.Areas is null||selection.Scenes is null||selection.Areas.Length is <1 or >256||selection.Scenes.Length is <1 or >16)throw new ArgumentException("Choose version 1, 1–256 areas and 1–16 exact scenes.");
+        if(selection.Version!=1||selection.Areas is null||selection.Scenes is null||selection.Areas.Length is <1 or >256||selection.Scenes.Length is <1 or >16||selection.Areas.Any(a=>a is null)||selection.Scenes.Any(s=>s is null))throw new ArgumentException("Choose version 1, 1–256 areas and 1–16 exact scenes.");
         var cells=new HashSet<GeographicBounds>();
         foreach(var area in selection.Areas)
         {
@@ -31,15 +31,21 @@ public sealed class ScientificLibraryJobs:IDisposable
         if(selection.Polygon is {} polygon)
         {
             if(polygon.Length is <3 or >500||polygon.Any(p=>!double.IsFinite(p.Latitude)||!double.IsFinite(p.Longitude)))throw new ArgumentException("Supply 3–500 finite polygon vertices.");
+            SurveyGeometry.Validate(polygon);
             var polygonBounds=new GeographicBounds(polygon.Min(p=>p.Longitude),polygon.Min(p=>p.Latitude),polygon.Max(p=>p.Longitude),polygon.Max(p=>p.Latitude));ScientificCatalog.ValidateBounds(polygonBounds);
             // Existing geodesic polygon traversal includes narrow boundary cells. Actual
             // numeric windows remain rectangular and their small edge overfetch is disclosed.
             var intersecting=ScientificGeographicWork.Cells([], [polygon],strict:true).ToArray();
             cells.RemoveWhere(c=>!intersecting.Any(a=>a.West<c.East&&a.East>c.West&&a.South<c.North&&a.North>c.South));
         }
+        if(selection.RegionGeometry is {} geometry)
+        {
+            var rings=ScientificCatalog.RegionRings(geometry);
+            cells.RemoveWhere(c=>!c.Corners.Append(c.Center).Any(p=>StacScientificProvider.Contains(geometry,p))&&!rings.SelectMany(r=>r).Any(c.Contains));
+        }
         return cells.OrderBy(a=>a.South).ThenBy(a=>a.West).ToArray();
     }
-    private ScientificSource? Reusable(ScientificSceneSelection scene,GeographicBounds area)=>science.Sources().FirstOrDefault(s=>
+    private ScientificSource? Reusable(ScientificSceneSelection scene,GeographicBounds area,ScientificSource[]? sources=null)=>(sources??science.Sources().ToArray()).FirstOrDefault(s=>
         s.Manifest.Acquisition?.CatalogRevision==scene.Revision&&s.Manifest.Acquisition is {} a&&
         (scene.Provider=="usgs-3dep"?a.Workflow=="usgs-3dep-numeric":s.Manifest.SceneId==scene.Scene)&&
         s.Manifest.Bands.Select(b=>b.Id).Order().SequenceEqual(scene.Bands.Order())&&ScientificSourceSelection.CoversArea(s,area));
@@ -55,11 +61,11 @@ public sealed class ScientificLibraryJobs:IDisposable
         if(selection.Scenes.Select(s=>s.Provider+"/"+s.Scene).Distinct().Count()!=selection.Scenes.Length)throw new ArgumentException("Select each exact scene only once.");
         var limit=selection.MaximumTransferBytes??Math.Min(p.PreflightTransferBytes??1073741824,1073741824);
         if(limit<1048576||limit> (p.PreflightTransferBytes??21474836480)||limit>21474836480)throw new ArgumentException("Choose a positive Library job budget within the configured preflight allowance (maximum 20 GiB).");
-        var products=new List<ScientificCatalogItem>();var work=new List<LibraryWorkUnit>();long reuse=0;var reusedIds=new HashSet<Guid>();var covered=new HashSet<GeographicBounds>();
+        var products=new List<ScientificCatalogItem>();var work=new List<LibraryWorkUnit>();long reuse=0;var reusedIds=new HashSet<Guid>();var covered=new HashSet<GeographicBounds>();var retainedSnapshot=science.Sources().ToArray();var checkedSources=new HashSet<Guid>();
         foreach(var selected in selection.Scenes)
         {
             var recipe=ScientificCatalog.Provider(selected.Provider);
-            var allLocal=cells.Select(c=>Reusable(selected,c)).ToArray();
+            var allLocal=cells.Select(c=>Reusable(selected,c,retainedSnapshot)).ToArray();
             ScientificCatalogItem item;
             if(allLocal.All(s=>s is not null))
             {
@@ -74,19 +80,20 @@ public sealed class ScientificLibraryJobs:IDisposable
                 if(item.Geometry is {} geometry&&!cell.Corners.Append(cell.Center).All(point=>StacScientificProvider.Contains(geometry,point)))continue;
                 if(selected.Provider=="usgs-3dep"&&(cell.West< -170||cell.East> -64||cell.South<17||cell.North>72))continue;
                 if(work.Count>=4096)throw new ArgumentException("Exact scenes × intersecting geographic cells exceed 4,096 work units. Narrow the region or scene selection.");
-                var retained=Reusable(selected,cell);if(retained is not null&&!Verify(retained))throw new IOException("An exact retained source changed; restore/reimport it. No original was replaced.");
+                var retained=Reusable(selected,cell,retainedSnapshot);if(retained is not null&&checkedSources.Add(retained.Id)&&!Verify(retained))throw new IOException("An exact retained source changed; restore/reimport it. No original was replaced.");
                 if(retained is not null&&reusedIds.Add(retained.Id))reuse+=retained.Files.Sum(f=>f.Bytes);
                 work.Add(new(work.Count,selected,cell,retained?.Id,AutomaticScientificData.StorageBound(recipe.Kind)));covered.Add(cell);
             }
         }
         if(work.Count==0)throw new ArgumentException("None of these bounded cells fit the selected scene footprints. Select cells wholly inside a scene; partial edge cells are not claimed as supported.");
+        var storage=science.Management?.Snapshot();
         var uncovered=cells.Length-covered.Count;var temp=work.Max(w=>w.StorageAllowanceBytes)+p.MaximumDownloadBytes;
         using(var reservation=science.Management?.ReserveScience(temp)){}
         var canonical=selection with{Areas=selection.Areas.OrderBy(a=>a.West).ThenBy(a=>a.South).ToArray(),Scenes=selection.Scenes.OrderBy(s=>s.Provider).ThenBy(s=>s.Scene).Select(s=>s with{Bands=s.Bands.Order().ToArray()}).ToArray(),MaximumTransferBytes=limit};
         var now=DateTimeOffset.UtcNow;var hash=ScientificCatalog.Hash(new{canonical,work,settings=SettingsHash(),limit,temp});
         var preview=new LibraryDownloadPreview(1,Guid.NewGuid(),canonical,hash,SettingsHash(),now,now.AddMinutes(30),work.ToArray(),products.ToArray(),limit,p.MaximumDownloadBytes,temp,reuse,
             work.All(w=>w.ReuseSourceId is not null)?0:null,null,
-            ["Download size and final retained size are Unknown until bounded numeric reads complete. Allowances are limits, not estimates.","Polygon edges may include adjacent numeric pixels within the displayed rectangular work windows; no entire original scene is requested.","Historical datasets are retained scientific originals, not airborne observations or automatically disposable caches.","Retries and interrupted-read allowances count against the approved total. Background work yields to active flight acquisition.","Mandatory numeric/QA band recipes cannot be reduced without a compatible reader; catalog footprints do not guarantee valid pixels."],uncovered);
+            ["Download size and final retained size are Unknown until bounded numeric reads complete. Allowances are limits, not estimates.","Polygon edges may include adjacent numeric pixels within the displayed rectangular work windows; no entire original scene is requested.","Historical datasets are retained scientific originals, not airborne observations or automatically disposable caches.","Retries and interrupted-read allowances count against the approved total. Background work yields to active flight acquisition.","Mandatory numeric/QA band recipes cannot be reduced without a compatible reader; catalog footprints do not guarantee valid pixels."],uncovered,storage?.Science.FreeBytes,storage?.Science.LimitBytes,storage?.Science.UsedBytes,automatic.QueueSummary().PreflightAvailableBytes);
         return science.SaveLibraryPreview(preview);
     }
     public async Task<LibraryDownloadJob> Approve(Guid id,string hash,CancellationToken token=default)
@@ -107,10 +114,11 @@ public sealed class ScientificLibraryJobs:IDisposable
             if(action is "resume" or "retry")
             {
                 if(job.ApprovalId is null||job.State=="Cancelled"||job.Preview.SettingsHash!=SettingsHash())throw new InvalidOperationException("This work needs a new preview and approval.");
+                await automatic.WaitForLibraryScope("library:"+id,token);job=science.LibraryJob(id);
                 foreach(var item in job.Items.Where(i=>i.State!="Completed"))science.SetLibraryItem(id,item.Index,"Queued");
                 automatic.PauseScope("library:"+id,false);return science.SetLibraryState(id,"Queued");
             }
-            var result=science.SetLibraryState(id,action=="pause"?"Paused":"Cancelled");automatic.CancelScope("library:"+id);return result;
+            var result=science.SetLibraryState(id,action=="pause"?"Paused":"Cancelled");automatic.CancelScope("library:"+id);await automatic.WaitForLibraryScope("library:"+id,token);return science.LibraryJob(result.Id);
         }finally{commands.Release();}
     }
     private async Task Run()
@@ -121,7 +129,7 @@ public sealed class ScientificLibraryJobs:IDisposable
             {
                 if(science.AvailabilityError() is {} unavailable){Warning=unavailable;initialized=null;await Task.Delay(500,stopping.Token);continue;}
                 if(initialized!=science.DirectoryPath){science.RecoverLibraryJobs();initialized=science.DirectoryPath;}Warning=null;
-                var job=science.LibraryJobs().Where(j=>j.State=="Queued").OrderBy(j=>j.UpdatedUtc).FirstOrDefault();
+                var job=science.NextQueuedLibraryJob();
                 if(job is not null&&automatic.LibraryAllowed)
                 {
                     var item=job.Items.FirstOrDefault(i=>i.State!="Completed");
@@ -138,7 +146,7 @@ public sealed class ScientificLibraryJobs:IDisposable
     }
     private async Task Execute(LibraryDownloadJob job,LibraryWorkUnit work,LibraryDownloadItem previous,CancellationToken token)
     {
-        ScientificDownloadBudget? budget=null;var initial=previous.DownloadedBytes;
+        ScientificDownloadBudget? budget=null;ScientificTransferLedger.Lease? transfer=null;var initial=previous.DownloadedBytes;
         try
         {
             using var operation=science.BeginAnalysis();
@@ -151,7 +159,8 @@ public sealed class ScientificLibraryJobs:IDisposable
             {
                 var p=settings.Get().Preferences;
                 if(!p.OnlineEnabled||!p.PrivacyAccepted||p.UnmeteredOnly&&settings.IsUnmetered()!=true)throw new InvalidOperationException("Scientific retrieval is offline or waiting for an unmetered connection. Resume after resolving it.");
-                budget=new(job.Preview.PerItemTransferLimit,bytes=>science.LibraryBudget(job.Id,work.Index,initial+bytes,initial+bytes),total=>science.LibraryBudget(job.Id,work.Index,initial+(budget?.Bytes??0),initial+total));
+                transfer=automatic.AcquireLibraryTransfer();
+                budget=new(job.Preview.PerItemTransferLimit,bytes=>{transfer.Charge(bytes);science.LibraryBudget(job.Id,work.Index,initial+bytes,initial+bytes);},total=>{transfer.EnsureTotal(total);science.LibraryBudget(job.Id,work.Index,initial+(budget?.Bytes??0),initial+total);});
                 var exact=await catalog.Resolve(work.Scene,work.Area,budget,token);
                 science.SetLibraryState(job.Id,"Downloading");science.SetLibraryItem(job.Id,work.Index,"Downloading");
                 source=await automatic.PrepareSource(exact.Discovery,budget,token,stage=>science.SetLibraryItem(job.Id,work.Index,stage is "Validating" or "Saving"?"Verifying":"Downloading"),"Downloads/Library/"+job.Id.ToString("N")+"/"+work.Index);
@@ -160,6 +169,8 @@ public sealed class ScientificLibraryJobs:IDisposable
             token.ThrowIfCancellationRequested();science.SetLibraryItem(job.Id,work.Index,"Completed",source:source.Id,verifiedBytes:source.Files.Sum(f=>f.Bytes));
             current=science.LibraryJob(job.Id);if(current.State is "Preparing" or "Downloading" or "Verifying")science.SetLibraryState(job.Id,current.Items.All(i=>i.State=="Completed")?"Completed":"Queued");
         }
+        catch(ScientificAllowanceWaitException error)
+        {science.SetLibraryItem(job.Id,work.Index,"Interrupted",error.Message);if(science.LibraryJob(job.Id).State is not("Paused" or "Cancelled"))science.SetLibraryState(job.Id,"Interrupted",error.Message);}
         catch(OperationCanceledException)
         {
             science.SetLibraryItem(job.Id,work.Index,"Interrupted",error:"Paused, preempted or interrupted; verified originals and safe partial ranges are preserved.");
@@ -170,7 +181,7 @@ public sealed class ScientificLibraryJobs:IDisposable
             var error=e is HttpRequestException?"Provider network unavailable. Retry when connectivity returns.":e is System.Text.Json.JsonException?"Provider metadata is incompatible; no scientific values were guessed.":e.Message;
             science.SetLibraryItem(job.Id,work.Index,"Failed",error);if(science.LibraryJob(job.Id).State is not("Paused" or "Cancelled"))science.SetLibraryState(job.Id,"Failed",error);
         }
-        finally{if(budget is not null)science.LibraryBudget(job.Id,work.Index,initial+budget.Bytes,initial+budget.Bytes,finish:true);science.Management?.RefreshScience();}
+        finally{transfer?.Dispose();if(budget is not null)science.LibraryBudget(job.Id,work.Index,initial+budget.Bytes,initial+budget.Bytes,finish:true);science.Management?.RefreshScience();}
     }
     public void Dispose(){stopping.Cancel();foreach(var job in science.AvailabilityError() is null?science.LibraryJobs():[])automatic.CancelScope("library:"+job.Id);try{worker.GetAwaiter().GetResult();}catch(OperationCanceledException){}stopping.Dispose();commands.Dispose();}
 }

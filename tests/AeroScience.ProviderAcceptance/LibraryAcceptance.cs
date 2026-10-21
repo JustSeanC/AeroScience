@@ -28,6 +28,12 @@ internal static class LibraryAcceptance
             var evidence=new{provider=provider.Id,catalog=page,preview=preview.Preview,source,locations,bands,derived,valid,reuse=current,flight="No flight or science session was created. Numeric Library preparation only."};
             results.Add(evidence);await File.WriteAllTextAsync(Path.Combine(output,provider.Id+"-library.json"),JsonSerializer.Serialize(evidence,WireJson.Options));Console.WriteLine(provider.Id+" Library acquisition/reuse passed; "+valid+" valid derived values.");
         }
+        var regions=new[]{await catalog.Region(new("35")),await catalog.Region(new("35","013"))};
+        await File.WriteAllTextAsync(Path.Combine(output,"regions.json"),JsonSerializer.Serialize(regions,WireJson.Options));Console.WriteLine("Genuine Census state/county boundaries retrieved without alteration.");
+        var paging=new ScientificCatalogQuery("sentinel-2",new(-75,40,-74.98,40.02),DateTimeOffset.Parse("2024-09-03T00:00:00Z"),DateTimeOffset.Parse("2024-09-04T00:00:00Z"),PageSize:1,Refresh:true);
+        var first=await catalog.Search(paging);if(first.NextCursor is null)throw new IOException("Expected actual Sentinel pagination continuation at this known overlapping-tile region.");
+        var next=await catalog.Search(paging with{Cursor=first.NextCursor});if(next.Items.Length==0)throw new IOException("Genuine provider continuation returned no scene metadata.");
+        await File.WriteAllTextAsync(Path.Combine(output,"pagination.json"),JsonSerializer.Serialize(new{first,next},WireJson.Options));Console.WriteLine("Genuine Sentinel next-link pagination passed.");
         if(science.Datasets().Count!=0||science.Products().Length!=0)throw new IOException("Library downloads unexpectedly produced flight observations.");
         await File.WriteAllTextAsync(Path.Combine(output,"library.json"),JsonSerializer.Serialize(new{utc=DateTimeOffset.UtcNow,results},WireJson.Options));
     }

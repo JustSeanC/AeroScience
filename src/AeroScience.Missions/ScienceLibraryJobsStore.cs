@@ -42,11 +42,17 @@ public sealed partial class ScienceStore
         using var reader=cmd.ExecuteReader();var items=new List<LibraryDownloadItem>();while(reader.Read())items.Add(new(reader.GetInt32(0),reader.GetString(1),reader.GetInt64(2),reader.GetInt64(3),reader.GetInt64(4),reader.GetInt32(5),reader.IsDBNull(6)?null:Guid.Parse(reader.GetString(6)),reader.GetInt64(7),reader.IsDBNull(8)?null:reader.GetString(8),DateTimeOffset.Parse(reader.GetString(9))));
         return new(id,state,preview,approval,utc,items.ToArray(),error);
     }
-    public LibraryDownloadJob[] LibraryJobs()
+    public LibraryDownloadJob[] LibraryJobs(int offset=0)
     {
+        if(offset is <0 or >100000)throw new ArgumentException("Invalid Library job page.");
         if(AvailabilityError() is {} error)throw new IOException(error);if(!File.Exists(DatabasePath))return [];
-        using var db=Open();using var cmd=db.CreateCommand();cmd.CommandText="SELECT id FROM library_jobs ORDER BY CASE WHEN state IN ('Completed','Cancelled') THEN 1 ELSE 0 END,updated_utc DESC LIMIT 64";
+        using var db=Open();using var cmd=db.CreateCommand();cmd.CommandText="SELECT id FROM library_jobs ORDER BY CASE WHEN state IN ('Completed','Cancelled') THEN 1 ELSE 0 END,updated_utc DESC LIMIT 64 OFFSET $offset";cmd.Parameters.AddWithValue("$offset",offset);
         var ids=new List<Guid>();using(var r=cmd.ExecuteReader())while(r.Read())ids.Add(Guid.Parse(r.GetString(0)));return ids.Select(LibraryJob).ToArray();
+    }
+    internal LibraryDownloadJob? NextQueuedLibraryJob()
+    {
+        using var db=Open();using var cmd=db.CreateCommand();cmd.CommandText="SELECT id FROM library_jobs WHERE state='Queued' ORDER BY updated_utc LIMIT 1";
+        return cmd.ExecuteScalar() is string id?LibraryJob(Guid.Parse(id)):null;
     }
     internal LibraryDownloadJob SetLibraryState(Guid id,string state,string? error=null,bool approve=false)
     {

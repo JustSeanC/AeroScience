@@ -76,9 +76,18 @@ public sealed class ScientificLibraryJobsTests:IDisposable
     {
         var handler=new InterruptibleHandler(raster);using var automatic=new AutomaticScientificData(science,settings,new(handler));var catalog=new ScientificCatalog(automatic,science,settings);using var jobs=new ScientificLibraryJobs(science,catalog,automatic,settings);
         var preview=await Preview(catalog,jobs);await jobs.Approve(preview.Id,preview.Preview.SelectionHash);await handler.Started.Task.WaitAsync(TimeSpan.FromSeconds(10));await jobs.Control(preview.Id,"pause");
-        for(var i=0;i<100&&science.LibraryJob(preview.Id).Items[0].State!="Interrupted";i++)await Task.Delay(10);
+        // Pause acknowledgement includes quiescence; an immediate Resume cannot be
+        // overwritten by the preceding attempt's cancellation completion.
+        Assert.Equal("Interrupted",science.LibraryJob(preview.Id).Items[0].State);
         Assert.Equal("Paused",science.LibraryJob(preview.Id).State);Assert.Empty(science.Sources());Assert.Equal(0,science.LibraryJob(preview.Id).Items[0].ReservedBytes);
         handler.Block=false;await jobs.Control(preview.Id,"resume");Assert.Equal("Completed",(await Terminal(science,preview.Id)).State);Assert.Single(science.Sources());
+    }
+    [Fact]public async Task FlightActivationPreemptsActiveLibraryTransferAndReleasesItsAllowances()
+    {
+        var handler=new InterruptibleHandler(raster);using var automatic=new AutomaticScientificData(science,settings,new(handler));var catalog=new ScientificCatalog(automatic,science,settings);using var jobs=new ScientificLibraryJobs(science,catalog,automatic,settings);
+        var preview=await Preview(catalog,jobs);await jobs.Approve(preview.Id,preview.Preview.SelectionHash);await handler.Started.Task.WaitAsync(TimeSpan.FromSeconds(10));automatic.FlightActive(true);
+        Assert.Equal("Interrupted",(await Terminal(science,preview.Id)).State);Assert.Equal(0,automatic.QueueSummary().PreflightReservedBytes);Assert.Empty(science.Sources());
+        handler.Block=false;automatic.FlightActive(false);await jobs.Control(preview.Id,"resume");Assert.Equal("Completed",(await Terminal(science,preview.Id)).State);
     }
     [Fact]public async Task ServiceOutageRetainsFailedWorkForExplicitRetry()
     {

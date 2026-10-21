@@ -60,7 +60,7 @@ public sealed class ScientificHttp : IDisposable
         if(uri.AbsoluteUri.Length>16384||uri.Scheme!="https"||uri.Port!=443||uri.UserInfo.Length!=0||uri.Fragment.Length!=0||uri.Host is not
             ("earth-search.aws.element84.com" or "sentinel-cogs.s3.us-west-2.amazonaws.com" or
             "planetarycomputer.microsoft.com" or "landsateuwest.blob.core.windows.net" or
-            "elevationeuwest.blob.core.windows.net" or "elevation.nationalmap.gov" or "cmr.earthdata.nasa.gov"))
+            "elevationeuwest.blob.core.windows.net" or "elevation.nationalmap.gov" or "cmr.earthdata.nasa.gov" or "tigerweb.geo.census.gov"))
             throw new IOException("Scientific provider returned an unsupported endpoint. No request was sent to it.");
     }
     public async Task<HttpResponseMessage> Send(Uri uri,long? start,long? end,string? etag,CancellationToken token)
@@ -111,12 +111,12 @@ public sealed class ScientificHttp : IDisposable
         if(declared is {} length&&output.Length!=length)throw new EndOfStreamException("Provider response ended before its declared size; received bytes remain accounted.");
         return output.ToArray();
     }
-    public async Task<JsonDocument> Json(string uri,ScientificDownloadBudget budget,CancellationToken token)
+    public async Task<JsonDocument> Json(string uri,ScientificDownloadBudget budget,CancellationToken token,bool refresh=false)
     {
         token.ThrowIfCancellationRequested();ValidateUrl(new(uri));
         // Authentication responses are never cached. Catalog/search responses have a short TTL.
         var cacheable=CacheEnabled&&!uri.Contains("/sas/",StringComparison.Ordinal);
-        lock(metricsGate)if(cacheable&&metadata.TryGetValue(uri,out var c)&&cacheClock()-c.At<TimeSpan.FromMinutes(5)){Count(new Uri(uri).Host,hits:1,reused:c.Bytes.Length);return JsonDocument.Parse(c.Bytes);}
+        lock(metricsGate)if(!refresh&&cacheable&&metadata.TryGetValue(uri,out var c)&&cacheClock()-c.At<TimeSpan.FromMinutes(5)){Count(new Uri(uri).Host,hits:1,reused:c.Bytes.Length);return JsonDocument.Parse(c.Bytes);}
         var bytes=await Bytes(new(uri),8388608,budget,token);
         using(var parsed=JsonDocument.Parse(bytes,new JsonDocumentOptions{MaxDepth=64})){}
         if(cacheable)lock(metricsGate){if(metadata.Remove(uri,out var old))metadataBytes-=old.Bytes.Length;while((metadata.Count>=32||metadataBytes+bytes.Length>16777216)&&metadata.Count>0){var first=metadata.First();metadataBytes-=first.Value.Bytes.Length;metadata.Remove(first.Key);}metadata[uri]=(cacheClock(),bytes);metadataBytes+=bytes.Length;}

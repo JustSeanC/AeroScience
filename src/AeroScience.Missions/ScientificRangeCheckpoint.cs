@@ -24,6 +24,7 @@ internal sealed class ScientificRangeCheckpoint
         if(etag is null||etag.StartsWith("W/",StringComparison.Ordinal)){index=null;return;}
         var path=Path.Combine(folder,"index.json");
         try{index=File.Exists(path)?JsonSerializer.Deserialize<Index>(File.ReadAllText(path),WireJson.Options):null;}catch(JsonException){index=null;}
+        if(index?.Blocks is null||index.Blocks.Count>2048)index=null;
         if(index is not null&&(index.Etag!=etag||index.Length!=length))throw new IOException("Approved scientific asset identity changed. Create a fresh preview; incompatible partial bytes were not appended or published.");
         index??=new(etag,length,[]);
     }

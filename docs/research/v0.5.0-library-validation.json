@@ -1,11 +1,26 @@
 {
   "formatVersion": 1,
   "evidenceType": "genuine-catalog-approved-library-acquisition-and-independent-numeric-check",
-  "checkedUtc": "2026-10-21T10:48:07.2491303+00:00",
+  "checkedUtc": "2026-10-21T11:20:52.6263374+00:00",
+  "sourceFileSha256": {
+    "src/AeroScience.Missions/ScientificCatalog.cs": "9cb981cedefcf5a9ed6d427b465c9541cc33a20490ea863fd61caaac5085e4a0",
+    "src/AeroScience.Missions/ScientificLibraryJobs.cs": "1f96e6669757255a363ee323919fbf6e5fa253f472be2e968060a0f6a1024ba1",
+    "src/AeroScience.Missions/ScienceLibraryJobsStore.cs": "dcd5bbb9e368fca843d342d7d126d83bcb294bc2c52cc92246128f5157edeb42",
+    "src/AeroScience.Missions/AutomaticScientificData.cs": "c2a64473aa81cfb585ce37d40af151f4b5c3c566ffd646dedca56251c677a38f",
+    "src/AeroScience.Missions/ScientificProviders.cs": "ce1350d51180fc55c4b251e29985448153fda179d8828f74d6f6ea4705e73d3b",
+    "src/AeroScience.Missions/ScientificHttp.cs": "3f76793aa9b6051326f4e2cdec0d6aca9155c7db17171fd145d0edd27983bd77",
+    "src/AeroScience.Missions/ScientificRangeCheckpoint.cs": "e421652118eb1f0d772916b87f1be65b4a7fc25085cf2118cbc74f07b889344f",
+    "src/AeroScience.Missions/ScientificGeographicWork.cs": "06209c5c2fba0009c25e10f110690e0c45d9f8c14f48074361c399bd3675548b",
+    "src/AeroScience.Missions/ScientificRaster.cs": "652707335e754dadef4dd07ba0d15ae0a7944bbbdb97b0a973833b7a7aa7d524",
+    "src/AeroScience.Missions/RemoteScienceStore.cs": "98ef7f53e82a69e9549d0ff89ce81ae62db38d1f7cd7ced8a9d31f30e0a50462",
+    "src/AeroScience.Missions/ScienceStore.cs": "e563f88b94587d616bc548f0b6af63ca3d4ea20a74a8a5cd38f72d351b2bf7e5",
+    "src/AeroScience.Shared/ScientificLibraryModels.cs": "2d56a698616b85dfbe5a414ad5a5e357e087bef88d01f72325a885383aa3fa18",
+    "src/AeroScience.Shared/ScientificAccessModels.cs": "b46c426adab5da846210b460afc4d18d6f3af4a1a0015587d31c0b233b094a15"
+  },
   "windowsMsfsIpadQuest": "not tested",
   "noFlightOrScienceSessionCreated": true,
   "independentValidation": {
-    "checked_utc": "2026-10-21T10:52:53.103889+00:00",
+    "checked_utc": "2026-10-21T11:23:19.557400+00:00",
     "method": "Independent GDAL/rasterio CRS, affine, native numeric scaling and QA comparison; documented 1e-8-pixel boundary snap, unchanged 1e-9 value tolerance",
     "results": [
       {
@@ -52,13 +67,97 @@
       }
     ]
   },
+  "genuinePagination": {
+    "provider": "sentinel-2",
+    "firstScenes": [
+      "S2A_18TVK_20240903_0_L2A"
+    ],
+    "nextScenes": [
+      "S2A_18TWK_20240903_0_L2A"
+    ],
+    "nextLinkFollowed": true
+  },
+  "authoritativeRegions": [
+    {
+      "id": "census-acs2024-35",
+      "name": "New Mexico",
+      "reference": "https://tigerweb.geo.census.gov/arcgis/rest/services/Generalized_ACS2024/State_County/MapServer/9/query?where=STATE%3D%2735%27&outFields=NAME,STATE&outSR=4326&returnGeometry=true&f=geojson",
+      "resolution": "US Census TIGERweb ACS2024 generalized 1:20,000,000 cartographic boundary; not a parcel, legal or navigation boundary",
+      "asOfUtc": "2026-10-21T11:20:52.0326217+00:00",
+      "bounds": {
+        "west": -109.0500440003227,
+        "south": 31.33231499989213,
+        "east": -103.00196400011592,
+        "north": 37.00013900017411,
+        "corners": [
+          {
+            "latitude": 31.33231499989213,
+            "longitude": -109.0500440003227
+          },
+          {
+            "latitude": 31.33231499989213,
+            "longitude": -103.00196400011592
+          },
+          {
+            "latitude": 37.00013900017411,
+            "longitude": -103.00196400011592
+          },
+          {
+            "latitude": 37.00013900017411,
+            "longitude": -109.0500440003227
+          }
+        ],
+        "center": {
+          "latitude": 34.16622700003312,
+          "longitude": -106.0260040002193
+        }
+      },
+      "geometrySha256": "5f93b11baeacd274aa8fcbbc4bcefabe0a7c42e2f980d185436d3e5f6a899ccc"
+    },
+    {
+      "id": "census-acs2024-35013",
+      "name": "Doña Ana County",
+      "reference": "https://tigerweb.geo.census.gov/arcgis/rest/services/Generalized_ACS2024/State_County/MapServer/13/query?where=STATE%3D%2735%27%20AND%20COUNTY%3D%27013%27&outFields=NAME,STATE&outSR=4326&returnGeometry=true&f=geojson",
+      "resolution": "US Census TIGERweb ACS2024 generalized 1:20,000,000 cartographic boundary; not a parcel, legal or navigation boundary",
+      "asOfUtc": "2026-10-21T11:20:52.2484648+00:00",
+      "bounds": {
+        "west": -107.29963099976509,
+        "south": 31.783148000290485,
+        "east": -106.34051500004966,
+        "north": 33.05277700003358,
+        "corners": [
+          {
+            "latitude": 31.783148000290485,
+            "longitude": -107.29963099976509
+          },
+          {
+            "latitude": 31.783148000290485,
+            "longitude": -106.34051500004966
+          },
+          {
+            "latitude": 33.05277700003358,
+            "longitude": -106.34051500004966
+          },
+          {
+            "latitude": 33.05277700003358,
+            "longitude": -107.29963099976509
+          }
+        ],
+        "center": {
+          "latitude": 32.417962500162034,
+          "longitude": -106.82007299990738
+        }
+      },
+      "geometrySha256": "5bf1b24dabea92b52e93f6abe71e31e062d3c08a71c74509725bf140daefa1eb"
+    }
+  ],
   "sources": [
     {
       "provider": "usgs-3dep",
       "scene": "3DEP--75,40,-74.98,40.02",
       "observationUtc": null,
       "verticalDatum": "Source-native vertical reference is unspecified by this composite export; no datum conversion or aircraft MSL comparison",
-      "sourceRevision": "662de85883eab386eff3007afa65cfeccd12a58a3444e7ad5b5f0620d471a3e1",
+      "sourceRevision": "a873a0d35e9923919b5207c136612ed8d62e6238274727a88462e726a9b1d71d",
       "sourceFiles": [
         {
           "relativePath": "elevation.tif",
@@ -105,7 +204,7 @@
             "longitude": -74.99000000000001
           }
         },
-        "retrievedUtc": "2026-10-21T10:47:07.8585543+00:00",
+        "retrievedUtc": "2026-10-21T11:19:51.4535228+00:00",
         "preparation": "Provider numeric F32 nearest-neighbor export in WGS84; composite native resolution and datum remain unspecified.",
         "quality": "USGS numeric composite; actual nodata checked before publishing",
         "nativeResolution": "Composite source resolution varies; 256 × 256 requested geographic grid (not a claim of native resolution)",
@@ -116,7 +215,7 @@
         "providerMetadataJson": "{\"pixelType\":\"F32\",\"bandCount\":1,\"description\":\"The USGS 3D Elevation Program (3DEP) Bare Earth DEM Dynamic service is based on multi-resolution USGS DEM sources and provides dynamic functions for visualization. These functions include: Hillshade, Aspect Map, Hillshade Stretched, Multi-directional Hillshade, Slope Map, Elevation Tinted Hillshade, Contour. In addition the OGC Web Map Service (WMS) and Web Coverage Service (WCS) interfaces are enabled. Data available in this map service reflects all 3DEP DEM data published as of September 28, 2026.\",\"export\":\"https://elevation.nationalmap.gov/arcgis/rest/services/3DEPElevation/ImageServer/exportImage?bbox=-75,40,-74.98,40.02\\u0026bboxSR=4326\\u0026imageSR=4326\\u0026size=256,256\\u0026format=tiff\\u0026pixelType=F32\\u0026interpolation=RSP_NearestNeighbor\\u0026noData=-999999\\u0026f=image\"}",
         "checkedPixels": 81,
         "usablePixels": 81,
-        "catalogRevision": "662de85883eab386eff3007afa65cfeccd12a58a3444e7ad5b5f0620d471a3e1"
+        "catalogRevision": "a873a0d35e9923919b5207c136612ed8d62e6238274727a88462e726a9b1d71d"
       }
     },
     {
@@ -124,7 +223,7 @@
       "scene": "Copernicus_DSM_COG_10_N46_00_E008_00_DEM",
       "observationUtc": null,
       "verticalDatum": "EGM2008 geoid (DSM, not bare-earth)",
-      "sourceRevision": "04daa4dc29a93ea1ac62bc7c41f34537733636d4cdaee2e5e04666c805f83945",
+      "sourceRevision": "31a6e48ae9fc1069b468f58818909510731d7981c675a15dcb55863dfb4c651d",
       "sourceFiles": [
         {
           "relativePath": "elevation.tif",
@@ -132,7 +231,7 @@
           "sha256": "f66b92a3a5f914f5c26ec8e5c1395311472f188347e5666d66a513aee4d22a3d"
         }
       ],
-      "networkBytes": 1442306,
+      "networkBytes": 1444937,
       "validDerivedValues": 576,
       "samplePositions": 576,
       "reuseNetworkBytes": 0,
@@ -171,11 +270,11 @@
             "longitude": 8.11
           }
         },
-        "retrievedUtc": "2026-10-21T10:47:17.3784916+00:00",
+        "retrievedUtc": "2026-10-21T11:20:00.9755746+00:00",
         "preparation": "Lossless native-grid, native-DN GeoTIFF crop via validated HTTP 206 ranges; no overview substitution or interpolation.",
         "quality": "Numeric DSM; vertical reference differs from 3DEP and aircraft MSL",
         "nativeResolution": "~30 m geographic DSM",
-        "networkBytes": 1442306,
+        "networkBytes": 1444937,
         "limitations": [
           "Discovery examines at most 60 ordered catalog candidates; no claim of exhaustive coverage.",
           "Copernicus GLO-30 digital surface model (includes vegetation/buildings), EGM2008 geoid heights. Catalog publication time is not a per-pixel observation date."
@@ -183,7 +282,7 @@
         "providerMetadataJson": "{\"collection\":\"cop-dem-glo-30\",\"scene\":\"Copernicus_DSM_COG_10_N46_00_E008_00_DEM\",\"properties\":{\"gsd\":30,\"datetime\":\"2021-04-22T00:00:00Z\",\"platform\":\"TanDEM-X\",\"proj:epsg\":4326,\"proj:shape\":[3600,3600],\"proj:transform\":[0.0002777777777777778,0.0,7.9998611111111115,0.0,-0.0002777777777777778,47.00013888888889]},\"geometry\":{\"type\":\"Polygon\",\"coordinates\":[[[8.99986111,46.00013889],[8.99986111,47.00013889],[7.99986111,47.00013889],[7.99986111,46.00013889],[8.99986111,46.00013889]]]},\"assets\":{\"elevation\":{\"href\":\"https://elevationeuwest.blob.core.windows.net/copernicus-dem/COP30_hh/Copernicus_DSM_COG_10_N46_00_E008_00_DEM.tif\",\"title\":\"N46_00_E008_00\",\"type\":\"image/tiff; application=geotiff; profile=cloud-optimized\",\"roles\":[\"data\"]}}}",
         "checkedPixels": 81,
         "usablePixels": 81,
-        "catalogRevision": "04daa4dc29a93ea1ac62bc7c41f34537733636d4cdaee2e5e04666c805f83945"
+        "catalogRevision": "31a6e48ae9fc1069b468f58818909510731d7981c675a15dcb55863dfb4c651d"
       }
     },
     {
@@ -191,7 +290,7 @@
       "scene": "LC08_L2SP_014032_20240903_02_T1",
       "observationUtc": "2024-09-03T15:39:44.650124+00:00",
       "verticalDatum": "not applicable",
-      "sourceRevision": "f7369b1f6eb8e19facbf9e3170cda7bef4676f61303321d2f0bc259762eff3e5",
+      "sourceRevision": "f5cd9eef4e2c10bd8c3439d62db6fcbac97bb1225f6832e61b5bce1479b7f932",
       "sourceFiles": [
         {
           "relativePath": "ST_B10.tif",
@@ -209,7 +308,7 @@
           "sha256": "6dcbf2ca051ac9b64c0574a5d61c465aeca0f08df0c9a6c227f5d41225563938"
         }
       ],
-      "networkBytes": 1050343,
+      "networkBytes": 1073548,
       "validDerivedValues": 576,
       "samplePositions": 576,
       "reuseNetworkBytes": 0,
@@ -250,11 +349,11 @@
             "longitude": -74.99000000000001
           }
         },
-        "retrievedUtc": "2026-10-21T10:47:23.7748476+00:00",
+        "retrievedUtc": "2026-10-21T11:20:07.8137273+00:00",
         "preparation": "Lossless native-grid, native-DN GeoTIFF crop via validated HTTP 206 ranges; no overview substitution or interpolation.",
         "quality": "Scene cloud cover 0.05%; local QA/nodata still determines valid samples",
         "nativeResolution": "30 m delivered grid / 100 m native TIRS",
-        "networkBytes": 1050343,
+        "networkBytes": 1073548,
         "limitations": [
           "Discovery examines at most 60 ordered catalog candidates; no claim of exhaustive coverage.",
           "Landsat Collection 2 Level-2 Surface Temperature (L2SP), not brightness temperature or aircraft thermal imagery. 30 m product grid; Landsat 8/9 TIRS native thermal resolution 100 m. QA is applied at sampling."
@@ -262,7 +361,7 @@
         "providerMetadataJson": "{\"collection\":\"landsat-c2-l2\",\"scene\":\"LC08_L2SP_014032_20240903_02_T1\",\"properties\":{\"gsd\":30,\"created\":\"2024-09-08T09:26:33.559749Z\",\"sci:doi\":\"10.5066/P9OGBGM6\",\"datetime\":\"2024-09-03T15:39:44.650124Z\",\"platform\":\"landsat-8\",\"proj:epsg\":32618,\"proj:shape\":[7871,7741],\"description\":\"Landsat Collection 2 Level-2\",\"instruments\":[\"oli\",\"tirs\"],\"eo:cloud_cover\":0.05,\"proj:transform\":[30.0,0.0,392985.0,0.0,-30.0,4582215.0],\"view:off_nadir\":0,\"landsat:wrs_row\":\"032\",\"landsat:scene_id\":\"LC80140322024247LGN00\",\"landsat:wrs_path\":\"014\",\"landsat:wrs_type\":\"2\",\"view:sun_azimuth\":146.62995528,\"landsat:correction\":\"L2SP\",\"view:sun_elevation\":52.46486712,\"landsat:cloud_cover_land\":0.05,\"landsat:collection_number\":\"02\",\"landsat:collection_category\":\"T1\"},\"geometry\":{\"type\":\"Polygon\",\"coordinates\":[[[-75.70869046957408,41.38387925198293],[-76.22840324314821,39.66713886561894],[-74.12262211502568,39.26971810071722],[-73.54896641568064,40.9842724273797],[-75.70869046957408,41.38387925198293]]]},\"assets\":{\"ST_B10\":{\"href\":\"https://landsateuwest.blob.core.windows.net/landsat-c2/level-2/standard/oli-tirs/2024/014/032/LC08_L2SP_014032_20240903_20240906_02_T1/LC08_L2SP_014032_20240903_20240906_02_T1_ST_B10.TIF\",\"gsd\":100,\"type\":\"image/tiff; application=geotiff; profile=cloud-optimized\",\"roles\":[\"data\",\"temperature\"],\"title\":\"Surface Temperature Band\",\"eo:bands\":[{\"name\":\"TIRS_B10\",\"common_name\":\"lwir11\",\"description\":\"Long-wave infrared\",\"center_wavelength\":10.9,\"full_width_half_max\":0.59}],\"description\":\"Collection 2 Level-2 Thermal Infrared Band (ST_B10) Surface Temperature\",\"raster:bands\":[{\"unit\":\"kelvin\",\"scale\":0.00341802,\"nodata\":0,\"offset\":149,\"data_type\":\"uint16\",\"spatial_resolution\":30}]},\"QA_PIXEL\":{\"href\":\"https://landsateuwest.blob.core.windows.net/landsat-c2/level-2/standard/oli-tirs/2024/014/032/LC08_L2SP_014032_20240903_20240906_02_T1/LC08_L2SP_014032_20240903_20240906_02_T1_QA_PIXEL.TIF\",\"classification:bitfields\":[{\"name\":\"fill\",\"length\":1,\"offset\":0,\"classes\":[{\"name\":\"not_fill\",\"value\":0,\"description\":\"Image data\"},{\"name\":\"fill\",\"value\":1,\"description\":\"Fill data\"}],\"description\":\"Image or fill data\"},{\"name\":\"dilated_cloud\",\"length\":1,\"offset\":1,\"classes\":[{\"name\":\"not_dilated\",\"value\":0,\"description\":\"Cloud is not dilated or no cloud\"},{\"name\":\"dilated\",\"value\":1,\"description\":\"Cloud dilation\"}],\"description\":\"Dilated cloud\"},{\"name\":\"cirrus\",\"length\":1,\"offset\":2,\"classes\":[{\"name\":\"not_cirrus\",\"value\":0,\"description\":\"Cirrus confidence is not high\"},{\"name\":\"cirrus\",\"value\":1,\"description\":\"High confidence cirrus\"}],\"description\":\"Cirrus mask\"},{\"name\":\"cloud\",\"length\":1,\"offset\":3,\"classes\":[{\"name\":\"not_cloud\",\"value\":0,\"description\":\"Cloud confidence is not high\"},{\"name\":\"cloud\",\"value\":1,\"description\":\"High confidence cloud\"}],\"description\":\"Cloud mask\"},{\"name\":\"cloud_shadow\",\"length\":1,\"offset\":4,\"classes\":[{\"name\":\"not_shadow\",\"value\":0,\"description\":\"Cloud shadow confidence is not high\"},{\"name\":\"shadow\",\"value\":1,\"description\":\"High confidence cloud shadow\"}],\"description\":\"Cloud shadow mask\"},{\"name\":\"snow\",\"length\":1,\"offset\":5,\"classes\":[{\"name\":\"not_snow\",\"value\":0,\"description\":\"Snow/Ice confidence is not high\"},{\"name\":\"snow\",\"value\":1,\"description\":\"High confidence snow cover\"}],\"description\":\"Snow/Ice mask\"},{\"name\":\"clear\",\"length\":1,\"offset\":6,\"classes\":[{\"name\":\"not_clear\",\"value\":0,\"description\":\"Cloud or dilated cloud bits are set\"},{\"name\":\"clear\",\"value\":1,\"description\":\"Cloud and dilated cloud bits are not set\"}],\"description\":\"Clear mask\"},{\"name\":\"water\",\"length\":1,\"offset\":7,\"classes\":[{\"name\":\"not_water\",\"value\":0,\"description\":\"Land or cloud\"},{\"name\":\"water\",\"value\":1,\"description\":\"Water\"}],\"description\":\"Water mask\"},{\"name\":\"cloud_confidence\",\"length\":2,\"offset\":8,\"classes\":[{\"name\":\"not_set\",\"value\":0,\"description\":\"No confidence level set\"},{\"name\":\"low\",\"value\":1,\"description\":\"Low confidence cloud\"},{\"name\":\"medium\",\"value\":2,\"description\":\"Medium confidence cloud\"},{\"name\":\"high\",\"value\":3,\"description\":\"High confidence cloud\"}],\"description\":\"Cloud confidence levels\"},{\"name\":\"cloud_shadow_confidence\",\"length\":2,\"offset\":10,\"classes\":[{\"name\":\"not_set\",\"value\":0,\"description\":\"No confidence level set\"},{\"name\":\"low\",\"value\":1,\"description\":\"Low confidence cloud shadow\"},{\"name\":\"reserved\",\"value\":2,\"description\":\"Reserved - value not used\"},{\"name\":\"high\",\"value\":3,\"description\":\"High confidence cloud shadow\"}],\"description\":\"Cloud shadow confidence levels\"},{\"name\":\"snow_confidence\",\"length\":2,\"offset\":12,\"classes\":[{\"name\":\"not_set\",\"value\":0,\"description\":\"No confidence level set\"},{\"name\":\"low\",\"value\":1,\"description\":\"Low confidence snow/ice\"},{\"name\":\"reserved\",\"value\":2,\"description\":\"Reserved - value not used\"},{\"name\":\"high\",\"value\":3,\"description\":\"High confidence snow/ice\"}],\"description\":\"Snow/Ice confidence levels\"},{\"name\":\"cirrus_confidence\",\"length\":2,\"offset\":14,\"classes\":[{\"name\":\"not_set\",\"value\":0,\"description\":\"No confidence level set\"},{\"name\":\"low\",\"value\":1,\"description\":\"Low confidence cirrus\"},{\"name\":\"reserved\",\"value\":2,\"description\":\"Reserved - value not used\"},{\"name\":\"high\",\"value\":3,\"description\":\"High confidence cirrus\"}],\"description\":\"Cirrus confidence levels\"}],\"type\":\"image/tiff; application=geotiff; profile=cloud-optimized\",\"roles\":[\"cloud\",\"cloud-shadow\",\"snow-ice\",\"water-mask\"],\"title\":\"Pixel Quality Assessment Band\",\"description\":\"Collection 2 Level-1 Pixel Quality Assessment Band (QA_PIXEL)\",\"raster:bands\":[{\"unit\":\"bit index\",\"nodata\":1,\"data_type\":\"uint16\",\"spatial_resolution\":30}]},\"QA_RADSAT\":{\"href\":\"https://landsateuwest.blob.core.windows.net/landsat-c2/level-2/standard/oli-tirs/2024/014/032/LC08_L2SP_014032_20240903_20240906_02_T1/LC08_L2SP_014032_20240903_20240906_02_T1_QA_RADSAT.TIF\",\"title\":\"Radiometric Saturation and Terrain Occlusion Quality Assessment Band\",\"description\":\"Collection 2 Level-1 Radiometric Saturation and Terrain Occlusion Quality Assessment Band (QA_RADSAT)\",\"classification:bitfields\":[{\"name\":\"band1\",\"length\":1,\"offset\":0,\"classes\":[{\"name\":\"not_saturated\",\"value\":0,\"description\":\"Band 1 not saturated\"},{\"name\":\"saturated\",\"value\":1,\"description\":\"Band 1 saturated\"}],\"description\":\"Band 1 radiometric saturation\"},{\"name\":\"band2\",\"length\":1,\"offset\":1,\"classes\":[{\"name\":\"not_saturated\",\"value\":0,\"description\":\"Band 2 not saturated\"},{\"name\":\"saturated\",\"value\":1,\"description\":\"Band 2 saturated\"}],\"description\":\"Band 2 radiometric saturation\"},{\"name\":\"band3\",\"length\":1,\"offset\":2,\"classes\":[{\"name\":\"not_saturated\",\"value\":0,\"description\":\"Band 3 not saturated\"},{\"name\":\"saturated\",\"value\":1,\"description\":\"Band 3 saturated\"}],\"description\":\"Band 3 radiometric saturation\"},{\"name\":\"band4\",\"length\":1,\"offset\":3,\"classes\":[{\"name\":\"not_saturated\",\"value\":0,\"description\":\"Band 4 not saturated\"},{\"name\":\"saturated\",\"value\":1,\"description\":\"Band 4 saturated\"}],\"description\":\"Band 4 radiometric saturation\"},{\"name\":\"band5\",\"length\":1,\"offset\":4,\"classes\":[{\"name\":\"not_saturated\",\"value\":0,\"description\":\"Band 5 not saturated\"},{\"name\":\"saturated\",\"value\":1,\"description\":\"Band 5 saturated\"}],\"description\":\"Band 5 radiometric saturation\"},{\"name\":\"band6\",\"length\":1,\"offset\":5,\"classes\":[{\"name\":\"not_saturated\",\"value\":0,\"description\":\"Band 6 not saturated\"},{\"name\":\"saturated\",\"value\":1,\"description\":\"Band 6 saturated\"}],\"description\":\"Band 6 radiometric saturation\"},{\"name\":\"band7\",\"length\":1,\"offset\":6,\"classes\":[{\"name\":\"not_saturated\",\"value\":0,\"description\":\"Band 7 not saturated\"},{\"name\":\"saturated\",\"value\":1,\"description\":\"Band 7 saturated\"}],\"description\":\"Band 7 radiometric saturation\"},{\"name\":\"band9\",\"length\":1,\"offset\":8,\"classes\":[{\"name\":\"not_saturated\",\"value\":0,\"description\":\"Band 9 not saturated\"},{\"name\":\"saturated\",\"value\":1,\"description\":\"Band 9 saturated\"}],\"description\":\"Band 9 radiometric saturation\"},{\"name\":\"occlusion\",\"length\":1,\"offset\":11,\"classes\":[{\"name\":\"not_occluded\",\"value\":0,\"description\":\"Terrain is not occluded\"},{\"name\":\"occluded\",\"value\":1,\"description\":\"Terrain is occluded\"}],\"description\":\"Terrain not visible from sensor due to intervening terrain\"}],\"type\":\"image/tiff; application=geotiff; profile=cloud-optimized\",\"roles\":[\"saturation\"],\"raster:bands\":[{\"unit\":\"bit index\",\"data_type\":\"uint16\",\"spatial_resolution\":30}]}}}",
         "checkedPixels": 81,
         "usablePixels": 81,
-        "catalogRevision": "f7369b1f6eb8e19facbf9e3170cda7bef4676f61303321d2f0bc259762eff3e5"
+        "catalogRevision": "f5cd9eef4e2c10bd8c3439d62db6fcbac97bb1225f6832e61b5bce1479b7f932"
       }
     },
     {
@@ -270,7 +369,7 @@
       "scene": "S2A_18TWK_20240903_0_L2A",
       "observationUtc": "2024-09-03T15:52:05.578+00:00",
       "verticalDatum": "not applicable",
-      "sourceRevision": "9173503ac1e05e4607c58cc3c05dbb0632633cfb30286335adc4d2f1cce37be8",
+      "sourceRevision": "84171372a2ece23d90bd4d7c678b00f1334b4faa6374005af2b3503171d2349c",
       "sourceFiles": [
         {
           "relativePath": "B02.tif",
@@ -298,7 +397,7 @@
           "sha256": "490d03dc11d94fabc5037777b2e8b4af374f4858ce801dfd33cbe7c146ea2fa5"
         }
       ],
-      "networkBytes": 13303808,
+      "networkBytes": 13325199,
       "validDerivedValues": 183,
       "samplePositions": 576,
       "reuseNetworkBytes": 0,
@@ -341,11 +440,11 @@
             "longitude": -74.99000000000001
           }
         },
-        "retrievedUtc": "2026-10-21T10:48:06.5719057+00:00",
+        "retrievedUtc": "2026-10-21T11:20:51.0779409+00:00",
         "preparation": "Lossless native-grid, native-DN GeoTIFF crop via validated HTTP 206 ranges; no overview substitution or interpolation.",
         "quality": "Scene cloud cover 0.01%; local QA/nodata still determines valid samples",
         "nativeResolution": "10 m reflectance / 20 m SCL",
-        "networkBytes": 13303808,
+        "networkBytes": 13325199,
         "limitations": [
           "Discovery examines at most 60 ordered catalog candidates; no claim of exhaustive coverage.",
           "Sentinel-2 Level-2A surface reflectance. Provider raster:bands scale/offset is retained, including product-specific radiometric offsets; SCL is sampled on its own native grid."
@@ -353,7 +452,7 @@
         "providerMetadataJson": "{\"collection\":\"sentinel-2-l2a\",\"scene\":\"S2A_18TWK_20240903_0_L2A\",\"properties\":{\"created\":\"2024-09-04T01:08:27.848Z\",\"platform\":\"sentinel-2a\",\"constellation\":\"sentinel-2\",\"instruments\":[\"msi\"],\"eo:cloud_cover\":0.008839,\"proj:epsg\":32618,\"mgrs:utm_zone\":18,\"mgrs:latitude_band\":\"T\",\"mgrs:grid_square\":\"WK\",\"grid:code\":\"MGRS-18TWK\",\"view:sun_azimuth\":152.042354522007,\"view:sun_elevation\":54.0250351942486,\"s2:degraded_msi_data_percentage\":0.0097,\"s2:nodata_pixel_percentage\":2.558834,\"s2:saturated_defective_pixel_percentage\":0,\"s2:cloud_shadow_percentage\":0,\"s2:vegetation_percentage\":60.362947,\"s2:not_vegetated_percentage\":9.258614,\"s2:water_percentage\":29.918349,\"s2:unclassified_percentage\":0.290954,\"s2:medium_proba_clouds_percentage\":0.003667,\"s2:high_proba_clouds_percentage\":0.002169,\"s2:thin_cirrus_percentage\":0.003003,\"s2:snow_ice_percentage\":0.003582,\"s2:product_type\":\"S2MSI2A\",\"s2:processing_baseline\":\"05.11\",\"s2:product_uri\":\"S2A_MSIL2A_20240903T153941_N0511_R011_T18TWK_20240903T231040.SAFE\",\"s2:generation_time\":\"2024-09-03T23:10:40.000000Z\",\"s2:datatake_id\":\"GS2A_20240903T153941_048056_N05.11\",\"s2:datatake_type\":\"INS-NOBS\",\"s2:datastrip_id\":\"S2A_OPER_MSI_L2A_DS_2APS_20240903T231040_S20240903T154200_N05.11\",\"s2:granule_id\":\"S2A_OPER_MSI_L2A_TL_2APS_20240903T231040_A048056_T18TWK_N05.11\",\"s2:reflectance_conversion_factor\":0.981719987726623,\"datetime\":\"2024-09-03T15:52:05.578000Z\",\"s2:sequence\":\"0\",\"earthsearch:s3_path\":\"s3://sentinel-cogs/sentinel-s2-l2a-cogs/18/T/WK/2024/9/S2A_18TWK_20240903_0_L2A\",\"earthsearch:payload_id\":\"roda-sentinel2/workflow-sentinel2-to-stac/001785ccba43cc4bfe001b27c8759884\",\"earthsearch:boa_offset_applied\":true,\"processing:software\":{\"sentinel2-to-stac\":\"0.1.1\"},\"updated\":\"2024-09-04T01:08:27.848Z\"},\"geometry\":{\"type\":\"Polygon\",\"coordinates\":[[[-74.85778467149682,40.6507599342301],[-75.000223181086,40.181986929502195],[-75.00022149801843,39.66161596790567],[-73.72036940893669,39.65456644304081],[-73.70167133682169,40.64354834012356],[-74.85778467149682,40.6507599342301]]]},\"assets\":{\"B02\":{\"href\":\"https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/18/T/WK/2024/9/S2A_18TWK_20240903_0_L2A/B02.tif\",\"type\":\"image/tiff; application=geotiff; profile=cloud-optimized\",\"title\":\"Blue (band 2) - 10m\",\"eo:bands\":[{\"name\":\"blue\",\"common_name\":\"blue\",\"description\":\"Blue (band 2)\",\"center_wavelength\":0.49,\"full_width_half_max\":0.098}],\"gsd\":10,\"proj:shape\":[10980,10980],\"proj:transform\":[10,0,499980,0,-10,4500000],\"raster:bands\":[{\"nodata\":0,\"data_type\":\"uint16\",\"bits_per_sample\":15,\"spatial_resolution\":10,\"scale\":0.0001,\"offset\":-0.1}],\"roles\":[\"data\",\"reflectance\"]},\"B03\":{\"href\":\"https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/18/T/WK/2024/9/S2A_18TWK_20240903_0_L2A/B03.tif\",\"type\":\"image/tiff; application=geotiff; profile=cloud-optimized\",\"title\":\"Green (band 3) - 10m\",\"eo:bands\":[{\"name\":\"green\",\"common_name\":\"green\",\"description\":\"Green (band 3)\",\"center_wavelength\":0.56,\"full_width_half_max\":0.045}],\"gsd\":10,\"proj:shape\":[10980,10980],\"proj:transform\":[10,0,499980,0,-10,4500000],\"raster:bands\":[{\"nodata\":0,\"data_type\":\"uint16\",\"bits_per_sample\":15,\"spatial_resolution\":10,\"scale\":0.0001,\"offset\":-0.1}],\"roles\":[\"data\",\"reflectance\"]},\"B04\":{\"href\":\"https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/18/T/WK/2024/9/S2A_18TWK_20240903_0_L2A/B04.tif\",\"type\":\"image/tiff; application=geotiff; profile=cloud-optimized\",\"title\":\"Red (band 4) - 10m\",\"eo:bands\":[{\"name\":\"red\",\"common_name\":\"red\",\"description\":\"Red (band 4)\",\"center_wavelength\":0.665,\"full_width_half_max\":0.038}],\"gsd\":10,\"proj:shape\":[10980,10980],\"proj:transform\":[10,0,499980,0,-10,4500000],\"raster:bands\":[{\"nodata\":0,\"data_type\":\"uint16\",\"bits_per_sample\":15,\"spatial_resolution\":10,\"scale\":0.0001,\"offset\":-0.1}],\"roles\":[\"data\",\"reflectance\"]},\"B08\":{\"href\":\"https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/18/T/WK/2024/9/S2A_18TWK_20240903_0_L2A/B08.tif\",\"type\":\"image/tiff; application=geotiff; profile=cloud-optimized\",\"title\":\"NIR 1 (band 8) - 10m\",\"eo:bands\":[{\"name\":\"nir\",\"common_name\":\"nir\",\"description\":\"NIR 1 (band 8)\",\"center_wavelength\":0.842,\"full_width_half_max\":0.145}],\"gsd\":10,\"proj:shape\":[10980,10980],\"proj:transform\":[10,0,499980,0,-10,4500000],\"raster:bands\":[{\"nodata\":0,\"data_type\":\"uint16\",\"bits_per_sample\":15,\"spatial_resolution\":10,\"scale\":0.0001,\"offset\":-0.1}],\"roles\":[\"data\",\"reflectance\"]},\"SCL\":{\"href\":\"https://sentinel-cogs.s3.us-west-2.amazonaws.com/sentinel-s2-l2a-cogs/18/T/WK/2024/9/S2A_18TWK_20240903_0_L2A/SCL.tif\",\"type\":\"image/tiff; application=geotiff; profile=cloud-optimized\",\"title\":\"Scene classification map (SCL)\",\"proj:shape\":[5490,5490],\"proj:transform\":[20,0,499980,0,-20,4500000],\"raster:bands\":[{\"nodata\":0,\"data_type\":\"uint8\",\"spatial_resolution\":20}],\"roles\":[\"data\",\"reflectance\"]}}}",
         "checkedPixels": 81,
         "usablePixels": 81,
-        "catalogRevision": "9173503ac1e05e4607c58cc3c05dbb0632633cfb30286335adc4d2f1cce37be8"
+        "catalogRevision": "84171372a2ece23d90bd4d7c678b00f1334b4faa6374005af2b3503171d2349c"
       }
     }
   ]

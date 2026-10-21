@@ -1,3 +1,4 @@
+import {libraryDownload} from './library-download.js';
 import {ResearchMap} from './map.js';
 import {openHyperspectralImport} from './hyperspectral-import.js';
 import {node as el,bytes,dateTime as local,readableName,button,link,select,disclosure,status} from './workstation-ui.js';
@@ -5,7 +6,8 @@ let dispose=()=>{};
 export function disposeScientificLibrary(){dispose();}
 export async function scientificLibrary(parent,api){
   dispose();let stopped=false,timer;const maps=[];dispose=()=>{stopped=true;clearTimeout(timer);maps.splice(0).forEach(map=>map.destroy());};
-  parent.replaceChildren();const heading=el('div',undefined,'page-heading');heading.append(el('div'));heading.firstChild.append(el('p','REUSABLE HISTORICAL SOURCES','eyebrow'),el('h1','Scientific Data Library'),el('p','Retained Earth observations for future research flights. Your mission-acquired results live in Science Workspace.'));parent.append(heading);
+  parent.replaceChildren();if(location.hash.startsWith('#library/download')){const close=await libraryDownload(parent,api,()=>stopped);if(stopped)close();else dispose=()=>{stopped=true;close();};return;}
+  const heading=el('div',undefined,'page-heading');heading.append(el('div'));heading.firstChild.append(el('p','REUSABLE HISTORICAL SOURCES','eyebrow'),el('h1','Scientific Data Library'),el('p','Retained Earth observations for future research flights. Your mission-acquired results live in Science Workspace.'));parent.append(heading);link(heading,'Browse & Download Data','#library/download');
   const tools=el('div',undefined,'workspace-controls'),searchLabel=el('label','Search collections'),search=el('input');search.type='search';search.placeholder='Provider, product, scene or datum';search.setAttribute('aria-label','Search Scientific Data Library');searchLabel.append(search);tools.append(searchLabel);
   const category=select(tools,'Scientific category',[['','All scientific categories'],...['terrain','thermal','multispectral','hyperspectral'].map(kind=>[kind,readableName(kind)])],'');
   const provider=select(tools,'Library provider',[['','All providers']],'');

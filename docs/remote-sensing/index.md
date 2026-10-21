@@ -11,3 +11,7 @@
 - [Troubleshooting](troubleshooting.md)
 
 For sensor planning, atmospheric missions and offline analysis, see the [v0.4.0 pilot walkthrough](../v0.4.0-pilot-guide.md). The [source-expansion report](../v0.4.0-scientific-source-expansion.md) distinguishes available workflows from NOAA/Hyperion/WorldCover/NASA/GOES investigations.
+
+## Geographic Library downloads
+
+Use [Browse & Download Data](../scientific-library.md) to select exact provider scenes and bounded geographic windows, approve durable downloads and reuse retained sources without an active flight. Advanced manual import remains available.

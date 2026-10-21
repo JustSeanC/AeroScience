@@ -5,7 +5,7 @@ namespace AeroScience.Missions;
 
 public sealed class ScientificAccessSettings(string directory,Func<bool?>? unmetered=null)
 {
-    public const string Privacy="Automatic scientific data access sends geographic search areas and your IP address to public scientific-data providers (USGS, Microsoft Planetary Computer, Element 84 and NASA). Historical numeric datasets are downloaded directly to your PC. Mission notes and flight recordings are not uploaded. This permission is separate from online basemaps. You can choose offline-only before any scientific query.";
+    public const string Privacy="Automatic scientific data access sends geographic search areas and your IP address to public scientific-data providers (USGS, Microsoft Planetary Computer, Element 84, NASA and US Census TIGERweb). Historical numeric datasets are downloaded directly to your PC. Mission notes and flight recordings are not uploaded. This permission is separate from online basemaps. You can choose offline-only before any scientific query.";
     public string ConfigurationDirectory => directory;
     private readonly string path=Path.Combine(directory,"scientific-access.json");private readonly object gate=new();
     public bool? IsUnmetered()=>unmetered?.Invoke();
@@ -128,7 +128,7 @@ public sealed class AutomaticScientificData : IDisposable
                     if(queue.Count>=64)
                     {
                         var least=queue.Values.MaxBy(j=>j.Priority)!;
-                        if(priority<least.Priority){queue.Remove(least.Key);states[least.Key]=states[least.Key] with{Status="Superseded",Message="Yielded to more urgent aircraft data; progressive preflight will revisit this area."};}
+                        if(priority<least.Priority){queue.Remove(least.Key);least.Completion?.TrySetCanceled();if(states.TryGetValue(least.Key,out var displaced))states[least.Key]=displaced with{Status="Superseded",Message="Yielded to more urgent aircraft data; progressive preflight will revisit this area."};}
                         else{Set(states[key] with{Status="Superseded",Message="Waiting for priority queue capacity; progressive preparation will retry."});continue;}
                     }
                     queue[key]=new(key,kind,area,ticket,priority,scope,background,samplePoint);
@@ -181,11 +181,21 @@ public sealed class AutomaticScientificData : IDisposable
             queue[key]=new(key,kind,area,Guid.NewGuid(),100000,scope,LibraryWork:action,Completion:completion);scopes[key]=scope;Wake();return completion.Task;
         }
     }
-    internal bool LibraryAllowed=>!flightActive&&!paused&&settings.Get().Preferences.BackgroundRetrieval;
+    internal async Task WaitForLibraryScope(string scope,CancellationToken token)
+    {
+        while(true)
+        {
+            token.ThrowIfCancellationRequested();lock(gate)if(!queue.Values.Any(j=>j.Scope==scope)&&!cancellations.Keys.Any(key=>scopes.GetValueOrDefault(key)==scope))return;
+            await Task.Delay(25,token);
+        }
+    }
+    internal ScientificTransferLedger.Lease AcquireLibraryTransfer()=>preflightTransfers.Acquire(()=>settings.Get().Preferences.PreflightTransferBytes);
+    internal bool LibraryAllowed {get{lock(gate)return !flightActive&&!paused&&settings.Get().Preferences.BackgroundRetrieval;}}
     private async Task Execute(Job job)
     {
         if(job.LibraryWork is not null)
         {
+            if(!LibraryAllowed){job.Completion!.TrySetCanceled();return;}
             using var lifetime=CancellationTokenSource.CreateLinkedTokenSource(stopping.Token);lifetime.CancelAfter(TimeSpan.FromMinutes(12));lock(gate)cancellations[job.Key]=lifetime;
             try{await job.LibraryWork(lifetime.Token);job.Completion!.TrySetResult();}
             catch(OperationCanceledException){job.Completion!.TrySetCanceled();}

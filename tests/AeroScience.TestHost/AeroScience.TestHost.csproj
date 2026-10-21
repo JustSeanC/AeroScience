@@ -4,4 +4,5 @@
     <Compile Include="../AeroScience.Tests/SyntheticTelemetryFixture.cs" Link="SyntheticTelemetryFixture.cs" />
     <Compile Include="../AeroScience.Tests/RemoteFixtureFiles.cs" Link="RemoteFixtureFiles.cs" />
   </ItemGroup>
+  <ItemGroup><None Include="../AeroScience.Tests/ProviderMetadata/*.json" Link="ProviderMetadata/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" /></ItemGroup>
 </Project>
