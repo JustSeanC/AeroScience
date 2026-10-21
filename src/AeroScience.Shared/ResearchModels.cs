@@ -31,7 +31,9 @@ public sealed record ScienceObservation(long Id, Guid DatasetId, Guid MissionId,
     DateTimeOffset TimestampUtc, string MeasurementId, double Value, string Unit, ScienceProvenance Provenance,
     string Source, double? Latitude, double? Longitude, double? AltitudeMslFeet, ObservationQuality Quality,
     DateTimeOffset? PositionTimestampUtc = null,
-    [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] CalibrationDerivation? Calibration = null);
+    [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] CalibrationDerivation? Calibration = null,
+    [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] Guid? SessionId = null,
+    [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] Guid? IntentId = null);
 public sealed record ScienceDataset(Guid Id, Guid LibraryId, Guid MissionId, string MissionName, string InstrumentId,
     DateTimeOffset CreatedUtc, string RelativePath, long ObservationCount, string ProvenanceJson);
 public sealed record InstrumentState(string InstrumentId, bool Enabled, int IntervalMs, ObservationQuality Quality,

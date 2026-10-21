@@ -28,7 +28,7 @@ public sealed class ResearchTests : IDisposable
         store = new(Path.Combine(settings.MissionDirectory, "missions.db")); store.Initialize();
         science = new(settings.ScienceLibraryDirectory); store.ScienceLibrary = science;
         research = new(store, science);
-        coordinator = new(store, 1000, research: research);
+        coordinator = new(store, 1000, research: research,utcNow:()=>now);
     }
     private void Apply(int second, double? temperature = 12, bool paused = false)
     {
@@ -226,7 +226,7 @@ public sealed class ResearchTests : IDisposable
     [Fact]
     public void ScienceLowCapacityDoesNotStopFlightAndRejectedReadingsAreRetainedAsDiagnostics()
     {
-        using var low = new ScienceStore(science.DirectoryPath, new Capacity(100)); using var research = new ResearchOperations(store, low); var c = new MissionCoordinator(store, 1000, research: research);
+        using var low = new ScienceStore(science.DirectoryPath, new Capacity(100)); using var research = new ResearchOperations(store, low); var c = new MissionCoordinator(store, 1000, research: research,utcNow:()=>now);
         var m = c.Start(new StartMissionRequest("Low science disk", Instruments: [new("ambient-temperature", true)])); var frame = SimulatedTelemetryProvider.Generate(now, 0);
         var connection = new ConnectionInfo(ConnectionState.Connected, TelemetrySource.Simulated, "fixture", now);
         c.Apply(new(connection, frame, new(now, 12, 29, 10, 270, .0023))); Assert.Single(store.StreamSamples(m.Id)); Assert.Empty(low.StreamObservations(m.Id));

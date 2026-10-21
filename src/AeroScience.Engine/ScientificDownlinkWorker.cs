@@ -10,12 +10,15 @@ public sealed class ScientificDownlinkWorker(MissionStore missions, ScienceStore
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         using var sampling = new RemoteAcquisition(missions, science, () => settings.Get().Preferences);
+        var reconciliationOffset=0;
         using var timer = new PeriodicTimer(TimeSpan.FromSeconds(2));
         while (await timer.WaitForNextTickAsync(stoppingToken))
         {
             if (coordinator.Snapshot().ActiveMission is not null) continue;
             try
             {
+                var scanned=missions.ReconcileSessionPublications(science,reconciliationOffset);
+                reconciliationOffset=scanned<32?0:reconciliationOffset+scanned;
                 var rows = missions.Recovery(limit: 24, pendingOnly: true);
                 foreach (var slot in rows)
                 {

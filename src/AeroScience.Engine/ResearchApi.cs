@@ -104,6 +104,14 @@ public static class ResearchApi
         app.MapGet("/api/display/units", (ScienceUnitSettings settings) => new { preferences = settings.Get(), options = ScienceUnits.Options, aviation = ScienceUnits.Aviation, scientific = ScienceUnits.Scientific, warning = settings.Warning });
         app.MapPost("/api/display/units", (ScienceUnitPreferences preferences, ScienceUnitSettings settings) => settings.Set(preferences));
         app.MapPost("/api/missions/{id:guid}/science/state", (Guid id, SciencePauseRequest request, MissionCoordinator missions) => missions.SetSciencePaused(id, request.Paused));
+        app.MapGet("/api/missions/{id:guid}/collection/counts",(Guid id,ScienceStore science)=>science.SessionCounts(id));
+        app.MapGet("/api/missions/{id:guid}/collection",(Guid id,MissionCoordinator missions)=>missions.ScienceCollection(id));
+        app.MapPost("/api/missions/{id:guid}/collection/control",(Guid id,CollectionControlRequest request,MissionCoordinator missions)=>
+        {
+            if(id!=request.MissionId)throw new ArgumentException("Flight identity does not match command.");
+            var result=missions.ControlScience(request);
+            return result.Event.Outcome==CollectionEventOutcome.Conflict?Results.Conflict(result):Results.Ok(result);
+        });
         app.MapGet("/api/patterns", () => Enum.GetNames<FlightPatternKind>());
         app.MapPost("/api/patterns/fit-survey", (PatternSurveyRequest request) => FlightPatterns.FitSurvey(request.Definition,request.Area,request.FitMode));
         app.MapPost("/api/patterns/preview", (PatternDefinition definition) => FlightPatterns.Generate(definition));

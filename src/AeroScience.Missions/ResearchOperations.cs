@@ -5,9 +5,41 @@ using Microsoft.Data.Sqlite;
 namespace AeroScience.Missions;
 
 // Invoked under MissionCoordinator's existing command/acquisition gate.
-public sealed class ResearchOperations(MissionStore missions, ScienceStore science, Func<ScienceUnitPreferences>? displayUnits = null,Func<ScientificAccessPreferences>? sourcePreferences=null) : IDisposable
+public sealed class ResearchOperations : IDisposable
 {
-    private readonly RemoteAcquisition remote = new(missions, science,sourcePreferences);
+    private readonly MissionStore missions;
+    private readonly ScienceStore science;
+    private readonly Func<ScienceUnitPreferences>? displayUnits;
+    private readonly RemoteAcquisition remote;
+    public Func<RemoteAcquisitionRequest,IDisposable>? PublicationLease { get; set; }
+    public ResearchOperations(MissionStore missions,ScienceStore science,Func<ScienceUnitPreferences>? displayUnits=null,Func<ScientificAccessPreferences>? sourcePreferences=null)
+    {
+        this.missions=missions;this.science=science;this.displayUnits=displayUnits;
+        remote=new(missions,science,sourcePreferences,request=>PublicationLease?.Invoke(request)??throw new InvalidOperationException("Session publication needs its coordinator lease."));
+    }
+    private bool collectionManaged;
+    private CollectionPhase collectionPhase;
+    private ScienceAcquisitionIntent[] ingressIntents=[];
+    public void HoldCollection(){collectionManaged=true;collectionPhase=CollectionPhase.Paused;remote.Reset(true);}
+    public void ApplyCollection(CollectionState state,ScienceCollectionSession? session,ScienceAcquisitionIntent[] intents,DateTimeOffset? at=null)
+    {
+        collectionManaged=true;ingressIntents=intents;
+        if(session is not null)foreach(var config in session.Configurations.GroupBy(c=>c.Settings.InstrumentId).Select(g=>g.OrderByDescending(c=>c.Revision).First()))effective[config.Settings.InstrumentId]=config;
+        if(CollectionSessionId!=state.CurrentSessionId)
+        {
+            remote.Reset(true);
+            if(state.CurrentSessionId is not null){acquisitions.Clear();remote.Begin();}
+        }
+        if(collectionPhase!=state.Phase||CollectionSessionId!=state.CurrentSessionId)
+        {
+            var now=at??DateTimeOffset.UtcNow;
+            if(state.Phase==CollectionPhase.Paused)pauseStarted=now;
+            else if(pauseStarted is {} began){pauseSeconds+=Math.Max(0,(now-began).TotalSeconds);pauseStarted=null;}
+            foreach(var run in acquisitions.Values){run.Anchor=null;run.Slot=-1;run.CadenceReference=null;}
+            remote.Reset(state.Phase!=CollectionPhase.Collecting);
+        }
+        CollectionSessionId=state.CurrentSessionId;collectionPhase=state.Phase;intentionallyPaused=state.Phase==CollectionPhase.Paused;
+    }
     public void Dispose() => remote.Dispose();
     private sealed class Acquisition
     {
@@ -46,7 +78,7 @@ public sealed class ResearchOperations(MissionStore missions, ScienceStore scien
         acquisitions.Clear(); baseline = null; intentionallyPaused = false; pauseStarted = null; pauseSeconds = 0;
         effective.Clear(); lastAssessment=null; operating=[];CollectionSessionId=null;
         foreach(var config in configurations)effective[config.InstrumentId]=InstrumentCalibration.Effective(config,Guid.NewGuid(),1,active.StartedUtc);
-        remote.Begin();
+        collectionManaged=false;collectionPhase=CollectionPhase.Unknown;ingressIntents=[];remote.Begin();
     }
     public void End()
     {
@@ -123,11 +155,11 @@ public sealed class ResearchOperations(MissionStore missions, ScienceStore scien
                 baseline = observed;
             }
         }
-        if (mission is not null && context is not null && !intentionallyPaused) remote.Offer(mission, context, configurations, update);
+        if (mission is not null && context is not null && !intentionallyPaused && (!collectionManaged||collectionPhase==CollectionPhase.Collecting)) remote.Offer(mission, context, configurations, update,ingressIntents,collectionManaged);
         if (update.Atmosphere is not { } source) return;
         if (atmosphere is not null && source.TimestampUtc <= atmosphere.TimestampUtc) return;
         atmosphere = source;
-        if (mission is null || context is null || intentionallyPaused || position?.IsPaused == true || source.Quality != ObservationQuality.Valid) return;
+        if (mission is null || context is null || intentionallyPaused || collectionManaged&&collectionPhase!=CollectionPhase.Collecting || position?.IsPaused == true || source.Quality != ObservationQuality.Valid) return;
         var located = position is not null && Math.Abs((source.TimestampUtc - position.TimestampUtc).TotalSeconds) <= 3 ? position : null;
         foreach (var config in configurations.Where(c => c.Enabled && !RemoteAcquisition.Instruments.ContainsKey(c.InstrumentId)))
         {
@@ -137,6 +169,8 @@ public sealed class ResearchOperations(MissionStore missions, ScienceStore scien
             var slot = (long)Math.Floor(((source.TimestampUtc - run.Anchor.Value).TotalMilliseconds + Math.Min(100, config.IntervalMs * .1)) / config.IntervalMs);
             if (slot <= run.Slot) continue;
             var gap = run.Slot >= 0 ? Math.Max(0, slot - run.Slot - 1) : 0; run.Missing += gap; run.Slot = slot;
+            var intent=ingressIntents.SingleOrDefault(i=>i.InstrumentId==config.InstrumentId&&i.ExposureUtc==source.TimestampUtc);
+            if(collectionManaged&&intent is null)continue;
             var instrument = ScienceCatalog.Instrument(config.InstrumentId);
             var readings = instrument.Read(source); run.Rejected += readings.Count(v => v.Value is null || v.Quality != ObservationQuality.Valid);
             var valid = readings.Where(v => v.Value is not null && v.Quality == ObservationQuality.Valid).ToArray();
@@ -149,9 +183,10 @@ public sealed class ResearchOperations(MissionStore missions, ScienceStore scien
                     source.TimestampUtc, v.MeasurementId, v.Value!.Value, v.Unit, v.Provenance,
                     (update.Connection.Source == TelemetrySource.Simulated ? "Synthetic test fixture / " : "MSFS 2024 / SimConnect ") + instrument.Definition.Measurements.Single(m => m.Id == v.MeasurementId).SimulatorVariable,
                     located?.Latitude, located?.Longitude, located?.AltitudeMslFeet, gap > 0 ? ObservationQuality.AcquisitionGap : ObservationQuality.Valid,
-                    located?.TimestampUtc)).ToArray();
+                    located?.TimestampUtc,SessionId:intent?.SessionId,IntentId:intent?.Id)).ToArray();
                 var values = originalValues.Concat(originalValues.Select(v => InstrumentCalibration.Derive(config, v)).OfType<ScienceObservation>()).ToArray();
                 var count = science.Append(values);
+                if(intent is not null)missions.AcknowledgeScienceIntent(intent.Id,intent.SessionId,intent.Id,ScienceStore.ObservationBatchHash(values));
                 if (run.Error is not null) missions.AddEvent(mission.Id, source.TimestampUtc, "science-recovered", config.InstrumentId + ": acquisition resumed"); run.Observations += count;
                 if (count > 0)
                 {
@@ -219,7 +254,7 @@ public sealed class ResearchOperations(MissionStore missions, ScienceStore scien
         }).ToArray();
         return new(CurrentGuidance(connection, position), atmosphere, states, context?.PlanSnapshot?.Id,
             context?.Template, science.AvailabilityError(),
-            mission is null ? ScienceCollectionStatus.Stopped : intentionallyPaused ? ScienceCollectionStatus.Paused :
+            mission is null || collectionManaged&&collectionPhase is CollectionPhase.Armed or CollectionPhase.BetweenSessions or CollectionPhase.Stopped ? ScienceCollectionStatus.Stopped : intentionallyPaused ? ScienceCollectionStatus.Paused :
             !states.Any(i => i.Enabled) ? ScienceCollectionStatus.Stopped :
             connection.State != ConnectionState.Connected || atmosphere is null || position?.IsPaused == true ? ScienceCollectionStatus.AwaitingSource :
             states.Where(i => i.Enabled).All(i => i.Quality is ObservationQuality.Unavailable or ObservationQuality.Stale) ? ScienceCollectionStatus.Unavailable : ScienceCollectionStatus.Collecting,

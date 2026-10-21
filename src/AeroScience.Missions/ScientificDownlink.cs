@@ -60,6 +60,15 @@ public sealed partial class MissionStore
     public bool VerifyRecoveryEvidence(ScientificRecoverySlot slot)
     {
         var frame = slot.Evidence.Frame; if (!frame.IsValid || frame.IsPaused || !slot.Evidence.Configuration.Enabled || !RemoteAcquisition.Instruments.ContainsKey(slot.InstrumentId)) return false;
+        if(slot.Evidence.IntentId is {} intentId&&slot.Evidence.SessionId is {} sessionId)
+        {
+            var intent=ScienceIntent(intentId)?.Intent;
+            if(intent is null||intent.MissionId!=slot.MissionId||intent.SessionId!=sessionId||intent.InstrumentId!=slot.InstrumentId||intent.ExposureUtc!=frame.TimestampUtc)return false;
+            var packet=CollectionInput(slot.MissionId,intent.InputReceiptId);
+            var configuration=CollectionSession(slot.MissionId,sessionId)?.Configurations.SingleOrDefault(c=>c.Id==intent.ConfigurationId);
+            return packet?.Packet.Frame is {} original&&JsonSerializer.Serialize(original,WireJson.Options)==JsonSerializer.Serialize(frame,WireJson.Options)&&configuration is not null&&
+                JsonSerializer.Serialize(configuration.Settings,WireJson.Options)==JsonSerializer.Serialize(slot.Evidence.Configuration,WireJson.Options);
+        }
         using var db = Open(); using var cmd = db.CreateCommand(); cmd.CommandText = "SELECT payload_json FROM telemetry WHERE mission_id=$mission AND timestamp_utc=$utc LIMIT 1";
         cmd.Parameters.AddWithValue("$mission", slot.MissionId.ToString()); cmd.Parameters.AddWithValue("$utc", frame.TimestampUtc.ToUniversalTime().ToString("O"));
         if (cmd.ExecuteScalar() is not string json) return false;

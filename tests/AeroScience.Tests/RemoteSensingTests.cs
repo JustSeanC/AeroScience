@@ -62,6 +62,23 @@ public sealed class RemoteSensingTests : IDisposable
         Assert.Contains("not tamper-proof",RemoteExports.Content(data,"evidence.json"));
         coordinator.End(product.MissionId);Assert.Single(science.Products(product.MissionId));Assert.NotEmpty(ResearchExports.Report(missions,product.MissionId));
     }
+    [Fact]public async Task LateRemotePublicationCannotCrossSessionBoundary()
+    {
+        await science.ImportSourceAsync(RemoteFixtureFiles.Create(Path.Combine(root,"session-publication"),RemoteKind.Terrain));
+        var flight=coordinator.Start(new("Session publication race",Instruments:[new("terrain-scanner",true)]));
+        var a=missions.CollectionCheckpoint(flight.Id)!.CurrentSessionId;
+        using var entered=new ManualResetEventSlim();using var release=new ManualResetEventSlim();
+        var eligibility=research.PublicationLease!;
+        research.PublicationLease=request=>{entered.Set();if(!release.Wait(TimeSpan.FromSeconds(10)))throw new TimeoutException("Publication barrier fixture timed out.");return eligibility(request);};
+        Apply(Frame());Assert.True(entered.Wait(TimeSpan.FromSeconds(10)));
+        CollectionCommitResult Control(CollectionAction action){var state=missions.CollectionCheckpoint(flight.Id)!;return coordinator.ControlScience(new(1,flight.Id,Guid.NewGuid(),state.Revision,action,state.CurrentSessionId));}
+        Control(CollectionAction.EndData);var b=Control(CollectionAction.StartData).Session!;Assert.NotEqual(a,b.Id);
+        release.Set();await Task.Delay(150);Assert.Empty(science.Products(flight.Id));Assert.Equal(b.Id,missions.CollectionCheckpoint(flight.Id)!.CurrentSessionId);
+        Assert.All(missions.ScienceIntents(flight.Id),i=>Assert.Equal("Cancelled",i.State));
+        research.PublicationLease=eligibility;Apply(Frame(DateTimeOffset.UtcNow.AddSeconds(1)));await Wait(()=>science.Products(flight.Id).Length==1);
+        var product=science.Products(flight.Id).Single();Assert.Equal(b.Id,product.SessionId);Assert.Equal(product.Id,product.IntentId);
+        Assert.Equal("Published",missions.ScienceIntent(product.Id)!.State);Assert.Equal(b.Id,science.ReadProduct(product.Id).Product.SessionId);
+    }
     [Fact]public async Task InvalidNdviDoesNotDiscardValidOriginalReflectance()
     {
         var path=RemoteFixtureFiles.Create(Path.Combine(root,"negative-reflectance"),RemoteKind.Multispectral);var source=ScienceStore.ReadSourceManifest(path);

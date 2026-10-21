@@ -5,10 +5,14 @@ namespace AeroScience.Missions;
 
 // All mutations pass through this gate, including telemetry and commands from every display.
 public sealed class MissionCoordinator(MissionStore store, int samplingIntervalMs, bool requireFreshTelemetry = false,
-    Action? ensureRecordingCapacity = null, ResearchOperations? research = null)
+    Action? ensureRecordingCapacity = null, ResearchOperations? research = null,Func<DateTimeOffset>? utcNow=null)
 {
     internal MissionStore Store => store;
     private readonly object gate = new();
+    private ScienceCollectionController? collection;
+    private bool collectionFault;
+    private DateTimeOffset Now => utcNow?.Invoke()??DateTimeOffset.UtcNow;
+    private DateTimeOffset ControlTime => !requireFreshTelemetry&&frame is {} f&&f.TimestampUtc>DateTimeOffset.UtcNow?f.TimestampUtc:Now;
     private string SelectionPath => Path.Combine(Path.GetDirectoryName(store.DatabasePath)!, "selected-plan.json");
     private Guid? SelectedPlan()
     {
@@ -53,62 +57,72 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
 
     public void Apply(TelemetryUpdate update)
     {
-        lock (gate)
+        lock(gate)
         {
-            if (active is not null && connection.State != update.Connection.State)
-                store.AddEvent(active.Id, DateTimeOffset.UtcNow, "connection", update.Connection.Message);
-            connection = update.Connection;
-            environment.Apply(update);
+            if(active is not null&&connection.State!=update.Connection.State)store.AddEvent(active.Id,DateTimeOffset.UtcNow,"connection",update.Connection.Message);
+            connection=update.Connection;environment.Apply(update);
             if(update.Frame is {IsValid:true} incoming)update=update with{Frame=environment.Enrich(incoming)};
-            frame = connection.State != ConnectionState.Connected ? null
-                : update.Frame is { IsValid: true } ? update.Frame : update.Frame is not null ? null : frame;
-            try { research?.Observe(update, frame); }
-            catch(Exception error) when(error is IOException or UnauthorizedAccessException or Microsoft.Data.Sqlite.SqliteException)
-            { ScientificDiagnostics.Record("science-processing-error",active?.Id.ToString()??"none","flight",RemoteKind.Terrain,result:error.GetType().Name+": "+error.Message); }
-            if (active is null || frame is null || update.Frame is null) return;
-            received++;
-            if (frame.IsPaused || lastRecordedUtc is not null && frame.TimestampUtc <= lastRecordedUtc)
-            { skipped++; return; }
-            samplingAnchor ??= frame.TimestampUtc;
-            // Quantize observations to a stable schedule, not the last write's timestamp.
-            // A bounded 10% (at most 100ms) phase tolerance avoids dropping every
-            // other nominal 1Hz observation when delivery jitters just below 1000ms.
-            var tolerance = Math.Min(100, samplingIntervalMs * .1);
-            var slot = (long)Math.Floor(((frame.TimestampUtc - samplingAnchor.Value).TotalMilliseconds + tolerance) / samplingIntervalMs);
-            if (slot <= lastSlot) { skipped++; return; }
-            if (lastSlot >= 0 && slot > lastSlot + 1)
+            frame=connection.State!=ConnectionState.Connected?null:update.Frame is {IsValid:true}?update.Frame:update.Frame is not null?null:frame;
+            if(active is null){research?.Observe(update,frame);return;}
+            TelemetryFrame? sample=null;long slot=-1;var capacityOkay=true;
+            if(update.Frame is not null&&frame is not null)
             {
-                missing += slot - lastSlot - 1;
-                store.AddEvent(active.Id, frame.TimestampUtc, "telemetry-gap", $"No committed observation in {slot - lastSlot - 1} configured recording intervals.");
-            }
-            if (lastAircraft is not null && lastAircraft != frame.Aircraft)
-                store.AddEvent(active.Id, frame.TimestampUtc, "aircraft-changed", $"Aircraft changed to {frame.Aircraft}.");
-            {
-                try { ensureRecordingCapacity?.Invoke(); store.Append(active.Id, frame with { Guidance = research?.CurrentGuidance(connection, frame) }); }
-                catch (Exception error) when(error is IOException or UnauthorizedAccessException or Microsoft.Data.Sqlite.SqliteException)
+                received++;
+                if(frame.IsPaused||lastRecordedUtc is not null&&frame.TimestampUtc<=lastRecordedUtc)skipped++;
+                else
                 {
-                    recordingStop = new(error is StorageLimitException ? "storageLimitReached" : "storageUnavailable", error.Message, active.Id, DateTimeOffset.UtcNow);
-                    ScientificDiagnostics.Record("recording-storage-error",active.Id.ToString(),"flight",RemoteKind.Terrain,result:error.GetType().Name+": "+error.Message);
-                    try { store.AddEvent(active.Id, recordingStop.TimestampUtc, recordingStop.Code, error.Message);store.Finish(active.Id, MissionStatus.Interrupted,lastRecordedUtc??active.StartedUtc,"Recording stopped to protect storage: "+error.Message); }
-                    catch(Exception finalization)when(finalization is IOException or UnauthorizedAccessException or Microsoft.Data.Sqlite.SqliteException){ScientificDiagnostics.Record("recording-finalization-error",active.Id.ToString(),"flight",RemoteKind.Terrain,result:finalization.GetType().Name+": "+finalization.Message);}
-                    try{research?.End();}catch(Exception endError)when(endError is IOException or UnauthorizedAccessException or Microsoft.Data.Sqlite.SqliteException){ScientificDiagnostics.Record("science-stop-error",active.Id.ToString(),"flight",RemoteKind.Terrain,result:endError.Message);}
-                    active = null; connection = connection with { Message = error.Message }; return;
+                    samplingAnchor??=frame.TimestampUtc;
+                    slot=(long)Math.Floor(((frame.TimestampUtc-samplingAnchor.Value).TotalMilliseconds+Math.Min(100,samplingIntervalMs*.1))/samplingIntervalMs);
+                    if(slot<=lastSlot)skipped++;
+                    else sample=frame with{Guidance=research?.CurrentGuidance(connection,frame)};
                 }
             }
-            firstRecordedUtc ??= frame.TimestampUtc;
-            lastSlot = slot;
-            lastRecordedUtc = frame.TimestampUtc;
-            lastAircraft = frame.Aircraft;
-            active = active with
+            try
             {
-                Aircraft = active.Aircraft ?? frame.Aircraft,
-                Source = active.Source ?? frame.Source,
-                Departure = active.Departure ?? new(frame.Latitude, frame.Longitude),
-                Arrival = new(frame.Latitude, frame.Longitude),
-                SampleCount = active.SampleCount + 1,
-                MinimumAltitudeFeet = Math.Min(active.MinimumAltitudeFeet ?? frame.AltitudeMslFeet, frame.AltitudeMslFeet),
-                MaximumAltitudeFeet = Math.Max(active.MaximumAltitudeFeet ?? frame.AltitudeMslFeet, frame.AltitudeMslFeet)
-            };
+                if(sample is not null){capacityOkay=false;ensureRecordingCapacity?.Invoke();capacityOkay=true;}
+                var intents=new List<ScienceAcquisitionIntent>();
+                if(collection is not null)
+                {
+                    intents.AddRange(collection.Ingest(sample is null?update:update with{Frame=sample},sample));
+                    if(update.Frame is not null&&update.Atmosphere is not null&&frame?.IsPaused!=true)
+                        intents.AddRange(collection.Ingest(update with{Frame=null,Guidance=null,Environment=null}));
+                    research?.ApplyCollection(collection.State,collection.Session,intents.ToArray());
+                }
+                else if(sample is not null)store.Append(active.Id,sample);
+                if(sample is not null)
+                {
+                    if(lastSlot>=0&&slot>lastSlot+1){missing+=slot-lastSlot-1;store.AddEvent(active.Id,sample.TimestampUtc,"telemetry-gap",$"No committed observation in {slot-lastSlot-1} configured recording intervals.");}
+                    if(lastAircraft is not null&&lastAircraft!=sample.Aircraft)store.AddEvent(active.Id,sample.TimestampUtc,"aircraft-changed",$"Aircraft changed to {sample.Aircraft}.");
+                    firstRecordedUtc??=sample.TimestampUtc;lastRecordedUtc=sample.TimestampUtc;lastSlot=slot;lastAircraft=sample.Aircraft;
+                    active=active with{Aircraft=active.Aircraft??sample.Aircraft,Source=active.Source??sample.Source,
+                        Departure=active.Departure??new(sample.Latitude,sample.Longitude),Arrival=new(sample.Latitude,sample.Longitude),SampleCount=active.SampleCount+1,
+                        MinimumAltitudeFeet=Math.Min(active.MinimumAltitudeFeet??sample.AltitudeMslFeet,sample.AltitudeMslFeet),MaximumAltitudeFeet=Math.Max(active.MaximumAltitudeFeet??sample.AltitudeMslFeet,sample.AltitudeMslFeet)};
+                }
+            }
+            catch(Exception error)when(error is IOException or UnauthorizedAccessException or Microsoft.Data.Sqlite.SqliteException or InvalidOperationException)
+            {
+                collectionFault=true;research?.HoldCollection();
+                // If the independent evidence operation fails but the flight row remains writable,
+                // continue raw recording safely; no unaudited scientific work is dispatched.
+                try
+                {
+                    if(!capacityOkay)System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw(error);
+                    if(sample is not null&&!store.HasTelemetryTime(active.Id,sample.TimestampUtc))store.Append(active.Id,sample);
+                    active=store.Detail(active.Id)!.Mission;
+                    if(sample is not null){lastRecordedUtc=sample.TimestampUtc;lastSlot=slot;firstRecordedUtc??=sample.TimestampUtc;lastAircraft=sample.Aircraft;}
+                    store.AddEvent(active.Id,DateTimeOffset.UtcNow,"collection-storage-hold",error.Message);
+                }
+                catch(Exception fatal)when(fatal is IOException or UnauthorizedAccessException or Microsoft.Data.Sqlite.SqliteException)
+                {
+                    recordingStop=new(fatal is StorageLimitException?"storageLimitReached":"storageUnavailable",fatal.Message,active.Id,DateTimeOffset.UtcNow);
+                    try{store.AddEvent(active.Id,recordingStop.TimestampUtc,recordingStop.Code,fatal.Message);store.Finish(active.Id,MissionStatus.Interrupted,lastRecordedUtc??active.StartedUtc,"Recording storage unavailable.");}catch(Exception e)when(e is IOException or Microsoft.Data.Sqlite.SqliteException){}
+                    research?.End();active=null;
+                }
+                return;
+            }
+            try{if(!collectionFault)research?.Observe(sample is null?update:update with{Frame=sample},frame);}
+            catch(Exception error)when(error is IOException or UnauthorizedAccessException or Microsoft.Data.Sqlite.SqliteException)
+            {ScientificDiagnostics.Record("science-processing-error",active.Id.ToString(),"flight",RemoteKind.Terrain,result:error.Message);}
         }
     }
 
@@ -135,12 +149,19 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
             if (requireFreshTelemetry && (connection.State != ConnectionState.Connected || frame is null
                 || DateTimeOffset.UtcNow - frame.TimestampUtc > TimeSpan.FromSeconds(6) || frame.IsPaused))
                 throw new InvalidOperationException("Live aircraft telemetry is unavailable. Mission History remains accessible.");
-            research?.EnsureCanStart(configurations);
-            var now = DateTimeOffset.UtcNow;
+            if(!request.ArmScience)research?.EnsureCanStart(configurations);
+            var now = Now;
             var id = store.Create(name, frame, now, mode, plan, configurations, request.Objective);
             active = store.Detail(id)!.Mission;
             recordingStop = null;
             research?.Begin(active, store.Research(id));
+            store.InitializeCollectionEvidence(new(1,id,0,CollectionPhase.Armed,CollectionAuthority.Manual));
+            store.AddEvent(id,now,"science-armed","Flight recording active; science awaits an explicit session start.");
+            collection=new(store,id,()=>research?.Configurations??configurations);collectionFault=false;
+            if(research is not null)research.PublicationLease=AcquireSciencePublication;
+            if(!request.ArmScience&&configurations.Any(c=>c.Enabled))
+                collection.Control(new(1,id,Guid.NewGuid(),0,CollectionAction.StartData,null),now);
+            research?.ApplyCollection(collection.State,collection.Session,[]);
             lastRecordedUtc = null;
             firstRecordedUtc = samplingAnchor = null;
             lastSlot = -1; received = skipped = missing = 0;
@@ -156,7 +177,12 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
         {
             if (maintenance) throw new InvalidOperationException("Storage maintenance is in progress.");
             if (research is null) throw new InvalidOperationException("Scientific acquisition is unavailable in this host.");
-            research.Configure(configurations);
+            var next=InstrumentProfiles.Freeze(ScienceCatalog.Normalize(configurations));
+            if(JsonSerializer.Serialize(next,WireJson.Options)==JsonSerializer.Serialize(research.Configurations,WireJson.Options))return;
+            research.EnsureCanStart(next);
+            collection?.ConfigurationChanged(ControlTime,next);
+            try{research.Configure(next);if(collection is not null)research.ApplyCollection(collection.State,collection.Session,[]);}
+            catch{collectionFault=true;research.HoldCollection();throw;}
         }
     }
     public void ConfigureInstrument(string id,bool? enabled,int? intervalMs)
@@ -174,9 +200,49 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
         {
             if (maintenance || active?.Id != id) throw new InvalidOperationException("This mission is not currently recording.");
             if (research is null) throw new InvalidOperationException("Science Collection is unavailable in this host.");
-            research.SetPaused(paused); return research.Snapshot(connection, frame);
+            var state=collection?.State??throw new InvalidOperationException("No collection controller.");
+            ControlScience(new(1,id,Guid.NewGuid(),state.Revision,paused?CollectionAction.PauseData:CollectionAction.ResumeData,state.CurrentSessionId));
+            return research.Snapshot(connection, frame);
         }
     }
+    public object ScienceCollection(Guid id)
+    {
+        lock(gate)return new{state=store.CollectionCheckpoint(id),sessions=store.CollectionSessions(id),fault=active?.Id==id&&collectionFault,
+            capabilities=new[]{"multi-session-1","session-bound-controls-1"}};
+    }
+
+    public CollectionCommitResult ControlScience(CollectionControlRequest request)
+    {
+        lock(gate)
+        {
+            if(store.CollectionControlReceipt(request) is {} previous)return previous;
+            if(maintenance||active?.Id!=request.MissionId||collection is null)throw new InvalidOperationException("This flight is not recording.");
+            if(request.Action==CollectionAction.StartData)research?.EnsureCanStart(research.Configurations);
+            if(request.Action==CollectionAction.RearmAutomation&&collectionFault&&collection.Session is {} retained)
+                research?.Configure(retained.Configurations.GroupBy(c=>c.Settings.InstrumentId).Select(g=>g.OrderByDescending(c=>c.Revision).First().Settings).ToArray());
+            var result=collection.Control(request,ControlTime);
+            if(request.Action==CollectionAction.RearmAutomation&&result.Event.Outcome==CollectionEventOutcome.Applied)collectionFault=false;
+            research?.ApplyCollection(collection.State,collection.Session,[],result.Event.InputUtc);return result;
+        }
+    }
+    private IDisposable AcquireSciencePublication(RemoteAcquisitionRequest request)
+    {
+        Monitor.Enter(gate);
+        try
+        {
+            if(request.SessionId is {} session&&request.IntentId is {} intent)
+            {
+                var state=collection?.State;
+                if(collectionFault||active?.Id!=request.Mission.Id||state?.Phase!=CollectionPhase.Collecting||state.CurrentSessionId!=session
+                    ||store.ScienceIntent(intent) is not {State:"Pending"} saved||saved.Intent.SessionId!=session)
+                    throw new OperationCanceledException("The original session/exposure is no longer eligible for live publication.");
+            }
+            return new SciencePublicationLease(gate);
+        }
+        catch{Monitor.Exit(gate);throw;}
+    }
+    private sealed class SciencePublicationLease(object gate):IDisposable{public void Dispose()=>Monitor.Exit(gate);}
+
     public MissionMarker AddMarker(Guid id, MarkerRequest request)
     {
         lock (gate)
@@ -220,7 +286,7 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
             if (active?.Id != id) throw new InvalidOperationException("This mission is not currently recording.");
             store.Finish(id, MissionStatus.Completed, DateTimeOffset.UtcNow, "Mission completed by operator.");
             research?.End();
-            active = null;
+            collection=null;active = null;
             return store.Detail(id)!.Mission;
         }
     }
@@ -233,7 +299,7 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
             store.Finish(active.Id, MissionStatus.Interrupted, lastRecordedUtc ?? active.StartedUtc,
                 "Engine stopped before the mission was completed.");
             research?.End();
-            active = null;
+            collection=null;active = null;
         }
     }
 }

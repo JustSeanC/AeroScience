@@ -44,7 +44,7 @@ public sealed partial class MissionStore
         foreach (var item in StreamEvents(id))
         {
             if (item.Kind == "science-paused") started ??= item.TimestampUtc;
-            else if (item.Kind is "science-resumed" or "science-stopped" && started is { } at)
+            else if (item.Kind is "science-resumed" or "science-stopped" or "science-session-ended" && started is { } at)
             { intervals.Add(new(at, item.TimestampUtc, Math.Max(0, (item.TimestampUtc - at).TotalSeconds), false)); started = null; }
         }
         if (started is { } open)

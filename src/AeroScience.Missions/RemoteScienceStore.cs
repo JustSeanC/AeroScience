@@ -251,7 +251,7 @@ public sealed partial class ScienceStore
         var data = JsonSerializer.Deserialize<RemoteProductData>(File.ReadAllText(path), WireJson.Options) ?? throw new IOException("Scientific product metadata is invalid.");
         return data with { Product = product };
     }
-    public RemoteProduct Publish(RemoteProductData data, Action? ensureCurrent = null)
+    public RemoteProduct Publish(RemoteProductData data, Action? ensureCurrent = null,Func<IDisposable>? publicationLease=null,Action<RemoteProduct>? acknowledge=null)
     {
         if (disk.FreeBytes(DirectoryPath) < StorageManager.MinimumFreeBytes + 33554432) throw new IOException("Insufficient space for a bounded science product and reserve; nothing was deleted.");
         var target = StorageManager.ResolveDataset(DirectoryPath, LibraryId, data.Product.RelativePath); Directory.CreateDirectory(Path.GetDirectoryName(target)!);
@@ -264,6 +264,8 @@ public sealed partial class ScienceStore
         {
         using (var output = new FileStream(temporary, FileMode.CreateNew, FileAccess.Write, FileShare.None)) { output.Write(bytes); output.Flush(true); }
         var product = data.Product with { Bytes = bytes.Length, Sha256 = Digest(temporary) };
+        using(var eligibility=publicationLease?.Invoke())
+        {
         lock (gate)
         {
             using var db = Open(write: true); using var tx = db.BeginTransaction(); using var cmd = db.CreateCommand(); cmd.Transaction = tx;
@@ -272,6 +274,8 @@ public sealed partial class ScienceStore
             cmd.Parameters.AddWithValue("$id", product.Id.ToString()); cmd.Parameters.AddWithValue("$dataset", product.DatasetId.ToString()); cmd.Parameters.AddWithValue("$mission", product.MissionId.ToString()); cmd.Parameters.AddWithValue("$instrument", product.InstrumentId);
             cmd.Parameters.AddWithValue("$utc", product.FlightPacketUtc.ToString("O", CultureInfo.InvariantCulture)); cmd.Parameters.AddWithValue("$json", JsonSerializer.Serialize(product, WireJson.Options)); cmd.ExecuteNonQuery();
             File.Move(temporary, target); tx.Commit();
+        }
+        acknowledge?.Invoke(product);
         }
         Management?.AddedScienceFile(bytes.Length, product: true);
         File.Delete(ledger);

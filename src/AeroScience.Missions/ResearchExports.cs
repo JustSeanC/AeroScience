@@ -57,9 +57,9 @@ public static class ResearchExports
         {
             var science = store.ScienceLibrary ?? throw new InvalidOperationException("Science Library is not configured in this host.");
             if (science.AvailabilityError() is { } error) throw new InvalidOperationException(error);
-            await Line("mission_id", "dataset_id", "instrument_id", "timestamp_utc", "measurement", "value", "unit", "provenance", "source", "quality", "latitude_deg_n", "longitude_deg_e", "altitude_msl_ft", "position_timestamp_utc");
+            await Line("mission_id", "dataset_id", "instrument_id", "timestamp_utc", "measurement", "value", "unit", "provenance", "source", "quality", "latitude_deg_n", "longitude_deg_e", "altitude_msl_ft", "position_timestamp_utc", "science_session_id", "acquisition_intent_id");
             foreach (var item in science.StreamObservations(id))
-                await Line(Q(item.MissionId.ToString()), Q(item.DatasetId.ToString()), Q(item.InstrumentId), Q(item.TimestampUtc.ToString("O")), Q(item.MeasurementId), N(item.Value), Q(item.Unit), Q(item.Provenance.ToString()), Q(item.Source), Q(item.Quality.ToString()), N(item.Latitude), N(item.Longitude), N(item.AltitudeMslFeet), Q(item.PositionTimestampUtc?.ToString("O")));
+                await Line(Q(item.MissionId.ToString()), Q(item.DatasetId.ToString()), Q(item.InstrumentId), Q(item.TimestampUtc.ToString("O")), Q(item.MeasurementId), N(item.Value), Q(item.Unit), Q(item.Provenance.ToString()), Q(item.Source), Q(item.Quality.ToString()), N(item.Latitude), N(item.Longitude), N(item.AltitudeMslFeet), Q(item.PositionTimestampUtc?.ToString("O")),Q(item.SessionId?.ToString()),Q(item.IntentId?.ToString()));
         }
         else if (kind == "events")
         {

@@ -18,8 +18,8 @@ public sealed partial class MissionStore
         using var db=Open();using var cmd=db.CreateCommand();cmd.CommandText="SELECT timestamp_utc,message FROM events WHERE mission_id=$id AND timestamp_utc<=$utc AND kind IN ('payload-snapshot','instruments-configured') ORDER BY timestamp_utc DESC,id DESC LIMIT 1";
         cmd.Parameters.AddWithValue("$id",mission.ToString());cmd.Parameters.AddWithValue("$utc",at.ToUniversalTime().ToString("O"));InstrumentConfiguration[]? configurations=null;DateTimeOffset? observed=null;
         using(var reader=cmd.ExecuteReader())if(reader.Read()){observed=Parse(reader.GetString(0));configurations=JsonSerializer.Deserialize<InstrumentConfiguration[]>(reader.GetString(1),WireJson.Options);}
-        cmd.CommandText="SELECT kind FROM events WHERE mission_id=$id AND timestamp_utc<=$utc AND kind IN ('science-paused','science-resumed','science-stopped') ORDER BY timestamp_utc DESC,id DESC LIMIT 1";
-        var state=cmd.ExecuteScalar() as string;return new(configurations,observed,state=="science-paused"?"Paused":state=="science-stopped"?"Stopped":configurations is null?"Not archived":configurations.Any(c=>c.Enabled)?"Enabled instruments active":"No instruments enabled",
+        cmd.CommandText="SELECT kind FROM events WHERE mission_id=$id AND timestamp_utc<=$utc AND kind IN ('science-paused','science-resumed','science-stopped','science-session-started','science-session-ended','science-armed') ORDER BY timestamp_utc DESC,id DESC LIMIT 1";
+        var state=cmd.ExecuteScalar() as string;return new(configurations,observed,state=="science-paused"?"Paused":state is "science-stopped" or "science-session-ended" or "science-armed"?"Stopped":configurations is null?"Not archived":configurations.Any(c=>c.Enabled)?"Enabled instruments active":"No instruments enabled",
             "Actual last archived configuration and collection event at or before this replay time. Legacy missions without an initial snapshot do not inherit their final configuration backwards in time.");
     }
     public ReplayPage Replay(Guid mission,long after=0,DateTimeOffset? at=null,int limit=200)

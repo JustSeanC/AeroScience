@@ -21,6 +21,22 @@ public sealed record CollectionCommitResult(bool Applied, CollectionState Result
 
 public sealed partial class MissionStore
 {
+    public CollectionCommitResult? CollectionControlReceipt(CollectionControlRequest request)
+    {
+        EvidenceContracts.Validate(request);
+        using var db=Open();using var tx=db.BeginTransaction();
+        var receipt=EvidenceReceipt(db,tx,request.MissionId,CollectionReceiptKind.Request,request.RequestId);
+        if(receipt is null)return null;
+        EvidenceRequire(receipt.Value.Hash==EvidenceContracts.ContentHash(request),"Request ID reused for another command.");
+        var result=JsonSerializer.Deserialize<CollectionCommitResult>(receipt.Value.Json,WireJson.Options)!;
+        return result with{Applied=false,CurrentState=EvidenceState(db,tx,request.MissionId)!};
+    }
+    public StoredScienceIntent? ScienceIntent(Guid id)
+    {
+        using var db=Open();using var cmd=db.CreateCommand();cmd.CommandText="SELECT payload_json,state,product_id,product_sha256 FROM science_intents WHERE id=$id";
+        cmd.Parameters.AddWithValue("$id",id.ToString());using var row=cmd.ExecuteReader();
+        return row.Read()?new(JsonSerializer.Deserialize<ScienceAcquisitionIntent>(row.GetString(0),WireJson.Options)!,row.GetString(1),row.IsDBNull(2)?null:Guid.Parse(row.GetString(2)),row.IsDBNull(3)?null:row.GetString(3)):null;
+    }
     public CollectionState? CollectionCheckpoint(Guid missionId)
     {
         using var db = Open(); return EvidenceState(db, null, missionId);
@@ -221,6 +237,17 @@ public sealed partial class MissionStore
         cmd.CommandText = "INSERT INTO collection_receipts VALUES($mission,$kind,$id,$hash,$result)";
         cmd.Parameters.AddWithValue("$kind", identity.Kind.ToString()); cmd.Parameters.AddWithValue("$id", identity.Id.ToString()); cmd.Parameters.AddWithValue("$hash", identity.Hash);
         cmd.Parameters.AddWithValue("$result", JsonSerializer.Serialize(result, WireJson.Options)); cmd.ExecuteNonQuery();
+        if(transition.Outcome==CollectionEventOutcome.Applied)
+        {
+            if(current.Phase==CollectionPhase.Collecting&&commit.State.Phase==CollectionPhase.Paused)
+                Event(db,tx,mission,transition.InputUtc,"science-paused",transition.Reason);
+            if(current.Phase==CollectionPhase.Paused&&commit.State.Phase==CollectionPhase.Collecting)
+                Event(db,tx,mission,transition.InputUtc,"science-resumed",transition.Reason);
+            if(commit.State.Phase==CollectionPhase.BetweenSessions&&current.CurrentSessionId is not null)
+                Event(db,tx,mission,transition.InputUtc,"science-session-ended",transition.Reason);
+            if(transition.Action==CollectionAction.StartData)
+                Event(db,tx,mission,transition.InputUtc,"science-session-started",transition.Reason);
+        }
         EvidenceFault?.Invoke("before-commit"); tx.Commit(); EvidenceFault?.Invoke("after-commit"); return result;
     }
 

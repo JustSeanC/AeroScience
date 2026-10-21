@@ -304,6 +304,7 @@ $("start-form").addEventListener("submit", (event) => {
       name: $("mission-name").value,
       mode: $("mission-mode").value,
       planId: $("selected-plan")?.value || null,
+      armScience: $("arm-science")?.checked || false,
     });
     $("mission-name").value = "";
     $("mission-mode").value = "universal";

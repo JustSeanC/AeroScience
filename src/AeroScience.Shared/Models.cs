@@ -48,7 +48,7 @@ public sealed record EngineSnapshot(ConnectionInfo Connection, TelemetryFrame? T
 public sealed record RecordingStopInfo(string Code, string Message, Guid MissionId, DateTimeOffset TimestampUtc);
 public sealed record MapLayerState(string Revision, bool OnlineEnabled, string Layer);
 public sealed record StartMissionRequest(string Name, ScienceMode Mode = ScienceMode.Universal,
-    Guid? PlanId = null, InstrumentConfiguration[]? Instruments = null, string? Objective = null);
+    Guid? PlanId = null, InstrumentConfiguration[]? Instruments = null, string? Objective = null, bool ArmScience = false);
 public sealed record InstrumentMissionContext(Guid MissionId, ScienceMode Mode);
 public sealed record DatasetReference(Guid DatasetId, Guid LibraryId, string RelativePath, string MetadataJson,
     bool Available = true);

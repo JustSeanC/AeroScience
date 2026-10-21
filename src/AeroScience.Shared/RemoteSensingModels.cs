@@ -17,12 +17,16 @@ public sealed record SensorMount(double HorizontalFovDegrees = 20, double Vertic
 public sealed record ObservationFootprint(Coordinates Center, Coordinates[] Boundary, double HeightAbovePlaneMetres,
     string HorizontalCrs, string VerticalReference, string Method, string[] Limitations);
 public sealed record RemoteAcquisitionRequest(Mission Mission, MissionResearch Research, InstrumentConfiguration Configuration,
-    TelemetryFrame Frame, long Generation, AtmosphericFrame? Atmosphere = null);
+    TelemetryFrame Frame, long Generation, AtmosphericFrame? Atmosphere = null,
+    [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] Guid? SessionId = null,
+    [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] Guid? IntentId = null);
 public sealed record RemoteProduct(Guid Id, Guid DatasetId, Guid LibraryId, Guid MissionId, string InstrumentId, Guid SourceId,
     DateTimeOffset FlightPacketUtc, DateTimeOffset ProcessedUtc, DateTimeOffset? SourceObservationUtc,
     ObservationFootprint Footprint, string RelativePath, long Bytes, string Sha256, int Width, int Height,
     string[] AvailableViews, string Provenance, string Quality, string[] Warnings,
-    ScienceProvenance SourceClass = ScienceProvenance.ExternalDataset,long? ValidSampleCount=null,RemoteBandStatistics[]? Statistics=null);
+    ScienceProvenance SourceClass = ScienceProvenance.ExternalDataset,long? ValidSampleCount=null,RemoteBandStatistics[]? Statistics=null,
+    [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] Guid? SessionId=null,
+    [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] Guid? IntentId=null);
 public sealed record RemoteBandStatistics(string Id,string Unit,long Count,double Minimum,double Maximum,double Mean);
 public sealed record RemoteBandValues(string Id, string Unit, double? WavelengthNm, double?[] Values,
     string SamplingMethod, RasterGrid OriginalGrid);

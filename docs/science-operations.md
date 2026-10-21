@@ -71,3 +71,27 @@ a new backup is the default and opens no backup picker. Requested backup cancell
 cancels the entire operation. Both typed phrases, final warnings, active-recording guards,
 transactions and existing backup preservation remain mandatory. Use disposable copies
 for acceptance testing, never the only research archive.
+
+## Scientific collection sessions (v0.5.0 development)
+
+Flight recording and science collection have separate lifecycles. On Mission Control,
+choose **Arm science without starting collection** to record the departure/transit
+without taking scientific samples. On Science Collection use **Start new science
+session**, **Pause data**, **Resume data**, and **End current science session**. Pausing
+keeps the same session; ending preserves it and allows a subsequent new session. Use
+**End mission** separately to finish the flight. No permanent flight-wide Finish Science
+action is provided.
+
+Manual collection commands take authority over automation. Explicit **Rearm automatic
+collection** permits future configured actions; it does not start/resume a session or
+replay missed actions. Commands are bound to the displayed flight and session. A changed
+session requires synchronization and a new deliberate command; an old End cannot close a
+new session. A storage hold requires resolving storage and explicit rearm. Flight recording
+continues independently while its database remains writable.
+
+History's **Science sessions and retained measurements** lists stable session identities,
+start/end information and retained original/derived values and remote product counts.
+These counts are not scientific accuracy, a valid-pixel coverage calculation or a grade.
+JSON and scientific CSV exports retain session/acquisition identities; older archives
+remain unsegmented rather than acquiring invented sessions. Restart interrupts the open
+session and never resumes flight recording or collection automatically.

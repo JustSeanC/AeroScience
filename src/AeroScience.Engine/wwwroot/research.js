@@ -1,3 +1,4 @@
+import { initializeScienceSessions } from "./science-sessions.js";
 import {reviewPreflight} from "./download-activity.js";
 import { hyperspectralCard } from "./hyperspectral-import.js";
 import { areaSummary } from "./planner-geometry.js";
@@ -740,6 +741,7 @@ async function instruments() {
   const collection = text("div");
   collection.id = "collection-status";
   p.append(collection);
+  initializeScienceSessions(ctx,collection);
   const presets = text("details");
   presets.append(text("summary", "Reusable instrument presets"));
   p.append(presets);
@@ -1031,8 +1033,7 @@ export function renderResearch(next) {
         `Science collection: ${next.research?.collectionStatus || "stopped"}`,
       ),
     );
-    if (next.activeMission)
-      collection.append(
+    collection.append(
         button(
           next.research?.intentionallyPaused
             ? "Resume science collection"
@@ -1190,6 +1191,14 @@ function showScience(parent, rows, label) {
   raw.append(list);
 }
 export async function researchDetail(body, id, mission) {
+  const sessions=text('details');sessions.append(text('summary','Science sessions and retained measurements'));body.append(sessions);
+  sessions.addEventListener('toggle',async()=>{if(!sessions.open||sessions.dataset.loaded)return;sessions.dataset.loaded='true';
+    try{const [record,counts]=await Promise.all([ctx.api(`/api/missions/${id}/collection`),ctx.api(`/api/missions/${id}/collection/counts`)]);
+      if(!record.state){sessions.append(text('p','Legacy archive: no science sessions were recorded or inferred.'));return;}
+      for(const session of record.sessions){const count=counts.find(c=>c.sessionId===session.id);sessions.append(text('p',`Session ${session.sequence} · ${session.id} · ${session.status} · ${session.startedUtc} → ${session.endedUtc||'unknown end time'} · ${count?.originalAtmosphericValues||0} original values · ${count?.derivedAtmosphericValues||0} derived values · ${count?.remoteProducts||0} remote products`));}
+      sessions.append(text('p','Retained counts do not establish measurement accuracy, valid survey coverage or a grade.'));
+    }catch(e){sessions.append(text('p','Session evidence / Scientific Library unavailable: '+e.message));}
+  });
   const operating=document.createElement('section');body.append(operating);await operatingAssessments(operating,ctx.api,id);
   await initializeUnits(ctx.api);
   const review = await ctx.api(`/api/missions/${id}/review`);
