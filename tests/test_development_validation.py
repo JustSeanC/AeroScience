@@ -66,3 +66,12 @@ class DevelopmentValidationTests(unittest.TestCase):
         self.assertIn('verify_scientific_acceptance.py', release)
         self.assertIn('smoke_evidence_recovery.py', release)
         self.assertIn('npm run test:web', release)
+
+    def test_each_windows_recovery_failure_is_checked_before_the_next_native_command(self):
+        workflow = (ROOT/'.github/workflows/ci.yml').read_text(encoding='utf-8')
+        windows = workflow.split('  windows-companion:', 1)[1]
+        lines = [line.strip() for line in windows.splitlines() if line.strip()]
+        for probe in ('smoke_recovery.py', 'smoke_evidence_recovery.py', 'smoke_library_recovery.py'):
+            index = next(i for i, line in enumerate(lines) if line.startswith('python scripts/build/'+probe))
+            self.assertTrue(lines[index+1].startswith('if ($LASTEXITCODE -ne 0)'), probe)
+            self.assertIn('throw ', lines[index+1], probe)
