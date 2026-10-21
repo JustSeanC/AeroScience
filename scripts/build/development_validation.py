@@ -14,7 +14,7 @@ PORTABLE_ONLY = {'test_airport_search', 'test_toolbar_sources'}
 
 def validation_tier(event, ref, base='', requested='full', message=''):
     if event == 'workflow_dispatch':
-        if requested not in {'fast', 'full'}:
+        if requested not in {'fast', 'full', 'windows-profile'}:
             raise ValueError('Unknown validation tier; refusing an empty validation run.')
         return requested if ref == 'refs/heads/develop/v0.5.0' else 'full'
     development = ref == 'refs/heads/develop/v0.5.0' or base == 'develop/v0.5.0'

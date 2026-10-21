@@ -37,10 +37,7 @@ try {
     $gatePassed = $LASTEXITCODE -eq 0
     & "$repo/scripts/build/Build-Companion.ps1"
     # Separate intermediates prevent profile metadata leaking into production.
-    dotnet publish src/AeroScience.Desktop -c Release -r win-x64 --self-contained true --artifacts-path (Join-Path $output 'intermediate') -p:AeroScienceValidation=true -p:RestoreLockedMode=true -o $app
-    if ($LASTEXITCODE -ne 0) { throw 'Private validation publish failed.' }
-    python scripts/build/verify_desktop_branding.py --folder $app
-    if ($LASTEXITCODE -ne 0) { throw 'Published Windows icon resources failed.' }
+    & "$repo/scripts/build/Publish-ValidationCompanion.ps1" -ArtifactsPath (Join-Path $output 'intermediate') -OutputDirectory $app
     Get-ChildItem $app -Filter *.pdb -File -Recurse | Remove-Item
     & "$repo/scripts/build/Build-Toolbar.ps1" -SdkRoot $SdkRoot -ValidationProfile
     $packages = @(Get-ChildItem "$repo/artifacts/toolbar-validation/output" -Filter manifest.json -Recurse | Where-Object { $_.Directory.Name -eq 'aeroscience-validation-toolbar' })

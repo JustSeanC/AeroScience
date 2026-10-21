@@ -27,6 +27,16 @@ class DevelopmentValidationTests(unittest.TestCase):
             self.assertIn(name, selected['dotnetFilter'])
         self.assertIn('not full integration', selected['scope'])
 
+    def test_windows_profile_diagnostic_is_manual_development_only(self):
+        self.assertEqual('windows-profile', ci.validation_tier('workflow_dispatch', 'refs/heads/develop/v0.5.0', requested='windows-profile'))
+        for ref in ('refs/heads/main', 'refs/tags/v0.5.0'):
+            self.assertEqual('full', ci.validation_tier('workflow_dispatch', ref, requested='windows-profile'))
+        self.assertEqual('fast', ci.validation_tier('push', 'refs/heads/develop/v0.5.0', requested='windows-profile'))
+        workflow = (ROOT/'.github/workflows/ci.yml').read_text(encoding='utf-8')
+        self.assertIn("if: needs.validation-scope.outputs.tier == 'windows-profile'", workflow)
+        self.assertEqual(2, workflow.count("if: needs.validation-scope.outputs.tier == 'full'"))
+        self.assertEqual(2, workflow.count('./scripts/build/Publish-ValidationCompanion.ps1 -ArtifactsPath artifacts/validation-probe'))
+
     def test_changed_tests_and_browser_specs_are_never_omitted(self):
         selected = ci.plan(['tests/AeroScience.Tests/RemoteSensingTests.cs', 'tests/web/new-feature.spec.js', 'tests/test_packaging.py'])
         self.assertIn('RemoteSensingTests', selected['dotnetFilter'])

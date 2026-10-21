@@ -57,6 +57,21 @@ the same source already has the required full result.
 
 ## Failure handling
 
+For a validation-profile publishing change, a manual diagnostic run can check actual
+Windows isolation/protocol tests, production and isolated `win-x64` publishing, icons
+and unchanged dependency locks before the full milestone run:
+
+```text
+gh workflow run ci.yml --ref develop/v0.5.0 -f validation=windows-profile
+```
+
+This development-only diagnostic does not replace either validation tier or a full
+milestone pass. Other branches still require full validation. Both the private build
+and full Windows CI use `Publish-ValidationCompanion.ps1`: locked solution restore
+without a global RID into isolated profile intermediates, then profile probe/publish
+with `--no-restore`. This preserves runtime-neutral project locks, separate compiled
+identities and the existing production companion restore/publish approach.
+
 Windows full CI places temporary fixtures on the runner's dedicated scratch volume
 (`RUNNER_TEMP/aeroscience-test-storage`) and logs a small, explicitly flushed write probe
 for both the default system temp and selected scratch. SQLite FULL durability, scientific

@@ -7,7 +7,7 @@ on:
         required: true
         default: full
         type: choice
-        options: [fast, full]
+        options: [fast, full, windows-profile]
   push:
     paths-ignore:
       - 'docs/roadmap/**'
@@ -75,6 +75,45 @@ jobs:
             tests/AeroScience.Tests/TestResults/**/Sequence_*.xml
           if-no-files-found: ignore
           retention-days: 7
+  windows-profile:
+    needs: validation-scope
+    if: needs.validation-scope.outputs.tier == 'windows-profile'
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+      - name: Test profile isolation and existing Windows wire compatibility
+        shell: pwsh
+        run: |
+          dotnet restore AeroScience.sln --locked-mode
+          if ($LASTEXITCODE -ne 0) { throw 'Locked dependency restore failed.' }
+          dotnet test tests/AeroScience.Tests -c Release --no-restore --filter 'FullyQualifiedName~ValidationIsolationTests|FullyQualifiedName~ModeAndToolbarTests' --logger 'trx;LogFileName=windows-profile.trx' --blame-hang-timeout 2m --blame-hang-dump-type none
+          if ($LASTEXITCODE -ne 0) { throw 'Windows isolation/protocol tests failed.' }
+      - name: Publish production and isolated validation graphs (not distributable)
+        shell: pwsh
+        run: |
+          dotnet publish src/AeroScience.Desktop -c Release -r win-x64 --self-contained true --no-restore -o artifacts/Windows-Companion
+          if ($LASTEXITCODE -ne 0) { throw 'Production Windows compilation failed.' }
+          python scripts/build/verify_desktop_branding.py --folder artifacts/Windows-Companion
+          if ($LASTEXITCODE -ne 0) { throw 'Production Windows icon resources failed verification.' }
+          ./scripts/build/Publish-ValidationCompanion.ps1 -ArtifactsPath artifacts/validation-probe -OutputDirectory artifacts/Windows-Validation-Structural
+      - name: Verify dependency locks remain unchanged
+        if: always()
+        shell: pwsh
+        run: |
+          git diff --exit-code -- '**/packages.lock.json'
+          if ($LASTEXITCODE -ne 0) { throw 'Publishing modified committed dependency locks.' }
+      - name: Retain focused Windows diagnostics
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: windows-profile-diagnostics
+          path: tests/AeroScience.Tests/TestResults/**/*.trx
+          if-no-files-found: ignore
+          retention-days: 7
+      # Manual diagnostic scope only; never substitutes for either full platform job.
   linux:
     needs: validation-scope
     if: needs.validation-scope.outputs.tier == 'full'
@@ -165,11 +204,13 @@ jobs:
         run: ./scripts/build/Build-Companion.ps1
       - name: Compile isolated validation identity and Windows application (not distributable)
         shell: pwsh
+        run: ./scripts/build/Publish-ValidationCompanion.ps1 -ArtifactsPath artifacts/validation-probe -OutputDirectory artifacts/Windows-Validation-Structural
+      - name: Verify dependency locks remain unchanged
+        if: always()
+        shell: pwsh
         run: |
-          dotnet run --project tests/AeroScience.TestHost -c Release --artifacts-path artifacts/validation-probe -p:AeroScienceValidation=true -p:RestoreLockedMode=true -- --profile-probe
-          if ($LASTEXITCODE -ne 0) { throw 'Compiled validation profile isolation failed.' }
-          dotnet publish src/AeroScience.Desktop -c Release -r win-x64 --self-contained true --artifacts-path artifacts/validation-probe -p:AeroScienceValidation=true -p:RestoreLockedMode=true -o artifacts/Windows-Validation-Structural
-          if ($LASTEXITCODE -ne 0) { throw 'Validation-profile Windows compilation failed.' }
+          git diff --exit-code -- '**/packages.lock.json'
+          if ($LASTEXITCODE -ne 0) { throw 'Publishing modified committed dependency locks.' }
       - name: Retain Windows test diagnostics
         if: always()
         uses: actions/upload-artifact@v7

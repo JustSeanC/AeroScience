@@ -1,11 +1,13 @@
 """Isolation/packaging fixtures only; no SDK or installed Windows acceptance."""
 import importlib.util
 import json
+import os
 from pathlib import Path
 import shutil
 import sys
 import tempfile
 import unittest
+import subprocess
 import test_packaging as fixtures
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -64,7 +66,8 @@ class PrivateValidationTests(unittest.TestCase):
 
     def test_build_does_not_install_publish_or_relax_public_finalization(self):
         script=(ROOT/'scripts/release/Build-PrivateValidation.ps1').read_text()
-        self.assertIn('-p:AeroScienceValidation=true',script);self.assertIn('--artifacts-path',script)
+        self.assertIn('Publish-ValidationCompanion.ps1',script)
+        self.assertIn("-ArtifactsPath (Join-Path $output 'intermediate') -OutputDirectory $app",script)
         self.assertIn('validate_runtime',script);self.assertIn('-ValidationProfile',script)
         self.assertNotIn('New-Release.ps1',script);self.assertNotIn('Complete-ReleaseAcceptance',script)
         self.assertNotIn('Set-ItemProperty',script);self.assertNotIn('AeroScience.iss',script)
@@ -72,3 +75,60 @@ class PrivateValidationTests(unittest.TestCase):
         self.assertIn('AppId={{BE9647D4-6501-48F2-BB5E-AEFAEC0F4542}',production)
         self.assertIn(r'DefaultDirName={localappdata}\Programs\AeroScience',production)
         self.assertNotIn('Validation',production)
+
+    @unittest.skipUnless(shutil.which('pwsh'), 'PowerShell is required to exercise the publish command sequence')
+    def test_validation_publish_restores_locked_graph_without_global_rid_then_never_restores_again(self):
+        result, commands = self.publish_commands()
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+        self.assertEqual(['restore', 'run', 'publish'], [c['argv'][0] for c in commands[:3]])
+        restore, probe, publish = [c['argv'] for c in commands[:3]]
+        self.assertEqual('AeroScience.sln', restore[1])
+        self.assertIn('--locked-mode', restore)
+        self.assertNotIn('-r', restore)
+        self.assertFalse(any('RuntimeIdentifier' in a for a in restore))
+        for args in (restore, probe, publish):
+            self.assertIn('-p:AeroScienceValidation=true', args)
+            self.assertEqual('isolated artifacts', args[args.index('--artifacts-path') + 1])
+            self.assertFalse(any('force-evaluate' in a or 'LockedMode=false' in a for a in args))
+        for args in (probe, publish):
+            self.assertIn('--no-restore', args)
+        self.assertEqual('win-x64', publish[publish.index('-r') + 1])
+        self.assertEqual('true', publish[publish.index('--self-contained') + 1])
+        self.assertIn('--profile-probe', probe)
+        self.assertEqual(['scripts/build/verify_desktop_branding.py', '--folder', 'validation output'], commands[3]['argv'])
+
+    @unittest.skipUnless(shutil.which('pwsh'), 'PowerShell is required to exercise publish failure propagation')
+    def test_failed_restore_probe_or_publish_stops_before_following_commands(self):
+        for failure, count in (('restore', 1), ('run', 2), ('publish', 3)):
+            with self.subTest(failure=failure):
+                result, commands = self.publish_commands(failure)
+                self.assertNotEqual(0, result.returncode)
+                self.assertEqual(count, len(commands))
+
+    def publish_commands(self, failure=''):
+        # Execute the production PowerShell script with recording native-command
+        # substitutes. This checks argument boundaries/ordering/error handling;
+        # hosted Windows separately executes real restore, probe and PE publishing.
+        with tempfile.TemporaryDirectory() as tmp:
+            log = Path(tmp)/'commands.json'
+            environment = dict(os.environ, VALIDATION_TEST_ROOT=str(ROOT), VALIDATION_TEST_LOG=str(log), VALIDATION_FAIL_COMMAND=failure)
+            driver = r'''
+$global:commands = [Collections.Generic.List[object]]::new()
+function global:dotnet {
+    $global:commands.Add(@{tool='dotnet'; argv=@($args)})
+    $global:LASTEXITCODE=0
+    if ($args[0] -eq $env:VALIDATION_FAIL_COMMAND) { $global:LASTEXITCODE=23 }
+}
+function global:python {
+    $global:commands.Add(@{tool='python'; argv=@($args)})
+    $global:LASTEXITCODE=0
+}
+try {
+    & (Join-Path $env:VALIDATION_TEST_ROOT 'scripts/build/Publish-ValidationCompanion.ps1') -ArtifactsPath 'isolated artifacts' -OutputDirectory 'validation output'
+    $code=0
+} catch { $code=1 }
+ConvertTo-Json -InputObject @($global:commands) -Depth 8 | Set-Content -LiteralPath $env:VALIDATION_TEST_LOG -Encoding utf8
+exit $code
+'''
+            result = subprocess.run(['pwsh', '-NoProfile', '-Command', driver], cwd=ROOT, env=environment, capture_output=True, text=True, timeout=30)
+            return result, json.loads(log.read_text(encoding='utf-8-sig'))
