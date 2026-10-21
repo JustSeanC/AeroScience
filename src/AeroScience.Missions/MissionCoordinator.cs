@@ -85,7 +85,9 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
                 if(collection is not null&&!collectionFault)
                 {
                     geographicCollection?.Observe(update,Now);
-                    intents.AddRange(collection.Ingest(sample is null?update:update with{Frame=sample},sample));
+                    var eligible=sample is null?update:update with{Frame=sample};
+                    if(eligible.Frame is null&&frame?.IsPaused==true)eligible=eligible with{Atmosphere=null};
+                    intents.AddRange(collection.Ingest(eligible,sample));
                     if(update.Frame is not null&&update.Atmosphere is not null&&frame?.IsPaused!=true)
                         intents.AddRange(collection.Ingest(update with{Frame=null,Guidance=null,Environment=null}));
                     research?.ApplyCollection(collection.State,collection.Session,intents.ToArray());

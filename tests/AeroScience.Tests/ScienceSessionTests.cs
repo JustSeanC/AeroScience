@@ -86,5 +86,14 @@ public sealed class ScienceSessionTests:IDisposable
         store.EvidenceFault=null;Observe(1);Assert.Null(coordinator.Snapshot().ActiveMission);Assert.Empty(science.Datasets());
         Assert.Equal(MissionStatus.Interrupted,store.List(10,0).Single().Status);
     }
+    [Fact] public void IndependentAtmosphereCannotCreateAnExposureWhileSimulatorPositionIsPaused()
+    {
+        var flight=Start();Do(flight.Id,CollectionAction.StartData);clock=clock.AddSeconds(1);
+        var frame=SimulatedTelemetryProvider.Generate(clock,0) with{IsPaused=true};
+        var connection=new ConnectionInfo(ConnectionState.Connected,TelemetrySource.Simulated,"Synthetic paused packet",clock);
+        coordinator.Apply(new(connection,frame));clock=clock.AddSeconds(1);
+        coordinator.Apply(new(connection,null,new(clock,20,29,5,90,.002)));
+        Assert.Empty(store.ScienceIntents(flight.Id));Assert.Empty(science.StreamObservations(flight.Id));
+    }
     public void Dispose(){coordinator.Interrupt();research.Dispose();science.Dispose();Directory.Delete(root,true);}
 }

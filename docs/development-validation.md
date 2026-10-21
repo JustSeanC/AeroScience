@@ -84,3 +84,10 @@ whole browser family. The targeted tier still avoids the Windows/full integratio
 its reported scope may grow when a dependency is shared. Preserve Playwright JSON and
 failure screenshots/context alongside TRX/sequence diagnostics so failures can be diagnosed
 without immediately rerunning them.
+
+The browser suite uses one authenticated seed session per local test-server run, saved
+only in ignored `artifacts/browser-auth.json` and removed at teardown. Each browser/API
+context still has isolated state and still performs the normal session/CSRF flow. This
+prevents discarded test contexts from exhausting the unchanged production 128-session
+limit during a complete suite. Do not upload the seed file or relax authentication to make
+UI tests pass. Configuration/shared browser fixture changes select the full browser family.

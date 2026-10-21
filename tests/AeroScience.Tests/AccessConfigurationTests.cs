@@ -13,6 +13,16 @@ public sealed class AccessConfigurationTests
         new EngineOptions { EnableLan = true, LanAddress = address }.Validate());
 
     [Fact]
+    public void PairingCapacityRemainsBoundedAndExistingSessionsRemainUsable()
+    {
+        var access=new AccessControl();var original=access.Pair(true,null)!;
+        for(var i=1;i<128;i++)Assert.NotNull(access.Pair(true,null));
+        Assert.Null(access.Pair(true,null));
+        var context=new Microsoft.AspNetCore.Http.DefaultHttpContext();
+        context.Request.Headers.Cookie=AccessControl.CookieName+"="+original.Token;
+        Assert.Equal(original,access.Get(context.Request));
+    }
+    [Fact]
     public void RemotePairingRequiresCodeExpiresAcrossRestartAndLimitsAttempts()
     {
         var access = new AccessControl(); Assert.Null(access.Pair(false, "WRONG")); Assert.Null(access.Pair(false, null));

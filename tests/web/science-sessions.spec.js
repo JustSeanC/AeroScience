@@ -31,3 +31,9 @@ test('Planner configures and preserves bounded collection actions without JSON e
  const saved=await(await request.get('/api/plans/'+id)).json();expect(saved.collection.initialPolicy).toBe('armed');expect(saved.collection.triggers).toHaveLength(2);expect(saved.collection.triggers[1].targetId).toBe(b);expect(saved.collection.surveyAreas[0].geometrySha256).toHaveLength(64);
  await page.reload({waitUntil:'domcontentloaded'});await page.locator('.plan-row').filter({hasText:'Automation GUI fixture'}).getByRole('button',{name:'Edit',exact:true}).click();await page.locator('#collection-planner summary').click();await expect(page.locator('#collection-planner')).toContainText(saved.collection.triggers[0].targetId);
 });
+test('a rejected session start leaves flight recording active and explains missing instruments',async({page,request})=>{
+ await post(request,'/api/instruments',[]);await post(request,'/api/mission-selection',{planId:null});
+ const flight=await post(request,'/api/missions',{name:'Synthetic no-instrument start',armScience:true});await page.goto('/#science');const panel=page.locator('#science-sessions');
+ await panel.getByRole('button',{name:'Start new science session',exact:true}).click();await expect(panel.getByRole('status')).toContainText('enabled instrument');
+ expect((await(await request.get(`/api/missions/${flight.id}/collection`)).json()).sessions).toHaveLength(0);expect((await(await request.get('/api/state')).json()).activeMission.id).toBe(flight.id);
+});

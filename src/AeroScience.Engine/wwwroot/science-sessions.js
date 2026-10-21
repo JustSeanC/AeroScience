@@ -1,7 +1,7 @@
 // Session-bound commands deliberately retain the state visible at click time. A stale
 // End must conflict, never be silently retried against a newer session.
 export function initializeScienceSessions({api},parent) {
-  let busy=false, flight=null;
+  let busy=false, flight=null, message="";
   const live=document.createElement('article');live.className='panel research-panel';live.id='science-sessions';
   parent.after(live);
   const element=(tag,value)=>{const n=document.createElement(tag);n.textContent=value;return n;};
@@ -20,13 +20,14 @@ export function initializeScienceSessions({api},parent) {
           try{for(let attempt=0;attempt<2;attempt++){
             const fresh=(await api(`/api/missions/${flight}/collection`)).state;
             if(fresh.currentSessionId!==state.currentSessionId||fresh.phase!==state.phase||fresh.authority!==state.authority||fresh.manualAutomationHold!==state.manualAutomationHold||fresh.continuityHold!==state.continuityHold)throw new Error("Science session or authority changed; no command was applied.");
-            try{await api(`/api/missions/${flight}/collection/control`,{version:1,missionId:state.missionId,requestId:crypto.randomUUID(),expectedRevision:fresh.revision,expectedSessionId:state.currentSessionId??null,action});break;}
+            try{const outcome=await api(`/api/missions/${flight}/collection/control`,{version:1,missionId:state.missionId,requestId:crypto.randomUUID(),expectedRevision:fresh.revision,expectedSessionId:state.currentSessionId??null,action});message=outcome.event.reason;break;}
             catch(e){if(attempt||!e.message.includes('(409)'))throw e;}
           }}
-          catch(e){live.append(element('p',`${e.message} Synchronize and issue a new command if still intended.`));}
+          catch(e){message=`${e.message} Synchronize and issue a new command if still intended.`;}
           finally{busy=false;await refresh();}
         };live.append(button);
       }
+      if(message){const status=element('p',message);status.setAttribute('role','status');live.append(status);}
       live.append(element('p','End current science session preserves its results. A new session remains possible. End mission / End flight separately stops flight recording. Rearming does not start or resume collection.'));
       const list=element('ul','');for(const session of result.sessions||[])list.append(element('li',`Session ${session.sequence} · ${session.id} · ${session.status} · ${session.startedUtc}${session.endedUtc?' → '+session.endedUtc:''}`));live.append(list);
 

@@ -48,6 +48,7 @@ class DevelopmentValidationTests(unittest.TestCase):
 
     def test_shared_browser_host_or_unknown_ui_dependencies_expand_browser_coverage(self):
         for path in ('tests/AeroScience.TestHost/Program.cs', 'tests/AeroScience.TestHost/BrowserTelemetryProvider.cs',
+                     'playwright.config.js', 'tests/web/helpers/auth-setup.mjs', 'tests/web/helpers/auth-teardown.mjs',
                      'src/AeroScience.Engine/wwwroot/shared-new-module.js', 'src/AeroScience.Engine/wwwroot/app.css'):
             self.assertEqual(['tests/web'], ci.plan([path])['browserSpecs'])
 

@@ -44,7 +44,7 @@ def plan(paths, uncertain=False):
                 full_dotnet = True  # Unknown/shared dependencies get the complete .NET suite.
         if name.startswith('tests/web/') and name.endswith('.spec.js'):
             web.add(name)
-        if name.startswith('tests/AeroScience.TestHost/'):
+        if name.startswith(('tests/AeroScience.TestHost/','tests/web/helpers/')) or name == 'playwright.config.js':
             web = {'tests/web'}  # Shared test-host behavior can affect every browser fixture.
         if name.endswith('help-center.js'):
             web.add('tests/web/science-review-041.spec.js')
