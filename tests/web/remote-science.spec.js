@@ -49,6 +49,21 @@ test('all four actual implemented viewers display stored synthetic fixture produ
   }
   expect(errors).toEqual([]);expect((await request.get('/help/remote-sensing/quick-start.md')).ok()).toBeTruthy();
 });
+test('changing a product filter removes stale acquisition controls before its asynchronous result arrives',async({page,request})=>{
+  await post(request,'/api/testing/remote/thermal');await post(request,'/api/testing/remote/hyperspectral');
+  await page.goto('/#science');const section=page.locator('.remote-products');
+  await section.getByLabel('Product instrument').selectOption('thermal-imager');
+  await expect(section.locator('.plan-row strong').first()).toHaveText('Thermal Imager');
+  let release,entered;const gate=new Promise(resolve=>release=resolve),waiting=new Promise(resolve=>entered=resolve);
+  await page.route('**/api/science/products/page?**',async route=>{if(new URL(route.request().url()).searchParams.get('instrumentId')==='hyperspectral-imager'){entered();await gate;}await route.continue();});
+  try {
+    await section.getByLabel('Product instrument').selectOption('hyperspectral-imager');await waiting;
+    await expect(section.locator('.plan-row')).toHaveCount(0);release();
+    await expect(section.locator('.plan-row strong').first()).toHaveText('Hyperspectral Imager');
+    await section.getByRole('button',{name:'View Data',exact:true}).first().click();
+    await expect(section.getByLabel('Spectral sample index')).toBeVisible();
+  }finally{release();}
+});
 test('storage defaults limits cleanup cancellation and update settings are usable',async({page,request})=>{
   await post(request,'/api/storage/preferences',{missionLimitBytes:25e9,scienceLimitBytes:50e9,automaticCacheCleanup:false,protectPinned:true});
   await page.goto('/#settings/storage');const storage=page.locator('#storage-management');
