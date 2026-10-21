@@ -11,7 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace AeroScience.Desktop;
 
-public sealed class MainForm : Form, IDesktopActions
+public sealed class MainForm : BrandedForm, IDesktopActions
 {
     public PreferenceStore Preferences { get; }
     public StorageManager Storage { get; }
@@ -39,7 +39,8 @@ public sealed class MainForm : Form, IDesktopActions
         Text = "AeroScience " + Application.ProductVersion.Split('+')[0]; MinimumSize = new(560, 290); Size = new(760, 350);
         AutoScaleMode = AutoScaleMode.Dpi;
         var panel = new FlowLayoutPanel { Dock = DockStyle.Fill, Padding = new(24), FlowDirection = FlowDirection.TopDown, WrapContents = false, AutoScroll = true };
-        panel.Controls.Add(new Label { Text = "AeroScience · Science Mission Operations", AutoSize = true, Font = new(Font.FontFamily, 16) });
+        var brand=new FlowLayoutPanel{AutoSize=true,WrapContents=false};brand.Controls.Add(PrimaryMark());
+        brand.Controls.Add(new Label { Text = "AeroScience · Science Mission Operations", AutoSize = true, Margin=new(8,12,0,0), Font = new(Font.FontFamily, 16) });panel.Controls.Add(brand);
         panel.Controls.Add(status); panel.Controls.Add(dashboard);
         dashboard.Click += (_, _) => OpenDashboard();
         AddButton(panel, "Settings", () => ShowSettings(false));
@@ -300,7 +301,7 @@ public sealed class MainForm : Form, IDesktopActions
     public void ShowError(Exception error) => MessageBox.Show(this, error.Message, "AeroScience", MessageBoxButtons.OK, MessageBoxIcon.Error);
     private void ShowFeedback()
     {
-        using var notes = new Form { Text = "Collect Feedback", Width = 560, Height = 300, StartPosition = FormStartPosition.CenterParent };
+        using var notes = new BrandedForm { Text = "Collect Feedback", Width = 560, Height = 300, StartPosition = FormStartPosition.CenterParent };
         var text = new TextBox { Multiline = true, Dock = DockStyle.Fill, PlaceholderText = "Optional reproduction steps and notes" };
         var save = new Button { Text = "Save feedback ZIP…", Dock = DockStyle.Bottom, Height = 42 };
         notes.Controls.Add(text); notes.Controls.Add(save);

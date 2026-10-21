@@ -1,0 +1,107 @@
+{
+  "version": 1,
+  "renderer": {
+    "package": "@resvg/resvg-js",
+    "version": "2.6.2",
+    "license": "MPL-2.0",
+    "scope": "maintainer-only; rendered project artwork contains no renderer runtime"
+  },
+  "sources": {
+    "assets/branding/orbital-arc-primary.svg": "82d6b379fba3fac2914d6021c97dfee022694c22d1f4ceb55d218b829b15d12c",
+    "assets/branding/orbital-arc-toolbar-white.svg": "6cf7219c0648b693c44066cf103d6152dad076b79e0ab9435aeb022bd22371d0"
+  },
+  "files": {
+    "src/AeroScience.Engine/wwwroot/branding/primary-16.png": {
+      "sha256": "8741a1729e454eeca80ffa775c34a561407e1c2b7c9b3f3765b2c7ec67549dcd",
+      "bytes": 483
+    },
+    "src/AeroScience.Engine/wwwroot/branding/primary-24.png": {
+      "sha256": "89df04cabfab3f9017342018af69fb35709f0a5e07908b780cf589ad1d8c2022",
+      "bytes": 822
+    },
+    "src/AeroScience.Engine/wwwroot/branding/primary-32.png": {
+      "sha256": "401bde075ca8017d5b5949d7a751dc160b3a78b2e38d4c7d7b6519cc9016bfed",
+      "bytes": 1151
+    },
+    "src/AeroScience.Engine/wwwroot/branding/primary-48.png": {
+      "sha256": "0dc4194994ac7d7853e7fa79af45ecb9cfed8a317833da85ba34119b528f798f",
+      "bytes": 1981
+    },
+    "src/AeroScience.Engine/wwwroot/branding/primary-64.png": {
+      "sha256": "9f232ad68d29a47d50469df069a8cdcd722caff03c958523a836a8bf3c7fa819",
+      "bytes": 2960
+    },
+    "src/AeroScience.Engine/wwwroot/branding/primary-128.png": {
+      "sha256": "a736499a9ff29fcefb9a68d789c8acafc952d372fec682e255bb3be58146c9b2",
+      "bytes": 7682
+    },
+    "src/AeroScience.Engine/wwwroot/branding/primary-180.png": {
+      "sha256": "de3958599b0c9f0c94efc2716e2769828b80eeceb0f8c69fa8368a1a8045c404",
+      "bytes": 12116
+    },
+    "src/AeroScience.Engine/wwwroot/branding/primary-192.png": {
+      "sha256": "564832e6aa9227b524fcf55f9976457d6af4c11ad381c5ab4a001ccb36b06f5f",
+      "bytes": 13405
+    },
+    "src/AeroScience.Engine/wwwroot/branding/primary-256.png": {
+      "sha256": "bf80dcb67b206d0e25df3e0f770753e11c10d866df45490efd55ae436c7381d3",
+      "bytes": 20183
+    },
+    "src/AeroScience.Engine/wwwroot/branding/primary-512.png": {
+      "sha256": "8a5a34513b29224696bc72e697897336d9e8d0eea5ec5baaa0cc5227748a2d4f",
+      "bytes": 53330
+    },
+    "src/AeroScience.Engine/wwwroot/branding/toolbar-16.png": {
+      "sha256": "7969db182b4922a7d1ca5525a9f80149435eb25103b108c58940063e1c6d171c",
+      "bytes": 402
+    },
+    "src/AeroScience.Engine/wwwroot/branding/toolbar-24.png": {
+      "sha256": "118738a225786707f5ca66cd43babbbb03bfa2d69d221860f6cb0ca022d76fa9",
+      "bytes": 609
+    },
+    "src/AeroScience.Engine/wwwroot/branding/toolbar-32.png": {
+      "sha256": "2a78e2d1e56e961a5901cd94c1d1f6a814c87b56d69c32740834f1c7dc8dbdd4",
+      "bytes": 793
+    },
+    "src/AeroScience.Engine/wwwroot/branding/toolbar-48.png": {
+      "sha256": "ae9b278c253ec3effe4fa787ee13484894c15277f0ee8050ffbb3fe88325c7c8",
+      "bytes": 1238
+    },
+    "src/AeroScience.Engine/wwwroot/branding/toolbar-64.png": {
+      "sha256": "d65bd67d480bae0d3176faa3e13a91737a3f6195b271fb30399fbc511afd39d9",
+      "bytes": 1723
+    },
+    "src/AeroScience.Engine/wwwroot/branding/toolbar-128.png": {
+      "sha256": "e4d39f3aeec3f5088848e020541dd855503a7dd4c98ac7da0bf3b276c1d4b773",
+      "bytes": 3430
+    },
+    "src/AeroScience.Engine/wwwroot/branding/toolbar-180.png": {
+      "sha256": "51ef00bd2ab43418de4ce609c14a7d9b5d50dd210ec0b3cb4181f060d6956d58",
+      "bytes": 4342
+    },
+    "src/AeroScience.Engine/wwwroot/branding/toolbar-192.png": {
+      "sha256": "3ff0079bd9ff5ab37a6a225a102e5b6d3861d6e921ea47b4813fc048df83c23e",
+      "bytes": 4656
+    },
+    "src/AeroScience.Engine/wwwroot/branding/toolbar-256.png": {
+      "sha256": "03b2e48635df7fe0f866c4caa50dff37209994a72ed9110b6c97792734208d94",
+      "bytes": 6415
+    },
+    "src/AeroScience.Engine/wwwroot/branding/toolbar-512.png": {
+      "sha256": "a2653ee5bab95b5b9091d839472cec8080de601e8f4e880363eb68d930f841d4",
+      "bytes": 13563
+    },
+    "src/AeroScience.Engine/wwwroot/branding/aeroscience.ico": {
+      "sha256": "be5f507f0f535a6c466951f35da25269ea9bcbc35ed64a816a76e89aa049f64d",
+      "bytes": 35380
+    },
+    "src/AeroScience.Engine/wwwroot/icon.svg": {
+      "sha256": "82d6b379fba3fac2914d6021c97dfee022694c22d1f4ceb55d218b829b15d12c",
+      "bytes": 2203
+    },
+    "msfs-toolbar/PackageSources/html_ui/icons/toolbar/ICON_AEROSCIENCE.svg": {
+      "sha256": "6cf7219c0648b693c44066cf103d6152dad076b79e0ab9435aeb022bd22371d0",
+      "bytes": 810
+    }
+  }
+}

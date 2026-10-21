@@ -55,6 +55,7 @@ jobs:
       - run: dotnet build AeroScience.sln -c Release --no-restore --nologo
       - run: python3 scripts/build/development_validation.py dotnet
       - run: npm ci --ignore-scripts
+      - run: npm run check:branding
       - run: npm run check:web
       - run: python3 scripts/build/verify_web_assets.py
       - run: npx playwright install --with-deps chromium
@@ -99,6 +100,7 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
       - run: npm ci --ignore-scripts
+      - run: npm run check:branding
       - run: npm run check:web
       - run: npx playwright install --with-deps chromium
       - run: npm run test:web

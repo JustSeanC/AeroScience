@@ -5,3 +5,9 @@
 
 # Keep the source manifest readable and consistent across maintainer checkouts.
 /src/AeroScience.Engine/wwwroot/assets-manifest.json text eol=lf
+
+# Approved and generated branding is byte-pinned across platforms.
+/assets/branding/*.svg -text
+/src/AeroScience.Engine/wwwroot/icon.svg -text
+/src/AeroScience.Engine/wwwroot/branding/** -text
+/msfs-toolbar/PackageSources/html_ui/icons/toolbar/ICON_AEROSCIENCE.svg -text

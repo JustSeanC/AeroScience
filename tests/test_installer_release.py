@@ -59,6 +59,10 @@ class InstallerReleaseTests(unittest.TestCase):
         recipe.write_bytes(original.replace('\n', '\r\n').encode('utf-8'))
         assets = checkout/'src/AeroScience.Engine/wwwroot/assets-manifest.json'; assets.parent.mkdir(parents=True)
         assets.write_bytes((i.p.REPO/'src/AeroScience.Engine/wwwroot/assets-manifest.json').read_bytes())
+        branding=assets.parent/'branding';branding.mkdir()
+        shutil.copy2(i.p.REPO/'src/AeroScience.Engine/wwwroot/branding/manifest.json',branding/'manifest.json')
+        approved=checkout/'assets/branding';approved.mkdir(parents=True)
+        shutil.copy2(i.p.REPO/'assets/branding/orbital-arc-toolbar-white.svg',approved/'orbital-arc-toolbar-white.svg')
         with patch.object(i.p, 'REPO', checkout): i.validate_candidate(folder, self.flow.acceptance)
 
 

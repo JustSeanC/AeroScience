@@ -9,11 +9,13 @@
   "scripts": {
     "pretest:web": "dotnet build tests/AeroScience.TestHost -c Release --no-restore --nologo --output artifacts/browser-test-host",
     "test:web": "playwright test",
-    "check:web": "node scripts/build/check-web.mjs"
+    "check:web": "node scripts/build/check-web.mjs",
+    "check:branding": "node scripts/build/generate-branding.mjs --check"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.14.0",
-    "@playwright/test": "1.64.1"
+    "@playwright/test": "1.64.1",
+    "@resvg/resvg-js": "2.6.2"
   },
   "dependencies": {
     "chart.js": "4.5.1",

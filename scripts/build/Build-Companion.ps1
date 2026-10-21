@@ -14,12 +14,16 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'Tests failed.' }
     npm ci --ignore-scripts
     if ($LASTEXITCODE -ne 0) { throw 'Browser tooling restore failed.' }
+    npm run check:branding
+    if ($LASTEXITCODE -ne 0) { throw 'Approved branding validation failed.' }
     python scripts/build/verify_web_assets.py
     if ($LASTEXITCODE -ne 0) { throw 'Bundled offline assets failed integrity checks.' }
     npm run check:web
     if ($LASTEXITCODE -ne 0) { throw 'Web JavaScript validation failed.' }
     dotnet publish src/AeroScience.Desktop -c $Configuration -r win-x64 --self-contained true --no-restore -o artifacts/Windows-Companion
     if ($LASTEXITCODE -ne 0) { throw 'Windows publish failed.' }
+    python scripts/build/verify_desktop_branding.py --folder artifacts/Windows-Companion
+    if ($LASTEXITCODE -ne 0) { throw 'Published Windows branding resources failed validation.' }
     foreach ($legacy in @('AeroScience.Engine.exe', 'createdump.exe', 'Launch-Simulated.cmd', 'Launch-SimConnect.cmd', 'Collect-Feedback.ps1', 'Test-SimConnectRuntime.ps1', 'SimConnect.dll')) {
         $path = Join-Path artifacts/Windows-Companion $legacy
         if (Test-Path $path) { Remove-Item $path }

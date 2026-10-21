@@ -164,6 +164,8 @@ def validate_community(root, package_version=VERSION):
     require(compatibility.get('protocol')==1 and compatibility.get('applicationVersion')==package_version, 'Toolbar compatibility descriptor differs from the release/protocol.')
     html = indexed["html_ui/ingamepanels/aeroscience/aeroscience.html"].read_text(encoding="utf-8-sig")
     require('panel-id="PANEL_AEROSCIENCE"' in html and "AeroScience.js" in html and "AeroScience.css" in html, "Panel references are inconsistent.")
+    expected_icon=hashlib.sha256((REPO/'assets/branding/orbital-arc-toolbar-white.svg').read_bytes()).hexdigest()
+    require(hashlib.sha256(indexed['html_ui/icons/toolbar/icon_aeroscience.svg'].read_bytes()).hexdigest()==expected_icon, 'Toolbar icon differs from approved Orbital Arc asset.')
     return found
 
 
@@ -185,6 +187,13 @@ def validate_companion(root, require_simconnect=False):
     for name,digest in asset_manifest['files'].items():
         asset=root/'wwwroot'/name
         require(asset.is_file() and hashlib.sha256(asset.read_bytes()).hexdigest()==digest, 'Bundled offline geography/library/license missing or changed: '+name)
+    branding = read_json(REPO/'src/AeroScience.Engine/wwwroot/branding/manifest.json')
+    require(read_json(root/'wwwroot/branding/manifest.json') == branding, 'Bundled branding manifest differs from release source.')
+    for name, entry in branding['files'].items():
+        prefix='src/AeroScience.Engine/wwwroot/'
+        if name.startswith(prefix):
+            path=root/'wwwroot'/name[len(prefix):]
+            require(path.is_file() and hashlib.sha256(path.read_bytes()).hexdigest()==entry['sha256'], 'Approved branding asset missing or changed: '+name)
     image = found["AeroScience.exe"].read_bytes()
     require(len(image) >= 64 and image[:2] == b"MZ", "Companion is not a published Windows executable.")
     offset = struct.unpack_from("<I", image, 60)[0]

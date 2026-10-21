@@ -5,7 +5,7 @@ using AeroScience.Shared;
 namespace AeroScience.Desktop;
 
 // Only reachable through the trusted local Windows UI. There is no browser deletion endpoint.
-public sealed class DataManagementForm : Form
+public sealed class DataManagementForm : BrandedForm
 {
     private readonly MainForm app;
     private readonly FlowLayoutPanel panel = new() { Dock = DockStyle.Fill, AutoScroll = true, FlowDirection = FlowDirection.TopDown, WrapContents = false, Padding = new(18) };

@@ -17,9 +17,10 @@ class PackagingTests(unittest.TestCase):
         # Minimal structural PE fixture; never evidence of Windows execution.
         (root/'wwwroot').mkdir(parents=True)
         web=packaging.REPO/'src/AeroScience.Engine/wwwroot'
-        for directory in ('vendor','geography'):
+        for directory in ('vendor','geography','branding'):
             shutil.copytree(web/directory,root/'wwwroot'/directory)
         shutil.copy2(web/'assets-manifest.json',root/'wwwroot/assets-manifest.json')
+        shutil.copy2(web/'icon.svg',root/'wwwroot/icon.svg')
         for name in ('patterns.js','location-search.js','planner-geometry.js','analysis.js','science-display.js','basemaps.js','geographic-view.js','route-export.js','hyperspectral-import.js','scientific-sources.js','settings-navigation.js','download-activity.js','remote-science.js','scientific-access.js','application-updates.js','storage-management.js'):
             shutil.copy2(web/name,root/'wwwroot'/name)
         shutil.copytree(packaging.REPO/'licenses',root/'licenses')
@@ -32,6 +33,12 @@ class PackagingTests(unittest.TestCase):
         for name in ('BitMiracle.LibTiff.NET.dll','AeroScience.Engine.dll', 'AeroScience.dll', 'AeroScience.deps.json', 'AeroScience.runtimeconfig.json',
                      'coreclr.dll', 'hostpolicy.dll', 'System.Windows.Forms.dll', 'wwwroot/index.html', 'wwwroot/app.js', 'wwwroot/app.css', 'wwwroot/research.js', 'wwwroot/map.js'):
             (root/name).write_text('test fixture', encoding='utf-8')
+
+    def test_changed_branded_payload_cannot_pass_packaging(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);self.companion_fixture(root)
+            asset=root/'wwwroot/branding/primary-192.png';asset.write_bytes(asset.read_bytes()+b'changed')
+            with self.assertRaisesRegex(ValueError,'Approved branding asset missing or changed'): packaging.validate_companion(root)
 
     def community_fixture(self, root, minimum_game_version, lowercase_assets=False):
         # Structural test data only; this is not an SDK output or simulator acceptance fixture.
@@ -50,7 +57,7 @@ class PackagingTests(unittest.TestCase):
             'html_ui/InGamePanels/AeroScience/AeroScience.css': b'/* test fixture */',
             'html_ui/InGamePanels/AeroScience/ProofOfConcept.html': b'<p>Diagnostic fixture</p>',
             'html_ui/InGamePanels/AeroScience/ProofOfConcept.js': b'// diagnostic fixture',
-            'html_ui/icons/toolbar/ICON_AEROSCIENCE.svg': b'<svg/>',
+            'html_ui/icons/toolbar/ICON_AEROSCIENCE.svg': (packaging.REPO/'assets/branding/orbital-arc-toolbar-white.svg').read_bytes(),
         }
         if lowercase_assets:
             assets = {name.lower(): content for name, content in assets.items()}

@@ -146,6 +146,7 @@ h3 {
   font-weight: 800;
   margin: 0 0 48px;
 }
+.brand img { object-fit: contain; flex-shrink: 0; }
 .brand-light {
   font-weight: 400;
 }

@@ -5,9 +5,12 @@
     <UseWindowsForms>true</UseWindowsForms>
     <OutputType>WinExe</OutputType>
     <AssemblyName>AeroScience</AssemblyName>
+    <ApplicationIcon>../AeroScience.Engine/wwwroot/branding/aeroscience.ico</ApplicationIcon>
     <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
   </PropertyGroup>
   <ItemGroup>
+    <EmbeddedResource Include="../AeroScience.Engine/wwwroot/branding/aeroscience.ico" LogicalName="AeroScience.Branding.Icon" />
+    <EmbeddedResource Include="../AeroScience.Engine/wwwroot/branding/primary-64.png" LogicalName="AeroScience.Branding.Primary" />
     <ProjectReference Include="../AeroScience.Engine/AeroScience.Engine.csproj" />
     <Content Include="../AeroScience.Engine/wwwroot/**" Link="wwwroot/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Include="../../docs/**" Link="wwwroot/help/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />

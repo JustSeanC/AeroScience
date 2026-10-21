@@ -3,7 +3,7 @@ using AeroScience.Missions;
 
 namespace AeroScience.Desktop;
 
-public sealed class SetupWizardForm : Form
+public sealed class SetupWizardForm : BrandedForm
 {
     private readonly MainForm app;
     private readonly Panel content = new() { Dock = DockStyle.Fill, Padding = new(24), AutoScroll = true };

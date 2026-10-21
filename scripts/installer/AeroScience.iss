@@ -37,6 +37,7 @@ RestartApplications=no
 UsePreviousAppDir=yes
 UsePreviousTasks=yes
 WizardStyle=modern
+SetupIconFile=..\..\src\AeroScience.Engine\wwwroot\branding\aeroscience.ico
 SetupLogging=yes
 LicenseFile={#PayloadDir}\LICENSE
 InfoBeforeFile=INSTALLER-NOTICE.txt

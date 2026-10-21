@@ -6,7 +6,7 @@ using AeroScience.Missions;
 
 namespace AeroScience.Desktop;
 
-public sealed class SettingsForm : Form
+public sealed class SettingsForm : BrandedForm
 {
     private readonly MainForm app;
     private readonly FlowLayoutPanel storagePanel = Panel();

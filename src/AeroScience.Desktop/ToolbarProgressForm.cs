@@ -2,7 +2,7 @@ using AeroScience.Engine;
 
 namespace AeroScience.Desktop;
 
-public sealed class ToolbarProgressForm : Form
+public sealed class ToolbarProgressForm : BrandedForm
 {
     private readonly Label stage = new() { AutoSize = true, MaximumSize = new(620, 0) };
     private readonly Label message = new() { AutoSize = true, MaximumSize = new(620, 0) };
@@ -44,7 +44,7 @@ public sealed class ToolbarProgressForm : Form
     }
 }
 
-public sealed class ToolbarUpdateForm : Form
+public sealed class ToolbarUpdateForm : BrandedForm
 {
     public ToolbarUpdateForm(MainForm app, ToolbarVersionStatus status)
     {

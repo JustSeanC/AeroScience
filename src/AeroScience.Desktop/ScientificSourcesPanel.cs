@@ -50,7 +50,7 @@ public sealed class ScientificSourcesPanel:FlowLayoutPanel
                 AddButton(actions,"View Coverage",()=>app.OpenScientificSources(kind.ToString().ToLowerInvariant(),dataset:source.Id));
                 AddButton(actions,"View Dataset Details",()=>
                 {
-                    using var detail=new Form{Text=source.Manifest.Name,Width=680,Height=520,AutoScaleMode=AutoScaleMode.Dpi,StartPosition=FormStartPosition.CenterParent};
+                    using var detail=new BrandedForm{Text=source.Manifest.Name,Width=680,Height=520,AutoScaleMode=AutoScaleMode.Dpi,StartPosition=FormStartPosition.CenterParent};
                     detail.Controls.Add(new TextBox{ReadOnly=true,Multiline=true,ScrollBars=ScrollBars.Both,Dock=DockStyle.Fill,Text=System.Text.Json.JsonSerializer.Serialize(source,WireJson.Options),WordWrap=true});detail.ShowDialog(owner);
                 });
             }
