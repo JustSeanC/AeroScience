@@ -44,5 +44,5 @@ public sealed record NasaAsset(string Name,string Url,string Role);
 public sealed record NasaGranuleMetadata(string Family,string CollectionId,string CollectionShortName,string CollectionVersion,
     string GranuleId,string Flightline,string ProcessingLevel,string Format,string Capability,string Authorization,
     long? OriginalBytes,int? BandCount,double[]? WavelengthsNm,string? Units,NasaAsset[] Assets,string CollectionRevision,
-    string MetadataUrl,DateTimeOffset? ObservationEndUtc=null);
+    string MetadataUrl,DateTimeOffset? ObservationEndUtc=null,DateTimeOffset? UpdatedUtc=null);
 public sealed record NasaSelectionRequest(string Provider,string GranuleId,string Revision);

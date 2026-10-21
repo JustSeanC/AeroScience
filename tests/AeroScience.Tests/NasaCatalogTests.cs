@@ -13,7 +13,7 @@ public sealed class NasaCatalogTests:IDisposable
     internal static JsonNode Metadata(string family,string type)=>JsonNode.Parse(File.ReadAllText(Path.Combine(AppContext.BaseDirectory,"ProviderMetadata",$"nasa-{family}-{type}.json")))!;
     sealed class Handler(Func<HttpRequestMessage,JsonNode> run):HttpMessageHandler
     {public int Count;protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage r,CancellationToken t){Count++;return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK){Content=new StringContent(run(r).ToJsonString())});}}
-    [Theory][InlineData("classic","AVIRIS-Classic","1")][InlineData("ng","AVIRIS-NG","1")][InlineData("emit","EMIT","001")]
+    [Theory][InlineData("classic","AVIRIS-Classic","1")][InlineData("ng","AVIRIS-NG","1")][InlineData("emit","EMIT","002")]
     public async Task RecordedOfficialMetadataPreservesIdentityTimesFootprintsAndUnknownSpectra(string family,string name,string version)
     {
         var handler=new Handler(r=>Metadata(family,r.RequestUri!.AbsolutePath.Contains("collections")?"collections":"granules"));using var auto=new AutomaticScientificData(science,settings,new(handler));var catalog=new ScientificCatalog(auto,science,settings);
@@ -60,6 +60,21 @@ public sealed class NasaCatalogTests:IDisposable
         using var session=new ScientificImportSession(science);session.BeginNasa(item);Assert.Equal(item.Scene,session.Snapshot().NasaSelection!.Scene);Assert.Equal("Choose",session.Snapshot().Stage);
         session.Cancel();Assert.Null(session.Snapshot().NasaSelection);Assert.Empty(science.Sources());
         Assert.Throws<ArgumentException>(()=>session.BeginNasa(item with{Provider="nasa-emit"}));
+    }
+    [Fact]public async Task MalformedCollectionAndProviderTimeoutAreUnavailableWithoutFabricatedResults()
+    {
+        using var malformed=new AutomaticScientificData(science,settings,new(new Handler(_=>JsonNode.Parse("{\"feed\":{\"entry\":{}}}")!)));
+        var query=new ScientificCatalogQuery("nasa-classic",new(-119,33,-117,35),Refresh:true);
+        var invalid=await new ScientificCatalog(malformed,science,settings).Search(query);Assert.Equal("Unavailable",invalid.Status);Assert.Empty(invalid.Items);
+        using var timeout=new AutomaticScientificData(science,settings,new(new Handler(_=>throw new TaskCanceledException("Synthetic provider request timeout"))));
+        var page=await new ScientificCatalog(timeout,science,settings).Search(query);Assert.Equal("Unavailable",page.Status);Assert.Contains("timeout",page.Error);Assert.Empty(page.Items);
+        using var cancel=new CancellationTokenSource();cancel.Cancel();await Assert.ThrowsAnyAsync<OperationCanceledException>(()=>new ScientificCatalog(timeout,science,settings).Search(query,cancel.Token));
+    }
+    [Fact]public void UnknownTimezoneAndPublicationAreNotInventedFromMetadataUpdate()
+    {
+        var c=Metadata("emit","collections")["feed"]!["entry"]![0]!;var e=Metadata("emit","granules")["feed"]!["entry"]![0]!;
+        e["time_start"]="2022-08-10";e["updated"]="2026-10-21T00:00:00Z";
+        var item=ScientificCatalog.DescribeNasa("nasa-emit",JsonSerializer.SerializeToElement(c),JsonSerializer.SerializeToElement(e));Assert.Null(item.ObservationUtc);Assert.Null(item.PublishedUtc);Assert.Equal(DateTimeOffset.Parse("2026-10-21T00:00:00Z"),item.Nasa!.UpdatedUtc);
     }
     public void Dispose(){science.Dispose();Directory.Delete(root,true);}
 }

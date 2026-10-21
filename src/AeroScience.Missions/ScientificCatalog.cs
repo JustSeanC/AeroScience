@@ -119,6 +119,8 @@ public sealed partial class ScientificCatalog(AutomaticScientificData automatic,
             if(cursorId is not null)PreferenceStore.WriteAtomic(Path.Combine(CacheFolder,"cursor-"+cursorId+".json"),cached);
             foreach(var old in new DirectoryInfo(CacheFolder).GetFiles("*.json").Where(f=>IsCacheFileName(f.Name)).OrderByDescending(f=>f.LastWriteTimeUtc).Skip(128))old.Delete();return page;
         }
+        catch(OperationCanceledException)when(!token.IsCancellationRequested)
+        {return new("Unavailable",[],null,DateTimeOffset.UtcNow,DateTimeOffset.UtcNow,false,["Provider request timed out; retained sources and cached metadata remain available."],"Provider timeout. Retry later or use cached-only review.");}
         catch(Exception e)when(e is HttpRequestException or IOException or JsonException or KeyNotFoundException)
         {return new("Unavailable",[],null,DateTimeOffset.UtcNow,DateTimeOffset.UtcNow,false,["This search did not establish current availability. Retained sources remain separate."],e is HttpRequestException?"Provider network unavailable.":e is JsonException or KeyNotFoundException?"Unsupported provider metadata.":e.Message);}
         finally{gate.Release();}

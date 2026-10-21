@@ -504,7 +504,7 @@ export async function libraryDownload(parent, api, isDisposed = () => false) {
       if (item.nasa) {
         const n = item.nasa;
         row.append(el("p", `${n.family} · ${n.capability}`), el("p", `Flightline: ${n.flightline} · collection ${n.collectionId} / ${n.collectionVersion} · ${n.processingLevel} reflectance · ${n.format}`), el("p", `${n.authorization}. Original distribution: ${bytes(n.originalBytes)}. Wavelengths / band count / units: ${n.bandCount ?? "Unknown until original-file verification"}.`));
-        more.append(el("p", `Collection revision: ${n.collectionRevision}. Granule metadata: ${n.metadataUrl}`));
+        more.append(el("p", `NASA metadata updated: ${dateTime(n.updatedUtc)} (not the observation or publication time). Collection revision: ${n.collectionRevision}. Granule metadata: ${n.metadataUrl}`));
         for (const asset of n.assets) { const a = link(more, `${asset.role}: ${asset.name}`, asset.url); a.target="_blank"; a.rel="noopener noreferrer"; }
         const official = link(row, "Open official NASA access / Earthdata", item.reference); official.target="_blank"; official.rel="noopener noreferrer";
         if(item.provider === "nasa-ng") button(row,"Find matching header / binary granules",async()=>{

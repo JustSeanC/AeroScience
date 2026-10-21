@@ -11,7 +11,7 @@ public sealed partial class ScientificCatalog
     private static ScientificCatalogProvider[] NasaProviders=>[
         new("nasa-classic","NASA AVIRIS-Classic","Level-2 reflectance V1",RemoteKind.Hyperspectral,[],true,true,"Guided official acquisition and compatible ENVI verification. Historical NASA observations; format must be checked."),
         new("nasa-ng","NASA AVIRIS-NG","Level-2 reflectance V1",RemoteKind.Hyperspectral,[],true,true,"Guided official acquisition; NG companions can be separate granules. Compatible ENVI only, not every distribution."),
-        new("nasa-emit","NASA EMIT","Level-2A reflectance V001",RemoteKind.Hyperspectral,[],true,true,"Discovery / official access only — native NetCDF-4 scientific import not yet supported.")];
+        new("nasa-emit","NASA EMIT","Level-2A reflectance V002",RemoteKind.Hyperspectral,[],true,true,"Discovery / official access only — native NetCDF-4 scientific import not yet supported.")];
     public static bool IsNasa(string id)=>id is "nasa-classic" or "nasa-ng" or "nasa-emit";
     public async Task<ScientificCatalogItem> ResolveNasa(NasaSelectionRequest request,CancellationToken token=default)
     {
@@ -27,7 +27,7 @@ public sealed partial class ScientificCatalog
     {
         "nasa-classic"=>("AVIRIS-Classic_L2_Reflectance_2154","1","AVIRIS-Classic"),
         "nasa-ng"=>("AVIRIS-NG_L2_Reflectance_2110","1","AVIRIS-NG"),
-        "nasa-emit"=>("EMITL2ARFL","001","EMIT"),
+        "nasa-emit"=>("EMITL2ARFL","002","EMIT"),
         _=>throw new ArgumentException("Unsupported NASA product.")
     };
     private static string NasaSearchUrl(ScientificCatalogQuery q,int page)
@@ -46,7 +46,7 @@ public sealed partial class ScientificCatalog
         if(uri.GetLeftPart(UriPartial.Path)!="https://cmr.earthdata.nasa.gov/search/granules.json")throw new IOException("Unsafe NASA pagination endpoint.");
         using var collections=await automatic.Http.Json("https://cmr.earthdata.nasa.gov/search/collections.json?short_name="+Uri.EscapeDataString(p.Name)+"&version="+p.Version+"&page_size=2",budget,token,refresh:q.Refresh);
         var matches=collections.RootElement.GetProperty("feed").GetProperty("entry");
-        if(matches.GetArrayLength()!=1)throw new IOException("NASA collection identity changed or is unavailable. No replacement product was selected.");
+        if(matches.ValueKind!=JsonValueKind.Array||matches.GetArrayLength()!=1)throw new IOException("NASA collection identity changed or is unavailable. No replacement product was selected.");
         var collection=matches[0];
         if(Text(collection,"short_name")!=p.Name||Text(collection,"version_id")!=p.Version)throw new IOException("NASA returned a different collection version.");
         using var granules=await automatic.Http.Json(url,budget,token,refresh:q.Refresh);
@@ -75,7 +75,7 @@ public sealed partial class ScientificCatalog
         return(items.ToArray(),next,warnings.ToArray());
     }
     private static string? Text(JsonElement e,string key)=>e.TryGetProperty(key,out var v)&&v.ValueKind==JsonValueKind.String?v.GetString():null;
-    private static DateTimeOffset? Time(JsonElement e,string key)=>DateTimeOffset.TryParse(Text(e,key),CultureInfo.InvariantCulture,DateTimeStyles.AssumeUniversal,out var t)?t.ToUniversalTime():null;
+    private static DateTimeOffset? Time(JsonElement e,string key)=>Text(e,key) is {} text&&(text.EndsWith('Z')||System.Text.RegularExpressions.Regex.IsMatch(text,@"[+-]\d{2}:\d{2}$"))&&DateTimeOffset.TryParse(text,CultureInfo.InvariantCulture,DateTimeStyles.None,out var t)?t.ToUniversalTime():null;
     internal static ScientificCatalogItem DescribeNasa(string provider,JsonElement collection,JsonElement entry)
     {
         var p=NasaProduct(provider);var id=Text(entry,"id")??throw new InvalidDataException("Missing granule identity.");
@@ -111,8 +111,8 @@ public sealed partial class ScientificCatalog
         var capability=provider=="nasa-emit"?"Discovery / official access only — native scientific import not yet supported":reflectance?"Guided import — compatible original ENVI reflectance only; verify files before use":"Download only — auxiliary or unknown product; no supported hyperspectral reflectance import";
         var details=new NasaGranuleMetadata(p.Family,cid,p.Name,p.Version,id,title,provider=="nasa-emit"?"2A":"2",format,capability,
             "Individual NASA Earthdata authorization may be required; official browser handles login",bytes,null,null,null,assets.DistinctBy(a=>a.Url).ToArray(),Hash(collection),
-            "https://cmr.earthdata.nasa.gov/search/concepts/"+id+".umm_json",Time(entry,"time_end"));
-        return new(provider,Text(collection,"dataset_id")??p.Name,id,Hash(new{collection,entry}),RemoteKind.Hyperspectral,bounds,geometry,Time(entry,"time_start"),Time(entry,"updated"),[],null,"Unknown / not inferred",
+            "https://cmr.earthdata.nasa.gov/search/concepts/"+id+".umm_json",Time(entry,"time_end"),Time(entry,"updated"));
+        return new(provider,Text(collection,"dataset_id")??p.Name,id,Hash(new{collection,entry}),RemoteKind.Hyperspectral,bounds,geometry,Time(entry,"time_start"),null,[],null,"Unknown / not inferred",
             "Catalog footprint; source nodata, bad bands and per-pixel quality remain unverified.","Unknown at granule discovery; verify original grid",
             "Review NASA collection terms and citation at the official source before acquisition.",reference,"Official browser handoff",["Historical NASA reflectance, not simulated-aircraft measurements.","No missing wavelengths, units or QA values were inferred.",capability],details);
     }

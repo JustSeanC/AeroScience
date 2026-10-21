@@ -11,8 +11,8 @@ outline guarantees valid pixels. Offline cached searches retain their original a
 
 Classic Collection `AVIRIS-Classic_L2_Reflectance_2154` V1 and NG
 `AVIRIS-NG_L2_Reflectance_2110` V1 use family-specific original ENVI companions.
-`EMITL2ARFL` V001 is **discovery / official access only**: native NetCDF-4 import is
-unsupported. Missing spectral/grid metadata stays Unknown until original-file inspection.
+`EMITL2ARFL` V002 is **discovery / official access only**: native NetCDF-4 import is
+unsupported. Current collection `C4079844428-LPCLOUD` V002 was verified directly in CMR; earlier V001 evidence remains historical and is not silently substituted. Missing spectral/grid metadata stays Unknown until original-file inspection.
 Choose **Open official NASA access / Earthdata**. NASA handles account login, permissions,
 terms and original-file download in the external browser. AeroScience does not request
 passwords, register an undocumented OAuth client, collect browser cookies or store tokens.
