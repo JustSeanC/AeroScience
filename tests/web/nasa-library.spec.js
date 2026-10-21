@@ -1,6 +1,60 @@
 import { test, expect } from '@playwright/test';
 async function post(request,path,value={}){const origin='http://127.0.0.1:5080';const session=await(await request.post('/api/session',{headers:{Origin:origin},data:{}})).json();const r=await request.post(path,{headers:{Origin:origin,'X-AeroScience-CSRF':session.csrf},data:value});expect(r.ok(),await r.text()).toBeTruthy();const text=await r.text();return text?JSON.parse(text):null;}
 test.afterEach(async({request})=>{await post(request,'/api/testing/library/teardown');});
+for (const [family, scene, granule, year, bounds] of [
+ ['classic', 'f080611', 'G3477024884-ORNL_CLOUD', 2008, ['-119', '33', '-117', '35']],
+ ['ng', 'ang20140621', 'G2663871321-ORNL_CLOUD', 2014, ['-116', '35', '-115', '36']],
+]) test(`${family} historical scenes are discoverable with untouched default date filters`, async ({ page, request }) => {
+ await post(request, '/api/testing/library/setup');
+ await page.goto('/#library/download');
+ await page.getByLabel('Data family', { exact: true }).selectOption('hyperspectral');
+ await page.getByLabel('Scientific provider / product', { exact: true }).selectOption('nasa-' + family);
+ await expect(page.getByLabel('Scene date from (UTC)', { exact: true })).toHaveValue('');
+ await expect(page.getByLabel('Scene date to (UTC)', { exact: true })).toHaveValue('');
+ for (const [i, label] of ['West longitude', 'South latitude', 'East longitude', 'North latitude'].entries())
+  await page.getByLabel(label, { exact: true }).fill(bounds[i]);
+ // Recorded official metadata goes through the actual catalog API/date filtering;
+ // this is browser regression coverage, not genuine NASA numerical acceptance.
+ const reply = page.waitForResponse(r => r.url().endsWith('/api/science/library/catalog') && r.request().method() === 'POST');
+ await page.getByRole('button', { name: 'Search provider catalog', exact: true }).click();
+ const response = await reply;
+ expect(response.ok(), await response.text()).toBeTruthy();
+ expect(response.request().postDataJSON()).toMatchObject({ provider: 'nasa-' + family, fromUtc: null, toUtc: null });
+ const catalog = await response.json();
+ const item = catalog.items.find(item => item.scene === granule);
+ expect(item, JSON.stringify(catalog)).toBeDefined();
+ expect(item.nasa.flightline).toContain(scene);
+ expect(new Date(item.observationUtc).getUTCFullYear()).toBe(year);
+ await expect(page.getByLabel('Provider catalog results')).toContainText(scene);
+ expect((await (await request.get('/api/state')).json()).activeMission).toBeNull();
+});
+test('manually selected or cleared scene dates survive product and data-family changes', async ({ page, request }) => {
+ await post(request, '/api/testing/library/setup');
+ await page.goto('/#library/download');
+ const family = page.getByLabel('Data family', { exact: true });
+ const provider = page.getByLabel('Scientific provider / product', { exact: true });
+ const from = page.getByLabel('Scene date from (UTC)', { exact: true });
+ const to = page.getByLabel('Scene date to (UTC)', { exact: true });
+ await provider.selectOption('landsat');
+ await expect(from).toHaveValue('2024-01-01');
+ await from.fill('2016-01-01');
+ await to.fill('2017-01-01');
+ await family.selectOption('hyperspectral');
+ for (const product of ['nasa-classic', 'nasa-ng', 'nasa-emit']) {
+  await provider.selectOption(product);
+  await expect(from).toHaveValue('2016-01-01');
+  await expect(to).toHaveValue('2017-01-01');
+ }
+ await from.fill('');
+ await to.fill('');
+ await family.selectOption('all');
+ await provider.selectOption('sentinel-2');
+ await expect(from).toHaveValue('');
+ await expect(to).toHaveValue('');
+ await family.selectOption('hyperspectral');
+ await expect(from).toHaveValue('');
+ await expect(to).toHaveValue('');
+});
 test('Hyperspectral uses existing geographic controls, actual backend catalog and honest support labels',async({page,request})=>{
  await post(request,'/api/testing/library/setup');await page.goto('/#library/download');
  await page.getByLabel('Data family',{exact:true}).selectOption('hyperspectral');await page.getByLabel('Scene date from (UTC)',{exact:true}).fill('2008-01-01');await page.getByLabel('Scene date to (UTC)',{exact:true}).fill('2009-01-01');await page.getByLabel('West longitude',{exact:true}).fill('-119');await page.getByLabel('East longitude',{exact:true}).fill('-117');await page.getByLabel('South latitude',{exact:true}).fill('33');await page.getByLabel('North latitude',{exact:true}).fill('35');

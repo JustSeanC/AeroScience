@@ -27,7 +27,8 @@ export async function libraryDownload(parent, api, isDisposed = () => false) {
     preview = null,
     query = null,
     budgetInput = null,
-    userBudget = false;
+    userBudget = false,
+    userDates = false;
   const cleanup = () => {
     stopped = true;
     clearTimeout(timer);
@@ -97,6 +98,10 @@ export async function libraryDownload(parent, api, isDisposed = () => false) {
     ),
     cloud = input(filters, "Maximum scene cloud (%)", "30", "number");
   const sceneFilter = input(filters, "Scene / flightline identifier contains", "");
+  const dateHint = el("p", "NASA defaults to all observation dates. Leave both dates empty for the full archive, or enter both to search a range of at most ten years.");
+  form.append(dateHint);
+  // Once edited, dates belong to the pilot, including an explicitly cleared range.
+  from.oninput = to.oninput = () => { userDates = true; };
   cloud.min = 0;
   cloud.max = 100;
   const cached = input(
@@ -426,6 +431,14 @@ export async function libraryDownload(parent, api, isDisposed = () => false) {
     );
     previewBox.replaceChildren();
     const p = providers.find((p) => p.id === provider.value);
+    const nasa = p.id.startsWith("nasa-");
+    if (!userDates) {
+      // CMR supports no temporal filter. A recent default hides historical AVIRIS
+      // flightlines; inventing a long dated range would exceed the API's range cap.
+      from.value = nasa ? "" : "2024-01-01";
+      to.value = nasa ? "" : new Date().toISOString().slice(0, 10);
+    }
+    dateHint.hidden = !nasa;
     earthdataBox.hidden = !p.id.startsWith("nasa-");
     if (!earthdataBox.hidden) refreshEarthdata().catch(error => { earthdataText.textContent = error.message; });
     if (budgetInput && p.id.startsWith("nasa-") && !userBudget) {
@@ -452,13 +465,12 @@ export async function libraryDownload(parent, api, isDisposed = () => false) {
   };
   for (const option of provider.options) option.hidden = option.value.startsWith("nasa-");
   sceneFilter.onchange = filtersChanged;
-  provider.onchange =
-    from.onchange =
-    to.onchange =
-    cloud.onchange =
-      filtersChanged;
+  provider.onchange = cloud.onchange = filtersChanged;
+  from.onchange = to.onchange = () => { userDates = true; filtersChanged(); };
   filtersChanged();
   async function search(cursor = null) {
+    if (!from.disabled && !!from.value !== !!to.value)
+      throw new Error("Enter both scene dates, or clear both dates to use the provider's default date scope.");
     preview = null;
     const own = ++epoch;
     feedback.textContent = cached.checked
@@ -469,10 +481,10 @@ export async function libraryDownload(parent, api, isDisposed = () => false) {
       : {
           provider: provider.value,
           area: bounds(),
-          fromUtc: from.disabled
+          fromUtc: from.disabled || !from.value
             ? null
             : new Date(from.value + "T00:00:00Z").toISOString(),
-          toUtc: to.disabled
+          toUtc: to.disabled || !to.value
             ? null
             : new Date(to.value + "T23:59:59Z").toISOString(),
           maximumCloudPercent: cloud.disabled ? 100 : Number(cloud.value),
