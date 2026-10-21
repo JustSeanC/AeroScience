@@ -9,6 +9,7 @@ internal sealed class LibraryHttpFixture(string root):HttpMessageHandler
 {
     private readonly string fixtureFolder=Path.Combine(root,"library-http-fixtures");
     public bool Enabled=>File.Exists(Path.Combine(root,"library-http-fixture.enabled"));
+    public Guid[] InactiveSources=[];
     public string Mode="normal";public int Revision=File.Exists(Path.Combine(root,"library-http-fixture.enabled"))&&int.TryParse(File.ReadAllText(Path.Combine(root,"library-http-fixture.enabled")),out var savedRevision)?savedRevision:0;
     private readonly HttpMessageInvoker fallback=new(new SocketsHttpHandler{AllowAutoRedirect=false,UseCookies=false});
     public void Enable()
@@ -17,6 +18,7 @@ internal sealed class LibraryHttpFixture(string root):HttpMessageHandler
         foreach(var kind in new[]{RemoteKind.Terrain,RemoteKind.Thermal,RemoteKind.Multispectral})RemoteFixtureFiles.Create(Path.Combine(fixtureFolder,kind.ToString()),kind);
         RemoteFixtureFiles.GeoTiff(Path.Combine(fixtureFolder,"Thermal","QA_RADSAT.tif"),0);
     }
+    public void Disable(){Mode="normal";File.Delete(Path.Combine(root,"library-http-fixture.enabled"));}
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,CancellationToken token)
     {
         if(!Enabled)return await fallback.SendAsync(request,token);if(!Directory.Exists(fixtureFolder))Enable();

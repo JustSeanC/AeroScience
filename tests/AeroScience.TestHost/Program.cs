@@ -11,7 +11,14 @@ if (args.Length > 0 && args[0] == "--evidence-probe") { EvidenceProbe.Run(args[1
 var app = EngineApplication.Create(args, services =>
 {
     services.AddSingleton(sp=>new LibraryHttpFixture(sp.GetRequiredService<EngineOptions>().DataDirectory));
-    services.AddSingleton(sp=>new AutomaticScientificData(sp.GetRequiredService<ScienceStore>(),sp.GetRequiredService<ScientificAccessSettings>(),new ScientificHttp(sp.GetRequiredService<LibraryHttpFixture>(),cacheEnabled:false)));
+    services.AddSingleton(sp=>{_=sp.GetRequiredService<StorageManagement>();return new AutomaticScientificData(sp.GetRequiredService<ScienceStore>(),sp.GetRequiredService<ScientificAccessSettings>(),new ScientificHttp(sp.GetRequiredService<LibraryHttpFixture>(),cacheEnabled:false));});
+    // Keep Library HTTP sources isolated from unrelated legacy science fixtures even
+    // when a later test intentionally rewrites normal application preferences.
+    services.AddSingleton(sp=>{_=sp.GetRequiredService<StorageManagement>();return new ResearchOperations(sp.GetRequiredService<MissionStore>(),sp.GetRequiredService<ScienceStore>(),sp.GetRequiredService<ScienceUnitSettings>().Get,()=>
+    {
+        var preferences=sp.GetRequiredService<ScientificAccessSettings>().Get().Preferences;
+        return preferences with{ExcludedSourceIds=(preferences.ExcludedSourceIds??[]).Concat(sp.GetRequiredService<LibraryHttpFixture>().InactiveSources).Distinct().ToArray()};
+    });});
     services.AddSingleton(sp => new BrowserTelemetryProvider(sp.GetRequiredService<EngineOptions>().SamplingIntervalMs));
     services.AddSingleton<ITelemetryProvider>(sp => sp.GetRequiredService<BrowserTelemetryProvider>());
 });
@@ -19,6 +26,13 @@ var options=app.Services.GetRequiredService<EngineOptions>();
 app.Services.GetRequiredService<MapSettings>().InitializeDefaults(true); // Existing offline browser fixtures; new-install tests reset explicitly.
 app.Services.GetRequiredService<ApplicationUpdates>().Configure(new(false)); // No real update traffic in synthetic browser tests.
 app.MapPost("/api/testing/library/setup",(LibraryHttpFixture fixture,ScientificAccessSettings settings)=>{fixture.Enable();settings.Save(new(true,true));return new{synthetic=true};});
+app.MapPost("/api/testing/library/teardown",async(LibraryHttpFixture fixture,ScienceStore science,AutomaticScientificData automatic)=>
+{
+    automatic.Configure(new());using var deadline=new CancellationTokenSource(TimeSpan.FromSeconds(10));
+    while(automatic.QueueSummary().Downloading>0)await Task.Delay(10,deadline.Token);
+    fixture.Disable();var ids=science.Sources().Where(s=>s.Manifest.Acquisition?.ProviderMetadataJson is {} metadata&&(metadata.Contains("SYNTHETIC browser test service",StringComparison.Ordinal)||metadata.Contains("aeroscience:test_fixture",StringComparison.Ordinal))).Select(s=>s.Id).ToArray();
+    fixture.InactiveSources=ids;automatic.Configure(new(ExcludedSourceIds:ids));return new{synthetic=true,excludedSources=ids.Length};
+});
 app.MapPost("/api/testing/library/mode/{mode}",(string mode,LibraryHttpFixture fixture)=>{fixture.Mode=mode;return new{synthetic=true,mode};});
 app.MapPost("/api/testing/maps/new-install",()=>{File.Delete(Path.Combine(options.ConfigurationDirectory??options.DataDirectory,"maps.json"));return new {reset=true};});
 app.MapPost("/api/testing/workstation",async(WorkstationFixtureRequest request,ScienceStore science,MissionStore missions,MissionCoordinator coordinator,BrowserTelemetryProvider provider)=>
