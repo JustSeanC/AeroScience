@@ -29,6 +29,8 @@ public sealed class OfflineApiTests
                 { ["AeroScience:DataDirectory"] = directory, ["AeroScience:EnableToolbarBridge"] = "false", ["AeroScience:RequireExistingDatabase"] = "true" }));
             });
             using var client = factory.CreateClient(new() { BaseAddress = new("http://localhost:5080") });
+            try
+            {
             client.DefaultRequestHeaders.Add("Origin", "http://localhost:5080");
             var session = await client.PostAsJsonAsync("/api/session", new { }); session.EnsureSuccessStatusCode();
             var csrf = (await session.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("csrf").GetString();
@@ -46,6 +48,8 @@ public sealed class OfflineApiTests
             Assert.Equal(id.ToString(), exported.RootElement.GetProperty("mission").GetProperty("id").GetString());
             Assert.Equal(HttpStatusCode.Conflict, (await client.PostAsJsonAsync("/api/missions", new { name = "No fake flight" })).StatusCode);
             Assert.Equal(1, store.Detail(id)!.Mission.SampleCount);
+            }
+            finally { await ApiHostLifetime.Stop(factory,client); }
         }
         finally { if (Directory.Exists(directory)) Directory.Delete(directory, true); }
     }
