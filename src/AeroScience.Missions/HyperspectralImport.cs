@@ -44,7 +44,7 @@ public static class GuidedHyperspectralImport
         var known=new List<string>();
         void Candidate(string file){if(!known.Contains(file,StringComparer.OrdinalIgnoreCase)&&File.Exists(Path.Combine(root,file)))known.Add(file);}
         if(fields.TryGetValue("data file",out var dataFile))Candidate(dataFile.Trim('"','\''));
-        Candidate(Path.GetFileNameWithoutExtension(header));var stem=Path.GetFileNameWithoutExtension(header);foreach(var extension in new[]{".img",".dat",".raw",""})Candidate(stem+extension);
+        Candidate(Path.GetFileNameWithoutExtension(header));var stem=Path.GetFileNameWithoutExtension(header);foreach(var extension in new[]{".bin",".img",".dat",".raw",""})Candidate(stem+extension);
         if(known.Count==0)foreach(var file in Directory.EnumerateFiles(root).Take(1024))if(!Path.GetExtension(file).Equals(".hdr",StringComparison.OrdinalIgnoreCase)&&new FileInfo(file).Length==expected)Candidate(Path.GetFileName(file));
         var candidates=known.Where(file=>new FileInfo(ScientificRaster.SafeFile(root,file)).Length==expected).ToArray();
         string? binary=associated;
@@ -107,10 +107,10 @@ public sealed class ScientificImportSession(ScienceStore science,Action? importe
 lock(gate){if(state.Busy||selected is null)throw new InvalidOperationException("Choose a header and wait for inspection first.");if(nasa is not null&&new[]{value.Provider,value.Source,value.License,value.Unit,value.SceneId,value.VerticalDatum}.Any(v=>v is not null)||nasa is not null&&(value.ObservationUtc is not null||value.Scale is not null||value.Offset is not null))throw new ArgumentException("NASA source identity, time and scientific units are verified from the selected product and original files; they cannot be overridden. Cancel for advanced manual import.");metadata=value;state=state with{Busy=true};}await Verify();}
     private async Task Verify()
     {
-        var own=generation;
+        var own=generation;CancellationToken token;lock(gate){cancel?.Dispose();cancel=new();token=cancel.Token;}
         try
         {
-            var inspection=await Task.Run(()=>kind==RemoteKind.Hyperspectral?nasa is not null?NasaGuidedImport.Inspect(selected!,nasa,metadata,associated):GuidedHyperspectralImport.Inspect(selected!,metadata,associated):GuidedScientificImport.Inspect(selected!,kind,metadata));
+            var inspection=await Task.Run(()=>kind==RemoteKind.Hyperspectral?nasa is not null?NasaGuidedImport.Inspect(selected!,nasa,metadata,associated,token):GuidedHyperspectralImport.Inspect(selected!,metadata,associated):GuidedScientificImport.Inspect(selected!,kind,metadata));
             var free=new LocalStorageCapacity().FreeBytes(science.DirectoryPath);
             if(own!=generation)return;
             Set(new("Verify",inspection.Manifest is null?"Select the associated binary or original documented scientific units before importing.":"Compatible ENVI dataset. Review its actual geographic coverage and metadata.",inspection,Destination:science.DirectoryPath,FreeBytes:free));
@@ -125,13 +125,13 @@ lock(gate){if(state.Busy||selected is null)throw new InvalidOperationException("
         {
             try
             {
-                if(nasa is not null)inspection=NasaGuidedImport.Inspect(selected!,nasa,metadata,associated);
+                if(nasa is not null)inspection=NasaGuidedImport.Inspect(selected!,nasa,metadata,associated,token);
                 var source=await science.ImportSourceAsync(inspection.Manifest!,inspection.Root,token,new Progress<string>(message=>{lock(gate)state=state with{Message=message};}),reuseExisting:true);
                 imported?.Invoke();
                 Set(new("Ready","Dataset Ready. It can be sampled only inside its real coverage; original external files are retained.",inspection,source,science.DirectoryPath));
             }
             catch(OperationCanceledException){Set(new("Cancelled","Import cancelled. No partial source is advertised as ready. Original files are unchanged; interrupted staging is available in Storage Management."));}
-            catch(Exception e)when(e is IOException or ArgumentException or InvalidOperationException or UnauthorizedAccessException or Microsoft.Data.Sqlite.SqliteException){Set(new("Invalid",e.Message));}
+            catch(Exception e)when(e is IOException or InvalidDataException or ArgumentException or InvalidOperationException or UnauthorizedAccessException or Microsoft.Data.Sqlite.SqliteException){Set(new("Invalid",e.Message));}
         });
     }
     public void Cancel(){lock(gate){cancel?.Cancel();generation++;if(state.Stage!="Importing"){nasa=null;state=new("Choose","Import cancelled. Original files are unchanged.");}}}

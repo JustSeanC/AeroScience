@@ -32,6 +32,39 @@ The catalog revalidates the official collection version and never substitutes an
 [Live catalog evidence](../research/v0.5.0-nasa-validation.json) distinguishes metadata
 acceptance from family-specific original-file numerical verification and installed testing.
 
+## AVIRIS-Classic original-file verification
+
+The assistant supports the documented V1 **224-band Float32/Float64 Level-2 reflectance**
+ENVI `.hdr` + `.bin` distribution (`fYYMMDDtNNpNNrNN_corr/rfl/refl…_img`). Choose the
+reflectance pair, not the three-band water-vapor `h2o` product or Level-1 radiance.
+Keep original names. Wavelengths, bad-band flags, nodata, scale/gain/offset, interleave,
+byte order and supported WGS84 geographic/rotated UTM grid come from the header.
+Conflicting dates, units, dimensions, source stems or non-overlapping geography are rejected.
+Missing wavelengths or georeferences are never guessed. Other revisions remain unsupported
+until verified; generic advanced ENVI import is preserved.
+
+Download any advertised `.sha256` companion too. AeroScience streams checksum validation
+and retains the checksum with the originals; a locally selected sidecar alone does not
+prove NASA authenticity, so compare it with the official provider. Originals are copied,
+hashed and atomically published through the existing Library importer. Exact same-source
+imports reuse the verified copy. Imported data and metadata reopen offline; importing a
+historical source does not create a flight, acquisition event or grading credit.
+
+The assistant does **not** unpack archives. Obtain the official individual companions;
+if the provider supplies only an archive, extract it with trusted system software first.
+Only the selected bounded header, matching numeric file and checksums are read/copied;
+links/junctions, escaping filenames, wrong files and incomplete downloads are rejected.
+Headers are capped at 1 MiB, checksums at 4 KiB, each original at 16 GiB and collections at
+64 GiB, subject to tighter Library quota/free-space protections. No entire cube is loaded
+into memory. Canceling verification/import leaves external originals intact and partial
+staging unavailable for science.
+
+Classic deterministic tests cover numeric preservation, masks, layouts/endian, rotation,
+checksums, cancellation/identity and offline retention. **Genuine NASA Classic numeric
+acceptance is pending**: the selected official header returned HTTP 401 without individual
+Earthdata authorization. The existing NV5 Cuprite validation is retained as its own baseline,
+not evidence that this official collection or every Classic distribution passed.
+
 ## Advanced local import reference
 
 Normal pilot setup: [automatic quick start](quick-start.md) and [provider capabilities](automatic-data.md). Automatic NASA catalog discovery is supported; automated hyperspectral file preparation/authorization is not. The following ENVI workflow remains advanced.

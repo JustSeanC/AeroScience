@@ -13,3 +13,11 @@ test('Hyperspectral uses existing geographic controls, actual backend catalog an
  await page.getByLabel('Scientific provider / product',{exact:true}).selectOption('nasa-emit');await page.getByRole('button',{name:'Search provider catalog',exact:true}).click();await expect(results).toContainText('native scientific import not yet supported');await expect(results).toContainText('NetCDF-4');
  await page.getByLabel('Use cached catalog / boundaries only',{exact:true}).check();await page.getByRole('button',{name:'Search provider catalog',exact:true}).click();await expect(page.getByRole('status').first()).toContainText('cached, not a new live search');
 });
+test('Classic guided files verify and atomically import through the existing Library without a flight',async({page,request})=>{
+ await post(request,'/api/testing/library/setup');await page.goto('/#library/download');await page.getByLabel('Data family',{exact:true}).selectOption('hyperspectral');await page.getByRole('button',{name:'Search provider catalog',exact:true}).click();
+ const results=page.getByLabel('Provider catalog results');await results.getByRole('button',{name:'Verify downloaded AVIRIS files on this PC',exact:true}).first().click();
+ const wizard=page.getByRole('dialog');await expect(wizard).toContainText('Step 1');await post(request,'/api/testing/nasa/files/classic');await expect(wizard).toContainText('224 bands');
+ await wizard.getByRole('button',{name:'Continue to Import',exact:true}).click();await expect(wizard).toContainText('Step 3');await wizard.getByRole('button',{name:'Import Dataset',exact:true}).click();await expect(wizard).toContainText('Dataset Ready');
+ const state=await (await request.get('/api/science/hyperspectral/import')).json();expect(state.source.manifest.sceneId).toBe('G3477024884-ORNL_CLOUD');expect(state.source.manifest.bands).toHaveLength(224);expect(state.source.files.every(f=>f.sha256.length===64)).toBeTruthy();
+ await wizard.getByRole('button',{name:'Close wizard',exact:true}).click();await post(request,'/api/science/hyperspectral/cancel');await post(request,'/api/science/access',{onlineEnabled:false,privacyAccepted:false});await page.goto('/#library');await expect(page.locator('main')).toContainText('SYNTHETIC NASA browser test');
+});

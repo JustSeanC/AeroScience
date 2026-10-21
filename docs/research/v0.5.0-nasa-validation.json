@@ -486,5 +486,20 @@
       "emptyStatus": "No match",
       "cachedAsOf": "2026-10-21T12:40:49.8554574+00:00"
     }
-  ]
+  ],
+  "classicOriginalAcceptance": {
+    "status": "Pending genuine original files / individual Earthdata authorization",
+    "collection": "C2711871294-ORNL_CLOUD",
+    "granule": "G3477024884-ORNL_CLOUD",
+    "flightline": "f080611t01p00r13",
+    "version": "1",
+    "observationUtc": "2008-06-11T21:38:00Z",
+    "attemptedHeader": "https://data.ornldaac.earthdata.nasa.gov/protected/aviris/AVIRIS-Classic_L2_Reflectance/data/f080611t01p00r13_corr_v1h_img.hdr",
+    "anonymousHttpStatus": 401,
+    "officialGuide": "https://daac.ornl.gov/AVIRIS/guides/AVIRIS-Classic_L2_Reflectance.html",
+    "supportedFormat": "Original 224-band Float32/Float64 reflectance ENVI header + matching bin; supported georeference and required original wavelengths",
+    "numericHashes": null,
+    "independentNumericComparison": "Not performed: no authorized original cube available. Deterministic synthetic tests are not genuine numeric acceptance.",
+    "installedAcceptance": "Pending Windows user-authorized browser transfer, native file selection, MSFS/iPad/Quest"
+  }
 }

@@ -3,6 +3,7 @@
     <ProjectReference Include="../../src/AeroScience.Engine/AeroScience.Engine.csproj" />
     <Compile Include="../AeroScience.Tests/SyntheticTelemetryFixture.cs" Link="SyntheticTelemetryFixture.cs" />
     <Compile Include="../AeroScience.Tests/RemoteFixtureFiles.cs" Link="RemoteFixtureFiles.cs" />
+    <Compile Include="../AeroScience.Tests/NasaFixtureFiles.cs" Link="NasaFixtureFiles.cs" />
   </ItemGroup>
   <ItemGroup><None Include="../AeroScience.Tests/ProviderMetadata/*.json" Link="ProviderMetadata/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" /></ItemGroup>
 </Project>

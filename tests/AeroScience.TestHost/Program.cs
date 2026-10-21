@@ -30,7 +30,7 @@ app.MapPost("/api/testing/library/teardown",async(LibraryHttpFixture fixture,Sci
 {
     automatic.Configure(new());using var deadline=new CancellationTokenSource(TimeSpan.FromSeconds(10));
     while(automatic.QueueSummary().Downloading>0)await Task.Delay(10,deadline.Token);
-    fixture.Disable();var ids=science.Sources().Where(s=>s.Manifest.Acquisition?.ProviderMetadataJson is {} metadata&&(metadata.Contains("SYNTHETIC browser test service",StringComparison.Ordinal)||metadata.Contains("aeroscience:test_fixture",StringComparison.Ordinal))).Select(s=>s.Id).ToArray();
+    fixture.Disable();var ids=science.Sources().Where(s=>s.Manifest.Notes?.Contains("SYNTHETIC NASA browser test",StringComparison.Ordinal)==true||s.Manifest.Acquisition?.ProviderMetadataJson is {} metadata&&(metadata.Contains("SYNTHETIC browser test service",StringComparison.Ordinal)||metadata.Contains("aeroscience:test_fixture",StringComparison.Ordinal))).Select(s=>s.Id).ToArray();
     fixture.InactiveSources=ids;automatic.Configure(new(ExcludedSourceIds:ids));return new{synthetic=true,excludedSources=ids.Length};
 });
 app.MapPost("/api/testing/library/mode/{mode}",(string mode,LibraryHttpFixture fixture)=>{fixture.Mode=mode;return new{synthetic=true,mode};});
@@ -65,6 +65,15 @@ app.MapPost("/api/testing/remote/{kind}",async (string kind,ScienceStore science
     return new{missionId=mission.Id,product=science.Products(mission.Id).Single()};
     }
     finally { if(coordinator.Snapshot().ActiveMission?.Id == mission.Id) coordinator.End(mission.Id); }
+});
+app.MapPost("/api/testing/nasa/files/{family}",async(string family,ScientificImportSession session)=>
+{
+    var item=session.Snapshot().NasaSelection??throw new InvalidOperationException("Choose a NASA granule through the production endpoint first.");
+    if(item.Provider!="nasa-"+family)throw new ArgumentException("Fixture family mismatch.");
+    var folder=Path.Combine(options.DataDirectory,"nasa-test-inputs",Guid.NewGuid().ToString("N"));
+    var header=NasaFixtureFiles.Cube(folder,item,family=="classic"?224:425);
+    await session.Select(header);await session.Configure(new(Name:"SYNTHETIC NASA browser test — "+family,Notes:"SYNTHETIC NASA browser test; not genuine numeric or installed acceptance"));
+    return session.Snapshot();
 });
 app.MapPost("/api/testing/guided/{kind}",async(string kind,ScientificImportSession session)=>
 {
