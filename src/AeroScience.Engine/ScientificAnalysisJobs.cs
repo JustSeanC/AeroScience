@@ -5,9 +5,9 @@ using AeroScience.Shared;
 namespace AeroScience.Engine;
 
 public sealed record AnalysisJob(Guid Id,Guid MissionId,string Kind,string State,long Completed,long? Total,Guid[] Artifacts,string? Message=null);
-public sealed class ScientificAnalysisJobs(MissionStore missions,ScienceStore science) : BackgroundService
+public sealed class ScientificAnalysisJobs(MissionStore missions,ScienceStore science,StorageManagement? storage=null) : BackgroundService
 {
-    private sealed record Work(Guid Id,Guid Mission,ScientificCoverageRequest? Coverage,CompositeRequest? Composite,CancellationTokenSource Cancel);
+    private sealed record Work(Guid Id,Guid Mission,ScientificCoverageRequest? Coverage,CompositeRequest? Composite,CancellationTokenSource Cancel,string? PerformanceReason=null);
     private readonly Channel<Work> queue=Channel.CreateBounded<Work>(4);
     private readonly object gate=new();private readonly Dictionary<Guid,AnalysisJob> states=[];private readonly Dictionary<Guid,CancellationTokenSource> cancellations=[];
     public AnalysisJob Enqueue(Guid mission,ScientificCoverageRequest? coverage=null,CompositeRequest? composite=null)
@@ -20,6 +20,20 @@ public sealed class ScientificAnalysisJobs(MissionStore missions,ScienceStore sc
             if(states.Count>=100){cancel.Dispose();throw new InvalidOperationException("Analysis history is full. Restart AeroScience after current work completes.");}
             states.Add(id,job);cancellations.Add(id,cancel);
             if(!queue.Writer.TryWrite(new(id,mission,coverage,composite,cancel))){states.Remove(id);cancellations.Remove(id);cancel.Dispose();throw new InvalidOperationException("Analysis queue is full. Wait for current work to finish.");}
+        }
+        return job;
+    }
+    public AnalysisJob EnqueuePerformance(Guid mission,string reason="End-flight archived evaluation")
+    {
+        ResearchExports.RequireCompleted(missions,mission);
+        if(string.IsNullOrWhiteSpace(reason)||reason.Length>500)throw new ArgumentException("Explain the report calculation or revision.");
+        var id=Guid.NewGuid();var cancel=new CancellationTokenSource();var job=new AnalysisJob(id,mission,"performance","Queued",0,null,[]);
+        lock(gate)
+        {
+            foreach(var old in states.Values.Where(s=>s.State is "Completed" or "Failed" or "Cancelled").Take(Math.Max(0,states.Count-95)).ToArray())states.Remove(old.Id);
+            if(states.Count>=100){cancel.Dispose();throw new InvalidOperationException("Analysis history is full.");}
+            states.Add(id,job);cancellations.Add(id,cancel);
+            if(!queue.Writer.TryWrite(new(id,mission,null,null,cancel,reason))){states.Remove(id);cancellations.Remove(id);cancel.Dispose();throw new InvalidOperationException("Analysis queue is full.");}
         }
         return job;
     }
@@ -36,6 +50,14 @@ public sealed class ScientificAnalysisJobs(MissionStore missions,ScienceStore sc
                 linked.Token.ThrowIfCancellationRequested();Update(work.Id,s=>s with{State="Running"});
                 var results=await Task.Run(()=>
                 {
+                    if(work.PerformanceReason is {} reason)
+                    {
+                        // Coordinate available Library migrations/clear operations using its existing
+                        // analysis lease; offline stored-report review does not require this lease.
+                        using var performanceLease=science.AvailabilityError() is null?science.BeginAnalysis():null;
+                        var evidence=MissionEvaluationArchive.Build(missions,science,work.Mission,linked.Token);
+                        missions.SavePerformanceReport(evidence,reason,bytes=>storage?.RequireFlightCapacity(bytes));return Array.Empty<ScientificArtifact>();
+                    }
                     using var lease=science.BeginAnalysis();
                     if(work.Coverage is {} request)
                     {

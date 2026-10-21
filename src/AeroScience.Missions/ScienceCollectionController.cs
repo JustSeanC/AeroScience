@@ -75,7 +75,7 @@ public sealed class ScienceCollectionController(MissionStore store, Guid mission
         var links=(inputs??[]).Select(MissionStore.DescribeCollectionInput).ToArray();
         var transition=new CollectionEvent(1,missionId,next.Revision,DateTimeOffset.UtcNow,at,changed?.Id??session?.Id,request.Action,origin,outcome,
             current.Phase,next.Phase,next.Authority,reason,links,automatic?null:request.RequestId,occurrence,request.ExpectedSessionId,
-            PlannedSessionKey:plannedSession,CollectionPolicy:policy);
+            PlannedSessionKey:plannedSession,CollectionPolicy:policy,Justification:automatic?null:request.Justification);
         var result=store.CommitCollectionEvidence(new(next,transition,changed,automatic?null:request,inputs));
         if(changed is not null || request.Action==CollectionAction.RearmAutomation){schedule.Clear();epoch=next.Revision;}
         return result;

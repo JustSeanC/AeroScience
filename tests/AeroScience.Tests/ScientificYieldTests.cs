@@ -28,7 +28,10 @@ public sealed class ScientificYieldTests
         Assert.Equal(new double[]{20,30,25,25},c.Rubric.Categories.Select(w=>w.Weight));Assert.Equal(.8,c.Rubric.MinimumEvidenceWeightFraction);Assert.All(c.Obligations.GroupBy(o=>o.CriterionId),g=>Assert.Equal(1,g.Sum(o=>o.Weight),9));
         p=p with{Instruments=[],SurveyAreas=[]};Assert.Equal(hash,EvidenceContracts.ContentHash(c));Assert.NotEmpty(c.Configurations);Assert.Contains(c.Obligations,o=>o.Scope=="region");
         Assert.Equal(hash,EvidenceContracts.ContentHash(EvidenceContracts.Read<MissionAssessmentContext>(EvidenceContracts.Write(c))));
-        var atmospheric=MissionRubrics.Define(MissionTemplateKind.AtmosphericProfile,false);Assert.False(atmospheric.Criteria.Single(c=>c.Id=="operating").Applicable);Assert.DoesNotContain(atmospheric.Criteria,c=>c.Method.Contains("require polygon"));
+        var sessionKey="never-started";var trigger=new CollectionTrigger(Guid.NewGuid(),Guid.NewGuid(),CollectionAction.StartData,CollectionTriggerKind.Waypoint,p.Waypoints![0].Id!.Value,1,20,PlannedSessionKey:sessionKey);
+        var combined=p with{SurveyAreas=PreflightReadinessTests.Plan().SurveyAreas,Collection=new(1,p.Id,InitialCollectionPolicy.Armed,[trigger],new(5,6))};var both=MissionRubrics.Freeze(Guid.NewGuid(),At,ScienceMode.Realistic,PreflightReadiness.Hash(combined),combined,ScienceCatalog.Normalize(c.Configurations.Select(c=>c.Settings)));
+        Assert.Contains(both.Obligations,o=>o.Scope=="planned-session"&&o.PlannedSessionKey==sessionKey);Assert.Contains(both.Obligations,o=>o.Scope=="region");
+        var atmospheric=MissionRubrics.Define(MissionTemplateKind.AtmosphericProfile,false);Assert.False(atmospheric.Criteria.Single(c=>c.Id=="operating").Applicable??true);Assert.DoesNotContain(atmospheric.Criteria,c=>c.Method.Contains("require polygon"));
     }
     [Fact] public void MissingAndEmptyEvidenceNeverBecomePerfectScience()
     {

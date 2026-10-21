@@ -1,4 +1,5 @@
 import { newIdentity } from "./workstation-ui.js";
+import { missionPerformance } from "./mission-performance.js";
 import { preflightReadiness } from "./preflight-readiness.js";
 import { collectionPlanner } from "./collection-planner.js";
 import { initializeScienceSessions } from "./science-sessions.js";
@@ -153,6 +154,7 @@ function readConfigs(parent) {
 }
 export function initializeResearch(context) {
   ctx = context;
+  missionPerformance($("control"),ctx.api,()=>state?.activeMission?.id,{live:true});
   const control = $("control"),
     guidance = text("article", undefined, "panel research-panel");
   guidance.id = "flight-guidance";
@@ -751,6 +753,7 @@ async function instruments() {
   collection.id = "collection-status";
   p.append(collection);
   initializeScienceSessions(ctx,collection);
+  missionPerformance(p,ctx.api,()=>state?.activeMission?.id,{live:true});
   const presets = text("details");
   presets.append(text("summary", "Reusable instrument presets"));
   p.append(presets);
@@ -1189,6 +1192,7 @@ function showScience(parent, rows, label) {
   raw.append(list);
 }
 export async function researchDetail(body, id, mission) {
+  missionPerformance(body,ctx.api,id);
   const sessions=text('details');sessions.append(text('summary','Science sessions and retained measurements'));body.append(sessions);
   sessions.addEventListener('toggle',async()=>{if(!sessions.open||sessions.dataset.loaded)return;sessions.dataset.loaded='true';
     try{const [record,counts]=await Promise.all([ctx.api(`/api/missions/${id}/collection`),ctx.api(`/api/missions/${id}/collection/counts`)]);

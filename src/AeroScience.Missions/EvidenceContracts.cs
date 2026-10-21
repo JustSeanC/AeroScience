@@ -85,8 +85,8 @@ public static class EvidenceContracts
             case ReadinessAssessment readiness:
                 Hash(readiness.PlanSha256); Utc(readiness.AssessedUtc); Texts(readiness.Limitations);
                 foreach (var check in Items(readiness.Checks, 256))
-                { Text(check.Id); Known(check.Status); Texts(check.Reasons); Texts(check.Actions); }
-                Unique(readiness.Checks.Select(c => c.Id)); break;
+                { Text(check.Id); Known(check.Status); Texts(check.Reasons); Texts(check.Actions); Text(check.Category); if(check.Inputs is not null)Texts(check.Inputs); }
+                Unique(readiness.Checks.Select(c => c.Id)); if(readiness.ContextSha256 is not null)Hash(readiness.ContextSha256); OptionalUtc(readiness.ExpiresUtc); Require(readiness.ExpiresUtc is null||readiness.ExpiresUtc>readiness.AssessedUtc,"Readiness expiry must follow assessment."); break;
             case GradingRubric rubric: ValidateRubric(rubric); break;
             case MissionAssessmentContext context: ValidateContext(context); break;
             case ScienceYield yield:
@@ -171,6 +171,7 @@ public static class EvidenceContracts
 
     private static void ValidateRequest(CollectionControlRequest request)
     {
+        Require(request.Justification is null || request.Action==CollectionAction.PauseData && request.Justification=="safety", "Only an explicit safety pause justification is supported; frozen research work is never erased.");
         Id(request.MissionId); Id(request.RequestId); OptionalId(request.ExpectedSessionId); Known(request.Action);
         Require(request.ExpectedRevision >= 0 && request.Action != CollectionAction.Unknown, "A control requires an explicit action and revision.");
         if (request.Action == CollectionAction.StartData) Require(request.ExpectedSessionId is null, "Start creates a new session only when no session is open.");
@@ -310,6 +311,7 @@ public static class EvidenceContracts
     private static void ValidateContext(MissionAssessmentContext context)
     {
         Id(context.MissionId); Utc(context.FrozenUtc); Known(context.Mode); Hash(context.PlanSha256); Validate(context.Rubric); Configurations(context.Configurations);
+        if(context.Readiness is not null){Validate(context.Readiness);Require(context.Readiness.AssessedUtc<=context.FrozenUtc,"Preflight evidence must precede flight start.");}
         var obligations = Items(context.Obligations, 4096); Unique(obligations.Select(o => o.Id));
         foreach (var obligation in obligations)
         {
@@ -319,7 +321,7 @@ public static class EvidenceContracts
             Require(obligation.WindowStartUtc is null || obligation.WindowEndUtc is null || obligation.WindowEndUtc >= obligation.WindowStartUtc, "Obligation window is reversed.");
             if (obligation.TargetAmount is { } target) { Range(target, double.Epsilon, double.MaxValue); Text(obligation.Unit); }
             else Require(obligation.Unit is null, "A target unit needs a target amount.");
-            OptionalText(obligation.RepeatRuleId);
+            OptionalText(obligation.RepeatRuleId); OptionalText(obligation.Scope); if(obligation.InstrumentId is not null)Instrument(obligation.InstrumentId); Require(obligation.RegionIndex is null||obligation.RegionIndex>=0,"Invalid region index."); if(obligation.TargetAltitudeFeet is {} altitude)Require(double.IsFinite(altitude),"Finite MSL target required.");
         }
         // Applicability and evidence sufficiency are decided by P08/P09, never guessed here.
     }

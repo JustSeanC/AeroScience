@@ -46,7 +46,8 @@ public sealed record CollectionState([property: JsonRequired] int Version, Guid 
 // EndData closes the expected current session; End Flight remains the existing separate command.
 public sealed record CollectionControlRequest([property: JsonRequired] int Version, Guid MissionId,
     Guid RequestId, [property: JsonRequired] long ExpectedRevision, CollectionAction Action,
-    [property: JsonRequired] Guid? ExpectedSessionId) : IVersionedEvidence;
+    [property: JsonRequired] Guid? ExpectedSessionId,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Justification = null) : IVersionedEvidence;
 
 public sealed record ScienceCollectionSession([property: JsonRequired] int Version, Guid Id,
     Guid MissionId, long Sequence, DateTimeOffset StartedUtc, CollectionSessionStatus Status,
@@ -61,4 +62,4 @@ public sealed record CollectionEvent([property: JsonRequired] int Version, Guid 
     EvidenceLink[] Evidence, Guid? RequestId = null, Guid? OccurrenceId = null,
     Guid? ExpectedSessionId = null, long? SessionSequence = null,
     string? PlannedSessionKey = null, EvidenceReference? CollectionPolicy = null,
-    Guid[]? ConfigurationIds = null) : IVersionedEvidence;
+    Guid[]? ConfigurationIds = null, [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Justification = null) : IVersionedEvidence;

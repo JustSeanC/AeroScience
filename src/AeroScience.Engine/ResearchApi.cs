@@ -6,6 +6,7 @@ namespace AeroScience.Engine;
 
 public sealed record PatternSurveyRequest(PatternDefinition Definition, SurveyArea Area,string FitMode="polygon");
 public sealed record EstimateRequest(InstrumentConfiguration[]? Instruments, double? DurationMinutes);
+public sealed record PerformanceRevisionRequest(string Reason);
 public sealed record SciencePauseRequest(bool Paused);
 public sealed record MapLayerRequest(string Layer);
 public sealed record MapPrivacyRequest(bool Online);
@@ -104,6 +105,11 @@ public static class ResearchApi
         app.MapGet("/api/display/units", (ScienceUnitSettings settings) => new { preferences = settings.Get(), options = ScienceUnits.Options, aviation = ScienceUnits.Aviation, scientific = ScienceUnits.Scientific, warning = settings.Warning });
         app.MapPost("/api/display/units", (ScienceUnitPreferences preferences, ScienceUnitSettings settings) => settings.Set(preferences));
         app.MapPost("/api/missions/{id:guid}/science/state", (Guid id, SciencePauseRequest request, MissionCoordinator missions) => missions.SetSciencePaused(id, request.Paused));
+        app.MapGet("/api/missions/{id:guid}/performance",(Guid id,MissionPerformanceService performance)=>performance.Read(id));
+        app.MapGet("/api/missions/{id:guid}/performance/{revision:int}",(Guid id,int revision,MissionStore missions)=>new{state="Available",reports=new[]{missions.PerformanceRevision(id,revision)},revisions=missions.PerformanceRevisions(id),projection=(MissionPerformanceReport?)null});
+        app.MapPost("/api/missions/{id:guid}/performance/recompute",(Guid id,PerformanceRevisionRequest request,MissionPerformanceService performance,HttpContext c)=>AccessControl.IsLoopback(c)?Results.Accepted(value:performance.Recompute(id,request.Reason)):Results.StatusCode(403));
+        app.MapGet("/api/missions/{id:guid}/performance/export.csv",(Guid id,MissionStore missions)=>Results.File(System.Text.Encoding.UTF8.GetBytes(ResearchExports.PerformanceCsv(missions,id)),"text/csv",$"AeroScience-performance-{id}.csv"));
+        app.MapGet("/api/missions/{id:guid}/performance/export",(Guid id,MissionStore missions,HttpContext c)=>Results.Stream(stream=>missions.ExportPerformanceJsonAsync(id,stream,c.RequestAborted),"application/json",$"AeroScience-performance-{id}.json"));
         app.MapGet("/api/missions/{id:guid}/collection/counts",(Guid id,ScienceStore science)=>science.SessionCounts(id));
         app.MapGet("/api/missions/{id:guid}/collection",(Guid id,MissionCoordinator missions)=>missions.ScienceCollection(id));
         app.MapPost("/api/missions/{id:guid}/collection/control",(Guid id,CollectionControlRequest request,MissionCoordinator missions)=>

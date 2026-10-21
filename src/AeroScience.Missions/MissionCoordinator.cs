@@ -5,7 +5,7 @@ namespace AeroScience.Missions;
 
 // All mutations pass through this gate, including telemetry and commands from every display.
 public sealed class MissionCoordinator(MissionStore store, int samplingIntervalMs, bool requireFreshTelemetry = false,
-    Action? ensureRecordingCapacity = null, ResearchOperations? research = null,Func<DateTimeOffset>? utcNow=null)
+    Action? ensureRecordingCapacity = null, ResearchOperations? research = null,Func<DateTimeOffset>? utcNow=null,Func<MissionPlan,ReadinessAssessment>? assessPreflight=null)
 {
     internal MissionStore Store => store;
     private readonly object gate = new();
@@ -155,6 +155,7 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
                 throw new InvalidOperationException("Live aircraft telemetry is unavailable. Mission History remains accessible.");
             var armed=request.ArmScience||plan?.Collection?.InitialPolicy==InitialCollectionPolicy.Armed;
             if(!armed)research?.EnsureCanStart(configurations);
+            var readiness=plan is null?null:assessPreflight?.Invoke(plan);
             var now = Now;
             var id = store.Create(name, frame, now, mode, plan, configurations, request.Objective);
             active = store.Detail(id)!.Mission;
@@ -165,7 +166,7 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
                 try
                 {
                     store.InitializeCollectionEvidence(new(1,id,0,CollectionPhase.Armed,plan?.Collection?.InitialPolicy==InitialCollectionPolicy.Armed?CollectionAuthority.Automatic:CollectionAuthority.Manual),plan?.Collection,
-                        MissionRubrics.Freeze(id,now,mode,store.RecordedPlanHash(id),plan,configurations,request.Objective));
+                        MissionRubrics.Freeze(id,now,mode,store.RecordedPlanHash(id),plan,configurations,request.Objective,readiness));
                     store.AddEvent(id,now,"science-armed","Flight recording active; science awaits an explicit session start.");
                     collection=new(store,id,()=>research!.Configurations);collectionFault=false;
                     geographicCollection=plan?.Collection is null?null:new(plan,collection);
@@ -317,7 +318,7 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
         lock (gate)
         {
             if (active?.Id != id) throw new InvalidOperationException("This mission is not currently recording.");
-            store.Finish(id, MissionStatus.Completed, DateTimeOffset.UtcNow, "Mission completed by operator.");
+            store.Finish(id, MissionStatus.Completed, ControlTime, "Mission completed by operator.");
             research?.End();
             geographicCollection=null;collection=null;active = null;
             return store.Detail(id)!.Mission;

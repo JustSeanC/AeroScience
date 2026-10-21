@@ -32,7 +32,7 @@ public static class ScientificEvaluationEvidence
                     if(product.IntentId!=intent.Id||product.SessionId!=intent.SessionId||product.Sha256!=stored.ProductSha256)throw new InvalidDataException("Published product identity differs from its frozen acquisition intent.");
                     var data=science.ReadProduct(id);var original=data.Bands.Where(b=>b.Id is not("QA_PIXEL" or "QA_RADSAT" or "SCL")).ToArray();
                     var expected=original.Sum(b=>b.Values.Length);var valid=original.Sum(b=>b.Values.Count(v=>v.HasValue&&double.IsFinite(v.Value)));
-                    results.Add(new(intent.Id,intent.SessionId,intent.InstrumentId,intent.ExposureUtc,expected,valid,expected-valid,true,true,reconstructed,[..references,"product:"+id+":"+product.Sha256,"source:"+product.SourceId],product.Warnings));
+                    results.Add(new(intent.Id,intent.SessionId,intent.InstrumentId,intent.ExposureUtc,expected,valid,expected-valid,true,true,reconstructed,[..references,"product:"+id+":"+product.Sha256,"source:"+product.SourceId],product.Warnings,product.ProcessedUtc));
                 }
                 else results.Add(new(intent.Id,intent.SessionId,intent.InstrumentId,intent.ExposureUtc,0,0,0,false,false,reconstructed,references,[libraryAvailable?"No verified original scientific product; pending, failed or source-unavailable result remains unassessed.":"Scientific Library unavailable; retained mission intents are not scientific results."]));
             }

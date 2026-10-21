@@ -26,6 +26,7 @@ public static class ResearchPackage
         }
         await Entry("scientific-review.json",stream=>JsonSerializer.SerializeAsync(stream,missions.ScientificReview(mission),WireJson.Options,token));
         await Entry("mission.json",stream=>missions.ExportJsonAsync(mission,stream,token));
+        if(missions.LatestPerformanceReport(mission) is not null)await Entry("performance-yield-v1.csv",stream=>stream.WriteAsync(Encoding.UTF8.GetBytes(ResearchExports.PerformanceCsv(missions,mission)),token).AsTask());
         foreach(var kind in new[]{"flight","science","events"})await Entry(kind+".csv",stream=>ResearchExports.CsvAsync(missions,mission,kind,stream,token));
         await Entry("track.gpx",stream=>ResearchExports.GpxAsync(missions,mission,stream,token));
         await Entry("track.kml",stream=>ResearchExports.KmlAsync(missions,mission,stream,token));

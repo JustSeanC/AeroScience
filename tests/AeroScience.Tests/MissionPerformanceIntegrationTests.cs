@@ -1,0 +1,69 @@
+using AeroScience.Shared;
+using AeroScience.Missions;
+using AeroScience.Telemetry;
+using Xunit;
+namespace AeroScience.Tests;
+public sealed class MissionPerformanceIntegrationTests:IDisposable
+{
+    readonly string root=Path.Combine(Path.GetTempPath(),"aeroscience-performance-"+Guid.NewGuid());
+    readonly MissionStore store;readonly ScienceStore science;readonly ResearchOperations research;readonly MissionCoordinator coordinator;
+    DateTimeOffset now=DateTimeOffset.UtcNow;
+    public MissionPerformanceIntegrationTests(){var s=new StorageManager(new PreferenceStore(root)).Initialize();store=new(Path.Combine(s.MissionDirectory,"missions.db"));store.Initialize();science=new(s.ScienceLibraryDirectory);science.Initialize();store.ScienceLibrary=science;research=new(store,science);coordinator=new(store,1000,research:research,utcNow:()=>now);}
+    Mission Start(bool armed=false,ScienceMode mode=ScienceMode.Realistic)
+    {var p=store.SavePlan(new(Guid.NewGuid(),"Synthetic three-set mission",Mode:mode,Objective:"Observe three seconds of original wind",EstimatedDurationMinutes:.05,Instruments:[new("ambient-wind",true)]));return coordinator.Start(new("Synthetic mission",PlanId:p.Id,ArmScience:armed));}
+    void Tick(){now=now.AddSeconds(1);var frame=SimulatedTelemetryProvider.Generate(now,0);coordinator.Apply(new(new(ConnectionState.Connected,TelemetrySource.Simulated,"Explicitly synthetic development evidence",now),frame,new(now,20,29,10,90,.002)));}
+    void Action(Guid mission,CollectionAction action){var state=store.CollectionCheckpoint(mission)!;coordinator.ControlScience(new(1,mission,Guid.NewGuid(),state.Revision,action,state.CurrentSessionId));}
+    [Fact] public async Task RealArchiveReportsSurviveRestartSettingsChangesLibraryMoveAndPortableExport()
+    {
+        var flight=Start();Tick();Tick();Action(flight.Id,CollectionAction.EndData);Assert.Equal(MissionStatus.Recording,store.Detail(flight.Id)!.Mission.Status);Assert.Empty(store.PerformanceReports(flight.Id));Action(flight.Id,CollectionAction.StartData);Tick();coordinator.End(flight.Id);
+        var input=MissionEvaluationArchive.Build(store,science,flight.Id);var report=store.SavePerformanceReport(input,"Actual synthetic backend acquisition evidence");Assert.Equal(MissionGradeStatus.Final,report.Grade.Status);Assert.Equal(MissionGradeLetter.A,report.Grade.Letter);Assert.Equal(2,report.Input.Sessions.Length);Assert.Equal(3,report.Input.Yield.Single().Metrics[0].Numerator);
+        var frozen=store.CollectionSnapshot<MissionAssessmentContext>(flight.Id)!;store.SetInstruments(flight.Id,[]);store.Initialize();var replay=MissionEvaluationArchive.Build(store,science,flight.Id);Assert.Equal(report.Grade.EvidenceSha256,PreflightReadiness.Hash(replay));Assert.Equal(EvidenceContracts.ContentHash(frozen),EvidenceContracts.ContentHash(store.CollectionSnapshot<MissionAssessmentContext>(flight.Id)!));
+        Assert.Single(store.PerformanceReports(flight.Id));MissionGrading.Verify(store.PerformanceReports(flight.Id)[0]);
+        var path=science.DirectoryPath;research.Dispose();science.Dispose();var moved=Path.Combine(root,"MovedLibrary");Directory.Move(path,moved);using var relocated=new ScienceStore(moved);relocated.Initialize();store.ScienceLibrary=relocated;var relocatedInput=MissionEvaluationArchive.Build(store,relocated,flight.Id);Assert.Equal(report.Grade.EvidenceSha256,PreflightReadiness.Hash(relocatedInput));
+        using var export=new MemoryStream();await store.ExportJsonAsync(flight.Id,export);var text=System.Text.Encoding.UTF8.GetString(export.ToArray());Assert.Contains("performanceReports",text);Assert.Contains(report.Sha256,text);Assert.DoesNotContain(path,text);
+    }
+    [Fact] public void EarlyEndAndEasyExtraSessionCannotEraseMissingFrozenWork()
+    {
+        var flight=Start();Tick();Action(flight.Id,CollectionAction.EndData);Tick();Action(flight.Id,CollectionAction.StartData);Tick();coordinator.End(flight.Id);
+        var input=MissionEvaluationArchive.Build(store,science,flight.Id);var report=MissionGrading.Report(input);var discipline=report.Categories.Single(c=>c.Category==RubricCategory.AcquisitionDiscipline);Assert.Equal(100d*2/3,discipline.ScoreLower,7);Assert.True(report.Grade.ScoreUpper<100);Assert.Equal(2,input.Sessions.Length);
+        Assert.All(input.Context!.Obligations.Where(o=>o.CriterionId=="discipline"),o=>Assert.Equal(3,o.TargetAmount));
+    }
+    [Fact] public void AllPausedOrNeverStartedFlightsDoNotEarnPerfectGradesAndUniversalIsUngraded()
+    {
+        var flight=Start(true);Tick();Tick();Tick();coordinator.End(flight.Id);var empty=MissionGrading.Report(MissionEvaluationArchive.Build(store,science,flight.Id));Assert.NotEqual(MissionGradeLetter.A,empty.Grade.Letter);Assert.All(empty.Input.Yield,y=>Assert.Null(y.Metrics[0].Numerator));
+        var universal=Start(mode:ScienceMode.Universal);Tick();Tick();Tick();coordinator.End(universal.Id);var result=MissionGrading.Report(MissionEvaluationArchive.Build(store,science,universal.Id));Assert.Equal(MissionGradeStatus.NotGraded,result.Grade.Status);Assert.Equal(3,result.Input.Yield.Single().Metrics[0].Numerator);
+    }
+    [Fact] public void RevisionsAreAppendOnlyDeduplicatedAndRawValuesAreNotModified()
+    {
+        var flight=Start();Tick();Tick();Tick();coordinator.End(flight.Id);var raw=PreflightReadiness.Hash(store.StreamSamples(flight.Id).ToArray());var input=MissionEvaluationArchive.Build(store,science,flight.Id);var first=store.SavePerformanceReport(input,"Original evidence");Assert.Equal(first.Sha256,store.SavePerformanceReport(input,"Same inputs").Sha256);
+        var second=store.SavePerformanceReport(input with{Limitations=[..input.Limitations,"Additional supported evidence explanation"]},"Explicit controlled revision");Assert.Equal(2,second.Revision);Assert.Equal(first.Sha256,second.PreviousSha256);Assert.Equal(MissionGradeStatus.Revised,second.Grade.Status);Assert.Equal(2,store.PerformanceReports(flight.Id).Length);Assert.Equal(raw,PreflightReadiness.Hash(store.StreamSamples(flight.Id).ToArray()));
+    }
+    [Fact] public void IncrementalLiveProjectionUsesEachArchivedPositionAndIntentOnce()
+    {
+        var flight=Start();var projection=new MissionLiveProjection(store,flight.Id);Tick();var first=projection.Update();Assert.Equal(MissionGradeStatus.Provisional,first.Grade.Status);Assert.Null(first.Grade.Letter);
+        Tick();Tick();var complete=projection.Update();var replay=projection.Update();Assert.Equal(complete.Sha256,replay.Sha256);Assert.True(complete.SupportedScoreLower>first.SupportedScoreLower);Assert.Equal(100,complete.SupportedScoreLower);Assert.Null(complete.Grade.Letter);coordinator.End(flight.Id);
+    }
+    [Fact] public void DeclaredSafetyPauseDoesNotRemoveFrozenTargetsOrPenalizeItsObservedInterval()
+    {
+        var flight=Start();Tick();var state=store.CollectionCheckpoint(flight.Id)!;coordinator.ControlScience(new(1,flight.Id,Guid.NewGuid(),state.Revision,CollectionAction.PauseData,state.CurrentSessionId,Justification:"safety"));Tick();Action(flight.Id,CollectionAction.ResumeData);Tick();Tick();coordinator.End(flight.Id);
+        var input=MissionEvaluationArchive.Build(store,science,flight.Id);var grade=MissionGrading.Report(input);Assert.Equal(100,grade.Categories.Single(c=>c.Category==RubricCategory.AcquisitionDiscipline).ScoreLower);Assert.Equal(3,input.Context!.Obligations.Single(o=>o.CriterionId=="discipline").TargetAmount);Assert.Contains(input.Sessions.Single().Events,e=>e.Justification=="safety");
+    }
+    [Fact] public void MissingRemoteSourceDoesNotBecomePilotFailureOrGoodScientificData()
+    {
+        now=DateTimeOffset.UtcNow.AddSeconds(-4);var plan=store.SavePlan(new(Guid.NewGuid(),"Missing source fixture",Mode:ScienceMode.Realistic,Objective:"Acquire remote source if available",EstimatedDurationMinutes:.05,Instruments:[new("thermal-imager",true)]));
+        var flight=coordinator.Start(new("Synthetic no-source flight",PlanId:plan.Id));Tick();Tick();Tick();coordinator.End(flight.Id);
+        var input=MissionEvaluationArchive.Build(store,science,flight.Id);var report=MissionGrading.Report(input);Assert.Equal(100,report.Categories.Single(c=>c.Category==RubricCategory.AcquisitionDiscipline).ScoreLower);Assert.Null(input.Yield.Single().Metrics.Single(m=>m.Id=="good-data-sets").Numerator);Assert.True(input.Yield.Single().Metrics.Single(m=>m.Id=="good-data-sets").Unassessed>0);
+    }
+    [Fact] public void InterruptedFlightCannotBecomeAFinalGradeFromAnApparentlyCompletedSession()
+    {
+        var flight=Start();Tick();Tick();Tick();coordinator.Interrupt();var input=MissionEvaluationArchive.Build(store,science,flight.Id);Assert.True(input.Interrupted);var report=store.SavePerformanceReport(input,"Interrupted evidence review");Assert.Equal(MissionGradeStatus.InsufficientEvidence,report.Grade.Status);Assert.Null(report.Grade.Letter);Assert.Contains(report.Grade.Limitations!,s=>s.Contains("final recording boundary"));
+    }
+    [Fact] public void PlannedAutomaticStartWithoutEndRetainsResearchUntilFlightEnd()
+    {
+        var frame=SimulatedTelemetryProvider.Generate(now,0);var waypoint=new ResearchWaypoint("Start only",frame.Latitude,frame.Longitude,Id:Guid.NewGuid());var id=Guid.NewGuid();var trigger=new CollectionTrigger(Guid.NewGuid(),Guid.NewGuid(),CollectionAction.StartData,CollectionTriggerKind.Waypoint,waypoint.Id!.Value,1,20,PlannedSessionKey:"A");
+        var plan=store.SavePlan(new(id,"Optional End fixture",Mode:ScienceMode.Realistic,Objective:"Observe wind after explicit Start",Waypoints:[waypoint],Instruments:[new("ambient-wind",true)],Collection:new(1,id,InitialCollectionPolicy.Armed,[trigger],new(5,6))));
+        var flight=coordinator.Start(new("Synthetic optional-end flight",PlanId:plan.Id));Tick();Tick();Tick();Assert.Equal(CollectionPhase.Collecting,store.CollectionCheckpoint(flight.Id)!.Phase);coordinator.End(flight.Id);
+        var input=MissionEvaluationArchive.Build(store,science,flight.Id);var obligation=input.Context!.Obligations.Single(o=>o.CriterionId=="discipline");var evidence=input.Evidence.Single(e=>e.ObligationId==obligation.Id);Assert.Equal(100,evidence.ScoreLower);Assert.Equal(3,evidence.Metrics!.Single().Denominator);Assert.Equal(3,evidence.Metrics.Single().Numerator);
+    }
+    public void Dispose(){research.Dispose();science.Dispose();if(Directory.Exists(root))Directory.Delete(root,true);}
+}

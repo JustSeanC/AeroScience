@@ -88,7 +88,7 @@ public static class EngineApplication
             requireFreshTelemetry: true, ensureRecordingCapacity: () =>
             {
                 sp.GetRequiredService<StorageManagement>().RequireFlightCapacity();
-            }, research: sp.GetRequiredService<ResearchOperations>()));
+            }, research: sp.GetRequiredService<ResearchOperations>(),assessPreflight:sp.GetRequiredService<PreflightReadinessService>().Assess));
         builder.Services.AddSingleton<ITelemetryProvider, SimConnectTelemetryProvider>();
         configureServices?.Invoke(builder.Services);
         builder.Services.AddHostedService<TelemetryWorker>();
@@ -99,6 +99,8 @@ public static class EngineApplication
         builder.Services.AddHostedService<StorageManagementWorker>();
         builder.Services.AddSingleton<ScientificAnalysisJobs>();
         builder.Services.AddSingleton<PreflightReadinessService>();
+        builder.Services.AddSingleton<MissionPerformanceService>();
+        builder.Services.AddHostedService(sp=>sp.GetRequiredService<MissionPerformanceService>());
         builder.Services.AddHostedService(sp=>sp.GetRequiredService<ScientificAnalysisJobs>());
 
         var app = builder.Build();

@@ -3,7 +3,7 @@ namespace AeroScience.Missions;
 
 public sealed record AcquisitionResult(Guid IntentId,Guid SessionId,string InstrumentId,DateTimeOffset ExposureUtc,
     int ExpectedMeasurements,int ValidMeasurements,int MissingMeasurements,bool Assessed,bool Acquired,bool Reconstructed,
-    string[] Evidence,string[] Limitations);
+    string[] Evidence,string[] Limitations,DateTimeOffset? ProcessedUtc=null);
 
 public static class ScienceYieldEvaluation
 {

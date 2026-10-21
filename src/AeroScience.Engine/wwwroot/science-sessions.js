@@ -16,6 +16,7 @@ export function initializeScienceSessions({api},parent) {
       if(view===key)return;view=key; // telemetry revisions must not destroy keyboard focus
       live.replaceChildren(element('h2',`Science: ${state.phase}`),element('p',state.currentSessionId?`Current session: ${state.currentSessionId}`:'No open science session. Flight recording continues.'));
       live.append(element('p',`Automation: ${state.authority}${state.manualAutomationHold?' · pilot override — rearm required':''}${state.continuityHold?' · continuity hold':''}${result.fault?' · storage hold; resolve storage and rearm':''}`));
+      const pauseReason=element('label','Pause rationale ');const rationale=document.createElement('select');rationale.setAttribute('aria-label','Science pause rationale');for(const [value,label] of [['','Unspecified (evidence stays uncertain)'],['safety','Pilot-declared safety pause']]){const option=element('option',label);option.value=value;option.selected=(live.dataset.pauseReason||'')===value;rationale.append(option);}rationale.onchange=()=>{live.dataset.pauseReason=rationale.value;};pauseReason.append(rationale);live.append(pauseReason);
       const actions=[['StartData','Start new science session',!state.currentSessionId],['PauseData','Pause science collection',state.phase==='collecting'],['ResumeData','Resume science collection',state.phase==='paused'],['EndData','End current science session',!!state.currentSessionId],['RearmAutomation','Rearm automatic collection',true]];
       for(const [action,label,enabled] of actions){
         const button=element('button',label);button.type='button';button.disabled=!enabled;
@@ -23,7 +24,7 @@ export function initializeScienceSessions({api},parent) {
           try{for(let attempt=0;attempt<2;attempt++){
             const fresh=(await api(`/api/missions/${flight}/collection`)).state;
             if(fresh.currentSessionId!==state.currentSessionId||fresh.phase!==state.phase||fresh.authority!==state.authority||fresh.manualAutomationHold!==state.manualAutomationHold||fresh.continuityHold!==state.continuityHold)throw new Error("Science session or authority changed; no command was applied.");
-            try{const outcome=await api(`/api/missions/${flight}/collection/control`,{version:1,missionId:state.missionId,requestId:newIdentity(),expectedRevision:fresh.revision,expectedSessionId:state.currentSessionId??null,action});message=outcome.event.reason;break;}
+            try{const outcome=await api(`/api/missions/${flight}/collection/control`,{version:1,missionId:state.missionId,requestId:newIdentity(),expectedRevision:fresh.revision,expectedSessionId:state.currentSessionId??null,action,...(action==='PauseData'&&rationale.value?{justification:rationale.value}:{})});message=outcome.event.reason;break;}
             catch(e){if(attempt||!e.message.includes('(409)'))throw e;}
           }}
           catch(e){message=`${e.message} Synchronize and issue a new command if still intended.`;}

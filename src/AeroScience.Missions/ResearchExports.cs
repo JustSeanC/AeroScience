@@ -153,6 +153,14 @@ public static class ResearchExports
         }
         await writer.FlushAsync(token);
     }
+    public static string PerformanceCsv(MissionStore store,Guid id)
+    {
+        var report=store.LatestPerformanceReport(id);var csv=new StringBuilder("formatVersion,missionId,reportRevision,sessionId,instrumentId,metric,numerator,denominator,unit,missing,unassessed,method\n");
+        if(report is null)return csv.ToString();
+        foreach(var y in report.Input.Yield.Concat(report.Input.Sessions.SelectMany(s=>s.Yield)))foreach(var m in y.Metrics)
+            csv.AppendLine(string.Join(',',"1",Q(id.ToString()),report.Revision,Q(y.SessionId?.ToString()),Q(y.InstrumentId),Q(m.Id),N(m.Numerator),N(m.Denominator),Q(m.Unit),m.Missing,m.Unassessed,Q(m.Method)));
+        return csv.ToString();
+    }
     public static string Report(MissionStore store, Guid id, bool includeDetails = true)
     {
         var detail = store.Detail(id) ?? throw new ArgumentException("Mission not found."); var research = store.Research(id); var stats = store.Statistics(id);
@@ -160,6 +168,14 @@ public static class ResearchExports
         text.AppendLine($"Mission: {id}\nTemplate: {research.Template}\nMode: {detail.Mission.Mode}\nAircraft: {detail.Mission.Aircraft ?? "Unavailable"}\nSource: {detail.Mission.Source?.ToString() ?? "Unavailable"}");
         text.AppendLine($"UTC start: {detail.Mission.StartedUtc:O}\nUTC end: {detail.Mission.EndedUtc:O}\nObjective: {research.Objective ?? "Not supplied"}\nSamples: {stats.Samples}\nReported gap events: {stats.GapEvents}");
         text.AppendLine($"Altitude range (ft MSL): {N(stats.MinimumAltitudeFeet)} – {N(stats.MaximumAltitudeFeet)}\nIAS range (kt): {N(stats.MinimumIasKnots)} – {N(stats.MaximumIasKnots)}\nMach range: {N(stats.MinimumMach)} – {N(stats.MaximumMach)} ({stats.MachSamples} available samples)\nAverage received recording interval (s): {N(stats.ActualAverageIntervalSeconds)}");
+        if(store.LatestPerformanceReport(id) is {} performance)
+        {
+            text.AppendLine($"Performance policy {performance.Input.Context?.Rubric.Id}; report revision {performance.Revision}; {performance.Grade.Status}; letter {performance.Grade.Letter?.ToString()??"Unavailable"}; supported bounds {N(performance.SupportedScoreLower)}–{N(performance.SupportedScoreUpper)}. Pilot performance is not scientific accuracy.");
+            text.AppendLine($"Evidence SHA-256: {performance.Grade.EvidenceSha256}; report SHA-256: {performance.Sha256}; cutoff {performance.Input.AsOfUtc:O}.");
+            foreach(var category in performance.Categories)text.AppendLine($"{category.Category}: effective weight {N(category.EffectiveWeight)}%, range {N(category.ScoreLower)}–{N(category.ScoreUpper)}, evidence {N(category.EvidenceFraction)}. {category.Method}");
+            foreach(var yield in performance.Input.Yield)foreach(var metric in yield.Metrics)text.AppendLine($"{yield.InstrumentId}/{metric.Id}: {N(metric.Numerator)} / {N(metric.Denominator)} {metric.Unit}; missing {metric.Missing}; unassessed {metric.Unassessed}. {metric.Method}");
+            foreach(var criterion in performance.Input.Evidence)foreach(var reason in criterion.Reasons.Concat(criterion.Recommendations))text.AppendLine($"Obligation {criterion.ObligationId}: {reason}");
+        }
         text.AppendLine("Scientific data: simulator-reported atmosphere and, where present, historical external remote-sensing datasets sampled along approximate simulator-derived footprints. Source dates are not flight times.");
         if (store.ScienceLibrary is null || store.ScienceLibrary.AvailabilityError() is { }) text.AppendLine("Scientific library unavailable in this host; no observations or findings were invented.");
         else foreach (var measurement in store.ScienceLibrary.Summary(id)) text.AppendLine($"{measurement.MeasurementId}: n={measurement.Count}, min={N(measurement.Minimum)}, max={N(measurement.Maximum)}, mean={N(measurement.Mean)} {measurement.Unit}; {measurement.FirstUtc:O} to {measurement.LastUtc:O}");

@@ -40,6 +40,8 @@ public sealed partial class MissionStore
             writer.WriteStartObject(); writer.WritePropertyName("intent"); writer.WriteRawValue(r.GetString(0)); writer.WriteString("state", r.GetString(1));
             writer.WriteString("productId", r.IsDBNull(2) ? null : r.GetString(2)); writer.WriteString("productSha256", r.IsDBNull(3) ? null : r.GetString(3)); writer.WriteEndObject();
         });
+        await Rows("performanceReports", "SELECT message FROM events WHERE mission_id=$mission AND kind='mission-performance-report' ORDER BY id", r =>
+        { var report=System.Text.Json.JsonSerializer.Deserialize<AeroScience.Shared.MissionPerformanceReport>(r.GetString(0),AeroScience.Shared.WireJson.Options)!;MissionGrading.Verify(report);writer.WriteRawValue(r.GetString(0)); });
         writer.WriteEndObject();
 
         async Task Rows(string name, string sql, Action<Microsoft.Data.Sqlite.SqliteDataReader> write)
@@ -47,7 +49,7 @@ public sealed partial class MissionStore
             writer.WritePropertyName(name); writer.WriteStartArray(); using var db = Open(); using var cmd = db.CreateCommand();
             cmd.CommandText = sql; cmd.Parameters.AddWithValue("$mission", mission.ToString()); using var reader = cmd.ExecuteReader();
             var count = 0;
-            while (reader.Read()) { cancellationToken.ThrowIfCancellationRequested(); write(reader); if (++count % 128 == 0) await flush(); }
+            while (reader.Read()) { cancellationToken.ThrowIfCancellationRequested(); write(reader); if (++count % 128 == 0 || name=="performanceReports") await flush(); }
             writer.WriteEndArray();
         }
     }
