@@ -92,6 +92,19 @@ public sealed class MissionPerformanceIntegrationTests:IDisposable
         foreach(var point in route){now=now.AddSeconds(1);var f=SimulatedTelemetryProvider.Generate(now,0) with{Latitude=point.Latitude,Longitude=point.Longitude};coordinator.Apply(new(new(ConnectionState.Connected,TelemetrySource.Simulated,"Synthetic route evidence",now),f,new(now,20,29,10,90,.002)));}
         coordinator.End(flight.Id);var input=MissionEvaluationArchive.Build(store,science,flight.Id);var result=input.Evidence.Single(e=>input.Context!.Obligations.Single(o=>o.Id==e.ObligationId).CriterionId=="discipline");Assert.Equal(100,result.ScoreLower);Assert.Equal(2,result.Metrics!.Single().Denominator);Assert.Equal(2,result.Metrics!.Single().Numerator);Assert.Equal(2,input.Yield.Single().Metrics[0].Numerator);
     }
+    [Fact] public void GeographicSurveyUsesExplicitFrozenWindowsAndRetainsBonusScienceSeparately()
+    {
+        var id=Guid.NewGuid();var route=Enumerable.Range(0,3).Select(i=>new ResearchWaypoint("Survey "+i,40,-75+i*.002,Id:Guid.NewGuid())).ToArray();
+        CollectionTrigger Trigger(int index,CollectionAction action)=>new(Guid.NewGuid(),Guid.NewGuid(),action,CollectionTriggerKind.Waypoint,route[index].Id!.Value,1,20,PlannedSessionKey:"survey-A");
+        var area=new SurveyArea("Frozen study region",[new(39.99,-75.01),new(39.99,-74.99),new(40.01,-74.99),new(40.01,-75.01)]);
+        var plan=store.SavePlan(new(id,"Bounded synthetic geographic study",MissionTemplateKind.GeographicSurvey,ScienceMode.Realistic,Objective:"Collect wind on the declared research legs",Waypoints:route,SurveyAreas:[area],Instruments:[new("ambient-wind",true)],Collection:new(1,id,InitialCollectionPolicy.Armed,[Trigger(0,CollectionAction.StartData),Trigger(2,CollectionAction.EndData)],new(5,6))));
+        var flight=coordinator.Start(new("Synthetic bounded survey",PlanId:plan.Id));
+        foreach(var point in route){now=now.AddSeconds(1);var f=SimulatedTelemetryProvider.Generate(now,0) with{Latitude=point.Latitude,Longitude=point.Longitude};coordinator.Apply(new(new(ConnectionState.Connected,TelemetrySource.Simulated,"Synthetic bounded geographic window",now),f,new(now,20,29,10,90,.002)));}
+        Action(flight.Id,CollectionAction.StartData);
+        for(var i=0;i<4;i++){now=now.AddSeconds(1);var f=SimulatedTelemetryProvider.Generate(now,0) with{Latitude=40,Longitude=-74.996};coordinator.Apply(new(new(ConnectionState.Connected,TelemetrySource.Simulated,"Synthetic bonus session",now),f,new(now,20,29,10,90,.002)));}
+        coordinator.End(flight.Id);var input=MissionEvaluationArchive.Build(store,science,flight.Id);var report=MissionGrading.Report(input);Assert.Equal(MissionGradeLetter.A,report.Grade.Letter);Assert.Equal(6,input.Yield.Single().Metrics[0].Numerator);
+        Assert.Equal(2,input.Sessions.Length);Assert.All(input.Evidence.Where(e=>input.Context!.Obligations.Single(o=>o.Id==e.ObligationId).CriterionId=="discipline"),e=>{Assert.Equal(100,e.ScoreLower);Assert.Equal(2,e.Metrics!.Single().Numerator);Assert.Equal(2,e.Metrics!.Single().Denominator);});
+    }
     [Fact] public void TelemetryJumpHoldIsUnassessedEvidenceAndCannotBecomePilotNoncompliance()
     {
         var id=Guid.NewGuid();var route=new[]{new ResearchWaypoint("Start",40,-75,Id:Guid.NewGuid()),new ResearchWaypoint("End",40,-74,Id:Guid.NewGuid())};

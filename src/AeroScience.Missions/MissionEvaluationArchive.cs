@@ -60,6 +60,14 @@ public static class MissionEvaluationArchive
         }
         var contiguous=verifiedFrames.Length==frames.Length&&frames.Length>=2&&frames.Zip(frames.Skip(1)).All(p=>(p.Second.TimestampUtc-p.First.TimestampUtc).TotalSeconds is >0 and <=5);
         var comparison=MissionAnalysis.Compare(plan,verifiedFrames,new());
+        (DateTimeOffset? From,DateTimeOffset? To) PlannedWindow(string? key)
+        {
+            var actions=plan?.Collection?.Triggers.Where(t=>t.PlannedSessionKey==key).ToArray()??[];
+            var start=actions.FirstOrDefault(t=>t.Action==CollectionAction.StartData);var end=actions.FirstOrDefault(t=>t.Action==CollectionAction.EndData&&t.Kind is CollectionTriggerKind.Waypoint or CollectionTriggerKind.DirectionalGate);
+            return(start is null?null:events.FirstOrDefault(e=>e.OccurrenceId==start.OccurrenceId)?.InputUtc,end is null?null:events.FirstOrDefault(e=>e.OccurrenceId==end.OccurrenceId&&e.Origin==CollectionEventOrigin.RouteTrigger)?.InputUtc);
+        }
+        var plannedWindows=(plan?.Collection?.Triggers??[]).Where(t=>t.Action==CollectionAction.StartData&&t.PlannedSessionKey is not null).Select(t=>t.PlannedSessionKey).Distinct().Select(PlannedWindow).ToArray();
+        var allWindowsBounded=plannedWindows.Length>0&&plannedWindows.All(w=>w.From.HasValue&&w.To.HasValue&&w.To>=w.From);
         bool InScope(TelemetryFrame f,MissionObligation o)
         {
             if(o.Scope=="region"&&o.RegionIndex is {} index&&plan?.SurveyAreas?.ElementAtOrDefault(index) is {} area)return MissionAnalysis.Inside(new(f.Latitude,f.Longitude),area.Vertices);
@@ -106,7 +114,7 @@ public static class MissionEvaluationArchive
                 var config=context!.Configurations.First(c=>c.Settings.InstrumentId==obligation.InstrumentId).Settings;
                 var interval=config.IntervalMs/1000d;
                 long Slot(DateTimeOffset time)=>(long)Math.Floor((time-detail.Mission.StartedUtc).TotalSeconds/interval+1e-6);
-                var scopedFrames=frames.Where(f=>InScope(f,obligation)&&!f.IsPaused).ToArray();
+                var scopedFrames=frames.Where(f=>InScope(f,obligation)&&!f.IsPaused&&(obligation.Scope!="region"||!allWindowsBounded||plannedWindows.Any(w=>f.TimestampUtc>=w.From&&f.TimestampUtc<w.To))).ToArray();
                 var expected=MissionRubrics.RequiredSlots(scopedFrames.Where(f=>!AuthorizedPause(StateAt(f.TimestampUtc))).Select(f=>Slot(f.TimestampUtc)),obligation.TargetAmount);
                 var matching=actual.Where(a=>a.InstrumentId==obligation.InstrumentId&&expected.Contains(Slot(a.ExposureUtc))).GroupBy(a=>Slot(a.ExposureUtc)).Select(g=>g.First()).ToArray();
                 var denominator=Math.Max(expected.Count,obligation.TargetAmount??0);
@@ -121,8 +129,9 @@ public static class MissionEvaluationArchive
                     if(!contiguous||unknownPaused.Count>0)reasons.Add("Telemetry gaps or manual pause rationale are not sufficient evidence of pilot fault; unresolved work remains uncertain, not perfect or failed.");
                 }
                 else if(contiguous&&completed&&obligation.Scope is "region" or "planned-session"){Score(0,"collection-intent");reasons.Add("The frozen research region was never visited/collected during a continuously observed flight.");}
-                var configuredEnd=obligation.Scope=="planned-session"?plan?.Collection?.Triggers.FirstOrDefault(t=>t.PlannedSessionKey==obligation.PlannedSessionKey&&t.Action==CollectionAction.EndData&&t.Kind is CollectionTriggerKind.Waypoint or CollectionTriggerKind.DirectionalGate):null;
-                var closedPlannedWindow=configuredEnd is not null&&events.Any(e=>e.OccurrenceId==configuredEnd.OccurrenceId&&e.Origin==CollectionEventOrigin.RouteTrigger);
+                var window=PlannedWindow(obligation.PlannedSessionKey);
+                var closedPlannedWindow=obligation.Scope=="region"?allWindowsBounded:obligation.Scope=="planned-session"&&window.From.HasValue&&window.To.HasValue&&window.To>=window.From;
+                if(obligation.Scope=="region"&&allWindowsBounded)reasons.Add("Study-region opportunities are bounded by the explicitly configured and observed route collection windows, not by later bonus science sessions or a polygon exit.");
                 if(denominator>0&&obligation.TargetAmount is null&&!closedPlannedWindow)
                 {
                     low=0;high=100;evidence=0;classes=[];
