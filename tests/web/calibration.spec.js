@@ -62,3 +62,16 @@ test('external calibration is metadata only and paired clients cannot create def
  });
  expect(result).toEqual({disabled:true,original:null,warning:true});
 });
+
+test('operating reports show separate compliance and source QA and remain available in history',async({page,request})=>{
+ await post(request,'/api/instruments',[{instrumentId:'ambient-temperature',enabled:true,intervalMs:1000},{instrumentId:'thermal-imager',enabled:true,intervalMs:1000}]);
+ const flight=await(await post(request,'/api/missions',{name:'Synthetic operating assessment flight',mode:'realistic'})).json();
+ await page.goto('/#science');
+ await expect.poll(async()=>{const reports=await(await request.get('/api/instruments/operating')).json();return reports.length;}).toBe(2);
+ await expect(page.locator('#operating-reports')).toContainText('thermal-imager');
+ await page.locator('#operating-reports summary').filter({hasText:'thermal-imager'}).click();
+ await expect(page.locator('#operating-reports')).toContainText('Operating:');await expect(page.locator('#operating-reports')).toContainText('Source QA:');
+ await post(request,`/api/missions/${flight.id}/end`);
+ const archived=await(await request.get(`/api/missions/${flight.id}/operating`)).json();expect(archived).toHaveLength(2);
+ expect(archived[0].input.frame.source).toBe('simulated');expect(archived[0].assessment.evidence[0].sha256).toHaveLength(64);
+});

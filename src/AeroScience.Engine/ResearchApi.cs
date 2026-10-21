@@ -116,6 +116,8 @@ public static class ResearchApi
         app.MapGet("/api/templates", () => ScienceCatalog.Templates);
         app.MapGet("/api/instruments", () => ScienceCatalog.Definitions);
         app.MapGet("/api/instruments/configuration", (ResearchOperations research) => research.Configurations);
+        app.MapGet("/api/instruments/operating",(ResearchOperations research)=>research.OperatingReports);
+        app.MapGet("/api/missions/{id:guid}/operating",(Guid id,DateTimeOffset? at,MissionStore store)=>store.OperatingReports(id,at));
         app.MapGet("/api/instruments/calibration", (InstrumentCalibrationSettings settings, HttpContext context) =>
         {
             var definitions = settings.Get();

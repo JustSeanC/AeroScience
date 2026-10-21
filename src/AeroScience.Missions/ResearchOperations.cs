@@ -27,6 +27,11 @@ public sealed class ResearchOperations(MissionStore missions, ScienceStore scien
     private bool intentionallyPaused;
     private DateTimeOffset? pauseStarted;
     private double pauseSeconds;
+    private readonly Dictionary<string, EffectiveInstrumentConfiguration> effective = [];
+    private DateTimeOffset? lastAssessment;
+    private InstrumentOperatingReport[] operating = [];
+    public InstrumentOperatingReport[] OperatingReports => Volatile.Read(ref operating);
+    public Guid? CollectionSessionId { get; set; }
     public InstrumentConfiguration[] Configurations => configurations.Select(InstrumentCalibration.Freeze).ToArray();
     public void EnsureCanStart(InstrumentConfiguration[] input)
     {
@@ -39,6 +44,8 @@ public sealed class ResearchOperations(MissionStore missions, ScienceStore scien
     {
         mission = active; context = research; configurations = ScienceCatalog.Normalize(research.Instruments);
         acquisitions.Clear(); baseline = null; intentionallyPaused = false; pauseStarted = null; pauseSeconds = 0;
+        effective.Clear(); lastAssessment=null; operating=[];CollectionSessionId=null;
+        foreach(var config in configurations)effective[config.InstrumentId]=InstrumentCalibration.Effective(config,Guid.NewGuid(),1,active.StartedUtc);
         remote.Begin();
     }
     public void End()
@@ -48,7 +55,7 @@ public sealed class ResearchOperations(MissionStore missions, ScienceStore scien
         {
             if(mission is not null)missions.AddEvent(mission.Id,now,"science-stopped",$"Science collection stopped. Intentional pause seconds: {pauseSeconds+(pauseStarted is {} began?Math.Max(0,(now-began).TotalSeconds):0):0.###}. Collection will not resume automatically after a restart.");
         }
-        finally{pauseStarted=null;intentionallyPaused=false;mission=null;context=null;baseline=null;remote.Reset(true);}
+        finally{Volatile.Write(ref operating,[]);pauseStarted=null;intentionallyPaused=false;mission=null;context=null;baseline=null;remote.Reset(true);}
     }
     public void Configure(InstrumentConfiguration[] input)
     {
@@ -60,6 +67,8 @@ public sealed class ResearchOperations(MissionStore missions, ScienceStore scien
             var previous = configurations.First(c => c.InstrumentId == config.InstrumentId);
             if (JsonSerializer.Serialize(previous,WireJson.Options)!=JsonSerializer.Serialize(config,WireJson.Options) && acquisitions.TryGetValue(config.InstrumentId, out var run))
             { run.Anchor = null; run.Slot = -1; run.Error = null; run.CadenceReference = null; }
+            if(JsonSerializer.Serialize(previous,WireJson.Options)!=JsonSerializer.Serialize(config,WireJson.Options))
+                effective[config.InstrumentId]=InstrumentCalibration.Effective(config,Guid.NewGuid(),(effective.GetValueOrDefault(config.InstrumentId)?.Revision??0)+1,DateTimeOffset.UtcNow);
         }
         configurations = next;
         remote.Reset(intentionallyPaused);
@@ -84,6 +93,13 @@ public sealed class ResearchOperations(MissionStore missions, ScienceStore scien
     }
     public void Observe(TelemetryUpdate update, TelemetryFrame? position)
     {
+        if(mission is not null && update.Frame is {} assessed && (lastAssessment is null || assessed.TimestampUtc-lastAssessment>=TimeSpan.FromSeconds(1)))
+        {
+            
+            var reports=configurations.Where(c=>c.Enabled).Select(c=>InstrumentOperatingAssessment.Evaluate(mission.Id,CollectionSessionId,
+                effective[c.InstrumentId],mission.Mode,update,context?.PlanSnapshot,RemoteAcquisition.Instruments.ContainsKey(c.InstrumentId)?remote.Status(c.InstrumentId):null,acquisitions.TryGetValue(c.InstrumentId,out var cadence)&&cadence.IntervalCount>0?cadence.IntervalSeconds/cadence.IntervalCount:null)).ToArray();
+            missions.SaveOperatingReports(mission.Id,reports);Volatile.Write(ref operating,reports);lastAssessment=assessed.TimestampUtc;
+        }
         if (update.Connection.State != ConnectionState.Connected)
         { baseline = null; return; }
         if (position is not null && aircraft != position.Aircraft) { aircraft = position.Aircraft; baseline = null; }

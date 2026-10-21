@@ -52,5 +52,8 @@ unreadable/future settings are preserved and cannot be silently replaced.
 See [scientific methods](v0.4.0-scientific-methods.md),
 [reference profiles](v0.4.0-instrument-profiles.md),
 [development progress](roadmap/v0.5.0-development-tracker.md) and
-[validation tiers](development-validation.md). Operating-assessment rules and multi-session
-lifecycle integration are subsequent P04/P05 milestones; they are not activated by P03.
+[validation tiers](development-validation.md). P04 adds instrument-specific operating reports to Science Collection and historical review.
+Reports retain exact inputs/configuration and separate operating compliance, derived validity
+and source QA. Modeled overlap is not valid scientific coverage; unknown internal payload
+temperature remains unknown. Read-only assessment APIs support offline replay cutoffs.
+These advisories do not veto raw acquisition. Multi-session integration is the P05 milestone.

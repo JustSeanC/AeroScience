@@ -8,6 +8,7 @@ import { ResearchMap } from "./map.js";
 import { patternEditor } from "./patterns.js";
 import { payloadSettings } from "./payload-settings.js";
 import { calibrationSettings } from "./calibration-settings.js";
+import { operatingAssessments } from "./operating-assessments.js";
 import { missionWorkspace } from "./mission-workspace.js";
 import {
   scienceCharts,
@@ -216,6 +217,7 @@ export async function loadResearch(page) {
   if (page === "instruments") await instruments();
 }
 let payloadCatalog;
+let operatingBusy=false,operatingFetched=0;
 let calibrationCatalog;
 let plannerDirty=false, pendingGeometry=false;
 window.addEventListener("beforeunload",event=>{if(plannerDirty||pendingGeometry){event.preventDefault();event.returnValue="";}});
@@ -827,6 +829,7 @@ async function instruments() {
   const values = text("div");
   values.id = "instrument-values";
   p.append(values);
+  const operating=text('section');operating.id='operating-reports';p.append(operating);await operatingAssessments(operating,ctx.api);
   const scienceMapPanel = text("details", undefined, "panel research-panel");
   scienceMapPanel.append(text("summary","Scientific sample locations · expand map and layers"));
   scienceMapPanel.append(text("h2", "Scientific sample locations"),text("p","Blue dots show successful atmospheric sample positions. Outlined remote-sensing footprints identify saved external-data acquisitions; their full boundary does not guarantee every pixel is valid. Missing coverage and acquisition gaps are reported in collection status; a dot is not a camera image or a continuous swath. Use the map layers to compare samples, footprints, route and recorded track."));
@@ -931,6 +934,10 @@ function guidance(parent, g) {
 export function renderResearch(next) {
   if (!next) return;
   state = next;
+  const operating=$('operating-reports');
+  if(operating&&operating.offsetParent!==null&&!operatingBusy&&Date.now()-operatingFetched>3000){
+    operatingBusy=true;operatingFetched=Date.now();operatingAssessments(operating,ctx.api).catch(()=>{}).finally(()=>{operatingBusy=false;});
+  }
   syncUnits(next.research?.units);
   guidance($("flight-guidance"), next.research?.guidance);
   const environment=$('environment-readings');
@@ -1183,6 +1190,7 @@ function showScience(parent, rows, label) {
   raw.append(list);
 }
 export async function researchDetail(body, id, mission) {
+  const operating=document.createElement('section');body.append(operating);await operatingAssessments(operating,ctx.api,id);
   await initializeUnits(ctx.api);
   const review = await ctx.api(`/api/missions/${id}/review`);
   const workspace=missionWorkspace(body,id,mission,ctx.api,review);body=workspace.overview;
