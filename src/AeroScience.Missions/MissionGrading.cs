@@ -54,7 +54,7 @@ public static class MissionGrading
             status==MissionGradeStatus.InsufficientEvidence?null:lo,status==MissionGradeStatus.InsufficientEvidence?null:hi,fraction,
             status==MissionGradeStatus.Final?Letter(lo,rubric.Thresholds):null,results.ToArray(),
             input.Sessions.Select(s=>new SessionPerformanceBreakdown(s.Session.Id,s.Criteria,s.Yield.SelectMany(y=>y.Metrics.Select(m=>m with{Id=y.InstrumentId+":"+m.Id})).ToArray(),s.Limitations)).ToArray(),
-            [..rubric.Limitations,..input.Limitations,..(input.Interrupted?new[]{"Flight interrupted: the final recording boundary is unknown; no final letter grade was inferred."}:Array.Empty<string>()),$"Evidence eligibility: {fraction:P1}, required classes {(required?"present":"missing")}; score range {(same?"within one letter":"spans letter bands")}. Provisional scores have no final letter."]);
+            [..rubric.Limitations,..input.Limitations,..(input.Interrupted?new[]{"Flight interrupted: the final recording boundary is unknown; no final letter grade was inferred."}:Array.Empty<string>()),$"Evidence eligibility: {fraction.ToString("P1",System.Globalization.CultureInfo.InvariantCulture)}, required classes {(required?"present":"missing")}; score range {(same?"within one letter":"spans letter bands")}. Provisional scores have no final letter."]);
         EvidenceContracts.Validate(grade);return(grade,categories.ToArray(),lo,hi);
     }
     public static MissionPerformanceReport Report(MissionEvaluationInput input,int revision=1,string reason="End-flight archived evidence",string? previous=null,DateTimeOffset? created=null)

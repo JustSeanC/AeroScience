@@ -88,7 +88,7 @@ public static class MissionEvaluationArchive
             {
                 bool? observed=null;
                 if(obligation.Scope=="waypoint"&&obligation.RegionIndex is {} index){observed=comparison.Waypoints.ElementAtOrDefault(index)?.Reached;reasons.Add("Ordered actual waypoint observations, 1000 m policy tolerance; geographic coverage is separate.");}
-                else if(obligation.Scope=="altitude"&&obligation.TargetAltitudeFeet is {} altitude){observed=frames.Any(f=>Math.Abs(f.AltitudeMslFeet-altitude)<=100);reasons.Add($"Actual altitude target {altitude:0.###} ft MSL within 100 ft policy tolerance; no polygon required.");}
+                else if(obligation.Scope=="altitude"&&obligation.TargetAltitudeFeet is {} altitude){observed=frames.Any(f=>Math.Abs(f.AltitudeMslFeet-altitude)<=100);reasons.Add($"Actual altitude target {altitude.ToString("0.###",System.Globalization.CultureInfo.InvariantCulture)} ft MSL within 100 ft policy tolerance; no polygon required.");}
                 else if(obligation.Scope=="region"){observed=frames.Any(f=>InScope(f,obligation));reasons.Add("Actual visit to frozen study region, not proof of valid scientific pixels.");}
                 else if(obligation.Scope=="planned-session"){observed=frames.Any(f=>InScope(f,obligation));reasons.Add("Configured point/gate research window assessed from route observations; actual session End does not shorten it.");}
                 else if(plan?.EstimatedDurationMinutes is {} duration&&frames.Length>0){Score(Math.Min(100,100*(frames[^1].TimestampUtc-detail.Mission.StartedUtc).TotalSeconds/(duration*60)),"flight-position");reasons.Add("Recorded time versus frozen planned duration; not geographic coverage.");}

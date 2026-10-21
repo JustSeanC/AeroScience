@@ -37,6 +37,7 @@ public sealed class MissionGradingTests
     [Fact] public void OriginalPolicyAndModesAreRetainedAndRevisionsReproduce()
     {
         var input=Example();var original=MissionGrading.Report(input);MissionGrading.Verify(original);
+        var culture=System.Globalization.CultureInfo.CurrentCulture;try{System.Globalization.CultureInfo.CurrentCulture=System.Globalization.CultureInfo.GetCultureInfo("fr-FR");MissionGrading.Verify(original);Assert.Equal(original.Sha256,MissionGrading.Report(input).Sha256);}finally{System.Globalization.CultureInfo.CurrentCulture=culture;}
         var revised=MissionGrading.Report(input with{Evidence=input.Evidence.Select(e=>e with{ScoreLower=95,ScoreUpper=95}).ToArray()},2,"New supported evidence",original.Sha256);Assert.Equal(MissionGradeStatus.Revised,revised.Grade.Status);MissionGrading.Verify(revised);
         Assert.Throws<InvalidDataException>(()=>MissionGrading.Verify(original with{Reason="changed"}));
         Assert.Equal(MissionGradeStatus.NotGraded,MissionGrading.Evaluate(input with{Context=null}).Grade.Status);
