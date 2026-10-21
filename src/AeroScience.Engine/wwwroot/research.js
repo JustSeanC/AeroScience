@@ -1,3 +1,4 @@
+import { newIdentity } from "./workstation-ui.js";
 import { collectionPlanner } from "./collection-planner.js";
 import { initializeScienceSessions } from "./science-sessions.js";
 import {reviewPreflight} from "./download-activity.js";
@@ -281,7 +282,7 @@ function editPlan(plan) {
   if((plannerDirty||pendingGeometry)&&!confirm("Discard unsaved mission and geometry edits? Cancel keeps the current draft."))return;
   plannerDirty=false;pendingGeometry=false;
   editing = plan;
-  const draftPlanId=plan?.id||crypto.randomUUID();
+  const draftPlanId=plan?.id||newIdentity();
   waypoints = structuredClone(plan?.waypoints || []);
   areas = structuredClone(plan?.surveyAreas || []);
   const e = $("plan-editor");
@@ -528,7 +529,7 @@ function editPlan(plan) {
       button("Save Waypoint", () => {
         const value = {
           ...w,
-          id: w.id || crypto.randomUUID(),
+          id: w.id || newIdentity(),
           navigationIdentifier: navigationIdentifier.value || null,
           name: title.value,
           latitude: Number(lat.value),
@@ -785,7 +786,7 @@ async function instruments() {
         button("Duplicate", async () => {
           await ctx.api("/api/presets", {
             ...item,
-            id: crypto.randomUUID(),
+            id: newIdentity(),
             name: item.name + " copy",
           });
           await presetRows();
@@ -807,7 +808,7 @@ async function instruments() {
   presets.append(
     button("Save current configuration as preset", async () => {
       await ctx.api("/api/presets", {
-        id: presetName.dataset.id || crypto.randomUUID(),
+        id: presetName.dataset.id || newIdentity(),
         name: presetName.value,
         description: presetDescription.value,
         instruments: readConfigs($("live-instrument-config")),

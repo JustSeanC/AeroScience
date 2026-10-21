@@ -42,6 +42,8 @@ def plan(paths, uncertain=False):
                 dotnet.update({'OfflineApiTests', 'StorageTests'})
             else:
                 full_dotnet = True  # Unknown/shared dependencies get the complete .NET suite.
+        if name.endswith(('/science-sessions.js', '/collection-planner.js')):
+            web.add('tests/web/science-sessions.spec.js')
         if name.startswith('tests/web/') and name.endswith('.spec.js'):
             web.add(name)
         if name.startswith(('tests/AeroScience.TestHost/','tests/web/helpers/')) or name == 'playwright.config.js':

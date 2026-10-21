@@ -1,3 +1,4 @@
+import { newIdentity } from "./workstation-ui.js";
 const node=(tag,text)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=text;return e;};
 // Mounted inside the existing instrument editor, also used by saved plans/presets.
 export function calibrationSettings(parent,config,catalog,api){
@@ -39,7 +40,7 @@ export function calibrationSettings(parent,config,catalog,api){
  create.onclick=()=>{
   editor.replaceChildren();editor.hidden=false;dirty=true;
   const prior=selected?.status==='userDefined'?selected:null;
-  const id=prior?.id??'user.'+crypto.randomUUID();
+  const id=prior?.id??'user.'+newIdentity();
   const revision=Math.max(0,...(catalog.definitions??[]).filter(r=>r.definition.id===id).map(r=>r.definition.revision))+1;
   editor.append(node('p',`New immutable revision ${revision}. Save this revision, then apply the instrument settings. Existing mission snapshots do not change.`));
   const author=field('Calibration author',prior?.author),basis=field('Basis / provenance',prior?.parameters?.[0]?.basis??prior?.limitations?.[1]??'', 'textarea');

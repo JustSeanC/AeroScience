@@ -52,6 +52,10 @@ class DevelopmentValidationTests(unittest.TestCase):
                      'src/AeroScience.Engine/wwwroot/shared-new-module.js', 'src/AeroScience.Engine/wwwroot/app.css'):
             self.assertEqual(['tests/web'], ci.plan([path])['browserSpecs'])
 
+    def test_session_controls_and_collection_planner_keep_their_functional_browser_checks(self):
+        for path in ('src/AeroScience.Engine/wwwroot/science-sessions.js','src/AeroScience.Engine/wwwroot/collection-planner.js'):
+            self.assertIn('tests/web/science-sessions.spec.js',ci.plan([path])['browserSpecs'])
+
     def test_lock_changes_keep_owner_shutdown_and_offline_tests(self):
         selected = ci.plan(['src/AeroScience.Engine/DataDirectoryLease.cs'])
         for name in ('ApiTests', 'OfflineApiTests', 'StorageTests'):

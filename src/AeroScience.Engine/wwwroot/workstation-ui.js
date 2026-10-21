@@ -109,3 +109,14 @@ export function chart(parent, title, datasets, {xLabel = 'Recorded position', yL
   const observer = new MutationObserver(() => { if (!holder.isConnected) { instance?.destroy(); observer.disconnect(); } });
   observer.observe(document.body, {childList:true,subtree:true}); return holder;
 }
+
+// randomUUID is limited to secure contexts; paired LAN HTTP clients still expose
+// cryptographic getRandomValues. These IDs identify requests/plans, not credentials.
+export function newIdentity(){
+ const provider=globalThis.crypto;
+ if(typeof provider?.randomUUID==='function')return provider.randomUUID();
+ if(typeof provider?.getRandomValues!=='function')throw new Error('This browser cannot generate a safe request identity. Use a current browser.');
+ const bytes=provider.getRandomValues(new Uint8Array(16));bytes[6]=(bytes[6]&15)|64;bytes[8]=(bytes[8]&63)|128;
+ const value=Array.from(bytes,n=>n.toString(16).padStart(2,'0')).join('');
+ return `${value.slice(0,8)}-${value.slice(8,12)}-${value.slice(12,16)}-${value.slice(16,20)}-${value.slice(20)}`;
+}

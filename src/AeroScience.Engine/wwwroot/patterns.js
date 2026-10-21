@@ -1,3 +1,4 @@
+import { newIdentity } from "./workstation-ui.js";
 import { planningField, planningDistance, planningArea, planningText,planningMeasure,onUnitsChanged } from "./science-display.js";
 import { areaSummary } from "./planner-geometry.js";
 import { sensorPlanning } from "./sensor-planning.js";
@@ -126,7 +127,7 @@ export function patternEditor(parent, { api, notice, get, set, aircraft, pickCen
         "Choose a geographic center or enter coordinates. An unset location is not 0,0.",
       );
     return {
-      id: preview?.definition.id || crypto.randomUUID(),
+      id: preview?.definition.id || newIdentity(),
       kind: kind.value,
       passes:kind.value==="straightTransect"?Number(passes.value):1,
       passAltitudesFeet:kind.value==="straightTransect"?readPassAltitudes():null,
