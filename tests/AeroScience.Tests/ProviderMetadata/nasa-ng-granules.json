@@ -1,0 +1,187 @@
+{
+  "feed": {
+    "updated": "2026-10-21T12:35:47.964Z",
+    "id": "https://cmr.earthdata.nasa.gov:443/search/granules.json?short_name=AVIRIS-NG_L2_Reflectance_2110&page_size=2",
+    "title": "ECHO granule metadata",
+    "entry": [
+      {
+        "time_start": "2014-06-21T19:05:50.000Z",
+        "updated": "2023-09-28T20:44:07.000Z",
+        "dataset_id": "AVIRIS-NG L2 Surface Reflectance, Facility Instrument Collection, V1",
+        "data_center": "ORNL_CLOUD",
+        "title": "AVIRIS-NG_L2_Reflectance.ang20140621t190550_corr_v1g_img.bin",
+        "coordinate_system": "CARTESIAN",
+        "day_night_flag": "BOTH",
+        "time_end": "2014-06-21T19:07:50.000Z",
+        "id": "G2663871321-ORNL_CLOUD",
+        "original_format": "ECHO10",
+        "granule_size": "3068.872704",
+        "browse_flag": false,
+        "polygons": [
+          [
+            "35.4193878 -115.5133667 35.432476 -115.4906311 35.4959831 -115.5452728 35.4828835 -115.5680084 35.4193878 -115.5133667"
+          ]
+        ],
+        "collection_concept_id": "C2659129205-ORNL_CLOUD",
+        "online_access_flag": true,
+        "links": [
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/data#",
+            "title": "Download ang20140621t190550_corr_v1g_img.bin",
+            "hreflang": "en-US",
+            "href": "https://data.ornldaac.earthdata.nasa.gov/protected/aviris/AVIRIS-NG_L2_Reflectance/data/ang20140621t190550_corr_v1g_img.bin"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/data#",
+            "title": "Download ang20140621t190550_corr_v1g_img.bin.sha256",
+            "hreflang": "en-US",
+            "href": "https://data.ornldaac.earthdata.nasa.gov/public/aviris/AVIRIS-NG_L2_Reflectance/data/ang20140621t190550_corr_v1g_img.bin.sha256"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/s3#",
+            "title": "This link provides direct download access via S3 to the granule",
+            "hreflang": "en-US",
+            "href": "s3://ornl-cumulus-prod-protected/aviris/AVIRIS-NG_L2_Reflectance/data/ang20140621t190550_corr_v1g_img.bin"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/metadata#",
+            "title": "ORNL DAAC Data Set Documentation (USER'S GUIDE)",
+            "hreflang": "en-US",
+            "href": "https://daac.ornl.gov/AVIRIS/guides/AVIRIS-NG_L2_Reflectance.html"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/metadata#",
+            "title": "Data set Landing Page DOI URL (DATA SET LANDING PAGE)",
+            "hreflang": "en-US",
+            "href": "https://doi.org/10.3334/ORNLDAAC/2110"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/metadata#",
+            "title": "Data Set Documentation (GENERAL DOCUMENTATION)",
+            "hreflang": "en-US",
+            "href": "https://daac.ornl.gov/daacdata/aviris/AVIRIS-NG_L2_Reflectance/comp/AVIRIS-NG_L2_Reflectance.pdf"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/metadata#",
+            "title": "api endpoint to retrieve temporary credentials valid for same-region direct s3 access (VIEW RELATED INFORMATION)",
+            "hreflang": "en-US",
+            "href": "https://data.ornldaac.earthdata.nasa.gov/s3credentials"
+          },
+          {
+            "inherited": true,
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/data#",
+            "hreflang": "en-US",
+            "href": "https://search.earthdata.nasa.gov/search/granules?p=C2659129205-ORNL_CLOUD"
+          },
+          {
+            "inherited": true,
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/metadata#",
+            "hreflang": "en-US",
+            "href": "https://doi.org/10.3334/ORNLDAAC/2110"
+          },
+          {
+            "inherited": true,
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/documentation#",
+            "hreflang": "en-US",
+            "href": "https://data.ornldaac.earthdata.nasa.gov/public/aviris/AVIRIS-NG_L2_Reflectance/comp/AVIRIS-NG_L2_Reflectance.pdf"
+          },
+          {
+            "inherited": true,
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/documentation#",
+            "hreflang": "en-US",
+            "href": "https://data.ornldaac.earthdata.nasa.gov/public/aviris/AVIRIS-NG_L2_Reflectance/comp/AVIRIS-NG_L2_Reflectance.pdf"
+          }
+        ]
+      },
+      {
+        "time_start": "2014-06-21T19:05:50.000Z",
+        "updated": "2023-09-28T20:44:07.000Z",
+        "dataset_id": "AVIRIS-NG L2 Surface Reflectance, Facility Instrument Collection, V1",
+        "data_center": "ORNL_CLOUD",
+        "title": "AVIRIS-NG_L2_Reflectance.ang20140621t190550_h2o_v1g_img.bin",
+        "coordinate_system": "CARTESIAN",
+        "day_night_flag": "BOTH",
+        "time_end": "2014-06-21T19:07:50.000Z",
+        "id": "G2663871412-ORNL_CLOUD",
+        "original_format": "ECHO10",
+        "granule_size": "21.311616",
+        "browse_flag": false,
+        "polygons": [
+          [
+            "35.4193878 -115.5133667 35.432476 -115.4906311 35.4959831 -115.5452728 35.4828835 -115.5680084 35.4193878 -115.5133667"
+          ]
+        ],
+        "collection_concept_id": "C2659129205-ORNL_CLOUD",
+        "online_access_flag": true,
+        "links": [
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/data#",
+            "title": "Download ang20140621t190550_h2o_v1g_img.bin",
+            "hreflang": "en-US",
+            "href": "https://data.ornldaac.earthdata.nasa.gov/protected/aviris/AVIRIS-NG_L2_Reflectance/data/ang20140621t190550_h2o_v1g_img.bin"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/data#",
+            "title": "Download ang20140621t190550_h2o_v1g_img.bin.sha256",
+            "hreflang": "en-US",
+            "href": "https://data.ornldaac.earthdata.nasa.gov/public/aviris/AVIRIS-NG_L2_Reflectance/data/ang20140621t190550_h2o_v1g_img.bin.sha256"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/s3#",
+            "title": "This link provides direct download access via S3 to the granule",
+            "hreflang": "en-US",
+            "href": "s3://ornl-cumulus-prod-protected/aviris/AVIRIS-NG_L2_Reflectance/data/ang20140621t190550_h2o_v1g_img.bin"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/metadata#",
+            "title": "ORNL DAAC Data Set Documentation (USER'S GUIDE)",
+            "hreflang": "en-US",
+            "href": "https://daac.ornl.gov/AVIRIS/guides/AVIRIS-NG_L2_Reflectance.html"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/metadata#",
+            "title": "Data set Landing Page DOI URL (DATA SET LANDING PAGE)",
+            "hreflang": "en-US",
+            "href": "https://doi.org/10.3334/ORNLDAAC/2110"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/metadata#",
+            "title": "Data Set Documentation (GENERAL DOCUMENTATION)",
+            "hreflang": "en-US",
+            "href": "https://daac.ornl.gov/daacdata/aviris/AVIRIS-NG_L2_Reflectance/comp/AVIRIS-NG_L2_Reflectance.pdf"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/metadata#",
+            "title": "api endpoint to retrieve temporary credentials valid for same-region direct s3 access (VIEW RELATED INFORMATION)",
+            "hreflang": "en-US",
+            "href": "https://data.ornldaac.earthdata.nasa.gov/s3credentials"
+          },
+          {
+            "inherited": true,
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/data#",
+            "hreflang": "en-US",
+            "href": "https://search.earthdata.nasa.gov/search/granules?p=C2659129205-ORNL_CLOUD"
+          },
+          {
+            "inherited": true,
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/metadata#",
+            "hreflang": "en-US",
+            "href": "https://doi.org/10.3334/ORNLDAAC/2110"
+          },
+          {
+            "inherited": true,
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/documentation#",
+            "hreflang": "en-US",
+            "href": "https://data.ornldaac.earthdata.nasa.gov/public/aviris/AVIRIS-NG_L2_Reflectance/comp/AVIRIS-NG_L2_Reflectance.pdf"
+          },
+          {
+            "inherited": true,
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/documentation#",
+            "hreflang": "en-US",
+            "href": "https://data.ornldaac.earthdata.nasa.gov/public/aviris/AVIRIS-NG_L2_Reflectance/comp/AVIRIS-NG_L2_Reflectance.pdf"
+          }
+        ]
+      }
+    ]
+  }
+}

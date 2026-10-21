@@ -1,0 +1,124 @@
+{
+  "feed": {
+    "updated": "2026-10-21T12:35:45.469Z",
+    "id": "https://cmr.earthdata.nasa.gov:443/search/collections.json?short_name=AVIRIS-NG_L2_Reflectance_2110&page_size=2",
+    "title": "ECHO dataset metadata",
+    "entry": [
+      {
+        "processing_level_id": "2",
+        "cloud_hosted": true,
+        "boxes": [
+          "9.19806 -166.652 84.356 88.8094"
+        ],
+        "has_combine": false,
+        "time_start": "2014-06-21T00:00:00.000Z",
+        "version_id": "1",
+        "updated": "2023-09-21T12:34:59.000Z",
+        "dataset_id": "AVIRIS-NG L2 Surface Reflectance, Facility Instrument Collection, V1",
+        "entry_id": "AVIRIS-NG_L2_Reflectance_2110_1",
+        "has_spatial_subsetting": false,
+        "has_transforms": false,
+        "associations": {
+          "citations": [
+            "CIT3804213765-ESDIS",
+            "CIT3804218857-ESDIS",
+            "CIT3963294649-ESDIS"
+          ]
+        },
+        "has_variables": false,
+        "data_center": "ORNL_CLOUD",
+        "short_name": "AVIRIS-NG_L2_Reflectance_2110",
+        "organizations": [
+          "ORNL_DAAC"
+        ],
+        "title": "AVIRIS-NG L2 Surface Reflectance, Facility Instrument Collection, V1",
+        "coordinate_system": "CARTESIAN",
+        "summary": "This dataset contains Level 2 (L2) orthocorrected reflectance from the Airborne Visible / Infrared Imaging Spectrometer-Next Generation (AVIRIS-NG) instrument.  This is the NASA Earth Observing System Data and Information System (EOSDIS) facility instrument archive of these data. The AVIRIS-NG is a pushbroom spectral mapping system with high signal-to-noise ratio (SNR), designed and toleranced for high performance spectroscopy. AVIRIS-NG measures reflected radiance at 5-nm intervals in the Visible to Shortwave Infrared (VSWIR) spectral range from 380-2510 nm. The AVIRIS-NG sensor has a 1 milliradian instantaneous field of view, providing altitude dependent ground sampling distances from 20 m to sub-meter range. For each flight line, two types of L2 data files may be included: (a) calibrated surface reflectance and (b) water vapor and optical absorption paths for liquid water and ice. The L2 data are provided in ENVI format, which includes a flat binary file accompanied by a header (.hdr) file holding metadata in text format.  The AVIRIS-NG is flown on a variety of aircraft platforms including the Twin Otter, the King Air B-200, and NASA's high altitude ER-2.  This archive currently includes data from 2014 - 2022. Additional AVIRIS-NG facility instrument L2 data will be added as they become available.  The AVIRIS-NG supports NASA Science and applications in many areas including plant composition and function, geology and soils, greenhouse gas mapping, and calibration of orbital platforms.",
+        "service_features": {
+          "opendap": {
+            "has_formats": false,
+            "has_variables": false,
+            "has_transforms": false,
+            "has_combine": false,
+            "has_spatial_subsetting": false,
+            "has_temporal_subsetting": false
+          },
+          "esi": {
+            "has_formats": false,
+            "has_variables": false,
+            "has_transforms": false,
+            "has_combine": false,
+            "has_spatial_subsetting": false,
+            "has_temporal_subsetting": false
+          },
+          "harmony": {
+            "has_formats": false,
+            "has_variables": false,
+            "has_transforms": false,
+            "has_combine": false,
+            "has_spatial_subsetting": false,
+            "has_temporal_subsetting": false
+          }
+        },
+        "orbit_parameters": {},
+        "id": "C2659129205-ORNL_CLOUD",
+        "has_formats": false,
+        "consortiums": [
+          "GEOSS",
+          "EOSDIS"
+        ],
+        "original_format": "UMM_JSON",
+        "archive_center": "ORNL_DAAC",
+        "has_temporal_subsetting": false,
+        "browse_flag": true,
+        "platforms": [
+          "NOAA Twin Otter",
+          "NASA ER-2",
+          "DHC-6",
+          "B-200"
+        ],
+        "association_details": {
+          "citations": [
+            {
+              "concept_id": "CIT3804213765-ESDIS"
+            },
+            {
+              "concept_id": "CIT3804218857-ESDIS"
+            },
+            {
+              "concept_id": "CIT3963294649-ESDIS"
+            }
+          ]
+        },
+        "online_access_flag": true,
+        "links": [
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/data#",
+            "hreflang": "en-US",
+            "href": "https://search.earthdata.nasa.gov/search/granules?p=C2659129205-ORNL_CLOUD"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/metadata#",
+            "hreflang": "en-US",
+            "href": "https://doi.org/10.3334/ORNLDAAC/2110"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/browse#",
+            "hreflang": "en-US",
+            "href": "https://daac.ornl.gov/AVIRIS/guides/AVIRIS-NG_L2_Reflectance_Fig1.jpg"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/documentation#",
+            "hreflang": "en-US",
+            "href": "https://data.ornldaac.earthdata.nasa.gov/public/aviris/AVIRIS-NG_L2_Reflectance/comp/AVIRIS-NG_L2_Reflectance.pdf"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/documentation#",
+            "hreflang": "en-US",
+            "href": "https://data.ornldaac.earthdata.nasa.gov/public/aviris/AVIRIS-NG_L2_Reflectance/comp/AVIRIS-NG_L2_Reflectance.pdf"
+          }
+        ]
+      }
+    ]
+  }
+}

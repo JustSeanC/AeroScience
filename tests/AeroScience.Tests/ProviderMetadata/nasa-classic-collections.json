@@ -1,0 +1,119 @@
+{
+  "feed": {
+    "updated": "2026-10-21T12:35:43.904Z",
+    "id": "https://cmr.earthdata.nasa.gov:443/search/collections.json?short_name=AVIRIS-Classic_L2_Reflectance_2154&page_size=2",
+    "title": "ECHO dataset metadata",
+    "entry": [
+      {
+        "processing_level_id": "2",
+        "cloud_hosted": true,
+        "boxes": [
+          "18.5747 -171.842 48.6945 -81.0205"
+        ],
+        "has_combine": false,
+        "time_start": "2008-06-11T00:00:00.000Z",
+        "version_id": "1",
+        "updated": "2026-09-08T16:28:43.000Z",
+        "dataset_id": "AVIRIS-Classic: L2 Calibrated Reflectance, Facility Instrument Collection, V1",
+        "entry_id": "AVIRIS-Classic_L2_Reflectance_2154_1",
+        "has_spatial_subsetting": false,
+        "has_transforms": false,
+        "associations": {
+          "citations": [
+            "CIT3804235725-ESDIS",
+            "CIT4106707771-ESDIS"
+          ]
+        },
+        "has_variables": false,
+        "data_center": "ORNL_CLOUD",
+        "short_name": "AVIRIS-Classic_L2_Reflectance_2154",
+        "organizations": [
+          "ORNL_DAAC"
+        ],
+        "title": "AVIRIS-Classic: L2 Calibrated Reflectance, Facility Instrument Collection, V1",
+        "coordinate_system": "CARTESIAN",
+        "summary": "This dataset contains Level 2 (L2) orthocorrected reflectance from the Airborne Visible / Infrared Imaging Spectrometer (AVIRIS-Classic) instrument. This is the NASA Earth Observing System Data and Information System (EOSDIS) facility instrument archive of these data. The NASA AVIRIS-Classic is a pushbroom spectral mapping system with high signal-to-noise ratio (SNR), designed and toleranced for high performance spectroscopy. AVIRIS-Classic measures reflected radiance in 224 contiguous bands at approximately 10-nm intervals in the Visible to Shortwave Infrared (VSWIR) spectral range from 400-2500 nm. The AVIRIS-Classic sensor has a 1 milliradian instantaneous field of view, providing altitude dependent ground sampling distances from 20 m to sub meter range. AVIRIS-Classic is flown on a variety of aircraft platforms including the Twin Otter, NASA's WB-57, and NASA's high altitude ER-2. For each flight line, two types of L2 data files may be included: (a) calibrated surface reflectance and (b) water vapor and optical absorption paths for liquid water and ice. The L2 data are provided in ENVI format, which includes a flat binary file accompanied by a header (.hdr) file holding metadata in text format. This archive currently includes data from 2008 - 2025. Additional AVIRIS-Classic facility instrument L2 data will be added as they become available. AVIRIS-Classic supports NASA Science and applications in many areas including plant composition and function, geology and soils, greenhouse gas mapping, and calibration of orbital platforms.",
+        "service_features": {
+          "opendap": {
+            "has_formats": false,
+            "has_variables": false,
+            "has_transforms": false,
+            "has_combine": false,
+            "has_spatial_subsetting": false,
+            "has_temporal_subsetting": false
+          },
+          "esi": {
+            "has_formats": false,
+            "has_variables": false,
+            "has_transforms": false,
+            "has_combine": false,
+            "has_spatial_subsetting": false,
+            "has_temporal_subsetting": false
+          },
+          "harmony": {
+            "has_formats": false,
+            "has_variables": false,
+            "has_transforms": false,
+            "has_combine": false,
+            "has_spatial_subsetting": false,
+            "has_temporal_subsetting": false
+          }
+        },
+        "orbit_parameters": {},
+        "id": "C2711871294-ORNL_CLOUD",
+        "has_formats": false,
+        "consortiums": [
+          "GEOSS",
+          "EOSDIS"
+        ],
+        "original_format": "UMM_JSON",
+        "archive_center": "ORNL_DAAC",
+        "has_temporal_subsetting": false,
+        "browse_flag": true,
+        "platforms": [
+          "NOAA Twin Otter",
+          "NASA ER-2",
+          "NASA WB-57F"
+        ],
+        "association_details": {
+          "citations": [
+            {
+              "concept_id": "CIT3804235725-ESDIS"
+            },
+            {
+              "concept_id": "CIT4106707771-ESDIS"
+            }
+          ]
+        },
+        "online_access_flag": true,
+        "links": [
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/data#",
+            "hreflang": "en-US",
+            "href": "https://search.earthdata.nasa.gov/search/granules?p=C2711871294-ORNL_CLOUD&ac=true"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/metadata#",
+            "hreflang": "en-US",
+            "href": "https://doi.org/10.3334/ORNLDAAC/2154"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/browse#",
+            "hreflang": "en-US",
+            "href": "https://daac.ornl.gov/AVIRIS/guides/AVIRIS-Classic_L2_Reflectance_Fig1.jpg"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/documentation#",
+            "hreflang": "en-US",
+            "href": "https://data.ornldaac.earthdata.nasa.gov/public/aviris/AVIRIS-Classic_L2_Reflectance/comp/AVIRIS-Classic_L2_Reflectance.pdf"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/documentation#",
+            "hreflang": "en-US",
+            "href": "https://data.ornldaac.earthdata.nasa.gov/public/aviris/AVIRIS-Classic_L2_Reflectance/comp/AVIRIS-Classic_L2_Reflectance.pdf"
+          }
+        ]
+      }
+    ]
+  }
+}

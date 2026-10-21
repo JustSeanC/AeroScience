@@ -1,0 +1,257 @@
+{
+  "feed": {
+    "updated": "2026-10-21T12:35:48.261Z",
+    "id": "https://cmr.earthdata.nasa.gov:443/search/collections.json?short_name=EMITL2ARFL&page_size=2",
+    "title": "ECHO dataset metadata",
+    "entry": [
+      {
+        "processing_level_id": "2A",
+        "cloud_hosted": true,
+        "boxes": [
+          "-54 -180 54 180"
+        ],
+        "has_combine": false,
+        "time_start": "2022-08-09T00:00:00.000Z",
+        "version_id": "001",
+        "updated": "2026-09-03T00:00:00.000Z",
+        "dataset_id": "EMIT L2A Estimated Surface Reflectance and Uncertainty and Masks 60 m V001",
+        "entry_id": "EMITL2ARFL_001",
+        "has_spatial_subsetting": false,
+        "has_transforms": false,
+        "associations": {
+          "variables": [
+            "V3204053518-LPCLOUD",
+            "V3204053593-LPCLOUD",
+            "V3204053601-LPCLOUD",
+            "V3204053636-LPCLOUD",
+            "V3204053653-LPCLOUD",
+            "V3204053647-LPCLOUD",
+            "V3204053597-LPCLOUD",
+            "V3204053667-LPCLOUD",
+            "V3204053710-LPCLOUD",
+            "V3204053623-LPCLOUD",
+            "V3204053606-LPCLOUD",
+            "V3204053685-LPCLOUD",
+            "V3204053614-LPCLOUD"
+          ],
+          "tools": [
+            "TL1860232272-LPDAAC_ECS"
+          ],
+          "citations": [
+            "CIT3804236365-ESDIS",
+            "CIT4201249512-ESDIS",
+            "CIT4321028524-ESDIS",
+            "CIT4201249504-ESDIS",
+            "CIT3804218857-ESDIS",
+            "CIT4321026694-ESDIS",
+            "CIT3804305343-ESDIS",
+            "CIT4201249445-ESDIS",
+            "CIT4321028185-ESDIS",
+            "CIT3804382317-ESDIS"
+          ]
+        },
+        "has_variables": true,
+        "data_center": "LPCLOUD",
+        "short_name": "EMITL2ARFL",
+        "organizations": [
+          "LP DAAC",
+          "NASA/JPL/EMIT"
+        ],
+        "title": "EMIT L2A Estimated Surface Reflectance and Uncertainty and Masks 60 m V001",
+        "coordinate_system": "CARTESIAN",
+        "summary": "The Earth Surface Mineral Dust Source Investigation (EMIT) instrument measures surface mineralogy, targeting the Earth\u2019s arid dust source regions. EMIT is installed on the International Space Station (ISS) and uses imaging spectroscopy to take mineralogical measurements of sunlit regions of interest between 52\u00b0 N latitude and 52\u00b0 S latitude. An interactive map showing the regions being investigated, current and forecasted data coverage, and additional data resources can be found on the VSWIR Imaging Spectroscopy Interface for Open Science (VISIONS) [EMIT Open Data Portal](https://earth.jpl.nasa.gov/emit/data/data-portal/coverage-and-forecasts/).\n\nThe EMIT Level 2A Estimated Surface Reflectance and Uncertainty and Masks (EMITL2ARFL) Version 1 data product provides surface reflectance data in a spatially raw, non-orthocorrected format. Each EMITL2ARFL granule consists of three Network Common Data Format 4 (NetCDF4) files at a spatial resolution of 60 meters (m): Reflectance (EMIT_L2A_RFL), Reflectance Uncertainty (EMIT_L2A_RFLUNCERT), and Reflectance Mask (EMIT_L2A_MASK). The Reflectance file contains surface reflectance maps of 285 bands with a spectral range of 381-2493 nanometers (nm) at a spectral resolution of ~7.5 nm, which are held within a single science dataset layer (SDS). The Reflectance Uncertainty file contains uncertainty estimates about the reflectance captured as per-pixel, per-band, posterior standard deviations. The Reflectance Mask file contains six binary flag bands and two data bands. The binary flag bands identify the presence of features including clouds, water, and spacecraft which indicate if a pixel should be excluded from analysis. The data bands contain estimates of aerosol optical depth (AOD) and water vapor.\n\nEach NetCDF4 file holds a location group containing a geometric lookup table (GLT) which is an orthorectified image that provides relative x and y reference locations from the raw scene to allow for projection of the data. Along with the GLT layers, the files will also contain latitude, longitude, and elevation layers. The latitude and longitude coordinates are presented using the World Geodetic System (WGS84) ellipsoid. The elevation data was obtained from Shuttle Radar Topography Mission v3 (SRTM v3) data and resampled to EMIT\u2019s spatial resolution.\n\nEach granule is approximately 75 kilometers (km) by 75 km, nominal at the equator, with some granules at the end of an orbit segment reaching 150 km in length.\n\nKnown Issues:\n\n* Data acquisition gap: From September 13, 2022, through January 6, 2023, a power issue outside of EMIT caused a pause in operations. Due to this shutdown, no data were acquired during that timeframe.\n* Possible Reflectance Discrepancies: Due to changes in computational architecture, EMITL2ARFL reflectance data produced after December 4, 2024, with Software Build 010621 and onward may show discrepancies in reflectance of up to 0.8% in extreme cases in some wavelengths as compared to values in previously processed data. These discrepancies are generally lower than 0.8% and well within estimated uncertainties. Between earlier builds and Build 010621, neither resulting output should be interpreted as more \u2018correct\u2019 than the other, as their results are simply convergence differences from an optimization search. Most users are unlikely to observe the impact.",
+        "time_end": "2026-08-31T01:26:00.000Z",
+        "service_features": {
+          "opendap": {
+            "has_formats": false,
+            "has_variables": false,
+            "has_transforms": false,
+            "has_combine": false,
+            "has_spatial_subsetting": false,
+            "has_temporal_subsetting": false
+          },
+          "esi": {
+            "has_formats": false,
+            "has_variables": false,
+            "has_transforms": false,
+            "has_combine": false,
+            "has_spatial_subsetting": false,
+            "has_temporal_subsetting": false
+          },
+          "harmony": {
+            "has_formats": false,
+            "has_variables": false,
+            "has_transforms": false,
+            "has_combine": false,
+            "has_spatial_subsetting": false,
+            "has_temporal_subsetting": false
+          }
+        },
+        "orbit_parameters": {},
+        "id": "C2408750690-LPCLOUD",
+        "has_formats": false,
+        "consortiums": [
+          "GEOSS",
+          "EOSDIS"
+        ],
+        "original_format": "UMM_JSON",
+        "collection_data_type": "SCIENCE_QUALITY",
+        "archive_center": "LP DAAC",
+        "has_temporal_subsetting": false,
+        "browse_flag": true,
+        "platforms": [
+          "ISS"
+        ],
+        "association_details": {
+          "variables": [
+            {
+              "concept_id": "V3204053518-LPCLOUD"
+            },
+            {
+              "concept_id": "V3204053593-LPCLOUD"
+            },
+            {
+              "concept_id": "V3204053601-LPCLOUD"
+            },
+            {
+              "concept_id": "V3204053636-LPCLOUD"
+            },
+            {
+              "concept_id": "V3204053653-LPCLOUD"
+            },
+            {
+              "concept_id": "V3204053647-LPCLOUD"
+            },
+            {
+              "concept_id": "V3204053597-LPCLOUD"
+            },
+            {
+              "concept_id": "V3204053667-LPCLOUD"
+            },
+            {
+              "concept_id": "V3204053710-LPCLOUD"
+            },
+            {
+              "concept_id": "V3204053623-LPCLOUD"
+            },
+            {
+              "concept_id": "V3204053606-LPCLOUD"
+            },
+            {
+              "concept_id": "V3204053685-LPCLOUD"
+            },
+            {
+              "concept_id": "V3204053614-LPCLOUD"
+            }
+          ],
+          "tools": [
+            {
+              "concept_id": "TL1860232272-LPDAAC_ECS"
+            }
+          ],
+          "citations": [
+            {
+              "concept_id": "CIT3804236365-ESDIS"
+            },
+            {
+              "concept_id": "CIT4201249512-ESDIS"
+            },
+            {
+              "concept_id": "CIT4321028524-ESDIS"
+            },
+            {
+              "concept_id": "CIT4201249504-ESDIS"
+            },
+            {
+              "concept_id": "CIT3804218857-ESDIS"
+            },
+            {
+              "concept_id": "CIT4321026694-ESDIS"
+            },
+            {
+              "concept_id": "CIT3804305343-ESDIS"
+            },
+            {
+              "concept_id": "CIT4201249445-ESDIS"
+            },
+            {
+              "concept_id": "CIT4321028185-ESDIS"
+            },
+            {
+              "concept_id": "CIT3804382317-ESDIS"
+            }
+          ]
+        },
+        "online_access_flag": true,
+        "links": [
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/metadata#",
+            "hreflang": "en-US",
+            "href": "https://earth.jpl.nasa.gov/emit/"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/metadata#",
+            "hreflang": "en-US",
+            "href": "https://www.earthdata.nasa.gov/centers/lp-daac"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/metadata#",
+            "hreflang": "en-US",
+            "href": "https://doi.org/10.5067/EMIT/EMITL2ARFL.001"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/documentation#",
+            "hreflang": "en-US",
+            "href": "https://lpdaac.usgs.gov/documents/1571/EMITL2A_ATBD_v1.pdf"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/documentation#",
+            "hreflang": "en-US",
+            "href": "https://lpdaac.usgs.gov/documents/1569/EMITL2ARFL_User_Guide_v1.pdf"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/documentation#",
+            "hreflang": "en-US",
+            "href": "https://github.com/emit-sds/emit-sds-l2a"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/browse#",
+            "hreflang": "en-US",
+            "href": "https://data.lpdaac.earthdatacloud.nasa.gov/lp-prod-public/EMITL2ARFL.001/EMIT_L2A_RFL_001_20240705T004833_2418616_021/EMIT_L2A_RFL_001_20240705T004833_2418616_021.png"
+          },
+          {
+            "length": "3.7GB",
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/data#",
+            "hreflang": "en-US",
+            "href": "https://search.earthdata.nasa.gov/search/granules?p=C2408750690-LPCLOUD"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/documentation#",
+            "hreflang": "en-US",
+            "href": "https://github.com/nasa/EMIT-Data-Resources/blob/main/python/tutorials/Exploring_EMIT_L2A_Reflectance.ipynb"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/documentation#",
+            "hreflang": "en-US",
+            "href": "https://www.youtube.com/playlist?list=PLO2yB4LGNlWrC5NdxeHMxyAxdwQhSypXe"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/documentation#",
+            "hreflang": "en-US",
+            "href": "https://github.com/nasa/EMIT-Data-Resources"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/documentation#",
+            "hreflang": "en-US",
+            "href": "https://lpdaac.usgs.gov/search/?query=EMIT&content_types=E-Learning&view=cards&sort=relevance"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/data#",
+            "hreflang": "en-US",
+            "href": "https://appeears.earthdatacloud.nasa.gov/"
+          }
+        ]
+      }
+    ]
+  }
+}

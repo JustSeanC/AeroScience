@@ -1,0 +1,209 @@
+{
+  "feed": {
+    "updated": "2026-10-21T12:35:45.092Z",
+    "id": "https://cmr.earthdata.nasa.gov:443/search/granules.json?short_name=AVIRIS-Classic_L2_Reflectance_2154&page_size=2",
+    "title": "ECHO granule metadata",
+    "entry": [
+      {
+        "time_start": "2008-06-11T21:38:00.000Z",
+        "dataset_id": "AVIRIS-Classic: L2 Calibrated Reflectance, Facility Instrument Collection, V1",
+        "data_center": "ORNL_CLOUD",
+        "title": "f080611t01p00r13_L2_reflectance",
+        "coordinate_system": "CARTESIAN",
+        "day_night_flag": "DAY",
+        "time_end": "2008-06-11T21:44:00.000Z",
+        "id": "G3477024884-ORNL_CLOUD",
+        "original_format": "UMM_JSON",
+        "granule_size": "2689.53618144989",
+        "browse_flag": false,
+        "polygons": [
+          [
+            "34.4952 -118.7215 34.023 -118.2636 34.0937 -118.1574 34.5663 -118.6152 34.4952 -118.7215"
+          ]
+        ],
+        "collection_concept_id": "C2711871294-ORNL_CLOUD",
+        "online_access_flag": true,
+        "links": [
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/data#",
+            "title": "Download f080611t01p00r13_corr_v1h_img.hdr",
+            "hreflang": "en-US",
+            "href": "https://data.ornldaac.earthdata.nasa.gov/protected/aviris/AVIRIS-Classic_L2_Reflectance/data/f080611t01p00r13_corr_v1h_img.hdr"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/data#",
+            "title": "Download f080611t01p00r13_h2o_v1h_img.bin",
+            "hreflang": "en-US",
+            "href": "https://data.ornldaac.earthdata.nasa.gov/protected/aviris/AVIRIS-Classic_L2_Reflectance/data/f080611t01p00r13_h2o_v1h_img.bin"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/data#",
+            "title": "Download f080611t01p00r13_h2o_v1h_img.hdr",
+            "hreflang": "en-US",
+            "href": "https://data.ornldaac.earthdata.nasa.gov/protected/aviris/AVIRIS-Classic_L2_Reflectance/data/f080611t01p00r13_h2o_v1h_img.hdr"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/data#",
+            "title": "Download f080611t01p00r13_corr_v1h_img.bin",
+            "hreflang": "en-US",
+            "href": "https://data.ornldaac.earthdata.nasa.gov/protected/aviris/AVIRIS-Classic_L2_Reflectance/data/f080611t01p00r13_corr_v1h_img.bin"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/s3#",
+            "title": "This link provides direct download access via S3 to the granule",
+            "hreflang": "en-US",
+            "href": "s3://ornl-cumulus-prod-protected/aviris/AVIRIS-Classic_L2_Reflectance/data/f080611t01p00r13_corr_v1h_img.hdr"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/s3#",
+            "title": "This link provides direct download access via S3 to the granule",
+            "hreflang": "en-US",
+            "href": "s3://ornl-cumulus-prod-protected/aviris/AVIRIS-Classic_L2_Reflectance/data/f080611t01p00r13_h2o_v1h_img.bin"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/s3#",
+            "title": "This link provides direct download access via S3 to the granule",
+            "hreflang": "en-US",
+            "href": "s3://ornl-cumulus-prod-protected/aviris/AVIRIS-Classic_L2_Reflectance/data/f080611t01p00r13_h2o_v1h_img.hdr"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/s3#",
+            "title": "This link provides direct download access via S3 to the granule",
+            "hreflang": "en-US",
+            "href": "s3://ornl-cumulus-prod-protected/aviris/AVIRIS-Classic_L2_Reflectance/data/f080611t01p00r13_corr_v1h_img.bin"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/metadata#",
+            "title": "api endpoint to retrieve temporary credentials valid for same-region direct s3 access",
+            "hreflang": "en-US",
+            "href": "https://data.ornldaac.earthdata.nasa.gov/s3credentials"
+          },
+          {
+            "inherited": true,
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/data#",
+            "hreflang": "en-US",
+            "href": "https://search.earthdata.nasa.gov/search/granules?p=C2711871294-ORNL_CLOUD&ac=true"
+          },
+          {
+            "inherited": true,
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/metadata#",
+            "hreflang": "en-US",
+            "href": "https://doi.org/10.3334/ORNLDAAC/2154"
+          },
+          {
+            "inherited": true,
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/documentation#",
+            "hreflang": "en-US",
+            "href": "https://data.ornldaac.earthdata.nasa.gov/public/aviris/AVIRIS-Classic_L2_Reflectance/comp/AVIRIS-Classic_L2_Reflectance.pdf"
+          },
+          {
+            "inherited": true,
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/documentation#",
+            "hreflang": "en-US",
+            "href": "https://data.ornldaac.earthdata.nasa.gov/public/aviris/AVIRIS-Classic_L2_Reflectance/comp/AVIRIS-Classic_L2_Reflectance.pdf"
+          }
+        ]
+      },
+      {
+        "time_start": "2008-06-11T21:50:00.000Z",
+        "dataset_id": "AVIRIS-Classic: L2 Calibrated Reflectance, Facility Instrument Collection, V1",
+        "data_center": "ORNL_CLOUD",
+        "title": "f080611t01p00r14_L2_reflectance",
+        "coordinate_system": "CARTESIAN",
+        "day_night_flag": "DAY",
+        "time_end": "2008-06-11T21:56:00.000Z",
+        "id": "G3477025011-ORNL_CLOUD",
+        "original_format": "UMM_JSON",
+        "granule_size": "2897.9427976608276",
+        "browse_flag": false,
+        "polygons": [
+          [
+            "34.5851 -118.7446 34.1056 -118.2789 34.1753 -118.1742 34.6552 -118.6397 34.5851 -118.7446"
+          ]
+        ],
+        "collection_concept_id": "C2711871294-ORNL_CLOUD",
+        "online_access_flag": true,
+        "links": [
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/data#",
+            "title": "Download f080611t01p00r14_h2o_v1h_img.hdr",
+            "hreflang": "en-US",
+            "href": "https://data.ornldaac.earthdata.nasa.gov/protected/aviris/AVIRIS-Classic_L2_Reflectance/data/f080611t01p00r14_h2o_v1h_img.hdr"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/data#",
+            "title": "Download f080611t01p00r14_corr_v1h_img.hdr",
+            "hreflang": "en-US",
+            "href": "https://data.ornldaac.earthdata.nasa.gov/protected/aviris/AVIRIS-Classic_L2_Reflectance/data/f080611t01p00r14_corr_v1h_img.hdr"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/data#",
+            "title": "Download f080611t01p00r14_h2o_v1h_img.bin",
+            "hreflang": "en-US",
+            "href": "https://data.ornldaac.earthdata.nasa.gov/protected/aviris/AVIRIS-Classic_L2_Reflectance/data/f080611t01p00r14_h2o_v1h_img.bin"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/data#",
+            "title": "Download f080611t01p00r14_corr_v1h_img.bin",
+            "hreflang": "en-US",
+            "href": "https://data.ornldaac.earthdata.nasa.gov/protected/aviris/AVIRIS-Classic_L2_Reflectance/data/f080611t01p00r14_corr_v1h_img.bin"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/s3#",
+            "title": "This link provides direct download access via S3 to the granule",
+            "hreflang": "en-US",
+            "href": "s3://ornl-cumulus-prod-protected/aviris/AVIRIS-Classic_L2_Reflectance/data/f080611t01p00r14_h2o_v1h_img.hdr"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/s3#",
+            "title": "This link provides direct download access via S3 to the granule",
+            "hreflang": "en-US",
+            "href": "s3://ornl-cumulus-prod-protected/aviris/AVIRIS-Classic_L2_Reflectance/data/f080611t01p00r14_corr_v1h_img.hdr"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/s3#",
+            "title": "This link provides direct download access via S3 to the granule",
+            "hreflang": "en-US",
+            "href": "s3://ornl-cumulus-prod-protected/aviris/AVIRIS-Classic_L2_Reflectance/data/f080611t01p00r14_h2o_v1h_img.bin"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/s3#",
+            "title": "This link provides direct download access via S3 to the granule",
+            "hreflang": "en-US",
+            "href": "s3://ornl-cumulus-prod-protected/aviris/AVIRIS-Classic_L2_Reflectance/data/f080611t01p00r14_corr_v1h_img.bin"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/metadata#",
+            "title": "api endpoint to retrieve temporary credentials valid for same-region direct s3 access",
+            "hreflang": "en-US",
+            "href": "https://data.ornldaac.earthdata.nasa.gov/s3credentials"
+          },
+          {
+            "inherited": true,
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/data#",
+            "hreflang": "en-US",
+            "href": "https://search.earthdata.nasa.gov/search/granules?p=C2711871294-ORNL_CLOUD&ac=true"
+          },
+          {
+            "inherited": true,
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/metadata#",
+            "hreflang": "en-US",
+            "href": "https://doi.org/10.3334/ORNLDAAC/2154"
+          },
+          {
+            "inherited": true,
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/documentation#",
+            "hreflang": "en-US",
+            "href": "https://data.ornldaac.earthdata.nasa.gov/public/aviris/AVIRIS-Classic_L2_Reflectance/comp/AVIRIS-Classic_L2_Reflectance.pdf"
+          },
+          {
+            "inherited": true,
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/documentation#",
+            "hreflang": "en-US",
+            "href": "https://data.ornldaac.earthdata.nasa.gov/public/aviris/AVIRIS-Classic_L2_Reflectance/comp/AVIRIS-Classic_L2_Reflectance.pdf"
+          }
+        ]
+      }
+    ]
+  }
+}

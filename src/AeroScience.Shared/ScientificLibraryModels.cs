@@ -3,13 +3,13 @@ namespace AeroScience.Shared;
 
 // Catalog outlines describe archived provider products, never QA-valid flight coverage.
 public sealed record ScientificCatalogQuery(string Provider,GeographicBounds Area,DateTimeOffset? FromUtc=null,
-    DateTimeOffset? ToUtc=null,double MaximumCloudPercent=100,int PageSize=10,string? Cursor=null,bool CachedOnly=false,bool Refresh=false);
+    DateTimeOffset? ToUtc=null,double MaximumCloudPercent=100,int PageSize=10,string? Cursor=null,bool CachedOnly=false,bool Refresh=false,string? SceneFilter=null);
 public sealed record ScientificCatalogBand(string Id,string Units,double Scale,double Offset,double? NoData,
     double? ResolutionMeters,string Format,long? OriginalAssetBytes);
 public sealed record ScientificCatalogItem(string Provider,string Product,string Scene,string Revision,RemoteKind Kind,
     GeographicBounds Bounds,JsonElement? Geometry,DateTimeOffset? ObservationUtc,DateTimeOffset? PublishedUtc,
     ScientificCatalogBand[] Bands,string? Crs,string VerticalDatum,string Quality,string Resolution,
-    string License,string Reference,string AcquisitionMethod,string[] Limitations);
+    string License,string Reference,string AcquisitionMethod,string[] Limitations,NasaGranuleMetadata? Nasa=null);
 public sealed record ScientificCatalogPage(string Status,ScientificCatalogItem[] Items,string? NextCursor,
     DateTimeOffset AsOfUtc,DateTimeOffset ExpiresUtc,bool Cached,string[] Limitations,string? Error=null);
 public sealed record ScientificCatalogProvider(string Id,string Name,string Product,RemoteKind Kind,string[] RequiredBands,
@@ -38,3 +38,11 @@ public sealed record LibraryJobControl(string Action);
 public sealed record ScientificRegionRequest(string StateFips,string? CountyFips=null,bool CachedOnly=false);
 public sealed record ScientificRegion(string Id,string Name,GeographicBounds Bounds,JsonElement Geometry,
     string Reference,string Resolution,DateTimeOffset AsOfUtc,bool Cached);
+
+// Optional authoritative NASA catalog details. Unknown metadata is nullable, never inferred pixels.
+public sealed record NasaAsset(string Name,string Url,string Role);
+public sealed record NasaGranuleMetadata(string Family,string CollectionId,string CollectionShortName,string CollectionVersion,
+    string GranuleId,string Flightline,string ProcessingLevel,string Format,string Capability,string Authorization,
+    long? OriginalBytes,int? BandCount,double[]? WavelengthsNm,string? Units,NasaAsset[] Assets,string CollectionRevision,
+    string MetadataUrl,DateTimeOffset? ObservationEndUtc=null);
+public sealed record NasaSelectionRequest(string Provider,string GranuleId,string Revision);

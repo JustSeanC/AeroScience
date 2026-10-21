@@ -1,0 +1,366 @@
+{
+  "feed": {
+    "updated": "2026-10-21T12:35:48.821Z",
+    "id": "https://cmr.earthdata.nasa.gov:443/search/granules.json?short_name=EMITL2ARFL&page_size=2",
+    "title": "ECHO granule metadata",
+    "entry": [
+      {
+        "time_start": "2022-08-10T03:41:03.000Z",
+        "cloud_cover": "100",
+        "updated": "2023-01-26T16:49:52.000Z",
+        "dataset_id": "EMIT L2A Estimated Surface Reflectance and Uncertainty and Masks 60 m V001",
+        "data_center": "LPCLOUD",
+        "title": "EMIT_L2A_RFL_001_20220810T034103_2222203_001",
+        "coordinate_system": "GEODETIC",
+        "day_night_flag": "DAY",
+        "time_end": "2022-08-10T03:41:15.000Z",
+        "id": "G2596854797-LPCLOUD",
+        "original_format": "UMM_JSON",
+        "granule_size": "3579.048852920533",
+        "browse_flag": true,
+        "polygons": [
+          [
+            "22.3909645 73.6947784 21.7689323 73.1546631 21.2682304 73.7312927 21.8902626 74.2714081 22.3909645 73.6947784"
+          ]
+        ],
+        "collection_concept_id": "C2408750690-LPCLOUD",
+        "online_access_flag": true,
+        "links": [
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/service#",
+            "title": "OPeNDAP request URL",
+            "hreflang": "en-US",
+            "href": "https://opendap.earthdata.nasa.gov/collections/C2408750690-LPCLOUD/granules/EMIT_L2A_RFL_001_20220810T034103_2222203_001"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/data#",
+            "title": "Download EMIT_L2A_RFL_001_20220810T034103_2222203_001.nc",
+            "hreflang": "en-US",
+            "href": "https://data.lpdaac.earthdatacloud.nasa.gov/lp-prod-protected/EMITL2ARFL.001/EMIT_L2A_RFL_001_20220810T034103_2222203_001/EMIT_L2A_RFL_001_20220810T034103_2222203_001.nc"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/data#",
+            "title": "Download EMIT_L2A_RFLUNCERT_001_20220810T034103_2222203_001.nc",
+            "hreflang": "en-US",
+            "href": "https://data.lpdaac.earthdatacloud.nasa.gov/lp-prod-protected/EMITL2ARFL.001/EMIT_L2A_RFL_001_20220810T034103_2222203_001/EMIT_L2A_RFLUNCERT_001_20220810T034103_2222203_001.nc"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/data#",
+            "title": "Download EMIT_L2A_MASK_001_20220810T034103_2222203_001.nc",
+            "hreflang": "en-US",
+            "href": "https://data.lpdaac.earthdatacloud.nasa.gov/lp-prod-protected/EMITL2ARFL.001/EMIT_L2A_RFL_001_20220810T034103_2222203_001/EMIT_L2A_MASK_001_20220810T034103_2222203_001.nc"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/browse#",
+            "title": "Download EMIT_L2A_RFL_001_20220810T034103_2222203_001.png",
+            "hreflang": "en-US",
+            "href": "https://data.lpdaac.earthdatacloud.nasa.gov/lp-prod-public/EMITL2ARFL.001/EMIT_L2A_RFL_001_20220810T034103_2222203_001/EMIT_L2A_RFL_001_20220810T034103_2222203_001.png"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/metadata#",
+            "title": "Download EMIT_L2A_RFL_001_20220810T034103_2222203_001.cmr.json",
+            "hreflang": "en-US",
+            "href": "https://data.lpdaac.earthdatacloud.nasa.gov/lp-prod-protected/EMITL2ARFL.001/EMIT_L2A_RFL_001_20220810T034103_2222203_001/EMIT_L2A_RFL_001_20220810T034103_2222203_001.cmr.json"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/metadata#",
+            "title": "Download EMIT_L2A_RFL_001_20220810T034103_2222203_001.nc.dmrpp",
+            "hreflang": "en-US",
+            "href": "https://data.lpdaac.earthdatacloud.nasa.gov/lp-prod-protected/EMITL2ARFL.001/EMIT_L2A_RFL_001_20220810T034103_2222203_001/EMIT_L2A_RFL_001_20220810T034103_2222203_001.nc.dmrpp"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/metadata#",
+            "title": "Download EMIT_L2A_RFLUNCERT_001_20220810T034103_2222203_001.nc.dmrpp",
+            "hreflang": "en-US",
+            "href": "https://data.lpdaac.earthdatacloud.nasa.gov/lp-prod-public/EMITL2ARFL.001/EMIT_L2A_RFL_001_20220810T034103_2222203_001/EMIT_L2A_RFLUNCERT_001_20220810T034103_2222203_001.nc.dmrpp"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/metadata#",
+            "title": "Download EMIT_L2A_MASK_001_20220810T034103_2222203_001.nc.dmrpp",
+            "hreflang": "en-US",
+            "href": "https://data.lpdaac.earthdatacloud.nasa.gov/lp-prod-public/EMITL2ARFL.001/EMIT_L2A_RFL_001_20220810T034103_2222203_001/EMIT_L2A_MASK_001_20220810T034103_2222203_001.nc.dmrpp"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/s3#",
+            "title": "This link provides direct download access via S3 to the granule",
+            "hreflang": "en-US",
+            "href": "s3://lp-prod-protected/EMITL2ARFL.001/EMIT_L2A_RFL_001_20220810T034103_2222203_001/EMIT_L2A_RFL_001_20220810T034103_2222203_001.nc"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/s3#",
+            "title": "This link provides direct download access via S3 to the granule",
+            "hreflang": "en-US",
+            "href": "s3://lp-prod-protected/EMITL2ARFL.001/EMIT_L2A_RFL_001_20220810T034103_2222203_001/EMIT_L2A_RFLUNCERT_001_20220810T034103_2222203_001.nc"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/s3#",
+            "title": "This link provides direct download access via S3 to the granule",
+            "hreflang": "en-US",
+            "href": "s3://lp-prod-protected/EMITL2ARFL.001/EMIT_L2A_RFL_001_20220810T034103_2222203_001/EMIT_L2A_MASK_001_20220810T034103_2222203_001.nc"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/browse#",
+            "title": "This link provides direct download access via S3 to the granule",
+            "hreflang": "en-US",
+            "href": "s3://lp-prod-public/EMITL2ARFL.001/EMIT_L2A_RFL_001_20220810T034103_2222203_001/EMIT_L2A_RFL_001_20220810T034103_2222203_001.png"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/metadata#",
+            "title": "This link provides direct download access via S3 to the granule",
+            "hreflang": "en-US",
+            "href": "s3://lp-prod-protected/EMITL2ARFL.001/EMIT_L2A_RFL_001_20220810T034103_2222203_001/EMIT_L2A_RFL_001_20220810T034103_2222203_001.cmr.json"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/metadata#",
+            "title": "This link provides direct download access via S3 to the granule",
+            "hreflang": "en-US",
+            "href": "s3://lp-prod-protected/EMITL2ARFL.001/EMIT_L2A_RFL_001_20220810T034103_2222203_001/EMIT_L2A_RFL_001_20220810T034103_2222203_001.nc.dmrpp"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/metadata#",
+            "title": "This link provides direct download access via S3 to the granule",
+            "hreflang": "en-US",
+            "href": "s3://lp-prod-public/EMITL2ARFL.001/EMIT_L2A_RFL_001_20220810T034103_2222203_001/EMIT_L2A_RFLUNCERT_001_20220810T034103_2222203_001.nc.dmrpp"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/metadata#",
+            "title": "This link provides direct download access via S3 to the granule",
+            "hreflang": "en-US",
+            "href": "s3://lp-prod-public/EMITL2ARFL.001/EMIT_L2A_RFL_001_20220810T034103_2222203_001/EMIT_L2A_MASK_001_20220810T034103_2222203_001.nc.dmrpp"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/metadata#",
+            "title": "api endpoint to retrieve temporary credentials valid for same-region direct s3 access",
+            "hreflang": "en-US",
+            "href": "https://data.lpdaac.earthdatacloud.nasa.gov/s3credentials"
+          },
+          {
+            "inherited": true,
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/metadata#",
+            "hreflang": "en-US",
+            "href": "https://earth.jpl.nasa.gov/emit/"
+          },
+          {
+            "inherited": true,
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/metadata#",
+            "hreflang": "en-US",
+            "href": "https://www.earthdata.nasa.gov/centers/lp-daac"
+          },
+          {
+            "inherited": true,
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/metadata#",
+            "hreflang": "en-US",
+            "href": "https://doi.org/10.5067/EMIT/EMITL2ARFL.001"
+          },
+          {
+            "inherited": true,
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/documentation#",
+            "hreflang": "en-US",
+            "href": "https://lpdaac.usgs.gov/documents/1571/EMITL2A_ATBD_v1.pdf"
+          },
+          {
+            "inherited": true,
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/documentation#",
+            "hreflang": "en-US",
+            "href": "https://lpdaac.usgs.gov/documents/1569/EMITL2ARFL_User_Guide_v1.pdf"
+          },
+          {
+            "inherited": true,
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/documentation#",
+            "hreflang": "en-US",
+            "href": "https://github.com/emit-sds/emit-sds-l2a"
+          },
+          {
+            "inherited": true,
+            "length": "3.7GB",
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/data#",
+            "hreflang": "en-US",
+            "href": "https://search.earthdata.nasa.gov/search/granules?p=C2408750690-LPCLOUD"
+          },
+          {
+            "inherited": true,
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/documentation#",
+            "hreflang": "en-US",
+            "href": "https://github.com/nasa/EMIT-Data-Resources/blob/main/python/tutorials/Exploring_EMIT_L2A_Reflectance.ipynb"
+          },
+          {
+            "inherited": true,
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/documentation#",
+            "hreflang": "en-US",
+            "href": "https://www.youtube.com/playlist?list=PLO2yB4LGNlWrC5NdxeHMxyAxdwQhSypXe"
+          },
+          {
+            "inherited": true,
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/documentation#",
+            "hreflang": "en-US",
+            "href": "https://github.com/nasa/EMIT-Data-Resources"
+          },
+          {
+            "inherited": true,
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/documentation#",
+            "hreflang": "en-US",
+            "href": "https://lpdaac.usgs.gov/search/?query=EMIT&content_types=E-Learning&view=cards&sort=relevance"
+          },
+          {
+            "inherited": true,
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/data#",
+            "hreflang": "en-US",
+            "href": "https://appeears.earthdatacloud.nasa.gov/"
+          }
+        ]
+      },
+      {
+        "producer_granule_id": "EMIT_L2A_RFL_002_20220810T034103",
+        "time_start": "2022-08-10T03:41:03.000Z",
+        "cloud_cover": "100",
+        "updated": "2026-09-22T02:58:56.000Z",
+        "dataset_id": "EMIT L2A Surface Reflectance and Uncertainty 60 m V002",
+        "data_center": "LPCLOUD",
+        "title": "EMIT_L2A_RFL_002_20220810T034103",
+        "coordinate_system": "GEODETIC",
+        "day_night_flag": "DAY",
+        "time_end": "2022-08-10T03:41:15.000Z",
+        "id": "G4319225918-LPCLOUD",
+        "original_format": "UMM_JSON",
+        "granule_size": "3555.8826398849487",
+        "browse_flag": true,
+        "polygons": [
+          [
+            "21.8902877 74.2713586 22.3422854 73.6548655 21.76889 73.1546848 21.3186311 73.7705811 21.8902877 74.2713586"
+          ]
+        ],
+        "collection_concept_id": "C4079844428-LPCLOUD",
+        "online_access_flag": true,
+        "links": [
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/service#",
+            "title": "OPeNDAP request URL",
+            "hreflang": "en-US",
+            "href": "https://opendap.earthdata.nasa.gov/collections/C4079844428-LPCLOUD/granules/EMIT_L2A_RFL_002_20220810T034103"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/data#",
+            "title": "Download EMIT_L2A_RFL_002_20220810T034103.nc",
+            "hreflang": "en-US",
+            "href": "https://data.lpdaac.earthdatacloud.nasa.gov/lp-prod-protected/EMITL2ARFL.002/EMIT_L2A_RFL_002_20220810T034103/EMIT_L2A_RFL_002_20220810T034103.nc"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/data#",
+            "title": "Download EMIT_L2A_RFLUNCERT_002_20220810T034103.nc",
+            "hreflang": "en-US",
+            "href": "https://data.lpdaac.earthdatacloud.nasa.gov/lp-prod-protected/EMITL2ARFL.002/EMIT_L2A_RFL_002_20220810T034103/EMIT_L2A_RFLUNCERT_002_20220810T034103.nc"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/browse#",
+            "title": "Download EMIT_L2A_RFL_002_20220810T034103.png",
+            "hreflang": "en-US",
+            "href": "https://data.lpdaac.earthdatacloud.nasa.gov/lp-prod-public/EMITL2ARFL.002/EMIT_L2A_RFL_002_20220810T034103/EMIT_L2A_RFL_002_20220810T034103.png"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/metadata#",
+            "title": "Download EMIT_L2A_RFL_002_20220810T034103.cmr.json",
+            "hreflang": "en-US",
+            "href": "https://data.lpdaac.earthdatacloud.nasa.gov/lp-prod-protected/EMITL2ARFL.002/EMIT_L2A_RFL_002_20220810T034103/EMIT_L2A_RFL_002_20220810T034103.cmr.json"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/s3#",
+            "title": "This link provides direct download access via S3 to the granule",
+            "hreflang": "en-US",
+            "href": "s3://lp-prod-protected/EMITL2ARFL.002/EMIT_L2A_RFL_002_20220810T034103/EMIT_L2A_RFL_002_20220810T034103.nc"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/s3#",
+            "title": "This link provides direct download access via S3 to the granule",
+            "hreflang": "en-US",
+            "href": "s3://lp-prod-protected/EMITL2ARFL.002/EMIT_L2A_RFL_002_20220810T034103/EMIT_L2A_RFLUNCERT_002_20220810T034103.nc"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/browse#",
+            "title": "This link provides direct download access via S3 to the granule",
+            "hreflang": "en-US",
+            "href": "s3://lp-prod-public/EMITL2ARFL.002/EMIT_L2A_RFL_002_20220810T034103/EMIT_L2A_RFL_002_20220810T034103.png"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/metadata#",
+            "title": "This link provides direct download access via S3 to the granule",
+            "hreflang": "en-US",
+            "href": "s3://lp-prod-protected/EMITL2ARFL.002/EMIT_L2A_RFL_002_20220810T034103/EMIT_L2A_RFL_002_20220810T034103.cmr.json"
+          },
+          {
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/metadata#",
+            "title": "api endpoint to retrieve temporary credentials valid for same-region direct s3 access",
+            "hreflang": "en-US",
+            "href": "https://data.lpdaac.earthdatacloud.nasa.gov/s3credentials"
+          },
+          {
+            "inherited": true,
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/documentation#",
+            "hreflang": "en-US",
+            "href": "https://earth.jpl.nasa.gov/emit/"
+          },
+          {
+            "inherited": true,
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/metadata#",
+            "hreflang": "en-US",
+            "href": "https://www.earthdata.nasa.gov/centers/lp-daac"
+          },
+          {
+            "inherited": true,
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/metadata#",
+            "hreflang": "en-US",
+            "href": "https://doi.org/10.5067/EMIT/EMITL2ARFL.002"
+          },
+          {
+            "inherited": true,
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/documentation#",
+            "hreflang": "en-US",
+            "href": "https://github.com/emit-sds/emit-sds-l2a/blob/docs/docs/EMITL2A_ATBD.md"
+          },
+          {
+            "inherited": true,
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/documentation#",
+            "hreflang": "en-US",
+            "href": "https://lpdaac.usgs.gov/documents/1569/EMITL2ARFL_User_Guide_v1.pdf"
+          },
+          {
+            "inherited": true,
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/metadata#",
+            "hreflang": "en-US",
+            "href": "https://github.com/emit-sds/emit-sds-l2a"
+          },
+          {
+            "inherited": true,
+            "length": "3.8GB",
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/data#",
+            "hreflang": "en-US",
+            "href": "https://search.earthdata.nasa.gov/search/granules?p=C4079844428-LPCLOUD"
+          },
+          {
+            "inherited": true,
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/documentation#",
+            "hreflang": "en-US",
+            "href": "https://git.earthdata.nasa.gov/projects/LPDUR/repos/emit_tutorials/browse/01_Exploring_L2A_Reflectance"
+          },
+          {
+            "inherited": true,
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/documentation#",
+            "hreflang": "en-US",
+            "href": "https://www.youtube.com/playlist?list=PLO2yB4LGNlWrC5NdxeHMxyAxdwQhSypXe"
+          },
+          {
+            "inherited": true,
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/documentation#",
+            "hreflang": "en-US",
+            "href": "https://github.com/nasa/EMIT-Data-Resources"
+          },
+          {
+            "inherited": true,
+            "rel": "http://esipfed.org/ns/fedsearch/1.1/documentation#",
+            "hreflang": "en-US",
+            "href": "https://github.com/emit-sds/emit-sds-l2a/blob/develop/docs/EMITL2A_v1_v2_DELTA.md"
+          }
+        ]
+      }
+    ]
+  }
+}

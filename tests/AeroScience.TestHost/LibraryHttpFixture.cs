@@ -24,6 +24,12 @@ internal sealed class LibraryHttpFixture(string root):HttpMessageHandler
         if(!Enabled)return await fallback.SendAsync(request,token);if(!Directory.Exists(fixtureFolder))Enable();
         var uri=request.RequestUri!;
         HttpResponseMessage Json(string value)=>new(HttpStatusCode.OK){Content=new StringContent(value,System.Text.Encoding.UTF8,"application/json")};
+        if(uri.Host=="cmr.earthdata.nasa.gov")
+        {
+            var family=uri.Query.Contains("Classic")?"classic":uri.Query.Contains("AVIRIS-NG")?"ng":"emit";
+            var type=uri.AbsolutePath.Contains("collections")?"collections":"granules";
+            return Json(File.ReadAllText(Path.Combine(AppContext.BaseDirectory,"ProviderMetadata",$"nasa-{family}-{type}.json")));
+        }
         if(uri.Host=="tigerweb.geo.census.gov")return Json(File.ReadAllText(Path.Combine(AppContext.BaseDirectory,"ProviderMetadata","census-county.json")));
         if(uri.AbsolutePath.Contains("/sas/"))return Json(System.Text.Json.JsonSerializer.Serialize(new{href=System.Web.HttpUtility.ParseQueryString(uri.Query)["href"]}));
         if(uri.AbsolutePath.Contains("ImageServer")&&!uri.AbsolutePath.Contains("exportImage"))return Json(System.Text.Json.JsonSerializer.Serialize(new{pixelType="F32",bandCount=1,description="SYNTHETIC browser test service revision "+Revision}));

@@ -6,9 +6,10 @@ using AeroScience.Shared;
 namespace AeroScience.Missions;
 
 // The Library shares consent, the HTTP allow-list and the automatic numeric asset parser.
-public sealed class ScientificCatalog(AutomaticScientificData automatic,ScienceStore science,ScientificAccessSettings settings)
+public sealed partial class ScientificCatalog(AutomaticScientificData automatic,ScienceStore science,ScientificAccessSettings settings)
 {
     public static readonly ScientificCatalogProvider[] Providers=[
+        ..NasaProviders,
         new("usgs-3dep","USGS 3DEP","Multi-resolution bare-earth elevation",RemoteKind.Terrain,["elevation"],false,false,"Bounded composite numeric export, not a dated scene catalog. Survey dates, native resolution and composite vertical datum are unknown."),
         new("copernicus","Copernicus GLO-30","GLO-30 surface elevation",RemoteKind.Terrain,["elevation"],false,true,"DSM includes buildings/vegetation; EGM2008 heights, not a bare-earth DEM."),
         new("landsat","Landsat / Planetary Computer","Collection 2 Level-2 Surface Temperature",RemoteKind.Thermal,["ST_B10","QA_PIXEL","QA_RADSAT"],true,true,"L2SP numeric temperature and integer QA; historical Earth observations, not aircraft imagery."),
@@ -46,6 +47,7 @@ public sealed class ScientificCatalog(AutomaticScientificData automatic,ScienceS
     public async Task<ScientificCatalogPage> Search(ScientificCatalogQuery query,CancellationToken token=default)
     {
         var provider=Provider(query.Provider);ValidateBounds(query.Area);
+        if(query.SceneFilter is {} filter&&(filter.Length>100||filter.Any(c=>!(char.IsAsciiLetterOrDigit(c)||c is '_' or '-' or '.'))))throw new ArgumentException("Use up to 100 letters, digits, dots, underscores or hyphens for a scene filter.");
         if(query.PageSize is <1 or >30||!double.IsFinite(query.MaximumCloudPercent)||query.MaximumCloudPercent is <0 or >100||query.FromUtc>query.ToUtc||query.FromUtc.HasValue!=query.ToUtc.HasValue||query.ToUtc-query.FromUtc>TimeSpan.FromDays(3650))throw new ArgumentException("Choose 1–30 results and an ordered date range no longer than ten years.");
         if(query.Cursor is {} c&&(c.Length!=32||!c.All(char.IsAsciiHexDigit)))throw new ArgumentException("Invalid catalog cursor.");
         var normalized=query with{Cursor=null,CachedOnly=false,Refresh=false};var key=Hash(new{normalized,query.Cursor});
@@ -66,14 +68,19 @@ public sealed class ScientificCatalog(AutomaticScientificData automatic,ScienceS
                 var previous=JsonSerializer.Deserialize<Cached>(await File.ReadAllTextAsync(cursorPath,token),WireJson.Options)!;
                 if(Hash(previous.Query)!=Hash(normalized)||previous.Page.ExpiresUtc<DateTimeOffset.UtcNow||previous.NextUrl is null)throw new ArgumentException("Catalog cursor does not match this search or has expired.");url=previous.NextUrl;
             }
+            else if(IsNasa(provider.Id))url=NasaSearchUrl(query,1);
             else url=Root(provider.Id)+"/search?collections="+Collection(provider.Id)+"&bbox="+StacScientificProvider.Bounds(query.Area)+"&limit="+query.PageSize;
-            if(query.Cursor is null&&provider.SceneDates)
+            if(!IsNasa(provider.Id)&&query.Cursor is null&&provider.SceneDates)
             {
                 var to=query.ToUtc??DateTimeOffset.UtcNow;var from=query.FromUtc??to.AddDays(-365);
                 url+="&datetime="+Uri.EscapeDataString(from.ToUniversalTime().ToString("O")+"/"+to.ToUniversalTime().ToString("O"))+"&query="+Uri.EscapeDataString(JsonSerializer.Serialize(new Dictionary<string,object>{{"eo:cloud_cover",new{lte=query.MaximumCloudPercent}}}));
             }
             var items=new List<ScientificCatalogItem>();string? next=null;var limitations=new List<string>{"Catalog outlines do not establish QA-valid pixels. Original asset sizes, where known, are not subset transfer estimates."};
-            if(provider.Id=="usgs-3dep")
+            if(IsNasa(provider.Id))
+            {
+                var result=await SearchNasa(query,url,budget,token);items.AddRange(result.Items);next=result.Next;limitations.AddRange(result.Limitations);
+            }
+            else if(provider.Id=="usgs-3dep")
             {
                 var d=await automatic.Provider("usgs-3dep").Discover(RemoteKind.Terrain,query.Area,settings.Get().Preferences,budget,token);
                 if(d is not null)items.Add(Describe(provider,d,null));limitations.Add(provider.Description);
@@ -120,7 +127,7 @@ public sealed class ScientificCatalog(AutomaticScientificData automatic,ScienceS
     internal async Task<(ScientificCatalogItem Item,ScientificDiscovery Discovery)> Resolve(ScientificSceneSelection selection,GeographicBounds area,ScientificDownloadBudget budget,CancellationToken token,bool requireCoverage=true)
     {
         if(selection is null||selection.Bands is null||string.IsNullOrWhiteSpace(selection.Scene)||string.IsNullOrWhiteSpace(selection.Revision)||selection.Bands.Any(string.IsNullOrWhiteSpace))throw new ArgumentException("Select an exact supported scene, revision and numeric band recipe.");
-        var provider=Provider(selection.Provider);AutomaticScientificData.ValidateArea(area);Consent();
+        var provider=Provider(selection.Provider);if(IsNasa(provider.Id))throw new ArgumentException("NASA products use official browser acquisition and verified local ENVI import, not automatic Library numeric downloads. EMIT is discovery only.");AutomaticScientificData.ValidateArea(area);Consent();
         if(!selection.Bands.Order().SequenceEqual(provider.RequiredBands.Order())||selection.Scene.Length>300||selection.Scene.Any(c=>!(char.IsAsciiLetterOrDigit(c)||c is '_' or '-' or '.' or ',')))throw new ArgumentException("Choose supported numeric measurements and mandatory quality bands.");
         ScientificDiscovery d;ScientificCatalogItem item;
         if(provider.Id=="usgs-3dep")

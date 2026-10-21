@@ -1,5 +1,26 @@
 # Hyperspectral Imager
 
+## NASA catalog browsing (0.5.0 development)
+
+Open **Scientific Data Library → Browse & Download Data → Data family → Hyperspectral**.
+Choose AVIRIS-Classic, AVIRIS-NG or EMIT, select coordinates/viewport/rectangle/polygon or
+an existing regional boundary, adjust dates and optional flightline filter, then search.
+NASA CMR returns bounded pages of actual granules, source dates and original footprints.
+The map distinguishes these remote outlines from verified retained local data. Neither
+outline guarantees valid pixels. Offline cached searches retain their original as-of time.
+
+Classic Collection `AVIRIS-Classic_L2_Reflectance_2154` V1 and NG
+`AVIRIS-NG_L2_Reflectance_2110` V1 use family-specific original ENVI companions.
+`EMITL2ARFL` V001 is **discovery / official access only**: native NetCDF-4 import is
+unsupported. Missing spectral/grid metadata stays Unknown until original-file inspection.
+Official access links open externally; browser transfers are not managed Library jobs.
+The catalog revalidates the official collection version and never substitutes another product.
+
+[Live catalog evidence](../research/v0.5.0-nasa-validation.json) distinguishes metadata
+acceptance from family-specific original-file numerical verification and installed testing.
+
+## Advanced local import reference
+
 Normal pilot setup: [automatic quick start](quick-start.md) and [provider capabilities](automatic-data.md). Automatic NASA catalog discovery is supported; automated hyperspectral file preparation/authorization is not. The following ENVI workflow remains advanced.
 
 The implemented minimum workflow reads **real georeferenced ENVI cubes** with ≥16 original wavelengths, not a generated spectrum or static graph. Candidate producers include NASA AVIRIS and AVIRIS-NG. Their products vary in format/projection and availability; not every portal item is directly supported. EMIT is a researched source, but its native NetCDF/HDF is not decoded here. No Earthdata token is embedded in the app.

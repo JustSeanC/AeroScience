@@ -51,6 +51,7 @@ export async function libraryDownload(parent, api, isDisposed = () => false) {
   parent.append(form);
   const providers = await api("/api/science/library/providers");
   if (stopped || isDisposed()) return cleanup;
+  const category = select(form, "Data family", [["all", "Terrain, thermal & multispectral"], ["hyperspectral", "Hyperspectral · NASA"]], "all");
   const provider = select(
     form,
     "Scientific provider / product",
@@ -79,6 +80,7 @@ export async function libraryDownload(parent, api, isDisposed = () => false) {
       "date",
     ),
     cloud = input(filters, "Maximum scene cloud (%)", "30", "number");
+  const sceneFilter = input(filters, "Scene / flightline identifier contains", "");
   cloud.min = 0;
   cloud.max = 100;
   const cached = input(
@@ -413,8 +415,18 @@ export async function libraryDownload(parent, api, isDisposed = () => false) {
       "Supported compatible numeric recipe: " +
       p.requiredBands.join(", ") +
       ". Required quality masks are always retained.";
-    from.disabled = to.disabled = cloud.disabled = !p.sceneDates;
+    from.disabled = to.disabled = !p.sceneDates;
+    cloud.disabled = !p.sceneDates || !!p.id.startsWith("nasa-");
+    sceneFilter.disabled = !p.id.startsWith("nasa-");
+    measurements.textContent = p.kind === "hyperspectral" ? p.description : measurements.textContent;
   }
+  category.onchange = () => {
+    for (const option of provider.options) option.hidden = (option.value.startsWith("nasa-")) !== (category.value === "hyperspectral");
+    provider.value = category.value === "hyperspectral" ? "nasa-classic" : "usgs-3dep";
+    filtersChanged();
+  };
+  for (const option of provider.options) option.hidden = option.value.startsWith("nasa-");
+  sceneFilter.onchange = filtersChanged;
   provider.onchange =
     from.onchange =
     to.onchange =
@@ -438,7 +450,8 @@ export async function libraryDownload(parent, api, isDisposed = () => false) {
           toUtc: to.disabled
             ? null
             : new Date(to.value + "T23:59:59Z").toISOString(),
-          maximumCloudPercent: Number(cloud.value),
+          maximumCloudPercent: cloud.disabled ? 100 : Number(cloud.value),
+          sceneFilter: sceneFilter.disabled ? null : sceneFilter.value.trim() || null,
           pageSize: 10,
           cachedOnly: cached.checked,
           refresh: !cached.checked,
@@ -460,6 +473,7 @@ export async function libraryDownload(parent, api, isDisposed = () => false) {
       check.type = "checkbox";
       check.setAttribute("aria-label", `Select scene ${item.scene}`);
       check.checked = chosen.has(item.provider + "/" + item.scene);
+      check.disabled = !!item.nasa;
       label.append(check, el("strong", item.scene));
       row.append(
         label,
@@ -486,6 +500,13 @@ export async function libraryDownload(parent, api, isDisposed = () => false) {
         el("p", item.license),
         el("p", item.limitations.join(" ")),
       );
+      if (item.nasa) {
+        const n = item.nasa;
+        row.append(el("p", `${n.family} · ${n.capability}`), el("p", `Flightline: ${n.flightline} · collection ${n.collectionId} / ${n.collectionVersion} · ${n.processingLevel} reflectance · ${n.format}`), el("p", `${n.authorization}. Original distribution: ${bytes(n.originalBytes)}. Wavelengths / band count / units: ${n.bandCount ?? "Unknown until original-file verification"}.`));
+        more.append(el("p", `Collection revision: ${n.collectionRevision}. Granule metadata: ${n.metadataUrl}`));
+        for (const asset of n.assets) { const a = link(more, `${asset.role}: ${asset.name}`, asset.url); a.target="_blank"; a.rel="noopener noreferrer"; }
+        row.append(el("p", "Use official NASA access in your browser. No AeroScience-controlled download or EMIT import is offered."));
+      }
       const reference = link(more, "Authoritative source", item.reference);
       reference.target = "_blank";
       reference.rel = "noopener noreferrer";
@@ -541,6 +562,7 @@ export async function libraryDownload(parent, api, isDisposed = () => false) {
   };
   const requestSelection = () => {
     if (!areas.length) throw Error("Select a geographic area first.");
+    if (provider.value.startsWith("nasa-")) throw Error("NASA uses official browser handoff and verified local ENVI import. Select a NASA scene’s access action. EMIT is discovery only.");
     if (!chosen.size)
       throw Error("Choose at least one exact provider scene/product first.");
     return {
