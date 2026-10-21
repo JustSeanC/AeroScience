@@ -120,5 +120,16 @@ public sealed class NasaDirectAcquisitionTests:IDisposable
             await jobs.DisconnectEarthdata();Assert.Null(vault.ReadToken());Assert.False(File.Exists(manifest));Assert.NotNull(science.AvailabilityError());
         }finally{File.Move(saved,manifest);}
     }
+    [Fact]public async Task AtomicWorkerTransitionsCannotOverwriteDurableControlOrTerminalStates()
+    {
+        var item=NasaFixtureFiles.Item("classic");var folder=Path.Combine(root,"originals");NasaFixtureFiles.Cube(folder,item);using var auto=new AutomaticScientificData(science,settings,new(new Handler(folder,"classic"),cacheEnabled:false));auto.FlightActive(true);var catalog=new ScientificCatalog(auto,science,settings);using var jobs=new ScientificLibraryJobs(science,catalog,auto,settings,new Credentials());
+        var preview=await jobs.PreviewNasa(new(new(item.Provider,item.Scene,item.Revision),10485760));
+        foreach(var control in new[]{"Paused","Cancelled","Completed","Failed","Interrupted"})
+        {
+            science.SetLibraryState(preview.Id,control);
+            foreach(var worker in new[]{"Preparing","Downloading","Verifying","Queued","Completed","Failed","Interrupted"})Assert.Equal(control,science.SetLibraryState(preview.Id,worker,runningOnly:true).State);
+        }
+        science.SetLibraryState(preview.Id,"Queued");Assert.Equal("Preparing",science.SetLibraryState(preview.Id,"Preparing",runningOnly:true).State);
+    }
     public void Dispose(){science.Dispose();Directory.Delete(root,true);}
 }

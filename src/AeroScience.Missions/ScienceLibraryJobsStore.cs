@@ -63,11 +63,12 @@ public sealed partial class ScienceStore
             """;
         using var rows=cmd.ExecuteReader();var ids=new List<Guid>();while(rows.Read())ids.Add(Guid.Parse(rows.GetString(0)));return ids.ToArray();
     }
-    internal LibraryDownloadJob SetLibraryState(Guid id,string state,string? error=null,bool approve=false)
+    internal LibraryDownloadJob SetLibraryState(Guid id,string state,string? error=null,bool approve=false,bool runningOnly=false)
     {
         lock(gate)
         {
-            using var db=Open(true);using var cmd=db.CreateCommand();cmd.CommandText="UPDATE library_jobs SET state=$s,error=$e,updated_utc=$u,approval_id=CASE WHEN $approve=1 THEN $approval ELSE approval_id END WHERE id=$id";
+            using var db=Open(true);using var cmd=db.CreateCommand();cmd.CommandText="UPDATE library_jobs SET state=$s,error=$e,updated_utc=$u,approval_id=CASE WHEN $approve=1 THEN $approval ELSE approval_id END WHERE id=$id AND ($running=0 OR state IN ('Queued','Preparing','Downloading','Verifying'))";
+            cmd.Parameters.AddWithValue("$running",runningOnly?1:0);
             cmd.Parameters.AddWithValue("$s",state);cmd.Parameters.AddWithValue("$e",(object?)error??DBNull.Value);cmd.Parameters.AddWithValue("$u",DateTimeOffset.UtcNow.ToString("O"));cmd.Parameters.AddWithValue("$approve",approve?1:0);cmd.Parameters.AddWithValue("$approval",Guid.NewGuid().ToString());cmd.Parameters.AddWithValue("$id",id.ToString());cmd.ExecuteNonQuery();return LibraryJob(id);
         }
     }

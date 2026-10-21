@@ -85,7 +85,7 @@ public sealed partial class ScientificLibraryJobs
         _=OwnedLedger();
         var merged=bundle.Selection with{Nasa=bundle.Selection.Nasa! with{Assets=bundle.Files.Select(f=>new NasaAsset(f.Name,f.Url,f.Role)).ToArray()}};
         var header=Path.Combine(folder,bundle.Files.Single(f=>f.Role=="ENVI header").Name);
-        science.SetLibraryState(job.Id,"Downloading");science.SetLibraryItem(job.Id,0,"Downloading");
+        science.SetLibraryState(job.Id,"Downloading",runningOnly:true);science.SetLibraryItem(job.Id,0,"Downloading");
         using(var reservation=science.Management?.ReserveScience(bundle.Files.Sum(f=>f.Bytes)))
             foreach(var file in bundle.Files.OrderBy(f=>f.Role=="ENVI header"?0:f.Role=="Provider SHA-256"?1:2))
             {
@@ -93,7 +93,7 @@ public sealed partial class ScientificLibraryJobs
                 if(file.Role=="Original numeric binary")_=NasaGuidedImport.Inspect(header,merged,token:token,direct:true);
                 await automatic.Http.DownloadNasaFile(file,folder,earthdata,budget,token);
             }
-        science.SetLibraryState(job.Id,"Verifying");science.SetLibraryItem(job.Id,0,"Verifying");
+        science.SetLibraryState(job.Id,"Verifying",runningOnly:true);science.SetLibraryItem(job.Id,0,"Verifying");
         var inspected=NasaGuidedImport.Inspect(header,merged,token:token,direct:true);
         if(inspected.Manifest is null)throw new IOException("NASA original metadata is incomplete or incompatible. Browser/manual import remains available; no metadata was guessed.");
         var provenance=new AutomaticSourceProvenance("nasa-earthdata-original-envi","NASA CMR / ORNL DAAC",bundle.Selection.Scene,bundle.Files.Select(f=>f.Url).ToArray(),bundle.Selection.Bounds,DateTimeOffset.UtcNow,

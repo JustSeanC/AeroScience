@@ -135,7 +135,7 @@ public sealed partial class ScientificLibraryJobs:IDisposable
                 if(job is not null&&automatic.LibraryAllowed)
                 {
                     var item=job.Items.FirstOrDefault(i=>i.State!="Completed");
-                    if(item is null){science.SetLibraryState(job.Id,"Completed");continue;}
+                    if(item is null){science.SetLibraryState(job.Id,"Completed",runningOnly:true);continue;}
                     var work=job.Preview.Work[item.Index];var key=job.Id+"/"+item.Index;
                     await automatic.ScheduleLibrary(key,ScientificCatalog.Provider(work.Scene.Provider).Kind,work.Area,token=>Execute(job,work,item,token));
                 }
@@ -155,7 +155,8 @@ public sealed partial class ScientificLibraryJobs:IDisposable
             using var operation=science.BeginAnalysis();
             var current=science.LibraryJob(job.Id);if(current.State!="Queued"||current.ApprovalId is null)return;
             if(current.Preview.SettingsHash!=SettingsHash(current.Preview.Nasa is not null))throw new InvalidOperationException("Scientific access limits/consent changed; create a new preview before further downloading.");
-            science.SetLibraryState(job.Id,"Preparing");science.SetLibraryItem(job.Id,work.Index,"Preparing");
+            if(science.SetLibraryState(job.Id,"Preparing",runningOnly:true).State!="Preparing")return;
+            science.SetLibraryItem(job.Id,work.Index,"Preparing");
             var source=job.Preview.Nasa is {} bundle?ReusableNasa(bundle):Reusable(work.Scene,work.Area);
             if(source is not null){if(!Verify(source))throw new IOException("Retained source failed verification; originals were preserved.");}
             else
@@ -168,25 +169,25 @@ public sealed partial class ScientificLibraryJobs:IDisposable
                 else
                 {
                     var exact=await catalog.Resolve(work.Scene,work.Area,budget,token);
-                    science.SetLibraryState(job.Id,"Downloading");science.SetLibraryItem(job.Id,work.Index,"Downloading");
+                    science.SetLibraryState(job.Id,"Downloading",runningOnly:true);science.SetLibraryItem(job.Id,work.Index,"Downloading");
                     source=await automatic.PrepareSource(exact.Discovery,budget,token,stage=>science.SetLibraryItem(job.Id,work.Index,stage is "Validating" or "Saving"?"Verifying":"Downloading"),"Downloads/Library/"+job.Id.ToString("N")+"/"+work.Index);
                 }
                 if(source is null)throw new IOException("Provider export contained no supported numeric coverage. No source was published as usable.");
             }
             token.ThrowIfCancellationRequested();science.SetLibraryItem(job.Id,work.Index,"Completed",source:source.Id,verifiedBytes:source.Files.Sum(f=>f.Bytes));
-            current=science.LibraryJob(job.Id);if(current.State is "Preparing" or "Downloading" or "Verifying")science.SetLibraryState(job.Id,current.Items.All(i=>i.State=="Completed")?"Completed":"Queued");
+            current=science.LibraryJob(job.Id);science.SetLibraryState(job.Id,current.Items.All(i=>i.State=="Completed")?"Completed":"Queued",runningOnly:true);
         }
         catch(ScientificAllowanceWaitException error)
-        {science.SetLibraryItem(job.Id,work.Index,"Interrupted",error.Message);if(science.LibraryJob(job.Id).State is not("Paused" or "Cancelled"))science.SetLibraryState(job.Id,"Interrupted",error.Message);}
+        {science.SetLibraryItem(job.Id,work.Index,"Interrupted",error.Message);science.SetLibraryState(job.Id,"Interrupted",error.Message,runningOnly:true);}
         catch(OperationCanceledException)
         {
             science.SetLibraryItem(job.Id,work.Index,"Interrupted",error:"Paused, preempted or interrupted; verified originals and safe partial ranges are preserved.");
-            var current=science.LibraryJob(job.Id);if(current.State is not("Paused" or "Cancelled"))science.SetLibraryState(job.Id,"Interrupted","Resume explicitly; active flight acquisition has priority.");
+            science.SetLibraryState(job.Id,"Interrupted","Resume explicitly; active flight acquisition has priority.",runningOnly:true);
         }
         catch(Exception e)when(e is IOException or InvalidDataException or HttpRequestException or InvalidOperationException or ArgumentException or UnauthorizedAccessException or System.Text.Json.JsonException or Microsoft.Data.Sqlite.SqliteException)
         {
             var error=e is HttpRequestException?"Provider network unavailable. Retry when connectivity returns.":e is System.Text.Json.JsonException?"Provider metadata is incompatible; no scientific values were guessed.":e.Message;
-            science.SetLibraryItem(job.Id,work.Index,"Failed",error);if(science.LibraryJob(job.Id).State is not("Paused" or "Cancelled"))science.SetLibraryState(job.Id,"Failed",error);
+            science.SetLibraryItem(job.Id,work.Index,"Failed",error);science.SetLibraryState(job.Id,"Failed",error,runningOnly:true);
         }
         finally{activeNasa.TryRemove(job.Id,out _);transfer?.Dispose();if(budget is not null)science.LibraryBudget(job.Id,work.Index,initial+budget.Bytes,initial+budget.Bytes,finish:true);science.Management?.RefreshScience();}
     }
