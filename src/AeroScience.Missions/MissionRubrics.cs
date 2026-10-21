@@ -12,6 +12,13 @@ public static class MissionRubrics
          new("execution",RubricCategory.FlightPlanExecution,1,true,["flight-position"],template==MissionTemplateKind.AtmosphericProfile?"Frozen altitude targets, not polygon overlap.":"Ordered research route/region evidence; no interpolation through telemetry gaps."),
          new("discipline",RubricCategory.AcquisitionDiscipline,1,true,["collection-intent"],"Frozen expected work and actual eligible acquisition attempts, independently of source success or science-session boundaries.")],
         new(90,80,70,60),.8,true,["AeroScience pilot-performance policy; initial thresholds require representative live validation.","Cloud/nodata/provider failures affect factual scientific yield, not automatically pilot compliance.","Unknown evidence is bounded, never silently scored perfect or discarded."]);
+    // First required opportunities are fixed once observed. Later easy repetitions cannot
+    // replace an earlier missed slot; an explicitly different retry policy needs a new rubric.
+    public static HashSet<long> RequiredSlots(IEnumerable<long> slots,double? target)
+    {
+        var ordered=slots.Distinct().Order();
+        return (target is {} count?ordered.TakeWhile((_,index)=>index<count):ordered).ToHashSet();
+    }
     public static MissionAssessmentContext Freeze(Guid mission,DateTimeOffset at,ScienceMode mode,string planHash,MissionPlan? plan,InstrumentConfiguration[] settings,string? objective=null,ReadinessAssessment? readiness=null)
     {
         var configs=settings.Where(c=>c.Enabled).Select((c,i)=>new EffectiveInstrumentConfiguration(MissionPlanning.StableWaypointId(mission,10000+i),1,at,c,c.Calibration,OperatingPolicy:new("hybrid-realistic-1",1,PreflightReadiness.Hash("hybrid-realistic-1")),Specification:InstrumentCalibration.Describe(c.InstrumentId).Specification)).ToArray();

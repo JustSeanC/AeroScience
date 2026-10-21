@@ -84,7 +84,7 @@ public static class MissionEvaluationArchive
             void Score(double value,string evidenceClass){low=high=value;evidence=1;classes=[evidenceClass];}
             if(obligation.CriterionId=="design")
             {
-                var tests=new[]{!string.IsNullOrWhiteSpace(plan?.Objective??research.Objective),instruments.Length>0,
+                var tests=new[]{!string.IsNullOrWhiteSpace(plan?.Objective??research.Objective),context!.Configurations.Length>0,
                     plan?.Template==MissionTemplateKind.GeographicSurvey?plan.SurveyAreas is {Length:>0}:plan?.Template==MissionTemplateKind.AtmosphericProfile?plan.MinimumAltitudeFeet<plan.MaximumAltitudeFeet:plan?.Waypoints is {Length:>0}||plan?.EstimatedDurationMinutes>0,
                     plan is not null&&(plan.Waypoints is {Length:>0}||plan.EstimatedDurationMinutes>0||plan.MinimumAltitudeFeet<plan.MaximumAltitudeFeet)};
                 Metric("design-checks",tests.Count(v=>v),tests.Length,"frozen requirements","Explicit objective, instruments, template research work and route/profile/duration.");Score(100d*tests.Count(v=>v)/tests.Length,"frozen-plan");reasons.Add($"{tests.Count(v=>v)}/{tests.Length} frozen design criteria: objective, enabled instruments, template research geometry, bounded route/profile/duration.");recommendations.Add("Define missing objective/instruments and template-specific research work before flight.");
@@ -107,20 +107,28 @@ public static class MissionEvaluationArchive
                 var interval=config.IntervalMs/1000d;
                 long Slot(DateTimeOffset time)=>(long)Math.Floor((time-detail.Mission.StartedUtc).TotalSeconds/interval+1e-6);
                 var scopedFrames=frames.Where(f=>InScope(f,obligation)&&!f.IsPaused).ToArray();
-                var expected=scopedFrames.Where(f=>!AuthorizedPause(StateAt(f.TimestampUtc))).Select(f=>Slot(f.TimestampUtc)).Distinct().ToHashSet();
+                var expected=MissionRubrics.RequiredSlots(scopedFrames.Where(f=>!AuthorizedPause(StateAt(f.TimestampUtc))).Select(f=>Slot(f.TimestampUtc)),obligation.TargetAmount);
                 var matching=actual.Where(a=>a.InstrumentId==obligation.InstrumentId&&expected.Contains(Slot(a.ExposureUtc))).GroupBy(a=>Slot(a.ExposureUtc)).Select(g=>g.First()).ToArray();
                 var denominator=Math.Max(expected.Count,obligation.TargetAmount??0);
                 // Start/End/disable never change expected slots. No result/source success is needed for attempt credit.
                 var unknownPaused=scopedFrames.Where(f=>continuityAt.GetValueOrDefault(f.TimestampUtc)||StateAt(f.TimestampUtc) is {To:CollectionPhase.Paused}&&!AuthorizedPause(StateAt(f.TimestampUtc))).Select(f=>Slot(f.TimestampUtc)).Distinct().ToHashSet();
                 if(denominator>0)
                 {
-                    low=100*matching.Length/denominator;var matchedSlots=matching.Select(a=>Slot(a.ExposureUtc)).ToHashSet();var unresolved=contiguous?unknownPaused.Count(s=>!matchedSlots.Contains(s)):denominator-matching.Length;high=Math.Min(100,low.Value+100*unresolved/denominator);evidence=1-unresolved/denominator;
-                    Metric("expected-acquisition-work",matching.Length,denominator,"acquisition opportunities","Unique frozen-cadence slots in this research scope, with frozen target amount as a minimum. Actual intents, including source-failed attempts, are counted once per slot. Session boundaries do not reset work.",(long)Math.Max(0,denominator-matching.Length),(long)Math.Ceiling(unresolved));
+                    low=100*matching.Length/denominator;var matchedSlots=matching.Select(a=>Slot(a.ExposureUtc)).ToHashSet();var unresolved=contiguous?unknownPaused.Count(s=>expected.Contains(s)&&!matchedSlots.Contains(s)):denominator-matching.Length;high=Math.Min(100,low.Value+100*unresolved/denominator);evidence=1-unresolved/denominator;
+                    Metric("expected-acquisition-work",matching.Length,denominator,"acquisition opportunities","First required frozen-cadence slots in this research scope. Later easy repetitions cannot replace earlier missed work. Actual intents, including source-failed attempts, are counted once per slot. Session boundaries do not reset work.",(long)Math.Max(0,denominator-matching.Length),(long)Math.Ceiling(unresolved));
                     classes=matching.Length>0?["collection-intent"]:contiguous&&completed?["collection-intent"]:[];
                     reasons.Add($"{matching.Length}/{denominator} frozen-cadence research opportunities have actual acquisition intents. Session count, source success and extra out-of-scope samples cannot change this denominator.");
                     if(!contiguous||unknownPaused.Count>0)reasons.Add("Telemetry gaps or manual pause rationale are not sufficient evidence of pilot fault; unresolved work remains uncertain, not perfect or failed.");
                 }
                 else if(contiguous&&completed&&obligation.Scope is "region" or "planned-session"){Score(0,"collection-intent");reasons.Add("The frozen research region was never visited/collected during a continuously observed flight.");}
+                var configuredEnd=obligation.Scope=="planned-session"?plan?.Collection?.Triggers.FirstOrDefault(t=>t.PlannedSessionKey==obligation.PlannedSessionKey&&t.Action==CollectionAction.EndData&&t.Kind is CollectionTriggerKind.Waypoint or CollectionTriggerKind.DirectionalGate):null;
+                var closedPlannedWindow=configuredEnd is not null&&events.Any(e=>e.OccurrenceId==configuredEnd.OccurrenceId&&e.Origin==CollectionEventOrigin.RouteTrigger);
+                if(denominator>0&&obligation.TargetAmount is null&&!closedPlannedWindow)
+                {
+                    low=0;high=100;evidence=0;classes=[];
+                    reasons.Add("This frozen scope has no finite acquisition target or completed explicit route/gate End bound. Observed-opportunity counts are factual diagnostics, not proof that all intended research was completed. Final discipline credit remains unassessed.");
+                    recommendations.Add("Before departure, define a bounded flight acquisition duration or explicit Start/End route window. Later sessions cannot retroactively create a smaller intended-work denominator.");
+                }
                 reasons.Add("Provider outages/cloud/nodata affect factual yield, not acquisition-attempt discipline. Frozen route/boundary pauses and explicit pilot-declared safety pauses exclude their observed time only; frozen target amounts and omitted regions remain required.");recommendations.Add("Complete frozen research work; ending/restarting sessions does not erase outstanding obligations.");
             }
             else if(obligation.CriterionId=="operating")

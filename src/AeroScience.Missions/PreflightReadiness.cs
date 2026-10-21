@@ -114,6 +114,13 @@ public static class PreflightReadiness
         var meaningful=!string.IsNullOrWhiteSpace(draft.Objective)&&configurations.Length>0&&(route.Length>0||validArea||draft.EstimatedDurationMinutes>0||draft.MinimumAltitudeFeet<draft.MaximumAltitudeFeet);
         Add("grading.obligations","Grading",draft.Mode==ScienceMode.Universal?ReadinessStatus.Ready:meaningful?ReadinessStatus.Caution:ReadinessStatus.NotYetAssessed,
             draft.Mode==ScienceMode.Universal?"Universal missions expose factual yield without Realistic pilot grades.":meaningful?"Research inputs can define frozen obligations. Actual grade eligibility still requires applicable archived evidence.":"Insufficient planned research obligations for a meaningful grade.","Specify objective, instruments and bounded research work before departure.");
+        if(draft.Mode==ScienceMode.Realistic)
+        {
+            var numericBound=draft.EstimatedDurationMinutes>0&&draft.SurveyAreas is not {Length:>0}&&!(draft.Collection?.Triggers.Any(t=>t.Action==CollectionAction.StartData&&t.PlannedSessionKey is not null)??false);
+            Add("grading.work-bound","Grading",numericBound?ReadinessStatus.Caution:ReadinessStatus.NotYetAssessed,
+                numericBound?"Declared flight acquisition duration freezes the first required cadence opportunities. Easy later repetitions cannot replace earlier missed work.":"Research scopes need finite intended work or a completed explicit Start/End route window for final acquisition-discipline credit. Observed samples alone cannot prove completeness.",
+                "Define the intended acquisition duration for a flight-wide study, or explicit Start/End gates for planned sessions. Unbounded scopes remain honestly unassessed; incomplete drafts can still be saved.");
+        }
         var result=new ReadinessAssessment(1,Hash(draft),now,checks.ToArray(),["Readiness is advisory and expires after 60 seconds. No save, recording, collection or download occurs.",..environment.Limitations],Hash(environment),now.AddSeconds(60));
         EvidenceContracts.Validate(result);return result;
     }

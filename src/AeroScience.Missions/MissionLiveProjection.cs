@@ -60,8 +60,9 @@ public sealed class MissionLiveProjection(MissionStore store,Guid mission)
             }
             else if(obligation.CriterionId=="discipline")
             {
-                var required=expected.GetValueOrDefault(obligation.Id,[]);var denominator=Math.Max(required.Count,obligation.TargetAmount??0);var completed=attempted.GetValueOrDefault(obligation.Id,[]).Count(s=>required.Contains(s));
+                var required=MissionRubrics.RequiredSlots(expected.GetValueOrDefault(obligation.Id,[]),obligation.TargetAmount);var denominator=Math.Max(required.Count,obligation.TargetAmount??0);var completed=attempted.GetValueOrDefault(obligation.Id,[]).Count(s=>required.Contains(s));
                 if(denominator>0){lower=100*completed/denominator;upper=100;evidence=completed/denominator;classes=completed>0?["collection-intent"]:[];}
+                if(obligation.TargetAmount is null){lower=0;upper=100;evidence=0;classes=[];reasons.Add("Intended work is not numerically bounded; explicit route-window completion is assessed from archived trigger evidence, never guessed live.");}
                 reasons.Add($"{completed}/{denominator} current frozen-cadence research slots contain actual attempts. Future work, source quality and final evidence reconciliation remain separate.");
             }
             else reasons.Add("Operating and exact scientific-support evaluation remains pending final archived assessment; no current rule outcome is guessed.");

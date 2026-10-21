@@ -33,6 +33,20 @@ public sealed class MissionPerformanceIntegrationTests:IDisposable
         var input=MissionEvaluationArchive.Build(store,science,flight.Id);var report=MissionGrading.Report(input);var discipline=report.Categories.Single(c=>c.Category==RubricCategory.AcquisitionDiscipline);Assert.Equal(100d*2/3,discipline.ScoreLower,7);Assert.True(report.Grade.ScoreUpper<100);Assert.Equal(2,input.Sessions.Length);
         Assert.All(input.Context!.Obligations.Where(o=>o.CriterionId=="discipline"),o=>Assert.Equal(3,o.TargetAmount));
     }
+    [Fact] public void EasyExtendedCollectionCannotDiluteAnEarlierMissedFrozenOpportunity()
+    {
+        var flight=Start();Tick();Action(flight.Id,CollectionAction.EndData);Tick();Action(flight.Id,CollectionAction.StartData);Tick();
+        var before=MissionGrading.Report(MissionEvaluationArchive.Build(store,science,flight.Id));
+        for(var i=0;i<10;i++)Tick();coordinator.End(flight.Id);var after=MissionGrading.Report(MissionEvaluationArchive.Build(store,science,flight.Id));
+        var original=before.Categories.Single(c=>c.Category==RubricCategory.AcquisitionDiscipline);var extended=after.Categories.Single(c=>c.Category==RubricCategory.AcquisitionDiscipline);
+        Assert.Equal(100d*2/3,original.ScoreLower,7);Assert.Equal(original.ScoreLower,extended.ScoreLower);Assert.Equal(12,after.Input.Yield.Single().Metrics[0].Denominator);Assert.Equal(12,after.Input.Yield.Single().Metrics[0].Numerator);
+    }
+    [Fact] public void UnquantifiedResearchCannotBecomeACompleteGradeByAddingSuccessfulSamples()
+    {
+        var flight=StartWithUnboundedPlan();for(var i=0;i<8;i++)Tick();coordinator.End(flight.Id);var report=MissionGrading.Report(MissionEvaluationArchive.Build(store,science,flight.Id));
+        Assert.Equal(MissionGradeStatus.InsufficientEvidence,report.Grade.Status);Assert.Null(report.Grade.Letter);Assert.Equal(0,report.Categories.Single(c=>c.Category==RubricCategory.AcquisitionDiscipline).EvidenceFraction);Assert.Equal(8,report.Input.Yield.Single().Metrics[0].Numerator);
+    }
+    Mission StartWithUnboundedPlan(){var p=store.SavePlan(new(Guid.NewGuid(),"Unbounded synthetic research",Mode:ScienceMode.Realistic,Objective:"Observe wind",Instruments:[new("ambient-wind",true)]));return coordinator.Start(new("Unbounded synthetic flight",PlanId:p.Id));}
     [Fact] public void AllPausedOrNeverStartedFlightsDoNotEarnPerfectGradesAndUniversalIsUngraded()
     {
         var flight=Start(true);Tick();Tick();Tick();coordinator.End(flight.Id);var empty=MissionGrading.Report(MissionEvaluationArchive.Build(store,science,flight.Id));Assert.NotEqual(MissionGradeLetter.A,empty.Grade.Letter);Assert.All(empty.Input.Yield,y=>Assert.Null(y.Metrics[0].Numerator));
@@ -68,7 +82,7 @@ public sealed class MissionPerformanceIntegrationTests:IDisposable
         var frame=SimulatedTelemetryProvider.Generate(now,0);var waypoint=new ResearchWaypoint("Start only",frame.Latitude,frame.Longitude,Id:Guid.NewGuid());var id=Guid.NewGuid();var trigger=new CollectionTrigger(Guid.NewGuid(),Guid.NewGuid(),CollectionAction.StartData,CollectionTriggerKind.Waypoint,waypoint.Id!.Value,1,20,PlannedSessionKey:"A");
         var plan=store.SavePlan(new(id,"Optional End fixture",Mode:ScienceMode.Realistic,Objective:"Observe wind after explicit Start",Waypoints:[waypoint],Instruments:[new("ambient-wind",true)],Collection:new(1,id,InitialCollectionPolicy.Armed,[trigger],new(5,6))));
         var flight=coordinator.Start(new("Synthetic optional-end flight",PlanId:plan.Id));Tick();Tick();Tick();Assert.Equal(CollectionPhase.Collecting,store.CollectionCheckpoint(flight.Id)!.Phase);coordinator.End(flight.Id);
-        var input=MissionEvaluationArchive.Build(store,science,flight.Id);var obligation=input.Context!.Obligations.Single(o=>o.CriterionId=="discipline");var evidence=input.Evidence.Single(e=>e.ObligationId==obligation.Id);Assert.Equal(100,evidence.ScoreLower);Assert.Equal(3,evidence.Metrics!.Single().Denominator);Assert.Equal(3,evidence.Metrics!.Single().Numerator);
+        var input=MissionEvaluationArchive.Build(store,science,flight.Id);var obligation=input.Context!.Obligations.Single(o=>o.CriterionId=="discipline");var evidence=input.Evidence.Single(e=>e.ObligationId==obligation.Id);Assert.Equal(0,evidence.ScoreLower);Assert.Equal(100,evidence.ScoreUpper);Assert.Equal(0,evidence.EvidenceFraction);Assert.Equal(MissionGradeStatus.InsufficientEvidence,MissionGrading.Report(input).Grade.Status);Assert.Equal(3,evidence.Metrics!.Single().Denominator);Assert.Equal(3,evidence.Metrics!.Single().Numerator);
     }
     [Fact] public void FrozenRoutePauseAndExplicitEndAreAuthorizedHalfOpenAcquisitionWindows()
     {
