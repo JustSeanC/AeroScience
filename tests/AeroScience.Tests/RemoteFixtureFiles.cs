@@ -30,7 +30,7 @@ public static class RemoteFixtureFiles
         var manifest=new ScientificSourceManifest(1,"SYNTHETIC TEST FIXTURE — "+kind,kind,"Isolated automated test data","Test-only numeric fixture","Not a genuine external observation; never distributed as scientific source data","fixture-scene",new DateTimeOffset(2020,1,1,0,0,0,TimeSpan.Zero),kind==RemoteKind.Terrain?"NAVD88 (fixture label, no conversion)":"not applicable",bands.ToArray());
         var path=Path.Combine(root,"source.json");File.WriteAllText(path,JsonSerializer.Serialize(manifest,WireJson.Options));return path;
     }
-    public static void GeoTiff(string file,float value,int size=64,double pixel=.001,bool byteSamples=false,bool gradient=false,bool pixelPoint=false)
+    public static void GeoTiff(string file,float value,int size=64,double pixel=.001,bool byteSamples=false,bool gradient=false,bool pixelPoint=false,double west=-75.032,double north=40.032)
     {
         using var tif=Tiff.Open(file,"w");
         tif.MergeFieldInfo([
@@ -39,7 +39,7 @@ public static class RemoteFixtureFiles
             new(TiffTag.GEOTIFF_GEOKEYDIRECTORYTAG,-1,-1,TiffType.SHORT,FieldBit.Custom,true,true,"GeoKeys"),
             new(TiffTag.GDAL_NODATA,-1,-1,TiffType.ASCII,FieldBit.Custom,true,false,"GDAL_NODATA")],4);
         tif.SetField(TiffTag.IMAGEWIDTH,size);tif.SetField(TiffTag.IMAGELENGTH,size);tif.SetField(TiffTag.SAMPLESPERPIXEL,1);tif.SetField(TiffTag.BITSPERSAMPLE,byteSamples?8:32);tif.SetField(TiffTag.SAMPLEFORMAT,byteSamples?SampleFormat.UINT:SampleFormat.IEEEFP);tif.SetField(TiffTag.ROWSPERSTRIP,8);tif.SetField(TiffTag.PHOTOMETRIC,Photometric.MINISBLACK);tif.SetField(TiffTag.PLANARCONFIG,PlanarConfig.CONTIG);tif.SetField(TiffTag.COMPRESSION,Compression.DEFLATE);
-        tif.SetField(TiffTag.GEOTIFF_MODELPIXELSCALETAG,3,new[]{pixel,pixel,0});tif.SetField(TiffTag.GEOTIFF_MODELTIEPOINTTAG,6,new[]{0d,0,0,-75.032,40.032,0});tif.SetField(TiffTag.GEOTIFF_GEOKEYDIRECTORYTAG,16,new short[]{1,1,0,3,1024,0,1,2,1025,0,1,(short)(pixelPoint?2:1),2048,0,1,4326});tif.SetField(TiffTag.GDAL_NODATA,"-9999");
+        tif.SetField(TiffTag.GEOTIFF_MODELPIXELSCALETAG,3,new[]{pixel,pixel,0});tif.SetField(TiffTag.GEOTIFF_MODELTIEPOINTTAG,6,new[]{0d,0,0,west,north,0});tif.SetField(TiffTag.GEOTIFF_GEOKEYDIRECTORYTAG,16,new short[]{1,1,0,3,1024,0,1,2,1025,0,1,(short)(pixelPoint?2:1),2048,0,1,4326});tif.SetField(TiffTag.GDAL_NODATA,"-9999");
         var bytes=new byte[size*(byteSamples?1:4)];for(var x=0;x<size;x++){if(byteSamples)bytes[x]=(byte)value;else BitConverter.GetBytes(value).CopyTo(bytes,x*4);}for(var row=0;row<size;row++){if(gradient)for(var x=0;x<size;x++)BitConverter.GetBytes((float)(row*size+x)).CopyTo(bytes,x*4);if(!tif.WriteScanline(bytes,row))throw new IOException("Fixture TIFF write failed.");}tif.WriteDirectory();
     }
 }

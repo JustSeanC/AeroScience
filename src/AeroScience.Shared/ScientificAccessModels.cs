@@ -27,6 +27,6 @@ public sealed record AutomaticSourceProvenance(string Workflow,string Catalog,st
     GeographicBounds RequestedArea,DateTimeOffset RetrievedUtc,string Preparation,string Quality,string NativeResolution,
     long NetworkBytes,string[] Limitations,string? ProviderMetadataJson=null,int? CheckedPixels=null,int? UsablePixels=null,string? CatalogRevision=null);
 
-public sealed record ScientificQueueSummary(int Queued,int Downloading,bool Paused,long HourlyBytes,long? HourlyLimit,double EstimatedPreparationSeconds,long ReservedBytes=0,long? AvailableBytes=null,long PreflightBytes=0,long PreflightReservedBytes=0,long? PreflightLimit=null,long? PreflightAvailableBytes=null,long CombinedNetworkBytes=0);
+public sealed record ScientificQueueSummary(int Queued,int Downloading,bool Paused,long HourlyBytes,long? HourlyLimit,double EstimatedPreparationSeconds,long ReservedBytes=0,long? AvailableBytes=null,long PreflightBytes=0,long PreflightReservedBytes=0,long? PreflightLimit=null,long? PreflightAvailableBytes=null,long CombinedNetworkBytes=0,string? WaitingReason=null,int? ActiveConcurrencyLimit=null);
 public sealed record ScientificPredictionSnapshot(string Status,string Message,double LookaheadSeconds,double DistanceMetres,
     bool RouteConsistent,bool Limited,double? ReadyAheadSeconds,ScientificDataReadiness[] Areas,ScientificQueueSummary Queue);

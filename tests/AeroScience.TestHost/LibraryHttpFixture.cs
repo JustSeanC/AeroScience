@@ -32,6 +32,11 @@ internal sealed class LibraryHttpFixture(string root):HttpMessageHandler
             var nasa=JsonNode.Parse(File.ReadAllText(Path.Combine(AppContext.BaseDirectory,"ProviderMetadata",$"nasa-{family}-{type}.json")))!;
             if(type=="collections")nasa["feed"]!["entry"]![0]!["dataset_id"]="SYNTHETIC NASA browser test · "+family;
             if(uri.Query.Contains("concept_id=")){var id=System.Web.HttpUtility.ParseQueryString(uri.Query)["concept_id"];var entries=nasa["feed"]!["entry"]!.AsArray();nasa["feed"]!["entry"]=new JsonArray(entries.Where(e=>e!["id"]!.GetValue<string>()==id).Select(e=>e!.DeepClone()).ToArray());}
+            else if(type=="granules"){
+                var entries=nasa["feed"]!["entry"]!.AsArray();var descending=query["sort_key[]"]?.Contains("-start_date")==true;
+                var ordered=descending?entries.OrderByDescending(e=>e!["time_start"]!.GetValue<string>()).ThenBy(e=>e!["id"]!.GetValue<string>()):entries.OrderBy(e=>e!["time_start"]!.GetValue<string>()).ThenBy(e=>e!["id"]!.GetValue<string>());
+                nasa["feed"]!["entry"]=new JsonArray(ordered.Select(e=>e!.DeepClone()).ToArray());
+            }
             return Json(nasa.ToJsonString());
         }
         if(uri.Host=="data.ornldaac.earthdata.nasa.gov")
@@ -39,7 +44,7 @@ internal sealed class LibraryHttpFixture(string root):HttpMessageHandler
             if(request.Headers.Authorization?.Parameter!=FixtureEarthdata.Token)return new(HttpStatusCode.Unauthorized);
             if(Mode=="outage")return new(HttpStatusCode.ServiceUnavailable);
             if(Mode=="wait"&&request.Method==HttpMethod.Get)await Task.Delay(Timeout.Infinite,token);
-            var family=uri.AbsolutePath.Contains("Classic")?"classic":"ng";var item=NasaFixtureFiles.Item(family);var folder=Path.Combine(fixtureFolder,"NASA-"+family);
+            var family=uri.AbsolutePath.Contains("Classic")?"classic":"ng";var item=NasaFixtureFiles.Item(family,Path.GetFileName(uri.AbsolutePath));var folder=Path.Combine(fixtureFolder,"NASA-"+family);
             var header=Path.Combine(folder,item.Nasa!.Assets.First(a=>a.Role=="Original numeric binary").Name[..^4]+".hdr");
             if(!File.Exists(header))NasaFixtureFiles.Cube(folder,item,family=="classic"?224:425);
             var name=Path.GetFileName(uri.AbsolutePath);var local=Path.Combine(folder,name);
@@ -47,14 +52,15 @@ internal sealed class LibraryHttpFixture(string root):HttpMessageHandler
             var originalResponse=new HttpResponseMessage(HttpStatusCode.OK){Content=new ByteArrayContent(request.Method==HttpMethod.Head?[]:originalBytes)};
             originalResponse.Content.Headers.ContentLength=originalBytes.Length;originalResponse.Headers.ETag=new("\"synthetic-browser-original-v1\"");originalResponse.Headers.AcceptRanges.Add("bytes");return originalResponse;
         }
-        if(uri.Host=="tigerweb.geo.census.gov")return Json(File.ReadAllText(Path.Combine(AppContext.BaseDirectory,"ProviderMetadata","census-county.json")));
+        if(uri.Host=="tigerweb.geo.census.gov")return Json(File.ReadAllText(Path.Combine(AppContext.BaseDirectory,"ProviderMetadata",uri.Query.Contains("returnGeometry=false")?uri.Query.Contains("COUNTY")?"census-new-mexico-counties.json":"census-states.json":"census-county.json")));
         if(uri.AbsolutePath.Contains("/sas/"))return Json(System.Text.Json.JsonSerializer.Serialize(new{href=System.Web.HttpUtility.ParseQueryString(uri.Query)["href"]}));
         if(uri.AbsolutePath.Contains("ImageServer")&&!uri.AbsolutePath.Contains("exportImage"))return Json(System.Text.Json.JsonSerializer.Serialize(new{pixelType="F32",bandCount=1,description="SYNTHETIC browser test service revision "+Revision}));
         if(uri.AbsolutePath.EndsWith("/search")||uri.AbsolutePath.Contains("/items/"))
         {
+            if(Mode=="catalog-outage")return new(HttpStatusCode.ServiceUnavailable);
             var file=uri.Host=="earth-search.aws.element84.com"?"sentinel":uri.PathAndQuery.Contains("landsat")?"landsat":"copdem";
             var f=JsonNode.Parse(File.ReadAllText(Path.Combine(AppContext.BaseDirectory,"ProviderMetadata",file+".json")))!;f["properties"]!["aeroscience:test_fixture"]=true;
-            return uri.AbsolutePath.Contains("/items/")?Json(f.ToJsonString()):Json(new JsonObject{["features"]=new JsonArray(f),["links"]=new JsonArray()}.ToJsonString());
+            return uri.AbsolutePath.Contains("/items/")?Json(f.ToJsonString()):Json(new JsonObject{["features"]=Mode=="catalog-empty"?new JsonArray():new JsonArray(f),["links"]=new JsonArray()}.ToJsonString());
         }
         if(Mode=="wait")await Task.Delay(Timeout.Infinite,token);
         if(Mode=="outage")return new(HttpStatusCode.ServiceUnavailable){Content=new StringContent("SYNTHETIC provider outage")};

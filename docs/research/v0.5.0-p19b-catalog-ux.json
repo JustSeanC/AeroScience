@@ -1,0 +1,4322 @@
+{
+  "checkedUtc": "2026-10-21T23:00:47.9181793+00:00",
+  "scope": "Real public catalog metadata only; no authorized NASA numeric import, physical or installed acceptance.",
+  "checks": [
+    {
+      "query": {
+        "provider": "landsat",
+        "area": {
+          "west": -119,
+          "south": 33,
+          "east": -117,
+          "north": 35,
+          "corners": [
+            {
+              "latitude": 33,
+              "longitude": -119
+            },
+            {
+              "latitude": 33,
+              "longitude": -117
+            },
+            {
+              "latitude": 35,
+              "longitude": -117
+            },
+            {
+              "latitude": 35,
+              "longitude": -119
+            }
+          ],
+          "center": {
+            "latitude": 34,
+            "longitude": -118
+          }
+        },
+        "fromUtc": "2024-12-01T00:00:00+00:00",
+        "toUtc": "2024-12-31T23:59:59+00:00",
+        "maximumCloudPercent": 100,
+        "pageSize": 3,
+        "cursor": null,
+        "cachedOnly": false,
+        "refresh": true,
+        "sceneFilter": null,
+        "sort": "latest"
+      },
+      "passed": true,
+      "page": {
+        "status": "Available",
+        "items": [
+          {
+            "provider": "landsat",
+            "product": "Collection 2 Level-2 Surface Temperature",
+            "scene": "LC09_L2SP_041037_20241229_02_T1",
+            "revision": "8d9549bef1399b48ccdacd40e62e88d93f81afedbb03a3837231c5a6dbe28756",
+            "kind": "thermal",
+            "bounds": {
+              "west": -120.00454889889456,
+              "south": 32.08376480607907,
+              "east": -117.46625721254038,
+              "north": 34.24941519392093,
+              "corners": [
+                {
+                  "latitude": 32.08376480607907,
+                  "longitude": -120.00454889889456
+                },
+                {
+                  "latitude": 32.08376480607907,
+                  "longitude": -117.46625721254038
+                },
+                {
+                  "latitude": 34.24941519392093,
+                  "longitude": -117.46625721254038
+                },
+                {
+                  "latitude": 34.24941519392093,
+                  "longitude": -120.00454889889456
+                }
+              ],
+              "center": {
+                "latitude": 33.16659,
+                "longitude": -118.73540305571747
+              }
+            },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [
+                    -119.46695880348565,
+                    34.22011762959985
+                  ],
+                  [
+                    -119.92150508329581,
+                    32.4965175439544
+                  ],
+                  [
+                    -117.98907945024656,
+                    32.1190064735656
+                  ],
+                  [
+                    -117.49617288731183,
+                    33.842692914161304
+                  ],
+                  [
+                    -119.46695880348565,
+                    34.22011762959985
+                  ]
+                ]
+              ]
+            },
+            "observationUtc": "2024-12-29T18:28:52.957487+00:00",
+            "publishedUtc": null,
+            "bands": [
+              {
+                "id": "ST_B10",
+                "units": "K",
+                "scale": 0.00341802,
+                "offset": 149,
+                "noData": 0,
+                "resolutionMeters": 30,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "QA_PIXEL",
+                "units": "1",
+                "scale": 1,
+                "offset": 0,
+                "noData": 1,
+                "resolutionMeters": 30,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "QA_RADSAT",
+                "units": "1",
+                "scale": 1,
+                "offset": 0,
+                "noData": null,
+                "resolutionMeters": 30,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              }
+            ],
+            "crs": "EPSG:32611",
+            "verticalDatum": "not applicable",
+            "quality": "Scene cloud cover 57.89%; local QA/nodata still determines valid samples",
+            "resolution": "30 m delivered grid / 100 m native TIRS",
+            "license": "USGS Landsat public domain; https://www.usgs.gov/landsat-missions/landsat-data-access",
+            "reference": "https://planetarycomputer.microsoft.com/api/stac/v1/collections/landsat-c2-l2/items/LC09_L2SP_041037_20241229_02_T1",
+            "acquisitionMethod": "HTTP range COG native-grid subset",
+            "limitations": [
+              "Discovery examines at most 60 ordered catalog candidates; no claim of exhaustive coverage.",
+              "Landsat Collection 2 Level-2 Surface Temperature (L2SP), not brightness temperature or aircraft thermal imagery. 30 m product grid; Landsat 8/9 TIRS native thermal resolution 100 m. QA is applied at sampling."
+            ],
+            "nasa": null,
+            "cloudPercent": 57.89
+          },
+          {
+            "provider": "landsat",
+            "product": "Collection 2 Level-2 Surface Temperature",
+            "scene": "LC09_L2SP_041036_20241229_02_T1",
+            "revision": "bd5ca573ba5120c0c88ffd589c7e6976a85f3892a7456aa210a97e7b32fbd51c",
+            "kind": "thermal",
+            "bounds": {
+              "west": -119.62347147815545,
+              "south": 33.52018482785756,
+              "east": -117.05369434587526,
+              "north": 35.678705172142436,
+              "corners": [
+                {
+                  "latitude": 33.52018482785756,
+                  "longitude": -119.62347147815545
+                },
+                {
+                  "latitude": 33.52018482785756,
+                  "longitude": -117.05369434587526
+                },
+                {
+                  "latitude": 35.678705172142436,
+                  "longitude": -117.05369434587526
+                },
+                {
+                  "latitude": 35.678705172142436,
+                  "longitude": -119.62347147815545
+                }
+              ],
+              "center": {
+                "latitude": 34.599445,
+                "longitude": -118.33858291201535
+              }
+            },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [
+                    -119.07825535536124,
+                    35.654563617095086
+                  ],
+                  [
+                    -119.54363319393609,
+                    33.93212871246421
+                  ],
+                  [
+                    -117.57981889667165,
+                    33.551729766480385
+                  ],
+                  [
+                    -117.07427451535588,
+                    35.2740285009352
+                  ],
+                  [
+                    -119.07825535536124,
+                    35.654563617095086
+                  ]
+                ]
+              ]
+            },
+            "observationUtc": "2024-12-29T18:28:29.066471+00:00",
+            "publishedUtc": null,
+            "bands": [
+              {
+                "id": "ST_B10",
+                "units": "K",
+                "scale": 0.00341802,
+                "offset": 149,
+                "noData": 0,
+                "resolutionMeters": 30,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "QA_PIXEL",
+                "units": "1",
+                "scale": 1,
+                "offset": 0,
+                "noData": 1,
+                "resolutionMeters": 30,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "QA_RADSAT",
+                "units": "1",
+                "scale": 1,
+                "offset": 0,
+                "noData": null,
+                "resolutionMeters": 30,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              }
+            ],
+            "crs": "EPSG:32611",
+            "verticalDatum": "not applicable",
+            "quality": "Scene cloud cover 15.89%; local QA/nodata still determines valid samples",
+            "resolution": "30 m delivered grid / 100 m native TIRS",
+            "license": "USGS Landsat public domain; https://www.usgs.gov/landsat-missions/landsat-data-access",
+            "reference": "https://planetarycomputer.microsoft.com/api/stac/v1/collections/landsat-c2-l2/items/LC09_L2SP_041036_20241229_02_T1",
+            "acquisitionMethod": "HTTP range COG native-grid subset",
+            "limitations": [
+              "Discovery examines at most 60 ordered catalog candidates; no claim of exhaustive coverage.",
+              "Landsat Collection 2 Level-2 Surface Temperature (L2SP), not brightness temperature or aircraft thermal imagery. 30 m product grid; Landsat 8/9 TIRS native thermal resolution 100 m. QA is applied at sampling."
+            ],
+            "nasa": null,
+            "cloudPercent": 15.89
+          },
+          {
+            "provider": "landsat",
+            "product": "Collection 2 Level-2 Surface Temperature",
+            "scene": "LC09_L2SP_041035_20241229_02_T1",
+            "revision": "09f7f7f75ac9e2443001ff7c80f5951a51c14bd29fda08ef1fefde6939b2ed8c",
+            "kind": "thermal",
+            "bounds": {
+              "west": -119.23345424859461,
+              "south": 34.95837485007798,
+              "east": -116.6171712735541,
+              "north": 37.10613514992202,
+              "corners": [
+                {
+                  "latitude": 34.95837485007798,
+                  "longitude": -119.23345424859461
+                },
+                {
+                  "latitude": 34.95837485007798,
+                  "longitude": -116.6171712735541
+                },
+                {
+                  "latitude": 37.10613514992202,
+                  "longitude": -116.6171712735541
+                },
+                {
+                  "latitude": 37.10613514992202,
+                  "longitude": -119.23345424859461
+                }
+              ],
+              "center": {
+                "latitude": 36.032255,
+                "longitude": -117.92531276107437
+              }
+            },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [
+                    -118.67459935871547,
+                    37.08708611367952
+                  ],
+                  [
+                    -119.15703052691372,
+                    35.36705495260952
+                  ],
+                  [
+                    -117.16078595332006,
+                    34.98313853290918
+                  ],
+                  [
+                    -116.639668352764,
+                    36.70352729333355
+                  ],
+                  [
+                    -118.67459935871547,
+                    37.08708611367952
+                  ]
+                ]
+              ]
+            },
+            "observationUtc": "2024-12-29T18:28:05.175457+00:00",
+            "publishedUtc": null,
+            "bands": [
+              {
+                "id": "ST_B10",
+                "units": "K",
+                "scale": 0.00341802,
+                "offset": 149,
+                "noData": 0,
+                "resolutionMeters": 30,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "QA_PIXEL",
+                "units": "1",
+                "scale": 1,
+                "offset": 0,
+                "noData": 1,
+                "resolutionMeters": 30,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "QA_RADSAT",
+                "units": "1",
+                "scale": 1,
+                "offset": 0,
+                "noData": null,
+                "resolutionMeters": 30,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              }
+            ],
+            "crs": "EPSG:32611",
+            "verticalDatum": "not applicable",
+            "quality": "Scene cloud cover 16.98%; local QA/nodata still determines valid samples",
+            "resolution": "30 m delivered grid / 100 m native TIRS",
+            "license": "USGS Landsat public domain; https://www.usgs.gov/landsat-missions/landsat-data-access",
+            "reference": "https://planetarycomputer.microsoft.com/api/stac/v1/collections/landsat-c2-l2/items/LC09_L2SP_041035_20241229_02_T1",
+            "acquisitionMethod": "HTTP range COG native-grid subset",
+            "limitations": [
+              "Discovery examines at most 60 ordered catalog candidates; no claim of exhaustive coverage.",
+              "Landsat Collection 2 Level-2 Surface Temperature (L2SP), not brightness temperature or aircraft thermal imagery. 30 m product grid; Landsat 8/9 TIRS native thermal resolution 100 m. QA is applied at sampling."
+            ],
+            "nasa": null,
+            "cloudPercent": 16.98
+          }
+        ],
+        "nextCursor": "bd7d125f3f8a4d01981b49445e49abe8",
+        "asOfUtc": "2026-10-21T23:00:36.2619168+00:00",
+        "expiresUtc": "2026-10-21T23:15:36.2619168+00:00",
+        "cached": false,
+        "limitations": [
+          "Catalog outlines do not establish QA-valid pixels. Original asset sizes, where known, are not subset transfer estimates."
+        ],
+        "error": null,
+        "ordering": "Provider-side descending original observation date with stable identity tie-break; bounded search, not a whole-archive or valid-pixel guarantee.",
+        "serverOrdered": true
+      }
+    },
+    {
+      "provider": "landsat",
+      "check": "next-page",
+      "passed": true,
+      "page": {
+        "status": "Available",
+        "items": [
+          {
+            "provider": "landsat",
+            "product": "Collection 2 Level-2 Surface Temperature",
+            "scene": "LC08_L2SP_040037_20241214_02_T1",
+            "revision": "c6796a315680e6e8369c1f8262e8d6774a375e4c2d2bb7d1400fe96ac11c5828",
+            "kind": "thermal",
+            "bounds": {
+              "west": -118.40609893353897,
+              "south": 32.1075847640031,
+              "east": -115.9043372016091,
+              "north": 34.2265152359969,
+              "corners": [
+                {
+                  "latitude": 32.1075847640031,
+                  "longitude": -118.40609893353897
+                },
+                {
+                  "latitude": 32.1075847640031,
+                  "longitude": -115.9043372016091
+                },
+                {
+                  "latitude": 34.2265152359969,
+                  "longitude": -115.9043372016091
+                },
+                {
+                  "latitude": 34.2265152359969,
+                  "longitude": -118.40609893353897
+                }
+              ],
+              "center": {
+                "latitude": 33.16705,
+                "longitude": -117.15521806757403
+              }
+            },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [
+                    -117.90225448148898,
+                    34.22214101682675
+                  ],
+                  [
+                    -118.35883838731861,
+                    32.49875947011376
+                  ],
+                  [
+                    -116.43365244258163,
+                    32.12024982821969
+                  ],
+                  [
+                    -115.94069616855313,
+                    33.84401056162295
+                  ],
+                  [
+                    -117.90225448148898,
+                    34.22214101682675
+                  ]
+                ]
+              ]
+            },
+            "observationUtc": "2024-12-14T18:22:33.395115+00:00",
+            "publishedUtc": null,
+            "bands": [
+              {
+                "id": "ST_B10",
+                "units": "K",
+                "scale": 0.00341802,
+                "offset": 149,
+                "noData": 0,
+                "resolutionMeters": 30,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "QA_PIXEL",
+                "units": "1",
+                "scale": 1,
+                "offset": 0,
+                "noData": 1,
+                "resolutionMeters": 30,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "QA_RADSAT",
+                "units": "1",
+                "scale": 1,
+                "offset": 0,
+                "noData": null,
+                "resolutionMeters": 30,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              }
+            ],
+            "crs": "EPSG:32611",
+            "verticalDatum": "not applicable",
+            "quality": "Scene cloud cover 39.04%; local QA/nodata still determines valid samples",
+            "resolution": "30 m delivered grid / 100 m native TIRS",
+            "license": "USGS Landsat public domain; https://www.usgs.gov/landsat-missions/landsat-data-access",
+            "reference": "https://planetarycomputer.microsoft.com/api/stac/v1/collections/landsat-c2-l2/items/LC08_L2SP_040037_20241214_02_T1",
+            "acquisitionMethod": "HTTP range COG native-grid subset",
+            "limitations": [
+              "Discovery examines at most 60 ordered catalog candidates; no claim of exhaustive coverage.",
+              "Landsat Collection 2 Level-2 Surface Temperature (L2SP), not brightness temperature or aircraft thermal imagery. 30 m product grid; Landsat 8/9 TIRS native thermal resolution 100 m. QA is applied at sampling."
+            ],
+            "nasa": null,
+            "cloudPercent": 39.04
+          },
+          {
+            "provider": "landsat",
+            "product": "Collection 2 Level-2 Surface Temperature",
+            "scene": "LC08_L2SP_040036_20241214_02_T1",
+            "revision": "cc089449719f630b5095fc6ec120ebae7e5ce5c4640176666fd8c579b45c7b4d",
+            "kind": "thermal",
+            "bounds": {
+              "west": -118.02318150803694,
+              "south": 33.54040479044994,
+              "east": -115.47759434950666,
+              "north": 35.65814520955006,
+              "corners": [
+                {
+                  "latitude": 33.54040479044994,
+                  "longitude": -118.02318150803694
+                },
+                {
+                  "latitude": 33.54040479044994,
+                  "longitude": -115.47759434950666
+                },
+                {
+                  "latitude": 35.65814520955006,
+                  "longitude": -115.47759434950666
+                },
+                {
+                  "latitude": 35.65814520955006,
+                  "longitude": -118.02318150803694
+                }
+              ],
+              "center": {
+                "latitude": 34.599275,
+                "longitude": -116.7503879287718
+              }
+            },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [
+                    -117.51476743243545,
+                    35.657064504171636
+                  ],
+                  [
+                    -117.98068195191496,
+                    33.93448611380809
+                  ],
+                  [
+                    -116.02343788801087,
+                    33.55275346899383
+                  ],
+                  [
+                    -115.51899562718802,
+                    35.27526438404871
+                  ],
+                  [
+                    -117.51476743243545,
+                    35.657064504171636
+                  ]
+                ]
+              ]
+            },
+            "observationUtc": "2024-12-14T18:22:09.504074+00:00",
+            "publishedUtc": null,
+            "bands": [
+              {
+                "id": "ST_B10",
+                "units": "K",
+                "scale": 0.00341802,
+                "offset": 149,
+                "noData": 0,
+                "resolutionMeters": 30,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "QA_PIXEL",
+                "units": "1",
+                "scale": 1,
+                "offset": 0,
+                "noData": 1,
+                "resolutionMeters": 30,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "QA_RADSAT",
+                "units": "1",
+                "scale": 1,
+                "offset": 0,
+                "noData": null,
+                "resolutionMeters": 30,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              }
+            ],
+            "crs": "EPSG:32611",
+            "verticalDatum": "not applicable",
+            "quality": "Scene cloud cover 50.56%; local QA/nodata still determines valid samples",
+            "resolution": "30 m delivered grid / 100 m native TIRS",
+            "license": "USGS Landsat public domain; https://www.usgs.gov/landsat-missions/landsat-data-access",
+            "reference": "https://planetarycomputer.microsoft.com/api/stac/v1/collections/landsat-c2-l2/items/LC08_L2SP_040036_20241214_02_T1",
+            "acquisitionMethod": "HTTP range COG native-grid subset",
+            "limitations": [
+              "Discovery examines at most 60 ordered catalog candidates; no claim of exhaustive coverage.",
+              "Landsat Collection 2 Level-2 Surface Temperature (L2SP), not brightness temperature or aircraft thermal imagery. 30 m product grid; Landsat 8/9 TIRS native thermal resolution 100 m. QA is applied at sampling."
+            ],
+            "nasa": null,
+            "cloudPercent": 50.56
+          },
+          {
+            "provider": "landsat",
+            "product": "Collection 2 Level-2 Surface Temperature",
+            "scene": "LC09_L2SP_041037_20241213_02_T1",
+            "revision": "0f8888816e5cb3a0b2ec4d1642cdfb093f88c2dc7ddb22de42b931728e20439b",
+            "kind": "thermal",
+            "bounds": {
+              "west": -120.00129889903207,
+              "south": 32.08383480597465,
+              "east": -117.46307721238735,
+              "north": 34.24943519402535,
+              "corners": [
+                {
+                  "latitude": 32.08383480597465,
+                  "longitude": -120.00129889903207
+                },
+                {
+                  "latitude": 32.08383480597465,
+                  "longitude": -117.46307721238735
+                },
+                {
+                  "latitude": 34.24943519402535,
+                  "longitude": -117.46307721238735
+                },
+                {
+                  "latitude": 34.24943519402535,
+                  "longitude": -120.00129889903207
+                }
+              ],
+              "center": {
+                "latitude": 33.166635,
+                "longitude": -118.73218805570971
+              }
+            },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [
+                    -119.46403808810594,
+                    34.2204468448764
+                  ],
+                  [
+                    -119.9186434730038,
+                    32.49685448760369
+                  ],
+                  [
+                    -117.9858997052299,
+                    32.11903127322308
+                  ],
+                  [
+                    -117.4929303859059,
+                    33.84270592062717
+                  ],
+                  [
+                    -119.46403808810594,
+                    34.2204468448764
+                  ]
+                ]
+              ]
+            },
+            "observationUtc": "2024-12-13T18:28:51.707724+00:00",
+            "publishedUtc": null,
+            "bands": [
+              {
+                "id": "ST_B10",
+                "units": "K",
+                "scale": 0.00341802,
+                "offset": 149,
+                "noData": 0,
+                "resolutionMeters": 30,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "QA_PIXEL",
+                "units": "1",
+                "scale": 1,
+                "offset": 0,
+                "noData": 1,
+                "resolutionMeters": 30,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "QA_RADSAT",
+                "units": "1",
+                "scale": 1,
+                "offset": 0,
+                "noData": null,
+                "resolutionMeters": 30,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              }
+            ],
+            "crs": "EPSG:32611",
+            "verticalDatum": "not applicable",
+            "quality": "Scene cloud cover 15.84%; local QA/nodata still determines valid samples",
+            "resolution": "30 m delivered grid / 100 m native TIRS",
+            "license": "USGS Landsat public domain; https://www.usgs.gov/landsat-missions/landsat-data-access",
+            "reference": "https://planetarycomputer.microsoft.com/api/stac/v1/collections/landsat-c2-l2/items/LC09_L2SP_041037_20241213_02_T1",
+            "acquisitionMethod": "HTTP range COG native-grid subset",
+            "limitations": [
+              "Discovery examines at most 60 ordered catalog candidates; no claim of exhaustive coverage.",
+              "Landsat Collection 2 Level-2 Surface Temperature (L2SP), not brightness temperature or aircraft thermal imagery. 30 m product grid; Landsat 8/9 TIRS native thermal resolution 100 m. QA is applied at sampling."
+            ],
+            "nasa": null,
+            "cloudPercent": 15.84
+          }
+        ],
+        "nextCursor": "c412cfb499b0419ebae2a668774477bc",
+        "asOfUtc": "2026-10-21T23:00:36.9569682+00:00",
+        "expiresUtc": "2026-10-21T23:15:36.9569682+00:00",
+        "cached": false,
+        "limitations": [
+          "Catalog outlines do not establish QA-valid pixels. Original asset sizes, where known, are not subset transfer estimates."
+        ],
+        "error": null,
+        "ordering": "Provider-side descending original observation date with stable identity tie-break; bounded search, not a whole-archive or valid-pixel guarantee.",
+        "serverOrdered": true
+      }
+    },
+    {
+      "query": {
+        "provider": "landsat",
+        "area": {
+          "west": -119,
+          "south": 33,
+          "east": -117,
+          "north": 35,
+          "corners": [
+            {
+              "latitude": 33,
+              "longitude": -119
+            },
+            {
+              "latitude": 33,
+              "longitude": -117
+            },
+            {
+              "latitude": 35,
+              "longitude": -117
+            },
+            {
+              "latitude": 35,
+              "longitude": -119
+            }
+          ],
+          "center": {
+            "latitude": 34,
+            "longitude": -118
+          }
+        },
+        "fromUtc": "2024-12-01T00:00:00+00:00",
+        "toUtc": "2024-12-31T23:59:59+00:00",
+        "maximumCloudPercent": 100,
+        "pageSize": 3,
+        "cursor": null,
+        "cachedOnly": false,
+        "refresh": true,
+        "sceneFilter": null,
+        "sort": "oldest"
+      },
+      "passed": true,
+      "page": {
+        "status": "Available",
+        "items": [
+          {
+            "provider": "landsat",
+            "product": "Collection 2 Level-2 Surface Temperature",
+            "scene": "LC09_L2SP_042035_20241204_02_T1",
+            "revision": "fd9c4101a8425072f01fa1bc198322a2ab1badaf092528b46cf2aad42b628680",
+            "kind": "thermal",
+            "bounds": {
+              "west": -120.82900419076925,
+              "south": 34.93415491684449,
+              "east": -118.15575130357693,
+              "north": 37.133255083155504,
+              "corners": [
+                {
+                  "latitude": 34.93415491684449,
+                  "longitude": -120.82900419076925
+                },
+                {
+                  "latitude": 34.93415491684449,
+                  "longitude": -118.15575130357693
+                },
+                {
+                  "latitude": 37.133255083155504,
+                  "longitude": -118.15575130357693
+                },
+                {
+                  "latitude": 37.133255083155504,
+                  "longitude": -120.82900419076925
+                }
+              ],
+              "center": {
+                "latitude": 36.033705,
+                "longitude": -119.4923777471731
+              }
+            },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [
+                    -120.24319600632042,
+                    37.088336010299656
+                  ],
+                  [
+                    -120.71937455800848,
+                    35.3671569603717
+                  ],
+                  [
+                    -118.72397010138964,
+                    34.98344767444251
+                  ],
+                  [
+                    -118.20312263511084,
+                    36.70394259889859
+                  ],
+                  [
+                    -120.24319600632042,
+                    37.088336010299656
+                  ]
+                ]
+              ]
+            },
+            "observationUtc": "2024-12-04T18:34:18.660704+00:00",
+            "publishedUtc": null,
+            "bands": [
+              {
+                "id": "ST_B10",
+                "units": "K",
+                "scale": 0.00341802,
+                "offset": 149,
+                "noData": 0,
+                "resolutionMeters": 30,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "QA_PIXEL",
+                "units": "1",
+                "scale": 1,
+                "offset": 0,
+                "noData": 1,
+                "resolutionMeters": 30,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "QA_RADSAT",
+                "units": "1",
+                "scale": 1,
+                "offset": 0,
+                "noData": null,
+                "resolutionMeters": 30,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              }
+            ],
+            "crs": "EPSG:32611",
+            "verticalDatum": "not applicable",
+            "quality": "Scene cloud cover 12.35%; local QA/nodata still determines valid samples",
+            "resolution": "30 m delivered grid / 100 m native TIRS",
+            "license": "USGS Landsat public domain; https://www.usgs.gov/landsat-missions/landsat-data-access",
+            "reference": "https://planetarycomputer.microsoft.com/api/stac/v1/collections/landsat-c2-l2/items/LC09_L2SP_042035_20241204_02_T1",
+            "acquisitionMethod": "HTTP range COG native-grid subset",
+            "limitations": [
+              "Discovery examines at most 60 ordered catalog candidates; no claim of exhaustive coverage.",
+              "Landsat Collection 2 Level-2 Surface Temperature (L2SP), not brightness temperature or aircraft thermal imagery. 30 m product grid; Landsat 8/9 TIRS native thermal resolution 100 m. QA is applied at sampling."
+            ],
+            "nasa": null,
+            "cloudPercent": 12.35
+          },
+          {
+            "provider": "landsat",
+            "product": "Collection 2 Level-2 Surface Temperature",
+            "scene": "LC09_L2SP_042036_20241204_02_T1",
+            "revision": "3d7b161e610359815824d6c70a9f345f2383a6f0fbd414703c743d275da124a5",
+            "kind": "thermal",
+            "bounds": {
+              "west": -121.21950141698915,
+              "south": 33.49720489827489,
+              "east": -118.58228438368602,
+              "north": 35.705635101725115,
+              "corners": [
+                {
+                  "latitude": 33.49720489827489,
+                  "longitude": -121.21950141698915
+                },
+                {
+                  "latitude": 33.49720489827489,
+                  "longitude": -118.58228438368602
+                },
+                {
+                  "latitude": 35.705635101725115,
+                  "longitude": -118.58228438368602
+                },
+                {
+                  "latitude": 35.705635101725115,
+                  "longitude": -121.21950141698915
+                }
+              ],
+              "center": {
+                "latitude": 34.601420000000005,
+                "longitude": -119.90089290033758
+              }
+            },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [
+                    -120.6409366682833,
+                    35.6547381917062
+                  ],
+                  [
+                    -121.10655198422229,
+                    33.93232574174917
+                  ],
+                  [
+                    -119.1424788521184,
+                    33.55159070438979
+                  ],
+                  [
+                    -118.63643418422605,
+                    35.273802331454604
+                  ],
+                  [
+                    -120.6409366682833,
+                    35.6547381917062
+                  ]
+                ]
+              ]
+            },
+            "observationUtc": "2024-12-04T18:34:42.555954+00:00",
+            "publishedUtc": null,
+            "bands": [
+              {
+                "id": "ST_B10",
+                "units": "K",
+                "scale": 0.00341802,
+                "offset": 149,
+                "noData": 0,
+                "resolutionMeters": 30,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "QA_PIXEL",
+                "units": "1",
+                "scale": 1,
+                "offset": 0,
+                "noData": 1,
+                "resolutionMeters": 30,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "QA_RADSAT",
+                "units": "1",
+                "scale": 1,
+                "offset": 0,
+                "noData": null,
+                "resolutionMeters": 30,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              }
+            ],
+            "crs": "EPSG:32611",
+            "verticalDatum": "not applicable",
+            "quality": "Scene cloud cover 36.07%; local QA/nodata still determines valid samples",
+            "resolution": "30 m delivered grid / 100 m native TIRS",
+            "license": "USGS Landsat public domain; https://www.usgs.gov/landsat-missions/landsat-data-access",
+            "reference": "https://planetarycomputer.microsoft.com/api/stac/v1/collections/landsat-c2-l2/items/LC09_L2SP_042036_20241204_02_T1",
+            "acquisitionMethod": "HTTP range COG native-grid subset",
+            "limitations": [
+              "Discovery examines at most 60 ordered catalog candidates; no claim of exhaustive coverage.",
+              "Landsat Collection 2 Level-2 Surface Temperature (L2SP), not brightness temperature or aircraft thermal imagery. 30 m product grid; Landsat 8/9 TIRS native thermal resolution 100 m. QA is applied at sampling."
+            ],
+            "nasa": null,
+            "cloudPercent": 36.07
+          },
+          {
+            "provider": "landsat",
+            "product": "Collection 2 Level-2 Surface Temperature",
+            "scene": "LC08_L2SP_041035_20241205_02_T1",
+            "revision": "c719c860c94b0fa034baf1ca88b93379483b233e42170bdfd1cb1b535688f868",
+            "kind": "thermal",
+            "bounds": {
+              "west": -119.24019424839555,
+              "south": 34.958254850285805,
+              "east": -116.62393127377537,
+              "north": 37.1061551497142,
+              "corners": [
+                {
+                  "latitude": 34.958254850285805,
+                  "longitude": -119.24019424839555
+                },
+                {
+                  "latitude": 34.958254850285805,
+                  "longitude": -116.62393127377537
+                },
+                {
+                  "latitude": 37.1061551497142,
+                  "longitude": -116.62393127377537
+                },
+                {
+                  "latitude": 37.1061551497142,
+                  "longitude": -119.24019424839555
+                }
+              ],
+              "center": {
+                "latitude": 36.032205000000005,
+                "longitude": -117.93206276108546
+              }
+            },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [
+                    -118.68780625700309,
+                    37.08906201544223
+                  ],
+                  [
+                    -119.17028867956824,
+                    35.36898100346421
+                  ],
+                  [
+                    -117.18050986214129,
+                    34.98419290682104
+                  ],
+                  [
+                    -116.65948072845494,
+                    36.704396944701266
+                  ],
+                  [
+                    -118.68780625700309,
+                    37.08906201544223
+                  ]
+                ]
+              ]
+            },
+            "observationUtc": "2024-12-05T18:28:03.579025+00:00",
+            "publishedUtc": null,
+            "bands": [
+              {
+                "id": "ST_B10",
+                "units": "K",
+                "scale": 0.00341802,
+                "offset": 149,
+                "noData": 0,
+                "resolutionMeters": 30,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "QA_PIXEL",
+                "units": "1",
+                "scale": 1,
+                "offset": 0,
+                "noData": 1,
+                "resolutionMeters": 30,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "QA_RADSAT",
+                "units": "1",
+                "scale": 1,
+                "offset": 0,
+                "noData": null,
+                "resolutionMeters": 30,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              }
+            ],
+            "crs": "EPSG:32611",
+            "verticalDatum": "not applicable",
+            "quality": "Scene cloud cover 1.01%; local QA/nodata still determines valid samples",
+            "resolution": "30 m delivered grid / 100 m native TIRS",
+            "license": "USGS Landsat public domain; https://www.usgs.gov/landsat-missions/landsat-data-access",
+            "reference": "https://planetarycomputer.microsoft.com/api/stac/v1/collections/landsat-c2-l2/items/LC08_L2SP_041035_20241205_02_T1",
+            "acquisitionMethod": "HTTP range COG native-grid subset",
+            "limitations": [
+              "Discovery examines at most 60 ordered catalog candidates; no claim of exhaustive coverage.",
+              "Landsat Collection 2 Level-2 Surface Temperature (L2SP), not brightness temperature or aircraft thermal imagery. 30 m product grid; Landsat 8/9 TIRS native thermal resolution 100 m. QA is applied at sampling."
+            ],
+            "nasa": null,
+            "cloudPercent": 1.01
+          }
+        ],
+        "nextCursor": "db83f5687169442aa6aea6ab33856233",
+        "asOfUtc": "2026-10-21T23:00:37.6748067+00:00",
+        "expiresUtc": "2026-10-21T23:15:37.6748067+00:00",
+        "cached": false,
+        "limitations": [
+          "Catalog outlines do not establish QA-valid pixels. Original asset sizes, where known, are not subset transfer estimates."
+        ],
+        "error": null,
+        "ordering": "Provider-side ascending original observation date with stable identity tie-break; bounded search, not a whole-archive or valid-pixel guarantee.",
+        "serverOrdered": true
+      }
+    },
+    {
+      "query": {
+        "provider": "landsat",
+        "area": {
+          "west": -119,
+          "south": 33,
+          "east": -117,
+          "north": 35,
+          "corners": [
+            {
+              "latitude": 33,
+              "longitude": -119
+            },
+            {
+              "latitude": 33,
+              "longitude": -117
+            },
+            {
+              "latitude": 35,
+              "longitude": -117
+            },
+            {
+              "latitude": 35,
+              "longitude": -119
+            }
+          ],
+          "center": {
+            "latitude": 34,
+            "longitude": -118
+          }
+        },
+        "fromUtc": "2024-12-01T00:00:00+00:00",
+        "toUtc": "2024-12-31T23:59:59+00:00",
+        "maximumCloudPercent": 100,
+        "pageSize": 3,
+        "cursor": null,
+        "cachedOnly": false,
+        "refresh": true,
+        "sceneFilter": null,
+        "sort": "cloud"
+      },
+      "passed": true,
+      "page": {
+        "status": "Available",
+        "items": [
+          {
+            "provider": "landsat",
+            "product": "Collection 2 Level-2 Surface Temperature",
+            "scene": "LC09_L2SP_040036_20241206_02_T1",
+            "revision": "b62e13b99e07c37d4314ebc8b47ead5e3894cc923d23fdcfaebdf772cb4dc0f1",
+            "kind": "thermal",
+            "bounds": {
+              "west": -118.05300150822951,
+              "south": 33.54074479084234,
+              "east": -115.50741434927328,
+              "north": 35.65788520915766,
+              "corners": [
+                {
+                  "latitude": 33.54074479084234,
+                  "longitude": -118.05300150822951
+                },
+                {
+                  "latitude": 33.54074479084234,
+                  "longitude": -115.50741434927328
+                },
+                {
+                  "latitude": 35.65788520915766,
+                  "longitude": -115.50741434927328
+                },
+                {
+                  "latitude": 35.65788520915766,
+                  "longitude": -118.05300150822951
+                }
+              ],
+              "center": {
+                "latitude": 34.599315000000004,
+                "longitude": -116.7802079287514
+              }
+            },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [
+                    -117.5382835970908,
+                    35.65479776938595
+                  ],
+                  [
+                    -118.0043526363999,
+                    33.93240141534764
+                  ],
+                  [
+                    -116.04025554733667,
+                    33.55153212711208
+                  ],
+                  [
+                    -115.53583776580972,
+                    35.27411702291947
+                  ],
+                  [
+                    -117.5382835970908,
+                    35.65479776938595
+                  ]
+                ]
+              ]
+            },
+            "observationUtc": "2024-12-06T18:22:18.109405+00:00",
+            "publishedUtc": null,
+            "bands": [
+              {
+                "id": "ST_B10",
+                "units": "K",
+                "scale": 0.00341802,
+                "offset": 149,
+                "noData": 0,
+                "resolutionMeters": 30,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "QA_PIXEL",
+                "units": "1",
+                "scale": 1,
+                "offset": 0,
+                "noData": 1,
+                "resolutionMeters": 30,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "QA_RADSAT",
+                "units": "1",
+                "scale": 1,
+                "offset": 0,
+                "noData": null,
+                "resolutionMeters": 30,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              }
+            ],
+            "crs": "EPSG:32611",
+            "verticalDatum": "not applicable",
+            "quality": "Scene cloud cover 0.13%; local QA/nodata still determines valid samples",
+            "resolution": "30 m delivered grid / 100 m native TIRS",
+            "license": "USGS Landsat public domain; https://www.usgs.gov/landsat-missions/landsat-data-access",
+            "reference": "https://planetarycomputer.microsoft.com/api/stac/v1/collections/landsat-c2-l2/items/LC09_L2SP_040036_20241206_02_T1",
+            "acquisitionMethod": "HTTP range COG native-grid subset",
+            "limitations": [
+              "Discovery examines at most 60 ordered catalog candidates; no claim of exhaustive coverage.",
+              "Landsat Collection 2 Level-2 Surface Temperature (L2SP), not brightness temperature or aircraft thermal imagery. 30 m product grid; Landsat 8/9 TIRS native thermal resolution 100 m. QA is applied at sampling."
+            ],
+            "nasa": null,
+            "cloudPercent": 0.13
+          },
+          {
+            "provider": "landsat",
+            "product": "Collection 2 Level-2 Surface Temperature",
+            "scene": "LC08_L2SP_041035_20241205_02_T1",
+            "revision": "c719c860c94b0fa034baf1ca88b93379483b233e42170bdfd1cb1b535688f868",
+            "kind": "thermal",
+            "bounds": {
+              "west": -119.24019424839555,
+              "south": 34.958254850285805,
+              "east": -116.62393127377537,
+              "north": 37.1061551497142,
+              "corners": [
+                {
+                  "latitude": 34.958254850285805,
+                  "longitude": -119.24019424839555
+                },
+                {
+                  "latitude": 34.958254850285805,
+                  "longitude": -116.62393127377537
+                },
+                {
+                  "latitude": 37.1061551497142,
+                  "longitude": -116.62393127377537
+                },
+                {
+                  "latitude": 37.1061551497142,
+                  "longitude": -119.24019424839555
+                }
+              ],
+              "center": {
+                "latitude": 36.032205000000005,
+                "longitude": -117.93206276108546
+              }
+            },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [
+                    -118.68780625700309,
+                    37.08906201544223
+                  ],
+                  [
+                    -119.17028867956824,
+                    35.36898100346421
+                  ],
+                  [
+                    -117.18050986214129,
+                    34.98419290682104
+                  ],
+                  [
+                    -116.65948072845494,
+                    36.704396944701266
+                  ],
+                  [
+                    -118.68780625700309,
+                    37.08906201544223
+                  ]
+                ]
+              ]
+            },
+            "observationUtc": "2024-12-05T18:28:03.579025+00:00",
+            "publishedUtc": null,
+            "bands": [
+              {
+                "id": "ST_B10",
+                "units": "K",
+                "scale": 0.00341802,
+                "offset": 149,
+                "noData": 0,
+                "resolutionMeters": 30,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "QA_PIXEL",
+                "units": "1",
+                "scale": 1,
+                "offset": 0,
+                "noData": 1,
+                "resolutionMeters": 30,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "QA_RADSAT",
+                "units": "1",
+                "scale": 1,
+                "offset": 0,
+                "noData": null,
+                "resolutionMeters": 30,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              }
+            ],
+            "crs": "EPSG:32611",
+            "verticalDatum": "not applicable",
+            "quality": "Scene cloud cover 1.01%; local QA/nodata still determines valid samples",
+            "resolution": "30 m delivered grid / 100 m native TIRS",
+            "license": "USGS Landsat public domain; https://www.usgs.gov/landsat-missions/landsat-data-access",
+            "reference": "https://planetarycomputer.microsoft.com/api/stac/v1/collections/landsat-c2-l2/items/LC08_L2SP_041035_20241205_02_T1",
+            "acquisitionMethod": "HTTP range COG native-grid subset",
+            "limitations": [
+              "Discovery examines at most 60 ordered catalog candidates; no claim of exhaustive coverage.",
+              "Landsat Collection 2 Level-2 Surface Temperature (L2SP), not brightness temperature or aircraft thermal imagery. 30 m product grid; Landsat 8/9 TIRS native thermal resolution 100 m. QA is applied at sampling."
+            ],
+            "nasa": null,
+            "cloudPercent": 1.01
+          },
+          {
+            "provider": "landsat",
+            "product": "Collection 2 Level-2 Surface Temperature",
+            "scene": "LC09_L2SP_041036_20241213_02_T1",
+            "revision": "897a5fcce1eec4537e57efb3086793f2731ae6422075e6d4568ca201bf67cd53",
+            "kind": "thermal",
+            "bounds": {
+              "west": -119.62016147828831,
+              "south": 33.520254827751046,
+              "east": -117.050464345707,
+              "north": 35.67871517224895,
+              "corners": [
+                {
+                  "latitude": 33.520254827751046,
+                  "longitude": -119.62016147828831
+                },
+                {
+                  "latitude": 33.520254827751046,
+                  "longitude": -117.050464345707
+                },
+                {
+                  "latitude": 35.67871517224895,
+                  "longitude": -117.050464345707
+                },
+                {
+                  "latitude": 35.67871517224895,
+                  "longitude": -119.62016147828831
+                }
+              ],
+              "center": {
+                "latitude": 34.599485,
+                "longitude": -118.33531291199765
+              }
+            },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [
+                    -119.07528151700019,
+                    35.65488535666713
+                  ],
+                  [
+                    -119.54072270237069,
+                    33.93245930867281
+                  ],
+                  [
+                    -117.5772336600733,
+                    33.551741846619414
+                  ],
+                  [
+                    -117.07130573593017,
+                    35.274030287093076
+                  ],
+                  [
+                    -119.07528151700019,
+                    35.65488535666713
+                  ]
+                ]
+              ]
+            },
+            "observationUtc": "2024-12-13T18:28:27.816709+00:00",
+            "publishedUtc": null,
+            "bands": [
+              {
+                "id": "ST_B10",
+                "units": "K",
+                "scale": 0.00341802,
+                "offset": 149,
+                "noData": 0,
+                "resolutionMeters": 30,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "QA_PIXEL",
+                "units": "1",
+                "scale": 1,
+                "offset": 0,
+                "noData": 1,
+                "resolutionMeters": 30,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "QA_RADSAT",
+                "units": "1",
+                "scale": 1,
+                "offset": 0,
+                "noData": null,
+                "resolutionMeters": 30,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              }
+            ],
+            "crs": "EPSG:32611",
+            "verticalDatum": "not applicable",
+            "quality": "Scene cloud cover 9.97%; local QA/nodata still determines valid samples",
+            "resolution": "30 m delivered grid / 100 m native TIRS",
+            "license": "USGS Landsat public domain; https://www.usgs.gov/landsat-missions/landsat-data-access",
+            "reference": "https://planetarycomputer.microsoft.com/api/stac/v1/collections/landsat-c2-l2/items/LC09_L2SP_041036_20241213_02_T1",
+            "acquisitionMethod": "HTTP range COG native-grid subset",
+            "limitations": [
+              "Discovery examines at most 60 ordered catalog candidates; no claim of exhaustive coverage.",
+              "Landsat Collection 2 Level-2 Surface Temperature (L2SP), not brightness temperature or aircraft thermal imagery. 30 m product grid; Landsat 8/9 TIRS native thermal resolution 100 m. QA is applied at sampling."
+            ],
+            "nasa": null,
+            "cloudPercent": 9.97
+          }
+        ],
+        "nextCursor": "19df122ef8664a158669cb5fa3fd46f1",
+        "asOfUtc": "2026-10-21T23:00:38.3629976+00:00",
+        "expiresUtc": "2026-10-21T23:15:38.3629976+00:00",
+        "cached": false,
+        "limitations": [
+          "Catalog outlines do not establish QA-valid pixels. Original asset sizes, where known, are not subset transfer estimates."
+        ],
+        "error": null,
+        "ordering": "Provider-side lowest reported scene cloud cover with stable identity tie-break; bounded search, not a whole-archive or valid-pixel guarantee.",
+        "serverOrdered": true
+      }
+    },
+    {
+      "query": {
+        "provider": "sentinel-2",
+        "area": {
+          "west": -119,
+          "south": 33,
+          "east": -117,
+          "north": 35,
+          "corners": [
+            {
+              "latitude": 33,
+              "longitude": -119
+            },
+            {
+              "latitude": 33,
+              "longitude": -117
+            },
+            {
+              "latitude": 35,
+              "longitude": -117
+            },
+            {
+              "latitude": 35,
+              "longitude": -119
+            }
+          ],
+          "center": {
+            "latitude": 34,
+            "longitude": -118
+          }
+        },
+        "fromUtc": "2024-12-01T00:00:00+00:00",
+        "toUtc": "2024-12-31T23:59:59+00:00",
+        "maximumCloudPercent": 100,
+        "pageSize": 3,
+        "cursor": null,
+        "cachedOnly": false,
+        "refresh": true,
+        "sceneFilter": null,
+        "sort": "latest"
+      },
+      "passed": true,
+      "page": {
+        "status": "Available",
+        "items": [
+          {
+            "provider": "sentinel-2",
+            "product": "Sentinel-2 Level-2A",
+            "scene": "S2B_11SLS_20241231_0_L2A",
+            "revision": "d97b0fc8e15aed0d8b7a08fc246ebc92eb2b8d39f61054dd8ccc91f40721b53f",
+            "kind": "multispectral",
+            "bounds": {
+              "west": -119.15102616247418,
+              "south": 32.9116521728679,
+              "east": -118.9825420356528,
+              "north": 33.423718276666406,
+              "corners": [
+                {
+                  "latitude": 32.9116521728679,
+                  "longitude": -119.15102616247418
+                },
+                {
+                  "latitude": 32.9116521728679,
+                  "longitude": -118.9825420356528
+                },
+                {
+                  "latitude": 33.423718276666406,
+                  "longitude": -118.9825420356528
+                },
+                {
+                  "latitude": 33.423718276666406,
+                  "longitude": -119.15102616247418
+                }
+              ],
+              "center": {
+                "latitude": 33.167685224767155,
+                "longitude": -119.06678409906348
+              }
+            },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [
+                    -119.15102616247418,
+                    33.420909931215405
+                  ],
+                  [
+                    -119.13861988779848,
+                    32.9116521728679
+                  ],
+                  [
+                    -118.9825420356528,
+                    33.423718276666406
+                  ],
+                  [
+                    -119.15102616247418,
+                    33.420909931215405
+                  ]
+                ]
+              ]
+            },
+            "observationUtc": "2024-12-31T18:55:09.538+00:00",
+            "publishedUtc": "2024-12-31T23:30:53.479+00:00",
+            "bands": [
+              {
+                "id": "B02",
+                "units": "reflectance",
+                "scale": 0.0001,
+                "offset": -0.1,
+                "noData": 0,
+                "resolutionMeters": 10,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "B03",
+                "units": "reflectance",
+                "scale": 0.0001,
+                "offset": -0.1,
+                "noData": 0,
+                "resolutionMeters": 10,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "B04",
+                "units": "reflectance",
+                "scale": 0.0001,
+                "offset": -0.1,
+                "noData": 0,
+                "resolutionMeters": 10,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "B08",
+                "units": "reflectance",
+                "scale": 0.0001,
+                "offset": -0.1,
+                "noData": 0,
+                "resolutionMeters": 10,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "SCL",
+                "units": "1",
+                "scale": 1,
+                "offset": 0,
+                "noData": 0,
+                "resolutionMeters": 20,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              }
+            ],
+            "crs": "EPSG:32611",
+            "verticalDatum": "not applicable",
+            "quality": "Scene cloud cover 100%; local QA/nodata still determines valid samples",
+            "resolution": "10 m reflectance / 20 m SCL",
+            "license": "Contains modified Copernicus Sentinel data (2024); https://sentinels.copernicus.eu/documents/247904/690755/Sentinel_Data_Legal_Notice.pdf",
+            "reference": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2B_11SLS_20241231_0_L2A",
+            "acquisitionMethod": "HTTP range COG native-grid subset",
+            "limitations": [
+              "Discovery examines at most 60 ordered catalog candidates; no claim of exhaustive coverage.",
+              "Sentinel-2 Level-2A surface reflectance. Provider raster:bands scale/offset is retained, including product-specific radiometric offsets; SCL is sampled on its own native grid."
+            ],
+            "nasa": null,
+            "cloudPercent": 100
+          },
+          {
+            "provider": "sentinel-2",
+            "product": "Sentinel-2 Level-2A",
+            "scene": "S2B_11SLT_20241231_0_L2A",
+            "revision": "83e877c38cd87acb23ced186bcab9f13ed05ccc3d4e503088ee56484d9561e8e",
+            "kind": "multispectral",
+            "bounds": {
+              "west": -119.17376896599782,
+              "south": 33.33367777990421,
+              "east": -118.70298534789883,
+              "north": 34.32981087329163,
+              "corners": [
+                {
+                  "latitude": 33.33367777990421,
+                  "longitude": -119.17376896599782
+                },
+                {
+                  "latitude": 33.33367777990421,
+                  "longitude": -118.70298534789883
+                },
+                {
+                  "latitude": 34.32981087329163,
+                  "longitude": -118.70298534789883
+                },
+                {
+                  "latitude": 34.32981087329163,
+                  "longitude": -119.17376896599782
+                }
+              ],
+              "center": {
+                "latitude": 33.831744326597914,
+                "longitude": -118.93837715694832
+              }
+            },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [
+                    -119.17376896599782,
+                    34.32235671057083
+                  ],
+                  [
+                    -119.14887876340761,
+                    33.33367777990421
+                  ],
+                  [
+                    -119.00881737255521,
+                    33.33709726560378
+                  ],
+                  [
+                    -118.70298534789883,
+                    34.32981087329163
+                  ],
+                  [
+                    -119.17376896599782,
+                    34.32235671057083
+                  ]
+                ]
+              ]
+            },
+            "observationUtc": "2024-12-31T18:54:58.851+00:00",
+            "publishedUtc": "2024-12-31T23:49:18.299+00:00",
+            "bands": [
+              {
+                "id": "B02",
+                "units": "reflectance",
+                "scale": 0.0001,
+                "offset": -0.1,
+                "noData": 0,
+                "resolutionMeters": 10,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "B03",
+                "units": "reflectance",
+                "scale": 0.0001,
+                "offset": -0.1,
+                "noData": 0,
+                "resolutionMeters": 10,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "B04",
+                "units": "reflectance",
+                "scale": 0.0001,
+                "offset": -0.1,
+                "noData": 0,
+                "resolutionMeters": 10,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "B08",
+                "units": "reflectance",
+                "scale": 0.0001,
+                "offset": -0.1,
+                "noData": 0,
+                "resolutionMeters": 10,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "SCL",
+                "units": "1",
+                "scale": 1,
+                "offset": 0,
+                "noData": 0,
+                "resolutionMeters": 20,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              }
+            ],
+            "crs": "EPSG:32611",
+            "verticalDatum": "not applicable",
+            "quality": "Scene cloud cover 92.58%; local QA/nodata still determines valid samples",
+            "resolution": "10 m reflectance / 20 m SCL",
+            "license": "Contains modified Copernicus Sentinel data (2024); https://sentinels.copernicus.eu/documents/247904/690755/Sentinel_Data_Legal_Notice.pdf",
+            "reference": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2B_11SLT_20241231_0_L2A",
+            "acquisitionMethod": "HTTP range COG native-grid subset",
+            "limitations": [
+              "Discovery examines at most 60 ordered catalog candidates; no claim of exhaustive coverage.",
+              "Sentinel-2 Level-2A surface reflectance. Provider raster:bands scale/offset is retained, including product-specific radiometric offsets; SCL is sampled on its own native grid."
+            ],
+            "nasa": null,
+            "cloudPercent": 92.58092
+          },
+          {
+            "provider": "sentinel-2",
+            "product": "Sentinel-2 Level-2A",
+            "scene": "S2B_11SLU_20241231_0_L2A",
+            "revision": "926a5b12691546d86a86944a842620300d53009a32ddaf4300281310f5b3530d",
+            "kind": "multispectral",
+            "bounds": {
+              "west": -119.19753042986382,
+              "south": 34.234597799877385,
+              "east": -118.42038050685275,
+              "north": 35.234733673136645,
+              "corners": [
+                {
+                  "latitude": 34.234597799877385,
+                  "longitude": -119.19753042986382
+                },
+                {
+                  "latitude": 34.234597799877385,
+                  "longitude": -118.42038050685275
+                },
+                {
+                  "latitude": 35.234733673136645,
+                  "longitude": -118.42038050685275
+                },
+                {
+                  "latitude": 35.234733673136645,
+                  "longitude": -119.19753042986382
+                }
+              ],
+              "center": {
+                "latitude": 34.73466573650701,
+                "longitude": -118.80895546835828
+              }
+            },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [
+                    -119.19753042986382,
+                    35.22311612951892
+                  ],
+                  [
+                    -119.17151002733817,
+                    34.234597799877385
+                  ],
+                  [
+                    -118.73005197029161,
+                    34.24216023976211
+                  ],
+                  [
+                    -118.62285449581977,
+                    34.588362402731235
+                  ],
+                  [
+                    -118.48661472143746,
+                    35.03267816459183
+                  ],
+                  [
+                    -118.42038050685275,
+                    35.234733673136645
+                  ],
+                  [
+                    -119.19753042986382,
+                    35.22311612951892
+                  ]
+                ]
+              ]
+            },
+            "observationUtc": "2024-12-31T18:54:45.331+00:00",
+            "publishedUtc": "2024-12-31T23:53:46.193+00:00",
+            "bands": [
+              {
+                "id": "B02",
+                "units": "reflectance",
+                "scale": 0.0001,
+                "offset": -0.1,
+                "noData": 0,
+                "resolutionMeters": 10,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "B03",
+                "units": "reflectance",
+                "scale": 0.0001,
+                "offset": -0.1,
+                "noData": 0,
+                "resolutionMeters": 10,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "B04",
+                "units": "reflectance",
+                "scale": 0.0001,
+                "offset": -0.1,
+                "noData": 0,
+                "resolutionMeters": 10,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "B08",
+                "units": "reflectance",
+                "scale": 0.0001,
+                "offset": -0.1,
+                "noData": 0,
+                "resolutionMeters": 10,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "SCL",
+                "units": "1",
+                "scale": 1,
+                "offset": 0,
+                "noData": 0,
+                "resolutionMeters": 20,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              }
+            ],
+            "crs": "EPSG:32611",
+            "verticalDatum": "not applicable",
+            "quality": "Scene cloud cover 50.56%; local QA/nodata still determines valid samples",
+            "resolution": "10 m reflectance / 20 m SCL",
+            "license": "Contains modified Copernicus Sentinel data (2024); https://sentinels.copernicus.eu/documents/247904/690755/Sentinel_Data_Legal_Notice.pdf",
+            "reference": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2B_11SLU_20241231_0_L2A",
+            "acquisitionMethod": "HTTP range COG native-grid subset",
+            "limitations": [
+              "Discovery examines at most 60 ordered catalog candidates; no claim of exhaustive coverage.",
+              "Sentinel-2 Level-2A surface reflectance. Provider raster:bands scale/offset is retained, including product-specific radiometric offsets; SCL is sampled on its own native grid."
+            ],
+            "nasa": null,
+            "cloudPercent": 50.564033
+          }
+        ],
+        "nextCursor": "69c05f930af44f679f26f2e302d965a7",
+        "asOfUtc": "2026-10-21T23:00:38.9723+00:00",
+        "expiresUtc": "2026-10-21T23:15:38.9723+00:00",
+        "cached": false,
+        "limitations": [
+          "Catalog outlines do not establish QA-valid pixels. Original asset sizes, where known, are not subset transfer estimates."
+        ],
+        "error": null,
+        "ordering": "Provider-side descending original observation date with stable identity tie-break; bounded search, not a whole-archive or valid-pixel guarantee.",
+        "serverOrdered": true
+      }
+    },
+    {
+      "provider": "sentinel-2",
+      "check": "next-page",
+      "passed": true,
+      "page": {
+        "status": "Available",
+        "items": [
+          {
+            "provider": "sentinel-2",
+            "product": "Sentinel-2 Level-2A",
+            "scene": "S2A_11SMS_20241230_0_L2A",
+            "revision": "2733a2975bd549aa6717db576e94a9667e6cb40cf794107b19955d21d90b8534",
+            "kind": "multispectral",
+            "bounds": {
+              "west": -117.45807734302043,
+              "south": 32.448304725124274,
+              "east": -116.8950079957242,
+              "north": 33.43952160498527,
+              "corners": [
+                {
+                  "latitude": 32.448304725124274,
+                  "longitude": -117.45807734302043
+                },
+                {
+                  "latitude": 32.448304725124274,
+                  "longitude": -116.8950079957242
+                },
+                {
+                  "latitude": 33.43952160498527,
+                  "longitude": -116.8950079957242
+                },
+                {
+                  "latitude": 33.43952160498527,
+                  "longitude": -117.45807734302043
+                }
+              ],
+              "center": {
+                "latitude": 32.943913165054774,
+                "longitude": -117.17654266937231
+              }
+            },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [
+                    -117.1949073123017,
+                    33.439412888261714
+                  ],
+                  [
+                    -117.45807734302043,
+                    32.448304725124274
+                  ],
+                  [
+                    -116.89617209347531,
+                    32.449095014427
+                  ],
+                  [
+                    -116.8950079957242,
+                    33.43952160498527
+                  ],
+                  [
+                    -117.1949073123017,
+                    33.439412888261714
+                  ]
+                ]
+              ]
+            },
+            "observationUtc": "2024-12-30T18:35:18.11+00:00",
+            "publishedUtc": "2024-12-30T23:09:28.238+00:00",
+            "bands": [
+              {
+                "id": "B02",
+                "units": "reflectance",
+                "scale": 0.0001,
+                "offset": -0.1,
+                "noData": 0,
+                "resolutionMeters": 10,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "B03",
+                "units": "reflectance",
+                "scale": 0.0001,
+                "offset": -0.1,
+                "noData": 0,
+                "resolutionMeters": 10,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "B04",
+                "units": "reflectance",
+                "scale": 0.0001,
+                "offset": -0.1,
+                "noData": 0,
+                "resolutionMeters": 10,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "B08",
+                "units": "reflectance",
+                "scale": 0.0001,
+                "offset": -0.1,
+                "noData": 0,
+                "resolutionMeters": 10,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "SCL",
+                "units": "1",
+                "scale": 1,
+                "offset": 0,
+                "noData": 0,
+                "resolutionMeters": 20,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              }
+            ],
+            "crs": "EPSG:32611",
+            "verticalDatum": "not applicable",
+            "quality": "Scene cloud cover 41.7%; local QA/nodata still determines valid samples",
+            "resolution": "10 m reflectance / 20 m SCL",
+            "license": "Contains modified Copernicus Sentinel data (2024); https://sentinels.copernicus.eu/documents/247904/690755/Sentinel_Data_Legal_Notice.pdf",
+            "reference": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2A_11SMS_20241230_0_L2A",
+            "acquisitionMethod": "HTTP range COG native-grid subset",
+            "limitations": [
+              "Discovery examines at most 60 ordered catalog candidates; no claim of exhaustive coverage.",
+              "Sentinel-2 Level-2A surface reflectance. Provider raster:bands scale/offset is retained, including product-specific radiometric offsets; SCL is sampled on its own native grid."
+            ],
+            "nasa": null,
+            "cloudPercent": 41.699684
+          },
+          {
+            "provider": "sentinel-2",
+            "product": "Sentinel-2 Level-2A",
+            "scene": "S2A_11SNS_20241230_0_L2A",
+            "revision": "424a2cbf0f231f59f5f2f55b7c48107cf9f1466418e9d1076d5773eba488b5f9",
+            "kind": "multispectral",
+            "bounds": {
+              "west": -117.00020441126553,
+              "south": 32.443722765689564,
+              "east": -115.81905327644382,
+              "north": 33.43956604740491,
+              "corners": [
+                {
+                  "latitude": 32.443722765689564,
+                  "longitude": -117.00020441126553
+                },
+                {
+                  "latitude": 32.443722765689564,
+                  "longitude": -115.81905327644382
+                },
+                {
+                  "latitude": 33.43956604740491,
+                  "longitude": -115.81905327644382
+                },
+                {
+                  "latitude": 33.43956604740491,
+                  "longitude": -117.00020441126553
+                }
+              ],
+              "center": {
+                "latitude": 32.94164440654724,
+                "longitude": -116.40962884385468
+              }
+            },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [
+                    -117.00020441126553,
+                    33.43956604740491
+                  ],
+                  [
+                    -117.00020214485278,
+                    32.44913781392346
+                  ],
+                  [
+                    -115.83214339311355,
+                    32.443722765689564
+                  ],
+                  [
+                    -115.81905327644382,
+                    33.43394314727185
+                  ],
+                  [
+                    -117.00020441126553,
+                    33.43956604740491
+                  ]
+                ]
+              ]
+            },
+            "observationUtc": "2024-12-30T18:35:15.042+00:00",
+            "publishedUtc": "2024-12-30T23:19:47.18+00:00",
+            "bands": [
+              {
+                "id": "B02",
+                "units": "reflectance",
+                "scale": 0.0001,
+                "offset": -0.1,
+                "noData": 0,
+                "resolutionMeters": 10,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "B03",
+                "units": "reflectance",
+                "scale": 0.0001,
+                "offset": -0.1,
+                "noData": 0,
+                "resolutionMeters": 10,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "B04",
+                "units": "reflectance",
+                "scale": 0.0001,
+                "offset": -0.1,
+                "noData": 0,
+                "resolutionMeters": 10,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "B08",
+                "units": "reflectance",
+                "scale": 0.0001,
+                "offset": -0.1,
+                "noData": 0,
+                "resolutionMeters": 10,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "SCL",
+                "units": "1",
+                "scale": 1,
+                "offset": 0,
+                "noData": 0,
+                "resolutionMeters": 20,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              }
+            ],
+            "crs": "EPSG:32611",
+            "verticalDatum": "not applicable",
+            "quality": "Scene cloud cover 2.67%; local QA/nodata still determines valid samples",
+            "resolution": "10 m reflectance / 20 m SCL",
+            "license": "Contains modified Copernicus Sentinel data (2024); https://sentinels.copernicus.eu/documents/247904/690755/Sentinel_Data_Legal_Notice.pdf",
+            "reference": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2A_11SNS_20241230_0_L2A",
+            "acquisitionMethod": "HTTP range COG native-grid subset",
+            "limitations": [
+              "Discovery examines at most 60 ordered catalog candidates; no claim of exhaustive coverage.",
+              "Sentinel-2 Level-2A surface reflectance. Provider raster:bands scale/offset is retained, including product-specific radiometric offsets; SCL is sampled on its own native grid."
+            ],
+            "nasa": null,
+            "cloudPercent": 2.668034
+          },
+          {
+            "provider": "sentinel-2",
+            "product": "Sentinel-2 Level-2A",
+            "scene": "S2A_11SMT_20241230_0_L2A",
+            "revision": "b8edca2c3fc33f5a0def2068bce0d32573699d37c282af1baa81e30c57cdf464",
+            "kind": "multispectral",
+            "bounds": {
+              "west": -117.21834982319582,
+              "south": 33.351178435418696,
+              "east": -116.89389685724393,
+              "north": 34.3416434971163,
+              "corners": [
+                {
+                  "latitude": 33.351178435418696,
+                  "longitude": -117.21834982319582
+                },
+                {
+                  "latitude": 33.351178435418696,
+                  "longitude": -116.89389685724393
+                },
+                {
+                  "latitude": 34.3416434971163,
+                  "longitude": -116.89389685724393
+                },
+                {
+                  "latitude": 34.3416434971163,
+                  "longitude": -117.21834982319582
+                }
+              ],
+              "center": {
+                "latitude": 33.8464109662675,
+                "longitude": -117.05612334021987
+              }
+            },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [
+                    -116.948231021669,
+                    34.3416434971163
+                  ],
+                  [
+                    -116.94977928381313,
+                    34.33031888159136
+                  ],
+                  [
+                    -116.98134503119935,
+                    34.213935468452135
+                  ],
+                  [
+                    -117.03101611697222,
+                    34.03940649864915
+                  ],
+                  [
+                    -117.21834982319582,
+                    33.351178435418696
+                  ],
+                  [
+                    -116.89511399068151,
+                    33.35132610635399
+                  ],
+                  [
+                    -116.89389685724393,
+                    34.34160846958666
+                  ],
+                  [
+                    -116.948231021669,
+                    34.3416434971163
+                  ]
+                ]
+              ]
+            },
+            "observationUtc": "2024-12-30T18:35:04.939+00:00",
+            "publishedUtc": "2024-12-30T23:09:35.899+00:00",
+            "bands": [
+              {
+                "id": "B02",
+                "units": "reflectance",
+                "scale": 0.0001,
+                "offset": -0.1,
+                "noData": 0,
+                "resolutionMeters": 10,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "B03",
+                "units": "reflectance",
+                "scale": 0.0001,
+                "offset": -0.1,
+                "noData": 0,
+                "resolutionMeters": 10,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "B04",
+                "units": "reflectance",
+                "scale": 0.0001,
+                "offset": -0.1,
+                "noData": 0,
+                "resolutionMeters": 10,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "B08",
+                "units": "reflectance",
+                "scale": 0.0001,
+                "offset": -0.1,
+                "noData": 0,
+                "resolutionMeters": 10,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "SCL",
+                "units": "1",
+                "scale": 1,
+                "offset": 0,
+                "noData": 0,
+                "resolutionMeters": 20,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              }
+            ],
+            "crs": "EPSG:32611",
+            "verticalDatum": "not applicable",
+            "quality": "Scene cloud cover 0.24%; local QA/nodata still determines valid samples",
+            "resolution": "10 m reflectance / 20 m SCL",
+            "license": "Contains modified Copernicus Sentinel data (2024); https://sentinels.copernicus.eu/documents/247904/690755/Sentinel_Data_Legal_Notice.pdf",
+            "reference": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2A_11SMT_20241230_0_L2A",
+            "acquisitionMethod": "HTTP range COG native-grid subset",
+            "limitations": [
+              "Discovery examines at most 60 ordered catalog candidates; no claim of exhaustive coverage.",
+              "Sentinel-2 Level-2A surface reflectance. Provider raster:bands scale/offset is retained, including product-specific radiometric offsets; SCL is sampled on its own native grid."
+            ],
+            "nasa": null,
+            "cloudPercent": 0.236958
+          }
+        ],
+        "nextCursor": "516efbe2015b4f05b6c44855a461bb8e",
+        "asOfUtc": "2026-10-21T23:00:39.1877855+00:00",
+        "expiresUtc": "2026-10-21T23:15:39.1877855+00:00",
+        "cached": false,
+        "limitations": [
+          "Catalog outlines do not establish QA-valid pixels. Original asset sizes, where known, are not subset transfer estimates."
+        ],
+        "error": null,
+        "ordering": "Provider-side descending original observation date with stable identity tie-break; bounded search, not a whole-archive or valid-pixel guarantee.",
+        "serverOrdered": true
+      }
+    },
+    {
+      "query": {
+        "provider": "sentinel-2",
+        "area": {
+          "west": -119,
+          "south": 33,
+          "east": -117,
+          "north": 35,
+          "corners": [
+            {
+              "latitude": 33,
+              "longitude": -119
+            },
+            {
+              "latitude": 33,
+              "longitude": -117
+            },
+            {
+              "latitude": 35,
+              "longitude": -117
+            },
+            {
+              "latitude": 35,
+              "longitude": -119
+            }
+          ],
+          "center": {
+            "latitude": 34,
+            "longitude": -118
+          }
+        },
+        "fromUtc": "2024-12-01T00:00:00+00:00",
+        "toUtc": "2024-12-31T23:59:59+00:00",
+        "maximumCloudPercent": 100,
+        "pageSize": 3,
+        "cursor": null,
+        "cachedOnly": false,
+        "refresh": true,
+        "sceneFilter": null,
+        "sort": "oldest"
+      },
+      "passed": true,
+      "page": {
+        "status": "Available",
+        "items": [
+          {
+            "provider": "sentinel-2",
+            "product": "Sentinel-2 Level-2A",
+            "scene": "S2B_11SLU_20241201_0_L2A",
+            "revision": "2fda4736f07502f86fba18f0f8c821be8f5f9fefb8535f97a7f0358d25bd5d73",
+            "kind": "multispectral",
+            "bounds": {
+              "west": -119.19753042986382,
+              "south": 34.234597790327705,
+              "east": -118.42696925824718,
+              "north": 35.2346561619881,
+              "corners": [
+                {
+                  "latitude": 34.234597790327705,
+                  "longitude": -119.19753042986382
+                },
+                {
+                  "latitude": 34.234597790327705,
+                  "longitude": -118.42696925824718
+                },
+                {
+                  "latitude": 35.2346561619881,
+                  "longitude": -118.42696925824718
+                },
+                {
+                  "latitude": 35.2346561619881,
+                  "longitude": -119.19753042986382
+                }
+              ],
+              "center": {
+                "latitude": 34.7346269761579,
+                "longitude": -118.8122498440555
+              }
+            },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [
+                    -119.19753042986382,
+                    35.22311612951892
+                  ],
+                  [
+                    -119.17151002709289,
+                    34.234597790327705
+                  ],
+                  [
+                    -118.73667682797085,
+                    34.241710125512654
+                  ],
+                  [
+                    -118.487150319851,
+                    35.05026027168695
+                  ],
+                  [
+                    -118.46277502769321,
+                    35.12104153766623
+                  ],
+                  [
+                    -118.42696925824718,
+                    35.2346561619881
+                  ],
+                  [
+                    -119.19753042986382,
+                    35.22311612951892
+                  ]
+                ]
+              ]
+            },
+            "observationUtc": "2024-12-01T18:54:45.783+00:00",
+            "publishedUtc": "2024-12-01T22:23:51.204+00:00",
+            "bands": [
+              {
+                "id": "B02",
+                "units": "reflectance",
+                "scale": 0.0001,
+                "offset": -0.1,
+                "noData": 0,
+                "resolutionMeters": 10,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "B03",
+                "units": "reflectance",
+                "scale": 0.0001,
+                "offset": -0.1,
+                "noData": 0,
+                "resolutionMeters": 10,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "B04",
+                "units": "reflectance",
+                "scale": 0.0001,
+                "offset": -0.1,
+                "noData": 0,
+                "resolutionMeters": 10,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "B08",
+                "units": "reflectance",
+                "scale": 0.0001,
+                "offset": -0.1,
+                "noData": 0,
+                "resolutionMeters": 10,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "SCL",
+                "units": "1",
+                "scale": 1,
+                "offset": 0,
+                "noData": 0,
+                "resolutionMeters": 20,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              }
+            ],
+            "crs": "EPSG:32611",
+            "verticalDatum": "not applicable",
+            "quality": "Scene cloud cover 11.99%; local QA/nodata still determines valid samples",
+            "resolution": "10 m reflectance / 20 m SCL",
+            "license": "Contains modified Copernicus Sentinel data (2024); https://sentinels.copernicus.eu/documents/247904/690755/Sentinel_Data_Legal_Notice.pdf",
+            "reference": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2B_11SLU_20241201_0_L2A",
+            "acquisitionMethod": "HTTP range COG native-grid subset",
+            "limitations": [
+              "Discovery examines at most 60 ordered catalog candidates; no claim of exhaustive coverage.",
+              "Sentinel-2 Level-2A surface reflectance. Provider raster:bands scale/offset is retained, including product-specific radiometric offsets; SCL is sampled on its own native grid."
+            ],
+            "nasa": null,
+            "cloudPercent": 11.991491
+          },
+          {
+            "provider": "sentinel-2",
+            "product": "Sentinel-2 Level-2A",
+            "scene": "S2B_11SLT_20241201_0_L2A",
+            "revision": "9e5b124dedc57dd753009bc6354b33e0e24e27fd525c859d6a289cce930991ac",
+            "kind": "multispectral",
+            "bounds": {
+              "west": -119.17376896599782,
+              "south": 33.333677784391696,
+              "east": -118.70950486646223,
+              "north": 34.32972001225679,
+              "corners": [
+                {
+                  "latitude": 33.333677784391696,
+                  "longitude": -119.17376896599782
+                },
+                {
+                  "latitude": 33.333677784391696,
+                  "longitude": -118.70950486646223
+                },
+                {
+                  "latitude": 34.32972001225679,
+                  "longitude": -118.70950486646223
+                },
+                {
+                  "latitude": 34.32972001225679,
+                  "longitude": -119.17376896599782
+                }
+              ],
+              "center": {
+                "latitude": 33.83169889832425,
+                "longitude": -118.94163691623002
+              }
+            },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [
+                    -119.17376896599782,
+                    34.32235671057083
+                  ],
+                  [
+                    -119.14887876351783,
+                    33.333677784391696
+                  ],
+                  [
+                    -119.01500404407207,
+                    33.33697849677666
+                  ],
+                  [
+                    -118.70950486646223,
+                    34.32972001225679
+                  ],
+                  [
+                    -119.17376896599782,
+                    34.32235671057083
+                  ]
+                ]
+              ]
+            },
+            "observationUtc": "2024-12-01T18:54:59.277+00:00",
+            "publishedUtc": "2024-12-01T21:49:57.835+00:00",
+            "bands": [
+              {
+                "id": "B02",
+                "units": "reflectance",
+                "scale": 0.0001,
+                "offset": -0.1,
+                "noData": 0,
+                "resolutionMeters": 10,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "B03",
+                "units": "reflectance",
+                "scale": 0.0001,
+                "offset": -0.1,
+                "noData": 0,
+                "resolutionMeters": 10,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "B04",
+                "units": "reflectance",
+                "scale": 0.0001,
+                "offset": -0.1,
+                "noData": 0,
+                "resolutionMeters": 10,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "B08",
+                "units": "reflectance",
+                "scale": 0.0001,
+                "offset": -0.1,
+                "noData": 0,
+                "resolutionMeters": 10,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "SCL",
+                "units": "1",
+                "scale": 1,
+                "offset": 0,
+                "noData": 0,
+                "resolutionMeters": 20,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              }
+            ],
+            "crs": "EPSG:32611",
+            "verticalDatum": "not applicable",
+            "quality": "Scene cloud cover 0.92%; local QA/nodata still determines valid samples",
+            "resolution": "10 m reflectance / 20 m SCL",
+            "license": "Contains modified Copernicus Sentinel data (2024); https://sentinels.copernicus.eu/documents/247904/690755/Sentinel_Data_Legal_Notice.pdf",
+            "reference": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2B_11SLT_20241201_0_L2A",
+            "acquisitionMethod": "HTTP range COG native-grid subset",
+            "limitations": [
+              "Discovery examines at most 60 ordered catalog candidates; no claim of exhaustive coverage.",
+              "Sentinel-2 Level-2A surface reflectance. Provider raster:bands scale/offset is retained, including product-specific radiometric offsets; SCL is sampled on its own native grid."
+            ],
+            "nasa": null,
+            "cloudPercent": 0.916444
+          },
+          {
+            "provider": "sentinel-2",
+            "product": "Sentinel-2 Level-2A",
+            "scene": "S2B_11SLS_20241201_0_L2A",
+            "revision": "6baad3940d45288e7d32b92172a60d6b6982a073351fabb7dea8d8c5e316ec63",
+            "kind": "multispectral",
+            "bounds": {
+              "west": -119.15102616247418,
+              "south": 32.93272456700678,
+              "east": -118.988455110812,
+              "north": 33.42362359341913,
+              "corners": [
+                {
+                  "latitude": 32.93272456700678,
+                  "longitude": -119.15102616247418
+                },
+                {
+                  "latitude": 32.93272456700678,
+                  "longitude": -118.988455110812
+                },
+                {
+                  "latitude": 33.42362359341913,
+                  "longitude": -118.988455110812
+                },
+                {
+                  "latitude": 33.42362359341913,
+                  "longitude": -119.15102616247418
+                }
+              ],
+              "center": {
+                "latitude": 33.178174080212955,
+                "longitude": -119.06974063664309
+              }
+            },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [
+                    -119.15102616247418,
+                    33.420909931215405
+                  ],
+                  [
+                    -119.13912705139184,
+                    32.93272456700678
+                  ],
+                  [
+                    -118.988455110812,
+                    33.42362359341913
+                  ],
+                  [
+                    -119.15102616247418,
+                    33.420909931215405
+                  ]
+                ]
+              ]
+            },
+            "observationUtc": "2024-12-01T18:55:09.893+00:00",
+            "publishedUtc": "2024-12-01T21:36:53.77+00:00",
+            "bands": [
+              {
+                "id": "B02",
+                "units": "reflectance",
+                "scale": 0.0001,
+                "offset": -0.1,
+                "noData": 0,
+                "resolutionMeters": 10,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "B03",
+                "units": "reflectance",
+                "scale": 0.0001,
+                "offset": -0.1,
+                "noData": 0,
+                "resolutionMeters": 10,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "B04",
+                "units": "reflectance",
+                "scale": 0.0001,
+                "offset": -0.1,
+                "noData": 0,
+                "resolutionMeters": 10,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "B08",
+                "units": "reflectance",
+                "scale": 0.0001,
+                "offset": -0.1,
+                "noData": 0,
+                "resolutionMeters": 10,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "SCL",
+                "units": "1",
+                "scale": 1,
+                "offset": 0,
+                "noData": 0,
+                "resolutionMeters": 20,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              }
+            ],
+            "crs": "EPSG:32611",
+            "verticalDatum": "not applicable",
+            "quality": "Scene cloud cover 0%; local QA/nodata still determines valid samples",
+            "resolution": "10 m reflectance / 20 m SCL",
+            "license": "Contains modified Copernicus Sentinel data (2024); https://sentinels.copernicus.eu/documents/247904/690755/Sentinel_Data_Legal_Notice.pdf",
+            "reference": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2B_11SLS_20241201_0_L2A",
+            "acquisitionMethod": "HTTP range COG native-grid subset",
+            "limitations": [
+              "Discovery examines at most 60 ordered catalog candidates; no claim of exhaustive coverage.",
+              "Sentinel-2 Level-2A surface reflectance. Provider raster:bands scale/offset is retained, including product-specific radiometric offsets; SCL is sampled on its own native grid."
+            ],
+            "nasa": null,
+            "cloudPercent": 0
+          }
+        ],
+        "nextCursor": "57f1169c0e214ef784456ea96006877c",
+        "asOfUtc": "2026-10-21T23:00:39.4979298+00:00",
+        "expiresUtc": "2026-10-21T23:15:39.4979298+00:00",
+        "cached": false,
+        "limitations": [
+          "Catalog outlines do not establish QA-valid pixels. Original asset sizes, where known, are not subset transfer estimates."
+        ],
+        "error": null,
+        "ordering": "Provider-side ascending original observation date with stable identity tie-break; bounded search, not a whole-archive or valid-pixel guarantee.",
+        "serverOrdered": true
+      }
+    },
+    {
+      "query": {
+        "provider": "sentinel-2",
+        "area": {
+          "west": -119,
+          "south": 33,
+          "east": -117,
+          "north": 35,
+          "corners": [
+            {
+              "latitude": 33,
+              "longitude": -119
+            },
+            {
+              "latitude": 33,
+              "longitude": -117
+            },
+            {
+              "latitude": 35,
+              "longitude": -117
+            },
+            {
+              "latitude": 35,
+              "longitude": -119
+            }
+          ],
+          "center": {
+            "latitude": 34,
+            "longitude": -118
+          }
+        },
+        "fromUtc": "2024-12-01T00:00:00+00:00",
+        "toUtc": "2024-12-31T23:59:59+00:00",
+        "maximumCloudPercent": 100,
+        "pageSize": 3,
+        "cursor": null,
+        "cachedOnly": false,
+        "refresh": true,
+        "sceneFilter": null,
+        "sort": "cloud"
+      },
+      "passed": true,
+      "page": {
+        "status": "Available",
+        "items": [
+          {
+            "provider": "sentinel-2",
+            "product": "Sentinel-2 Level-2A",
+            "scene": "S2B_11SLS_20241201_0_L2A",
+            "revision": "6baad3940d45288e7d32b92172a60d6b6982a073351fabb7dea8d8c5e316ec63",
+            "kind": "multispectral",
+            "bounds": {
+              "west": -119.15102616247418,
+              "south": 32.93272456700678,
+              "east": -118.988455110812,
+              "north": 33.42362359341913,
+              "corners": [
+                {
+                  "latitude": 32.93272456700678,
+                  "longitude": -119.15102616247418
+                },
+                {
+                  "latitude": 32.93272456700678,
+                  "longitude": -118.988455110812
+                },
+                {
+                  "latitude": 33.42362359341913,
+                  "longitude": -118.988455110812
+                },
+                {
+                  "latitude": 33.42362359341913,
+                  "longitude": -119.15102616247418
+                }
+              ],
+              "center": {
+                "latitude": 33.178174080212955,
+                "longitude": -119.06974063664309
+              }
+            },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [
+                    -119.15102616247418,
+                    33.420909931215405
+                  ],
+                  [
+                    -119.13912705139184,
+                    32.93272456700678
+                  ],
+                  [
+                    -118.988455110812,
+                    33.42362359341913
+                  ],
+                  [
+                    -119.15102616247418,
+                    33.420909931215405
+                  ]
+                ]
+              ]
+            },
+            "observationUtc": "2024-12-01T18:55:09.893+00:00",
+            "publishedUtc": "2024-12-01T21:36:53.77+00:00",
+            "bands": [
+              {
+                "id": "B02",
+                "units": "reflectance",
+                "scale": 0.0001,
+                "offset": -0.1,
+                "noData": 0,
+                "resolutionMeters": 10,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "B03",
+                "units": "reflectance",
+                "scale": 0.0001,
+                "offset": -0.1,
+                "noData": 0,
+                "resolutionMeters": 10,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "B04",
+                "units": "reflectance",
+                "scale": 0.0001,
+                "offset": -0.1,
+                "noData": 0,
+                "resolutionMeters": 10,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "B08",
+                "units": "reflectance",
+                "scale": 0.0001,
+                "offset": -0.1,
+                "noData": 0,
+                "resolutionMeters": 10,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "SCL",
+                "units": "1",
+                "scale": 1,
+                "offset": 0,
+                "noData": 0,
+                "resolutionMeters": 20,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              }
+            ],
+            "crs": "EPSG:32611",
+            "verticalDatum": "not applicable",
+            "quality": "Scene cloud cover 0%; local QA/nodata still determines valid samples",
+            "resolution": "10 m reflectance / 20 m SCL",
+            "license": "Contains modified Copernicus Sentinel data (2024); https://sentinels.copernicus.eu/documents/247904/690755/Sentinel_Data_Legal_Notice.pdf",
+            "reference": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2B_11SLS_20241201_0_L2A",
+            "acquisitionMethod": "HTTP range COG native-grid subset",
+            "limitations": [
+              "Discovery examines at most 60 ordered catalog candidates; no claim of exhaustive coverage.",
+              "Sentinel-2 Level-2A surface reflectance. Provider raster:bands scale/offset is retained, including product-specific radiometric offsets; SCL is sampled on its own native grid."
+            ],
+            "nasa": null,
+            "cloudPercent": 0
+          },
+          {
+            "provider": "sentinel-2",
+            "product": "Sentinel-2 Level-2A",
+            "scene": "S2B_11SNS_20241218_0_L2A",
+            "revision": "307e960754bc197c2ffa76fe162a4262bf14453b209ff37065b1699f37a8eaa0",
+            "kind": "multispectral",
+            "bounds": {
+              "west": -117.00020441126553,
+              "south": 32.45003999135196,
+              "east": -116.4637481739545,
+              "north": 33.43956604740491,
+              "corners": [
+                {
+                  "latitude": 32.45003999135196,
+                  "longitude": -117.00020441126553
+                },
+                {
+                  "latitude": 32.45003999135196,
+                  "longitude": -116.4637481739545
+                },
+                {
+                  "latitude": 33.43956604740491,
+                  "longitude": -116.4637481739545
+                },
+                {
+                  "latitude": 33.43956604740491,
+                  "longitude": -117.00020441126553
+                }
+              ],
+              "center": {
+                "latitude": 32.94480301937843,
+                "longitude": -116.73197629261001
+              }
+            },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [
+                    -117.00020441126553,
+                    33.43956604740491
+                  ],
+                  [
+                    -117.00020214686695,
+                    32.45003999135196
+                  ],
+                  [
+                    -116.76136135099469,
+                    32.45088256166613
+                  ],
+                  [
+                    -116.61286445533793,
+                    32.95752364351317
+                  ],
+                  [
+                    -116.4637481739545,
+                    33.43840666429468
+                  ],
+                  [
+                    -117.00020441126553,
+                    33.43956604740491
+                  ]
+                ]
+              ]
+            },
+            "observationUtc": "2024-12-18T18:45:10.5+00:00",
+            "publishedUtc": "2024-12-18T23:24:17.848+00:00",
+            "bands": [
+              {
+                "id": "B02",
+                "units": "reflectance",
+                "scale": 0.0001,
+                "offset": -0.1,
+                "noData": 0,
+                "resolutionMeters": 10,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "B03",
+                "units": "reflectance",
+                "scale": 0.0001,
+                "offset": -0.1,
+                "noData": 0,
+                "resolutionMeters": 10,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "B04",
+                "units": "reflectance",
+                "scale": 0.0001,
+                "offset": -0.1,
+                "noData": 0,
+                "resolutionMeters": 10,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "B08",
+                "units": "reflectance",
+                "scale": 0.0001,
+                "offset": -0.1,
+                "noData": 0,
+                "resolutionMeters": 10,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "SCL",
+                "units": "1",
+                "scale": 1,
+                "offset": 0,
+                "noData": 0,
+                "resolutionMeters": 20,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              }
+            ],
+            "crs": "EPSG:32611",
+            "verticalDatum": "not applicable",
+            "quality": "Scene cloud cover 0%; local QA/nodata still determines valid samples",
+            "resolution": "10 m reflectance / 20 m SCL",
+            "license": "Contains modified Copernicus Sentinel data (2024); https://sentinels.copernicus.eu/documents/247904/690755/Sentinel_Data_Legal_Notice.pdf",
+            "reference": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2B_11SNS_20241218_0_L2A",
+            "acquisitionMethod": "HTTP range COG native-grid subset",
+            "limitations": [
+              "Discovery examines at most 60 ordered catalog candidates; no claim of exhaustive coverage.",
+              "Sentinel-2 Level-2A surface reflectance. Provider raster:bands scale/offset is retained, including product-specific radiometric offsets; SCL is sampled on its own native grid."
+            ],
+            "nasa": null,
+            "cloudPercent": 3e-05
+          },
+          {
+            "provider": "sentinel-2",
+            "product": "Sentinel-2 Level-2A",
+            "scene": "S2A_11SLS_20241216_0_L2A",
+            "revision": "f6584000fa48b99203122bf8c81aaf674e9bc4c69c34f5a668efd7397f030611",
+            "kind": "multispectral",
+            "bounds": {
+              "west": -119.15102616247418,
+              "south": 32.898130092473984,
+              "east": -118.97802701696553,
+              "north": 33.42379038358335,
+              "corners": [
+                {
+                  "latitude": 32.898130092473984,
+                  "longitude": -119.15102616247418
+                },
+                {
+                  "latitude": 32.898130092473984,
+                  "longitude": -118.97802701696553
+                },
+                {
+                  "latitude": 33.42379038358335,
+                  "longitude": -118.97802701696553
+                },
+                {
+                  "latitude": 33.42379038358335,
+                  "longitude": -119.15102616247418
+                }
+              ],
+              "center": {
+                "latitude": 33.160960238028665,
+                "longitude": -119.06452658971986
+              }
+            },
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [
+                    -119.15102616247418,
+                    33.420909931215405
+                  ],
+                  [
+                    -119.1382947219804,
+                    32.898130092473984
+                  ],
+                  [
+                    -118.97802701696553,
+                    33.42379038358335
+                  ],
+                  [
+                    -119.15102616247418,
+                    33.420909931215405
+                  ]
+                ]
+              ]
+            },
+            "observationUtc": "2024-12-16T18:55:08.294+00:00",
+            "publishedUtc": "2024-12-17T01:59:58.784+00:00",
+            "bands": [
+              {
+                "id": "B02",
+                "units": "reflectance",
+                "scale": 0.0001,
+                "offset": -0.1,
+                "noData": 0,
+                "resolutionMeters": 10,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "B03",
+                "units": "reflectance",
+                "scale": 0.0001,
+                "offset": -0.1,
+                "noData": 0,
+                "resolutionMeters": 10,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "B04",
+                "units": "reflectance",
+                "scale": 0.0001,
+                "offset": -0.1,
+                "noData": 0,
+                "resolutionMeters": 10,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "B08",
+                "units": "reflectance",
+                "scale": 0.0001,
+                "offset": -0.1,
+                "noData": 0,
+                "resolutionMeters": 10,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              },
+              {
+                "id": "SCL",
+                "units": "1",
+                "scale": 1,
+                "offset": 0,
+                "noData": 0,
+                "resolutionMeters": 20,
+                "format": "geotiff",
+                "originalAssetBytes": null
+              }
+            ],
+            "crs": "EPSG:32611",
+            "verticalDatum": "not applicable",
+            "quality": "Scene cloud cover 0%; local QA/nodata still determines valid samples",
+            "resolution": "10 m reflectance / 20 m SCL",
+            "license": "Contains modified Copernicus Sentinel data (2024); https://sentinels.copernicus.eu/documents/247904/690755/Sentinel_Data_Legal_Notice.pdf",
+            "reference": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2A_11SLS_20241216_0_L2A",
+            "acquisitionMethod": "HTTP range COG native-grid subset",
+            "limitations": [
+              "Discovery examines at most 60 ordered catalog candidates; no claim of exhaustive coverage.",
+              "Sentinel-2 Level-2A surface reflectance. Provider raster:bands scale/offset is retained, including product-specific radiometric offsets; SCL is sampled on its own native grid."
+            ],
+            "nasa": null,
+            "cloudPercent": 8.4e-05
+          }
+        ],
+        "nextCursor": "99e7cfd971cf4601b25aae32975c1f49",
+        "asOfUtc": "2026-10-21T23:00:39.8162356+00:00",
+        "expiresUtc": "2026-10-21T23:15:39.8162356+00:00",
+        "cached": false,
+        "limitations": [
+          "Catalog outlines do not establish QA-valid pixels. Original asset sizes, where known, are not subset transfer estimates."
+        ],
+        "error": null,
+        "ordering": "Provider-side lowest reported scene cloud cover with stable identity tie-break; bounded search, not a whole-archive or valid-pixel guarantee.",
+        "serverOrdered": true
+      }
+    },
+    {
+      "query": {
+        "provider": "nasa-classic",
+        "area": {
+          "west": -119,
+          "south": 33,
+          "east": -117,
+          "north": 35,
+          "corners": [
+            {
+              "latitude": 33,
+              "longitude": -119
+            },
+            {
+              "latitude": 33,
+              "longitude": -117
+            },
+            {
+              "latitude": 35,
+              "longitude": -117
+            },
+            {
+              "latitude": 35,
+              "longitude": -119
+            }
+          ],
+          "center": {
+            "latitude": 34,
+            "longitude": -118
+          }
+        },
+        "fromUtc": null,
+        "toUtc": null,
+        "maximumCloudPercent": 100,
+        "pageSize": 5,
+        "cursor": null,
+        "cachedOnly": false,
+        "refresh": true,
+        "sceneFilter": "f080611t01p00r13",
+        "sort": "latest"
+      },
+      "passed": true,
+      "page": {
+        "status": "Available",
+        "items": [
+          {
+            "provider": "nasa-classic",
+            "product": "AVIRIS-Classic: L2 Calibrated Reflectance, Facility Instrument Collection, V1",
+            "scene": "G3477024884-ORNL_CLOUD",
+            "revision": "2f6aa47136b14e36a135bf7c8365a335b0202c4fc296de6a4e6a37c8226d5cc4",
+            "kind": "hyperspectral",
+            "bounds": {
+              "west": -118.7215,
+              "south": 34.023,
+              "east": -118.1574,
+              "north": 34.5663,
+              "corners": [
+                {
+                  "latitude": 34.023,
+                  "longitude": -118.7215
+                },
+                {
+                  "latitude": 34.023,
+                  "longitude": -118.1574
+                },
+                {
+                  "latitude": 34.5663,
+                  "longitude": -118.1574
+                },
+                {
+                  "latitude": 34.5663,
+                  "longitude": -118.7215
+                }
+              ],
+              "center": {
+                "latitude": 34.294650000000004,
+                "longitude": -118.43945
+              }
+            },
+            "geometry": {
+              "type": "MultiPolygon",
+              "coordinates": [
+                [
+                  [
+                    [
+                      -118.7215,
+                      34.4952
+                    ],
+                    [
+                      -118.2636,
+                      34.023
+                    ],
+                    [
+                      -118.1574,
+                      34.0937
+                    ],
+                    [
+                      -118.6152,
+                      34.5663
+                    ],
+                    [
+                      -118.7215,
+                      34.4952
+                    ]
+                  ]
+                ]
+              ]
+            },
+            "observationUtc": "2008-06-11T21:38:00+00:00",
+            "publishedUtc": null,
+            "bands": [],
+            "crs": null,
+            "verticalDatum": "Unknown / not inferred",
+            "quality": "Catalog footprint; source nodata, bad bands and per-pixel quality remain unverified.",
+            "resolution": "Unknown at granule discovery; verify original grid",
+            "license": "Review NASA collection terms and citation at the official source before acquisition.",
+            "reference": "https://search.earthdata.nasa.gov/search/granules?p=C2711871294-ORNL_CLOUD&g=G3477024884-ORNL_CLOUD",
+            "acquisitionMethod": "Earthdata-authorized original acquisition or official browser/manual fallback",
+            "limitations": [
+              "Historical NASA reflectance, not simulated-aircraft measurements.",
+              "No missing wavelengths, units or QA values were inferred.",
+              "Guided import \u2014 compatible original ENVI reflectance only; verify files before use"
+            ],
+            "nasa": {
+              "family": "AVIRIS-Classic",
+              "collectionId": "C2711871294-ORNL_CLOUD",
+              "collectionShortName": "AVIRIS-Classic_L2_Reflectance_2154",
+              "collectionVersion": "1",
+              "granuleId": "G3477024884-ORNL_CLOUD",
+              "flightline": "f080611t01p00r13_L2_reflectance",
+              "processingLevel": "2",
+              "format": "ENVI (individual companions; verify original header)",
+              "capability": "Guided import \u2014 compatible original ENVI reflectance only; verify files before use",
+              "authorization": "Individual NASA Earthdata authorization may be required; official browser handles login",
+              "originalBytes": 2820183091,
+              "bandCount": null,
+              "wavelengthsNm": null,
+              "units": null,
+              "assets": [
+                {
+                  "name": "f080611t01p00r13_corr_v1h_img.hdr",
+                  "url": "https://data.ornldaac.earthdata.nasa.gov/protected/aviris/AVIRIS-Classic_L2_Reflectance/data/f080611t01p00r13_corr_v1h_img.hdr",
+                  "role": "ENVI header"
+                },
+                {
+                  "name": "f080611t01p00r13_h2o_v1h_img.bin",
+                  "url": "https://data.ornldaac.earthdata.nasa.gov/protected/aviris/AVIRIS-Classic_L2_Reflectance/data/f080611t01p00r13_h2o_v1h_img.bin",
+                  "role": "Original numeric binary"
+                },
+                {
+                  "name": "f080611t01p00r13_h2o_v1h_img.hdr",
+                  "url": "https://data.ornldaac.earthdata.nasa.gov/protected/aviris/AVIRIS-Classic_L2_Reflectance/data/f080611t01p00r13_h2o_v1h_img.hdr",
+                  "role": "ENVI header"
+                },
+                {
+                  "name": "f080611t01p00r13_corr_v1h_img.bin",
+                  "url": "https://data.ornldaac.earthdata.nasa.gov/protected/aviris/AVIRIS-Classic_L2_Reflectance/data/f080611t01p00r13_corr_v1h_img.bin",
+                  "role": "Original numeric binary"
+                }
+              ],
+              "collectionRevision": "2a3c7d328d2c15d23aa36af11f2770b01bda01cfd43389239eb3ed14b35c0875",
+              "metadataUrl": "https://cmr.earthdata.nasa.gov/search/concepts/G3477024884-ORNL_CLOUD.umm_json",
+              "observationEndUtc": "2008-06-11T21:44:00+00:00",
+              "updatedUtc": null
+            },
+            "cloudPercent": null
+          }
+        ],
+        "nextCursor": null,
+        "asOfUtc": "2026-10-21T23:00:41.9832753+00:00",
+        "expiresUtc": "2026-10-21T23:15:41.9832753+00:00",
+        "cached": false,
+        "limitations": [
+          "Catalog outlines do not establish QA-valid pixels. Original asset sizes, where known, are not subset transfer estimates.",
+          "NASA footprints are catalog geometry, not QA-valid pixel coverage. Browser transfers are not controlled or measured by AeroScience.",
+          "Granule size, when supplied by CMR, is the original distribution total, not a subset estimate. Spectral details are verified from original files before import."
+        ],
+        "error": null,
+        "ordering": "Provider-side descending original observation date with stable identity tie-break; bounded search, not a whole-archive or valid-pixel guarantee.",
+        "serverOrdered": true
+      }
+    },
+    {
+      "query": {
+        "provider": "nasa-ng",
+        "area": {
+          "west": -115.6,
+          "south": 35.4,
+          "east": -115.4,
+          "north": 35.6,
+          "corners": [
+            {
+              "latitude": 35.4,
+              "longitude": -115.6
+            },
+            {
+              "latitude": 35.4,
+              "longitude": -115.4
+            },
+            {
+              "latitude": 35.6,
+              "longitude": -115.4
+            },
+            {
+              "latitude": 35.6,
+              "longitude": -115.6
+            }
+          ],
+          "center": {
+            "latitude": 35.5,
+            "longitude": -115.5
+          }
+        },
+        "fromUtc": null,
+        "toUtc": null,
+        "maximumCloudPercent": 100,
+        "pageSize": 5,
+        "cursor": null,
+        "cachedOnly": false,
+        "refresh": true,
+        "sceneFilter": "ang20140621t190550",
+        "sort": "latest"
+      },
+      "passed": true,
+      "page": {
+        "status": "Available",
+        "items": [
+          {
+            "provider": "nasa-ng",
+            "product": "AVIRIS-NG L2 Surface Reflectance, Facility Instrument Collection, V1",
+            "scene": "G2663871321-ORNL_CLOUD",
+            "revision": "53872e8870d74d0145dfd632ec595b9d9b99e28a48fbded30b31c4c053045bc5",
+            "kind": "hyperspectral",
+            "bounds": {
+              "west": -115.5680084,
+              "south": 35.4193878,
+              "east": -115.4906311,
+              "north": 35.4959831,
+              "corners": [
+                {
+                  "latitude": 35.4193878,
+                  "longitude": -115.5680084
+                },
+                {
+                  "latitude": 35.4193878,
+                  "longitude": -115.4906311
+                },
+                {
+                  "latitude": 35.4959831,
+                  "longitude": -115.4906311
+                },
+                {
+                  "latitude": 35.4959831,
+                  "longitude": -115.5680084
+                }
+              ],
+              "center": {
+                "latitude": 35.45768545,
+                "longitude": -115.52931975
+              }
+            },
+            "geometry": {
+              "type": "MultiPolygon",
+              "coordinates": [
+                [
+                  [
+                    [
+                      -115.5133667,
+                      35.4193878
+                    ],
+                    [
+                      -115.4906311,
+                      35.432476
+                    ],
+                    [
+                      -115.5452728,
+                      35.4959831
+                    ],
+                    [
+                      -115.5680084,
+                      35.4828835
+                    ],
+                    [
+                      -115.5133667,
+                      35.4193878
+                    ]
+                  ]
+                ]
+              ]
+            },
+            "observationUtc": "2014-06-21T19:05:50+00:00",
+            "publishedUtc": null,
+            "bands": [],
+            "crs": null,
+            "verticalDatum": "Unknown / not inferred",
+            "quality": "Catalog footprint; source nodata, bad bands and per-pixel quality remain unverified.",
+            "resolution": "Unknown at granule discovery; verify original grid",
+            "license": "Review NASA collection terms and citation at the official source before acquisition.",
+            "reference": "https://search.earthdata.nasa.gov/search/granules?p=C2659129205-ORNL_CLOUD&g=G2663871321-ORNL_CLOUD",
+            "acquisitionMethod": "Earthdata-authorized original acquisition or official browser/manual fallback",
+            "limitations": [
+              "Historical NASA reflectance, not simulated-aircraft measurements.",
+              "No missing wavelengths, units or QA values were inferred.",
+              "Guided import \u2014 compatible original ENVI reflectance only; verify files before use"
+            ],
+            "nasa": {
+              "family": "AVIRIS-NG",
+              "collectionId": "C2659129205-ORNL_CLOUD",
+              "collectionShortName": "AVIRIS-NG_L2_Reflectance_2110",
+              "collectionVersion": "1",
+              "granuleId": "G2663871321-ORNL_CLOUD",
+              "flightline": "AVIRIS-NG_L2_Reflectance.ang20140621t190550_corr_v1g_img.bin",
+              "processingLevel": "2",
+              "format": "ENVI (individual companions; verify original header)",
+              "capability": "Guided import \u2014 compatible original ENVI reflectance only; verify files before use",
+              "authorization": "Individual NASA Earthdata authorization may be required; official browser handles login",
+              "originalBytes": 3217946265,
+              "bandCount": null,
+              "wavelengthsNm": null,
+              "units": null,
+              "assets": [
+                {
+                  "name": "ang20140621t190550_corr_v1g_img.bin",
+                  "url": "https://data.ornldaac.earthdata.nasa.gov/protected/aviris/AVIRIS-NG_L2_Reflectance/data/ang20140621t190550_corr_v1g_img.bin",
+                  "role": "Original numeric binary"
+                },
+                {
+                  "name": "ang20140621t190550_corr_v1g_img.bin.sha256",
+                  "url": "https://data.ornldaac.earthdata.nasa.gov/public/aviris/AVIRIS-NG_L2_Reflectance/data/ang20140621t190550_corr_v1g_img.bin.sha256",
+                  "role": "Provider SHA-256"
+                }
+              ],
+              "collectionRevision": "08ae10f6ca268bbd9b040d1acedccaac39dc735862fd47c5899c54b1bc84ef7a",
+              "metadataUrl": "https://cmr.earthdata.nasa.gov/search/concepts/G2663871321-ORNL_CLOUD.umm_json",
+              "observationEndUtc": "2014-06-21T19:07:50+00:00",
+              "updatedUtc": "2023-09-28T20:44:07+00:00"
+            },
+            "cloudPercent": null
+          },
+          {
+            "provider": "nasa-ng",
+            "product": "AVIRIS-NG L2 Surface Reflectance, Facility Instrument Collection, V1",
+            "scene": "G2663884932-ORNL_CLOUD",
+            "revision": "2dd6d4d021ec5dc3699d781fc89d473156f90f0aed997662ebd5597ca503ffa6",
+            "kind": "hyperspectral",
+            "bounds": {
+              "west": -115.5680084,
+              "south": 35.4193878,
+              "east": -115.4906311,
+              "north": 35.4959831,
+              "corners": [
+                {
+                  "latitude": 35.4193878,
+                  "longitude": -115.5680084
+                },
+                {
+                  "latitude": 35.4193878,
+                  "longitude": -115.4906311
+                },
+                {
+                  "latitude": 35.4959831,
+                  "longitude": -115.4906311
+                },
+                {
+                  "latitude": 35.4959831,
+                  "longitude": -115.5680084
+                }
+              ],
+              "center": {
+                "latitude": 35.45768545,
+                "longitude": -115.52931975
+              }
+            },
+            "geometry": {
+              "type": "MultiPolygon",
+              "coordinates": [
+                [
+                  [
+                    [
+                      -115.5133667,
+                      35.4193878
+                    ],
+                    [
+                      -115.4906311,
+                      35.432476
+                    ],
+                    [
+                      -115.5452728,
+                      35.4959831
+                    ],
+                    [
+                      -115.5680084,
+                      35.4828835
+                    ],
+                    [
+                      -115.5133667,
+                      35.4193878
+                    ]
+                  ]
+                ]
+              ]
+            },
+            "observationUtc": "2014-06-21T19:05:50+00:00",
+            "publishedUtc": null,
+            "bands": [],
+            "crs": null,
+            "verticalDatum": "Unknown / not inferred",
+            "quality": "Catalog footprint; source nodata, bad bands and per-pixel quality remain unverified.",
+            "resolution": "Unknown at granule discovery; verify original grid",
+            "license": "Review NASA collection terms and citation at the official source before acquisition.",
+            "reference": "https://search.earthdata.nasa.gov/search/granules?p=C2659129205-ORNL_CLOUD&g=G2663884932-ORNL_CLOUD",
+            "acquisitionMethod": "Earthdata-authorized original acquisition or official browser/manual fallback",
+            "limitations": [
+              "Historical NASA reflectance, not simulated-aircraft measurements.",
+              "No missing wavelengths, units or QA values were inferred.",
+              "Guided import \u2014 compatible original ENVI reflectance only; verify files before use"
+            ],
+            "nasa": {
+              "family": "AVIRIS-NG",
+              "collectionId": "C2659129205-ORNL_CLOUD",
+              "collectionShortName": "AVIRIS-NG_L2_Reflectance_2110",
+              "collectionVersion": "1",
+              "granuleId": "G2663884932-ORNL_CLOUD",
+              "flightline": "AVIRIS-NG_L2_Reflectance.ang20140621t190550_corr_v1g_img.hdr",
+              "processingLevel": "2",
+              "format": "ENVI (individual companions; verify original header)",
+              "capability": "Guided import \u2014 compatible original ENVI reflectance only; verify files before use",
+              "authorization": "Individual NASA Earthdata authorization may be required; official browser handles login",
+              "originalBytes": 22095,
+              "bandCount": null,
+              "wavelengthsNm": null,
+              "units": null,
+              "assets": [
+                {
+                  "name": "ang20140621t190550_corr_v1g_img.hdr",
+                  "url": "https://data.ornldaac.earthdata.nasa.gov/protected/aviris/AVIRIS-NG_L2_Reflectance/data/ang20140621t190550_corr_v1g_img.hdr",
+                  "role": "ENVI header"
+                },
+                {
+                  "name": "ang20140621t190550_corr_v1g_img.hdr.sha256",
+                  "url": "https://data.ornldaac.earthdata.nasa.gov/public/aviris/AVIRIS-NG_L2_Reflectance/data/ang20140621t190550_corr_v1g_img.hdr.sha256",
+                  "role": "Provider SHA-256"
+                }
+              ],
+              "collectionRevision": "08ae10f6ca268bbd9b040d1acedccaac39dc735862fd47c5899c54b1bc84ef7a",
+              "metadataUrl": "https://cmr.earthdata.nasa.gov/search/concepts/G2663884932-ORNL_CLOUD.umm_json",
+              "observationEndUtc": "2014-06-21T19:07:50+00:00",
+              "updatedUtc": "2023-09-28T20:44:07+00:00"
+            },
+            "cloudPercent": null
+          },
+          {
+            "provider": "nasa-ng",
+            "product": "AVIRIS-NG L2 Surface Reflectance, Facility Instrument Collection, V1",
+            "scene": "G2663871412-ORNL_CLOUD",
+            "revision": "e061eef8f24e8f4e5aed44e2878580d69a6b537827ffc992aa8050df0c0f54be",
+            "kind": "hyperspectral",
+            "bounds": {
+              "west": -115.5680084,
+              "south": 35.4193878,
+              "east": -115.4906311,
+              "north": 35.4959831,
+              "corners": [
+                {
+                  "latitude": 35.4193878,
+                  "longitude": -115.5680084
+                },
+                {
+                  "latitude": 35.4193878,
+                  "longitude": -115.4906311
+                },
+                {
+                  "latitude": 35.4959831,
+                  "longitude": -115.4906311
+                },
+                {
+                  "latitude": 35.4959831,
+                  "longitude": -115.5680084
+                }
+              ],
+              "center": {
+                "latitude": 35.45768545,
+                "longitude": -115.52931975
+              }
+            },
+            "geometry": {
+              "type": "MultiPolygon",
+              "coordinates": [
+                [
+                  [
+                    [
+                      -115.5133667,
+                      35.4193878
+                    ],
+                    [
+                      -115.4906311,
+                      35.432476
+                    ],
+                    [
+                      -115.5452728,
+                      35.4959831
+                    ],
+                    [
+                      -115.5680084,
+                      35.4828835
+                    ],
+                    [
+                      -115.5133667,
+                      35.4193878
+                    ]
+                  ]
+                ]
+              ]
+            },
+            "observationUtc": "2014-06-21T19:05:50+00:00",
+            "publishedUtc": null,
+            "bands": [],
+            "crs": null,
+            "verticalDatum": "Unknown / not inferred",
+            "quality": "Catalog footprint; source nodata, bad bands and per-pixel quality remain unverified.",
+            "resolution": "Unknown at granule discovery; verify original grid",
+            "license": "Review NASA collection terms and citation at the official source before acquisition.",
+            "reference": "https://search.earthdata.nasa.gov/search/granules?p=C2659129205-ORNL_CLOUD&g=G2663871412-ORNL_CLOUD",
+            "acquisitionMethod": "Earthdata-authorized original acquisition or official browser/manual fallback",
+            "limitations": [
+              "Historical NASA reflectance, not simulated-aircraft measurements.",
+              "No missing wavelengths, units or QA values were inferred.",
+              "Download only \u2014 auxiliary or unknown product; no supported hyperspectral reflectance import"
+            ],
+            "nasa": {
+              "family": "AVIRIS-NG",
+              "collectionId": "C2659129205-ORNL_CLOUD",
+              "collectionShortName": "AVIRIS-NG_L2_Reflectance_2110",
+              "collectionVersion": "1",
+              "granuleId": "G2663871412-ORNL_CLOUD",
+              "flightline": "AVIRIS-NG_L2_Reflectance.ang20140621t190550_h2o_v1g_img.bin",
+              "processingLevel": "2",
+              "format": "ENVI (individual companions; verify original header)",
+              "capability": "Download only \u2014 auxiliary or unknown product; no supported hyperspectral reflectance import",
+              "authorization": "Individual NASA Earthdata authorization may be required; official browser handles login",
+              "originalBytes": 22346850,
+              "bandCount": null,
+              "wavelengthsNm": null,
+              "units": null,
+              "assets": [
+                {
+                  "name": "ang20140621t190550_h2o_v1g_img.bin",
+                  "url": "https://data.ornldaac.earthdata.nasa.gov/protected/aviris/AVIRIS-NG_L2_Reflectance/data/ang20140621t190550_h2o_v1g_img.bin",
+                  "role": "Original numeric binary"
+                },
+                {
+                  "name": "ang20140621t190550_h2o_v1g_img.bin.sha256",
+                  "url": "https://data.ornldaac.earthdata.nasa.gov/public/aviris/AVIRIS-NG_L2_Reflectance/data/ang20140621t190550_h2o_v1g_img.bin.sha256",
+                  "role": "Provider SHA-256"
+                }
+              ],
+              "collectionRevision": "08ae10f6ca268bbd9b040d1acedccaac39dc735862fd47c5899c54b1bc84ef7a",
+              "metadataUrl": "https://cmr.earthdata.nasa.gov/search/concepts/G2663871412-ORNL_CLOUD.umm_json",
+              "observationEndUtc": "2014-06-21T19:07:50+00:00",
+              "updatedUtc": "2023-09-28T20:44:07+00:00"
+            },
+            "cloudPercent": null
+          },
+          {
+            "provider": "nasa-ng",
+            "product": "AVIRIS-NG L2 Surface Reflectance, Facility Instrument Collection, V1",
+            "scene": "G2663874343-ORNL_CLOUD",
+            "revision": "dd76072127d28123611e79b4820e8ac7f37f109174fb0edfb26301836cfbf1ef",
+            "kind": "hyperspectral",
+            "bounds": {
+              "west": -115.5680084,
+              "south": 35.4193878,
+              "east": -115.4906311,
+              "north": 35.4959831,
+              "corners": [
+                {
+                  "latitude": 35.4193878,
+                  "longitude": -115.5680084
+                },
+                {
+                  "latitude": 35.4193878,
+                  "longitude": -115.4906311
+                },
+                {
+                  "latitude": 35.4959831,
+                  "longitude": -115.4906311
+                },
+                {
+                  "latitude": 35.4959831,
+                  "longitude": -115.5680084
+                }
+              ],
+              "center": {
+                "latitude": 35.45768545,
+                "longitude": -115.52931975
+              }
+            },
+            "geometry": {
+              "type": "MultiPolygon",
+              "coordinates": [
+                [
+                  [
+                    [
+                      -115.5133667,
+                      35.4193878
+                    ],
+                    [
+                      -115.4906311,
+                      35.432476
+                    ],
+                    [
+                      -115.5452728,
+                      35.4959831
+                    ],
+                    [
+                      -115.5680084,
+                      35.4828835
+                    ],
+                    [
+                      -115.5133667,
+                      35.4193878
+                    ]
+                  ]
+                ]
+              ]
+            },
+            "observationUtc": "2014-06-21T19:05:50+00:00",
+            "publishedUtc": null,
+            "bands": [],
+            "crs": null,
+            "verticalDatum": "Unknown / not inferred",
+            "quality": "Catalog footprint; source nodata, bad bands and per-pixel quality remain unverified.",
+            "resolution": "Unknown at granule discovery; verify original grid",
+            "license": "Review NASA collection terms and citation at the official source before acquisition.",
+            "reference": "https://search.earthdata.nasa.gov/search/granules?p=C2659129205-ORNL_CLOUD&g=G2663874343-ORNL_CLOUD",
+            "acquisitionMethod": "Earthdata-authorized original acquisition or official browser/manual fallback",
+            "limitations": [
+              "Historical NASA reflectance, not simulated-aircraft measurements.",
+              "No missing wavelengths, units or QA values were inferred.",
+              "Download only \u2014 auxiliary or unknown product; no supported hyperspectral reflectance import"
+            ],
+            "nasa": {
+              "family": "AVIRIS-NG",
+              "collectionId": "C2659129205-ORNL_CLOUD",
+              "collectionShortName": "AVIRIS-NG_L2_Reflectance_2110",
+              "collectionVersion": "1",
+              "granuleId": "G2663874343-ORNL_CLOUD",
+              "flightline": "AVIRIS-NG_L2_Reflectance.ang20140621t190550_h2o_v1g_img.hdr",
+              "processingLevel": "2",
+              "format": "ENVI (individual companions; verify original header)",
+              "capability": "Download only \u2014 auxiliary or unknown product; no supported hyperspectral reflectance import",
+              "authorization": "Individual NASA Earthdata authorization may be required; official browser handles login",
+              "originalBytes": 14832,
+              "bandCount": null,
+              "wavelengthsNm": null,
+              "units": null,
+              "assets": [
+                {
+                  "name": "ang20140621t190550_h2o_v1g_img.hdr",
+                  "url": "https://data.ornldaac.earthdata.nasa.gov/protected/aviris/AVIRIS-NG_L2_Reflectance/data/ang20140621t190550_h2o_v1g_img.hdr",
+                  "role": "ENVI header"
+                },
+                {
+                  "name": "ang20140621t190550_h2o_v1g_img.hdr.sha256",
+                  "url": "https://data.ornldaac.earthdata.nasa.gov/public/aviris/AVIRIS-NG_L2_Reflectance/data/ang20140621t190550_h2o_v1g_img.hdr.sha256",
+                  "role": "Provider SHA-256"
+                }
+              ],
+              "collectionRevision": "08ae10f6ca268bbd9b040d1acedccaac39dc735862fd47c5899c54b1bc84ef7a",
+              "metadataUrl": "https://cmr.earthdata.nasa.gov/search/concepts/G2663874343-ORNL_CLOUD.umm_json",
+              "observationEndUtc": "2014-06-21T19:07:50+00:00",
+              "updatedUtc": "2023-09-28T20:44:07+00:00"
+            },
+            "cloudPercent": null
+          }
+        ],
+        "nextCursor": null,
+        "asOfUtc": "2026-10-21T23:00:47.5250659+00:00",
+        "expiresUtc": "2026-10-21T23:15:47.5250659+00:00",
+        "cached": false,
+        "limitations": [
+          "Catalog outlines do not establish QA-valid pixels. Original asset sizes, where known, are not subset transfer estimates.",
+          "NASA footprints are catalog geometry, not QA-valid pixel coverage. Browser transfers are not controlled or measured by AeroScience.",
+          "Granule size, when supplied by CMR, is the original distribution total, not a subset estimate. Spectral details are verified from original files before import."
+        ],
+        "error": null,
+        "ordering": "Provider-side descending original observation date with stable identity tie-break; bounded search, not a whole-archive or valid-pixel guarantee.",
+        "serverOrdered": true
+      }
+    },
+    {
+      "check": "authoritative-named-regions",
+      "passed": true,
+      "states": {
+        "items": [
+          {
+            "code": "01",
+            "name": "Alabama"
+          },
+          {
+            "code": "02",
+            "name": "Alaska"
+          },
+          {
+            "code": "04",
+            "name": "Arizona"
+          },
+          {
+            "code": "05",
+            "name": "Arkansas"
+          },
+          {
+            "code": "06",
+            "name": "California"
+          },
+          {
+            "code": "08",
+            "name": "Colorado"
+          },
+          {
+            "code": "09",
+            "name": "Connecticut"
+          },
+          {
+            "code": "10",
+            "name": "Delaware"
+          },
+          {
+            "code": "11",
+            "name": "District of Columbia"
+          },
+          {
+            "code": "12",
+            "name": "Florida"
+          },
+          {
+            "code": "13",
+            "name": "Georgia"
+          },
+          {
+            "code": "15",
+            "name": "Hawaii"
+          },
+          {
+            "code": "16",
+            "name": "Idaho"
+          },
+          {
+            "code": "17",
+            "name": "Illinois"
+          },
+          {
+            "code": "18",
+            "name": "Indiana"
+          },
+          {
+            "code": "19",
+            "name": "Iowa"
+          },
+          {
+            "code": "20",
+            "name": "Kansas"
+          },
+          {
+            "code": "21",
+            "name": "Kentucky"
+          },
+          {
+            "code": "22",
+            "name": "Louisiana"
+          },
+          {
+            "code": "23",
+            "name": "Maine"
+          },
+          {
+            "code": "24",
+            "name": "Maryland"
+          },
+          {
+            "code": "25",
+            "name": "Massachusetts"
+          },
+          {
+            "code": "26",
+            "name": "Michigan"
+          },
+          {
+            "code": "27",
+            "name": "Minnesota"
+          },
+          {
+            "code": "28",
+            "name": "Mississippi"
+          },
+          {
+            "code": "29",
+            "name": "Missouri"
+          },
+          {
+            "code": "30",
+            "name": "Montana"
+          },
+          {
+            "code": "31",
+            "name": "Nebraska"
+          },
+          {
+            "code": "32",
+            "name": "Nevada"
+          },
+          {
+            "code": "33",
+            "name": "New Hampshire"
+          },
+          {
+            "code": "34",
+            "name": "New Jersey"
+          },
+          {
+            "code": "35",
+            "name": "New Mexico"
+          },
+          {
+            "code": "36",
+            "name": "New York"
+          },
+          {
+            "code": "37",
+            "name": "North Carolina"
+          },
+          {
+            "code": "38",
+            "name": "North Dakota"
+          },
+          {
+            "code": "39",
+            "name": "Ohio"
+          },
+          {
+            "code": "40",
+            "name": "Oklahoma"
+          },
+          {
+            "code": "41",
+            "name": "Oregon"
+          },
+          {
+            "code": "42",
+            "name": "Pennsylvania"
+          },
+          {
+            "code": "72",
+            "name": "Puerto Rico"
+          },
+          {
+            "code": "44",
+            "name": "Rhode Island"
+          },
+          {
+            "code": "45",
+            "name": "South Carolina"
+          },
+          {
+            "code": "46",
+            "name": "South Dakota"
+          },
+          {
+            "code": "47",
+            "name": "Tennessee"
+          },
+          {
+            "code": "48",
+            "name": "Texas"
+          },
+          {
+            "code": "49",
+            "name": "Utah"
+          },
+          {
+            "code": "50",
+            "name": "Vermont"
+          },
+          {
+            "code": "51",
+            "name": "Virginia"
+          },
+          {
+            "code": "53",
+            "name": "Washington"
+          },
+          {
+            "code": "54",
+            "name": "West Virginia"
+          },
+          {
+            "code": "55",
+            "name": "Wisconsin"
+          },
+          {
+            "code": "56",
+            "name": "Wyoming"
+          }
+        ],
+        "reference": "https://tigerweb.geo.census.gov/arcgis/rest/services/Generalized_ACS2024/State_County/MapServer/9/query?where=1%3D1&outFields=NAME,STATE&returnGeometry=false&orderByFields=NAME&resultRecordCount=100&f=json",
+        "asOfUtc": "2026-10-21T23:00:47.8255739+00:00",
+        "cached": false
+      },
+      "counties": {
+        "items": [
+          {
+            "code": "001",
+            "name": "Bernalillo County"
+          },
+          {
+            "code": "003",
+            "name": "Catron County"
+          },
+          {
+            "code": "005",
+            "name": "Chaves County"
+          },
+          {
+            "code": "006",
+            "name": "Cibola County"
+          },
+          {
+            "code": "007",
+            "name": "Colfax County"
+          },
+          {
+            "code": "009",
+            "name": "Curry County"
+          },
+          {
+            "code": "011",
+            "name": "De Baca County"
+          },
+          {
+            "code": "013",
+            "name": "Do\u00f1a Ana County"
+          },
+          {
+            "code": "015",
+            "name": "Eddy County"
+          },
+          {
+            "code": "017",
+            "name": "Grant County"
+          },
+          {
+            "code": "019",
+            "name": "Guadalupe County"
+          },
+          {
+            "code": "021",
+            "name": "Harding County"
+          },
+          {
+            "code": "023",
+            "name": "Hidalgo County"
+          },
+          {
+            "code": "025",
+            "name": "Lea County"
+          },
+          {
+            "code": "027",
+            "name": "Lincoln County"
+          },
+          {
+            "code": "028",
+            "name": "Los Alamos County"
+          },
+          {
+            "code": "029",
+            "name": "Luna County"
+          },
+          {
+            "code": "031",
+            "name": "McKinley County"
+          },
+          {
+            "code": "033",
+            "name": "Mora County"
+          },
+          {
+            "code": "035",
+            "name": "Otero County"
+          },
+          {
+            "code": "037",
+            "name": "Quay County"
+          },
+          {
+            "code": "039",
+            "name": "Rio Arriba County"
+          },
+          {
+            "code": "041",
+            "name": "Roosevelt County"
+          },
+          {
+            "code": "045",
+            "name": "San Juan County"
+          },
+          {
+            "code": "047",
+            "name": "San Miguel County"
+          },
+          {
+            "code": "043",
+            "name": "Sandoval County"
+          },
+          {
+            "code": "049",
+            "name": "Santa Fe County"
+          },
+          {
+            "code": "051",
+            "name": "Sierra County"
+          },
+          {
+            "code": "053",
+            "name": "Socorro County"
+          },
+          {
+            "code": "055",
+            "name": "Taos County"
+          },
+          {
+            "code": "057",
+            "name": "Torrance County"
+          },
+          {
+            "code": "059",
+            "name": "Union County"
+          },
+          {
+            "code": "061",
+            "name": "Valencia County"
+          }
+        ],
+        "reference": "https://tigerweb.geo.census.gov/arcgis/rest/services/Generalized_ACS2024/State_County/MapServer/13/query?where=STATE%3D%2735%27&outFields=NAME,STATE,COUNTY&returnGeometry=false&orderByFields=NAME&resultRecordCount=400&f=json",
+        "asOfUtc": "2026-10-21T23:00:47.916649+00:00",
+        "cached": false
+      }
+    }
+  ],
+  "failures": [],
+  "sourceBaseCommit": "ea7a8d4ef9df2d431e2accc17100f26733c3974d",
+  "sourceFiles": {
+    "src/AeroScience.Missions/ScientificCatalog.cs": "6eb0fca72164ae3d705443c1893a06ac65d201dc150839aa897cdf13cd675828",
+    "src/AeroScience.Missions/ScientificCatalogDiscovery.cs": "ebcfa10b2b7b7804b36c92e3f10875e348c85808a1d41809ddb15a62618e1cf4",
+    "src/AeroScience.Missions/NasaCatalog.cs": "0bfbd1f0234f8563a5b051a238a6b4cc0967e596a17ea40213d701bee175e77b",
+    "tests/AeroScience.ProviderAcceptance/CatalogUxAcceptance.cs": "56ab49a438cc6c23ab4bf404f942b9d10cabdcd2fb807e715befb77ae79779e1"
+  }
+}

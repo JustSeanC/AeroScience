@@ -1,3 +1,4 @@
+import {openLibrary,applyBounds} from './helpers/library-ui.js';
 import { test, expect } from '@playwright/test';
 const origin = 'http://127.0.0.1:5080';
 async function post(request, path, data = {}) {
@@ -25,14 +26,14 @@ test.afterEach(async ({ request }) => {
   await post(request, '/api/testing/library/teardown');
 });
 async function discover(page, family) {
-  await page.goto('/#library/download');
+  await openLibrary(page);
   await page.getByLabel('Data family', { exact: true }).selectOption('hyperspectral');
   await page.getByLabel('Scientific provider / product', { exact: true }).selectOption('nasa-' + family);
   await page.getByLabel('Scene date from (UTC)', { exact: true }).fill(family === 'classic' ? '2008-01-01' : '2014-01-01');
   await page.getByLabel('Scene date to (UTC)', { exact: true }).fill(family === 'classic' ? '2009-01-01' : '2015-01-01');
   for (const [label, value] of [['West longitude', family === 'classic' ? '-119' : '-116'], ['East longitude', family === 'classic' ? '-117' : '-115'], ['South latitude', family === 'classic' ? '33' : '35'], ['North latitude', family === 'classic' ? '35' : '36']])
     await page.getByLabel(label, { exact: true }).fill(value);
-  await page.getByRole('button', { name: 'Search provider catalog', exact: true }).click();
+  await applyBounds(page);await page.getByRole('button', { name: 'Find Available Data', exact: true }).click();
   await expect(page.getByLabel('Provider catalog results')).toContainText(family === 'classic' ? 'f080611' : 'ang20140621');
 }
 async function completionState(request, id) {
@@ -55,7 +56,7 @@ for (const [family, bands] of [['classic', 224], ['ng', 425]]) test(`${family} d
   await page.getByRole('button', { name: 'Download & Import', exact: true }).click();
   await expect.poll(() => completionState(request, job.id)).toBe('Completed');
   const completed = await (await request.get(`/api/science/library/jobs/${job.id}`)).json();
-  expect(completed.downloadedBytes).toBeGreaterThan(0); expect(JSON.stringify(completed)).not.toContain('synthetic_browser_earthdata_token');
+  expect(completed.downloadedBytes).toBeGreaterThan(0);expect(completed.progress.stage).toBe("Ready");expect(completed.progress.preparedOriginalBytes).toBe(completed.progress.totalOriginalBytes);expect(completed.progress.completedFiles).toBe(completed.preview.nasa.files.length); expect(JSON.stringify(completed)).not.toContain('synthetic_browser_earthdata_token');
   const sources = await (await request.get('/api/science/sources')).json();
   const source = sources.find(s => s.source.id === completed.items[0].sourceId).source;
   expect(source.manifest.bands).toHaveLength(bands); expect(source.manifest.acquisition.workflow).toBe('nasa-earthdata-original-envi');

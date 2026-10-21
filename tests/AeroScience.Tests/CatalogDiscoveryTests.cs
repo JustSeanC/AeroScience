@@ -21,7 +21,7 @@ public sealed class CatalogDiscoveryTests:IDisposable
         using var auto=new AutomaticScientificData(science,settings,new(h));var catalog=new ScientificCatalog(auto,science,settings);
         var q=new ScientificCatalogQuery(provider,new(-75,40,-74.98,40.02),DateTimeOffset.Parse("2024-01-01Z"),DateTimeOffset.Parse("2024-12-31Z"),Sort:sort);
         var first=await catalog.Search(q);Assert.True(first.ServerOrdered);Assert.NotNull(first.Ordering);Assert.NotNull(first.NextCursor);
-        var query=System.Web.HttpUtility.ParseQueryString(h.Requests[0].Query);Assert.Equal(expected,query["sortby"]);
+        var query=System.Web.HttpUtility.ParseQueryString(h.Requests[0].Query);Assert.Equal(expected,query["sortby"]);Assert.All(query["datetime"]!.Split('/'),instant=>Assert.EndsWith("Z",instant));
         if(provider=="landsat")Assert.Contains("L2SP",query["query"]);
         await catalog.Search(q with{Cursor=first.NextCursor});Assert.Contains("next=provider-cursor",h.Requests[^1].Query);
         await Assert.ThrowsAsync<ArgumentException>(()=>catalog.Search(q with{Cursor=first.NextCursor,Sort=sort=="oldest"?"latest":"oldest"}));

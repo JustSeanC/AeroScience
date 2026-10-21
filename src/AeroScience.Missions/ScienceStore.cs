@@ -93,6 +93,7 @@ public sealed partial class ScienceStore(string directory, IStorageCapacity? cap
             if(schema<CurrentSchemaVersion)InitializeLibraryJobs(db);
             if (!File.Exists(Path.Combine(DirectoryPath, MarkerName)))
                 PreferenceStore.WriteAtomic(Path.Combine(DirectoryPath, MarkerName), new { formatVersion = 1, libraryId = id, database = RelativeDatabasePath });
+            if(!sourceDeletionRecoveryDone){RecoverSourceDeletionJournals();sourceDeletionRecoveryDone=true;}
         }
     }
     public ScienceDataset EnsureDataset(Mission mission, InstrumentConfiguration configuration, MissionResearch research)

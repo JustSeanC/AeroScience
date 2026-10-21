@@ -1,3 +1,4 @@
+import {dialogHeader,requestDialogClose,markDialogSaved} from './dialog-ui.js';
 import {readableName} from './workstation-ui.js';
 import {readSuccessResponse} from './http-response.js';
 import {scienceWorkspace,disposeScienceWorkspace} from './science-workspace.js';
@@ -357,12 +358,12 @@ async function navigate() {
   $("breadcrumb").textContent = {
     control: "MISSION CONTROL",
     history: "MISSION HISTORY",
-    instruments: "SCIENCE COLLECTION",
+    instruments: "INSTRUMENTS & COLLECTION",
     planner: "MISSION PLANNER",
     settings: "SETTINGS",
-    "science-workspace": "SCIENCE WORKSPACE",library:"SCIENTIFIC DATA LIBRARY",help:"HELP & SUPPORT",downloads:"DOWNLOAD ACTIVITY",
+    "science-workspace": "SCIENCE RESULTS & ANALYSIS",library:"EXTERNAL DATA MANAGER",help:"HELP & SUPPORT",downloads:"DOWNLOAD ACTIVITY",
   }[page];
-  document.title = `AeroScience · ${page === "control" ? "Mission Control" : page[0].toUpperCase() + page.slice(1)}`;
+  document.title = `AeroScience · ${{library:"External Data Manager", "science-workspace":"Science Results & Analysis", instruments:"Instruments & Collection", control:"Mission Control"}[page] || page[0].toUpperCase()+page.slice(1)}`;
   if (!authorized) return;
   if (page === "science-workspace") await scienceWorkspace($("science-workspace"),api);
   if (page === "help") await helpCenter($("help"),api);
@@ -485,7 +486,7 @@ async function showDetail(id) {
     body.append(complete);
   }
   await researchDetail(body, id, m);
-  $("mission-detail").showModal();
+  dialogHeader($("mission-detail"),{title:"Mission detail"});$("mission-detail").showModal();
 }
 let settingsView=null;
 async function loadSettings() {

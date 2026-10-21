@@ -60,6 +60,13 @@ public sealed class ScientificLibraryJobsTests:IDisposable
         science.RecoverLibraryJobs();var recovered=science.LibraryJob(id);Assert.Equal("Interrupted",recovered.State);Assert.Equal(0,recovered.DownloadedBytes);Assert.Equal(65536,recovered.UncertainBytes);Assert.NotNull(recovered.ApprovalId);Assert.Equal(hash,recovered.Preview.SelectionHash);
         using(var second=new ScientificLibraryJobs(science,catalog,automatic,settings)){await second.Control(id,"resume");automatic.FlightActive(false);Assert.Equal("Completed",(await Terminal(science,id)).State);}
     }
+    [Fact]public async Task RecoveryFinishesBeforeNewPreviewsCanCreateTransferReservations()
+    {
+        using var automatic=new AutomaticScientificData(science,settings,new(new Handler(raster)));automatic.FlightActive(true);var catalog=new ScientificCatalog(automatic,science,settings);Guid old;
+        using(var first=new ScientificLibraryJobs(science,catalog,automatic,settings)){var job=await Preview(catalog,first);old=job.Id;science.LibraryBudget(old,0,0,123);}
+        using var reopened=new ScientificLibraryJobs(science,catalog,automatic,settings);Assert.Equal(123,science.LibraryJob(old).UncertainBytes);
+        var fresh=await Preview(catalog,reopened);science.LibraryBudget(fresh.Id,0,0,100);science.LibraryBudget(fresh.Id,0,100,100,finish:true);Assert.Equal(100,science.LibraryJob(fresh.Id).DownloadedBytes);Assert.Equal(123,science.LibraryJob(old).UncertainBytes);
+    }
     [Fact]public async Task ChangedConsentAndScopeCannotSpendOldApprovalAndBudgetsPersistAcrossRetries()
     {
         using var automatic=new AutomaticScientificData(science,settings,new(new Handler(raster)));automatic.FlightActive(true);var catalog=new ScientificCatalog(automatic,science,settings);using var jobs=new ScientificLibraryJobs(science,catalog,automatic,settings);

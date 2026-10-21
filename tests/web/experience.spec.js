@@ -110,7 +110,7 @@ test("science pause synchronizes displays while telemetry continues and unit pre
   });
   await page.goto("/#science");
   await expect(
-    page.getByRole("heading", { name: "Science Collection", exact: true }),
+    page.getByRole("heading", { name: "Instruments & Collection", exact: true }),
   ).toBeVisible();
   await expect
     .poll(

@@ -50,18 +50,19 @@ public static class ResearchApi
         app.MapGet("/api/science/prediction",(ScientificFlightPrediction prediction)=>prediction.Snapshot());
         app.MapPost("/api/science/preparation/control",(PreparationControl request,AutomaticScientificData automatic)=>{if(request.Action is not("pause" or "resume"))throw new ArgumentException("Choose pause or resume.");automatic.Pause(request.Action=="pause");return Results.Ok(new { action=request.Action,queue=automatic.QueueSummary() });});
         app.MapPost("/api/plans/{id:guid}/preparation/control",(Guid id,PreparationControl request,ScientificPlanData plans)=>{plans.Control(id,request.Action);return Results.Ok(plans.Snapshot().Single(s=>s.PlanId==id));});
-        app.MapGet("/api/science/activity",(AutomaticScientificData automatic,ScientificPlanData plans)=>new{jobs=automatic.Snapshot(),queue=automatic.QueueSummary(),plans=plans.Snapshot(),plansWarning=plans.Warning,network=automatic.NetworkDiagnostics()});
+        app.MapGet("/api/science/activity",(AutomaticScientificData automatic,ScientificPlanData plans,ScienceStore science,ScientificLibraryJobs libraryJobs)=>{var inventory=plans.Activity();return new{jobs=automatic.Snapshot(),queue=automatic.QueueSummary(),plans=inventory.Plans,planInstruments=inventory.Inventories,libraryJobs=(science.AvailabilityError() is null?science.LibraryJobs():[]).Select(libraryJobs.Project),plansWarning=plans.Warning,network=automatic.NetworkDiagnostics()};});
         app.MapGet("/api/science/diagnostics",(AutomaticScientificData automatic,HttpContext c)=>AccessControl.IsLoopback(c)?Results.Ok(new{privacy="Geographic regions and provider/instrument activity are included. Review before sharing. No credentials or original scientific files.",events=ScientificDiagnostics.Snapshot(),network=automatic.NetworkDiagnostics(),queue=automatic.QueueSummary()}):Results.StatusCode(403));
-        app.MapGet("/api/science/library/jobs",(int? offset,ScienceStore science,ScientificLibraryJobs jobs)=>new{jobs=science.LibraryJobs(offset??0),warning=jobs.Warning});
-        app.MapPost("/api/science/library/preview",(ScientificLibrarySelection selection,ScientificLibraryJobs jobs,HttpContext c)=>jobs.Preview(selection,c.RequestAborted));
-        app.MapPost("/api/science/library/nasa/preview",(NasaDownloadRequest request,ScientificLibraryJobs jobs,HttpContext c)=>jobs.PreviewNasa(request,c.RequestAborted));
+        static async Task<LibraryDownloadJob> ProjectLibraryPreview(Task<LibraryDownloadJob> task,ScientificLibraryJobs jobs)=>jobs.Project(await task);
+        app.MapGet("/api/science/library/jobs",(int? offset,ScienceStore science,ScientificLibraryJobs jobs)=>new{jobs=science.LibraryJobs(offset??0).Select(jobs.Project),warning=jobs.Warning});
+        app.MapPost("/api/science/library/preview",(ScientificLibrarySelection selection,ScientificLibraryJobs jobs,HttpContext c)=>ProjectLibraryPreview(jobs.Preview(selection,c.RequestAborted),jobs));
+        app.MapPost("/api/science/library/nasa/preview",(NasaDownloadRequest request,ScientificLibraryJobs jobs,HttpContext c)=>ProjectLibraryPreview(jobs.PreviewNasa(request,c.RequestAborted),jobs));
         app.MapGet("/api/science/earthdata",(IEarthdataCredentials credentials)=>EarthdataConnection.Status(credentials));
         app.MapPost("/api/science/earthdata/disconnect",async(ScientificLibraryJobs jobs,IEarthdataCredentials credentials,HttpContext c)=>
         {
             if(!AccessControl.IsLoopback(c))return Results.StatusCode(403);
             await jobs.DisconnectEarthdata(c.RequestAborted);return Results.Ok(EarthdataConnection.Status(credentials));
         });
-        app.MapGet("/api/science/library/jobs/{id:guid}",(Guid id,ScienceStore science)=>science.LibraryJob(id));
+        app.MapGet("/api/science/library/jobs/{id:guid}",(Guid id,ScienceStore science,ScientificLibraryJobs jobs)=>jobs.Project(science.LibraryJob(id)));
         app.MapPost("/api/science/library/jobs/{id:guid}/approve",(Guid id,LibraryApprovalRequest request,ScientificLibraryJobs jobs,HttpContext c)=>jobs.Approve(id,request.SelectionHash,c.RequestAborted));
         app.MapPost("/api/science/library/jobs/{id:guid}/control",(Guid id,LibraryJobControl request,ScientificLibraryJobs jobs,HttpContext c)=>jobs.Control(id,request.Action,c.RequestAborted));
         app.MapPost("/api/science/library/regions",(ScientificRegionRequest request,ScientificCatalog catalog,HttpContext c)=>catalog.Region(request,c.RequestAborted));
@@ -73,13 +74,9 @@ public static class ResearchApi
         app.MapGet("/api/science/readiness",(AutomaticScientificData automatic)=>automatic.Snapshot());
         app.MapPost("/api/science/prepare",(ScientificPreparationRequest request,AutomaticScientificData automatic)=>automatic.Prepare(GeographicBounds.Around(new(request.Latitude,request.Longitude)),request.Kinds??[RemoteKind.Thermal,RemoteKind.Multispectral,RemoteKind.Terrain],retry:true,samplePoint:new(request.Latitude,request.Longitude)));
         app.MapPost("/api/science/prepare/cancel",(PreparationCancel request,AutomaticScientificData automatic)=>{automatic.Cancel(request.Key);return Results.Ok(new{cancelled=true});});
-        app.MapGet("/api/plans/{id:guid}/preparation/preview",(Guid id,MissionStore store,ScienceStore science,ScientificAccessSettings settings)=>
-        {
-            var plan=store.Plan(id)??throw new ArgumentException("Plan not found.");var areas=ScientificPlanPreparation.Cells(plan,.04).Take(4096).ToArray();var kinds=ScientificPlanPreparation.Kinds(plan);var sources=science.Availability();var p=settings.Get().Preferences;
-            var retained=kinds.ToDictionary(k=>k.ToString(),k=>areas.Take(128).Count(a=>ScientificSourceSelection.Select(sources.Select(s=>s with{CoversPoint=ScientificSourceSelection.CoversArea(s.Source,a)}),k,p) is not null));
-            return new{planName=plan.Name,areas,reviewedRegions=Math.Min(128,areas.Length),instruments=kinds,retained,allowance=p.PreflightTransferBytes,estimatedBytes=(long?)null,limitations="Native source grids and masks remain authoritative. Local footprint candidates are checked again before use. Transfer size is unknown before provider selection. Up to 4096 bounded regions; no whole-scene download.",plan};
-        });
-        app.MapPost("/api/plans/{id:guid}/prepare",(Guid id,MissionStore store,ScientificPlanData preparation)=>store.Plan(id) is {} plan?Results.Ok(preparation.Prepare(plan,true)):Results.NotFound());
+        app.MapGet("/api/plans/{id:guid}/preparation/preview",(Guid id,MissionStore store,ScienceStore science,ScientificAccessSettings settings)=>ScientificPreparationScope.Review(store.Plan(id)??throw new ArgumentException("Plan not found."),science,settings));
+        app.MapPost("/api/plans/{id:guid}/preparation/preview",(Guid id,PreflightScope scope,MissionStore store,ScienceStore science,ScientificAccessSettings settings)=>ScientificPreparationScope.Review(store.Plan(id)??throw new ArgumentException("Plan not found."),science,settings,scope));
+        app.MapPost("/api/plans/{id:guid}/prepare",(Guid id,PreflightScope scope,MissionStore store,ScientificPlanData preparation)=>store.Plan(id) is {} plan?Results.Ok(preparation.Prepare(plan,true,scope)):Results.NotFound());
         app.MapPost("/api/science/hyperspectral/nasa",async(NasaSelectionRequest request,ScientificCatalog catalog,ScientificImportSession session,HttpContext c)=>
         {
             if(!AccessControl.IsLoopback(c))return Results.StatusCode(403);
@@ -91,6 +88,14 @@ public static class ResearchApi
         app.MapPost("/api/science/hyperspectral/import",(ScientificImportSession session,HttpContext c)=>{if(!AccessControl.IsLoopback(c))return Results.StatusCode(403);session.Import();return Results.Accepted();});
         app.MapPost("/api/science/hyperspectral/cancel",(ScientificImportSession session,HttpContext c)=>{if(!AccessControl.IsLoopback(c))return Results.StatusCode(403);session.Cancel();return Results.Ok();});
         app.MapGet("/api/science/sources", (double? latitude, double? longitude, ScienceStore science) => science.Availability(latitude is { } lat && longitude is { } lon ? new Coordinates(lat, lon) : null));
+        app.MapPost("/api/science/sources/deletion/preview",(SourceDeletionRequest request,ScienceStore science,MissionStore missions,MissionCoordinator coordinator,AutomaticScientificData automatic,ScientificPlanData preparation,HttpContext context)=>
+            AccessControl.IsLoopback(context)?Results.Ok(science.PreviewSourceDeletion(request,missions,()=>coordinator.Snapshot().ActiveMission is not null?"End flight recording before deleting external sources.":automatic.QueueSummary().Downloading>0?"Scientific source transfer is active; pause or finish it before deletion.":null,context.RequestAborted,preparation.SourceDeletionDependencies)):Results.StatusCode(403));
+        app.MapPost("/api/science/sources/deletion/execute",(SourceDeletionExecution request,ScienceStore science,MissionStore missions,MissionCoordinator coordinator,AutomaticScientificData automatic,ScientificPlanData preparation,HttpContext context)=>
+        {
+            if(!AccessControl.IsLoopback(context))return Results.StatusCode(403);
+            var result=science.DeleteExternalSources(request,missions,coordinator.EnterMaintenance,()=>automatic.QueueSummary().Downloading>0?"Scientific source transfer is active; pause or finish it before deletion.":null,context.RequestAborted,preparation.SourceDeletionDependencies);
+            automatic.RefreshLocalReadiness();preparation.SourcesRemoved(result.RemovedSourceIds??[]);science.Management?.RefreshScience();return Results.Ok(result);
+        });
         app.MapGet("/api/science/sources/{id:guid}/coverage",(Guid id,ScienceStore science)=>
         {
             var source=science.Sources().FirstOrDefault(s=>s.Id==id)??throw new ArgumentException("Source not found.");var g=source.Grids.Values.First();
@@ -205,7 +210,7 @@ public static class ResearchApi
         app.MapPost("/api/mission-selection", (MissionSelection request, MissionCoordinator missions) => new { planId=missions.SelectPlan(request.PlanId) });
         app.MapGet("/api/plans", (int? limit, int? offset, MissionStore missions) => missions.Plans(limit ?? 50, offset ?? 0));
         app.MapGet("/api/plans/{id:guid}", (Guid id, MissionStore missions) => missions.Plan(id) is { } plan ? Results.Ok(plan) : Results.NotFound());
-        app.MapPost("/api/plans", (MissionPlan plan, MissionStore missions,ScientificPlanData preparation) => {var saved=missions.SavePlan(plan);return Results.Ok(saved);});
+        app.MapPost("/api/plans", (MissionPlan plan, MissionStore missions,ScientificPlanData preparation) => {var saved=missions.SavePlan(plan);preparation.PlanChanged(saved);return Results.Ok(saved);});
         app.MapPost("/api/plans/{id:guid}/delete", (Guid id, MissionStore missions) => missions.DeletePlan(id) ? Results.Ok(new { deleted = true }) : Results.NotFound());
         app.MapGet("/api/missions/{id:guid}/research", (Guid id, MissionStore missions) => missions.Detail(id) is null ? Results.NotFound() : Results.Ok(missions.Research(id)));
         app.MapGet("/api/missions/{id:guid}/track", (Guid id, int? limit, long? after, MissionStore missions) =>

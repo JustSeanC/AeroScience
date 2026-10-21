@@ -9,11 +9,12 @@ public sealed partial class ScientificLibraryJobs:IDisposable
     private readonly ScienceStore science;private readonly ScientificCatalog catalog;private readonly AutomaticScientificData automatic;
     private readonly ScientificAccessSettings settings;private readonly CancellationTokenSource stopping=new();private readonly SemaphoreSlim commands=new(1);private readonly Task worker;
     public string? Warning {get;private set;}
-    private string? initialized;
+    private string? initialized;private readonly object recoveryGate=new();
+    private void EnsureRecovered(){lock(recoveryGate){if(science.AvailabilityError() is {} unavailable){initialized=null;throw new IOException(unavailable);}var identity=science.DirectoryPath+":"+science.LibraryId;if(initialized==identity)return;science.RecoverLibraryJobs();initialized=identity;}}
     private readonly IEarthdataCredentials earthdata;
     private readonly System.Collections.Concurrent.ConcurrentDictionary<Guid,byte> activeNasa=[];
     public ScientificLibraryJobs(ScienceStore science,ScientificCatalog catalog,AutomaticScientificData automatic,ScientificAccessSettings settings,IEarthdataCredentials? earthdata=null)
-    {this.science=science;this.catalog=catalog;this.automatic=automatic;this.settings=settings;this.earthdata=earthdata??new UnavailableEarthdataCredentials();worker=Task.Run(Run);}
+    {this.science=science;this.catalog=catalog;this.automatic=automatic;this.settings=settings;this.earthdata=earthdata??new UnavailableEarthdataCredentials();try{EnsureRecovered();}catch(Exception error)when(error is IOException or UnauthorizedAccessException or Microsoft.Data.Sqlite.SqliteException){Warning=error.Message;}worker=Task.Run(Run);}
     private string SettingsHash(bool nasa=false)=>nasa?ScientificCatalog.Hash(new{general=SettingsHash(),settings.Get().Preferences.NasaOriginalMaximumBytes}):ScientificCatalog.Hash(new{settings.Get().Preferences.OnlineEnabled,settings.Get().Preferences.PrivacyAccepted,settings.Get().Preferences.MaximumDownloadBytes,settings.Get().Preferences.PreflightTransferBytes,settings.Get().Preferences.UnmeteredOnly,settings.Get().Preferences.BackgroundRetrieval});
     public static GeographicBounds[] Expand(ScientificLibrarySelection selection)
     {
@@ -58,6 +59,7 @@ public sealed partial class ScientificLibraryJobs:IDisposable
     }
     public async Task<LibraryDownloadJob> Preview(ScientificLibrarySelection selection,CancellationToken token=default)
     {
+        EnsureRecovered();using var sourceRead=science.BeginAnalysis();
         var cells=Expand(selection);var p=settings.Get().Preferences;
         if(cells.Length==0)throw new ArgumentException("No supported cells intersect this polygon.");
         if(selection.Scenes.Select(s=>s.Provider+"/"+s.Scene).Distinct().Count()!=selection.Scenes.Length)throw new ArgumentException("Select each exact scene only once.");
@@ -102,7 +104,7 @@ public sealed partial class ScientificLibraryJobs:IDisposable
     {
         await commands.WaitAsync(token);try
         {
-            var job=science.LibraryJob(id);
+            EnsureRecovered();using var sourceRead=science.BeginAnalysis();var job=science.LibraryJob(id);
             if(job.State!="Awaiting Approval"||job.Preview.SelectionHash!=hash||job.Preview.ExpiresUtc<DateTimeOffset.UtcNow||job.Preview.SettingsHash!=SettingsHash(job.Preview.Nasa is not null)||job.Preview.UncoveredCells>0)throw new InvalidOperationException("Preview expired, changed, incomplete or already approved. Resolve uncovered cells and create a fresh preview.");
             return science.SetLibraryState(id,"Queued",approve:true);
         }finally{commands.Release();}
@@ -129,8 +131,8 @@ public sealed partial class ScientificLibraryJobs:IDisposable
         {
             try
             {
-                if(science.AvailabilityError() is {} unavailable){Warning=unavailable;initialized=null;await Task.Delay(500,stopping.Token);continue;}
-                if(initialized!=science.DirectoryPath){science.RecoverLibraryJobs();initialized=science.DirectoryPath;}Warning=null;
+                if(science.AvailabilityError() is {} unavailable){Warning=unavailable;lock(recoveryGate)initialized=null;await Task.Delay(500,stopping.Token);continue;}
+                EnsureRecovered();Warning=null;
                 var job=science.NextQueuedLibraryJob();
                 if(job is not null&&automatic.LibraryAllowed)
                 {
@@ -146,10 +148,27 @@ public sealed partial class ScientificLibraryJobs:IDisposable
             try{await Task.Delay(250,stopping.Token);}catch(OperationCanceledException){break;}
         }
     }
+    private readonly System.Collections.Concurrent.ConcurrentDictionary<Guid,ScientificTransferProgress> progress=[];
+    private readonly System.Collections.Concurrent.ConcurrentDictionary<string,(double Rate,DateTimeOffset At)> recentRates=[];
+    public LibraryDownloadJob Project(LibraryDownloadJob job)
+    {
+        if(progress.TryGetValue(job.Id,out var measured)){
+            var result=measured.Snapshot(job.State);
+            if(job.State=="Completed"&&measured.LastReliableRate is {} rate)recentRates[job.Preview.Products[0].Provider]=(rate,measured.LastMeasuredAt);
+            return job with{Progress=result};
+        }
+        if(job.State=="Awaiting Approval"&&job.Preview.EstimatedTransferBytes is {} known){
+            var history=recentRates.GetValueOrDefault(job.Preview.Products[0].Provider);var recent=history.Rate>0&&DateTimeOffset.UtcNow-history.At<TimeSpan.FromMinutes(30);
+            return job with{Progress=new("Preview",known,0,0,recent?history.Rate:null,recent?known/history.Rate*.75:null,recent?known/history.Rate*1.5:null,DateTimeOffset.UtcNow,recent?"Approximate download duration from a comparable same-provider transfer measured in this process within 30 minutes. Excludes verification/import and future queue constraints.":"Time estimate available after download starts. No assumed internet speed.",TotalFiles:job.Preview.Nasa?.Files.Length??0)};
+        }
+        return job;
+    }
     private async Task Execute(LibraryDownloadJob job,LibraryWorkUnit work,LibraryDownloadItem previous,CancellationToken token)
     {
         if(job.Preview.Nasa is not null)activeNasa.TryAdd(job.Id,0);
         ScientificDownloadBudget? budget=null;ScientificTransferLedger.Lease? transfer=null;var initial=previous.DownloadedBytes;
+        if(progress.Count>128)foreach(var id in progress.Keys.Where(id=>id!=job.Id).Take(64))progress.TryRemove(id,out _);
+        var measured=new ScientificTransferProgress();progress[job.Id]=measured;measured.Begin(job.Preview.EstimatedTransferBytes,job.Preview.EstimatedTransferBytes==0?0:job.Preview.Nasa?.Files.Length??0);
         try
         {
             using var operation=science.BeginAnalysis();
@@ -164,18 +183,18 @@ public sealed partial class ScientificLibraryJobs:IDisposable
                 var p=settings.Get().Preferences;
                 if(!p.OnlineEnabled||!p.PrivacyAccepted||p.UnmeteredOnly&&settings.IsUnmetered()!=true)throw new InvalidOperationException("Scientific retrieval is offline or waiting for an unmetered connection. Resume after resolving it.");
                 transfer=automatic.AcquireLibraryTransfer();
-                budget=new(job.Preview.PerItemTransferLimit,bytes=>{transfer.Charge(bytes);science.LibraryBudget(job.Id,work.Index,initial+bytes,initial+bytes);},total=>{transfer.EnsureTotal(total);science.LibraryBudget(job.Id,work.Index,initial+(budget?.Bytes??0),initial+total);});
+                budget=new(job.Preview.PerItemTransferLimit,bytes=>{measured.Network(bytes);transfer.Charge(bytes);science.LibraryBudget(job.Id,work.Index,initial+bytes,initial+bytes);},total=>{transfer.EnsureTotal(total);science.LibraryBudget(job.Id,work.Index,initial+(budget?.Bytes??0),initial+total);});
                 if(job.Preview.Nasa is {} nasa)source=await AcquireNasa(job,nasa,budget,token);
                 else
                 {
                     var exact=await catalog.Resolve(work.Scene,work.Area,budget,token);
-                    science.SetLibraryState(job.Id,"Downloading",runningOnly:true);science.SetLibraryItem(job.Id,work.Index,"Downloading");
-                    source=await automatic.PrepareSource(exact.Discovery,budget,token,stage=>science.SetLibraryItem(job.Id,work.Index,stage is "Validating" or "Saving"?"Verifying":"Downloading"),"Downloads/Library/"+job.Id.ToString("N")+"/"+work.Index);
+                    science.SetLibraryState(job.Id,"Downloading",runningOnly:true);science.SetLibraryItem(job.Id,work.Index,"Downloading");measured.Stage("Downloading");
+                    source=await automatic.PrepareSource(exact.Discovery,budget,token,stage=>{measured.Stage(stage=="Saving"?"Importing":stage=="Validating"?"Verifying":"Downloading");science.SetLibraryItem(job.Id,work.Index,stage is "Validating" or "Saving"?"Verifying":"Downloading");},"Downloads/Library/"+job.Id.ToString("N")+"/"+work.Index);
                 }
                 if(source is null)throw new IOException("Provider export contained no supported numeric coverage. No source was published as usable.");
             }
             token.ThrowIfCancellationRequested();science.SetLibraryItem(job.Id,work.Index,"Completed",source:source.Id,verifiedBytes:source.Files.Sum(f=>f.Bytes));
-            current=science.LibraryJob(job.Id);science.SetLibraryState(job.Id,current.Items.All(i=>i.State=="Completed")?"Completed":"Queued",runningOnly:true);
+            current=science.LibraryJob(job.Id);science.SetLibraryState(job.Id,current.Items.All(i=>i.State=="Completed")?"Completed":"Queued",runningOnly:true);if(current.Items.All(i=>i.State=="Completed")&&measured.LastReliableRate is {} rate)recentRates[job.Preview.Products[0].Provider]=(rate,measured.LastMeasuredAt);
         }
         catch(ScientificAllowanceWaitException error)
         {science.SetLibraryItem(job.Id,work.Index,"Interrupted",error.Message);science.SetLibraryState(job.Id,"Interrupted",error.Message,runningOnly:true);}

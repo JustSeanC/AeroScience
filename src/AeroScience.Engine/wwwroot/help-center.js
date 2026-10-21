@@ -1,6 +1,6 @@
 import {select,link,disclosure} from './workstation-ui.js';
 const node=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
-const guides=[['v0.4.2-pilot-guide.md','First mission & results'],['v0.4.2-science-visualization.md','Reading scientific maps'],['v0.4.1-pilot-guide.md','Getting started'],['mission-planner.md','Mission planning'],['remote-sensing/index.md','Instruments & scientific data'],['v0.4.1-science-workspace.md','Science Workspace'],['v0.4.1-scientific-comparison.md','Comparisons'],['v0.4.1-scientific-downlink.md','Preparation & downlink'],['v0.4.1-windows-testing.md','Troubleshooting & testing']];
+const guides=[['v0.4.2-pilot-guide.md','First mission & results'],['v0.4.2-science-visualization.md','Reading scientific maps'],['v0.4.1-pilot-guide.md','Getting started'],['mission-planner.md','Mission planning'],['remote-sensing/index.md','Instruments & scientific data'],['v0.4.1-science-workspace.md','Science Results & Analysis'],['v0.4.1-scientific-comparison.md','Comparisons'],['v0.4.1-scientific-downlink.md','Preparation & downlink'],['v0.4.1-windows-testing.md','Troubleshooting & testing']];
 guides.push(['scientific-library.md','Browse & download scientific data']);
 guides.push(['remote-sensing/hyperspectral.md','NASA hyperspectral assistant']);
 guides.push(['README.md','Documentation index']);
@@ -37,10 +37,10 @@ let generation=0,controller;
 export function disposeHelpCenter(){generation++;controller?.abort();}
 const tasks=[
  ['How do I find and import NASA AVIRIS data?','remote-sensing/hyperspectral.md','nasa aviris classic ng emit earthdata authorization hyperspectral header binary checksum official browser guided import'],
- ['How do I download and reuse scientific data without a flight?','scientific-library.md','library catalog scenes source date bands polygon region download approval queue offline reuse'],
+ ['How do I use External Data Manager without a flight?','scientific-library.md','library catalog scenes source date bands polygon region download approval queue offline reuse'],
  ['How do I create my first mission?','v0.4.2-pilot-guide.md','plan select start first flight'],
  ['How do I configure scientific instruments?','remote-sensing/index.md','instruments payload source thermal terrain multispectral hyperspectral'],
- ['Why is my scientific data still downloading?','v0.4.2-pilot-guide.md','preparation download partial offline allowance budget'],
+ ['Why is my scientific data still downloading?','scientific-library.md','preparation download partial offline allowance budget'],
  ['What does this measurement represent?','v0.4.2-science-visualization.md','units temperature elevation NDVI source date quality'],
  ['How do I view my results?','v0.4.2-pilot-guide.md','review science map analysis history'],
  ['How do I compare two missions?','v0.4.2-science-visualization.md','comparison shared scales difference overlap compatible'],

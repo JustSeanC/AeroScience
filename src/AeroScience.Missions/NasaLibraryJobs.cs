@@ -17,6 +17,7 @@ public sealed partial class ScientificLibraryJobs
     }
     public async Task<LibraryDownloadJob> PreviewNasa(NasaDownloadRequest request,CancellationToken token=default)
     {
+        EnsureRecovered();using var sourceRead=science.BeginAnalysis();
         if(request.Selection is null||request.Selection.Provider is not("nasa-classic" or "nasa-ng"))throw new ArgumentException("Choose an exact AVIRIS-Classic or AVIRIS-NG reflectance scene. EMIT is discovery-only.");
         var p=settings.Get().Preferences;var limit=request.MaximumTransferBytes;
         if(limit<1048576||limit>p.NasaOriginalMaximumBytes||limit>(p.PreflightTransferBytes??21474836480))throw new ArgumentException("The NASA original-job budget must fit the configured NASA scene cap and remaining preflight policy (1 MiB–20 GiB). Review Scientific access settings; automatic subset caps stay unchanged.");
@@ -85,22 +86,22 @@ public sealed partial class ScientificLibraryJobs
         _=OwnedLedger();
         var merged=bundle.Selection with{Nasa=bundle.Selection.Nasa! with{Assets=bundle.Files.Select(f=>new NasaAsset(f.Name,f.Url,f.Role)).ToArray()}};
         var header=Path.Combine(folder,bundle.Files.Single(f=>f.Role=="ENVI header").Name);
-        science.SetLibraryState(job.Id,"Downloading",runningOnly:true);science.SetLibraryItem(job.Id,0,"Downloading");
+        science.SetLibraryState(job.Id,"Downloading",runningOnly:true);science.SetLibraryItem(job.Id,0,"Downloading");progress[job.Id].Stage("Downloading");
         using(var reservation=science.Management?.ReserveScience(bundle.Files.Sum(f=>f.Bytes)))
             foreach(var file in bundle.Files.OrderBy(f=>f.Role=="ENVI header"?0:f.Role=="Provider SHA-256"?1:2))
             {
                 // Reject unsupported spectral/header metadata before requesting a large cube.
                 if(file.Role=="Original numeric binary")_=NasaGuidedImport.Inspect(header,merged,token:token,direct:true);
-                await automatic.Http.DownloadNasaFile(file,folder,earthdata,budget,token);
+                await automatic.Http.DownloadNasaFile(file,folder,earthdata,budget,token,bytes=>progress[job.Id].File(Array.IndexOf(bundle.Files,file),bytes,file.Bytes));
             }
-        science.SetLibraryState(job.Id,"Verifying",runningOnly:true);science.SetLibraryItem(job.Id,0,"Verifying");
+        progress[job.Id].Stage("Verifying");science.SetLibraryState(job.Id,"Verifying",runningOnly:true);science.SetLibraryItem(job.Id,0,"Verifying");
         var inspected=NasaGuidedImport.Inspect(header,merged,token:token,direct:true);
         if(inspected.Manifest is null)throw new IOException("NASA original metadata is incomplete or incompatible. Browser/manual import remains available; no metadata was guessed.");
         var provenance=new AutomaticSourceProvenance("nasa-earthdata-original-envi","NASA CMR / ORNL DAAC",bundle.Selection.Scene,bundle.Files.Select(f=>f.Url).ToArray(),bundle.Selection.Bounds,DateTimeOffset.UtcNow,
             "Original ENVI files streamed, identity-checked and verified by the existing NASA/ENVI importer; no numerical conversion.",bundle.Selection.Quality,bundle.Selection.Resolution,budget.Bytes,
             ["Historical source; no flight observation is created.","Provider/catalog footprints do not guarantee QA-valid pixels.","Retained hashes establish local integrity; only an authoritative advertised checksum verifies provider file identity."],JsonSerializer.Serialize(bundle,WireJson.Options),CatalogRevision:bundle.Revision);
         var manifest=inspected.Manifest with{Acquisition=provenance};
-        var imported=await science.ImportSourceAsync(manifest,folder,token,reuseExisting:true,verifyStaged:stage=>
+        progress[job.Id].Stage("Importing");var imported=await science.ImportSourceAsync(manifest,folder,token,reuseExisting:true,verifyStaged:stage=>
         {
             var copy=NasaGuidedImport.Inspect(Path.Combine(stage,Path.GetFileName(header)),merged,token:token,direct:true);
             if(ScientificCatalog.Hash(copy.Manifest)!=ScientificCatalog.Hash(inspected.Manifest))throw new IOException("NASA metadata changed during staged verification; no source was published.");

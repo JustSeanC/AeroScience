@@ -55,7 +55,7 @@ public sealed partial class ScienceStore
     }
     public IDisposable BeginAnalysis()
     {
-        lock(gate){Initialize();activeAnalyses++;return new AnalysisLease(()=>{lock(gate)activeAnalyses--;});}
+        lock(gate){if(sourceMaintenance)throw new IOException("External source maintenance is in progress. Retry after it finishes; no observation was fabricated.");Initialize();activeAnalyses++;return new AnalysisLease(()=>{lock(gate)activeAnalyses--;});}
     }
     private sealed class AnalysisLease(Action release):IDisposable
     {private int done;public void Dispose(){if(Interlocked.Exchange(ref done,1)==0)release();}}

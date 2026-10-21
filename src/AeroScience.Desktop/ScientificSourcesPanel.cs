@@ -12,7 +12,7 @@ public sealed class ScientificSourcesPanel:FlowLayoutPanel
         (RemoteKind.Terrain,"Terrain & Elevation","USGS 3DEP / Copernicus GLO-30","Numeric DEM/DSM elevation, not aircraft laser returns. Local: single-band elevation GeoTIFF."),
         (RemoteKind.Thermal,"Thermal Imaging","Landsat 8/9 Collection 2 Level-2","Historical satellite surface temperature and original QA masks. Local: ST_B10 + QA_PIXEL (+ QA_RADSAT), with original metadata."),
         (RemoteKind.Multispectral,"Multispectral Imaging","Copernicus Sentinel-2 Level-2A","Historical reflectance, RGB and NDVI. Local: B02/B03/B04/B08 and SCL GeoTIFFs with original scaling metadata."),
-        (RemoteKind.Hyperspectral,"Hyperspectral Imaging","NASA AVIRIS / original ENVI datasets","Use Library Browse & Download → Hyperspectral for approved Earthdata Download & Import. Original ENVI manual/browser import remains available. EMIT is discovery only.")
+        (RemoteKind.Hyperspectral,"Hyperspectral Imaging","NASA AVIRIS / original ENVI datasets","Use External Data Manager → Find & Download Data → Hyperspectral Research for approved Earthdata Download & Import. Original ENVI manual/browser import remains available. EMIT is discovery only.")
     ];
     public ScientificSourcesPanel(MainForm app,IWin32Window owner)
     {
@@ -51,7 +51,9 @@ public sealed class ScientificSourcesPanel:FlowLayoutPanel
                 AddButton(actions,"View Dataset Details",()=>
                 {
                     using var detail=new BrandedForm{Text=source.Manifest.Name,Width=680,Height=520,AutoScaleMode=AutoScaleMode.Dpi,StartPosition=FormStartPosition.CenterParent};
-                    detail.Controls.Add(new TextBox{ReadOnly=true,Multiline=true,ScrollBars=ScrollBars.Both,Dock=DockStyle.Fill,Text=System.Text.Json.JsonSerializer.Serialize(source,WireJson.Options),WordWrap=true});detail.ShowDialog(owner);
+                    var detailContent=new FlowLayoutPanel{Dock=DockStyle.Fill,AutoScroll=true,FlowDirection=FlowDirection.TopDown,WrapContents=false,Padding=new(16)};detail.Controls.Add(detailContent);
+                    AddLabel(detailContent,$"{source.Manifest.Name}\nProvider: {source.Manifest.Provider}\nScene: {source.Manifest.SceneId}\nObserved: {source.Manifest.ObservationUtc?.ToString("u")??"Unknown"}\nKind: {source.Manifest.Kind} · Bands: {source.Manifest.Bands.Length}\nVertical reference: {source.Manifest.VerticalDatum}\nTerms: {source.Manifest.License}\nSource ID: {source.Id}\nHistorical external source; not a live aircraft observation.");
+                    AddButton(detailContent,"Advanced Diagnostics — exact source metadata",()=>{using var diagnostic=new BrandedForm{Text="Source diagnostics — review before sharing",Width=680,Height=520,StartPosition=FormStartPosition.CenterParent};diagnostic.Controls.Add(new TextBox{ReadOnly=true,Multiline=true,ScrollBars=ScrollBars.Both,Dock=DockStyle.Fill,Text=System.Text.Json.JsonSerializer.Serialize(source,WireJson.Options),WordWrap=true});diagnostic.ShowDialog(detail);});detail.ShowDialog(owner);
                 });
             }
             if(collection.Count()>20)AddButton(regional,"View All Regions and Collection Coverage",()=>app.OpenScientificSources(kind.ToString().ToLowerInvariant()));

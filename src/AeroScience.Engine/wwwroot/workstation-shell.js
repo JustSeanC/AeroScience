@@ -5,7 +5,7 @@ export function initializeWorkstationShell(){
   main.id='main-content';main.tabIndex=-1;sidebar.id='app-navigation';sidebar.setAttribute('aria-label','Application navigation');
   const skip=node('a','Skip to main content','skip-link');skip.href='#main-content';skip.onclick=event=>{event.preventDefault();main.focus();};document.body.prepend(skip);
   const toggle=node('button','☰ Menu','navigation-toggle secondary');toggle.type='button';toggle.setAttribute('aria-controls',sidebar.id);toggle.setAttribute('aria-expanded','false');header.prepend(toggle);
-  const close=node('button','Close navigation','navigation-close secondary');close.type='button';sidebar.prepend(close);
+  const close=node('button','×','navigation-close popup-close secondary');close.type='button';close.setAttribute('aria-label','Close navigation');sidebar.prepend(close);
   const backdrop=node('div',undefined,'navigation-backdrop');backdrop.hidden=true;document.body.append(backdrop);
   const compact=matchMedia('(max-width:1100px)');let open=false;
   function setOpen(value,restore=true){

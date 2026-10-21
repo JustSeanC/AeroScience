@@ -1,3 +1,4 @@
+import {dialogHeader,requestDialogClose,markDialogSaved} from './dialog-ui.js';
 const layers = [
   ["offline", "Offline Geographic Map"],
   ["streets", "OpenStreetMap / Streets"],
@@ -42,7 +43,7 @@ async function firstRunPrivacy(config) {
     };
     privacyDialog.append(button);
   }
-  privacyDialog.addEventListener("cancel", (e) => e.preventDefault());
+  dialogHeader(privacyDialog,{title:"Choose your map privacy",onDismiss:()=>{privacyDialog.close();privacyDialog.remove();privacyDialog=null;}});
   document.body.append(privacyDialog);
   privacyDialog.showModal();
 }

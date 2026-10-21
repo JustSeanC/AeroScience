@@ -25,8 +25,11 @@ public sealed record LibraryDownloadPreview(int Version,Guid Id,ScientificLibrar
     long ReusableBytes,long? EstimatedTransferBytes,long? EstimatedRetainedBytes,string[] Warnings,int UncoveredCells=0,long? AvailableDriveBytes=null,long? ScientificStorageLimitBytes=null,long? ScientificStorageUsedBytes=null,long? PreparationBudgetRemainingBytes=null,NasaDownloadBundle? Nasa=null);
 public sealed record LibraryDownloadItem(int Index,string State,long DownloadedBytes,long UncertainBytes,long ReservedBytes,
     int Attempts,Guid? SourceId,long VerifiedBytes,string? Error,DateTimeOffset UpdatedUtc);
+public sealed record LibraryTransferProgress(string Stage,long? TotalOriginalBytes,long? PreparedOriginalBytes,long MeasuredNetworkBytes,
+    double? BytesPerSecond,double? RemainingSecondsLow,double? RemainingSecondsHigh,DateTimeOffset UpdatedUtc,string Basis,
+    double? CurrentBytesPerSecond=null,int CompletedFiles=0,int TotalFiles=0,int? CurrentFile=null);
 public sealed record LibraryDownloadJob(Guid Id,string State,LibraryDownloadPreview Preview,Guid? ApprovalId,
-    DateTimeOffset UpdatedUtc,LibraryDownloadItem[] Items,string? Error=null)
+    DateTimeOffset UpdatedUtc,LibraryDownloadItem[] Items,string? Error=null,LibraryTransferProgress? Progress=null)
 {
     public long DownloadedBytes=>Items.Sum(i=>i.DownloadedBytes);
     public long UncertainBytes=>Items.Sum(i=>i.UncertainBytes);

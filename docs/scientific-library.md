@@ -1,6 +1,6 @@
-# Geographic Scientific Data Library
+# External Data Manager — historical scientific datasets
 
-Open **Scientific Data Library → Browse & Download Data**. No flight is required.
+Open **External Data Manager → Find & Download Data**. No flight is required.
 Downloaded datasets are historical Earth observations or elevation sources, not measurements
 made by your simulated aircraft. Downloading data does not add flight science yield or grades.
 
@@ -9,24 +9,102 @@ made by your simulated aircraft. Downloading data does not add flight science yi
 1. Review scientific online access in **Settings → Scientific Data Sources**. This separate
    permission sends geographic queries and your IP address to the selected providers.
    Basemap permission alone does not enable scientific queries or downloads.
-2. Choose a provider/product. For satellites, choose a bounded date range and scene-cloud
-   filter, search, then select the exact scene(s). Native numeric bands and required quality
-   masks are shown together; incompatible partial recipes are not offered as usable science.
-3. Select an area using a small cell, multiple cells, a map rectangle, viewport, polygon,
-   numeric bounding box or latitude/longitude polygon coordinates. Drawing is optional.
-   US state/county boundaries can be retrieved using official FIPS codes. These are Census
-   ACS2024 generalized 1:20M cartographic boundaries, not parcel/legal/navigation boundaries.
-4. Choose **Preview selected download**. Review original scene dates, bands, license,
-   geographic windows, verified local reuse, transfer cap and temporary disk allowance.
-   Unknown subset/network/retained sizes remain **Unknown**. An allowance is a protective
-   bound, not a prediction of download size or duration.
-5. Choose **Approve & queue download**. Nothing downloads merely because you opened this
-   page, searched, selected a scene or created a preview. Material scope/limit/source changes
-   require a new preview and approval. Uncovered cells must be resolved before approval.
-6. The **Download Manager** shows persisted work, actual bytes, verified items and errors.
-   Pause/resume/cancel/retry operate on the companion, not just the browser. Reopening a
-   completed job never restarts it. Completed numeric sources appear in retained collections
-   and are eligible for compatible future missions, subject to normal source-selection rules.
+2. Choose **What scientific data do you need?**: terrain/elevation, thermal, surface
+   elevation, multispectral, hyperspectral or EMIT discovery. The page selects a compatible
+   provider and explains what the measurements represent. Terrain is a numeric elevation
+   grid; it is not a downloadable aircraft LiDAR point cloud. Provider details remain advanced.
+3. Find a place/airport, select a small cell, draw a rectangle, use the visible map area, or
+   choose a **named state/county** from authoritative Census lists. Multiple cells, polygons,
+   numeric bounds and FIPS identifiers remain under Advanced area selection. Census ACS2024
+   1:20M generalized boundaries are cartographic, not legal/parcel/navigation boundaries.
+4. Choose **Find Available Data**. Satellite results request provider-side latest/oldest/cloud
+   ordering with a stable ID tie-break, and retain original observation dates. A recommendation
+   is made only when the returned provider order can be confirmed. It is not a claim of the
+   newest valid pixels worldwide. Composites have no invented observation date. An empty result
+   can be followed by an explicit **Search earlier years**; outages are shown separately.
+   NASA defaults span its historical archive. Manually edited dates are preserved.
+5. Inspect the ordinary science/date/quality summary, select the exact dataset(s), and choose
+   **Review & Download**. Exact native numeric bands, scale/offset, CRS, masks, IDs and revisions
+   remain available in Technical details. No alternate scene is silently substituted.
+6. Review reuse, scope, actual known file sizes, Unknown subset sizes, physical drive space,
+   application storage quotas and the independent transfer cap. **Download & Import** explicitly
+   approves that work. Searching, opening the page or creating a preview does not approve it.
+   Changed scope, source revisions or budgets require a fresh preview and approval.
+7. The Download Manager shows durable state, measured network bytes, original file progress
+   where its denominator is known, verification/import and final Dataset ready. Pause/resume,
+   cancel and retry operate on real backend jobs. Reopening a completed job never restarts it.
+   Verified retained sources are reusable by compatible missions; they do not add flight yield.
+
+## Preparation scope and in-flight retrieval
+
+Mission Planner's **Prepare scientific data** opens a review with three choices:
+
+- **Entire Mission**: the complete bounded plan inventory.
+- **First Half of Mission**: the first 50% by geodesic length of an unambiguously ordered
+  collection route. Explicit waypoint collection actions or route portions within declared
+  survey polygons establish this order; transit is excluded where known. Polygon membership
+  is bounded at 350 m along the route. Source preparation cells extend beyond the route itself.
+  Ambiguous/repeated/area-trigger sequences cannot invent an ordering; use Entire or Choose Areas.
+- **Choose Research Areas**: named planned survey areas and individual ordered route segments,
+  with a map preview and accessible checkboxes. Unsupported/empty selections are rejected.
+
+The approved scope is stored against the saved plan revision. Scope changes preserve verified
+sources and reconcile pending work. Expanding to Entire reuses retained exact content. The full
+plan's readiness denominator and frozen grading obligations do not shrink with preflight scope.
+The review reports selected units separately, and local envelopes are reuse candidates until
+verified; provider/QA availability can still prevent usable observations.
+
+During an active flight the matching plan can prepare upcoming missing regions beyond its
+preflight scope, subject to explicit scientific consent, background/network policy, in-flight
+allowances, storage and flight priority. Current aircraft/predicted arrivals and plan-route
+order reprioritize the existing deduplicated queue. In-flight preparation uses at most one
+shared transfer; science-processing backlog, stale telemetry or host-memory pressure can
+temporarily hold it and resume it during the flight. Separate user-directed Library downloads
+yield to active flight work. Paused/cancelled plan preparation does not silently restart.
+After End Flight, unfinished plan work waits for **Continue preparation for a future flight**.
+Late source arrival never backfills a missed live scientific observation.
+
+## Progress and time estimates
+
+Download Activity displays **each plan's complete instrument × region inventory**, including in
+All Activity. Its recent-job list and global queued/active counts describe a bounded processing
+window, not the number of mission regions remaining. Separate plans are never averaged into
+one readiness percentage. For example, a 204-region/two-instrument plan retains 204 logical
+regions on each instrument card even when only 24 jobs are currently queued/active.
+
+Known original lengths allow a transfer progress bar. COG subsets whose required native blocks
+are not yet known show Unknown instead of using the approval cap as a denominator. Network
+bytes (including retries), resumed original bytes, verified source reuse and Library publication
+are separate counts. A file reaching 100% is not a claim of scientific QA validity or import.
+
+After sustained measured transfer, an EWMA-smoothed recent speed supports an approximate
+remaining network-time range. The estimate disappears when stale, paused, queued or processing.
+Comparable same-provider transfers within this process can inform a subsequent preview;
+otherwise **Time estimate available after download starts**. Verification/import time stays
+Unknown. No speed-test traffic, assumed connection speed or reliable whole-queue finish time
+is promised. Timing history is bounded and contains no credentials or signed URLs.
+
+## Manage downloaded data safely
+
+Collections group retained source regions without merging scientific originals. Inspect source
+observation dates, units, provider, managed bytes, coverage and source-selection state.
+**Exclude from Active Science** retains files and is reversible; deletion actually removes
+reviewed managed copies from the current Library.
+
+Choose one source, selected sources/collections or **Delete All Downloaded External Data**.
+Review exact identities, managed files/bytes, blockers and preserved data, type the requested
+confirmation, and confirm permanent removal without a new backup. All requires
+`DELETE ALL EXTERNAL DATA`. Referenced sources, active operations, unverified ownership,
+changed originals, unreadable dependencies and unsafe paths block execution. A source needed by runnable plan preparation is blocked; pause/cancel that preparation
+first. Resuming/reviewing preparation later can acquire missing approved data again. A blocked batch
+is never silently reduced; review an explicitly smaller eligible set.
+
+Deletion does not cascade into missions, scientific observations/products/grades/reports,
+calibration, settings, previous backups or user originals outside the Library. A durable
+file journal and atomic database receipt recover precommit interruptions by rollback and
+postcommit interruptions by exact owned-file cleanup. Changed/locked files remain pending
+for review; Retry owned cleanup or restart after releasing the file lock. Logical managed bytes and measured physical free-space change are reported
+separately; neither deletion nor successful downloading certifies valid source pixels.
 
 ## Products and scientific meaning
 
@@ -53,7 +131,7 @@ geometries must be split rather than interpreted as worldwide downloads.
 
 Existing 25 GB mission and 50 GB Scientific Library defaults, disk-space reservations and
 pinned/source protections remain in effect. Library jobs use the same bounded preparation
-queue as flight science and defer to active flights. Unmetered/background/consent settings
+queue as flight science and yield to active flight acquisition. Unmetered/background/consent settings
 are honored. Provider 429/503 responses or outages may require an explicit retry; limits are
 never silently enlarged. Actual received bytes remain charged across retries. A process kill
 can leave an unresolved read reservation, shown separately as an interrupted-read allowance.
@@ -79,7 +157,7 @@ external Library drive produces an error; an empty replacement database is never
 
 ## NASA hyperspectral assistant
 
-Choose **Data family → Hyperspectral** in the same Browse & Download page. Search actual
+Choose **Hyperspectral Research** under What scientific data do you need? on Find & Download Data. Search actual
 NASA CMR flightlines by product, original date, bounds and optional scene identifier.
 Footprints are catalog outlines, not guaranteed valid pixels. For compatible Classic/NG
 original ENVI reflectance, choose **Connect Earthdata on this PC** once, sign in on NASA's
@@ -102,5 +180,8 @@ transfers have external progress. No JSON editing or terminal is required in eit
 EMIT is **discovery / official access only**, with no native NetCDF-4 import.
 Read the [supported formats, steps and acceptance limits](remote-sensing/hyperspectral.md).
 
-Advanced manual source import remains available. Windows/MSFS and physical
+**Import Files Already on My Computer** remains an advanced manual alternative. Closing its
+window does not cancel an ongoing import. Use the explicitly labeled Cancel import control
+for that operation. Applicable popups have a touch-sized top-right X, Escape dismissal and
+focus return; dirty popup fields offer Keep editing before discarding unsaved edits. Windows/MSFS and physical
 paired-device acceptance remain separate from browser and provider tests.

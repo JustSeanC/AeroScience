@@ -2,7 +2,7 @@
 
 ## NASA catalog browsing (0.5.0 development)
 
-Open **Scientific Data Library → Browse & Download Data → Data family → Hyperspectral**.
+Open **External Data Manager → Find & Download Data → Hyperspectral Research**.
 Choose AVIRIS-Classic, AVIRIS-NG or EMIT, select coordinates/viewport/rectangle/polygon or
 an existing regional boundary, adjust dates and optional flightline filter, then search.
 NASA CMR returns bounded pages of actual granules, source dates and original footprints.

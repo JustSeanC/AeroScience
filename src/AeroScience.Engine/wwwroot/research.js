@@ -62,7 +62,7 @@ const button = (label, action) => {
   b.onclick = async () => {
     b.disabled = true;
     try {
-      await action();
+      await action(b);
     } catch (e) {
       ctx.notice(e.message);
     } finally {
@@ -135,9 +135,10 @@ function configs(parent, selected = []) {
     interval.max = 60;
     interval.step = 1;
     interval.dataset.interval = d.id;
+    const cadenceHelp=text("small","Saved scientific acquisition interval: 1–60 seconds. Controls how often AeroScience attempts a recorded observation; separate from telemetry, physical line/pulse rates and spatial source resolution. No valid data is fabricated when coverage or quality is unavailable.");row.append(cadenceHelp);
     row.prepend(label);
     const config=selected.find(c=>c.instrumentId===d.id)??{instrumentId:d.id};
-    row.readPayload=payloadSettings(row,config,payloadCatalog);
+    row.readPayload=payloadSettings(row,config,payloadCatalog,ctx.api);
     row.readCalibration=calibrationSettings(row,config,calibrationCatalog,ctx.api);
     row.dataset.payloadInstrument=d.id;
     parent.append(row);
@@ -238,12 +239,13 @@ async function planner() {
   await scientificReadiness(p, ctx.api);
   for (const plan of plans) {
     const row = text("div", undefined, "plan-row");
+    const scopeLabel=text("label","Preflight preparation scope "),scopeChoice=text("select");scopeChoice.setAttribute("aria-label","Preflight preparation scope for "+plan.name);for(const [value,title] of [["entire","Entire Mission"],["first-half","First Half of Mission (when route order supports it)"],["areas","Choose Research Areas"]]){const o=text("option",title);o.value=value;scopeChoice.append(o);}scopeLabel.append(scopeChoice);row.append(scopeLabel);
     row.append(
       text("strong", plan.name),
       text("span", `${plan.template} · ${plan.mode}`),
       button("Edit", () => editPlan(plan)),
-      button("Prepare scientific data", async () => {
-        await reviewPreflight(ctx.api,plan.id);
+      button("Prepare scientific data", async (opener) => {
+        await reviewPreflight(ctx.api,plan.id,scopeChoice.value,opener);
       }),
       button("Select for Flight", async () => {
         await ctx.api("/api/mission-selection", {planId:plan.id});
@@ -388,6 +390,33 @@ function editPlan(plan) {
   const configuration = text("div");
   form.append(configuration);
   configs(configuration, plan?.instruments || []);
+  const recommended=text("section",undefined,"panel recommended-payload");recommended.setAttribute("aria-label","Recommended instrument payload");
+  const recommendations=text("div"),payloadActions=text("div",undefined,"action-row");recommended.append(recommendations,payloadActions);template.closest("label").after(recommended);
+  let localSourceCandidates=null,priorTemplate=template.value,payloadTouched=!!plan;
+  const externalKinds={"terrain-scanner":"terrain","thermal-imager":"thermal","multispectral-imager":"multispectral","hyperspectral-imager":"hyperspectral"};
+  function showRecommended(){
+    const t=templates.find(t=>t.id===template.value),current=readConfigs(configuration),recommendedIds=new Set((t?.instruments||[]).filter(c=>c.enabled).map(c=>c.instrumentId));
+    recommendations.replaceChildren(text("h3","Recommended instrument payload"),text("p",`${t?.name||"No template"}: ${t?.objective||"No objective supplied"}`));
+    for(const c of(t?.instruments||[]).filter(c=>c.enabled)){
+      const definition=definitions.find(d=>d.id===c.instrumentId),effective=current.find(v=>v.instrumentId===c.instrumentId),kind=externalKinds[c.instrumentId],row=text("article",undefined,"finding-card");
+      row.append(text("h4",definition?.name||c.instrumentId),text("p",definition?.description||"Unsupported instrument — review configuration."),text("p",`${effective?.enabled?"Recommended and included":"Recommended but not included"} · recommended acquisition interval ${c.intervalMs/1000} s · current configured interval ${effective?.intervalMs/1000||"Unknown"} s. ${effective?.payload?.profile?.name||"No optical/scanner profile required or selected"}`));
+      if(kind){const retained=localSourceCandidates?.filter(s=>s.filesAvailable&&s.source.manifest.kind===kind);row.append(text("p",`Requires compatible external data. ${localSourceCandidates===null?"Local source presence not yet assessed":retained?.length?retained.length+" retained candidate(s); mission-area suitability and actual QA-valid pixels not yet assessed":"No verified retained candidate of this scientific type is present"}. Historical source observation dates remain separate from flight time.`));const a=text("a","Find Compatible External Data","button secondary");a.href="#library/download?science="+kind;row.append(a);}
+      else row.append(text("p","Uses supported simulator-derived observations; no external satellite dataset is required for this instrument."));
+      row.append(text("p",(effective?.payload?.profile?.limitations||[]).join(" ")||"Operating limits are assessed only where documented evidence exists; unknown constraints stay unknown."));recommendations.append(row);
+    }
+    const extra=current.filter(c=>c.enabled&&!recommendedIds.has(c.instrumentId));if(extra.length)recommendations.append(text("p","Additional/custom instruments: "+extra.map(c=>definitions.find(d=>d.id===c.instrumentId)?.name||c.instrumentId).join(", ")));
+    recommendations.append(text("p","Recommendations describe supported research configurations, not certified aircraft hardware. Save and reassess the actual selected payload; this panel never starts a download or collection."));
+  }
+  payloadActions.append(button("Apply Recommended Payload",()=>{
+    const t=templates.find(t=>t.id===template.value),current=readConfigs(configuration);
+    if((plan||current.some(c=>c.enabled||c.payload?.custom))&&!confirm("Replace this draft's instrument settings, cadence, profiles and calibration references with the selected template recommendations? Current included instruments: "+current.filter(c=>c.enabled).map(c=>definitions.find(d=>d.id===c.instrumentId)?.name||c.instrumentId).join(", ")+". Your saved plan and active flight remain unchanged until separately saved/applied."))return;
+    payloadTouched=true;configs(configuration,t.instruments);showRecommended();dirty("Recommended payload applied to draft. Review and Save mission plan separately.");
+  }),button("Merge Recommended Instruments",()=>{
+    const current=readConfigs(configuration),ids=new Set(templates.find(t=>t.id===template.value).instruments.filter(c=>c.enabled).map(c=>c.instrumentId));
+    payloadTouched=true;configs(configuration,current.map(c=>ids.has(c.instrumentId)?{...c,enabled:true}:c));showRecommended();dirty("Recommended instruments enabled in the draft; existing settings preserved. Review before saving.");
+  }),button("Keep Current Payload",()=>{showRecommended();draftStatus.textContent="Current payload retained. Template choice and recommendations do not overwrite custom settings. Save remains separate.";}));
+  configuration.addEventListener("input",()=>{payloadTouched=true;showRecommended();});configuration.addEventListener("change",()=>{payloadTouched=true;showRecommended();});showRecommended();
+  ctx.api('/api/science/sources').then(s=>{if(form.isConnected){localSourceCandidates=s;showRecommended();}}).catch(()=>{if(form.isConnected){localSourceCandidates=null;showRecommended();}});
   const presetSection = text("details");
   presetSection.append(text("summary", "Apply an instrument preset"));
   configuration.after(presetSection);
@@ -406,7 +435,7 @@ function editPlan(plan) {
               )
             )
               return;
-            configs(configuration, resolved.instruments);dirty();
+            payloadTouched=true;configs(configuration, resolved.instruments);showRecommended();dirty();
           }),
         );
       if (!rows.length)
@@ -416,10 +445,11 @@ function editPlan(plan) {
     })
     .catch((e) => ctx.notice(e.message));
   template.onchange = () => {
-    dirty();
     const t = templates.find((t) => t.id === template.value);
-    objective.value = t.objective;
-    configs(configuration, t.instruments);
+    if(!objective.value||objective.value===templates.find(t=>t.id===priorTemplate)?.objective)objective.value = t.objective;
+    priorTemplate=template.value;
+    if(!plan&&!payloadTouched){configs(configuration,t.instruments);showRecommended();dirty("Recommended payload visibly prefilled for this untouched new draft. Review the payload and Save mission plan separately.");}
+    else{showRecommended();dirty("Template recommendations updated. Current instrument configuration is preserved; apply, merge or keep it explicitly.");}
   };
   const estimate = text("p", undefined, "footnote");
   form.append(

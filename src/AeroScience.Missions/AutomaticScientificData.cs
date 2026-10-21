@@ -54,7 +54,13 @@ public sealed class AutomaticScientificData : IDisposable
     private bool steadyFastFlight;
     public void SetTrajectoryRegionHint(bool steadyFast){lock(gate)steadyFastFlight=steadyFast;}
     private bool paused,flightActive;
-    public void FlightActive(bool value){lock(gate){if(value&&!flightActive){foreach(var p in cancellations.Where(x=>(scopes.GetValueOrDefault(x.Key)?.StartsWith("plan:")==true||scopes.GetValueOrDefault(x.Key)?.StartsWith("library:")==true))){preempted.Add(p.Key);p.Value.Cancel();}}flightActive=value;}Wake();}
+    public void FlightActive(bool value){lock(gate){if(value&&!flightActive){var keep=cancellations.Keys.FirstOrDefault(key=>scopes.GetValueOrDefault(key)?.StartsWith("library:")!=true);foreach(var p in cancellations.Where(x=>x.Key!=keep)){preempted.Add(p.Key);p.Value.Cancel();}}if(!value&&flightActive){foreach(var scope in scopes.Values.Where(s=>s.StartsWith("plan:")).Distinct())pausedScopes.Add(scope);foreach(var p in cancellations.Where(x=>scopes.GetValueOrDefault(x.Key)=="flight"||scopes.GetValueOrDefault(x.Key)?.StartsWith("plan:")==true)){preempted.Add(p.Key);p.Value.Cancel();}foreach(var job in queue.Values.Where(j=>j.Scope=="flight").ToArray())queue.Remove(job.Key);}flightActive=value;}Wake();}
+    private string? flightResourceHold;
+    public void FlightResourceHold(string? reason){lock(gate){if(reason is not null&&flightResourceHold is null)foreach(var p in cancellations.Where(x=>scopes.GetValueOrDefault(x.Key)?.StartsWith("library:")!=true)){preempted.Add(p.Key);p.Value.Cancel();}flightResourceHold=reason;}Wake();}
+    public void ReprioritizeScope(string scope,IReadOnlyDictionary<string,double> priorities){lock(gate)foreach(var job in queue.Values.Where(j=>j.Scope==scope).ToArray())if(priorities.TryGetValue(job.Key,out var priority))queue[job.Key]=job with{Priority=priority};Wake();}
+    public void LimitScopeWindow(string scope,IReadOnlySet<string> desired){lock(gate)foreach(var job in queue.Values.Where(j=>j.Scope==scope&&!desired.Contains(j.Key)).ToArray()){queue.Remove(job.Key);retryAfter.Remove(job.Key);if(states.TryGetValue(job.Key,out var state))states[job.Key]=state with{Status="Superseded",Message="Upcoming aircraft regions reprioritized; this unsent area remains in the full plan inventory."};}Wake();}
+    public void RetainScopeKeys(string scope,IReadOnlySet<string> keys){lock(gate)foreach(var key in scopes.Where(p=>p.Value==scope&&!keys.Contains(p.Key)).Select(p=>p.Key).ToArray())Cancel(key);}
+
     private readonly HashSet<string> flightKeys=[],preempted=[];
     private DateTimeOffset lastPreemption;
     private double preparationSeconds=45;
@@ -72,7 +78,7 @@ public sealed class AutomaticScientificData : IDisposable
     public ScientificQueueSummary QueueSummary()
     {
         var p=settings.Get().Preferences;var f=flightTransfers.Snapshot(p.PrefetchHourlyBytes);var pre=preflightTransfers.Snapshot(p.PreflightTransferBytes);
-        lock(gate)return new(queue.Count,cancellations.Count,paused,f.Spent,p.PrefetchHourlyBytes,preparationSeconds,f.Reserved,f.Available,pre.Spent,pre.Reserved,p.PreflightTransferBytes,pre.Available,flightTransfers.TotalBytes+preflightTransfers.TotalBytes);
+        lock(gate)return new(queue.Count,cancellations.Count,paused,f.Spent,p.PrefetchHourlyBytes,preparationSeconds,f.Reserved,f.Available,pre.Spent,pre.Reserved,p.PreflightTransferBytes,pre.Available,flightTransfers.TotalBytes+preflightTransfers.TotalBytes,flightResourceHold,flightActive?1:p.ConcurrentDownloads);
     }
     public void Pause(bool value){lock(gate)paused=value;Wake();}
     public void ReprioritizeFlight(IReadOnlyDictionary<string,double> priorities)
@@ -118,7 +124,7 @@ public sealed class AutomaticScientificData : IDisposable
             lock(gate)
             {
                 if(states.TryGetValue(key,out var previous)&&(!retry||previous.Status is "Downloading" or "Queued")&&DateTimeOffset.UtcNow-previous.UpdatedUtc<TimeSpan.FromMinutes(30)&&!(previous.Status=="Offline"&&p.OnlineEnabled)&&previous.Status!="Superseded"&&!(kind==RemoteKind.Hyperspectral&&samplePoint!=previous.SamplePoint))
-                {if(queue.TryGetValue(key,out var queued)&&priority<queued.Priority)queue[key]=queued with{Priority=priority,Scope=scope};if(scope=="flight")scopes[key]=scope;continue;}
+                {if(queue.TryGetValue(key,out var queued)&&priority<queued.Priority)queue[key]=queued with{Priority=priority,Scope=scope};continue;}
                 if(states.Count>=256){var old=states.Values.Where(s=>s.Status is not("Queued" or "Downloading" or "Waiting for download allowance")).OrderBy(s=>s.UpdatedUtc).FirstOrDefault();if(old is not null){states.Remove(old.Key);tickets.Remove(old.Key);scopes.Remove(old.Key);retryAfter.Remove(old.Key);}else continue;}
                 string? reason=!p.OnlineEnabled||!p.PrivacyAccepted?"Scientific online access is disabled. Enable it separately from basemaps in Settings. Verified local sources still work.":background&&!p.BackgroundRetrieval?"Background retrieval is disabled. Prepare this area explicitly before flight.":p.UnmeteredOnly&&settings.IsUnmetered()!=true?"Waiting for a reliably detected unmetered connection. Change the unmetered-only control to proceed on this connection.":null;
                 // Local hyperspectral checks run without online consent and never trigger NASA downloading.
@@ -147,8 +153,9 @@ public sealed class AutomaticScientificData : IDisposable
         var candidate=cancellations.FirstOrDefault(p=>scopes.GetValueOrDefault(p.Key)?.StartsWith("plan:",StringComparison.Ordinal)==true&&!flightKeys.Contains(p.Key)&&!p.Value.IsCancellationRequested&&states.GetValueOrDefault(p.Key)?.Status=="Downloading");
         if(candidate.Value is null)return;lastPreemption=DateTimeOffset.UtcNow;preempted.Add(candidate.Key);candidate.Value.Cancel();
     }
+    public void RetryScope(string scope){lock(gate)foreach(var key in states.Where(p=>p.Value.Scope==scope&&p.Value.Status is not("Ready" or "Dataset Ready" or "Downloading" or "Queued")).Select(p=>p.Key).ToArray()){states.Remove(key);tickets.Remove(key);retryAfter.Remove(key);}}
     public void RefreshLocalReadiness()
-    {lock(gate)foreach(var key in states.Where(p=>p.Value.Status is not("Queued" or "Downloading" or "Waiting for download allowance")).Select(p=>p.Key).ToArray()){states.Remove(key);tickets.Remove(key);}}
+    {Interlocked.Increment(ref configurationRevision);lock(gate)foreach(var key in states.Where(p=>p.Value.Status is not("Queued" or "Downloading" or "Waiting for download allowance")).Select(p=>p.Key).ToArray()){states.Remove(key);tickets.Remove(key);}}
     public static void ValidateArea(GeographicBounds a)
     {
         if(new[]{a.West,a.South,a.East,a.North}.Any(v=>!double.IsFinite(v))||a.West< -180||a.East>180||a.South< -80||a.North>84||a.East<=a.West||a.North<=a.South||a.East-a.West>.061||a.North-a.South>.061)
@@ -164,8 +171,8 @@ public sealed class AutomaticScientificData : IDisposable
             {
                 active.RemoveAll(t=>t.IsCompleted);
                 Job? job=null;
-                lock(gate)if(!paused&&active.Count<settings.Get().Preferences.ConcurrentDownloads&&queue.Count>0)
-                {job=queue.Values.Where(j=>!pausedScopes.Contains(j.Scope)).Where(j=>!(flightActive&&(j.Scope.StartsWith("plan:")||j.Scope.StartsWith("library:")))).Where(j=>!retryAfter.TryGetValue(j.Key,out var after)||after<=DateTimeOffset.UtcNow).MinBy(j=>j.Priority);if(job is not null)queue.Remove(job.Key);}
+                lock(gate)if(!paused&&active.Count<(flightActive?1:settings.Get().Preferences.ConcurrentDownloads)&&queue.Count>0)
+                {job=queue.Values.Where(j=>!pausedScopes.Contains(j.Scope)).Where(j=>!(flightActive&&(j.Scope.StartsWith("library:")||flightResourceHold is not null))).Where(j=>!retryAfter.TryGetValue(j.Key,out var after)||after<=DateTimeOffset.UtcNow).MinBy(j=>j.Priority);if(job is not null)queue.Remove(job.Key);}
                 if(job is not null){active.Add(Task.Run(()=>Execute(job),stopping.Token));continue;}
                 await wake.WaitAsync(TimeSpan.FromMilliseconds(200),stopping.Token);
             }
@@ -211,6 +218,7 @@ public sealed class AutomaticScientificData : IDisposable
         ScientificDiagnostics.Record("start",job.Key,job.Scope,job.Kind);
         try
         {
+            using var sourceLease=science.BeginAnalysis();
             var p=settings.Get().Preferences;
             // Reuse verified sources before any network traffic. They remain retained originals,
             // not cleanup-eligible caches; actual sampling still applies per-pixel QA.
@@ -237,8 +245,9 @@ public sealed class AutomaticScientificData : IDisposable
             }
             string? blocked=p.SourceModes?.GetValueOrDefault(job.Kind)=="local"?"My Datasets Only: no compatible local dataset covers this area. Import a dataset or change this instrument’s source mode; no provider download was attempted.":!p.OnlineEnabled||!p.PrivacyAccepted?"Scientific online access is disabled; retained local sources remain usable.":job.Background&&!p.BackgroundRetrieval?"Background retrieval is disabled.":p.UnmeteredOnly&&settings.IsUnmetered()!=true?"Waiting for a reliably detected unmetered connection.":null;
             if(blocked is not null){Set(state with{Status="Offline",Message=blocked});return;}
-            var ledger=job.Scope.StartsWith("plan:",StringComparison.Ordinal)?preflightTransfers:flightTransfers;
-            transfer=ledger.Acquire(()=>job.Scope.StartsWith("plan:",StringComparison.Ordinal)?settings.Get().Preferences.PreflightTransferBytes:settings.Get().Preferences.PrefetchHourlyBytes);
+            bool inFlight;lock(gate)inFlight=flightActive;
+            var ledger=job.Scope.StartsWith("plan:",StringComparison.Ordinal)&&!inFlight?preflightTransfers:flightTransfers;
+            transfer=ledger.Acquire(()=>job.Scope.StartsWith("plan:",StringComparison.Ordinal)&&!inFlight?settings.Get().Preferences.PreflightTransferBytes:settings.Get().Preferences.PrefetchHourlyBytes);
             state=state with{Status="Downloading",Stage="Finding source",Message="Finding a suitable scientific source."};Set(state);
             var budget=new ScientificDownloadBudget(p.MaximumDownloadBytes,bytes=>
             {
@@ -285,7 +294,7 @@ public sealed class AutomaticScientificData : IDisposable
         {
             if(transfer is not null)ScientificDiagnostics.Record("allowance-released",job.Key,job.Scope,job.Kind,bytes:transfer.HeldBytes,result:"Unused reservation released; actual transferred bytes remain charged.");
             transfer?.Dispose();
-            lock(gate){cancellations.Remove(job.Key);preempted.Remove(job.Key);if(revision!=ConfigurationRevision&&tickets.GetValueOrDefault(job.Key)==job.Ticket){states.Remove(job.Key);tickets.Remove(job.Key);}if(state.DownloadedBytes>0)preparationSeconds=Math.Clamp(.7*preparationSeconds+.3*(DateTimeOffset.UtcNow-started).TotalSeconds,5,300);}
+            lock(gate){if(preempted.Contains(job.Key)&&flightActive&&flightResourceHold is not null&&!pausedScopes.Contains(job.Scope)&&job.Scope!="flight"){queue[job.Key]=job;Set(state with{Status="Queued",Message="Waiting for Flight Priority: "+flightResourceHold});}cancellations.Remove(job.Key);preempted.Remove(job.Key);if(revision!=ConfigurationRevision&&tickets.GetValueOrDefault(job.Key)==job.Ticket){states.Remove(job.Key);tickets.Remove(job.Key);}if(state.DownloadedBytes>0)preparationSeconds=Math.Clamp(.7*preparationSeconds+.3*(DateTimeOffset.UtcNow-started).TotalSeconds,5,300);}
             ScientificDiagnostics.Record("finish",job.Key,job.Scope,job.Kind,state.Provider,state.DownloadedBytes,Snapshot().FirstOrDefault(x=>x.Key==job.Key)?.Status);
             Wake();
         }

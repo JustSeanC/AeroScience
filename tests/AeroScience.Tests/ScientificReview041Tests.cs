@@ -93,7 +93,7 @@ public sealed class ScientificReview041Tests : IDisposable
         var settings = new ScientificAccessSettings(root); using var automatic = new AutomaticScientificData(science, settings); var sessions = new ScientificPlanData(automatic, settings);
         var plan = missions.SavePlan(new(Guid.NewGuid(), "Preparation", Waypoints: [new("A", 40, -75), new("B", 40.01, -75)], Instruments: [new("terrain-scanner", true)]));
         sessions.Prepare(plan, true); sessions.Control(plan.Id, "pause"); Assert.Equal("Paused", sessions.Snapshot().Single().Status);
-        sessions = new(automatic, settings); Assert.Equal("Paused", sessions.Snapshot().Single().Status); sessions.Control(plan.Id, "resume"); sessions.Tick(true); Assert.Equal("Waiting for active flight", sessions.Snapshot().Single().Status); sessions.Tick(false); Assert.NotEqual("Paused", sessions.Snapshot().Single().Status);
+        sessions = new(automatic, settings); Assert.Equal("Paused", sessions.Snapshot().Single().Status); sessions.Control(plan.Id, "resume"); sessions.Tick(true); Assert.Equal("Waiting for Flight Priority", sessions.Snapshot().Single().Status); sessions.Tick(false); Assert.Equal("Awaiting future-flight approval", sessions.Snapshot().Single().Status); sessions.Control(plan.Id,"continue");sessions.Tick(false);Assert.NotEqual("Paused",sessions.Snapshot().Single().Status);
         var instruments = sessions.Instruments(plan.Id); Assert.Single(instruments); Assert.Equal(instruments[0].Total, instruments[0].Ready + instruments[0].Awaiting + instruments[0].Unavailable);
     }
     [Fact]

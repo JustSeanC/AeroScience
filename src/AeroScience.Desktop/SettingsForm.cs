@@ -9,6 +9,7 @@ namespace AeroScience.Desktop;
 public sealed class SettingsForm : BrandedForm
 {
     private readonly MainForm app;
+    private readonly List<Func<bool>> pendingEdits=[];
     private readonly FlowLayoutPanel storagePanel = Panel();
     private readonly Label progress = new() { AutoSize = true, MaximumSize = new(720, 0) };
     private readonly ProgressBar progressBar = new() { Width = 650, Style = ProgressBarStyle.Marquee, Visible = false };
@@ -28,7 +29,8 @@ public sealed class SettingsForm : BrandedForm
         var updatesTab = new TabPage("Updates"); var updatesPanel = Panel(); updatesTab.Controls.Add(updatesPanel); tabs.TabPages.Add(updatesTab);
         Label(updatesPanel, "AeroScience " + ApplicationUpdates.CurrentVersion + ". Dashboard Settings → Updates shows your installed version and optional GitHub release notifications. Checks are cached daily, never block offline archives, and never execute an installer automatically. You can disable automatic checks or include/exclude alpha releases there.");
         Button(updatesPanel, "Open update settings / Check for updates", (_, _) => app.OpenDashboard(settings: true));
-        FormClosing += (_, e) => { if (app.Busy) { e.Cancel = true; MessageBox.Show(this, "Wait for the current operation to finish."); } };
+        FormClosing += (_, e) => { if (app.Busy) { e.Cancel = true; MessageBox.Show(this, "Wait for the current operation to finish."); }
+            else if(pendingEdits.Any(check=>check())&&MessageBox.Show(this,"Discard unapplied settings and close? Choose No to keep editing. Saved settings, recording and background work will be preserved.","Unsaved settings",MessageBoxButtons.YesNo,MessageBoxIcon.Question)!=DialogResult.Yes)e.Cancel=true; };
     }
     private static Button Button(Control parent, string text, EventHandler action)
     { var button = new Button { Text = text, AutoSize = true }; button.Click += action; parent.Controls.Add(button); return button; }
@@ -133,6 +135,7 @@ public sealed class SettingsForm : BrandedForm
         panel.Controls.Add(addresses);
         Label(panel, "Recording interval (milliseconds; SimConnect is requested at 1 Hz).");
         var interval = new NumericUpDown { Minimum = 1000, Maximum = 60000, Increment = 1000, Value = Math.Max(1000, preferences.SamplingIntervalMs), Width = 130 }; panel.Controls.Add(interval);
+        pendingEdits.Add(()=>{var saved=app.Preferences.Load();return lan.Checked!=saved.EnableLan||(int)interval.Value!=Math.Max(1000,saved.SamplingIntervalMs)||lan.Checked&&addresses.SelectedItem as string!=saved.LanAddress;});
         Button(panel, "Apply connection settings", async (_, _) => await Execute(() => app.RunStoppedAsync(() =>
         {
             var next = app.Preferences.Load() with { EnableLan = lan.Checked, LanAddress = addresses.SelectedItem as string, SamplingIntervalMs = (int)interval.Value };
@@ -148,6 +151,7 @@ public sealed class SettingsForm : BrandedForm
         var community = new ComboBox { Width = 700 };
         community.Items.AddRange(ToolbarInstaller.DiscoverCommunityFolders().Select(p => (object)p).ToArray());
         community.Text = preferences.CommunityDirectory ?? (community.Items.Count > 0 ? community.Items[0]?.ToString() ?? "" : ""); panel.Controls.Add(community);
+        var originalCommunity=community.Text;pendingEdits.Add(()=>community.Text!=(app.Preferences.Load().CommunityDirectory??originalCommunity));
         Button(panel, "Browse Community folder…", (_, _) => { using var browse = new FolderBrowserDialog { Description = "Select the configured MSFS Community folder", UseDescriptionForTitle = true }; if (browse.ShowDialog(this) == DialogResult.OK) community.Text = browse.SelectedPath; });
         var toolbarStatus = Label(panel, "");
         void RefreshToolbar() { var value = ToolbarVersions.Inspect(Path.Combine(AppContext.BaseDirectory, "Toolbar"), community.Text); toolbarStatus.Text = $"Installed: {value.InstalledVersion ?? "Unknown / not installed"} · Available: {value.BundledVersion ?? "Unknown"}\nStatus: {value.Status}\n{value.Message}"; }

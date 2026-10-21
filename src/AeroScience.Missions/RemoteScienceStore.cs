@@ -129,6 +129,7 @@ public sealed partial class ScienceStore
     }
     public async Task<ScientificSource> ImportSourceAsync(ScientificSourceManifest input,string root,CancellationToken token=default,IProgress<string>? progress=null,bool reuseExisting=false,Action<string>? verifyStaged=null)
     {
+        using var sourceOperation=BeginAnalysis();
         var inspected = InspectImport(input,root); var manifest = inspected.Manifest;
         if(reuseExisting)
         {
@@ -212,6 +213,7 @@ public sealed partial class ScienceStore
     public ScientificSource[] Sources()
     {
         if (AvailabilityError() is { } unavailable) throw new IOException(unavailable);
+        if(!sourceDeletionRecoveryDone&&File.Exists(DatabasePath))Initialize();
         if (!File.Exists(DatabasePath)) return [];
         using var db = Open(); using var cmd = db.CreateCommand(); cmd.CommandText = "SELECT name FROM sqlite_master WHERE name='remote_sources'";
         if (cmd.ExecuteScalar() is null) return [];

@@ -5,9 +5,11 @@ namespace AeroScience.Tests;
 // Synthetic numeric files; recorded NASA metadata is not genuine numeric acceptance.
 internal static class NasaFixtureFiles
 {
-    public static ScientificCatalogItem Item(string family)
+    public static ScientificCatalogItem Item(string family,string? originalName=null)
     {
         var c=JsonDocument.Parse(File.ReadAllText(Path.Combine(AppContext.BaseDirectory,"ProviderMetadata",$"nasa-{family}-collections.json"))).RootElement.GetProperty("feed").GetProperty("entry")[0];var e=JsonDocument.Parse(File.ReadAllText(Path.Combine(AppContext.BaseDirectory,"ProviderMetadata",$"nasa-{family}-granules.json"))).RootElement.GetProperty("feed").GetProperty("entry")[0];
+        if(originalName is not null){var entries=JsonDocument.Parse(File.ReadAllText(Path.Combine(AppContext.BaseDirectory,"ProviderMetadata",$"nasa-{family}-granules.json"))).RootElement.GetProperty("feed").GetProperty("entry");
+            foreach(var candidate in entries.EnumerateArray())if(candidate.GetProperty("links").EnumerateArray().Any(l=>l.TryGetProperty("href",out var href)&&originalName.StartsWith(Path.GetFileNameWithoutExtension(Path.GetFileName(new Uri(href.GetString()!).AbsolutePath)),StringComparison.Ordinal))){e=candidate;break;}}
         return ScientificCatalog.DescribeNasa("nasa-"+family,JsonSerializer.SerializeToElement(c),JsonSerializer.SerializeToElement(e));
     }
     public static string Cube(string root,ScientificCatalogItem item,int bands=224,string interleave="bil",bool bigEndian=false,bool float64=false)

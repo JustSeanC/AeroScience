@@ -76,7 +76,7 @@ public sealed partial class ScientificCatalog(AutomaticScientificData automatic,
                 var to=query.ToUtc??DateTimeOffset.UtcNow;var from=query.FromUtc??to.AddDays(-365);
                 var filters=new Dictionary<string,object>{{"eo:cloud_cover",new{lte=query.MaximumCloudPercent}}};
                 if(provider.Id=="landsat")filters["landsat:correction"]=new{eq="L2SP"};
-                url+="&datetime="+Uri.EscapeDataString(from.ToUniversalTime().ToString("O")+"/"+to.ToUniversalTime().ToString("O"))+"&query="+Uri.EscapeDataString(JsonSerializer.Serialize(filters));
+                url+="&datetime="+Uri.EscapeDataString(from.ToUniversalTime().ToString("yyyy-MM-dd'T'HH:mm:ss.fffffff'Z'",CultureInfo.InvariantCulture)+"/"+to.ToUniversalTime().ToString("yyyy-MM-dd'T'HH:mm:ss.fffffff'Z'",CultureInfo.InvariantCulture))+"&query="+Uri.EscapeDataString(JsonSerializer.Serialize(filters));
                 if(query.Sort!="browse")url+="&sortby="+Uri.EscapeDataString(query.Sort=="cloud"?"properties.eo:cloud_cover,-properties.datetime,id":(query.Sort=="oldest"?"":"-")+"properties.datetime,id");
             }
             var items=new List<ScientificCatalogItem>();string? next=null;var limitations=new List<string>{"Catalog outlines do not establish QA-valid pixels. Original asset sizes, where known, are not subset transfer estimates."};

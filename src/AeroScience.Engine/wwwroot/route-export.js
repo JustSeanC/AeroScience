@@ -1,3 +1,4 @@
+import {dialogHeader,requestDialogClose,markDialogSaved} from './dialog-ui.js';
 import { planningDistance, planningText } from "./science-display.js";
 const el = (tag, text) => {
   const e = document.createElement(tag);
@@ -156,9 +157,9 @@ export function routeExportButton(parent, getPlan, api) {
         warnings.textContent = e.message;
       }
     };
-    close.onclick = () => dialog.close();
+    close.onclick = () => requestDialogClose(dialog);
     dialog.onclose = () => dialog.remove();
     content.append(note, preview, summary, warnings, output, action, close);
-    dialog.showModal();
+    dialogHeader(dialog,{title:"Export / Share Planned Route"});dialog.showModal();
   };
 }

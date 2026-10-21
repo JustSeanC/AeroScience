@@ -1,136 +1,38 @@
-export function payloadSettings(parent, config, catalog) {
-  const profiles = [
-    ...(catalog?.generic || []),
-    ...(catalog?.profiles || []),
-  ].filter((p) => p.instrumentId === config.instrumentId);
-  if (!profiles.length) return () => config.payload ?? null;
-  const label = document.createElement("label");
-  label.textContent = "Sensor profile";
-  const select = document.createElement("select");
-  select.setAttribute("aria-label", "Sensor profile");
-  label.append(select);
-  parent.append(label);
-  let payload = structuredClone(
-    config.payload ?? {
-      profile: profiles[0],
-      forwardDegrees: 0,
-      rightDegrees: 0,
-      custom: false,
-      geometryAlgorithm: "sensor-plane-2",
-    },
-  );
-  if (!profiles.some((p) => p.id === payload.profile.id))
-    profiles.push(payload.profile);
-  for (const p of profiles) {
-    const o = document.createElement("option");
-    o.value = p.id;
-    o.textContent = p.name;
-    select.append(o);
-  }
-  select.value = payload.profile.id;
-  const info = document.createElement("details"),
-    summary = document.createElement("summary"),
-    content = document.createElement("div");
-  summary.textContent = "Geometry, mount and documented limitations";
-  info.append(summary, content);
-  parent.append(info);
-  const editor = (name, value, minimum, maximum) => {
-    const l = document.createElement("label");
-    l.textContent = name;
-    const input = document.createElement("input");
-    input.type = "number";
-    input.step = "any";
-    input.min = minimum;
-    input.max = maximum;
-    input.value = value??'';
-    input.setAttribute("aria-label", name);
-    l.append(input);
-    content.append(l);
-    return input;
-  };
-  let h, v, forward, right, custom,crossPixels,alongPixels,lineRate,measurementRate;
-  function render() {
-    content.replaceChildren();
-    const description = document.createElement("p");
-    description.textContent = payload.profile.limitations.join(" ");
-    content.append(description);
-    const customLabel = document.createElement("label");
-    custom = document.createElement("input");
-    custom.type = "checkbox";
-    custom.checked = payload.custom;
-    customLabel.append(
-      custom,
-      " Customize geometry (identified as a custom configuration)",
-    );
-    content.append(customLabel);
-    h = editor(
-      "Horizontal field of view (degrees)",
-      payload.profile.horizontalFovDegrees,
-      0.001,
-      119.99,
-    );
-    v = editor(
-      "Along-track angular envelope (degrees)",
-      payload.profile.verticalFovDegrees,
-      0.001,
-      119.99,
-    );
-    crossPixels=editor('Cross-track detector elements (optional)',payload.profile.crossTrackPixels,1,100000);
-    alongPixels=editor('Along-track detector elements (optional)',payload.profile.alongTrackPixels,1,100000);
-    lineRate=editor('Nominal pushbroom line rate (Hz; optional)',payload.profile.lineRateHz,.01,100000000);
-    measurementRate=editor('Effective scanner measurement rate (Hz; optional)',payload.profile.measurementRateHz,.01,100000000);
-    forward = editor(
-      "Mount forward tilt (degrees)",
-      payload.forwardDegrees ?? 0,
-      -60,
-      60,
-    );
-    right = editor(
-      "Mount right tilt (degrees)",
-      payload.rightDegrees ?? 0,
-      -60,
-      60,
-    );
-    const lock = () => {
-      for(const field of [h,v,crossPixels,alongPixels,lineRate,measurementRate])field.disabled=!custom.checked;
-    };
-    custom.onchange = lock;
-    lock();
-    for (const url of payload.profile.references) {
-      const a = document.createElement("a");
-      a.href = url;
-      a.textContent = "Official reference";
-      a.target = "_blank";
-      a.rel = "noopener noreferrer";
-      content.append(a, document.createTextNode(" "));
-    }
-  }
-  select.onchange = () => {
-    payload = {
-      profile: structuredClone(profiles.find((p) => p.id === select.value)),
-      forwardDegrees: Number(forward.value),
-      rightDegrees: Number(right.value),
-      custom: false,
-      geometryAlgorithm: "sensor-plane-2",
-    };
-    render();
-  };
-  render();
-  return () => ({
-    ...payload,
-    custom: custom.checked,
-    forwardDegrees: Number(forward.value),
-    rightDegrees: Number(right.value),
-    profile: {
-      ...payload.profile,
-      horizontalFovDegrees: Number(h.value),
-      verticalFovDegrees: Number(v.value),
-      crossTrackPixels:crossPixels.value===''?null:Number(crossPixels.value),
-      alongTrackPixels:alongPixels.value===''?null:Number(alongPixels.value),
-      lineRateHz:lineRate.value===''?null:Number(lineRate.value),
-      measurementRateHz:measurementRate.value===''?null:Number(measurementRate.value),
-      pixelPitchMicrometres:custom.checked?null:payload.profile.pixelPitchMicrometres,
-      focalLengthMillimetres:custom.checked?null:payload.profile.focalLengthMillimetres,
-    },
-  });
+// Presentation extends the existing profile contracts and backend planning solver.
+export function payloadSettings(parent, config, catalog, api) {
+ const profiles=[...(catalog?.generic||[]),...(catalog?.profiles||[])].filter(p=>p.instrumentId===config.instrumentId);
+ if(!profiles.length)return()=>config.payload??null;
+ let payload=structuredClone(config.payload??{profile:profiles[0],forwardDegrees:0,rightDegrees:0,custom:false,geometryAlgorithm:'sensor-plane-2'});
+ if(!profiles.some(p=>p.id===payload.profile.id))profiles.push(payload.profile);
+ const el=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
+ const root=el('section');root.className='payload-settings';root.setAttribute('aria-label','Sensor configuration');parent.append(root);
+ const wrap=el('label','Sensor profile'),select=el('select');select.setAttribute('aria-label','Sensor profile');for(const p of profiles)select.append(new Option(p.name,p.id));select.value=payload.profile.id;wrap.append(select);root.append(wrap);
+ root.append(el('p','Choose a documented reference or a generic model. This configures modeled sensor geometry; it does not install physical hardware, change external pixel resolution, or certify measurement accuracy.'));
+ const summary=el('section'),advanced=el('details'),content=el('div');summary.setAttribute('aria-label','Profile Summary');advanced.append(el('summary','Advanced — Customize Sensor Geometry'),content);root.append(summary,advanced);
+ let h,v,cross,along,line,rate,forward,right,custom,geometry;
+ function editor(holder,name,value,min,max,help){const label=el('label',name),input=el('input'),note=el('small',`${help} Accepted range: ${min}–${max}; blank means Unknown for optional fields. Current profile value: ${value??'Unknown'}.`);input.type='number';input.step='any';input.min=min;input.max=max;input.value=value??'';input.setAttribute('aria-label',name);const id='sensor-help-'+crypto.getRandomValues(new Uint32Array(1))[0];note.id=id;input.setAttribute('aria-describedby',id);label.append(input,note);holder.append(label);return input;}
+ function render(){
+  summary.replaceChildren(el('h4','Profile Summary'));
+  const p=payload.profile;summary.append(el('p',`${p.name} · version ${p.version} · ${payload.custom?'Customized':p.id.startsWith('generic.')?'Generic model':'Documented reference'} · ${p.geometry}`),el('p',`Cross-track field of view ${p.horizontalFovDegrees}°; along-track envelope ${p.verticalFovDegrees}°. Detector elements ${p.crossTrackPixels??'Unknown'} × ${p.alongTrackPixels??'Unknown'}. Line rate ${p.lineRateHz??'Unknown'} Hz; effective measurement rate ${p.measurementRateHz??'Unknown'} Hz.`));
+  summary.append(el('p',`Documented temperature limits: ${p.minimumOperatingCelsius??'Unknown'} to ${p.maximumOperatingCelsius??'Unknown'} °C. No sensor internal temperature, undocumented altitude limit or aircraft restriction is invented.`));
+  for(const text of p.limitations||[])summary.append(el('p',text));
+  for(const url of p.references||[]){const a=el('a','Official manufacturer / scientific reference');a.href=url;a.target='_blank';a.rel='noopener noreferrer';summary.append(a,document.createTextNode(' '));}
+  content.replaceChildren(el('p','Custom values change the effective configuration identity and require a new preflight assessment. Turning customization off uses the unchanged selected profile values. No original measurements or source values are altered.'));
+  const customLabel=el('label','Customize geometry (identified as a custom configuration)');custom=el('input');custom.type='checkbox';custom.checked=payload.custom;custom.setAttribute('aria-label','Customize geometry (identified as a custom configuration)');customLabel.prepend(custom);content.append(customLabel);
+  geometry=el('div');geometry.className='sensor-editor-grid';content.append(geometry);
+  h=editor(geometry,'Horizontal field of view (degrees)',p.horizontalFovDegrees,.001,119.99,'Cross-track angular width of the modeled footprint. Wider FOV can widen a geometric swath; it does not add source pixels or genuine laser returns.');
+  v=editor(geometry,'Along-track angular envelope (degrees)',p.verticalFovDegrees,.001,119.99,'Angular extent along the flight direction. For scanners/pushbroom profiles this is an envelope, not a continuous image or certified optical resolution.');
+  cross=editor(geometry,'Cross-track detector elements (optional)',p.crossTrackPixels,1,100000,'Nominal detector count across the swath (elements, not acquired observations). Used only for supported nominal geometry calculations; native data resolution is unchanged.');
+  along=editor(geometry,'Along-track detector elements (optional)',p.alongTrackPixels,1,100000,'Nominal detector count along the footprint (elements). Unknown stays unknown; this is not a flight sample count.');
+  line=editor(geometry,'Nominal pushbroom line rate (Hz; optional)',p.lineRateHz,.01,100000000,'Physical nominal lines per second when documented. Distinct from AeroScience saved acquisitions and from a laser pulse rate. Sparse collection cannot prove continuous line coverage.');
+  rate=editor(geometry,'Effective scanner measurement rate (Hz; optional)',p.measurementRateHz,.01,100000000,'Supported effective measurements per second, not an assumed hardware pulse rate. A nominal rate does not produce that many real LiDAR points in AeroScience; imported elevation remains externally observed terrain.');
+  const mount=el('div');mount.className='sensor-editor-grid';content.append(el('h4','Mount direction'),mount);
+  forward=editor(mount,'Mount forward tilt (degrees)',payload.forwardDegrees??0,-60,60,'Forward view relative to the modeled aircraft mount; 0° is nadir. Tilt can change/intersect the derived footprint; it does not change original raster georeferencing or aircraft controls.');
+  right=editor(mount,'Mount right tilt (degrees)',payload.rightDegrees??0,-60,60,'Rightward mount tilt; 0° is nadir. Aircraft attitude and terrain also affect validity. The planning spacing baseline remains nadir and level-flight, with a warning for tilt.');
+  custom.onchange=()=>{geometry.hidden=!custom.checked;for(const field of[h,v,cross,along,line,rate])field.disabled=!custom.checked;};custom.onchange();
+ }
+ select.onchange=()=>{payload={profile:structuredClone(profiles.find(p=>p.id===select.value)),forwardDegrees:Number(forward.value),rightDegrees:Number(right.value),custom:false,geometryAlgorithm:'sensor-plane-2'};render();};render();
+ const read=()=>({...payload,custom:custom.checked,forwardDegrees:Number(forward.value),rightDegrees:Number(right.value),profile:custom.checked?{...payload.profile,horizontalFovDegrees:Number(h.value),verticalFovDegrees:Number(v.value),crossTrackPixels:cross.value===''?null:Number(cross.value),alongTrackPixels:along.value===''?null:Number(along.value),lineRateHz:line.value===''?null:Number(line.value),measurementRateHz:rate.value===''?null:Number(rate.value),pixelPitchMicrometres:null,focalLengthMillimetres:null}:structuredClone(profiles.find(p=>p.id===payload.profile.id&&p.version===payload.profile.version)??payload.profile)});
+ if(api){const preview=el('details');preview.append(el('summary','Modeled geometry preview — explicit assumptions'));const fields=el('div');fields.className='sensor-editor-grid';preview.append(fields);const altitude=editor(fields,'Preview altitude AGL (m)',1000,1,60000,'Assumed height above ground, not feet MSL and not a measured aircraft position.'),speed=editor(fields,'Preview groundspeed (m/s)',50,.01,2000,'Assumed groundspeed used by the existing planning solver, not IAS or TAS.');const output=el('p','No geometry assessment yet. Preview never saves settings or starts collection.');output.setAttribute('role','status');const b=el('button','Calculate modeled geometry');b.type='button';b.onclick=async()=>{b.disabled=true;try{const interval=Number(parent.querySelector('[data-interval]')?.value||config.intervalMs/1000||1)*1000;const result=await api('/api/sensor-planning',{instrument:{...config,enabled:true,intervalMs:interval,payload:read()},altitudeAglMetres:Number(altitude.value),groundspeedMetresPerSecond:Number(speed.value),sideOverlap:.3,forwardOverlap:.6});output.textContent=`Nadir level-flight flat-ground baseline: swath ${result.swathMetres.toFixed(1)} m; along-track envelope ${result.alongTrackMetres.toFixed(1)} m; track spacing ${result.trackSpacingMetres.toFixed(1)} m at assumed 30% side overlap. ${result.advisories.join(' ')} This is not measured coverage, return density or sensor accuracy.`;}catch(error){output.textContent=error.message;}finally{b.disabled=false;}};preview.append(b,output);root.append(preview);content.addEventListener('input',()=>{output.textContent='Configuration changed. Recalculate the modeled preview; preflight assessments require review.';});}
+ return read;
 }

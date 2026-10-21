@@ -17,7 +17,7 @@ test('single integrated help renders safe offline markdown and library groups ac
  await page.goto('/#help?guide=v0.4.1-science-workspace.md');await expect(page.locator('.sidebar a').filter({hasText:'Help'})).toHaveCount(1);await expect(page.locator('#help .help-guide h2')).toBeVisible();await expect(page.getByRole('link',{name:'Join our Discord',exact:true})).toHaveAttribute('href','https://discord.gg/mpYyazCqvJ');await expect(page.getByRole('button',{name:'Collect Feedback / Logs',exact:true})).toBeVisible();
  await page.screenshot({path:'artifacts/v041-help-desktop.png',fullPage:true});
  const safety=await page.evaluate(async()=>{const {markdown}=await import('/help-center.js');const parent=document.createElement('div');markdown(parent,'# Safe\n\n<script>window.unsafeHelp=true</script>\n\n[bad](javascript:alert(1))\n\n| A | B |\n|---|---|\n| 1 | 2 |','v0.4.1-science-workspace.md');return {script:parent.querySelectorAll('script').length,link:parent.querySelector('a:not([href])')!==null,table:parent.querySelectorAll('table').length};});expect(safety).toEqual({script:0,link:true,table:1});
- await page.goto('/#library');await expect(page.getByRole('heading',{name:'Scientific Data Library',exact:true})).toBeVisible();await page.screenshot({path:'artifacts/v041-library-desktop.png',fullPage:true});
+ await page.goto('/#library');await expect(page.getByRole('heading',{name:'External Data Manager',exact:true})).toBeVisible();await page.screenshot({path:'artifacts/v041-library-desktop.png',fullPage:true});
 });
 test('empty success commands do not cause JSON retry; preparation aggregation and ETA preserve unknowns',async({page})=>{
  await page.goto('/#control');await page.waitForResponse(r=>r.url().endsWith('/api/state'));

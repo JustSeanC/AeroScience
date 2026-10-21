@@ -40,3 +40,34 @@ button,input,select,textarea{font:inherit}label{font-size:var(--font-support);li
 .mission-intelligence button,.mission-intelligence select { min-height:44px; max-width:100%; }
 .mission-intelligence details { margin-block:.7rem; }
 .mission-intelligence details > div { max-width:100%; }
+
+/* P19B: readable discovery and bounded review dialogs. */
+.library-recommendation { border-left: .25rem solid var(--accent, #45d6bf); padding: .7rem; font-weight: 600; }
+.library-catalog-results article { display: flex; flex-direction: column; gap: .35rem; }
+.library-catalog-results article h3, .library-catalog-results article p { margin: .25rem 0; }
+.storage-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); gap: .8rem; }
+.storage-summary section { border: 1px solid var(--line); border-radius: .5rem; padding: .8rem; min-width: 0; overflow-wrap: anywhere; }
+.storage-summary progress { width: 100%; }
+.preparation-review { width: min(50rem, 94vw); max-height: 88dvh; overflow: hidden; padding: 0; }
+.preparation-review[open] { display: flex; flex-direction: column; }
+.preparation-review-body { padding: 1.2rem; overflow-y: auto; min-height: 0; }
+.dialog-actions { display: flex; flex-wrap: wrap; gap: .6rem; padding: .8rem 1.2rem; border-top: 1px solid var(--line); flex-shrink: 0; background: var(--surface, #132238); }
+.sensor-editor-grid,.automation-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,18rem),1fr));gap:.8rem; }
+.sensor-editor-grid label { display:flex;flex-direction:column;gap:.25rem;min-width:0; }
+.sensor-editor-grid small { line-height:1.45; color:var(--muted,#bdcad9); }
+.payload-settings { margin-block:.7rem; }
+.payload-settings [hidden] { display:none; }
+/* Dismissal stays separate from operation controls and outside scrolling content. */
+dialog.managed-popup{max-width:min(56rem,calc(100vw - 1.5rem));max-height:88dvh;overflow:auto;box-sizing:border-box;scroll-padding-top:5rem}
+.popup-header{position:sticky;top:0;z-index:1200;display:flex;align-items:center;justify-content:space-between;gap:1rem;background:var(--panel,#152337);padding:.6rem .75rem;border-bottom:1px solid var(--border,#52637b);margin:-1px -1px 1rem}
+.popup-header h2{font-size:1.15rem;line-height:1.4;overflow-wrap:anywhere;margin:0}
+.popup-close{flex:0 0 44px;min-width:44px;min-height:44px;font-size:1.6rem;line-height:1;padding:.25rem;align-self:flex-start}
+.popup-header .popup-close{margin-left:auto}
+.navigation-close.popup-close{position:sticky;top:.5rem;float:right;z-index:10}
+.leaflet-popup-close-button{min-width:44px!important;min-height:44px!important;font-size:26px!important;line-height:44px!important}
+.leaflet-popup-content{margin-right:44px}
+@media(max-width:600px){dialog.managed-popup{width:calc(100vw - 1rem);max-height:90dvh;padding:.65rem}.popup-header{gap:.5rem}.dialog-actions{flex-wrap:wrap;gap:.5rem}}
+
+.popup-header{color:var(--text,#e4edf6)}
+.leaflet-control-layers-list{max-height:65dvh;max-width:min(22rem,calc(100vw - 3rem));overflow:auto;scroll-padding-top:5rem}
+.leaflet-control-layers-list .popup-header{margin:0 0 .5rem;padding:.25rem}.leaflet-control-layers-list .popup-header h2{font-size:1rem}.leaflet-control-layers label{font-size:.875rem;min-height:32px}

@@ -13,7 +13,9 @@ export async function scienceWorkspace(parent,api){
   const ids=(params.get('missions')||'').split(',').filter(Boolean),instrument=params.get('instrument')||'';
   const title=pages.find(([id])=>id===path)?.[1]||'Science Map';
   parent.replaceChildren();const heading=el('div',undefined,'page-heading');heading.append(el('div'));heading.firstChild.append(el('p','SCIENCE WORKSPACE','eyebrow'),el('h1',title));parent.append(heading);
-  const nav=el('nav',undefined,'workspace-subnav');nav.setAttribute('aria-label','Science Workspace pages');
+  heading.append(el('p','Science Results & Analysis: examine recorded observations, scientific maps, comparisons, replay and exported products. Configure payloads and control live sessions in Instruments & Collection.'));
+  link(heading,'Instruments & Collection','#science');link(heading,'Mission History','#history');link(heading,'External Data Manager','#library');
+  const nav=el('nav',undefined,'workspace-subnav');nav.setAttribute('aria-label','Science Results & Analysis pages');
   for(const [key,label] of pages){const a=link(nav,label,'#workspace/'+key+(params.size?'?'+params:''));if(path===key)a.setAttribute('aria-current','page');}parent.append(nav);
   const feedback=status(parent,'Loading the local research archive…');
   const ownHash=location.hash;

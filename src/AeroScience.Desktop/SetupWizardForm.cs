@@ -40,7 +40,9 @@ public sealed class SetupWizardForm : BrandedForm
         next.Click += async (_, _) => await Advance();
         mission.TextChanged += (_, _) => Capacity(mission.Text, missionSpace, true);
         library.TextChanged += (_, _) => Capacity(library.Text, librarySpace, false);
-        FormClosing += (_, e) => { if (working) e.Cancel = true; };
+        var initialMission=mission.Text;var initialLibrary=library.Text;var initialCommunity=community.Text;var initialOnline=scientificOnline.Checked;var initialInstall=install.Checked;
+        FormClosing += (_, e) => { if (working) e.Cancel = true;
+            else if(DialogResult!=DialogResult.OK&&(mission.Text!=initialMission||library.Text!=initialLibrary||community.Text!=initialCommunity||scientificOnline.Checked!=initialOnline||install.Checked!=initialInstall)&&MessageBox.Show(this,"Close setup with unapplied choices? Choose No to keep editing. Previously saved settings and verified user data remain intact.","Unfinished setup",MessageBoxButtons.YesNo,MessageBoxIcon.Question)!=DialogResult.Yes)e.Cancel=true; };
         Render();
     }
 

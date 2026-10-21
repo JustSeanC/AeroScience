@@ -1,3 +1,4 @@
+import {layerPopup} from './dialog-ui.js';
 import { ResearchMap } from "./map.js";
 import { planningArea, planningDistance, displayReading } from "./science-display.js";
 import {table as scientificTable} from './workstation-ui.js';
@@ -525,7 +526,7 @@ export async function coverage(parent, id, api, review) {
               style: { color: "#52dbc0", fillOpacity: 0.3 },
             }).addTo(map.map);
         }
-        window.L.control.layers(null, layers).addTo(map.map);
+        layerPopup(window.L.control.layers(null, layers).addTo(map.map));
         const detail = el("details");
         detail.append(
           el("summary", "Methods, denominator and uncertainty"),

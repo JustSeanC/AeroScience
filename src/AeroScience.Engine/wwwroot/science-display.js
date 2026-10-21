@@ -1,3 +1,4 @@
+import {dialogHeader,requestDialogClose,markDialogSaved} from './dialog-ui.js';
 import {table as scientificTable,numeric} from './workstation-ui.js';
 let settings = null;
 const chartPreferences = new Map();
@@ -323,9 +324,9 @@ export function scienceCharts(parent, rows) {
       const original = card.parentNode,
         next = card.nextSibling;
       dialog.append(card);
-      dialog.showModal();
+      dialogHeader(dialog,{title:"Expanded scientific chart",opener:launch});dialog.showModal();
       chart.resize();
-      close.onclick = () => dialog.close();
+      close.onclick = () => requestDialogClose(dialog);
       dialog.onclose = () => {
         original.insertBefore(card, next);
         dialog.remove();

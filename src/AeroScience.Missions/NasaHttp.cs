@@ -59,7 +59,7 @@ public sealed partial class ScientificHttp
         return new(asset.Name,asset.Url,asset.Role,length.Value,etag,response.Headers.AcceptRanges.Contains("bytes"));
     }
     private sealed record FileCheckpoint(long Bytes,string Sha256,string? Etag,long Length);
-    public async Task DownloadNasaFile(NasaDownloadFile file,string folder,IEarthdataCredentials credentials,ScientificDownloadBudget budget,CancellationToken token)
+    public async Task DownloadNasaFile(NasaDownloadFile file,string folder,IEarthdataCredentials credentials,ScientificDownloadBudget budget,CancellationToken token,Action<long>? progress=null)
     {
         ValidateNasaOriginal(new(file.Url));
         if(Path.GetFileName(file.Name)!=file.Name||file.Name.Contains('/')||file.Name.Contains('\\'))throw new IOException("Unsafe NASA filename.");
@@ -80,7 +80,7 @@ public sealed partial class ScientificHttp
                 while(hashed<saved.Bytes){var n=await input.ReadAsync(prefix.AsMemory(0,(int)Math.Min(prefix.Length,saved.Bytes-hashed)),token);if(n==0)break;digest.AppendData(prefix,0,n);hashed+=n;}
                 if(hashed!=saved.Bytes||saved.Bytes==file.Bytes&&input.Length!=file.Bytes||Convert.ToHexString(digest.GetCurrentHash()).ToLowerInvariant()!=saved.Sha256)saved=null;
             }
-            if(saved?.Bytes==file.Bytes){if(!File.Exists(finished))File.Move(partial,finished);return;}
+            if(saved?.Bytes==file.Bytes){if(!File.Exists(finished))File.Move(partial,finished);progress?.Invoke(file.Bytes);return;}
         }
         if(saved is null)digest.GetHashAndReset();
         var offset=saved?.Bytes??0;
@@ -96,7 +96,7 @@ public sealed partial class ScientificHttp
         if(response.Content.Headers.ContentLength is {} expected&&expected!=file.Bytes-offset)throw new IOException("NASA original length changed; fresh preview required.");
         if(file.Bytes-offset>budget.Maximum-budget.Bytes)throw new IOException("The remaining NASA original exceeds this attempt's approved transfer allowance. Review the job budget; no limit was enlarged.");
         await using var output=new FileStream(partial,offset==0?FileMode.Create:FileMode.Open,FileAccess.ReadWrite,FileShare.None,1048576,FileOptions.Asynchronous);
-        output.SetLength(offset);output.Position=offset;
+        output.SetLength(offset);output.Position=offset;progress?.Invoke(offset);
         await using var inputStream=await response.Content.ReadAsStreamAsync(token);var buffer=new byte[1048576];var checkpointAt=offset;
         void SaveCheckpoint()
         {
@@ -111,7 +111,7 @@ public sealed partial class ScientificHttp
                 token.ThrowIfCancellationRequested();var count=(int)Math.Min(buffer.Length,file.Bytes-output.Position);budget.EnsureCapacity(count);
                 var n=await inputStream.ReadAsync(buffer.AsMemory(0,count),token);if(n==0)throw new EndOfStreamException("NASA original download is incomplete. Resume or retry; no source was published.");
                 budget.Charge(n);Received(new(file.Url),n,true);await output.WriteAsync(buffer.AsMemory(0,n),token);
-                digest.AppendData(buffer,0,n);if(output.Position-checkpointAt>=8388608)SaveCheckpoint();
+                digest.AppendData(buffer,0,n);progress?.Invoke(output.Position);if(output.Position-checkpointAt>=8388608)SaveCheckpoint();
             }
         }
         finally

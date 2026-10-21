@@ -61,6 +61,21 @@ public sealed class ApiTests : IAsyncLifetime
         var data = await response.Content.ReadFromJsonAsync<JsonElement>();
         display.DefaultRequestHeaders.Add("X-AeroScience-CSRF", data.GetProperty("csrf").GetString());
     }
+    [Fact]public async Task ExternalSourceDeletionRequiresCsrfAndTrustedLocalAccessEvenWithAnExactReview()
+    {
+        await Pair(client);var science=factory.Services.GetRequiredService<ScienceStore>();
+        var original=RemoteFixtureFiles.Create(Path.Combine(directory,"synthetic-owned-source"),RemoteKind.Terrain);var source=await science.ImportSourceAsync(original);
+        var preview=await client.PostAsJsonAsync("/api/science/sources/deletion/preview",new SourceDeletionRequest([source.Id]),WireJson.Options);preview.EnsureSuccessStatusCode();var reviewed=(await preview.Content.ReadFromJsonAsync<SourceDeletionPreview>(WireJson.Options))!;Assert.Equal(1,reviewed.EligibleSources);
+        var execute=new SourceDeletionExecution(reviewed.Id,reviewed.SelectionHash,reviewed.Confirmation);
+        client.DefaultRequestHeaders.Remove("X-AeroScience-CSRF");Assert.Equal(HttpStatusCode.Forbidden,(await client.PostAsJsonAsync("/api/science/sources/deletion/execute",execute,WireJson.Options)).StatusCode);
+        var access=factory.Services.GetRequiredService<AccessControl>();var paired=access.Pair(false,access.PairingCode)!;
+        var payload=JsonSerializer.SerializeToUtf8Bytes(execute,WireJson.Options);
+        var remote=await factory.Server.SendAsync(context=>{
+            context.Features.Set<Microsoft.AspNetCore.Http.Features.IHttpRequestBodyDetectionFeature>(new KnownRequestBody());context.Connection.RemoteIpAddress=IPAddress.Parse("192.168.1.40");context.Request.Scheme="http";context.Request.Host=new("localhost",5080);context.Request.Method="POST";context.Request.Path="/api/science/sources/deletion/execute";context.Request.ContentType="application/json";context.Request.ContentLength=payload.Length;context.Request.Body=new MemoryStream(payload);context.Request.Headers.Origin="http://localhost:5080";context.Request.Headers.Cookie=access.SessionCookieName+"="+paired.Token;context.Request.Headers["X-AeroScience-CSRF"]=paired.Csrf;
+        });
+        Assert.Equal(403,remote.Response.StatusCode);Assert.Single(science.Sources());
+    }
+    private sealed class KnownRequestBody:Microsoft.AspNetCore.Http.Features.IHttpRequestBodyDetectionFeature {public bool CanHaveBody=>true;}
     [Fact] public async Task MissionIntelligenceUsesAuthenticatedReadOnlyEvidenceAndBoundedPages()
     {
         Assert.Equal(HttpStatusCode.Unauthorized,(await client.GetAsync("/api/mission-intelligence")).StatusCode);

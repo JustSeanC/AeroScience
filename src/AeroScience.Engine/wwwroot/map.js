@@ -1,3 +1,4 @@
+import {layerPopup} from './dialog-ui.js';
 import { planningDistance, onUnitsChanged } from "./science-display.js";
 import { airportLocations, searchLocations, locationLabel } from "./location-search.js";
 import "./geographic-view.js";
@@ -76,7 +77,7 @@ export class ResearchMap {
     this.aircraft=L.layerGroup().addTo(this.map);
     this.patterns=L.layerGroup().addTo(this.map);
     this.readiness=L.layerGroup().addTo(this.map);
-    L.control.layers(null, {"Planned route":this.route,"Semantic pattern outlines":this.patterns,"Waypoint markers":this.points,"Recorded track":this.track,"Survey areas":this.areas,"Aircraft":this.aircraft,"Observation markers":this.markers,"Scientific sample locations":this.samples,"Scientific data readiness":this.readiness,"Science footprints":this.footprints},{collapsed:true}).addTo(this.map);
+    layerPopup(L.control.layers(null, {"Planned route":this.route,"Semantic pattern outlines":this.patterns,"Waypoint markers":this.points,"Recorded track":this.track,"Survey areas":this.areas,"Aircraft":this.aircraft,"Observation markers":this.markers,"Scientific sample locations":this.samples,"Scientific data readiness":this.readiness,"Science footprints":this.footprints},{collapsed:true}).addTo(this.map));
     const action = (name, fn) => {
       const b = document.createElement("button");
       b.type = "button";
@@ -331,11 +332,11 @@ export class ResearchMap {
       })),
     );
   }
-  setReadiness(states) {
+  setReadiness(states,{limit=128}={}) {
     if(this.destroyed)return;
-    const key=JSON.stringify(states.map(s=>[s.key,s.status]));if(key===this.readinessKey)return;this.readinessKey=key;this.readiness.clearLayers();
+    const key=JSON.stringify(states.map(s=>[s.key,s.status,s.area,s.sourceCoverage]));if(key===this.readinessKey)return;this.readinessKey=key;this.readiness.clearLayers();
     const colors={Ready:"#3adbb0","Dataset Ready":"#3adbb0",Downloading:"#62bbff",Queued:"#e9ce70","Partially usable":"#e6a453","Limited Coverage":"#e6a453",Unavailable:"#df6975","Dataset Required":"#df6975","Dataset Outside Coverage":"#a08ab8",Offline:"#a0aab8"};
-    for(const s of states.slice(0,128)){const a=s.area;if(!a||s.status==="Superseded")continue;(s.sourceCoverage?.length?this.L.polygon(s.sourceCoverage.map(p=>[p.latitude,p.longitude]),{color:colors[s.status]||"#a0aab8",weight:1,fillOpacity:.08}):this.L.rectangle([[a.south,a.west],[a.north,a.east]],{color:colors[s.status]||"#a0aab8",weight:1,fillOpacity:.08})).bindTooltip(label(`${s.kind}: ${s.status} · Requested preparation envelope; per-pixel masks and actual source coverage still apply`)).addTo(this.readiness);}
+    for(const s of states.slice(0,Math.min(4096,limit))){const a=s.area;if(!a||s.status==="Superseded")continue;(s.sourceCoverage?.length?this.L.polygon(s.sourceCoverage.map(p=>[p.latitude,p.longitude]),{color:colors[s.status]||"#a0aab8",weight:1,fillOpacity:.08}):this.L.rectangle([[a.south,a.west],[a.north,a.east]],{color:colors[s.status]||"#a0aab8",weight:1,fillOpacity:.08})).bindTooltip(label(`${s.kind}: ${s.status} · Requested preparation envelope; per-pixel masks and actual source coverage still apply`)).addTo(this.readiness);}
   }
   set(data) {
     if(this.destroyed)return;

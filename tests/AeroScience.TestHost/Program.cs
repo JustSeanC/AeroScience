@@ -5,6 +5,7 @@ using AeroScience.Shared;
 using AeroScience.Tests;
 
 if (args.Length > 0 && args[0] == "--library-probe") { LibraryProbe.Run(args[1..]); return; }
+if (args.Length > 0 && args[0] == "--source-deletion-probe") { await SourceDeletionProbe.Run(args[1..]); return; }
 if (args.Length > 0 && args[0] == "--evidence-probe") { EvidenceProbe.Run(args[1..]); return; }
 if (args.Length > 0 && args[0] == "--earthdata-vault-probe")
 {
@@ -68,6 +69,17 @@ app.MapPost("/api/testing/library/teardown",async(LibraryHttpFixture fixture,Sci
     fixture.InactiveSources=ids;automatic.Configure(new(ExcludedSourceIds:ids));return new{synthetic=true,excludedSources=ids.Length};
 });
 app.MapPost("/api/testing/library/mode/{mode}",(string mode,LibraryHttpFixture fixture)=>{fixture.Mode=mode;return new{synthetic=true,mode};});
+// Actual production import/persistence with explicitly synthetic originals; no flight observations.
+app.MapPost("/api/testing/sources/unreferenced/{kind}",async(string kind,ScienceStore science)=>{
+    var folder=Path.Combine(options.DataDirectory,"synthetic-local-original-"+Guid.NewGuid().ToString("N"));
+    var file=RemoteFixtureFiles.Create(folder,Enum.Parse<RemoteKind>(kind,true));var source=await science.ImportSourceAsync(file);return new{sourceId=source.Id,synthetic=true};
+});
+app.MapPost("/api/testing/preparation/local",async(ScienceStore science,AutomaticScientificData automatic)=>{
+    var folder=Path.Combine(options.DataDirectory,"synthetic-preparation-original-"+Guid.NewGuid().ToString("N"));Directory.CreateDirectory(folder);
+    RemoteFixtureFiles.GeoTiff(Path.Combine(folder,"elevation.tif"),123.25f,west:-76.01,north:.05);
+    var manifest=new ScientificSourceManifest(1,"SYNTHETIC 204-region reuse fixture",RemoteKind.Terrain,"Isolated browser fixture","Synthetic only","Not genuine scientific acceptance","synthetic-preparation-cell",DateTimeOffset.Parse("2020-01-01T00:00:00Z"),"Unknown",[new("elevation","elevation.tif","geotiff",Unit:"m")]);
+    var source=await science.ImportSourceAsync(manifest,folder);automatic.RefreshLocalReadiness();return new{sourceId=source.Id,synthetic=true};
+});
 app.MapPost("/api/testing/maps/new-install",()=>{File.Delete(Path.Combine(options.ConfigurationDirectory??options.DataDirectory,"maps.json"));return new {reset=true};});
 app.MapPost("/api/testing/workstation",async(WorkstationFixtureRequest request,ScienceStore science,MissionStore missions,MissionCoordinator coordinator,BrowserTelemetryProvider provider)=>
 {

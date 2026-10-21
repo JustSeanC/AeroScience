@@ -31,6 +31,8 @@ public sealed class RemoteAcquisition : IDisposable
         Interlocked.Increment(ref generation); paused = pause; schedule.Clear();
         foreach (var id in states.Keys) states.AddOrUpdate(id, Status(id), (_, s) => s with { Processing = false });
     }
+    private readonly ConcurrentDictionary<string,long> processingBegan=new();
+    public string? BackgroundDownloadHold => queues.Values.Any(q=>q.Reader.CanCount&&q.Reader.Count>0)||processingBegan.Values.Any(t=>System.Diagnostics.Stopwatch.GetElapsedTime(t)>TimeSpan.FromMilliseconds(750))?"Scientific acquisition backlog; background preparation will resume after processing catches up.":null;
     public void Begin() { Reset(); states.Clear(); }
     public RemoteInstrumentStatus Status(string id) => states.GetValueOrDefault(id) ?? new(id, ObservationQuality.Waiting,
         "Scientific data unavailable for this location or acquisition. Check Scientific Data Readiness and automatic scientific access in Settings. Manual source import remains an advanced option.", null, 0, 0, 0);
@@ -62,7 +64,7 @@ public sealed class RemoteAcquisition : IDisposable
             {
                 if (request.Generation != Volatile.Read(ref generation)) continue;
                 var id = request.Configuration.InstrumentId;
-                states.AddOrUpdate(id, Status(id), (_, s) => s with { Processing = true });
+                states.AddOrUpdate(id, Status(id), (_, s) => s with { Processing = true });processingBegan[id]=System.Diagnostics.Stopwatch.GetTimestamp();
                 var began=System.Diagnostics.Stopwatch.StartNew();
                 try
                 {
@@ -81,6 +83,7 @@ public sealed class RemoteAcquisition : IDisposable
                     ScientificDiagnostics.Record("acquisition-unavailable",request.Mission.Id.ToString(),"flight",Instruments[id],result:e is ScientificObservationUnavailableException u?u.Status+": "+u.Message:e.GetType().Name+": "+e.Message);
                     states.AddOrUpdate(id, Status(id), (_, s) => s with { Quality = ObservationQuality.Unavailable, Message = e.Message,Status=e is ScientificObservationUnavailableException unavailable?unavailable.Status:"Error",ProcessingSeconds=began.Elapsed.TotalSeconds, Rejected = s.Rejected + 1, MissingIntervals=s.MissingIntervals+1, Processing = false });
                 }
+                processingBegan.TryRemove(id,out _);
                 if (request.Generation == Volatile.Read(ref generation))
                 {
                     var state = Status(id);
@@ -99,6 +102,7 @@ public sealed class RemoteAcquisition : IDisposable
     }
     private RemoteProduct Process(RemoteAcquisitionRequest request,bool reconstruction=false,CancellationToken token=default,Action? authorize=null)
     {
+        using var sourceOperation=science.BeginAnalysis();
         void Check() { authorize?.Invoke();token.ThrowIfCancellationRequested(); if (!reconstruction)stop.Token.ThrowIfCancellationRequested(); if (!reconstruction && request.Generation != Volatile.Read(ref generation)) throw new OperationCanceledException("Science paused/stopped or configuration changed."); }
         Check();
         science.Management?.RequireScienceCapacity();

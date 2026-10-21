@@ -41,6 +41,7 @@ public sealed class ResearchOperations : IDisposable
         }
         CollectionSessionId=state.CurrentSessionId;collectionPhase=state.Phase;intentionallyPaused=state.Phase==CollectionPhase.Paused;
     }
+    public string? BackgroundDownloadHold => remote.BackgroundDownloadHold;
     public void Dispose() => remote.Dispose();
     private sealed class Acquisition
     {
