@@ -3,15 +3,15 @@ namespace AeroScience.Shared;
 
 // Catalog outlines describe archived provider products, never QA-valid flight coverage.
 public sealed record ScientificCatalogQuery(string Provider,GeographicBounds Area,DateTimeOffset? FromUtc=null,
-    DateTimeOffset? ToUtc=null,double MaximumCloudPercent=100,int PageSize=10,string? Cursor=null,bool CachedOnly=false,bool Refresh=false,string? SceneFilter=null);
+    DateTimeOffset? ToUtc=null,double MaximumCloudPercent=100,int PageSize=10,string? Cursor=null,bool CachedOnly=false,bool Refresh=false,string? SceneFilter=null,string Sort="latest");
 public sealed record ScientificCatalogBand(string Id,string Units,double Scale,double Offset,double? NoData,
     double? ResolutionMeters,string Format,long? OriginalAssetBytes);
 public sealed record ScientificCatalogItem(string Provider,string Product,string Scene,string Revision,RemoteKind Kind,
     GeographicBounds Bounds,JsonElement? Geometry,DateTimeOffset? ObservationUtc,DateTimeOffset? PublishedUtc,
     ScientificCatalogBand[] Bands,string? Crs,string VerticalDatum,string Quality,string Resolution,
-    string License,string Reference,string AcquisitionMethod,string[] Limitations,NasaGranuleMetadata? Nasa=null);
+    string License,string Reference,string AcquisitionMethod,string[] Limitations,NasaGranuleMetadata? Nasa=null,double? CloudPercent=null);
 public sealed record ScientificCatalogPage(string Status,ScientificCatalogItem[] Items,string? NextCursor,
-    DateTimeOffset AsOfUtc,DateTimeOffset ExpiresUtc,bool Cached,string[] Limitations,string? Error=null);
+    DateTimeOffset AsOfUtc,DateTimeOffset ExpiresUtc,bool Cached,string[] Limitations,string? Error=null,string? Ordering=null,bool ServerOrdered=false);
 public sealed record ScientificCatalogProvider(string Id,string Name,string Product,RemoteKind Kind,string[] RequiredBands,
     bool SceneDates,bool ScenePagination,string Description);
 public sealed record ScientificSceneSelection(string Provider,string Scene,string Revision,string[] Bands);
@@ -38,6 +38,9 @@ public sealed record LibraryJobControl(string Action);
 public sealed record ScientificRegionRequest(string StateFips,string? CountyFips=null,bool CachedOnly=false);
 public sealed record ScientificRegion(string Id,string Name,GeographicBounds Bounds,JsonElement Geometry,
     string Reference,string Resolution,DateTimeOffset AsOfUtc,bool Cached);
+public sealed record ScientificRegionNamesRequest(string? StateFips=null,bool CachedOnly=false);
+public sealed record ScientificRegionName(string Code,string Name);
+public sealed record ScientificRegionNames(ScientificRegionName[] Items,string Reference,DateTimeOffset AsOfUtc,bool Cached);
 
 // Optional authoritative NASA catalog details. Unknown metadata is nullable, never inferred pixels.
 public sealed record NasaAsset(string Name,string Url,string Role);

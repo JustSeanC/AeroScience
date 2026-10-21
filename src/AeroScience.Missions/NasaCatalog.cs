@@ -34,7 +34,7 @@ public sealed partial class ScientificCatalog
     {
         var p=NasaProduct(q.Provider);
         var url="https://cmr.earthdata.nasa.gov/search/granules.json?short_name="+Uri.EscapeDataString(p.Name)+"&version="+p.Version+
-            "&bounding_box="+StacScientificProvider.Bounds(q.Area)+"&page_size="+q.PageSize+"&page_num="+page+"&sort_key[]=start_date&sort_key[]=granule_ur";
+            "&bounding_box="+StacScientificProvider.Bounds(q.Area)+"&page_size="+q.PageSize+"&page_num="+page+"&sort_key[]="+(q.Sort=="oldest"?"start_date":"-start_date")+"&sort_key[]=granule_ur";
         if(q.FromUtc is {} from&&q.ToUtc is {} to)url+="&temporal="+Uri.EscapeDataString(from.ToUniversalTime().ToString("O")+","+to.ToUniversalTime().ToString("O"));
         if(!string.IsNullOrWhiteSpace(q.SceneFilter))url+="&granule_ur="+Uri.EscapeDataString("*"+q.SceneFilter+"*")+"&options[granule_ur][pattern]=true";
         return url;

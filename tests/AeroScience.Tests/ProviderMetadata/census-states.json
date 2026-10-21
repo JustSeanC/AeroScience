@@ -1,0 +1,335 @@
+{
+  "displayFieldName": "BASENAME",
+  "fieldAliases": {
+    "NAME": "NAME",
+    "STATE": "STATE"
+  },
+  "fields": [
+    {
+      "name": "NAME",
+      "type": "esriFieldTypeString",
+      "alias": "NAME",
+      "length": 100
+    },
+    {
+      "name": "STATE",
+      "type": "esriFieldTypeString",
+      "alias": "STATE",
+      "length": 2
+    }
+  ],
+  "features": [
+    {
+      "attributes": {
+        "NAME": "Alabama",
+        "STATE": "01"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Alaska",
+        "STATE": "02"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Arizona",
+        "STATE": "04"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Arkansas",
+        "STATE": "05"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "California",
+        "STATE": "06"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Colorado",
+        "STATE": "08"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Connecticut",
+        "STATE": "09"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Delaware",
+        "STATE": "10"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "District of Columbia",
+        "STATE": "11"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Florida",
+        "STATE": "12"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Georgia",
+        "STATE": "13"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Hawaii",
+        "STATE": "15"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Idaho",
+        "STATE": "16"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Illinois",
+        "STATE": "17"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Indiana",
+        "STATE": "18"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Iowa",
+        "STATE": "19"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Kansas",
+        "STATE": "20"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Kentucky",
+        "STATE": "21"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Louisiana",
+        "STATE": "22"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Maine",
+        "STATE": "23"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Maryland",
+        "STATE": "24"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Massachusetts",
+        "STATE": "25"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Michigan",
+        "STATE": "26"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Minnesota",
+        "STATE": "27"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Mississippi",
+        "STATE": "28"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Missouri",
+        "STATE": "29"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Montana",
+        "STATE": "30"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Nebraska",
+        "STATE": "31"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Nevada",
+        "STATE": "32"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "New Hampshire",
+        "STATE": "33"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "New Jersey",
+        "STATE": "34"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "New Mexico",
+        "STATE": "35"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "New York",
+        "STATE": "36"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "North Carolina",
+        "STATE": "37"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "North Dakota",
+        "STATE": "38"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Ohio",
+        "STATE": "39"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Oklahoma",
+        "STATE": "40"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Oregon",
+        "STATE": "41"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Pennsylvania",
+        "STATE": "42"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Puerto Rico",
+        "STATE": "72"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Rhode Island",
+        "STATE": "44"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "South Carolina",
+        "STATE": "45"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "South Dakota",
+        "STATE": "46"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Tennessee",
+        "STATE": "47"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Texas",
+        "STATE": "48"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Utah",
+        "STATE": "49"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Vermont",
+        "STATE": "50"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Virginia",
+        "STATE": "51"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Washington",
+        "STATE": "53"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "West Virginia",
+        "STATE": "54"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Wisconsin",
+        "STATE": "55"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Wyoming",
+        "STATE": "56"
+      }
+    }
+  ]
+}

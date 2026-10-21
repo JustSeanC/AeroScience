@@ -65,6 +65,7 @@ public static class ResearchApi
         app.MapPost("/api/science/library/jobs/{id:guid}/approve",(Guid id,LibraryApprovalRequest request,ScientificLibraryJobs jobs,HttpContext c)=>jobs.Approve(id,request.SelectionHash,c.RequestAborted));
         app.MapPost("/api/science/library/jobs/{id:guid}/control",(Guid id,LibraryJobControl request,ScientificLibraryJobs jobs,HttpContext c)=>jobs.Control(id,request.Action,c.RequestAborted));
         app.MapPost("/api/science/library/regions",(ScientificRegionRequest request,ScientificCatalog catalog,HttpContext c)=>catalog.Region(request,c.RequestAborted));
+        app.MapPost("/api/science/library/regions/names",(ScientificRegionNamesRequest request,ScientificCatalog catalog,HttpContext c)=>catalog.RegionNames(request,c.RequestAborted));
         app.MapPost("/api/science/library/scope",(ScientificLibrarySelection selection)=>new{workCells=ScientificLibraryJobs.Expand(selection),maximumWorkUnits=4096,maximumGeometryCandidates=100000});
         app.MapGet("/api/science/library/providers",()=>ScientificCatalog.Providers);
         app.MapGet("/api/science/library/local",(ScientificCatalog catalog)=>catalog.Local());

@@ -1,0 +1,261 @@
+{
+  "displayFieldName": "NAME",
+  "fieldAliases": {
+    "NAME": "NAME",
+    "STATE": "STATE",
+    "COUNTY": "COUNTY"
+  },
+  "fields": [
+    {
+      "name": "NAME",
+      "type": "esriFieldTypeString",
+      "alias": "NAME",
+      "length": 100
+    },
+    {
+      "name": "STATE",
+      "type": "esriFieldTypeString",
+      "alias": "STATE",
+      "length": 2
+    },
+    {
+      "name": "COUNTY",
+      "type": "esriFieldTypeString",
+      "alias": "COUNTY",
+      "length": 3
+    }
+  ],
+  "features": [
+    {
+      "attributes": {
+        "NAME": "Bernalillo County",
+        "STATE": "35",
+        "COUNTY": "001"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Catron County",
+        "STATE": "35",
+        "COUNTY": "003"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Chaves County",
+        "STATE": "35",
+        "COUNTY": "005"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Cibola County",
+        "STATE": "35",
+        "COUNTY": "006"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Colfax County",
+        "STATE": "35",
+        "COUNTY": "007"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Curry County",
+        "STATE": "35",
+        "COUNTY": "009"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "De Baca County",
+        "STATE": "35",
+        "COUNTY": "011"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Do\u00f1a Ana County",
+        "STATE": "35",
+        "COUNTY": "013"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Eddy County",
+        "STATE": "35",
+        "COUNTY": "015"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Grant County",
+        "STATE": "35",
+        "COUNTY": "017"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Guadalupe County",
+        "STATE": "35",
+        "COUNTY": "019"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Harding County",
+        "STATE": "35",
+        "COUNTY": "021"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Hidalgo County",
+        "STATE": "35",
+        "COUNTY": "023"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Lea County",
+        "STATE": "35",
+        "COUNTY": "025"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Lincoln County",
+        "STATE": "35",
+        "COUNTY": "027"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Los Alamos County",
+        "STATE": "35",
+        "COUNTY": "028"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Luna County",
+        "STATE": "35",
+        "COUNTY": "029"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "McKinley County",
+        "STATE": "35",
+        "COUNTY": "031"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Mora County",
+        "STATE": "35",
+        "COUNTY": "033"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Otero County",
+        "STATE": "35",
+        "COUNTY": "035"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Quay County",
+        "STATE": "35",
+        "COUNTY": "037"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Rio Arriba County",
+        "STATE": "35",
+        "COUNTY": "039"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Roosevelt County",
+        "STATE": "35",
+        "COUNTY": "041"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "San Juan County",
+        "STATE": "35",
+        "COUNTY": "045"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "San Miguel County",
+        "STATE": "35",
+        "COUNTY": "047"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Sandoval County",
+        "STATE": "35",
+        "COUNTY": "043"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Santa Fe County",
+        "STATE": "35",
+        "COUNTY": "049"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Sierra County",
+        "STATE": "35",
+        "COUNTY": "051"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Socorro County",
+        "STATE": "35",
+        "COUNTY": "053"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Taos County",
+        "STATE": "35",
+        "COUNTY": "055"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Torrance County",
+        "STATE": "35",
+        "COUNTY": "057"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Union County",
+        "STATE": "35",
+        "COUNTY": "059"
+      }
+    },
+    {
+      "attributes": {
+        "NAME": "Valencia County",
+        "STATE": "35",
+        "COUNTY": "061"
+      }
+    }
+  ]
+}

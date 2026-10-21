@@ -27,7 +27,7 @@ public sealed partial class ScientificCatalog(AutomaticScientificData automatic,
     internal static bool IsCacheFileName(string name)
     {
         if(Path.GetExtension(name)!=".json")return false;var stem=Path.GetFileNameWithoutExtension(name);
-        return stem.Length==64&&stem.All(char.IsAsciiHexDigit)||stem.StartsWith("cursor-",StringComparison.Ordinal)&&stem.Length==39&&stem[7..].All(char.IsAsciiHexDigit)||stem.StartsWith("region-",StringComparison.Ordinal)&&stem.Length is 9 or 12&&stem[7..].All(char.IsAsciiDigit);
+        return stem.Length==64&&stem.All(char.IsAsciiHexDigit)||stem.StartsWith("cursor-",StringComparison.Ordinal)&&stem.Length==39&&stem[7..].All(char.IsAsciiHexDigit)||stem.StartsWith("region-",StringComparison.Ordinal)&&stem.Length is 9 or 12&&stem[7..].All(char.IsAsciiDigit)||stem=="names-states"||stem.StartsWith("names-counties-",StringComparison.Ordinal)&&stem.Length==17&&stem[15..].All(char.IsAsciiDigit);
     }
     private string CacheFolder=>Path.Combine(science.DirectoryPath,"Metadata","Catalog");
     public object Local()=>science.Availability().Select(a=>new{a.Source.Id,a.FilesAvailable,a.Source.Manifest,
@@ -47,6 +47,7 @@ public sealed partial class ScientificCatalog(AutomaticScientificData automatic,
     public async Task<ScientificCatalogPage> Search(ScientificCatalogQuery query,CancellationToken token=default)
     {
         var provider=Provider(query.Provider);ValidateBounds(query.Area);
+        if(query.Sort is not("latest" or "oldest" or "cloud" or "browse")||query.Sort=="cloud"&&query.Provider is not("landsat" or "sentinel-2"))throw new ArgumentException("Choose a supported catalog order. Cloud sorting applies only to Landsat and Sentinel-2.");
         if(query.SceneFilter is {} filter&&(filter.Length>100||filter.Any(c=>!(char.IsAsciiLetterOrDigit(c)||c is '_' or '-' or '.'))))throw new ArgumentException("Use up to 100 letters, digits, dots, underscores or hyphens for a scene filter.");
         if(query.PageSize is <1 or >30||!double.IsFinite(query.MaximumCloudPercent)||query.MaximumCloudPercent is <0 or >100||query.FromUtc>query.ToUtc||query.FromUtc.HasValue!=query.ToUtc.HasValue||query.ToUtc-query.FromUtc>TimeSpan.FromDays(3650))throw new ArgumentException("Choose 1–30 results and an ordered date range no longer than ten years.");
         if(query.Cursor is {} c&&(c.Length!=32||!c.All(char.IsAsciiHexDigit)))throw new ArgumentException("Invalid catalog cursor.");
@@ -73,7 +74,10 @@ public sealed partial class ScientificCatalog(AutomaticScientificData automatic,
             if(!IsNasa(provider.Id)&&query.Cursor is null&&provider.SceneDates)
             {
                 var to=query.ToUtc??DateTimeOffset.UtcNow;var from=query.FromUtc??to.AddDays(-365);
-                url+="&datetime="+Uri.EscapeDataString(from.ToUniversalTime().ToString("O")+"/"+to.ToUniversalTime().ToString("O"))+"&query="+Uri.EscapeDataString(JsonSerializer.Serialize(new Dictionary<string,object>{{"eo:cloud_cover",new{lte=query.MaximumCloudPercent}}}));
+                var filters=new Dictionary<string,object>{{"eo:cloud_cover",new{lte=query.MaximumCloudPercent}}};
+                if(provider.Id=="landsat")filters["landsat:correction"]=new{eq="L2SP"};
+                url+="&datetime="+Uri.EscapeDataString(from.ToUniversalTime().ToString("O")+"/"+to.ToUniversalTime().ToString("O"))+"&query="+Uri.EscapeDataString(JsonSerializer.Serialize(filters));
+                if(query.Sort!="browse")url+="&sortby="+Uri.EscapeDataString(query.Sort=="cloud"?"properties.eo:cloud_cover,-properties.datetime,id":(query.Sort=="oldest"?"":"-")+"properties.datetime,id");
             }
             var items=new List<ScientificCatalogItem>();string? next=null;var limitations=new List<string>{"Catalog outlines do not establish QA-valid pixels. Original asset sizes, where known, are not subset transfer estimates."};
             if(IsNasa(provider.Id))
@@ -114,7 +118,9 @@ public sealed partial class ScientificCatalog(AutomaticScientificData automatic,
                 }
             }
             var now=DateTimeOffset.UtcNow;var cursorId=next is null?null:Guid.NewGuid().ToString("N");
-            var page=new ScientificCatalogPage(items.Count>0?"Available":"No match",items.ToArray(),cursorId,now,now.AddMinutes(15),false,limitations.Distinct().ToArray());
+            var ordered=provider.SceneDates&&query.Sort!="browse"&&CatalogOrderVerified(items,query.Sort);
+            var ordering=!provider.SceneDates?"Undated/composite product: no observation-date recency claim.":query.Sort=="browse"?"Provider order; no newest-match claim.":ordered?"Provider-side "+(query.Sort=="cloud"?"lowest reported scene cloud cover":query.Sort=="oldest"?"ascending original observation date":"descending original observation date")+" with stable identity tie-break; bounded search, not a whole-archive or valid-pixel guarantee.":"Requested provider order could not be verified from this page; no newest-match claim.";
+            var page=new ScientificCatalogPage(items.Count>0?"Available":"No match",items.ToArray(),cursorId,now,now.AddMinutes(15),false,limitations.Distinct().ToArray(),Ordering:ordering,ServerOrdered:ordered);
             Directory.CreateDirectory(CacheFolder);var cached=new Cached(normalized,page,next);PreferenceStore.WriteAtomic(path,cached);
             if(cursorId is not null)PreferenceStore.WriteAtomic(Path.Combine(CacheFolder,"cursor-"+cursorId+".json"),cached);
             foreach(var old in new DirectoryInfo(CacheFolder).GetFiles("*.json").Where(f=>IsCacheFileName(f.Name)).OrderByDescending(f=>f.LastWriteTimeUtc).Skip(128))old.Delete();return page;
@@ -188,6 +194,7 @@ public sealed partial class ScientificCatalog(AutomaticScientificData automatic,
         var revision=Hash(new{provider.Id,compositeDescription=provider.Id=="usgs-3dep"?composite.GetProperty("description").GetString():null,scene=provider.Id=="usgs-3dep"?"composite":d.Manifest.SceneId,d.Manifest.ObservationUtc,d.Manifest.PublicationUtc,d.Manifest.VerticalDatum,bands=d.Manifest.Bands.Select(b=>b with{SceneId=provider.Id=="usgs-3dep"?"composite":b.SceneId}),metadata=feature is {} ff?new{properties=ff.GetProperty("properties"),assets=ff.GetProperty("assets"),geometry=ff.GetProperty("geometry")}:null});
         DateTimeOffset? published=d.Manifest.PublicationUtc;
         if(props is {} properties&&properties.TryGetProperty("updated",out var updated)&&DateTimeOffset.TryParse(updated.GetString(),CultureInfo.InvariantCulture,DateTimeStyles.AssumeUniversal,out var timestamp))published=timestamp.ToUniversalTime();
-        return new(provider.Id,provider.Product,provider.Id=="usgs-3dep"?"3dep-composite":d.Manifest.SceneId,revision,provider.Kind,bounds,geometry,d.Manifest.ObservationUtc,published,bands,crs,d.Manifest.VerticalDatum,d.Quality,d.Resolution,d.Manifest.License,d.Manifest.Citation,provider.Id=="usgs-3dep"?"Bounded F32 numeric export":"HTTP range COG native-grid subset",d.Limitations??[]);
+        var cloud=props is {} propertiesWithCloud?StacScientificProvider.Number(propertiesWithCloud,"eo:cloud_cover",double.NaN):double.NaN;
+        return new(provider.Id,provider.Product,provider.Id=="usgs-3dep"?"3dep-composite":d.Manifest.SceneId,revision,provider.Kind,bounds,geometry,d.Manifest.ObservationUtc,published,bands,crs,d.Manifest.VerticalDatum,d.Quality,d.Resolution,d.Manifest.License,d.Manifest.Citation,provider.Id=="usgs-3dep"?"Bounded F32 numeric export":"HTTP range COG native-grid subset",d.Limitations??[],CloudPercent:double.IsFinite(cloud)&&cloud is >=0 and <=100?cloud:null);
     }
 }
