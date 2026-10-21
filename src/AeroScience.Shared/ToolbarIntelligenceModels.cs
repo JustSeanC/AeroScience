@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 namespace AeroScience.Shared;
 
 // Optional protocol-v1 extension. Stable identities and numbers are never shortened.
@@ -6,7 +7,10 @@ public sealed record ToolbarScienceMetric(string InstrumentId,string Id,Assessme
 public sealed record ToolbarIntelligence(int Version,DateTimeOffset GeneratedUtc,Guid? MissionId,
     long? Revision,long? ControlRevision,Guid? SessionId,long? SessionSequence,CollectionPhase Phase,
     CollectionAuthority Authority,bool ManualHold,bool ContinuityHold,CollectionAction[] Actions,
-    MissionGradeStatus GradeStatus,double? ScoreLower,double? ScoreUpper,double? EvidenceFraction,
+    MissionGradeStatus GradeStatus,
+    [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] double? ScoreLower,
+    [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] double? ScoreUpper,
+    [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] double? EvidenceFraction,
     DateTimeOffset? MetricsUtc,ToolbarScienceMetric[] Metrics,string[] Warnings,string TriggerStatus,
     bool DetailsOmitted=false);
 public sealed record ToolbarControlReceipt(long Sequence,CollectionEventOutcome Outcome,Guid? SessionId,string Reason);
