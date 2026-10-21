@@ -32,7 +32,7 @@ export function dialogHeader(dialog,{title,opener=document.activeElement,protect
  dialog.addEventListener('cancel',event=>{event.preventDefault();requestClose();});
  dialog.addEventListener('input',event=>{if(protectEdits&&!event.target.matches('[data-transient]'))dirty=true;});
  dialog.addEventListener('close',()=>queueMicrotask(()=>{const top=[...document.querySelectorAll('dialog[open]')].at(-1);if(returnTo?.isConnected&&(!top||top.contains(returnTo)))returnTo.focus({preventScroll:true});}));
- const result={requestClose,markSaved:()=>{dirty=false;},markDirty:()=>{dirty=true;}};states.set(dialog,result);return result;
+ const result={requestClose,isDirty:()=>dirty,markSaved:()=>{dirty=false;},markDirty:()=>{dirty=true;}};states.set(dialog,result);return result;
 }
 export function requestDialogClose(dialog){const state=states.get(dialog);if(state)state.requestClose();else dialog.close();}
 export function markDialogSaved(dialog){states.get(dialog)?.markSaved();}
