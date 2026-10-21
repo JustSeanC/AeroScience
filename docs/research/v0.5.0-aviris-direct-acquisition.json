@@ -73,5 +73,29 @@
     "basis": "Redirects observed from official public ORNL guide/checksum requests; signed URLs intentionally omitted.",
     "protected_bucket_basis": "Official CMR s3://ornl-cumulus-prod-protected/aviris/ references in the captured NG companion records.",
     "protected_authenticated_redirect_validation": "Pending authorized original acquisition; a changed host/path fails closed, without bearer forwarding."
+  },
+  "technical_validation": {
+    "source_commit": "12defaef38ad3c7ed16607e73b0c9e829e084c55",
+    "run": "https://github.com/JustSeanC/AeroScience/actions/runs/39675152493",
+    "conclusion": "passed",
+    "linux": {
+      "dotnet_passed": 488,
+      "browser_passed": 123,
+      "helpers_passed": 100,
+      "helpers_skipped": 1,
+      "skip_reason": "Native PE fixture requires Windows publish"
+    },
+    "windows": {
+      "dotnet_passed": 488,
+      "helpers_passed": 97,
+      "helpers_skipped": 1,
+      "skip_reason": "Case-collision fixture requires case-sensitive filesystem",
+      "publish_and_profile_isolation": "passed",
+      "native_credential_vault": "Actual OS round-trip/isolation/removal passed with disposable synthetic credentials; NOT genuine Earthdata authorization",
+      "installer_structure": "Inno 6.7.1 synthetic fixture compile only; no installer publication"
+    },
+    "recovery": "Recorder restart, ten session/evidence kills and two Library budget/intent kills passed on both OSes; synthetic persistence evidence",
+    "genuine_authorized_nasa_import": "Not tested: authorized original files and independent family-specific numerical validation remain required",
+    "physical_acceptance": "Not tested"
   }
 }
