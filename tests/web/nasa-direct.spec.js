@@ -7,6 +7,13 @@ async function post(request, path, data = {}) {
   return response.json();
 }
 test.beforeEach(async ({ request }) => {
+  // The workspace fixture leaves scientific instruments enabled while its synthetic
+  // aircraft keeps moving. Establish this scenario's explicit no-flight/no-collection
+  // precondition; otherwise dozens of legitimate higher-priority requests precede it.
+  expect((await (await request.get('/api/state')).json()).activeMission).toBeNull();
+  await post(request, '/api/instruments', []);
+  await post(request, '/api/science/prepare/cancel');
+  await post(request, '/api/science/preparation/control', { action: 'resume' });
   await post(request, '/api/testing/library/setup');
   await post(request, '/api/testing/library/mode/normal');
   await post(request, '/api/testing/nasa/connection'); // Explicit synthetic credential; never a NASA login.
@@ -28,6 +35,13 @@ async function discover(page, family) {
   await page.getByRole('button', { name: 'Search provider catalog', exact: true }).click();
   await expect(page.getByLabel('Provider catalog results')).toContainText(family === 'classic' ? 'f080611' : 'ang20140621');
 }
+async function completionState(request, id) {
+  const job = await (await request.get(`/api/science/library/jobs/${id}`)).json();
+  if (job.state !== 'Queued') return job.state;
+  const activity = await (await request.get('/api/science/activity')).json();
+  const flight = await (await request.get('/api/state')).json();
+  return JSON.stringify({ state: job.state, paused: activity.queue.paused, activeMission: flight.activeMission?.id ?? null, queue: activity.queue, plans: activity.plans });
+}
 for (const [family, bands] of [['classic', 224], ['ng', 425]]) test(`${family} direct preview, approval, original verification, automatic import and offline reuse`, async ({ page, request }) => {
   await discover(page, family);
   await expect(page.getByLabel('NASA Earthdata connection')).toContainText('Credential saved');
@@ -39,12 +53,13 @@ for (const [family, bands] of [['classic', 224], ['ng', 425]]) test(`${family} d
   await expect(review).toContainText('.hdr'); await expect(review).toContainText('.bin');
   expect((await (await request.get(`/api/science/library/jobs/${job.id}`)).json()).state).toBe('Awaiting Approval');
   await page.getByRole('button', { name: 'Download & Import', exact: true }).click();
-  await expect.poll(async () => (await (await request.get(`/api/science/library/jobs/${job.id}`)).json()).state).toBe('Completed');
+  await expect.poll(() => completionState(request, job.id)).toBe('Completed');
   const completed = await (await request.get(`/api/science/library/jobs/${job.id}`)).json();
   expect(completed.downloadedBytes).toBeGreaterThan(0); expect(JSON.stringify(completed)).not.toContain('synthetic_browser_earthdata_token');
   const sources = await (await request.get('/api/science/sources')).json();
   const source = sources.find(s => s.source.id === completed.items[0].sourceId).source;
   expect(source.manifest.bands).toHaveLength(bands); expect(source.manifest.acquisition.workflow).toBe('nasa-earthdata-original-envi');
+  expect((await (await request.get('/api/state')).json()).activeMission).toBeNull();
   await post(request, '/api/science/earthdata/disconnect');
   await post(request, '/api/science/access', { onlineEnabled: false, privacyAccepted: false });
   const reuse = await post(request, '/api/science/library/nasa/preview', { selection: { provider: job.preview.selection.scenes[0].provider, granuleId: source.manifest.sceneId, revision: job.preview.selection.scenes[0].revision }, maximumTransferBytes: 67108864 });

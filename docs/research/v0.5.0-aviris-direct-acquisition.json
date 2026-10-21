@@ -66,5 +66,12 @@
   "genuine_classic_numeric_import": "Pending: individual authorized original header/binary and independent comparison required.",
   "genuine_ng_numeric_import": "Pending: independent individual authorized original header/binary and spectral comparison required.",
   "installed_and_physical_acceptance": "Pending; cloud fixtures are not Windows/MSFS/iPad/Quest acceptance.",
-  "emit": "Discovery/official links only; native NetCDF-4 remains deferred."
+  "emit": "Discovery/official links only; native NetCDF-4 remains deferred.",
+  "implementation_commit": "13f6c15330ee77ecb8817243969bcb5b739bacb2",
+  "cdn_observation": {
+    "host": "d3o6w55j8uz1ro.cloudfront.net",
+    "basis": "Redirects observed from official public ORNL guide/checksum requests; signed URLs intentionally omitted.",
+    "protected_bucket_basis": "Official CMR s3://ornl-cumulus-prod-protected/aviris/ references in the captured NG companion records.",
+    "protected_authenticated_redirect_validation": "Pending authorized original acquisition; a changed host/path fails closed, without bearer forwarding."
+  }
 }
