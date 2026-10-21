@@ -45,9 +45,17 @@ public sealed class StacScientificProvider(ScientificHttp http,string id):IScien
         candidates=p.SelectionPolicy=="newest"?candidates.OrderByDescending(f=>Date(f.GetProperty("properties"))):candidates.OrderBy(f=>Cloud(f.GetProperty("properties"))).ThenByDescending(f=>Date(f.GetProperty("properties")));
         foreach(var feature in candidates)
         {
+            var result=Describe(feature,kind,area);if(result is not null)return result;
+        }
+        return null;
+    }
+    internal ScientificDiscovery? Describe(JsonElement feature,RemoteKind kind,GeographicBounds area)
+    {
+        var root=id=="earth-search"?"https://earth-search.aws.element84.com/v1":"https://planetarycomputer.microsoft.com/api/stac/v1";
+        var collection=kind switch{RemoteKind.Thermal=>"landsat-c2-l2",RemoteKind.Multispectral=>"sentinel-2-l2a",_=>"cop-dem-glo-30"};
             var props=feature.GetProperty("properties");var assets=feature.GetProperty("assets");var scene=feature.GetProperty("id").GetString()!;
             var wanted=kind switch{RemoteKind.Thermal=>new[]{("ST_B10","lwir11"),("QA_PIXEL","qa_pixel"),("QA_RADSAT","qa_radsat")},RemoteKind.Multispectral=>new[]{("B02","blue"),("B03","green"),("B04","red"),("B08","nir"),("SCL","scl")},_=>new[]{("elevation","data")}};
-            if(wanted.Any(pair=>!assets.TryGetProperty(pair.Item2,out _)))continue;
+            if(wanted.Any(pair=>!assets.TryGetProperty(pair.Item2,out _)))return null;
             var bands=new List<ProviderAsset>();
             foreach(var (bandId,key) in wanted)
             {
@@ -75,8 +83,7 @@ public sealed class StacScientificProvider(ScientificHttp http,string id):IScien
             return new(manifest,bands.ToArray(),root,item,kind==RemoteKind.Terrain?"Numeric DSM; vertical reference differs from 3DEP and aircraft MSL":$"Scene cloud cover {Cloud(props):0.##}%; local QA/nodata still determines valid samples",kind==RemoteKind.Thermal?"30 m delivered grid / 100 m native TIRS":kind==RemoteKind.Multispectral?"10 m reflectance / 20 m SCL":"~30 m geographic DSM",area,
                 Limitations:["Discovery examines at most 60 ordered catalog candidates; no claim of exhaustive coverage.",notes],
                 ProviderMetadataJson:JsonSerializer.Serialize(new{collection,scene,properties=props,geometry=feature.GetProperty("geometry"),assets=wanted.ToDictionary(pair=>pair.Item1,pair=>assets.GetProperty(pair.Item2))}));
-        }
-        return null;
+
     }
     public static bool Matches(JsonElement feature,RemoteKind kind,GeographicBounds area,ScientificAccessPreferences p)
     {
@@ -89,7 +96,7 @@ public sealed class StacScientificProvider(ScientificHttp http,string id):IScien
         }
         catch(Exception e)when(e is JsonException or KeyNotFoundException or InvalidOperationException or FormatException){return false;}
     }
-    private static bool Contains(JsonElement geometry,Coordinates point)
+    internal static bool Contains(JsonElement geometry,Coordinates point)
     {
         var type=geometry.GetProperty("type").GetString();var coords=geometry.GetProperty("coordinates");
         return type=="Polygon"?Polygon(coords,point):type=="MultiPolygon"&&coords.EnumerateArray().Any(p=>Polygon(p,point));

@@ -61,6 +61,8 @@ public sealed class AutomaticScientificData : IDisposable
     private readonly ScientificTransferLedger preflightTransfers=new(rolling:false);
     private readonly Dictionary<string,string> scopes=[];
     private readonly System.Collections.Concurrent.ConcurrentDictionary<string,(long Length,DateTime Modified)> verified=new();
+    internal ScientificHttp Http => http;
+    internal IScientificDataProvider Provider(string id)=>providers.Single(p=>p.Id==id);
     public string? AvailabilityError => science.AvailabilityError();
     public object NetworkDiagnostics()=>http.Diagnostics();
     public double EstimatedPreparationSeconds {get{lock(gate)return preparationSeconds;}}

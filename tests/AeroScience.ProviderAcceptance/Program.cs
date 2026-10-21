@@ -34,6 +34,19 @@ if(args.Contains("--benchmark")){await RegionalBenchmark.Run(output,args);return
 if(args.Contains("--offline-from")){await OfflineScientificAcceptance.Run(args[Array.IndexOf(args,"--offline-from")+1],output,science,missions,settings);return;}
 if(args.Contains("--trace-from")){ScientificTraceBenchmark.Run(args[Array.IndexOf(args,"--trace-from")+1],output);return;}
 using var auto=new AutomaticScientificData(science,settings);
+if(args.Contains("--library-catalog"))
+{
+    var catalog=new ScientificCatalog(auto,science,settings);var pages=new List<object>();
+    foreach(var provider in ScientificCatalog.Providers)
+    {
+        var area=provider.Id=="copernicus"?new GeographicBounds(8.1,46.1,8.12,46.12):new(-75,40,-74.98,40.02);
+        var page=await catalog.Search(new(provider.Id,area,provider.SceneDates?DateTimeOffset.Parse("2024-09-01T00:00:00Z"):null,provider.SceneDates?DateTimeOffset.Parse("2024-09-10T00:00:00Z"):null,PageSize:3));
+        Console.WriteLine(provider.Id+": "+page.Status+" / "+string.Join(", ",page.Items.Select(i=>i.Scene)));
+        if(page.Status!="Available"||page.Items.Length==0)throw new IOException("Genuine catalog failed: "+provider.Id+" "+page.Error);
+        pages.Add(new{provider=provider.Id,page});
+    }
+    await File.WriteAllTextAsync(Path.Combine(output,"catalog.json"),JsonSerializer.Serialize(pages,WireJson.Options));return;
+}
 var cases=new[]{("usgs-3dep",RemoteKind.Terrain,new Coordinates(40.005,-74.995)),("landsat-c2-l2",RemoteKind.Thermal,new Coordinates(40.005,-74.995)),("sentinel-2-l2a",RemoteKind.Multispectral,new Coordinates(40.005,-74.995)),("cop-dem-glo-30",RemoteKind.Terrain,new Coordinates(46.105,8.105))};
 var results=new List<object>();
 foreach(var (name,kind,point) in cases)

@@ -52,6 +52,9 @@ public static class ResearchApi
         app.MapPost("/api/plans/{id:guid}/preparation/control",(Guid id,PreparationControl request,ScientificPlanData plans)=>{plans.Control(id,request.Action);return Results.Ok(plans.Snapshot().Single(s=>s.PlanId==id));});
         app.MapGet("/api/science/activity",(AutomaticScientificData automatic,ScientificPlanData plans)=>new{jobs=automatic.Snapshot(),queue=automatic.QueueSummary(),plans=plans.Snapshot(),plansWarning=plans.Warning,network=automatic.NetworkDiagnostics()});
         app.MapGet("/api/science/diagnostics",(AutomaticScientificData automatic,HttpContext c)=>AccessControl.IsLoopback(c)?Results.Ok(new{privacy="Geographic regions and provider/instrument activity are included. Review before sharing. No credentials or original scientific files.",events=ScientificDiagnostics.Snapshot(),network=automatic.NetworkDiagnostics(),queue=automatic.QueueSummary()}):Results.StatusCode(403));
+        app.MapGet("/api/science/library/providers",()=>ScientificCatalog.Providers);
+        app.MapGet("/api/science/library/local",(ScientificCatalog catalog)=>catalog.Local());
+        app.MapPost("/api/science/library/catalog",(ScientificCatalogQuery query,ScientificCatalog catalog,HttpContext c)=>catalog.Search(query,c.RequestAborted));
         app.MapGet("/api/science/readiness",(AutomaticScientificData automatic)=>automatic.Snapshot());
         app.MapPost("/api/science/prepare",(ScientificPreparationRequest request,AutomaticScientificData automatic)=>automatic.Prepare(GeographicBounds.Around(new(request.Latitude,request.Longitude)),request.Kinds??[RemoteKind.Thermal,RemoteKind.Multispectral,RemoteKind.Terrain],retry:true,samplePoint:new(request.Latitude,request.Longitude)));
         app.MapPost("/api/science/prepare/cancel",(PreparationCancel request,AutomaticScientificData automatic)=>{automatic.Cancel(request.Key);return Results.Ok(new{cancelled=true});});

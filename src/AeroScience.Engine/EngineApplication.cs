@@ -41,6 +41,7 @@ public static class EngineApplication
         builder.Services.AddSingleton<AccessControl>();
         builder.Services.AddSingleton(sp => new ScientificAccessSettings(sp.GetRequiredService<EngineOptions>().ConfigurationDirectory ?? sp.GetRequiredService<EngineOptions>().DataDirectory, NetworkCost.IsUnmetered));
         builder.Services.AddSingleton(sp => { _ = sp.GetRequiredService<StorageManagement>(); return new AutomaticScientificData(sp.GetRequiredService<ScienceStore>(),sp.GetRequiredService<ScientificAccessSettings>()); });
+        builder.Services.AddSingleton<ScientificCatalog>();
         builder.Services.AddSingleton(sp=>new ScientificImportSession(sp.GetRequiredService<ScienceStore>(),sp.GetRequiredService<AutomaticScientificData>().RefreshLocalReadiness));
         builder.Services.AddSingleton<ScientificPlanData>();
         builder.Services.AddSingleton<ScientificFlightPrediction>();
