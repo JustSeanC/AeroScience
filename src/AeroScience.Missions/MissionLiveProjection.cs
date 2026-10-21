@@ -18,7 +18,7 @@ public sealed class MissionLiveProjection(MissionStore store,Guid mission)
         var page=store.EvaluationPositions(mission,after);var route=research.PlanSnapshot?.Waypoints??[];
         foreach(var (sequence,frame) in page)
         {
-            after=sequence;at=frame.TimestampUtc;var tick=frame.TimestampUtc.ToUnixTimeSeconds();positions[tick]=frame;
+            after=sequence;if(frame.TimestampUtc<flight.StartedUtc)continue;at=frame.TimestampUtc;var tick=frame.TimestampUtc.ToUnixTimeSeconds();positions[tick]=frame;
             if(positions.Count>200000){positions.Remove(positions.Keys.Min());bounded=true;}
             if(expectedWaypoint<route.Length&&Geodesy.Distance(new(frame.Latitude,frame.Longitude),Geodesy.Point(route[expectedWaypoint]))<=1000)expectedWaypoint++;
             foreach(var obligation in context?.Obligations??[])

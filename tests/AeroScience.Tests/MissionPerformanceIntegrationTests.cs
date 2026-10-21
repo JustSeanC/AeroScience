@@ -2,6 +2,11 @@ using AeroScience.Shared;
 using AeroScience.Missions;
 using AeroScience.Telemetry;
 using Xunit;
+using AeroScience.Engine;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Data.Sqlite;
 namespace AeroScience.Tests;
 public sealed class MissionPerformanceIntegrationTests:IDisposable
 {
@@ -85,6 +90,19 @@ public sealed class MissionPerformanceIntegrationTests:IDisposable
     {
         var flight=Start();Tick();coordinator.ConfigureInstruments([new("ambient-temperature",true)]);Tick();Tick();coordinator.End(flight.Id);var input=MissionEvaluationArchive.Build(store,science,flight.Id);
         Assert.Single(input.Context!.Configurations);Assert.Equal("ambient-wind",input.Context.Configurations[0].Settings.InstrumentId);Assert.Equal(2,input.Yield.Length);Assert.Equal(1,input.Yield.Single(y=>y.InstrumentId=="ambient-wind").Metrics[0].Numerator);Assert.Equal(2,input.Yield.Single(y=>y.InstrumentId=="ambient-temperature").Metrics[0].Numerator);Assert.Equal(2,input.Sessions.Single().Yield.Length);var grade=MissionGrading.Report(input);Assert.Equal(100d/3,grade.Categories.Single(c=>c.Category==RubricCategory.AcquisitionDiscipline).ScoreLower,7);
+    }
+    [Fact] public void QueuedPreStartTelemetryCannotProduceNegativeLiveGrades()
+    {
+        var flight=Start();var early=now.AddMilliseconds(-50);var frame=SimulatedTelemetryProvider.Generate(early,0);store.Append(flight.Id,frame);var projection=new MissionLiveProjection(store,flight.Id).Update();Assert.Equal(MissionGradeStatus.Provisional,projection.Grade.Status);Assert.True(projection.SupportedScoreLower>=0);Assert.All(projection.Input.Evidence,e=>Assert.True(e.EvidenceFraction>=0));coordinator.End(flight.Id);
+    }
+    [Fact] public async Task UnsupportedGradingContextCannotStopTheHostOrRawFlightRecorder()
+    {
+        var flight=Start();using(var db=new SqliteConnection(new SqliteConnectionStringBuilder{DataSource=store.DatabasePath,Pooling=false}.ToString())){db.Open();using var cmd=db.CreateCommand();cmd.CommandText="UPDATE collection_snapshots SET payload_json=json_set(payload_json,'$.version',99) WHERE kind='assessment-context' AND mission_id=$id";cmd.Parameters.AddWithValue("$id",flight.Id.ToString());Assert.Equal(1,cmd.ExecuteNonQuery());}
+        using var analysis=new ScientificAnalysisJobs(store,science);var worker=new MissionPerformanceService(store,analysis,NullLogger<MissionPerformanceService>.Instance);
+        using var host=new HostBuilder().ConfigureServices((_,services)=>{services.AddSingleton(worker);services.AddHostedService(sp=>sp.GetRequiredService<MissionPerformanceService>());}).Build();
+        await host.StartAsync();var deadline=System.Diagnostics.Stopwatch.StartNew();
+        while(true){await Task.Delay(10);try{if(System.Text.Json.JsonSerializer.SerializeToElement(worker.Read(flight.Id),WireJson.Options).GetProperty("state").GetString()=="Unavailable")break;}catch(NotSupportedException){}if(deadline.Elapsed>TimeSpan.FromSeconds(5))throw new TimeoutException("Expected the independent grading worker to report its fault without stopping the host.");}
+        Assert.False(host.Services.GetRequiredService<IHostApplicationLifetime>().ApplicationStopping.IsCancellationRequested);Tick();Assert.Equal(1,store.Detail(flight.Id)!.Mission.SampleCount);Assert.Empty(store.PerformanceReports(flight.Id));await host.StopAsync();coordinator.End(flight.Id);
     }
     public void Dispose(){research.Dispose();science.Dispose();if(Directory.Exists(root))Directory.Delete(root,true);}
 }

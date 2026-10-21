@@ -24,7 +24,9 @@ public static class WorkstationFixtures
             var mission=coordinator.Start(new("SYNTHETIC WORKSTATION FIXTURE — "+kind,Instruments:[new(instrument,true)]));missionIds.Add(mission.Id);
             var utc=DateTimeOffset.UtcNow;var frame=new TelemetryFrame(utc,TelemetrySource.Simulated,"SYNTHETIC UI/load fixture; no MSFS",40,-75,1000,328.0839895,140,150,160,0,0,0,0,0);
             coordinator.Apply(new(new(ConnectionState.Connected,TelemetrySource.Simulated,"SYNTHETIC UI/load fixture",utc),frame));
-            using var timeout=new CancellationTokenSource(TimeSpan.FromSeconds(15));while(science.Products(mission.Id).Length==0)await Task.Delay(10,timeout.Token);
+            using var timeout=new CancellationTokenSource(TimeSpan.FromSeconds(15));
+            try{while(science.Products(mission.Id).Length==0)await Task.Delay(10,timeout.Token);}
+            catch(OperationCanceledException)when(timeout.IsCancellationRequested){throw new TimeoutException($"15-second synthetic workstation acquisition deadline for {kind}; actual worker state: {JsonSerializer.Serialize(coordinator.Snapshot().Research,WireJson.Options)}");}
             originals.Add(science.ReadProduct(science.Products(mission.Id).First().Id));coordinator.End(mission.Id);
         }
         var primary=missions.Detail(missionIds[0])!.Mission;

@@ -10,7 +10,7 @@ public static class MissionEvaluationArchive
     public static MissionEvaluationInput Build(MissionStore store,ScienceStore science,Guid mission,CancellationToken token=default,bool coverage=true)
     {
         var detail=store.Detail(mission)??throw new ArgumentException("Mission not found.");var research=store.Research(mission);var plan=research.PlanSnapshot;
-        var frames=store.StreamSamples(mission).Take(2000001).ToArray();if(frames.Length>2000000)throw new InvalidOperationException("Archive exceeds two million positions; no partial final grade generated.");
+        var archivedFrames=store.StreamSamples(mission).Take(2000001).ToArray();var frames=archivedFrames.Where(f=>f.TimestampUtc>=detail.Mission.StartedUtc&&(detail.Mission.EndedUtc is null||f.TimestampUtc<=detail.Mission.EndedUtc)).ToArray();if(archivedFrames.Length>2000000)throw new InvalidOperationException("Archive exceeds two million positions; no partial final grade generated.");
         var sessions=Sessions(store,mission);var events=Events(store,mission);var actual=ScientificEvaluationEvidence.Read(store,science,mission,token);
         var operating=store.StreamOperatingReports(mission).Take(1000001).ToArray();if(operating.Length>1000000)throw new InvalidOperationException("Operating evidence exceeds bounded report workload.");
         var context=store.CollectionSnapshot<MissionAssessmentContext>(mission);var at=detail.Mission.EndedUtc??frames.LastOrDefault()?.TimestampUtc??detail.Mission.StartedUtc;
@@ -169,6 +169,6 @@ public static class MissionEvaluationArchive
         }
         catch(Exception e)when(e is IOException or Microsoft.Data.Sqlite.SqliteException){limitations.Add("Original source metadata unavailable at this evaluation; earlier report revisions remain retained.");}
         return new(1,mission,at,completed,context,criteria.ToArray(),yield.Where(y=>y.SessionId is null).ToArray(),sessionReports,
-            ["telemetry-sha256:"+PreflightReadiness.Hash(frames),"collection-events-sha256:"+PreflightReadiness.Hash(events),"operating-sha256:"+PreflightReadiness.Hash(operating),"science-results-sha256:"+PreflightReadiness.Hash(actual)],limitations.ToArray(),sources,actual.Length==0?null:actual.Max(a=>a.ProcessedUtc??a.ExposureUtc),detail.Mission.Source,detail.Mission.Status==MissionStatus.Interrupted);
+            ["telemetry-sha256:"+PreflightReadiness.Hash(archivedFrames),"collection-events-sha256:"+PreflightReadiness.Hash(events),"operating-sha256:"+PreflightReadiness.Hash(operating),"science-results-sha256:"+PreflightReadiness.Hash(actual)],limitations.ToArray(),sources,actual.Length==0?null:actual.Max(a=>a.ProcessedUtc??a.ExposureUtc),detail.Mission.Source,detail.Mission.Status==MissionStatus.Interrupted);
     }
 }

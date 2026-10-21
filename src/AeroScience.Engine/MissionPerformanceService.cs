@@ -8,7 +8,7 @@ public sealed class MissionPerformanceService(MissionStore missions,ScientificAn
     readonly HashSet<Guid> attempted=[];
     readonly System.Collections.Concurrent.ConcurrentDictionary<Guid,Guid> jobs=new();
     int archiveOffset;
-    MissionLiveProjection? live;Guid? liveId;MissionPerformanceReport? projected;
+    MissionLiveProjection? live;Guid? liveId;MissionPerformanceReport? projected;string? projectionFault;
     public object Read(Guid id)
     {
         var mission=missions.Detail(id)?.Mission??throw new ArgumentException("Mission not found.");
@@ -20,8 +20,9 @@ public sealed class MissionPerformanceService(MissionStore missions,ScientificAn
             return new{state=reports.Length>0?"Available":legacy?"Not Graded":job?.State??"Pending",message=legacy?"Legacy archive has no frozen rubric or obligations. Existing scientific results remain available; no historical grading evidence is invented.":job?.Message,reports,revisions,projection=(MissionPerformanceReport?)null};
         }
         var projection=Volatile.Read(ref projected);
-        if(projection?.MissionId!=id){var context=missions.CollectionSnapshot<MissionAssessmentContext>(id);projection=MissionGrading.Report(new(1,id,mission.StartedUtc,false,context,[],[],[],[],["Live evidence projection pending the next bounded background update."]));}
-        return new{state="Provisional",reports,revisions,projection};
+        var fault=Volatile.Read(ref projectionFault);
+        if(projection?.MissionId!=id&&fault is null){var context=missions.CollectionSnapshot<MissionAssessmentContext>(id);projection=MissionGrading.Report(new(1,id,mission.StartedUtc,false,context,[],[],[],[],["Live evidence projection pending the next bounded background update."]));}
+        return new{state=fault is null?"Provisional":"Unavailable",message=fault,reports,revisions,projection};
     }
     public AnalysisJob Recompute(Guid mission,string reason)
     {var job=analysis.EnqueuePerformance(mission,reason);jobs[mission]=job.Id;return job;}
@@ -33,7 +34,7 @@ public sealed class MissionPerformanceService(MissionStore missions,ScientificAn
             {
                 var recent=missions.List(20);
                 var active=recent.FirstOrDefault(m=>m.Status==MissionStatus.Recording);
-                if(active is not null){if(liveId!=active.Id){liveId=active.Id;live=new(missions,active.Id);}Volatile.Write(ref projected,live!.Update());}
+                if(active is not null){if(liveId!=active.Id){liveId=active.Id;live=new(missions,active.Id);}Volatile.Write(ref projected,live!.Update());projectionFault=null;}
                 else {live=null;liveId=null;Volatile.Write(ref projected,null);}
                 var page=archiveOffset==0?recent:missions.List(20,archiveOffset);archiveOffset=page.Count<20?0:archiveOffset+20;
                 foreach(var mission in page.Where(m=>m.Status!=MissionStatus.Recording))
@@ -43,7 +44,12 @@ public sealed class MissionPerformanceService(MissionStore missions,ScientificAn
                     try{Recompute(mission.Id,"End-flight archived evaluation");}catch(InvalidOperationException){attempted.Remove(mission.Id);break;}
                 }
             }
-            catch(Exception e)when(e is IOException or InvalidOperationException or Microsoft.Data.Sqlite.SqliteException){logger.LogWarning("Archived performance evaluation unavailable: {Kind}",e.GetType().Name);}
+            catch(Exception e)when(e is not OutOfMemoryException)
+            {
+                projectionFault="Mission performance is unavailable; flight recording continues independently. "+e.GetType().Name;
+                Volatile.Write(ref projected,null);live=null;liveId=null;
+                logger.LogWarning(e,"Mission performance evaluation failed; no score was fabricated and flight recording remains independent.");
+            }
             try{await Task.Delay(TimeSpan.FromSeconds(5),stoppingToken);}catch(OperationCanceledException){break;}
         }
     }

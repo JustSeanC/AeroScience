@@ -70,6 +70,7 @@ jobs:
             artifacts/development-plan.json
             artifacts/web-results.json
             artifacts/browser-tests/**
+            artifacts/browser-server/**
             tests/AeroScience.Tests/TestResults/**/*.trx
             tests/AeroScience.Tests/TestResults/**/Sequence_*.xml
           if-no-files-found: ignore
@@ -112,6 +113,7 @@ jobs:
           path: |
             artifacts/web-results.json
             artifacts/browser-tests/**
+            artifacts/browser-server/**
           if-no-files-found: ignore
           retention-days: 7
       - run: python3 -m unittest discover -s tests -p 'test_*.py' -v
