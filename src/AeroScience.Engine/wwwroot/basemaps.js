@@ -14,8 +14,9 @@ let privacyDialog;
 async function firstRunPrivacy(config) {
   if (!config.configuration.requiresPrivacyChoice || privacyDialog) return;
   privacyDialog = element("dialog");
-  privacyDialog.setAttribute("aria-label", "Choose your map privacy");
-  privacyDialog.append(
+  const dialog=privacyDialog;
+  dialog.setAttribute("aria-label", "Choose your map privacy");
+  dialog.append(
     element("h2", "Choose your map privacy"),
     element(
       "p",
@@ -31,21 +32,21 @@ async function firstRunPrivacy(config) {
     button.onclick = async () => {
       try {
         await api("/api/maps/privacy", { online });
-        privacyDialog.close();
-        privacyDialog.remove();
-        privacyDialog = null;
+        dialog.close();
+        dialog.remove();
+        if(privacyDialog===dialog)privacyDialog = null;
         configuration = null;
         await settings();
         notify();
       } catch (e) {
-        privacyDialog.append(element("p", e.message));
+        if(dialog.isConnected)dialog.append(element("p", e.message));
       }
     };
-    privacyDialog.append(button);
+    dialog.append(button);
   }
-  dialogHeader(privacyDialog,{title:"Choose your map privacy",onDismiss:()=>{privacyDialog.close();privacyDialog.remove();privacyDialog=null;}});
-  document.body.append(privacyDialog);
-  privacyDialog.showModal();
+  dialogHeader(dialog,{title:"Choose your map privacy",onDismiss:()=>{dialog.close();dialog.remove();if(privacyDialog===dialog)privacyDialog=null;}});
+  document.body.append(dialog);
+  dialog.showModal();
 }
 async function api(path, value) {
   if (value !== undefined && !csrf) {

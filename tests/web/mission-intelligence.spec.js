@@ -37,6 +37,6 @@ test('delayed End for session A cannot end a new session B; reconnect clears sta
 test('unknown metrics do not render a fabricated percentage and Library/History links use existing routes',async({page,request})=>{
  await begin(request);await page.goto('/#control');const panel=page.locator('#mission-intelligence');await expect(panel).toContainText('armed');
  const text=await page.evaluate(async()=>{const {metricText}=await import('/mission-intelligence.js');return metricText({id:'coverage',status:'unsupported',numerator:10,denominator:10,unit:'m²',missing:0,unassessed:1,method:'Unknown native support'});});expect(text).not.toContain('100%');expect(text).toContain('unsupported');
- await panel.getByRole('link',{name:'Browse & Download scientific sources',exact:true}).click();await expect(page.getByRole('heading',{name:'Find & Download Data',exact:true})).toBeVisible();await page.goBack();await expect(panel).toBeVisible();
+ await panel.getByRole('link',{name:'Find & Download External Data',exact:true}).click();await expect(page.getByRole('heading',{name:'Find & Download Data',exact:true})).toBeVisible();await page.goBack();await expect(panel).toBeVisible();
  await panel.getByRole('link',{name:'Review offline flight reports',exact:true}).click();await expect(page.locator('#history')).toBeVisible();
 });

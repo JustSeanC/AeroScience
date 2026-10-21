@@ -21,9 +21,10 @@ export function initializeWorkstationShell(){
     if(event.key==='Tab'){const elements=[...sidebar.querySelectorAll('a[href],button')].filter(element=>element.getClientRects().length&&!element.disabled);const first=elements[0],last=elements.at(-1);
       if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}}
   });
+  window.addEventListener('hashchange',()=>setOpen(false,false));
   compact.addEventListener('change',()=>setOpen(false,false));setOpen(false,false);
   const links=document.querySelectorAll('.nav-link');for(const link of links){link.title=link.textContent.trim();}
-  return {afterNavigation(parent){setOpen(false,false);const heading=parent?.querySelector('h1');if(heading){heading.tabIndex=-1;heading.focus({preventScroll:true});}window.dispatchEvent(new Event('resize'));}};
+  return {afterNavigation(parent){if(open){window.dispatchEvent(new Event('resize'));return;}setOpen(false,false);const heading=parent?.querySelector('h1');if(heading){heading.tabIndex=-1;heading.focus({preventScroll:true});}window.dispatchEvent(new Event('resize'));}};
 }
 
 export function streamlineMissionControl(){

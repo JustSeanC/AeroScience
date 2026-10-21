@@ -51,6 +51,16 @@ public sealed class PreparationScopeTests:IDisposable
         public readonly List<GeographicBounds> Started=[];public readonly TaskCompletionSource Began=new(TaskCreationOptions.RunContinuationsAsynchronously);
         public async Task<ScientificDiscovery?> Discover(RemoteKind kind,GeographicBounds area,ScientificAccessPreferences preferences,ScientificDownloadBudget budget,CancellationToken token){lock(Started)Started.Add(area);Began.TrySetResult();await Task.Delay(Timeout.Infinite,token);return null;}
     }
+    private sealed class NoCoverage:IScientificDataProvider
+    {
+        public string Id=>"synthetic-retry";public int Calls;public bool Supports(RemoteKind kind)=>true;
+        public Task<ScientificDiscovery?> Discover(RemoteKind kind,GeographicBounds area,ScientificAccessPreferences preferences,ScientificDownloadBudget budget,CancellationToken token){Interlocked.Increment(ref Calls);return Task.FromResult<ScientificDiscovery?>(null);}
+    }
+    [Fact]public async Task ExplicitNewPlanPreparationCanRetryASelectedAreaPreviouslyFailedInAnotherScope()
+    {
+        settings.Save(new(true,true));var provider=new NoCoverage();using var automatic=new AutomaticScientificData(science,settings,providers:[provider]);var area=new GeographicBounds(-75,40,-74.96,40.04);automatic.Prepare(area,[RemoteKind.Terrain],scope:"plan:earlier");await Wait(()=>automatic.Snapshot().Any(s=>s.Status=="Unavailable"));
+        var plan=new MissionPlan(Guid.NewGuid(),"Explicit selected retry",Waypoints:[new("Area",40.001,-74.999)],Instruments:[new("terrain-scanner",true)]);var plans=new ScientificPlanData(automatic,settings);plans.Prepare(plan,true);await Wait(()=>provider.Calls==2);Assert.Empty(science.Sources());Assert.Equal(1,plans.Instruments(plan.Id)[0].Total);
+    }
     [Fact]public async Task RelevantPreparationContinuesDuringFlightWithBoundedConcurrencyAndHonorsResourceAndUserHolds()
     {
         settings.Save(new(true,true,ConcurrentDownloads:4));var provider=new Blocking();using var automatic=new AutomaticScientificData(science,settings,providers:[provider]);automatic.Pause(true);var sessions=new ScientificPlanData(automatic,settings);var plan=WithActions();sessions.Prepare(plan,true,new("first-half"));

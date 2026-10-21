@@ -61,7 +61,7 @@ public sealed class AutomaticScientificData : IDisposable
     public void LimitScopeWindow(string scope,IReadOnlySet<string> desired){lock(gate)foreach(var job in queue.Values.Where(j=>j.Scope==scope&&!desired.Contains(j.Key)).ToArray()){queue.Remove(job.Key);retryAfter.Remove(job.Key);if(states.TryGetValue(job.Key,out var state))states[job.Key]=state with{Status="Superseded",Message="Upcoming aircraft regions reprioritized; this unsent area remains in the full plan inventory."};}Wake();}
     public void RetainScopeKeys(string scope,IReadOnlySet<string> keys){lock(gate)foreach(var key in scopes.Where(p=>p.Value==scope&&!keys.Contains(p.Key)).Select(p=>p.Key).ToArray())Cancel(key);}
 
-    private readonly HashSet<string> flightKeys=[],preempted=[];
+    private readonly HashSet<string> flightKeys=[],urgentFlightKeys=[],preempted=[];
     private DateTimeOffset lastPreemption;
     private double preparationSeconds=45;
     private readonly ScientificTransferLedger flightTransfers=new();
@@ -83,7 +83,7 @@ public sealed class AutomaticScientificData : IDisposable
     public void Pause(bool value){lock(gate)paused=value;Wake();}
     public void ReprioritizeFlight(IReadOnlyDictionary<string,double> priorities)
     {
-        lock(gate){flightKeys.Clear();flightKeys.UnionWith(priorities.Keys);foreach(var job in queue.Values.Where(j=>j.Scope=="flight").ToArray())
+        lock(gate){flightKeys.Clear();flightKeys.UnionWith(priorities.Keys);urgentFlightKeys.Clear();urgentFlightKeys.UnionWith(priorities.Where(p=>p.Value<=0).Select(p=>p.Key));foreach(var job in queue.Values.Where(j=>j.Scope=="flight").ToArray())
         {
             if(priorities.TryGetValue(job.Key,out var priority))queue[job.Key]=job with{Priority=priority};
             else{queue.Remove(job.Key);states[job.Key]=states[job.Key] with{Status="Superseded",Message="Observed course changed; unsent preparation was replaced. Retained sources and useful active downloads are preserved."};}
@@ -124,7 +124,7 @@ public sealed class AutomaticScientificData : IDisposable
             lock(gate)
             {
                 if(states.TryGetValue(key,out var previous)&&(!retry||previous.Status is "Downloading" or "Queued")&&DateTimeOffset.UtcNow-previous.UpdatedUtc<TimeSpan.FromMinutes(30)&&!(previous.Status=="Offline"&&p.OnlineEnabled)&&previous.Status!="Superseded"&&!(kind==RemoteKind.Hyperspectral&&samplePoint!=previous.SamplePoint))
-                {if(queue.TryGetValue(key,out var queued)&&priority<queued.Priority)queue[key]=queued with{Priority=priority,Scope=scope};continue;}
+                {if(queue.TryGetValue(key,out var queued)&&priority<queued.Priority)queue[key]=queued with{Priority=priority};if(scope=="flight"&&queue.TryGetValue(key,out var held)&&pausedScopes.Contains(held.Scope)){queue[key]=held with{Priority=priority,Scope=scope};scopes[key]=scope;states[key]=previous with{Scope=scope};}continue;}
                 if(states.Count>=256){var old=states.Values.Where(s=>s.Status is not("Queued" or "Downloading" or "Waiting for download allowance")).OrderBy(s=>s.UpdatedUtc).FirstOrDefault();if(old is not null){states.Remove(old.Key);tickets.Remove(old.Key);scopes.Remove(old.Key);retryAfter.Remove(old.Key);}else continue;}
                 string? reason=!p.OnlineEnabled||!p.PrivacyAccepted?"Scientific online access is disabled. Enable it separately from basemaps in Settings. Verified local sources still work.":background&&!p.BackgroundRetrieval?"Background retrieval is disabled. Prepare this area explicitly before flight.":p.UnmeteredOnly&&settings.IsUnmetered()!=true?"Waiting for a reliably detected unmetered connection. Change the unmetered-only control to proceed on this connection.":null;
                 // Local hyperspectral checks run without online consent and never trigger NASA downloading.
@@ -150,10 +150,10 @@ public sealed class AutomaticScientificData : IDisposable
     private void PreemptDistantPreflight(string scope,double priority)
     {
         if(scope!="flight"||priority>0||DateTimeOffset.UtcNow-lastPreemption<TimeSpan.FromSeconds(30)||cancellations.Count<settings.Get().Preferences.ConcurrentDownloads)return;
-        var candidate=cancellations.FirstOrDefault(p=>scopes.GetValueOrDefault(p.Key)?.StartsWith("plan:",StringComparison.Ordinal)==true&&!flightKeys.Contains(p.Key)&&!p.Value.IsCancellationRequested&&states.GetValueOrDefault(p.Key)?.Status=="Downloading");
+        var candidate=cancellations.FirstOrDefault(p=>scopes.GetValueOrDefault(p.Key)?.StartsWith("plan:",StringComparison.Ordinal)==true&&!urgentFlightKeys.Contains(p.Key)&&!urgentFlightKeys.Any(key=>states.TryGetValue(key,out var wanted)&&states.TryGetValue(p.Key,out var current)&&wanted.Kind==current.Kind&&wanted.Area.West<current.Area.East&&wanted.Area.East>current.Area.West&&wanted.Area.South<current.Area.North&&wanted.Area.North>current.Area.South)&&!p.Value.IsCancellationRequested&&states.GetValueOrDefault(p.Key)?.Status=="Downloading");
         if(candidate.Value is null)return;lastPreemption=DateTimeOffset.UtcNow;preempted.Add(candidate.Key);candidate.Value.Cancel();
     }
-    public void RetryScope(string scope){lock(gate)foreach(var key in states.Where(p=>p.Value.Scope==scope&&p.Value.Status is not("Ready" or "Dataset Ready" or "Downloading" or "Queued")).Select(p=>p.Key).ToArray()){states.Remove(key);tickets.Remove(key);retryAfter.Remove(key);}}
+    public void RetryScope(string scope,IReadOnlySet<string>? explicitlyRequestedKeys=null){lock(gate)foreach(var key in states.Where(p=>(p.Value.Scope==scope||explicitlyRequestedKeys?.Contains(p.Key)==true)&&p.Value.Status is not("Ready" or "Dataset Ready" or "Downloading" or "Queued")).Select(p=>p.Key).ToArray()){states.Remove(key);tickets.Remove(key);retryAfter.Remove(key);}}
     public void RefreshLocalReadiness()
     {Interlocked.Increment(ref configurationRevision);lock(gate)foreach(var key in states.Where(p=>p.Value.Status is not("Queued" or "Downloading" or "Waiting for download allowance")).Select(p=>p.Key).ToArray()){states.Remove(key);tickets.Remove(key);}}
     public static void ValidateArea(GeographicBounds a)

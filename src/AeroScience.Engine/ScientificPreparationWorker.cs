@@ -67,7 +67,7 @@ public sealed class ScientificPlanData
             automatic.RetainScopeKeys("plan:"+plan.Id,rows.Where(r=>r.Selected).Select(r=>r.Key).ToHashSet());
             sessions[plan.Id]=s=new(new(plan,false,false,retry,rows,selection.Selection));
             if(retry)foreach(var r in s.Regions.Values.Where(r=>r.Selected&&!Ready(r.Status)).ToArray())s.Regions[r.Key]=r with{Status="Queued"};
-            if(retry)automatic.RetryScope("plan:"+plan.Id);Pump(s);Save();return new(selection.Areas.Length,false,$"{selection.Selection.Mode}: {selection.InstrumentUnits} selected instrument-region units of {selection.FullInstrumentUnits} planned. Scope does not reduce grading obligations. Source readiness is separate from valid pixels.",automatic.Snapshot());
+            if(retry)automatic.RetryScope("plan:"+plan.Id,rows.Where(r=>r.Selected).Select(r=>r.Key).ToHashSet());Pump(s);Save();return new(selection.Areas.Length,false,$"{selection.Selection.Mode}: {selection.InstrumentUnits} selected instrument-region units of {selection.FullInstrumentUnits} planned. Scope does not reduce grading obligations. Source readiness is separate from valid pixels.",automatic.Snapshot());
         }
     }
     public void PlanChanged(MissionPlan plan){lock(gate){if(!sessions.TryGetValue(plan.Id,out var s)||ScientificPreparationScope.Revision(plan)==ScientificPreparationScope.Revision(s.Plan))return;s.PlanStale=true;if(!s.InFlight)automatic.PauseScope("plan:"+plan.Id,true);Save();}}

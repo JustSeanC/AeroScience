@@ -324,7 +324,7 @@ export function scienceCharts(parent, rows) {
       const original = card.parentNode,
         next = card.nextSibling;
       dialog.append(card);
-      dialogHeader(dialog,{title:"Expanded scientific chart",opener:launch});dialog.showModal();
+      dialogHeader(dialog,{title:"Expanded scientific chart",opener:launch,reuseHeading:false});dialog.showModal();
       chart.resize();
       close.onclick = () => requestDialogClose(dialog);
       dialog.onclose = () => {

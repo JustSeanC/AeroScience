@@ -66,10 +66,25 @@ public sealed class PredictiveScienceTests:IDisposable
     }
     private sealed class Blocking:IScientificDataProvider
     {
+        public CancellationToken FirstToken;
         public readonly List<double> Order=[];public readonly TaskCompletionSource First=new(TaskCreationOptions.RunContinuationsAsynchronously);
         public string Id=>"isolated-priority-fixture";public bool Supports(RemoteKind k)=>true;
         public async Task<ScientificDiscovery?> Discover(RemoteKind kind,GeographicBounds area,ScientificAccessPreferences p,ScientificDownloadBudget b,CancellationToken token)
-        {int count;lock(Order){Order.Add(area.West);count=Order.Count;}if(count==1){First.SetResult();await Task.Delay(Timeout.Infinite,token);}return null;}
+        {int count;lock(Order){Order.Add(area.West);count=Order.Count;}if(count==1){FirstToken=token;First.SetResult();await Task.Delay(Timeout.Infinite,token);}return null;}
+    }
+    [Fact]public async Task RelevantPreflightWindowIsNotCancelledForAnOverlappingFlightCell()
+    {
+        var settings=new ScientificAccessSettings(root);settings.Save(new(true,true));var provider=new Blocking();using var automatic=new AutomaticScientificData(science,settings,providers:[provider]);
+        var planArea=new GeographicBounds(-75,40,-74.96,40.04);automatic.Prepare(planArea,[RemoteKind.Terrain],scope:"plan:matching-flight");await provider.First.Task.WaitAsync(TimeSpan.FromSeconds(3));automatic.FlightActive(true);
+        var flightArea=new GeographicBounds(-74.99,40.01,-74.97,40.03);automatic.ReprioritizeFlight(new Dictionary<string,double>{{AutomaticScientificData.AreaKey(RemoteKind.Terrain,flightArea),-90}});automatic.Prepare(flightArea,[RemoteKind.Terrain],scope:"flight",priority:-90);
+        Assert.False(provider.FirstToken.IsCancellationRequested);Assert.Equal(1,automatic.QueueSummary().Downloading);lock(provider.Order)Assert.Single(provider.Order);
+    }
+    [Fact]public async Task DistantLookaheadDoesNotPreventMoreUrgentCurrentAircraftWork()
+    {
+        var settings=new ScientificAccessSettings(root);settings.Save(new(true,true));var provider=new Blocking();using var automatic=new AutomaticScientificData(science,settings,providers:[provider]);
+        var later=new GeographicBounds(-75,40,-74.98,40.02);automatic.Prepare(later,[RemoteKind.Terrain],scope:"plan:later");await provider.First.Task.WaitAsync(TimeSpan.FromSeconds(3));automatic.FlightActive(true);
+        var now=new GeographicBounds(-76,40,-75.98,40.02);automatic.ReprioritizeFlight(new Dictionary<string,double>{{AutomaticScientificData.AreaKey(RemoteKind.Terrain,later),500},{AutomaticScientificData.AreaKey(RemoteKind.Terrain,now),-90}});automatic.Prepare(now,[RemoteKind.Terrain],scope:"flight",priority:-90);
+        Assert.True(provider.FirstToken.IsCancellationRequested);await Wait(()=>{lock(provider.Order)return provider.Order.Count>=2;});lock(provider.Order)Assert.Equal(-76,provider.Order[1]);
     }
     [Fact]public async Task UrgentFlightDataBypassesDistantPreflightAndRepeatedUpdatesDeduplicate()
     {

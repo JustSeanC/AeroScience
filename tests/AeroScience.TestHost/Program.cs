@@ -72,7 +72,7 @@ app.MapPost("/api/testing/library/mode/{mode}",(string mode,LibraryHttpFixture f
 // Actual production import/persistence with explicitly synthetic originals; no flight observations.
 app.MapPost("/api/testing/sources/unreferenced/{kind}",async(string kind,ScienceStore science)=>{
     var folder=Path.Combine(options.DataDirectory,"synthetic-local-original-"+Guid.NewGuid().ToString("N"));
-    var file=RemoteFixtureFiles.Create(folder,Enum.Parse<RemoteKind>(kind,true));var source=await science.ImportSourceAsync(file);return new{sourceId=source.Id,synthetic=true};
+    var file=RemoteFixtureFiles.Create(folder,Enum.Parse<RemoteKind>(kind,true));var manifest=ScienceStore.ReadSourceManifest(file) with{SceneId="synthetic-unreferenced-"+Guid.NewGuid().ToString("N")};var source=await science.ImportSourceAsync(manifest,folder);return new{sourceId=source.Id,synthetic=true};
 });
 app.MapPost("/api/testing/preparation/local",async(ScienceStore science,AutomaticScientificData automatic)=>{
     var folder=Path.Combine(options.DataDirectory,"synthetic-preparation-original-"+Guid.NewGuid().ToString("N"));Directory.CreateDirectory(folder);

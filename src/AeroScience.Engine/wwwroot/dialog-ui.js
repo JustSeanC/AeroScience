@@ -12,11 +12,11 @@ export function layerPopup(control){
  container.addEventListener('keydown',event=>{if(event.key==='Escape'){event.preventDefault();event.stopPropagation();dismiss();}});
  return control;
 }
-export function dialogHeader(dialog,{title,opener=document.activeElement,protectEdits=false,onDismiss}={}){
+export function dialogHeader(dialog,{title,opener=document.activeElement,protectEdits=false,onDismiss,reuseHeading=true}={}){
  if(states.has(dialog))return states.get(dialog);
  const name=title||dialog.getAttribute('aria-label')||dialog.querySelector('h1,h2,h3')?.textContent||'dialog';
  if(!dialog.hasAttribute('aria-label')&&!dialog.hasAttribute('aria-labelledby'))dialog.setAttribute('aria-label',name);
- const {header,close}=popupHeader(name,()=>requestClose(),dialog.querySelector('h1,h2,h3'),dialog.querySelector('#close-detail'));dialog.prepend(header);dialog.classList.add('managed-popup');
+ const {header,close}=popupHeader(name,()=>requestClose(),reuseHeading?dialog.querySelector('h1,h2,h3'):null,dialog.querySelector('#close-detail'));dialog.prepend(header);dialog.classList.add('managed-popup');
  let dirty=false,confirming=false,returnTo=opener;
  dialog.addEventListener('beforetoggle',event=>{if(event.newState==='open'&&document.activeElement!==document.body&&!dialog.contains(document.activeElement))returnTo=document.activeElement;});
  const requestClose=()=>{
