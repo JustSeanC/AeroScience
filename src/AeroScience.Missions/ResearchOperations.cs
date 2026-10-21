@@ -12,6 +12,7 @@ public sealed class ResearchOperations : IDisposable
     private readonly Func<ScienceUnitPreferences>? displayUnits;
     private readonly RemoteAcquisition remote;
     public Func<RemoteAcquisitionRequest,IDisposable>? PublicationLease { get; set; }
+    public Func<bool,DateTimeOffset?,bool>? ManagedPause {get;set;}
     public ResearchOperations(MissionStore missions,ScienceStore science,Func<ScienceUnitPreferences>? displayUnits=null,Func<ScientificAccessPreferences>? sourcePreferences=null)
     {
         this.missions=missions;this.science=science;this.displayUnits=displayUnits;
@@ -112,6 +113,7 @@ public sealed class ResearchOperations : IDisposable
     }
     public bool SetPaused(bool paused, DateTimeOffset? timestamp = null)
     {
+        if(collectionManaged&&ManagedPause is not null)return ManagedPause(paused,timestamp);
         if (mission is null) throw new InvalidOperationException("Science Collection controls require an active mission.");
         if (intentionallyPaused == paused) return false;
         var now = (timestamp ?? DateTimeOffset.UtcNow).ToUniversalTime();

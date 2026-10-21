@@ -112,6 +112,7 @@ public static class ResearchApi
             var result=missions.ControlScience(request);
             return result.Event.Outcome==CollectionEventOutcome.Conflict?Results.Conflict(result):Results.Ok(result);
         });
+        app.MapPost("/api/plans/collection/bind",(MissionPlan draft)=>CollectionPlanning.Bind(draft));
         app.MapGet("/api/patterns", () => Enum.GetNames<FlightPatternKind>());
         app.MapPost("/api/patterns/fit-survey", (PatternSurveyRequest request) => FlightPatterns.FitSurvey(request.Definition,request.Area,request.FitMode));
         app.MapPost("/api/patterns/preview", (PatternDefinition definition) => FlightPatterns.Generate(definition));

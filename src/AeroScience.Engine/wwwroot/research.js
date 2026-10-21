@@ -1,3 +1,4 @@
+import { collectionPlanner } from "./collection-planner.js";
 import { initializeScienceSessions } from "./science-sessions.js";
 import {reviewPreflight} from "./download-activity.js";
 import { hyperspectralCard } from "./hyperspectral-import.js";
@@ -280,6 +281,7 @@ function editPlan(plan) {
   if((plannerDirty||pendingGeometry)&&!confirm("Discard unsaved mission and geometry edits? Cancel keeps the current draft."))return;
   plannerDirty=false;pendingGeometry=false;
   editing = plan;
+  const draftPlanId=plan?.id||crypto.randomUUID();
   waypoints = structuredClone(plan?.waypoints || []);
   areas = structuredClone(plan?.surveyAreas || []);
   const e = $("plan-editor");
@@ -659,6 +661,7 @@ function editPlan(plan) {
   atmosphericSection.append(text('p','Profiles preserve actual observation times. Clouds are sampled only along your aircraft path; gaps never become inferred cloud boundaries.'));
   scienceSection.prepend(atmosphericSection);
   const atmosphericVisibility=()=>{atmosphericSection.hidden=!['atmosphericProfile','cloudStructureSurvey','atmosphericTransect'].includes(template.value);};template.addEventListener('change',atmosphericVisibility);atmosphericVisibility();
+  const automation=collectionPlanner(form,plan?.collection,()=>({id:draftPlanId,name:name.value,waypoints,surveyAreas:areas}),ctx.api,dirty);
   form.append(text("h3","5. Review and save"),text("p","Save waypoints and areas to this draft first. A saved mission plan keeps the route, survey geometry, pattern definitions and science configuration together."));
   departure.onchange = drawList;
   drawList();
@@ -692,7 +695,8 @@ function editPlan(plan) {
     ctx.command(save, async () => {
       const nullable = (e) => e.planningUnits?e.planningUnits.read():(e.value ? Number(e.value) : null);
       const savedPlan = await ctx.api("/api/plans", {
-        id: plan?.id || crypto.randomUUID(),
+        id: draftPlanId,
+        collection: automation.read(),
         name: name.value,
         template: template.value,
         mode: mode.value,

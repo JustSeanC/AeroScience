@@ -95,3 +95,39 @@ These counts are not scientific accuracy, a valid-pixel coverage calculation or 
 JSON and scientific CSV exports retain session/acquisition identities; older archives
 remain unsegmented rather than acquiring invented sessions. Restart interrupts the open
 session and never resumes flight recording or collection automatically.
+
+### Optional geographic collection automation
+
+In Mission Planner expand **Scientific collection automation**. Choose Armed or Manual,
+add explicit waypoint/gate or survey-entry/exit actions, and give planned sessions distinct
+keys such as A and B. A gate direction is **degrees true**; tolerance and hysteresis are
+shown in metres. Pass numbers distinguish return visits to the same target. Automatic
+End is optional and requires an explicit waypoint or directional gate. Survey exits never
+end sessions; optional boundary pause/resume retains the same session.
+
+After geographic edits, use **Refresh and review automation targets**, then **Save mission
+plan**. This freezes stable target bindings; changing a polygon invalidates the old binding
+until explicitly reviewed. No collection or downloads start during review. Select the
+saved plan before starting the flight. Armed policy waits for a configured Start; manual
+commands take precedence, and manual End requires explicit rearm for future automatic
+Starts. Manual Resume deliberately overrides scoped route/boundary pauses; a continuity
+hold still requires rearm first.
+
+Triggers run in the companion backend with every display closed. Point actions require an
+actual observed proximity; gates require continuous bracketing packets in the configured
+direction. Missed points are not invented. Duplicate packets, gaps, stale/out-of-order
+positions, reconnects and implausible jumps cannot fire skipped actions. A continuity
+hold pauses scientific collection and requires explicit rearm; the next packet establishes
+a new baseline. Default area entry requires a witnessed entry; **Start when initially
+inside** is a separate explicit permission. Boundary regions form a union, with dwell
+and distance hysteresis suppressing grazes. Transit or recorded track is not valid-pixel
+scientific coverage.
+
+Automation supports local bounded polygons (up to 256 vertices per region, 1,024 total,
+within 100 km and below 80° latitude). Dateline membership/gates retain WGS84 coordinates.
+Unsupported geometry is rejected with manual collection available. Plans permit 128
+explicit actions; up to 4,096 flight-wide automatic receipts are retained without eviction.
+If that technical receipt budget is reached, automation holds visibly and manual controls
+remain available. Automatic End takes priority over coincident Start/Resume, and Pause over
+coincident Resume. A later distinct Start can create another session after an automatic
+End. No autopilot/aircraft control is sent to MSFS.

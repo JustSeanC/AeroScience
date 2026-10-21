@@ -13,7 +13,7 @@ public sealed class ExperienceTests : IDisposable
     private readonly string root = Path.Combine(Path.GetTempPath(), "aeroscience-experience-" + Guid.NewGuid());
     private readonly MissionStore store; private readonly ScienceStore science; private readonly ResearchOperations research; private readonly MissionCoordinator coordinator;
     private readonly DateTimeOffset now = DateTimeOffset.UtcNow;
-    public ExperienceTests() { var settings = new StorageManager(new PreferenceStore(root)).Initialize(); store = new(Path.Combine(settings.MissionDirectory, "missions.db")); store.Initialize(); science = new(settings.ScienceLibraryDirectory); store.ScienceLibrary = science; research = new(store, science); coordinator = new(store, 1000, research: research); }
+    public ExperienceTests() { var settings = new StorageManager(new PreferenceStore(root)).Initialize(); store = new(Path.Combine(settings.MissionDirectory, "missions.db")); store.Initialize(); science = new(settings.ScienceLibraryDirectory); store.ScienceLibrary = science; research = new(store, science); coordinator = new(store, 1000, research: research,utcNow:()=>now); }
     private void Apply(int s) { var f = SimulatedTelemetryProvider.Generate(now, s); var c = new ConnectionInfo(ConnectionState.Connected, TelemetrySource.Simulated, "test fixture", f.TimestampUtc); coordinator.Apply(new(c, f, new(f.TimestampUtc, 15, 29.92, 12, 270, .0023))); }
     [Theory]
     [InlineData("temperature", 0, 32, "°F")]

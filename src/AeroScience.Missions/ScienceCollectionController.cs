@@ -13,11 +13,11 @@ public sealed class ScienceCollectionController(MissionStore store, Guid mission
     public ScienceCollectionSession? Session => State.CurrentSessionId is {} id ? store.CollectionSession(missionId,id) : null;
     public CollectionCommitResult Control(CollectionControlRequest request, DateTimeOffset at,
         CollectionEventOrigin origin=CollectionEventOrigin.Manual, Guid? occurrence=null,
-        CollectionInputReceipt[]? inputs=null, string? plannedSession=null, CollectionHold[]? automaticHolds=null)
+        CollectionInputReceipt[]? inputs=null, string? plannedSession=null, CollectionHold[]? automaticHolds=null,EvidenceReference? policy=null,string? suppression=null)
     {
-        EvidenceContracts.Validate(request);
+        if(origin==CollectionEventOrigin.Manual)EvidenceContracts.Validate(request);
         var current=State;
-        var old=store.CollectionControlReceipt(request);
+        var old=origin==CollectionEventOrigin.Manual?store.CollectionControlReceipt(request):null;
         if(old is not null)return old;
         var automatic=origin is CollectionEventOrigin.RouteTrigger or CollectionEventOrigin.Boundary;
         var conflict=request.ExpectedRevision!=current.Revision||request.ExpectedSessionId!=current.CurrentSessionId;
@@ -27,6 +27,7 @@ public sealed class ScienceCollectionController(MissionStore store, Guid mission
         var reason=conflict?"Stale controller revision/session; synchronize before a new command.":request.Action.ToString();
         if(!conflict && automatic && (current.Authority!=CollectionAuthority.Automatic||current.ManualAutomationHold||current.ContinuityHold))
         {outcome=CollectionEventOutcome.Suppressed;reason="Manual authority or continuity hold suppresses automatic action; explicit rearm is required.";}
+        if(!conflict&&suppression is not null){outcome=CollectionEventOutcome.Suppressed;reason=suppression;}
         ScienceCollectionSession? changed=null;
         if(outcome==CollectionEventOutcome.Applied)
         {
@@ -50,7 +51,8 @@ public sealed class ScienceCollectionController(MissionStore store, Guid mission
                     changed=session with{Status=CollectionSessionStatus.Paused};break;
                 case CollectionAction.ResumeData:
                     if(session is null||current.Phase!=CollectionPhase.Paused){outcome=CollectionEventOutcome.NoOp;reason="Resume requires the same open paused session; ended sessions never reopen.";break;}
-                    var remaining=manual?(current.Holds??[]).Where(h=>h.Kind!=CollectionHoldKind.Manual).ToArray():automaticHolds??current.Holds??[];
+                    var remaining=manual?(current.Holds??[]).Where(h=>h.Kind==CollectionHoldKind.Continuity).ToArray():automaticHolds??current.Holds??[];
+                    next=next with{Holds=remaining};
                     if(current.ContinuityHold||remaining.Length>0){outcome=CollectionEventOutcome.Suppressed;reason="A continuity, route or boundary hold remains. Resolve/rearm it explicitly.";break;}
                     next=next with{Phase=CollectionPhase.Collecting,Authority=manual?CollectionAuthority.Manual:current.Authority,
                         ManualAutomationHold=manual||current.ManualAutomationHold,Holds=remaining};
@@ -73,10 +75,21 @@ public sealed class ScienceCollectionController(MissionStore store, Guid mission
         var links=(inputs??[]).Select(MissionStore.DescribeCollectionInput).ToArray();
         var transition=new CollectionEvent(1,missionId,next.Revision,DateTimeOffset.UtcNow,at,changed?.Id??session?.Id,request.Action,origin,outcome,
             current.Phase,next.Phase,next.Authority,reason,links,automatic?null:request.RequestId,occurrence,request.ExpectedSessionId,
-            PlannedSessionKey:plannedSession);
+            PlannedSessionKey:plannedSession,CollectionPolicy:policy);
         var result=store.CommitCollectionEvidence(new(next,transition,changed,automatic?null:request,inputs));
         if(changed is not null || request.Action==CollectionAction.RearmAutomation){schedule.Clear();epoch=next.Revision;}
         return result;
+    }
+
+    public void ContinuityHold(string reason,CollectionInputReceipt[] inputs,DateTimeOffset at)
+    {
+        var current=State;if(current.ContinuityHold)return;var session=Session;
+        var next=current with{Revision=current.Revision+1,ContinuityHold=true,Phase=session is null?current.Phase:CollectionPhase.Paused,
+            Holds=[..(current.Holds??[]).Where(h=>h.Kind!=CollectionHoldKind.Continuity),new(CollectionHoldKind.Continuity,reason,session?.Id)]};
+        var transition=new CollectionEvent(1,missionId,next.Revision,DateTimeOffset.UtcNow,at,session?.Id,CollectionAction.Unknown,CollectionEventOrigin.Engine,
+            CollectionEventOutcome.Applied,current.Phase,next.Phase,next.Authority,reason,inputs.Select(MissionStore.DescribeCollectionInput).ToArray(),ExpectedSessionId:session?.Id);
+        store.CommitCollectionEvidence(new(next,transition,session is null?null:session with{Status=CollectionSessionStatus.Paused},Inputs:inputs,EngineDecisionId:Guid.NewGuid()));
+        schedule.Clear();epoch=next.Revision;
     }
 
     public ScienceAcquisitionIntent[] Ingest(TelemetryUpdate input, TelemetryFrame? flightSample=null)

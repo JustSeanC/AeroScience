@@ -16,7 +16,8 @@ public sealed record MissionPlan(Guid Id, string Name, MissionTemplateKind Templ
     ResearchWaypoint[]? Waypoints = null, SurveyArea[]? SurveyAreas = null, double? MinimumAltitudeFeet = null,
     double? MaximumAltitudeFeet = null, double? EstimatedDurationMinutes = null,
     InstrumentConfiguration[]? Instruments = null, string? PreflightNotes = null, DateTimeOffset? UpdatedUtc = null, PatternDefinition[]? Patterns = null,
-    string FlightRules = "VFR", double? CruisingAltitudeFeet = null, AtmosphericMissionSettings? AtmosphericSettings = null,SensorPlanningSettings? SensorPlanning=null);
+    string FlightRules = "VFR", double? CruisingAltitudeFeet = null, AtmosphericMissionSettings? AtmosphericSettings = null,SensorPlanningSettings? SensorPlanning=null,
+    [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] CollectionPlan? Collection=null);
 public sealed record MissionTemplate(MissionTemplateKind Id, string Name, string Objective,
     InstrumentConfiguration[] Instruments, string[] NoteCategories);
 public sealed record MeasurementDefinition(string Id, string Name, string Unit, string SimulatorVariable);

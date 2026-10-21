@@ -11,7 +11,7 @@ public static class MissionAnalysis
             || s.SwathWidthMetres is { } w && (!double.IsFinite(w) || w <= 0 || w > 50000)) throw new ArgumentException("Use a 10–50,000 m waypoint tolerance and 1–600 s maximum telemetry gap.");
     }
     private static double Delta(double a, double b) => (a - b + 540) % 360 - 180;
-    private static bool Inside(Coordinates p, Coordinates[] vertices)
+    public static bool Inside(Coordinates p, Coordinates[] vertices)
     {
         var inside = false; for (int i = 0, j = vertices.Length - 1; i < vertices.Length; j = i++)
         {
@@ -20,7 +20,7 @@ public static class MissionAnalysis
         }
         return inside;
     }
-    private static double SegmentDistance(Coordinates p, Coordinates a, Coordinates b, double length, double bearing)
+    public static double SegmentDistance(Coordinates p, Coordinates a, Coordinates b, double length, double bearing)
     {
         // Candidate fraction in a local tangent approximation, then measure its WGS84 position.
         // This is a route comparison, never navigation guidance. Long/polar limitations are reported.

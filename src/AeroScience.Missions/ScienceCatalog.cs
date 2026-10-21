@@ -111,7 +111,7 @@ public static class MissionPlanning
             SurveyGeometry.Validate(a.Vertices);
             return a with { Name = Text(a.Name, 100) ?? "Survey area", Vertices = a.Vertices.ToArray() };
         }).ToArray();
-        return plan with
+        var validated=plan with
         {
             Name = name,
             Description = Text(plan.Description),
@@ -128,5 +128,7 @@ public static class MissionPlanning
             Instruments = InstrumentProfiles.Freeze(ScienceCatalog.Normalize(plan.Instruments ?? ScienceCatalog.Templates.Single(t => t.Id == plan.Template).Instruments)),
             UpdatedUtc = DateTimeOffset.UtcNow
         };
+        if(validated.Collection is {} collection)CollectionPlanning.Validate(validated,collection);
+        return validated;
     }
 }

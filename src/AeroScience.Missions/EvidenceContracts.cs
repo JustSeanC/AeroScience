@@ -11,6 +11,9 @@ public static class EvidenceContracts
 {
     public const int CurrentVersion = 1;
     public const int MaximumTriggers = 128;
+    // Saved triggers stay bounded at 128; repeated boundary decisions need their own
+    // bounded, flight-wide receipts and must never evict earlier session history.
+    public const int MaximumOccurrences = 4096;
     public const int MaximumJsonBytes = 1_048_576;
     private static readonly JsonSerializerOptions StrictJson = CreateJson();
 
@@ -181,7 +184,7 @@ public static class EvidenceContracts
         Known(state.Phase); Known(state.Authority); OptionalId(state.CurrentSessionId); OptionalId(state.LastSessionId);
         Require(state.CurrentSessionId.HasValue == (state.Phase is CollectionPhase.Collecting or CollectionPhase.Paused), "Controller phase and current session disagree.");
         foreach (var ids in new[] { state.FiredOccurrenceIds, state.SuppressedOccurrenceIds })
-            if (ids is not null) { Items(ids, MaximumTriggers); Unique(ids); foreach (var id in ids) Id(id); }
+            if (ids is not null) { Items(ids, MaximumOccurrences); Unique(ids); foreach (var id in ids) Id(id); }
         Require(!(state.FiredOccurrenceIds ?? []).Intersect(state.SuppressedOccurrenceIds ?? []).Any(), "An occurrence cannot be both fired and suppressed.");
         foreach (var hold in Items(state.Holds ?? [], 256))
         {

@@ -61,7 +61,7 @@ public sealed class ScientificConcurrencyTests : IDisposable
             await began.Task.WaitAsync(TimeSpan.FromSeconds(10));
             var recording=Task.Factory.StartNew(()=>
             {
-                using var research=new ResearchOperations(missions,science);var recorder=new MissionCoordinator(missions,1000,research:research);
+                using var research=new ResearchOperations(missions,science);var recorder=new MissionCoordinator(missions,1000,research:research,utcNow:()=>utc);
                 var active=recorder.Start(new StartMissionRequest("Concurrent logical 1 Hz fixture",Instruments:[new("ambient-temperature",true)]));
                 for(var i=0;i<120;i++)
                 {

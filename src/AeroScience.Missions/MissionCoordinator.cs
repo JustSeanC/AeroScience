@@ -10,6 +10,7 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
     internal MissionStore Store => store;
     private readonly object gate = new();
     private ScienceCollectionController? collection;
+    private GeographicCollectionEngine? geographicCollection;
     private bool collectionFault;
     private DateTimeOffset Now => utcNow?.Invoke()??DateTimeOffset.UtcNow;
     private DateTimeOffset ControlTime => !requireFreshTelemetry&&frame is {} f&&f.TimestampUtc>DateTimeOffset.UtcNow?f.TimestampUtc:Now;
@@ -81,8 +82,9 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
             {
                 if(sample is not null){capacityOkay=false;ensureRecordingCapacity?.Invoke();capacityOkay=true;}
                 var intents=new List<ScienceAcquisitionIntent>();
-                if(collection is not null)
+                if(collection is not null&&!collectionFault)
                 {
+                    geographicCollection?.Observe(update,Now);
                     intents.AddRange(collection.Ingest(sample is null?update:update with{Frame=sample},sample));
                     if(update.Frame is not null&&update.Atmosphere is not null&&frame?.IsPaused!=true)
                         intents.AddRange(collection.Ingest(update with{Frame=null,Guidance=null,Environment=null}));
@@ -149,19 +151,36 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
             if (requireFreshTelemetry && (connection.State != ConnectionState.Connected || frame is null
                 || DateTimeOffset.UtcNow - frame.TimestampUtc > TimeSpan.FromSeconds(6) || frame.IsPaused))
                 throw new InvalidOperationException("Live aircraft telemetry is unavailable. Mission History remains accessible.");
-            if(!request.ArmScience)research?.EnsureCanStart(configurations);
+            var armed=request.ArmScience||plan?.Collection?.InitialPolicy==InitialCollectionPolicy.Armed;
+            if(!armed)research?.EnsureCanStart(configurations);
             var now = Now;
             var id = store.Create(name, frame, now, mode, plan, configurations, request.Objective);
             active = store.Detail(id)!.Mission;
             recordingStop = null;
             research?.Begin(active, store.Research(id));
-            store.InitializeCollectionEvidence(new(1,id,0,CollectionPhase.Armed,CollectionAuthority.Manual));
-            store.AddEvent(id,now,"science-armed","Flight recording active; science awaits an explicit session start.");
-            collection=new(store,id,()=>research?.Configurations??configurations);collectionFault=false;
-            if(research is not null)research.PublicationLease=AcquireSciencePublication;
-            if(!request.ArmScience&&configurations.Any(c=>c.Enabled))
-                collection.Control(new(1,id,Guid.NewGuid(),0,CollectionAction.StartData,null),now);
-            research?.ApplyCollection(collection.State,collection.Session,[]);
+            if(research is not null)
+            {
+                try
+                {
+                    store.InitializeCollectionEvidence(new(1,id,0,CollectionPhase.Armed,plan?.Collection?.InitialPolicy==InitialCollectionPolicy.Armed?CollectionAuthority.Automatic:CollectionAuthority.Manual),plan?.Collection);
+                    store.AddEvent(id,now,"science-armed","Flight recording active; science awaits an explicit session start.");
+                    collection=new(store,id,()=>research!.Configurations);collectionFault=false;
+                    geographicCollection=plan?.Collection is null?null:new(plan,collection);
+                    research.PublicationLease=AcquireSciencePublication;
+                    if(!armed&&configurations.Any(c=>c.Enabled))
+                        collection.Control(new(1,id,Guid.NewGuid(),0,CollectionAction.StartData,null),now);
+                    research.ApplyCollection(collection.State,collection.Session,[]);
+                    research.ManagedPause=SetManagedPaused;
+                }
+                catch
+                {
+                    research.HoldCollection();collectionFault=true;collection=null;geographicCollection=null;
+                    try{store.Finish(id,MissionStatus.Interrupted,now,"Collection initialization failed; no scientific acquisition was enabled.");}
+                    catch(Exception error)when(error is IOException or UnauthorizedAccessException or Microsoft.Data.Sqlite.SqliteException){ScientificDiagnostics.Record("collection-initialization-error",id.ToString(),"flight",RemoteKind.Terrain,result:error.Message);}
+                    try{research.End();}finally{active=null;}
+                    throw;
+                }
+            }
             lastRecordedUtc = null;
             firstRecordedUtc = samplingAnchor = null;
             lastSlot = -1; received = skipped = missing = 0;
@@ -194,6 +213,17 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
             ConfigureInstruments(current.Select(c=>c.InstrumentId==id?c with{Enabled=enabled??c.Enabled,IntervalMs=intervalMs??c.IntervalMs}:c).ToArray());
         }
     }
+    private bool SetManagedPaused(bool paused,DateTimeOffset? timestamp)
+    {
+        lock(gate)
+        {
+            var state=collection?.State??throw new InvalidOperationException("No active collection controller.");
+            if((state.Phase==CollectionPhase.Paused)==paused)return false;
+            var result=collection!.Control(new(1,state.MissionId,Guid.NewGuid(),state.Revision,paused?CollectionAction.PauseData:CollectionAction.ResumeData,state.CurrentSessionId),timestamp??ControlTime);
+            research?.ApplyCollection(collection.State,collection.Session,[],result.Event.InputUtc);
+            return result.Event.Outcome==CollectionEventOutcome.Applied;
+        }
+    }
     public ResearchState SetSciencePaused(Guid id, bool paused)
     {
         lock (gate)
@@ -221,7 +251,7 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
             if(request.Action==CollectionAction.RearmAutomation&&collectionFault&&collection.Session is {} retained)
                 research?.Configure(retained.Configurations.GroupBy(c=>c.Settings.InstrumentId).Select(g=>g.OrderByDescending(c=>c.Revision).First().Settings).ToArray());
             var result=collection.Control(request,ControlTime);
-            if(request.Action==CollectionAction.RearmAutomation&&result.Event.Outcome==CollectionEventOutcome.Applied)collectionFault=false;
+            if(request.Action==CollectionAction.RearmAutomation&&result.Event.Outcome==CollectionEventOutcome.Applied){collectionFault=false;geographicCollection?.Rearm();}
             research?.ApplyCollection(collection.State,collection.Session,[],result.Event.InputUtc);return result;
         }
     }
@@ -286,7 +316,7 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
             if (active?.Id != id) throw new InvalidOperationException("This mission is not currently recording.");
             store.Finish(id, MissionStatus.Completed, DateTimeOffset.UtcNow, "Mission completed by operator.");
             research?.End();
-            collection=null;active = null;
+            geographicCollection=null;collection=null;active = null;
             return store.Detail(id)!.Mission;
         }
     }
@@ -299,7 +329,7 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
             store.Finish(active.Id, MissionStatus.Interrupted, lastRecordedUtc ?? active.StartedUtc,
                 "Engine stopped before the mission was completed.");
             research?.End();
-            collection=null;active = null;
+            geographicCollection=null;collection=null;active = null;
         }
     }
 }

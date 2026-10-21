@@ -71,5 +71,20 @@ public sealed class ScienceSessionTests:IDisposable
         var intent=store.ScienceIntents(flight.Id).Single();Assert.Equal("Published",intent.State);Assert.Equal(a.Id,intent.Intent.SessionId);
         Assert.Equal(original,science.StreamObservations(flight.Id).Single());store.ReconcileSessionPublications(science);Assert.Single(science.StreamObservations(flight.Id));
     }
+    [Fact] public void EvidenceFailureHoldsScienceButKeepsWritableFlightRecordingUntilExplicitRearm()
+    {
+        var flight=Start();Do(flight.Id,CollectionAction.StartData);
+        store.EvidenceFault=point=>{if(point=="before-commit")throw new IOException("Synthetic evidence write interruption");};
+        Observe(1);Assert.Single(store.StreamSamples(flight.Id));Assert.Empty(science.StreamObservations(flight.Id));Assert.Empty(store.ScienceIntents(flight.Id));
+        store.EvidenceFault=null;Observe(1);Assert.Equal(2,store.StreamSamples(flight.Id).Count());Assert.Empty(science.StreamObservations(flight.Id));
+        Do(flight.Id,CollectionAction.RearmAutomation);Observe(1);Assert.Single(science.StreamObservations(flight.Id));
+    }
+    [Fact] public void InitializationFailureNeverEnablesUnmanagedAcquisition()
+    {
+        store.EvidenceFault=point=>{if(point=="initialize-before-commit")throw new IOException("Synthetic initialization interruption");};
+        Assert.Throws<IOException>(()=>coordinator.Start(new("Failed start",Instruments:[new("ambient-temperature",true)])));
+        store.EvidenceFault=null;Observe(1);Assert.Null(coordinator.Snapshot().ActiveMission);Assert.Empty(science.Datasets());
+        Assert.Equal(MissionStatus.Interrupted,store.List(10,0).Single().Status);
+    }
     public void Dispose(){coordinator.Interrupt();research.Dispose();science.Dispose();Directory.Delete(root,true);}
 }
