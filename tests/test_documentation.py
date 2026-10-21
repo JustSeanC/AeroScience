@@ -7,10 +7,32 @@ from pathlib import Path
 import re
 import subprocess
 import tarfile
+import tempfile
 import unittest
 from urllib.parse import unquote, urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def committed_blobs(root, paths):
+    """Read canonical object bytes, never archive/checkout-filtered content."""
+    data = subprocess.check_output(['git', 'cat-file', '--batch'], cwd=root,
+                                   input=''.join('HEAD:'+path+'\n' for path in paths).encode('utf-8'))
+    offset = 0
+    result = {}
+    for path in paths:
+        end = data.index(b'\n', offset)
+        oid, kind, size = data[offset:end].split()
+        if kind != b'blob':
+            raise ValueError('Protected path is not a Git blob: '+path)
+        start = end+1; finish = start+int(size)
+        result[path] = data[start:finish]
+        if data[finish:finish+1] != b'\n':
+            raise ValueError('Invalid Git object framing: '+path)
+        offset = finish+1
+    if offset != len(data):
+        raise ValueError('Unexpected Git object output')
+    return result
 
 
 def links(text):
@@ -65,11 +87,28 @@ class DocumentationTests(unittest.TestCase):
         # Compare exact repository blobs and reject current edits. Windows Git may
         # legitimately checkout text as CRLF; do not confuse that with altered evidence.
         self.assertEqual('', subprocess.check_output(['git', 'diff', 'HEAD', '--name-only', '--', *paths], cwd=ROOT, text=True))
-        archive = subprocess.check_output(['git', 'archive', 'HEAD', *paths], cwd=ROOT)
-        with tarfile.open(fileobj=io.BytesIO(archive)) as files:
-            for row in protected:
-                with self.subTest(path=row['path']):
-                    self.assertEqual(row['sha256'], hashlib.sha256(files.extractfile(row['path']).read()).hexdigest())
+        blobs = committed_blobs(ROOT, paths)
+        for row in protected:
+            with self.subTest(path=row['path']):
+                self.assertEqual(row['sha256'], hashlib.sha256(blobs[row['path']]).hexdigest())
+
+    def test_raw_evidence_hashing_is_independent_of_windows_archive_conversion(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            def git(*args):
+                return subprocess.check_output(['git', *args], cwd=root, stderr=subprocess.DEVNULL)
+            git('init'); git('config', 'core.autocrlf', 'false')
+            original = b'protected text\nwith original LF bytes\n'
+            binary = b'\x00\xff\r\noriginal binary\n'
+            (root/'record.txt').write_bytes(original); (root/'image.bin').write_bytes(binary)
+            (root/'.gitattributes').write_text('record.txt text\nimage.bin -text\n', encoding='utf-8')
+            git('add', '.'); git('-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', 'commit', '-qm', 'Synthetic evidence bytes')
+            git('config', 'core.autocrlf', 'true')
+            # Demonstrate the original bug rather than normalizing the expected evidence.
+            archive = git('archive', 'HEAD', 'record.txt')
+            with tarfile.open(fileobj=io.BytesIO(archive)) as files:
+                self.assertEqual(original.replace(b'\n', b'\r\n'), files.extractfile('record.txt').read())
+            self.assertEqual({'record.txt': original, 'image.bin': binary}, committed_blobs(root, ['record.txt', 'image.bin']))
 
     def test_distribution_template_is_valid_in_source_and_rendered_contexts(self):
         spec = importlib.util.spec_from_file_location('docs_package_release', ROOT/'scripts/release/package_release.py')
