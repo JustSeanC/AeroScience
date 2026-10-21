@@ -18,6 +18,7 @@ public sealed class EngineOptions
 
     public void Validate()
     {
+        ApplicationProfile.Current.ValidateEngine(this);
         if (Telemetry != "SimConnect") throw new InvalidOperationException("Production AeroScience uses live SimConnect telemetry only.");
         if (Port is < 1024 or > 65535) throw new InvalidOperationException("AeroScience:Port must be 1024–65535.");
         if (SamplingIntervalMs is < 250 or > 60000) throw new InvalidOperationException("Sampling interval must be 250–60000 ms.");

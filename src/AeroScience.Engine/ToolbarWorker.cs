@@ -19,7 +19,7 @@ public sealed class ToolbarWorker(ToolbarCommandHandler handler, EngineOptions o
         {
             try
             {
-                using var transport = new CommBusTransport();
+                using var transport = new CommBusTransport(ApplicationProfile.Current.CommandEvent, ApplicationProfile.Current.ReplyEvent);
                 logger.LogInformation("MSFS toolbar CommBus connected (SU5+); waiting for panel requests");
                 lastError = null;status.Connection("Connected","SimConnect CommBus subscribed; waiting for native panel requests.");
                 while (!stoppingToken.IsCancellationRequested)

@@ -25,6 +25,7 @@ public sealed class SetupCoordinator(PreferenceStore preferences, StorageManager
         var original = new[] { current.MissionDirectory, current.ScienceLibraryDirectory };
         for (var i = 0; i < selected.Length; i++)
         {
+            preferences.ValidateDirectory(selected[i]);
             var retainingUnavailableLibrary = i == 1 && current.Initialized && SamePath(selected[i], original[i]);
             ValidateDataLocation(selected[i], applicationDirectory, requireAvailable: !retainingUnavailableLibrary);
             if (!SamePath(selected[i], original[i]) && Directory.Exists(selected[i]) && Directory.EnumerateFileSystemEntries(selected[i]).Any())

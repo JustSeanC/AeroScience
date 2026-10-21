@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup><RuntimeIdentifiers>win-x64</RuntimeIdentifiers></PropertyGroup>
   <ItemGroup>
+    <AssemblyMetadata Include="AeroScienceProfile" Value="validation" Condition="'$(AeroScienceValidation)' == 'true'" />
     <ProjectReference Include="../AeroScience.Shared/AeroScience.Shared.csproj" />
     <ProjectReference Include="../AeroScience.Telemetry/AeroScience.Telemetry.csproj" />
     <ProjectReference Include="../AeroScience.Missions/AeroScience.Missions.csproj" />

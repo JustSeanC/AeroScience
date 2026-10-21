@@ -1,4 +1,5 @@
 using System.Net;
+using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using AeroScience.Engine;
@@ -96,7 +97,7 @@ public static class EngineApplication
         configureServices?.Invoke(builder.Services);
         builder.Services.AddHostedService<TelemetryWorker>();
         builder.Services.AddSingleton(sp=>new ToolbarCommandHandler(sp.GetRequiredService<MissionCoordinator>(),sp.GetRequiredService<RouteMapService>(),
-            (snapshot,collection)=>sp.GetRequiredService<MissionIntelligenceService>().Native(snapshot,collection)));
+            (snapshot,collection)=>sp.GetRequiredService<MissionIntelligenceService>().Native(snapshot,collection), ApplicationProfile.Current.AuthorizeToolbar));
         builder.Services.AddSingleton<RouteMapService>();
         builder.Services.AddSingleton<ToolbarBridgeStatus>();
         builder.Services.AddHostedService<ToolbarWorker>();
@@ -168,6 +169,14 @@ public static class EngineApplication
         });
         app.MapGet("/api/toolbar/bridge",(ToolbarBridgeStatus status)=>status.Snapshot());
         app.MapGet("/api/health", () => Results.Ok(new { status = "ok", version = "0.5.0" }));
+        app.MapGet("/api/build", () => new {
+            profile = ApplicationProfile.Current.Validation ? "validation" : "production",
+            name = ApplicationProfile.Current.Name,
+            sourceCommit = typeof(EngineApplication).Assembly.GetCustomAttributes<System.Reflection.AssemblyInformationalVersionAttribute>()
+                .FirstOrDefault()?.InformationalVersion.Split('+').LastOrDefault(),
+            port = options.Port,
+            toolbarChannel = ApplicationProfile.Current.CommandEvent
+        });
         app.MapGet("/api/access", (HttpContext c) => new { requiresPairing = !AccessControl.IsLoopback(c) });
         app.MapPost("/api/session", (HttpContext c, PairRequest request, AccessControl access) =>
         {

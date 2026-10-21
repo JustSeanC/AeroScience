@@ -25,18 +25,38 @@ public sealed class LocalStorageCapacity : IStorageCapacity
 }
 
 // Settings stay in a stable local folder independently of either movable store.
-public sealed class PreferenceStore(string configurationDirectory)
+public sealed class PreferenceStore(string configurationDirectory, string? confinementRoot = null)
 {
     public string DirectoryPath { get; } = Path.GetFullPath(configurationDirectory);
+    public bool IsConfined => confinementRoot is not null;
     public string SettingsPath => Path.Combine(DirectoryPath, "settings.json");
     public string JournalPath => Path.Combine(DirectoryPath, "storage-migration.json");
     public string DefaultMissionDirectory => DirectoryPath;
     public string DefaultLibraryDirectory => Path.Combine(DirectoryPath, "ScienceLibrary");
-    public AppPreferences Load() => File.Exists(SettingsPath)
+    public AppPreferences Load()
+    {
+        ValidateDirectory(DirectoryPath);
+        var result = File.Exists(SettingsPath)
         ? JsonSerializer.Deserialize<AppPreferences>(File.ReadAllText(SettingsPath))
             ?? throw new IOException("Application settings are invalid. Restore a settings backup; no archive was replaced.")
         : new(DefaultMissionDirectory, DefaultLibraryDirectory);
-    public void Save(AppPreferences settings) => WriteAtomic(SettingsPath, settings);
+        ValidateDirectory(result.MissionDirectory); ValidateDirectory(result.ScienceLibraryDirectory); return result;
+    }
+    public void ValidateDirectory(string directory)
+    {
+        if (confinementRoot is null) return;
+        var root = Path.GetFullPath(confinementRoot).TrimEnd(Path.DirectorySeparatorChar);
+        var selected = Path.GetFullPath(directory);
+        if (!Path.IsPathFullyQualified(directory) || !(selected.Equals(root, StringComparison.OrdinalIgnoreCase)
+            || selected.StartsWith(root + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)))
+            throw new IOException("Validation data must stay inside the isolated validation profile. Use a disposable archive copy; production data was not opened.");
+        // Resolve no links/junctions, including an ancestor of the profile itself.
+        for (var current = new DirectoryInfo(selected); current is not null; current = current.Parent)
+            if (current.Exists && (current.Attributes & FileAttributes.ReparsePoint) != 0)
+                throw new IOException("Validation storage cannot traverse a link or junction.");
+    }
+    public void Save(AppPreferences settings)
+    { ValidateDirectory(DirectoryPath); ValidateDirectory(settings.MissionDirectory); ValidateDirectory(settings.ScienceLibraryDirectory); WriteAtomic(SettingsPath, settings); }
     public static void WriteAtomic<T>(string path, T value)
     {
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
@@ -104,6 +124,7 @@ public sealed partial class StorageManager(PreferenceStore preferences, IStorage
                 throw new InvalidOperationException("A previous migration needs recovery/review before another migration.");
             var settings = preferences.Load();
             var source = Selected(settings, kind); destination = Path.GetFullPath(destination);
+            preferences.ValidateDirectory(destination);
             ValidateLocalPath(source); ValidateLocalPath(destination);
             if (SamePath(source, destination)) return;
             if (kind == StorageKind.ScienceLibrary && (IsWithin(source, destination) || IsWithin(destination, source)))
@@ -171,6 +192,7 @@ public sealed partial class StorageManager(PreferenceStore preferences, IStorage
         lock (gate)
         {
             if (File.Exists(preferences.JournalPath)) throw new InvalidOperationException("Review the interrupted migration first.");
+            preferences.ValidateDirectory(path);
             ValidateLocalPath(path);
             using var lease = Acquire(path);
             if (kind == StorageKind.Missions) { RequireMissionDatabase(path); _ = DatabaseFingerprint(Path.Combine(path, "missions.db")); }
@@ -186,6 +208,7 @@ public sealed partial class StorageManager(PreferenceStore preferences, IStorage
             if (!File.Exists(preferences.JournalPath)) return null;
             var journal = JsonSerializer.Deserialize<MigrationJournal>(File.ReadAllText(preferences.JournalPath))
                 ?? throw new IOException("Invalid migration journal; preserve it and use the original store.");
+            preferences.ValidateDirectory(journal.Source); preferences.ValidateDirectory(journal.Destination);
             var settings = preferences.Load();
             if (SamePath(Selected(settings, journal.Kind), journal.Destination))
             {
@@ -209,6 +232,7 @@ public sealed partial class StorageManager(PreferenceStore preferences, IStorage
         {
             var journal = JsonSerializer.Deserialize<MigrationJournal>(File.ReadAllText(preferences.JournalPath))
                 ?? throw new IOException("Migration journal is invalid.");
+            preferences.ValidateDirectory(journal.Source); preferences.ValidateDirectory(journal.Destination);
             using var sourceLease = Acquire(journal.Source);
             if (journal.Kind == StorageKind.Missions) _ = DatabaseFingerprint(Path.Combine(journal.Source, "missions.db"));
             else _ = LibraryFingerprint(journal.Source);

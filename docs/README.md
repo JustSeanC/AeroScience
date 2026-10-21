@@ -1,5 +1,10 @@
 # AeroScience documentation
 
+For private 0.5.0 testing while 0.4.2 QA continues: [build and isolation](v0.5.0-private-validation.md),
+[owner acceptance workbook](v0.5.0-acceptance-workbook.md), [readiness and blockers](v0.5.0-readiness.md).
+No public 0.5.0 release is authorized.
+
+
 Development additions: [instrument calibration and provenance](instrument-calibration.md)
 describes P03; use the [development tracker](roadmap/v0.5.0-development-tracker.md) for
 implementation and outstanding acceptance. Stable 0.4.2 QA material remains below.

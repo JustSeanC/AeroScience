@@ -60,7 +60,7 @@ storage moves. Missing selected stores never silently become empty replacements.
 
 Stable v0.4.2 uses mission schema 7 and Library schema 2. Current v0.5.0 development adds
 mission schema 8 evidence tables with a verified WAL-aware pre-upgrade backup; Library
-schema 2 is unchanged. Legacy records do not acquire invented sessions, calibration or
+schema 3 adds durable approved Library jobs with its own verified backup. Legacy records do not acquire invented sessions, calibration or
 grades. A v0.4.2 binary must use the preserved compatible backup instead of opening a
 migrated database. Migration requires stopped recording, coordinated services/leases,
 destination validation, SQLite backup/integrity/fingerprint checks, retained originals

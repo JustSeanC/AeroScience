@@ -13,7 +13,7 @@ public sealed record ToolbarReply(int Protocol, Guid RequestId, bool Ok, string?
 
 // The simulator-native channel reaches the same coordinator as the authenticated browser API.
 public sealed class ToolbarCommandHandler(MissionCoordinator coordinator, RouteMapService? maps = null,
-    Func<EngineSnapshot,CollectionOverview?,ToolbarIntelligence>? intelligence=null)
+    Func<EngineSnapshot,CollectionOverview?,ToolbarIntelligence>? intelligence=null, Func<string,string?>? authorize=null)
 {
     readonly Guid engineInstance=Guid.NewGuid();
     private readonly RouteMapService navigation = maps ?? new(coordinator);
@@ -32,6 +32,7 @@ public sealed class ToolbarCommandHandler(MissionCoordinator coordinator, RouteM
                 command = JsonSerializer.Deserialize<ToolbarCommand>(json, WireJson.Options);
                 if (command is null || command.Protocol != 1 || command.RequestId == Guid.Empty)
                     throw new ArgumentException("Invalid toolbar protocol or request identifier.");
+                if (authorize?.Invoke(json) is { } rejection) throw new ArgumentException(rejection);
                 if (command.Op is "map-state" or "map-chunk" or "map-plans")
                 {
                     object value = command.Op switch {

@@ -59,7 +59,7 @@ public sealed class ScientificSourcesPanel:FlowLayoutPanel
             var buttons=new FlowLayoutPanel{AutoSize=true,MaximumSize=new(660,0),WrapContents=true};content.Controls.Add(buttons);
             AddButton(buttons,kind==RemoteKind.Hyperspectral?"Import Hyperspectral Dataset…":"Import Dataset…",()=>app.OpenScientificSources(kind.ToString().ToLowerInvariant(),import:true));
             AddButton(buttons,"Manage Datasets",()=>app.OpenScientificSources(kind.ToString().ToLowerInvariant()));
-            AddButton(buttons,"Open Beginner Guide",()=>System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("http://127.0.0.1:5080/help/remote-sensing/"+(kind==RemoteKind.Hyperspectral?"using-your-own-hyperspectral-dataset.md":"scientific-data-sources.md#"+kind.ToString().ToLowerInvariant())){UseShellExecute=true}));
+            AddButton(buttons,"Open Beginner Guide",()=>System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("http://127.0.0.1:"+AeroScience.Engine.ApplicationProfile.Current.Port+"/help/remote-sensing/"+(kind==RemoteKind.Hyperspectral?"using-your-own-hyperspectral-dataset.md":"scientific-data-sources.md#"+kind.ToString().ToLowerInvariant())){UseShellExecute=true}));
         }
         AddButton(this,"Refresh dataset status",RefreshSources);
         AddButton(this,"Online scientific-data privacy and predictive controls",()=>app.OpenScientificSources("access"));

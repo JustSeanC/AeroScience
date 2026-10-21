@@ -68,6 +68,10 @@ public sealed class ApplicationUpdates
     { lock (gate) { state = state with { RemindAfterUtc = DateTimeOffset.UtcNow.AddDays(1) }; Save(); return state; } }
     public async Task<UpdateSnapshot> Check(bool force = false, CancellationToken token = default)
     {
+        if (ApplicationProfile.Current.Validation)
+        {
+            lock (gate) return state = state with { Available=null, Preferences=new(false), Message="Private validation profile. Rebuild from develop/v0.5.0; public installers do not update this profile." };
+        }
         await check.WaitAsync(token);
         try
         {

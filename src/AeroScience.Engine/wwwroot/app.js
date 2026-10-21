@@ -104,6 +104,13 @@ async function connect(code = null) {
   const session = await api("/api/session", { code });
   csrf = session.csrf;
   authorized = true;
+  const build=await api("/api/build");
+  if(build.profile==="validation"){
+    document.title=build.name;
+    let banner=document.getElementById("validation-identity");
+    if(!banner){banner=el("p","","notice");banner.id="validation-identity";banner.setAttribute("role","status");document.body.prepend(banner);}
+    banner.textContent=`${build.name} · private test profile · port ${build.port} · source ${build.sourceCommit}`;
+  }
   window.dispatchEvent(new Event("aeroscience-session"));
   $("pairing").hidden = true;
   $("workspace").hidden = false;
@@ -488,7 +495,8 @@ async function loadSettings() {
   const view=settingsNavigation(container),panels=view.panels;settingsView=view;view.show();
   function paragraph(category,value){panels.get(category).append(el("p",value));}
   function desktop(category,label,action){const b=el("button",label,"secondary");b.disabled=!s.desktopAvailable;b.onclick=()=>command(b,()=>api(`/api/desktop/${action}`,{}));panels.get(category).append(b);}
-  paragraph("general",`AeroScience ${s.version}`);paragraph("general",`Live connection: ${current?.connection?.message||s.telemetry}`);
+  paragraph("general",`AeroScience ${s.version}`);
+  paragraph("general",`Live connection: ${current?.connection?.message||s.telemetry}`);
   paragraph("general","Mission History and exports remain available without MSFS while your selected storage is connected.");desktop("general","Open application settings","settings");
   await unitControls(panels.get("units"),api,()=>{});
   await mapSettingsUI(panels.get("maps"),api);

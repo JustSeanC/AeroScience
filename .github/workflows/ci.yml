@@ -89,6 +89,8 @@ jobs:
           node-version: '22'
           cache: npm
       - run: dotnet restore AeroScience.sln --locked-mode
+      - name: Verify independently compiled private validation identity
+        run: dotnet run --project tests/AeroScience.TestHost -c Release --artifacts-path artifacts/validation-probe -p:AeroScienceValidation=true -p:RestoreLockedMode=true -- --profile-probe
       - run: dotnet test AeroScience.sln -c Release --no-restore --logger trx --logger 'console;verbosity=normal' --blame-hang-timeout 2m --blame-hang-dump-type none
       - name: Retain Linux test diagnostics
         if: always()
@@ -161,6 +163,13 @@ jobs:
           Add-Content -LiteralPath $env:GITHUB_ENV -Value @("TEMP=$testScratch", "TMP=$testScratch") -Encoding utf8
       - shell: pwsh
         run: ./scripts/build/Build-Companion.ps1
+      - name: Compile isolated validation identity and Windows application (not distributable)
+        shell: pwsh
+        run: |
+          dotnet run --project tests/AeroScience.TestHost -c Release --artifacts-path artifacts/validation-probe -p:AeroScienceValidation=true -p:RestoreLockedMode=true -- --profile-probe
+          if ($LASTEXITCODE -ne 0) { throw 'Compiled validation profile isolation failed.' }
+          dotnet publish src/AeroScience.Desktop -c Release -r win-x64 --self-contained true --artifacts-path artifacts/validation-probe -p:AeroScienceValidation=true -p:RestoreLockedMode=true -o artifacts/Windows-Validation-Structural
+          if ($LASTEXITCODE -ne 0) { throw 'Validation-profile Windows compilation failed.' }
       - name: Retain Windows test diagnostics
         if: always()
         uses: actions/upload-artifact@v7

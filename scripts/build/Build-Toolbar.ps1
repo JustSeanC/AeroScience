@@ -3,6 +3,7 @@
 param(
     [Parameter(Mandatory)][string]$SdkRoot,
     [switch]$ProofOfConcept,
+    [switch]$ValidationProfile,
     [switch]$WindowProbe,
     [string]$PackageToolPath,
     [string]$HeaderDirectory
@@ -18,7 +19,8 @@ if (-not (Test-Path $tool)) { throw "Official SDK package builder missing: $tool
 if (-not (Test-Path "$include/SimConnect.h")) { throw 'Official SimConnect headers are missing.' }
 if (-not (Get-Command cl.exe -ErrorAction SilentlyContinue)) { throw 'Run from an x64 Visual Studio Native Tools shell (cl.exe is required for the SDK contract check).' }
 if (-not (Get-Command python -ErrorAction SilentlyContinue)) { throw 'Python 3 must be installed and available as python on PATH for package validation.' }
-$variant = if ($ProofOfConcept) { 'toolbar-poc' } elseif ($WindowProbe) { 'toolbar-window-probe' } else { 'toolbar-full' }
+if ($ValidationProfile -and ($ProofOfConcept -or $WindowProbe)) { throw 'Validation requires the complete genuine toolbar.' }
+$variant = if ($ValidationProfile) { 'toolbar-validation' } elseif ($ProofOfConcept) { 'toolbar-poc' } elseif ($WindowProbe) { 'toolbar-window-probe' } else { 'toolbar-full' }
 $stage = Join-Path $repo "artifacts/$variant"
 # This is an isolated generated build directory. No SDK or checkout sources are modified.
 if (Test-Path $stage) { Remove-Item $stage -Recurse -Force }
@@ -46,6 +48,10 @@ if ($ProofOfConcept -or $WindowProbe) {
     $entryPage = if ($ProofOfConcept) { 'ProofOfConcept.html' } else { 'WindowProbe.html' }
     (Get-Content $definition -Raw).Replace('AeroScience/AeroScience.html', "AeroScience/$entryPage") | Set-Content $definition -Encoding utf8
 }
+if ($ValidationProfile) {
+    python "$repo/scripts/release/private_validation.py" stage-toolbar --folder $stage --commit ((git -C $repo rev-parse HEAD).Trim())
+    if ($LASTEXITCODE -ne 0) { throw 'Validation namespace staging failed.' }
+}
 $output = Join-Path $stage 'output'
 Push-Location $stage
 try {
@@ -53,10 +59,13 @@ try {
     $packageExit = $LASTEXITCODE
     if ($packageExit -ne 0) { throw "Official SDK package build failed (exit $packageExit). Inspect build.log in the staged build directory." }
 } finally { Pop-Location }
-$packages = @(Get-ChildItem $output -Filter manifest.json -Recurse | Where-Object { $_.Directory.Name -eq 'aeroscience-toolbar' })
+$packageName = if ($ValidationProfile) { 'aeroscience-validation-toolbar' } else { 'aeroscience-toolbar' }
+$packages = @(Get-ChildItem $output -Filter manifest.json -Recurse | Where-Object { $_.Directory.Name -eq $packageName })
 if ($packages.Count -ne 1) { throw 'Expected one SDK-built aeroscience-toolbar package.' }
 $package = $packages[0].Directory.FullName
-python "$repo/scripts/release/package_release.py" validate --community $package
+if ($ValidationProfile) {
+    python -c "import sys; from pathlib import Path; sys.path.insert(0, sys.argv[2]); from package_release import validate_community; validate_community(Path(sys.argv[1]), validation=True)" $package "$repo/scripts/release"
+} else { python "$repo/scripts/release/package_release.py" validate --community $package }
 if ($LASTEXITCODE -ne 0) { throw 'SDK output failed package validation.' }
 $hashes = @{}
 Get-ChildItem $package -File -Recurse | ForEach-Object {

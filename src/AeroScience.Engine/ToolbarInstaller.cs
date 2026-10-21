@@ -46,7 +46,7 @@ public static class ToolbarInstaller
     public static string InstalledStatus(AppPreferences preferences)
     {
         if (preferences.CommunityDirectory is null) return "Community folder not configured";
-        var manifest = Path.Combine(preferences.CommunityDirectory, "aeroscience-toolbar", "manifest.json");
+        var manifest = Path.Combine(preferences.CommunityDirectory, ApplicationProfile.Current.ToolbarPackage, "manifest.json");
         try
         {
             if (!File.Exists(manifest)) return "Not installed in the selected Community folder";
@@ -72,10 +72,10 @@ public static class ToolbarInstaller
         Report("Checking MSFS installation", "Checking the simulator is closed and validating the selected package.");
         simulatorRunning ??= SimulatorRunning;
         if (simulatorRunning()) throw new IOException("Close MSFS before installing/updating the toolbar.");
-        var package = Path.Combine(input, "aeroscience-toolbar");
+        var package = Path.Combine(input, ApplicationProfile.Current.ToolbarPackage);
         if (!Directory.Exists(package)) throw new IOException("This developer build has no verified SDK-built toolbar. A complete alpha must include it; no source/placeholder package was installed.");
         using var receipt = JsonDocument.Parse(File.ReadAllText(Path.Combine(input, "sdk-build.json")));
-        if (receipt.RootElement.GetProperty("variant").GetString() != "toolbar-full") throw new IOException("Diagnostic toolbar packages cannot be installed as the full release.");
+        if (receipt.RootElement.GetProperty("variant").GetString() != (ApplicationProfile.Current.Validation ? "toolbar-validation" : "toolbar-full")) throw new IOException("Diagnostic toolbar packages cannot be installed as the full release.");
         var expected = receipt.RootElement.GetProperty("files").EnumerateObject().ToDictionary(p => p.Name, p => p.Value.GetString(), StringComparer.OrdinalIgnoreCase);
         var files = ValidatedFiles(package);
         Report("Checking the existing toolbar", "Validating bundled files against their genuine SDK build receipt.");
@@ -91,20 +91,20 @@ public static class ToolbarInstaller
             var version = typeof(ToolbarInstaller).Assembly.GetName().Version!;
             if (manifest.RootElement.GetProperty("package_version").GetString() != $"{version.Major}.{version.Minor}.{version.Build}") throw new IOException("Toolbar/app package versions do not match.");
         }
-        var binary = File.ReadAllBytes(files["InGamePanels/aeroscience_panel.spb"]);
+        var binary = File.ReadAllBytes(files[ApplicationProfile.Current.Validation ? "InGamePanels/aeroscience_validation_panel.spb" : "InGamePanels/aeroscience_panel.spb"]);
         if (binary.Length <= 32 || binary[0] == '<' || binary[0] == '{') throw new IOException("A genuine SDK-compiled registration is required.");
         if (!Directory.Exists(community)) throw new IOException("Select an existing configured Community folder.");
         StorageManager.ValidateLocalPath(Path.GetFullPath(community));
         foreach (var directory in Directory.EnumerateDirectories(community))
         {
-            if (Path.GetFileName(directory).Equals("aeroscience-toolbar", StringComparison.OrdinalIgnoreCase)) continue;
+            if (Path.GetFileName(directory).Equals(ApplicationProfile.Current.ToolbarPackage, StringComparison.OrdinalIgnoreCase)) continue;
             var manifestPath = Path.Combine(directory, "manifest.json");
             if (!File.Exists(manifestPath)) continue;
             try
             {
                 using var manifest = JsonDocument.Parse(File.ReadAllText(manifestPath));
                 if (manifest.RootElement.TryGetProperty("title", out var title) && title.ValueKind == JsonValueKind.String
-                    && string.Equals(title.GetString(), "AeroScience", StringComparison.OrdinalIgnoreCase))
+                    && string.Equals(title.GetString(), ApplicationProfile.Current.ToolbarTitle, StringComparison.OrdinalIgnoreCase))
                     throw new InvalidOperationException("A renamed AeroScience toolbar copy exists at " + directory + ". Move it outside Community before installing another copy.");
             }
             catch (Exception error) when (error is IOException or UnauthorizedAccessException or JsonException) { /* Unrelated unreadable manifests are not modified. */ }
@@ -114,9 +114,9 @@ public static class ToolbarInstaller
         foreach (var candidate in discovered.Concat(new[] { Path.Combine(Path.GetDirectoryName(community)!, "Community2024"), Path.Combine(Path.GetDirectoryName(community)!, "Community") })
             .Concat(previousCommunity is null ? [] : new[] { previousCommunity }))
             if (!string.Equals(Path.GetFullPath(candidate), Path.GetFullPath(community), StringComparison.OrdinalIgnoreCase)
-                && Directory.Exists(Path.Combine(candidate, "aeroscience-toolbar")))
+                && Directory.Exists(Path.Combine(candidate, ApplicationProfile.Current.ToolbarPackage)))
                 throw new IOException("Another AeroScience toolbar copy exists at " + candidate + ". Remove/move that copy outside Community before installing another.");
-        var target = Path.Combine(community, "aeroscience-toolbar");
+        var target = Path.Combine(community, ApplicationProfile.Current.ToolbarPackage);
         var targetVersion = ToolbarVersions.ReadVersion(package);
         var existingVersion = ToolbarVersions.ReadVersion(target);
         if (targetVersion is null) throw new IOException("The bundled toolbar version is unknown.");
@@ -124,8 +124,8 @@ public static class ToolbarInstaller
         if (status.Status == ToolbarInstallState.Incompatible) throw new IOException(status.Message);
         if (existingVersion is not null && existingVersion > targetVersion) throw new IOException("A newer toolbar is installed. It was not downgraded.");
         var parent = Path.GetDirectoryName(Path.GetFullPath(community))!;
-        var stage = Path.Combine(parent, ".aeroscience-stage-" + Guid.NewGuid().ToString("N"));
-        var backup = Path.Combine(parent, ".aeroscience-backups", DateTime.UtcNow.ToString("yyyyMMdd-HHmmss") + "-" + Guid.NewGuid().ToString("N"));
+        var stage = Path.Combine(parent, (ApplicationProfile.Current.Validation ? ".aeroscience-validation-stage-" : ".aeroscience-stage-") + Guid.NewGuid().ToString("N"));
+        var backup = Path.Combine(parent, ApplicationProfile.Current.Validation ? ".aeroscience-validation-backups" : ".aeroscience-backups", DateTime.UtcNow.ToString("yyyyMMdd-HHmmss") + "-" + Guid.NewGuid().ToString("N"));
         using var lease = new FileStream(Path.Combine(parent, ".aeroscience-toolbar-install.lock"), FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
         var movedOld = false;
         var activated = false;
@@ -148,7 +148,7 @@ public static class ToolbarInstaller
             {
                 StorageManager.ValidateLocalPath(target);
                 using var existing = JsonDocument.Parse(File.ReadAllText(Path.Combine(target, "manifest.json")));
-                if (!string.Equals(existing.RootElement.GetProperty("title").GetString(), "AeroScience", StringComparison.OrdinalIgnoreCase))
+                if (!string.Equals(existing.RootElement.GetProperty("title").GetString(), ApplicationProfile.Current.ToolbarTitle, StringComparison.OrdinalIgnoreCase))
                     throw new IOException("The target folder contains an unrecognized add-on; it was not changed.");
                 Directory.CreateDirectory(Path.GetDirectoryName(backup)!); Directory.Move(target, backup); movedOld = true;
             }
@@ -171,7 +171,7 @@ public static class ToolbarInstaller
         {
             Report("Installation failed", failure.Message + " Restoring the prior package when safe.");
             if (activated && Directory.Exists(target))
-                Directory.Move(target, Path.Combine(parent, ".aeroscience-failed-" + Guid.NewGuid().ToString("N")));
+                Directory.Move(target, Path.Combine(parent, (ApplicationProfile.Current.Validation ? ".aeroscience-validation-failed-" : ".aeroscience-failed-") + Guid.NewGuid().ToString("N")));
             if (movedOld && !Directory.Exists(target)) Directory.Move(backup, target);
             Report("Recovery completed", movedOld ? "The previous toolbar was restored. The failed replacement is retained outside Community." : "No previous toolbar was replaced. Diagnostic logs are retained.");
             throw;
@@ -196,14 +196,14 @@ public static class ToolbarInstaller
         simulatorRunning ??= SimulatorRunning;
         if (simulatorRunning()) throw new IOException("Close MSFS before removing the AeroScience toolbar.");
         StorageManager.ValidateLocalPath(Path.GetFullPath(community));
-        var target = Path.Combine(community, "aeroscience-toolbar");
+        var target = Path.Combine(community, ApplicationProfile.Current.ToolbarPackage);
         if (!Directory.Exists(target)) return null;
         StorageManager.ValidateLocalPath(target);
         _ = ValidatedFiles(target);
         using var manifest = JsonDocument.Parse(File.ReadAllText(Path.Combine(target, "manifest.json")));
-        if (!string.Equals(manifest.RootElement.GetProperty("title").GetString(), "AeroScience", StringComparison.OrdinalIgnoreCase))
+        if (!string.Equals(manifest.RootElement.GetProperty("title").GetString(), ApplicationProfile.Current.ToolbarTitle, StringComparison.OrdinalIgnoreCase))
             throw new IOException("The toolbar folder is not recognized as AeroScience. It was preserved.");
-        var backup = Path.Combine(Path.GetDirectoryName(Path.GetFullPath(community))!, ".aeroscience-backups", "removed-" + Guid.NewGuid().ToString("N"));
+        var backup = Path.Combine(Path.GetDirectoryName(Path.GetFullPath(community))!, ApplicationProfile.Current.Validation ? ".aeroscience-validation-backups" : ".aeroscience-backups", "removed-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(Path.GetDirectoryName(backup)!);
         if (simulatorRunning()) throw new IOException("MSFS started during removal. Close it and try again.");
         Directory.Move(target, backup);

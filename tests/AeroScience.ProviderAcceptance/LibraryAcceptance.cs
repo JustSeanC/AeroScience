@@ -6,7 +6,9 @@ internal static class LibraryAcceptance
     internal static async Task Run(string output,ScienceStore science,ScientificAccessSettings settings,AutomaticScientificData automatic)
     {
         var catalog=new ScientificCatalog(automatic,science,settings);using var jobs=new ScientificLibraryJobs(science,catalog,automatic,settings);var results=new List<object>();
-        foreach(var provider in ScientificCatalog.Providers)
+        // Protected NASA browser handoff is checked separately by --nasa; it is
+        // not an automatic numeric-download provider. Keep all four automatic adapters.
+        foreach(var provider in ScientificCatalog.Providers.Where(p => p.Id is "usgs-3dep" or "copernicus" or "landsat" or "sentinel-2"))
         {
             var area=provider.Id=="copernicus"?new GeographicBounds(8.1,46.1,8.12,46.12):new(-75,40,-74.98,40.02);
             var from=DateTimeOffset.Parse("2024-09-03T00:00:00Z");var to=from.AddDays(1);

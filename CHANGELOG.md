@@ -1,21 +1,40 @@
 # Changelog
 
-## Unreleased — v0.5.0 development
+## Unreleased — v0.5.0 development (draft; not published)
 
-- P01/P02 add versioned scientific-evidence contracts and an additive mission schema 8
-  foundation for multiple collection sessions, immutable obligations, atomic decisions,
-  exact input/command receipts, acquisition intents, recovery and offline evidence export.
-  Runtime session controls/calibration/grading are not activated by this foundation.
-- P03 extends existing instrument configurations with immutable, attributed calibration
-  revisions and reference specifications. Optional user affine scalar derivations retain
-  originals and independent provenance/snapshots; external scientific pixels are unchanged.
-  Add focused plan/preset/instrument controls and offline replay/export support.
-- Development CI separates targeted pushes from complete milestone/manual integration;
-  full release/scientific/SDK/runtime/hardware acceptance requirements remain.
-- Consolidate current documentation, retire superseded alpha workbooks/unused synthetic
-  illustrations, and preserve scientific evidence and active v0.4.2 QA paths.
-- This is development status, not a published installer, new genuine-source acceptance or
-  Windows/MSFS/device pass. Follow the [tracker](docs/roadmap/v0.5.0-development-tracker.md).
+- Versioned instrument calibration/reference definitions and optional validated user
+  calibration keep original simulator/source values and separately attributed derivations.
+- Hybrid Realistic operating assessments distinguish documented advisories, invalid
+  derived geometry, source quality and unknown evidence without arbitrary collection stops.
+- Multiple independent science sessions in one continuous flight: Start, Pause, Resume,
+  End Current Session and explicit automation rearm; End Flight remains separate.
+- Backend route/gate triggers and optional survey-boundary pause/resume work with displays
+  closed. Explicit End triggers are optional; final waypoints and area exits do not infer End.
+- Planner preflight readiness evaluates actual design, instruments, sources, storage,
+  automation and grading evidence while allowing incomplete drafts and offline work.
+- Versioned Realistic pilot-performance grading uses frozen flight-wide obligations,
+  transparent uncertainty, session diagnostics and factual scientific-yield denominators.
+  Grades describe mission execution, not certified scientific accuracy. Universal/legacy
+  missions are not assigned invented historical grades or evidence.
+- Geographic Library browsing supports bounded cells, polygons, viewports, coordinates
+  and authoritative regions, exact scenes, approval previews, durable jobs and offline reuse.
+  Automatic numeric downloads support USGS 3DEP, Copernicus GLO-30 DSM, Landsat Collection 2
+  Level-2 temperature and Sentinel-2 Level-2A. Historical sources are not live aircraft images.
+- NASA CMR discovery includes AVIRIS-Classic, AVIRIS-NG and EMIT V002. AVIRIS uses official
+  Earthdata **browser handoff and guided local ENVI verification/import**, not direct
+  authenticated in-app downloading. Genuine protected Classic/NG numeric acceptance
+  remains pending. EMIT is discovery/official-link only; no native NetCDF-4 import.
+- Shared dashboard/paired-browser mission intelligence, retained session reports and
+  compact capability-gated native-toolbar controls preserve existing navigation and wire limits.
+- Approved Orbital Arc branding across web, Windows, packaging and native assets;
+  consolidated current documentation and preserved active 0.4.2 QA/scientific records.
+- Isolated private validation profile protects production installation/data and provides
+  a separate toolbar namespace. No new public installer or release is authorized.
+
+See the [readiness report](docs/v0.5.0-readiness.md), [private build guide](docs/v0.5.0-private-validation.md)
+and [owner acceptance workbook](docs/v0.5.0-acceptance-workbook.md). Full technical CI,
+genuine public data, protected NASA originals and physical Windows/MSFS/iPad/Quest
+acceptance are separate results. No release date, hardware pass or publication is claimed.
 
 
 ## 0.4.2 — Research Workstation & Scientific Visualization (development; acceptance pending)

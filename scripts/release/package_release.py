@@ -120,7 +120,7 @@ def files(root):
     return result
 
 
-def validate_community(root, package_version=VERSION):
+def validate_community(root, package_version=VERSION, *, validation=False):
     found = files(root)
     # The Windows SDK can lowercase layout paths independently of the disk names.
     # Keep original names for the SDK receipt; only matching is case-insensitive.
@@ -157,19 +157,31 @@ def validate_community(root, package_version=VERSION):
                 "html_ui/InGamePanels/AeroScience/AeroScience.js", "html_ui/InGamePanels/AeroScience/AeroScience.css",
                 "html_ui/icons/toolbar/ICON_AEROSCIENCE.svg", "html_ui/InGamePanels/AeroScience/toolbar-compatibility.json",
                 "html_ui/InGamePanels/AeroScience/AeroScience.Map.js", "html_ui/InGamePanels/AeroScience/AeroScience.Geography.js", "html_ui/InGamePanels/AeroScience/geography-provenance.json"}
+    if validation:
+        expected = {name.replace('aeroscience_panel', 'aeroscience_validation_panel').replace('InGamePanels/AeroScience/', 'InGamePanels/AeroScienceValidation/').replace('ICON_AEROSCIENCE', 'ICON_AEROSCIENCE_VALIDATION') for name in expected}
+    def identity_path(name):
+        return name.replace('aeroscience_panel', 'aeroscience_validation_panel').replace('ingamepanels/aeroscience/', 'ingamepanels/aerosciencevalidation/').replace('icon_aeroscience.svg', 'icon_aeroscience_validation.svg') if validation else name
     require({name.casefold() for name in expected} <= indexed.keys(), "Compiled panel registration or toolbar assets are missing.")
-    binary = indexed["ingamepanels/aeroscience_panel.spb"].read_bytes()
+    binary = indexed[identity_path("ingamepanels/aeroscience_panel.spb")].read_bytes()
     require(len(binary) > 32 and not binary.lstrip().startswith((b"<", b"{")), "Panel is source/placeholder content, not an SDK-compiled SPB.")
-    compatibility=read_json(indexed["html_ui/ingamepanels/aeroscience/toolbar-compatibility.json"])
+    compatibility=read_json(indexed[identity_path("html_ui/ingamepanels/aeroscience/toolbar-compatibility.json")])
     require(compatibility.get('protocol')==1 and compatibility.get('applicationVersion')==package_version, 'Toolbar compatibility descriptor differs from the release/protocol.')
-    html = indexed["html_ui/ingamepanels/aeroscience/aeroscience.html"].read_text(encoding="utf-8-sig")
-    require('panel-id="PANEL_AEROSCIENCE"' in html and "AeroScience.js" in html and "AeroScience.css" in html, "Panel references are inconsistent.")
+    html = indexed[identity_path("html_ui/ingamepanels/aeroscience/aeroscience.html")].read_text(encoding="utf-8-sig")
+    require(('panel-id="PANEL_AEROSCIENCE_VALIDATION"' if validation else 'panel-id="PANEL_AEROSCIENCE"') in html and "AeroScience.js" in html and "AeroScience.css" in html, "Panel references are inconsistent.")
     expected_icon=hashlib.sha256((REPO/'assets/branding/orbital-arc-toolbar-white.svg').read_bytes()).hexdigest()
-    require(hashlib.sha256(indexed['html_ui/icons/toolbar/icon_aeroscience.svg'].read_bytes()).hexdigest()==expected_icon, 'Toolbar icon differs from approved Orbital Arc asset.')
+    require(hashlib.sha256(indexed[identity_path('html_ui/icons/toolbar/icon_aeroscience.svg')].read_bytes()).hexdigest()==expected_icon, 'Toolbar icon differs from approved Orbital Arc asset.')
+    if validation:
+        script = indexed['html_ui/ingamepanels/aerosciencevalidation/aeroscience.js'].read_text(encoding='utf-8-sig')
+        require('AeroScience.Validation.0_5_0.Command.v1' in script and 'AeroScience.Validation.0_5_0.Reply.v1' in script, 'Validation CommBus identity missing.')
+        require('AeroScience.Command.v1' not in script and 'AeroScience.Reply.v1' not in script, 'Production CommBus channel in validation package.')
+        require(manifest.get('title') == 'AeroScience 0.5.0 Validation', 'Validation title missing.')
     return found
 
 
 def validate_companion(root, require_simconnect=False):
+    require(not (root/'VALIDATION-RECEIPT.json').exists(), 'Private validation artifacts cannot become public release payloads.')
+    if (root/'build-info.json').exists():
+        require(read_json(root/'build-info.json').get('profile') != 'validation', 'Private validation binaries are not a production release candidate.')
     found = files(root)
     expected = {"AeroScience.exe", "AeroScience.dll", "AeroScience.deps.json",
                 "AeroScience.runtimeconfig.json", "AeroScience.Engine.dll", "coreclr.dll", "hostpolicy.dll",

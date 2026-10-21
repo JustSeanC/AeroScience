@@ -17,14 +17,16 @@ public sealed class CommBusTransport : IDisposable
     private readonly Queue<string> queue = new();
     private bool quit;
     private string? failure;
+    private readonly string replyEvent;
 
-    public CommBusTransport()
+    public CommBusTransport(string commandEvent = CommandEvent, string responseEvent = ReplyEvent)
     {
+        replyEvent = responseEvent;
         if (!OperatingSystem.IsWindows() || RuntimeInformation.ProcessArchitecture != Architecture.X64)
             throw new PlatformNotSupportedException("CommBus requires MSFS 2024 on Windows x64.");
         callback = OnMessage;
         Check(Native.Open(out handle, "AeroScience toolbar bridge", IntPtr.Zero, 0, IntPtr.Zero, 0));
-        try { Check(Subscribe(handle, SubscriptionId, CommandEvent)); }
+        try { Check(Subscribe(handle, SubscriptionId, commandEvent)); }
         catch { Dispose(); throw; }
     }
 
@@ -57,7 +59,7 @@ public sealed class CommBusTransport : IDisposable
         var buffer = Encoding.UTF8.GetBytes(json + "\0");
         if (buffer.Length > 8192) throw new InvalidOperationException("Toolbar state exceeds its bounded payload size.");
         // JS only. Send a response only when an active panel asks, avoiding a backlog while JS is halted.
-        Check(Call(handle, ReplyEvent, 1, (uint)buffer.Length, buffer));
+        Check(Call(handle, replyEvent, 1, (uint)buffer.Length, buffer));
     }
 
     public static string? DecodeCommand(ReadOnlySpan<byte> packet)

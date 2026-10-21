@@ -25,40 +25,55 @@ public sealed record ToolbarInstallContext(IProgress<ToolbarProgress>? Progress 
 
 public static class ToolbarVersions
 {
-    public static Version? ReadVersion(string folder)
+    public static Version? ReadVersion(string folder, ApplicationProfile? profile = null)
     {
+        profile ??= ApplicationProfile.Current;
         try
         {
             using var data = JsonDocument.Parse(File.ReadAllText(Path.Combine(folder, "manifest.json")));
-            if (!data.RootElement.TryGetProperty("title", out var title) || !string.Equals(title.GetString(), "AeroScience", StringComparison.OrdinalIgnoreCase)) return null;
+            if (!data.RootElement.TryGetProperty("title", out var title) || !string.Equals(title.GetString(), profile.ToolbarTitle, StringComparison.OrdinalIgnoreCase)) return null;
             var value = data.RootElement.GetProperty("package_version").GetString();
             return Version.TryParse(value, out var version) && version.Build >= 0 && version.Revision <= 0 ? version : null;
         }
         catch (Exception error) when (error is IOException or UnauthorizedAccessException or JsonException or InvalidOperationException or KeyNotFoundException) { return null; }
     }
-    private static int? Protocol(string folder)
+    private static int? Protocol(string folder, ApplicationProfile profile)
     {
         try
         {
-            using var data = JsonDocument.Parse(File.ReadAllText(Path.Combine(folder, "html_ui", "InGamePanels", "AeroScience", "toolbar-compatibility.json")));
+            using var data = JsonDocument.Parse(File.ReadAllText(Path.Combine(folder, "html_ui", "InGamePanels", profile.ToolbarFolder, "toolbar-compatibility.json")));
             return data.RootElement.GetProperty("protocol").GetInt32();
         }
         catch (Exception error) when (error is IOException or UnauthorizedAccessException or JsonException or InvalidOperationException or KeyNotFoundException or FormatException) { return null; }
     }
-    public static ToolbarVersionStatus Inspect(string bundle, string? community)
+    public static ToolbarVersionStatus Inspect(string bundle, string? community, ApplicationProfile? profile = null)
     {
-        var bundled = ReadVersion(Path.Combine(bundle, "aeroscience-toolbar"));
+        profile ??= ApplicationProfile.Current;
+        var bundled = ReadVersion(Path.Combine(bundle, profile.ToolbarPackage), profile);
         var companion = typeof(ToolbarVersions).Assembly.GetName().Version!;
+        if (profile.Validation && SourceCommit(Path.Combine(bundle, profile.ToolbarPackage), profile) != ApplicationProfile.SourceCommit)
+            return new(null,bundled?.ToString(3),community,ToolbarInstallState.Incompatible,"The validation toolbar does not match this compiled source. Rebuild the complete private candidate.",false);
         if (bundled is null || bundled.ToString(3) != companion.ToString(3)) return new(null, bundled?.ToString(3), community, ToolbarInstallState.Unknown,
             "The bundled SDK toolbar is missing, unknown, or does not match this companion. Repair the application with a complete installer.", false);
-        var target = community is null ? null : Path.Combine(community, "aeroscience-toolbar");
+        var target = community is null ? null : Path.Combine(community, profile.ToolbarPackage);
         if (target is null || !Directory.Exists(target)) return new(null, bundled.ToString(3), community, ToolbarInstallState.Missing, "AeroScience MSFS Toolbar is not installed.", true);
-        var installed = ReadVersion(target); var protocol = Protocol(target);
+        if (profile.Validation && SourceCommit(target, profile) != ApplicationProfile.SourceCommit)
+            return new(ReadVersion(target,profile)?.ToString(3),bundled.ToString(3),community,ToolbarInstallState.UpdateAvailable,"Validation toolbar source mismatch. Close MSFS and install this candidate's matching validation package. Production is preserved.",true);
+        var installed = ReadVersion(target, profile); var protocol = Protocol(target, profile);
         if (installed is null) return new(null, bundled.ToString(3), community, ToolbarInstallState.Unknown, "The installed toolbar version cannot be determined. Inspect or repair the selected package; no version was assumed.", false, true, protocol);
         if (protocol is not null && protocol != 1) return new(installed.ToString(3), bundled.ToString(3), community, ToolbarInstallState.Incompatible, "The installed toolbar protocol is unsupported. Flight recording and the browser remain available.", false, false, protocol);
         if (installed > bundled) return new(installed.ToString(3), bundled.ToString(3), community, ToolbarInstallState.Incompatible, "A newer toolbar is installed. It will not be automatically downgraded.", false, false, protocol);
         if (installed < bundled) return new(installed.ToString(3), bundled.ToString(3), community, ToolbarInstallState.UpdateAvailable, $"AeroScience Toolbar {installed.ToString(3)} is installed. Version {bundled.ToString(3)} is available.", true, false, protocol);
         return new(installed.ToString(3), bundled.ToString(3), community, ToolbarInstallState.Current, "AeroScience Toolbar is up to date.", true, true, protocol);
+    }
+    private static string? SourceCommit(string folder, ApplicationProfile profile)
+    {
+        try
+        {
+            using var data=JsonDocument.Parse(File.ReadAllText(Path.Combine(folder,"html_ui","InGamePanels",profile.ToolbarFolder,"toolbar-compatibility.json")));
+            return data.RootElement.GetProperty("profile").GetString()=="validation"?data.RootElement.GetProperty("sourceCommit").GetString():null;
+        }
+        catch(Exception error)when(error is IOException or UnauthorizedAccessException or JsonException or InvalidOperationException or KeyNotFoundException){return null;}
     }
 }
 

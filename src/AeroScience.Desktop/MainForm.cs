@@ -28,24 +28,40 @@ public sealed class MainForm : BrandedForm, IDesktopActions
     public bool Recording => engine?.Services.GetRequiredService<MissionCoordinator>().Snapshot().ActiveMission is not null;
     private readonly ToolbarPromptPolicy toolbarPrompts = new();
     public ToolbarVersionStatus Toolbar => ToolbarVersions.Inspect(Path.Combine(AppContext.BaseDirectory, "Toolbar"), PreferredCommunity());
-    private string? PreferredCommunity() => Preferences.Load().CommunityDirectory ?? ToolbarInstaller.DiscoverCommunityFolders().OrderByDescending(p => Directory.Exists(Path.Combine(p, "aeroscience-toolbar"))).FirstOrDefault();
+    private string? PreferredCommunity() => Preferences.Load().CommunityDirectory ?? ToolbarInstaller.DiscoverCommunityFolders().OrderByDescending(p => Directory.Exists(Path.Combine(p, ApplicationProfile.Current.ToolbarPackage))).FirstOrDefault();
     public StorageStatus MissionStorage => Storage.Status(StorageKind.Missions);
     public StorageStatus ScienceStorage => Storage.Status(StorageKind.ScienceLibrary);
 
     public MainForm(string configurationDirectory, bool showSetup = false)
     {
-        Preferences = new(configurationDirectory); Storage = new(Preferences);
+        Preferences = new(configurationDirectory, ApplicationProfile.Current.Validation ? ApplicationProfile.Current.ConfigurationDirectory : null); Storage = new(Preferences);
         new MapSettings(configurationDirectory).InitializeDefaults(File.Exists(Preferences.SettingsPath) || File.Exists(Path.Combine(configurationDirectory, "missions.db")));
-        Text = "AeroScience " + Application.ProductVersion.Split('+')[0]; MinimumSize = new(560, 290); Size = new(760, 350);
+        Text = ApplicationProfile.Current.Name + " " + Application.ProductVersion.Split('+')[0]; MinimumSize = new(560, 290); Size = new(760, 350);
         AutoScaleMode = AutoScaleMode.Dpi;
         var panel = new FlowLayoutPanel { Dock = DockStyle.Fill, Padding = new(24), FlowDirection = FlowDirection.TopDown, WrapContents = false, AutoScroll = true };
         var brand=new FlowLayoutPanel{AutoSize=true,WrapContents=false};brand.Controls.Add(PrimaryMark());
-        brand.Controls.Add(new Label { Text = "AeroScience · Science Mission Operations", AutoSize = true, Margin=new(8,12,0,0), Font = new(Font.FontFamily, 16) });panel.Controls.Add(brand);
+        brand.Controls.Add(new Label { Text = ApplicationProfile.Current.Name + " · Science Mission Operations", AutoSize = true, Margin=new(8,12,0,0), Font = new(Font.FontFamily, 16) });panel.Controls.Add(brand);
         panel.Controls.Add(status); panel.Controls.Add(dashboard);
         dashboard.Click += (_, _) => OpenDashboard();
         AddButton(panel, "Settings", () => ShowSettings(false));
         AddButton(panel, "Storage", () => ShowSettings(true));
         AddButton(panel, "Collect Feedback", ShowFeedback);
+        if (ApplicationProfile.Current.Validation)
+            AddButton(panel, "Copy archives for validation", async () =>
+            {
+                if (Busy || Recording) return;
+                using var mission = new FolderBrowserDialog { Description="Choose the ORIGINAL mission database folder to COPY. It will not be migrated.", UseDescriptionForTitle=true };
+                if(mission.ShowDialog(this)!=DialogResult.OK)return;
+                using var science = new FolderBrowserDialog { Description="Choose the ORIGINAL Science Library folder to COPY. Originals will be preserved.", UseDescriptionForTitle=true };
+                if(science.ShowDialog(this)!=DialogResult.OK)return;
+                if(MessageBox.Show(this,"Create a verified disposable copy of both archives inside the Validation profile, then select that copy? Originals and production settings are retained. Close other applications using these archives first.","Copy archives for validation",MessageBoxButtons.YesNo,MessageBoxIcon.Question,MessageBoxDefaultButton.Button2)!=DialogResult.Yes)return;
+                try { await RunStoppedAsync(()=>Task.Run(()=>
+                {
+                    var destination=Path.Combine(Preferences.DirectoryPath,"Copies",DateTime.UtcNow.ToString("yyyyMMdd-HHmmss")+"-"+Guid.NewGuid().ToString("N"));
+                    var copy=ValidationArchiveCopy.Create(Preferences,mission.SelectedPath,science.SelectedPath,destination);
+                    Preferences.Save(Preferences.Load() with {MissionDirectory=copy.MissionDirectory,ScienceLibraryDirectory=copy.ScienceLibraryDirectory,Initialized=true});
+                })); }catch(Exception error){ShowError(error);}
+            });
         AddButton(panel, "Exit", Close); Controls.Add(panel);
         timer.Tick += (_, _) => RefreshStatus();
         Shown += async (_, _) =>
@@ -88,13 +104,14 @@ public sealed class MainForm : BrandedForm, IDesktopActions
         foreach (var path in new[] { preferences.MissionDirectory, preferences.ScienceLibraryDirectory })
             SetupCoordinator.ValidateDataLocation(path, AppContext.BaseDirectory, requireAvailable: false);
         preferences = Storage.Initialize();
-        using (var key = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(@"Software\AeroScience"))
+        using (var key = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(ApplicationProfile.Current.RegistryKey))
         {
             key.SetValue("MissionDirectory", preferences.MissionDirectory);
             key.SetValue("ScienceLibraryDirectory", preferences.ScienceLibraryDirectory);
         }
         var args = new[] {
             "--AeroScience:Telemetry=SimConnect",
+            "--AeroScience:Port=" + ApplicationProfile.Current.Port,
             "--AeroScience:ConfigurationDirectory=" + Preferences.DirectoryPath,
             "--AeroScience:DataDirectory=" + preferences.MissionDirectory,
             "--AeroScience:ScienceLibraryDirectory=" + preferences.ScienceLibraryDirectory,
@@ -136,12 +153,12 @@ public sealed class MainForm : BrandedForm, IDesktopActions
         if (engine.Lifetime.ApplicationStopped.IsCancellationRequested)
         { status.Text = "The local engine stopped after an error. Collect Feedback and check Storage/Settings; existing records are retained."; dashboard.Enabled = false; return; }
         var snapshot = engine.Services.GetRequiredService<MissionCoordinator>().Snapshot();
-        status.Text = $"Engine running · {snapshot.Connection.Message}\n{(snapshot.ActiveMission is null ? "No active mission" : "Mission recording")} · Toolbar: {Toolbar.Message}";
+        status.Text = $"{ApplicationProfile.Current.Name} · Engine running · {snapshot.Connection.Message}\n{(snapshot.ActiveMission is null ? "No active mission" : "Mission recording")} · Toolbar: {Toolbar.Message}";
     }
     public void OpenDashboard(bool settings = false)
     {
         if (engine is null) { MessageBox.Show(this, "The engine is stopped. Check Storage/Settings."); return; }
-        Process.Start(new ProcessStartInfo("http://127.0.0.1:5080" + (settings ? "/#settings" : "")) { UseShellExecute = true });
+        Process.Start(new ProcessStartInfo("http://127.0.0.1:" + ApplicationProfile.Current.Port + (settings ? "/#settings" : "")) { UseShellExecute = true });
     }
     private void ShowSettings(bool storage)
     {
@@ -231,7 +248,7 @@ public sealed class MainForm : BrandedForm, IDesktopActions
         var p=ScientificAccess.Preferences;var modes=new Dictionary<RemoteKind,string>(p.SourceModes??[]){[kind]=mode};automatic.Configure(p with{SourceModes=modes});
     }
     public void OpenScientificSources(string kind,bool import=false,Guid? dataset=null)
-    {if(engine is not null)Process.Start(new ProcessStartInfo("http://127.0.0.1:5080/#settings/science?"+(kind=="access"?"section=access":"source="+kind)+(import?"&import=1":"")+(dataset is null?"":"&dataset="+dataset)){UseShellExecute=true});}
+    {if(engine is not null)Process.Start(new ProcessStartInfo("http://127.0.0.1:"+ApplicationProfile.Current.Port+"/#settings/science?"+(kind=="access"?"section=access":"source="+kind)+(import?"&import=1":"")+(dataset is null?"":"&dataset="+dataset)){UseShellExecute=true});}
     private void DispatchSourcePicker(Func<IWin32Window,Task> action)
     {
         var lease=desktopActions.TryEnter();if(lease is null){Dispatch(()=>{});return;}

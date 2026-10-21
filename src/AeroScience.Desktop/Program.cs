@@ -9,15 +9,16 @@ internal static class Program
     private static int Main(string[] args)
     {
         ApplicationConfiguration.Initialize();
-        var directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "AeroScience");
-        using var instance = new Mutex(true, @"Local\AeroScience.Desktop", out var created);
+        var profile = ApplicationProfile.Current;
+        var directory = profile.ConfigurationDirectory;
+        using var instance = new Mutex(true, ApplicationProfile.DesktopMutex, out var created);
         if (!created) { MessageBox.Show("AeroScience is already running. Close it before installation or removal.", "AeroScience"); return 1; }
         if (args.Contains("--uninstall-toolbar"))
         {
             try
             {
-                var path = new PreferenceStore(directory).Load().CommunityDirectory;
-                if (path is not null && Directory.Exists(Path.Combine(path, "aeroscience-toolbar"))
+                var path = profile.Preferences().Load().CommunityDirectory;
+                if (path is not null && Directory.Exists(Path.Combine(path, profile.ToolbarPackage))
                     && MessageBox.Show("Remove the AeroScience MSFS toolbar too?\n\n" + path + "\n\nOnly AeroScience will be moved to a backup outside Community. Mission history, scientific data, configuration and unrelated add-ons will be retained. Choose No to keep the toolbar.", "Uninstall AeroScience", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) == DialogResult.Yes)
                 {
                     while (ToolbarInstaller.SimulatorRunning())

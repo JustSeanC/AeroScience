@@ -84,3 +84,12 @@ The script retains `sdk-contract.log` and `build.log`, uses its staged project a
 Mach is shown alongside indicated airspeed when available, using the shared nullable field. Its actual simulator reception and layout need Windows acceptance after the extended ABI contract passes.
 
 The panel uses the simulator's `ingame-ui`, header and native push-button templates for its floating, resize and input behavior. AeroScience uses one responsive interface with high contrast text and controls at least 48 px high. Compact VR has been removed. Desktop simulator testing verifies native movement, resizing, wheel input and mission controls. VR-specific acceptance measures frame rate/frame times, stutters and companion/toolbar resource impact only; there is no separate headset interaction matrix. A Chromium screenshot cannot establish native input or headset performance. The disconnected lifecycle releases listeners/timers; closing the panel sends no mission-end command.
+
+## Private validation namespace
+
+The ordinary production IDs/channels above remain unchanged. The explicitly compiled
+[private validation profile](v0.5.0-private-validation.md) stages a separate SDK package,
+panel/icon/custom element and CommBus namespace before official compilation. It checks
+the candidate source identity before any native request is executed, uses validation-only
+backup ownership and retains production files. Only one desktop version is supported
+at a time. Actual installed coexistence and MSFS rendering remain workbook A/H checks.
