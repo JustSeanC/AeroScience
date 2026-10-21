@@ -25,7 +25,9 @@ export async function libraryDownload(parent, api, isDisposed = () => false) {
     results = [],
     chosen = new Map(),
     preview = null,
-    query = null;
+    query = null,
+    budgetInput = null,
+    userBudget = false;
   const cleanup = () => {
     stopped = true;
     clearTimeout(timer);
@@ -61,6 +63,19 @@ export async function libraryDownload(parent, api, isDisposed = () => false) {
   );
   const details = el("p");
   form.append(details);
+  const earthdataBox = el("section");
+  earthdataBox.setAttribute("aria-label", "NASA Earthdata connection");
+  const earthdataText = el("p");
+  earthdataBox.append(el("h2", "NASA Earthdata"), earthdataText);
+  form.append(earthdataBox);
+  button(earthdataBox, "Connect Earthdata on this PC", () => api("/api/desktop/earthdata-connect", {}));
+  button(earthdataBox, "Refresh Earthdata connection", refreshEarthdata);
+  button(earthdataBox, "Disconnect Earthdata on this PC", async () => { await api("/api/science/earthdata/disconnect", {}); await refreshEarthdata(); });
+  async function refreshEarthdata() {
+    const connection = await api("/api/science/earthdata");
+    if (stopped || isDisposed()) return;
+    earthdataText.textContent = `${connection.connected ? "Credential saved" : "Not connected"}. ${connection.message} On paired devices, complete connection management on the companion PC. NASA originals can require gigabytes; review the exact full-file scope before approval.`;
+  }
   const filters = el("div", undefined, "workspace-controls");
   form.append(filters);
   function input(parent, label, value, type = "text") {
@@ -411,6 +426,15 @@ export async function libraryDownload(parent, api, isDisposed = () => false) {
     );
     previewBox.replaceChildren();
     const p = providers.find((p) => p.id === provider.value);
+    earthdataBox.hidden = !p.id.startsWith("nasa-");
+    if (!earthdataBox.hidden) refreshEarthdata().catch(error => { earthdataText.textContent = error.message; });
+    if (budgetInput && p.id.startsWith("nasa-") && !userBudget) {
+      const revision = epoch;
+      api("/api/science/access").then(({ configuration }) => {
+        if (stopped || isDisposed() || revision !== epoch || userBudget) return;
+        budgetInput.value = Math.min(configuration.preferences.nasaOriginalMaximumBytes ?? 1073741824, configuration.preferences.preflightTransferBytes ?? 21474836480) / 1048576;
+      }).catch(error => { feedback.textContent = error.message; });
+    }
     details.textContent = p.description;
     measurements.textContent =
       "Supported compatible numeric recipe: " +
@@ -517,6 +541,11 @@ export async function libraryDownload(parent, api, isDisposed = () => false) {
           await api("/api/science/hyperspectral/nasa", {provider:item.provider, granuleId:item.scene, revision:item.revision});
           openHyperspectralImport(api);
         });
+        if (item.provider !== "nasa-emit" && item.nasa.capability.startsWith("Guided import")) button(row, "Preview NASA Download & Import", async () => {
+          const own = ++epoch;
+          const job = await api("/api/science/library/nasa/preview", { selection: { provider: item.provider, granuleId: item.scene, revision: item.revision }, maximumTransferBytes: Number(budgetInput.value) * 1048576 });
+          await displayPreview(job, own);
+        });
       }
       const reference = link(more, "Authoritative source", item.reference);
       reference.target = "_blank";
@@ -566,14 +595,15 @@ export async function libraryDownload(parent, api, isDisposed = () => false) {
   budget.max = 20480;
   // Keep the budget field separate from the replaceable preview result.
   form.append(budget.parentElement);
-  const budgetInput = budget;
+  budgetInput = budget;
   budget.oninput = () => {
+    userBudget = true;
     epoch++;
     preview = null;
   };
   const requestSelection = () => {
     if (!areas.length) throw Error("Select a geographic area first.");
-    if (provider.value.startsWith("nasa-")) throw Error("NASA uses official browser handoff and verified local ENVI import. Select a NASA scene’s access action. EMIT is discovery only.");
+    if (provider.value.startsWith("nasa-")) throw Error("Choose the exact NASA scene's Preview NASA Download & Import action. Browser/manual fallback remains available; EMIT is discovery only.");
     if (!chosen.size)
       throw Error("Choose at least one exact provider scene/product first.");
     return {
@@ -593,6 +623,9 @@ export async function libraryDownload(parent, api, isDisposed = () => false) {
   button(searchTools, "Preview selected download", async () => {
     const own = ++epoch;
     const job = await api("/api/science/library/preview", requestSelection());
+    await displayPreview(job, own);
+  });
+  async function displayPreview(job, own) {
     if (stopped || isDisposed() || own !== epoch) return;
     preview = job;
     const p = job.preview;
@@ -627,6 +660,7 @@ export async function libraryDownload(parent, api, isDisposed = () => false) {
         ),
       );
     for (const text of p.warnings) previewBox.append(el("p", text, "footnote"));
+    if (p.nasa) table(previewBox, "Exact original NASA files", ["Original file", "Role", "Verified header length (bytes)", "Safe range resume"], p.nasa.files.map(file => [file.name, file.role, file.bytes, file.etag && file.ranges ? "Supported with identity verification" : "Restart safely if interrupted"]));
     const units = disclosure(
       previewBox,
       "Exact work windows & retained-source reuse",
@@ -643,7 +677,7 @@ export async function libraryDownload(parent, api, isDisposed = () => false) {
       ]),
       { pageSize: 50 },
     );
-    const approve = button(previewBox, "Approve & queue download", async () => {
+    const approve = button(previewBox, p.nasa ? "Download & Import" : "Approve & queue download", async () => {
       if (preview !== job) throw Error("Selection changed. Preview again.");
       await api(`/api/science/library/jobs/${job.id}/approve`, {
         selectionHash: p.selectionHash,
@@ -662,7 +696,7 @@ export async function libraryDownload(parent, api, isDisposed = () => false) {
           "Remove uncovered cells or choose a covering scene before approval. No subset was silently substituted.",
         ),
       );
-  });
+  }
   const manager = el("section", undefined, "panel library-job-manager");
   manager.setAttribute("aria-label", "Library Download Manager");
   manager.append(el("h2", "Download Manager"));
@@ -688,6 +722,7 @@ export async function libraryDownload(parent, api, isDisposed = () => false) {
     if (stopped || isDisposed() || running) return;
     running = true;
     try {
+      if (!earthdataBox.hidden) await refreshEarthdata();
       const response = await api(
         `/api/science/library/jobs?offset=${jobOffset}`,
       );

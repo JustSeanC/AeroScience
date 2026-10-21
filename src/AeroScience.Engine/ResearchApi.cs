@@ -54,6 +54,13 @@ public static class ResearchApi
         app.MapGet("/api/science/diagnostics",(AutomaticScientificData automatic,HttpContext c)=>AccessControl.IsLoopback(c)?Results.Ok(new{privacy="Geographic regions and provider/instrument activity are included. Review before sharing. No credentials or original scientific files.",events=ScientificDiagnostics.Snapshot(),network=automatic.NetworkDiagnostics(),queue=automatic.QueueSummary()}):Results.StatusCode(403));
         app.MapGet("/api/science/library/jobs",(int? offset,ScienceStore science,ScientificLibraryJobs jobs)=>new{jobs=science.LibraryJobs(offset??0),warning=jobs.Warning});
         app.MapPost("/api/science/library/preview",(ScientificLibrarySelection selection,ScientificLibraryJobs jobs,HttpContext c)=>jobs.Preview(selection,c.RequestAborted));
+        app.MapPost("/api/science/library/nasa/preview",(NasaDownloadRequest request,ScientificLibraryJobs jobs,HttpContext c)=>jobs.PreviewNasa(request,c.RequestAborted));
+        app.MapGet("/api/science/earthdata",(IEarthdataCredentials credentials)=>EarthdataConnection.Status(credentials));
+        app.MapPost("/api/science/earthdata/disconnect",async(ScientificLibraryJobs jobs,IEarthdataCredentials credentials,HttpContext c)=>
+        {
+            if(!AccessControl.IsLoopback(c))return Results.StatusCode(403);
+            await jobs.DisconnectEarthdata(c.RequestAborted);return Results.Ok(EarthdataConnection.Status(credentials));
+        });
         app.MapGet("/api/science/library/jobs/{id:guid}",(Guid id,ScienceStore science)=>science.LibraryJob(id));
         app.MapPost("/api/science/library/jobs/{id:guid}/approve",(Guid id,LibraryApprovalRequest request,ScientificLibraryJobs jobs,HttpContext c)=>jobs.Approve(id,request.SelectionHash,c.RequestAborted));
         app.MapPost("/api/science/library/jobs/{id:guid}/control",(Guid id,LibraryJobControl request,ScientificLibraryJobs jobs,HttpContext c)=>jobs.Control(id,request.Action,c.RequestAborted));

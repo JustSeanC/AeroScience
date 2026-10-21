@@ -1,0 +1,70 @@
+{
+  "checked_utc": "2026-10-21T20:21:17.133670+00:00",
+  "milestone": "P19A",
+  "scope": "Public official metadata, companion identity and public checksum access only. No protected spectral originals or Earthdata authorization exercised.",
+  "authorization_method": {
+    "nasa_user_token_documentation": "https://urs.earthdata.nasa.gov/documentation/for_users/user_token",
+    "ornl_bearer_example": "https://github.com/ornldaac/gedi_tutorials/blob/5822b2f28cf8c8e7421c667fd68e170552102922/scripts/gedi_l4a_search_download.py",
+    "flow": "NASA official profile User Token; Windows current-user Credential Manager; bearer only to fixed ORNL original endpoint. No OAuth client registration or NASA password collection."
+  },
+  "catalog_records": [
+    {
+      "id": "G3477024884-ORNL_CLOUD",
+      "title": "f080611t01p00r13_L2_reflectance",
+      "collection_concept_id": "C2711871294-ORNL_CLOUD",
+      "time_start": "2008-06-11T21:38:00.000Z",
+      "time_end": "2008-06-11T21:44:00.000Z",
+      "updated": null
+    },
+    {
+      "id": "G2663871321-ORNL_CLOUD",
+      "title": "AVIRIS-NG_L2_Reflectance.ang20140621t190550_corr_v1g_img.bin",
+      "collection_concept_id": "C2659129205-ORNL_CLOUD",
+      "time_start": "2014-06-21T19:05:50.000Z",
+      "time_end": "2014-06-21T19:07:50.000Z",
+      "updated": "2023-09-28T20:44:07.000Z"
+    },
+    {
+      "id": "G2663884932-ORNL_CLOUD",
+      "title": "AVIRIS-NG_L2_Reflectance.ang20140621t190550_corr_v1g_img.hdr",
+      "collection_concept_id": "C2659129205-ORNL_CLOUD",
+      "time_start": "2014-06-21T19:05:50.000Z",
+      "time_end": "2014-06-21T19:07:50.000Z",
+      "updated": "2023-09-28T20:44:07.000Z"
+    }
+  ],
+  "public_checksum_records": [
+    {
+      "url": "https://data.ornldaac.earthdata.nasa.gov/public/aviris/AVIRIS-NG_L2_Reflectance/data/ang20140621t190550_corr_v1g_img.bin.sha256",
+      "bytes": 64,
+      "payload_sha256": "2e92a9bb703900707f2be138e96907190bbe1fc533b8130207fe3390cfdf679d",
+      "original_advertised_sha256": "857c24ef7971c5dff2389448b9cb806e55c3edb589f1a6f4346d72ffa8bac8e7",
+      "limitation": "Provider checksum retrieved; protected target binary/header NOT acquired or verified."
+    },
+    {
+      "url": "https://data.ornldaac.earthdata.nasa.gov/public/aviris/AVIRIS-NG_L2_Reflectance/data/ang20140621t190550_corr_v1g_img.hdr.sha256",
+      "bytes": 64,
+      "payload_sha256": "91aae79f665ae9e6bb8ba7247b3917408dbb708b61f00fadc4ef33f2640bcca5",
+      "original_advertised_sha256": "77c6d30754d1597e9c2959abe9434961bad7dbc9cfda3a0c9dbbb60464fa5478",
+      "limitation": "Provider checksum retrieved; protected target binary/header NOT acquired or verified."
+    }
+  ],
+  "protected_requests_without_credentials": [
+    {
+      "url": "https://data.ornldaac.earthdata.nasa.gov/protected/aviris/AVIRIS-Classic_L2_Reflectance/data/f080611t01p00r13_corr_v1h_img.hdr",
+      "status": 303
+    },
+    {
+      "url": "https://data.ornldaac.earthdata.nasa.gov/protected/aviris/AVIRIS-Classic_L2_Reflectance/data/f080611t01p00r13_h2o_v1h_img.hdr",
+      "status": 303
+    },
+    {
+      "url": "https://data.ornldaac.earthdata.nasa.gov/protected/aviris/AVIRIS-NG_L2_Reflectance/data/ang20140621t190550_corr_v1g_img.hdr",
+      "status": 303
+    }
+  ],
+  "genuine_classic_numeric_import": "Pending: individual authorized original header/binary and independent comparison required.",
+  "genuine_ng_numeric_import": "Pending: independent individual authorized original header/binary and spectral comparison required.",
+  "installed_and_physical_acceptance": "Pending; cloud fixtures are not Windows/MSFS/iPad/Quest acceptance.",
+  "emit": "Discovery/official links only; native NetCDF-4 remains deferred."
+}

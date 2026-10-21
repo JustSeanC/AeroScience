@@ -121,7 +121,7 @@ public sealed class MainForm : BrandedForm, IDesktopActions
             "--AeroScience:EnableLan=" + preferences.EnableLan,
             "--AeroScience:LanAddress=" + preferences.LanAddress
         };
-        var app = EngineApplication.Create(args, services => services.AddSingleton<IDesktopActions>(this));
+        var app = EngineApplication.Create(args, services => {services.AddSingleton<IDesktopActions>(this);services.AddSingleton<IEarthdataCredentials>(new WindowsEarthdataCredentials(Preferences.DirectoryPath));});
         try { await app.StartAsync(); engine = app; }
         catch { await app.DisposeAsync(); throw; }
         dashboard.Enabled = true;
@@ -286,6 +286,11 @@ public sealed class MainForm : BrandedForm, IDesktopActions
         await engine.Services.GetRequiredService<ScientificImportSession>().Select(path);
     });
     void IDesktopActions.ImportScientificSource() => Dispatch(() => ImportScientificSource());
+    void IDesktopActions.ConnectEarthdata()=>DispatchSourcePicker(owner=>
+    {
+        if(engine is not null){using var dialog=new EarthdataConnectionForm((WindowsEarthdataCredentials)engine.Services.GetRequiredService<IEarthdataCredentials>());dialog.ShowDialog(owner);}
+        return Task.CompletedTask;
+    });
     void IDesktopActions.CompactStorage(bool science) => Dispatch(async () =>
     {
         if(Busy||Recording){MessageBox.Show(this,"End recording and wait for active setup/storage work before compacting.");return;}

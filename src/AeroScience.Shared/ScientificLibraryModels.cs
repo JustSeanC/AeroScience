@@ -22,7 +22,7 @@ public sealed record LibraryWorkUnit(int Index,ScientificSceneSelection Scene,Ge
 public sealed record LibraryDownloadPreview(int Version,Guid Id,ScientificLibrarySelection Selection,string SelectionHash,
     string SettingsHash,DateTimeOffset CreatedUtc,DateTimeOffset ExpiresUtc,LibraryWorkUnit[] Work,
     ScientificCatalogItem[] Products,long MaximumTransferBytes,long PerItemTransferLimit,long TemporaryStorageAllowanceBytes,
-    long ReusableBytes,long? EstimatedTransferBytes,long? EstimatedRetainedBytes,string[] Warnings,int UncoveredCells=0,long? AvailableDriveBytes=null,long? ScientificStorageLimitBytes=null,long? ScientificStorageUsedBytes=null,long? PreparationBudgetRemainingBytes=null);
+    long ReusableBytes,long? EstimatedTransferBytes,long? EstimatedRetainedBytes,string[] Warnings,int UncoveredCells=0,long? AvailableDriveBytes=null,long? ScientificStorageLimitBytes=null,long? ScientificStorageUsedBytes=null,long? PreparationBudgetRemainingBytes=null,NasaDownloadBundle? Nasa=null);
 public sealed record LibraryDownloadItem(int Index,string State,long DownloadedBytes,long UncertainBytes,long ReservedBytes,
     int Attempts,Guid? SourceId,long VerifiedBytes,string? Error,DateTimeOffset UpdatedUtc);
 public sealed record LibraryDownloadJob(Guid Id,string State,LibraryDownloadPreview Preview,Guid? ApprovalId,
@@ -46,3 +46,8 @@ public sealed record NasaGranuleMetadata(string Family,string CollectionId,strin
     long? OriginalBytes,int? BandCount,double[]? WavelengthsNm,string? Units,NasaAsset[] Assets,string CollectionRevision,
     string MetadataUrl,DateTimeOffset? ObservationEndUtc=null,DateTimeOffset? UpdatedUtc=null);
 public sealed record NasaSelectionRequest(string Provider,string GranuleId,string Revision);
+public sealed record NasaDownloadRequest(NasaSelectionRequest Selection,long MaximumTransferBytes);
+// Original unsigned authoritative URLs only; tokens and temporary redirects are never durable.
+public sealed record NasaDownloadFile(string Name,string Url,string Role,long Bytes,string? Etag,bool Ranges);
+public sealed record NasaDownloadBundle(ScientificCatalogItem Selection,ScientificCatalogItem[] Companions,NasaDownloadFile[] Files,string Revision,int Version=1);
+public sealed record EarthdataConnectionStatus(bool Available,bool Connected,string Message);

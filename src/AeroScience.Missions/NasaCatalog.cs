@@ -9,16 +9,16 @@ public sealed partial class ScientificCatalog
     // Official short names/versions verified against CMR, 2026-10-21. Resolve collection
     // concept/revision at query time: a renamed/replaced collection is not silently substituted.
     private static ScientificCatalogProvider[] NasaProviders=>[
-        new("nasa-classic","NASA AVIRIS-Classic","Level-2 reflectance V1",RemoteKind.Hyperspectral,[],true,true,"Guided official acquisition and compatible ENVI verification. Historical NASA observations; format must be checked."),
-        new("nasa-ng","NASA AVIRIS-NG","Level-2 reflectance V1",RemoteKind.Hyperspectral,[],true,true,"Guided official acquisition; NG companions can be separate granules. Compatible ENVI only, not every distribution."),
+        new("nasa-classic","NASA AVIRIS-Classic","Level-2 reflectance V1",RemoteKind.Hyperspectral,[],true,true,"Earthdata Download & Import for exact compatible original ENVI pairs; official browser/manual fallback remains. Historical NASA observations; originals must pass verification."),
+        new("nasa-ng","NASA AVIRIS-NG","Level-2 reflectance V1",RemoteKind.Hyperspectral,[],true,true,"Earthdata Download & Import with exact CMR companion matching; NG headers/binaries can be separate granules. Compatible ENVI only, with browser/manual fallback."),
         new("nasa-emit","NASA EMIT","Level-2A reflectance V002",RemoteKind.Hyperspectral,[],true,true,"Discovery / official access only — native NetCDF-4 scientific import not yet supported.")];
     public static bool IsNasa(string id)=>id is "nasa-classic" or "nasa-ng" or "nasa-emit";
-    public async Task<ScientificCatalogItem> ResolveNasa(NasaSelectionRequest request,CancellationToken token=default)
+    public async Task<ScientificCatalogItem> ResolveNasa(NasaSelectionRequest request,CancellationToken token=default,ScientificDownloadBudget? budget=null)
     {
         if(!IsNasa(request.Provider)||string.IsNullOrWhiteSpace(request.GranuleId)||string.IsNullOrWhiteSpace(request.Revision)||request.GranuleId.Length>100||!System.Text.RegularExpressions.Regex.IsMatch(request.GranuleId,@"^G[0-9]+-[A-Z0-9_]+$")||request.Revision.Length!=64||!request.Revision.All(char.IsAsciiHexDigit))throw new ArgumentException("Select an exact NASA catalog granule and revision.");
         Consent();
         var q=new ScientificCatalogQuery(request.Provider,new(0,0,.01,.01),PageSize:1,Refresh:true);
-        var result=await SearchNasa(q,"https://cmr.earthdata.nasa.gov/search/granules.json?concept_id="+Uri.EscapeDataString(request.GranuleId)+"&page_size=1&page_num=1",new(Math.Min(settings.Get().Preferences.MaximumDownloadBytes,8388608)),token);
+        var result=await SearchNasa(q,"https://cmr.earthdata.nasa.gov/search/granules.json?concept_id="+Uri.EscapeDataString(request.GranuleId)+"&page_size=1&page_num=1",budget??new(Math.Min(settings.Get().Preferences.MaximumDownloadBytes,8388608)),token);
         var item=result.Items.SingleOrDefault(i=>i.Scene==request.GranuleId)??throw new IOException("NASA granule removed, unavailable or unsupported. Search again; no alternate scene was selected.");
         if(item.Revision!=request.Revision)throw new InvalidOperationException("NASA granule or collection changed. Search and review the revised product before continuing.");
         return item;
@@ -114,7 +114,7 @@ public sealed partial class ScientificCatalog
             "https://cmr.earthdata.nasa.gov/search/concepts/"+id+".umm_json",Time(entry,"time_end"),Time(entry,"updated"));
         return new(provider,Text(collection,"dataset_id")??p.Name,id,Hash(new{collection,entry}),RemoteKind.Hyperspectral,bounds,geometry,Time(entry,"time_start"),null,[],null,"Unknown / not inferred",
             "Catalog footprint; source nodata, bad bands and per-pixel quality remain unverified.","Unknown at granule discovery; verify original grid",
-            "Review NASA collection terms and citation at the official source before acquisition.",reference,"Official browser handoff",["Historical NASA reflectance, not simulated-aircraft measurements.","No missing wavelengths, units or QA values were inferred.",capability],details);
+            "Review NASA collection terms and citation at the official source before acquisition.",reference,provider=="nasa-emit"?"Official browser handoff; discovery only":"Earthdata-authorized original acquisition or official browser/manual fallback",["Historical NASA reflectance, not simulated-aircraft measurements.","No missing wavelengths, units or QA values were inferred.",capability],details);
     }
     // Browser links only. This does NOT expand the backend ScientificHttp allow-list.
     public static bool OfficialNasaLink(string? value)=>Uri.TryCreate(value,UriKind.Absolute,out var u)&&u.Scheme=="https"&&u.Port==443&&u.UserInfo.Length==0&&u.Query.Length==0&&u.Fragment.Length==0&&u.AbsoluteUri.Length<=2048&&

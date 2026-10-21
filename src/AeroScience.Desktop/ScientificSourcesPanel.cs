@@ -12,7 +12,7 @@ public sealed class ScientificSourcesPanel:FlowLayoutPanel
         (RemoteKind.Terrain,"Terrain & Elevation","USGS 3DEP / Copernicus GLO-30","Numeric DEM/DSM elevation, not aircraft laser returns. Local: single-band elevation GeoTIFF."),
         (RemoteKind.Thermal,"Thermal Imaging","Landsat 8/9 Collection 2 Level-2","Historical satellite surface temperature and original QA masks. Local: ST_B10 + QA_PIXEL (+ QA_RADSAT), with original metadata."),
         (RemoteKind.Multispectral,"Multispectral Imaging","Copernicus Sentinel-2 Level-2A","Historical reflectance, RGB and NDVI. Local: B02/B03/B04/B08 and SCL GeoTIFFs with original scaling metadata."),
-        (RemoteKind.Hyperspectral,"Hyperspectral Imaging","User-provided ENVI dataset","No automatic hyperspectral download is required or supported. Import a georeferenced .hdr and its original binary.")
+        (RemoteKind.Hyperspectral,"Hyperspectral Imaging","NASA AVIRIS / original ENVI datasets","Use Library Browse & Download → Hyperspectral for approved Earthdata Download & Import. Original ENVI manual/browser import remains available. EMIT is discovery only.")
     ];
     public ScientificSourcesPanel(MainForm app,IWin32Window owner)
     {

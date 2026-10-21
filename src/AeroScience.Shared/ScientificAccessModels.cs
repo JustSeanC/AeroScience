@@ -15,7 +15,7 @@ public sealed record GeographicBounds(double West,double South,double East,doubl
 public sealed record ScientificAccessPreferences(bool OnlineEnabled=false,bool PrivacyAccepted=false,
     bool UnmeteredOnly=false,long MaximumDownloadBytes=67108864,int ConcurrentDownloads=1,
     bool BackgroundRetrieval=true,string SelectionPolicy="clear-recent",int LookbackDays=730,double MaximumCloudPercent=30,
-    DateTimeOffset? PreferredDateUtc=null,int LookaheadSeconds=0,long? PrefetchHourlyBytes=268435456,Dictionary<RemoteKind,string>? SourceModes=null,Guid[]? ExcludedSourceIds=null,long? PreflightTransferBytes=1073741824);
+    DateTimeOffset? PreferredDateUtc=null,int LookaheadSeconds=0,long? PrefetchHourlyBytes=268435456,Dictionary<RemoteKind,string>? SourceModes=null,Guid[]? ExcludedSourceIds=null,long? PreflightTransferBytes=1073741824,long NasaOriginalMaximumBytes=1073741824);
 public sealed record ScientificAccessConfiguration(ScientificAccessPreferences Preferences,string Privacy,string? Warning=null,string? NetworkCost=null);
 public sealed record ScientificDataReadiness(string Key,RemoteKind Kind,string Status,string Message,GeographicBounds Area,
     string? Provider=null,string? Dataset=null,DateTimeOffset? ObservationUtc=null,string? Quality=null,

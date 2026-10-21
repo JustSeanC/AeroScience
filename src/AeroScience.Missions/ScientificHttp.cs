@@ -22,7 +22,7 @@ public sealed class ScientificDownloadBudget(long maximum,Action<long>? progress
 }
 // Provider endpoints are fixed and HTTPS-only. Catalog-supplied URLs cannot become
 // arbitrary local/network fetches; redirects and cookies are disabled.
-public sealed class ScientificHttp : IDisposable
+public sealed partial class ScientificHttp : IDisposable
 {
     private readonly HttpClient http;
     private readonly SemaphoreSlim pace=new(1);
@@ -63,15 +63,17 @@ public sealed class ScientificHttp : IDisposable
             "elevationeuwest.blob.core.windows.net" or "elevation.nationalmap.gov" or "cmr.earthdata.nasa.gov" or "tigerweb.geo.census.gov"))
             throw new IOException("Scientific provider returned an unsupported endpoint. No request was sent to it.");
     }
-    public async Task<HttpResponseMessage> Send(Uri uri,long? start,long? end,string? etag,CancellationToken token)
+    public Task<HttpResponseMessage> Send(Uri uri,long? start,long? end,string? etag,CancellationToken token)=>SendCore(uri,HttpMethod.Get,start,end,etag,token);
+    private async Task<HttpResponseMessage> SendCore(Uri uri,HttpMethod method,long? start,long? end,string? etag,CancellationToken token,string? bearer=null,Action<Uri>? validate=null)
     {
-        ValidateUrl(uri);
+        (validate??ValidateUrl)(uri);
         for(var attempt=0;attempt<3;attempt++)
         {
             await pace.WaitAsync(token);
             try {var delay=last.AddMilliseconds(180)-DateTimeOffset.UtcNow;if(delay>TimeSpan.Zero)await Task.Delay(delay,token);last=DateTimeOffset.UtcNow;}
             finally{pace.Release();}
-            using var request=new HttpRequestMessage(HttpMethod.Get,uri);
+            using var request=new HttpRequestMessage(method,uri);
+            if(bearer is not null)request.Headers.Authorization=new AuthenticationHeaderValue("Bearer",bearer);
             request.Headers.AcceptEncoding.ParseAdd("identity");
             if(start is {} from)request.Headers.Range=new RangeHeaderValue(from,end);
             if(etag is not null)request.Headers.TryAddWithoutValidation("If-Match",etag);

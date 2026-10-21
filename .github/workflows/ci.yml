@@ -205,6 +205,11 @@ jobs:
       - name: Compile isolated validation identity and Windows application (not distributable)
         shell: pwsh
         run: ./scripts/build/Publish-ValidationCompanion.ps1 -ArtifactsPath artifacts/validation-probe -OutputDirectory artifacts/Windows-Validation-Structural
+      - name: Verify Windows Earthdata vault with disposable synthetic credentials
+        shell: pwsh
+        run: |
+          dotnet run --project tests/AeroScience.TestHost -c Release --no-restore -- --earthdata-vault-probe
+          if ($LASTEXITCODE -ne 0) { throw 'Windows Earthdata credential protection/isolation failed.' }
       - name: Verify dependency locks remain unchanged
         if: always()
         shell: pwsh

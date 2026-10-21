@@ -119,6 +119,12 @@ UI tests pass. Configuration/shared browser fixture changes select the full brow
 
 ## Geographic Scientific Library (P10–P12)
 
+P19A full Windows CI also executes the unpublished test host's `--earthdata-vault-probe`
+against the actual desktop credential-store source. It writes/reads/removes disposable
+synthetic Windows credentials under two random configuration identities and checks that
+disconnecting one cannot affect the other. It does not contact NASA or establish a real
+Earthdata login, protected original download, native dialog or physical-device acceptance.
+
 The full platform jobs also run `smoke_library_recovery.py --host-dll <test-host.dll>`:
 two actual process kills retain approved intent, confirmed bytes and unresolved read
 reservations without publishing a source or creating a mission. `library-restart.spec.js`

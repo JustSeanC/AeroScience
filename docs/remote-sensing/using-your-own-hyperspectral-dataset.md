@@ -6,8 +6,9 @@ These are historical external Earth observations. Your simulated aircraft select
 
 For official NASA Classic/NG scenes, use the [NASA Hyperspectral Assistant](hyperspectral.md)
 inside **Library → Browse & Download Data**. It binds the selected product's metadata to
-this same local-file verification/import workflow. NASA handles protected downloads in
-your external browser; AeroScience never asks for your password. EMIT stays discovery-only.
+this same verification/import workflow. Earthdata-authorized direct Download & Import is
+available for supported original pairs; official browser acquisition remains the fallback.
+NASA handles sign-in, and AeroScience never asks for your password. EMIT stays discovery-only.
 
 ## Supported files
 

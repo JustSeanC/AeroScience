@@ -44,6 +44,17 @@ public sealed class ApiTests : IAsyncLifetime
         client.DefaultRequestHeaders.Remove("X-AeroScience-CSRF");Assert.Equal(HttpStatusCode.Forbidden,(await client.PostAsJsonAsync("/api/science/library/catalog",q,WireJson.Options)).StatusCode);
         Assert.Equal(HttpStatusCode.Forbidden,(await client.PostAsJsonAsync("/api/science/hyperspectral/nasa",new NasaSelectionRequest("nasa-classic","G1-ORNL_CLOUD",new string('a',64)),WireJson.Options)).StatusCode);
     }
+    [Fact]public async Task EarthdataConnectionUsesExistingSessionCsrfAndReturnsStatusOnly()
+    {
+        Assert.Equal(HttpStatusCode.Unauthorized,(await client.GetAsync("/api/science/earthdata")).StatusCode);
+        await Pair(client);using var status=JsonDocument.Parse(await client.GetStringAsync("/api/science/earthdata"));
+        Assert.Equal(new[]{"available","connected","message"},status.RootElement.EnumerateObject().Select(p=>p.Name).Order().ToArray());Assert.False(status.RootElement.GetProperty("connected").GetBoolean());
+        var request=new NasaDownloadRequest(new("nasa-emit","G1-LPCLOUD",new string('a',64)),10485760);
+        Assert.Equal(HttpStatusCode.BadRequest,(await client.PostAsJsonAsync("/api/science/library/nasa/preview",request,WireJson.Options)).StatusCode);
+        client.DefaultRequestHeaders.Remove("X-AeroScience-CSRF");
+        Assert.Equal(HttpStatusCode.Forbidden,(await client.PostAsJsonAsync("/api/science/earthdata/disconnect",new{})).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden,(await client.PostAsJsonAsync("/api/desktop/earthdata-connect",new{})).StatusCode);
+    }
     private async Task Pair(HttpClient display)
     {
         var response = await display.PostAsJsonAsync("/api/session", new { code = (string?)null }); response.EnsureSuccessStatusCode();

@@ -81,12 +81,24 @@ external Library drive produces an error; an empty replacement database is never
 
 Choose **Data family → Hyperspectral** in the same Browse & Download page. Search actual
 NASA CMR flightlines by product, original date, bounds and optional scene identifier.
-Footprints are catalog outlines, not guaranteed valid pixels. Classic and NG compatible
-original ENVI reflectance use an explicitly labeled **official browser handoff**, followed
-by **Verify downloaded AVIRIS files on this PC**. NASA handles individual login and browser
-transfer; AeroScience handles bounded original-file validation and atomic Library import.
-Companions/checksums stay with the header; no manual JSON or terminal is required.
-Paired browsers can browse/open official access; local selection remains on the companion PC.
+Footprints are catalog outlines, not guaranteed valid pixels. For compatible Classic/NG
+original ENVI reflectance, choose **Connect Earthdata on this PC** once, sign in on NASA's
+official site and save its User Token in the masked Windows dialog. Then select a scene's
+**Preview NASA Download & Import**, review the exact original files/bytes and click
+**Download & Import**. Existing Library jobs handle progress, pause, resume, retry,
+restart recovery, verification and automatic atomic import without a flight.
+
+Complete original cubes can be large: geographic selection discovers flightlines; this
+workflow does not claim NASA subset downloads. The separate NASA scene cap defaults to
+1 GiB; review it and the preflight allowance in Scientific access settings when necessary.
+The automatic subset cap is unchanged. Exact verified retained sources can be reused
+offline without a token or another transfer. Tokens expire; reconnect when NASA denies
+access. Connection/disconnection takes place on the PC; paired clients can use an already
+connected Library. Neither token nor password is sent to the browser dashboard.
+
+**Open official NASA access / Earthdata** and **Verify downloaded AVIRIS files on this PC**
+remain the browser/manual fallback for unsupported access or formats. Those browser
+transfers have external progress. No JSON editing or terminal is required in either workflow.
 EMIT is **discovery / official access only**, with no native NetCDF-4 import.
 Read the [supported formats, steps and acceptance limits](remote-sensing/hyperspectral.md).
 

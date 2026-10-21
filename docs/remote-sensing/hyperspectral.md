@@ -13,11 +13,61 @@ Classic Collection `AVIRIS-Classic_L2_Reflectance_2154` V1 and NG
 `AVIRIS-NG_L2_Reflectance_2110` V1 use family-specific original ENVI companions.
 `EMITL2ARFL` V002 is **discovery / official access only**: native NetCDF-4 import is
 unsupported. Current collection `C4079844428-LPCLOUD` V002 was verified directly in CMR; earlier V001 evidence remains historical and is not silently substituted. Missing spectral/grid metadata stays Unknown until original-file inspection.
-Choose **Open official NASA access / Earthdata**. NASA handles account login, permissions,
-terms and original-file download in the external browser. AeroScience does not request
-passwords, register an undocumented OAuth client, collect browser cookies or store tokens.
-Protected original Classic and NG header requests returned HTTP 401 without individual
-Earthdata authorization in development. No direct authenticated app-download claim is made.
+### Earthdata Download & Import (P19A development)
+
+1. On the companion PC choose **Connect Earthdata on this PC**. The native dialog opens
+   [NASA's official profile](https://urs.earthdata.nasa.gov/profile). Sign in there and use
+   **Generate Token**. Approve ORNL DAAC access on NASA's site when requested.
+2. Paste the NASA **User Token**, not a password, into AeroScience's masked native field
+   and save. Windows Credential Manager protects it for the current Windows user and
+   configuration profile; production and Validation credentials have separate identities.
+3. Select **Preview NASA Download & Import** on the exact Classic/NG scene. AeroScience
+   verifies CMR identities, finds actual matching companions (NG files may be separate
+   granules), and checks exact provider file lengths. No original cube is downloaded yet.
+4. Review the original `.hdr`/`.bin`, advertised SHA-256 companions, dates, full-file bytes,
+   storage allowance and approved transfer cap. Choose **Download & Import**.
+5. The existing Download Manager reports actual durable work. After numeric/header/hash
+   verification, the source is atomically published in the same Library used by manual
+   imports. Original spectral values, channel mapping, masks, units and georeferencing
+   are preserved; downloading a scene creates no flight science or grading credit.
+
+Subsequent scenes reuse the saved connection until NASA expires/revokes it. NASA currently
+documents a 60-day User Token lifetime, not permanent login. **Disconnect Earthdata on this
+PC** pauses its unfinished NASA jobs before removing this profile's local credential.
+Revoke the token on NASA's profile page if required; local disconnection does not revoke
+it server-side. AeroScience never asks for NASA passwords, collects browser cookies,
+registers an invented OAuth client, operates an authentication proxy, or exports the token.
+Paired browsers receive connection status and may operate approved downloads; they never
+receive the token or manage its native secret field. Unrelated AeroScience features remain
+usable without an Earthdata account.
+
+These are complete original distributions, **not geographic subsets**. The independent
+NASA original-scene cap defaults to 1 GiB (configurable 1 MiB–20 GiB). The existing automatic
+subset default remains 64 MiB. NASA job approval and the preflight allowance must also fit;
+metadata, retries and crash-uncertain reads count against them. Increase only explicit
+limits you intend to authorize. Temporary storage must accommodate staging plus the
+retained original copy. No original, protected source or completed product is deleted
+to make room. Active flight acquisition preempts this background Library work.
+
+Safe resumption requires provider byte ranges, a strong ETag and matching exact length.
+Streaming prefix hashes and durable checkpoints protect partial data across interruption.
+Unsupported ranges restart safely; changed identity requires a fresh preview. URLs from
+CMR are restricted to the known ORNL original paths. The currently observed ORNL CDN
+distribution/path is pinned, receives no bearer header and is held only in memory; a
+provider routing change fails closed with browser fallback. Signed URLs are never saved
+in jobs, source metadata or exports. Archives/JP2/NetCDF are not unpacked or converted.
+
+The [P19A evidence](../research/v0.5.0-aviris-direct-acquisition.json) records genuine CMR
+companion identities and public checksum access. **It does not establish protected numeric
+downloads/imports.** No authorized Earthdata credential is available in the cloud task.
+Classic and NG each still require owner-authorized original-file acquisition, independent
+spectral/numeric comparison and offline reopening; native installed/device acceptance is
+separate from deterministic synthetic tests and the cloud Windows vault probe.
+
+### Browser/manual fallback
+
+Choose **Open official NASA access / Earthdata** when direct access is unavailable or the
+distribution is unsupported. NASA handles account login, permissions, terms and downloading.
 
 After downloading, keep the matching reflectance `.hdr` and binary together and choose
 **Verify downloaded AVIRIS files on this PC**. The exact granule/collection revision is

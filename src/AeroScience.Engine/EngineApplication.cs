@@ -43,6 +43,7 @@ public static class EngineApplication
         builder.Services.AddSingleton(sp => new ScientificAccessSettings(sp.GetRequiredService<EngineOptions>().ConfigurationDirectory ?? sp.GetRequiredService<EngineOptions>().DataDirectory, NetworkCost.IsUnmetered));
         builder.Services.AddSingleton(sp => { _ = sp.GetRequiredService<StorageManagement>(); return new AutomaticScientificData(sp.GetRequiredService<ScienceStore>(),sp.GetRequiredService<ScientificAccessSettings>()); });
         builder.Services.AddSingleton<ScientificCatalog>();
+        builder.Services.AddSingleton<IEarthdataCredentials,UnavailableEarthdataCredentials>();
         builder.Services.AddSingleton<ScientificLibraryJobs>();
         builder.Services.AddHostedService<ScientificLibraryWorker>();
         builder.Services.AddSingleton(sp=>new ScientificImportSession(sp.GetRequiredService<ScienceStore>(),sp.GetRequiredService<AutomaticScientificData>().RefreshLocalReadiness));
@@ -253,6 +254,7 @@ public static class EngineApplication
                 case "multispectral-import": desktop.ChooseScientificDataset("multispectral"); break;
                 case "hyperspectral-header": desktop.ChooseHyperspectral(false); break;
                 case "hyperspectral-folder": desktop.ChooseHyperspectral(true); break;
+                case "earthdata-connect": desktop.ConnectEarthdata(); break;
                 case "compact-flight": desktop.CompactStorage(false); break;
                 case "compact-science": desktop.CompactStorage(true); break;
                 default: return Results.NotFound();

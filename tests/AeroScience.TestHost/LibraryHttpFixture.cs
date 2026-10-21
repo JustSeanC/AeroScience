@@ -27,10 +27,25 @@ internal sealed class LibraryHttpFixture(string root):HttpMessageHandler
         if(uri.Host=="cmr.earthdata.nasa.gov")
         {
             var family=uri.Query.Contains("Classic")||uri.Query.Contains("G347702")?"classic":uri.Query.Contains("AVIRIS-NG")||uri.Query.Contains("G26638")?"ng":"emit";
-            var type=uri.AbsolutePath.Contains("collections")?"collections":"granules";
+            var query=System.Web.HttpUtility.ParseQueryString(uri.Query);
+            var type=uri.AbsolutePath.Contains("collections")?"collections":family=="ng"&&(query["granule_ur"]?.Contains("_corr_",StringComparison.Ordinal)==true||query["concept_id"]=="G2663884932-ORNL_CLOUD")?"companions":"granules";
             var nasa=JsonNode.Parse(File.ReadAllText(Path.Combine(AppContext.BaseDirectory,"ProviderMetadata",$"nasa-{family}-{type}.json")))!;
+            if(type=="collections")nasa["feed"]!["entry"]![0]!["dataset_id"]="SYNTHETIC NASA browser test · "+family;
             if(uri.Query.Contains("concept_id=")){var id=System.Web.HttpUtility.ParseQueryString(uri.Query)["concept_id"];var entries=nasa["feed"]!["entry"]!.AsArray();nasa["feed"]!["entry"]=new JsonArray(entries.Where(e=>e!["id"]!.GetValue<string>()==id).Select(e=>e!.DeepClone()).ToArray());}
             return Json(nasa.ToJsonString());
+        }
+        if(uri.Host=="data.ornldaac.earthdata.nasa.gov")
+        {
+            if(request.Headers.Authorization?.Parameter!=FixtureEarthdata.Token)return new(HttpStatusCode.Unauthorized);
+            if(Mode=="outage")return new(HttpStatusCode.ServiceUnavailable);
+            if(Mode=="wait"&&request.Method==HttpMethod.Get)await Task.Delay(Timeout.Infinite,token);
+            var family=uri.AbsolutePath.Contains("Classic")?"classic":"ng";var item=NasaFixtureFiles.Item(family);var folder=Path.Combine(fixtureFolder,"NASA-"+family);
+            var header=Path.Combine(folder,item.Nasa!.Assets.First(a=>a.Role=="Original numeric binary").Name[..^4]+".hdr");
+            if(!File.Exists(header))NasaFixtureFiles.Cube(folder,item,family=="classic"?224:425);
+            var name=Path.GetFileName(uri.AbsolutePath);var local=Path.Combine(folder,name);
+            var originalBytes=!File.Exists(local)&&name.EndsWith(".hdr.sha256",StringComparison.Ordinal)?System.Text.Encoding.ASCII.GetBytes(Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(File.ReadAllBytes(local[..^7]))).ToLowerInvariant()+"  "+name[..^7]):File.ReadAllBytes(local);
+            var originalResponse=new HttpResponseMessage(HttpStatusCode.OK){Content=new ByteArrayContent(request.Method==HttpMethod.Head?[]:originalBytes)};
+            originalResponse.Content.Headers.ContentLength=originalBytes.Length;originalResponse.Headers.ETag=new("\"synthetic-browser-original-v1\"");originalResponse.Headers.AcceptRanges.Add("bytes");return originalResponse;
         }
         if(uri.Host=="tigerweb.geo.census.gov")return Json(File.ReadAllText(Path.Combine(AppContext.BaseDirectory,"ProviderMetadata","census-county.json")));
         if(uri.AbsolutePath.Contains("/sas/"))return Json(System.Text.Json.JsonSerializer.Serialize(new{href=System.Web.HttpUtility.ParseQueryString(uri.Query)["href"]}));
@@ -55,4 +70,12 @@ internal sealed class LibraryHttpFixture(string root):HttpMessageHandler
         var range=request.Headers.Range.Ranges.Single();var from=range.From!.Value;var to=Math.Min(range.To!.Value,bytes.Length-1);var response=new HttpResponseMessage(HttpStatusCode.PartialContent){Content=new ByteArrayContent(bytes[(int)from..((int)to+1)])};response.Headers.ETag=new("\"synthetic-browser-v1\"");response.Content.Headers.ContentRange=new(from,to,bytes.Length);return response;
     }
     protected override void Dispose(bool disposing){if(disposing)fallback.Dispose();base.Dispose(disposing);}
+}
+// Only the unpublished test host can supply this explicit synthetic credential.
+internal sealed class FixtureEarthdata:IEarthdataCredentials
+{
+    public const string Token="synthetic_browser_earthdata_token";
+    public bool Available=>true;public bool Connected;
+    public string? ReadToken()=>Connected?Token:null;
+    public void Clear()=>Connected=false;
 }

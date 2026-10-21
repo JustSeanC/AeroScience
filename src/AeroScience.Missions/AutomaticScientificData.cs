@@ -25,6 +25,7 @@ public sealed class ScientificAccessSettings(string directory,Func<bool?>? unmet
     {Validate(p);if(p.OnlineEnabled&&!p.PrivacyAccepted)throw new ArgumentException("Review the separate scientific-data privacy disclosure before enabling retrieval.");lock(gate)PreferenceStore.WriteAtomic(path,p);return Get();}
     private static void Validate(ScientificAccessPreferences p)
     {
+        if(p.NasaOriginalMaximumBytes is <1048576 or >21474836480)throw new ArgumentException("Choose a NASA original-scene cap between 1 MiB and 20 GiB. Automatic subset limits remain separate.");
         if(p.MaximumDownloadBytes is <1048576 or >536870912||p.ConcurrentDownloads is <1 or >8||p.LookbackDays is <1 or >3650||!double.IsFinite(p.MaximumCloudPercent)||p.MaximumCloudPercent is <0 or >100||p.SelectionPolicy is not("clear-recent" or "newest")||p.PreferredDateUtc>DateTimeOffset.UtcNow.AddDays(1)||p.LookaheadSeconds is <0 or >900||p.PrefetchHourlyBytes is <1048576 or >21474836480||p.PreflightTransferBytes is <1048576 or >21474836480||p.SourceModes?.Any(kv=>!Enum.IsDefined(kv.Key)||kv.Value is not("automatic" or "local" or "prefer-local")||kv.Key==RemoteKind.Hyperspectral&&kv.Value!="local")==true)
             throw new ArgumentException("Choose 1–512 MiB per download, 1–8 concurrent preparations, 1–3650 lookback days, 0–100% scene cloud, and a supported selection policy/date.");
     }

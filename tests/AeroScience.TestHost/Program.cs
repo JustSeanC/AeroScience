@@ -6,6 +6,24 @@ using AeroScience.Tests;
 
 if (args.Length > 0 && args[0] == "--library-probe") { LibraryProbe.Run(args[1..]); return; }
 if (args.Length > 0 && args[0] == "--evidence-probe") { EvidenceProbe.Run(args[1..]); return; }
+if (args.Length > 0 && args[0] == "--earthdata-vault-probe")
+{
+    if(!OperatingSystem.IsWindows())throw new PlatformNotSupportedException("The real Windows credential-vault probe requires Windows.");
+    var temporary=Path.Combine(Path.GetTempPath(),"aeroscience-vault-probe-"+Guid.NewGuid().ToString("N"));
+    var first=new AeroScience.Desktop.WindowsEarthdataCredentials(Path.Combine(temporary,"production"));
+    var isolated=new AeroScience.Desktop.WindowsEarthdataCredentials(Path.Combine(temporary,"validation"));
+    const string synthetic="synthetic_cloud_test_credential_not_a_nasa_token";
+    try
+    {
+        first.Save(synthetic);
+        if(first.ReadToken()!=synthetic||isolated.ReadToken() is not null)throw new IOException("OS credential round-trip/profile isolation failed.");
+        isolated.Save(synthetic+"_isolated");isolated.Clear();
+        if(first.ReadToken()!=synthetic||isolated.ReadToken() is not null)throw new IOException("Disconnect crossed profile identities.");
+        first.Clear();if(first.ReadToken() is not null)throw new IOException("Windows credential removal failed.");
+        Console.WriteLine("PASS: real Windows Credential Manager write/read/profile isolation/removal with disposable synthetic data; no NASA authorization or installed-device acceptance.");
+    }finally{first.Clear();isolated.Clear();}
+    return;
+}
 if (args.Length > 0 && args[0] == "--profile-probe")
 {
     var profile=ApplicationProfile.Current;
@@ -23,6 +41,7 @@ if (args.Length > 0 && args[0] == "--profile-probe")
 var app = EngineApplication.Create(args, services =>
 {
     services.AddSingleton(sp=>new LibraryHttpFixture(sp.GetRequiredService<EngineOptions>().DataDirectory));
+    services.AddSingleton<IEarthdataCredentials,FixtureEarthdata>();
     services.AddSingleton(sp=>{_=sp.GetRequiredService<StorageManagement>();return new AutomaticScientificData(sp.GetRequiredService<ScienceStore>(),sp.GetRequiredService<ScientificAccessSettings>(),new ScientificHttp(sp.GetRequiredService<LibraryHttpFixture>(),cacheEnabled:false));});
     // Keep Library HTTP sources isolated from unrelated legacy science fixtures even
     // when a later test intentionally rewrites normal application preferences.
@@ -38,6 +57,7 @@ var options=app.Services.GetRequiredService<EngineOptions>();
 app.Services.GetRequiredService<MapSettings>().InitializeDefaults(true); // Existing offline browser fixtures; new-install tests reset explicitly.
 app.Services.GetRequiredService<ApplicationUpdates>().Configure(new(false)); // No real update traffic in synthetic browser tests.
 app.MapPost("/api/testing/library/setup",(LibraryHttpFixture fixture,ScientificAccessSettings settings)=>{fixture.Enable();settings.Save(new(true,true));return new{synthetic=true};});
+app.MapPost("/api/testing/nasa/connection",(IEarthdataCredentials credentials)=>{((FixtureEarthdata)credentials).Connected=true;return new{synthetic=true};});
 // Synthetic SDK transport only; commands execute the production coordinator/SQLite handler.
 app.MapPost("/api/testing/toolbar",(System.Text.Json.JsonElement command,ToolbarCommandHandler toolbar)=>Results.Text(toolbar.Handle(command.GetRawText()),"application/json"));
 app.MapPost("/api/testing/library/teardown",async(LibraryHttpFixture fixture,ScienceStore science,AutomaticScientificData automatic)=>

@@ -10,7 +10,7 @@ namespace AeroScience.Missions;
 // engine or downloader. Browser authorization/transfer stays with the official provider.
 public static class NasaGuidedImport
 {
-    public static HyperspectralInspection Inspect(string selected,ScientificCatalogItem item,HyperspectralUserMetadata? additions=null,string? associated=null,CancellationToken token=default)
+    public static HyperspectralInspection Inspect(string selected,ScientificCatalogItem item,HyperspectralUserMetadata? additions=null,string? associated=null,CancellationToken token=default,bool direct=false)
     {
         var n=item.Nasa??throw new InvalidDataException("Missing selected NASA granule.");
         if(!n.Capability.StartsWith("Guided import",StringComparison.Ordinal)||item.Provider is not("nasa-classic" or "nasa-ng"))throw new InvalidDataException("EMIT native import is not supported.");
@@ -59,11 +59,11 @@ public static class NasaGuidedImport
             using var stream=File.OpenRead(ScientificRaster.SafeFile(inspection.Root,file));
             var actual=SHA256.HashDataAsync(stream,token).GetAwaiter().GetResult();
             if(!Convert.ToHexString(actual).Equals(match.Groups[1].Value,StringComparison.OrdinalIgnoreCase))throw new InvalidDataException("Original file SHA-256 does not match its checksum. Download the complete unchanged original again.");
-            companions.Add(sidecar);checksums.Add(new{file,sha256=Convert.ToHexString(actual).ToLowerInvariant(),catalogAdvertised=advertised,limitation="Sidecar was selected locally; compare with the official provider. Local sidecars alone do not authenticate NASA origin."});
+            companions.Add(sidecar);checksums.Add(new{file,sha256=Convert.ToHexString(actual).ToLowerInvariant(),catalogAdvertised=advertised,limitation=direct?"Retrieved directly from the exact official CMR-advertised checksum endpoint.":"Sidecar was selected locally; compare with the official provider. Local sidecars alone do not authenticate NASA origin."});
         }
         _=ScienceStore.InspectImport(inspection.Manifest,inspection.Root);
-        var notes=JsonSerializer.Serialize(new{workflow="NASA official-browser acquisition followed by local ENVI verification",catalog=item,checksumVerification=checksums,headerInspection=JsonSerializer.Deserialize<JsonElement>(inspection.Manifest.Notes!),identityLimitation="Matching metadata and filenames are not proof of NASA origin without an authoritative provider checksum. Retained file hashes establish local integrity.",userNotes=additions?.Notes},WireJson.Options);
+        var notes=JsonSerializer.Serialize(new{workflow=direct?"NASA Earthdata-authorized direct acquisition followed by original ENVI verification":"NASA official-browser acquisition followed by local ENVI verification",catalog=item,checksumVerification=checksums,headerInspection=JsonSerializer.Deserialize<JsonElement>(inspection.Manifest.Notes!),identityLimitation="Matching metadata and filenames are not proof of NASA origin without an authoritative provider checksum. Retained file hashes establish local integrity.",userNotes=additions?.Notes},WireJson.Options);
         var companionBytes=companions.Sum(name=>new FileInfo(Path.Combine(inspection.Root,name)).Length);
-        return inspection with{FileBytes=inspection.FileBytes+companionBytes,EstimatedImportBytes=inspection.EstimatedImportBytes+companionBytes,Manifest=inspection.Manifest with{SceneId=n.GranuleId,PublicationUtc=item.PublishedUtc,Notes=notes,OriginalMetadataFiles=companions.ToArray()},Warnings=[..inspection.Warnings,"Original NASA observations; browser download progress/authentication is external. No new aircraft observations are created."]};
+        return inspection with{FileBytes=inspection.FileBytes+companionBytes,EstimatedImportBytes=inspection.EstimatedImportBytes+companionBytes,Manifest=inspection.Manifest with{SceneId=n.GranuleId,PublicationUtc=item.PublishedUtc,Notes=notes,OriginalMetadataFiles=companions.ToArray()},Warnings=[..inspection.Warnings,direct?"Original NASA observations acquired by an approved Library job. No new aircraft observations are created.":"Original NASA observations; browser download progress/authentication is external. No new aircraft observations are created."]};
     }
 }
