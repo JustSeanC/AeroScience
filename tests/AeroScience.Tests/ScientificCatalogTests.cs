@@ -64,5 +64,13 @@ public sealed class ScientificCatalogTests:IDisposable
         settings.Save(new());var retained=await catalog.Region(new("35","013",true));Assert.True(retained.Cached);Assert.True(JsonElement.DeepEquals(region.Geometry,retained.Geometry));Assert.Equal(region.AsOfUtc,retained.AsOfUtc);Assert.Equal(1,handler.Count);
         await Assert.ThrowsAsync<ArgumentException>(()=>catalog.Region(new("35 OR 1=1","013")));
     }
+    [Fact]public async Task CatalogEvictionPreservesUnrelatedUserFiles()
+    {
+        var folder=Path.Combine(science.DirectoryPath,"Metadata","Catalog");Directory.CreateDirectory(folder);
+        for(var i=0;i<129;i++){var file=Path.Combine(folder,"pilot-note-"+i+".json");File.WriteAllText(file,"{\"userOwned\":true}");File.SetLastWriteTimeUtc(file,DateTime.UtcNow.AddDays(-1));}
+        using var automatic=new AutomaticScientificData(science,settings,new(new Handler(_=>Json(new{features=Array.Empty<object>()}))));
+        var page=await new ScientificCatalog(automatic,science,settings).Search(new("sentinel-2",new(-75,40,-74.98,40.02)));Assert.Equal("No match",page.Status);
+        Assert.Equal(129,Directory.GetFiles(folder,"pilot-note-*.json").Length);Assert.All(Directory.GetFiles(folder,"pilot-note-*.json"),file=>Assert.Equal("{\"userOwned\":true}",File.ReadAllText(file)));
+    }
     public void Dispose(){science.Dispose();if(Directory.Exists(root))Directory.Delete(root,true);}
 }

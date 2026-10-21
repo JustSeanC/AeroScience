@@ -64,7 +64,7 @@ public sealed class StorageManagement
         {
             var folder=StorageManager.ResolveDataset(science.DirectoryPath,science.LibraryId,"Metadata/"+category);
             if(Directory.Exists(folder))foreach(var file in Directory.EnumerateFiles(folder,"*.json").Take(10000))
-                if(category=="Catalog"||Guid.TryParseExact(Path.GetFileNameWithoutExtension(file),"N",out _)){StorageManager.ValidateLocalPath(file);metadata+=Size(file);}
+                if(category=="Catalog"?ScientificCatalog.IsCacheFileName(Path.GetFileName(file)):Guid.TryParseExact(Path.GetFileNameWithoutExtension(file),"N",out _)){StorageManager.ValidateLocalPath(file);metadata+=Size(file);}
         }
         long datasets = 0; for (var offset = 0; ; offset += 100) { var page = science.Datasets(limit: 100, offset: offset); datasets += page.Count; if (page.Count < 100) break; }
         lock (gate) { if(version!=mutationVersion)return;scienceFiles = sources + products + caches + metadata + retained; sourceBytes = sources; cacheBytes = caches; productCount = count; datasetCount = datasets; pendingBytes=retained; pendingOperations=pending.Ledgers.Length; backups = BackupBytes(Path.Combine(science.DirectoryPath, "Metadata", "Backups")); checkedUtc = DateTimeOffset.UtcNow; }

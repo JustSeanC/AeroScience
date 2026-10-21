@@ -167,10 +167,17 @@ public sealed class ScientificRangeStream : Stream
             if(length>=0&&range.Length!=length||etag is not null&&response.Headers.ETag?.ToString()!=etag)throw new IOException("Scientific asset changed during retrieval. Retry as a new acquisition.");
             length=range.Length.Value;etag??=response.Headers.ETag?.ToString();
             if(index==0)checkpoint?.Establish(etag,length);
-            var count=checked((int)(range.To!.Value-start+1));budget.EnsureCapacity(count);
+            var count=checked((int)(range.To!.Value-start+1));
+            if(response.Content.Headers.ContentLength is {} declared&&declared!=count)throw new IOException("Provider range body length differs from its Content-Range.");
+            budget.EnsureCapacity(count);
             var bytes=new byte[count];using var stream=response.Content.ReadAsStream(token);var received=0;
-            while(received<count){var n=stream.Read(bytes,received,count-received);if(n==0)throw new EndOfStreamException("Provider range ended early; actual received bytes remain accounted.");budget.Charge(n);http.Received(original,n,true);received+=n;}
-            if(stream.ReadByte()!=-1)throw new IOException("Provider returned more bytes than the approved range.");
+            while(received<count){var n=stream.ReadAsync(bytes.AsMemory(received,count-received),token).AsTask().GetAwaiter().GetResult();if(n==0)throw new EndOfStreamException("Provider range ended early; actual received bytes remain accounted.");budget.Charge(n);http.Received(original,n,true);received+=n;}
+            if(response.Content.Headers.ContentLength is null)
+            {
+                // Unknown-length bodies need a bounded, cancellation-aware EOF probe.
+                budget.EnsureCapacity(1);var tail=new byte[1];var extra=stream.ReadAsync(tail,token).AsTask().GetAwaiter().GetResult();
+                if(extra!=0){budget.Charge(extra);http.Received(original,extra,true);throw new IOException("Provider returned more bytes than the approved range.");}
+            }
             checkpoint?.Save(index,bytes);http.CacheRange(original,etag,index,bytes);if(cache.Count>=256)cache.Remove(cache.Keys.First());cache[index]=bytes;return bytes;
         }
         throw new IOException("Scientific asset authorization expired. Retry when the provider is available.");

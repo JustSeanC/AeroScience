@@ -133,6 +133,27 @@ public sealed class ScientificLibraryJobsTests:IDisposable
         using(var stream=new ScientificRangeStream(http,uri,new(1000000),default,new(science,"Downloads/range-test"))){stream.Position=70000;Assert.Equal(bytes[70000],stream.ReadByte());}Assert.Equal(5,handler.Count);
         handler.Etag="\"different\"";Assert.Throws<IOException>(()=>new ScientificRangeStream(http,uri,new(1000000),default,new(science,"Downloads/range-test")));Assert.Equal(6,handler.Count);
     }
+    [Fact]public async Task CogBodyCancellationAfterHeadersRetainsActualPartialByteAccounting()
+    {
+        var handler=new StallingBodyHandler();using var http=new ScientificHttp(handler,cacheEnabled:false);using var cancel=new CancellationTokenSource();var budget=new ScientificDownloadBudget(1048576);
+        var reading=Task.Run(()=>{using var stream=new ScientificRangeStream(http,new("https://sentinel-cogs.s3.us-west-2.amazonaws.com/fixture.tif"),budget,cancel.Token);});
+        await handler.Body.Started.Task.WaitAsync(TimeSpan.FromSeconds(5));cancel.Cancel();await Assert.ThrowsAnyAsync<OperationCanceledException>(()=>reading.WaitAsync(TimeSpan.FromSeconds(5)));Assert.Equal(32,budget.Bytes);
+    }
+    private sealed class StallingBodyHandler:HttpMessageHandler
+    {
+        public readonly StallingBody Body=new();
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,CancellationToken token)
+        {var response=new HttpResponseMessage(HttpStatusCode.PartialContent){Content=new StreamContent(Body)};response.Content.Headers.ContentRange=new(0,65535,150000);response.Headers.ETag=new("\"fixture-v1\"");return Task.FromResult(response);}
+    }
+    private sealed class StallingBody:Stream
+    {
+        public TaskCompletionSource Started=new(TaskCreationOptions.RunContinuationsAsynchronously);private bool first=true;
+        public override async ValueTask<int> ReadAsync(Memory<byte> buffer,CancellationToken token=default)
+        {if(first){first=false;buffer.Span[..32].Clear();return 32;}Started.TrySetResult();await Task.Delay(Timeout.Infinite,token);return 0;}
+        public override int Read(byte[] buffer,int offset,int count)=>throw new NotSupportedException("A bounded remote read must honor its cancellation token.");
+        public override bool CanRead=>true;public override bool CanSeek=>false;public override bool CanWrite=>false;public override long Length=>throw new NotSupportedException();public override long Position{get=>throw new NotSupportedException();set=>throw new NotSupportedException();}
+        public override void Flush(){}public override long Seek(long offset,SeekOrigin origin)=>throw new NotSupportedException();public override void SetLength(long value)=>throw new NotSupportedException();public override void Write(byte[] buffer,int offset,int count)=>throw new NotSupportedException();
+    }
     private sealed class RangeHandler(byte[] bytes):HttpMessageHandler
     {
         public string Etag="\"one\"";public int Count;

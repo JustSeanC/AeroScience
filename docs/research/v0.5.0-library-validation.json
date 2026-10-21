@@ -1,26 +1,29 @@
 {
   "formatVersion": 1,
   "evidenceType": "genuine-catalog-approved-library-acquisition-and-independent-numeric-check",
-  "checkedUtc": "2026-10-21T11:20:52.6263374+00:00",
+  "checkedUtc": "2026-10-21T11:33:52.875733+00:00",
   "sourceFileSha256": {
-    "src/AeroScience.Missions/ScientificCatalog.cs": "9cb981cedefcf5a9ed6d427b465c9541cc33a20490ea863fd61caaac5085e4a0",
+    "src/AeroScience.Missions/ScientificCatalog.cs": "030c4212122d979b711dd0a74e5aa684c6b19599fbdbf53b1de5f67b53a8527d",
     "src/AeroScience.Missions/ScientificLibraryJobs.cs": "1f96e6669757255a363ee323919fbf6e5fa253f472be2e968060a0f6a1024ba1",
     "src/AeroScience.Missions/ScienceLibraryJobsStore.cs": "dcd5bbb9e368fca843d342d7d126d83bcb294bc2c52cc92246128f5157edeb42",
     "src/AeroScience.Missions/AutomaticScientificData.cs": "c2a64473aa81cfb585ce37d40af151f4b5c3c566ffd646dedca56251c677a38f",
     "src/AeroScience.Missions/ScientificProviders.cs": "ce1350d51180fc55c4b251e29985448153fda179d8828f74d6f6ea4705e73d3b",
-    "src/AeroScience.Missions/ScientificHttp.cs": "3f76793aa9b6051326f4e2cdec0d6aca9155c7db17171fd145d0edd27983bd77",
+    "src/AeroScience.Missions/ScientificHttp.cs": "a458b324f456fe299d9b60ba53fc454336eb0bb0b90f95329db9407434d6f00e",
     "src/AeroScience.Missions/ScientificRangeCheckpoint.cs": "e421652118eb1f0d772916b87f1be65b4a7fc25085cf2118cbc74f07b889344f",
     "src/AeroScience.Missions/ScientificGeographicWork.cs": "06209c5c2fba0009c25e10f110690e0c45d9f8c14f48074361c399bd3675548b",
     "src/AeroScience.Missions/ScientificRaster.cs": "652707335e754dadef4dd07ba0d15ae0a7944bbbdb97b0a973833b7a7aa7d524",
     "src/AeroScience.Missions/RemoteScienceStore.cs": "98ef7f53e82a69e9549d0ff89ce81ae62db38d1f7cd7ced8a9d31f30e0a50462",
     "src/AeroScience.Missions/ScienceStore.cs": "e563f88b94587d616bc548f0b6af63ca3d4ea20a74a8a5cd38f72d351b2bf7e5",
+    "src/AeroScience.Missions/StorageManagement.cs": "4f412eb5f774d437b5c8c0f1f619def71b469623dd7812a1fc864d66d2d69a56",
     "src/AeroScience.Shared/ScientificLibraryModels.cs": "2d56a698616b85dfbe5a414ad5a5e357e087bef88d01f72325a885383aa3fa18",
-    "src/AeroScience.Shared/ScientificAccessModels.cs": "b46c426adab5da846210b460afc4d18d6f3af4a1a0015587d31c0b233b094a15"
+    "src/AeroScience.Shared/ScientificAccessModels.cs": "b46c426adab5da846210b460afc4d18d6f3af4a1a0015587d31c0b233b094a15",
+    "tests/AeroScience.ProviderAcceptance/LibraryAcceptance.cs": "7fb73977e79cac35f95424b44898dfa2cb3259799d9cfd4389f27688e4493ed0",
+    "scripts/research/verify_library_sources.py": "cc8d17d207baeb02c2cdc3f19faea43aa01f3594ce8cacec700ca9d39136a119"
   },
   "windowsMsfsIpadQuest": "not tested",
   "noFlightOrScienceSessionCreated": true,
   "independentValidation": {
-    "checked_utc": "2026-10-21T11:23:19.557400+00:00",
+    "checked_utc": "2026-10-21T11:35:07.998755+00:00",
     "method": "Independent GDAL/rasterio CRS, affine, native numeric scaling and QA comparison; documented 1e-8-pixel boundary snap, unchanged 1e-9 value tolerance",
     "results": [
       {
@@ -83,7 +86,7 @@
       "name": "New Mexico",
       "reference": "https://tigerweb.geo.census.gov/arcgis/rest/services/Generalized_ACS2024/State_County/MapServer/9/query?where=STATE%3D%2735%27&outFields=NAME,STATE&outSR=4326&returnGeometry=true&f=geojson",
       "resolution": "US Census TIGERweb ACS2024 generalized 1:20,000,000 cartographic boundary; not a parcel, legal or navigation boundary",
-      "asOfUtc": "2026-10-21T11:20:52.0326217+00:00",
+      "asOfUtc": "2026-10-21T11:33:52.2113329+00:00",
       "bounds": {
         "west": -109.0500440003227,
         "south": 31.33231499989213,
@@ -119,7 +122,7 @@
       "name": "Doña Ana County",
       "reference": "https://tigerweb.geo.census.gov/arcgis/rest/services/Generalized_ACS2024/State_County/MapServer/13/query?where=STATE%3D%2735%27%20AND%20COUNTY%3D%27013%27&outFields=NAME,STATE&outSR=4326&returnGeometry=true&f=geojson",
       "resolution": "US Census TIGERweb ACS2024 generalized 1:20,000,000 cartographic boundary; not a parcel, legal or navigation boundary",
-      "asOfUtc": "2026-10-21T11:20:52.2484648+00:00",
+      "asOfUtc": "2026-10-21T11:33:52.4023362+00:00",
       "bounds": {
         "west": -107.29963099976509,
         "south": 31.783148000290485,
@@ -204,7 +207,7 @@
             "longitude": -74.99000000000001
           }
         },
-        "retrievedUtc": "2026-10-21T11:19:51.4535228+00:00",
+        "retrievedUtc": "2026-10-21T11:32:38.7860866+00:00",
         "preparation": "Provider numeric F32 nearest-neighbor export in WGS84; composite native resolution and datum remain unspecified.",
         "quality": "USGS numeric composite; actual nodata checked before publishing",
         "nativeResolution": "Composite source resolution varies; 256 × 256 requested geographic grid (not a claim of native resolution)",
@@ -231,7 +234,7 @@
           "sha256": "f66b92a3a5f914f5c26ec8e5c1395311472f188347e5666d66a513aee4d22a3d"
         }
       ],
-      "networkBytes": 1444937,
+      "networkBytes": 1444943,
       "validDerivedValues": 576,
       "samplePositions": 576,
       "reuseNetworkBytes": 0,
@@ -270,11 +273,11 @@
             "longitude": 8.11
           }
         },
-        "retrievedUtc": "2026-10-21T11:20:00.9755746+00:00",
+        "retrievedUtc": "2026-10-21T11:32:48.6512518+00:00",
         "preparation": "Lossless native-grid, native-DN GeoTIFF crop via validated HTTP 206 ranges; no overview substitution or interpolation.",
         "quality": "Numeric DSM; vertical reference differs from 3DEP and aircraft MSL",
         "nativeResolution": "~30 m geographic DSM",
-        "networkBytes": 1444937,
+        "networkBytes": 1444943,
         "limitations": [
           "Discovery examines at most 60 ordered catalog candidates; no claim of exhaustive coverage.",
           "Copernicus GLO-30 digital surface model (includes vegetation/buildings), EGM2008 geoid heights. Catalog publication time is not a per-pixel observation date."
@@ -308,7 +311,7 @@
           "sha256": "6dcbf2ca051ac9b64c0574a5d61c465aeca0f08df0c9a6c227f5d41225563938"
         }
       ],
-      "networkBytes": 1073548,
+      "networkBytes": 1073550,
       "validDerivedValues": 576,
       "samplePositions": 576,
       "reuseNetworkBytes": 0,
@@ -349,11 +352,11 @@
             "longitude": -74.99000000000001
           }
         },
-        "retrievedUtc": "2026-10-21T11:20:07.8137273+00:00",
+        "retrievedUtc": "2026-10-21T11:32:56.1172505+00:00",
         "preparation": "Lossless native-grid, native-DN GeoTIFF crop via validated HTTP 206 ranges; no overview substitution or interpolation.",
         "quality": "Scene cloud cover 0.05%; local QA/nodata still determines valid samples",
         "nativeResolution": "30 m delivered grid / 100 m native TIRS",
-        "networkBytes": 1073548,
+        "networkBytes": 1073550,
         "limitations": [
           "Discovery examines at most 60 ordered catalog candidates; no claim of exhaustive coverage.",
           "Landsat Collection 2 Level-2 Surface Temperature (L2SP), not brightness temperature or aircraft thermal imagery. 30 m product grid; Landsat 8/9 TIRS native thermal resolution 100 m. QA is applied at sampling."
@@ -440,7 +443,7 @@
             "longitude": -74.99000000000001
           }
         },
-        "retrievedUtc": "2026-10-21T11:20:51.0779409+00:00",
+        "retrievedUtc": "2026-10-21T11:33:51.3118059+00:00",
         "preparation": "Lossless native-grid, native-DN GeoTIFF crop via validated HTTP 206 ranges; no overview substitution or interpolation.",
         "quality": "Scene cloud cover 0.01%; local QA/nodata still determines valid samples",
         "nativeResolution": "10 m reflectance / 20 m SCL",

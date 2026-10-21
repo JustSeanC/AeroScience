@@ -23,6 +23,11 @@ public sealed class ScientificCatalog(AutomaticScientificData automatic,ScienceS
     }
     private static string Root(string id)=>id=="sentinel-2"?"https://earth-search.aws.element84.com/v1":"https://planetarycomputer.microsoft.com/api/stac/v1";
     private static string Collection(string id)=>id switch{"sentinel-2"=>"sentinel-2-l2a","landsat"=>"landsat-c2-l2",_=>"cop-dem-glo-30"};
+    internal static bool IsCacheFileName(string name)
+    {
+        if(Path.GetExtension(name)!=".json")return false;var stem=Path.GetFileNameWithoutExtension(name);
+        return stem.Length==64&&stem.All(char.IsAsciiHexDigit)||stem.StartsWith("cursor-",StringComparison.Ordinal)&&stem.Length==39&&stem[7..].All(char.IsAsciiHexDigit)||stem.StartsWith("region-",StringComparison.Ordinal)&&stem.Length is 9 or 12&&stem[7..].All(char.IsAsciiDigit);
+    }
     private string CacheFolder=>Path.Combine(science.DirectoryPath,"Metadata","Catalog");
     public object Local()=>science.Availability().Select(a=>new{a.Source.Id,a.FilesAvailable,a.Source.Manifest,
         bounds=a.Source.Grids.Values.Select(ScientificRaster.GridCoverage).ToArray(),status=a.FilesAvailable?"Retained":"Unavailable",limitation="Retained footprint; scientific QA is still applied at sampling."}).ToArray();
@@ -105,7 +110,7 @@ public sealed class ScientificCatalog(AutomaticScientificData automatic,ScienceS
             var page=new ScientificCatalogPage(items.Count>0?"Available":"No match",items.ToArray(),cursorId,now,now.AddMinutes(15),false,limitations.Distinct().ToArray());
             Directory.CreateDirectory(CacheFolder);var cached=new Cached(normalized,page,next);PreferenceStore.WriteAtomic(path,cached);
             if(cursorId is not null)PreferenceStore.WriteAtomic(Path.Combine(CacheFolder,"cursor-"+cursorId+".json"),cached);
-            foreach(var old in new DirectoryInfo(CacheFolder).GetFiles("*.json").OrderByDescending(f=>f.LastWriteTimeUtc).Skip(128))old.Delete();return page;
+            foreach(var old in new DirectoryInfo(CacheFolder).GetFiles("*.json").Where(f=>IsCacheFileName(f.Name)).OrderByDescending(f=>f.LastWriteTimeUtc).Skip(128))old.Delete();return page;
         }
         catch(Exception e)when(e is HttpRequestException or IOException or JsonException or KeyNotFoundException)
         {return new("Unavailable",[],null,DateTimeOffset.UtcNow,DateTimeOffset.UtcNow,false,["This search did not establish current availability. Retained sources remain separate."],e is HttpRequestException?"Provider network unavailable.":e is JsonException or KeyNotFoundException?"Unsupported provider metadata.":e.Message);}
