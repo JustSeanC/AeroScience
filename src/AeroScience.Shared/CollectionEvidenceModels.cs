@@ -40,14 +40,16 @@ public sealed record CollectionState([property: JsonRequired] int Version, Guid 
     CollectionPhase Phase, CollectionAuthority Authority, Guid? CurrentSessionId = null,
     Guid? LastSessionId = null, bool ManualAutomationHold = false, bool ContinuityHold = false,
     Guid[]? FiredOccurrenceIds = null, Guid[]? SuppressedOccurrenceIds = null,
-    CollectionHold[]? Holds = null) : IVersionedEvidence;
+    CollectionHold[]? Holds = null,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] long? ControlRevision = null) : IVersionedEvidence;
 
 // Null ExpectedSessionId explicitly means "no open session", not "whichever session is current".
 // EndData closes the expected current session; End Flight remains the existing separate command.
 public sealed record CollectionControlRequest([property: JsonRequired] int Version, Guid MissionId,
     Guid RequestId, [property: JsonRequired] long ExpectedRevision, CollectionAction Action,
     [property: JsonRequired] Guid? ExpectedSessionId,
-    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Justification = null) : IVersionedEvidence;
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Justification = null,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] long? ExpectedControlRevision = null) : IVersionedEvidence;
 
 public sealed record ScienceCollectionSession([property: JsonRequired] int Version, Guid Id,
     Guid MissionId, long Sequence, DateTimeOffset StartedUtc, CollectionSessionStatus Status,

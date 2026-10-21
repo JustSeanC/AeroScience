@@ -44,7 +44,7 @@ const modeLabel = (mode) =>
   mode === "realistic" ? "Realistic Mode" : "Universal Mode";
 const modeHelp = (mode) =>
   mode === "realistic"
-    ? "Realistic Mode · Advanced science limits and procedures are coming in a future release. All compatible aircraft can record missions."
+    ? "Realistic Mode · Evidence-based operating advisories and mission-performance grading. All compatible aircraft can record missions."
     : "Universal Mode";
 function el(tag, text, className) {
   const node = document.createElement(tag);

@@ -125,7 +125,7 @@ public sealed class MissionPerformanceIntegrationTests:IDisposable
     [Fact] public async Task UnsupportedGradingContextCannotStopTheHostOrRawFlightRecorder()
     {
         var flight=Start();using(var db=new SqliteConnection(new SqliteConnectionStringBuilder{DataSource=store.DatabasePath,Pooling=false}.ToString())){db.Open();using var cmd=db.CreateCommand();cmd.CommandText="UPDATE collection_snapshots SET payload_json=json_set(payload_json,'$.version',99) WHERE kind='assessment-context' AND mission_id=$id";cmd.Parameters.AddWithValue("$id",flight.Id.ToString());Assert.Equal(1,cmd.ExecuteNonQuery());}
-        using var analysis=new ScientificAnalysisJobs(store,science);var worker=new MissionPerformanceService(store,analysis,NullLogger<MissionPerformanceService>.Instance);
+        using var analysis=new ScientificAnalysisJobs(store,science);var worker=new MissionPerformanceService(store,analysis,NullLogger<MissionPerformanceService>.Instance,science);
         using var host=new HostBuilder().ConfigureServices((_,services)=>{services.AddSingleton(worker);services.AddHostedService(sp=>sp.GetRequiredService<MissionPerformanceService>());}).Build();
         await host.StartAsync();var deadline=System.Diagnostics.Stopwatch.StartNew();
         while(true){await Task.Delay(10);try{if(System.Text.Json.JsonSerializer.SerializeToElement(worker.Read(flight.Id),WireJson.Options).GetProperty("state").GetString()=="Unavailable")break;}catch(NotSupportedException){}if(deadline.Elapsed>TimeSpan.FromSeconds(5))throw new TimeoutException("Expected the independent grading worker to report its fault without stopping the host.");}

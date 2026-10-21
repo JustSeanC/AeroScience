@@ -188,7 +188,7 @@ public sealed partial class MissionStore
         {
             if (transition.Outcome == CollectionEventOutcome.Conflict)
             {
-                EvidenceRequire(request.ExpectedRevision != current.Revision || request.ExpectedSessionId != current.CurrentSessionId,
+                EvidenceRequire(!EvidenceContracts.ControlMatches(request,current),
                     "A stale-control conflict needs the actual mismatched request.");
                 EvidenceRequire(EvidenceContracts.Write(commit.State with { Revision = current.Revision }) == EvidenceContracts.Write(current)
                     && commit.Session is null && intents.Length == 0 && commit.FlightSample is null,
@@ -199,6 +199,12 @@ public sealed partial class MissionStore
         EvidenceRequire(commit.State.Revision == current.Revision + 1 && transition.Sequence == commit.State.Revision
             && transition.From == current.Phase && transition.To == commit.State.Phase && transition.Authority == commit.State.Authority,
             "Collection checkpoint and event ordering conflict.");
+        if(current.ControlRevision.HasValue)
+        {
+            var ingress=transition.Action==CollectionAction.Unknown&&transition.Origin==CollectionEventOrigin.Engine&&transition.Reason.StartsWith("Committed exact ingress",StringComparison.Ordinal);
+            var expectedControl=ingress||transition.Outcome==CollectionEventOutcome.Conflict?current.ControlRevision:commit.State.Revision;
+            EvidenceRequire(commit.State.ControlRevision==expectedControl,"Control revision must advance for controls/configuration/holds and remain stable only for ingress or rejected commands.");
+        }
         EvidenceRequire(transition.Outcome == CollectionEventOutcome.Conflict || transition.ExpectedSessionId == current.CurrentSessionId,
             "An old session decision cannot target the current session.");
         EvidenceRequire((current.FiredOccurrenceIds ?? []).All(id => (commit.State.FiredOccurrenceIds ?? []).Contains(id))

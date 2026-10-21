@@ -23,6 +23,13 @@ public sealed class GeographicCollectionEngine(MissionPlan mission,ScienceCollec
     EvidenceReference Policy=>new("collection-plan",plan.Version,EvidenceContracts.ContentHash(plan));
     static Coordinates Point(TelemetryFrame f)=>new(f.Latitude,f.Longitude);
     static Guid Key(string value)=>new(SHA256.HashData(Encoding.UTF8.GetBytes(value))[..16]);
+    public CollectionAreaStatus[] Areas(DateTimeOffset now)=> (plan.SurveyAreas??[]).Select(a=>
+    {
+        var position=previous?.Packet.Frame?.TimestampUtc;
+        var fresh=hasBaseline&&!disconnected&&!controller.State.ContinuityHold&&position is {} at&&(now-at).TotalSeconds is >=-2 and <=5;
+        return new CollectionAreaStatus(a.Id,mission.SurveyAreas![a.PlanAreaIndex].Name,
+            fresh?regions.GetValueOrDefault(a.Id)?.Inside:null,position);
+    }).ToArray();
     public void Rearm(){previous=null;regions.Clear();visitsInside.Clear();unionInside=null;hasBaseline=false;disconnected=false;resetByPilot=true;}
     public void Observe(TelemetryUpdate update,DateTimeOffset evaluatedUtc)
     {

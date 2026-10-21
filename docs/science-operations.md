@@ -74,6 +74,31 @@ for acceptance testing, never the only research archive.
 
 ## Scientific collection sessions (v0.5.0 development)
 
+Mission Control and Science Collection share **Mission intelligence**. The flight name,
+mode, aircraft and recording time remain separate from the current science session's
+stable identity, sequence, phase and time. Expand the instrument, performance, frozen
+objectives and automation sections for supporting evidence. Keyboard focus and open
+sections remain in place during polling. Controls are disabled when their authoritative
+state is unavailable; reconnect before issuing a new deliberate command.
+
+Manual controls use session-bound durable request identities. A transport retry repeats
+the identical request. The optional control revision tolerates newly recorded telemetry
+only; another control, configuration change or continuity hold invalidates it. A stale
+End cannot be redirected to another session. Existing clients retain strict revision checks.
+
+Live original atmospheric Good Data uses verified scalar acquisition receipts: wind speed
+and direction count as two values in one set, and calibration derivatives are excluded.
+Pending remote QA, native pixel unions and intended-work completeness remain unassessed
+where the background evaluator has no supported result. Provisional bounds are not a final
+letter grade. Whole-flight obligations survive all session boundaries. Detailed archived
+reports retain session diagnostics, source dates, hashes and report revisions; opening
+History never triggers recalculation. The original collection audit is paged separately.
+
+Library links open the existing geographic browse/download and NASA guided workflows.
+Historical satellite/airborne source imports are not new simulator-aircraft observations.
+EMIT remains discovery/official access only. Protected Earthdata retrieval and genuine
+AVIRIS-family numeric import acceptance remain deferred to P19; no login is required here.
+
 Flight recording and science collection have separate lifecycles. On Mission Control,
 choose **Arm science without starting collection** to record the departure/transit
 without taking scientific samples. On Science Collection use **Start new science

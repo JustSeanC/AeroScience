@@ -165,7 +165,7 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
             {
                 try
                 {
-                    store.InitializeCollectionEvidence(new(1,id,0,CollectionPhase.Armed,plan?.Collection?.InitialPolicy==InitialCollectionPolicy.Armed?CollectionAuthority.Automatic:CollectionAuthority.Manual),plan?.Collection,
+                    store.InitializeCollectionEvidence(new(1,id,0,CollectionPhase.Armed,plan?.Collection?.InitialPolicy==InitialCollectionPolicy.Armed?CollectionAuthority.Automatic:CollectionAuthority.Manual,ControlRevision:0),plan?.Collection,
                         MissionRubrics.Freeze(id,now,mode,store.RecordedPlanHash(id),plan,configurations,request.Objective,readiness));
                     store.AddEvent(id,now,"science-armed","Flight recording active; science awaits an explicit session start.");
                     collection=new(store,id,()=>research!.Configurations);collectionFault=false;
@@ -239,10 +239,27 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
             return research.Snapshot(connection, frame);
         }
     }
-    public object ScienceCollection(Guid id)
+    public CollectionOverview ScienceCollection(Guid id)
     {
-        lock(gate)return new{state=store.CollectionCheckpoint(id),sessions=store.CollectionSessions(id),fault=active?.Id==id&&collectionFault,
-            capabilities=new[]{"multi-session-1","session-bound-controls-1"}};
+        lock(gate)
+        {
+            var state=store.CollectionCheckpoint(id);var recording=active?.Id==id&&!maintenance;
+            var current=state?.CurrentSessionId is {} sid?store.CollectionSession(id,sid):null;
+            var actions=Enum.GetValues<CollectionAction>().Where(a=>a!=CollectionAction.Unknown).Select(a=>
+            {
+                var allowed=recording&&state is not null&&research is not null&&a switch
+                {
+                    CollectionAction.StartData=>state.CurrentSessionId is null&&state.Phase!=CollectionPhase.Stopped&&research.Configurations.Any(c=>c.Enabled),
+                    CollectionAction.PauseData=>state.Phase==CollectionPhase.Collecting,
+                    CollectionAction.ResumeData=>state.Phase==CollectionPhase.Paused&&!state.ContinuityHold,
+                    CollectionAction.EndData=>state.CurrentSessionId is not null,
+                    CollectionAction.RearmAutomation=>true,
+                    _=>false
+                };
+                return new CollectionActionAvailability(a,allowed,allowed?"Session-bound command; state is checked again when applied.":!recording?"Flight is not recording.":a==CollectionAction.StartData&&research?.Configurations.Any(c=>c.Enabled)!=true?"Select an enabled instrument before starting science.":"Not available in the current session/hold state. Resolve holds and explicitly rearm when appropriate.");
+            }).ToArray();
+            return new(state,store.CollectionSessions(id),recording&&collectionFault,["multi-session-1","session-bound-controls-1","control-revision-1"],actions,current,recording?geographicCollection?.Areas(Now):null);
+        }
     }
 
     public CollectionCommitResult ControlScience(CollectionControlRequest request)

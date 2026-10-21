@@ -127,6 +127,8 @@ public static class ResearchApi
         app.MapGet("/api/missions/{id:guid}/performance/export",(Guid id,MissionStore missions,HttpContext c)=>Results.Stream(stream=>missions.ExportPerformanceJsonAsync(id,stream,c.RequestAborted),"application/json",$"AeroScience-performance-{id}.json"));
         app.MapGet("/api/missions/{id:guid}/collection/counts",(Guid id,ScienceStore science)=>science.SessionCounts(id));
         app.MapGet("/api/missions/{id:guid}/collection",(Guid id,MissionCoordinator missions)=>missions.ScienceCollection(id));
+        app.MapGet("/api/missions/{id:guid}/collection/events",(Guid id,long? after,int? limit,MissionStore store)=>store.CollectionEvents(id,after??0,limit??50));
+        app.MapGet("/api/missions/{id:guid}/collection/sessions",(Guid id,int? offset,int? limit,MissionStore store)=>store.CollectionSessions(id,limit??50,offset??0));
         app.MapPost("/api/missions/{id:guid}/collection/control",(Guid id,CollectionControlRequest request,MissionCoordinator missions)=>
         {
             if(id!=request.MissionId)throw new ArgumentException("Flight identity does not match command.");

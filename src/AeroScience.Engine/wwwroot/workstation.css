@@ -35,3 +35,8 @@ button,input,select,textarea{font:inherit}label{font-size:var(--font-support);li
 .library-catalog-results input[type=checkbox] { min-width:24px;min-height:24px; }
 .library-chunks { display:flex;flex-wrap:wrap;gap:.5rem;max-height:18rem;overflow:auto; }
 .library-job-manager .action-row { min-height:44px; }
+:root .mission-intelligence { min-width: 0; overflow-wrap: anywhere; }
+.mission-intelligence .mission-actions,.mission-intelligence nav { display:flex; flex-wrap:wrap; gap:.6rem; margin:.7rem 0; }
+.mission-intelligence button,.mission-intelligence select { min-height:44px; max-width:100%; }
+.mission-intelligence details { margin-block:.7rem; }
+.mission-intelligence details > div { max-width:100%; }

@@ -103,6 +103,7 @@ public static class EngineApplication
         builder.Services.AddSingleton<ScientificAnalysisJobs>();
         builder.Services.AddSingleton<PreflightReadinessService>();
         builder.Services.AddSingleton<MissionPerformanceService>();
+        builder.Services.AddSingleton<MissionIntelligenceService>();
         builder.Services.AddHostedService(sp=>sp.GetRequiredService<MissionPerformanceService>());
         builder.Services.AddHostedService(sp=>sp.GetRequiredService<ScientificAnalysisJobs>());
 
@@ -187,6 +188,7 @@ public static class EngineApplication
             return missions.Snapshot() with { Maps = new(map.Revision, map.Preferences.OnlineEnabled, map.Preferences.Layer) };
         }
         app.MapGet("/api/state", (MissionCoordinator missions) => DisplaySnapshot(missions));
+        app.MapGet("/api/mission-intelligence", (MissionIntelligenceService intelligence) => intelligence.Read());
         app.MapPost("/api/missions", (StartMissionRequest request, MissionCoordinator missions) =>
         {
             var mission = missions.Start(request);

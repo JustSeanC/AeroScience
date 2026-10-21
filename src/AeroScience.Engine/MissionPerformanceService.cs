@@ -3,12 +3,15 @@ using AeroScience.Missions;
 namespace AeroScience.Engine;
 
 // Reuses the existing bounded analysis queue. Reads never create/revise final reports.
-public sealed class MissionPerformanceService(MissionStore missions,ScientificAnalysisJobs analysis,ILogger<MissionPerformanceService> logger):BackgroundService
+public sealed class MissionPerformanceService(MissionStore missions,ScientificAnalysisJobs analysis,ILogger<MissionPerformanceService> logger,ScienceStore science):BackgroundService
 {
     readonly HashSet<Guid> attempted=[];
     readonly System.Collections.Concurrent.ConcurrentDictionary<Guid,Guid> jobs=new();
     int archiveOffset;
     MissionLiveProjection? live;Guid? liveId;MissionPerformanceReport? projected;string? projectionFault;
+    public MissionPerformanceReport? CachedProjection(Guid id)
+    {var value=Volatile.Read(ref projected);return value?.MissionId==id?value:null;}
+    public string? ProjectionFault=>Volatile.Read(ref projectionFault);
     public object Read(Guid id)
     {
         var mission=missions.Detail(id)?.Mission??throw new ArgumentException("Mission not found.");
@@ -34,7 +37,7 @@ public sealed class MissionPerformanceService(MissionStore missions,ScientificAn
             {
                 var recent=missions.List(20);
                 var active=recent.FirstOrDefault(m=>m.Status==MissionStatus.Recording);
-                if(active is not null){if(liveId!=active.Id){liveId=active.Id;live=new(missions,active.Id);}Volatile.Write(ref projected,live!.Update());projectionFault=null;}
+                if(active is not null){if(liveId!=active.Id){liveId=active.Id;live=new(missions,active.Id,science);}Volatile.Write(ref projected,live!.Update());projectionFault=null;}
                 else {live=null;liveId=null;Volatile.Write(ref projected,null);}
                 var page=archiveOffset==0?recent:missions.List(20,archiveOffset);archiveOffset=page.Count<20?0:archiveOffset+20;
                 foreach(var mission in page.Where(m=>m.Status!=MissionStatus.Recording))

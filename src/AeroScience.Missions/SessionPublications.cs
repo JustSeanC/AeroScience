@@ -45,6 +45,16 @@ public sealed partial class MissionStore
 
 public sealed partial class ScienceStore
 {
+    // A bounded original-scalar lookup for live evidence, not a cube/archive scan.
+    public ScienceObservation[] IntentObservations(ScienceAcquisitionIntent intent)
+    {
+        using var db=Open();using var cmd=db.CreateCommand();
+        cmd.CommandText="SELECT payload_json FROM observations WHERE mission_id=$mission AND timestamp_utc=$utc AND json_extract(payload_json,'$.intentId')=$id ORDER BY measurement_id LIMIT 16";
+        cmd.Parameters.AddWithValue("$mission",intent.MissionId.ToString());cmd.Parameters.AddWithValue("$utc",intent.ExposureUtc.ToString("O"));cmd.Parameters.AddWithValue("$id",intent.Id.ToString());
+        var rows=new List<ScienceObservation>();using var reader=cmd.ExecuteReader();while(reader.Read())rows.Add(ReadCatalog<ScienceObservation>(reader.GetString(0)));
+        if(rows.Any(r=>r.SessionId!=intent.SessionId||r.MissionId!=intent.MissionId||r.InstrumentId!=intent.InstrumentId||r.IntentId!=intent.Id))throw new IOException("Live original/session identity mismatch.");
+        return rows.Where(r=>r.Calibration is null).GroupBy(r=>r.MeasurementId).Select(g=>g.First()).ToArray();
+    }
     public static string ObservationBatchHash(IEnumerable<ScienceObservation> values) => Convert.ToHexStringLower(SHA256.HashData(
         JsonSerializer.SerializeToUtf8Bytes(values.OrderBy(v=>v.MeasurementId,StringComparer.Ordinal).Select(v=>v with{Id=0}).ToArray(),WireJson.Options)));
     public (string Hash,bool Reconstructed)? SessionPublication(ScienceAcquisitionIntent intent)

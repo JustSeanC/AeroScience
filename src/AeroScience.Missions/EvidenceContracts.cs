@@ -129,10 +129,13 @@ public static class EvidenceContracts
     public static void ValidateControl(CollectionControlRequest request, CollectionState current)
     {
         Validate(request); Validate(current);
-        Require(request.MissionId == current.MissionId && request.ExpectedRevision == current.Revision
-            && request.ExpectedSessionId == current.CurrentSessionId, "Stale mission, controller revision or session target; resynchronize before issuing a new command.");
+        Require(ControlMatches(request,current), "Stale mission, controller revision or session target; resynchronize before issuing a new command.");
         // Receipt lookup/idempotent retry and transitions belong to P02/P05, not this validator.
     }
+    public static bool ControlMatches(CollectionControlRequest request,CollectionState current)=>
+        request.MissionId==current.MissionId&&request.ExpectedSessionId==current.CurrentSessionId&&
+        (request.ExpectedRevision==current.Revision&&(!request.ExpectedControlRevision.HasValue||request.ExpectedControlRevision==current.ControlRevision)||
+         request.ExpectedRevision<current.Revision&&request.ExpectedControlRevision.HasValue&&request.ExpectedControlRevision==current.ControlRevision);
 
     private static void ValidatePlan(CollectionPlan plan)
     {
@@ -174,6 +177,7 @@ public static class EvidenceContracts
         Require(request.Justification is null || request.Action==CollectionAction.PauseData && request.Justification=="safety", "Only an explicit safety pause justification is supported; frozen research work is never erased.");
         Id(request.MissionId); Id(request.RequestId); OptionalId(request.ExpectedSessionId); Known(request.Action);
         Require(request.ExpectedRevision >= 0 && request.Action != CollectionAction.Unknown, "A control requires an explicit action and revision.");
+        Require(request.ExpectedControlRevision is null||request.ExpectedControlRevision>=0&&request.ExpectedControlRevision<=request.ExpectedRevision,"Invalid control revision.");
         if (request.Action == CollectionAction.StartData) Require(request.ExpectedSessionId is null, "Start creates a new session only when no session is open.");
         if (request.Action is CollectionAction.PauseData or CollectionAction.ResumeData)
             Require(request.ExpectedSessionId.HasValue, "Pause/Resume must target an open session.");
@@ -182,6 +186,7 @@ public static class EvidenceContracts
     private static void ValidateState(CollectionState state)
     {
         Id(state.MissionId); Require(state.Revision >= 0, "Controller revision cannot be negative.");
+        Require(state.ControlRevision is null||state.ControlRevision>=0&&state.ControlRevision<=state.Revision,"Invalid control checkpoint revision.");
         Known(state.Phase); Known(state.Authority); OptionalId(state.CurrentSessionId); OptionalId(state.LastSessionId);
         Require(state.CurrentSessionId.HasValue == (state.Phase is CollectionPhase.Collecting or CollectionPhase.Paused), "Controller phase and current session disagree.");
         foreach (var ids in new[] { state.FiredOccurrenceIds, state.SuppressedOccurrenceIds })

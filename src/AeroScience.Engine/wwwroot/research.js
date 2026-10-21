@@ -3,6 +3,7 @@ import { missionPerformance } from "./mission-performance.js";
 import { preflightReadiness } from "./preflight-readiness.js";
 import { collectionPlanner } from "./collection-planner.js";
 import { initializeScienceSessions } from "./science-sessions.js";
+import { missionIntelligence } from "./mission-intelligence.js";
 import {reviewPreflight} from "./download-activity.js";
 import { hyperspectralCard } from "./hyperspectral-import.js";
 import { areaSummary } from "./planner-geometry.js";
@@ -154,6 +155,7 @@ function readConfigs(parent) {
 }
 export function initializeResearch(context) {
   ctx = context;
+  missionIntelligence($("control"),ctx.api);
   missionPerformance($("control"),ctx.api,()=>state?.activeMission?.id,{live:true});
   const control = $("control"),
     guidance = text("article", undefined, "panel research-panel");

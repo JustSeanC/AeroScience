@@ -20,8 +20,8 @@ public sealed class ScienceCollectionController(MissionStore store, Guid mission
         var old=origin==CollectionEventOrigin.Manual?store.CollectionControlReceipt(request):null;
         if(old is not null)return old;
         var automatic=origin is CollectionEventOrigin.RouteTrigger or CollectionEventOrigin.Boundary;
-        var conflict=request.ExpectedRevision!=current.Revision||request.ExpectedSessionId!=current.CurrentSessionId;
-        var next=current with{Revision=current.Revision+1};
+        var conflict=!EvidenceContracts.ControlMatches(request,current);
+        var next=current with{Revision=current.Revision+1,ControlRevision=conflict?current.ControlRevision:current.Revision+1};
         var session=Session;
         var outcome=conflict?CollectionEventOutcome.Conflict:CollectionEventOutcome.Applied;
         var reason=conflict?"Stale controller revision/session; synchronize before a new command.":request.Action.ToString();
@@ -84,7 +84,7 @@ public sealed class ScienceCollectionController(MissionStore store, Guid mission
     public void ContinuityHold(string reason,CollectionInputReceipt[] inputs,DateTimeOffset at)
     {
         var current=State;if(current.ContinuityHold)return;var session=Session;
-        var next=current with{Revision=current.Revision+1,ContinuityHold=true,Phase=session is null?current.Phase:CollectionPhase.Paused,
+        var next=current with{Revision=current.Revision+1,ControlRevision=current.Revision+1,ContinuityHold=true,Phase=session is null?current.Phase:CollectionPhase.Paused,
             Holds=[..(current.Holds??[]).Where(h=>h.Kind!=CollectionHoldKind.Continuity),new(CollectionHoldKind.Continuity,reason,session?.Id)]};
         var transition=new CollectionEvent(1,missionId,next.Revision,DateTimeOffset.UtcNow,at,session?.Id,CollectionAction.Unknown,CollectionEventOrigin.Engine,
             CollectionEventOutcome.Applied,current.Phase,next.Phase,next.Authority,reason,inputs.Select(MissionStore.DescribeCollectionInput).ToArray(),ExpectedSessionId:session?.Id);
@@ -124,13 +124,13 @@ public sealed class ScienceCollectionController(MissionStore store, Guid mission
 
     public void ConfigurationChanged(DateTimeOffset at,InstrumentConfiguration[]? updated=null)
     {
-        var current=State;var session=Session;if(session is null)return;
-        var added=(updated??settings()).Select(c=>InstrumentCalibration.Effective(c,Guid.NewGuid(),
+        var current=State;var session=Session;
+        var added=session is null?[]:(updated??settings()).Select(c=>InstrumentCalibration.Effective(c,Guid.NewGuid(),
             session.Configurations.Where(p=>p.Settings.InstrumentId==c.InstrumentId).Max(p=>p.Revision)+1,at)).ToArray();
-        var next=current with{Revision=current.Revision+1};
-        var transition=new CollectionEvent(1,missionId,next.Revision,at,at,session.Id,CollectionAction.Unknown,CollectionEventOrigin.Engine,
-            CollectionEventOutcome.Applied,current.Phase,current.Phase,current.Authority,"Frozen effective instrument configuration changed.",[],ExpectedSessionId:session.Id);
-        store.CommitCollectionEvidence(new(next,transition,session with{Configurations=[..session.Configurations,..added]},EngineDecisionId:Guid.NewGuid()));
+        var next=current with{Revision=current.Revision+1,ControlRevision=current.Revision+1};
+        var transition=new CollectionEvent(1,missionId,next.Revision,at,at,session?.Id,CollectionAction.Unknown,CollectionEventOrigin.Engine,
+            CollectionEventOutcome.Applied,current.Phase,current.Phase,current.Authority,"Frozen effective instrument configuration changed.",[],ExpectedSessionId:session?.Id);
+        store.CommitCollectionEvidence(new(next,transition,session is null?null:session with{Configurations=[..session.Configurations,..added]},EngineDecisionId:Guid.NewGuid()));
         schedule.Clear();epoch=next.Revision;
     }
 }

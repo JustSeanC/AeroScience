@@ -50,6 +50,21 @@ public sealed class ApiTests : IAsyncLifetime
         var data = await response.Content.ReadFromJsonAsync<JsonElement>();
         display.DefaultRequestHeaders.Add("X-AeroScience-CSRF", data.GetProperty("csrf").GetString());
     }
+    [Fact] public async Task MissionIntelligenceUsesAuthenticatedReadOnlyEvidenceAndBoundedPages()
+    {
+        Assert.Equal(HttpStatusCode.Unauthorized,(await client.GetAsync("/api/mission-intelligence")).StatusCode);
+        await Pair(client);var before=await client.GetFromJsonAsync<MissionIntelligence>("/api/mission-intelligence",WireJson.Options);
+        Assert.Null(before!.Flight.ActiveMission);Assert.Null(before.Performance);Assert.Null(before.Collection);
+        var response=await client.PostAsJsonAsync("/api/missions",new StartMissionRequest("Intelligence API fixture",Instruments:[new("ambient-temperature",true)],ArmScience:true),WireJson.Options);response.EnsureSuccessStatusCode();
+        var flight=(await response.Content.ReadFromJsonAsync<Mission>(WireJson.Options))!;
+        var view=await client.GetFromJsonAsync<MissionIntelligence>("/api/mission-intelligence",WireJson.Options);
+        Assert.Equal(flight.Id,view!.Flight.ActiveMission!.Id);Assert.Equal(CollectionPhase.Armed,view.Collection!.State!.Phase);
+        Assert.Empty(view.Collection.Sessions);Assert.Contains(view.Collection.Actions,a=>a.Action==CollectionAction.StartData&&a.Available);
+        Assert.Empty(await client.GetFromJsonAsync<ScienceCollectionSession[]>($"/api/missions/{flight.Id}/collection/sessions?limit=1&offset=0",WireJson.Options)??[]);
+        Assert.NotNull(await client.GetFromJsonAsync<CollectionEvent[]>($"/api/missions/{flight.Id}/collection/events?limit=1&after=0",WireJson.Options));
+        Assert.Equal(flight.Id,(await client.GetFromJsonAsync<EngineSnapshot>("/api/state",WireJson.Options))!.ActiveMission!.Id);
+        (await client.PostAsJsonAsync($"/api/missions/{flight.Id}/end",new{})).EnsureSuccessStatusCode();
+    }
 
     [Fact]
     public async Task CalibrationDefinitionsUseExistingSessionCsrfAndValidationWithoutChangingRawContracts()

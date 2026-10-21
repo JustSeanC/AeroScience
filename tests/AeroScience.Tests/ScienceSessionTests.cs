@@ -13,8 +13,44 @@ public sealed class ScienceSessionTests:IDisposable
     DateTimeOffset clock=DateTimeOffset.UtcNow;
     public ScienceSessionTests(){var settings=new StorageManager(new PreferenceStore(root)).Initialize();store=new(Path.Combine(settings.MissionDirectory,"missions.db"));store.Initialize();science=new(settings.ScienceLibraryDirectory);science.Initialize();store.ScienceLibrary=science;research=new(store,science);coordinator=new(store,1000,research:research,utcNow:()=>clock);}
     Mission Start()=>coordinator.Start(new("Continuous flight",Instruments:[new("ambient-temperature",true)],ArmScience:true));
+    [Fact] public void AuthoritativeActionsAndBoundedLiveYieldTrackOriginalSessionEvidence()
+    {
+        var flight=Start();var armed=coordinator.ScienceCollection(flight.Id);
+        Assert.True(armed.Actions.Single(a=>a.Action==CollectionAction.StartData).Available);
+        Assert.False(armed.Actions.Single(a=>a.Action==CollectionAction.EndData).Available);
+        var a=Do(flight.Id,CollectionAction.StartData).Session!;Observe(1);Observe(1);
+        var projection=new MissionLiveProjection(store,flight.Id,science).Update();
+        var metric=Assert.Single(projection.Input.Yield).Metrics.Single(m=>m.Id=="good-data-sets");
+        Assert.Equal(2,metric.Numerator);Assert.Equal(2,metric.Denominator);
+        Assert.Equal(a.Id,Assert.Single(projection.Input.Sessions).Session.Id);
+        Do(flight.Id,CollectionAction.PauseData);var paused=coordinator.ScienceCollection(flight.Id);
+        Assert.True(paused.Actions.Single(a=>a.Action==CollectionAction.ResumeData).Available);
+        Assert.False(paused.Actions.Single(a=>a.Action==CollectionAction.StartData).Available);
+        Do(flight.Id,CollectionAction.EndData);var b=Do(flight.Id,CollectionAction.StartData).Session!;Observe(1);
+        projection=new MissionLiveProjection(store,flight.Id,science).Update();
+        Assert.Equal(2,projection.Input.Sessions.Length);Assert.Equal(3,Assert.Single(projection.Input.Yield).Metrics.Single(m=>m.Id=="good-data-sets").Numerator);
+        Assert.Equal(b.Id,coordinator.ScienceCollection(flight.Id).CurrentSession!.Id);
+        coordinator.End(flight.Id);Assert.All(coordinator.ScienceCollection(flight.Id).Actions,a=>Assert.False(a.Available));
+    }
     CollectionControlRequest Request(Guid id,CollectionAction action){var s=store.CollectionCheckpoint(id)!;return new(1,id,Guid.NewGuid(),s.Revision,action,s.CurrentSessionId);}
     CollectionCommitResult Do(Guid id,CollectionAction action)=>coordinator.ControlScience(Request(id,action));
+    [Fact] public void ControlRevisionToleratesOnlyIngressAndRejectsConfigurationAndAuthorityRoundTrips()
+    {
+        var flight=Start();Do(flight.Id,CollectionAction.StartData);
+        var captured=store.CollectionCheckpoint(flight.Id)!;
+        var pause=new CollectionControlRequest(1,flight.Id,Guid.NewGuid(),captured.Revision,CollectionAction.PauseData,captured.CurrentSessionId,ExpectedControlRevision:captured.ControlRevision);
+        Observe(1);Observe(1);Assert.True(coordinator.ControlScience(pause).Applied);
+        Assert.False(coordinator.ControlScience(pause).Applied);Do(flight.Id,CollectionAction.ResumeData);
+        captured=store.CollectionCheckpoint(flight.Id)!;
+        var end=new CollectionControlRequest(1,flight.Id,Guid.NewGuid(),captured.Revision,CollectionAction.EndData,captured.CurrentSessionId,ExpectedControlRevision:captured.ControlRevision);
+        Do(flight.Id,CollectionAction.PauseData);Do(flight.Id,CollectionAction.ResumeData);
+        Assert.Equal(CollectionEventOutcome.Conflict,coordinator.ControlScience(end).Event.Outcome);
+        captured=store.CollectionCheckpoint(flight.Id)!;
+        end=end with{RequestId=Guid.NewGuid(),ExpectedRevision=captured.Revision,ExpectedControlRevision=captured.ControlRevision};
+        coordinator.ConfigureInstrument("ambient-temperature",null,2000);
+        Assert.Equal(CollectionEventOutcome.Conflict,coordinator.ControlScience(end).Event.Outcome);
+        Assert.NotNull(store.CollectionCheckpoint(flight.Id)!.CurrentSessionId);coordinator.End(flight.Id);
+    }
     void Observe(int second){clock=clock.AddSeconds(second);var f=SimulatedTelemetryProvider.Generate(clock,0);coordinator.Apply(new(new(ConnectionState.Connected,TelemetrySource.Simulated,"Synthetic session test",clock),f,new(clock,17,29,8,270,.002)));}
     [Fact] public async Task ArmedFlightCollectsTwoIndependentlyIdentifiedSessionsAndExportsOffline()
     {

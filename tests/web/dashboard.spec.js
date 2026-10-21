@@ -20,7 +20,7 @@ test('two displays share recording, history and safe mission detail', async ({ p
   await page.getByLabel('MISSION NAME', { exact: true }).fill(name);
   await expect(page.getByLabel('SCIENCE OPERATING MODE')).toHaveValue('universal');
   await page.getByLabel('SCIENCE OPERATING MODE').selectOption('realistic');
-  await expect(page.locator('#mode-help')).toContainText('future release');
+  await expect(page.locator('#mode-help')).toContainText('Evidence-based operating advisories');
   await page.getByRole('button', { name: 'Start mission', exact: true }).click();
   await expect(page.locator('#active-name')).toHaveText(name);
   await expect.poll(async () => Number((await page.locator('#active-samples').textContent()).replaceAll(',', ''))).toBeGreaterThan(1);
