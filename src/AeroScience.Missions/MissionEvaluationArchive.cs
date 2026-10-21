@@ -21,16 +21,21 @@ public static class MissionEvaluationArchive
         foreach(var frame in frames){while(controlIndex<controls.Length&&controls[controlIndex].InputUtc<=frame.TimestampUtc)lastControl=controls[controlIndex++];controlAt[frame.TimestampUtc]=lastControl;}
         // Exact ingress sequence disambiguates Pause/Resume issued at the same clock instant
         // as an already committed observation. Later controls cannot rewrite that observation.
-        CollectionEvent? sequencedControl=null;
+        CollectionEvent? sequencedControl=null;bool continuityHeld=false;var continuityAt=new Dictionary<DateTimeOffset,bool>();
         foreach(var e in events.OrderBy(e=>e.Sequence))
         {
             if(e.Outcome!=CollectionEventOutcome.Applied)continue;
-            if(e.Action!=CollectionAction.Unknown)sequencedControl=e;
+            var engineHold=e.Origin==CollectionEventOrigin.Engine&&e.Action==CollectionAction.Unknown&&e.ConfigurationIds is null&&!e.Reason.StartsWith("Committed exact ingress",StringComparison.Ordinal);
+            if(engineHold)continuityHeld=true;
+            if(e.Action==CollectionAction.RearmAutomation)continuityHeld=false;
+            if(e.Action!=CollectionAction.Unknown||engineHold)sequencedControl=e;
             else if(e.Origin==CollectionEventOrigin.Engine&&e.Reason.StartsWith("Committed exact ingress",StringComparison.Ordinal))
-                foreach(var link in e.Evidence)controlAt[link.ObservedUtc]=sequencedControl;
+                foreach(var link in e.Evidence){controlAt[link.ObservedUtc]=sequencedControl;continuityAt[link.ObservedUtc]=continuityHeld;}
         }
         CollectionEvent? StateAt(DateTimeOffset time)=>controlAt.GetValueOrDefault(time);
-        var criteria=new List<CriterionEvidence>();var instruments=(context?.Configurations.Select(c=>c.Settings.InstrumentId)??research.Instruments.Where(c=>c.Enabled).Select(c=>c.InstrumentId)).Distinct().ToArray();
+        bool AuthorizedPause(CollectionEvent? e)=>e is {Action:CollectionAction.PauseData}&&(e.Justification=="safety"||e.Origin is CollectionEventOrigin.RouteTrigger or CollectionEventOrigin.Boundary);
+        var verifiedFrames=frames.Where(f=>!continuityAt.GetValueOrDefault(f.TimestampUtc)).ToArray();
+        var criteria=new List<CriterionEvidence>();var instruments=(context?.Configurations.Select(c=>c.Settings.InstrumentId)??[]).Concat(research.Instruments.Where(c=>c.Enabled).Select(c=>c.InstrumentId)).Concat(sessions.SelectMany(s=>s.Configurations).Where(c=>c.Settings.Enabled).Select(c=>c.Settings.InstrumentId)).Concat(actual.Select(a=>a.InstrumentId)).Distinct().Order(StringComparer.Ordinal).ToArray();
         var yield=new List<ScienceYield>();
         foreach(var instrument in instruments)
         {
@@ -53,8 +58,8 @@ public static class MissionEvaluationArchive
             {metric=new("valid-survey-coverage",AssessmentStatus.NotAssessed,null,null,"m²","Native union unavailable or outside supported geometry; no approximate success percentage substituted.",0,1,EvidenceOrigin.Derived,["Use the existing detailed coverage analysis to inspect available source support."]);}
             return y with{Metrics=[..y.Metrics,metric]};
         }
-        var contiguous=frames.Length>=2&&frames.Zip(frames.Skip(1)).All(p=>(p.Second.TimestampUtc-p.First.TimestampUtc).TotalSeconds is >0 and <=5);
-        var comparison=MissionAnalysis.Compare(plan,frames,new());
+        var contiguous=verifiedFrames.Length==frames.Length&&frames.Length>=2&&frames.Zip(frames.Skip(1)).All(p=>(p.Second.TimestampUtc-p.First.TimestampUtc).TotalSeconds is >0 and <=5);
+        var comparison=MissionAnalysis.Compare(plan,verifiedFrames,new());
         bool InScope(TelemetryFrame f,MissionObligation o)
         {
             if(o.Scope=="region"&&o.RegionIndex is {} index&&plan?.SurveyAreas?.ElementAtOrDefault(index) is {} area)return MissionAnalysis.Inside(new(f.Latitude,f.Longitude),area.Vertices);
@@ -68,7 +73,7 @@ public static class MissionEvaluationArchive
                 var to=end is null?null:events.FirstOrDefault(e=>e.OccurrenceId==end.OccurrenceId)?.InputUtc;
                 var areaIndex=plan?.Collection?.SurveyAreas?.FirstOrDefault(a=>a.Id==start?.TargetId)?.PlanAreaIndex;
                 var inside=areaIndex is null||MissionAnalysis.Inside(new(f.Latitude,f.Longitude),plan!.SurveyAreas![areaIndex.Value].Vertices);
-                return inside&&from.HasValue&&f.TimestampUtc>=from&&(!to.HasValue||f.TimestampUtc<=to);
+                return inside&&from.HasValue&&f.TimestampUtc>=from&&(!to.HasValue||f.TimestampUtc<to);
             }
             return true;
         }
@@ -88,9 +93,9 @@ public static class MissionEvaluationArchive
             {
                 bool? observed=null;
                 if(obligation.Scope=="waypoint"&&obligation.RegionIndex is {} index){observed=comparison.Waypoints.ElementAtOrDefault(index)?.Reached;reasons.Add("Ordered actual waypoint observations, 1000 m policy tolerance; geographic coverage is separate.");}
-                else if(obligation.Scope=="altitude"&&obligation.TargetAltitudeFeet is {} altitude){observed=frames.Any(f=>Math.Abs(f.AltitudeMslFeet-altitude)<=100);reasons.Add($"Actual altitude target {altitude.ToString("0.###",System.Globalization.CultureInfo.InvariantCulture)} ft MSL within 100 ft policy tolerance; no polygon required.");}
-                else if(obligation.Scope=="region"){observed=frames.Any(f=>InScope(f,obligation));reasons.Add("Actual visit to frozen study region, not proof of valid scientific pixels.");}
-                else if(obligation.Scope=="planned-session"){observed=frames.Any(f=>InScope(f,obligation));reasons.Add("Configured point/gate research window assessed from route observations; actual session End does not shorten it.");}
+                else if(obligation.Scope=="altitude"&&obligation.TargetAltitudeFeet is {} altitude){observed=verifiedFrames.Any(f=>Math.Abs(f.AltitudeMslFeet-altitude)<=100);reasons.Add($"Actual altitude target {altitude.ToString("0.###",System.Globalization.CultureInfo.InvariantCulture)} ft MSL within 100 ft policy tolerance; no polygon required.");}
+                else if(obligation.Scope=="region"){observed=verifiedFrames.Any(f=>InScope(f,obligation));reasons.Add("Actual visit to frozen study region, not proof of valid scientific pixels.");}
+                else if(obligation.Scope=="planned-session"){observed=verifiedFrames.Any(f=>InScope(f,obligation));reasons.Add("Configured point/gate research window assessed from route observations; actual session End does not shorten it.");}
                 else if(plan?.EstimatedDurationMinutes is {} duration&&frames.Length>0){Score(Math.Min(100,100*(frames[^1].TimestampUtc-detail.Mission.StartedUtc).TotalSeconds/(duration*60)),"flight-position");reasons.Add("Recorded time versus frozen planned duration; not geographic coverage.");}
                 if(observed.HasValue)Metric("planned-target",observed.Value?1:0,1,"planned target","Observed ordered route, altitude or research-region target; not valid scientific coverage.");
                 if(observed==true)Score(100,"flight-position");else if(observed==false&&contiguous&&completed)Score(0,"flight-position");
@@ -102,11 +107,11 @@ public static class MissionEvaluationArchive
                 var interval=config.IntervalMs/1000d;
                 long Slot(DateTimeOffset time)=>(long)Math.Floor((time-detail.Mission.StartedUtc).TotalSeconds/interval+1e-6);
                 var scopedFrames=frames.Where(f=>InScope(f,obligation)&&!f.IsPaused).ToArray();
-                var expected=scopedFrames.Where(f=>StateAt(f.TimestampUtc) is not {Action:CollectionAction.PauseData,Justification:"safety"}).Select(f=>Slot(f.TimestampUtc)).Distinct().ToHashSet();
+                var expected=scopedFrames.Where(f=>!AuthorizedPause(StateAt(f.TimestampUtc))).Select(f=>Slot(f.TimestampUtc)).Distinct().ToHashSet();
                 var matching=actual.Where(a=>a.InstrumentId==obligation.InstrumentId&&expected.Contains(Slot(a.ExposureUtc))).GroupBy(a=>Slot(a.ExposureUtc)).Select(g=>g.First()).ToArray();
                 var denominator=Math.Max(expected.Count,obligation.TargetAmount??0);
                 // Start/End/disable never change expected slots. No result/source success is needed for attempt credit.
-                var unknownPaused=scopedFrames.Where(f=>StateAt(f.TimestampUtc) is {Action:CollectionAction.PauseData,Origin:CollectionEventOrigin.Manual,Justification:null}).Select(f=>Slot(f.TimestampUtc)).Distinct().ToHashSet();
+                var unknownPaused=scopedFrames.Where(f=>continuityAt.GetValueOrDefault(f.TimestampUtc)||StateAt(f.TimestampUtc) is {To:CollectionPhase.Paused}&&!AuthorizedPause(StateAt(f.TimestampUtc))).Select(f=>Slot(f.TimestampUtc)).Distinct().ToHashSet();
                 if(denominator>0)
                 {
                     low=100*matching.Length/denominator;var matchedSlots=matching.Select(a=>Slot(a.ExposureUtc)).ToHashSet();var unresolved=contiguous?unknownPaused.Count(s=>!matchedSlots.Contains(s)):denominator-matching.Length;high=Math.Min(100,low.Value+100*unresolved/denominator);evidence=1-unresolved/denominator;
@@ -116,13 +121,13 @@ public static class MissionEvaluationArchive
                     if(!contiguous||unknownPaused.Count>0)reasons.Add("Telemetry gaps or manual pause rationale are not sufficient evidence of pilot fault; unresolved work remains uncertain, not perfect or failed.");
                 }
                 else if(contiguous&&completed&&obligation.Scope is "region" or "planned-session"){Score(0,"collection-intent");reasons.Add("The frozen research region was never visited/collected during a continuously observed flight.");}
-                reasons.Add("Provider outages/cloud/nodata affect factual yield, not acquisition-attempt discipline. Explicit pilot-declared safety pauses exclude their observed time only; frozen target amounts and omitted regions remain required.");recommendations.Add("Complete frozen research work; ending/restarting sessions does not erase outstanding obligations.");
+                reasons.Add("Provider outages/cloud/nodata affect factual yield, not acquisition-attempt discipline. Frozen route/boundary pauses and explicit pilot-declared safety pauses exclude their observed time only; frozen target amounts and omitted regions remain required.");recommendations.Add("Complete frozen research work; ending/restarting sessions does not erase outstanding obligations.");
             }
             else if(obligation.CriterionId=="operating")
             {
                 var reports=operating.Where(r=>r.Policy=="hybrid-realistic-1"&&r.Configuration.Settings.InstrumentId==obligation.InstrumentId&&r.Input.Frame is {} f&&InScope(f,obligation)).ToArray();
                 var rules=reports.SelectMany(r=>r.Assessment.Rules.Where(rule=>rule.Rule.Id is "geometry.ground-intersection" or "planning.forward-overlap" or "planning.side-overlap" or "riegl.conditional-range" or "aviris-ng.nominal-line-rate")).ToArray();
-                var known=rules.Where(r=>r.Compliance is AssessmentStatus.Supported or AssessmentStatus.Caution or AssessmentStatus.Invalid).ToArray();
+                var known=reports.Where(r=>r.Input.Frame is {} f&&!continuityAt.GetValueOrDefault(f.TimestampUtc)).SelectMany(r=>r.Assessment.Rules.Where(rule=>rule.Rule.Id is "geometry.ground-intersection" or "planning.forward-overlap" or "planning.side-overlap" or "riegl.conditional-range" or "aviris-ng.nominal-line-rate")).Where(r=>r.Compliance is AssessmentStatus.Supported or AssessmentStatus.Caution or AssessmentStatus.Invalid).ToArray();
                 if(rules.Length>0){Metric("operating-assessments",known.Count(r=>r.Compliance==AssessmentStatus.Supported),rules.Length,"applicable rule outcomes","P04 documented geometry/overlap/reference rules. Unknown compliance remains unassessed; source QA and measurement accuracy are separate.",unassessed:rules.Length-known.Length);low=100d*known.Count(r=>r.Compliance==AssessmentStatus.Supported)/rules.Length;high=low+100d*(rules.Length-known.Length)/rules.Length;evidence=(double)known.Length/rules.Length;classes=known.Length>0?["operating-assessment"]:[];}
                 reasons.Add($"{known.Count(r=>r.Compliance==AssessmentStatus.Supported)}/{rules.Length} applicable P04 rule outcomes supported; {rules.Length-known.Length} unknown. Source QA and unavailable payload temperature are not pilot noncompliance.");recommendations.Add("Review documented geometry/overlap constraints and unknown operating evidence.");
             }

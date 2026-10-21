@@ -65,5 +65,26 @@ public sealed class MissionPerformanceIntegrationTests:IDisposable
         var flight=coordinator.Start(new("Synthetic optional-end flight",PlanId:plan.Id));Tick();Tick();Tick();Assert.Equal(CollectionPhase.Collecting,store.CollectionCheckpoint(flight.Id)!.Phase);coordinator.End(flight.Id);
         var input=MissionEvaluationArchive.Build(store,science,flight.Id);var obligation=input.Context!.Obligations.Single(o=>o.CriterionId=="discipline");var evidence=input.Evidence.Single(e=>e.ObligationId==obligation.Id);Assert.Equal(100,evidence.ScoreLower);Assert.Equal(3,evidence.Metrics!.Single().Denominator);Assert.Equal(3,evidence.Metrics!.Single().Numerator);
     }
+    [Fact] public void FrozenRoutePauseAndExplicitEndAreAuthorizedHalfOpenAcquisitionWindows()
+    {
+        var id=Guid.NewGuid();var route=Enumerable.Range(0,4).Select(i=>new ResearchWaypoint("Action "+i,40,-75+i*.002,Id:Guid.NewGuid())).ToArray();
+        CollectionTrigger Trigger(int index,CollectionAction action)=>new(Guid.NewGuid(),Guid.NewGuid(),action,CollectionTriggerKind.Waypoint,route[index].Id!.Value,1,20,PlannedSessionKey:"A");
+        var plan=store.SavePlan(new(id,"Frozen route pauses",Mode:ScienceMode.Realistic,Objective:"Collect on authorized research segments",Waypoints:route,Instruments:[new("ambient-wind",true)],Collection:new(1,id,InitialCollectionPolicy.Armed,[Trigger(0,CollectionAction.StartData),Trigger(1,CollectionAction.PauseData),Trigger(2,CollectionAction.ResumeData),Trigger(3,CollectionAction.EndData)],new(5,6))));var flight=coordinator.Start(new("Synthetic authorized-pause flight",PlanId:plan.Id));
+        foreach(var point in route){now=now.AddSeconds(1);var f=SimulatedTelemetryProvider.Generate(now,0) with{Latitude=point.Latitude,Longitude=point.Longitude};coordinator.Apply(new(new(ConnectionState.Connected,TelemetrySource.Simulated,"Synthetic route evidence",now),f,new(now,20,29,10,90,.002)));}
+        coordinator.End(flight.Id);var input=MissionEvaluationArchive.Build(store,science,flight.Id);var result=input.Evidence.Single(e=>input.Context!.Obligations.Single(o=>o.Id==e.ObligationId).CriterionId=="discipline");Assert.Equal(100,result.ScoreLower);Assert.Equal(2,result.Metrics!.Single().Denominator);Assert.Equal(2,result.Metrics!.Single().Numerator);Assert.Equal(2,input.Yield.Single().Metrics[0].Numerator);
+    }
+    [Fact] public void TelemetryJumpHoldIsUnassessedEvidenceAndCannotBecomePilotNoncompliance()
+    {
+        var id=Guid.NewGuid();var route=new[]{new ResearchWaypoint("Start",40,-75,Id:Guid.NewGuid()),new ResearchWaypoint("End",40,-74,Id:Guid.NewGuid())};
+        CollectionTrigger Trigger(int index,CollectionAction action)=>new(Guid.NewGuid(),Guid.NewGuid(),action,CollectionTriggerKind.Waypoint,route[index].Id!.Value,1,20,PlannedSessionKey:"A");
+        var plan=store.SavePlan(new(id,"Uncertain continuity",Mode:ScienceMode.Realistic,Objective:"Observe wind with verified continuity",Waypoints:route,Instruments:[new("ambient-wind",true)],Collection:new(1,id,InitialCollectionPolicy.Armed,[Trigger(0,CollectionAction.StartData),Trigger(1,CollectionAction.EndData)],new(5,6))));var flight=coordinator.Start(new("Synthetic jump flight",PlanId:plan.Id));
+        foreach(var point in route){now=now.AddSeconds(1);var f=SimulatedTelemetryProvider.Generate(now,0) with{Latitude=point.Latitude,Longitude=point.Longitude};coordinator.Apply(new(new(ConnectionState.Connected,TelemetrySource.Simulated,"Synthetic discontinuous positions",now),f,new(now,20,29,10,90,.002)));}
+        Assert.True(store.CollectionCheckpoint(flight.Id)!.ContinuityHold);coordinator.End(flight.Id);var input=MissionEvaluationArchive.Build(store,science,flight.Id);var report=MissionGrading.Report(input);Assert.Equal(MissionGradeStatus.InsufficientEvidence,report.Grade.Status);Assert.Null(report.Grade.Letter);var result=input.Evidence.Single(e=>input.Context!.Obligations.Single(o=>o.Id==e.ObligationId).CriterionId=="discipline");Assert.Equal(100,result.ScoreUpper);Assert.True(result.EvidenceFraction<1);Assert.True(result.Metrics!.Single().Unassessed>0);
+    }
+    [Fact] public void LaterEnabledInstrumentRetainsItsYieldWithoutReplacingFrozenResearchObligations()
+    {
+        var flight=Start();Tick();coordinator.ConfigureInstruments([new("ambient-temperature",true)]);Tick();Tick();coordinator.End(flight.Id);var input=MissionEvaluationArchive.Build(store,science,flight.Id);
+        Assert.Single(input.Context!.Configurations);Assert.Equal("ambient-wind",input.Context.Configurations[0].Settings.InstrumentId);Assert.Equal(2,input.Yield.Length);Assert.Equal(1,input.Yield.Single(y=>y.InstrumentId=="ambient-wind").Metrics[0].Numerator);Assert.Equal(2,input.Yield.Single(y=>y.InstrumentId=="ambient-temperature").Metrics[0].Numerator);Assert.Equal(2,input.Sessions.Single().Yield.Length);var grade=MissionGrading.Report(input);Assert.Equal(100d/3,grade.Categories.Single(c=>c.Category==RubricCategory.AcquisitionDiscipline).ScoreLower,7);
+    }
     public void Dispose(){research.Dispose();science.Dispose();if(Directory.Exists(root))Directory.Delete(root,true);}
 }
