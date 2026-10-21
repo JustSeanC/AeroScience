@@ -104,5 +104,17 @@ public sealed class ValidationIsolationTests : IDisposable
         Assert.Contains("Validation toolbar source mismatch",result.RootElement.GetProperty("error").GetString());
         Assert.Null(coordinator.Snapshot().ActiveMission);Assert.Empty(store.List(10,0));
     }
+    [Fact] public void BrowserCookiesDoNotCollideAcrossPortsAndConnectionSettingsKeepTheirProfile()
+    {
+        var production=new AccessControl(new ApplicationProfile(false).SessionCookieName);
+        var validation=new AccessControl(new ApplicationProfile(true).SessionCookieName);
+        var oldSession=production.Pair(true,null)!;var testSession=validation.Pair(true,null)!;
+        var context=new Microsoft.AspNetCore.Http.DefaultHttpContext();
+        context.Request.Headers.Cookie=production.SessionCookieName+"="+oldSession.Token+"; "+validation.SessionCookieName+"="+testSession.Token;
+        Assert.Equal(oldSession,production.Get(context.Request));Assert.Equal(testSession,validation.Get(context.Request));
+        var profile=new ApplicationProfile(true);var defaults=profile.Preferences().Load();
+        var options=profile.EngineOptions(defaults with{EnableLan=true,LanAddress="192.168.1.5",SamplingIntervalMs=2000});
+        profile.ValidateEngine(options);Assert.Equal(5085,options.Port);Assert.Equal(2000,options.SamplingIntervalMs);Assert.True(options.EnableLan);
+    }
     public void Dispose(){if(Directory.Exists(root))Directory.Delete(root,true);}
 }

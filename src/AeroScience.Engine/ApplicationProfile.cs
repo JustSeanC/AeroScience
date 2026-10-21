@@ -21,6 +21,13 @@ public sealed record ApplicationProfile(bool Validation)
     public string ToolbarFolder => Validation ? "AeroScienceValidation" : "AeroScience";
     public string CommandEvent => Validation ? "AeroScience.Validation.0_5_0.Command.v1" : "AeroScience.Command.v1";
     public string ReplyEvent => Validation ? "AeroScience.Validation.0_5_0.Reply.v1" : "AeroScience.Reply.v1";
+    public string SessionCookieName => Validation ? "AeroScience.Validation.0_5_0.Session" : AccessControl.CookieName;
+    public EngineOptions EngineOptions(AppPreferences preferences) => new()
+    {
+        ConfigurationDirectory=ConfigurationDirectory, DataDirectory=preferences.MissionDirectory,
+        ScienceLibraryDirectory=preferences.ScienceLibraryDirectory, Port=Port, RequireExistingDatabase=true,
+        EnableLan=preferences.EnableLan,LanAddress=preferences.LanAddress,SamplingIntervalMs=preferences.SamplingIntervalMs
+    };
     public PreferenceStore Preferences() => new(ConfigurationDirectory, Validation ? ConfigurationDirectory : null);
     public static string SourceCommit => typeof(ApplicationProfile).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion.Split('+').LastOrDefault() ?? "unknown";
     public string? AuthorizeToolbar(string command)

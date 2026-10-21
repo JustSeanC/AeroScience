@@ -136,7 +136,7 @@ public sealed class SettingsForm : BrandedForm
         Button(panel, "Apply connection settings", async (_, _) => await Execute(() => app.RunStoppedAsync(() =>
         {
             var next = app.Preferences.Load() with { EnableLan = lan.Checked, LanAddress = addresses.SelectedItem as string, SamplingIntervalMs = (int)interval.Value };
-            new EngineOptions { EnableLan = next.EnableLan, LanAddress = next.LanAddress, SamplingIntervalMs = next.SamplingIntervalMs }.Validate();
+            ApplicationProfile.Current.EngineOptions(next).Validate();
             app.Preferences.Save(next); return Task.CompletedTask;
         })));
         Label(panel, "LAN is optional. Allow AeroScience on the Windows Private network profile only when using iPad/LAN. The pairing code is in dashboard Settings. Local operation requires no firewall change.");

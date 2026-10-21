@@ -188,7 +188,7 @@ public static class EngineApplication
             if (!loopback && !access.AllowAttempt(c.Connection.RemoteIpAddress?.ToString() ?? "unknown")) return Results.StatusCode(429);
             var session = access.Pair(loopback, request.Code);
             if (session is null) return Results.Unauthorized();
-            c.Response.Cookies.Append(AccessControl.CookieName, session.Token, new CookieOptions
+            c.Response.Cookies.Append(access.SessionCookieName, session.Token, new CookieOptions
             { HttpOnly = true, SameSite = SameSiteMode.Strict, Secure = c.Request.IsHttps, MaxAge = TimeSpan.FromHours(12), IsEssential = true });
             return Results.Ok(new { csrf = session.Csrf, expiresUtc = session.ExpiresUtc });
         });

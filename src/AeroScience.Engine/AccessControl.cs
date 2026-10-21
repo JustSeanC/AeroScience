@@ -8,13 +8,14 @@ namespace AeroScience.Engine;
 public sealed record PairRequest(string? Code);
 public sealed record AccessSession(string Token, string Csrf, DateTimeOffset ExpiresUtc);
 
-public sealed class AccessControl
+public sealed class AccessControl(string? cookieName = null)
 {
     private readonly ConcurrentDictionary<string, AccessSession> sessions = new();
     private readonly ConcurrentDictionary<string, (DateTimeOffset Start, int Count)> attempts = new();
     private readonly object attemptGate = new();
     public string PairingCode { get; } = Convert.ToHexString(RandomNumberGenerator.GetBytes(12));
     public const string CookieName = "AeroScience.Session";
+    public string SessionCookieName { get; } = cookieName ?? ApplicationProfile.Current.SessionCookieName;
 
     public bool AllowAttempt(string address)
     {
@@ -41,7 +42,7 @@ public sealed class AccessControl
         return session;
     }
 
-    public AccessSession? Get(HttpRequest request) => request.Cookies.TryGetValue(CookieName, out var token)
+    public AccessSession? Get(HttpRequest request) => request.Cookies.TryGetValue(SessionCookieName, out var token)
         && sessions.TryGetValue(token, out var session) && session.ExpiresUtc > DateTimeOffset.UtcNow ? session : null;
     public static bool Equal(string a, string b) => CryptographicOperations.FixedTimeEquals(Encoding.UTF8.GetBytes(a), Encoding.UTF8.GetBytes(b));
     public static bool IsLoopback(HttpContext context) => context.Connection.RemoteIpAddress is { } address
