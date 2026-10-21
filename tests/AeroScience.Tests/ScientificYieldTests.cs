@@ -12,7 +12,7 @@ public sealed class ScientificYieldTests
         var a=Guid.NewGuid();var good=Result(a);var rows=new[]{good,good,Result(a,1,1),Result(a,0,2,false,false)};
         var y=ScienceYieldEvaluation.Calculate(Guid.NewGuid(),null,"ambient-wind",At,rows);
         var sets=y.Metrics.Single(m=>m.Id=="good-data-sets");Assert.Equal(1,sets.Numerator);Assert.Equal(2,sets.Denominator);Assert.Equal(1,sets.Unassessed);
-        var values=y.Metrics.Single(m=>m.Id=="good-data-values");Assert.Equal(3,values.Numerator);Assert.Equal(4,values.Denominator);Assert.Equal(1,values.Missing);
+        var values=y.Metrics.Single(m=>m.Id=="good-data-values");Assert.Equal(3,values.Numerator);Assert.Equal(4,values.Denominator);Assert.Equal(1,values.Missing);Assert.Equal(2,values.Unassessed);
     }
     [Fact] public void SessionSplittingDoesNotChangeFlightDenominatorsAndReconstructionIsSeparate()
     {
