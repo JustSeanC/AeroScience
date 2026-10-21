@@ -164,7 +164,8 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
             {
                 try
                 {
-                    store.InitializeCollectionEvidence(new(1,id,0,CollectionPhase.Armed,plan?.Collection?.InitialPolicy==InitialCollectionPolicy.Armed?CollectionAuthority.Automatic:CollectionAuthority.Manual),plan?.Collection);
+                    store.InitializeCollectionEvidence(new(1,id,0,CollectionPhase.Armed,plan?.Collection?.InitialPolicy==InitialCollectionPolicy.Armed?CollectionAuthority.Automatic:CollectionAuthority.Manual),plan?.Collection,
+                        MissionRubrics.Freeze(id,now,mode,store.RecordedPlanHash(id),plan,configurations,request.Objective));
                     store.AddEvent(id,now,"science-armed","Flight recording active; science awaits an explicit session start.");
                     collection=new(store,id,()=>research!.Configurations);collectionFault=false;
                     geographicCollection=plan?.Collection is null?null:new(plan,collection);

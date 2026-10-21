@@ -7,7 +7,7 @@ public enum MissionGradeStatus { NotGraded, Provisional, Final, Revised, Insuffi
 public enum MissionGradeLetter { A, B, C, D, F }
 public sealed record RubricCategoryWeight(RubricCategory Category, double Weight);
 public sealed record RubricCriterion(string Id, RubricCategory Category, double Weight,
-    bool Required, string[] RequiredEvidenceClasses, string Method);
+    bool Required, string[] RequiredEvidenceClasses, string Method, bool Applicable = true, string? ApplicabilityBasis = null);
 public sealed record GradeThresholds(double A, double B, double C, double D);
 public sealed record GradingRubric([property: JsonRequired] int Version, string Id, int Revision,
     MissionTemplateKind Template, RubricCategoryWeight[] Categories, RubricCriterion[] Criteria,
@@ -16,7 +16,7 @@ public sealed record GradingRubric([property: JsonRequired] int Version, string 
 public sealed record MissionObligation(Guid Id, string CriterionId, double Weight,
     string? PlannedSessionKey = null, Guid? WaypointId = null, Guid? SurveyAreaId = null,
     DateTimeOffset? WindowStartUtc = null, DateTimeOffset? WindowEndUtc = null,
-    double? TargetAmount = null, string? Unit = null, string? RepeatRuleId = null);
+    double? TargetAmount = null, string? Unit = null, string? RepeatRuleId = null, string? InstrumentId = null, string? Scope = null, int? RegionIndex = null);
 public sealed record MissionAssessmentContext([property: JsonRequired] int Version, Guid MissionId,
     DateTimeOffset FrozenUtc, ScienceMode Mode, string PlanSha256, GradingRubric Rubric,
     MissionObligation[] Obligations, EffectiveInstrumentConfiguration[] Configurations) : IVersionedEvidence;

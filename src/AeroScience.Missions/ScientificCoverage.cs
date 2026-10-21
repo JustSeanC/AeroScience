@@ -100,16 +100,16 @@ public static class ScientificSupport
 }
 public static class ScientificCoverage
 {
-    public static ScientificCoverageResult Calculate(ScienceStore science,MissionPlan? plan,Guid mission,ScientificCoverageRequest request,CancellationToken token=default,Action<long>? progress=null)
+    public static ScientificCoverageResult Calculate(ScienceStore science,MissionPlan? plan,Guid mission,ScientificCoverageRequest request,CancellationToken token=default,Action<long>? progress=null,Guid? sessionId=null,ISet<Guid>? eligibleProducts=null)
     {
         if(!RemoteAcquisition.Instruments.ContainsKey(request.InstrumentId))throw new ArgumentException("Choose a remote-sensing instrument.");
-        var first=science.Products(mission,1,0,request.InstrumentId).FirstOrDefault()??throw new InvalidOperationException("No saved acquisition exists for this instrument; scientific coverage is unavailable.");
+        var first=science.AllProducts(mission).FirstOrDefault(p=>p.InstrumentId==request.InstrumentId&&(!sessionId.HasValue||p.SessionId==sessionId)&&(eligibleProducts is null||eligibleProducts.Contains(p.Id)))??throw new InvalidOperationException("No saved acquisition exists for this instrument; scientific coverage is unavailable.");
         var local=new ScientificLocalGeometry(plan?.SurveyAreas?.FirstOrDefault()?.Vertices[0]??first.Footprint.Center);
         var survey=plan?.SurveyAreas is {Length:>0} areas?ScientificLocalGeometry.Union(areas.Select(a=>local.Polygon(a.Vertices))):null;
         Geometry geometry=local.Empty;var geometricBatch=new List<Geometry>();
         var groups=new Dictionary<(Guid Source,string Band,string Unit),(Geometry Union,List<Geometry> Batch,long Samples)>();
         var fullCells=new HashSet<string>(StringComparer.Ordinal);long acquisitions=0,processed=0;
-        foreach(var product in science.AllProducts(mission).Where(p=>p.InstrumentId==request.InstrumentId))
+        foreach(var product in science.AllProducts(mission).Where(p=>p.InstrumentId==request.InstrumentId&&(!sessionId.HasValue||p.SessionId==sessionId)&&(eligibleProducts is null||eligibleProducts.Contains(p.Id))))
         {
             token.ThrowIfCancellationRequested();acquisitions++;progress?.Invoke(acquisitions);
             Geometry footprint=local.Polygon(product.Footprint.Boundary);if(survey is not null)footprint=footprint.Intersection(survey);
