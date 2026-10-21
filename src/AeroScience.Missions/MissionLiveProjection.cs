@@ -7,6 +7,7 @@ public sealed class MissionLiveProjection(MissionStore store,Guid mission,Scienc
 {
     readonly Dictionary<Guid,AcquisitionResult> acquisitions=[];
     readonly Dictionary<Guid,ScienceAcquisitionIntent> pending=[];
+    readonly Queue<Guid> pendingOrder=[];
     readonly MissionAssessmentContext? context=store.CollectionSnapshot<MissionAssessmentContext>(mission);
     readonly MissionResearch research=store.Research(mission);
     readonly Mission flight=store.Detail(mission)!.Mission;
@@ -37,7 +38,7 @@ public sealed class MissionLiveProjection(MissionStore store,Guid mission,Scienc
         var intents=store.ScienceIntents(mission,limit:500,offset:intentOffset);intentOffset+=intents.Length;
         foreach(var intent in intents.Select(i=>i.Intent))
         {
-            if(pending.Count<4096)pending[intent.Id]=intent;else bounded=true;
+            if(pending.Count<4096){pending[intent.Id]=intent;pendingOrder.Enqueue(intent.Id);}else bounded=true;
             TelemetryFrame? frame=null;var time=intent.ExposureUtc.ToUnixTimeSeconds();for(var i=0;i<=6;i++)if(positions.TryGetValue(time-i,out frame))break;
             foreach(var obligation in context?.Obligations.Where(o=>o.CriterionId=="discipline"&&o.InstrumentId==intent.InstrumentId)??[])
             {
@@ -73,8 +74,10 @@ public sealed class MissionLiveProjection(MissionStore store,Guid mission,Scienc
         }
         // Reconcile bounded original scalar receipts after asynchronous publication. Native
         // raster QA/coverage stays pending; no full cube is decoded during a live projection.
-        if(science is not null)foreach(var intent in pending.Values.Take(64).ToArray())
+        var retryCount=Math.Min(64,pendingOrder.Count);
+        if(science is not null)for(var retryIndex=0;retryIndex<retryCount;retryIndex++)
         {
+            var key=pendingOrder.Dequeue();if(!pending.TryGetValue(key,out var intent))continue;
             if(acquisitions.Count>=200000){bounded=true;break;}
             if(RemoteAcquisition.Instruments.ContainsKey(intent.InstrumentId))
             {acquisitions[intent.Id]=new(intent.Id,intent.SessionId,intent.InstrumentId,intent.ExposureUtc,0,0,0,false,false,false,["intent:"+intent.Id],["Native source QA and valid-pixel support await archived reconciliation."]);pending.Remove(intent.Id);continue;}
@@ -82,7 +85,7 @@ public sealed class MissionLiveProjection(MissionStore store,Guid mission,Scienc
             var packet=store.CollectionInput(mission,intent.InputReceiptId)?.Packet;var assessable=packet?.Atmosphere is not null||packet?.Frame?.Atmosphere is not null;
             var valid=rows.Count(r=>r.Quality==ObservationQuality.Valid&&double.IsFinite(r.Value));
             acquisitions[intent.Id]=new(intent.Id,intent.SessionId,intent.InstrumentId,intent.ExposureUtc,expectedCount,valid,expectedCount-valid,assessable&&rows.Length>0,rows.Length>0,false,["intent:"+intent.Id],[]);
-            if(rows.Length>0)pending.Remove(intent.Id);
+            if(rows.Length>0)pending.Remove(intent.Id);else pendingOrder.Enqueue(intent.Id);
         }
         var asOf=at==default?flight.StartedUtc:at;
         var yield=acquisitions.Values.Select(a=>a.InstrumentId).Distinct().Select(i=>ScienceYieldEvaluation.Calculate(mission,null,i,asOf,acquisitions.Values)).ToArray();

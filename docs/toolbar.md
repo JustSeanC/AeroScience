@@ -25,6 +25,40 @@ These establish a concrete SDK-format implementation path, not proof that AeroSc
 
 ## Transport
 
+### v0.5.0 compact mission intelligence
+
+The existing Mission/Payload/Map tabs and plan/recording controls remain. **Compact VR**
+is an independent presentation toggle; it does not navigate, select a plan or send a
+mission/science command. The shared science summary shows the authoritative session,
+phase, manual/continuity holds, a relevant warning, provisional performance bounds and
+whole-flight Good Data acquisition-set metrics when available. Configured occurrences
+are not predicted crossings or ETAs. Detailed operating rules, calibration, session
+reports, grading and source choices stay in the companion dashboard. Unknown/native
+pixel coverage remains unassessed; older metric cutoffs are explicitly stale.
+
+Protocol **1** and the existing events, package IDs and SDK bootstrap are unchanged.
+Replies advertise optional `mission-intelligence-1`, `session-bound-controls-1` and
+`control-revision-1` capabilities, a version-1 compact `intelligence`, engine-instance ID
+and optional command receipt. Older panels ignore these additions; a new panel connected
+to an older/unsupported engine disables new session controls and retains legacy Payload
+pause/resume. Those commands still delegate to the authoritative controller and do not
+rearm automation. No flight-wide Finish Science action is introduced.
+
+`science-control` wraps the same `CollectionControlRequest` used by the browser; its
+request identity must match the outer native identity. Expected session, durable revision
+and optional control revision are verified under the mission gate. An ingress-only
+revision advance is tolerated; any intervening control/configuration/hold is not. The
+durable receipt survives handler restart/cache eviction. One timeout retry reuses the
+identical JSON, never a new target. Older replies cannot replace newer projections.
+
+Commands remain **at most 1,024 characters**. Replies are measured as **at most 8,000
+UTF-8 bytes** (transport allocation 8,192 including terminator). Optional display detail
+is removed in complete groups with `detailsOmitted`; IDs and scientific numbers are not
+shortened or altered. Map chunk limits remain unchanged. Tests measure multilingual
+payloads, stable IDs/values, unsupported clients, actual handler/browser synchronization,
+duplicate requests, reconnect, scrolling and compact-mode independence. Browser SDK
+wrappers and hosted compilation are not actual simulator/Quest acceptance.
+
 `Include.addScript('/JS/Services/CommBus.js', callback)` loads the simulator's helper, then `RegisterCommBusListener()` subscribes to `AeroScience.Reply.v1`. The toolbar calls `callSimConnect('AeroScience.Command.v1', json)`. The native bridge subscribes through `SimConnect_SubscribeToCommBusEvent` and replies through `SimConnect_CallCommBusEvent` with the JS broadcast flag.
 
 Each request has `protocol:1`, a GUID `requestId`, and `op:'state'|'start'|'end'`. Start includes `name` and `mode:'universal'|'realistic'`; end includes the active `missionId`. Replies correlate by GUID and include the same engine snapshot consumed by the web application. Requests are bounded, mutating retries are deduplicated, and a wrong mission ID cannot end another mission. The full protocol logic is exercised by C# tests; browser tests mock the SDK to test the UI contract. Neither test is a simulator acceptance test.

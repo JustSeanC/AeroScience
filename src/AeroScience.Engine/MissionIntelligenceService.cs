@@ -10,6 +10,14 @@ public sealed class MissionIntelligenceService(MissionCoordinator coordinator, M
     readonly object metadataGate=new();Guid? cachedMission;MissionPlan? cachedPlan;
     MissionPlan? Plan(Guid id)
     {lock(metadataGate){if(cachedMission!=id){cachedPlan=store.Research(id).PlanSnapshot;cachedMission=id;}return cachedPlan;}}
+    public ToolbarIntelligence Native(EngineSnapshot flight,CollectionOverview? collection)
+    {
+        var id=flight.ActiveMission?.Id;var plan=id is {} p?Plan(p):null;
+        var consumed=(collection?.State?.FiredOccurrenceIds??[]).Concat(collection?.State?.SuppressedOccurrenceIds??[]).ToHashSet();
+        var remaining=plan?.Collection?.Triggers.Count(t=>!consumed.Contains(t.OccurrenceId))??0;
+        return ToolbarIntelligenceProjection.Create(flight,collection,id is {} current?performance.CachedProjection(current):null,research.OperatingReports,
+            $"{remaining} configured occurrences remain. Next crossing/order/ETA not assessed; see dashboard.");
+    }
     public MissionIntelligence Read()
     {
         var flight=coordinator.Snapshot();var id=flight.ActiveMission?.Id;

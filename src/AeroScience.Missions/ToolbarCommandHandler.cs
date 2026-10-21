@@ -6,12 +6,16 @@ namespace AeroScience.Missions;
 
 public sealed record ToolbarCommand(int Protocol, Guid RequestId, string Op, string? Name = null, Guid? MissionId = null,
     ScienceMode Mode = ScienceMode.Universal, string? InstrumentId = null, bool? Enabled = null, int? IntervalMs = null,
-    string? Category = null, string? Notes = null, Guid? PlanId = null, string? Revision = null, int Offset = 0, long? After = null, int? WaypointIndex = null);
-public sealed record ToolbarReply(int Protocol, Guid RequestId, bool Ok, string? Error, EngineSnapshot State);
+    string? Category = null, string? Notes = null, Guid? PlanId = null, string? Revision = null, int Offset = 0, long? After = null, int? WaypointIndex = null,
+    CollectionControlRequest? Control=null);
+public sealed record ToolbarReply(int Protocol, Guid RequestId, bool Ok, string? Error, EngineSnapshot State,
+    string[]? Capabilities=null,ToolbarIntelligence? Intelligence=null,ToolbarControlReceipt? Receipt=null,Guid? EngineInstance=null);
 
 // The simulator-native channel reaches the same coordinator as the authenticated browser API.
-public sealed class ToolbarCommandHandler(MissionCoordinator coordinator, RouteMapService? maps = null)
+public sealed class ToolbarCommandHandler(MissionCoordinator coordinator, RouteMapService? maps = null,
+    Func<EngineSnapshot,CollectionOverview?,ToolbarIntelligence>? intelligence=null)
 {
+    readonly Guid engineInstance=Guid.NewGuid();
     private readonly RouteMapService navigation = maps ?? new(coordinator);
     private readonly Dictionary<Guid, (string Request, string Reply)> completed = [];
     private readonly Queue<Guid> order = new();
@@ -38,6 +42,15 @@ public sealed class ToolbarCommandHandler(MissionCoordinator coordinator, RouteM
                     if (Encoding.UTF8.GetByteCount(encoded) > 8000) throw new InvalidOperationException("Map response exceeds its safe packet bound. Resynchronize the map.");
                     return encoded;
                 }
+                if(command.Op=="science-control")
+                {
+                    var control=command.Control??throw new ArgumentException("Missing session-bound control request.");
+                    if(control.RequestId!=command.RequestId)throw new ArgumentException("Native and durable request identities must match.");
+                    var result=coordinator.ControlScience(control);
+                    return Reply(command.RequestId,result.Event.Outcome!=CollectionEventOutcome.Conflict,
+                        result.Event.Outcome==CollectionEventOutcome.Conflict?result.Event.Reason:null,
+                        new(result.Event.Sequence,result.Event.Outcome,result.Event.SessionId,result.Event.Reason));
+                }
                 if (completed.TryGetValue(command.RequestId, out var previous))
                     return previous.Request == json ? previous.Reply : Reply(command.RequestId, false, "Request identifier was already used.");
                 switch (command.Op)
@@ -58,18 +71,20 @@ public sealed class ToolbarCommandHandler(MissionCoordinator coordinator, RouteM
                 Remember(command.RequestId, json, reply);
                 return reply;
             }
-            catch (Exception e) when (e is ArgumentException or InvalidOperationException or JsonException)
+            catch (Exception e) when (e is ArgumentException or InvalidOperationException or JsonException or NotSupportedException)
             {
                 var reply = Reply(command?.RequestId ?? Guid.Empty, false, e is JsonException ? "Malformed toolbar JSON." : e.Message);
-                if (command is { RequestId: var id, Op: not "state" } && id != Guid.Empty) Remember(id, json, reply);
+                if (command is { RequestId: var id, Op: not ("state" or "science-control") } && id != Guid.Empty) Remember(id, json, reply);
                 return reply;
             }
         }
     }
-    private string Reply(Guid id, bool ok, string? error)
+    private string Reply(Guid id, bool ok, string? error,ToolbarControlReceipt? receipt=null)
     {
-        static string? Short(string? value, int length = 100) => value?.Length > length ? value[..length] + "…" : value;
+        static string? Short(string? value, int length = 100) => value?.Length > length ? string.Concat(value.EnumerateRunes().Take(length).Select(r=>r.ToString())) + "…" : value;
         var state = coordinator.Snapshot();
+        var collection=state.ActiveMission is {} flight?coordinator.ScienceCollection(flight.Id):null;
+        var summary=intelligence?.Invoke(state,collection)??ToolbarIntelligenceProjection.Create(state,collection);
         // Display-only text bounds keep native CommBus below 8 KiB; database/export values stay intact.
         state = state with
         {
@@ -82,13 +97,16 @@ public sealed class ToolbarCommandHandler(MissionCoordinator coordinator, RouteM
                 Instruments = r.Instruments.Select(i => i with { Message = Short(i.Message, 80) }).ToArray()
             } : null
         };
-        var encoded=JsonSerializer.Serialize(new ToolbarReply(1,id,ok,Short(error,180),state),WireJson.Options);
+        string Encode()=>JsonSerializer.Serialize(new ToolbarReply(1,id,ok,Short(error,180),state,
+            ["mission-intelligence-1","session-bound-controls-1","control-revision-1"],summary,receipt is null?null:receipt with{Reason=Short(receipt.Reason,120)!},engineInstance),WireJson.Options);
+        var encoded=Encode();
         if(Encoding.UTF8.GetByteCount(encoded)>8000)
         {
             // Scientific diagnostics remain on the dashboard; avoid losing the entire native bridge.
-            state=state with{Research=state.Research is {} research?research with{Units=null,Instruments=research.Instruments.Select(i=>i with{Measurements=[],Message=Short(i.Message,40)}).ToArray()}:null};
-            encoded=JsonSerializer.Serialize(new ToolbarReply(1,id,ok,Short(error,180),state),WireJson.Options);
+            state=state with{Research=state.Research is {} research?research with{Units=null,Guidance=null,Atmosphere=null,Instruments=research.Instruments.Select(i=>i with{Measurements=[],Message=null,PayloadProfileName=null,PayloadProfileId=null}).ToArray()}:null};
+            summary=summary with{DetailsOmitted=true};encoded=Encode();
         }
+        if(Encoding.UTF8.GetByteCount(encoded)>8000){summary=summary with{Metrics=[],Warnings=[],TriggerStatus="Open dashboard for details.",DetailsOmitted=true};encoded=Encode();}
         if(Encoding.UTF8.GetByteCount(encoded)>8000)throw new InvalidOperationException("Native reply exceeds 8 KiB even after display-only reduction. Open bridge diagnostics.");
         return encoded;
     }

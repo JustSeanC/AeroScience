@@ -10,7 +10,7 @@ test('toolbar sends selected mode through CommBus and renders central state (SDK
     } }));
   });
   await page.locator('#as-mode').selectOption('realistic');
-  await expect(page.locator('#as-mode-help')).toContainText('future release');
+  await expect(page.locator('#as-mode-help')).toContainText('companion\'s capabilities');
   await page.locator('#as-name').fill('Rotary-wing research');
   await page.locator('#as-start').click();
   const sent = await page.evaluate(() => window.bus.sent.find(x => x.command.op === 'start'));

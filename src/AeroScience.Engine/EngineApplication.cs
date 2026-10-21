@@ -95,7 +95,8 @@ public static class EngineApplication
         builder.Services.AddSingleton<ITelemetryProvider, SimConnectTelemetryProvider>();
         configureServices?.Invoke(builder.Services);
         builder.Services.AddHostedService<TelemetryWorker>();
-        builder.Services.AddSingleton<ToolbarCommandHandler>();
+        builder.Services.AddSingleton(sp=>new ToolbarCommandHandler(sp.GetRequiredService<MissionCoordinator>(),sp.GetRequiredService<RouteMapService>(),
+            (snapshot,collection)=>sp.GetRequiredService<MissionIntelligenceService>().Native(snapshot,collection)));
         builder.Services.AddSingleton<RouteMapService>();
         builder.Services.AddSingleton<ToolbarBridgeStatus>();
         builder.Services.AddHostedService<ToolbarWorker>();

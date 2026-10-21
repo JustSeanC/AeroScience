@@ -26,6 +26,8 @@ var options=app.Services.GetRequiredService<EngineOptions>();
 app.Services.GetRequiredService<MapSettings>().InitializeDefaults(true); // Existing offline browser fixtures; new-install tests reset explicitly.
 app.Services.GetRequiredService<ApplicationUpdates>().Configure(new(false)); // No real update traffic in synthetic browser tests.
 app.MapPost("/api/testing/library/setup",(LibraryHttpFixture fixture,ScientificAccessSettings settings)=>{fixture.Enable();settings.Save(new(true,true));return new{synthetic=true};});
+// Synthetic SDK transport only; commands execute the production coordinator/SQLite handler.
+app.MapPost("/api/testing/toolbar",(System.Text.Json.JsonElement command,ToolbarCommandHandler toolbar)=>Results.Text(toolbar.Handle(command.GetRawText()),"application/json"));
 app.MapPost("/api/testing/library/teardown",async(LibraryHttpFixture fixture,ScienceStore science,AutomaticScientificData automatic)=>
 {
     automatic.Configure(new());using var deadline=new CancellationTokenSource(TimeSpan.FromSeconds(10));

@@ -34,6 +34,54 @@ public sealed class ScienceSessionTests:IDisposable
     }
     CollectionControlRequest Request(Guid id,CollectionAction action){var s=store.CollectionCheckpoint(id)!;return new(1,id,Guid.NewGuid(),s.Revision,action,s.CurrentSessionId);}
     CollectionCommitResult Do(Guid id,CollectionAction action)=>coordinator.ControlScience(Request(id,action));
+    [Fact] public void BoundedLiveReconciliationDoesNotStarveLaterOriginalsBehindMissingReceipts()
+    {
+        var flight=Start();Do(flight.Id,CollectionAction.StartData);for(var i=0;i<65;i++)Observe(1);
+        // Deliberately missing synthetic scalar rows model unresolved earlier publications.
+        using(var db=new SqliteConnection(new SqliteConnectionStringBuilder{DataSource=science.DatabasePath,Pooling=false}.ToString()))
+        {db.Open();using var cmd=db.CreateCommand();cmd.CommandText="DELETE FROM observations WHERE mission_id=$id AND timestamp_utc < $last";cmd.Parameters.AddWithValue("$id",flight.Id.ToString());cmd.Parameters.AddWithValue("$last",clock.ToString("O"));cmd.ExecuteNonQuery();}
+        var projection=new MissionLiveProjection(store,flight.Id,science);projection.Update();var second=projection.Update();
+        var metric=Assert.Single(second.Input.Yield).Metrics.Single(m=>m.Id=="good-data-sets");Assert.Equal(1,metric.Numerator);Assert.Equal(1,metric.Denominator);Assert.Equal(64,metric.Unassessed);
+        coordinator.End(flight.Id);
+    }
+    [Fact] public void NativeSessionCommandsShareDurableReceiptsAcrossHandlerRestartsAndCannotRetarget()
+    {
+        var flight=Start();var toolbar=new ToolbarCommandHandler(coordinator);
+        ToolbarReply Send(CollectionAction action)
+        {
+            var state=store.CollectionCheckpoint(flight.Id)!;var id=Guid.NewGuid();
+            var request=new CollectionControlRequest(1,flight.Id,id,state.Revision,action,state.CurrentSessionId,ExpectedControlRevision:state.ControlRevision);
+            return JsonSerializer.Deserialize<ToolbarReply>(toolbar.Handle(JsonSerializer.Serialize(new ToolbarCommand(1,id,"science-control",Control:request),WireJson.Options)),WireJson.Options)!;
+        }
+        Assert.True(Send(CollectionAction.StartData).Ok);var a=store.CollectionCheckpoint(flight.Id)!;
+        var id=Guid.NewGuid();var end=new CollectionControlRequest(1,flight.Id,id,a.Revision,CollectionAction.EndData,a.CurrentSessionId,ExpectedControlRevision:a.ControlRevision);
+        var json=JsonSerializer.Serialize(new ToolbarCommand(1,id,"science-control",Control:end),WireJson.Options);Assert.True(json.Length<=1024);
+        Assert.True(JsonSerializer.Deserialize<ToolbarReply>(toolbar.Handle(json),WireJson.Options)!.Ok);
+        Do(flight.Id,CollectionAction.StartData);var b=store.CollectionCheckpoint(flight.Id)!.CurrentSessionId;
+        toolbar=new(coordinator);var duplicate=JsonSerializer.Deserialize<ToolbarReply>(toolbar.Handle(json),WireJson.Options)!;
+        Assert.True(duplicate.Ok);Assert.Equal(b,duplicate.Intelligence!.SessionId);Assert.Equal(a.CurrentSessionId,duplicate.Receipt!.SessionId);
+        var stale=end with{RequestId=Guid.NewGuid()};var rejected=JsonSerializer.Deserialize<ToolbarReply>(toolbar.Handle(JsonSerializer.Serialize(new ToolbarCommand(1,stale.RequestId,"science-control",Control:stale),WireJson.Options)),WireJson.Options)!;
+        Assert.False(rejected.Ok);Assert.Equal(b,rejected.Intelligence!.SessionId);Assert.Contains("control-revision-1",rejected.Capabilities!);
+        var unsupported=end with{Version=99,RequestId=Guid.NewGuid()};
+        Assert.False(JsonSerializer.Deserialize<ToolbarReply>(toolbar.Handle(JsonSerializer.Serialize(new ToolbarCommand(1,unsupported.RequestId,"science-control",Control:unsupported),WireJson.Options)),WireJson.Options)!.Ok);
+        Assert.Equal(b,store.CollectionCheckpoint(flight.Id)!.CurrentSessionId);
+        var legacy=JsonSerializer.Deserialize<ToolbarReply>(toolbar.Handle(JsonSerializer.Serialize(new ToolbarCommand(1,Guid.NewGuid(),"science-pause",MissionId:flight.Id),WireJson.Options)),WireJson.Options)!;
+        Assert.True(legacy.Ok);Assert.True(legacy.Intelligence!.ManualHold);Assert.Equal(CollectionPhase.Paused,legacy.Intelligence.Phase);
+        coordinator.End(flight.Id);
+    }
+    [Fact] public void NativeBudgetReductionPreservesStableIdentitiesAndOriginalUnicodeEvidence()
+    {
+        var flight=Start();Do(flight.Id,CollectionAction.StartData);Observe(1);
+        var original=coordinator.Snapshot().Telemetry!;var unicode=string.Concat(Enumerable.Repeat("研究😀",200));
+        clock=clock.AddSeconds(1);coordinator.Apply(new(new(ConnectionState.Connected,TelemetrySource.Simulated,unicode,clock),original with{Aircraft=unicode,TimestampUtc=clock}));
+        var expected=store.CollectionCheckpoint(flight.Id)!;
+        var toolbar=new ToolbarCommandHandler(coordinator,intelligence:(snapshot,collection)=>ToolbarIntelligenceProjection.Create(snapshot,collection) with{Warnings=[unicode,unicode,unicode],TriggerStatus=unicode});
+        var encoded=toolbar.Handle(JsonSerializer.Serialize(new ToolbarCommand(1,Guid.NewGuid(),"state"),WireJson.Options));
+        var bytes=System.Text.Encoding.UTF8.GetByteCount(encoded);Console.WriteLine($"Native multilingual reduced reply: {bytes} UTF-8 bytes; limit 8000.");Assert.True(bytes<=8000);var reply=JsonSerializer.Deserialize<ToolbarReply>(encoded,WireJson.Options)!;
+        Assert.Equal(1,reply.Protocol);Assert.Equal(expected.CurrentSessionId,reply.Intelligence!.SessionId);Assert.Equal(expected.Revision,reply.Intelligence.Revision);Assert.True(reply.Intelligence.DetailsOmitted);
+        Assert.Equal(original.Latitude,reply.State.Telemetry!.Latitude);Assert.Equal(unicode,coordinator.Snapshot().Telemetry!.Aircraft);Assert.DoesNotContain("\ufffd",encoded);
+        coordinator.End(flight.Id);
+    }
     [Fact] public void ControlRevisionToleratesOnlyIngressAndRejectsConfigurationAndAuthorityRoundTrips()
     {
         var flight=Start();Do(flight.Id,CollectionAction.StartData);

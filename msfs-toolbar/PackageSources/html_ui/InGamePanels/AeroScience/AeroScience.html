@@ -36,6 +36,7 @@
               <strong>AEROSCIENCE</strong>
               <span id="as-source">WAITING FOR ENGINE</span>
             </div>
+            <button id="as-compact" type="button" aria-pressed="false">Compact VR: Off</button>
           </header>
           <nav aria-label="AeroScience pages">
             <new-push-button id="as-mission-page">Mission</new-push-button
@@ -52,6 +53,28 @@
             role="region"
             aria-label="Mission and payload content"
           >
+            <section id="as-intelligence" aria-label="Scientific mission intelligence">
+              <h3 id="as-session-phase">Science intelligence unavailable</h3>
+              <p id="as-session-authority" class="as-note"></p>
+              <p id="as-grade" class="as-note"></p>
+              <p id="as-intelligence-warning" class="as-note"></p>
+              <details>
+                <summary>Science session controls & evidence</summary>
+                <p id="as-session-identity" class="as-note"></p>
+                <div id="as-session-actions">
+                  <button data-science-action="startData" disabled>Start new science session</button>
+                  <button data-science-action="pauseData" disabled>Pause science collection</button>
+                  <button data-science-action="resumeData" disabled>Resume science collection</button>
+                  <button data-science-action="endData" disabled>End current science session</button>
+                  <button data-science-action="rearmAutomation" disabled>Rearm automatic collection</button>
+                </div>
+                <p id="as-collection-message" role="status"></p>
+                <p id="as-next-trigger" class="as-note"></p>
+                <p id="as-science-yield" class="as-note"></p>
+                <p id="as-intelligence-asof" class="as-note"></p>
+                <p class="as-note">End science closes this session. End mission below ends the continuous flight. Detailed calibration, grading and source evidence remain on the companion dashboard.</p>
+              </details>
+            </section>
             <section id="as-mission-view">
               <h2 id="as-aircraft">Awaiting aircraft telemetry</h2>
               <div class="as-metrics">
@@ -174,8 +197,9 @@
                 <p>
                   Simulator-reported atmospheric observations. An active mission
                   is required to save science. Flight telemetry continues when
-                  science collection is paused. Realistic instrument limits and
-                  calibration are future features.
+                  science collection is paused. Documented calibration and operating
+                  evidence are available on the companion dashboard. Unknown constraints
+                  are not successful compliance or certified scientific accuracy.
                 </p>
               </details>
             </section>
