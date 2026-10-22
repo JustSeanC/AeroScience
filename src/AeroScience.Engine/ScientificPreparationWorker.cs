@@ -116,7 +116,7 @@ public sealed class ScientificPlanData
         lock(gate){
             if(configurationRevision!=automatic.ConfigurationRevision){configurationRevision=automatic.ConfigurationRevision;foreach(var session in sessions.Values.Where(s=>!s.Cancelled))foreach(var row in session.Regions.Values.ToArray())session.Regions[row.Key]=row with{Status="Queued",Message="Rechecking retained data after scientific sources/preferences changed"};}
             foreach(var s in sessions.Values){
-                if(wasFlight&&!flightActive){s.AfterFlight=true;automatic.PauseScope("plan:"+s.Plan.Id,true);}
+                if(wasFlight&&!flightActive&&(s.InFlight||s.Preempted)){s.AfterFlight=true;automatic.PauseScope("plan:"+s.Plan.Id,true);}
                 s.InFlight=flightActive&&s.Plan.Id==activePlanId&&(frozenPlan is null||ScientificPreparationScope.Revision(s.Plan)==ScientificPreparationScope.Revision(frozenPlan));
                 if(s.InFlight)s.AfterFlight=false;
                 s.Preempted=flightActive&&(!s.InFlight||flightHold is not null);

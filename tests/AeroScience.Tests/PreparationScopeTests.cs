@@ -73,6 +73,14 @@ public sealed class PreparationScopeTests:IDisposable
         sessions.Control(plan.Id,"continue");sessions.Tick();await Wait(()=>automatic.QueueSummary().Downloading>0);
     }
     private static async Task Wait(Func<bool> condition){using var timeout=new CancellationTokenSource(TimeSpan.FromSeconds(4));while(!condition())await Task.Delay(20,timeout.Token);}
+    [Fact]public void NewPreflightApprovalAfterFlightEndDoesNotInheritTheEarlierFlightHold()
+    {
+        using var automatic=new AutomaticScientificData(science,settings);automatic.Pause(true);var plans=new ScientificPlanData(automatic,settings);
+        plans.Tick(true); // Last worker tick of the previous flight; no preparation existed.
+        var plan=WithActions();plans.Prepare(plan,true,new("first-half")); // Explicit approval after End Flight, before the next tick.
+        plans.Tick(false);Assert.Equal("Preparing",plans.Snapshot().Single().Status);Assert.NotEmpty(automatic.Snapshot());
+        plans.Tick(false);Assert.Equal("Preparing",plans.Snapshot().Single().Status);
+    }
     [Fact]public async Task AircraftNearLaterResearchReplacesTheUnsentEarlyWindowWithoutDuplicatingTransfers()
     {
         settings.Save(new(true,true));var provider=new Blocking();using var automatic=new AutomaticScientificData(science,settings,providers:[provider]);automatic.Pause(true);var plans=new ScientificPlanData(automatic,settings);var plan=LongPlan();plans.Prepare(plan,true,new("areas",SegmentIndices:[0]));
