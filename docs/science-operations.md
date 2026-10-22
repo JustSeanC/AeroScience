@@ -1,9 +1,10 @@
 # Scientific mission operations
 
-These instructions describe the implemented v0.4.2 workflow. The v0.5.0 session,
-operating-assessment and grading lifecycles remain under development. P03 adds optional
-[user-defined scalar derivations and calibration provenance](instrument-calibration.md); consult
-the [tracker](roadmap/v0.5.0-development-tracker.md) before treating them as usable controls.
+Production v0.4.2 remains the QA baseline. Development v0.5.0 adds multi-session collection,
+operating assessments and evidence-based grading, plus optional
+[user-defined scalar derivations and calibration provenance](instrument-calibration.md).
+The [tracker](roadmap/v0.5.0-development-tracker.md) distinguishes implemented controls,
+technical validation and pending installed/device/scientific-source acceptance.
 
 ## Plan, prepare and fly
 
@@ -33,6 +34,53 @@ hardware calibration or resolution on a satellite scene. Preserve source observa
 date, retrieval/processing time, units/scale/offset, grids, QA/nodata, license and original
 scientific values. A DEM/DSM is not an aircraft LiDAR return. See
 [instrument profiles](v0.4.0-instrument-profiles.md) and [methods](v0.4.0-scientific-methods.md).
+
+## Live Sensor Operating Status (v0.5.0 development)
+
+Open **Instruments & Collection** for instrument-first cards, or use the compact **Sensor
+Operating Status** panel in Mission Control. Each enabled instrument shows its reference
+profile/version, collection phase/session, operating assessment, advice, separate scientific
+data status and last assessment time. Disabled instruments are collapsed separately.
+**View Technical Details** retains the exact P04 values, units, rule outcomes, derived validity,
+source QA, explanations, configuration revision, calibration provenance and evidence hashes.
+These are supported checks, not physical hardware-health or accuracy certification.
+
+The shared `operating-ui-1` projection uses typed rule IDs/revisions and outcomes; it never
+parses explanations to make a decision. Its deterministic mapping is:
+
+| State or rule | Pilot-facing interpretation |
+|---|---|
+| Disabled; no flight; Armed/Paused/BetweenSessions/Stopped | Disabled or Not Collecting takes precedence over earlier operating results. End Data closes a session; another session needs its own evidence. |
+| Current assessment eligibility | Mission, session, effective configuration content/ID and policy/rule versions must match. Current and recorded position/assessment timestamps must be within 6 seconds, with at most 2 seconds future tolerance; valid, unpaused telemetry must be connected. Assessment must follow the latest collection transition and effective configuration. Missing required rules, stale or unsupported evidence is Cannot Assess. |
+| `geometry.ground-intersection` | Supported compliance with supported derived geometry is a checked result. Invalid geometry is Caution; missing AGL/evidence is Cannot Assess. MSL is not substituted for AGL. |
+| `planning.forward-overlap`, `planning.side-overlap` | Compare only emitted applicable P04 rules with the saved target/track spacing. Concerns suggest reviewing planned interval, groundspeed, spacing and modeled swath; no guaranteed valid-pixel coverage. |
+| `cadence.spacing` | A typed Caution identifies observed acquisition delays relative to configured cadence. Unknown is descriptive spacing, not a passed cadence or detector-sampling check; this limitation stays visible. |
+| `riegl.conditional-range` | Below the documented 100 m modeled slant-range minimum is Caution. Other range outcomes remain Unknown; no universal maximum altitude/range is inferred. |
+| `environment.payload-temperature` | Applicable only when the selected profile supplies a documented temperature envelope. Missing internal temperature is unassessed, never a failure; ambient temperature is not a substitute. |
+| `aviris-ng.nominal-line-rate` | Only the configured nominal 10–100 lines/s reference check is presented, not measured detector performance. |
+| Other P04 rows | MSL/orientation are recorded inputs to geometry, not separate invented attitude limits. Missing overlap targets, calibration-derived rows and simulator-channel availability do not create hardware operating passes. Unknown rule IDs/revisions fail safely as Cannot Assess. |
+
+An applicable concern is **Caution**, with remaining uncertainties visible. Otherwise any
+applicable unassessed check is **Cannot Assess**. **Within Checked Limits** requires at least
+one supported applicable check and no applicable unknown/failed checks. A generic profile may
+only support geometry; its absent detector/environmental envelope and unassessed cadence remain
+explicit. No positive result is inferred merely from an absence of errors. Guidance supports
+planning/configuration review and never directs an unsafe maneuver.
+
+**Scientific Data** is independent: Ready requires fresh supported P04 source QA, Partially
+Available indicates mixed/limited QA, Unavailable indicates assessed missing/invalid source
+support, Pending indicates an actual waiting acquisition, and Unknown indicates insufficient
+evidence. Atmospheric channel timestamps are checked independently of fresh aircraft position.
+An unavailable selected Library is reported separately from retained source QA and operating
+conditions. Local dataset presence or provider/scene outlines alone never produce Ready. Ready does not
+prove an observation was saved or guarantee valid pixels everywhere. Historical Landsat is
+not live FLIR imagery; DEM/DSM values are not RIEGL laser returns.
+
+Pausing or changing sessions/configurations invalidates earlier live operating clearance.
+No source downloads, geometry processing, archive writes or grading changes are triggered by
+reading this panel. Existing refreshes are reused; a one-shot expiry removes favorable live
+labels if the connection stalls. Cards update without modal interruptions or focus stealing.
+Archived operating reports retain their original records and historical timestamps.
 
 ## Recording, review and exports
 

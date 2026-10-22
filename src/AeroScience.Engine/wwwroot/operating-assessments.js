@@ -1,4 +1,7 @@
+import {renderSensorOperating,markSensorOperatingStale} from './sensor-operating-status.js';
+const requests=new WeakMap();
 export async function operatingAssessments(parent,api,missionId=null,at=null){
+ if(!missionId){const own=(requests.get(parent)||0)+1;requests.set(parent,own);try{const overview=await api('/api/instruments/operating-status');if(parent.isConnected&&requests.get(parent)===own)renderSensorOperating(parent,overview);}catch(error){if(parent.isConnected&&requests.get(parent)===own)markSensorOperatingStale(parent,'Sensor status unavailable: '+error.message);}return;}
  const reports=await api(missionId?`/api/missions/${missionId}/operating${at?'?at='+encodeURIComponent(at):''}`:'/api/instruments/operating');
  parent.replaceChildren();
  const heading=document.createElement('h3');heading.textContent='Instrument operating assessments';parent.append(heading);

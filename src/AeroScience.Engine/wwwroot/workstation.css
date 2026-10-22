@@ -69,5 +69,15 @@ dialog.managed-popup{max-width:min(56rem,calc(100vw - 1.5rem));max-height:88dvh;
 @media(max-width:600px){dialog.managed-popup{width:calc(100vw - 1rem);max-height:90dvh;padding:.65rem}.popup-header{gap:.5rem}.dialog-actions{flex-wrap:wrap;gap:.5rem}}
 
 .popup-header{color:var(--text,#e4edf6)}
+.sensor-operating-panel{margin:1rem 0;min-width:0}
+.sensor-operating-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,22rem),1fr));gap:1rem;align-items:start}
+.sensor-operating-card{min-width:0;border:1px solid var(--border,#64748b);border-radius:.6rem;padding:1rem;overflow-wrap:anywhere}
+.sensor-operating-card h3{margin:0 0 .5rem}.sensor-operating-card section{margin:.8rem 0}.sensor-operating-card p{margin:.45rem 0}
+.sensor-operating-card[data-operating=caution]{border-left:5px solid #d9a441}
+.sensor-operating-card[data-operating=cannotAssess]{border-left:5px solid #8395ac}
+.sensor-operating-card summary{min-height:44px;display:list-item;padding:.6rem .25rem;cursor:pointer}
+.sensor-operating-card details{margin-top:.8rem}.sensor-operating-card details p{overflow-wrap:anywhere}
+.sensor-operating-compact .sensor-operating-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,19rem),1fr))}
+.sensor-operating-uncertainty{font-size:.9em}.sensor-operating-panel>details{margin-top:.75rem}
 .leaflet-control-layers-list{max-height:65dvh;max-width:min(22rem,calc(100vw - 3rem));overflow:auto;scroll-padding-top:5rem}
 .leaflet-control-layers-list .popup-header{margin:0 0 .5rem;padding:.25rem}.leaflet-control-layers-list .popup-header h2{font-size:1rem}.leaflet-control-layers label{font-size:.875rem;min-height:32px}

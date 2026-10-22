@@ -20,8 +20,7 @@ public sealed class MissionIntelligenceService(MissionCoordinator coordinator, M
     }
     public MissionIntelligence Read()
     {
-        var flight=coordinator.Snapshot();var id=flight.ActiveMission?.Id;
-        var collection=id is {} mission?coordinator.ScienceCollection(mission):null;
+        var (flight,collection,sensors)=coordinator.OperatingIntelligence();var id=flight.ActiveMission?.Id;
         var plan=id is {} p?Plan(p):null;
         var state=collection?.State;
         var triggers=(plan?.Collection?.Triggers??[]).Select(t=>new TriggerIntelligence(t,
@@ -32,6 +31,6 @@ public sealed class MissionIntelligenceService(MissionCoordinator coordinator, M
             performance.ProjectionFault is not null?"Unavailable: "+performance.ProjectionFault:report is null?"Pending":"Provisional",
             ["Up to 100 sessions shown; complete session evidence remains in the archived reports and paged session API.",
              "Provider footprints, modeled footprints, flown paths and scientifically valid acquired coverage are distinct.",
-             "No next-trigger order or active-area membership is inferred from map proximity; configured occurrences and backend event evidence are shown."]);
+             "No next-trigger order or active-area membership is inferred from map proximity; configured occurrences and backend event evidence are shown."],sensors);
     }
 }

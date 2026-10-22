@@ -226,7 +226,6 @@ export async function loadResearch(page) {
   if (page === "instruments") await instruments();
 }
 let payloadCatalog;
-let operatingBusy=false,operatingFetched=0;
 let calibrationCatalog;
 let plannerDirty=false, pendingGeometry=false;
 window.addEventListener("beforeunload",event=>{if(plannerDirty||pendingGeometry){event.preventDefault();event.returnValue="";}});
@@ -778,13 +777,14 @@ async function instruments() {
     "source-notice",
   );
   p.append(sourceLabel);
+  const operating=text('section');operating.id='operating-reports';p.append(operating);await operatingAssessments(operating,ctx.api);
   await scientificReadiness(p, ctx.api);
   await hyperspectralCard(p,ctx.api,state?.telemetry);
   await unitControls(p, ctx.api, () => instruments());
   const collection = text("div");
   collection.id = "collection-status";
   p.append(collection);
-  initializeScienceSessions(ctx,collection);
+  const scienceStatus=initializeScienceSessions(ctx,collection,{sensorParent:operating});
   missionPerformance(p,ctx.api,()=>state?.activeMission?.id,{live:true});
   const presets = text("details");
   presets.append(text("summary", "Reusable instrument presets"));
@@ -870,12 +870,12 @@ async function instruments() {
   p.append(
     button("Apply instrument configuration", async () => {
       await ctx.api("/api/instruments", readConfigs(configuration));
+      scienceStatus.invalidate();await scienceStatus.refresh();
     }),
   );
   const values = text("div");
   values.id = "instrument-values";
   p.append(values);
-  const operating=text('section');operating.id='operating-reports';p.append(operating);await operatingAssessments(operating,ctx.api);
   const scienceMapPanel = text("details", undefined, "panel research-panel");
   scienceMapPanel.append(text("summary","Scientific sample locations · expand map and layers"));
   scienceMapPanel.append(text("h2", "Scientific sample locations"),text("p","Blue dots show successful atmospheric sample positions. Outlined remote-sensing footprints identify saved external-data acquisitions; their full boundary does not guarantee every pixel is valid. Missing coverage and acquisition gaps are reported in collection status; a dot is not a camera image or a continuous swath. Use the map layers to compare samples, footprints, route and recorded track."));
@@ -980,10 +980,6 @@ function guidance(parent, g) {
 export function renderResearch(next) {
   if (!next) return;
   state = next;
-  const operating=$('operating-reports');
-  if(operating&&operating.offsetParent!==null&&!operatingBusy&&Date.now()-operatingFetched>3000){
-    operatingBusy=true;operatingFetched=Date.now();operatingAssessments(operating,ctx.api).catch(()=>{}).finally(()=>{operatingBusy=false;});
-  }
   syncUnits(next.research?.units);
   guidance($("flight-guidance"), next.research?.guidance);
   const environment=$('environment-readings');

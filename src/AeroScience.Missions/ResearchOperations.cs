@@ -24,6 +24,7 @@ public sealed class ResearchOperations : IDisposable
     public void HoldCollection(){collectionManaged=true;collectionPhase=CollectionPhase.Paused;remote.Reset(true);}
     public void ApplyCollection(CollectionState state,ScienceCollectionSession? session,ScienceAcquisitionIntent[] intents,DateTimeOffset? at=null)
     {
+        if(collectionPhase!=state.Phase||CollectionSessionId!=state.CurrentSessionId)OperatingContextUtc=at??DateTimeOffset.UtcNow;
         collectionManaged=true;ingressIntents=intents;
         if(session is not null)foreach(var config in session.Configurations.GroupBy(c=>c.Settings.InstrumentId).Select(g=>g.OrderByDescending(c=>c.Revision).First()))effective[config.Settings.InstrumentId]=config;
         if(CollectionSessionId!=state.CurrentSessionId)
@@ -65,6 +66,9 @@ public sealed class ResearchOperations : IDisposable
     private DateTimeOffset? lastAssessment;
     private InstrumentOperatingReport[] operating = [];
     public InstrumentOperatingReport[] OperatingReports => Volatile.Read(ref operating);
+    // Live presentation freshness only. Original persisted P04 evidence is never rewritten.
+    public DateTimeOffset? OperatingContextUtc { get; private set; }
+    public EffectiveInstrumentConfiguration[] EffectiveConfigurations => effective.Values.ToArray();
     public Guid? CollectionSessionId { get; set; }
     public InstrumentConfiguration[] Configurations => configurations.Select(InstrumentCalibration.Freeze).ToArray();
     public void EnsureCanStart(InstrumentConfiguration[] input)
@@ -79,6 +83,7 @@ public sealed class ResearchOperations : IDisposable
         mission = active; context = research; configurations = ScienceCatalog.Normalize(research.Instruments);
         acquisitions.Clear(); baseline = null; intentionallyPaused = false; pauseStarted = null; pauseSeconds = 0;
         effective.Clear(); lastAssessment=null; operating=[];CollectionSessionId=null;
+        OperatingContextUtc=active.StartedUtc;
         foreach(var config in configurations)effective[config.InstrumentId]=InstrumentCalibration.Effective(config,Guid.NewGuid(),1,active.StartedUtc);
         collectionManaged=false;collectionPhase=CollectionPhase.Unknown;ingressIntents=[];remote.Begin();
     }
@@ -105,6 +110,7 @@ public sealed class ResearchOperations : IDisposable
                 effective[config.InstrumentId]=InstrumentCalibration.Effective(config,Guid.NewGuid(),(effective.GetValueOrDefault(config.InstrumentId)?.Revision??0)+1,DateTimeOffset.UtcNow);
         }
         configurations = next;
+        OperatingContextUtc=DateTimeOffset.UtcNow;
         remote.Reset(intentionallyPaused);
         if (mission is not null)
         {

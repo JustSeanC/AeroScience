@@ -1,4 +1,5 @@
 import {node, numeric, dateTime, link, newIdentity} from './workstation-ui.js';
+import {renderSensorOperating,markSensorOperatingStale} from './sensor-operating-status.js';
 const labels={startData:'Start new science session',pauseData:'Pause science collection',resumeData:'Resume science collection',endData:'End current science session',rearmAutomation:'Rearm automatic collection'};
 export function metricText(m){
  const supported=['supported','caution'].includes(m.status)&&Number.isFinite(m.numerator)&&Number.isFinite(m.denominator)&&m.denominator>0;
@@ -8,7 +9,7 @@ const semantic=s=>JSON.stringify([s?.missionId,s?.controlRevision,s?.currentSess
 const elapsed=(from,to)=>from?`${Math.max(0,Math.floor(((to?Date.parse(to):Date.now())-Date.parse(from))/1000))} s`:'Unknown';
 
 // Shared desktop/paired-browser presentation. Backend services own all decisions.
-export function missionIntelligence(parent,api,{id='mission-intelligence',after=false}={}){
+export function missionIntelligence(parent,api,{id='mission-intelligence',after=false,sensorParent=null}={}){
  const panel=node('article',undefined,'panel research-panel mission-intelligence');panel.id=id;
  if(after)parent.after(panel);else parent.append(panel);panel.append(node('h2','Mission intelligence'));
  const status=node('p','Loading authoritative mission state…');status.setAttribute('role','status');
@@ -20,6 +21,7 @@ export function missionIntelligence(parent,api,{id='mission-intelligence',after=
  panel.append(status,summary,sessionLine,authority,reasonLabel,actions,message,node('p','End current science session preserves its results; Start begins another session. End Flight is a separate recording control. Rearm does not start or resume science.'));
  const sections={};for(const [key,title]of [['sessions','Science sessions'],['instruments','Effective instruments & operating evidence'],['performance','Provisional flight performance & scientific yield'],['obligations','Frozen research objectives & obligations'],['triggers','Configured automation & recorded events']]){const detail=node('details');detail.append(node('summary',title));const body=node('div');detail.append(body);panel.append(detail);sections[key]=body;}
  const links=node('nav');links.setAttribute('aria-label','Mission intelligence tools');link(links,'Find & Download External Data','#library/download');link(links,'NASA AVIRIS Download & Import','#library/download?science=hyperspectral');link(links,'Review offline flight reports','#history');panel.append(links);
+ const sensors=sensorParent||node('section');if(!sensorParent){sensors.id=id+'-sensors';panel.querySelector('details').before(sensors);}
  const historyList=node('ul');panel.append(historyList);
  const eventList=node('ol'),more=node('button','Load more collection events'),reloadEvents=node('button','Refresh collection event evidence');more.type=reloadEvents.type='button';sections.triggers.append(eventList,more,reloadEvents);let eventAfter=0,eventMission=null,eventBusy=false;
  reloadEvents.onclick=()=>{if(eventBusy)return;eventAfter=0;eventList.replaceChildren();more.hidden=false;more.click();};
@@ -27,7 +29,7 @@ export function missionIntelligence(parent,api,{id='mission-intelligence',after=
   try{const rows=await api(`/api/missions/${mission}/collection/events?after=${eventAfter}&limit=50`);if(eventMission!==mission||disposed)return;for(const e of rows){eventAfter=e.sequence;eventList.append(node('li',`${dateTime(e.inputUtc)} · ${e.action} · ${e.origin} · ${e.outcome} · session ${e.sessionId||'none'} · occurrence ${e.occurrenceId||'none'} · ${e.reason}. Evidence: ${e.evidence.map(v=>v.id).join(', ')}`));}more.hidden=rows.length<50;}catch(e){message.textContent='Event evidence unavailable: '+e.message;}finally{eventBusy=false;more.disabled=false;}};
  function replace(body,key,render){if(body.dataset.key===key)return;body.dataset.key=key;body.replaceChildren();render(body);}
  function draw(data){
-  current=data;lastSuccess=Date.now();const {flight,collection,plan,performance}=data,s=collection?.state,m=flight.activeMission;
+  current=data;lastSuccess=Date.now();renderSensorOperating(sensors,data.sensorOperating,{compact:!sensorParent});const {flight,collection,plan,performance}=data,s=collection?.state,m=flight.activeMission;
   const age=flight.telemetry?(Date.now()-Date.parse(flight.telemetry.timestampUtc))/1000:null;
   status.textContent=`${flight.connection.state} · ${flight.connection.source==='simulated'?'SIMULATED TEST FIXTURE — no MSFS acceptance':'Read-only simulator connection'} · ${age===null?'Position unavailable':age< -2||age>6?'Stale position — no crossing inferred':`Position age ${Math.max(0,Math.floor(age))} s`} · refreshed ${dateTime(data.generatedUtc)}`;
   summary.textContent=m?`${m.name} · ${plan?.objective||'Objective not declared'} · ${plan?.template||flight.research?.template||'General research'} · ${m.aircraft||'Aircraft unknown'} · ${m.mode} · Flight recording ${elapsed(m.startedUtc)} · ${m.sampleCount} flight samples`:'Start a flight to arm science or begin a session. Flight recording and scientific collection are separate.';
@@ -63,17 +65,18 @@ export function missionIntelligence(parent,api,{id='mission-intelligence',after=
   });
   if(eventMission!==m?.id){eventMission=m?.id;eventAfter=0;eventList.replaceChildren();more.hidden=!m;if(m)more.click();}
  }
- async function control(action){if(busy||!current?.collection?.state)return;const visible=current.collection.state,mission=visible.missionId;busy=true;for(const button of controls.values())button.disabled=true;
+ function invalidate(){generation++;markSensorOperatingStale(sensors,'Collection or configuration changed; waiting for current sensor evidence.');}
+ async function control(action){if(busy||!current?.collection?.state)return;const visible=current.collection.state,mission=visible.missionId;busy=true;invalidate();for(const button of controls.values())button.disabled=true;
   try{const fresh=await api(`/api/missions/${mission}/collection`);if(semantic(fresh.state)!==semantic(visible))throw Error('Science session or authority changed; no command was applied.');
    const request={version:1,missionId:mission,requestId:newIdentity(),expectedRevision:fresh.state.revision,expectedControlRevision:fresh.state.controlRevision??null,expectedSessionId:visible.currentSessionId??null,action,...(action==='pauseData'&&reason.value?{justification:reason.value}:{})};
    let result;try{result=await api(`/api/missions/${mission}/collection/control`,request);}catch(error){if(!(error instanceof TypeError))throw error;result=await api(`/api/missions/${mission}/collection/control`,request);}message.textContent=result.event.reason;
   }catch(error){message.textContent=error.message+' Synchronize and issue a new command if still intended.';}finally{busy=false;await refresh();}
  }
  async function refresh(){if(inflight||busy||disposed||document.hidden||!panel.offsetParent)return;inflight=true;const own=++generation;
-  try{const data=await api('/api/mission-intelligence');if(own===generation&&panel.isConnected)draw(data);}catch(error){if(own===generation){status.textContent='Mission state unavailable or stale: '+error.message;for(const button of controls.values())button.disabled=true;}}finally{inflight=false;}
+  try{const data=await api('/api/mission-intelligence');if(own===generation&&panel.isConnected)draw(data);}catch(error){if(own===generation){status.textContent='Mission state unavailable or stale: '+error.message;markSensorOperatingStale(sensors);for(const button of controls.values())button.disabled=true;}}finally{inflight=false;}
  }
  const wake=()=>refresh();window.addEventListener('hashchange',wake);document.addEventListener('visibilitychange',wake);
  const timer=setInterval(()=>{if(!panel.isConnected){dispose();return;}if(lastSuccess&&Date.now()-lastSuccess>6000){status.textContent='Mission state stale — reconnect before issuing collection commands.';for(const button of controls.values())button.disabled=true;}refresh();},2000);
  function dispose(){disposed=true;generation++;clearInterval(timer);window.removeEventListener('hashchange',wake);document.removeEventListener('visibilitychange',wake);}
- refresh();return {refresh,dispose};
+ refresh();return {refresh,dispose,invalidate};
 }

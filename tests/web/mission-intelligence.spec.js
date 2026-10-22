@@ -19,13 +19,13 @@ test('Control and touch-sized second browser share sessions, authority, genuine 
  expect(await other.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy();await other.close();
 });
 test('lost command reply retries the exact identity and session rather than applying an End twice',async({page,request})=>{
- const flight=await begin(request);await page.goto('/#control');const panel=page.locator('#mission-intelligence');await panel.getByRole('button',{name:'Start new science session',exact:true}).click();await expect(panel).toContainText('collecting');
+ const flight=await begin(request);await page.goto('/#control');const panel=page.locator('#mission-intelligence');await panel.getByRole('button',{name:'Start new science session',exact:true}).click();await expect(panel).toContainText('Science: collecting');
  const bodies=[];await page.route(`**/api/missions/${flight.id}/collection/control`,async route=>{bodies.push(route.request().postDataJSON());if(bodies.length===1){await route.fetch();await route.abort('failed');}else await route.continue();});
  await panel.getByRole('button',{name:'End current science session',exact:true}).click();await expect(panel).toContainText('betweenSessions');expect(bodies).toHaveLength(2);expect(bodies[1]).toEqual(bodies[0]);
  const saved=await(await request.get(`/api/missions/${flight.id}/collection`)).json();expect(saved.sessions).toHaveLength(1);expect(saved.sessions[0].status).toBe('ended');
 });
 test('delayed End for session A cannot end a new session B; reconnect clears stale disabled controls',async({page,request})=>{
- const flight=await begin(request);await page.goto('/#control');const panel=page.locator('#mission-intelligence');await panel.getByRole('button',{name:'Start new science session',exact:true}).click();await expect(panel).toContainText('collecting');
+ const flight=await begin(request);await page.goto('/#control');const panel=page.locator('#mission-intelligence');await panel.getByRole('button',{name:'Start new science session',exact:true}).click();await expect(panel).toContainText('Science: collecting');
  let release,seen;const arrived=new Promise(r=>seen=r);await page.route(`**/api/missions/${flight.id}/collection/control`,async route=>{seen();await new Promise(r=>release=r);await route.continue();});
  await panel.getByRole('button',{name:'End current science session',exact:true}).click();await arrived;
  async function control(action){const s=(await(await request.get(`/api/missions/${flight.id}/collection`)).json()).state;return post(request,`/api/missions/${flight.id}/collection/control`,{version:1,missionId:flight.id,requestId:crypto.randomUUID(),expectedRevision:s.revision,expectedSessionId:s.currentSessionId,action});}

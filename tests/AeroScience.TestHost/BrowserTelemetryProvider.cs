@@ -6,6 +6,8 @@ using AeroScience.Telemetry;
 public sealed class BrowserTelemetryProvider(int intervalMs) : ITelemetryProvider
 {
     private int remoteLocation;
+    private SensorTelemetryFixture? sensorFixture;
+    public SensorTelemetryFixture? SensorFixture { get=>Volatile.Read(ref sensorFixture);set=>Volatile.Write(ref sensorFixture,value); }
     public IDisposable UseRemoteFixtureLocation()
     {
         if (Interlocked.Exchange(ref remoteLocation, 1) != 0) throw new InvalidOperationException("Remote browser fixtures cannot overlap.");
@@ -15,6 +17,15 @@ public sealed class BrowserTelemetryProvider(int intervalMs) : ITelemetryProvide
     {
         await foreach (var update in new SimulatedTelemetryProvider(intervalMs, includeResearch: true).ReadAsync(cancellationToken))
         {
+            if(SensorFixture is {} fixture && update.Frame is {} original)
+            {
+                var at=DateTimeOffset.UtcNow.AddSeconds(-fixture.AgeSeconds);
+                var sensorFrame=original with{TimestampUtc=at,Latitude=40,Longitude=-75,AltitudeMslFeet=1000,AltitudeAglFeet=fixture.AltitudeAglFeet,
+                    PitchDegrees=fixture.PitchDegrees,BankDegrees=fixture.BankDegrees,GroundspeedKnots=fixture.GroundspeedKnots,IsPaused=fixture.Paused};
+                yield return update with{Frame=sensorFrame,Atmosphere=update.Atmosphere is {} air?air with{TimestampUtc=at}:null,
+                    Connection=update.Connection with{State=fixture.Disconnected?ConnectionState.Disconnected:ConnectionState.Connected}};
+                continue;
+            }
             // The test endpoint and periodic provider must describe the same location.
             // Otherwise a provider tick can take the first acquisition slot at the
             // default California position before the endpoint supplies its local packet.
@@ -26,3 +37,6 @@ public sealed class BrowserTelemetryProvider(int intervalMs) : ITelemetryProvide
     }
     private sealed class Scope(Action release) : IDisposable { public void Dispose() => release(); }
 }
+// Explicit synthetic test inputs; the production assessment, controller and source workers run unchanged.
+public sealed record SensorTelemetryFixture(double? AltitudeAglFeet=1000,double PitchDegrees=0,double BankDegrees=0,
+    double GroundspeedKnots=120,int AgeSeconds=0,bool Disconnected=false,bool Paused=false);
