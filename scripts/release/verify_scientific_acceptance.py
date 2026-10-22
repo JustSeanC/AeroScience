@@ -6,6 +6,8 @@ canonical LF source text so a clean Windows Git checkout has the same identity.
 import hashlib
 import json
 import xml.etree.ElementTree as ET
+import os
+import tempfile
 from pathlib import Path
 
 ROOT=Path(__file__).resolve().parents[2]
@@ -52,8 +54,50 @@ if tuple(map(int, VERSION.split('-')[0].split('.'))) >= (0,4,1):
 if tuple(map(int, VERSION.split('-')[0].split('.'))) >= (0,4,2):
     SOURCES += ['src/AeroScience.Missions/ScientificMapOverview.cs']
 
+if tuple(map(int, VERSION.split('-')[0].split('.'))) >= (0,5,0):
+    # Bind the actual 0.5 acquisition/catalog/jobs/NASA code and the evidence tools,
+    # not just the older automatic-provider subset. Never hash generated obj/bin files.
+    candidates = [ROOT/'Directory.Build.props', ROOT/'global.json']
+    for directory in ('src','tests/AeroScience.ProviderAcceptance'):
+        candidates += [p for p in (ROOT/directory).rglob('*') if p.suffix in ('.cs','.csproj') and not {'obj','bin'} & set(p.relative_to(ROOT).parts)]
+    candidates += list((ROOT/'scripts/release').glob('*scientific*acceptance.py'))
+    candidates += [ROOT/'scripts/release'/name for name in ('scientific_evidence.py','record_envi_acceptance.py','record_workspace_acceptance.py')]
+    candidates += [ROOT/'scripts/research'/name for name in ('verify_library_sources.py','verify_envi_originals.py','verify_nasa_originals.py','download_cuprite_acceptance.py')]
+    SOURCES = list(dict.fromkeys(SOURCES + sorted(p.relative_to(ROOT).as_posix() for p in candidates if p.is_file())))
+
 def source_digest(path):
     return hashlib.sha256(path.read_text(encoding='utf-8').replace('\r\n','\n').encode()).hexdigest()
+def source_hashes(root=ROOT):
+    return {name:source_digest(root/name) for name in SOURCES}
+def manifest_digest(hashes):
+    return hashlib.sha256(json.dumps(hashes,sort_keys=True,separators=(',',':')).encode()).hexdigest()
+def verify_provenance(value):
+    if tuple(map(int,VERSION.split('-')[0].split('.'))) < (0,5,0): return
+    if value.get('formatVersion')!=1 or value.get('version') != VERSION: raise ValueError('Scientific evidence format/version does not match this release.')
+    runs=value.get('runProvenance',[])
+    if not runs: raise ValueError('Execution-time scientific source provenance is missing.')
+    for run in runs:
+        if (run.get('status')!='passed' or len(run.get('sourceCommit',''))!=40 or
+            len(run.get('receiptSha256',''))!=64 or not run.get('runId') or
+            run.get('sourceManifestSha256')!=manifest_digest(value.get('canonicalLfSourceSha256',{}))):
+            raise ValueError('Scientific run provenance is incomplete or bound to different source files.')
+def write_verified(output,value,validator):
+    """Validate a temporary record before atomically replacing any canonical evidence."""
+    output=Path(output);output.parent.mkdir(parents=True,exist_ok=True)
+    temporary=None
+    local=None
+    try:
+        with tempfile.NamedTemporaryFile('w',encoding='utf-8',newline='\n',suffix='.json',delete=False) as stream:
+            temporary=Path(stream.name);json.dump(value,stream,indent=2);stream.write('\n')
+        validator(temporary)
+        # Stage on the destination filesystem for a real atomic replacement.
+        with tempfile.NamedTemporaryFile('wb',dir=output.parent,prefix='.'+output.name+'.',delete=False) as staged:
+            local=Path(staged.name)
+            staged.write(temporary.read_bytes());staged.flush();os.fsync(staged.fileno())
+        os.replace(local,output)
+    finally:
+        if local is not None: local.unlink(missing_ok=True)
+        if temporary is not None: temporary.unlink(missing_ok=True)
 def verify_guided_envi(report=None,root=ROOT):
     report=report or root/f'docs/research/v{VERSION}-guided-envi-acceptance.json'
     value=json.loads(report.read_text(encoding='utf-8'))
@@ -63,11 +107,16 @@ def verify_guided_envi(report=None,root=ROOT):
     hashes=value.get('canonicalLfSourceSha256',{})
     if set(hashes)!=set(SOURCES) or any(source_digest(root/name)!=sha for name,sha in hashes.items()):
         raise ValueError('Guided ENVI source changed since genuine import/product acceptance.')
+    verify_provenance(value)
     validation=value.get('validation',{})
     if value.get('bands',0)<16 or value.get('downloadedRangeBytes',0)<=0 or validation.get('validSamples',0)<=0 or len(validation.get('publishedProductSha256',''))!=64 or any(validation.get(k) is not True for k in ('automaticManifest','originalChannelsPreserved','originalFilesPreserved','offlineReopen','duplicateReused')):
         raise ValueError('Genuine guided ENVI import, retained originals, product and offline evidence are incomplete.')
+    if tuple(map(int,VERSION.split('-')[0].split('.'))) >= (0,5,0):
+        comparison=value.get('independentComparison',{})
+        if value.get('bands')!=224 or comparison.get('checkedGoodBands')!=170 or comparison.get('excludedBadBands')!=54 or comparison.get('maximumAbsoluteDifference')!=0:
+            raise ValueError('Pinned genuine Cuprite spectral comparison is incomplete; it is not Classic/NG original acceptance.')
     return value
-def verify(report=REPORT,root=ROOT,require_current=True):
+def verify_providers(report=REPORT,root=ROOT,require_current=True):
     value=json.loads(report.read_text(encoding='utf-8'))
     if value.get('evidenceType')=='pending-genuine-provider-network':
         raise ValueError('Current '+VERSION+' genuine online-provider acceptance is pending: '+str(value.get('finalNetworkRerunReason') or 'Run the bounded provider harness and record its actual results.'))
@@ -76,14 +125,25 @@ def verify(report=REPORT,root=ROOT,require_current=True):
     hashes=value.get('canonicalLfSourceSha256',{})
     if set(hashes)!=set(SOURCES) or any(source_digest(root/name)!=sha for name,sha in hashes.items()):
         raise ValueError('Automatic scientific source changed since genuine acceptance. Re-run the bounded network acceptance and update its factual report before distributing these claims.')
+    verify_provenance(value)
     results=value.get('workflows',[])
     if {r.get('workflow') for r in results}!=WORKFLOWS or len(results)!=len(WORKFLOWS):
         raise ValueError('Genuine acceptance must include USGS, Copernicus DEM, Landsat and Sentinel workflows.')
     for r in results:
         if not(r.get('passed') is True and r.get('networkBytes',0)>0 and r.get('validDerivedSamples',0)>0 and r.get('publishedProductVerified') is True and len(r.get('publishedProductSha256',''))==64 and r.get('sceneId') and r.get('bands') and r.get('flightInput')=='synthetic test position; not MSFS'):
             raise ValueError('Missing genuine discovery/retrieval/preparation/import/sampling/product evidence for '+str(r.get('workflow')))
+    if tuple(map(int,VERSION.split('-')[0].split('.'))) >= (0,5,0):
+        independent=value.get('independentComparison',{}).get('results',[])
+        if len(independent)!=4 or {r.get('provider') for r in independent}!=WORKFLOWS:raise ValueError('Four independent original numeric/QA comparisons are required.')
+        for result in results:
+            check=next(r for r in independent if r['provider']==result['workflow'])
+            if check.get('comparisons',0)<=0 or check.get('valid_derived_values')!=result['validDerivedSamples'] or check.get('source_hashes')!=[f['sha256'] for f in result.get('sourceFiles',[])]:
+                raise ValueError('Independent source/numeric results differ from the accepted workflow.')
     if require_current and value.get('finalNetworkRerun')!='passed':
         raise ValueError('Final automatic-provider network rerun is pending: '+(value.get('finalNetworkRerunReason') or 'See genuine provider report.'))
+    return value
+def verify(report=REPORT,root=ROOT,require_current=True):
+    value=verify_providers(report,root,require_current)
     verify_guided_envi(root=root)
     if tuple(map(int,VERSION.split("-")[0].split("."))) >= (0,4,0): verify_workspace(root=root)
     return value
@@ -94,6 +154,7 @@ def verify_workspace(report=None,root=ROOT):
     hashes=value.get('canonicalLfSourceSha256',{})
     if value.get('evidenceType')!='genuine-scientific-workspace' or value.get('windowsMsfs')!='not tested' or set(hashes)!=set(SOURCES) or any(source_digest(root/n)!=h for n,h in hashes.items()):
         raise ValueError('Current-source genuine workspace/composite evidence is missing or stale.')
+    verify_provenance(value)
     results=value.get('independentRasterResults',[])
     if len(results)<12 or any(r.get('nodataSupportMatches') is not True or r.get('nativeAffineAndCrsMatch') is not True or r.get('maximumAbsoluteDifference',1)>1e-9 for r in results):
         raise ValueError('Independent genuine raster value/grid/nodata comparisons are incomplete.')

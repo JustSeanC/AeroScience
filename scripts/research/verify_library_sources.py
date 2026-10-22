@@ -11,11 +11,12 @@ import rasterio
 from rasterio.warp import transform
 
 
-def verify(folder):
+def verify(folder,providers=False):
     folder = Path(folder)
-    evidence = json.loads((folder/'library.json').read_text(encoding='utf-8'))
+    evidence = json.loads((folder/('provider-acceptance.json' if providers else 'library.json')).read_text(encoding='utf-8'))
     results = []
     for item in evidence['results']:
+        if providers:item={**item,'provider':item['workflow']}
         source = item['source']
         root = folder/'ScienceLibrary'/source['relativeDirectory']
         for original in source['files']:
@@ -83,7 +84,8 @@ def verify(folder):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('folder', type=Path)
+    parser.add_argument('--providers',action='store_true',help='Check actual automatic-provider run receipts with the same independent numeric/QA rules.')
     args = parser.parse_args()
-    result = verify(args.folder)
-    (args.folder/'independent-library.json').write_text(json.dumps(result, indent=2)+'\n', encoding='utf-8')
+    result = verify(args.folder,args.providers)
+    (args.folder/('independent-numeric-comparison.json' if args.providers else 'independent-library.json')).write_text(json.dumps(result, indent=2)+'\n', encoding='utf-8')
     print(json.dumps(result, indent=2))

@@ -2,6 +2,15 @@ using System.Text.Json;
 using AeroScience.Missions;
 using AeroScience.Shared;
 
+if(args.Contains("--nasa-retained-source"))
+{
+    string Required(string name){var i=Array.IndexOf(args,name);return i>=0&&i+1<args.Length&&!args[i+1].StartsWith("--",StringComparison.Ordinal)?args[i+1]:throw new ArgumentException("Provide "+name+" with its explicit value.");}
+    var result=Path.GetFullPath(Required("--output"));
+    if(Directory.Exists(result))throw new IOException("Choose a new owner original-verification directory.");
+    Directory.CreateDirectory(result);
+    NasaOriginalAcceptance.Run(Required("--nasa-retained-source"),Required("--nasa-family"),result);
+    return;
+}
 // Explicit opt-in network acceptance. These are real provider downloads, never
 // replaced with synthetic rasters or mocked catalogs when a provider fails.
 if(!args.Contains("--network"))throw new ArgumentException("Pass --network to authorize bounded real provider queries/downloads for public test areas.");
@@ -23,11 +32,11 @@ var output=Path.GetFullPath(args.SkipWhile(a=>a!="--output").Skip(1).FirstOrDefa
 if(Directory.Exists(output)&&Directory.EnumerateFileSystemEntries(output).Any())throw new IOException("Use a new empty acceptance output directory; existing data was not changed.");
 Directory.CreateDirectory(output);var library=Path.Combine(output,"ScienceLibrary");Directory.CreateDirectory(library);
 PreferenceStore.WriteAtomic(Path.Combine(library,StorageManager.LibraryManifest),new{formatVersion=1,libraryId=Guid.NewGuid()});
-var missions=new MissionStore(Path.Combine(output,"missions.db"));missions.Initialize();var science=new ScienceStore(library);science.Initialize();
+var missions=new MissionStore(Path.Combine(output,"missions.db"));missions.Initialize();using var science=new ScienceStore(library);science.Initialize();
 missions.ScienceLibrary=science;
 var management=new StorageManagement(output,missions,science);science.Management=management;
 var settings=new ScientificAccessSettings(output,()=>true);settings.Save(new(true,true,MaximumDownloadBytes:67108864,PreferredDateUtc:DateTimeOffset.Parse("2024-09-10T00:00:00Z"),LookbackDays:120));
-if(args.Contains("--envi")){await GuidedEnviAcceptance.Run(args[Array.IndexOf(args,"--envi")+1],output,science,missions);if(args.Contains("--workspace"))await WorkspaceAcceptance.Run(output,science,missions,true);return;}
+if(args.Contains("--envi")){await GuidedEnviAcceptance.Run(args[Array.IndexOf(args,"--envi")+1],output,science,missions,args.Contains("--workspace"));return;}
 if(args.Contains("--review-from")){await ReviewAcceptance.Run(args[Array.IndexOf(args,"--review-from")+1],output);return;}
 if(args.Contains("--concurrency")){await ConcurrencyAcceptance.Run(output);return;}
 if(args.Contains("--benchmark")){await RegionalBenchmark.Run(output,args);return;}

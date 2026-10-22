@@ -8,4 +8,9 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5"><PrivateAssets>all</PrivateAssets></PackageReference>
   </ItemGroup>
   <ItemGroup><None Update="ProviderMetadata/*.json" CopyToOutputDirectory="PreserveNewest" /></ItemGroup>
+  <ItemGroup>
+    <Compile Include="../AeroScience.ProviderAcceptance/GuidedEnviAcceptance.cs" Link="Acceptance/GuidedEnviAcceptance.cs" />
+    <Compile Include="../AeroScience.ProviderAcceptance/WorkspaceAcceptance.cs" Link="Acceptance/WorkspaceAcceptance.cs" />
+    <Compile Include="../AeroScience.ProviderAcceptance/NasaOriginalAcceptance.cs" Link="Acceptance/NasaOriginalAcceptance.cs" />
+  </ItemGroup>
 </Project>
