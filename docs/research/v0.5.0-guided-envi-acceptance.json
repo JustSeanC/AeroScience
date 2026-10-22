@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "version": "0.5.0",
   "evidenceType": "genuine-downloaded-envi",
-  "checkedUtc": "2026-10-22T23:06:00.72464+00:00",
+  "checkedUtc": "2026-10-22T23:32:40.7988603+00:00",
   "windowsMsfs": "not tested",
   "firstTimeUser": "not tested",
   "flightInput": "synthetic test position; not MSFS",
@@ -63,12 +63,12 @@
     "originalFilesPreserved": true,
     "offlineReopen": true,
     "duplicateReused": true,
-    "publishedProductSha256": "3f1768f07b58f8d2f150cd79993a05d282174c3ca47576dd19e109ea2b446332",
+    "publishedProductSha256": "d3d11f7c4b5273cd8a7087e345a383f064c9c2dd9490e2de57f1adccaf0e9a56",
     "validSamples": 97920
   },
   "independentComparison": {
     "evidenceType": "independent-genuine-envi-comparison",
-    "checkedUtc": "2026-10-22T23:06:02.350057+00:00",
+    "checkedUtc": "2026-10-22T23:32:42.272284+00:00",
     "tool": "rasterio 1.4.3 / GDAL 3.9.3",
     "checkedGoodBands": 170,
     "excludedBadBands": 54,
@@ -88,7 +88,7 @@
     "src/AeroScience.Shared/RemoteSensingModels.cs": "137ee510c8cf3c3971f7a158c593ecab589bcaee22c2c58ed3a2fde436cf0e73",
     "src/AeroScience.Shared/ScientificAccessModels.cs": "cbd7325b0b3dd99274f4484c1317fddc2d13902dacbe65dce211b3cb9dc6e152",
     "tests/AeroScience.ProviderAcceptance/Program.cs": "3ceecc3436f820c7e52314661134d2b69b9a407a32c72f5f0f128f8375e4f94b",
-    "tests/AeroScience.ProviderAcceptance/GuidedEnviAcceptance.cs": "420966d560061316c23fd4e4c422699a0f93c8d3ede05733655d522517a97d1f",
+    "tests/AeroScience.ProviderAcceptance/GuidedEnviAcceptance.cs": "9c5e19b3d5a8beded71cf96e75100eedcf1ebf2fffcf6fb0ef2fad4a4819eac8",
     "src/AeroScience.Missions/HyperspectralImport.cs": "a7423a2f10059dce039382e196b91375f96f5d52471dd005853f91758387d928",
     "src/AeroScience.Missions/GuidedScientificImport.cs": "236524e6eef0c86b77316d4a262ba2186e0aa69f2f8b3ebeac22575be6c196a7",
     "src/AeroScience.Missions/ScientificPrediction.cs": "a497a0772873b97fd4e5b785a5d8df856b2bac096ef225baa074720c963909ee",
@@ -264,15 +264,15 @@
   },
   "runProvenance": [
     {
-      "runId": "c9bfec61-7787-47f8-85b9-d137e7065c1d",
+      "runId": "c4b5b775-3b4d-4faf-a575-95ea4bbafccf",
       "status": "passed",
-      "sourceCommit": "ba96a672bd1eed65ac6ad0c26ab2649beac120fa",
-      "sourceManifestSha256": "228ca971ff3213faa7381e85902243f6acccfef97e4698353c300caccde8bbf0",
-      "receiptSha256": "ec8a7e8f2748112b1a5cc64511373f9ecabcffd55940ad8f643948756cf5854b"
+      "sourceCommit": "111e9e96e82ba8039b1239b1b29cbe6c1d4954a5",
+      "sourceManifestSha256": "05ef51e1d5acc22316d724041e5cf8a314851012c54fd61e0e20595bf33fa96c",
+      "receiptSha256": "73e99cdac8d6f93a2c685d3fbf913dec794ee6fb9f75daf75f0e3214d38631f1"
     }
   ],
   "notes": "Actual public ENVI originals imported and sampled through production source/product pipeline. Original detector channels retained; 54 original bad bands excluded. Unknown acquisition date retained. No Windows/MSFS flight or uncoached-user acceptance asserted. Data files are not redistributed.",
-  "artifactSha256": "0a0b93ef7642737320977e81a02a12c88cf477860ac59c33625ce1d9e9fdcd29",
+  "artifactSha256": "a8f97538e8c6ce3c2c118323ad7e03af0a9c8dda0d6eee0ad7a59af8fd6eb1ac",
   "downloadedRangeBytes": 98717996,
   "downloadReceiptSha256": "254a29682d7a5031f2d95ac0600e3d9aee377afed54fad277ae830a56e1d2861"
 }
