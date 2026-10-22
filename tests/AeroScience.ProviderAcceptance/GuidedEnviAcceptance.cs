@@ -30,6 +30,7 @@ internal static class GuidedEnviAcceptance
         // Reopen the stored library without network access and revalidate the retained source/product.
         science.Dispose();
         using var reopened=new ScienceStore(science.DirectoryPath);reopened.Initialize();missions.ScienceLibrary=reopened;
+        reopened.Management=new StorageManagement(output,missions,reopened);
         var retained=reopened.Availability(center).Single(s=>s.Source.Id==source.Id);if(!retained.FilesAvailable||retained.CoversPoint!=true)throw new IOException("Offline source reuse failed.");
         var recovered=reopened.ReadProduct(product.Id);
         if(recovered.Product.Sha256!=product.Sha256||!JsonSerializer.Serialize(recovered,WireJson.Options).Equals(JsonSerializer.Serialize(data,WireJson.Options),StringComparison.Ordinal))throw new IOException("Offline product evidence changed.");
