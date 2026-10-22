@@ -65,6 +65,14 @@ yield to active flight work. Paused/cancelled plan preparation does not silently
 After End Flight, unfinished plan work waits for **Continue preparation for a future flight**.
 Late source arrival never backfills a missed live scientific observation.
 
+When you select **Start Mission**, incomplete external preparation shows **Some Scientific
+Data Is Not Ready**. The advisory separates the full mission inventory from First Half or
+Custom Areas and labels unassessed/stale/unavailable counts honestly. **Start Mission Anyway**
+uses the normal recording checks without changing preparation or source choices. **View Data
+Preparation** opens the existing activity page; **Continue Setup**, X and Escape return without
+recording. Fully ready plans need no extra confirmation. Starting a flight or science session
+does not guarantee valid measurements everywhere; upcoming retrieval remains conditional.
+
 ## Progress and time estimates
 
 Download Activity displays **each plan's complete instrument × region inventory**, including in

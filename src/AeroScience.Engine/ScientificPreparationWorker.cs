@@ -22,6 +22,8 @@ public sealed record PreparationInstrument(string InstrumentId,string Name,strin
 public sealed record PreparationRegion(string Key,RemoteKind Kind,GeographicBounds Area,string Status="Queued",string Message="Waiting for preparation",long DownloadedBytes=0,long ReusedBytes=0,string Stage="Queued",DateTimeOffset? UpdatedUtc=null,long PreviousAttemptBytes=0,bool Selected=true,Guid? SourceId=null);
 public sealed record PlanInstrumentInventory(Guid PlanId,DateTimeOffset? PlanRevision,PreparationInstrument[] Instruments);
 public sealed record PreparationActivity(ScientificPlanReadiness[] Plans,PlanInstrumentInventory[] Inventories);
+public sealed record MissionStartReadiness(Guid PlanId,string PlanRevision,DateTimeOffset? PlanUpdatedUtc,DateTimeOffset CheckedUtc,
+    string Status,string Message,ScientificPlanReadiness? Preparation=null,PreparationInstrument[]? Instruments=null);
 public sealed class ScientificPlanData
 {
     private sealed record SavedSession(MissionPlan Plan,bool Paused,bool Cancelled,bool Explicit,PreparationRegion[] Regions,PreflightScope? Scope=null,bool AfterFlight=false,bool InFlight=false,bool PlanStale=false,int Version=1);
@@ -138,6 +140,22 @@ public sealed class ScientificPlanData
         }
     }
     public PreparationActivity Activity(){lock(gate)return new(Snapshot(),sessions.Values.Select(s=>new PlanInstrumentInventory(s.Plan.Id,s.Plan.UpdatedUtc,Instruments(s.Plan.Id))).ToArray());}
+    // Read-only full-plan projection. Never schedule preparation or derive denominators from recent jobs.
+    public MissionStartReadiness StartReadiness(MissionPlan plan)
+    {
+        var revision=ScientificPreparationScope.Revision(plan);var now=DateTimeOffset.UtcNow;
+        MissionStartReadiness Unknown(string status,string message)=>new(plan.Id,revision,plan.UpdatedUtc,now,status,message);
+        lock(gate){
+            if(ScientificPlanPreparation.Kinds(plan).Length==0)return Unknown("NotRequired","No external-data instruments are planned. Normal science-session and recording requirements still apply.");
+            if(Warning is not null)return Unknown("Unavailable",Warning);
+            if(automatic.AvailabilityError is {} error)return Unknown("Unavailable",error);
+            if(!sessions.TryGetValue(plan.Id,out var session))return Unknown("NotAssessed","No scientific preparation assessment exists for this plan. Ready and outstanding counts are Unknown.");
+            if(session.PlanStale||ScientificPreparationScope.Revision(session.Plan)!=revision)return Unknown("Stale","Preparation belongs to an older plan revision. Its counts are not current; review preparation for this saved plan.");
+            var projection=Snapshot().Single(p=>p.PlanId==plan.Id);var instruments=Instruments(plan.Id);
+            return new(plan.Id,revision,plan.UpdatedUtc,now,projection.Awaiting==0&&projection.Unavailable==0&&instruments.Sum(i=>i.Total)>0?"Ready":"Incomplete",
+                "Current complete planned instrument-region inventory. Prepared source support does not guarantee valid measurements at every pixel.",projection,instruments);
+        }
+    }
     public ScientificPlanReadiness[] Snapshot()
     {
         lock(gate)return sessions.Values.Select(s=>{

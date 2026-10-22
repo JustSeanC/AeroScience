@@ -4,6 +4,7 @@ import {readSuccessResponse} from './http-response.js';
 import {scienceWorkspace,disposeScienceWorkspace} from './science-workspace.js';
 import {helpCenter,disposeHelpCenter} from './help-center.js';
 import {missionSelection} from './mission-selection.js';
+import {startMissionWithReadiness} from './mission-start-advisory.js';
 import {scientificLibrary,disposeScientificLibrary} from './scientific-library.js';
 import {downloadWorkspace,disposeDownloadWorkspace} from './download-workspace.js';
 import {initializeWorkstationShell,streamlineMissionControl} from './workstation-shell.js';
@@ -265,7 +266,7 @@ function render(state) {
     }
   } else clearTelemetry();
   $("start-button").disabled =
-    !fresh || state.connection.state !== "connected" || !!t?.isPaused;
+    starting || !fresh || state.connection.state !== "connected" || !!t?.isPaused;
   const mission = state.activeMission;
   $("mission-idle").hidden = !!mission;
   $("mission-active").hidden = !mission;
@@ -305,20 +306,24 @@ async function command(button, operation) {
     button.disabled = false;
   }
 }
+let starting=false;
+const launchInputs=()=>({name:$("mission-name").value,mode:$("mission-mode").value,
+  planId:$("selected-plan")?.value||null,armScience:$("arm-science")?.checked||false});
 $("start-form").addEventListener("submit", (event) => {
   event.preventDefault();
+  if(starting)return;
+  starting=true;
+  const startHash=location.hash;
   command($("start-button"), async () => {
-    await api("/api/missions", {
-      name: $("mission-name").value,
-      mode: $("mission-mode").value,
-      planId: $("selected-plan")?.value || null,
-      armScience: $("arm-science")?.checked || false,
-    });
+    try{
+    const mission=await startMissionWithReadiness(api,launchInputs(),{readLaunch:launchInputs,opener:$("start-button")});
+    if(!mission)return;
     $("mission-name").value = "";
     $("mission-mode").value = "universal";
     $("mode-help").textContent = modeHelp("universal");
     render(await api("/api/state"));
-  });
+    }finally{starting=false;if(current)render(current);}
+  }).then(()=>{if(current)render(current);if(location.hash===startHash&&!current?.activeMission&&!document.querySelector("dialog[open]"))$("start-button").focus({preventScroll:true});});
 });
 $("mission-mode").addEventListener("change", () => {
   $("mode-help").textContent = modeHelp($("mission-mode").value);

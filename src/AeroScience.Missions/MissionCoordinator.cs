@@ -145,7 +145,10 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
         {
             if (maintenance) throw new InvalidOperationException("Storage/settings maintenance is in progress. Try again after it completes.");
             if (active is not null) throw new InvalidOperationException("A mission is already recording.");
+            if(request.CheckSelectedPlan&&SelectedPlan()!=request.PlanId)throw new InvalidOperationException("The selected mission plan changed. Review the current selection before starting.");
             var plan = request.PlanId is { } planId ? store.Plan(planId) ?? throw new ArgumentException("Saved mission plan not found.") : null;
+            if(request.ExpectedPlanRevision is not null&&(plan is null||ScientificComposites.Identity(plan)!=request.ExpectedPlanRevision))
+                throw new InvalidOperationException("The saved mission plan changed. Review its current revision before starting.");
             if (plan is not null) mode = plan.Mode;
             var configurations = InstrumentProfiles.Freeze(ScienceCatalog.Normalize(request.Instruments ?? plan?.Instruments ?? research?.Configurations));
             try { ensureRecordingCapacity?.Invoke(); }

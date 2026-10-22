@@ -80,6 +80,16 @@ app.MapPost("/api/testing/preparation/local",async(ScienceStore science,Automati
     var manifest=new ScientificSourceManifest(1,"SYNTHETIC 204-region reuse fixture",RemoteKind.Terrain,"Isolated browser fixture","Synthetic only","Not genuine scientific acceptance","synthetic-preparation-cell",DateTimeOffset.Parse("2020-01-01T00:00:00Z"),"Unknown",[new("elevation","elevation.tif","geotiff",Unit:"m")]);
     var source=await science.ImportSourceAsync(manifest,folder);automatic.RefreshLocalReadiness();return new{sourceId=source.Id,synthetic=true};
 });
+app.MapPost("/api/testing/preparation/advisory-source",async(ScienceStore science,AutomaticScientificData automatic)=>{
+    var folder=Path.Combine(options.DataDirectory,"synthetic-advisory-original-"+Guid.NewGuid().ToString("N"));Directory.CreateDirectory(folder);
+    RemoteFixtureFiles.GeoTiff(Path.Combine(folder,"elevation.tif"),123.25f,size:128,pixel:.00065625,west:-75.001,north:40.041);
+    var manifest=new ScientificSourceManifest(1,"SYNTHETIC readiness advisory fixture",RemoteKind.Terrain,"Isolated browser fixture","Synthetic only","Not genuine scientific acceptance","synthetic-advisory-window",DateTimeOffset.Parse("2020-01-01T00:00:00Z"),"Unknown",[new("elevation","elevation.tif","geotiff",Unit:"m")]);
+    var source=await science.ImportSourceAsync(manifest,folder);automatic.RefreshLocalReadiness();return new{sourceId=source.Id,synthetic=true};
+});
+IDisposable? startMaintenance=null;
+app.MapPost("/api/testing/start/maintenance/{enabled:bool}",(bool enabled,MissionCoordinator coordinator)=>{
+    if(enabled)startMaintenance??=coordinator.EnterMaintenance();else{startMaintenance?.Dispose();startMaintenance=null;}return new{synthetic=true,maintenance=startMaintenance is not null};
+});
 app.MapPost("/api/testing/maps/new-install",()=>{File.Delete(Path.Combine(options.ConfigurationDirectory??options.DataDirectory,"maps.json"));return new {reset=true};});
 app.MapPost("/api/testing/workstation",async(WorkstationFixtureRequest request,ScienceStore science,MissionStore missions,MissionCoordinator coordinator,BrowserTelemetryProvider provider)=>
 {

@@ -76,6 +76,22 @@ public sealed class ApiTests : IAsyncLifetime
         Assert.Equal(403,remote.Response.StatusCode);Assert.Single(science.Sources());
     }
     private sealed class KnownRequestBody:Microsoft.AspNetCore.Http.Features.IHttpRequestBodyDetectionFeature {public bool CanHaveBody=>true;}
+    [Fact]public async Task MissionStartReadinessIsAuthenticatedReadOnlyAndChecksPlanRevisionAtStartup()
+    {
+        var store=factory.Services.GetRequiredService<MissionStore>();var plans=factory.Services.GetRequiredService<ScientificPlanData>();
+        var automatic=factory.Services.GetRequiredService<AutomaticScientificData>();automatic.Pause(true);
+        var plan=store.SavePlan(PreparationScopeTests.LongPlan());
+        Assert.Equal(HttpStatusCode.Unauthorized,(await client.GetAsync($"/api/plans/{plan.Id}/preparation/start-readiness")).StatusCode);
+        await Pair(client);var unknown=await client.GetFromJsonAsync<MissionStartReadiness>($"/api/plans/{plan.Id}/preparation/start-readiness",WireJson.Options);Assert.Equal("NotAssessed",unknown!.Status);Assert.Null(unknown.Preparation);Assert.Empty(automatic.Snapshot());
+        plans.Prepare(plan,true);var ready=await client.GetFromJsonAsync<MissionStartReadiness>($"/api/plans/{plan.Id}/preparation/start-readiness",WireJson.Options);Assert.Equal(408,ready!.Preparation!.Awaiting);Assert.All(ready.Instruments!,i=>Assert.Equal(204,i.Total));
+        var revision=await client.GetFromJsonAsync<JsonElement>($"/api/plans/{plan.Id}/revision");Assert.Equal(ready.PlanRevision,revision.GetProperty("planRevision").GetString());
+        var coordinator=factory.Services.GetRequiredService<MissionCoordinator>();coordinator.SelectPlan(plan.Id);
+        var request=new StartMissionRequest("Incomplete API flight",PlanId:plan.Id,ArmScience:true,ExpectedPlanRevision:ready.PlanRevision,CheckSelectedPlan:true);
+        var bad=await client.PostAsJsonAsync("/api/missions",request with{ExpectedPlanRevision=new string('0',64)},WireJson.Options);Assert.Equal(HttpStatusCode.Conflict,bad.StatusCode);Assert.Empty(store.List(20));
+        var access=factory.Services.GetRequiredService<AccessControl>();var paired=access.Pair(false,access.PairingCode)!;
+        var remote=await factory.Server.SendAsync(context=>{context.Connection.RemoteIpAddress=IPAddress.Parse("192.168.1.40");context.Request.Scheme="http";context.Request.Host=new("localhost",5080);context.Request.Method="GET";context.Request.Path=$"/api/plans/{plan.Id}/preparation/start-readiness";context.Request.Headers.Cookie=access.SessionCookieName+"="+paired.Token;});Assert.Equal(200,remote.Response.StatusCode);
+        var created=await client.PostAsJsonAsync("/api/missions",request,WireJson.Options);Assert.Equal(HttpStatusCode.Created,created.StatusCode);Assert.Single(store.List(20));Assert.Equal(408,plans.StartReadiness(plan).Preparation!.Awaiting);
+    }
     [Fact] public async Task MissionIntelligenceUsesAuthenticatedReadOnlyEvidenceAndBoundedPages()
     {
         Assert.Equal(HttpStatusCode.Unauthorized,(await client.GetAsync("/api/mission-intelligence")).StatusCode);
