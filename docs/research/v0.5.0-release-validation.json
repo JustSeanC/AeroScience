@@ -2,43 +2,43 @@
   "formatVersion": 1,
   "version": "0.5.0",
   "evidenceType": "genuine-scientific-release-engineering",
-  "sourceCommit": "ba96a672bd1eed65ac6ad0c26ab2649beac120fa",
-  "sourceManifestSha256": "228ca971ff3213faa7381e85902243f6acccfef97e4698353c300caccde8bbf0",
+  "sourceCommit": "111e9e96e82ba8039b1239b1b29cbe6c1d4954a5",
+  "sourceManifestSha256": "05ef51e1d5acc22316d724041e5cf8a314851012c54fd61e0e20595bf33fa96c",
   "runProvenance": {
     "providers": {
-      "runId": "3749efe7-8d6f-4d9a-a479-23a0a8104654",
+      "runId": "bfa7e5cd-b383-4017-a55b-8319087390ac",
       "status": "passed",
-      "sourceCommit": "ba96a672bd1eed65ac6ad0c26ab2649beac120fa",
-      "sourceManifestSha256": "228ca971ff3213faa7381e85902243f6acccfef97e4698353c300caccde8bbf0",
-      "receiptSha256": "3f45b601293d07f96c33207a341468a7b614f1187d22b6b6b7cc8d3e7441939a"
+      "sourceCommit": "111e9e96e82ba8039b1239b1b29cbe6c1d4954a5",
+      "sourceManifestSha256": "05ef51e1d5acc22316d724041e5cf8a314851012c54fd61e0e20595bf33fa96c",
+      "receiptSha256": "dc6080c1b218f8d0418d101c901e4dd22d0999b1e83593d5f96bc6ba15d503ea"
     },
     "envi": {
-      "runId": "c9bfec61-7787-47f8-85b9-d137e7065c1d",
+      "runId": "c4b5b775-3b4d-4faf-a575-95ea4bbafccf",
       "status": "passed",
-      "sourceCommit": "ba96a672bd1eed65ac6ad0c26ab2649beac120fa",
-      "sourceManifestSha256": "228ca971ff3213faa7381e85902243f6acccfef97e4698353c300caccde8bbf0",
-      "receiptSha256": "ec8a7e8f2748112b1a5cc64511373f9ecabcffd55940ad8f643948756cf5854b"
+      "sourceCommit": "111e9e96e82ba8039b1239b1b29cbe6c1d4954a5",
+      "sourceManifestSha256": "05ef51e1d5acc22316d724041e5cf8a314851012c54fd61e0e20595bf33fa96c",
+      "receiptSha256": "73e99cdac8d6f93a2c685d3fbf913dec794ee6fb9f75daf75f0e3214d38631f1"
     },
     "library": {
-      "runId": "e4f2aee6-24b7-47fa-9a8c-cf38226e9540",
+      "runId": "5743c1cc-ed88-4041-a333-baefdd21b558",
       "status": "passed",
-      "sourceCommit": "ba96a672bd1eed65ac6ad0c26ab2649beac120fa",
-      "sourceManifestSha256": "228ca971ff3213faa7381e85902243f6acccfef97e4698353c300caccde8bbf0",
-      "receiptSha256": "517a8717de2e3a49c725f4d3174478ef7e60f0134d20d457e2ec047feab81bc2"
+      "sourceCommit": "111e9e96e82ba8039b1239b1b29cbe6c1d4954a5",
+      "sourceManifestSha256": "05ef51e1d5acc22316d724041e5cf8a314851012c54fd61e0e20595bf33fa96c",
+      "receiptSha256": "acc8fce40ad8668208824817cc89bd09cbbbe27d20b5884256bc6eb2faf01160"
     },
     "nasa-metadata": {
-      "runId": "488aa6f9-6284-4424-a14b-d2767abab952",
+      "runId": "fddfbe5e-ecae-4f06-85ec-a4db61e48dc0",
       "status": "passed",
-      "sourceCommit": "ba96a672bd1eed65ac6ad0c26ab2649beac120fa",
-      "sourceManifestSha256": "228ca971ff3213faa7381e85902243f6acccfef97e4698353c300caccde8bbf0",
-      "receiptSha256": "c10e419ac44e0c9af183f3abc2b1d5f5d3c05c0fa57bafd1a6422da29ce38e8e"
+      "sourceCommit": "111e9e96e82ba8039b1239b1b29cbe6c1d4954a5",
+      "sourceManifestSha256": "05ef51e1d5acc22316d724041e5cf8a314851012c54fd61e0e20595bf33fa96c",
+      "receiptSha256": "9cbafe1245c9a85c2f50132526fc9304fed269c9a6832a8b76cb5eff46141d2c"
     },
     "offline-library": {
-      "runId": "e4e86e24-a6da-4cf5-823d-1a301691ac34",
+      "runId": "007e3eae-1cf6-4cba-9123-465f393cd5cf",
       "status": "passed",
-      "sourceCommit": "ccac0d23ca129573fcce5a8d6ecdd3df72a6f948",
-      "sourceManifestSha256": "228ca971ff3213faa7381e85902243f6acccfef97e4698353c300caccde8bbf0",
-      "receiptSha256": "b7be9cc9f59e5d3b3f09311c7bf351c38b8187f533d13cf2f93a2b8752788db8"
+      "sourceCommit": "fb4e664d32e7d96b5b3acff29f090d948a9902c0",
+      "sourceManifestSha256": "05ef51e1d5acc22316d724041e5cf8a314851012c54fd61e0e20595bf33fa96c",
+      "receiptSha256": "9d2a94103e8305c71c7dba7407a27c82f4189c4405b4c3d3a1bed5bb73e2f24b"
     }
   },
   "scientificGateResult": "passed",
@@ -46,7 +46,7 @@
   "physicalIpadQuest": "not tested",
   "library": {
     "independentComparison": {
-      "checked_utc": "2026-10-22T23:08:11.553466+00:00",
+      "checked_utc": "2026-10-22T23:34:45.944654+00:00",
       "method": "Independent GDAL/rasterio CRS, affine, native numeric scaling and QA comparison; documented 1e-8-pixel boundary snap, unchanged 1e-9 value tolerance",
       "results": [
         {
@@ -97,7 +97,7 @@
       {
         "provider": "usgs-3dep",
         "scene": "3DEP--75,40,-74.98,40.02",
-        "sourceId": "fe1776f8-e1ca-42cd-a56e-c3f5acb47f5d",
+        "sourceId": "1cb974db-248a-4c17-9c54-cdb31f18990d",
         "observedUtc": null,
         "qaValidDerivedValues": 576,
         "verifiedReuseNetworkBytes": 0
@@ -105,7 +105,7 @@
       {
         "provider": "copernicus",
         "scene": "Copernicus_DSM_COG_10_N46_00_E008_00_DEM",
-        "sourceId": "c0e670dc-e1b7-409d-b0c8-639c3862b12e",
+        "sourceId": "c6464844-cc01-435c-88a2-c549e81cf2d8",
         "observedUtc": null,
         "qaValidDerivedValues": 576,
         "verifiedReuseNetworkBytes": 0
@@ -113,7 +113,7 @@
       {
         "provider": "landsat",
         "scene": "LC08_L2SP_014032_20240903_02_T1",
-        "sourceId": "2f5a50f0-564d-444c-a2c4-531e0ca736af",
+        "sourceId": "92e2f7f5-2298-4382-87cb-7ead70d5c307",
         "observedUtc": "2024-09-03T15:39:44.650124+00:00",
         "qaValidDerivedValues": 576,
         "verifiedReuseNetworkBytes": 0
@@ -121,19 +121,19 @@
       {
         "provider": "sentinel-2",
         "scene": "S2A_18TWK_20240903_0_L2A",
-        "sourceId": "80f3b477-f35a-4136-885d-5b8543d24a5d",
+        "sourceId": "22a2d016-5d3a-448b-b0dd-13d9979ae7cb",
         "observedUtc": "2024-09-03T15:52:05.578+00:00",
         "qaValidDerivedValues": 183,
         "verifiedReuseNetworkBytes": 0
       }
     ],
-    "censusRegionArtifactSha256": "38c27ab0201ac1cf70c47ddc692f1f96441b2728c2fe55065d2ee13ae6621a7f",
-    "paginationArtifactSha256": "b9f28e5484ae087b087caf49887a51ac6dcd6ec119e0219efe5f371dc5b5767c",
+    "censusRegionArtifactSha256": "c60ccd2f79509cd8f378a24880ed3f34a20af950d00c41f7d87de4d801ab57fe",
+    "paginationArtifactSha256": "32bbd981aa8127c6689780be4c9a04519741af8387a397c54fa1f288b551ec57",
     "missionObservationsCreated": 0
   },
   "nasaMetadata": {
     "source": "Official NASA CMR via production ScientificCatalog/ScientificHttp",
-    "checkedUtc": "2026-10-22T23:08:22.415158+00:00",
+    "checkedUtc": "2026-10-22T23:35:11.0144803+00:00",
     "results": [
       {
         "provider": "nasa-classic",
@@ -143,7 +143,7 @@
         "firstPageItems": 1,
         "nextPageStatus": "Available",
         "emptyResultStatus": "No match",
-        "cachedAsOfUtc": "2026-10-22T23:08:14.1210936+00:00"
+        "cachedAsOfUtc": "2026-10-22T23:34:50.7378675+00:00"
       },
       {
         "provider": "nasa-ng",
@@ -153,7 +153,7 @@
         "firstPageItems": 1,
         "nextPageStatus": "Available",
         "emptyResultStatus": "No match",
-        "cachedAsOfUtc": "2026-10-22T23:08:17.0970749+00:00"
+        "cachedAsOfUtc": "2026-10-22T23:35:01.5250847+00:00"
       },
       {
         "provider": "nasa-emit",
@@ -163,29 +163,14 @@
         "firstPageItems": 1,
         "nextPageStatus": "Available",
         "emptyResultStatus": "No match",
-        "cachedAsOfUtc": "2026-10-22T23:08:19.0294049+00:00"
+        "cachedAsOfUtc": "2026-10-22T23:35:06.2372715+00:00"
       }
     ],
     "numericAcceptance": "Not established by catalog metadata; original authorized Classic and NG distributions remain independently pending. EMIT discovery only."
   },
-  "rawEvidenceRetention": "Original files, local databases, raw numerical samples, sealed receipts and logs retained outside the checkout; not redistributed in Git or release assets.",
-  "canonicalRecords": [
-    {
-      "path": "docs/research/v0.5.0-automatic-provider-acceptance.json",
-      "sha256": "343297a8b61b427bc931b8f52e8c097b48fe09bdeb7d78e193c15d5db9e3e295"
-    },
-    {
-      "path": "docs/research/v0.5.0-guided-envi-acceptance.json",
-      "sha256": "97336505de0961b3706d9e46d4570bdbb3d330da97807c9e236e4d1028bbe85a"
-    },
-    {
-      "path": "docs/research/v0.5.0-workspace-acceptance.json",
-      "sha256": "d7e27eaa49ecc9d42ed83ad51ce34055522e09ea504466a77a51a0715e79851b"
-    }
-  ],
   "offlineLibrary": {
     "evidenceType": "genuine-retained-public-data-offline",
-    "checkedUtc": "2026-10-22T23:12:58.4801256+00:00",
+    "checkedUtc": "2026-10-22T23:35:50.6218825+00:00",
     "scientificNetworkConsent": "disabled",
     "networkAcceptance": "not established by this offline run",
     "flightInput": "synthetic test position",
@@ -197,7 +182,7 @@
         "validSamples": 183,
         "networkBytes": 0,
         "readinessNetworkBytes": 0,
-        "publishedProductSha256": "d14ca7bd80d5463fc2bf9cd22032b72fe742ac1f6593c16c2f9eba8d8f76684f",
+        "publishedProductSha256": "715b5f1367504be9567c55cdd5df5888d6779bfc49170792a17185a62d9dffdd",
         "originalFiles": [
           {
             "relativePath": "B02.tif",
@@ -233,7 +218,7 @@
         "validSamples": 576,
         "networkBytes": 0,
         "readinessNetworkBytes": 0,
-        "publishedProductSha256": "852b52d227ccff61092efb25a98b25a1abde164ff027acceff18706797bd4329",
+        "publishedProductSha256": "e87776c27ac0066a79e22347e6c3536c52bb39310694b8b4d3e959a056686243",
         "originalFiles": [
           {
             "relativePath": "ST_B10.tif",
@@ -259,7 +244,7 @@
         "validSamples": 576,
         "networkBytes": 0,
         "readinessNetworkBytes": 0,
-        "publishedProductSha256": "023cbac6ca9631cfc3a28ce8090dcded9f094c3bac17c695d55c44ff4b60ca53",
+        "publishedProductSha256": "882de617db990469b224c6020b32f8a9fce1a5d6aa46b4ee8fdea07b939cbd1e",
         "originalFiles": [
           {
             "relativePath": "elevation.tif",
@@ -275,7 +260,7 @@
         "validSamples": 576,
         "networkBytes": 0,
         "readinessNetworkBytes": 0,
-        "publishedProductSha256": "60855cf26108c2c6371257d0ab1e188a8ce25e65420124878a3cbcac9df889b4",
+        "publishedProductSha256": "bdeda4a4605e2e9bd8fd18a6c8df26d056ed4d684e26c8ecb3827400d6480c09",
         "originalFiles": [
           {
             "relativePath": "elevation.tif",
@@ -285,5 +270,20 @@
         ]
       }
     ]
-  }
+  },
+  "rawEvidenceRetention": "Original files, local databases, raw numerical samples, sealed receipts and logs retained outside the checkout; not redistributed in Git or release assets.",
+  "canonicalRecords": [
+    {
+      "path": "docs/research/v0.5.0-automatic-provider-acceptance.json",
+      "canonicalLfSha256": "657851a82a2aa2da30dc641b75ef92aecf2c8935a25ed05116b453c5b087b7ee"
+    },
+    {
+      "path": "docs/research/v0.5.0-guided-envi-acceptance.json",
+      "canonicalLfSha256": "19f9fe80fdf3b33414d9b004685e3651f8a121faf13fda9fa767edd0c5e8951a"
+    },
+    {
+      "path": "docs/research/v0.5.0-workspace-acceptance.json",
+      "canonicalLfSha256": "9489b76004f7942552f64f9db7c3f9b4b3405c3f6b2afc23a589b6df4f6a30ad"
+    }
+  ]
 }
