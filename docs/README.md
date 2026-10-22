@@ -29,7 +29,8 @@ on `develop/v0.5.0`; planned contracts do not establish implemented or accepted 
 ## Develop, verify and release
 
 - [Current architecture](architecture.md) and [development/verification workflow](verification.md) and [two-tier CI](development-validation.md).
-- [Windows build, installed acceptance and manual publication](public-release-windows.md).
+- [Windows candidate build and installed acceptance](public-release-windows.md): current
+  0.5.0 handoff and preserved 0.4.2 guide; publication requires separate approval.
 - [v0.4.2 QA checklist](v0.4.2-windows-testing.md),
   [completion and limitations](v0.4.2-completion.md),
   [accessibility evidence](v0.4.2-accessibility.md) and

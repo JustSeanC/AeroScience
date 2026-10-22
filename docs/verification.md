@@ -41,11 +41,12 @@ not passes; inspect Actions for the exact pushed commit.
 ### Current P19 acceptance
 
 Use the [private validation build guide](v0.5.0-private-validation.md) and
-[A–J owner workbook](v0.5.0-acceptance-workbook.md). The consolidated
+[A–K owner workbook](v0.5.0-acceptance-workbook.md). The consolidated
 [readiness report](v0.5.0-readiness.md) distinguishes final-source technical CI,
 fresh genuine public-provider/CMR checks, protected NASA originals and physical tests.
-P19 engineering preparation is authorized; merge, public release and personal Earthdata
-login are not authorized by this cycle. The private profile preserves 0.4.2 on disk and
+The 0.5.0 implementation is integrated into main; acceptance corrections are reviewed on
+`release/v0.5.0-acceptance`. Public release and personal Earthdata login are separate
+owner actions. The private profile preserves 0.4.2 on disk and
 rejects production data paths. A private build is not an accepted production installer.
 
 The former P17/P18 handoff remains in Git history; its test obligations are carried into
@@ -54,8 +55,10 @@ the workbook without claiming execution. Unexecuted hardware checks remain Not T
 - [Scientific methods](v0.4.0-scientific-methods.md) and retained [research records](research/README.md)
   distinguish genuine provider/numeric evidence from synthetic aircraft/HTTP fixtures.
   `scripts/release/verify_scientific_acceptance.py` requires current source-bound evidence.
-  The v0.5.0 records are pending until genuine final-source reruns; never edit hashes to
-  relabel a historical pass.
+  Current genuine provider/workspace/guided records and their execution-time source
+  receipts pass; see the readiness report. Never edit hashes to relabel a historical pass.
+  [Frozen-source rerun instructions](development-validation.md#frozen-source-scientific-acceptance)
+  retain failed runs and independently validate originals before recording evidence.
 - [Windows release procedure](public-release-windows.md) requires the official installed
   MSFS 2024 SDK, ABI/compiler/package validation, authorized exact native runtime and
   installer checks. Inno recipe CI fixtures are deliberately non-distributable.

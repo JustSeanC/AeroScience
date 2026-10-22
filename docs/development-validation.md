@@ -148,3 +148,35 @@ failure is a failed or missing genuine check; mocks never replace it. The indepe
 retains strict numeric/hash/CRS/affine/QA assertions and the reader's documented boundary
 snap. Hardware, installed Windows, physical paired devices and sustained operational
 acceptance remain separate. Existing release gates are unchanged.
+
+## Frozen-source scientific acceptance
+
+For the full public-provider/workspace/guided-ENVI gate, commit the corrected source first
+and use a **clean checkout** plus a new evidence directory outside the repository:
+
+```text
+python scripts/release/complete_scientific_acceptance.py --output <new-evidence-directory> --python <rasterio-python>
+python scripts/release/verify_scientific_acceptance.py
+```
+
+Use a developer-only Python environment with `rasterio==1.4.3` and `numpy==2.2.6`.
+The runner performs a locked restore, captures source identity before each execution,
+runs actual four-provider acquisition/products, regional workspace, guided Cuprite import,
+Library jobs/reuse and public CMR discovery, then independent numeric/QA/CRS comparisons.
+`--cuprite-originals <folder>` may reuse the unchanged, pinned genuine DAT/HDR plus their
+actual `download-receipt.json`; it still reruns import/sampling/offline/workspace checks.
+Otherwise the existing bounded public tutorial downloader obtains them. No fixtures
+replace failed provider data. Current per-download, storage and network limits still apply.
+
+Raw outputs and originals remain outside Git. Completed `run-source.json` receipts seal
+the run artifacts and all relevant canonical-LF source hashes. Recorders refuse missing,
+unfinished, changed or stale runs and validate before atomically replacing canonical
+records. A failed recorder leaves its previous record intact. Keep failed runs for diagnosis;
+do not hand-edit status/hashes or restamp older results. A later evidence/documentation-only
+commit may retain acceptance only when **every hashed scientific source file is unchanged**.
+Run the aggregate verifier again on the exact final checkout.
+
+Protected NASA files are separate. Follow [workbook Group J](v0.5.0-acceptance-workbook.md#j--pending-owner-authorized-earthdata-access-and-nasa-originals)
+for authorized acquisition and independent owner-local Classic/NG comparisons. Public
+CMR metadata and Cuprite cannot pass either family's original-file acceptance. Native EMIT
+import remains unsupported. No acceptance runner finalizes an installer or publishes a release.

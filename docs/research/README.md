@@ -6,7 +6,11 @@ reproduction and release verification; age alone is not a reason to delete evide
 
 - v0.5.0 [automatic providers](v0.5.0-automatic-provider-acceptance.json),
   [guided ENVI](v0.5.0-guided-envi-acceptance.json) and
-  [workspace](v0.5.0-workspace-acceptance.json) are **pending**, not acceptance passes.
+  [workspace](v0.5.0-workspace-acceptance.json) pass fresh genuine-source verification
+  on frozen source `ba96a67`; later evidence/docs retain identical scientific hashes.
+  The [release-engineering receipt](v0.5.0-release-validation.json) also records fresh
+  Library jobs/reuse and public NASA CMR metadata. Protected Classic/NG originals and
+  installed/device acceptance remain pending independently.
 - v0.4.2 [automatic providers](v0.4.2-automatic-provider-acceptance.json),
   [guided ENVI](v0.4.2-guided-envi-acceptance.json) and
   [workspace](v0.4.2-workspace-acceptance.json) retain their original source-bound findings

@@ -1,0 +1,179 @@
+{
+  "formatVersion": 1,
+  "version": "0.5.0",
+  "evidenceType": "genuine-scientific-release-engineering",
+  "sourceCommit": "ba96a672bd1eed65ac6ad0c26ab2649beac120fa",
+  "sourceManifestSha256": "228ca971ff3213faa7381e85902243f6acccfef97e4698353c300caccde8bbf0",
+  "runProvenance": {
+    "providers": {
+      "runId": "3749efe7-8d6f-4d9a-a479-23a0a8104654",
+      "status": "passed",
+      "sourceCommit": "ba96a672bd1eed65ac6ad0c26ab2649beac120fa",
+      "sourceManifestSha256": "228ca971ff3213faa7381e85902243f6acccfef97e4698353c300caccde8bbf0",
+      "receiptSha256": "3f45b601293d07f96c33207a341468a7b614f1187d22b6b6b7cc8d3e7441939a"
+    },
+    "envi": {
+      "runId": "c9bfec61-7787-47f8-85b9-d137e7065c1d",
+      "status": "passed",
+      "sourceCommit": "ba96a672bd1eed65ac6ad0c26ab2649beac120fa",
+      "sourceManifestSha256": "228ca971ff3213faa7381e85902243f6acccfef97e4698353c300caccde8bbf0",
+      "receiptSha256": "ec8a7e8f2748112b1a5cc64511373f9ecabcffd55940ad8f643948756cf5854b"
+    },
+    "library": {
+      "runId": "e4f2aee6-24b7-47fa-9a8c-cf38226e9540",
+      "status": "passed",
+      "sourceCommit": "ba96a672bd1eed65ac6ad0c26ab2649beac120fa",
+      "sourceManifestSha256": "228ca971ff3213faa7381e85902243f6acccfef97e4698353c300caccde8bbf0",
+      "receiptSha256": "517a8717de2e3a49c725f4d3174478ef7e60f0134d20d457e2ec047feab81bc2"
+    },
+    "nasa-metadata": {
+      "runId": "488aa6f9-6284-4424-a14b-d2767abab952",
+      "status": "passed",
+      "sourceCommit": "ba96a672bd1eed65ac6ad0c26ab2649beac120fa",
+      "sourceManifestSha256": "228ca971ff3213faa7381e85902243f6acccfef97e4698353c300caccde8bbf0",
+      "receiptSha256": "c10e419ac44e0c9af183f3abc2b1d5f5d3c05c0fa57bafd1a6422da29ce38e8e"
+    }
+  },
+  "scientificGateResult": "passed",
+  "windowsMsfs": "not tested",
+  "physicalIpadQuest": "not tested",
+  "library": {
+    "independentComparison": {
+      "checked_utc": "2026-10-22T23:08:11.553466+00:00",
+      "method": "Independent GDAL/rasterio CRS, affine, native numeric scaling and QA comparison; documented 1e-8-pixel boundary snap, unchanged 1e-9 value tolerance",
+      "results": [
+        {
+          "provider": "usgs-3dep",
+          "scene": "3DEP--75,40,-74.98,40.02",
+          "comparisons": 1152,
+          "valid_derived_values": 576,
+          "source_hashes": [
+            "b25437967ba562cbdb4830d219e6fc65fa0ee0be760c48fce31a1dfa0fee04f5"
+          ]
+        },
+        {
+          "provider": "copernicus",
+          "scene": "Copernicus_DSM_COG_10_N46_00_E008_00_DEM",
+          "comparisons": 1152,
+          "valid_derived_values": 576,
+          "source_hashes": [
+            "f66b92a3a5f914f5c26ec8e5c1395311472f188347e5666d66a513aee4d22a3d"
+          ]
+        },
+        {
+          "provider": "landsat",
+          "scene": "LC08_L2SP_014032_20240903_02_T1",
+          "comparisons": 2304,
+          "valid_derived_values": 576,
+          "source_hashes": [
+            "05b5e70505ae77243f394049ba2f800a714ce4c55f7e22349f3e3a43462caaa8",
+            "ba3d6e05277aa9fc9629bced52401b387c8bd7744c6137878177788537a7b996",
+            "6dcbf2ca051ac9b64c0574a5d61c465aeca0f08df0c9a6c227f5d41225563938"
+          ]
+        },
+        {
+          "provider": "sentinel-2",
+          "scene": "S2A_18TWK_20240903_0_L2A",
+          "comparisons": 3456,
+          "valid_derived_values": 183,
+          "source_hashes": [
+            "3a73bd5220bdf9a756516d4164e050a8584735c96388b913d3f00c79e74e6eee",
+            "0b51220f541aac313b81188027efd1db1d0e0d4bf9d6f37266f732f8b519bb0e",
+            "18af6015253641f4856d77d87b8283a20eb08d49f83656b5522e22c17d20e15b",
+            "2709bf2409ed5aedc3b41663975ce79e3141b7dfd8b1ed5780bcab9d6dd72dc4",
+            "490d03dc11d94fabc5037777b2e8b4af374f4858ce801dfd33cbe7c146ea2fa5"
+          ]
+        }
+      ]
+    },
+    "datasets": [
+      {
+        "provider": "usgs-3dep",
+        "scene": "3DEP--75,40,-74.98,40.02",
+        "sourceId": "fe1776f8-e1ca-42cd-a56e-c3f5acb47f5d",
+        "observedUtc": null,
+        "qaValidDerivedValues": 576,
+        "verifiedReuseNetworkBytes": 0
+      },
+      {
+        "provider": "copernicus",
+        "scene": "Copernicus_DSM_COG_10_N46_00_E008_00_DEM",
+        "sourceId": "c0e670dc-e1b7-409d-b0c8-639c3862b12e",
+        "observedUtc": null,
+        "qaValidDerivedValues": 576,
+        "verifiedReuseNetworkBytes": 0
+      },
+      {
+        "provider": "landsat",
+        "scene": "LC08_L2SP_014032_20240903_02_T1",
+        "sourceId": "2f5a50f0-564d-444c-a2c4-531e0ca736af",
+        "observedUtc": "2024-09-03T15:39:44.650124+00:00",
+        "qaValidDerivedValues": 576,
+        "verifiedReuseNetworkBytes": 0
+      },
+      {
+        "provider": "sentinel-2",
+        "scene": "S2A_18TWK_20240903_0_L2A",
+        "sourceId": "80f3b477-f35a-4136-885d-5b8543d24a5d",
+        "observedUtc": "2024-09-03T15:52:05.578+00:00",
+        "qaValidDerivedValues": 183,
+        "verifiedReuseNetworkBytes": 0
+      }
+    ],
+    "censusRegionArtifactSha256": "38c27ab0201ac1cf70c47ddc692f1f96441b2728c2fe55065d2ee13ae6621a7f",
+    "paginationArtifactSha256": "b9f28e5484ae087b087caf49887a51ac6dcd6ec119e0219efe5f371dc5b5767c",
+    "missionObservationsCreated": 0
+  },
+  "nasaMetadata": {
+    "source": "Official NASA CMR via production ScientificCatalog/ScientificHttp",
+    "checkedUtc": "2026-10-22T23:08:22.415158+00:00",
+    "results": [
+      {
+        "provider": "nasa-classic",
+        "collection": "C2711871294-ORNL_CLOUD",
+        "granule": "G3654888007-ORNL_CLOUD",
+        "observationUtc": "2025-06-27T20:20:00+00:00",
+        "firstPageItems": 1,
+        "nextPageStatus": "Available",
+        "emptyResultStatus": "No match",
+        "cachedAsOfUtc": "2026-10-22T23:08:14.1210936+00:00"
+      },
+      {
+        "provider": "nasa-ng",
+        "collection": "C2659129205-ORNL_CLOUD",
+        "granule": "G2663888136-ORNL_CLOUD",
+        "observationUtc": "2020-07-29T20:47:35+00:00",
+        "firstPageItems": 1,
+        "nextPageStatus": "Available",
+        "emptyResultStatus": "No match",
+        "cachedAsOfUtc": "2026-10-22T23:08:17.0970749+00:00"
+      },
+      {
+        "provider": "nasa-emit",
+        "collection": "C4079844428-LPCLOUD",
+        "granule": "G4334256299-LPCLOUD",
+        "observationUtc": "2026-09-30T05:05:39+00:00",
+        "firstPageItems": 1,
+        "nextPageStatus": "Available",
+        "emptyResultStatus": "No match",
+        "cachedAsOfUtc": "2026-10-22T23:08:19.0294049+00:00"
+      }
+    ],
+    "numericAcceptance": "Not established by catalog metadata; original authorized Classic and NG distributions remain independently pending. EMIT discovery only."
+  },
+  "rawEvidenceRetention": "Original files, local databases, raw numerical samples, sealed receipts and logs retained outside the checkout; not redistributed in Git or release assets.",
+  "canonicalRecords": [
+    {
+      "path": "docs/research/v0.5.0-automatic-provider-acceptance.json",
+      "sha256": "343297a8b61b427bc931b8f52e8c097b48fe09bdeb7d78e193c15d5db9e3e295"
+    },
+    {
+      "path": "docs/research/v0.5.0-guided-envi-acceptance.json",
+      "sha256": "97336505de0961b3706d9e46d4570bdbb3d330da97807c9e236e4d1028bbe85a"
+    },
+    {
+      "path": "docs/research/v0.5.0-workspace-acceptance.json",
+      "sha256": "d7e27eaa49ecc9d42ed83ad51ce34055522e09ea504466a77a51a0715e79851b"
+    }
+  ]
+}
