@@ -32,6 +32,13 @@
       "sourceCommit": "ba96a672bd1eed65ac6ad0c26ab2649beac120fa",
       "sourceManifestSha256": "228ca971ff3213faa7381e85902243f6acccfef97e4698353c300caccde8bbf0",
       "receiptSha256": "c10e419ac44e0c9af183f3abc2b1d5f5d3c05c0fa57bafd1a6422da29ce38e8e"
+    },
+    "offline-library": {
+      "runId": "e4e86e24-a6da-4cf5-823d-1a301691ac34",
+      "status": "passed",
+      "sourceCommit": "ccac0d23ca129573fcce5a8d6ecdd3df72a6f948",
+      "sourceManifestSha256": "228ca971ff3213faa7381e85902243f6acccfef97e4698353c300caccde8bbf0",
+      "receiptSha256": "b7be9cc9f59e5d3b3f09311c7bf351c38b8187f533d13cf2f93a2b8752788db8"
     }
   },
   "scientificGateResult": "passed",
@@ -175,5 +182,108 @@
       "path": "docs/research/v0.5.0-workspace-acceptance.json",
       "sha256": "d7e27eaa49ecc9d42ed83ad51ce34055522e09ea504466a77a51a0715e79851b"
     }
-  ]
+  ],
+  "offlineLibrary": {
+    "evidenceType": "genuine-retained-public-data-offline",
+    "checkedUtc": "2026-10-22T23:12:58.4801256+00:00",
+    "scientificNetworkConsent": "disabled",
+    "networkAcceptance": "not established by this offline run",
+    "flightInput": "synthetic test position",
+    "results": [
+      {
+        "provider": "Copernicus / Element 84 Earth Search",
+        "scene": "S2A_18TWK_20240903_0_L2A",
+        "sourceObservedUtc": "2024-09-03T15:52:05.578+00:00",
+        "validSamples": 183,
+        "networkBytes": 0,
+        "readinessNetworkBytes": 0,
+        "publishedProductSha256": "d14ca7bd80d5463fc2bf9cd22032b72fe742ac1f6593c16c2f9eba8d8f76684f",
+        "originalFiles": [
+          {
+            "relativePath": "B02.tif",
+            "bytes": 58716,
+            "sha256": "3a73bd5220bdf9a756516d4164e050a8584735c96388b913d3f00c79e74e6eee"
+          },
+          {
+            "relativePath": "B03.tif",
+            "bytes": 58692,
+            "sha256": "0b51220f541aac313b81188027efd1db1d0e0d4bf9d6f37266f732f8b519bb0e"
+          },
+          {
+            "relativePath": "B04.tif",
+            "bytes": 59780,
+            "sha256": "18af6015253641f4856d77d87b8283a20eb08d49f83656b5522e22c17d20e15b"
+          },
+          {
+            "relativePath": "B08.tif",
+            "bytes": 60866,
+            "sha256": "2709bf2409ed5aedc3b41663975ce79e3141b7dfd8b1ed5780bcab9d6dd72dc4"
+          },
+          {
+            "relativePath": "SCL.tif",
+            "bytes": 1444,
+            "sha256": "490d03dc11d94fabc5037777b2e8b4af374f4858ce801dfd33cbe7c146ea2fa5"
+          }
+        ]
+      },
+      {
+        "provider": "Microsoft Planetary Computer / USGS Landsat",
+        "scene": "LC08_L2SP_014032_20240903_02_T1",
+        "sourceObservedUtc": "2024-09-03T15:39:44.650124+00:00",
+        "validSamples": 576,
+        "networkBytes": 0,
+        "readinessNetworkBytes": 0,
+        "publishedProductSha256": "852b52d227ccff61092efb25a98b25a1abde164ff027acceff18706797bd4329",
+        "originalFiles": [
+          {
+            "relativePath": "ST_B10.tif",
+            "bytes": 7818,
+            "sha256": "05b5e70505ae77243f394049ba2f800a714ce4c55f7e22349f3e3a43462caaa8"
+          },
+          {
+            "relativePath": "QA_PIXEL.tif",
+            "bytes": 436,
+            "sha256": "ba3d6e05277aa9fc9629bced52401b387c8bd7744c6137878177788537a7b996"
+          },
+          {
+            "relativePath": "QA_RADSAT.tif",
+            "bytes": 388,
+            "sha256": "6dcbf2ca051ac9b64c0574a5d61c465aeca0f08df0c9a6c227f5d41225563938"
+          }
+        ]
+      },
+      {
+        "provider": "Microsoft Planetary Computer / Copernicus DEM",
+        "scene": "Copernicus_DSM_COG_10_N46_00_E008_00_DEM",
+        "sourceObservedUtc": null,
+        "validSamples": 576,
+        "networkBytes": 0,
+        "readinessNetworkBytes": 0,
+        "publishedProductSha256": "023cbac6ca9631cfc3a28ce8090dcded9f094c3bac17c695d55c44ff4b60ca53",
+        "originalFiles": [
+          {
+            "relativePath": "elevation.tif",
+            "bytes": 18044,
+            "sha256": "f66b92a3a5f914f5c26ec8e5c1395311472f188347e5666d66a513aee4d22a3d"
+          }
+        ]
+      },
+      {
+        "provider": "USGS 3DEP National Map",
+        "scene": "3DEP--75,40,-74.98,40.02",
+        "sourceObservedUtc": null,
+        "validSamples": 576,
+        "networkBytes": 0,
+        "readinessNetworkBytes": 0,
+        "publishedProductSha256": "60855cf26108c2c6371257d0ab1e188a8ce25e65420124878a3cbcac9df889b4",
+        "originalFiles": [
+          {
+            "relativePath": "elevation.tif",
+            "bytes": 263002,
+            "sha256": "b25437967ba562cbdb4830d219e6fc65fa0ee0be760c48fce31a1dfa0fee04f5"
+          }
+        ]
+      }
+    ]
+  }
 }
