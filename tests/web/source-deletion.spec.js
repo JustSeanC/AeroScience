@@ -1,9 +1,21 @@
-import {test,expect} from '@playwright/test';
-const origin='http://127.0.0.1:5080';
+import {test,expect,request as playwrightRequest} from '@playwright/test';
+import {spawn} from 'node:child_process';
+import {mkdtempSync,rmSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {resolve,join} from 'node:path';
+const origin='http://127.0.0.1:5094';
 async function post(request,path,data={}){const {csrf}=await(await request.post('/api/session',{headers:{Origin:origin},data:{}})).json();const r=await request.post(path,{headers:{Origin:origin,'X-AeroScience-CSRF':csrf},data});expect(r.ok(),await r.text()).toBeTruthy();return r.status()===204?null:r.json();}
-test('real source deletion is separate from exclusion, requires typed/final confirmation, and X preserves originals',async({page,request})=>{
+test('real source deletion is separate from exclusion, requires typed/final confirmation, and X preserves originals',async({browser})=>{
+ // Deletion requires an idle Library. Other suites deliberately queue postflight analysis.
+ // Exercise the unchanged real API/store/UI in its own companion, as the restart test does.
+ const folder=mkdtempSync(join(tmpdir(),'aeroscience-source-delete-browser-'));let child,context,request;
+ try{
+ child=spawn(process.env.DOTNET||'dotnet',[resolve('artifacts/browser-test-host/AeroScience.TestHost.dll')],{env:{...process.env,AeroScience__DataDirectory:folder,AeroScience__Port:'5094',AeroScience__EnableLan:'false',AeroScience__SamplingIntervalMs:'250'},stdio:'ignore'});
+ await expect.poll(async()=>{try{return (await fetch(origin+'/api/health')).ok;}catch{return false;}},{timeout:15000}).toBeTruthy();
+ request=await playwrightRequest.newContext({baseURL:origin});await post(request,'/api/session');context=await browser.newContext({baseURL:origin,storageState:await request.storageState()});const page=await context.newPage();
  const paused=(await(await request.get('/api/science/activity')).json()).queue.paused;await post(request,'/api/science/preparation/control',{action:'pause'});
  try{ await post(request,'/api/science/prepare/cancel');await expect.poll(async()=>(await(await request.get('/api/science/activity')).json()).queue.downloading).toBe(0);const seeded=await post(request,'/api/testing/sources/unreferenced/terrain');const before=await(await request.get('/api/science/sources')).json();await page.goto('/#library');await page.getByLabel('Scientific category',{exact:true}).selectOption('terrain');const group=page.locator('.library-collection').filter({has:page.getByRole('heading',{name:'SYNTHETIC TEST FIXTURE — Terrain',exact:true})});await group.getByText('Individual Regions & Provenance',{exact:true}).click();const source=group.locator('.library-region').filter({hasText:seeded.sourceId});await source.locator(':scope > details > summary').click();await expect(source.getByRole('button',{name:'Exclude from Active Science',exact:true})).toBeVisible();await source.getByRole('button',{name:'Delete This Source',exact:true}).click();let dialog=page.getByRole('dialog',{name:'Delete Downloaded External Data',exact:true});await expect(dialog).toContainText(seeded.sourceId);await expect(dialog).toContainText('mission/science observations');await dialog.getByLabel('External data deletion confirmation').fill('wrong');await expect(dialog.getByRole('button',{name:'Delete reviewed external data',exact:true})).toBeDisabled();await dialog.getByRole('button',{name:'Close Delete Downloaded External Data',exact:true}).click();expect((await(await request.get('/api/science/sources')).json()).some(s=>s.source.id===seeded.sourceId)).toBe(true);
  await source.getByRole('button',{name:'Delete This Source',exact:true}).click();dialog=page.getByRole('dialog',{name:'Delete Downloaded External Data',exact:true});await dialog.getByLabel('External data deletion confirmation').fill('DELETE EXTERNAL DATA');page.once('dialog',d=>d.dismiss());await dialog.getByRole('button',{name:'Delete reviewed external data',exact:true}).click();await expect(dialog).toBeVisible();expect((await(await request.get('/api/science/sources')).json()).some(s=>s.source.id===seeded.sourceId)).toBe(true);page.once('dialog',d=>d.accept());await dialog.getByRole('button',{name:'Delete reviewed external data',exact:true}).click();await expect(dialog).toContainText('Completed: 1 sources removed');const after=await(await request.get('/api/science/sources')).json();expect(after.length).toBe(before.length-1);expect(after.some(s=>s.source.id===seeded.sourceId)).toBe(false);await dialog.getByRole('button',{name:'Close Delete Downloaded External Data',exact:true}).click();
  }finally{await post(request,'/api/science/preparation/control',{action:paused?'pause':'resume'});}
+ }finally{await context?.close();await request?.dispose();if(child&&child.exitCode===null){const exited=new Promise(resolve=>child.once('exit',resolve));child.kill('SIGKILL');await exited;}rmSync(folder,{recursive:true,force:true});}
 });
