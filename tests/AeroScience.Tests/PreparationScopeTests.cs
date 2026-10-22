@@ -37,6 +37,13 @@ public sealed class PreparationScopeTests:IDisposable
         reopened.Prepare(plan,true,new("entire",PlanRevision:half.PlanRevision));Assert.Equal(total,reopened.Snapshot().Single().SelectedUnits);Assert.Equal(total,reopened.Instruments(plan.Id).Sum(i=>i.Total));Assert.NotNull(plan.Collection);Assert.Empty(science.Products());
         var custom=ScientificPreparationScope.Preview(plan,new("areas",SegmentIndices:[1]));Assert.True(custom.Areas.Length<custom.FullRegions);
     }
+    [Fact]public void BoundaryPausedRoutesRequireExplicitAreasInsteadOfAnInventedContinuousFirstHalf()
+    {
+        var plan=WithActions();var area=new SurveyArea("Research",[new(39.99,-75.11),new(39.99,-74.89),new(40.01,-74.89),new(40.01,-75.11)]);
+        var identity=new CollectionSurveyArea(Guid.NewGuid(),0,EvidenceContracts.SurveyGeometryHash(area));plan=plan with{SurveyAreas=[area],Collection=plan.Collection! with{SurveyAreas=[identity],Boundary=new([identity.Id],true,true,2,0)}};
+        EvidenceContracts.ValidatePlan(plan.Collection!,plan);var preview=ScientificPreparationScope.Preview(plan);Assert.False(preview.FirstHalfAvailable);Assert.Contains("Boundary pause/resume",preview.FirstHalfExplanation);
+        Assert.Throws<ArgumentException>(()=>ScientificPreparationScope.Preview(plan,new("first-half")));Assert.NotEmpty(ScientificPreparationScope.Preview(plan,new("areas",AreaIndices:[0])).Areas);
+    }
     [Fact]public void ChangedSavedPlanHoldsOldScopeUntilReviewButAnOngoingFrozenFlightCanContinue()
     {
         using var automatic=new AutomaticScientificData(science,settings);automatic.Pause(true);var sessions=new ScientificPlanData(automatic,settings);var plan=WithActions();sessions.Prepare(plan,true,new("first-half"));

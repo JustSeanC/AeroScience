@@ -44,7 +44,8 @@ Mission Planner's **Prepare scientific data** opens a review with three choices:
   collection route. Explicit waypoint collection actions or route portions within declared
   survey polygons establish this order; transit is excluded where known. Polygon membership
   is bounded at 350 m along the route. Source preparation cells extend beyond the route itself.
-  Ambiguous/repeated/area-trigger sequences cannot invent an ordering; use Entire or Choose Areas.
+  Ambiguous/repeated/area-or-gate-trigger sequences and boundary pause/resume policies cannot
+  assume continuous collection intervals; use Entire or Choose Areas for those plans.
 - **Choose Research Areas**: named planned survey areas and individual ordered route segments,
   with a map preview and accessible checkboxes. Unsupported/empty selections are rejected.
 

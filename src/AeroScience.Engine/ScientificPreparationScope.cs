@@ -21,7 +21,7 @@ public static class ScientificPreparationScope
     {
         var points=plan.Waypoints??[];if(points.Length<2)return null;
         var collection=plan.Collection;var polygons=plan.SurveyAreas??[];
-        if(collection is not null&&collection.Triggers.Any(t=>t.Kind!=CollectionTriggerKind.Waypoint||t.Pass!=1))return null;
+        if(collection is not null&&(collection.Boundary?.PauseOnExit==true||collection.Triggers.Any(t=>t.Kind!=CollectionTriggerKind.Waypoint||t.Pass!=1)))return null;
         if(collection is null&&polygons.Length==0)return null;
         var result=new List<(Coordinates,Coordinates,double)>();bool collecting=collection?.InitialPolicy==InitialCollectionPolicy.Manual;
         int inspected=0;
@@ -43,7 +43,7 @@ public static class ScientificPreparationScope
     public static PreparationScopePreview Preview(MissionPlan plan,PreflightScope? input=null)
     {
         var revision=Revision(plan);var request=input??new();if(request.PlanRevision is {} supplied&&supplied!=revision)throw new InvalidOperationException("The saved plan revision changed. Review preparation scope again.");
-        var ordered=OrderedCollection(plan);var explanation=ordered is null?"First Half needs an ordered route with unambiguous waypoint collection actions, or route portions inside declared survey areas. Choose research areas/segments explicitly or Entire Mission.":"First 50% by WGS84 geodesic length of the ordered collection route. Transit outside declared research areas or explicit collection intervals is excluded. Polygon-edge membership is bounded at 350 m; requested source cells can extend past the route boundary.";
+        var ordered=OrderedCollection(plan);var explanation=ordered is null?"First Half needs an ordered route with unambiguous waypoint collection actions, or route portions inside declared survey areas. Boundary pause/resume, area/gate triggers and repeated occurrences need explicit research area/segment selection or Entire Mission; no continuous collection interval is assumed.":"First 50% by WGS84 geodesic length of the ordered collection route. Transit outside declared research areas or explicit collection intervals is excluded. Polygon-edge membership is bounded at 350 m; requested source cells can extend past the route boundary.";
         var full=ScientificPlanPreparation.Cells(plan,.04).Distinct().ToArray();GeographicBounds[] selected;
         if(request.Mode=="entire")selected=full;
         else if(request.Mode=="first-half"){
