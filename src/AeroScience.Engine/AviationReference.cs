@@ -47,12 +47,27 @@ public sealed partial class AviationReference(string configurationDirectory, str
             PreferenceStore.WriteAtomic(settingsPath, p with { OnlineEnabled = enabled }); return Configuration();
         }
     }
+    private AviationIntegrityStamp? integrityStamp;
+    private DateTimeOffset? lastIntegrityUtc;
+    // Diagnostics only; original-file hash/CRC verification is a separate unchanged path.
+    public DateTimeOffset? LastIntegrityValidationUtc { get { lock (gate) return lastIntegrityUtc; } }
     private AviationMetadataStore Open(AviationReferencePreferences p)
     {
         if (p.StoreId is not {} expected) throw new InvalidOperationException("Enable FAA reference access on the companion PC before the first search.");
-        var store = new AviationMetadataStore(directory);
-        if (store.StoreId == expected) return store;
-        store.Dispose(); throw new IOException("Configured aviation storage identity changed. Reconnect the original store; no replacement was opened.");
+        var now = clock.GetUtcNow();
+        var fresh = lastIntegrityUtc is {} last && now >= last && now - last < TimeSpan.FromMinutes(5);
+        try
+        {
+            // Schema, identity, path/link checks and one-writer ownership still run on
+            // every open. Avoid scanning a large immutable reference inventory for
+            // every 64-KiB transfer accounting operation or idle worker poll.
+            var store = new AviationMetadataStore(directory, integrity: fresh ? integrityStamp : null);
+            if (store.StoreId != expected) { store.Dispose(); throw new IOException("Configured aviation storage identity changed. Reconnect the original store; no replacement was opened."); }
+            integrityStamp = store.IntegrityStamp;
+            if (store.FullIntegrityCheckPerformed) lastIntegrityUtc = now;
+            return store;
+        }
+        catch { integrityStamp = null; lastIntegrityUtc = null; throw; }
     }
     private static string Url(string kind) => kind switch
     { "vfr" => AviationCatalog.VfrUrl, "ifr" => AviationCatalog.IfrUrl, "nasr" => AviationCatalog.NasrUrl, "tfr" => AviationCatalog.TfrUrl, _ => throw new ArgumentException("Select VFR, IFR, NASR or TFR references.") };

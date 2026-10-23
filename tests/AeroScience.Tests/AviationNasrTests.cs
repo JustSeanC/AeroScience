@@ -137,6 +137,35 @@ public sealed class AviationNasrTests : IDisposable
         Assert.Equal("Completed", Assert.Single(service.DownloadJobs()).State); disk.Free = 1073741824;
         Assert.Equal(2, (await service.ImportVectors(job.Id)).Features);
     }
+    private sealed class Clock : TimeProvider
+    { public DateTimeOffset Utc = new(2026,10,23,0,0,0,TimeSpan.Zero); public override DateTimeOffset GetUtcNow() => Utc; }
+    [Fact] public async Task IntegrityIsFullAtStartupPeriodicAndAfterMissingStorageNotEveryPoll()
+    {
+        var clock = new Clock(); using var service = new AviationReference(root, root, new HttpClient(new Transport()), clock, unmetered: () => true);
+        _ = await Original(service); var first = service.LastIntegrityValidationUtc; Assert.NotNull(first);
+        clock.Utc = clock.Utc.AddMinutes(1); _ = service.DownloadJobs(); Assert.Equal(first, service.LastIntegrityValidationUtc);
+        clock.Utc = clock.Utc.AddMinutes(5); _ = service.DownloadJobs(); Assert.Equal(clock.Utc, service.LastIntegrityValidationUtc);
+        var directory = Path.Combine(root, "AviationReference"); Directory.Move(directory, directory + "-offline");
+        Assert.Throws<IOException>(() => service.DownloadJobs()); Assert.Null(service.LastIntegrityValidationUtc);
+        Directory.Move(directory + "-offline", directory); clock.Utc = clock.Utc.AddSeconds(1); _ = service.DownloadJobs(); Assert.Equal(clock.Utc, service.LastIntegrityValidationUtc);
+    }
+    [Fact] public void IntegrityProofCannotCrossStoresAndDefaultConstructionStillChecksFully()
+    {
+        var first = Path.Combine(root,"first"); var second = Path.Combine(root,"second"); AviationIntegrityStamp stamp;
+        using (var store = new AviationMetadataStore(first,create:true)) { Assert.True(store.FullIntegrityCheckPerformed); stamp = store.IntegrityStamp; }
+        using (var cached = new AviationMetadataStore(first,integrity:stamp)) Assert.False(cached.FullIntegrityCheckPerformed);
+        using (var normal = new AviationMetadataStore(first)) Assert.True(normal.FullIntegrityCheckPerformed);
+        using var other = new AviationMetadataStore(second,create:true,integrity:stamp); Assert.True(other.FullIntegrityCheckPerformed);
+    }
+    [Theory] [InlineData("schema")] [InlineData("identity")]
+    public void IssuedProofNeverBypassesSchemaOrIdentityChecks(string fault)
+    {
+        AviationIntegrityStamp stamp; using (var store = new AviationMetadataStore(root,create:true)) stamp = store.IntegrityStamp;
+        using (var db = new SqliteConnection("Data Source=" + Path.Combine(root,"aviation.db") + ";Pooling=False"))
+        { db.Open(); using var cmd = db.CreateCommand(); cmd.CommandText = fault=="schema"?"PRAGMA user_version=999":"UPDATE identity SET id='00000000-0000-0000-0000-000000000001'"; cmd.ExecuteNonQuery(); }
+        if(fault=="schema")Assert.Throws<NotSupportedException>(()=>new AviationMetadataStore(root,integrity:stamp));
+        else Assert.Throws<IOException>(()=>new AviationMetadataStore(root,integrity:stamp));
+    }
     [Fact] public void UnadvertisedCyclesAndUnsafeNasrOriginalsAreNotGuessed()
     {
         Assert.Throws<InvalidDataException>(() => AviationCatalog.NasrCycles("<p>Maintenance</p>"u8.ToArray(), new(2026, 10, 23)));

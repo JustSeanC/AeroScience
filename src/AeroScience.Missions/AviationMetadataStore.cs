@@ -4,6 +4,19 @@ using Microsoft.Data.Sqlite;
 
 namespace AeroScience.Missions;
 
+// Opaque process-local proof issued only after opening the same identified file.
+// Never serialized/persisted or accepted from an HTTP request.
+public sealed class AviationIntegrityStamp
+{
+    internal AviationIntegrityStamp(string directory, Guid id, DateTime createdUtc)
+    { Directory = directory; Id = id; CreatedUtc = createdUtc; }
+    internal string Directory { get; }
+    internal Guid Id { get; }
+    internal DateTime CreatedUtc { get; }
+    internal bool Matches(string directory, Guid id, DateTime createdUtc) => Id == id && CreatedUtc == createdUtc &&
+        string.Equals(Directory, directory, OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
+}
+
 // Metadata only. No scientific source IDs, measurements, transfer allowances or original-file deletion.
 // Creation is explicit. Every later read/write requires the same retained identity and database.
 public sealed partial class AviationMetadataStore : IDisposable
@@ -16,7 +29,9 @@ public sealed partial class AviationMetadataStore : IDisposable
     private readonly Identity identity;
     private bool disposed;
     public Guid StoreId => identity.Id;
-    public AviationMetadataStore(string directory, bool create = false)
+    public AviationIntegrityStamp IntegrityStamp { get; }
+    public bool FullIntegrityCheckPerformed { get; }
+    public AviationMetadataStore(string directory, bool create = false, AviationIntegrityStamp? integrity = null)
     {
         StorageManager.ValidateLocalPath(directory);
         this.directory = Path.GetFullPath(directory);
@@ -57,8 +72,15 @@ public sealed partial class AviationMetadataStore : IDisposable
             }
             if (identity.Version != 1 || identity.Id == Guid.Empty) throw new NotSupportedException("Unsupported aviation identity. Preserve this store.");
             MigrateJobs();
-            using var verified = Open(); using var check = verified.CreateCommand(); check.CommandText = "PRAGMA quick_check";
-            if (check.ExecuteScalar() as string != "ok") throw new IOException("Aviation database integrity failed. Preserve it for recovery.");
+            using var verified = Open();
+            var createdUtc = File.GetCreationTimeUtc(database);
+            FullIntegrityCheckPerformed = integrity?.Matches(this.directory, identity.Id, createdUtc) != true;
+            if (FullIntegrityCheckPerformed)
+            {
+                using var check = verified.CreateCommand(); check.CommandText = "PRAGMA quick_check";
+                if (check.ExecuteScalar() as string != "ok") throw new IOException("Aviation database integrity failed. Preserve it for recovery.");
+            }
+            IntegrityStamp = new(this.directory, identity.Id, createdUtc);
         }
         catch { lease.Dispose(); throw; }
     }
