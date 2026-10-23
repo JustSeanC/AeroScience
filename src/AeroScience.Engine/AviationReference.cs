@@ -17,7 +17,7 @@ public sealed record AviationReferencePage(string Kind, string Status, AviationC
 public sealed partial class AviationReference(string configurationDirectory, string dataDirectory, HttpClient? transport = null, TimeProvider? time = null,
     IStorageCapacity? capacity = null, Func<bool?>? unmetered = null, Func<bool>? flightActive = null) : IDisposable
 {
-    public const string Privacy = "FAA requests reveal your IP address to FAA providers. Aviation reference access is separate from online maps and scientific-data consent. Each manual metadata refresh is bounded to 4 MiB. Original ZIPs require a separate exact-edition preview, explicit approval and aviation transfer/storage allowances. Opening maps or catalogs never downloads originals. Retained records remain available offline. Flight-simulation reference only, not a real-world safety product.";
+    public const string Privacy = "FAA requests reveal your IP address to FAA providers. Aviation reference access is separate from online maps and scientific-data consent. Each metadata request is bounded to 4 MiB; NASR refresh reads its index plus at most two advertised cycle pages. Original ZIPs require a separate exact-edition preview, explicit approval and aviation transfer/storage allowances. Opening maps or catalogs never downloads originals. Retained records remain available offline. Flight-simulation reference only, not a real-world safety product.";
     private readonly string settingsPath = Path.Combine(configurationDirectory, "aviation-reference.json");
     private string directory => Preferences().StorageDirectory ?? Path.Combine(dataDirectory, "AviationReference");
     private readonly HttpClient http = transport ?? new(new HttpClientHandler { AllowAutoRedirect = false }) { Timeout = TimeSpan.FromSeconds(20) };
@@ -55,7 +55,7 @@ public sealed partial class AviationReference(string configurationDirectory, str
         store.Dispose(); throw new IOException("Configured aviation storage identity changed. Reconnect the original store; no replacement was opened.");
     }
     private static string Url(string kind) => kind switch
-    { "vfr" => AviationCatalog.VfrUrl, "ifr" => AviationCatalog.IfrUrl, "tfr" => AviationCatalog.TfrUrl, _ => throw new ArgumentException("Select VFR, IFR or TFR references.") };
+    { "vfr" => AviationCatalog.VfrUrl, "ifr" => AviationCatalog.IfrUrl, "nasr" => AviationCatalog.NasrUrl, "tfr" => AviationCatalog.TfrUrl, _ => throw new ArgumentException("Select VFR, IFR, NASR or TFR references.") };
     public AviationReferencePage Page(string kind, int offset = 0)
     {
         _ = Url(kind); if (offset is < 0 or > 2048 || offset % 50 != 0) throw new ArgumentException("Use a bounded 50-item aviation page.");
@@ -108,7 +108,15 @@ public sealed partial class AviationReference(string configurationDirectory, str
                 bytes = output.ToArray();
                 // Validate before taking the writer; malformed content never replaces successful snapshots.
                 var retrieved = clock.GetUtcNow();
-                var charts = kind == "tfr" ? null : AviationCatalog.Charts(bytes, retrieved);
+                AviationCatalogSnapshot? charts;
+                if (kind == "nasr")
+                {
+                    var pages = new List<byte[]>();
+                    foreach (var cycle in AviationCatalog.NasrCycles(bytes, DateOnly.FromDateTime(retrieved.UtcDateTime)))
+                        pages.Add(await NasrMetadata(cycle, token));
+                    charts = AviationCatalog.NasrCharts(pages, retrieved);
+                }
+                else charts = kind == "tfr" ? null : AviationCatalog.Charts(bytes, retrieved);
                 var notices = kind == "tfr" ? AviationCatalog.Notices(bytes, retrieved) : null;
                 lock (gate)
                 {

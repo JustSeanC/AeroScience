@@ -153,7 +153,7 @@ public sealed class AviationAcquisitionTests : IDisposable
         using (var service = Service(handler)) { await Preview(service); }
         var directory = Path.Combine(root, "AviationReference"); using (var store = new AviationMetadataStore(directory)) id = store.StoreId;
         using (var db = new SqliteConnection($"Data Source={Path.Combine(directory, "aviation.db")};Pooling=False"))
-        { db.Open(); using var cmd = db.CreateCommand(); cmd.CommandText = "DROP TABLE download_jobs; PRAGMA user_version=1"; cmd.ExecuteNonQuery(); }
+        { db.Open(); using var cmd = db.CreateCommand(); cmd.CommandText = "DROP TABLE download_jobs; DROP TABLE vector_datasets; DROP TABLE vector_features; PRAGMA user_version=1"; cmd.ExecuteNonQuery(); }
         using var migrated = new AviationMetadataStore(directory); Assert.Equal(id, migrated.StoreId); Assert.Single(migrated.Catalog("vfr")!.Items); Assert.Empty(migrated.Jobs());
         foreach (var backup in Directory.GetFiles(Path.Combine(directory, "Backups")))
         { using var db = new SqliteConnection($"Data Source={backup};Pooling=False"); db.Open(); using var cmd = db.CreateCommand(); cmd.CommandText = "PRAGMA integrity_check"; Assert.Equal("ok", cmd.ExecuteScalar()); }

@@ -39,7 +39,7 @@ public static class AviationDownloads
         await using var stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read, 65536, true);
         return Convert.ToHexString(await SHA256.HashDataAsync(stream, token)).ToLowerInvariant();
     }
-    public static async Task<AviationRetainedFile[]> VerifyArchive(string zip, string expanded, long maximumBytes, CancellationToken token, Func<bool>? canContinue = null)
+    public static async Task<AviationRetainedFile[]> VerifyArchive(string zip, string expanded, long maximumBytes, CancellationToken token, Func<bool>? canContinue = null, bool nasr = false)
     {
         StorageManager.ValidateLocalPath(zip); StorageManager.ValidateLocalPath(expanded);
         if (new FileInfo(zip).LinkTarget is not null || (File.GetAttributes(zip) & FileAttributes.ReparsePoint) != 0)
@@ -47,7 +47,7 @@ public static class AviationDownloads
         Directory.CreateDirectory(expanded); var files = new List<AviationRetainedFile>(); var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         using var archive = ZipFile.OpenRead(zip);
         if (archive.Entries.Count is < 1 or > 100) throw new InvalidDataException("FAA archive must contain 1–100 bounded entries.");
-        long total = 0; var tiffs = 0;
+        long total = 0; var tiffs = 0; var csvs = 0;
         foreach (var entry in archive.Entries)
         {
             token.ThrowIfCancellationRequested(); var name = entry.FullName;
@@ -61,7 +61,7 @@ public static class AviationDownloads
                 entry.Length < 0 || entry.Length > maximumBytes - total || entry.Length > Math.Max(1048576, entry.CompressedLength * 200))
                 throw new InvalidDataException("FAA archive exceeds approved bounds or has conflicting file names.");
             var extension = Path.GetExtension(fileName).ToLowerInvariant();
-            if (extension is not (".tif" or ".tiff" or ".tfw" or ".prj" or ".xml" or ".txt" or ".htm" or ".html"))
+            if (nasr ? extension is not (".csv" or ".pdf" or ".txt") : extension is not (".tif" or ".tiff" or ".tfw" or ".prj" or ".xml" or ".txt" or ".htm" or ".html"))
                 throw new InvalidDataException("Unsupported FAA archive companion. Nested archives and executables are not extracted; original ZIP is preserved.");
             total = checked(total + entry.Length); var path = Path.Combine(expanded, fileName);
             await using (var input = entry.Open())
@@ -87,9 +87,10 @@ public static class AviationDownloads
                     throw new InvalidDataException("FAA original is not a TIFF raster. No rendering or scientific support was inferred.");
                 tiffs++;
             }
+            if (extension == ".csv") csvs++;
             files.Add(new(fileName, entry.Length, await FileHash(path, token)));
         }
-        if (tiffs == 0) throw new InvalidDataException("No original TIFF chart in this distribution.");
+        if (nasr ? csvs == 0 : tiffs == 0) throw new InvalidDataException("No original TIFF chart in this distribution.");
         return files.ToArray();
     }
     public static async Task<bool> VerifyRetained(string directory, AviationDownloadJob job, CancellationToken token = default)

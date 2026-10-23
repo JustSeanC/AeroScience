@@ -8,7 +8,7 @@ namespace AeroScience.Missions;
 // Creation is explicit. Every later read/write requires the same retained identity and database.
 public sealed partial class AviationMetadataStore : IDisposable
 {
-    public const int SchemaVersion = 2;
+    public const int SchemaVersion = 3;
     private sealed record Identity(int Version, Guid Id);
     private readonly string directory, database;
     private readonly FileStream lease;
@@ -88,7 +88,7 @@ public sealed partial class AviationMetadataStore : IDisposable
     }
     private static void Kind(string kind)
     {
-        if (kind is not ("vfr" or "ifr" or "tfr")) throw new ArgumentException("Select a supported aviation metadata category.");
+        if (kind is not ("vfr" or "ifr" or "tfr" or "nasr")) throw new ArgumentException("Select a supported aviation metadata category.");
     }
     private void Write<T>(string kind, T snapshot, DateTimeOffset utc)
     {
@@ -108,7 +108,7 @@ public sealed partial class AviationMetadataStore : IDisposable
     public void Save(string kind, AviationCatalogSnapshot snapshot)
     {
         Kind(kind); if (kind == "tfr") throw new ArgumentException("Use the notice snapshot contract."); AviationCatalog.Validate(snapshot);
-        if (snapshot.Items.Any(i => (i.Product is AviationProduct.IfrLow or AviationProduct.IfrHigh) != (kind == "ifr")))
+        if (snapshot.Items.Any(i => (i.Product is AviationProduct.IfrLow or AviationProduct.IfrHigh) != (kind == "ifr") || (i.Product == AviationProduct.Nasr) != (kind == "nasr")))
             throw new InvalidDataException("Catalog records belong to a different FAA product category.");
         Write(kind, snapshot, snapshot.RetrievedUtc);
     }

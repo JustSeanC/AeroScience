@@ -9,11 +9,12 @@ using AeroScience.Shared;
 namespace AeroScience.Missions;
 
 // Parses bounded official metadata. Discovery is not download approval or geographic verification.
-public static class AviationCatalog
+public static partial class AviationCatalog
 {
     public const int MaximumMetadataBytes = 4 * 1024 * 1024;
     public const string VfrUrl = "https://www.faa.gov/air_traffic/flight_info/aeronav/digital_products/vfr/";
     public const string IfrUrl = "https://www.faa.gov/air_traffic/flight_info/aeronav/digital_products/ifr/";
+    public const string NasrUrl = "https://www.faa.gov/air_traffic/flight_info/aeronav/Aero_Data/NASR_Subscription/";
     public const string TfrUrl = "https://tfr.faa.gov/tfrapi/exportTfrList";
     public const string TfrReference = "https://tfr.faa.gov/tfr3/?page=map";
     public const string Attribution = "Federal Aviation Administration (FAA). Flight-simulation reference only; not a real-world preflight safety product.";
@@ -51,8 +52,9 @@ public static class AviationCatalog
     public static (AviationProduct Product, string Edition, string File) OriginalIdentity(string url)
     {
         if (string.IsNullOrEmpty(url) || url.Length > 2048 || url.Contains('%') || url.Contains('\\') || !Uri.TryCreate(url, UriKind.Absolute, out var u) ||
-            u.Scheme != "https" || u.Port != 443 || u.UserInfo.Length != 0 || u.Query.Length != 0 || u.Fragment.Length != 0 || u.Host != "aeronav.faa.gov" || u.AbsoluteUri != url)
-            throw new InvalidDataException("Only exact trusted FAA original chart links are supported.");
+            u.Scheme != "https" || u.Port != 443 || u.UserInfo.Length != 0 || u.Query.Length != 0 || u.Fragment.Length != 0 || u.Host is not ("aeronav.faa.gov" or "nfdc.faa.gov") || u.AbsoluteUri != url)
+            throw new InvalidDataException("Only exact trusted FAA original links are supported.");
+        if (u.Host == "nfdc.faa.gov") return NasrIdentity(u);
         var m = Regex.Match(u.AbsolutePath, @"^/(visual|enroute)/(\d{2}-\d{2}-\d{4})/(?:(sectional-files|tac-files|heli_files)/)?([A-Za-z0-9_-]+\.zip)$", RegexOptions.CultureInvariant, RegexDeadline);
         if (!m.Success || !DateOnly.TryParseExact(m.Groups[2].Value, "MM-dd-yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out _))
             throw new InvalidDataException("Unsupported FAA chart path or edition.");
@@ -70,7 +72,7 @@ public static class AviationCatalog
         foreach (Match link in Regex.Matches(Encoding.UTF8.GetString(html), """href\s*=\s*(?:"([^"<>]{1,2048})"|'([^'<>]{1,2048})'|([^\s"'<>`=]{1,2048}))""", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant, RegexDeadline))
         {
             var url = WebUtility.HtmlDecode(link.Groups.Cast<Group>().Skip(1).First(g => g.Success).Value);
-            if (!url.StartsWith("https://aeronav.faa.gov/", StringComparison.Ordinal)) continue;
+            if (!url.StartsWith("https://aeronav.faa.gov/", StringComparison.Ordinal) && !url.StartsWith("https://nfdc.faa.gov/", StringComparison.Ordinal)) continue;
             try
             {
                 var (product, edition, file) = OriginalIdentity(url); var id = Hash(Encoding.UTF8.GetBytes(url));

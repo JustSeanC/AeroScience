@@ -12,6 +12,7 @@ export async function openAviationDownloads(api,selection=null){
  dialog.append(status,storage,settings,work,jobs);document.body.append(dialog);dialogHeader(dialog);dialog.showModal();
  let closed=false,epoch=0,busy=false,timer,offset=0,lastJobs='';
  const paging=el('div',undefined,'action-row');dialog.append(paging);
+ button(paging,'Refresh FAA Jobs',()=>refresh());
  const previous=button(paging,'Previous Saved FAA Jobs',()=>{offset=Math.max(0,offset-50);lastJobs='';refresh();}),next=button(paging,'Next Saved FAA Jobs',()=>{offset+=50;lastJobs='';refresh();});
  dialog.addEventListener('close',()=>{closed=true;epoch++;clearTimeout(timer);dialog.remove();});
  const field=(parent,title,value)=>{const label=el('label',title),input=el('input');input.type='number';input.min='1';input.value=value;input.setAttribute('aria-label',title);label.append(input);parent.append(label);return input;};
@@ -52,11 +53,12 @@ export async function openAviationDownloads(api,selection=null){
    for(const job of list){
     const card=el('article',undefined,'panel');card.dataset.jobId=job.id;card.append(el('h4',`${job.preview.item.originalFileName} · ${job.preview.item.edition}`),el('p',job.state),el('p',`Received across attempts: ${bytes(job.downloadedBytes)}. Approved transfer limit: ${bytes(job.preview.maximumTransferBytes)}. Original size: ${bytes(job.preview.expectedBytes)}.`));
     if(job.state==='Completed')card.append(el('p',`Verified original SHA-256: ${job.originalSha256}. ${(job.files||[]).length} checked companions retained. Geographic rendering not yet assessed.`));
+    if(job.state==='Completed'&&job.preview.item.product==='nasr')card.append(el('p','Optional import builds a local FAA reference index and uses additional aviation database storage. Exact index size is Unknown before import; physical free-space checks remain enforced. No additional download or scientific observation is created.'));
     if(job.error)card.append(el('p',job.error));
     if(job.retryAfterUtc)card.append(el('p',`Next eligible provider retry: ${new Date(job.retryAfterUtc).toLocaleString()}`));
     const controls=el('div',undefined,'action-row');card.append(controls);
-    const actions=job.state==='Completed'?['verify']:job.state==='Awaiting Approval'||job.state==='Cancelled'?[]:job.state==='Paused by User'||job.state==='Interrupted'||job.state==='Failed'||job.state.startsWith('Waiting')?['resume','cancel']:['pause','cancel'];
-    for(const action of actions){const control=button(controls,{verify:'Verify Retained Original',pause:'Pause FAA Download',resume:'Resume / Retry FAA Download',cancel:'Cancel FAA Download'}[action],async()=>{try{await api(`/api/aviation/downloads/${job.id}/`+(action==='verify'?'verify':'control'),action==='verify'?{}:{revision:job.revision,action});status.textContent=action==='verify'?'Retained original and all extracted files match their recorded hashes.':'Stored job updated.';await refresh();}catch(error){status.textContent=error.message;}});control.dataset.action=action;}
+    const actions=job.state==='Completed'?(job.preview.item.product==='nasr'?['verify','import-vectors']:['verify']):job.state==='Awaiting Approval'||job.state==='Cancelled'?[]:job.state==='Paused by User'||job.state==='Interrupted'||job.state==='Failed'||job.state.startsWith('Waiting')?['resume','cancel']:['pause','cancel'];
+    for(const action of actions){const control=button(controls,{'import-vectors':'Import FAA Reference Features',verify:'Verify Retained Original',pause:'Pause FAA Download',resume:'Resume / Retry FAA Download',cancel:'Cancel FAA Download'}[action],async()=>{try{await api(`/api/aviation/downloads/${job.id}/`+(action==='verify'?'verify':action==='import-vectors'?'import-vectors':'control'),action==='verify'||action==='import-vectors'?{}:{revision:job.revision,action});status.textContent=action==='import-vectors'?'FAA reference features imported. Open Overlays & Legend and choose the exact edition. Original data and science are unchanged.':action==='verify'?'Retained original and all extracted files match their recorded hashes.':'Stored job updated.';await refresh();}catch(error){status.textContent=error.message;}});control.dataset.action=action;}
     jobs.append(card);
    }
    if(!list.length)jobs.append(el('p','No retained download intents on this page. Select an exact chart edition in FAA Catalog & Notices.'));

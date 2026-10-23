@@ -15,11 +15,11 @@ public sealed partial class AviationMetadataStore
         db.Open(); using var cmd = db.CreateCommand(); cmd.CommandText = "PRAGMA user_version";
         var version = Convert.ToInt32(cmd.ExecuteScalar());
         if (version == SchemaVersion) return;
-        if (version != 1) throw new NotSupportedException("Unsupported aviation database schema. Preserve the original database.");
+        if (version is not (1 or 2)) throw new NotSupportedException("Unsupported aviation database schema. Preserve the original database.");
         cmd.CommandText = "SELECT id FROM identity";
         if (cmd.ExecuteScalar() as string != identity.Id.ToString()) throw new IOException("Aviation store identity mismatch.");
         var folder = Path.Combine(directory, "Backups"); StorageManager.ValidateLocalPath(folder); Directory.CreateDirectory(folder);
-        var backup = Path.Combine(folder, $"aviation-schema1-{Guid.NewGuid():N}.sqlite");
+        var backup = Path.Combine(folder, $"aviation-schema{version}-{Guid.NewGuid():N}.sqlite");
         using (var copy = new SqliteConnection($"Data Source={backup};Pooling=False"))
         {
             copy.Open(); db.BackupDatabase(copy); using var check = copy.CreateCommand(); check.CommandText = "PRAGMA integrity_check";
@@ -28,7 +28,10 @@ public sealed partial class AviationMetadataStore
             if (check.ExecuteScalar() as string != identity.Id.ToString()) throw new IOException("Aviation backup identity failed.");
         }
         using var tx = db.BeginTransaction(); cmd.Transaction = tx;
-        cmd.CommandText = "CREATE TABLE download_jobs(id TEXT PRIMARY KEY,revision INTEGER NOT NULL,state TEXT NOT NULL,payload TEXT NOT NULL); PRAGMA user_version=2;";
+        cmd.CommandText = (version == 1 ? "CREATE TABLE download_jobs(id TEXT PRIMARY KEY,revision INTEGER NOT NULL,state TEXT NOT NULL,payload TEXT NOT NULL);" : "") +
+            "CREATE TABLE vector_datasets(id TEXT PRIMARY KEY,job_id TEXT NOT NULL UNIQUE,payload TEXT NOT NULL);" +
+            "CREATE TABLE vector_features(dataset_id TEXT NOT NULL,id TEXT NOT NULL,west REAL NOT NULL,south REAL NOT NULL,east REAL NOT NULL,north REAL NOT NULL,payload TEXT NOT NULL,PRIMARY KEY(dataset_id,id));" +
+            "PRAGMA user_version=3;";
         cmd.ExecuteNonQuery(); tx.Commit();
     }
     public AviationDownloadJob[] Jobs(int offset = 0)

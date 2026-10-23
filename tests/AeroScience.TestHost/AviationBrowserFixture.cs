@@ -18,6 +18,16 @@ public sealed class AviationBrowserFixture : HttpMessageHandler
     {
         Interlocked.Increment(ref Calls);
         if (Mode == "outage") return Task.FromResult(new HttpResponseMessage(HttpStatusCode.ServiceUnavailable));
+        if (request.RequestUri!.Host == "nfdc.faa.gov")
+        {
+            var family = request.RequestUri.AbsolutePath.Contains("_APT_", StringComparison.Ordinal) ? "APT" : request.RequestUri.AbsolutePath.Contains("_NAV_", StringComparison.Ordinal) ? "NAV" : "FIX";
+            var data = SyntheticNasr.Archive(family);
+            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.PartialContent) { Content = new ByteArrayContent(data) { Headers = { ContentRange = new(0, data.Length - 1, data.Length) } } });
+        }
+        if (request.RequestUri!.AbsoluteUri == AeroScience.Missions.AviationCatalog.NasrUrl)
+            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("<a href='./../NASR_Subscription/2026-10-01'>Synthetic advertised cycle</a>") });
+        if (request.RequestUri!.AbsoluteUri.StartsWith(AeroScience.Missions.AviationCatalog.NasrUrl, StringComparison.Ordinal))
+            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(string.Join("\n", new[]{"APT","NAV","FIX"}.Select(f => "<a href='"+SyntheticNasr.Url(f)+"'>Synthetic original</a>"))) });
         if (request.RequestUri!.Host == "aeronav.faa.gov")
         {
             using var memory = new MemoryStream();

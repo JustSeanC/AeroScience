@@ -1,5 +1,6 @@
 import {layerSelector,mapRequest} from './basemaps.js';
 import {dialogHeader} from './dialog-ui.js';
+import {aviationMapLayers} from './aviation-map-layers.js';
 import {openAviationReference} from './aviation-reference.js';
 const el=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
 const preferenceKey='aeroscience.map-overlay-visibility.v1';
@@ -19,20 +20,21 @@ export function mapLayerManager(L,map,definitions,applyBasemap){
  function render(){
   if(!dialog)return;const content=dialog.querySelector('.map-overlay-content');content.replaceChildren();inputs.clear();groups.clear();
   content.append(el('p','Basemap supplies geographic context. Mission geometry, recorded science and FAA references are independent overlays. An outline or locally retained dataset does not prove valid scientific pixels.'));
-  for(const name of ['Mission','Science']){const set=el('fieldset'),legend=el('legend',name+' overlays');set.append(legend);
+  for(const name of ['Mission','Science','FAA']){const set=el('fieldset'),legend=el('legend',name+' overlays');set.append(legend);
    const allLabel=el('label'),all=el('input');all.type='checkbox';all.setAttribute('aria-label',name+' overlays');allLabel.className='checkbox-label';allLabel.append(all,'Show '+name.toLowerCase()+' overlays');set.append(allLabel);groups.set(name,all);
    all.onchange=()=>{const visible=all.checked;for(const item of overlays.values())if(item.group===name)visibility(item,visible);sync();};
    for(const item of overlays.values()){if(item.group!==name)continue;const label=el('label'),input=el('input');input.type='checkbox';input.setAttribute('aria-label',item.name);label.className='checkbox-label';label.append(input,item.name);input.onchange=()=>{visibility(item,input.checked);sync();};inputs.set(item.id,input);set.append(label);
     if(item.description)set.append(el('p',item.description));
+    if(item.inspect){const inspect=el('button','View '+item.name+' references');inspect.type='button';inspect.onclick=item.inspect;set.append(inspect);}
     if(item.setOpacity){const opacityLabel=el('label',item.name+' opacity'),opacity=el('input');opacity.type='range';opacity.min='0';opacity.max='1';opacity.step='.05';opacity.value=item.opacity??1;opacity.setAttribute('aria-label',item.name+' opacity');opacity.oninput=()=>{item.opacity=Number(opacity.value);item.setOpacity(item.opacity);};opacityLabel.append(opacity);set.append(opacityLabel);}
    }
    content.append(set);
   }
-  const faa=el('section');faa.append(el('h3','FAA aviation & TFR overlays'),el('p','FAA vector/chart overlays: not yet available in this build. TFR polygons: unverified / unavailable. These layers cannot be used to clear a route of restrictions.'));
+  const faa=el('section');faa.append(el('p',aviation.status()),el('h3','FAA aviation & TFR overlays'),el('p','FAA imported NASR point/runway references are independent overlays. Airspace/SUA polygons, chart rendering remain unavailable. TFR polygons: unverified / unavailable. No layer can clear a route of restrictions.'));
   const references=el('button','FAA Catalog & Notices');references.type='button';references.onclick=()=>openAviationReference(mapRequest);faa.append(references);content.append(faa);
   content.append(el('p','Source edition / as-of: inspect the original source or recorded observation details. No chart edition or restriction freshness is inferred from the basemap.'));sync();
  }
- open.onclick=()=>{if(dialog?.open)return;dialog=el('dialog');dialog.setAttribute('aria-label','Map Overlays & Legend');dialog.className='map-overlays-dialog';dialog.append(el('h2','Map Overlays & Legend'));const content=el('div');content.className='map-overlay-content';dialog.append(content);document.body.append(dialog);dialogHeader(dialog,{opener:open});dialog.addEventListener('close',()=>{dialog.remove();dialog=null;inputs.clear();groups.clear();});render();dialog.showModal();};
- map.on('layeradd layerremove',sync);definitions.forEach(addOverlay);
- return {addOverlay,dispose(){if(disposed)return;disposed=true;stopBasemap();if(dialog){dialog.close();dialog?.remove();}map.off('layeradd layerremove',sync);control.remove();}};
+ open.onclick=()=>{if(dialog?.open)return;dialog=el('dialog');dialog.setAttribute('aria-label','Map Overlays & Legend');dialog.className='map-overlays-dialog';dialog.append(el('h2','Map Overlays & Legend'));const content=el('div');content.className='map-overlay-content';dialog.append(content);document.body.append(dialog);dialogHeader(dialog,{opener:open});dialog.addEventListener('close',()=>{dialog.remove();dialog=null;inputs.clear();groups.clear();});render();dialog.showModal();aviation.discover().then(changed=>{if(changed&&dialog?.open)render();});};
+ const aviation=aviationMapLayers(L,map,addOverlay);map.on('layeradd layerremove',sync);definitions.forEach(addOverlay);aviation.discover();
+ return {addOverlay,dispose(){if(disposed)return;disposed=true;aviation.dispose();stopBasemap();if(dialog){dialog.close();dialog?.remove();}map.off('layeradd layerremove',sync);control.remove();}};
 }

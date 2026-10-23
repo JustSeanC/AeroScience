@@ -75,7 +75,7 @@ public sealed partial class AviationReference
         AviationDownloadJob[] retained; AviationCatalogItem item;
         lock (gate)
         {
-            if (kind is not ("vfr" or "ifr")) throw new ArgumentException("Choose a cached VFR or IFR original.");
+            if (kind is not ("vfr" or "ifr" or "nasr")) throw new ArgumentException("Choose a cached VFR, IFR or supported NASR original.");
             using var store = Open(Preferences());
             item = store.Catalog(kind)?.Items.SingleOrDefault(i => i.Id == itemId) ?? throw new ArgumentException("Exact FAA edition not in the retained catalog. Refresh and select it again.");
             if (transfer is < MinimumBytes or > AviationDownloads.MaximumTransferBytes || expanded is < MinimumBytes or > AviationDownloads.MaximumExpandedBytes || item.OriginalBytes > transfer)
@@ -108,7 +108,7 @@ public sealed partial class AviationReference
                 var p = Preferences();
                 if (!p.OnlineEnabled || job.State != "Awaiting Approval" || job.Preview.ExpiresUtc < clock.GetUtcNow() || selectionHash != job.Preview.SelectionHash)
                     throw new InvalidOperationException("FAA preview changed/expired, access is disabled or approval already exists. Review a fresh preview.");
-                var current = store.Catalog(job.Preview.Item.Product is AviationProduct.IfrLow or AviationProduct.IfrHigh ? "ifr" : "vfr")?.Items.SingleOrDefault(i => i.Id == job.Preview.Item.Id);
+                var current = store.Catalog(job.Preview.Item.Product == AviationProduct.Nasr ? "nasr" : job.Preview.Item.Product is AviationProduct.IfrLow or AviationProduct.IfrHigh ? "ifr" : "vfr")?.Items.SingleOrDefault(i => i.Id == job.Preview.Item.Id);
                 if (current != job.Preview.Item) throw new InvalidOperationException("FAA edition metadata changed. Review a fresh preview.");
                 if (store.PendingJobs().Any(j => j.Preview.Item.Id == job.Preview.Item.Id)) throw new InvalidOperationException("This exact FAA original is already approved. Use its existing job.");
                 if (disk.FreeBytes(directory) < Reservation(job) + store.PendingJobs().Sum(Reservation) + StorageManager.MinimumFreeBytes)
@@ -191,6 +191,10 @@ public sealed partial class AviationReference
         if (!ContinueTransfer(job.Id)) return;
         if (disk.FreeBytes(directory) < Reservation(job) + StorageManager.MinimumFreeBytes) throw new IOException("Insufficient aviation staging capacity.");
         using var request = new HttpRequestMessage(HttpMethod.Get, job.Preview.Item.SourceUrl); request.Headers.UserAgent.ParseAdd("AeroScience/0.6.0");
+        // NASR supports bounded complete-entity range GETs even when HEAD/ordinary
+        // GET is unavailable. This always starts at zero in a fresh staging file.
+        if (job.Preview.Item.Product == AviationProduct.Nasr)
+            request.Headers.Range = new(0, job.Preview.MaximumTransferBytes - job.ChargedBytes - 1);
         using var response = await http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, token);
         if (response.StatusCode is HttpStatusCode.TooManyRequests or HttpStatusCode.ServiceUnavailable)
         {
@@ -203,7 +207,12 @@ public sealed partial class AviationReference
             }
             return;
         }
-        if (response.StatusCode != HttpStatusCode.OK || response.Headers.Location is not null) throw new InvalidDataException("Unsupported FAA response or redirect. No credentials are forwarded.");
+        var completeRange = response.Content.Headers.ContentRange;
+        var supportedRange = job.Preview.Item.Product == AviationProduct.Nasr && response.StatusCode == HttpStatusCode.PartialContent &&
+            completeRange is { Unit: "bytes", From: 0, Length: > 0 } && completeRange.To == completeRange.Length - 1 &&
+            response.Content.Headers.ContentLength == completeRange.Length;
+        if (response.StatusCode != HttpStatusCode.OK && !supportedRange || response.Headers.Location is not null)
+            throw new InvalidDataException("Unsupported FAA response, incomplete range or redirect. No credentials are forwarded.");
         var expected = response.Content.Headers.ContentLength;
         if (expected > job.Preview.MaximumTransferBytes - job.ChargedBytes || job.Preview.ExpectedBytes is {} published && expected != published)
             throw new InvalidDataException("FAA length changed or exceeds the remaining approved transfer allowance.");
@@ -255,7 +264,7 @@ public sealed partial class AviationReference
         var sha = await AviationDownloads.FileHash(zip, token);
         if (job.Preview.Item.OriginalSha256 is {} providerHash && providerHash != sha) throw new InvalidDataException("FAA original checksum mismatch.");
         if (disk.FreeBytes(directory) < job.Preview.MaximumExpandedBytes + StorageManager.MinimumFreeBytes) throw new IOException("Insufficient extraction capacity.");
-        var files = await AviationDownloads.VerifyArchive(zip, Path.Combine(stage, "files"), job.Preview.MaximumExpandedBytes, token, () => ContinueTransfer(job.Id));
+        var files = await AviationDownloads.VerifyArchive(zip, Path.Combine(stage, "files"), job.Preview.MaximumExpandedBytes, token, () => ContinueTransfer(job.Id), nasr: job.Preview.Item.Product == AviationProduct.Nasr);
         if (!ContinueTransfer(job.Id)) return;
         lock (gate)
         {
