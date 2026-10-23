@@ -5,10 +5,17 @@ storage/toolbar onboarding and launch AeroScience from Start. The local services
 browser dashboard start automatically. Pilots need no SDK, terminal, Python/GDAL,
 manual DLL copy or separate server. Portable ZIPs are secondary.
 
-Use [the pilot guide](v0.4.2-pilot-guide.md) for Plan → Prepare → Fly → Review →
-Compare → Export. Automatic, bounded terrain/Landsat/Sentinel preparation is the normal
-supported workflow after separate scientific-data consent. Hyperspectral uses supported
-graphical ENVI import; global automatic hyperspectral coverage is not claimed. Science
+Use [Mission Planner](mission-planner.md), [science operations](science-operations.md) and
+the [0.5.0 readiness/evidence](v0.5.0-readiness.md) for Plan → Prepare → Fly → Review →
+Compare → Export. Version 0.5.0 adds multiple science sessions in a continuous flight,
+backend route/gate automation, evidence-backed preflight readiness, calibration/operating
+assessments and reproducible Realistic mission-performance grading. Geographic Survey
+recommends terrain and multispectral instruments with optional thermal/hyperspectral context.
+The Geographic Library supports explicit bounded discovery, approved durable downloads,
+recovery and reuse. Automatic terrain/Landsat/Sentinel preparation follows separate
+scientific-data consent. AVIRIS supports authorized Earthdata Download & Import or official
+browser handoff/guided ENVI import; EMIT is discovery-only. Global hyperspectral coverage is
+not claimed. Science
 Map represents the complete selected indexed archive with independent instrument
 layers, bounded aggregation and accessible exact values. A location overview is not a
 continuous raster or a scientific value measured at its centroid.
@@ -30,7 +37,8 @@ Windows/MSFS, physical iPad Safari, Quest 3, representative-user usability or WC
 conformance. For a published installer, consult its exact-hash release evidence rather
 than inferring acceptance from this document. See the included completion, scientific
 visualization, accessibility and Windows testing guides. No release is authorized by
-the v0.4.2 implementation prompt alone.
+an implementation prompt or a stable version label alone. Owner approval applies to the
+identified tested build; inspect the exact installer/source hashes in its release receipts.
 
 Need help with AeroScience? Join our Discord community for support, troubleshooting,
 questions, feature requests, and discussions with other pilots.

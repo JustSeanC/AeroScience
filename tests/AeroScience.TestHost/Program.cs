@@ -28,7 +28,7 @@ if (args.Length > 0 && args[0] == "--earthdata-vault-probe")
 if (args.Length > 0 && args[0] == "--profile-probe")
 {
     var profile=ApplicationProfile.Current;
-    if(!profile.Validation || profile.Port!=5085 || profile.ToolbarPackage!="aeroscience-validation-toolbar" || profile.CommandEvent==AeroScience.SimConnect.CommBusTransport.CommandEvent)
+    if(!profile.Validation || profile.Port!=5086 || profile.ToolbarPackage!="aeroscience-validation-v0-6-0-toolbar" || profile.CommandEvent==AeroScience.SimConnect.CommBusTransport.CommandEvent)
         throw new InvalidOperationException("The compiled validation profile was not isolated.");
     var preferences=profile.Preferences();var defaults=preferences.Load();
     profile.EngineOptions(defaults with{EnableLan=true,LanAddress="192.168.1.5"}).Validate();

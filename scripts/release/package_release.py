@@ -91,6 +91,8 @@ def identity(version=RELEASE_VERSION):
     if base == '0.4.2': title = f'AeroScience v{base} — Research Workstation & Scientific Visualization' + (' Prerelease' if preview else '')
     if base == '0.4.1': title = f'AeroScience v{base} — Scientific Review & Mission Readiness' + (' Prerelease' if preview else '')
     if base == '0.4.0': title = f'AeroScience v{base} — Scientific Mission Planning, Sensor Modeling & Analysis' + (' Prerelease' if preview else '')
+    if base == '0.5.0': title = f'AeroScience v{base} — Scientific Mission Operations' + (' Prerelease' if preview else '')
+    if base == '0.6.0': title = f'AeroScience v{base} — Aviation Mapping & Scientific Data Expansion' + (' Prerelease' if preview else '')
     return dict(version=version, package_version=base, tag='v'+version, root_name=root,
                 asset_name=root+'.zip', candidate_name=root+'-CANDIDATE.zip', setup_name=f'AeroScience-Setup-v{version}.exe',
                 setup_record_name=f'AeroScience-Setup-v{version}.release.json', prerelease=preview, title=title)
@@ -158,23 +160,23 @@ def validate_community(root, package_version=VERSION, *, validation=False):
                 "html_ui/icons/toolbar/ICON_AEROSCIENCE.svg", "html_ui/InGamePanels/AeroScience/toolbar-compatibility.json",
                 "html_ui/InGamePanels/AeroScience/AeroScience.Map.js", "html_ui/InGamePanels/AeroScience/AeroScience.Geography.js", "html_ui/InGamePanels/AeroScience/geography-provenance.json"}
     if validation:
-        expected = {name.replace('aeroscience_panel', 'aeroscience_validation_panel').replace('InGamePanels/AeroScience/', 'InGamePanels/AeroScienceValidation/').replace('ICON_AEROSCIENCE', 'ICON_AEROSCIENCE_VALIDATION') for name in expected}
+        expected = {name.replace('aeroscience_panel', 'aeroscience_validation_v060_panel').replace('InGamePanels/AeroScience/', 'InGamePanels/AeroScienceValidationV060/').replace('ICON_AEROSCIENCE', 'ICON_AEROSCIENCE_VALIDATION_V060') for name in expected}
     def identity_path(name):
-        return name.replace('aeroscience_panel', 'aeroscience_validation_panel').replace('ingamepanels/aeroscience/', 'ingamepanels/aerosciencevalidation/').replace('icon_aeroscience.svg', 'icon_aeroscience_validation.svg') if validation else name
+        return name.replace('aeroscience_panel', 'aeroscience_validation_v060_panel').replace('ingamepanels/aeroscience/', 'ingamepanels/aerosciencevalidationv060/').replace('icon_aeroscience.svg', 'icon_aeroscience_validation_v060.svg') if validation else name
     require({name.casefold() for name in expected} <= indexed.keys(), "Compiled panel registration or toolbar assets are missing.")
     binary = indexed[identity_path("ingamepanels/aeroscience_panel.spb")].read_bytes()
     require(len(binary) > 32 and not binary.lstrip().startswith((b"<", b"{")), "Panel is source/placeholder content, not an SDK-compiled SPB.")
     compatibility=read_json(indexed[identity_path("html_ui/ingamepanels/aeroscience/toolbar-compatibility.json")])
     require(compatibility.get('protocol')==1 and compatibility.get('applicationVersion')==package_version, 'Toolbar compatibility descriptor differs from the release/protocol.')
     html = indexed[identity_path("html_ui/ingamepanels/aeroscience/aeroscience.html")].read_text(encoding="utf-8-sig")
-    require(('panel-id="PANEL_AEROSCIENCE_VALIDATION"' if validation else 'panel-id="PANEL_AEROSCIENCE"') in html and "AeroScience.js" in html and "AeroScience.css" in html, "Panel references are inconsistent.")
+    require(('panel-id="PANEL_AEROSCIENCE_VALIDATION_V060"' if validation else 'panel-id="PANEL_AEROSCIENCE"') in html and "AeroScience.js" in html and "AeroScience.css" in html, "Panel references are inconsistent.")
     expected_icon=hashlib.sha256((REPO/'assets/branding/orbital-arc-toolbar-white.svg').read_bytes()).hexdigest()
     require(hashlib.sha256(indexed[identity_path('html_ui/icons/toolbar/icon_aeroscience.svg')].read_bytes()).hexdigest()==expected_icon, 'Toolbar icon differs from approved Orbital Arc asset.')
     if validation:
-        script = indexed['html_ui/ingamepanels/aerosciencevalidation/aeroscience.js'].read_text(encoding='utf-8-sig')
-        require('AeroScience.Validation.0_5_0.Command.v1' in script and 'AeroScience.Validation.0_5_0.Reply.v1' in script, 'Validation CommBus identity missing.')
+        script = indexed['html_ui/ingamepanels/aerosciencevalidationv060/aeroscience.js'].read_text(encoding='utf-8-sig')
+        require('AeroScience.Validation.0_6_0.Command.v1' in script and 'AeroScience.Validation.0_6_0.Reply.v1' in script, 'Validation CommBus identity missing.')
         require('AeroScience.Command.v1' not in script and 'AeroScience.Reply.v1' not in script, 'Production CommBus channel in validation package.')
-        require(manifest.get('title') == 'AeroScience 0.5.0 Validation', 'Validation title missing.')
+        require(manifest.get('title') == 'AeroScience 0.6.0 Validation', 'Validation title missing.')
     return found
 
 
@@ -440,6 +442,37 @@ def verify_archive(archive, checksum):
 
 
 def release_notes(info):
+    if info['package_version'] == '0.5.0' and 'acceptance' in info:
+        return f'''# {info['title']}
+
+Download **{info['asset_name']}** and its SHA-256 checksum. Run the setup EXE, then launch AeroScience from Start. The guided setup preserves existing mission/science storage and offers the genuine SDK-built MSFS 2024 toolbar. Pilots need no SDK, terminal, Python or separate server.
+
+## Scientific Mission Operations
+
+- Plan with evidence-backed preflight readiness, selective First Half / Entire Mission / chosen-area preparation, and a compact Recommended Science Payload panel. Geographic Survey recommends Terrain Scanner and Multispectral Imager; thermal, hyperspectral and atmospheric context are explicit optional additions. Existing custom geometry, profiles, calibration and cadence remain protected.
+- Conduct multiple independent science sessions in one continuous flight recording. Start, Pause, Resume and End Current Science Session remain separate from End Flight. Explicit backend route/gate triggers and optional boundary pause/resume work without an open dashboard; manual overrides and rearm remain authoritative.
+- Use versioned calibration/reference configurations and live Realistic Mode Sensor Operating Status. Documented operating checks, unknown evidence and external-source availability stay distinct. Universal mode and aircraft-agnostic, read-only simulator integration remain available.
+- Review session results and reproducible Realistic mission-performance grading from frozen flight-wide obligations. Good Data, valid scientific coverage and pilot-performance scores are distinct; ending or splitting sessions cannot erase required work or manufacture successful observations.
+- Browse the Geographic Scientific Data Library, select exact scenes and bounded areas, review/approve durable download jobs, recover interrupted work and reuse verified originals offline. Providers include USGS 3DEP bare-earth elevation, Copernicus GLO-30 surface elevation/DSM, Landsat Collection 2 Level-2 temperature and Sentinel-2 Level-2A multispectral data.
+- Discover AVIRIS-Classic, AVIRIS-NG and EMIT through NASA CMR. Supported AVIRIS originals use individually authorized Earthdata Download & Import with profile-scoped Windows credential protection, or official browser handoff and guided ENVI import. EMIT is discovery/official-access only; native NetCDF import is not supported.
+- Review mission intelligence, replay, native-grid scientific comparisons, archived observations and portable exports across the dashboard, paired browser and compact MSFS toolbar. Orbital Arc branding and current Help/support guidance are included.
+
+## Scientific and acceptance boundaries
+
+Historical satellite/DEM datasets are external observations, not live aircraft camera pixels or airborne LiDAR returns. Native values, source dates, units, masks, resolution, datums and provenance remain authoritative. Missing or late data cannot create past live observations. No guaranteed worldwide hyperspectral coverage, certified sensor accuracy or real-world flight-planning certification is claimed.
+
+Public provider, workspace and genuine Cuprite ENVI verification are recorded separately from installed acceptance. Catalog discovery and Cuprite do not establish authorized AVIRIS-Classic/NG original numerical acceptance; consult the release's specific evidence and limitations. Per-user Earthdata authorization is optional and credentials are never bundled. No AeroScience account or hosted download server is required.
+
+The Windows/MSFS acceptance for the exact-source installer and its build receipts accompany this release. Earlier owner-approved Windows/MSFS testing remains valid evidence for its identified build; it is not automatically identical-byte approval of a later installer. Physical-device and protected-source checks must be read from actual evidence, never inferred from automated tests or this release's stable label. Updates and uninstall preserve existing user data; only managed regenerable caches are eligible for automatic cleanup.
+
+New installations check stable releases by default; an explicit existing prerelease preference is preserved. Installers are never executed automatically. Flight/science defaults remain 25 GB / 50 GB, with separate online scientific-data and basemap consent.
+
+Need help with AeroScience? Join our Discord community for support, troubleshooting, questions, feature requests, and discussions with other pilots. [Join our Discord](https://discord.gg/mpYyazCqvJ). Membership is optional; feedback/log collection and GitHub issue reporting remain available.
+
+Source: https://github.com/JustSeanC/AeroScience/commit/{info['source_commit']}
+
+SHA-256: `{info['sha256']}`
+'''
     if requires_manual_acceptance(info['version']) and 'acceptance' in info:
         changes = ('v0.4.2 improves the research workstation, complete-scope Science Map with independent instrument layers, native-grid value comparison, instrument findings, download activity, offline help and responsive navigation. Scientific values, source dates, masks, units and original files remain authoritative. Human usability scores and broad accessibility conformance are not established by automated checks.'
                    if tuple(map(int, info['version'].split('-')[0].split('.'))) >= (0,4,2) else 'v0.4.1 adds explicit saved-plan selection before flight, instrument-first preparation, full-page Science Map / Compare / Analysis / Results / Replay, a grouped reusable source library, evidence-bound post-flight reconstruction, repeated straight transects and integrated offline Help. External-source QA, native-grid composites, original timestamps and immutable products remain authoritative. Download concurrency stays at one by default; up to eight is configurable, subject to provider/resource limits.'

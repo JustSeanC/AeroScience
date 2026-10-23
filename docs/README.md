@@ -2,24 +2,26 @@
 
 ## v0.6.0 development reference
 
-The current source baseline contains v0.5.0; v0.6.0 work is isolated on `develop/v0.6.0`.
+Current development is **0.6.0 / prerelease** on `develop/v0.6.0`, integrating frozen 0.5.0
+source `27e5f53` while retaining the existing aviation/map/cache implementation.
 Start with [scope](roadmap/v0.6.0-scope.md), [architecture](roadmap/v0.6.0-architecture.md),
 [phase tracker](roadmap/v0.6.0-development-tracker.md) and [readiness](v0.6.0-readiness.md).
 No v0.6.0 public release or owner acceptance is implied. [Map/reference guide](v0.6.0-aviation-reference.md)
 and [owner workbook](v0.6.0-acceptance-workbook.md) distinguish implemented metadata UI from pending original-data features.
 Historical QA records below retain their dates.
 
-For private 0.5.0 testing while 0.4.2 QA continues: [build and isolation](v0.5.0-private-validation.md),
+Use the [0.6.0 private build/isolation guide](v0.6.0-private-validation.md) for its separate profile.
+Historical 0.5.0 testing: [build and isolation](v0.5.0-private-validation.md),
 [owner acceptance workbook](v0.5.0-acceptance-workbook.md), [readiness and blockers](v0.5.0-readiness.md).
-No public 0.5.0 release is authorized.
+The owner is handling official 0.5.0 Windows building/publication separately from frozen main.
 
 
 Development additions: [instrument calibration and provenance](instrument-calibration.md)
 describes P03; use the [development tracker](roadmap/v0.5.0-development-tracker.md) for
 implementation and outstanding acceptance. Stable 0.4.2 QA material remains below.
 
-Stable software and active external QA use **v0.4.2**. Version **0.5.0 is in development**
-on `develop/v0.5.0`; planned contracts do not establish implemented or accepted features.
+Published **v0.4.2** assets and QA evidence remain protected. The completed **0.5.0** source is frozen
+on main; current 0.6.0 development and historical acceptance are separate from its public publication.
 
 ## Install, fly and review
 
@@ -38,7 +40,8 @@ on `develop/v0.5.0`; planned contracts do not establish implemented or accepted 
 ## Develop, verify and release
 
 - [Current architecture](architecture.md) and [development/verification workflow](verification.md) and [two-tier CI](development-validation.md).
-- [Windows build, installed acceptance and manual publication](public-release-windows.md).
+- [Windows candidate build and installed acceptance](public-release-windows.md): current
+  0.5.0 handoff and preserved 0.4.2 guide; publication requires separate approval.
 - [v0.4.2 QA checklist](v0.4.2-windows-testing.md),
   [completion and limitations](v0.4.2-completion.md),
   [accessibility evidence](v0.4.2-accessibility.md) and

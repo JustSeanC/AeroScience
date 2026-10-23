@@ -4,9 +4,16 @@ These records preserve original provider identities, source dates, units, grids,
 retrieval/processing context, numeric comparisons and source hashes. Retain them for
 reproduction and release verification; age alone is not a reason to delete evidence.
 
-- v0.5.0 [automatic providers](v0.5.0-automatic-provider-acceptance.json),
+- Current 0.6.0 records are separate: [automatic providers](v0.6.0-automatic-provider-acceptance.json),
+  [guided ENVI](v0.6.0-guided-envi-acceptance.json), [workspace](v0.6.0-workspace-acceptance.json).
+  Check their actual status and [current readiness](../v0.6.0-readiness.md); history cannot approve changed source.
+- Historical v0.5.0 [automatic providers](v0.5.0-automatic-provider-acceptance.json),
   [guided ENVI](v0.5.0-guided-envi-acceptance.json) and
-  [workspace](v0.5.0-workspace-acceptance.json) are **pending**, not acceptance passes.
+  [workspace](v0.5.0-workspace-acceptance.json) pass fresh genuine-source verification
+  from clean source `8e4151e`, retaining matching hashes in frozen main `27e5f53`.
+  The [release-engineering receipt](v0.5.0-release-validation.json) also records fresh
+  Library jobs/reuse and public NASA CMR metadata for its earlier `111e9e9` source. Protected Classic/NG originals and
+  installed/device acceptance remain pending independently.
 - v0.4.2 [automatic providers](v0.4.2-automatic-provider-acceptance.json),
   [guided ENVI](v0.4.2-guided-envi-acceptance.json) and
   [workspace](v0.4.2-workspace-acceptance.json) retain their original source-bound findings

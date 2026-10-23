@@ -26,7 +26,7 @@ class DevelopmentValidationTests(unittest.TestCase):
         self.assertEqual('fast', ci.validation_tier('workflow_dispatch', 'refs/heads/develop/v0.6.0', requested='fast'))
         self.assertEqual('full', ci.validation_tier('push', 'refs/heads/develop/v0.6.0', message='P01 [full-validation]'))
         self.assertEqual('full', ci.validation_tier('workflow_dispatch', 'refs/heads/develop/v0.6.0', requested='full'))
-        self.assertEqual('full', ci.validation_tier('workflow_dispatch', 'refs/heads/develop/v0.6.0', requested='windows-profile'))
+        self.assertEqual('windows-profile', ci.validation_tier('workflow_dispatch', 'refs/heads/develop/v0.6.0', requested='windows-profile'))
         for ref in ('refs/heads/develop/v0.7.0', 'refs/heads/release/v0.5.0-acceptance', 'refs/heads/main', 'refs/tags/v0.6.0'):
             self.assertEqual('full', ci.validation_tier('push', ref))
 
@@ -35,6 +35,10 @@ class DevelopmentValidationTests(unittest.TestCase):
         for name in ('EvidenceContractsTests', 'MissionEvidenceStoreTests', 'AlphaDataTests', 'ResearchTests', 'ScientificWorkspaceTests'):
             self.assertIn(name, selected['dotnetFilter'])
         self.assertIn('not full integration', selected['scope'])
+
+    def test_forward_integration_pr_requires_full_but_routine_development_stays_fast(self):
+        self.assertEqual('full',ci.validation_tier('pull_request','refs/pull/20/merge','develop/v0.6.0',head='integration/v0.6.0-frozen-v0.5.0'))
+        self.assertEqual('fast',ci.validation_tier('pull_request','refs/pull/21/merge','develop/v0.6.0',head='feature/ordinary-development'))
 
     def test_windows_profile_diagnostic_is_manual_development_only(self):
         self.assertEqual('windows-profile', ci.validation_tier('workflow_dispatch', 'refs/heads/develop/v0.5.0', requested='windows-profile'))

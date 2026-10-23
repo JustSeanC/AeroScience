@@ -1054,6 +1054,34 @@ select:focus-visible {
   gap: 14px;
   margin: 14px 0;
 }
+/* Template guidance spans the form; it must never become a Mission Details grid cell. */
+.mission-objective-field { grid-column: 1 / -1; }
+.mission-objective-field textarea { width: 100%; box-sizing: border-box; resize: vertical; }
+#plan-form > .recommended-payload {
+  padding: clamp(14px, 2vw, 22px);
+  margin: 18px 0;
+  max-width: 100%;
+}
+.recommended-payload-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  align-items: start;
+  gap: 14px;
+  margin: 12px 0;
+}
+.payload-recommendation { min-width: 0; }
+.payload-recommendation h4 { margin: 6px 0; font-size: 1.05rem; }
+.payload-recommendation p { margin: 7px 0; }
+.payload-role, .payload-inclusion { font-size: var(--font-support, .875rem); font-weight: 600; }
+.payload-role { color: var(--accent); }
+.payload-recommendation .payload-inclusion { color: var(--text); }
+.payload-reference, .payload-source { overflow-wrap: anywhere; }
+.recommended-payload summary { min-height: 44px; padding: 10px 0; box-sizing: border-box; }
+.recommended-payload summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.recommended-payload details { margin-top: 8px; }
+.recommended-payload .action-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+.recommended-payload button, .recommended-payload .button { min-height: 44px; max-width: 100%; white-space: normal; }
+.recommended-optional, .recommended-explanation { border-top: 1px solid var(--line); }
 #plan-form label,
 #control > .research-panel label {
   display: flex;

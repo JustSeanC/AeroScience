@@ -59,9 +59,15 @@ class ReleaseFlowTests(unittest.TestCase):
         self.acceptance.write_text(json.dumps(acceptance), encoding='utf-8')
         return acceptance
 
-    def test_science_release_is_a_prerelease_with_the_conventional_setup_filename(self):
+    def test_development_release_is_separate_from_the_frozen_stable_identity(self):
         self.assertEqual(p.identity()['setup_name'], f"AeroScience-Setup-v{p.RELEASE_VERSION}.exe")
+        self.assertEqual(p.RELEASE_VERSION, '0.6.0')
+        self.assertEqual(p.RELEASE_CHANNEL, 'prerelease')
         self.assertTrue(p.identity()['prerelease'])
+        self.assertEqual(p.identity()['tag'], 'v0.6.0')
+        self.assertEqual(p.identity('0.5.0')['tag'], 'v0.5.0')
+        self.assertFalse(p.identity('0.5.0')['prerelease'])
+        self.assertEqual(p.identity('0.5.0')['title'], 'AeroScience v0.5.0 — Scientific Mission Operations')
         self.assertFalse(p.identity('1.0.0')['prerelease'])
 
     def test_version_metadata_supports_future_prerelease_and_stable_versions(self):
@@ -72,7 +78,7 @@ class ReleaseFlowTests(unittest.TestCase):
         for invalid in ('v0.1.1-alpha', '../bad', '0.1', '1.0.0\n', '1.0.0+local'):
             with self.assertRaises(ValueError): p.identity(invalid)
 
-    def test_science_prerelease_requires_installed_extended_and_scientific_checks(self):
+    def test_science_stable_requires_installed_extended_and_scientific_checks(self):
         commit, digest = self.prepare(); data = self.accept(commit, digest)
         p.validate_acceptance(self.acceptance, source_commit=COMMIT, payload_sha256=digest)
         self.assertEqual(data['checks']['vr_performance']['result'], 'passed')
@@ -85,6 +91,17 @@ class ReleaseFlowTests(unittest.TestCase):
         self.acceptance.write_text(json.dumps(data), encoding='utf-8')
         with self.assertRaisesRegex(ValueError, 'live_mission_smoke'): p.finalize_candidate(self.candidate, self.acceptance, self.final)
         self.assertFalse(self.final.exists())
+
+    def test_stable_notes_describe_current_features_without_claiming_unperformed_nasa_acceptance(self):
+        info = dict(p.identity('0.5.0'), acceptance={'checks':{}}, source_commit=COMMIT, sha256='b'*64)
+        notes=p.release_notes(info)
+        for expected in ('multiple independent science sessions', 'calibration', 'Geographic Scientific Data Library',
+                         'AVIRIS-Classic', 'Sensor Operating Status', 'Grading', 'End Flight', 'EMIT', 'SHA-256'):
+            self.assertIn(expected.lower(), notes.lower())
+        self.assertNotIn('v0.4.2 improves',notes)
+        self.assertNotIn('Science Mission Operations Prerelease',notes)
+        self.assertIn('do not establish authorized AVIRIS-Classic/NG original numerical acceptance',notes)
+        self.assertIn('native NetCDF import is not supported',notes)
 
     def test_final_zip_keeps_exact_tested_payload_and_has_no_private_runtime_path(self):
         commit, digest = self.prepare(); self.accept(commit, digest)
@@ -220,7 +237,7 @@ function global:gh {
     }
     if ($a[0] -eq 'release' -and $a[1] -eq 'create') {
         $global:mock.creates++
-        $global:mock.release=@{ draft=$true; prerelease=$true; assets=@(); html_url='https://github.com/JustSeanC/AeroScience/releases/tag/v0.1.1-alpha' }; return
+        $global:mock.release=@{ draft=$true; prerelease=($a -contains '--prerelease'); assets=@(); html_url="https://github.com/JustSeanC/AeroScience/releases/tag/$($a[2])" }; return
     }
     if ($a[0] -eq 'release' -and $a[1] -eq 'upload') {
         $file=$a[3]; $global:mock.uploads++

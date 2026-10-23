@@ -53,7 +53,7 @@ public sealed partial class ScientificHttp : IDisposable
         CacheEnabled=cacheEnabled;this.cacheClock=cacheClock??(()=>DateTimeOffset.UtcNow);
         http=handler is null?new(new SocketsHttpHandler{AllowAutoRedirect=false,UseCookies=false,AutomaticDecompression=DecompressionMethods.None,MaxResponseDrainSize=0,MaxConnectionsPerServer=2,ConnectTimeout=TimeSpan.FromSeconds(20)}):new(handler);
         http.Timeout=TimeSpan.FromSeconds(45);
-        http.DefaultRequestHeaders.UserAgent.ParseAdd("AeroScience/0.5.0 (+https://github.com/JustSeanC/AeroScience)");
+        http.DefaultRequestHeaders.UserAgent.ParseAdd("AeroScience/0.6.0 (+https://github.com/JustSeanC/AeroScience)");
     }
     public static void ValidateUrl(Uri uri)
     {
