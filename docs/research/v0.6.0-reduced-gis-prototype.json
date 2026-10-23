@@ -509,12 +509,12 @@
         "delayImports": []
       }
     ],
-    "finding": "Only jpeg62.dll imports vcruntime140.dll. Upstream sharedlib/CMakeLists.txt overrides its libjpeg API target to MultiThreadedDLL despite WITH_CRT_DLL=OFF; actual Ninja flags confirm /MT followed by -MD and /NODEFAULTLIB:LIBCMT. GDAL and ten other DLLs use the selected static CRT."
+    "finding": "Only jpeg62.dll imports vcruntime140.dll. Upstream sharedlib/CMakeLists.txt overrides its libjpeg API target to MultiThreadedDLL despite WITH_CRT_DLL=OFF; actual Ninja flags confirm /MT followed by -MD and /NODEFAULTLIB:LIBCMT. The ten other DLLs, including GDAL, use the selected static CRT."
   },
   "staticJpegCorrection": {
     "sourceCommit": "29f87be8dbdcd3f358933ec506f9bf9e5e5b5dd5",
     "run": "https://github.com/JustSeanC/AeroScience/actions/runs/40027523220",
-    "status": "pending actual Windows result",
+    "status": "passed: actual isolated Windows native import/loading, copied PROJ database and genuine FAA raster/CRS verification",
     "approach": "Supported per-port static libjpeg linked into TIFF; unused TurboJPEG disabled. Exact-source-pinned packaging guard skips only absent optional TurboJPEG library renames. No runtime audit allowlist change.",
     "priorAttempt": {
       "sourceCommit": "e8db40ab003918b2a69826037b8fb46bf8f1845c",
@@ -526,7 +526,298 @@
       "skipped": 0,
       "evidenceClass": "Synthetic recipe/PE import checks, not Windows execution"
     },
-    "productionDistributionApproved": false
+    "productionDistributionApproved": false,
+    "actualNativeResult": {
+      "evidenceClass": "Actual native research process and limited genuine FAA original window/CRS comparison; no chart neatline, application, EMIT or owner acceptance",
+      "version": "3.12.4",
+      "drivers": [
+        "GTiff",
+        "COG",
+        "VRT",
+        "MEM",
+        "GNMFile",
+        "GNMDatabase",
+        "ESRI Shapefile",
+        "GeoJSON",
+        "GeoJSONSeq",
+        "ESRIJSON",
+        "TopoJSON"
+      ],
+      "paletteCount": 256,
+      "window": [
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        86,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        10,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        0,
+        74,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        129,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        0,
+        94,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        86,
+        94,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        129,
+        68,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        9,
+        84
+      ],
+      "transformed": [
+        [
+          -161.75682700741896,
+          23.964706702681063
+        ],
+        [
+          -157.5580613732131,
+          20.889443974946932
+        ],
+        [
+          -153.53812304860543,
+          17.712709840554524
+        ]
+      ],
+      "maximumDifference": 0,
+      "elapsedSeconds": 0.1086714,
+      "peakResidentBytes": 44998656,
+      "productionDependencyAdded": false
+    },
+    "imports": {
+      "architecture": "Windows x64",
+      "importsAccountedFor": true,
+      "staticCrtRequired": true,
+      "files": [
+        {
+          "file": "gdal.dll",
+          "bytes": 10491392,
+          "sha256": "86b665a88bf1b63d788c4fee3eb918b55eb53f4d469e67a6c4ba37bf5dbc0f45",
+          "imports": [
+            "geotiff.dll",
+            "json-c.dll",
+            "kernel32.dll",
+            "proj_9.dll",
+            "tiff.dll",
+            "z.dll"
+          ],
+          "directImports": [
+            "geotiff.dll",
+            "json-c.dll",
+            "kernel32.dll",
+            "proj_9.dll",
+            "tiff.dll",
+            "z.dll"
+          ],
+          "delayImports": []
+        },
+        {
+          "file": "geotiff.dll",
+          "bytes": 332288,
+          "sha256": "2b3f1751d204d7dfbb5703a402de696e4e2ae348ca654942ec70f1a9802097c5",
+          "imports": [
+            "kernel32.dll",
+            "proj_9.dll",
+            "tiff.dll"
+          ],
+          "directImports": [
+            "kernel32.dll",
+            "proj_9.dll",
+            "tiff.dll"
+          ],
+          "delayImports": []
+        },
+        {
+          "file": "json-c.dll",
+          "bytes": 259584,
+          "sha256": "63303ddf2bf16f481aa15981aea4716c795dc476ee0375aa6122ffdd93b6b16e",
+          "imports": [
+            "advapi32.dll",
+            "kernel32.dll"
+          ],
+          "directImports": [
+            "advapi32.dll",
+            "kernel32.dll"
+          ],
+          "delayImports": []
+        },
+        {
+          "file": "libcurl.dll",
+          "bytes": 908800,
+          "sha256": "d8b8fc490b5d63bb97a53dc6a8bb7a973276c046731585859ee6c05ef2bf9596",
+          "imports": [
+            "advapi32.dll",
+            "bcrypt.dll",
+            "crypt32.dll",
+            "iphlpapi.dll",
+            "kernel32.dll",
+            "secur32.dll",
+            "ws2_32.dll",
+            "z.dll"
+          ],
+          "directImports": [
+            "advapi32.dll",
+            "bcrypt.dll",
+            "crypt32.dll",
+            "iphlpapi.dll",
+            "kernel32.dll",
+            "secur32.dll",
+            "ws2_32.dll",
+            "z.dll"
+          ],
+          "delayImports": []
+        },
+        {
+          "file": "liblzma.dll",
+          "bytes": 285184,
+          "sha256": "ebec53da590a2352451bebdd1661ab98ca33e48159bfb723a69af97c6f3dd75c",
+          "imports": [
+            "kernel32.dll"
+          ],
+          "directImports": [
+            "kernel32.dll"
+          ],
+          "delayImports": []
+        },
+        {
+          "file": "proj_9.dll",
+          "bytes": 4045312,
+          "sha256": "e76a41ab5afaa3657e1384c33d7708d78893051e528f48fd88cd115b2b4c8143",
+          "imports": [
+            "kernel32.dll",
+            "libcurl.dll",
+            "ole32.dll",
+            "shell32.dll",
+            "sqlite3.dll",
+            "tiff.dll"
+          ],
+          "directImports": [
+            "kernel32.dll",
+            "libcurl.dll",
+            "ole32.dll",
+            "shell32.dll",
+            "sqlite3.dll",
+            "tiff.dll"
+          ],
+          "delayImports": []
+        },
+        {
+          "file": "sqlite3.dll",
+          "bytes": 1221632,
+          "sha256": "adbef9699cb0db95c7d4dc20953801dba23bb95f9a5fd070827dba65ba49d0fb",
+          "imports": [
+            "kernel32.dll"
+          ],
+          "directImports": [
+            "kernel32.dll"
+          ],
+          "delayImports": []
+        },
+        {
+          "file": "tiff.dll",
+          "bytes": 1382400,
+          "sha256": "d6fa54ffe166ec700b4c2380e57e3532bceafe89eabc672e3b3f705aeac19457",
+          "imports": [
+            "kernel32.dll",
+            "liblzma.dll",
+            "z.dll"
+          ],
+          "directImports": [
+            "kernel32.dll",
+            "liblzma.dll",
+            "z.dll"
+          ],
+          "delayImports": []
+        },
+        {
+          "file": "z.dll",
+          "bytes": 228352,
+          "sha256": "9641a9615fc75fcd3b48f4efe2830b105c318a7e4fb59b31050ad9235bdb1978",
+          "imports": [
+            "kernel32.dll"
+          ],
+          "directImports": [
+            "kernel32.dll"
+          ],
+          "delayImports": []
+        }
+      ],
+      "errors": [],
+      "limitations": [
+        "Direct/delay PE imports only; dynamic driver loading still requires actual isolated execution/security review.",
+        "This is research evidence, not SDK/MSFS or public distribution acceptance."
+      ]
+    },
+    "recipe": {
+      "vcpkgCommit": "1391150599c0b9dc6f2a3c79c50eff6c94b077d1",
+      "gdalVersion": "3.12.4",
+      "originalPortSha256": "181be76ccc9326d9657020783dc573d3638e3385197964cca8f96efe8f05d841",
+      "reducedPortSha256": "09bce7d224f532c564d26052d9c0f41f08a349b3543470129729780574df914b",
+      "defaultFeatures": false,
+      "optionalDrivers": false,
+      "requestedRasterDrivers": [
+        "GTiff",
+        "VRT"
+      ],
+      "jpegOriginalPortSha256": "7a3d4443ecb74757d6798e1280763da918b4ecee06a4e1c247fb2c3ec71994ff",
+      "jpegReducedPortSha256": "0c4584c019a3b4571a34f94865b52945afaad60e8195da0b4c32d4bbf879b588",
+      "jpegLibraryLinkage": "static",
+      "turbojpegEnabled": false,
+      "productionDistributionApproved": false
+    },
+    "nativeDllCount": 9,
+    "nativeDllBytes": 19154944,
+    "noticesSha256": "d0a3e91db305db02929a731e29bd0d2f3f322626bcf5d7d1d2b2a5eaebafdfc6",
+    "limitations": [
+      "Owned DLL bytes exclude the copied PROJ database and .NET host; exact complete distribution manifest/data hashes must be retained at production packaging.",
+      "No main-body chart neatline or all-five-family printed control points validated.",
+      "Production native inclusion/packaging, remaining advisory reachability/security review and owner devices are pending."
+    ]
   },
   "distributionSecurityReview": {
     "status": "incomplete; not production-approved",
@@ -535,5 +826,6 @@
     "advisorySha256": "bf0b7cb2e1c07a8d14f0c64f7e00c5940491b672eb65b0bcb211d1114ce906be",
     "finding": "OSV-2026-1068 lists libjpeg-turbo 3.2.0: UNKNOWN READ in jpeg_abort via tj3Compress8. The declared fixed commit changes regression tests/docs; no speculative patch was substituted. TurboJPEG is excluded from corrected runtime, but remaining reachability/upstream security review is open.",
     "limitation": "Empty advisory query results do not certify security or complete coverage. Static-link/import success does not establish native distribution or chart acceptance."
-  }
+  },
+  "currentNativeStatus": "Original missing-CRT linkage blocker fixed and independently isolated Windows probe passed at 29f87be. Production distribution and chart rendering remain unapproved/incomplete."
 }

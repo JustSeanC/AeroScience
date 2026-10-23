@@ -268,7 +268,7 @@
   "physicalAcceptance": "pending",
   "circleFollowUp": {
     "sourceCommit": "02e8fe2a0653cef69d48ca0c6e0596248a83ba95",
-    "status": "genuine independent offline comparison passed; full hosted milestone pending",
+    "status": "genuine independent offline comparison and full Linux/Windows application integration passed; installed acceptance pending",
     "evidenceClass": "Actual application re-import of retained genuine FAA originals plus independent pyshp/Shapely/PROJ; not owner installed acceptance",
     "aviationSchema": 5,
     "priorSaaFeaturesPreserved": 901,
@@ -332,6 +332,18 @@
       "No live activation, TFR clearance, certified positional accuracy or owner-installed Windows acceptance.",
       "SAA partial arcs/composites/contributor relationships remain unsupported and omitted; full geodesic circles independently compared with PROJ, not certified original boundary accuracy.",
       "NAD83 coordinates preserved without claiming a precise WGS84 transformation."
-    ]
+    ],
+    "fullValidation": {
+      "sourceCommit": "33844fee3f796b2820cf58ec501a603f3256c5ba",
+      "run": "https://github.com/JustSeanC/AeroScience/actions/runs/40028587587",
+      "linuxDotnetPassed": 683,
+      "windowsDotnetPassed": 682,
+      "windowsDotnetSkipped": 1,
+      "browserPassed": 198,
+      "linuxHelpersPassed": 121,
+      "linuxHelpersSkipped": 1,
+      "windowsHelpersPassed": 118,
+      "windowsHelpersSkipped": 1
+    }
   }
 }

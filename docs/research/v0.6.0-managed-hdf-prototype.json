@@ -284,5 +284,38 @@
       "Production Library/jobs/native source/map/analysis/export integration",
       "Authorized NASA numeric and installed SDK/MSFS/iPad/Quest acceptance"
     ]
+  },
+  "adversarialContainment": {
+    "status": "failed; experimental reader must remain excluded from production import",
+    "sourceCommit": "33844fee3f796b2820cf58ec501a603f3256c5ba",
+    "readerUnchangedFrom": "e497a3c7c5e1747a82a7b08a56ad64ee667259ad",
+    "evidence": {
+      "evidenceClass": "Synthetic adversarial local-original containment probe; no NASA originals or private data",
+      "externalReferenceRejected": false,
+      "outsideCanaryObserved": true,
+      "rawReflectance": [
+        0.777,
+        0.777,
+        0.777,
+        0.777,
+        0.777
+      ],
+      "productionImportApproved": false,
+      "exitCode": 1,
+      "readerSha256": "85c5d7b1c3d1b27984d499ade1bc690fe07d55f9f93b3095804b5e21f684af6b",
+      "inputSha256": {
+        "approved/reflectance.nc": "a416680115eff8bf141c6e2ace200acadf8d83d9524e7204871fb087336cf596",
+        "approved/uncertainty.nc": "d58300937eb61062e2b0c07181d6b17f4647f838c53183f90c9fd2ad3dd1ff2e",
+        "approved/mask.nc": "859b9dab8346d9f701d7276896dc2580bd7cc6a2c12dc3fc3aae7fed84aa3d3a",
+        "outside/canary.nc": "679ffa4a66c624d955b77edd6b49b6bea0b37aa8fa73ee02493ca16be6182e4f"
+      }
+    },
+    "inputMethod": "Existing synthetic netCDF-C fixtures copied to isolated scratch; native HDF5 changes reflectance to a relative external link to a separate writable-root canary. No NASA originals, user files or private data were read.",
+    "actualResult": "Experimental reader followed the external link and returned five 0.777 canary values outside the selected dataset root. Exit 1; not counted as acceptance.",
+    "integrationRequirement": "Reject HDF external links and external raw storage before resolving variables. Preserve existing rejection of virtual datasets. A metadata-safe link/storage inspector or audited resolver restriction is required; path-prefix strings alone do not establish containment.",
+    "upstreamReview": "Pinned PureHDF NativeGroup/SymbolicLink/FilePathUtils resolve external paths; external raw storage opens separate files and zero-fills short input. This is documented library functionality requiring an application policy, not a blanket vulnerability assertion against PureHDF.",
+    "rawEvidence": "/workspace/AeroScience-060-continuation-20261023/emit-containment",
+    "productionExposure": false,
+    "productionImportApproved": false
   }
 }
