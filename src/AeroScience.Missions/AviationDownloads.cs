@@ -52,7 +52,8 @@ public static class AviationDownloads
                 throw new InvalidDataException("FAA archive contains an unsafe path or link.");
             if (name.EndsWith('/') && entry.Length == 0) continue;
             var fileName = Path.GetFileName(name);
-            if (!System.Text.RegularExpressions.Regex.IsMatch(fileName, @"^[A-Za-z0-9_ .-]{1,180}$") || !names.Add(fileName) ||
+            if (!System.Text.RegularExpressions.Regex.IsMatch(fileName, @"^[A-Za-z0-9_ .-]{1,180}$") ||
+                System.Text.RegularExpressions.Regex.IsMatch(fileName.Split('.')[0].TrimEnd(), @"^(CON|PRN|AUX|NUL|COM[0-9]|LPT[0-9])$", System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.CultureInvariant) || !names.Add(fileName) ||
                 entry.Length < 0 || entry.Length > maximumBytes - total || entry.Length > Math.Max(1048576, entry.CompressedLength * 200))
                 throw new InvalidDataException("FAA archive exceeds approved bounds or has conflicting file names.");
             var extension = Path.GetExtension(fileName).ToLowerInvariant();

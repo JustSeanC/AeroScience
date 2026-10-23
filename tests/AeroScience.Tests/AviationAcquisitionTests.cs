@@ -121,6 +121,7 @@ public sealed class AviationAcquisitionTests : IDisposable
     }
     [Theory]
     [InlineData("../escape.tif")][InlineData("/absolute.tif")][InlineData("folder/../escape.tif")][InlineData("C:escape.tif")][InlineData("folder\\escape.tif")][InlineData("nested.zip")][InlineData("run.exe")]
+    [InlineData("CON.tif")][InlineData("lpt1.tif")]
     public async Task UnsafeArchiveEntriesAreRejected(string name)
     {
         Directory.CreateDirectory(root); var zip = Path.Combine(root, "bad.zip"); await File.WriteAllBytesAsync(zip, Zip(name));
@@ -199,6 +200,16 @@ public sealed class AviationAcquisitionTests : IDisposable
             }
             await Assert.ThrowsAsync<InvalidDataException>(() => AviationDownloads.VerifyArchive(zipPath, Path.Combine(root, mode), 1048576, default));
         }
+    }
+    [Fact] public async Task MissingDriveDuringTransferRecoversOnReconnectWithoutRequiringAnApplicationRestart()
+    {
+        var handler = new Transport(); using var service = Service(handler); var job = Approve(service, await Preview(service));
+        var entered = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously); var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        handler.BeforeRead = async () => { entered.SetResult(); await release.Task; };
+        var run = service.ProcessDownloads(); await entered.Task;
+        var directory = Path.Combine(root, "AviationReference"); Directory.Move(directory, directory + "-offline"); release.SetResult(); await run;
+        Assert.False(Directory.Exists(directory)); Directory.Move(directory + "-offline", directory); await service.ProcessDownloads();
+        Assert.Equal("Interrupted", Assert.Single(service.DownloadJobs()).State); Assert.Equal(1, handler.Downloads);
     }
     public void Dispose() { if (Directory.Exists(root)) Directory.Delete(root, true); }
 }

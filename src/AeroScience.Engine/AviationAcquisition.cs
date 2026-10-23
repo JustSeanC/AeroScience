@@ -168,7 +168,8 @@ public sealed partial class AviationReference
         lock (gate)
         {
             try { using var store = Open(Preferences()); var current = store.Job(id); if (current.State is "Preparing" or "Downloading" or "Verifying") Change(store, current with { RetryAfterUtc = state == "Waiting for Network" ? clock.GetUtcNow().AddMinutes(5) : null }, state, message); }
-            catch (Exception e) when (e is IOException or UnauthorizedAccessException or Microsoft.Data.Sqlite.SqliteException) { /* Missing drive retains the last durable state for restart recovery. */ }
+            catch (Exception e) when (e is IOException or UnauthorizedAccessException or Microsoft.Data.Sqlite.SqliteException)
+            { recovered.Clear(); /* Reconnected storage must reconcile its last durable active state even without restarting the host. */ }
         }
     }
     private bool ContinueTransfer(Guid id)

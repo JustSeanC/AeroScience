@@ -4,7 +4,6 @@
   "evidenceType": "pending-genuine-workspace",
   "windowsMsfs": "not tested",
   "workflows": [],
-  "reason": "P01 aviation runtime/schema changes require current-source genuine verification. Prior passed evidence remains in Git at 051cd70; it is not restamped.",
-  "previousRecordSha256": "0f151f06eba72ae3a43c05aed86a90e9fba24372ef8e773bb9380661844bc55a",
-  "previousCommit": "051cd70a99c47fe396b008c5bbe5762abbabc8ac"
+  "reason": "Final P01 drive-reconnection and archive safety corrections require genuine verification on the corrected source. A completed 5a724f9 run is retained outside the checkout, not reused or restamped.",
+  "previousCommit": "5a724f9406af809d37504daf3738cf6cc6e2c87f"
 }

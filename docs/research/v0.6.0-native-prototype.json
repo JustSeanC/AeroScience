@@ -1,0 +1,62 @@
+{
+  "version": 1,
+  "evidenceClass": "Independent Linux research prototype; not application/native Windows or owner acceptance",
+  "packageVersion": "3.13.3.583",
+  "packages": [
+    {
+      "id": "maxrev.gdal.core",
+      "version": "3.13.3.583",
+      "packageBytes": 1399658,
+      "expandedBytes": 6397399,
+      "sha256": "973626f2bf9bae3a07491e49ff10ada7b04b1f3d53f8e43de5447d704e14688d",
+      "noticeFiles": [
+        "runtimes/any/native/gdal-data/LICENSE.TXT"
+      ]
+    },
+    {
+      "id": "maxrev.gdal.windowsruntime.minimal",
+      "version": "3.13.3.583",
+      "packageBytes": 40866080,
+      "expandedBytes": 113653488,
+      "sha256": "70dc6b984a923ef9df5ba1b3684af891d298041c653390d422306f1ce8fe520e",
+      "noticeFiles": []
+    },
+    {
+      "id": "maxrev.gdal.linuxruntime.minimal.x64",
+      "version": "3.13.3.583",
+      "packageBytes": 53488794,
+      "expandedBytes": 162817392,
+      "sha256": "c0c34ca6c39247681a6cdc9685edc6d01405d0cd260b1644a584bf72aa87c096",
+      "noticeFiles": []
+    }
+  ],
+  "linuxSelfContained": {
+    "drivers": [
+      "GTiff",
+      "netCDF",
+      "HDF5"
+    ],
+    "compressedSyntheticWindowValues": [
+      -9999,
+      6
+    ],
+    "fillValue": -9999,
+    "peakResidentKiB": 116720,
+    "wallSeconds": 0.195
+  },
+  "genuineFaaWindow": {
+    "originalSha256": "351107a94c53634014410bacec43253ed4117a77f34a952207c7a7bd9112680e",
+    "independentCornerPixelTransformMaximumDifferenceDegrees": 0.0,
+    "independent8x8ByteWindowExact": true
+  },
+  "windowsCrossPublish": true,
+  "windowsNativeExecution": "Not tested",
+  "productionDependencyAdded": false,
+  "remaining": [
+    "Verify complete native component versions/notices and redistribution obligations, including bundled runtimes; NuGet MIT metadata alone is insufficient.",
+    "Actual Windows x64 native loading, NetCDF/HDF compression, self-contained package isolation and disposal/cancellation tests.",
+    "Main-body chart neatlines/printed control points, supported swath/group layouts and protected EMIT originals remain unassessed.",
+    "VersionInfo reports a placeholder released 2018/99/99; do not use that string as an authoritative release date."
+  ],
+  "rawPrototypeDirectory": "/workspace/AeroScience-060-native-prototype"
+}
