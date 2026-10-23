@@ -1,0 +1,31 @@
+{
+  "evidenceClass": "Synthetic NetCDF-C fixtures, not NASA original/product acceptance",
+  "declaredContract": "Research-only attributes; genuine EMIT metadata resolver still needs authorized original validation",
+  "files": [
+    {
+      "file": "synthetic-emit-reflectance.nc",
+      "bytes": 15521,
+      "sha256": "9c0eeed43230a4ae525ba3b7b6cd970cd6bfa679b08eea67149046c56bf7faca"
+    },
+    {
+      "file": "synthetic-emit-uncertainty.nc",
+      "bytes": 11987,
+      "sha256": "d58300937eb61062e2b0c07181d6b17f4647f838c53183f90c9fd2ad3dd1ff2e"
+    },
+    {
+      "file": "synthetic-emit-mask.nc",
+      "bytes": 9434,
+      "sha256": "859b9dab8346d9f701d7276896dc2580bd7cc6a2c12dc3fc3aae7fed84aa3d3a"
+    },
+    {
+      "file": "synthetic-emit-mismatch.nc",
+      "bytes": 9435,
+      "sha256": "926acc3a06be414f7081d38324b07710f42a17637e1554965600db70ef03f4f1"
+    },
+    {
+      "file": "synthetic-emit-oversized.nc",
+      "bytes": 6933,
+      "sha256": "991e76b119705ec491feb3ccb6098b7eba338b4c62b2176d2e766607b0ff64da"
+    }
+  ]
+}

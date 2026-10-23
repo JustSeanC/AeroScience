@@ -9,5 +9,5 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
   <ItemGroup><PackageReference Include="PureHDF" Version="2.2.0" /></ItemGroup>
-  <ItemGroup><None Update="synthetic-netcdf4.nc" CopyToOutputDirectory="PreserveNewest" /></ItemGroup>
+  <ItemGroup><None Update="synthetic*.nc" CopyToOutputDirectory="PreserveNewest" /><None Update="emit-fixture-provenance.json" CopyToOutputDirectory="PreserveNewest" /></ItemGroup>
 </Project>
