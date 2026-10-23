@@ -68,6 +68,12 @@ app.Services.GetRequiredService<MapSettings>().InitializeDefaults(true); // Exis
 app.Services.GetRequiredService<ApplicationUpdates>().Configure(new(false)); // No real update traffic in synthetic browser tests.
 app.MapPost("/api/testing/aviation/{mode}",(string mode,AviationBrowserFixture fixture,AviationReference aviation)=>
 {
+    if(mode=="fast-resume")
+    {
+        if(fixture.Mode!="slow")throw new ArgumentException("Fast resume only changes delivery pacing of the same synthetic large asset.");
+        fixture.FastSlowTransfers=true;return new{synthetic=true,fixture.Calls};
+    }
+    fixture.FastSlowTransfers=false;
     if(mode is not("reset" or "normal" or "outage" or "malformed" or "slow"))throw new ArgumentException("Unknown synthetic aviation fixture.");
     fixture.Clock.Advance();fixture.Mode=mode=="reset"?"normal":mode;fixture.Calls=0;
     if(mode=="reset")aviation.Configure(false);

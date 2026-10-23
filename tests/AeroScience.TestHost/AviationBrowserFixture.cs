@@ -13,6 +13,7 @@ public sealed class AviationBrowserFixture : HttpMessageHandler
     }
     public TestClock Clock { get; } = new();
     public int Calls;
+    public bool FastSlowTransfers;
     public string Mode = "normal";
     protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken token)
     {
@@ -32,8 +33,8 @@ public sealed class AviationBrowserFixture : HttpMessageHandler
         {
             using var memory = new MemoryStream();
             using (var zip = new System.IO.Compression.ZipArchive(memory, System.IO.Compression.ZipArchiveMode.Create, true))
-            { var entry = zip.CreateEntry("synthetic.tif"); using var stream = entry.Open(); var data = new byte[Mode == "slow" ? 2097152 : 8]; new Random(42).NextBytes(data); new byte[] { 73, 73, 42, 0 }.CopyTo(data, 0); stream.Write(data); }
-            var content = Mode == "slow" ? (HttpContent)new StreamContent(new SlowRead(memory.ToArray())) : new ByteArrayContent(memory.ToArray());
+            { var entry = zip.CreateEntry("synthetic.tif"); entry.LastWriteTime = new DateTimeOffset(2026,1,1,0,0,0,TimeSpan.Zero); using var stream = entry.Open(); var data = new byte[Mode == "slow" ? 2097152 : 8]; new Random(42).NextBytes(data); new byte[] { 73, 73, 42, 0 }.CopyTo(data, 0); stream.Write(data); }
+            var content = Mode == "slow" ? (HttpContent)new StreamContent(new SlowRead(memory.ToArray(), () => FastSlowTransfers)) : new ByteArrayContent(memory.ToArray());
             content.Headers.ContentLength = memory.Length;
             return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = content });
         }
@@ -42,9 +43,9 @@ public sealed class AviationBrowserFixture : HttpMessageHandler
             string.Join("\n", Enumerable.Range(0, 61).Select(i => $"<a href=https://aeronav.faa.gov/visual/09-03-2026/sectional-files/Synthetic_Sheet_{i:D3}.zip>GEO-TIFF</a>"));
         return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(Mode == "malformed" ? "Maintenance" : text) });
     }
-    private sealed class SlowRead(byte[] content) : MemoryStream(content)
+    private sealed class SlowRead(byte[] content, Func<bool> fast) : MemoryStream(content)
     {
         public override async ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken token = default)
-        { await Task.Delay(50, token); return await base.ReadAsync(buffer[..Math.Min(buffer.Length, 65536)], token); }
+        { if (!fast()) await Task.Delay(50, token); return await base.ReadAsync(buffer[..Math.Min(buffer.Length, 65536)], token); }
     }
 }

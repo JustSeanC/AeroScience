@@ -39,8 +39,12 @@ test('actual recording preempts a live FAA transfer, telemetry continues and an 
   await expect.poll(async()=>{const frames=await(await request.get(`/api/missions/${flight.id}/telemetry?limit=10`)).json();return frames.length;}).toBeGreaterThan(1);
   const job=await state();await post(request,`/api/aviation/downloads/${job.id}/control`,{revision:job.revision,action:'pause'});
   await post(request,`/api/missions/${flight.id}/end`);expect((await state()).state).toBe('Paused by User');
+  // Priority is already established above. Resume the identical 2-MiB asset without
+  // artificial per-chunk network delay; this is a lifecycle test, not a throughput SLA.
+  await post(request,'/api/testing/aviation/fast-resume');
   const paused=await state();await post(request,`/api/aviation/downloads/${paused.id}/control`,{revision:paused.revision,action:'resume'});
   await expect.poll(async()=>(await state()).state).toBe('Completed');
+  const complete=await state();expect(complete.files[0].bytes).toBe(2097152);expect(complete.downloadedBytes).toBeGreaterThanOrEqual(2097152);
  }finally{const current=await(await request.get('/api/state')).json();if(current.activeMission)await post(request,`/api/missions/${current.activeMission.id}/end`);await post(request,'/api/testing/aviation/normal');await post(request,'/api/aviation/configuration',{onlineEnabled:false});}
 });
 

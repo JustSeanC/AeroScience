@@ -1,0 +1,28 @@
+{
+  "formatVersion": 1,
+  "version": "0.6.0",
+  "evidenceClass": "A synthetic NetCDF-4 storage fixture + B actual self-contained Windows/Linux processes; not genuine NASA acceptance",
+  "sourceCommit": "3076767dca1a65190909dfd5b3504d500afd8a8e",
+  "run": "https://github.com/JustSeanC/AeroScience/actions/runs/39992709216",
+  "package": "PureHDF",
+  "packageVersion": "2.2.0",
+  "packageSha256": "be5c4ed6554629c457d0008772454e74085e88bf224a902ea962160b1c94b9d8",
+  "packageSourceCommit": "c2cea464ad2a6649258ab14c8d798cb6239b9e1e",
+  "license": "MIT; translated C-Blosc2 shuffle code under BSD terms; complete publisher notice retained in the test-only project",
+  "runtimeDependencies": [],
+  "fixtureSha256": "80d927d8b2c6dc53e43f531328332d574c9f0d067f66a105512048c6e3e5358d",
+  "verified": [
+    "Locked restore and self-contained publish; lock files unchanged",
+    "Actual Windows x64 execution",
+    "Actual Linux x64 execution",
+    "Deflate/shuffle/Fletcher32 1x1x4 window, exact fill, groups, spectral units and GLT bytes"
+  ],
+  "productionDependencyAdded": false,
+  "notVerified": [
+    "Genuine EMIT file compatibility/numeric samples",
+    "Complete versioned reflectance/uncertainty/mask pairing",
+    "NASA QA semantics, GLT/lat-lon geometry and non-affine coverage",
+    "Large-cube cancellation/memory, original import, analysis, exports or offline source reuse",
+    "Installed Windows SDK/MSFS, physical iPad or Quest acceptance"
+  ]
+}
