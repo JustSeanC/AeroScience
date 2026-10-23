@@ -1,0 +1,245 @@
+{
+  "formatVersion": 1,
+  "version": "0.6.0",
+  "evidenceClass": "Actual source-pinned Windows native research plus limited genuine FAA window/CRS; not application or owner acceptance",
+  "sourceCommit": "15d0530e405bf603ab8b30dce470f481f79f3e3c",
+  "run": "https://github.com/JustSeanC/AeroScience/actions/runs/40009717298",
+  "result": {
+    "evidenceClass": "Actual native research process and limited genuine FAA original window/CRS comparison; no chart neatline, application, EMIT or owner acceptance",
+    "version": "3.12.4",
+    "drivers": [
+      "GTiff",
+      "COG",
+      "VRT",
+      "MEM",
+      "GNMFile",
+      "GNMDatabase",
+      "ESRI Shapefile",
+      "GeoJSON",
+      "GeoJSONSeq",
+      "ESRIJSON",
+      "TopoJSON"
+    ],
+    "paletteCount": 256,
+    "window": [
+      9,
+      9,
+      9,
+      9,
+      9,
+      9,
+      9,
+      86,
+      9,
+      9,
+      9,
+      9,
+      9,
+      9,
+      9,
+      10,
+      9,
+      9,
+      9,
+      9,
+      9,
+      9,
+      0,
+      74,
+      9,
+      9,
+      9,
+      9,
+      9,
+      9,
+      129,
+      9,
+      9,
+      9,
+      9,
+      9,
+      9,
+      9,
+      0,
+      94,
+      9,
+      9,
+      9,
+      9,
+      9,
+      9,
+      86,
+      94,
+      9,
+      9,
+      9,
+      9,
+      9,
+      9,
+      129,
+      68,
+      9,
+      9,
+      9,
+      9,
+      9,
+      9,
+      9,
+      84
+    ],
+    "transformed": [
+      [
+        -161.75682700741896,
+        23.964706702681063
+      ],
+      [
+        -157.5580613732131,
+        20.889443974946932
+      ],
+      [
+        -153.53812304860543,
+        17.712709840554524
+      ]
+    ],
+    "maximumDifference": 0,
+    "elapsedSeconds": 0.0521015,
+    "peakResidentBytes": 43286528,
+    "productionDependencyAdded": false
+  },
+  "runtimeFiles": [
+    {
+      "sha256": "7a482f2943416e42dd5e6b36599ec9d9334dea359286b5b7532f21a9b9ac50e6",
+      "name": "gdal.dll",
+      "bytes": 10006528
+    },
+    {
+      "sha256": "a475479d4824c1c0e182745162ee753c6138f1917d3bb079bb9c9ce27282e6fb",
+      "name": "geotiff.dll",
+      "bytes": 160256
+    },
+    {
+      "sha256": "bbf52c78c4f3e156111920f88cd130e0b4d5a5c6c7a15ae336f4fe3f136aa89c",
+      "name": "jpeg62.dll",
+      "bytes": 722944
+    },
+    {
+      "sha256": "a92cab311543580724e6a37e1e1e370091b700e5f539d75f5df4b510aaffce27",
+      "name": "json-c.dll",
+      "bytes": 63488
+    },
+    {
+      "sha256": "2acab88679f189d8275fbe6f388bf20c019feafe0ce6f9db3d329043773b9d09",
+      "name": "libcurl.dll",
+      "bytes": 729088
+    },
+    {
+      "sha256": "e78c850e62eb9888886978f429403e613fad8cc72f09ca5964b8d983c2312442",
+      "name": "liblzma.dll",
+      "bytes": 189952
+    },
+    {
+      "sha256": "8873e961e2c5b065717aa2fd8893f4aba08e44469fea43d27807245051998d1f",
+      "name": "proj_9.dll",
+      "bytes": 3573248
+    },
+    {
+      "sha256": "e77e55e8fab36e61595bce5f53923847077f720dadf4e87b4a190ead394b87ed",
+      "name": "sqlite3.dll",
+      "bytes": 1111040
+    },
+    {
+      "sha256": "4c9e4c873f789662202d040ee1b77272e00abb1487a2db400e8fac9c9e7104a9",
+      "name": "tiff.dll",
+      "bytes": 495104
+    },
+    {
+      "sha256": "1b433f995daf9b597abc86e8a8b597ca4ceb40a3dc8d4eb4e067ffc9a0e43b94",
+      "name": "turbojpeg.dll",
+      "bytes": 1022976
+    },
+    {
+      "sha256": "1e620712fcb1e21d26ab0eb1d951038448157d59a932e8474fbb42d4e41841ee",
+      "name": "z.dll",
+      "bytes": 91648
+    }
+  ],
+  "nativeDllBytes": 18166272,
+  "registryLicenseMetadata": [
+    {
+      "name": "gdal",
+      "license": null,
+      "version": "3.12.4"
+    },
+    {
+      "name": "proj",
+      "license": "MIT",
+      "version": "9.8.1"
+    },
+    {
+      "name": "libgeotiff",
+      "license": "MIT",
+      "version": "1.7.4"
+    },
+    {
+      "name": "tiff",
+      "license": "libtiff",
+      "version": "4.7.2"
+    },
+    {
+      "name": "libjpeg-turbo",
+      "license": "BSD-3-Clause",
+      "version": "3.2.0"
+    },
+    {
+      "name": "json-c",
+      "license": "MIT",
+      "version": "0.19-20260627"
+    },
+    {
+      "name": "curl",
+      "license": "curl AND ISC AND BSD-3-Clause",
+      "version": "8.22.0"
+    },
+    {
+      "name": "liblzma",
+      "license": null,
+      "version": "5.8.3"
+    },
+    {
+      "name": "sqlite3",
+      "license": "blessing",
+      "version": "3.53.4"
+    },
+    {
+      "name": "zlib",
+      "license": "Zlib",
+      "version": "1.3.2"
+    },
+    {
+      "name": "nlohmann-json",
+      "license": "MIT",
+      "version": "3.12.0"
+    }
+  ],
+  "componentNoticesSha256": "d0a3e91db305db02929a731e29bd0d2f3f322626bcf5d7d1d2b2a5eaebafdfc6",
+  "portReceipt": {
+    "vcpkgCommit": "1391150599c0b9dc6f2a3c79c50eff6c94b077d1",
+    "gdalVersion": "3.12.4",
+    "originalPortSha256": "181be76ccc9326d9657020783dc573d3638e3385197964cca8f96efe8f05d841",
+    "reducedPortSha256": "09bce7d224f532c564d26052d9c0f41f08a349b3543470129729780574df914b",
+    "defaultFeatures": false,
+    "optionalDrivers": false,
+    "requestedRasterDrivers": [
+      "GTiff",
+      "VRT"
+    ],
+    "productionDistributionApproved": false
+  },
+  "productionDependencyAdded": false,
+  "followUp": "Static CRT, direct/delay import audit and isolated owned DLL/proj.db deployment require their own actual Windows result.",
+  "remaining": [
+    "Complete native import/CRT/PROJ database/data/codec/vulnerability and package review",
+    "Main chart-body neatlines, independent printed control points and all five families",
+    "Production Windows/private packaging and physical devices"
+  ]
+}

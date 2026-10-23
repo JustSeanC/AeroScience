@@ -56,11 +56,19 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Research publishing changed dependency locks.' }
           python tests/AeroScience.GisProbe/prepare_faa_sample.py --output "$env:RUNNER_TEMP/reduced-gis-original"
           if ($LASTEXITCODE -ne 0) { throw 'Genuine original unavailable; no synthetic substitution.' }
-          $env:PATH = "$env:REDUCED_GIS_INSTALL/bin;$env:PATH"
-          $env:GDAL_DATA = "$env:REDUCED_GIS_INSTALL/share/gdal"
-          $env:PROJ_DATA = "$env:REDUCED_GIS_INSTALL/share/proj"
+          # Deploy only the owned DLLs and required CRS database into isolated scratch.
+          # Do not rely on runner-installed GDAL/Python/VC runtime or a vcpkg data path.
+          $isolated = Join-Path $env:RUNNER_TEMP 'reduced-gis-isolated'
+          New-Item -ItemType Directory -Path "$isolated/bin","$isolated/share/proj","$isolated/share/gdal" -Force | Out-Null
+          Copy-Item "$env:REDUCED_GIS_INSTALL/bin/*.dll" "$isolated/bin"
+          Copy-Item "$env:REDUCED_GIS_INSTALL/share/proj/proj.db" "$isolated/share/proj"
+          python tests/AeroScience.ReducedGisProbe/inspect_native.py --folder "$isolated/bin" --output artifacts/reduced-gis/native-imports.json
+          if ($LASTEXITCODE -ne 0) { throw 'Native import/deployment inventory incomplete.' }
+          $env:PATH = "$isolated/bin;$env:SystemRoot/System32;$env:SystemRoot"
+          $env:GDAL_DATA = "$isolated/share/gdal"
+          $env:PROJ_DATA = "$isolated/share/proj"
           $env:PROJ_NETWORK = 'OFF'
-          $native = @(Get-ChildItem "$env:REDUCED_GIS_INSTALL/bin" -Filter 'gdal*.dll')
+          $native = @(Get-ChildItem "$isolated/bin" -Filter 'gdal*.dll')
           if ($native.Count -ne 1) { throw 'Ambiguous native GDAL identity.' }
           & "$env:RUNNER_TEMP/reduced-gis-probe/AeroScience.ReducedGisProbe.exe" $native[0].FullName "$env:RUNNER_TEMP/reduced-gis-original/Hawaiian Islands SEC.tif" tests/AeroScience.GisProbe/faa-window-reference.json artifacts/reduced-gis/result.json
           if ($LASTEXITCODE -ne 0) { throw 'Actual reduced native loading/window/CRS verification failed.' }
