@@ -1,0 +1,17 @@
+using PureHDF;
+using System.Security.Cryptography;
+using PureHDF.Selections;
+using System.Text.Json;
+var fixture=Path.Combine(AppContext.BaseDirectory,"synthetic-netcdf4.nc");
+using(var input=File.OpenRead(fixture))if(Convert.ToHexString(SHA256.HashData(input)).ToLowerInvariant()!="80d927d8b2c6dc53e43f531328332d574c9f0d067f66a105512048c6e3e5358d")throw new Exception("Synthetic fixture bytes changed.");
+using var file = H5File.OpenRead(fixture);
+var cube = file.Dataset("reflectance");
+var window = cube.Read<float[]>(fileSelection: new HyperslabSelection(3, new ulong[]{1,2,0}, new ulong[]{1,1,4}));
+if(!window.SequenceEqual(new float[]{.20f,.21f,-9999f,.23f}))throw new Exception("Native compressed NetCDF window differs.");
+var fill = cube.Attribute("_FillValue").Read<float>();if(fill!=-9999)throw new Exception("Fill differs.");
+var wavelength = file.Dataset("sensor_band_parameters/wavelengths").Read<float[]>();
+if(!wavelength.SequenceEqual(new float[]{400,500,700,900}))throw new Exception("Group wavelength mismatch.");
+var unit = file.Dataset("sensor_band_parameters/wavelengths").Attribute("units").Read<string>();if(unit!="nm")throw new Exception("Units differ.");
+var x = file.Dataset("location/glt_x").Read<int[]>();var y = file.Dataset("location/glt_y").Read<int[]>();
+if(x[4]!=0||y[4]!=0||x[5]-1!=2||y[5]-1!=1)throw new Exception("GLT reference bytes differ.");
+Console.WriteLine(JsonSerializer.Serialize(new{evidence="Synthetic netCDF-C fixture, compressed HDF5 groups/window/fill only; not EMIT original or product integration",window,fill,wavelength,unit,x,y}));

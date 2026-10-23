@@ -1,0 +1,14 @@
+{
+  "formatVersion": 1,
+  "evidenceClass": "A: synthetic storage fixture, never NASA numeric acceptance",
+  "generator": "generate_fixture.py; development system libnetcdf.so.22 only, not shipped/needed by the reader",
+  "sha256": "80d927d8b2c6dc53e43f531328332d574c9f0d067f66a105512048c6e3e5358d",
+  "bytes": 12172,
+  "format": "Actual NetCDF-4/HDF5 from netCDF-C; deflate, shuffle, Fletcher32, groups, fill and a 2x3x4 synthetic cube",
+  "notValidated": [
+    "Original EMIT file compatibility",
+    "NASA QA, uncertainty and geolocation semantics",
+    "Large-cube memory/cancellation",
+    "Application integration"
+  ]
+}

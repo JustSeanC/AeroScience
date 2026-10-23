@@ -1,0 +1,46 @@
+name: managed-hdf-prototype
+on:
+  workflow_dispatch:
+  push:
+    branches: [develop/v0.6.0]
+    paths: ['tests/AeroScience.ManagedHdfProbe/**', '.github/workflows/managed-hdf-prototype.yml']
+permissions:
+  contents: read
+jobs:
+  managed-research:
+    if: github.ref == 'refs/heads/develop/v0.6.0'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            rid: linux-x64
+            executable: AeroScience.ManagedHdfProbe
+          - os: windows-latest
+            rid: win-x64
+            executable: AeroScience.ManagedHdfProbe.exe
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+      - name: Locked isolated research publish and actual execution
+        shell: pwsh
+        run: |
+          dotnet restore tests/AeroScience.ManagedHdfProbe --locked-mode
+          if ($LASTEXITCODE -ne 0) { throw 'Managed research locked restore failed.' }
+          dotnet publish tests/AeroScience.ManagedHdfProbe -c Release -r ${{ matrix.rid }} --self-contained true --no-restore -o artifacts/managed-hdf-research
+          if ($LASTEXITCODE -ne 0) { throw 'Managed research publish failed.' }
+          & ./artifacts/managed-hdf-research/${{ matrix.executable }} | Tee-Object -FilePath artifacts/managed-hdf-result.json
+          if ($LASTEXITCODE -ne 0) { throw 'Actual managed storage/window probe failed.' }
+          git diff --exit-code -- '**/packages.lock.json'
+          if ($LASTEXITCODE -ne 0) { throw 'Managed research changed dependency locks.' }
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: managed-hdf-${{ matrix.rid }}
+          path: artifacts/managed-hdf-result.json
+          if-no-files-found: ignore
+          retention-days: 14

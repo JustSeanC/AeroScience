@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "dependencies": {
+    "net10.0": {
+      "PureHDF": {
+        "type": "Direct",
+        "requested": "[2.2.0, )",
+        "resolved": "2.2.0",
+        "contentHash": "hevzHJfMNquPaUThPvr5tbBJruhQRgdyqh4V4QjochIGkqLnJGWpX/Va7/pvaUMRQMZOH+VIAv/9ENdo6TkpNQ=="
+      }
+    },
+    "net10.0/linux-x64": {},
+    "net10.0/win-x64": {}
+  }
+}
