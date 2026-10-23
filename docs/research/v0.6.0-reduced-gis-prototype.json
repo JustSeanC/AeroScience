@@ -241,5 +241,73 @@
     "Complete native import/CRT/PROJ database/data/codec/vulnerability and package review",
     "Main chart-body neatlines, independent printed control points and all five families",
     "Production Windows/private packaging and physical devices"
-  ]
+  ],
+  "deploymentFollowUp": {
+    "sourceCommit": "d54d6b201ba1fd1293e3c012d359f75a86566d9d",
+    "run": "https://github.com/JustSeanC/AeroScience/actions/runs/40014966487",
+    "status": "failed",
+    "nativeCompilation": "passed",
+    "lockedSelfContainedDotnetPublish": "passed",
+    "importAudit": "failed: vcruntime140.dll remains imported despite static CRT triplet",
+    "isolatedNativeFixtureExecution": "not run; import gate stopped it",
+    "nativeRuntimeFiles": [
+      {
+        "bytes": 10491392,
+        "name": "gdal.dll",
+        "sha256": "4ed87258823b1848224d3243b208b921bf870fa0d8b3e9f2dc3b391658a6749d"
+      },
+      {
+        "bytes": 332288,
+        "name": "geotiff.dll",
+        "sha256": "4c733e71b3493fe960d674974fd5433f0033705d253df39cef559d08a4ba47ba"
+      },
+      {
+        "bytes": 722944,
+        "name": "jpeg62.dll",
+        "sha256": "fbd1e81f4e80342f421ac28995dd10520e86f8652426b7a5d7d51fc353055067"
+      },
+      {
+        "bytes": 259584,
+        "name": "json-c.dll",
+        "sha256": "270c4f9eddbca44197e39f12d4b84f88352eee8f2916f2e191dc6ff9bd8897af"
+      },
+      {
+        "bytes": 908800,
+        "name": "libcurl.dll",
+        "sha256": "90fb16b9d1f6e667c0cf7292fa9b04ec0007717f073d925cfc2c592fefd8e0ad"
+      },
+      {
+        "bytes": 285184,
+        "name": "liblzma.dll",
+        "sha256": "674ab448364635269aeebe1f204e1b94d42cda5488fa1cc2200d1e49421fc324"
+      },
+      {
+        "bytes": 4045312,
+        "name": "proj_9.dll",
+        "sha256": "a599a81e377129c958f0bd3f1ace87a5eb41bd26f9c3afaca23c68065f37c48a"
+      },
+      {
+        "bytes": 1221632,
+        "name": "sqlite3.dll",
+        "sha256": "944312a655f7de224910ba5b4d5c1f25d979ca8e6526334b811429b058283fea"
+      },
+      {
+        "bytes": 669696,
+        "name": "tiff.dll",
+        "sha256": "5e2d1f99f4a431757a301347774c45fd2f7ae3d5476fc1aca6f6660a4f3c60fa"
+      },
+      {
+        "bytes": 1203712,
+        "name": "turbojpeg.dll",
+        "sha256": "343e083f06be4bff43ab769d162505e09ccf2881dd09fea914b07dd8a8107842"
+      },
+      {
+        "bytes": 228352,
+        "name": "z.dll",
+        "sha256": "83d15d8bfc99ced68580e2ade3feeaf2be23a17465983cdbc770c9bbe4c57905"
+      }
+    ],
+    "productionDistributionApproved": false,
+    "nextInvestigation": "Retain complete per-component direct/delay imports and CMake/compiler CRT configuration, then correct the offending target linkage or establish a legitimate explicitly packaged VC runtime distribution. Do not whitelist the missing CRT, restamp the earlier pass or blindly rerun the unchanged build."
+  }
 }
