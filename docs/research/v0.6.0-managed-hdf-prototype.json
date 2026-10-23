@@ -24,5 +24,265 @@
     "NASA QA semantics, GLT/lat-lon geometry and non-affine coverage",
     "Large-cube cancellation/memory, original import, analysis, exports or offline source reuse",
     "Installed Windows SDK/MSFS, physical iPad or Quest acceptance"
-  ]
+  ],
+  "continuedResearch": {
+    "sourceCommit": "e497a3c7c5e1747a82a7b08a56ad64ee667259ad",
+    "run": "https://github.com/JustSeanC/AeroScience/actions/runs/40015751950",
+    "evidenceClass": "Synthetic NetCDF-C semantics + actual Windows/Linux self-contained processes; not NASA original or production import acceptance",
+    "semanticChecksPassed": 21,
+    "repeatedWindowSamples": 1000,
+    "maximumDecompressedChunkBytes": 4194304,
+    "perDatasetCacheBytes": 262144,
+    "syntheticFixtures": {
+      "evidenceClass": "Synthetic NetCDF-C fixtures, not NASA original/product acceptance",
+      "declaredContract": "Research-only attributes; genuine EMIT metadata resolver still needs authorized original validation",
+      "files": [
+        {
+          "file": "synthetic-emit-reflectance.nc",
+          "bytes": 15521,
+          "sha256": "9c0eeed43230a4ae525ba3b7b6cd970cd6bfa679b08eea67149046c56bf7faca"
+        },
+        {
+          "file": "synthetic-emit-uncertainty.nc",
+          "bytes": 11987,
+          "sha256": "d58300937eb61062e2b0c07181d6b17f4647f838c53183f90c9fd2ad3dd1ff2e"
+        },
+        {
+          "file": "synthetic-emit-mask.nc",
+          "bytes": 9434,
+          "sha256": "859b9dab8346d9f701d7276896dc2580bd7cc6a2c12dc3fc3aae7fed84aa3d3a"
+        },
+        {
+          "file": "synthetic-emit-mismatch.nc",
+          "bytes": 9435,
+          "sha256": "926acc3a06be414f7081d38324b07710f42a17637e1554965600db70ef03f4f1"
+        },
+        {
+          "file": "synthetic-emit-oversized.nc",
+          "bytes": 6933,
+          "sha256": "991e76b119705ec491feb3ccb6098b7eba338b4c62b2176d2e766607b0ff64da"
+        }
+      ]
+    },
+    "actualPlatformResults": {
+      "managed-hdf-win-x64": {
+        "evidence": "Synthetic NetCDF-C semantic/window prototype + actual managed process; not NASA original compatibility or production import",
+        "originalStorageResult": {
+          "evidence": "Synthetic netCDF-C fixture, compressed HDF5 groups/window/fill only; not EMIT original or product integration",
+          "window": [
+            0.2,
+            0.21,
+            -9999,
+            0.23
+          ],
+          "fill": -9999,
+          "wavelength": [
+            400,
+            500,
+            700,
+            900
+          ],
+          "unit": "nm",
+          "x": [
+            1,
+            2,
+            3,
+            1,
+            0,
+            3
+          ],
+          "y": [
+            1,
+            1,
+            1,
+            2,
+            0,
+            2
+          ]
+        },
+        "semanticChecksPassed": 21,
+        "sample": {
+          "State": "Original source window",
+          "SourceColumn": 1,
+          "SourceRow": 0,
+          "NativeLatitude": 37.99,
+          "NativeLongitude": -119.98,
+          "GeographicPixelLatitude": 37.995,
+          "GeographicPixelLongitude": -119.985,
+          "RawReflectance": [
+            0.05,
+            0.06,
+            0.07,
+            0.08,
+            0.09
+          ],
+          "Reflectance": [
+            0.05,
+            0.06,
+            0.07,
+            0.08,
+            0.09
+          ],
+          "RawUncertainty": [
+            0.006,
+            0.007,
+            0.008,
+            0.009,
+            0.01
+          ],
+          "Uncertainty": [
+            0.006,
+            0.007,
+            0.008,
+            0.009,
+            0.01
+          ],
+          "RawQuality": [
+            1,
+            0
+          ],
+          "RawPackedBandMask": "gA==",
+          "BandMasked": [
+            true,
+            false,
+            false,
+            false,
+            false
+          ],
+          "QualityInterpretation": "Raw flags retained; source-version-specific QA interpretation remains unverified. No Good Data/accuracy claim."
+        },
+        "elapsedSeconds": 0.1436064,
+        "peakResidentBytes": 51322880,
+        "productionDependencyAdded": false,
+        "limitations": [
+          "Strict experimental metadata resolver; genuine version-specific NASA attribute/type/filter compatibility remains unverified",
+          "Mask values retained; no scientific Good Data/accuracy/activation or in-flight credit inferred",
+          "No production import, Library/downloader/UI/export integration or protected original acceptance"
+        ]
+      },
+      "managed-hdf-linux-x64": {
+        "evidence": "Synthetic NetCDF-C semantic/window prototype + actual managed process; not NASA original compatibility or production import",
+        "originalStorageResult": {
+          "evidence": "Synthetic netCDF-C fixture, compressed HDF5 groups/window/fill only; not EMIT original or product integration",
+          "window": [
+            0.2,
+            0.21,
+            -9999,
+            0.23
+          ],
+          "fill": -9999,
+          "wavelength": [
+            400,
+            500,
+            700,
+            900
+          ],
+          "unit": "nm",
+          "x": [
+            1,
+            2,
+            3,
+            1,
+            0,
+            3
+          ],
+          "y": [
+            1,
+            1,
+            1,
+            2,
+            0,
+            2
+          ]
+        },
+        "semanticChecksPassed": 21,
+        "sample": {
+          "State": "Original source window",
+          "SourceColumn": 1,
+          "SourceRow": 0,
+          "NativeLatitude": 37.99,
+          "NativeLongitude": -119.98,
+          "GeographicPixelLatitude": 37.995,
+          "GeographicPixelLongitude": -119.985,
+          "RawReflectance": [
+            0.05,
+            0.06,
+            0.07,
+            0.08,
+            0.09
+          ],
+          "Reflectance": [
+            0.05,
+            0.06,
+            0.07,
+            0.08,
+            0.09
+          ],
+          "RawUncertainty": [
+            0.006,
+            0.007,
+            0.008,
+            0.009,
+            0.01
+          ],
+          "Uncertainty": [
+            0.006,
+            0.007,
+            0.008,
+            0.009,
+            0.01
+          ],
+          "RawQuality": [
+            1,
+            0
+          ],
+          "RawPackedBandMask": "gA==",
+          "BandMasked": [
+            true,
+            false,
+            false,
+            false,
+            false
+          ],
+          "QualityInterpretation": "Raw flags retained; source-version-specific QA interpretation remains unverified. No Good Data/accuracy claim."
+        },
+        "elapsedSeconds": 0.1370333,
+        "peakResidentBytes": 69361664,
+        "productionDependencyAdded": false,
+        "limitations": [
+          "Strict experimental metadata resolver; genuine version-specific NASA attribute/type/filter compatibility remains unverified",
+          "Mask values retained; no scientific Good Data/accuracy/activation or in-flight credit inferred",
+          "No production import, Library/downloader/UI/export integration or protected original acceptance"
+        ]
+      }
+    },
+    "publicAccessDiagnostic": {
+      "observedUtc": "2026-10-23T19:56:28.328574+00:00",
+      "credentialsUsed": false,
+      "requests": [
+        {
+          "purpose": "metadata",
+          "url": "https://opendap.earthdata.nasa.gov/collections/C4079844428-LPCLOUD/granules/EMIT_L2A_RFL_002_20220810T174243.dmr",
+          "status": 302,
+          "redirectHost": null,
+          "numericAcceptance": false
+        },
+        {
+          "purpose": "bounded-original",
+          "url": "https://data.lpdaac.earthdatacloud.nasa.gov/lp-prod-protected/EMITL2ARFL.002/EMIT_L2A_RFL_002_20220810T174243/EMIT_L2A_RFL_002_20220810T174243.nc",
+          "status": 302,
+          "redirectHost": "urs.earthdata.nasa.gov",
+          "numericAcceptance": false
+        }
+      ],
+      "genuineNumericAcceptance": false
+    },
+    "productionDependencyAdded": false,
+    "remaining": [
+      "Actual original metadata/type/filter/units/QA/uncertainty/GLT compatibility",
+      "Hostile external links/file/codec security review before arbitrary user input",
+      "Production Library/jobs/native source/map/analysis/export integration",
+      "Authorized NASA numeric and installed SDK/MSFS/iPad/Quest acceptance"
+    ]
+  }
 }
