@@ -1,0 +1,76 @@
+name: reduced-gis-prototype
+on:
+  workflow_dispatch:
+  push:
+    branches: [develop/v0.6.0]
+    paths: ['tests/AeroScience.ReducedGisProbe/**', '.github/workflows/reduced-gis-prototype.yml']
+permissions:
+  contents: read
+jobs:
+  reduced-windows:
+    if: github.ref == 'refs/heads/develop/v0.6.0'
+    runs-on: windows-latest
+    timeout-minutes: 90
+    env:
+      VCPKG_MAX_CONCURRENCY: '2'
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Build the pinned reduced chart codec (research only)
+        shell: pwsh
+        run: |
+          $codecTools = Join-Path $env:RUNNER_TEMP 'reduced-gis-vcpkg'
+          $codecInstall = Join-Path $env:RUNNER_TEMP 'reduced-gis-installed'
+          git init $codecTools
+          git -C $codecTools remote add origin https://github.com/microsoft/vcpkg.git
+          git -C $codecTools fetch --depth 1 origin 1391150599c0b9dc6f2a3c79c50eff6c94b077d1
+          if ($LASTEXITCODE -ne 0) { throw 'Pinned build-tool source unavailable.' }
+          git -C $codecTools checkout --detach FETCH_HEAD
+          if ($LASTEXITCODE -ne 0) { throw 'Pinned build-tool checkout failed.' }
+          python tests/AeroScience.ReducedGisProbe/prepare_port.py --vcpkg $codecTools --receipt artifacts/reduced-gis/port-receipt.json
+          if ($LASTEXITCODE -ne 0) { throw 'Exact reduced-port verification failed.' }
+          & "$codecTools/bootstrap-vcpkg.bat" -disableMetrics
+          if ($LASTEXITCODE -ne 0) { throw 'Build-tool bootstrap failed.' }
+          & "$codecTools/vcpkg.exe" install --triplet x64-windows-research "--x-manifest-root=$pwd/tests/AeroScience.ReducedGisProbe" "--overlay-triplets=$pwd/tests/AeroScience.ReducedGisProbe/triplets" "--overlay-ports=$codecTools/ports" "--x-install-root=$codecInstall"
+          if ($LASTEXITCODE -ne 0) { throw 'Reduced native compilation failed; no bundle substitution.' }
+          Add-Content $env:GITHUB_ENV "REDUCED_GIS_INSTALL=$codecInstall/x64-windows-research"
+          Copy-Item "$codecInstall/vcpkg/status" artifacts/reduced-gis/dependency-status.txt
+          $rows = Get-ChildItem "$codecInstall/x64-windows-research/bin" -Filter '*.dll' | ForEach-Object { @{ name=$_.Name; bytes=$_.Length; sha256=(Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant() } }
+          $rows | ConvertTo-Json -Depth 4 | Set-Content artifacts/reduced-gis/runtime-files.json
+          # Retain source/license evidence, never native binaries or original charts.
+          $notices = Get-ChildItem "$codecInstall/x64-windows-research/share" -Filter copyright -Recurse | ForEach-Object { "`nCOMPONENT: $($_.Directory.Name)`n"; Get-Content $_.FullName -Raw }
+          $notices | Set-Content artifacts/reduced-gis/component-copyrights.txt
+      - name: Publish locked self-contained probe and exercise the genuine FAA original
+        shell: pwsh
+        run: |
+          dotnet restore tests/AeroScience.ReducedGisProbe --locked-mode
+          if ($LASTEXITCODE -ne 0) { throw 'Locked research restore failed.' }
+          dotnet publish tests/AeroScience.ReducedGisProbe -c Release -r win-x64 --self-contained true --no-restore -o "$env:RUNNER_TEMP/reduced-gis-probe"
+          if ($LASTEXITCODE -ne 0) { throw 'Self-contained probe publish failed.' }
+          git diff --exit-code -- '**/packages.lock.json'
+          if ($LASTEXITCODE -ne 0) { throw 'Research publishing changed dependency locks.' }
+          python tests/AeroScience.GisProbe/prepare_faa_sample.py --output "$env:RUNNER_TEMP/reduced-gis-original"
+          if ($LASTEXITCODE -ne 0) { throw 'Genuine original unavailable; no synthetic substitution.' }
+          $env:PATH = "$env:REDUCED_GIS_INSTALL/bin;$env:PATH"
+          $env:GDAL_DATA = "$env:REDUCED_GIS_INSTALL/share/gdal"
+          $env:PROJ_DATA = "$env:REDUCED_GIS_INSTALL/share/proj"
+          $env:PROJ_NETWORK = 'OFF'
+          $native = @(Get-ChildItem "$env:REDUCED_GIS_INSTALL/bin" -Filter 'gdal*.dll')
+          if ($native.Count -ne 1) { throw 'Ambiguous native GDAL identity.' }
+          & "$env:RUNNER_TEMP/reduced-gis-probe/AeroScience.ReducedGisProbe.exe" $native[0].FullName "$env:RUNNER_TEMP/reduced-gis-original/Hawaiian Islands SEC.tif" tests/AeroScience.GisProbe/faa-window-reference.json artifacts/reduced-gis/result.json
+          if ($LASTEXITCODE -ne 0) { throw 'Actual reduced native loading/window/CRS verification failed.' }
+      - name: Retain research receipts only
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: reduced-gis-windows-evidence
+          path: |
+            artifacts/reduced-gis/*.json
+            artifacts/reduced-gis/*.txt
+          if-no-files-found: ignore
+          retention-days: 14

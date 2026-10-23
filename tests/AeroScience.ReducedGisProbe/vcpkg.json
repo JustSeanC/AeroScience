@@ -1,0 +1,6 @@
+{
+  "name": "aeroscience-chart-codec-research",
+  "version-string": "0.6.0",
+  "builtin-baseline": "1391150599c0b9dc6f2a3c79c50eff6c94b077d1",
+  "dependencies": [{"name": "gdal", "default-features": false, "features": ["tools"]}]
+}
