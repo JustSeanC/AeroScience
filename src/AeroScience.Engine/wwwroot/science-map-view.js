@@ -15,6 +15,8 @@ export async function scienceMap(parent,api,params,ids,instrument,disposals,cata
   const tools=el('div',undefined,'workspace-controls map-primary-actions'),holder=el('div',undefined,'workspace-map');main.append(tools,holder);
   const map=new ResearchMap(holder,null,{coverageOnly:true});window.L.control.scale({metric:true,imperial:false}).addTo(map.map);
   const layers=window.L.layerGroup().addTo(map.map),imagery=window.L.layerGroup().addTo(map.map);
+  map.layers.addOverlay({id:'science-records',name:'Saved scientific observations',layer:layers,group:'Science'});
+  map.layers.addOverlay({id:'science-raster',name:'Verified scientific raster views',layer:imagery,group:'Science'});
   const inspector=el('section',undefined,'sample-inspector');inspector.setAttribute('aria-label','Science sample inspection');
   inspector.append(el('h3','Inspect saved science'),el('p','Choose an overview cluster to zoom, or inspect any acquisition / recorded value in the accessible browser below.'));
   panel.append(el('h2','Science layers'));const controls=el('div',undefined,'independent-layers');panel.append(controls);

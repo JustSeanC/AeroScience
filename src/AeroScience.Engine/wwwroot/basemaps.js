@@ -1,9 +1,12 @@
+import {openAviationReference} from './aviation-reference.js';
 import {dialogHeader,requestDialogClose,markDialogSaved} from './dialog-ui.js';
 const layers = [
   ["offline", "Offline Geographic Map"],
   ["streets", "OpenStreetMap / Streets"],
   ["satellite", "Satellite Imagery"],
   ["satellite-labels", "Satellite + Labels"],
+  ["esri-outdoor", "Esri Outdoor / Topographic Context"],
+  ["esri-navigation", "Esri Navigation / Road Context"],
 ];
 let csrf = "",
   configuration,
@@ -108,11 +111,11 @@ export function syncBasemaps(value) {
     });
 }
 export function layerSelector(parent, changed) {
-  const wrap = element("label", "Map Layers "),
+  const wrap = element("label", "Basemap "),
     select = element("select"),
     message = element("p");
   message.className = "footnote map-layer-status";
-  select.setAttribute("aria-label", "Map Layers");
+  select.setAttribute("aria-label", "Map Layers — Basemap");
   for (const [id, name] of layers) {
     const o = element("option", name);
     o.value = id;
@@ -134,7 +137,7 @@ export function layerSelector(parent, changed) {
       if (own !== generation) return;
       changed(client);
       message.replaceChildren();
-      if(client.error){message.append(document.createTextNode(client.error+" "));if(["satellite","satelliteLabels"].includes(select.value)){const a=element("a","Configure Esri API Key");a.href="#settings/maps";message.append(a);}}
+      if(client.error){message.append(document.createTextNode(client.error+" "));if(["satellite","satellite-labels","esri-outdoor","esri-navigation"].includes(select.value)){const a=element("a","Configure Esri API Key");a.href="#settings/maps";message.append(a);}}
 
     } catch (e) {
       if (own === generation) {
@@ -171,6 +174,7 @@ export async function mapSettingsUI(parent, request) {
   const panel = element("section"),
     title = element("h2", "Maps & Basemaps");
   panel.append(title);
+  const faa=element('button','FAA Catalog & Notices');faa.type='button';faa.className='secondary';faa.onclick=()=>openAviationReference(api);panel.append(faa);
   parent.append(panel);
   const data = await request("/api/maps/settings"),
     current = data.configuration;
@@ -178,7 +182,7 @@ export async function mapSettingsUI(parent, request) {
   panel.append(
     element(
       "p",
-      "Satellite uses your own ArcGIS Location Platform public basemap API key. Use minimum basemap scopes and appropriate URL restrictions; localhost and paired LAN origins may need separate restrictions. Client tokens are visible to authorized browsers and the provider. Never enter privileged server credentials. Keys are protected with Windows DPAPI at rest.",
+      "Esri imagery, Outdoor and Navigation use your own ArcGIS Location Platform public basemap API key. Use minimum basemap scopes and appropriate URL restrictions; localhost and paired LAN origins may need separate restrictions. Client tokens are visible to authorized browsers and the provider. Never enter privileged server credentials. Keys are protected with Windows DPAPI at rest.",
     ),
   );
   const online = element("input");
@@ -296,3 +300,5 @@ export async function mapSettingsUI(parent, request) {
     panel.append(a, element("br"));
   }
 }
+
+export {api as mapRequest};

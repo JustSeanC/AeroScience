@@ -3,6 +3,7 @@ const node=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)
 const guides=[['v0.4.2-pilot-guide.md','First mission & results'],['v0.4.2-science-visualization.md','Reading scientific maps'],['v0.4.1-pilot-guide.md','Getting started'],['mission-planner.md','Mission planning'],['remote-sensing/index.md','Instruments & scientific data'],['v0.4.1-science-workspace.md','Science Results & Analysis'],['v0.4.1-scientific-comparison.md','Comparisons'],['v0.4.1-scientific-downlink.md','Preparation & downlink'],['v0.4.1-windows-testing.md','Troubleshooting & testing']];
 guides.push(['scientific-library.md','Browse & download scientific data']);
 guides.push(['remote-sensing/hyperspectral.md','NASA hyperspectral assistant']);
+guides.push(['v0.6.0-aviation-reference.md','Aviation maps & FAA references (0.6.0 development)']);
 guides.push(['README.md','Documentation index']);
 guides.push(['instrument-calibration.md','Calibration & provenance (development)']);
 export function documentationUrl(target,guide){

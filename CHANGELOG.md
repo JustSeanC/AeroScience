@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased — v0.6.0 development checkpoint
+
+- Separate, consent-gated FAA chart catalog and TFR-summary metadata cache with bounded pages,
+  explicit freshness/failure status and offline reopening; no scientific observation credit.
+- Unified basemap/overlay controls, independent Mission and Science visibility, and documented
+  user-keyed Esri Outdoor/Navigation static raster adapters with offline fallback.
+- Original FAA chart jobs/rendering, aviation vectors/verified TFR polygons and native EMIT
+  numerical import remain pending. This is not a public release or completed acceptance.
+
 ## Unreleased — v0.5.0 development (draft; not published)
 
 - Versioned instrument calibration/reference definitions and optional validated user

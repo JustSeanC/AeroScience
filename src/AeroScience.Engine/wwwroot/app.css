@@ -1491,3 +1491,15 @@ dialog::backdrop { background:#000a; } dialog button { margin:8px; min-height:44
 .science-page h2 {font-size:1.5rem}.science-page h3 {font-size:1.15rem}.instrument-result p,.science-review-status p {margin:.55rem 0}
 .map-tools {align-items:end}.map-tools label {margin-bottom:0;min-width:200px;flex:1 1 200px}.map-search {display:flex;gap:.5rem;flex:2 1 260px}.map-search input {flex:1;min-width:0;width:100%}
 .map-tools>p:empty {display:none}.help-guide td,.help-guide th {white-space:normal}
+
+/* Permanent map control; temporary views use the shared close/focus pattern. */
+.map-layer-manager {background:var(--panel,#182331);padding:.5rem;max-width:min(15rem,65vw);box-sizing:border-box}
+.map-layer-manager label {display:block;margin:0;font-size:.85rem}
+.map-layer-manager select,.map-layer-manager button {width:100%;min-height:44px;max-width:100%;margin:.15rem 0;box-sizing:border-box}
+.map-layer-manager .map-layer-status {font-size:.75rem;margin:.2rem 0;max-width:100%;overflow-wrap:anywhere}
+.map-layer-manager .map-layer-status:empty {display:none}
+.map-overlays-dialog,.aviation-reference-dialog {width:min(52rem,calc(100vw - 2rem));max-height:85dvh;overflow:auto;box-sizing:border-box}
+.map-overlay-content fieldset {margin:.75rem 0;padding:.5rem}
+.map-overlay-content label {display:flex;align-items:center;gap:.6rem;min-height:44px;margin:0}
+.aviation-reference-records {display:grid;gap:.6rem}.aviation-reference-records .panel {margin:0;overflow-wrap:anywhere}
+@media(max-width:600px){.map-layer-manager{max-width:12rem;padding:.25rem}.map-layer-manager label{font-size:.75rem}.map-overlays-dialog,.aviation-reference-dialog{width:calc(100vw - .75rem);max-height:92dvh}.aviation-reference-dialog .action-row{flex-wrap:wrap}}

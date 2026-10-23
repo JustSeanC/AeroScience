@@ -72,7 +72,7 @@ public sealed class MapSettings
     }
     public MapConfiguration Save(MapSettingsRequest request)
     {
-        if (request.Layer is not ("offline" or "streets" or "satellite" or "satellite-labels") || request.Provider != "esri") throw new ArgumentException("Select a supported map layer/provider.");
+        if (request.Layer is not ("offline" or "streets" or "satellite" or "satellite-labels" or "esri-outdoor" or "esri-navigation") || request.Provider != "esri") throw new ArgumentException("Select a supported map layer/provider.");
         if (request.OnlineEnabled && !request.PrivacyAccepted) throw new ArgumentException("Review and accept the online-map privacy and billing notice first.");
         if (!request.OnlineEnabled && request.Layer != "offline") throw new ArgumentException("Enable online maps before choosing an online layer.");
         lock (gate)
@@ -84,7 +84,7 @@ public sealed class MapSettings
                 try { key = protector.Protect(request.PublicApiKey); }
                 catch (Exception error) when (error is PlatformNotSupportedException or CryptographicException) { throw new InvalidOperationException("The map key could not be protected. Configure it in the Windows companion; no plaintext key was saved."); }
             }
-            if (request.Layer.StartsWith("satellite", StringComparison.Ordinal) && key is null) throw new ArgumentException("Configure your own public Esri basemap API key for satellite imagery, or use Offline/Streets.");
+            if ((request.Layer.StartsWith("satellite", StringComparison.Ordinal) || request.Layer.StartsWith("esri-", StringComparison.Ordinal)) && key is null) throw new ArgumentException(request.Layer.StartsWith("satellite", StringComparison.Ordinal) ? "Configure your own public Esri basemap API key for satellite imagery, or use Offline/Streets." : "Configure your own public Esri basemap API key for Esri basemaps, or use Offline/Streets.");
             PreferenceStore.WriteAtomic(path, new StoredMapSettings(new(request.OnlineEnabled, request.Layer, request.Provider), key, true)); cached = null;
             return Get();
         }
@@ -102,13 +102,45 @@ public sealed class MapSettings
         if (layer == "offline") return new("offline", []);
         if (!settings.Preferences.OnlineEnabled) return new("offline", [], "Online maps are disabled. Bundled offline geography remains available.");
         if (layer == "streets") return new(layer, [new("https://tile.openstreetmap.org/{z}/{x}/{y}.png", "© OpenStreetMap contributors", 19)]);
-        if (layer is not ("satellite" or "satellite-labels")) throw new ArgumentException("Unknown map layer.");
+        if (layer is not ("satellite" or "satellite-labels" or "esri-outdoor" or "esri-navigation")) throw new ArgumentException("Unknown map layer.");
         lock (gate) if (cached is { } c && c.Layer == layer && DateTimeOffset.UtcNow - cachedUtc < TimeSpan.FromMinutes(5)) return c;
         try
         {
             string? key; lock (gate) key = Load().ProtectedKey;
             if (key is null) return new("offline", [], "Configure an Esri public API key in Settings → Maps & Basemaps.");
             key = protector.Unprotect(key);
+            if (layer is "esri-outdoor" or "esri-navigation")
+            {
+                var staticStyle = layer == "esri-outdoor" ? "outdoor" : "navigation";
+                var endpoint = "https://static-map-tiles-api.arcgis.com/arcgis/rest/services/static-basemap-tiles-service/v1/arcgis/" + staticStyle + "/static";
+                using var staticMetadata = await Fetch(endpoint + "?f=pjson", key, cancellationToken);
+                var m = staticMetadata.RootElement;
+                var tileInfo = m.GetProperty("tileInfo");
+                var sr = tileInfo.GetProperty("spatialReference");
+                var wkid = sr.TryGetProperty("latestWkid", out var latest) ? latest.GetInt32() : sr.GetProperty("wkid").GetInt32();
+                var format = tileInfo.GetProperty("format").GetString();
+                var origin = tileInfo.GetProperty("origin");
+                if (wkid is not (3857 or 102100) || tileInfo.GetProperty("rows").GetInt32() != 256 || tileInfo.GetProperty("cols").GetInt32() != 256 ||
+                    format is not ("JPEG" or "PNG" or "PNG24" or "PNG32" or "MIXED") ||
+                    Math.Abs(origin.GetProperty("x").GetDouble() + 20037508.3427892) > 1 || Math.Abs(origin.GetProperty("y").GetDouble() - 20037508.3427892) > 1)
+                    throw new InvalidOperationException("The provider returned an incompatible raster tile scheme.");
+                var attribution = m.GetProperty("copyrightText").GetString();
+                if (string.IsNullOrWhiteSpace(attribution)) throw new InvalidOperationException("Provider attribution is unavailable.");
+                var lods = tileInfo.GetProperty("lods").EnumerateArray().ToArray();
+                var levels = lods.Select(l => l.GetProperty("level").GetInt32()).ToArray();
+                if (levels.Length == 0 || !levels.Contains(0) || levels.Distinct().Count() != levels.Length || levels.Any(l => l is < 0 or > 30) ||
+                    !Enumerable.Range(0, levels.Max() + 1).SequenceEqual(levels.Order()) || lods.Any(l =>
+                        !l.TryGetProperty("resolution", out var resolution) || !double.IsFinite(resolution.GetDouble()) ||
+                        Math.Abs(resolution.GetDouble() / (156543.03392804097 / Math.Pow(2, l.GetProperty("level").GetInt32())) - 1) > 0.000001))
+                    throw new InvalidOperationException("Unsupported raster zoom levels.");
+                var staticResult = new BasemapClient(layer, [new(WithToken(endpoint + "/tile/{z}/{y}/{x}", key), "Powered by Esri · " + Regex.Replace(attribution, "<[^>]*>", " "), Math.Min(19, levels.Max()))]);
+                lock (gate)
+                {
+                    if (Get().Revision != settings.Revision) return new("offline", [], "Map settings changed; use the current layer selection.");
+                    cached = staticResult; cachedUtc = DateTimeOffset.UtcNow;
+                }
+                return staticResult;
+            }
             // Use the documented authenticated style to discover its authorized raster source.
             using var style = await Fetch("https://basemapstyles-api.arcgis.com/arcgis/rest/services/styles/v2/styles/arcgis/imagery", key, cancellationToken);
             var tiles = new List<BasemapTiles>();
@@ -158,7 +190,7 @@ public sealed class MapSettings
             return result;
         }
         catch (Exception e) when (e is HttpRequestException or TaskCanceledException or JsonException or KeyNotFoundException or InvalidOperationException or CryptographicException or PlatformNotSupportedException or FormatException or IOException)
-        { return new("offline", [], "Satellite imagery unavailable: check your key, basemap scope, provider status and account quota. Offline geography and recording remain available."); }
+        { return new("offline", [], "Esri basemap unavailable: check your key, basemap scope, provider status and account quota. Offline geography and recording remain available."); }
     }
     private async Task<JsonDocument> Fetch(string url, string key, CancellationToken token)
     {

@@ -102,5 +102,19 @@
     "No TFR polygons, activation UTC or altitude inferred.",
     "Aviation original acquisition/jobs/storage management and chart rendering are not yet implemented.",
     "No genuine NASA numeric or installed Windows/MSFS/iPad/Quest acceptance."
-  ]
+  ],
+  "diagnosticRetry": {
+    "diagnosticRetry": true,
+    "Status": "Cached",
+    "Total": 184,
+    "Cache": {
+      "Available": true,
+      "StoreId": "2d9267de-c0b1-41ee-ad9c-12c1deed2e2b",
+      "LastSuccessUtc": "2026-10-23T01:25:18.8215792+00:00",
+      "LastAttemptUtc": "2026-10-23T01:25:18.4818258+00:00",
+      "Error": null,
+      "DatabaseBytes": 225280
+    },
+    "offline": "Offline cached"
+  }
 }

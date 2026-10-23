@@ -41,6 +41,11 @@ if (args.Length > 0 && args[0] == "--profile-probe")
 // This executable is built only for automated tests and never published with the app.
 var app = EngineApplication.Create(args, services =>
 {
+    services.AddSingleton<AviationBrowserFixture>();
+    services.AddSingleton(sp => new AviationReference(
+        sp.GetRequiredService<EngineOptions>().ConfigurationDirectory ?? sp.GetRequiredService<EngineOptions>().DataDirectory,
+        sp.GetRequiredService<EngineOptions>().DataDirectory,
+        new HttpClient(sp.GetRequiredService<AviationBrowserFixture>()),sp.GetRequiredService<AviationBrowserFixture>().Clock));
     services.AddSingleton(sp=>new LibraryHttpFixture(sp.GetRequiredService<EngineOptions>().DataDirectory));
     services.AddSingleton<IEarthdataCredentials,FixtureEarthdata>();
     services.AddSingleton(sp=>{_=sp.GetRequiredService<StorageManagement>();return new AutomaticScientificData(sp.GetRequiredService<ScienceStore>(),sp.GetRequiredService<ScientificAccessSettings>(),new ScientificHttp(sp.GetRequiredService<LibraryHttpFixture>(),cacheEnabled:false));});
@@ -58,6 +63,14 @@ var options=app.Services.GetRequiredService<EngineOptions>();
 app.MapPost("/api/testing/operating/input",(SensorTelemetryFixture fixture,BrowserTelemetryProvider provider)=>{provider.SensorFixture=fixture;return new{synthetic=true};});
 app.Services.GetRequiredService<MapSettings>().InitializeDefaults(true); // Existing offline browser fixtures; new-install tests reset explicitly.
 app.Services.GetRequiredService<ApplicationUpdates>().Configure(new(false)); // No real update traffic in synthetic browser tests.
+app.MapPost("/api/testing/aviation/{mode}",(string mode,AviationBrowserFixture fixture,AviationReference aviation)=>
+{
+    if(mode is not("reset" or "normal" or "outage" or "malformed"))throw new ArgumentException("Unknown synthetic aviation fixture.");
+    fixture.Clock.Advance();fixture.Mode=mode=="reset"?"normal":mode;fixture.Calls=0;
+    if(mode=="reset")aviation.Configure(false);
+    return new{synthetic=true,fixture.Calls};
+});
+app.MapGet("/api/testing/aviation",(AviationBrowserFixture fixture)=>new{synthetic=true,fixture.Calls});
 app.MapPost("/api/testing/library/setup",(LibraryHttpFixture fixture,ScientificAccessSettings settings)=>{fixture.Enable();settings.Save(new(true,true));return new{synthetic=true};});
 app.MapPost("/api/testing/nasa/connection",(IEarthdataCredentials credentials)=>{((FixtureEarthdata)credentials).Connected=true;return new{synthetic=true};});
 // Synthetic SDK transport only; commands execute the production coordinator/SQLite handler.

@@ -1,8 +1,7 @@
-import {layerPopup} from './dialog-ui.js';
+import {mapLayerManager} from './map-layer-manager.js';
 import { planningDistance, onUnitsChanged } from "./science-display.js";
 import { airportLocations, searchLocations, locationLabel } from "./location-search.js";
 import "./geographic-view.js";
-import { layerSelector } from "./basemaps.js";
 import {table as geographicTable} from './workstation-ui.js';
 const valid = (p) =>
   Number.isFinite(p?.latitude) && Number.isFinite(p?.longitude);
@@ -77,7 +76,13 @@ export class ResearchMap {
     this.aircraft=L.layerGroup().addTo(this.map);
     this.patterns=L.layerGroup().addTo(this.map);
     this.readiness=L.layerGroup().addTo(this.map);
-    layerPopup(L.control.layers(null, {"Planned route":this.route,"Semantic pattern outlines":this.patterns,"Waypoint markers":this.points,"Recorded track":this.track,"Survey areas":this.areas,"Aircraft":this.aircraft,"Observation markers":this.markers,"Scientific sample locations":this.samples,"Scientific data readiness":this.readiness,"Science footprints":this.footprints},{collapsed:true}).addTo(this.map));
+    const overlays=[
+      ['planned-route','Planned route',this.route,'Mission'],['patterns','Semantic pattern outlines',this.patterns,'Mission'],
+      ['waypoints','Waypoint markers',this.points,'Mission'],['recorded-track','Recorded track',this.track,'Mission'],
+      ['survey-areas','Survey areas',this.areas,'Mission'],['aircraft','Aircraft',this.aircraft,'Mission'],
+      ['observations','Observation markers',this.markers,'Science'],['sample-locations','Scientific sample locations',this.samples,'Science'],
+      ['science-readiness','Scientific data readiness',this.readiness,'Science'],['science-footprints','Science footprints',this.footprints,'Science']
+    ].map(([id,name,layer,group])=>({id,name,layer,group}));
     const action = (name, fn) => {
       const b = document.createElement("button");
       b.type = "button";
@@ -187,7 +192,7 @@ export class ResearchMap {
         });
         this.onlineTiles.push(tile);
       }
-      if (client.layer.startsWith("satellite") && this.onlineTiles.length) {
+      if ((client.layer.startsWith("satellite") || client.layer.startsWith("esri-")) && this.onlineTiles.length) {
         const Logo = L.Control.extend({
           onAdd() {
             const a = document.createElement("a");
@@ -206,7 +211,8 @@ export class ResearchMap {
         this.esriLogo = new Logo({ position: "bottomleft" }).addTo(this.map);
       }
     };
-    this.layerCleanup = layerSelector(tools, this.applyBasemap);
+    this.layers = mapLayerManager(L,this.map,overlays,this.applyBasemap);
+    this.layerCleanup = ()=>this.layers.dispose();
     tools.append(results,searchStatus);
     this.map.on("click", (e) => {
       if (onPoint && this.interactionMode && !this.drawing)

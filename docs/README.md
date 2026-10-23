@@ -5,7 +5,9 @@
 The current source baseline contains v0.5.0; v0.6.0 work is isolated on `develop/v0.6.0`.
 Start with [scope](roadmap/v0.6.0-scope.md), [architecture](roadmap/v0.6.0-architecture.md),
 [phase tracker](roadmap/v0.6.0-development-tracker.md) and [readiness](v0.6.0-readiness.md).
-No v0.6.0 public release or owner acceptance is implied. Historical QA records below retain their dates.
+No v0.6.0 public release or owner acceptance is implied. [Map/reference guide](v0.6.0-aviation-reference.md)
+and [owner workbook](v0.6.0-acceptance-workbook.md) distinguish implemented metadata UI from pending original-data features.
+Historical QA records below retain their dates.
 
 For private 0.5.0 testing while 0.4.2 QA continues: [build and isolation](v0.5.0-private-validation.md),
 [owner acceptance workbook](v0.5.0-acceptance-workbook.md), [readiness and blockers](v0.5.0-readiness.md).
