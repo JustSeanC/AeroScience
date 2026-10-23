@@ -1,0 +1,430 @@
+{
+  "formatVersion": 1,
+  "asOfUtc": "2026-10-23T00:57:27.649158+00:00",
+  "baseSource": "2419efa22a4205fdbcc0dbe2b8f06fa07a6586b2",
+  "classification": "Genuine public metadata/original format inspection; class C independent numeric/geographic acceptance remains pending.",
+  "metadata": [
+    {
+      "id": "faa-vfr",
+      "url": "https://www.faa.gov/air_traffic/flight_info/aeronav/digital_products/vfr/",
+      "retrievedUtc": "2026-10-23T00:52:01.598918+00:00",
+      "status": 200,
+      "bytes": 165947,
+      "sha256": "ad835a0decf208b151252deb688bb47e1878c49f5af31fe98f916f1df3807fab",
+      "contentType": "text/html;charset=UTF-8",
+      "lastModified": null
+    },
+    {
+      "id": "faa-ifr",
+      "url": "https://www.faa.gov/air_traffic/flight_info/aeronav/digital_products/ifr/",
+      "retrievedUtc": "2026-10-23T00:52:01.599593+00:00",
+      "status": 200,
+      "bytes": 156399,
+      "sha256": "a174100565ada3963d8904ce62d3e34b14fd9e9c499422f470733148bd8758c1",
+      "contentType": "text/html;charset=UTF-8",
+      "lastModified": null
+    },
+    {
+      "id": "faa-nasr",
+      "url": "https://www.faa.gov/air_traffic/flight_info/aeronav/Aero_Data/NASR_Subscription/",
+      "retrievedUtc": "2026-10-23T00:52:01.600157+00:00",
+      "status": 200,
+      "bytes": 111058,
+      "sha256": "803da84de84d7125bc6262128208175e7086a0c6adb9f45a36a4cce5496b84e6",
+      "contentType": "text/html;charset=UTF-8",
+      "lastModified": null
+    },
+    {
+      "id": "faa-tfr",
+      "url": "https://tfr.faa.gov/tfrapi/exportTfrList",
+      "retrievedUtc": "2026-10-23T00:52:01.849069+00:00",
+      "status": 200,
+      "bytes": 16236,
+      "sha256": "d94dff260edbad47bbfea81d8897adb1ca590df0d49ad06071ff6db8698ece03",
+      "contentType": "application/json",
+      "lastModified": null
+    },
+    {
+      "id": "faa-tfr-map",
+      "url": "https://tfr.faa.gov/tfr3/?page=map",
+      "retrievedUtc": "2026-10-23T00:52:01.849994+00:00",
+      "status": 200,
+      "bytes": 8341,
+      "sha256": "3a728c43f7ecbfd11b9cadfd21c8cfa51f9982b905c29f892a5437be2cc4d6e3",
+      "contentType": "text/html",
+      "lastModified": "Wed, 16 Sep 2026 18:12:50 GMT"
+    },
+    {
+      "id": "emit-guide",
+      "url": "https://api.github.com/repos/nasa/EMIT-Data-Resources/contents",
+      "retrievedUtc": "2026-10-23T00:52:01.968996+00:00",
+      "status": 200,
+      "bytes": 8983,
+      "sha256": "e22f7816d56ad321415eacb31bcf39c6c2858ba1f2947baafa55439e2b2c619a",
+      "contentType": "application/json; charset=utf-8",
+      "lastModified": "Fri, 09 Oct 2026 06:11:26 GMT"
+    },
+    {
+      "id": "emit-release",
+      "url": "https://forum.earthdata.nasa.gov/viewtopic.php?t=8243",
+      "retrievedUtc": "2026-10-23T00:52:02.137332+00:00",
+      "status": 200,
+      "bytes": 27563,
+      "sha256": "78a8189cc0491d0cba5f8594a8913c3cc2bdcc46c823473de369b8d1fb9b44da",
+      "contentType": "text/html; charset=UTF-8",
+      "lastModified": null
+    },
+    {
+      "id": "esri-topo",
+      "url": "https://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer?f=pjson",
+      "retrievedUtc": "2026-10-23T00:52:02.312671+00:00",
+      "status": 200,
+      "bytes": 10173,
+      "sha256": "2f29a2aa75fe6a44c4fabe566eba713c1efb73cb31bfeb8e703981c035dbb698",
+      "contentType": "text/plain;charset=UTF-8",
+      "lastModified": null
+    },
+    {
+      "id": "esri-terrain",
+      "url": "https://services.arcgisonline.com/ArcGIS/rest/services/World_Terrain_Base/MapServer?f=pjson",
+      "retrievedUtc": "2026-10-23T00:52:02.399201+00:00",
+      "status": 200,
+      "bytes": 8154,
+      "sha256": "d0d18ee6a91ef57f82d5297094ffc979a1328c1990500b1b1845a466bc8c9fef",
+      "contentType": "text/plain;charset=UTF-8",
+      "lastModified": null
+    },
+    {
+      "id": "nasr-cycle",
+      "url": "https://www.faa.gov/air_traffic/flight_info/aeronav/Aero_Data/NASR_Subscription/2026-10-01",
+      "status": 200,
+      "bytes": 118709,
+      "sha256": "c8b2103430321d3ece7cacf28711357195974e7b97a5e6316af4520e881aef7c"
+    },
+    {
+      "id": "emit-tree",
+      "url": "https://api.github.com/repos/nasa/EMIT-Data-Resources/git/trees/main?recursive=1",
+      "status": 200,
+      "bytes": 14341,
+      "sha256": "597e3da8e7375c3be537122cd33d80e3a161bc36621e358a6a175242b61cbd91"
+    },
+    {
+      "id": "emit-cmr",
+      "url": "https://cmr.earthdata.nasa.gov/search/collections.json?short_name=EMITL2ARFL&version=002&page_size=5",
+      "status": 200,
+      "bytes": 7547,
+      "sha256": "6a5025d2d31ec4fec2a3c9645b0b6c64299906b95a34d33e71a0b86283fd785e"
+    },
+    {
+      "id": "mask-cmr",
+      "url": "https://cmr.earthdata.nasa.gov/search/collections.json?short_name=EMITL2AMASK&version=003&page_size=5",
+      "status": 200,
+      "bytes": 6688,
+      "sha256": "c2368d662772c9c86cdf538e10c37e2e54ae31f088fb77baca619c9b749a3c54"
+    },
+    {
+      "id": "esri-raster-doc",
+      "url": "https://developers.arcgis.com/rest/basemap-styles/arcgis-styles-get/",
+      "error": "HTTP Error 404: Not Found"
+    },
+    {
+      "id": "tfr-detail",
+      "url": "https://tfr.faa.gov/save_pages/detail_6_1800.html",
+      "error": "HTTP Error 404: Not Found"
+    },
+    {
+      "id": "tfr-xml",
+      "url": "https://tfr.faa.gov/save_pages/detail_6_1800.xml",
+      "error": "HTTP Error 404: Not Found"
+    }
+  ],
+  "originalSamples": [
+    {
+      "id": "boston-heli.zip",
+      "url": "https://aeronav.faa.gov/visual/09-03-2026/heli_files/Boston_Heli.zip",
+      "bytes": 26153201,
+      "sha256": "ede35eade9ed8d625964ebd52e7d6556fd8d6dea8e68b42733c72e0c26a5a902",
+      "seconds": 1.577
+    },
+    {
+      "id": "boston-tac.zip",
+      "url": "https://aeronav.faa.gov/visual/09-03-2026/tac-files/Boston_TAC.zip",
+      "bytes": 23963891,
+      "sha256": "961e6304c3b47c6e3d4e0722bb646f03fc363e10c930d4459c17e68818ba9ffa",
+      "seconds": 0.656
+    },
+    {
+      "id": "emit-tools.py",
+      "url": "https://raw.githubusercontent.com/nasa/EMIT-Data-Resources/main/python/modules/emit_tools.py",
+      "bytes": 26279,
+      "sha256": "61c8d1506744db1372a34f2822b6bf14d15ff86d90cc42822c1097751d36453e",
+      "seconds": 0.265
+    }
+  ],
+  "chartInspection": [
+    {
+      "archive": "boston-heli.zip",
+      "files": [
+        {
+          "name": "Boston Downtown HEL.htm",
+          "bytes": 26441,
+          "compressed": 5278
+        },
+        {
+          "name": "Boston Downtown HEL.tfw",
+          "bytes": 88,
+          "compressed": 58
+        },
+        {
+          "name": "Boston Downtown HEL.tif",
+          "bytes": 12926376,
+          "compressed": 11219386
+        },
+        {
+          "name": "Boston HEL.htm",
+          "bytes": 26408,
+          "compressed": 5269
+        },
+        {
+          "name": "Boston HEL.tfw",
+          "bytes": 90,
+          "compressed": 59
+        },
+        {
+          "name": "Boston HEL.tif",
+          "bytes": 15863462,
+          "compressed": 14922451
+        }
+      ],
+      "raster": "Boston Downtown HEL.tif",
+      "crsWkt": "PROJCS[\"Lambert Conformal Conic\",GEOGCS[\"NAD83\",DATUM[\"North_American_Datum_1983\",SPHEROID[\"GRS 1980\",6378137,298.257222101004,AUTHORITY[\"EPSG\",\"7019\"]],AUTHORITY[\"EPSG\",\"6269\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4269\"]],PROJECTION[\"Lambert_Conformal_Conic_2SP\"],PARAMETER[\"latitude_of_origin\",42.375],PARAMETER[\"central_meridian\",-71],PARAMETER[\"standard_parallel_1\",42.5],PARAMETER[\"standard_parallel_2\",42.16667],PARAMETER[\"false_easting\",0],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH]]",
+      "dimensions": [
+        10472,
+        8678,
+        1
+      ],
+      "types": [
+        "uint8"
+      ],
+      "transform": [
+        4.233491159770642,
+        0.0,
+        -21773.665731907186,
+        0.0,
+        -4.233657190250305,
+        17178.695925183965
+      ],
+      "centerWgs84": [
+        -70.99523049250635,
+        42.36427661669466
+      ],
+      "tags": {
+        "TIFFTAG_SOFTWARE": "Adobe Photoshop 23.3 (Windows)",
+        "TIFFTAG_DATETIME": "2026:08:07 09:51:12",
+        "TIFFTAG_XRESOLUTION": "300",
+        "TIFFTAG_YRESOLUTION": "300",
+        "TIFFTAG_RESOLUTIONUNIT": "2 (pixels/inch)",
+        "AREA_OR_POINT": "Area"
+      },
+      "windowShape": [
+        1,
+        128,
+        128
+      ],
+      "windowSha256": "b416bd94b6556c7f810bd4dc106e4ae23d56d28951ff8210aad16bddeeed1a0f",
+      "seconds": 0.1,
+      "peakRssKiB": 75780,
+      "limitation": "Center coordinate is a CRS transform, not an independently verified chart control point. Margins/insets/neatline not validated."
+    },
+    {
+      "archive": "boston-heli.zip",
+      "files": [
+        {
+          "name": "Boston Downtown HEL.htm",
+          "bytes": 26441,
+          "compressed": 5278
+        },
+        {
+          "name": "Boston Downtown HEL.tfw",
+          "bytes": 88,
+          "compressed": 58
+        },
+        {
+          "name": "Boston Downtown HEL.tif",
+          "bytes": 12926376,
+          "compressed": 11219386
+        },
+        {
+          "name": "Boston HEL.htm",
+          "bytes": 26408,
+          "compressed": 5269
+        },
+        {
+          "name": "Boston HEL.tfw",
+          "bytes": 90,
+          "compressed": 59
+        },
+        {
+          "name": "Boston HEL.tif",
+          "bytes": 15863462,
+          "compressed": 14922451
+        }
+      ],
+      "raster": "Boston HEL.tif",
+      "crsWkt": "PROJCS[\"Lambert Conformal Conic\",GEOGCS[\"NAD83\",DATUM[\"North_American_Datum_1983\",SPHEROID[\"GRS 1980\",6378137,298.257222101004,AUTHORITY[\"EPSG\",\"7019\"]],AUTHORITY[\"EPSG\",\"6269\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4269\"]],PROJECTION[\"Lambert_Conformal_Conic_2SP\"],PARAMETER[\"latitude_of_origin\",42.36667],PARAMETER[\"central_meridian\",-71],PARAMETER[\"standard_parallel_1\",42.75],PARAMETER[\"standard_parallel_2\",42.08333],PARAMETER[\"false_easting\",0],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH]]",
+      "dimensions": [
+        10491,
+        8691,
+        1
+      ],
+      "types": [
+        "uint8"
+      ],
+      "transform": [
+        10.58455386946129,
+        0.0,
+        -54837.277691044445,
+        0.0,
+        -10.58393823411211,
+        48230.24375070196
+      ],
+      "centerWgs84": [
+        -70.99169356221294,
+        42.386815226004366
+      ],
+      "tags": {
+        "TIFFTAG_SOFTWARE": "Adobe Photoshop 23.3 (Windows)",
+        "TIFFTAG_DATETIME": "2026:08:07 09:03:37",
+        "TIFFTAG_XRESOLUTION": "300",
+        "TIFFTAG_YRESOLUTION": "300",
+        "TIFFTAG_RESOLUTIONUNIT": "2 (pixels/inch)",
+        "AREA_OR_POINT": "Area"
+      },
+      "windowShape": [
+        1,
+        128,
+        128
+      ],
+      "windowSha256": "8219cfba2015f5d041927591cee6fcfc9db5f91aac1e72bbf9a8f3ef395e7d51",
+      "seconds": 0.062,
+      "peakRssKiB": 76548,
+      "limitation": "Center coordinate is a CRS transform, not an independently verified chart control point. Margins/insets/neatline not validated."
+    },
+    {
+      "archive": "boston-tac.zip",
+      "files": [
+        {
+          "name": "Boston TAC.htm",
+          "bytes": 26568,
+          "compressed": 5364
+        },
+        {
+          "name": "Boston TAC.tfw",
+          "bytes": 90,
+          "compressed": 59
+        },
+        {
+          "name": "Boston TAC.tif",
+          "bytes": 25206975,
+          "compressed": 23958134
+        }
+      ],
+      "raster": "Boston TAC.tif",
+      "crsWkt": "PROJCS[\"Lambert Conformal Conic\",GEOGCS[\"NAD83\",DATUM[\"North_American_Datum_1983\",SPHEROID[\"GRS 1980\",6378137,298.257222101004,AUTHORITY[\"EPSG\",\"7019\"]],AUTHORITY[\"EPSG\",\"6269\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4269\"]],PROJECTION[\"Lambert_Conformal_Conic_2SP\"],PARAMETER[\"latitude_of_origin\",42.05],PARAMETER[\"central_meridian\",-71.1],PARAMETER[\"standard_parallel_1\",45],PARAMETER[\"standard_parallel_2\",33],PARAMETER[\"false_easting\",0],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH]]",
+      "dimensions": [
+        12478,
+        8969,
+        1
+      ],
+      "types": [
+        "uint8"
+      ],
+      "transform": [
+        21.167878433528255,
+        0.0,
+        -97278.48893543372,
+        0.0,
+        -21.168755246763023,
+        97974.12863179817
+      ],
+      "centerWgs84": [
+        -70.67787993750031,
+        42.07677707090483
+      ],
+      "tags": {
+        "TIFFTAG_SOFTWARE": "Adobe Photoshop 23.3 (Windows)",
+        "TIFFTAG_DATETIME": "2026:08:07 08:01:13",
+        "TIFFTAG_XRESOLUTION": "300",
+        "TIFFTAG_YRESOLUTION": "300",
+        "TIFFTAG_RESOLUTIONUNIT": "2 (pixels/inch)",
+        "AREA_OR_POINT": "Area"
+      },
+      "windowShape": [
+        1,
+        128,
+        128
+      ],
+      "windowSha256": "cfe33fc283992362043159792f0bfe25b25bda0adac956565676a87f58f2fddc",
+      "seconds": 0.102,
+      "peakRssKiB": 78084,
+      "limitation": "Center coordinate is a CRS transform, not an independently verified chart control point. Margins/insets/neatline not validated."
+    }
+  ],
+  "limitations": [
+    "No independent printed chart control-point or neatline verification yet.",
+    "No packaged Windows GDAL/PROJ/NetCDF stack selected, licensed or tested.",
+    "NASA credentials unavailable: no protected EMIT original numeric acceptance.",
+    "FAA TFR list has no polygons or exact UTC activation. Old detail HTML/XML both 404.",
+    "NASR original requests returned 503; schema/geometry acceptance pending.",
+    "Esri legacy raster metadata is accessible; this does not establish current authorized style distribution or billing rights."
+  ],
+  "assetHeadResults": [
+    {
+      "id": "sectional",
+      "url": "https://aeronav.faa.gov/visual/09-03-2026/sectional-files/Puerto_Rico-Virgin_Is.zip",
+      "error": "HTTP Error 404: Not Found"
+    },
+    {
+      "id": "ifr-low",
+      "url": "https://aeronav.faa.gov/enroute/09-03-2026/enr_l01.zip",
+      "bytes": "8595043",
+      "ranges": "bytes",
+      "status": 200
+    },
+    {
+      "id": "ifr-high",
+      "url": "https://aeronav.faa.gov/enroute/09-03-2026/enr_h01.zip",
+      "bytes": "9180279",
+      "ranges": "bytes",
+      "status": 200
+    },
+    {
+      "id": "nasr-airspace",
+      "url": "https://nfdc.faa.gov/webContent/28DaySub/2026-10-01/class_airspace_shape_files.zip",
+      "error": "HTTP Error 503: Service Unavailable"
+    },
+    {
+      "id": "nasr-fixes",
+      "url": "https://nfdc.faa.gov/webContent/28DaySub/extra/01_Oct_2026_FIX_CSV.zip",
+      "error": "HTTP Error 503: Service Unavailable"
+    }
+  ],
+  "emitGranule": {
+    "url": "https://cmr.earthdata.nasa.gov/search/granules.json?collection_concept_id=C4079844428-LPCLOUD&page_size=1&bounding_box=-120,34,-115,38",
+    "sha256": "fc2d46f32e7e09c76d28ec7dab9b0e318992c2f1811691d540169bbafa0b5a90",
+    "granules": [
+      {
+        "id": "G4319234505-LPCLOUD",
+        "title": "EMIT_L2A_RFL_002_20220810T174243",
+        "observation": "2022-08-10T17:42:43.000Z"
+      }
+    ],
+    "originalAccess": "No Earthdata credentials are configured; numerical acceptance pending.",
+    "originalHeadResult": "403 Forbidden without credentials; no protected numeric bytes acquired"
+  },
+  "esriCompatibleRasterReference": {
+    "url": "https://developers.arcgis.com/rest/static-basemap-tiles/arcgis-outdoor-meta-data-get/",
+    "sha256": "6450fff5848d987a60ae6882528a7e7b6b013695395c21d9b53464f6148b2e13",
+    "result": "Documented static Outdoor raster endpoint. Actual authorized tiles pending user-owned public key; no key configured here."
+  }
+}
