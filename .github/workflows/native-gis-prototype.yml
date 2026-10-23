@@ -1,0 +1,59 @@
+name: native-gis-prototype
+on:
+  workflow_dispatch:
+  push:
+    branches: [develop/v0.6.0]
+    paths:
+      - 'tests/AeroScience.GisProbe/**'
+      - '.github/workflows/native-gis-prototype.yml'
+permissions:
+  contents: read
+jobs:
+  native-research:
+    if: github.ref == 'refs/heads/develop/v0.6.0'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            rid: linux-x64
+            executable: AeroScience.GisProbe
+          - os: windows-latest
+            rid: win-x64
+            executable: AeroScience.GisProbe.exe
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Restore exact research graph and self-contained publish
+        shell: pwsh
+        run: |
+          dotnet restore tests/AeroScience.GisProbe --locked-mode
+          if ($LASTEXITCODE -ne 0) { throw 'Native research locked restore failed.' }
+          dotnet publish tests/AeroScience.GisProbe -c Release -r ${{ matrix.rid }} --self-contained true --no-restore -o artifacts/native-gis-research/publish
+          if ($LASTEXITCODE -ne 0) { throw 'Native research publish failed.' }
+          git diff --exit-code -- '**/packages.lock.json'
+          if ($LASTEXITCODE -ne 0) { throw 'Native research modified dependency locks.' }
+      - name: Bounded genuine FAA sample and actual native execution
+        shell: pwsh
+        run: |
+          python tests/AeroScience.GisProbe/prepare_faa_sample.py --output artifacts/native-gis-research/original
+          if ($LASTEXITCODE -ne 0) { throw 'Pinned genuine FAA acquisition failed; no synthetic substitute.' }
+          & ./artifacts/native-gis-research/publish/${{ matrix.executable }} 'artifacts/native-gis-research/original/Hawaiian Islands SEC.tif' artifacts/native-gis-research/result.json
+          if ($LASTEXITCODE -ne 0) { throw 'Actual native loading/window/CRS probe failed.' }
+      - name: Keep research JSON only (no distributable binaries or original chart)
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: native-research-${{ matrix.rid }}
+          path: |
+            artifacts/native-gis-research/result.json
+            artifacts/native-gis-research/original/acquisition.json
+          if-no-files-found: ignore
+          retention-days: 14

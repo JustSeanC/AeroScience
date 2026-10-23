@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "dependencies": {
+    "net10.0": {
+      "MaxRev.Gdal.Core": {
+        "type": "Direct",
+        "requested": "[3.13.3.583, )",
+        "resolved": "3.13.3.583",
+        "contentHash": "PZ3dqdaj4Ezjz0Y6JSD0W/dlHAE0UFH/8JUn82ttYlWjj7skz3Z40O6iWVQwdz5fyOqGqiSJcQnyw/jE5JnWqQ=="
+      },
+      "MaxRev.Gdal.LinuxRuntime.Minimal.x64": {
+        "type": "Direct",
+        "requested": "[3.13.3.583, )",
+        "resolved": "3.13.3.583",
+        "contentHash": "Y7foC9B+Nt28ACzZIVwLwWrB7Y36B4hKSaCbB6ntGKxRYAIDpcAkpwInwT856e3LbzLHaaatdPrF1e1UOqjJ4w=="
+      },
+      "MaxRev.Gdal.WindowsRuntime.Minimal": {
+        "type": "Direct",
+        "requested": "[3.13.3.583, )",
+        "resolved": "3.13.3.583",
+        "contentHash": "ZDVsfogU8JkpXfqGUFLq5WmhU8IwlSTnxi2DHsS3ox8nABctgfU82vVPeorCsNiddLO8yffKuSnE7v6RP3+CfQ=="
+      }
+    },
+    "net10.0/linux-x64": {
+      "MaxRev.Gdal.Core": {
+        "type": "Direct",
+        "requested": "[3.13.3.583, )",
+        "resolved": "3.13.3.583",
+        "contentHash": "PZ3dqdaj4Ezjz0Y6JSD0W/dlHAE0UFH/8JUn82ttYlWjj7skz3Z40O6iWVQwdz5fyOqGqiSJcQnyw/jE5JnWqQ=="
+      },
+      "MaxRev.Gdal.LinuxRuntime.Minimal.x64": {
+        "type": "Direct",
+        "requested": "[3.13.3.583, )",
+        "resolved": "3.13.3.583",
+        "contentHash": "Y7foC9B+Nt28ACzZIVwLwWrB7Y36B4hKSaCbB6ntGKxRYAIDpcAkpwInwT856e3LbzLHaaatdPrF1e1UOqjJ4w=="
+      },
+      "MaxRev.Gdal.WindowsRuntime.Minimal": {
+        "type": "Direct",
+        "requested": "[3.13.3.583, )",
+        "resolved": "3.13.3.583",
+        "contentHash": "ZDVsfogU8JkpXfqGUFLq5WmhU8IwlSTnxi2DHsS3ox8nABctgfU82vVPeorCsNiddLO8yffKuSnE7v6RP3+CfQ=="
+      }
+    },
+    "net10.0/win-x64": {
+      "MaxRev.Gdal.Core": {
+        "type": "Direct",
+        "requested": "[3.13.3.583, )",
+        "resolved": "3.13.3.583",
+        "contentHash": "PZ3dqdaj4Ezjz0Y6JSD0W/dlHAE0UFH/8JUn82ttYlWjj7skz3Z40O6iWVQwdz5fyOqGqiSJcQnyw/jE5JnWqQ=="
+      },
+      "MaxRev.Gdal.LinuxRuntime.Minimal.x64": {
+        "type": "Direct",
+        "requested": "[3.13.3.583, )",
+        "resolved": "3.13.3.583",
+        "contentHash": "Y7foC9B+Nt28ACzZIVwLwWrB7Y36B4hKSaCbB6ntGKxRYAIDpcAkpwInwT856e3LbzLHaaatdPrF1e1UOqjJ4w=="
+      },
+      "MaxRev.Gdal.WindowsRuntime.Minimal": {
+        "type": "Direct",
+        "requested": "[3.13.3.583, )",
+        "resolved": "3.13.3.583",
+        "contentHash": "ZDVsfogU8JkpXfqGUFLq5WmhU8IwlSTnxi2DHsS3ox8nABctgfU82vVPeorCsNiddLO8yffKuSnE7v6RP3+CfQ=="
+      }
+    }
+  }
+}

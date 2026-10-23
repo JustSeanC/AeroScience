@@ -34,3 +34,12 @@ Esri ArcGIS Location Platform satellite/labels services are optional authenticat
 ## v0.3.0 scientific raster decoding
 
 BitMiracle.LibTiff.NET **2.4.660**, Bit Miracle, BSD 3-Clause and upstream component notices. The unmodified managed NuGet package is hash-pinned in lock files. Its complete published license, including ComponentAce and upstream acknowledgments, is bundled in [licenses/LibTiff.NET.txt](licenses/LibTiff.NET.txt). Official package license: <https://bitmiracle.github.io/libtiff.net/help/articles/license.html>. No GDAL, Python, rasterio, external scientific data archive, or satellite imagery is installed as an AeroScience runtime dependency. Users retain responsibility for the licenses of collections they import. Native SimConnect redistribution uses the separately documented, DLL-hash-bound maintainer authorization; original correspondence stays private.
+
+## v0.6.0 development-only native GIS research
+
+`tests/AeroScience.GisProbe` independently pins MaxRev.Gdal **3.13.3.583** for actual Linux/Windows
+codec/CRS research. It is outside the solution/application dependency graph and is not packaged with
+AeroScience. NuGet's wrapper MIT label is not a complete native distribution review. In particular,
+the pinned upstream vcpkg manifests identify bundled Poppler/MySQL as GPL-2.0-or-later, and the Windows
+runtime contains additional proprietary runtime components. Production redistribution is **not approved**.
+See [the exact research gate and source references](tests/AeroScience.GisProbe/README.md).
