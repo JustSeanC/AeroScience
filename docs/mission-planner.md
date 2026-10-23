@@ -13,6 +13,50 @@ Mission Planner prepares the route, areas and intended science configuration. Mi
 9. **Save mission plan** persists the complete draft. Save/cancel any temporary point/polygon and add/discard a pattern preview first. The persistent status distinguishes draft points, plan edits, previews and a saved plan. Switching dashboard sections keeps the draft in this browser tab. Opening another plan asks before discarding edits; reloading/leaving warns. Drafts are not a substitute for saving and do not survive a browser crash.
 10. **Export / Share Route** previews the complete route before download/copy. PLN needs a cruising altitude. Check target EFB point limits. Saved plans can be started with **Record this plan**; Mission Control and the toolbar use the same immutable recording snapshot.
 
+## Recommended science payload
+
+The full-width **Recommended Science Payload** panel follows Mission Details. Its compact cards
+separate the selected template's **Primary** recommendations from **Optional** additions, show whether
+each instrument is enabled in this draft, and identify external-data requirements and the selected
+reference profile where applicable. Expand an instrument's details for acquisition cadence,
+operating limitations and source guidance. Expanding information does not change the draft.
+
+| Mission template | Primary recommendation | Optional/contextual use |
+|---|---|---|
+| General Research | None; choose a payload for the actual objective | Flexible research and observation markers; no automatic instrument selection |
+| Vertical Profile | Ambient thermometer, pressure, wind and density | Simulator-derived atmospheric observations across altitude changes |
+| Geographic Survey | Terrain Scanner and Multispectral Imager | Thermal Imager, Hyperspectral Imager and ambient atmospheric context, selected individually |
+| Observation Flight | Ambient thermometer | Observation/marker-focused and otherwise flexible |
+| Cloud Structure Survey | Ambient thermometer, wind and pressure | Simulator-reported conditions and entry/exit observations; no remote cloud sensor implied |
+| Atmospheric Transect | Ambient thermometer, wind, pressure and density | Simulator-derived observations along a transect |
+
+An untouched new draft may prefill the selected template's primary instruments. Existing plans and
+modified payloads are preserved when the template changes. **Apply Recommended Payload** explicitly
+replaces the draft's payload with the primary recommendations; when existing settings would be
+replaced, review the confirmation covering enabled instruments, cadence, geometry, profiles and
+calibration references. **Merge Recommended Instruments** enables missing primary instruments while
+retaining current settings and additional instruments. **Keep Current Payload** retains the draft.
+An optional instrument is added only by its individual control or the normal instrument editor;
+Apply and Merge do not silently enable optional additions. Review the result before saving.
+
+Terrain needs supported **3DEP bare-earth DEM or Copernicus DSM** data, multispectral needs supported
+**Sentinel-2** products, and thermal needs supported **Landsat surface-temperature** observations.
+Hyperspectral needs compatible original **ENVI** collections; generic geographic preflight preparation
+does not guarantee a compatible hyperspectral source. **Find Compatible External Data** opens the
+existing Library workflow. Rendering recommendations, changing templates and merging instruments
+do not save a plan, start recording/collection or initiate downloads.
+
+Retained source candidates do not establish route coverage or QA-valid pixels. Original dataset dates
+remain distinct from flight observation times. DEM-derived samples are not airborne LiDAR returns;
+historical satellite imagery is not a live aircraft camera. Recommendations do not claim installed
+hardware or certified performance. Both Universal and Realistic modes remain aircraft-agnostic;
+Realistic assessments use documented operating evidence and retain unknown limitations.
+
+Browser captures of the corrected Geographic Survey editor: [desktop](images/v0.5.0-payload-ux/desktop.png),
+[390 px overview](images/v0.5.0-payload-ux/narrow-overview.png) and
+[complete narrow payload panel](images/v0.5.0-payload-ux/narrow-payload.png). These use the real local
+backend with development inputs; they are not installed Windows or physical iPad acceptance.
+
 The shared map layer control separates planned route, semantic pattern outlines, waypoint markers, recorded track, survey areas, aircraft, observation markers, successful scientific sample locations and saved remote-sensing footprint outlines. Blue sample points require valid saved scientific values. A footprint can contain excluded cloud/nodata pixels and is not a live camera image or proof of complete coverage. **Scientific sample locations** in Science Collection is expandable rather than another always-open map.
 
 Dashboard Settings actions share one auxiliary native dialog. Repeated requests focus the existing window; conflicting work waits. Owned file/folder pickers and legitimate Settings children remain available. Other dashboard clients can continue viewing telemetry/history.

@@ -19,7 +19,8 @@ public sealed record MissionPlan(Guid Id, string Name, MissionTemplateKind Templ
     string FlightRules = "VFR", double? CruisingAltitudeFeet = null, AtmosphericMissionSettings? AtmosphericSettings = null,SensorPlanningSettings? SensorPlanning=null,
     [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] CollectionPlan? Collection=null);
 public sealed record MissionTemplate(MissionTemplateKind Id, string Name, string Objective,
-    InstrumentConfiguration[] Instruments, string[] NoteCategories);
+    InstrumentConfiguration[] Instruments, string[] NoteCategories,
+    [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] InstrumentConfiguration[]? OptionalInstruments = null);
 public sealed record MeasurementDefinition(string Id, string Name, string Unit, string SimulatorVariable);
 public sealed record InstrumentDefinition(string Id, string Name, string Description, string DataSource,
     MeasurementDefinition[] Measurements, int MinimumIntervalMs = 1000);
