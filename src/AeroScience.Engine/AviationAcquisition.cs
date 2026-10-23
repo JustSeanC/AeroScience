@@ -264,7 +264,8 @@ public sealed partial class AviationReference
         var sha = await AviationDownloads.FileHash(zip, token);
         if (job.Preview.Item.OriginalSha256 is {} providerHash && providerHash != sha) throw new InvalidDataException("FAA original checksum mismatch.");
         if (disk.FreeBytes(directory) < job.Preview.MaximumExpandedBytes + StorageManager.MinimumFreeBytes) throw new IOException("Insufficient extraction capacity.");
-        var files = await AviationDownloads.VerifyArchive(zip, Path.Combine(stage, "files"), job.Preview.MaximumExpandedBytes, token, () => ContinueTransfer(job.Id), nasr: job.Preview.Item.Product == AviationProduct.Nasr);
+        var files = await AviationDownloads.VerifyArchive(zip, Path.Combine(stage, "files"), job.Preview.MaximumExpandedBytes, token, () => ContinueTransfer(job.Id), nasr: job.Preview.Item.Product == AviationProduct.Nasr,
+            airspace: job.Preview.Item.OriginalFileName == "class_airspace_shape_files.zip", saa: job.Preview.Item.OriginalFileName == "aixm5.0.zip");
         if (!ContinueTransfer(job.Id)) return;
         lock (gate)
         {

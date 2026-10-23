@@ -9,12 +9,13 @@ test('approved FAA original uses durable host jobs, closes independently, verifi
  await page.goto('/#settings/maps');await page.getByRole('button',{name:'FAA Catalog & Notices',exact:true}).click();
  const catalog=page.getByRole('dialog',{name:'FAA Catalog & Notices',exact:true});const opener=catalog.getByRole('button',{name:'Download & Retain Original'}).first();await opener.click();
  let dialog=page.getByRole('dialog',{name:'FAA Downloads',exact:true});await expect(dialog.getByText(/Entire original ZIP/)).toBeVisible();
- await dialog.getByRole('button',{name:'Review FAA Download'}).click();
+ const previewResponse=page.waitForResponse(r=>r.url().endsWith('/api/aviation/downloads/preview')&&r.request().method()==='POST');
+ await dialog.getByRole('button',{name:'Review FAA Download'}).click();const selectedJob=await(await previewResponse).json();
  const reusable=dialog.getByText(/Exact verified original already retained/);
  await expect(dialog.getByRole('button',{name:'Approve FAA Download'}).or(reusable)).toBeVisible();
  if(await dialog.getByRole('button',{name:'Approve FAA Download'}).isVisible())await dialog.getByRole('button',{name:'Approve FAA Download'}).click();
  await dialog.getByRole('button',{name:'Close FAA Downloads',exact:true}).click();await expect(opener).toBeFocused();
- await expect.poll(async()=>{const jobs=await(await request.get('/api/aviation/downloads')).json();return jobs.some(j=>j.state==='Completed');}).toBeTruthy();
+ await expect.poll(async()=>{const jobs=await(await request.get('/api/aviation/downloads')).json();return jobs.find(j=>j.id===selectedJob.id)?.state;}).toBe('Completed');
  await catalog.getByRole('button',{name:'Manage FAA Downloads'}).click();dialog=page.getByRole('dialog',{name:'FAA Downloads',exact:true});
  await expect(dialog.getByText(/Verified original SHA-256/).first()).toBeVisible();await dialog.getByRole('button',{name:'Verify Retained Original'}).first().click();await expect(dialog.getByRole('status')).toContainText('match their recorded hashes');
  await page.setViewportSize({width:390,height:740});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy();
@@ -32,7 +33,7 @@ test('actual recording preempts a live FAA transfer, telemetry continues and an 
  const preview=await post(request,'/api/aviation/downloads/preview',{kind:'vfr',itemId:item.id,maximumTransferBytes:16777216,maximumExpandedBytes:8388608});
  await post(request,`/api/aviation/downloads/${preview.id}/control`,{revision:preview.revision,action:'approve',selectionHash:preview.preview.selectionHash});
  const state=async()=>(await(await request.get('/api/aviation/downloads')).json()).find(j=>j.id===preview.id);
- await expect.poll(async()=>(await state()).downloadedBytes).toBeGreaterThan(0);
+ try{await expect.poll(async()=>(await state()).downloadedBytes).toBeGreaterThan(0);}catch(error){throw new Error(`FAA transfer did not start: ${JSON.stringify(await state())}`,{cause:error});}
  await post(request,'/api/mission-selection',{planId:null});const flight=await post(request,'/api/missions',{name:'Synthetic aviation transfer priority',mode:'universal',armScience:true});
  try{
   await expect.poll(async()=>(await state()).state).toBe('Waiting for Flight Priority');

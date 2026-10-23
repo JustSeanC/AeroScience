@@ -35,7 +35,7 @@ public static class NasrReferenceProbe
         {
             service.ConfigureDownloads(false, null); service.Configure(true); var catalog = await service.Refresh("nasr");
             // The reviewed cycle is deliberately explicit, never silently replaced by a newer scene/cycle.
-            var selected = catalog.Charts.Where(i => i.Product == AviationProduct.Nasr && i.Edition == "2026-10-01").ToArray();
+            var selected = catalog.Charts.Where(i => i.Product == AviationProduct.Nasr && i.Edition == "2026-10-01" && i.OriginalFileName.EndsWith("_CSV.zip",StringComparison.Ordinal)).ToArray();
             if (selected.Length != 3) throw new IOException("Reviewed NASR 2026-10-01 APT/NAV/FIX originals are not in the actual FAA catalog: " + catalog.Status + " / " + catalog.Cache?.Error + ". No substitution.");
             foreach (var item in selected)
             {

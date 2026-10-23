@@ -2,14 +2,14 @@ import {dialogHeader} from './dialog-ui.js';
 import {node as el,bytes,button,link} from './workstation-ui.js';
 import {openAviationDownloads} from './aviation-downloads.js';
 const utc=value=>value?new Date(value).toISOString().replace('T',' ').replace('Z',' UTC'):'Unknown';
-const productNames={sectional:'VFR Sectional',terminalArea:'Terminal Area Chart',helicopter:'Helicopter Route Chart',ifrLow:'IFR Low Enroute',ifrHigh:'IFR High Enroute',nasr:'FAA NASR APT/NAV/FIX CSV'};
+const productNames={sectional:'VFR Sectional',terminalArea:'Terminal Area Chart',helicopter:'Helicopter Route Chart',ifrLow:'IFR Low Enroute',ifrHigh:'IFR High Enroute',nasr:'FAA NASR reference original'};
 
 // The host owns consent/cache/refresh. Reading or closing this view never downloads chart originals.
 export async function openAviationReference(api) {
  const dialog=el('dialog');dialog.className='aviation-reference-dialog';dialog.setAttribute('aria-label','FAA Catalog & Notices');
  dialog.append(el('h2','FAA Catalog & Notices'),el('p','FAA reference metadata, not a real-world preflight product. Local chart rendering and verified TFR polygons are not yet available.'));
  const access=el('section'),tools=el('div',undefined,'action-row'),kindLabel=el('label','FAA reference product'),kind=el('select');kind.setAttribute('aria-label','FAA reference product');
- for(const [value,name] of [['vfr','VFR / TAC / Helicopter catalogs'],['ifr','IFR Low / High catalogs'],['nasr','NASR airports / runways / NAVAIDs / fixes'],['tfr','TFR notice summaries']]){const o=el('option',name);o.value=value;kind.append(o);}
+ for(const [value,name] of [['vfr','VFR / TAC / Helicopter catalogs'],['ifr','IFR Low / High catalogs'],['nasr','NASR references / Class airspace / SAA'],['tfr','TFR notice summaries']]){const o=el('option',name);o.value=value;kind.append(o);}
  kindLabel.append(kind);tools.append(kindLabel);const refresh=button(tools,'Refresh FAA References',()=>load(true));
  const message=el('p');message.setAttribute('role','status');message.setAttribute('aria-live','polite');
  const metadata=el('p',undefined,'footnote'),limitations=el('ul'),records=el('div',undefined,'aviation-reference-records'),paging=el('div',undefined,'action-row');

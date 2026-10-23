@@ -30,7 +30,7 @@ export function mapLayerManager(L,map,definitions,applyBasemap){
    }
    content.append(set);
   }
-  const faa=el('section');faa.append(el('p',aviation.status()),el('h3','FAA aviation & TFR overlays'),el('p','FAA imported NASR point/runway references are independent overlays. Airspace/SUA polygons, chart rendering remain unavailable. TFR polygons: unverified / unavailable. No layer can clear a route of restrictions.'));
+  const faa=el('section');faa.append(el('p',aviation.status()),el('h3','FAA aviation & TFR overlays'),el('p','Imported FAA points/runways, Class B/C/D/E polygons and supported literal SAA boundaries are independent overlays. Review source-specific omissions, display tolerance and activation uncertainty. Chart rendering and verified TFR screening remain unavailable. No layer can clear a route of restrictions.'));
   const references=el('button','FAA Catalog & Notices');references.type='button';references.onclick=()=>openAviationReference(mapRequest);faa.append(references);content.append(faa);
   content.append(el('p','Source edition / as-of: inspect the original source or recorded observation details. No chart edition or restriction freshness is inferred from the basemap.'));sync();
  }

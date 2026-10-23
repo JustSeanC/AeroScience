@@ -6,7 +6,7 @@ using AeroScience.Shared;
 namespace AeroScience.Missions;
 
 // Bounded aviation originals, not numeric science. No reprojection or neatline claim here.
-public static class AviationDownloads
+public static partial class AviationDownloads
 {
     private static readonly uint[] CrcTable = Enumerable.Range(0, 256).Select(i =>
     { var value = (uint)i; for (var bit = 0; bit < 8; bit++) value = (value >> 1) ^ ((value & 1) != 0 ? 0xEDB88320u : 0); return value; }).ToArray();
@@ -39,15 +39,16 @@ public static class AviationDownloads
         await using var stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read, 65536, true);
         return Convert.ToHexString(await SHA256.HashDataAsync(stream, token)).ToLowerInvariant();
     }
-    public static async Task<AviationRetainedFile[]> VerifyArchive(string zip, string expanded, long maximumBytes, CancellationToken token, Func<bool>? canContinue = null, bool nasr = false)
+    public static async Task<AviationRetainedFile[]> VerifyArchive(string zip, string expanded, long maximumBytes, CancellationToken token, Func<bool>? canContinue = null, bool nasr = false, bool airspace = false, bool saa = false)
     {
+        if (saa) return await VerifySaaArchive(zip, expanded, maximumBytes, token, canContinue);
         StorageManager.ValidateLocalPath(zip); StorageManager.ValidateLocalPath(expanded);
         if (new FileInfo(zip).LinkTarget is not null || (File.GetAttributes(zip) & FileAttributes.ReparsePoint) != 0)
             throw new IOException("Aviation archives cannot follow file links or reparse points.");
         Directory.CreateDirectory(expanded); var files = new List<AviationRetainedFile>(); var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         using var archive = ZipFile.OpenRead(zip);
         if (archive.Entries.Count is < 1 or > 100) throw new InvalidDataException("FAA archive must contain 1–100 bounded entries.");
-        long total = 0; var tiffs = 0; var csvs = 0;
+        long total = 0; var tiffs = 0; var csvs = 0; var shapes = 0; var xmls = 0;
         foreach (var entry in archive.Entries)
         {
             token.ThrowIfCancellationRequested(); var name = entry.FullName;
@@ -61,7 +62,7 @@ public static class AviationDownloads
                 entry.Length < 0 || entry.Length > maximumBytes - total || entry.Length > Math.Max(1048576, entry.CompressedLength * 200))
                 throw new InvalidDataException("FAA archive exceeds approved bounds or has conflicting file names.");
             var extension = Path.GetExtension(fileName).ToLowerInvariant();
-            if (nasr ? extension is not (".csv" or ".pdf" or ".txt") : extension is not (".tif" or ".tiff" or ".tfw" or ".prj" or ".xml" or ".txt" or ".htm" or ".html"))
+            if (airspace ? extension is not (".shp" or ".shx" or ".dbf" or ".prj" or ".cpg" or ".xml" or ".gml" or ".txt" or ".pdf") : nasr ? extension is not (".csv" or ".pdf" or ".txt") : extension is not (".tif" or ".tiff" or ".tfw" or ".prj" or ".xml" or ".txt" or ".htm" or ".html"))
                 throw new InvalidDataException("Unsupported FAA archive companion. Nested archives and executables are not extracted; original ZIP is preserved.");
             total = checked(total + entry.Length); var path = Path.Combine(expanded, fileName);
             await using (var input = entry.Open())
@@ -88,9 +89,11 @@ public static class AviationDownloads
                 tiffs++;
             }
             if (extension == ".csv") csvs++;
+            if (extension == ".shp") shapes++;
+            if (extension is ".xml" or ".gml") xmls++;
             files.Add(new(fileName, entry.Length, await FileHash(path, token)));
         }
-        if (nasr ? csvs == 0 : tiffs == 0) throw new InvalidDataException("No original TIFF chart in this distribution.");
+        if (airspace ? shapes == 0 && xmls == 0 : nasr ? csvs == 0 : tiffs == 0) throw new InvalidDataException("No supported original data member in this FAA distribution.");
         return files.ToArray();
     }
     public static async Task<bool> VerifyRetained(string directory, AviationDownloadJob job, CancellationToken token = default)

@@ -28,7 +28,9 @@ public sealed partial class AviationMetadataStore
         if (json.Length > 16384) throw new InvalidDataException("Oversized FAA dataset metadata.");
         var d = JsonSerializer.Deserialize<AviationVectorDataset>(json, WireJson.Options) ?? throw new InvalidDataException("Invalid FAA dataset metadata.");
         if (d.Version != 1 || !Regex.IsMatch(d.Id, "^[a-f0-9]{64}$") || !Regex.IsMatch(d.OriginalSha256, "^[a-f0-9]{64}$") ||
-            d.JobId == Guid.Empty || d.Features is < 1 or > AviationNasr.MaximumFeatures || d.OmittedRecords < 0 || d.Family is not ("APT" or "NAV" or "FIX") || d.SourceCrs != "EPSG:4269 (NAD83; realization/epoch unspecified by NASR CSV)")
+            d.JobId == Guid.Empty || d.Features is < 1 or > AviationNasr.MaximumFeatures || d.OmittedRecords < 0 ||
+            (d.Family is "APT" or "NAV" or "FIX" ? d.SourceCrs != "EPSG:4269 (NAD83; realization/epoch unspecified by NASR CSV)" :
+             d.Family is "CLASS" or "SUA" ? d.SourceCrs is not (AviationAirspace.Nad83 or "OGC:CRS84 (WGS84 longitude/latitude)") : true))
             throw new NotSupportedException("Unsupported FAA vector dataset version or metadata. Preserve the original store.");
         return d;
     }
@@ -90,7 +92,9 @@ public sealed partial class AviationMetadataStore
         {
             using var db = Open(); using var command = db.CreateCommand(); command.CommandText = "SELECT payload FROM vector_datasets WHERE id=$id"; command.Parameters.AddWithValue("$id", id);
             if (command.ExecuteScalar() is not string json) throw new KeyNotFoundException("FAA dataset not imported.");
-            var dataset = ParseDataset(json); var tree = VectorIndex(db, dataset);
+            var dataset = ParseDataset(json);
+            if (dataset.Family is "CLASS" or "SUA") throw new ArgumentException("Use the bounded airspace polygon endpoint for this dataset.");
+            var tree = VectorIndex(db, dataset);
             var envelope = new Envelope(bounds.West, bounds.East, bounds.South, bounds.North); var region = new GeometryFactory().ToGeometry(envelope);
             var matches = tree.Query(envelope).Where(e => (kind is null || e.Kind == kind) && e.Geometry.Intersects(region)).OrderBy(e => e.Id, StringComparer.Ordinal).ToArray();
             var features = new List<AviationVectorFeature>(); command.CommandText = "SELECT payload FROM vector_features WHERE dataset_id=$dataset AND id=$id"; command.Parameters.AddWithValue("$dataset", id);

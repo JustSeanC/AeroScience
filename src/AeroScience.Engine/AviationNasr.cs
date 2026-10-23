@@ -49,6 +49,17 @@ public sealed partial class AviationReference
                 var retained = store.VectorDatasets().FirstOrDefault(d => d.JobId == jobId); if (retained is not null) return retained;
             }
             await AviationDownloads.VerifyRetained(JobDirectory(jobId), job, token);
+            if (AviationAirspace.IsOriginal(job.Preview.Item))
+                return await Task.Run(() =>
+                {
+                    lock (gate)
+                    {
+                        if (!CanIndexVectors()) throw new InvalidOperationException("Airspace indexing yields to flight recording.");
+                        using var store = Open(Preferences());
+                        return store.SaveAirspace(job, Path.Combine(JobDirectory(jobId), "files"), clock.GetUtcNow(), token, CanIndexVectors,
+                            () => AviationDownloads.VerifyRetained(JobDirectory(jobId), job, token).GetAwaiter().GetResult());
+                    }
+                }, token);
             var parsed = await Task.Run(() => AviationNasr.Parse(Path.Combine(JobDirectory(jobId), "files"), job, clock.GetUtcNow(), token, CanIndexVectors), token);
             await AviationDownloads.VerifyRetained(JobDirectory(jobId), job, token);
             lock (gate)
@@ -58,6 +69,18 @@ public sealed partial class AviationReference
             }
         }
         finally { vectorImport.Release(); }
+    }
+    public AviationAirspacePage AirspaceFeatures(string datasetId, double west, double south, double east, double north, string? kind = null, int offset = 0)
+    {
+        lock (gate)
+        {
+            using var store = Open(Preferences());
+            var page = store.AirspaceFeatures(datasetId, new(west, south, east, north), kind, offset);
+            var cache = store.Status("nasr");
+            var status = cache.LastSuccessUtc is {} utc ? (Preferences().OnlineEnabled ? "Cached FAA catalog as of " : "Offline FAA catalog as of ") + utc.ToString("O") : "No successful FAA catalog assessment";
+            if (cache.Error is not null || cache.LastSuccessUtc is {} success && clock.GetUtcNow() - success > TimeSpan.FromHours(24)) status += "; stale or refresh unavailable";
+            return page with { Status = status + ". " + page.Status };
+        }
     }
     public AviationVectorPage VectorFeatures(string datasetId, double west, double south, double east, double north, string? kind = null, int offset = 0)
     {

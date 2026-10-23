@@ -25,7 +25,7 @@ export async function openAviationDownloads(api,selection=null){
   }else settings.append(el('p','Aviation network and storage settings are managed on the companion PC.'));
   if(selection){
    work.append(el('h3',selection.item.originalFileName),el('p',`Exact catalog edition ${selection.item.edition}. Original transfer size: ${bytes(selection.item.originalBytes)}. Entire original ZIP will be requested, even for a small map area.`));
-   const transfer=field(work,'Aviation transfer allowance (MiB)',128),expanded=field(work,'Expanded storage allowance (MiB)',512);transfer.max='2048';expanded.max='8192';
+   const transfer=field(work,'Aviation transfer allowance (MiB)',selection.item.originalFileName==='class_airspace_shape_files.zip'?256:128),expanded=field(work,'Expanded storage allowance (MiB)',512);transfer.max='2048';expanded.max='8192';
    const previewArea=el('div');
    button(work,'Review FAA Download',async()=>{
     if(busy)return;busy=true;try{

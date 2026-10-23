@@ -85,7 +85,7 @@ public sealed class AviationNasrTests : IDisposable
     {
         using var service = Service(new()); var job = await Original(service); var folder = Path.Combine(root, "AviationReference");
         using (var db = new SqliteConnection("Data Source=" + Path.Combine(folder, "aviation.db") + ";Pooling=False"))
-        { db.Open(); using var cmd = db.CreateCommand(); cmd.CommandText = "DROP TABLE vector_features; DROP TABLE vector_datasets; PRAGMA user_version=2"; cmd.ExecuteNonQuery(); }
+        { db.Open(); using var cmd = db.CreateCommand(); cmd.CommandText = "DROP TABLE airspace_features; DROP TABLE vector_features; DROP TABLE vector_datasets; PRAGMA user_version=2"; cmd.ExecuteNonQuery(); }
         var dataset = await service.ImportVectors(job.Id); Assert.Single(service.VectorDatasets()); Assert.Equal(job.Id, Assert.Single(service.DownloadJobs()).Id);
         var backup = Assert.Single(Directory.GetFiles(Path.Combine(folder, "Backups"), "aviation-schema2-*.sqlite"));
         using var saved = new SqliteConnection("Data Source=" + backup + ";Mode=ReadOnly;Pooling=False"); saved.Open(); using var check = saved.CreateCommand(); check.CommandText = "PRAGMA integrity_check"; Assert.Equal("ok", check.ExecuteScalar()); check.CommandText = "PRAGMA user_version"; Assert.Equal(2L, check.ExecuteScalar());

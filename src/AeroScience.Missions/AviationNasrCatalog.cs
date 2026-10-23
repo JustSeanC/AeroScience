@@ -10,6 +10,9 @@ public static partial class AviationCatalog
 {
     private static (AviationProduct Product, string Edition, string File) NasrIdentity(Uri uri)
     {
+        var spatial = Regex.Match(uri.AbsolutePath, @"^/webContent/28DaySub/(\d{4}-\d{2}-\d{2})/(class_airspace_shape_files|aixm5\.0)\.zip$", RegexOptions.CultureInvariant, RegexDeadline);
+        if (spatial.Success && DateOnly.TryParseExact(spatial.Groups[1].Value, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out _))
+            return (AviationProduct.Nasr, spatial.Groups[1].Value, Path.GetFileName(uri.AbsolutePath));
         var match = Regex.Match(uri.AbsolutePath, @"^/webContent/28DaySub/extra/(\d{2}_[A-Za-z]{3}_\d{4})_(APT|NAV|FIX)_CSV\.zip$", RegexOptions.CultureInvariant, RegexDeadline);
         if (!match.Success || !DateOnly.TryParseExact(match.Groups[1].Value, "dd_MMM_yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var date))
             throw new InvalidDataException("Only supported exact NASR APT/NAV/FIX CSV originals are accepted.");
@@ -38,9 +41,9 @@ public static partial class AviationCatalog
             hash.AppendData(BitConverter.GetBytes(page.Length)); hash.AppendData(page);
             foreach (var item in Charts(page, utc).Items.Where(i => i.Product == AviationProduct.Nasr)) originals[item.Id] = item;
         }
-        if (originals.Count is < 1 or > 6) throw new InvalidDataException("No supported NASR originals, or unexpected product count.");
+        if (originals.Count is < 1 or > 10) throw new InvalidDataException("No supported NASR originals, or unexpected product count.");
         return new(1, utc, Convert.ToHexString(hash.GetHashAndReset()).ToLowerInvariant(), originals.Values.OrderBy(i => i.Id, StringComparer.Ordinal).ToArray(),
-            ["Official APT/NAV/FIX CSV references only. Class airspace/SUA geometry is not supplied by these datasets.",
+            ["Official APT/NAV/FIX CSV, Class airspace shapefile and Special Activity Airspace AIXM 5.0 originals. Download/import support is product-specific; discovery alone is not interpreted geometry.",
              "Edition is the published effective date label. Exact UTC validity/expiry remains Unknown; no activation schedule is inferred.",
              "US coordinates reference NAD83 according to the retained FAA CSV_README. Display is approximate geographic context, not certified WGS84 navigation."]);
     }

@@ -32,6 +32,7 @@ public static class ResearchApi
         app.MapPost("/api/aviation/catalog/{kind}/refresh", (string kind, AviationReference aviation, HttpContext c) => aviation.Refresh(kind, c.RequestAborted));
         app.MapGet("/api/aviation/vectors", (AviationReference aviation) => aviation.VectorDatasets());
         app.MapGet("/api/aviation/vectors/{id}", (string id, double west, double south, double east, double north, string? kind, int? offset, AviationReference aviation) => aviation.VectorFeatures(id, west, south, east, north, kind, offset ?? 0));
+        app.MapGet("/api/aviation/airspace/{id}", (string id, double west, double south, double east, double north, string? kind, int? offset, AviationReference aviation) => aviation.AirspaceFeatures(id, west, south, east, north, kind, offset ?? 0));
         app.MapPost("/api/aviation/downloads/{id:guid}/import-vectors", (Guid id, AviationReference aviation, HttpContext c) => aviation.ImportVectors(id, c.RequestAborted));
         app.MapGet("/api/aviation/downloads/configuration", (AviationReference aviation) => aviation.DownloadConfiguration());
         app.MapPost("/api/aviation/downloads/configuration", (AviationDownloadSettingsRequest request, AviationReference aviation, HttpContext c) => AccessControl.IsLoopback(c) ? Results.Ok(aviation.ConfigureDownloads(request.UnmeteredOnly, request.StorageDirectory)) : Results.StatusCode(403));

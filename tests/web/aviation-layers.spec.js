@@ -38,7 +38,7 @@ test('unified basemap and overlay controls preserve geographic geometry and scie
  const map=planner.locator('.geographic-map'),center=await map.getAttribute('data-center');const opener=planner.getByRole('button',{name:'Overlays & Legend'});await opener.click();
  let dialog=page.getByRole('dialog',{name:'Map Overlays & Legend',exact:true});await dialog.getByLabel('Mission overlays', {exact:true}).uncheck();await dialog.getByLabel('Science overlays',{exact:true}).uncheck();
  await expect(dialog.getByLabel('Planned route',{exact:true})).not.toBeChecked();await expect(dialog.getByLabel('Science footprints',{exact:true})).not.toBeChecked();
- await expect(dialog.getByText(/TFR polygons: unverified/)).toBeVisible();await page.keyboard.press('Escape');await expect(dialog).not.toBeVisible();await expect(opener).toBeFocused();
+  await expect(dialog.getByText(/verified TFR screening remain unavailable/)).toBeVisible();await page.keyboard.press('Escape');await expect(dialog).not.toBeVisible();await expect(opener).toBeFocused();
  expect(await map.getAttribute('data-center')).toBe(center);const after=await (await request.get('/api/plans/'+plan.id)).json();expect(after.waypoints).toEqual(plan.waypoints);
  await opener.click();dialog=page.getByRole('dialog',{name:'Map Overlays & Legend',exact:true});await expect(dialog.getByLabel('Mission overlays',{exact:true})).not.toBeChecked();
  await dialog.getByRole('button',{name:'FAA Catalog & Notices',exact:true}).click();const faa=page.getByRole('dialog',{name:'FAA Catalog & Notices',exact:true});await faa.getByRole('button',{name:'Close FAA Catalog & Notices',exact:true}).click();
