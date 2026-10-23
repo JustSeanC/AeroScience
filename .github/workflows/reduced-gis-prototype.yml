@@ -55,8 +55,6 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Self-contained probe publish failed.' }
           git diff --exit-code -- '**/packages.lock.json'
           if ($LASTEXITCODE -ne 0) { throw 'Research publishing changed dependency locks.' }
-          python tests/AeroScience.GisProbe/prepare_faa_sample.py --output "$env:RUNNER_TEMP/reduced-gis-original"
-          if ($LASTEXITCODE -ne 0) { throw 'Genuine original unavailable; no synthetic substitution.' }
           # Deploy only the owned DLLs and required CRS database into isolated scratch.
           # Do not rely on runner-installed GDAL/Python/VC runtime or a vcpkg data path.
           $isolated = Join-Path $env:RUNNER_TEMP 'reduced-gis-isolated'
@@ -65,6 +63,8 @@ jobs:
           Copy-Item "$env:REDUCED_GIS_INSTALL/share/proj/proj.db" "$isolated/share/proj"
           python tests/AeroScience.ReducedGisProbe/inspect_native.py --folder "$isolated/bin" --output artifacts/reduced-gis/native-imports.json
           if ($LASTEXITCODE -ne 0) { throw 'Native import/deployment inventory incomplete.' }
+          python tests/AeroScience.GisProbe/prepare_faa_sample.py --output "$env:RUNNER_TEMP/reduced-gis-original"
+          if ($LASTEXITCODE -ne 0) { throw 'Genuine original unavailable; no synthetic substitution.' }
           $env:PATH = "$isolated/bin;$env:SystemRoot/System32;$env:SystemRoot"
           $env:GDAL_DATA = "$isolated/share/gdal"
           $env:PROJ_DATA = "$isolated/share/proj"

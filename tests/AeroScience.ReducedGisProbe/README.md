@@ -53,3 +53,11 @@ Passing does not validate main-body chart neatlines, printed control points, eve
 native EMIT, installed MSFS or physical-device use. The application must retain its existing official
 SDK/runtime/private-profile gates. Do not add these libraries to production until the actual Windows
 result, security/component review and packaging gates pass.
+
+The complete diagnostic at `40023669199` isolated the unexpected CRT to **jpeg62.dll**,
+not GDAL or PROJ. Upstream libjpeg-turbo deliberately forces its shared libjpeg API to the
+dynamic CRT despite WITH_CRT_DLL=OFF. The triplet now chooses the supported static libjpeg
+configuration only for that port, links it into TIFF's static-CRT module, and omits the unused
+TurboJPEG API. The direct/delay audit remains unchanged and must pass on rebuilt actual binaries.
+OSV-2026-1068 is retained as an unresolved advisory/reachability review, not silently dismissed.
+This still does not approve production distribution or all-family chart/neatline rendering.
