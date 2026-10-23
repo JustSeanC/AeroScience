@@ -41,6 +41,15 @@ class ReducedNativeImportTests(unittest.TestCase):
             with self.subTest(direct=direct,delay=delay):
                 self.write(fixture(direct,delay))
                 with self.assertRaisesRegex(ValueError,'VC runtime'):audit.verify(self.folder)
+    def test_failed_audit_retains_all_component_identities_and_direct_delay_imports(self):
+        self.write(fixture('vcruntime140.dll'),'gdal.dll')
+        self.write(fixture(delay='msvcp140.dll'),'proj_9.dll')
+        result=audit.inspect(self.folder)
+        self.assertFalse(result['importsAccountedFor']);self.assertEqual(2,len(result['errors']))
+        self.assertIn('gdal.dll: Unshipped VC runtime',result['errors'][0])
+        self.assertEqual(['msvcp140.dll'],result['files'][1]['delayImports'])
+        self.assertEqual(['vcruntime140.dll'],result['files'][0]['directImports'])
+        self.assertEqual(64,len(result['files'][1]['sha256']))
     def test_non_x64_architecture_is_rejected(self):
         data=fixture();struct.pack_into('<H',data,0x84,0x14c)
         with self.assertRaises(AssertionError):audit.imports(self.write(data))

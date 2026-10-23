@@ -9,7 +9,7 @@ SYSTEM = {'kernel32.dll','ntdll.dll','ucrtbase.dll','advapi32.dll','bcrypt.dll',
     'wldap32.dll','normaliz.dll','secur32.dll','shell32.dll','user32.dll','ole32.dll','psapi.dll','rpcrt4.dll',
     'shlwapi.dll','gdi32.dll','comdlg32.dll','winmm.dll','version.dll','iphlpapi.dll','dnsapi.dll'}
 
-def imports(path):
+def import_groups(path):
     if path.is_symlink() or not 1024 <= path.stat().st_size <= 33554432:
         raise ValueError('Unexpected native size/link.')
     data=path.read_bytes()
@@ -33,14 +33,14 @@ def imports(path):
     def name(rva):
         at=offset(rva);end=data.index(0,at,min(at+256,len(data)))
         return data[at:end].decode('ascii').lower()
-    result=[]
+    direct=[]; delayed=[]
     rva=u32(optional+120)
     if rva:
         at=offset(rva)
         for index in range(256):
             descriptor=at+index*20
             if data[descriptor:descriptor+20]==b'\0'*20: break
-            result.append(name(u32(descriptor+12)))
+            direct.append(name(u32(descriptor+12)))
         else: raise ValueError('Unbounded PE import inventory.')
     # Delay imports must be accounted for too, rather than hidden by a successful fixture load.
     delay=u32(optional+112+13*8)
@@ -50,25 +50,46 @@ def imports(path):
             descriptor=at+index*32
             if data[descriptor:descriptor+32]==b'\0'*32: break
             if u32(descriptor)!=1: raise ValueError('Unsupported delay-import addressing.')
-            result.append(name(u32(descriptor+4)))
+            delayed.append(name(u32(descriptor+4)))
         else: raise ValueError('Unbounded PE delay-import inventory.')
-    return sorted(set(result))
+    return {'direct':sorted(set(direct)),'delay':sorted(set(delayed))}
 
-def verify(folder):
+def imports(path):
+    groups=import_groups(path)
+    return sorted(set(groups['direct']+groups['delay']))
+
+
+def inspect(folder):
     files=sorted(folder.glob('*.dll'))
     if not 1 <= len(files) <= 32: raise ValueError('Bound runtime inventory.')
-    names={p.name.lower() for p in files};result=[]
+    names={p.name.lower() for p in files};result=[];errors=[]
     for p in files:
-        required=imports(p)
-        for dependency in required:
-            if dependency.startswith(('vcruntime','msvcp','msvcr')): raise ValueError('Unshipped VC runtime import: '+dependency)
-            if dependency not in names|SYSTEM and not dependency.startswith(('api-ms-win-','ext-ms-win-')):
-                raise ValueError('Unreviewed/unbundled import: '+dependency)
-        result.append({'file':p.name,'bytes':p.stat().st_size,'sha256':hashlib.sha256(p.read_bytes()).hexdigest(),'imports':required})
-    return {'architecture':'Windows x64','importsAccountedFor':True,'staticCrtRequired':True,'files':result,
-        'limitations':['Direct/delay PE imports only; dynamic driver loading still requires actual isolated execution/security review.','This is research evidence, not SDK/MSFS or public distribution acceptance.']}
+        try:
+            groups=import_groups(p);required=sorted(set(groups['direct']+groups['delay']))
+            for dependency in required:
+                if dependency.startswith(('vcruntime','msvcp','msvcr')):
+                    errors.append(f'{p.name}: Unshipped VC runtime import: {dependency}')
+                elif dependency not in names|SYSTEM and not dependency.startswith(('api-ms-win-','ext-ms-win-')):
+                    errors.append(f'{p.name}: Unreviewed/unbundled import: {dependency}')
+            result.append({'file':p.name,'bytes':p.stat().st_size,'sha256':hashlib.sha256(p.read_bytes()).hexdigest(),
+                           'imports':required,'directImports':groups['direct'],'delayImports':groups['delay']})
+        except (ValueError,AssertionError,IndexError,struct.error) as exc:
+            errors.append(f'{p.name}: Invalid native import inventory: {exc}')
+    return {'architecture':'Windows x64','importsAccountedFor':not errors,'staticCrtRequired':True,
+        'files':result,'errors':errors,
+        'limitations':['Direct/delay PE imports only; dynamic driver loading still requires actual isolated execution/security review.',
+                       'This is research evidence, not SDK/MSFS or public distribution acceptance.']}
+
+
+def verify(folder):
+    result=inspect(folder)
+    if result['errors']: raise ValueError('; '.join(result['errors']))
+    return result
+
 
 if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--folder',type=Path,required=True);parser.add_argument('--output',type=Path,required=True);args=parser.parse_args()
-    args.output.write_text(json.dumps(verify(args.folder),indent=2)+'\n')
+    result=inspect(args.folder)
+    args.output.write_text(json.dumps(result,indent=2)+'\n')
+    if result['errors']: raise SystemExit('Native import audit failed: '+ '; '.join(result['errors']))
     print('PASS: bounded x64 native imports, owned dependency inventory and no unshipped VC runtime imports.')

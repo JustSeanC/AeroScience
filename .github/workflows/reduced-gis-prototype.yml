@@ -25,6 +25,7 @@ jobs:
         shell: pwsh
         run: |
           $codecTools = Join-Path $env:RUNNER_TEMP 'reduced-gis-vcpkg'
+          Add-Content $env:GITHUB_ENV "REDUCED_GIS_TOOLS=$codecTools"
           $codecInstall = Join-Path $env:RUNNER_TEMP 'reduced-gis-installed'
           git init $codecTools
           git -C $codecTools remote add origin https://github.com/microsoft/vcpkg.git
@@ -72,6 +73,12 @@ jobs:
           if ($native.Count -ne 1) { throw 'Ambiguous native GDAL identity.' }
           & "$env:RUNNER_TEMP/reduced-gis-probe/AeroScience.ReducedGisProbe.exe" $native[0].FullName "$env:RUNNER_TEMP/reduced-gis-original/Hawaiian Islands SEC.tif" tests/AeroScience.GisProbe/faa-window-reference.json artifacts/reduced-gis/result.json
           if ($LASTEXITCODE -ne 0) { throw 'Actual reduced native loading/window/CRS verification failed.' }
+      - name: Retain native target compiler configuration even on failure
+        if: always() && env.REDUCED_GIS_TOOLS != ''
+        shell: pwsh
+        run: |
+          python tests/AeroScience.ReducedGisProbe/collect_build.py --root "$env:REDUCED_GIS_TOOLS/buildtrees" --output artifacts/reduced-gis/compiler-settings.json
+          if ($LASTEXITCODE -ne 0) { throw 'Native compiler diagnostic inventory failed.' }
       - name: Retain research receipts only
         if: always()
         uses: actions/upload-artifact@v7
