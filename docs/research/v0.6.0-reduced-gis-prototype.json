@@ -309,5 +309,231 @@
     ],
     "productionDistributionApproved": false,
     "nextInvestigation": "Retain complete per-component direct/delay imports and CMake/compiler CRT configuration, then correct the offending target linkage or establish a legitimate explicitly packaged VC runtime distribution. Do not whitelist the missing CRT, restamp the earlier pass or blindly rerun the unchanged build."
+  },
+  "crtDiagnostics": {
+    "sourceCommit": "63b4e34ceea0c0b80f6dfc5eab24f86a3b42fe09",
+    "run": "https://github.com/JustSeanC/AeroScience/actions/runs/40023669199",
+    "status": "failed; complete diagnostic evidence retained",
+    "errors": [
+      "jpeg62.dll: Unshipped VC runtime import: vcruntime140.dll"
+    ],
+    "files": [
+      {
+        "file": "gdal.dll",
+        "bytes": 10491392,
+        "sha256": "cd5756076629f9675f288860ca9a24c8c5a901690c9c69c95a280d81cafab5fc",
+        "imports": [
+          "geotiff.dll",
+          "json-c.dll",
+          "kernel32.dll",
+          "proj_9.dll",
+          "tiff.dll",
+          "z.dll"
+        ],
+        "directImports": [
+          "geotiff.dll",
+          "json-c.dll",
+          "kernel32.dll",
+          "proj_9.dll",
+          "tiff.dll",
+          "z.dll"
+        ],
+        "delayImports": []
+      },
+      {
+        "file": "geotiff.dll",
+        "bytes": 332288,
+        "sha256": "e57d25a24e98eb45d2db0b64b3a62cded7158b23b902425a0b1589d573732d2e",
+        "imports": [
+          "kernel32.dll",
+          "proj_9.dll",
+          "tiff.dll"
+        ],
+        "directImports": [
+          "kernel32.dll",
+          "proj_9.dll",
+          "tiff.dll"
+        ],
+        "delayImports": []
+      },
+      {
+        "file": "jpeg62.dll",
+        "bytes": 722944,
+        "sha256": "09fa722f993217b5505aed4ab3879974062d305d39dbd3e83f8ad9c248c03fb8",
+        "imports": [
+          "api-ms-win-crt-environment-l1-1-0.dll",
+          "api-ms-win-crt-heap-l1-1-0.dll",
+          "api-ms-win-crt-runtime-l1-1-0.dll",
+          "api-ms-win-crt-stdio-l1-1-0.dll",
+          "api-ms-win-crt-string-l1-1-0.dll",
+          "kernel32.dll",
+          "vcruntime140.dll"
+        ],
+        "directImports": [
+          "api-ms-win-crt-environment-l1-1-0.dll",
+          "api-ms-win-crt-heap-l1-1-0.dll",
+          "api-ms-win-crt-runtime-l1-1-0.dll",
+          "api-ms-win-crt-stdio-l1-1-0.dll",
+          "api-ms-win-crt-string-l1-1-0.dll",
+          "kernel32.dll",
+          "vcruntime140.dll"
+        ],
+        "delayImports": []
+      },
+      {
+        "file": "json-c.dll",
+        "bytes": 259584,
+        "sha256": "19b142a67234b9a131004a933a89f047f52994068ebc0ef7cd32edf853dcb43c",
+        "imports": [
+          "advapi32.dll",
+          "kernel32.dll"
+        ],
+        "directImports": [
+          "advapi32.dll",
+          "kernel32.dll"
+        ],
+        "delayImports": []
+      },
+      {
+        "file": "libcurl.dll",
+        "bytes": 908800,
+        "sha256": "0a8d07e6a6b496767fca3bce48b8bd8e8231e126140ac0fddbc91f510f4e8238",
+        "imports": [
+          "advapi32.dll",
+          "bcrypt.dll",
+          "crypt32.dll",
+          "iphlpapi.dll",
+          "kernel32.dll",
+          "secur32.dll",
+          "ws2_32.dll",
+          "z.dll"
+        ],
+        "directImports": [
+          "advapi32.dll",
+          "bcrypt.dll",
+          "crypt32.dll",
+          "iphlpapi.dll",
+          "kernel32.dll",
+          "secur32.dll",
+          "ws2_32.dll",
+          "z.dll"
+        ],
+        "delayImports": []
+      },
+      {
+        "file": "liblzma.dll",
+        "bytes": 285184,
+        "sha256": "2b049f7d9353e4224608ccce94a432e97118c3d322d81c6e9f428e38d5cd5bfb",
+        "imports": [
+          "kernel32.dll"
+        ],
+        "directImports": [
+          "kernel32.dll"
+        ],
+        "delayImports": []
+      },
+      {
+        "file": "proj_9.dll",
+        "bytes": 4045312,
+        "sha256": "c88e79f53169a7a769e7086bacc285dbf858f0888686aa3033dab1ebf3550c1f",
+        "imports": [
+          "kernel32.dll",
+          "libcurl.dll",
+          "ole32.dll",
+          "shell32.dll",
+          "sqlite3.dll",
+          "tiff.dll"
+        ],
+        "directImports": [
+          "kernel32.dll",
+          "libcurl.dll",
+          "ole32.dll",
+          "shell32.dll",
+          "sqlite3.dll",
+          "tiff.dll"
+        ],
+        "delayImports": []
+      },
+      {
+        "file": "sqlite3.dll",
+        "bytes": 1221632,
+        "sha256": "26ea1f041682fd6c012b02ff3a12f09bfbc0243b66955a34e1271986f8abfd70",
+        "imports": [
+          "kernel32.dll"
+        ],
+        "directImports": [
+          "kernel32.dll"
+        ],
+        "delayImports": []
+      },
+      {
+        "file": "tiff.dll",
+        "bytes": 669696,
+        "sha256": "e0cc3b5b4b30bc596c5c4702c8a7ccb1d1c9f10260e1fa575019ec04c7a56128",
+        "imports": [
+          "jpeg62.dll",
+          "kernel32.dll",
+          "liblzma.dll",
+          "z.dll"
+        ],
+        "directImports": [
+          "jpeg62.dll",
+          "kernel32.dll",
+          "liblzma.dll",
+          "z.dll"
+        ],
+        "delayImports": []
+      },
+      {
+        "file": "turbojpeg.dll",
+        "bytes": 1203712,
+        "sha256": "be790ddb41a0d854da63def67f3fe5d520083c7f427a69878c9408ecdff28c9a",
+        "imports": [
+          "kernel32.dll"
+        ],
+        "directImports": [
+          "kernel32.dll"
+        ],
+        "delayImports": []
+      },
+      {
+        "file": "z.dll",
+        "bytes": 228352,
+        "sha256": "fed3bb841de5bb41017c5b2e054aed4c75051870c151f8c9f18e055a0ce1a7fd",
+        "imports": [
+          "kernel32.dll"
+        ],
+        "directImports": [
+          "kernel32.dll"
+        ],
+        "delayImports": []
+      }
+    ],
+    "finding": "Only jpeg62.dll imports vcruntime140.dll. Upstream sharedlib/CMakeLists.txt overrides its libjpeg API target to MultiThreadedDLL despite WITH_CRT_DLL=OFF; actual Ninja flags confirm /MT followed by -MD and /NODEFAULTLIB:LIBCMT. GDAL and ten other DLLs use the selected static CRT."
+  },
+  "staticJpegCorrection": {
+    "sourceCommit": "29f87be8dbdcd3f358933ec506f9bf9e5e5b5dd5",
+    "run": "https://github.com/JustSeanC/AeroScience/actions/runs/40027523220",
+    "status": "pending actual Windows result",
+    "approach": "Supported per-port static libjpeg linked into TIFF; unused TurboJPEG disabled. Exact-source-pinned packaging guard skips only absent optional TurboJPEG library renames. No runtime audit allowlist change.",
+    "priorAttempt": {
+      "sourceCommit": "e8db40ab003918b2a69826037b8fb46bf8f1845c",
+      "run": "https://github.com/JustSeanC/AeroScience/actions/runs/40026794309",
+      "status": "failed after successful static JPEG compilation: pinned vcpkg recipe unconditionally renamed disabled turbojpeg-static.lib"
+    },
+    "localTests": {
+      "passed": 11,
+      "skipped": 0,
+      "evidenceClass": "Synthetic recipe/PE import checks, not Windows execution"
+    },
+    "productionDistributionApproved": false
+  },
+  "distributionSecurityReview": {
+    "status": "incomplete; not production-approved",
+    "query": "https://api.osv.dev/v1/querybatch",
+    "querySha256": "e01d32a1995df16b279b594d30be7892c39e7315ef348030643570e86e0e854e",
+    "advisorySha256": "bf0b7cb2e1c07a8d14f0c64f7e00c5940491b672eb65b0bcb211d1114ce906be",
+    "finding": "OSV-2026-1068 lists libjpeg-turbo 3.2.0: UNKNOWN READ in jpeg_abort via tj3Compress8. The declared fixed commit changes regression tests/docs; no speculative patch was substituted. TurboJPEG is excluded from corrected runtime, but remaining reachability/upstream security review is open.",
+    "limitation": "Empty advisory query results do not certify security or complete coverage. Static-link/import success does not establish native distribution or chart acceptance."
   }
 }
