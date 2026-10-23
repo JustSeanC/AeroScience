@@ -63,6 +63,15 @@ class ReducedNativeImportTests(unittest.TestCase):
         path=self.folder/'oversized.dll'
         with path.open('wb') as stream:stream.truncate(33554433)
         with self.assertRaisesRegex(ValueError,'size/link'):audit.imports(path)
+    def test_turbojpeg_entrypoints_are_rejected_in_the_actual_export_table(self):
+        data=fixture();struct.pack_into('<I',data,0x98+112,0x1200)
+        struct.pack_into('<I',data,1024+24,1);struct.pack_into('<I',data,1024+32,0x1300);struct.pack_into('<I',data,1280,0x1400)
+        encoded=b'tj3Compress8\0';data[1536:1536+len(encoded)]=encoded
+        path=self.write(data);self.assertEqual(['tj3Compress8'],audit.exports(path))
+        result=audit.inspect(self.folder);self.assertFalse(result['importsAccountedFor']);self.assertEqual(['tj3Compress8'],result['files'][0]['turbojpegExports'])
+    def test_export_count_cannot_force_unbounded_allocation(self):
+        data=fixture();struct.pack_into('<I',data,0x98+112,0x1200);struct.pack_into('<I',data,1024+24,65537)
+        with self.assertRaisesRegex(ValueError,'Unbounded PE export'):audit.exports(self.write(data))
 
 
 if __name__=='__main__':unittest.main()

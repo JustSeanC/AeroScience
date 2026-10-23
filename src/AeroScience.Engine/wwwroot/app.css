@@ -1526,6 +1526,8 @@ dialog::backdrop { background:#000a; } dialog button { margin:8px; min-height:44
 .map-layer-manager select,.map-layer-manager button {width:100%;min-height:44px;max-width:100%;margin:.15rem 0;box-sizing:border-box}
 .map-layer-manager .map-layer-status {font-size:.75rem;margin:.2rem 0;max-width:100%;overflow-wrap:anywhere}
 .map-layer-manager .map-layer-status:empty {display:none}
+.aviation-chart-status {max-width:min(28rem,65vw);padding:.35rem .5rem;background:var(--panel,#182331);color:var(--text,#eef4ff);font-size:.75rem;overflow-wrap:anywhere;pointer-events:none}
+.aviation-chart-status:empty {display:none}
 .map-overlays-dialog,.aviation-reference-dialog {width:min(52rem,calc(100vw - 2rem));max-height:85dvh;overflow:auto;box-sizing:border-box}
 .map-overlay-content fieldset {margin:.75rem 0;padding:.5rem}
 .map-overlay-content label {display:flex;align-items:center;gap:.6rem;min-height:44px;margin:0}

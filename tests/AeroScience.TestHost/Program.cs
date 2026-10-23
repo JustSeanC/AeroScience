@@ -50,7 +50,8 @@ var app = EngineApplication.Create(args, services =>
         sp.GetRequiredService<EngineOptions>().ConfigurationDirectory ?? sp.GetRequiredService<EngineOptions>().DataDirectory,
         sp.GetRequiredService<EngineOptions>().DataDirectory,
         new HttpClient(sp.GetRequiredService<AviationBrowserFixture>()),sp.GetRequiredService<AviationBrowserFixture>().Clock,
-        flightActive: () => sp.GetRequiredService<MissionCoordinator>().Snapshot().ActiveMission is not null));
+        flightActive: () => sp.GetRequiredService<MissionCoordinator>().Snapshot().ActiveMission is not null,
+        chartRenderer:new SyntheticChartRenderer(sp.GetRequiredService<AviationBrowserFixture>()),chartDefinitions:[AviationBrowserFixture.ChartDefinition]));
     services.AddSingleton(sp=>new LibraryHttpFixture(sp.GetRequiredService<EngineOptions>().DataDirectory));
     services.AddSingleton<IEarthdataCredentials,FixtureEarthdata>();
     services.AddSingleton(sp=>{_=sp.GetRequiredService<StorageManagement>();return new AutomaticScientificData(sp.GetRequiredService<ScienceStore>(),sp.GetRequiredService<ScientificAccessSettings>(),new ScientificHttp(sp.GetRequiredService<LibraryHttpFixture>(),cacheEnabled:false));});
@@ -76,7 +77,7 @@ app.MapPost("/api/testing/aviation/{mode}",(string mode,AviationBrowserFixture f
         fixture.FastSlowTransfers=true;return new{synthetic=true,fixture.Calls};
     }
     fixture.FastSlowTransfers=false;
-    if(mode is not("reset" or "normal" or "outage" or "malformed" or "slow" or "airspace" or "tfr"))throw new ArgumentException("Unknown synthetic aviation fixture.");
+    if(mode is not("reset" or "normal" or "outage" or "malformed" or "slow" or "airspace" or "tfr" or "charts"))throw new ArgumentException("Unknown synthetic aviation fixture.");
     fixture.Clock.Advance();fixture.Mode=mode=="reset"?"normal":mode;fixture.Calls=0;
     if(mode=="reset")aviation.Configure(false);
     return new{synthetic=true,fixture.Calls};

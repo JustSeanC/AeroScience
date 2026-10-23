@@ -150,5 +150,8 @@ if __name__ == '__main__':
     check.add_argument('--folder', required=True, type=Path)
     args = parser.parse_args()
     result = assemble(args.install, args.output, args.port_receipt, args.source_sha) if args.command == 'assemble' else verify(args.folder)
-    print(json.dumps({'verified': True, 'files': len(result['files']), 'totalBytes': result['totalBytes'],
+    folder = args.output if args.command == 'assemble' else args.folder
+    manifest_identity = identity(folder/'manifest.json')
+    print(json.dumps({'verified': True, 'payloadFiles': len(result['files']), 'payloadBytes': result['totalBytes'],
+                      'manifest': manifest_identity, 'completeFolderBytes': result['totalBytes']+manifest_identity['bytes'],
                       'dllBytes': result['dllBytes'], 'sourceSha': result['sourceSha']}))

@@ -16,5 +16,6 @@
     <Content Include="../../licenses/OurAirports.txt" Link="licenses/OurAirports.txt" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Include="../../licenses/LibTiff.NET.txt" Link="licenses/LibTiff.NET.txt" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Include="../../licenses/NetTopologySuite.txt" Link="licenses/NetTopologySuite.txt" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="../../licenses/ChartRuntime.md" Link="wwwroot/help/_root/licenses/ChartRuntime.md" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

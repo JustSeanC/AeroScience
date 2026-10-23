@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   push:
     branches: [develop/v0.6.0]
-    paths: ['tests/AeroScience.ReducedGisProbe/**', 'scripts/build/chart_runtime.py', '.github/workflows/reduced-gis-prototype.yml']
+    paths: ['tests/AeroScience.ReducedGisProbe/**', 'src/AeroScience.Missions/AviationChartRaster.cs', 'scripts/build/chart_runtime.py', '.github/workflows/reduced-gis-prototype.yml']
 permissions:
   contents: read
 jobs:
@@ -13,6 +13,7 @@ jobs:
     timeout-minutes: 90
     env:
       VCPKG_MAX_CONCURRENCY: '2'
+      VCPKG_DEFAULT_BINARY_CACHE: '${{ runner.temp }}/aeroscience-chart-vcpkg-cache'
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-dotnet@v6
@@ -21,10 +22,15 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
+      - uses: actions/cache@v4
+        with:
+          path: '${{ runner.temp }}/aeroscience-chart-vcpkg-cache'
+          key: 'chart-codec-v1-${{ runner.os }}-${{ hashFiles(''tests/AeroScience.ReducedGisProbe/vcpkg.json'', ''tests/AeroScience.ReducedGisProbe/triplets/**'', ''tests/AeroScience.ReducedGisProbe/prepare_port.py'') }}'
       - name: Build the pinned reduced chart codec (research only)
         shell: pwsh
         run: |
           $codecTools = Join-Path $env:RUNNER_TEMP 'reduced-gis-vcpkg'
+          New-Item -ItemType Directory -Path $env:VCPKG_DEFAULT_BINARY_CACHE -Force | Out-Null
           Add-Content $env:GITHUB_ENV "REDUCED_GIS_TOOLS=$codecTools"
           $codecInstall = Join-Path $env:RUNNER_TEMP 'reduced-gis-installed'
           git init $codecTools
@@ -46,6 +52,8 @@ jobs:
           # Retain source/license evidence, never native binaries or original charts.
           $notices = Get-ChildItem "$codecInstall/x64-windows-research/share" -Filter copyright -Recurse | ForEach-Object { "`nCOMPONENT: $($_.Directory.Name)`n"; Get-Content $_.FullName -Raw }
           $notices | Set-Content artifacts/reduced-gis/component-copyrights.txt
+          python tests/AeroScience.ReducedGisProbe/inspect_native.py --folder "$codecInstall/x64-windows-research/bin" --output artifacts/reduced-gis/build-native-imports.json
+          if ($LASTEXITCODE -ne 0) { throw 'Complete direct/delay/export inventory failed; per-component diagnostics were retained.' }
           python scripts/build/chart_runtime.py assemble --install "$codecInstall/x64-windows-research" --output "$env:RUNNER_TEMP/chart-runtime-complete" --port-receipt artifacts/reduced-gis/port-receipt.json --source-sha $env:GITHUB_SHA
           if ($LASTEXITCODE -ne 0) { throw 'Complete runtime/data/static-notice inventory failed.' }
           Copy-Item "$env:RUNNER_TEMP/chart-runtime-complete/manifest.json" artifacts/reduced-gis/distribution-manifest.json
@@ -62,20 +70,31 @@ jobs:
           # Do not rely on runner-installed GDAL/Python/VC runtime or a vcpkg data path.
           $isolated = Join-Path $env:RUNNER_TEMP 'reduced-gis-isolated'
           Copy-Item "$env:RUNNER_TEMP/chart-runtime-complete" $isolated -Recurse
-          python scripts/build/chart_runtime.py verify --folder $isolated
+          python scripts/build/chart_runtime.py verify --folder $isolated > artifacts/reduced-gis/distribution-summary.json
           if ($LASTEXITCODE -ne 0) { throw 'Copied distribution manifest/hash/import verification failed.' }
           python tests/AeroScience.ReducedGisProbe/inspect_native.py --folder "$isolated/bin" --output artifacts/reduced-gis/native-imports.json
           if ($LASTEXITCODE -ne 0) { throw 'Native import/deployment inventory incomplete.' }
-          python tests/AeroScience.GisProbe/prepare_faa_sample.py --output "$env:RUNNER_TEMP/reduced-gis-original"
-          if ($LASTEXITCODE -ne 0) { throw 'Genuine original unavailable; no synthetic substitution.' }
+          python tests/AeroScience.ReducedGisProbe/prepare_chart_samples.py --output "$env:RUNNER_TEMP/chart-family-originals"
+          if ($LASTEXITCODE -ne 0) { throw 'Pinned five-family originals unavailable; no substitute or restamp.' }
           $env:PATH = "$isolated/bin;$env:SystemRoot/System32;$env:SystemRoot"
           $env:GDAL_DATA = "$isolated/share/gdal"
           $env:PROJ_DATA = "$isolated/share/proj"
           $env:PROJ_NETWORK = 'OFF'
           $native = @(Get-ChildItem "$isolated/bin" -Filter 'gdal*.dll')
           if ($native.Count -ne 1) { throw 'Ambiguous native GDAL identity.' }
-          & "$env:RUNNER_TEMP/reduced-gis-probe/AeroScience.ReducedGisProbe.exe" $native[0].FullName "$env:RUNNER_TEMP/reduced-gis-original/Hawaiian Islands SEC.tif" tests/AeroScience.GisProbe/faa-window-reference.json artifacts/reduced-gis/result.json
+          & "$env:RUNNER_TEMP/reduced-gis-probe/AeroScience.ReducedGisProbe.exe" $native[0].FullName "$env:RUNNER_TEMP/chart-family-originals/Hawaiian Islands SEC.tif" tests/AeroScience.GisProbe/faa-window-reference.json artifacts/reduced-gis/result.json
           if ($LASTEXITCODE -ne 0) { throw 'Actual reduced native loading/window/CRS verification failed.' }
+          & "$env:RUNNER_TEMP/reduced-gis-probe/AeroScience.ReducedGisProbe.exe" --chart $isolated "$env:RUNNER_TEMP/chart-family-originals" tests/AeroScience.ReducedGisProbe/chart-window-reference.json artifacts/reduced-gis/chart-application-result.json
+          if ($LASTEXITCODE -ne 0) { throw 'Actual application chart-color/interior/CRS checks failed.' }
+      - name: Independently verify application PNGs and private-profile runtime packaging
+        shell: pwsh
+        run: |
+          python tests/AeroScience.ReducedGisProbe/verify_chart_tiles.py --folder artifacts/reduced-gis/chart-native-tiles --reference tests/AeroScience.ReducedGisProbe/chart-window-reference.json --output artifacts/reduced-gis/chart-independent-result.json
+          if ($LASTEXITCODE -ne 0) { throw 'Independent chart PNG integrity/original-color comparison failed.' }
+          & ./scripts/build/Publish-ValidationCompanion.ps1 -ArtifactsPath "$env:RUNNER_TEMP/chart-private-intermediate" -OutputDirectory "$env:RUNNER_TEMP/chart-private-companion" -ChartRuntimeDirectory "$env:RUNNER_TEMP/chart-runtime-complete"
+          if ($LASTEXITCODE -ne 0) { throw 'Actual isolated companion/chart runtime publish failed.' }
+          python scripts/build/chart_runtime.py verify --folder "$env:RUNNER_TEMP/chart-private-companion/ChartRuntime"
+          if ($LASTEXITCODE -ne 0) { throw 'Private companion runtime/data/notices identity verification failed.' }
       - name: Retain native target compiler configuration even on failure
         if: always() && env.REDUCED_GIS_TOOLS != ''
         shell: pwsh

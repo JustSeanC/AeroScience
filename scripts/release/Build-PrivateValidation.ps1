@@ -4,7 +4,8 @@ param(
     [string]$SdkRoot = 'C:\MSFS 2024 SDK',
     [Parameter(Mandatory)][string]$RuntimeApprovalRecord,
     [switch]$RuntimeRedistributionConfirmed,
-    [Parameter(Mandatory)][string]$OutputDirectory
+    [Parameter(Mandatory)][string]$OutputDirectory,
+    [string]$ChartRuntimeDirectory
 )
 $ErrorActionPreference = 'Stop'
 $repo = (Resolve-Path "$PSScriptRoot/../..").Path
@@ -37,7 +38,7 @@ try {
     $gatePassed = $LASTEXITCODE -eq 0
     & "$repo/scripts/build/Build-Companion.ps1"
     # Separate intermediates prevent profile metadata leaking into production.
-    & "$repo/scripts/build/Publish-ValidationCompanion.ps1" -ArtifactsPath (Join-Path $output 'intermediate') -OutputDirectory $app
+    & "$repo/scripts/build/Publish-ValidationCompanion.ps1" -ArtifactsPath (Join-Path $output 'intermediate') -OutputDirectory $app -ChartRuntimeDirectory $ChartRuntimeDirectory
     Get-ChildItem $app -Filter *.pdb -File -Recurse | Remove-Item
     & "$repo/scripts/build/Build-Toolbar.ps1" -SdkRoot $SdkRoot -ValidationProfile
     $packages = @(Get-ChildItem "$repo/artifacts/toolbar-validation-v060/output" -Filter manifest.json -Recurse | Where-Object { $_.Directory.Name -eq 'aeroscience-validation-v0-6-0-toolbar' })

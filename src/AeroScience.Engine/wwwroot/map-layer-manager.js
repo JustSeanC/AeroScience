@@ -3,6 +3,7 @@ import {dialogHeader} from './dialog-ui.js';
 import {aviationMapLayers} from './aviation-map-layers.js';
 import {openAviationReference} from './aviation-reference.js';
 import {tfrMapLayer,openTfrReferences} from './tfr-layers.js';
+import {aviationChartLayers} from './aviation-charts.js';
 const el=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
 const preferenceKey='aeroscience.map-overlay-visibility.v1';
 function saved(){try{const text=localStorage.getItem(preferenceKey);if(!text||text.length>4096)return {};const value=JSON.parse(text);return value&&typeof value==='object'&&!Array.isArray(value)?value:{};}catch{return {};}}
@@ -17,7 +18,8 @@ export function mapLayerManager(L,map,definitions,applyBasemap){
  function persist(id,visible){preferences[id]=visible;const bounded=Object.fromEntries(Object.entries(preferences).filter(([key,value])=>/^[a-z][a-z0-9-]{0,99}$/.test(key)&&typeof value==='boolean').slice(-32));try{localStorage.setItem(preferenceKey,JSON.stringify(bounded));}catch{}}
  function visibility(item,visible){if(visible&&!map.hasLayer(item.layer))map.addLayer(item.layer);if(!visible&&map.hasLayer(item.layer))map.removeLayer(item.layer);persist(item.id,visible);}
  function sync(){map.getContainer().dataset.visibleOverlays=JSON.stringify([...overlays.values()].filter(item=>map.hasLayer(item.layer)).map(item=>item.id));for(const [id,input] of inputs)input.checked=map.hasLayer(overlays.get(id).layer);for(const [name,input] of groups){const list=[...overlays.values()].filter(i=>i.group===name),on=list.filter(i=>map.hasLayer(i.layer)).length;input.checked=on===list.length&&on>0;input.indeterminate=on>0&&on<list.length;}}
- function addOverlay(item){if(disposed||overlays.has(item.id))return;overlays.set(item.id,item);if(preferences[item.id]===false)map.removeLayer(item.layer);else if(preferences[item.id]===true)map.addLayer(item.layer);if(dialog?.open)render();sync();}
+ function canRender(){return dialog?.open&&![...document.querySelectorAll('dialog[open]')].some(d=>d!==dialog);}
+ function addOverlay(item){if(disposed||overlays.has(item.id))return;overlays.set(item.id,item);if(preferences[item.id]===false)map.removeLayer(item.layer);else if(preferences[item.id]===true)map.addLayer(item.layer);if(canRender())render();sync();}
  function render(){
   if(!dialog)return;const content=dialog.querySelector('.map-overlay-content');content.replaceChildren();inputs.clear();groups.clear();
   content.append(el('p','Basemap supplies geographic context. Mission geometry, recorded science and FAA references are independent overlays. An outline or locally retained dataset does not prove valid scientific pixels.'));
@@ -31,13 +33,15 @@ export function mapLayerManager(L,map,definitions,applyBasemap){
    }
    content.append(set);
   }
-  const faa=el('section');faa.append(el('p',aviation.status()),el('h3','FAA aviation & TFR overlays'),el('p','Imported FAA points/runways, Class B/C/D/E polygons and supported literal SAA boundaries are independent overlays. TFR horizontal boundaries and cautious saved-mission screening retain unknown altitude, time and missing geometry. Chart rendering remains unavailable. No layer can clear a route of restrictions.'));
+  const faa=el('section');faa.append(el('p',aviation.status()),el('h3','FAA aviation & TFR overlays'),el('p','Imported FAA points/runways, Class B/C/D/E polygons and supported SAA boundaries are independent overlays. TFR screening retains unknown altitude, time and missing geometry. Retained charts require a verified Windows runtime and an exact reviewed source interior. No layer can clear a route of restrictions.'),el('p',charts.status()));
   const references=el('button','FAA Catalog & Notices');references.type='button';references.onclick=()=>openAviationReference(mapRequest);faa.append(references);content.append(faa);
   const tfrButton=el('button','TFR Boundaries & Screening');tfrButton.type='button';tfrButton.onclick=()=>openTfrReferences(mapRequest,map);faa.append(tfrButton);
+  const chartButton=el('button','Retained FAA Charts');chartButton.type='button';chartButton.onclick=charts.open;faa.append(chartButton);
   content.append(el('p','Source edition / as-of: inspect the original source or recorded observation details. No chart edition or restriction freshness is inferred from the basemap.'));sync();
  }
- open.onclick=()=>{if(dialog?.open)return;dialog=el('dialog');dialog.setAttribute('aria-label','Map Overlays & Legend');dialog.className='map-overlays-dialog';dialog.append(el('h2','Map Overlays & Legend'));const content=el('div');content.className='map-overlay-content';dialog.append(content);document.body.append(dialog);dialogHeader(dialog,{opener:open});dialog.addEventListener('close',()=>{dialog.remove();dialog=null;inputs.clear();groups.clear();});render();dialog.showModal();aviation.discover().then(changed=>{if(changed&&dialog?.open)render();});};
+ open.onclick=()=>{if(dialog?.open)return;dialog=el('dialog');dialog.setAttribute('aria-label','Map Overlays & Legend');dialog.className='map-overlays-dialog';dialog.append(el('h2','Map Overlays & Legend'));const content=el('div');content.className='map-overlay-content';dialog.append(content);document.body.append(dialog);dialogHeader(dialog,{opener:open});dialog.addEventListener('close',()=>{dialog.remove();dialog=null;inputs.clear();groups.clear();});render();dialog.showModal();Promise.all([aviation.discover(),charts.discover()]).then(changes=>{if(changes.some(Boolean)&&canRender())render();});};
  const aviation=aviationMapLayers(L,map,addOverlay);map.on('layeradd layerremove',sync);definitions.forEach(addOverlay);aviation.discover();
  const tfr=tfrMapLayer(L,map,addOverlay);
- return {addOverlay,dispose(){if(disposed)return;disposed=true;tfr.dispose();aviation.dispose();stopBasemap();if(dialog){dialog.close();dialog?.remove();}map.off('layeradd layerremove',sync);control.remove();}};
+ const charts=aviationChartLayers(L,map,addOverlay);
+ return {addOverlay,dispose(){if(disposed)return;disposed=true;charts.dispose();tfr.dispose();aviation.dispose();stopBasemap();if(dialog){dialog.close();dialog?.remove();}map.off('layeradd layerremove',sync);control.remove();}};
 }

@@ -15,7 +15,8 @@ public sealed record AviationReferencePage(string Kind, string Status, AviationC
 // User-requested public metadata only. Original-download jobs/rendering are later phases.
 // Explicit aviation consent/budget; no scientific quotas, source IDs, mission creation or provider calls on reads.
 public sealed partial class AviationReference(string configurationDirectory, string dataDirectory, HttpClient? transport = null, TimeProvider? time = null,
-    IStorageCapacity? capacity = null, Func<bool?>? unmetered = null, Func<bool>? flightActive = null) : IDisposable
+    IStorageCapacity? capacity = null, Func<bool?>? unmetered = null, Func<bool>? flightActive = null, IAviationChartRenderer? chartRenderer = null,
+    IReadOnlyList<AviationChartDefinition>? chartDefinitions = null) : IDisposable
 {
     public const string Privacy = "FAA requests reveal your IP address to FAA providers. Aviation reference access is separate from online maps and scientific-data consent. Each metadata request is bounded to 4 MiB; NASR refresh reads its index plus at most two advertised cycle pages. Original ZIPs require a separate exact-edition preview, explicit approval and aviation transfer/storage allowances. Opening maps or catalogs never downloads originals. Retained records remain available offline. Flight-simulation reference only, not a real-world safety product.";
     private readonly string settingsPath = Path.Combine(configurationDirectory, "aviation-reference.json");

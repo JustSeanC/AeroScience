@@ -59,6 +59,33 @@ def imports(path):
     return sorted(set(groups['direct']+groups['delay']))
 
 
+def exports(path):
+    """Bounded PE named-export inventory; import_groups validates x64 headers first."""
+    import_groups(path)
+    data=path.read_bytes()
+    def u16(at):return struct.unpack_from('<H',data,at)[0]
+    def u32(at):return struct.unpack_from('<I',data,at)[0]
+    pe=u32(0x3c);optional=pe+24;start=optional+u16(pe+20);sections=u16(pe+6)
+    def address(rva):
+        for i in range(sections):
+            section=start+i*40;virtual=u32(section+12);size=u32(section+16);raw=u32(section+20)
+            if virtual<=rva<virtual+size:
+                at=raw+rva-virtual
+                if at>=len(data):raise ValueError('Export RVA outside file.')
+                return at
+        raise ValueError('Unmapped export RVA.')
+    rva=u32(optional+112)
+    if not rva:return []
+    directory=address(rva);count=u32(directory+24)
+    if count>65536:raise ValueError('Unbounded PE export inventory.')
+    names=address(u32(directory+32)) if count else 0
+    result=[]
+    for i in range(count):
+        at=address(u32(names+i*4));end=data.index(0,at,min(at+4096,len(data)))
+        result.append(data[at:end].decode('ascii'))
+    return sorted(set(result))
+
+
 def inspect(folder):
     files=sorted(folder.glob('*.dll'))
     if not 1 <= len(files) <= 32: raise ValueError('Bound runtime inventory.')
@@ -66,13 +93,16 @@ def inspect(folder):
     for p in files:
         try:
             groups=import_groups(p);required=sorted(set(groups['direct']+groups['delay']))
+            symbols=exports(p);turbo=[s for s in symbols if s.startswith('tj')]
+            if turbo:errors.append(f'{p.name}: Excluded TurboJPEG API unexpectedly exported: '+', '.join(turbo))
             for dependency in required:
                 if dependency.startswith(('vcruntime','msvcp','msvcr')):
                     errors.append(f'{p.name}: Unshipped VC runtime import: {dependency}')
                 elif dependency not in names|SYSTEM and not dependency.startswith(('api-ms-win-','ext-ms-win-')):
                     errors.append(f'{p.name}: Unreviewed/unbundled import: {dependency}')
             result.append({'file':p.name,'bytes':p.stat().st_size,'sha256':hashlib.sha256(p.read_bytes()).hexdigest(),
-                           'imports':required,'directImports':groups['direct'],'delayImports':groups['delay']})
+                           'imports':required,'directImports':groups['direct'],'delayImports':groups['delay'],
+                           'exportCount':len(symbols),'exportsSha256':hashlib.sha256(('\n'.join(symbols)+'\n').encode()).hexdigest(),'turbojpegExports':turbo})
         except (ValueError,AssertionError,IndexError,struct.error) as exc:
             errors.append(f'{p.name}: Invalid native import inventory: {exc}')
     return {'architecture':'Windows x64','importsAccountedFor':not errors,'staticCrtRequired':True,

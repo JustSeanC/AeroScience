@@ -59,6 +59,22 @@ public sealed partial class AviationMetadataStore
             return cmd.ExecuteScalar() is string json ? ParseJob(json) : throw new KeyNotFoundException("Aviation job not found.");
         }
     }
+    public (AviationDownloadJob Job, AviationRetainedFile File)[] ChartFiles(int offset = 0)
+    {
+        if(offset<0||offset>10000||offset%50!=0)throw new ArgumentException("Use 50-sheet pages.");
+        lock(gate)
+        {
+            using var db=Open();using var cmd=db.CreateCommand();
+            cmd.CommandText="""
+                SELECT j.payload,json_extract(f.value,'$.name') FROM download_jobs j,json_each(j.payload,'$.files') f
+                WHERE j.state='Completed' AND (lower(json_extract(f.value,'$.name')) LIKE '%.tif' OR lower(json_extract(f.value,'$.name')) LIKE '%.tiff')
+                ORDER BY j.rowid DESC, json_extract(f.value,'$.name') LIMIT 50 OFFSET $offset
+                """;
+            cmd.Parameters.AddWithValue("$offset",offset);using var rows=cmd.ExecuteReader();var result=new List<(AviationDownloadJob,AviationRetainedFile)>();
+            while(rows.Read()){var job=ParseJob(rows.GetString(0));var name=rows.GetString(1);result.Add((job,job.Files!.Single(f=>f.Name==name)));}
+            return result.ToArray();
+        }
+    }
     public AviationDownloadJob[] RetainedJobs(string itemId)
     {
         lock (gate)

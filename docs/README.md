@@ -8,20 +8,22 @@ Start with [scope](roadmap/v0.6.0-scope.md), [architecture](roadmap/v0.6.0-archi
 [phase tracker](roadmap/v0.6.0-development-tracker.md) and [readiness](v0.6.0-readiness.md).
 No v0.6.0 public release or owner acceptance is implied. [Map/reference guide](v0.6.0-aviation-reference.md)
 and [owner workbook](v0.6.0-acceptance-workbook.md) distinguish implemented metadata UI from pending original-data features.
+The optional chart runtime has an additive [license/notice supplement](../licenses/ChartRuntime.md);
+the historical legal notice file and original scientific/QA evidence remain unchanged.
 Historical QA records below retain their dates.
 
 Use the [0.6.0 private build/isolation guide](v0.6.0-private-validation.md) for its separate profile.
 Historical 0.5.0 testing: [build and isolation](v0.5.0-private-validation.md),
 [owner acceptance workbook](v0.5.0-acceptance-workbook.md), [readiness and blockers](v0.5.0-readiness.md).
-The owner is handling official 0.5.0 Windows building/publication separately from frozen main.
+The owner published stable v0.5.0 separately from frozen source; development does not replace that installer.
 
 
 Development additions: [instrument calibration and provenance](instrument-calibration.md)
 describes P03; use the [development tracker](roadmap/v0.5.0-development-tracker.md) for
 implementation and outstanding acceptance. Stable 0.4.2 QA material remains below.
 
-Published **v0.4.2** assets and QA evidence remain protected. The completed **0.5.0** source is frozen
-on main; current 0.6.0 development and historical acceptance are separate from its public publication.
+Published **v0.4.2** assets/QA evidence and the stable **v0.5.0** release remain protected.
+Current 0.6.0 development and its acceptance are separate from those published releases.
 
 ## Install, fly and review
 

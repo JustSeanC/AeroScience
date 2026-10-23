@@ -827,5 +827,83 @@
     "finding": "OSV-2026-1068 lists libjpeg-turbo 3.2.0: UNKNOWN READ in jpeg_abort via tj3Compress8. The declared fixed commit changes regression tests/docs; no speculative patch was substituted. TurboJPEG is excluded from corrected runtime, but remaining reachability/upstream security review is open.",
     "limitation": "Empty advisory query results do not certify security or complete coverage. Static-link/import success does not establish native distribution or chart acceptance."
   },
-  "currentNativeStatus": "Original missing-CRT linkage blocker fixed and independently isolated Windows probe passed at 29f87be. Production distribution and chart rendering remain unapproved/incomplete."
+  "currentNativeStatus": "Original missing-CRT linkage blocker fixed and independently isolated Windows probe passed at 29f87be. Production distribution and chart rendering remain unapproved/incomplete.",
+  "completeDistributionFollowup": {
+    "sourceCommit": "4ffa5aacea5884fc1dd3e5f57c7c8d29a2afb790",
+    "run": "https://github.com/JustSeanC/AeroScience/actions/runs/40035123988",
+    "actualConclusion": "success",
+    "classification": "Actual isolated Windows runtime/data/hash/import checks and existing genuine FAA window/CRS probe; not later application renderer or owner acceptance",
+    "payloadFiles": 57,
+    "payloadBytes": 30512087,
+    "dllBytes": 19154944,
+    "manifestBytes": 15097,
+    "manifestSha256": "846bfdd6051bfa47cd833247fd8feae46917f93bd2b3e36342f5fbd8e1d54202",
+    "completeFolderBytes": 30527184,
+    "projDatabase": {
+      "path": "share/proj/proj.db",
+      "bytes": 10207232,
+      "sha256": "757fb871cfd6192c3e246967e179873f8372f89fcd6cacc2878c895e86d1a194"
+    },
+    "gdalResourceFiles": 36,
+    "componentNotices": [
+      {
+        "path": "licenses/curl.txt",
+        "bytes": 2055,
+        "sha256": "543457a53893d439ac029f115c15940c0921ce1b919db501bbad266e2a4d1059"
+      },
+      {
+        "path": "licenses/gdal.txt",
+        "bytes": 21841,
+        "sha256": "1dae3468e81d00da56e2936f74d33b8b3ad09d726437f19ce209a5dabea41f77"
+      },
+      {
+        "path": "licenses/json-c.txt",
+        "bytes": 2205,
+        "sha256": "74c1e6ca5eba76b54d0ad00d4815c8315c1b3bc45ff99de61d103dc92486284c"
+      },
+      {
+        "path": "licenses/libgeotiff.txt",
+        "bytes": 3634,
+        "sha256": "a822a731a7ac4ba7d8f18fa0dc29db2e68a5dcfc315b46e4a4c8956720d55d93"
+      },
+      {
+        "path": "licenses/libjpeg-turbo.txt",
+        "bytes": 6077,
+        "sha256": "ba6bceebcba0fdd35488477c2cca8c4632ce82c74dbfbc87d886ce6fc4433579"
+      },
+      {
+        "path": "licenses/liblzma.txt",
+        "bytes": 3119,
+        "sha256": "616a3ad264ce29b8f1cb97e53037b139d406899ca8d1f799651e17bfa09830b8"
+      },
+      {
+        "path": "licenses/nlohmann-json.txt",
+        "bytes": 1076,
+        "sha256": "46a65cffd1ea955132d95a8dd921640714a8d6b537d2e4e482d31145ae95b603"
+      },
+      {
+        "path": "licenses/proj.txt",
+        "bytes": 1784,
+        "sha256": "6a8f30793e877d32e3f88b972f0970a051a3b5a26cd057d3993cb51e21c43319"
+      },
+      {
+        "path": "licenses/sqlite3.txt",
+        "bytes": 71,
+        "sha256": "3cafdd9b568b924b234b91f4a24649d509f02643ae727eac6a4e33818288c9c4"
+      },
+      {
+        "path": "licenses/tiff.txt",
+        "bytes": 2416,
+        "sha256": "0e27c2382d7b8147972bbb746e04059a1152c8d0fda9d03ef1399d1a433c4ade"
+      },
+      {
+        "path": "licenses/zlib.txt",
+        "bytes": 1002,
+        "sha256": "e32ff4e00d9d94930537635291da39e7e612703334bf6fde8c7f1686fe8a45a2"
+      }
+    ],
+    "publicDistributionApproved": false,
+    "newApplicationRendererAndExportChecks": "Pending new source-pinned execution; source-derived references are not acceptance",
+    "rawEvidence": "/workspace/AeroScience-060-final-20261023/native-complete"
+  }
 }

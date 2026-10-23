@@ -4,4 +4,5 @@
     <RuntimeIdentifiers>win-x64;linux-x64</RuntimeIdentifiers>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
   </PropertyGroup>
+  <ItemGroup><Compile Include="../../src/AeroScience.Missions/AviationChartRaster.cs" Link="ApplicationChartRaster.cs" /></ItemGroup>
 </Project>

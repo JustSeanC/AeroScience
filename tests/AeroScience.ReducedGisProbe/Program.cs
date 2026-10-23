@@ -4,7 +4,8 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text.Json;
 
-// Test-only C ABI; no MaxRev package and no production native dependency or Python requirement.
+if(args.Length==5&&args[0]=="--chart"){ChartRenderingChecks.Run(args[1],args[2],args[3],args[4]);return;}
+// Test-only C ABI; the --chart path above exercises the shared application implementation.
 if (args.Length != 4) throw new ArgumentException("Use native-library, original-TIFF, independent-reference-JSON and result-JSON.");
 var native = Path.GetFullPath(args[0]); var original = Path.GetFullPath(args[1]);
 var handle = NativeLibrary.Load(native, Assembly.GetExecutingAssembly(), DllImportSearchPath.UseDllDirectoryForDependencies | DllImportSearchPath.SafeDirectories);

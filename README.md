@@ -32,7 +32,7 @@ After your flight, explore collected observations on interactive maps, review sc
 
 AeroScience integrates actual Earth observation datasets, including satellite imagery and geographic information, to connect your simulated flights with real scientific information.
 
-In v0.6.0 development, explore FAA airport, runway, navigation and supported airspace references alongside your research route. Retained references work offline; TFR information includes freshness and coverage limitations. FAA chart display and native EMIT import are still in development.
+In v0.6.0 development, explore FAA airport, runway, navigation and supported airspace references alongside your research route. Retained references work offline; TFR information includes freshness and coverage limitations. Development also adds chart interiors for reviewed FAA sheets on Windows. Full chart validation and native EMIT import remain in progress; see the [aviation guide](docs/v0.6.0-aviation-reference.md) for supported builds and limitations.
 
 ## 🚀 How Does It Work?
 

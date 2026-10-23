@@ -31,6 +31,21 @@ public static class ResearchApi
         app.MapGet("/api/aviation/catalog/{kind}", (string kind, int? offset, AviationReference aviation) => aviation.Page(kind, offset ?? 0));
         app.MapPost("/api/aviation/catalog/{kind}/refresh", (string kind, AviationReference aviation, HttpContext c) => aviation.Refresh(kind, c.RequestAborted));
         app.MapGet("/api/aviation/vectors", (AviationReference aviation) => aviation.VectorDatasets());
+        app.MapGet("/api/aviation/charts", async (int? offset, AviationReference aviation, HttpContext c) =>
+        {
+            try{return Results.Ok(await aviation.ChartSheets(offset ?? 0,c.RequestAborted));}
+            catch(Exception e)when(e is IOException or UnauthorizedAccessException or Microsoft.Data.Sqlite.SqliteException)
+            {return Results.Conflict(new{error="Retained aviation chart storage is unavailable. Reconnect the original drive; existing data was preserved."});}
+        });
+        app.MapGet("/api/aviation/charts/{jobId:guid}/{sheetId}/{zoom:int}/{x:int}/{y:int}.png", async (Guid jobId,string sheetId,int zoom,int x,int y,AviationReference aviation,HttpContext c) =>
+        {
+            try{return Results.File(await aviation.ChartTile(jobId,sheetId,zoom,x,y,c.RequestAborted),"image/png");}
+            catch(Exception e)when(e is IOException or UnauthorizedAccessException or Microsoft.Data.Sqlite.SqliteException or System.Runtime.InteropServices.ExternalException or DllNotFoundException or EntryPointNotFoundException)
+            {return Results.Conflict(new{error="Chart source, derived-cache integrity or verified runtime is unavailable. Original files and recording were preserved. Check the original aviation drive and runtime; remove only a damaged regenerable chart cache before retrying."});}
+            catch(OperationCanceledException)when(!c.RequestAborted.IsCancellationRequested)
+            {return Results.Conflict(new{error="Chart processing deadline reached. Retry the map when resources permit; recording continues normally."});}
+            catch(KeyNotFoundException){return Results.NotFound(new{error="Retained FAA chart job not found."});}
+        });
         app.MapGet("/api/aviation/tfr/configuration",(AviationReference aviation)=>aviation.TfrConfiguration());
         app.MapPost("/api/aviation/tfr/configuration",(AviationConsentRequest request,AviationReference aviation,HttpContext c)=>AccessControl.IsLoopback(c)?Results.Ok(aviation.ConfigureTfr(request.OnlineEnabled)):Results.StatusCode(403));
         app.MapGet("/api/aviation/tfr/summary",(AviationReference aviation)=>aviation.TfrSummary());
