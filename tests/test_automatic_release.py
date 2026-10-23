@@ -17,6 +17,8 @@ class AutomaticReleaseTests(unittest.TestCase):
         # isolated control tests. Current science releases have a separate gate.
         legacy_gate=patch.object(a.p,'requires_manual_acceptance',lambda *args:False)
         legacy_gate.start();self.addCleanup(legacy_gate.stop)
+        legacy_channel=patch.object(a.p,'RELEASE_CHANNEL','prerelease')
+        legacy_channel.start();self.addCleanup(legacy_channel.stop)
         # Release-control fixtures cannot establish genuine network acceptance.
         # Preserve recorded numeric evidence structurally while testing this isolated
         # synthetic finalization flow. Production evidence() still requires a passing final run.
@@ -51,6 +53,12 @@ class AutomaticReleaseTests(unittest.TestCase):
         with patch.object(a.p,'requires_manual_acceptance',lambda *args:True):
             with self.assertRaisesRegex(ValueError,'actual Windows/MSFS acceptance'):
                 a.finalize(self.flow.root/'unused',self.flow.root/'final',self.flow.root/'unused.json')
+
+    def test_stable_cannot_use_source_only_alpha_finalization_even_without_the_science_version_gate(self):
+        folder=fixtures.candidate(self.flow);proof=self.evidence()
+        with patch.object(a.p,'RELEASE_CHANNEL','stable'):
+            with self.assertRaisesRegex(ValueError,'prerelease'):
+                a.finalize(folder,self.flow.root/'final',proof)
 
     def test_failed_tests_zero_tests_forged_hardware_status_and_wrong_source_are_rejected(self):
         value=a.p.read_json(self.evidence())
