@@ -58,7 +58,10 @@ test('science-map overlay visibility leaves native quantities, filters and archi
  const fixture=await post(request,'/api/testing/remote/Terrain');const evidenceBefore=await (await request.get('/api/science/products/'+fixture.product.id+'/export/evidence.json')).text();
  await page.goto('/#workspace/map?missions='+fixture.missionId+'&instrument=terrain-scanner');
  await expect(page.getByLabel('Science layer opacity',{exact:true})).toBeVisible();await page.getByLabel('Science layer opacity',{exact:true}).fill('0.35');
- const workspace=page.locator('#science-workspace'),center=await workspace.locator('.geographic-map').getAttribute('data-center');
+ const workspace=page.locator('#science-workspace');
+ await expect(workspace.locator('.map-overview-counts')).toHaveAttribute('data-total-acquisitions','1');
+ await expect(workspace.locator('.workspace-status').first()).toContainText('1 geographically indexed acquisitions reviewed');
+ const center=await workspace.locator('.geographic-map').getAttribute('data-center');
  await workspace.getByRole('button',{name:'Overlays & Legend'}).click();const dialog=page.getByRole('dialog',{name:'Map Overlays & Legend',exact:true});
  await dialog.getByLabel('Science overlays',{exact:true}).uncheck();await expect(dialog.getByLabel('Saved scientific observations',{exact:true})).not.toBeChecked();
  await expect(dialog.getByLabel('Verified scientific raster views',{exact:true})).not.toBeChecked();

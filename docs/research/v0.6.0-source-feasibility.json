@@ -687,6 +687,187 @@
       ],
       "decision": "No dependency selected or added: transitive native licenses, needed drivers, ABI and locked Windows self-contained prototype remain a gate."
     },
-    "classification": "Genuine public original/metadata research with independent coordinate/affine-field comparisons. Application FAA-vector/chart/TFR acceptance and EMIT numerical acceptance remain incomplete."
+    "classification": "Genuine public original/metadata research with independent coordinate/affine-field comparisons. Application FAA-vector/chart/TFR acceptance and EMIT numerical acceptance remain incomplete.",
+    "additionalChartFamilies": {
+      "samples": [
+        {
+          "archive": "hawaii-sectional.zip",
+          "url": "https://aeronav.faa.gov/visual/09-03-2026/sectional-files/Hawaiian_Islands.zip",
+          "bytes": 27291624,
+          "sha256": "351107a94c53634014410bacec43253ed4117a77f34a952207c7a7bd9112680e",
+          "rasters": [
+            {
+              "name": "Hawaiian Islands SEC.tif",
+              "dimensions": [
+                20186,
+                16370,
+                1
+              ],
+              "dtype": [
+                "uint8"
+              ],
+              "crsWkt": "PROJCS[\"Lambert Conformal Conic\",GEOGCS[\"NAD83\",DATUM[\"North_American_Datum_1983\",SPHEROID[\"GRS 1980\",6378137,298.257222101004,AUTHORITY[\"EPSG\",\"7019\"]],AUTHORITY[\"EPSG\",\"6269\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4269\"]],PROJECTION[\"Lambert_Conformal_Conic_2SP\"],PARAMETER[\"latitude_of_origin\",21],PARAMETER[\"central_meridian\",-157.5],PARAMETER[\"standard_parallel_1\",23.3333333333333],PARAMETER[\"standard_parallel_2\",20.6666666666667],PARAMETER[\"false_easting\",0],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH]]",
+              "affine": [
+                42.33821288015833,
+                0.0,
+                -433359.64125889057,
+                0.0,
+                -42.339975291621336,
+                334315.18390010414
+              ],
+              "sampleSha256": "cd9f203a824fa2419a5bca19d72adb1599283dcab1f08943bae86acc4996c63b",
+              "seconds": 0.075,
+              "peakRssKiB": 80828,
+              "worldFile": "Hawaiian Islands SEC.tfw",
+              "maximumAffineDifference": 4.1666226024972275e-11
+            },
+            {
+              "name": "Honolulu Inset SEC.tif",
+              "dimensions": [
+                5665,
+                4622,
+                1
+              ],
+              "dtype": [
+                "uint8"
+              ],
+              "crsWkt": "PROJCS[\"Lambert Conformal Conic\",GEOGCS[\"NAD83\",DATUM[\"North_American_Datum_1983\",SPHEROID[\"GRS 1980\",6378137,298.257222101004,AUTHORITY[\"EPSG\",\"7019\"]],AUTHORITY[\"EPSG\",\"6269\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4269\"]],PROJECTION[\"Lambert_Conformal_Conic_2SP\"],PARAMETER[\"latitude_of_origin\",21.1833333333333],PARAMETER[\"central_meridian\",-158],PARAMETER[\"standard_parallel_1\",20.6666666666667],PARAMETER[\"standard_parallel_2\",23.3333333333333],PARAMETER[\"false_easting\",0],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH]]",
+              "affine": [
+                21.167609862542974,
+                0.0,
+                -52313.257798046914,
+                0.0,
+                -21.168690012054686,
+                48313.79742722391
+              ],
+              "sampleSha256": "cf606a7d35c98e2effc07a6477adc0adb4fe90931f6932be10d0302190e8b627",
+              "seconds": 0.021,
+              "peakRssKiB": 80828,
+              "worldFile": "Honolulu Inset SEC.tfw",
+              "maximumAffineDifference": 6.548361852765083e-11
+            },
+            {
+              "name": "Mariana Islands Inset SEC.tif",
+              "dimensions": [
+                6178,
+                6198,
+                1
+              ],
+              "dtype": [
+                "uint8"
+              ],
+              "crsWkt": "PROJCS[\"Lambert Conformal Conic\",GEOGCS[\"NAD83\",DATUM[\"North_American_Datum_1983\",SPHEROID[\"GRS 1980\",6378137,298.257222101004,AUTHORITY[\"EPSG\",\"7019\"]],AUTHORITY[\"EPSG\",\"6269\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4269\"]],PROJECTION[\"Lambert_Conformal_Conic_2SP\"],PARAMETER[\"latitude_of_origin\",14.3],PARAMETER[\"central_meridian\",146.5],PARAMETER[\"standard_parallel_1\",9.33333],PARAMETER[\"standard_parallel_2\",14.66667],PARAMETER[\"false_easting\",0],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH]]",
+              "affine": [
+                63.48431645562193,
+                0.0,
+                -386158.3327097463,
+                0.0,
+                -63.48345336673462,
+                202760.80601106043
+              ],
+              "sampleSha256": "4fe7b59af6de3b665b67788cc2f99892ab827efae3a467342b3bb4e3bc8e5bfe",
+              "seconds": 0.012,
+              "peakRssKiB": 80828,
+              "worldFile": "Mariana Islands Inset SEC.tfw",
+              "maximumAffineDifference": 5.820766091346741e-11
+            },
+            {
+              "name": "Samoan Islands Inset SEC.tif",
+              "dimensions": [
+                8976,
+                4143,
+                1
+              ],
+              "dtype": [
+                "uint8"
+              ],
+              "crsWkt": "PROJCS[\"Lambert Conformal Conic\",GEOGCS[\"NAD83\",DATUM[\"North_American_Datum_1983\",SPHEROID[\"GRS 1980\",6378137,298.257222101004,AUTHORITY[\"EPSG\",\"7019\"]],AUTHORITY[\"EPSG\",\"6269\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4269\"]],PROJECTION[\"Lambert_Conformal_Conic_2SP\"],PARAMETER[\"latitude_of_origin\",-13.933333],PARAMETER[\"central_meridian\",-171.333333333333],PARAMETER[\"standard_parallel_1\",-9.33333],PARAMETER[\"standard_parallel_2\",-14.66667],PARAMETER[\"false_easting\",0],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH]]",
+              "affine": [
+                42.335115864528795,
+                0.0,
+                -166000.00000000186,
+                0.0,
+                -42.331643736421405,
+                82880.00000009628
+              ],
+              "sampleSha256": "7cea5229aef614317d2ffe7c2d498bc2146dabaa070a83d6ff8141c51d63d930",
+              "seconds": 0.013,
+              "peakRssKiB": 80828,
+              "worldFile": "Samoan Islands Inset SEC.tfw",
+              "maximumAffineDifference": 2.9103830456733704e-11
+            }
+          ]
+        },
+        {
+          "archive": "ifr-low-01.zip",
+          "url": "https://aeronav.faa.gov/enroute/09-03-2026/enr_l01.zip",
+          "bytes": 8595043,
+          "sha256": "7e1e4d7053e445d5d2907cdd0f9d8a070a70b95e3eeeb82aa39187ec49858da7",
+          "rasters": [
+            {
+              "name": "ENR_L01.tif",
+              "dimensions": [
+                22000,
+                8000,
+                3
+              ],
+              "dtype": [
+                "uint8",
+                "uint8",
+                "uint8"
+              ],
+              "crsWkt": "PROJCS[\"US_IFR\",GEOGCS[\"NAD83\",DATUM[\"North_American_Datum_1983\",SPHEROID[\"GRS 1980\",6378137,298.257221999999,AUTHORITY[\"EPSG\",\"7019\"]],AUTHORITY[\"EPSG\",\"6269\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4269\"]],PROJECTION[\"Lambert_Conformal_Conic_2SP\"],PARAMETER[\"latitude_of_origin\",39],PARAMETER[\"central_meridian\",-95],PARAMETER[\"standard_parallel_1\",45],PARAMETER[\"standard_parallel_2\",33],PARAMETER[\"false_easting\",0],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH]]",
+              "affine": [
+                11.1018489,
+                35.3270044,
+                -2416761.34,
+                35.3375741,
+                -11.0969413,
+                738550.606
+              ],
+              "sampleSha256": "94b672cd13e7382c628952bba165d980e8d2cdbe8e799eee6594cd4a84452b57",
+              "seconds": 0.057,
+              "peakRssKiB": 82324
+            }
+          ]
+        },
+        {
+          "archive": "ifr-high-01.zip",
+          "url": "https://aeronav.faa.gov/enroute/09-03-2026/enr_h01.zip",
+          "bytes": 9180279,
+          "sha256": "f0f7025a93cb981688cd086afe3c70845cbba85acccff6bc658b683f4a2c6af4",
+          "rasters": [
+            {
+              "name": "ENR_H01.tif",
+              "dimensions": [
+                24000,
+                8000,
+                3
+              ],
+              "dtype": [
+                "uint8",
+                "uint8",
+                "uint8"
+              ],
+              "crsWkt": "PROJCS[\"US_IFR\",GEOGCS[\"NAD83\",DATUM[\"North_American_Datum_1983\",SPHEROID[\"GRS 1980\",6378137,298.257221999999,AUTHORITY[\"EPSG\",\"7019\"]],AUTHORITY[\"EPSG\",\"6269\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4269\"]],PROJECTION[\"Lambert_Conformal_Conic_2SP\"],PARAMETER[\"latitude_of_origin\",39],PARAMETER[\"central_meridian\",-95],PARAMETER[\"standard_parallel_1\",45],PARAMETER[\"standard_parallel_2\",33],PARAMETER[\"false_easting\",0],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH]]",
+              "affine": [
+                91.6780727,
+                -13.0149189,
+                -2842968.75,
+                -13.0216605,
+                -91.684661,
+                1594896.39
+              ],
+              "sampleSha256": "667454480b696cec644a5524aa09e4386c755b24da2f9cd2a1511ebbf2bd8f27",
+              "seconds": 0.039,
+              "peakRssKiB": 82324
+            }
+          ]
+        }
+      ],
+      "limitations": [
+        "Real original format/window/affine inspection only; no printed control-point, neatline, original approval job, Windows renderer or offline application acceptance."
+      ]
+    }
   }
 }
