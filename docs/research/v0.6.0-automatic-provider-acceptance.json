@@ -1,0 +1,10 @@
+{
+  "formatVersion": 1,
+  "version": "0.6.0",
+  "evidenceType": "pending-genuine-provider-network",
+  "windowsMsfs": "not tested",
+  "description": "Development source after frozen 0.5.0 forward integration. Historical 0.5.0 evidence remains unchanged; a clean-source genuine rerun is required before current-source release claims.",
+  "workflows": [],
+  "finalNetworkRerun": "pending",
+  "finalNetworkRerunReason": "0.6.0 version/profile and merged aviation source require a new genuine execution; frozen 0.5.0 reports are historical evidence."
+}

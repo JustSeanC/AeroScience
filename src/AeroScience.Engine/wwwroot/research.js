@@ -303,7 +303,7 @@ function editPlan(plan) {
   const dirty=message=>{if(!form.isConnected)return;plannerDirty=true;readinessView?.invalidate();draftStatus.textContent=message||"Unsaved changes · Save mission plan when ready. Your draft stays here when you switch sections.";};
   form.addEventListener("input",event=>{if(!event.target.closest(".pattern-editor")&&!event.target.closest(".draft-geometry-editor"))dirty();});
   form.append(text("h3","1. Mission details"));
-  const grid = text("div", undefined, "research-grid");
+  const grid = text("div", undefined, "research-grid mission-details-grid");
   form.append(grid);
   const name = input(grid, "Plan name", plan?.name);
   name.required = true;
@@ -324,7 +324,7 @@ function editPlan(plan) {
     ],
     plan?.mode || "universal",
   );
-  const objective = input(grid, "Objective", plan?.objective),
+  const objective = input(grid, "Objective", plan?.objective, "textarea"),
     description = input(grid, "Description", plan?.description, "textarea"),
     aircraft = input(
       grid,
@@ -333,6 +333,7 @@ function editPlan(plan) {
     ),
     departure = input(grid, "Departure", plan?.departure),
     destination = input(grid, "Destination", plan?.destination);
+  objective.closest("label").classList.add("mission-objective-field");
   const flightRules = select(
     grid,
     "Flight plan rules",
@@ -379,41 +380,106 @@ function editPlan(plan) {
   form.append(
     text(
       "p",
-      "Realistic Mode supports documented sensor geometry and operating advisories with any compatible aircraft. Advanced calibration and failure simulation remain future work.",
+      "Realistic Mode supports documented sensor geometry, calibration provenance and operating assessments with any compatible aircraft. Unknown operating limits remain unknown; no physical hardware or sensor failures are simulated.",
       "footnote",
     ),
   );
   const advanced=text("details");advanced.append(text("summary","Advanced mission details & export settings"));
-  for(const field of [description,aircraft,flightRules,cruise,low,high,duration,notes])advanced.append(field.closest("label"));
+  for(const field of [description,aircraft,departure,destination,flightRules,cruise,low,high,duration,notes])advanced.append(field.closest("label"));
   form.append(advanced);
   const configuration = text("div");
   form.append(configuration);
   configs(configuration, plan?.instruments || []);
   const recommended=text("section",undefined,"panel recommended-payload");recommended.setAttribute("aria-label","Recommended instrument payload");
-  const recommendations=text("div"),payloadActions=text("div",undefined,"action-row");recommended.append(recommendations,payloadActions);template.closest("label").after(recommended);
+  const recommendations=text("div"),payloadActions=text("div",undefined,"action-row");recommended.append(recommendations,payloadActions);grid.after(recommended);
   let localSourceCandidates=null,priorTemplate=template.value,payloadTouched=!!plan;
   const externalKinds={"terrain-scanner":"terrain","thermal-imager":"thermal","multispectral-imager":"multispectral","hyperspectral-imager":"hyperspectral"};
+  const payloadPurpose={
+    "terrain-scanner":"Study terrain elevations along the planned survey.",
+    "multispectral-imager":"Study surface reflectance and vegetation patterns.",
+    "thermal-imager":"Study historical land-surface temperature.",
+    "hyperspectral-imager":"Examine spectra from compatible original ENVI observations.",
+    "ambient-temperature":"Record simulator-reported ambient air temperature.",
+    "ambient-wind":"Record simulator-reported wind speed and direction.",
+    "ambient-pressure":"Record simulator-reported ambient pressure.",
+    "ambient-density":"Record simulator-reported ambient air density."
+  };
+  const sourceRequirement={
+    "terrain-scanner":"External data: supported 3DEP bare-earth DEM or Copernicus surface DSM.",
+    "multispectral-imager":"External data: compatible Sentinel-2 Level-2A observations.",
+    "thermal-imager":"External data: Landsat Collection 2 Level-2 surface temperature.",
+    "hyperspectral-imager":"External data: compatible original ENVI reflectance/radiance collections."
+  };
+  let recommendationTemplate=null,recommendationCards=[];
+  function recommendationCard(c,role,parent){
+    const definition=definitions.find(d=>d.id===c.instrumentId),kind=externalKinds[c.instrumentId],row=text("article",undefined,"finding-card payload-recommendation");
+    row.dataset.recommendation=role;row.dataset.instrumentId=c.instrumentId;
+    const included=text("p",undefined,"payload-inclusion"),profile=text("p",undefined,"payload-reference"),details=text("details"),cadence=text("p"),sources=text("p"),limits=text("p"),calibration=text("p"),reference=text("p");
+    row.append(text("span",role==="primary"?"Primary recommendation":"Optional addition","payload-role"),text("h4",definition?.name||c.instrumentId),text("p",payloadPurpose[c.instrumentId]||definition?.description||"Review this instrument's supported measurements."),included);
+    row.append(text("p",sourceRequirement[c.instrumentId]||"Simulator-derived observations; no external satellite data required.","payload-source"));
+    if(kind)row.append(profile);
+    details.append(text("summary","View instrument details"),text("p",definition?.description||"Unknown instrument — review configuration."),cadence,calibration);
+    if(kind){
+      details.append(reference,sources,text("p",kind==="hyperspectral"?"Use the Library's supported authorized AVIRIS download/import or guided original ENVI workflow. Generic geographic preflight downloading cannot prepare arbitrary hyperspectral coverage.":"Retained source files and provider footprints do not prove mission-area coverage or QA-valid pixels. Prepare and assess the actual saved mission separately."),text("p","Original external observation dates remain separate from simulator flight time. Historical Landsat imagery is not a live aircraft camera; DEM/DSM elevations are not airborne LiDAR returns."));
+      const a=text("a","Find Compatible External Data","button secondary");a.href="#library/download?science="+kind;details.append(a);
+    }
+    details.append(limits);row.append(details);
+    let add;
+    if(role==="optional"){
+      add=text("button","Add "+(definition?.name||c.instrumentId),"secondary");add.type="button";
+      add.onclick=()=>{
+        const enabled=configuration.querySelector(`[data-instrument="${c.instrumentId}"]`);
+        if(!enabled)return;
+        enabled.checked=true;payloadTouched=true;showRecommended();dirty("Optional instrument enabled in this draft. Its existing cadence, profile, geometry and calibration are preserved. Save separately.");
+      };row.append(add);
+    }
+    parent.append(row);
+    return current=>{
+      const effective=current.find(v=>v.instrumentId===c.instrumentId);
+      included.textContent=effective?.enabled?"Enabled in draft":"Not enabled in draft";
+      row.dataset.enabled=String(!!effective?.enabled);
+      profile.textContent="Reference: "+(effective?.payload?.profile?.name||"No reference selected");
+      reference.textContent=`Reference identity: ${effective?.payload?.profile?.id||"Unknown"}; version ${effective?.payload?.profile?.version??"Unknown"}. ${effective?.payload?.custom?"Custom modeled geometry":"Selected reference geometry"}; no physical installation or accuracy certification is implied.`;
+      cadence.textContent=`Recommended acquisition interval ${c.intervalMs/1000} s; current configured interval ${effective?.intervalMs/1000??"Unknown"} s. Saved acquisition cadence is separate from sensor line/pulse rates and native source resolution.`;
+      calibration.textContent="Calibration provenance: "+(effective?.calibration?.name||effective?.calibration?.id||"Not supplied; no accuracy certification is implied.");
+      const retained=localSourceCandidates?.filter(s=>s.filesAvailable&&s.source.manifest.kind===kind);
+      sources.textContent=localSourceCandidates===null?"Local source presence not yet assessed.":retained?.length?`${retained.length} retained candidate(s); mission-area suitability and valid pixels not yet assessed.`:"No verified retained candidate of this scientific type is present.";
+      limits.textContent=(effective?.payload?.profile?.limitations||[]).join(" ")||"Operating limits are assessed only where documented evidence exists; unknown constraints stay unknown.";
+      if(add)add.disabled=!!effective?.enabled;
+    };
+  }
   function showRecommended(){
     const t=templates.find(t=>t.id===template.value),current=readConfigs(configuration),recommendedIds=new Set((t?.instruments||[]).filter(c=>c.enabled).map(c=>c.instrumentId));
-    recommendations.replaceChildren(text("h3","Recommended instrument payload"),text("p",`${t?.name||"No template"}: ${t?.objective||"No objective supplied"}`));
-    for(const c of(t?.instruments||[]).filter(c=>c.enabled)){
-      const definition=definitions.find(d=>d.id===c.instrumentId),effective=current.find(v=>v.instrumentId===c.instrumentId),kind=externalKinds[c.instrumentId],row=text("article",undefined,"finding-card");
-      row.append(text("h4",definition?.name||c.instrumentId),text("p",definition?.description||"Unsupported instrument — review configuration."),text("p",`${effective?.enabled?"Recommended and included":"Recommended but not included"} · recommended acquisition interval ${c.intervalMs/1000} s · current configured interval ${effective?.intervalMs/1000||"Unknown"} s. ${effective?.payload?.profile?.name||"No optical/scanner profile required or selected"}`));
-      if(kind){const retained=localSourceCandidates?.filter(s=>s.filesAvailable&&s.source.manifest.kind===kind);row.append(text("p",`Requires compatible external data. ${localSourceCandidates===null?"Local source presence not yet assessed":retained?.length?retained.length+" retained candidate(s); mission-area suitability and actual QA-valid pixels not yet assessed":"No verified retained candidate of this scientific type is present"}. Historical source observation dates remain separate from flight time.`));const a=text("a","Find Compatible External Data","button secondary");a.href="#library/download?science="+kind;row.append(a);}
-      else row.append(text("p","Uses supported simulator-derived observations; no external satellite dataset is required for this instrument."));
-      row.append(text("p",(effective?.payload?.profile?.limitations||[]).join(" ")||"Operating limits are assessed only where documented evidence exists; unknown constraints stay unknown."));recommendations.append(row);
+    if(recommendationTemplate!==t){
+      recommendationTemplate=t;recommendationCards=[];
+      recommendations.replaceChildren(text("h3","Recommended Science Payload"),text("p",`${t?.name||"No template"}: ${t?.objective||"No objective supplied"}`));
+      const primary=text("div",undefined,"recommended-payload-grid");recommendations.append(primary);
+      for(const c of(t?.instruments||[]).filter(c=>c.enabled))recommendationCards.push(recommendationCard(c,"primary",primary));
+      if(!primary.childElementCount)primary.append(text("p","No fixed primary payload. Choose instruments for your research objective, or keep an observation/marker-focused mission."));
+      const optional=(t?.optionalInstruments||[]).filter(c=>!recommendedIds.has(c.instrumentId));
+      if(optional.length){
+        const more=text("details",undefined,"recommended-optional"),list=text("div",undefined,"recommended-payload-grid");
+        more.append(text("summary",`Optional scientific instruments (${optional.length}) — add individually`),text("p","Optional additions are not enabled automatically. Atmospheric instruments provide context for geographic surveys."),list);
+        for(const c of optional)recommendationCards.push(recommendationCard(c,"optional",list));
+        recommendations.append(more);
+      }
+      const caveats=text("details",undefined,"recommended-explanation");caveats.append(text("summary","How recommendations work & scientific limitations"),text("p","Primary instruments match the template's research objective. Apply replaces the draft payload after confirmation; Merge only enables missing primary instruments and keeps current settings. Keep retains your current payload. Add enables one optional instrument without changing its settings."),text("p","Recommendations do not install hardware or confirm source readiness. Historical scientific datasets remain external observations. Save and reassess your actual plan; no download, science session or flight starts from this panel."));recommendations.append(caveats);
+      recommendations.append(text("p",undefined,"payload-additional"));
     }
-    const extra=current.filter(c=>c.enabled&&!recommendedIds.has(c.instrumentId));if(extra.length)recommendations.append(text("p","Additional/custom instruments: "+extra.map(c=>definitions.find(d=>d.id===c.instrumentId)?.name||c.instrumentId).join(", ")));
-    recommendations.append(text("p","Recommendations describe supported research configurations, not certified aircraft hardware. Save and reassess the actual selected payload; this panel never starts a download or collection."));
+    for(const update of recommendationCards)update(current);
+    const extra=current.filter(c=>c.enabled&&!recommendedIds.has(c.instrumentId)),additional=recommendations.querySelector(".payload-additional");
+    additional.textContent=extra.length?"Additional/custom instruments enabled: "+extra.map(c=>definitions.find(d=>d.id===c.instrumentId)?.name||c.instrumentId).join(", "):"";
+    additional.hidden=!extra.length;
   }
   payloadActions.append(button("Apply Recommended Payload",()=>{
     const t=templates.find(t=>t.id===template.value),current=readConfigs(configuration);
-    if((plan||current.some(c=>c.enabled||c.payload?.custom))&&!confirm("Replace this draft's instrument settings, cadence, profiles and calibration references with the selected template recommendations? Current included instruments: "+current.filter(c=>c.enabled).map(c=>definitions.find(d=>d.id===c.instrumentId)?.name||c.instrumentId).join(", ")+". Your saved plan and active flight remain unchanged until separately saved/applied."))return;
+    if((plan||payloadTouched||current.some(c=>c.enabled||c.payload?.custom))&&!confirm("Replace this draft's instrument settings, cadence, profiles and calibration references with the selected template recommendations? Current included instruments: "+current.filter(c=>c.enabled).map(c=>definitions.find(d=>d.id===c.instrumentId)?.name||c.instrumentId).join(", ")+". Your saved plan and active flight remain unchanged until separately saved/applied."))return;
     payloadTouched=true;configs(configuration,t.instruments);showRecommended();dirty("Recommended payload applied to draft. Review and Save mission plan separately.");
   }),button("Merge Recommended Instruments",()=>{
-    const current=readConfigs(configuration),ids=new Set(templates.find(t=>t.id===template.value).instruments.filter(c=>c.enabled).map(c=>c.instrumentId));
-    payloadTouched=true;configs(configuration,current.map(c=>ids.has(c.instrumentId)?{...c,enabled:true}:c));showRecommended();dirty("Recommended instruments enabled in the draft; existing settings preserved. Review before saving.");
-  }),button("Keep Current Payload",()=>{showRecommended();draftStatus.textContent="Current payload retained. Template choice and recommendations do not overwrite custom settings. Save remains separate.";}));
+    const ids=new Set(templates.find(t=>t.id===template.value).instruments.filter(c=>c.enabled).map(c=>c.instrumentId));
+    for(const id of ids){const enabled=configuration.querySelector(`[data-instrument="${id}"]`);if(enabled)enabled.checked=true;}
+    payloadTouched=true;showRecommended();dirty("Recommended instruments enabled in the draft; existing settings preserved. Review before saving.");
+  }),button("Keep Current Payload",()=>{payloadTouched=true;showRecommended();draftStatus.textContent="Current payload retained. Template choice and recommendations do not overwrite custom settings. Save remains separate.";}));
   configuration.addEventListener("input",()=>{payloadTouched=true;showRecommended();});configuration.addEventListener("change",()=>{payloadTouched=true;showRecommended();});showRecommended();
   ctx.api('/api/science/sources').then(s=>{if(form.isConnected){localSourceCandidates=s;showRecommended();}}).catch(()=>{if(form.isConnected){localSourceCandidates=null;showRecommended();}});
   const presetSection = text("details");

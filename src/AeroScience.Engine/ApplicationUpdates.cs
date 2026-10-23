@@ -5,7 +5,7 @@ using AeroScience.Missions;
 
 namespace AeroScience.Engine;
 
-public sealed record UpdatePreferences(bool Automatic = true, bool IncludePrereleases = true);
+public sealed record UpdatePreferences(bool Automatic = true, bool IncludePrereleases = false);
 public sealed record AvailableRelease(string Version, string ReleaseUrl, string InstallerName, bool Prerelease);
 public sealed record UpdateSnapshot(string CurrentVersion, UpdatePreferences Preferences, AvailableRelease? Available = null,
     DateTimeOffset? LastCheckedUtc = null, string? Message = null, DateTimeOffset? RemindAfterUtc = null);
@@ -35,7 +35,7 @@ public static class ReleaseVersions
 }
 public sealed class ApplicationUpdates
 {
-    public const string CurrentVersion = "0.5.0";
+    public const string CurrentVersion = "0.6.0";
     private readonly string path;
     private readonly HttpClient http;
     private readonly SemaphoreSlim check = new(1, 1);
@@ -70,7 +70,7 @@ public sealed class ApplicationUpdates
     {
         if (ApplicationProfile.Current.Validation)
         {
-            lock (gate) return state = state with { Available=null, Preferences=new(false), Message="Private validation profile. Rebuild from develop/v0.5.0; public installers do not update this profile." };
+            lock (gate) return state = state with { Available=null, Preferences=new(false), Message="Private validation profile. Rebuild from develop/v0.6.0; public installers do not update this profile." };
         }
         await check.WaitAsync(token);
         try

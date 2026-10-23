@@ -9,7 +9,7 @@ async function post(path,data={}){const r=await client.post(path,{headers:{Origi
 async function get(path){const r=await client.get(path);expect(r.ok(),await r.text()).toBeTruthy();return r.json();}
 const settings=(id='thermal-imager',extra={})=>({instrumentId:id,enabled:true,intervalMs:1000,...extra});
 async function begin(instruments=[settings()],extra={}){return post('/api/missions',{name:'SYNTHETIC operating UX '+crypto.randomUUID(),mode:'realistic',instruments,...extra});}
-async function control(id,action){const s=(await get(`/api/missions/${id}/collection`)).state;return post(`/api/missions/${id}/collection/control`,{version:1,missionId:id,requestId:crypto.randomUUID(),expectedRevision:s.revision,expectedSessionId:s.currentSessionId,action});}
+async function control(id,action){const s=(await get(`/api/missions/${id}/collection`)).state;return post(`/api/missions/${id}/collection/control`,{version:1,missionId:id,requestId:crypto.randomUUID(),expectedRevision:s.revision,expectedControlRevision:s.controlRevision??null,expectedSessionId:s.currentSessionId,action});}
 async function card(id='thermal-imager'){return(await get('/api/instruments/operating-status')).instruments.find(c=>c.instrumentId===id);}
 async function view(browser,route='science',width=1280){const context=await browser.newContext({baseURL:origin,storageState:await client.storageState(),viewport:{width,height:950}});const page=await context.newPage();await page.goto('/#'+route);const panel=page.locator(route==='science'?'#operating-reports':'#mission-intelligence-sensors');await expect(panel.getByRole('heading',{name:'Sensor Operating Status',exact:true})).toBeVisible();return{context,page,panel};}
 test.beforeAll(async()=>{

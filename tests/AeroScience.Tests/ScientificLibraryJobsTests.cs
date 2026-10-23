@@ -27,9 +27,9 @@ public sealed class ScientificLibraryJobsTests:IDisposable
         var area=bounds??new(-75.01,39.99,-74.99,40.01);var item=Assert.Single((await catalog.Search(new("usgs-3dep",area))).Items);
         return await jobs.Preview(new(1,[area],[new(item.Provider,item.Scene,item.Revision,item.Bands.Select(b=>b.Id).ToArray())]));
     }
-    private static async Task<LibraryDownloadJob> Terminal(ScienceStore science,Guid id)
+    private static async Task<LibraryDownloadJob> Terminal(ScienceStore science,Guid id,Func<LibraryDownloadJob,bool>? settled=null)
     {
-        var watch=System.Diagnostics.Stopwatch.StartNew();while(true){var j=science.LibraryJob(id);if(j.State is "Completed" or "Failed" or "Interrupted")return j;if(watch.Elapsed>TimeSpan.FromSeconds(15))throw new TimeoutException(JsonSerializer.Serialize(j,WireJson.Options));await Task.Delay(25);}
+        var watch=System.Diagnostics.Stopwatch.StartNew();while(true){var j=science.LibraryJob(id);if((j.State is "Completed" or "Failed" or "Interrupted")&&(settled is null||settled(j)))return j;if(watch.Elapsed>TimeSpan.FromSeconds(15))throw new TimeoutException(JsonSerializer.Serialize(j,WireJson.Options));await Task.Delay(25);}
     }
     [Fact]public async Task RealPersistedJobRequiresApprovalPublishesVerifiedSourceWithoutMissionAndReusesExactly()
     {
@@ -93,7 +93,10 @@ public sealed class ScientificLibraryJobsTests:IDisposable
     {
         var handler=new InterruptibleHandler(raster);using var automatic=new AutomaticScientificData(science,settings,new(handler));var catalog=new ScientificCatalog(automatic,science,settings);using var jobs=new ScientificLibraryJobs(science,catalog,automatic,settings);
         var preview=await Preview(catalog,jobs);await jobs.Approve(preview.Id,preview.Preview.SelectionHash);await handler.Started.Task.WaitAsync(TimeSpan.FromSeconds(10));automatic.FlightActive(true);
-        Assert.Equal("Interrupted",(await Terminal(science,preview.Id)).State);Assert.Equal(0,automatic.QueueSummary().PreflightReservedBytes);Assert.Empty(science.Sources());
+        // FlightActive requests asynchronous preemption. The persisted Interrupted state
+        // precedes Execute's finally block; wait for that attempt's resource release too.
+        var interrupted=await Terminal(science,preview.Id,j=>j.Items.All(i=>i.ReservedBytes==0)&&automatic.QueueSummary().PreflightReservedBytes==0);
+        Assert.Equal("Interrupted",interrupted.State);Assert.Equal(0,automatic.QueueSummary().PreflightReservedBytes);Assert.All(interrupted.Items,i=>Assert.Equal(0,i.ReservedBytes));Assert.Empty(science.Sources());
         handler.Block=false;automatic.FlightActive(false);await jobs.Control(preview.Id,"resume");Assert.Equal("Completed",(await Terminal(science,preview.Id)).State);
     }
     [Fact]public async Task ServiceOutageRetainsFailedWorkForExplicitRetry()

@@ -13,6 +13,7 @@ public sealed class ApplicationUpdateTests : IDisposable
     [Fact]public async Task SafeReleaseSelectionCachesChecksSupportsChannelsAndNeverDownloadsAnInstaller()
     {
         var handler=new Handler();using var http=new HttpClient(handler);var service=new ApplicationUpdates(root,http);
+        service.Configure(new(true,true)); // Explicit opt-in; stable installations default to stable releases.
         var update=await service.Check();Assert.Equal("v9.0.0-alpha.10",update.Available!.Version);Assert.Equal(1,handler.Calls);Assert.Equal("api.github.com",handler.LastHost);Assert.Equal("/repos/JustSeanC/AeroScience/releases",handler.LastPath);
         await service.Check();Assert.Equal(1,handler.Calls);Assert.NotNull(new ApplicationUpdates(root,http).Get().Available);
         service.RemindLater();Assert.True(service.Get().RemindAfterUtc>DateTimeOffset.UtcNow);
@@ -33,15 +34,29 @@ public sealed class ApplicationUpdateTests : IDisposable
     {
         Directory.CreateDirectory(root);File.WriteAllText(Path.Combine(root,"updates.json"),"{\"Preferences\":null}");var service=new ApplicationUpdates(root);var snapshot=await service.Check();Assert.False(snapshot.Preferences.Automatic);Assert.Null(snapshot.Available);
     }
+    [Fact]public async Task StableDefaultsSelectVerifiedStableAssetsAndPreserveAnExplicitPrereleasePreference()
+    {
+        var handler=new Handler{IncludeStable=true};using var http=new HttpClient(handler);var service=new ApplicationUpdates(root,http);
+        Assert.False(service.Get().Preferences.IncludePrereleases);
+        var stable=await service.Check();Assert.Equal("v8.0.0",stable.Available!.Version);Assert.False(stable.Available.Prerelease);
+        Assert.Equal(1,handler.Calls);Assert.Equal("api.github.com",handler.LastHost); // Metadata only; no installer download.
+        service.Configure(new(true,true));
+        var reopened=new ApplicationUpdates(root,http);Assert.True(reopened.Get().Preferences.IncludePrereleases);
+        Assert.Equal("v9.0.0-alpha.10",(await reopened.Check()).Available!.Version);
+        Assert.True(ReleaseVersions.Compare("v0.5.0","v0.4.2")>0);
+        Assert.Equal(0,ReleaseVersions.Compare("v0.6.0",ApplicationUpdates.CurrentVersion));
+        Assert.True(ReleaseVersions.Compare(ApplicationUpdates.CurrentVersion,"v0.5.0")>0);
+    }
     private sealed class Handler:HttpMessageHandler
     {
-        public int Code=200,Calls;public bool Malformed,BadAssets;public string? LastHost,LastPath;
+        public int Code=200,Calls;public bool Malformed,BadAssets,IncludeStable;public string? LastHost,LastPath;
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,CancellationToken token)
         {
             Calls++;LastHost=request.RequestUri!.Host;LastPath=request.RequestUri.AbsolutePath;Assert.Contains("AeroScience/",request.Headers.UserAgent.ToString());
-            object Release(string tag)=>new{draft=false,prerelease=true,tag_name=tag,html_url="https://github.com/JustSeanC/AeroScience/releases/tag/"+tag,
+            object Release(string tag)=>new{draft=false,prerelease=tag.Contains('-'),tag_name=tag,html_url="https://github.com/JustSeanC/AeroScience/releases/tag/"+tag,
                 assets=BadAssets?Array.Empty<object>():new[]{new{name="AeroScience-Setup-"+tag+".exe",browser_download_url="https://github.com/JustSeanC/AeroScience/releases/download/"+tag+"/AeroScience-Setup-"+tag+".exe"},new{name="AeroScience-Setup-"+tag+".exe.sha256",browser_download_url="https://github.com/JustSeanC/AeroScience/releases/download/"+tag+"/AeroScience-Setup-"+tag+".exe.sha256"}}};
-            return Task.FromResult(new HttpResponseMessage((HttpStatusCode)Code){Content=new StringContent(Malformed?"not json":JsonSerializer.Serialize(new[]{Release("v9.0.0-alpha.2"),Release("v9.0.0-alpha.10")}))});
+            var releases=new List<object>{Release("v9.0.0-alpha.2"),Release("v9.0.0-alpha.10")};if(IncludeStable)releases.Add(Release("v8.0.0"));
+            return Task.FromResult(new HttpResponseMessage((HttpStatusCode)Code){Content=new StringContent(Malformed?"not json":JsonSerializer.Serialize(releases))});
         }
     }
     public void Dispose(){if(Directory.Exists(root))Directory.Delete(root,true);}

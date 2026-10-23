@@ -13,14 +13,13 @@ PORTABLE_ONLY = {'test_airport_search', 'test_toolbar_sources'}
 DEVELOPMENT_BRANCHES = {'develop/v0.5.0', 'develop/v0.6.0'}
 
 
-def validation_tier(event, ref, base='', requested='full', message=''):
+def validation_tier(event, ref, base='', requested='full', message='', head=''):
     if event == 'workflow_dispatch':
         if requested not in {'fast', 'full', 'windows-profile'}:
             raise ValueError('Unknown validation tier; refusing an empty validation run.')
-        # The diagnostic profile retains its existing 0.5.0 identity; no new private build identity is implied.
-        if requested == 'windows-profile' and ref != 'refs/heads/develop/v0.5.0':
-            return 'full'
         return requested if ref.removeprefix('refs/heads/') in DEVELOPMENT_BRANCHES else 'full'
+    if event == 'pull_request' and head.startswith('integration/'):
+        return 'full'  # History integration must pass both platforms before merging into develop.
     development = ref.removeprefix('refs/heads/') in DEVELOPMENT_BRANCHES or base in DEVELOPMENT_BRANCHES
     return 'fast' if development and '[full-validation]' not in message else 'full'
 
@@ -102,7 +101,7 @@ def main():
         event = json.loads(Path(os.environ['GITHUB_EVENT_PATH']).read_text(encoding='utf-8'))
         tier = validation_tier(os.environ['GITHUB_EVENT_NAME'], os.environ['GITHUB_REF'],
                                os.environ.get('BASE_REF', ''), os.environ.get('REQUESTED') or 'full',
-                               (event.get('head_commit') or {}).get('message', ''))
+                               (event.get('head_commit') or {}).get('message', ''), os.environ.get('GITHUB_HEAD_REF', ''))
         with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as stream:
             stream.write('tier='+tier+'\n')
         with open(os.environ['GITHUB_STEP_SUMMARY'], 'a', encoding='utf-8') as stream:

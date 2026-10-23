@@ -1,0 +1,7 @@
+{
+  "formatVersion": 1,
+  "version": "0.6.0",
+  "evidenceType": "pending-genuine-guided-envi",
+  "windowsMsfs": "not tested",
+  "description": "Development source after frozen 0.5.0 forward integration. Historical 0.5.0 evidence remains unchanged; a clean-source genuine rerun is required before current-source release claims."
+}

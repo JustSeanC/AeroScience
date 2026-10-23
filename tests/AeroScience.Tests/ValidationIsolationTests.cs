@@ -18,10 +18,18 @@ public sealed class ValidationIsolationTests : IDisposable
         Assert.Equal("AeroScience.Command.v1",production.CommandEvent);
         Assert.Equal(@"Local\AeroScience.Desktop",ApplicationProfile.DesktopMutex);
         Assert.NotEqual(production.ConfigurationDirectory,validation.ConfigurationDirectory);
-        Assert.NotEqual(production.RegistryKey,validation.RegistryKey);Assert.Equal(5085,validation.Port);
+        Assert.NotEqual(production.RegistryKey,validation.RegistryKey);Assert.Equal(5086,validation.Port);
         Assert.NotEqual(production.ToolbarPackage,validation.ToolbarPackage);
         Assert.NotEqual(production.CommandEvent,validation.CommandEvent);Assert.NotEqual(production.ReplyEvent,validation.ReplyEvent);
         Assert.StartsWith(validation.ConfigurationDirectory,validation.Preferences().Load().MissionDirectory);
+        Assert.Equal("0.6.0",ApplicationUpdates.CurrentVersion);
+        Assert.Equal(new Version(0,6,0,0),typeof(ApplicationProfile).Assembly.GetName().Version);
+        Assert.Equal("AeroScience-Validation-v0.6.0",validation.Folder);
+        Assert.Equal(@"Software\AeroScience\Validation\v0.6.0",validation.RegistryKey);
+        Assert.Equal("aeroscience-validation-v0-6-0-toolbar",validation.ToolbarPackage);
+        Assert.Equal("AeroScienceValidationV060",validation.ToolbarFolder);
+        Assert.Equal("AeroScience.Validation.0_6_0.Command.v1",validation.CommandEvent);
+        Assert.Equal("AeroScience.Validation.0_6_0.Session",validation.SessionCookieName);
     }
     [Fact] public void SharedPathsAndTamperedPreferencesFailBeforeOpeningAStore()
     {
@@ -82,8 +90,8 @@ public sealed class ValidationIsolationTests : IDisposable
         var validation=new ApplicationProfile(true);
         Assert.Throws<IOException>(()=>validation.ValidateEngine(new EngineOptions()));
         var defaults=validation.Preferences().Load();
-        validation.ValidateEngine(new(){ConfigurationDirectory=validation.ConfigurationDirectory,DataDirectory=defaults.MissionDirectory,ScienceLibraryDirectory=defaults.ScienceLibraryDirectory,Port=5085});
-        Assert.Throws<IOException>(()=>validation.ValidateEngine(new(){ConfigurationDirectory=validation.ConfigurationDirectory,DataDirectory=new ApplicationProfile(false).ConfigurationDirectory,ScienceLibraryDirectory=defaults.ScienceLibraryDirectory,Port=5085}));
+        validation.ValidateEngine(new(){ConfigurationDirectory=validation.ConfigurationDirectory,DataDirectory=defaults.MissionDirectory,ScienceLibraryDirectory=defaults.ScienceLibraryDirectory,Port=5086});
+        Assert.Throws<IOException>(()=>validation.ValidateEngine(new(){ConfigurationDirectory=validation.ConfigurationDirectory,DataDirectory=new ApplicationProfile(false).ConfigurationDirectory,ScienceLibraryDirectory=defaults.ScienceLibraryDirectory,Port=5086}));
     }
     [Fact] public void ValidationToolbarRequiresExactSourceBeforeAnyControlOrMapRequest()
     {
@@ -92,6 +100,14 @@ public sealed class ValidationIsolationTests : IDisposable
         Assert.NotNull(profile.AuthorizeToolbar("{\"validationSource\":\"another-build\"}"));
         Assert.Null(profile.AuthorizeToolbar(System.Text.Json.JsonSerializer.Serialize(new{validationSource=ApplicationProfile.SourceCommit})));
         Assert.Null(new ApplicationProfile(false).AuthorizeToolbar("{}"));
+    }
+    [Fact] public void PreviousValidationPortAndDataRootCannotBeReused()
+    {
+        var validation=new ApplicationProfile(true);var defaults=validation.Preferences().Load();
+        var oldRoot=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"AeroScience-Validation-v0.5.0");
+        Assert.Throws<IOException>(()=>validation.Preferences().ValidateDirectory(oldRoot));
+        var oldPort=validation.EngineOptions(defaults);oldPort.Port=5085;
+        Assert.Throws<IOException>(()=>validation.ValidateEngine(oldPort));
     }
     [Fact] public void WrongSourceNativeStartIsRejectedByTheActualHandler()
     {
@@ -114,7 +130,7 @@ public sealed class ValidationIsolationTests : IDisposable
         Assert.Equal(oldSession,production.Get(context.Request));Assert.Equal(testSession,validation.Get(context.Request));
         var profile=new ApplicationProfile(true);var defaults=profile.Preferences().Load();
         var options=profile.EngineOptions(defaults with{EnableLan=true,LanAddress="192.168.1.5",SamplingIntervalMs=2000});
-        profile.ValidateEngine(options);Assert.Equal(5085,options.Port);Assert.Equal(2000,options.SamplingIntervalMs);Assert.True(options.EnableLan);
+        profile.ValidateEngine(options);Assert.Equal(5086,options.Port);Assert.Equal(2000,options.SamplingIntervalMs);Assert.True(options.EnableLan);
     }
     public void Dispose(){if(Directory.Exists(root))Directory.Delete(root,true);}
 }
