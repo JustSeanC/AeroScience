@@ -32,9 +32,10 @@ test('provider failure preserves successful FAA inventory and shows last attempt
 
 test('unified basemap and overlay controls preserve geographic geometry and science filters, close and restore keyboard focus',async({page,request})=>{
  const plan=await post(request,'/api/plans',{id:crypto.randomUUID(),name:'Aviation layer geometry fixture',cruisingAltitudeFeet:7500,waypoints:[{name:'A',latitude:42.3,longitude:-71},{name:'B',latitude:42.4,longitude:-70.9}]});
- await page.goto('/#planner');await expect(page.locator('.map-layer-manager').first()).toBeVisible();const choice=page.getByLabel('Map Layers — Basemap').first();await expect(choice).toHaveValue('offline');
+ await page.goto('/#control');await expect(page.locator('#control .map-layer-manager')).toBeVisible();
+ await page.goto('/#planner');const planner=page.locator('#planner');await expect(planner.locator('.map-layer-manager')).toBeVisible();const choice=planner.getByLabel('Map Layers — Basemap');await expect(choice).toHaveValue('offline');
  await expect(choice.locator('option[value="esri-outdoor"]')).toHaveCount(1);await expect(choice.locator('option[value="esri-navigation"]')).toHaveCount(1);
- const map=page.locator('.geographic-map').first(),center=await map.getAttribute('data-center');const opener=page.getByRole('button',{name:'Overlays & Legend'}).first();await opener.click();
+ const map=planner.locator('.geographic-map'),center=await map.getAttribute('data-center');const opener=planner.getByRole('button',{name:'Overlays & Legend'});await opener.click();
  let dialog=page.getByRole('dialog',{name:'Map Overlays & Legend',exact:true});await dialog.getByLabel('Mission overlays', {exact:true}).uncheck();await dialog.getByLabel('Science overlays',{exact:true}).uncheck();
  await expect(dialog.getByLabel('Planned route',{exact:true})).not.toBeChecked();await expect(dialog.getByLabel('Science footprints',{exact:true})).not.toBeChecked();
  await expect(dialog.getByText(/TFR polygons: unverified/)).toBeVisible();await page.keyboard.press('Escape');await expect(dialog).not.toBeVisible();await expect(opener).toBeFocused();
@@ -57,12 +58,12 @@ test('science-map overlay visibility leaves native quantities, filters and archi
  const fixture=await post(request,'/api/testing/remote/Terrain');const evidenceBefore=await (await request.get('/api/science/products/'+fixture.product.id+'/export/evidence.json')).text();
  await page.goto('/#workspace/map?missions='+fixture.missionId+'&instrument=terrain-scanner');
  await expect(page.getByLabel('Science layer opacity',{exact:true})).toBeVisible();await page.getByLabel('Science layer opacity',{exact:true}).fill('0.35');
- const center=await page.locator('.geographic-map').first().getAttribute('data-center');
- await page.getByRole('button',{name:'Overlays & Legend'}).click();const dialog=page.getByRole('dialog',{name:'Map Overlays & Legend',exact:true});
+ const workspace=page.locator('#science-workspace'),center=await workspace.locator('.geographic-map').getAttribute('data-center');
+ await workspace.getByRole('button',{name:'Overlays & Legend'}).click();const dialog=page.getByRole('dialog',{name:'Map Overlays & Legend',exact:true});
  await dialog.getByLabel('Science overlays',{exact:true}).uncheck();await expect(dialog.getByLabel('Saved scientific observations',{exact:true})).not.toBeChecked();
  await expect(dialog.getByLabel('Verified scientific raster views',{exact:true})).not.toBeChecked();
  await dialog.getByLabel('Science overlays',{exact:true}).check();await dialog.getByRole('button',{name:'Close Map Overlays & Legend'}).click();
  await expect(page.getByLabel('Science layer opacity',{exact:true})).toHaveValue('0.35');expect(page.url()).toContain('instrument=terrain-scanner');
- expect(await page.locator('.geographic-map').first().getAttribute('data-center')).toBe(center);
+ expect(await workspace.locator('.geographic-map').getAttribute('data-center')).toBe(center);
  expect(await (await request.get('/api/science/products/'+fixture.product.id+'/export/evidence.json')).text()).toBe(evidenceBefore);
 });

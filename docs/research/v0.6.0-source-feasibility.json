@@ -426,5 +426,267 @@
     "url": "https://developers.arcgis.com/rest/static-basemap-tiles/arcgis-outdoor-meta-data-get/",
     "sha256": "6450fff5848d987a60ae6882528a7e7b6b013695395c21d9b53464f6148b2e13",
     "result": "Documented static Outdoor raster endpoint. Actual authorized tiles pending user-owned public key; no key configured here."
+  },
+  "followupResearch": {
+    "tfrGeometryEndpoint": [
+      {
+        "id": "tfr-schema",
+        "url": "https://tfr.faa.gov/geoserver/TFR/ows?service=WFS&version=1.1.0&request=DescribeFeatureType&typeName=TFR:V_TFR_LOC",
+        "bytes": 1529,
+        "sha256": "0557b7984904f5f0bb8544c519c762bc657f41a9cc7a80e94ba6b6d03230ba06"
+      },
+      {
+        "id": "tfr-three-features",
+        "url": "https://tfr.faa.gov/geoserver/TFR/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=TFR:V_TFR_LOC&maxFeatures=3&outputFormat=application/json&srsname=EPSG:3857",
+        "bytes": 5574,
+        "sha256": "006b621f37f640773f9cf4805d5726ca77ef46b862fba6f9541480d2694ec7e4"
+      }
+    ],
+    "tfrOfficialClientMetadata": [
+      {
+        "id": "getTfrList",
+        "url": "https://tfr.faa.gov/tfrapi/getTfrList",
+        "bytes": 22260,
+        "sha256": "bbecf57f678c81278fed2b5b821ead8fb1d7d002ab2ef575ea5dcc48e336035c",
+        "count": 77
+      },
+      {
+        "id": "noShapeTfrList",
+        "url": "https://tfr.faa.gov/tfrapi/noShapeTfrList",
+        "bytes": 3781,
+        "sha256": "261c1b094050f0c3b7f43677fbf39861a8b46410274958ea44c9d4e84d335e6f",
+        "count": 15
+      }
+    ],
+    "tfrCoordinateCheck": {
+      "results": [
+        {
+          "feature": "V_TFR_LOC.6/9169",
+          "notamKey": "6/9169-1-FDC-F",
+          "listIdentityMatches": true,
+          "titleMatches": true,
+          "ringsClosed": true,
+          "vertices": 37,
+          "wgs84Bounds": [
+            -78.73187655997789,
+            35.77886411768541,
+            -78.69090122002201,
+            35.81224695587931
+          ],
+          "inverseMercatorVsIndependentProjMaxErrorDegrees": 2.842170943040401e-14
+        },
+        {
+          "feature": "V_TFR_LOC.6/4240",
+          "notamKey": "6/4240-1-FDC-F",
+          "listIdentityMatches": true,
+          "titleMatches": true,
+          "ringsClosed": true,
+          "vertices": 37,
+          "wgs84Bounds": [
+            -100.47335512091396,
+            31.196203663191582,
+            -100.27886709908601,
+            31.36323968991692
+          ],
+          "inverseMercatorVsIndependentProjMaxErrorDegrees": 2.842170943040401e-14
+        },
+        {
+          "feature": "V_TFR_LOC.5/6914",
+          "notamKey": "5/6914-1-FDC-F",
+          "listIdentityMatches": true,
+          "titleMatches": true,
+          "ringsClosed": true,
+          "vertices": 37,
+          "wgs84Bounds": [
+            -97.18212062176616,
+            26.055227974102035,
+            -97.14510159823375,
+            26.08866086718027
+          ],
+          "inverseMercatorVsIndependentProjMaxErrorDegrees": 2.842170943040401e-14
+        }
+      ],
+      "limitations": [
+        "Transform verification is not full NOTAM boundary, altitude, schedule or snapshot-completeness acceptance.",
+        "Public FAA application uses this WFS endpoint; no stable external API/SLA has been established.",
+        "15 notices in noShapeTfrList have no polygon; absence of plotted overlap cannot clear a route."
+      ]
+    },
+    "nasrDiagnostic": {
+      "url": "https://nfdc.faa.gov/webContent/28DaySub/extra/01_Oct_2026_FIX_CSV.zip",
+      "purpose": "One diagnostic GET after the earlier HEAD 503; bounded to 64 KiB and no mirrors or credentials.",
+      "status": 206,
+      "observedBytes": 65536,
+      "sha256": "aad6ac327c4569c9f94565b853c6105111ac81310d7f28109fa0fc2423c945ec",
+      "contentRange": "bytes 0-65535/3560838",
+      "contentLength": "65536",
+      "signatureHex": "504b030414000000"
+    },
+    "nasrFixOriginal": {
+      "url": "https://nfdc.faa.gov/webContent/28DaySub/extra/01_Oct_2026_FIX_CSV.zip",
+      "bytes": 3560838,
+      "sha256": "81df483fb8269260aa2060c94e675de7439df8f6664f2479e5f9844d14fc2701",
+      "effectiveCycle": "2026-10-01",
+      "files": [
+        {
+          "name": "CSV_README.pdf",
+          "bytes": 285482
+        },
+        {
+          "name": "FIX DATA LAYOUT.pdf",
+          "bytes": 138560
+        },
+        {
+          "name": "FIX_BASE.csv",
+          "bytes": 10545295,
+          "firstRecord": {
+            "EFF_DATE": "2026/10/01",
+            "FIX_ID": "AAALL",
+            "ICAO_REGION_CODE": "K6",
+            "STATE_CODE": "MA",
+            "COUNTRY_CODE": "US",
+            "LAT_DEG": "42",
+            "LAT_MIN": "7",
+            "LAT_SEC": "12.68",
+            "LAT_HEMIS": "N",
+            "LAT_DECIMAL": "42.12018888",
+            "LONG_DEG": "71",
+            "LONG_MIN": "8",
+            "LONG_SEC": "30.34",
+            "LONG_HEMIS": "W",
+            "LONG_DECIMAL": "-71.14176111",
+            "FIX_ID_OLD": "",
+            "CHARTING_REMARK": "",
+            "FIX_USE_CODE": "WP   ",
+            "ARTCC_ID_HIGH": "ZBW",
+            "ARTCC_ID_LOW": "ZBW",
+            "PITCH_FLAG": "N",
+            "CATCH_FLAG": "N",
+            "SUA_ATCAA_FLAG": "N",
+            "MIN_RECEP_ALT": "",
+            "COMPULSORY": "",
+            "CHARTS": "IAP"
+          }
+        },
+        {
+          "name": "FIX_CHRT.csv",
+          "bytes": 5044490,
+          "firstRecord": {
+            "EFF_DATE": "2026/10/01",
+            "FIX_ID": "AAALL",
+            "ICAO_REGION_CODE": "K6",
+            "STATE_CODE": "MA",
+            "COUNTRY_CODE": "US",
+            "CHARTING_TYPE_DESC": "IAP"
+          }
+        },
+        {
+          "name": "FIX_CSV_DATA_STRUCTURE.csv",
+          "bytes": 1524,
+          "firstRecord": {
+            "CSV File": "FIX_BASE",
+            "Column Name": "EFF_DATE",
+            "Max Length": "10",
+            "Data Type": "VARCHAR",
+            "Nullable": "No"
+          }
+        },
+        {
+          "name": "FIX_NAV.csv",
+          "bytes": 1617380,
+          "firstRecord": {
+            "EFF_DATE": "2026/10/01",
+            "FIX_ID": "AABEE",
+            "ICAO_REGION_CODE": "K7",
+            "STATE_CODE": "GA",
+            "COUNTRY_CODE": "US",
+            "NAV_ID": "PDK",
+            "NAV_TYPE": "LOC",
+            "BEARING": "25.51",
+            "DISTANCE": "12.86"
+          }
+        }
+      ]
+    },
+    "nasrFieldConsistency": {
+      "records": 70129,
+      "effectiveDates": [
+        "2026/10/01"
+      ],
+      "missingCoordinateFields": 0,
+      "dmsVsDeclaredDecimalMaximumErrorDegrees": 8.888918046068284e-09,
+      "twoRegionSamples": {
+        "MA": {
+          "FIX_ID": "AAALL",
+          "ICAO_REGION_CODE": "K6",
+          "COUNTRY_CODE": "US",
+          "LAT_DECIMAL": "42.12018888",
+          "LONG_DECIMAL": "-71.14176111",
+          "EFF_DATE": "2026/10/01"
+        },
+        "CA": {
+          "FIX_ID": "AAAME",
+          "ICAO_REGION_CODE": "K2",
+          "COUNTRY_CODE": "US",
+          "LAT_DECIMAL": "37.77090833",
+          "LONG_DECIMAL": "-122.08281111",
+          "EFF_DATE": "2026/10/01"
+        }
+      },
+      "limitations": [
+        "Independent field consistency only, not an implemented app layer.",
+        "Coordinate datum remains unverified until the authoritative NASR specification is checked; no WGS84 transformation was guessed."
+      ]
+    },
+    "chartWorldfileComparison": [
+      {
+        "archive": "boston-heli.zip",
+        "raster": "Boston Downtown HEL.tif",
+        "worldFile": "Boston Downtown HEL.tfw",
+        "maximumAffineDifference": 4.969447076064171e-11,
+        "crsProjection": "Lambert Conformal Conic 2SP",
+        "interpretation": "Independent world-file center-to-corner interpretation agrees with TIFF reader; not printed-control-point/neatline accuracy acceptance."
+      },
+      {
+        "archive": "boston-heli.zip",
+        "raster": "Boston HEL.tif",
+        "worldFile": "Boston HEL.tfw",
+        "maximumAffineDifference": 3.871036824421026e-11,
+        "crsProjection": "Lambert Conformal Conic 2SP",
+        "interpretation": "Independent world-file center-to-corner interpretation agrees with TIFF reader; not printed-control-point/neatline accuracy acceptance."
+      },
+      {
+        "archive": "boston-tac.zip",
+        "raster": "Boston TAC.tif",
+        "worldFile": "Boston TAC.tfw",
+        "maximumAffineDifference": 3.6976643968955614e-11,
+        "crsProjection": "Lambert Conformal Conic 2SP",
+        "interpretation": "Independent world-file center-to-corner interpretation agrees with TIFF reader; not printed-control-point/neatline accuracy acceptance."
+      }
+    ],
+    "nativeCandidates": {
+      "candidates": [
+        {
+          "package": "maxrev.gdal.core",
+          "url": "https://api.nuget.org/v3-flatcontainer/maxrev.gdal.core/index.json",
+          "latest": "3.13.3.583",
+          "sha256": "f391daee569350a0ebf959c67009e8c03db5905ebf5aa01f1209172f1b8bf446"
+        },
+        {
+          "package": "maxrev.gdal.windowsruntime.minimal",
+          "url": "https://api.nuget.org/v3-flatcontainer/maxrev.gdal.windowsruntime.minimal/index.json",
+          "latest": "3.13.3.583",
+          "sha256": "fe0925aeaf3af4964f4c79e05961b833ed81dea6d7957659367d73aee426305d"
+        },
+        {
+          "package": "purehdf",
+          "url": "https://api.nuget.org/v3-flatcontainer/purehdf/index.json",
+          "latest": "3.0.0-beta.1",
+          "sha256": "ac86041db8bee30f94473d908b2163c992940b7f17fe018a6242c5f74deb14be"
+        }
+      ],
+      "decision": "No dependency selected or added: transitive native licenses, needed drivers, ABI and locked Windows self-contained prototype remain a gate."
+    },
+    "classification": "Genuine public original/metadata research with independent coordinate/affine-field comparisons. Application FAA-vector/chart/TFR acceptance and EMIT numerical acceptance remain incomplete."
   }
 }
