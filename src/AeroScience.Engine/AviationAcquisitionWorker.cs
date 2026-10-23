@@ -6,7 +6,7 @@ public sealed class AviationAcquisitionWorker(AviationReference aviation, ILogge
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            try { await aviation.ProcessDownloads(stoppingToken); }
+            try { await aviation.ProcessDownloads(stoppingToken);await aviation.RefreshTfrIfDue(stoppingToken); }
             catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested) { break; }
             catch (Exception e) when (e is IOException or InvalidDataException or NotSupportedException or UnauthorizedAccessException or Microsoft.Data.Sqlite.SqliteException)
             { logger.LogWarning("Aviation storage is unavailable; originals and durable work were preserved."); }

@@ -19,6 +19,7 @@ public sealed class AviationBrowserFixture : HttpMessageHandler
     {
         Interlocked.Increment(ref Calls);
         if (Mode == "outage") return Task.FromResult(new HttpResponseMessage(HttpStatusCode.ServiceUnavailable));
+        if(Mode=="tfr"&&request.RequestUri!.Host=="tfr.faa.gov")return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK){Content=new ByteArrayContent(request.RequestUri.AbsoluteUri==AeroScience.Missions.AviationTfr.NoticesUrl?SyntheticTfr.Notices():request.RequestUri.AbsoluteUri==AeroScience.Missions.AviationTfr.NoShapeUrl?SyntheticTfr.NoShape():SyntheticTfr.Geometry())});
         if (request.RequestUri!.Host == "nfdc.faa.gov")
         {
             if (request.RequestUri.AbsoluteUri is SyntheticAirspace.ClassUrl or SyntheticAirspace.SaaUrl)

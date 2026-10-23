@@ -6,7 +6,7 @@ using AeroScience.Shared;
 namespace AeroScience.Engine;
 
 public sealed record AviationReferencePreferences(int Version = 1, bool OnlineEnabled = false, Guid? StoreId = null,
-    string? StorageDirectory = null, bool UnmeteredOnly = true);
+    string? StorageDirectory = null, bool UnmeteredOnly = true, bool TfrMonitoringEnabled = false, DateTimeOffset? TfrRetryNotBeforeUtc = null);
 public sealed record AviationReferenceConfiguration(bool OnlineEnabled, bool Configured, string Privacy,
     int MaximumMetadataBytes = AviationCatalog.MaximumMetadataBytes, int MinimumRefreshSeconds = 300);
 public sealed record AviationReferencePage(string Kind, string Status, AviationCacheStatus? Cache,

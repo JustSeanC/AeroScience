@@ -31,6 +31,13 @@ public static class ResearchApi
         app.MapGet("/api/aviation/catalog/{kind}", (string kind, int? offset, AviationReference aviation) => aviation.Page(kind, offset ?? 0));
         app.MapPost("/api/aviation/catalog/{kind}/refresh", (string kind, AviationReference aviation, HttpContext c) => aviation.Refresh(kind, c.RequestAborted));
         app.MapGet("/api/aviation/vectors", (AviationReference aviation) => aviation.VectorDatasets());
+        app.MapGet("/api/aviation/tfr/configuration",(AviationReference aviation)=>aviation.TfrConfiguration());
+        app.MapPost("/api/aviation/tfr/configuration",(AviationConsentRequest request,AviationReference aviation,HttpContext c)=>AccessControl.IsLoopback(c)?Results.Ok(aviation.ConfigureTfr(request.OnlineEnabled)):Results.StatusCode(403));
+        app.MapGet("/api/aviation/tfr/summary",(AviationReference aviation)=>aviation.TfrSummary());
+        app.MapGet("/api/aviation/tfr/notices",(int? offset,bool? missingOnly,AviationReference aviation)=>aviation.TfrNotices(offset??0,missingOnly??false));
+        app.MapPost("/api/aviation/tfr/refresh",(AviationReference aviation,HttpContext c)=>aviation.RefreshTfr(c.RequestAborted));
+        app.MapGet("/api/aviation/tfr/boundaries",(double west,double south,double east,double north,int? offset,AviationReference aviation)=>aviation.TfrBoundaries(west,south,east,north,offset??0));
+        app.MapPost("/api/aviation/tfr/screen",(AviationTfrScreenRequest request,AviationReference aviation)=>aviation.ScreenTfr(request));
         app.MapGet("/api/aviation/vectors/{id}", (string id, double west, double south, double east, double north, string? kind, int? offset, AviationReference aviation) => aviation.VectorFeatures(id, west, south, east, north, kind, offset ?? 0));
         app.MapGet("/api/aviation/airspace/{id}", (string id, double west, double south, double east, double north, string? kind, int? offset, AviationReference aviation) => aviation.AirspaceFeatures(id, west, south, east, north, kind, offset ?? 0));
         app.MapPost("/api/aviation/downloads/{id:guid}/import-vectors", (Guid id, AviationReference aviation, HttpContext c) => aviation.ImportVectors(id, c.RequestAborted));

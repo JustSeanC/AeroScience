@@ -110,7 +110,7 @@ public sealed partial class AviationMetadataStore : IDisposable
     }
     private static void Kind(string kind)
     {
-        if (kind is not ("vfr" or "ifr" or "tfr" or "nasr")) throw new ArgumentException("Select a supported aviation metadata category.");
+        if (kind is not ("vfr" or "ifr" or "tfr" or "nasr" or AviationTfr.Kind)) throw new ArgumentException("Select a supported aviation metadata category.");
     }
     private void Write<T>(string kind, T snapshot, DateTimeOffset utc)
     {
@@ -129,12 +129,14 @@ public sealed partial class AviationMetadataStore : IDisposable
     }
     public void Save(string kind, AviationCatalogSnapshot snapshot)
     {
-        Kind(kind); if (kind == "tfr") throw new ArgumentException("Use the notice snapshot contract."); AviationCatalog.Validate(snapshot);
+        Kind(kind); if (kind is "tfr" or AviationTfr.Kind) throw new ArgumentException("Use the notice snapshot contract."); AviationCatalog.Validate(snapshot);
         if (snapshot.Items.Any(i => (i.Product is AviationProduct.IfrLow or AviationProduct.IfrHigh) != (kind == "ifr") || (i.Product == AviationProduct.Nasr) != (kind == "nasr")))
             throw new InvalidDataException("Catalog records belong to a different FAA product category.");
         Write(kind, snapshot, snapshot.RetrievedUtc);
     }
     public void Save(AviationTfrSnapshot snapshot) { AviationCatalog.Validate(snapshot); Write("tfr", snapshot, snapshot.RetrievedUtc); }
+    public void Save(AviationTfrGeometrySnapshot snapshot) { AviationTfr.Validate(snapshot); Write(AviationTfr.Kind,snapshot,snapshot.RetrievedUtc); }
+    public AviationTfrGeometrySnapshot? TfrBoundaries() { var result=Read<AviationTfrGeometrySnapshot>(AviationTfr.Kind);if(result is not null)AviationTfr.Validate(result);return result; }
     private T? Read<T>(string kind) where T : class
     {
         Kind(kind); lock (gate)

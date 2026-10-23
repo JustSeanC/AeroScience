@@ -5,6 +5,7 @@ using AeroScience.Shared;
 using AeroScience.Tests;
 
 if (args.Length > 0 && args[0] == "--airspace-reference-probe") { await AirspaceReferenceProbe.Run(args[1..]); return; }
+if (args.Length > 0 && args[0] == "--tfr-reference-probe") { await TfrReferenceProbe.Run(args[1..]); return; }
 if (args.Length > 0 && args[0] == "--nasr-reference-probe") { await NasrReferenceProbe.Run(args[1..]); return; }
 if (args.Length > 0 && args[0] == "--aviation-probe") { await AviationDownloadProbe.Run(args[1..]); return; }
 if (args.Length > 0 && args[0] == "--library-probe") { LibraryProbe.Run(args[1..]); return; }
@@ -75,7 +76,7 @@ app.MapPost("/api/testing/aviation/{mode}",(string mode,AviationBrowserFixture f
         fixture.FastSlowTransfers=true;return new{synthetic=true,fixture.Calls};
     }
     fixture.FastSlowTransfers=false;
-    if(mode is not("reset" or "normal" or "outage" or "malformed" or "slow" or "airspace"))throw new ArgumentException("Unknown synthetic aviation fixture.");
+    if(mode is not("reset" or "normal" or "outage" or "malformed" or "slow" or "airspace" or "tfr"))throw new ArgumentException("Unknown synthetic aviation fixture.");
     fixture.Clock.Advance();fixture.Mode=mode=="reset"?"normal":mode;fixture.Calls=0;
     if(mode=="reset")aviation.Configure(false);
     return new{synthetic=true,fixture.Calls};
