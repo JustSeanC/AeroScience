@@ -80,7 +80,7 @@ Your missions and collected data are stored locally, and previously saved result
 
 ## 🧪 Project Status
 
-**AeroScience v0.5.0 — Prerelease**
+**AeroScience v0.5.0*
 
 AeroScience is actively developed and continues to expand its scientific capabilities, mission planning tools, aircraft integration, and research workflows.
 
