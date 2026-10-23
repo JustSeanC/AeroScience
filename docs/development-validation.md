@@ -1,5 +1,18 @@
 # Development and full integration validation
 
+## Public README standard
+
+The owner's README design from main commit `b5285aa776e9f358cac0612ea41749bf9d37d74f`
+is the permanent presentation template. Preserve its `# ✈️ AeroScience` heading, friendly
+introduction, emoji headings, section order, numbered workflow, modes/source explanations,
+Getting Started, Project Status, Community & Support, closing tagline and navigation links.
+For future releases, update versions, publication status and supported features within that
+structure; keep download links on genuine published releases. Correct Markdown defects without
+redesigning the page. Keep technical instructions, evidence, test counts and milestone logs under
+`docs/`, and do not advertise disabled or unfinished features as available. A different README
+format requires explicit owner direction. Development must identify both the published stable
+version and its own unpublished version.
+
 The `foundation` workflow has two scopes on `develop/v0.5.0` and `develop/v0.6.0`. Neither scope establishes
 genuine scientific or Windows/MSFS/iPad/Quest acceptance. The release scripts retain
 their complete checks, current scientific evidence requirements, official SDK/runtime
