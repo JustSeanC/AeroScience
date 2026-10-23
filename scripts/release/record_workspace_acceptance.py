@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 import zipfile
 import verify_scientific_acceptance as verification
+from scientific_evidence import load_run,require_artifact,refuse_secrets,safe_file
 
 
 def digest(path):
@@ -18,28 +19,36 @@ def record(providers, envi, output):
     packages = []
     raw = []
     regional_count = 0
+    runs=[];hashes=None;seen_artifacts=set();seen_missions=set()
     for folder in (providers, envi):
-        workspace_path = folder / 'workspace-acceptance.json'
-        comparison_path = folder / 'independent-workspace-comparison.json'
+        run,provenance=load_run(folder,'providers' if folder==providers else 'envi');runs.append(provenance)
+        hashes=run['canonicalLfSourceSha256']
+        workspace_path = require_artifact(folder,run,'workspace-acceptance.json')
+        comparison_path = require_artifact(folder,run,'independent-workspace-comparison.json')
         workspace = json.loads(workspace_path.read_text(encoding='utf-8'))
         comparison = json.loads(comparison_path.read_text(encoding='utf-8'))
         if workspace['evidenceType'] != 'genuine-external-data-and-synthetic-flight-input' or workspace['windowsMsfs'] != 'not tested' or comparison['evidenceType'] != 'independent-genuine-raster-comparison':
             raise ValueError('Actual genuine-source runs and independent numeric comparisons are required')
         checked = {r['artifactId']: r for r in comparison['results']}
+        if len(checked)!=len(comparison['results']) or set(checked)!={a['id'] for item in workspace['results'] for a in item['artifacts']}:raise ValueError('Independent rasters must match the actual distinct workspace artifacts.')
         catalog = {s['id']: s for s in workspace['retainedSources']}
         for item in workspace['results']:
             for artifact in item['artifacts']:
+                if artifact['id'] in seen_artifacts:raise ValueError('Duplicate raster cannot inflate independent evidence.')
+                seen_artifacts.add(artifact['id'])
                 proof = checked[artifact['id']]
-                if digest(folder / 'ScienceLibrary' / artifact['relativePath']) != proof['sha256']:
+                if digest(safe_file(folder/'ScienceLibrary',artifact['relativePath'])) != proof['sha256']:
                     raise ValueError('Derived raster changed after independent validation')
                 metadata = json.loads(artifact['metadataJson'])
-                regional_count = max(regional_count, len(metadata['sourceIds']))
+                regional_count = max(regional_count, len(set(metadata['sourceIds'])))
                 for sid in metadata['sourceIds']:
                     source = catalog[sid]
                     for f in source['files']:
-                        if digest(folder / 'ScienceLibrary' / source['relativeDirectory'] / f['relativePath']) != f['sha256']:
+                        if digest(safe_file(folder/'ScienceLibrary',str(Path(source['relativeDirectory'])/f['relativePath']))) != f['sha256']:
                             raise ValueError('Retained original changed')
-            package = folder / item['package']
+            package = safe_file(folder,item['package'])
+            if item['product']['missionId'] in seen_missions:raise ValueError('Duplicate mission cannot inflate verified research packages.')
+            seen_missions.add(item['product']['missionId'])
             with zipfile.ZipFile(package) as archive:
                 manifest = json.loads(archive.read('manifest.json'))
                 if manifest['missionId'] != item['product']['missionId']:
@@ -49,6 +58,7 @@ def record(providers, envi, output):
                         h = hashlib.file_digest(stream, 'sha256').hexdigest()
                     if h != f['sha256'] or archive.getinfo(f['path']).file_size != f['bytes']:
                         raise ValueError('Research ZIP content/hash manifest mismatch')
+                if set(archive.namelist())!={f['path'] for f in manifest['files']}|{'manifest.json'}:raise ValueError('Unlisted research ZIP content.')
             packages.append(dict(missionId=item['product']['missionId'], package=package.name, sha256=digest(package)))
         rasters.extend(comparison['results'])
         raw.append(dict(workspaceSha256=digest(workspace_path), independentSha256=digest(comparison_path), tool=comparison['tool']))
@@ -58,9 +68,9 @@ def record(providers, envi, output):
                  originalIntegrityVerified=True, regionalSourcesCombined=regional_count,
                  researchPackagesVerified=len(packages), packages=packages,
                  independentRasterResults=rasters, runReceipts=raw,
-                 canonicalLfSourceSha256={n: verification.source_digest(verification.ROOT/n) for n in verification.SOURCES})
-    output.write_text(json.dumps(value, indent=2)+'\n', encoding='utf-8', newline='\n')
-    verification.verify_workspace(output)
+                 canonicalLfSourceSha256=hashes,runProvenance=runs)
+    refuse_secrets(value)
+    verification.write_verified(output,value,verification.verify_workspace)
     return value
 
 

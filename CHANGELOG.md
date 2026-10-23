@@ -20,9 +20,10 @@
   and authoritative regions, exact scenes, approval previews, durable jobs and offline reuse.
   Automatic numeric downloads support USGS 3DEP, Copernicus GLO-30 DSM, Landsat Collection 2
   Level-2 temperature and Sentinel-2 Level-2A. Historical sources are not live aircraft images.
-- NASA CMR discovery includes AVIRIS-Classic, AVIRIS-NG and EMIT V002. AVIRIS uses official
-  Earthdata **browser handoff and guided local ENVI verification/import**, not direct
-  authenticated in-app downloading. Genuine protected Classic/NG numeric acceptance
+- NASA CMR discovery includes AVIRIS-Classic, AVIRIS-NG and EMIT V002. AVIRIS supports
+  authorized Earthdata direct Download & Import with profile-scoped Windows credential
+  storage, plus official browser handoff and guided local ENVI verification/import.
+  Genuine protected Classic/NG numeric acceptance
   remains pending. EMIT is discovery/official-link only; no native NetCDF-4 import.
 - Shared dashboard/paired-browser mission intelligence, retained session reports and
   compact capability-gated native-toolbar controls preserve existing navigation and wire limits.
@@ -30,6 +31,10 @@
   consolidated current documentation and preserved active 0.4.2 QA/scientific records.
 - Isolated private validation profile protects production installation/data and provides
   a separate toolbar namespace. No new public installer or release is authorized.
+- Correct guided ENVI acceptance ownership/offline reopening, execution-time source binding
+  and atomic evidence recording. Fresh genuine four-provider, Library, 224-band Cuprite
+  and independent workspace checks pass; these do not establish protected NASA originals
+  or installed Windows/MSFS/device acceptance.
 
 See the [readiness report](docs/v0.5.0-readiness.md), [private build guide](docs/v0.5.0-private-validation.md)
 and [owner acceptance workbook](docs/v0.5.0-acceptance-workbook.md). Full technical CI,
