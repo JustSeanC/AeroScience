@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "version": "0.5.0",
   "evidenceType": "genuine-public-provider-network",
-  "checkedUtc": "2026-10-22T23:35:11.493478+00:00",
+  "checkedUtc": "2026-10-23T03:28:28.427066+00:00",
   "windowsMsfs": "not tested",
   "description": "Actual public API discovery, bounded numeric retrieval, internal manifest, verified library import, QA-aware sampling and persisted/reloaded mission products. Flight inputs are synthetic and explicitly labeled. Data files and SAS tokens are not bundled.",
   "finalNetworkRerun": "passed",
@@ -26,7 +26,7 @@
     "src/AeroScience.Engine/ScientificPreparationWorker.cs": "85fc1aabd30f002d08f9de7ad1ca00c148d66784f5c18c1f0ac91f700b2b3afd",
     "src/AeroScience.Shared/MissionScienceModels.cs": "bdf45c21ca1f796f7d84e94028084285b19f4f6537eb18084193e756121b3438",
     "src/AeroScience.Shared/Models.cs": "8cfddf8dbd2538e6fb4089bd37acf160578696037a31f5f2b7990b1b8c14bca4",
-    "src/AeroScience.Shared/ResearchModels.cs": "79af2bfc0ee33f8873ca145f27789275bd8e8876d01b3927273b3d8303001e6c",
+    "src/AeroScience.Shared/ResearchModels.cs": "c518116a15dde1126ce0adcdd1bdb0f0df736dc5a58f8a67b10869a137819761",
     "src/AeroScience.Missions/InstrumentProfiles.cs": "5dce5b2d53c5f786a0f336ce6b731f2cf272e19cbcf3111d2499f691af84edde",
     "src/AeroScience.Missions/ScientificCapabilities.cs": "661c920b2219ce3bbecdab178c6ff68cdca21fe75a5483f7d62a15fa436fac1f",
     "src/AeroScience.Missions/SensorGeometry.cs": "927bc1d1865262f4eba8a37fd54b69516212f60667f0f894fd7d3b4baf163405",
@@ -144,7 +144,7 @@
     "src/AeroScience.Missions/ResearchExports.cs": "9ecbd2a6d106add9b8802063c08141df93dffe2244e87915a903b92a1d78f536",
     "src/AeroScience.Missions/ResearchStore.cs": "4cfb149cc2cc8e908c6dc660099ae77051f5310b30af78f9bb75f3c8915a3e81",
     "src/AeroScience.Missions/RouteMapService.cs": "76da482a9be1797e6ddd1241cbb28f8f3d73b3babced88457de3a71d1df6980a",
-    "src/AeroScience.Missions/ScienceCatalog.cs": "5805b0b1921bac9e14bb8dfb1830bc107551c648a1809f288111e14e956029e2",
+    "src/AeroScience.Missions/ScienceCatalog.cs": "893d543f90e8db5c35000dabb73923eb1694afd5001f85ed91ff4cc038bd5b61",
     "src/AeroScience.Missions/ScienceCollectionController.cs": "a30823056e31fe5b9a2bd28389a5412b7daceceb86208898538564620f433af5",
     "src/AeroScience.Missions/ScienceLibraryJobsStore.cs": "fab3a5f764f3219370ad696891c4b39bbf9d07294579caa5270afb23c2b44d2d",
     "src/AeroScience.Missions/ScienceUnitSettings.cs": "cf1b97c7abc98605b7e93259029d69e34db4b32d74dcb1d273f1931cf9dacdc1",
@@ -195,11 +195,11 @@
   },
   "runProvenance": [
     {
-      "runId": "bfa7e5cd-b383-4017-a55b-8319087390ac",
+      "runId": "d69b6d31-9192-4fb9-b11d-1757bfd8de76",
       "status": "passed",
-      "sourceCommit": "111e9e96e82ba8039b1239b1b29cbe6c1d4954a5",
-      "sourceManifestSha256": "05ef51e1d5acc22316d724041e5cf8a314851012c54fd61e0e20595bf33fa96c",
-      "receiptSha256": "dc6080c1b218f8d0418d101c901e4dd22d0999b1e83593d5f96bc6ba15d503ea"
+      "sourceCommit": "f3ba55d98a37d9236d8bac842883d057603eb330",
+      "sourceManifestSha256": "1bab60d1463b142245f880304c8444155e54b61aef709008b981bc7680258888",
+      "receiptSha256": "d8c5581fca62b5a8511846f0ed5a9594fe1163f2c0bdeac630357ce528553460"
     }
   ],
   "workflows": [
@@ -241,7 +241,7 @@
           "longitude": 8.11
         }
       },
-      "networkBytes": 1445256,
+      "networkBytes": 1445258,
       "retainedNumericBytes": 18044,
       "bands": [
         {
@@ -263,7 +263,7 @@
       "validDerivedSamples": 576,
       "sampleCount": 576,
       "publishedProductVerified": true,
-      "publishedProductSha256": "41a0d06e380b5b6ad262c1e8d8f2ded0e514cc96a314ae9818fdad01ef6692ef",
+      "publishedProductSha256": "967e04e54782fe77bba0b813e3131aa5eee08ca06c8c640ca58ded426d12277b",
       "flightInput": "synthetic test position; not MSFS",
       "sourceFiles": [
         {
@@ -272,7 +272,7 @@
           "sha256": "f66b92a3a5f914f5c26ec8e5c1395311472f188347e5666d66a513aee4d22a3d"
         }
       ],
-      "acceptanceArtifactSha256": "8faea844f2e747a6ba55a4c29fe89300930924881d2aa9a0af75b42a8b11569c"
+      "acceptanceArtifactSha256": "4fa621e95d303d4aa1a0bf4ff823b0c62bf640f95fb30566f02f005646f4cc42"
     },
     {
       "workflow": "landsat-c2-l2",
@@ -312,7 +312,7 @@
           "longitude": -74.99000000000001
         }
       },
-      "networkBytes": 1259546,
+      "networkBytes": 1259544,
       "retainedNumericBytes": 8642,
       "bands": [
         {
@@ -364,7 +364,7 @@
       "validDerivedSamples": 576,
       "sampleCount": 576,
       "publishedProductVerified": true,
-      "publishedProductSha256": "0316aec73ff16d9510e82eaff054c57498f604668d8c2bf996814b6ee3dd4f50",
+      "publishedProductSha256": "030cdad8da8142c217e6731d8f944203f30c5e7dee2fa3387c23eee097c5b72b",
       "flightInput": "synthetic test position; not MSFS",
       "sourceFiles": [
         {
@@ -383,7 +383,7 @@
           "sha256": "6dcbf2ca051ac9b64c0574a5d61c465aeca0f08df0c9a6c227f5d41225563938"
         }
       ],
-      "acceptanceArtifactSha256": "88cdf2f586d9254989456030e549a7582c636dd7f40e154c698ab16df294fe8d"
+      "acceptanceArtifactSha256": "ad5a91f6f966f202ff6527fe9430068a47dbe73f2933a036ee0fe1e4b5462478"
     },
     {
       "workflow": "sentinel-2-l2a",
@@ -505,7 +505,7 @@
       "validDerivedSamples": 183,
       "sampleCount": 576,
       "publishedProductVerified": true,
-      "publishedProductSha256": "02c04478d6868795d95001c9d609d0b1ad9e528dd721bffba120edc0cdf3517b",
+      "publishedProductSha256": "3efac303e15e6611b30514c527c47c55d5895be9e9412ec44e1aed7dd5776d36",
       "flightInput": "synthetic test position; not MSFS",
       "sourceFiles": [
         {
@@ -534,7 +534,7 @@
           "sha256": "490d03dc11d94fabc5037777b2e8b4af374f4858ce801dfd33cbe7c146ea2fa5"
         }
       ],
-      "acceptanceArtifactSha256": "57def639801adcca4b114aac29cb237fbb9756632c5f475902bdfe2d17e19668"
+      "acceptanceArtifactSha256": "5fbde9e84acb788653d7988e89adb072696eb380bb30134b77c44c1c1c0b7c3b"
     },
     {
       "workflow": "usgs-3dep",
@@ -596,7 +596,7 @@
       "validDerivedSamples": 576,
       "sampleCount": 576,
       "publishedProductVerified": true,
-      "publishedProductSha256": "0bf705d112fbdd357d5451530be5a03704bd6580506e974e8955fe12eb6b441d",
+      "publishedProductSha256": "04bde32dccd6ec3211dd7a582052d539287b333b5e0248619a935c944ac2388b",
       "flightInput": "synthetic test position; not MSFS",
       "sourceFiles": [
         {
@@ -605,11 +605,11 @@
           "sha256": "b25437967ba562cbdb4830d219e6fc65fa0ee0be760c48fce31a1dfa0fee04f5"
         }
       ],
-      "acceptanceArtifactSha256": "90805c133667a0d745148d150bbccad9d93dd7bda00a734dc23a16c22811578a"
+      "acceptanceArtifactSha256": "3b523f304355053a9293d6f5c7019c153603b7e835de75e400b6a1fb6cc035a4"
     }
   ],
   "independentComparison": {
-    "checked_utc": "2026-10-22T23:32:35.587855+00:00",
+    "checked_utc": "2026-10-23T03:25:22.888565+00:00",
     "method": "Independent GDAL/rasterio CRS, affine, native numeric scaling and QA comparison; documented 1e-8-pixel boundary snap, unchanged 1e-9 value tolerance",
     "results": [
       {
