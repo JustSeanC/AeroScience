@@ -25,3 +25,30 @@ test('approved FAA original uses durable host jobs, closes independently, verifi
  await expect(page.getByRole('dialog',{name:'FAA Downloads',exact:true}).getByText(/Verified original SHA-256/).first()).toBeVisible();
  expect(await(await request.get('/api/science/sources')).json()).toEqual(sources);expect((await(await request.get('/api/state')).json()).activeMission).toBeNull();
 });
+
+test('actual recording preempts a live FAA transfer, telemetry continues and an explicit pause survives flight end',async({request})=>{
+ await post(request,'/api/testing/aviation/slow');await post(request,'/api/aviation/downloads/configuration',{unmeteredOnly:false});await post(request,'/api/aviation/configuration',{onlineEnabled:true});
+ const catalog=await post(request,'/api/aviation/catalog/vfr/refresh'),item=catalog.charts[1];
+ const preview=await post(request,'/api/aviation/downloads/preview',{kind:'vfr',itemId:item.id,maximumTransferBytes:16777216,maximumExpandedBytes:8388608});
+ await post(request,`/api/aviation/downloads/${preview.id}/control`,{revision:preview.revision,action:'approve',selectionHash:preview.preview.selectionHash});
+ const state=async()=>(await(await request.get('/api/aviation/downloads')).json()).find(j=>j.id===preview.id);
+ await expect.poll(async()=>(await state()).downloadedBytes).toBeGreaterThan(0);
+ await post(request,'/api/mission-selection',{planId:null});const flight=await post(request,'/api/missions',{name:'Synthetic aviation transfer priority',mode:'universal',armScience:true});
+ try{
+  await expect.poll(async()=>(await state()).state).toBe('Waiting for Flight Priority');
+  await expect.poll(async()=>{const frames=await(await request.get(`/api/missions/${flight.id}/telemetry?limit=10`)).json();return frames.length;}).toBeGreaterThan(1);
+  const job=await state();await post(request,`/api/aviation/downloads/${job.id}/control`,{revision:job.revision,action:'pause'});
+  await post(request,`/api/missions/${flight.id}/end`);expect((await state()).state).toBe('Paused by User');
+  const paused=await state();await post(request,`/api/aviation/downloads/${paused.id}/control`,{revision:paused.revision,action:'resume'});
+  await expect.poll(async()=>(await state()).state).toBe('Completed');
+ }finally{const current=await(await request.get('/api/state')).json();if(current.activeMission)await post(request,`/api/missions/${current.activeMission.id}/end`);await post(request,'/api/testing/aviation/normal');await post(request,'/api/aviation/configuration',{onlineEnabled:false});}
+});
+
+test('saved FAA jobs are bounded and keyboard-paged without changing any approval state',async({page,request})=>{
+ await post(request,'/api/testing/aviation/reset');await post(request,'/api/aviation/configuration',{onlineEnabled:true});const catalog=await post(request,'/api/aviation/catalog/vfr/refresh'),item=catalog.charts[2];
+ for(let i=0;i<51;i++)await post(request,'/api/aviation/downloads/preview',{kind:'vfr',itemId:item.id,maximumTransferBytes:1048576,maximumExpandedBytes:1048576});
+ await page.goto('/#settings/maps');await page.getByRole('button',{name:'FAA Catalog & Notices',exact:true}).click();await page.getByRole('button',{name:'Manage FAA Downloads',exact:true}).click();const dialog=page.getByRole('dialog',{name:'FAA Downloads',exact:true});
+ await expect(dialog.getByRole('region',{name:'Saved FAA download jobs'}).locator('article')).toHaveCount(50);await expect(dialog.getByRole('button',{name:'Previous Saved FAA Jobs'})).toBeDisabled();
+ const next=dialog.getByRole('button',{name:'Next Saved FAA Jobs'});await next.focus();await page.keyboard.press('Enter');await expect(dialog.getByRole('heading',{name:'Saved FAA downloads · page 2'})).toBeVisible();await expect(dialog.getByRole('button',{name:'Previous Saved FAA Jobs'})).toBeEnabled();
+ await dialog.getByRole('button',{name:'Previous Saved FAA Jobs'}).click();await expect(dialog.getByRole('heading',{name:'Saved FAA downloads · page 1'})).toBeVisible();const jobs=await(await request.get('/api/aviation/downloads')).json();expect(jobs.every(j=>j.state==='Awaiting Approval')).toBeTruthy();await post(request,'/api/aviation/configuration',{onlineEnabled:false});
+});

@@ -10,7 +10,9 @@ export async function openAviationDownloads(api,selection=null){
  const storage=el('p'),settings=el('details'),settingsTitle=el('summary','Aviation network & storage settings');settings.append(settingsTitle);
  const work=el('section'),jobs=el('section');jobs.setAttribute('aria-label','Saved FAA download jobs');
  dialog.append(status,storage,settings,work,jobs);document.body.append(dialog);dialogHeader(dialog);dialog.showModal();
- let closed=false,epoch=0,busy=false,timer;
+ let closed=false,epoch=0,busy=false,timer,offset=0,lastJobs='';
+ const paging=el('div',undefined,'action-row');dialog.append(paging);
+ const previous=button(paging,'Previous Saved FAA Jobs',()=>{offset=Math.max(0,offset-50);lastJobs='';refresh();}),next=button(paging,'Next Saved FAA Jobs',()=>{offset+=50;lastJobs='';refresh();});
  dialog.addEventListener('close',()=>{closed=true;epoch++;clearTimeout(timer);dialog.remove();});
  const field=(parent,title,value)=>{const label=el('label',title),input=el('input');input.type='number';input.min='1';input.value=value;input.setAttribute('aria-label',title);label.append(input);parent.append(label);return input;};
  try{
@@ -41,9 +43,12 @@ export async function openAviationDownloads(api,selection=null){
  async function refresh(){
   clearTimeout(timer);const own=++epoch;
   try{
-   const [list,s]=await Promise.all([api('/api/aviation/downloads'),api('/api/aviation/downloads/storage')]);if(closed||own!==epoch)return;
+   const [list,s]=await Promise.all([api('/api/aviation/downloads?offset='+offset),api('/api/aviation/downloads/storage')]);if(closed||own!==epoch)return;
    storage.textContent=s.available?`Aviation used: ${bytes(s.usedBytes)} · Reserved allowances: ${bytes(s.reservedBytes)} · Physical drive free: ${bytes(s.physicalFreeBytes)}. Physical capacity is separate from per-job limits.`:(s.error||'Aviation storage Unknown.');
-   jobs.replaceChildren(el('h3','Saved FAA downloads'));
+   previous.disabled=offset===0;next.disabled=list.length<50||offset>=10000;
+   const signature=JSON.stringify(list);if(signature===lastJobs)return;lastJobs=signature;
+   const focused=document.activeElement?.closest('[data-job-id]'),focusId=focused?.dataset.jobId,focusAction=focused?.contains(document.activeElement)?document.activeElement?.dataset.action:null;
+   jobs.replaceChildren(el('h3',`Saved FAA downloads · page ${offset/50+1}`));
    for(const job of list){
     const card=el('article',undefined,'panel');card.dataset.jobId=job.id;card.append(el('h4',`${job.preview.item.originalFileName} · ${job.preview.item.edition}`),el('p',job.state),el('p',`Received across attempts: ${bytes(job.downloadedBytes)}. Approved transfer limit: ${bytes(job.preview.maximumTransferBytes)}. Original size: ${bytes(job.preview.expectedBytes)}.`));
     if(job.state==='Completed')card.append(el('p',`Verified original SHA-256: ${job.originalSha256}. ${(job.files||[]).length} checked companions retained. Geographic rendering not yet assessed.`));
@@ -51,10 +56,11 @@ export async function openAviationDownloads(api,selection=null){
     if(job.retryAfterUtc)card.append(el('p',`Next eligible provider retry: ${new Date(job.retryAfterUtc).toLocaleString()}`));
     const controls=el('div',undefined,'action-row');card.append(controls);
     const actions=job.state==='Completed'?['verify']:job.state==='Awaiting Approval'||job.state==='Cancelled'?[]:job.state==='Paused by User'||job.state==='Interrupted'||job.state==='Failed'||job.state.startsWith('Waiting')?['resume','cancel']:['pause','cancel'];
-    for(const action of actions)button(controls,{verify:'Verify Retained Original',pause:'Pause FAA Download',resume:'Resume / Retry FAA Download',cancel:'Cancel FAA Download'}[action],async()=>{try{await api(`/api/aviation/downloads/${job.id}/`+(action==='verify'?'verify':'control'),action==='verify'?{}:{revision:job.revision,action});status.textContent=action==='verify'?'Retained original and all extracted files match their recorded hashes.':'Stored job updated.';await refresh();}catch(error){status.textContent=error.message;}});
+    for(const action of actions){const control=button(controls,{verify:'Verify Retained Original',pause:'Pause FAA Download',resume:'Resume / Retry FAA Download',cancel:'Cancel FAA Download'}[action],async()=>{try{await api(`/api/aviation/downloads/${job.id}/`+(action==='verify'?'verify':'control'),action==='verify'?{}:{revision:job.revision,action});status.textContent=action==='verify'?'Retained original and all extracted files match their recorded hashes.':'Stored job updated.';await refresh();}catch(error){status.textContent=error.message;}});control.dataset.action=action;}
     jobs.append(card);
    }
-   if(!list.length)jobs.append(el('p','No retained download intents. Select an exact chart edition in FAA Catalog & Notices.'));
+   if(!list.length)jobs.append(el('p','No retained download intents on this page. Select an exact chart edition in FAA Catalog & Notices.'));
+   if(focusId&&focusAction)jobs.querySelector(`[data-job-id="${focusId}"] [data-action="${focusAction}"]`)?.focus({preventScroll:true});
   }catch(error){if(!closed&&own===epoch)status.textContent=error.message;}
   finally{if(!closed)timer=setTimeout(refresh,5000);}
  }

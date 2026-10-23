@@ -4,6 +4,6 @@
   "evidenceType": "pending-genuine-provider-network",
   "windowsMsfs": "not tested",
   "workflows": [],
-  "reason": "Final P01 drive-reconnection and archive safety corrections require genuine verification on the corrected source. A completed 5a724f9 run is retained outside the checkout, not reused or restamped.",
-  "previousCommit": "5a724f9406af809d37504daf3738cf6cc6e2c87f"
+  "reason": "Final retained-original file-link guard requires current-source genuine verification. Prior ee05933 acceptance is retained outside the checkout, not restamped.",
+  "previousCommit": "ee05933"
 }

@@ -34,12 +34,16 @@ public static class AviationDownloads
     public static async Task<string> FileHash(string file, CancellationToken token = default)
     {
         StorageManager.ValidateLocalPath(file);
+        if (new FileInfo(file).LinkTarget is not null || (File.GetAttributes(file) & FileAttributes.ReparsePoint) != 0)
+            throw new IOException("Retained aviation originals cannot follow file links or reparse points.");
         await using var stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read, 65536, true);
         return Convert.ToHexString(await SHA256.HashDataAsync(stream, token)).ToLowerInvariant();
     }
     public static async Task<AviationRetainedFile[]> VerifyArchive(string zip, string expanded, long maximumBytes, CancellationToken token, Func<bool>? canContinue = null)
     {
         StorageManager.ValidateLocalPath(zip); StorageManager.ValidateLocalPath(expanded);
+        if (new FileInfo(zip).LinkTarget is not null || (File.GetAttributes(zip) & FileAttributes.ReparsePoint) != 0)
+            throw new IOException("Aviation archives cannot follow file links or reparse points.");
         Directory.CreateDirectory(expanded); var files = new List<AviationRetainedFile>(); var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         using var archive = ZipFile.OpenRead(zip);
         if (archive.Entries.Count is < 1 or > 100) throw new InvalidDataException("FAA archive must contain 1–100 bounded entries.");

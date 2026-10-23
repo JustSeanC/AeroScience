@@ -68,7 +68,20 @@ public static class AviationDownloadProbe
         }
         var jobs = service.DownloadJobs();
         if (mode != "recover") foreach (var job in jobs)
-        { if (job.State != "Completed") throw new IOException("Aviation original not completed: " + job.State + ": " + job.Error); await service.VerifyDownload(job.Id); }
+        {
+            if (job.State != "Completed") throw new IOException("Aviation original not completed: " + job.State + ": " + job.Error); await service.VerifyDownload(job.Id);
+            if (mode == "offline")
+            {
+                var audit = Path.Combine(directory, "Audit-" + Guid.NewGuid().ToString("N"));
+                try
+                {
+                    var archive = Path.Combine(directory, "AviationReference", "Originals", job.Id.ToString("N"), "original.zip");
+                    var verified = await AviationDownloads.VerifyArchive(archive, audit, job.Preview.MaximumExpandedBytes, default);
+                    if (!verified.OrderBy(f => f.Name).SequenceEqual(job.Files!.OrderBy(f => f.Name))) throw new IOException("Offline original archive differs from its published verified files.");
+                }
+                finally { if (Directory.Exists(audit)) Directory.Delete(audit, true); }
+            }
+        }
         var receipt = new { evidenceClass = mode == "network" ? "Genuine public FAA original, application acquisition and retention only; geographic placement unassessed" : "Synthetic real-process recovery/offline probe", mode, handler.Transfers, jobs, storage = service.DownloadStorage(), missionCreated = File.Exists(Path.Combine(directory, "missions.db")) };
         PreferenceStore.WriteAtomic(Path.Combine(directory, "aviation-" + mode + "-receipt.json"), JsonSerializer.SerializeToElement(receipt, WireJson.Options));
         Console.WriteLine(JsonSerializer.Serialize(new { mode, jobs = jobs.Length, states = jobs.Select(j => j.State), handler.Transfers }, WireJson.Options));

@@ -11,6 +11,10 @@ namespace AeroScience.Tests;
 
 public sealed class AviationAcquisitionTests : IDisposable
 {
+    private sealed class UnixSymlinkFactAttribute : FactAttribute
+    {
+        public UnixSymlinkFactAttribute() { if (OperatingSystem.IsWindows()) Skip = "Unix symlink fixture; Windows junction/privilege behavior requires separate installed acceptance."; }
+    }
     private readonly string root = Path.Combine(Path.GetTempPath(), "aeroscience-aviation-jobs", Guid.NewGuid().ToString("N"));
     private const string Url = "https://aeronav.faa.gov/visual/09-03-2026/sectional-files/Synthetic.zip";
     private sealed class Disk : IStorageCapacity { public long Free = 100L * 1024 * 1024 * 1024; public long FreeBytes(string directory) => Free; }
@@ -210,6 +214,14 @@ public sealed class AviationAcquisitionTests : IDisposable
         var directory = Path.Combine(root, "AviationReference"); Directory.Move(directory, directory + "-offline"); release.SetResult(); await run;
         Assert.False(Directory.Exists(directory)); Directory.Move(directory + "-offline", directory); await service.ProcessDownloads();
         Assert.Equal("Interrupted", Assert.Single(service.DownloadJobs()).State); Assert.Equal(1, handler.Downloads);
+    }
+    [UnixSymlinkFact] public async Task RetainedOriginalFileLinksAreRejectedRatherThanFollowed()
+    {
+        var handler = new Transport(); using var service = Service(handler); var job = Approve(service, await Preview(service)); await service.ProcessDownloads();
+        var zip = Path.Combine(root, "AviationReference", "Originals", job.Id.ToString("N"), "original.zip");
+        var retained = zip + ".preserved"; File.Move(zip, retained); File.CreateSymbolicLink(zip, retained);
+        await Assert.ThrowsAsync<IOException>(() => service.VerifyDownload(job.Id));
+        Assert.Equal(handler.Archive, await File.ReadAllBytesAsync(retained));
     }
     public void Dispose() { if (Directory.Exists(root)) Directory.Delete(root, true); }
 }
