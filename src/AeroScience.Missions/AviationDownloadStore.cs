@@ -15,7 +15,7 @@ public sealed partial class AviationMetadataStore
         db.Open(); using var cmd = db.CreateCommand(); cmd.CommandText = "PRAGMA user_version";
         var version = Convert.ToInt32(cmd.ExecuteScalar());
         if (version == SchemaVersion) return;
-        if (version is not (1 or 2 or 3)) throw new NotSupportedException("Unsupported aviation database schema. Preserve the original database.");
+        if (version is not (1 or 2 or 3 or 4)) throw new NotSupportedException("Unsupported aviation database schema. Preserve the original database.");
         cmd.CommandText = "SELECT id FROM identity";
         if (cmd.ExecuteScalar() as string != identity.Id.ToString()) throw new IOException("Aviation store identity mismatch.");
         var folder = Path.Combine(directory, "Backups"); StorageManager.ValidateLocalPath(folder); Directory.CreateDirectory(folder);
@@ -29,10 +29,15 @@ public sealed partial class AviationMetadataStore
         }
         using var tx = db.BeginTransaction(); cmd.Transaction = tx;
         cmd.CommandText = (version == 1 ? "CREATE TABLE download_jobs(id TEXT PRIMARY KEY,revision INTEGER NOT NULL,state TEXT NOT NULL,payload TEXT NOT NULL);" : "") +
-            (version < 3 ? "CREATE TABLE vector_datasets(id TEXT PRIMARY KEY,job_id TEXT NOT NULL UNIQUE,payload TEXT NOT NULL);" +
+            (version < 3 ? "CREATE TABLE vector_datasets(id TEXT PRIMARY KEY,job_id TEXT NOT NULL,payload TEXT NOT NULL);" +
             "CREATE TABLE vector_features(dataset_id TEXT NOT NULL,id TEXT NOT NULL,west REAL NOT NULL,south REAL NOT NULL,east REAL NOT NULL,north REAL NOT NULL,payload TEXT NOT NULL,PRIMARY KEY(dataset_id,id));" : "") +
-            "CREATE TABLE airspace_features(dataset_id TEXT NOT NULL,id TEXT NOT NULL,kind TEXT NOT NULL,west REAL NOT NULL,south REAL NOT NULL,east REAL NOT NULL,north REAL NOT NULL,vertices INTEGER NOT NULL,tolerance REAL NOT NULL,geometry BLOB NOT NULL,display BLOB,payload TEXT NOT NULL,PRIMARY KEY(dataset_id,id));" +
-            "PRAGMA user_version=4;";
+            (version < 4 ? "CREATE TABLE airspace_features(dataset_id TEXT NOT NULL,id TEXT NOT NULL,kind TEXT NOT NULL,west REAL NOT NULL,south REAL NOT NULL,east REAL NOT NULL,north REAL NOT NULL,vertices INTEGER NOT NULL,tolerance REAL NOT NULL,geometry BLOB NOT NULL,display BLOB,payload TEXT NOT NULL,PRIMARY KEY(dataset_id,id));" : "") +
+            // A verified original may have immutable derived interpretations from different
+            // parser versions. Preserve every old row and geometry; identity remains the key.
+            (version >= 3 ? "CREATE TABLE vector_datasets_v5(id TEXT PRIMARY KEY,job_id TEXT NOT NULL,payload TEXT NOT NULL);" +
+            "INSERT INTO vector_datasets_v5 SELECT id,job_id,payload FROM vector_datasets;" +
+            "DROP TABLE vector_datasets; ALTER TABLE vector_datasets_v5 RENAME TO vector_datasets;" : "") +
+            "CREATE INDEX vector_datasets_by_job ON vector_datasets(job_id); PRAGMA user_version=5;";
         cmd.ExecuteNonQuery(); tx.Commit();
     }
     public AviationDownloadJob[] Jobs(int offset = 0)

@@ -61,13 +61,16 @@ public static partial class AviationAirspace
             var crs = surface?.Attribute("srsName")?.Value;
             if (surface?.Name != Aixm + "Surface" || !string.Equals(crs, "urn:ogc:def:crs:OGC:1.3:CRS84", StringComparison.OrdinalIgnoreCase) || surface.Attribute("srsDimension")?.Value != "2")
                 throw new NotSupportedException("Unverified SAA coordinate order/CRS/dimensions.");
-            if (surface.Descendants(Gml + "ArcByCenterPoint").Any() || surface.Descendants(Gml + "CircleByCenterPoint").Any())
+            if (surface.Descendants(Gml + "ArcByCenterPoint").Any())
             { yield return new(number, "sua", name, attributes, null, null, 0, "Curved SAA geometry requires independently validated curve semantics; source retained, no guessed arcs/circles"); continue; }
+            if (surface.Descendants(Gml + "CircleByCenterPoint").Any())
+                Retain("GEOMETRY_INTERPOLATION", "WGS84 geodesic circle; 0.5 m nominal chord target. Original center/radius/units retained in the immutable XML. Not certified boundary accuracy.");
             var factory = new GeometryFactory(); var polygons = new List<Polygon>(); var unsupported = false;
             foreach (var patch in surface.Descendants(Gml + "PolygonPatch"))
             {
                 LinearRing ReadRing(XElement boundary)
                 {
+                    if (boundary.Descendants(Gml + "CircleByCenterPoint").Any()) return ReadSaaCircle(boundary, token, canContinue);
                     if (boundary.Descendants().Any(n => n.Name.LocalName is not ("LinearRing" or "Ring" or "curveMember" or "Curve" or "segments" or "LineStringSegment" or "pos" or "posList"))) throw new NotSupportedException("Unsupported SAA ring/curve element.");
                     var points = new List<Coordinate>();
                     foreach (var p in boundary.Descendants().Where(n => n.Name == Gml + "pos" || n.Name == Gml + "posList"))

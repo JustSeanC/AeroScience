@@ -21,7 +21,7 @@ public sealed class AviationIntegrityStamp
 // Creation is explicit. Every later read/write requires the same retained identity and database.
 public sealed partial class AviationMetadataStore : IDisposable
 {
-    public const int SchemaVersion = 4;
+    public const int SchemaVersion = 5;
     private sealed record Identity(int Version, Guid Id);
     private readonly string directory, database;
     private readonly FileStream lease;

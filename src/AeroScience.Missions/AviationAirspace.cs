@@ -16,6 +16,8 @@ public static partial class AviationAirspace
     public const string Nad83 = "EPSG:4269 (NAD83; realization/epoch unspecified by FAA PRJ)";
     public const int MaximumRecords = 100000, MaximumRecordVertices = 1000000, MaximumDisplayVertices = 12000;
     public static readonly string[] Kinds = ["class-b", "class-c", "class-d", "class-e", "sua"];
+    public static string DatasetId(AviationDownloadJob job) => AviationDownloads.Hash(new
+        { airspaceParser = job.Preview.Item.OriginalFileName == "aixm5.0.zip" ? 2 : 1, job.Preview.Item.Id, job.OriginalSha256 });
     public static bool IsOriginal(AviationCatalogItem item) => item.Product == AviationProduct.Nasr && item.OriginalFileName is "class_airspace_shape_files.zip" or "aixm5.0.zip";
     public sealed record SourceRecord(int Number, string Kind, string Name, Dictionary<string, string> Attributes,
         Geometry? Original, Geometry? Display, double Tolerance, string? UnsupportedReason);

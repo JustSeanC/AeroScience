@@ -2,6 +2,8 @@
 import argparse
 import hashlib
 import json
+import math
+from pyproj import Geod
 from pathlib import Path
 import sqlite3
 import struct
@@ -62,11 +64,22 @@ def saa_geometry(document):
         return None
     surface = volumes[0].find('a:horizontalProjection/a:Surface', NS)
     assert surface is not None and surface.attrib['srsName'].lower() == 'urn:ogc:def:crs:ogc:1.3:crs84'
-    if surface.findall('.//g:ArcByCenterPoint', NS) or surface.findall('.//g:CircleByCenterPoint', NS):
+    if surface.findall('.//g:ArcByCenterPoint', NS):
         return None
     polygons = []
     for patch in surface.findall('.//g:PolygonPatch', NS):
         def ring(boundary):
+            circles = boundary.findall('.//g:CircleByCenterPoint', NS)
+            if circles:
+                assert len(circles) == 1
+                circle = circles[0]
+                center = list(map(float,circle.findtext('g:pointProperty/g:Point/g:pos',namespaces=NS).split()))
+                radius = circle.find('g:radius',NS)
+                metres = float(radius.text) * {'NM':1852,'MI':1609.344,'FT':.3048,'M':1}[radius.attrib['uom']]
+                count = max(36,math.ceil(math.pi/math.acos(1-.5/metres)))
+                geodesic = Geod(ellps='WGS84')
+                points = [geodesic.fwd(*center,360*i/count,metres)[:2] for i in range(count)]
+                return points+[points[0]]
             points = []
             for element in boundary.iter():
                 if element.tag in ('{'+NS['g']+'}pos', '{'+NS['g']+'}posList'):
@@ -97,16 +110,20 @@ def verify(root):
             region_shapes = {'Massachusetts': box(-73, 41, -70, 43), 'California': box(-124, 32, -114, 42)}
             regions = dict.fromkeys(region_shapes, 0)
             compared, attributes, coordinates, omitted = 0, 0, 0, 0
+            maximum_difference = 0.0
 
             def compare(number, geometry, raw):
-                nonlocal compared, coordinates, attributes, omitted
+                nonlocal compared, coordinates, attributes, omitted, maximum_difference
                 if number not in retained:
                     omitted += 1
                     # A valid unsupported subset is an explicit omission, never an inferred all-clear.
                     return
                 actual, payload = retained[number]
                 assert geometry is not None and geometry.is_valid
-                assert equals_exact(normalize(actual), normalize(geometry), tolerance=0), f'{family} original coordinates differ: {number}'
+                tolerance = 1e-10 if 'GEOMETRY_INTERPOLATION' in raw else 0
+                difference = actual.hausdorff_distance(geometry) if tolerance else 0
+                maximum_difference = max(maximum_difference,difference)
+                assert equals_exact(normalize(actual), normalize(geometry), tolerance=tolerance), f'{family} original coordinates differ: {number}'
                 assert payload['attributes'] == raw, f'{family} original attributes differ: {number}'
                 attributes += len(raw)
                 coordinates += sum(len(p.exterior.coords)+sum(len(r.coords) for r in p.interiors) for p in ([geometry] if geometry.geom_type == 'Polygon' else geometry.geoms))*2
@@ -144,13 +161,15 @@ def verify(root):
                                 raw[prefix+'_VAL'] = (value.text or '') if value is not None else ''
                                 raw[prefix+'_UOM'] = value.attrib.get('uom', '') if value is not None else ''
                                 raw[prefix+'_CODE'] = volume.findtext('a:'+field+'Reference', default='', namespaces=NS)
+                            if document.findall('.//g:CircleByCenterPoint',NS):
+                                raw['GEOMETRY_INTERPOLATION'] = 'WGS84 geodesic circle; 0.5 m nominal chord target. Original center/radius/units retained in the immutable XML. Not certified boundary accuracy.'
                         compare(number, saa_geometry(document), raw if expected else {})
             assert compared == dataset['features'] and omitted == dataset['omittedRecords'] and all(regions.values())
             results.append({'family': family, 'edition': dataset['edition'], 'originalSha256': EXPECTED[family], 'featuresCompared': compared, 'originalCoordinateComponentsCompared': coordinates, 'originalAttributeFieldsChecked': attributes,
-                'maximumCoordinateDifference': 0, 'regions': regions, 'explicitUnsupportedRecords': omitted, 'sourceCrs': dataset['sourceCrs']})
+                'maximumCoordinateDifference': maximum_difference, 'regions': regions, 'explicitUnsupportedRecords': omitted, 'sourceCrs': dataset['sourceCrs']})
     assert {r['family'] for r in results} == set(EXPECTED)
     return {'evidenceClass': 'Genuine FAA originals; independent pyshp/Shapely/ElementTree versus retained NTS geometry. Offline read-only verification.', 'results': results,
-        'limitations': ['No live activation, TFR clearance, certified positional accuracy or owner-installed Windows acceptance.', 'SAA curves/composites/contributor relationships remain unsupported and omitted.', 'NAD83 coordinates preserved without claiming a precise WGS84 transformation.']}
+        'limitations': ['No live activation, TFR clearance, certified positional accuracy or owner-installed Windows acceptance.', 'SAA partial arcs/composites/contributor relationships remain unsupported and omitted; full geodesic circles independently compared with PROJ, not certified original boundary accuracy.', 'NAD83 coordinates preserved without claiming a precise WGS84 transformation.']}
 
 
 if __name__ == '__main__':

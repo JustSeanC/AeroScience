@@ -17,3 +17,18 @@ test('approved original Class airspace and SAA imports provide real bounded poly
  await page.setViewportSize({width:390,height:740});expect((await new AxeBuilder({page}).include('dialog[aria-label="FAA Reference Details"]').analyze()).violations).toEqual([]);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy();await page.keyboard.press('Escape');await expect(list.getByRole('button',{name:'Synthetic Class B',exact:true})).toBeFocused();await page.keyboard.press('Escape');await expect(layers.getByRole('button',{name:'View '+label+' references',exact:true})).toBeFocused();await page.keyboard.press('Escape');
  expect(await(await request.get('/api/science/sources')).json()).toEqual(sources);expect((await(await request.get('/api/state')).json()).activeMission).toBeNull();await page.reload();await planner.getByRole('button',{name:'Overlays & Legend',exact:true}).click();await expect(page.getByLabel(label,{exact:true})).toBeChecked();
 });
+
+test('full-circle SAA reference imports through approved jobs and exposes interpolation and independent local geometry offline',async({page,request})=>{
+ await post(request,'/api/testing/aviation/airspace');await post(request,'/api/aviation/downloads/configuration',{unmeteredOnly:false});await post(request,'/api/aviation/configuration',{onlineEnabled:true});
+ const catalog=await post(request,'/api/aviation/catalog/nasr/refresh');const item=catalog.charts.find(x=>x.originalFileName==='aixm5.0.zip');expect(item).toBeTruthy();
+ const j=await post(request,'/api/aviation/downloads/preview',{kind:'nasr',itemId:item.id,maximumTransferBytes:1048576,maximumExpandedBytes:1048576});
+ if(j.state!=='Completed'){await post(request,`/api/aviation/downloads/${j.id}/control`,{revision:j.revision,action:'approve',selectionHash:j.preview.selectionHash});await expect.poll(async()=>(await(await request.get('/api/aviation/downloads')).json()).find(x=>x.id===j.id).state).toBe('Completed');}
+ const imported=await post(request,`/api/aviation/downloads/${j.id}/import-vectors`);await post(request,'/api/aviation/configuration',{onlineEnabled:false});
+ const actual=await(await request.get(`/api/aviation/airspace/${imported.id}?west=-76&south=39&east=-74&north=41&kind=sua`)).json();
+ expect(actual.features).toHaveLength(1);expect(actual.features[0].attributes.GEOMETRY_INTERPOLATION).toContain('0.5 m');expect(actual.features[0].polygons[0][0].length).toBeGreaterThan(36);
+ await page.goto('/#planner');const planner=page.locator('#planner');await planner.getByLabel('Offline geographic location search').fill('40,-75');await planner.getByRole('button',{name:'Find',exact:true}).click();await planner.getByLabel('Search results').selectOption('0');
+ await planner.getByRole('button',{name:'Overlays & Legend',exact:true}).click();const layers=page.getByRole('dialog',{name:'Map Overlays & Legend',exact:true});
+ const label=`FAA Special-use airspace · 2026-10-01 · interpretation ${imported.id.slice(0,8)}`;await layers.getByLabel(label,{exact:true}).last().check();
+ await layers.getByRole('button',{name:'View '+label+' references',exact:true}).last().click();const list=page.getByRole('dialog',{name:'FAA Reference List',exact:true});await list.getByRole('button',{name:'Synthetic Special Use',exact:true}).click();
+ const details=page.getByRole('dialog',{name:'FAA Reference Details',exact:true});await expect(details).toContainText('10000 FT · MSL');await details.getByText('Original reference attributes',{exact:true}).click();await expect(details).toContainText('geodesic circle');
+});

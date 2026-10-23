@@ -23,7 +23,7 @@ public sealed class AviationBrowserFixture : HttpMessageHandler
         if (request.RequestUri!.Host == "nfdc.faa.gov")
         {
             if (request.RequestUri.AbsoluteUri is SyntheticAirspace.ClassUrl or SyntheticAirspace.SaaUrl)
-                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new ByteArrayContent(request.RequestUri.AbsoluteUri == SyntheticAirspace.ClassUrl ? SyntheticAirspace.ClassArchive() : SyntheticAirspace.SaaArchive()) });
+                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new ByteArrayContent(request.RequestUri.AbsoluteUri == SyntheticAirspace.ClassUrl ? SyntheticAirspace.ClassArchive() : SyntheticAirspace.SaaArchive("circle")) });
             var family = request.RequestUri.AbsolutePath.Contains("_APT_", StringComparison.Ordinal) ? "APT" : request.RequestUri.AbsolutePath.Contains("_NAV_", StringComparison.Ordinal) ? "NAV" : "FIX";
             var data = SyntheticNasr.Archive(family);
             return Task.FromResult(new HttpResponseMessage(HttpStatusCode.PartialContent) { Content = new ByteArrayContent(data) { Headers = { ContentRange = new(0, data.Length - 1, data.Length) } } });

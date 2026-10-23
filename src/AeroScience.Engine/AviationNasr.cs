@@ -46,7 +46,7 @@ public sealed partial class AviationReference
                 if (!CanIndexVectors()) throw new InvalidOperationException("Reference indexing yields to active flight recording. Retained originals are preserved; import after flight.");
                 using var store = Open(Preferences()); job = store.Job(jobId);
                 if (job.State != "Completed" || job.Preview.Item.Product != AviationProduct.Nasr) throw new ArgumentException("Select a verified retained NASR original.");
-                var retained = store.VectorDatasets().FirstOrDefault(d => d.JobId == jobId); if (retained is not null) return retained;
+                var retained = store.VectorDatasets().FirstOrDefault(d => d.JobId == jobId && (!AviationAirspace.IsOriginal(job.Preview.Item) || d.Id == AviationAirspace.DatasetId(job))); if (retained is not null) return retained;
             }
             await AviationDownloads.VerifyRetained(JobDirectory(jobId), job, token);
             if (AviationAirspace.IsOriginal(job.Preview.Item))

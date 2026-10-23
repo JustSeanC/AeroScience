@@ -57,6 +57,66 @@ public sealed class AviationAirspaceTests : IDisposable
         Assert.Equal(0,f.Lower.Value);Assert.Equal("AVBL_FOR_ACTIVATION",f.Attributes["ACTIVATION_SOURCE_STATUS"]);Assert.Equal("NOTAM",f.Schedule.Code);Assert.Contains("Unknown",f.Schedule.Interpretation);
         Assert.Equal("2020-01-01T09:01:00Z",f.Attributes["DEFINITION_BEGIN"]);Assert.Contains("activation",d.Limitations.Single(x=>x.Contains("certified",StringComparison.Ordinal)));
     }
+    [Fact] public async Task ExplicitFullSaaCircleUsesOriginalUnitsAndRetainsOfflineProvenance()
+    {
+        var handler=new Transport(true,"circle");string id;int calls;
+        using(var service=new AviationReference(root,root,new HttpClient(handler),unmetered:()=>true))
+        {
+            var job=await Acquire(service);var d=await service.ImportVectors(job.Id);id=d.Id;
+            var feature=Assert.Single(service.AirspaceFeatures(id,-76,39,-74,41).Features);
+            var ring=Assert.Single(Assert.Single(feature.Polygons));
+            Assert.True(ring.Length is >=36 and <=4097);Assert.Equal(ring[0],ring[^1]);
+            foreach(var point in ring)Assert.InRange(Geodesy.Distance(new(40,-75),point),1851.999999,1852.000001);
+            Assert.InRange(ring[0].Latitude,40.0166794,40.0166795);Assert.InRange(ring[0].Longitude,-75.000000001,-74.999999999);
+            Assert.Contains("0.5 m",feature.Attributes["GEOMETRY_INTERPOLATION"]);Assert.Equal(job.OriginalSha256,d.OriginalSha256);
+            Assert.Contains(d.Limitations,x=>x.Contains("adapter 2",StringComparison.Ordinal));await service.VerifyDownload(job.Id);
+            Assert.Equal(id,(await service.ImportVectors(job.Id)).Id);service.Configure(false);calls=handler.Calls;
+        }
+        using var reopened=new AviationReference(root,root,new HttpClient(handler));
+        Assert.Single(reopened.AirspaceFeatures(id,-76,39,-74,41).Features);Assert.Equal(calls,handler.Calls);
+    }
+    [Theory] [InlineData("circle-unit")] [InlineData("circle-negative")] [InlineData("circle-mixed")] [InlineData("circle-dateline")]
+    public async Task UnverifiedCircleUnitsMixedSegmentsAndUnsupportedBoundsCannotPublish(string fault)
+    {
+        using var service=new AviationReference(root,root,new HttpClient(new Transport(true,fault)),unmetered:()=>true);var job=await Acquire(service);
+        await Assert.ThrowsAsync<NotSupportedException>(()=>service.ImportVectors(job.Id));Assert.Empty(service.VectorDatasets());await service.VerifyDownload(job.Id);
+    }
+    [Theory] [InlineData(false)] [InlineData(true)]
+    public async Task SchemaFourLiteralInterpretationAndOriginalSurviveVersionedReimport(bool interruptMigration)
+    {
+        var handler=new Transport(true);Guid jobId;string oldId;string oldJson;string originalHash;
+        using(var service=new AviationReference(root,root,new HttpClient(handler),unmetered:()=>true))
+        {
+            var job=await Acquire(service);jobId=job.Id;originalHash=job.OriginalSha256!;var d=await service.ImportVectors(jobId);
+            oldId=AviationDownloads.Hash(new{airspaceParser=1,job.Preview.Item.Id,job.OriginalSha256});
+            oldJson=System.Text.Json.JsonSerializer.Serialize(d with{Id=oldId,Limitations=["Synthetic retained adapter-1 literal interpretation"]},AeroScience.Shared.WireJson.Options);
+        }
+        var folder=Path.Combine(root,"AviationReference");var file=Path.Combine(folder,"aviation.db");
+        using(var db=new SqliteConnection("Data Source="+file+";Pooling=False"))
+        {
+            db.Open();using var tx=db.BeginTransaction();using var c=db.CreateCommand();c.Transaction=tx;
+            c.CommandText="CREATE TABLE schema4_datasets(id TEXT PRIMARY KEY,job_id TEXT NOT NULL UNIQUE,payload TEXT NOT NULL); INSERT INTO schema4_datasets SELECT $old,job_id,$json FROM vector_datasets; DROP TABLE vector_datasets; ALTER TABLE schema4_datasets RENAME TO vector_datasets; UPDATE airspace_features SET dataset_id=$old,id=$feature; PRAGMA user_version=4;";
+            c.Parameters.AddWithValue("$old",oldId);c.Parameters.AddWithValue("$json",oldJson);c.Parameters.AddWithValue("$feature",AviationDownloads.Hash(new{id=oldId,Number=1}));c.ExecuteNonQuery();
+            if(interruptMigration){c.CommandText="CREATE TABLE vector_datasets_v5(sentinel TEXT)";c.ExecuteNonQuery();}tx.Commit();
+        }
+        if(interruptMigration)
+        {
+            Assert.Throws<SqliteException>(()=>new AviationReference(root,root,new HttpClient(handler)).VectorDatasets());
+            using var db=new SqliteConnection("Data Source="+file+";Pooling=False");db.Open();using var c=db.CreateCommand();c.CommandText="PRAGMA user_version";Assert.Equal(4L,c.ExecuteScalar());
+            c.CommandText="SELECT payload FROM vector_datasets";Assert.Equal(oldJson,c.ExecuteScalar());return;
+        }
+        using(var service=new AviationReference(root,root,new HttpClient(handler)))
+        {
+            var calls=handler.Calls;var upgraded=await service.ImportVectors(jobId);Assert.NotEqual(oldId,upgraded.Id);Assert.Equal(2,service.VectorDatasets().Length);
+            Assert.Single(service.AirspaceFeatures(oldId,-76,39,-74,41).Features);Assert.Single(service.AirspaceFeatures(upgraded.Id,-76,39,-74,41).Features);
+            Assert.Equal(originalHash,upgraded.OriginalSha256);Assert.Equal(calls,handler.Calls);await service.VerifyDownload(jobId);
+            Assert.Equal(upgraded.Id,(await service.ImportVectors(jobId)).Id);
+        }
+        var backup=Assert.Single(Directory.GetFiles(Path.Combine(folder,"Backups"),"aviation-schema4-*.sqlite"));
+        using var saved=new SqliteConnection("Data Source="+backup+";Mode=ReadOnly;Pooling=False");saved.Open();using var check=saved.CreateCommand();
+        check.CommandText="PRAGMA integrity_check";Assert.Equal("ok",check.ExecuteScalar());check.CommandText="PRAGMA user_version";Assert.Equal(4L,check.ExecuteScalar());
+        check.CommandText="SELECT payload FROM vector_datasets";Assert.Equal(oldJson,check.ExecuteScalar());
+    }
     [Theory] [InlineData("index")] [InlineData("huge-count")] [InlineData("crs")]
     public async Task InvalidClassIndexDimensionsOrUnverifiedCrsCannotPublish(string fault)
     {
