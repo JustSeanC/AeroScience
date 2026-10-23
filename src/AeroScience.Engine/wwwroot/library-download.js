@@ -255,6 +255,13 @@ export async function libraryDownload(parent, api, isDisposed = () => false) {
     layers = {};
   for (const name of ["retained", "remote", "selected", "jobs", "parts"])
     layers[name] = L.layerGroup().addTo(map.map);
+  for(const [key,name,description] of [
+    ['retained','Library retained sources','Verified retained-source outlines. Original acquisition dates and per-pixel quality remain separate; these are not in-flight observations.'],
+    ['remote','Library provider catalog','Actually discovered provider footprints, with search as-of dates in the catalog. Outlines do not guarantee valid scientific pixels.'],
+    ['selected','Library geographic selection','Requested source/preparation windows; hiding these does not change the approved selection.'],
+    ['jobs','Library approved jobs','Persisted queued/download work. Incomplete staging is not usable source data.'],
+    ['parts','Library bounded subdivisions','Reviewable geographic work subdivisions, not satellite pixels or verified coverage.']
+  ]) map.layers.addOverlay({id:'library-'+key,name,layer:layers[key],group:'Science',description});
   const legend = el("ul", undefined, "library-legend");
   legend.setAttribute("aria-label", "Scientific coverage legend");
   for (const [name, text, color] of [

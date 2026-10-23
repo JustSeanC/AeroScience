@@ -19,7 +19,7 @@ export function documentationUrl(target,guide){
   return local.endsWith('.md')?'#help?guide='+encodeURIComponent(local)+(url.hash?'&anchor='+encodeURIComponent(url.hash.slice(1)):''):'/help/'+local+url.hash;
  }
  // Code/branding references remain source links rather than nonexistent offline files.
- return 'https://github.com/JustSeanC/AeroScience/blob/develop/v0.5.0'+url.pathname+url.hash;
+ return 'https://github.com/JustSeanC/AeroScience/blob/develop/v0.6.0'+url.pathname+url.hash;
 }
 export function markdown(parent,source,guide){
  const toc=node('nav');toc.setAttribute('aria-label','In this guide');parent.append(toc);let code=null,list=null,table=null;

@@ -76,10 +76,13 @@ export class ResearchMap {
     this.aircraft=L.layerGroup().addTo(this.map);
     this.patterns=L.layerGroup().addTo(this.map);
     this.readiness=L.layerGroup().addTo(this.map);
+    this.draftLayer=L.layerGroup().addTo(this.map);
+    this.previewLayer=L.layerGroup().addTo(this.map);
     const overlays=[
       ['planned-route','Planned route',this.route,'Mission'],['patterns','Semantic pattern outlines',this.patterns,'Mission'],
       ['waypoints','Waypoint markers',this.points,'Mission'],['recorded-track','Recorded track',this.track,'Mission'],
       ['survey-areas','Survey areas',this.areas,'Mission'],['aircraft','Aircraft',this.aircraft,'Mission'],
+      ['mission-draft','Draft route and survey geometry',this.draftLayer,'Mission'],['mission-preview','Pattern preview and modeled geometry',this.previewLayer,'Mission'],
       ['observations','Observation markers',this.markers,'Science'],['sample-locations','Scientific sample locations',this.samples,'Science'],
       ['science-readiness','Scientific data readiness',this.readiness,'Science'],['science-footprints','Science footprints',this.footprints,'Science']
     ].map(([id,name,layer,group])=>({id,name,layer,group}));
@@ -403,15 +406,14 @@ export class ResearchMap {
   }
   draft(points=[],polygon=false) {
     if(this.destroyed)return;
-    this.draftLayer?.remove();this.draftLayer=this.L.layerGroup().addTo(this.map);
+    this.draftLayer.clearLayers();
     for(const p of points)this.L.circleMarker(ll(p,points[0]?.longitude),{radius:7,color:"#ffffff",fillColor:"#f5cd79",fillOpacity:1}).addTo(this.draftLayer);
     if(points.length>1)(polygon&&points.length>=3?this.L.polygon(points.map(p=>ll(p,points[0]?.longitude)),{color:"#ffffff",dashArray:"4 6",fillOpacity:.08}):this.L.polyline(points.map(p=>ll(p,points[0]?.longitude)),{color:"#ffffff",dashArray:"4 6"})).addTo(this.draftLayer);
   }
   preview(result) {
     if(this.destroyed)return;
-    this.previewLayer?.remove();this.previewResult=result;
+    this.previewLayer.clearLayers();this.previewResult=result;
     this.container.dataset.previewPoints=String(result?.waypoints?.length||0);
-    this.previewLayer=this.L.layerGroup().addTo(this.map);
     if(!result)return;
     for(const vertices of result.modeledSwaths||[])this.L.polygon(vertices.map(p=>ll(p)),{color:'#6ce4b9',weight:1,fillOpacity:.08}).bindTooltip('Modeled nadir flat-ground swath; source validity, relief and continuous acquisition are unverified.').addTo(this.previewLayer);
     if(result.terrainPlanningFootprint)this.L.polygon(result.terrainPlanningFootprint.boundary.map(p=>ll(p)),{color:'#efb96b',weight:2,fillOpacity:.15}).bindTooltip('Relative-AGL terrain-aware centre footprint; no simulator vertical-datum correction.').addTo(this.previewLayer);

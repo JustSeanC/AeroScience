@@ -1,4 +1,3 @@
-import {layerPopup} from './dialog-ui.js';
 import { ResearchMap } from "./map.js";
 import { planningArea, planningDistance, displayReading } from "./science-display.js";
 import {table as scientificTable} from './workstation-ui.js';
@@ -526,7 +525,7 @@ export async function coverage(parent, id, api, review) {
               style: { color: "#52dbc0", fillOpacity: 0.3 },
             }).addTo(map.map);
         }
-        layerPopup(window.L.control.layers(null, layers).addTo(map.map));
+        for(const [name,layer] of Object.entries(layers))map.layers.addOverlay({id:'coverage-'+name.toLowerCase().replace(/[^a-z0-9]+/g,'-').slice(0,85),name,layer,group:'Science',description:name.startsWith('Modeled')||name.startsWith('Geometric')?'Modeled geometry only; not valid acquired pixels.':'Valid scientific support for the named original sources; dates and measurement identities remain separate.'});
         const detail = el("details");
         detail.append(
           el("summary", "Methods, denominator and uncertainty"),
@@ -648,8 +647,10 @@ export async function imagery(parent, id, api) {
         const p = await api(`/api/science/artifacts/${a.id}/preview`);
         if (!map) {
           map = new ResearchMap(display);
+          map.artifactGroup=window.L.layerGroup().addTo(map.map);
+          map.layers.addOverlay({id:'scientific-artifact',name:'Retained scientific artifact',layer:map.artifactGroup,group:'Science',description:'Derived product from retained scientific evidence. Source dates, masks, units and lineage remain in the existing legend.'});
         }
-        overlay?.remove();
+        map.artifactGroup.clearLayers();
         overlay = window.L.imageOverlay(
           p.image,
           [
@@ -657,7 +658,7 @@ export async function imagery(parent, id, api) {
             [p.bounds.north, p.bounds.east],
           ],
           { opacity: 0.8 },
-        ).addTo(map.map);
+        ).addTo(map.artifactGroup);
         map.map.fitBounds(overlay.getBounds());
         let legend = display.querySelector(".raster-legend");
         if (!legend) {
