@@ -5,7 +5,8 @@ using AeroScience.Shared;
 
 namespace AeroScience.Engine;
 
-public sealed record AviationReferencePreferences(int Version = 1, bool OnlineEnabled = false, Guid? StoreId = null);
+public sealed record AviationReferencePreferences(int Version = 1, bool OnlineEnabled = false, Guid? StoreId = null,
+    string? StorageDirectory = null, bool UnmeteredOnly = true);
 public sealed record AviationReferenceConfiguration(bool OnlineEnabled, bool Configured, string Privacy,
     int MaximumMetadataBytes = AviationCatalog.MaximumMetadataBytes, int MinimumRefreshSeconds = 300);
 public sealed record AviationReferencePage(string Kind, string Status, AviationCacheStatus? Cache,
@@ -13,11 +14,12 @@ public sealed record AviationReferencePage(string Kind, string Status, AviationC
 
 // User-requested public metadata only. Original-download jobs/rendering are later phases.
 // Explicit aviation consent/budget; no scientific quotas, source IDs, mission creation or provider calls on reads.
-public sealed class AviationReference(string configurationDirectory, string dataDirectory, HttpClient? transport = null, TimeProvider? time = null) : IDisposable
+public sealed partial class AviationReference(string configurationDirectory, string dataDirectory, HttpClient? transport = null, TimeProvider? time = null,
+    IStorageCapacity? capacity = null, Func<bool?>? unmetered = null, Func<bool>? flightActive = null) : IDisposable
 {
-    public const string Privacy = "FAA metadata requests reveal your IP address to FAA providers. Aviation reference access is separate from online maps and scientific-data consent. Each manual refresh is bounded to 4 MiB; original charts are not downloaded. Cached records remain available offline. Flight-simulation reference only, not a real-world safety product.";
+    public const string Privacy = "FAA requests reveal your IP address to FAA providers. Aviation reference access is separate from online maps and scientific-data consent. Each manual metadata refresh is bounded to 4 MiB. Original ZIPs require a separate exact-edition preview, explicit approval and aviation transfer/storage allowances. Opening maps or catalogs never downloads originals. Retained records remain available offline. Flight-simulation reference only, not a real-world safety product.";
     private readonly string settingsPath = Path.Combine(configurationDirectory, "aviation-reference.json");
-    private readonly string directory = Path.Combine(dataDirectory, "AviationReference");
+    private string directory => Preferences().StorageDirectory ?? Path.Combine(dataDirectory, "AviationReference");
     private readonly HttpClient http = transport ?? new(new HttpClientHandler { AllowAutoRedirect = false }) { Timeout = TimeSpan.FromSeconds(20) };
     private readonly TimeProvider clock = time ?? TimeProvider.System;
     private readonly SemaphoreSlim refresh = new(1);
@@ -39,7 +41,7 @@ public sealed class AviationReference(string configurationDirectory, string data
             var p = Preferences();
             if (p.StoreId is null && enabled)
             {
-                if (Directory.Exists(directory)) throw new IOException("An unregistered aviation directory already exists. Preserve it for recovery; no replacement was created.");
+                if (Directory.Exists(directory) && Directory.EnumerateFileSystemEntries(directory).Any()) throw new IOException("An unregistered aviation directory already exists. Preserve it for recovery; no replacement was created.");
                 using var store = new AviationMetadataStore(directory, create: true); p = p with { StoreId = store.StoreId };
             }
             PreferenceStore.WriteAtomic(settingsPath, p with { OnlineEnabled = enabled }); return Configuration();
@@ -127,5 +129,5 @@ public sealed class AviationReference(string configurationDirectory, string data
     }
     private void Failure(string kind, DateTimeOffset attempt, string code)
     { lock (gate) { using var store = Open(Preferences()); store.Attempt(kind, attempt, code); } }
-    public void Dispose() { refresh.Dispose(); if (transport is null) http.Dispose(); }
+    public void Dispose() { shutdown.Cancel(); refresh.Dispose(); if (transport is null) http.Dispose(); }
 }

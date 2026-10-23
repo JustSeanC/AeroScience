@@ -6,9 +6,9 @@ namespace AeroScience.Missions;
 
 // Metadata only. No scientific source IDs, measurements, transfer allowances or original-file deletion.
 // Creation is explicit. Every later read/write requires the same retained identity and database.
-public sealed class AviationMetadataStore : IDisposable
+public sealed partial class AviationMetadataStore : IDisposable
 {
-    public const int SchemaVersion = 1;
+    public const int SchemaVersion = 2;
     private sealed record Identity(int Version, Guid Id);
     private readonly string directory, database;
     private readonly FileStream lease;
@@ -56,6 +56,7 @@ public sealed class AviationMetadataStore : IDisposable
                 identity = JsonSerializer.Deserialize<Identity>(File.ReadAllText(manifest)) ?? throw new IOException("Missing aviation identity.");
             }
             if (identity.Version != 1 || identity.Id == Guid.Empty) throw new NotSupportedException("Unsupported aviation identity. Preserve this store.");
+            MigrateJobs();
             using var verified = Open(); using var check = verified.CreateCommand(); check.CommandText = "PRAGMA quick_check";
             if (check.ExecuteScalar() as string != "ok") throw new IOException("Aviation database integrity failed. Preserve it for recovery.");
         }

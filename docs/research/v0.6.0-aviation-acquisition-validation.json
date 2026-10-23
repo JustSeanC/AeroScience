@@ -1,0 +1,71 @@
+{
+  "version": 1,
+  "evidenceClass": "C-original-retention-only",
+  "source": "https://aeronav.faa.gov/visual/09-03-2026/sectional-files/Hawaiian_Islands.zip",
+  "edition": "09-03-2026",
+  "originalBytes": 27291624,
+  "originalSha256": "351107a94c53634014410bacec43253ed4117a77f34a952207c7a7bd9112680e",
+  "jobId": "9622a119-a337-4c97-88f4-87b9249683bf",
+  "measuredDownloadBytes": 27291624,
+  "chargedBytes": 27291624,
+  "verifiedFileCount": 12,
+  "rasters": [
+    {
+      "name": "Hawaiian Islands SEC.tif",
+      "width": 20186,
+      "height": 16370,
+      "bands": 1,
+      "crs": "PROJCS[\"Lambert Conformal Conic\",GEOGCS[\"NAD83\",DATUM[\"North_American_Datum_1983\",SPHEROID[\"GRS 1980\",6378137,298.257222101004,AUTHORITY[\"EPSG\",\"7019\"]],AUTHORITY[\"EPSG\",\"6269\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4269\"]],PROJECTION[\"Lambert_Conformal_Conic_2SP\"],PARAMETER[\"latitude_of_origin\",21],PARAMETER[\"central_meridian\",-157.5],PARAMETER[\"standard_parallel_1\",23.3333333333333],PARAMETER[\"standard_parallel_2\",20.6666666666667],PARAMETER[\"false_easting\",0],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH]]",
+      "sampleWindowShape": [
+        1,
+        8,
+        8
+      ]
+    },
+    {
+      "name": "Honolulu Inset SEC.tif",
+      "width": 5665,
+      "height": 4622,
+      "bands": 1,
+      "crs": "PROJCS[\"Lambert Conformal Conic\",GEOGCS[\"NAD83\",DATUM[\"North_American_Datum_1983\",SPHEROID[\"GRS 1980\",6378137,298.257222101004,AUTHORITY[\"EPSG\",\"7019\"]],AUTHORITY[\"EPSG\",\"6269\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4269\"]],PROJECTION[\"Lambert_Conformal_Conic_2SP\"],PARAMETER[\"latitude_of_origin\",21.1833333333333],PARAMETER[\"central_meridian\",-158],PARAMETER[\"standard_parallel_1\",20.6666666666667],PARAMETER[\"standard_parallel_2\",23.3333333333333],PARAMETER[\"false_easting\",0],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH]]",
+      "sampleWindowShape": [
+        1,
+        8,
+        8
+      ]
+    },
+    {
+      "name": "Mariana Islands Inset SEC.tif",
+      "width": 6178,
+      "height": 6198,
+      "bands": 1,
+      "crs": "PROJCS[\"Lambert Conformal Conic\",GEOGCS[\"NAD83\",DATUM[\"North_American_Datum_1983\",SPHEROID[\"GRS 1980\",6378137,298.257222101004,AUTHORITY[\"EPSG\",\"7019\"]],AUTHORITY[\"EPSG\",\"6269\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4269\"]],PROJECTION[\"Lambert_Conformal_Conic_2SP\"],PARAMETER[\"latitude_of_origin\",14.3],PARAMETER[\"central_meridian\",146.5],PARAMETER[\"standard_parallel_1\",9.33333],PARAMETER[\"standard_parallel_2\",14.66667],PARAMETER[\"false_easting\",0],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH]]",
+      "sampleWindowShape": [
+        1,
+        8,
+        8
+      ]
+    },
+    {
+      "name": "Samoan Islands Inset SEC.tif",
+      "width": 8976,
+      "height": 4143,
+      "bands": 1,
+      "crs": "PROJCS[\"Lambert Conformal Conic\",GEOGCS[\"NAD83\",DATUM[\"North_American_Datum_1983\",SPHEROID[\"GRS 1980\",6378137,298.257222101004,AUTHORITY[\"EPSG\",\"7019\"]],AUTHORITY[\"EPSG\",\"6269\"]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4269\"]],PROJECTION[\"Lambert_Conformal_Conic_2SP\"],PARAMETER[\"latitude_of_origin\",-13.933333],PARAMETER[\"central_meridian\",-171.333333333333],PARAMETER[\"standard_parallel_1\",-9.33333],PARAMETER[\"standard_parallel_2\",-14.66667],PARAMETER[\"false_easting\",0],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH]]",
+      "sampleWindowShape": [
+        1,
+        8,
+        8
+      ]
+    }
+  ],
+  "offlineProcess": "offline",
+  "limitations": [
+    "No chart rendering, printed control point, neatline or Windows native acceptance.",
+    "Catalog exact UTC validity remains Unknown.",
+    "No scientific source/mission/observation created."
+  ],
+  "rawEvidenceDirectory": "/workspace/AeroScience-060-P01-original-20261023-current",
+  "validationUtc": "2026-10-23",
+  "sourceRevision": "P01 implementation recorded in accompanying commit; sample acquisition before the CRC-table optimization, independent ZIP CRC/hash checks and offline reopening passed."
+}

@@ -54,7 +54,9 @@ public static class EngineApplication
         builder.Services.AddHostedService<ScientificDownlinkWorker>();
         builder.Services.AddSingleton(sp => new AviationReference(
             sp.GetRequiredService<EngineOptions>().ConfigurationDirectory ?? sp.GetRequiredService<EngineOptions>().DataDirectory,
-            sp.GetRequiredService<EngineOptions>().DataDirectory));
+            sp.GetRequiredService<EngineOptions>().DataDirectory,
+            flightActive: () => sp.GetRequiredService<MissionCoordinator>().Snapshot().ActiveMission is not null));
+        builder.Services.AddHostedService<AviationAcquisitionWorker>();
         builder.Services.AddSingleton(sp => new MapSettings(sp.GetRequiredService<EngineOptions>().ConfigurationDirectory ?? sp.GetRequiredService<EngineOptions>().DataDirectory));
         builder.Services.AddSingleton(sp => new ApplicationUpdates(sp.GetRequiredService<EngineOptions>().ConfigurationDirectory ?? sp.GetRequiredService<EngineOptions>().DataDirectory));
         builder.Services.AddHostedService<ApplicationUpdateWorker>();

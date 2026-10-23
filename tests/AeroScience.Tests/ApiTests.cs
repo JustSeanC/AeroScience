@@ -46,14 +46,17 @@ public sealed class ApiTests : IAsyncLifetime
     [Fact] public async Task AviationMetadataRequiresSessionAndCsrfAndKeepsReadsOfflineAndBounded()
     {
         Assert.Equal(HttpStatusCode.Unauthorized, (await client.GetAsync("/api/aviation/catalog/vfr")).StatusCode);
+        Assert.Equal(HttpStatusCode.Unauthorized, (await client.GetAsync("/api/aviation/downloads")).StatusCode);
         await Pair(client);
         var page = await client.GetFromJsonAsync<AviationReferencePage>("/api/aviation/catalog/vfr", WireJson.Options);
         Assert.Equal("Not searched", page!.Status); Assert.Empty(page.Charts); Assert.Null(page.Cache);
         Assert.Equal(HttpStatusCode.BadRequest, (await client.GetAsync("/api/aviation/catalog/vfr?offset=50000")).StatusCode);
         Assert.Equal(HttpStatusCode.BadRequest, (await client.GetAsync("/api/aviation/catalog/arbitrary-provider")).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, (await client.GetAsync("/api/aviation/downloads?offset=-1")).StatusCode);
         client.DefaultRequestHeaders.Remove("X-AeroScience-CSRF");
         Assert.Equal(HttpStatusCode.Forbidden, (await client.PostAsJsonAsync("/api/aviation/configuration", new AviationConsentRequest(true), WireJson.Options)).StatusCode);
         Assert.Equal(HttpStatusCode.Forbidden, (await client.PostAsJsonAsync("/api/aviation/catalog/tfr/refresh", new {}, WireJson.Options)).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, (await client.PostAsJsonAsync("/api/aviation/downloads/preview", new AviationPreviewRequest("vfr", "invalid", 1048576, 1048576), WireJson.Options)).StatusCode);
         using var missions = JsonDocument.Parse(await client.GetStringAsync("/api/missions"));
         Assert.Equal(0, missions.RootElement.GetArrayLength());
     }
