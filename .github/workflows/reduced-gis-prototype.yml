@@ -13,7 +13,6 @@ jobs:
     timeout-minutes: 90
     env:
       VCPKG_MAX_CONCURRENCY: '2'
-      VCPKG_DEFAULT_BINARY_CACHE: '${{ runner.temp }}/aeroscience-chart-vcpkg-cache'
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-dotnet@v6
@@ -22,6 +21,12 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
+      - name: Configure the bounded compiler cache path on this runner
+        shell: pwsh
+        run: |
+          $chartCache = Join-Path $env:RUNNER_TEMP 'aeroscience-chart-vcpkg-cache'
+          New-Item -ItemType Directory -Path $chartCache -Force | Out-Null
+          Add-Content $env:GITHUB_ENV "VCPKG_DEFAULT_BINARY_CACHE=$chartCache"
       - uses: actions/cache@v4
         with:
           path: '${{ runner.temp }}/aeroscience-chart-vcpkg-cache'
