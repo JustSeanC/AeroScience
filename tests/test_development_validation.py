@@ -21,6 +21,15 @@ class DevelopmentValidationTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             ci.validation_tier('workflow_dispatch', 'refs/heads/develop/v0.5.0', requested='none')
 
+    def test_v060_development_is_fast_but_milestones_and_other_branches_remain_full(self):
+        self.assertEqual('fast', ci.validation_tier('push', 'refs/heads/develop/v0.6.0'))
+        self.assertEqual('fast', ci.validation_tier('workflow_dispatch', 'refs/heads/develop/v0.6.0', requested='fast'))
+        self.assertEqual('full', ci.validation_tier('push', 'refs/heads/develop/v0.6.0', message='P01 [full-validation]'))
+        self.assertEqual('full', ci.validation_tier('workflow_dispatch', 'refs/heads/develop/v0.6.0', requested='full'))
+        self.assertEqual('full', ci.validation_tier('workflow_dispatch', 'refs/heads/develop/v0.6.0', requested='windows-profile'))
+        for ref in ('refs/heads/develop/v0.7.0', 'refs/heads/release/v0.5.0-acceptance', 'refs/heads/main', 'refs/tags/v0.6.0'):
+            self.assertEqual('full', ci.validation_tier('push', ref))
+
     def test_evidence_changes_keep_migration_archive_and_contract_coverage(self):
         selected = ci.plan(['src/AeroScience.Missions/MissionEvidenceStore.cs'])
         for name in ('EvidenceContractsTests', 'MissionEvidenceStoreTests', 'AlphaDataTests', 'ResearchTests', 'ScientificWorkspaceTests'):

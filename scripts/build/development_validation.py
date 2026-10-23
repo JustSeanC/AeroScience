@@ -10,14 +10,18 @@ import unittest
 ROOT = Path(__file__).resolve().parents[2]
 CORE = {'EvidenceContractsTests', 'MissionEvidenceStoreTests', 'MissionTests', 'ModeAndToolbarTests', 'ApiTests'}
 PORTABLE_ONLY = {'test_airport_search', 'test_toolbar_sources'}
+DEVELOPMENT_BRANCHES = {'develop/v0.5.0', 'develop/v0.6.0'}
 
 
 def validation_tier(event, ref, base='', requested='full', message=''):
     if event == 'workflow_dispatch':
         if requested not in {'fast', 'full', 'windows-profile'}:
             raise ValueError('Unknown validation tier; refusing an empty validation run.')
-        return requested if ref == 'refs/heads/develop/v0.5.0' else 'full'
-    development = ref == 'refs/heads/develop/v0.5.0' or base == 'develop/v0.5.0'
+        # The diagnostic profile retains its existing 0.5.0 identity; no new private build identity is implied.
+        if requested == 'windows-profile' and ref != 'refs/heads/develop/v0.5.0':
+            return 'full'
+        return requested if ref.removeprefix('refs/heads/') in DEVELOPMENT_BRANCHES else 'full'
+    development = ref.removeprefix('refs/heads/') in DEVELOPMENT_BRANCHES or base in DEVELOPMENT_BRANCHES
     return 'fast' if development and '[full-validation]' not in message else 'full'
 
 

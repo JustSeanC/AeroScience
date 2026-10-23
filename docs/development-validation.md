@@ -148,3 +148,7 @@ failure is a failed or missing genuine check; mocks never replace it. The indepe
 retains strict numeric/hash/CRS/affine/QA assertions and the reader's documented boundary
 snap. Hardware, installed Windows, physical paired devices and sustained operational
 acceptance remain separate. Existing release gates are unchanged.
+
+Routine `develop/v0.6.0` pushes use the same conservative fast selector as `develop/v0.5.0`.
+`[full-validation]` and manual full runs retain both platform suites and all release gates.
+The 0.5.0 private diagnostic identity is not renamed or extended to owner-facing 0.6.0 builds.
