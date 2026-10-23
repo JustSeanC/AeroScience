@@ -265,5 +265,73 @@
   },
   "currentParserOfflineReceiptSha256": "a7ed332103125868b8f73b79c3313f87fb11fd9f187f86bf43d927bd48232605",
   "scienceObservationsCreated": false,
-  "physicalAcceptance": "pending"
+  "physicalAcceptance": "pending",
+  "circleFollowUp": {
+    "sourceCommit": "02e8fe2a0653cef69d48ca0c6e0596248a83ba95",
+    "status": "genuine independent offline comparison passed; full hosted milestone pending",
+    "evidenceClass": "Actual application re-import of retained genuine FAA originals plus independent pyshp/Shapely/PROJ; not owner installed acceptance",
+    "aviationSchema": 5,
+    "priorSaaFeaturesPreserved": 901,
+    "newSaaFeatures": 941,
+    "omittedSaaRecords": 295,
+    "results": [
+      {
+        "family": "CLASS",
+        "edition": "2026-10-01",
+        "originalSha256": "7057b1a982d5dd5df4d92a5101d222854b415c5ad163d464de36d94100e20201",
+        "featuresCompared": 5610,
+        "originalCoordinateComponentsCompared": 24575338,
+        "originalAttributeFieldsChecked": 140250,
+        "maximumCoordinateDifference": 0.0,
+        "regions": {
+          "Massachusetts": 113,
+          "California": 550
+        },
+        "explicitUnsupportedRecords": 2,
+        "sourceCrs": "EPSG:4269 (NAD83; realization/epoch unspecified by FAA PRJ)"
+      },
+      {
+        "family": "SUA",
+        "edition": "2026-10-01",
+        "originalSha256": "5bd6c9221ec61d1a9af22b18fe4d59d9378d2c38859d9c1a3619c26ff00b657b",
+        "featuresCompared": 901,
+        "originalCoordinateComponentsCompared": 30340,
+        "originalAttributeFieldsChecked": 17119,
+        "maximumCoordinateDifference": 0.0,
+        "regions": {
+          "Massachusetts": 9,
+          "California": 131
+        },
+        "explicitUnsupportedRecords": 335,
+        "sourceCrs": "OGC:CRS84 (WGS84 longitude/latitude)"
+      },
+      {
+        "family": "SUA",
+        "edition": "2026-10-01",
+        "originalSha256": "5bd6c9221ec61d1a9af22b18fe4d59d9378d2c38859d9c1a3619c26ff00b657b",
+        "featuresCompared": 941,
+        "originalCoordinateComponentsCompared": 47462,
+        "originalAttributeFieldsChecked": 17919,
+        "maximumCoordinateDifference": 2.864289338439558e-14,
+        "regions": {
+          "Massachusetts": 9,
+          "California": 134
+        },
+        "explicitUnsupportedRecords": 295,
+        "sourceCrs": "OGC:CRS84 (WGS84 longitude/latitude)"
+      }
+    ],
+    "independentTools": {
+      "pyproj": "3.7.2",
+      "proj": "9.5.1",
+      "shapely": "2.1.2",
+      "pyshp": "2.3.1"
+    },
+    "rawEvidence": "/workspace/AeroScience-060-continuation-20261023/airspace-offline",
+    "limitations": [
+      "No live activation, TFR clearance, certified positional accuracy or owner-installed Windows acceptance.",
+      "SAA partial arcs/composites/contributor relationships remain unsupported and omitted; full geodesic circles independently compared with PROJ, not certified original boundary accuracy.",
+      "NAD83 coordinates preserved without claiming a precise WGS84 transformation."
+    ]
+  }
 }
