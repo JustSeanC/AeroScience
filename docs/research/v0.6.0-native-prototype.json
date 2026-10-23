@@ -50,13 +50,58 @@
     "independent8x8ByteWindowExact": true
   },
   "windowsCrossPublish": true,
-  "windowsNativeExecution": "Not tested",
+  "windowsNativeExecution": {
+    "status": "passed",
+    "sourceSha": "c2d42f860ed286991425ab01a81c32309e7c2dd2",
+    "run": "https://github.com/JustSeanC/AeroScience/actions/runs/39982236682",
+    "platform": "Windows 10.0.26100 / win-x64",
+    "selfContained": true,
+    "lockedRestore": true,
+    "gdal": "3.13.3",
+    "compressedNetCdfWindow": [
+      -9999,
+      6
+    ],
+    "genuineFaaPaletteWindowExact": true,
+    "independentCoordinateToleranceDegrees": 1e-09,
+    "elapsedSeconds": 0.6093018,
+    "peakResidentBytes": 63737856,
+    "limitations": "Not installed application, original EMIT, chart neatlines or printed control point acceptance."
+  },
   "productionDependencyAdded": false,
   "remaining": [
-    "Verify complete native component versions/notices and redistribution obligations, including bundled runtimes; NuGet MIT metadata alone is insufficient.",
-    "Actual Windows x64 native loading, NetCDF/HDF compression, self-contained package isolation and disposal/cancellation tests.",
-    "Main-body chart neatlines/printed control points, supported swath/group layouts and protected EMIT originals remain unassessed.",
-    "VersionInfo reports a placeholder released 2018/99/99; do not use that string as an authoritative release date."
+    "Complete native component inventory/notices and redistribution review or select a reduced independently built stack. Actual load success does not approve distribution.",
+    "Genuine main-body chart neatlines and printed control points across all families.",
+    "Native EMIT groups, cross-version companions, QA/uncertainty and GLT plus authorized original numerical acceptance."
   ],
-  "rawPrototypeDirectory": "/workspace/AeroScience-060-native-prototype"
+  "rawPrototypeDirectory": "/workspace/AeroScience-060-native-prototype",
+  "linuxHostedExecution": {
+    "status": "passed",
+    "run": "https://github.com/JustSeanC/AeroScience/actions/runs/39982236682",
+    "elapsedSeconds": 0.1329655,
+    "peakResidentBytes": 123715584,
+    "limitations": "GDAL Linux release-date string is a placeholder; not authoritative."
+  },
+  "distributionReview": {
+    "status": "blocked",
+    "wrapperSourceCommit": "55ffd9b17c9fadf9aadf3d21da0ed1e0c3f8bd00",
+    "vcpkgBaseline": "1391150599c0b9dc6f2a3c79c50eff6c94b077d1",
+    "confirmedBundledComponents": [
+      {
+        "name": "poppler",
+        "version": "26.4.0",
+        "license": "GPL-2.0-or-later"
+      },
+      {
+        "name": "libmysql",
+        "version": "8.0.46",
+        "license": "GPL-2.0-or-later"
+      },
+      {
+        "name": "msodbcsql17.dll",
+        "license": "Separate Microsoft terms; no bundled complete inventory"
+      }
+    ],
+    "recommendation": "Build and audit a reduced codec stack excluding unneeded GPL/proprietary drivers before adding a production dependency."
+  }
 }
