@@ -5,7 +5,7 @@ using AeroScience.Missions;
 
 namespace AeroScience.Engine;
 
-public sealed record UpdatePreferences(bool Automatic = true, bool IncludePrereleases = true);
+public sealed record UpdatePreferences(bool Automatic = true, bool IncludePrereleases = false);
 public sealed record AvailableRelease(string Version, string ReleaseUrl, string InstallerName, bool Prerelease);
 public sealed record UpdateSnapshot(string CurrentVersion, UpdatePreferences Preferences, AvailableRelease? Available = null,
     DateTimeOffset? LastCheckedUtc = null, string? Message = null, DateTimeOffset? RemindAfterUtc = null);

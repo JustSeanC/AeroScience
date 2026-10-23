@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "version": "0.5.0",
   "evidenceType": "genuine-downloaded-envi",
-  "checkedUtc": "2026-10-23T03:25:27.7188531+00:00",
+  "checkedUtc": "2026-10-23T11:12:35.7249179+00:00",
   "windowsMsfs": "not tested",
   "firstTimeUser": "not tested",
   "flightInput": "synthetic test position; not MSFS",
@@ -63,12 +63,12 @@
     "originalFilesPreserved": true,
     "offlineReopen": true,
     "duplicateReused": true,
-    "publishedProductSha256": "bb97e2a70b5bdad722dec233eeddbc9addcb6dcdc19dfde18410aeb9df2cefa6",
+    "publishedProductSha256": "81adbd2977165417c349e22263c7307a3c5fa9b5ed17964ed4bcb3ce96336a35",
     "validSamples": 97920
   },
   "independentComparison": {
     "evidenceType": "independent-genuine-envi-comparison",
-    "checkedUtc": "2026-10-23T03:25:29.209393+00:00",
+    "checkedUtc": "2026-10-23T11:12:37.168182+00:00",
     "tool": "rasterio 1.4.3 / GDAL 3.9.3",
     "checkedGoodBands": 170,
     "excludedBadBands": 54,
@@ -132,7 +132,7 @@
     "src/AeroScience.Engine/ScientificDownlinkWorker.cs": "23800951215cefce916e9d3155f192b43122a2b08150a3e723f47ba7d975f243",
     "src/AeroScience.Engine/ScientificDownlinkSignals.cs": "31a7826e7e3ea530999c1fac2112e638f7acf11478878086d4076f7c8bef55a6",
     "src/AeroScience.Missions/ScientificMapOverview.cs": "c4da1d52ee09b682ac39cee6429eeed78dc22f15ed8561e17096f42db2b301cf",
-    "Directory.Build.props": "61765965defcd3ad835fd3e7717c193ce50f34fbcbe1de92edbc0e2ba2ca9205",
+    "Directory.Build.props": "12dd594723d70dc7b3dd0a4e6c32a4d5e4129a8625aa45c80fb6a5958aed1b37",
     "global.json": "8abaad26584f555d7581405cc5e45e5bf4866a2c8b1fa64b937a42cf0c81d0ad",
     "scripts/release/complete_scientific_acceptance.py": "6dadfb78716dcd6a4376efb868d3f5b2bf95bc4dfda2fa65f3df1b6a4a777b4e",
     "scripts/release/record_envi_acceptance.py": "e89120a21ce452506f7f1f8a701105f7a8cf67732821c9665dc6420a01216347",
@@ -157,7 +157,7 @@
     "src/AeroScience.Engine/AccessControl.cs": "7c821fc351d33e8a6aea61cdfef571ff07b61d721a992d5eed7ba0ff19b6eca7",
     "src/AeroScience.Engine/AeroScience.Engine.csproj": "b339204a0592d959b21fb034b35d0baa5afd255a68a05011263c9b2f1990d8c2",
     "src/AeroScience.Engine/ApplicationProfile.cs": "9cbe61eecc834aa4cdd09dfb931980352e98fd692bcd630414362052b71154e9",
-    "src/AeroScience.Engine/ApplicationUpdates.cs": "c2df948ee51dbd7779eab4778c8d58a7b7ddd559dc80ab47fd82dad84ef45232",
+    "src/AeroScience.Engine/ApplicationUpdates.cs": "234414085f866d5d7b68c2f61d18b11b0c869ce1bd06d8664de5731f76de42da",
     "src/AeroScience.Engine/DataDirectoryLease.cs": "6d3e7fc8d056906fff1f3aa8cf0badc8f24696c7d822fd3e4ce5be9905297c0b",
     "src/AeroScience.Engine/DesktopActionGate.cs": "3963de758823548d8b6040ee08709e90405e12f323a13961131b8bcbd594e9dc",
     "src/AeroScience.Engine/DesktopActions.cs": "d06c6e8aaf942e15bc2333287b9073805fce98360a60a4d992cf9b8a0e6e0870",
@@ -264,15 +264,15 @@
   },
   "runProvenance": [
     {
-      "runId": "bef6dc94-891c-42fd-ab35-b2ca3c5694ca",
+      "runId": "2a9df287-5a23-48a3-a2a7-a450bc7a7c98",
       "status": "passed",
-      "sourceCommit": "f3ba55d98a37d9236d8bac842883d057603eb330",
-      "sourceManifestSha256": "1bab60d1463b142245f880304c8444155e54b61aef709008b981bc7680258888",
-      "receiptSha256": "f252e2aeac5110925279f6dca99bcf3dff64495a787cb3c796fd382008778bb5"
+      "sourceCommit": "8e4151e1cfe3c3af62a53174ac89d1abef92b3d8",
+      "sourceManifestSha256": "0cb7c83d31a015f5a72376c2f5f183457d27444a3e13faf4861655a21f99d0f6",
+      "receiptSha256": "5f032615983387968d8dc95b2960453767910a77ffb271187eeb39e97f04bc00"
     }
   ],
   "notes": "Actual public ENVI originals imported and sampled through production source/product pipeline. Original detector channels retained; 54 original bad bands excluded. Unknown acquisition date retained. No Windows/MSFS flight or uncoached-user acceptance asserted. Data files are not redistributed.",
-  "artifactSha256": "f9df08d27e97be28ae820b956c74ebd84a65998e12102de7240d3c33877a4bee",
+  "artifactSha256": "627568825faa622356f8bb35dd51c8ef6938caa223cc16b46b00456489b90257",
   "downloadedRangeBytes": 98717996,
   "downloadReceiptSha256": "254a29682d7a5031f2d95ac0600e3d9aee377afed54fad277ae830a56e1d2861"
 }

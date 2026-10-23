@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased — v0.5.0 development (draft; not published)
+## 0.5.0 — Scientific Mission Operations (stable source preparation; publication pending)
 
 - Versioned instrument calibration/reference definitions and optional validated user
   calibration keep original simulator/source values and separately attributed derivations.
@@ -30,7 +30,12 @@
 - Approved Orbital Arc branding across web, Windows, packaging and native assets;
   consolidated current documentation and preserved active 0.4.2 QA/scientific records.
 - Isolated private validation profile protects production installation/data and provides
-  a separate toolbar namespace. No new public installer or release is authorized.
+  a separate toolbar namespace. Private validation builds are not public release artifacts.
+- Correct the final Mission Planner payload layout and Geographic Survey recommendations:
+  Terrain Scanner and Multispectral Imager are primary; thermal, hyperspectral and atmospheric
+  context remain explicit optional additions. Preserve existing customized plans.
+- Prepare stable release identity and current 0.5.0 release notes. New installations default
+  to stable update discovery while preserving explicit existing prerelease preferences.
 - Correct guided ENVI acceptance ownership/offline reopening, execution-time source binding
   and atomic evidence recording. Fresh genuine four-provider, Library, 224-band Cuprite
   and independent workspace checks pass; these do not establish protected NASA originals
@@ -39,7 +44,9 @@
 See the [readiness report](docs/v0.5.0-readiness.md), [private build guide](docs/v0.5.0-private-validation.md)
 and [owner acceptance workbook](docs/v0.5.0-acceptance-workbook.md). Full technical CI,
 genuine public data, protected NASA originals and physical Windows/MSFS/iPad/Quest
-acceptance are separate results. No release date, hardware pass or publication is claimed.
+acceptance are separate results. The owner reports successful local Windows/MSFS testing and
+approves the tested version. Its source/installer hashes must be identified before claiming exact
+final-candidate acceptance; publication is authorized but remains gated on the official installer.
 
 
 ## 0.4.2 — Research Workstation & Scientific Visualization (development; acceptance pending)
