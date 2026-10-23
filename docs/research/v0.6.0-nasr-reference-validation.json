@@ -140,7 +140,7 @@
     "src/AeroScience.Engine/AviationAcquisition.cs": "6ba31012511e43819e7c7e1274ec09b36a7404ee98a877878c1b706787032d70",
     "src/AeroScience.Engine/AviationAcquisitionWorker.cs": "3dc4daa09cdd312ccdf602158171f693dd1d77cf5d09a09d09ccfbbe3028236f",
     "src/AeroScience.Engine/AviationNasr.cs": "e53051efa026a0cdd357d7ff5255d1e29c3558aa52bb1230b256504334024d00",
-    "src/AeroScience.Engine/AviationReference.cs": "dcb5c9c810dbc27225df8570d0d8e4c020f9e570372b3ac81f66f459ead3c2f8",
+    "src/AeroScience.Engine/AviationReference.cs": "66e8998f118f0d6df76a20d6594bd0060109118c383d3c82f74e97365c2b4eea",
     "src/AeroScience.Engine/DataDirectoryLease.cs": "6d3e7fc8d056906fff1f3aa8cf0badc8f24696c7d822fd3e4ce5be9905297c0b",
     "src/AeroScience.Engine/DesktopActionGate.cs": "3963de758823548d8b6040ee08709e90405e12f323a13961131b8bcbd594e9dc",
     "src/AeroScience.Engine/DesktopActions.cs": "d06c6e8aaf942e15bc2333287b9073805fce98360a60a4d992cf9b8a0e6e0870",
@@ -169,7 +169,7 @@
     "src/AeroScience.Missions/AviationCatalog.cs": "5eba176e2d41bda695ba626b3fdcf23ce40779767ac37f16c5526c0a44af79ad",
     "src/AeroScience.Missions/AviationDownloadStore.cs": "a99615108c1c7b0adc894d6c01f460fafab94a50d519e1f1c5ed9eb34603cbd0",
     "src/AeroScience.Missions/AviationDownloads.cs": "35e2270e51f0005f67bf531d6567cef644eee47826662a7f86b1c35e29c6342d",
-    "src/AeroScience.Missions/AviationMetadataStore.cs": "834acbad7d5e52bd531485334f01f61ece2ca0f7d21b6c08622b5cef1f046653",
+    "src/AeroScience.Missions/AviationMetadataStore.cs": "8f3dee72871691b286989788733b02d0d1048123ac9ef9a18342facc1153160f",
     "src/AeroScience.Missions/AviationNasr.cs": "3ce7c56f29bccab8e338aba7ffd1ac3e5aeef1e796f8f2dea1fff495f20995a4",
     "src/AeroScience.Missions/AviationNasrCatalog.cs": "645bb9d63f3b7390d28e0ceebc575e1620675c29a1eda505172b948f355b38cc",
     "src/AeroScience.Missions/AviationVectorStore.cs": "e5f08cc87d38eda6f5ba2ebed3b1b1220ed2ba9a1007b820bee77e5665b8b0ac",
@@ -280,7 +280,8 @@
     "exit": 0,
     "wallSeconds": 9.98240273500005,
     "peakResidentKiB": 410752,
-    "evidence": "Final parser/offline process with streaming full-inventory comparison and no retained complete runway row dictionaries."
+    "evidence": "Final parser/offline process with streaming full-inventory comparison and no retained complete runway row dictionaries.",
+    "sourceCommit": "b9d2536a900fdb85531447570f7a6d969e40f3b9"
   },
   "earlierAuditPeakKiB": 744564,
   "memoryCorrection": "Keep runway coordinates, not complete row dictionaries; stream audit geometry hashes. Final full-audit peak 410752 KiB; not a live map or large chart/EMIT benchmark.",
@@ -289,5 +290,17 @@
     "Class B/C/D/E and SUA polygons, altitude and activation semantics.",
     "Precise NAD83 realization/epoch-to-WGS84 transformation is not claimed.",
     "Owner-installed SDK/MSFS, physical iPad Safari and Quest acceptance."
-  ]
+  ],
+  "executionSourceCommit": "a34fa01da38630809b3963e1eadbc1ba5199adfd",
+  "revalidatedUtc": "2026-10-23T17:52:25.173467+00:00",
+  "independentReceiptSha256": "d6c969b9c8446e6ff259e651ccd8e3fa2645a9cb4cfcd8adbda3954f8934f857",
+  "integrityHotPathBenchmark": {
+    "sourceCommit": "a34fa01da38630809b3963e1eadbc1ba5199adfd",
+    "genuineDatabaseBytes": 97320960,
+    "reads": 20,
+    "defaultFullCheckSeconds": 1.2649761,
+    "verifiedInitializationReuseSeconds": 0.0224583,
+    "sameInventories": true,
+    "limitation": "Application inventory reads on retained genuine references; not a large-raster or simulator performance acceptance."
+  }
 }
