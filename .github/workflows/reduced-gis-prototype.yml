@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   push:
     branches: [develop/v0.6.0]
-    paths: ['tests/AeroScience.ReducedGisProbe/**', '.github/workflows/reduced-gis-prototype.yml']
+    paths: ['tests/AeroScience.ReducedGisProbe/**', 'scripts/build/chart_runtime.py', '.github/workflows/reduced-gis-prototype.yml']
 permissions:
   contents: read
 jobs:
@@ -46,6 +46,9 @@ jobs:
           # Retain source/license evidence, never native binaries or original charts.
           $notices = Get-ChildItem "$codecInstall/x64-windows-research/share" -Filter copyright -Recurse | ForEach-Object { "`nCOMPONENT: $($_.Directory.Name)`n"; Get-Content $_.FullName -Raw }
           $notices | Set-Content artifacts/reduced-gis/component-copyrights.txt
+          python scripts/build/chart_runtime.py assemble --install "$codecInstall/x64-windows-research" --output "$env:RUNNER_TEMP/chart-runtime-complete" --port-receipt artifacts/reduced-gis/port-receipt.json --source-sha $env:GITHUB_SHA
+          if ($LASTEXITCODE -ne 0) { throw 'Complete runtime/data/static-notice inventory failed.' }
+          Copy-Item "$env:RUNNER_TEMP/chart-runtime-complete/manifest.json" artifacts/reduced-gis/distribution-manifest.json
       - name: Publish locked self-contained probe and exercise the genuine FAA original
         shell: pwsh
         run: |
@@ -58,9 +61,9 @@ jobs:
           # Deploy only the owned DLLs and required CRS database into isolated scratch.
           # Do not rely on runner-installed GDAL/Python/VC runtime or a vcpkg data path.
           $isolated = Join-Path $env:RUNNER_TEMP 'reduced-gis-isolated'
-          New-Item -ItemType Directory -Path "$isolated/bin","$isolated/share/proj","$isolated/share/gdal" -Force | Out-Null
-          Copy-Item "$env:REDUCED_GIS_INSTALL/bin/*.dll" "$isolated/bin"
-          Copy-Item "$env:REDUCED_GIS_INSTALL/share/proj/proj.db" "$isolated/share/proj"
+          Copy-Item "$env:RUNNER_TEMP/chart-runtime-complete" $isolated -Recurse
+          python scripts/build/chart_runtime.py verify --folder $isolated
+          if ($LASTEXITCODE -ne 0) { throw 'Copied distribution manifest/hash/import verification failed.' }
           python tests/AeroScience.ReducedGisProbe/inspect_native.py --folder "$isolated/bin" --output artifacts/reduced-gis/native-imports.json
           if ($LASTEXITCODE -ne 0) { throw 'Native import/deployment inventory incomplete.' }
           python tests/AeroScience.GisProbe/prepare_faa_sample.py --output "$env:RUNNER_TEMP/reduced-gis-original"
