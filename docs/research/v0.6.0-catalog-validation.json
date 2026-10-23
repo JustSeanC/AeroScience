@@ -1,0 +1,106 @@
+{
+  "formatVersion": 1,
+  "evidenceClass": "B real service/SQLite + genuine FAA public metadata; not class C geographic/numeric or class D owner acceptance",
+  "results": [
+    {
+      "kind": "vfr",
+      "total": 184,
+      "products": {
+        "TerminalArea": 60,
+        "Sectional": 106,
+        "Helicopter": 18
+      },
+      "metadataSha256": "ad835a0decf208b151252deb688bb47e1878c49f5af31fe98f916f1df3807fab"
+    },
+    {
+      "kind": "ifr",
+      "total": 96,
+      "products": {
+        "IfrLow": 72,
+        "IfrHigh": 24
+      },
+      "metadataSha256": "a174100565ada3963d8904ce62d3e34b14fd9e9c499422f470733148bd8758c1"
+    },
+    {
+      "kind": "tfr",
+      "total": 76,
+      "geometry": "Not provided",
+      "metadataSha256": "d94dff260edbad47bbfea81d8897adb1ca590df0d49ad06071ff6db8698ece03"
+    },
+    {
+      "kind": "vfr",
+      "live": true,
+      "Status": "Not searched",
+      "Total": 0,
+      "Cache": {
+        "Available": true,
+        "StoreId": "2d9267de-c0b1-41ee-ad9c-12c1deed2e2b",
+        "LastSuccessUtc": null,
+        "LastAttemptUtc": "2026-10-23T01:09:35.9555909+00:00",
+        "Error": "Timeout",
+        "DatabaseBytes": 57344
+      },
+      "firstPageCount": 0
+    },
+    {
+      "kind": "ifr",
+      "live": true,
+      "Status": "Cached",
+      "Total": 96,
+      "Cache": {
+        "Available": true,
+        "StoreId": "2d9267de-c0b1-41ee-ad9c-12c1deed2e2b",
+        "LastSuccessUtc": "2026-10-23T01:09:56.1578577+00:00",
+        "LastAttemptUtc": "2026-10-23T01:09:55.9791414+00:00",
+        "Error": null,
+        "DatabaseBytes": 106496
+      },
+      "firstPageCount": 50
+    },
+    {
+      "kind": "tfr",
+      "live": true,
+      "Status": "Cached",
+      "Total": 76,
+      "Cache": {
+        "Available": true,
+        "StoreId": "2d9267de-c0b1-41ee-ad9c-12c1deed2e2b",
+        "LastSuccessUtc": "2026-10-23T01:09:56.8232183+00:00",
+        "LastAttemptUtc": "2026-10-23T01:09:56.2106027+00:00",
+        "Error": null,
+        "DatabaseBytes": 126976
+      },
+      "firstPageCount": 50
+    },
+    {
+      "kind": "vfr",
+      "offline": true,
+      "Status": "Not searched",
+      "Total": 0
+    },
+    {
+      "kind": "ifr",
+      "offline": true,
+      "Status": "Offline cached",
+      "Total": 96
+    },
+    {
+      "kind": "tfr",
+      "offline": true,
+      "Status": "Offline cached",
+      "Total": 76
+    }
+  ],
+  "sourceSha256": {
+    "src/AeroScience.Shared/AviationModels.cs": "bc232acc1027f8253850e3b114d04c1be4cb4f678d3c12c78b406598d43e4faa",
+    "src/AeroScience.Missions/AviationCatalog.cs": "514a82454f35a169b8c0328155dfed37cfd89340f078755218ea3def3664f671",
+    "src/AeroScience.Missions/AviationMetadataStore.cs": "1b301866758a31eb22d9d77fb1e7dedb9e31e9321b4dfcec9505bea134b71f22",
+    "src/AeroScience.Engine/AviationReference.cs": "62111ab3c31cf88a391dcb9c66fa67d57519f7aea6f62e2ed790c23c2072c79b"
+  },
+  "limitations": [
+    "No chart originals are downloaded by these metadata APIs.",
+    "No TFR polygons, activation UTC or altitude inferred.",
+    "Aviation original acquisition/jobs/storage management and chart rendering are not yet implemented.",
+    "No genuine NASA numeric or installed Windows/MSFS/iPad/Quest acceptance."
+  ]
+}

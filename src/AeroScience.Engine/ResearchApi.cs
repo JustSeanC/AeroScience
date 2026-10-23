@@ -10,6 +10,7 @@ public sealed record PerformanceRevisionRequest(string Reason);
 public sealed record SciencePauseRequest(bool Paused);
 public sealed record MapLayerRequest(string Layer);
 public sealed record MapPrivacyRequest(bool Online);
+public sealed record AviationConsentRequest(bool OnlineEnabled);
 public sealed record ProtectionRequest(bool Protected);
 public sealed record SourceSelectionRequest(Guid SourceId,bool Enabled);
 public sealed record SourceModeRequest(RemoteKind Kind,string Mode);
@@ -22,6 +23,10 @@ public static class ResearchApi
 {
     public static void MapResearchEndpoints(this WebApplication app)
     {
+        app.MapGet("/api/aviation/configuration", (AviationReference aviation, HttpContext c) => new { configuration = aviation.Configuration(), canConfigure = AccessControl.IsLoopback(c) });
+        app.MapPost("/api/aviation/configuration", (AviationConsentRequest request, AviationReference aviation, HttpContext c) => AccessControl.IsLoopback(c) ? Results.Ok(aviation.Configure(request.OnlineEnabled)) : Results.StatusCode(403));
+        app.MapGet("/api/aviation/catalog/{kind}", (string kind, int? offset, AviationReference aviation) => aviation.Page(kind, offset ?? 0));
+        app.MapPost("/api/aviation/catalog/{kind}/refresh", (string kind, AviationReference aviation, HttpContext c) => aviation.Refresh(kind, c.RequestAborted));
         app.MapGet("/api/storage/management", (StorageManagement storage) => storage.Snapshot());
         app.MapPost("/api/storage/refresh", (StorageManagement storage, HttpContext c) => AccessControl.IsLoopback(c) ? Results.Ok(storage.Snapshot(true)) : Results.StatusCode(403));
         app.MapPost("/api/storage/preferences", (StorageLimits preferences, StorageManagement storage, HttpContext c) => AccessControl.IsLoopback(c) ? Results.Ok(storage.Configure(preferences)) : Results.StatusCode(403));
