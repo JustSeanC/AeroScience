@@ -11,3 +11,7 @@
 /src/AeroScience.Engine/wwwroot/icon.svg -text
 /src/AeroScience.Engine/wwwroot/branding/** -text
 /msfs-toolbar/PackageSources/html_ui/icons/toolbar/ICON_AEROSCIENCE.svg -text
+
+# Reviewed upstream notices are hashed as original bytes, never canonicalized.
+/tests/AeroScience.SafeHdfSource/LICENSE.md -text
+/tests/AeroScience.SafeHdfSource/3rd-party-licenses.md -text

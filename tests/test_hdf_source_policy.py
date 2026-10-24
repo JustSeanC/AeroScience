@@ -1,6 +1,7 @@
 """Synthetic preparation/manifest controls. Actual pinned C# execution is a separate workflow."""
 import importlib.util
 import json
+import subprocess
 from pathlib import Path
 import tempfile
 import unittest
@@ -74,6 +75,23 @@ class RestrictedHdfSourceTests(unittest.TestCase):
         self.assertEqual(recipe['commit'], 'c2cea464ad2a6649258ab14c8d798cb6239b9e1e')
         for name, expected in recipe['notices'].items():
             self.assertEqual(policy.digest((ROOT/'tests/AeroScience.SafeHdfSource'/name).read_bytes()), expected)
+
+    def test_windows_autocrlf_checkout_preserves_exact_reviewed_notice_bytes(self):
+        recipe = json.loads(policy.RECIPE.read_text())
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary); repository = root/'source'; repository.mkdir()
+            (repository/'.gitattributes').write_bytes((ROOT/'.gitattributes').read_bytes())
+            for name in recipe['notices']:
+                path = repository/'tests/AeroScience.SafeHdfSource'/name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_bytes((ROOT/'tests/AeroScience.SafeHdfSource'/name).read_bytes())
+            def git(*args):
+                subprocess.run(['git', '-C', str(repository), '-c', 'core.autocrlf=true', *args], check=True, capture_output=True, text=True)
+            git('init'); git('add', '.')
+            output = root/'checkout'; output.mkdir()
+            git('checkout-index', '--all', '--prefix='+output.as_posix()+'/')
+            for name, expected in recipe['notices'].items():
+                self.assertEqual(policy.digest((output/'tests/AeroScience.SafeHdfSource'/name).read_bytes()), expected)
 
 
 if __name__ == '__main__':
