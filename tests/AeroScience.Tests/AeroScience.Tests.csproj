@@ -7,6 +7,9 @@
     <PackageReference Include="xunit" Version="2.9.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5"><PrivateAssets>all</PrivateAssets></PackageReference>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="../AeroScience.ManagedHdfProbe/synthetic-emit-*.nc;../AeroScience.ManagedHdfProbe/security-fixtures/*.nc;../AeroScience.HdfFixtures/*.nc" Link="HdfFixtures/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
   <ItemGroup><None Update="ProviderMetadata/*.json" CopyToOutputDirectory="PreserveNewest" /></ItemGroup>
   <ItemGroup>
     <Compile Include="../AeroScience.ProviderAcceptance/GuidedEnviAcceptance.cs" Link="Acceptance/GuidedEnviAcceptance.cs" />

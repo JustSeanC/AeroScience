@@ -36,7 +36,7 @@ public sealed partial class AviationReference
     private int pendingChartTiles;
     private readonly Dictionary<string,AviationChartRaster.Description> chartDescriptions = new(StringComparer.Ordinal);
     private const long ChartCacheBytes = 128L * 1024 * 1024;
-    public async Task<AviationChartPage> ChartSheets(int offset = 0, CancellationToken token = default)
+    public async Task<AviationChartPage> ChartSheets(int offset = 0, CancellationToken token = default, bool researchRendering = false)
     {
         if(offset<0||offset>10000||offset%50!=0)throw new ArgumentException("Use bounded 50-sheet pages.");
         // Existing durable-job page is authoritative. Reads never search FAA or download originals.
@@ -47,10 +47,10 @@ public sealed partial class AviationReference
         foreach (var (job,file) in originals)
         {
             token.ThrowIfCancellationRequested(); var definition=knownCharts.SingleOrDefault(d=>d.Sha256==file.Sha256&&d.FileName==file.Name); var id=definition?.Id??file.Sha256[..24]+"-"+AviationChartDefinition.FileIdentity(file.Name)+"-unreviewed";
-            var state=definition is null?"Main body not reviewed":!chartRaster.Available?"Runtime unavailable":"Not yet rendered";
-            var explanation=definition?.Evidence??"This exact raster/edition has no reviewed main-body clip. Original retained; no geographic placement was guessed.";
+            var state=!researchRendering?"Rendering deferred by owner":definition is null?"Main body not reviewed":!chartRaster.Available?"Runtime unavailable":"Not yet rendered";
+            var explanation=!researchRendering?"Chart rendering is deferred for v0.6.0. Original files, hashes, editions and offline retention remain available.":definition?.Evidence??"This exact raster/edition has no reviewed main-body clip. Original retained; no geographic placement was guessed.";
             AviationChartRaster.Description? description=null;
-            if(definition is not null && chartRaster.Available)
+            if(researchRendering && definition is not null && chartRaster.Available)
             {
                 var key=job.Id.ToString("N")+definition.Id;
                 lock(chartDescriptions)chartDescriptions.TryGetValue(key,out description);
@@ -74,7 +74,7 @@ public sealed partial class AviationReference
             sheets.Add(new(id,job.Id,file.Name,item.Product.ToString(),item.Edition,file.Sha256,state,explanation,
                 description?.MainBody.Select(p=>new Coordinates(p.Latitude,p.Longitude)).ToArray()??[],description?.Crs,item.EffectiveUtc,item.ExpiresUtc,currency));
         }
-        return new(1,offset,originals.Length==50?offset+50:null,chartRaster.Available,sheets.ToArray(),
+        return new(1,offset,originals.Length==50?offset+50:null,researchRendering && chartRaster.Available,sheets.ToArray(),
             "Retained aviation originals only. Choose an exact sheet/edition; overlapping sheets remain independent. Supersession/current operational validity is unverified. Bounded 50-sheet pages; unreviewed insets remain explicit.",
             [AviationChartSheets.Limitations,"Runtime/data/source integrity and full chart acceptance are separate. No science or flight evidence is created."]);
     }
@@ -85,8 +85,9 @@ public sealed partial class AviationReference
         if(new FileInfo(path).Length!=file.Bytes)throw new IOException("Retained chart file changed.");
         return path;
     }
-    public async Task<byte[]> ChartTile(Guid jobId,string sheetId,int zoom,int x,int y,CancellationToken token=default)
+    public async Task<byte[]> ChartTile(Guid jobId,string sheetId,int zoom,int x,int y,CancellationToken token=default,bool researchRendering=false)
     {
+        if(!researchRendering)throw new NotSupportedException("Chart rendering is deferred by owner decision for v0.6.0; retained originals are unchanged.");
         if(zoom is <3 or >15||x<0||y<0||x>=1<<zoom||y>=1<<zoom)throw new ArgumentException("Choose bounded chart tile coordinates.");
         var definition=knownCharts.SingleOrDefault(d=>d.Id==sheetId)??throw new ArgumentException("Unreviewed chart sheet identity.");
         AviationDownloadJob job;lock(gate){using var store=Open(Preferences());job=store.Job(jobId);}

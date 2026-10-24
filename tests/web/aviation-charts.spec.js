@@ -12,7 +12,9 @@ async function acquire(request){
 }
 test('approved originals provide local chart overlays, independent science, offline tiles and exact edition selection',async({page,request})=>{
  const jobId=await acquire(request),sources=await(await request.get('/api/science/sources')).json();await post(request,'/api/aviation/configuration',{onlineEnabled:false});
- const inventory=await(await request.get('/api/aviation/charts')).json();const sheet=inventory.sheets.find(s=>s.jobId===jobId&&s.state==='Reviewed interior available');expect(sheet).toBeTruthy();
+ const inventory=await(await request.get('/api/aviation/charts')).json();
+ test.skip(inventory.sheets.filter(s=>s.jobId===jobId).every(s=>s.state==='Rendering deferred by owner'),'Owner deferred the ordinary chart viewer; retained research renderer coverage remains in AviationChartTests.');
+ const sheet=inventory.sheets.find(s=>s.jobId===jobId&&s.state==='Reviewed interior available');expect(sheet).toBeTruthy();
  const calls=(await(await request.get('/api/testing/aviation')).json()).calls;
  await page.goto('/#planner');const planner=page.locator('#planner');await planner.getByRole('button',{name:'Overlays & Legend',exact:true}).click();
  const layers=page.getByRole('dialog',{name:'Map Overlays & Legend',exact:true});await layers.getByRole('button',{name:'Retained FAA Charts',exact:true}).click();
@@ -28,9 +30,22 @@ test('approved originals provide local chart overlays, independent science, offl
 });
 test('unknown runtime is honest and chart inventory remains accessible at tablet width without altering saved data',async({page,request})=>{
  const id=await acquire(request);await post(request,'/api/testing/aviation/normal');await post(request,'/api/aviation/configuration',{onlineEnabled:false});
- const inventory=await(await request.get('/api/aviation/charts')).json();expect(inventory.runtimeAvailable).toBe(false);expect(inventory.sheets.filter(s=>s.jobId===id).every(s=>s.mainBody.length===0)).toBe(true);
+ const inventory=await(await request.get('/api/aviation/charts')).json();
+ test.skip(inventory.sheets.filter(s=>s.jobId===id).every(s=>s.state==='Rendering deferred by owner'),'Owner deferred the ordinary chart viewer; the active deferral scenario checks retention, tablet accessibility and other overlays.');
+ expect(inventory.runtimeAvailable).toBe(false);expect(inventory.sheets.filter(s=>s.jobId===id).every(s=>s.mainBody.length===0)).toBe(true);
  await page.setViewportSize({width:390,height:740});await page.goto('/#planner');const planner=page.locator('#planner');await planner.getByRole('button',{name:'Overlays & Legend',exact:true}).click();
  const layers=page.getByRole('dialog',{name:'Map Overlays & Legend',exact:true});await layers.getByRole('button',{name:'Retained FAA Charts',exact:true}).click();const dialog=page.getByRole('dialog',{name:'Retained FAA Charts',exact:true});
  await expect(dialog).toContainText('Runtime unavailable');expect((await new AxeBuilder({page}).include('dialog[aria-label="Retained FAA Charts"]').analyze()).violations).toEqual([]);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy();
  await page.keyboard.press('Escape');await expect(layers.getByRole('button',{name:'Retained FAA Charts',exact:true})).toBeFocused();await page.keyboard.press('Escape');await expect(planner.getByRole('button',{name:'Overlays & Legend',exact:true})).toBeFocused();
+});
+
+test('deferred chart viewer preserves approved originals, offline metadata, FAA and TFR controls',async({page,request})=>{
+ const jobId=await acquire(request),sources=await(await request.get('/api/science/sources')).json();await post(request,'/api/aviation/configuration',{onlineEnabled:false});
+ const inventory=await(await request.get('/api/aviation/charts')).json();expect(inventory.runtimeAvailable).toBe(false);expect(inventory.sheets.filter(s=>s.jobId===jobId)).toHaveLength(2);expect(inventory.sheets.filter(s=>s.jobId===jobId).every(s=>s.state==='Rendering deferred by owner'&&s.mainBody.length===0)).toBe(true);
+ const before=await(await request.get('/api/aviation/downloads')).json();let chartReads=0;page.on('request',r=>{if(r.url().includes('/api/aviation/charts'))chartReads++;});
+ await page.setViewportSize({width:390,height:740});await page.goto('/#planner');const planner=page.locator('#planner');await planner.getByRole('button',{name:'Overlays & Legend',exact:true}).click();
+ const layers=page.getByRole('dialog',{name:'Map Overlays & Legend',exact:true});await expect(layers).toContainText('Chart rendering is deferred');await expect(layers.getByRole('button',{name:'Retained FAA Charts',exact:true})).toHaveCount(0);await expect(layers.getByRole('button',{name:'FAA Catalog & Notices',exact:true})).toBeVisible();await expect(layers.getByRole('button',{name:'TFR Boundaries & Screening',exact:true})).toBeVisible();
+ expect((await new AxeBuilder({page}).include('dialog[aria-label="Map Overlays & Legend"]').analyze()).violations).toEqual([]);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.keyboard.press('Escape');await expect(planner.getByRole('button',{name:'Overlays & Legend',exact:true})).toBeFocused();
+ const tile=await request.get(`/api/aviation/charts/${jobId}/any-sheet/5/9/12.png`);expect(tile.status()).toBe(410);expect(await tile.text()).toContain('deferred');
+ expect(chartReads).toBe(0);expect(await(await request.get('/api/aviation/downloads')).json()).toEqual(before);expect(await(await request.get('/api/science/sources')).json()).toEqual(sources);expect((await(await request.get('/api/state')).json()).activeMission).toBeNull();
 });

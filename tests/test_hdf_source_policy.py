@@ -14,6 +14,28 @@ spec.loader.exec_module(policy)
 
 
 class RestrictedHdfSourceTests(unittest.TestCase):
+    def test_production_fork_verifies_all_pins_and_rejects_unreviewed_code(self):
+        import shutil
+        recipe = ROOT/'src/AeroScience.HdfReader/source-policy.json'
+        original = ROOT/'src/AeroScience.HdfReader/Vendor/PureHDF'
+        self.assertEqual(policy.verify(original, recipe)['verifiedFiles'], 275)
+        config = json.loads(recipe.read_text())
+        self.assertEqual(config['policyVersion'], 2)
+        self.assertEqual(len(config['patchedSha256']), 6)
+        with tempfile.TemporaryDirectory() as temporary:
+            output = Path(temporary)/'fork'; shutil.copytree(original, output)
+            (output/'Source/Filters/H5Filter.cs').write_bytes(b'UNREVIEWED')
+            with self.assertRaises(ValueError):
+                policy.verify(output, recipe)
+
+    def test_synthetic_resource_and_numeric_originals_match_pinned_provenance(self):
+        import hashlib
+        for name in ['provenance.json', 'numeric-provenance.json']:
+            info = json.loads((ROOT/'tests/AeroScience.HdfFixtures'/name).read_text())
+            original = ROOT/'tests/AeroScience.HdfFixtures'/info['file']
+            self.assertEqual(original.stat().st_size, info['bytes'])
+            self.assertEqual(hashlib.sha256(original.read_bytes()).hexdigest(), info['sha256'])
+
     def test_exact_patch_rejects_missing_and_duplicate_sites(self):
         self.assertEqual(policy.replace_once('a POLICY b', 'POLICY', 'REJECT'), 'a REJECT b')
         for value in ['absent', 'POLICY POLICY']:

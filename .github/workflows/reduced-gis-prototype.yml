@@ -1,9 +1,7 @@
 name: reduced-gis-prototype
 on:
   workflow_dispatch:
-  push:
-    branches: [develop/v0.6.0]
-    paths: ['tests/AeroScience.ReducedGisProbe/**', 'src/AeroScience.Missions/AviationChartRaster.cs', 'scripts/build/chart_runtime.py', '.github/workflows/reduced-gis-prototype.yml']
+  # Chart rendering is deferred by owner decision. Research is manual only.
 permissions:
   contents: read
 jobs:

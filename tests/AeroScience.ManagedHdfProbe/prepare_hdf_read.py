@@ -1,6 +1,8 @@
-"""Hash-verify pinned PureHDF source and apply pre-resolution restrictions, research only.
+"""Hash-verify PureHDF source and apply exact, source-pinned read restrictions.
 
-No network access or app/installer modification. The caller supplies an exact source tree.
+Default policy preserves historical research; --recipe selects the reviewed bounded foundation.
+Neither receipt asserts NASA product/import acceptance. No network access or installer modification.
+The caller supplies an exact source tree.
 Never edit upstream or reuse/overwrite an existing generated source directory.
 """
 import argparse
@@ -31,11 +33,11 @@ def replace_once(source, old, new):
     return source.replace(old, new)
 
 
-def prepare(upstream, output):
+def prepare(upstream, output, recipe_path=None):
     upstream, output = ordinary(Path(upstream).absolute()), ordinary(Path(output).absolute())
     if output.exists():
         raise ValueError('Preserve the generated policy source; choose an unused output directory.')
-    recipe = json.loads(RECIPE.read_text(encoding='utf-8'))
+    recipe = json.loads((recipe_path or RECIPE).read_text(encoding='utf-8'))
     source = upstream / 'src/PureHDF'
     inventory = {p.relative_to(source).as_posix(): p for p in source.rglob('*.cs') if not {'bin', 'obj'}.intersection(p.relative_to(source).parts)}
     if set(inventory) != set(recipe['files']):
@@ -94,11 +96,15 @@ def prepare(upstream, output):
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]''')
+    if recipe.get('boundedDecoder'):
+        patch('Filters/H5Filter.cs', '            using var sourceStream = new MemorySpanStream(info.Buffer);\n            using var decompressedStream = new MemoryStream(capacity: info.ChunkSize /* minimum size to expect */);\n            using var decompressionStream = new ZLibStream(sourceStream, CompressionMode.Decompress);\n\n            decompressionStream.CopyTo(decompressedStream);', '            if (info.ChunkSize < 1 || info.ChunkSize > 4194304)\n                throw new NotSupportedException("AeroScience rejects decompressed HDF chunks above 4 MiB.");\n            using var sourceStream = new MemorySpanStream(info.Buffer);\n            using var decompressedStream = new MemoryStream(capacity: info.ChunkSize);\n            using var decompressionStream = new ZLibStream(sourceStream, CompressionMode.Decompress);\n            var scratch = new byte[8192];\n            int read;\n            while ((read = decompressionStream.Read(scratch, 0, scratch.Length)) != 0)\n            {\n                if (decompressedStream.Length + read > info.ChunkSize + 4L)\n                    throw new NotSupportedException("AeroScience rejects decompressed HDF chunks above their declared size.");\n                decompressedStream.Write(scratch, 0, read);\n            }\n            // Fletcher32 may precede deflate in the publisher\'s filter order.\n            // Its four intermediate checksum bytes are removed by that filter;\n            // the final decoded chunk is checked exactly in H5D_Chunk.')
+        patch('VOL/Native/H5D/H5D_Chunk.cs', '                        (int)ChunkByteSize,\n                        buffer);', '                        (int)ChunkByteSize,\n                        buffer);\n                    if (chunk.Length != (int)ChunkByteSize)\n                        throw new InvalidDataException("HDF decoded chunk length differs from its declared size.");')
+        patch('VOL/Native/API.Reading/NativeDataset.cs', '        if (InternalDataLayout.LayoutClass == LayoutClass.VirtualStorage)\n            throw new NotSupportedException("AeroScience rejects HDF virtual storage before resolution.");', '        if (InternalDataLayout.LayoutClass == LayoutClass.VirtualStorage)\n            throw new NotSupportedException("AeroScience rejects HDF virtual storage before resolution.");\n        if (InternalFilterPipeline is { } pipeline &&\n            (pipeline.FilterDescriptions.Length > 3 ||\n             pipeline.FilterDescriptions.Any(f => f.Identifier is not (1 or 2 or 3) || f.ClientData.Length > 4) ||\n             pipeline.FilterDescriptions.Select(f => f.Identifier).Distinct().Count() != pipeline.FilterDescriptions.Length))\n            throw new NotSupportedException("AeroScience rejects unsupported HDF filter pipelines before decoding.");')
     for name, data in values.items():
         if digest(data) != recipe['patchedSha256'].get(name, recipe['files'][name]):
             raise ValueError('Prepared policy source does not match its reviewed hash.')
     receipt = {'formatVersion': 1, 'evidenceClass': 'Pinned source-level restrictions; not production importer or genuine NASA acceptance',
-               'upstreamCommit': recipe['commit'], 'assembly': 'AeroScience.Hdf.SafeRead', 'policyVersion': 1,
+               'upstreamCommit': recipe['commit'], 'assembly': 'AeroScience.Hdf.SafeRead', 'policyVersion': recipe.get('policyVersion', 1),
                'files': [{'name': name, 'originalSha256': recipe['files'][name], 'preparedSha256': digest(data), 'bytes': len(data)} for name, data in sorted(values.items())],
                'productionApproved': False}
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -118,9 +124,9 @@ def prepare(upstream, output):
     return {'upstreamCommit': recipe['commit'], 'files': len(values), 'patchedFiles': [r['name'] for r in receipt['files'] if r['originalSha256'] != r['preparedSha256']], 'productionApproved': False}
 
 
-def verify(output):
+def verify(output, recipe_path=None):
     output = ordinary(Path(output).absolute())
-    recipe = json.loads(RECIPE.read_text(encoding='utf-8'))
+    recipe = json.loads((recipe_path or RECIPE).read_text(encoding='utf-8'))
     files = {p.relative_to(output / 'Source').as_posix(): p for p in (output / 'Source').rglob('*') if p.is_file() or p.is_symlink()}
     if set(files) != set(recipe['files']):
         raise ValueError('Generated restricted-source inventory changed.')
@@ -140,8 +146,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--source', type=Path)
     parser.add_argument('--verify', action='store_true')
+    parser.add_argument('--recipe', type=Path, help='Explicit reviewed production policy; default preserves historical research policy.')
     parser.add_argument('--output', required=True, type=Path)
     args = parser.parse_args()
     if not args.verify and args.source is None:
         parser.error("--source is required when preparing.")
-    print(json.dumps(verify(args.output) if args.verify else prepare(args.source, args.output)))
+    print(json.dumps(verify(args.output,args.recipe) if args.verify else prepare(args.source, args.output,args.recipe)))

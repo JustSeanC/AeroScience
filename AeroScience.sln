@@ -23,6 +23,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AeroScience.TestHost", "tes
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AeroScience.Desktop", "src\AeroScience.Desktop\AeroScience.Desktop.csproj", "{BA76AFDF-4387-480B-9B22-F450264657EE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AeroScience.HdfReader", "src\AeroScience.HdfReader\AeroScience.HdfReader.csproj", "{63ADA464-6D04-4346-A6F8-32C02F79FE38}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -129,6 +131,18 @@ Global
 		{BA76AFDF-4387-480B-9B22-F450264657EE}.Release|x64.Build.0 = Release|Any CPU
 		{BA76AFDF-4387-480B-9B22-F450264657EE}.Release|x86.ActiveCfg = Release|Any CPU
 		{BA76AFDF-4387-480B-9B22-F450264657EE}.Release|x86.Build.0 = Release|Any CPU
+		{63ADA464-6D04-4346-A6F8-32C02F79FE38}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{63ADA464-6D04-4346-A6F8-32C02F79FE38}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{63ADA464-6D04-4346-A6F8-32C02F79FE38}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{63ADA464-6D04-4346-A6F8-32C02F79FE38}.Debug|x64.Build.0 = Debug|Any CPU
+		{63ADA464-6D04-4346-A6F8-32C02F79FE38}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{63ADA464-6D04-4346-A6F8-32C02F79FE38}.Debug|x86.Build.0 = Debug|Any CPU
+		{63ADA464-6D04-4346-A6F8-32C02F79FE38}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{63ADA464-6D04-4346-A6F8-32C02F79FE38}.Release|Any CPU.Build.0 = Release|Any CPU
+		{63ADA464-6D04-4346-A6F8-32C02F79FE38}.Release|x64.ActiveCfg = Release|Any CPU
+		{63ADA464-6D04-4346-A6F8-32C02F79FE38}.Release|x64.Build.0 = Release|Any CPU
+		{63ADA464-6D04-4346-A6F8-32C02F79FE38}.Release|x86.ActiveCfg = Release|Any CPU
+		{63ADA464-6D04-4346-A6F8-32C02F79FE38}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -142,5 +156,6 @@ Global
 		{0E17804C-C37A-44C0-A7E8-096E378C6CDF} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 		{AEF88DB1-7769-4F4F-A8B6-2873D8339E9E} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 		{BA76AFDF-4387-480B-9B22-F450264657EE} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+		{63ADA464-6D04-4346-A6F8-32C02F79FE38} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 	EndGlobalSection
 EndGlobal

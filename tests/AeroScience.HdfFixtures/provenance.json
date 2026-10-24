@@ -1,0 +1,9 @@
+{
+  "evidenceClass": "Synthetic HDF5-C adversarial input, not NASA",
+  "file": "deflate-expansion.nc",
+  "bytes": 264938,
+  "sha256": "5e884c3ae2bfff50f77bae45641d0daa5ca211e0ed1b093371fdd572fcfc901c",
+  "declaredUncompressedChunkBytes": 1048576,
+  "actualDeflateExpansionBytes": 268435456,
+  "generatorMemory": "1 MiB scratch plus bounded compressed output; no expanded 256 MiB allocation"
+}

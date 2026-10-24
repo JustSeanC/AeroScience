@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AssemblyName>AeroScience.Hdf.SafeRead</AssemblyName>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup><AssemblyMetadata Include="AeroScienceHdfSourcePolicy" Value="2" /></ItemGroup>
+  <Target Name="VerifyRestrictedSource" BeforeTargets="CoreCompile">
+    <Exec Command="python &quot;$(MSBuildThisFileDirectory)../../tests/AeroScience.ManagedHdfProbe/prepare_hdf_read.py&quot; --verify --recipe &quot;$(MSBuildThisFileDirectory)source-policy.json&quot; --output &quot;$(MSBuildThisFileDirectory)Vendor/PureHDF&quot;" />
+  </Target>
+</Project>

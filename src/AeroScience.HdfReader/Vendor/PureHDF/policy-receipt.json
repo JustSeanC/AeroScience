@@ -1,0 +1,1660 @@
+{
+  "formatVersion": 1,
+  "evidenceClass": "Pinned source-level restrictions; not production importer or genuine NASA acceptance",
+  "upstreamCommit": "c2cea464ad2a6649258ab14c8d798cb6239b9e1e",
+  "assembly": "AeroScience.Hdf.SafeRead",
+  "policyVersion": 2,
+  "files": [
+    {
+      "name": "API.Reading/H5Constants.cs",
+      "originalSha256": "6cb6154d724d9bb9af8b2d7016bc1ac10022d0b15c4617bc7733e0e2e10c8fa1",
+      "preparedSha256": "6cb6154d724d9bb9af8b2d7016bc1ac10022d0b15c4617bc7733e0e2e10c8fa1",
+      "bytes": 272
+    },
+    {
+      "name": "API.Reading/H5DataLayoutClass.cs",
+      "originalSha256": "d1d9145579ff379b7ac6a5d0f75389ace23f9aa388638b128ae8d27eb78af6e4",
+      "preparedSha256": "d1d9145579ff379b7ac6a5d0f75389ace23f9aa388638b128ae8d27eb78af6e4",
+      "bytes": 575
+    },
+    {
+      "name": "API.Reading/H5DataTypeClass.cs",
+      "originalSha256": "28e125c4645b49c039b6cb39939390f27ff4a8838ee0ac2382f0a2c55d30fd2c",
+      "preparedSha256": "28e125c4645b49c039b6cb39939390f27ff4a8838ee0ac2382f0a2c55d30fd2c",
+      "bytes": 1081
+    },
+    {
+      "name": "API.Reading/H5DataspaceType.cs",
+      "originalSha256": "da7fd12e396745135343a0ec52e83a1747beb180a9a9fcd06dd56656002f331e",
+      "preparedSha256": "da7fd12e396745135343a0ec52e83a1747beb180a9a9fcd06dd56656002f331e",
+      "bytes": 354
+    },
+    {
+      "name": "API.Reading/H5File.cs",
+      "originalSha256": "1209be04a1d23948b9c666695c6701b529e5e72fe64271bdcedf3f0cefe9e44a",
+      "preparedSha256": "1209be04a1d23948b9c666695c6701b529e5e72fe64271bdcedf3f0cefe9e44a",
+      "bytes": 3423
+    },
+    {
+      "name": "API.Reading/H5NameAttribute.cs",
+      "originalSha256": "e0ede2d0362e97dd558702ece61762cf30bc18152cbc2eb1d1718daaa470b7b9",
+      "preparedSha256": "e0ede2d0362e97dd558702ece61762cf30bc18152cbc2eb1d1718daaa470b7b9",
+      "bytes": 603
+    },
+    {
+      "name": "API.Reading/H5ReadOptions.cs",
+      "originalSha256": "07a84c0c22b8260e5410fb59219e75e9a5d84b9ab00f4c911eeb9654d5a34409",
+      "preparedSha256": "07a84c0c22b8260e5410fb59219e75e9a5d84b9ab00f4c911eeb9654d5a34409",
+      "bytes": 1350
+    },
+    {
+      "name": "API.Reading/H5SourceGeneratorAttribute.cs",
+      "originalSha256": "c285d3a4f4b25a577a41ffbf89983d04b903e7048f9fb70a9feaa05007759190",
+      "preparedSha256": "c285d3a4f4b25a577a41ffbf89983d04b903e7048f9fb70a9feaa05007759190",
+      "bytes": 669
+    },
+    {
+      "name": "API.Reading/H5StringLengthAttribute.cs",
+      "originalSha256": "41d056fd964a3e17897bf0ed420e2d0e48ce147bab80fa65b57affd5180ba01b",
+      "preparedSha256": "41d056fd964a3e17897bf0ed420e2d0e48ce147bab80fa65b57affd5180ba01b",
+      "bytes": 615
+    },
+    {
+      "name": "API.Reading/IDatasetStream.cs",
+      "originalSha256": "c3d23e27740314f188106214e87e91e55b969ee31ec6c8f7df19801a0f8faa87",
+      "preparedSha256": "c3d23e27740314f188106214e87e91e55b969ee31ec6c8f7df19801a0f8faa87",
+      "bytes": 437
+    },
+    {
+      "name": "API.Reading/IH5Attribute.cs",
+      "originalSha256": "632d8fadb56114029f18d4be0e752f23242480ad2c2ddc068625a0a3902bb0d1",
+      "preparedSha256": "632d8fadb56114029f18d4be0e752f23242480ad2c2ddc068625a0a3902bb0d1",
+      "bytes": 1094
+    },
+    {
+      "name": "API.Reading/IH5CommitedDataType.cs",
+      "originalSha256": "967e27560481601d05be4ee31e7e97a13880ba09108d01a0776f3b0b3500f7bd",
+      "preparedSha256": "967e27560481601d05be4ee31e7e97a13880ba09108d01a0776f3b0b3500f7bd",
+      "bytes": 199
+    },
+    {
+      "name": "API.Reading/IH5DataLayout.cs",
+      "originalSha256": "50ec448072c2efef0b3e9e106001f51030d77b615436b08cbffc419942f80711",
+      "preparedSha256": "50ec448072c2efef0b3e9e106001f51030d77b615436b08cbffc419942f80711",
+      "bytes": 322
+    },
+    {
+      "name": "API.Reading/IH5DataType.cs",
+      "originalSha256": "772172d751a415c19641bcb425f1ddced32206ccaa92fe353849d7b4d96757d5",
+      "preparedSha256": "772172d751a415c19641bcb425f1ddced32206ccaa92fe353849d7b4d96757d5",
+      "bytes": 3589
+    },
+    {
+      "name": "API.Reading/IH5Dataset.cs",
+      "originalSha256": "bf055e63e1f01b03b524ef0e2999855c149258f32ac0b06a4d4f5342c1e15db3",
+      "preparedSha256": "bf055e63e1f01b03b524ef0e2999855c149258f32ac0b06a4d4f5342c1e15db3",
+      "bytes": 3290
+    },
+    {
+      "name": "API.Reading/IH5Dataspace.cs",
+      "originalSha256": "ce98638699112c96e10c5af3f6b252a68529c66d54f2c0f0913fbd14c9cc0c94",
+      "preparedSha256": "ce98638699112c96e10c5af3f6b252a68529c66d54f2c0f0913fbd14c9cc0c94",
+      "bytes": 535
+    },
+    {
+      "name": "API.Reading/IH5FillValue.cs",
+      "originalSha256": "0cbb6f694e38efdc679d649107340c93d04cb1fa3120fd5b21d8eec59090d81e",
+      "preparedSha256": "0cbb6f694e38efdc679d649107340c93d04cb1fa3120fd5b21d8eec59090d81e",
+      "bytes": 488
+    },
+    {
+      "name": "API.Reading/IH5Group.cs",
+      "originalSha256": "6f2c1070aff5ba14d1696868c160e083e4a3a8ff819eaccbf3b7569352180ca9",
+      "preparedSha256": "6f2c1070aff5ba14d1696868c160e083e4a3a8ff819eaccbf3b7569352180ca9",
+      "bytes": 2002
+    },
+    {
+      "name": "API.Reading/IH5GroupExtensions.cs",
+      "originalSha256": "33c7888d7577a0c0b6783f97c6f8d226ffe458923b8e56e6e81d7603c04951f9",
+      "preparedSha256": "33c7888d7577a0c0b6783f97c6f8d226ffe458923b8e56e6e81d7603c04951f9",
+      "bytes": 5021
+    },
+    {
+      "name": "API.Reading/IH5Object.cs",
+      "originalSha256": "cfb5314e2b870bb5fe39b55687bf1afe3136a3b96714a453fe20da7be3c1fd4e",
+      "preparedSha256": "cfb5314e2b870bb5fe39b55687bf1afe3136a3b96714a453fe20da7be3c1fd4e",
+      "bytes": 2014
+    },
+    {
+      "name": "API.Reading/IH5UnresolvedLink.cs",
+      "originalSha256": "ec620c8928f047bf2525bf22cec6136dbd515e32d5cefd9733d704923bfc99f9",
+      "preparedSha256": "ec620c8928f047bf2525bf22cec6136dbd515e32d5cefd9733d704923bfc99f9",
+      "bytes": 383
+    },
+    {
+      "name": "API.Writing/H5Attribute.cs",
+      "originalSha256": "13f123515d59160a7bc0f429b3408b15277f6912e85f9dac5c0f464b8e5f8dfe",
+      "preparedSha256": "13f123515d59160a7bc0f429b3408b15277f6912e85f9dac5c0f464b8e5f8dfe",
+      "bytes": 2574
+    },
+    {
+      "name": "API.Writing/H5Dataset.cs",
+      "originalSha256": "65cd633d2a4f18b8b2ac048af5625328d73d87abee19d6f85e1084bd69564253",
+      "preparedSha256": "65cd633d2a4f18b8b2ac048af5625328d73d87abee19d6f85e1084bd69564253",
+      "bytes": 5221
+    },
+    {
+      "name": "API.Writing/H5File.cs",
+      "originalSha256": "d285c54f0a49b4cced80550efc45852ba27421f7474b6b3535ea5fd5b5c16cca",
+      "preparedSha256": "d285c54f0a49b4cced80550efc45852ba27421f7474b6b3535ea5fd5b5c16cca",
+      "bytes": 2657
+    },
+    {
+      "name": "API.Writing/H5Group.cs",
+      "originalSha256": "d5084378a6b8bda23118510a68ceb9982222c60f63ef049f8409a2077a06f858",
+      "preparedSha256": "d5084378a6b8bda23118510a68ceb9982222c60f63ef049f8409a2077a06f858",
+      "bytes": 2151
+    },
+    {
+      "name": "API.Writing/H5Object.cs",
+      "originalSha256": "d39bd77d9a73669cba2837bd294625b5b876fc71569e474f670f62d64f9a97ef",
+      "preparedSha256": "d39bd77d9a73669cba2837bd294625b5b876fc71569e474f670f62d64f9a97ef",
+      "bytes": 571
+    },
+    {
+      "name": "API.Writing/H5ObjectReference.cs",
+      "originalSha256": "db1efd7587ad0a4ae5a1dd643f1f0b525372343d6464f9ed436c973bdde11f8a",
+      "preparedSha256": "db1efd7587ad0a4ae5a1dd643f1f0b525372343d6464f9ed436c973bdde11f8a",
+      "bytes": 704
+    },
+    {
+      "name": "API.Writing/H5OpaqueInfo.cs",
+      "originalSha256": "261aaea5940419d92f8e62e9661615c369fa45e395c11972806346e0d87f591c",
+      "preparedSha256": "261aaea5940419d92f8e62e9661615c369fa45e395c11972806346e0d87f591c",
+      "bytes": 262
+    },
+    {
+      "name": "API.Writing/H5SoftLink.cs",
+      "originalSha256": "3b5cf9c05f6f85cbcf2edd94ba744068418577de7694012bfa04d7e7ace24b8b",
+      "preparedSha256": "3b5cf9c05f6f85cbcf2edd94ba744068418577de7694012bfa04d7e7ace24b8b",
+      "bytes": 161
+    },
+    {
+      "name": "API.Writing/H5WriteOptions.cs",
+      "originalSha256": "8fbbccd11d3a00b061bebce317b8c4493987711ebf5a6c24bdc0eff500457d99",
+      "preparedSha256": "8fbbccd11d3a00b061bebce317b8c4493987711ebf5a6c24bdc0eff500457d99",
+      "bytes": 3182
+    },
+    {
+      "name": "AssemblyInfo.cs",
+      "originalSha256": "ae21a1762aecce28d354ee77a1f7c857cbdbd429f6c5fd305af2a1575052f753",
+      "preparedSha256": "ae21a1762aecce28d354ee77a1f7c857cbdbd429f6c5fd305af2a1575052f753",
+      "bytes": 390
+    },
+    {
+      "name": "Filters/EndiannessConverter.cs",
+      "originalSha256": "262c0ed78274f23c0a98a16973a4285dc538cc652307147931bfe531ef8a9263",
+      "preparedSha256": "262c0ed78274f23c0a98a16973a4285dc538cc652307147931bfe531ef8a9263",
+      "bytes": 887
+    },
+    {
+      "name": "Filters/EndiannessConverterAvx2.cs",
+      "originalSha256": "00b54d896affc587a39c6df8c8ff3da7a1a3a18b66603d324bc6c7423410dc0f",
+      "preparedSha256": "00b54d896affc587a39c6df8c8ff3da7a1a3a18b66603d324bc6c7423410dc0f",
+      "bytes": 5021
+    },
+    {
+      "name": "Filters/EndiannessConverterGeneric.cs",
+      "originalSha256": "fd3ecc4bbaf75c78774d9b6693a6f01eb0c2427ef16c06ba52e5136c6be68dfd",
+      "preparedSha256": "fd3ecc4bbaf75c78774d9b6693a6f01eb0c2427ef16c06ba52e5136c6be68dfd",
+      "bytes": 2278
+    },
+    {
+      "name": "Filters/Fletcher32Generic.cs",
+      "originalSha256": "2f555f7d0a03a19068bde6be57139b470f6ae67ffb6dfcfa7368fe3186731218",
+      "preparedSha256": "2f555f7d0a03a19068bde6be57139b470f6ae67ffb6dfcfa7368fe3186731218",
+      "bytes": 1564
+    },
+    {
+      "name": "Filters/H5Filter.cs",
+      "originalSha256": "a491339ed5228ed02ac34a11a60f1c7617061a0fe830225246ff2fcb6e131377",
+      "preparedSha256": "5df975f3902eb16c0183b996dc5151888a54cc89a80bce9043c1a748862a7f9e",
+      "bytes": 14873
+    },
+    {
+      "name": "Filters/H5FilterFlags.cs",
+      "originalSha256": "2c4af5dc3733562649dca713906ef1250182e68cebe9688ae715feb39bfc4dbe",
+      "preparedSha256": "2c4af5dc3733562649dca713906ef1250182e68cebe9688ae715feb39bfc4dbe",
+      "bytes": 471
+    },
+    {
+      "name": "Filters/IH5Filter.cs",
+      "originalSha256": "fda3e786d881925acc030bb5f824eca325e140c796fc11682be83260bbacae00",
+      "preparedSha256": "fda3e786d881925acc030bb5f824eca325e140c796fc11682be83260bbacae00",
+      "bytes": 1215
+    },
+    {
+      "name": "Filters/MemorySpanStream.cs",
+      "originalSha256": "4c42656039434345c649486b8dca3bdfd7613056142f804d2be63f38ec0a7ea6",
+      "preparedSha256": "4c42656039434345c649486b8dca3bdfd7613056142f804d2be63f38ec0a7ea6",
+      "bytes": 2583
+    },
+    {
+      "name": "Filters/ScaleOffsetGeneric.cs",
+      "originalSha256": "196e2bae29683fb89f84bcf034ff1a5c56d0196215787d705ab287ae2f54cab2",
+      "preparedSha256": "196e2bae29683fb89f84bcf034ff1a5c56d0196215787d705ab287ae2f54cab2",
+      "bytes": 17069
+    },
+    {
+      "name": "Filters/Shuffle.cs",
+      "originalSha256": "0df6f7abe6a593ba5caf3f561ed7411fe5fbb7069eb5e757fb6ae4cbd496820f",
+      "preparedSha256": "0df6f7abe6a593ba5caf3f561ed7411fe5fbb7069eb5e757fb6ae4cbd496820f",
+      "bytes": 915
+    },
+    {
+      "name": "Filters/ShuffleAvx2.cs",
+      "originalSha256": "3e88d2ef7b9bce8ff2c7f4621f15b1a64a41f0785912ddf83206dc812228e553",
+      "preparedSha256": "3e88d2ef7b9bce8ff2c7f4621f15b1a64a41f0785912ddf83206dc812228e553",
+      "bytes": 36302
+    },
+    {
+      "name": "Filters/ShuffleGeneric.cs",
+      "originalSha256": "12951f6c64a4d043d3bdcc1e41a988163244df67d1292bc2d959887a22b44743",
+      "preparedSha256": "12951f6c64a4d043d3bdcc1e41a988163244df67d1292bc2d959887a22b44743",
+      "bytes": 2595
+    },
+    {
+      "name": "Filters/ShuffleSse2.cs",
+      "originalSha256": "b35b68776527af3476d87162535ef2dc274ee8ee1130e79a742d3a2caa79bc33",
+      "preparedSha256": "b35b68776527af3476d87162535ef2dc274ee8ee1130e79a742d3a2caa79bc33",
+      "bytes": 33783
+    },
+    {
+      "name": "GlobalUsings.cs",
+      "originalSha256": "17f4aeb9201c4c58cee5198d3258c09a6dae978c4de7db19e88cbb3731a832d2",
+      "preparedSha256": "17f4aeb9201c4c58cee5198d3258c09a6dae978c4de7db19e88cbb3731a832d2",
+      "bytes": 91
+    },
+    {
+      "name": "Selections/AllSelection.cs",
+      "originalSha256": "e5549e8efd92ab1f3b44ed39c8a2c6ad3b6807ab0d129f66f0e825e0056c586f",
+      "preparedSha256": "e5549e8efd92ab1f3b44ed39c8a2c6ad3b6807ab0d129f66f0e825e0056c586f",
+      "bytes": 642
+    },
+    {
+      "name": "Selections/DelegateSelection.cs",
+      "originalSha256": "7f254d8e8d96cc1544693f448562a2e99f636a0852c7d37fffbf6222d72432e6",
+      "preparedSha256": "7f254d8e8d96cc1544693f448562a2e99f636a0852c7d37fffbf6222d72432e6",
+      "bytes": 970
+    },
+    {
+      "name": "Selections/HyperslabSelection.cs",
+      "originalSha256": "319a25264a56085db35cedd2bd285718ea18d1861d97b14e42fd94a4e1a87bdc",
+      "preparedSha256": "319a25264a56085db35cedd2bd285718ea18d1861d97b14e42fd94a4e1a87bdc",
+      "bytes": 8385
+    },
+    {
+      "name": "Selections/IrregularHyperslabSelection.cs",
+      "originalSha256": "b557c710b33676aa46567238820ffcb55584f7e998ee7d46be8823af816abdd3",
+      "preparedSha256": "b557c710b33676aa46567238820ffcb55584f7e998ee7d46be8823af816abdd3",
+      "bytes": 4095
+    },
+    {
+      "name": "Selections/NoneSelection.cs",
+      "originalSha256": "cad2940e62dcd9d622513dbf13826eaa14413d84956f5c4632f1caaec64876f1",
+      "preparedSha256": "cad2940e62dcd9d622513dbf13826eaa14413d84956f5c4632f1caaec64876f1",
+      "bytes": 514
+    },
+    {
+      "name": "Selections/PointSelection.cs",
+      "originalSha256": "1afd0ac6f4858e1241b4b89a0775be5742be3819c6298b4cc54bdb824d109770",
+      "preparedSha256": "1afd0ac6f4858e1241b4b89a0775be5742be3819c6298b4cc54bdb824d109770",
+      "bytes": 1162
+    },
+    {
+      "name": "Selections/Selection.cs",
+      "originalSha256": "f855ae42136d688a1df310180c78aaf19fec0d4ca74b8c29738e6886148a5693",
+      "preparedSha256": "f855ae42136d688a1df310180c78aaf19fec0d4ca74b8c29738e6886148a5693",
+      "bytes": 685
+    },
+    {
+      "name": "Selections/SelectionHelper.cs",
+      "originalSha256": "b3d7ba06c37265bd99ccf5c5e9d5b44db8c177e52d12cb318c59d17ea61bd48d",
+      "preparedSha256": "b3d7ba06c37265bd99ccf5c5e9d5b44db8c177e52d12cb318c59d17ea61bd48d",
+      "bytes": 12917
+    },
+    {
+      "name": "Selections/Step.cs",
+      "originalSha256": "b141a54678ed033d05058a230d40fe0e161f1b1d85aab81cfc2edf2ceecd51f2",
+      "preparedSha256": "b141a54678ed033d05058a230d40fe0e161f1b1d85aab81cfc2edf2ceecd51f2",
+      "bytes": 362
+    },
+    {
+      "name": "Utils/ArrayMemoryManager.cs",
+      "originalSha256": "25536e6947492ed461bfa4b74df7e638fed3e2884eb1ec3c96cb93e99b31b2f0",
+      "preparedSha256": "25536e6947492ed461bfa4b74df7e638fed3e2884eb1ec3c96cb93e99b31b2f0",
+      "bytes": 862
+    },
+    {
+      "name": "Utils/ChecksumUtils.cs",
+      "originalSha256": "618922c88601114c435618f921b9585ab6c00e8d0bc0e415550f8331a4073e1f",
+      "preparedSha256": "618922c88601114c435618f921b9585ab6c00e8d0bc0e415550f8331a4073e1f",
+      "bytes": 7960
+    },
+    {
+      "name": "Utils/DataUtils.cs",
+      "originalSha256": "4c9ddf6c268555aa7add9ba0f3cbe21ec02a7fb651adc5f6a0f5c1a42c69cefd",
+      "preparedSha256": "4c9ddf6c268555aa7add9ba0f3cbe21ec02a7fb651adc5f6a0f5c1a42c69cefd",
+      "bytes": 2339
+    },
+    {
+      "name": "Utils/DataspaceExtensions.cs",
+      "originalSha256": "91efb4516eeff69881e061610ff77a55ddb770b524acba428c768b489f0cae3a",
+      "preparedSha256": "91efb4516eeff69881e061610ff77a55ddb770b524acba428c768b489f0cae3a",
+      "bytes": 1626
+    },
+    {
+      "name": "Utils/FilePathUtils.cs",
+      "originalSha256": "9c01ff6401aae219ea874529d7602a63e7a5cb1e3f0580ebcc84d1aa6cb43151",
+      "preparedSha256": "9c01ff6401aae219ea874529d7602a63e7a5cb1e3f0580ebcc84d1aa6cb43151",
+      "bytes": 5573
+    },
+    {
+      "name": "Utils/MathUtils.cs",
+      "originalSha256": "d4a64e93e0971752050c988e9f77a1424c35db34c31ca6a45cfbcfbbbc2b2f76",
+      "preparedSha256": "d4a64e93e0971752050c988e9f77a1424c35db34c31ca6a45cfbcfbbbc2b2f76",
+      "bytes": 5035
+    },
+    {
+      "name": "Utils/ReadUtils.cs",
+      "originalSha256": "bd607e7eab828b58c1a2ad7aa6423a7b2813b63190eeec4bd48ba25502c80d18",
+      "preparedSha256": "bd607e7eab828b58c1a2ad7aa6423a7b2813b63190eeec4bd48ba25502c80d18",
+      "bytes": 7156
+    },
+    {
+      "name": "Utils/SpanExtensions.cs",
+      "originalSha256": "0aef1ab00e2b8825bd0e9088c4963747f6bc84f1ca0269f21dc0bc760ad5dcd4",
+      "preparedSha256": "0aef1ab00e2b8825bd0e9088c4963747f6bc84f1ca0269f21dc0bc760ad5dcd4",
+      "bytes": 345
+    },
+    {
+      "name": "Utils/StreamExtensions.cs",
+      "originalSha256": "dd55e334e94da57db8c81771d5f9a0036e6fa208ee1b75d4e88bf3dc7a006e08",
+      "preparedSha256": "dd55e334e94da57db8c81771d5f9a0036e6fa208ee1b75d4e88bf3dc7a006e08",
+      "bytes": 721
+    },
+    {
+      "name": "Utils/WriteUtils.cs",
+      "originalSha256": "05b1b3a1073af60d4e8072db1011f98e70793882c4d43aeaa7189ccfd5ce603b",
+      "preparedSha256": "05b1b3a1073af60d4e8072db1011f98e70793882c4d43aeaa7189ccfd5ce603b",
+      "bytes": 6144
+    },
+    {
+      "name": "VFD/H5DriverBase.Reading.cs",
+      "originalSha256": "7b09ddba898314cc1626367ae411c1a9cd8273fdbd317bccdc36c9858f1ea76f",
+      "preparedSha256": "7b09ddba898314cc1626367ae411c1a9cd8273fdbd317bccdc36c9858f1ea76f",
+      "bytes": 1146
+    },
+    {
+      "name": "VFD/H5DriverBase.Writing.cs",
+      "originalSha256": "80883dfdb410800397fd03502b0ca5d9dc5eb6f5ef0e52d3a66077356d0e9560",
+      "preparedSha256": "80883dfdb410800397fd03502b0ca5d9dc5eb6f5ef0e52d3a66077356d0e9560",
+      "bytes": 457
+    },
+    {
+      "name": "VFD/H5FileHandleDriver.Reading.cs",
+      "originalSha256": "d75b1446144f29c46273c3b6b2d9257bfe2039aaa4baa52d9e4d2a85bc0ad1a3",
+      "preparedSha256": "90e65a8da0025c7065169710e10d2fc438a8577247e873d901217dc3a6f7eed7",
+      "bytes": 2948
+    },
+    {
+      "name": "VFD/H5FileHandleDriver.Writing.cs",
+      "originalSha256": "035267246295285b8445e62ae4cc9e4569d158fcce356c70129604c63671d83a",
+      "preparedSha256": "035267246295285b8445e62ae4cc9e4569d158fcce356c70129604c63671d83a",
+      "bytes": 417
+    },
+    {
+      "name": "VFD/H5MemoryMappedFileDriver.Reading.cs",
+      "originalSha256": "90384c112a7f343ee9269d38af6ff3e5d08e89540deaec31f770738619562a78",
+      "preparedSha256": "90384c112a7f343ee9269d38af6ff3e5d08e89540deaec31f770738619562a78",
+      "bytes": 3882
+    },
+    {
+      "name": "VFD/H5MemoryMappedFileDriver.Writing.cs",
+      "originalSha256": "323676dbf03a5e213059f07d0106a92c6acf50a4a5c743f76857170cc0df78cf",
+      "preparedSha256": "323676dbf03a5e213059f07d0106a92c6acf50a4a5c743f76857170cc0df78cf",
+      "bytes": 430
+    },
+    {
+      "name": "VFD/H5StreamDriver.Reading.cs",
+      "originalSha256": "aa261b95722f3611b250058865809fdda1143336485428830204084884eaf497",
+      "preparedSha256": "aa261b95722f3611b250058865809fdda1143336485428830204084884eaf497",
+      "bytes": 2669
+    },
+    {
+      "name": "VFD/H5StreamDriver.Writing.cs",
+      "originalSha256": "c351e44d3e430cfec0104a58c0f55831ffd0360a1e68446730236d912dc26c50",
+      "preparedSha256": "c351e44d3e430cfec0104a58c0f55831ffd0360a1e68446730236d912dc26c50",
+      "bytes": 377
+    },
+    {
+      "name": "VOL/Native/API.Reading/ChunkCache.cs",
+      "originalSha256": "5f6dfabebce41be73411d38ac11f6c389273f0a28f204924cba30d050d460635",
+      "preparedSha256": "5f6dfabebce41be73411d38ac11f6c389273f0a28f204924cba30d050d460635",
+      "bytes": 415
+    },
+    {
+      "name": "VOL/Native/API.Reading/H5Properties.cs",
+      "originalSha256": "f11e0076bb8e730287895c7292d6a1ad0e35e5da7ba8ed6f5df9ae3f2496c827",
+      "preparedSha256": "f11e0076bb8e730287895c7292d6a1ad0e35e5da7ba8ed6f5df9ae3f2496c827",
+      "bytes": 1537
+    },
+    {
+      "name": "VOL/Native/API.Reading/IReadingChunkCache.cs",
+      "originalSha256": "277c05cbe6439918a5206408985e474f5e409ff3014b7ade506bdb31667135d6",
+      "preparedSha256": "277c05cbe6439918a5206408985e474f5e409ff3014b7ade506bdb31667135d6",
+      "bytes": 507
+    },
+    {
+      "name": "VOL/Native/API.Reading/NativeAttribute.cs",
+      "originalSha256": "d87590fda26f18876d5a76853aa1a13175a541694d4c74f37ae0538f4e7fa014",
+      "preparedSha256": "d87590fda26f18876d5a76853aa1a13175a541694d4c74f37ae0538f4e7fa014",
+      "bytes": 8068
+    },
+    {
+      "name": "VOL/Native/API.Reading/NativeDataset.cs",
+      "originalSha256": "3fca92495d42a028cf5f34f0122a9f2fc6ec104d16dc0e906d6e64fcc237e829",
+      "preparedSha256": "0457dcd62d7c3bfcea667ba89769f8f45d31325e06a1cc6d42d86aebca571cd5",
+      "bytes": 24161
+    },
+    {
+      "name": "VOL/Native/API.Reading/NativeFile.cs",
+      "originalSha256": "7415f3e9aa34aecf0603d5ce229c9400b4a4f0d775e76155a19f4cdbdb8a2fa0",
+      "preparedSha256": "5639478875fb14ca4c080faf29231f92b38cc8d909dc17a68662f9cb50b80b15",
+      "bytes": 7826
+    },
+    {
+      "name": "VOL/Native/API.Reading/NativeGroup.cs",
+      "originalSha256": "962d0e310c3b3712e22da5274fe696b584b45df624c93e550aa1a0497a581afd",
+      "preparedSha256": "ea4b4014c1d1a545b02fb3756adc92dccaba8f7e4b779654405b7f01ae4a3ce0",
+      "bytes": 25011
+    },
+    {
+      "name": "VOL/Native/API.Reading/NativeGroupExtensions.cs",
+      "originalSha256": "a16d0827f2ebb17527e2bd0b92eabe9844ae5e6010eb0e6ce2cd2b084665971d",
+      "preparedSha256": "a16d0827f2ebb17527e2bd0b92eabe9844ae5e6010eb0e6ce2cd2b084665971d",
+      "bytes": 4255
+    },
+    {
+      "name": "VOL/Native/API.Reading/NativeObject.cs",
+      "originalSha256": "71cc0c282331f804f0060a1413921ab58c4fa7d765933f1c7849e9dc372720e0",
+      "preparedSha256": "71cc0c282331f804f0060a1413921ab58c4fa7d765933f1c7849e9dc372720e0",
+      "bytes": 8665
+    },
+    {
+      "name": "VOL/Native/API.Reading/References/InternalReferenceTypes.cs",
+      "originalSha256": "b9c45657d33839653bedefd0da68efaa75a4cb98b541faf3ee24cd8870f3ddb6",
+      "preparedSha256": "b9c45657d33839653bedefd0da68efaa75a4cb98b541faf3ee24cd8870f3ddb6",
+      "bytes": 800
+    },
+    {
+      "name": "VOL/Native/API.Reading/References/NativeObjectReference1.cs",
+      "originalSha256": "becdc7afd85d04a89f22e996798d85f2c7a2ef913813bd8fbcfa15f1c3ded0b1",
+      "preparedSha256": "becdc7afd85d04a89f22e996798d85f2c7a2ef913813bd8fbcfa15f1c3ded0b1",
+      "bytes": 265
+    },
+    {
+      "name": "VOL/Native/API.Reading/References/NativeRegionReference1.cs",
+      "originalSha256": "b1c8db1e1ff811b936f14d61db55795cc73bb55a6a526dfb9ad9ec69eb506ad2",
+      "preparedSha256": "b1c8db1e1ff811b936f14d61db55795cc73bb55a6a526dfb9ad9ec69eb506ad2",
+      "bytes": 339
+    },
+    {
+      "name": "VOL/Native/API.Reading/SimpleReadingChunkCache.cs",
+      "originalSha256": "1bddebea5f90f04b77c90b95274dc14e831e1fc8907bad5c7806267d0734267f",
+      "preparedSha256": "1bddebea5f90f04b77c90b95274dc14e831e1fc8907bad5c7806267d0734267f",
+      "bytes": 7082
+    },
+    {
+      "name": "VOL/Native/API.Writing/ChunkCache.cs",
+      "originalSha256": "cbff1a2146345867c873b7073991637bbbdeba86268dc83816447b68cfd8f240",
+      "preparedSha256": "cbff1a2146345867c873b7073991637bbbdeba86268dc83816447b68cfd8f240",
+      "bytes": 313
+    },
+    {
+      "name": "VOL/Native/API.Writing/H5NativeWriter.cs",
+      "originalSha256": "fabdcd16aa09010f1584bf4cacbe52a872f7a15bedf2044238344b9a85ac35a5",
+      "preparedSha256": "fabdcd16aa09010f1584bf4cacbe52a872f7a15bedf2044238344b9a85ac35a5",
+      "bytes": 2928
+    },
+    {
+      "name": "VOL/Native/API.Writing/H5Properties.cs",
+      "originalSha256": "a4b84c41e88aca0badb51f75d39bf5db548cef5cc51d370a9897edebda441a63",
+      "preparedSha256": "a4b84c41e88aca0badb51f75d39bf5db548cef5cc51d370a9897edebda441a63",
+      "bytes": 801
+    },
+    {
+      "name": "VOL/Native/API.Writing/IWritingChunkCache.cs",
+      "originalSha256": "dd81f7b419dd47471c1604852a9afdb01f4374a5cc1973ac0a29943f59852952",
+      "preparedSha256": "dd81f7b419dd47471c1604852a9afdb01f4374a5cc1973ac0a29943f59852952",
+      "bytes": 913
+    },
+    {
+      "name": "VOL/Native/API.Writing/SimpleWritingChunkCache.cs",
+      "originalSha256": "a784d587fd9c80d8a62b23dc8c9711c7f2c125caa9b58b1a000f499d849b37d7",
+      "preparedSha256": "a784d587fd9c80d8a62b23dc8c9711c7f2c125caa9b58b1a000f499d849b37d7",
+      "bytes": 2082
+    },
+    {
+      "name": "VOL/Native/Core.Reading/NativeCache.cs",
+      "originalSha256": "bcf02158e6d35968d3364140d322fc31275b679f4792489af0baf349d11b8256",
+      "preparedSha256": "bcf02158e6d35968d3364140d322fc31275b679f4792489af0baf349d11b8256",
+      "bytes": 3694
+    },
+    {
+      "name": "VOL/Native/Core.Reading/NativeCommitedDataType.cs",
+      "originalSha256": "24220f77648b210f7534b1eff73a76a6fa35d37f9a2d6442f40c370d3c274c39",
+      "preparedSha256": "24220f77648b210f7534b1eff73a76a6fa35d37f9a2d6442f40c370d3c274c39",
+      "bytes": 469
+    },
+    {
+      "name": "VOL/Native/Core.Reading/NativeDataLayout.cs",
+      "originalSha256": "45e7f2fd9924b159e3e43f8f62b5ef970b6fd1db4b51b0c8c20afb35f645079b",
+      "preparedSha256": "45e7f2fd9924b159e3e43f8f62b5ef970b6fd1db4b51b0c8c20afb35f645079b",
+      "bytes": 1560
+    },
+    {
+      "name": "VOL/Native/Core.Reading/NativeDataType.cs",
+      "originalSha256": "c2c9370256db39703ed44ef64d8eace421a55c5ea2cbc1340df3c2b525f8ad09",
+      "preparedSha256": "c2c9370256db39703ed44ef64d8eace421a55c5ea2cbc1340df3c2b525f8ad09",
+      "bytes": 8439
+    },
+    {
+      "name": "VOL/Native/Core.Reading/NativeDataspace.cs",
+      "originalSha256": "db9e4a5324980c3f0f900ad8deaf95f32d68bbe679f357a9b7e2f06574942636",
+      "preparedSha256": "db9e4a5324980c3f0f900ad8deaf95f32d68bbe679f357a9b7e2f06574942636",
+      "bytes": 605
+    },
+    {
+      "name": "VOL/Native/Core.Reading/NativeFillValue.cs",
+      "originalSha256": "6ed037ba51f33011b7f3e12630a6258be4c667c5e2abc5a464b81a293862b5da",
+      "preparedSha256": "6ed037ba51f33011b7f3e12630a6258be4c667c5e2abc5a464b81a293862b5da",
+      "bytes": 614
+    },
+    {
+      "name": "VOL/Native/Core.Reading/NativeNamedReference.cs",
+      "originalSha256": "e4eb01ede1a147701c0666858a20c81d136ee8dfb59146896fd809f349d2da4b",
+      "preparedSha256": "e4eb01ede1a147701c0666858a20c81d136ee8dfb59146896fd809f349d2da4b",
+      "bytes": 1701
+    },
+    {
+      "name": "VOL/Native/Core.Reading/NativeReadContext.cs",
+      "originalSha256": "dc73b2b68e97703eb02a3b1273bea3e749e919fee2c16316f684beb8dd6d7076",
+      "preparedSha256": "dc73b2b68e97703eb02a3b1273bea3e749e919fee2c16316f684beb8dd6d7076",
+      "bytes": 247
+    },
+    {
+      "name": "VOL/Native/Core.Reading/NativeUnresolvedLink.cs",
+      "originalSha256": "f1a375c133efc67b0d4e63af60a312e1684d5ad2d4f94d0ec08c3ae4c59287ea",
+      "preparedSha256": "f1a375c133efc67b0d4e63af60a312e1684d5ad2d4f94d0ec08c3ae4c59287ea",
+      "bytes": 380
+    },
+    {
+      "name": "VOL/Native/Core.Reading/ObjectType.cs",
+      "originalSha256": "4918036073de3154384c83538ddd42f8b6f131bc23fce34d81972d13386ab6d9",
+      "preparedSha256": "4918036073de3154384c83538ddd42f8b6f131bc23fce34d81972d13386ab6d9",
+      "bytes": 141
+    },
+    {
+      "name": "VOL/Native/Core.Reading/ReadTypes.cs",
+      "originalSha256": "c3b343d858a5ba5e7970c39a62f1903df9d24b87960ec9421c40f578d68ec16c",
+      "preparedSha256": "c3b343d858a5ba5e7970c39a62f1903df9d24b87960ec9421c40f578d68ec16c",
+      "bytes": 340
+    },
+    {
+      "name": "VOL/Native/Core.Reading/SymbolicLink.cs",
+      "originalSha256": "86cf531eaaab7f001eba2f49732e2b94f09ff48782ec987e6d7cadbd05e2d35b",
+      "preparedSha256": "86cf531eaaab7f001eba2f49732e2b94f09ff48782ec987e6d7cadbd05e2d35b",
+      "bytes": 2424
+    },
+    {
+      "name": "VOL/Native/Core.Writing/FreeSpaceManager.cs",
+      "originalSha256": "76f41f1952d9c97dcc6b4a772137ed770c7e1aee3cec670812a77c09f2aa24ad",
+      "preparedSha256": "76f41f1952d9c97dcc6b4a772137ed770c7e1aee3cec670812a77c09f2aa24ad",
+      "bytes": 308
+    },
+    {
+      "name": "VOL/Native/Core.Writing/GlobalHeapManager.cs",
+      "originalSha256": "46d4a8a8562a8423011fd3bb786f2b85d1bb88c2c2f33e5277484391056a07ff",
+      "preparedSha256": "46d4a8a8562a8423011fd3bb786f2b85d1bb88c2c2f33e5277484391056a07ff",
+      "bytes": 5694
+    },
+    {
+      "name": "VOL/Native/Core.Writing/H5NativeWriter.cs",
+      "originalSha256": "024448665dd0818a93315e612e2ce7d62c6f30654980c72bc08ecf6e95e2917c",
+      "preparedSha256": "024448665dd0818a93315e612e2ce7d62c6f30654980c72bc08ecf6e95e2917c",
+      "bytes": 23093
+    },
+    {
+      "name": "VOL/Native/Core.Writing/NativeWriteContext.cs",
+      "originalSha256": "cf0d4f742a9d9e03cd619119be716e67263f1ac257cdb7b879e1bbd537acd728",
+      "preparedSha256": "cf0d4f742a9d9e03cd619119be716e67263f1ac257cdb7b879e1bbd537acd728",
+      "bytes": 1480
+    },
+    {
+      "name": "VOL/Native/Core.Writing/WriteTypes.cs",
+      "originalSha256": "f7659e960ca3f8725fe457905ec71509802469caa8b90866381f90fa97c4d52a",
+      "preparedSha256": "f7659e960ca3f8725fe457905ec71509802469caa8b90866381f90fa97c4d52a",
+      "bytes": 753
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level0/DriverInfoTypes.cs",
+      "originalSha256": "60ca0d135208e98fbef8d8cb5453f1a010f12475cda5ee930a0857afc12e1a22",
+      "preparedSha256": "60ca0d135208e98fbef8d8cb5453f1a010f12475cda5ee930a0857afc12e1a22",
+      "bytes": 3029
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level0/FileConsistencyFlags.cs",
+      "originalSha256": "562604373304d6b417c04d2994eba23ba64c9a573eb902022d93c8cf8305cea2",
+      "preparedSha256": "562604373304d6b417c04d2994eba23ba64c9a573eb902022d93c8cf8305cea2",
+      "bytes": 122
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level0/Superblock.cs",
+      "originalSha256": "dca5777e979ab460078738aef7c57c483328bac68c2a31710edad516456e9914",
+      "preparedSha256": "dca5777e979ab460078738aef7c57c483328bac68c2a31710edad516456e9914",
+      "bytes": 2411
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level0/Superblock01.cs",
+      "originalSha256": "6c35ebb4f35507368cea5f762d8a28ec9b2b432f54c0510615da4c5cb53a8692",
+      "preparedSha256": "6c35ebb4f35507368cea5f762d8a28ec9b2b432f54c0510615da4c5cb53a8692",
+      "bytes": 3133
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level0/Superblock23.Reading.cs",
+      "originalSha256": "4bc0a4ebe434d42556a52cacd9e482361bf5685a2ecd5d8b4decb3119b6b62b4",
+      "preparedSha256": "4bc0a4ebe434d42556a52cacd9e482361bf5685a2ecd5d8b4decb3119b6b62b4",
+      "bytes": 1765
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level0/Superblock23.Writing.cs",
+      "originalSha256": "13c30f4e6e29cb99f1e8dd289ba2593b0e449d27edb801c5ed488772db4951f2",
+      "preparedSha256": "13c30f4e6e29cb99f1e8dd289ba2593b0e449d27edb801c5ed488772db4951f2",
+      "bytes": 1069
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level1/BTree1/BTree1Node.cs",
+      "originalSha256": "e81a408331c2d414cc80552f118cd37908746459657580ff2b107dc4cadb9118",
+      "preparedSha256": "e81a408331c2d414cc80552f118cd37908746459657580ff2b107dc4cadb9118",
+      "bytes": 5314
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level1/BTree1/BTree1Types.cs",
+      "originalSha256": "4f2d9cceee58d9202967dbcde43130bf6ed72574d1eafd1e2e44b96a4af4d8f7",
+      "preparedSha256": "4f2d9cceee58d9202967dbcde43130bf6ed72574d1eafd1e2e44b96a4af4d8f7",
+      "bytes": 1518
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level1/BTree2/BTree2Header.cs",
+      "originalSha256": "94644a5d942b5c02b5f8377bbab8acaaa1588aebcaf42801643cc766c9003d57",
+      "preparedSha256": "94644a5d942b5c02b5f8377bbab8acaaa1588aebcaf42801643cc766c9003d57",
+      "bytes": 11924
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level1/BTree2/BTree2InternalNode.cs",
+      "originalSha256": "1441585dfeb4585226b4c265b7973b30491e01b4fb4f17f8144e369ebb3894e3",
+      "preparedSha256": "1441585dfeb4585226b4c265b7973b30491e01b4fb4f17f8144e369ebb3894e3",
+      "bytes": 1904
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level1/BTree2/BTree2LeafNode.cs",
+      "originalSha256": "46d6545b1d5a8276a577dbbf305b67acaf289fab230c3dd1e2f2d590223b9f0a",
+      "preparedSha256": "46d6545b1d5a8276a577dbbf305b67acaf289fab230c3dd1e2f2d590223b9f0a",
+      "bytes": 775
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level1/BTree2/BTree2Node.cs",
+      "originalSha256": "ece34430378dbda5997776c79bd9d20230792f6cf9cf19f6297519c55956607a",
+      "preparedSha256": "ece34430378dbda5997776c79bd9d20230792f6cf9cf19f6297519c55956607a",
+      "bytes": 1318
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level1/BTree2/BTree2Records.cs",
+      "originalSha256": "80d65416f4fcac7dde9179248a5d060c0c1c21a804c93f16fe1449998e98b9e7",
+      "preparedSha256": "80d65416f4fcac7dde9179248a5d060c0c1c21a804c93f16fe1449998e98b9e7",
+      "bytes": 7230
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level1/BTree2/BTree2Types.cs",
+      "originalSha256": "7fcc1786e79dc94b906879c0e8f5919ef285a80da2c9ffd51d93e544f618db6e",
+      "preparedSha256": "7fcc1786e79dc94b906879c0e8f5919ef285a80da2c9ffd51d93e544f618db6e",
+      "bytes": 1115
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level1/Enums/MessageLocation.cs",
+      "originalSha256": "21b0ad835349b2cf86037594541d8f9cab02037fc0f83d100e4d5d9638bd69d6",
+      "preparedSha256": "21b0ad835349b2cf86037594541d8f9cab02037fc0f83d100e4d5d9638bd69d6",
+      "bytes": 99
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level1/FractalHeap/FractalHeapDirectBlock.cs",
+      "originalSha256": "5079459bcd2f74863afc4f4a2b8f0dde8f68689e56ee75a901eb413b74122c58",
+      "preparedSha256": "5079459bcd2f74863afc4f4a2b8f0dde8f68689e56ee75a901eb413b74122c58",
+      "bytes": 2335
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level1/FractalHeap/FractalHeapHeader.cs",
+      "originalSha256": "6bef94ee88fb32a463012919b25030523cde9069088c26f1de307241f2021f5a",
+      "preparedSha256": "6bef94ee88fb32a463012919b25030523cde9069088c26f1de307241f2021f5a",
+      "bytes": 15416
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level1/FractalHeap/FractalHeapId/FractalHeapId.cs",
+      "originalSha256": "002a0e04019e18c7a7b80496b0dfd344598f03365225e50e0f45b98008da2a51",
+      "preparedSha256": "002a0e04019e18c7a7b80496b0dfd344598f03365225e50e0f45b98008da2a51",
+      "bytes": 2471
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level1/FractalHeap/FractalHeapId/HugeObjectsFractalHeapIdSubType1.cs",
+      "originalSha256": "f92608c486220584eae9cbad45501a52388271b25699f5e200c33de2c12fe42e",
+      "preparedSha256": "f92608c486220584eae9cbad45501a52388271b25699f5e200c33de2c12fe42e",
+      "bytes": 1512
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level1/FractalHeap/FractalHeapId/HugeObjectsFractalHeapIdSubType2.cs",
+      "originalSha256": "fdda8d509fb9c4f19a01fb8dacbd2c65f7afd382000b1b33d336e5b8a603d494",
+      "preparedSha256": "fdda8d509fb9c4f19a01fb8dacbd2c65f7afd382000b1b33d336e5b8a603d494",
+      "bytes": 875
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level1/FractalHeap/FractalHeapId/HugeObjectsFractalHeapIdSubType3.cs",
+      "originalSha256": "4599be71c9f6297dc82758db26c744d0eeb7f72c70601e756f1cb7827fd2d636",
+      "preparedSha256": "4599be71c9f6297dc82758db26c744d0eeb7f72c70601e756f1cb7827fd2d636",
+      "bytes": 809
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level1/FractalHeap/FractalHeapId/HugeObjectsFractalHeapIdSubType4.cs",
+      "originalSha256": "3a49644f233cbce0e5f864aa1076a436594d639f1af104a347ebd750fac1e8d3",
+      "preparedSha256": "3a49644f233cbce0e5f864aa1076a436594d639f1af104a347ebd750fac1e8d3",
+      "bytes": 868
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level1/FractalHeap/FractalHeapId/ManagedObjectsFractalHeapId.cs",
+      "originalSha256": "97b59f09927fdcbecc38411cfa807b3e9fae15ae0621dd20117032f4b7972386",
+      "preparedSha256": "97b59f09927fdcbecc38411cfa807b3e9fae15ae0621dd20117032f4b7972386",
+      "bytes": 991
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level1/FractalHeap/FractalHeapId/TinyObjectsFractalHeapIdSubType1.cs",
+      "originalSha256": "8fdf703307aed8255c19225f19aec5adabd7e35bd96cd93f11bc1eca6eca251d",
+      "preparedSha256": "8fdf703307aed8255c19225f19aec5adabd7e35bd96cd93f11bc1eca6eca251d",
+      "bytes": 734
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level1/FractalHeap/FractalHeapId/TinyObjectsFractalHeapIdSubType2.cs",
+      "originalSha256": "41c103fa97912c1a62dbac5173fd3bfe197da7fe27cb6a8de4d0269fb6f1adae",
+      "preparedSha256": "41c103fa97912c1a62dbac5173fd3bfe197da7fe27cb6a8de4d0269fb6f1adae",
+      "bytes": 586
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level1/FractalHeap/FractalHeapIndirectBlock.cs",
+      "originalSha256": "409bca9b237debcb475e7c07d9b8111014350623d550f185c2a11772c01c6bd7",
+      "preparedSha256": "409bca9b237debcb475e7c07d9b8111014350623d550f185c2a11772c01c6bd7",
+      "bytes": 3596
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level1/FractalHeap/FractalHeapTypes.cs",
+      "originalSha256": "505b017c5e4c48a01babbcd64b5ad85b0b151f67b6895ffc637868c886d79eff",
+      "preparedSha256": "505b017c5e4c48a01babbcd64b5ad85b0b151f67b6895ffc637868c886d79eff",
+      "bytes": 355
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level1/FreeSpaceManager/ClientId.cs",
+      "originalSha256": "937c8bcc070f9c101e2f7094f45e089a44f175fc264155c54c8bc496b8ab4d4b",
+      "preparedSha256": "937c8bcc070f9c101e2f7094f45e089a44f175fc264155c54c8bc496b8ab4d4b",
+      "bytes": 94
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level1/FreeSpaceManager/FreeSpaceManagerHeader.cs",
+      "originalSha256": "8f63c8b65e7b184ecfced2b5e8b40451fca823afdb70c6426175697a1f1c79ef",
+      "preparedSha256": "8f63c8b65e7b184ecfced2b5e8b40451fca823afdb70c6426175697a1f1c79ef",
+      "bytes": 3507
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level1/FreeSpaceManager/FreeSpaceSectionList.cs",
+      "originalSha256": "9b858f9bdbe1996847279b04c91f115e099d05d4c0819cd151c5db66abcd6b58",
+      "preparedSha256": "9b858f9bdbe1996847279b04c91f115e099d05d4c0819cd151c5db66abcd6b58",
+      "bytes": 2273
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level1/FreeSpaceManager/SectionDataRecords.cs",
+      "originalSha256": "2df93205adf72239233726d63ba4b8e91df8babf9368a700a6ee7b57542e8e5a",
+      "preparedSha256": "2df93205adf72239233726d63ba4b8e91df8babf9368a700a6ee7b57542e8e5a",
+      "bytes": 1977
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level1/GlobalHeap/GlobalHeapCollection.cs",
+      "originalSha256": "a39e22d10c35febf0306befded858552674337f5025e9b2deb564540353b24b7",
+      "preparedSha256": "a39e22d10c35febf0306befded858552674337f5025e9b2deb564540353b24b7",
+      "bytes": 2503
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level1/GlobalHeap/GlobalHeapObject.cs",
+      "originalSha256": "7930698a54865fcb865198058bca61b094c42641b27475b495a1a6c661e5ef0b",
+      "preparedSha256": "7930698a54865fcb865198058bca61b094c42641b27475b495a1a6c661e5ef0b",
+      "bytes": 1260
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level1/GlobalHeap/ReadingGlobalHeapId.cs",
+      "originalSha256": "c9c2ff4b643a19ccea933ccc2f83d2516242558fbf5521209c6273d2888ecb02",
+      "preparedSha256": "c9c2ff4b643a19ccea933ccc2f83d2516242558fbf5521209c6273d2888ecb02",
+      "bytes": 487
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level1/GlobalHeapBlock_VirtualDatasets/DataspaceSelection.cs",
+      "originalSha256": "dffccec1d5dc6e9bc875a313aced77ded120cd8138434ffe9e810e4f7cf03531",
+      "preparedSha256": "dffccec1d5dc6e9bc875a313aced77ded120cd8138434ffe9e810e4f7cf03531",
+      "bytes": 1181
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level1/GlobalHeapBlock_VirtualDatasets/H5S_SEL.cs",
+      "originalSha256": "0971645dbe60e0f6a775f6b71a0ba4a009705262c1f4968ee48f5efc1c3026a8",
+      "preparedSha256": "0971645dbe60e0f6a775f6b71a0ba4a009705262c1f4968ee48f5efc1c3026a8",
+      "bytes": 616
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level1/GlobalHeapBlock_VirtualDatasets/H5S_SEL_ALL.cs",
+      "originalSha256": "226890ed0a70ba5a152176af78606c3193b891becbdd74f5d0dcc318483fc6dc",
+      "preparedSha256": "226890ed0a70ba5a152176af78606c3193b891becbdd74f5d0dcc318483fc6dc",
+      "bytes": 1509
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level1/GlobalHeapBlock_VirtualDatasets/H5S_SEL_HYPER.cs",
+      "originalSha256": "3c34a8246436a760ceaddf159afa3da1814eeb0d29877009a9f11523aee302fa",
+      "preparedSha256": "3c34a8246436a760ceaddf159afa3da1814eeb0d29877009a9f11523aee302fa",
+      "bytes": 10615
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level1/GlobalHeapBlock_VirtualDatasets/H5S_SEL_NONE.cs",
+      "originalSha256": "71d592007c8a0bf460aa6c4f6432e28bfb300cccdb4f482b0b918fa9ec40eaf9",
+      "preparedSha256": "71d592007c8a0bf460aa6c4f6432e28bfb300cccdb4f482b0b918fa9ec40eaf9",
+      "bytes": 1026
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level1/GlobalHeapBlock_VirtualDatasets/H5S_SEL_POINTS.cs",
+      "originalSha256": "9b21aa14ec1727c36ed715fd307800574bd7d7b72992fb76ff0a124691c96cfe",
+      "preparedSha256": "9b21aa14ec1727c36ed715fd307800574bd7d7b72992fb76ff0a124691c96cfe",
+      "bytes": 4068
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level1/GlobalHeapBlock_VirtualDatasets/HyperslabSelectionInfo.cs",
+      "originalSha256": "8fb0fcb85ddf9d8f9a03be4209a9d86f057b6b511a37f81516ea9d652efa20b6",
+      "preparedSha256": "8fb0fcb85ddf9d8f9a03be4209a9d86f057b6b511a37f81516ea9d652efa20b6",
+      "bytes": 1533
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level1/GlobalHeapBlock_VirtualDatasets/IrregularHyperslabSelectionInfo.cs",
+      "originalSha256": "65f41f9069bbf4ecd5a7402aece8d79cba08c44b1b4d72884a1e1622984d5b7b",
+      "preparedSha256": "65f41f9069bbf4ecd5a7402aece8d79cba08c44b1b4d72884a1e1622984d5b7b",
+      "bytes": 3350
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level1/GlobalHeapBlock_VirtualDatasets/RegularHyperslabSelectionInfo.cs",
+      "originalSha256": "d49e6a194aa0eb865154917fe03928b1c3cb9fb24f26a52940fa81fe1a81706d",
+      "preparedSha256": "d49e6a194aa0eb865154917fe03928b1c3cb9fb24f26a52940fa81fe1a81706d",
+      "bytes": 1223
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level1/GlobalHeapBlock_VirtualDatasets/Types.cs",
+      "originalSha256": "fa88a3e6c07c611f132664c9929e83827ec460cf8a21ef0e099ee9fbae89ace5",
+      "preparedSha256": "fa88a3e6c07c611f132664c9929e83827ec460cf8a21ef0e099ee9fbae89ace5",
+      "bytes": 392
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level1/GlobalHeapBlock_VirtualDatasets/VdsDatasetEntry.cs",
+      "originalSha256": "f2a0cc25143be4e79d3440a1b3f602ca5b8e309c7b0a185aaccfcf7de9f27413",
+      "preparedSha256": "f2a0cc25143be4e79d3440a1b3f602ca5b8e309c7b0a185aaccfcf7de9f27413",
+      "bytes": 637
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level1/GlobalHeapBlock_VirtualDatasets/VdsGlobalHeapBlock.cs",
+      "originalSha256": "8477b740b27dfb7357f8596459dca50a0f2dffe86f98d15b8edebc257a58d97e",
+      "preparedSha256": "8477b740b27dfb7357f8596459dca50a0f2dffe86f98d15b8edebc257a58d97e",
+      "bytes": 1201
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level1/GroupSymbolTable/SymbolTableNode.cs",
+      "originalSha256": "356f7569fe7692d70093117f05a3722d6fc9d2f092a0b5af16ea657bad9899a8",
+      "preparedSha256": "356f7569fe7692d70093117f05a3722d6fc9d2f092a0b5af16ea657bad9899a8",
+      "bytes": 1427
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level1/LocalHeaps/LocalHeap.cs",
+      "originalSha256": "f50191398877a65c96a589cba9540d48aa10971bc0029e17553feffb408695b3",
+      "preparedSha256": "f50191398877a65c96a589cba9540d48aa10971bc0029e17553feffb408695b3",
+      "bytes": 2079
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level1/SharedObjectHeaderMessageTable/MessageTypeFlags.cs",
+      "originalSha256": "bab2d99833df6ac193e3fffd6e1fa4aeb524e411996439a0397e040674848a57",
+      "preparedSha256": "bab2d99833df6ac193e3fffd6e1fa4aeb524e411996439a0397e040674848a57",
+      "bytes": 184
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level1/SharedObjectHeaderMessageTable/SharedMessageRecordList.cs",
+      "originalSha256": "850b04936e1c716cc03d052bfd33ca946c036d54955345255d6ee07ca601f817",
+      "preparedSha256": "850b04936e1c716cc03d052bfd33ca946c036d54955345255d6ee07ca601f817",
+      "bytes": 742
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level1/SharedObjectHeaderMessageTable/SharedMessageRecords.cs",
+      "originalSha256": "537103a082547e18161bd38a06b5a32b57cec7f2adb847727d767d79abc653b5",
+      "preparedSha256": "537103a082547e18161bd38a06b5a32b57cec7f2adb847727d767d79abc653b5",
+      "bytes": 1825
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level1/SharedObjectHeaderMessageTable/SharedObjectHeaderMessageTable.cs",
+      "originalSha256": "bcee0565aec64e37f576d12f451790090e841e14edbc5c2a6cea23c2feae329b",
+      "preparedSha256": "bcee0565aec64e37f576d12f451790090e841e14edbc5c2a6cea23c2feae329b",
+      "bytes": 1055
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level1/SymbolTableEntry/CacheType.cs",
+      "originalSha256": "d3db9cad595f35ca3b39437f12b4d485aaba77ee5d4082e9625f988dd55d092c",
+      "preparedSha256": "d3db9cad595f35ca3b39437f12b4d485aaba77ee5d4082e9625f988dd55d092c",
+      "bytes": 128
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level1/SymbolTableEntry/ScratchPadTypes.cs",
+      "originalSha256": "baf5b557441efce6f08ad2694a5a5ebe9f7ab30b08e1182dd72748d280f5843a",
+      "preparedSha256": "baf5b557441efce6f08ad2694a5a5ebe9f7ab30b08e1182dd72748d280f5843a",
+      "bytes": 1585
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level1/SymbolTableEntry/SymbolTableEntry.cs",
+      "originalSha256": "7c481e3decc72471a8280a17d0f8b44092f93ef52ce075cb1aa6c753557cd9d9",
+      "preparedSha256": "7c481e3decc72471a8280a17d0f8b44092f93ef52ce075cb1aa6c753557cd9d9",
+      "bytes": 1438
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/Enums/AttributeMessageFlags.cs",
+      "originalSha256": "cabadfe95e79ec2bcab35b21ac1dbef101bc0f6c56c65bc803256e0c03420e7d",
+      "preparedSha256": "cabadfe95e79ec2bcab35b21ac1dbef101bc0f6c56c65bc803256e0c03420e7d",
+      "bytes": 150
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/Enums/ByteOrder.cs",
+      "originalSha256": "7a122dd363f9a2b1f0832a2449f2e3aec4deafe94ea13d14634a20d2f5a268a7",
+      "preparedSha256": "7a122dd363f9a2b1f0832a2449f2e3aec4deafe94ea13d14634a20d2f5a268a7",
+      "bytes": 127
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/Enums/CharacterSetEncoding.cs",
+      "originalSha256": "39e6f634d192c4d78e7ac568c10955b6c8179f41e1e3e2ae4e683a9dbceb766b",
+      "preparedSha256": "39e6f634d192c4d78e7ac568c10955b6c8179f41e1e3e2ae4e683a9dbceb766b",
+      "bytes": 107
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/Enums/ChunkIndexingType.cs",
+      "originalSha256": "0b1a448564998184f5cc4d86a19494a4200a2d72bbfcd051cdcaadc60c0bb6be",
+      "preparedSha256": "0b1a448564998184f5cc4d86a19494a4200a2d72bbfcd051cdcaadc60c0bb6be",
+      "bytes": 175
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/Enums/ChunkedStoragePropertyFlags.cs",
+      "originalSha256": "cfe5645a395ffba9a94d90fc237c4d8c71f922b1db418c877e4d99105554fb6e",
+      "preparedSha256": "cfe5645a395ffba9a94d90fc237c4d8c71f922b1db418c877e4d99105554fb6e",
+      "bytes": 183
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/Enums/CreationOrderFlags.cs",
+      "originalSha256": "13f69df02885aa56c94883bcae61950fd5f394cf4d8410b77d4281f3be662001",
+      "preparedSha256": "13f69df02885aa56c94883bcae61950fd5f394cf4d8410b77d4281f3be662001",
+      "bytes": 154
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/Enums/DataspaceMessageFlags.cs",
+      "originalSha256": "4328a358d10f5f8bd8e223dd2b7b153d10e5b60ec60d26c8c44ae9773ae87c0f",
+      "preparedSha256": "4328a358d10f5f8bd8e223dd2b7b153d10e5b60ec60d26c8c44ae9773ae87c0f",
+      "bytes": 155
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/Enums/DataspaceType.cs",
+      "originalSha256": "194e29aecb9f3e912af615a1980fc51fb9c3e47b928cc6244d236b168fd440a9",
+      "preparedSha256": "194e29aecb9f3e912af615a1980fc51fb9c3e47b928cc6244d236b168fd440a9",
+      "bytes": 117
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/Enums/DatatypeMessageClass.cs",
+      "originalSha256": "b7f085a1f45989a1cceee21cc12d61001879381e3dca5da69b4d1b0a7b2dc315",
+      "preparedSha256": "b7f085a1f45989a1cceee21cc12d61001879381e3dca5da69b4d1b0a7b2dc315",
+      "bytes": 282
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/Enums/FillValueWriteTime.cs",
+      "originalSha256": "94b19e13948a5f151e8412706b27423d03a8c537eb81e91b17895c242a9fea3c",
+      "preparedSha256": "94b19e13948a5f151e8412706b27423d03a8c537eb81e91b17895c242a9fea3c",
+      "bytes": 134
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/Enums/FilterFlags.cs",
+      "originalSha256": "fa40a8f3c3e9453ce70ebb7aa5071e4122f0c7544f194545800d9fba92002f9a",
+      "preparedSha256": "fa40a8f3c3e9453ce70ebb7aa5071e4122f0c7544f194545800d9fba92002f9a",
+      "bytes": 121
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/Enums/GroupInfoMessageFlags.cs",
+      "originalSha256": "76ebea2813710e75017d99a600e80f7627419198cdae64137c930d10624f7187",
+      "preparedSha256": "76ebea2813710e75017d99a600e80f7627419198cdae64137c930d10624f7187",
+      "bytes": 164
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/Enums/LayoutClass.cs",
+      "originalSha256": "0e6432d9ceb017e9c3ee48e252eee29a52733086baa6f4f64b211628dbf6785f",
+      "preparedSha256": "0e6432d9ceb017e9c3ee48e252eee29a52733086baa6f4f64b211628dbf6785f",
+      "bytes": 147
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/Enums/LinkInfoFlags.cs",
+      "originalSha256": "9b3c15e8740a3ee6dff92aa60376ba510e66f9ca7029d8da0a7adbb3b5200c79",
+      "preparedSha256": "9b3c15e8740a3ee6dff92aa60376ba510e66f9ca7029d8da0a7adbb3b5200c79",
+      "bytes": 275
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/Enums/LinkType.cs",
+      "originalSha256": "7f7ce667860b66f0b95a4a499ad1d33fa4b85d128ff8b4e40c3ae23da7630812",
+      "preparedSha256": "7f7ce667860b66f0b95a4a499ad1d33fa4b85d128ff8b4e40c3ae23da7630812",
+      "bytes": 113
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/Enums/MantissaNormalization.cs",
+      "originalSha256": "441f8485a1485d3267ecbacf46ee7313052a701201bd4a6f8e2e0290cb458c32",
+      "preparedSha256": "441f8485a1485d3267ecbacf46ee7313052a701201bd4a6f8e2e0290cb458c32",
+      "bytes": 162
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/Enums/MessageFlags.cs",
+      "originalSha256": "1d5a591fedd3fa315a9c461432f14d589e2615385206bb941be20484ea7bb242",
+      "preparedSha256": "1d5a591fedd3fa315a9c461432f14d589e2615385206bb941be20484ea7bb242",
+      "bytes": 320
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/Enums/MessageType.cs",
+      "originalSha256": "542fc8e0cc78929b5001bb9e4350a5614e4cd1359827a09888a1c27d09fab91a",
+      "preparedSha256": "542fc8e0cc78929b5001bb9e4350a5614e4cd1359827a09888a1c27d09fab91a",
+      "bytes": 695
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/Enums/ObjectHeaderFlags.cs",
+      "originalSha256": "af87884cec977939977cac3437d3f16cf5c5482d61996d554c2f7e6d501bf847",
+      "preparedSha256": "af87884cec977939977cac3437d3f16cf5c5482d61996d554c2f7e6d501bf847",
+      "bytes": 284
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/Enums/PaddingType.cs",
+      "originalSha256": "3f96e54b5fcc0c9f37a61c40441875f1d05071927a5bd02659819ed3dae60d34",
+      "preparedSha256": "3f96e54b5fcc0c9f37a61c40441875f1d05071927a5bd02659819ed3dae60d34",
+      "bytes": 127
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/Enums/ReferenceType.cs",
+      "originalSha256": "90cc8df0034eab1f94e81ef74fabbaff30f5d868e093a8ed4a150be7a5be8f39",
+      "preparedSha256": "90cc8df0034eab1f94e81ef74fabbaff30f5d868e093a8ed4a150be7a5be8f39",
+      "bytes": 129
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/Enums/SharedMessageLocation.cs",
+      "originalSha256": "57590eccbb500b21bd73e934450979e0d634ed71c8686dc7af38bbcdd7048300",
+      "preparedSha256": "57590eccbb500b21bd73e934450979e0d634ed71c8686dc7af38bbcdd7048300",
+      "bytes": 208
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/Enums/SpaceAllocationTime.cs",
+      "originalSha256": "00d7b00f768df67de617ab075676a4240843acf7dff12090d6815007a71a51e3",
+      "preparedSha256": "00d7b00f768df67de617ab075676a4240843acf7dff12090d6815007a71a51e3",
+      "bytes": 144
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/Enums/VariableLengthType.cs",
+      "originalSha256": "4a1e300d7d267a4a08c1064ebfefcc84af1fc452c46dd5fddf63fcafe3a8b180",
+      "preparedSha256": "4a1e300d7d267a4a08c1064ebfefcc84af1fc452c46dd5fddf63fcafe3a8b180",
+      "bytes": 111
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/Attribute/AttributeInfoMessage.Reading.cs",
+      "originalSha256": "802fc23bacdcd11e18cd23da158e064f8e0b4c64ce03772581dec606da0faf8f",
+      "preparedSha256": "802fc23bacdcd11e18cd23da158e064f8e0b4c64ce03772581dec606da0faf8f",
+      "bytes": 3629
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/Attribute/AttributeInfoMessage.Writing.cs",
+      "originalSha256": "1908789beb8231f37ed294da4fb26b732307412989dfbf2e14ef2d4ace41e0d2",
+      "preparedSha256": "1908789beb8231f37ed294da4fb26b732307412989dfbf2e14ef2d4ace41e0d2",
+      "bytes": 1274
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/Attribute/AttributeMessage.Reading.cs",
+      "originalSha256": "bfc4c29e0030dd61356617a600abe9408cffcc1799a46e0937dc38f24588f378",
+      "preparedSha256": "bfc4c29e0030dd61356617a600abe9408cffcc1799a46e0937dc38f24588f378",
+      "bytes": 3462
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/Attribute/AttributeMessage.Writing.cs",
+      "originalSha256": "a4743e02753c231223953da9756a0e49d3cda005ec95534ef2d6084fa0cfc6ca",
+      "preparedSha256": "a4743e02753c231223953da9756a0e49d3cda005ec95534ef2d6084fa0cfc6ca",
+      "bytes": 5498
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/BTreeKValues/BTreeKValuesMessage.cs",
+      "originalSha256": "bbd695ef4b97b317be8a8443b1f553c3deba9575a46e0ef4bd5037fa62f08c5e",
+      "preparedSha256": "bbd695ef4b97b317be8a8443b1f553c3deba9575a46e0ef4bd5037fa62f08c5e",
+      "bytes": 925
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/Bogus/BogusMessage.cs",
+      "originalSha256": "33867e4f4be7519c89dcf4696902ec8f5d21e01e85aa912f7189625ae15bd5fa",
+      "preparedSha256": "33867e4f4be7519c89dcf4696902ec8f5d21e01e85aa912f7189625ae15bd5fa",
+      "bytes": 635
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/DataLayout/DataLayoutMessage.cs",
+      "originalSha256": "78ea736f0c091bc4ebac88722b398639c2029dc16d32d46a83d4720327927f17",
+      "preparedSha256": "78ea736f0c091bc4ebac88722b398639c2029dc16d32d46a83d4720327927f17",
+      "bytes": 652
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/DataLayout/DataLayoutMessage12.cs",
+      "originalSha256": "05c24713e87be4b483d42bc8d0dc329b3f59ff484ac49f444eaf25d9bf43e67c",
+      "preparedSha256": "05c24713e87be4b483d42bc8d0dc329b3f59ff484ac49f444eaf25d9bf43e67c",
+      "bytes": 2223
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/DataLayout/DataLayoutMessage3.cs",
+      "originalSha256": "b37f3da63af32e3abc43abe084eaa402852c7dd440bb43166ab9685ed59b7bf1",
+      "preparedSha256": "b37f3da63af32e3abc43abe084eaa402852c7dd440bb43166ab9685ed59b7bf1",
+      "bytes": 1548
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/DataLayout/DataLayoutMessage4.Reading.cs",
+      "originalSha256": "526dd1e01ccaa9c6c135049d449f106c828a9a65735af221697eea87e7efc144",
+      "preparedSha256": "526dd1e01ccaa9c6c135049d449f106c828a9a65735af221697eea87e7efc144",
+      "bytes": 1332
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/DataLayout/DataLayoutMessage4.Writing.cs",
+      "originalSha256": "63df506521abe8c7b293b7d8997a930fde630abae0f537807ccd2b7ee890e9c3",
+      "preparedSha256": "63df506521abe8c7b293b7d8997a930fde630abae0f537807ccd2b7ee890e9c3",
+      "bytes": 6424
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/DataLayout/ExtensibleArrayIndex/ExtensibleArrayDataBlock.cs",
+      "originalSha256": "1e18e40ac09c35c6851e2f43594b26549dd5f27d63d372b3d4a0f18d65f4a7a2",
+      "preparedSha256": "1e18e40ac09c35c6851e2f43594b26549dd5f27d63d372b3d4a0f18d65f4a7a2",
+      "bytes": 2387
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/DataLayout/ExtensibleArrayIndex/ExtensibleArrayHeader.cs",
+      "originalSha256": "732c0a1ea1de6b8da202c5736f0a18718ee6fb49fee5ca7596a9266ee3f7093b",
+      "preparedSha256": "732c0a1ea1de6b8da202c5736f0a18718ee6fb49fee5ca7596a9266ee3f7093b",
+      "bytes": 5546
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/DataLayout/ExtensibleArrayIndex/ExtensibleArrayIndexBlock.cs",
+      "originalSha256": "6e86c9cf3876abe7ee1d2d26911668eb72f0d278843b6f1e30868fbe8fb39fc9",
+      "preparedSha256": "6e86c9cf3876abe7ee1d2d26911668eb72f0d278843b6f1e30868fbe8fb39fc9",
+      "bytes": 2864
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/DataLayout/ExtensibleArrayIndex/ExtensibleArraySecondaryBlock.cs",
+      "originalSha256": "1a09d7e99091109f88a70d6c78d5edc8d4172256e25fad4cde6bf89029915814",
+      "preparedSha256": "1a09d7e99091109f88a70d6c78d5edc8d4172256e25fad4cde6bf89029915814",
+      "bytes": 3906
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/DataLayout/ExtensibleArrayIndex/ExtensibleArraySecondaryBlockInformation.cs",
+      "originalSha256": "dc0bdbe0ee201f56c7e7a12d90704153eecf81c67b245a8604a82b954ba0b040",
+      "preparedSha256": "dc0bdbe0ee201f56c7e7a12d90704153eecf81c67b245a8604a82b954ba0b040",
+      "bytes": 252
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/DataLayout/FixedArrayIndex/FixedArrayDataBlock.Reading.cs",
+      "originalSha256": "5d76f892401f9d18b940000a2336959e214a6e98cb5d927d5a46989af53d9bda",
+      "preparedSha256": "5d76f892401f9d18b940000a2336959e214a6e98cb5d927d5a46989af53d9bda",
+      "bytes": 2507
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/DataLayout/FixedArrayIndex/FixedArrayDataBlock.Writing.cs",
+      "originalSha256": "3cecef112254dee253e270e7d8802d4216dcd992720503f0a64966be9b778eaa",
+      "preparedSha256": "3cecef112254dee253e270e7d8802d4216dcd992720503f0a64966be9b778eaa",
+      "bytes": 1567
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/DataLayout/FixedArrayIndex/FixedArrayHeader.Reading.cs",
+      "originalSha256": "dfb207de8756bfc547b0507c940f4cf705399183d7c5e8433fceb18aac04a5d5",
+      "preparedSha256": "dfb207de8756bfc547b0507c940f4cf705399183d7c5e8433fceb18aac04a5d5",
+      "bytes": 1747
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/DataLayout/FixedArrayIndex/FixedArrayHeader.Writing.cs",
+      "originalSha256": "f60242db72dce152e872bc7be3bf6b2e2132f74ce2f57c44f74ceafc8ef43240",
+      "preparedSha256": "f60242db72dce152e872bc7be3bf6b2e2132f74ce2f57c44f74ceafc8ef43240",
+      "bytes": 1080
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/DataLayout/IndexingInformations.cs",
+      "originalSha256": "580e19aa6faaeab574949943d69477d9acc261fe941fc5e38d7ee4662debedef",
+      "preparedSha256": "580e19aa6faaeab574949943d69477d9acc261fe941fc5e38d7ee4662debedef",
+      "bytes": 5348
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/DataLayout/SharedTypes.cs",
+      "originalSha256": "6b99124b7b21cbd72dee6c521b930d0e5d75fdb2a9a10c16afb0a21a504b2975",
+      "preparedSha256": "6b99124b7b21cbd72dee6c521b930d0e5d75fdb2a9a10c16afb0a21a504b2975",
+      "bytes": 1062
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/DataLayout/StoragePropertyDescriptions.cs",
+      "originalSha256": "a6377dcac4030e11252d45386e04eaecac3f8f21aa69fe88dcd09832d4805bbe",
+      "preparedSha256": "a6377dcac4030e11252d45386e04eaecac3f8f21aa69fe88dcd09832d4805bbe",
+      "bytes": 8582
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/Dataspace/DataspaceMessage.Reading.cs",
+      "originalSha256": "7736ab18ff77aba0c5791d8a99b2213c5ca93a1872f543286a7338a8ed7f7652",
+      "preparedSha256": "7736ab18ff77aba0c5791d8a99b2213c5ca93a1872f543286a7338a8ed7f7652",
+      "bytes": 2506
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/Dataspace/DataspaceMessage.Writing.cs",
+      "originalSha256": "a8a1483c4b8afe33d49884e0c295c0df6f69efe6edd4f5a99d1ce4d7eb8529eb",
+      "preparedSha256": "a8a1483c4b8afe33d49884e0c295c0df6f69efe6edd4f5a99d1ce4d7eb8529eb",
+      "bytes": 2649
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/Datatype/DatatypeBitFieldDescriptions.cs",
+      "originalSha256": "7168bd3d205600d5461d5d95524e01a17a6a60b865bdc4d5828323ee1176682d",
+      "preparedSha256": "7168bd3d205600d5461d5d95524e01a17a6a60b865bdc4d5828323ee1176682d",
+      "bytes": 8498
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/Datatype/DatatypeMessage.Reading.cs",
+      "originalSha256": "8e8f2b8b3b2b9f265195675ad0ace5edfc9a088ee1482f70818e2ce76975a025",
+      "preparedSha256": "8e8f2b8b3b2b9f265195675ad0ace5edfc9a088ee1482f70818e2ce76975a025",
+      "bytes": 48230
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/Datatype/DatatypeMessage.Writing.cs",
+      "originalSha256": "4892dea9a6562b1201e1f39297b35f5c32e693a7b7ad17f2fb09398accb80f28",
+      "preparedSha256": "4892dea9a6562b1201e1f39297b35f5c32e693a7b7ad17f2fb09398accb80f28",
+      "bytes": 38515
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/Datatype/DatatypePropertyDescriptions.cs",
+      "originalSha256": "2250263ee4b931ddfab8c45fbcc2257701246f8862bb92cc93791c1de6c2ad5f",
+      "preparedSha256": "2250263ee4b931ddfab8c45fbcc2257701246f8862bb92cc93791c1de6c2ad5f",
+      "bytes": 13178
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/Datatype/IByteOrderAware.cs",
+      "originalSha256": "5e53c450439b2f2c9a35248c0a3e233f249f83f030dda73a2e1472ecb683c073",
+      "preparedSha256": "5e53c450439b2f2c9a35248c0a3e233f249f83f030dda73a2e1472ecb683c073",
+      "bytes": 111
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/DriverInfo/DriverInfoMessage.cs",
+      "originalSha256": "96f95f395bce904888a8b5c84cbaeb5df2f86f13707cca7abe982dd1466bc301",
+      "preparedSha256": "96f95f395bce904888a8b5c84cbaeb5df2f86f13707cca7abe982dd1466bc301",
+      "bytes": 1338
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/ExternalFileList/ExternalFileListMessage.cs",
+      "originalSha256": "4109a40f1f903729a6d49c74f1b3ab763be3014dd865a68925b4c6859e0506d1",
+      "preparedSha256": "4109a40f1f903729a6d49c74f1b3ab763be3014dd865a68925b4c6859e0506d1",
+      "bytes": 2071
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/ExternalFileList/ExternalFileListSlot.cs",
+      "originalSha256": "57592abee744ab1f59ce1e5b6d09702b4321427e314a36c4efd27c156ad231d6",
+      "preparedSha256": "57592abee744ab1f59ce1e5b6d09702b4321427e314a36c4efd27c156ad231d6",
+      "bytes": 492
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/FillValue/FillValueMessage.Reading.cs",
+      "originalSha256": "3ad34b533e096d766f0299b7e6fcd7c56bb95efbab6984ec40dd144be90ace57",
+      "preparedSha256": "3ad34b533e096d766f0299b7e6fcd7c56bb95efbab6984ec40dd144be90ace57",
+      "bytes": 3491
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/FillValue/FillValueMessage.Writing.cs",
+      "originalSha256": "0270fadce9233dcbe22c9aa08faf43d23ee63a2a9552c1c3c754b168750d2b5d",
+      "preparedSha256": "0270fadce9233dcbe22c9aa08faf43d23ee63a2a9552c1c3c754b168750d2b5d",
+      "bytes": 1145
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/FillValue/OldFillValueMessage.cs",
+      "originalSha256": "7b398e02c2085bcaf94397d4363928d867d50e412434ec64a62d2c7022d2a897",
+      "preparedSha256": "7b398e02c2085bcaf94397d4363928d867d50e412434ec64a62d2c7022d2a897",
+      "bytes": 369
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/FilterPipeline/FilterDescription.Reading.cs",
+      "originalSha256": "ece63abb27754ccf2c061069c2c25232f0091764ab0339a01685e2fb931104f9",
+      "preparedSha256": "ece63abb27754ccf2c061069c2c25232f0091764ab0339a01685e2fb931104f9",
+      "bytes": 1735
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/FilterPipeline/FilterDescription.Writing.cs",
+      "originalSha256": "2b312fa0f893cb8a852d8a1f46d397bcc490c0007dd0905a3e82abb84e9574ac",
+      "preparedSha256": "2b312fa0f893cb8a852d8a1f46d397bcc490c0007dd0905a3e82abb84e9574ac",
+      "bytes": 1276
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/FilterPipeline/FilterPipelineMessage.Reading.cs",
+      "originalSha256": "dc05ba425cc0291062e864f747e367191afd21510491da4eab4c01ce16dee068",
+      "preparedSha256": "dc05ba425cc0291062e864f747e367191afd21510491da4eab4c01ce16dee068",
+      "bytes": 1382
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/FilterPipeline/FilterPipelineMessage.Writing.cs",
+      "originalSha256": "1e5e9f96732c5e58f505a90e985cfab971a6c854752b77f617187df7ce437240",
+      "preparedSha256": "1e5e9f96732c5e58f505a90e985cfab971a6c854752b77f617187df7ce437240",
+      "bytes": 2027
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/GroupInfo/GroupInfoMessage.Reading.cs",
+      "originalSha256": "bf1b875531ee7110bcfac27085f3815ec95107117159ee21e3533b31bb1b0b64",
+      "preparedSha256": "bf1b875531ee7110bcfac27085f3815ec95107117159ee21e3533b31bb1b0b64",
+      "bytes": 1951
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/GroupInfo/GroupInfoMessage.Writing.cs",
+      "originalSha256": "4012c09814300bdd4d0f678cabddb00bb06cda81317981db9ada898d4bfce3d1",
+      "preparedSha256": "4012c09814300bdd4d0f678cabddb00bb06cda81317981db9ada898d4bfce3d1",
+      "bytes": 1312
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/Link/LinkInfoMessage.Reading.cs",
+      "originalSha256": "cf7b8f8a72893b2e58f930bf3eb1584af8d64e35e108d8a476fdbe9f7668eb79",
+      "preparedSha256": "cf7b8f8a72893b2e58f930bf3eb1584af8d64e35e108d8a476fdbe9f7668eb79",
+      "bytes": 3498
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/Link/LinkInfoMessage.Writing.cs",
+      "originalSha256": "c786c21a08a42d1e556f5744e0a2d5bab0b9d56dbb0b07b0bfbcb8862735cf56",
+      "preparedSha256": "c786c21a08a42d1e556f5744e0a2d5bab0b9d56dbb0b07b0bfbcb8862735cf56",
+      "bytes": 1264
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/Link/LinkInfos.cs",
+      "originalSha256": "feac2546244f7826a30ca987ffb42e5f40a846b418271c8b662251f22b53cf14",
+      "preparedSha256": "feac2546244f7826a30ca987ffb42e5f40a846b418271c8b662251f22b53cf14",
+      "bytes": 3991
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/Link/LinkMessage.Reading.cs",
+      "originalSha256": "1f51921c5dccd55ed52520ca15a53305f7ca748d8a418bac7e99daf14b405c57",
+      "preparedSha256": "1f51921c5dccd55ed52520ca15a53305f7ca748d8a418bac7e99daf14b405c57",
+      "bytes": 2511
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/Link/LinkMessage.Writing.cs",
+      "originalSha256": "5fdf0f6fdb0489afdb1d766044e2ced13e42eba72ff4a9b6a94ccaa3a6358fc2",
+      "preparedSha256": "5fdf0f6fdb0489afdb1d766044e2ced13e42eba72ff4a9b6a94ccaa3a6358fc2",
+      "bytes": 2168
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/Message.Reading.cs",
+      "originalSha256": "573c0c1dc23d740e3d10051b69b2889c8e8ada4faa3411f6dce24cabbd7e4327",
+      "preparedSha256": "573c0c1dc23d740e3d10051b69b2889c8e8ada4faa3411f6dce24cabbd7e4327",
+      "bytes": 2122
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/Message.Writing.cs",
+      "originalSha256": "20e425399d881b694f6ff400ebd9613254e13eed0aee0f75fedfb328ddc01ce3",
+      "preparedSha256": "20e425399d881b694f6ff400ebd9613254e13eed0aee0f75fedfb328ddc01ce3",
+      "bytes": 293
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/Nil/NilMessage.cs",
+      "originalSha256": "7e411b2c1449d3f1ea5b1e2cb66e5e848239fe54cf0af725f1f71b6fab335b4a",
+      "preparedSha256": "7e411b2c1449d3f1ea5b1e2cb66e5e848239fe54cf0af725f1f71b6fab335b4a",
+      "bytes": 87
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/ObjectComment/ObjectCommentMessage.cs",
+      "originalSha256": "a119c4af605cb2c35b56a0a5320ea2644a179f1f70b8c10acc8251d1cb80dd49",
+      "preparedSha256": "a119c4af605cb2c35b56a0a5320ea2644a179f1f70b8c10acc8251d1cb80dd49",
+      "bytes": 319
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/ObjectHeaderContinuation/ObjectHeaderContinuationBlock2.cs",
+      "originalSha256": "85bb24594ebac833b1ce835f3cdaad882d17143198372ea0990713ea74b9f44b",
+      "preparedSha256": "85bb24594ebac833b1ce835f3cdaad882d17143198372ea0990713ea74b9f44b",
+      "bytes": 1236
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/ObjectHeaderContinuation/ObjectHeaderContinuationMessage.cs",
+      "originalSha256": "4a5fcfd82b8aa8b145eff4577b01fd3d59591394f0fb2b8d29274b807977ad5a",
+      "preparedSha256": "4a5fcfd82b8aa8b145eff4577b01fd3d59591394f0fb2b8d29274b807977ad5a",
+      "bytes": 444
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/ObjectModification/ObjectModificationMessage.cs",
+      "originalSha256": "8c86f2bb16725c7a35416178674dd6b028f5128a65e9e681314e3445a7634416",
+      "preparedSha256": "8c86f2bb16725c7a35416178674dd6b028f5128a65e9e681314e3445a7634416",
+      "bytes": 940
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/ObjectModification/OldObjectModificationTimeMessage.cs",
+      "originalSha256": "7a9c6725bbeb9a8914032590dc277074abc27a840526a516a0d894c0cd1d7bc6",
+      "preparedSha256": "7a9c6725bbeb9a8914032590dc277074abc27a840526a516a0d894c0cd1d7bc6",
+      "bytes": 1390
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/ObjectReferenceCount/ObjectReferenceCountMessage.Writing.cs",
+      "originalSha256": "1d301f689053f6712975451f41d30bf853f6ffd9edb4376f00e9e6cd1930481b",
+      "preparedSha256": "1d301f689053f6712975451f41d30bf853f6ffd9edb4376f00e9e6cd1930481b",
+      "bytes": 375
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/ObjectReferenceCount/ObjectReferenceCountMessage.cs",
+      "originalSha256": "3aaf96dadfe8bc9d6c5ddd87c6045c0ccf7b20352473058a40970e62756e68dd",
+      "preparedSha256": "3aaf96dadfe8bc9d6c5ddd87c6045c0ccf7b20352473058a40970e62756e68dd",
+      "bytes": 777
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/SharedMessage.cs",
+      "originalSha256": "413648d34bcdcc00bce93caef51ba3e17f86b10334ef02b427510a96c34e9998",
+      "preparedSha256": "413648d34bcdcc00bce93caef51ba3e17f86b10334ef02b427510a96c34e9998",
+      "bytes": 1984
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/SharedMessageTable/SharedMessageTableMessage.cs",
+      "originalSha256": "ca6d2d701bb36500197aaa161ab7178676b1b37ec6695af3ff476599ceac9511",
+      "preparedSha256": "ca6d2d701bb36500197aaa161ab7178676b1b37ec6695af3ff476599ceac9511",
+      "bytes": 1744
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderMessages/SymbolTable/SymbolTableMessage.cs",
+      "originalSha256": "9a7a14c1b2c982a715bbd09bb4e4e4673ce37a046733e3510faa9116126cde16",
+      "preparedSha256": "9a7a14c1b2c982a715bbd09bb4e4e4673ce37a046733e3510faa9116126cde16",
+      "bytes": 1228
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderPrefix/HeaderMessage.Reading.cs",
+      "originalSha256": "e9bbc5b1b62b7d3d3762b09546d705dc64afec57fde96f59869d2ac1fc384e6c",
+      "preparedSha256": "e9bbc5b1b62b7d3d3762b09546d705dc64afec57fde96f59869d2ac1fc384e6c",
+      "bytes": 4938
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderPrefix/HeaderMessage.Writing.cs",
+      "originalSha256": "fdcb34cbaf44d1afe2ef26476931af6991bb39236563038686f288fff31c2079",
+      "preparedSha256": "fdcb34cbaf44d1afe2ef26476931af6991bb39236563038686f288fff31c2079",
+      "bytes": 1243
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderPrefix/ObjectHeader.cs",
+      "originalSha256": "f640fbb3a79a4af28778e29a39b810693d50c01f33e0524f35d06b8780a3d01f",
+      "preparedSha256": "f640fbb3a79a4af28778e29a39b810693d50c01f33e0524f35d06b8780a3d01f",
+      "bytes": 4746
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderPrefix/ObjectHeader1.cs",
+      "originalSha256": "ac989fe81cfaf91ed250ececcef0a0fe92859946e9171cd297c7cd6222cbdabb",
+      "preparedSha256": "ac989fe81cfaf91ed250ececcef0a0fe92859946e9171cd297c7cd6222cbdabb",
+      "bytes": 1780
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderPrefix/ObjectHeader2.Reading.cs",
+      "originalSha256": "c8f98210a234e1e2c8e334c962e0b8c33dded08352ef834c65345c9d5fefd882",
+      "preparedSha256": "c8f98210a234e1e2c8e334c962e0b8c33dded08352ef834c65345c9d5fefd882",
+      "bytes": 3080
+    },
+    {
+      "name": "VOL/Native/FileFormat/Level2/ObjectHeaderPrefix/ObjectHeader2.Writing.cs",
+      "originalSha256": "f89fc17c718f1915e079af19d3c462081ea627844b7a485d1e8d4ad7aed8b68b",
+      "preparedSha256": "f89fc17c718f1915e079af19d3c462081ea627844b7a485d1e8d4ad7aed8b68b",
+      "bytes": 3566
+    },
+    {
+      "name": "VOL/Native/H5D/DatasetInfo.cs",
+      "originalSha256": "4c4657695d58f5722582c4953b0a27e09dc0468e6f48ece433f74cb341bef0f1",
+      "preparedSha256": "4c4657695d58f5722582c4953b0a27e09dc0468e6f48ece433f74cb341bef0f1",
+      "bytes": 830
+    },
+    {
+      "name": "VOL/Native/H5D/H5D_Base.cs",
+      "originalSha256": "eb4348f1213ba1fd11db735ab562ad589a2ebba295e358f720aeca09b42584f7",
+      "preparedSha256": "eb4348f1213ba1fd11db735ab562ad589a2ebba295e358f720aeca09b42584f7",
+      "bytes": 1032
+    },
+    {
+      "name": "VOL/Native/H5D/H5D_Chunk.cs",
+      "originalSha256": "8caaad40cb91c4d9fe3142f6a149b9842d246819afb7c249a1edfd55755402d5",
+      "preparedSha256": "95da96c8b2e82614d9e72c9a17d4280ae08394655312f4fcbc1c8843b41f4d3d",
+      "bytes": 10999
+    },
+    {
+      "name": "VOL/Native/H5D/H5D_Chunk123_BTree1.cs",
+      "originalSha256": "527a982ae6001a86adbce4274ffb901a385697391729712fc1c146c5e452527f",
+      "preparedSha256": "527a982ae6001a86adbce4274ffb901a385697391729712fc1c146c5e452527f",
+      "bytes": 5655
+    },
+    {
+      "name": "VOL/Native/H5D/H5D_Chunk4.cs",
+      "originalSha256": "15ebfb6c3a231e64e377f8ae72f6a7e643e797003d836cfdd924a4c037ea0a4f",
+      "preparedSha256": "15ebfb6c3a231e64e377f8ae72f6a7e643e797003d836cfdd924a4c037ea0a4f",
+      "bytes": 3025
+    },
+    {
+      "name": "VOL/Native/H5D/H5D_Chunk4_BTree2.cs",
+      "originalSha256": "08c2a75ba312c929e18997698a81760921c9d2157041e52aba3e9d19cec386d2",
+      "preparedSha256": "08c2a75ba312c929e18997698a81760921c9d2157041e52aba3e9d19cec386d2",
+      "bytes": 3183
+    },
+    {
+      "name": "VOL/Native/H5D/H5D_Chunk4_ExtensibleArray.cs",
+      "originalSha256": "807329a2ffaf8c5236bc06208099ef4512ceec294e621d17c1cc01f77700549b",
+      "preparedSha256": "807329a2ffaf8c5236bc06208099ef4512ceec294e621d17c1cc01f77700549b",
+      "bytes": 13300
+    },
+    {
+      "name": "VOL/Native/H5D/H5D_Chunk4_FixedArray.cs",
+      "originalSha256": "035db52960f9383e452671696253230cac84b2489cbedccebb22b772c0e3ee66",
+      "preparedSha256": "035db52960f9383e452671696253230cac84b2489cbedccebb22b772c0e3ee66",
+      "bytes": 10272
+    },
+    {
+      "name": "VOL/Native/H5D/H5D_Chunk4_Implicit.cs",
+      "originalSha256": "7ea511576664a09595b7519ac32584d1d4bf792fa29120fbd9ae187c16621929",
+      "preparedSha256": "7ea511576664a09595b7519ac32584d1d4bf792fa29120fbd9ae187c16621929",
+      "bytes": 929
+    },
+    {
+      "name": "VOL/Native/H5D/H5D_Chunk4_SingleChunk.cs",
+      "originalSha256": "971cffc357119205f983e9616d89f92eefce0418005ee9725d4c53fc2ceda604",
+      "preparedSha256": "971cffc357119205f983e9616d89f92eefce0418005ee9725d4c53fc2ceda604",
+      "bytes": 1347
+    },
+    {
+      "name": "VOL/Native/H5D/H5D_Compact.cs",
+      "originalSha256": "cbc102ac72aff6d2b07505d57f42330734f8693679fcc0988bf0542329bcd2f0",
+      "preparedSha256": "cbc102ac72aff6d2b07505d57f42330734f8693679fcc0988bf0542329bcd2f0",
+      "bytes": 1868
+    },
+    {
+      "name": "VOL/Native/H5D/H5D_Contiguous.cs",
+      "originalSha256": "b5c067850881d37a51ff0a3cac3c5b907185bd3ac26df7c676ebd7989b89173b",
+      "preparedSha256": "b5c067850881d37a51ff0a3cac3c5b907185bd3ac26df7c676ebd7989b89173b",
+      "bytes": 2438
+    },
+    {
+      "name": "VOL/Native/H5D/H5D_Virtual.cs",
+      "originalSha256": "3376b1f628bac9c91920b0df9642d3bf6be9a1cf3a6f438985af8e7f4e7de969",
+      "preparedSha256": "3376b1f628bac9c91920b0df9642d3bf6be9a1cf3a6f438985af8e7f4e7de969",
+      "bytes": 3217
+    },
+    {
+      "name": "VOL/Native/Streams/Contiguous@ExternalFileListStream.cs",
+      "originalSha256": "ce982fc2e7402cc7ae9991523a05079da801221a8e384eeb3191ba6ba0e42f16",
+      "preparedSha256": "ce982fc2e7402cc7ae9991523a05079da801221a8e384eeb3191ba6ba0e42f16",
+      "bytes": 3393
+    },
+    {
+      "name": "VOL/Native/Streams/Contiguous@OffsetStream.Reading.cs",
+      "originalSha256": "ffc6a0f4864c2c94993636048c66ee00bee8ce4d94963b225701b35e1a1fe657",
+      "preparedSha256": "ffc6a0f4864c2c94993636048c66ee00bee8ce4d94963b225701b35e1a1fe657",
+      "bytes": 976
+    },
+    {
+      "name": "VOL/Native/Streams/Contiguous@OffsetStream.Writing.cs",
+      "originalSha256": "0c0f6b03d5f6869bdab88ee8a312dd2128de7ed44fce4e594ad7db240aeea74c",
+      "preparedSha256": "0c0f6b03d5f6869bdab88ee8a312dd2128de7ed44fce4e594ad7db240aeea74c",
+      "bytes": 192
+    },
+    {
+      "name": "VOL/Native/Streams/Contiguous@SlotStream.cs",
+      "originalSha256": "1b00993a2f7aa5feeb4ed783f206ffe9f77c5e02c3a3b0d13f8d2de3951f5b13",
+      "preparedSha256": "1b00993a2f7aa5feeb4ed783f206ffe9f77c5e02c3a3b0d13f8d2de3951f5b13",
+      "bytes": 2557
+    },
+    {
+      "name": "VOL/Native/Streams/Contiguous@UnsafeFillValueStream.cs",
+      "originalSha256": "e8eaaeafb62a627949781a4ab257b7180c1e30d2b4d6f426ab03451a0e28f778",
+      "preparedSha256": "e8eaaeafb62a627949781a4ab257b7180c1e30d2b4d6f426ab03451a0e28f778",
+      "bytes": 1239
+    },
+    {
+      "name": "VOL/Native/Streams/IH5ReadStream.cs",
+      "originalSha256": "f1b0af84f815b815c078e4a7977672d43e42a5bb014d8c03dc281ee12bf131e0",
+      "preparedSha256": "f1b0af84f815b815c078e4a7977672d43e42a5bb014d8c03dc281ee12bf131e0",
+      "bytes": 187
+    },
+    {
+      "name": "VOL/Native/Streams/IH5WriteStream.cs",
+      "originalSha256": "2844985de5f6f6607b42f1238b85da014307034bc58aef3fb3b997c04213cb35",
+      "preparedSha256": "2844985de5f6f6607b42f1238b85da014307034bc58aef3fb3b997c04213cb35",
+      "bytes": 189
+    },
+    {
+      "name": "VOL/Native/Streams/SystemMemoryStream.Reading.cs",
+      "originalSha256": "41bc76d476fee5104f74a1a9c73e4d87d5615aa0fe834c7214b588ec068d1b26",
+      "preparedSha256": "41bc76d476fee5104f74a1a9c73e4d87d5615aa0fe834c7214b588ec068d1b26",
+      "bytes": 1969
+    },
+    {
+      "name": "VOL/Native/Streams/SystemMemoryStream.Writing.cs",
+      "originalSha256": "e938b047106648c3e7a6147a905e1edd84c93249e3fc6d39f2b41195ea2da193",
+      "preparedSha256": "e938b047106648c3e7a6147a905e1edd84c93249e3fc6d39f2b41195ea2da193",
+      "bytes": 321
+    },
+    {
+      "name": "VOL/Native/Streams/Virtual@VirtualDatasetStream.cs",
+      "originalSha256": "d48a750f8a58d21e72c826409e4ac0d750cd5b6fde2cd6154a41882ccc580e67",
+      "preparedSha256": "d48a750f8a58d21e72c826409e4ac0d750cd5b6fde2cd6154a41882ccc580e67",
+      "bytes": 8534
+    }
+  ],
+  "productionApproved": false
+}

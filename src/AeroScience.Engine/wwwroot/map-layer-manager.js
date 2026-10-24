@@ -3,7 +3,6 @@ import {dialogHeader} from './dialog-ui.js';
 import {aviationMapLayers} from './aviation-map-layers.js';
 import {openAviationReference} from './aviation-reference.js';
 import {tfrMapLayer,openTfrReferences} from './tfr-layers.js';
-import {aviationChartLayers} from './aviation-charts.js';
 const el=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n;};
 const preferenceKey='aeroscience.map-overlay-visibility.v1';
 function saved(){try{const text=localStorage.getItem(preferenceKey);if(!text||text.length>4096)return {};const value=JSON.parse(text);return value&&typeof value==='object'&&!Array.isArray(value)?value:{};}catch{return {};}}
@@ -33,15 +32,13 @@ export function mapLayerManager(L,map,definitions,applyBasemap){
    }
    content.append(set);
   }
-  const faa=el('section');faa.append(el('p',aviation.status()),el('h3','FAA aviation & TFR overlays'),el('p','Imported FAA points/runways, Class B/C/D/E polygons and supported SAA boundaries are independent overlays. TFR screening retains unknown altitude, time and missing geometry. Retained charts require a verified Windows runtime and an exact reviewed source interior. No layer can clear a route of restrictions.'),el('p',charts.status()));
+  const faa=el('section');faa.append(el('p',aviation.status()),el('h3','FAA aviation & TFR overlays'),el('p','Imported FAA points/runways, Class B/C/D/E polygons and supported SAA boundaries are independent overlays. TFR screening retains unknown altitude, time and missing geometry. Chart rendering is deferred for v0.6.0; official catalogs, downloads and retained originals remain available. No layer can clear a route of restrictions.'));
   const references=el('button','FAA Catalog & Notices');references.type='button';references.onclick=()=>openAviationReference(mapRequest);faa.append(references);content.append(faa);
   const tfrButton=el('button','TFR Boundaries & Screening');tfrButton.type='button';tfrButton.onclick=()=>openTfrReferences(mapRequest,map);faa.append(tfrButton);
-  const chartButton=el('button','Retained FAA Charts');chartButton.type='button';chartButton.onclick=charts.open;faa.append(chartButton);
   content.append(el('p','Source edition / as-of: inspect the original source or recorded observation details. No chart edition or restriction freshness is inferred from the basemap.'));sync();
  }
- open.onclick=()=>{if(dialog?.open)return;dialog=el('dialog');dialog.setAttribute('aria-label','Map Overlays & Legend');dialog.className='map-overlays-dialog';dialog.append(el('h2','Map Overlays & Legend'));const content=el('div');content.className='map-overlay-content';dialog.append(content);document.body.append(dialog);dialogHeader(dialog,{opener:open});dialog.addEventListener('close',()=>{dialog.remove();dialog=null;inputs.clear();groups.clear();});render();dialog.showModal();Promise.all([aviation.discover(),charts.discover()]).then(changes=>{if(changes.some(Boolean)&&canRender())render();});};
+ open.onclick=()=>{if(dialog?.open)return;dialog=el('dialog');dialog.setAttribute('aria-label','Map Overlays & Legend');dialog.className='map-overlays-dialog';dialog.append(el('h2','Map Overlays & Legend'));const content=el('div');content.className='map-overlay-content';dialog.append(content);document.body.append(dialog);dialogHeader(dialog,{opener:open});dialog.addEventListener('close',()=>{dialog.remove();dialog=null;inputs.clear();groups.clear();});render();dialog.showModal();aviation.discover().then(changed=>{if(changed&&canRender())render();});};
  const aviation=aviationMapLayers(L,map,addOverlay);map.on('layeradd layerremove',sync);definitions.forEach(addOverlay);aviation.discover();
  const tfr=tfrMapLayer(L,map,addOverlay);
- const charts=aviationChartLayers(L,map,addOverlay);
- return {addOverlay,dispose(){if(disposed)return;disposed=true;charts.dispose();tfr.dispose();aviation.dispose();stopBasemap();if(dialog){dialog.close();dialog?.remove();}map.off('layeradd layerremove',sync);control.remove();}};
+ return {addOverlay,dispose(){if(disposed)return;disposed=true;tfr.dispose();aviation.dispose();stopBasemap();if(dialog){dialog.close();dialog?.remove();}map.off('layeradd layerremove',sync);control.remove();}};
 }

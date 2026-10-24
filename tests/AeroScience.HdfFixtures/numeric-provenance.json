@@ -1,0 +1,26 @@
+{
+  "evidenceClass": "Synthetic HDF5-C typed original, not NASA",
+  "file": "numeric-types.nc",
+  "bytes": 2100,
+  "sha256": "7bf04fe36d0c80f0917384a53591e408031e7ea70a8a6efae51096aba108513a",
+  "expected": {
+    "double_be": [
+      "1.25",
+      "-9999",
+      "NaN",
+      "2.5"
+    ],
+    "signed": [
+      -1,
+      0,
+      2147483647,
+      -2147483648
+    ],
+    "flags": [
+      0,
+      128,
+      255,
+      8
+    ]
+  }
+}

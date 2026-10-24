@@ -15,3 +15,9 @@
 # Reviewed upstream notices are hashed as original bytes, never canonicalized.
 /tests/AeroScience.SafeHdfSource/LICENSE.md -text
 /tests/AeroScience.SafeHdfSource/3rd-party-licenses.md -text
+
+# Source-pinned read-only HDF fork and original notices retain exact reviewed bytes.
+/src/AeroScience.HdfReader/Vendor/** -text
+/tests/AeroScience.HdfFixtures/*.nc -text
+/licenses/PureHDF.txt -text
+/licenses/Blosc-shuffle.txt -text

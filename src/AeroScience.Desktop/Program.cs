@@ -8,6 +8,7 @@ internal static class Program
     [STAThread]
     private static int Main(string[] args)
     {
+        if (ScientificHdfWorker.IsCommand(args)) return ScientificHdfWorker.Run();
         ApplicationConfiguration.Initialize();
         var profile = ApplicationProfile.Current;
         var directory = profile.ConfigurationDirectory;
