@@ -22,7 +22,7 @@ test('EMIT local review, explicit experimental approval, spectrum/QA/map/compari
 test('CMR companion review drives durable NASA job, retains source and reuses offline without another transfer',async({page,request})=>{
  test.setTimeout(60000);
  const existing=(await(await request.get('/api/science/sources/page?kind=hyperspectral&limit=100')).json()).items.filter(x=>x.source.manifest.swath).map(x=>x.source.id);
- if(existing.length){const review=await post(request,'/api/science/sources/deletion/preview',{sourceIds:existing});expect(review.canDelete).toBe(true);await post(request,'/api/science/sources/deletion/execute',{previewId:review.id,selectionHash:review.selectionHash});}
+ if(existing.length){const review=await post(request,'/api/science/sources/deletion/preview',{sourceIds:existing});expect(review.blockedSources).toBe(0);expect(review.eligibleSources).toBe(existing.length);await post(request,'/api/science/sources/deletion/execute',{previewId:review.id,selectionHash:review.selectionHash});}
  await post(request,'/api/testing/library/mode/emit-application');await openLibrary(page);await page.getByLabel('Scientific provider / product',{exact:true}).selectOption('nasa-emit');
  for(const[label,value]of[['West longitude','-120.1'],['East longitude','-119.9'],['South latitude','37.9'],['North latitude','38.1']])await page.getByLabel(label,{exact:true}).fill(value);
  await applyBounds(page);await page.getByRole('button',{name:'Find Available Data',exact:true}).click();await expect(page.getByLabel('Provider catalog results')).toContainText('EMIT_L2A_RFL_002_20220810T034103');
