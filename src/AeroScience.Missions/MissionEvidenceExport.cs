@@ -12,6 +12,7 @@ public sealed partial class MissionStore
         var state = CollectionCheckpoint(mission); if (state is null) return;
         writer.WritePropertyName("collectionEvidence"); writer.WriteStartObject();
         writer.WriteNumber("formatVersion", 1);
+        if(ScienceDeleted(mission))writer.WriteString("scienceAvailability","Permanently deleted by user; input packets, scientific values and grades were purged. Remaining session metadata is historical, not reproducible acquisition evidence.");
         writer.WritePropertyName("state"); writer.WriteRawValue(EvidenceContracts.Write(state));
         await Rows("snapshots", "SELECT kind,sha256,payload_json FROM collection_snapshots WHERE mission_id=$mission ORDER BY kind", (reader) =>
         {

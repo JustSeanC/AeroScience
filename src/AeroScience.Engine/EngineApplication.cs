@@ -76,10 +76,10 @@ public static class EngineApplication
                 Directory.CreateDirectory(directory);
                 PreferenceStore.WriteAtomic(Path.Combine(directory, StorageManager.LibraryManifest), new { formatVersion = 1, libraryId = Guid.NewGuid() });
             }
-            var science = new ScienceStore(directory);
+            var science = new ScienceStore(directory){ManagedReplicaRoots=()=>StorageManager.KnownScientificReplicaRoots(settings.ConfigurationDirectory??settings.DataDirectory,directory)};
             var missions = sp.GetRequiredService<MissionStore>(); missions.ScienceLibrary = science;
             if (science.AvailabilityError() is null)
-                try { science.Initialize(); missions.ReconcileDatasetReferences(science.LibraryId, science.ContainsDataset); }
+                try { science.Initialize(); science.RecoverCollectedDeletion(missions); missions.ReconcileDatasetReferences(science.LibraryId, science.ContainsDataset); }
                 catch (Exception error) when (error is IOException or Microsoft.Data.Sqlite.SqliteException)
                 { sp.GetRequiredService<ILogger<ScienceStore>>().LogWarning("Science references need review: {Message}", error.Message); }
             return science;
@@ -92,6 +92,7 @@ public static class EngineApplication
             var management = new StorageManagement(o.ConfigurationDirectory ?? o.DataDirectory, sp.GetRequiredService<MissionStore>(), science);
             science.Management = management; science.MissionIsProtected = sp.GetRequiredService<MissionStore>().IsProtected; return management;
         });
+        builder.Services.AddSingleton<ScientificLibraryFolders>();
         builder.Services.AddSingleton(sp=>new ScientificCache(sp.GetRequiredService<ScienceStore>(),sp.GetRequiredService<MissionStore>(),sp.GetRequiredService<StorageManagement>(),log:message=>sp.GetRequiredService<ILogger<ScientificCache>>().LogInformation("{CleanupResult}",message)));
         builder.Services.AddSingleton(sp => { _ = sp.GetRequiredService<StorageManagement>(); return new ResearchOperations(sp.GetRequiredService<MissionStore>(), sp.GetRequiredService<ScienceStore>(), sp.GetRequiredService<ScienceUnitSettings>().Get,()=>sp.GetRequiredService<ScientificAccessSettings>().Get().Preferences); });
         builder.Services.AddSingleton(sp => new MissionCoordinator(sp.GetRequiredService<MissionStore>(), sp.GetRequiredService<EngineOptions>().SamplingIntervalMs,

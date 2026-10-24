@@ -2,6 +2,14 @@
 
 ## Unreleased — v0.6.0 development checkpoint
 
+- Remove overall Library source-count ceilings; add indexed/paged retained collections, physical-
+  capacity accounting and read-only local folder access with paired-device Copy Path.
+- Separate permanent deletion of external originals from collected science. Saved measurements
+  retain source snapshots; explicit science deletion purges dependent results/grades and registered
+  managed copies, with recoverable completion of interrupted cleanup and no new deletion backup.
+- Accept verified ORNL HEAD metadata redirects without forwarding Earthdata credentials; report
+  provider/authentication/IO failures accurately instead of labeling all failures as unavailable storage.
+
 - Separate, consent-gated FAA chart catalog and TFR-summary metadata cache with bounded pages,
   explicit freshness/failure status and offline reopening; no scientific observation credit.
 - Unified basemap/overlay controls, independent Mission and Science visibility, and documented

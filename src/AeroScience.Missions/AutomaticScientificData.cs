@@ -31,7 +31,7 @@ public sealed class ScientificAccessSettings(string directory,Func<bool?>? unmet
     }
 }
 
-public sealed class AutomaticScientificData : IDisposable
+public sealed partial class AutomaticScientificData : IDisposable
 {
     private long configurationRevision;
     public long ConfigurationRevision => Interlocked.Read(ref configurationRevision);
@@ -154,6 +154,7 @@ public sealed class AutomaticScientificData : IDisposable
         if(candidate.Value is null)return;lastPreemption=DateTimeOffset.UtcNow;preempted.Add(candidate.Key);candidate.Value.Cancel();
     }
     public void RetryScope(string scope,IReadOnlySet<string>? explicitlyRequestedKeys=null){lock(gate)foreach(var key in states.Where(p=>(p.Value.Scope==scope||explicitlyRequestedKeys?.Contains(p.Key)==true)&&p.Value.Status is not("Ready" or "Dataset Ready" or "Downloading" or "Queued")).Select(p=>p.Key).ToArray()){states.Remove(key);tickets.Remove(key);retryAfter.Remove(key);}}
+    public void ForgetDeletedSources(){http.ClearNumericCache();verified.Clear();RefreshLocalReadiness();}
     public void RefreshLocalReadiness()
     {Interlocked.Increment(ref configurationRevision);lock(gate)foreach(var key in states.Where(p=>p.Value.Status is not("Queued" or "Downloading" or "Waiting for download allowance")).Select(p=>p.Key).ToArray()){states.Remove(key);tickets.Remove(key);}}
     public static void ValidateArea(GeographicBounds a)
@@ -222,7 +223,7 @@ public sealed class AutomaticScientificData : IDisposable
             var p=settings.Get().Preferences;
             // Reuse verified sources before any network traffic. They remain retained originals,
             // not cleanup-eligible caches; actual sampling still applies per-pixel QA.
-            var available=ScientificSourceSelection.Select(science.Availability(job.Point??job.Area.Center).Where(a=>a.FilesAvailable&&a.CoversPoint==true&&
+            var available=ScientificSourceSelection.Select(science.Availability(job.Point??job.Area.Center,job.Kind).Where(a=>a.FilesAvailable&&a.CoversPoint==true&&
                 (job.Kind==RemoteKind.Hyperspectral||p.SourceModes?.GetValueOrDefault(job.Kind)=="local"||ScientificSourceSelection.CoversArea(a.Source,job.Area))),job.Kind,p);
             if(available is not null)
             {
@@ -240,7 +241,7 @@ public sealed class AutomaticScientificData : IDisposable
             }
             if(job.Kind==RemoteKind.Hyperspectral)
             {
-                var local=science.Availability().Where(a=>a.Source.Manifest.Kind==RemoteKind.Hyperspectral).ToArray();
+                var local=science.Availability(kind:RemoteKind.Hyperspectral).Take(1).ToArray();
                 Set(state with{Status=local.Length==0?"Dataset Required":local.All(a=>!a.FilesAvailable)?"Dataset Invalid":"Dataset Outside Coverage",Message=local.Length==0?"Import a compatible hyperspectral dataset covering your research area. No account or automatic download is required.":"Review imported dataset coverage or import another compatible dataset. No automatic hyperspectral download is required."});return;
             }
             string? blocked=p.SourceModes?.GetValueOrDefault(job.Kind)=="local"?"My Datasets Only: no compatible local dataset covers this area. Import a dataset or change this instrument’s source mode; no provider download was attempted.":!p.OnlineEnabled||!p.PrivacyAccepted?"Scientific online access is disabled; retained local sources remain usable.":job.Background&&!p.BackgroundRetrieval?"Background retrieval is disabled.":p.UnmeteredOnly&&settings.IsUnmetered()!=true?"Waiting for a reliably detected unmetered connection.":null;
@@ -302,6 +303,7 @@ public sealed class AutomaticScientificData : IDisposable
     internal async Task<ScientificSource?> PrepareSource(ScientificDiscovery d,ScientificDownloadBudget budget,CancellationToken token,Action<string>? stage=null,string? checkpointRoot=null)
     {
         science.Initialize();
+        if(await RecoverPreparedSource(d,token,stage,checkpointRoot) is {} recovered)return recovered;
         using var reservation=science.Management?.ReserveScience(StorageBound(d.Manifest.Kind)+(checkpointRoot is null?0:budget.Maximum));
         var relative="Downloads/"+Guid.NewGuid().ToString("N");var folder=StorageManager.ResolveDataset(science.DirectoryPath,science.LibraryId,relative);
         var names=d.Manifest.Bands.Select(b=>b.File).Append("source.json").ToArray();
@@ -341,7 +343,7 @@ public sealed class AutomaticScientificData : IDisposable
         // this owned, duplicated preparation folder; the imported originals stay retained.
         foreach(var name in names)File.Delete(Path.Combine(folder,name));Directory.Delete(folder);File.Delete(ledger);
         foreach(var checkpoint in checkpoints)checkpoint.Complete();
-        science.Management?.RefreshScience();return imported;
+        return imported;
     }
     public async Task DiscoverHyperspectralMetadata(GeographicBounds area,CancellationToken token)
     {

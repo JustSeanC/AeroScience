@@ -38,7 +38,7 @@ public static class TerrainPlanning
         try
         {
             var centre=request.Pattern?.Center??throw new InvalidOperationException("Choose a pattern centre to inspect terrain-aware planning.");
-            var source=science.Sources().SingleOrDefault(s=>s.Id==id&&s.Manifest.Kind==RemoteKind.Terrain)??throw new InvalidOperationException("Selected retained numeric terrain source is unavailable.");
+            var source=(science.Source(id) is {Manifest.Kind:RemoteKind.Terrain} terrain?terrain:null)??throw new InvalidOperationException("Selected retained numeric terrain source is unavailable.");
             var band=source.Manifest.Bands.FirstOrDefault(b=>!b.BadBand&&b.Unit=="m")??throw new InvalidOperationException("Selected terrain source has no supported metre elevation band.");
             var root=StorageManager.ResolveDataset(science.DirectoryPath,science.LibraryId,source.RelativeDirectory);
             foreach(var file in source.Files){using var stream=File.OpenRead(ScientificRaster.SafeFile(root,file.RelativePath));if(stream.Length!=file.Bytes||Convert.ToHexString(SHA256.HashData(stream)).ToLowerInvariant()!=file.Sha256)throw new IOException("Selected terrain source failed its original-file hash check.");}

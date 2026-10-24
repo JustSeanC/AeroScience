@@ -59,6 +59,7 @@ export function metric(parent, title, value, detail) {
 export function table(parent, title, headings, rows, {pageSize = 25, onSelect} = {}) {
   const container = node('section', undefined, 'data-table-section'); container.setAttribute('aria-label', title);
   const wrap = node('div', undefined, 'data-table-scroll'), grid = node('table'), caption = node('caption', title);
+  wrap.tabIndex=0;wrap.setAttribute('role','group');wrap.setAttribute('aria-label',title+' — scrollable table');
   grid.append(caption); const head = node('thead'), header = node('tr');
   for (const title of headings) { const cell = node('th', title); cell.scope = 'col'; header.append(cell); }
   if (onSelect) { const cell = node('th', 'Inspect'); cell.scope = 'col'; header.append(cell); }
@@ -69,12 +70,12 @@ export function table(parent, title, headings, rows, {pageSize = 25, onSelect} =
   tools.append(summary); const next = button(tools, 'Next values', () => { page++; render(); });
   const render = () => { body.replaceChildren(); const start = page * pageSize;
     for (const [offset, row] of rows.slice(start, start + pageSize).entries()) {
-      const tr = node('tr'); for (const value of row) tr.append(node('td', value));
+      const tr = node('tr'); for (const value of row) { const cell = node('td'); if (value instanceof Node) cell.append(value); else cell.textContent = value ?? 'Unavailable'; tr.append(cell); }
       if (onSelect) { const td = node('td'); button(td, `Inspect sample ${start + offset + 1}`, () => onSelect(start + offset)); tr.append(td); } body.append(tr);
     }
     if (!rows.length) { const tr = node('tr'), td = node('td', 'No valid recorded values in this selection.'); td.colSpan = headings.length; tr.append(td); body.append(tr); }
     summary.textContent = rows.length ? `${start + 1}–${Math.min(rows.length, start + pageSize)} of ${rows.length} displayed values` : 'No recorded values';
-    previous.disabled = page === 0; next.disabled = start + pageSize >= rows.length;
+    previous.disabled = page === 0; next.disabled = start + pageSize >= rows.length; tools.hidden = rows.length <= pageSize;
   };
   container.append(wrap, tools); parent.append(container); render(); return container;
 }

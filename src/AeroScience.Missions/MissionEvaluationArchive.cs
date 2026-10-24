@@ -181,10 +181,10 @@ public static class MissionEvaluationArchive
         try
         {
             var used=actual.SelectMany(a=>a.Evidence).Where(e=>e.StartsWith("source:")).Select(e=>Guid.Parse(e[7..])).ToHashSet();
-            sources=science.Sources().Where(s=>used.Contains(s.Id)).Select(s=>new ScientificSourceEvidence(s.Id,s.Manifest.Provider,s.Manifest.Name,s.Manifest.SceneId,s.Manifest.ObservationUtc,s.ImportedUtc,s.Manifest.VerticalDatum,s.ManifestSha256,
+            sources=science.AllProducts(mission).Where(p=>used.Contains(p.SourceId)).DistinctBy(p=>p.SourceId).Select(p=>science.ReadProduct(p.Id).Source).Select(s=>new ScientificSourceEvidence(s.Id,s.Manifest.Provider,s.Manifest.Name,s.Manifest.SceneId,s.Manifest.ObservationUtc,s.ImportedUtc,s.Manifest.VerticalDatum,s.ManifestSha256,
                 s.Manifest.Bands.Select(b=>new ScientificBandEvidence(b.Id,b.Unit,b.Scale,b.Offset,b.NoData,b.WavelengthNm,s.Grids.GetValueOrDefault(b.Id))).ToArray(),["Historical external observations, not measurements by the simulated aircraft. Native source QA and georeferencing remain authoritative."])).ToArray();
         }
-        catch(Exception e)when(e is IOException or Microsoft.Data.Sqlite.SqliteException){limitations.Add("Original source metadata unavailable at this evaluation; earlier report revisions remain retained.");}
+        catch(Exception e)when(e is IOException or Microsoft.Data.Sqlite.SqliteException){limitations.Add("Saved source snapshots unavailable at this evaluation; earlier report revisions remain retained.");}
         return new(1,mission,at,completed,context,criteria.ToArray(),yield.Where(y=>y.SessionId is null).ToArray(),sessionReports,
             ["telemetry-sha256:"+PreflightReadiness.Hash(archivedFrames),"collection-events-sha256:"+PreflightReadiness.Hash(events),"operating-sha256:"+PreflightReadiness.Hash(operating),"science-results-sha256:"+PreflightReadiness.Hash(actual)],limitations.ToArray(),sources,actual.Length==0?null:actual.Max(a=>a.ProcessedUtc??a.ExposureUtc),detail.Mission.Source,detail.Mission.Status==MissionStatus.Interrupted);
     }

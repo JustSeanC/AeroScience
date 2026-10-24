@@ -38,17 +38,17 @@ public static class ResearchPackage
             foreach(var f in missions.StreamSamples(mission))foreach(var r in f.Environment?.Readings??[])
             {token.ThrowIfCancellationRequested();await writer.WriteLineAsync(string.Join(',',Q(f.TimestampUtc.ToString("O")),Q(r.TimestampUtc.ToString("O")),f.Latitude.ToString("R",System.Globalization.CultureInfo.InvariantCulture),f.Longitude.ToString("R",System.Globalization.CultureInfo.InvariantCulture),f.AltitudeMslFeet.ToString("R",System.Globalization.CultureInfo.InvariantCulture),Q(r.SimulatorVariable),r.Value?.ToString("R",System.Globalization.CultureInfo.InvariantCulture)??"",Q(r.Unit),Q(r.Quality.ToString()),"SimulatorReported").AsMemory(),token);}
         });
-        var used=new HashSet<Guid>();
+        var used=new Dictionary<Guid,ScientificSource>();
         foreach(var p in science.AllProducts(mission))
         {
-            token.ThrowIfCancellationRequested();_=science.ReadProduct(p.Id);used.Add(p.SourceId);
+            token.ThrowIfCancellationRequested();var saved=science.ReadProduct(p.Id);used.TryAdd(p.SourceId,saved.Source);
             var path=StorageManager.ResolveDataset(science.DirectoryPath,p.LibraryId,p.RelativePath);
             await Entry($"acquisitions/{p.Id:N}.json",async stream=>{await using var input=File.OpenRead(path);await input.CopyToAsync(stream,token);});
         }
         foreach(var a in science.Artifacts(mission))
         {
             using(var metadata=JsonDocument.Parse(a.MetadataJson))if(metadata.RootElement.ValueKind==JsonValueKind.Object&&metadata.RootElement.TryGetProperty("sourceIds",out var ids)&&ids.ValueKind==JsonValueKind.Array)
-                foreach(var id in ids.EnumerateArray())if(id.TryGetGuid(out var sourceId))used.Add(sourceId);
+                foreach(var id in ids.EnumerateArray())if(id.TryGetGuid(out var sourceId))if(science.Source(sourceId) is {} source)used.TryAdd(sourceId,source);
             var path=science.VerifiedArtifactPath(a);
             await Entry($"analysis/{a.Id:N}.{a.Format}",async stream=>{await using var input=File.OpenRead(path);await input.CopyToAsync(stream,token);});
             await Entry($"analysis/{a.Id:N}.metadata.json",stream=>JsonSerializer.SerializeAsync(stream,a,WireJson.Options,token));
@@ -62,8 +62,8 @@ public static class ResearchPackage
                 await Entry($"coverage/{a.Id:N}.geojson",stream=>JsonSerializer.SerializeAsync(stream,new{type="FeatureCollection",features},WireJson.Options,token));
             }
         }
-        await Entry("sources.json",stream=>JsonSerializer.SerializeAsync(stream,science.Sources().Where(s=>used.Contains(s.Id)),WireJson.Options,token));
-        await Entry("methods.txt",stream=>stream.WriteAsync(Encoding.UTF8.GetBytes("AeroScience research package 1. Recorded aircraft and auxiliary times are host packet-receipt UTC; source observation and processing times are separate. Missing values remain missing. Profile snapshots model geometry, not external-source calibration. Coverage artifacts contain exact processing settings, projection, denominator and limitations. Mission sample composites contain saved valid native pixels; retained-source mosaics contain historical originals selected for analysis and do not establish aircraft collection. GeoTIFF tiles retain units, nodata, CRS and source resolution. Originals are referenced with hashes and relative library identifiers, not bundled. Reproduction requires the referenced sources. No data was uploaded. Explicitly labeled post-flight derived reconstruction may be present; scientific-review.json identifies unresolved gaps and provisional state.\n"),token).AsTask());
+        await Entry("sources.json",stream=>JsonSerializer.SerializeAsync(stream,used.Values,WireJson.Options,token));
+        await Entry("methods.txt",stream=>stream.WriteAsync(Encoding.UTF8.GetBytes("AeroScience research package 1. Recorded aircraft and auxiliary times are host packet-receipt UTC; source observation and processing times are separate. Missing values remain missing. Profile snapshots model geometry, not external-source calibration. Coverage artifacts contain exact processing settings, projection, denominator and limitations. Mission sample composites contain saved valid native pixels; retained-source mosaics contain historical originals selected for analysis and do not establish aircraft collection. GeoTIFF tiles retain units, nodata, CRS and source resolution. Originals are referenced with hashes and relative library identifiers, not bundled. Saved acquisition samples can be reviewed without originals; new source-pixel processing requires the referenced originals. No data was uploaded. Explicitly labeled post-flight derived reconstruction may be present; scientific-review.json identifies unresolved gaps and provisional state.\n"),token).AsTask());
         var final=zip.CreateEntry("manifest.json",CompressionLevel.Fastest);await using var finalStream=await final.OpenAsync(token);
         await JsonSerializer.SerializeAsync(finalStream,new{formatVersion=1,missionId=mission,createdUtc=DateTimeOffset.UtcNow,files=manifest,manifestHash="The manifest excludes itself; verify the complete exported ZIP hash separately.",sourcePolicy="Original retained-source references and SHA-256 hashes included; original datasets are not duplicated."},WireJson.Options,token);
     }

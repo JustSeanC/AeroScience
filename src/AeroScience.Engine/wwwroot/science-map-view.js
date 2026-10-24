@@ -1,3 +1,4 @@
+import {archivedSources} from "./archived-source-picker.js";
 import {ResearchMap} from './map.js';
 import {measurements,initialMeasurement,layerSignature} from './science-layers.js';
 import {node as el,numeric as number,dateTime as local,button,link,select,disclosure,status,table,color,legend,errorMessage,readableName} from './workstation-ui.js';
@@ -25,8 +26,9 @@ export async function scienceMap(parent,api,params,ids,instrument,disposals,cata
   const advanced=disclosure(parent,'Advanced — flight/source dates and quality filters'),filters=el('div',undefined,'workspace-controls');advanced.append(filters);
   function dateField(title,key){const label=el('label',title),input=el('input');input.type='date';input.setAttribute('aria-label',title);input.value=params.get(key)||'';label.append(input);filters.append(label);return input;}
   const from=dateField('Flight date from (UTC)','from'),to=dateField('Flight date to (UTC)','to'),sourceFrom=dateField('Source observation from (UTC)','sourceFrom'),sourceTo=dateField('Source observation to (UTC)','sourceTo');
-  const sources=await api('/api/science/sources');
+  const archived=await archivedSources(api,filters,ids,instrument,params.get('source'));disposals.push(archived.stop);const sources=archived.items;
   const source=select(filters,'Source / scene',[['','All historical sources'],...sources.map(item=>[item.source.id,item.source.manifest.provider+' · '+item.source.manifest.sceneId])],params.get('source')||'');
+  filters.addEventListener('aeroscience-archived-sources',()=>{const value=source.value;for(const item of sources)if(![...source.options].some(option=>option.value===item.source.id)){const option=el('option',item.source.manifest.provider+' · '+item.source.manifest.sceneId+(item.originalsRetained?'':' · originals deleted; saved samples retained'));option.value=item.source.id;source.append(option);}source.value=value;});
   const quality=select(filters,'Acquisition quality',[['','All saved support'],['gaps','Known incomplete acquisitions'],['complete','Known full sample grids']],params.get('quality')||'');
   advanced.append(el('p','Historical source and sample-grid quality filters apply to remote acquisitions. Simulator environmental values retain their own recorded quality and timestamps.'));
   const evidence=disclosure(parent,'Sources, dates & sampled support',support),evidenceRows=el('div');evidence.append(evidenceRows);
@@ -126,7 +128,7 @@ export async function scienceMap(parent,api,params,ids,instrument,disposals,cata
       const estimated=products.reduce((n,p)=>n+p.width*p.height,0);
       const complete=!page.hasMore&&estimated<=6000;
       const selected=complete?products:[...new Map(products.map(product=>[product.instrumentId,product])).values()];
-      for(const product of selected){if(!current())return;const measurement=quantities.get(product.instrumentId)||initialMeasurement(product.instrumentId,sources.find(item=>item.source.id===product.sourceId)?.source);if(!measurement)continue;
+      for(const product of selected){if(!current())return;if(product.instrumentId==='hyperspectral-imager'&&!sources.some(s=>s.source.id===product.sourceId)){const data=await api('/api/science/products/'+product.id);if(!current())return;sources.push({source:data.source,originalsRetained:false});}const measurement=quantities.get(product.instrumentId)||initialMeasurement(product.instrumentId,sources.find(item=>item.source.id===product.sourceId)?.source);if(!measurement)continue;
         try{const layer=await getLayer(product,measurement,request);if(!current())return;addNative(product,layer,items);}catch(error){if(error.name==='AbortError')throw error;const warning=`${readableName(product.instrumentId,catalog)}: ${error.message}`;detailWarnings.push(warning);evidenceRows.append(el('p',warning));}await pause();}
       holder.dataset.detailRepresentation=complete?'all-visible-native-cells':'overview-and-selected-acquisitions';
     }
@@ -160,7 +162,7 @@ export async function scienceMap(parent,api,params,ids,instrument,disposals,cata
     await refreshVisible(true);await loadBrowser();initial=false;
   }
   async function inspectProduct(product){
-    selectedProduct=product;const measurement=quantities.get(product.instrumentId)||initialMeasurement(product.instrumentId,sources.find(item=>item.source.id===product.sourceId)?.source);if(!measurement)throw Error('Choose an available wavelength for this instrument.');
+    selectedProduct=product;if(product.instrumentId==='hyperspectral-imager'&&!sources.some(s=>s.source.id===product.sourceId)){const data=await api('/api/science/products/'+product.id);sources.push({source:data.source,originalsRetained:false});}const measurement=quantities.get(product.instrumentId)||initialMeasurement(product.instrumentId,sources.find(item=>item.source.id===product.sourceId)?.source);if(!measurement)throw Error('Choose an available wavelength for this instrument.');
     const layer=await getLayer(product,measurement,api);if(stopped)return;
     const old=nativeLayers.get(product.instrumentId);if(old)layers.removeLayer(old);nativeLayers.delete(product.instrumentId);nativeEntries=nativeEntries.filter(entry=>entry.product.instrumentId!==product.instrumentId);const items=[];displayedCells=0;addNative(product,layer,items);rescaleNative();sampleTable(items,`${readableName(product.instrumentId,catalog)} — acquisition ${local(product.flightPacketUtc)}`);if(items.length)describeSample(items[0],true);
     const coordinates=layer.features.flatMap(feature=>feature.geometry.coordinates[0].map(p=>[p[1],p[0]]));if(coordinates.length){initial=true;map.map.fitBounds(window.L.latLngBounds(coordinates),{padding:[20,20],maxZoom:18});setTimeout(()=>initial=false,0);}visibility();if(visibleScope)updateCounts(visibleScope);

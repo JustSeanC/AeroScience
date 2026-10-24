@@ -69,6 +69,7 @@ export async function storageManagement(parent, api) {
       const progress = e("progress");
       progress.max = 100;
       progress.value = Math.min(100, s.percentage || 0);
+      progress.hidden=s.percentage==null;
       progress.setAttribute("aria-label", title + " capacity");
       card.append(
         progress,
@@ -102,7 +103,6 @@ export async function storageManagement(parent, api) {
   await load();
   for (const [key, label] of [
     ["missionLimitBytes", "Flight/Mission maximum"],
-    ["scienceLimitBytes", "Scientific Library maximum"],
   ]) {
     const row = e("label", label + " "),
       select = e("select"),
@@ -145,6 +145,7 @@ export async function storageManagement(parent, api) {
               1e9,
           );
   }
+  settings.append(e("p","Scientific Library capacity: available physical storage only. Per-download allowances, concurrent reservations and the recovery safety reserve still apply; there is no total source-count or Library-size quota."));
   const automatic = e("input");
   automatic.type = "checkbox";
   automatic.checked = snapshot.preferences.automaticCacheCleanup;
@@ -162,7 +163,7 @@ export async function storageManagement(parent, api) {
     button("Save storage limits", async () => {
       await api("/api/storage/preferences", {
         missionLimitBytes: choices.missionLimitBytes(),
-        scienceLimitBytes: choices.scienceLimitBytes(),
+        scienceLimitBytes: null,
         automaticCacheCleanup: automatic.checked,
         protectPinned: true,
       });

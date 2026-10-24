@@ -101,12 +101,63 @@ public sealed class ScientificWorkspaceTests : IDisposable
     }
     [Fact] public void AnalysisCancellationAndClearCoordinateAndPreserveOriginals()
     {
-        Add(0);using(var lease=science.BeginAnalysis())Assert.Throws<InvalidOperationException>(()=>science.Clear("DELETE SCIENCE DATA",false));
+        Add(0);var review=science.PreviewCollectedDeletion(new([mission.Id]),missions);var coordinator=new MissionCoordinator(missions,1000);using(var lease=science.BeginAnalysis())Assert.Throws<InvalidOperationException>(()=>science.Clear(new(review.Id,review.SelectionHash),missions,coordinator.EnterMaintenance));
         using var cancel=new CancellationTokenSource();cancel.Cancel();Assert.Throws<OperationCanceledException>(()=>ScientificComposites.Build(science,missions,mission.Id,new(source.Id,"elevation"),cancel.Token));
         Assert.Empty(science.Artifacts());_=ScientificComposites.Build(science,missions,mission.Id,new(source.Id,"elevation"));
-        science.Clear("DELETE SCIENCE DATA",false);Assert.Empty(science.Artifacts());Assert.Single(science.Sources());
+        review=science.PreviewCollectedDeletion(new([mission.Id]),missions);Assert.Equal("Completed",science.Clear(new(review.Id,review.SelectionHash),missions,coordinator.EnterMaintenance).State);Assert.Empty(science.Artifacts());Assert.Single(science.Sources());
         Assert.All(source.Files,f=>Assert.True(File.Exists(ScientificRaster.SafeFile(Path.Combine(science.DirectoryPath,source.RelativeDirectory),f.RelativePath))));
     }
+    [Fact] public void PermanentExternalDeletionPreservesIndependentScienceThenScienceDeletionPurgesResultsAndGrades()
+    {
+        var product=Add(0);var saved=science.ReadProduct(product.Id);var numeric=JsonSerializer.Serialize(saved.Bands,WireJson.Options);
+        var artifact=Assert.Single(ScientificComposites.Build(science,missions,mission.Id,new(source.Id,"elevation")));
+        var originalRecording=missions.StreamSamples(mission.Id).Select(f=>JsonSerializer.Serialize(f,WireJson.Options)).ToArray();
+        var example=MissionGradingTests.Example();var context=example.Context! with{MissionId=mission.Id};var report=MissionGrading.Report(example with{MissionId=mission.Id,Context=context});
+        using(var db=new SqliteConnection("Data Source="+missions.DatabasePath+";Pooling=False")){db.Open();using var command=db.CreateCommand();command.CommandText="INSERT INTO events(mission_id,timestamp_utc,kind,message) VALUES($id,$utc,'mission-performance-report',$json)";command.Parameters.AddWithValue("$id",mission.Id.ToString());command.Parameters.AddWithValue("$utc",utc.ToString("O"));command.Parameters.AddWithValue("$json",JsonSerializer.Serialize(report,WireJson.Options));command.ExecuteNonQuery();}
+        var backupDirectory=Path.Combine(science.DirectoryPath,"Metadata","Backups");var backup=DataBackup.Create(science.DatabasePath,backupDirectory,true);
+        var duplicateRelative="Downloads/"+Guid.NewGuid().ToString("N")+"/"+source.Files[0].RelativePath;var duplicate=Path.Combine(science.DirectoryPath,duplicateRelative);Directory.CreateDirectory(Path.GetDirectoryName(duplicate)!);File.Copy(Path.Combine(science.DirectoryPath,source.RelativeDirectory,source.Files[0].RelativePath),duplicate);_=science.BeginManagedWrite("Interrupted source copy fixture "+source.Id,[duplicateRelative]);
+        var coordinator=new MissionCoordinator(missions,1000);var preview=science.PreviewSourceDeletion(new([source.Id]),missions);Assert.Equal(1,preview.EligibleSources);
+        var deletedSource=science.DeleteExternalSources(new(preview.Id,preview.SelectionHash),missions,coordinator.EnterMaintenance);Assert.True(deletedSource.State=="Completed",deletedSource.Warning);
+        Assert.False(File.Exists(duplicate));Assert.All(source.Files,f=>Assert.False(File.Exists(Path.Combine(science.DirectoryPath,source.RelativeDirectory,f.RelativePath))));
+        Assert.Equal(report.Sha256,missions.LatestPerformanceReport(mission.Id)!.Sha256);Assert.Equal(numeric,JsonSerializer.Serialize(science.ReadProduct(product.Id).Bands,WireJson.Options));
+        Assert.NotEmpty(ScientificResearchSummary.Build(missions,science,mission.Id).Instruments.SelectMany(r=>r.Sources??[]));
+        var archived=Assert.Single(science.ArchivedSources(new(Missions:[mission.Id])).Items);Assert.Equal(source.Id,archived.Source.Id);Assert.False(archived.OriginalsRetained);Assert.Equal(source.ManifestSha256,archived.Source.ManifestSha256);
+        Assert.NotNull(ScientificMapLayer.Create(science.ReadProduct(product.Id),"elevation"));Assert.Equal(artifact.Sha256,science.Artifact(artifact.Id).Sha256);
+        Assert.Throws<ArgumentException>(()=>ScientificComposites.Build(science,missions,mission.Id,new(source.Id,"elevation",Mode:"retained-source")));
+        // A new saved-sample analysis remains possible; no source raster is read.
+        Assert.Single(ScientificComposites.Build(science,missions,mission.Id,new(source.Id,"elevation",Selection:"first")));
+        science.Dispose();using var reopened=new ScienceStore(science.DirectoryPath);reopened.Initialize();missions.ScienceLibrary=reopened;
+        Assert.Equal(numeric,JsonSerializer.Serialize(reopened.ReadProduct(product.Id).Bands,WireJson.Options));Assert.Empty(reopened.Availability());
+        var collected=reopened.PreviewCollectedDeletion(new([mission.Id]),missions);Assert.True(collected.Products>=2);Assert.Empty(collected.Blockers);
+        Assert.Throws<InvalidOperationException>(()=>reopened.DeleteCollectedScience(new(collected.Id,"wrong hash"),missions,coordinator.EnterMaintenance));Assert.NotNull(reopened.ReadProduct(product.Id));
+        var result=reopened.DeleteCollectedScience(new(collected.Id,collected.SelectionHash),missions,coordinator.EnterMaintenance);Assert.True(result.State=="Completed",result.Warning);
+        Assert.Empty(reopened.AllProducts(mission.Id));Assert.Empty(reopened.Artifacts(mission.Id));Assert.Empty(reopened.StreamObservations(mission.Id));Assert.Null(missions.LatestPerformanceReport(mission.Id));Assert.True(missions.ScienceDeleted(mission.Id));Assert.Empty(missions.InstrumentDiagnostics(mission.Id));
+        Assert.False(File.Exists(Path.Combine(reopened.DirectoryPath,product.RelativePath)));Assert.False(File.Exists(Path.Combine(reopened.DirectoryPath,artifact.RelativePath)));
+        Assert.Equal(originalRecording,missions.StreamSamples(mission.Id).Select(f=>JsonSerializer.Serialize(f,WireJson.Options)).ToArray());
+        using var inspect=new SqliteConnection("Data Source="+backup+";Mode=ReadOnly;Pooling=False");inspect.Open();using var check=inspect.CreateCommand();check.CommandText="SELECT (SELECT count(*) FROM remote_sources)+(SELECT count(*) FROM remote_products)+(SELECT count(*) FROM observations)+(SELECT count(*) FROM datasets)";Assert.Equal(0L,check.ExecuteScalar());check.CommandText="PRAGMA integrity_check";Assert.Equal("ok",check.ExecuteScalar());
+    }
+    [Fact]public void CollectedDeletionPurgesRegisteredRecoveryCopiesButPreservesUnrelatedMissionResults()
+    {
+        var product=Add(0);var other=missions.Create("Unrelated recorded flight",null,utc,ScienceMode.Universal);missions.Finish(other,MissionStatus.Completed,utc.AddSeconds(1),"Synthetic fixture");var otherMission=missions.Detail(other)!.Mission;var otherDataset=science.EnsureDataset(otherMission,new("terrain-scanner",true),missions.Research(other));var saved=science.ReadProduct(product.Id);var otherId=Guid.NewGuid();
+        var unrelated=science.Publish(saved with{Product=saved.Product with{Id=otherId,DatasetId=otherDataset.Id,MissionId=other,RelativePath=$"Products/{other:N}/{otherId:N}.json"}});
+        var destination=Path.Combine(root,"owner-recovery");Directory.CreateDirectory(destination);var recovery=science.CreateRecoveryBackup(destination);var deletedCopy=Path.Combine(recovery,product.RelativePath);var keptCopy=Path.Combine(recovery,unrelated.RelativePath);Assert.True(File.Exists(deletedCopy));Assert.True(File.Exists(keptCopy));
+        var preview=science.PreviewCollectedDeletion(new([mission.Id]),missions);Assert.Empty(preview.Blockers);var coordinator=new MissionCoordinator(missions,1000);var result=science.DeleteCollectedScience(new(preview.Id,preview.SelectionHash),missions,coordinator.EnterMaintenance);Assert.True(result.State=="Completed",result.Warning);
+        Assert.False(File.Exists(deletedCopy));Assert.True(File.Exists(keptCopy));Assert.Equal(unrelated.Sha256,science.ReadProduct(unrelated.Id).Product.Sha256);Assert.Single(science.Sources());Assert.NotNull(missions.Detail(other));
+        using var db=new SqliteConnection("Data Source="+Directory.GetFiles(recovery,"*.sqlite").Single()+";Mode=ReadOnly;Pooling=False");db.Open();using var command=db.CreateCommand();command.CommandText="SELECT count(*) FROM remote_products";Assert.Equal(1L,command.ExecuteScalar());
+    }
+    [Theory][InlineData("approved")][InlineData("records-removed")]
+    public void InterruptedCollectedDeletionCompletesAfterOfflineRestart(string checkpoint)
+    {
+        var product=Add(0);var review=science.PreviewCollectedDeletion(new([mission.Id]),missions);var coordinator=new MissionCoordinator(missions,1000);science.CollectedDeletionFault=point=>{if(point==checkpoint)throw new DeletionProcessKilled();};Assert.Throws<DeletionProcessKilled>(()=>science.DeleteCollectedScience(new(review.Id,review.SelectionHash),missions,coordinator.EnterMaintenance));science.Dispose();
+        using var reopened=new ScienceStore(science.DirectoryPath);reopened.Initialize();reopened.RecoverCollectedDeletion(missions);Assert.Empty(reopened.AllProducts(mission.Id));Assert.False(File.Exists(Path.Combine(reopened.DirectoryPath,product.RelativePath)));Assert.True(missions.ScienceDeleted(mission.Id));Assert.Single(missions.StreamSamples(mission.Id));Assert.Single(reopened.Sources());Assert.Equal("Completed",reopened.DeleteCollectedScience(new(review.Id,review.SelectionHash),missions,coordinator.EnterMaintenance).State);
+    }
+    [Fact]public void LockedCollectedFileRemainsPendingUntilItCanActuallyBeRemoved()
+    {
+        var product=Add(0);var review=science.PreviewCollectedDeletion(new([mission.Id]),missions);var coordinator=new MissionCoordinator(missions,1000);science.CollectedDeletionFault=point=>{if(point=="before-file-remove")throw new IOException("Synthetic locked file");};
+        var pending=science.DeleteCollectedScience(new(review.Id,review.SelectionHash),missions,coordinator.EnterMaintenance);Assert.Equal("Cleanup pending",pending.State);Assert.True(pending.PendingFiles>0);Assert.True(File.Exists(Path.Combine(science.DirectoryPath,product.RelativePath)));Assert.True(missions.ScienceDeleted(mission.Id));science.CollectedDeletionFault=null;
+        Assert.Equal("Completed",science.DeleteCollectedScience(new(review.Id,review.SelectionHash),missions,coordinator.EnterMaintenance).State);Assert.False(File.Exists(Path.Combine(science.DirectoryPath,product.RelativePath)));
+    }
+    private sealed class DeletionProcessKilled:Exception;
     [Fact] public void PreviousMissionAndScienceSchemasUpgradeWithVerifiedBackupsWithoutRewritingSavedPayloads()
     {
         Add(0);
@@ -114,7 +165,7 @@ public sealed class ScientificWorkspaceTests : IDisposable
         {using var db=new SqliteConnection(new SqliteConnectionStringBuilder{DataSource=path,Pooling=false}.ToString());db.Open();using var command=db.CreateCommand();command.CommandText=sql;return command.ExecuteScalar();}
         EvidenceTestDatabase.RemoveSchemaEight(missions.DatabasePath);
         Sql(missions.DatabasePath,"PRAGMA user_version=5; DROP INDEX telemetry_receipt_time; DROP INDEX events_receipt_time");
-        Sql(science.DatabasePath,"PRAGMA user_version=1; DROP TABLE scientific_artifacts; DROP INDEX observations_receipt_time");
+        Sql(science.DatabasePath,"PRAGMA user_version=1; DROP TABLE science_delete_files; DROP TABLE science_delete_missions; DROP TABLE science_delete_reviews; DROP TABLE source_delete_items; DROP TABLE source_delete_ledgers; DROP TABLE source_delete_previews; DROP TABLE source_references; DROP TABLE source_search; DROP TABLE source_bounds; DROP INDEX remote_products_source; DROP TABLE scientific_artifacts; DROP INDEX observations_receipt_time");
         var telemetry=Sql(missions.DatabasePath,"SELECT payload_json FROM telemetry LIMIT 1");var product=Sql(science.DatabasePath,"SELECT payload_json FROM remote_products LIMIT 1");
         missions.Initialize();science.Initialize();
         Assert.Equal((long)MissionStore.CurrentSchemaVersion,Sql(missions.DatabasePath,"PRAGMA user_version"));Assert.Equal((long)ScienceStore.CurrentSchemaVersion,Sql(science.DatabasePath,"PRAGMA user_version"));

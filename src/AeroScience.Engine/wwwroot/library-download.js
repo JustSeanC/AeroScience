@@ -1,3 +1,4 @@
+import {libraryLocation} from './library-location.js';
 import {renderTransferProgress} from './transfer-progress.js';
 import { openHyperspectralImport } from "./hyperspectral-import.js";
 import { ResearchMap } from "./map.js";
@@ -59,6 +60,7 @@ export async function libraryDownload(parent, api, isDisposed = () => false) {
     ),
   );
   parent.append(heading);
+  await libraryLocation(parent,api,{stopped:()=>stopped||isDisposed()});if(stopped||isDisposed())return cleanup;
   link(heading, "Retained collections", "#library");
   link(heading, "Scientific access & privacy", "#settings/science");
   const feedback = status(
@@ -92,13 +94,15 @@ export async function libraryDownload(parent, api, isDisposed = () => false) {
   const earthdataText = el("p");
   earthdataBox.append(el("h2", "NASA Earthdata"), earthdataText);
   form.append(earthdataBox);
-  button(earthdataBox, "Connect Earthdata on this PC", () => api("/api/desktop/earthdata-connect", {}));
-  button(earthdataBox, "Refresh Earthdata connection", refreshEarthdata);
-  button(earthdataBox, "Disconnect Earthdata on this PC", async () => { await api("/api/science/earthdata/disconnect", {}); await refreshEarthdata(); });
+  const connectEarthdata = button(earthdataBox, "Connect Earthdata on this PC", () => api("/api/desktop/earthdata-connect", {}));
+  const earthdataManagement = disclosure(earthdataBox, "Manage Earthdata connection");
+  button(earthdataManagement, "Refresh Earthdata connection", refreshEarthdata);
+  const disconnectEarthdata = button(earthdataManagement, "Disconnect Earthdata on this PC", async () => { await api("/api/science/earthdata/disconnect", {}); await refreshEarthdata(); });
   async function refreshEarthdata() {
     const connection = await api("/api/science/earthdata");
     if (stopped || isDisposed()) return;
     earthdataText.textContent = `${connection.connected ? "Credential saved" : "Not connected"}. ${connection.message} On paired devices, complete connection management on the companion PC. NASA originals can require gigabytes; review the exact full-file scope before approval.`;
+    connectEarthdata.hidden=connection.connected;disconnectEarthdata.hidden=!connection.connected;
   }
   const advancedFilters = disclosure(form, "Advanced discovery filters");
   const filters = el("div", undefined, "workspace-controls");
@@ -462,7 +466,7 @@ export async function libraryDownload(parent, api, isDisposed = () => false) {
         "Selection changed. Preview and explicit approval are required before downloading.",
       ),
     );
-    selectionText.textContent = `${areas.length} selected area(s)${polygon ? " · polygon clipping" : ""}${regionGeometry ? " · authoritative region" : ""}. Numeric source cells are bounded geographic windows, not native pixels.`;
+    selectionText.textContent = `${areas.length} selected ${areas.length===1?'area':'areas'}${polygon ? " · polygon clipping" : ""}${regionGeometry ? " · authoritative region" : ""}. Numeric source cells are bounded geographic windows, not native pixels.`;
     layers.selected.clearLayers();
     for (const a of areas)
       shape(a, "#ffd166", layers.selected, "Selected numeric window");

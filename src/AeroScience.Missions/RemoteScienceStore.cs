@@ -35,6 +35,7 @@ public sealed partial class ScienceStore
         Initialize(); var summary = ManagedProductSummary();
         if (disk.FreeBytes(folder) < summary.Bytes + StorageManager.DatabaseBytes(DatabasePath) * 2 + StorageManager.MinimumFreeBytes) throw new IOException("Insufficient space for the scientific database and complete managed products. No data was cleared.");
         var destination = Path.Combine(folder, "AeroScience-science-recovery-" + Guid.NewGuid().ToString("N")); Directory.CreateDirectory(destination);
+        RegisterScientificCopy(DirectoryPath,destination,"recovery");PreferenceStore.WriteAtomic(Path.Combine(destination,"recovery.json"),new{formatVersion=1,libraryId=LibraryId,state="Copying; not a complete recovery archive"});
         var database = DataBackup.Create(DatabasePath, destination, true);
         foreach (var product in AllProducts())
         {
@@ -134,7 +135,7 @@ public sealed partial class ScienceStore
         if(reuseExisting)
         {
             var identity=JsonSerializer.Serialize(manifest,WireJson.Options);
-            foreach(var existing in Sources().Where(s=>JsonSerializer.Serialize(s.Manifest,WireJson.Options)==identity))
+            foreach(var existing in StreamSources(new(ManifestKey:ScientificCatalog.Hash(manifest))).Where(s=>JsonSerializer.Serialize(s.Manifest,WireJson.Options)==identity))
             {
                 var matches=true;foreach(var file in existing.Files)
                 {
@@ -147,7 +148,6 @@ public sealed partial class ScienceStore
             }
         }
         using var reservation=Management?.ReserveScience(inspected.Bytes+1048576);
-        if (Sources().Length >= 500) throw new InvalidOperationException("This library supports up to 500 source collections; use bounded regional collections.");
         if (AvailabilityError() is { } unavailable) throw new IOException(unavailable);
         if (disk.FreeBytes(DirectoryPath) < inspected.Bytes + StorageManager.MinimumFreeBytes) throw new IOException("Insufficient Science Library space for the original source files and reserve.");
         var id = Guid.NewGuid();
@@ -179,7 +179,15 @@ public sealed partial class ScienceStore
                 Directory.CreateDirectory(Path.GetDirectoryName(target)!); progress?.Report("Copying " + Path.GetFileName(name));
                 using (var from = File.OpenRead(fromPath))
                 using (var to = new FileStream(target, FileMode.CreateNew, FileAccess.Write, FileShare.None, 131072, FileOptions.Asynchronous))
-                { await from.CopyToAsync(to, token); to.Flush(true); }
+                {
+                    var buffer=new byte[131072];int count;
+                    while((count=await from.ReadAsync(buffer,token))>0)
+                    {
+                        if(disk.FreeBytes(DirectoryPath)<count+StorageManager.MinimumFreeBytes)throw new IOException("Scientific Library drive has insufficient space during import; staging preserved, no source was published.");
+                        await to.WriteAsync(buffer.AsMemory(0,count),token);
+                    }
+                    to.Flush(true);
+                }
                 if (Digest(fromPath) != Digest(target)) throw new IOException("Source changed during import; no source was published.");
                 files.Add(new(name.Replace('\\', '/'), new FileInfo(target).Length, Digest(target)));
             }
@@ -190,13 +198,14 @@ public sealed partial class ScienceStore
             var source = new ScientificSource(id, manifest, DateTimeOffset.UtcNow, grids, files.ToArray(), fingerprint, relative);
             PreferenceStore.WriteAtomic(Path.Combine(temporary, "source.json"), source);
             token.ThrowIfCancellationRequested();
-            if(reuseExisting&&Sources().FirstOrDefault(s=>s.ManifestSha256==fingerprint) is {} existing)
+            if(StreamSources(new(Fingerprint:fingerprint)).FirstOrDefault() is {} existing)
             {foreach(var name in files.Select(f=>f.RelativePath).Append("source.json"))File.Delete(Path.Combine(temporary,name));Directory.Delete(temporary);File.Delete(ledger);progress?.Report("This verified dataset is already imported.");return existing;}
             Directory.Move(temporary, destination);
             lock (gate)
             {
-                using var db = Open(write: true); using var cmd = db.CreateCommand(); cmd.CommandText = "INSERT INTO remote_sources VALUES($id,$sha,$json)";
+                using var db = Open(write: true); using var tx = db.BeginTransaction(); using var cmd = db.CreateCommand(); cmd.Transaction=tx; cmd.CommandText = "INSERT INTO remote_sources VALUES($id,$sha,$json)";
                 cmd.Parameters.AddWithValue("$id", id.ToString()); cmd.Parameters.AddWithValue("$sha", fingerprint); cmd.Parameters.AddWithValue("$json", JsonSerializer.Serialize(source, WireJson.Options)); cmd.ExecuteNonQuery();
+                IndexSource(db,tx,source); tx.Commit();
             }
             Management?.AddedScienceFile(inspected.Bytes + new FileInfo(Path.Combine(destination, "source.json")).Length, source: true);
             File.Delete(ledger);
@@ -210,18 +219,10 @@ public sealed partial class ScienceStore
             throw;
         }
     }
-    public ScientificSource[] Sources()
-    {
-        if (AvailabilityError() is { } unavailable) throw new IOException(unavailable);
-        if(!sourceDeletionRecoveryDone&&File.Exists(DatabasePath))Initialize();
-        if (!File.Exists(DatabasePath)) return [];
-        using var db = Open(); using var cmd = db.CreateCommand(); cmd.CommandText = "SELECT name FROM sqlite_master WHERE name='remote_sources'";
-        if (cmd.ExecuteScalar() is null) return [];
-        cmd.CommandText = "SELECT payload_json FROM remote_sources ORDER BY rowid DESC LIMIT 500";
-        using var read = cmd.ExecuteReader(); var list = new List<ScientificSource>();
-        while (read.Read()) list.Add(ReadCatalog<ScientificSource>(read.GetString(0))); return list.ToArray();
-    }
-    public SourceAvailability[] Availability(Coordinates? point = null) => Sources().Select(source =>
+    public ScientificSourceInventory Sources() => new(this);
+    public IEnumerable<SourceAvailability> Availability(Coordinates? point = null,RemoteKind? kind=null,GeographicBounds? area=null) =>
+        StreamSources(new(kind,kind is null?null:point,area)).Select(source=>InspectAvailability(source,point));
+    public SourceAvailability InspectAvailability(ScientificSource source,Coordinates? point=null)
     {
         try
         {
@@ -231,7 +232,7 @@ public sealed partial class ScienceStore
         }
         catch (Exception e) when (e is IOException or ArgumentException or InvalidOperationException or UnauthorizedAccessException)
         { return new SourceAvailability(source, false, false, e.Message); }
-    }).ToArray();
+    }
     public RemoteProduct[] Products(Guid? mission = null, int limit = 50, int offset = 0, string? instrument = null)
     {
         if (AvailabilityError() is { } unavailable) throw new IOException(unavailable);

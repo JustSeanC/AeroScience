@@ -129,7 +129,7 @@ public sealed class AutomaticScientificDataTests : IDisposable
         auto.Configure(Preferences with{UnmeteredOnly=true});auto.Prepare(Area,[RemoteKind.Terrain]);await Wait(()=>auto.Snapshot().Single().Status!="Queued");Assert.Equal("Offline",auto.Snapshot().Single().Status);Assert.Equal(0,handler.Count);
         var input=RemoteFixtureFiles.Create(Path.Combine(root,"fixture"),RemoteKind.Terrain);var original=File.ReadAllBytes(Path.Combine(root,"fixture","elevation.tif"));
         var settings2=new ScientificAccessSettings(Path.Combine(root,"two"));settings2.Save(Preferences);
-        var provider=new FixtureProvider(ScienceStore.ReadSourceManifest(input));using var limited=new AutomaticScientificData(science,settings2,new ScientificHttp(handler),[provider]);management.Configure(new(null,100000));limited.Prepare(Area,[RemoteKind.Terrain]);await Wait(()=>limited.Snapshot().Single().Status=="Unavailable");Assert.Equal(0,handler.Count);Assert.Empty(science.Sources());
+        var provider=new FixtureProvider(ScienceStore.ReadSourceManifest(input));using var limited=new AutomaticScientificData(science,settings2,new ScientificHttp(handler),[provider]);science.Management=new StorageManagement(root,missions,science,new FullDisk());limited.Prepare(Area,[RemoteKind.Terrain]);await Wait(()=>limited.Snapshot().Single().Status=="Unavailable");Assert.Equal(0,handler.Count);Assert.Empty(science.Sources());
         Assert.Equal(original,File.ReadAllBytes(Path.Combine(root,"fixture","elevation.tif")));
         using var cts=new CancellationTokenSource();cts.Cancel();using var http=new ScientificHttp(handler);await Assert.ThrowsAnyAsync<OperationCanceledException>(()=>http.Json("https://earth-search.aws.element84.com/v1/search",new(1048576),cts.Token));Assert.Equal(0,handler.Count);
         using var outage=new ScientificHttp(new Handler((_,_)=>new(HttpStatusCode.NotFound)));await Assert.ThrowsAsync<IOException>(()=>outage.Json("https://earth-search.aws.element84.com/v1/search",new(1048576),default));
@@ -187,5 +187,6 @@ public sealed class AutomaticScientificDataTests : IDisposable
         using var auto=new AutomaticScientificData(science,new(root));var result=ScientificPlanPreparation.Prepare(auto,new(Guid.NewGuid(),"Long",Waypoints:[new("A",40,-75),new("B",41,-74)],Instruments:[new("thermal-imager",true)]));Assert.True(result.LimitedCoverage);Assert.InRange(result.AreasQueued,1,8);await Wait(()=>auto.Snapshot().All(s=>s.Status!="Queued"));Assert.All(auto.Snapshot(),s=>Assert.Equal("Offline",s.Status));
     }
     private static async Task Wait(Func<bool> condition){using var c=new CancellationTokenSource(TimeSpan.FromSeconds(10));while(!condition())await Task.Delay(20,c.Token);}
+    private sealed class FullDisk:IStorageCapacity{public long FreeBytes(string directory)=>0;}
     public void Dispose(){science.Dispose();Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();if(Directory.Exists(root))Directory.Delete(root,true);}
 }

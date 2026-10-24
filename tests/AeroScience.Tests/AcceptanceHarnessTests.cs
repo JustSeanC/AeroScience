@@ -9,8 +9,9 @@ namespace AeroScience.Tests;
 [Collection(ScientificIoCollection.Name)]
 public sealed class AcceptanceHarnessTests
 {
+    private sealed class FullDisk:IStorageCapacity{public long FreeBytes(string directory)=>0;}
     [Fact]
-    public async Task ReopenedGuidedWorkspaceHonorsConfiguredScientificQuota()
+    public async Task ReopenedGuidedWorkspaceHonorsPhysicalDiskReserve()
     {
         var root=Path.Combine(Path.GetTempPath(),"acceptance-quota-"+Guid.NewGuid().ToString("N"));
         try
@@ -22,9 +23,8 @@ public sealed class AcceptanceHarnessTests
             var missions=new MissionStore(Path.Combine(output,"missions.db"));missions.Initialize();
             using var science=new ScienceStore(paths.ScienceLibraryDirectory);science.Initialize();missions.ScienceLibrary=science;
             // Isolate the reopened owner's guard: initial fixture acquisition has no
-            // manager, but the offline workspace must load and honor saved limits.
-            File.WriteAllText(Path.Combine(output,"storage-limits.json"),JsonSerializer.Serialize(new StorageLimits(ScienceLimitBytes:1)));
-            await Assert.ThrowsAsync<StorageLimitException>(()=>GuidedEnviAcceptance.Run(Path.Combine(originals,"cube.hdr"),output,science,missions,workspace:true));
+            // manager, but the reopened workspace must honor actual drive availability.
+            await Assert.ThrowsAsync<StorageLimitException>(()=>GuidedEnviAcceptance.Run(Path.Combine(originals,"cube.hdr"),output,science,missions,workspace:true,capacity:new FullDisk()));
             Assert.True(File.Exists(Path.Combine(output,"guided-envi-acceptance.json")));
             Assert.False(File.Exists(Path.Combine(output,"workspace-acceptance.json")));
             using var reopened=new ScienceStore(paths.ScienceLibraryDirectory);reopened.Initialize();

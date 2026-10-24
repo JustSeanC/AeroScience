@@ -27,7 +27,7 @@ made by your simulated aircraft. Downloading data does not add flight science yi
    **Review & Download**. Exact native numeric bands, scale/offset, CRS, masks, IDs and revisions
    remain available in Technical details. No alternate scene is silently substituted.
 6. Review reuse, scope, actual known file sizes, Unknown subset sizes, physical drive space,
-   application storage quotas and the independent transfer cap. **Download & Import** explicitly
+   the flight-recording quota (separate from Library capacity) and the independent transfer cap. **Download & Import** explicitly
    approves that work. Searching, opening the page or creating a preview does not approve it.
    Changed scope, source revisions or budgets require a fresh preview and approval.
 7. The Download Manager shows durable state, measured network bytes, original file progress
@@ -100,20 +100,57 @@ observation dates, units, provider, managed bytes, coverage and source-selection
 **Exclude from Active Science** retains files and is reversible; deletion actually removes
 reviewed managed copies from the current Library.
 
-Choose one source, selected sources/collections or **Delete All Downloaded External Data**.
-Review exact identities, managed files/bytes, blockers and preserved data, type the requested
-confirmation, and confirm permanent removal without a new backup. All requires
-`DELETE ALL EXTERNAL DATA`. Referenced sources, active operations, unverified ownership,
-changed originals, unreadable dependencies and unsafe paths block execution. A source needed by runnable plan preparation is blocked; pause/cancel that preparation
-first. Resuming/reviewing preparation later can acquire missing approved data again. A blocked batch
-is never silently reduced; review an explicitly smaller eligible set.
+Choose one source, selected regions, a collection or **Delete All Downloaded External Data**.
+One accessible review shows the exact selection, region count, estimated managed bytes and any
+blockers. Use **Cancel** or the red **Delete Data** / **Delete All Downloaded Data** button.
+There is no typed phrase or browser-native confirmation. X and Escape dismiss an unapproved review;
+closing an already approved operation does not cancel it. Reviews expire after ten minutes and
+files/ownership/dependencies are rechecked. A blocked batch is never silently reduced.
 
-Deletion does not cascade into missions, scientific observations/products/grades/reports,
-calibration, settings, previous backups or user originals outside the Library. A durable
-file journal and atomic database receipt recover precommit interruptions by rollback and
-postcommit interruptions by exact owned-file cleanup. Changed/locked files remain pending
-for review; Retry owned cleanup or restart after releasing the file lock. Logical managed bytes and measured physical free-space change are reported
-separately; neither deletion nor successful downloading certifies valid source pixels.
+External-source deletion preserves independently published mission measurements, source snapshots,
+units, dates, provenance and grades supported by retained evidence. Saved-sample maps, spectra,
+comparisons and composites do not need the original raster. New source-pixel sampling and retained-
+source mosaics require originals again. Modeled geometry is not verified scientific coverage.
+Active flight/acquisition/analysis and runnable preparation still block deletion; pause/cancel
+preparation first. Explicitly requested preparation can subsequently fetch missing approved data.
+
+Deletion creates no recovery archive. Approved originals, attributable staging/range copies and
+retained-source derived copies are purged; selected content in registered managed database/recovery
+backups is also purged without removing unrelated records. Saved mission-sample products are
+independent results, not original-source caches. Unknown ownership, changed files, a shared mosaic
+with unselected contributors or an unavailable retained migration copy blocks complete deletion.
+Older unregistered copies outside known managed locations require explicit reconciliation; AeroScience
+cannot discover arbitrary offline/user-made archives or claim to erase operating-system backups.
+
+An atomic database receipt precedes irreversible file removal. A precommit failure changes no files;
+a committed interruption resumes exact cleanup on restart. Locked files or unfinished database/WAL
+cleanup remain **Cleanup pending**, never Completed. Logical bytes and physical free-space change
+are distinct. SQLite selected rows use secure deletion/checkpoint/compaction; this is managed-data
+removal, not a forensic SSD or system-backup erasure claim.
+
+**Delete Collected Science** in Mission History (or the Windows Data Management scientific clear)
+is a separate one-review action. It purges selected observations, products, thumbnails, generated
+analysis, auxiliary scientific evidence, instrument measurement summaries, grades and registered
+recovery copies. Deleted evidence cannot automatically regenerate an old grade or reconstruction.
+Raw flight recordings/telemetry, plans, instrument configuration history and external source datasets
+remain separate. Shared historical journals or unavailable copies require explicit resolution.
+
+## Storage location and Library scale
+
+**Open Data Folder** and **Copy Path** appear in both Manage Downloaded Data and Find & Download
+Data, with configured path, managed usage and physical free space (or Unknown). A trusted local
+Windows companion opens Explorer; paired iPads/browsers only copy the path. Each retained source
+also offers **Open Source Folder**. Identity/path validation is repeated; missing drives never cause
+an empty replacement directory.
+
+There is no overall source/collection/region count ceiling or default scientific-retention quota.
+Physical capacity and write/recovery headroom govern retained size. Flight-recording quotas,
+per-job transfer allowances, bounded work units, request pages and concurrency remain independent.
+Collections and regions use full-inventory counts and bounded pages; the geographic source index
+searches the complete catalog. A page limit is not a Library capacity limit. Existing exact verified
+sources are checked before transfer. Failed 3DEP-style imports can re-enter the existing validator
+from exact, owned completed staging after restart without transferring the dataset again; mismatched
+or invalid staging is not accepted as verified. Compatible multi-source gap-only preparation is not implemented in this checkpoint; it remains a required follow-up.
 
 ## Products and scientific meaning
 

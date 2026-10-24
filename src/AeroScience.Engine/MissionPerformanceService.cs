@@ -15,6 +15,7 @@ public sealed class MissionPerformanceService(MissionStore missions,ScientificAn
     public object Read(Guid id)
     {
         var mission=missions.Detail(id)?.Mission??throw new ArgumentException("Mission not found.");
+        if(missions.ScienceDeleted(id))return new{state="Deleted",message="Collected science and dependent grades were permanently deleted. Flight recording remains available.",reports=Array.Empty<MissionPerformanceReport>(),revisions=Array.Empty<object>(),projection=(MissionPerformanceReport?)null};
         var latest=missions.LatestPerformanceReport(id);var reports=latest is null?Array.Empty<MissionPerformanceReport>():[latest];var revisions=missions.PerformanceRevisions(id);
         if(mission.Status!=MissionStatus.Recording)
         {
@@ -42,7 +43,7 @@ public sealed class MissionPerformanceService(MissionStore missions,ScientificAn
                 var page=archiveOffset==0?recent:missions.List(20,archiveOffset);archiveOffset=page.Count<20?0:archiveOffset+20;
                 foreach(var mission in page.Where(m=>m.Status!=MissionStatus.Recording))
                 {
-                    if(attempted.Contains(mission.Id)||missions.CollectionSnapshot<MissionAssessmentContext>(mission.Id) is null||missions.LatestPerformanceReport(mission.Id) is not null)continue;
+                    if(missions.ScienceDeleted(mission.Id)||attempted.Contains(mission.Id)||missions.CollectionSnapshot<MissionAssessmentContext>(mission.Id) is null||missions.LatestPerformanceReport(mission.Id) is not null)continue;
                     attempted.Add(mission.Id);
                     try{Recompute(mission.Id,"End-flight archived evaluation");}catch(InvalidOperationException){attempted.Remove(mission.Id);break;}
                 }

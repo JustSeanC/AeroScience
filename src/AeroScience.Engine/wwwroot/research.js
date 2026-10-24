@@ -1,3 +1,4 @@
+import {reviewCollectedScienceDeletion} from "./collected-science-deletion.js";
 import { newIdentity } from "./workstation-ui.js";
 import { missionPerformance } from "./mission-performance.js";
 import { preflightReadiness } from "./preflight-readiness.js";
@@ -1286,6 +1287,8 @@ function showScience(parent, rows, label) {
   raw.append(list);
 }
 export async function researchDetail(body, id, mission) {
+  const host=body,access=await ctx.api('/api/science/access');
+  if(access.canConfigure&&mission.status!=='recording'){const removeScience=button('Delete Collected Science',()=>reviewCollectedScienceDeletion(ctx.api,{missionIds:[id]},async()=>{host.replaceChildren();await researchDetail(host,id,mission);}));removeScience.className='danger';body.append(removeScience);}
   missionPerformance(body,ctx.api,id);
   const sessions=text('details');sessions.append(text('summary','Science sessions and retained measurements'));body.append(sessions);
   sessions.addEventListener('toggle',async()=>{if(!sessions.open||sessions.dataset.loaded)return;sessions.dataset.loaded='true';

@@ -82,7 +82,7 @@ public static class ResearchApi
         app.MapGet("/api/science/access", (ScientificAccessSettings settings,HttpContext c)=>new{configuration=settings.Get(),canConfigure=AccessControl.IsLoopback(c)});
         app.MapPost("/api/science/access",(ScientificAccessPreferences preferences,AutomaticScientificData automatic,HttpContext c)=>AccessControl.IsLoopback(c)?Results.Ok(automatic.Configure(preferences)):Results.StatusCode(403));
         app.MapPost("/api/science/source-selection",(SourceSelectionRequest request,ScientificAccessSettings settings,AutomaticScientificData automatic,ScienceStore science,HttpContext c)=>
-        {if(!AccessControl.IsLoopback(c))return Results.StatusCode(403);if(!science.Sources().Any(s=>s.Id==request.SourceId))throw new ArgumentException("Source not found.");var p=settings.Get().Preferences;var excluded=(p.ExcludedSourceIds??[]).ToHashSet();if(request.Enabled)excluded.Remove(request.SourceId);else excluded.Add(request.SourceId);return Results.Ok(automatic.Configure(p with{ExcludedSourceIds=excluded.ToArray()}));});
+        {if(!AccessControl.IsLoopback(c))return Results.StatusCode(403);if(!(science.Source(request.SourceId) is not null))throw new ArgumentException("Source not found.");var p=settings.Get().Preferences;var excluded=(p.ExcludedSourceIds??[]).ToHashSet();if(request.Enabled)excluded.Remove(request.SourceId);else excluded.Add(request.SourceId);return Results.Ok(automatic.Configure(p with{ExcludedSourceIds=excluded.ToArray()}));});
         app.MapPost("/api/science/source-mode",(SourceModeRequest request,ScientificAccessSettings settings,AutomaticScientificData automatic,HttpContext c)=>
         {if(!AccessControl.IsLoopback(c))return Results.StatusCode(403);var p=settings.Get().Preferences;var modes=new Dictionary<RemoteKind,string>(p.SourceModes??[]){[request.Kind]=request.Mode};return Results.Ok(automatic.Configure(p with{SourceModes=modes}));});
         app.MapGet("/api/plans/{id:guid}/preparation/instruments",(Guid id,ScientificPlanData plans)=>plans.Instruments(id));
@@ -130,18 +130,46 @@ public static class ResearchApi
         app.MapPost("/api/science/hyperspectral/associate",async (HyperspectralAssociation request,ScientificImportSession session,HttpContext c)=>{if(!AccessControl.IsLoopback(c))return Results.StatusCode(403);await session.Associate(request.FileName);return Results.Ok(session.Snapshot());});
         app.MapPost("/api/science/hyperspectral/import",(ScientificImportSession session,HttpContext c)=>{if(!AccessControl.IsLoopback(c))return Results.StatusCode(403);session.Import();return Results.Accepted();});
         app.MapPost("/api/science/hyperspectral/cancel",(ScientificImportSession session,HttpContext c)=>{if(!AccessControl.IsLoopback(c))return Results.StatusCode(403);session.Cancel();return Results.Ok();});
-        app.MapGet("/api/science/sources", (double? latitude, double? longitude, ScienceStore science) => science.Availability(latitude is { } lat && longitude is { } lon ? new Coordinates(lat, lon) : null));
+        app.MapGet("/api/science/library/location",(Guid? sourceId,ScientificLibraryFolders folders,HttpContext context)=>folders.Location(AccessControl.IsLoopback(context),sourceId));
+        app.MapPost("/api/science/library/open-folder",(ScientificFolderRequest request,ScientificLibraryFolders folders,HttpContext context)=>
+        {
+            if(!AccessControl.IsLoopback(context))return Results.StatusCode(403);
+            folders.Open(true,request);return Results.Accepted(value:new{opened=true});
+        });
+        app.MapGet("/api/science/source-collections",(string? kind,string? provider,string? search,string? after,int? limit,string? sort,ScienceStore science)=>science.SourceCollections(new(Kind:ScienceStore.ParseSourceKind(kind),Provider:provider,Search:search),after,limit??20,sort??"name"));
+        app.MapGet("/api/science/sources/page",(long? after,long? through,int? limit,string? kind,string? provider,string? scene,string? collection,string? search,double? latitude,double? longitude,ScienceStore science)=>
+        {
+            var point=latitude is {} lat&&longitude is {} lon?new Coordinates(lat,lon):null;
+            var page=science.SourcePage(new(ScienceStore.ParseSourceKind(kind),point,Provider:provider,Scene:scene,Collection:collection,Search:search),after??0,limit??50,through);
+            return new{items=page.Items.Select(s=>science.InspectAvailability(s,point)),page.Next,page.Through,page.Total};
+        });
+        app.MapGet("/api/science/sources", (double? latitude, double? longitude,long? after,long? through,int? limit,string? kind, ScienceStore science,HttpContext context) =>
+        {
+            var point=latitude is {} lat&&longitude is {} lon?new Coordinates(lat,lon):null;
+            var page=science.SourcePage(new(ScienceStore.ParseSourceKind(kind),point),after??0,limit??50,through);
+            context.Response.Headers["X-AeroScience-Source-Total"]=page.Total.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            context.Response.Headers["X-AeroScience-Source-Through"]=page.Through.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            if(page.Next is {} next)context.Response.Headers["X-AeroScience-Source-Next"]=next.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            return page.Items.Select(s=>science.InspectAvailability(s,point));
+        });
+        app.MapPost("/api/science/collected/deletion/preview",(HttpContext context,CollectedScienceDeletionRequest request,ScienceStore science,MissionStore missions)=>
+            AccessControl.IsLoopback(context)?Results.Ok(science.PreviewCollectedDeletion(request,missions)):Results.StatusCode(403));
+        app.MapPost("/api/science/collected/deletion/execute",(HttpContext context,SourceDeletionExecution request,ScienceStore science,MissionStore missions,MissionCoordinator coordinator)=>{
+            if(!AccessControl.IsLoopback(context))return Results.StatusCode(403);
+            var result=science.DeleteCollectedScience(request,missions,coordinator.EnterMaintenance);science.Management?.RefreshScience();return Results.Ok(result);
+        });
         app.MapPost("/api/science/sources/deletion/preview",(SourceDeletionRequest request,ScienceStore science,MissionStore missions,MissionCoordinator coordinator,AutomaticScientificData automatic,ScientificPlanData preparation,HttpContext context)=>
             AccessControl.IsLoopback(context)?Results.Ok(science.PreviewSourceDeletion(request,missions,()=>coordinator.Snapshot().ActiveMission is not null?"End flight recording before deleting external sources.":automatic.QueueSummary().Downloading>0?"Scientific source transfer is active; pause or finish it before deletion.":null,context.RequestAborted,preparation.SourceDeletionDependencies)):Results.StatusCode(403));
+        app.MapGet("/api/science/sources/deletion/{id:guid}/items",(Guid id,long? after,ScienceStore science,HttpContext context)=>AccessControl.IsLoopback(context)?Results.Ok(science.DeletionPage(id,after??0)):Results.StatusCode(403));
         app.MapPost("/api/science/sources/deletion/execute",(SourceDeletionExecution request,ScienceStore science,MissionStore missions,MissionCoordinator coordinator,AutomaticScientificData automatic,ScientificPlanData preparation,HttpContext context)=>
         {
             if(!AccessControl.IsLoopback(context))return Results.StatusCode(403);
             var result=science.DeleteExternalSources(request,missions,coordinator.EnterMaintenance,()=>automatic.QueueSummary().Downloading>0?"Scientific source transfer is active; pause or finish it before deletion.":null,context.RequestAborted,preparation.SourceDeletionDependencies);
-            automatic.RefreshLocalReadiness();preparation.SourcesRemoved(result.RemovedSourceIds??[]);science.Management?.RefreshScience();return Results.Ok(result);
+            automatic.ForgetDeletedSources();if(result.RemovedSourceIds is {} removed)preparation.SourcesRemoved(removed);else preparation.SourcesRemoved(id=>science.SourceRemovedBy(result.Id,id));science.Management?.RefreshScience();return Results.Ok(result);
         });
         app.MapGet("/api/science/sources/{id:guid}/coverage",(Guid id,ScienceStore science)=>
         {
-            var source=science.Sources().FirstOrDefault(s=>s.Id==id)??throw new ArgumentException("Source not found.");var g=source.Grids.Values.First();
+            var source=science.Source(id)??throw new ArgumentException("Source not found.");var g=source.Grids.Values.First();
             return ScientificRaster.GridCoverage(g);
         });
         app.MapPost("/api/science/workspace/atmosphere",(ScienceMapQuery query,ScienceStore science)=>science.AtmosphereMap(query));
@@ -151,6 +179,7 @@ public static class ResearchApi
         app.MapGet("/api/missions/{id:guid}/science-interpretation",(Guid id,MissionStore missions)=>ScientificInterpretation.Describe(missions.StreamSamples(id)));
         app.MapGet("/api/missions/{id:guid}/science-summary",(Guid id,MissionStore missions,ScienceStore science)=>ScientificResearchSummary.Build(missions,science,id));
         app.MapGet("/api/missions/{id:guid}/archive-summary",(Guid id,MissionStore missions)=>new { instruments=missions.Research(id).Instruments.Where(i=>i.Enabled).Select(i=>i.InstrumentId).ToArray(),review=missions.ScientificReview(id) });
+        app.MapPost("/api/science/workspace/sources",(ArchivedSourceQuery query,ScienceStore science)=>science.ArchivedSources(query));
         app.MapGet("/api/science/products/page",(Guid? missionId,int? offset,string? instrumentId,ScienceStore science)=>new{items=science.Products(missionId,30,offset??0,instrumentId),total=science.ProductCount(missionId,instrumentId),offset=offset??0});
         app.MapGet("/api/missions/{id:guid}/scientific-results",(Guid id,MissionStore store,ScienceStore science)=>store.Detail(id) is {} detail?Results.Ok(new{mission=detail.Mission,diagnostics=store.Research(id).Diagnostics,datasets=science.Datasets(id,200)}):Results.NotFound());
         app.MapGet("/api/missions/{id:guid}/scientific-atmosphere-locations",(Guid id,string? instrumentId,long? after,ScienceStore science)=>
@@ -238,8 +267,8 @@ public static class ResearchApi
             try{return Results.Ok(new{instruments,observations=science.ReplayObservations(id,at),error=(string?)null});}
             catch(Exception e)when(e is IOException or UnauthorizedAccessException or Microsoft.Data.Sqlite.SqliteException){return Results.Ok(new{instruments,observations=(ScienceObservation[]?)null,error=e.Message});}
         });
-        app.MapGet("/api/missions/{id:guid}/transect-passes",(Guid id,MissionStore store)=>store.Research(id).PlanSnapshot?.Patterns?.Where(p=>p.Kind==FlightPatternKind.StraightTransect).Select(p=>new{p.Id,passes=TransectPasses.Recognize(p,store.StreamSamples(id))}).ToArray()??[]);
-        app.MapGet("/api/missions/{id:guid}/atmospheric-analysis", (Guid id,MissionStore store,HttpContext context) => AtmosphericAnalysis.Calculate(store.StreamSamples(id),store.Research(id).PlanSnapshot?.AtmosphericSettings,token:context.RequestAborted));
+        app.MapGet("/api/missions/{id:guid}/transect-passes",(Guid id,MissionStore store)=>store.ScienceDeleted(id)?throw new InvalidOperationException("Collected science and dependent transect results were permanently deleted. Flight recording remains available."):store.Research(id).PlanSnapshot?.Patterns?.Where(p=>p.Kind==FlightPatternKind.StraightTransect).Select(p=>new{p.Id,passes=TransectPasses.Recognize(p,store.StreamSamples(id))}).ToArray()??[]);
+        app.MapGet("/api/missions/{id:guid}/atmospheric-analysis", (Guid id,MissionStore store,HttpContext context) => store.ScienceDeleted(id)?throw new InvalidOperationException("Collected science was permanently deleted. Raw flight recording remains available; scientific analysis is not recreated from it automatically."):AtmosphericAnalysis.Calculate(store.StreamSamples(id),store.Research(id).PlanSnapshot?.AtmosphericSettings,token:context.RequestAborted));
         app.MapPost("/api/missions/{id:guid}/coverage",(Guid id,ScientificCoverageRequest request,ScientificAnalysisJobs jobs)=>jobs.Enqueue(id,coverage:request));
         app.MapPost("/api/missions/{id:guid}/composites",(Guid id,CompositeRequest request,ScientificAnalysisJobs jobs)=>jobs.Enqueue(id,composite:request));
         app.MapGet("/api/analysis/jobs/{id:guid}",(Guid id,ScientificAnalysisJobs jobs)=>jobs.Get(id));

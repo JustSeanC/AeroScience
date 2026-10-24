@@ -133,7 +133,8 @@ public sealed partial class ScientificHttp : IDisposable
         if(uri.GetLeftPart(UriPartial.Path)!=unsigned.GetLeftPart(UriPartial.Path))throw new IOException("Provider authorization changed the requested asset.");
         return uri; // Short-lived SAS exists in memory only; never written to manifests/logs.
     }
-    public void Dispose(){http.Dispose();pace.Dispose();}
+    public void ClearNumericCache(){lock(metricsGate){foreach(var value in ranges.Values)Array.Clear(value.Bytes);ranges.Clear();cacheBytes=0;}}
+    public void Dispose(){ClearNumericCache();http.Dispose();pace.Dispose();}
 }
 
 // Seekable 64 KiB remote COG cache, bounded both on wire and in memory. Only used

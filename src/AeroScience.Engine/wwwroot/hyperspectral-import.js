@@ -57,7 +57,7 @@ export function openHyperspectralImport(api,kind="hyperspectral"){
 }
 export async function hyperspectralCard(parent,api,point=null){
   const card=el("article");card.className="panel hyperspectral-status";card.append(el("h3","Hyperspectral Imager · Historical external data"));parent.append(card);
-  const query=point?`?latitude=${point.latitude}&longitude=${point.longitude}`:"";
+  const query=point?`?kind=hyperspectral&latitude=${point.latitude}&longitude=${point.longitude}`:"?kind=hyperspectral";
   const sources=(await api("/api/science/sources"+query)).filter(s=>s.source.manifest.kind==="hyperspectral");
   if(!card.isConnected)return card;
   const active=(await api("/api/state")).research?.instruments?.find(i=>i.instrumentId==="hyperspectral-imager");

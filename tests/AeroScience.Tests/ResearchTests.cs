@@ -137,10 +137,10 @@ public sealed class ResearchTests : IDisposable
     public void SeparateClearsPreserveOtherArchiveSettingsTemplatesAndUnrelatedFiles()
     {
         var plan = store.SavePlan(new(Guid.Empty, "Keep plan")); var m = coordinator.Start(new StartMissionRequest("Archive", Instruments: [new("ambient-temperature", true)])); Apply(0);
-        Assert.Throws<InvalidOperationException>(() => store.ClearFlightData("DELETE FLIGHT DATA")); Assert.Throws<InvalidOperationException>(() => science.Clear("DELETE SCIENCE DATA", true));
+        Assert.Throws<InvalidOperationException>(() => store.ClearFlightData("DELETE FLIGHT DATA")); var activeReview=science.PreviewCollectedDeletion(new([m.Id]),store);Assert.Throws<InvalidOperationException>(() => science.Clear(new(activeReview.Id,activeReview.SelectionHash),store,coordinator.EnterMaintenance));
         coordinator.End(m.Id); var unrelated = Path.Combine(science.DirectoryPath, "my-file.txt"); File.WriteAllText(unrelated, "keep"); var libraryId = science.LibraryId;
-        Assert.Throws<InvalidOperationException>(() => science.Clear("wrong", false)); Assert.Single(science.StreamObservations(m.Id));
-        science.Clear("DELETE SCIENCE DATA", false); Assert.Single(store.StreamSamples(m.Id)); Assert.Empty(science.StreamObservations(m.Id));
+        var review=science.PreviewCollectedDeletion(new([m.Id]),store);Assert.Throws<InvalidOperationException>(() => science.Clear(new(review.Id,"wrong"),store,coordinator.EnterMaintenance)); Assert.Single(science.StreamObservations(m.Id));
+        science.Clear(new(review.Id,review.SelectionHash),store,coordinator.EnterMaintenance); Assert.Single(store.StreamSamples(m.Id)); Assert.Empty(science.StreamObservations(m.Id));
         Assert.False(store.ResolvedDatasetReferences(m.Id).Single().Available); Assert.Equal(libraryId, science.LibraryId); Assert.Equal("keep", File.ReadAllText(unrelated));
         var m2 = coordinator.Start(new StartMissionRequest("Second", Instruments: [new("ambient-temperature", true)])); Apply(1); coordinator.End(m2.Id);
         store.ClearFlightData("DELETE FLIGHT DATA"); Assert.Empty(store.List(20, 0)); Assert.Single(science.StreamObservations(m2.Id)); Assert.NotNull(store.Plan(plan.Id));
@@ -152,7 +152,7 @@ public sealed class ResearchTests : IDisposable
         var m = coordinator.Start(new StartMissionRequest("Rollback", Instruments: [new("ambient-temperature", true)])); Apply(0); coordinator.End(m.Id);
         using (var db = new SqliteConnection(new SqliteConnectionStringBuilder { DataSource = science.DatabasePath, Pooling = false }.ToString()))
         { db.Open(); using var cmd = db.CreateCommand(); cmd.CommandText = "CREATE TRIGGER reject_clear BEFORE DELETE ON datasets BEGIN SELECT RAISE(ABORT,'test interruption'); END;"; cmd.ExecuteNonQuery(); }
-        Assert.Throws<SqliteException>(() => science.Clear("DELETE SCIENCE DATA", false)); Assert.Single(science.StreamObservations(m.Id));
+        var review=science.PreviewCollectedDeletion(new([m.Id]),store);var pending=science.Clear(new(review.Id,review.SelectionHash),store,coordinator.EnterMaintenance);Assert.Equal("Cleanup pending",pending.State); Assert.Single(science.StreamObservations(m.Id));
         science.Dispose(); File.Move(science.DatabasePath, science.DatabasePath + ".saved"); Assert.NotNull(science.AvailabilityError()); Assert.Throws<IOException>(science.Initialize); Assert.False(File.Exists(science.DatabasePath)); Assert.Single(store.StreamSamples(m.Id));
     }
     [Fact]

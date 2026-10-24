@@ -28,6 +28,10 @@ public sealed partial class MissionStore
     {
         StorageManager.RequireMissionDatabase(Path.GetDirectoryName(DatabasePath)!);
         using var db=Open();using var cmd=db.CreateCommand();cmd.CommandText="PRAGMA user_version";if(Convert.ToInt32(cmd.ExecuteScalar())!=CurrentSchemaVersion)throw new IOException("Mission evidence schema is unsupported for deletion dependency checks.");
-        return SourceDependencies.ArchivedReferences(db,source);
+        // A legacy direct path into Sources still needs the original. Frozen plan,
+        // session and grading provenance does not: it contains retained evidence.
+        using var command=db.CreateCommand();command.CommandText="SELECT relative_path FROM dataset_references WHERE relative_path LIKE $path";
+        command.Parameters.AddWithValue("$path","Sources/"+source.ToString("N")+"%");
+        using var rows=command.ExecuteReader();var reasons=new List<string>();while(rows.Read())reasons.Add("Unresolved legacy original-file reference: "+rows.GetString(0));return reasons.ToArray();
     }
 }

@@ -7,7 +7,7 @@ internal static class GuidedEnviAcceptance
 {
     // This terminal harness branch relinquishes its initial Library owner before
     // acquiring a fresh offline owner. Production ownership rules are unchanged.
-    public static async Task Run(string header,string output,ScienceStore science,MissionStore missions,bool workspace=false)
+    public static async Task Run(string header,string output,ScienceStore science,MissionStore missions,bool workspace=false,IStorageCapacity? capacity=null)
     {
         var inspection=GuidedHyperspectralImport.Inspect(header,new(Provider:"NASA AVIRIS / NV5 Cuprite reflectance tutorial",Source:"https://www.nv5geospatialsoftware.com/docs/HyperspectralAnalysisTutorial.html",License:"Publicly downloadable NV5 tutorial dataset; consult original usage terms. Scientific files are not redistributed by AeroScience."));
         var manifest=inspection.Manifest??throw new IOException("Genuine ENVI example is not compatible.");
@@ -29,8 +29,8 @@ internal static class GuidedEnviAcceptance
         }
         // Reopen the stored library without network access and revalidate the retained source/product.
         science.Dispose();
-        using var reopened=new ScienceStore(science.DirectoryPath);reopened.Initialize();missions.ScienceLibrary=reopened;
-        reopened.Management=new StorageManagement(output,missions,reopened);
+        using var reopened=new ScienceStore(science.DirectoryPath,capacity);reopened.Initialize();missions.ScienceLibrary=reopened;
+        reopened.Management=new StorageManagement(output,missions,reopened,capacity);
         var retained=reopened.Availability(center).Single(s=>s.Source.Id==source.Id);if(!retained.FilesAvailable||retained.CoversPoint!=true)throw new IOException("Offline source reuse failed.");
         var recovered=reopened.ReadProduct(product.Id);
         if(recovered.Product.Sha256!=product.Sha256||!JsonSerializer.Serialize(recovered,WireJson.Options).Equals(JsonSerializer.Serialize(data,WireJson.Options),StringComparison.Ordinal))throw new IOException("Offline product evidence changed.");

@@ -125,7 +125,7 @@ public static class ScientificResearchSummary
     public static MissionScientificSummary Build(MissionStore missions, ScienceStore science, Guid id)
     {
         var mission = missions.Detail(id)?.Mission ?? throw new ArgumentException("Mission not found."); var research = missions.Research(id); var stats = science.Summary(id); var datasets = science.Datasets(id, 200);
-        var allSources=science.Sources().ToDictionary(s=>s.Id);
+        var snapshots=new Dictionary<Guid,ScientificSource>();
         var instrumentIds = datasets.Select(d => d.InstrumentId).Concat(research.Instruments.Where(c => c.Enabled).Select(c => c.InstrumentId)).Distinct();
         var reviews = instrumentIds.Select(instrument =>
         {
@@ -133,13 +133,14 @@ public static class ScientificResearchSummary
             foreach(var p in science.AllProducts(id).Where(p=>p.InstrumentId==instrument))
             {
                 products++;samples+=p.ValidSampleCount??0;used.Add(p.SourceId);
+                if(!snapshots.ContainsKey(p.SourceId))snapshots[p.SourceId]=science.ReadProduct(p.Id).Source;
                 // Terrain's derived elevation aliases its native elevation band. Count one
                 // physical quantity per acquisition, including legacy cached statistics.
                 foreach(var statistic in science.ProductStatistics(p).DistinctBy(s=>(s.Id,s.Unit))){var key=(p.SourceId,statistic.Id,statistic.Unit);var value=ranges.GetValueOrDefault(key,(0,double.PositiveInfinity,double.NegativeInfinity,0));ranges[key]=(value.Item1+statistic.Count,Math.Min(value.Item2,statistic.Minimum),Math.Max(value.Item3,statistic.Maximum),value.Item4+statistic.Mean*statistic.Count);}
             }
             var ids = ScienceCatalog.Definitions.FirstOrDefault(d => d.Id == instrument); var measurements = stats.Where(s => ids?.Measurements.Any(m => m.Id == s.MeasurementId) == true).ToArray();
             return new InstrumentReview(instrument, ids?.Name ?? instrument, count.Values, count.Times, products, samples, measurements, research.Diagnostics?.FirstOrDefault(d => d.InstrumentId == instrument), RemoteAcquisition.Instruments.ContainsKey(instrument) ? "Geographic samples from independently observed historical source data. Source dates and masks remain distinct from aircraft time." : "Simulator-reported environmental measurement values. Several fields can share one timestamp; stored values are not additional sampling instants.",
-                used.Where(allSources.ContainsKey).Select(sourceId=>(object)new{sourceId,name=allSources[sourceId].Manifest.Name,provider=allSources[sourceId].Manifest.Provider,observedUtc=allSources[sourceId].Manifest.ObservationUtc,verticalDatum=allSources[sourceId].Manifest.VerticalDatum,quality=allSources[sourceId].Manifest.Acquisition?.Quality}).ToArray(),
+                used.Where(snapshots.ContainsKey).Select(sourceId=>(object)new{sourceId,name=snapshots[sourceId].Manifest.Name,provider=snapshots[sourceId].Manifest.Provider,observedUtc=snapshots[sourceId].Manifest.ObservationUtc,verticalDatum=snapshots[sourceId].Manifest.VerticalDatum,quality=snapshots[sourceId].Manifest.Acquisition?.Quality}).ToArray(),
                 ranges.Select(k=>(object)new{sourceId=k.Key.Item1,measurement=k.Key.Item2,unit=k.Key.Item3,count=k.Value.Count,minimum=k.Value.Min,maximum=k.Value.Max,mean=k.Value.Sum/k.Value.Count,basis="Saved acquisition samples, including repeated positions at different packets. Separate original sources; not an area mean."}).ToArray());
         }).ToArray(); return new(mission, research.Objective, missions.ScientificReview(id), reviews, missions.Statistics(id));
     }

@@ -22,6 +22,20 @@ public sealed class ScientificLibraryJobsTests:IDisposable
             Numeric++;requested?.Invoke();if(fail?.Invoke()==true)throw new HttpRequestException("Synthetic outage");return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK){Content=new ByteArrayContent(File.ReadAllBytes(raster))});
         }
     }
+    private sealed class InterruptedImportDisk:IStorageCapacity{public bool Full;public long FreeBytes(string directory)=>Full?0:4L*1024*1024*1024;}
+    [Fact]public async Task InterruptedThreeDepImportRevalidatesOwnedPreparationAfterRestartWithoutDownloadingAgain()
+    {
+        var disk=new InterruptedImportDisk();var missions=new MissionStore(Path.Combine(root,"missions.db"));missions.Initialize();science.Management=new StorageManagement(root,missions,science,disk);
+        var handler=new Handler(raster,requested:()=>disk.Full=true);ScientificDiscovery discovery;
+        using(var automatic=new AutomaticScientificData(science,settings,new(handler))){
+            discovery=(await automatic.Provider("usgs-3dep").Discover(RemoteKind.Terrain,new(-75.01,39.99,-74.99,40.01),settings.Get().Preferences,new(1048576),default))!;
+            await Assert.ThrowsAsync<StorageLimitException>(()=>automatic.PrepareSource(discovery,new(8388608),default));
+            Assert.Equal(1,handler.Numeric);Assert.Empty(science.Sources());Assert.Contains(science.PendingArtifacts().Artifacts,p=>Path.GetFileName(p)=="source.json"&&File.Exists(p));
+        }
+        science.Dispose();using var reopened=new ScienceStore(science.DirectoryPath);reopened.Initialize();var noNetwork=new Handler(raster,requested:()=>throw new InvalidOperationException("No second numeric transfer is permitted"));using var resumed=new AutomaticScientificData(reopened,settings,new(noNetwork));var budget=new ScientificDownloadBudget(8388608);
+        var source=await resumed.PrepareSource(discovery,budget,default);Assert.NotNull(source);Assert.Equal(0,noNetwork.Numeric);Assert.Equal(0,budget.Bytes);Assert.Single(reopened.Sources());Assert.Empty(reopened.PendingArtifacts().Artifacts);
+        using var numeric=new ScientificRaster(Path.Combine(reopened.DirectoryPath,source.RelativeDirectory),source.Manifest.Bands[0]);Assert.Equal(123.25,numeric.Read(new(40,-75))!.Value,8);
+    }
     private async Task<LibraryDownloadJob> Preview(ScientificCatalog catalog,ScientificLibraryJobs jobs,GeographicBounds? bounds=null)
     {
         var area=bounds??new(-75.01,39.99,-74.99,40.01);var item=Assert.Single((await catalog.Search(new("usgs-3dep",area))).Items);
@@ -131,8 +145,8 @@ public sealed class ScientificLibraryJobsTests:IDisposable
         Assert.Equal(4,ScientificLibraryJobs.Expand(new(1,[new(-75,40,-74.96,40.04)],[scene])).Length);
         Assert.Throws<ArgumentException>(()=>ScientificLibraryJobs.Expand(new(1,[new(-75,40,-70,45)],[scene])));
         Assert.Throws<ArgumentException>(()=>ScientificLibraryJobs.Expand(new(1,[new(179,40,-179,41)],[scene])));
-        using(var db=new SqliteConnection("Data Source="+science.DatabasePath)){db.Open();using var cmd=db.CreateCommand();cmd.CommandText="DROP TABLE library_job_items; DROP TABLE library_jobs; PRAGMA user_version=2";cmd.ExecuteNonQuery();}
-        science.Initialize();using(var db=new SqliteConnection("Data Source="+science.DatabasePath)){db.Open();using var cmd=db.CreateCommand();cmd.CommandText="PRAGMA user_version";Assert.Equal(3L,cmd.ExecuteScalar());cmd.CommandText="PRAGMA integrity_check";Assert.Equal("ok",cmd.ExecuteScalar());}Assert.NotEmpty(Directory.EnumerateFiles(Path.Combine(science.DirectoryPath,"Metadata","Backups")));
+        using(var db=new SqliteConnection("Data Source="+science.DatabasePath)){db.Open();using var cmd=db.CreateCommand();cmd.CommandText="DROP TABLE science_delete_files; DROP TABLE science_delete_missions; DROP TABLE science_delete_reviews; DROP INDEX remote_products_source; DROP TABLE source_delete_items; DROP TABLE source_delete_ledgers; DROP TABLE source_delete_previews; DROP TABLE source_references; DROP TABLE source_search; DROP TABLE source_bounds; DROP TABLE library_job_items; DROP TABLE library_jobs; PRAGMA user_version=2";cmd.ExecuteNonQuery();}
+        science.Initialize();using(var db=new SqliteConnection("Data Source="+science.DatabasePath)){db.Open();using var cmd=db.CreateCommand();cmd.CommandText="PRAGMA user_version";Assert.Equal((long)ScienceStore.CurrentSchemaVersion,cmd.ExecuteScalar());cmd.CommandText="PRAGMA integrity_check";Assert.Equal("ok",cmd.ExecuteScalar());}Assert.NotEmpty(Directory.EnumerateFiles(Path.Combine(science.DirectoryPath,"Metadata","Backups")));
     }
     [Fact]public void PersistedRangesRequireFreshStrongIdentityAndRejectCorruptBlocks()
     {

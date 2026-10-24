@@ -30,7 +30,7 @@ public sealed class ScientificDownlinkWorker(MissionStore missions, ScienceStore
                     using var lease = science.BeginAnalysis();
                     if (!missions.VerifyRecoveryEvidence(slot)) { missions.UpdateRecovery(slot with { State = "Gap", Reason = "Exact archived telemetry/configuration evidence unavailable or intentionally paused. Original flight preserved." }); continue; }
                     var area = GeographicBounds.Around(new(slot.Evidence.Frame.Latitude, slot.Evidence.Frame.Longitude));
-                    var kind = RemoteAcquisition.Instruments[slot.InstrumentId]; var source = ScientificSourceSelection.Select(science.Availability(area.Center), kind, settings.Get().Preferences, slot.Evidence.Configuration.Payload);
+                    var kind = RemoteAcquisition.Instruments[slot.InstrumentId]; var source = ScientificSourceSelection.Select(science.Availability(area.Center,kind), kind, settings.Get().Preferences, slot.Evidence.Configuration.Payload);
                     if (source is null)
                     {
                         var scope = "plan:downlink:" + slot.MissionId;

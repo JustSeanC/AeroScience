@@ -19,6 +19,6 @@ internal static class SourceDeletionProbe
         PreferenceStore.WriteAtomic(Path.Combine(root,"expected.json"),originals);Directory.CreateDirectory(Path.GetDirectoryName(backup)!);File.WriteAllText(backup,"preserve original backup");
         var preview=science.PreviewSourceDeletion(new(All:true),missions);if(preview.EligibleSources!=2)throw new IOException("Synthetic source fixture was unexpectedly blocked.");
         science.SourceDeletionFault=point=>{if(point!=args[0])return;using(var marker=new FileStream(args[2],FileMode.CreateNew,FileAccess.Write,FileShare.Read)){marker.WriteByte(1);marker.Flush(true);}Thread.Sleep(Timeout.Infinite);};
-        science.DeleteExternalSources(new(preview.Id,preview.SelectionHash,preview.Confirmation),missions,new MissionCoordinator(missions,1000).EnterMaintenance);
+        science.DeleteExternalSources(new(preview.Id,preview.SelectionHash),missions,new MissionCoordinator(missions,1000).EnterMaintenance);
     }
 }

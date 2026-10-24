@@ -3,7 +3,7 @@ using AeroScience.Shared;
 
 namespace AeroScience.Missions;
 
-public sealed record StorageLimits(long? MissionLimitBytes = 25000000000, long? ScienceLimitBytes = 50000000000,
+public sealed record StorageLimits(long? MissionLimitBytes = 25000000000, long? ScienceLimitBytes = null,
     bool AutomaticCacheCleanup = true, bool ProtectPinned = true);
 public sealed record ManagedStorageStatus(string Kind, string Directory, bool Available, long UsedBytes, long? LimitBytes,
     double? Percentage, long? FreeBytes, string Status, long Missions = 0, long Datasets = 0, long Products = 0,
@@ -32,34 +32,34 @@ public sealed class StorageManagement
     {
         path = Path.Combine(configuration, "storage-limits.json"); this.missions = missions; this.science = science; this.disk = disk ?? new LocalStorageCapacity();
         limits = new();
-        try { limits = File.Exists(path) ? JsonSerializer.Deserialize<StorageLimits>(File.ReadAllText(path)) ?? throw new IOException("Invalid storage settings.") : new(); Validate(limits); }
+        try { limits = File.Exists(path) ? JsonSerializer.Deserialize<StorageLimits>(File.ReadAllText(path)) ?? throw new IOException("Invalid storage settings.") : new(); limits=limits with{ScienceLimitBytes=null}; Validate(limits); }
         catch (Exception error) when (error is IOException or JsonException or UnauthorizedAccessException or ArgumentException)
         { limits = new(); ConfigurationError = "Storage limit preferences cannot be read. Offline history remains available; new recording is blocked until you save reviewed limits in Settings. " + error.Message; }
     }
     public StorageLimits Preferences { get { lock (gate) return limits; } }
     private static void Validate(StorageLimits value)
     {
-        if (value.MissionLimitBytes is <= 0 || value.ScienceLimitBytes is <= 0 || !value.ProtectPinned) throw new ArgumentException("Storage limits must be positive byte values or Unlimited (null). Pinned-item protection remains enabled.");
+        if (value.MissionLimitBytes is <= 0 || !value.ProtectPinned) throw new ArgumentException("Storage limits must be positive byte values or Unlimited (null). Pinned-item protection remains enabled.");
     }
     public StorageLimits Configure(StorageLimits value)
-    { Validate(value); lock (gate) { if(reservedBytes>0&&value.ScienceLimitBytes is {} cap&&scienceFiles+science.DatabaseUsageBytes()+reservedBytes>=cap)throw new InvalidOperationException("Wait for the active scientific import/acquisition budget to finish before lowering the limit below its reserved space.");PreferenceStore.WriteAtomic(path, value); limits = value; ConfigurationError = null; return limits; } }
+    { value=value with{ScienceLimitBytes=null};Validate(value);lock(gate){PreferenceStore.WriteAtomic(path,value);limits=value;ConfigurationError=null;return limits;} }
     private static long Size(string path) {try{return new FileInfo(path).Length;}catch(FileNotFoundException){return 0;}catch(DirectoryNotFoundException){return 0;}}
     private static long BackupBytes(string path) => Directory.Exists(path) ? Directory.EnumerateFiles(path, "*", SearchOption.TopDirectoryOnly).Where(p => (File.GetAttributes(p) & FileAttributes.ReparsePoint) == 0).Sum(Size) : 0;
     public void RefreshScience()
     {
         long version;lock(gate)version=mutationVersion;
         if (science.AvailabilityError() is { } error) throw new IOException(error);
-        var originals = science.Sources().SelectMany(s => s.Files.Select(f => (Source: s, File: f))).ToArray();
+        var originals = science.Sources().SelectMany(s => s.Files.Select(f => (Source: s, File: f)));
         var catalogued = new HashSet<string>(StringComparer.Ordinal);
         long sources = 0;
-        foreach (var group in originals.GroupBy(v => v.Source.RelativeDirectory + "/" + v.File.RelativePath, StringComparer.Ordinal)) { var file=StorageManager.ResolveDataset(science.DirectoryPath, science.LibraryId, group.Key); catalogued.Add(file); sources += Size(file); }
+        foreach(var original in originals){var file=StorageManager.ResolveDataset(science.DirectoryPath,science.LibraryId,original.Source.RelativeDirectory+"/"+original.File.RelativePath);sources=checked(sources+Size(file));}
         long products = 0, count = 0;
         foreach (var product in science.AllProducts()) { var file=StorageManager.ResolveDataset(science.DirectoryPath, product.LibraryId, product.RelativePath); catalogued.Add(file); products += Size(file); count++; }
         foreach(var artifact in science.Artifacts()){var file=StorageManager.ResolveDataset(science.DirectoryPath,artifact.LibraryId,artifact.RelativePath);catalogued.Add(file);products+=Size(file);count++;}
         var caches = science.CacheEntries().Sum(c => Size(StorageManager.ResolveDataset(science.DirectoryPath, science.LibraryId, c.RelativePath)));
         var metadata = Size(Path.Combine(science.DirectoryPath, StorageManager.LibraryManifest)) + Size(Path.Combine(science.DirectoryPath, ".science-storage.json"));
-        foreach (var source in science.Sources()) { var file=StorageManager.ResolveDataset(science.DirectoryPath, science.LibraryId, source.RelativeDirectory + "/source.json"); catalogued.Add(file); metadata += Size(file); }
-        var pending=science.PendingArtifacts(); var retained=pending.Artifacts.Where(p=>!catalogued.Contains(p)).Sum(Size); metadata+=pending.Ledgers.Sum(Size);
+        foreach (var source in science.Sources()) { var file=StorageManager.ResolveDataset(science.DirectoryPath, science.LibraryId, source.RelativeDirectory + "/source.json"); metadata += Size(file); }
+        var pending=science.PendingArtifacts(); var retained=pending.Artifacts.Where(p=>!catalogued.Contains(p)&&!science.IsCataloguedSourcePath(p)).Sum(Size); metadata+=pending.Ledgers.Sum(Size);
         foreach(var category in new[]{"CleanupHistory","Clears","Catalog"})
         {
             var folder=StorageManager.ResolveDataset(science.DirectoryPath,science.LibraryId,"Metadata/"+category);
@@ -82,8 +82,6 @@ public sealed class StorageManagement
             var free = disk.FreeBytes(science.DirectoryPath);
             long reserved;lock(gate)reserved=reservedBytes;
             if (free < expectedBytes + reserved + StorageManager.MinimumFreeBytes) throw new StorageLimitException("Scientific drive has insufficient unreserved free space; new science writes are suspended. Completed research is preserved; flight recording is independent.");
-            lock (gate) if (limits.ScienceLimitBytes is { } cap && scienceFiles + science.DatabaseUsageBytes() + reservedBytes + expectedBytes >= cap)
-                throw new StorageLimitException("Scientific storage limit reached. New science writes are suspended; change the limit or clean regenerable caches. Completed data and flight telemetry are preserved.");
         }
         try { Check(); }
         catch (StorageLimitException) when (Preferences.AutomaticCacheCleanup && AutomaticCleanup is not null)
@@ -95,7 +93,7 @@ public sealed class StorageManagement
         RequireScienceCapacity(expectedBytes);
         lock(gate)
         {
-            if(limits.ScienceLimitBytes is {} cap&&scienceFiles+science.DatabaseUsageBytes()+reservedBytes+expectedBytes>=cap)throw new StorageLimitException("Scientific capacity was reserved by another import/acquisition. New science writes are suspended; flight recording continues.");
+            if(disk.FreeBytes(science.DirectoryPath)<expectedBytes+reservedBytes+StorageManager.MinimumFreeBytes)throw new StorageLimitException("Scientific drive space is reserved by another operation. Wait or free physical storage; completed originals and flight recording remain protected.");
             reservedBytes=checked(reservedBytes+expectedBytes);
         }
         return new Reservation(()=>{lock(gate)reservedBytes=Math.Max(0,reservedBytes-expectedBytes);});

@@ -78,6 +78,17 @@ public sealed partial class StorageManager(PreferenceStore preferences, IStorage
     public const string LargeDataWarning = "Scientific mapping and remote-sensing missions may generate substantial amounts of data. Storage requirements will vary by instrument, recording settings, and mission duration. Consider using a dedicated high-capacity drive.";
     private readonly IStorageCapacity disk = capacity ?? new LocalStorageCapacity();
     private readonly object gate = new();
+    public static IEnumerable<string> KnownScientificReplicaRoots(string configuration,string current)
+    {
+        var directory=Path.GetFullPath(configuration);if(!Directory.Exists(directory))return [];
+        var records=Directory.EnumerateFiles(directory,"storage-migration.json.complete-*").Select(path=>{
+            ValidateLocalPath(path);if(new FileInfo(path).Length>65536)throw new IOException("A retained migration record exceeds its verification bound.");
+            return JsonSerializer.Deserialize<MigrationJournal>(File.ReadAllText(path))??throw new IOException("Retained migration ownership is invalid.");
+        }).Where(j=>j.Kind==StorageKind.ScienceLibrary).ToArray();
+        var connected=new HashSet<string>(StringComparer.OrdinalIgnoreCase){Path.GetFullPath(current)};bool changed;
+        do{changed=false;foreach(var record in records)if(connected.Contains(Path.GetFullPath(record.Source))||connected.Contains(Path.GetFullPath(record.Destination))){changed|=connected.Add(Path.GetFullPath(record.Source));changed|=connected.Add(Path.GetFullPath(record.Destination));}}while(changed);
+        connected.Remove(Path.GetFullPath(current));return connected.Order(StringComparer.OrdinalIgnoreCase);
+    }
     private static readonly string[] LibraryFolders = ["Imagery", "Elevation", "Observations", "Reports", "Exports"];
     public const string LibraryManifest = "library.json";
 

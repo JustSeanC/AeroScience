@@ -92,7 +92,7 @@ public sealed class ApiTests : IAsyncLifetime
         await Pair(client);var science=factory.Services.GetRequiredService<ScienceStore>();
         var original=RemoteFixtureFiles.Create(Path.Combine(directory,"synthetic-owned-source"),RemoteKind.Terrain);var source=await science.ImportSourceAsync(original);
         var preview=await client.PostAsJsonAsync("/api/science/sources/deletion/preview",new SourceDeletionRequest([source.Id]),WireJson.Options);preview.EnsureSuccessStatusCode();var reviewed=(await preview.Content.ReadFromJsonAsync<SourceDeletionPreview>(WireJson.Options))!;Assert.Equal(1,reviewed.EligibleSources);
-        var execute=new SourceDeletionExecution(reviewed.Id,reviewed.SelectionHash,reviewed.Confirmation);
+        var execute=new SourceDeletionExecution(reviewed.Id,reviewed.SelectionHash);
         client.DefaultRequestHeaders.Remove("X-AeroScience-CSRF");Assert.Equal(HttpStatusCode.Forbidden,(await client.PostAsJsonAsync("/api/science/sources/deletion/execute",execute,WireJson.Options)).StatusCode);
         var access=factory.Services.GetRequiredService<AccessControl>();var paired=access.Pair(false,access.PairingCode)!;
         var payload=JsonSerializer.SerializeToUtf8Bytes(execute,WireJson.Options);
@@ -100,6 +100,27 @@ public sealed class ApiTests : IAsyncLifetime
             context.Features.Set<Microsoft.AspNetCore.Http.Features.IHttpRequestBodyDetectionFeature>(new KnownRequestBody());context.Connection.RemoteIpAddress=IPAddress.Parse("192.168.1.40");context.Request.Scheme="http";context.Request.Host=new("localhost",5080);context.Request.Method="POST";context.Request.Path="/api/science/sources/deletion/execute";context.Request.ContentType="application/json";context.Request.ContentLength=payload.Length;context.Request.Body=new MemoryStream(payload);context.Request.Headers.Origin="http://localhost:5080";context.Request.Headers.Cookie=access.SessionCookieName+"="+paired.Token;context.Request.Headers["X-AeroScience-CSRF"]=paired.Csrf;
         });
         Assert.Equal(403,remote.Response.StatusCode);Assert.Single(science.Sources());
+    }
+    [Fact]public async Task RetainedSourceApiPagesAndSearchesTheFullIndexWithLowercaseCategories()
+    {
+        await Pair(client);var science=factory.Services.GetRequiredService<ScienceStore>();var input=RemoteFixtureFiles.Create(Path.Combine(directory,"page-fixture"),RemoteKind.Terrain);var manifest=ScienceStore.ReadSourceManifest(input);
+        for(var n=0;n<4;n++)await science.ImportSourceAsync(manifest with{SceneId="page-"+n},Path.GetDirectoryName(input)!);
+        var first=await client.GetFromJsonAsync<JsonElement>("/api/science/sources/page?kind=terrain&limit=2",WireJson.Options);Assert.Equal(4,first.GetProperty("total").GetInt64());Assert.Equal(2,first.GetProperty("items").GetArrayLength());
+        var next=first.GetProperty("next").GetInt64();var through=first.GetProperty("through").GetInt64();var second=await client.GetFromJsonAsync<JsonElement>($"/api/science/sources/page?kind=terrain&limit=2&after={next}&through={through}",WireJson.Options);Assert.Equal(2,second.GetProperty("items").GetArrayLength());Assert.Equal(JsonValueKind.Null,second.GetProperty("next").ValueKind);
+        var collection=await client.GetFromJsonAsync<JsonElement>("/api/science/source-collections?kind=terrain",WireJson.Options);Assert.Equal(4,collection.GetProperty("items")[0].GetProperty("regions").GetInt64());
+        Assert.Equal(HttpStatusCode.BadRequest,(await client.GetAsync("/api/science/sources/page?kind=invented")).StatusCode);Assert.Equal(HttpStatusCode.BadRequest,(await client.GetAsync("/api/science/sources/page?limit=1000")).StatusCode);
+    }
+    [Fact]public async Task CollectedScienceDeletionRequiresReviewedHashAndCsrfAndPreservesRawRecording()
+    {
+        await Pair(client);var coordinator=factory.Services.GetRequiredService<MissionCoordinator>();var missions=factory.Services.GetRequiredService<MissionStore>();var science=factory.Services.GetRequiredService<ScienceStore>();
+        // Isolate deterministic input from the hosted simulator fixture's reconnect loop.
+        foreach(var worker in factory.Services.GetServices<IHostedService>().OfType<TelemetryWorker>())await worker.StopAsync(default);
+        var first=SimulatedTelemetryProvider.Generate(DateTimeOffset.UtcNow,0);coordinator.Apply(new(new(ConnectionState.Connected,TelemetrySource.Simulated,"Synthetic fixture",first.TimestampUtc),first,new(first.TimestampUtc,15,29,5,90,.002)));
+        var mission=coordinator.Start(new("Synthetic deletion API fixture",Instruments:[new("ambient-temperature",true)]));var frame=first with{TimestampUtc=first.TimestampUtc.AddSeconds(1)};coordinator.Apply(new(new(ConnectionState.Connected,TelemetrySource.Simulated,"Synthetic fixture",frame.TimestampUtc),frame,new(frame.TimestampUtc,15,29,5,90,.002)));coordinator.End(mission.Id);
+        var samples=missions.StreamSamples(mission.Id).Count();Assert.True(samples>0);Assert.NotEmpty(science.StreamObservations(mission.Id));
+        var response=await client.PostAsJsonAsync("/api/science/collected/deletion/preview",new CollectedScienceDeletionRequest([mission.Id]),WireJson.Options);response.EnsureSuccessStatusCode();var preview=(await response.Content.ReadFromJsonAsync<CollectedScienceDeletionPreview>(WireJson.Options))!;Assert.Empty(preview.Blockers);
+        var execute=new SourceDeletionExecution(preview.Id,preview.SelectionHash);client.DefaultRequestHeaders.Remove("X-AeroScience-CSRF");Assert.Equal(HttpStatusCode.Forbidden,(await client.PostAsJsonAsync("/api/science/collected/deletion/execute",execute,WireJson.Options)).StatusCode);Assert.NotEmpty(science.StreamObservations(mission.Id));
+        await Pair(client);var deleted=await client.PostAsJsonAsync("/api/science/collected/deletion/execute",execute,WireJson.Options);deleted.EnsureSuccessStatusCode();var result=(await deleted.Content.ReadFromJsonAsync<CollectedScienceDeletionResult>(WireJson.Options))!;Assert.True(result.State=="Completed",result.Warning);Assert.Empty(science.StreamObservations(mission.Id));Assert.True(missions.ScienceDeleted(mission.Id));Assert.Empty(missions.InstrumentDiagnostics(mission.Id));Assert.Equal(samples,missions.StreamSamples(mission.Id).Count());
     }
     private sealed class KnownRequestBody:Microsoft.AspNetCore.Http.Features.IHttpRequestBodyDetectionFeature {public bool CanHaveBody=>true;}
     [Fact]public async Task MissionStartReadinessIsAuthenticatedReadOnlyAndChecksPlanRevisionAtStartup()

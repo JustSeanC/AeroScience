@@ -71,8 +71,13 @@ for (const [family, bands] of [['classic', 224], ['ng', 425]]) test(`${family} d
 });
 test('NASA connection and import controls retain explicit EMIT boundary and do not expose tokens', async ({ page, request }) => {
   await discover(page, 'classic');
+  await expect(page.getByRole('button', { name: 'Connect Earthdata on this PC', exact: true })).toBeHidden();
+  await expect(page.getByRole('button', { name: 'Disconnect Earthdata on this PC', exact: true })).toBeHidden();
+  await page.getByText('Manage Earthdata connection', { exact: true }).click();
   await page.getByRole('button', { name: 'Disconnect Earthdata on this PC', exact: true }).click();
   await expect(page.getByLabel('NASA Earthdata connection')).toContainText('Not connected');
+  await expect(page.getByRole('button', { name: 'Connect Earthdata on this PC', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Disconnect Earthdata on this PC', exact: true })).toBeHidden();
   const status = await (await request.get('/api/science/earthdata')).json(); expect(status.connected).toBe(false); expect(Object.keys(status).sort()).toEqual(['available', 'connected', 'message']);
   await page.getByLabel('Scientific provider / product', { exact: true }).selectOption('nasa-emit');
   await expect(page.getByRole('button', { name: 'Preview NASA Download & Import', exact: true })).toHaveCount(0);

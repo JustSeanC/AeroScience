@@ -1,10 +1,23 @@
 # Storage limits, protection and safe cleanup
 
-**Settings → Storage & Data** configures two independent local/external folders. **Storage Management** shows decimal GB (1 GB=1,000,000,000 bytes), actual available drive space and configurable caps. Defaults: **25 GB flight / 50 GB science**, automatic **Regenerable caches only**, pinned protection enabled, automatic flight/original-science deletion disabled. Existing configured limits survive updates; changing a limit never erases existing data. Custom/Unlimited are supported.
+**Settings → Storage & Data** configures independent flight and Scientific Library folders.
+The flight archive retains its configurable quota (default 25 GB). Scientific retention has no
+source-count limit and no default application quota: available physical storage and write/recovery
+headroom govern capacity. Legacy scientific cap settings are normalized to Unlimited without
+removing existing data. Per-request/job bounds and network allowances remain safety controls.
 
-The flight number is actual SQLite DB/WAL/SHM physical allocation; deleting rows may not shrink it. Science includes its DB/WAL/SHM, unique imported originals, complete product JSON, registered PNG previews, known metadata and ledger-tracked temporary/interrupted output. Shared cube files are counted once per stored physical path. Backups are shown separately and consume **physical** disk capacity even though excluded from the configured cap. Unrelated files are excluded from managed usage and never cleanup candidates. Directory-wide scans are not performed on every telemetry packet: usage is cached, updated for known writes and refreshed while idle or explicitly with Refresh usage. Thus physical external edits may not appear until refresh. In-progress imports/products reserve their expected budget separately from actual used bytes, preventing concurrent acquisition from spending that same capacity. Conservative reservations can suspend other science writes before the actual-use meter reaches its cap; lowering a cap beneath active reserved work requires waiting for that work to finish.
+Managed science usage includes SQLite DB/WAL/SHM, unique stored originals, complete products,
+registered previews, metadata and owned interrupted work. It is separate from physical free space,
+reservations and separately displayed backup allocation. Accounting is cached/updated for known
+writes; Refresh usage reconciles external changes. Reserve checks prevent concurrent writers from
+spending the same free capacity. Imports verify free space while copying as well as before publication.
+Insufficient scientific-drive space suspends new science writes independently of flight recording.
+A missing configured drive never creates a replacement Library. Invalid settings remain explicit.
 
-80%/95%/100% states warn about caps; low free drive space is a separate condition. A science cap suspends **new science writes only**, tries bounded asynchronous safe cache cleanup, and leaves flight recording/history intact. A flight cap stops recording safely with persistent `storageLimitReached`, an interrupted mission and committed samples preserved. Reconnect an unavailable configured drive; AeroScience never creates an empty replacement archive to hide the problem. Invalid limit settings permit offline review but block new writes until reviewed limits are saved graphically.
+Both External Data Manager views show the actual configured path, usage and physical free space.
+Local Windows uses **Open Data Folder**; paired devices use **Copy Path**. Source details can open
+only verified managed source folders, never arbitrary browser-supplied paths. See the
+[Library guide](../scientific-library.md#storage-location-and-library-scale).
 
 ## Preview Cleanup
 
@@ -14,11 +27,18 @@ Open **Settings → Storage & Data → Storage Management → Preview Cleanup**.
 
 Choose **Clean Eligible Files**, review final file count/estimate and confirm, or **Cancel**. Only that preview's eligible snapshot is considered, including filtered-out eligible rows (the confirmation states this). Every candidate is revalidated; pinned/changed/busy/missing dependencies are skipped, complete original-product checksum is checked immediately before deleting the cache. New files are not silently added. After 5 minutes or a material usage change, refresh before confirming. Results distinguish removed/skipped/failed, actual bytes removed and measured free-space delta (which can differ due to filesystem allocation/other activity). Cleanup history is local in `Metadata/CleanupHistory`; automatic cleanup uses the same rules, bounded to 20 cache eligibility checks/removals per pass, without requiring a manual preview.
 
-**Protect Mission** in history and **Protect Dataset** in product view survive restarts/migrations. Protection prevents automatic cache deletion, not an explicitly typed, separately confirmed archive clear that warns about protected items.
+**Protect Mission** in history and **Protect Dataset** in product view survive restarts/migrations. Protection prevents automatic cache deletion, not a deliberate reviewed scientific-data deletion that explicitly identifies its selected scope.
 
 ## Archive clear, compaction and migration
 
-Data Management remains the independent deliberate **Clear Flight & Mission Data / Clear Scientific Data** workflow. Default is permanent deletion **without creating a new backup**; it never opens a backup picker. Typed phrases, final warning, cancel and active-recording guards remain. Choosing a recovery backup opens a clearly identified backup destination; cancel cancels the whole operation. Scientific recovery backup verifies the DB and complete managed products. Imported Sources, prior backups, unrelated files and the other archive are preserved. Science clear removes observations/products, **not your imported source library**.
+External originals and collected mission science have separate deletion scopes. Each scientific
+operation uses one expiring hashed review, Cancel and a red Delete action; no typed phrase or
+second browser confirmation. Science deletion never creates a backup and purges targeted content
+from registered managed copies. Shared/unavailable copies block completion rather than silently
+retaining selected content. Completed independent mission results survive deletion of their external
+originals; deleting collected science instead removes dependent grades/analysis. Raw flight telemetry
+and external originals remain unless separately selected. See [permanent deletion](../scientific-library.md#manage-downloaded-data-safely).
+The separate flight-archive clear retains its existing safeguards and explicit backup option.
 
 Optional **Compact Flight/Science Database…** stops services, requires confirmation, lease/free-space checks, creates a verified backup, runs SQLite VACUUM and verifies logical fingerprints. It reports actual DB allocation reclaimed; backup bytes are additional. No automatic compaction runs in flight.
 
@@ -26,4 +46,4 @@ Storage location changes use the existing stopped-store SQLite backup/verificati
 
 ## Automatic scientific access
 
-Prepared provider subsets are retained scientific originals, never regenerable cache entries. Discovery/transfer budgets and conservative staging reservations are separate from actual retained usage. Existing 25/50 GB defaults, pinned protection, verified migrations and deliberate clear remain unchanged. Partial downloads stay ledger-accounted for explicit review; cancellation never discards completed observations/products or a prior source. See [automatic provider limits](automatic-data.md).
+Prepared provider subsets are retained scientific originals, never regenerable cache entries. Discovery/transfer budgets and conservative staging reservations are separate from actual retained usage. Flight quota, pinned automatic-cleanup protection and verified migrations remain separate from unlimited-count scientific retention. Partial downloads stay ledger-accounted for explicit review; cancellation never discards completed observations/products or a prior source. See [automatic provider limits](automatic-data.md).

@@ -166,3 +166,21 @@ test('All Missions clears additional mission selections and queries the whole ar
  const entire=await post(request,'/api/science/workspace/overview',{});await page.goto('/#workspace/map?missions='+fixture.missionIds.join(','));await expect(page.locator('.map-overview-counts')).toHaveAttribute('data-total-acquisitions','144');
  await page.getByLabel('Mission scope',{exact:true}).selectOption('');await expect(page).not.toHaveURL(/missions=/);await expect(page.locator('.map-overview-counts')).toHaveAttribute('data-total-acquisitions',String(entire.acquisitions));expect(await page.getByLabel('Additional missions',{exact:true}).locator('option:checked').count()).toBe(0);
 });
+
+test('scientific tables keep headers whole, hide unnecessary paging and preserve expandable notes',async({page})=>{
+ await page.setViewportSize({width:390,height:844});await page.goto('/#control');
+ const result=await page.evaluate(async()=>{const {table,node}=await import('/workstation-ui.js');const parent=document.createElement('section');parent.style.width='100%';document.querySelector('main').replaceChildren(parent);const notes=node('details');notes.append(node('summary','View quality notes'),node('p','Synthetic quality detail '.repeat(30)));const small=table(parent,'Small scientific table',['Pass','Packets','Mean altitude','Quality'],[[1,4,'Unavailable',notes]]);const large=table(parent,'Paged table',['Value'],Array.from({length:26},(_,index)=>[index]));return {smallPagerHidden:small.querySelector('.table-pagination').hidden,largePagerHidden:large.querySelector('.table-pagination').hidden,header:getComputedStyle(small.querySelector('th')).whiteSpace,text:small.textContent,details:small.querySelectorAll('details').length,pageFits:document.documentElement.scrollWidth<=innerWidth};});
+ expect(result.smallPagerHidden).toBe(true);expect(result.largePagerHidden).toBe(false);expect(result.header).toBe('nowrap');expect(result.details).toBe(1);expect(result.text).not.toContain('[object');expect(result.pageFits).toBe(true);
+ await page.getByText('View quality notes',{exact:true}).click();await expect(page.getByText(/Synthetic quality detail/)).toBeVisible();
+ await page.getByRole('button',{name:'Next values',exact:true}).click();await expect(page.getByRole('region',{name:'Paged table',exact:true})).toContainText('26–26 of 26');
+});
+
+test('transect missing values do not display units as though measurements exist',async({page,request})=>{
+ const response=await request.get(`/api/missions/${fixture.missionId}/science-summary`);
+ // This test uses the real summary API and the production renderer. Only the
+ // transect response is an explicit incomplete-pass fixture, not provider evidence.
+ expect(response.ok(),await response.text()).toBeTruthy();const summary=await response.json();
+ await page.goto('/#control');await page.evaluate(async({summary})=>{const {summaryView}=await import('/science-analysis.js');const parent=document.createElement('section');document.querySelector('main').replaceChildren(parent);await summaryView(parent,summary,async path=>path.endsWith('/transect-passes')?[{passes:[{number:1,direction:'Outbound',completed:false,samples:0,meanAltitudeFeet:null,meanTemperatureCelsius:null,meanWindSpeedKnots:null,quality:'No supported samples in this synthetic incomplete pass.'}]}]:path.endsWith('/science-interpretation')?[]:fetch(path).then(r=>r.json()),null,{analysis:true});},{summary:{...summary,instruments:[]}});
+ const table=page.getByRole('region',{name:'Recorded transect comparison',exact:true});await expect(table).toBeVisible();await expect(table).not.toContainText('Unavailable ft');await expect(table).not.toContainText('Unavailable °C');await expect(table).not.toContainText('Unavailable kt');await expect(table.getByText('Unavailable',{exact:true})).toHaveCount(3);
+ await table.getByText('View quality notes',{exact:true}).click();await expect(table).toContainText('No supported samples');await expect(table.getByRole('button',{name:'Previous values',exact:true})).toBeHidden();
+});

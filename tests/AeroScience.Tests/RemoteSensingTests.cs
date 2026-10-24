@@ -128,18 +128,33 @@ public sealed class RemoteSensingTests : IDisposable
         var preview=cache.Preview();Assert.Equal(1,preview.EligibleFiles);science.ProtectDataset(product.DatasetId,true);var skipped=cache.Clean(preview.Id,true);Assert.Equal(0,skipped.Removed);Assert.Equal(1,skipped.Skipped);
         science.ProtectDataset(product.DatasetId,false);var eligible=cache.Preview();var result=cache.Clean(eligible.Id,true);Assert.Equal(1,result.Removed);Assert.Equal(png.Length,result.ActualBytesRemoved);Assert.Single(science.Products(product.MissionId));Assert.Single(science.Sources());Assert.NotEmpty(cache.History());
         var source=science.Sources().Single();var original=Path.Combine(science.DirectoryPath,source.RelativeDirectory,source.Files[0].RelativePath);Assert.True(File.Exists(original));
-        Assert.Throws<InvalidOperationException>(()=>science.Clear("wrong",false));science.Clear("DELETE SCIENCE DATA",false);Assert.True(File.Exists(original));Assert.Empty(science.Products());Assert.Single(science.Sources());
+        var review=science.PreviewCollectedDeletion(new([product.MissionId]),missions);Assert.Throws<InvalidOperationException>(()=>science.Clear(new(review.Id,"wrong"),missions,coordinator.EnterMaintenance));Assert.Equal("Completed",science.Clear(new(review.Id,review.SelectionHash),missions,coordinator.EnterMaintenance).State);Assert.True(File.Exists(original));Assert.Empty(science.Products());Assert.Single(science.Sources());
     }
+    private sealed class FullScientificDisk:IStorageCapacity{public long FreeBytes(string directory)=>0;}
+    [Fact]public async Task OverallGradingInputsRemainIdenticalAfterOriginalSourceDeletion()
+    {
+        var product=await Acquire(RemoteKind.Terrain);coordinator.End(product.MissionId);var before=MissionEvaluationArchive.Build(missions,science,product.MissionId);Assert.Single(before.Sources!);
+        var report=missions.SavePerformanceReport(before,"Synthetic acquisition grading-independence regression");
+        var review=science.PreviewSourceDeletion(new([product.SourceId]),missions);Assert.True(review.EligibleSources==1,string.Join("; ",review.Sources.SelectMany(s=>s.Blockers)));Assert.Equal("Completed",science.DeleteExternalSources(new(review.Id,review.SelectionHash),missions,coordinator.EnterMaintenance).State);
+        var after=MissionEvaluationArchive.Build(missions,science,product.MissionId);Assert.Equal(PreflightReadiness.Hash(before),PreflightReadiness.Hash(after));Assert.Equal(report.Sha256,missions.LatestPerformanceReport(product.MissionId)!.Sha256);Assert.Equal(product.Sha256,science.ReadProduct(product.Id).Product.Sha256);
+    }
+    private sealed class ScientificReservationDisk:IStorageCapacity{public long FreeBytes(string directory)=>StorageManager.MinimumFreeBytes+1000000;}
     [Fact]public async Task QuotasPreserveHistoryAndStopFlightWithAnExplicitReasonWhileScienceIsIndependent()
     {
-        var management=new StorageManagement(root,missions,science);Assert.Equal(25000000000,management.Preferences.MissionLimitBytes);Assert.Equal(50000000000,management.Preferences.ScienceLimitBytes);
+        var management=new StorageManagement(root,missions,science);Assert.Equal(25000000000,management.Preferences.MissionLimitBytes);Assert.Null(management.Preferences.ScienceLimitBytes);
         management.Configure(new(2000000000,null));Assert.Equal(2000000000,new StorageManagement(root,missions,science).Preferences.MissionLimitBytes);
         var c=new MissionCoordinator(missions,1000,ensureRecordingCapacity:()=>management.RequireFlightCapacity());var mission=c.Start("Quota");var f=Frame();c.Apply(new(new(ConnectionState.Connected,TelemetrySource.Simulator,"fixture",f.TimestampUtc),f));
         management.Configure(new(StorageManager.DatabaseBytes(missions.DatabasePath)+1,1000000000));c.Apply(new(new(ConnectionState.Connected,TelemetrySource.Simulator,"fixture",f.TimestampUtc),f with{TimestampUtc=f.TimestampUtc.AddSeconds(1)}));
         Assert.Null(c.Snapshot().ActiveMission);Assert.Equal("storageLimitReached",c.Snapshot().RecordingStop!.Code);Assert.Single(missions.StreamSamples(mission.Id));Assert.Equal(MissionStatus.Interrupted,missions.Detail(mission.Id)!.Mission.Status);
         Assert.Equal("storageLimitReached",new MissionCoordinator(missions,1000).Snapshot().RecordingStop!.Code);
         management.Configure(new(null,null));Assert.Null(new StorageManagement(root,missions,science).Preferences.ScienceLimitBytes);management.RequireFlightCapacity();await Task.CompletedTask;
-        management.Configure(new(null,1000000));using(var budget=management.ReserveScience(700000)){Assert.Throws<StorageLimitException>(()=>management.ReserveScience(700000));Assert.Throws<InvalidOperationException>(()=>management.Configure(new(null,500000)));}management.RequireScienceCapacity(700000);
+        // Legacy quota values are accepted for compatibility but cannot impose a total
+        // scientific capacity ceiling. Physical reservations still protect writes.
+        management.Configure(new(null,1000000));Assert.Null(management.Preferences.ScienceLimitBytes);
+        using(var first=management.ReserveScience(700000))using(var second=management.ReserveScience(700000))Assert.Equal(1400000,management.Snapshot().Science.ReservedBytes);
+        var capacity=new ScientificReservationDisk();var bounded=new StorageManagement(root,missions,science,capacity);
+        using(var first=bounded.ReserveScience(700000))Assert.Throws<StorageLimitException>(()=>bounded.ReserveScience(700000));
+        bounded.RequireScienceCapacity(700000);
     }
     [Fact]public async Task SourceChecksumAndLibraryMigrationKeepStableProductAndProtectionReferences()
     {
@@ -184,9 +199,9 @@ public sealed class RemoteSensingTests : IDisposable
     }
     [Fact]public async Task ScientificLimitSuspendsOnlyScienceAndPreservesCompletedProductsAndFlightRecording()
     {
-        var product=await Acquire(RemoteKind.Terrain);var management=new StorageManagement(root,missions,science);science.Management=management;var used=management.Snapshot(true).Science.UsedBytes;management.Configure(new(null,used+1,AutomaticCacheCleanup:false));
+        var product=await Acquire(RemoteKind.Terrain);var management=new StorageManagement(root,missions,science,new FullScientificDisk());science.Management=management;management.Configure(new(null,null,AutomaticCacheCleanup:false));
         Apply(Frame(DateTimeOffset.UtcNow.AddSeconds(2)));await Wait(()=>coordinator.Snapshot().Research!.Instruments.Single(i=>i.InstrumentId=="terrain-scanner").Quality==ObservationQuality.Unavailable);
-        Assert.Single(science.Products());Assert.NotNull(science.ReadProduct(product.Id));Assert.NotNull(coordinator.Snapshot().ActiveMission);Assert.Equal(2,missions.StreamSamples(product.MissionId).Count());Assert.Contains("storage limit",coordinator.Snapshot().Research!.Instruments.Single(i=>i.InstrumentId=="terrain-scanner").Message);
+        Assert.Single(science.Products());Assert.NotNull(science.ReadProduct(product.Id));Assert.NotNull(coordinator.Snapshot().ActiveMission);Assert.Equal(2,missions.StreamSamples(product.MissionId).Count());Assert.Contains("space",coordinator.Snapshot().Research!.Instruments.Single(i=>i.InstrumentId=="terrain-scanner").Message);
     }
     public void Dispose(){research.Dispose();science.Dispose();if(Directory.Exists(root))Directory.Delete(root,true);}
 }

@@ -40,7 +40,7 @@ def main():
             for _ in range(2):
                 check = subprocess.run(command+['inspect', str(folder)], capture_output=True, text=True, timeout=20, check=True)
                 result = json.loads(check.stdout)
-                assert result == {'sources': 0 if phase == 'committed' else 2, 'products': 0, 'datasets': 0, 'backupPreserved': True, 'userOriginalsPreserved': True}, result
+                assert result == {'sources': 0 if phase in ('committed','quarantined') else 2, 'products': 0, 'datasets': 0, 'backupPreserved': True, 'userOriginalsPreserved': True}, result
     print('PASS: 3 actual process kills recovered exact source ownership/SQLite receipts idempotently; original hashes, user files and prior backups preserved; no mission/science observations created.')
 
 

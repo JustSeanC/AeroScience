@@ -5,10 +5,10 @@ namespace AeroScience.Missions;
 
 public sealed partial class ScientificLibraryJobs
 {
-    private ScientificSource? ReusableNasa(NasaDownloadBundle bundle)=>science.Sources().FirstOrDefault(s=>s.Manifest.Acquisition is {Workflow:"nasa-earthdata-original-envi"} a&&a.CatalogRevision==bundle.Revision&&s.Manifest.SceneId==bundle.Selection.Scene);
+    private ScientificSource? ReusableNasa(NasaDownloadBundle bundle)=>science.StreamSources(new(Scene:bundle.Selection.Scene)).FirstOrDefault(s=>s.Manifest.Acquisition is {Workflow:"nasa-earthdata-original-envi"} a&&a.CatalogRevision==bundle.Revision&&s.Manifest.SceneId==bundle.Selection.Scene);
     private NasaDownloadBundle? RetainedNasa(NasaSelectionRequest request)
     {
-        foreach(var source in science.Sources().Where(s=>s.Manifest.SceneId==request.GranuleId&&s.Manifest.Acquisition?.Workflow=="nasa-earthdata-original-envi"))
+        foreach(var source in science.StreamSources(new(Scene:request.GranuleId)).Where(s=>s.Manifest.SceneId==request.GranuleId&&s.Manifest.Acquisition?.Workflow=="nasa-earthdata-original-envi"))
         {
             var bundle=JsonSerializer.Deserialize<NasaDownloadBundle>(source.Manifest.Acquisition!.ProviderMetadataJson!,WireJson.Options);
             if(bundle?.Selection.Provider==request.Provider&&bundle.Selection.Revision==request.Revision)return bundle;

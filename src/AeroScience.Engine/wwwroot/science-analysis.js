@@ -57,7 +57,8 @@ export async function summaryView(parent,summary,api,instrument,{disposals=[],ca
   }else parent.append(el('p','No recorded atmospheric readings for this flight. Geographic results above retain their own source dates.'));
   const patterns=await api(`/api/missions/${summary.mission.id}/transect-passes`);
   if(patterns.length){const section=el('section',undefined,'panel transect-results');section.append(el('h3','Actually flown transect passes'));parent.append(section);const rows=[];
-    for(const pattern of patterns)for(const pass of pattern.passes)rows.push([pass.number,pass.direction,pass.completed?'Observed':'Incomplete',pass.samples,number(pass.meanAltitudeFeet)+' ft MSL',number(pass.meanTemperatureCelsius)+' °C',number(pass.meanWindSpeedKnots)+' kt',pass.quality]);
+    const reading=(value,unit)=>Number.isFinite(value)?number(value)+' '+unit:'Unavailable';
+    for(const pattern of patterns)for(const pass of pattern.passes){const quality=el('details');quality.append(el('summary','View quality notes'),el('p',pass.quality||'Quality not assessed.'));rows.push([pass.number,pass.direction,pass.completed?'Observed':'Incomplete',pass.samples,reading(pass.meanAltitudeFeet,'ft MSL'),reading(pass.meanTemperatureCelsius,'°C'),reading(pass.meanWindSpeedKnots,'kt'),quality]);}
     table(section,'Recorded transect comparison',['Pass','Direction','Observed completion','Packets','Mean altitude','Mean temperature','Mean wind speed','Quality'],rows);
     const passes=patterns.flatMap(pattern=>pattern.passes);chart(section,'Recorded transect temperature by actual pass',[{label:'Mean recorded temperature (°C)',data:passes.filter(pass=>Number.isFinite(pass.meanTemperatureCelsius)).map(pass=>({x:pass.number,y:pass.meanTemperatureCelsius})),borderColor:'#62dec6',pointRadius:4}],{xLabel:'Planned pass number — incomplete passes remain labeled',yLabel:'Recorded mean temperature (°C)'});
   }

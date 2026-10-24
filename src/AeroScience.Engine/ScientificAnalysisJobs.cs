@@ -12,7 +12,7 @@ public sealed class ScientificAnalysisJobs(MissionStore missions,ScienceStore sc
     private readonly object gate=new();private readonly Dictionary<Guid,AnalysisJob> states=[];private readonly Dictionary<Guid,CancellationTokenSource> cancellations=[];
     public AnalysisJob Enqueue(Guid mission,ScientificCoverageRequest? coverage=null,CompositeRequest? composite=null)
     {
-        ResearchExports.RequireCompleted(missions,mission);if((coverage is null)==(composite is null))throw new ArgumentException("Choose one analysis operation.");
+        ResearchExports.RequireCompleted(missions,mission);if(missions.ScienceDeleted(mission))throw new InvalidOperationException("Collected science was permanently deleted. Analysis and historical grades cannot be recreated from missing evidence.");if((coverage is null)==(composite is null))throw new ArgumentException("Choose one analysis operation.");
         var id=Guid.NewGuid();var cancel=new CancellationTokenSource();var job=new AnalysisJob(id,mission,coverage is null?"composite":"coverage","Queued",0,null,[]);
         lock(gate)
         {
@@ -25,7 +25,7 @@ public sealed class ScientificAnalysisJobs(MissionStore missions,ScienceStore sc
     }
     public AnalysisJob EnqueuePerformance(Guid mission,string reason="End-flight archived evaluation")
     {
-        ResearchExports.RequireCompleted(missions,mission);
+        ResearchExports.RequireCompleted(missions,mission);if(missions.ScienceDeleted(mission))throw new InvalidOperationException("Collected science was permanently deleted. Analysis and historical grades cannot be recreated from missing evidence.");
         if(string.IsNullOrWhiteSpace(reason)||reason.Length>500)throw new ArgumentException("Explain the report calculation or revision.");
         var id=Guid.NewGuid();var cancel=new CancellationTokenSource();var job=new AnalysisJob(id,mission,"performance","Queued",0,null,[]);
         lock(gate)
@@ -50,6 +50,7 @@ public sealed class ScientificAnalysisJobs(MissionStore missions,ScienceStore sc
                 linked.Token.ThrowIfCancellationRequested();Update(work.Id,s=>s with{State="Running"});
                 var results=await Task.Run(()=>
                 {
+                    if(missions.ScienceDeleted(work.Mission))throw new InvalidOperationException("Collected science was deliberately deleted; queued analysis cannot recreate it.");
                     if(work.PerformanceReason is {} reason)
                     {
                         // Coordinate available Library migrations/clear operations using its existing

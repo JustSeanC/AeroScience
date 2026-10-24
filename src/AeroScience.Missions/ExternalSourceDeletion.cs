@@ -4,18 +4,19 @@ using AeroScience.Shared;
 using Microsoft.Data.Sqlite;
 namespace AeroScience.Missions;
 
-public sealed record SourceDeletionRequest(Guid[]? SourceIds=null,bool All=false);
-public sealed record SourceDeletionExecution(Guid PreviewId,string SelectionHash,string Confirmation);
+public sealed record SourceDeletionRequest(Guid[]? SourceIds=null,bool All=false,string? CollectionId=null);
+public sealed record SourceDeletionExecution(Guid PreviewId,string SelectionHash);
 public sealed record SourceDeletionItem(Guid Id,string Name,string Provider,RemoteKind Kind,string RelativeDirectory,
-    string ManifestSha256,ManagedSourceFile[] Files,long ManagedBytes,string[] Blockers);
+    string ManifestSha256,ManagedSourceFile[] Files,long ManagedBytes,string[] Blockers,int? FileCount=null,ManagedSourceFile[]? AdditionalFiles=null)
+{ public int ManagedFileCount=>FileCount??(Files.Length+(AdditionalFiles?.Length??0)); }
 public sealed record SourceDeletionPreview(Guid Id,Guid LibraryId,bool All,DateTimeOffset CreatedUtc,string SelectionHash,
-    SourceDeletionItem[] Sources,string Confirmation,string Preserved)
+    SourceDeletionItem[] Sources,string Preserved,int Version=1,long TotalSources=0,long BlockedSources=0,long ManagedBytes=0,long? Next=null,string? CollectionId=null)
 {
-    public int EligibleSources=>Sources.Count(s=>s.Blockers.Length==0);
-    public long EligibleManagedBytes=>Sources.Where(s=>s.Blockers.Length==0).Sum(s=>s.ManagedBytes);
+    public long EligibleSources=>Version==2?TotalSources-BlockedSources:Sources.Count(s=>s.Blockers.Length==0);
+    public long EligibleManagedBytes=>Version==2?ManagedBytes:Sources.Where(s=>s.Blockers.Length==0).Sum(s=>s.ManagedBytes);
 }
-public sealed record SourceDeletionResult(Guid Id,int RemovedSources,long RemovedManagedBytes,long PendingManagedBytes,
-    long? PhysicalFreeSpaceChangeBytes,string State,string? Warning,Guid[]? RemovedSourceIds=null);
+public sealed record SourceDeletionResult(Guid Id,long RemovedSources,long RemovedManagedBytes,long PendingManagedBytes,
+    long? PhysicalFreeSpaceChangeBytes,string State,string? Warning,Guid[]? RemovedSourceIds=null,bool MetadataCleanupPending=false);
 internal sealed record SourceDeletionJournal(SourceDeletionPreview Preview,string State,string[] Ledgers,long? FreeBefore,string? Warning=null,int Version=1);
 
 public sealed partial class ScienceStore
@@ -32,9 +33,16 @@ public sealed partial class ScienceStore
     private static bool ContainsIdentity(string json,Guid id)=>json.Contains(id.ToString(),StringComparison.OrdinalIgnoreCase)||json.Contains(id.ToString("N"),StringComparison.OrdinalIgnoreCase);
     private string[] ScientificSourceDependencies(ScientificSource source)
     {
-        using var db=Open();var reasons=SourceDependencies.ArchivedReferences(db,source.Id,"remote_sources","library_jobs","library_job_items","metadata").ToList();
-        using var cmd=db.CreateCommand();cmd.CommandText="SELECT id,payload_json FROM remote_sources WHERE id<>$id";cmd.Parameters.AddWithValue("$id",source.Id.ToString());
-        using(var rows=cmd.ExecuteReader())while(rows.Read())if(ContainsIdentity(rows.GetString(1),source.Id))reasons.Add("Another retained source references this identity: "+rows.GetString(0));
+        using var db=Open();var reasons=new List<string>();using var cmd=db.CreateCommand();
+        // Published products carry their own sampled numeric values and source snapshot.
+        // Verify those retained results; provenance alone is not a dependency on originals.
+        cmd.CommandText="SELECT id FROM remote_products WHERE json_extract(payload_json,'$.sourceId')=$id";
+        cmd.Parameters.AddWithValue("$id",source.Id.ToString());
+        using(var rows=cmd.ExecuteReader())while(rows.Read()){
+            var data=ReadProduct(Guid.Parse(rows.GetString(0)));
+            if(data.Source.Id!=source.Id||data.FormatVersion!=1||data.SampleLocations.Length==0||data.Bands.Any(b=>b.Values.Length!=data.SampleLocations.Length))
+                reasons.Add("A published product lacks independently retained scientific evidence: "+data.Product.Id);
+        }
         cmd.CommandText="SELECT id,preview_json FROM library_jobs WHERE state NOT IN ('Completed','Cancelled','Failed')";cmd.Parameters.Clear();
         using(var rows=cmd.ExecuteReader())while(rows.Read()){
             var json=rows.GetString(1);using var parsed=JsonDocument.Parse(json);
@@ -66,9 +74,9 @@ public sealed partial class ScienceStore
         }
         return files.ToArray();
     }
-    public SourceDeletionPreview PreviewSourceDeletion(SourceDeletionRequest request,MissionStore missions,Func<string?>? busy=null,CancellationToken token=default,Func<ScientificSource,string[]>? planningDependencies=null)
+    private SourceDeletionPreview PreviewSourceDeletionLegacy(SourceDeletionRequest request,MissionStore missions,Func<string?>? busy=null,CancellationToken token=default,Func<ScientificSource,string[]>? planningDependencies=null)
     {
-        if(request.All&&request.SourceIds is {Length:>0}||!request.All&&(request.SourceIds is not {Length:>0 and <=500}||request.SourceIds.Distinct().Count()!=request.SourceIds.Length))throw new ArgumentException("Choose an exact nonempty source set, or explicitly request all downloaded sources.");
+        if(request.All&&request.SourceIds is {Length:>0}||!request.All&&(request.SourceIds is not {Length:>0}||request.SourceIds.Distinct().Count()!=request.SourceIds.Length))throw new ArgumentException("Choose an exact nonempty source set, or explicitly request all downloaded sources.");
         if(AvailabilityError() is {} error)throw new IOException(error);
         var library=LibraryId;var all=Sources();var ids=request.All?all.Select(s=>s.Id).Order().ToArray():request.SourceIds!.Order().ToArray();
         if(ids.Length==0)throw new InvalidOperationException("There are no retained external sources to delete.");
@@ -85,11 +93,11 @@ public sealed partial class ScienceStore
         }
         if(LibraryId!=library)throw new IOException("Library identity changed during review; no deletion was authorized.");
         var hash=SourceDeleteHash(library,request.All,items);
-        var preview=new SourceDeletionPreview(Guid.NewGuid(),library,request.All,DateTimeOffset.UtcNow,hash,items.ToArray(),request.All?"DELETE ALL EXTERNAL DATA":"DELETE EXTERNAL DATA",
+        var preview=new SourceDeletionPreview(Guid.NewGuid(),library,request.All,DateTimeOffset.UtcNow,hash,items.ToArray(),
             "Flight recordings, telemetry, mission/science observations, grades, reports, calibration history, settings, prior backups, other sources and user originals outside this Library remain untouched. Referenced/protected sources cannot be deleted.");
         lock(gate){foreach(var old in sourceDeletionPreviews.Values.Where(p=>p.CreatedUtc<DateTimeOffset.UtcNow.AddMinutes(-10)).Select(p=>p.Id).ToArray())sourceDeletionPreviews.Remove(old);if(sourceDeletionPreviews.Count>=32)throw new InvalidOperationException("Close expired source-deletion reviews before creating more.");sourceDeletionPreviews[preview.Id]=preview;}return preview;
     }
-    public SourceDeletionResult DeleteExternalSources(SourceDeletionExecution request,MissionStore missions,Func<IDisposable> missionMaintenance,Func<string?>? busy=null,CancellationToken token=default,Func<ScientificSource,string[]>? planningDependencies=null)
+    private SourceDeletionResult DeleteExternalSourcesLegacy(SourceDeletionExecution request,MissionStore missions,Func<IDisposable> missionMaintenance,Func<string?>? busy=null,CancellationToken token=default,Func<ScientificSource,string[]>? planningDependencies=null)
     {
         if(AvailabilityError() is {} unavailable)throw new IOException(unavailable);
         var journalPath=Path.Combine(SourceDeletionFolder(request.PreviewId),"journal.json");
@@ -98,7 +106,7 @@ public sealed partial class ScienceStore
         AuthorizeDeletion(preview,request);if(preview.CreatedUtc<DateTimeOffset.UtcNow.AddMinutes(-10))throw new InvalidOperationException("Deletion review expired. Preview again.");
         if(preview.Sources.Any(s=>s.Blockers.Length>0))throw new InvalidOperationException("Selected sources are blocked. Review a new explicit eligible selection; no reduced set was silently deleted.");
         using var missionLock=missionMaintenance();
-        var current=PreviewSourceDeletion(new(preview.All?null:preview.Sources.Select(s=>s.Id).ToArray(),preview.All),missions,busy,token,planningDependencies);
+        var current=PreviewSourceDeletionLegacy(new(preview.All?null:preview.Sources.Select(s=>s.Id).ToArray(),preview.All),missions,busy,token,planningDependencies);
         if(current.SelectionHash!=preview.SelectionHash||current.Sources.Any(s=>s.Blockers.Length>0))throw new InvalidOperationException("Source files, dependencies or selection changed. Review and confirm again.");
         using var maintenance=EnterSourceMaintenance();
         // New readers/imports/flight starts are now excluded. Recheck lineage in this
@@ -125,12 +133,12 @@ public sealed partial class ScienceStore
         }
     }
     private static string SourceDeleteHash(Guid library,bool all,IEnumerable<SourceDeletionItem> sources)=>ScientificCatalog.Hash(new{library,all,sources=sources.Select(i=>new{i.Id,i.ManifestSha256,i.Files,i.Blockers})});
-    private static void AuthorizeDeletion(SourceDeletionPreview p,SourceDeletionExecution r){if(p.Id!=r.PreviewId||p.SelectionHash!=r.SelectionHash||p.Confirmation!=r.Confirmation)throw new InvalidOperationException("Review the exact source selection and supply its required confirmation.");}
+    private static void AuthorizeDeletion(SourceDeletionPreview p,SourceDeletionExecution r){if(p.Id!=r.PreviewId||p.SelectionHash!=r.SelectionHash)throw new InvalidOperationException("Review and explicitly approve the exact source selection.");}
     private SourceDeletionJournal ReadDeletionJournal(string path)
     {
         StorageManager.ValidateLocalPath(path);if(new FileInfo(path).Length>33554432)throw new IOException("Source deletion journal exceeds supported bounds; preserve it for recovery.");
         var j=JsonSerializer.Deserialize<SourceDeletionJournal>(File.ReadAllText(path),WireJson.Options)??throw new IOException("Missing source deletion journal.");
-        if(j.Version!=1||j.Preview.LibraryId!=LibraryId||Path.GetFullPath(path)!=Path.Combine(SourceDeletionFolder(j.Preview.Id),"journal.json")||j.Preview.Sources.Length is <1 or >500||j.Preview.Sources.Sum(s=>s.Files.Length)>20000||j.Preview.Sources.Any(s=>s.RelativeDirectory!=$"Sources/{s.Id:N}")||j.Ledgers.Any(n=>!Guid.TryParseExact(Path.GetFileNameWithoutExtension(n),"N",out _)||n!=Path.GetFileName(n)||!n.EndsWith(".json",StringComparison.Ordinal)))throw new IOException("Source deletion ownership is invalid; no recovery paths were modified.");
+        if(j.Version!=1||j.Preview.LibraryId!=LibraryId||Path.GetFullPath(path)!=Path.Combine(SourceDeletionFolder(j.Preview.Id),"journal.json")||j.Preview.Sources.Length<1||j.Preview.Sources.Sum(s=>s.Files.Length)>20000||j.Preview.Sources.Any(s=>s.RelativeDirectory!=$"Sources/{s.Id:N}")||j.Ledgers.Any(n=>!Guid.TryParseExact(Path.GetFileNameWithoutExtension(n),"N",out _)||n!=Path.GetFileName(n)||!n.EndsWith(".json",StringComparison.Ordinal)))throw new IOException("Source deletion ownership is invalid; no recovery paths were modified.");
         if(j.Preview.SelectionHash!=SourceDeleteHash(j.Preview.LibraryId,j.Preview.All,j.Preview.Sources)||j.Preview.Sources.Any(s=>s.Blockers.Length>0||s.Files.Any(f=>f.Bytes<0||f.Sha256.Length!=64)))throw new IOException("Deletion journal content identity is invalid; preserve all files.");
         return j;
     }
@@ -158,7 +166,8 @@ public sealed partial class ScienceStore
     private void RecoverSourceDeletionJournals()
     {
         var folder=StorageManager.ResolveDataset(DirectoryPath,LibraryId,"Metadata/SourceDeletions");if(!Directory.Exists(folder))return;
-        var directories=Directory.EnumerateDirectories(folder).Take(1001).ToArray();if(directories.Length>1000)throw new IOException("Too many source deletion records; review recovery history before continuing.");
-        foreach(var directory in directories){if(!Guid.TryParseExact(Path.GetFileName(directory),"N",out _))continue;var path=Path.Combine(directory,"journal.json");StorageManager.ValidateLocalPath(path);if(!File.Exists(path))continue;var journal=ReadDeletionJournal(path);if(journal.State is "Completed" or "Rolled back")continue;_=RecoverSourceDeletion(path,journal);}
+        var directories=Directory.EnumerateDirectories(folder);
+        foreach(var directory in directories){if(!Guid.TryParseExact(Path.GetFileName(directory),"N",out _))continue;var path=Path.Combine(directory,"journal.json");StorageManager.ValidateLocalPath(path);if(!File.Exists(path))continue;using(var document=JsonDocument.Parse(File.ReadAllText(path)))if((document.RootElement.TryGetProperty("version",out var version)||document.RootElement.TryGetProperty("Version",out version))&&version.GetInt32()==2){RecoverSourceDeletionV2(path);continue;}
+            var journal=ReadDeletionJournal(path);if(journal.State is "Completed" or "Rolled back")continue;_=RecoverSourceDeletion(path,journal);}
     }
 }

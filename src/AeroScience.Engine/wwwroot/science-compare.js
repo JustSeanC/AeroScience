@@ -50,7 +50,7 @@ export async function comparison(parent,api,missions,ids,disposals,catalog){
     const details=disclosure(card,'Recorded values and source details'),values=el('div'),evidence=el('pre');details.append(values,evidence);
     async function chooseAcquisition(){
       const product=column.items.find(p=>p.id===acquisition.value);if(!product)return;
-      if(product.instrumentId==='hyperspectral-imager')sources??=await api('/api/science/sources');
+      if(product.instrumentId==='hyperspectral-imager'){sources??=[];if(!sources.some(item=>item.source.id===product.sourceId)){const data=await api('/api/science/products/'+product.id);sources.push({source:data.source});}}
       if(stopped||acquisition.value!==product.id)return;
       const source=sources?.find(item=>item.source.id===product.sourceId)?.source,previous=quantity.value,options=measurementsFor(product.instrumentId,source);
       quantity.replaceChildren(...options.map(([value,label])=>{const option=el('option',label);option.value=value;return option;}));

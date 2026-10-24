@@ -5,7 +5,7 @@ namespace AeroScience.Missions;
 
 public sealed partial class ScienceStore
 {
-    public const int CurrentSchemaVersion=3;
+    public const int CurrentSchemaVersion=4;
     private static void InitializeLibraryJobs(SqliteConnection db)
     {
         using var tx=db.BeginTransaction();using var cmd=db.CreateCommand();cmd.Transaction=tx;cmd.CommandText="""

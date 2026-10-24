@@ -47,7 +47,7 @@ public sealed partial class ScienceStore(string directory, IStorageCapacity? cap
         }.ToString());
         try
         {
-            db.Open(); using var cmd = db.CreateCommand(); cmd.CommandText = "PRAGMA foreign_keys=ON; PRAGMA synchronous=FULL"; cmd.ExecuteNonQuery(); return db;
+            db.Open(); using var cmd = db.CreateCommand(); cmd.CommandText = "PRAGMA foreign_keys=ON; PRAGMA synchronous=FULL"; cmd.ExecuteNonQuery(); if(write){cmd.CommandText="PRAGMA secure_delete=ON";cmd.ExecuteNonQuery();}return db;
         }
         catch { db.Dispose(); throw; }
     }
@@ -61,6 +61,7 @@ public sealed partial class ScienceStore(string directory, IStorageCapacity? cap
             Directory.CreateDirectory(Path.GetDirectoryName(DatabasePath)!);
             var existed = File.Exists(DatabasePath);
             using var db = Open(write: true, create: !existed); using var cmd = db.CreateCommand();
+            cmd.CommandText="PRAGMA journal_mode=WAL";cmd.ExecuteNonQuery();
             if (!existed)
             {
                 using var tx = db.BeginTransaction(); cmd.Transaction = tx;
@@ -83,14 +84,15 @@ public sealed partial class ScienceStore(string directory, IStorageCapacity? cap
             if (cmd.ExecuteScalar() as string != id.ToString()) throw new IOException("Science database/library identity mismatch; nothing was replaced.");
             cmd.CommandText = "PRAGMA user_version";
             var schema=Convert.ToInt32(cmd.ExecuteScalar(), CultureInfo.InvariantCulture);
-            if (schema is not(1 or 2 or 3)) throw new IOException("Unsupported science schema; preserve this library.");
+            if (schema is not(1 or 2 or 3 or 4)) throw new IOException("Unsupported science schema; preserve this library.");
             if(schema<CurrentSchemaVersion&&existed){var backups=Path.Combine(DirectoryPath,"Metadata","Backups");Directory.CreateDirectory(backups);_=DataBackup.Create(DatabasePath,backups,true);}
             InitializeRemoteTables(db);
             InitializeArtifactTable(db);
             InitializeSpatialIndex(db);
             InitializeAtmosphereIndex(db);
             InitializeStatisticsCache(db);
-            if(schema<CurrentSchemaVersion)InitializeLibraryJobs(db);
+            if(schema<3)InitializeLibraryJobs(db);
+            InitializeSourceIndex(db,schema<4);
             if (!File.Exists(Path.Combine(DirectoryPath, MarkerName)))
                 PreferenceStore.WriteAtomic(Path.Combine(DirectoryPath, MarkerName), new { formatVersion = 1, libraryId = id, database = RelativeDatabasePath });
             if(!sourceDeletionRecoveryDone){RecoverSourceDeletionJournals();sourceDeletionRecoveryDone=true;}
@@ -207,45 +209,9 @@ public sealed partial class ScienceStore(string directory, IStorageCapacity? cap
         var caches=CacheEntries();
         return new("science", DirectoryPath, 0, 0, datasets, observations, StorageManager.DatabaseBytes(DatabasePath) + managed.Bytes + caches.Sum(c=>c.Bytes),
             "AeroScience atmospheric observations, dataset metadata and indexed generated remote-sensing product files. Only unchanged, checksum-matching managed files are removed.",
-            "Original imported Sources, prior backups, flight recordings, telemetry, plans, settings, library identity and unrelated/changed files", "DELETE SCIENCE DATA", managed.Count, managed.Bytes, managed.Paths, ProtectedDatasetCount(),caches.LongLength);
+            "Original imported Sources, flight recordings, telemetry, plans, settings, library identity and unrelated files. Targeted scientific content is also purged from managed backups; unresolved shared copies block completion", "", managed.Count, managed.Bytes, managed.Paths, ProtectedDatasetCount(),caches.LongLength);
     }
-    public void Clear(string confirmation, bool recording)
-    {
-        if (confirmation != "DELETE SCIENCE DATA" || recording) throw new InvalidOperationException("End recording and type DELETE SCIENCE DATA to confirm.");
-        lock (gate)
-        {
-            if(activeAnalyses>0)throw new InvalidOperationException("Cancel or finish scientific analysis before clearing the library.");
-            if (AvailabilityError() is { } error) throw new IOException(error);
-            if (!File.Exists(DatabasePath)) return;
-            Initialize(); var products = AllProducts().ToArray();var caches=CacheEntries();var artifacts=Artifacts().ToArray();
-            var retainedPaths=products.Select(p=>p.RelativePath).Concat(caches.Select(c=>c.RelativePath)).Concat(artifacts.Select(a=>a.RelativePath)).ToArray();
-            var workLedgers=retainedPaths.Chunk(1024).Select(paths=>BeginManagedWrite("Deliberate scientific archive clear",paths)).ToArray();
-            var journalPath = Path.Combine(DirectoryPath, "Metadata", "Clears", Guid.NewGuid().ToString("N") + ".json");
-            PreferenceStore.WriteAtomic(journalPath, new { phase = "prepared", products,artifacts });
-            using var db = Open(write: true); using var tx = db.BeginTransaction(); using var cmd = db.CreateCommand(); cmd.Transaction = tx;
-            cmd.CommandText = "DELETE FROM observations; DELETE FROM remote_products; DELETE FROM scientific_artifacts; DELETE FROM datasets; INSERT OR REPLACE INTO metadata VALUES('last_clear_utc',$now)";
-            cmd.Parameters.AddWithValue("$now", DateTimeOffset.UtcNow.ToString("O", CultureInfo.InvariantCulture)); cmd.ExecuteNonQuery(); tx.Commit();
-            PreferenceStore.WriteAtomic(journalPath, new { phase = "records-cleared", products,artifacts });
-            foreach (var product in products)
-            {
-                var path = StorageManager.ResolveDataset(DirectoryPath, product.LibraryId, product.RelativePath);
-                if (File.Exists(path) && new FileInfo(path).Length == product.Bytes && Digest(path) == product.Sha256) File.Delete(path);
-            }
-            foreach(var cache in caches)
-            {
-                if(cache.RelativePath!=$"Cache/Thumbnails/{cache.Id:N}.png"||cache.Recipe!="remote-preview-v1")continue;
-                var path=StorageManager.ResolveDataset(DirectoryPath,LibraryId,cache.RelativePath);
-                if(File.Exists(path)&&new FileInfo(path).Length==cache.Bytes&&Digest(path)==cache.Sha256)File.Delete(path);
-            }
-            foreach(var artifact in artifacts)
-            {
-                var path=StorageManager.ResolveDataset(DirectoryPath,LibraryId,artifact.RelativePath);
-                if(File.Exists(path)&&new FileInfo(path).Length==artifact.Bytes&&Digest(path)==artifact.Sha256)File.Delete(path);
-            }
-            PreferenceStore.WriteAtomic(journalPath, new { phase = "completed", note = "Only checksum-matching managed product files were removed; missing/modified/unrelated files and Sources were preserved.", products,artifacts });
-            if(!retainedPaths.Any(p=>File.Exists(StorageManager.ResolveDataset(DirectoryPath,LibraryId,p))))foreach(var ledger in workLedgers)File.Delete(ledger);
-        }
-    }
+    public CollectedScienceDeletionResult Clear(SourceDeletionExecution reviewed,MissionStore missions,Func<IDisposable> maintenance)=>DeleteCollectedScience(reviewed,missions,maintenance);
     public ScienceStorageEstimate Estimate(InstrumentConfiguration[]? input, double? minutes)
     {
         var configurations = ScienceCatalog.Normalize(input); var counts = new Dictionary<string, long>();

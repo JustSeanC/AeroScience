@@ -38,6 +38,7 @@ var management=new StorageManagement(output,missions,science);science.Management
 var settings=new ScientificAccessSettings(output,()=>true);settings.Save(new(true,true,MaximumDownloadBytes:67108864,PreferredDateUtc:DateTimeOffset.Parse("2024-09-10T00:00:00Z"),LookbackDays:120));
 if(args.Contains("--envi")){await GuidedEnviAcceptance.Run(args[Array.IndexOf(args,"--envi")+1],output,science,missions,args.Contains("--workspace"));return;}
 if(args.Contains("--review-from")){await ReviewAcceptance.Run(args[Array.IndexOf(args,"--review-from")+1],output);return;}
+if(args.Contains("--deletion-from")){await SourceDeletionAcceptance.Run(args[Array.IndexOf(args,"--deletion-from")+1],output,science,missions);return;}
 if(args.Contains("--concurrency")){await ConcurrencyAcceptance.Run(output);return;}
 if(args.Contains("--benchmark")){await RegionalBenchmark.Run(output,args);return;}
 if(args.Contains("--offline-from")){await OfflineScientificAcceptance.Run(args[Array.IndexOf(args,"--offline-from")+1],output,science,missions,settings);return;}

@@ -16,11 +16,15 @@ public sealed class DataManagementForm : BrandedForm
     {
         this.app = app; Text = "AeroScience · Storage & Data · Data Management"; Size = new(800, 650); AutoScaleMode = AutoScaleMode.Dpi;
         MinimumSize = new(680, 500);
-        Font = new Font("Segoe UI", 11); Controls.Add(panel); panel.Controls.Add(new Label { Text = "Export individual completed missions from Mission History. These operations clear whole archives independently. Existing backups and unrelated files are preserved.", AutoSize = true, MaximumSize = new(700, 0) });
+        Font = new Font("Segoe UI", 11); Controls.Add(panel); panel.Controls.Add(new Label { Text = "Export individual completed missions from Mission History. These operations clear whole archives independently. Permanent scientific deletion purges selected scientific content from managed backups; unrelated content is preserved.", AutoSize = true, MaximumSize = new(700, 0) });
         foreach (var science in new[] { false, true })
         {
             var heading = new Label { Text = science ? "Clear Scientific Data" : "Clear Flight & Mission Data", UseMnemonic = false, AutoSize = true, Font = new(Font, FontStyle.Bold), Margin = new(3, 20, 3, 3) }; panel.Controls.Add(heading);
             var preview = new Label { AutoSize = true, MaximumSize = new(700, 0) }; panel.Controls.Add(preview);
+            if(science){
+                var deleteScience=new Button{Text="Delete Collected Scientific Data",AutoSize=true,BackColor=Color.Firebrick,ForeColor=Color.White};panel.Controls.Add(deleteScience);
+                deleteScience.Click+=async(_,_)=>{await DeleteCollected();RefreshPreview();};RefreshPreview();continue;
+            }
             if (!science) panel.Controls.Add(plans);
             panel.Controls.Add(new Label { Text = "Deletion options:", AutoSize = true, Margin = new(3, 12, 3, 3) });
             var options = new FlowLayoutPanel { AutoSize = true, FlowDirection = FlowDirection.TopDown, WrapContents = false };
@@ -59,6 +63,22 @@ public sealed class DataManagementForm : BrandedForm
         using var store = new ScienceStore(settings.ScienceLibraryDirectory);store.MissionIsProtected=new MissionStore(Path.Combine(settings.MissionDirectory,"missions.db")).IsProtected;return store.PreviewClear();
     }
     private static string Describe(DataClearPreview p) => (p.Kind == "flight" ? $"{p.Missions} recorded missions will be deleted." : $"{p.Datasets} scientific datasets, {p.Observations} observations and {p.ManagedProductFiles} generated product files will be deleted.") + $"\nData to delete from: {p.Directory}\nProtected missions/datasets included in this deliberate clear: {p.ProtectedItems}\nSaved plans to delete: {p.Plans}\nApproximate managed size: {p.ApproximateBytes / 1048576d:0.00} MiB including SQLite companion files and indexed products (clearing rows may retain allocation)\nGenerated product files: {p.ManagedProductFiles} ({p.ManagedProductBytes / 1048576d:0.00} MiB)\n" + string.Join("\n", p.ProductPathPreview ?? []) + $"\nRemoves: {p.Removes}\nPreserves: {p.Preserves}";
+    private async Task DeleteCollected()
+    {
+        if(working||app.Busy||app.Recording){MessageBox.Show(this,"End recording and wait for active operations first.");return;}
+        try{
+            working=true;panel.Enabled=false;status.Text="Reviewing the exact collected-science selection; background operations are unchanged…";
+                var review=await Task.Run(app.PreviewCollectedScience);
+                using var confirm=new Form{Text="Delete Collected Mission Science",Size=new(650,400),MinimumSize=new(450,320),StartPosition=FormStartPosition.CenterParent,MaximizeBox=false,MinimizeBox=false};
+                var content=new TableLayoutPanel{Dock=DockStyle.Fill,Padding=new(18),RowCount=2,ColumnCount=1};content.RowStyles.Add(new(SizeType.Percent,100));content.RowStyles.Add(new(SizeType.AutoSize));confirm.Controls.Add(content);
+                content.Controls.Add(new Label{Dock=DockStyle.Fill,AutoSize=false,Text=$"{review.Missions} missions · {review.Datasets} datasets · {review.Observations} observations · {review.Products} generated products. Estimated managed file space: {review.ManagedBytes/1048576d:0.00} MiB.\n\nDeletion is permanent. Scientific measurements, generated analysis and dependent grades are purged, including their managed copies. No recovery backup is created. Flight recordings and external source datasets remain untouched.\n\n"+string.Join("\n",review.Blockers)});
+                var actions=new FlowLayoutPanel{Dock=DockStyle.Fill,AutoSize=true,FlowDirection=FlowDirection.RightToLeft};var delete=new Button{Text="Delete All Collected Science",AutoSize=true,BackColor=Color.Firebrick,ForeColor=Color.White,DialogResult=DialogResult.OK,Enabled=review.Blockers.Length==0};var cancel=new Button{Text="Cancel",AutoSize=true,DialogResult=DialogResult.Cancel};actions.Controls.Add(delete);actions.Controls.Add(cancel);content.Controls.Add(actions);confirm.CancelButton=cancel;confirm.AcceptButton=cancel;confirm.Shown+=(_,_)=>cancel.Focus();
+                if(confirm.ShowDialog(this)!=DialogResult.OK){status.Text="Cancelled. No scientific data was changed.";return;}
+                status.Text="Permanently deleting reviewed collected science…";
+                var result=await Task.Run(()=>app.DeleteCollectedScience(new(review.Id,review.SelectionHash)));
+                status.Text=$"{result.State}: {result.RemovedFiles} files removed, {result.PendingFiles} pending. {result.Warning}";
+        }catch(Exception error){status.Text="Deletion is not complete: "+error.Message;app.ShowError(error);}finally{working=false;panel.Enabled=true;}
+    }
     private async Task Clear(bool science, string typed, bool backupRequested)
     {
         if (working || app.Busy || app.Recording) { MessageBox.Show(this, "End recording and wait for other operations first."); return; }
@@ -95,18 +115,8 @@ public sealed class DataManagementForm : BrandedForm
                 var missions = new MissionStore(Path.Combine(settings.MissionDirectory, "missions.db"));
                 if (missions.List(1000, 0).Any(m => m.Status == MissionStatus.Recording)) throw new InvalidOperationException("A recording remains active; no data was cleared.");
                 using var library = new ScienceStore(settings.ScienceLibraryDirectory);
-                if (science)
-                {
-                    library.Initialize();
-                    if (backupFolder is not null) result = library.CreateRecoveryBackup(backupFolder);
-                    library.Clear(typed, false);
-                    missions.ReconcileDatasetReferences(library.LibraryId, library.ContainsDataset);
-                }
-                else
-                {
-                    if (backupFolder is not null) result = DataBackup.Create(missions.DatabasePath, backupFolder, false);
-                    missions.ClearFlightData(typed, includePlans);
-                }
+                if (backupFolder is not null) result = DataBackup.Create(missions.DatabasePath, backupFolder, false);
+                missions.ClearFlightData(typed, includePlans);
             }));
             status.Text = "Completed. " + (result.Length > 0 ? "Verified backup: " + result : "No backup requested.");
         }

@@ -51,8 +51,8 @@ public sealed class SettingsForm : BrandedForm
             Button(buttons, "Browse / Change Location…", async (_, _) => await SelectStorage(kind, false));
             Button(buttons, "Open Folder", (_, _) =>
             {
-                if (Directory.Exists(status.Directory)) Process.Start(new ProcessStartInfo(status.Directory) { UseShellExecute = true });
-                else MessageBox.Show(this, "The selected drive/folder is unavailable. No replacement was created.");
+                try { NativeFolder.Open(status.Directory); }
+                catch(Exception error)when(error is IOException or UnauthorizedAccessException or System.ComponentModel.Win32Exception){MessageBox.Show(this,error.Message);}
             });
             Button(buttons, "Restore Default…", async (_, _) => await SelectStorage(kind, true));
             storagePanel.Controls.Add(buttons);

@@ -9,11 +9,11 @@ public sealed class ExternalSourceDeletionTests:IDisposable
     private readonly string root=Path.Combine(Path.GetTempPath(),"external-deletion-"+Guid.NewGuid().ToString("N"));private readonly ScienceStore science;private readonly MissionStore missions;private readonly MissionCoordinator coordinator;
     public ExternalSourceDeletionTests(){var paths=new StorageManager(new PreferenceStore(root)).Initialize();missions=new(Path.Combine(paths.MissionDirectory,"missions.db"));missions.Initialize();science=new(paths.ScienceLibraryDirectory);science.Initialize();coordinator=new(missions,1000);}
     private Task<ScientificSource> Import(RemoteKind kind=RemoteKind.Terrain)=>science.ImportSourceAsync(RemoteFixtureFiles.Create(Path.Combine(root,"user-original-"+Guid.NewGuid()),kind));
-    private SourceDeletionResult Delete(SourceDeletionPreview p,string? confirmation=null)=>science.DeleteExternalSources(new(p.Id,p.SelectionHash,confirmation??p.Confirmation),missions,coordinator.EnterMaintenance);
+    private SourceDeletionResult Delete(SourceDeletionPreview p,string? hash=null)=>science.DeleteExternalSources(new(p.Id,hash??p.SelectionHash),missions,coordinator.EnterMaintenance);
     [Fact]public async Task ActualSelectiveDeletionRemovesOnlyOwnedOriginalsAndIsIdempotent()
     {
         var a=await Import();var b=await Import(RemoteKind.Thermal);var backup=Path.Combine(science.DirectoryPath,"Metadata","Backups","previous-backup.txt");Directory.CreateDirectory(Path.GetDirectoryName(backup)!);File.WriteAllText(backup,"preserved");
-        var preview=science.PreviewSourceDeletion(new([a.Id]),missions);Assert.True(preview.EligibleSources==1,string.Join("; ",preview.Sources.SelectMany(s=>s.Blockers)));Assert.True(preview.EligibleManagedBytes>0);Assert.Throws<InvalidOperationException>(()=>Delete(preview,"wrong"));Assert.Equal(2,science.Sources().Length);
+        var preview=science.PreviewSourceDeletion(new([a.Id]),missions);Assert.True(preview.EligibleSources==1,string.Join("; ",preview.Sources.SelectMany(s=>s.Blockers)));Assert.True(preview.EligibleManagedBytes>0);Assert.Throws<InvalidOperationException>(()=>Delete(preview,"wrong selection hash"));Assert.Equal(2,science.Sources().Length);
         var removed=Delete(preview);Assert.Equal("Completed",removed.State);Assert.Equal(preview.EligibleManagedBytes,removed.RemovedManagedBytes);Assert.Equal(b.Id,Assert.Single(science.Sources()).Id);Assert.Equal("preserved",File.ReadAllText(backup));Assert.All(Directory.GetDirectories(root,"user-original-*"),d=>Assert.True(File.Exists(Path.Combine(d,"source.json"))));Assert.Empty(science.Datasets());Assert.Empty(science.Products());Assert.Equal(removed.RemovedSources,Delete(preview).RemovedSources);
     }
     [Fact]public async Task ArchivedReferenceActiveAnalysisAndChangedFileEachBlockTheExactSelection()
@@ -23,7 +23,7 @@ public sealed class ExternalSourceDeletionTests:IDisposable
         var other=await Import(RemoteKind.Thermal);using(var lease=science.BeginAnalysis())Assert.Equal(0,science.PreviewSourceDeletion(new([other.Id]),missions).EligibleSources);
         var clean=science.PreviewSourceDeletion(new([other.Id]),missions);File.AppendAllText(Path.Combine(science.DirectoryPath,other.RelativeDirectory,other.Files[0].RelativePath),"changed");Assert.Throws<InvalidOperationException>(()=>Delete(clean));Assert.Equal(2,science.Sources().Length);
     }
-    [Theory][InlineData("quarantined",false)][InlineData("before-commit",false)][InlineData("committed",true)]
+    [Theory][InlineData("quarantined",true)][InlineData("before-commit",false)][InlineData("committed",true)]
     public async Task ProcessInterruptionRecoversAccordingToAtomicDatabaseReceipt(string checkpoint,bool committed)
     {
         var a=await Import();var b=await Import(RemoteKind.Thermal);var p=science.PreviewSourceDeletion(new(All:true),missions);science.SourceDeletionFault=point=>{if(point==checkpoint)throw new SimulatedKill();};Assert.Throws<SimulatedKill>(()=>Delete(p));science.SourceDeletionFault=null;science.Dispose();

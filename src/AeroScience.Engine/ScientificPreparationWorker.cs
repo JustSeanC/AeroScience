@@ -74,6 +74,17 @@ public sealed class ScientificPlanData
     }
     public void PlanChanged(MissionPlan plan){lock(gate){if(!sessions.TryGetValue(plan.Id,out var s)||ScientificPreparationScope.Revision(plan)==ScientificPreparationScope.Revision(s.Plan))return;s.PlanStale=true;if(!s.InFlight)automatic.PauseScope("plan:"+plan.Id,true);Save();}}
     public string[] SourceDeletionDependencies(ScientificSource source){lock(gate)return sessions.Values.Where(s=>!s.Paused&&!s.Cancelled&&!s.AfterFlight&&s.Regions.Values.Any(r=>r.Kind==source.Manifest.Kind&&(r.SourceId==source.Id||r.SourceId is null&&(!Terminal(r.Status)||Ready(r.Status))&&ScientificSourceSelection.CoversArea(source,r.Area)))).Select(s=>"Active preparation for "+s.Plan.Name+" uses or can reuse this source. Pause/cancel its preparation before deletion.").ToArray();}
+    public void SourcesRemoved(Func<Guid,bool> wasRemoved)
+    {
+        lock(gate)
+        {
+            var referenced=sessions.Values.SelectMany(s=>s.Regions.Values).Where(r=>r.SourceId is not null).Select(r=>r.SourceId!.Value).Distinct();
+            var removed=referenced.Where(wasRemoved).ToHashSet();
+            foreach(var session in sessions.Values)foreach(var region in session.Regions.Values.Where(r=>r.SourceId is {} id&&removed.Contains(id)).ToArray())
+                session.Regions[region.Key]=region with{Status="Dataset Required",Message="The owner deleted this external source. Review preparation scope or import compatible data to use it again.",SourceId=null,ReusedBytes=0};
+            Save();
+        }
+    }
     public void SourcesRemoved(Guid[] ids){lock(gate){foreach(var s in sessions.Values)foreach(var r in s.Regions.Values.Where(r=>r.SourceId is {} id&&ids.Contains(id)).ToArray())s.Regions[r.Key]=r with{Status="Dataset Required",Message="The owner deleted this external source. Review preparation scope or import compatible data to use it again.",SourceId=null,ReusedBytes=0};Save();}}
     public bool AutomaticFlightAllowed(Guid id){lock(gate)return !sessions.TryGetValue(id,out var s)||!s.Paused&&!s.Cancelled;}
     public void Control(Guid id,string action)

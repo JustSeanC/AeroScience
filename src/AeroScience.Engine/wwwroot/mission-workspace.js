@@ -1,3 +1,4 @@
+import {archivedSources} from "./archived-source-picker.js";
 import { ResearchMap } from "./map.js";
 import { planningArea, planningDistance, displayReading } from "./science-display.js";
 import {table as scientificTable} from './workstation-ui.js';
@@ -545,15 +546,15 @@ export async function imagery(parent, id, api) {
     ),
   );
   const products = await api(`/api/science/products/page?missionId=${id}`),
-    sources = await api("/api/science/sources");
-  const sourceLabel = el("label", "Retained source"),
+    sources = (await archivedSources(api,parent,[id])).items;
+  const sourceLabel = el("label", "Saved acquisition source"),
     source = el("select");
   source.setAttribute("aria-label", "Composite source");
   for (const item of sources) {
     const s = item.source;
     const o = el(
       "option",
-      `${s.manifest.name} · ${s.manifest.observationUtc ?? "date unknown"}`,
+      `${s.manifest.name} · ${s.manifest.observationUtc ?? "date unknown"}${item.originalsRetained?"":" · originals deleted; saved values retained"}`,
     );
     o.value = s.id;
     source.append(o);
@@ -596,6 +597,7 @@ export async function imagery(parent, id, api) {
       band.append(o);
     }
   }
+  parent.addEventListener('aeroscience-archived-sources',()=>{const value=source.value;for(const item of sources)if(![...source.options].some(option=>option.value===item.source.id)){const option=el('option',item.source.manifest.name+' · '+(item.originalsRetained?'originals retained':'saved values only'));option.value=item.source.id;source.append(option);}source.value=value;});
   source.onchange = bands;
   bands();
   const modeLabel = el("label", "Product type"),

@@ -13,6 +13,8 @@ public static class DataBackup
             throw new IOException("Insufficient backup capacity. No data was cleared.");
         var name = $"AeroScience-{(science ? "science" : "missions")}-{DateTime.UtcNow:yyyyMMdd-HHmmss}-{Guid.NewGuid():N}.sqlite";
         var target = Path.Combine(destinationFolder, name); var temporary = target + ".partial";
+            if(science){var library=Path.GetDirectoryName(Path.GetDirectoryName(Path.GetFullPath(source))!)!;var internalBackups=Path.Combine(library,"Metadata","Backups");if(StorageManager.LibraryId(library)!=Guid.Empty&&!Path.GetFullPath(destinationFolder).Equals(internalBackups,StringComparison.OrdinalIgnoreCase))ScienceStore.RegisterScientificCopy(library,target,"database");}
+        if(!science)MissionStore.RegisterScienceBearingBackup(source,target);
         try
         {
             using (var from = new SqliteConnection(new SqliteConnectionStringBuilder { DataSource = source, Mode = SqliteOpenMode.ReadOnly, Pooling = false }.ToString()))
@@ -20,7 +22,9 @@ public static class DataBackup
             { from.Open(); to.Open(); from.BackupDatabase(to); }
             if (StorageManager.DatabaseFingerprint(source, science) != StorageManager.DatabaseFingerprint(temporary, science))
                 throw new IOException("Backup verification failed. No data was cleared.");
-            File.Move(temporary, target); return target;
+            File.Move(temporary, target);
+
+            return target;
         }
         catch { if (File.Exists(temporary)) File.Delete(temporary); throw; }
     }

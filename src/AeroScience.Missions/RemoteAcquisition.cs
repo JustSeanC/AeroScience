@@ -108,7 +108,7 @@ public sealed class RemoteAcquisition : IDisposable
         science.Management?.RequireScienceCapacity();
         var mount=InstrumentProfiles.Mount(request.Configuration);
         var footprint = SensorGeometry.ForInstrument(request.Frame,request.Configuration);
-        var source = ScientificSourceSelection.Select(science.Availability(footprint.Center),Instruments[request.Configuration.InstrumentId],sourcePreferences?.Invoke(),request.Configuration.Payload)
+        var source = ScientificSourceSelection.Select(science.Availability(footprint.Center,Instruments[request.Configuration.InstrumentId]),Instruments[request.Configuration.InstrumentId],sourcePreferences?.Invoke(),request.Configuration.Payload)
             ?? throw new ScientificObservationUnavailableException(science.Sources().Any(s=>s.Manifest.Kind==Instruments[request.Configuration.InstrumentId])?"Outside coverage":"Preparing data","No compatible retained source covers this acquisition location. Check data preparation and source selection; eligible archived packets may be recovered after flight.");
         var root = StorageManager.ResolveDataset(science.DirectoryPath, science.LibraryId, source.RelativeDirectory);
         foreach (var file in source.Files)

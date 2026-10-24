@@ -22,6 +22,7 @@ public sealed partial class MissionStore
     }
     public void SaveRecovery(RemoteAcquisitionRequest request, string reason, bool eligible)
     {
+        if(ScienceDeleted(request.Mission.Id))throw new InvalidOperationException("Collected science was deliberately deleted; no recovery may recreate it.");
         // An actual scheduled acquisition carries its exact frozen configuration, never a guessed interval.
         var identity = $"{request.Mission.Id:N}|{request.Configuration.InstrumentId}|{request.Frame.TimestampUtc:O}";
         var id = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(identity))).ToLowerInvariant();
@@ -81,6 +82,7 @@ public sealed partial class MissionStore
     public ScientificReviewStatus ScientificReview(Guid id)
     {
         var mission = Detail(id)?.Mission ?? throw new ArgumentException("Mission not found.");
+        if(ScienceDeleted(id))return new(mission.Status.ToString(),"Deleted",false,0,0,0,0,"Collected scientific data and dependent analysis were permanently deleted. Flight recording and external source files remain separate.");
         using var db = Open(); using var cmd = db.CreateCommand(); cmd.CommandText = "SELECT state,COUNT(*) FROM scientific_recovery WHERE mission_id=$id GROUP BY state"; cmd.Parameters.AddWithValue("$id", id.ToString());
         var counts = new Dictionary<string, long>(); using (var reader = cmd.ExecuteReader()) while (reader.Read()) counts[reader.GetString(0)] = reader.GetInt64(1);
         cmd.CommandText = "SELECT COUNT(*) FROM scientific_recovery WHERE mission_id=$id AND state='Recovered' AND COALESCE(json_extract(payload_json,'$.derivedCompleted'),0)=0"; var derived = Convert.ToInt64(cmd.ExecuteScalar());

@@ -14,7 +14,7 @@ public sealed partial class ScienceStore
     public AnalysisScratch CreateAnalysisScratch(long maximumBytes)
     {
         if(maximumBytes is <1048576 or >2147483648)throw new ArgumentException("Analysis working space must have a bounded reservation.");
-        if(disk.FreeBytes(DirectoryPath)<maximumBytes+StorageManager.MinimumFreeBytes)throw new IOException("Insufficient scientific working space; originals and recordings were preserved.");
+        if(disk.FreeBytes(DirectoryPath)<maximumBytes+StorageManager.MinimumFreeBytes)throw new StorageLimitException("Insufficient scientific working space; originals and recordings were preserved.");
         var reservation=Management?.ReserveScience(maximumBytes);var relative=$"Metadata/AnalysisWork/{Guid.NewGuid():N}.sqlite";
         try
         {

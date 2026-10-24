@@ -50,6 +50,7 @@ public sealed partial class MissionStore
     }
     public MissionPerformanceReport SavePerformanceReport(MissionEvaluationInput input,string reason,Action<long>? ensureCapacity=null)
     {
+        if(ScienceDeleted(input.MissionId))throw new InvalidOperationException("Collected science was deliberately deleted; historical performance cannot be recreated from missing evidence.");
         if(!input.Completed||Detail(input.MissionId)?.Mission.Status==MissionStatus.Recording)throw new InvalidOperationException("Only End Flight finalizes an archived overall report.");
         if(string.IsNullOrWhiteSpace(reason)||reason.Length>500||reason.Any(char.IsControl))throw new ArgumentException("A concise revision reason is required.");
         var frozen=CollectionSnapshot<MissionAssessmentContext>(input.MissionId);

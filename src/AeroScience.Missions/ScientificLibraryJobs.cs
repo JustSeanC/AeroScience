@@ -48,7 +48,7 @@ public sealed partial class ScientificLibraryJobs:IDisposable
         }
         return cells.OrderBy(a=>a.South).ThenBy(a=>a.West).ToArray();
     }
-    private ScientificSource? Reusable(ScientificSceneSelection scene,GeographicBounds area,ScientificSource[]? sources=null)=>(sources??science.Sources().ToArray()).FirstOrDefault(s=>
+    private ScientificSource? Reusable(ScientificSceneSelection scene,GeographicBounds area,IEnumerable<ScientificSource>? sources=null)=>(sources??science.StreamSources(new(Kind:ScientificCatalog.Provider(scene.Provider).Kind,Area:area,Scene:scene.Provider=="usgs-3dep"?null:scene.Scene))).FirstOrDefault(s=>
         s.Manifest.Acquisition?.CatalogRevision==scene.Revision&&s.Manifest.Acquisition is {} a&&
         (scene.Provider=="usgs-3dep"?a.Workflow=="usgs-3dep-numeric":s.Manifest.SceneId==scene.Scene)&&
         s.Manifest.Bands.Select(b=>b.Id).Order().SequenceEqual(scene.Bands.Order())&&ScientificSourceSelection.CoversArea(s,area));
@@ -65,11 +65,11 @@ public sealed partial class ScientificLibraryJobs:IDisposable
         if(selection.Scenes.Select(s=>s.Provider+"/"+s.Scene).Distinct().Count()!=selection.Scenes.Length)throw new ArgumentException("Select each exact scene only once.");
         var limit=selection.MaximumTransferBytes??Math.Min(p.PreflightTransferBytes??1073741824,1073741824);
         if(limit<1048576||limit> (p.PreflightTransferBytes??21474836480)||limit>21474836480)throw new ArgumentException("Choose a positive Library job budget within the configured preflight allowance (maximum 20 GiB).");
-        var products=new List<ScientificCatalogItem>();var work=new List<LibraryWorkUnit>();long reuse=0;var reusedIds=new HashSet<Guid>();var covered=new HashSet<GeographicBounds>();var retainedSnapshot=science.Sources().ToArray();var checkedSources=new HashSet<Guid>();
+        var products=new List<ScientificCatalogItem>();var work=new List<LibraryWorkUnit>();long reuse=0;var reusedIds=new HashSet<Guid>();var covered=new HashSet<GeographicBounds>();var checkedSources=new HashSet<Guid>();
         foreach(var selected in selection.Scenes)
         {
             var recipe=ScientificCatalog.Provider(selected.Provider);
-            var allLocal=cells.Select(c=>Reusable(selected,c,retainedSnapshot)).ToArray();
+            var allLocal=cells.Select(c=>Reusable(selected,c)).ToArray();
             ScientificCatalogItem item;
             if(allLocal.All(s=>s is not null))
             {
@@ -84,7 +84,7 @@ public sealed partial class ScientificLibraryJobs:IDisposable
                 if(item.Geometry is {} geometry&&!cell.Corners.Append(cell.Center).All(point=>StacScientificProvider.Contains(geometry,point)))continue;
                 if(selected.Provider=="usgs-3dep"&&(cell.West< -170||cell.East> -64||cell.South<17||cell.North>72))continue;
                 if(work.Count>=4096)throw new ArgumentException("Exact scenes × intersecting geographic cells exceed 4,096 work units. Narrow the region or scene selection.");
-                var retained=Reusable(selected,cell,retainedSnapshot);if(retained is not null&&checkedSources.Add(retained.Id)&&!Verify(retained))throw new IOException("An exact retained source changed; restore/reimport it. No original was replaced.");
+                var retained=Reusable(selected,cell);if(retained is not null&&checkedSources.Add(retained.Id)&&!Verify(retained))throw new IOException("An exact retained source changed; restore/reimport it. No original was replaced.");
                 if(retained is not null&&reusedIds.Add(retained.Id))reuse+=retained.Files.Sum(f=>f.Bytes);
                 work.Add(new(work.Count,selected,cell,retained?.Id,AutomaticScientificData.StorageBound(recipe.Kind)));covered.Add(cell);
             }

@@ -68,7 +68,7 @@ public sealed class GuidedScientificImportTests:IDisposable
     {
         var path=Cube();var inspection=GuidedHyperspectralImport.Inspect(path);var storage=new StorageManager(new PreferenceStore(Path.Combine(root,"settings"))).Initialize();using var science=new ScienceStore(storage.ScienceLibraryDirectory);science.Initialize();
         using var cancelled=new CancellationTokenSource();cancelled.Cancel();await Assert.ThrowsAnyAsync<OperationCanceledException>(()=>science.ImportSourceAsync(inspection.Manifest!,inspection.Root,cancelled.Token));Assert.Empty(science.Sources());Assert.True(File.Exists(Path.Combine(path,"cube.img")));
-        var missions=new MissionStore(Path.Combine(storage.MissionDirectory,"missions.db"));missions.Initialize();var management=new StorageManagement(root,missions,science);science.Management=management;management.Configure(new(null,1));await Assert.ThrowsAsync<StorageLimitException>(()=>science.ImportSourceAsync(inspection.Manifest!,inspection.Root));Assert.Empty(science.Sources());
+        var missions=new MissionStore(Path.Combine(storage.MissionDirectory,"missions.db"));missions.Initialize();var management=new StorageManagement(root,missions,science,new FullDisk());science.Management=management;management.Configure(new(null,null));await Assert.ThrowsAsync<StorageLimitException>(()=>science.ImportSourceAsync(inspection.Manifest!,inspection.Root));Assert.Empty(science.Sources());
     }
     [Fact]public async Task LocalTerrainThermalAndMultispectralCollectionsGenerateManifestsWithoutJsonEditing()
     {
@@ -85,5 +85,6 @@ public sealed class GuidedScientificImportTests:IDisposable
         Assert.NotEmpty(FlightPatterns.Generate(orbit).Waypoints);
         var lawn=new PatternDefinition(Guid.NewGuid(),FlightPatternKind.Lawnmower,new(40,-75),RadiusMetres:-1,Orbits:0);Assert.NotEmpty(FlightPatterns.Generate(lawn).Waypoints);
     }
+    private sealed class FullDisk:IStorageCapacity{public long FreeBytes(string directory)=>0;}
     public void Dispose(){Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();if(Directory.Exists(root))Directory.Delete(root,true);}
 }

@@ -67,9 +67,9 @@ test('changing a product filter removes stale acquisition controls before its as
 test('storage defaults limits cleanup cancellation and update settings are usable',async({page,request})=>{
   await post(request,'/api/storage/preferences',{missionLimitBytes:25e9,scienceLimitBytes:50e9,automaticCacheCleanup:false,protectPinned:true});
   await page.goto('/#settings/storage');const storage=page.locator('#storage-management');
-  await expect(storage).toContainText('25 GB');await expect(storage).toContainText('50 GB');
+  await expect(storage).toContainText('25 GB');await expect(storage).toContainText('available physical storage only');
   await expect(storage.getByLabel('Flight/Mission maximum preset')).toHaveValue('25');
-  await expect(storage.getByLabel('Scientific Library maximum preset')).toHaveValue('50');
+  await expect(storage.getByLabel('Scientific Library maximum preset')).toHaveCount(0);expect((await(await request.get('/api/storage/management')).json()).preferences.scienceLimitBytes).toBeNull();
   await storage.getByRole('button',{name:'Preview Cleanup',exact:true}).click();
   await expect(storage).toContainText('Regenerable caches only');
   await storage.getByRole('button',{name:'Cancel',exact:true}).click();

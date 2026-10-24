@@ -81,3 +81,9 @@ dialog.managed-popup{max-width:min(56rem,calc(100vw - 1.5rem));max-height:88dvh;
 .sensor-operating-uncertainty{font-size:.9em}.sensor-operating-panel>details{margin-top:.75rem}
 .leaflet-control-layers-list{max-height:65dvh;max-width:min(22rem,calc(100vw - 3rem));overflow:auto;scroll-padding-top:5rem}
 .leaflet-control-layers-list .popup-header{margin:0 0 .5rem;padding:.25rem}.leaflet-control-layers-list .popup-header h2{font-size:1rem}.leaflet-control-layers label{font-size:.875rem;min-height:32px}
+/* Keep scientific headers readable; narrow screens scroll this table, not the page. */
+.data-table-section th{white-space:nowrap;overflow-wrap:normal;word-break:normal}
+.data-table-section table{table-layout:auto}
+.data-table-section td>details{min-width:12rem;max-width:24rem}
+.data-table-section td>details>summary{cursor:pointer;white-space:nowrap}
+.table-pagination[hidden]{display:none}
