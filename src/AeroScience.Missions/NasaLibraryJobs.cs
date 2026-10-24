@@ -102,7 +102,7 @@ public sealed partial class ScientificLibraryJobs
         progress[job.Id].Stage("Verifying");science.SetLibraryState(job.Id,"Verifying",runningOnly:true);science.SetLibraryItem(job.Id,0,"Verifying");
         if(emit)
         {
-            var published=await (swathImport??throw new IOException("The EMIT verifier is unavailable; no source was published.")).ImportNasa(folder,bundle,token);
+            var published=await (swathImport??throw new IOException("The EMIT verifier is unavailable; no source was published.")).ImportNasa(folder,bundle,science.LibraryJob(job.Id).DownloadedBytes,token);
             Cleanup();return published;
         }
         var inspected=NasaGuidedImport.Inspect(header!,merged,token:token,direct:true);

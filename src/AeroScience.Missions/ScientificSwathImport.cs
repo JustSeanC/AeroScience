@@ -4,5 +4,5 @@ namespace AeroScience.Missions;
 public interface IScientificSwathImport
 {
     Task<ScientificSource?> FindReusable(NasaDownloadBundle bundle,CancellationToken token);
-    Task<ScientificSource> ImportNasa(string folder,NasaDownloadBundle bundle,CancellationToken token);
+    Task<ScientificSource> ImportNasa(string folder,NasaDownloadBundle bundle,long networkBytes,CancellationToken token);
 }

@@ -127,7 +127,7 @@ public sealed class EmitLibrary(ScienceStore science,EmitProductDecoder decoder,
                 !bundle.Files.Select(f=>(f.Name,f.Bytes)).OrderBy(f=>f.Name).SequenceEqual(d.Sources.Select(f=>(f.OriginalFileName,f.Bytes)).OrderBy(f=>f.OriginalFileName)))
                 throw new EmitProductException("CatalogMismatch","Original EMIT identity, time, geographic domain or required files disagree with the approved CMR selection; no source was published or substituted.");
     }
-    private async Task<ScientificSource> Publish(EmitProduct product,string folder,NasaDownloadBundle? bundle,CancellationToken token)
+    private async Task<ScientificSource> Publish(EmitProduct product,string folder,NasaDownloadBundle? bundle,CancellationToken token,long networkBytes=0)
     {
         var manifest=Manifest(product);
         if(bundle is not null)CheckBundle(product,bundle);
@@ -135,7 +135,7 @@ public sealed class EmitLibrary(ScienceStore science,EmitProductDecoder decoder,
         // Exact original hashes/policy only. Nearby acquisitions are never interchangeable.
         foreach(var source in science.StreamSources(new(Scene:manifest.SceneId)).Where(s=>s.Manifest.Swath?.DecoderPolicy==EmitProductDecoder.Policy))
             if(source.Files.Select(f=>(f.RelativePath,f.Bytes,f.Sha256)).OrderBy(f=>f.RelativePath).SequenceEqual(product.Definition.Sources.Select(f=>(f.OriginalFileName,f.Bytes,f.Sha256)).OrderBy(f=>f.OriginalFileName))){await OpenSource(source,token);return source;}
-        if(bundle is not null)manifest=manifest with{Acquisition=new("nasa-earthdata-original-emit","NASA CMR / LP DAAC",bundle.Selection.Scene,bundle.Files.Select(f=>f.Url).ToArray(),bundle.Selection.Bounds,DateTimeOffset.UtcNow,"Original NetCDF bytes retained, isolated EMIT decoder; no affine conversion or flight observation.",bundle.Selection.Quality,bundle.Selection.Resolution,0,["Genuine NASA numeric acceptance is separate and pending."],JsonSerializer.Serialize(bundle,WireJson.Options),CatalogRevision:bundle.Revision)};
+        if(bundle is not null)manifest=manifest with{Acquisition=new("nasa-earthdata-original-emit","NASA CMR / LP DAAC",bundle.Selection.Scene,bundle.Files.Select(f=>f.Url).ToArray(),bundle.Selection.Bounds,DateTimeOffset.UtcNow,"Original NetCDF bytes retained, isolated EMIT decoder; no affine conversion or flight observation.",bundle.Selection.Quality,bundle.Selection.Resolution,networkBytes,["Genuine NASA numeric acceptance is separate and pending."],JsonSerializer.Serialize(bundle,WireJson.Options),CatalogRevision:bundle.Revision)};
         return await science.ImportSourceAsync(manifest,folder,token,reuseExisting:true,verifySwath:async(stage,ct)=>
         {
             var copied=await OpenFolder(stage,ct);
@@ -163,10 +163,11 @@ public sealed class EmitLibrary(ScienceStore science,EmitProductDecoder decoder,
             return null;
         }finally{work.Release();}
     }
-    public async Task<ScientificSource> ImportNasa(string folder,NasaDownloadBundle bundle,CancellationToken token)
+    public async Task<ScientificSource> ImportNasa(string folder,NasaDownloadBundle bundle,long networkBytes,CancellationToken token)
     {RequireIdle();await work.WaitAsync(token);try{
         foreach(var file in bundle.Files.Where(f=>f.Sha512 is not null)){await using var input=File.OpenRead(ScientificRaster.SafeFile(folder,file.Name));if(file.Sha512!.Length!=128||Convert.ToHexStringLower(await SHA512.HashDataAsync(input,token))!=file.Sha512)throw new EmitProductException("Integrity","Downloaded original failed NASA CMR SHA-512 verification; no source was published.");}
-        return await Publish(await OpenFolder(folder,token),folder,bundle,token);
+        if(networkBytes<0)throw new ArgumentOutOfRangeException(nameof(networkBytes));
+        return await Publish(await OpenFolder(folder,token),folder,bundle,token,networkBytes);
     }finally{work.Release();}}
     // Compare parsed scientific metadata, not process-dependent dictionary order in
     // an opaque JSON string. The global Library hash algorithm remains unchanged.
