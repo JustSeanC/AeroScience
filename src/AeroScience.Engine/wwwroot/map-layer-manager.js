@@ -39,6 +39,9 @@ export function mapLayerManager(L,map,definitions,applyBasemap){
  }
  open.onclick=()=>{if(dialog?.open)return;dialog=el('dialog');dialog.setAttribute('aria-label','Map Overlays & Legend');dialog.className='map-overlays-dialog';dialog.append(el('h2','Map Overlays & Legend'));const content=el('div');content.className='map-overlay-content';dialog.append(content);document.body.append(dialog);dialogHeader(dialog,{opener:open});dialog.addEventListener('close',()=>{dialog.remove();dialog=null;inputs.clear();groups.clear();});render();dialog.showModal();aviation.discover().then(changed=>{if(changed&&canRender())render();});};
  const aviation=aviationMapLayers(L,map,addOverlay);map.on('layeradd layerremove',sync);definitions.forEach(addOverlay);aviation.discover();
- const tfr=tfrMapLayer(L,map,addOverlay);
+ const tfr=tfrMapLayer(L,map,addOverlay,{
+  persistVisibility:visible=>persist('faa-tfr-boundaries',visible),
+  isolateMission:()=>{const shown=[...overlays.values()].filter(i=>['Mission','Science'].includes(i.group)&&map.hasLayer(i.layer));shown.forEach(i=>map.removeLayer(i.layer));return()=>shown.forEach(i=>map.addLayer(i.layer));}
+ });
  return {addOverlay,dispose(){if(disposed)return;disposed=true;tfr.dispose();aviation.dispose();stopBasemap();if(dialog){dialog.close();dialog?.remove();}map.off('layeradd layerremove',sync);control.remove();}};
 }

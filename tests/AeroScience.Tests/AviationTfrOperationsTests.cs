@@ -139,5 +139,13 @@ public sealed class AviationTfrOperationsTests:IDisposable
         var h=new Transport();var clock=new Clock{Now=DateTimeOffset.Parse(now)};using var s=Service(h,clock);s.Configure(true);await s.RefreshTfr();var view=await s.RefreshTfrOperations("6/2070");
         Assert.Contains(expected,view.Areas.Single().WindowStatus);Assert.Contains("unverified",view.Areas.Single().WindowStatus);Assert.Equal(5,h.Calls);
     }
+    [Fact]public async Task SyntheticStandardPressureLimitCannotExcludeAMissionExpressedInMsl()
+    {
+        // Adversarial operational fixture based on a copied packet, not genuine pressure-level acceptance.
+        var h=new Transport{XmlChange=bytes=>Encoding.UTF8.GetBytes(Encoding.UTF8.GetString(bytes).Replace("<codeDistVerUpper>HEI</codeDistVerUpper>","<codeDistVerUpper>STD</codeDistVerUpper>"))};
+        var clock=new Clock();using var s=Service(h,clock);s.Configure(true);await s.RefreshTfr();var view=await s.RefreshTfrOperations("6/2070");Assert.Equal("Standard pressure",view.Areas.Single().Upper.Reference);
+        var b=Geometry().Boundaries.Single(b=>b.NotamId=="6/2070");var result=s.ScreenTfr(new(1,[Point(b)],MinimumMslFeet:8000,MaximumMslFeet:9000));var finding=result.Findings!.Single(f=>f.NotamId==b.NotamId);
+        Assert.Equal("Unknown",finding.Altitude);Assert.Equal("Potential intersection",finding.Outcome);Assert.False(result.SnapshotComplete);
+    }
     public void Dispose(){try{Directory.Delete(root,true);}catch(IOException){}}
 }

@@ -1537,3 +1537,22 @@ dialog::backdrop { background:#000a; } dialog button { margin:8px; min-height:44
 /* Bounded scientific source exploration uses the shared dialog and map components. */
 .emit-chart{height:280px;position:relative;max-width:100%;min-width:0}
 #emit-import{max-width:min(850px,95vw)}
+
+/* TFR review borrows the existing Leaflet map; drafts and layer visibility are restored on close. */
+dialog.managed-popup.tfr-review{width:min(92rem,calc(100vw - 1.5rem));max-width:min(92rem,calc(100vw - 1.5rem));max-height:92dvh}
+.tfr-layout{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:1rem;align-items:start}
+.tfr-map-pane{position:sticky;top:0;min-width:0}.tfr-review-content{min-width:0;max-height:72dvh;overflow:auto;padding:.3rem}
+.tfr-map>.geographic-map{height:53dvh;min-height:300px;max-height:600px;width:100%}
+.tfr-map .map-layer-manager{display:none}.tfr-review .action-row{flex-wrap:wrap;gap:.4rem}
+.tfr-review input,.tfr-review select{box-sizing:border-box;max-width:100%;min-height:44px}.tfr-review fieldset{min-width:0}
+.tfr-review p,.tfr-review li,.tfr-review article{overflow-wrap:anywhere}.tfr-review article{margin:.65rem 0}
+.tfr-review summary{min-height:44px;align-content:center}.tfr-review .action-row button,.tfr-review .action-row a{min-height:44px}
+.tfr-finding.potential{border-left:5px dashed #a76ee6}.tfr-finding.outside{border-left:5px double #6e93b8}
+.tfr-review article[aria-current=true]{outline:3px solid #e4cf8a;outline-offset:2px}
+.tfr-line{display:inline-block;width:2rem;margin-right:.5rem;border-top:3px dashed #bd862d;vertical-align:middle}
+.tfr-line.potential{border-color:#a76ee6;border-top-style:dotted}.tfr-line.outside{border-color:#6e93b8;border-top-style:double}.tfr-line.retained{border-color:#83909e;border-top-style:dotted}
+@media(max-width:800px){.tfr-layout{grid-template-columns:minmax(0,1fr)}.tfr-map-pane{position:static}.tfr-review-content{max-height:none;overflow:visible}.tfr-map>.geographic-map{height:36dvh;min-height:230px}.tfr-review{width:calc(100vw - .75rem)}}
+.tfr-map .leaflet-control-attribution{background:#e8edf2;color:#17212b}
+.tfr-map .leaflet-control-attribution a{color:#005179;text-decoration:underline}
+
+.aviation-reference-dialog .advanced-details{overflow-wrap:anywhere}

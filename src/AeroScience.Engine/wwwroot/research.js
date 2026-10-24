@@ -5,6 +5,7 @@ import { preflightReadiness } from "./preflight-readiness.js";
 import { collectionPlanner } from "./collection-planner.js";
 import { initializeScienceSessions } from "./science-sessions.js";
 import { missionIntelligence } from "./mission-intelligence.js";
+import {openTfrReferences} from "./tfr-layers.js";
 import {reviewPreflight} from "./download-activity.js";
 import { hyperspectralCard } from "./hyperspectral-import.js";
 import { areaSummary } from "./planner-geometry.js";
@@ -244,6 +245,7 @@ async function planner() {
       text("strong", plan.name),
       text("span", `${plan.template} · ${plan.mode}`),
       button("Edit", () => editPlan(plan)),
+      button("Review TFRs", opener => {openTfrReferences(ctx.api,planMap?.map,{planId:plan.id,opener}).catch(()=>ctx.notice("TFR review is unavailable. Mission controls remain available."));}),
       button("Prepare scientific data", async (opener) => {
         await reviewPreflight(ctx.api,plan.id,scopeChoice.value,opener);
       }),
