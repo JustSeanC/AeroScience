@@ -64,8 +64,6 @@ def saa_geometry(document):
         return None
     surface = volumes[0].find('a:horizontalProjection/a:Surface', NS)
     assert surface is not None and surface.attrib['srsName'].lower() == 'urn:ogc:def:crs:ogc:1.3:crs84'
-    if surface.findall('.//g:ArcByCenterPoint', NS):
-        return None
     polygons = []
     for patch in surface.findall('.//g:PolygonPatch', NS):
         def ring(boundary):
@@ -80,13 +78,52 @@ def saa_geometry(document):
                 geodesic = Geod(ellps='WGS84')
                 points = [geodesic.fwd(*center,360*i/count,metres)[:2] for i in range(count)]
                 return points+[points[0]]
+            if boundary.findall('.//g:ArcByCenterPoint', NS):
+                segments = boundary.findall('g:Ring/g:curveMember/g:Curve/g:segments/*', NS)
+                points, decoded = [], []
+                geodesic = Geod(ellps='WGS84')
+                for segment in segments:
+                    if segment.tag == '{'+NS['g']+'}ArcByCenterPoint':
+                        center = list(map(float, segment.findtext('g:pointProperty/g:Point/g:pos', namespaces=NS).split()))
+                        radius = segment.find('g:radius', NS)
+                        metres = float(radius.text) * {'NM':1852, 'MI':1609.344, 'FT':.3048, 'M':1}[radius.attrib['uom']]
+                        start, end = [float(segment.findtext('g:'+name, namespaces=NS)) for name in ('startAngle', 'endAngle')]
+                        if not 0 < end-start <= 180:
+                            return None
+                        count = max(2, math.ceil(math.radians(end-start)/(2*math.acos(1-.5/metres))))
+                        current = [geodesic.fwd(*center, 90-(start+(end-start)*i/count), metres)[:2] for i in range(count+1)]
+                    else:
+                        current = []
+                        for element in segment:
+                            values = list(map(float, element.text.split()))
+                            current.extend(zip(values[::2], values[1::2]))
+                    assert current
+                    decoded.append(current)
+                for i, segment in enumerate(segments):
+                    following, previous = (i+1) % len(segments), (i-1) % len(segments)
+                    assert geodesic.inv(*decoded[i][-1], *decoded[following][0])[2] <= .5
+                    if segment.tag == '{'+NS['g']+'}ArcByCenterPoint':
+                        assert segments[previous].tag.endswith('LineStringSegment') and segments[following].tag.endswith('LineStringSegment')
+                        decoded[i][0], decoded[i][-1] = decoded[previous][-1], decoded[following][0]
+                for current in decoded:
+                    for point in current:
+                        if not points or point != points[-1]:
+                            points.append(point)
+                assert points and geodesic.inv(*points[-1], *points[0])[2] <= .5
+                if points[-1] != points[0]:
+                    points.append(points[0])
+                return points
             points = []
             for element in boundary.iter():
                 if element.tag in ('{'+NS['g']+'}pos', '{'+NS['g']+'}posList'):
                     values = list(map(float, element.text.split()))
                     points.extend(zip(values[::2], values[1::2]))
             return points
-        polygons.append(Polygon(ring(patch.find('g:exterior', NS)), [ring(b) for b in patch.findall('g:interior', NS)]))
+        exterior = ring(patch.find('g:exterior', NS))
+        interiors = [ring(b) for b in patch.findall('g:interior', NS)]
+        if exterior is None or any(r is None for r in interiors):
+            return None
+        polygons.append(Polygon(exterior, interiors))
     return polygons[0] if len(polygons) == 1 else MultiPolygon(polygons)
 
 
@@ -161,15 +198,17 @@ def verify(root):
                                 raw[prefix+'_VAL'] = (value.text or '') if value is not None else ''
                                 raw[prefix+'_UOM'] = value.attrib.get('uom', '') if value is not None else ''
                                 raw[prefix+'_CODE'] = volume.findtext('a:'+field+'Reference', default='', namespaces=NS)
-                            if document.findall('.//g:CircleByCenterPoint',NS):
+                            if document.findall('.//g:ArcByCenterPoint', NS):
+                                raw['GEOMETRY_INTERPOLATION'] = 'WGS84 geodesic partial arcs; inherited CRS84 angles from longitude axis, increasing explicit minor span only. 0.5 m nominal chord target and maximum source endpoint join; derived arc endpoints use adjacent original literal vertices. Original literal vertices/center/radius/angles retained; not certified boundary accuracy.'
+                            elif document.findall('.//g:CircleByCenterPoint',NS):
                                 raw['GEOMETRY_INTERPOLATION'] = 'WGS84 geodesic circle; 0.5 m nominal chord target. Original center/radius/units retained in the immutable XML. Not certified boundary accuracy.'
-                        compare(number, saa_geometry(document), raw if expected else {})
+                        compare(number, saa_geometry(document) if expected else None, raw if expected else {})
             assert compared == dataset['features'] and omitted == dataset['omittedRecords'] and all(regions.values())
             results.append({'family': family, 'edition': dataset['edition'], 'originalSha256': EXPECTED[family], 'featuresCompared': compared, 'originalCoordinateComponentsCompared': coordinates, 'originalAttributeFieldsChecked': attributes,
                 'maximumCoordinateDifference': maximum_difference, 'regions': regions, 'explicitUnsupportedRecords': omitted, 'sourceCrs': dataset['sourceCrs']})
     assert {r['family'] for r in results} == set(EXPECTED)
     return {'evidenceClass': 'Genuine FAA originals; independent pyshp/Shapely/ElementTree versus retained NTS geometry. Offline read-only verification.', 'results': results,
-        'limitations': ['No live activation, TFR clearance, certified positional accuracy or owner-installed Windows acceptance.', 'SAA partial arcs/composites/contributor relationships remain unsupported and omitted; full geodesic circles independently compared with PROJ, not certified original boundary accuracy.', 'NAD83 coordinates preserved without claiming a precise WGS84 transformation.']}
+        'limitations': ['No live activation, TFR clearance, certified positional accuracy or owner-installed Windows acceptance.', 'Only explicit increasing minor arcs with endpoint joins <=0.5 m are supported in adapter 3; angular wraps, major/reversed arcs, discrepant source endpoints and composites/contributors remain omitted. Derived circles/arcs independently compared with PROJ, not certified boundary accuracy.', 'NAD83 coordinates preserved without claiming a precise WGS84 transformation.']}
 
 
 if __name__ == '__main__':

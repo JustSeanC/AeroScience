@@ -64,6 +64,26 @@ public static class SyntheticAirspace
         if(fault=="axis")xml=xml.Replace("urn:ogc:def:crs:OGC:1.3:CRS84","EPSG:4326");
         var members=new Dictionary<string,byte[]>{["Synthetic, SAA.xml"]=Encoding.UTF8.GetBytes(xml)};
         if(fault is "composite" or "curve")members["Unsupported.xml"]=Encoding.UTF8.GetBytes(fault=="composite"?xml.Replace("<operation>BASE</operation>","<operation>SUBTR</operation>"):xml.Replace("<gml:LinearRing>","<gml:LinearRing><gml:ArcByCenterPoint/>"));
+        if (fault?.StartsWith("arc", StringComparison.Ordinal) == true)
+        {
+            var ringStart = xml.IndexOf("<gml:LinearRing>", StringComparison.Ordinal); var ringEnd = xml.IndexOf("</gml:LinearRing>", StringComparison.Ordinal) + "</gml:LinearRing>".Length;
+            // Independent pyproj WGS84 endpoints rounded to the genuine FAA's six decimal places.
+            var curve = """
+                <gml:Ring><gml:curveMember><gml:Curve><gml:segments><gml:LineStringSegment><gml:pos>-75 40.016679</gml:pos><gml:pos>-75 40</gml:pos><gml:pos>-74.978312 39.999998</gml:pos></gml:LineStringSegment></gml:segments></gml:Curve></gml:curveMember><gml:curveMember><gml:Curve><gml:segments><gml:ArcByCenterPoint numArc="1"><gml:pointProperty><gml:Point><gml:pos>-75 40</gml:pos></gml:Point></gml:pointProperty><gml:radius uom="NM">1</gml:radius><gml:startAngle uom="deg">0</gml:startAngle><gml:endAngle uom="deg">90</gml:endAngle></gml:ArcByCenterPoint></gml:segments></gml:Curve></gml:curveMember></gml:Ring>
+                """;
+            curve = fault switch
+            {
+                "arc-unit" => curve.Replace("uom=\"NM\"", "uom=\"DEGREES\""),
+                "arc-wrap" => curve.Replace(">90</gml:endAngle>", ">-270</gml:endAngle>"),
+                "arc-gap" => curve.Replace("-74.978312 39.999998", "-74.9 40"),
+                "arc-link" => curve.Replace("<gml:Point>", "<gml:Point xmlns:xlink=\"http://www.w3.org/1999/xlink\" xlink:href=\"file:///untrusted\">"),
+                "arc-axis" => curve.Replace("<gml:Curve>", "<gml:Curve srsName=\"EPSG:4326\">"),
+                "arc-major" => curve.Replace(">90</gml:endAngle>", ">270</gml:endAngle>"),
+                "arc-reverse" => curve.Replace("<gml:Curve>", "<gml:Curve orientation=\"-\">"),
+                _ => curve
+            };
+            members["Curved.xml"] = Encoding.UTF8.GetBytes(xml[..ringStart] + curve + xml[ringEnd..]);
+        }
         var data=Zip(members);
         var middle=Zip(new(){[fault=="nested"?"unexpected.zip":"Saa_Sub_File.zip"]=data});
         return Zip(new(){[fault=="traversal"?"../SaaSubscriberFile.zip":"SAA-AIXM_5_Schema/SaaSubscriberFile.zip"]=middle});

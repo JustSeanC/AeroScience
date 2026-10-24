@@ -1,7 +1,7 @@
 # Managed HDF/NetCDF storage candidate (research only)
 
 This executable is excluded from AeroScience.sln and all application dependencies. It explores a
-smaller alternative to the unapproved GDAL binary bundle. PureHDF **2.2.0** is MIT, has no NuGet
+smaller alternative to the unapproved GDAL binary bundle. The exact PureHDF **2.2.0** source is MIT, has no NuGet
 runtime dependencies, and incorporates translated C-Blosc2 shuffle code under BSD terms. Pinned
 publisher notices are retained here; complete production notice/codec/security review remains a gate.
 No app package/installer includes this probe or its dependency.
@@ -38,7 +38,11 @@ The generator uses a development system library; the probe/installed .NET reader
 native NetCDF library. Fixture checksum identifies the input; generator library versions may produce
 different container bytes while preserving the intentionally synthetic values.
 
+The source restriction step is mandatory before restoring/publishing. Check out exact upstream
+`c2cea464ad2a6649258ab14c8d798cb6239b9e1e` into separate developer scratch, then run:
+
 ```text
+python tests/AeroScience.ManagedHdfProbe/prepare_hdf_read.py --source <upstream-checkout> --output tests/AeroScience.SafeHdfSource/obj/pinned
 dotnet restore tests/AeroScience.ManagedHdfProbe --locked-mode
 dotnet publish tests/AeroScience.ManagedHdfProbe -c Release -r win-x64 --self-contained true --no-restore -o <new-research-output>
 <new-research-output>/AeroScience.ManagedHdfProbe.exe
@@ -50,3 +54,20 @@ EMIT discovery-only. A successful storage prototype does not authorize a product
 
 Upstream: [exact source](https://github.com/Apollo3zehn/PureHDF/tree/c2cea464ad2a6649258ab14c8d798cb6239b9e1e).
 See [license](PureHDF-LICENSE.md) and [publisher third-party notice](PureHDF-THIRD-PARTY.md).
+
+## Pre-resolution containment correction
+
+The probe now references the distinct **AeroScience.Hdf.SafeRead** source assembly, never the
+unrestricted NuGet assembly. All **275** original C# files and notices are pinned; three reviewed
+files reject external/symbolic links (including legacy symbol-table links), external raw storage and
+virtual layouts before resolution, and require complete metadata scalar reads. Every compile checks
+the prepared source hashes again. Neither generated source nor binaries are committed. The unchanged
+MIT and BSD publisher notices remain beside the source manifest. This source policy is research-only;
+it is not included in AeroScience.sln, the production app or installer and adds no app dependency.
+
+**13** adversarial checks now reject traversal, absolute, Windows/UNC and URL external references,
+recursive soft links, raw/virtual storage, the **exact previous failed canary**, and short metadata.
+The unchanged positive storage control and **21** spectral/GLT/QA semantic checks still pass.
+These checks do not establish complete malicious-file resistance: untrusted metadata allocations,
+process memory/decompression isolation, deadlines and genuine NASA metadata compatibility remain
+required before production integration. Do not enable user-file import based on this result alone.

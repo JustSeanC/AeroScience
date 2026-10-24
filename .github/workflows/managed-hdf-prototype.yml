@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   push:
     branches: [develop/v0.6.0]
-    paths: ['tests/AeroScience.ManagedHdfProbe/**', '.github/workflows/managed-hdf-prototype.yml']
+    paths: ['tests/AeroScience.ManagedHdfProbe/**', 'tests/AeroScience.SafeHdfSource/**', '.github/workflows/managed-hdf-prototype.yml']
 permissions:
   contents: read
 jobs:
@@ -26,6 +26,21 @@ jobs:
       - uses: actions/setup-dotnet@v6
         with:
           global-json-file: global.json
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Verify pinned source and prepare the pre-resolution restricted reader
+        shell: pwsh
+        run: |
+          $hdfSource = Join-Path $env:RUNNER_TEMP 'aeroscience-pinned-hdf-source'
+          git init $hdfSource
+          git -C $hdfSource remote add origin https://github.com/Apollo3zehn/PureHDF.git
+          git -C $hdfSource fetch --depth 1 origin c2cea464ad2a6649258ab14c8d798cb6239b9e1e
+          if ($LASTEXITCODE -ne 0) { throw 'Exact managed reader source unavailable.' }
+          git -C $hdfSource checkout --detach FETCH_HEAD
+          if ($LASTEXITCODE -ne 0) { throw 'Pinned reader source checkout failed.' }
+          python tests/AeroScience.ManagedHdfProbe/prepare_hdf_read.py --source $hdfSource --output tests/AeroScience.SafeHdfSource/obj/pinned
+          if ($LASTEXITCODE -ne 0) { throw 'Source hash/policy/notice validation failed; no upstream package substitution.' }
       - name: Locked isolated research publish and actual execution
         shell: pwsh
         run: |
@@ -41,6 +56,8 @@ jobs:
         if: always()
         with:
           name: managed-hdf-${{ matrix.rid }}
-          path: artifacts/managed-hdf-result.json
+          path: |
+            artifacts/managed-hdf-result.json
+            tests/AeroScience.SafeHdfSource/obj/pinned/policy-receipt.json
           if-no-files-found: ignore
           retention-days: 14

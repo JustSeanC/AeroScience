@@ -69,7 +69,7 @@ public sealed class AviationAirspaceTests : IDisposable
             foreach(var point in ring)Assert.InRange(Geodesy.Distance(new(40,-75),point),1851.999999,1852.000001);
             Assert.InRange(ring[0].Latitude,40.0166794,40.0166795);Assert.InRange(ring[0].Longitude,-75.000000001,-74.999999999);
             Assert.Contains("0.5 m",feature.Attributes["GEOMETRY_INTERPOLATION"]);Assert.Equal(job.OriginalSha256,d.OriginalSha256);
-            Assert.Contains(d.Limitations,x=>x.Contains("adapter 2",StringComparison.Ordinal));await service.VerifyDownload(job.Id);
+            Assert.Contains(d.Limitations,x=>x.Contains("adapter 3",StringComparison.Ordinal));await service.VerifyDownload(job.Id);
             Assert.Equal(id,(await service.ImportVectors(job.Id)).Id);service.Configure(false);calls=handler.Calls;
         }
         using var reopened=new AviationReference(root,root,new HttpClient(handler));
@@ -130,6 +130,55 @@ public sealed class AviationAirspaceTests : IDisposable
         using var service=new AviationReference(root,root,new HttpClient(new Transport(true,fault)),unmetered:()=>true);var job=await Acquire(service);var d=await service.ImportVectors(job.Id);
         Assert.Equal(1,d.Features);Assert.Equal(1,d.OmittedRecords);Assert.Single(service.AirspaceFeatures(d.Id,-76,39,-74,41).Features);
         Assert.Contains(d.Limitations,x=>x.Contains(fault=="composite"?"SUBTR/UNION":"Curved SAA",StringComparison.Ordinal));await service.VerifyDownload(job.Id);
+    }
+    [Fact] public async Task ExplicitMinorArcPreservesLiteralVerticesAndIndependentWgs84SamplesOffline()
+    {
+        var handler = new Transport(true, "arc"); string id; int calls;
+        using (var service = new AviationReference(root, root, new HttpClient(handler), unmetered: () => true))
+        {
+            var job = await Acquire(service); var dataset = await service.ImportVectors(job.Id); id = dataset.Id;
+            Assert.Equal(2, dataset.Features); Assert.Equal(0, dataset.OmittedRecords);
+            var feature = Assert.Single(service.AirspaceFeatures(id, -76, 39, -74, 41).Features, f => f.Attributes.ContainsKey("GEOMETRY_INTERPOLATION"));
+            var points = Assert.Single(Assert.Single(feature.Polygons));
+            Assert.Contains(points, p => p.Longitude == -74.978312 && p.Latitude == 39.999998);
+            Assert.Contains(points, p => p.Longitude == -75 && p.Latitude == 40);
+            // Retain the rounded original endpoints. Every derived arc interior is
+            // one nautical mile from its original center, independently checked above.
+            Assert.Contains(points, p => p.Latitude == 40.016679 && p.Longitude == -75);
+            foreach (var point in points.Where(p => p.Latitude != 40 || p.Longitude != -75))
+                Assert.InRange(Geodesy.Distance(new(40, -75), point), 1851.9, 1852.1);
+            Assert.Equal(points[0], points[^1]); Assert.Contains("CRS84", feature.Attributes["GEOMETRY_INTERPOLATION"]);
+            await service.VerifyDownload(job.Id); service.Configure(false); calls = handler.Calls;
+        }
+        using var reopened = new AviationReference(root, root, new HttpClient(handler));
+        Assert.Equal(2, reopened.AirspaceFeatures(id, -76, 39, -74, 41).Features.Length); Assert.Equal(calls, handler.Calls);
+    }
+    [Fact] public async Task SchemaFiveKeepsPriorCircleInterpretationDuringAdapterThreeReimport()
+    {
+        var handler = new Transport(true, "circle"); Guid jobId; string oldId; string oldPayload;
+        using (var service = new AviationReference(root, root, new HttpClient(handler), unmetered: () => true))
+        {
+            var job = await Acquire(service); jobId = job.Id; var current = await service.ImportVectors(jobId);
+            oldId = AviationDownloads.Hash(new { airspaceParser = 2, job.Preview.Item.Id, job.OriginalSha256 });
+            oldPayload = System.Text.Json.JsonSerializer.Serialize(current with { Id = oldId, Limitations = ["Synthetic retained circle adapter 2"] }, AeroScience.Shared.WireJson.Options);
+            using var db = new SqliteConnection("Data Source=" + Path.Combine(root, "AviationReference", "aviation.db") + ";Pooling=False"); db.Open(); using var tx = db.BeginTransaction(); using var command = db.CreateCommand(); command.Transaction = tx;
+            command.CommandText = "UPDATE vector_datasets SET id=$old,payload=$json WHERE id=$current; UPDATE airspace_features SET dataset_id=$old WHERE dataset_id=$current";
+            command.Parameters.AddWithValue("$old", oldId); command.Parameters.AddWithValue("$json", oldPayload); command.Parameters.AddWithValue("$current", current.Id); command.ExecuteNonQuery(); tx.Commit();
+        }
+        using var reopened = new AviationReference(root, root, new HttpClient(handler)); var calls = handler.Calls;
+        var next = await reopened.ImportVectors(jobId); Assert.NotEqual(oldId, next.Id); Assert.Equal(2, reopened.VectorDatasets().Length);
+        Assert.Single(reopened.AirspaceFeatures(oldId, -76, 39, -74, 41).Features); Assert.Single(reopened.AirspaceFeatures(next.Id, -76, 39, -74, 41).Features);
+        Assert.Equal(oldPayload, System.Text.Json.JsonSerializer.Serialize(reopened.VectorDatasets().Single(d => d.Id == oldId), AeroScience.Shared.WireJson.Options));
+        Assert.Equal(calls, handler.Calls); await reopened.VerifyDownload(jobId);
+    }
+    [Theory] [InlineData("arc-unit")] [InlineData("arc-wrap")] [InlineData("arc-gap")] [InlineData("arc-link")]
+    [InlineData("arc-axis")] [InlineData("arc-major")] [InlineData("arc-reverse")]
+    public async Task UnverifiedArcSemanticsNeverPublishGuessedOrRepairedBoundaries(string fault)
+    {
+        using var service = new AviationReference(root, root, new HttpClient(new Transport(true, fault)), unmetered: () => true);
+        var job = await Acquire(service); var dataset = await service.ImportVectors(job.Id);
+        Assert.Equal(1, dataset.Features); Assert.Equal(1, dataset.OmittedRecords);
+        Assert.Contains(dataset.Limitations, x => x.Contains("Curved SAA omitted", StringComparison.Ordinal)); await service.VerifyDownload(job.Id);
     }
     [Fact] public async Task AirspaceIndexingYieldsToRecordingAndOriginalsRemainReusable()
     {

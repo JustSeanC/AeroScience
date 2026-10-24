@@ -61,15 +61,17 @@ public static partial class AviationAirspace
             var crs = surface?.Attribute("srsName")?.Value;
             if (surface?.Name != Aixm + "Surface" || !string.Equals(crs, "urn:ogc:def:crs:OGC:1.3:CRS84", StringComparison.OrdinalIgnoreCase) || surface.Attribute("srsDimension")?.Value != "2")
                 throw new NotSupportedException("Unverified SAA coordinate order/CRS/dimensions.");
-            if (surface.Descendants(Gml + "ArcByCenterPoint").Any())
-            { yield return new(number, "sua", name, attributes, null, null, 0, "Curved SAA geometry requires independently validated curve semantics; source retained, no guessed arcs/circles"); continue; }
-            if (surface.Descendants(Gml + "CircleByCenterPoint").Any())
+            var hasArcs = surface.Descendants(Gml + "ArcByCenterPoint").Any();
+            if (hasArcs) Retain("GEOMETRY_INTERPOLATION", ArcInterpolation);
+            if (!hasArcs && surface.Descendants(Gml + "CircleByCenterPoint").Any())
                 Retain("GEOMETRY_INTERPOLATION", "WGS84 geodesic circle; 0.5 m nominal chord target. Original center/radius/units retained in the immutable XML. Not certified boundary accuracy.");
             var factory = new GeometryFactory(); var polygons = new List<Polygon>(); var unsupported = false;
+            string? arcOmission = null;
             foreach (var patch in surface.Descendants(Gml + "PolygonPatch"))
             {
                 LinearRing ReadRing(XElement boundary)
                 {
+                    if (boundary.Descendants(Gml + "ArcByCenterPoint").Any()) return ReadSaaArcRing(boundary, token, canContinue);
                     if (boundary.Descendants(Gml + "CircleByCenterPoint").Any()) return ReadSaaCircle(boundary, token, canContinue);
                     if (boundary.Descendants().Any(n => n.Name.LocalName is not ("LinearRing" or "Ring" or "curveMember" or "Curve" or "segments" or "LineStringSegment" or "pos" or "posList"))) throw new NotSupportedException("Unsupported SAA ring/curve element.");
                     var points = new List<Coordinate>();
@@ -90,8 +92,11 @@ public static partial class AviationAirspace
                     return factory.CreateLinearRing(points.ToArray());
                 }
                 var exterior = patch.Element(Gml + "exterior") ?? throw new InvalidDataException("SAA exterior missing.");
-                polygons.Add(factory.CreatePolygon(ReadRing(exterior), patch.Elements(Gml + "interior").Select(ReadRing).ToArray()));
+                try { polygons.Add(factory.CreatePolygon(ReadRing(exterior), patch.Elements(Gml + "interior").Select(ReadRing).ToArray())); }
+                catch (NotSupportedException ex) when (hasArcs) { arcOmission = ex.Message; break; }
             }
+            if (arcOmission is not null)
+            { yield return new(number, "sua", name, attributes, null, null, 0, "Curved SAA omitted: " + arcOmission); continue; }
             Geometry geometry = polygons.Count == 1 ? polygons[0] : factory.CreateMultiPolygon(polygons.ToArray());
             if (unsupported || polygons.Count == 0 || !geometry.IsValid || geometry.NumPoints > MaximumDisplayVertices)
             { yield return new(number, "sua", name, attributes, null, null, 0, "Unsupported SAA dateline/polar, invalid topology or oversized display; source preserved"); continue; }

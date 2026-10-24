@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <AssemblyName>AeroScience.Hdf.SafeRead</AssemblyName>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup><Compile Include="obj/pinned/Source/**/*.cs" /></ItemGroup>
+  <Target Name="RequirePinnedSafeSource" BeforeTargets="CoreCompile">
+    <Exec Command="python &quot;../AeroScience.ManagedHdfProbe/prepare_hdf_read.py&quot; --verify --output &quot;obj/pinned&quot;" />
+    <Error Condition="!Exists('obj/pinned/policy-receipt.json')" Text="Prepare the exact pinned policy source with prepare_hdf_read.py; no unpatched package fallback is allowed." />
+  </Target>
+</Project>
