@@ -27,12 +27,13 @@ test('approved FAA original uses durable host jobs, closes independently, verifi
  expect(await(await request.get('/api/science/sources')).json()).toEqual(sources);expect((await(await request.get('/api/state')).json()).activeMission).toBeNull();
 });
 
-test('actual recording preempts a live FAA transfer, telemetry continues and an explicit pause survives flight end',async({request})=>{
+test('actual recording preempts a live FAA transfer, telemetry continues and an explicit pause survives flight end',async({request},testInfo)=>{
  await post(request,'/api/testing/aviation/slow');await post(request,'/api/aviation/downloads/configuration',{unmeteredOnly:false});await post(request,'/api/aviation/configuration',{onlineEnabled:true});
  const catalog=await post(request,'/api/aviation/catalog/vfr/refresh'),item=catalog.charts[1];
  const preview=await post(request,'/api/aviation/downloads/preview',{kind:'vfr',itemId:item.id,maximumTransferBytes:16777216,maximumExpandedBytes:8388608});
  await post(request,`/api/aviation/downloads/${preview.id}/control`,{revision:preview.revision,action:'approve',selectionHash:preview.preview.selectionHash});
- const state=async()=>(await(await request.get('/api/aviation/downloads')).json()).find(j=>j.id===preview.id);
+ const started=performance.now(),transitions=[];
+ const state=async()=>{const job=(await(await request.get('/api/aviation/downloads')).json()).find(j=>j.id===preview.id);if(transitions.at(-1)?.revision!==job?.revision)transitions.push({elapsedMs:Math.round(performance.now()-started),state:job?.state,revision:job?.revision,downloadedBytes:job?.downloadedBytes,chargedBytes:job?.chargedBytes,error:job?.error});return job;};
  try{await expect.poll(async()=>(await state()).downloadedBytes).toBeGreaterThan(0);}catch(error){throw new Error(`FAA transfer did not start: ${JSON.stringify(await state())}`,{cause:error});}
  await post(request,'/api/mission-selection',{planId:null});const flight=await post(request,'/api/missions',{name:'Synthetic aviation transfer priority',mode:'universal',armScience:true});
  try{
@@ -44,9 +45,18 @@ test('actual recording preempts a live FAA transfer, telemetry continues and an 
   // artificial per-chunk network delay; this is a lifecycle test, not a throughput SLA.
   await post(request,'/api/testing/aviation/fast-resume');
   const paused=await state();await post(request,`/api/aviation/downloads/${paused.id}/control`,{revision:paused.revision,action:'resume'});
-  await expect.poll(async()=>(await state()).state).toBe('Completed');
+  // This includes a host-worker tick (2 s), charged durable writes for every
+  // 64-KiB block, CRC/hash checks, flushed extraction and atomic publication.
+  // The generic 5-s UI predicate is not a completion SLA for that whole lifecycle.
+  // Keep a bounded 15-s deadline only here, with real revisions/bytes on failure.
+  await expect.poll(async()=>(await state()).state,{timeout:15000,message:'Resumed approved FAA job must verify and durably publish the same original'}).toBe('Completed');
   const complete=await state();expect(complete.files[0].bytes).toBe(2097152);expect(complete.downloadedBytes).toBeGreaterThanOrEqual(2097152);
- }finally{const current=await(await request.get('/api/state')).json();if(current.activeMission)await post(request,`/api/missions/${current.activeMission.id}/end`);await post(request,'/api/testing/aviation/normal');await post(request,'/api/aviation/configuration',{onlineEnabled:false});}
+  expect(complete.id).toBe(preview.id);expect(complete.preview).toEqual(preview.preview);expect(complete.originalSha256).toMatch(/^[a-f0-9]{64}$/);expect(complete.files[0].sha256).toMatch(/^[a-f0-9]{64}$/);
+  await post(request,'/api/aviation/configuration',{onlineEnabled:false});const before=(await(await request.get('/api/testing/aviation')).json()).calls;
+  expect(await post(request,`/api/aviation/downloads/${complete.id}/verify`)).toEqual({verified:true});
+  const reused=await post(request,'/api/aviation/downloads/preview',{kind:'vfr',itemId:item.id,maximumTransferBytes:16777216,maximumExpandedBytes:8388608});
+  expect(reused).toEqual(complete);expect(await state()).toEqual(complete);expect((await(await request.get('/api/testing/aviation')).json()).calls).toBe(before);
+ }finally{console.log('FAA priority/resume transitions:',JSON.stringify(transitions));await testInfo.attach('faa-priority-resume-transitions',{body:JSON.stringify(transitions,null,2),contentType:'application/json'});const current=await(await request.get('/api/state')).json();if(current.activeMission)await post(request,`/api/missions/${current.activeMission.id}/end`);await post(request,'/api/testing/aviation/normal');await post(request,'/api/aviation/configuration',{onlineEnabled:false});}
 });
 
 test('saved FAA jobs are bounded and keyboard-paged without changing any approval state',async({page,request})=>{

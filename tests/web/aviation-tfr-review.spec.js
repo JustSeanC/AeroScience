@@ -50,7 +50,7 @@ test('offline retained review keeps missing notices visible and failed refreshes
 
 test('obsolete in-flight replies cannot restore findings after changing time or selected mission',async({page,request})=>{
  await setup(request);const p=await savePlan(request),other=await savePlan(request,{name:'Other TFR mission '+crypto.randomUUID(),waypoints:[{name:'Remote point',latitude:30,longitude:-100}],surveyAreas:[]});const {d}=await open(page,p);await times(d);let release,entered;const arrived=new Promise(resolve=>entered=resolve),wait=new Promise(resolve=>release=resolve);
- await page.route('**/api/aviation/tfr/screen',async route=>{const response=await route.fetch();entered();await wait;await route.fulfill({response});});await d.getByRole('button',{name:'Check Saved Mission Against Retained TFRs'}).click();await arrived;await d.getByLabel('Planned end (UTC)').fill('2026-10-27T19:00');await d.getByLabel('TFR screening mission plan').selectOption(other.id);release();await expect(d.getByLabel('TFR screening geometry')).toHaveValue('route');await expect(summary(d)).toBeEmpty();await expect(findings(d)).toBeEmpty();await page.unroute('**/api/aviation/tfr/screen');await assess(d);await expect(summary(d)).toContainText(other.name);await expect(findings(d)).toContainText('Unable to determine');
+ await page.route('**/api/aviation/tfr/screen',async route=>{const response=await route.fetch();entered();await wait;await route.fulfill({response});});await d.getByRole('button',{name:'Check Saved Mission Against Retained TFRs'}).click();await arrived;await d.getByLabel('Planned end (UTC)').fill('2026-10-27T19:00');await d.getByLabel('TFR screening mission plan').selectOption(other.id);release();await expect(d.getByLabel('TFR screening geometry')).toHaveValue('route');await expect(summary(d)).toBeEmpty();await expect(findings(d)).toBeEmpty();await page.unrouteAll({behavior:'wait'});await assess(d);await expect(summary(d)).toContainText(other.name);await expect(findings(d)).toContainText('Unable to determine');
 });
 
 test('narrow screen review, shared X, keyboard focus and malformed UTC input remain accessible',async({page,request})=>{
@@ -62,10 +62,29 @@ test('narrow screen review, shared X, keyboard focus and malformed UTC input rem
 
 
 test('slow saved-plan loading is independent of time edits and source-packet mismatches invalidate review',async({page,request})=>{
- await setup(request);const p=await savePlan(request);await page.goto('/#planner');let release,entered;const reached=new Promise(r=>entered=r),gate=new Promise(r=>release=r);
+ await setup(request);const p=await savePlan(request);await page.goto('/#planner');const draft=page.locator('#plan-form input').first();await draft.fill('Preserve draft through source revalidation');let release,entered;const reached=new Promise(r=>entered=r),gate=new Promise(r=>release=r);
  await page.route('**/api/plans/'+p.id,async route=>{const response=await route.fetch();entered();await gate;await route.fulfill({response});});
- await page.locator('.plan-row').filter({hasText:p.name}).getByRole('button',{name:'Review TFRs',exact:true}).click();const d=page.getByRole('dialog',{name:'FAA TFR Boundaries & Screening',exact:true});await reached;await times(d);release();await expect(d.getByLabel('TFR screening geometry')).toContainText('Saved route');await page.unroute('**/api/plans/'+p.id);
- await page.route('**/api/aviation/tfr/boundaries?**',async route=>{const response=await route.fetch();const data=await response.json();for(const b of data.boundaries)if(b.operational?.xmlSha256)b.operational.xmlSha256='f'.repeat(64);await route.fulfill({response,json:data});});await d.getByRole('button',{name:'Check Saved Mission Against Retained TFRs'}).click();await expect(d.getByRole('region',{name:'Saved mission TFR review'}).getByRole('status')).toContainText('Operational details changed during this review');await expect(summary(d)).toBeEmpty();await expect(findings(d)).toBeEmpty();await page.unroute('**/api/aviation/tfr/boundaries?**');await assess(d);await expect(summary(d)).toContainText(p.name);
+ await page.locator('.plan-row').filter({hasText:p.name}).getByRole('button',{name:'Review TFRs',exact:true}).click();const d=page.getByRole('dialog',{name:'FAA TFR Boundaries & Screening',exact:true});await reached;await times(d);release();await expect(d.getByLabel('TFR screening geometry')).toContainText('Saved route');await page.unrouteAll({behavior:'wait'});
+ // The map and the review independently read this same retained-boundary endpoint.
+ // Keep one viewport response in flight to exercise interception teardown deterministically.
+ let releaseViewport,viewportEntered;const viewportReached=new Promise(r=>viewportEntered=r),viewportGate=new Promise(r=>releaseViewport=r);let changedPackets=0;
+ await page.route('**/api/aviation/tfr/boundaries?**',async route=>{
+  const response=await route.fetch(),data=await response.json();
+  if(route.request().headers()['x-tfr-test-viewport']==='held'){viewportEntered();await viewportGate;}
+  for(const b of data.boundaries)if(b.operational?.xmlSha256){b.operational.xmlSha256='f'.repeat(64);changedPackets++;}
+  await route.fulfill({response,json:data});
+ });
+ await d.getByRole('button',{name:'Check Saved Mission Against Retained TFRs'}).click();
+ await expect(d.getByRole('region',{name:'Saved mission TFR review'}).getByRole('status')).toContainText('Operational details changed during this review');
+ expect(changedPackets).toBeGreaterThan(0);await expect(summary(d)).toBeEmpty();await expect(findings(d)).toBeEmpty();
+ const viewport=page.evaluate(async()=>{const response=await fetch('/api/aviation/tfr/boundaries?west=-98&south=27&east=-97&north=28',{headers:{'X-Tfr-Test-Viewport':'held'}});return response.status;});
+ // Drain callbacks before removing the interceptor. Default unroute continues
+ // in-flight routes while their fetch/fulfill callbacks still own them. Do not
+ // suppress errors: both the adversarial and concurrent viewport handlers finish.
+ await viewportReached;const draining=page.unrouteAll({behavior:'wait'});releaseViewport();
+ expect(await viewport).toBe(200);await draining;
+ await assess(d);await expect(summary(d)).toContainText(p.name);await expect(findings(d)).toContainText('Potential intersection');
+ expect(await(await request.get('/api/plans/'+p.id)).json()).toEqual(p);await page.keyboard.press('Escape');await expect(draft).toHaveValue('Preserve draft through source revalidation');
 });
 
 test('active waypoint placement is suspended for read-only TFR review and restored without changing draft coordinates',async({page,request})=>{
