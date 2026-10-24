@@ -69,7 +69,7 @@ public sealed class AviationAirspaceTests : IDisposable
             foreach(var point in ring)Assert.InRange(Geodesy.Distance(new(40,-75),point),1851.999999,1852.000001);
             Assert.InRange(ring[0].Latitude,40.0166794,40.0166795);Assert.InRange(ring[0].Longitude,-75.000000001,-74.999999999);
             Assert.Contains("0.5 m",feature.Attributes["GEOMETRY_INTERPOLATION"]);Assert.Equal(job.OriginalSha256,d.OriginalSha256);
-            Assert.Contains(d.Limitations,x=>x.Contains("adapter 3",StringComparison.Ordinal));await service.VerifyDownload(job.Id);
+            Assert.Contains(d.Limitations,x=>x.Contains("adapter 4",StringComparison.Ordinal));await service.VerifyDownload(job.Id);
             Assert.Equal(id,(await service.ImportVectors(job.Id)).Id);service.Configure(false);calls=handler.Calls;
         }
         using var reopened=new AviationReference(root,root,new HttpClient(handler));
@@ -79,7 +79,7 @@ public sealed class AviationAirspaceTests : IDisposable
     public async Task UnverifiedCircleUnitsMixedSegmentsAndUnsupportedBoundsCannotPublish(string fault)
     {
         using var service=new AviationReference(root,root,new HttpClient(new Transport(true,fault)),unmetered:()=>true);var job=await Acquire(service);
-        await Assert.ThrowsAsync<NotSupportedException>(()=>service.ImportVectors(job.Id));Assert.Empty(service.VectorDatasets());await service.VerifyDownload(job.Id);
+        var error = await Assert.ThrowsAsync<InvalidDataException>(()=>service.ImportVectors(job.Id));Assert.Contains("No supported valid airspace polygons", error.Message);Assert.Empty(service.VectorDatasets());await service.VerifyDownload(job.Id);
     }
     [Theory] [InlineData(false)] [InlineData(true)]
     public async Task SchemaFourLiteralInterpretationAndOriginalSurviveVersionedReimport(bool interruptMigration)
@@ -185,6 +185,62 @@ public sealed class AviationAirspaceTests : IDisposable
         var flying=false;using var service=new AviationReference(root,root,new HttpClient(new Transport()),unmetered:()=>true,flightActive:()=>flying);var job=await Acquire(service);flying=true;
         await Assert.ThrowsAsync<InvalidOperationException>(()=>service.ImportVectors(job.Id));Assert.Empty(service.VectorDatasets());await service.VerifyDownload(job.Id);
         flying=false;Assert.Equal(2,(await service.ImportVectors(job.Id)).Features);
+    }
+    [Theory] [InlineData("arc-unwrapped")] [InlineData("arc-adjacent")]
+    public async Task ExplicitUnwrappedAnglesAndAdjacentMinorArcsKeepLiteralVerticesAndRadius(string variant)
+    {
+        using var service=new AviationReference(root,root,new HttpClient(new Transport(true,variant)),unmetered:()=>true);
+        var job=await Acquire(service);var d=await service.ImportVectors(job.Id);Assert.Equal(2,d.Features);Assert.Equal(0,d.OmittedRecords);
+        var f=Assert.Single(service.AirspaceFeatures(d.Id,-76,39,-74,41).Features,x=>x.Attributes.ContainsKey("GEOMETRY_INTERPOLATION"));
+        var ring=Assert.Single(Assert.Single(f.Polygons));Assert.Equal(ring[0],ring[^1]);
+        Assert.Contains(ring,p=>p.Longitude==-74.978312&&p.Latitude==39.999998);
+        foreach(var p in ring.Where(p=>p.Latitude!=40||p.Longitude!=-75))Assert.InRange(Geodesy.Distance(new(40,-75),p),1851.9,1852.1);
+        Assert.Contains("increasing explicit minor span",f.Attributes["GEOMETRY_INTERPOLATION"]);await service.VerifyDownload(job.Id);
+    }
+    [Theory] [InlineData("composite-subtract",1,2)] [InlineData("composite-union",2,2)]
+    [InlineData("composite-split",2,2)] [InlineData("composite-nested",2,3)]
+    public async Task OrderedSameVolumeCompositesPreserveHolesMultipartAndOfflineOriginals(string variant,int pieces,int rings)
+    {
+        var handler=new Transport(true,variant);string id;int calls;string original;
+        using(var service=new AviationReference(root,root,new HttpClient(handler),unmetered:()=>true))
+        {
+            var job=await Acquire(service);original=job.OriginalSha256!;var d=await service.ImportVectors(job.Id);id=d.Id;
+            Assert.Equal(2,d.Features);Assert.Equal(0,d.OmittedRecords);
+            var feature=Assert.Single(service.AirspaceFeatures(id,-77,38,-70,42).Features,f=>f.Attributes.ContainsKey("GEOMETRY_COMPOSITION"));
+            Assert.Equal(pieces,feature.Polygons.Length);Assert.Equal(rings,feature.Polygons.Sum(p=>p.Length));
+            Assert.Equal("MSL",feature.Upper.Reference);Assert.Equal(10000,feature.Upper.Value);Assert.Equal("Above surface",feature.Lower.Reference);
+            using var manifest=System.Text.Json.JsonDocument.Parse(feature.Attributes["SOURCE_COMPONENTS"]);
+            var components=manifest.RootElement.GetProperty("components");Assert.Equal(10,components[0].GetProperty("sequence").GetInt32());
+            Assert.Equal(2,components[0].GetProperty("sourceComponent").GetInt32()); // XML order is not operation order.
+            Assert.Equal("BASE",components[0].GetProperty("operation").GetString());
+            Assert.Contains("Activation and UTC intervals are Unknown",feature.Schedule.Interpretation);Assert.Equal(original,d.OriginalSha256);
+            if(variant=="composite-subtract")Assert.DoesNotContain(service.AirspaceFeatures(id,-75.2,39.8,-74.8,40.2).Features,f=>f.Id==feature.Id);
+            if(variant=="composite-nested")
+            {Assert.DoesNotContain(service.AirspaceFeatures(id,-75.4,39.6,-75.3,39.7).Features,f=>f.Id==feature.Id);Assert.Contains(service.AirspaceFeatures(id,-75.1,39.9,-74.9,40.1).Features,f=>f.Id==feature.Id);}
+            await service.VerifyDownload(job.Id);service.Configure(false);calls=handler.Calls;
+        }
+        using var reopened=new AviationReference(root,root,new HttpClient(handler));
+        Assert.Equal(2,reopened.AirspaceFeatures(id,-77,38,-70,42).Features.Length);Assert.Equal(calls,handler.Calls);
+        Assert.Equal(original,reopened.VectorDatasets().Single(d=>d.Id==id).OriginalSha256);
+    }
+    [Theory] [InlineData("composite-vertical")] [InlineData("composite-unknown")] [InlineData("composite-duplicate")]
+    [InlineData("composite-base-order")] [InlineData("composite-empty")] [InlineData("composite-axis")]
+    [InlineData("composite-missing")] [InlineData("composite-cycle")] [InlineData("composite-excess")]
+    [InlineData("composite-self-intersect")] [InlineData("composite-dateline")] [InlineData("composite-polar")] [InlineData("composite-work")]
+    public async Task UnsafeCompositesAreIsolatedOmissionsWithoutFlatteningOrResolvingReferences(string variant)
+    {
+        using var service=new AviationReference(root,root,new HttpClient(new Transport(true,variant)),unmetered:()=>true);
+        var job=await Acquire(service);var d=await service.ImportVectors(job.Id);Assert.Equal(1,d.Features);Assert.Equal(1,d.OmittedRecords);
+        Assert.Single(service.AirspaceFeatures(d.Id,-77,38,-70,42).Features);
+        Assert.Contains(d.Limitations,s=>s.Contains("Composite SAA omitted",StringComparison.Ordinal));await service.VerifyDownload(job.Id);
+    }
+    [Fact] public async Task CurvedCompositeWorkYieldsMidImportAndRollsBackWithoutRedownloading()
+    {
+        var armed=false;var checks=0;var handler=new Transport(true,"arc-adjacent");
+        using var service=new AviationReference(root,root,new HttpClient(handler),unmetered:()=>true,flightActive:()=>armed&&++checks>20);
+        var job=await Acquire(service);var calls=handler.Calls;armed=true;
+        await Assert.ThrowsAsync<InvalidOperationException>(()=>service.ImportVectors(job.Id));Assert.Empty(service.VectorDatasets());
+        armed=false;Assert.Equal(2,(await service.ImportVectors(job.Id)).Features);Assert.Equal(calls,handler.Calls);await service.VerifyDownload(job.Id);
     }
     [Theory] [InlineData("traversal")] [InlineData("nested")]
     public async Task SaaNestingIsExactAndDoesNotEnableArbitraryNestedArchiveExtraction(string fault)

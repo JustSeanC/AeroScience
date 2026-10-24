@@ -52,18 +52,59 @@ def dbf_strings(path):
             yield row
 
 
-def saa_geometry(document):
+ARC3 = 'WGS84 geodesic partial arcs; inherited CRS84 angles from longitude axis, increasing explicit minor span only. 0.5 m nominal chord target and maximum source endpoint join; derived arc endpoints use adjacent original literal vertices. Original literal vertices/center/radius/angles retained; not certified boundary accuracy.'
+ARC4 = 'WGS84 geodesic partial arcs; inherited CRS84 angles from longitude axis, increasing explicit minor span only (unwrapped source angles retained). 0.5 m nominal chord target and maximum source endpoint join; literal endpoints take precedence, adjacent derived arcs join at the preceding computed endpoint. Original literal vertices/center/radius/angles retained in immutable XML; not certified boundary accuracy.'
+CIRCLE = 'WGS84 geodesic circle; 0.5 m nominal chord target. Original center/radius/units retained in the immutable XML. Not certified boundary accuracy.'
+COMPOSITION = 'Derived CRS84 horizontal geometry: BASE then explicit operationSequence UNION/SUBTR with identical verified original vertical limits. NTS polygon Boolean operations, no topology repair or altitude conversion. Original component curves/coordinates and relationships remain authoritative in the retained XML; no live activation inferred.'
+
+
+def components(document):
     airspaces = document.findall('.//a:Airspace', NS)
-    if len(airspaces) != 1:
-        return None
-    components = airspaces[0].findall('a:timeSlice/a:AirspaceTimeSlice/a:geometryComponent/a:AirspaceGeometryComponent', NS)
-    if len(components) != 1 or components[0].findtext('a:operation', namespaces=NS) != 'BASE':
-        return None
-    volumes = components[0].findall('a:theAirspaceVolume/a:AirspaceVolume', NS)
-    if len(volumes) != 1:
-        return None
-    surface = volumes[0].find('a:horizontalProjection/a:Surface', NS)
-    assert surface is not None and surface.attrib['srsName'].lower() == 'urn:ogc:def:crs:ogc:1.3:crs84'
+    assert len(airspaces) == 1
+    return airspaces[0].findall('a:timeSlice/a:AirspaceTimeSlice/a:geometryComponent/a:AirspaceGeometryComponent', NS)
+
+
+def level(volume, field):
+    e = volume.find('a:'+field, NS)
+    raw, unit, code = e.text or '', e.attrib.get('uom',''), volume.findtext('a:'+field+'Reference',default='',namespaces=NS)
+    value = 0 if raw == 'GND' and code == 'SFC' else float(raw)
+    return dict(value=value,unit=unit,reference={'MSL':'MSL','SFC':'Above surface','STD':'Standard pressure'}[code],
+                rawValue=raw,rawUnit=unit,rawReference=code,description='',status='Known')
+
+
+def source_components(document):
+    values=[]
+    for i,c in enumerate(components(document),1):
+        v=c.find('a:theAirspaceVolume/a:AirspaceVolume',NS);surface=v.find('a:horizontalProjection/a:Surface',NS)
+        values.append(dict(sourceComponent=i,sequence=int(c.findtext('a:operationSequence',namespaces=NS)),operation=c.findtext('a:operation',namespaces=NS),
+            volumeId=v.attrib.get('{'+NS['g']+'}id'),surfaceId=surface.attrib.get('{'+NS['g']+'}id'),sourceCrs=surface.attrib['srsName'],lower=level(v,'lowerLimit'),upper=level(v,'upperLimit')))
+    return dict(version=1,components=sorted(values,key=lambda c:c['sequence']))
+
+
+def saa_geometry(document, adapter=4):
+    cs=components(document)
+    if len(cs)==1:
+        assert cs[0].findtext('a:operation',namespaces=NS)=='BASE'
+        return saa_volume(cs[0].find('a:theAirspaceVolume/a:AirspaceVolume',NS),adapter)
+    assert adapter==4
+    ordered=sorted(cs,key=lambda c:int(c.findtext('a:operationSequence',namespaces=NS)))
+    manifest=source_components(document)['components']
+    assert len(set(c['sequence'] for c in manifest))==len(cs) and manifest[0]['operation']=='BASE'
+    assert all((c['lower'],c['upper'])==(manifest[0]['lower'],manifest[0]['upper']) for c in manifest)
+    result=None
+    for c in ordered:
+        geometry=saa_volume(c.find('a:theAirspaceVolume/a:AirspaceVolume',NS),adapter)
+        operation=c.findtext('a:operation',namespaces=NS)
+        if result is None:result=geometry
+        elif operation=='UNION':result=result.union(geometry)
+        else:assert operation=='SUBTR';result=result.difference(geometry)
+        assert result.is_valid and not result.is_empty
+    return result
+
+
+def saa_volume(volume, adapter):
+    surface=volume.find('a:horizontalProjection/a:Surface',NS)
+    assert surface is not None and surface.attrib['srsName'].lower()=='urn:ogc:def:crs:ogc:1.3:crs84'
     polygons = []
     for patch in surface.findall('.//g:PolygonPatch', NS):
         def ring(boundary):
@@ -102,9 +143,16 @@ def saa_geometry(document):
                 for i, segment in enumerate(segments):
                     following, previous = (i+1) % len(segments), (i-1) % len(segments)
                     assert geodesic.inv(*decoded[i][-1], *decoded[following][0])[2] <= .5
-                    if segment.tag == '{'+NS['g']+'}ArcByCenterPoint':
-                        assert segments[previous].tag.endswith('LineStringSegment') and segments[following].tag.endswith('LineStringSegment')
-                        decoded[i][0], decoded[i][-1] = decoded[previous][-1], decoded[following][0]
+                for i, segment in enumerate(segments):
+                    following, previous = (i+1) % len(segments), (i-1) % len(segments)
+                    if adapter == 3:
+                        if segment.tag.endswith('ArcByCenterPoint'):
+                            assert segments[previous].tag.endswith('LineStringSegment') and segments[following].tag.endswith('LineStringSegment')
+                            decoded[i][0], decoded[i][-1] = decoded[previous][-1], decoded[following][0]
+                    elif segments[following].tag.endswith('ArcByCenterPoint'):
+                        decoded[following][0] = decoded[i][-1]
+                    elif segment.tag.endswith('ArcByCenterPoint'):
+                        decoded[i][-1] = decoded[following][0]
                 for current in decoded:
                     for point in current:
                         if not points or point != points[-1]:
@@ -127,7 +175,7 @@ def saa_geometry(document):
     return polygons[0] if len(polygons) == 1 else MultiPolygon(polygons)
 
 
-def verify(root):
+def verify(root, adapter=4):
     folder = root.resolve() / 'AviationReference'
     results = []
     with sqlite3.connect((folder / 'aviation.db').as_uri()+'?mode=ro', uri=True) as db:
@@ -137,6 +185,8 @@ def verify(root):
             job_id = str(uuid.UUID(dataset['jobId']))
             job = json.loads(db.execute('SELECT payload FROM download_jobs WHERE id=?', (job_id,)).fetchone()[0])
             original = folder / 'Originals' / uuid.UUID(job_id).hex
+            expected_id=hashlib.sha256(json.dumps(dict(airspaceParser=adapter if family=='SUA' else 1,id=job['preview']['item']['id'],originalSha256=job['originalSha256']),separators=(',',':')).encode()).hexdigest()
+            if dataset['id'] != expected_id:continue # Historical interpretations remain stored; verify only the explicitly selected adapter.
             assert dataset['edition'] == '2026-10-01'
             assert digest(original/'original.zip') == dataset['originalSha256'] == job['originalSha256'] == EXPECTED[family]
             for f in job['files']:
@@ -157,11 +207,14 @@ def verify(root):
                     return
                 actual, payload = retained[number]
                 assert geometry is not None and geometry.is_valid
-                tolerance = 1e-10 if 'GEOMETRY_INTERPOLATION' in raw else 0
+                tolerance = 1e-10 if 'GEOMETRY_INTERPOLATION' in raw or 'GEOMETRY_COMPOSITION' in raw else 0
                 difference = actual.hausdorff_distance(geometry) if tolerance else 0
                 maximum_difference = max(maximum_difference,difference)
                 assert equals_exact(normalize(actual), normalize(geometry), tolerance=tolerance), f'{family} original coordinates differ: {number}'
-                assert payload['attributes'] == raw, f'{family} original attributes differ: {number}'
+                actual_attributes=dict(payload['attributes']);expected_attributes=dict(raw)
+                if 'SOURCE_COMPONENTS' in expected_attributes:
+                    assert json.loads(actual_attributes.pop('SOURCE_COMPONENTS'))==expected_attributes.pop('SOURCE_COMPONENTS'), f'Component identities/roles/limits differ: {number}'
+                assert actual_attributes == expected_attributes, f'{family} original attributes differ: {number}'
                 attributes += len(raw)
                 coordinates += sum(len(p.exterior.coords)+sum(len(r.coords) for r in p.interiors) for p in ([geometry] if geometry.geom_type == 'Polygon' else geometry.geoms))*2
                 for name, region in region_shapes.items():
@@ -192,29 +245,35 @@ def verify(root):
                                 'ACTIVATION_SOURCE_STATUS': usage_text('.//a:statusActivation'), 'WKHR_CODE': usage_text('.//a:workingHours'),
                                 'WKHR_RMK': '; '.join(' '.join(e.tag.rsplit('}', 1)[-1]+'='+(e.text or '') for e in timesheet if len(e) == 0) for timesheet in (usage.findall('.//a:Timesheet', NS) if usage is not None else [])),
                                 'DST': usage_text('.//a:daylightSavingAdjust'), 'GMTOFFSET': next((e.text or '' for e in usage.iter() if e.tag.rsplit('}', 1)[-1] == 'timeOffset'), '') if usage is not None else ''}
-                            volume = document.find('.//a:AirspaceVolume', NS)
+                            cs=components(document)
+                            primary=min(cs,key=lambda c:int(c.findtext('a:operationSequence',default='0',namespaces=NS)))
+                            volume = primary.find('a:theAirspaceVolume/a:AirspaceVolume',NS)
                             for prefix, field in [('LOWER', 'lowerLimit'), ('UPPER', 'upperLimit')]:
                                 value = volume.find('a:'+field, NS)
                                 raw[prefix+'_VAL'] = (value.text or '') if value is not None else ''
                                 raw[prefix+'_UOM'] = value.attrib.get('uom', '') if value is not None else ''
                                 raw[prefix+'_CODE'] = volume.findtext('a:'+field+'Reference', default='', namespaces=NS)
                             if document.findall('.//g:ArcByCenterPoint', NS):
-                                raw['GEOMETRY_INTERPOLATION'] = 'WGS84 geodesic partial arcs; inherited CRS84 angles from longitude axis, increasing explicit minor span only. 0.5 m nominal chord target and maximum source endpoint join; derived arc endpoints use adjacent original literal vertices. Original literal vertices/center/radius/angles retained; not certified boundary accuracy.'
+                                raw['GEOMETRY_INTERPOLATION'] = ARC3 if adapter==3 else ARC4
                             elif document.findall('.//g:CircleByCenterPoint',NS):
-                                raw['GEOMETRY_INTERPOLATION'] = 'WGS84 geodesic circle; 0.5 m nominal chord target. Original center/radius/units retained in the immutable XML. Not certified boundary accuracy.'
-                        compare(number, saa_geometry(document) if expected else None, raw if expected else {})
+                                raw['GEOMETRY_INTERPOLATION'] = CIRCLE
+                            if len(cs)>1:
+                                raw['GEOMETRY_COMPOSITION']=COMPOSITION
+                                raw['SOURCE_COMPONENTS']=source_components(document)
+                        compare(number, saa_geometry(document,adapter) if expected else None, raw if expected else {})
             assert compared == dataset['features'] and omitted == dataset['omittedRecords'] and all(regions.values())
             results.append({'family': family, 'edition': dataset['edition'], 'originalSha256': EXPECTED[family], 'featuresCompared': compared, 'originalCoordinateComponentsCompared': coordinates, 'originalAttributeFieldsChecked': attributes,
                 'maximumCoordinateDifference': maximum_difference, 'regions': regions, 'explicitUnsupportedRecords': omitted, 'sourceCrs': dataset['sourceCrs']})
-    assert {r['family'] for r in results} == set(EXPECTED)
+    assert {r['family'] for r in results} == set(EXPECTED) and len(results)==2
     return {'evidenceClass': 'Genuine FAA originals; independent pyshp/Shapely/ElementTree versus retained NTS geometry. Offline read-only verification.', 'results': results,
-        'limitations': ['No live activation, TFR clearance, certified positional accuracy or owner-installed Windows acceptance.', 'Only explicit increasing minor arcs with endpoint joins <=0.5 m are supported in adapter 3; angular wraps, major/reversed arcs, discrepant source endpoints and composites/contributors remain omitted. Derived circles/arcs independently compared with PROJ, not certified boundary accuracy.', 'NAD83 coordinates preserved without claiming a precise WGS84 transformation.']}
+        'limitations': ['No live activation, TFR clearance, certified positional accuracy or owner-installed Windows acceptance.', 'Adapter '+str(adapter)+': explicit positive minor spans, 0.5 m joins, and (adapter 4) same-original-volume ordered Boolean operations. Signed/reversed or inferred wraps, discrepant joins, unequal/unknown vertical volumes and unresolved contributors remain omitted. PROJ/GEOS comparisons are not certified boundary accuracy.', 'NAD83 coordinates preserved without claiming a precise WGS84 transformation.']}
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--folder', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--adapter',type=int,choices=[3,4],default=4,help='Explicit interpretation version; historical datasets are never silently reinterpreted.')
     args = parser.parse_args()
-    args.output.write_text(json.dumps(verify(args.folder), indent=2)+'\n')
+    args.output.write_text(json.dumps(verify(args.folder,args.adapter), indent=2)+'\n')
     print('PASS: genuine Class/SAA original geometry and attributes independently compared offline in two regions.')

@@ -1,6 +1,8 @@
 using System.Buffers.Binary;
 using System.IO.Compression;
 using System.Text;
+using System.Xml.Linq;
+using System.Globalization;
 
 namespace AeroScience.Tests;
 
@@ -73,6 +75,8 @@ public static class SyntheticAirspace
                 """;
             curve = fault switch
             {
+                "arc-unwrapped" => curve.Replace(">0</gml:startAngle>", ">360</gml:startAngle>").Replace(">90</gml:endAngle>", ">450</gml:endAngle>"),
+                "arc-adjacent" => curve.Replace(">90</gml:endAngle>", ">45</gml:endAngle>").Replace("</gml:segments></gml:Curve></gml:curveMember></gml:Ring>", "<gml:ArcByCenterPoint numArc=\"1\"><gml:pointProperty><gml:Point><gml:pos>-75 40</gml:pos></gml:Point></gml:pointProperty><gml:radius uom=\"NM\">1</gml:radius><gml:startAngle uom=\"deg\">45</gml:startAngle><gml:endAngle uom=\"deg\">90</gml:endAngle></gml:ArcByCenterPoint></gml:segments></gml:Curve></gml:curveMember></gml:Ring>"),
                 "arc-unit" => curve.Replace("uom=\"NM\"", "uom=\"DEGREES\""),
                 "arc-wrap" => curve.Replace(">90</gml:endAngle>", ">-270</gml:endAngle>"),
                 "arc-gap" => curve.Replace("-74.978312 39.999998", "-74.9 40"),
@@ -83,6 +87,43 @@ public static class SyntheticAirspace
                 _ => curve
             };
             members["Curved.xml"] = Encoding.UTF8.GetBytes(xml[..ringStart] + curve + xml[ringEnd..]);
+        }
+        if(fault?.StartsWith("composite-",StringComparison.Ordinal)==true)
+        {
+            XNamespace a="http://www.aixm.aero/schema/5.0",g="http://www.opengis.net/gml/3.2",x="http://www.w3.org/1999/xlink";
+            var doc=XDocument.Parse(xml);var slice=doc.Descendants(a+"AirspaceTimeSlice").Single();slice.Element(a+"name")!.Value="Synthetic composite "+fault;var original=slice.Element(a+"geometryComponent")!;
+            XElement Component(string operation,int sequence,double west,double south,double east,double north)
+            {
+                var component=new XElement(original);var c=component.Element(a+"AirspaceGeometryComponent")!;
+                c.Element(a+"operation")!.Value=operation;c.AddFirst(new XElement(a+"operationSequence",sequence));
+                var surface=c.Descendants(a+"Surface").Single();surface.SetAttributeValue(g+"id","surface-"+sequence);
+                var ring=surface.Descendants(g+"LinearRing").Single();ring.ReplaceNodes(new[]{(west,south),(east,south),(east,north),(west,north),(west,south)}.Select(p=>new XElement(g+"pos",p.Item1.ToString(CultureInfo.InvariantCulture)+" "+p.Item2.ToString(CultureInfo.InvariantCulture))));
+                return component;
+            }
+            var first=Component("BASE",10,-76,39,-74,41);
+            var second=Component(fault=="composite-union"?"UNION":"SUBTR",20,fault=="composite-union"?-72:-75.5,39.5,fault=="composite-union"?-71:-74.5,40.5);
+            if(fault=="composite-split")second=Component("SUBTR",20,-75.2,38,-74.8,42);
+            if(fault=="composite-empty")second=Component("SUBTR",20,-77,38,-73,42);
+            var c2=second.Element(a+"AirspaceGeometryComponent")!;
+            if(fault=="composite-vertical")c2.Descendants(a+"upperLimit").Single().Value="9000";
+            if(fault=="composite-unknown")c2.Descendants(a+"lowerLimitReference").Single().Remove();
+            if(fault=="composite-duplicate")c2.Element(a+"operationSequence")!.Value="10";
+            if(fault=="composite-base-order")first.Descendants(a+"operationSequence").Single().Value="30";
+            if(fault=="composite-axis")c2.Descendants(a+"Surface").Single().SetAttributeValue("srsName","EPSG:4326");
+            if(fault is "composite-missing" or "composite-cycle")
+            {var v=c2.Element(a+"theAirspaceVolume")!;v.RemoveNodes();v.SetAttributeValue(x+"href",fault=="composite-cycle"?"#surface-20":"file:///never-resolve");}
+            if(fault=="composite-self-intersect")c2.Descendants(g+"LinearRing").Single().ReplaceNodes(new[]{"-75.5 39.5","-74.5 40.5","-75.5 40.5","-74.5 39.5","-75.5 39.5"}.Select(v=>new XElement(g+"pos",v)));
+            if(fault=="composite-dateline")second=Component("SUBTR",20,-179,39,179,41);
+            if(fault=="composite-polar")second=Component("SUBTR",20,-75.5,84,-74.5,86);
+            if(fault=="composite-work")
+            {
+                foreach(var (component,radius) in new[]{(first,500000),(second,400000)})
+                    component.Descendants(g+"LinearRing").Single().ReplaceWith(new XElement(g+"Ring",new XElement(g+"curveMember",new XElement(g+"Curve",new XElement(g+"segments",new XElement(g+"CircleByCenterPoint",new XAttribute("numArc","1"),new XElement(g+"pointProperty",new XElement(g+"Point",new XElement(g+"pos","-75 40"))),new XElement(g+"radius",new XAttribute("uom","M"),radius)))))));
+            }
+            original.Remove();slice.Add(second,first); // Deliberately not operation order.
+            if(fault=="composite-nested")slice.Add(Component("UNION",30,-75.25,39.75,-74.75,40.25));
+            if(fault=="composite-excess")for(var i=0;i<31;i++)slice.Add(Component("UNION",30+i,-72,39,-71,40));
+            members["Composite.xml"]=Encoding.UTF8.GetBytes(doc.ToString(SaveOptions.DisableFormatting));
         }
         var data=Zip(members);
         var middle=Zip(new(){[fault=="nested"?"unexpected.zip":"Saa_Sub_File.zip"]=data});

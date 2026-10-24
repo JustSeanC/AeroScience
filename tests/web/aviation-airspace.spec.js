@@ -32,3 +32,28 @@ test('full-circle SAA reference imports through approved jobs and exposes interp
  await layers.getByRole('button',{name:'View '+label+' references',exact:true}).last().click();const list=page.getByRole('dialog',{name:'FAA Reference List',exact:true});await list.getByRole('button',{name:'Synthetic Special Use',exact:true}).click();
  const details=page.getByRole('dialog',{name:'FAA Reference Details',exact:true});await expect(details).toContainText('10000 FT · MSL');await details.getByText('Original reference attributes',{exact:true}).click();await expect(details).toContainText('geodesic circle');
 });
+
+test('ordered SAA composites expose multipart islands, true holes and source relationships through existing offline overlays',async({page,request})=>{
+ await post(request,'/api/testing/aviation/airspace-composite');await post(request,'/api/aviation/downloads/configuration',{unmeteredOnly:false});await post(request,'/api/aviation/configuration',{onlineEnabled:true});
+ const sources=await(await request.get('/api/science/sources')).json(),catalog=await post(request,'/api/aviation/catalog/nasr/refresh'),item=catalog.charts.find(c=>c.originalFileName==='aixm5.0.zip');
+ // A distinct fixture edition/source identity keeps the earlier circle's verified original immutable.
+ // The host mode advertises this exact composite source separately; no silent replacement.
+ const job=await post(request,'/api/aviation/downloads/preview',{kind:'nasr',itemId:item.id,maximumTransferBytes:1048576,maximumExpandedBytes:1048576});
+ await post(request,`/api/aviation/downloads/${job.id}/control`,{revision:job.revision,action:'approve',selectionHash:job.preview.selectionHash});
+ await expect.poll(async()=>(await(await request.get('/api/aviation/downloads')).json()).find(j=>j.id===job.id).state).toBe('Completed');
+ const dataset=await post(request,`/api/aviation/downloads/${job.id}/import-vectors`);expect(dataset.features).toBe(2);expect(dataset.omittedRecords).toBe(0);
+ const url=`/api/aviation/airspace/${dataset.id}`,region='?west=-76&south=39&east=-74&north=41&kind=sua';
+ const feature=(await(await request.get(url+region)).json()).features.find(f=>f.attributes.GEOMETRY_COMPOSITION);
+ expect(feature.polygons).toHaveLength(2);expect(feature.polygons.reduce((n,p)=>n+p.length,0)).toBe(3);
+ expect(JSON.parse(feature.attributes.SOURCE_COMPONENTS).components.map(c=>c.operation)).toEqual(['BASE','SUBTR','UNION']);
+ expect((await(await request.get(url+'?west=-75.4&south=39.6&east=-75.3&north=39.7')).json()).features.some(f=>f.id===feature.id)).toBe(false);
+ expect((await(await request.get(url+'?west=-75.1&south=39.9&east=-74.9&north=40.1')).json()).features.some(f=>f.id===feature.id)).toBe(true);
+ await post(request,'/api/aviation/configuration',{onlineEnabled:false});const before=(await(await request.get('/api/testing/aviation')).json()).calls;
+ await page.goto('/#planner');const planner=page.locator('#planner');await planner.getByLabel('Offline geographic location search').fill('39.25,-75.75');await planner.getByRole('button',{name:'Find',exact:true}).click();await planner.getByLabel('Search results').selectOption('0');
+ await planner.getByRole('button',{name:'Overlays & Legend',exact:true}).click();const layers=page.getByRole('dialog',{name:'Map Overlays & Legend',exact:true}),label=`FAA Special-use airspace · ${dataset.edition} · interpretation ${dataset.id.slice(0,8)}`;
+ await layers.getByLabel(label,{exact:true}).check();await layers.getByRole('button',{name:'View '+label+' references',exact:true}).click();
+ const list=page.getByRole('dialog',{name:'FAA Reference List',exact:true});await list.getByRole('button',{name:'Synthetic composite composite-nested',exact:true}).click();
+ const detail=page.getByRole('dialog',{name:'FAA Reference Details',exact:true});await expect(detail).toContainText('10000 FT · MSL');await detail.getByText('Original reference attributes',{exact:true}).click();await expect(detail).toContainText('Derived CRS84 horizontal geometry');await expect(detail).toContainText('SOURCE_COMPONENTS');
+ await page.setViewportSize({width:390,height:740});expect((await new AxeBuilder({page}).include('dialog[aria-label="FAA Reference Details"]').analyze()).violations).toEqual([]);await page.keyboard.press('Escape');await expect(list.getByRole('button',{name:'Synthetic composite composite-nested',exact:true})).toBeFocused();
+ expect((await(await request.get('/api/testing/aviation')).json()).calls).toBe(before);expect(await(await request.get('/api/science/sources')).json()).toEqual(sources);expect((await(await request.get('/api/state')).json()).activeMission).toBeNull();
+});

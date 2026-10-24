@@ -50,8 +50,8 @@ public sealed partial class AviationMetadataStore
             if (count == 0) throw new InvalidDataException("No supported valid airspace polygons; no empty dataset was published.");
             var dataset = new AviationVectorDataset(1, id, job.Id, job.Preview.Item.Edition, job.OriginalSha256!, saa ? "SUA" : "CLASS", sourceCrs, utc, count, omitted.Values.Sum(),
                 [AviationCatalog.Attribution,
-                 "Original horizontal polygons and attributes retained. Shape Z/PRJ VERTCS do not establish restriction altitude datum.",
-                 saa ? "SAA geometry adapter 3: full circles and endpoint-verified explicit increasing minor arcs have interpolation metadata; immutable XML remains authoritative. Ambiguous arcs/composites remain unsupported." : "Class polygon adapter 1; literal source coordinates retained.",
+                 saa ? "Immutable original XML retains literal component geometry/attributes; interpolated and Boolean indexed geometries are explicitly derived interpretations." : "Original horizontal polygons and attributes retained. Shape Z/PRJ VERTCS do not establish restriction altitude datum.",
+                 saa ? "SAA geometry adapter 4: bounded circles, explicit increasing minor arcs including unwrapped source angles and verified adjacent joins; ordered BASE/UNION/SUBTR only with identical verified vertical limits. Boolean/interpolated geometry is derived; immutable XML retains every original component/coordinate. Ambiguous arcs, contributors and unequal vertical volumes remain unsupported." : "Class polygon adapter 1; literal source coordinates retained.",
                  "Map display may be topology-preserving generalized; each feature reports tolerance and original vertex count. Full original geometry remains retained separately.",
                  "Source CRS is retained; NAD83 display is approximate. No positional accuracy, activation or unrestricted-airspace clearance is certified.",
                  "Negative/unknown altitude codes remain Unknown. Published hours, DST and offsets are not inferred UTC activation intervals.",

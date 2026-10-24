@@ -7,7 +7,7 @@ namespace AeroScience.Missions;
 
 public static partial class AviationAirspace
 {
-    public const string ArcInterpolation = "WGS84 geodesic partial arcs; inherited CRS84 angles from longitude axis, increasing explicit minor span only. 0.5 m nominal chord target and maximum source endpoint join; derived arc endpoints use adjacent original literal vertices. Original literal vertices/center/radius/angles retained; not certified boundary accuracy.";
+    public const string ArcInterpolation = "WGS84 geodesic partial arcs; inherited CRS84 angles from longitude axis, increasing explicit minor span only (unwrapped source angles retained). 0.5 m nominal chord target and maximum source endpoint join; literal endpoints take precedence, adjacent derived arcs join at the preceding computed endpoint. Original literal vertices/center/radius/angles retained in immutable XML; not certified boundary accuracy.";
 
     // Do not normalize angle wraps or select a short/long path from endpoints. Those
     // interpretations require additional source proof. This subset is deliberately explicit.
@@ -21,17 +21,19 @@ public static partial class AviationAirspace
         var segments = members.SelectMany(e => Single(Single(e, "Curve"), "segments").Elements()).ToArray();
         if (segments.Length is < 2 or > 256 || segments.Count(e => e.Name == Gml + "ArcByCenterPoint") > 64) throw new NotSupportedException("Unsupported curved SAA segment inventory.");
         var decoded = segments.Select(segment => segment.Name == Gml + "ArcByCenterPoint" ? Arc(segment) : segment.Name == Gml + "LineStringSegment" ? Line(segment) : throw new NotSupportedException("Unsupported curved SAA segment.")).ToArray();
+        // Verify every original join before aligning any derived endpoint. No
+        // normalization of the angular span, guessed direction or gap repair.
         for (var i = 0; i < segments.Length; i++)
         {
             Check(token, canContinue);
-            var previous = (i + segments.Length - 1) % segments.Length; var next = (i + 1) % segments.Length;
+            var next = (i + 1) % segments.Length;
             if (Separation(decoded[i][^1], decoded[next][0]) > .5) throw new NotSupportedException("Curved SAA source endpoints differ by more than 0.5 m; no gap was repaired.");
-            if (segments[i].Name != Gml + "ArcByCenterPoint") continue;
-            if (segments[previous].Name != Gml + "LineStringSegment" || segments[next].Name != Gml + "LineStringSegment") throw new NotSupportedException("Adjacent SAA arcs require independently supported join semantics.");
-            // Only derived arc endpoints are aligned to the adjacent authoritative
-            // literal vertices within the explicit source-precision tolerance. Joining
-            // both rounded and computed endpoints can create tiny self-intersections.
-            decoded[i][0] = decoded[previous][^1].Copy(); decoded[i][^1] = decoded[next][0].Copy();
+        }
+        for (var i = 0; i < segments.Length; i++)
+        {
+            var next = (i + 1) % segments.Length;
+            if (segments[next].Name == Gml + "ArcByCenterPoint") decoded[next][0] = decoded[i][^1].Copy();
+            else if (segments[i].Name == Gml + "ArcByCenterPoint") decoded[i][^1] = decoded[next][0].Copy();
         }
         var points = new List<Coordinate>();
         foreach (var part in decoded)
@@ -83,7 +85,11 @@ public static partial class AviationAirspace
             var startElement = element.Element(Gml + "startAngle")!; var endElement = element.Element(Gml + "endAngle")!;
             if (startElement.Attribute("uom")?.Value != "deg" || endElement.Attribute("uom")?.Value != "deg") throw new NotSupportedException("Unsupported curved SAA angular units.");
             var start = Number(startElement); var end = Number(endElement); var span = end - start;
-            if (metres is < 1 or > 500000 || start is < -360 or > 360 || end is < -360 or > 360 || span is <= 0 or > 180) throw new NotSupportedException("Curved SAA radius, wrap or major/reversed angular span is not independently supported.");
+            if (metres is < 1 or > 500000 || span is <= 0 or > 180) throw new NotSupportedException("Curved SAA radius, wrap or major/reversed angular span is not independently supported.");
+            // GML AngleType does not constrain absolute values to one revolution.
+            // Reduce only the initial bearing; the explicit positive source span
+            // remains unchanged. In particular 350 -> 10 is still rejected.
+            start = Math.IEEERemainder(start, 360);
             var count = Math.Max(2, (int)Math.Ceiling(span * Math.PI / 180 / (2 * Math.Acos(1 - .5 / metres))));
             if (count > 4096) throw new NotSupportedException("Curved SAA arc exceeds its vertex bound.");
             var result = new List<Coordinate>(count + 1);
