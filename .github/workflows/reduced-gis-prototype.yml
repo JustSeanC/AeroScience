@@ -28,6 +28,7 @@ jobs:
           New-Item -ItemType Directory -Path $chartCache -Force | Out-Null
           Add-Content $env:GITHUB_ENV "VCPKG_DEFAULT_BINARY_CACHE=$chartCache"
       - uses: actions/cache@v4
+        id: chart-cache
         with:
           path: '${{ runner.temp }}/aeroscience-chart-vcpkg-cache'
           key: 'chart-codec-v1-${{ runner.os }}-${{ hashFiles(''tests/AeroScience.ReducedGisProbe/vcpkg.json'', ''tests/AeroScience.ReducedGisProbe/triplets/**'', ''tests/AeroScience.ReducedGisProbe/prepare_port.py'') }}'
@@ -62,6 +63,12 @@ jobs:
           python scripts/build/chart_runtime.py assemble --install "$codecInstall/x64-windows-research" --output "$env:RUNNER_TEMP/chart-runtime-complete" --port-receipt artifacts/reduced-gis/port-receipt.json --source-sha $env:GITHUB_SHA
           if ($LASTEXITCODE -ne 0) { throw 'Complete runtime/data/static-notice inventory failed.' }
           Copy-Item "$env:RUNNER_TEMP/chart-runtime-complete/manifest.json" artifacts/reduced-gis/distribution-manifest.json
+      - name: Preserve successfully compiled pinned codec cache before application diagnostics
+        if: steps.chart-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: '${{ runner.temp }}/aeroscience-chart-vcpkg-cache'
+          key: 'chart-codec-v1-${{ runner.os }}-${{ hashFiles(''tests/AeroScience.ReducedGisProbe/vcpkg.json'', ''tests/AeroScience.ReducedGisProbe/triplets/**'', ''tests/AeroScience.ReducedGisProbe/prepare_port.py'') }}'
       - name: Publish locked self-contained probe and exercise the genuine FAA original
         shell: pwsh
         run: |

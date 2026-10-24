@@ -20,7 +20,12 @@ public static class ChartRenderingChecks
             if(description.Width!=dims[0].GetInt32()||description.Height!=dims[1].GetInt32()||description.Bands!=dims[2].GetInt32())throw new IOException("Genuine chart dimensions differ.");
             var expected=r.GetProperty("mainBodyWgs84").EnumerateArray().ToArray();var max=0d;
             for(var i=0;i<expected.Length;i++)max=Math.Max(max,Math.Max(Math.Abs(description.MainBody[i].Longitude-expected[i][0].GetDouble()),Math.Abs(description.MainBody[i].Latitude-expected[i][1].GetDouble())));
-            if(max>1e-9)throw new IOException("Independent original CRS/interior-coordinate comparison failed.");
+            if(max>1e-9)
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(output)!);
+                File.WriteAllText(Path.Combine(Path.GetDirectoryName(output)!,"chart-coordinate-diagnostic.json"),JsonSerializer.Serialize(new{file=name,sha256=sha,maximumDifference=max,originalCrs=description.Crs,actual=description.MainBody,expected=expected.Select(e=>new[]{e[0].GetDouble(),e[1].GetDouble()}).ToArray(),tolerance=1e-9,passed=false}));
+                throw new IOException("Independent original CRS/interior-coordinate comparison failed; retained exact diagnostic for "+name+". No tolerance was relaxed.");
+            }
             var tile=r.GetProperty("tile");var tileClock=Stopwatch.StartNew();
             var png=AviationChartRaster.Tile(path,sha,ring,tile.GetProperty("zoom").GetInt32(),tile.GetProperty("x").GetInt32(),tile.GetProperty("y").GetInt32());
             var imageDirectory=Path.Combine(Path.GetDirectoryName(output)!,"chart-native-tiles");Directory.CreateDirectory(imageDirectory);File.WriteAllBytes(Path.Combine(imageDirectory,name+".png"),png);
