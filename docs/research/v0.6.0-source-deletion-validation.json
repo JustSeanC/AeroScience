@@ -1,0 +1,51 @@
+{
+  "formatVersion": 1,
+  "sourceCommit": "106714066ad950fec0d8f9d8f9fb78373fc80e9b",
+  "checkedUtc": "2026-10-24T02:06:02.015645+00:00",
+  "evidenceType": "genuine public retained 3DEP original + synthetic flight-input integration",
+  "scope": "Supplemental controlled deletion validation; not a release-gate waiver or owner acceptance",
+  "provider": "USGS 3DEP National Map",
+  "scene": "3DEP--75,40,-74.98,40.02",
+  "originalObservationUtc": null,
+  "originalFiles": [
+    {
+      "relativePath": "elevation.tif",
+      "bytes": 263002,
+      "sha256": "b25437967ba562cbdb4830d219e6fc65fa0ee0be760c48fce31a1dfa0fee04f5"
+    }
+  ],
+  "originalSourceManifestSha256": "9e3b42957aef74d5cf1a51ee9af3d525c060188b2e70638169fa24d37aea1a5d",
+  "independentComparison": {
+    "numericComparisons": 576,
+    "absoluteTolerance": 1e-09,
+    "relativeTolerance": 0,
+    "method": "Independent rasterio native original samples/CRS/affine/nodata/scale against hash-verified retained values; synthetic flight inputs, not MSFS acceptance"
+  },
+  "results": {
+    "originalsRemoved": true,
+    "offlineSavedValuesIdentical": true,
+    "savedMapAndPackageOpened": true,
+    "removedSourceNotSelectableForNewSampling": true,
+    "collectedSciencePurged": true,
+    "controlledRecoveryCopyPurged": true,
+    "inputOriginalsPreserved": true
+  },
+  "gradingInputSha256": "c69fb857e0516f197b4edceccb368f60fb9539d7c7c18cbe4be4c36afdf1b115",
+  "reportSha256": "f17f1254f8692643e5d3b03a7222c8a78bd7d4e1f35bf6eb05787e453dba7e40",
+  "gradeStatus": "insufficientEvidence",
+  "rawSyntheticFlightSha256": "2c90600ce45f629b6089b81da2a4aac3c912fe96d9dd8bb83c1fa5ff07afee19",
+  "receiptsSha256": {
+    "source-deletion.json": "ef30db09cdc6e8ab38c33aefd876639e78013af0b96acd8678321465204355b1",
+    "independent-deletion.json": "1d3941945a1f9f4ad21af2d6b3389305a7714799f236d956c350181d1224d19e"
+  },
+  "verificationScriptSha256": "6f42bcc346d251310b18298f6c429029f36f4a90283ccca5c36a478e9a98d653",
+  "windowsMsfs": "not tested",
+  "iPadQuest": "not tested",
+  "nasaProtectedOriginals": "not tested",
+  "limitations": [
+    "Flight and collection positions are synthetic; spectral/elevation numeric values are from genuine public source originals.",
+    "Maps/packages opened through actual scientific processing; this does not replace installed visual/device acceptance.",
+    "Only controlled copies were deleted; original public acceptance inputs remain unchanged.",
+    "Known unavailable/shared managed copies block deletion; arbitrary unregistered external or operating-system backups cannot be discovered or erased."
+  ]
+}
