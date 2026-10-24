@@ -73,5 +73,22 @@ public sealed class ScientificSourceIndexTests:IDisposable
         command.CommandText="SELECT payload_json FROM remote_sources WHERE id=$id";command.Parameters.AddWithValue("$id",source.Id.ToString());Assert.Equal(JsonSerializer.Serialize(source,WireJson.Options),(string)command.ExecuteScalar()!);
         foreach(var file in source.Files)Assert.True(File.Exists(Path.Combine(science.DirectoryPath,source.RelativeDirectory,file.RelativePath)));
     }
+    [Fact]public async Task CurvedUtmEdgesRemainCandidatesAndPriorCornerIndexRepairsWithoutChangingOriginals()
+    {
+        var path=RemoteFixtureFiles.Create(Path.Combine(root,"synthetic-utm"),RemoteKind.Hyperspectral);var header=Path.Combine(Path.GetDirectoryName(path)!,"cube.hdr");
+        File.WriteAllText(header,File.ReadAllText(header).Replace("499680, 4428000, 10, 10","490000, 4470000, 312.5, 156.25"));
+        var source=await science.ImportSourceAsync(path);var grid=source.Grids.Values.First();var point=ScientificRaster.GridPoint(grid,32,.01);
+        Assert.True(point.Latitude>ScientificRaster.GridCoverage(grid).Max(p=>p.Latitude));Assert.True(ScientificRaster.GridCovers(grid,point));
+        Assert.Equal(source.Id,Assert.Single(science.SourcePage(new(RemoteKind.Hyperspectral,point)).Items).Id);
+        Assert.True(Assert.Single(science.Availability(point,RemoteKind.Hyperspectral)).CoversPoint);science.Dispose();
+        using(var db=new SqliteConnection("Data Source="+science.DatabasePath+";Pooling=False")){
+            db.Open();using var command=db.CreateCommand();command.CommandText="DELETE FROM metadata WHERE key='source_bounds_policy'; UPDATE source_search SET north=0; UPDATE source_bounds SET north=0,south=-1";command.ExecuteNonQuery();
+        }
+        using var reopened=new ScienceStore(science.DirectoryPath);reopened.Initialize();
+        Assert.Equal(source.Id,Assert.Single(reopened.SourcePage(new(RemoteKind.Hyperspectral,point)).Items).Id);
+        Assert.Equal(source.ManifestSha256,reopened.Source(source.Id)!.ManifestSha256);
+        foreach(var file in source.Files){using var input=File.OpenRead(Path.Combine(science.DirectoryPath,source.RelativeDirectory,file.RelativePath));Assert.Equal(file.Sha256,Convert.ToHexStringLower(System.Security.Cryptography.SHA256.HashData(input)));}
+        var outside=new Coordinates(45,-75);Assert.False(Assert.Single(reopened.Availability(outside,RemoteKind.Hyperspectral)).CoversPoint);
+    }
     public void Dispose(){science.Dispose();SqliteConnection.ClearAllPools();if(Directory.Exists(root))Directory.Delete(root,true);}
 }

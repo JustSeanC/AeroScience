@@ -31,7 +31,7 @@ public sealed partial class ScienceStore
     }
     private void InitializeSourceIndex(SqliteConnection db, bool migrate)
     {
-        if (!migrate) { sourceIndexReady = true; return; }
+        if (!migrate) { UpgradeSourceBoundsPolicy(db); sourceIndexReady = true; return; }
         using var tx = db.BeginTransaction(); using var command = db.CreateCommand(); command.Transaction = tx;
         command.CommandText = """
             CREATE TABLE source_search(seq INTEGER PRIMARY KEY AUTOINCREMENT,source_id TEXT NOT NULL UNIQUE REFERENCES remote_sources(id) ON DELETE CASCADE,
@@ -62,7 +62,7 @@ public sealed partial class ScienceStore
             using var rows = read.ExecuteReader();
             while (rows.Read()) IndexSource(db, tx, ReadCatalog<ScientificSource>(rows.GetString(0)));
         }
-        command.CommandText = "PRAGMA user_version=4"; command.ExecuteNonQuery(); tx.Commit();
+        command.CommandText = "INSERT OR REPLACE INTO metadata VALUES('source_bounds_policy','2'); PRAGMA user_version=4"; command.ExecuteNonQuery(); tx.Commit();
         command.Transaction = null; command.CommandText = "PRAGMA integrity_check";
         if (command.ExecuteScalar() as string != "ok") throw new IOException("Library source-index migration failed integrity verification; restore its preserved backup.");
         sourceIndexReady = true;
@@ -88,8 +88,9 @@ public sealed partial class ScienceStore
         command.Parameters.AddWithValue("$collection",collection); command.Parameters.AddWithValue("$product",product);
         command.Parameters.AddWithValue("$observation",(object?)m.ObservationUtc?.ToString("O")??DBNull.Value);
         command.Parameters.AddWithValue("$bytes",source.Files.Sum(f=>f.Bytes));
-        command.Parameters.AddWithValue("$west",corners.Min(p=>p.Longitude)); command.Parameters.AddWithValue("$east",corners.Max(p=>p.Longitude));
-        command.Parameters.AddWithValue("$south",corners.Min(p=>p.Latitude)); command.Parameters.AddWithValue("$north",corners.Max(p=>p.Latitude));
+        var bounds=SourceIndexBounds(source);
+        command.Parameters.AddWithValue("$west",bounds.West); command.Parameters.AddWithValue("$east",bounds.East);
+        command.Parameters.AddWithValue("$south",bounds.South); command.Parameters.AddWithValue("$north",bounds.North);
         command.Parameters.AddWithValue("$search",string.Join(' ',m.Name,m.Provider,m.SceneId,m.VerticalDatum,m.Kind,m.Notes).ToLowerInvariant()); command.ExecuteNonQuery();
         var json=JsonSerializer.Serialize(source,WireJson.Options);
         foreach(var id in SourceIdentityPattern.Matches(json).Select(match=>Guid.Parse(match.Value)).Where(id=>id!=source.Id).Distinct())
@@ -97,6 +98,39 @@ public sealed partial class ScienceStore
             command.Parameters.Clear(); command.CommandText="INSERT INTO source_references VALUES($id,$target)";
             command.Parameters.AddWithValue("$id",source.Id.ToString());command.Parameters.AddWithValue("$target",id.ToString());command.ExecuteNonQuery();
         }
+    }
+    private static GeographicBounds SourceIndexBounds(ScientificSource source)
+    {
+        var corners=source.Grids.Values.SelectMany(ScientificRaster.GridCoverage).ToArray();
+        var west=corners.Min(p=>p.Longitude);var east=corners.Max(p=>p.Longitude);var south=corners.Min(p=>p.Latitude);var north=corners.Max(p=>p.Latitude);
+        foreach(var grid in source.Grids.Values.Where(g=>g.Crs!="EPSG:4326"))
+        {
+            // A UTM edge is curved in WGS84: its four corners cannot safely prune
+            // candidates. Use the existing Project() supported domain, then let
+            // GridCovers and original QA make the exact scientific decision.
+            var epsg=int.Parse(grid.Crs.AsSpan(5),System.Globalization.CultureInfo.InvariantCulture);
+            if(epsg is not (>=32601 and <=32660 or >=32701 and <=32760))throw new IOException("Source index CRS is unsupported; original files preserved.");
+            var central=(epsg%100)*6-183;var left=central-12d;var right=central+12d;
+            if(left< -180||right>180){left=-180;right=180;}
+            west=Math.Min(west,left);east=Math.Max(east,right);south=Math.Min(south,-80);north=Math.Max(north,84);
+        }
+        return new(west,south,east,north);
+    }
+    private static void UpgradeSourceBoundsPolicy(SqliteConnection db)
+    {
+        using var command=db.CreateCommand();command.CommandText="SELECT value FROM metadata WHERE key='source_bounds_policy'";var policy=command.ExecuteScalar() as string;if(policy=="2")return;
+        if(policy is not (null or "1"))throw new IOException("Unsupported scientific source-index policy; original data was preserved.");
+        // Derived-index repair only. Immutable source payloads/files and schema 4
+        // are unchanged; transaction rollback preserves the previous index.
+        using var tx=db.BeginTransaction();command.Transaction=tx;
+        using(var read=db.CreateCommand()){
+            read.Transaction=tx;read.CommandText="SELECT payload_json FROM remote_sources";using var rows=read.ExecuteReader();while(rows.Read()){
+                var source=ReadCatalog<ScientificSource>(rows.GetString(0));var bounds=SourceIndexBounds(source);
+                command.Parameters.Clear();command.CommandText="UPDATE source_search SET west=$w,east=$e,south=$s,north=$n WHERE source_id=$id; UPDATE source_bounds SET west=$w,east=$e,south=$s,north=$n WHERE seq=(SELECT seq FROM source_search WHERE source_id=$id)";
+                command.Parameters.AddWithValue("$id",source.Id.ToString());command.Parameters.AddWithValue("$w",bounds.West);command.Parameters.AddWithValue("$e",bounds.East);command.Parameters.AddWithValue("$s",bounds.South);command.Parameters.AddWithValue("$n",bounds.North);command.ExecuteNonQuery();
+            }
+        }
+        command.Parameters.Clear();command.CommandText="INSERT OR REPLACE INTO metadata VALUES('source_bounds_policy','2')";command.ExecuteNonQuery();tx.Commit();
     }
     private static string SourceWhere(SqliteCommand command,SourceQuery? query)
     {
