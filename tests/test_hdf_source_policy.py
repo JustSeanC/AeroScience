@@ -70,7 +70,7 @@ class RestrictedHdfSourceTests(unittest.TestCase):
     def test_actual_recipe_pins_all_reviewed_files_and_notices(self):
         recipe = json.loads(policy.RECIPE.read_text())
         self.assertEqual(len(recipe['files']), 275)
-        self.assertEqual(len(recipe['patchedSha256']), 3)
+        self.assertEqual(len(recipe['patchedSha256']), 4)
         self.assertEqual(recipe['commit'], 'c2cea464ad2a6649258ab14c8d798cb6239b9e1e')
         for name, expected in recipe['notices'].items():
             self.assertEqual(policy.digest((ROOT/'tests/AeroScience.SafeHdfSource'/name).read_bytes()), expected)

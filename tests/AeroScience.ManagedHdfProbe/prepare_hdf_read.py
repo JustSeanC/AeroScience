@@ -74,6 +74,26 @@ def prepare(upstream, output):
     patch(driver, '''RandomAccess.Read(_handle, buffer, Position);
         _position.Value += size;''', '''// Do not decode short metadata from uninitialized stack bytes.
         ReadCore(buffer);''')
+    native_file = 'VOL/Native/API.Reading/NativeFile.cs'
+    patch(native_file, '''        if (!BitConverter.IsLittleEndian)
+            throw new Exception("This library only works on little endian systems.");''', '''        try
+        {
+        if (!BitConverter.IsLittleEndian)
+            throw new Exception("This library only works on little endian systems.");''')
+    patch(native_file, '''        return file;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]''', '''        return file;
+        }
+        catch
+        {
+            // A failed constructor cannot leak a locked source handle on Windows.
+            driver.Dispose();
+            throw;
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]''')
     for name, data in values.items():
         if digest(data) != recipe['patchedSha256'].get(name, recipe['files'][name]):
             raise ValueError('Prepared policy source does not match its reviewed hash.')

@@ -52,6 +52,9 @@ internal static class SecurityChecks
                 try { using var file = H5File.OpenRead(path); _ = file.Dataset("reflectance"); }
                 catch (Exception error) when (error is not OutOfMemoryException and not StackOverflowException) { rejected = true; }
                 if (!rejected) throw new InvalidDataException("Truncated scientific metadata was accepted.");
+                // The failure must release its input handle immediately; do not rely
+                // on GC/finalizers or suppress a Windows locked-file failure.
+                using(var exclusive=File.Open(path,FileMode.Open,FileAccess.ReadWrite,FileShare.None)){}
                 checks++;
             }
         }

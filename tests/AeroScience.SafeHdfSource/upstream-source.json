@@ -287,6 +287,7 @@
   "patchedSha256": {
     "VFD/H5FileHandleDriver.Reading.cs": "90e65a8da0025c7065169710e10d2fc438a8577247e873d901217dc3a6f7eed7",
     "VOL/Native/API.Reading/NativeDataset.cs": "a52e23fd272b7029be17d2a026a1e46f73cb7b5335addd16666ced87b9526848",
-    "VOL/Native/API.Reading/NativeGroup.cs": "ea4b4014c1d1a545b02fb3756adc92dccaba8f7e4b779654405b7f01ae4a3ce0"
+    "VOL/Native/API.Reading/NativeGroup.cs": "ea4b4014c1d1a545b02fb3756adc92dccaba8f7e4b779654405b7f01ae4a3ce0",
+    "VOL/Native/API.Reading/NativeFile.cs": "5639478875fb14ca4c080faf29231f92b38cc8d909dc17a68662f9cb50b80b15"
   }
 }
