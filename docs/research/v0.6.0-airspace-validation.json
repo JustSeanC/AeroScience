@@ -345,5 +345,89 @@
       "windowsHelpersPassed": 118,
       "windowsHelpersSkipped": 1
     }
+  },
+  "partialArcFollowup": {
+    "sourceCommit": "9718eae05d25e1826927cd6d79f4a8a50a8baa05",
+    "recordedUtc": "2026-10-24T00:10:32.897025+00:00",
+    "evidenceClass": "Genuine FAA originals; independent pyshp/Shapely/ElementTree versus retained NTS geometry. Offline read-only verification.",
+    "method": "Actual offline reimport in an isolated copy; PROJ/Shapely independent geometry comparison, original archive/files hash verified; no network, no mission creation. Prior interpretations preserved.",
+    "result": {
+      "evidenceClass": "Genuine FAA originals; independent pyshp/Shapely/ElementTree versus retained NTS geometry. Offline read-only verification.",
+      "results": [
+        {
+          "family": "CLASS",
+          "edition": "2026-10-01",
+          "originalSha256": "7057b1a982d5dd5df4d92a5101d222854b415c5ad163d464de36d94100e20201",
+          "featuresCompared": 5610,
+          "originalCoordinateComponentsCompared": 24575338,
+          "originalAttributeFieldsChecked": 140250,
+          "maximumCoordinateDifference": 0.0,
+          "regions": {
+            "Massachusetts": 113,
+            "California": 550
+          },
+          "explicitUnsupportedRecords": 2,
+          "sourceCrs": "EPSG:4269 (NAD83; realization/epoch unspecified by FAA PRJ)"
+        },
+        {
+          "family": "SUA",
+          "edition": "2026-10-01",
+          "originalSha256": "5bd6c9221ec61d1a9af22b18fe4d59d9378d2c38859d9c1a3619c26ff00b657b",
+          "featuresCompared": 901,
+          "originalCoordinateComponentsCompared": 30340,
+          "originalAttributeFieldsChecked": 17119,
+          "maximumCoordinateDifference": 0.0,
+          "regions": {
+            "Massachusetts": 9,
+            "California": 131
+          },
+          "explicitUnsupportedRecords": 335,
+          "sourceCrs": "OGC:CRS84 (WGS84 longitude/latitude)"
+        },
+        {
+          "family": "SUA",
+          "edition": "2026-10-01",
+          "originalSha256": "5bd6c9221ec61d1a9af22b18fe4d59d9378d2c38859d9c1a3619c26ff00b657b",
+          "featuresCompared": 941,
+          "originalCoordinateComponentsCompared": 47462,
+          "originalAttributeFieldsChecked": 17919,
+          "maximumCoordinateDifference": 2.864289338439558e-14,
+          "regions": {
+            "Massachusetts": 9,
+            "California": 134
+          },
+          "explicitUnsupportedRecords": 295,
+          "sourceCrs": "OGC:CRS84 (WGS84 longitude/latitude)"
+        },
+        {
+          "family": "SUA",
+          "edition": "2026-10-01",
+          "originalSha256": "5bd6c9221ec61d1a9af22b18fe4d59d9378d2c38859d9c1a3619c26ff00b657b",
+          "featuresCompared": 979,
+          "originalCoordinateComponentsCompared": 54264,
+          "originalAttributeFieldsChecked": 18679,
+          "maximumCoordinateDifference": 2.864289338439558e-14,
+          "regions": {
+            "Massachusetts": 9,
+            "California": 137
+          },
+          "explicitUnsupportedRecords": 257,
+          "sourceCrs": "OGC:CRS84 (WGS84 longitude/latitude)"
+        }
+      ],
+      "limitations": [
+        "No live activation, TFR clearance, certified positional accuracy or owner-installed Windows acceptance.",
+        "Only explicit increasing minor arcs with endpoint joins <=0.5 m are supported in adapter 3; angular wraps, major/reversed arcs, discrepant source endpoints and composites/contributors remain omitted. Derived circles/arcs independently compared with PROJ, not certified boundary accuracy.",
+        "NAD83 coordinates preserved without claiming a precise WGS84 transformation."
+      ]
+    },
+    "rawReceipt": "/workspace/AeroScience-060-final-20261023/airspace-arcs/independent-arcs.json",
+    "runtimeFilesSha256": {
+      "src/AeroScience.Missions/AviationSaaArc.cs": "018b4c0756450496f4265570f9074f7c08ff2e9a4a925d637f11d9727c9cf16c",
+      "src/AeroScience.Missions/AviationSaa.cs": "2f36042d7dc3cd43adc1836f10d76efc2f71b0887297d6aa15028d90cb8625e8",
+      "src/AeroScience.Missions/AviationAirspace.cs": "0d43457b436250f52bd9ff418801a4a3d4a23323eb42120eebfffe99d35735e5",
+      "src/AeroScience.Missions/AviationAirspaceStore.cs": "ca1f8c39d5870323570dd474c90fcc5ba20bcb6cdcb5888460fc2c1a0ecfbdaa",
+      "scripts/research/verify_airspace_originals.py": "c83c9f523a0f956c5a9c2e3cd0da9740e0b8debc334eabddbb78fa101142e6c9"
+    }
   }
 }
