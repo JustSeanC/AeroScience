@@ -7,6 +7,10 @@ namespace AeroScience.Tests;
 
 public sealed class ScientificLibraryFolderTests : IDisposable
 {
+    private sealed class UnixSymlinkFactAttribute:FactAttribute
+    {
+        public UnixSymlinkFactAttribute(){if(OperatingSystem.IsWindows())Skip="Unix symlink fixture; installed Windows junction/privilege acceptance remains pending.";}
+    }
     private readonly string root=Path.Combine(Path.GetTempPath(),"aeroscience-folder-"+Guid.NewGuid().ToString("N"));
     private sealed class Opener:IScientificFolderOpener
     {
@@ -35,7 +39,7 @@ public sealed class ScientificLibraryFolderTests : IDisposable
         var f=Setup();using var science=f.Science;
         var source=await science.ImportSourceAsync(RemoteFixtureFiles.Create(Path.Combine(root,"user"),RemoteKind.Terrain));
         var before=source.Files.Select(file=>File.ReadAllBytes(Path.Combine(science.DirectoryPath,source.RelativeDirectory,file.RelativePath))).ToArray();
-        Assert.Equal(Path.Combine(science.DirectoryPath,source.RelativeDirectory),f.Folders.Location(true,source.Id).Path);
+        Assert.Equal(Path.Combine(science.DirectoryPath,"Sources",source.Id.ToString("N")),f.Folders.Location(true,source.Id).Path);
         f.Folders.Open(true,new(science.LibraryId,source.Id));Assert.Equal(source.Id,f.Opener.Source);
         Assert.Throws<ArgumentException>(()=>f.Folders.Open(true,new(science.LibraryId,Guid.NewGuid())));
         foreach(var pair in source.Files.Select((file,i)=>(file,i)))Assert.Equal(before[pair.i],File.ReadAllBytes(Path.Combine(science.DirectoryPath,source.RelativeDirectory,pair.file.RelativePath)));
@@ -49,9 +53,8 @@ public sealed class ScientificLibraryFolderTests : IDisposable
         Assert.False(location.Available);Assert.False(location.CanOpen);Assert.Equal(science.DirectoryPath,location.Path);Assert.NotNull(location.Error);
         Assert.Throws<IOException>(()=>f.Folders.Open(true,new(id)));Assert.False(Directory.Exists(science.DirectoryPath));Assert.Equal(0,f.Opener.Calls);
     }
-    [Fact]public async Task LinkedSourceDirectoryIsRejected()
+    [UnixSymlinkFact]public async Task LinkedSourceDirectoryIsRejected()
     {
-        if(OperatingSystem.IsWindows())return; // Actual Windows reparse behavior remains in platform coverage.
         var f=Setup();using var science=f.Science;var source=await science.ImportSourceAsync(RemoteFixtureFiles.Create(Path.Combine(root,"user"),RemoteKind.Terrain));
         var path=Path.Combine(science.DirectoryPath,source.RelativeDirectory);Directory.Move(path,path+".held");Directory.CreateSymbolicLink(path,path+".held");
         Assert.False(f.Folders.Location(true,source.Id).Available);Assert.Throws<IOException>(()=>f.Folders.Open(true,new(science.LibraryId,source.Id)));Assert.Equal(0,f.Opener.Calls);
