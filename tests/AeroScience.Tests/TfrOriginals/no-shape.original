@@ -1,0 +1,121 @@
+[ {
+  "notam_id" : "6/9978",
+  "cns_location_id" : "ZAB",
+  "notam_key" : "6/9978-1-FDC-F",
+  "title" : "U.S. MEXICO BORDER, TX, Tuesday, October 20, 2026 through Tuesday, October 19, 2027 UTC",
+  "last_modification_datetime" : "202610161819",
+  "state" : "TX",
+  "legal" : "SECURITY"
+}, {
+  "notam_id" : "6/9954",
+  "cns_location_id" : "ZLA",
+  "notam_key" : "6/9954-1-FDC-F",
+  "title" : "U.S. MEXICO BORDER, AZ, Tuesday, October 20, 2026 through Tuesday, October 19, 2027 UTC",
+  "last_modification_datetime" : "202610161644",
+  "state" : "AZ",
+  "legal" : "SECURITY"
+}, {
+  "notam_id" : "6/9956",
+  "cns_location_id" : "ZHU",
+  "notam_key" : "6/9956-1-FDC-F",
+  "title" : "U.S MEXICO BORDER, TX, Tuesday, October 20, 2026 through Tuesday, October 19, 2027 UTC",
+  "last_modification_datetime" : "202610161644",
+  "state" : "TX",
+  "legal" : "SECURITY"
+}, {
+  "notam_id" : "6/3366",
+  "cns_location_id" : "FDC",
+  "notam_key" : "6/3366-1-FDC-F",
+  "title" : "  USA, Thursday, April 16, 2026 through Sunday, April 16, 2028 UTC",
+  "last_modification_datetime" : "202604161717",
+  "state" : "USA",
+  "legal" : "SECURITY"
+}, {
+  "notam_id" : "5/3402",
+  "cns_location_id" : "FDC",
+  "notam_key" : "5/3402-1-FDC-F",
+  "title" : "  USA, Thursday, November 6, 2025 UTC",
+  "last_modification_datetime" : "202511061946",
+  "state" : "USA",
+  "legal" : "SECURITY"
+}, {
+  "notam_id" : "5/6379",
+  "cns_location_id" : "FDC",
+  "notam_key" : "5/6379-1-FDC-F",
+  "title" : "  USA, Wednesday, October 29, 2025 through Friday, October 29, 2027 UTC",
+  "last_modification_datetime" : "202510250139",
+  "state" : "USA",
+  "legal" : "SECURITY"
+}, {
+  "notam_id" : "5/7224",
+  "cns_location_id" : "ZDC",
+  "notam_key" : "5/7224-1-FDC-F",
+  "title" : "WASHINGTON, DC, Wednesday, September 3, 2025 UTC",
+  "last_modification_datetime" : "202509031606",
+  "state" : "DC",
+  "legal" : "SECURITY"
+}, {
+  "notam_id" : "5/6874",
+  "cns_location_id" : "FDC",
+  "notam_key" : "5/6874-1-FDC-F",
+  "title" : "  USA, Saturday, March 1, 2025 through Wednesday, March 31, 2027 UTC",
+  "last_modification_datetime" : "202502260113",
+  "state" : "USA",
+  "legal" : "SECURITY"
+}, {
+  "notam_id" : "4/9433",
+  "cns_location_id" : "ZDC",
+  "notam_key" : "4/9433-1-FDC-F",
+  "title" : "  USA, Tuesday, September 3, 2024 UTC",
+  "last_modification_datetime" : "202409032122",
+  "state" : "USA",
+  "legal" : "SECURITY"
+}, {
+  "notam_id" : "4/2565",
+  "cns_location_id" : "ZDC",
+  "notam_key" : "4/2565-1-FDC-F",
+  "title" : "  USA, Monday, June 24, 2024 UTC",
+  "last_modification_datetime" : "202406241547",
+  "state" : "USA",
+  "legal" : "SECURITY"
+}, {
+  "notam_id" : "4/1789",
+  "cns_location_id" : "ZDC",
+  "notam_key" : "4/1789-1-FDC-F",
+  "title" : "  USA, Friday, June 21, 2024 UTC",
+  "last_modification_datetime" : "202406211730",
+  "state" : "USA",
+  "legal" : "SECURITY"
+}, {
+  "notam_id" : "1/5060",
+  "cns_location_id" : "FDC",
+  "notam_key" : "1/5060-1-FDC-F",
+  "title" : "  USA, Wednesday, September 29, 2021 UTC",
+  "last_modification_datetime" : "202401270823",
+  "state" : "USA",
+  "legal" : "SPECIAL"
+}, {
+  "notam_id" : "2/8783",
+  "cns_location_id" : "FDC",
+  "notam_key" : "2/8783-1-FDC-F",
+  "title" : "  USA, Monday, February 28, 2022 UTC",
+  "last_modification_datetime" : "202401270823",
+  "state" : "USA",
+  "legal" : "SECURITY"
+}, {
+  "notam_id" : "0/0367",
+  "cns_location_id" : "FDC",
+  "notam_key" : "0/0367-1-FDC-F",
+  "title" : "  USA, Wednesday, January 15, 2020 UTC",
+  "last_modification_datetime" : "202001022307",
+  "state" : "USA",
+  "legal" : "SECURITY"
+}, {
+  "notam_id" : "6/8818",
+  "cns_location_id" : "FDC",
+  "notam_key" : "6/8818-1-FDC-F",
+  "title" : "Special Notice, USA",
+  "last_modification_datetime" : "201603231540",
+  "state" : "USA",
+  "legal" : "SECURITY"
+} ]

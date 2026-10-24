@@ -18,4 +18,5 @@
     <Compile Include="../AeroScience.ProviderAcceptance/NasaOriginalAcceptance.cs" Link="Acceptance/NasaOriginalAcceptance.cs" />
   </ItemGroup>
 <ItemGroup><None Include="../AeroScience.EmitApplicationFixtures/**/*.nc" Link="EmitApplicationFixtures/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" /></ItemGroup>
+<ItemGroup><None Include="TfrOriginals/*.original" Link="TfrOriginals/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" /></ItemGroup>
 </Project>

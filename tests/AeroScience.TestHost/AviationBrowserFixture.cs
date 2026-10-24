@@ -29,6 +29,15 @@ public sealed class AviationBrowserFixture : HttpMessageHandler
     {
         Interlocked.Increment(ref Calls);
         if (Mode == "outage") return Task.FromResult(new HttpResponseMessage(HttpStatusCode.ServiceUnavailable));
+        if(Mode=="tfr-originals"&&request.RequestUri!.Host=="tfr.faa.gov")
+        {
+            var uri=request.RequestUri.AbsoluteUri;byte[] bytes;
+            if(uri==AviationTfr.NoticesUrl)bytes=TfrOriginalFiles.Read("notices");
+            else if(uri==AviationTfr.NoShapeUrl)bytes=TfrOriginalFiles.Read("no-shape");
+            else if(uri==AviationTfr.GeometryUrl)bytes=TfrOriginalFiles.Read("geometry");
+            else{var id=new[]{"6/2070","6/2069","6/2014","6/9169"}.Single(id=>uri==AviationTfrOperations.Url(id)||uri==AviationTfrOperations.Url(id,true));bytes=TfrOriginalFiles.Packet(id,uri.EndsWith(".aixm50",StringComparison.Ordinal));}
+            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK){Content=new ByteArrayContent(bytes)});
+        }
         if(Mode=="tfr"&&request.RequestUri!.Host=="tfr.faa.gov")return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK){Content=new ByteArrayContent(request.RequestUri.AbsoluteUri==AeroScience.Missions.AviationTfr.NoticesUrl?SyntheticTfr.Notices():request.RequestUri.AbsoluteUri==AeroScience.Missions.AviationTfr.NoShapeUrl?SyntheticTfr.NoShape():SyntheticTfr.Geometry())});
         if (request.RequestUri!.Host == "nfdc.faa.gov")
         {

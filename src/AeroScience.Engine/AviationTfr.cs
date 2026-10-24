@@ -11,7 +11,7 @@ namespace AeroScience.Engine;
 public sealed partial class AviationReference
 {
     private (Guid Store,DateTimeOffset Retrieved,AviationTfrGeometrySnapshot Snapshot,STRtree<(AviationTfrBoundary Boundary,Geometry Geometry)> Index)? tfrIndex;
-    public object TfrConfiguration(){lock(gate){var p=Preferences();return new{p.TfrMonitoringEnabled,p.OnlineEnabled,minimumRefreshSeconds=300,privacy="One companion host retrieves at most three bounded official metadata responses. Paired devices read retained data; polling is opt-in. No complete real-world restriction feed is promised."};}}
+    public object TfrConfiguration(){lock(gate){var p=Preferences();return new{p.TfrMonitoringEnabled,p.OnlineEnabled,minimumRefreshSeconds=300,privacy="One companion host retrieves three bounded inventory/geometry responses. Selected operational details require an explicit retrieval of two bounded official packets per notice. Paired devices read the host cache; polling is opt-in. No complete real-world restriction feed is promised."};}}
     public object ConfigureTfr(bool enabled)
     {
         lock(gate){var p=Preferences();if(enabled&&!p.OnlineEnabled)throw new InvalidOperationException("Enable FAA reference consent before TFR monitoring.");PreferenceStore.WriteAtomic(settingsPath,p with{TfrMonitoringEnabled=enabled});return TfrConfiguration();}
@@ -26,7 +26,7 @@ public sealed partial class AviationReference
         }
         try{await RefreshTfr(token);}catch(InvalidOperationException){/* Another explicit refresh or consent change won the race; no automatic retry loop. */}
     }
-    private async Task<byte[]> TfrBytes(string url,CancellationToken token)
+    private async Task<byte[]> TfrBytes(string url,CancellationToken token,int maximumBytes=AviationCatalog.MaximumMetadataBytes)
     {
         using var deadline=CancellationTokenSource.CreateLinkedTokenSource(token);deadline.CancelAfter(TimeSpan.FromSeconds(30));token=deadline.Token;
         lock(gate){var p=Preferences();if(!p.OnlineEnabled||p.UnmeteredOnly&&(unmetered??NetworkCost.IsUnmetered)()!=true)throw new InvalidOperationException("FAA consent or network policy prevents retrieval.");}
@@ -39,9 +39,9 @@ public sealed partial class AviationReference
             throw new HttpRequestException("FAA retry guidance retained",null,response.StatusCode);
         }
         if((int)response.StatusCode is >=300 and <400||response.Headers.Location is not null)throw new InvalidDataException("Unsupported FAA redirect; no authentication forwarded.");
-        response.EnsureSuccessStatusCode();if(response.Content.Headers.ContentLength>AviationCatalog.MaximumMetadataBytes)throw new InvalidDataException("FAA metadata exceeds 4 MiB.");
+        response.EnsureSuccessStatusCode();if(response.Content.Headers.ContentLength>maximumBytes)throw new InvalidDataException("FAA metadata exceeds its bounded request allowance.");
         using var output=new MemoryStream();await using var input=await response.Content.ReadAsStreamAsync(token);var buffer=new byte[32768];
-        while(true){var count=await input.ReadAsync(buffer,token);if(count==0)break;if(output.Length+count>AviationCatalog.MaximumMetadataBytes)throw new InvalidDataException("FAA metadata exceeds 4 MiB.");output.Write(buffer,0,count);}
+        while(true){var count=await input.ReadAsync(buffer,token);if(count==0)break;if(output.Length+count>maximumBytes)throw new InvalidDataException("FAA metadata exceeds its bounded request allowance.");output.Write(buffer,0,count);}
         return output.ToArray();
     }
     public async Task<object> RefreshTfr(CancellationToken token=default)
@@ -112,14 +112,15 @@ public sealed partial class AviationReference
             if(retained is null)return new(1,TfrFreshness(status),status,null,false,offset,null,0,0,[],0,AeroScience.Missions.AviationTfr.Limitations);
             var (snapshot,index)=retained.Value;var bounds=new Envelope(west,east,south,north);var region=new GeometryFactory().ToGeometry(bounds);
             var candidates=index.Query(bounds).OrderBy(e=>e.Boundary.Id,StringComparer.Ordinal).ToArray();var result=new List<AviationTfrBoundary>();var vertices=0;var cursor=offset;
-            foreach(var b in candidates.Skip(offset).Take(100)){if(vertices+b.Geometry.NumPoints>25000)break;cursor++;if(!b.Geometry.Intersects(region))continue;vertices+=b.Geometry.NumPoints;result.Add(b.Boundary);}
+            var views=new Dictionary<string,(AviationTfrOperationalView,AviationTfrInterpretation?)>();
+            foreach(var b in candidates.Skip(offset).Take(100)){if(vertices+b.Geometry.NumPoints>25000)break;cursor++;if(!b.Geometry.Intersects(region))continue;vertices+=b.Geometry.NumPoints;result.Add(WithOperations(store,snapshot,b.Boundary,views));}
             return new(1,TfrFreshness(status),status,snapshot.RetrievedUtc,false,offset,cursor<candidates.Length?cursor:null,candidates.Length,vertices,result.ToArray(),snapshot.NoticeIds.Except(snapshot.Boundaries.Select(b=>b.NotamId)).Count(),snapshot.Limitations);
         }
     }
     public AviationTfrScreenResult ScreenTfr(AviationTfrScreenRequest request)
     {
         if(request.Version!=1)throw new NotSupportedException("Unsupported TFR screening request version.");
-        if(request.Route.Length>512||request.Area?.Length>1024||request.Route.Concat(request.Area??[]).Any(c=>!double.IsFinite(c.Latitude)||!double.IsFinite(c.Longitude)||Math.Abs(c.Latitude)>85||Math.Abs(c.Longitude)>180)||request.TimeBasis is not("Unspecified" or "Real-world planned UTC" or "Simulator time"))throw new ArgumentException("Bound route/area inputs and identify real-world versus simulator time.");
+        if(request.Route is null||request.Route.Length>512||request.Area?.Length>1024||request.Route.Concat(request.Area??[]).Any(c=>c is null||!double.IsFinite(c.Latitude)||!double.IsFinite(c.Longitude)||Math.Abs(c.Latitude)>85||Math.Abs(c.Longitude)>180)||request.TimeBasis is not("Unspecified" or "Real-world planned UTC" or "Simulator time"))throw new ArgumentException("Bound route/area inputs and identify real-world versus simulator time.");
         var points=request.Route.Concat(request.Area??[]).ToArray();if(points.Length==0)throw new ArgumentException("Supply an actual route or study polygon.");
         if(points.Max(c=>c.Longitude)-points.Min(c=>c.Longitude)>30||points.Max(c=>c.Latitude)-points.Min(c=>c.Latitude)>30)throw new NotSupportedException("Split extreme/dateline routes before TFR screening.");
         if(request.MinimumMslFeet is {} min&&!double.IsFinite(min)||request.MaximumMslFeet is {} max&&!double.IsFinite(max)||request.MinimumMslFeet>request.MaximumMslFeet||request.PlannedStartUtc>request.PlannedEndUtc)throw new ArgumentException("Invalid planned altitude/time interval.");
@@ -129,9 +130,10 @@ public sealed partial class AviationReference
         var geometry=factory.CreateGeometryCollection(shapes.ToArray());
         lock(gate)
         {
-            AviationCacheStatus? cache=null;AviationTfrGeometrySnapshot? snapshot=null;string[] matches=[];
-            if(Preferences().StoreId is not null){using var store=Open(Preferences());cache=store.Status(AeroScience.Missions.AviationTfr.Kind);var retained=ReadTfr(store);if(retained is not null){snapshot=retained.Value.Snapshot;matches=retained.Value.Index.Query(geometry.EnvelopeInternal).Where(b=>b.Geometry.Intersects(geometry)).Select(b=>b.Boundary.NotamId).Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal).ToArray();}}
-            return new(1,matches.Length>0?"Potential intersection":"Unable to determine",matches.Length>0?"Published horizontal boundaries intersect the supplied plan. Altitude, exact activation, cancellation, segment identity and snapshot completeness are unverified; review the official notices.":"No intersection was found in the available shapes, or no shapes are retained. Missing boundaries, stale/partial coverage and unknown time/altitude prevent an all-clear.",matches,snapshot?.RetrievedUtc,TfrFreshness(cache),false,AeroScience.Missions.AviationTfr.Limitations);
+            AviationCacheStatus? cache=null;AviationTfrGeometrySnapshot? snapshot=null;var findings=new List<AviationTfrScreenFinding>();
+            if(Preferences().StoreId is not null){using var store=Open(Preferences());cache=store.Status(AeroScience.Missions.AviationTfr.Kind);var retained=ReadTfr(store);if(retained is not null){snapshot=retained.Value.Snapshot;var views=new Dictionary<string,(AviationTfrOperationalView,AviationTfrInterpretation?)>();foreach(var b in retained.Value.Index.Query(geometry.EnvelopeInternal).Where(b=>b.Geometry.Intersects(geometry)).OrderBy(b=>b.Boundary.Id,StringComparer.Ordinal))findings.Add(ScreenBoundary(WithOperations(store,snapshot,b.Boundary,views),request));}}
+            var matches=findings.Where(f=>f.Outcome=="Potential intersection").Select(f=>f.NotamId).Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal).ToArray();
+            return new(1,matches.Length>0?"Potential intersection":"Unable to determine",matches.Length>0?"Published horizontal boundaries intersect the supplied plan. Per-area findings distinguish supported time/altitude evidence from Unknown. Cancellation, legal applicability and snapshot completeness remain unverified; review the official notices.":"No potentially intersecting area was established in assessed dimensions. Missing boundaries, stale/partial coverage and unverified lifecycle prevent an all-clear.",matches,snapshot?.RetrievedUtc,TfrFreshness(cache),false,AeroScience.Missions.AviationTfr.Limitations,findings.ToArray());
         }
     }
 }

@@ -1,0 +1,133 @@
+[
+  {
+    "name": "notices",
+    "url": "https://tfr.faa.gov/tfrapi/getTfrList",
+    "status": 200,
+    "bytes": 21993,
+    "sha256": "393d85a7abf9188ac83ab586e2b466f7488aebd5d03b0ed1338690f620d1aea7",
+    "retrievedUtc": "2026-10-24T18:56:06.465608+00:00",
+    "contentType": "application/json",
+    "shape": [
+      "notam_id",
+      "facility",
+      "state",
+      "type",
+      "description",
+      "mod_date",
+      "mod_abs_time",
+      "is_new",
+      "gid"
+    ],
+    "count": 76
+  },
+  {
+    "name": "no-shape",
+    "url": "https://tfr.faa.gov/tfrapi/noShapeTfrList",
+    "status": 200,
+    "bytes": 3781,
+    "sha256": "261c1b094050f0c3b7f43677fbf39861a8b46410274958ea44c9d4e84d335e6f",
+    "retrievedUtc": "2026-10-24T18:56:06.510166+00:00",
+    "contentType": "application/json",
+    "shape": [
+      "notam_id",
+      "cns_location_id",
+      "notam_key",
+      "title",
+      "last_modification_datetime",
+      "state",
+      "legal"
+    ],
+    "count": 15
+  },
+  {
+    "name": "geometry",
+    "url": "https://tfr.faa.gov/geoserver/TFR/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=TFR:V_TFR_LOC&maxFeatures=2000&outputFormat=application/json&srsname=EPSG:3857",
+    "status": 200,
+    "bytes": 147931,
+    "sha256": "93f56254ae559639a1c3f490cffebe587698ec9fcf3181ebde1eefba299fd780",
+    "retrievedUtc": "2026-10-24T18:56:06.733445+00:00",
+    "contentType": "application/json;charset=UTF-8",
+    "shape": [
+      "type",
+      "features",
+      "totalFeatures",
+      "numberMatched",
+      "numberReturned",
+      "timeStamp",
+      "crs"
+    ],
+    "count": 82
+  },
+  {
+    "name": "notice-xml",
+    "url": "https://tfr.faa.gov/download/detail_6_2070.xml",
+    "status": 200,
+    "bytes": 32848,
+    "sha256": "c5c5b96608db16f5b79f3ea220b0150f44acccce4c3df180a13da9f1706128f3",
+    "retrievedUtc": "2026-10-24T18:59:39.937200+00:00",
+    "contentType": "application/xml"
+  },
+  {
+    "name": "notice-aixm",
+    "url": "https://tfr.faa.gov/download/detail_6_2070.aixm50",
+    "status": 200,
+    "bytes": 55012,
+    "sha256": "a0ca3dc213caf50ffa130bc92206639b8f7c225f633dacfc36e25513a41cbab0",
+    "retrievedUtc": "2026-10-24T18:59:40.129135+00:00",
+    "contentType": null
+  },
+  {
+    "name": "xml-6_2069",
+    "url": "https://tfr.faa.gov/download/detail_6_2069.xml",
+    "status": 200,
+    "bytes": 47441,
+    "sha256": "103b4322675ae776a7da96b9a32816353cccc0dd326c91fc520a35a04dfb17e8",
+    "retrievedUtc": "2026-10-24T19:00:25.891529+00:00",
+    "contentType": "application/xml"
+  },
+  {
+    "name": "aixm-6_2069",
+    "url": "https://tfr.faa.gov/download/detail_6_2069.aixm50",
+    "status": 200,
+    "bytes": 71578,
+    "sha256": "661b5eab81a9f53889ab3b68fcbfa39ea2184c225523bbdcc924f483533c5a91",
+    "retrievedUtc": "2026-10-24T19:00:25.849614+00:00",
+    "contentType": null
+  },
+  {
+    "name": "xml-6_2014",
+    "url": "https://tfr.faa.gov/download/detail_6_2014.xml",
+    "status": 200,
+    "bytes": 26632,
+    "sha256": "a370f4e9f55463b5a03dd90b9327e4a610f294dca544bed32698b173b90ed0e2",
+    "retrievedUtc": "2026-10-24T19:00:26.047581+00:00",
+    "contentType": "application/xml"
+  },
+  {
+    "name": "aixm-6_2014",
+    "url": "https://tfr.faa.gov/download/detail_6_2014.aixm50",
+    "status": 200,
+    "bytes": 44748,
+    "sha256": "1120b9653ba6fc0679a5aaf1fad8a4004cfc065cb42a5c37061795c479d22b56",
+    "retrievedUtc": "2026-10-24T19:00:26.144694+00:00",
+    "contentType": null
+  },
+  {
+    "name": "xml-6_9169",
+    "url": "https://tfr.faa.gov/download/detail_6_9169.xml",
+    "status": 200,
+    "bytes": 32901,
+    "sha256": "f2a2362a8b3b6938e4641085a05f0fbe82b56b68d615af7b5c67ce796c1bf563",
+    "retrievedUtc": "2026-10-24T19:00:26.232950+00:00",
+    "contentType": "application/xml"
+  },
+  {
+    "name": "aixm-6_9169",
+    "url": "https://tfr.faa.gov/download/detail_6_9169.aixm50",
+    "status": 200,
+    "bytes": 54844,
+    "sha256": "3804dbca350602432b121ac03cdb4030bfb5644ce7c4b064ea8c23e13c76eaed",
+    "retrievedUtc": "2026-10-24T19:00:26.314706+00:00",
+    "contentType": null
+  }
+]

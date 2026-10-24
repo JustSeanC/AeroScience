@@ -17,8 +17,8 @@ public static class AviationTfr
     public const int MaximumVertices=50000;
     public static readonly string[] Limitations=[
         "Official FAA graphical service, joined to exact notice identity/title/facility/state. Its external API stability and full operational completeness are unverified.",
-        "Not every notice has geometry. A geometry ID is not an independently verified NOTAM segment. Exact altitude, activation, cancellation and UTC schedule remain Unknown.",
-        "Current service geometry is shown as time/altitude Unknown, not red confirmed-active airspace. Dates in descriptions are never parsed into guessed UTC intervals.",
+        "Not every notice has geometry. A geometry ID is not a verified NOTAM segment. Selected XML/AIXM packets can support matched-area altitude/UTC findings; absent or ambiguous fields and cancellation remain Unknown.",
+        "Graphical boundaries do not establish confirmed-active airspace. Dates in descriptions are never parsed into guessed UTC intervals. At most 32 distinct notice interpretations are projected per bounded query; remaining areas stay unassessed.",
         "No map or screening result establishes clearance or absence of restrictions. Flight-simulation reference only; mission/recording/science controls remain unrestricted."
     ];
     private static string Text(JsonElement row,string name,int maximum)
