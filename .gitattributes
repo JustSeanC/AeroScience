@@ -26,4 +26,4 @@
 /tests/AeroScience.EmitApplicationFixtures/**/*.nc -text
 
 # Genuine public FAA XML/AIXM/JSON receipts refer to these exact upstream bytes.
-/tests/AeroScience.Tests/TfrOriginals/*.original -text
+/tests/AeroScience.Tests/TfrOriginals/*.original -text -diff
