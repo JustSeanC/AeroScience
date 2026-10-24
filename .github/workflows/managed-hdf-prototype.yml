@@ -37,7 +37,8 @@ jobs:
           git -C $hdfSource remote add origin https://github.com/Apollo3zehn/PureHDF.git
           git -C $hdfSource fetch --depth 1 origin c2cea464ad2a6649258ab14c8d798cb6239b9e1e
           if ($LASTEXITCODE -ne 0) { throw 'Exact managed reader source unavailable.' }
-          git -C $hdfSource checkout --detach FETCH_HEAD
+          # Verify exact Git blob bytes, unaffected by the Windows runner's global CRLF policy.
+          git -C $hdfSource -c core.autocrlf=false checkout --detach FETCH_HEAD
           if ($LASTEXITCODE -ne 0) { throw 'Pinned reader source checkout failed.' }
           python tests/AeroScience.ManagedHdfProbe/prepare_hdf_read.py --source $hdfSource --output tests/AeroScience.SafeHdfSource/obj/pinned
           if ($LASTEXITCODE -ne 0) { throw 'Source hash/policy/notice validation failed; no upstream package substitution.' }
