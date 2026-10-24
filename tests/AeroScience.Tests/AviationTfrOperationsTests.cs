@@ -132,5 +132,12 @@ public sealed class AviationTfrOperationsTests:IDisposable
         var xml=Encoding.UTF8.GetBytes(Encoding.UTF8.GetString(TfrOriginalFiles.Packet("6/2070")).Replace("<codeType>GRC</codeType>","<codeType>UNKNOWN</codeType>"));
         var parsed=AviationTfrOperations.Parse(Source(xml:xml));Assert.Null(parsed.Areas.Single().Polygons);Assert.Null(AviationTfrOperations.Match(Geometry().Boundaries.Single(b=>b.NotamId=="6/2070"),parsed));
     }
+    [Theory][InlineData("2026-10-24T19:00:00Z","Upcoming")][InlineData("2026-10-27T17:00:00Z","Within published")][InlineData("2026-10-28T17:00:00Z","elapsed")]
+    public async Task PublishedWindowPhaseUsesExplicitApplicationClockNotNoticeTextOrBrowserClock(string now,string expected)
+    {
+        // Controlled-clock replay, not a claim these historical notices remain in the live FAA list.
+        var h=new Transport();var clock=new Clock{Now=DateTimeOffset.Parse(now)};using var s=Service(h,clock);s.Configure(true);await s.RefreshTfr();var view=await s.RefreshTfrOperations("6/2070");
+        Assert.Contains(expected,view.Areas.Single().WindowStatus);Assert.Contains("unverified",view.Areas.Single().WindowStatus);Assert.Equal(5,h.Calls);
+    }
     public void Dispose(){try{Directory.Delete(root,true);}catch(IOException){}}
 }
