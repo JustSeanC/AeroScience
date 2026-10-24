@@ -6,6 +6,27 @@ namespace AeroScience.Missions;
 public sealed partial class ScienceStore
 {
     public const int CurrentSchemaVersion=4;
+    // A verified local source can satisfy an approved NASA transfer without changing
+    // immutable source provenance. Retain that exact catalog/source association in the
+    // existing completed job, then reuse it offline; no parallel alias database.
+    internal (NasaDownloadBundle Bundle,ScientificSource Source)? CompletedNasaReuse(NasaSelectionRequest request,string? bundleRevision=null)
+    {
+        using var db=Open();using var cmd=db.CreateCommand();
+        cmd.CommandText="""
+            SELECT j.preview_json,s.payload_json FROM library_jobs j
+            JOIN library_job_items i ON i.job_id=j.id JOIN remote_sources s ON s.id=i.source_id
+            WHERE j.state='Completed' AND i.state='Completed' AND j.approval_id IS NOT NULL
+              AND json_extract(j.preview_json,'$.nasa.selection.provider')=$provider
+              AND json_extract(j.preview_json,'$.nasa.selection.scene')=$scene
+              AND json_extract(j.preview_json,'$.nasa.selection.revision')=$revision
+              AND ($bundle='' OR json_extract(j.preview_json,'$.nasa.revision')=$bundle)
+            ORDER BY j.updated_utc DESC LIMIT 1
+            """;
+        cmd.Parameters.AddWithValue("$provider",request.Provider);cmd.Parameters.AddWithValue("$scene",request.GranuleId);cmd.Parameters.AddWithValue("$revision",request.Revision);cmd.Parameters.AddWithValue("$bundle",bundleRevision??"");
+        using var rows=cmd.ExecuteReader();if(!rows.Read())return null;
+        var preview=ReadCatalog<LibraryDownloadPreview>(rows.GetString(0));if(preview.Version!=1||preview.Nasa is not{Version:1} bundle)return null;
+        return (bundle,ReadCatalog<ScientificSource>(rows.GetString(1)));
+    }
     private static void InitializeLibraryJobs(SqliteConnection db)
     {
         using var tx=db.BeginTransaction();using var cmd=db.CreateCommand();cmd.Transaction=tx;cmd.CommandText="""

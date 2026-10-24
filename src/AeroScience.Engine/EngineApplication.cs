@@ -45,6 +45,8 @@ public static class EngineApplication
         builder.Services.AddSingleton<ScientificCatalog>();
         builder.Services.AddSingleton<ScientificHdfReader>();
         builder.Services.AddSingleton<EmitProductDecoder>();
+        builder.Services.AddSingleton<EmitLibrary>();
+        builder.Services.AddSingleton<IScientificSwathImport>(sp=>sp.GetRequiredService<EmitLibrary>());
         builder.Services.AddSingleton<IEarthdataCredentials,UnavailableEarthdataCredentials>();
         builder.Services.AddSingleton<ScientificLibraryJobs>();
         builder.Services.AddHostedService<ScientificLibraryWorker>();
@@ -262,6 +264,7 @@ public static class EngineApplication
                 case "multispectral-import": desktop.ChooseScientificDataset("multispectral"); break;
                 case "hyperspectral-header": desktop.ChooseHyperspectral(false); break;
                 case "hyperspectral-folder": desktop.ChooseHyperspectral(true); break;
+                case "emit-originals": desktop.ChooseEmitOriginals(); break;
                 case "earthdata-connect": desktop.ConnectEarthdata(); break;
                 case "compact-flight": desktop.CompactStorage(false); break;
                 case "compact-science": desktop.CompactStorage(true); break;

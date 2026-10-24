@@ -18,6 +18,18 @@ class EmitProductEvidenceTests(unittest.TestCase):
                 self.assertEqual(original['bytes'],path.stat().st_size)
                 self.assertEqual(original['sha256'],hashlib.sha256(path.read_bytes()).hexdigest())
 
+    def test_application_fixtures_are_separately_labeled_and_hash_pinned(self):
+        root=ROOT/'tests/AeroScience.EmitApplicationFixtures'
+        receipt=json.loads((root/'provenance.json').read_text())
+        self.assertIn('NOT NASA original',receipt['evidenceClass'])
+        self.assertIn('synthetic',receipt['date'])
+        self.assertEqual(3,len(receipt['files']))
+        self.assertEqual({p.relative_to(root).as_posix() for p in root.rglob('*.nc')},{f['file'] for f in receipt['files']})
+        for original in receipt['files']:
+            path=root/original['file']
+            self.assertEqual(original['bytes'],path.stat().st_size)
+            self.assertEqual(original['sha256'],hashlib.sha256(path.read_bytes()).hexdigest())
+
     def test_official_metadata_ledger_preserves_authentication_and_numeric_acceptance_limits(self):
         ledger=json.loads((ROOT/'docs/research/v0.6.0-emit-product-definitions.json').read_text())
         self.assertEqual({('EMITL2ARFL','002'),('EMITL2AMASK','003')},{(c['shortName'],c['version']) for c in ledger['collections']})

@@ -1,3 +1,4 @@
+import {openEmitImport} from './emit-library.js';
 import {libraryLocation} from './library-location.js';
 import {renderTransferProgress} from './transfer-progress.js';
 import { openHyperspectralImport } from "./hyperspectral-import.js";
@@ -42,7 +43,7 @@ export async function libraryDownload(parent, api, isDisposed = () => false) {
     ["surface", "Surface elevation / buildings / vegetation", "copernicus", "Copernicus GLO-30 is a digital surface model containing vegetation and buildings, not bare-earth terrain or LiDAR point clouds."],
     ["multispectral", "Multispectral imagery", "sentinel-2", "Sentinel-2 Level-2A blue, green, red and near-infrared reflectance, with the required scene-classification quality mask. Historical observations; cloudy or missing pixels stay unavailable."],
     ["hyperspectral", "Hyperspectral imagery · AVIRIS", "nasa-classic", "NASA AVIRIS-Classic / AVIRIS-NG cover historical flightlines, not the whole Earth. Supported original reflectance pairs use authorized Earthdata Download & Import; original full flightlines, not map subsets."],
-    ["emit", "EMIT · discovery only", "nasa-emit", "EMIT discovery and official access only. Native NetCDF-4 import is deferred to 0.6.0."],
+    ["emit", "EMIT · development validation", "nasa-emit", "EMIT RFL002, uncertainty002 and MASK003 original import and exploration are available for development validation. Genuine NASA numerical acceptance is pending."],
   ];
   const cleanup = () => {
     stopped = true;
@@ -674,9 +675,14 @@ export async function libraryDownload(parent, api, isDisposed = () => false) {
           await api("/api/science/hyperspectral/nasa", {provider:item.provider, granuleId:item.scene, revision:item.revision});
           openHyperspectralImport(api);
         });
-        if (item.provider !== "nasa-emit" && item.nasa.capability.startsWith("Guided import")) button(row, "Preview NASA Download & Import", async () => {
+        if (item.provider === "nasa-emit") button(row,"Import EMIT Originals on This PC",()=>openEmitImport(api));
+        if (item.provider === "nasa-emit" || item.nasa.capability.startsWith("Guided import")) button(row, "Preview NASA Download & Import", async () => {
+          let acknowledged=false;
+          if(item.provider==="nasa-emit"){
+            const {acknowledgeEmit}=await import('./emit-review.js');acknowledged=await acknowledgeEmit();if(!acknowledged)return;
+          }
           const own = ++epoch;
-          const job = await api("/api/science/library/nasa/preview", { selection: { provider: item.provider, granuleId: item.scene, revision: item.revision }, maximumTransferBytes: Number(budgetInput.value) * 1048576 });
+          const job = await api("/api/science/library/nasa/preview", { selection: { provider: item.provider, granuleId: item.scene, revision: item.revision }, maximumTransferBytes: Number(budgetInput.value) * 1048576,validationAcknowledged:acknowledged });
           await displayPreview(job, own);
         });
       }
@@ -737,7 +743,7 @@ export async function libraryDownload(parent, api, isDisposed = () => false) {
   filtersChanged(); // Apply the correct NASA allowance after its control exists.
   const requestSelection = () => {
     if (!areas.length) throw Error("Select a geographic area first.");
-    if (provider.value.startsWith("nasa-")) throw Error("Choose the exact NASA scene's Preview NASA Download & Import action. Browser/manual fallback remains available; EMIT is discovery only.");
+    if (provider.value.startsWith("nasa-")) throw Error("Choose the exact NASA scene's Preview NASA Download & Import action. Browser/manual fallback remains available; EMIT requires acknowledgement of pending genuine-original acceptance.");
     if (!chosen.size)
       throw Error("Choose at least one exact provider scene/product first.");
     return {

@@ -22,7 +22,7 @@ export function openHyperspectralImport(api,kind="hyperspectral"){
     const key=JSON.stringify([s.stage,s.inspection,s.source?.id,confirming,s.nasaSelection?.scene]);message.textContent=s.message;
     if(key===lastKey)return;lastKey=key;map?.destroy();map=null;body.replaceChildren();
     steps.textContent=`${s.stage==="Choose"||s.stage==="Invalid"?"●":"✓"} 1. Choose files → ${s.stage==="Verify"?"●":""} 2. Verify dataset → ${confirming||s.stage==="Importing"?"●":""} 3. Import → ${s.stage==="Ready"?"●":""} 4. Use in a mission`;
-    if(s.nasaSelection){const n=s.nasaSelection.nasa;body.append(el("p",`NASA ${n.family} · ${n.flightline} · ${n.granuleId}. Official browser download is external; this wizard verifies local originals. Only matching reflectance ENVI files are accepted. EMIT import is unavailable.`));}
+    if(s.nasaSelection){const n=s.nasaSelection.nasa;body.append(el("p",`NASA ${n.family} · ${n.flightline} · ${n.granuleId}. Official browser download is external; this wizard verifies local originals. Only matching reflectance ENVI files are accepted. For development-validation EMIT NetCDF originals, use Import NASA EMIT Originals in External Data Manager.`));}
     if(s.stage==="Choose"||s.stage==="Invalid"||s.stage==="Cancelled"){choose();return;}
     if(s.stage==="Verifying"){body.append(el("p","Reading the header and bounded file metadata. The entire cube is not loaded into memory."));return;}
     const i=s.inspection;if(!i)return;kind=i.kind||kind;
@@ -58,7 +58,7 @@ export function openHyperspectralImport(api,kind="hyperspectral"){
 export async function hyperspectralCard(parent,api,point=null){
   const card=el("article");card.className="panel hyperspectral-status";card.append(el("h3","Hyperspectral Imager · Historical external data"));parent.append(card);
   const query=point?`?kind=hyperspectral&latitude=${point.latitude}&longitude=${point.longitude}`:"?kind=hyperspectral";
-  const sources=(await api("/api/science/sources"+query)).filter(s=>s.source.manifest.kind==="hyperspectral");
+  const sources=(await api("/api/science/sources"+query)).filter(s=>s.source.manifest.kind==="hyperspectral"&&!s.source.manifest.swath);
   if(!card.isConnected)return card;
   const active=(await api("/api/state")).research?.instruments?.find(i=>i.instrumentId==="hyperspectral-imager");
   const ready=sources.find(s=>s.filesAvailable&&(!point||s.coversPoint));

@@ -300,6 +300,13 @@ public sealed class MainForm : BrandedForm, IDesktopActions, IScientificFolderOp
         else{using var picker=new OpenFileDialog{Title="Choose the original hyperspectral ENVI header",Filter="ENVI header (*.hdr)|*.hdr",CheckFileExists=true};if(picker.ShowDialog(owner)!=DialogResult.OK)return;path=picker.FileName;}
         await engine.Services.GetRequiredService<ScientificImportSession>().Select(path);
     });
+    void IDesktopActions.ChooseEmitOriginals()=>DispatchSourcePicker(async owner=>
+    {
+        if(engine is null)return;
+        using var picker=new OpenFileDialog{Title="Select matching EMIT RFL002, RFLUNCERT002 and MASK003 originals",Filter="Original NetCDF (*.nc)|*.nc",Multiselect=true,CheckFileExists=true};
+        if(picker.ShowDialog(owner)!=DialogResult.OK)return;
+        await engine.Services.GetRequiredService<EmitLibrary>().SelectLocal(picker.FileNames);
+    });
     void IDesktopActions.ImportScientificSource() => Dispatch(() => ImportScientificSource());
     void IDesktopActions.ConnectEarthdata()=>DispatchSourcePicker(owner=>
     {

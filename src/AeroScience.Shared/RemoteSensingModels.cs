@@ -7,7 +7,7 @@ public sealed record SourceBand(string Id, string File, string Format, int Chann
     string? SceneId = null,string EnviMapReference="legacy-pixel-center");
 public sealed record ScientificSourceManifest(int FormatVersion, string Name, RemoteKind Kind, string Provider,
     string License, string Citation, string SceneId, DateTimeOffset? ObservationUtc, string VerticalDatum,
-    SourceBand[] Bands, DateTimeOffset? PublicationUtc = null, string? Notes = null, AutomaticSourceProvenance? Acquisition = null,string[]? OriginalMetadataFiles=null);
+    SourceBand[] Bands, DateTimeOffset? PublicationUtc = null, string? Notes = null, AutomaticSourceProvenance? Acquisition = null,string[]? OriginalMetadataFiles=null,[property:System.Text.Json.Serialization.JsonIgnore(Condition=System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] ScientificSwathSource? Swath=null);
 public sealed record ManagedSourceFile(string RelativePath, long Bytes, string Sha256);
 public sealed record ScientificSource(Guid Id, ScientificSourceManifest Manifest, DateTimeOffset ImportedUtc,
     Dictionary<string, RasterGrid> Grids, ManagedSourceFile[] Files, string ManifestSha256, string RelativeDirectory);
@@ -39,3 +39,6 @@ public sealed record RemoteInstrumentStatus(string InstrumentId, ObservationQual
     DateTimeOffset? LastSuccessfulUtc, long Products, long Rejected, long MissingIntervals, bool Processing = false,string Status="Preparing data",double ProcessingSeconds=0,long ValidMeasurements=0);
 public sealed record RemoteStorageEstimate(long Acquisitions, int Width, int Height, int Bands, int BytesPerValue,
     long RawBytesPerAcquisition, long ConservativeOutputBytes, long TemporaryBytes, string Basis);
+
+// An indexed candidate domain is not an affine original raster or valid-pixel coverage.
+public sealed record ScientificSwathSource(int Version,string Format,string DecoderPolicy,GeographicBounds Domain,string DefinitionJson);

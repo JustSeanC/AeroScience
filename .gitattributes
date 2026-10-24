@@ -22,3 +22,5 @@
 /tests/AeroScience.EmitFixtures/**/*.nc -text
 /licenses/PureHDF.txt -text
 /licenses/Blosc-shuffle.txt -text
+
+/tests/AeroScience.EmitApplicationFixtures/**/*.nc -text

@@ -77,7 +77,7 @@ public sealed partial class ScienceStore
     };
     private static void IndexSource(SqliteConnection db, SqliteTransaction tx, ScientificSource source)
     {
-        var m = source.Manifest; var corners = source.Grids.Values.SelectMany(ScientificRaster.GridCoverage).ToArray();
+        var m = source.Manifest; var corners = source.Manifest.Swath?.Domain.Corners??source.Grids.Values.SelectMany(ScientificRaster.GridCoverage).ToArray();
         if (corners.Length == 0 || corners.Any(p => !double.IsFinite(p.Latitude) || !double.IsFinite(p.Longitude) || Math.Abs(p.Latitude)>90 || Math.Abs(p.Longitude)>180)) throw new IOException("Source geographic index cannot be established; original data preserved.");
         var product = SourceProduct(m); var collection = ScientificCatalog.Hash(new { m.Kind, m.Provider, product });
         using var command = db.CreateCommand(); command.Transaction = tx;
@@ -101,6 +101,7 @@ public sealed partial class ScienceStore
     }
     private static GeographicBounds SourceIndexBounds(ScientificSource source)
     {
+        if(source.Manifest.Swath is {} swath)return swath.Domain;
         var corners=source.Grids.Values.SelectMany(ScientificRaster.GridCoverage).ToArray();
         var west=corners.Min(p=>p.Longitude);var east=corners.Max(p=>p.Longitude);var south=corners.Min(p=>p.Latitude);var north=corners.Max(p=>p.Latitude);
         foreach(var grid in source.Grids.Values.Where(g=>g.Crs!="EPSG:4326"))

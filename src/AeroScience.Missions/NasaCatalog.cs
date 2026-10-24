@@ -11,8 +11,8 @@ public sealed partial class ScientificCatalog
     private static ScientificCatalogProvider[] NasaProviders=>[
         new("nasa-classic","NASA AVIRIS-Classic","Level-2 reflectance V1",RemoteKind.Hyperspectral,[],true,true,"Earthdata Download & Import for exact compatible original ENVI pairs; official browser/manual fallback remains. Historical NASA observations; originals must pass verification."),
         new("nasa-ng","NASA AVIRIS-NG","Level-2 reflectance V1",RemoteKind.Hyperspectral,[],true,true,"Earthdata Download & Import with exact CMR companion matching; NG headers/binaries can be separate granules. Compatible ENVI only, with browser/manual fallback."),
-        new("nasa-emit","NASA EMIT","Level-2A reflectance V002",RemoteKind.Hyperspectral,[],true,true,"Discovery / official access only — native NetCDF-4 scientific import not yet supported.")];
-    public static bool IsNasa(string id)=>id is "nasa-classic" or "nasa-ng" or "nasa-emit";
+        new("nasa-emit","NASA EMIT","Level-2A reflectance V002",RemoteKind.Hyperspectral,[],true,true,"Development validation: RFL002 / uncertainty002 / MASK003 original import and exploration. Genuine NASA numerical acceptance pending.")];
+    public static bool IsNasa(string id)=>id is "nasa-classic" or "nasa-ng" or "nasa-emit" or "nasa-emit-mask";
     public async Task<ScientificCatalogItem> ResolveNasa(NasaSelectionRequest request,CancellationToken token=default,ScientificDownloadBudget? budget=null)
     {
         if(!IsNasa(request.Provider)||string.IsNullOrWhiteSpace(request.GranuleId)||string.IsNullOrWhiteSpace(request.Revision)||request.GranuleId.Length>100||!System.Text.RegularExpressions.Regex.IsMatch(request.GranuleId,@"^G[0-9]+-[A-Z0-9_]+$")||request.Revision.Length!=64||!request.Revision.All(char.IsAsciiHexDigit))throw new ArgumentException("Select an exact NASA catalog granule and revision.");
@@ -28,6 +28,7 @@ public sealed partial class ScientificCatalog
         "nasa-classic"=>("AVIRIS-Classic_L2_Reflectance_2154","1","AVIRIS-Classic"),
         "nasa-ng"=>("AVIRIS-NG_L2_Reflectance_2110","1","AVIRIS-NG"),
         "nasa-emit"=>("EMITL2ARFL","002","EMIT"),
+        "nasa-emit-mask"=>("EMITL2AMASK","003","EMIT"),
         _=>throw new ArgumentException("Unsupported NASA product.")
     };
     private static string NasaSearchUrl(ScientificCatalogQuery q,int page)
@@ -101,20 +102,20 @@ public sealed partial class ScientificCatalog
             var href=Text(link,"href");if(!OfficialNasaLink(href))continue;
             var u=new Uri(href!);var name=Uri.UnescapeDataString(Path.GetFileName(u.AbsolutePath));
             if(Text(link,"rel")?.EndsWith("/data#",StringComparison.Ordinal)!=true||link.TryGetProperty("inherited",out var inherited)&&inherited.ValueKind==JsonValueKind.True)continue;
-            var role=name.EndsWith(".hdr",StringComparison.OrdinalIgnoreCase)?"ENVI header":name.EndsWith(".bin",StringComparison.OrdinalIgnoreCase)?"Original numeric binary":name.EndsWith(".sha256",StringComparison.OrdinalIgnoreCase)?"Provider SHA-256":name.EndsWith(".nc",StringComparison.OrdinalIgnoreCase)?"Unsupported NetCDF-4":"Official access";
+            var role=name.EndsWith(".hdr",StringComparison.OrdinalIgnoreCase)?"ENVI header":name.EndsWith(".bin",StringComparison.OrdinalIgnoreCase)?"Original numeric binary":name.EndsWith(".sha256",StringComparison.OrdinalIgnoreCase)?"Provider SHA-256":name.EndsWith(".nc",StringComparison.OrdinalIgnoreCase)?"Original NetCDF-4":"Official access";
             assets.Add(new(name,u.AbsoluteUri,role));
         }
         long? bytes=null;if(double.TryParse(Text(entry,"granule_size"),NumberStyles.Float,CultureInfo.InvariantCulture,out var mb)&&double.IsFinite(mb)&&mb>0&&mb<long.MaxValue/1048576d)bytes=(long)Math.Ceiling(mb*1048576);
         var reference="https://search.earthdata.nasa.gov/search/granules?p="+cid+"&g="+id;
-        var format=provider=="nasa-emit"?"NetCDF-4 (not imported)":assets.Any(a=>a.Role is "ENVI header" or "Original numeric binary")?"ENVI (individual companions; verify original header)":"Unknown; inspect official distribution";
+        var format=provider.StartsWith("nasa-emit",StringComparison.Ordinal)?"NetCDF-4 (strict versioned development importer)":assets.Any(a=>a.Role is "ENVI header" or "Original numeric binary")?"ENVI (individual companions; verify original header)":"Unknown; inspect official distribution";
         var reflectance=provider=="nasa-classic"||assets.Any(a=>a.Role is "ENVI header" or "Original numeric binary"&&System.Text.RegularExpressions.Regex.IsMatch(a.Name,@"_(corr|rfl|refl)_"));
-        var capability=provider=="nasa-emit"?"Discovery / official access only — native scientific import not yet supported":reflectance?"Guided import — compatible original ENVI reflectance only; verify files before use":"Download only — auxiliary or unknown product; no supported hyperspectral reflectance import";
-        var details=new NasaGranuleMetadata(p.Family,cid,p.Name,p.Version,id,title,provider=="nasa-emit"?"2A":"2",format,capability,
+        var capability=provider.StartsWith("nasa-emit",StringComparison.Ordinal)?"Development validation — exact RFL002/uncertainty002/MASK003 required; genuine-original acceptance pending":reflectance?"Guided import — compatible original ENVI reflectance only; verify files before use":"Download only — auxiliary or unknown product; no supported hyperspectral reflectance import";
+        var details=new NasaGranuleMetadata(p.Family,cid,p.Name,p.Version,id,title,provider.StartsWith("nasa-emit",StringComparison.Ordinal)?"2A":"2",format,capability,
             "Individual NASA Earthdata authorization may be required; official browser handles login",bytes,null,null,null,assets.DistinctBy(a=>a.Url).ToArray(),Hash(collection),
             "https://cmr.earthdata.nasa.gov/search/concepts/"+id+".umm_json",Time(entry,"time_end"),Time(entry,"updated"));
         return new(provider,Text(collection,"dataset_id")??p.Name,id,Hash(new{collection,entry}),RemoteKind.Hyperspectral,bounds,geometry,Time(entry,"time_start"),null,[],null,"Unknown / not inferred",
             "Catalog footprint; source nodata, bad bands and per-pixel quality remain unverified.","Unknown at granule discovery; verify original grid",
-            "Review NASA collection terms and citation at the official source before acquisition.",reference,provider=="nasa-emit"?"Official browser handoff; discovery only":"Earthdata-authorized original acquisition or official browser/manual fallback",["Historical NASA reflectance, not simulated-aircraft measurements.","No missing wavelengths, units or QA values were inferred.",capability],details);
+            "Review NASA collection terms and citation at the official source before acquisition.",reference,provider.StartsWith("nasa-emit",StringComparison.Ordinal)?"Earthdata-authorized originals or local original import; validation acknowledgement required":"Earthdata-authorized original acquisition or official browser/manual fallback",["Historical NASA reflectance, not simulated-aircraft measurements.","No missing wavelengths, units or QA values were inferred.",capability],details);
     }
     // Browser links only. This does NOT expand the backend ScientificHttp allow-list.
     public static bool OfficialNasaLink(string? value)=>Uri.TryCreate(value,UriKind.Absolute,out var u)&&u.Scheme=="https"&&u.Port==443&&u.UserInfo.Length==0&&u.Query.Length==0&&u.Fragment.Length==0&&u.AbsoluteUri.Length<=2048&&

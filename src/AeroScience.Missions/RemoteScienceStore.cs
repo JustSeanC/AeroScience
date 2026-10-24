@@ -105,6 +105,9 @@ public sealed partial class ScienceStore
             throw new InvalidDataException("Quality masks require their original unscaled integer class/bit values, unit 1, scale 1, offset 0, and cannot be disabled as bad bands.");
         if (source.Kind == RemoteKind.Terrain && (source.Bands.Length != 1 || source.Bands[0].Unit != "m"))
             throw new InvalidDataException("Terrain imports require one elevation band in metres and an explicitly stated source vertical datum. DEM samples are not LiDAR returns.");
+        if(source.Swath is {} swath && (swath.Version!=1||swath.Format!="emit-netcdf"||source.Kind!=RemoteKind.Hyperspectral||swath.DefinitionJson.Length>262144||source.Bands.Length!=285||source.Bands.Any(b=>b.Format!="emit-netcdf"||b.Unit!="reflectance")||source.OriginalMetadataFiles is not{Length:3}))
+            throw new InvalidDataException("Unsupported swath source contract or missing original companions.");
+        if(source.Swath is {} valid)ScientificCatalog.ValidateBounds(valid.Domain);
         return source;
     }
     public static (ScientificSourceManifest Manifest, long Bytes) InspectImport(string manifestPath)
@@ -128,7 +131,7 @@ public sealed partial class ScienceStore
     {
         return await ImportSourceAsync(ReadSourceManifest(manifestPath),Path.GetDirectoryName(Path.GetFullPath(manifestPath))!,token,progress);
     }
-    public async Task<ScientificSource> ImportSourceAsync(ScientificSourceManifest input,string root,CancellationToken token=default,IProgress<string>? progress=null,bool reuseExisting=false,Action<string>? verifyStaged=null)
+    public async Task<ScientificSource> ImportSourceAsync(ScientificSourceManifest input,string root,CancellationToken token=default,IProgress<string>? progress=null,bool reuseExisting=false,Action<string>? verifyStaged=null,Func<string,CancellationToken,Task>? verifySwath=null)
     {
         using var sourceOperation=BeginAnalysis();
         var inspected = InspectImport(input,root); var manifest = inspected.Manifest;
@@ -152,15 +155,16 @@ public sealed partial class ScienceStore
         if (disk.FreeBytes(DirectoryPath) < inspected.Bytes + StorageManager.MinimumFreeBytes) throw new IOException("Insufficient Science Library space for the original source files and reserve.");
         var id = Guid.NewGuid();
         var relative = "Sources/" + id.ToString("N"); var destination = Path.Combine(DirectoryPath, relative); var temporary = destination + ".partial";
+        if(manifest.Swath is not null && verifySwath is null)throw new InvalidDataException("This swath requires its isolated scientific product verifier; an affine importer cannot accept it.");
         var grids = new Dictionary<string, RasterGrid>(); var bands = new List<SourceBand>();
-        foreach (var band in manifest.Bands)
+        foreach (var band in manifest.Bands.Where(_=>manifest.Swath is null))
         {
             token.ThrowIfCancellationRequested(); using var raster = new ScientificRaster(root, band);
             if (band.WavelengthNm is { } declared && raster.NativeWavelengthNm is { } native && Math.Abs(declared - native) > .01) throw new InvalidDataException("Wavelength metadata differs from the original ENVI header.");
             grids.Add(band.Id, raster.Grid); bands.Add(band with { WavelengthNm = raster.NativeWavelengthNm ?? band.WavelengthNm });
         }
-        manifest = manifest with { Bands = bands.ToArray() };
-        if (manifest.Kind == RemoteKind.Hyperspectral)
+        manifest = manifest.Swath is null?manifest with { Bands = bands.ToArray() }:manifest;
+        if (manifest.Kind == RemoteKind.Hyperspectral && manifest.Swath is null)
         {
             if (bands.Count < 16 || bands.All(b=>b.BadBand) || grids.Values.Distinct().Count()!=1 || bands.Select(b=>b.Unit).Distinct().Count()!=1 || bands.Any(b => b.Format != "envi" || b.WavelengthNm is not (> 0 and < 100000) || b.Unit is not ("reflectance" or "radiance W/(m2 sr um)" or "radiance W/(m2 sr nm)" or "radiance mW/(cm2 sr um)" or "radiance uW/(cm2 sr nm)"))
                 || bands.Zip(bands.Skip(1)).Any(p => p.First.WavelengthNm >= p.Second.WavelengthNm))
@@ -193,6 +197,7 @@ public sealed partial class ScienceStore
             }
             // Product adapters may verify copied originals before atomic publication.
             verifyStaged?.Invoke(temporary);
+            if(verifySwath is not null)await verifySwath(temporary,token);
             token.ThrowIfCancellationRequested();
             var fingerprint = Convert.ToHexString(SHA256.HashData(JsonSerializer.SerializeToUtf8Bytes(new { manifest, files }, WireJson.Options))).ToLowerInvariant();
             var source = new ScientificSource(id, manifest, DateTimeOffset.UtcNow, grids, files.ToArray(), fingerprint, relative);
@@ -228,7 +233,7 @@ public sealed partial class ScienceStore
         {
             var root = StorageManager.ResolveDataset(DirectoryPath, LibraryId, source.RelativeDirectory);
             foreach (var file in source.Files) if (new FileInfo(ScientificRaster.SafeFile(root, file.RelativePath)).Length != file.Bytes) throw new IOException("A source file is missing or changed; reimport a verified collection.");
-            return new SourceAvailability(source, true, point is null ? null : source.Grids.Values.All(g=>ScientificRaster.GridCovers(g,point)), null);
+            return new SourceAvailability(source, true, point is null || source.Manifest.Swath is not null ? null : source.Grids.Values.All(g=>ScientificRaster.GridCovers(g,point)), null);
         }
         catch (Exception e) when (e is IOException or ArgumentException or InvalidOperationException or UnauthorizedAccessException)
         { return new SourceAvailability(source, false, false, e.Message); }

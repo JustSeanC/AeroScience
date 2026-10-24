@@ -10,4 +10,5 @@
     <Compile Include="../../src/AeroScience.Desktop/WindowsEarthdataCredentials.cs" Link="WindowsEarthdataCredentials.cs" />
   </ItemGroup>
   <ItemGroup><None Include="../AeroScience.Tests/ProviderMetadata/*.json" Link="ProviderMetadata/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" /></ItemGroup>
+<ItemGroup><None Include="../AeroScience.EmitApplicationFixtures/**/*.nc" Link="EmitApplicationFixtures/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" /></ItemGroup>
 </Project>

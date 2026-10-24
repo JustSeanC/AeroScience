@@ -8,7 +8,7 @@ namespace AeroScience.Missions;
 public sealed record ManagedScientificWork(Guid Id, DateTimeOffset StartedUtc, string Operation, string[] Paths);
 public sealed partial class ScienceStore
 {
-    internal string BeginManagedWrite(string operation, IEnumerable<string> paths)
+    public string BeginManagedWrite(string operation, IEnumerable<string> paths)
     {
         var work = new ManagedScientificWork(Guid.NewGuid(), DateTimeOffset.UtcNow, operation, paths.Distinct(StringComparer.Ordinal).ToArray());
         foreach (var path in work.Paths) _ = StorageManager.ResolveDataset(DirectoryPath, LibraryId, path);

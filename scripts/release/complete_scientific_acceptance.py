@@ -70,7 +70,7 @@ def complete(output,python,originals=None):
         statuses['release-scientific-gates']={'status':'passed'}
     except (OSError,ValueError,KeyError) as error:
         statuses['release-scientific-gates']={'status':'failed','error':str(error)}
-    statuses['nasa-originals']={'status':'pending-owner-authorization','classic':'not tested','ng':'not tested','emit':'discovery only; native import unsupported'}
+    statuses['nasa-originals']={'status':'pending-owner-authorization','classic':'not tested','ng':'not tested','emit':'experimental application integration; authorized original numerical acceptance pending' if verification.VERSION=='0.6.0' else 'discovery only; native import unsupported'}
     refuse_secrets(statuses)
     (output/'summary.json').write_text(json.dumps(statuses,indent=2)+'\n')
     if any(v['status']=='failed' for v in statuses.values()):raise ValueError('One or more genuine workflows failed. No failed result was promoted; see summary/logs.')

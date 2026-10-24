@@ -36,7 +36,7 @@ def record(folder,output,pending=False):
         finalNetworkRerun='pending' if pending else 'passed',finalNetworkRerunReason='Final rerun is still pending. Completed source-bound results below do not approve distribution; preserve the actual interruption diagnostics separately.' if pending else None,
         canonicalLfSourceSha256=run['canonicalLfSourceSha256'],runProvenance=[provenance],workflows=results,
         independentComparison=independent,
-        hyperspectral=dict(status='Classic/NG authorized acquisition implemented; protected original numerical acceptance remains separate and pending. EMIT discovery only.'))
+        hyperspectral=dict(status='Classic/NG authorized acquisition implemented; protected original numerical acceptance remains separate and pending. '+('EMIT application integration is experimental; genuine original numerical acceptance remains pending.' if verification.VERSION=='0.6.0' else 'EMIT discovery only.')))
     refuse_secrets(value)
     verification.write_verified(output,value,lambda path:verification.verify_providers(path,require_current=not pending))
     return value

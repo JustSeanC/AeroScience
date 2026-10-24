@@ -14,6 +14,7 @@ public interface IDesktopActions
     void CollectFeedback();
     void ImportScientificSource();
     void ChooseHyperspectral(bool folder);
+    void ChooseEmitOriginals()=>throw new NotSupportedException("Choose EMIT files on the Windows companion PC.");
     void ChooseScientificDataset(string kind);
     void CompactStorage(bool science);
     void ConnectEarthdata()=>throw new NotSupportedException("Connect Earthdata from the current Windows desktop companion.");

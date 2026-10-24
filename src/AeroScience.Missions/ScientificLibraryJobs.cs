@@ -11,10 +11,10 @@ public sealed partial class ScientificLibraryJobs:IDisposable
     public string? Warning {get;private set;}
     private string? initialized;private readonly object recoveryGate=new();
     private void EnsureRecovered(){lock(recoveryGate){if(science.AvailabilityError() is {} unavailable){initialized=null;throw new IOException(unavailable);}var identity=science.DirectoryPath+":"+science.LibraryId;if(initialized==identity)return;science.RecoverLibraryJobs();initialized=identity;}}
-    private readonly IEarthdataCredentials earthdata;
+    private readonly IEarthdataCredentials earthdata;private readonly IScientificSwathImport? swathImport;
     private readonly System.Collections.Concurrent.ConcurrentDictionary<Guid,byte> activeNasa=[];
-    public ScientificLibraryJobs(ScienceStore science,ScientificCatalog catalog,AutomaticScientificData automatic,ScientificAccessSettings settings,IEarthdataCredentials? earthdata=null)
-    {this.science=science;this.catalog=catalog;this.automatic=automatic;this.settings=settings;this.earthdata=earthdata??new UnavailableEarthdataCredentials();try{EnsureRecovered();}catch(Exception error)when(error is IOException or UnauthorizedAccessException or Microsoft.Data.Sqlite.SqliteException){Warning=error.Message;}worker=Task.Run(Run);}
+    public ScientificLibraryJobs(ScienceStore science,ScientificCatalog catalog,AutomaticScientificData automatic,ScientificAccessSettings settings,IEarthdataCredentials? earthdata=null,IScientificSwathImport? swathImport=null)
+    {this.swathImport=swathImport;this.science=science;this.catalog=catalog;this.automatic=automatic;this.settings=settings;this.earthdata=earthdata??new UnavailableEarthdataCredentials();try{EnsureRecovered();}catch(Exception error)when(error is IOException or UnauthorizedAccessException or Microsoft.Data.Sqlite.SqliteException){Warning=error.Message;}worker=Task.Run(Run);}
     private string SettingsHash(bool nasa=false)=>nasa?ScientificCatalog.Hash(new{general=SettingsHash(),settings.Get().Preferences.NasaOriginalMaximumBytes}):ScientificCatalog.Hash(new{settings.Get().Preferences.OnlineEnabled,settings.Get().Preferences.PrivacyAccepted,settings.Get().Preferences.MaximumDownloadBytes,settings.Get().Preferences.PreflightTransferBytes,settings.Get().Preferences.UnmeteredOnly,settings.Get().Preferences.BackgroundRetrieval});
     public static GeographicBounds[] Expand(ScientificLibrarySelection selection)
     {
@@ -176,7 +176,7 @@ public sealed partial class ScientificLibraryJobs:IDisposable
             if(current.Preview.SettingsHash!=SettingsHash(current.Preview.Nasa is not null))throw new InvalidOperationException("Scientific access limits/consent changed; create a new preview before further downloading.");
             if(science.SetLibraryState(job.Id,"Preparing",runningOnly:true).State!="Preparing")return;
             science.SetLibraryItem(job.Id,work.Index,"Preparing");
-            var source=job.Preview.Nasa is {} bundle?ReusableNasa(bundle):Reusable(work.Scene,work.Area);
+            var source=job.Preview.Nasa is {} bundle?await ReusableNasa(bundle,token):Reusable(work.Scene,work.Area);
             if(source is not null){if(!Verify(source))throw new IOException("Retained source failed verification; originals were preserved.");}
             else
             {

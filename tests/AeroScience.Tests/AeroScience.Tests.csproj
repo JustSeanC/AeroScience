@@ -17,4 +17,5 @@
     <Compile Include="../AeroScience.ProviderAcceptance/WorkspaceAcceptance.cs" Link="Acceptance/WorkspaceAcceptance.cs" />
     <Compile Include="../AeroScience.ProviderAcceptance/NasaOriginalAcceptance.cs" Link="Acceptance/NasaOriginalAcceptance.cs" />
   </ItemGroup>
+<ItemGroup><None Include="../AeroScience.EmitApplicationFixtures/**/*.nc" Link="EmitApplicationFixtures/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" /></ItemGroup>
 </Project>

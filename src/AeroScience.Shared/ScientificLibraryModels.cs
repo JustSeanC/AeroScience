@@ -52,8 +52,8 @@ public sealed record NasaGranuleMetadata(string Family,string CollectionId,strin
     long? OriginalBytes,int? BandCount,double[]? WavelengthsNm,string? Units,NasaAsset[] Assets,string CollectionRevision,
     string MetadataUrl,DateTimeOffset? ObservationEndUtc=null,DateTimeOffset? UpdatedUtc=null);
 public sealed record NasaSelectionRequest(string Provider,string GranuleId,string Revision);
-public sealed record NasaDownloadRequest(NasaSelectionRequest Selection,long MaximumTransferBytes);
+public sealed record NasaDownloadRequest(NasaSelectionRequest Selection,long MaximumTransferBytes,bool ValidationAcknowledged=false);
 // Original unsigned authoritative URLs only; tokens and temporary redirects are never durable.
-public sealed record NasaDownloadFile(string Name,string Url,string Role,long Bytes,string? Etag,bool Ranges);
+public sealed record NasaDownloadFile(string Name,string Url,string Role,long Bytes,string? Etag,bool Ranges,[property:System.Text.Json.Serialization.JsonIgnore(Condition=System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] string? Sha512=null);
 public sealed record NasaDownloadBundle(ScientificCatalogItem Selection,ScientificCatalogItem[] Companions,NasaDownloadFile[] Files,string Revision,int Version=1);
 public sealed record EarthdataConnectionStatus(bool Available,bool Connected,string Message);

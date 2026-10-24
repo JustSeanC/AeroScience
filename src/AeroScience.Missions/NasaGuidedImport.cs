@@ -13,7 +13,7 @@ public static class NasaGuidedImport
     public static HyperspectralInspection Inspect(string selected,ScientificCatalogItem item,HyperspectralUserMetadata? additions=null,string? associated=null,CancellationToken token=default,bool direct=false)
     {
         var n=item.Nasa??throw new InvalidDataException("Missing selected NASA granule.");
-        if(!n.Capability.StartsWith("Guided import",StringComparison.Ordinal)||item.Provider is not("nasa-classic" or "nasa-ng"))throw new InvalidDataException("EMIT native import is not supported.");
+        if(!n.Capability.StartsWith("Guided import",StringComparison.Ordinal)||item.Provider is not("nasa-classic" or "nasa-ng"))throw new InvalidDataException("This ENVI workflow accepts Classic/NG only. Use the EMIT Originals workflow for development-validation NetCDF import.");
         var header=GuidedHyperspectralImport.FindHeader(selected);_=ScientificRaster.SafeFile(Path.GetDirectoryName(header)!,Path.GetFileName(header));var stem=Path.GetFileNameWithoutExtension(header);
         var prefix=Regex.Match(n.Flightline,item.Provider=="nasa-classic"?@"f\d{6}t\d{2}p\d{2}r\d{2}":@"ang\d{8}t\d{6}").Value;
         if(prefix.Length==0||!stem.StartsWith(prefix+"_",StringComparison.Ordinal)||!Regex.IsMatch(stem,@"_(corr|rfl|refl)(_|$)"))throw new InvalidDataException("The selected header is not the selected NASA reflectance flightline. Do not select h2o, radiance, RGB, another scene or an incomplete download.");

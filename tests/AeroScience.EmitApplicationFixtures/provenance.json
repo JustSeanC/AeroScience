@@ -1,0 +1,22 @@
+{
+  "evidenceClass": "Synthetic NetCDF-C; official-writer-aligned contract tests, NOT NASA original numerical acceptance",
+  "date": "2022-08-10 synthetic contract fixture; NOT genuine NASA",
+  "generator": "generate_fixtures.py",
+  "files": [
+    {
+      "file": "standard/EMIT_L2A_RFL_002_20220810T034103.nc",
+      "bytes": 30537,
+      "sha256": "8b6bb9f77e2f2a4325a629f6eedb29cdb56efb948e35c8354bc869a6e457509f"
+    },
+    {
+      "file": "standard/EMIT_L2A_RFLUNCERT_002_20220810T034103.nc",
+      "bytes": 30071,
+      "sha256": "eaa207f905db4b65e88f3ae885a970ada6b21db78d3fabbae0e0b5e967667518"
+    },
+    {
+      "file": "standard/EMIT_L2A_MASK_003_20220810T034103.nc",
+      "bytes": 16306,
+      "sha256": "bfdced720629625de2b5bcd7466aee96b0e507a2c4fc954261051696f4d9dd6a"
+    }
+  ]
+}

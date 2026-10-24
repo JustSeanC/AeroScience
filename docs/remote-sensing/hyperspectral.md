@@ -1,6 +1,6 @@
 # Hyperspectral Imager
 
-## NASA catalog browsing (0.5.0 development)
+## NASA catalog browsing
 
 Open **External Data Manager → Find & Download Data → Hyperspectral Research**.
 Choose AVIRIS-Classic, AVIRIS-NG or EMIT, select coordinates/viewport/rectangle/polygon or
@@ -11,7 +11,7 @@ outline guarantees valid pixels. Offline cached searches retain their original a
 
 Classic Collection `AVIRIS-Classic_L2_Reflectance_2154` V1 and NG
 `AVIRIS-NG_L2_Reflectance_2110` V1 use family-specific original ENVI companions.
-`EMITL2ARFL` V002 is **discovery / official access only**: native NetCDF-4 import is
+`EMITL2ARFL` V002 in published **0.5.0** is discovery / official access only: native NetCDF-4 import is
 unsupported. Current collection `C4079844428-LPCLOUD` V002 was verified directly in CMR; earlier V001 evidence remains historical and is not silently substituted. Missing spectral/grid metadata stays Unknown until original-file inspection.
 ### Earthdata Download & Import (P19A development)
 
@@ -166,3 +166,12 @@ Create a `kind: "hyperspectral"` manifest with one band entry per cube channel, 
 Actual wavelengths are read from the header. If supplied in the manifest they must match. `badBand: true` must honor every zero in `bbl`; missing bands remain graph gaps. Use the real reflectance scale factor (if present in the header it is checked). Supported homogeneous units are `reflectance`, `radiance W/(m2 sr um)`, `radiance W/(m2 sr nm)`, `radiance mW/(cm2 sr um)` or `radiance uW/(cm2 sr nm)`. Do not relabel radiance as reflectance; automatic atmospheric correction/unit interconversion is not provided.
 
 Enable Hyperspectral Imager over that collection, record and open **View Data → spectrum**. Select a geographic sample index; the viewer shows its coordinates and a chart of **original wavelength versus measured/scaled value**, with units. Canonical JSON and spectral CSV retain all sampled channels/quality gaps, source date and native grid. This does not identify minerals/species or perform spectral-library classification/calibration. The storage estimate grows with actual imported band count; 24×24 samples are bounded extractions, not a new full-resolution flight-line cube.
+
+## EMIT development capability (unreleased 0.6.0)
+
+The 0.6.0 Library adds explicitly gated exact RFL002 / uncertainty002 / compatible MASK003
+original import, bounded spectra/uncertainty/QA and GLT-map exploration, same-scene comparison,
+portable evidence export and offline reopening. Genuine NASA original numerical acceptance is
+pending; authorized direct LP DAAC redirects and installed device behavior remain unverified.
+See [the application workflow and limits](../research/v0.6.0-emit-integration.md). Existing AVIRIS
+workflows remain available. Importing EMIT does not create aircraft observations or grade credit.

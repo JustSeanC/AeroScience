@@ -20,7 +20,7 @@ public static class ScientificComposites
         ResearchExports.RequireCompleted(missions,mission);
         if(request.Mode is not("mission-samples" or "retained-source")||request.Selection is not("first" or "last"))throw new ArgumentException("Choose mission samples or retained source, with deterministic first/last selection.");
         using var analysis=science.BeginAnalysis();
-        IEnumerable<ScientificSource> available=request.Mode=="retained-source"?science.StreamSources():science.AllProducts(mission).Select(p=>p.SourceId).Distinct().Select(id=>science.Source(id)??science.ReadProduct(science.AllProducts(mission).First(p=>p.SourceId==id).Id).Source);
+        IEnumerable<ScientificSource> available=request.Mode=="retained-source"?science.StreamSources().Where(s=>s.Manifest.Swath is null):science.AllProducts(mission).Select(p=>p.SourceId).Distinct().Select(id=>science.Source(id)??science.ReadProduct(science.AllProducts(mission).First(p=>p.SourceId==id).Id).Source);
         var source=science.Source(request.SourceId)??(request.Mode=="mission-samples"?science.AllProducts(mission).Where(p=>p.SourceId==request.SourceId).Select(p=>science.ReadProduct(p.Id).Source).FirstOrDefault():null)??throw new ArgumentException("Source originals are unavailable for new source-pixel processing. Saved acquisitions remain independently reviewable.");
         var regions=available.Where(s=>s.Id==source.Id||request.CombineCompatibleRegions&&Compatible(source,s)).OrderBy(s=>s.Id).ToArray();
         var sourceIds=regions.Select(s=>s.Id).ToHashSet();

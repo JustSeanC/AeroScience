@@ -87,6 +87,7 @@ app.MapPost("/api/testing/aviation/{mode}",(string mode,AviationBrowserFixture f
 });
 app.MapGet("/api/testing/aviation",(AviationBrowserFixture fixture)=>new{synthetic=true,fixture.Calls});
 app.MapPost("/api/testing/library/setup",(LibraryHttpFixture fixture,ScientificAccessSettings settings)=>{fixture.Enable();settings.Save(new(true,true));return new{synthetic=true};});
+app.MapPost("/api/testing/emit/select",async(EmitLibrary emit)=>{await emit.SelectLocal(Directory.GetFiles(Path.Combine(AppContext.BaseDirectory,"EmitApplicationFixtures","standard"),"*.nc"));return new{synthetic=true};});
 app.MapPost("/api/testing/nasa/connection",(IEarthdataCredentials credentials)=>{((FixtureEarthdata)credentials).Connected=true;return new{synthetic=true};});
 // Synthetic SDK transport only; commands execute the production coordinator/SQLite handler.
 app.MapPost("/api/testing/toolbar",(System.Text.Json.JsonElement command,ToolbarCommandHandler toolbar)=>Results.Text(toolbar.Handle(command.GetRawText()),"application/json"));

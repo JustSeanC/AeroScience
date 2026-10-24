@@ -17,7 +17,7 @@ public sealed partial class ScientificCatalog(AutomaticScientificData automatic,
     private sealed record Cached(ScientificCatalogQuery Query,ScientificCatalogPage Page,string? NextUrl);
     private readonly SemaphoreSlim gate=new(1);
     public static ScientificCatalogProvider Provider(string id)=>Providers.SingleOrDefault(p=>p.Id==id)??throw new ArgumentException("Select a supported scientific provider.");
-    internal static string Hash<T>(T value)
+    public static string Hash<T>(T value)
     {
         static JsonNode? Ordered(JsonNode? n)=>n switch{JsonObject o=>new JsonObject(o.OrderBy(k=>k.Key,StringComparer.Ordinal).Select(k=>KeyValuePair.Create(k.Key,Ordered(k.Value)))),JsonArray a=>new JsonArray(a.Select(Ordered).ToArray()),_=>n?.DeepClone()};
         return Convert.ToHexString(SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(Ordered(JsonSerializer.SerializeToNode(value,WireJson.Options))!.ToJsonString()))).ToLowerInvariant();
@@ -31,7 +31,7 @@ public sealed partial class ScientificCatalog(AutomaticScientificData automatic,
     }
     private string CacheFolder=>Path.Combine(science.DirectoryPath,"Metadata","Catalog");
     public object Local()=>science.Availability().Select(a=>new{a.Source.Id,a.FilesAvailable,a.Source.Manifest,
-        bounds=a.Source.Grids.Values.Select(ScientificRaster.GridCoverage).ToArray(),status=a.FilesAvailable?"Retained":"Unavailable",limitation="Retained footprint; scientific QA is still applied at sampling."}).ToArray();
+        bounds=a.Source.Manifest.Swath is {} swath?new[]{swath.Domain.Corners}:a.Source.Grids.Values.Select(ScientificRaster.GridCoverage).ToArray(),status=a.FilesAvailable?"Retained":"Unavailable",limitation="Retained footprint; scientific QA is still applied at sampling."}).ToArray();
     private void Consent()
     {
         var p=settings.Get().Preferences;
@@ -135,7 +135,7 @@ public sealed partial class ScientificCatalog(AutomaticScientificData automatic,
     internal async Task<(ScientificCatalogItem Item,ScientificDiscovery Discovery)> Resolve(ScientificSceneSelection selection,GeographicBounds area,ScientificDownloadBudget budget,CancellationToken token,bool requireCoverage=true)
     {
         if(selection is null||selection.Bands is null||string.IsNullOrWhiteSpace(selection.Scene)||string.IsNullOrWhiteSpace(selection.Revision)||selection.Bands.Any(string.IsNullOrWhiteSpace))throw new ArgumentException("Select an exact supported scene, revision and numeric band recipe.");
-        var provider=Provider(selection.Provider);if(IsNasa(provider.Id))throw new ArgumentException("NASA products use official browser acquisition and verified local ENVI import, not automatic Library numeric downloads. EMIT is discovery only.");AutomaticScientificData.ValidateArea(area);Consent();
+        var provider=Provider(selection.Provider);if(IsNasa(provider.Id))throw new ArgumentException("NASA products require the exact NASA original-job preview or trusted local importer, not generic raster subset jobs. EMIT requires its development-validation acknowledgement.");AutomaticScientificData.ValidateArea(area);Consent();
         if(!selection.Bands.Order().SequenceEqual(provider.RequiredBands.Order())||selection.Scene.Length>300||selection.Scene.Any(c=>!(char.IsAsciiLetterOrDigit(c)||c is '_' or '-' or '.' or ',')))throw new ArgumentException("Choose supported numeric measurements and mandatory quality bands.");
         ScientificDiscovery d;ScientificCatalogItem item;
         if(provider.Id=="usgs-3dep")

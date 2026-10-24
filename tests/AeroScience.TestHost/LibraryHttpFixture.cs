@@ -28,8 +28,23 @@ internal sealed class LibraryHttpFixture(string root):HttpMessageHandler
         {
             var family=uri.Query.Contains("Classic")||uri.Query.Contains("G347702")?"classic":uri.Query.Contains("AVIRIS-NG")||uri.Query.Contains("G26638")?"ng":"emit";
             var query=System.Web.HttpUtility.ParseQueryString(uri.Query);
+            if(uri.AbsolutePath.Contains("/concepts/"))
+            {
+                var mask=uri.AbsolutePath.Contains("G4319481618");var entries=Directory.GetFiles(Path.Combine(AppContext.BaseDirectory,"EmitApplicationFixtures","standard"),"*.nc").Where(p=>mask?Path.GetFileName(p).Contains("_MASK_"):!Path.GetFileName(p).Contains("_MASK_")).Select(p=>new{Name=Path.GetFileName(p),SizeInBytes=new FileInfo(p).Length,Checksum=new{Algorithm="SHA-512",Value=Convert.ToHexStringLower(System.Security.Cryptography.SHA512.HashData(File.ReadAllBytes(p)))}});
+                return Json(System.Text.Json.JsonSerializer.Serialize(new{GranuleUR="EMIT_L2A_"+(mask?"MASK_003_":"RFL_002_")+"20220810T034103",CollectionReference=new{ShortName=mask?"EMITL2AMASK":"EMITL2ARFL",Version=mask?"003":"002"},DataGranule=new{ArchiveAndDistributionInformation=entries}}));
+            }
             var type=uri.AbsolutePath.Contains("collections")?"collections":family=="ng"&&(query["granule_ur"]?.Contains("_corr_",StringComparison.Ordinal)==true||query["concept_id"]=="G2663884932-ORNL_CLOUD")?"companions":"granules";
             var nasa=JsonNode.Parse(File.ReadAllText(Path.Combine(AppContext.BaseDirectory,"ProviderMetadata",$"nasa-{family}-{type}.json")))!;
+            if(family=="emit")
+            {
+                var mask=uri.Query.Contains("EMITL2AMASK")||uri.Query.Contains("G4319481618");
+                if(mask){
+                    if(type=="collections"){var c=nasa["feed"]!["entry"]![0]!;c["id"]="C4279547358-LPCLOUD";c["short_name"]="EMITL2AMASK";c["version_id"]="003";}
+                    else{var entry=nasa["feed"]!["entry"]![0]!.DeepClone();entry["id"]="G4319481618-LPCLOUD";entry["collection_concept_id"]="C4279547358-LPCLOUD";entry["title"]="EMIT_L2A_MASK_003_20220810T034103";entry["links"]=new JsonArray(new JsonObject{["rel"]="http://esipfed.org/ns/fedsearch/1.1/data#",["href"]="https://data.lpdaac.earthdatacloud.nasa.gov/lp-prod-protected/EMITL2AMASK.003/EMIT_L2A_MASK_003_20220810T034103/EMIT_L2A_MASK_003_20220810T034103.nc"});nasa["feed"]!["entry"]=new JsonArray(entry);}
+                }
+                else if(type!="collections")nasa["feed"]!["entry"]=new JsonArray(nasa["feed"]!["entry"]![0]!.DeepClone());
+            }
+            if(family=="emit"&&type!="collections"&&Mode.StartsWith("emit-",StringComparison.Ordinal))foreach(var entry in nasa["feed"]!["entry"]!.AsArray())entry!["polygons"]=new JsonArray(new JsonArray("37.98 -120 38 -120 38 -119.96 37.98 -119.96 37.98 -120"));
             if(type=="collections")nasa["feed"]!["entry"]![0]!["dataset_id"]="SYNTHETIC NASA browser test · "+family;
             if(uri.Query.Contains("concept_id=")){var id=System.Web.HttpUtility.ParseQueryString(uri.Query)["concept_id"];var entries=nasa["feed"]!["entry"]!.AsArray();nasa["feed"]!["entry"]=new JsonArray(entries.Where(e=>e!["id"]!.GetValue<string>()==id).Select(e=>e!.DeepClone()).ToArray());}
             else if(type=="granules"){
@@ -38,6 +53,13 @@ internal sealed class LibraryHttpFixture(string root):HttpMessageHandler
                 nasa["feed"]!["entry"]=new JsonArray(ordered.Select(e=>e!.DeepClone()).ToArray());
             }
             return Json(nasa.ToJsonString());
+        }
+        if(uri.Host=="data.lpdaac.earthdatacloud.nasa.gov")
+        {
+            if(request.Headers.Authorization?.Parameter!=FixtureEarthdata.Token)return new(HttpStatusCode.Unauthorized);
+            if(Mode=="wait"&&request.Method==HttpMethod.Get)await Task.Delay(Timeout.Infinite,token);
+            var path=Path.Combine(AppContext.BaseDirectory,"EmitApplicationFixtures","standard",Path.GetFileName(uri.AbsolutePath));
+            var content=File.ReadAllBytes(path);var emitResponse=new HttpResponseMessage(HttpStatusCode.OK){Content=new ByteArrayContent(request.Method==HttpMethod.Head?[]:content)};emitResponse.Content.Headers.ContentLength=content.Length;emitResponse.Headers.ETag=new("\"synthetic-emit-original-v1\"");emitResponse.Headers.AcceptRanges.Add("bytes");return emitResponse;
         }
         if(uri.Host=="data.ornldaac.earthdata.nasa.gov")
         {

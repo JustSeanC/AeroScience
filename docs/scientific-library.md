@@ -10,7 +10,7 @@ made by your simulated aircraft. Downloading data does not add flight science yi
    permission sends geographic queries and your IP address to the selected providers.
    Basemap permission alone does not enable scientific queries or downloads.
 2. Choose **What scientific data do you need?**: terrain/elevation, thermal, surface
-   elevation, multispectral, hyperspectral or EMIT discovery. The page selects a compatible
+   elevation, multispectral, hyperspectral or EMIT development validation. The page selects a compatible
    provider and explains what the measurements represent. Terrain is a numeric elevation
    grid; it is not a downloadable aircraft LiDAR point cloud. Provider details remain advanced.
 3. Find a place/airport, select a small cell, draw a rectangle, use the visible map area, or
@@ -231,3 +231,13 @@ window does not cancel an ongoing import. Use the explicitly labeled Cancel impo
 for that operation. Applicable popups have a touch-sized top-right X, Escape dismissal and
 focus return; dirty popup fields offer Keep editing before discarding unsaved edits. Windows/MSFS and physical
 paired-device acceptance remain separate from browser and provider tests.
+
+## EMIT historical swath exploration (unreleased 0.6.0)
+
+**EMIT · development validation** connects exact RFL002 / uncertainty002 / compatible MASK003
+originals to the existing Library jobs and trusted local-file picker. Explicit approval and a
+pending-genuine-acceptance acknowledgement are required. Retained sources provide spectrum and
+uncertainty charts, QA-aware bounded GLT map windows, same-scene comparison and portable JSON.
+This adapter does not enable automatic aircraft sampling or create flight observations/grade credit.
+Genuine NASA originals, authorized direct-access redirects and installed-device acceptance remain
+pending. Follow [the current workflow and limitations](research/v0.6.0-emit-integration.md).

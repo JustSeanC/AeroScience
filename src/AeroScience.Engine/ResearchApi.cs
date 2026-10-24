@@ -90,6 +90,7 @@ public static class ResearchApi
         app.MapGet("/api/science/library/jobs",(int? offset,ScienceStore science,ScientificLibraryJobs jobs)=>new{jobs=science.LibraryJobs(offset??0).Select(jobs.Project),warning=jobs.Warning});
         app.MapPost("/api/science/library/preview",(ScientificLibrarySelection selection,ScientificLibraryJobs jobs,HttpContext c)=>ProjectLibraryPreview(jobs.Preview(selection,c.RequestAborted),jobs));
         app.MapPost("/api/science/library/nasa/preview",(NasaDownloadRequest request,ScientificLibraryJobs jobs,HttpContext c)=>ProjectLibraryPreview(jobs.PreviewNasa(request,c.RequestAborted),jobs));
+        app.MapEmitEndpoints();
         app.MapGet("/api/science/earthdata",(IEarthdataCredentials credentials)=>EarthdataConnection.Status(credentials));
         app.MapPost("/api/science/earthdata/disconnect",async(ScientificLibraryJobs jobs,IEarthdataCredentials credentials,HttpContext c)=>
         {
@@ -162,7 +163,7 @@ public static class ResearchApi
         });
         app.MapGet("/api/science/sources/{id:guid}/coverage",(Guid id,ScienceStore science)=>
         {
-            var source=science.Source(id)??throw new ArgumentException("Source not found.");var g=source.Grids.Values.First();
+            var source=science.Source(id)??throw new ArgumentException("Source not found.");if(source.Manifest.Swath is {} swath)return swath.Domain.Corners;var g=source.Grids.Values.First();
             return ScientificRaster.GridCoverage(g);
         });
         app.MapPost("/api/science/workspace/atmosphere",(ScienceMapQuery query,ScienceStore science)=>science.AtmosphereMap(query));

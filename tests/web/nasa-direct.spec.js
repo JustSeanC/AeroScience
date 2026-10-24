@@ -50,7 +50,7 @@ for (const [family, bands] of [['classic', 224], ['ng', 425]]) test(`${family} d
   await page.getByRole('button', { name: 'Preview NASA Download & Import', exact: true }).first().click();
   const previewResponse = await response; expect(previewResponse.ok(), await previewResponse.text()).toBeTruthy(); const job = await previewResponse.json();
   const review = page.getByLabel('Download preview', { exact: true });
-  await expect(review).toContainText('complete original ENVI companions');
+  await expect(review).toContainText('complete original scientific companions');
   await expect(review).toContainText('.hdr'); await expect(review).toContainText('.bin');
   expect((await (await request.get(`/api/science/library/jobs/${job.id}`)).json()).state).toBe('Awaiting Approval');
   await page.getByRole('button', { name: 'Download & Import', exact: true }).click();
@@ -81,5 +81,5 @@ test('NASA connection and import controls retain explicit EMIT boundary and do n
   const status = await (await request.get('/api/science/earthdata')).json(); expect(status.connected).toBe(false); expect(Object.keys(status).sort()).toEqual(['available', 'connected', 'message']);
   await page.getByLabel('Scientific provider / product', { exact: true }).selectOption('nasa-emit');
   await expect(page.getByRole('button', { name: 'Preview NASA Download & Import', exact: true })).toHaveCount(0);
-  await expect(page.locator('main')).toContainText('native NetCDF-4 scientific import not yet supported');
+  await expect(page.locator('main')).toContainText('Genuine NASA numerical acceptance is pending');
 });

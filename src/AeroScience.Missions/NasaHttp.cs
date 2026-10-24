@@ -8,6 +8,11 @@ public sealed partial class ScientificHttp
 {
     public static void ValidateNasaOriginal(Uri uri)
     {
+        if(ScientificCatalog.OfficialNasaLink(uri.AbsoluteUri)&&uri.Host=="data.lpdaac.earthdatacloud.nasa.gov")
+        {
+            var match=System.Text.RegularExpressions.Regex.Match(uri.AbsolutePath,@"^/lp-prod-protected/EMITL2A(?<collection>RFL\.002|MASK\.003)/EMIT_L2A_(?<parent>RFL_002|MASK_003)_(?<scene>\d{8}T\d{6}(?:_\d{7}_\d{3})?)/EMIT_L2A_(?<role>RFL_002|RFLUNCERT_002|MASK_003)_\k<scene>\.nc$");
+            if(match.Success&&(match.Groups["collection"].Value=="RFL.002"&&match.Groups["parent"].Value=="RFL_002"&&match.Groups["role"].Value is "RFL_002" or "RFLUNCERT_002"||match.Groups["collection"].Value=="MASK.003"&&match.Groups["parent"].Value=="MASK_003"&&match.Groups["role"].Value=="MASK_003"))return;
+        }
         if(!ScientificCatalog.OfficialNasaLink(uri.AbsoluteUri)||uri.Host!="data.ornldaac.earthdata.nasa.gov"||
             !System.Text.RegularExpressions.Regex.IsMatch(uri.AbsolutePath,@"^/(protected|public)/aviris/AVIRIS-(Classic|NG)_L2_Reflectance/data/[A-Za-z0-9_.-]+\.(hdr|bin|sha256)$"))
             throw ScientificFailure.Create(ScientificFailureKind.UnsupportedFormat,"Unsupported NASA original endpoint. Use the official browser fallback for other distributions.");
@@ -18,6 +23,7 @@ public sealed partial class ScientificHttp
     public static void ValidateNasaRedirect(Uri original,Uri redirected,HttpMethod? method=null)
     {
         ValidateNasaOriginal(original);
+        if(original.Host=="data.lpdaac.earthdatacloud.nasa.gov")throw ScientificFailure.Create(ScientificFailureKind.ProviderRedirect,"EMIT redirected to an unverified destination; no token was forwarded. Use official browser download and local import.");
         var relative=original.AbsolutePath[(original.AbsolutePath.IndexOf("/aviris/",StringComparison.Ordinal)+1)..];
         var bucket=original.AbsolutePath.StartsWith("/protected/",StringComparison.Ordinal)?"ornl-cumulus-prod-protected":"ornl-cumulus-prod-public";
         var prefix=method==HttpMethod.Head?"(?:s3|head)":"s3";

@@ -5,10 +5,13 @@ namespace AeroScience.Missions;
 
 public sealed partial class ScientificLibraryJobs
 {
-    private ScientificSource? ReusableNasa(NasaDownloadBundle bundle)=>science.StreamSources(new(Scene:bundle.Selection.Scene)).FirstOrDefault(s=>s.Manifest.Acquisition is {Workflow:"nasa-earthdata-original-envi"} a&&a.CatalogRevision==bundle.Revision&&s.Manifest.SceneId==bundle.Selection.Scene);
+    private ScientificSource? KnownNasa(NasaDownloadBundle bundle)=>science.StreamSources(new(Scene:bundle.Selection.Scene)).FirstOrDefault(s=>s.Manifest.Acquisition is {} a&&a.Workflow is ("nasa-earthdata-original-envi" or "nasa-earthdata-original-emit")&&a.CatalogRevision==bundle.Revision&&s.Manifest.SceneId==bundle.Selection.Scene)??science.CompletedNasaReuse(new(bundle.Selection.Provider,bundle.Selection.Scene,bundle.Selection.Revision),bundle.Revision)?.Source;
+    private async Task<ScientificSource?> ReusableNasa(NasaDownloadBundle bundle,CancellationToken token)
+    {return KnownNasa(bundle)??(bundle.Selection.Provider=="nasa-emit"&&swathImport is not null?await swathImport.FindReusable(bundle,token):null);}
     private NasaDownloadBundle? RetainedNasa(NasaSelectionRequest request)
     {
-        foreach(var source in science.StreamSources(new(Scene:request.GranuleId)).Where(s=>s.Manifest.SceneId==request.GranuleId&&s.Manifest.Acquisition?.Workflow=="nasa-earthdata-original-envi"))
+        if(science.CompletedNasaReuse(request) is {} completed)return completed.Bundle;
+        foreach(var source in science.StreamSources(new(Scene:request.GranuleId)).Where(s=>s.Manifest.SceneId==request.GranuleId&&s.Manifest.Acquisition?.Workflow is ("nasa-earthdata-original-envi" or "nasa-earthdata-original-emit")))
         {
             var bundle=JsonSerializer.Deserialize<NasaDownloadBundle>(source.Manifest.Acquisition!.ProviderMetadataJson!,WireJson.Options);
             if(bundle?.Selection.Provider==request.Provider&&bundle.Selection.Revision==request.Revision)return bundle;
@@ -18,7 +21,8 @@ public sealed partial class ScientificLibraryJobs
     public async Task<LibraryDownloadJob> PreviewNasa(NasaDownloadRequest request,CancellationToken token=default)
     {
         EnsureRecovered();using var sourceRead=science.BeginAnalysis();
-        if(request.Selection is null||request.Selection.Provider is not("nasa-classic" or "nasa-ng"))throw new ArgumentException("Choose an exact AVIRIS-Classic or AVIRIS-NG reflectance scene. EMIT is discovery-only.");
+        if(request.Selection is null||request.Selection.Provider is not("nasa-classic" or "nasa-ng" or "nasa-emit"))throw new ArgumentException("Choose an exact supported NASA reflectance scene.");
+        if(request.Selection.Provider=="nasa-emit"&&(!request.ValidationAcknowledged||swathImport is null))throw new ArgumentException("EMIT is a development validation capability. Acknowledge pending genuine-original numerical acceptance before preview/import; installed acceptance is separate.");
         var p=settings.Get().Preferences;var limit=request.MaximumTransferBytes;
         if(limit<1048576||limit>p.NasaOriginalMaximumBytes||limit>(p.PreflightTransferBytes??21474836480))throw new ArgumentException("The NASA original-job budget must fit the configured NASA scene cap and remaining preflight policy (1 MiB–20 GiB). Review Scientific access settings; automatic subset caps stay unchanged.");
         var bundle=RetainedNasa(request.Selection);
@@ -28,7 +32,7 @@ public sealed partial class ScientificLibraryJobs
             if(earthdata.ReadToken() is null)throw new IOException("Connect Earthdata on the companion PC, then preview the exact original files.");
             bundle=await DiscoverNasaBundle(request.Selection,token);
         }
-        var retained=ReusableNasa(bundle);if(retained is not null&&!Verify(retained))throw new IOException("Retained NASA originals changed. Restore/reimport them; no original was replaced.");
+        var retained=await ReusableNasa(bundle,token);if(retained is not null&&!Verify(retained))throw new IOException("Retained NASA originals changed. Restore/reimport them; no original was replaced.");
         if(bundle.Version!=1)throw new IOException("Unsupported NASA acquisition contract version. Preserve these records and use a compatible application.");
         var bytes=bundle.Files.Sum(f=>f.Bytes);if(retained is null&&bytes>limit)throw new IOException($"The selected NASA originals require {bytes} bytes before metadata/retries, above the {limit}-byte approval cap. Choose a smaller flightline or explicitly raise NASA/preflight/job limits. No subset was invented.");
         var temp=retained is null?checked(bytes*2+2097152):0;
@@ -41,12 +45,12 @@ public sealed partial class ScientificLibraryJobs
         var now=DateTimeOffset.UtcNow;var config=SettingsHash(true);var hash=ScientificCatalog.Hash(new{selection,bundle,work,config});var storage=science.Management?.Snapshot();
         return science.SaveLibraryPreview(new(1,Guid.NewGuid(),selection,hash,config,now,now.AddMinutes(30),work,[bundle.Selection,..bundle.Companions],limit,limit,temp,
             retained?.Files.Sum(f=>f.Bytes)??0,retained is not null?0:bytes,bytes,
-            ["NASA direct acquisition downloads these complete original ENVI companions, not just the map selection. All native spectral channels are preserved; there is no validated NASA regional subset service here.","Exact file bytes are obtained from provider headers. Metadata, retries and interrupted-read allowances also consume the explicitly approved job cap; allow headroom.","The independent NASA original-scene cap does not change the existing automatic numeric-subset limit. Active flights preempt Library downloads.","Historical NASA reflectance is not a new aircraft observation. Successful file transfer does not establish QA-valid pixels or certify scientific accuracy.","Earthdata User Tokens expire (NASA documents 60 days). Reconnect when NASA denies access. Browser/manual import remains available."],
+            ["NASA direct acquisition downloads these complete original scientific companions, not just the map selection. All native spectral channels are preserved; there is no validated NASA regional subset service here.","Exact file bytes are obtained from provider headers. Metadata, retries and interrupted-read allowances also consume the explicitly approved job cap; allow headroom.","The independent NASA original-scene cap does not change the existing automatic numeric-subset limit. Active flights preempt Library downloads.","Historical NASA reflectance is not a new aircraft observation. Successful file transfer does not establish QA-valid pixels or certify scientific accuracy.","Earthdata User Tokens expire (NASA documents 60 days). Reconnect when NASA denies access. Browser/manual import remains available."],
             AvailableDriveBytes:storage?.Science.FreeBytes,ScientificStorageLimitBytes:storage?.Science.LimitBytes,ScientificStorageUsedBytes:storage?.Science.UsedBytes,PreparationBudgetRemainingBytes:automatic.QueueSummary().PreflightAvailableBytes,Nasa:bundle));
     }
     private async Task<NasaDownloadBundle> DiscoverNasaBundle(NasaSelectionRequest request,CancellationToken token)
     {
-        var selected=await catalog.ResolveNasa(request,token);var originals=selected.Nasa!.Assets.Where(a=>a.Role is "ENVI header" or "Original numeric binary"&&Regex.IsMatch(a.Name,@"_(corr|rfl|refl)(_|$)")).ToArray();
+        var selected=await catalog.ResolveNasa(request,token);if(request.Provider=="nasa-emit")return await DiscoverEmitBundle(selected,token);var originals=selected.Nasa!.Assets.Where(a=>a.Role is "ENVI header" or "Original numeric binary"&&Regex.IsMatch(a.Name,@"_(corr|rfl|refl)(_|$)")).ToArray();
         var stems=originals.Select(a=>Path.GetFileNameWithoutExtension(a.Name)).Distinct().ToArray();
         if(stems.Length!=1)throw new IOException("This granule does not identify exactly one supported original reflectance pair. Use the guided importer for ambiguous/unsupported distributions.");
         var stem=stems[0];var items=new List<ScientificCatalogItem>{selected};
@@ -85,17 +89,23 @@ public sealed partial class ScientificLibraryJobs
         }
         _=OwnedLedger();
         var merged=bundle.Selection with{Nasa=bundle.Selection.Nasa! with{Assets=bundle.Files.Select(f=>new NasaAsset(f.Name,f.Url,f.Role)).ToArray()}};
-        var header=Path.Combine(folder,bundle.Files.Single(f=>f.Role=="ENVI header").Name);
+        var emit=bundle.Selection.Provider=="nasa-emit";
+        var header=emit?null:Path.Combine(folder,bundle.Files.Single(f=>f.Role=="ENVI header").Name);
         science.SetLibraryState(job.Id,"Downloading",runningOnly:true);science.SetLibraryItem(job.Id,0,"Downloading");progress[job.Id].Stage("Downloading");
         using(var reservation=science.Management?.ReserveScience(bundle.Files.Sum(f=>f.Bytes)))
             foreach(var file in bundle.Files.OrderBy(f=>f.Role=="ENVI header"?0:f.Role=="Provider SHA-256"?1:2))
             {
                 // Reject unsupported spectral/header metadata before requesting a large cube.
-                if(file.Role=="Original numeric binary")_=NasaGuidedImport.Inspect(header,merged,token:token,direct:true);
+                if(file.Role=="Original numeric binary")_=NasaGuidedImport.Inspect(header!,merged,token:token,direct:true);
                 await automatic.Http.DownloadNasaFile(file,folder,earthdata,budget,token,bytes=>progress[job.Id].File(Array.IndexOf(bundle.Files,file),bytes,file.Bytes));
             }
         progress[job.Id].Stage("Verifying");science.SetLibraryState(job.Id,"Verifying",runningOnly:true);science.SetLibraryItem(job.Id,0,"Verifying");
-        var inspected=NasaGuidedImport.Inspect(header,merged,token:token,direct:true);
+        if(emit)
+        {
+            var published=await (swathImport??throw new IOException("The EMIT verifier is unavailable; no source was published.")).ImportNasa(folder,bundle,token);
+            Cleanup();return published;
+        }
+        var inspected=NasaGuidedImport.Inspect(header!,merged,token:token,direct:true);
         if(inspected.Manifest is null)throw new IOException("NASA original metadata is incomplete or incompatible. Browser/manual import remains available; no metadata was guessed.");
         var provenance=new AutomaticSourceProvenance("nasa-earthdata-original-envi","NASA CMR / ORNL DAAC",bundle.Selection.Scene,bundle.Files.Select(f=>f.Url).ToArray(),bundle.Selection.Bounds,DateTimeOffset.UtcNow,
             "Original ENVI files streamed, identity-checked and verified by the existing NASA/ENVI importer; no numerical conversion.",bundle.Selection.Quality,bundle.Selection.Resolution,budget.Bytes,
@@ -103,15 +113,16 @@ public sealed partial class ScientificLibraryJobs
         var manifest=inspected.Manifest with{Acquisition=provenance};
         progress[job.Id].Stage("Importing");var imported=await science.ImportSourceAsync(manifest,folder,token,reuseExisting:true,verifyStaged:stage=>
         {
-            var copy=NasaGuidedImport.Inspect(Path.Combine(stage,Path.GetFileName(header)),merged,token:token,direct:true);
+            var copy=NasaGuidedImport.Inspect(Path.Combine(stage,Path.GetFileName(header!)),merged,token:token,direct:true);
             if(ScientificCatalog.Hash(copy.Manifest)!=ScientificCatalog.Hash(inspected.Manifest))throw new IOException("NASA metadata changed during staged verification; no source was published.");
         });
         automatic.RefreshLocalReadiness();
         // Atomic publication succeeded. Remove ONLY this job's owned download duplicates.
-        var completedLedger=OwnedLedger();
+        Cleanup();return imported;
+        void Cleanup(){var completedLedger=OwnedLedger();
         foreach(var path in paths){var absolute=StorageManager.ResolveDataset(science.DirectoryPath,science.LibraryId,path);if(File.Exists(absolute))File.Delete(absolute);}
         File.Delete(completedLedger);
-        File.Delete(marker);Directory.Delete(folder);return imported;
+        File.Delete(marker);Directory.Delete(folder);}
     }
     public async Task DisconnectEarthdata(CancellationToken token=default)
     {

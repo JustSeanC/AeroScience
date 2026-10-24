@@ -9,7 +9,7 @@ internal static class NasaOriginalAcceptance
 {
     public static void Run(string folder,string family,string output)
     {
-        if(family is not("classic" or "ng"))throw new ArgumentException("Choose classic or ng independently. EMIT native import is unsupported.");
+        if(family is not("classic" or "ng"))throw new ArgumentException("Choose classic or ng independently. EMIT requires its separate product original-verification harness; this tool cannot establish EMIT numerical acceptance.");
         folder=Path.GetFullPath(folder);
         var sourceFile=ScientificRaster.SafeFile(folder,"source.json");
         var source=JsonSerializer.Deserialize<ScientificSource>(File.ReadAllText(sourceFile),new JsonSerializerOptions(WireJson.Options){PropertyNameCaseInsensitive=true})??throw new IOException("Missing retained source identity.");
