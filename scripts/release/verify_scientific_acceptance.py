@@ -63,6 +63,8 @@ if tuple(map(int, VERSION.split('-')[0].split('.'))) >= (0,5,0):
     candidates += list((ROOT/'scripts/release').glob('*scientific*acceptance.py'))
     candidates += [ROOT/'scripts/release'/name for name in ('scientific_evidence.py','record_envi_acceptance.py','record_workspace_acceptance.py')]
     candidates += [ROOT/'scripts/research'/name for name in ('verify_library_sources.py','verify_envi_originals.py','verify_nasa_originals.py','download_cuprite_acceptance.py')]
+    if tuple(map(int, VERSION.split('-')[0].split('.'))) >= (0,6,0):
+        candidates += [ROOT/'scripts/research/verify_emit_originals.py']
     SOURCES = list(dict.fromkeys(SOURCES + sorted(p.relative_to(ROOT).as_posix() for p in candidates if p.is_file())))
 
 def source_digest(path):

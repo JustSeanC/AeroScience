@@ -1,0 +1,163 @@
+{
+  "formatVersion": 1,
+  "version": "0.6.0",
+  "decoderPolicy": "emit-l2a-rfl002-uncert002-mask003-seven/1",
+  "evidenceClass": "Official public metadata and producer definitions; NOT protected NASA original numerical acceptance",
+  "checkedUtc": "2026-10-24",
+  "sources": [
+    {
+      "title": "NASA developer reference",
+      "repository": "https://github.com/nasa/EMIT-Data-Resources",
+      "commit": "2ae671f128031f7c1c7f97c286294d7655c92ea2",
+      "documents": [
+        {
+          "name": "emit_tools.py",
+          "sha256": "61c8d1506744db1372a34f2822b6bf14d15ff86d90cc42822c1097751d36453e",
+          "bytes": 26279,
+          "sourcePath": "python/modules/emit_tools.py",
+          "url": "https://github.com/nasa/EMIT-Data-Resources/blob/2ae671f128031f7c1c7f97c286294d7655c92ea2/python/modules/emit_tools.py"
+        },
+        {
+          "name": "Exploring_EMIT_L2A_Reflectance.ipynb",
+          "sha256": "212189540439032a65ea02a33a890e4fe01c8ae5edd6b557c5c6aad6cbf3ee7a",
+          "bytes": 31324,
+          "sourcePath": "python/tutorials/Exploring_EMIT_L2A_Reflectance.ipynb",
+          "url": "https://github.com/nasa/EMIT-Data-Resources/blob/2ae671f128031f7c1c7f97c286294d7655c92ea2/python/tutorials/Exploring_EMIT_L2A_Reflectance.ipynb"
+        },
+        {
+          "name": "quality-notebook.txt",
+          "sha256": "20e438231689ce9d08fa8456697fb870f2f3d24df02759f24678f462011a9980",
+          "bytes": 15152,
+          "sourcePath": "python/how-tos/How_to_use_EMIT_Quality_data.ipynb",
+          "url": "https://github.com/nasa/EMIT-Data-Resources/blob/2ae671f128031f7c1c7f97c286294d7655c92ea2/python/how-tos/How_to_use_EMIT_Quality_data.ipynb"
+        }
+      ]
+    },
+    {
+      "title": "EMIT L2A producer",
+      "repository": "https://github.com/emit-sds/emit-sds-l2a",
+      "commit": "87ca059354a1840b6bf445544cc2939aca633ab2",
+      "documents": [
+        {
+          "name": "l2a-output_conversion.py",
+          "sha256": "4ba521288eebc90c6d54f50d6e729f1479d352a9073ebf172540e1c8857e9820",
+          "bytes": 8288,
+          "sourcePath": "output_conversion.py",
+          "url": "https://github.com/emit-sds/emit-sds-l2a/blob/87ca059354a1840b6bf445544cc2939aca633ab2/output_conversion.py"
+        },
+        {
+          "name": "delta.txt",
+          "sha256": "71c5be9eb868d4ad219ea0403a29f4f9ac87613a9736990963e8dbbabec326c6",
+          "bytes": 22098,
+          "sourcePath": "docs/EMITL2A_v1_v2_DELTA.md",
+          "url": "https://github.com/emit-sds/emit-sds-l2a/blob/87ca059354a1840b6bf445544cc2939aca633ab2/docs/EMITL2A_v1_v2_DELTA.md"
+        }
+      ]
+    },
+    {
+      "title": "EMIT NetCDF converter",
+      "repository": "https://github.com/emit-sds/emit-utils",
+      "commit": "101f0740dc9d729f91b4823da50db46de91cf0f5",
+      "documents": [
+        {
+          "name": "daac_converter.py",
+          "sha256": "d141d3804ab241fef14afbde2518a5d93d2cfe9331c24f09a9deb0b7f73a4015",
+          "bytes": 22975,
+          "sourcePath": "emit_utils/daac_converter.py",
+          "url": "https://github.com/emit-sds/emit-utils/blob/101f0740dc9d729f91b4823da50db46de91cf0f5/emit_utils/daac_converter.py"
+        }
+      ]
+    },
+    {
+      "title": "EMIT mask producer",
+      "repository": "https://github.com/emit-sds/emit-sds-masks",
+      "commit": "47bf9f38253c3aee3fb62b0c47e2a81704513754",
+      "documents": [
+        {
+          "name": "mask-output_conversion.py",
+          "sha256": "7b4f136358b51045c32ff2bb6f4f749bd0659a273b4e9e0fa45052a6815763b1",
+          "bytes": 3985,
+          "sourcePath": "output_conversion.py",
+          "url": "https://github.com/emit-sds/emit-sds-masks/blob/47bf9f38253c3aee3fb62b0c47e2a81704513754/output_conversion.py"
+        },
+        {
+          "name": "make_emit_masks.py",
+          "sha256": "76758bb6e593a50faa01d676c7a2a3c5face2f7e930383d378f5309470ddb721",
+          "bytes": 7049,
+          "sourcePath": "make_emit_masks.py",
+          "url": "https://github.com/emit-sds/emit-sds-masks/blob/47bf9f38253c3aee3fb62b0c47e2a81704513754/make_emit_masks.py"
+        },
+        {
+          "name": "EMIT_L2A_Mask_User_Guide.md",
+          "sha256": "6f7533388e9225231e5122b7a78c4a407d8390e7ef49cca195f7a9bd42faae20",
+          "bytes": 9525,
+          "sourcePath": "docs/EMIT_L2A_Mask_User_Guide.md",
+          "url": "https://github.com/emit-sds/emit-sds-masks/blob/47bf9f38253c3aee3fb62b0c47e2a81704513754/docs/EMIT_L2A_Mask_User_Guide.md"
+        }
+      ]
+    },
+    {
+      "title": "EMIT UTC/header workflow",
+      "repository": "https://github.com/emit-sds/emit-main",
+      "commit": "be55f169b97a31aa559d65a9ee65edf634c51cff",
+      "documents": [
+        {
+          "name": "l2a_tasks.py",
+          "sha256": "9fc1610941d04c6ccaab714ac57cf972b134ba7202ff019a39aa997b6ad66ce9",
+          "bytes": 52489,
+          "sourcePath": "emit_main/workflow/l2a_tasks.py",
+          "url": "https://github.com/emit-sds/emit-main/blob/be55f169b97a31aa559d65a9ee65edf634c51cff/emit_main/workflow/l2a_tasks.py"
+        }
+      ]
+    }
+  ],
+  "collections": [
+    {
+      "shortName": "EMITL2ARFL",
+      "version": "002",
+      "conceptId": "C4079844428-LPCLOUD",
+      "revision": 14
+    },
+    {
+      "shortName": "EMITL2AMASK",
+      "version": "003",
+      "conceptId": "C4279547358-LPCLOUD",
+      "revision": 7
+    }
+  ],
+  "verifiedPublicGranules": [
+    "EMIT_L2A_RFL_002_20220810T034103",
+    "EMIT_L2A_MASK_003_20220810T034103"
+  ],
+  "originalAccess": {
+    "status": "blocked-earthdata-authorization",
+    "probe": "One bounded original Range request, redirect following disabled",
+    "httpStatus": 302,
+    "redirectHost": "urs.earthdata.nasa.gov",
+    "credentialsAvailable": false,
+    "protectedOriginalBytesRead": 0,
+    "numericalAcceptance": "pending authorized original files; no retry or authentication bypass attempted"
+  },
+  "compatibility": {
+    "rfl": "V002 float32 reflectance, unitless; associated RFLUNCERT002 in the same RFL collection",
+    "mask": "V003 current seven-band producer plus uint8 packed per-wavelength mask; legacy 11-band guide describes an older schema and is not assumed interchangeable",
+    "time": "Original flight_line plus exact start/end. SDS UTC +0000 and standard Z/+00:00 parsed explicitly",
+    "spectral": "285 original float32 wavelength/FWHM channels in nm; uint8 good_wavelengths; strict reflectance/uncertainty matching",
+    "geography": "Original float64 native lat/lon plus one-based int32 GLT. Derived GLT-domain bounds are not QA-valid scene coverage",
+    "quality": "Cloud/Cirrus/Dilated/SpecTf binary flags; optional water. Probability/distance remain quantitative values, not binary flags; per-band interpolation and missing QA remain distinct",
+    "unsupported": [
+      "RFL001/newer versions",
+      "MASK001/002 or unverified MASK003 layouts",
+      "radiance/mineral/CH4 products",
+      "unknown CRS or rotated GLT",
+      "unmatched/ambiguous companions",
+      "custom numeric encodings or unsupported HDF filters"
+    ],
+    "processing": "Original software_build_version/software_delivery_version required; RFL/uncertainty must match, mask processing may differ."
+  },
+  "officialRelease": {
+    "url": "https://forum.earthdata.nasa.gov/viewtopic.php?t=8243",
+    "sha256": "a5800ed97ebd55d9e33de55f46931ed0d1b3b2183235c573b44675ee317c3a0a",
+    "fact": "NASA September 21 2026 release explicitly pairs RFL002 and MASK003; metadata does not establish original-file acceptance."
+  }
+}

@@ -11,6 +11,7 @@
     <None Include="../AeroScience.ManagedHdfProbe/synthetic-emit-*.nc;../AeroScience.ManagedHdfProbe/security-fixtures/*.nc;../AeroScience.HdfFixtures/*.nc" Link="HdfFixtures/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
   <ItemGroup><None Update="ProviderMetadata/*.json" CopyToOutputDirectory="PreserveNewest" /></ItemGroup>
+  <ItemGroup><None Include="../AeroScience.EmitFixtures/**/*.nc" Link="EmitFixtures/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" /></ItemGroup>
   <ItemGroup>
     <Compile Include="../AeroScience.ProviderAcceptance/GuidedEnviAcceptance.cs" Link="Acceptance/GuidedEnviAcceptance.cs" />
     <Compile Include="../AeroScience.ProviderAcceptance/WorkspaceAcceptance.cs" Link="Acceptance/WorkspaceAcceptance.cs" />

@@ -19,5 +19,6 @@
 # Source-pinned read-only HDF fork and original notices retain exact reviewed bytes.
 /src/AeroScience.HdfReader/Vendor/** -text
 /tests/AeroScience.HdfFixtures/*.nc -text
+/tests/AeroScience.EmitFixtures/**/*.nc -text
 /licenses/PureHDF.txt -text
 /licenses/Blosc-shuffle.txt -text

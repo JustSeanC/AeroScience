@@ -1,0 +1,137 @@
+{
+  "evidenceClass": "Synthetic NetCDF-C; official-writer-aligned contract tests, NOT NASA original numerical acceptance",
+  "date": "2099-01-01 intentionally synthetic",
+  "generator": "generate_fixtures.py",
+  "files": [
+    {
+      "file": "standard/EMIT_L2A_RFL_002_20990101T000000.nc",
+      "bytes": 30537,
+      "sha256": "cf7caa6c2cc31280f2eacd12ea0704b55769ebb65e2ac370ebed7a925c776a84"
+    },
+    {
+      "file": "standard/EMIT_L2A_RFLUNCERT_002_20990101T000000.nc",
+      "bytes": 30071,
+      "sha256": "eb7848d1a611891186cdfc367e68ee484098185a7b706fd9474604537e8ddbf5"
+    },
+    {
+      "file": "standard/EMIT_L2A_MASK_003_20990101T000000.nc",
+      "bytes": 16306,
+      "sha256": "581281dd8d2eec1ef2f4534df619a0deb35bbddc375a5d5914060af9e8777927"
+    },
+    {
+      "file": "scaled/EMIT_L2A_RFL_002_20990101T000000.nc",
+      "bytes": 30687,
+      "sha256": "124416c2ea1f6429f271ebd6e9d2b9ddcc497196b96ab1838a3b1713d1d48d13"
+    },
+    {
+      "file": "scaled/EMIT_L2A_RFLUNCERT_002_20990101T000000.nc",
+      "bytes": 30221,
+      "sha256": "616bfb0719c380f8ff52171eb45422946416a52df9ed648e03a1d80c24d2af14"
+    },
+    {
+      "file": "scaled/EMIT_L2A_MASK_003_20990101T000000.nc",
+      "bytes": 16306,
+      "sha256": "581281dd8d2eec1ef2f4534df619a0deb35bbddc375a5d5914060af9e8777927"
+    },
+    {
+      "file": "shifted/EMIT_L2A_RFLUNCERT_002_20990101T000000.nc",
+      "bytes": 30071,
+      "sha256": "a9591ab89edbd46ba1deade1a53a6ab0607b9b8d5982d1a8ada43f794a4f1237"
+    },
+    {
+      "file": "spectral/EMIT_L2A_RFLUNCERT_002_20990101T000000.nc",
+      "bytes": 30071,
+      "sha256": "2b7e45a79df4a0b0536b12ab222da7b8fa0b9d4fbbe5dc1447fee08448a558cc"
+    },
+    {
+      "file": "time/EMIT_L2A_RFLUNCERT_002_20990101T000000.nc",
+      "bytes": 30071,
+      "sha256": "d84bd629d34c9017191711447726f80435aea308447685af90d0e0774824297c"
+    },
+    {
+      "file": "glt/EMIT_L2A_MASK_003_20990101T000000.nc",
+      "bytes": 16306,
+      "sha256": "82f60e1073dba4584e8d8e04a69ef731f1d432ac52e6c42edd02eeafc09621fc"
+    },
+    {
+      "file": "old-mask/EMIT_L2A_MASK_003_20990101T000000.nc",
+      "bytes": 16562,
+      "sha256": "81c897a87d1e6b0baad830e319b343a0a90a02c40b0ab6095cef59db4b978cd5"
+    },
+    {
+      "file": "labels/EMIT_L2A_MASK_003_20990101T000000.nc",
+      "bytes": 16306,
+      "sha256": "79e3a88955bd613bc66df547dce87535f585676269f7a4dd1445c4a19e839ebe"
+    },
+    {
+      "file": "version/EMIT_L2A_MASK_003_20990101T000000.nc",
+      "bytes": 16306,
+      "sha256": "36463b6ad44223413cf6ff2e76a2f62b3b71874d9eab55e8f7a724a462a50093"
+    },
+    {
+      "file": "missing-units/EMIT_L2A_RFL_002_20990101T000000.nc",
+      "bytes": 30496,
+      "sha256": "5db3aec026fbb83b455f9c75c888e90afb621013566812193db5235db48bd412"
+    },
+    {
+      "file": "extremes/EMIT_L2A_RFL_002_20990101T000000.nc",
+      "bytes": 30542,
+      "sha256": "dee059b8b93ce2ec6cf0f78fb48cddb13c75a253aaea4f6aa33d4f797a0f311b"
+    },
+    {
+      "file": "extremes/EMIT_L2A_RFLUNCERT_002_20990101T000000.nc",
+      "bytes": 30080,
+      "sha256": "8f9e7a1d1f29a63ab0e824d461a260a72f986e8fec091083bedc6803b4e3209e"
+    },
+    {
+      "file": "extremes/EMIT_L2A_MASK_003_20990101T000000.nc",
+      "bytes": 16306,
+      "sha256": "581281dd8d2eec1ef2f4534df619a0deb35bbddc375a5d5914060af9e8777927"
+    },
+    {
+      "file": "limits/EMIT_L2A_RFL_002_20990101T000000.nc",
+      "bytes": 211929,
+      "sha256": "17eb174ee8e9884b880ae7d5f7e4e3b93307fcb904df6c8f80e896ad946d8c73"
+    },
+    {
+      "file": "limits/EMIT_L2A_RFLUNCERT_002_20990101T000000.nc",
+      "bytes": 211929,
+      "sha256": "9395bc8278406427a5521f1bc2621916d5de19dd82c2d03e120a9c56ac1c5e43"
+    },
+    {
+      "file": "limits/EMIT_L2A_MASK_003_20990101T000000.nc",
+      "bytes": 977330,
+      "sha256": "f815b8f3d1ea1cf1d7489bba705479d9c0f4e645c2211aedc927671d5344111e"
+    },
+    {
+      "file": "oversized-string/EMIT_L2A_MASK_003_20990101T000000.nc",
+      "bytes": 21338,
+      "sha256": "3d805361279ab3d52e9488aeb477a8f6bb217008b31557ead6ca04ffc51a4b18"
+    },
+    {
+      "file": "missing-packed/EMIT_L2A_MASK_003_20990101T000000.nc",
+      "bytes": 16306,
+      "sha256": "fba1d373887492855b13c00686a42feb0becef91730c013eaa67e09195e51bf3"
+    },
+    {
+      "file": "producer/EMIT_L2A_RFL_002_20990101T000000.nc",
+      "bytes": 30537,
+      "sha256": "3aa6360ad556a6e954ce172668d3e00b0e0329cae83c929c2d64ee147e050d6d"
+    },
+    {
+      "file": "producer/EMIT_L2A_RFLUNCERT_002_20990101T000000.nc",
+      "bytes": 30071,
+      "sha256": "149a2d70bfce802cb2d252a9052aafdeb0f9e143405efd0ed710424bb4d8cfea"
+    },
+    {
+      "file": "producer/EMIT_L2A_MASK_003_20990101T000000.nc",
+      "bytes": 16306,
+      "sha256": "f1dc462e5e4236c87253d50249aa549f4d871f44b4cce32ee9f0c9ff50044a53"
+    },
+    {
+      "file": "processing/EMIT_L2A_RFLUNCERT_002_20990101T000000.nc",
+      "bytes": 30071,
+      "sha256": "780e6498eda86290c8664248ee83cc38b07fb4b1540cdad08b3381bfab2a9307"
+    }
+  ]
+}

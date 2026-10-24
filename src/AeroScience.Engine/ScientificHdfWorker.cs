@@ -39,12 +39,15 @@ public static class ScientificHdfWorker
                 attributes=Attributes(hdf,request.RootAttributes);long total=0;var results=new List<HdfWindowResult>();
                 foreach(var item in request.Windows)
                 {
-                    var dataset=(NativeDataset)hdf.Dataset(item.Dataset);var dims=Dimensions(dataset.Space.Dimensions);var type=ScientificHdfNumeric.Describe(dataset).Type;var chunks=dataset.Layout.Class==H5DataLayoutClass.Chunked?dataset.Layout.Chunks:[];
+                    var dataset=(NativeDataset)hdf.Dataset(item.Dataset);var dims=Dimensions(dataset.Space.Dimensions);var isString=ScientificHdfNumeric.IsString(dataset);var type=isString?"String":ScientificHdfNumeric.Describe(dataset).Type;var chunks=dataset.Layout.Class==H5DataLayoutClass.Chunked?dataset.Layout.Chunks:[];
                     if(dataset.Layout.Class is not(H5DataLayoutClass.Chunked or H5DataLayoutClass.Compact or H5DataLayoutClass.Contiguous))throw new ScientificHdfException("ExternalStorage","Unsupported HDF storage.");
                     if(chunks.Length>0&&Size(chunks,dataset.Type.Size)>ScientificHdfReader.MaximumChunk)throw new ScientificHdfException("Limit","Decoded chunk exceeds its bound.");
-                    byte[]? data=null;
-                    if(item.Count is {} count){if(count.Length!=dims.Length||count.Select((n,i)=>item.Start![i]>=dims[i]||n>dims[i]-item.Start[i]).Any(v=>v))throw new ArgumentException("Numeric window is outside dataset bounds.");var size=Size(count,dataset.Type.Size);total=checked(total+size);if(total>ScientificHdfReader.MaximumValues)throw new ScientificHdfException("Limit","Numeric response exceeds its bound.");data=Values(dataset,type,item.Start!,count);}
-                    results.Add(new(item.Dataset,type,dims,dataset.Layout.Class.ToString(),chunks,item.Start,item.Count,data,Attributes(dataset,item.Attributes)));
+                    byte[]? data=null;string[]? strings=null;
+                    if(item.Count is {} count){if(count.Length!=dims.Length||count.Select((n,i)=>item.Start![i]>=dims[i]||n>dims[i]-item.Start[i]).Any(v=>v))throw new ArgumentException("Numeric window is outside dataset bounds.");
+                        if(isString){if(dims.Length!=1||dims[0]>128||item.Start![0]!=0||count[0]!=dims[0])throw new ScientificHdfException("Limit","Read only a bounded whole string-label vector.");strings=BoundedStrings(dataset.Read<string[]>());total=checked(total+strings.Sum(s=>s.Length*4L));}
+                        else{var size=Size(count,dataset.Type.Size);total=checked(total+size);if(total>ScientificHdfReader.MaximumValues)throw new ScientificHdfException("Limit","Numeric response exceeds its bound.");data=Values(dataset,type,item.Start!,count);}}
+                    if(total>ScientificHdfReader.MaximumValues)throw new ScientificHdfException("Limit","Reader response exceeds its bound.");
+                    results.Add(new(item.Dataset,type,dims,dataset.Layout.Class.ToString(),chunks,item.Start,item.Count,data,Attributes(dataset,item.Attributes),strings));
                 }
                 windows=results.ToArray();
             }
@@ -88,12 +91,14 @@ public static class ScientificHdfWorker
     {
         var result=new Dictionary<string,HdfAttributeValue>();
         foreach(var name in names??[]){if(!node.AttributeExists(name)){result[name]=new("Missing","Unknown",[]);continue;}var attr=node.Attribute(name);var dims=Dimensions(attr.Space.Dimensions);var elements=dims.Aggregate(1UL,(n,d)=>checked(n*d));if(elements>128||attr.Type.Size is <1 or >4096)throw new ScientificHdfException("Limit","Attribute metadata exceeds its bound.");
-            if(attr.Type.Class==H5DataTypeClass.String){if(elements*(ulong)attr.Type.Size>8192)throw new ScientificHdfException("Limit","Attribute string exceeds its bound.");var text=attr.Read<string[]>();if(text.Any(s=>s.Length>4096)||text.Sum(s=>s.Length)>8192)throw new ScientificHdfException("Limit","Attribute string exceeds its bound.");result[name]=new("Original","FixedString",dims,Strings:text);}
+            if(ScientificHdfNumeric.IsString((NativeAttribute)attr)){if(elements*(ulong)attr.Type.Size>8192)throw new ScientificHdfException("Limit","Attribute string exceeds its bound.");result[name]=new("Original","String",dims,Strings:BoundedStrings(attr.Read<string[]>()));}
             else if(attr.Type.Class is H5DataTypeClass.FloatingPoint or H5DataTypeClass.FixedPoint){var type=ScientificHdfNumeric.Describe((NativeAttribute)attr).Type;var data=type switch{"Float32"=>Bytes(attr.Read<float[]>()),"Float64"=>Bytes(attr.Read<double[]>()),"Int8"=>Bytes(attr.Read<sbyte[]>()),"UInt8"=>attr.Read<byte[]>(),"Int16"=>Bytes(attr.Read<short[]>()),"UInt16"=>Bytes(attr.Read<ushort[]>()),"Int32"=>Bytes(attr.Read<int[]>()),"UInt32"=>Bytes(attr.Read<uint[]>()),"Int64"=>Bytes(attr.Read<long[]>()),"UInt64"=>Bytes(attr.Read<ulong[]>()),_=>throw new NotSupportedException()};result[name]=new("Original",type,dims,data);}
             else result[name]=new("Unsupported",attr.Type.Class.ToString(),dims);
         }
         return result;
     }
+    private static string[] BoundedStrings(string[] values)
+    {if(values.Length>128||values.Any(s=>s is null||s.Length>4096)||values.Sum(s=>s.Length)>8192)throw new ScientificHdfException("Limit","String metadata exceeds its bound.");return values;}
     private sealed class HdfInput(FileStream source):Stream
     {
         internal long ReadBytes{get;private set;}

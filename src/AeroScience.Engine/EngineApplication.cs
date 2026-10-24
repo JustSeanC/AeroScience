@@ -44,6 +44,7 @@ public static class EngineApplication
         builder.Services.AddSingleton(sp => { _ = sp.GetRequiredService<StorageManagement>(); return new AutomaticScientificData(sp.GetRequiredService<ScienceStore>(),sp.GetRequiredService<ScientificAccessSettings>()); });
         builder.Services.AddSingleton<ScientificCatalog>();
         builder.Services.AddSingleton<ScientificHdfReader>();
+        builder.Services.AddSingleton<EmitProductDecoder>();
         builder.Services.AddSingleton<IEarthdataCredentials,UnavailableEarthdataCredentials>();
         builder.Services.AddSingleton<ScientificLibraryJobs>();
         builder.Services.AddHostedService<ScientificLibraryWorker>();

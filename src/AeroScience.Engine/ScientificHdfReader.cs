@@ -11,7 +11,7 @@ public sealed record HdfOriginal(string RootDirectory,Guid LibraryId,string Rela
 public sealed record HdfWindow(string Dataset,ulong[]? Start=null,ulong[]? Count=null,string[]? Attributes=null);
 public sealed record HdfReadRequest(int Version,HdfOriginal Original,HdfWindow[] Windows,string[]? RootAttributes=null);
 public sealed record HdfAttributeValue(string State,string Type,ulong[] Dimensions,byte[]? LittleEndianValues=null,string[]? Strings=null);
-public sealed record HdfWindowResult(string Dataset,string NumericType,ulong[] Dimensions,string Layout,ulong[] Chunks,ulong[]? Start,ulong[]? Count,byte[]? LittleEndianValues,Dictionary<string,HdfAttributeValue> Attributes);
+public sealed record HdfWindowResult(string Dataset,string NumericType,ulong[] Dimensions,string Layout,ulong[] Chunks,ulong[]? Start,ulong[]? Count,byte[]? LittleEndianValues,Dictionary<string,HdfAttributeValue> Attributes,string[]? Strings=null);
 public sealed record HdfBoundary(string Kind,long ProcessMemoryBytes,long ManagedHeapBytes,long AddressSpaceBytes,long ReadBytes,long ElapsedMilliseconds,long WorkingSetBytes);
 public sealed record HdfReadResult(int Version,Guid LibraryId,string RelativePath,string OriginalSha256,long OriginalBytes,HdfWindowResult[] Windows,Dictionary<string,HdfAttributeValue> RootAttributes,HdfBoundary Boundary,string Method);
 internal sealed record HdfFrame(string Phase,HdfReadResult? Result=null,string? Code=null);

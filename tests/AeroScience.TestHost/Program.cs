@@ -5,6 +5,7 @@ using AeroScience.Shared;
 using AeroScience.Tests;
 
 if (ScientificHdfWorker.IsCommand(args)) { Environment.ExitCode=ScientificHdfWorker.Run(); return; }
+if (args.Length > 0 && args[0] == "--emit-product-probe") { await EmitProductProbe.Run(args[1..]); return; }
 
 if (args.Length > 0 && args[0] == "--airspace-reference-probe") { await AirspaceReferenceProbe.Run(args[1..]); return; }
 if (args.Length > 0 && args[0] == "--tfr-reference-probe") { await TfrReferenceProbe.Run(args[1..]); return; }

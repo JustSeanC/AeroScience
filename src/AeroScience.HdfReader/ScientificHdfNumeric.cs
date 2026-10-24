@@ -6,6 +6,9 @@ namespace AeroScience.Hdf;
 // preserve fill/NaN payloads and allow endian conversion without scaling.
 public static class ScientificHdfNumeric
 {
+    public static bool IsString(NativeDataset dataset)=>IsString(dataset.InternalDataType);
+    public static bool IsString(NativeAttribute attribute)=>IsString(attribute.Message.Datatype);
+    private static bool IsString(DatatypeMessage type)=>type.Class==DatatypeMessageClass.String||type.BitField is VariableLengthBitFieldDescription {Type:InternalVariableLengthType.String};
     public static (string Type,bool BigEndian) Describe(NativeDataset dataset)=>Describe(dataset.InternalDataType);
     public static (string Type,bool BigEndian) Describe(NativeAttribute attribute)=>Describe(attribute.Message.Datatype);
     private static (string,bool) Describe(DatatypeMessage type)
