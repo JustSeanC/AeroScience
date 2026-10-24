@@ -214,7 +214,9 @@ export class ResearchMap {
         this.esriLogo = new Logo({ position: "bottomleft" }).addTo(this.map);
       }
     };
-    this.layers = mapLayerManager(L,this.map,overlays,this.applyBasemap);
+    this.layers = mapLayerManager(L,this.map,overlays,this.applyBasemap,{
+      beginReadOnly:()=>{const mode=this.interactionMode;this.interaction(null);return()=>this.interaction(mode);}
+    });
     this.layerCleanup = ()=>this.layers.dispose();
     tools.append(results,searchStatus);
     this.map.on("click", (e) => {

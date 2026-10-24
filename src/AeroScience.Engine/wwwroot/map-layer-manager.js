@@ -9,7 +9,7 @@ function saved(){try{const text=localStorage.getItem(preferenceKey);if(!text||te
 
 // One permanent map control: exactly one basemap; independently visible overlay groups.
 // Changing visibility neither changes source filters nor mutates the underlying mission/science.
-export function mapLayerManager(L,map,definitions,applyBasemap){
+export function mapLayerManager(L,map,definitions,applyBasemap,{beginReadOnly=()=>()=>{}}={}){
  const overlays=new Map(),inputs=new Map(),groups=new Map();let dialog,disposed=false,preferences=saved();
  const Control=L.Control.extend({onAdd(){const box=el('div');box.className='leaflet-bar map-layer-manager';box.setAttribute('role','group');box.setAttribute('aria-label','Map layer manager');L.DomEvent.disableClickPropagation(box);L.DomEvent.disableScrollPropagation(box);return box;}});
  const control=new Control({position:'topright'}).addTo(map),box=control.getContainer();
@@ -41,7 +41,7 @@ export function mapLayerManager(L,map,definitions,applyBasemap){
  const aviation=aviationMapLayers(L,map,addOverlay);map.on('layeradd layerremove',sync);definitions.forEach(addOverlay);aviation.discover();
  const tfr=tfrMapLayer(L,map,addOverlay,{
   persistVisibility:visible=>persist('faa-tfr-boundaries',visible),
-  isolateMission:()=>{const shown=[...overlays.values()].filter(i=>['Mission','Science'].includes(i.group)&&map.hasLayer(i.layer));shown.forEach(i=>map.removeLayer(i.layer));return()=>shown.forEach(i=>map.addLayer(i.layer));}
+  isolateMission:()=>{const restoreInteraction=beginReadOnly();const shown=[...overlays.values()].filter(i=>['Mission','Science'].includes(i.group)&&map.hasLayer(i.layer));shown.forEach(i=>map.removeLayer(i.layer));return()=>{shown.forEach(i=>map.addLayer(i.layer));restoreInteraction();};}
  });
  return {addOverlay,dispose(){if(disposed)return;disposed=true;tfr.dispose();aviation.dispose();stopBasemap();if(dialog){dialog.close();dialog?.remove();}map.off('layeradd layerremove',sync);control.remove();}};
 }
