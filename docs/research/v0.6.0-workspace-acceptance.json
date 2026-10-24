@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "version": "0.6.0",
   "evidenceType": "genuine-scientific-workspace",
-  "checkedUtc": "2026-10-23T23:40:34.511857+00:00",
+  "checkedUtc": "2026-10-24T00:12:25.334486+00:00",
   "windowsMsfs": "not tested",
   "flightInput": "synthetic test positions; genuine external originals",
   "originalIntegrityVerified": true,
@@ -10,41 +10,41 @@
   "researchPackagesVerified": 6,
   "packages": [
     {
-      "missionId": "258aca25-44b6-4478-b90e-13c26765f0a4",
-      "package": "258aca2544b64478b90e13c26765f0a4-research.zip",
-      "sha256": "41bb90e95893086df48f6fcbf6532a5dbd0067e4ebb595fe441267a05bb998bb"
+      "missionId": "395c09a8-ebf1-4e46-a116-d26c4d2b98d3",
+      "package": "395c09a8ebf14e46a116d26c4d2b98d3-research.zip",
+      "sha256": "7a62bc75871b3b25735622e9601c344df191acab429b415d5810e6c7cadf88dd"
     },
     {
-      "missionId": "8ba9c94c-3715-49ad-8f11-96153c3d67a4",
-      "package": "8ba9c94c371549ad8f1196153c3d67a4-research.zip",
-      "sha256": "7dd685d823219a368f3a3d748c1fb0d077d59e9bc31b5f681a6ffadd6dfd24b8"
+      "missionId": "8576ff58-5cc1-4ff2-985d-174b8af1b04a",
+      "package": "8576ff585cc14ff2985d174b8af1b04a-research.zip",
+      "sha256": "db05a6a7db0235145580c48a0897125d1a85037a4d514a3cfa6d4e823ca79046"
     },
     {
-      "missionId": "d864fc42-ba06-4741-9d2e-27974fa7975c",
-      "package": "d864fc42ba0647419d2e27974fa7975c-research.zip",
-      "sha256": "396fbef25703e4e829c2cc10900a8aa27df39628ab2eddaab0a95cac8a2bba12"
+      "missionId": "4b6395ef-dbc0-4536-9e56-97324364893b",
+      "package": "4b6395efdbc045369e5697324364893b-research.zip",
+      "sha256": "3ab41100024bb96beb4208a52a84dde92cb422c2c43f90f2d9cfe3149cf07549"
     },
     {
-      "missionId": "e7067765-3180-4536-8227-fb15a2260745",
-      "package": "e7067765318045368227fb15a2260745-research.zip",
-      "sha256": "9a5700265912f570ed8e6ebc7e273e464212f73eb5f5ef440fe57ab3296bdd4d"
+      "missionId": "88d86965-9672-4e55-8d98-6928566c11e2",
+      "package": "88d8696596724e558d986928566c11e2-research.zip",
+      "sha256": "524c5cd1d6a7ac0180e55bc3b080c07b5d4ee01f8d65ab2ae99baf1320950508"
     },
     {
-      "missionId": "c0ceb83d-e759-47f0-b20c-d18e92531449",
-      "package": "c0ceb83de75947f0b20cd18e92531449-research.zip",
-      "sha256": "f389ded15c83c9762755adb56a04c4137c951d45ff12b51c8b5382204acc1623"
+      "missionId": "c7e79724-dc74-4927-aab6-3a09f5adc67b",
+      "package": "c7e79724dc744927aab63a09f5adc67b-research.zip",
+      "sha256": "58a63594842caacdddf9481230d796dcc95d40eac453f65a713afc27e202a656"
     },
     {
-      "missionId": "d2709bd3-49d5-4015-8cb8-f4d99bd2fcb1",
-      "package": "d2709bd349d540158cb8f4d99bd2fcb1-research.zip",
-      "sha256": "9c52865df54f7922b8bb5a80bb3b2e8bec7ff998f002324f6a1ebe9711ba8e9c"
+      "missionId": "f7cce0f2-785e-4899-8a85-37e4354fe1ba",
+      "package": "f7cce0f2785e48998a8537e4354fe1ba-research.zip",
+      "sha256": "c650bcb7487dbf8aa322f7878121f01df72b787945bb2ae23c828166ebf26584"
     }
   ],
   "independentRasterResults": [
     {
-      "sourceId": "6421993f-f99e-4713-a09a-e0efa9e8a91d",
+      "sourceId": "7bd66717-d025-41a2-a743-fa195835652b",
       "sourceScene": "Copernicus_DSM_COG_10_N46_00_E008_00_DEM",
-      "artifactId": "1b98fcc8-2560-4445-86f1-5a8c7451a53d",
+      "artifactId": "eb0574e2-6d47-4868-8739-adf028893ec0",
       "mode": "mission-samples",
       "bands": [
         "elevation"
@@ -54,12 +54,12 @@
       "maximumAbsoluteDifference": 0.0,
       "nodataSupportMatches": true,
       "nativeAffineAndCrsMatch": true,
-      "sha256": "f9bd5cc0f70e8fd17d57542b66f1693edf48d82141c202275446335c3c9abe8f"
+      "sha256": "8ea8cb8c4bb6cdc4b885ac3be750d18ab6daf7c10347759faed771c381c31887"
     },
     {
-      "sourceId": "6421993f-f99e-4713-a09a-e0efa9e8a91d",
+      "sourceId": "7bd66717-d025-41a2-a743-fa195835652b",
       "sourceScene": "Copernicus_DSM_COG_10_N46_00_E008_00_DEM",
-      "artifactId": "341c6308-f4e4-4692-b2b0-740d5d86c295",
+      "artifactId": "fa370266-a8a3-4034-9be2-f5f57ff9636d",
       "mode": "retained-source",
       "bands": [
         "elevation"
@@ -69,12 +69,12 @@
       "maximumAbsoluteDifference": 0.0,
       "nodataSupportMatches": true,
       "nativeAffineAndCrsMatch": true,
-      "sha256": "2d7a40f9a11c5500328ef0f7f1a2b1a50ea1c89cbe657bf873032298557399ff"
+      "sha256": "f9c09398e950f254096e7b952b7f128b977bd1ff36f8ad2cade3a110ddc0010a"
     },
     {
-      "sourceId": "5b2ac372-6115-41d4-8042-c88acc5df2b5",
+      "sourceId": "7a3d7ac0-1f69-4bd4-9532-6037c3793372",
       "sourceScene": "Copernicus_DSM_COG_10_N46_00_E008_00_DEM",
-      "artifactId": "7d591f14-9492-4fe8-be5d-50518db446df",
+      "artifactId": "86a68af7-eacc-460a-8495-4d989a35ab9c",
       "mode": "mission-samples",
       "bands": [
         "elevation"
@@ -84,12 +84,12 @@
       "maximumAbsoluteDifference": 0.0,
       "nodataSupportMatches": true,
       "nativeAffineAndCrsMatch": true,
-      "sha256": "e6e2580280a006abb2055e15e83518f7ee4e6f5017dedab47a9691f487a9aa47"
+      "sha256": "95b5d41608eb21862a850686d6929eeb342f3f8bf48ab7cc55a9f88b2d98fa27"
     },
     {
-      "sourceId": "5b2ac372-6115-41d4-8042-c88acc5df2b5",
+      "sourceId": "7a3d7ac0-1f69-4bd4-9532-6037c3793372",
       "sourceScene": "Copernicus_DSM_COG_10_N46_00_E008_00_DEM",
-      "artifactId": "30c055e2-4e2a-48ca-8b04-ddeaa4feb789",
+      "artifactId": "9b502bed-6318-41aa-93e1-f8523e9ad3fe",
       "mode": "retained-source",
       "bands": [
         "elevation"
@@ -99,12 +99,12 @@
       "maximumAbsoluteDifference": 0.0,
       "nodataSupportMatches": true,
       "nativeAffineAndCrsMatch": true,
-      "sha256": "8dd0c52230ad4ac783a1213974624dc2ad3e80ed8fddf10cd6b40fb2d86370ef"
+      "sha256": "de3f0b975cc9267c90eed308a24f81cd2ec3a6bc33541cb46aa3bd6922680c27"
     },
     {
-      "sourceId": "14166bba-eb4e-4aab-b496-13c8f20bcb97",
+      "sourceId": "25b134a3-2fc7-472e-b8a0-8d67fb5c3990",
       "sourceScene": "S2A_18TWK_20240903_0_L2A",
-      "artifactId": "383213f0-1197-4f81-a30a-7407d7624511",
+      "artifactId": "b819ba55-f7f1-421d-b92b-12bcaff98112",
       "mode": "mission-samples",
       "bands": [
         "ndvi"
@@ -114,12 +114,12 @@
       "maximumAbsoluteDifference": 0.0,
       "nodataSupportMatches": true,
       "nativeAffineAndCrsMatch": true,
-      "sha256": "3203537602823862b92ff040766333d59474b4cce20b1d328f54270860a83e53"
+      "sha256": "d6e8788dda0928c17d90357e0c50c7491164a7bee5a6cdec918e902c51ab65e4"
     },
     {
-      "sourceId": "14166bba-eb4e-4aab-b496-13c8f20bcb97",
+      "sourceId": "25b134a3-2fc7-472e-b8a0-8d67fb5c3990",
       "sourceScene": "S2A_18TWK_20240903_0_L2A",
-      "artifactId": "a83aed7e-1db2-4cd5-abdc-6846545f44a1",
+      "artifactId": "bad6846b-ca75-4429-8ec4-064f830474b4",
       "mode": "retained-source",
       "bands": [
         "ndvi"
@@ -129,12 +129,12 @@
       "maximumAbsoluteDifference": 0.0,
       "nodataSupportMatches": true,
       "nativeAffineAndCrsMatch": true,
-      "sha256": "560cb4b8d361fcc72a0c3fd6eef8078f3cb4db6738f3a9e89171d80002ad61a1"
+      "sha256": "e71e75e71982f052d1c4521fb98b42c28d1937da44c1282fa2169bea2bc34ddb"
     },
     {
-      "sourceId": "14166bba-eb4e-4aab-b496-13c8f20bcb97",
+      "sourceId": "25b134a3-2fc7-472e-b8a0-8d67fb5c3990",
       "sourceScene": "S2A_18TWK_20240903_0_L2A",
-      "artifactId": "89f4237d-3639-4351-bdc5-7a0b8e69a6e1",
+      "artifactId": "3f0a3f70-cf0a-4b0d-849b-754687cd0857",
       "mode": "mission-samples",
       "bands": [
         "B04",
@@ -146,12 +146,12 @@
       "maximumAbsoluteDifference": 0.0,
       "nodataSupportMatches": true,
       "nativeAffineAndCrsMatch": true,
-      "sha256": "b601ba129ee1ba95dc4973ceba0c3f0fd72c52251e34f8e7f13f3b98cef6f120"
+      "sha256": "7b9abdeee776cb6d037eb7f784c97b836c42614837d9f63655dea13a94acedfa"
     },
     {
-      "sourceId": "14166bba-eb4e-4aab-b496-13c8f20bcb97",
+      "sourceId": "25b134a3-2fc7-472e-b8a0-8d67fb5c3990",
       "sourceScene": "S2A_18TWK_20240903_0_L2A",
-      "artifactId": "935ef7c6-f669-4440-b350-653fd6d760b3",
+      "artifactId": "b3512f2d-9a45-4572-a1b0-f93d7ba15b1c",
       "mode": "mission-samples",
       "bands": [
         "B08",
@@ -163,12 +163,12 @@
       "maximumAbsoluteDifference": 0.0,
       "nodataSupportMatches": true,
       "nativeAffineAndCrsMatch": true,
-      "sha256": "0159f9bfcc784f76b0dddc92fff111e1429ecb13622c19c348209a925705830a"
+      "sha256": "2f7b1665afb3c04d558dadd6cdb73576b18254da68946f732b2bea35159f86ca"
     },
     {
-      "sourceId": "3723a089-42f2-431c-b14b-3a7c3f6f9088",
+      "sourceId": "7a710916-7248-4f96-8a76-33a66e38f3b3",
       "sourceScene": "LC08_L2SP_014032_20240903_02_T1",
-      "artifactId": "f69e8219-2e95-4bc6-8d48-02a8dbf63ab9",
+      "artifactId": "7222031b-4281-4f48-bbc4-67faafacbc17",
       "mode": "mission-samples",
       "bands": [
         "temperature"
@@ -178,12 +178,12 @@
       "maximumAbsoluteDifference": 0.0,
       "nodataSupportMatches": true,
       "nativeAffineAndCrsMatch": true,
-      "sha256": "7ad6dce1849d9c64214f2a1d261998ce8a1658cc5c826dc633cac85fe1186f5d"
+      "sha256": "127fb0b2b19459db3b2f5344ef776c5caa326c1567e1944d0bcf40999b83c9c1"
     },
     {
-      "sourceId": "3723a089-42f2-431c-b14b-3a7c3f6f9088",
+      "sourceId": "7a710916-7248-4f96-8a76-33a66e38f3b3",
       "sourceScene": "LC08_L2SP_014032_20240903_02_T1",
-      "artifactId": "d2374c44-8948-4f09-81da-55862b738004",
+      "artifactId": "b487c631-3c73-4fcc-b739-d12ac14561e4",
       "mode": "retained-source",
       "bands": [
         "temperature"
@@ -193,12 +193,12 @@
       "maximumAbsoluteDifference": 0.0,
       "nodataSupportMatches": true,
       "nativeAffineAndCrsMatch": true,
-      "sha256": "321cef0c9063c0c67fc745b99abac52434c179eda03078ea2750b6a3b3063a9f"
+      "sha256": "e5c35435d1cbecfd565bc4499b5887ac64c23e43516c1467485656f328a4f88e"
     },
     {
-      "sourceId": "31a4654a-9968-4523-816f-b4e79ee02834",
+      "sourceId": "5a4063c9-ac8d-413b-a157-510451075da5",
       "sourceScene": "3DEP--75,40,-74.98,40.02",
-      "artifactId": "b4797efc-430a-467a-afbb-c2e9d3c59b6f",
+      "artifactId": "6818048c-31c1-448b-bdea-91e1d244531a",
       "mode": "mission-samples",
       "bands": [
         "elevation"
@@ -208,12 +208,12 @@
       "maximumAbsoluteDifference": 0.0,
       "nodataSupportMatches": true,
       "nativeAffineAndCrsMatch": true,
-      "sha256": "a8ec8e59402f726b1b3a995075b7941f384bfa82aa0939ee6f8e74beb1704342"
+      "sha256": "e2948208db7685dec4227d3f306ee9a2551b67a306ee9f278949c82e807333d3"
     },
     {
-      "sourceId": "31a4654a-9968-4523-816f-b4e79ee02834",
+      "sourceId": "5a4063c9-ac8d-413b-a157-510451075da5",
       "sourceScene": "3DEP--75,40,-74.98,40.02",
-      "artifactId": "55333191-8828-4954-9416-3794dfee60a8",
+      "artifactId": "fbad5232-1237-4d3c-9fd0-e64d8f85a305",
       "mode": "retained-source",
       "bands": [
         "elevation"
@@ -223,12 +223,12 @@
       "maximumAbsoluteDifference": 0.0,
       "nodataSupportMatches": true,
       "nativeAffineAndCrsMatch": true,
-      "sha256": "5bed10f98be064b13e810ab8c3ef2eec57d257e5c7eb9880570209bfbb8c72d6"
+      "sha256": "7128e7022b1831e232f176a6cbc399db91a23a81bceab654f4eabf75f6d533db"
     },
     {
-      "sourceId": "471b4922-89db-45ba-9a4e-bedd6dc7540f",
+      "sourceId": "ba6725d2-d6be-4f2b-883f-a020b9b1dbe8",
       "sourceScene": "CupriteReflectance",
-      "artifactId": "028d51f0-528a-4996-9f51-eff6a62234aa",
+      "artifactId": "300b69a2-0b4b-4ff5-bb9d-aead2569bced",
       "mode": "mission-samples",
       "bands": [
         "spectral-000"
@@ -238,12 +238,12 @@
       "maximumAbsoluteDifference": 0.0,
       "nodataSupportMatches": true,
       "nativeAffineAndCrsMatch": true,
-      "sha256": "9a8aa41842b3e74f2891165492b4b27a4ef787dc8c62de6215a10328c56c7aa5"
+      "sha256": "fd33dac9c0eb04a351308beeefca7f0e5d18b9a604406bcbdac2675b2acd5e55"
     },
     {
-      "sourceId": "471b4922-89db-45ba-9a4e-bedd6dc7540f",
+      "sourceId": "ba6725d2-d6be-4f2b-883f-a020b9b1dbe8",
       "sourceScene": "CupriteReflectance",
-      "artifactId": "40e9bbb3-81f3-4904-ba03-48432281d153",
+      "artifactId": "618805fd-d48a-4ade-ab8e-942ee4dede93",
       "mode": "retained-source",
       "bands": [
         "spectral-000"
@@ -253,18 +253,18 @@
       "maximumAbsoluteDifference": 0.0,
       "nodataSupportMatches": true,
       "nativeAffineAndCrsMatch": true,
-      "sha256": "3f60f08141b95d79de3e0c1c2c4c1431905aacb4eb281db28f291677f7506bb0"
+      "sha256": "fd5696714230accc6d64cc1bd604b253a8b9ed14a1dfb1d41e303708000065df"
     }
   ],
   "runReceipts": [
     {
-      "workspaceSha256": "896a43d4f7fea31ecd7b9f265aa519f9b706c85719cf72787dc4d316ded98191",
-      "independentSha256": "b59f25dd9352f220af2d14280201cc3e4373b24e32272953198712e787ca343f",
+      "workspaceSha256": "46d2efc52cd8a908f5e69bd4b275850f5721711e4317aae5c3aff189798985d4",
+      "independentSha256": "c6ac5a4ec119523cf6cf4874fbd405cd8e19ac50f6acee9ed77000e372e3351c",
       "tool": "rasterio 1.4.3 / GDAL 3.9.3 / numpy 2.2.6"
     },
     {
-      "workspaceSha256": "9202f1a6991c7ec156a73798710a16e8394ec1a560f0ab80411e8193f28648f1",
-      "independentSha256": "d2cabc8cda567e21b68adac37ec3f66829a489d0503087008d2be46bb4cc92e2",
+      "workspaceSha256": "cc4c0ed9046f8acdfe42b8a9368c6ffcfc745cd289ece9b89ed883a3dae31822",
+      "independentSha256": "6efe220ae94f6c0cb1efa3026494f1700c92fc16fe8b9ed1d15395de621160ea",
       "tool": "rasterio 1.4.3 / GDAL 3.9.3 / numpy 2.2.6"
     }
   ],
@@ -381,8 +381,8 @@
     "src/AeroScience.Engine/ValidationArchiveCopy.cs": "5468e9c19249d1cff487dcb2d3e595cf799484589d800f5c8fcbbc0aa68a5e22",
     "src/AeroScience.Missions/AeroScience.Missions.csproj": "4cff0d48d034e95c4427b36bad68466134f0a9e7247f439cbf0f70a8d4c387f2",
     "src/AeroScience.Missions/ArchiveClearPolicy.cs": "232b72d1d52d02746152fef5b7aa9b0408ac5df92318b7888e224522a4a7a4bb",
-    "src/AeroScience.Missions/AviationAirspace.cs": "933023f0bfad2bb66beecad9f97ee2d740fbec33e4f5c3d6b8d719d9616bb4ea",
-    "src/AeroScience.Missions/AviationAirspaceStore.cs": "2151a6219f199af9098bdf455ea871f75f41bed606da8973a3be19d42cb8b99a",
+    "src/AeroScience.Missions/AviationAirspace.cs": "0d43457b436250f52bd9ff418801a4a3d4a23323eb42120eebfffe99d35735e5",
+    "src/AeroScience.Missions/AviationAirspaceStore.cs": "ca1f8c39d5870323570dd474c90fcc5ba20bcb6cdcb5888460fc2c1a0ecfbdaa",
     "src/AeroScience.Missions/AviationCatalog.cs": "5eba176e2d41bda695ba626b3fdcf23ce40779767ac37f16c5526c0a44af79ad",
     "src/AeroScience.Missions/AviationChartRaster.cs": "cee44ebc7f156a5539123170517c6a7b0ad0472859ba1620469bd39362034413",
     "src/AeroScience.Missions/AviationChartSheets.cs": "d79351100e16585440caa3da4349af4e5e7f208ac74222da34a2eac2e1f1146f",
@@ -391,7 +391,8 @@
     "src/AeroScience.Missions/AviationMetadataStore.cs": "e5952e597f865d9ac9975deddd170db4140b086fd18e2d86ebc6a2efe56d0c95",
     "src/AeroScience.Missions/AviationNasr.cs": "3ce7c56f29bccab8e338aba7ffd1ac3e5aeef1e796f8f2dea1fff495f20995a4",
     "src/AeroScience.Missions/AviationNasrCatalog.cs": "ff4825e5314950ad9ca5eb1de1e95f46ccf0b36a00b2ff98eba9f92a6f5239d8",
-    "src/AeroScience.Missions/AviationSaa.cs": "bf516e9e04574edba7721ab4512ce20124bd03bfd67326f08c7c629d3517df84",
+    "src/AeroScience.Missions/AviationSaa.cs": "2f36042d7dc3cd43adc1836f10d76efc2f71b0887297d6aa15028d90cb8625e8",
+    "src/AeroScience.Missions/AviationSaaArc.cs": "018b4c0756450496f4265570f9074f7c08ff2e9a4a925d637f11d9727c9cf16c",
     "src/AeroScience.Missions/AviationSaaArchive.cs": "605a7e8b4673f9c57b6b080c38481f98b6bb056c6788dab9198d7ba22acadab0",
     "src/AeroScience.Missions/AviationSaaCircle.cs": "67868c2a57aca5d58dee6220182508c89107fcb7264600c860f09fe9349c141a",
     "src/AeroScience.Missions/AviationTfr.cs": "b9dd28fb76d2572f9e9ac9ac81e259f04c59f5b0c704213d9230e1fb57178378",
@@ -483,18 +484,18 @@
   },
   "runProvenance": [
     {
-      "runId": "852598a0-f02f-4fe8-a9b4-34bf5b0faece",
+      "runId": "868b4414-b675-4fe8-a0ae-804a0a1f0bdc",
       "status": "passed",
-      "sourceCommit": "43cb34466d4d0234a699a24a9b5dc6efda91d409",
-      "sourceManifestSha256": "fd9133283e0040137ae2f4ce4bafce6e8d24fef8c867572565e77e430f4d71a0",
-      "receiptSha256": "8a6008502c8177c7b910160597f856ce7e386fe6c36e8fed25badd9c8444f520"
+      "sourceCommit": "77a3cd404ead8273be7de99090b4d85dc87a27ad",
+      "sourceManifestSha256": "2b4cdfb15296742a15947b49fd34959c37b10cb877d97f0a4ebd3aef3e28ff71",
+      "receiptSha256": "681a7f97e33592a1495d70cc9fe3dca1ca2422b2e21e8212f381c98fd0b55ab4"
     },
     {
-      "runId": "e7ba7d0f-c081-468e-b189-4d5b3845ac6a",
+      "runId": "4d495b06-de36-42c5-8a1a-9b100f9e446f",
       "status": "passed",
-      "sourceCommit": "43cb34466d4d0234a699a24a9b5dc6efda91d409",
-      "sourceManifestSha256": "fd9133283e0040137ae2f4ce4bafce6e8d24fef8c867572565e77e430f4d71a0",
-      "receiptSha256": "d676e77ac9b491f037cd858e46064cfef4f38db18b09fe083bd8733f91d21520"
+      "sourceCommit": "9718eae05d25e1826927cd6d79f4a8a50a8baa05",
+      "sourceManifestSha256": "2b4cdfb15296742a15947b49fd34959c37b10cb877d97f0a4ebd3aef3e28ff71",
+      "receiptSha256": "8c0a7fb0aef16d47c09cb16fc8a53755ed53b16d1b935d068eb2d748d06ca9bd"
     }
   ]
 }
