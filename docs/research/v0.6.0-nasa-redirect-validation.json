@@ -1,0 +1,85 @@
+{
+  "observedUtc": "2026-10-24T00:59:08.380453+00:00",
+  "classification": "genuine official HTTP metadata; not authorized file/numeric acceptance",
+  "results": [
+    {
+      "family": "Classic",
+      "source": "https://data.ornldaac.earthdata.nasa.gov/protected/aviris/AVIRIS-Classic_L2_Reflectance/data/f080611t01p00r13_corr_v1h_img.hdr",
+      "httpStatus": 303,
+      "redirectHost": "d3o6w55j8uz1ro.cloudfront.net",
+      "redirectPath": "/head-d0f68fa49c8cba12794bb586349f2341/ornl-cumulus-prod-protected.s3.us-west-2.amazonaws.com/aviris/AVIRIS-Classic_L2_Reflectance/data/f080611t01p00r13_corr_v1h_img.hdr",
+      "redirectQueryFields": [
+        "Expires",
+        "Key-Pair-Id",
+        "Signature"
+      ],
+      "authorizationSent": false,
+      "redirectFollowed": false
+    },
+    {
+      "family": "NG",
+      "source": "https://data.ornldaac.earthdata.nasa.gov/protected/aviris/AVIRIS-NG_L2_Reflectance/data/ang20140621t190550_corr_v1g_img.bin",
+      "httpStatus": 303,
+      "redirectHost": "d3o6w55j8uz1ro.cloudfront.net",
+      "redirectPath": "/head-d0f68fa49c8cba12794bb586349f2341/ornl-cumulus-prod-protected.s3.us-west-2.amazonaws.com/aviris/AVIRIS-NG_L2_Reflectance/data/ang20140621t190550_corr_v1g_img.bin",
+      "redirectQueryFields": [
+        "Expires",
+        "Key-Pair-Id",
+        "Signature"
+      ],
+      "authorizationSent": false,
+      "redirectFollowed": false
+    },
+    {
+      "family": "NG checksum",
+      "source": "https://data.ornldaac.earthdata.nasa.gov/public/aviris/AVIRIS-NG_L2_Reflectance/data/ang20140621t190550_corr_v1g_img.bin.sha256",
+      "httpStatus": 303,
+      "redirectHost": "d3o6w55j8uz1ro.cloudfront.net",
+      "redirectPath": "/head-d0f68fa49c8cba12794bb586349f2341/ornl-cumulus-prod-public.s3.us-west-2.amazonaws.com/aviris/AVIRIS-NG_L2_Reflectance/data/ang20140621t190550_corr_v1g_img.bin.sha256",
+      "redirectQueryFields": [
+        "Expires",
+        "Key-Pair-Id",
+        "Signature"
+      ],
+      "authorizationSent": false,
+      "redirectFollowed": false
+    },
+    {
+      "family": "Classic",
+      "method": "GET",
+      "requestedRange": "bytes=0-0",
+      "source": "https://data.ornldaac.earthdata.nasa.gov/protected/aviris/AVIRIS-Classic_L2_Reflectance/data/f080611t01p00r13_corr_v1h_img.hdr",
+      "httpStatus": 302,
+      "redirectHost": "urs.earthdata.nasa.gov",
+      "redirectPath": "/oauth/authorize",
+      "redirectQueryFields": [
+        "app_type",
+        "client_id",
+        "redirect_uri",
+        "response_type",
+        "state"
+      ],
+      "authorizationSent": false,
+      "redirectFollowed": false
+    },
+    {
+      "family": "NG",
+      "method": "GET",
+      "requestedRange": "bytes=0-0",
+      "source": "https://data.ornldaac.earthdata.nasa.gov/protected/aviris/AVIRIS-NG_L2_Reflectance/data/ang20140621t190550_corr_v1g_img.bin",
+      "httpStatus": 302,
+      "redirectHost": "urs.earthdata.nasa.gov",
+      "redirectPath": "/oauth/authorize",
+      "redirectQueryFields": [
+        "app_type",
+        "client_id",
+        "redirect_uri",
+        "response_type",
+        "state"
+      ],
+      "authorizationSent": false,
+      "redirectFollowed": false
+    }
+  ],
+  "conclusion": "HEAD redirects use the head- prefix on the existing verified ORNL CloudFront host. Permit that prefix only for HEAD, retaining exact original bucket/path and stripping Authorization at the CDN. Unauthenticated protected GETs require Earthdata login; original numeric acceptance remains pending."
+}

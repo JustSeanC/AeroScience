@@ -159,8 +159,8 @@ public static class EngineApplication
             { context.Response.StatusCode = 400; await context.Response.WriteAsJsonAsync(new { error = e.Message }); }
             catch (InvalidOperationException e) when (!context.Response.HasStarted)
             { context.Response.StatusCode = 409; await context.Response.WriteAsJsonAsync(new { error = e.Message }); }
-            catch (Exception e) when (!context.Response.HasStarted && e is IOException or UnauthorizedAccessException or Microsoft.Data.Sqlite.SqliteException)
-            { context.Response.StatusCode = 409; await context.Response.WriteAsJsonAsync(new { error = "Storage unavailable. Existing data was not replaced. " + e.Message }); }
+            catch (Exception e) when (!context.Response.HasStarted && e is IOException or UnauthorizedAccessException or Microsoft.Data.Sqlite.SqliteException or HttpRequestException)
+            { var failure=OperationFailure.Describe(e);context.Response.StatusCode=failure.Status;await context.Response.WriteAsJsonAsync(new{error=failure.Error,code=failure.Code,category=failure.Category}); }
         });
         app.UseDefaultFiles();
         var contentTypes = new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider();

@@ -73,6 +73,23 @@ public sealed class NasaTransferTests:IDisposable
         Assert.Equal(new[]{("data.ornldaac.earthdata.nasa.gov",true),("d3o6w55j8uz1ro.cloudfront.net",false)},seen);
         handler.Override=_=>new(HttpStatusCode.Found){Headers={Location=new("https://evil.example/stolen")}};var before=handler.Requests;await Assert.ThrowsAsync<IOException>(()=>http.SendNasa(new(Url),HttpMethod.Get,credentials,null,null,null,default));Assert.Equal(before+1,handler.Requests);
     }
+    [Theory][InlineData("Classic","f080611t01p00r13_corr_v1h_img.hdr")][InlineData("NG","ang20140621t190550_corr_v1g_img.bin")]
+    public async Task OfficialHeadRedirectIsMethodBoundAndNeverReceivesEarthdataCredential(string family,string name)
+    {
+        var original=new Uri($"https://data.ornldaac.earthdata.nasa.gov/protected/aviris/AVIRIS-{family}_L2_Reflectance/data/{name}");
+        var observed=new Uri($"https://d3o6w55j8uz1ro.cloudfront.net/head-d0f68fa49c8cba12794bb586349f2341/ornl-cumulus-prod-protected.s3.us-west-2.amazonaws.com/aviris/AVIRIS-{family}_L2_Reflectance/data/{name}?Signature=synthetic-test-only");
+        ScientificHttp.ValidateNasaRedirect(original,observed,HttpMethod.Head);
+        Assert.Throws<IOException>(()=>ScientificHttp.ValidateNasaRedirect(original,observed,HttpMethod.Get));
+        Assert.Throws<IOException>(()=>ScientificHttp.ValidateNasaRedirect(original,new(observed.AbsoluteUri.Replace("prod-protected","prod-public")),HttpMethod.Head));
+        Assert.Throws<IOException>(()=>ScientificHttp.ValidateNasaRedirect(original,new(observed.AbsoluteUri.Replace(name,"another.bin")),HttpMethod.Head));
+        var seen=new List<(HttpMethod Method,bool Credential)>();var handler=new Handler{Override=request=>{
+            seen.Add((request.Method,request.Headers.Authorization is not null));
+            if(request.RequestUri!.Host==original.Host)return new(HttpStatusCode.SeeOther){Headers={Location=observed}};
+            return new(HttpStatusCode.OK){Content=new ByteArrayContent([])};
+        }};
+        using var http=new ScientificHttp(handler);using var response=await http.SendNasa(original,HttpMethod.Head,credentials,null,null,null,default);
+        Assert.Equal(new[]{(HttpMethod.Head,true),(HttpMethod.Head,false)},seen);
+    }
     [Fact]public async Task BudgetAndCancellationCannotPublishIncompleteFile()
     {
         var handler=new Handler();using var http=new ScientificHttp(handler);var file=await http.DescribeNasaFile(new(Path.GetFileName(new Uri(Url).AbsolutePath),Url,"Original numeric binary"),credentials,default);

@@ -10,23 +10,25 @@ public sealed partial class ScientificHttp
     {
         if(!ScientificCatalog.OfficialNasaLink(uri.AbsoluteUri)||uri.Host!="data.ornldaac.earthdata.nasa.gov"||
             !System.Text.RegularExpressions.Regex.IsMatch(uri.AbsolutePath,@"^/(protected|public)/aviris/AVIRIS-(Classic|NG)_L2_Reflectance/data/[A-Za-z0-9_.-]+\.(hdr|bin|sha256)$"))
-            throw new IOException("Unsupported NASA original endpoint. Use the official browser fallback for other distributions.");
+            throw ScientificFailure.Create(ScientificFailureKind.UnsupportedFormat,"Unsupported NASA original endpoint. Use the official browser fallback for other distributions.");
     }
-    // Observed through official ORNL responses, 2026-10-21. Fail closed if its CDN
+    // Official ORNL responses: s3 original transfers (2026-10-21), head metadata
+    // redirects (2026-10-24). The head route is authorized only for HEAD. Fail closed if its CDN
     // identity changes. Never forward the Earthdata token to this signed destination.
-    public static void ValidateNasaRedirect(Uri original,Uri redirected)
+    public static void ValidateNasaRedirect(Uri original,Uri redirected,HttpMethod? method=null)
     {
         ValidateNasaOriginal(original);
         var relative=original.AbsolutePath[(original.AbsolutePath.IndexOf("/aviris/",StringComparison.Ordinal)+1)..];
         var bucket=original.AbsolutePath.StartsWith("/protected/",StringComparison.Ordinal)?"ornl-cumulus-prod-protected":"ornl-cumulus-prod-public";
+        var prefix=method==HttpMethod.Head?"(?:s3|head)":"s3";
         if(redirected.Scheme!="https"||redirected.Port!=443||redirected.UserInfo.Length!=0||redirected.Fragment.Length!=0||redirected.AbsoluteUri.Length>16384||
-            redirected.Host!="d3o6w55j8uz1ro.cloudfront.net"||!System.Text.RegularExpressions.Regex.IsMatch(redirected.AbsolutePath,@"^/s3-[a-f0-9]+/"+bucket+@"\.s3\.us-west-2\.amazonaws\.com/"+System.Text.RegularExpressions.Regex.Escape(relative)+"$"))
-            throw new IOException("NASA redirected to an unsupported destination. No credential was forwarded; use official browser access or retry after a provider update.");
+            redirected.Host!="d3o6w55j8uz1ro.cloudfront.net"||!System.Text.RegularExpressions.Regex.IsMatch(redirected.AbsolutePath,@"^/"+prefix+@"-[a-f0-9]+/"+bucket+@"\.s3\.us-west-2\.amazonaws\.com/"+System.Text.RegularExpressions.Regex.Escape(relative)+"$"))
+            throw ScientificFailure.Create(ScientificFailureKind.ProviderRedirect,"NASA redirected to an unsupported destination. No credential was forwarded; use official browser access or retry after a provider update.");
     }
     public async Task<HttpResponseMessage> SendNasa(Uri original,HttpMethod method,IEarthdataCredentials credentials,long? start,long? end,string? etag,CancellationToken token)
     {
         ValidateNasaOriginal(original);
-        var bearer=credentials.ReadToken()??throw new IOException("Connect Earthdata on the companion PC before acquiring NASA originals.");
+        var bearer=credentials.ReadToken()??throw ScientificFailure.Create(ScientificFailureKind.Authorization,"Connect Earthdata on the companion PC before acquiring NASA originals.");
         EarthdataConnection.ValidateToken(bearer);
         try
         {
@@ -36,12 +38,12 @@ public sealed partial class ScientificHttp
                 var location=response.Headers.Location;response.Dispose();
                 if(location is null)throw new IOException("NASA access redirect is missing. Reconnect or use official browser access.");
                 var destination=new Uri(original,location);
-                if(destination.Host=="urs.earthdata.nasa.gov")throw new IOException("NASA sign-in is required: reconnect with a current User Token and approve ORNL DAAC on NASA's site, or use the official browser import fallback. No credential was forwarded to the login redirect.");
-                ValidateNasaRedirect(original,destination);
-                response=await SendCore(destination,method,start,end,etag,token,validate:u=>ValidateNasaRedirect(original,u));
+                if(destination.Host=="urs.earthdata.nasa.gov")throw ScientificFailure.Create(ScientificFailureKind.Authorization,"NASA sign-in is required: reconnect with a current User Token and approve ORNL DAAC on NASA's site, or use the official browser import fallback. No credential was forwarded to the login redirect.");
+                ValidateNasaRedirect(original,destination,method);
+                response=await SendCore(destination,method,start,end,etag,token,validate:u=>ValidateNasaRedirect(original,u,method));
             }
             if(response.StatusCode is HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden)
-            {response.Dispose();throw new IOException("Earthdata access denied or expired. Reconnect with a current NASA User Token and approve ORNL DAAC access on NASA's site; browser import remains available.");}
+            {response.Dispose();throw ScientificFailure.Create(ScientificFailureKind.Authorization,"Earthdata access denied or expired. Reconnect with a current NASA User Token and approve ORNL DAAC access on NASA's site; browser import remains available.");}
             if(!response.IsSuccessStatusCode){var code=(int)response.StatusCode;response.Dispose();throw new IOException($"NASA original request failed (HTTP {code}). Retry later or use the official browser fallback.");}
             if(response.Content.Headers.ContentEncoding.Any(c=>!c.Equals("identity",StringComparison.OrdinalIgnoreCase)))
             {response.Dispose();throw new IOException("NASA returned encoded content; original numeric bytes were refused.");}
