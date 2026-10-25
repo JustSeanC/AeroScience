@@ -187,7 +187,7 @@ public sealed partial class ScientificLibraryJobs:IDisposable
             if(science.SetLibraryState(job.Id,"Preparing",runningOnly:true).State!="Preparing")return;
             science.SetLibraryItem(job.Id,work.Index,"Preparing");
             var source=job.Preview.Nasa is {} bundle?await ReusableNasa(bundle,token):work.ReuseSourceId is {} reviewedId?science.Source(reviewedId):Reusable(work.Scene,work.Area);
-            if(work.ReuseSourceId is not null&&(source is null||!Compatible(work.Scene,source)||!ScientificSourceSelection.CoversArea(source,work.Area)))throw new InvalidOperationException("The reviewed retained source is no longer available/compatible. Create a fresh preview; no unapproved replacement was downloaded.");
+            if(work.ReuseSourceId is not null&&(source is null||job.Preview.Nasa is null&&(!Compatible(work.Scene,source)||!ScientificSourceSelection.CoversArea(source,work.Area))))throw new InvalidOperationException("The reviewed retained source is no longer available/compatible. Create a fresh preview; no unapproved replacement was downloaded.");
             if(source is not null){if(!Verify(source))throw new IOException("Retained source failed verification; originals were preserved.");}
             else
             {

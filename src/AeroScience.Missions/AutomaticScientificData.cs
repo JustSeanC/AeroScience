@@ -252,7 +252,9 @@ public sealed partial class AutomaticScientificData : IDisposable
                 Set(state with{SourceCoverage=ScientificRaster.GridCoverage(coverageRaster.Grid),Status=!full?"Partially usable":job.Kind==RemoteKind.Hyperspectral?"Dataset Ready":available.Manifest.Acquisition?.UsablePixels==0?"Limited Coverage":"Ready",Message="Verified retained source available offline; actual per-pixel masks still apply.",ReusedBytes=available.Files.Sum(f=>f.Bytes),Stage="Ready",Provider=available.Manifest.Provider,Dataset=available.Manifest.Name,ObservationUtc=available.Manifest.ObservationUtc,SourceId=available.Id,Quality=available.Manifest.Acquisition?.Quality});return;
             }
 
-            var union=ScientificSourceSelection.ReuseArea(science,job.Area,source=>ScientificSourceSelection.Select([new(source,true,true,null)],job.Kind,p) is not null,part=>VerifyRetainedSource(part,token),token);
+            // Hyperspectral prediction assesses the actual sample point above;
+            // never replace its native flightline support with generic whole-cell union.
+            var union=job.Kind==RemoteKind.Hyperspectral?new ScientificReusePlan([],[job.Area],[],[]):ScientificSourceSelection.ReuseArea(science,job.Area,source=>ScientificSourceSelection.Select([new(source,true,true,null)],job.Kind,p) is not null,part=>VerifyRetainedSource(part,token),token);
             var retained=union.Reused.Select(r=>r.Source).DistinctBy(s=>s.Id).ToList();
             if(union.Missing.Length==0)
             {Set(state with{Status=job.Kind==RemoteKind.Hyperspectral?"Dataset Ready":"Ready",Stage="Ready",Message="Several verified compatible retained windows jointly provide numeric support. Native grids, QA and per-observation source identity remain independent; no common-resolution mosaic or airborne measurement was created.",SourceIds=retained.Select(s=>s.Id).ToArray(),ReusedBytes=retained.Sum(s=>s.Files.Sum(f=>f.Bytes))});return;}
