@@ -1,5 +1,6 @@
 import {openEmitImport} from './emit-library.js';
 import {libraryLocation} from './library-location.js';
+import {openOnlineAccess} from './online-access.js';
 import {renderTransferProgress} from './transfer-progress.js';
 import { openHyperspectralImport } from "./hyperspectral-import.js";
 import { ResearchMap } from "./map.js";
@@ -13,6 +14,7 @@ import {
   disclosure,
   status,
   table,
+  errorMessage,
 } from "./workstation-ui.js";
 
 // Every catalog/preview/control operates on the shared backend; UI state never
@@ -33,7 +35,8 @@ export async function libraryDownload(parent, api, isDisposed = () => false) {
     userBudget = false,
     userDates = false,
     localSources = [],
-    regionEpoch = 0, localEpoch = 0, localAfter = 0, localThrough = null;
+    regionEpoch = 0, localEpoch = 0, localAfter = 0, localThrough = null,
+    consentWarning = null, privacyDialog = null;
   const memoryKey = "aeroscience.external-discovery.v1";
   let remembered;
   try { remembered = JSON.parse(localStorage.getItem(memoryKey)); } catch {}
@@ -48,6 +51,7 @@ export async function libraryDownload(parent, api, isDisposed = () => false) {
   const cleanup = () => {
     stopped = true;
     clearTimeout(timer);
+    privacyDialog?.close();
     map?.destroy();
   };
   const heading = el("div", undefined, "page-heading");
@@ -597,6 +601,7 @@ export async function libraryDownload(parent, api, isDisposed = () => false) {
   }
   filtersChanged();
   async function search(cursor = null) {
+    consentWarning?.remove();consentWarning=null;
     if (!from.disabled && !!from.value !== !!to.value)
       throw new Error("Enter both scene dates, or clear both dates to use the provider's default date scope.");
     preview = null;
@@ -622,7 +627,35 @@ export async function libraryDownload(parent, api, isDisposed = () => false) {
           refresh: !cached.checked,
           sort: ordering.disabled?"browse":ordering.value,
         };
-    const page = await api("/api/science/library/catalog", query);
+    let page;
+    try{page=await api("/api/science/library/catalog", query);}
+    catch(error){
+      // Use the server conflict and current saved permission, never message matching.
+      // Cached/offline searches and unrelated auth/provider errors keep their behavior.
+      if(error.status===409&&!query.cachedOnly){
+        const access=await api('/api/science/access').catch(()=>null);
+        if(stopped||isDisposed()||own!==epoch)return;
+        const p=access?.configuration.preferences;
+        if(p&&(!p.onlineEnabled||!p.privacyAccepted)){
+          consentWarning=errorMessage(searchTools,error);
+          const warning=consentWarning;
+          consentWarning.firstElementChild.textContent='Review scientific data privacy before searching online';
+          const review=button(consentWarning,'Review Privacy Consent',()=>{
+            privacyDialog=openOnlineAccess(api,{opener:review,onAllowed:state=>{
+              const preferences=state.science.configuration.preferences;
+              if(stopped||isDisposed()||own!==epoch||consentWarning!==warning||!consentWarning?.isConnected)return;
+              consentWarning.classList.remove('action-error');consentWarning.classList.add('panel');consentWarning.setAttribute('role','status');
+              consentWarning.firstElementChild.textContent='Scientific access choices saved';
+              consentWarning.querySelector('p').textContent=preferences.onlineEnabled&&preferences.privacyAccepted?'Select Find Available Data to search with your existing area and filters.':'Online searches remain disabled. Cached results and retained sources remain available.';
+              feedback.textContent=consentWarning.querySelector('p').textContent;
+            }});
+          });
+          feedback.textContent='Online scientific discovery needs your explicit access and privacy choices. Your search area and filters are unchanged.';
+          return;
+        }
+      }
+      throw error;
+    }
     if (stopped || isDisposed() || own !== epoch) return;
     if (!cursor) {
       results = [];

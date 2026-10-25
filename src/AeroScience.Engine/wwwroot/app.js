@@ -90,7 +90,7 @@ async function api(path, body, options = {}) {
       $("pairing").hidden = false;
       $("workspace").hidden = true;
     }
-    throw new Error(
+    const error = new Error(
       data.error ||
         {
           401: "Pairing failed or your session expired. Reconnect this display.",
@@ -99,6 +99,8 @@ async function api(path, body, options = {}) {
         }[response.status] ||
         `Request failed (${response.status}).`,
     );
+    error.status = response.status;
+    throw error;
   }
   return readSuccessResponse(response);
 }

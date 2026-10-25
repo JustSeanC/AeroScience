@@ -1556,3 +1556,8 @@ dialog.managed-popup.tfr-review{width:min(92rem,calc(100vw - 1.5rem));max-width:
 .tfr-map .leaflet-control-attribution a{color:#005179;text-decoration:underline}
 
 .aviation-reference-dialog .advanced-details{overflow-wrap:anywhere}
+
+/* A single consent decision: disclosure scrolls, actions and shared X remain visible. */
+.online-access-dialog[open]{display:flex;flex-direction:column;width:min(48rem,94vw);max-height:90dvh;box-sizing:border-box}
+.online-access-content{overflow:auto;min-height:0;overflow-wrap:anywhere}
+.online-access-dialog>.popup-header,.online-access-dialog>.action-row{flex-shrink:0}

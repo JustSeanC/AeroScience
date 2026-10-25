@@ -1,4 +1,5 @@
 import {renderInstrumentSummaries,instrumentSummaries} from './preparation-summary.js';
+import {openOnlineAccess} from './online-access.js';
 import {openDownloadActivity,allowanceText} from "./download-activity.js";
 import { openHyperspectralImport } from "./hyperspectral-import.js";
 import { planningDistance } from "./science-display.js";
@@ -37,6 +38,13 @@ export async function scientificAccessSettings(parent, api) {
   const date = input("Preferred latest observation date (blank = now)", p.preferredDateUtc?.slice(0, 10), "date");
   const policy = node("select"); for (const [value, label] of [["clear-recent", "Clearest scenes within the date window"], ["newest", "Newest acceptable scene"]]) { const o = node("option", label); o.value = value; o.selected = value === p.selectionPolicy; policy.append(o); } policy.disabled = !canConfigure; form.append(node("label", "Source date / quality policy "), policy);
   const result = node("p");
+  const combinedAccess=button("Review Combined Online Access",()=>openOnlineAccess(api,{opener:combinedAccess,onAllowed:state=>{
+    if(!section.isConnected)return;
+    enabled.checked=state.science.configuration.preferences.onlineEnabled;
+    consent.checked=state.science.configuration.preferences.privacyAccepted;
+    result.textContent="Online maps, scientific access and automatic FAA/TFR updates are allowed. Your other settings and download approvals are unchanged.";
+  }}));
+  section.append(combinedAccess,node("p","Use one disclosure to allow maps, scientific access and FAA/TFR updates, or keep using the individual controls below. NASA authorization and original-download approvals remain separate."));
   form.append(node("br"), button("Save scientific access preferences", async () => { if (!form.reportValidity()) return; await api("/api/science/access", { ...(await api("/api/science/access")).configuration.preferences, onlineEnabled: enabled.checked, privacyAccepted: consent.checked, unmeteredOnly: unmetered.checked, backgroundRetrieval: background.checked, maximumDownloadBytes: Math.round(Number(maximum.value) * 1048576), nasaOriginalMaximumBytes: Math.round(Number(nasaMaximum.value) * 1048576), concurrentDownloads: Number(concurrent.value), lookaheadSeconds:Number(lookahead.value),prefetchHourlyBytes:unlimited.checked?null:Math.round(Number(hourly.value)*1048576),preflightTransferBytes:preUnlimited.checked?null:Math.round(Number(preflight.value)*1048576), lookbackDays: Number(days.value), maximumCloudPercent: Number(cloud.value), preferredDateUtc: date.value ? date.value + "T23:59:59Z" : null, selectionPolicy: policy.value }); result.textContent = enabled.checked ? "Saved. Enable an instrument and prepare a plan, or fly for bounded background discovery. Eligible archived remote-source attempts can be reconstructed after flight; absent atmospheric measurements remain missing." : "Offline-only scientific operation saved. Retained sources and mission history remain available."; }), button("Cancel current downloads", () => api("/api/science/prepare/cancel", {})), result);
   if (!canConfigure) form.append(node("p", "Change scientific access controls in the companion PC's Settings. Paired clients share its saved preferences and readiness."));
   section.append(form, node("p", "Prepared source subsets are retained scientific originals and count toward your Science Library limit. Cleanup removes only eligible regenerable caches. Download/storage figures shown before preparation are conservative limits, not guaranteed file sizes."));

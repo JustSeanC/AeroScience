@@ -1,3 +1,4 @@
+import {openOnlineAccess} from './online-access.js';
 import {openAviationReference} from './aviation-reference.js';
 import {dialogHeader,requestDialogClose,markDialogSaved} from './dialog-ui.js';
 const layers = [
@@ -16,40 +17,12 @@ const listeners = new Set();
 let privacyDialog;
 async function firstRunPrivacy(config) {
   if (!config.configuration.requiresPrivacyChoice || privacyDialog) return;
-  privacyDialog = element("dialog");
-  const dialog=privacyDialog;
-  dialog.setAttribute("aria-label", "Choose your map privacy");
-  dialog.append(
-    element("h2", "Choose your map privacy"),
-    element(
-      "p",
-      "OpenStreetMap / Streets gives you recognizable maps without an account or API key. Tile requests reveal your viewed geographic region and IP address to the map provider. Offline-only maps send no tile requests.",
-    ),
-  );
-  for (const [text, online] of [
-    ["Continue with OpenStreetMap", true],
-    ["Use offline-only maps", false],
-  ]) {
-    const button = element("button", text);
-    button.className=online?"primary":"secondary";
-    button.onclick = async () => {
-      try {
-        await api("/api/maps/privacy", { online });
-        dialog.close();
-        dialog.remove();
-        if(privacyDialog===dialog)privacyDialog = null;
-        configuration = null;
-        await settings();
-        notify();
-      } catch (e) {
-        if(dialog.isConnected)dialog.append(element("p", e.message));
-      }
-    };
-    dialog.append(button);
-  }
-  dialogHeader(dialog,{title:"Choose your map privacy",onDismiss:()=>{dialog.close();dialog.remove();if(privacyDialog===dialog)privacyDialog=null;}});
-  document.body.append(dialog);
-  dialog.showModal();
+  const refresh=async()=>{configuration=null;await settings();notify();};
+  privacyDialog=openOnlineAccess(api,{
+    onAllowed:refresh,
+    onClosed:()=>{privacyDialog=null;},
+    onOffline:async()=>{await api('/api/maps/privacy',{online:false});await refresh();}
+  });
 }
 async function api(path, value) {
   if (value !== undefined && !csrf) {

@@ -6,21 +6,23 @@ async function post(request,path,data={}) {
   expect(response.ok(),await response.text()).toBeTruthy();return response.json();
 }
 test.afterEach(async({request})=>{
+  await post(request,'/api/aviation/tfr/configuration',{onlineEnabled:false});
+  await post(request,'/api/aviation/configuration',{onlineEnabled:false});
   await post(request,'/api/maps/settings',{onlineEnabled:false,layer:'offline',privacyAccepted:false});
 });
 test('fresh map disclosure blocks all external requests and offline choice persists',async({page,request})=>{
   await post(request,'/api/testing/maps/new-install');const external=[];
   page.on('request',r=>{if(!r.url().startsWith(origin))external.push(r.url());});
-  await page.goto('/#planner');const dialog=page.getByRole('dialog',{name:'Choose your map privacy'});
+  await page.goto('/#planner');const dialog=page.getByRole('dialog',{name:'Online Access & Privacy'});
   await expect(dialog).toBeVisible();expect(external).toEqual([]);
-  await dialog.getByRole('button',{name:'Use offline-only maps'}).click();await expect(dialog).toHaveCount(0);
-  await page.reload();await expect(page.getByRole('dialog',{name:'Choose your map privacy'})).toHaveCount(0);
+  await dialog.getByRole('button',{name:'Use Offline Maps'}).click();await expect(dialog).toHaveCount(0);
+  await page.reload();await expect(page.getByRole('dialog',{name:'Online Access & Privacy'})).toHaveCount(0);
   await expect(page.getByLabel('Map Layers').last()).toHaveValue('offline');expect(external).toEqual([]);
 });
 test('online choice enables OSM and provider failures retain route and saved preference',async({page,request})=>{
   await post(request,'/api/testing/maps/new-install');const tiles=[];
   await page.route('https://tile.openstreetmap.org/**',route=>{tiles.push(route.request().url());return route.abort();});
-  await page.goto('/#planner');await page.getByRole('button',{name:'Continue with OpenStreetMap'}).click();
+  await page.goto('/#planner');await page.getByRole('button',{name:'Allow Online Access'}).click();
   await expect.poll(()=>tiles.length).toBeGreaterThan(0);
   await expect(page.locator('.geographic-map').last().locator('..')).toContainText('Online provider unavailable');
   const settings=await (await request.get('/api/maps/settings')).json();expect(settings.configuration.preferences.layer).toBe('streets');
