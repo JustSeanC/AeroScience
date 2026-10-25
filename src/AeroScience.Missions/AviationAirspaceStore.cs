@@ -14,7 +14,7 @@ public sealed partial class AviationMetadataStore
     private sealed record AirspaceEntry(string Id, string Kind, Envelope Bounds);
     private sealed record AirspaceCachedIndex(Guid Store, string Dataset, STRtree<AirspaceEntry> Tree);
     private static readonly Queue<AirspaceCachedIndex> AirspaceIndexes = new();
-    private sealed record AirspaceAttributes(int Version, int SourceRecord, string Name, Dictionary<string, string> Attributes);
+    private sealed record AirspaceAttributes(int Version, int SourceRecord, string Name, Dictionary<string, string> Attributes,AviationAirspaceVolume[]? Volumes=null);
     public AviationVectorDataset SaveAirspace(AviationDownloadJob job, string folder, DateTimeOffset utc,
         CancellationToken token, Func<bool> canContinue, Action verifyOriginals)
     {
@@ -39,7 +39,7 @@ public sealed partial class AviationMetadataStore
                 token.ThrowIfCancellationRequested(); if (!canContinue()) throw new InvalidOperationException("Airspace import yielded to recording; original files preserved.");
                 if (record.UnsupportedReason is {} reason) { omitted[reason] = omitted.GetValueOrDefault(reason) + 1; continue; }
                 var original = record.Original!; var display = record.Display!; var bounds = original.EnvelopeInternal;
-                var payload = JsonSerializer.Serialize(new AirspaceAttributes(1, record.Number, record.Name, record.Attributes), WireJson.Options);
+                var payload = JsonSerializer.Serialize(new AirspaceAttributes(record.Volumes is null?1:2, record.Number, record.Name, record.Attributes,record.Volumes), WireJson.Options);
                 if (payload.Length > 32768) throw new InvalidDataException("Oversized airspace attributes.");
                 cmd.Parameters["$id"].Value = AviationDownloads.Hash(new { id, record.Number }); cmd.Parameters["$kind"].Value = record.Kind;
                 cmd.Parameters["$west"].Value = bounds.MinX; cmd.Parameters["$east"].Value = bounds.MaxX; cmd.Parameters["$south"].Value = bounds.MinY; cmd.Parameters["$north"].Value = bounds.MaxY;
@@ -51,7 +51,7 @@ public sealed partial class AviationMetadataStore
             var dataset = new AviationVectorDataset(1, id, job.Id, job.Preview.Item.Edition, job.OriginalSha256!, saa ? "SUA" : "CLASS", sourceCrs, utc, count, omitted.Values.Sum(),
                 [AviationCatalog.Attribution,
                  saa ? "Immutable original XML retains literal component geometry/attributes; interpolated and Boolean indexed geometries are explicitly derived interpretations." : "Original horizontal polygons and attributes retained. Shape Z/PRJ VERTCS do not establish restriction altitude datum.",
-                 saa ? "SAA geometry adapter 4: bounded circles, explicit increasing minor arcs including unwrapped source angles and verified adjacent joins; ordered BASE/UNION/SUBTR only with identical verified vertical limits. Boolean/interpolated geometry is derived; immutable XML retains every original component/coordinate. Ambiguous arcs, contributors and unequal vertical volumes remain unsupported." : "Class polygon adapter 1; literal source coordinates retained.",
+                 saa ? "SAA geometry adapter 5: equivalent known volumes use bounded horizontal Boolean construction; different or unknown native vertical limits retain ordered component geometry and separate potential map extent. No datum conversion, flattening or activation inferred; ambiguous curves/contributors remain unsupported." : "Class polygon adapter 1; literal source coordinates retained.",
                  "Map display may be topology-preserving generalized; each feature reports tolerance and original vertex count. Full original geometry remains retained separately.",
                  "Source CRS is retained; NAD83 display is approximate. No positional accuracy, activation or unrestricted-airspace clearance is certified.",
                  "Negative/unknown altitude codes remain Unknown. Published hours, DST and offsets are not inferred UTC activation intervals.",
@@ -96,7 +96,7 @@ public sealed partial class AviationMetadataStore
             var envelope = new Envelope(bounds.West, bounds.East, bounds.South, bounds.North);
             var entries = AirspaceIndex(db, dataset).Query(envelope).Where(e => kind is null || e.Kind == kind).OrderBy(e => e.Id, StringComparer.Ordinal).ToArray();
             var region = new GeometryFactory().ToGeometry(envelope); var reader = new WKBReader(); var result = new List<AviationAirspaceFeature>(); var vertices = 0; var cursor = offset;
-            cmd.CommandText = "SELECT vertices,tolerance,CASE WHEN length(COALESCE(display,geometry))<=512000 THEN COALESCE(display,geometry) ELSE NULL END,CASE WHEN length(CAST(payload AS BLOB))<=32768 THEN payload ELSE NULL END FROM airspace_features WHERE dataset_id=$dataset AND id=$id"; cmd.Parameters.AddWithValue("$dataset", id);
+            cmd.CommandText = "SELECT vertices,tolerance,CASE WHEN length(COALESCE(display,geometry))<=512000 THEN COALESCE(display,geometry) ELSE NULL END,CASE WHEN length(CAST(payload AS BLOB))<=32768 THEN payload ELSE NULL END,CASE WHEN length(geometry)<=512000 THEN geometry ELSE NULL END FROM airspace_features WHERE dataset_id=$dataset AND id=$id"; cmd.Parameters.AddWithValue("$dataset", id);
             foreach (var entry in entries.Skip(offset).Take(100))
             {
                 cmd.Parameters["$id"].Value = entry.Id; using var row = cmd.ExecuteReader(); if (!row.Read()) throw new IOException("Missing airspace index member.");
@@ -104,14 +104,23 @@ public sealed partial class AviationMetadataStore
                 var bytes = row.GetFieldValue<byte[]>(2);
                 var geometry = reader.Read(bytes); if (geometry.NumPoints > AviationAirspace.MaximumDisplayVertices) throw new IOException("Oversized retained display geometry.");
                 if (vertices + geometry.NumPoints > 25000) break;
-                cursor++; if (!geometry.Intersects(region)) continue;
+                if (!geometry.Intersects(region)){cursor++;continue;}
                 var raw = row.GetString(3); if (raw.Length > 32768) throw new IOException("Oversized retained airspace metadata.");
                 var attrs = JsonSerializer.Deserialize<AirspaceAttributes>(raw, WireJson.Options) ?? throw new IOException("Missing airspace metadata.");
-                if (attrs.Version != 1) throw new NotSupportedException("Unsupported retained airspace attributes.");
+                if (attrs.Version is not (1 or 2)) throw new NotSupportedException("Unsupported retained airspace attributes.");
                 attrs.Attributes["SOURCE_RECORD"] = attrs.SourceRecord.ToString(System.Globalization.CultureInfo.InvariantCulture);
-                result.Add(new(1, entry.Id, entry.Kind, attrs.Name, PolygonCoordinates(geometry), attrs.Attributes,
-                    AviationAirspace.Altitude(attrs.Attributes, "LOWER"), AviationAirspace.Altitude(attrs.Attributes, "UPPER"), AviationAirspace.Schedule(attrs.Attributes), row.GetInt32(0), row.GetDouble(1)));
-                vertices += geometry.NumPoints;
+                AviationAirspaceVolume[]? volumes=null;var originalVertices=0;
+                if(attrs.Version==2)
+                {
+                    if(attrs.Volumes is null||attrs.Volumes.Length is <2 or >32||row.IsDBNull(4))throw new InvalidDataException("Invalid retained native volume model.");
+                    var original=reader.Read(row.GetFieldValue<byte[]>(4));originalVertices=original.NumPoints;
+                    if(original is not GeometryCollection||original.NumGeometries!=attrs.Volumes.Length||originalVertices>AviationAirspace.MaximumDisplayVertices)throw new InvalidDataException("Native volume geometry/metadata differs.");
+                    if(vertices+geometry.NumPoints+originalVertices>25000)break;
+                    volumes=attrs.Volumes.Select((v,i)=>v with{Polygons=PolygonCoordinates(original.GetGeometryN(i))}).ToArray();
+                }
+                result.Add(new(attrs.Version, entry.Id, entry.Kind, attrs.Name, PolygonCoordinates(geometry), attrs.Attributes,
+                    AviationAirspace.Altitude(attrs.Attributes, "LOWER"), AviationAirspace.Altitude(attrs.Attributes, "UPPER"), AviationAirspace.Schedule(attrs.Attributes), row.GetInt32(0), row.GetDouble(1),volumes));
+                vertices += geometry.NumPoints+originalVertices;cursor++;
             }
             return new(1, dataset, "Retained FAA reference; source edition and activation must be reviewed. Bounding candidates are not a count of active restrictions.", offset,
                 cursor < entries.Length ? cursor : null, entries.Length, vertices, result.ToArray(), dataset.Limitations);
@@ -122,5 +131,24 @@ public sealed partial class AviationMetadataStore
         Coordinates[] Ring(LineString ring) => ring.Coordinates.Select(c => new Coordinates(c.Y, c.X)).ToArray();
         return Enumerable.Range(0, geometry.NumGeometries).Select(i => geometry.GetGeometryN(i)).Cast<Polygon>()
             .Select(p => new[] { Ring(p.ExteriorRing) }.Concat(Enumerable.Range(0, p.NumInteriorRings).Select(i => Ring(p.GetInteriorRingN(i)))).ToArray()).ToArray();
+    }
+    public AviationVolumeAssessment AssessAirspace(string dataset,string feature,Coordinates point,double altitude,string unit,string reference)
+    {
+        if(!Regex.IsMatch(dataset,"^[a-f0-9]{64}$")||!Regex.IsMatch(feature,"^[a-f0-9]{64}$"))throw new ArgumentException("Select a retained airspace feature.");
+        lock(gate)
+        {
+            using var db=Open();using var cmd=db.CreateCommand();cmd.CommandText="SELECT CASE WHEN length(geometry)<=512000 THEN geometry ELSE NULL END,CASE WHEN length(CAST(payload AS BLOB))<=32768 THEN payload ELSE NULL END FROM airspace_features WHERE dataset_id=$dataset AND id=$feature";
+            cmd.Parameters.AddWithValue("$dataset",dataset);cmd.Parameters.AddWithValue("$feature",feature);using var row=cmd.ExecuteReader();
+            if(!row.Read())throw new KeyNotFoundException("Retained airspace feature is unavailable.");
+            if(row.IsDBNull(0)||row.IsDBNull(1))throw new InvalidDataException("Oversized airspace evidence.");
+            var attrs=JsonSerializer.Deserialize<AirspaceAttributes>(row.GetString(1),WireJson.Options)??throw new InvalidDataException("Missing airspace evidence.");
+            var geometry=new WKBReader().Read(row.GetFieldValue<byte[]>(0));if(geometry.NumPoints>AviationAirspace.MaximumRecordVertices)throw new InvalidDataException("Oversized airspace geometry.");
+            AviationAirspaceVolume[] volumes;
+            if(attrs.Version==1)volumes=[new(1,1,0,"BASE",null,null,AviationAirspace.Altitude(attrs.Attributes,"LOWER"),AviationAirspace.Altitude(attrs.Attributes,"UPPER"),Polygons:PolygonCoordinates(geometry))];
+            else if(attrs.Version==2&&attrs.Volumes is {Length:>=2 and <=32} native&&geometry is GeometryCollection&&geometry.NumGeometries==native.Length&&geometry.NumPoints<=AviationAirspace.MaximumDisplayVertices)
+                volumes=native.Select((v,i)=>v with{Polygons=PolygonCoordinates(geometry.GetGeometryN(i))}).ToArray();
+            else throw new NotSupportedException("Unsupported retained volume interpretation.");
+            return AviationAirspace.AssessVolumes(volumes,point,altitude,unit,reference);
+        }
     }
 }

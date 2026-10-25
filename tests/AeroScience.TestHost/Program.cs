@@ -81,7 +81,7 @@ app.MapPost("/api/testing/aviation/{mode}",(string mode,AviationBrowserFixture f
         fixture.FastSlowTransfers=true;return new{synthetic=true,fixture.Calls};
     }
     fixture.FastSlowTransfers=false;
-    if(mode is not("reset" or "normal" or "outage" or "malformed" or "slow" or "airspace" or "airspace-composite" or "tfr" or "tfr-originals" or "charts"))throw new ArgumentException("Unknown synthetic aviation fixture.");
+    if(mode is not("reset" or "normal" or "outage" or "malformed" or "slow" or "airspace" or "airspace-composite" or "airspace-volumes" or "tfr" or "tfr-originals" or "charts"))throw new ArgumentException("Unknown synthetic aviation fixture.");
     fixture.Clock.Advance();fixture.Mode=mode=="reset"?"normal":mode;fixture.Calls=0;
     if(mode=="reset")aviation.Configure(false);
     return new{synthetic=true,fixture.Calls};

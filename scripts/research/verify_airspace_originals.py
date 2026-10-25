@@ -13,7 +13,7 @@ import xml.etree.ElementTree as ET
 
 import shapefile
 from shapely import from_wkb, normalize, equals_exact
-from shapely.geometry import shape, Polygon, MultiPolygon, box
+from shapely.geometry import shape, Polygon, MultiPolygon, GeometryCollection, box
 
 EXPECTED = {
     'CLASS': '7057b1a982d5dd5df4d92a5101d222854b415c5ad163d464de36d94100e20201',
@@ -65,11 +65,26 @@ def components(document):
 
 
 def level(volume, field):
-    e = volume.find('a:'+field, NS)
-    raw, unit, code = e.text or '', e.attrib.get('uom',''), volume.findtext('a:'+field+'Reference',default='',namespaces=NS)
-    value = 0 if raw == 'GND' and code == 'SFC' else float(raw)
-    return dict(value=value,unit=unit,reference={'MSL':'MSL','SFC':'Above surface','STD':'Standard pressure'}[code],
-                rawValue=raw,rawUnit=unit,rawReference=code,description='',status='Known')
+    e=volume.find('a:'+field,NS);raw=(e.text or '') if e is not None else '';unit=e.attrib.get('uom','') if e is not None else '';code=volume.findtext('a:'+field+'Reference',default='',namespaces=NS)
+    try:value=0 if raw=='GND' and code=='SFC' else float(raw)
+    except ValueError:value=None
+    if value is not None and (not math.isfinite(value) or value<0):value=None
+    ref={'MSL':'MSL','SFC':'Above surface','STD':'Standard pressure'}.get(code,'Unknown');u=unit if unit in ('FT','M','FL') else None
+    return dict(value=value,unit=u,reference=ref,rawValue=raw,rawUnit=unit,rawReference=code,description='',status='Published unlimited' if raw=='UNL' else 'Known' if value is not None and u and ref!='Unknown' else 'Unknown')
+
+
+def native_model(document):
+    cs=components(document)
+    if len(cs)<2:return False
+    pairs=[(level(c.find('a:theAirspaceVolume/a:AirspaceVolume',NS),'lowerLimit'),level(c.find('a:theAirspaceVolume/a:AirspaceVolume',NS),'upperLimit')) for c in cs]
+    return any(a['status']!='Known' or b['status']!='Known' for a,b in pairs) or any(p!=pairs[0] for p in pairs)
+
+
+def volume_definitions(document):
+    result=[]
+    for c in source_components(document)['components']:
+        result.append(dict(version=1,sourceComponent=c['sourceComponent'],sequence=c['sequence'],operation=c['operation'],volumeId=c['volumeId'],surfaceId=c['surfaceId'],lower=c['lower'],upper=c['upper'],lowerIncluded=None,upperIncluded=None,polygons=None))
+    return result
 
 
 def source_components(document):
@@ -81,14 +96,15 @@ def source_components(document):
     return dict(version=1,components=sorted(values,key=lambda c:c['sequence']))
 
 
-def saa_geometry(document, adapter=4):
+def saa_geometry(document, adapter=5):
     cs=components(document)
     if len(cs)==1:
         assert cs[0].findtext('a:operation',namespaces=NS)=='BASE'
         return saa_volume(cs[0].find('a:theAirspaceVolume/a:AirspaceVolume',NS),adapter)
-    assert adapter==4
+    assert adapter in (4,5)
     ordered=sorted(cs,key=lambda c:int(c.findtext('a:operationSequence',namespaces=NS)))
     manifest=source_components(document)['components']
+    if adapter==5 and native_model(document):return GeometryCollection([saa_volume(c.find('a:theAirspaceVolume/a:AirspaceVolume',NS),adapter) for c in ordered])
     assert len(set(c['sequence'] for c in manifest))==len(cs) and manifest[0]['operation']=='BASE'
     assert all((c['lower'],c['upper'])==(manifest[0]['lower'],manifest[0]['upper']) for c in manifest)
     result=None
@@ -175,7 +191,7 @@ def saa_volume(volume, adapter):
     return polygons[0] if len(polygons) == 1 else MultiPolygon(polygons)
 
 
-def verify(root, adapter=4):
+def verify(root, adapter=5):
     folder = root.resolve() / 'AviationReference'
     results = []
     with sqlite3.connect((folder / 'aviation.db').as_uri()+'?mode=ro', uri=True) as db:
@@ -193,7 +209,7 @@ def verify(root, adapter=4):
                 assert Path(f['name']).name == f['name']
                 p = original/'files'/f['name']
                 assert p.stat().st_size == f['bytes'] and digest(p) == f['sha256']
-            retained = {json.loads(payload)['sourceRecord']: (from_wkb(wkb), json.loads(payload)) for wkb, payload in db.execute('SELECT geometry,payload FROM airspace_features WHERE dataset_id=?', (dataset['id'],))}
+            retained = {json.loads(payload)['sourceRecord']: (from_wkb(wkb), json.loads(payload),from_wkb(display) if display else from_wkb(wkb)) for wkb, payload,display in db.execute('SELECT geometry,payload,display FROM airspace_features WHERE dataset_id=?', (dataset['id'],))}
             region_shapes = {'Massachusetts': box(-73, 41, -70, 43), 'California': box(-124, 32, -114, 42)}
             regions = dict.fromkeys(region_shapes, 0)
             compared, attributes, coordinates, omitted = 0, 0, 0, 0
@@ -205,7 +221,7 @@ def verify(root, adapter=4):
                     omitted += 1
                     # A valid unsupported subset is an explicit omission, never an inferred all-clear.
                     return
-                actual, payload = retained[number]
+                actual, payload, display = retained[number]
                 assert geometry is not None and geometry.is_valid
                 tolerance = 1e-10 if 'GEOMETRY_INTERPOLATION' in raw or 'GEOMETRY_COMPOSITION' in raw else 0
                 difference = actual.hausdorff_distance(geometry) if tolerance else 0
@@ -214,11 +230,20 @@ def verify(root, adapter=4):
                 actual_attributes=dict(payload['attributes']);expected_attributes=dict(raw)
                 if 'SOURCE_COMPONENTS' in expected_attributes:
                     assert json.loads(actual_attributes.pop('SOURCE_COMPONENTS'))==expected_attributes.pop('SOURCE_COMPONENTS'), f'Component identities/roles/limits differ: {number}'
+                if payload['version']==2:
+                    assert payload['volumes']==volume_definitions(document),f'Native altitude/component definitions differ: {number}'
+                    assert len(actual.geoms)==len(geometry.geoms)
+                    assert all(equals_exact(normalize(a),normalize(b),tolerance=1e-10) for a,b in zip(actual.geoms,geometry.geoms,strict=True)),f'Native geometry/order differs: {number}'
+                    expected_display=None
+                    for c,g in zip(source_components(document)['components'],geometry.geoms,strict=True):
+                        if c['operation'] in ('BASE','UNION'):expected_display=g if expected_display is None else expected_display.union(g)
+                    assert equals_exact(normalize(display),normalize(expected_display),tolerance=1e-10),f'Potential extent differs: {number}'
                 assert actual_attributes == expected_attributes, f'{family} original attributes differ: {number}'
                 attributes += len(raw)
-                coordinates += sum(len(p.exterior.coords)+sum(len(r.coords) for r in p.interiors) for p in ([geometry] if geometry.geom_type == 'Polygon' else geometry.geoms))*2
+                def coordinate_count(g):return (len(g.exterior.coords)+sum(len(r.coords) for r in g.interiors))*2 if g.geom_type=='Polygon' else sum(coordinate_count(p) for p in g.geoms)
+                coordinates += coordinate_count(geometry)
                 for name, region in region_shapes.items():
-                    regions[name] += int(geometry.intersects(region))
+                    regions[name] += int(display.intersects(region))
                 compared += 1
 
             if family == 'CLASS':
@@ -258,22 +283,27 @@ def verify(root, adapter=4):
                             elif document.findall('.//g:CircleByCenterPoint',NS):
                                 raw['GEOMETRY_INTERPOLATION'] = CIRCLE
                             if len(cs)>1:
-                                raw['GEOMETRY_COMPOSITION']=COMPOSITION
-                                raw['SOURCE_COMPONENTS']=source_components(document)
+                                if adapter==5 and native_model(document):
+                                    for key in ('LOWER_VAL','LOWER_UOM','LOWER_CODE','UPPER_VAL','UPPER_UOM','UPPER_CODE'):raw[key]=''
+                                    raw.pop('GEOMETRY_INTERPOLATION',None)
+                                    raw['GEOMETRY_COMPOSITION']='Ordered native vertical-volume model; map shows potential horizontal extent, not a flattened restriction. Inspect each component and comparable altitude dimensions. Activation remains Unknown.'
+                                else:
+                                    raw['GEOMETRY_COMPOSITION']=COMPOSITION
+                                    raw['SOURCE_COMPONENTS']=source_components(document)
                         compare(number, saa_geometry(document,adapter) if expected else None, raw if expected else {})
             assert compared == dataset['features'] and omitted == dataset['omittedRecords'] and all(regions.values())
             results.append({'family': family, 'edition': dataset['edition'], 'originalSha256': EXPECTED[family], 'featuresCompared': compared, 'originalCoordinateComponentsCompared': coordinates, 'originalAttributeFieldsChecked': attributes,
                 'maximumCoordinateDifference': maximum_difference, 'regions': regions, 'explicitUnsupportedRecords': omitted, 'sourceCrs': dataset['sourceCrs']})
     assert {r['family'] for r in results} == set(EXPECTED) and len(results)==2
     return {'evidenceClass': 'Genuine FAA originals; independent pyshp/Shapely/ElementTree versus retained NTS geometry. Offline read-only verification.', 'results': results,
-        'limitations': ['No live activation, TFR clearance, certified positional accuracy or owner-installed Windows acceptance.', 'Adapter '+str(adapter)+': explicit positive minor spans, 0.5 m joins, and (adapter 4) same-original-volume ordered Boolean operations. Signed/reversed or inferred wraps, discrepant joins, unequal/unknown vertical volumes and unresolved contributors remain omitted. PROJ/GEOS comparisons are not certified boundary accuracy.', 'NAD83 coordinates preserved without claiming a precise WGS84 transformation.']}
+        'limitations': ['No live activation, TFR clearance, certified positional accuracy or owner-installed Windows acceptance.', 'Adapter '+str(adapter)+': explicit positive minor spans, 0.5 m joins, same-original-volume ordered Boolean operations (4+), and separate native unequal/unknown vertical component models with conservative map extents (5). Signed/reversed or inferred wraps, discrepant joins and unresolved contributors remain omitted. Inclusion at exact altitude boundaries and activation remain Unknown. PROJ/GEOS comparisons are not certified boundary accuracy.', 'NAD83 coordinates preserved without claiming a precise WGS84 transformation.']}
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--folder', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
-    parser.add_argument('--adapter',type=int,choices=[3,4],default=4,help='Explicit interpretation version; historical datasets are never silently reinterpreted.')
+    parser.add_argument('--adapter',type=int,choices=[3,4,5],default=5,help='Explicit interpretation version; historical datasets are never silently reinterpreted.')
     args = parser.parse_args()
     args.output.write_text(json.dumps(verify(args.folder,args.adapter), indent=2)+'\n')
     print('PASS: genuine Class/SAA original geometry and attributes independently compared offline in two regions.')

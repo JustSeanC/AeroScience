@@ -5,6 +5,8 @@ namespace AeroScience.Engine;
 
 public sealed partial class AviationReference
 {
+    public AviationVolumeAssessment AssessAirspace(string dataset,string feature,double latitude,double longitude,double altitude,string unit,string reference)
+    {lock(gate){using var store=Open(Preferences());return store.AssessAirspace(dataset,feature,new(latitude,longitude),altitude,unit,reference);}}
     private readonly SemaphoreSlim vectorImport = new(1);
     private async Task<byte[]> NasrMetadata(string url, CancellationToken token)
     {

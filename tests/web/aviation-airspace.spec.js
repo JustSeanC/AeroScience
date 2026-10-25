@@ -57,3 +57,23 @@ test('ordered SAA composites expose multipart islands, true holes and source rel
  await page.setViewportSize({width:390,height:740});expect((await new AxeBuilder({page}).include('dialog[aria-label="FAA Reference Details"]').analyze()).violations).toEqual([]);await page.keyboard.press('Escape');await expect(list.getByRole('button',{name:'Synthetic composite composite-nested',exact:true})).toBeFocused();
  expect((await(await request.get('/api/testing/aviation')).json()).calls).toBe(before);expect(await(await request.get('/api/science/sources')).json()).toEqual(sources);expect((await(await request.get('/api/state')).json()).activeMission).toBeNull();
 });
+
+test('different SAA altitude volumes remain independent in retained maps and point advisories',async({page,request})=>{
+ await post(request,'/api/testing/aviation/airspace-volumes');await post(request,'/api/aviation/downloads/configuration',{unmeteredOnly:false});await post(request,'/api/aviation/configuration',{onlineEnabled:true});
+ const catalog=await post(request,'/api/aviation/catalog/nasr/refresh'),item=catalog.charts.find(c=>c.originalFileName==='aixm5.0.zip');
+ const job=await post(request,'/api/aviation/downloads/preview',{kind:'nasr',itemId:item.id,maximumTransferBytes:1048576,maximumExpandedBytes:1048576});
+ await post(request,`/api/aviation/downloads/${job.id}/control`,{revision:job.revision,action:'approve',selectionHash:job.preview.selectionHash});
+ await expect.poll(async()=>(await(await request.get('/api/aviation/downloads')).json()).find(j=>j.id===job.id).state).toBe('Completed');
+ const dataset=await post(request,`/api/aviation/downloads/${job.id}/import-vectors`);expect(dataset.features).toBe(2);expect(dataset.omittedRecords).toBe(0);
+ const features=(await(await request.get(`/api/aviation/airspace/${dataset.id}?west=-76&south=39&east=-74&north=41&kind=sua`)).json()).features,feature=features.find(f=>f.volumes);
+ expect(feature.volumes.map(v=>v.upper.value)).toEqual([10000,9000]);expect(feature.lower.status).toBe('Unknown');expect(feature.volumes.every(v=>v.polygons.length)).toBe(true);
+ await post(request,'/api/aviation/configuration',{onlineEnabled:false});const calls=(await(await request.get('/api/testing/aviation')).json()).calls;
+ await page.goto('/#planner');const planner=page.locator('#planner');await planner.getByLabel('Offline geographic location search').fill('39.25,-75.75');await planner.getByRole('button',{name:'Find',exact:true}).click();await planner.getByLabel('Search results').selectOption('0');
+ await planner.getByRole('button',{name:'Overlays & Legend',exact:true}).click();const layers=page.getByRole('dialog',{name:'Map Overlays & Legend',exact:true}),label=`FAA Special-use airspace · ${dataset.edition} · interpretation ${dataset.id.slice(0,8)}`;
+ await layers.getByLabel(label,{exact:true}).check();await layers.getByRole('button',{name:'View '+label+' references',exact:true}).click();const list=page.getByRole('dialog',{name:'FAA Reference List',exact:true});await expect(list).toContainText('2 native altitude components');await list.getByRole('button',{name:'Synthetic composite composite-vertical',exact:true}).click();
+ const detail=page.getByRole('dialog',{name:'FAA Reference Details',exact:true}),native=detail.getByRole('region',{name:'Native airspace levels'});
+ await expect(native).toContainText('not verified');await native.getByRole('button',{name:'Show component 2 outline'}).click();
+ await native.getByLabel('Assessment latitude').fill('39.25');await native.getByLabel('Assessment longitude').fill('-75.75');await native.getByLabel('Assessment altitude').fill('11000');await native.getByRole('button',{name:'Assess native volume at this point'}).click();await expect(native.getByRole('status')).toContainText('Outside assessed volume dimensions');
+ await native.getByLabel('Assessment altitude').fill('1000');await expect(native.getByRole('status')).not.toContainText('Outside assessed volume');await native.getByRole('button',{name:'Assess native volume at this point'}).click();await expect(native.getByRole('status')).toContainText('Unable to determine');
+ await page.setViewportSize({width:390,height:740});expect((await new AxeBuilder({page}).include('dialog[aria-label="FAA Reference Details"]').analyze()).violations).toEqual([]);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy();await page.keyboard.press('Escape');await expect(list.getByRole('button',{name:'Synthetic composite composite-vertical',exact:true})).toBeFocused();expect((await(await request.get('/api/testing/aviation')).json()).calls).toBe(calls);expect((await(await request.get('/api/state')).json()).activeMission).toBeNull();
+});

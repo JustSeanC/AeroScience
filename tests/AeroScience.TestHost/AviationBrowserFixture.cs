@@ -25,6 +25,7 @@ public sealed class AviationBrowserFixture : HttpMessageHandler
     public int Calls;
     public bool FastSlowTransfers;
     public string Mode = "normal";
+    private string Cycle=>Mode=="airspace-volumes"?"2026-11-26":Mode=="airspace-composite"?"2026-10-29":"2026-10-01";
     protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken token)
     {
         Interlocked.Increment(ref Calls);
@@ -41,16 +42,16 @@ public sealed class AviationBrowserFixture : HttpMessageHandler
         if(Mode=="tfr"&&request.RequestUri!.Host=="tfr.faa.gov")return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK){Content=new ByteArrayContent(request.RequestUri.AbsoluteUri==AeroScience.Missions.AviationTfr.NoticesUrl?SyntheticTfr.Notices():request.RequestUri.AbsoluteUri==AeroScience.Missions.AviationTfr.NoShapeUrl?SyntheticTfr.NoShape():SyntheticTfr.Geometry())});
         if (request.RequestUri!.Host == "nfdc.faa.gov")
         {
-            if (request.RequestUri.AbsoluteUri == SyntheticAirspace.ClassUrl || request.RequestUri.AbsoluteUri == SyntheticAirspace.SaaUrl || request.RequestUri.AbsoluteUri == SyntheticAirspace.SaaUrl.Replace("2026-10-01","2026-10-29"))
-                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new ByteArrayContent(request.RequestUri.AbsoluteUri == SyntheticAirspace.ClassUrl ? SyntheticAirspace.ClassArchive() : SyntheticAirspace.SaaArchive(Mode=="airspace-composite"?"composite-nested":"circle")) });
+            if (request.RequestUri.AbsoluteUri == SyntheticAirspace.ClassUrl || request.RequestUri.AbsoluteUri == SyntheticAirspace.SaaUrl || request.RequestUri.AbsoluteUri == SyntheticAirspace.SaaUrl.Replace("2026-10-01",Cycle))
+                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new ByteArrayContent(request.RequestUri.AbsoluteUri == SyntheticAirspace.ClassUrl ? SyntheticAirspace.ClassArchive() : SyntheticAirspace.SaaArchive(Mode=="airspace-volumes"?"composite-vertical":Mode=="airspace-composite"?"composite-nested":"circle")) });
             var family = request.RequestUri.AbsolutePath.Contains("_APT_", StringComparison.Ordinal) ? "APT" : request.RequestUri.AbsolutePath.Contains("_NAV_", StringComparison.Ordinal) ? "NAV" : "FIX";
             var data = SyntheticNasr.Archive(family);
             return Task.FromResult(new HttpResponseMessage(HttpStatusCode.PartialContent) { Content = new ByteArrayContent(data) { Headers = { ContentRange = new(0, data.Length - 1, data.Length) } } });
         }
         if (request.RequestUri!.AbsoluteUri == AeroScience.Missions.AviationCatalog.NasrUrl)
-            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("<a href='./../NASR_Subscription/"+(Mode=="airspace-composite"?"2026-10-29":"2026-10-01")+"'>Synthetic advertised cycle</a>") });
+            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("<a href='./../NASR_Subscription/"+Cycle+"'>Synthetic advertised cycle</a>") });
         if (request.RequestUri!.AbsoluteUri.StartsWith(AeroScience.Missions.AviationCatalog.NasrUrl, StringComparison.Ordinal))
-            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(Mode=="airspace-composite" ? "<a href=\""+SyntheticAirspace.SaaUrl.Replace("2026-10-01","2026-10-29")+"\">Synthetic composite original</a>" : Mode == "airspace" ? string.Join("\n", new[]{SyntheticAirspace.ClassUrl,SyntheticAirspace.SaaUrl}.Select(url=>"<a href='"+url+"'>Synthetic airspace original</a>")) : string.Join("\n", new[]{"APT","NAV","FIX"}.Select(f => "<a href='"+SyntheticNasr.Url(f)+"'>Synthetic original</a>"))) });
+            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(Mode is "airspace-composite" or "airspace-volumes" ? "<a href=\""+SyntheticAirspace.SaaUrl.Replace("2026-10-01",Cycle)+"\">Synthetic composite original</a>" : Mode == "airspace" ? string.Join("\n", new[]{SyntheticAirspace.ClassUrl,SyntheticAirspace.SaaUrl}.Select(url=>"<a href='"+url+"'>Synthetic airspace original</a>")) : string.Join("\n", new[]{"APT","NAV","FIX"}.Select(f => "<a href='"+SyntheticNasr.Url(f)+"'>Synthetic original</a>"))) });
         if (request.RequestUri!.Host == "aeronav.faa.gov")
         {
             using var memory = new MemoryStream();

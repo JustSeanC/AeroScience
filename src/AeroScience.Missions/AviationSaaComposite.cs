@@ -11,8 +11,9 @@ public static partial class AviationAirspace
     public const string SaaComposition = "Derived CRS84 horizontal geometry: BASE then explicit operationSequence UNION/SUBTR with identical verified original vertical limits. NTS polygon Boolean operations, no topology repair or altitude conversion. Original component curves/coordinates and relationships remain authoritative in the retained XML; no live activation inferred.";
 
     private static Geometry ReadSaaComposite(XElement[] components, Dictionary<string, string> attributes,
-        CancellationToken token, Func<bool>? canContinue)
+        CancellationToken token, Func<bool>? canContinue,out Geometry? footprint,out AviationAirspaceVolume[]? volumes)
     {
+        footprint=null;volumes=null;
         if (components.Length is < 2 or > 32) throw new NotSupportedException("SUBTR/UNION requires 2–32 explicit components and exactly one BASE.");
         var decoded = new List<(int Sequence, string Operation, XElement Volume, XElement Surface, int SourceIndex)>();
         for (var i = 0; i < components.Length; i++)
@@ -37,6 +38,39 @@ public static partial class AviationAirspace
         var ordered = decoded.OrderBy(c => c.Sequence).ToArray();
         if (ordered.Select(c => c.Sequence).Distinct().Count() != ordered.Length || ordered[0].Operation != "BASE" || ordered.Count(c => c.Operation == "BASE") != 1)
             throw new NotSupportedException("SUBTR/UNION requires unique explicit ordering with exactly one initial BASE.");
+        foreach(var c in ordered)foreach(var field in new[]{"lowerLimit","lowerLimitReference","upperLimit","upperLimitReference"})
+        {
+            var values=c.Volume.Elements(Aixm+field).ToArray();
+            if(values.Length>1||values.Any(v=>v.HasElements||v.Attributes().Any(a=>a.Name.LocalName is "nil" or "nilReason")&&!string.IsNullOrWhiteSpace(v.Value)))
+                throw new NotSupportedException("Ambiguous or contradictory native altitude field.");
+        }
+        var limits=ordered.Select(c=>{var raw=new Dictionary<string,string>();RetainSaaLimits(c.Volume,raw);return raw;}).ToArray();
+        if(limits.Any(r=>Altitude(r,"LOWER").Status!="Known"||Altitude(r,"UPPER").Status!="Known")||limits.Select(r=>JsonSerializer.Serialize(r,WireJson.Options)).Distinct().Count()!=1)
+        {
+            var native=new List<Geometry>();var definitions=new List<AviationAirspaceVolume>();var total=0;Geometry? extent=null;
+            foreach(var c in ordered)
+            {
+                Check(token,canContinue);var raw=new Dictionary<string,string>();RetainSaaLimits(c.Volume,raw);
+                var lo=Altitude(raw,"LOWER");var hi=Altitude(raw,"UPPER");
+                if(lo.Status=="Known"&&hi.Status=="Known"&&lo.Reference==hi.Reference&&lo.Unit==hi.Unit&&lo.Value>hi.Value)throw new NotSupportedException("Contradictory comparable native vertical bounds.");
+                var geometry=ReadSaaSurface(c.Surface,raw,token,canContinue);total+=geometry.NumPoints;
+                if(total>MaximumDisplayVertices)throw new NotSupportedException("Native volume input exceeds its bounded work budget.");
+                native.Add(geometry);definitions.Add(new(1,c.SourceIndex,c.Sequence,c.Operation,c.Volume.Attribute(Gml+"id")?.Value,c.Surface.Attribute(Gml+"id")?.Value,Altitude(raw,"LOWER"),Altitude(raw,"UPPER")));
+                if(c.Operation is "BASE" or "UNION")
+                {
+                    if(extent is not null&&(long)extent.NumPoints*geometry.NumPoints>4000000)throw new NotSupportedException("Native volume extent exceeds its bounded work budget.");
+                    extent=extent is null?geometry:extent.Union(geometry);
+                    if(!extent.IsValid||extent.NumPoints>MaximumDisplayVertices)throw new NotSupportedException("Invalid/oversized potential horizontal extent.");
+                }
+                Check(token,canContinue);
+            }
+            // GeometryCollection preserves every native component independently. The
+            // separate display/index extent is only a conservative candidate region.
+            foreach(var key in new[]{"LOWER_VAL","LOWER_UOM","LOWER_CODE","UPPER_VAL","UPPER_UOM","UPPER_CODE"})attributes[key]="";
+            attributes["GEOMETRY_COMPOSITION"]="Ordered native vertical-volume model; map shows potential horizontal extent, not a flattened restriction. Inspect each component and comparable altitude dimensions. Activation remains Unknown.";
+            footprint=extent!;volumes=definitions.ToArray();
+            return new GeometryFactory().CreateGeometryCollection(native.ToArray());
+        }
         string? vertical = null; var manifest = new List<object>(); var vertices = 0; Geometry? result = null;
         var interpolation = new HashSet<string>(StringComparer.Ordinal);
         foreach (var c in ordered)

@@ -50,6 +50,7 @@ public static class ResearchApi
         app.MapPost("/api/aviation/tfr/screen",(AviationTfrScreenRequest request,AviationReference aviation)=>aviation.ScreenTfr(request));
         app.MapGet("/api/aviation/vectors/{id}", (string id, double west, double south, double east, double north, string? kind, int? offset, AviationReference aviation) => aviation.VectorFeatures(id, west, south, east, north, kind, offset ?? 0));
         app.MapGet("/api/aviation/airspace/{id}", (string id, double west, double south, double east, double north, string? kind, int? offset, AviationReference aviation) => aviation.AirspaceFeatures(id, west, south, east, north, kind, offset ?? 0));
+        app.MapGet("/api/aviation/airspace/{id}/{feature}/assessment",(string id,string feature,double latitude,double longitude,double altitude,string unit,string reference,AviationReference aviation)=>aviation.AssessAirspace(id,feature,latitude,longitude,altitude,unit,reference));
         app.MapPost("/api/aviation/downloads/{id:guid}/import-vectors", (Guid id, AviationReference aviation, HttpContext c) => aviation.ImportVectors(id, c.RequestAborted));
         app.MapGet("/api/aviation/downloads/configuration", (AviationReference aviation) => aviation.DownloadConfiguration());
         app.MapPost("/api/aviation/downloads/configuration", (AviationDownloadSettingsRequest request, AviationReference aviation, HttpContext c) => AccessControl.IsLoopback(c) ? Results.Ok(aviation.ConfigureDownloads(request.UnmeteredOnly, request.StorageDirectory)) : Results.StatusCode(403));

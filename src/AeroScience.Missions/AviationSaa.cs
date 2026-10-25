@@ -57,11 +57,11 @@ public static partial class AviationAirspace
             var number = ++index;
             if (components.Length != 1 || components[0].Element(Aixm + "operation")?.Value != "BASE")
             {
-                Geometry? composite = null; string? omission = null;
-                try { composite = ReadSaaComposite(components, attributes, token, canContinue); }
+                Geometry? composite = null,footprint=null;AviationAirspaceVolume[]? volumesModel=null; string? omission = null;
+                try { composite = ReadSaaComposite(components, attributes, token, canContinue,out footprint,out volumesModel); }
                 catch (Exception e) when (e is NotSupportedException or InvalidDataException or TopologyException)
                 { omission = "Composite SAA omitted: " + e.Message; }
-                yield return new(number, "sua", name, attributes, composite, composite, 0, omission); continue;
+                yield return new(number, "sua", name, attributes, composite, footprint??composite, 0, omission,volumesModel); continue;
             }
             var volumes = components[0].Elements(Aixm + "theAirspaceVolume").Elements(Aixm + "AirspaceVolume").ToArray();
             if (volumes.Length != 1) { yield return new(number, "sua", name, attributes, null, null, 0, "Unresolved or multiple SAA volumes; no geometry invented"); continue; }

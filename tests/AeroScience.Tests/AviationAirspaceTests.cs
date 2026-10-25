@@ -69,7 +69,7 @@ public sealed class AviationAirspaceTests : IDisposable
             foreach(var point in ring)Assert.InRange(Geodesy.Distance(new(40,-75),point),1851.999999,1852.000001);
             Assert.InRange(ring[0].Latitude,40.0166794,40.0166795);Assert.InRange(ring[0].Longitude,-75.000000001,-74.999999999);
             Assert.Contains("0.5 m",feature.Attributes["GEOMETRY_INTERPOLATION"]);Assert.Equal(job.OriginalSha256,d.OriginalSha256);
-            Assert.Contains(d.Limitations,x=>x.Contains("adapter 4",StringComparison.Ordinal));await service.VerifyDownload(job.Id);
+            Assert.Contains(d.Limitations,x=>x.Contains("adapter 5",StringComparison.Ordinal));await service.VerifyDownload(job.Id);
             Assert.Equal(id,(await service.ImportVectors(job.Id)).Id);service.Configure(false);calls=handler.Calls;
         }
         using var reopened=new AviationReference(root,root,new HttpClient(handler));
@@ -230,7 +230,24 @@ public sealed class AviationAirspaceTests : IDisposable
     public async Task UnsafeCompositesAreIsolatedOmissionsWithoutFlatteningOrResolvingReferences(string variant)
     {
         using var service=new AviationReference(root,root,new HttpClient(new Transport(true,variant)),unmetered:()=>true);
-        var job=await Acquire(service);var d=await service.ImportVectors(job.Id);Assert.Equal(1,d.Features);Assert.Equal(1,d.OmittedRecords);
+        var job=await Acquire(service);var d=await service.ImportVectors(job.Id);
+        if(variant is "composite-vertical" or "composite-unknown")
+        {
+            // Adapter 5 can retain these source relationships, but must never
+            // flatten them into an authoritative polygon/altitude interval.
+            Assert.Equal(2,d.Features);Assert.Equal(0,d.OmittedRecords);
+            var model=Assert.Single(service.AirspaceFeatures(d.Id,-77,38,-70,42).Features,f=>f.Volumes is not null);
+            Assert.Equal(2,model.Version);Assert.Equal(2,model.Volumes!.Length);
+            Assert.Null(model.Lower.Value);Assert.Null(model.Upper.Value);
+            Assert.All(model.Volumes,v=>Assert.NotNull(v.Polygons));
+            Assert.Equal(new[]{"BASE","SUBTR"},model.Volumes.Select(v=>v.Operation));
+            if(variant=="composite-vertical")Assert.Equal(new double?[]{10000,9000},model.Volumes.Select(v=>v.Upper.Value));
+            else Assert.Equal("Unknown",model.Volumes[1].Lower.Status);
+            var check=AviationAirspace.AssessVolumes(model.Volumes,new(40,-75),1000,"FT","MSL");
+            Assert.Equal("Unable to determine assessed volume membership",check.Outcome);
+            Assert.Contains(check.Components,c=>c.Vertical=="Unknown");await service.VerifyDownload(job.Id);return;
+        }
+        Assert.Equal(1,d.Features);Assert.Equal(1,d.OmittedRecords);
         Assert.Single(service.AirspaceFeatures(d.Id,-77,38,-70,42).Features);
         Assert.Contains(d.Limitations,s=>s.Contains("Composite SAA omitted",StringComparison.Ordinal));await service.VerifyDownload(job.Id);
     }
@@ -241,6 +258,23 @@ public sealed class AviationAirspaceTests : IDisposable
         var job=await Acquire(service);var calls=handler.Calls;armed=true;
         await Assert.ThrowsAsync<InvalidOperationException>(()=>service.ImportVectors(job.Id));Assert.Empty(service.VectorDatasets());
         armed=false;Assert.Equal(2,(await service.ImportVectors(job.Id)).Features);Assert.Equal(calls,handler.Calls);await service.VerifyDownload(job.Id);
+    }
+    [Fact] public void NativeVolumeSetAlgebraKeepsDifferentLevelsAndUnknownBoundaries()
+    {
+        AeroScience.Shared.Coordinates[][][] polygon=[[[new(39,-76),new(39,-74),new(41,-74),new(41,-76),new(39,-76)]]];
+        AeroScience.Shared.AviationAltitudeLimit Limit(double n,string reference="MSL",string unit="FT")=>new(n,unit,reference,n.ToString(System.Globalization.CultureInfo.InvariantCulture),unit,reference,"","Known");
+        AeroScience.Shared.AviationAirspaceVolume[] model=[new(1,1,0,"BASE",null,null,Limit(1000),Limit(10000),Polygons:polygon),new(1,2,1,"SUBTR",null,null,Limit(3000),Limit(5000),Polygons:polygon),new(1,3,2,"UNION",null,null,Limit(12000),Limit(15000),Polygons:polygon)];
+        var point=new AeroScience.Shared.Coordinates(40,-75);
+        Assert.Equal("Inside assessed volume dimensions",AviationAirspace.AssessVolumes(model,point,2000,"FT","MSL").Outcome);
+        Assert.Equal("Outside assessed volume dimensions",AviationAirspace.AssessVolumes(model,point,4000,"FT","MSL").Outcome);
+        Assert.Equal("Inside assessed volume dimensions",AviationAirspace.AssessVolumes(model,point,13000,"FT","MSL").Outcome);
+        Assert.Equal("Unable to determine assessed volume membership",AviationAirspace.AssessVolumes(model,point,1000,"FT","MSL").Outcome);
+        Assert.Equal("Unable to determine assessed volume membership",AviationAirspace.AssessVolumes(model,point,4000,"FT","Above surface").Outcome);
+        Assert.Equal("Outside assessed volume dimensions",AviationAirspace.AssessVolumes(model,new(45,-75),4000,"FT","MSL").Outcome);
+        Assert.Equal("Inside assessed volume dimensions",AviationAirspace.AssessVolumes(model,point,609.6,"M","MSL").Outcome);
+        var pressure=new[]{model[0] with{Lower=Limit(100,"Standard pressure","FL"),Upper=Limit(200,"Standard pressure","FL")}};
+        Assert.Equal("Inside assessed volume dimensions",AviationAirspace.AssessVolumes(pressure,point,15000,"FT","Standard pressure").Outcome);
+        Assert.Equal("Unable to determine assessed volume membership",AviationAirspace.AssessVolumes(pressure,point,15000,"FT","MSL").Outcome);
     }
     [Theory] [InlineData("traversal")] [InlineData("nested")]
     public async Task SaaNestingIsExactAndDoesNotEnableArbitraryNestedArchiveExtraction(string fault)

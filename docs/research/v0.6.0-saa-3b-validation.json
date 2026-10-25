@@ -1,0 +1,73 @@
+{
+  "formatVersion": 1,
+  "version": "0.6.0",
+  "adapter": 5,
+  "evidenceClass": "Genuine FAA originals; independent pyshp/Shapely/ElementTree versus retained NTS geometry. Offline read-only verification.",
+  "baseCommit": "a09e85654db9391bfcd3e457d5d288d34e838133",
+  "sourceSha256": {
+    "src/AeroScience.Missions/AviationAirspace.cs": "8fca9d72cdd19e5426207fb8371c4a674b701ef27ae5e530a7df7f330f3ba48a",
+    "src/AeroScience.Missions/AviationAirspaceStore.cs": "7cf0ac532d133fe1d7a92e5b6c3577af4bf71f294cf419bfa160c0466ef52f8f",
+    "src/AeroScience.Missions/AviationSaa.cs": "7fb167322fc3f277c439256332ba04d6713a5cea13f92e1db328492ccc738ef2",
+    "src/AeroScience.Missions/AviationSaaComposite.cs": "f22f6548ff417b8c2eaf02417dc2ac2365a87b75ecb6cbdaac0e621b5130bc47",
+    "src/AeroScience.Missions/AviationVolumeAssessment.cs": "465c4803297b3df38a9762e1e1ea5b57bf2b46e948ed0527349755831306d5c7",
+    "src/AeroScience.Shared/AviationAirspaceModels.cs": "56499c6b440bcc97d61adecb06df94b7ed346a38dea56c21edb89c9b56665d39",
+    "scripts/research/verify_airspace_originals.py": "9287a7933611c519f21afba15ed93c6a09b56ef2d43100d5a52f0548dd7a4952"
+  },
+  "supportedBefore": 990,
+  "supportedAfter": 1098,
+  "omittedBefore": 246,
+  "omittedAfter": 138,
+  "nativeComponentModels": 108,
+  "knownDifferentLimitModels": 95,
+  "modelsWithUnknownNativeLimits": 13,
+  "componentOperations": {
+    "BASE": 108,
+    "SUBTR": 168,
+    "UNION": 50
+  },
+  "independent": {
+    "evidenceClass": "Genuine FAA originals; independent pyshp/Shapely/ElementTree versus retained NTS geometry. Offline read-only verification.",
+    "results": [
+      {
+        "family": "CLASS",
+        "edition": "2026-10-01",
+        "originalSha256": "7057b1a982d5dd5df4d92a5101d222854b415c5ad163d464de36d94100e20201",
+        "featuresCompared": 5610,
+        "originalCoordinateComponentsCompared": 24575338,
+        "originalAttributeFieldsChecked": 140250,
+        "maximumCoordinateDifference": 0.0,
+        "regions": {
+          "Massachusetts": 113,
+          "California": 550
+        },
+        "explicitUnsupportedRecords": 2,
+        "sourceCrs": "EPSG:4269 (NAD83; realization/epoch unspecified by FAA PRJ)"
+      },
+      {
+        "family": "SUA",
+        "edition": "2026-10-01",
+        "originalSha256": "5bd6c9221ec61d1a9af22b18fe4d59d9378d2c38859d9c1a3619c26ff00b657b",
+        "featuresCompared": 1098,
+        "originalCoordinateComponentsCompared": 137628,
+        "originalAttributeFieldsChecked": 21064,
+        "maximumCoordinateDifference": 2.864289338439558e-14,
+        "regions": {
+          "Massachusetts": 9,
+          "California": 165
+        },
+        "explicitUnsupportedRecords": 138,
+        "sourceCrs": "OGC:CRS84 (WGS84 longitude/latitude)"
+      }
+    ],
+    "limitations": [
+      "No live activation, TFR clearance, certified positional accuracy or owner-installed Windows acceptance.",
+      "Adapter 5: explicit positive minor spans, 0.5 m joins, same-original-volume ordered Boolean operations (4+), and separate native unequal/unknown vertical component models with conservative map extents (5). Signed/reversed or inferred wraps, discrepant joins and unresolved contributors remain omitted. Inclusion at exact altitude boundaries and activation remain Unknown. PROJ/GEOS comparisons are not certified boundary accuracy.",
+      "NAD83 coordinates preserved without claiming a precise WGS84 transformation."
+    ]
+  },
+  "limitations": [
+    "Potential horizontal extent is not a flattened restriction. Native component geometry and operations remain separate.",
+    "Boundary inclusivity, unresolved terrain/pressure conversion and actual activation remain Unknown.",
+    "No installed Windows/MSFS, physical iPad or Quest acceptance."
+  ]
+}
