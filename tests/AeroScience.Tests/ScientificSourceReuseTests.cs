@@ -1,3 +1,4 @@
+using AeroScience.Engine;
 using AeroScience.Missions;
 using AeroScience.Shared;
 using System.Net;
@@ -26,10 +27,10 @@ public sealed class ScientificSourceReuseTests:IDisposable
  }
  GeographicBounds[] Quarters()=>[new(area.West,area.South,-75,40),new(-75,area.South,area.East,40),new(area.West,40,-75,area.North),new(-75,40,area.East,area.North)];
  async Task<ScientificSceneSelection> Selection(){var item=Assert.Single((await catalog.Search(new("usgs-3dep",area))).Items);return new(item.Provider,item.Scene,item.Revision,item.Bands.Select(b=>b.Id).ToArray());}
- async Task<ScientificSource> Import(GeographicBounds part,ScientificSceneSelection selection,bool legacy=false,string? datum=null,float value=123.25f)
+ async Task<ScientificSource> Import(GeographicBounds part,ScientificSceneSelection selection,bool legacy=false,string? datum=null,float value=123.25f,bool guardBorder=false)
  {
   var d=(await automatic.Provider("usgs-3dep").Discover(RemoteKind.Terrain,part,settings.Get().Preferences,new(1048576),default))!;
-  var folder=Path.Combine(root,Guid.NewGuid().ToString("N"));Directory.CreateDirectory(folder);RemoteFixtureFiles.GeoTiff(Path.Combine(folder,"elevation.tif"),value,10,(part.East-part.West)/10,west:part.West,north:part.North);
+  var folder=Path.Combine(root,Guid.NewGuid().ToString("N"));Directory.CreateDirectory(folder);var pixel=(part.East-part.West)/10;RemoteFixtureFiles.GeoTiff(Path.Combine(folder,"elevation.tif"),value,guardBorder?12:10,pixel,west:part.West-(guardBorder?pixel:0),north:part.North+(guardBorder?pixel:0));
   var provenance=new AutomaticSourceProvenance("usgs-3dep-numeric",d.Catalog,d.Item,[],part,DateTimeOffset.UtcNow,"Synthetic native file; no flight observation","Original fixture nodata applies","Synthetic native grid; not NASA/FAA data",0,[],d.ProviderMetadataJson,100,value==-9999?0:100,legacy?null:selection.Revision);
   return await science.ImportSourceAsync(d.Manifest with{VerticalDatum=datum??d.Manifest.VerticalDatum,Acquisition=provenance},folder);
  }
@@ -94,6 +95,17 @@ public sealed class ScientificSourceReuseTests:IDisposable
  {
   var selected=await Selection();var d=(await automatic.Provider("usgs-3dep").Discover(RemoteKind.Terrain,area,settings.Get().Preferences,new(1048576),default))! with{CatalogRevision=selected.Revision};var first=new ScientificDownloadBudget(1048576);var second=new ScientificDownloadBudget(1048576);
   var acquired=await Task.WhenAll(automatic.PrepareSource(d,first,default),automatic.PrepareSource(d,second,default));Assert.Equal(acquired[0]!.Id,acquired[1]!.Id);Assert.Equal(1,handler.Numeric);Assert.Equal(1,science.CountSources());Assert.True(first.Bytes+second.Bytes>0);Assert.True(first.Bytes==0||second.Bytes==0);
+ }
+ [Fact]public async Task ActivePreparationProtectsEveryContributingSourceAndRemovalInvalidatesItsSavedRegion()
+ {
+  var selected=await Selection();var plan=new MissionPlan(Guid.NewGuid(),"Synthetic multi-source dependency route",Waypoints:[new("A",40.005,-75.015),new("B",40.015,-75.005)],Instruments:[new("terrain-scanner",true)],UpdatedUtc:DateTimeOffset.UtcNow);
+  // Seed the actual backend plan cell (0.04°), not an assumed Library cell (0.02°).
+  // Native edge pixels include a real one-pixel crop border, as COG subset windows do.
+  var full=Assert.Single(ScientificPreparationScope.Preview(plan).Areas);var c=full.Center;var originals=new List<ScientificSource>();foreach(var q in new GeographicBounds[]{new(full.West,full.South,c.Longitude,c.Latitude),new(c.Longitude,full.South,full.East,c.Latitude),new(full.West,c.Latitude,c.Longitude,full.North),new(c.Longitude,c.Latitude,full.East,full.North)})originals.Add(await Import(q,selected,guardBorder:true));
+  settings.Save(new());var preparation=new ScientificPlanData(automatic,settings);preparation.Prepare(plan,true);using var deadline=new CancellationTokenSource(TimeSpan.FromSeconds(10));
+  while(!deadline.IsCancellationRequested){preparation.Tick();if(preparation.Regions(plan.Id).Any(r=>r.Status=="Ready"&&r.SourceIds?.Length==4))break;try{await Task.Delay(20,deadline.Token);}catch(OperationCanceledException){break;}}
+  Assert.True(preparation.Regions(plan.Id).Any(r=>r.Status=="Ready"&&r.SourceIds?.Length==4),System.Text.Json.JsonSerializer.Serialize(new{regions=preparation.Regions(plan.Id),activity=automatic.Snapshot()},WireJson.Options));
+  Assert.All(originals,s=>Assert.NotEmpty(preparation.SourceDeletionDependencies(s)));preparation.Control(plan.Id,"pause");Assert.All(originals,s=>Assert.Empty(preparation.SourceDeletionDependencies(s)));automatic.ForgetDeletedSources();preparation.SourcesRemoved([originals[0].Id]);Assert.Contains(preparation.Regions(plan.Id),r=>r.Status=="Dataset Required"&&r.SourceIds is null);
  }
  public void Dispose(){automatic.Dispose();science.Dispose();try{Directory.Delete(root,true);}catch(IOException){}}
 }

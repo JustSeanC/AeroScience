@@ -806,7 +806,7 @@ export async function libraryDownload(parent, api, isDisposed = () => false) {
       ),
       el(
         "p",
-        `Drive free: ${bytes(p.availableDriveBytes)} · Library used: ${bytes(p.scientificStorageUsedBytes)} / limit ${bytes(p.scientificStorageLimitBytes)} · preparation allowance currently remaining: ${bytes(p.preparationBudgetRemainingBytes)}. Storage is rechecked during work.`,
+        `Drive free: ${bytes(p.availableDriveBytes)} · Library used: ${bytes(p.scientificStorageUsedBytes)} / limit ${p.scientificStorageLimitBytes==null?(p.availableDriveBytes==null?"Unknown":"Unlimited"):bytes(p.scientificStorageLimitBytes)} · preparation allowance currently remaining: ${bytes(p.preparationBudgetRemainingBytes)}. Storage is rechecked during work.`,
       ),
       el(
         "p",
