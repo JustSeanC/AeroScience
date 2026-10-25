@@ -7,12 +7,13 @@ public sealed record PreparationScopePreview(string PlanRevision,bool FirstHalfA
     PreflightScope Selection,GeographicBounds[] Areas,int FullRegions,int InstrumentUnits,int FullInstrumentUnits);
 public static class ScientificPreparationScope
 {
-    public static object Review(MissionPlan plan,ScienceStore science,ScientificAccessSettings settings,PreflightScope? scope=null)
+    public static object Review(MissionPlan plan,ScienceStore science,ScientificAccessSettings settings,PreflightScope? scope=null,AutomaticScientificData? automatic=null,CancellationToken token=default)
     {
-        var preview=Preview(plan,scope);var areas=preview.Areas;var kinds=ScientificPlanPreparation.Kinds(plan);var sources=science.Availability();var p=settings.Get().Preferences;
-        var retained=kinds.ToDictionary(k=>k.ToString(),k=>areas.Take(128).Count(a=>ScientificSourceSelection.Select(sources.Select(s=>s with{CoversPoint=ScientificSourceSelection.CoversArea(s.Source,a)}),k,p) is not null));
-        return new{planName=plan.Name,areas,reviewedRegions=Math.Min(128,areas.Length),instruments=kinds,retained,allowance=p.PreflightTransferBytes,estimatedBytes=(long?)null,
-            limitations="Native source grids/masks remain authoritative. Retained footprint candidates require re-verification. Transfer size and duration unknown before source/subset selection. Scope changes preserve verified sources; no additional preflight work starts until approved.",plan,scope=preview};
+        var preview=Preview(plan,scope);var areas=preview.Areas;var kinds=ScientificPlanPreparation.Kinds(plan);var p=settings.Get().Preferences;
+        var context=new ScientificReuseContext();var uncertain=kinds.ToDictionary(k=>k.ToString(),_=>0);
+        var retained=kinds.ToDictionary(k=>k.ToString(),k=>areas.Count(a=>{token.ThrowIfCancellationRequested();if(automatic is null)return ScientificSourceSelection.Select(science.Availability(a.Center,k,a).Select(s=>s with{CoversPoint=ScientificSourceSelection.CoversArea(s.Source,a)}),k,p) is not null;var coverage=automatic.LocalCoverage(a,k,context,token);if(coverage.Uncertain)uncertain[k.ToString()]++;return coverage.Missing.Length==0&&coverage.QualityLimited.Length==0;}));
+        return new{planName=plan.Name,areas,reviewedRegions=areas.Length,instruments=kinds,retained,uncertain,allowance=p.PreflightTransferBytes,estimatedBytes=(long?)null,
+            limitations="All selected regions were queried through the geographic index, without a first-page/count ceiling. Retained counts include verified compatible cumulative windows where supported; uncertain bounded assessments are reported separately. Single-source QA and actual measurements are rechecked during preparation, not claimed ready by this estimate. Transfer size and duration unknown before source/subset selection. Scope changes preserve verified sources; no additional preflight work starts until approved.",plan,scope=preview};
     }
     public static string Revision(MissionPlan plan)=>ScientificComposites.Identity(plan);
     // Order comes from geodesic route traversal and explicit route collection actions,

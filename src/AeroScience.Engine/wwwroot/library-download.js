@@ -794,11 +794,11 @@ export async function libraryDownload(parent, api, isDisposed = () => false) {
       el("h2", "Review & approve download"),
       el(
         "p",
-        `${p.work.length} bounded work unit(s) · ${p.uncoveredCells} uncovered cells · ${p.work.filter((w) => w.reuseSourceId).length} reusable unit(s).`,
+        `${p.work.length} bounded source work window(s) · ${p.uncoveredCells} uncovered planning cells · ${p.work.filter((w) => w.reuseSourceId).length} reusable window(s). A planning cell may use several retained sources; mission instrument-region totals are unchanged.`,
       ),
       el(
         "p",
-        `Estimated transfer: ${bytes(p.estimatedTransferBytes)} · retained size: ${bytes(p.estimatedRetainedBytes)} · reusable originals: ${bytes(p.reusableBytes)}.`,
+        `Estimated transfer: ${bytes(p.estimatedTransferBytes)} · retained size: ${bytes(p.estimatedRetainedBytes)} · retained originals reused: ${bytes(p.reusableBytes)} (counted once per source; not a claim that this many network bytes were avoided).`,
       ),
       el(
         "p",

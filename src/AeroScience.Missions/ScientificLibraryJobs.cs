@@ -27,7 +27,9 @@ public sealed partial class ScientificLibraryJobs:IDisposable
             if((long)width*height>100000)throw new ArgumentException("Selection exceeds 100,000 geometry candidates. Use smaller regions, each no more than 4,096 work units.");
             for(var y=0;y<height;y++)for(var x=0;x<width;x++)
             {
-                var cell=new GeographicBounds(area.West+x*.02,area.South+y*.02,Math.Min(area.East,area.West+(x+1)*.02),Math.Min(area.North,area.South+(y+1)*.02));cells.Add(cell);
+                // The final cell must retain the pilot's exact endpoint. Repeated
+                // floating additions can otherwise leave a real unreviewed sliver.
+                var cell=new GeographicBounds(area.West+x*.02,area.South+y*.02,x==width-1?area.East:area.West+(x+1)*.02,y==height-1?area.North:area.South+(y+1)*.02);cells.Add(cell);
                 if(cells.Count>4096)throw new ArgumentException("Selection exceeds 4,096 work units. Divide this region into narrower explicit bounding boxes, polygons or fewer scenes.");
             }
         }
@@ -48,10 +50,11 @@ public sealed partial class ScientificLibraryJobs:IDisposable
         }
         return cells.OrderBy(a=>a.South).ThenBy(a=>a.West).ToArray();
     }
-    private ScientificSource? Reusable(ScientificSceneSelection scene,GeographicBounds area,IEnumerable<ScientificSource>? sources=null)=>(sources??science.StreamSources(new(Kind:ScientificCatalog.Provider(scene.Provider).Kind,Area:area,Scene:scene.Provider=="usgs-3dep"?null:scene.Scene))).FirstOrDefault(s=>
-        s.Manifest.Acquisition?.CatalogRevision==scene.Revision&&s.Manifest.Acquisition is {} a&&
+    private static bool Compatible(ScientificSceneSelection scene,ScientificSource s)=>s.Manifest.Kind==ScientificCatalog.Provider(scene.Provider).Kind&&
+        ScientificCatalog.RetainedRevision(s,scene.Provider)==scene.Revision&&s.Manifest.Acquisition is {} a&&
         (scene.Provider=="usgs-3dep"?a.Workflow=="usgs-3dep-numeric":s.Manifest.SceneId==scene.Scene)&&
-        s.Manifest.Bands.Select(b=>b.Id).Order().SequenceEqual(scene.Bands.Order())&&ScientificSourceSelection.CoversArea(s,area));
+        s.Manifest.Bands.Select(b=>b.Id).Order().SequenceEqual(scene.Bands.Order());
+    private ScientificSource? Reusable(ScientificSceneSelection scene,GeographicBounds area,IEnumerable<ScientificSource>? sources=null)=>(sources??science.StreamSources(new(Kind:ScientificCatalog.Provider(scene.Provider).Kind,Area:area,Scene:scene.Provider=="usgs-3dep"?null:scene.Scene))).FirstOrDefault(s=>Compatible(scene,s)&&science.InspectAvailability(s).FilesAvailable&&ScientificSourceSelection.CoversArea(s,area));
     private bool Verify(ScientificSource source)
     {
         foreach(var file in source.Files)
@@ -65,15 +68,18 @@ public sealed partial class ScientificLibraryJobs:IDisposable
         if(selection.Scenes.Select(s=>s.Provider+"/"+s.Scene).Distinct().Count()!=selection.Scenes.Length)throw new ArgumentException("Select each exact scene only once.");
         var limit=selection.MaximumTransferBytes??Math.Min(p.PreflightTransferBytes??1073741824,1073741824);
         if(limit<1048576||limit> (p.PreflightTransferBytes??21474836480)||limit>21474836480)throw new ArgumentException("Choose a positive Library job budget within the configured preflight allowance (maximum 20 GiB).");
-        var products=new List<ScientificCatalogItem>();var work=new List<LibraryWorkUnit>();long reuse=0;var reusedIds=new HashSet<Guid>();var covered=new HashSet<GeographicBounds>();var checkedSources=new HashSet<Guid>();
+        var products=new List<ScientificCatalogItem>();var work=new List<LibraryWorkUnit>();long reuse=0;var reusedIds=new HashSet<Guid>();var covered=new HashSet<GeographicBounds>();var checkedSources=new HashSet<Guid>();var reuseContext=new ScientificReuseContext();var reuseNotes=new HashSet<string>();
+        bool Verified(ScientificSource source)=>!checkedSources.Add(source.Id)||Verify(source);
         foreach(var selected in selection.Scenes)
         {
             var recipe=ScientificCatalog.Provider(selected.Provider);
-            var allLocal=cells.Select(c=>Reusable(selected,c)).ToArray();
+            var partitions=new Dictionary<GeographicBounds,ScientificReusePlan>();
+            foreach(var cell in cells){var single=Reusable(selected,cell);partitions[cell]=single is not null?new([new(cell,single)],[],[],[]):ScientificSourceSelection.ReuseArea(science,cell,s=>Compatible(selected,s),Verified,token,reuseContext);}
+            foreach(var note in partitions.Values.SelectMany(r=>r.Limitations))reuseNotes.Add(note);
             ScientificCatalogItem item;
-            if(allLocal.All(s=>s is not null))
+            if(partitions.Values.All(r=>r.Missing.Length==0))
             {
-                var source=allLocal[0]!;var m=source.Manifest;var provenance=m.Acquisition!;
+                var source=partitions.Values.First().Reused[0].Source;var m=source.Manifest;var provenance=m.Acquisition!;
                 item=new(selected.Provider,recipe.Product,selected.Scene,selected.Revision,m.Kind,cells[0],null,m.ObservationUtc,m.PublicationUtc,
                     m.Bands.Select(b=>new ScientificCatalogBand(b.Id,b.Unit,b.Scale,b.Offset,b.NoData,null,b.Format,null)).ToArray(),source.Grids.Values.First().Crs,m.VerticalDatum,provenance.Quality,provenance.NativeResolution,m.License,m.Citation,"Verified retained reuse; no provider query",["Retained local evidence, not newly verified provider availability."]);
             }
@@ -84,20 +90,24 @@ public sealed partial class ScientificLibraryJobs:IDisposable
                 if(item.Geometry is {} geometry&&!cell.Corners.Append(cell.Center).All(point=>StacScientificProvider.Contains(geometry,point)))continue;
                 if(selected.Provider=="usgs-3dep"&&(cell.West< -170||cell.East> -64||cell.South<17||cell.North>72))continue;
                 if(work.Count>=4096)throw new ArgumentException("Exact scenes × intersecting geographic cells exceed 4,096 work units. Narrow the region or scene selection.");
-                var retained=Reusable(selected,cell);if(retained is not null&&checkedSources.Add(retained.Id)&&!Verify(retained))throw new IOException("An exact retained source changed; restore/reimport it. No original was replaced.");
-                if(retained is not null&&reusedIds.Add(retained.Id))reuse+=retained.Files.Sum(f=>f.Bytes);
-                work.Add(new(work.Count,selected,cell,retained?.Id,AutomaticScientificData.StorageBound(recipe.Kind)));covered.Add(cell);
+                var partition=partitions[cell];
+                if(partition.Uncertain)throw new InvalidOperationException("Retained partial coverage could not be scientifically verified within this bounded review. Choose smaller windows or inspect the source; uncertain coverage was not labeled missing or downloaded again.");
+                if(partition.QualityLimited.Length>0)throw new InvalidOperationException("Some retained pixels are nodata or quality-excluded. Re-downloading the same source is not a remedy; choose another scientifically suitable source or smaller area.");
+                foreach(var piece in partition.Reused){if(!Verified(piece.Source))throw new IOException("An exact retained source changed; restore/reimport it. No original was replaced.");if(reusedIds.Add(piece.Source.Id))reuse+=piece.Source.Files.Sum(f=>f.Bytes);work.Add(new(work.Count,selected,piece.Area,piece.Source.Id,AutomaticScientificData.StorageBound(recipe.Kind)));}
+                foreach(var gap in partition.Missing)work.Add(new(work.Count,selected,gap,null,AutomaticScientificData.StorageBound(recipe.Kind)));
+                if(work.Count>4096)throw new ArgumentException("The reviewed reuse/gap partition exceeds 4,096 work units. Choose smaller areas; this is not a Library capacity limit.");
+                covered.Add(cell);
             }
         }
         if(work.Count==0)throw new ArgumentException("None of these bounded cells fit the selected scene footprints. Select cells wholly inside a scene; partial edge cells are not claimed as supported.");
         var storage=science.Management?.Snapshot();
-        var uncovered=cells.Length-covered.Count;var temp=work.Max(w=>w.StorageAllowanceBytes)+p.MaximumDownloadBytes;
+        var uncovered=cells.Length-covered.Count;var temp=work.All(w=>w.ReuseSourceId is not null)?1048576:work.Max(w=>w.StorageAllowanceBytes)+p.MaximumDownloadBytes;
         using(var reservation=science.Management?.ReserveScience(temp)){}
         var canonical=selection with{Areas=selection.Areas.OrderBy(a=>a.West).ThenBy(a=>a.South).ToArray(),Scenes=selection.Scenes.OrderBy(s=>s.Provider).ThenBy(s=>s.Scene).Select(s=>s with{Bands=s.Bands.Order().ToArray()}).ToArray(),MaximumTransferBytes=limit};
         var now=DateTimeOffset.UtcNow;var hash=ScientificCatalog.Hash(new{canonical,work,settings=SettingsHash(),limit,temp});
         var preview=new LibraryDownloadPreview(1,Guid.NewGuid(),canonical,hash,SettingsHash(),now,now.AddMinutes(30),work.ToArray(),products.ToArray(),limit,p.MaximumDownloadBytes,temp,reuse,
             work.All(w=>w.ReuseSourceId is not null)?0:null,null,
-            ["Download size and final retained size are Unknown until bounded numeric reads complete. Allowances are limits, not estimates.","Polygon edges may include adjacent numeric pixels within the displayed rectangular work windows; no entire original scene is requested.","Historical datasets are retained scientific originals, not airborne observations or automatically disposable caches.","Retries and interrupted-read allowances count against the approved total. Background work yields to active flight acquisition.","Mandatory numeric/QA band recipes cannot be reduced without a compatible reader; catalog footprints do not guarantee valid pixels."],uncovered,storage?.Science.FreeBytes,storage?.Science.LimitBytes,storage?.Science.UsedBytes,automatic.QueueSummary().PreflightAvailableBytes);
+            ["Download size and final retained size are Unknown until bounded numeric reads complete. Allowances are limits, not estimates.","Polygon edges may include adjacent numeric pixels within the displayed rectangular work windows; no entire original scene is requested.","Historical datasets are retained scientific originals, not airborne observations or automatically disposable caches.","Retries and interrupted-read allowances count against the approved total. Background work yields to active flight acquisition.","Mandatory numeric/QA band recipes cannot be reduced without a compatible reader; catalog footprints do not guarantee valid pixels.","Retained originals are counted once even when several approved windows reuse them. Gap windows use the provider's existing bounded numeric subsetting, not full-scene claims. Native resolution and per-observation source provenance remain separate.",..reuseNotes],uncovered,storage?.Science.FreeBytes,storage?.Science.LimitBytes,storage?.Science.UsedBytes,automatic.QueueSummary().PreflightAvailableBytes);
         return science.SaveLibraryPreview(preview);
     }
     public async Task<LibraryDownloadJob> Approve(Guid id,string hash,CancellationToken token=default)
@@ -176,7 +186,8 @@ public sealed partial class ScientificLibraryJobs:IDisposable
             if(current.Preview.SettingsHash!=SettingsHash(current.Preview.Nasa is not null))throw new InvalidOperationException("Scientific access limits/consent changed; create a new preview before further downloading.");
             if(science.SetLibraryState(job.Id,"Preparing",runningOnly:true).State!="Preparing")return;
             science.SetLibraryItem(job.Id,work.Index,"Preparing");
-            var source=job.Preview.Nasa is {} bundle?await ReusableNasa(bundle,token):Reusable(work.Scene,work.Area);
+            var source=job.Preview.Nasa is {} bundle?await ReusableNasa(bundle,token):work.ReuseSourceId is {} reviewedId?science.Source(reviewedId):Reusable(work.Scene,work.Area);
+            if(work.ReuseSourceId is not null&&(source is null||!Compatible(work.Scene,source)||!ScientificSourceSelection.CoversArea(source,work.Area)))throw new InvalidOperationException("The reviewed retained source is no longer available/compatible. Create a fresh preview; no unapproved replacement was downloaded.");
             if(source is not null){if(!Verify(source))throw new IOException("Retained source failed verification; originals were preserved.");}
             else
             {

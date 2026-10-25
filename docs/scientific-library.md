@@ -241,3 +241,26 @@ uncertainty charts, QA-aware bounded GLT map windows, same-scene comparison and 
 This adapter does not enable automatic aircraft sampling or create flight observations/grade credit.
 Genuine NASA originals, authorized direct-access redirects and installed-device acceptance remain
 pending. Follow [the current workflow and limitations](research/v0.6.0-emit-integration.md).
+
+### v0.6.0 development: cumulative retained reuse
+
+Download previews and preparation now search the indexed retained inventory before transfers.
+Several compatible verified request windows can satisfy one planned region. Native numeric reads,
+nodata and the existing thermal/Sentinel quality rules establish support; outlines alone do not.
+Source dates, units, scaling, datum, recipe and processing identity remain distinct. Each observation
+still identifies its actual original source. No common-resolution mosaic or past airborne observation
+is created by preparation.
+
+For supported numeric subset providers, reviewed work separates reused windows from actual gaps.
+Only gaps are requested; optical regional expansion is disabled when it would redownload retained
+pieces. Exact simultaneous preparations share one verified original. Original bytes are counted once
+in the preview; this retained size is not an estimate of avoided network traffic. NASA full-original
+jobs retain their existing exact-scene/companion reuse and explicit full-file sizes.
+
+Union validation is bounded and cancellable. Unaligned grids, incomplete projected QA, unavailable
+originals or missing historical request/version contracts remain Unknown/limited, rather than a false
+positive coverage claim. Exact retained reuse remains available; narrow the review or inspect the
+source where a partial union cannot be verified. These are individual work/read bounds, not a
+maximum Library collection count. Preflight review queries every selected region through the index;
+uncertain assessments are separate from reusable counts. Physical storage and existing quotas,
+source/network consent, pause/cancel, flight priority and permanent deletion remain enforced.

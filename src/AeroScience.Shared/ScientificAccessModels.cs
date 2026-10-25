@@ -20,7 +20,7 @@ public sealed record ScientificAccessConfiguration(ScientificAccessPreferences P
 public sealed record ScientificDataReadiness(string Key,RemoteKind Kind,string Status,string Message,GeographicBounds Area,
     string? Provider=null,string? Dataset=null,DateTimeOffset? ObservationUtc=null,string? Quality=null,
     long DownloadedBytes=0,long? EstimatedDownloadBytes=null,long? EstimatedStorageBytes=null,
-    Guid? SourceId=null,string? Authorization=null,DateTimeOffset? UpdatedUtc=null,HyperspectralDiscovery[]? Discoveries=null,Coordinates? SamplePoint=null,Coordinates[]? SourceCoverage=null,string Scope="manual",string Stage="Queued",double? Seconds=null,long ReusedBytes=0);
+    Guid? SourceId=null,string? Authorization=null,DateTimeOffset? UpdatedUtc=null,HyperspectralDiscovery[]? Discoveries=null,Coordinates? SamplePoint=null,Coordinates[]? SourceCoverage=null,string Scope="manual",string Stage="Queued",double? Seconds=null,long ReusedBytes=0,[property:System.Text.Json.Serialization.JsonIgnore(Condition=System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] Guid[]? SourceIds=null);
 public sealed record HyperspectralDiscovery(string Catalog,string Dataset,DateTimeOffset? ObservationUtc,string Format,string Authorization,string MetadataUrl);
 public sealed record ScientificPreparationRequest(double Latitude,double Longitude,RemoteKind[]? Kinds=null);
 public sealed record AutomaticSourceProvenance(string Workflow,string Catalog,string Item,string[] UnsignedAssets,

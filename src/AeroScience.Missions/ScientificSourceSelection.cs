@@ -3,7 +3,7 @@ using AeroScience.Shared;
 
 namespace AeroScience.Missions;
 
-public static class ScientificSourceSelection
+public static partial class ScientificSourceSelection
 {
     public static bool CoversArea(ScientificSource source,GeographicBounds area)=>source.Manifest.Swath is null && area.Corners.All(p=>source.Grids.Values.All(g=>ScientificRaster.GridCovers(g,new(p.Latitude+(area.Center.Latitude-p.Latitude)*.000001,p.Longitude+(area.Center.Longitude-p.Longitude)*.000001))));
     public static ScientificSource? Select(IEnumerable<SourceAvailability> available,RemoteKind kind,ScientificAccessPreferences? p=null,PayloadConfiguration? payload=null)

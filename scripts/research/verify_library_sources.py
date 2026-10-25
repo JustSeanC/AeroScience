@@ -11,9 +11,12 @@ import rasterio
 from rasterio.warp import transform
 
 
-def verify(folder,providers=False):
+def verify(folder,providers=False,reuse=False):
     folder = Path(folder)
-    evidence = json.loads((folder/('provider-acceptance.json' if providers else 'library.json')).read_text(encoding='utf-8'))
+    evidence = json.loads((folder/('provider-acceptance.json' if providers else 'library-reuse.json' if reuse else 'library.json')).read_text(encoding='utf-8'))
+    if reuse:
+        assert evidence['observedInitialTransferBytes']>0 and evidence['repeatedTransferBytes']==0
+        assert evidence['repeat']['state']=='Completed' and len({w['reuseSourceId'] for w in evidence['repeat']['preview']['work']})==2
     results = []
     for item in evidence['results']:
         if providers:item={**item,'provider':item['workflow']}
@@ -85,7 +88,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('folder', type=Path)
     parser.add_argument('--providers',action='store_true',help='Check actual automatic-provider run receipts with the same independent numeric/QA rules.')
+    parser.add_argument('--reuse',action='store_true',help='Verify genuine cumulative Library windows at the same unchanged numeric/CRS tolerances.')
     args = parser.parse_args()
-    result = verify(args.folder,args.providers)
-    (args.folder/('independent-numeric-comparison.json' if args.providers else 'independent-library.json')).write_text(json.dumps(result, indent=2)+'\n', encoding='utf-8')
+    if args.providers and args.reuse:parser.error('Choose one evidence workload.')
+    result = verify(args.folder,args.providers,args.reuse)
+    (args.folder/('independent-numeric-comparison.json' if args.providers else 'independent-reuse.json' if args.reuse else 'independent-library.json')).write_text(json.dumps(result, indent=2)+'\n', encoding='utf-8')
     print(json.dumps(result, indent=2))

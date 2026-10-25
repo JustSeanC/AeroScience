@@ -19,7 +19,7 @@ public static class ScientificPlanPreparation
 }
 
 public sealed record PreparationInstrument(string InstrumentId,string Name,string? Profile,string Status,int Total,int Ready,int Awaiting,int Unavailable,long DownloadedBytes,long ReusedBytes,string Eta,string[] Reasons,bool ActivelyDownloading=false);
-public sealed record PreparationRegion(string Key,RemoteKind Kind,GeographicBounds Area,string Status="Queued",string Message="Waiting for preparation",long DownloadedBytes=0,long ReusedBytes=0,string Stage="Queued",DateTimeOffset? UpdatedUtc=null,long PreviousAttemptBytes=0,bool Selected=true,Guid? SourceId=null);
+public sealed record PreparationRegion(string Key,RemoteKind Kind,GeographicBounds Area,string Status="Queued",string Message="Waiting for preparation",long DownloadedBytes=0,long ReusedBytes=0,string Stage="Queued",DateTimeOffset? UpdatedUtc=null,long PreviousAttemptBytes=0,bool Selected=true,Guid? SourceId=null,[property:System.Text.Json.Serialization.JsonIgnore(Condition=System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] Guid[]? SourceIds=null);
 public sealed record PlanInstrumentInventory(Guid PlanId,DateTimeOffset? PlanRevision,PreparationInstrument[] Instruments);
 public sealed record PreparationActivity(ScientificPlanReadiness[] Plans,PlanInstrumentInventory[] Inventories);
 public sealed record MissionStartReadiness(Guid PlanId,string PlanRevision,DateTimeOffset? PlanUpdatedUtc,DateTimeOffset CheckedUtc,
@@ -73,19 +73,19 @@ public sealed class ScientificPlanData
         }
     }
     public void PlanChanged(MissionPlan plan){lock(gate){if(!sessions.TryGetValue(plan.Id,out var s)||ScientificPreparationScope.Revision(plan)==ScientificPreparationScope.Revision(s.Plan))return;s.PlanStale=true;if(!s.InFlight)automatic.PauseScope("plan:"+plan.Id,true);Save();}}
-    public string[] SourceDeletionDependencies(ScientificSource source){lock(gate)return sessions.Values.Where(s=>!s.Paused&&!s.Cancelled&&!s.AfterFlight&&s.Regions.Values.Any(r=>r.Kind==source.Manifest.Kind&&(r.SourceId==source.Id||r.SourceId is null&&(!Terminal(r.Status)||Ready(r.Status))&&ScientificSourceSelection.CoversArea(source,r.Area)))).Select(s=>"Active preparation for "+s.Plan.Name+" uses or can reuse this source. Pause/cancel its preparation before deletion.").ToArray();}
+    public string[] SourceDeletionDependencies(ScientificSource source){lock(gate)return sessions.Values.Where(s=>!s.Paused&&!s.Cancelled&&!s.AfterFlight&&s.Regions.Values.Any(r=>r.Kind==source.Manifest.Kind&&(r.SourceId==source.Id||r.SourceIds?.Contains(source.Id)==true||r.SourceId is null&&(!Terminal(r.Status)||Ready(r.Status))&&ScientificSourceSelection.CoversArea(source,r.Area)))).Select(s=>"Active preparation for "+s.Plan.Name+" uses or can reuse this source. Pause/cancel its preparation before deletion.").ToArray();}
     public void SourcesRemoved(Func<Guid,bool> wasRemoved)
     {
         lock(gate)
         {
-            var referenced=sessions.Values.SelectMany(s=>s.Regions.Values).Where(r=>r.SourceId is not null).Select(r=>r.SourceId!.Value).Distinct();
+            var referenced=sessions.Values.SelectMany(s=>s.Regions.Values).SelectMany(r=>(r.SourceIds??[]).Concat(r.SourceId is {} id?new[]{id}:[])).Distinct();
             var removed=referenced.Where(wasRemoved).ToHashSet();
-            foreach(var session in sessions.Values)foreach(var region in session.Regions.Values.Where(r=>r.SourceId is {} id&&removed.Contains(id)).ToArray())
-                session.Regions[region.Key]=region with{Status="Dataset Required",Message="The owner deleted this external source. Review preparation scope or import compatible data to use it again.",SourceId=null,ReusedBytes=0};
+            foreach(var session in sessions.Values)foreach(var region in session.Regions.Values.Where(r=>r.SourceId is {} id&&removed.Contains(id)||r.SourceIds?.Any(removed.Contains)==true).ToArray())
+                session.Regions[region.Key]=region with{Status="Dataset Required",Message="The owner deleted this external source. Review preparation scope or import compatible data to use it again.",SourceId=null,SourceIds=null,ReusedBytes=0};
             Save();
         }
     }
-    public void SourcesRemoved(Guid[] ids){lock(gate){foreach(var s in sessions.Values)foreach(var r in s.Regions.Values.Where(r=>r.SourceId is {} id&&ids.Contains(id)).ToArray())s.Regions[r.Key]=r with{Status="Dataset Required",Message="The owner deleted this external source. Review preparation scope or import compatible data to use it again.",SourceId=null,ReusedBytes=0};Save();}}
+    public void SourcesRemoved(Guid[] ids){lock(gate){foreach(var s in sessions.Values)foreach(var r in s.Regions.Values.Where(r=>r.SourceId is {} id&&ids.Contains(id)||r.SourceIds?.Any(ids.Contains)==true).ToArray())s.Regions[r.Key]=r with{Status="Dataset Required",Message="The owner deleted this external source. Review preparation scope or import compatible data to use it again.",SourceId=null,SourceIds=null,ReusedBytes=0};Save();}}
     public bool AutomaticFlightAllowed(Guid id){lock(gate)return !sessions.TryGetValue(id,out var s)||!s.Paused&&!s.Cancelled;}
     public void Control(Guid id,string action)
     {
@@ -109,7 +109,7 @@ public sealed class ScientificPlanData
         var scope="plan:"+s.Plan.Id;automatic.PauseScope(scope,s.Paused||s.Cancelled||s.Preempted||s.AfterFlight||s.PlanStale&&!s.InFlight);
         var states=automatic.Snapshot().ToDictionary(r=>r.Key);
         foreach(var region in s.Regions.Values.ToArray())if(states.TryGetValue(region.Key,out var row))
-            s.Regions[region.Key]=region with{Status=row.Status,Message=row.Message,DownloadedBytes=row.Scope==scope?row.DownloadedBytes:0,PreviousAttemptBytes=region.PreviousAttemptBytes+(row.Scope==scope&&row.DownloadedBytes<region.DownloadedBytes?region.DownloadedBytes:0),ReusedBytes=row.ReusedBytes,Stage=row.Stage,UpdatedUtc=row.UpdatedUtc,SourceId=row.SourceId};
+            s.Regions[region.Key]=region with{Status=row.Status,Message=row.Message,DownloadedBytes=row.Scope==scope?row.DownloadedBytes:0,PreviousAttemptBytes=region.PreviousAttemptBytes+(row.Scope==scope&&row.DownloadedBytes<region.DownloadedBytes?region.DownloadedBytes:0),ReusedBytes=row.ReusedBytes,Stage=row.Stage,UpdatedUtc=row.UpdatedUtc,SourceId=row.SourceId,SourceIds=row.SourceIds};
         if(s.Paused||s.Cancelled||s.Preempted||s.AfterFlight||s.PlanStale&&!s.InFlight||s.InFlight&&!settings.Get().Preferences.BackgroundRetrieval||!s.Explicit&&!settings.Get().Preferences.BackgroundRetrieval)return;
         var candidates=s.Regions.Values.Where(r=>s.InFlight||r.Selected).ToArray();
         var areas=s.Regions.Values.Select(r=>r.Area).Distinct().ToArray();var near=s.Aircraft is {} position?Array.IndexOf(areas,areas.MinBy(a=>Geodesy.Distance(position,a.Center))!):0;

@@ -30,6 +30,7 @@ internal static class LibraryAcceptance
             var evidence=new{provider=provider.Id,catalog=page,preview=preview.Preview,source,locations,bands,derived,valid,reuse=current,flight="No flight or science session was created. Numeric Library preparation only."};
             results.Add(evidence);await File.WriteAllTextAsync(Path.Combine(output,provider.Id+"-library.json"),JsonSerializer.Serialize(evidence,WireJson.Options));Console.WriteLine(provider.Id+" Library acquisition/reuse passed; "+valid+" valid derived values.");
         }
+        await CumulativeReuse(output,science,settings,jobs,catalog);
         var regions=new[]{await catalog.Region(new("35")),await catalog.Region(new("35","013"))};
         await File.WriteAllTextAsync(Path.Combine(output,"regions.json"),JsonSerializer.Serialize(regions,WireJson.Options));Console.WriteLine("Genuine Census state/county boundaries retrieved without alteration.");
         var paging=new ScientificCatalogQuery("sentinel-2",new(-75,40,-74.98,40.02),DateTimeOffset.Parse("2024-09-03T00:00:00Z"),DateTimeOffset.Parse("2024-09-04T00:00:00Z"),PageSize:1,Refresh:true);
@@ -38,5 +39,36 @@ internal static class LibraryAcceptance
         await File.WriteAllTextAsync(Path.Combine(output,"pagination.json"),JsonSerializer.Serialize(new{first,next},WireJson.Options));Console.WriteLine("Genuine Sentinel next-link pagination passed.");
         if(science.Datasets().Count!=0||science.Products().Length!=0)throw new IOException("Library downloads unexpectedly produced flight observations.");
         await File.WriteAllTextAsync(Path.Combine(output,"library.json"),JsonSerializer.Serialize(new{utc=DateTimeOffset.UtcNow,results},WireJson.Options));
+    }
+    private static async Task CumulativeReuse(string output,ScienceStore science,ScientificAccessSettings settings,ScientificLibraryJobs jobs,ScientificCatalog catalog)
+    {
+        var area=new GeographicBounds(-75.04,40,-75.02,40.02);var left=new GeographicBounds(area.West,area.South,-75.03,area.North);var right=new GeographicBounds(-75.03,area.South,area.East,area.North);
+        var item=(await catalog.Search(new("usgs-3dep",area))).Items.Single();var scene=new ScientificSceneSelection(item.Provider,item.Scene,item.Revision,item.Bands.Select(b=>b.Id).ToArray());
+        var preview=await jobs.Preview(new(1,[left,right],[scene],MaximumTransferBytes:16777216));await jobs.Approve(preview.Id,preview.Preview.SelectionHash);
+        async Task<LibraryDownloadJob> Complete(Guid id){var end=DateTimeOffset.UtcNow.AddMinutes(13);while(true){var current=science.LibraryJob(id);if(current.State is "Completed" or "Failed" or "Interrupted")return current;if(DateTimeOffset.UtcNow>end)throw new IOException("Cumulative genuine reuse exceeded its existing bounded job deadline.");await Task.Delay(100);}}
+        var acquired=await Complete(preview.Id);if(acquired.State!="Completed"||acquired.DownloadedBytes<=0)throw new IOException("Genuine bounded cumulative-source acquisition did not complete: "+acquired.Error);
+        var ids=acquired.Items.Select(i=>i.SourceId!.Value).Distinct().ToArray();if(ids.Length!=2)throw new IOException("This acceptance requires two independently retained genuine windows.");
+        var count=science.CountSources();var before=settings.Get().Preferences;LibraryDownloadJob repeat;
+        settings.Save(before with{OnlineEnabled=false,PrivacyAccepted=false});
+        try
+        {
+            var combined=await jobs.Preview(new(1,[area],[scene],MaximumTransferBytes:16777216));
+            if(combined.Preview.EstimatedTransferBytes!=0||combined.Preview.Work.Any(w=>w.ReuseSourceId is null)||combined.Preview.Work.Select(w=>w.ReuseSourceId!.Value).Distinct().Count()!=2)throw new IOException("Both genuine windows were not recognized as complete numeric union support.");
+            await jobs.Approve(combined.Id,combined.Preview.SelectionHash);repeat=await Complete(combined.Id);
+            if(repeat.State!="Completed"||repeat.DownloadedBytes!=0||science.CountSources()!=count)throw new IOException("Offline cumulative reuse transferred bytes or created duplicate originals.");
+        }
+        finally{settings.Save(before);}
+        // Fresh read-only persistence handle, not falsely described as an installed restart test.
+        using(var reopened=new ScienceStore(science.DirectoryPath))if(reopened.LibraryJob(repeat.Id).State!="Completed"||ids.Any(id=>reopened.Source(id) is null))throw new IOException("Offline retained job/source reopening failed.");
+        var results=new List<object>();foreach(var id in ids)
+        {
+            var source=science.Source(id)!;var region=source.Manifest.Acquisition!.RequestedArea;var folder=Path.Combine(science.DirectoryPath,source.RelativeDirectory);
+            var locations=Enumerable.Range(0,576).Select(i=>new Coordinates(region.South+(region.North-region.South)*(i/24+.5)/24,region.West+(region.East-region.West)*(i%24+.5)/24)).ToArray();
+            var bands=source.Manifest.Bands.Select(b=>{using var raster=new ScientificRaster(folder,b);return new RemoteBandValues(b.Id,b.Unit,b.WavelengthNm,locations.Select(raster.Read).ToArray(),"Genuine retained native value; source inspection only, no flight",raster.Grid);}).ToArray();var derived=RemoteCalculations.Apply(source.Manifest.Kind,bands);var valid=derived.Values.SelectMany(v=>v).Count(v=>v.HasValue);
+            if(valid!=576)throw new IOException("The genuine cumulative fixture does not have full checked sample support; no pass substituted.");
+            results.Add(new{provider="usgs-3dep",source,locations,bands,derived,valid});
+        }
+        await File.WriteAllTextAsync(Path.Combine(output,"library-reuse.json"),JsonSerializer.Serialize(new{evidenceClass="Genuine bounded USGS originals and actual Library jobs; independent rasterio verification required",area,initial=acquired,repeat,observedInitialTransferBytes=acquired.DownloadedBytes,repeatedTransferBytes=repeat.DownloadedBytes,reopened="Fresh read-only persistence handle; deterministic full host/process recovery tested separately",results},WireJson.Options));
+        Console.WriteLine("Genuine two-window numeric union: initial "+acquired.DownloadedBytes+" bytes, identical-area offline repeat "+repeat.DownloadedBytes+" bytes; no duplicated original or flight observation.");
     }
 }

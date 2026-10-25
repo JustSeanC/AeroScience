@@ -67,7 +67,7 @@ public sealed partial class AutomaticScientificData : IDisposable
     private readonly ScientificTransferLedger flightTransfers=new();
     private readonly ScientificTransferLedger preflightTransfers=new(rolling:false);
     private readonly Dictionary<string,string> scopes=[];
-    private readonly System.Collections.Concurrent.ConcurrentDictionary<string,(long Length,DateTime Modified)> verified=new();
+    private readonly System.Collections.Concurrent.ConcurrentDictionary<string,(long Length,DateTime Modified,string Sha)> verified=new();
     internal ScientificHttp Http => http;
     internal IScientificDataProvider Provider(string id)=>providers.Single(p=>p.Id==id);
     public string? AvailabilityError => science.AvailabilityError();
@@ -157,6 +157,24 @@ public sealed partial class AutomaticScientificData : IDisposable
     public void ForgetDeletedSources(){http.ClearNumericCache();verified.Clear();RefreshLocalReadiness();}
     public void RefreshLocalReadiness()
     {Interlocked.Increment(ref configurationRevision);lock(gate)foreach(var key in states.Where(p=>p.Value.Status is not("Queued" or "Downloading" or "Waiting for download allowance")).Select(p=>p.Key).ToArray()){states.Remove(key);tickets.Remove(key);}}
+    public bool VerifyRetainedSource(ScientificSource source,CancellationToken token=default)
+    {
+        foreach(var file in source.Files)
+        {
+            token.ThrowIfCancellationRequested();using var bytes=File.OpenRead(ScientificRaster.SafeFile(Path.Combine(science.DirectoryPath,source.RelativeDirectory),file.RelativePath));var info=new FileInfo(bytes.Name);var identity=(bytes.Length,info.LastWriteTimeUtc,file.Sha256);
+            if(verified.TryGetValue(bytes.Name,out var cached)&&cached==identity)continue;
+            using var hash=System.Security.Cryptography.IncrementalHash.CreateHash(System.Security.Cryptography.HashAlgorithmName.SHA256);var block=new byte[65536];int read;
+            while((read=bytes.Read(block))>0){token.ThrowIfCancellationRequested();hash.AppendData(block,0,read);}
+            if(bytes.Length!=file.Bytes||Convert.ToHexString(hash.GetHashAndReset()).ToLowerInvariant()!=file.Sha256)return false;verified[bytes.Name]=identity;
+        }
+        return true;
+    }
+    public ScientificReusePlan LocalCoverage(GeographicBounds area,RemoteKind kind,ScientificReuseContext? context=null,CancellationToken token=default)
+    {
+        using var originals=science.BeginAnalysis();var p=settings.Get().Preferences;var single=ScientificSourceSelection.Select(science.Availability(area.Center,kind,area).Where(a=>ScientificSourceSelection.CoversArea(a.Source,area)),kind,p);
+        if(single is not null){if(!VerifyRetainedSource(single,token))throw new IOException("Retained original failed verification.");return new([new(area,single)],[],single.Manifest.Acquisition?.UsablePixels==0?[area]:[],["Single-source file/extent reuse; per-pixel QA still applies."]);}
+        return ScientificSourceSelection.ReuseArea(science,area,s=>ScientificSourceSelection.Select([new(s,true,true,null)],kind,p) is not null,s=>VerifyRetainedSource(s,token),token,context);
+    }
     public static void ValidateArea(GeographicBounds a)
     {
         if(new[]{a.West,a.South,a.East,a.North}.Any(v=>!double.IsFinite(v))||a.West< -180||a.East>180||a.South< -80||a.North>84||a.East<=a.West||a.North<=a.South||a.East-a.West>.061||a.North-a.South>.061)
@@ -227,18 +245,19 @@ public sealed partial class AutomaticScientificData : IDisposable
                 (job.Kind==RemoteKind.Hyperspectral||p.SourceModes?.GetValueOrDefault(job.Kind)=="local"||ScientificSourceSelection.CoversArea(a.Source,job.Area))),job.Kind,p);
             if(available is not null)
             {
-                foreach(var file in available.Files)
-                {
-                    token.ThrowIfCancellationRequested();using var bytes=File.OpenRead(ScientificRaster.SafeFile(Path.Combine(science.DirectoryPath,available.RelativeDirectory),file.RelativePath));
-                    var info=new FileInfo(bytes.Name);var identity=(info.Length,info.LastWriteTimeUtc);
-                    if((!verified.TryGetValue(bytes.Name,out var cached)||cached!=identity)&&Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(bytes)).ToLowerInvariant()!=file.Sha256)throw new IOException("Retained scientific source failed its integrity check. Restore/reimport it; no download replaced the original.");
-                    verified[bytes.Name]=identity;
-                }
+                if(!VerifyRetainedSource(available,token))throw new IOException("Retained scientific source failed its integrity check. Restore/reimport it; no download replaced the original.");
                 using var coverageRaster=new ScientificRaster(Path.Combine(science.DirectoryPath,available.RelativeDirectory),available.Manifest.Bands[0]);
                 var full=ScientificSourceSelection.CoversArea(available,job.Area);
                 ScientificDiagnostics.Record("source-reused",job.Key,job.Scope,job.Kind,available.Manifest.Provider,result:available.Id.ToString());
                 Set(state with{SourceCoverage=ScientificRaster.GridCoverage(coverageRaster.Grid),Status=!full?"Partially usable":job.Kind==RemoteKind.Hyperspectral?"Dataset Ready":available.Manifest.Acquisition?.UsablePixels==0?"Limited Coverage":"Ready",Message="Verified retained source available offline; actual per-pixel masks still apply.",ReusedBytes=available.Files.Sum(f=>f.Bytes),Stage="Ready",Provider=available.Manifest.Provider,Dataset=available.Manifest.Name,ObservationUtc=available.Manifest.ObservationUtc,SourceId=available.Id,Quality=available.Manifest.Acquisition?.Quality});return;
             }
+
+            var union=ScientificSourceSelection.ReuseArea(science,job.Area,source=>ScientificSourceSelection.Select([new(source,true,true,null)],job.Kind,p) is not null,part=>VerifyRetainedSource(part,token),token);
+            var retained=union.Reused.Select(r=>r.Source).DistinctBy(s=>s.Id).ToList();
+            if(union.Missing.Length==0)
+            {Set(state with{Status=job.Kind==RemoteKind.Hyperspectral?"Dataset Ready":"Ready",Stage="Ready",Message="Several verified compatible retained windows jointly provide numeric support. Native grids, QA and per-observation source identity remain independent; no common-resolution mosaic or airborne measurement was created.",SourceIds=retained.Select(s=>s.Id).ToArray(),ReusedBytes=retained.Sum(s=>s.Files.Sum(f=>f.Bytes))});return;}
+            if(union.Uncertain||union.QualityLimited.Length>0)
+            {Set(state with{Status="Partially usable",Stage="Review coverage",Message="Retained partial support requires review: "+string.Join(" ",union.Limitations)+(union.QualityLimited.Length>0?" Some original pixels are nodata or quality-excluded; re-downloading that same source would not make them valid.":" No unexamined footprint was treated as valid coverage."),SourceIds=retained.Select(s=>s.Id).ToArray(),ReusedBytes=retained.Sum(s=>s.Files.Sum(f=>f.Bytes))});return;}
             if(job.Kind==RemoteKind.Hyperspectral)
             {
                 var local=science.Availability(kind:RemoteKind.Hyperspectral).Take(1).ToArray();
@@ -256,21 +275,39 @@ public sealed partial class AutomaticScientificData : IDisposable
                 state=state with{DownloadedBytes=bytes,Seconds=(DateTimeOffset.UtcNow-started).TotalSeconds};Set(state);
             },transfer.EnsureTotal);
             ScientificDiscovery? discovery=null;ScientificSource? source=null;var providerFailures=new List<string>();
+            var needed=retained.Count==0?new[]{job.Area}:union.Missing;
+            foreach(var required in needed)
+            {
+            source=null;discovery=null;
             foreach(var provider in providers.Where(provider=>provider.Supports(job.Kind)))
             {
                 token.ThrowIfCancellationRequested();
                 try
                 {
-                    var requested=job.Area;
+                    var requested=required;
                     // Optical source-block costs dominate tiny adjacent requests. Retain a bounded
                     // native-grid regional crop when steady motion/preflight justifies it.
-                    if(job.Kind is RemoteKind.Thermal or RemoteKind.Multispectral&&(job.Scope.StartsWith("plan:")||steadyFastFlight)&&requested.East-requested.West<.039)
+                    if(retained.Count==0&&(job.Kind is RemoteKind.Thermal or RemoteKind.Multispectral)&&(job.Scope.StartsWith("plan:")||steadyFastFlight)&&requested.East-requested.West<.039)
                     {
                         var west=Math.Floor(requested.Center.Longitude/.04)*.04;var south=Math.Floor(requested.Center.Latitude/.04)*.04;requested=new(west,south,west+.04,south+.04);
                     }
-                    discovery=await provider.Discover(job.Kind,requested,p,budget,token);
-                    // A larger crop can cross a real scene edge. Retry the exact required region.
-                    if(discovery is null&&requested!=job.Area)discovery=await provider.Discover(job.Kind,job.Area,p,budget,token);
+                    if(retained.Count>0)
+                    {
+                        var anchor=retained[0];var a=anchor.Manifest.Acquisition!;
+                        if(a.Workflow=="usgs-3dep-numeric")
+                        {if(provider.Id!="usgs-3dep")continue;discovery=await provider.Discover(job.Kind,required,p,budget,token);}
+                        else if(a.Workflow=="stac-cog-native-subset"&&provider is StacScientificProvider stac&&a.ProviderMetadataJson is {} metadata)
+                        {using var original=System.Text.Json.JsonDocument.Parse(metadata);if(!required.Corners.Append(required.Center).All(point=>StacScientificProvider.Contains(original.RootElement.GetProperty("geometry"),point)))continue;discovery=stac.Describe(original.RootElement,job.Kind,required);}
+                        else continue;
+                        var id=a.Workflow=="usgs-3dep-numeric"?"usgs-3dep":job.Kind==RemoteKind.Terrain?"copernicus":job.Kind==RemoteKind.Thermal?"landsat":"sentinel-2";
+                        if(discovery is not null){System.Text.Json.JsonElement? feature=id=="usgs-3dep"?null:System.Text.Json.JsonSerializer.Deserialize<System.Text.Json.JsonElement>(discovery.ProviderMetadataJson!);var sourceRevision=ScientificCatalog.Describe(ScientificCatalog.Provider(id),discovery,feature).Revision;if(sourceRevision!=ScientificCatalog.RetainedRevision(anchor,id))throw new InvalidOperationException("The missing-window source revision changed; retained data was preserved. Review the exact source before continuing.");discovery=discovery with{CatalogRevision=sourceRevision};}
+                    }
+                    else
+                    {
+                        discovery=await provider.Discover(job.Kind,requested,p,budget,token);
+                        // A larger crop can cross a real scene edge. Retry the exact required region.
+                        if(discovery is null&&requested!=required)discovery=await provider.Discover(job.Kind,required,p,budget,token);
+                    }
                 }
                 catch(Exception e)when(provider.Id=="usgs-3dep"&&e is IOException or HttpRequestException or JsonException){providerFailures.Add("USGS 3DEP discovery unavailable: "+(e is IOException?e.Message:"provider network/metadata error"));continue;}
                 if(discovery is null)continue;
@@ -280,8 +317,10 @@ public sealed partial class AutomaticScientificData : IDisposable
                 if(source is not null)break;
             }
             if(source is null){Set(state with{Status="Unavailable",Message="No suitable numeric dataset covers this entire bounded area within the date/quality policy. "+string.Join(" ",providerFailures)+" Try a different area/date or retry the provider; advanced manual import remains available.",DownloadedBytes=budget.Bytes});return;}
-            var usable=source.Manifest.Acquisition?.UsablePixels;
-            Set(state with{Status=usable==0?"Limited Coverage":"Ready",Message=usable==0?"Numeric source prepared, but the bounded QA preview found no usable pixels. Flight observations remain unavailable until valid pixels are reached.":"Numeric source validated and retained in the Scientific Data Library. Historical external observations; per-pixel QA is enforced during flight sampling.",SourceId=source.Id,SourceCoverage=ScientificRaster.GridCoverage(source.Grids.Values.First()),DownloadedBytes=budget.Bytes,Stage="Ready",Seconds=(DateTimeOffset.UtcNow-started).TotalSeconds});
+            retained.Add(source);
+            }
+            var originals=retained.DistinctBy(s=>s.Id).ToArray();var usable=originals.Any(s=>s.Manifest.Acquisition?.UsablePixels==0)?0:1;
+            Set(state with{Status=usable==0?"Limited Coverage":"Ready",Message=usable==0?"Numeric sources prepared, but the bounded QA preview found excluded pixels. Actual per-pixel masks remain authoritative.":"Verified numeric sources retained. Existing compatible windows were reused; only required gaps were acquired. Each observation retains its actual source/date/grid; no past airborne observation was created.",SourceId=originals.Length==1?originals[0].Id:null,SourceIds=originals.Length>1?originals.Select(s=>s.Id).ToArray():null,SourceCoverage=originals.Length==1?ScientificRaster.GridCoverage(originals[0].Grids.Values.First()):null,ReusedBytes=union.Reused.Select(r=>r.Source).DistinctBy(s=>s.Id).Sum(s=>s.Files.Sum(f=>f.Bytes)),DownloadedBytes=budget.Bytes,Stage="Ready",Seconds=(DateTimeOffset.UtcNow-started).TotalSeconds});
         }
         catch(ScientificAllowanceWaitException e)
         {
@@ -301,6 +340,28 @@ public sealed partial class AutomaticScientificData : IDisposable
         }
     }
     internal async Task<ScientificSource?> PrepareSource(ScientificDiscovery d,ScientificDownloadBudget budget,CancellationToken token,Action<string>? stage=null,string? checkpointRoot=null)
+    {
+        using var originals=science.BeginAnalysis();
+        var descriptor=ScientificCatalog.DiscoveryRevision(d);var manifest=ScientificCatalog.Hash(d.Manifest with{Acquisition=null});
+        // Bounded striped locks coalesce identical in-flight originals across
+        // preflight, prediction and Library jobs without retaining one lock per source.
+        var key=ScientificCatalog.Hash(new{manifest,d.Area,descriptor});var serial=sourcePreparations[Convert.ToInt32(key[..2],16)%sourcePreparations.Length];
+        await serial.WaitAsync(token);
+        try
+        {
+            if(descriptor is not null)foreach(var source in science.StreamSources(new(Kind:d.Manifest.Kind,Area:d.Area)))
+            {
+                token.ThrowIfCancellationRequested();
+                if(source.Manifest.Acquisition?.RequestedArea!=d.Area||ScientificCatalog.RetainedRevision(source)!=descriptor||ScientificCatalog.Hash(source.Manifest with{Acquisition=null})!=manifest||!science.InspectAvailability(source).FilesAvailable)continue;
+                foreach(var file in source.Files){using var bytes=File.OpenRead(ScientificRaster.SafeFile(Path.Combine(science.DirectoryPath,source.RelativeDirectory),file.RelativePath));if(bytes.Length!=file.Bytes||Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(bytes)).ToLowerInvariant()!=file.Sha256)throw new IOException("Exact retained source changed; no replacement transfer was permitted.");}
+                stage?.Invoke("Validating");return source;
+            }
+            return await PrepareSourceCore(d,budget,token,stage,checkpointRoot);
+        }
+        finally{serial.Release();}
+    }
+    private readonly SemaphoreSlim[] sourcePreparations=Enumerable.Range(0,64).Select(_=>new SemaphoreSlim(1)).ToArray();
+    private async Task<ScientificSource?> PrepareSourceCore(ScientificDiscovery d,ScientificDownloadBudget budget,CancellationToken token,Action<string>? stage,string? checkpointRoot)
     {
         science.Initialize();
         if(await RecoverPreparedSource(d,token,stage,checkpointRoot) is {} recovered)return recovered;

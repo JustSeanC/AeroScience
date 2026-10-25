@@ -178,6 +178,30 @@ public sealed partial class ScientificCatalog(AutomaticScientificData automatic,
         var rings=polygons.Select(p=>p[0].EnumerateArray().Select(v=>new Coordinates(v[1].GetDouble(),v[0].GetDouble())).ToArray()).ToArray();
         if(rings.Length is <1 or >128||rings.Sum(r=>r.Length)>10000||rings.Any(r=>r.Length<3||r.Any(p=>!MissionPlanning.Position(p.Latitude,p.Longitude))))throw new ArgumentException("This boundary exceeds supported geometry complexity. Choose smaller explicit regions.");return rings;
     }
+    internal static string? DiscoveryRevision(ScientificDiscovery d)
+    {
+        if(d.CatalogRevision is {} known)return known;
+        if(d.ProviderMetadataJson is null)return null;
+        var id=d.NumericExport is not null?"usgs-3dep":d.Manifest.Kind switch{RemoteKind.Terrain=>"copernicus",RemoteKind.Thermal=>"landsat",RemoteKind.Multispectral=>"sentinel-2",_=>null};
+        if(id is null)return null;
+        try{using var original=JsonDocument.Parse(d.ProviderMetadataJson);return Describe(Provider(id),d,id=="usgs-3dep"?null:original.RootElement).Revision;}
+        catch(Exception e)when(e is JsonException or KeyNotFoundException or InvalidOperationException or ArgumentException){return null;}
+    }
+    internal static string? RetainedRevision(ScientificSource source,string? providerId=null)
+    {
+        var a=source.Manifest.Acquisition;if(a is null)return null;if(a.CatalogRevision is {} existing)return existing;
+        providerId??=a.Workflow=="usgs-3dep-numeric"?"usgs-3dep":a.Workflow=="stac-cog-native-subset"?source.Manifest.Kind switch{RemoteKind.Terrain=>"copernicus",RemoteKind.Thermal=>"landsat",RemoteKind.Multispectral=>"sentinel-2",_=>null}:null;
+        if(providerId is null||IsNasa(providerId)||a.ProviderMetadataJson is null)return null;
+        try
+        {
+            using var metadata=JsonDocument.Parse(a.ProviderMetadataJson);
+            // Recompute the same versioned descriptor from retained original metadata;
+            // do not rewrite historical manifests or assert current remote availability.
+            var d=new ScientificDiscovery(source.Manifest,[],a.Catalog,a.Item,a.Quality,a.NativeResolution,a.RequestedArea,ProviderMetadataJson:a.ProviderMetadataJson);
+            return Describe(Provider(providerId),d,providerId=="usgs-3dep"?null:metadata.RootElement).Revision;
+        }
+        catch(Exception e)when(e is JsonException or KeyNotFoundException or InvalidOperationException or ArgumentException){return null;}
+    }
     internal static ScientificCatalogItem Describe(ScientificCatalogProvider provider,ScientificDiscovery d,JsonElement? feature)
     {
         var props=feature?.GetProperty("properties");var geometry=feature?.GetProperty("geometry").Clone();var bounds=d.Area;

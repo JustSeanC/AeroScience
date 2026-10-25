@@ -10,6 +10,11 @@ public sealed class PreparationScopeTests:IDisposable
     private readonly ScienceStore science;private readonly ScientificAccessSettings settings;
     public PreparationScopeTests(){var p=new StorageManager(new PreferenceStore(root)).Initialize();science=new(p.ScienceLibraryDirectory);science.Initialize();settings=new(root);}
     public static MissionPlan LongPlan()=>new(Guid.NewGuid(),"204 actual route regions",Waypoints:[new("A",.001,-75.99),new("B",.001,-67.87)],Instruments:[new("terrain-scanner",true),new("thermal-imager",true)],UpdatedUtc:DateTimeOffset.UtcNow);
+    [Fact]public void ReviewQueriesEverySelectedRegionRatherThanOnlyTheFirst128()
+    {
+        var plan=LongPlan();var projected=System.Text.Json.JsonSerializer.SerializeToElement(ScientificPreparationScope.Review(plan,science,settings),WireJson.Options);
+        Assert.Equal(204,projected.GetProperty("reviewedRegions").GetInt32());Assert.Equal(204,projected.GetProperty("areas").GetArrayLength());Assert.Equal(0,projected.GetProperty("retained").GetProperty("Terrain").GetInt32());
+    }
     private static MissionPlan Ordered()=>new(Guid.NewGuid(),"Ordered research",Waypoints:[new("Transit",40,-75.15,Id:Guid.NewGuid()),new("Start",40,-75.1,Id:Guid.NewGuid()),new("Middle",40,-75,Id:Guid.NewGuid()),new("End",40,-74.9,Id:Guid.NewGuid()),new("Home",40,-74.8,Id:Guid.NewGuid())],Instruments:[new("terrain-scanner",true),new("thermal-imager",true)]);
     private static MissionPlan WithActions(){var p=Ordered();return p with{Collection=new(1,p.Id,InitialCollectionPolicy.Armed,[new(Guid.NewGuid(),Guid.NewGuid(),CollectionAction.StartData,CollectionTriggerKind.Waypoint,p.Waypoints![1].Id!.Value,1,100),new(Guid.NewGuid(),Guid.NewGuid(),CollectionAction.EndData,CollectionTriggerKind.Waypoint,p.Waypoints[3].Id!.Value,1,100)],new(10,6))};}
     [Fact]public void Actual204RegionTwoInstrumentInventoryNeverUsesTwentyFourRecentJobs()

@@ -99,6 +99,17 @@ app.MapPost("/api/testing/library/teardown",async(LibraryHttpFixture fixture,Sci
     fixture.Disable();var ids=science.Sources().Where(s=>s.Manifest.Notes?.Contains("SYNTHETIC NASA browser test",StringComparison.Ordinal)==true||s.Manifest.Acquisition?.ProviderMetadataJson is {} metadata&&(metadata.Contains("SYNTHETIC browser test service",StringComparison.Ordinal)||metadata.Contains("aeroscience:test_fixture",StringComparison.Ordinal))).Select(s=>s.Id).ToArray();
     fixture.InactiveSources=ids;automatic.Configure(new(ExcludedSourceIds:ids));return new{synthetic=true,excludedSources=ids.Length};
 });
+app.MapPost("/api/testing/library/reuse",async(ScienceStore science,AutomaticScientificData automatic,ScientificCatalog catalog,ScientificAccessSettings settings)=>
+{
+    var area=new GeographicBounds(-75.01,39.99,-74.99,40.01);var item=(await catalog.Search(new("usgs-3dep",area))).Items.Single();var ids=new List<Guid>();
+    foreach(var part in new GeographicBounds[]{new(-75.01,39.99,-75,40),new(-75,39.99,-74.99,40),new(-75.01,40,-75,40.01),new(-75,40,-74.99,40.01)})
+    {
+        var d=(await automatic.Provider("usgs-3dep").Discover(RemoteKind.Terrain,part,settings.Get().Preferences,new(1048576),default))!;var folder=Path.Combine(options.DataDirectory,"reuse-test-fixtures",Guid.NewGuid().ToString("N"));Directory.CreateDirectory(folder);RemoteFixtureFiles.GeoTiff(Path.Combine(folder,"elevation.tif"),123.25f,10,(part.East-part.West)/10,west:part.West,north:part.North);
+        var provenance=new AutomaticSourceProvenance("usgs-3dep-numeric",d.Catalog,d.Item,[],part,DateTimeOffset.UtcNow,"Synthetic source windows; not genuine-data acceptance",d.Quality,d.Resolution,0,[],d.ProviderMetadataJson,100,100,item.Revision);
+        ids.Add((await science.ImportSourceAsync(d.Manifest with{Acquisition=provenance},folder)).Id);
+    }
+    return new{synthetic=true,sourceIds=ids,area};
+});
 app.MapPost("/api/testing/library/mode/{mode}",(string mode,LibraryHttpFixture fixture)=>{fixture.Mode=mode;return new{synthetic=true,mode};});
 // Actual production import/persistence with explicitly synthetic originals; no flight observations.
 app.MapPost("/api/testing/sources/unreferenced/{kind}",async(string kind,ScienceStore science)=>{
