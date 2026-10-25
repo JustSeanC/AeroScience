@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using System.Text.Json;
 using AeroScience.Engine;
 using AeroScience.Missions;
 using AeroScience.Shared;
@@ -20,6 +21,32 @@ public sealed class ScientificHdfReaderTests:IDisposable
     private HdfOriginal Original(string name)
     {var relative="Downloads/"+Guid.NewGuid().ToString("N")+"/original.nc";var path=Path.Combine(root,relative);Directory.CreateDirectory(Path.GetDirectoryName(path)!);File.Copy(Path.Combine(Fixtures,name),path);using var data=File.OpenRead(path);return new(root,library,relative,data.Length,Convert.ToHexStringLower(SHA256.HashData(data)));}
     private static HdfReadRequest Request(HdfOriginal source,string dataset="reflectance",ulong[]? count=null)=>new(1,source,[new(dataset,[0,0,0],count??[1,1,5],["units","_FillValue","missing_attribute"])],["scene_id"]);
+    private static async Task<string> ResolveProtocolInterpreter(HdfWorkerCommand? launcher=null)
+    {
+        // WindowsApps may supply an activation/manager alias rather than CPython.
+        // Resolve it in the normal build environment, then test the real executable
+        // under the production reader's unchanged, scrubbed child environment.
+        launcher??=new(OperatingSystem.IsWindows()?"python":"python3",[]);
+        var start=new ProcessStartInfo(launcher.FileName){UseShellExecute=false,CreateNoWindow=true,RedirectStandardInput=true,RedirectStandardOutput=true,RedirectStandardError=true};
+        foreach(var argument in launcher.Arguments)start.ArgumentList.Add(argument);
+        foreach(var argument in new[]{"-I","-S","-c","import sys,json;print(json.dumps(sys.executable,ensure_ascii=True),flush=True)"})start.ArgumentList.Add(argument);
+        using var child=Process.Start(start)??throw new IOException("Python protocol fixture could not start.");
+        void Stop(){try{if(!child.HasExited)child.Kill(entireProcessTree:true);}catch(InvalidOperationException){}catch(System.ComponentModel.Win32Exception){}}
+        using var deadline=new CancellationTokenSource(TimeSpan.FromSeconds(15));using var cancel=deadline.Token.Register(Stop);
+        async Task Drain(){var bytes=new byte[1024];var total=0;int n;while((n=await child.StandardError.BaseStream.ReadAsync(bytes,deadline.Token))>0)if((total+=n)>8192)throw new IOException("Python fixture startup diagnostics exceeded their bound.");}
+        var diagnostics=Drain();
+        try
+        {
+            child.StandardInput.Close();
+            var output=await ScientificHdfReader.Line(child.StandardOutput.BaseStream,8192,deadline.Token);
+            await child.WaitForExitAsync(deadline.Token);await diagnostics;
+            Assert.True(child.ExitCode==0,"Python protocol fixture interpreter resolution failed.");
+            var executable=JsonSerializer.Deserialize<string>(output);
+            Assert.True(executable is not null&&Path.IsPathFullyQualified(executable)&&File.Exists(executable),"Python protocol fixture requires an existing absolute interpreter path.");
+            return executable!;
+        }
+        finally{Stop();try{await child.WaitForExitAsync();await diagnostics;}catch(Exception error)when(error is IOException or OperationCanceledException or InvalidOperationException){}}
+    }
     [Fact]public async Task ActualWorkerReturnsExactNativeWindowsMetadataHashesAndEnforcedBoundsWithoutImporting()
     {
         var source=Original("synthetic-emit-reflectance.nc");var before=Directory.GetFiles(root,"*",SearchOption.AllDirectories);var result=await Reader().ReadAsync(Request(source));
@@ -83,8 +110,9 @@ public sealed class ScientificHdfReaderTests:IDisposable
     }
     [Fact]public async Task ChildProtocolOutputAndInheritedSecretsAreBoundedAndDeadlineCannotStallTheHost()
     {
+        var interpreter=await ResolveProtocolInterpreter();
         var source=Original("synthetic-emit-reflectance.nc");const string key="AEROSCIENCE_READER_TEST_SECRET";var previous=Environment.GetEnvironmentVariable(key);Environment.SetEnvironmentVariable(key,"synthetic-environment-canary-not-a-secret");
-        ScientificHdfReader Fake(string script)=>new(new(OperatingSystem.IsWindows()?"python":"python3",["-c",script]));
+        ScientificHdfReader Fake(string script)=>new(new(interpreter,["-I","-S","-c",script]));
         try
         {
             var error=await Assert.ThrowsAsync<ScientificHdfException>(()=>Fake("import os,json;print(json.dumps({'phase':'error','code':'SecretLeak' if os.environ.get('"+key+"') else 'Limit'}),flush=True)").ReadAsync(Request(source)));Assert.Equal("Limit",error.Code);
@@ -93,6 +121,25 @@ public sealed class ScientificHdfReaderTests:IDisposable
         }
         finally{Environment.SetEnvironmentVariable(key,previous);}
         Assert.Single((await Reader().ReadAsync(Request(source))).Windows);
+    }
+    [Fact]public async Task EnvironmentDependentProtocolLauncherIsResolvedBeforeWorkerEnvironmentIsScrubbed()
+    {
+        var interpreter=await ResolveProtocolInterpreter();var source=Original("synthetic-emit-reflectance.nc");
+        const string key="AEROSCIENCE_READER_TEST_LAUNCHER";var previous=Environment.GetEnvironmentVariable(key);
+        var bootstrap="import os,sys;sys.stdin.readline();sys.exit(37) if not os.environ.get('"+key+"') else os.execv(sys.executable,[sys.executable]+sys.argv[1:])";
+        var launcher=new HdfWorkerCommand(interpreter,["-I","-S","-c",bootstrap]);
+        var probe="import os,json;print(json.dumps({'phase':'error','code':'SecretLeak' if os.environ.get('"+key+"') else 'Limit'}),flush=True)";
+        Environment.SetEnvironmentVariable(key,"synthetic-launcher-activation-canary");
+        try
+        {
+            // Reproduce the owner failure without depending on a Store installation.
+            var unresolved=new ScientificHdfReader(launcher with{Arguments=[..launcher.Arguments,"-I","-S","-c",probe]});
+            Assert.Equal("ResourceOrFormat",(await Assert.ThrowsAsync<ScientificHdfException>(()=>unresolved.ReadAsync(Request(source)))).Code);
+            var resolved=await ResolveProtocolInterpreter(launcher);Assert.Equal(interpreter,resolved);
+            var reader=new ScientificHdfReader(new(resolved,["-I","-S","-c",probe]));
+            Assert.Equal("Limit",(await Assert.ThrowsAsync<ScientificHdfException>(()=>reader.ReadAsync(Request(source)))).Code);
+        }
+        finally{Environment.SetEnvironmentVariable(key,previous);}
     }
     [Fact]public async Task CancellationDisposesTheActualWorkerAndRecordingRemainsIndependent()
     {
