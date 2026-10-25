@@ -223,7 +223,9 @@ connected Library. Neither token nor password is sent to the browser dashboard.
 **Open official NASA access / Earthdata** and **Verify downloaded AVIRIS files on this PC**
 remain the browser/manual fallback for unsupported access or formats. Those browser
 transfers have external progress. No JSON editing or terminal is required in either workflow.
-EMIT is **discovery / official access only**, with no native NetCDF-4 import.
+In released **v0.5.0**, EMIT is **discovery / official access only**, with no native NetCDF-4 import.
+The separate unreleased v0.6.0 experimental workflow and its pending genuine-original gate are
+described below; this does not change v0.5.0 support.
 Read the [supported formats, steps and acceptance limits](remote-sensing/hyperspectral.md).
 
 **Import Files Already on My Computer** remains an advanced manual alternative. Closing its

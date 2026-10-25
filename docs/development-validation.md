@@ -196,5 +196,6 @@ Run the aggregate verifier again on the exact final checkout.
 
 Protected NASA files are separate. Follow [workbook Group J](v0.5.0-acceptance-workbook.md#j--pending-owner-authorized-earthdata-access-and-nasa-originals)
 for authorized acquisition and independent owner-local Classic/NG comparisons. Public
-CMR metadata and Cuprite cannot pass either family's original-file acceptance. Native EMIT
-import remains unsupported. No acceptance runner finalizes an installer or publishes a release.
+CMR metadata and Cuprite cannot pass either family's original-file acceptance. Native EMIT import
+remains unsupported in released v0.5.0; v0.6.0's experimental integration still requires its separate
+1D genuine-original gate. No acceptance runner finalizes an installer or publishes a release.
