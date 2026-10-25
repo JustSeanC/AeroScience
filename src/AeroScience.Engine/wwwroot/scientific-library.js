@@ -1,3 +1,4 @@
+import {inspectSource} from './source-inspection.js';
 import {openEmitSource,openEmitImport} from './emit-library.js';
 import {libraryLocation} from './library-location.js';
 import {reviewSourceDeletion} from './source-deletion.js';
@@ -8,8 +9,8 @@ import {node as el,bytes,dateTime as local,readableName,button,link,select,discl
 let dispose=()=>{};
 export function disposeScientificLibrary(){dispose();}
 export async function scientificLibrary(parent,api){
- dispose();let stopped=false,timer,epoch=0;const maps=[],selected=new Set();
- dispose=()=>{stopped=true;clearTimeout(timer);maps.splice(0).forEach(map=>map.destroy());};
+ dispose();let stopped=false,timer,epoch=0;const maps=[],popups=[],selected=new Set();
+ dispose=()=>{stopped=true;clearTimeout(timer);popups.splice(0).forEach(close=>close());maps.splice(0).forEach(map=>map.destroy());};
  parent.replaceChildren();if(location.hash.startsWith('#library/download')){const close=await libraryDownload(parent,api,()=>stopped);if(stopped)close();else dispose=()=>{stopped=true;close();};return;}
  const heading=el('div',undefined,'page-heading');heading.append(el('p','REUSABLE HISTORICAL SOURCES','eyebrow'),el('h1','External Data Manager'),el('p','Historical scientific datasets can be reused during future missions. Flight recordings remain separate.'));parent.append(heading);link(heading,'Find & Download Data','#library/download');
  await libraryLocation(parent,api,{stopped:()=>stopped});if(stopped)return;
@@ -52,6 +53,7 @@ export async function scientificLibrary(parent,api){
      button(detail,'Exclude from Active Science',async()=>{await api('/api/science/source-selection',{sourceId:source.id,enabled:false});excluded.add(source.id);state.textContent='Active source selection: Excluded (originals retained)';feedback.textContent='Retained originals were not deleted.';}).disabled=!access.canConfigure;
      button(detail,m.swath?'Aircraft Sampling Not Supported':'Use for Active Science',async()=>{await api('/api/science/source-selection',{sourceId:source.id,enabled:true});excluded.delete(source.id);state.textContent='Active source selection: Eligible, subject to coverage and QA';feedback.textContent='Coverage and actual quality masks still apply.';}).disabled=!access.canConfigure||!!m.swath;
      if(m.swath?.format==='emit-netcdf'){button(detail,'Explore Spectrum / Map / Export',()=>openEmitSource(api,source.id));detail.append(el('p','EMIT development validation. Historical source exploration only; automatic aircraft sampling is not yet supported. GLT extent is not valid-pixel coverage.'));}
+     if(!m.swath)button(detail,'Inspect Numeric Values / Map',async()=>{const vertices=await api(`/api/science/sources/${source.id}/coverage`);if(stopped||!detail.isConnected)return;popups.push(inspectSource(api,source,vertices));});
      let map;button(detail,'View Coverage',async()=>{if(map){map.fit();return;}const vertices=await api(`/api/science/sources/${source.id}/coverage`);if(stopped||!detail.isConnected)return;const holder=el('div');detail.append(holder);map=new ResearchMap(holder,null,{coverageOnly:true});maps.push(map);map.set({plan:{surveyAreas:[{name:m.name,vertices}]}});map.fit();});rows.append(row);
     }
     if(after)button(rows,'First regions',()=>regionPage(),'secondary');if(result.next!=null)button(rows,'More regions',()=>regionPage(result.next,result.through),'secondary');

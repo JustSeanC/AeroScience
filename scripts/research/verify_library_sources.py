@@ -84,13 +84,54 @@ def verify(folder,providers=False,reuse=False):
     return dict(checked_utc=datetime.now(timezone.utc).isoformat(), method='Independent GDAL/rasterio CRS, affine, native numeric scaling and QA comparison; documented 1e-8-pixel boundary snap, unchanged 1e-9 value tolerance', results=results)
 
 
+def verify_inspections(folder):
+    folder=Path(folder);results=[]
+    for entry in json.loads((folder/'source-inspections.json').read_text())['inspections']:
+        source=entry['source'];inspected=entry['inspection'];samples=inspected['samples'];assert inspected['sourceId']==source['id'] and len(samples)<=1024
+        root=folder/'ScienceLibrary'/source['relativeDirectory'];raw={};positions=[s['location'] for s in samples]
+        for band in source['manifest']['bands']:
+            with rasterio.open(root/band['file']) as raster:
+                x,y=transform('EPSG:4326',raster.crs,[p['longitude'] for p in positions],[p['latitude'] for p in positions])
+                a=np.array([float(v[0]) for v in raster.sample(zip(x,y),indexes=band['channel']+1)])
+                for nodata in (raster.nodata,band.get('noData')):
+                    if nodata is not None:a[a==nodata]=np.nan
+                if band.get('badBand'):a[:]=np.nan
+                raw[band['id']]=a*band['scale']+band['offset']
+                if band['id']==inspected['band']['id']:
+                    for sample,px,py in zip(samples,x,y,strict=True):
+                        col,row=(~raster.transform)*(px,py);assert int(np.floor(col))==sample['column'] and int(np.floor(row))==sample['row']
+                        expected=raster.transform*(sample['column']+.5,sample['row']+.5);lon,lat=transform(raster.crs,'EPSG:4326',[expected[0]],[expected[1]])
+                        np.testing.assert_allclose([sample['location']['longitude'],sample['location']['latitude']],[lon[0],lat[0]],rtol=0,atol=1e-9)
+        selected=inspected['band']['id'];decode=np.array([np.nan if s['decodedSourceValue'] is None else s['decodedSourceValue'] for s in samples]);np.testing.assert_allclose(raw[selected],decode,rtol=0,atol=1e-9,equal_nan=True)
+        filtered={k:v.copy() for k,v in raw.items()};kind=source['manifest']['kind']
+        if kind=='thermal':
+            qa=raw['QA_PIXEL'];good=np.isfinite(qa)&(qa==np.floor(qa))&(qa>=0)&(qa<=65535)&((np.nan_to_num(qa).astype(np.int64)&63)==0)&(raw['ST_B10']>=100)&(raw['ST_B10']<=500)
+            if 'QA_RADSAT' in raw:good &= raw['QA_RADSAT']==0
+            filtered['ST_B10']=np.where(good,raw['ST_B10'],np.nan)
+        elif kind=='multispectral':
+            good=np.isin(raw['SCL'],[2,4,5,6,7]);filtered={k:v if k=='SCL' else np.where(good,v,np.nan) for k,v in raw.items()}
+        expected=filtered[selected]
+        if inspected['measurement']=='ndvi':
+            red,nir=filtered['B04'],filtered['B08'];den=nir+red
+            with np.errstate(divide='ignore',invalid='ignore'):ratio=(nir-red)/den
+            expected=np.where((np.abs(den)>1e-12)&(ratio>=-1)&(ratio<=1),ratio,np.nan)
+        actual=np.array([np.nan if s['value'] is None else s['value'] for s in samples]);np.testing.assert_allclose(expected,actual,rtol=0,atol=1e-9,equal_nan=True)
+        assert len({(s['column'],s['row']) for s in samples})==len(samples)
+        valid=expected[np.isfinite(expected)]
+        if len(valid):np.testing.assert_allclose([inspected['minimum'],inspected['maximum']],[valid.min(),valid.max()],rtol=0,atol=1e-9)
+        else:assert inspected['minimum'] is None and inspected['maximum'] is None
+        results.append(dict(source=source['id'],provider=source['manifest']['provider'],nativeSamples=len(samples),valid=int(np.isfinite(expected).sum()),numericTolerance=1e-9,geographicToleranceDegrees=1e-9))
+    return dict(evidenceClass='Genuine retained originals; independent rasterio native values, QA, native row/column and center geolocation; not aircraft/device acceptance',results=results)
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('folder', type=Path)
     parser.add_argument('--providers',action='store_true',help='Check actual automatic-provider run receipts with the same independent numeric/QA rules.')
+    parser.add_argument('--inspect',action='store_true',help='Independently compare actual source-window map/value inspection against originals.')
     parser.add_argument('--reuse',action='store_true',help='Verify genuine cumulative Library windows at the same unchanged numeric/CRS tolerances.')
     args = parser.parse_args()
     if args.providers and args.reuse:parser.error('Choose one evidence workload.')
-    result = verify(args.folder,args.providers,args.reuse)
-    (args.folder/('independent-numeric-comparison.json' if args.providers else 'independent-reuse.json' if args.reuse else 'independent-library.json')).write_text(json.dumps(result, indent=2)+'\n', encoding='utf-8')
+    result = verify_inspections(args.folder) if args.inspect else verify(args.folder,args.providers,args.reuse)
+    (args.folder/('independent-source-inspection.json' if args.inspect else 'independent-numeric-comparison.json' if args.providers else 'independent-reuse.json' if args.reuse else 'independent-library.json')).write_text(json.dumps(result, indent=2)+'\n', encoding='utf-8')
     print(json.dumps(result, indent=2))

@@ -57,7 +57,7 @@ def complete(output,python,originals=None):
     envi=workload('envi',['--envi',str(originals/'CupriteReflectance.hdr'),'--workspace'],[
         ('scripts/research/verify_envi_originals.py',['--folder','{folder}']),
         ('scripts/research/verify_workspace_rasters.py',['--folder','{folder}','--output','{folder}/independent-workspace-comparison.json'])])
-    library=workload('library',['--library'],[('scripts/research/verify_library_sources.py',['{folder}']),('scripts/research/verify_library_sources.py',['{folder}','--reuse'])])
+    library=workload('library',['--library'],[('scripts/research/verify_library_sources.py',['{folder}']),('scripts/research/verify_library_sources.py',['{folder}','--reuse']),('scripts/research/verify_library_sources.py',['{folder}','--inspect'])])
     nasa=workload('nasa-metadata',['--nasa'],[])
     # Recording cannot turn an incomplete raw run into a pass. Each recorder checks
     # captured source and sealed input hashes, then validates before atomic replacement.

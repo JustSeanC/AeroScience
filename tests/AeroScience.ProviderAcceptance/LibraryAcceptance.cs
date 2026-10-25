@@ -5,7 +5,7 @@ internal static class LibraryAcceptance
 {
     internal static async Task Run(string output,ScienceStore science,ScientificAccessSettings settings,AutomaticScientificData automatic)
     {
-        var catalog=new ScientificCatalog(automatic,science,settings);using var jobs=new ScientificLibraryJobs(science,catalog,automatic,settings);var results=new List<object>();
+        var catalog=new ScientificCatalog(automatic,science,settings);using var jobs=new ScientificLibraryJobs(science,catalog,automatic,settings);var results=new List<object>();var inspections=new List<object>();
         // Protected NASA browser handoff is checked separately by --nasa; it is
         // not an automatic numeric-download provider. Keep all four automatic adapters.
         foreach(var provider in ScientificCatalog.Providers.Where(p => p.Id is "usgs-3dep" or "copernicus" or "landsat" or "sentinel-2"))
@@ -27,9 +27,12 @@ internal static class LibraryAcceptance
             var reused=await jobs.Preview(selection);await jobs.Approve(reused.Id,reused.Preview.SelectionHash);until=DateTimeOffset.UtcNow.AddSeconds(15);
             do{await Task.Delay(100);current=science.LibraryJob(reused.Id);}while(current.State is not("Completed" or "Failed")&&DateTimeOffset.UtcNow<until);
             if(current.State!="Completed"||current.DownloadedBytes!=0)throw new IOException("Exact retained reuse failed.");
+            var inspectBand=source.Manifest.Kind==RemoteKind.Multispectral?"ndvi":source.Manifest.Bands.First(b=>b.Id is not("QA_PIXEL" or "QA_RADSAT" or "SCL")).Id;
+            inspections.Add(new{source,inspection=science.InspectSource(source.Id,new(area,inspectBand),s=>automatic.VerifyRetainedSource(s))});
             var evidence=new{provider=provider.Id,catalog=page,preview=preview.Preview,source,locations,bands,derived,valid,reuse=current,flight="No flight or science session was created. Numeric Library preparation only."};
             results.Add(evidence);await File.WriteAllTextAsync(Path.Combine(output,provider.Id+"-library.json"),JsonSerializer.Serialize(evidence,WireJson.Options));Console.WriteLine(provider.Id+" Library acquisition/reuse passed; "+valid+" valid derived values.");
         }
+        await File.WriteAllTextAsync(Path.Combine(output,"source-inspections.json"),JsonSerializer.Serialize(new{inspections},WireJson.Options));
         await CumulativeReuse(output,science,settings,jobs,catalog);
         var regions=new[]{await catalog.Region(new("35")),await catalog.Region(new("35","013"))};
         await File.WriteAllTextAsync(Path.Combine(output,"regions.json"),JsonSerializer.Serialize(regions,WireJson.Options));Console.WriteLine("Genuine Census state/county boundaries retrieved without alteration.");

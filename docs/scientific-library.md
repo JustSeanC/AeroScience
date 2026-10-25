@@ -264,3 +264,17 @@ source where a partial union cannot be verified. These are individual work/read 
 maximum Library collection count. Preflight review queries every selected region through the index;
 uncertain assessments are separate from reusable counts. Physical storage and existing quotas,
 source/network consent, pause/cancel, flight priority and permanent deletion remain enforced.
+
+### Inspect retained numeric values
+
+Open a retained region's details and choose **Inspect Numeric Values / Map**. Read a small window
+in the original dataset, view its scalar legend and native cell locations, inspect the paged numeric
+table, or export CSV with units, source date, native row/column, declared scaling, quality and original
+file hashes. QA-excluded values remain distinct from decoded source values; empty/invalid pixels do
+not receive valid colors. NDVI is explicitly derived. Native resolution is not improved by the display.
+
+This is historical source exploration, not a recorded aircraft measurement or acquisition credit.
+The chart's sample index is not flight distance. Large-source inspection yields while flight recording
+is active. Closing or changing the window cancels the read and clears stale results; originals remain
+unchanged. EMIT uses its existing experimental Spectrum / Map / Export explorer and separate
+original-data acceptance gate. Installed/device and genuine-original acceptance remain separate.

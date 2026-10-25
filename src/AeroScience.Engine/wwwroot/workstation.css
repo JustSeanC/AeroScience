@@ -87,3 +87,8 @@ dialog.managed-popup{max-width:min(56rem,calc(100vw - 1.5rem));max-height:88dvh;
 .data-table-section td>details{min-width:12rem;max-width:24rem}
 .data-table-section td>details>summary{cursor:pointer;white-space:nowrap}
 .table-pagination[hidden]{display:none}
+
+/* Retained-source exploration reuses the standard dialog, numeric legend and map. */
+.source-inspection-dialog{width:min(980px,calc(100vw - 1rem));max-width:calc(100vw - 1rem);max-height:calc(100dvh - 2rem);overflow:auto;box-sizing:border-box}
+.source-inspection-dialog .workspace-map .geographic-map{height:clamp(240px,40vh,420px);min-height:240px}
+.source-inspection-dialog .workspace-controls>*{max-width:100%;box-sizing:border-box}

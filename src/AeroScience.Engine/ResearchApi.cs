@@ -179,6 +179,12 @@ public static class ResearchApi
             var result=science.DeleteExternalSources(request,missions,coordinator.EnterMaintenance,()=>automatic.QueueSummary().Downloading>0?"Scientific source transfer is active; pause or finish it before deletion.":null,context.RequestAborted,preparation.SourceDeletionDependencies);
             automatic.ForgetDeletedSources();if(result.RemovedSourceIds is {} removed)preparation.SourcesRemoved(removed);else preparation.SourcesRemoved(id=>science.SourceRemovedBy(result.Id,id));science.Management?.RefreshScience();return Results.Ok(result);
         });
+        app.MapPost("/api/science/sources/{id:guid}/inspect",async (Guid id,ScientificSourceInspectionRequest request,ScienceStore science,AutomaticScientificData automatic,MissionCoordinator coordinator,HttpContext context)=>
+        {
+            if(coordinator.Snapshot().ActiveMission is not null)return (IResult)Results.Conflict(new{error="Original-source pixel inspection yields to flight recording. Saved observations remain available; read this source window after the flight."});
+            var result=await Task.Run(()=>science.InspectSource(id,request,s=>automatic.VerifyRetainedSource(s,context.RequestAborted),context.RequestAborted),context.RequestAborted);
+            return Results.Ok(result);
+        });
         app.MapGet("/api/science/sources/{id:guid}/coverage",(Guid id,ScienceStore science)=>
         {
             var source=science.Source(id)??throw new ArgumentException("Source not found.");if(source.Manifest.Swath is {} swath)return swath.Domain.Corners;var g=source.Grids.Values.First();
