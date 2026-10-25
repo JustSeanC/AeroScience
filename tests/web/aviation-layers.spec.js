@@ -3,9 +3,9 @@ import AxeBuilder from '@axe-core/playwright';
 const origin='http://127.0.0.1:5080';
 async function post(request,path,data={}){const auth=await request.post('/api/session',{data:{},headers:{Origin:origin}}),csrf=(await auth.json()).csrf;const response=await request.post(path,{data,headers:{Origin:origin,'X-AeroScience-CSRF':csrf}});expect(response.ok(),await response.text()).toBeTruthy();return response.json();}
 test.beforeEach(async({request})=>{await post(request,'/api/testing/aviation/reset');await post(request,'/api/maps/settings',{onlineEnabled:false,layer:'offline'});});
-test.afterEach(async({request})=>{await post(request,'/api/aviation/configuration',{onlineEnabled:false});await post(request,'/api/maps/settings',{onlineEnabled:false,layer:'offline'});});
+test.afterEach(async({request})=>{await post(request,'/api/aviation/tfr/configuration',{onlineEnabled:false});await post(request,'/api/aviation/configuration',{onlineEnabled:false});await post(request,'/api/maps/settings',{onlineEnabled:false,layer:'offline'});});
 async function references(page){await page.goto('/#settings/maps');await page.getByRole('button',{name:'FAA Catalog & Notices',exact:true}).click();return page.getByRole('dialog',{name:'FAA Catalog & Notices',exact:true});}
-async function enable(dialog){await dialog.getByLabel('Allow FAA metadata retrieval').check();await dialog.getByRole('button',{name:'Save FAA Access'}).click();await expect(dialog.getByRole('button',{name:'Refresh FAA References'})).toBeEnabled();}
+async function enable(dialog){await dialog.getByLabel('Allow FAA metadata retrieval').check();await dialog.getByLabel('Automatically update TFR notices and boundaries').uncheck();await dialog.getByRole('button',{name:'Save FAA Access'}).click();await expect(dialog.getByRole('button',{name:'Refresh FAA References'})).toBeEnabled();await dialog.getByLabel('FAA reference product').selectOption('vfr');}
 
 test('FAA references use real persisted metadata, bounded pages, explicit consent and offline reopening without science credit',async({page,request})=>{
  const sources=await (await request.get('/api/science/sources')).json();let dialog=await references(page);
@@ -15,12 +15,12 @@ test('FAA references use real persisted metadata, bounded pages, explicit consen
  await expect(dialog.locator('.aviation-reference-records article')).toHaveCount(50);await expect(dialog.getByText('Geographic coverage / CRS / neatline: Not verified').first()).toBeVisible();
  await dialog.getByRole('button',{name:'Next FAA Page'}).click();await expect(dialog.locator('.aviation-reference-records article')).toHaveCount(11);
  await expect(dialog.getByRole('button',{name:'Next FAA Page'})).toBeDisabled();
- await dialog.getByLabel('FAA reference product').selectOption('tfr');await dialog.getByRole('button',{name:'Refresh FAA References'}).click();
- await expect(dialog.getByRole('heading',{name:'NOTAM 6/9001 · SYNTHETIC TEST'})).toBeVisible();await expect(dialog.getByText(/No polygon has been drawn/)).toBeVisible();
+ await post(request,'/api/testing/aviation/tfr');await post(request,'/api/aviation/downloads/configuration',{unmeteredOnly:false});await dialog.getByLabel('FAA reference product').selectOption('tfr');await dialog.getByRole('button',{name:'Refresh FAA References'}).click();
+ await expect(dialog.getByRole('heading',{name:'NOTAM 6/99991 · SYNTHETIC'})).toBeVisible();await expect(dialog.getByText(/A notice listing is not proof/).first()).toBeVisible();
  await expect(dialog.getByText(/cannot clear a route/)).toBeVisible();
- await dialog.getByLabel('Allow FAA metadata retrieval').uncheck();await dialog.getByRole('button',{name:'Save FAA Access'}).click();await expect(dialog.getByRole('status')).toContainText('Offline cached');
+ await dialog.getByLabel('Allow FAA metadata retrieval').uncheck();await dialog.getByRole('button',{name:'Save FAA Access'}).click();await expect(dialog.getByRole('status')).toContainText('Offline retained');
  await dialog.getByRole('button',{name:'Close FAA Catalog & Notices',exact:true}).click();await page.reload();dialog=await references(page);
- await dialog.getByLabel('FAA reference product').selectOption('tfr');await expect(dialog.getByRole('heading',{name:'NOTAM 6/9001 · SYNTHETIC TEST'})).toBeVisible();
+ await dialog.getByLabel('FAA reference product').selectOption('tfr');await expect(dialog.getByRole('heading',{name:'NOTAM 6/99991 · SYNTHETIC'})).toBeVisible();
  expect(await (await request.get('/api/science/sources')).json()).toEqual(sources);expect((await (await request.get('/api/state')).json()).activeMission).toBeNull();
 });
 

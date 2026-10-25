@@ -7,7 +7,7 @@ test('approved FAA original uses durable host jobs, closes independently, verifi
  await post(request,'/api/testing/aviation/reset');await post(request,'/api/aviation/downloads/configuration',{unmeteredOnly:false});await post(request,'/api/aviation/configuration',{onlineEnabled:true});
  await post(request,'/api/aviation/catalog/vfr/refresh');const sources=await (await request.get('/api/science/sources')).json();
  await page.goto('/#settings/maps');await page.getByRole('button',{name:'FAA Catalog & Notices',exact:true}).click();
- const catalog=page.getByRole('dialog',{name:'FAA Catalog & Notices',exact:true});const opener=catalog.getByRole('button',{name:'Download & Retain Original'}).first();await opener.click();
+ const catalog=page.getByRole('dialog',{name:'FAA Catalog & Notices',exact:true});await catalog.getByLabel('FAA reference product').selectOption('vfr');const opener=catalog.getByRole('button',{name:'Download & Retain Original'}).first();await opener.click();
  let dialog=page.getByRole('dialog',{name:'FAA Downloads',exact:true});await expect(dialog.getByText(/Entire original ZIP/)).toBeVisible();
  const previewResponse=page.waitForResponse(r=>r.url().endsWith('/api/aviation/downloads/preview')&&r.request().method()==='POST');
  await dialog.getByRole('button',{name:'Review FAA Download'}).click();const selectedJob=await(await previewResponse).json();

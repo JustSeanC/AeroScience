@@ -136,7 +136,7 @@ export async function openTfrReferences(api,map,{planId=null,opener=document.act
 }
 
 export function tfrMapLayer(L,map,register,{persistVisibility=()=>{},isolateMission=()=>()=>{}}={}){
- const layer=L.layerGroup(),context=L.layerGroup();let disposed=false,epoch=0,timer,opacity=1,base=[],review=[],findings=[],selectedId=null,selectHandler=null,geometry=null,scope=null;
+ const layer=L.layerGroup(),context=L.layerGroup();let disposed=false,epoch=0,timer,opacity=1,base=[],review=[],findings=[],selectedId=null,selectHandler=null,geometry=null,scope=null,reading=false,lastPage=null;
  const item={id:'faa-tfr-boundaries',group:'FAA',name:'FAA TFR boundaries · activation Unknown',layer,description:tfrGuidance,inspect:()=>openTfrReferences(mapRequest,map),opacity,setOpacity:v=>setOpacity(v)};
  function style(b){const f=findings.find(f=>f.boundaryId===b.id);let key=findingKind(f);if(key==='published'&&b.operational?.status!==freshDetail)key=b.operational?.retrievedUtc?'retained':'published';const s=tfrStyles[key];return {color:s.color,dashArray:s.dashArray,weight:selectedId===b.id?5:2,opacity,fillOpacity:(selectedId===b.id ? .2 : .07)*opacity};}
  function draw(){if(disposed)return;layer.clearLayers();const all=new Map([...base,...review].map(b=>[b.id,b]));for(const b of all.values()){
@@ -144,8 +144,8 @@ export function tfrMapLayer(L,map,register,{persistVisibility=()=>{},isolateMiss
  }map.getContainer().dataset.tfrBoundaryCount=String(all.size);map.getContainer().dataset.tfrSelected=selectedId||'';map.getContainer().dataset.tfrFindingCount=String(findings.length);}
  function drawContext(){context.clearLayers();if(geometry?.route.length)L.polyline(geometry.route.map(c=>[c.latitude,c.longitude]),{color:'#5ee3d5',weight:4,dashArray:'10 4'}).bindTooltip(el('span','Selected saved mission route · not a live flight track')).addTo(context);if(geometry?.area?.length)L.polygon(geometry.area.map(c=>[c.latitude,c.longitude]),{color:'#5ee3d5',weight:3,fillOpacity:.035}).bindTooltip(el('span','Selected saved survey area')).addTo(context);map.getContainer().dataset.tfrReviewGeometry=geometry?.area?'survey':geometry?.route.length?'route':'';}
  function setOpacity(value){opacity=Math.max(0,Math.min(1,value));item.opacity=opacity;draw();}
- async function refresh(){const own=++epoch;if(disposed||!map.hasLayer(layer))return;const b=map.getBounds();if(map.getZoom()<7||b.getEast()-b.getWest()>30||b.getNorth()-b.getSouth()>30){base=[];draw();return;}
-  try{const p=await mapRequest('/api/aviation/tfr/boundaries?'+new URLSearchParams({west:b.getWest(),south:b.getSouth(),east:b.getEast(),north:b.getNorth()}));if(disposed||own!==epoch||!map.hasLayer(layer))return;base=p.boundaries;map.getContainer().dataset.tfrFreshness=p.status;draw();}catch{if(!disposed&&own===epoch){base=[];draw();map.getContainer().dataset.tfrFreshness='Unavailable; no restriction clearance';}}
+ async function refresh(){const own=++epoch;if(disposed||!map.hasLayer(layer)||document.hidden||!map.getContainer().isConnected||!map.getContainer().getClientRects().length){reading=false;return;}const b=map.getBounds();if(map.getZoom()<7||b.getEast()-b.getWest()>30||b.getNorth()-b.getSouth()>30){base=[];lastPage=null;draw();return;}
+  reading=true;try{const p=await mapRequest('/api/aviation/tfr/boundaries?'+new URLSearchParams({west:b.getWest(),south:b.getSouth(),east:b.getEast(),north:b.getNorth()}));if(disposed||own!==epoch||!map.hasLayer(layer))return;const stamp=JSON.stringify(p.boundaries);map.getContainer().dataset.tfrFreshness=p.status;if(stamp!==lastPage){lastPage=stamp;base=p.boundaries;draw();}}catch{if(!disposed&&own===epoch){base=[];lastPage=null;draw();map.getContainer().dataset.tfrFreshness='Unavailable; no restriction clearance';}}finally{if(own===epoch)reading=false;}
  }
  function schedule(){clearTimeout(timer);timer=setTimeout(refresh,150);}function changed(e){if(e.layer===layer)schedule();}
  const controller={visible:()=>map.hasLayer(layer),opacity:()=>opacity,setOpacity,setVisible(visible,persist=false){if(scope&&persist)scope.explicit=true;if(visible)map.addLayer(layer);else map.removeLayer(layer);if(persist)persistVisibility(visible);},
@@ -153,7 +153,9 @@ export function tfrMapLayer(L,map,register,{persistVisibility=()=>{},isolateMiss
   setReview(value,results,boundaries){geometry=value;findings=results;review=boundaries;selectedId=null;drawContext();draw();},
   fitGeometry(value){const points=(value.area||value.route).map(c=>[c.latitude,c.longitude]);if(points.length)map.fitBounds(points,{padding:[25,25],maxZoom:12});},
   select(b){selectedId=b.id;if(!base.some(v=>v.id===b.id)&&!review.some(v=>v.id===b.id))review=[...review,b];draw();map.fitBounds(b.polygons.flat(2).map(c=>[c.latitude,c.longitude]),{padding:[25,25],maxZoom:12});},onSelect(fn){selectHandler=fn;},
-  dispose(){disposed=true;epoch++;clearTimeout(timer);map.off('moveend',schedule);map.off('layeradd layerremove',changed);document.removeEventListener('aeroscience:tfr-updated',schedule);controllers.delete(map);layer.clearLayers();context.clearLayers();map.removeLayer(context);}
+  dispose(){disposed=true;epoch++;clearTimeout(timer);clearInterval(poll);map.off('moveend',schedule);map.off('layeradd layerremove',changed);document.removeEventListener('aeroscience:tfr-updated',schedule);controllers.delete(map);layer.clearLayers();context.clearLayers();map.removeLayer(context);}
  };
+ // Read the host cache while this map is visible; no browser polls FAA.
+ const poll=setInterval(()=>{if(!reading&&!disposed&&!document.hidden&&map.getContainer().isConnected&&map.getContainer().getClientRects().length&&map.hasLayer(layer))refresh();},30000);
  controllers.set(map,controller);register(item);map.on('moveend',schedule);map.on('layeradd layerremove',changed);document.addEventListener('aeroscience:tfr-updated',schedule);schedule();return controller;
 }

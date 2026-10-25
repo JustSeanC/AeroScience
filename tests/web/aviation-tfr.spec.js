@@ -40,3 +40,35 @@ test('recorded FAA XML/AIXM packets drive retained operational details and real 
  expect(await(await request.get('/api/science/sources')).json()).toEqual(sources);expect((await(await request.get('/api/state')).json()).activeMission).toBeNull();
  const denied=await request.post('/api/aviation/tfr/operations/refresh',{data:{notamId:'6/2070'},headers:{Origin:origin}});expect(denied.status()).toBe(403);
 });
+
+test('FAA access shows managed storage and enables host-owned automatic TFR updates without chart approval',async({page,request})=>{
+ await post(request,'/api/testing/aviation/tfr');await post(request,'/api/aviation/configuration',{onlineEnabled:false});await post(request,'/api/aviation/tfr/configuration',{onlineEnabled:false});
+ const jobsBefore=await(await request.get('/api/aviation/downloads')).json();
+ const storage=await(await request.get('/api/aviation/downloads/configuration')).json();
+ await page.clock.install();await page.goto('/#settings/maps');await page.getByRole('button',{name:'FAA Catalog & Notices',exact:true}).click();const d=page.getByRole('dialog',{name:'FAA Catalog & Notices',exact:true});
+ await expect(d.getByLabel('FAA reference product')).toHaveValue('tfr');await expect(d.getByText('Aviation data folder: '+storage.storageDirectory)).toBeVisible();await expect(d.getByLabel('New aviation storage folder')).toBeHidden();
+ await d.getByLabel('Allow FAA metadata retrieval').check();await d.getByLabel('Automatically update TFR notices and boundaries').check();
+ await d.getByText('Advanced aviation storage & network',{exact:true}).click();await d.getByLabel('Use only confirmed unmetered networks for aviation data').uncheck();await d.getByRole('button',{name:'Save FAA Access',exact:true}).click();
+ await expect.poll(async()=>(await(await request.get('/api/aviation/tfr/configuration')).json()).tfrMonitoringEnabled).toBe(true);
+ await expect.poll(async()=>(await(await request.get('/api/testing/aviation')).json()).calls).toBe(3);
+ await expect.poll(async()=>(await(await request.get('/api/aviation/tfr/summary')).json()).boundaryCount).toBe(1);
+ // The dialog follows the host cache, without another external refresh or any ZIP job.
+ await page.clock.fastForward(16000);await expect(d.getByRole('heading',{name:'NOTAM 6/99991 · SYNTHETIC',exact:true})).toBeVisible();
+ expect(await(await request.get('/api/aviation/downloads')).json()).toEqual(jobsBefore);
+ const calls=(await(await request.get('/api/testing/aviation')).json()).calls;
+ await page.setViewportSize({width:390,height:740});expect((await new AxeBuilder({page}).include('dialog[aria-label="FAA Catalog & Notices"]').analyze()).violations).toEqual([]);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy();
+ await page.keyboard.press('Escape');await expect(page.getByRole('button',{name:'FAA Catalog & Notices',exact:true})).toBeFocused();
+ await page.getByRole('button',{name:'FAA Catalog & Notices',exact:true}).click();await expect(d.getByLabel('Automatically update TFR notices and boundaries')).toBeChecked();await page.keyboard.press('Escape');
+ await post(request,'/api/aviation/configuration',{onlineEnabled:false});await page.clock.fastForward(60000);expect((await(await request.get('/api/testing/aviation')).json()).calls).toBe(calls);
+});
+
+test('visible TFR overlays follow refreshed host geometry without panning and dispose their local polling',async({page,request})=>{
+ await post(request,'/api/testing/aviation/tfr');await post(request,'/api/aviation/downloads/configuration',{unmeteredOnly:false});await post(request,'/api/aviation/configuration',{onlineEnabled:true});await post(request,'/api/aviation/tfr/refresh');
+ let viewportUrl;page.on('request',r=>{if(r.url().includes('/api/aviation/tfr/boundaries?'))viewportUrl=r.url();});
+ await page.clock.install();await page.goto('/#planner');const planner=page.locator('#planner');await planner.getByLabel('Offline geographic location search').fill('39.2,-75.8');await planner.getByRole('button',{name:'Find',exact:true}).click();await planner.getByLabel('Search results').selectOption('0');await planner.getByRole('button',{name:'Overlays & Legend',exact:true}).click();const layers=page.getByRole('dialog',{name:'Map Overlays & Legend',exact:true});await layers.getByLabel('FAA TFR boundaries · activation Unknown',{exact:true}).check();await page.keyboard.press('Escape');await expect(planner.locator('.geographic-map')).toHaveAttribute('data-tfr-boundary-count','1');
+ const center=await planner.locator('.geographic-map').getAttribute('data-center');
+ // Compare against the retained backend snapshot for the actual map viewport.
+ await post(request,'/api/testing/aviation/tfr-originals');await post(request,'/api/aviation/tfr/refresh');const expected=(await(await request.get(viewportUrl)).json()).boundaries;expect(expected.some(b=>b.notamId==='6/99991')).toBe(false);expect(expected.length).not.toBe(1);const external=(await(await request.get('/api/testing/aviation')).json()).calls;
+ await page.clock.fastForward(31000);await expect(planner.locator('.geographic-map')).toHaveAttribute('data-tfr-boundary-count',String(expected.length));expect(await planner.locator('.geographic-map').getAttribute('data-center')).toBe(center);expect((await(await request.get('/api/testing/aviation')).json()).calls).toBe(external);
+ await page.evaluate(()=>{location.hash='#settings/maps';});await expect(page.getByRole('heading',{name:'Maps & Basemaps',exact:true})).toBeVisible();let viewportReads=0;page.on('request',r=>{if(r.url().includes('/api/aviation/tfr/boundaries?'))viewportReads++;});await page.clock.fastForward(61000);expect(viewportReads).toBe(0);
+});

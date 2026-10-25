@@ -33,7 +33,7 @@ export function mapLayerManager(L,map,definitions,applyBasemap,{beginReadOnly=()
    content.append(set);
   }
   const faa=el('section');faa.append(el('p',aviation.status()),el('h3','FAA aviation & TFR overlays'),el('p','Imported FAA points/runways, Class B/C/D/E polygons and supported SAA boundaries are independent overlays. TFR screening retains unknown altitude, time and missing geometry. Chart rendering is deferred for v0.6.0; official catalogs, downloads and retained originals remain available. No layer can clear a route of restrictions.'));
-  const references=el('button','FAA Catalog & Notices');references.type='button';references.onclick=()=>openAviationReference(mapRequest);faa.append(references);content.append(faa);
+  const references=el('button','FAA Catalog & Notices');references.type='button';references.onclick=()=>openAviationReference(mapRequest,map);faa.append(references);content.append(faa);
   const tfrButton=el('button','TFR Boundaries & Screening');tfrButton.type='button';tfrButton.onclick=()=>openTfrReferences(mapRequest,map);faa.append(tfrButton);
   content.append(el('p','Source edition / as-of: inspect the original source or recorded observation details. No chart edition or restriction freshness is inferred from the basemap.'));sync();
  }

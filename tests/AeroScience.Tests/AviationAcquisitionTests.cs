@@ -22,10 +22,17 @@ public sealed class AviationAcquisitionTests : IDisposable
     private sealed class Transport : HttpMessageHandler
     {
         public byte[] Archive = Zip("chart.tif"); public HttpStatusCode Code = HttpStatusCode.OK; public int Downloads;
-        public Func<Task>? BeforeRead;
+        public Func<Task>? BeforeRead; public int TfrCalls;
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken token)
         {
             Assert.Null(request.Headers.Authorization); Assert.Null(request.Headers.Range);
+            if (request.RequestUri!.Host == "tfr.faa.gov")
+            {
+                Interlocked.Increment(ref TfrCalls);
+                var url=request.RequestUri.AbsoluteUri;
+                Assert.Contains(url,new[]{AviationTfr.NoticesUrl,AviationTfr.NoShapeUrl,AviationTfr.GeometryUrl});
+                return new(HttpStatusCode.OK){Content=new ByteArrayContent(url==AviationTfr.NoticesUrl?SyntheticTfr.Notices():url==AviationTfr.NoShapeUrl?SyntheticTfr.NoShape():SyntheticTfr.Geometry())};
+            }
             if (request.RequestUri!.Host == "www.faa.gov") return new(HttpStatusCode.OK) { Content = new StringContent($"<a href='{Url}'>Original</a>") };
             Assert.Equal(Url, request.RequestUri.AbsoluteUri); Downloads++;
             if (BeforeRead is not null) await BeforeRead();
@@ -50,6 +57,38 @@ public sealed class AviationAcquisitionTests : IDisposable
         return await service.PreviewDownload("vfr", service.Page("vfr").Charts[0].Id, 1048576, 1048576);
     }
     private AviationDownloadJob Approve(AviationReference service, AviationDownloadJob job) => service.DownloadControl(job.Id, job.Revision, "approve", job.Preview.SelectionHash);
+    [Fact] public async Task HostMonitoringContinuesWhileAnApprovedOriginalTransferIsHeld()
+    {
+        var handler=new Transport();using var service=Service(handler);var job=Approve(service,await Preview(service));service.ConfigureTfr(true);
+        var entered=new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);var release=new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        handler.BeforeRead=async()=>{entered.TrySetResult();await release.Task;};
+        using var worker=new AviationAcquisitionWorker(service,Microsoft.Extensions.Logging.Abstractions.NullLogger<AviationAcquisitionWorker>.Instance);
+        await worker.StartAsync(default);
+        try
+        {
+            await entered.Task.WaitAsync(TimeSpan.FromSeconds(5));
+            using var deadline=new CancellationTokenSource(TimeSpan.FromSeconds(5));
+            while(Volatile.Read(ref handler.TfrCalls)<3){await Task.Delay(20,deadline.Token);}
+            Assert.Single(service.TfrBoundaries(-76,39,-74,41).Boundaries);
+            // Held before response headers: the real job remains Preparing.
+            Assert.Equal("Preparing",Assert.Single(service.DownloadJobs()).State);
+            Assert.Equal(job.Id,Assert.Single(service.DownloadJobs()).Id);Assert.Equal(1,handler.Downloads);
+            release.TrySetResult();
+            while(Assert.Single(service.DownloadJobs()).State!="Completed"){await Task.Delay(20,deadline.Token);}
+        }
+        finally{release.TrySetResult();await worker.StopAsync(default);}
+        Assert.Equal(3,handler.TfrCalls);Assert.Equal(1,handler.Downloads);await service.VerifyDownload(job.Id);
+    }
+    [Fact] public void DefaultFolderNeedsNoSetupAndConfigurationReadsNeverCreateOrReplaceStorage()
+    {
+        var handler=new Transport();using var service=Service(handler);
+        var before=System.Text.Json.JsonSerializer.SerializeToElement(service.DownloadConfiguration());
+        var folder=Path.Combine(root,"AviationReference");Assert.Equal(folder,before.GetProperty("storageDirectory").GetString());Assert.True(before.GetProperty("usingDefaultStorage").GetBoolean());
+        Assert.False(Directory.Exists(folder));service.Configure(true);Assert.True(Directory.Exists(folder));
+        Directory.Move(folder,folder+"-missing");
+        Assert.False(service.DownloadStorage().Available);service.DownloadConfiguration();Assert.False(Directory.Exists(folder));
+        Directory.Move(folder+"-missing",folder);
+    }
     [Fact] public async Task ApprovalBindsExactScopeAndReadsNeverTransfer()
     {
         var handler = new Transport(); using var service = Service(handler); var preview = await Preview(service);

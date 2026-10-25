@@ -19,6 +19,7 @@ public sealed partial class AviationReference
         lock (gate)
         {
             var p = Preferences(); return new { p.UnmeteredOnly, p.OnlineEnabled, configured = p.StoreId is not null,
+                storageDirectory = Path.GetFullPath(directory), usingDefaultStorage = p.StorageDirectory is null,
                 maximumTransferBytes = AviationDownloads.MaximumTransferBytes, maximumExpandedBytes = AviationDownloads.MaximumExpandedBytes,
                 policy = "Whole original FAA ZIPs are downloaded. Separate aviation allowances; no scientific budget is used. Interrupted transfers restart safely, counting all attempts. Originals are not silently deleted. Chart rendering may retain up to 128 MiB of additional regenerable tiles plus small checksum receipts in aviation storage; these are separate from original-download allowances." };
         }
