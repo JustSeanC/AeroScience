@@ -69,5 +69,6 @@
     "Potential horizontal extent is not a flattened restriction. Native component geometry and operations remain separate.",
     "Boundary inclusivity, unresolved terrain/pressure conversion and actual activation remain Unknown.",
     "No installed Windows/MSFS, physical iPad or Quest acceptance."
-  ]
+  ],
+  "sourceCommit": "44999d293c34d82742fbca169d7156f0eb976f0e"
 }
