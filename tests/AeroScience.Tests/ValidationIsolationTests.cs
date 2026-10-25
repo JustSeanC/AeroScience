@@ -15,6 +15,7 @@ public sealed class ValidationIsolationTests : IDisposable
         Assert.Equal("AeroScience",production.Folder);Assert.Equal(5080,production.Port);
         Assert.Equal(@"Software\AeroScience",production.RegistryKey);
         Assert.Equal("aeroscience-toolbar",production.ToolbarPackage);
+        Assert.Equal("InGamePanels/aeroscience_panel.spb",production.ToolbarRegistrationPath);
         Assert.Equal("AeroScience.Command.v1",production.CommandEvent);
         Assert.Equal(@"Local\AeroScience.Desktop",ApplicationProfile.DesktopMutex);
         Assert.NotEqual(production.ConfigurationDirectory,validation.ConfigurationDirectory);
@@ -28,6 +29,7 @@ public sealed class ValidationIsolationTests : IDisposable
         Assert.Equal(@"Software\AeroScience\Validation\v0.6.0",validation.RegistryKey);
         Assert.Equal("aeroscience-validation-v0-6-0-toolbar",validation.ToolbarPackage);
         Assert.Equal("AeroScienceValidationV060",validation.ToolbarFolder);
+        Assert.Equal("InGamePanels/aeroscience_validation_v060_panel.spb",validation.ToolbarRegistrationPath);
         Assert.Equal("AeroScience.Validation.0_6_0.Command.v1",validation.CommandEvent);
         Assert.Equal("AeroScience.Validation.0_6_0.Session",validation.SessionCookieName);
     }

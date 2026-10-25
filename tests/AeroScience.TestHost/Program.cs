@@ -43,6 +43,7 @@ if (args.Length > 0 && args[0] == "--profile-probe")
     if(new AccessControl().SessionCookieName==AccessControl.CookieName)throw new InvalidOperationException("Validation reused the production browser cookie.");
     preferences.ValidateDirectory(defaults.MissionDirectory);preferences.ValidateDirectory(defaults.ScienceLibraryDirectory);
     try { preferences.ValidateDirectory(new ApplicationProfile(false).ConfigurationDirectory);throw new InvalidOperationException("Production path accepted."); } catch(IOException){}
+    ValidationToolbarProbe.Run();
     Console.WriteLine("Compiled validation profile verified: separate roots, port, package and CommBus; shared one-active desktop mutex. No installation or MSFS acceptance claimed.");return;
 }
 

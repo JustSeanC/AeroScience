@@ -19,6 +19,7 @@ public sealed record ApplicationProfile(bool Validation)
     public string ToolbarPackage => Validation ? "aeroscience-validation-v0-6-0-toolbar" : "aeroscience-toolbar";
     public string ToolbarTitle => Validation ? "AeroScience 0.6.0 Validation" : "AeroScience";
     public string ToolbarFolder => Validation ? "AeroScienceValidationV060" : "AeroScience";
+    public string ToolbarRegistrationPath => Validation ? "InGamePanels/aeroscience_validation_v060_panel.spb" : "InGamePanels/aeroscience_panel.spb";
     public string CommandEvent => Validation ? "AeroScience.Validation.0_6_0.Command.v1" : "AeroScience.Command.v1";
     public string ReplyEvent => Validation ? "AeroScience.Validation.0_6_0.Reply.v1" : "AeroScience.Reply.v1";
     public string SessionCookieName => Validation ? "AeroScience.Validation.0_6_0.Session" : AccessControl.CookieName;

@@ -126,7 +126,7 @@ public sealed class ScientificHdfReaderTests:IDisposable
     {
         var interpreter=await ResolveProtocolInterpreter();var source=Original("synthetic-emit-reflectance.nc");
         const string key="AEROSCIENCE_READER_TEST_LAUNCHER";var previous=Environment.GetEnvironmentVariable(key);
-        var bootstrap="import os,sys;sys.stdin.readline();sys.exit(37) if not os.environ.get('"+key+"') else os.execv(sys.executable,[sys.executable]+sys.argv[1:])";
+        var bootstrap="import os,sys,subprocess;sys.stdin.readline();sys.exit(37) if not os.environ.get('"+key+"') else subprocess.run([sys.executable]+sys.argv[1:],check=True)";
         var launcher=new HdfWorkerCommand(interpreter,["-I","-S","-c",bootstrap]);
         var probe="import os,json;print(json.dumps({'phase':'error','code':'SecretLeak' if os.environ.get('"+key+"') else 'Limit'}),flush=True)";
         Environment.SetEnvironmentVariable(key,"synthetic-launcher-activation-canary");

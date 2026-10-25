@@ -91,7 +91,9 @@ public static class ToolbarInstaller
             var version = typeof(ToolbarInstaller).Assembly.GetName().Version!;
             if (manifest.RootElement.GetProperty("package_version").GetString() != $"{version.Major}.{version.Minor}.{version.Build}") throw new IOException("Toolbar/app package versions do not match.");
         }
-        var binary = File.ReadAllBytes(files[ApplicationProfile.Current.Validation ? "InGamePanels/aeroscience_validation_panel.spb" : "InGamePanels/aeroscience_panel.spb"]);
+        if (!files.TryGetValue(ApplicationProfile.Current.ToolbarRegistrationPath, out var registration))
+            throw new IOException("The bundled toolbar is missing this profile's SDK-compiled registration. Rebuild the matching toolbar package; the installed toolbar was not changed.");
+        var binary = File.ReadAllBytes(registration);
         if (binary.Length <= 32 || binary[0] == '<' || binary[0] == '{') throw new IOException("A genuine SDK-compiled registration is required.");
         if (!Directory.Exists(community)) throw new IOException("Select an existing configured Community folder.");
         StorageManager.ValidateLocalPath(Path.GetFullPath(community));
