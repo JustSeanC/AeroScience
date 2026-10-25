@@ -51,9 +51,21 @@ export class ResearchMap {
     this.routeValues.addEventListener('toggle',()=>{if(this.routeValues.open)this.showRouteValues();});
     const L = window.L;
     this.L = L;
+    const renderer=L.canvas();
+    if(renderer){
+      const redraw=renderer._redraw;
+      renderer._redraw=function(){
+        // Leaflet 1.9.4 also calls _redraw synchronously on viewport updates.
+        // Cancel its already queued frame before _redraw clears the frame ID;
+        // otherwise remove() cannot cancel that orphan after deleting the context.
+        L.Util.cancelAnimFrame(this._redrawRequest);
+        return redraw.call(this);
+      };
+    }
     this.map = L.map(this.container, {
       worldCopyJump: true,
       preferCanvas: true,
+      renderer,
       zoomControl: true,
       // Leaflet 1.9's delayed CSS zoom completion can outlive remove().
       // Product maps are replaceable; keep zoom immediate and teardown synchronous.

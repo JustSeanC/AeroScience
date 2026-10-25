@@ -1,5 +1,30 @@
 import {test,expect} from '@playwright/test';
 
+test('synchronous viewport redraw cannot orphan a queued canvas frame after map disposal',async({page})=>{
+  const errors=[];page.on('pageerror',error=>errors.push(error.stack));
+  await page.goto('/#control');await page.clock.install();
+  await page.evaluate(async()=>{
+    const {ResearchMap}=await import('/map.js');
+    const holder=document.createElement('div');holder.style.cssText='width:600px;height:420px';document.body.append(holder);
+    window.canvasLifecycle=new ResearchMap(holder);await window.canvasLifecycle.ready;
+  });
+  await page.clock.runFor(50);
+  const state=await page.evaluate(()=>{
+    const model=window.canvasLifecycle;
+    model.route.setLatLngs([[40,-75],[40.01,-75.01]]);
+    const renderer=model.map.getRenderer(model.route),queued=renderer._redrawRequest!=null;
+    // A real Leaflet moveend performs a synchronous _updatePaths/_redraw before
+    // the queued path redraw. Disposal must cancel that older frame as well.
+    model.map.fire('moveend');
+    const synchronouslyRedrawn=renderer._redrawRequest===null;
+    model.destroy();model.destroy();model.container.parentElement.remove();
+    return {queued,synchronouslyRedrawn};
+  });
+  expect(state).toEqual({queued:true,synchronouslyRedrawn:true});
+  await page.clock.runFor(100);
+  expect(errors).toEqual([]);
+});
+
 test('replacing a map during zoom leaves no delayed Leaflet callbacks on removed panes',async({page})=>{
   const errors=[];page.on('pageerror',error=>errors.push(error.stack));
   await page.goto('/#control');await page.clock.install();
