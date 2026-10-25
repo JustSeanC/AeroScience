@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Microsoft.Data.Sqlite;
 using AeroScience.Missions;
 using AeroScience.Shared;
 internal static class LibraryAcceptance
@@ -61,8 +62,16 @@ internal static class LibraryAcceptance
             if(repeat.State!="Completed"||repeat.DownloadedBytes!=0||science.CountSources()!=count)throw new IOException("Offline cumulative reuse transferred bytes or created duplicate originals.");
         }
         finally{settings.Save(before);}
-        // Fresh read-only persistence handle, not falsely described as an installed restart test.
-        using(var reopened=new ScienceStore(science.DirectoryPath))if(reopened.LibraryJob(repeat.Id).State!="Completed"||ids.Any(id=>reopened.Source(id) is null))throw new IOException("Offline retained job/source reopening failed.");
+        // A second ScienceStore.Source() intentionally requires deletion recovery and
+        // the exclusive writer lease. Inspect committed rows through a read-only
+        // connection instead; actual process restart/recovery has separate tests.
+        using(var reopened=new ScienceStore(science.DirectoryPath))
+        using(var persisted=new SqliteConnection(new SqliteConnectionStringBuilder{DataSource=science.DatabasePath,Mode=SqliteOpenMode.ReadOnly,Pooling=false}.ToString()))
+        {
+            if(reopened.LibraryJob(repeat.Id).State!="Completed")throw new IOException("Offline retained job reopening failed.");
+            persisted.Open();using var query=persisted.CreateCommand();query.CommandText="SELECT payload_json FROM remote_sources WHERE id=$id";query.Parameters.Add("$id",SqliteType.Text);
+            foreach(var id in ids){query.Parameters["$id"].Value=id.ToString();if(query.ExecuteScalar() is not string json||JsonSerializer.Deserialize<ScientificSource>(json,WireJson.Options)?.Id!=id)throw new IOException("Offline retained source reopening failed.");}
+        }
         var results=new List<object>();foreach(var id in ids)
         {
             var source=science.Source(id)!;var region=source.Manifest.Acquisition!.RequestedArea;var folder=Path.Combine(science.DirectoryPath,source.RelativeDirectory);
@@ -71,7 +80,7 @@ internal static class LibraryAcceptance
             if(valid!=576)throw new IOException("The genuine cumulative fixture does not have full checked sample support; no pass substituted.");
             results.Add(new{provider="usgs-3dep",source,locations,bands,derived,valid});
         }
-        await File.WriteAllTextAsync(Path.Combine(output,"library-reuse.json"),JsonSerializer.Serialize(new{evidenceClass="Genuine bounded USGS originals and actual Library jobs; independent rasterio verification required",area,initial=acquired,repeat,observedInitialTransferBytes=acquired.DownloadedBytes,repeatedTransferBytes=repeat.DownloadedBytes,reopened="Fresh read-only persistence handle; deterministic full host/process recovery tested separately",results},WireJson.Options));
+        await File.WriteAllTextAsync(Path.Combine(output,"library-reuse.json"),JsonSerializer.Serialize(new{evidenceClass="Genuine bounded USGS originals and actual Library jobs; independent rasterio verification required",area,initial=acquired,repeat,observedInitialTransferBytes=acquired.DownloadedBytes,repeatedTransferBytes=repeat.DownloadedBytes,reopened="Fresh read-only SQLite connection and job handle; deterministic full host/process recovery tested separately",results},WireJson.Options));
         Console.WriteLine("Genuine two-window numeric union: initial "+acquired.DownloadedBytes+" bytes, identical-area offline repeat "+repeat.DownloadedBytes+" bytes; no duplicated original or flight observation.");
     }
 }
