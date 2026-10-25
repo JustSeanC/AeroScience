@@ -33,7 +33,7 @@ export async function libraryDownload(parent, api, isDisposed = () => false) {
     userBudget = false,
     userDates = false,
     localSources = [],
-    regionEpoch = 0;
+    regionEpoch = 0, localEpoch = 0, localAfter = 0, localThrough = null;
   const memoryKey = "aeroscience.external-discovery.v1";
   let remembered;
   try { remembered = JSON.parse(localStorage.getItem(memoryKey)); } catch {}
@@ -440,6 +440,26 @@ export async function libraryDownload(parent, api, isDisposed = () => false) {
   catalogList.setAttribute("aria-label", "Provider catalog results");
   catalogList.append(el("h2", "Provider catalog — not searched"));
   parent.append(catalogList);
+  const retainedPanel=el("section",undefined,"panel");retainedPanel.setAttribute("aria-label","Retained coverage inventory");
+  retainedPanel.append(el("h2","Existing data in your selected area"));const localStatus=status(retainedPanel,"Select an area to inspect retained candidates.");
+  const localNavigation=el("div",undefined,"action-row");retainedPanel.append(localNavigation);parent.append(retainedPanel);
+  button(localNavigation,"Refresh retained coverage",()=>loadLocal(0,null));
+  const firstLocal=button(localNavigation,"First retained page",()=>loadLocal(0,null));
+  const nextLocal=button(localNavigation,"More retained coverage",()=>loadLocal(Number(nextLocal.dataset.next),localThrough));firstLocal.disabled=nextLocal.disabled=true;
+  async function loadLocal(after=localAfter,through=after?localThrough:null){
+    const own=++localEpoch;localAfter=after;localThrough=through;
+    if(!areas.length){localSources=[];layers.retained.clearLayers();localStatus.textContent="Select an area to inspect retained candidates; the complete inventory remains available in Manage Downloaded Data.";firstLocal.disabled=nextLocal.disabled=true;return;}
+    let area;try{area=selectedBounds();}catch(error){localStatus.textContent=error.message;return;}
+    const params=new URLSearchParams({...area,after,limit:50});if(through!=null)params.set('through',through);
+    const page=await api('/api/science/library/local/page?'+params);
+    if(stopped||isDisposed()||own!==localEpoch)return;
+    localThrough=page.through;localSources=page.items;
+    firstLocal.disabled=after===0;nextLocal.disabled=page.next==null;nextLocal.dataset.next=page.next??'';
+    localStatus.textContent=`${page.items.length} retained candidates on this page · ${page.total} intersect the search bounds. Page size is not a Library capacity limit. ${polygon||regionGeometry?'Search bounds enclose the selected shape; some candidates lie outside it. ':''}Originals, compatibility and actual valid pixels are checked at preview/sampling, not established by these outlines.`;
+    const key=JSON.stringify([area,page.items]);if(key===localSignature)return;localSignature=key;layers.retained.clearLayers();
+    for(const source of page.items)for(const ring of source.bounds||[])L.polygon(ring.map(p=>[p.latitude,p.longitude]),{color:source.filesAvailable?'#45d6bf':'#ff8899',fillOpacity:.08}).bindTooltip(el('span',`${source.filesAvailable?'Retained candidate':'Unavailable'} · ${source.manifest.sceneId} · integrity, compatibility and pixel QA remain to be checked`)).addTo(layers.retained);
+  }
+
   const previewBox = el("section", undefined, "panel");
   previewBox.setAttribute("aria-label", "Download preview");
   parent.append(previewBox);
@@ -467,7 +487,7 @@ export async function libraryDownload(parent, api, isDisposed = () => false) {
         "Selection changed. Preview and explicit approval are required before downloading.",
       ),
     );
-    selectionText.textContent = `${areas.length} selected ${areas.length===1?'area':'areas'}${polygon ? " · polygon clipping" : ""}${regionGeometry ? " · authoritative region" : ""}. Numeric source cells are bounded geographic windows, not native pixels.`;
+    selectionText.textContent = `${areas.length} selected ${areas.length===1?'area':'areas'}${polygon ? " · polygon clipping" : ""}${regionGeometry ? " · authoritative region" : ""}. Numeric source cells are bounded geographic windows, not native pixels.${polygon||regionGeometry?" The provider search uses enclosing bounds; edge windows may include pixels outside the selected shape. Review the exact work windows before approval.":""}`;
     layers.selected.clearLayers();
     for (const a of areas)
       shape(a, "#ffd166", layers.selected, "Selected numeric window");
@@ -475,6 +495,7 @@ export async function libraryDownload(parent, api, isDisposed = () => false) {
     else map.draft([]);
     selection.dataset.bounds=JSON.stringify(areas);
     remember();
+    loadLocal(0,null).catch(error=>{if(!stopped)localStatus.textContent="Retained coverage unavailable: "+error.message;});
   }
   function remember() {
     // Store one explicit rectangle only. Never restore a polygon as its broader box,
@@ -641,7 +662,7 @@ export async function libraryDownload(parent, api, isDisposed = () => false) {
           `${item.product} · ${item.observationUtc?"original observation "+dateTime(item.observationUtc):"Composite / original observation date unknown"} · ${item.resolution}`,
         ),
         el("p", item.quality),
-        el("p",`${retained?"Retained and verified candidate — exact reuse checked at preview":"Discovered, not verified as retained"} · ${item.cloudPercent==null?"Scene cloud information unknown / not applicable":`Reported scene cloud ${item.cloudPercent}% (not a valid-pixel percentage)`}`),
+        el("p",`${retained?"Retained candidate on the loaded inventory page — integrity and exact reuse checked at preview":"Discovered — not confirmed in the loaded local page; full indexed reuse is checked at preview"} · ${item.cloudPercent==null?"Scene cloud information unknown / not applicable":`Reported scene cloud ${item.cloudPercent}% (not a valid-pixel percentage)`}`),
         el("p",`Catalog footprint intersects the selected search bounds: ${Math.max(item.bounds.west,query.area.west).toFixed(3)}–${Math.min(item.bounds.east,query.area.east).toFixed(3)}° longitude, ${Math.max(item.bounds.south,query.area.south).toFixed(3)}–${Math.min(item.bounds.north,query.area.north).toFixed(3)}° latitude. The map shows original outlines; intersections do not establish full-area or QA-valid coverage.`),
       );
       if(!item.nasa)button(row,"Select this dataset",()=>{check.checked=true;check.onchange();});
@@ -966,6 +987,7 @@ export async function libraryDownload(parent, api, isDisposed = () => false) {
                 { pageSize: 25 },
               );
           });
+          if(job.preview.work.length>500)box.append(el("p",`Map displays the first 500 of ${job.preview.work.length} work windows for responsiveness. The approved job and paged work tables retain the complete selection.`));
           manager.append(box);
           if (job.approvalId && !["Completed", "Cancelled"].includes(job.state))
             for (const work of job.preview.work.slice(0, 500))
@@ -1004,30 +1026,7 @@ export async function libraryDownload(parent, api, isDisposed = () => false) {
         }
       }
 
-      const local = await api("/api/science/library/local");
-      if (stopped || isDisposed()) return;
-      localSources=local;
-      const localKey = JSON.stringify(local);
-      if (localKey !== localSignature) {
-        localSignature = localKey;
-        layers.retained.clearLayers();
-        for (const source of local)
-          for (const ring of source.bounds || [])
-            L.polygon(
-              ring.map((p) => [p.latitude, p.longitude]),
-              {
-                color: source.filesAvailable ? "#45d6bf" : "#ff8899",
-                fillOpacity: 0.08,
-              },
-            )
-              .bindTooltip(
-                el(
-                  "span",
-                  `${source.filesAvailable ? "Retained" : "Unavailable"} · ${source.manifest.sceneId} · source QA still applies`,
-                ),
-              )
-              .addTo(layers.retained);
-      }
+      await loadLocal();
     } catch (error) {
       if (!stopped)
         feedback.textContent =

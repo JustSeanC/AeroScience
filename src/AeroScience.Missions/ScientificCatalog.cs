@@ -30,8 +30,13 @@ public sealed partial class ScientificCatalog(AutomaticScientificData automatic,
         return stem.Length==64&&stem.All(char.IsAsciiHexDigit)||stem.StartsWith("cursor-",StringComparison.Ordinal)&&stem.Length==39&&stem[7..].All(char.IsAsciiHexDigit)||stem.StartsWith("region-",StringComparison.Ordinal)&&stem.Length is 9 or 12&&stem[7..].All(char.IsAsciiDigit)||stem=="names-states"||stem.StartsWith("names-counties-",StringComparison.Ordinal)&&stem.Length==17&&stem[15..].All(char.IsAsciiDigit);
     }
     private string CacheFolder=>Path.Combine(science.DirectoryPath,"Metadata","Catalog");
-    public object Local()=>science.Availability().Select(a=>new{a.Source.Id,a.FilesAvailable,a.Source.Manifest,
-        bounds=a.Source.Manifest.Swath is {} swath?new[]{swath.Domain.Corners}:a.Source.Grids.Values.Select(ScientificRaster.GridCoverage).ToArray(),status=a.FilesAvailable?"Retained":"Unavailable",limitation="Retained footprint; scientific QA is still applied at sampling."}).ToArray();
+    public (ScientificSourcePage Page,object[] Items) LocalPage(GeographicBounds? area=null,long after=0,int limit=50,long? through=null)
+    {
+        if(area is not null)ValidateBounds(area);
+        var page=science.SourcePage(new(Area:area),after,limit,through);
+        return(page,page.Items.Select(s=>{var a=science.InspectAvailability(s);return (object)new{s.Id,a.FilesAvailable,s.Manifest,
+            bounds=s.Manifest.Swath is {} swath?new[]{swath.Domain.Corners}:s.Grids.Values.Select(ScientificRaster.GridCoverage).ToArray(),status=a.FilesAvailable?"Retained candidate":"Unavailable",limitation="Presence and geographic candidates only; exact integrity, compatibility and pixel QA are checked separately."};}).ToArray());
+    }
     private void Consent()
     {
         var p=settings.Get().Preferences;

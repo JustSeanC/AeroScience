@@ -30,6 +30,11 @@ public sealed class ScientificSourceIndexTests:IDisposable
         science.Dispose();using var reopened=new ScienceStore(science.DirectoryPath);reopened.Initialize();
         Assert.Equal(first.Id,reopened.SourcePage(new(Scene:"synthetic-region-0"),limit:1).Items.Single().Id);Assert.Equal(505,reopened.Sources().Length);
         Assert.Contains(reopened.Availability(new(40,-75),RemoteKind.Terrain),a=>a.Source.Id==first.Id&&a.FilesAvailable);
+        var settings=new ScientificAccessSettings(root);using var automatic=new AutomaticScientificData(reopened,settings);var catalog=new ScientificCatalog(automatic,reopened,settings);
+        seen.Clear();after=0;through=null;
+        do{var local=catalog.LocalPage(new(-75.02,39.98,-74.98,40.02),after,37,through);Assert.Equal(505,local.Page.Total);Assert.Equal(local.Items.Length,local.Page.Items.Length);Assert.InRange(local.Items.Length,1,37);foreach(var item in local.Page.Items)Assert.True(seen.Add(item.Id));through=local.Page.Through;if(local.Page.Next is not {} next)break;after=next;}while(true);
+        Assert.Equal(505,seen.Count);Assert.Empty(catalog.LocalPage(new(0,0,.01,.01)).Items);Assert.Throws<ArgumentException>(()=>catalog.LocalPage(limit:101));
+
         using var db=new SqliteConnection("Data Source="+science.DatabasePath+";Mode=ReadOnly;Pooling=False");db.Open();using var command=db.CreateCommand();command.CommandText="PRAGMA integrity_check";Assert.Equal("ok",command.ExecuteScalar());
         var missions=new MissionStore(Path.Combine(new PreferenceStore(root).Load().MissionDirectory,"missions.db"));missions.Initialize();var coordinator=new MissionCoordinator(missions,1000);
         var deletion=reopened.PreviewSourceDeletion(new(All:true),missions);Assert.Equal(505,deletion.TotalSources);Assert.Equal(20,deletion.Sources.Length);Assert.NotNull(deletion.Next);Assert.Equal(0,deletion.BlockedSources);

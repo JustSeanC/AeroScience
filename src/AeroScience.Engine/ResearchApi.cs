@@ -107,7 +107,22 @@ public static class ResearchApi
         app.MapPost("/api/science/library/regions/names",(ScientificRegionNamesRequest request,ScientificCatalog catalog,HttpContext c)=>catalog.RegionNames(request,c.RequestAborted));
         app.MapPost("/api/science/library/scope",(ScientificLibrarySelection selection)=>new{workCells=ScientificLibraryJobs.Expand(selection),maximumWorkUnits=4096,maximumGeometryCandidates=100000});
         app.MapGet("/api/science/library/providers",()=>ScientificCatalog.Providers);
-        app.MapGet("/api/science/library/local",(ScientificCatalog catalog)=>catalog.Local());
+        app.MapGet("/api/science/library/local",(long? after,long? through,int? limit,ScientificCatalog catalog,HttpContext context)=>
+        {
+            var local=catalog.LocalPage(after:after??0,limit:limit??50,through:through);
+            context.Response.Headers["X-AeroScience-Source-Total"]=local.Page.Total.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            context.Response.Headers["X-AeroScience-Source-Through"]=local.Page.Through.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            if(local.Page.Next is {} next)context.Response.Headers["X-AeroScience-Source-Next"]=next.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            return local.Items;
+        });
+        app.MapGet("/api/science/library/local/page",(double? west,double? south,double? east,double? north,long? after,long? through,int? limit,ScientificCatalog catalog)=>
+        {
+            GeographicBounds? area=null;
+            if(west.HasValue||south.HasValue||east.HasValue||north.HasValue)
+                area=west.HasValue&&south.HasValue&&east.HasValue&&north.HasValue?new(west.Value,south.Value,east.Value,north.Value):throw new ArgumentException("Supply all four geographic bounds.");
+            var local=catalog.LocalPage(area,after??0,limit??50,through);
+            return new{local.Items,local.Page.Next,local.Page.Through,local.Page.Total};
+        });
         app.MapPost("/api/science/library/catalog",(ScientificCatalogQuery query,ScientificCatalog catalog,HttpContext c)=>catalog.Search(query,c.RequestAborted));
         app.MapGet("/api/science/readiness",(AutomaticScientificData automatic)=>automatic.Snapshot());
         app.MapPost("/api/science/prepare",(ScientificPreparationRequest request,AutomaticScientificData automatic)=>automatic.Prepare(GeographicBounds.Around(new(request.Latitude,request.Longitude)),request.Kinds??[RemoteKind.Thermal,RemoteKind.Multispectral,RemoteKind.Terrain],retry:true,samplePoint:new(request.Latitude,request.Longitude)));
