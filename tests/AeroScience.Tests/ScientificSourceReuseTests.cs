@@ -107,5 +107,17 @@ public sealed class ScientificSourceReuseTests:IDisposable
   Assert.True(preparation.Regions(plan.Id).Any(r=>r.Status=="Ready"&&r.SourceIds?.Length==4),System.Text.Json.JsonSerializer.Serialize(new{regions=preparation.Regions(plan.Id),activity=automatic.Snapshot()},WireJson.Options));
   Assert.All(originals,s=>Assert.NotEmpty(preparation.SourceDeletionDependencies(s)));preparation.Control(plan.Id,"pause");Assert.All(originals,s=>Assert.Empty(preparation.SourceDeletionDependencies(s)));automatic.ForgetDeletedSources();preparation.SourcesRemoved([originals[0].Id]);Assert.Contains(preparation.Regions(plan.Id),r=>r.Status=="Dataset Required"&&r.SourceIds is null);
  }
+ [Fact]public async Task OfficialStyleRoundedTiffEdgesUseExistingRequestCoverageWithoutChangingOriginalGrid()
+ {
+  var selected=await Selection();var target=new GeographicBounds(-75.04,40,-75.02,40.02);var list=new List<ScientificSource>();
+  foreach(var part in new GeographicBounds[]{new(-75.04,40,-75.03,40.02),new(-75.03,40,-75.02,40.02)})
+  {
+   var d=(await automatic.Provider("usgs-3dep").Discover(RemoteKind.Terrain,part,settings.Get().Preferences,new(1048576),default))!;var folder=Path.Combine(root,Guid.NewGuid().ToString("N"));Directory.CreateDirectory(folder);
+   RemoteFixtureFiles.GeoTiff(Path.Combine(folder,"elevation.tif"),123.25f,256,7.812499999998446e-05,west:part.West-.005,north:40.02000000000001);
+   var provenance=new AutomaticSourceProvenance("usgs-3dep-numeric",d.Catalog,d.Item,[],part,DateTimeOffset.UtcNow,"SYNTHETIC reproduction of original TIFF encoding, not genuine evidence",d.Quality,d.Resolution,0,[],d.ProviderMetadataJson,81,81,selected.Revision);list.Add(await science.ImportSourceAsync(d.Manifest with{Acquisition=provenance},folder));
+  }
+  var grids=list.Select(s=>s.Grids["elevation"]).ToArray();Assert.All(grids,g=>Assert.True(g.OriginY+g.Height*g.PixelHeight>40));
+  var result=ScientificSourceSelection.ReuseArea(science,target,_=>true,Verify);Assert.Empty(result.Missing);Assert.Empty(result.QualityLimited);Assert.Equal(2,result.Reused.Select(r=>r.Source.Id).Distinct().Count());Assert.Equal(grids,list.Select(s=>science.Source(s.Id)!.Grids["elevation"]).ToArray());Assert.Equal(0,handler.Numeric);
+ }
  public void Dispose(){automatic.Dispose();science.Dispose();try{Directory.Delete(root,true);}catch(IOException){}}
 }

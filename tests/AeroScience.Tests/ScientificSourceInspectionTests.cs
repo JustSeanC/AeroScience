@@ -29,5 +29,13 @@ public sealed class ScientificSourceInspectionTests:IDisposable
  {
   var source=await Source(RemoteKind.Multispectral);var result=Read(source,"ndvi");Assert.True(result.GetProperty("derived").GetBoolean());Assert.Equal("1",result.GetProperty("unit").GetString());Assert.InRange(result.GetProperty("minimum").GetDouble(),-1,1);Assert.True(automatic.VerifyRetainedSource(source));
  }
+ [Theory]
+ [InlineData("EPSG:32618",500040,4429920,40.019486199181074,-74.99953126152131)]
+ [InlineData("EPSG:32755",345000,6250000,-33.878965845662975,145.32402781796569)]
+ [InlineData("EPSG:32633",500000,9100000,81.95674023788764,14.999999999999982)]
+ public void InspectionNativeCentersMatchIndependentProjInBothHemispheres(string crs,double x,double y,double latitude,double longitude)
+ {
+  var grid=new RasterGrid(1,1,crs,x-5,y+5,10,-10);var p=ScientificRaster.InspectionGridPoint(grid,.5,.5);Assert.InRange(Math.Abs(p.Latitude-latitude),0,1e-11);Assert.InRange(Math.Abs(p.Longitude-longitude),0,1e-11);Assert.Equal(x-5,grid.OriginX);Assert.Equal(y+5,grid.OriginY);
+ }
  public void Dispose(){automatic.Dispose();science.Dispose();try{Directory.Delete(root,true);}catch(IOException){}}
 }

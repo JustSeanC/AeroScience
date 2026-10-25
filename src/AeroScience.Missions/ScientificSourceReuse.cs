@@ -84,10 +84,14 @@ public static partial class ScientificSourceSelection
             _=RemoteCalculations.Apply(source.Manifest.Kind,numeric);
             var scientific=numeric.Where(b=>b.Id is not("QA_PIXEL" or "QA_RADSAT" or "SCL")).ToArray();
             bool Valid(int i)=>scientific.Length>0&&scientific.All(b=>b.Values[i] is {} v&&double.IsFinite(v));
-            if(grid.Crs!="EPSG:4326")
+            // An all-valid native window has the same verified RequestedArea /
+            // CoversArea contract as existing single-source reuse. Do not invent
+            // nanometre gaps by subtracting independently rounded TIFF endpoints.
+            // Original grids/coordinates and decoder tolerances remain untouched.
+            if(Enumerable.Range(0,grid.Width*grid.Height).All(Valid))support.Add(requested);
+            else if(grid.Crs!="EPSG:4326")
             {
-                if(Enumerable.Range(0,grid.Width*grid.Height).All(Valid))support.Add(requested);
-                else{const string reason="Projected source contains excluded pixels: its requested rectangle is not asserted fully valid. Exact originals remain reusable; inspect pixel QA before new acquisition.";notes.Add(reason);if(context.Supports.Count<128)context.Supports[source.Id]=([],reason);uncertain=true;continue;}
+                const string reason="Projected source contains excluded pixels: its requested rectangle is not asserted fully valid. Exact originals remain reusable; inspect pixel QA before new acquisition.";notes.Add(reason);if(context.Supports.Count<128)context.Supports[source.Id]=([],reason);uncertain=true;continue;
             }
             else
             {

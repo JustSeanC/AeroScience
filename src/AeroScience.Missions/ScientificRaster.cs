@@ -241,6 +241,18 @@ public sealed partial class ScientificRaster : IDisposable
             (south ? 10000000 : 0) + k * (m + n * Math.Tan(lat) * (A * A / 2 + (5 - t + 9 * c + 4 * c * c) * Math.Pow(A, 4) / 24 + (61 - 58 * t + t * t + 600 * c - 330 * e2 / (1 - e2)) * Math.Pow(A, 6) / 720)));
     }
     public static Coordinates GridPoint(RasterGrid grid,double column,double row)=>Unproject(grid.OriginX+column*grid.PixelWidth+row*grid.RowX,grid.OriginY+column*grid.ColumnY+row*grid.PixelHeight,grid.Crs);
+    // New retained-source inspection uses the existing GeographicLib projection
+    // for independently reproducible native centers/corners. Legacy saved-product
+    // sampling/geometry keeps its original GridPoint/Project interpretation.
+    public static Coordinates InspectionGridPoint(RasterGrid grid,double column,double row)
+    {
+        var x=grid.OriginX+column*grid.PixelWidth+row*grid.RowX;var y=grid.OriginY+column*grid.ColumnY+row*grid.PixelHeight;
+        if(grid.Crs=="EPSG:4326")return new(y,x);
+        if(!double.IsFinite(x)||!double.IsFinite(y)||!int.TryParse(grid.Crs.Replace("EPSG:",""),out var code)||code is <32601 or >32760||code is >32660 and <32701)throw new InvalidDataException("Unsupported native inspection CRS or coordinates.");
+        var point=GeographicLib.Projections.TransverseMercator.UTM.Reverse((code%100)*6-183,x-500000,y-(code>=32700?10000000:0));
+        if(!double.IsFinite(point.Item1)||!double.IsFinite(point.Item2)||point.Item1 is < -80 or >84)throw new InvalidDataException("Native inspection coordinate is outside supported UTM bounds.");
+        return new(point.Item1,point.Item2);
+    }
     public static Coordinates[] GridCoverage(RasterGrid grid)=>[GridPoint(grid,0,0),GridPoint(grid,grid.Width,0),GridPoint(grid,grid.Width,grid.Height),GridPoint(grid,0,grid.Height)];
     private (double Column,double Row) Pixel(Coordinates point)
     {
