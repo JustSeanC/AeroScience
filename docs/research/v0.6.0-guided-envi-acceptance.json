@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "version": "0.6.0",
   "evidenceType": "genuine-downloaded-envi",
-  "checkedUtc": "2026-10-25T02:56:23.9525928+00:00",
+  "checkedUtc": "2026-10-25T04:02:58.9267723+00:00",
   "windowsMsfs": "not tested",
   "firstTimeUser": "not tested",
   "flightInput": "synthetic test position; not MSFS",
@@ -63,12 +63,12 @@
     "originalFilesPreserved": true,
     "offlineReopen": true,
     "duplicateReused": true,
-    "publishedProductSha256": "8314715557930ae0be121b5f5371d0d1d01ae0efce7f18dd9c0996f2dc494e4c",
+    "publishedProductSha256": "b06da8f1bf673f2d5779c8c0f4202ae8b3cc1c4c33281d5997131c7890dc5f8c",
     "validSamples": 97920
   },
   "independentComparison": {
     "evidenceType": "independent-genuine-envi-comparison",
-    "checkedUtc": "2026-10-25T02:56:25.515662+00:00",
+    "checkedUtc": "2026-10-25T04:03:00.491415+00:00",
     "tool": "rasterio 1.4.3 / GDAL 3.9.3",
     "checkedGoodBands": 170,
     "excludedBadBands": 54,
@@ -601,15 +601,15 @@
   },
   "runProvenance": [
     {
-      "runId": "5dd1bf7b-c272-45bf-9e5d-1257dfb4e539",
+      "runId": "ba063531-eb15-47fb-9f9d-c42669c2d158",
       "status": "passed",
-      "sourceCommit": "b69b70abd5ca9c03b13a36519b837f8500835322",
+      "sourceCommit": "93529b8fc7eaf060b710bf4410e6a4614a8904e4",
       "sourceManifestSha256": "a4be599b6b33668d9ca099800201db2a578eaab86fcb862087745c9fc0f83b71",
-      "receiptSha256": "c9045eae28efb0bcfdc7a1faf7deb158b3250be0f9770400d6b6f286e52c37f9"
+      "receiptSha256": "ab81bb6c04591bbc180fa597789d740c89e76df7add3fa686dec415c38a0b8f9"
     }
   ],
   "notes": "Actual public ENVI originals imported and sampled through production source/product pipeline. Original detector channels retained; 54 original bad bands excluded. Unknown acquisition date retained. No Windows/MSFS flight or uncoached-user acceptance asserted. Data files are not redistributed.",
-  "artifactSha256": "93f3abbb886e3159ac6dc270846738a65b46628f74ed24443ff8cbf1febae11c",
+  "artifactSha256": "b4f64a0bcd4dc7a2de62332152eac92014fd36bd5950d89a0f8dd3f1596803f2",
   "downloadedRangeBytes": 98717996,
   "downloadReceiptSha256": "254a29682d7a5031f2d95ac0600e3d9aee377afed54fad277ae830a56e1d2861"
 }
