@@ -52,7 +52,11 @@ public sealed class ScientificHdfReader(HdfWorkerCommand? command=null)
             try
             {
                 try{child.PriorityClass=ProcessPriorityClass.BelowNormal;}catch(Exception error)when(error is InvalidOperationException or System.ComponentModel.Win32Exception){throw new ScientificHdfException("IsolationUnavailable","Scientific reader background priority could not be established.");}
-                await child.StandardInput.BaseStream.WriteAsync(body,token);await child.StandardInput.WriteLineAsync();child.StandardInput.Close();
+                // One token-aware UTF-8 frame. Mixing a raw write with StreamWriter's
+                // uncancellable newline/flush can race the cancellation callback that
+                // kills the child, leaving Windows to report a broken pipe instead.
+                var framedRequest=new byte[body.Length+1];body.CopyTo(framedRequest,0);framedRequest[^1]=10;
+                await child.StandardInput.BaseStream.WriteAsync(framedRequest,token);child.StandardInput.Close();
                 async Task<HdfFrame> Frame(int seconds)
                 {
                     using var deadline=CancellationTokenSource.CreateLinkedTokenSource(token);deadline.CancelAfter(TimeSpan.FromSeconds(seconds));
@@ -64,8 +68,12 @@ public sealed class ScientificHdfReader(HdfWorkerCommand? command=null)
                 using var exit=CancellationTokenSource.CreateLinkedTokenSource(token);exit.CancelAfter(TimeSpan.FromSeconds(5));await child.WaitForExitAsync(exit.Token);await stderr;
                 var result=final.Result??throw new IOException("Scientific reader did not return a verified result.");
                 if(child.ExitCode!=0||result.Version!=1||result.LibraryId!=request.Original.LibraryId||result.OriginalSha256!=request.Original.Sha256||result.OriginalBytes!=request.Original.Bytes||result.RelativePath!=request.Original.RelativePath||result.Windows.Length!=request.Windows.Length)throw new ScientificHdfException("Protocol","Scientific reader result identity differs from the approved original.");
-                return result;
+                token.ThrowIfCancellationRequested();return result;
             }
+            // Windows can report pipe closure; frame reads can carry a linked
+            // deadline token. Only caller cancellation takes this path, always
+            // identifying the caller's token. Genuine failures/deadlines stay errors.
+            catch(Exception error)when(token.IsCancellationRequested && error is (IOException or OperationCanceledException)){throw new OperationCanceledException("Scientific reader was cancelled; no result was published.",error,token);}
             catch(Exception error)when(error is EndOfStreamException or JsonException){token.ThrowIfCancellationRequested();throw new ScientificHdfException("ResourceOrFormat","Isolated scientific reader stopped without a verified result. The source may be malformed or exceed reader resource limits; no data was imported.");}
             finally{Stop();try{await child.WaitForExitAsync();await stderr;}catch(Exception error)when(error is IOException or OperationCanceledException or InvalidOperationException){}}
         }

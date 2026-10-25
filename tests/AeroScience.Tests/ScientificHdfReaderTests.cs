@@ -150,5 +150,45 @@ public sealed class ScientificHdfReaderTests:IDisposable
         using(var file=File.Open(Path.Combine(root,source.RelativePath),FileMode.Open,FileAccess.ReadWrite,FileShare.None)){}
         var result=await Reader().ReadAsync(Request(source));Assert.Single(result.Windows);
     }
+    [Theory][InlineData(true)][InlineData(false)]
+    public async Task PendingRequestPipeCancellationIsDistinctFromUnexpectedWorkerExitAndReleasesTheReader(bool cancelRequest)
+    {
+        var source=Original("synthetic-emit-reflectance.nc");var interpreter=await ResolveProtocolInterpreter();
+        var marker=Path.Combine(root,"protocol-worker.pid");
+        // Fill the Windows anonymous-input pipe while the real child deliberately
+        // does not read. The owner failure occurred during this request/kill race.
+        var attributes=Enumerable.Range(0,16).Select(i=>new string('a',79)+(char)('A'+i)).ToArray();
+        var request=new HdfReadRequest(1,source,Enumerable.Range(0,16).Select(_=>new HdfWindow(new string('d',500),[0],[1],attributes)).ToArray());
+        var bytes=JsonSerializer.SerializeToUtf8Bytes(request,ScientificHdfReader.Json);
+        Assert.InRange(bytes.Length,16384,ScientificHdfReader.MaximumRequest);
+        var script="import os,pathlib,time;p=pathlib.Path("+JsonSerializer.Serialize(marker)+");s=p.with_suffix('.pending');s.write_text(str(os.getpid()));os.replace(s,p);"+(cancelRequest?"time.sleep(40)":"raise SystemExit(37)");
+        using var cancellation=new CancellationTokenSource();
+        var reader=new ScientificHdfReader(new(interpreter,["-I","-S","-c",script]));
+        var read=reader.ReadAsync(request,cancellation.Token);
+        try
+        {
+            if(cancelRequest)
+            {
+                using var startup=new CancellationTokenSource(TimeSpan.FromSeconds(15));
+                while(!File.Exists(marker))await Task.Delay(10,startup.Token);
+                // Atomic publication avoids observing a half-written PID marker.
+                var pid=int.Parse(await File.ReadAllTextAsync(marker,startup.Token));
+                using var child=Process.GetProcessById(pid);Assert.False(read.IsCompleted);
+                cancellation.Cancel();
+                var error=await Assert.ThrowsAnyAsync<OperationCanceledException>(()=>read.WaitAsync(TimeSpan.FromSeconds(5)));
+                Assert.Equal(cancellation.Token,error.CancellationToken);Assert.True(child.HasExited);
+            }
+            else
+            {
+                await Assert.ThrowsAnyAsync<IOException>(()=>read.WaitAsync(TimeSpan.FromSeconds(15)));
+                Assert.False(cancellation.IsCancellationRequested);
+            }
+        }
+        finally{cancellation.Cancel();try{await read;}catch(Exception e)when(e is IOException or OperationCanceledException){}}
+        using(var original=File.Open(Path.Combine(root,source.RelativePath),FileMode.Open,FileAccess.ReadWrite,FileShare.None))
+            Assert.Equal(source.Sha256,Convert.ToHexStringLower(SHA256.HashData(original)));
+        // A cancelled/failed transfer must release the global slot and actual file.
+        Assert.Single((await Reader().ReadAsync(Request(source))).Windows);
+    }
     public void Dispose(){Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();if(Directory.Exists(root))Directory.Delete(root,true);}
 }
