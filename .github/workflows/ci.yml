@@ -84,12 +84,12 @@ jobs:
       - uses: actions/setup-dotnet@v6
         with:
           global-json-file: global.json
-      - name: Test profile isolation and existing Windows wire compatibility
+      - name: Test profile isolation, toolbar installation and HDF worker protocol
         shell: pwsh
         run: |
           dotnet restore AeroScience.sln --locked-mode
           if ($LASTEXITCODE -ne 0) { throw 'Locked dependency restore failed.' }
-          dotnet test tests/AeroScience.Tests -c Release --no-restore --filter 'FullyQualifiedName~ValidationIsolationTests|FullyQualifiedName~ModeAndToolbarTests' --logger 'trx;LogFileName=windows-profile.trx' --blame-hang-timeout 2m --blame-hang-dump-type none
+          dotnet test tests/AeroScience.Tests -c Release --no-restore --filter 'FullyQualifiedName~ValidationIsolationTests|FullyQualifiedName~ModeAndToolbarTests|FullyQualifiedName~ToolbarInstallTests|FullyQualifiedName~ScientificHdfReaderTests' --logger 'trx;LogFileName=windows-profile.trx' --blame-hang-timeout 2m --blame-hang-dump-type none
           if ($LASTEXITCODE -ne 0) { throw 'Windows isolation/protocol tests failed.' }
       - name: Publish production and isolated validation graphs (not distributable)
         shell: pwsh

@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "version": "0.6.0",
   "evidenceType": "genuine-downloaded-envi",
-  "checkedUtc": "2026-10-25T04:02:58.9267723+00:00",
+  "checkedUtc": "2026-10-25T18:34:05.0380681+00:00",
   "windowsMsfs": "not tested",
   "firstTimeUser": "not tested",
   "flightInput": "synthetic test position; not MSFS",
@@ -63,12 +63,12 @@
     "originalFilesPreserved": true,
     "offlineReopen": true,
     "duplicateReused": true,
-    "publishedProductSha256": "b06da8f1bf673f2d5779c8c0f4202ae8b3cc1c4c33281d5997131c7890dc5f8c",
+    "publishedProductSha256": "b5379bc7fc53f28b06ec4b754e9dbbbdc4ffbeb28ba02c130d22010a78020ad0",
     "validSamples": 97920
   },
   "independentComparison": {
     "evidenceType": "independent-genuine-envi-comparison",
-    "checkedUtc": "2026-10-25T04:03:00.491415+00:00",
+    "checkedUtc": "2026-10-25T18:34:07.208041+00:00",
     "tool": "rasterio 1.4.3 / GDAL 3.9.3",
     "checkedGoodBands": 170,
     "excludedBadBands": 54,
@@ -158,10 +158,10 @@
     "src/AeroScience.Desktop/WindowsEarthdataCredentials.cs": "1cd020cf04a9dca4a9b942806531efdbc748ee637bbca38a6c6719e427e3f26f",
     "src/AeroScience.Engine/AccessControl.cs": "7c821fc351d33e8a6aea61cdfef571ff07b61d721a992d5eed7ba0ff19b6eca7",
     "src/AeroScience.Engine/AeroScience.Engine.csproj": "f553d0ce2800d6bd7dc20c30d8d6224dfc532223c2f936b04d61a119c3c48193",
-    "src/AeroScience.Engine/ApplicationProfile.cs": "ed9eb77ef8a6a957930113c6a9de24a1a3ec5a61d00a10419d6e304698564297",
+    "src/AeroScience.Engine/ApplicationProfile.cs": "6723da530845cf5a55beb89528f2ede77c9ed3fb1fa0ff5c9f71f054fb65bcfe",
     "src/AeroScience.Engine/ApplicationUpdates.cs": "9a14a04c54122ab0e28ef7ac440c961edf02a219d3fed8cf2cb6d1df4a9302c8",
-    "src/AeroScience.Engine/AviationAcquisition.cs": "3a2c6bb8b95e9d5a6dda924e85f5eb86f0643624cbf3f2dad619b04e95d0392c",
-    "src/AeroScience.Engine/AviationAcquisitionWorker.cs": "62eab4165a28873ffea275382a23e428520855d9f409ce7978825ff798145fa9",
+    "src/AeroScience.Engine/AviationAcquisition.cs": "1dea8b135091c2acec21eb28a6a3176fd9ed75e199ee219001ffbb0e97212b56",
+    "src/AeroScience.Engine/AviationAcquisitionWorker.cs": "5671bacd8d226f4c3c6f358901459101740809e9da070428b082ff3785afc295",
     "src/AeroScience.Engine/AviationCharts.cs": "40dd17c7c97c1cad1604425951d8bb5e2331a1d104d2d41682339fc85354c313",
     "src/AeroScience.Engine/AviationNasr.cs": "38ad8c151c73bb2bb1ea9bd3ecee20bf89f3183eedb6bbc09b4a868109584671",
     "src/AeroScience.Engine/AviationReference.cs": "e30219e757ed0a6ecac5fbac4685cc2618d3d35295df1f6a805b8f62ba471ec6",
@@ -196,7 +196,7 @@
     "src/AeroScience.Engine/StorageManagementWorker.cs": "452fdbd7236f60bc9bceba816f8f9da43647b4f63a50147e74dd269e32e4c582",
     "src/AeroScience.Engine/TelemetryWorker.cs": "928c25359f41c348b00b681f8f9be9ffd3f38af94384ab04e2e55d60201c2a7f",
     "src/AeroScience.Engine/ToolbarBridgeStatus.cs": "1fe8204db87b4e17a8cefe30231237fcf0e8ba853f834f595a12e4820b8bb69c",
-    "src/AeroScience.Engine/ToolbarInstaller.cs": "306ce6ee260d9e29a09a9edb027e6873d84baa0f4b0a02b343e27bb9a0c7de92",
+    "src/AeroScience.Engine/ToolbarInstaller.cs": "707e02f00dca63628354297a981c6c5298199e2a9a9e342e01a3e407742cb3c3",
     "src/AeroScience.Engine/ToolbarVersions.cs": "d54d6a5472a0ca55035ffd8a5102548db147fff337ecb07b9ee63c7018708880",
     "src/AeroScience.Engine/ToolbarWorker.cs": "e25d750c688eef7d06e6b4c58cf0da603f764d9c2d3079e1fba7635ccfc5327a",
     "src/AeroScience.Engine/ValidationArchiveCopy.cs": "5468e9c19249d1cff487dcb2d3e595cf799484589d800f5c8fcbbc0aa68a5e22",
@@ -601,15 +601,15 @@
   },
   "runProvenance": [
     {
-      "runId": "ba063531-eb15-47fb-9f9d-c42669c2d158",
+      "runId": "095c3cee-1d4e-4e8f-ba6f-45a68439bb1b",
       "status": "passed",
-      "sourceCommit": "93529b8fc7eaf060b710bf4410e6a4614a8904e4",
-      "sourceManifestSha256": "a4be599b6b33668d9ca099800201db2a578eaab86fcb862087745c9fc0f83b71",
-      "receiptSha256": "ab81bb6c04591bbc180fa597789d740c89e76df7add3fa686dec415c38a0b8f9"
+      "sourceCommit": "29b9c5eaa421faec25a9a6535ec006446acf28c9",
+      "sourceManifestSha256": "0dfafb2874c48a56c6c430eed20423ffc7fc0292d35a7b4cb94e7c0d1931234f",
+      "receiptSha256": "485f7dd703b8f84ca42b168f671dcebfa6586eb736c61fc946b1ea2444fc6c9a"
     }
   ],
   "notes": "Actual public ENVI originals imported and sampled through production source/product pipeline. Original detector channels retained; 54 original bad bands excluded. Unknown acquisition date retained. No Windows/MSFS flight or uncoached-user acceptance asserted. Data files are not redistributed.",
-  "artifactSha256": "b4f64a0bcd4dc7a2de62332152eac92014fd36bd5950d89a0f8dd3f1596803f2",
+  "artifactSha256": "b4041a3ae97f50f2940ebe07910f8e2efe90a802ce6bc90d7e2a0cf1652959c8",
   "downloadedRangeBytes": 98717996,
   "downloadReceiptSha256": "254a29682d7a5031f2d95ac0600e3d9aee377afed54fad277ae830a56e1d2861"
 }
