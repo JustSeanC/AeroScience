@@ -1,3 +1,4 @@
+import {removeRetainedFixtureSources} from './helpers/source-cleanup.mjs';
 import {openLibrary,applyBounds} from './helpers/library-ui.js';
 import {test,expect} from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
@@ -62,7 +63,7 @@ test('retained geographic inventory pages independently without claiming verifie
   expect((await request.get('/api/science/library/local/page?west=-75')).status()).toBe(400);const legacy=await request.get('/api/science/library/local?limit=7');expect((await legacy.json()).length).toBe(7);expect(legacy.headers()['x-aeroscience-source-next']).toBeTruthy();
   await openLibrary(page);await applyBounds(page);const panel=page.getByRole('region',{name:'Retained coverage inventory'});await expect(panel).toContainText('50 retained candidates on this page');await expect(panel).toContainText('not a Library capacity limit');await panel.getByRole('button',{name:'More retained coverage'}).click();await expect(panel.getByRole('button',{name:'First retained page'})).toBeEnabled();await panel.getByRole('button',{name:'First retained page'}).click();await expect(panel).toContainText('50 retained candidates on this page');
   await page.setViewportSize({width:390,height:740});expect((await new AxeBuilder({page}).include('[aria-label="Retained coverage inventory"]').analyze()).violations).toEqual([]);expect((await(await request.get('/api/science/library/jobs')).json()).jobs.every(j=>j.state==='Awaiting Approval'||j.state==='Completed'||j.state==='Cancelled')).toBe(true);
- }finally{if(created.length){const preview=await post(request,'/api/science/sources/deletion/preview',{sourceIds:created});expect(preview.blockedSources).toBe(0);const result=await post(request,'/api/science/sources/deletion/execute',{previewId:preview.id,selectionHash:preview.selectionHash});expect(result.state).toBe('Completed');expect(result.removedSources).toBe(64);}}
+ }finally{if(created.length){await page.goto('/#control');await removeRetainedFixtureSources(request,created);}}
 });
 
 test('four real local numeric windows jointly satisfy one approved region offline without new source copies',async({page,request})=>{
