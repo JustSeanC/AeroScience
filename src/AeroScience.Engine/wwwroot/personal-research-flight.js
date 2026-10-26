@@ -51,16 +51,18 @@ export function researchFlightControls(parent,api){
  }};
 }
 
-export async function researchFlightTimeline(parent,api,flight){
+export async function researchFlightTimeline(parent,api,flight,{attemptId,at}={}){
  const root=node('section',undefined,'panel research-panel');root.setAttribute('aria-label','Test-card activity and evidence');root.append(node('h2','Test-card Activity & Evidence Timeline'),node('p','Actual host UTC events and original evidence references. Card activation is independent of science sessions. Selecting an event reads nearby retained evidence; gaps are never interpolated.'));parent.append(root);
  const status=node('p');status.setAttribute('role','status');root.append(status);const [state]=await Promise.all([api(`/api/missions/${flight}/research-operations`)]);if(!root.isConnected)return;
- let offset=0,after=0,inspection=0;const attempts=node('div'),events=node('div'),evidence=node('div');evidence.setAttribute('role','status');root.append(attempts,events,evidence);
- async function loadAttempts(){const rows=await api(`/api/missions/${flight}/research-attempts?offset=${offset}`);if(!root.isConnected)return;attempts.replaceChildren(node('h3','Recorded Attempts'));
+ let selected=attemptId?await api(`/api/research/recorded-attempts/${attemptId}`):null;
+ if(selected&&selected.flightId!==flight)throw Error('The selected attempt belongs to another flight. Refresh the experiment.');
+ let offset=0,after=selected?Math.max(0,selected.beginEventId-1):0,inspection=0;const attempts=node('div'),events=node('div'),evidence=node('div');evidence.setAttribute('role','status');root.append(attempts,events,evidence);
+ async function loadAttempts(){const rows=selected?[selected]:await api(`/api/missions/${flight}/research-attempts?offset=${offset}`);if(!root.isConnected)return;attempts.replaceChildren(node('h3','Recorded Attempts'));
   if(!rows.length)attempts.append(node('p','No marked attempts on this page. Existing postflight-only P01 results remain available in My Research.'));
   for(const attempt of rows){const card=state.cards.find(c=>c.card.id===attempt.cardId)?.card;const label={recording:'Recording',recorded:'Recorded',interrupted:'Interrupted'}[attempt.status]||'Unknown';const row=node('article');row.append(node('strong',`${card?.name||'Personal test card'} · revision ${attempt.cardRevision} · ${label}`),node('p',`${attempt.startUtc} → ${attempt.endUtc||'Attempt still recording'} · ${attempt.endReason||'Explicit attempt boundaries'} · Events ${attempt.beginEventId} / ${attempt.endEventId??'pending'}`));
    if(attempt.endUtc&&!state.recording){const command=newIdentity();button(row,'Evaluate Attempt',async()=>{const result=await api(`/api/research/recorded-attempts/${attempt.id}/evaluate`,{requestId:command});if(row.isConnected){row.querySelector('.attempt-result')?.remove();const shown=attemptView(result);shown.classList.add('attempt-result');row.append(shown);}});}
    attempts.append(row);
-  }button(attempts,'Newer Attempt Page',()=>{offset=Math.max(0,offset-20);return loadAttempts();});button(attempts,'Older Attempt Page',()=>{offset+=20;return loadAttempts();});
+  }if(selected)button(attempts,'Show All Flight Attempts',()=>{selected=null;return loadAttempts();});else{button(attempts,'Newer Attempt Page',()=>{offset=Math.max(0,offset-20);return loadAttempts();});button(attempts,'Older Attempt Page',()=>{offset+=20;return loadAttempts();});}
  }
  async function inspect(at){
   const own=++inspection,q=encodeURIComponent(at);const found=await Promise.allSettled([api(`/api/missions/${flight}/replay?at=${q}&limit=3`),api(`/api/missions/${flight}/replay/context?at=${q}`),api(`/api/missions/${flight}/replay/acquisitions?at=${q}`)]);if(!root.isConnected||own!==inspection)return;evidence.replaceChildren(node('h3','Original Evidence Near '+at));
@@ -75,5 +77,5 @@ export async function researchFlightTimeline(parent,api,flight){
    if(technical){const details=node('details');details.append(node('summary','Technical Event Evidence'),node('pre',event.message));row.append(details);}
   }button(events,'First Event Page',()=>{after=0;return loadEvents();});if(rows.length===100)button(events,'Next Event Page',()=>{after=rows.at(-1).id;return loadEvents();});
  }
- try{await Promise.all([loadAttempts(),loadEvents()]);status.textContent='Recorded events retain their original UTC and identities. An interrupted attempt cannot receive an automatic pass.';}catch(error){status.textContent=error.message;}
+ try{await Promise.all([loadAttempts(),loadEvents()]);if(at)await inspect(at);status.textContent='Recorded events retain their original UTC and identities. An interrupted attempt cannot receive an automatic pass.';}catch(error){status.textContent=error.message;}
 }

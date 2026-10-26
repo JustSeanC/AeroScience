@@ -1,4 +1,5 @@
 import {newIdentity,node} from './workstation-ui.js';
+import {researchExperimentReview} from './personal-research-review.js';
 let epoch = 0, cardOffset = 0, resultOffset = 0;
 let draft = null;
 export function disposePersonalResearch() { epoch++; }
@@ -59,6 +60,7 @@ export async function personalResearch(root, api) {
       editor.append(form);
     };
     renderEditor(); root.append(editor);
+    const experiment=node('div');
     const review = node('section', undefined, 'panel research-panel'); review.id = 'personal-research-review';
     let reviewEpoch = 0;
     const showReview = async (card, selectedFlight = null, offset = 0) => {
@@ -113,14 +115,15 @@ export async function personalResearch(root, api) {
           if (active()) location.hash = `#planner?researchPlan=${plan.id}`;
         }, 'primary'),
         action('Review Recorded Flight', () => showReview(card)),
+        action('Overview & Compare',()=>researchExperimentReview(experiment,api,card,active)),
         action('Edit Card', () => { draft = structuredClone(card); renderEditor(); editor.scrollIntoView({block:'start'}); editor.querySelector('input').focus(); }));
       root.append(row);
     }
-    root.append(action('Newer Cards', async () => {cardOffset = Math.max(0,cardOffset-20); await personalResearch(root,api);}), action('Older Cards', async () => {cardOffset += 20; await personalResearch(root,api);}), review,
-      node('h2', 'Saved Local Results'));
-    if (!attempts.length) root.append(node('p', 'No saved results on this page. Review a completed card flight to evaluate its recorded evidence.'));
-    for (const attempt of attempts) root.append(attemptView(attempt));
-    root.append(action('Newer Results', async () => {resultOffset = Math.max(0,resultOffset-20); await personalResearch(root,api);}), action('Older Results', async () => {resultOffset += 20; await personalResearch(root,api);}));
+    root.append(action('Newer Cards', async () => {cardOffset = Math.max(0,cardOffset-20); await personalResearch(root,api);}), action('Older Cards', async () => {cardOffset += 20; await personalResearch(root,api);}), experiment, review);
+    const saved=node('details',undefined,'panel research-panel');saved.append(node('summary','Saved Local Results — All Evaluations'),node('p','Every saved evaluation is retained here. Overview & Compare groups repeated evaluations into their original attempts.'));
+    if (!attempts.length) saved.append(node('p', 'No saved results on this page. Review a completed card flight to evaluate its recorded evidence.'));
+    for (const attempt of attempts) saved.append(attemptView(attempt));
+    saved.append(action('Newer Results', async () => {resultOffset = Math.max(0,resultOffset-20); await personalResearch(root,api);}), action('Older Results', async () => {resultOffset += 20; await personalResearch(root,api);}));root.append(saved);
     const selectedFlight = new URLSearchParams(location.hash.split('?')[1] || '').get('flight');
     if (selectedFlight) {
       const research = await api(`/api/missions/${encodeURIComponent(selectedFlight)}/research`);
@@ -135,7 +138,7 @@ export function attemptView(attempt) {
   const outcome = {pass:'Pass', fail:'Fail', insufficientEvidence:'Insufficient Evidence'}[attempt.outcome] || 'Unknown';
   panel.append(node('h3', `${attempt.card.name} — ${outcome}`), node('p', attempt.explanation),
     node('p', `Longest supported hold: ${attempt.longestSupportedHoldSeconds.toFixed(1)} seconds · Required: ${attempt.card.flightRegime.holdSeconds} seconds · Card revision ${attempt.card.revision}`),
-    node('p', `Evidence: ${attempt.startUtc} to ${attempt.endUtc} · ${attempt.evidence.sampleCount} recorded samples · ${attempt.evidence.source === 'simulator' ? 'Recorded simulator telemetry' : 'Synthetic/demo telemetry; not an installed MSFS test'}`));
+    node('p', `Evidence: ${attempt.startUtc} to ${attempt.endUtc} · ${attempt.evidence.sampleCount} recorded samples · ${attempt.evidence.source === 'simulator' ? 'Recorded simulator telemetry' : attempt.evidence.source === 'simulated' ? 'Synthetic/demo telemetry; not an installed MSFS test' : 'Source unavailable; no telemetry source type inferred'}`));
   const details = node('details'); details.append(node('summary', 'Evidence References'), node('p', `Flight ${attempt.flightId} · Original telemetry sequences ${attempt.evidence.firstSequence}–${attempt.evidence.lastSequence}`),
     node('p', `Evaluator ${attempt.evaluatorVersion} · Evidence SHA-256 ${attempt.evidence.sha256} · Plan SHA-256 ${attempt.evidence.planSha256}`));
   panel.append(details); return panel;

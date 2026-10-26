@@ -92,3 +92,9 @@ dialog.managed-popup{max-width:min(56rem,calc(100vw - 1.5rem));max-height:88dvh;
 .source-inspection-dialog{width:min(980px,calc(100vw - 1rem));max-width:calc(100vw - 1rem);max-height:calc(100dvh - 2rem);overflow:auto;box-sizing:border-box}
 .source-inspection-dialog .workspace-map .geographic-map{height:clamp(240px,40vh,420px);min-height:240px}
 .source-inspection-dialog .workspace-controls>*{max-width:100%;box-sizing:border-box}
+
+/* Personal Research reuses the scientific table/chart components. */
+#research-experiment-review label{display:flex;align-items:center;gap:.7rem;min-height:44px;overflow-wrap:anywhere}
+#research-experiment-review input[type=checkbox]{width:24px;height:24px;flex:0 0 24px}
+#research-experiment-review section,#research-experiment-review article{min-width:0}
+#research-experiment-review .action-row{flex-wrap:wrap}

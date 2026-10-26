@@ -111,12 +111,18 @@ public sealed partial class MissionStore
             ||request.Attempts.Select(a=>(a.Kind,a.Id)).Distinct().Count()!=request.Attempts.Length)
             throw new ArgumentException("Choose 2–8 distinct attempts from this experiment. This limits one comparison, not your retained results.");
         var card=ResearchCard(cardId);using var db=Open();using var tx=db.BeginTransaction(deferred:true);
+        token.ThrowIfCancellationRequested();
+        var predicates=Enumerable.Range(0,request.Attempts.Length).Select(i=>$"(id=$id{i} AND kind=$kind{i})");
+        using var selectionCommand=ResearchReviewCommand(db,tx,cardId,"SELECT "+ResearchHistoryColumns+" FROM selected WHERE "+string.Join(" OR ",predicates));
+        for(var i=0;i<request.Attempts.Length;i++){
+            selectionCommand.Parameters.AddWithValue("$id"+i,request.Attempts[i].Id.ToString());selectionCommand.Parameters.AddWithValue("$kind"+i,request.Attempts[i].Kind.ToString());
+        }
+        var chosen=new Dictionary<(ResearchAttemptKind,Guid),ResearchHistoryItem>();
+        using(var reader=selectionCommand.ExecuteReader())while(reader.Read()){var row=ReadResearchHistory(reader);chosen.Add((row.Kind,row.Id),row);}
         var rows=new List<ResearchComparisonEntry>();
         foreach(var selection in request.Attempts){
             token.ThrowIfCancellationRequested();
-            using var cmd=ResearchReviewCommand(db,tx,cardId,"SELECT "+ResearchHistoryColumns+" FROM selected WHERE id=$id AND kind=$kind");
-            cmd.Parameters.AddWithValue("$id",selection.Id.ToString());cmd.Parameters.AddWithValue("$kind",selection.Kind.ToString());
-            ResearchHistoryItem row;using(var r=cmd.ExecuteReader())row=r.Read()?ReadResearchHistory(r):throw new ArgumentException("An attempt or flight is no longer available in this experiment. Refresh its history.");
+            var row=chosen.GetValueOrDefault((selection.Kind,selection.Id))??throw new ArgumentException("An attempt or flight is no longer available in this experiment. Refresh its history.");
             if(row.Result?.Id!=selection.ResultId)throw new InvalidOperationException("A selected result changed. Refresh the experiment before comparing.");
             rows.Add(new(row,row.Result is {} result?AuditResearchEvidence(db,tx,result,token):null));
         }
