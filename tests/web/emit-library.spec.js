@@ -7,6 +7,36 @@ test.beforeEach(async({request})=>{await clean(request);await post(request,'/api
 test.afterEach(async({request})=>{await clean(request);await post(request,'/api/testing/library/teardown');});
 async function select(request){await post(request,'/api/testing/emit/select');return (await(await request.get('/api/science/emit/import')).json()).review;}
 async function imported(request){const r=await select(request);await post(request,'/api/science/emit/import',{id:r.id,selectionHash:r.selectionHash,validationAcknowledged:true});await expect.poll(async()=>(await(await request.get('/api/science/emit/import')).json()).stage,{timeout:20000}).toBe('Ready');return (await(await request.get('/api/science/emit/import')).json()).sourceId;}
+async function removeRetainedFixtureSources(request,sourceIds){
+ // A reviewed selection does not reserve a source-maintenance lease. Retained
+ // preparation/inspection can start between preview and execution in the shared
+ // real host. Wait only for that explicit busy response, never bypass the guard.
+ const session=await(await request.post('/api/session',{headers:{Origin:origin},data:{}})).json();
+ const headers={Origin:origin,'X-AeroScience-CSRF':session.csrf};
+ const deadline=Date.now()+5000;
+ while(true){
+  const response=await request.post('/api/science/sources/deletion/preview',{headers,data:{sourceIds}});expect(response.ok(),await response.text()).toBeTruthy();const review=await response.json();
+  expect(review.totalSources).toBe(sourceIds.length);
+  if(review.blockedSources){
+   const blockers=review.sources.flatMap(s=>s.blockers);
+   expect(blockers.length).toBeGreaterThan(0);
+   for(const reason of blockers)expect(reason).toBe('Scientific acquisition/import/analysis or source maintenance is active. Finish or cancel it before deletion.');
+  }else{
+   expect(review.eligibleSources).toBe(sourceIds.length);
+   const execution=await request.post('/api/science/sources/deletion/execute',{headers,data:{previewId:review.id,selectionHash:review.selectionHash}});
+   if(execution.ok())break;
+   expect(execution.status()).toBe(409);const error=(await execution.json()).error;
+   expect([
+    'Finish active scientific acquisition, import or analysis before deleting external sources.',
+    'Selected source is protected or cannot be safely verified. Nothing was removed: Scientific acquisition/import/analysis or source maintenance is active.',
+   ]).toContain(error);
+  }
+  expect(Date.now(), 'Temporary source activity must quiesce; deletion protections were retained.').toBeLessThan(deadline);
+  await new Promise(resolve=>setTimeout(resolve,50));
+ }
+ const remaining=(await(await request.get('/api/science/sources/page?kind=hyperspectral&limit=100')).json()).items;
+ expect(remaining.some(item=>sourceIds.includes(item.source.id))).toBe(false);
+}
 test('EMIT local review, explicit experimental approval, spectrum/QA/map/comparison/export and accessible close use actual backend',async({page,request})=>{
  test.setTimeout(60000);await page.goto('/#library');await page.getByRole('button',{name:'Import NASA EMIT Originals',exact:true}).click();const dialog=page.getByRole('dialog',{name:'Import NASA EMIT Originals',exact:true});await select(request);
  await expect(dialog.getByText('Review exact originals',{exact:true})).toBeVisible();await expect(dialog).toContainText('RFL002 / uncertainty002 / MASK003');const approve=dialog.getByRole('button',{name:'Import Verified EMIT Source'});await expect(approve).toBeDisabled();await dialog.getByRole('checkbox').check();await approve.click();
@@ -22,7 +52,7 @@ test('EMIT local review, explicit experimental approval, spectrum/QA/map/compari
 test('CMR companion review drives durable NASA job, retains source and reuses offline without another transfer',async({page,request})=>{
  test.setTimeout(60000);
  const existing=(await(await request.get('/api/science/sources/page?kind=hyperspectral&limit=100')).json()).items.filter(x=>x.source.manifest.swath).map(x=>x.source.id);
- if(existing.length){const review=await post(request,'/api/science/sources/deletion/preview',{sourceIds:existing});expect(review.blockedSources).toBe(0);expect(review.eligibleSources).toBe(existing.length);await post(request,'/api/science/sources/deletion/execute',{previewId:review.id,selectionHash:review.selectionHash});}
+ if(existing.length)await removeRetainedFixtureSources(request,existing);
  await post(request,'/api/testing/library/mode/emit-application');await openLibrary(page);await page.getByLabel('Scientific provider / product',{exact:true}).selectOption('nasa-emit');
  for(const[label,value]of[['West longitude','-120.1'],['East longitude','-119.9'],['South latitude','37.9'],['North latitude','38.1']])await page.getByLabel(label,{exact:true}).fill(value);
  await applyBounds(page);await page.getByRole('button',{name:'Find Available Data',exact:true}).click();await expect(page.getByLabel('Provider catalog results')).toContainText('EMIT_L2A_RFL_002_20220810T034103');
