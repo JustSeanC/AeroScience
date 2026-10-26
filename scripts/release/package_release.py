@@ -92,6 +92,7 @@ def identity(version=RELEASE_VERSION):
     if base == '0.4.1': title = f'AeroScience v{base} — Scientific Review & Mission Readiness' + (' Prerelease' if preview else '')
     if base == '0.4.0': title = f'AeroScience v{base} — Scientific Mission Planning, Sensor Modeling & Analysis' + (' Prerelease' if preview else '')
     if base == '0.5.0': title = f'AeroScience v{base} — Scientific Mission Operations' + (' Prerelease' if preview else '')
+    if base == '0.7.0': title = f'AeroScience v{base} — Organizations & Research Campaigns' + (' Prerelease' if preview else '')
     if base == '0.6.0': title = f'AeroScience v{base} — Aviation Mapping & Scientific Data Expansion' + (' Prerelease' if preview else '')
     return dict(version=version, package_version=base, tag='v'+version, root_name=root,
                 asset_name=root+'.zip', candidate_name=root+'-CANDIDATE.zip', setup_name=f'AeroScience-Setup-v{version}.exe',
@@ -160,23 +161,23 @@ def validate_community(root, package_version=VERSION, *, validation=False):
                 "html_ui/icons/toolbar/ICON_AEROSCIENCE.svg", "html_ui/InGamePanels/AeroScience/toolbar-compatibility.json",
                 "html_ui/InGamePanels/AeroScience/AeroScience.Map.js", "html_ui/InGamePanels/AeroScience/AeroScience.Geography.js", "html_ui/InGamePanels/AeroScience/geography-provenance.json"}
     if validation:
-        expected = {name.replace('aeroscience_panel', 'aeroscience_validation_v060_panel').replace('InGamePanels/AeroScience/', 'InGamePanels/AeroScienceValidationV060/').replace('ICON_AEROSCIENCE', 'ICON_AEROSCIENCE_VALIDATION_V060') for name in expected}
+        expected = {name.replace('aeroscience_panel', 'aeroscience_validation_v070_panel').replace('InGamePanels/AeroScience/', 'InGamePanels/AeroScienceValidationV070/').replace('ICON_AEROSCIENCE', 'ICON_AEROSCIENCE_VALIDATION_V070') for name in expected}
     def identity_path(name):
-        return name.replace('aeroscience_panel', 'aeroscience_validation_v060_panel').replace('ingamepanels/aeroscience/', 'ingamepanels/aerosciencevalidationv060/').replace('icon_aeroscience.svg', 'icon_aeroscience_validation_v060.svg') if validation else name
+        return name.replace('aeroscience_panel', 'aeroscience_validation_v070_panel').replace('ingamepanels/aeroscience/', 'ingamepanels/aerosciencevalidationv070/').replace('icon_aeroscience.svg', 'icon_aeroscience_validation_v070.svg') if validation else name
     require({name.casefold() for name in expected} <= indexed.keys(), "Compiled panel registration or toolbar assets are missing.")
     binary = indexed[identity_path("ingamepanels/aeroscience_panel.spb")].read_bytes()
     require(len(binary) > 32 and not binary.lstrip().startswith((b"<", b"{")), "Panel is source/placeholder content, not an SDK-compiled SPB.")
     compatibility=read_json(indexed[identity_path("html_ui/ingamepanels/aeroscience/toolbar-compatibility.json")])
     require(compatibility.get('protocol')==1 and compatibility.get('applicationVersion')==package_version, 'Toolbar compatibility descriptor differs from the release/protocol.')
     html = indexed[identity_path("html_ui/ingamepanels/aeroscience/aeroscience.html")].read_text(encoding="utf-8-sig")
-    require(('panel-id="PANEL_AEROSCIENCE_VALIDATION_V060"' if validation else 'panel-id="PANEL_AEROSCIENCE"') in html and "AeroScience.js" in html and "AeroScience.css" in html, "Panel references are inconsistent.")
+    require(('panel-id="PANEL_AEROSCIENCE_VALIDATION_V070"' if validation else 'panel-id="PANEL_AEROSCIENCE"') in html and "AeroScience.js" in html and "AeroScience.css" in html, "Panel references are inconsistent.")
     expected_icon=hashlib.sha256((REPO/'assets/branding/orbital-arc-toolbar-white.svg').read_bytes()).hexdigest()
     require(hashlib.sha256(indexed[identity_path('html_ui/icons/toolbar/icon_aeroscience.svg')].read_bytes()).hexdigest()==expected_icon, 'Toolbar icon differs from approved Orbital Arc asset.')
     if validation:
-        script = indexed['html_ui/ingamepanels/aerosciencevalidationv060/aeroscience.js'].read_text(encoding='utf-8-sig')
-        require('AeroScience.Validation.0_6_0.Command.v1' in script and 'AeroScience.Validation.0_6_0.Reply.v1' in script, 'Validation CommBus identity missing.')
+        script = indexed['html_ui/ingamepanels/aerosciencevalidationv070/aeroscience.js'].read_text(encoding='utf-8-sig')
+        require('AeroScience.Validation.0_7_0.Command.v1' in script and 'AeroScience.Validation.0_7_0.Reply.v1' in script, 'Validation CommBus identity missing.')
         require('AeroScience.Command.v1' not in script and 'AeroScience.Reply.v1' not in script, 'Production CommBus channel in validation package.')
-        require(manifest.get('title') == 'AeroScience 0.6.0 Validation', 'Validation title missing.')
+        require(manifest.get('title') == 'AeroScience 0.7.0 Validation', 'Validation title missing.')
     return found
 
 

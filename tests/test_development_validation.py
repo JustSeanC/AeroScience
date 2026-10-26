@@ -27,8 +27,13 @@ class DevelopmentValidationTests(unittest.TestCase):
         self.assertEqual('full', ci.validation_tier('push', 'refs/heads/develop/v0.6.0', message='P01 [full-validation]'))
         self.assertEqual('full', ci.validation_tier('workflow_dispatch', 'refs/heads/develop/v0.6.0', requested='full'))
         self.assertEqual('windows-profile', ci.validation_tier('workflow_dispatch', 'refs/heads/develop/v0.6.0', requested='windows-profile'))
-        for ref in ('refs/heads/develop/v0.7.0', 'refs/heads/release/v0.5.0-acceptance', 'refs/heads/main', 'refs/tags/v0.6.0'):
+        for ref in ('refs/heads/release/v0.5.0-acceptance', 'refs/heads/main', 'refs/tags/v0.6.0'):
             self.assertEqual('full', ci.validation_tier('push', ref))
+
+    def test_v070_keeps_explicit_full_milestone_validation(self):
+        self.assertEqual('fast', ci.validation_tier('push', 'refs/heads/develop/v0.7.0'))
+        self.assertEqual('full', ci.validation_tier('push', 'refs/heads/develop/v0.7.0', message='P01 [full-validation]'))
+        self.assertEqual('full', ci.validation_tier('pull_request', 'refs/pull/23/merge', 'develop/v0.7.0', message='[full-validation]'))
 
     def test_evidence_changes_keep_migration_archive_and_contract_coverage(self):
         selected = ci.plan(['src/AeroScience.Missions/MissionEvidenceStore.cs'])

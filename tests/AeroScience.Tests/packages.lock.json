@@ -463,11 +463,11 @@
       "aeroscience.engine": {
         "type": "Project",
         "dependencies": {
-          "AeroScience.Hdf.SafeRead": "[0.6.0, )",
-          "AeroScience.Missions": "[0.6.0, )",
-          "AeroScience.Shared": "[0.6.0, )",
-          "AeroScience.SimConnect": "[0.6.0, )",
-          "AeroScience.Telemetry": "[0.6.0, )"
+          "AeroScience.Hdf.SafeRead": "[0.7.0, )",
+          "AeroScience.Missions": "[0.7.0, )",
+          "AeroScience.Shared": "[0.7.0, )",
+          "AeroScience.SimConnect": "[0.7.0, )",
+          "AeroScience.Telemetry": "[0.7.0, )"
         }
       },
       "AeroScience.Hdf.SafeRead": {
@@ -476,7 +476,7 @@
       "aeroscience.missions": {
         "type": "Project",
         "dependencies": {
-          "AeroScience.Shared": "[0.6.0, )",
+          "AeroScience.Shared": "[0.7.0, )",
           "BitMiracle.LibTiff.NET": "[2.4.660, )",
           "GeographicLib.NET": "[2.3.2, )",
           "Microsoft.Data.Sqlite": "[10.0.13, )",
@@ -490,13 +490,13 @@
       "aeroscience.simconnect": {
         "type": "Project",
         "dependencies": {
-          "AeroScience.Telemetry": "[0.6.0, )"
+          "AeroScience.Telemetry": "[0.7.0, )"
         }
       },
       "aeroscience.telemetry": {
         "type": "Project",
         "dependencies": {
-          "AeroScience.Shared": "[0.6.0, )"
+          "AeroScience.Shared": "[0.7.0, )"
         }
       }
     }

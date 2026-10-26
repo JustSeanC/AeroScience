@@ -22,7 +22,7 @@ public sealed class AviationAcquisitionTests : IDisposable
     private sealed class Transport : HttpMessageHandler
     {
         public byte[] Archive = Zip("chart.tif"); public HttpStatusCode Code = HttpStatusCode.OK; public int Downloads;
-        public Func<Task>? BeforeRead; public int TfrCalls;
+        public Func<Task>? BeforeRead, BeforeTfrGeometry; public int TfrCalls;
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken token)
         {
             Assert.Null(request.Headers.Authorization); Assert.Null(request.Headers.Range);
@@ -31,6 +31,7 @@ public sealed class AviationAcquisitionTests : IDisposable
                 Interlocked.Increment(ref TfrCalls);
                 var url=request.RequestUri.AbsoluteUri;
                 Assert.Contains(url,new[]{AviationTfr.NoticesUrl,AviationTfr.NoShapeUrl,AviationTfr.GeometryUrl});
+                if (url == AviationTfr.GeometryUrl && BeforeTfrGeometry is not null) await BeforeTfrGeometry();
                 return new(HttpStatusCode.OK){Content=new ByteArrayContent(url==AviationTfr.NoticesUrl?SyntheticTfr.Notices():url==AviationTfr.NoShapeUrl?SyntheticTfr.NoShape():SyntheticTfr.Geometry())};
             }
             if (request.RequestUri!.Host == "www.faa.gov") return new(HttpStatusCode.OK) { Content = new StringContent($"<a href='{Url}'>Original</a>") };
@@ -61,14 +62,24 @@ public sealed class AviationAcquisitionTests : IDisposable
     {
         var handler=new Transport();using var service=Service(handler);var job=Approve(service,await Preview(service));service.ConfigureTfr(true);
         var entered=new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);var release=new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var geometryEntered=new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);var geometryRelease=new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         handler.BeforeRead=async()=>{entered.TrySetResult();await release.Task;};
+        handler.BeforeTfrGeometry=async()=>{geometryEntered.TrySetResult();await geometryRelease.Task;};
         using var worker=new AviationAcquisitionWorker(service,Microsoft.Extensions.Logging.Abstractions.NullLogger<AviationAcquisitionWorker>.Instance);
         await worker.StartAsync(default);
         try
         {
             await entered.Task.WaitAsync(TimeSpan.FromSeconds(5));
             using var deadline=new CancellationTokenSource(TimeSpan.FromSeconds(5));
-            while(Volatile.Read(ref handler.TfrCalls)<3){await Task.Delay(20,deadline.Token);}
+            await geometryEntered.Task.WaitAsync(deadline.Token);
+            Assert.Equal(3, Volatile.Read(ref handler.TfrCalls));
+            Assert.Empty(service.TfrBoundaries(-76,39,-74,41).Boundaries);
+            geometryRelease.TrySetResult();
+            // Request dispatch is not publication: parsing runs on Task.Run and the
+            // snapshot is committed afterward. Observe durable completion within the
+            // same existing deadline while the original transfer remains held.
+            while(service.TfrBoundaries(-76,39,-74,41).Cache?.LastSuccessUtc is null)
+                await Task.Delay(20,deadline.Token);
             Assert.Single(service.TfrBoundaries(-76,39,-74,41).Boundaries);
             // Held before response headers: the real job remains Preparing.
             Assert.Equal("Preparing",Assert.Single(service.DownloadJobs()).State);
@@ -76,7 +87,7 @@ public sealed class AviationAcquisitionTests : IDisposable
             release.TrySetResult();
             while(Assert.Single(service.DownloadJobs()).State!="Completed"){await Task.Delay(20,deadline.Token);}
         }
-        finally{release.TrySetResult();await worker.StopAsync(default);}
+        finally{geometryRelease.TrySetResult();release.TrySetResult();await worker.StopAsync(default);}
         Assert.Equal(3,handler.TfrCalls);Assert.Equal(1,handler.Downloads);await service.VerifyDownload(job.Id);
     }
     [Fact] public void DefaultFolderNeedsNoSetupAndConfigurationReadsNeverCreateOrReplaceStorage()

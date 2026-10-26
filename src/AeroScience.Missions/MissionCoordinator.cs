@@ -12,6 +12,7 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
     private ScienceCollectionController? collection;
     private GeographicCollectionEngine? geographicCollection;
     private bool collectionFault;
+    private bool simulatorPaused;
     private DateTimeOffset Now => utcNow?.Invoke()??DateTimeOffset.UtcNow;
     private DateTimeOffset ControlTime => !requireFreshTelemetry&&frame is {} f&&f.TimestampUtc>Now?f.TimestampUtc:Now;
     private string SelectionPath => Path.Combine(Path.GetDirectoryName(store.DatabasePath)!, "selected-plan.json");
@@ -76,6 +77,7 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
             if(update.Frame is {IsValid:true} incoming)update=update with{Frame=environment.Enrich(incoming)};
             frame=connection.State!=ConnectionState.Connected?null:update.Frame is {IsValid:true}?update.Frame:update.Frame is not null?null:frame;
             if(active is null){research?.Observe(update,frame);return;}
+            var pauseTransition = update.Frame is { IsValid: true } pauseFrame && pauseFrame.IsPaused != simulatorPaused ? pauseFrame : null;
             TelemetryFrame? sample=null;long slot=-1;var capacityOkay=true;
             if(update.Frame is not null&&frame is not null)
             {
@@ -92,6 +94,12 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
             try
             {
                 if(sample is not null){capacityOkay=false;ensureRecordingCapacity?.Invoke();capacityOkay=true;}
+                if (pauseTransition is not null)
+                {
+                    store.AddEvent(active.Id, pauseTransition.TimestampUtc, pauseTransition.IsPaused ? "simulator-paused" : "simulator-resumed",
+                        pauseTransition.IsPaused ? "Simulator paused; this interval cannot establish a research hold." : "Simulator resumed.");
+                    simulatorPaused = pauseTransition.IsPaused;
+                }
                 var intents=new List<ScienceAcquisitionIntent>();
                 if(collection is not null&&!collectionFault)
                 {
@@ -200,6 +208,7 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
                 }
             }
             lastRecordedUtc = null;
+            simulatorPaused = false;
             firstRecordedUtc = samplingAnchor = null;
             lastSlot = -1; received = skipped = missing = 0;
             lastAircraft = null;

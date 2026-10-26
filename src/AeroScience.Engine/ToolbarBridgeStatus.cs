@@ -1,6 +1,6 @@
 namespace AeroScience.Engine;
 
-public sealed record NativeToolbarStatus(string State, string Message, string EngineVersion = "0.6.0", int Protocol = 1, DateTimeOffset? LastRequestUtc = null, string? LastOperation = null, long Requests = 0, long Replies = 0);
+public sealed record NativeToolbarStatus(string State, string Message, string EngineVersion = "0.7.0", int Protocol = 1, DateTimeOffset? LastRequestUtc = null, string? LastOperation = null, long Requests = 0, long Replies = 0);
 public sealed class ToolbarBridgeStatus
 {
     private NativeToolbarStatus state = new("Initializing", "Waiting for native bridge initialization. Aircraft telemetry and CommBus are separate channels.");

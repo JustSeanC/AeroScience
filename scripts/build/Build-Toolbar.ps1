@@ -21,7 +21,7 @@ if (-not (Get-Command cl.exe -ErrorAction SilentlyContinue)) { throw 'Run from a
 if (-not (Get-Command python -ErrorAction SilentlyContinue)) { throw 'Python 3 must be installed and available as python on PATH for package validation.' }
 if ($ValidationProfile -and ($ProofOfConcept -or $WindowProbe)) { throw 'Validation requires the complete genuine toolbar.' }
 $variant = if ($ValidationProfile) { 'toolbar-validation' } elseif ($ProofOfConcept) { 'toolbar-poc' } elseif ($WindowProbe) { 'toolbar-window-probe' } else { 'toolbar-full' }
-$stageName = if ($ValidationProfile) { 'toolbar-validation-v060' } else { $variant }
+$stageName = if ($ValidationProfile) { 'toolbar-validation-v070' } else { $variant }
 $stage = Join-Path $repo "artifacts/$stageName"
 # This is an isolated generated build directory. No SDK or checkout sources are modified.
 if (Test-Path $stage) { Remove-Item $stage -Recurse -Force }
@@ -60,7 +60,7 @@ try {
     $packageExit = $LASTEXITCODE
     if ($packageExit -ne 0) { throw "Official SDK package build failed (exit $packageExit). Inspect build.log in the staged build directory." }
 } finally { Pop-Location }
-$packageName = if ($ValidationProfile) { 'aeroscience-validation-v0-6-0-toolbar' } else { 'aeroscience-toolbar' }
+$packageName = if ($ValidationProfile) { 'aeroscience-validation-v0-7-0-toolbar' } else { 'aeroscience-toolbar' }
 $packages = @(Get-ChildItem $output -Filter manifest.json -Recurse | Where-Object { $_.Directory.Name -eq $packageName })
 if ($packages.Count -ne 1) { throw 'Expected one SDK-built aeroscience-toolbar package.' }
 $package = $packages[0].Directory.FullName

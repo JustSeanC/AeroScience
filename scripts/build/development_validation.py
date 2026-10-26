@@ -10,7 +10,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[2]
 CORE = {'EvidenceContractsTests', 'MissionEvidenceStoreTests', 'MissionTests', 'ModeAndToolbarTests', 'ApiTests'}
 PORTABLE_ONLY = {'test_airport_search', 'test_toolbar_sources'}
-DEVELOPMENT_BRANCHES = {'develop/v0.5.0', 'develop/v0.6.0'}
+DEVELOPMENT_BRANCHES = {'develop/v0.5.0', 'develop/v0.6.0', 'develop/v0.7.0'}
 
 
 def validation_tier(event, ref, base='', requested='full', message='', head=''):

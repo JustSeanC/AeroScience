@@ -9,20 +9,20 @@ public sealed record ApplicationProfile(bool Validation)
 {
     public static ApplicationProfile Current { get; } = new(typeof(ApplicationProfile).Assembly
         .GetCustomAttributes<AssemblyMetadataAttribute>().Any(a => a.Key == "AeroScienceProfile" && a.Value == "validation"));
-    public string Name => Validation ? "AeroScience 0.6.0 Validation" : "AeroScience";
-    public string Folder => Validation ? "AeroScience-Validation-v0.6.0" : "AeroScience";
+    public string Name => Validation ? "AeroScience 0.7.0 Validation" : "AeroScience";
+    public string Folder => Validation ? "AeroScience-Validation-v0.7.0" : "AeroScience";
     public string ConfigurationDirectory => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), Folder);
-    public string RegistryKey => Validation ? @"Software\AeroScience\Validation\v0.6.0" : @"Software\AeroScience";
+    public string RegistryKey => Validation ? @"Software\AeroScience\Validation\v0.7.0" : @"Software\AeroScience";
     public int Port => Validation ? 5086 : 5080;
     // Deliberately shared: preserve the older application's exclusion mechanism.
     public const string DesktopMutex = @"Local\AeroScience.Desktop";
-    public string ToolbarPackage => Validation ? "aeroscience-validation-v0-6-0-toolbar" : "aeroscience-toolbar";
-    public string ToolbarTitle => Validation ? "AeroScience 0.6.0 Validation" : "AeroScience";
-    public string ToolbarFolder => Validation ? "AeroScienceValidationV060" : "AeroScience";
-    public string ToolbarRegistrationPath => Validation ? "InGamePanels/aeroscience_validation_v060_panel.spb" : "InGamePanels/aeroscience_panel.spb";
-    public string CommandEvent => Validation ? "AeroScience.Validation.0_6_0.Command.v1" : "AeroScience.Command.v1";
-    public string ReplyEvent => Validation ? "AeroScience.Validation.0_6_0.Reply.v1" : "AeroScience.Reply.v1";
-    public string SessionCookieName => Validation ? "AeroScience.Validation.0_6_0.Session" : AccessControl.CookieName;
+    public string ToolbarPackage => Validation ? "aeroscience-validation-v0-7-0-toolbar" : "aeroscience-toolbar";
+    public string ToolbarTitle => Validation ? "AeroScience 0.7.0 Validation" : "AeroScience";
+    public string ToolbarFolder => Validation ? "AeroScienceValidationV070" : "AeroScience";
+    public string ToolbarRegistrationPath => Validation ? "InGamePanels/aeroscience_validation_v070_panel.spb" : "InGamePanels/aeroscience_panel.spb";
+    public string CommandEvent => Validation ? "AeroScience.Validation.0_7_0.Command.v1" : "AeroScience.Command.v1";
+    public string ReplyEvent => Validation ? "AeroScience.Validation.0_7_0.Reply.v1" : "AeroScience.Reply.v1";
+    public string SessionCookieName => Validation ? "AeroScience.Validation.0_7_0.Session" : AccessControl.CookieName;
     public EngineOptions EngineOptions(AppPreferences preferences) => new()
     {
         ConfigurationDirectory=ConfigurationDirectory, DataDirectory=preferences.MissionDirectory,

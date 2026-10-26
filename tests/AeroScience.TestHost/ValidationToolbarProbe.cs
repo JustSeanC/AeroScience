@@ -18,7 +18,7 @@ internal static class ValidationToolbarProbe
             var panels=Path.Combine(package,"InGamePanels");Directory.CreateDirectory(panels);
             // Independent literal from SDK staging; do not derive the fixture's
             // filename from the runtime lookup being tested.
-            var registration=Path.Combine(panels,"aeroscience_validation_v060_panel.spb");File.WriteAllBytes(registration,new byte[64]);
+            var registration=Path.Combine(panels,"aeroscience_validation_v070_panel.spb");File.WriteAllBytes(registration,new byte[64]);
             var web=Path.Combine(package,"html_ui","InGamePanels",profile.ToolbarFolder);Directory.CreateDirectory(web);
             File.WriteAllText(Path.Combine(web,"toolbar-compatibility.json"),JsonSerializer.Serialize(new{profile="validation",sourceCommit=ApplicationProfile.SourceCommit,protocol=1}));
             Receipt(input,package);
@@ -26,7 +26,7 @@ internal static class ValidationToolbarProbe
             var marker=Path.Combine(production,"manifest.json");File.WriteAllText(marker,"{\"title\":\"AeroScience\",\"package_version\":\"0.5.0\"}");var before=File.ReadAllBytes(marker);
             void Install()=>ToolbarInstaller.Install(input,community,()=>false,discoverCommunityFolders:()=>[]);
             Install();Install();
-            var installed=Path.Combine(community,profile.ToolbarPackage,"InGamePanels","aeroscience_validation_v060_panel.spb");
+            var installed=Path.Combine(community,profile.ToolbarPackage,"InGamePanels","aeroscience_validation_v070_panel.spb");
             Check(File.Exists(installed)&&ToolbarVersions.Inspect(input,community).Status==ToolbarInstallState.Current,"Validation registration was not installed/verified.");
             var original=File.ReadAllBytes(installed);
             File.Move(registration,Path.Combine(panels,"aeroscience_validation_panel.spb"));Receipt(input,package);

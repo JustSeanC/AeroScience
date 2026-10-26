@@ -44,7 +44,7 @@ public sealed class ApplicationUpdateTests : IDisposable
         var reopened=new ApplicationUpdates(root,http);Assert.True(reopened.Get().Preferences.IncludePrereleases);
         Assert.Equal("v9.0.0-alpha.10",(await reopened.Check()).Available!.Version);
         Assert.True(ReleaseVersions.Compare("v0.5.0","v0.4.2")>0);
-        Assert.Equal(0,ReleaseVersions.Compare("v0.6.0",ApplicationUpdates.CurrentVersion));
+        Assert.Equal(0,ReleaseVersions.Compare("v0.7.0",ApplicationUpdates.CurrentVersion));
         Assert.True(ReleaseVersions.Compare(ApplicationUpdates.CurrentVersion,"v0.5.0")>0);
     }
     private sealed class Handler:HttpMessageHandler

@@ -79,6 +79,7 @@ public sealed partial class MissionStore
     }
     public MissionPlan SavePlan(MissionPlan input)
     {
+        if (input.ResearchCard is {} card) _ = ResearchCard(card.Id, card.Revision);
         var plan = MissionPlanning.Validate(input with { Id = input.Id == Guid.Empty ? Guid.NewGuid() : input.Id });
         using var db = Open(); using var cmd = db.CreateCommand();
         cmd.CommandText = "INSERT INTO mission_plans VALUES($id,$name,$time,$json) ON CONFLICT(id) DO UPDATE SET name=$name,updated_utc=$time,payload_json=$json";

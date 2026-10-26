@@ -7,7 +7,7 @@ namespace AeroScience.Missions;
 
 public sealed partial class MissionStore
 {
-    public const int CurrentSchemaVersion = 8;
+    public const int CurrentSchemaVersion = 9;
     private readonly string connectionString;
     public string DatabasePath { get; }
 
@@ -37,6 +37,14 @@ public sealed partial class MissionStore
 
     public void Initialize()
     {
+        InitializeCore();
+        using var db = Open();
+        using var cmd = db.CreateCommand(); cmd.CommandText = "PRAGMA user_version;";
+        if (Convert.ToInt32(cmd.ExecuteScalar(), CultureInfo.InvariantCulture) < 9) MigratePersonalResearch(db);
+    }
+
+    private void InitializeCore()
+    {
         Directory.CreateDirectory(Path.GetDirectoryName(DatabasePath)!);
         using var db = Open(allowCreate: true);
         using var cmd = db.CreateCommand();
@@ -62,6 +70,7 @@ public sealed partial class MissionStore
             // Already current: no JSON or historical sample is rewritten.
             return;
         }
+        if (version == 8) return;
         if (version == 7) { MigrateCollectionEvidence(db); return; }
         if (version == 6) { MigrateScientificReview(db); MigrateCollectionEvidence(db); return; }
         if (version == 5) { MigrateMissionScience(db); MigrateCollectionEvidence(db); return; }
