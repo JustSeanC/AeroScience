@@ -72,6 +72,7 @@ var app = EngineApplication.Create(args, services =>
 });
 var options=app.Services.GetRequiredService<EngineOptions>();
 app.MapPost("/api/testing/operating/input",(SensorTelemetryFixture fixture,BrowserTelemetryProvider provider)=>{provider.SensorFixture=fixture;return new{synthetic=true};});
+app.MapPost("/api/testing/research/observations/{count:int}",(int count,MissionStore missions,MissionCoordinator coordinator)=>ObservationResearchFixture.Create(count,missions,coordinator));
 app.MapPost("/api/testing/research/transect/{locations:int}",(int locations,MissionStore missions,ScienceStore science,MissionCoordinator coordinator)=>AtmosphericTransectFixture.Create(locations,missions,science,coordinator));
 app.MapPost("/api/testing/research/survey/{cloudy:bool}",(bool cloudy,MissionStore missions,ScienceStore science,MissionCoordinator coordinator)=>SurveyResearchFixture.Create(cloudy,options.DataDirectory,missions,science,coordinator));
 app.MapPost("/api/testing/research/atmosphere/{bands:int}",(int bands,MissionStore missions,ScienceStore science,MissionCoordinator coordinator)=>AtmosphericResearchFixture.Create(bands,missions,science,coordinator));

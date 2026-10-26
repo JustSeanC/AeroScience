@@ -195,6 +195,7 @@ ingamepanel-aeroscience .as-panel {
   margin-top: 5px;
 }
 .as-panel input,
+.as-panel textarea,
 .as-panel select {
   display: block;
   box-sizing: border-box;
@@ -256,6 +257,7 @@ ingamepanel-aeroscience .as-panel {
 }
 new-push-button:focus-visible,
 input:focus-visible,
+textarea:focus-visible,
 select:focus-visible {
   outline: 2px solid #75ead1;
   outline-offset: 2px;

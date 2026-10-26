@@ -149,6 +149,15 @@
                   <span id="as-duration">00:00:00</span
                   ><span id="as-samples">0 samples</span>
                 </div>
+                <details>
+                  <summary>Pilot Observation</summary>
+                  <p class="as-note">Your written account, not a sensor reading. Missing locations stay unavailable. Use the dashboard for longer notes.</p>
+                  <label for="as-observation-category">Observation category</label>
+                  <select id="as-observation-category"><option value="observation">Observation</option><option value="finding">Finding</option><option value="interesting-weather">Interesting weather</option><option value="equipment-note">Equipment note</option><option value="note">Note</option><option value="start-survey">Start survey</option><option value="end-survey">End survey</option></select>
+                  <label for="as-observation-note">Short observation (120 characters)</label>
+                  <textarea id="as-observation-note" maxlength="120" rows="2"></textarea>
+                  <p id="as-observation-status" class="as-note" role="status" aria-live="polite"></p>
+                </details>
                 <new-push-button id="as-marker" disabled
                   >Add observation marker</new-push-button
                 >

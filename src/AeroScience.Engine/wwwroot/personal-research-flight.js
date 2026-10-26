@@ -1,3 +1,4 @@
+import {openPilotObservations} from './observation-research.js';
 import {researchCardTargets} from './personal-research-start.js';
 import {node,button,newIdentity,table} from './workstation-ui.js';
 import {attemptView} from './personal-research.js';
@@ -36,7 +37,7 @@ export function researchFlightControls(parent,api){
       catch(error){if(own===epoch){status.textContent=error.message;lastRead=0;}}
       finally{if(own===epoch){busy=false;refreshButtons();}}
      };actions.append(b);
-    }controls.set(card.id,{info,buttons});rows.append(row);
+    }if(card.observationFlight)button(actions,'Record Pilot Observation',openPilotObservations,'primary');controls.set(card.id,{info,buttons});rows.append(row);
    }
   }
   refreshButtons();

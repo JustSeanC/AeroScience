@@ -32,7 +32,7 @@ export function streamlineMissionControl(){
   const details=node('details',undefined,'control-secondary panel');details.id='flight-details';details.append(node('summary','Flight details — attitude, altitude profile and position'));
   for(const child of [control.querySelector('.flight-panel'),control.querySelector('.lower-grid')])if(child)details.append(child);
   control.append(details);
-  const tools=node('details',undefined,'control-secondary panel');tools.id='flight-tools';tools.append(node('summary','Flight tools — guidance, environment and observation notes'));
+  const tools=node('details',undefined,'control-secondary panel');tools.id='flight-tools';tools.append(node('summary','Flight tools — Pilot Observations, guidance and environment'));
   for(const id of ['flight-guidance','environment-readings','observation-notes']){const child=document.getElementById(id);if(child)tools.append(child);}control.append(tools);
   const telemetry=control.querySelector('.metrics'),label=telemetry?.previousElementSibling;
   if(map&&telemetry){if(label?.classList.contains('section-label'))map.before(label);map.before(telemetry);}

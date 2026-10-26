@@ -175,7 +175,7 @@ export function initializeResearch(context) {
   control.querySelector(".mission-grid").after(mapPanel);
   const markerPanel = text("article", undefined, "panel research-panel");
   markerPanel.id = "observation-notes";
-  markerPanel.append(text("h2", "Observation markers & in-flight notes"));
+  markerPanel.append(text("h2", "Pilot Observations"),text("p","Choose a Category and write what you observed in Notes. Pilot Observation is a written account, not a sensor reading. A marker without a note does not meet a documentation goal. Recorded location is attached only when available; optional measurements require normal science collection."));
   const category = select(
     markerPanel,
     "Category",
@@ -194,23 +194,20 @@ export function initializeResearch(context) {
   const note = input(markerPanel, "Notes", "", "textarea");
   note.id = "marker-note";
   note.maxLength = 4000;
+  let observationRequest=null,noteRequest=null;const savedObservation=text("p");savedObservation.setAttribute("role","status");markerPanel.append(savedObservation);
   markerPanel.append(
     button("Add observation marker", async () => {
       if (!state?.activeMission) throw Error("Start a mission first.");
-      await ctx.api(`/api/missions/${state.activeMission.id}/markers`, {
-        category: category.value,
-        notes: note.value,
-      });
-      note.value = "";
+      const id=state.activeMission.id,content={category:category.value,notes:note.value},key=JSON.stringify([id,content]);if(observationRequest?.key!==key)observationRequest={key,requestId:newIdentity()};
+      savedObservation.textContent='Saving Pilot Observation…';const saved=await ctx.api(`/api/missions/${id}/markers`,{...content,requestId:observationRequest.requestId}).catch(error=>{savedObservation.textContent="Pilot Observation could not be confirmed. Your text is preserved; retry keeps the same observation identity.";throw error;});
+      if(state?.activeMission?.id===id&&note.value===content.notes)note.value="";observationRequest=null;savedObservation.textContent=`Pilot Observation saved · ${saved.timestampUtc} · ${saved.latitude===null?'Location unavailable; no position was invented':'Recorded location attached'}. Flight and science controls are unchanged.`;
       lastFetch = 0;
     }),
     button("Save in-flight note", async () => {
       if (!state?.activeMission) throw Error("Start a mission first.");
-      await ctx.api(`/api/missions/${state.activeMission.id}/notes`, {
-        phase: "in-flight",
-        text: note.value,
-      });
-      note.value = "";
+      const id=state.activeMission.id,content=note.value,key=JSON.stringify([id,content]);if(noteRequest?.key!==key)noteRequest={key,requestId:newIdentity()};savedObservation.textContent="Saving pilot in-flight note…";
+      await ctx.api(`/api/missions/${id}/notes`,{phase:"in-flight",text:content,requestId:noteRequest.requestId}).catch(error=>{savedObservation.textContent="The pilot note could not be confirmed. Your text is preserved; retry keeps the same note identity.";throw error;});
+      if(state?.activeMission?.id===id&&note.value===content)note.value="";noteRequest=null;savedObservation.textContent="Pilot in-flight note saved. Its location is unavailable; use Add observation marker when a recorded location is needed.";
     }),
   );
   control.append(markerPanel);
@@ -330,7 +327,7 @@ function editPlan(plan) {
   if(plan?.researchStarter&&(plan.researchStarter.intent==='customize'||!plan.researchStarter.originalCard)&&references.some(r=>r.id===plan.researchStarter.requestId)){
     starterSection=text('section',undefined,'research-panel');starterSection.id='research-starter-targets';starterSection.append(text('h3','Your Experiment Targets'),text('p','This is your own prepared card. Editing targets saves a new revision for this plan; original experiments and past flight results stay unchanged. These are pilot-reviewed simulator targets, not safe aircraft limits.'));
     const feedback=text('p','Loading your prepared targets…');starterFeedback=feedback;feedback.setAttribute('role','status');starterSection.append(feedback);const fields=text('div',undefined,'research-grid');starterSection.append(fields);form.append(starterSection);
-    const load=()=>{loadStarter=ctx.api(`/api/research/cards/${plan.researchStarter.requestId}?revision=${readCards().find(r=>r.id===plan.researchStarter.requestId)?.revision||references[0].revision}`).then(card=>{if(!form.isConnected)return;starterCard=card;fields.replaceChildren();starterName=input(fields,'Experiment name',card.name);starterName.required=true;starterName.maxLength=100;starterFields=researchFields(fields,card,{prefix:'Experiment: '});fields.onchange=event=>{if(!starterCard.survey||event.target.type!=='checkbox')return;const selected=new Set(starterFields.read().measurements.map(m=>({airTemperature:'ambient-temperature',terrainElevation:'terrain-scanner',landSurfaceTemperature:'thermal-imager'})[m]));for(const id of ['ambient-temperature','terrain-scanner','thermal-imager']){const control=configuration.querySelector(`[data-instrument="${id}"]`);if(control)control.checked=selected.has(id);}payloadTouched=true;showRecommended();dirty('Selected survey measurements updated their matching instruments. You can still edit the payload below; unavailable objectives remain incomplete.');};feedback.textContent=`Revision ${card.revision} · ${researchCardTargets(card)}. Free flight is supported; route, patterns and science instruments remain editable below.`;save.disabled=false;retry.hidden=true;}).catch(error=>{if(form.isConnected){feedback.textContent='Experiment targets could not load: '+error.message;save.disabled=!starterSection.hidden;retry.hidden=false;}throw error;});return loadStarter;};
+    const load=()=>{loadStarter=ctx.api(`/api/research/cards/${plan.researchStarter.requestId}?revision=${readCards().find(r=>r.id===plan.researchStarter.requestId)?.revision||references[0].revision}`).then(card=>{if(!form.isConnected)return;starterCard=card;fields.replaceChildren();starterName=input(fields,'Experiment name',card.name);starterName.required=true;starterName.maxLength=100;starterFields=researchFields(fields,card,{prefix:'Experiment: '});fields.onchange=event=>{if(starterCard.observationFlight&&event.target.type==='checkbox'){const selected=new Set(starterFields.read().supportingInstruments);for(const id of ['ambient-temperature','ambient-pressure','ambient-wind','ambient-density']){const control=configuration.querySelector(`[data-instrument="${id}"]`);if(control)control.checked=selected.has(id);}payloadTouched=true;showRecommended();dirty('Optional supporting instruments updated. Pilot observations stay separate from science collection.');return;}if(!starterCard.survey||event.target.type!=='checkbox')return;const selected=new Set(starterFields.read().measurements.map(m=>({airTemperature:'ambient-temperature',terrainElevation:'terrain-scanner',landSurfaceTemperature:'thermal-imager'})[m]));for(const id of ['ambient-temperature','terrain-scanner','thermal-imager']){const control=configuration.querySelector(`[data-instrument="${id}"]`);if(control)control.checked=selected.has(id);}payloadTouched=true;showRecommended();dirty('Selected survey measurements updated their matching instruments. You can still edit the payload below; unavailable objectives remain incomplete.');};feedback.textContent=`Revision ${card.revision} · ${researchCardTargets(card)}. Free flight is supported; route, patterns and science instruments remain editable below.`;save.disabled=false;retry.hidden=true;}).catch(error=>{if(form.isConnected){feedback.textContent='Experiment targets could not load: '+error.message;save.disabled=!starterSection.hidden;retry.hidden=false;}throw error;});return loadStarter;};
     const retry=button('Reload Experiment Targets',()=>load());retry.hidden=true;starterSection.append(retry);load().catch(()=>{});
   }else if(plan?.researchStarter)form.append(text('p','This plan reuses a saved experiment revision. Routes, patterns and instruments remain editable. To change experiment targets in an independent copy, return to My Research and choose Customize.'));
   form.append(text("h3","1. Mission details"));
@@ -863,7 +860,7 @@ function editPlan(plan) {
         if(starterSection&&!starterSection.hidden)await loadStarter;if(!form.isConnected)return;
         const draft=readDraft();
         if(starterCard&&draft.researchCards.some(r=>r.id===starterCard.id)&&(starterName.value.trim()!==starterCard.name||JSON.stringify(starterFields.read())!==JSON.stringify(researchDefinition(starterCard)))){
-          starterCard=await ctx.api('/api/research/cards',{id:starterCard.id,expectedRevision:starterCard.revision,name:starterName.value,flightRegime:isScienceResearch(starterCard)?null:starterFields.read(),atmosphericProfile:starterCard.atmosphericProfile?starterFields.read():null,atmosphericTransect:starterCard.atmosphericTransect?starterFields.read():null,survey:starterCard.survey?starterFields.read():null});
+          starterCard=await ctx.api('/api/research/cards',{id:starterCard.id,expectedRevision:starterCard.revision,name:starterName.value,flightRegime:isScienceResearch(starterCard)?null:starterFields.read(),atmosphericProfile:starterCard.atmosphericProfile?starterFields.read():null,atmosphericTransect:starterCard.atmosphericTransect?starterFields.read():null,survey:starterCard.survey?starterFields.read():null,observationFlight:starterCard.observationFlight?starterFields.read():null});
           if(!form.isConnected)return;readCards.replaceReference(starterCard);draft.researchCards=readCards();draft.researchCard=draft.researchCards[0]||null;starterFeedback.textContent=`Your card revision ${starterCard.revision} is saved locally. Save mission plan to keep this plan linked to those targets.`;
         }
         const savedPlan=await ctx.api('/api/plans',draft);

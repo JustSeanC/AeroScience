@@ -57,7 +57,8 @@ class IngamePanelAeroScience extends TemplateElement {
       )
         this.send("marker", {
           missionId: this.state.activeMission.id,
-          category: "observation",
+          category: this.byId("as-observation-category").value,
+          notes: this.byId("as-observation-note").value,
         });
     };
     this.byId("as-mode").onchange = () => {
@@ -350,7 +351,7 @@ class IngamePanelAeroScience extends TemplateElement {
       op: op,
       sent: Date.now(),
       planId: (fields && fields.planId) || null,
-      serial:++this.serial,payload,retries:0,researchOffset:fields?.offset??0,
+      observationText:op==='marker'?fields?.notes:null,serial:++this.serial,payload,retries:0,researchOffset:fields?.offset??0,
     });
     if (op !== "state" && op !== "research-state" && !op.startsWith("map-")) {
       this.setControls(false);
@@ -365,13 +366,13 @@ class IngamePanelAeroScience extends TemplateElement {
       );
       if (result && typeof result.catch === "function")
         result.catch(() => {
-          if(['science-control','research-control'].includes(op)){const pending=this.pending.get(requestId);if(pending)pending.sent=Date.now()-5001;}else this.pending.delete(requestId);
+          if(['science-control','research-control','marker'].includes(op)){const pending=this.pending.get(requestId);if(pending)pending.sent=Date.now()-5001;}else this.pending.delete(requestId);
           this.status(
             "Simulator command delivery failed. Check the engine connection.",
           );
         });
     } catch (error) {
-      if(['science-control','research-control'].includes(op)){const pending=this.pending.get(requestId);if(pending)pending.sent=Date.now()-5001;}else this.pending.delete(requestId);
+      if(['science-control','research-control','marker'].includes(op)){const pending=this.pending.get(requestId);if(pending)pending.sent=Date.now()-5001;}else this.pending.delete(requestId);
       this.status("Simulator command delivery failed.");
     }
   }
@@ -384,13 +385,13 @@ class IngamePanelAeroScience extends TemplateElement {
       return;
     for (const [id, request] of this.pending)
       if (Date.now() - request.sent > 5000) {
-        if(['science-control','research-control'].includes(request.op)&&request.retries===0){
+        if(['science-control','research-control','marker'].includes(request.op)&&request.retries===0){
           request.retries++;request.sent=Date.now();
           try{const retry=this.listener.callSimConnect('AeroScience.Command.v1',request.payload);if(retry?.catch)retry.catch(()=>{request.sent=Date.now()-5001;});}catch(error){request.sent=Date.now()-5001;}
-          this.byId(request.op==='research-control'?'as-research-status':'as-collection-message').textContent='Retrying the identical flight-bound request; no new command target.';continue;
+          this.byId(request.op==='marker'?'as-observation-status':request.op==='research-control'?'as-research-status':'as-collection-message').textContent='Retrying the identical flight-bound request; no new command target.';continue;
         }
         this.pending.delete(id);
-        if(['science-control','research-control'].includes(request.op))this.byId(request.op==='research-control'?'as-research-status':'as-collection-message').textContent='No command confirmation after one identical retry. Review synchronized state before issuing a new command.';
+        if(['science-control','research-control','marker'].includes(request.op))this.byId(request.op==='marker'?'as-observation-status':request.op==='research-control'?'as-research-status':'as-collection-message').textContent='No command confirmation after one identical retry. Review synchronized state before issuing a new command.';
         if (request.op.startsWith("map-"))
           this.byId("as-map-status").textContent =
             "Map reply timed out; retrying with the cached route retained.";
@@ -483,6 +484,7 @@ class IngamePanelAeroScience extends TemplateElement {
       )
         return;
       this.pending.delete(reply.requestId);
+      if(pendingRequest.op==='marker'){if(reply.ok&&this.byId('as-observation-note').value===pendingRequest.observationText)this.byId('as-observation-note').value='';this.byId('as-observation-status').textContent=reply.ok?'Pilot Observation saved. Flight and science continue independently.':reply.error||'Observation was not saved; your text is preserved.';}
       if(pendingRequest.serial<this.appliedSerial){if(pendingRequest.op==='science-control')this.byId('as-collection-message').textContent=(reply.error||reply.receipt?.reason||'Earlier request acknowledged')+' · A newer authoritative view is already displayed.';return;}
       if(reply.engineInstance&&reply.engineInstance!==this.engineInstance&&this.seenEngines.has(reply.engineInstance))return;
       if(reply.intelligence&&this.intelligence&&reply.engineInstance===this.engineInstance&&reply.intelligence.missionId===this.intelligence.missionId&&reply.intelligence.revision<this.intelligence.revision)return;
@@ -613,7 +615,8 @@ class IngamePanelAeroScience extends TemplateElement {
       const atmospheric=item.card.atmosphericProfile;
       const transect=item.card.atmosphericTransect;
       const survey=item.card.survey;
-      const requirements=survey?'Survey: '+survey.measurements.map(m=>({airTemperature:'Air Temperature',terrainElevation:'Terrain Elevation',landSurfaceTemperature:'Land Surface Temperature'})[m]).join(' + ')+' · source-qualified samples required':transect?transect.requiredStations+' distinct sampling locations · '+transect.minimumExtentMetres+' m geographic extent · collect valid temperature readings':atmospheric?atmospheric.requiredBands+' neighboring '+atmospheric.bandWidthFeet+'-foot MSL bands · collect valid temperature readings':item.card.flightRegime.airspeedKnots+' knots IAS · '+item.card.flightRegime.altitudeMslFeet+' feet MSL';
+      const observation=item.card.observationFlight;
+      const requirements=observation?observation.minimumObservations+' documented Pilot Observations · notes are not sensor measurements':survey?'Survey: '+survey.measurements.map(m=>({airTemperature:'Air Temperature',terrainElevation:'Terrain Elevation',landSurfaceTemperature:'Land Surface Temperature'})[m]).join(' + ')+' · source-qualified samples required':transect?transect.requiredStations+' distinct sampling locations · '+transect.minimumExtentMetres+' m geographic extent · collect valid temperature readings':atmospheric?atmospheric.requiredBands+' neighboring '+atmospheric.bandWidthFeet+'-foot MSL bands · collect valid temperature readings':item.card.flightRegime.airspeedKnots+' knots IAS · '+item.card.flightRegime.altitudeMslFeet+' feet MSL';
       title.textContent=item.card.name+' · revision '+item.card.revision;info.textContent=(item.openAttempt?'Attempt recording':item.active?'Active':'Inactive')+' · '+requirements+'. '+(item.activationBlocked||'');row.append(title,info);
       for(const [action,label] of [['activate','Activate Card'],['deactivate','Deactivate Card'],['beginAttempt','Begin Attempt'],['endAttempt','End Attempt']]){
         const b=document.createElement('button');b.textContent=label;b.dataset.researchCard=item.card.id;b.dataset.researchAction=action;
