@@ -130,8 +130,12 @@ public sealed partial class MissionStore
                 :new(row,row.Result is {} result?AuditResearchEvidence(db,tx,result,token):null));
         }
         var revisions=rows.Select(r=>r.Attempt.Card.Revision).Distinct().Count()>1;
-        if(card.ObservationFlight is not null)return new(card,rows.ToArray(),revisions,rows.Select(r=>PreflightReadiness.Hash(r.Attempt.Card.ObservationFlight!)).Distinct().Count()>1,false,false,
-            ["Counts describe documentation records, not independent scientific measurements or proven hypotheses. Original note text, categories, locations and frozen revisions remain separate.","Optional original simulator quantities keep their units, times and provenance. Different places, weather, aircraft and observation approaches can confound comparisons; no subjective numerical trend is inferred."]);
+        if(card.ObservationFlight is not null){
+            var mixed=rows.Select(r=>r.Attempt.Result?.Evidence.Source).Where(s=>s is not null).Distinct().Count()>1;
+            if(mixed&&rows.Any(r=>r.Attempt.Card.ObservationFlight!.SelectedInstruments.Length>0))throw new ArgumentException("Compare optional supporting measurements with the same simulator/demo provenance. Pilot-only documentation remains distinct from quantitative measurements.");
+            return new(card,rows.ToArray(),revisions,rows.Select(r=>PreflightReadiness.Hash(r.Attempt.Card.ObservationFlight!)).Distinct().Count()>1,false,mixed,
+                ["Counts describe documentation records, not independent scientific measurements or proven hypotheses. Original note text, categories, locations and frozen revisions remain separate.","Optional original simulator quantities keep their units, times and provenance. Different places, weather, aircraft and observation approaches can confound comparisons; no subjective numerical trend is inferred."]);
+        }
         if(card.Survey is not null){
             if(card.Survey.Measurements.Contains(SurveyMeasurement.AirTemperature)&&rows.Select(r=>r.Attempt.Result?.Evidence.Source).Where(s=>s is not null).Distinct().Count()>1)throw new ArgumentException("Compare simulator air-temperature evidence with the same simulator/demo provenance.");
             return new(card,rows.ToArray(),revisions,rows.Select(r=>PreflightReadiness.Hash(r.Attempt.Card.Survey!)).Distinct().Count()>1,false,false,
