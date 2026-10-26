@@ -14,6 +14,12 @@ public static class AtmosphericResearch
     public static readonly (string Instrument,string Measurement,string Unit)[] Quantities=[
         ("ambient-temperature","temperature","degC"),("ambient-pressure","pressure","inHg"),
         ("ambient-wind","wind-speed","kt"),("ambient-wind","wind-direction","degT"),("ambient-density","density","slug/ft3")];
+    public static bool IsCollectionCard(PersonalResearchCard card)=>card.AtmosphericProfile is not null||card.AtmosphericTransect is not null;
+    public static string EvaluatorFor(PersonalResearchCard card)=>card.AtmosphericTransect is null?Evaluator:AtmosphericTransectResearch.Evaluator;
+    internal static bool Usable(ScienceObservation o,string unit)=>o.Provenance==ScienceProvenance.SimulatorReported&&o.Calibration is null&&o.Quality==ObservationQuality.Valid&&o.Unit==unit
+        &&double.IsFinite(o.Value)&&o.AltitudeMslFeet is {} a&&double.IsFinite(a)&&a is >=-2000 and <=100000
+        &&o.PositionTimestampUtc is {} position&&(o.TimestampUtc-position).TotalSeconds is >=0 and <=3
+        &&o.Latitude is {} lat&&o.Longitude is {} lon&&MissionPlanning.Position(lat,lon)&&!string.IsNullOrWhiteSpace(o.Source);
     public static void Validate(AtmosphericResearchDefinition? rule)
     {
         if(rule is null||rule.Version!=1||string.IsNullOrWhiteSpace(rule.Question)||rule.Question.Length>500||rule.Question.Any(char.IsControl)
@@ -23,10 +29,12 @@ public static class AtmosphericResearch
     }
     sealed class Quantity {public long Count,Excluded;public double? Min,Max;public void Add(double v){Count++;Min=Math.Min(Min??v,v);Max=Math.Max(Max??v,v);}}
     sealed class Band {public long Count,Run,Longest;public double? Min,Max;}
-    public static (AtmosphericResearchSummary Summary,string Hash,ScienceObservation[] Preview,bool Downsampled) Calculate(
+    public static (AtmosphericResearchSummary Summary,string Hash,ScienceObservation[] Preview,bool Downsampled,AtmosphericTransectPoint[]? TransectPoints) Calculate(
         IEnumerable<ScienceObservation> observations,PersonalResearchCard card,Guid library,IEnumerable<DateTimeOffset> breaks,CancellationToken token=default,ResearchAttemptRequest? window=null)
     {
-        token.ThrowIfCancellationRequested();var rule=card.AtmosphericProfile;Validate(rule);var r=rule!;
+        token.ThrowIfCancellationRequested();
+        if(card.AtmosphericTransect is not null)return AtmosphericTransectResearch.Calculate(observations,card,library,breaks,token,window);
+        var rule=card.AtmosphericProfile;Validate(rule);var r=rule!;
         using var hash=IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
         void Hash(string value)=>hash.AppendData(Encoding.UTF8.GetBytes(value+"\n"));
         Hash(Evaluator);Hash(library.ToString());Hash(PreflightReadiness.Hash(card));
@@ -41,10 +49,7 @@ public static class AtmosphericResearch
             Hash(o.Id.ToString(CultureInfo.InvariantCulture)+":"+JsonSerializer.Serialize(o,WireJson.Options));
             var q=Quantities.FirstOrDefault(q=>q.Instrument==o.InstrumentId&&q.Measurement==o.MeasurementId);
             if(q==default)continue;var quantity=quantities[o.MeasurementId];
-            var usable=o.Provenance==ScienceProvenance.SimulatorReported&&o.Calibration is null&&o.Quality==ObservationQuality.Valid&&o.Unit==q.Unit
-                &&double.IsFinite(o.Value)&&o.AltitudeMslFeet is {} a&&double.IsFinite(a)&&a is >=-2000 and <=100000
-                &&o.PositionTimestampUtc is {} position&&(o.TimestampUtc-position).TotalSeconds is >=0 and <=3
-                &&o.Latitude is {} lat&&o.Longitude is {} lon&&MissionPlanning.Position(lat,lon)&&!string.IsNullOrWhiteSpace(o.Source);
+            var usable=Usable(o,q.Unit);
             if(!usable){quantity.Excluded++;excluded++;if(o.MeasurementId=="temperature"){pendingBreak|=previous is not null;previous=null;previousBand=null;}continue;}
             quantity.Add(o.Value);
             if(previewCount++%stride==0)preview.Add(o);
@@ -75,8 +80,10 @@ public static class AtmosphericResearch
              "These are conditions sampled at the aircraft and recorded UTC, not unsampled altitudes or a regional atmosphere. Horizontal travel and changing simulator weather confound vertical interpretation.",
              "Collection completeness addresses evidence coverage, not proof of a hypothesis or real-world aircraft certification. Pressure, wind and density are optional and remain unavailable when absent.",
              "Chart previews are bounded retained observations, not interpolation. Original values, quality, units, session and observation identities remain available in Science Results & Analysis."]);
-        return(summary,Convert.ToHexStringLower(hash.GetHashAndReset()),preview.ToArray(),stride>1);
+        return(summary,Convert.ToHexStringLower(hash.GetHashAndReset()),preview.ToArray(),stride>1,null);
     }
+    public static (ResearchAttemptOutcome Outcome,string Explanation) Outcome(AtmosphericResearchSummary summary,PersonalResearchCard card,bool interrupted)
+        =>card.AtmosphericTransect is {} transect?AtmosphericTransectResearch.Outcome(summary,transect,interrupted):Outcome(summary,card.AtmosphericProfile!,interrupted);
     public static (ResearchAttemptOutcome Outcome,string Explanation) Outcome(AtmosphericResearchSummary summary,AtmosphericResearchDefinition rule,bool interrupted)
     {
         var run=0;var longest=0;foreach(var b in summary.Bands){run=b.Covered?run+1:0;longest=Math.Max(longest,run);}

@@ -20,7 +20,8 @@ public sealed record MissionPlan(Guid Id, string Name, MissionTemplateKind Templ
     [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] CollectionPlan? Collection=null,
     [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] ResearchCardReference? ResearchCard=null,
     [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] ResearchCardReference[]? ResearchCards=null,
-    [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] ResearchStarterOrigin? ResearchStarter=null);
+    [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] ResearchStarterOrigin? ResearchStarter=null,
+    [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] bool? StartScienceArmed=null);
 public sealed record MissionTemplate(MissionTemplateKind Id, string Name, string Objective,
     InstrumentConfiguration[] Instruments, string[] NoteCategories,
     [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] InstrumentConfiguration[]? OptionalInstruments = null);

@@ -7,10 +7,12 @@ public sealed record FlightRegimeDefinition(double AirspeedKnots, double Airspee
     double AltitudeMslFeet, double AltitudeToleranceFeet, double HoldSeconds);
 public sealed record PersonalResearchCard(int Version, Guid Id, int Revision, string Name,
     string TemplateId, [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] FlightRegimeDefinition? FlightRegime, DateTimeOffset CreatedUtc,
-    [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] AtmosphericResearchDefinition? AtmosphericProfile=null);
+    [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] AtmosphericResearchDefinition? AtmosphericProfile=null,
+    [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] AtmosphericTransectDefinition? AtmosphericTransect=null);
 public sealed record SaveResearchCardRequest(string Name, FlightRegimeDefinition? FlightRegime,
     Guid? Id = null, int? ExpectedRevision = null,
-    [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] AtmosphericResearchDefinition? AtmosphericProfile=null);
+    [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] AtmosphericResearchDefinition? AtmosphericProfile=null,
+    [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] AtmosphericTransectDefinition? AtmosphericTransect=null);
 public enum ResearchAttemptOutcome { Pass, Fail, InsufficientEvidence, CollectionComplete, PartialCollection }
 public sealed record ResearchAttemptRequest(Guid RequestId, Guid FlightId,
     DateTimeOffset StartUtc, DateTimeOffset EndUtc,
@@ -46,7 +48,8 @@ public sealed record ResearchCardResult(ResearchCardReceipt Receipt, ResearchFli
 public enum ResearchEntryIntent { Unknown, FlyNow, Customize }
 public sealed record ResearchStarter(string Id,int Version,string Name,string Description,string[] Measurements,
     [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] FlightRegimeDefinition? Example,
-    [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] AtmosphericResearchDefinition? AtmosphericExample=null);
+    [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] AtmosphericResearchDefinition? AtmosphericExample=null,
+    [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] AtmosphericTransectDefinition? TransectExample=null);
 public sealed record ResearchStarterRequest(int Version,Guid RequestId,string StarterId,ResearchEntryIntent Intent,ResearchCardReference? Card=null,int StarterVersion=1);
 public sealed record ResearchStarterOrigin(int Version,Guid RequestId,string RequestSha256,string StarterId,ResearchEntryIntent Intent,ResearchCardReference? OriginalCard);
 public sealed record PreparedResearchStarter(MissionPlan Plan,PersonalResearchCard Card,bool Reused);
@@ -60,6 +63,21 @@ public sealed record AtmosphericQuantitySummary(string InstrumentId,string Measu
     long ExcludedReadings,double? Minimum,double? Maximum);
 public sealed record AtmosphericResearchSummary(int Version,Guid LibraryId,long OriginalObservations,long ValidTemperatureReadings,
     long ExcludedReadings,double? MinimumAltitudeFeetMsl,double? MaximumAltitudeFeetMsl,long MajorGaps,
-    AtmosphericResearchBand[] Bands,AtmosphericQuantitySummary[] Quantities,bool BandsTruncated,string[] Limitations);
+    AtmosphericResearchBand[] Bands,AtmosphericQuantitySummary[] Quantities,bool BandsTruncated,string[] Limitations,
+    [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] AtmosphericTransectSummary? Transect=null);
 public sealed record AtmosphericResearchReview(bool MatchesSavedEvidence,AtmosphericResearchSummary Retained,
-    ScienceObservation[] Preview,bool Downsampled,string Message);
+    ScienceObservation[] Preview,bool Downsampled,string Message,
+    [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] AtmosphericTransectPoint[]? TransectPoints=null,
+    [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] InstrumentConfiguration[]? PlannedInstruments=null);
+
+public sealed record AtmosphericTransectDefinition(int Version=1,string Question="How do atmospheric conditions change as my aircraft travels across a region?",
+    double StationSpacingMetres=500,int RequiredStations=3,int MinimumReadingsPerStation=3,
+    double MinimumExtentMetres=1000,double MaximumGapSeconds=5,double MaximumStepMetres=5000);
+// Derived support and references only; original values/positions remain in the science store.
+public sealed record AtmosphericTransectStation(int Index,long AnchorObservationId,long TemperatureReadings,long LongestContinuousReadings,bool Covered);
+public sealed record AtmosphericTransectLeg(int Id,long FirstObservationId,long LastObservationId,long TemperatureReadings,
+    int CoveredStations,double LinkedDistanceMetres,double ExtentFromFirstSampleMetres);
+public sealed record AtmosphericTransectSummary(int Version,long UniqueStations,long CoveredStations,double LinkedDistanceMetres,
+    double GreatestLegExtentMetres,int MostCoveredStationsInOneLeg,int? CompleteLegId,long TotalLegs,
+    AtmosphericTransectStation[] Stations,AtmosphericTransectLeg[] Legs,bool DetailsTruncated,long DatasetCount,long SessionCount);
+public sealed record AtmosphericTransectPoint(long ObservationId,double? DistanceMetres,int? LegId,int? StationIndex);

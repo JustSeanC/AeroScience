@@ -175,7 +175,7 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
             if (requireFreshTelemetry && (connection.State != ConnectionState.Connected || frame is null
                 || DateTimeOffset.UtcNow - frame.TimestampUtc > TimeSpan.FromSeconds(6) || frame.IsPaused))
                 throw new InvalidOperationException("Live aircraft telemetry is unavailable. Mission History remains accessible.");
-            var armed=request.ArmScience||plan?.Collection?.InitialPolicy==InitialCollectionPolicy.Armed;
+            var armed=request.ArmScience||plan?.StartScienceArmed==true||plan?.Collection?.InitialPolicy==InitialCollectionPolicy.Armed;
             if(!armed)research?.EnsureCanStart(configurations);
             var readiness=plan is null?null:assessPreflight?.Invoke(plan);
             var now = Now;

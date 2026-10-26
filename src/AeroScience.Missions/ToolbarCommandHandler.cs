@@ -39,7 +39,7 @@ public sealed class ToolbarCommandHandler(MissionCoordinator coordinator, RouteM
                     var id=command.MissionId??coordinator.Snapshot().ActiveMission?.Id;
                     var state=id is {} flight?coordinator.PersonalResearch(flight):null;
                     // Validate page identity before any durable control side effect.
-                    var pageSize=state?.Cards.Any(c=>c.Card.AtmosphericProfile is not null)==true?1:4;
+                    var pageSize=state?.Cards.Any(c=>AtmosphericResearch.IsCollectionCard(c.Card))==true?1:4;
                     if(command.Offset%pageSize!=0)throw new ArgumentException("Use bounded four-card pages.");
                     ResearchCardReceipt? receipt=null;
                     if(command.Op=="research-control"){

@@ -126,14 +126,14 @@ public sealed partial class MissionStore
             token.ThrowIfCancellationRequested();
             var row=chosen.GetValueOrDefault((selection.Kind,selection.Id))??throw new ArgumentException("An attempt or flight is no longer available in this experiment. Refresh its history.");
             if(row.Result?.Id!=selection.ResultId)throw new InvalidOperationException("A selected result changed. Refresh the experiment before comparing.");
-            rows.Add(card.AtmosphericProfile is not null?new(row,null,row.Result is {} atmospheric?ReviewAtmosphericEvidence(atmospheric,science,token):null)
+            rows.Add(AtmosphericResearch.IsCollectionCard(card)?new(row,null,row.Result is {} atmospheric?ReviewAtmosphericEvidence(atmospheric,science,token):null)
                 :new(row,row.Result is {} result?AuditResearchEvidence(db,tx,result,token):null));
         }
         var revisions=rows.Select(r=>r.Attempt.Card.Revision).Distinct().Count()>1;
-        var requirements=rows.Select(r=>card.AtmosphericProfile is null?PreflightReadiness.Hash(r.Attempt.Card.FlightRegime!):PreflightReadiness.Hash(r.Attempt.Card.AtmosphericProfile!)).Distinct().Count()>1;
+        var requirements=rows.Select(r=>!AtmosphericResearch.IsCollectionCard(card)?PreflightReadiness.Hash(r.Attempt.Card.FlightRegime!):PreflightReadiness.Hash((object?)r.Attempt.Card.AtmosphericTransect??r.Attempt.Card.AtmosphericProfile!)).Distinct().Count()>1;
         var evaluators=rows.Where(r=>r.Attempt.Result is not null).Select(r=>r.Attempt.Result!.EvaluatorVersion).Distinct().Count()>1;
-        var sources=card.AtmosphericProfile is null?rows.SelectMany(r=>r.Evidence?.Sources??[]).Distinct().ToArray():rows.Where(r=>r.Attempt.Result?.Evidence.Source is not null).Select(r=>r.Attempt.Result!.Evidence.Source!.Value).Distinct().ToArray();
-        if(card.AtmosphericProfile is not null){
+        var sources=!AtmosphericResearch.IsCollectionCard(card)?rows.SelectMany(r=>r.Evidence?.Sources??[]).Distinct().ToArray():rows.Where(r=>r.Attempt.Result?.Evidence.Source is not null).Select(r=>r.Attempt.Result!.Evidence.Source!.Value).Distinct().ToArray();
+        if(AtmosphericResearch.IsCollectionCard(card)){
             if(sources.Length>1)throw new ArgumentException("Compare atmospheric profiles with the same simulator/demo provenance. Synthetic fixtures and simulator flights are not interchangeable.");
             return new(card,rows.ToArray(),revisions,requirements,evaluators,false,
                 ["Only like-for-like original simulator atmospheric quantities and units are compared. Points remain separate observations; no missing altitude is interpolated or filled.",
