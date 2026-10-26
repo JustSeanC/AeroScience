@@ -13,7 +13,7 @@ test('two displays share recording, history and safe mission detail', async ({ p
   const errors = []; page.on('pageerror', error => errors.push(error.message));
   const {version} = await (await request.get('/api/health')).json();
   await page.goto('/');
-  await expect(page.locator('.sidebar-footer small')).toHaveText(`v${version} · Development`);
+  await expect(page.locator('.sidebar-footer small')).toHaveText(`v${version}`);
   await expect(page.locator('#source-badge')).toHaveText('SIMULATED TELEMETRY');
   await expect(page.locator('#altitude')).not.toHaveText('—');
   await expect(page.locator('#mach')).toHaveText('Mach 0.82');
@@ -27,7 +27,7 @@ test('two displays share recording, history and safe mission detail', async ({ p
   await expect(page.locator('#active-name')).toHaveText(name);
   await expect.poll(async () => Number((await page.locator('#active-samples').textContent()).replaceAll(',', ''))).toBeGreaterThan(1);
   const second = await context.newPage(); await second.goto('/');
-  await expect(second.locator('.sidebar-footer small')).toHaveText(`v${version} · Development`);
+  await expect(second.locator('.sidebar-footer small')).toHaveText(`v${version}`);
   await expect(second.locator('#active-name')).toHaveText(name);
   await expect(second.locator('#active-mode')).toContainText('Realistic Mode');
   await second.getByRole('button', { name: 'End mission', exact: true }).click();
