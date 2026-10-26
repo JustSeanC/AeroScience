@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "version": "0.6.0",
   "evidenceType": "genuine-public-provider-network",
-  "checkedUtc": "2026-10-25T04:05:02.170464+00:00",
+  "checkedUtc": "2026-10-26T00:44:13.516345+00:00",
   "windowsMsfs": "not tested",
   "description": "Actual public API discovery, bounded numeric retrieval, internal manifest, verified library import, QA-aware sampling and persisted/reloaded mission products. Flight inputs are synthetic and explicitly labeled. Data files and SAS tokens are not bundled.",
   "finalNetworkRerun": "passed",
@@ -89,10 +89,10 @@
     "src/AeroScience.Desktop/WindowsEarthdataCredentials.cs": "1cd020cf04a9dca4a9b942806531efdbc748ee637bbca38a6c6719e427e3f26f",
     "src/AeroScience.Engine/AccessControl.cs": "7c821fc351d33e8a6aea61cdfef571ff07b61d721a992d5eed7ba0ff19b6eca7",
     "src/AeroScience.Engine/AeroScience.Engine.csproj": "f553d0ce2800d6bd7dc20c30d8d6224dfc532223c2f936b04d61a119c3c48193",
-    "src/AeroScience.Engine/ApplicationProfile.cs": "ed9eb77ef8a6a957930113c6a9de24a1a3ec5a61d00a10419d6e304698564297",
+    "src/AeroScience.Engine/ApplicationProfile.cs": "6723da530845cf5a55beb89528f2ede77c9ed3fb1fa0ff5c9f71f054fb65bcfe",
     "src/AeroScience.Engine/ApplicationUpdates.cs": "9a14a04c54122ab0e28ef7ac440c961edf02a219d3fed8cf2cb6d1df4a9302c8",
-    "src/AeroScience.Engine/AviationAcquisition.cs": "3a2c6bb8b95e9d5a6dda924e85f5eb86f0643624cbf3f2dad619b04e95d0392c",
-    "src/AeroScience.Engine/AviationAcquisitionWorker.cs": "62eab4165a28873ffea275382a23e428520855d9f409ce7978825ff798145fa9",
+    "src/AeroScience.Engine/AviationAcquisition.cs": "1dea8b135091c2acec21eb28a6a3176fd9ed75e199ee219001ffbb0e97212b56",
+    "src/AeroScience.Engine/AviationAcquisitionWorker.cs": "5671bacd8d226f4c3c6f358901459101740809e9da070428b082ff3785afc295",
     "src/AeroScience.Engine/AviationCharts.cs": "40dd17c7c97c1cad1604425951d8bb5e2331a1d104d2d41682339fc85354c313",
     "src/AeroScience.Engine/AviationNasr.cs": "38ad8c151c73bb2bb1ea9bd3ecee20bf89f3183eedb6bbc09b4a868109584671",
     "src/AeroScience.Engine/AviationReference.cs": "e30219e757ed0a6ecac5fbac4685cc2618d3d35295df1f6a805b8f62ba471ec6",
@@ -118,7 +118,7 @@
     "src/AeroScience.Engine/Program.cs": "11e86bdd345a269e2e4b8f43d0790fa71b89bc427a4e1a649f81d1dc7167ab10",
     "src/AeroScience.Engine/ScientificAnalysisJobs.cs": "e9f1b3e68a7f35a57a834366106196392ee10e4e827c8c547d876ff8ebe9a39b",
     "src/AeroScience.Engine/ScientificHdfBoundary.cs": "fcae8c84a16180bf907e3688b887d4d25f136d1fac94e118328fb61c3e1a219c",
-    "src/AeroScience.Engine/ScientificHdfReader.cs": "8e7dff9f1d2573cf36c5461c4ff21fe2c5702bc257fb79bc6b244cc7399bfc70",
+    "src/AeroScience.Engine/ScientificHdfReader.cs": "80b4aedc3f88f3251ff0c5a719d1e04ab1f14c3bdf3940d1012e3e3306be743d",
     "src/AeroScience.Engine/ScientificHdfWorker.cs": "adfdf0c9a76a983ecbd1c1a7d69127df5d4f586ad62091818f487ff3f80a2a48",
     "src/AeroScience.Engine/ScientificLibraryFolders.cs": "398d36ed87799388914b2c4450fbaa7615489b17a3a4398e21f353a1a7faafb5",
     "src/AeroScience.Engine/ScientificLibraryWorker.cs": "40538506d7b5d95238b651e44974695ef4c915bcf62def19111e7ed8ac85eaf5",
@@ -127,7 +127,7 @@
     "src/AeroScience.Engine/StorageManagementWorker.cs": "452fdbd7236f60bc9bceba816f8f9da43647b4f63a50147e74dd269e32e4c582",
     "src/AeroScience.Engine/TelemetryWorker.cs": "928c25359f41c348b00b681f8f9be9ffd3f38af94384ab04e2e55d60201c2a7f",
     "src/AeroScience.Engine/ToolbarBridgeStatus.cs": "1fe8204db87b4e17a8cefe30231237fcf0e8ba853f834f595a12e4820b8bb69c",
-    "src/AeroScience.Engine/ToolbarInstaller.cs": "306ce6ee260d9e29a09a9edb027e6873d84baa0f4b0a02b343e27bb9a0c7de92",
+    "src/AeroScience.Engine/ToolbarInstaller.cs": "707e02f00dca63628354297a981c6c5298199e2a9a9e342e01a3e407742cb3c3",
     "src/AeroScience.Engine/ToolbarVersions.cs": "d54d6a5472a0ca55035ffd8a5102548db147fff337ecb07b9ee63c7018708880",
     "src/AeroScience.Engine/ToolbarWorker.cs": "e25d750c688eef7d06e6b4c58cf0da603f764d9c2d3079e1fba7635ccfc5327a",
     "src/AeroScience.Engine/ValidationArchiveCopy.cs": "5468e9c19249d1cff487dcb2d3e595cf799484589d800f5c8fcbbc0aa68a5e22",
@@ -532,11 +532,11 @@
   },
   "runProvenance": [
     {
-      "runId": "8546916b-5b78-4acb-9395-4ac46d5e0cdb",
+      "runId": "ffde62f3-8579-46b1-9cde-3aeb28e3e4f2",
       "status": "passed",
-      "sourceCommit": "93529b8fc7eaf060b710bf4410e6a4614a8904e4",
-      "sourceManifestSha256": "a4be599b6b33668d9ca099800201db2a578eaab86fcb862087745c9fc0f83b71",
-      "receiptSha256": "055b500c687ad89b164def9c05ba4ab9588e190c37c71b6fb811e6b20e140a82"
+      "sourceCommit": "eb5bdfbbc92ec8c17cf7f3dca63b7c80cb0aa88b",
+      "sourceManifestSha256": "5aab523a567a1d179b40f6ab789e8ee01865b39d33bc4cab264e3212ecf591b8",
+      "receiptSha256": "a90eaea1fb23dac19e47786fa01288c1697d2f1e48a86f9f5242ae5d84f06558"
     }
   ],
   "workflows": [
@@ -600,7 +600,7 @@
       "validDerivedSamples": 576,
       "sampleCount": 576,
       "publishedProductVerified": true,
-      "publishedProductSha256": "8b2af5418c1f1c721507256d48579b89b61a504eeed8adf5cba413180a44fc63",
+      "publishedProductSha256": "e5b13c23fb57d8816fee412aea29c277a217fa0e63f931fda4cde02c4bbac755",
       "flightInput": "synthetic test position; not MSFS",
       "sourceFiles": [
         {
@@ -609,7 +609,7 @@
           "sha256": "f66b92a3a5f914f5c26ec8e5c1395311472f188347e5666d66a513aee4d22a3d"
         }
       ],
-      "acceptanceArtifactSha256": "0653c8f9ef61db065dc11279a05c51931819d9a879720ec7e76790efe990e3f5"
+      "acceptanceArtifactSha256": "e8d2a68a11f5b48d2bdb45e620d2671d8fe07264e94703ba36159f63d1decfcc"
     },
     {
       "workflow": "landsat-c2-l2",
@@ -701,7 +701,7 @@
       "validDerivedSamples": 576,
       "sampleCount": 576,
       "publishedProductVerified": true,
-      "publishedProductSha256": "e20b66eeb20ad8700e9d7fa92b56c1962f9169ca33df155275c0747f47cf0b01",
+      "publishedProductSha256": "ed2dce2ec8759782ed510618808342985152d23b74a39a7334cff5d9888a365d",
       "flightInput": "synthetic test position; not MSFS",
       "sourceFiles": [
         {
@@ -720,7 +720,7 @@
           "sha256": "6dcbf2ca051ac9b64c0574a5d61c465aeca0f08df0c9a6c227f5d41225563938"
         }
       ],
-      "acceptanceArtifactSha256": "a971551ed025ab3da63dda412c6c7c923e1c627380bb95fccf796f5546b68c87"
+      "acceptanceArtifactSha256": "5797ef0e2d6f102c891610afee6d30a30e819f64e1ddad11229e3a157444eaf5"
     },
     {
       "workflow": "sentinel-2-l2a",
@@ -842,7 +842,7 @@
       "validDerivedSamples": 183,
       "sampleCount": 576,
       "publishedProductVerified": true,
-      "publishedProductSha256": "65e9e662e4b80e064ccce3c5a355753b90dd052eb2781132dc308d7df426b52c",
+      "publishedProductSha256": "efe28614e6d4f759476c7dad5fcec2d19985508319015996b647b44a091af710",
       "flightInput": "synthetic test position; not MSFS",
       "sourceFiles": [
         {
@@ -871,7 +871,7 @@
           "sha256": "490d03dc11d94fabc5037777b2e8b4af374f4858ce801dfd33cbe7c146ea2fa5"
         }
       ],
-      "acceptanceArtifactSha256": "3f91be70af0155191b539e82c160be678a45618f87f7cc9086a1e77e41c90708"
+      "acceptanceArtifactSha256": "9dda654fdaabb35284aa8489beaf97144c7dc65f0185d43bccc2903f85114ec8"
     },
     {
       "workflow": "usgs-3dep",
@@ -933,7 +933,7 @@
       "validDerivedSamples": 576,
       "sampleCount": 576,
       "publishedProductVerified": true,
-      "publishedProductSha256": "03d6b4169642ad84d72cc21171af64d14667d9a031f31ac1c04b86923a089688",
+      "publishedProductSha256": "b2a64ebfbcf0849817859b2e953d92f13f472438962d2bf32329b3895717ee37",
       "flightInput": "synthetic test position; not MSFS",
       "sourceFiles": [
         {
@@ -942,11 +942,11 @@
           "sha256": "b25437967ba562cbdb4830d219e6fc65fa0ee0be760c48fce31a1dfa0fee04f5"
         }
       ],
-      "acceptanceArtifactSha256": "b796ec292041ef37a27e8ab7a292145d03ef9cafb02fa1135cc9362e57474b87"
+      "acceptanceArtifactSha256": "4683eacf2df3587248ff3c9348cc72344c95e9300d15e9fc7a30532146925030"
     }
   ],
   "independentComparison": {
-    "checked_utc": "2026-10-25T04:02:53.427184+00:00",
+    "checked_utc": "2026-10-26T00:41:17.047324+00:00",
     "method": "Independent GDAL/rasterio CRS, affine, native numeric scaling and QA comparison; documented 1e-8-pixel boundary snap, unchanged 1e-9 value tolerance",
     "results": [
       {
