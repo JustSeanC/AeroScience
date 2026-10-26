@@ -609,7 +609,7 @@ class IngamePanelAeroScience extends TemplateElement {
     if(!valid){this.byId('as-research-status').textContent=this.state?.activeMission?'Waiting for synchronized personal card state. Flight and science remain independent.':'Choose personal cards in Mission Planner before recording.';return;}
     this.byId('as-research-status').textContent=state.cards.length?'Activate a card, then Begin Attempt / End Attempt. Deactivate Card does not stop flight or science.':'No personal cards selected for this flight.';
     for(const item of state.cards){
-      const row=document.createElement('section'),title=document.createElement('h4'),info=document.createElement('p');row.setAttribute('aria-label',item.card.name);row.tabIndex=-1;
+      const row=document.createElement('section'),title=document.createElement('h4'),info=document.createElement('p');row.setAttribute('aria-label',item.card.name);row.tabIndex=-1;row.dataset.researchCard=item.card.id;
       title.textContent=item.card.name+' · revision '+item.card.revision;info.textContent=(item.openAttempt?'Attempt recording':item.active?'Active':'Inactive')+' · '+item.card.flightRegime.airspeedKnots+' knots IAS · '+item.card.flightRegime.altitudeMslFeet+' feet MSL. '+(item.activationBlocked||'');row.append(title,info);
       for(const [action,label] of [['activate','Activate Card'],['deactivate','Deactivate Card'],['beginAttempt','Begin Attempt'],['endAttempt','End Attempt']]){
         const b=document.createElement('button');b.textContent=label;b.dataset.researchCard=item.card.id;b.dataset.researchAction=action;
@@ -617,7 +617,7 @@ class IngamePanelAeroScience extends TemplateElement {
         b.onclick=()=>{if(b.disabled)return;const requestId=this.requestId();this.send('research-control',{requestId,missionId:state.flightId,offset:this.researchOffset,researchControl:{version:1,flightId:state.flightId,requestId,expectedRevision:state.revision,action,cardId:item.card.id,expectedAttemptId:item.openAttempt?.id||null}});this.renderPersonalResearch(true);};row.append(b);
       }host.append(row);
     }
-    if(focusCard){const same=Array.from(host.querySelectorAll('button')).find(b=>b.dataset.researchCard===focusCard&&b.dataset.researchAction===focusAction);if(same&&!same.disabled)same.focus();}
+    if(focusCard){const choices=Array.from(host.querySelectorAll('button')).filter(b=>b.dataset.researchCard===focusCard&&!b.disabled);const target=choices.find(b=>b.dataset.researchAction===focusAction)||choices[0]||Array.from(host.children).find(r=>r.dataset.researchCard===focusCard);target?.focus();}
   }
   renderResearch(research, fresh) {
     const g = research && research.guidance;
