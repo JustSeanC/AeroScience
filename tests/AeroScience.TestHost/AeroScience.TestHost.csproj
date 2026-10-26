@@ -6,6 +6,7 @@
     <Compile Include="../AeroScience.Tests/SyntheticTfr.cs" Link="SyntheticTfr.cs" />
     <Compile Include="../AeroScience.Tests/SyntheticTelemetryFixture.cs" Link="SyntheticTelemetryFixture.cs" />
     <Compile Include="../AeroScience.Tests/RemoteFixtureFiles.cs" Link="RemoteFixtureFiles.cs" />
+    <Compile Include="../AeroScience.Tests/SurveyFixture.cs" Link="SurveyFixture.cs" />
     <Compile Include="../AeroScience.Tests/NasaFixtureFiles.cs" Link="NasaFixtureFiles.cs" />
     <Compile Include="../../src/AeroScience.Desktop/WindowsEarthdataCredentials.cs" Link="WindowsEarthdataCredentials.cs" />
   </ItemGroup>

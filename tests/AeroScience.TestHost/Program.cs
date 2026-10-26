@@ -73,6 +73,7 @@ var app = EngineApplication.Create(args, services =>
 var options=app.Services.GetRequiredService<EngineOptions>();
 app.MapPost("/api/testing/operating/input",(SensorTelemetryFixture fixture,BrowserTelemetryProvider provider)=>{provider.SensorFixture=fixture;return new{synthetic=true};});
 app.MapPost("/api/testing/research/transect/{locations:int}",(int locations,MissionStore missions,ScienceStore science,MissionCoordinator coordinator)=>AtmosphericTransectFixture.Create(locations,missions,science,coordinator));
+app.MapPost("/api/testing/research/survey/{cloudy:bool}",(bool cloudy,MissionStore missions,ScienceStore science,MissionCoordinator coordinator)=>SurveyResearchFixture.Create(cloudy,options.DataDirectory,missions,science,coordinator));
 app.MapPost("/api/testing/research/atmosphere/{bands:int}",(int bands,MissionStore missions,ScienceStore science,MissionCoordinator coordinator)=>AtmosphericResearchFixture.Create(bands,missions,science,coordinator));
 app.Services.GetRequiredService<MapSettings>().InitializeDefaults(true); // Existing offline browser fixtures; new-install tests reset explicitly.
 app.Services.GetRequiredService<ApplicationUpdates>().Configure(new(false)); // No real update traffic in synthetic browser tests.
