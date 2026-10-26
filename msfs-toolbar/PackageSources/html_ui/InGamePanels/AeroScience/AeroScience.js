@@ -611,7 +611,8 @@ class IngamePanelAeroScience extends TemplateElement {
     for(const item of state.cards){
       const row=document.createElement('section'),title=document.createElement('h4'),info=document.createElement('p');row.setAttribute('aria-label',item.card.name);row.tabIndex=-1;row.dataset.researchCard=item.card.id;
       const atmospheric=item.card.atmosphericProfile;
-      const requirements=atmospheric?atmospheric.requiredBands+' neighboring '+atmospheric.bandWidthFeet+'-foot MSL bands · collect valid temperature readings':item.card.flightRegime.airspeedKnots+' knots IAS · '+item.card.flightRegime.altitudeMslFeet+' feet MSL';
+      const transect=item.card.atmosphericTransect;
+      const requirements=transect?transect.requiredStations+' distinct sampling locations · '+transect.minimumExtentMetres+' m geographic extent · collect valid temperature readings':atmospheric?atmospheric.requiredBands+' neighboring '+atmospheric.bandWidthFeet+'-foot MSL bands · collect valid temperature readings':item.card.flightRegime.airspeedKnots+' knots IAS · '+item.card.flightRegime.altitudeMslFeet+' feet MSL';
       title.textContent=item.card.name+' · revision '+item.card.revision;info.textContent=(item.openAttempt?'Attempt recording':item.active?'Active':'Inactive')+' · '+requirements+'. '+(item.activationBlocked||'');row.append(title,info);
       for(const [action,label] of [['activate','Activate Card'],['deactivate','Deactivate Card'],['beginAttempt','Begin Attempt'],['endAttempt','End Attempt']]){
         const b=document.createElement('button');b.textContent=label;b.dataset.researchCard=item.card.id;b.dataset.researchAction=action;

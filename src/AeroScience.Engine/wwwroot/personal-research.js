@@ -1,7 +1,7 @@
 import {atmosphericSummary,showAtmosphericResult} from './atmospheric-research.js';
 import {newIdentity,node} from './workstation-ui.js';
 import {researchExperimentReview} from './personal-research-review.js';
-import {flightRegimeFields,atmosphericFields,researchCardTargets,researchStarterChoices,researchEntryActions} from './personal-research-start.js';
+import {flightRegimeFields,atmosphericFields,researchFields,researchDefinition,isAtmosphericResearch,researchCardTargets,researchStarterChoices,researchEntryActions} from './personal-research-start.js';
 let epoch = 0, cardOffset = 0, resultOffset = 0;
 let draft = null;
 export function disposePersonalResearch() { epoch++; }
@@ -33,15 +33,15 @@ export async function personalResearch(root, api) {
     researchStarterChoices(root,api,starters,active);
     const editor = node('section', undefined, 'panel research-panel');
     const renderEditor = () => {
-      const atmospheric=draft?.atmosphericProfile;editor.replaceChildren(node('h2',atmospheric?'Edit Vertical Atmospheric Profile':draft?.id?'Edit Flight-Regime Validation':'Create Flight-Regime Validation'));
-      editor.append(node('p', atmospheric?'Choose achievable altitude bands. Collection coverage is not proof of a hypothesis.':'Choose targets appropriate for your aircraft. Results assess simulator evidence only; they are not aircraft certification.'));
+      const atmospheric=draft?.atmosphericProfile||draft?.atmosphericTransect;editor.replaceChildren(node('h2',draft?.atmosphericTransect?'Edit Atmospheric Transect':atmospheric?'Edit Vertical Atmospheric Profile':draft?.id?'Edit Flight-Regime Validation':'Create Flight-Regime Validation'));
+      editor.append(node('p', atmospheric?'Choose achievable sampling goals. Collection coverage is not proof of a hypothesis.':'Choose targets appropriate for your aircraft. Results assess simulator evidence only; they are not aircraft certification.'));
       const form = node('form'); form.id = 'research-card-form';
       const fields = node('div', undefined, 'research-grid');
       const name = field(fields, 'Test card name', draft?.name || 'Flight-Regime Validation', 'text'); name.required = true; name.maxLength = 100;
       const rule=draft?.flightRegime||starters.find(s=>s.id==='flight-regime').example;
-      const targets=atmospheric?atmosphericFields(fields,atmospheric):flightRegimeFields(fields,rule);
+      const targets=researchFields(fields,draft||{flightRegime:rule});
       const read = () => ({id:draft?.id, revision:draft?.revision, name:name.value,
-        flightRegime:atmospheric?null:targets.read(),atmosphericProfile:atmospheric?targets.read():null});
+        flightRegime:atmospheric?null:targets.read(),atmosphericProfile:draft?.atmosphericProfile?targets.read():null,atmosphericTransect:draft?.atmosphericTransect?targets.read():null});
       form.oninput = () => { draft = read(); };
       const save = node('button', draft?.id ? 'Save New Revision' : 'Save Test Card', 'primary'); save.type = 'submit';
       form.onsubmit = async event => {
@@ -49,7 +49,7 @@ export async function personalResearch(root, api) {
         const value = read();
         for (const input of fields.querySelectorAll('input')) input.disabled = true;
         try {
-          await api('/api/research/cards', {name:value.name, flightRegime:value.flightRegime,atmosphericProfile:value.atmosphericProfile, id:value.id || null, expectedRevision:value.revision || null});
+          await api('/api/research/cards', {name:value.name, flightRegime:value.flightRegime,atmosphericProfile:value.atmosphericProfile,atmosphericTransect:value.atmosphericTransect, id:value.id || null, expectedRevision:value.revision || null});
           if (JSON.stringify(draft) === JSON.stringify(value)) draft = null;
           if (active()) { draft = null; await personalResearch(root, api); }
         } catch (error) { if (active()) status.textContent = error.message; }
@@ -88,15 +88,15 @@ export async function personalResearch(root, api) {
         select.onchange = setInterval; setInterval();
         const result = node('div'); result.setAttribute('role', 'status');
         let lastEvaluation;
-        if(card.atmosphericProfile){const advanced=node('details');advanced.append(node('summary','Optional — shorter collection interval (UTC)'),interval);review.append(advanced);}else review.append(interval);
-        review.append(node('p', card.atmosphericProfile?'Review actual retained observations for the selected flight. Optional interval controls use UTC; raw flight context never fills missing or paused science.':'Times above are UTC, not local or simulator clock time. Choose the whole flight or a shorter test interval. Samples must be at most 1.5 seconds apart; pauses and gaps cannot be joined into a successful hold.'),
-          action(card.atmosphericProfile?'Evaluate Atmospheric Profile':'Evaluate Recorded Attempt', async () => {
+        if(isAtmosphericResearch(card)){const advanced=node('details');advanced.append(node('summary','Optional — shorter collection interval (UTC)'),interval);review.append(advanced);}else review.append(interval);
+        review.append(node('p', isAtmosphericResearch(card)?'Review actual retained observations for the selected flight. Optional interval controls use UTC; raw flight context never fills missing or paused science.':'Times above are UTC, not local or simulator clock time. Choose the whole flight or a shorter test interval. Samples must be at most 1.5 seconds apart; pauses and gaps cannot be joined into a successful hold.'),
+          action(card.atmosphericTransect?'Evaluate Atmospheric Transect':card.atmosphericProfile?'Evaluate Atmospheric Profile':'Evaluate Recorded Attempt', async () => {
             if (!start.value || !end.value) throw Error('Choose both UTC times for this recorded attempt.');
             const input = {flightId:select.value, startUtc:new Date(start.value+'Z').toISOString(), endUtc:new Date(end.value+'Z').toISOString(),cardId:card.id};
             const key = JSON.stringify(input);
             if (lastEvaluation?.key !== key) lastEvaluation = {key, requestId:newIdentity()};
             const attempt = await api('/api/research/attempts', {requestId:lastEvaluation.requestId, ...input});
-            if (active() && request === reviewEpoch) { if(card.atmosphericProfile)await showAtmosphericResult(result,api,attempt,()=>active()&&request===reviewEpoch);else result.replaceChildren(attemptView(attempt,api)); }
+            if (active() && request === reviewEpoch) { if(isAtmosphericResearch(card))await showAtmosphericResult(result,api,attempt,()=>active()&&request===reviewEpoch);else result.replaceChildren(attemptView(attempt,api)); }
           }, 'primary'), result);
         const timeline=node('div');review.append(timeline);
         const showTimeline=async()=>{timeline.replaceChildren();const {researchFlightTimeline}=await import('./personal-research-flight.js');if(active()&&request===reviewEpoch)await researchFlightTimeline(timeline,api,select.value);};
@@ -114,7 +114,7 @@ export async function personalResearch(root, api) {
           const plan = await api(`/api/research/cards/${card.id}/plan`, {id:card.id, revision:card.revision});
           if (active()) location.hash = `#planner?researchPlan=${plan.id}`;
         }, 'primary'),
-        action(card.atmosphericProfile?'Review Atmospheric Profile':'Review Recorded Flight', () => showReview(card)),
+        action(card.atmosphericTransect?'Review Atmospheric Transect':card.atmosphericProfile?'Review Atmospheric Profile':'Review Recorded Flight', () => showReview(card)),
         action('Overview & Compare',()=>researchExperimentReview(experiment,api,card,active)),
         action('Edit Card', () => { draft = structuredClone(card); renderEditor(); editor.scrollIntoView({block:'start'}); editor.querySelector('input').focus(); }));
       root.append(row);
@@ -135,7 +135,7 @@ export async function personalResearch(root, api) {
 }
 
 export function attemptView(attempt,api) {
-  if(attempt.atmosphericProfile){const panel=atmosphericSummary(attempt);if(api){const button=node('button','Open Atmospheric Profile','secondary');button.type='button';const detail=node('div');button.onclick=()=>showAtmosphericResult(detail,api,attempt);panel.append(button,detail);}return panel;}
+  if(attempt.atmosphericProfile){const panel=atmosphericSummary(attempt);if(api){const button=node('button',attempt.card.atmosphericTransect?'Open Atmospheric Transect':'Open Atmospheric Profile','secondary');button.type='button';const detail=node('div');button.onclick=()=>showAtmosphericResult(detail,api,attempt);panel.append(button,detail);}return panel;}
   const panel = node('article', undefined, 'panel research-panel');
   const outcome = {pass:'Pass', fail:'Fail', insufficientEvidence:'Insufficient Evidence'}[attempt.outcome] || 'Unknown';
   panel.append(node('h3', `${attempt.card.name} — ${outcome}`), node('p', attempt.explanation),

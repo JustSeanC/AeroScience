@@ -1,7 +1,7 @@
 import {reviewCollectedScienceDeletion} from "./collected-science-deletion.js";
 import { newIdentity } from "./workstation-ui.js";
 import {researchCardSelection,researchFlightControls,researchFlightTimeline} from './personal-research-flight.js';
-import {flightRegimeFields,atmosphericFields,researchCardTargets} from './personal-research-start.js';
+import {flightRegimeFields,atmosphericFields,researchFields,researchDefinition,isAtmosphericResearch,researchCardTargets} from './personal-research-start.js';
 import { missionPerformance } from "./mission-performance.js";
 import { preflightReadiness } from "./preflight-readiness.js";
 import { collectionPlanner } from "./collection-planner.js";
@@ -330,7 +330,7 @@ function editPlan(plan) {
   if(plan?.researchStarter&&(plan.researchStarter.intent==='customize'||!plan.researchStarter.originalCard)&&references.some(r=>r.id===plan.researchStarter.requestId)){
     starterSection=text('section',undefined,'research-panel');starterSection.id='research-starter-targets';starterSection.append(text('h3','Your Experiment Targets'),text('p','This is your own prepared card. Editing targets saves a new revision for this plan; original experiments and past flight results stay unchanged. These are pilot-reviewed simulator targets, not safe aircraft limits.'));
     const feedback=text('p','Loading your prepared targets…');starterFeedback=feedback;feedback.setAttribute('role','status');starterSection.append(feedback);const fields=text('div',undefined,'research-grid');starterSection.append(fields);form.append(starterSection);
-    const load=()=>{loadStarter=ctx.api(`/api/research/cards/${plan.researchStarter.requestId}?revision=${readCards().find(r=>r.id===plan.researchStarter.requestId)?.revision||references[0].revision}`).then(card=>{if(!form.isConnected)return;starterCard=card;fields.replaceChildren();starterName=input(fields,'Experiment name',card.name);starterName.required=true;starterName.maxLength=100;starterFields=(card.atmosphericProfile?atmosphericFields:flightRegimeFields)(fields,card.atmosphericProfile||card.flightRegime,{prefix:'Experiment: '});feedback.textContent=`Revision ${card.revision} · ${researchCardTargets(card)}. Free flight is supported; route, patterns and science instruments remain editable below.`;save.disabled=false;retry.hidden=true;}).catch(error=>{if(form.isConnected){feedback.textContent='Experiment targets could not load: '+error.message;save.disabled=!starterSection.hidden;retry.hidden=false;}throw error;});return loadStarter;};
+    const load=()=>{loadStarter=ctx.api(`/api/research/cards/${plan.researchStarter.requestId}?revision=${readCards().find(r=>r.id===plan.researchStarter.requestId)?.revision||references[0].revision}`).then(card=>{if(!form.isConnected)return;starterCard=card;fields.replaceChildren();starterName=input(fields,'Experiment name',card.name);starterName.required=true;starterName.maxLength=100;starterFields=researchFields(fields,card,{prefix:'Experiment: '});feedback.textContent=`Revision ${card.revision} · ${researchCardTargets(card)}. Free flight is supported; route, patterns and science instruments remain editable below.`;save.disabled=false;retry.hidden=true;}).catch(error=>{if(form.isConnected){feedback.textContent='Experiment targets could not load: '+error.message;save.disabled=!starterSection.hidden;retry.hidden=false;}throw error;});return loadStarter;};
     const retry=button('Reload Experiment Targets',()=>load());retry.hidden=true;starterSection.append(retry);load().catch(()=>{});
   }else if(plan?.researchStarter)form.append(text('p','This plan reuses a saved experiment revision. Routes, patterns and instruments remain editable. To change experiment targets in an independent copy, return to My Research and choose Customize.'));
   form.append(text("h3","1. Mission details"));
@@ -787,6 +787,7 @@ function editPlan(plan) {
   });
   const advancedCoordinates=text("details");advancedCoordinates.append(text("summary","Advanced: enter survey vertices manually"),button("Manual survey coordinates",()=>areaEditor()));locationSection.append(advancedCoordinates);
   const scienceSection=text("section");scienceSection.append(text("h3","4. Scientific instruments and data readiness"),configuration,presetSection);form.append(scienceSection);scientificReadiness(scienceSection,ctx.api).catch(()=>{});
+  const waitLabel=text('label','Wait for me to start science collection'),waitForScience=document.createElement('input');waitForScience.type='checkbox';waitForScience.checked=plan?.startScienceArmed===true;waitLabel.prepend(waitForScience);scienceSection.append(waitLabel,text('p','When selected, Start mission records the flight but leaves science armed. Use Start new science session when ready. Card activation remains separate.'));
   const atmosphericSection=text('section');atmosphericSection.append(text('h3','Atmospheric research settings'));
   const profileDirection=select(atmosphericSection,'Profile direction',[['both','Ascent and descent'],['ascent','Ascent'],['descent','Descent']],plan?.atmosphericSettings?.direction??'both');
   const profileInterval=input(atmosphericSection,'Altitude interval', (plan?.atmosphericSettings?.altitudeIntervalMetres??100)/.3048,'number');planningField(profileInterval,'altitude',(plan?.atmosphericSettings?.altitudeIntervalMetres??100)/.3048,'Altitude interval','interval');
@@ -828,6 +829,7 @@ function editPlan(plan) {
         researchCard: readCards()[0] || null,
         researchCards: readCards(),
         researchStarter:plan?.researchStarter||null,
+        startScienceArmed:waitForScience.checked?true:plan?.startScienceArmed===true?false:plan?.startScienceArmed??null,
         collection: automation.read(),
         name: name.value,
         template: template.value,
@@ -860,8 +862,8 @@ function editPlan(plan) {
       try{
         if(starterSection&&!starterSection.hidden)await loadStarter;if(!form.isConnected)return;
         const draft=readDraft();
-        if(starterCard&&draft.researchCards.some(r=>r.id===starterCard.id)&&(starterName.value.trim()!==starterCard.name||JSON.stringify(starterFields.read())!==JSON.stringify(starterCard.atmosphericProfile||starterCard.flightRegime))){
-          starterCard=await ctx.api('/api/research/cards',{id:starterCard.id,expectedRevision:starterCard.revision,name:starterName.value,flightRegime:starterCard.atmosphericProfile?null:starterFields.read(),atmosphericProfile:starterCard.atmosphericProfile?starterFields.read():null});
+        if(starterCard&&draft.researchCards.some(r=>r.id===starterCard.id)&&(starterName.value.trim()!==starterCard.name||JSON.stringify(starterFields.read())!==JSON.stringify(researchDefinition(starterCard)))){
+          starterCard=await ctx.api('/api/research/cards',{id:starterCard.id,expectedRevision:starterCard.revision,name:starterName.value,flightRegime:isAtmosphericResearch(starterCard)?null:starterFields.read(),atmosphericProfile:starterCard.atmosphericProfile?starterFields.read():null,atmosphericTransect:starterCard.atmosphericTransect?starterFields.read():null});
           if(!form.isConnected)return;readCards.replaceReference(starterCard);draft.researchCards=readCards();draft.researchCard=draft.researchCards[0]||null;starterFeedback.textContent=`Your card revision ${starterCard.revision} is saved locally. Save mission plan to keep this plan linked to those targets.`;
         }
         const savedPlan=await ctx.api('/api/plans',draft);

@@ -20,7 +20,7 @@ public sealed class BrowserTelemetryProvider(int intervalMs) : ITelemetryProvide
             if(SensorFixture is {} fixture && update.Frame is {} original)
             {
                 var at=DateTimeOffset.UtcNow.AddSeconds(-fixture.AgeSeconds);
-                var sensorFrame=original with{TimestampUtc=at,Latitude=40,Longitude=-75,AltitudeMslFeet=fixture.AltitudeMslFeet,AltitudeAglFeet=fixture.AltitudeAglFeet,
+                var sensorFrame=original with{TimestampUtc=at,Latitude=fixture.Latitude,Longitude=fixture.Longitude,AltitudeMslFeet=fixture.AltitudeMslFeet,AltitudeAglFeet=fixture.AltitudeAglFeet,
                     PitchDegrees=fixture.PitchDegrees,BankDegrees=fixture.BankDegrees,GroundspeedKnots=fixture.GroundspeedKnots,IsPaused=fixture.Paused};
                 yield return update with{Frame=sensorFrame,Atmosphere=fixture.ResearchAtmosphere?new(at,fixture.TemperatureCelsius,fixture.PressureInHg,fixture.WindKnots,fixture.WindDirection,fixture.Density,fixture.Paused?ObservationQuality.Paused:ObservationQuality.Valid):update.Atmosphere is {} air?air with{TimestampUtc=at}:null,
                     Connection=update.Connection with{State=fixture.Disconnected?ConnectionState.Disconnected:ConnectionState.Connected}};
@@ -40,4 +40,5 @@ public sealed class BrowserTelemetryProvider(int intervalMs) : ITelemetryProvide
 // Explicit synthetic test inputs; the production assessment, controller and source workers run unchanged.
 public sealed record SensorTelemetryFixture(double? AltitudeAglFeet=1000,double PitchDegrees=0,double BankDegrees=0,
     double GroundspeedKnots=120,int AgeSeconds=0,bool Disconnected=false,bool Paused=false,double AltitudeMslFeet=1000,
-    bool ResearchAtmosphere=false,double? TemperatureCelsius=12,double? PressureInHg=29.9,double? WindKnots=8,double? WindDirection=270,double? Density=.0023);
+    bool ResearchAtmosphere=false,double? TemperatureCelsius=12,double? PressureInHg=29.9,double? WindKnots=8,double? WindDirection=270,double? Density=.0023,
+    double Latitude=40,double Longitude=-75);

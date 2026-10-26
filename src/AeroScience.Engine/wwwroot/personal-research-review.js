@@ -1,9 +1,9 @@
-import {researchCardTargets} from './personal-research-start.js';
+import {researchCardTargets,isAtmosphericResearch} from './personal-research-start.js';
 import {collectionOutcome,showAtmosphericResult,showAtmosphericComparison} from './atmospheric-research.js';
 import {node,button,metric,table,chart,numeric,dateTime,link,disclosure,newIdentity} from './workstation-ui.js';
 
 const outcomes={pass:'Pass',fail:'Fail',insufficientEvidence:'Insufficient Evidence'};
-const outcome=row=>row.result?(row.card.atmosphericProfile?collectionOutcome(row.result.outcome):outcomes[row.result.outcome]||'Unknown'):row.markedAttempt?.status==='recording'?'In Progress':row.markedAttempt?.status==='interrupted'?'Interrupted — Awaiting Evaluation':'Awaiting Evaluation';
+const outcome=row=>row.result?(isAtmosphericResearch(row.card)?collectionOutcome(row.result.outcome):outcomes[row.result.outcome]||'Unknown'):row.markedAttempt?.status==='recording'?'In Progress':row.markedAttempt?.status==='interrupted'?'Interrupted — Awaiting Evaluation':'Awaiting Evaluation';
 const targets=researchCardTargets;
 const identity=row=>row.kind+'/'+row.id;
 
@@ -22,7 +22,7 @@ export async function researchExperimentReview(parent,api,card,isCurrent=()=>tru
    status.textContent=`${result.entries.length} attempts compared. Each keeps its own requirements and outcome.`;
    comparison.append(node('h3','What Changed Between Attempts?'));
    for(const text of result.notices)comparison.append(node('p',text));
-   if(card.atmosphericProfile){showAtmosphericComparison(comparison,result.entries);for(const entry of result.entries)button(comparison,'Inspect '+entry.attempt.flightName,()=>inspect(entry));return;}
+   if(isAtmosphericResearch(card)){showAtmosphericComparison(comparison,result.entries);for(const entry of result.entries)button(comparison,'Inspect '+entry.attempt.flightName,()=>inspect(entry));return;}
    const rows=result.entries.map((entry,index)=>{
     const row=entry.attempt,audit=entry.evidence,action=node('div');button(action,'Inspect Evidence',()=>inspect(entry));
     const hold=row.result&&audit?.matchesSavedEvidence&&audit.retainedSamples>1
@@ -44,7 +44,7 @@ export async function researchExperimentReview(parent,api,card,isCurrent=()=>tru
  button(tools,'Clear Comparison Selection',()=>{selected.clear();comparison.replaceChildren();inspection.replaceChildren();inspectEpoch++;return load();});
  button(tools,'Refresh Experiment',()=>{epoch++;selected.clear();inspection.replaceChildren();comparison.replaceChildren();inspectEpoch++;return load();});
  async function inspect(entry){
-  const own=++inspectEpoch,row=entry.attempt,audit=entry.evidence;if(row.card.atmosphericProfile&&row.result){await showAtmosphericResult(inspection,api,row.result,()=>active()&&own===inspectEpoch);inspection.focus();return;}inspection.replaceChildren(node('h3',`${row.flightName} — ${outcome(row)}`),node('p',targets(row.card)));
+  const own=++inspectEpoch,row=entry.attempt,audit=entry.evidence;if(isAtmosphericResearch(row.card)&&row.result){await showAtmosphericResult(inspection,api,row.result,()=>active()&&own===inspectEpoch);inspection.focus();return;}inspection.replaceChildren(node('h3',`${row.flightName} — ${outcome(row)}`),node('p',targets(row.card)));
   if(audit){
    inspection.append(node('p',`${audit.matchesSavedEvidence?'Retained sample and plan hashes match the saved result.':'Evidence is missing or changed. The saved outcome is historical and has not been rewritten.'} ${audit.retainedSamples} retained samples; ${audit.invalidSamples} paused or invalid samples. Source: ${audit.sources.map(s=>s==='simulator'?'Recorded simulator telemetry':s==='simulated'?'Synthetic/demo telemetry':'Unknown').join(', ')||'No retained telemetry'}.`));
    table(inspection,'Original attempt samples — bounded first/last preview',['Sequence','Original UTC','IAS (knots)','Altitude (feet MSL)','Aircraft','Source'],audit.preview.map(s=>[s.sequence,s.frame.timestampUtc,numeric(s.frame.indicatedAirspeedKnots),numeric(s.frame.altitudeMslFeet),s.frame.aircraft,s.frame.source]));
@@ -65,9 +65,9 @@ export async function researchExperimentReview(parent,api,card,isCurrent=()=>tru
   const counts=node('div',undefined,'review-kpis');overview.append(counts);
   metric(counts,'Marked attempts',summary.markedAttempts,`${summary.postflightIntervals} distinct postflight intervals also reviewed`);
   metric(counts,'Evaluated attempts',summary.evaluatedAttempts,`${summary.savedEvaluations} saved evaluations; repeated evaluations do not create new attempts`);
-  if(card.atmosphericProfile)metric(counts,'Completed / Partial / Insufficient',`${summary.completedCollections} / ${summary.partialCollections} / ${summary.insufficientEvidence}`,'Science collection coverage, not hypothesis proof or aircraft certification.');else metric(counts,'Pass / Fail / Insufficient Evidence',`${summary.pass} / ${summary.fail} / ${summary.insufficientEvidence}`,'Latest saved result for each attempt, across all card revisions. Demo results remain demo evidence.');
+  if(isAtmosphericResearch(card))metric(counts,'Completed / Partial / Insufficient',`${summary.completedCollections} / ${summary.partialCollections} / ${summary.insufficientEvidence}`,'Science collection coverage, not hypothesis proof or aircraft certification.');else metric(counts,'Pass / Fail / Insufficient Evidence',`${summary.pass} / ${summary.fail} / ${summary.insufficientEvidence}`,'Latest saved result for each attempt, across all card revisions. Demo results remain demo evidence.');
   metric(counts,'Awaiting evaluation',summary.awaitingEvaluation,`${summary.interrupted} interrupted · ${summary.inProgress} in progress. These activity counts may overlap evaluated outcomes.`);
-  overview.append(node('h3',card.atmosphericProfile?'What Scientific Evidence Was Collected?':'Did the Experiment Work?'),node('p',card.atmosphericProfile?'Review the valid temperature coverage and original quantities for each flight. A recorded climb is not a completed scientific investigation.':summary.currentRevisionDemonstrated
+  overview.append(node('h3',isAtmosphericResearch(card)?'What Scientific Evidence Was Collected?':'Did the Experiment Work?'),node('p',isAtmosphericResearch(card)?'Review the valid temperature coverage and original quantities for each flight. A recorded climb is not a completed scientific investigation.':summary.currentRevisionDemonstrated
    ?`A simulator Pass was recorded for current revision ${summary.card.revision}. Inspect evidence to verify the retained samples. This is not aircraft certification.`
    :summary.currentRevisionDemoPass?`Demo only: a saved Pass exists for revision ${summary.card.revision}. An installed simulator-flight demonstration is not established.`
    :`The required conditions are not yet demonstrated by a retained simulator Pass for current revision ${summary.card.revision}. Earlier revisions may have different requirements.`));
