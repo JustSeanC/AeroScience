@@ -30,8 +30,9 @@ public sealed partial class MissionStore
 
     public PersonalResearchCard SaveResearchCard(SaveResearchCardRequest input)
     {
-        if(new object?[]{input.FlightRegime,input.AtmosphericProfile,input.AtmosphericTransect}.Count(x=>x is not null)!=1)throw new ArgumentException("Choose exactly one experiment type.");
-        if(input.AtmosphericTransect is not null)AtmosphericTransectResearch.Validate(input.AtmosphericTransect);
+        if(new object?[]{input.FlightRegime,input.AtmosphericProfile,input.AtmosphericTransect,input.Survey}.Count(x=>x is not null)!=1)throw new ArgumentException("Choose exactly one experiment type.");
+        if(input.Survey is not null)SurveyResearch.Validate(input.Survey);
+        else if(input.AtmosphericTransect is not null)AtmosphericTransectResearch.Validate(input.AtmosphericTransect);
         else if(input.AtmosphericProfile is not null)AtmosphericResearch.Validate(input.AtmosphericProfile);
         else FlightRegimeEvaluation.Validate(input.FlightRegime);
         var name = input.Name?.Trim();
@@ -46,9 +47,9 @@ public sealed partial class MissionStore
         var revision = cmd.ExecuteScalar() is long value ? checked((int)value) : 0;
         if (input.Id.HasValue && (revision == 0 || input.ExpectedRevision != revision))
             throw new InvalidOperationException("This card changed. Reload it before saving a new revision.");
-        var template=input.AtmosphericTransect is not null?AtmosphericTransectResearch.Template:input.AtmosphericProfile is null?"flight-regime":AtmosphericResearch.Template;
+        var template=input.Survey is not null?SurveyResearch.Template:input.AtmosphericTransect is not null?AtmosphericTransectResearch.Template:input.AtmosphericProfile is null?"flight-regime":AtmosphericResearch.Template;
         if(revision>0&&ResearchCard(id,revision).TemplateId!=template)throw new ArgumentException("Keep an experiment's research type when revising it; prepare a separate experiment instead.");
-        var card = new PersonalResearchCard(input.AtmosphericTransect is not null?3:input.AtmosphericProfile is null?1:2, id, revision + 1, name, template, input.FlightRegime, DateTimeOffset.UtcNow,input.AtmosphericProfile,input.AtmosphericTransect);
+        var card = new PersonalResearchCard(input.Survey is not null?4:input.AtmosphericTransect is not null?3:input.AtmosphericProfile is null?1:2, id, revision + 1, name, template, input.FlightRegime, DateTimeOffset.UtcNow,input.AtmosphericProfile,input.AtmosphericTransect,input.Survey);
         InsertResearchCard(db,tx,card);tx.Commit();return card;
     }
 
@@ -81,7 +82,7 @@ public sealed partial class MissionStore
     public MissionPlan CreateResearchPlan(Guid cardId, int revision)
     {
         var card = ResearchCard(cardId, revision);
-        if(AtmosphericResearch.IsCollectionCard(card))return PrepareResearchStarter(new(1,Guid.NewGuid(),card.TemplateId,ResearchEntryIntent.FlyNow,new(cardId,revision))).Plan;
+        if(AtmosphericResearch.IsCollectionCard(card)||card.Survey is not null)return PrepareResearchStarter(new(1,Guid.NewGuid(),card.TemplateId,ResearchEntryIntent.FlyNow,new(cardId,revision))).Plan;
         return SavePlan(new(Guid.NewGuid(), card.Name, MissionTemplateKind.ObservationFlight,
             Objective: "Hold the card's indicated airspeed and MSL altitude within its tolerances.",
             Instruments: [], ResearchCard: new(card.Id, card.Revision)));
@@ -133,7 +134,7 @@ public sealed partial class MissionStore
             {
                 if (existing.GetString(0) != requestHash) throw new InvalidOperationException("This attempt command was already used for different evidence.");
                 var saved=JsonSerializer.Deserialize<PersonalResearchAttempt>(existing.GetString(1), WireJson.Options)!;
-                if(saved.AtmosphericProfile is not null&&ScienceDeleted(saved.FlightId))throw new InvalidOperationException("Collected science was permanently deleted; this investigation cannot be recreated from flight context.");
+                if((saved.AtmosphericProfile is not null||saved.Survey is not null)&&ScienceDeleted(saved.FlightId))throw new InvalidOperationException("Collected science was permanently deleted; this investigation cannot be recreated from flight context.");
                 return saved;
             }
         var mission = Detail(request.FlightId)?.Mission ?? throw new ArgumentException("Recorded flight not found.");
@@ -149,9 +150,16 @@ public sealed partial class MissionStore
                 : throw new ArgumentException("This flight has no matching frozen personal test card. Select the card before recording."));
         SupportedCard(card);
         cmd.Parameters.AddWithValue("$flight", mission.Id.ToString());
-        using var scienceLease=AtmosphericResearch.IsCollectionCard(card)?science?.BeginAnalysis():null;
+        using var scienceLease=AtmosphericResearch.IsCollectionCard(card)||card.Survey is not null?science?.BeginAnalysis():null;
         PersonalResearchAttempt attempt;
-        if(AtmosphericResearch.IsCollectionCard(card)){
+        if(card.Survey is not null){
+            if(ScienceDeleted(mission.Id))throw new InvalidOperationException("Collected survey science was permanently deleted; raw flight context cannot recreate it.");
+            if(science is null)throw new InvalidOperationException("Reconnect the Scientific Data Library to evaluate retained survey evidence.");
+            var calculated=SurveyResearch.Calculate(this,science,card,request,PersonalPauseTimes(mission.Id,request.StartUtc,request.EndUtc,true),token);
+            var outcome=SurveyResearch.Outcome(calculated.Summary,mission.Status!=MissionStatus.Completed||marked?.Status==ResearchAttemptStatus.Interrupted);
+            attempt=new(4,request.RequestId,mission.Id,card,request.StartUtc,request.EndUtc,DateTimeOffset.UtcNow,SurveyResearch.Evaluator,outcome.Outcome,0,null,null,
+                new(0,0,calculated.Summary.OriginalObservations+calculated.Summary.Products,calculated.Hash,PreflightReadiness.Hash(plan!),mission.Source),outcome.Explanation,marked?.Id,Survey:calculated.Summary);
+        }else if(AtmosphericResearch.IsCollectionCard(card)){
             if(ScienceDeleted(mission.Id))throw new InvalidOperationException("Collected science was permanently deleted; it cannot be recreated from raw flight context.");
             if(science is null)throw new InvalidOperationException("Reconnect the Scientific Data Library to evaluate retained atmospheric observations.");
             var calculated=AtmosphericResearch.Calculate(science.ResearchObservationWindow(mission.Id,request.StartUtc,request.EndUtc),card,science.LibraryId,PersonalPauseTimes(mission.Id,request.StartUtc,request.EndUtc,true),token,request);

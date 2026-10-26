@@ -92,6 +92,15 @@ public sealed class ApiTests : IAsyncLifetime
         Assert.Equal(prepared.Card.Id,prepared.Plan.ResearchCard!.Id);client.DefaultRequestHeaders.Remove("X-AeroScience-CSRF");
         Assert.Equal(HttpStatusCode.Forbidden,(await client.PostAsJsonAsync("/api/research/starters/prepare",input,WireJson.Options)).StatusCode);
     }
+    [Fact] public async Task SurveyReadinessUsesAuthenticatedLocalReadsAndExplicitPreparationPermission()
+    {
+        var id=Guid.NewGuid();foreach(var path in new[]{$"/api/research/attempts/{id}/survey",$"/api/research/plans/{id}/survey-sources"})Assert.Equal(HttpStatusCode.Unauthorized,(await client.GetAsync(path)).StatusCode);
+        await Pair(client);var input=new ResearchStarterRequest(1,Guid.NewGuid(),SurveyResearch.Template,ResearchEntryIntent.FlyNow,Survey:new(1,Enum.GetValues<SurveyMeasurement>()));
+        var response=await client.PostAsJsonAsync("/api/research/starters/prepare",input,WireJson.Options);response.EnsureSuccessStatusCode();var prepared=(await response.Content.ReadFromJsonAsync<PreparedResearchStarter>(WireJson.Options))!;
+        using var review=JsonDocument.Parse(await client.GetStringAsync($"/api/research/plans/{prepared.Plan.Id}/survey-sources"));var rows=review.RootElement.GetProperty("measurements").EnumerateArray().ToArray();Assert.Equal(3,rows.Length);Assert.Equal("LocalOnly",rows[0].GetProperty("status").GetString());Assert.All(rows,r=>Assert.Empty(r.GetProperty("sources").EnumerateArray()));
+        var state=await client.GetFromJsonAsync<EngineSnapshot>("/api/state",WireJson.Options);Assert.Null(state!.ActiveMission);Assert.Null(state.SelectedPlanId);
+        client.DefaultRequestHeaders.Remove("X-AeroScience-CSRF");Assert.Equal(HttpStatusCode.Forbidden,(await client.PostAsJsonAsync("/api/research/starters/prepare",input with{RequestId=Guid.NewGuid()},WireJson.Options)).StatusCode);
+    }
     [Fact] public async Task AviationMetadataRequiresSessionAndCsrfAndKeepsReadsOfflineAndBounded()
     {
         Assert.Equal(HttpStatusCode.Unauthorized, (await client.GetAsync("/api/aviation/catalog/vfr")).StatusCode);

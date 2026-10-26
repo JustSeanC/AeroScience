@@ -32,7 +32,7 @@ public static class AtmosphericTransectResearch
         void Hash(string s)=>hash.AppendData(Encoding.UTF8.GetBytes(s+"\n"));
         Hash(Evaluator);Hash(library.ToString());Hash(PreflightReadiness.Hash(card));if(window is not null)Hash(PreflightReadiness.Hash(new{window.FlightId,window.StartUtc,window.EndUtc}));
         var quantities=AtmosphericResearch.Quantities.ToDictionary(q=>q.Measurement,_=>new Quantity());
-        var stations=new List<Station>();var index=new Quadtree<Station>();var legs=new List<AtmosphericTransectLeg>();
+        var stations=new List<Station>();var locationIndex=new ResearchLocationIndex(r.StationSpacingMetres);var legs=new List<AtmosphericTransectLeg>();
         var datasets=new HashSet<Guid>();var sessions=new HashSet<Guid>();var preview=new List<(ScienceObservation Observation,AtmosphericTransectPoint Point)>();
         long rows=0,valid=0,excluded=0,gaps=0,previewCount=0,totalLegs=0;int stride=1,mostStations=0;int? completeLeg=null;
         ScienceObservation? previous=null;Leg? leg=null;Station? previousStation=null;long run=0;double totalDistance=0,greatestExtent=0;double? minAlt=null,maxAlt=null;
@@ -42,17 +42,7 @@ public static class AtmosphericTransectResearch
         void FinishLeg(){if(leg is null)return;mostStations=Math.Max(mostStations,leg.Covered.Count);greatestExtent=Math.Max(greatestExtent,leg.Extent);
             if(leg.Covered.Count>=r.RequiredStations&&leg.Extent>=r.MinimumExtentMetres)completeLeg??=leg.Id;
             if(legs.Count<1000)legs.Add(new(leg.Id,leg.First.Id,leg.Last.Id,leg.Count,leg.Covered.Count,leg.Distance,leg.Extent));leg=null;}
-        Station Locate(ScienceObservation o){
-            // Conservative angular query, then exact WGS84 distances. Longitude aliases
-            // preserve the same station across the dateline; polar queries cover all longitudes.
-            var latitude=o.Latitude!.Value;var longitude=o.Longitude!.Value;var dy=r.StationSpacingMetres/110000d;
-            var dx=Math.Min(180,dy/Math.Max(1e-12,Math.Cos(Math.Min(90,Math.Abs(latitude)+dy)*Math.PI/180)));
-            var found=index.Query(new Envelope(longitude-dx,longitude+dx,latitude-dy,latitude+dy)).DistinctBy(s=>s.Index)
-                .Select(s=>(Station:s,Distance:Distance(o,s.Anchor))).Where(x=>x.Distance<r.StationSpacingMetres).OrderBy(x=>x.Distance).ThenBy(x=>x.Station.Index).FirstOrDefault();
-            if(found.Station is not null)return found.Station;
-            if(stations.Count>=20000)throw new InvalidOperationException("This analysis window exceeds 20,000 distinct sampling locations. Choose a shorter evidence interval or wider sampling spacing; retained Library and flight history are not limited.");
-            var station=new Station(stations.Count,o);stations.Add(station);foreach(var offset in new[]{-360,0,360})index.Insert(new Envelope(longitude+offset,longitude+offset,latitude,latitude),station);return station;
-        }
+        Station Locate(ScienceObservation o){var location=locationIndex.Locate(Position(o));if(location==stations.Count)stations.Add(new(location,o));return stations[location];}
         void Process(List<ScienceObservation> group){
             if(group.Count==0)return;var at=group[0].TimestampUtc;
             while(hasEdge&&edges.Current<=at){Hash("break:"+edges.Current.ToString("O",CultureInfo.InvariantCulture));pendingBreak|=previous is not null;hasEdge=edges.MoveNext();}

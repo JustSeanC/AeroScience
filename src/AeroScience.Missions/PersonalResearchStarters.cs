@@ -14,13 +14,16 @@ public sealed partial class MissionStore
         ["Simulator air temperature (degC)","Pressure (inHg)","Wind (kt / degT)","Air density (slug/ft3)","Altitude (feet MSL)"],null,new()),
         new(AtmosphericTransectResearch.Template,1,"Atmospheric Transect",
         "Fly across a region to investigate changing air temperature, pressure, wind and density at your aircraft. Repeated locations and measurement gaps remain visible.",
-        ["Simulator air temperature (degC)","Pressure (inHg)","Wind (kt / degT)","Air density (slug/ft3)","Recorded geographic position"],null,null,new())];
+        ["Simulator air temperature (degC)","Pressure (inHg)","Wind (kt / degT)","Air density (slug/ft3)","Recorded geographic position"],null,null,new()),
+        new(SurveyResearch.Template,1,"Terrain & Temperature Survey","Investigate DEM-derived terrain elevation, historical Landsat land surface temperature or simulator air temperature. Choose one or several separate measurements.",["Terrain elevation (m, source datum)","Historical land surface temperature (K)","Simulator air temperature (degC)"],null,null,null,SurveyResearchDefinition.Default)];
 
     public PreparedResearchStarter PrepareResearchStarter(ResearchStarterRequest request)
     {
         if(request.Version!=1||request.RequestId==Guid.Empty||request.Intent is not(ResearchEntryIntent.FlyNow or ResearchEntryIntent.Customize))
             throw new ArgumentException("Choose a supported research entry and preparation identity.");
         var starter=ResearchStarters().SingleOrDefault(s=>s.Id==request.StarterId)??throw new NotSupportedException("This starter is not available.");
+        if(request.Survey is not null&&(starter.Id!=SurveyResearch.Template||request.Card is not null))throw new ArgumentException("Choose measurements for a new survey, or edit a saved survey in Mission Planner.");
+        var survey=request.Survey??starter.SurveyExample;if(survey is not null)SurveyResearch.Validate(survey);
         if(request.StarterVersion!=starter.Version)throw new ArgumentException("This starter changed. Refresh My Research before preparing it.");
         if(request.Card is {} input&&(input.Id==Guid.Empty||input.Revision<1))throw new ArgumentException("Choose an exact saved card revision.");
         var hash=PreflightReadiness.Hash(request);
@@ -49,11 +52,12 @@ public sealed partial class MissionStore
                   AND json_extract(c.payload_json,'$.version')=$version AND json_extract(c.payload_json,'$.templateId')=$starter
                   AND (($starter='flight-regime' AND json_extract(c.payload_json,'$.flightRegime')=$rule)
                     OR ($starter='vertical-atmospheric-profile' AND json_extract(c.payload_json,'$.atmosphericProfile')=$rule)
-                    OR ($starter='atmospheric-transect' AND json_extract(c.payload_json,'$.atmosphericTransect')=$rule))
+                    OR ($starter='atmospheric-transect' AND json_extract(c.payload_json,'$.atmosphericTransect')=$rule)
+                    OR ($starter='terrain-temperature-survey' AND json_extract(c.payload_json,'$.survey')=$rule))
                 ORDER BY p.updated_utc DESC,p.id LIMIT 1
                 """;
-            cmd.Parameters.AddWithValue("$starter",starter.Id);cmd.Parameters.AddWithValue("$version",starter.TransectExample is not null?3:starter.AtmosphericExample is null?1:2);
-            cmd.Parameters.AddWithValue("$rule",starter.TransectExample is {} transect?JsonSerializer.Serialize(transect,WireJson.Options):starter.AtmosphericExample is {} atmospheric?JsonSerializer.Serialize(atmospheric,WireJson.Options):JsonSerializer.Serialize(starter.Example,WireJson.Options));
+            cmd.Parameters.AddWithValue("$starter",starter.Id);cmd.Parameters.AddWithValue("$version",survey is not null?4:starter.TransectExample is not null?3:starter.AtmosphericExample is null?1:2);
+            cmd.Parameters.AddWithValue("$rule",survey is not null?JsonSerializer.Serialize(survey,WireJson.Options):starter.TransectExample is {} transect?JsonSerializer.Serialize(transect,WireJson.Options):starter.AtmosphericExample is {} atmospheric?JsonSerializer.Serialize(atmospheric,WireJson.Options):JsonSerializer.Serialize(starter.Example,WireJson.Options));
             if(cmd.ExecuteScalar() is string retained)source=JsonSerializer.Deserialize<PersonalResearchCard>(retained,WireJson.Options)!;
         }
         if(source is not null)SupportedCard(source);
@@ -63,20 +67,20 @@ public sealed partial class MissionStore
             cmd.CommandText="SELECT COUNT(*) FROM personal_research_cards WHERE id=$id";
             if((long)cmd.ExecuteScalar()!>0)throw new InvalidOperationException("This preparation's plan was removed or its identity is in use. Start a new preparation.");
             var rule=source?.FlightRegime??starter.Example;var atmosphere=source?.AtmosphericProfile??starter.AtmosphericExample;var transect=source?.AtmosphericTransect??starter.TransectExample;
-            card=new(transect is not null?3:atmosphere is null?1:2,request.RequestId,1,source?.Name??starter.Name,starter.Id,rule,DateTimeOffset.UtcNow,atmosphere,transect);SupportedCard(card);
+            card=new(survey is not null?4:transect is not null?3:atmosphere is null?1:2,request.RequestId,1,source?.Name??starter.Name,starter.Id,rule,DateTimeOffset.UtcNow,atmosphere,transect,source?.Survey??survey);SupportedCard(card);
             InsertResearchCard(db,tx,card);
         }else card=source!;
         var referenceCard=new ResearchCardReference(card.Id,card.Revision);
-        var atmosphericCard=card.AtmosphericProfile;var geographicCard=card.AtmosphericTransect;var collection=AtmosphericResearch.IsCollectionCard(card);
-        var template=geographicCard is not null?MissionTemplateKind.AtmosphericTransect:collection?MissionTemplateKind.AtmosphericProfile:MissionTemplateKind.ObservationFlight;
+        var atmosphericCard=card.AtmosphericProfile;var geographicCard=card.AtmosphericTransect;var collection=AtmosphericResearch.IsCollectionCard(card)||card.Survey is not null;
+        var template=card.Survey is not null?MissionTemplateKind.GeographicSurvey:geographicCard is not null?MissionTemplateKind.AtmosphericTransect:collection?MissionTemplateKind.AtmosphericProfile:MissionTemplateKind.ObservationFlight;
         var prepared=MissionPlanning.Validate(new(request.RequestId,card.Name,template,
             Description:!collection?"Personal research using saved simulator flight telemetry; no aircraft settings are changed.":starter.Description,
-            Objective:geographicCard?.Question??atmosphericCard?.Question??"Hold the selected indicated airspeed and MSL altitude within both card tolerances for its continuous hold duration.",
-            Instruments:!collection?[]:ScienceCatalog.Templates.Single(t=>t.Id==template).Instruments,
-            AtmosphericSettings:!collection?null:new(AltitudeIntervalMetres:(atmosphericCard?.BandWidthFeet??500)*.3048,MaximumGapSeconds:geographicCard?.MaximumGapSeconds??atmosphericCard!.MaximumGapSeconds),
-            StartScienceArmed:geographicCard is null?null:true,
+            Objective:card.Survey?.Question??geographicCard?.Question??atmosphericCard?.Question??"Hold the selected indicated airspeed and MSL altitude within both card tolerances for its continuous hold duration.",
+            Instruments:card.Survey is {} selection?selection.Measurements.Select(m=>new InstrumentConfiguration(SurveyResearch.Instrument(m),true,m==SurveyMeasurement.AirTemperature?1000:2000)).ToArray():!collection?[]:ScienceCatalog.Templates.Single(t=>t.Id==template).Instruments,
+            AtmosphericSettings:!collection||card.Survey is not null?null:new(AltitudeIntervalMetres:(atmosphericCard?.BandWidthFeet??500)*.3048,MaximumGapSeconds:geographicCard?.MaximumGapSeconds??atmosphericCard!.MaximumGapSeconds),
+            StartScienceArmed:geographicCard is null&&card.Survey is null?null:true,
             PreflightNotes:!collection?"Example targets require pilot review for the simulated aircraft. Free flight is supported; a route and extra scientific instruments are optional. Start mission, then Activate Card and Begin Attempt explicitly.":
-                geographicCard is not null?"Fly from anywhere along a free-flight or pilot-reviewed route. Collect distinct sampling locations within a supported leg. Review geographic extent, sampling gaps, altitude and changing weather; no external scene or fixed airport is required.":"Fly from anywhere at pilot-chosen achievable altitudes. Use normal flight and science controls; valid temperature observations in neighboring MSL bands establish coverage, not proof of a hypothesis. Pressure, wind and density are optional. Historical surface imagery is not air temperature.",
+                card.Survey is not null?"Choose terrain elevation, historical land surface temperature and/or simulator air temperature. Use existing source readiness/preparation and Library reuse; no download is approved here. Start mission, then explicitly Start new science session. Missing external data never substitutes for another objective.":geographicCard is not null?"Fly from anywhere along a free-flight or pilot-reviewed route. Collect distinct sampling locations within a supported leg. Review geographic extent, sampling gaps, altitude and changing weather; no external scene or fixed airport is required.":"Fly from anywhere at pilot-chosen achievable altitudes. Use normal flight and science controls; valid temperature observations in neighboring MSL bands establish coverage, not proof of a hypothesis. Pressure, wind and density are optional. Historical surface imagery is not air temperature.",
             ResearchCard:referenceCard,ResearchCards:[referenceCard],ResearchStarter:new(1,request.RequestId,hash,starter.Id,request.Intent,request.Card)));
         WritePlan(db,tx,prepared);EvidenceFault?.Invoke("research-starter-before-commit");tx.Commit();
         return new(prepared,card,false);

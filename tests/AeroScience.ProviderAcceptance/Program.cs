@@ -2,6 +2,13 @@ using System.Text.Json;
 using AeroScience.Missions;
 using AeroScience.Shared;
 
+if(args.Contains("--survey-from"))
+{
+    string SurveyArgument(string name){var i=Array.IndexOf(args,name);return i>=0&&i+1<args.Length&&!args[i+1].StartsWith("--",StringComparison.Ordinal)?args[i+1]:throw new ArgumentException("Provide "+name+" with its explicit value.");}
+    var source=Path.GetFullPath(SurveyArgument("--survey-from"));var outputPath=Path.GetFullPath(SurveyArgument("--output"));
+    if(Directory.Exists(outputPath))throw new IOException("Choose a new survey evidence directory; originals and earlier evidence are preserved.");
+    await SurveyAcceptance.Run(source,outputPath);return;
+}
 if(args.Contains("--nasa-retained-source"))
 {
     string Required(string name){var i=Array.IndexOf(args,name);return i>=0&&i+1<args.Length&&!args[i+1].StartsWith("--",StringComparison.Ordinal)?args[i+1]:throw new ArgumentException("Provide "+name+" with its explicit value.");}

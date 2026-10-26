@@ -30,7 +30,7 @@ public sealed partial class MissionStore
         using var hash=IncrementalHash.CreateHash(HashAlgorithmName.SHA256);using var db=Open();using var command=db.CreateCommand();command.Parameters.AddWithValue("$id",mission.ToString());
         foreach(var sql in new[]{"SELECT payload_json FROM observations WHERE mission_id=$id ORDER BY id","SELECT message FROM events WHERE mission_id=$id AND kind IN ('mission-performance-report','operating-assessment') ORDER BY id","SELECT payload_json FROM scientific_recovery WHERE mission_id=$id ORDER BY id","SELECT metadata_json FROM instrument_metadata WHERE mission_id=$id ORDER BY instrument_id"})
         {command.CommandText=sql;using var rows=command.ExecuteReader();while(rows.Read()){var bytes=Encoding.UTF8.GetBytes(rows.GetString(0));hash.AppendData(BitConverter.GetBytes(bytes.Length));hash.AppendData(bytes);}}
-        command.CommandText="SELECT payload_json FROM personal_research_attempts WHERE mission_id=$id AND json_extract(payload_json,'$.card.templateId') IN ('vertical-atmospheric-profile','atmospheric-transect') ORDER BY id";
+        command.CommandText="SELECT payload_json FROM personal_research_attempts WHERE mission_id=$id AND json_extract(payload_json,'$.card.templateId') IN ('vertical-atmospheric-profile','atmospheric-transect','terrain-temperature-survey') ORDER BY id";
         using(var rows=command.ExecuteReader())while(rows.Read()){var bytes=Encoding.UTF8.GetBytes(rows.GetString(0));hash.AppendData(BitConverter.GetBytes(bytes.Length));hash.AppendData(bytes);}
         return Convert.ToHexStringLower(hash.GetHashAndReset());
     }
@@ -52,7 +52,7 @@ public sealed partial class MissionStore
             command.Transaction=tx;command.Parameters.AddWithValue("$id",mission.ToString());
             command.CommandText="DELETE FROM observations WHERE mission_id=$id; DELETE FROM events WHERE mission_id=$id AND kind IN ('mission-performance-report','operating-assessment'); DELETE FROM instrument_metadata WHERE mission_id=$id";command.ExecuteNonQuery();
             command.CommandText="SELECT COUNT(*) FROM sqlite_master WHERE name='personal_research_attempts'";
-            if(Convert.ToInt64(command.ExecuteScalar())>0){command.CommandText="DELETE FROM personal_research_attempts WHERE mission_id=$id AND json_extract(payload_json,'$.card.templateId') IN ('vertical-atmospheric-profile','atmospheric-transect')";command.ExecuteNonQuery();}
+            if(Convert.ToInt64(command.ExecuteScalar())>0){command.CommandText="DELETE FROM personal_research_attempts WHERE mission_id=$id AND json_extract(payload_json,'$.card.templateId') IN ('vertical-atmospheric-profile','atmospheric-transect','terrain-temperature-survey')";command.ExecuteNonQuery();}
             foreach(var table in new[]{"scientific_recovery","analysis_settings","collection_inputs","collection_receipts","science_intents","dataset_references"}){
                 command.Parameters.AddWithValue("$table",table);command.CommandText="SELECT COUNT(*) FROM sqlite_master WHERE name=$table";var exists=Convert.ToInt64(command.ExecuteScalar())>0;command.Parameters.RemoveAt("$table");if(!exists)continue;
                 command.CommandText=table=="dataset_references"?"UPDATE dataset_references SET available=0 WHERE mission_id=$id":$"DELETE FROM {table} WHERE mission_id=$id";command.ExecuteNonQuery();

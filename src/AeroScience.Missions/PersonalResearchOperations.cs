@@ -56,6 +56,8 @@ public sealed partial class MissionStore
 
     private static void SupportedCard(PersonalResearchCard card)
     {
+        if(card.Version==4&&card.TemplateId==SurveyResearch.Template&&card.FlightRegime is null&&card.AtmosphericProfile is null&&card.AtmosphericTransect is null){SurveyResearch.Validate(card.Survey);return;}
+        if(card.Survey is not null)throw new NotSupportedException("Unsupported survey definition version.");
         if(card.Version==3&&card.TemplateId==AtmosphericTransectResearch.Template&&card.FlightRegime is null&&card.AtmosphericProfile is null){AtmosphericTransectResearch.Validate(card.AtmosphericTransect);return;}
         if(card.Version==2&&card.TemplateId==AtmosphericResearch.Template&&card.FlightRegime is null&&card.AtmosphericTransect is null){AtmosphericResearch.Validate(card.AtmosphericProfile);return;}
         if (card.Version != 1 || card.TemplateId != "flight-regime"||card.AtmosphericProfile is not null||card.AtmosphericTransect is not null) throw new NotSupportedException("Unsupported personal research definition version.");
@@ -66,7 +68,7 @@ public sealed partial class MissionStore
     {
         SupportedCard(first); SupportedCard(second);
         // Atmospheric collection sets no aircraft target constraint. Science controls remain separate.
-        if(AtmosphericResearch.IsCollectionCard(first)||AtmosphericResearch.IsCollectionCard(second))return true;
+        if(first.Survey is not null||second.Survey is not null||AtmosphericResearch.IsCollectionCard(first)||AtmosphericResearch.IsCollectionCard(second))return true;
         var a = first.FlightRegime!; var b = second.FlightRegime!;
         return Math.Max(a.AirspeedKnots-a.AirspeedToleranceKnots,b.AirspeedKnots-b.AirspeedToleranceKnots)
                 <= Math.Min(a.AirspeedKnots+a.AirspeedToleranceKnots,b.AirspeedKnots+b.AirspeedToleranceKnots)

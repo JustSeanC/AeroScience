@@ -22,7 +22,7 @@ public sealed record ResearchEvidenceBreak(DateTimeOffset TimestampUtc, string K
 public sealed record ResearchEvidenceAudit(bool MatchesSavedEvidence, long RetainedSamples, long ExpectedSamples,
     long GapCount, long PauseOrConnectionEdges, long InvalidSamples, double? MaximumGapSeconds,
     TelemetrySource[] Sources, ReplaySample[] Preview, ResearchEvidenceBreak[] Breaks, bool MoreBreaks);
-public sealed record ResearchComparisonEntry(ResearchHistoryItem Attempt, ResearchEvidenceAudit? Evidence,AtmosphericResearchReview? Atmosphere=null);
+public sealed record ResearchComparisonEntry(ResearchHistoryItem Attempt, ResearchEvidenceAudit? Evidence,AtmosphericResearchReview? Atmosphere=null,SurveyResearchReview? Survey=null);
 public sealed record ResearchComparison(PersonalResearchCard Card, ResearchComparisonEntry[] Entries,
     bool DifferentRevisions, bool DifferentRequirements, bool DifferentEvaluators, bool DifferentSources, string[] Notices);
 
@@ -126,10 +126,15 @@ public sealed partial class MissionStore
             token.ThrowIfCancellationRequested();
             var row=chosen.GetValueOrDefault((selection.Kind,selection.Id))??throw new ArgumentException("An attempt or flight is no longer available in this experiment. Refresh its history.");
             if(row.Result?.Id!=selection.ResultId)throw new InvalidOperationException("A selected result changed. Refresh the experiment before comparing.");
-            rows.Add(AtmosphericResearch.IsCollectionCard(card)?new(row,null,row.Result is {} atmospheric?ReviewAtmosphericEvidence(atmospheric,science,token):null)
+            rows.Add(card.Survey is not null?new(row,null,Survey:row.Result is {} survey?ReviewSurveyEvidence(survey,science??throw new IOException("Reconnect the Scientific Data Library."),token):null):AtmosphericResearch.IsCollectionCard(card)?new(row,null,row.Result is {} atmospheric?ReviewAtmosphericEvidence(atmospheric,science,token):null)
                 :new(row,row.Result is {} result?AuditResearchEvidence(db,tx,result,token):null));
         }
         var revisions=rows.Select(r=>r.Attempt.Card.Revision).Distinct().Count()>1;
+        if(card.Survey is not null){
+            if(card.Survey.Measurements.Contains(SurveyMeasurement.AirTemperature)&&rows.Select(r=>r.Attempt.Result?.Evidence.Source).Where(s=>s is not null).Distinct().Count()>1)throw new ArgumentException("Compare simulator air-temperature evidence with the same simulator/demo provenance.");
+            return new(card,rows.ToArray(),revisions,rows.Select(r=>PreflightReadiness.Hash(r.Attempt.Card.Survey!)).Distinct().Count()>1,false,false,
+                ["Each selected objective keeps its own units, source dates, grid/datum and quality. Only compatible groups are plotted together; air temperature and historical surface temperature never share one measurement scale.","Different dates, geography, altitude, weather and measurement configurations confound comparison. Native pixels are deduplicated; no continuous field or hypothesis is inferred."]);
+        }
         var requirements=rows.Select(r=>!AtmosphericResearch.IsCollectionCard(card)?PreflightReadiness.Hash(r.Attempt.Card.FlightRegime!):PreflightReadiness.Hash((object?)r.Attempt.Card.AtmosphericTransect??r.Attempt.Card.AtmosphericProfile!)).Distinct().Count()>1;
         var evaluators=rows.Where(r=>r.Attempt.Result is not null).Select(r=>r.Attempt.Result!.EvaluatorVersion).Distinct().Count()>1;
         var sources=!AtmosphericResearch.IsCollectionCard(card)?rows.SelectMany(r=>r.Evidence?.Sources??[]).Distinct().ToArray():rows.Where(r=>r.Attempt.Result?.Evidence.Source is not null).Select(r=>r.Attempt.Result!.Evidence.Source!.Value).Distinct().ToArray();
