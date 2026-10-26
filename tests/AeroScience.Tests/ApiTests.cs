@@ -70,6 +70,17 @@ public sealed class ApiTests : IAsyncLifetime
         Assert.Equal(HttpStatusCode.Forbidden,(await client.PostAsJsonAsync("/api/research/control",new ResearchCardControl(1,flight,Guid.NewGuid(),0,ResearchCardAction.Activate,Guid.NewGuid(),null),WireJson.Options)).StatusCode);
         Assert.Equal(HttpStatusCode.Forbidden,(await client.PostAsJsonAsync($"/api/research/recorded-attempts/{Guid.NewGuid()}/evaluate",new ResearchEvaluationCommand(Guid.NewGuid()),WireJson.Options)).StatusCode);
     }
+    [Fact] public async Task ResearchReviewUsesAuthenticatedBoundedReadsAndCsrfForEvidenceComparison()
+    {
+        var id=Guid.NewGuid();foreach(var path in new[]{ $"/api/research/cards/{id}/overview",$"/api/research/cards/{id}/history",$"/api/research/recorded-attempts/{id}" })
+            Assert.Equal(HttpStatusCode.Unauthorized,(await client.GetAsync(path)).StatusCode);
+        await Pair(client);var store=factory.Services.GetRequiredService<MissionStore>();var card=store.SaveResearchCard(new("API overview",new(120,5,3000,100,2)));
+        var overview=await client.GetFromJsonAsync<ResearchOverview>($"/api/research/cards/{card.Id}/overview",WireJson.Options);Assert.Equal(0,overview!.EvaluatedAttempts);Assert.False(overview.CurrentRevisionDemonstrated);
+        var page=await client.GetFromJsonAsync<ResearchHistoryPage>($"/api/research/cards/{card.Id}/history",WireJson.Options);Assert.Empty(page!.Items);
+        Assert.Equal(HttpStatusCode.BadRequest,(await client.GetAsync($"/api/research/cards/{card.Id}/history?offset=-1")).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest,(await client.PostAsJsonAsync($"/api/research/cards/{card.Id}/comparison",new ResearchComparisonRequest([]),WireJson.Options)).StatusCode);
+        client.DefaultRequestHeaders.Remove("X-AeroScience-CSRF");Assert.Equal(HttpStatusCode.Forbidden,(await client.PostAsJsonAsync($"/api/research/cards/{card.Id}/comparison",new ResearchComparisonRequest([]),WireJson.Options)).StatusCode);
+    }
     [Fact] public async Task AviationMetadataRequiresSessionAndCsrfAndKeepsReadsOfflineAndBounded()
     {
         Assert.Equal(HttpStatusCode.Unauthorized, (await client.GetAsync("/api/aviation/catalog/vfr")).StatusCode);

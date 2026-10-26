@@ -150,15 +150,15 @@ public sealed partial class MissionStore
                 var sequence = reader.GetInt64(0); var json = reader.GetString(1);
                 var sample = JsonSerializer.Deserialize<TelemetryFrame>(json, WireJson.Options)!;
                 while (hasPause && pauses.Current <= sample.TimestampUtc)
-                { token.ThrowIfCancellationRequested(); evaluation.Break(); hash.AppendData(Encoding.UTF8.GetBytes("break:" + Stamp(pauses.Current) + "\n")); hasPause = pauses.MoveNext(); }
+                { token.ThrowIfCancellationRequested(); evaluation.Break(); AppendResearchBreak(hash,pauses.Current); hasPause = pauses.MoveNext(); }
                 evaluation.Add(sample); source ??= sample.Source;
                 if (count++ == 0) first = sequence; last = sequence;
-                hash.AppendData(Encoding.UTF8.GetBytes(sequence.ToString(CultureInfo.InvariantCulture) + ":" + json + "\n"));
+                AppendResearchSample(hash,sequence,json);
             }
         while (hasPause)
         {
             token.ThrowIfCancellationRequested(); evaluation.Break();
-            hash.AppendData(Encoding.UTF8.GetBytes("break:" + Stamp(pauses.Current) + "\n")); hasPause = pauses.MoveNext();
+            AppendResearchBreak(hash,pauses.Current); hasPause = pauses.MoveNext();
         }
         var result = evaluation.Finish(mission.Status != MissionStatus.Completed);
         if (marked?.Status == ResearchAttemptStatus.Interrupted)

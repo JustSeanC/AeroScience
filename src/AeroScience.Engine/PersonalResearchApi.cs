@@ -11,6 +11,10 @@ public static class PersonalResearchApi
         app.MapGet("/api/research/cards", (int? offset, MissionStore store) => store.ResearchCards(offset ?? 0));
         app.MapGet("/api/research/cards/{id:guid}", (Guid id, int? revision, MissionStore store) => store.ResearchCard(id, revision));
         app.MapGet("/api/research/cards/{id:guid}/flights", (Guid id, int? offset, MissionStore store) => store.ResearchFlights(id, offset ?? 0));
+        app.MapGet("/api/research/cards/{id:guid}/overview",(Guid id,MissionStore store)=>store.ResearchOverview(id));
+        app.MapGet("/api/research/cards/{id:guid}/history",(Guid id,int? offset,MissionStore store)=>store.ResearchHistory(id,offset??0));
+        app.MapPost("/api/research/cards/{id:guid}/comparison",(Guid id,ResearchComparisonRequest request,MissionStore store,HttpContext context)=>store.CompareResearch(id,request,context.RequestAborted));
+        app.MapGet("/api/research/recorded-attempts/{id:guid}",(Guid id,MissionStore store)=>store.RecordedResearchAttempt(id));
         app.MapPost("/api/research/cards", (SaveResearchCardRequest request, MissionStore store) => store.SaveResearchCard(request));
         app.MapPost("/api/research/cards/{id:guid}/plan", (Guid id, ResearchCardReference request, MissionStore store) =>
         {

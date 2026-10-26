@@ -43,6 +43,8 @@ public sealed partial class MissionStore
         if (Convert.ToInt32(cmd.ExecuteScalar(), CultureInfo.InvariantCulture) < 9) MigratePersonalResearch(db);
         cmd.CommandText = "PRAGMA user_version;";
         if (Convert.ToInt32(cmd.ExecuteScalar(), CultureInfo.InvariantCulture) < 10) MigrateResearchOperations(db);
+        cmd.CommandText="CREATE INDEX IF NOT EXISTS personal_card_attempts_card ON personal_card_attempts(card_id,started_utc DESC,id)";
+        cmd.ExecuteNonQuery(); // Additive read index; no schema-version change or historical row rewrite.
     }
 
     private void InitializeCore()
