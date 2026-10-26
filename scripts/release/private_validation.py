@@ -19,19 +19,19 @@ def hashes(folder):
 def stage_toolbar(stage, commit):
     """Namespace generated sources BEFORE the genuine SDK compilation."""
     if len(commit)!=40 or any(c not in "0123456789abcdef" for c in commit): raise ValueError("An exact source commit is required")
-    substitutions = [('AeroScience.Command.v1','AeroScience.Validation.0_6_0.Command.v1'),
-                     ('AeroScience.Reply.v1','AeroScience.Validation.0_6_0.Reply.v1'),
-                     ('PANEL_AEROSCIENCE','PANEL_AEROSCIENCE_VALIDATION_V060'),
-                     ('ICON_AEROSCIENCE','ICON_AEROSCIENCE_VALIDATION_V060'),
-                     ('ingamepanel-aeroscience','ingamepanel-aeroscience-validation-v060'),
-                     ('IngamePanelAeroScience','IngamePanelAeroScienceValidationV060'),
-                     ('aeroscience_panel','aeroscience_validation_v060_panel'),
-                     ('InGamePanels/AeroScience/','InGamePanels/AeroScienceValidationV060/'),
-                     ('aeroscience-toolbar.xml','aeroscience-validation-v0-6-0-toolbar.xml'),
-                     ('<Title>AeroScience</Title>','<Title>AeroScience 0.6.0 Validation</Title>'),
-                     ('Name="AeroScience"','Name="AeroScience 0.6.0 Validation"'),
-                     ('title="AeroScience"','title="AeroScience 0.6.0 Validation"'),
-                     ('Windows engine unavailable. Launch AeroScience','Validation engine unavailable or wrong toolbar selected. Launch AeroScience 0.6.0 Validation')]
+    substitutions = [('AeroScience.Command.v1','AeroScience.Validation.0_7_0.Command.v1'),
+                     ('AeroScience.Reply.v1','AeroScience.Validation.0_7_0.Reply.v1'),
+                     ('PANEL_AEROSCIENCE','PANEL_AEROSCIENCE_VALIDATION_V070'),
+                     ('ICON_AEROSCIENCE','ICON_AEROSCIENCE_VALIDATION_V070'),
+                     ('ingamepanel-aeroscience','ingamepanel-aeroscience-validation-v070'),
+                     ('IngamePanelAeroScience','IngamePanelAeroScienceValidationV070'),
+                     ('aeroscience_panel','aeroscience_validation_v070_panel'),
+                     ('InGamePanels/AeroScience/','InGamePanels/AeroScienceValidationV070/'),
+                     ('aeroscience-toolbar.xml','aeroscience-validation-v0-7-0-toolbar.xml'),
+                     ('<Title>AeroScience</Title>','<Title>AeroScience 0.7.0 Validation</Title>'),
+                     ('Name="AeroScience"','Name="AeroScience 0.7.0 Validation"'),
+                     ('title="AeroScience"','title="AeroScience 0.7.0 Validation"'),
+                     ('Windows engine unavailable. Launch AeroScience','Validation engine unavailable or wrong toolbar selected. Launch AeroScience 0.7.0 Validation')]
     for path in stage.rglob('*'):
         if path.is_file() and path.suffix in {'.xml','.html','.js','.json','.css'}:
             text = path.read_text(encoding='utf-8-sig')
@@ -43,10 +43,10 @@ def stage_toolbar(stage, commit):
             if path.name=='toolbar-compatibility.json':
                 value=json.loads(text);value.update(profile='validation',sourceCommit=commit);text=json.dumps(value)
             path.write_text(text,encoding='utf-8')
-    for old,new in [('PackageDefinitions/aeroscience-toolbar.xml','PackageDefinitions/aeroscience-validation-v0-6-0-toolbar.xml'),
-                    ('PackageSources/InGamePanels/aeroscience_panel.xml','PackageSources/InGamePanels/aeroscience_validation_v060_panel.xml'),
-                    ('PackageSources/html_ui/InGamePanels/AeroScience','PackageSources/html_ui/InGamePanels/AeroScienceValidationV060'),
-                    ('PackageSources/html_ui/icons/toolbar/ICON_AEROSCIENCE.svg','PackageSources/html_ui/icons/toolbar/ICON_AEROSCIENCE_VALIDATION_V060.svg')]:
+    for old,new in [('PackageDefinitions/aeroscience-toolbar.xml','PackageDefinitions/aeroscience-validation-v0-7-0-toolbar.xml'),
+                    ('PackageSources/InGamePanels/aeroscience_panel.xml','PackageSources/InGamePanels/aeroscience_validation_v070_panel.xml'),
+                    ('PackageSources/html_ui/InGamePanels/AeroScience','PackageSources/html_ui/InGamePanels/AeroScienceValidationV070'),
+                    ('PackageSources/html_ui/icons/toolbar/ICON_AEROSCIENCE.svg','PackageSources/html_ui/icons/toolbar/ICON_AEROSCIENCE_VALIDATION_V070.svg')]:
         (stage/old).rename(stage/new)
 
 def record(folder,commit):
@@ -59,11 +59,11 @@ def record(folder,commit):
     if receipt.exists():
         raise ValueError('An earlier receipt exists; use a new output folder')
     from package_release import validate_community
-    validate_community(folder/'Toolbar/aeroscience-validation-v0-6-0-toolbar',validation=True)
+    validate_community(folder/'Toolbar/aeroscience-validation-v0-7-0-toolbar',validation=True)
     sdk = json.loads((folder/'Toolbar/sdk-build.json').read_text(encoding='utf-8-sig'))
     if sdk.get('variant')!='toolbar-validation' or sdk.get('source_commit')!=commit or sdk.get('source_dirty') is not False or sdk.get('sdk_contract')!='passed':
         raise ValueError('Genuine exact-source validation SDK receipt missing')
-    if sdk['files']!=hashes(folder/'Toolbar/aeroscience-validation-v0-6-0-toolbar'):
+    if sdk['files']!=hashes(folder/'Toolbar/aeroscience-validation-v0-7-0-toolbar'):
         raise ValueError('SDK package bytes changed')
     receipt.write_text(json.dumps(dict(profile='validation',source_commit=commit,public_release_approved=False,
         installed_acceptance='Not tested',files=hashes(folder)),indent=2)+'\n',encoding='utf-8')

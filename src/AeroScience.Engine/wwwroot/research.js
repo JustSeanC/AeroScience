@@ -224,7 +224,14 @@ export async function loadResearch(page) {
       ctx.api("/api/templates"),
     ]);
   }
-  if (page === "planner") await planner();
+  if (page === "planner") {
+    await planner();
+    const cardPlanId = new URLSearchParams(location.hash.split("?")[1] || "").get("researchPlan");
+    if (cardPlanId && editing?.id !== cardPlanId) {
+      const plan = await ctx.api(`/api/plans/${encodeURIComponent(cardPlanId)}`);
+      if (location.hash.includes(`researchPlan=${cardPlanId}`)) editPlan(plan);
+    }
+  }
   if (page === "instruments") await instruments();
 }
 let payloadCatalog;
@@ -301,6 +308,11 @@ function editPlan(plan) {
   const form = document.createElement("form");
   form.id = "plan-form";
   e.append(form);
+  if (plan?.researchCard) {
+    const linked = text("p", `Personal Research test card · Revision ${plan.researchCard.revision}. Recording freezes this association; editing the route does not change its test rules.`);
+    const back = text("a", "My Research"); back.href = "#my-research";
+    form.append(linked, back);
+  }
   const draftStatus=text("p","Mission plan draft · Changes are not saved until Save mission plan.","planner-status");draftStatus.setAttribute("role","status");form.append(draftStatus);
   let readinessView;
   const dirty=message=>{if(!form.isConnected)return;plannerDirty=true;readinessView?.invalidate();draftStatus.textContent=message||"Unsaved changes · Save mission plan when ready. Your draft stays here when you switch sections.";};
@@ -796,6 +808,7 @@ function editPlan(plan) {
   const nullable = (e) => e.planningUnits?e.planningUnits.read():(e.value ? Number(e.value) : null);
   const readDraft = () => ({
         id: draftPlanId,
+        researchCard: plan?.researchCard || null,
         collection: automation.read(),
         name: name.value,
         template: template.value,
@@ -1305,6 +1318,9 @@ export async function researchDetail(body, id, mission) {
   const operating=document.createElement('section');body.append(operating);await operatingAssessments(operating,ctx.api,id);
   await initializeUnits(ctx.api);
   const review = await ctx.api(`/api/missions/${id}/review`);
+  if (review.research.planSnapshot?.researchCard) {
+    const link = text("a", "Review Personal Research"); link.href = `#my-research?flight=${id}`; body.append(link);
+  }
   const workspace=missionWorkspace(body,id,mission,ctx.api,review);body=workspace.overview;
   const protection = await ctx.api(`/api/missions/${id}/protection`);
   const protectedLabel = text(

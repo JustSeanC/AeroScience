@@ -61,10 +61,10 @@ class ReleaseFlowTests(unittest.TestCase):
 
     def test_development_release_is_separate_from_the_frozen_stable_identity(self):
         self.assertEqual(p.identity()['setup_name'], f"AeroScience-Setup-v{p.RELEASE_VERSION}.exe")
-        self.assertEqual(p.RELEASE_VERSION, '0.6.0')
+        self.assertEqual(p.RELEASE_VERSION, '0.7.0')
         self.assertEqual(p.RELEASE_CHANNEL, 'prerelease')
         self.assertTrue(p.identity()['prerelease'])
-        self.assertEqual(p.identity()['tag'], 'v0.6.0')
+        self.assertEqual(p.identity()['tag'], 'v0.7.0')
         self.assertEqual(p.identity('0.5.0')['tag'], 'v0.5.0')
         self.assertFalse(p.identity('0.5.0')['prerelease'])
         self.assertEqual(p.identity('0.5.0')['title'], 'AeroScience v0.5.0 — Scientific Mission Operations')

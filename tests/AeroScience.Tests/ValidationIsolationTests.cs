@@ -23,15 +23,15 @@ public sealed class ValidationIsolationTests : IDisposable
         Assert.NotEqual(production.ToolbarPackage,validation.ToolbarPackage);
         Assert.NotEqual(production.CommandEvent,validation.CommandEvent);Assert.NotEqual(production.ReplyEvent,validation.ReplyEvent);
         Assert.StartsWith(validation.ConfigurationDirectory,validation.Preferences().Load().MissionDirectory);
-        Assert.Equal("0.6.0",ApplicationUpdates.CurrentVersion);
-        Assert.Equal(new Version(0,6,0,0),typeof(ApplicationProfile).Assembly.GetName().Version);
-        Assert.Equal("AeroScience-Validation-v0.6.0",validation.Folder);
-        Assert.Equal(@"Software\AeroScience\Validation\v0.6.0",validation.RegistryKey);
-        Assert.Equal("aeroscience-validation-v0-6-0-toolbar",validation.ToolbarPackage);
-        Assert.Equal("AeroScienceValidationV060",validation.ToolbarFolder);
-        Assert.Equal("InGamePanels/aeroscience_validation_v060_panel.spb",validation.ToolbarRegistrationPath);
-        Assert.Equal("AeroScience.Validation.0_6_0.Command.v1",validation.CommandEvent);
-        Assert.Equal("AeroScience.Validation.0_6_0.Session",validation.SessionCookieName);
+        Assert.Equal("0.7.0",ApplicationUpdates.CurrentVersion);
+        Assert.Equal(new Version(0,7,0,0),typeof(ApplicationProfile).Assembly.GetName().Version);
+        Assert.Equal("AeroScience-Validation-v0.7.0",validation.Folder);
+        Assert.Equal(@"Software\AeroScience\Validation\v0.7.0",validation.RegistryKey);
+        Assert.Equal("aeroscience-validation-v0-7-0-toolbar",validation.ToolbarPackage);
+        Assert.Equal("AeroScienceValidationV070",validation.ToolbarFolder);
+        Assert.Equal("InGamePanels/aeroscience_validation_v070_panel.spb",validation.ToolbarRegistrationPath);
+        Assert.Equal("AeroScience.Validation.0_7_0.Command.v1",validation.CommandEvent);
+        Assert.Equal("AeroScience.Validation.0_7_0.Session",validation.SessionCookieName);
     }
     [Fact] public void SharedPathsAndTamperedPreferencesFailBeforeOpeningAStore()
     {

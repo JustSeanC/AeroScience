@@ -5,6 +5,7 @@ import {scienceWorkspace,disposeScienceWorkspace} from './science-workspace.js';
 import {helpCenter,disposeHelpCenter} from './help-center.js';
 import {missionSelection} from './mission-selection.js';
 import {startMissionWithReadiness} from './mission-start-advisory.js';
+import {personalResearch,disposePersonalResearch} from './personal-research.js';
 import {scientificLibrary,disposeScientificLibrary} from './scientific-library.js';
 import {downloadWorkspace,disposeDownloadWorkspace} from './download-workspace.js';
 import {initializeWorkstationShell,streamlineMissionControl} from './workstation-shell.js';
@@ -342,7 +343,7 @@ $("pair-form").addEventListener("submit", (event) => {
   command(event.submitter, () => connect($("pair-code").value));
 });
 async function navigate() {
-  const allowed = ["control", "planner", "history", "instruments", "settings", "science-workspace", "library", "help", "downloads"];
+  const allowed = ["control", "planner", "history", "instruments", "settings", "science-workspace", "library", "help", "downloads", "my-research"];
   if(location.hash.startsWith("#settings/support")){location.replace("#help");return;}
   const routePage=settingsLocation().page;
   const hash =
@@ -354,6 +355,7 @@ async function navigate() {
   if(page!=="downloads")disposeDownloadWorkspace();
   if(page!=="library")disposeScientificLibrary();
   if(page!=="help")disposeHelpCenter();
+  if(page!=="my-research")disposePersonalResearch();
   for (const id of allowed) $(id).hidden = id !== page;
   for (const link of document.querySelectorAll(".nav-link")) {
     const selected =
@@ -367,6 +369,7 @@ async function navigate() {
     history: "MISSION HISTORY",
     instruments: "INSTRUMENTS & COLLECTION",
     planner: "MISSION PLANNER",
+    "my-research": "MY RESEARCH",
     settings: "SETTINGS",
     "science-workspace": "SCIENCE RESULTS & ANALYSIS",library:"EXTERNAL DATA MANAGER",help:"HELP & SUPPORT",downloads:"DOWNLOAD ACTIVITY",
   }[page];
@@ -376,6 +379,7 @@ async function navigate() {
   if (page === "help") await helpCenter($("help"),api);
   if (page === "library") await scientificLibrary($("library"),api);
   if (page === "downloads") await downloadWorkspace($("downloads"),api);
+  if (page === "my-research") await personalResearch($("my-research"),api);
   if (page === "control") selection?.refresh();
   if (page === "history") await loadHistory();
   if (page === "settings") await loadSettings();

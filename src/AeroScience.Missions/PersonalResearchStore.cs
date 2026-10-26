@@ -1,0 +1,181 @@
+using System.Globalization;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json;
+using AeroScience.Shared;
+using Microsoft.Data.Sqlite;
+
+namespace AeroScience.Missions;
+
+public sealed partial class MissionStore
+{
+    private void MigratePersonalResearch(SqliteConnection db)
+    {
+        using var tx = db.BeginTransaction(); using var cmd = db.CreateCommand(); cmd.Transaction = tx;
+        cmd.CommandText = """
+            CREATE TABLE IF NOT EXISTS personal_research_cards(
+              id TEXT NOT NULL, revision INTEGER NOT NULL, name TEXT NOT NULL, payload_json TEXT NOT NULL,
+              PRIMARY KEY(id,revision));
+            CREATE TABLE IF NOT EXISTS personal_research_attempts(
+              id TEXT PRIMARY KEY, mission_id TEXT NOT NULL REFERENCES missions(id) ON DELETE CASCADE,
+              card_id TEXT NOT NULL, card_revision INTEGER NOT NULL, created_utc TEXT NOT NULL,
+              request_sha256 TEXT NOT NULL,payload_json TEXT NOT NULL,
+              FOREIGN KEY(card_id,card_revision) REFERENCES personal_research_cards(id,revision));
+            CREATE INDEX IF NOT EXISTS personal_attempts_card ON personal_research_attempts(card_id,created_utc DESC,id);
+            CREATE INDEX IF NOT EXISTS personal_attempts_flight ON personal_research_attempts(mission_id);
+            PRAGMA user_version=9;
+            """;
+        cmd.ExecuteNonQuery(); EvidenceFault?.Invoke("personal-research-before-commit"); tx.Commit();
+    }
+
+    public PersonalResearchCard SaveResearchCard(SaveResearchCardRequest input)
+    {
+        FlightRegimeEvaluation.Validate(input.FlightRegime);
+        var name = input.Name?.Trim();
+        if (string.IsNullOrWhiteSpace(name) || name.Length > 100 || name.Any(char.IsControl))
+            throw new ArgumentException("Give the test card a name of 1–100 characters.");
+        if (input.Id == Guid.Empty || input.Id.HasValue != input.ExpectedRevision.HasValue)
+            throw new ArgumentException("Editing requires the card identity and its current revision.");
+        using var db = Open(); using var tx = db.BeginTransaction(); using var cmd = db.CreateCommand(); cmd.Transaction = tx;
+        var id = input.Id ?? Guid.NewGuid();
+        cmd.CommandText = "SELECT MAX(revision) FROM personal_research_cards WHERE id=$id";
+        cmd.Parameters.AddWithValue("$id", id.ToString());
+        var revision = cmd.ExecuteScalar() is long value ? checked((int)value) : 0;
+        if (input.Id.HasValue && (revision == 0 || input.ExpectedRevision != revision))
+            throw new InvalidOperationException("This card changed. Reload it before saving a new revision.");
+        var card = new PersonalResearchCard(1, id, revision + 1, name, "flight-regime", input.FlightRegime, DateTimeOffset.UtcNow);
+        cmd.CommandText = "INSERT INTO personal_research_cards VALUES($id,$revision,$name,$json)";
+        cmd.Parameters.AddWithValue("$revision", card.Revision); cmd.Parameters.AddWithValue("$name", name);
+        cmd.Parameters.AddWithValue("$json", JsonSerializer.Serialize(card, WireJson.Options)); cmd.ExecuteNonQuery(); tx.Commit(); return card;
+    }
+
+    public PersonalResearchCard ResearchCard(Guid id, int? revision = null)
+    {
+        using var db = Open(); using var cmd = db.CreateCommand();
+        cmd.CommandText = "SELECT payload_json FROM personal_research_cards WHERE id=$id AND ($revision IS NULL OR revision=$revision) ORDER BY revision DESC LIMIT 1";
+        cmd.Parameters.AddWithValue("$id", id.ToString()); cmd.Parameters.AddWithValue("$revision", (object?)revision ?? DBNull.Value);
+        return cmd.ExecuteScalar() is string json ? JsonSerializer.Deserialize<PersonalResearchCard>(json, WireJson.Options)!
+            : throw new ArgumentException("The requested personal test-card revision was not found.");
+    }
+
+    public PersonalResearchCard[] ResearchCards(int offset = 0)
+    {
+        if (offset < 0) throw new ArgumentException("Invalid test-card page.");
+        using var db = Open(); using var cmd = db.CreateCommand();
+        cmd.CommandText = "SELECT payload_json FROM personal_research_cards c WHERE revision=(SELECT MAX(revision) FROM personal_research_cards WHERE id=c.id) ORDER BY name,id LIMIT 20 OFFSET $offset";
+        cmd.Parameters.AddWithValue("$offset", offset); using var r = cmd.ExecuteReader(); var cards = new List<PersonalResearchCard>();
+        while (r.Read()) cards.Add(JsonSerializer.Deserialize<PersonalResearchCard>(r.GetString(0), WireJson.Options)!);
+        return cards.ToArray();
+    }
+
+    public MissionPlan CreateResearchPlan(Guid cardId, int revision)
+    {
+        var card = ResearchCard(cardId, revision);
+        return SavePlan(new(Guid.NewGuid(), card.Name, MissionTemplateKind.ObservationFlight,
+            Objective: "Hold the card's indicated airspeed and MSL altitude within its tolerances.",
+            Instruments: [], ResearchCard: new(card.Id, card.Revision)));
+    }
+
+    public PersonalResearchAttempt[] ResearchAttempts(Guid? cardId = null, Guid? flightId = null, int offset = 0)
+    {
+        if (offset < 0) throw new ArgumentException("Invalid results page.");
+        using var db = Open(); using var cmd = db.CreateCommand();
+        cmd.CommandText = "SELECT payload_json FROM personal_research_attempts WHERE ($card IS NULL OR card_id=$card) AND ($flight IS NULL OR mission_id=$flight) ORDER BY created_utc DESC,id LIMIT 20 OFFSET $offset";
+        cmd.Parameters.AddWithValue("$card", (object?)cardId?.ToString() ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("$flight", (object?)flightId?.ToString() ?? DBNull.Value); cmd.Parameters.AddWithValue("$offset", offset);
+        using var r = cmd.ExecuteReader(); var items = new List<PersonalResearchAttempt>();
+        while (r.Read()) items.Add(JsonSerializer.Deserialize<PersonalResearchAttempt>(r.GetString(0), WireJson.Options)!);
+        return items.ToArray();
+    }
+
+    public Mission[] ResearchFlights(Guid cardId, int offset = 0)
+    {
+        if (offset < 0) throw new ArgumentException("Invalid recorded-flight page.");
+        using var db = Open(); using var cmd = db.CreateCommand();
+        cmd.CommandText = """
+            SELECT m.id FROM missions m JOIN mission_research r ON r.mission_id=m.id
+            WHERE m.status <> 'Recording' AND json_extract(r.plan_snapshot_json,'$.researchCard.id')=$id
+            ORDER BY m.started_utc DESC,m.id LIMIT 20 OFFSET $offset
+            """;
+        cmd.Parameters.AddWithValue("$id", cardId.ToString()); cmd.Parameters.AddWithValue("$offset", offset);
+        var ids = new List<Guid>(); using (var r = cmd.ExecuteReader()) while (r.Read()) ids.Add(Guid.Parse(r.GetString(0)));
+        return ids.Select(id => Detail(id)!.Mission).ToArray();
+    }
+
+    public PersonalResearchAttempt EvaluateResearchAttempt(ResearchAttemptRequest request, CancellationToken token = default)
+    {
+        if (request.RequestId == Guid.Empty || request.StartUtc.Offset != TimeSpan.Zero || request.EndUtc.Offset != TimeSpan.Zero
+            || request.EndUtc <= request.StartUtc || request.EndUtc - request.StartUtc > TimeSpan.FromHours(24))
+            throw new ArgumentException("Select a UTC evidence interval of up to 24 hours.");
+        using var db = Open(); using var tx = db.BeginTransaction(deferred: true);
+        using var cmd = db.CreateCommand(); cmd.Transaction = tx;
+        var requestHash = PreflightReadiness.Hash(request);
+        cmd.CommandText = "SELECT request_sha256,payload_json FROM personal_research_attempts WHERE id=$id";
+        cmd.Parameters.AddWithValue("$id", request.RequestId.ToString());
+        using (var existing = cmd.ExecuteReader())
+            if (existing.Read())
+            {
+                if (existing.GetString(0) != requestHash) throw new InvalidOperationException("This attempt command was already used for different evidence.");
+                return JsonSerializer.Deserialize<PersonalResearchAttempt>(existing.GetString(1), WireJson.Options)!;
+            }
+        var mission = Detail(request.FlightId)?.Mission ?? throw new ArgumentException("Recorded flight not found.");
+        if (mission.Status == MissionStatus.Recording) throw new InvalidOperationException("End the flight before reviewing its recorded attempt.");
+        if (request.StartUtc < mission.StartedUtc || request.EndUtc > mission.EndedUtc)
+            throw new ArgumentException("The evidence interval must stay inside this recorded flight.");
+        var plan = Research(mission.Id).PlanSnapshot;
+        var reference = plan?.ResearchCard ?? throw new ArgumentException("This flight has no frozen personal test card. Select a card plan before recording.");
+        var card = ResearchCard(reference.Id, reference.Revision);
+        if (card.Version != 1 || card.TemplateId != "flight-regime") throw new NotSupportedException("Unsupported personal test-card rule version.");
+        var evaluation = new FlightRegimeEvaluation.Window(card.FlightRegime, request.StartUtc, request.EndUtc);
+        using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
+        long first = 0, last = 0, count = 0; TelemetrySource? source = null;
+        cmd.CommandText = "SELECT sequence,payload_json FROM telemetry WHERE mission_id=$flight AND timestamp_utc >= $start AND timestamp_utc <= $end ORDER BY sequence";
+        cmd.Parameters.AddWithValue("$flight", mission.Id.ToString()); cmd.Parameters.AddWithValue("$start", Stamp(request.StartUtc)); cmd.Parameters.AddWithValue("$end", Stamp(request.EndUtc));
+        // Pause edges are retained by the existing event recorder, not copied telemetry.
+        using var pauses = PersonalPauseTimes(mission.Id, request.StartUtc, request.EndUtc).GetEnumerator();
+        var hasPause = pauses.MoveNext();
+        using (var reader = cmd.ExecuteReader())
+            while (reader.Read())
+            {
+                token.ThrowIfCancellationRequested();
+                var sequence = reader.GetInt64(0); var json = reader.GetString(1);
+                var sample = JsonSerializer.Deserialize<TelemetryFrame>(json, WireJson.Options)!;
+                while (hasPause && pauses.Current <= sample.TimestampUtc)
+                { token.ThrowIfCancellationRequested(); evaluation.Break(); hash.AppendData(Encoding.UTF8.GetBytes("break:" + Stamp(pauses.Current) + "\n")); hasPause = pauses.MoveNext(); }
+                evaluation.Add(sample); source ??= sample.Source;
+                if (count++ == 0) first = sequence; last = sequence;
+                hash.AppendData(Encoding.UTF8.GetBytes(sequence.ToString(CultureInfo.InvariantCulture) + ":" + json + "\n"));
+            }
+        while (hasPause)
+        {
+            token.ThrowIfCancellationRequested(); evaluation.Break();
+            hash.AppendData(Encoding.UTF8.GetBytes("break:" + Stamp(pauses.Current) + "\n")); hasPause = pauses.MoveNext();
+        }
+        var result = evaluation.Finish(mission.Status != MissionStatus.Completed);
+        var attempt = new PersonalResearchAttempt(1, request.RequestId, mission.Id, card, request.StartUtc, request.EndUtc,
+            DateTimeOffset.UtcNow, FlightRegimeEvaluation.Version, result.Outcome, evaluation.LongestHold,
+            evaluation.HoldStart, evaluation.HoldEnd,
+            new(first, last, count, Convert.ToHexString(hash.GetHashAndReset()).ToLowerInvariant(), PreflightReadiness.Hash(plan!), source), result.Explanation);
+        tx.Commit(); // Release the read snapshot before acquiring a short publication write lock.
+        using var publication = db.BeginTransaction(); cmd.Transaction = publication;
+        cmd.CommandText = "SELECT request_sha256,payload_json FROM personal_research_attempts WHERE id=$id";
+        using (var existing = cmd.ExecuteReader())
+            if (existing.Read())
+            {
+                if (existing.GetString(0) != requestHash) throw new InvalidOperationException("This attempt command was already used for different evidence.");
+                return JsonSerializer.Deserialize<PersonalResearchAttempt>(existing.GetString(1), WireJson.Options)!;
+            }
+        cmd.CommandText = "INSERT INTO personal_research_attempts VALUES($id,$flight,$card,$revision,$at,$request,$json)";
+        cmd.Parameters.AddWithValue("$card", card.Id.ToString()); cmd.Parameters.AddWithValue("$revision", card.Revision);
+        cmd.Parameters.AddWithValue("$at", Stamp(attempt.EvaluatedUtc)); cmd.Parameters.AddWithValue("$request", requestHash);
+        cmd.Parameters.AddWithValue("$json", JsonSerializer.Serialize(attempt, WireJson.Options)); cmd.ExecuteNonQuery(); publication.Commit(); return attempt;
+    }
+
+    private IEnumerable<DateTimeOffset> PersonalPauseTimes(Guid flight, DateTimeOffset start, DateTimeOffset end)
+    {
+        using var db = Open(); using var cmd = db.CreateCommand();
+        cmd.CommandText = "SELECT timestamp_utc FROM events WHERE mission_id=$id AND kind IN ('simulator-paused','telemetry-gap','connection') AND timestamp_utc >= $start AND timestamp_utc <= $end ORDER BY timestamp_utc,id";
+        cmd.Parameters.AddWithValue("$id", flight.ToString()); cmd.Parameters.AddWithValue("$start", Stamp(start)); cmd.Parameters.AddWithValue("$end", Stamp(end));
+        using var r = cmd.ExecuteReader(); while (r.Read()) yield return Parse(r.GetString(0));
+    }
+}

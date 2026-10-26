@@ -84,13 +84,13 @@ public sealed class MissionEvidenceStoreTests : IDisposable
         var frame = Input(0).Packet.Frame!; store.Append(flight, frame); store.Finish(flight, MissionStatus.Completed, utc.AddSeconds(2), "Fixture end");
         EvidenceTestDatabase.RemoveSchemaEight(store.DatabasePath);
         var original = StorageManager.DatabaseFingerprint(store.DatabasePath); store.Initialize();
-        Assert.Equal(8L, Scalar(store.DatabasePath, "PRAGMA user_version"));
+        Assert.Equal((long)MissionStore.CurrentSchemaVersion, Scalar(store.DatabasePath, "PRAGMA user_version"));
         Assert.Equal(frame, Assert.Single(store.StreamSamples(flight))); Assert.Equal(ScienceMode.Realistic, store.Detail(flight)!.Mission.Mode);
         Assert.Null(store.CollectionCheckpoint(flight)); Assert.Empty(store.CollectionSessions(flight)); Assert.Empty(store.CollectionEvents(flight));
         Assert.Null(store.CollectionSnapshot<MissionAssessmentContext>(flight));
         var backup = Assert.Single(Directory.GetFiles(Path.Combine(root, "Backups"), "missions-schema7-*.db"));
         Assert.Equal(original, StorageManager.DatabaseFingerprint(backup)); Assert.Equal(7L, Scalar(backup, "PRAGMA user_version"));
-        Assert.Equal(8L, Scalar(store.DatabasePath, "PRAGMA user_version")); store.Initialize();
+        Assert.Equal((long)MissionStore.CurrentSchemaVersion, Scalar(store.DatabasePath, "PRAGMA user_version")); store.Initialize();
         Assert.Single(Directory.GetFiles(Path.Combine(root, "Backups"), "*.db"));
     }
 
@@ -107,13 +107,13 @@ public sealed class MissionEvidenceStoreTests : IDisposable
         Assert.Equal(original, StorageManager.DatabaseFingerprint(store.DatabasePath));
         Assert.Equal(0, Scalar(store.DatabasePath, "SELECT COUNT(*) FROM sqlite_master WHERE name='science_sessions'"));
         Assert.Equal("Synthetic persistence flight", store.Detail(flight)!.Mission.Name);
-        store.EvidenceFreeBytes = null; store.EvidenceFault = null; store.Initialize(); Assert.Equal(8L, Scalar(store.DatabasePath, "PRAGMA user_version"));
+        store.EvidenceFreeBytes = null; store.EvidenceFault = null; store.Initialize(); Assert.Equal((long)MissionStore.CurrentSchemaVersion, Scalar(store.DatabasePath, "PRAGMA user_version"));
     }
 
     [Fact]
     public void NewerDatabaseIsRefusedWithoutBackupOrMutation()
     {
-        Sql(store.DatabasePath, "PRAGMA user_version=9"); var hash = StorageManager.DatabaseFingerprint(store.DatabasePath);
+        Sql(store.DatabasePath, "PRAGMA user_version=10"); var hash = StorageManager.DatabaseFingerprint(store.DatabasePath);
         Assert.Throws<InvalidOperationException>(store.Initialize);
         Assert.Equal(hash, StorageManager.DatabaseFingerprint(store.DatabasePath)); Assert.False(Directory.Exists(Path.Combine(root, "Backups")));
     }

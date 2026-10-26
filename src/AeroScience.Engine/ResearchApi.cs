@@ -26,6 +26,7 @@ public static class ResearchApi
 {
     public static void MapResearchEndpoints(this WebApplication app)
     {
+        app.MapPersonalResearchEndpoints();
         app.MapGet("/api/aviation/configuration", (AviationReference aviation, HttpContext c) => new { configuration = aviation.Configuration(), canConfigure = AccessControl.IsLoopback(c) });
         app.MapPost("/api/aviation/configuration", (AviationConsentRequest request, AviationReference aviation, HttpContext c) => AccessControl.IsLoopback(c) ? Results.Ok(aviation.Configure(request.OnlineEnabled)) : Results.StatusCode(403));
         app.MapGet("/api/aviation/catalog/{kind}", (string kind, int? offset, AviationReference aviation) => aviation.Page(kind, offset ?? 0));

@@ -37,11 +37,26 @@ public sealed class ApiTests : IAsyncLifetime
     [Fact] public async Task HealthReportsTheDevelopmentAssemblyVersionWithoutStartingRecording()
     {
         using var health=JsonDocument.Parse(await client.GetStringAsync("/api/health"));
-        Assert.Equal("0.6.0",health.RootElement.GetProperty("version").GetString());
-        Assert.Equal(new Version(0,6,0,0),typeof(EngineApplication).Assembly.GetName().Version);
+        Assert.Equal("0.7.0",health.RootElement.GetProperty("version").GetString());
+        Assert.Equal(new Version(0,7,0,0),typeof(EngineApplication).Assembly.GetName().Version);
         await Pair(client);
         using var missions=JsonDocument.Parse(await client.GetStringAsync("/api/missions"));
         Assert.Equal(0,missions.RootElement.GetArrayLength());
+    }
+    [Fact] public async Task PersonalResearchUsesExistingSessionCsrfAndRejectsUnsupportedCardInput()
+    {
+        Assert.Equal(HttpStatusCode.Unauthorized, (await client.GetAsync("/api/research/cards")).StatusCode);
+        await Pair(client);
+        var input = new SaveResearchCardRequest("API personal card", new(120,5,3000,100,30));
+        var response = await client.PostAsJsonAsync("/api/research/cards", input, WireJson.Options); response.EnsureSuccessStatusCode();
+        var card = (await response.Content.ReadFromJsonAsync<PersonalResearchCard>(WireJson.Options))!;
+        var planResponse = await client.PostAsJsonAsync($"/api/research/cards/{card.Id}/plan", new ResearchCardReference(card.Id,card.Revision), WireJson.Options);
+        planResponse.EnsureSuccessStatusCode(); var plan = (await planResponse.Content.ReadFromJsonAsync<MissionPlan>(WireJson.Options))!;
+        Assert.Equal(new(card.Id,1), plan.ResearchCard); Assert.DoesNotContain(plan.Instruments!, c => c.Enabled);
+        Assert.Equal(HttpStatusCode.BadRequest, (await client.PostAsJsonAsync("/api/research/cards", input with { FlightRegime = input.FlightRegime with { HoldSeconds = 0 } }, WireJson.Options)).StatusCode);
+        client.DefaultRequestHeaders.Remove("X-AeroScience-CSRF");
+        Assert.Equal(HttpStatusCode.Forbidden, (await client.PostAsJsonAsync("/api/research/cards", input, WireJson.Options)).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, (await client.PostAsJsonAsync("/api/research/attempts", new ResearchAttemptRequest(Guid.NewGuid(),Guid.NewGuid(),DateTimeOffset.UtcNow.AddMinutes(-1),DateTimeOffset.UtcNow), WireJson.Options)).StatusCode);
     }
     [Fact] public async Task AviationMetadataRequiresSessionAndCsrfAndKeepsReadsOfflineAndBounded()
     {
