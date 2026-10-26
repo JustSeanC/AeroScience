@@ -32,7 +32,7 @@ After your flight, explore collected observations on interactive maps, review sc
 
 AeroScience integrates actual Earth observation datasets, including satellite imagery and geographic information, to connect your simulated flights with real scientific information.
 
-In v0.6.0 development, explore FAA airport, runway, navigation and supported airspace references alongside your research route. Retained references work offline; TFR information includes freshness and coverage limitations. Official chart catalogs and downloads remain available, while chart rendering is deferred. Native EMIT import is still in development; see the [aviation guide](docs/v0.6.0-aviation-reference.md) for supported builds and limitations.
+In v0.6.0, explore FAA airport, runway, navigation and supported airspace references alongside your research route. Retained references work offline; published TFR boundaries and advisory mission screening show source freshness and coverage limitations. Official chart catalogs and downloads remain available, while in-app chart rendering is deferred. NASA EMIT import and spectral exploration are experimental, with genuine-original scientific validation still pending. See the [aviation guide](docs/v0.6.0-aviation-reference.md) and [EMIT guide](docs/research/v0.6.0-emit-integration.md) for supported capabilities and limitations.
 
 ## 🚀 How Does It Work?
 
@@ -82,11 +82,11 @@ Your missions and collected data are stored locally, and previously saved result
 
 ## 🧪 Project Status
 
-**Latest stable release: AeroScience v0.5.0**
+**Latest release: AeroScience v0.6.0 — Aviation Mapping & Scientific Data Expansion**
 
-**In development: AeroScience v0.6.0 — Aviation Mapping & Scientific Data Expansion**
+**In development: AeroScience v0.7.0**
 
-This development branch is not a published v0.6.0 release. Use the [v0.5.0 release](https://github.com/JustSeanC/AeroScience/releases/tag/v0.5.0) for the current stable installer.
+Find the Windows installer and release notes on the [v0.6.0 release page](https://github.com/JustSeanC/AeroScience/releases/tag/v0.6.0).
 
 AeroScience is actively developed and continues to expand its scientific capabilities, mission planning tools, aircraft integration, and research workflows.
 
