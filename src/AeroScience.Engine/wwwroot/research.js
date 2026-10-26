@@ -913,8 +913,7 @@ async function instruments() {
       presetList.append(row);
     }
   }
-  presets.append(
-    button("Save current configuration as preset", async () => {
+  const savePreset=button("Save current configuration as preset", async () => {
       await ctx.api("/api/presets", {
         id: presetName.dataset.id || newIdentity(),
         name: presetName.value,
@@ -923,8 +922,10 @@ async function instruments() {
       });
       delete presetName.dataset.id;
       await presetRows();
-    }),
-  );
+    });
+  savePreset.disabled=true;
+  const presetLoading=text('p','Loading current instrument configuration…','footnote');presetLoading.setAttribute('role','status');
+  presets.append(savePreset,presetLoading);
   for (const recommendation of templates.filter((t) => t.instruments.length))
     presets.append(
       button("Recommended: " + recommendation.name, () =>
@@ -936,6 +937,7 @@ async function instruments() {
   configuration.id = "live-instrument-config";
   p.append(configuration);
   configs(configuration, await ctx.api('/api/instruments/configuration'));
+  savePreset.disabled=false;presetLoading.textContent='';
   p.append(
     button("Apply instrument configuration", async () => {
       await ctx.api("/api/instruments", readConfigs(configuration));

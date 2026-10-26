@@ -274,3 +274,27 @@ test("Science Payload uses human names units compact cards and shared pause comm
     .locator("#aeroscience-frame")
     .screenshot({ path: "artifacts/v021-toolbar-browser-fixture.png" });
 });
+
+test('preset saving waits for actual configuration loading and preserves its snapshot',async({page,request})=>{
+ let release,entered,finished;
+ const gate=new Promise(resolve=>release=resolve),waiting=new Promise(resolve=>entered=resolve),handled=new Promise(resolve=>finished=resolve);
+ let intercepted=false,saves=0;
+ page.on('request',r=>{if(r.url().endsWith('/api/presets')&&r.method()==='POST')saves++;});
+ await page.route('**/api/instruments/configuration',async route=>{
+  if(intercepted)return route.continue();intercepted=true;entered();await gate;
+  try{await route.continue();}finally{finished();}
+ });
+ try{
+  await page.goto('/#science');await waiting;
+  await page.getByText('Reusable instrument presets',{exact:true}).click();
+  const save=page.getByRole('button',{name:'Save current configuration as preset',exact:true});
+  await expect(save).toBeVisible();await expect(save).toBeDisabled();expect(saves).toBe(0);
+  release();await handled;await expect(save).toBeEnabled();
+  await page.getByLabel('Preset name',{exact:true}).fill('Loaded configuration snapshot');
+  const configuration=await(await request.get('/api/instruments/configuration')).json();
+  const response=page.waitForResponse(r=>r.url().endsWith('/api/presets')&&r.request().method()==='POST');
+  await save.click();const saved=await response;expect(saved.ok()).toBeTruthy();expect(saves).toBe(1);
+  await expect(page.locator('#instrument-content')).toContainText('Loaded configuration snapshot');
+  const presets=await(await request.get('/api/presets')).json();expect(presets.find(p=>p.name==='Loaded configuration snapshot').instruments).toEqual(configuration);
+ }finally{release();if(intercepted)await handled;}
+});
