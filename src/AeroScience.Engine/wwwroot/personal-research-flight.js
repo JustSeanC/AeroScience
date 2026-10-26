@@ -1,3 +1,4 @@
+import {researchCardTargets} from './personal-research-start.js';
 import {node,button,newIdentity,table} from './workstation-ui.js';
 import {attemptView} from './personal-research.js';
 
@@ -9,7 +10,7 @@ export function researchCardSelection(parent,api,references,changed){
   const row=node('div',undefined,'action-row');row.append(node('span',`${ref.name||'Saved test card'} · revision ${ref.revision}`));button(row,'Remove Card',()=>{selected.delete(ref.id);changed();drawChosen();});chosen.append(row);
  }};
  async function load(){const own=++epoch;try{const cards=await api(`/api/research/cards?offset=${offset}`);if(own!==epoch||!section.isConnected)return;catalog.replaceChildren();
-  for(const card of cards){const row=node('div',undefined,'plan-row');row.append(node('span',`${card.name} · revision ${card.revision} · ${card.flightRegime.airspeedKnots} knots IAS / ${card.flightRegime.altitudeMslFeet} feet MSL`));button(row,'Add Card',()=>{if(selected.size>=16&&!selected.has(card.id))throw Error('Choose at most 16 cards for this flight. Your saved card library is not limited.');selected.set(card.id,{id:card.id,revision:card.revision,name:card.name});changed();drawChosen();});catalog.append(row);}
+  for(const card of cards){const row=node('div',undefined,'plan-row');row.append(node('span',`${card.name} · revision ${card.revision} · ${researchCardTargets(card)}`));button(row,'Add Card',()=>{if(selected.size>=16&&!selected.has(card.id))throw Error('Choose at most 16 cards for this flight. Your saved card library is not limited.');selected.set(card.id,{id:card.id,revision:card.revision,name:card.name});changed();drawChosen();});catalog.append(row);}
   button(catalog,'Newer Test Cards',()=>{offset=Math.max(0,offset-20);return load();});button(catalog,'Older Test Cards',()=>{offset+=20;return load();});status.textContent=cards.length?'Saved personal cards. Different target ranges may require separate activation.':'No saved cards on this page. Create one in My Research.';
  }catch(error){status.textContent=error.message;}}
  for(const ref of references)api(`/api/research/cards/${ref.id}?revision=${ref.revision}`).then(card=>{if(selected.get(ref.id)?.revision===ref.revision){selected.set(ref.id,{...ref,name:card.name});drawChosen();}}).catch(error=>status.textContent=error.message);
@@ -41,7 +42,7 @@ export function researchFlightControls(parent,api){
   refreshButtons();
  }
  function refreshButtons(){if(!state)return;for(const card of state.cards){const view=controls.get(card.card.id);if(!view)continue;
-  view.info.textContent=`${card.openAttempt?'Attempt recording since '+card.openAttempt.startUtc:card.active?'Active — ready for an attempt':'Inactive'} · ${card.card.flightRegime.airspeedKnots} ± ${card.card.flightRegime.airspeedToleranceKnots} knots IAS · ${card.card.flightRegime.altitudeMslFeet} ± ${card.card.flightRegime.altitudeToleranceFeet} feet MSL. ${card.activationBlocked||''}`;
+  view.info.textContent=`${card.openAttempt?'Attempt recording since '+card.openAttempt.startUtc:card.active?'Active — ready for an attempt':'Inactive'} · ${researchCardTargets(card.card)} ${card.activationBlocked||''}`;
   for(const [action,b]of Object.entries(view.buttons))b.disabled=busy||!state.recording||action==='activate'&&(card.active||!!card.activationBlocked)||action==='deactivate'&&!card.active||action==='beginAttempt'&&(!card.active||!!card.openAttempt||!state.canBeginAttempt)||action==='endAttempt'&&!card.openAttempt;
  }}
  return {update(snapshot){
@@ -60,7 +61,7 @@ export async function researchFlightTimeline(parent,api,flight,{attemptId,at}={}
  async function loadAttempts(){const rows=selected?[selected]:await api(`/api/missions/${flight}/research-attempts?offset=${offset}`);if(!root.isConnected)return;attempts.replaceChildren(node('h3','Recorded Attempts'));
   if(!rows.length)attempts.append(node('p','No marked attempts on this page. Existing postflight-only P01 results remain available in My Research.'));
   for(const attempt of rows){const card=state.cards.find(c=>c.card.id===attempt.cardId)?.card;const label={recording:'Recording',recorded:'Recorded',interrupted:'Interrupted'}[attempt.status]||'Unknown';const row=node('article');row.append(node('strong',`${card?.name||'Personal test card'} · revision ${attempt.cardRevision} · ${label}`),node('p',`${attempt.startUtc} → ${attempt.endUtc||'Attempt still recording'} · ${attempt.endReason||'Explicit attempt boundaries'} · Events ${attempt.beginEventId} / ${attempt.endEventId??'pending'}`));
-   if(attempt.endUtc&&!state.recording){const command=newIdentity();button(row,'Evaluate Attempt',async()=>{const result=await api(`/api/research/recorded-attempts/${attempt.id}/evaluate`,{requestId:command});if(row.isConnected){row.querySelector('.attempt-result')?.remove();const shown=attemptView(result);shown.classList.add('attempt-result');row.append(shown);}});}
+   if(attempt.endUtc&&!state.recording){const command=newIdentity();button(row,'Evaluate Attempt',async()=>{const result=await api(`/api/research/recorded-attempts/${attempt.id}/evaluate`,{requestId:command});if(row.isConnected){row.querySelector('.attempt-result')?.remove();const shown=attemptView(result,api);shown.classList.add('attempt-result');row.append(shown);}});}
    attempts.append(row);
   }if(selected)button(attempts,'Show All Flight Attempts',()=>{selected=null;return loadAttempts();});else{button(attempts,'Newer Attempt Page',()=>{offset=Math.max(0,offset-20);return loadAttempts();});button(attempts,'Older Attempt Page',()=>{offset+=20;return loadAttempts();});}
  }

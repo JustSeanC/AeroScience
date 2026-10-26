@@ -36,7 +36,9 @@ export async function scienceWorkspace(parent,api){
     if(path==='compare'){await comparison(body,safeApi,missions,ids,disposals,catalog);return;}
     if(!choice.value){const empty=el('div',undefined,'panel empty-state');empty.append(el('h2','Choose a recorded mission'),el('p','Review saved scientific measurements, replay the flight or export its research. MSFS and Internet access are not required.'));link(empty,'Find a mission','#history','button primary');body.append(empty);return;}
     const id=choice.value,summary=await safeApi(`/api/missions/${id}/science-summary`);
-    body.append(el('h2',summary.mission.name));await downlink(body,id,safeApi,disposals,catalog);
+    body.append(el('h2',summary.mission.name));
+    if(summary.mission.status!=='recording'){const research=await safeApi(`/api/missions/${id}/research`);if(research.planSnapshot?.researchStarter?.starterId==='vertical-atmospheric-profile')link(body,'Review Atmospheric Profile',`#my-research?flight=${id}`);}
+    await downlink(body,id,safeApi,disposals,catalog);
     if(path==='replay'){await replay(body,id,summary.mission,safeApi,{},stop=>disposals.push(stop));return;}
     if(path==='analysis'){await summaryView(body,summary,safeApi,instrument,{disposals,catalog,analysis:true});return;}
     const exports=el('section',undefined,'panel export-workspace');body.append(exports);

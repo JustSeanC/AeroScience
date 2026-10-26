@@ -26,6 +26,10 @@ test.afterEach(async({request})=>{const s=await(await request.get('/api/state'))
 
 test('offline experiment overview compares frozen cross-flight attempts with real hashes, chart gaps and original evidence',async({page,request})=>{
  test.setTimeout(60000);await page.goto('/');await expect(page.locator('#altitude')).not.toHaveText('—');const {card,attempts}=await seed(request);
+ if(attempts.some((a,i)=>a.result.outcome!==['pass','fail'][i])){
+  const diagnostic=await Promise.all(attempts.map(async a=>({result:a.result,events:(await(await request.get(`/api/missions/${a.flight.id}/replay/events?after=0`)).json()).filter(e=>['connection','telemetry-gap','simulator-paused'].includes(e.kind)),samples:await(await request.get(`/api/missions/${a.flight.id}/telemetry?limit=1000`)).json()})));
+  await test.info().attach('unexpected-recorded-research-outcome',{body:JSON.stringify(diagnostic),contentType:'application/json'});
+ }
  expect(attempts.map(a=>a.result.outcome)).toEqual(['pass','fail']);
  await page.goto('/#my-research');await page.locator('#my-research article').filter({has:page.getByRole('heading',{name:card.name,exact:true})}).getByRole('button',{name:'Overview & Compare',exact:true}).click();
  const root=page.getByRole('region',{name:'Experiment overview and comparison',exact:true});await expect(root).toContainText('Current revision 2');await expect(root.getByText('1 / 1 / 1',{exact:true})).toBeVisible();await expect(root).toContainText('not yet demonstrated');

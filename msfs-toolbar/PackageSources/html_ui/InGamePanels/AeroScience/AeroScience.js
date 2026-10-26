@@ -19,7 +19,7 @@ class IngamePanelAeroScience extends TemplateElement {
     this.serial=0;this.appliedSerial=0;this.seenEngines=new Set();this.intelligence=null;this.capabilities=[];this.mutationPending=false;
     this.byId = (id) => this.querySelector("#" + id);
     this.researchState=null;this.researchOffset=0;this.researchSerial=0;
-    this.byId('as-research-previous').onclick=()=>{this.researchOffset=Math.max(0,this.researchOffset-4);this.requestResearch();};
+    this.byId('as-research-previous').onclick=()=>{this.researchOffset=Math.max(0,this.researchOffset-(this.researchState?.pageSize||4));this.requestResearch();};
     this.byId('as-research-next').onclick=()=>{if(this.researchState?.nextOffset!=null){this.researchOffset=this.researchState.nextOffset;this.requestResearch();}};
     this.byId('as-compact').onclick=()=>{
       const compact=this.byId('as-root').classList.toggle('as-compact');
@@ -610,7 +610,9 @@ class IngamePanelAeroScience extends TemplateElement {
     this.byId('as-research-status').textContent=state.cards.length?'Activate a card, then Begin Attempt / End Attempt. Deactivate Card does not stop flight or science.':'No personal cards selected for this flight.';
     for(const item of state.cards){
       const row=document.createElement('section'),title=document.createElement('h4'),info=document.createElement('p');row.setAttribute('aria-label',item.card.name);row.tabIndex=-1;row.dataset.researchCard=item.card.id;
-      title.textContent=item.card.name+' · revision '+item.card.revision;info.textContent=(item.openAttempt?'Attempt recording':item.active?'Active':'Inactive')+' · '+item.card.flightRegime.airspeedKnots+' knots IAS · '+item.card.flightRegime.altitudeMslFeet+' feet MSL. '+(item.activationBlocked||'');row.append(title,info);
+      const atmospheric=item.card.atmosphericProfile;
+      const requirements=atmospheric?atmospheric.requiredBands+' neighboring '+atmospheric.bandWidthFeet+'-foot MSL bands · collect valid temperature readings':item.card.flightRegime.airspeedKnots+' knots IAS · '+item.card.flightRegime.altitudeMslFeet+' feet MSL';
+      title.textContent=item.card.name+' · revision '+item.card.revision;info.textContent=(item.openAttempt?'Attempt recording':item.active?'Active':'Inactive')+' · '+requirements+'. '+(item.activationBlocked||'');row.append(title,info);
       for(const [action,label] of [['activate','Activate Card'],['deactivate','Deactivate Card'],['beginAttempt','Begin Attempt'],['endAttempt','End Attempt']]){
         const b=document.createElement('button');b.textContent=label;b.dataset.researchCard=item.card.id;b.dataset.researchAction=action;
         b.disabled=pending||action==='activate'&&(item.active||!!item.activationBlocked)||action==='deactivate'&&!item.active||action==='beginAttempt'&&(!item.active||!!item.openAttempt||!state.canBeginAttempt)||action==='endAttempt'&&!item.openAttempt;
