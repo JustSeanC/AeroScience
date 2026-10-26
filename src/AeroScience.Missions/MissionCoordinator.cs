@@ -365,6 +365,30 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
         }
     }
 
+    public ResearchFlightState PersonalResearch(Guid id)
+    {
+        lock(gate){
+            var state=store.ResearchOperations(id);
+            var canBegin=active?.Id==id&&connection.State==ConnectionState.Connected&&frame is {IsValid:true,IsPaused:false}
+                && Now-frame.TimestampUtc>=TimeSpan.FromSeconds(-2)&&Now-frame.TimestampUtc<=TimeSpan.FromSeconds(6);
+            return state with{GeneratedUtc=Now,CanBeginAttempt=canBegin};
+        }
+    }
+    public ResearchCardResult ControlPersonalResearch(ResearchCardControl request)
+    {
+        lock(gate){
+            // Durable receipts may be replayed after End Flight; a new command cannot
+            // mutate an old flight. Store rechecks recording/revision transactionally.
+            if(maintenance)throw new InvalidOperationException("Storage maintenance is in progress.");
+            if(store.ResearchReceipt(request) is {} prior)return new(prior,PersonalResearch(request.FlightId));
+            if(active?.Id!=request.FlightId)throw new InvalidOperationException("This flight is not currently recording. Synchronize before issuing card controls.");
+            if(request.Action==ResearchCardAction.BeginAttempt&&!PersonalResearch(request.FlightId).CanBeginAttempt)
+                throw new InvalidOperationException("Begin Attempt needs fresh, unpaused aircraft telemetry for this active flight.");
+            var receipt=store.ControlResearchCard(request,ControlTime);
+            return new(receipt,PersonalResearch(request.FlightId));
+        }
+    }
+
     public void Interrupt()
     {
         lock (gate)

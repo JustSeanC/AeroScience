@@ -18,7 +18,8 @@ public sealed record MissionPlan(Guid Id, string Name, MissionTemplateKind Templ
     InstrumentConfiguration[]? Instruments = null, string? PreflightNotes = null, DateTimeOffset? UpdatedUtc = null, PatternDefinition[]? Patterns = null,
     string FlightRules = "VFR", double? CruisingAltitudeFeet = null, AtmosphericMissionSettings? AtmosphericSettings = null,SensorPlanningSettings? SensorPlanning=null,
     [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] CollectionPlan? Collection=null,
-    [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] ResearchCardReference? ResearchCard=null);
+    [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] ResearchCardReference? ResearchCard=null,
+    [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] ResearchCardReference[]? ResearchCards=null);
 public sealed record MissionTemplate(MissionTemplateKind Id, string Name, string Objective,
     InstrumentConfiguration[] Instruments, string[] NoteCategories,
     [property: System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] InstrumentConfiguration[]? OptionalInstruments = null);

@@ -7,7 +7,7 @@ namespace AeroScience.Missions;
 
 public sealed partial class MissionStore
 {
-    public const int CurrentSchemaVersion = 9;
+    public const int CurrentSchemaVersion = 10;
     private readonly string connectionString;
     public string DatabasePath { get; }
 
@@ -41,6 +41,8 @@ public sealed partial class MissionStore
         using var db = Open();
         using var cmd = db.CreateCommand(); cmd.CommandText = "PRAGMA user_version;";
         if (Convert.ToInt32(cmd.ExecuteScalar(), CultureInfo.InvariantCulture) < 9) MigratePersonalResearch(db);
+        cmd.CommandText = "PRAGMA user_version;";
+        if (Convert.ToInt32(cmd.ExecuteScalar(), CultureInfo.InvariantCulture) < 10) MigrateResearchOperations(db);
     }
 
     private void InitializeCore()
@@ -70,7 +72,7 @@ public sealed partial class MissionStore
             // Already current: no JSON or historical sample is rewritten.
             return;
         }
-        if (version == 8) return;
+        if (version is 8 or 9) return;
         if (version == 7) { MigrateCollectionEvidence(db); return; }
         if (version == 6) { MigrateScientificReview(db); MigrateCollectionEvidence(db); return; }
         if (version == 5) { MigrateMissionScience(db); MigrateCollectionEvidence(db); return; }
@@ -250,6 +252,7 @@ public sealed partial class MissionStore
         cmd.ExecuteNonQuery();
         Event(db, tx, id, now, "started", "Mission recording started.");
         WriteResearch(db, tx, id, plan, instruments, objective);
+        FreezeResearchCards(db, tx, id, plan);
         Event(db,tx,id,now,"payload-snapshot",JsonSerializer.Serialize(instruments??plan?.Instruments??[],WireJson.Options));
         tx.Commit();
         return id;
@@ -312,6 +315,7 @@ public sealed partial class MissionStore
         if (cmd.ExecuteNonQuery() != 1) throw new InvalidOperationException("Mission is not recording.");
         Event(db, tx, id, now, status.ToString().ToLowerInvariant(), message);
         CloseEvidenceForFlight(db, tx, id, status, now);
+        CloseResearchOperations(db, tx, id, now);
         tx.Commit();
     }
 

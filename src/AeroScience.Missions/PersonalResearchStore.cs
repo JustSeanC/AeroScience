@@ -94,7 +94,8 @@ public sealed partial class MissionStore
         using var db = Open(); using var cmd = db.CreateCommand();
         cmd.CommandText = """
             SELECT m.id FROM missions m JOIN mission_research r ON r.mission_id=m.id
-            WHERE m.status <> 'Recording' AND json_extract(r.plan_snapshot_json,'$.researchCard.id')=$id
+            WHERE m.status <> 'Recording' AND (json_extract(r.plan_snapshot_json,'$.researchCard.id')=$id
+              OR EXISTS(SELECT 1 FROM personal_flight_cards f WHERE f.mission_id=m.id AND f.card_id=$id))
             ORDER BY m.started_utc DESC,m.id LIMIT 20 OFFSET $offset
             """;
         cmd.Parameters.AddWithValue("$id", cardId.ToString()); cmd.Parameters.AddWithValue("$offset", offset);
@@ -104,8 +105,12 @@ public sealed partial class MissionStore
 
     public PersonalResearchAttempt EvaluateResearchAttempt(ResearchAttemptRequest request, CancellationToken token = default)
     {
+        var marked = request.RecordedAttemptId is {} marker ? RecordedResearchAttempt(marker) : null;
+        if (marked is not null && (marked.FlightId != request.FlightId || marked.Status == ResearchAttemptStatus.Recording
+            || marked.StartUtc != request.StartUtc || marked.EndUtc != request.EndUtc || marked.CardId != request.CardId))
+            throw new InvalidOperationException("The recorded attempt identity, boundaries or flight do not match. Open its retained timeline.");
         if (request.RequestId == Guid.Empty || request.StartUtc.Offset != TimeSpan.Zero || request.EndUtc.Offset != TimeSpan.Zero
-            || request.EndUtc <= request.StartUtc || request.EndUtc - request.StartUtc > TimeSpan.FromHours(24))
+            || (marked is null ? request.EndUtc <= request.StartUtc : request.EndUtc < request.StartUtc) || request.EndUtc - request.StartUtc > TimeSpan.FromHours(24))
             throw new ArgumentException("Select a UTC evidence interval of up to 24 hours.");
         using var db = Open(); using var tx = db.BeginTransaction(deferred: true);
         using var cmd = db.CreateCommand(); cmd.Transaction = tx;
@@ -120,11 +125,15 @@ public sealed partial class MissionStore
             }
         var mission = Detail(request.FlightId)?.Mission ?? throw new ArgumentException("Recorded flight not found.");
         if (mission.Status == MissionStatus.Recording) throw new InvalidOperationException("End the flight before reviewing its recorded attempt.");
-        if (request.StartUtc < mission.StartedUtc || request.EndUtc > mission.EndedUtc)
+        if ((request.StartUtc < mission.StartedUtc || request.EndUtc > mission.EndedUtc) && marked?.Status != ResearchAttemptStatus.Interrupted)
             throw new ArgumentException("The evidence interval must stay inside this recorded flight.");
         var plan = Research(mission.Id).PlanSnapshot;
-        var reference = plan?.ResearchCard ?? throw new ArgumentException("This flight has no frozen personal test card. Select a card plan before recording.");
-        var card = ResearchCard(reference.Id, reference.Revision);
+        var frozen = ResearchOperations(mission.Id).Cards;
+        var reference = plan?.ResearchCard ?? SelectedResearchCards(plan).FirstOrDefault();
+        var cardId = request.CardId ?? reference?.Id;
+        var card = frozen.FirstOrDefault(c => c.Card.Id == cardId)?.Card
+            ?? (reference is not null && reference.Id == cardId ? ResearchCard(reference.Id, reference.Revision)
+                : throw new ArgumentException("This flight has no matching frozen personal test card. Select the card before recording."));
         if (card.Version != 1 || card.TemplateId != "flight-regime") throw new NotSupportedException("Unsupported personal test-card rule version.");
         var evaluation = new FlightRegimeEvaluation.Window(card.FlightRegime, request.StartUtc, request.EndUtc);
         using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
@@ -152,10 +161,12 @@ public sealed partial class MissionStore
             hash.AppendData(Encoding.UTF8.GetBytes("break:" + Stamp(pauses.Current) + "\n")); hasPause = pauses.MoveNext();
         }
         var result = evaluation.Finish(mission.Status != MissionStatus.Completed);
+        if (marked?.Status == ResearchAttemptStatus.Interrupted)
+            result = (ResearchAttemptOutcome.InsufficientEvidence,"Attempt interrupted: " + marked.EndReason + ". Retained samples remain available; no automatic success was inferred.");
         var attempt = new PersonalResearchAttempt(1, request.RequestId, mission.Id, card, request.StartUtc, request.EndUtc,
             DateTimeOffset.UtcNow, FlightRegimeEvaluation.Version, result.Outcome, evaluation.LongestHold,
             evaluation.HoldStart, evaluation.HoldEnd,
-            new(first, last, count, Convert.ToHexString(hash.GetHashAndReset()).ToLowerInvariant(), PreflightReadiness.Hash(plan!), source), result.Explanation);
+            new(first, last, count, Convert.ToHexString(hash.GetHashAndReset()).ToLowerInvariant(), PreflightReadiness.Hash(plan!), source), result.Explanation, marked?.Id);
         tx.Commit(); // Release the read snapshot before acquiring a short publication write lock.
         using var publication = db.BeginTransaction(); cmd.Transaction = publication;
         cmd.CommandText = "SELECT request_sha256,payload_json FROM personal_research_attempts WHERE id=$id";
@@ -169,6 +180,13 @@ public sealed partial class MissionStore
         cmd.Parameters.AddWithValue("$card", card.Id.ToString()); cmd.Parameters.AddWithValue("$revision", card.Revision);
         cmd.Parameters.AddWithValue("$at", Stamp(attempt.EvaluatedUtc)); cmd.Parameters.AddWithValue("$request", requestHash);
         cmd.Parameters.AddWithValue("$json", JsonSerializer.Serialize(attempt, WireJson.Options)); cmd.ExecuteNonQuery(); publication.Commit(); return attempt;
+    }
+
+    public PersonalResearchAttempt EvaluateRecordedResearchAttempt(Guid id, Guid requestId, CancellationToken token=default)
+    {
+        var attempt=RecordedResearchAttempt(id);
+        if(attempt.EndUtc is not {} end)throw new InvalidOperationException("End this attempt before evaluating its retained evidence.");
+        return EvaluateResearchAttempt(new(requestId,attempt.FlightId,attempt.StartUtc,end,attempt.Id,attempt.CardId),token);
     }
 
     private IEnumerable<DateTimeOffset> PersonalPauseTimes(Guid flight, DateTimeOffset start, DateTimeOffset end)

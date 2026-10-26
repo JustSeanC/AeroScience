@@ -19,5 +19,10 @@ public static class PersonalResearchApi
         });
         app.MapGet("/api/research/attempts", (Guid? cardId, Guid? flightId, int? offset, MissionStore store) => store.ResearchAttempts(cardId, flightId, offset ?? 0));
         app.MapPost("/api/research/attempts", (ResearchAttemptRequest request, MissionStore store, HttpContext context) => store.EvaluateResearchAttempt(request, context.RequestAborted));
+        app.MapGet("/api/missions/{id:guid}/research-operations",(Guid id,MissionCoordinator coordinator)=>coordinator.PersonalResearch(id));
+        app.MapPost("/api/research/control",(ResearchCardControl request,MissionCoordinator coordinator)=>coordinator.ControlPersonalResearch(request));
+        app.MapGet("/api/missions/{id:guid}/research-attempts",(Guid id,int? offset,MissionStore store)=>store.RecordedResearchAttempts(id,offset??0));
+        app.MapPost("/api/research/recorded-attempts/{id:guid}/evaluate",(Guid id,ResearchEvaluationCommand request,MissionStore store,HttpContext context)=>store.EvaluateRecordedResearchAttempt(id,request.RequestId,context.RequestAborted));
     }
 }
+public sealed record ResearchEvaluationCommand(Guid RequestId);
