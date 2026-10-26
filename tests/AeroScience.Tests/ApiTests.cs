@@ -101,6 +101,11 @@ public sealed class ApiTests : IAsyncLifetime
         var state=await client.GetFromJsonAsync<EngineSnapshot>("/api/state",WireJson.Options);Assert.Null(state!.ActiveMission);Assert.Null(state.SelectedPlanId);
         client.DefaultRequestHeaders.Remove("X-AeroScience-CSRF");Assert.Equal(HttpStatusCode.Forbidden,(await client.PostAsJsonAsync("/api/research/starters/prepare",input with{RequestId=Guid.NewGuid()},WireJson.Options)).StatusCode);
     }
+    [Fact]public async Task PilotObservationPreparationReviewAndMarkerCreationRetainExistingAccessControls(){
+        var id=Guid.NewGuid();Assert.Equal(HttpStatusCode.Unauthorized,(await client.GetAsync($"/api/research/attempts/{id}/observations")).StatusCode);await Pair(client);
+        var response=await client.PostAsJsonAsync("/api/research/starters/prepare",new ResearchStarterRequest(1,Guid.NewGuid(),ObservationResearch.Template,ResearchEntryIntent.FlyNow),WireJson.Options);response.EnsureSuccessStatusCode();var prepared=(await response.Content.ReadFromJsonAsync<PreparedResearchStarter>(WireJson.Options))!;Assert.Equal(5,prepared.Card.Version);Assert.DoesNotContain(prepared.Plan.Instruments!,i=>i.Enabled);Assert.Null((await client.GetFromJsonAsync<EngineSnapshot>("/api/state",WireJson.Options))!.ActiveMission);
+        client.DefaultRequestHeaders.Remove("X-AeroScience-CSRF");Assert.Equal(HttpStatusCode.Forbidden,(await client.PostAsJsonAsync($"/api/missions/{id}/markers",new MarkerRequest("observation","Pilot note",Guid.NewGuid()),WireJson.Options)).StatusCode);
+    }
     [Fact] public async Task AviationMetadataRequiresSessionAndCsrfAndKeepsReadsOfflineAndBounded()
     {
         Assert.Equal(HttpStatusCode.Unauthorized, (await client.GetAsync("/api/aviation/catalog/vfr")).StatusCode);

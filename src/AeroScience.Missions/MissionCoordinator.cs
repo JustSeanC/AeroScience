@@ -321,9 +321,11 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
     {
         lock (gate)
         {
-            if (maintenance || active?.Id != id) throw new InvalidOperationException("Observation markers require an active mission.");
-            var available = connection.State == ConnectionState.Connected && frame is { IsPaused: false }
-                && DateTimeOffset.UtcNow - frame.TimestampUtc <= TimeSpan.FromSeconds(6) ? frame : null;
+            if(maintenance)throw new InvalidOperationException("Data maintenance is in progress.");
+            if(store.MarkerReceipt(id,request) is {} receipt)return receipt;
+            if(active?.Id!=id)throw new InvalidOperationException("Observation markers require an active mission.");
+            var available = connection.State == ConnectionState.Connected && frame is { IsValid:true, IsPaused: false }
+                && (DateTimeOffset.UtcNow-frame.TimestampUtc).TotalSeconds is >=0 and <=6 ? frame : null;
             return store.AddMarker(id, request, DateTimeOffset.UtcNow, available,
                 JsonSerializer.Serialize(research?.Snapshot(connection, frame), WireJson.Options));
         }
@@ -333,6 +335,7 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
         lock (gate)
         {
             if (maintenance) throw new InvalidOperationException("Data maintenance is in progress.");
+            if(store.NoteReceipt(id,request) is {} receipt)return receipt;
             if (request.Phase == "in-flight" && active?.Id != id) throw new InvalidOperationException("In-flight notes require that active mission.");
             return store.AddNote(id, request);
         }

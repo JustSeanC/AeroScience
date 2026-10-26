@@ -22,7 +22,7 @@ public sealed record ResearchEvidenceBreak(DateTimeOffset TimestampUtc, string K
 public sealed record ResearchEvidenceAudit(bool MatchesSavedEvidence, long RetainedSamples, long ExpectedSamples,
     long GapCount, long PauseOrConnectionEdges, long InvalidSamples, double? MaximumGapSeconds,
     TelemetrySource[] Sources, ReplaySample[] Preview, ResearchEvidenceBreak[] Breaks, bool MoreBreaks);
-public sealed record ResearchComparisonEntry(ResearchHistoryItem Attempt, ResearchEvidenceAudit? Evidence,AtmosphericResearchReview? Atmosphere=null,SurveyResearchReview? Survey=null);
+public sealed record ResearchComparisonEntry(ResearchHistoryItem Attempt, ResearchEvidenceAudit? Evidence,AtmosphericResearchReview? Atmosphere=null,SurveyResearchReview? Survey=null,ObservationResearchReview? ObservationFlight=null);
 public sealed record ResearchComparison(PersonalResearchCard Card, ResearchComparisonEntry[] Entries,
     bool DifferentRevisions, bool DifferentRequirements, bool DifferentEvaluators, bool DifferentSources, string[] Notices);
 
@@ -126,10 +126,12 @@ public sealed partial class MissionStore
             token.ThrowIfCancellationRequested();
             var row=chosen.GetValueOrDefault((selection.Kind,selection.Id))??throw new ArgumentException("An attempt or flight is no longer available in this experiment. Refresh its history.");
             if(row.Result?.Id!=selection.ResultId)throw new InvalidOperationException("A selected result changed. Refresh the experiment before comparing.");
-            rows.Add(card.Survey is not null?new(row,null,Survey:row.Result is {} survey?ReviewSurveyEvidence(survey,science??throw new IOException("Reconnect the Scientific Data Library."),token):null):AtmosphericResearch.IsCollectionCard(card)?new(row,null,row.Result is {} atmospheric?ReviewAtmosphericEvidence(atmospheric,science,token):null)
+            rows.Add(card.ObservationFlight is not null?new(row,null,ObservationFlight:row.Result is {} observation?ReviewObservationEvidence(observation,science,token):null):card.Survey is not null?new(row,null,Survey:row.Result is {} survey?ReviewSurveyEvidence(survey,science??throw new IOException("Reconnect the Scientific Data Library."),token):null):AtmosphericResearch.IsCollectionCard(card)?new(row,null,row.Result is {} atmospheric?ReviewAtmosphericEvidence(atmospheric,science,token):null)
                 :new(row,row.Result is {} result?AuditResearchEvidence(db,tx,result,token):null));
         }
         var revisions=rows.Select(r=>r.Attempt.Card.Revision).Distinct().Count()>1;
+        if(card.ObservationFlight is not null)return new(card,rows.ToArray(),revisions,rows.Select(r=>PreflightReadiness.Hash(r.Attempt.Card.ObservationFlight!)).Distinct().Count()>1,false,false,
+            ["Counts describe documentation records, not independent scientific measurements or proven hypotheses. Original note text, categories, locations and frozen revisions remain separate.","Optional original simulator quantities keep their units, times and provenance. Different places, weather, aircraft and observation approaches can confound comparisons; no subjective numerical trend is inferred."]);
         if(card.Survey is not null){
             if(card.Survey.Measurements.Contains(SurveyMeasurement.AirTemperature)&&rows.Select(r=>r.Attempt.Result?.Evidence.Source).Where(s=>s is not null).Distinct().Count()>1)throw new ArgumentException("Compare simulator air-temperature evidence with the same simulator/demo provenance.");
             return new(card,rows.ToArray(),revisions,rows.Select(r=>PreflightReadiness.Hash(r.Attempt.Card.Survey!)).Distinct().Count()>1,false,false,

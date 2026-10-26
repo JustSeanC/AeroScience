@@ -56,10 +56,12 @@ public sealed record ResearchState(FlightGuidance? Guidance, AtmosphericFrame? A
 public sealed record MissionResearch(MissionPlan? PlanSnapshot, InstrumentConfiguration[] Instruments,
     string? Objective, string Template, MissionNote[] Notes, InstrumentState[]? Diagnostics = null);
 public sealed record MissionMarker(Guid Id, Guid MissionId, string Category, DateTimeOffset TimestampUtc,
-    double? Latitude, double? Longitude, double? AltitudeMslFeet, string? Notes, string? ScientificContextJson = null);
-public sealed record MarkerRequest(string Category = "observation", string? Notes = null);
-public sealed record MissionNote(Guid Id, Guid MissionId, string Phase, string Text, DateTimeOffset TimestampUtc);
-public sealed record NoteRequest(string Text, string Phase = "postflight");
+    double? Latitude, double? Longitude, double? AltitudeMslFeet, string? Notes, string? ScientificContextJson = null,
+    [property: System.Text.Json.Serialization.JsonIgnore(Condition=System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] PilotObservationContext? PilotObservation=null);
+public sealed record MarkerRequest(string Category = "observation", string? Notes = null, Guid? RequestId=null);
+public sealed record MissionNote(Guid Id, Guid MissionId, string Phase, string Text, DateTimeOffset TimestampUtc,
+    [property: System.Text.Json.Serialization.JsonIgnore(Condition=System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] ResearchCardReference[]? ObservationCards=null);
+public sealed record NoteRequest(string Text, string Phase = "postflight",Guid? RequestId=null);
 public sealed record TrackPoint(long Sequence, DateTimeOffset TimestampUtc, double Latitude, double Longitude,
     double AltitudeMslFeet, bool BreakBefore = false);
 public sealed record TrackPage(TrackPoint[] Points, long NextSequence, bool HasMore, long TotalSamples, bool Downsampled);

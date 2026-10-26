@@ -7,7 +7,7 @@ using Microsoft.Data.Sqlite;
 namespace AeroScience.Missions;
 
 public sealed record CollectedScienceDeletionRequest(Guid[]? MissionIds=null,bool All=false);
-public sealed record CollectedScienceDeletionPreview(Guid Id,Guid LibraryId,DateTimeOffset CreatedUtc,string SelectionHash,bool All,long Missions,long Datasets,long Observations,long Products,long ManagedBytes,string[] Blockers);
+public sealed record CollectedScienceDeletionPreview(Guid Id,Guid LibraryId,DateTimeOffset CreatedUtc,string SelectionHash,bool All,long Missions,long Datasets,long Observations,long Products,long ManagedBytes,string[] Blockers,[property:System.Text.Json.Serialization.JsonIgnore(Condition=System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)] long PilotObservations=0);
 public sealed record CollectedScienceDeletionResult(Guid Id,string State,long RemovedFiles,long? PendingFiles,string? Warning,bool DatabaseCleanupPending=false);
 public sealed partial class ScienceStore
 {
@@ -53,7 +53,7 @@ public sealed partial class ScienceStore
             foreach(var mission in request.All?missions.DeletionMissionIds():request.MissionIds!.Order())
             {if(missions.Detail(mission) is null)throw new ArgumentException("A selected mission no longer exists.");command.Parameters["$mission"].Value=mission.ToString();command.ExecuteNonQuery();}
         }
-        var blockers=new List<string>();long missionCount=0,datasets=0,observations=0,products=0,bytes=0;
+        var blockers=new List<string>();long missionCount=0,datasets=0,observations=0,products=0,bytes=0,pilotObservations=0;
         void FileItem(string relative,long length,string sha)
         {
             var path=ResolveCollectedPath(relative);StorageManager.ValidateLocalPath(path);
@@ -62,7 +62,7 @@ public sealed partial class ScienceStore
         }
         foreach(var mission in CollectedMissionIds(id))
         {
-            missionCount++;if(missions.Detail(mission)?.Mission.Status==MissionStatus.Recording)blockers.Add("End active flight recording before deleting collected science.");
+            missionCount++;pilotObservations+=missions.PilotObservationCount(mission);if(missions.Detail(mission)?.Mission.Status==MissionStatus.Recording)blockers.Add("End active flight recording before deleting collected science.");
             using(var db=Open())using(var command=db.CreateCommand()){command.CommandText="SELECT (SELECT COUNT(*) FROM datasets WHERE mission_id=$id),(SELECT COUNT(*) FROM observations WHERE mission_id=$id)";command.Parameters.AddWithValue("$id",mission.ToString());using var row=command.ExecuteReader();row.Read();datasets+=row.GetInt64(0);observations+=row.GetInt64(1);}
             foreach(var product in AllProducts(mission)){FileItem(product.RelativePath,product.Bytes,product.Sha256);products++;}
             foreach(var artifact in Artifacts(mission)){FileItem(artifact.RelativePath,artifact.Bytes,artifact.Sha256);products++;}
@@ -103,7 +103,7 @@ public sealed partial class ScienceStore
         }
         foreach(var root in ManagedReplicaRoots?.Invoke()??[])blockers.Add("A retained relocation copy needs an explicitly reconciled science purge before deletion: "+root);
         CheckSourceBackupSafety(Guid.Empty);
-        var review=new CollectedScienceDeletionPreview(id,LibraryId,now,CollectedHash(id,missions),request.All,missionCount,datasets,observations,products,bytes,blockers.Distinct().ToArray());
+        var review=new CollectedScienceDeletionPreview(id,LibraryId,now,CollectedHash(id,missions),request.All,missionCount,datasets,observations,products,bytes,blockers.Distinct().ToArray(),pilotObservations);
         using(var db=Open(true))using(var command=db.CreateCommand()){command.CommandText="UPDATE science_delete_reviews SET payload_json=$json,state='Previewed' WHERE id=$id";command.Parameters.AddWithValue("$id",id.ToString());command.Parameters.AddWithValue("$json",JsonSerializer.Serialize(review,WireJson.Options));command.ExecuteNonQuery();}return review;
     }
     public CollectedScienceDeletionResult DeleteCollectedScience(SourceDeletionExecution request,MissionStore missions,Func<IDisposable> missionMaintenance)

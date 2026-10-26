@@ -131,20 +131,41 @@ public sealed partial class MissionStore
         cmd.CommandText = "UPDATE mission_research SET configuration_json=$json WHERE mission_id=$id";
         cmd.Parameters.AddWithValue("$json", JsonSerializer.Serialize(configurations, WireJson.Options)); cmd.Parameters.AddWithValue("$id", id.ToString()); cmd.ExecuteNonQuery();
     }
+    internal MissionMarker? MarkerReceipt(Guid missionId,MarkerRequest request)
+    {
+        if(request.RequestId==Guid.Empty)throw new ArgumentException("Use a non-empty observation request identity.");
+        if(request.RequestId is not {} id)return null;using var db=Open();using var cmd=db.CreateCommand();cmd.CommandText="SELECT payload_json FROM research_markers WHERE id=$id";cmd.Parameters.AddWithValue("$id",id.ToString());
+        if(cmd.ExecuteScalar() is not string json)return null;var old=JsonSerializer.Deserialize<MissionMarker>(json,WireJson.Options)!;
+        if(old.MissionId!=missionId||old.Category!=request.Category||old.Notes!=MissionPlanning.Text(request.Notes))throw new InvalidOperationException("This observation identity already belongs to a different selection or note.");return old;
+    }
+    ResearchCardReference[] ObservationCards(Guid mission)=>ResearchOperations(mission).Cards.Where(c=>c.Card.ObservationFlight is not null).Select(c=>new ResearchCardReference(c.Card.Id,c.Card.Revision)).ToArray();
     public MissionMarker AddMarker(Guid missionId, MarkerRequest request, DateTimeOffset timestamp, TelemetryFrame? frame, string? context)
     {
         if (!ScienceCatalog.MarkerCategories.Contains(request.Category)) throw new ArgumentException("Choose a known observation category.");
-        var marker = new MissionMarker(Guid.NewGuid(), missionId, request.Category, timestamp.ToUniversalTime(), frame?.Latitude,
-            frame?.Longitude, frame?.AltitudeMslFeet, MissionPlanning.Text(request.Notes), context);
+        if(MarkerReceipt(missionId,request) is {} prior)return prior;
+        var cards=ObservationCards(missionId);if(cards.Length>0&&ScienceDeleted(missionId))throw new InvalidOperationException("Collected pilot research was permanently deleted.");
+        var located=frame is{IsValid:true,IsPaused:false}&&(timestamp-frame.TimestampUtc).TotalSeconds is >=0 and <=6?frame:null;
+        var marker = new MissionMarker(request.RequestId??Guid.NewGuid(), missionId, request.Category, timestamp.ToUniversalTime(), located?.Latitude,
+            located?.Longitude, located?.AltitudeMslFeet, MissionPlanning.Text(request.Notes), context,
+            cards.Length==0?null:new(1,cards,located?.TimestampUtc,located is null?ObservationQuality.Unavailable:ObservationQuality.Valid));
         InsertResearch("research_markers", marker.Id, missionId, timestamp, marker); return marker;
+    }
+    internal MissionNote? NoteReceipt(Guid mission,NoteRequest request)
+    {
+        if(request.RequestId==Guid.Empty)throw new ArgumentException("Use a non-empty note request identity.");if(request.RequestId is not {} id)return null;
+        using var db=Open();using var cmd=db.CreateCommand();cmd.CommandText="SELECT payload_json FROM research_notes WHERE id=$id";cmd.Parameters.AddWithValue("$id",id.ToString());
+        if(cmd.ExecuteScalar() is not string json)return null;var old=JsonSerializer.Deserialize<MissionNote>(json,WireJson.Options)!;
+        if(old.MissionId!=mission||old.Phase!=request.Phase||old.Text!=MissionPlanning.Text(request.Text))throw new InvalidOperationException("This note identity already belongs to different text or a different flight.");return old;
     }
     public MissionNote AddNote(Guid missionId, NoteRequest request)
     {
+        if(NoteReceipt(missionId,request) is {} receipt)return receipt;
         if (Detail(missionId) is null) throw new ArgumentException("Mission not found.");
         if (request.Phase is not ("preflight" or "in-flight" or "postflight")) throw new ArgumentException("Choose a research note phase.");
         var text = MissionPlanning.Text(request.Text);
         if (string.IsNullOrWhiteSpace(text)) throw new ArgumentException("Enter research note text.");
-        var note = new MissionNote(Guid.NewGuid(), missionId, request.Phase, text, DateTimeOffset.UtcNow);
+        var cards=ObservationCards(missionId);if(cards.Length>0&&ScienceDeleted(missionId))throw new InvalidOperationException("Collected pilot research was permanently deleted.");
+        var note = new MissionNote(request.RequestId??Guid.NewGuid(), missionId, request.Phase, text, DateTimeOffset.UtcNow,cards.Length==0?null:cards);
         InsertResearch("research_notes", note.Id, missionId, note.TimestampUtc, note); return note;
     }
     private void InsertResearch<T>(string table, Guid id, Guid mission, DateTimeOffset time, T item)

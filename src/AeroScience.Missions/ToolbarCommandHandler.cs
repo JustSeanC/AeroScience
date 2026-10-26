@@ -15,6 +15,9 @@ public sealed record ToolbarReply(int Protocol, Guid RequestId, bool Ok, string?
 public sealed class ToolbarCommandHandler(MissionCoordinator coordinator, RouteMapService? maps = null,
     Func<EngineSnapshot,CollectionOverview?,ToolbarIntelligence>? intelligence=null, Func<string,string?>? authorize=null)
 {
+    // Native JSON is transported as UTF-8, never inserted as HTML. Preserve safe
+    // JSON/HTML escaping while avoiding needless ASCII escapes for research text.
+    private static readonly JsonSerializerOptions NativeResearchJson=new(WireJson.Options){Encoder=System.Text.Encodings.Web.JavaScriptEncoder.Create(System.Text.Unicode.UnicodeRanges.All)};
     readonly Guid engineInstance=Guid.NewGuid();
     private readonly RouteMapService navigation = maps ?? new(coordinator);
     private readonly Dictionary<Guid, (string Request, string Reply)> completed = [];
@@ -39,7 +42,7 @@ public sealed class ToolbarCommandHandler(MissionCoordinator coordinator, RouteM
                     var id=command.MissionId??coordinator.Snapshot().ActiveMission?.Id;
                     var state=id is {} flight?coordinator.PersonalResearch(flight):null;
                     // Validate page identity before any durable control side effect.
-                    var pageSize=state?.Cards.Any(c=>(AtmosphericResearch.IsCollectionCard(c.Card)||c.Card.Survey is not null))==true?1:4;
+                    var pageSize=state?.Cards.Any(c=>(AtmosphericResearch.IsCollectionCard(c.Card)||c.Card.Survey is not null||c.Card.ObservationFlight is not null))==true?1:4;
                     if(command.Offset%pageSize!=0)throw new ArgumentException("Use bounded four-card pages.");
                     ResearchCardReceipt? receipt=null;
                     if(command.Op=="research-control"){
@@ -51,7 +54,7 @@ public sealed class ToolbarCommandHandler(MissionCoordinator coordinator, RouteM
                     // A full atmospheric question may contain 500 Unicode characters.
                     // Keep exact definitions and the same byte boundary by paging one card.
                     if(state is not null)state=state with{Cards=state.Cards.Skip(command.Offset).Take(pageSize).ToArray(),NextOffset=command.Offset+pageSize<state.TotalCards?command.Offset+pageSize:null,PageSize=pageSize};
-                    var encoded=JsonSerializer.Serialize(new{protocol=1,command.RequestId,ok=true,research=state,receipt},WireJson.Options);
+                    var encoded=JsonSerializer.Serialize(new{protocol=1,command.RequestId,ok=true,research=state,receipt},NativeResearchJson);
                     if(Encoding.UTF8.GetByteCount(encoded)>8000)throw new InvalidOperationException("Personal card reply exceeds the native packet bound. Use the dashboard.");
                     return encoded;
                 }
@@ -74,8 +77,17 @@ public sealed class ToolbarCommandHandler(MissionCoordinator coordinator, RouteM
                         result.Event.Outcome==CollectionEventOutcome.Conflict?result.Event.Reason:null,
                         new(result.Event.Sequence,result.Event.Outcome,result.Event.SessionId,result.Event.Reason));
                 }
+                if(command.Op=="marker"&&command.MissionId is {} markerMission){
+                    // The existing marker row is the durable receipt. Do not retain
+                    // personal note contents in a second in-memory command archive.
+                    // Bounded transient replies retain only a request digest, not its text.
+                    if(completed.TryGetValue(command.RequestId,out var prior)&&prior.Request!=Digest(json))return Reply(command.RequestId,false,"Request identifier was already used.");
+                    coordinator.AddMarker(markerMission,new(command.Category??"observation",command.Notes,command.RequestId));
+                    if(prior.Reply is {} previousReply&&coordinator.Snapshot().ActiveMission?.Id==markerMission)return previousReply;
+                    var markerReply=Reply(command.RequestId,true,null);Remember(command.RequestId,json,markerReply);return markerReply;
+                }
                 if (completed.TryGetValue(command.RequestId, out var previous))
-                    return previous.Request == json ? previous.Reply : Reply(command.RequestId, false, "Request identifier was already used.");
+                    return previous.Request == Digest(json) ? previous.Reply : Reply(command.RequestId, false, "Request identifier was already used.");
                 switch (command.Op)
                 {
                     case "state": return Reply(command.RequestId, true, null);
@@ -84,8 +96,6 @@ public sealed class ToolbarCommandHandler(MissionCoordinator coordinator, RouteM
                     case "end" when command.MissionId is { } id: coordinator.End(id); break;
                     case "science-pause" when command.MissionId is { } pauseMission: coordinator.SetSciencePaused(pauseMission, true); break;
                     case "science-resume" when command.MissionId is { } resumeMission: coordinator.SetSciencePaused(resumeMission, false); break;
-                    case "marker" when command.MissionId is { } markerMission:
-                        coordinator.AddMarker(markerMission, new(command.Category ?? "observation", command.Notes)); break;
                     case "instrument" when command.InstrumentId is { } instrument:
                         coordinator.ConfigureInstrument(instrument,command.Enabled,command.IntervalMs);break;
                     default: throw new ArgumentException("Unknown toolbar command or missing mission ID.");
@@ -97,7 +107,7 @@ public sealed class ToolbarCommandHandler(MissionCoordinator coordinator, RouteM
             catch (Exception e) when (e is ArgumentException or InvalidOperationException or JsonException or NotSupportedException)
             {
                 var reply = Reply(command?.RequestId ?? Guid.Empty, false, e is JsonException ? "Malformed toolbar JSON." : e.Message);
-                if (command is { RequestId: var id, Op: not ("state" or "science-control") } && id != Guid.Empty) Remember(id, json, reply);
+                if (command is { RequestId: var id, Op: not ("state" or "science-control" or "marker") } && id != Guid.Empty) Remember(id, json, reply);
                 return reply;
             }
         }
@@ -133,10 +143,11 @@ public sealed class ToolbarCommandHandler(MissionCoordinator coordinator, RouteM
         if(Encoding.UTF8.GetByteCount(encoded)>8000)throw new InvalidOperationException("Native reply exceeds 8 KiB even after display-only reduction. Open bridge diagnostics.");
         return encoded;
     }
+    private static string Digest(string json)=>Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(Encoding.UTF8.GetBytes(json)));
     private void Remember(Guid id, string json, string reply)
     {
         if (completed.ContainsKey(id)) return;
-        completed.Add(id, (json, reply)); order.Enqueue(id);
+        completed.Add(id, (Digest(json), reply)); order.Enqueue(id);
         while (order.Count > 128) completed.Remove(order.Dequeue());
     }
 }
