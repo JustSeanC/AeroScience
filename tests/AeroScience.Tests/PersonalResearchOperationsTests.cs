@@ -1,6 +1,8 @@
 using AeroScience.Missions;
 using AeroScience.Shared;
 using Microsoft.Data.Sqlite;
+using System.Text;
+using System.Text.Json;
 using Xunit;
 
 namespace AeroScience.Tests;
@@ -119,6 +121,32 @@ public sealed class PersonalResearchOperationsTests : IDisposable
         Control(a,ResearchCardAction.Activate);Observe(1,true);Assert.Throws<InvalidOperationException>(()=>Control(a,ResearchCardAction.BeginAttempt));
         Observe(2);Control(a,ResearchCardAction.BeginAttempt);Observe(3,true);Control(a,ResearchCardAction.EndAttempt);
         Assert.NotNull(coordinator.Snapshot().ActiveMission);Assert.True(coordinator.PersonalResearch(flight.Id).Cards.Single(x=>x.Card.Id==a.Id).Active);
+    }
+    [Fact]public void NativeCommandsUseSameDurableAuthorityAndBoundedRepliesWithoutChangingScience()
+    {
+        var native=new ToolbarCommandHandler(coordinator);var request=Command(a,ResearchCardAction.Activate);
+        var packet=new ToolbarCommand(1,request.RequestId,"research-control",MissionId:flight.Id,ResearchControl:request);
+        foreach(var invalid in new[]{packet with{MissionId=Guid.NewGuid()},packet with{Offset=1}}){
+            using var rejected=JsonDocument.Parse(native.Handle(JsonSerializer.Serialize(invalid,WireJson.Options)));
+            Assert.False(rejected.RootElement.GetProperty("ok").GetBoolean());Assert.Equal(0,coordinator.PersonalResearch(flight.Id).Revision);
+        }
+        var encoded=JsonSerializer.Serialize(packet,WireJson.Options);var reply=native.Handle(encoded);
+        Assert.True(Encoding.UTF8.GetByteCount(reply)<8000);using var doc=JsonDocument.Parse(reply);Assert.True(doc.RootElement.GetProperty("ok").GetBoolean());
+        var receipt=coordinator.ControlPersonalResearch(request).Receipt;
+        using var repeated=JsonDocument.Parse(native.Handle(encoded));Assert.Equal(receipt.EventId,repeated.RootElement.GetProperty("receipt").GetProperty("eventId").GetInt64());
+        using var mismatch=JsonDocument.Parse(native.Handle(JsonSerializer.Serialize(packet with{RequestId=Guid.NewGuid()},WireJson.Options)));Assert.False(mismatch.RootElement.GetProperty("ok").GetBoolean());
+        Assert.Equal(flight.Id,coordinator.Snapshot().ActiveMission!.Id);Assert.Equal(CollectionPhase.Collecting,coordinator.ScienceCollection(flight.Id).State!.Phase);
+    }
+    [Fact]public void SchemaNineUpgradeLeavesOriginalRowsAndDoesNotInventHistoricActivations()
+    {
+        Observe(1);var sample=Assert.Single(store.StreamSamples(flight.Id));
+        using(var db=new SqliteConnection($"Data Source={store.DatabasePath};Pooling=False")){
+            db.Open();using var cmd=db.CreateCommand();cmd.CommandText="DROP TABLE personal_card_attempts; DROP TABLE personal_research_state; DROP TABLE personal_flight_cards; PRAGMA user_version=9";cmd.ExecuteNonQuery();
+        }
+        var original=StorageManager.DatabaseFingerprint(store.DatabasePath);
+        store.EvidenceFault=point=>{if(point=="research-operations-before-commit")throw new IOException("Synthetic migration interruption");};
+        Assert.Throws<IOException>(store.Initialize);Assert.Equal(original,StorageManager.DatabaseFingerprint(store.DatabasePath));
+        store.EvidenceFault=null;store.Initialize();Assert.Equal(sample,Assert.Single(store.StreamSamples(flight.Id)));Assert.Empty(store.ResearchOperations(flight.Id).Cards);
     }
     public void Dispose(){if(store.Detail(flight.Id)?.Mission.Status==MissionStatus.Recording)coordinator.Interrupt();else research.End();science.Dispose();SqliteConnection.ClearAllPools();Directory.Delete(root,true);}
 }

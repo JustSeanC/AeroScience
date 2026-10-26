@@ -1,5 +1,6 @@
 import {reviewCollectedScienceDeletion} from "./collected-science-deletion.js";
 import { newIdentity } from "./workstation-ui.js";
+import {researchCardSelection,researchFlightControls,researchFlightTimeline} from './personal-research-flight.js';
 import { missionPerformance } from "./mission-performance.js";
 import { preflightReadiness } from "./preflight-readiness.js";
 import { collectionPlanner } from "./collection-planner.js";
@@ -160,6 +161,7 @@ export function initializeResearch(context) {
   ctx = context;
   missionIntelligence($("control"),ctx.api);
   missionPerformance($("control"),ctx.api,()=>state?.activeMission?.id,{live:true});
+  personalFlight=researchFlightControls($("control"),ctx.api);
   const control = $("control"),
     guidance = text("article", undefined, "panel research-panel");
   guidance.id = "flight-guidance";
@@ -235,6 +237,7 @@ export async function loadResearch(page) {
   if (page === "instruments") await instruments();
 }
 let payloadCatalog;
+let personalFlight;
 let calibrationCatalog;
 let plannerDirty=false, pendingGeometry=false;
 window.addEventListener("beforeunload",event=>{if(plannerDirty||pendingGeometry){event.preventDefault();event.returnValue="";}});
@@ -317,6 +320,7 @@ function editPlan(plan) {
   let readinessView;
   const dirty=message=>{if(!form.isConnected)return;plannerDirty=true;readinessView?.invalidate();draftStatus.textContent=message||"Unsaved changes · Save mission plan when ready. Your draft stays here when you switch sections.";};
   form.addEventListener("input",event=>{if(!event.target.closest(".pattern-editor")&&!event.target.closest(".draft-geometry-editor"))dirty();});
+  const readCards=researchCardSelection(form,ctx.api,plan?.researchCards??(plan?.researchCard?[plan.researchCard]:[]),dirty);
   form.append(text("h3","1. Mission details"));
   const grid = text("div", undefined, "research-grid mission-details-grid");
   form.append(grid);
@@ -808,7 +812,8 @@ function editPlan(plan) {
   const nullable = (e) => e.planningUnits?e.planningUnits.read():(e.value ? Number(e.value) : null);
   const readDraft = () => ({
         id: draftPlanId,
-        researchCard: plan?.researchCard || null,
+        researchCard: readCards()[0] || null,
+        researchCards: readCards(),
         collection: automation.read(),
         name: name.value,
         template: template.value,
@@ -1063,6 +1068,7 @@ function guidance(parent, g) {
 }
 export function renderResearch(next) {
   if (!next) return;
+  personalFlight?.update(next);
   state = next;
   syncUnits(next.research?.units);
   guidance($("flight-guidance"), next.research?.guidance);
@@ -1318,10 +1324,11 @@ export async function researchDetail(body, id, mission) {
   const operating=document.createElement('section');body.append(operating);await operatingAssessments(operating,ctx.api,id);
   await initializeUnits(ctx.api);
   const review = await ctx.api(`/api/missions/${id}/review`);
-  if (review.research.planSnapshot?.researchCard) {
+  if (review.research.planSnapshot?.researchCards?.length || review.research.planSnapshot?.researchCard) {
     const link = text("a", "Review Personal Research"); link.href = `#my-research?flight=${id}`; body.append(link);
   }
   const workspace=missionWorkspace(body,id,mission,ctx.api,review);body=workspace.overview;
+  researchFlightTimeline(body,ctx.api,id).catch(error=>body.append(text('p',error.message)));
   const protection = await ctx.api(`/api/missions/${id}/protection`);
   const protectedLabel = text(
     "strong",

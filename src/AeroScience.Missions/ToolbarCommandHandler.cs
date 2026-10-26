@@ -7,7 +7,7 @@ namespace AeroScience.Missions;
 public sealed record ToolbarCommand(int Protocol, Guid RequestId, string Op, string? Name = null, Guid? MissionId = null,
     ScienceMode Mode = ScienceMode.Universal, string? InstrumentId = null, bool? Enabled = null, int? IntervalMs = null,
     string? Category = null, string? Notes = null, Guid? PlanId = null, string? Revision = null, int Offset = 0, long? After = null, int? WaypointIndex = null,
-    CollectionControlRequest? Control=null);
+    CollectionControlRequest? Control=null,ResearchCardControl? ResearchControl=null);
 public sealed record ToolbarReply(int Protocol, Guid RequestId, bool Ok, string? Error, EngineSnapshot State,
     string[]? Capabilities=null,ToolbarIntelligence? Intelligence=null,ToolbarControlReceipt? Receipt=null,Guid? EngineInstance=null);
 
@@ -33,6 +33,23 @@ public sealed class ToolbarCommandHandler(MissionCoordinator coordinator, RouteM
                 if (command is null || command.Protocol != 1 || command.RequestId == Guid.Empty)
                     throw new ArgumentException("Invalid toolbar protocol or request identifier.");
                 if (authorize?.Invoke(json) is { } rejection) throw new ArgumentException(rejection);
+                if(command.Op is "research-state" or "research-control")
+                {
+                    if(command.Offset<0||command.Offset>MissionStore.MaximumFlightCards||command.Offset%4!=0)throw new ArgumentException("Use bounded four-card pages.");
+                    ResearchCardReceipt? receipt=null;
+                    if(command.Op=="research-control"){
+                        var control=command.ResearchControl??throw new ArgumentException("Missing flight-bound card command.");
+                        if(control.RequestId!=command.RequestId)throw new ArgumentException("Native and card command identities must match.");
+                        if(command.MissionId!=control.FlightId)throw new ArgumentException("Native and card flight identities must match.");
+                        receipt=coordinator.ControlPersonalResearch(control).Receipt;
+                    }
+                    var id=command.MissionId??coordinator.Snapshot().ActiveMission?.Id;
+                    var state=id is {} flight?coordinator.PersonalResearch(flight):null;
+                    if(state is not null)state=state with{Cards=state.Cards.Skip(command.Offset).Take(4).ToArray(),NextOffset=command.Offset+4<state.TotalCards?command.Offset+4:null};
+                    var encoded=JsonSerializer.Serialize(new{protocol=1,command.RequestId,ok=true,research=state,receipt},WireJson.Options);
+                    if(Encoding.UTF8.GetByteCount(encoded)>8000)throw new InvalidOperationException("Personal card reply exceeds the native packet bound. Use the dashboard.");
+                    return encoded;
+                }
                 if (command.Op is "map-state" or "map-chunk" or "map-plans")
                 {
                     object value = command.Op switch {
@@ -99,7 +116,7 @@ public sealed class ToolbarCommandHandler(MissionCoordinator coordinator, RouteM
             } : null
         };
         string Encode()=>JsonSerializer.Serialize(new ToolbarReply(1,id,ok,Short(error,180),state,
-            ["mission-intelligence-1","session-bound-controls-1","control-revision-1"],summary,receipt is null?null:receipt with{Reason=Short(receipt.Reason,120)!},engineInstance),WireJson.Options);
+            ["mission-intelligence-1","session-bound-controls-1","control-revision-1","personal-research-controls-1"],summary,receipt is null?null:receipt with{Reason=Short(receipt.Reason,120)!},engineInstance),WireJson.Options);
         var encoded=Encode();
         if(Encoding.UTF8.GetByteCount(encoded)>8000)
         {

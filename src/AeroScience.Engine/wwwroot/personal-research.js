@@ -67,7 +67,7 @@ export async function personalResearch(root, api) {
       const flights = await api(`/api/research/cards/${card.id}/flights?offset=${offset}`);
       if (selectedFlight && !flights.some(f => f.id === selectedFlight)) {
         const [detail, research] = await Promise.all([api(`/api/missions/${selectedFlight}`), api(`/api/missions/${selectedFlight}/research`)]);
-        if (research.planSnapshot?.researchCard?.id !== card.id) throw Error('This recorded flight belongs to a different test card. Reload the selected flight.');
+        if (!(research.planSnapshot?.researchCards??[research.planSnapshot?.researchCard]).some(ref=>ref?.id===card.id)) throw Error('This recorded flight belongs to a different test card. Reload the selected flight.');
         if (detail.mission.status === 'recording') throw Error('End this flight before evaluating its recorded attempt.');
         flights.unshift(detail.mission); // Exact history link can reference a flight beyond the current page.
       }
@@ -90,12 +90,15 @@ export async function personalResearch(root, api) {
         review.append(interval, node('p', 'Times above are UTC, not local or simulator clock time. Choose the whole flight or a shorter test interval. Samples must be at most 1.5 seconds apart; pauses and gaps cannot be joined into a successful hold.'),
           action('Evaluate Recorded Attempt', async () => {
             if (!start.value || !end.value) throw Error('Choose both UTC times for this recorded attempt.');
-            const input = {flightId:select.value, startUtc:new Date(start.value+'Z').toISOString(), endUtc:new Date(end.value+'Z').toISOString()};
+            const input = {flightId:select.value, startUtc:new Date(start.value+'Z').toISOString(), endUtc:new Date(end.value+'Z').toISOString(),cardId:card.id};
             const key = JSON.stringify(input);
             if (lastEvaluation?.key !== key) lastEvaluation = {key, requestId:newIdentity()};
             const attempt = await api('/api/research/attempts', {requestId:lastEvaluation.requestId, ...input});
             if (active() && request === reviewEpoch) { result.replaceChildren(attemptView(attempt)); }
           }, 'primary'), result);
+        const timeline=node('div');review.append(timeline);
+        const showTimeline=async()=>{timeline.replaceChildren();const {researchFlightTimeline}=await import('./personal-research-flight.js');if(active()&&request===reviewEpoch)await researchFlightTimeline(timeline,api,select.value);};
+        select.addEventListener('change',()=>showTimeline().catch(error=>status.textContent=error.message));await showTimeline();
       }
       review.append(action('Newer Flights', () => showReview(card, null, Math.max(0, offset-20))), action('Older Flights', () => showReview(card, null, offset+20)));
       review.scrollIntoView({block:'nearest'});
@@ -121,13 +124,13 @@ export async function personalResearch(root, api) {
     const selectedFlight = new URLSearchParams(location.hash.split('?')[1] || '').get('flight');
     if (selectedFlight) {
       const research = await api(`/api/missions/${encodeURIComponent(selectedFlight)}/research`);
-      const ref = research.planSnapshot?.researchCard;
+      const ref = research.planSnapshot?.researchCards?.[0]??research.planSnapshot?.researchCard;
       if (active() && ref) await showReview(await api(`/api/research/cards/${ref.id}?revision=${ref.revision}`), selectedFlight);
     }
   } catch (error) { if (active()) status.textContent = `Personal Research could not load: ${error.message}`; }
 }
 
-function attemptView(attempt) {
+export function attemptView(attempt) {
   const panel = node('article', undefined, 'panel research-panel');
   const outcome = {pass:'Pass', fail:'Fail', insufficientEvidence:'Insufficient Evidence'}[attempt.outcome] || 'Unknown';
   panel.append(node('h3', `${attempt.card.name} — ${outcome}`), node('p', attempt.explanation),

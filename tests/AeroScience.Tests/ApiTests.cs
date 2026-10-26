@@ -58,6 +58,18 @@ public sealed class ApiTests : IAsyncLifetime
         Assert.Equal(HttpStatusCode.Forbidden, (await client.PostAsJsonAsync("/api/research/cards", input, WireJson.Options)).StatusCode);
         Assert.Equal(HttpStatusCode.Forbidden, (await client.PostAsJsonAsync("/api/research/attempts", new ResearchAttemptRequest(Guid.NewGuid(),Guid.NewGuid(),DateTimeOffset.UtcNow.AddMinutes(-1),DateTimeOffset.UtcNow), WireJson.Options)).StatusCode);
     }
+    [Fact] public async Task PersonalCardOperationsKeepHostAuthorityCsrfAndRequiredCommandIdentities()
+    {
+        var flight=Guid.NewGuid();
+        foreach(var path in new[]{ $"/api/missions/{flight}/research-operations",$"/api/missions/{flight}/research-attempts" })
+            Assert.Equal(HttpStatusCode.Unauthorized,(await client.GetAsync(path)).StatusCode);
+        await Pair(client);
+        Assert.Equal(HttpStatusCode.BadRequest,(await client.PostAsJsonAsync("/api/research/control",new{flightId=flight,requestId=Guid.NewGuid(),action="activate",cardId=Guid.NewGuid()},WireJson.Options)).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest,(await client.GetAsync($"/api/missions/{flight}/research-attempts?offset=-1")).StatusCode);
+        client.DefaultRequestHeaders.Remove("X-AeroScience-CSRF");
+        Assert.Equal(HttpStatusCode.Forbidden,(await client.PostAsJsonAsync("/api/research/control",new ResearchCardControl(1,flight,Guid.NewGuid(),0,ResearchCardAction.Activate,Guid.NewGuid(),null),WireJson.Options)).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden,(await client.PostAsJsonAsync($"/api/research/recorded-attempts/{Guid.NewGuid()}/evaluate",new ResearchEvaluationCommand(Guid.NewGuid()),WireJson.Options)).StatusCode);
+    }
     [Fact] public async Task AviationMetadataRequiresSessionAndCsrfAndKeepsReadsOfflineAndBounded()
     {
         Assert.Equal(HttpStatusCode.Unauthorized, (await client.GetAsync("/api/aviation/catalog/vfr")).StatusCode);
