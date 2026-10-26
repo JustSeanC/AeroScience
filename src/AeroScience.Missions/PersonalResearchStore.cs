@@ -44,9 +44,14 @@ public sealed partial class MissionStore
         if (input.Id.HasValue && (revision == 0 || input.ExpectedRevision != revision))
             throw new InvalidOperationException("This card changed. Reload it before saving a new revision.");
         var card = new PersonalResearchCard(1, id, revision + 1, name, "flight-regime", input.FlightRegime, DateTimeOffset.UtcNow);
-        cmd.CommandText = "INSERT INTO personal_research_cards VALUES($id,$revision,$name,$json)";
-        cmd.Parameters.AddWithValue("$revision", card.Revision); cmd.Parameters.AddWithValue("$name", name);
-        cmd.Parameters.AddWithValue("$json", JsonSerializer.Serialize(card, WireJson.Options)); cmd.ExecuteNonQuery(); tx.Commit(); return card;
+        InsertResearchCard(db,tx,card);tx.Commit();return card;
+    }
+
+    static void InsertResearchCard(SqliteConnection db,SqliteTransaction tx,PersonalResearchCard card)
+    {
+        using var cmd=db.CreateCommand();cmd.Transaction=tx;cmd.CommandText="INSERT INTO personal_research_cards VALUES($id,$revision,$name,$json)";
+        cmd.Parameters.AddWithValue("$id",card.Id.ToString());cmd.Parameters.AddWithValue("$revision",card.Revision);cmd.Parameters.AddWithValue("$name",card.Name);
+        cmd.Parameters.AddWithValue("$json",JsonSerializer.Serialize(card,WireJson.Options));cmd.ExecuteNonQuery();
     }
 
     public PersonalResearchCard ResearchCard(Guid id, int? revision = null)

@@ -81,6 +81,17 @@ public sealed class ApiTests : IAsyncLifetime
         Assert.Equal(HttpStatusCode.BadRequest,(await client.PostAsJsonAsync($"/api/research/cards/{card.Id}/comparison",new ResearchComparisonRequest([]),WireJson.Options)).StatusCode);
         client.DefaultRequestHeaders.Remove("X-AeroScience-CSRF");Assert.Equal(HttpStatusCode.Forbidden,(await client.PostAsJsonAsync($"/api/research/cards/{card.Id}/comparison",new ResearchComparisonRequest([]),WireJson.Options)).StatusCode);
     }
+    [Fact] public async Task ResearchStarterPreparationUsesSessionCsrfAndNeverStartsOrSelectsRecording()
+    {
+        Assert.Equal(HttpStatusCode.Unauthorized,(await client.GetAsync("/api/research/starters")).StatusCode);await Pair(client);
+        var choices=await client.GetFromJsonAsync<ResearchStarter[]>("/api/research/starters",WireJson.Options);Assert.Equal("flight-regime",Assert.Single(choices!).Id);
+        var input=new ResearchStarterRequest(1,Guid.NewGuid(),"flight-regime",ResearchEntryIntent.FlyNow);
+        var response=await client.PostAsJsonAsync("/api/research/starters/prepare",input,WireJson.Options);response.EnsureSuccessStatusCode();var prepared=(await response.Content.ReadFromJsonAsync<PreparedResearchStarter>(WireJson.Options))!;
+        var retry=await client.PostAsJsonAsync("/api/research/starters/prepare",input,WireJson.Options);retry.EnsureSuccessStatusCode();Assert.True((await retry.Content.ReadFromJsonAsync<PreparedResearchStarter>(WireJson.Options))!.Reused);
+        var state=await client.GetFromJsonAsync<EngineSnapshot>("/api/state",WireJson.Options);Assert.Null(state!.ActiveMission);Assert.Null(state.SelectedPlanId);
+        Assert.Equal(prepared.Card.Id,prepared.Plan.ResearchCard!.Id);client.DefaultRequestHeaders.Remove("X-AeroScience-CSRF");
+        Assert.Equal(HttpStatusCode.Forbidden,(await client.PostAsJsonAsync("/api/research/starters/prepare",input,WireJson.Options)).StatusCode);
+    }
     [Fact] public async Task AviationMetadataRequiresSessionAndCsrfAndKeepsReadsOfflineAndBounded()
     {
         Assert.Equal(HttpStatusCode.Unauthorized, (await client.GetAsync("/api/aviation/catalog/vfr")).StatusCode);

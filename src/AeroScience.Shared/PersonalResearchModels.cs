@@ -39,3 +39,9 @@ public sealed record ResearchFlightState(int Version, Guid FlightId, long Revisi
 public sealed record ResearchCardReceipt(Guid RequestId, Guid FlightId, long Revision, long EventId,
     Guid CardId, Guid? AttemptId, DateTimeOffset TimestampUtc, string Message);
 public sealed record ResearchCardResult(ResearchCardReceipt Receipt, ResearchFlightState State);
+
+public enum ResearchEntryIntent { Unknown, FlyNow, Customize }
+public sealed record ResearchStarter(string Id,int Version,string Name,string Description,string[] Measurements,FlightRegimeDefinition Example);
+public sealed record ResearchStarterRequest(int Version,Guid RequestId,string StarterId,ResearchEntryIntent Intent,ResearchCardReference? Card=null,int StarterVersion=1);
+public sealed record ResearchStarterOrigin(int Version,Guid RequestId,string RequestSha256,string StarterId,ResearchEntryIntent Intent,ResearchCardReference? OriginalCard);
+public sealed record PreparedResearchStarter(MissionPlan Plan,PersonalResearchCard Card,bool Reused);

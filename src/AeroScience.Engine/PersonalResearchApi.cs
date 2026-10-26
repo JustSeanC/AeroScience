@@ -8,6 +8,8 @@ public static class PersonalResearchApi
     public static void MapPersonalResearchEndpoints(this WebApplication app)
     {
         // Existing host session, paired-display and CSRF middleware protects these routes.
+        app.MapGet("/api/research/starters",()=>MissionStore.ResearchStarters());
+        app.MapPost("/api/research/starters/prepare",(ResearchStarterRequest request,MissionStore store)=>store.PrepareResearchStarter(request));
         app.MapGet("/api/research/cards", (int? offset, MissionStore store) => store.ResearchCards(offset ?? 0));
         app.MapGet("/api/research/cards/{id:guid}", (Guid id, int? revision, MissionStore store) => store.ResearchCard(id, revision));
         app.MapGet("/api/research/cards/{id:guid}/flights", (Guid id, int? offset, MissionStore store) => store.ResearchFlights(id, offset ?? 0));

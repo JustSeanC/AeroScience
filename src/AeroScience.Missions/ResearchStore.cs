@@ -79,13 +79,19 @@ public sealed partial class MissionStore
     }
     public MissionPlan SavePlan(MissionPlan input)
     {
+        if(input.ResearchStarter is {} origin&&Plan(input.Id)?.ResearchStarter!=origin)
+            throw new ArgumentException("Starter provenance must match the prepared plan. Prepare a separate copy from My Research.");
         foreach (var card in SelectedResearchCards(input)) _ = ResearchCard(card.Id, card.Revision);
         var plan = MissionPlanning.Validate(input with { Id = input.Id == Guid.Empty ? Guid.NewGuid() : input.Id });
-        using var db = Open(); using var cmd = db.CreateCommand();
+        using var db = Open();WritePlan(db,null,plan);return plan;
+    }
+    static void WritePlan(SqliteConnection db,SqliteTransaction? tx,MissionPlan plan)
+    {
+        using var cmd=db.CreateCommand();cmd.Transaction=tx;
         cmd.CommandText = "INSERT INTO mission_plans VALUES($id,$name,$time,$json) ON CONFLICT(id) DO UPDATE SET name=$name,updated_utc=$time,payload_json=$json";
         cmd.Parameters.AddWithValue("$id", plan.Id.ToString()); cmd.Parameters.AddWithValue("$name", plan.Name);
         cmd.Parameters.AddWithValue("$time", Stamp(plan.UpdatedUtc!.Value)); cmd.Parameters.AddWithValue("$json", JsonSerializer.Serialize(plan, WireJson.Options));
-        cmd.ExecuteNonQuery(); return plan;
+        cmd.ExecuteNonQuery();
     }
     public MissionPlan? Plan(Guid id)
     {
