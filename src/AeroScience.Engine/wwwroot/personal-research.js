@@ -1,5 +1,6 @@
 import {newIdentity,node} from './workstation-ui.js';
 import {researchExperimentReview} from './personal-research-review.js';
+import {flightRegimeFields,researchStarterChoices,researchEntryActions} from './personal-research-start.js';
 let epoch = 0, cardOffset = 0, resultOffset = 0;
 let draft = null;
 export function disposePersonalResearch() { epoch++; }
@@ -25,9 +26,10 @@ export async function personalResearch(root, api) {
     wrap.append(input); parent.append(wrap); return input;
   };
   try {
-    const [cards, attempts] = await Promise.all([api(`/api/research/cards?offset=${cardOffset}`), api(`/api/research/attempts?offset=${resultOffset}`)]);
+    const [cards, attempts, starters] = await Promise.all([api(`/api/research/cards?offset=${cardOffset}`), api(`/api/research/attempts?offset=${resultOffset}`),api('/api/research/starters')]);
     if (!active()) return;
     status.textContent = 'Flight-Regime Validation uses recorded indicated airspeed and altitude above mean sea level. Flight recording and science sessions keep their normal controls.';
+    researchStarterChoices(root,api,starters,active);
     const editor = node('section', undefined, 'panel research-panel');
     const renderEditor = () => {
       editor.replaceChildren(node('h2', draft?.id ? 'Edit Flight-Regime Validation' : 'Create Flight-Regime Validation'));
@@ -35,14 +37,10 @@ export async function personalResearch(root, api) {
       const form = node('form'); form.id = 'research-card-form';
       const fields = node('div', undefined, 'research-grid');
       const name = field(fields, 'Test card name', draft?.name || 'Flight-Regime Validation', 'text'); name.required = true; name.maxLength = 100;
-      const rule = draft?.flightRegime || {airspeedKnots:120, airspeedToleranceKnots:5, altitudeMslFeet:3000, altitudeToleranceFeet:100, holdSeconds:30};
-      const speed = field(fields, 'Indicated airspeed target (knots)', rule.airspeedKnots); speed.min = '1'; speed.max = '2000';
-      const speedTolerance = field(fields, 'Airspeed tolerance (± knots)', rule.airspeedToleranceKnots); speedTolerance.min = '0.01';
-      const altitude = field(fields, 'Altitude target (feet MSL)', rule.altitudeMslFeet); altitude.min = '-2000'; altitude.max = '100000';
-      const altitudeTolerance = field(fields, 'Altitude tolerance (± feet)', rule.altitudeToleranceFeet); altitudeTolerance.min = '0.01'; altitudeTolerance.max = '10000';
-      const hold = field(fields, 'Required continuous hold (seconds)', rule.holdSeconds); hold.min = '1'; hold.max = '3600';
+      const rule=draft?.flightRegime||starters.find(s=>s.id==='flight-regime').example;
+      const targets=flightRegimeFields(fields,rule);
       const read = () => ({id:draft?.id, revision:draft?.revision, name:name.value,
-        flightRegime:{airspeedKnots:Number(speed.value), airspeedToleranceKnots:Number(speedTolerance.value), altitudeMslFeet:Number(altitude.value), altitudeToleranceFeet:Number(altitudeTolerance.value), holdSeconds:Number(hold.value)}});
+        flightRegime:targets.read()});
       form.oninput = () => { draft = read(); };
       const save = node('button', draft?.id ? 'Save New Revision' : 'Save Test Card', 'primary'); save.type = 'submit';
       form.onsubmit = async event => {
@@ -118,6 +116,7 @@ export async function personalResearch(root, api) {
         action('Overview & Compare',()=>researchExperimentReview(experiment,api,card,active)),
         action('Edit Card', () => { draft = structuredClone(card); renderEditor(); editor.scrollIntoView({block:'start'}); editor.querySelector('input').focus(); }));
       root.append(row);
+      researchEntryActions(row,api,{card,starter:starters.find(s=>s.id===card.templateId)},active);
     }
     root.append(action('Newer Cards', async () => {cardOffset = Math.max(0,cardOffset-20); await personalResearch(root,api);}), action('Older Cards', async () => {cardOffset += 20; await personalResearch(root,api);}), experiment, review);
     const saved=node('details',undefined,'panel research-panel');saved.append(node('summary','Saved Local Results — All Evaluations'),node('p','Every saved evaluation is retained here. Overview & Compare groups repeated evaluations into their original attempts.'));

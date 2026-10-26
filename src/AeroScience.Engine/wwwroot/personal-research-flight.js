@@ -13,7 +13,7 @@ export function researchCardSelection(parent,api,references,changed){
   button(catalog,'Newer Test Cards',()=>{offset=Math.max(0,offset-20);return load();});button(catalog,'Older Test Cards',()=>{offset+=20;return load();});status.textContent=cards.length?'Saved personal cards. Different target ranges may require separate activation.':'No saved cards on this page. Create one in My Research.';
  }catch(error){status.textContent=error.message;}}
  for(const ref of references)api(`/api/research/cards/${ref.id}?revision=${ref.revision}`).then(card=>{if(selected.get(ref.id)?.revision===ref.revision){selected.set(ref.id,{...ref,name:card.name});drawChosen();}}).catch(error=>status.textContent=error.message);
- drawChosen();load();return ()=>[...selected.values()].map(({id,revision})=>({id,revision}));
+ drawChosen();load();const read=()=>[...selected.values()].map(({id,revision})=>({id,revision}));read.replaceReference=card=>{if(selected.has(card.id)){selected.set(card.id,{id:card.id,revision:card.revision,name:card.name});drawChosen();}};return read;
 }
 
 export function researchFlightControls(parent,api){

@@ -1,6 +1,7 @@
 import {reviewCollectedScienceDeletion} from "./collected-science-deletion.js";
 import { newIdentity } from "./workstation-ui.js";
 import {researchCardSelection,researchFlightControls,researchFlightTimeline} from './personal-research-flight.js';
+import {flightRegimeFields,researchTargets} from './personal-research-start.js';
 import { missionPerformance } from "./mission-performance.js";
 import { preflightReadiness } from "./preflight-readiness.js";
 import { collectionPlanner } from "./collection-planner.js";
@@ -229,9 +230,12 @@ export async function loadResearch(page) {
   if (page === "planner") {
     await planner();
     const cardPlanId = new URLSearchParams(location.hash.split("?")[1] || "").get("researchPlan");
-    if (cardPlanId && editing?.id !== cardPlanId) {
-      const plan = await ctx.api(`/api/plans/${encodeURIComponent(cardPlanId)}`);
-      if (location.hash.includes(`researchPlan=${cardPlanId}`)) editPlan(plan);
+    if (cardPlanId) {
+      const plan=editing?.id===cardPlanId?editing:await ctx.api(`/api/plans/${encodeURIComponent(cardPlanId)}`);
+      if (location.hash.includes(`researchPlan=${cardPlanId}`)) {
+        if(editing?.id===cardPlanId||editPlan(plan))window.dispatchEvent(new CustomEvent('aeroscience-research-plan-opened',{detail:{planId:cardPlanId}}));
+        else{history.replaceState(null,'','#planner');ctx.notice('Your existing mission draft was kept. Choose Customize again when you are ready.');}
+      }
     }
   }
   if (page === "instruments") await instruments();
@@ -298,7 +302,7 @@ async function planner() {
   editPlan(editing);
 }
 function editPlan(plan) {
-  if((plannerDirty||pendingGeometry)&&!confirm("Discard unsaved mission and geometry edits? Cancel keeps the current draft."))return;
+  if((plannerDirty||pendingGeometry)&&!confirm("Discard unsaved mission and geometry edits? Cancel keeps the current draft."))return false;
   plannerDirty=false;pendingGeometry=false;
   editing = plan;
   const draftPlanId=plan?.id||newIdentity();
@@ -313,14 +317,22 @@ function editPlan(plan) {
   e.append(form);
   if (plan?.researchCard) {
     const linked = text("p", `Personal Research test card · Revision ${plan.researchCard.revision}. Recording freezes this association; editing the route does not change its test rules.`);
-    const back = text("a", "My Research"); back.href = "#my-research";
+    const back = text("a", plan.researchStarter?"Back to My Research":"My Research"); back.href = "#my-research";
     form.append(linked, back);
   }
   const draftStatus=text("p","Mission plan draft · Changes are not saved until Save mission plan.","planner-status");draftStatus.setAttribute("role","status");form.append(draftStatus);
   let readinessView;
   const dirty=message=>{if(!form.isConnected)return;plannerDirty=true;readinessView?.invalidate();draftStatus.textContent=message||"Unsaved changes · Save mission plan when ready. Your draft stays here when you switch sections.";};
   form.addEventListener("input",event=>{if(!event.target.closest(".pattern-editor")&&!event.target.closest(".draft-geometry-editor"))dirty();});
-  const readCards=researchCardSelection(form,ctx.api,plan?.researchCards??(plan?.researchCard?[plan.researchCard]:[]),dirty);
+  let starterSection,starterCard,starterFields,starterName,starterFeedback,loadStarter=Promise.resolve();
+  const references=plan?.researchCards??(plan?.researchCard?[plan.researchCard]:[]);
+  const readCards=researchCardSelection(form,ctx.api,references,()=>{dirty();if(starterSection){starterSection.hidden=!readCards().some(r=>r.id===plan.researchStarter.requestId);save.disabled=!starterSection.hidden&&!starterFields;}});
+  if(plan?.researchStarter&&(plan.researchStarter.intent==='customize'||!plan.researchStarter.originalCard)&&references.some(r=>r.id===plan.researchStarter.requestId)){
+    starterSection=text('section',undefined,'research-panel');starterSection.id='research-starter-targets';starterSection.append(text('h3','Your Experiment Targets'),text('p','This is your own prepared card. Editing targets saves a new revision for this plan; original experiments and past flight results stay unchanged. These are pilot-reviewed simulator targets, not safe aircraft limits.'));
+    const feedback=text('p','Loading your prepared targets…');starterFeedback=feedback;feedback.setAttribute('role','status');starterSection.append(feedback);const fields=text('div',undefined,'research-grid');starterSection.append(fields);form.append(starterSection);
+    const load=()=>{loadStarter=ctx.api(`/api/research/cards/${plan.researchStarter.requestId}?revision=${readCards().find(r=>r.id===plan.researchStarter.requestId)?.revision||references[0].revision}`).then(card=>{if(!form.isConnected)return;starterCard=card;fields.replaceChildren();starterName=input(fields,'Experiment name',card.name);starterName.required=true;starterName.maxLength=100;starterFields=flightRegimeFields(fields,card.flightRegime,{prefix:'Experiment: '});feedback.textContent=`Revision ${card.revision} · ${researchTargets(card.flightRegime)}. Free flight is supported; route, patterns and science instruments remain editable below.`;save.disabled=false;retry.hidden=true;}).catch(error=>{if(form.isConnected){feedback.textContent='Experiment targets could not load: '+error.message;save.disabled=!starterSection.hidden;retry.hidden=false;}throw error;});return loadStarter;};
+    const retry=button('Reload Experiment Targets',()=>load());retry.hidden=true;starterSection.append(retry);load().catch(()=>{});
+  }else if(plan?.researchStarter)form.append(text('p','This plan reuses a saved experiment revision. Routes, patterns and instruments remain editable. To change experiment targets in an independent copy, return to My Research and choose Customize.'));
   form.append(text("h3","1. Mission details"));
   const grid = text("div", undefined, "research-grid mission-details-grid");
   form.append(grid);
@@ -787,6 +799,7 @@ function editPlan(plan) {
   departure.onchange = drawList;
   drawList();
   const save = text("button", "Save mission plan", "primary");
+  save.disabled=!!starterSection&&!starterFields;
   save.type = "submit";
   form.append(save);
   routeExportButton(
@@ -814,6 +827,7 @@ function editPlan(plan) {
         id: draftPlanId,
         researchCard: readCards()[0] || null,
         researchCards: readCards(),
+        researchStarter:plan?.researchStarter||null,
         collection: automation.read(),
         name: name.value,
         template: template.value,
@@ -842,10 +856,20 @@ function editPlan(plan) {
     if(pendingGeometry){draftStatus.textContent="Save or cancel the draft waypoint/survey area before saving the mission plan.";editor.scrollIntoView({block:"center"});return;}
     if(pattern.hasPreview?.()){draftStatus.textContent="Pattern preview only. Add Pattern to Mission or Discard Preview before saving.";return;}
     ctx.command(save, async () => {
-      const savedPlan = await ctx.api("/api/plans", readDraft());
-      if(!form.isConnected)return;editing=savedPlan;plannerDirty=false;pendingGeometry=false;await planner();document.querySelector("#plan-editor .planner-status").textContent="Mission plan saved · Ready to start mission from Mission Control or the saved plan row.";
+      form.inert=true;
+      try{
+        if(starterSection&&!starterSection.hidden)await loadStarter;if(!form.isConnected)return;
+        const draft=readDraft();
+        if(starterCard&&draft.researchCards.some(r=>r.id===starterCard.id)&&(starterName.value.trim()!==starterCard.name||JSON.stringify(starterFields.read())!==JSON.stringify(starterCard.flightRegime))){
+          starterCard=await ctx.api('/api/research/cards',{id:starterCard.id,expectedRevision:starterCard.revision,name:starterName.value,flightRegime:starterFields.read()});
+          if(!form.isConnected)return;readCards.replaceReference(starterCard);draft.researchCards=readCards();draft.researchCard=draft.researchCards[0]||null;starterFeedback.textContent=`Your card revision ${starterCard.revision} is saved locally. Save mission plan to keep this plan linked to those targets.`;
+        }
+        const savedPlan=await ctx.api('/api/plans',draft);
+        if(!form.isConnected)return;editing=savedPlan;plannerDirty=false;pendingGeometry=false;await planner();document.querySelector('#plan-editor .planner-status').textContent='Mission plan saved · Ready to start mission from Mission Control or the saved plan row.';
+      }finally{if(form.isConnected)form.inert=false;}
     });
   };
+  return true;
 }
 async function instruments() {
   await initializeUnits(ctx.api);

@@ -1,6 +1,6 @@
 // Advisory only: this module never saves, records or prepares scientific sources.
-export function preflightReadiness(parent, readDraft, api) {
-  const panel=document.createElement('section'); panel.id='preflight-readiness';
+export function preflightReadiness(parent, readDraft, api,{id='preflight-readiness',active=()=>true}={}) {
+  const panel=document.createElement('section'); panel.id=id;
   const title=document.createElement('h3');title.textContent='Preflight Science Readiness';
   const status=document.createElement('p');status.setAttribute('role','status');status.textContent='Not yet assessed · evaluate this draft without saving.';
   const results=document.createElement('div');const run=document.createElement('button');run.type='button';run.textContent='Evaluate science readiness';
@@ -28,7 +28,7 @@ export function preflightReadiness(parent, readDraft, api) {
   };
   async function observe(){
     if(!panel.isConnected)return;
-    if(current){try{const context=await api('/api/plans/readiness/context');if(current&&(context.contextSha256!==current.contextSha256||Date.now()>=Date.parse(current.expiresUtc)))invalidate();}catch{if(current)invalidate();}}
+    if(current&&active()){try{const context=await api('/api/plans/readiness/context');if(current&&(context.contextSha256!==current.contextSha256||Date.now()>=Date.parse(current.expiresUtc)))invalidate();}catch{if(current)invalidate();}}
     if(panel.isConnected)timer=setTimeout(observe,10000);
   }
   timer=setTimeout(observe,10000);

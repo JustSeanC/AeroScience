@@ -198,6 +198,7 @@ function render(state) {
   } else stopped?.remove();
   syncBasemaps(state.maps);
   renderResearch(state);
+  selection?.update(state);
   const wasActive = current?.activeMission?.id;
   current = state;
   const t = state.telemetry;
