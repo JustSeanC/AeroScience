@@ -60,8 +60,8 @@ public sealed class PersonalResearchOperationsTests : IDisposable
     [Fact]public void OnlyIntersectingInclusiveTargetRangesCanBeActiveTogether()
     {
         Assert.True(MissionStore.CompatibleResearchCards(a,b));Assert.False(MissionStore.CompatibleResearchCards(a,c));
-        Assert.True(MissionStore.CompatibleResearchCards(a,c with{FlightRegime=c.FlightRegime with{AirspeedKnots=130}}));
-        Assert.False(MissionStore.CompatibleResearchCards(a,b with{FlightRegime=b.FlightRegime with{AltitudeMslFeet=4000}}));
+        Assert.True(MissionStore.CompatibleResearchCards(a,c with{FlightRegime=c.FlightRegime! with{AirspeedKnots=130}}));
+        Assert.False(MissionStore.CompatibleResearchCards(a,b with{FlightRegime=b.FlightRegime! with{AltitudeMslFeet=4000}}));
         Control(a,ResearchCardAction.Activate);Assert.Throws<InvalidOperationException>(()=>Control(c,ResearchCardAction.Activate));
         Assert.Contains("Deactivate Card A",coordinator.PersonalResearch(flight.Id).Cards.Single(x=>x.Card.Id==c.Id).ActivationBlocked);
         Control(a,ResearchCardAction.Deactivate);Control(c,ResearchCardAction.Activate);
@@ -89,11 +89,11 @@ public sealed class PersonalResearchOperationsTests : IDisposable
     }
     [Fact]public void EditingCardDoesNotRewriteFrozenDefinitionOrOriginalSamples()
     {
-        store.SaveResearchCard(new(a.Name,a.FlightRegime with{AirspeedKnots=200},a.Id,1));
+        store.SaveResearchCard(new(a.Name,a.FlightRegime! with{AirspeedKnots=200},a.Id,1));
         Control(a,ResearchCardAction.Activate);var id=Control(a,ResearchCardAction.BeginAttempt).Receipt.AttemptId!.Value;
         Observe(1);Observe(2);Observe(3);Control(a,ResearchCardAction.EndAttempt);coordinator.End(flight.Id);
         var samples=store.StreamSamples(flight.Id).ToArray();var result=store.EvaluateRecordedResearchAttempt(id,Guid.NewGuid());
-        Assert.Equal(1,result.Card.Revision);Assert.Equal(120,result.Card.FlightRegime.AirspeedKnots);Assert.Equal(ResearchAttemptOutcome.Pass,result.Outcome);
+        Assert.Equal(1,result.Card.Revision);Assert.Equal(120,result.Card.FlightRegime!.AirspeedKnots);Assert.Equal(ResearchAttemptOutcome.Pass,result.Outcome);
         Assert.Equal(samples,store.StreamSamples(flight.Id));Assert.Equal(3,result.Evidence.SampleCount);
         Assert.Equal(id,store.EvaluateRecordedResearchAttempt(id,result.Id).RecordedAttemptId);
     }

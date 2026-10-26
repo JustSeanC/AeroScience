@@ -35,17 +35,22 @@ public sealed class ToolbarCommandHandler(MissionCoordinator coordinator, RouteM
                 if (authorize?.Invoke(json) is { } rejection) throw new ArgumentException(rejection);
                 if(command.Op is "research-state" or "research-control")
                 {
-                    if(command.Offset<0||command.Offset>MissionStore.MaximumFlightCards||command.Offset%4!=0)throw new ArgumentException("Use bounded four-card pages.");
+                    if(command.Offset<0||command.Offset>MissionStore.MaximumFlightCards)throw new ArgumentException("Use bounded personal-card pages.");
+                    var id=command.MissionId??coordinator.Snapshot().ActiveMission?.Id;
+                    var state=id is {} flight?coordinator.PersonalResearch(flight):null;
+                    // Validate page identity before any durable control side effect.
+                    var pageSize=state?.Cards.Any(c=>c.Card.AtmosphericProfile is not null)==true?1:4;
+                    if(command.Offset%pageSize!=0)throw new ArgumentException("Use bounded four-card pages.");
                     ResearchCardReceipt? receipt=null;
                     if(command.Op=="research-control"){
                         var control=command.ResearchControl??throw new ArgumentException("Missing flight-bound card command.");
                         if(control.RequestId!=command.RequestId)throw new ArgumentException("Native and card command identities must match.");
                         if(command.MissionId!=control.FlightId)throw new ArgumentException("Native and card flight identities must match.");
-                        receipt=coordinator.ControlPersonalResearch(control).Receipt;
+                        var result=coordinator.ControlPersonalResearch(control);receipt=result.Receipt;state=result.State;
                     }
-                    var id=command.MissionId??coordinator.Snapshot().ActiveMission?.Id;
-                    var state=id is {} flight?coordinator.PersonalResearch(flight):null;
-                    if(state is not null)state=state with{Cards=state.Cards.Skip(command.Offset).Take(4).ToArray(),NextOffset=command.Offset+4<state.TotalCards?command.Offset+4:null};
+                    // A full atmospheric question may contain 500 Unicode characters.
+                    // Keep exact definitions and the same byte boundary by paging one card.
+                    if(state is not null)state=state with{Cards=state.Cards.Skip(command.Offset).Take(pageSize).ToArray(),NextOffset=command.Offset+pageSize<state.TotalCards?command.Offset+pageSize:null,PageSize=pageSize};
                     var encoded=JsonSerializer.Serialize(new{protocol=1,command.RequestId,ok=true,research=state,receipt},WireJson.Options);
                     if(Encoding.UTF8.GetByteCount(encoded)>8000)throw new InvalidOperationException("Personal card reply exceeds the native packet bound. Use the dashboard.");
                     return encoded;

@@ -8,7 +8,10 @@ public sealed partial class MissionStore
     // Entry metadata for existing card/mission types, not a second template engine.
     public static ResearchStarter[] ResearchStarters()=>[new("flight-regime",1,"Flight-Regime Validation",
         "Practice holding a pilot-chosen indicated airspeed and altitude using recorded simulator telemetry. This does not certify an aircraft.",
-        ["Indicated airspeed (knots)","Altitude above mean sea level (feet)","Continuous recorded time (seconds)"],new(120,5,3000,100,30))];
+        ["Indicated airspeed (knots)","Altitude above mean sea level (feet)","Continuous recorded time (seconds)"],new(120,5,3000,100,30)),
+        new(AtmosphericResearch.Template,1,"Vertical Atmospheric Profile",
+        "Fly through different altitudes to investigate how atmospheric conditions change. Collect temperature, pressure, wind and air-density measurements as your aircraft climbs or descends.",
+        ["Simulator air temperature (degC)","Pressure (inHg)","Wind (kt / degT)","Air density (slug/ft3)","Altitude (feet MSL)"],null,new())];
 
     public PreparedResearchStarter PrepareResearchStarter(ResearchStarterRequest request)
     {
@@ -29,6 +32,7 @@ public sealed partial class MissionStore
             return new(plan,retained,true); // Preserve any later route, payload or card-revision edits.
         }
         var source=request.Card is {} selected?ResearchCard(selected.Id,selected.Revision):null;
+        if(source is not null&&source.TemplateId!=starter.Id)throw new ArgumentException("The selected card belongs to a different experiment.");
         if(source is null&&request.Intent==ResearchEntryIntent.FlyNow){
             // Repeating the unmodified starter remains the same local experiment.
             // Search retained preparation provenance, not a capped browser page.
@@ -39,11 +43,13 @@ public sealed partial class MissionStore
                   AND json_extract(p.payload_json,'$.researchStarter.intent')='flyNow'
                   AND json_extract(p.payload_json,'$.researchStarter.originalCard') IS NULL
                   AND c.revision=(SELECT MAX(revision) FROM personal_research_cards WHERE id=c.id)
-                  AND json_extract(c.payload_json,'$.version')=1 AND json_extract(c.payload_json,'$.templateId')=$starter
-                  AND json_extract(c.payload_json,'$.flightRegime')=$rule
+                  AND json_extract(c.payload_json,'$.version')=$version AND json_extract(c.payload_json,'$.templateId')=$starter
+                  AND (($starter='flight-regime' AND json_extract(c.payload_json,'$.flightRegime')=$rule)
+                    OR ($starter='vertical-atmospheric-profile' AND json_extract(c.payload_json,'$.atmosphericProfile')=$rule))
                 ORDER BY p.updated_utc DESC,p.id LIMIT 1
                 """;
-            cmd.Parameters.AddWithValue("$starter",starter.Id);cmd.Parameters.AddWithValue("$rule",JsonSerializer.Serialize(starter.Example,WireJson.Options));
+            cmd.Parameters.AddWithValue("$starter",starter.Id);cmd.Parameters.AddWithValue("$version",starter.AtmosphericExample is null?1:2);
+            cmd.Parameters.AddWithValue("$rule",starter.AtmosphericExample is {} atmospheric?JsonSerializer.Serialize(atmospheric,WireJson.Options):JsonSerializer.Serialize(starter.Example,WireJson.Options));
             if(cmd.ExecuteScalar() is string retained)source=JsonSerializer.Deserialize<PersonalResearchCard>(retained,WireJson.Options)!;
         }
         if(source is not null)SupportedCard(source);
@@ -52,15 +58,19 @@ public sealed partial class MissionStore
         if(copy){
             cmd.CommandText="SELECT COUNT(*) FROM personal_research_cards WHERE id=$id";
             if((long)cmd.ExecuteScalar()!>0)throw new InvalidOperationException("This preparation's plan was removed or its identity is in use. Start a new preparation.");
-            var rule=source?.FlightRegime??starter.Example;FlightRegimeEvaluation.Validate(rule);
-            card=new(1,request.RequestId,1,source?.Name??starter.Name,starter.Id,rule,DateTimeOffset.UtcNow);
+            var rule=source?.FlightRegime??starter.Example;var atmosphere=source?.AtmosphericProfile??starter.AtmosphericExample;
+            card=new(atmosphere is null?1:2,request.RequestId,1,source?.Name??starter.Name,starter.Id,rule,DateTimeOffset.UtcNow,atmosphere);SupportedCard(card);
             InsertResearchCard(db,tx,card);
         }else card=source!;
         var referenceCard=new ResearchCardReference(card.Id,card.Revision);
-        var prepared=MissionPlanning.Validate(new(request.RequestId,card.Name,MissionTemplateKind.ObservationFlight,
-            Description:"Personal research using saved simulator flight telemetry; no aircraft settings are changed.",
-            Objective:"Hold the selected indicated airspeed and MSL altitude within both card tolerances for its continuous hold duration.",
-            Instruments:[],PreflightNotes:"Example targets require pilot review for the simulated aircraft. Free flight is supported; a route and extra scientific instruments are optional. Start mission, then Activate Card and Begin Attempt explicitly.",
+        var atmosphericCard=card.AtmosphericProfile;
+        var prepared=MissionPlanning.Validate(new(request.RequestId,card.Name,atmosphericCard is null?MissionTemplateKind.ObservationFlight:MissionTemplateKind.AtmosphericProfile,
+            Description:atmosphericCard is null?"Personal research using saved simulator flight telemetry; no aircraft settings are changed.":starter.Description,
+            Objective:atmosphericCard?.Question??"Hold the selected indicated airspeed and MSL altitude within both card tolerances for its continuous hold duration.",
+            Instruments:atmosphericCard is null?[]:ScienceCatalog.Templates.Single(t=>t.Id==MissionTemplateKind.AtmosphericProfile).Instruments,
+            AtmosphericSettings:atmosphericCard is null?null:new(AltitudeIntervalMetres:atmosphericCard.BandWidthFeet*.3048,MaximumGapSeconds:atmosphericCard.MaximumGapSeconds),
+            PreflightNotes:atmosphericCard is null?"Example targets require pilot review for the simulated aircraft. Free flight is supported; a route and extra scientific instruments are optional. Start mission, then Activate Card and Begin Attempt explicitly.":
+                "Fly from anywhere at pilot-chosen achievable altitudes. Use normal flight and science controls; valid temperature observations in neighboring MSL bands establish coverage, not proof of a hypothesis. Pressure, wind and density are optional. Historical surface imagery is not air temperature.",
             ResearchCard:referenceCard,ResearchCards:[referenceCard],ResearchStarter:new(1,request.RequestId,hash,starter.Id,request.Intent,request.Card)));
         WritePlan(db,tx,prepared);EvidenceFault?.Invoke("research-starter-before-commit");tx.Commit();
         return new(prepared,card,false);

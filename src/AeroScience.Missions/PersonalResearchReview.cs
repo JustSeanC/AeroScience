@@ -15,14 +15,14 @@ public sealed record ResearchHistoryPage(ResearchHistoryItem[] Items, long Total
 public sealed record ResearchOverview(PersonalResearchCard Card, long MarkedAttempts, long PostflightIntervals,
     long EvaluatedAttempts, long Pass, long Fail, long InsufficientEvidence, long AwaitingEvaluation,
     long Interrupted, long InProgress, long SavedEvaluations, bool CurrentRevisionDemonstrated,
-    bool CurrentRevisionDemoPass, ResearchHistoryItem? MostRecent);
+    bool CurrentRevisionDemoPass, ResearchHistoryItem? MostRecent,long CompletedCollections=0,long PartialCollections=0);
 public sealed record ResearchAttemptSelection(Guid Id, ResearchAttemptKind Kind, Guid? ResultId);
 public sealed record ResearchComparisonRequest(ResearchAttemptSelection[] Attempts);
 public sealed record ResearchEvidenceBreak(DateTimeOffset TimestampUtc, string Kind, double? Seconds);
 public sealed record ResearchEvidenceAudit(bool MatchesSavedEvidence, long RetainedSamples, long ExpectedSamples,
     long GapCount, long PauseOrConnectionEdges, long InvalidSamples, double? MaximumGapSeconds,
     TelemetrySource[] Sources, ReplaySample[] Preview, ResearchEvidenceBreak[] Breaks, bool MoreBreaks);
-public sealed record ResearchComparisonEntry(ResearchHistoryItem Attempt, ResearchEvidenceAudit? Evidence);
+public sealed record ResearchComparisonEntry(ResearchHistoryItem Attempt, ResearchEvidenceAudit? Evidence,AtmosphericResearchReview? Atmosphere=null);
 public sealed record ResearchComparison(PersonalResearchCard Card, ResearchComparisonEntry[] Entries,
     bool DifferentRevisions, bool DifferentRequirements, bool DifferentEvaluators, bool DifferentSources, string[] Notices);
 
@@ -95,17 +95,19 @@ public sealed partial class MissionStore
                 AND (SELECT COUNT(*) FROM telemetry t WHERE t.mission_id=selected.mission_id
                   AND t.sequence BETWEEN json_extract(result_json,'$.evidence.firstSequence') AND json_extract(result_json,'$.evidence.lastSequence'))=json_extract(result_json,'$.evidence.sampleCount')),
               COUNT(*) FILTER(WHERE json_extract(card_json,'$.revision')=$revision AND status<>'Interrupted'
-                AND json_extract(result_json,'$.outcome')='pass' AND json_extract(result_json,'$.evidence.source')='simulated')
+                AND json_extract(result_json,'$.outcome')='pass' AND json_extract(result_json,'$.evidence.source')='simulated'),
+              COUNT(*) FILTER(WHERE json_extract(result_json,'$.outcome')='collectionComplete'),
+              COUNT(*) FILTER(WHERE json_extract(result_json,'$.outcome')='partialCollection')
             FROM selected
             """);
-        cmd.Parameters.AddWithValue("$revision",card.Revision);long[] counts=new long[12];
+        cmd.Parameters.AddWithValue("$revision",card.Revision);long[] counts=new long[14];
         using(var r=cmd.ExecuteReader()){r.Read();for(var i=0;i<counts.Length;i++)counts[i]=r.GetInt64(i);}
         cmd.CommandText=ResearchHistorySql+"SELECT "+ResearchHistoryColumns+" FROM selected ORDER BY at DESC,id DESC LIMIT 1";
         ResearchHistoryItem? recent;using(var r=cmd.ExecuteReader())recent=r.Read()?ReadResearchHistory(r):null;
-        return new(card,counts[0],counts[1],counts[2],counts[3],counts[4],counts[5],counts[6],counts[7],counts[8],counts[9],counts[10]>0,counts[11]>0,recent);
+        return new(card,counts[0],counts[1],counts[2],counts[3],counts[4],counts[5],counts[6],counts[7],counts[8],counts[9],counts[10]>0,counts[11]>0,recent,counts[12],counts[13]);
     }
 
-    public ResearchComparison CompareResearch(Guid cardId,ResearchComparisonRequest request,CancellationToken token=default)
+    public ResearchComparison CompareResearch(Guid cardId,ResearchComparisonRequest request,CancellationToken token=default,ScienceStore? science=null)
     {
         if(request.Attempts is null||request.Attempts.Length is <2 or >8||request.Attempts.Any(a=>a is null||a.Id==Guid.Empty||!Enum.IsDefined(a.Kind))
             ||request.Attempts.Select(a=>(a.Kind,a.Id)).Distinct().Count()!=request.Attempts.Length)
@@ -124,12 +126,20 @@ public sealed partial class MissionStore
             token.ThrowIfCancellationRequested();
             var row=chosen.GetValueOrDefault((selection.Kind,selection.Id))??throw new ArgumentException("An attempt or flight is no longer available in this experiment. Refresh its history.");
             if(row.Result?.Id!=selection.ResultId)throw new InvalidOperationException("A selected result changed. Refresh the experiment before comparing.");
-            rows.Add(new(row,row.Result is {} result?AuditResearchEvidence(db,tx,result,token):null));
+            rows.Add(card.AtmosphericProfile is not null?new(row,null,row.Result is {} atmospheric?ReviewAtmosphericEvidence(atmospheric,science,token):null)
+                :new(row,row.Result is {} result?AuditResearchEvidence(db,tx,result,token):null));
         }
         var revisions=rows.Select(r=>r.Attempt.Card.Revision).Distinct().Count()>1;
-        var requirements=rows.Select(r=>r.Attempt.Card.FlightRegime).Distinct().Count()>1;
+        var requirements=rows.Select(r=>card.AtmosphericProfile is null?PreflightReadiness.Hash(r.Attempt.Card.FlightRegime!):PreflightReadiness.Hash(r.Attempt.Card.AtmosphericProfile!)).Distinct().Count()>1;
         var evaluators=rows.Where(r=>r.Attempt.Result is not null).Select(r=>r.Attempt.Result!.EvaluatorVersion).Distinct().Count()>1;
-        var sources=rows.SelectMany(r=>r.Evidence?.Sources??[]).Distinct().ToArray();
+        var sources=card.AtmosphericProfile is null?rows.SelectMany(r=>r.Evidence?.Sources??[]).Distinct().ToArray():rows.Where(r=>r.Attempt.Result?.Evidence.Source is not null).Select(r=>r.Attempt.Result!.Evidence.Source!.Value).Distinct().ToArray();
+        if(card.AtmosphericProfile is not null){
+            if(sources.Length>1)throw new ArgumentException("Compare atmospheric profiles with the same simulator/demo provenance. Synthetic fixtures and simulator flights are not interchangeable.");
+            return new(card,rows.ToArray(),revisions,requirements,evaluators,false,
+                ["Only like-for-like original simulator atmospheric quantities and units are compared. Points remain separate observations; no missing altitude is interpolated or filled.",
+                 "Different dates, places and changing simulator weather can explain differences. Collection completeness does not establish a hypothesis or certification.",
+                 sources.Contains(TelemetrySource.Simulated)?"Synthetic/demo observations: not an installed MSFS scientific acceptance test.":"Recorded simulator observations are not independent real-world atmospheric measurements."]);
+        }
         var notices=new List<string>{"Each result belongs to its own frozen card and recorded interval. No averages, success rates or performance trends are inferred. Overlapping intervals may reference the same samples and are not independent trials."};
         if(revisions)notices.Add("Different card revisions are selected. Review each target, tolerance and hold requirement; these are not automatically identical tests.");
         if(revisions&&!requirements)notices.Add("These revision numbers differ, but their numeric Flight-Regime requirements are identical. The original revision identities are still preserved.");

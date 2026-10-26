@@ -90,6 +90,7 @@ public sealed partial class ScienceStore(string directory, IStorageCapacity? cap
             InitializeArtifactTable(db);
             InitializeSpatialIndex(db);
             InitializeAtmosphereIndex(db);
+            cmd.CommandText="CREATE INDEX IF NOT EXISTS science_mission_observation_time ON observations(mission_id,timestamp_utc,id)";cmd.ExecuteNonQuery();
             InitializeStatisticsCache(db);
             if(schema<3)InitializeLibraryJobs(db);
             InitializeSourceIndex(db,schema<4);

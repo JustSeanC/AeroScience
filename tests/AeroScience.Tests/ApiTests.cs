@@ -53,7 +53,7 @@ public sealed class ApiTests : IAsyncLifetime
         var planResponse = await client.PostAsJsonAsync($"/api/research/cards/{card.Id}/plan", new ResearchCardReference(card.Id,card.Revision), WireJson.Options);
         planResponse.EnsureSuccessStatusCode(); var plan = (await planResponse.Content.ReadFromJsonAsync<MissionPlan>(WireJson.Options))!;
         Assert.Equal(new(card.Id,1), plan.ResearchCard); Assert.DoesNotContain(plan.Instruments!, c => c.Enabled);
-        Assert.Equal(HttpStatusCode.BadRequest, (await client.PostAsJsonAsync("/api/research/cards", input with { FlightRegime = input.FlightRegime with { HoldSeconds = 0 } }, WireJson.Options)).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, (await client.PostAsJsonAsync("/api/research/cards", input with { FlightRegime = input.FlightRegime! with { HoldSeconds = 0 } }, WireJson.Options)).StatusCode);
         client.DefaultRequestHeaders.Remove("X-AeroScience-CSRF");
         Assert.Equal(HttpStatusCode.Forbidden, (await client.PostAsJsonAsync("/api/research/cards", input, WireJson.Options)).StatusCode);
         Assert.Equal(HttpStatusCode.Forbidden, (await client.PostAsJsonAsync("/api/research/attempts", new ResearchAttemptRequest(Guid.NewGuid(),Guid.NewGuid(),DateTimeOffset.UtcNow.AddMinutes(-1),DateTimeOffset.UtcNow), WireJson.Options)).StatusCode);
@@ -84,7 +84,7 @@ public sealed class ApiTests : IAsyncLifetime
     [Fact] public async Task ResearchStarterPreparationUsesSessionCsrfAndNeverStartsOrSelectsRecording()
     {
         Assert.Equal(HttpStatusCode.Unauthorized,(await client.GetAsync("/api/research/starters")).StatusCode);await Pair(client);
-        var choices=await client.GetFromJsonAsync<ResearchStarter[]>("/api/research/starters",WireJson.Options);Assert.Equal("flight-regime",Assert.Single(choices!).Id);
+        var choices=await client.GetFromJsonAsync<ResearchStarter[]>("/api/research/starters",WireJson.Options);Assert.Equal("flight-regime",Assert.Single(choices!,s=>s.Id=="flight-regime").Id);
         var input=new ResearchStarterRequest(1,Guid.NewGuid(),"flight-regime",ResearchEntryIntent.FlyNow);
         var response=await client.PostAsJsonAsync("/api/research/starters/prepare",input,WireJson.Options);response.EnsureSuccessStatusCode();var prepared=(await response.Content.ReadFromJsonAsync<PreparedResearchStarter>(WireJson.Options))!;
         var retry=await client.PostAsJsonAsync("/api/research/starters/prepare",input,WireJson.Options);retry.EnsureSuccessStatusCode();Assert.True((await retry.Content.ReadFromJsonAsync<PreparedResearchStarter>(WireJson.Options))!.Reused);

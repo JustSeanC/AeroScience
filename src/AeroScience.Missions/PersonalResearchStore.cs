@@ -30,7 +30,8 @@ public sealed partial class MissionStore
 
     public PersonalResearchCard SaveResearchCard(SaveResearchCardRequest input)
     {
-        FlightRegimeEvaluation.Validate(input.FlightRegime);
+        if(input.AtmosphericProfile is not null){if(input.FlightRegime is not null)throw new ArgumentException("Choose atmospheric collection or Flight-Regime criteria, not both.");AtmosphericResearch.Validate(input.AtmosphericProfile);}
+        else FlightRegimeEvaluation.Validate(input.FlightRegime);
         var name = input.Name?.Trim();
         if (string.IsNullOrWhiteSpace(name) || name.Length > 100 || name.Any(char.IsControl))
             throw new ArgumentException("Give the test card a name of 1–100 characters.");
@@ -43,7 +44,9 @@ public sealed partial class MissionStore
         var revision = cmd.ExecuteScalar() is long value ? checked((int)value) : 0;
         if (input.Id.HasValue && (revision == 0 || input.ExpectedRevision != revision))
             throw new InvalidOperationException("This card changed. Reload it before saving a new revision.");
-        var card = new PersonalResearchCard(1, id, revision + 1, name, "flight-regime", input.FlightRegime, DateTimeOffset.UtcNow);
+        var template=input.AtmosphericProfile is null?"flight-regime":AtmosphericResearch.Template;
+        if(revision>0&&ResearchCard(id,revision).TemplateId!=template)throw new ArgumentException("Keep an experiment's research type when revising it; prepare a separate experiment instead.");
+        var card = new PersonalResearchCard(input.AtmosphericProfile is null?1:2, id, revision + 1, name, template, input.FlightRegime, DateTimeOffset.UtcNow,input.AtmosphericProfile);
         InsertResearchCard(db,tx,card);tx.Commit();return card;
     }
 
@@ -76,6 +79,7 @@ public sealed partial class MissionStore
     public MissionPlan CreateResearchPlan(Guid cardId, int revision)
     {
         var card = ResearchCard(cardId, revision);
+        if(card.AtmosphericProfile is not null)return PrepareResearchStarter(new(1,Guid.NewGuid(),AtmosphericResearch.Template,ResearchEntryIntent.FlyNow,new(cardId,revision))).Plan;
         return SavePlan(new(Guid.NewGuid(), card.Name, MissionTemplateKind.ObservationFlight,
             Objective: "Hold the card's indicated airspeed and MSL altitude within its tolerances.",
             Instruments: [], ResearchCard: new(card.Id, card.Revision)));
@@ -108,7 +112,7 @@ public sealed partial class MissionStore
         return ids.Select(id => Detail(id)!.Mission).ToArray();
     }
 
-    public PersonalResearchAttempt EvaluateResearchAttempt(ResearchAttemptRequest request, CancellationToken token = default)
+    public PersonalResearchAttempt EvaluateResearchAttempt(ResearchAttemptRequest request, CancellationToken token = default,ScienceStore? science=null)
     {
         var marked = request.RecordedAttemptId is {} marker ? RecordedResearchAttempt(marker) : null;
         if (marked is not null && (marked.FlightId != request.FlightId || marked.Status == ResearchAttemptStatus.Recording
@@ -126,7 +130,9 @@ public sealed partial class MissionStore
             if (existing.Read())
             {
                 if (existing.GetString(0) != requestHash) throw new InvalidOperationException("This attempt command was already used for different evidence.");
-                return JsonSerializer.Deserialize<PersonalResearchAttempt>(existing.GetString(1), WireJson.Options)!;
+                var saved=JsonSerializer.Deserialize<PersonalResearchAttempt>(existing.GetString(1), WireJson.Options)!;
+                if(saved.AtmosphericProfile is not null&&ScienceDeleted(saved.FlightId))throw new InvalidOperationException("Collected science was permanently deleted; this investigation cannot be recreated from flight context.");
+                return saved;
             }
         var mission = Detail(request.FlightId)?.Mission ?? throw new ArgumentException("Recorded flight not found.");
         if (mission.Status == MissionStatus.Recording) throw new InvalidOperationException("End the flight before reviewing its recorded attempt.");
@@ -139,12 +145,23 @@ public sealed partial class MissionStore
         var card = frozen.FirstOrDefault(c => c.Card.Id == cardId)?.Card
             ?? (reference is not null && reference.Id == cardId ? ResearchCard(reference.Id, reference.Revision)
                 : throw new ArgumentException("This flight has no matching frozen personal test card. Select the card before recording."));
-        if (card.Version != 1 || card.TemplateId != "flight-regime") throw new NotSupportedException("Unsupported personal test-card rule version.");
-        var evaluation = new FlightRegimeEvaluation.Window(card.FlightRegime, request.StartUtc, request.EndUtc);
+        SupportedCard(card);
+        cmd.Parameters.AddWithValue("$flight", mission.Id.ToString());
+        using var scienceLease=card.AtmosphericProfile is not null?science?.BeginAnalysis():null;
+        PersonalResearchAttempt attempt;
+        if(card.AtmosphericProfile is not null){
+            if(ScienceDeleted(mission.Id))throw new InvalidOperationException("Collected science was permanently deleted; it cannot be recreated from raw flight context.");
+            if(science is null)throw new InvalidOperationException("Reconnect the Scientific Data Library to evaluate retained atmospheric observations.");
+            var calculated=AtmosphericResearch.Calculate(science.ResearchObservationWindow(mission.Id,request.StartUtc,request.EndUtc),card,science.LibraryId,PersonalPauseTimes(mission.Id,request.StartUtc,request.EndUtc,true),token,request);
+            var outcome=AtmosphericResearch.Outcome(calculated.Summary,card.AtmosphericProfile,mission.Status!=MissionStatus.Completed||marked?.Status==ResearchAttemptStatus.Interrupted);
+            attempt=new(2,request.RequestId,mission.Id,card,request.StartUtc,request.EndUtc,DateTimeOffset.UtcNow,AtmosphericResearch.Evaluator,outcome.Outcome,0,null,null,
+                new(0,0,calculated.Summary.OriginalObservations,calculated.Hash,PreflightReadiness.Hash(plan!),mission.Source),outcome.Explanation,marked?.Id,calculated.Summary);
+        }else{
+        var evaluation = new FlightRegimeEvaluation.Window(card.FlightRegime!, request.StartUtc, request.EndUtc);
         using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
         long first = 0, last = 0, count = 0; TelemetrySource? source = null;
         cmd.CommandText = "SELECT sequence,payload_json FROM telemetry WHERE mission_id=$flight AND timestamp_utc >= $start AND timestamp_utc <= $end ORDER BY sequence";
-        cmd.Parameters.AddWithValue("$flight", mission.Id.ToString()); cmd.Parameters.AddWithValue("$start", Stamp(request.StartUtc)); cmd.Parameters.AddWithValue("$end", Stamp(request.EndUtc));
+        cmd.Parameters.AddWithValue("$start", Stamp(request.StartUtc)); cmd.Parameters.AddWithValue("$end", Stamp(request.EndUtc));
         // Pause edges are retained by the existing event recorder, not copied telemetry.
         using var pauses = PersonalPauseTimes(mission.Id, request.StartUtc, request.EndUtc).GetEnumerator();
         var hasPause = pauses.MoveNext();
@@ -168,10 +185,11 @@ public sealed partial class MissionStore
         var result = evaluation.Finish(mission.Status != MissionStatus.Completed);
         if (marked?.Status == ResearchAttemptStatus.Interrupted)
             result = (ResearchAttemptOutcome.InsufficientEvidence,"Attempt interrupted: " + marked.EndReason + ". Retained samples remain available; no automatic success was inferred.");
-        var attempt = new PersonalResearchAttempt(1, request.RequestId, mission.Id, card, request.StartUtc, request.EndUtc,
+        attempt = new PersonalResearchAttempt(1, request.RequestId, mission.Id, card, request.StartUtc, request.EndUtc,
             DateTimeOffset.UtcNow, FlightRegimeEvaluation.Version, result.Outcome, evaluation.LongestHold,
             evaluation.HoldStart, evaluation.HoldEnd,
             new(first, last, count, Convert.ToHexString(hash.GetHashAndReset()).ToLowerInvariant(), PreflightReadiness.Hash(plan!), source), result.Explanation, marked?.Id);
+        }
         tx.Commit(); // Release the read snapshot before acquiring a short publication write lock.
         using var publication = db.BeginTransaction(); cmd.Transaction = publication;
         cmd.CommandText = "SELECT request_sha256,payload_json FROM personal_research_attempts WHERE id=$id";
@@ -187,17 +205,18 @@ public sealed partial class MissionStore
         cmd.Parameters.AddWithValue("$json", JsonSerializer.Serialize(attempt, WireJson.Options)); cmd.ExecuteNonQuery(); publication.Commit(); return attempt;
     }
 
-    public PersonalResearchAttempt EvaluateRecordedResearchAttempt(Guid id, Guid requestId, CancellationToken token=default)
+    public PersonalResearchAttempt EvaluateRecordedResearchAttempt(Guid id, Guid requestId, CancellationToken token=default,ScienceStore? science=null)
     {
         var attempt=RecordedResearchAttempt(id);
         if(attempt.EndUtc is not {} end)throw new InvalidOperationException("End this attempt before evaluating its retained evidence.");
-        return EvaluateResearchAttempt(new(requestId,attempt.FlightId,attempt.StartUtc,end,attempt.Id,attempt.CardId),token);
+        return EvaluateResearchAttempt(new(requestId,attempt.FlightId,attempt.StartUtc,end,attempt.Id,attempt.CardId),token,science);
     }
 
-    private IEnumerable<DateTimeOffset> PersonalPauseTimes(Guid flight, DateTimeOffset start, DateTimeOffset end)
+    private IEnumerable<DateTimeOffset> PersonalPauseTimes(Guid flight, DateTimeOffset start, DateTimeOffset end,bool includeScience=false)
     {
         using var db = Open(); using var cmd = db.CreateCommand();
         cmd.CommandText = "SELECT timestamp_utc FROM events WHERE mission_id=$id AND kind IN ('simulator-paused','telemetry-gap','connection') AND timestamp_utc >= $start AND timestamp_utc <= $end ORDER BY timestamp_utc,id";
+        if(includeScience)cmd.CommandText=cmd.CommandText.Replace("'connection')","'connection','science-paused','science-stopped','science-session-started','science-session-ended','science-armed')",StringComparison.Ordinal);
         cmd.Parameters.AddWithValue("$id", flight.ToString()); cmd.Parameters.AddWithValue("$start", Stamp(start)); cmd.Parameters.AddWithValue("$end", Stamp(end));
         using var r = cmd.ExecuteReader(); while (r.Read()) yield return Parse(r.GetString(0));
     }

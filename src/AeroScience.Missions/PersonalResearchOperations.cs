@@ -56,13 +56,17 @@ public sealed partial class MissionStore
 
     private static void SupportedCard(PersonalResearchCard card)
     {
-        if (card.Version != 1 || card.TemplateId != "flight-regime") throw new NotSupportedException("This flight supports Flight-Regime Validation revision format 1 only.");
+        if(card.Version==2&&card.TemplateId==AtmosphericResearch.Template&&card.FlightRegime is null){AtmosphericResearch.Validate(card.AtmosphericProfile);return;}
+        if (card.Version != 1 || card.TemplateId != "flight-regime"||card.AtmosphericProfile is not null) throw new NotSupportedException("Unsupported personal research definition version.");
         FlightRegimeEvaluation.Validate(card.FlightRegime);
     }
 
     public static bool CompatibleResearchCards(PersonalResearchCard first, PersonalResearchCard second)
     {
-        SupportedCard(first); SupportedCard(second); var a = first.FlightRegime; var b = second.FlightRegime;
+        SupportedCard(first); SupportedCard(second);
+        // Atmospheric collection sets no aircraft target constraint. Science controls remain separate.
+        if(first.AtmosphericProfile is not null||second.AtmosphericProfile is not null)return true;
+        var a = first.FlightRegime!; var b = second.FlightRegime!;
         return Math.Max(a.AirspeedKnots-a.AirspeedToleranceKnots,b.AirspeedKnots-b.AirspeedToleranceKnots)
                 <= Math.Min(a.AirspeedKnots+a.AirspeedToleranceKnots,b.AirspeedKnots+b.AirspeedToleranceKnots)
             && Math.Max(a.AltitudeMslFeet-a.AltitudeToleranceFeet,b.AltitudeMslFeet-b.AltitudeToleranceFeet)

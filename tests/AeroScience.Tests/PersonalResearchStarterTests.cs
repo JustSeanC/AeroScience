@@ -15,7 +15,7 @@ public sealed class PersonalResearchStarterTests : IDisposable
     static ResearchStarterRequest Request(ResearchEntryIntent intent=ResearchEntryIntent.FlyNow,ResearchCardReference? card=null)=>new(1,Guid.NewGuid(),"flight-regime",intent,card);
     [Fact]public void DefaultsCreateOneLocalCardAndPlanWithoutRecordingSelectionOrExternalWork()
     {
-        var starter=Assert.Single(MissionStore.ResearchStarters());FlightRegimeEvaluation.Validate(starter.Example);
+        var starter=Assert.Single(MissionStore.ResearchStarters(),s=>s.Id=="flight-regime");FlightRegimeEvaluation.Validate(starter.Example);
         var prepared=store.PrepareResearchStarter(Request());Assert.Equal(starter.Example,prepared.Card.FlightRegime);Assert.False(prepared.Reused);
         Assert.Equal(prepared.Card.Id,prepared.Plan.ResearchCard!.Id);Assert.Equal(new[]{prepared.Plan.ResearchCard},prepared.Plan.ResearchCards);
         Assert.DoesNotContain(prepared.Plan.Instruments!,i=>i.Enabled);Assert.Empty(prepared.Plan.Waypoints??[]);Assert.Empty(store.List());
@@ -36,8 +36,8 @@ public sealed class PersonalResearchStarterTests : IDisposable
     {
         var first=store.PrepareResearchStarter(Request());var second=store.PrepareResearchStarter(Request());
         Assert.Equal(first.Card,second.Card);Assert.NotEqual(first.Plan.Id,second.Plan.Id);Assert.Single(store.ResearchCards());Assert.Equal(2,store.Plans().Count);
-        store.SaveResearchCard(new(first.Card.Name,first.Card.FlightRegime with{AirspeedKnots=140},first.Card.Id,1));
-        var fresh=store.PrepareResearchStarter(Request());Assert.NotEqual(first.Card.Id,fresh.Card.Id);Assert.Equal(120,fresh.Card.FlightRegime.AirspeedKnots);
+        store.SaveResearchCard(new(first.Card.Name,first.Card.FlightRegime! with{AirspeedKnots=140},first.Card.Id,1));
+        var fresh=store.PrepareResearchStarter(Request());Assert.NotEqual(first.Card.Id,fresh.Card.Id);Assert.Equal(120,fresh.Card.FlightRegime!.AirspeedKnots);
     }
     [Fact]public void CustomizeCopiesExactDefinitionAndNeverRevisesOriginalCardPlanOrHistoricEvidence()
     {
@@ -46,7 +46,7 @@ public sealed class PersonalResearchStarterTests : IDisposable
         var snapshot=JsonSerializer.Serialize(store.Research(flight).PlanSnapshot,WireJson.Options);
         var request=Request(ResearchEntryIntent.Customize,new(card.Id,1));var copy=store.PrepareResearchStarter(request);
         Assert.NotEqual(card.Id,copy.Card.Id);Assert.Equal(card.FlightRegime,copy.Card.FlightRegime);Assert.Equal(new(card.Id,1),copy.Plan.ResearchStarter!.OriginalCard);
-        var revised=store.SaveResearchCard(new(copy.Card.Name,copy.Card.FlightRegime with{AirspeedKnots=150},copy.Card.Id,1));
+        var revised=store.SaveResearchCard(new(copy.Card.Name,copy.Card.FlightRegime! with{AirspeedKnots=150},copy.Card.Id,1));
         var edited=store.SavePlan(copy.Plan with{Name="My independent plan",Waypoints=[new("Start",40,-75),new("End",40.1,-75)],Instruments=[new("ambient-temperature",true)],ResearchCard=new(revised.Id,2),ResearchCards=[new(revised.Id,2)]});
         var replay=store.PrepareResearchStarter(request);Assert.True(replay.Reused);Assert.Equal(PreflightReadiness.Hash(edited),PreflightReadiness.Hash(replay.Plan));Assert.Equal(2,replay.Card.Revision);
         Assert.Equal(card,store.ResearchCard(card.Id));Assert.Equal(PreflightReadiness.Hash(plan),PreflightReadiness.Hash(store.Plan(plan.Id)));Assert.Equal(snapshot,JsonSerializer.Serialize(store.Research(flight).PlanSnapshot,WireJson.Options));
@@ -54,7 +54,7 @@ public sealed class PersonalResearchStarterTests : IDisposable
     [Fact]public void FlyNowReusesSelectedSavedRevisionButDoesNotChangeActiveRecording()
     {
         var card=store.SaveResearchCard(new("Reusable",new(120,5,3000,100,3)));
-        store.SaveResearchCard(new(card.Name,card.FlightRegime with{HoldSeconds=4},card.Id,1));
+        store.SaveResearchCard(new(card.Name,card.FlightRegime! with{HoldSeconds=4},card.Id,1));
         var prepared=store.PrepareResearchStarter(Request(card:new(card.Id,1)));Assert.Equal(card,prepared.Card);Assert.Equal(2,store.ResearchCards()[0].Revision);Assert.Single(store.ResearchCards());
         var coordinator=new MissionCoordinator(store,1000);var recording=coordinator.Start(new("Still recording",PlanId:prepared.Plan.Id));
         var next=store.PrepareResearchStarter(Request(ResearchEntryIntent.Customize,new(card.Id,1)));

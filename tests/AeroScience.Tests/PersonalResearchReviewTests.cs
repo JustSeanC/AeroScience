@@ -35,7 +35,7 @@ public sealed class PersonalResearchReviewTests : IDisposable
     [Fact]public void DifferentFlightsAndRevisionsRetainTheirRequirementsAndOriginalResults()
     {
         Start();var a=Attempt(0,4);End();Evaluate(a);var first=store.StreamSamples(flight!.Id).ToArray();
-        var second=store.SaveResearchCard(new(card.Name,card.FlightRegime with{AirspeedKnots=150,HoldSeconds=3},card.Id,1));Start(second);var b=Attempt(0,5);End();Evaluate(b);
+        var second=store.SaveResearchCard(new(card.Name,card.FlightRegime! with{AirspeedKnots=150,HoldSeconds=3},card.Id,1));Start(second);var b=Attempt(0,5);End();Evaluate(b);
         var view=store.ResearchOverview(card.Id);Assert.Equal(1,view.Pass);Assert.Equal(1,view.Fail);Assert.False(view.CurrentRevisionDemonstrated);Assert.Equal(2,view.MostRecent!.Card.Revision);
         var comparison=Compare(store.ResearchHistory(card.Id).Items);Assert.True(comparison.DifferentRevisions);Assert.True(comparison.DifferentRequirements);
         Assert.Equal(2,comparison.Entries.Select(e=>e.Attempt.FlightId).Distinct().Count());Assert.All(comparison.Entries,e=>Assert.True(e.Evidence!.MatchesSavedEvidence));
