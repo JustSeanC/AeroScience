@@ -56,6 +56,8 @@ public sealed partial class MissionStore
 
     private static void SupportedCard(PersonalResearchCard card)
     {
+        if(card.Version==6&&card.TemplateId==ExperimentalSensorResearch.Template&&card.FlightRegime is null&&card.AtmosphericProfile is null&&card.AtmosphericTransect is null&&card.Survey is null&&card.ObservationFlight is null){ExperimentalSensorResearch.Validate(card.ExperimentalSensor);return;}
+        if(card.ExperimentalSensor is not null)throw new NotSupportedException("Unsupported experimental-sensor definition version.");
         if(card.Version==5&&card.TemplateId==ObservationResearch.Template&&card.FlightRegime is null&&card.AtmosphericProfile is null&&card.AtmosphericTransect is null&&card.Survey is null){ObservationResearch.Validate(card.ObservationFlight);return;}
         if(card.ObservationFlight is not null)throw new NotSupportedException("Unsupported observation-research definition version.");
         if(card.Version==4&&card.TemplateId==SurveyResearch.Template&&card.FlightRegime is null&&card.AtmosphericProfile is null&&card.AtmosphericTransect is null){SurveyResearch.Validate(card.Survey);return;}
@@ -70,7 +72,7 @@ public sealed partial class MissionStore
     {
         SupportedCard(first); SupportedCard(second);
         // Atmospheric collection sets no aircraft target constraint. Science controls remain separate.
-        if(first.ObservationFlight is not null||second.ObservationFlight is not null||first.Survey is not null||second.Survey is not null||AtmosphericResearch.IsCollectionCard(first)||AtmosphericResearch.IsCollectionCard(second))return true;
+        if(first.ExperimentalSensor is not null||second.ExperimentalSensor is not null||first.ObservationFlight is not null||second.ObservationFlight is not null||first.Survey is not null||second.Survey is not null||AtmosphericResearch.IsCollectionCard(first)||AtmosphericResearch.IsCollectionCard(second))return true;
         var a = first.FlightRegime!; var b = second.FlightRegime!;
         return Math.Max(a.AirspeedKnots-a.AirspeedToleranceKnots,b.AirspeedKnots-b.AirspeedToleranceKnots)
                 <= Math.Min(a.AirspeedKnots+a.AirspeedToleranceKnots,b.AirspeedKnots+b.AirspeedToleranceKnots)

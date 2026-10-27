@@ -10,13 +10,15 @@ public sealed record PersonalResearchCard(int Version, Guid Id, int Revision, st
     [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] AtmosphericResearchDefinition? AtmosphericProfile=null,
     [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] AtmosphericTransectDefinition? AtmosphericTransect=null,
     [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] SurveyResearchDefinition? Survey=null,
-    [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] ObservationResearchDefinition? ObservationFlight=null);
+    [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] ObservationResearchDefinition? ObservationFlight=null,
+    [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] ExperimentalSensorDefinition? ExperimentalSensor=null);
 public sealed record SaveResearchCardRequest(string Name, FlightRegimeDefinition? FlightRegime,
     Guid? Id = null, int? ExpectedRevision = null,
     [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] AtmosphericResearchDefinition? AtmosphericProfile=null,
     [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] AtmosphericTransectDefinition? AtmosphericTransect=null,
     [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] SurveyResearchDefinition? Survey=null,
-    [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] ObservationResearchDefinition? ObservationFlight=null);
+    [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] ObservationResearchDefinition? ObservationFlight=null,
+    [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] ExperimentalSensorDefinition? ExperimentalSensor=null);
 public enum ResearchAttemptOutcome { Pass, Fail, InsufficientEvidence, CollectionComplete, PartialCollection }
 public sealed record ResearchAttemptRequest(Guid RequestId, Guid FlightId,
     DateTimeOffset StartUtc, DateTimeOffset EndUtc,
@@ -32,7 +34,8 @@ public sealed record PersonalResearchAttempt(int Version, Guid Id, Guid FlightId
     [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] Guid? RecordedAttemptId = null,
     [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] AtmosphericResearchSummary? AtmosphericProfile=null,
     [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] SurveyResearchSummary? Survey=null,
-    [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] ObservationResearchSummary? ObservationFlight=null);
+    [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] ObservationResearchSummary? ObservationFlight=null,
+    [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] ExperimentalSensorSummary? ExperimentalSensor=null);
 
 public enum ResearchCardAction { Unknown, Activate, Deactivate, BeginAttempt, EndAttempt }
 public enum ResearchAttemptStatus { Recording, Recorded, Interrupted }
@@ -57,7 +60,8 @@ public sealed record ResearchStarter(string Id,int Version,string Name,string De
     [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] AtmosphericResearchDefinition? AtmosphericExample=null,
     [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] AtmosphericTransectDefinition? TransectExample=null,
     [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] SurveyResearchDefinition? SurveyExample=null,
-    [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] ObservationResearchDefinition? ObservationExample=null);
+    [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] ObservationResearchDefinition? ObservationExample=null,
+    [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] ExperimentalSensorDefinition? SensorExample=null);
 public sealed record ResearchStarterRequest(int Version,Guid RequestId,string StarterId,ResearchEntryIntent Intent,ResearchCardReference? Card=null,int StarterVersion=1,
     [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] SurveyResearchDefinition? Survey=null);
 public sealed record ResearchStarterOrigin(int Version,Guid RequestId,string RequestSha256,string StarterId,ResearchEntryIntent Intent,ResearchCardReference? OriginalCard);
