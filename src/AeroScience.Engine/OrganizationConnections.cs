@@ -103,6 +103,7 @@ public sealed class OrganizationConnections:IDisposable
             var verifier=Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(32));var challenge=Convert.ToBase64String(SHA256.HashData(Encoding.ASCII.GetBytes(verifier))).TrimEnd('=').Replace('+','-').Replace('/','_');
             var device=await Request<OrganizationDevicePending>(review.Identity.Origin,"/api/device/start",new OrganizationDeviceStart(review.Identity.Id,"AeroScience Desktop",challenge),ct);
             if(device.Id==Guid.Empty||device.DeviceSecret is not {Length:64}||device.UserCode is not {Length:11}||device.ApprovalUrl!=review.Identity.Origin+"/#connect="+device.Id||device.ExpiresUtc<=DateTimeOffset.UtcNow||device.ExpiresUtc>DateTimeOffset.UtcNow.AddMinutes(11)||device.PollSeconds is <5 or >30)throw new IOException("Unsupported organization authorization response.");
+            if(Read().Any(c=>c.Id==device.Id)||pending.ContainsKey(device.Id))throw new IOException("The server reused an existing connection identity. No saved authorization was changed.");
             pending[device.Id]=(review.Identity,device,verifier);reviews.Remove(approval.ReviewId);
             return new(device.Id,review.Identity,device.UserCode,device.ApprovalUrl,device.ExpiresUtc,device.PollSeconds);
         }finally{gate.Release();}
@@ -116,6 +117,7 @@ public sealed class OrganizationConnections:IDisposable
             if(token.ConnectionId!=id||token.Credential is not {Length:64}||token.Credential.Any(c=>!char.IsAsciiHexDigit(c))||token.ExpiresUtc is null||token.ExpiresUtc<=DateTimeOffset.UtcNow||token.ExpiresUtc>DateTimeOffset.UtcNow.AddHours(25))throw new IOException("Invalid organization credential response.");
             var saved=new OrganizationSavedConnection(id,item.Identity.Id,item.Identity.Name,item.Identity.Origin,token.ExpiresUtc.Value);
             var rows=Read();if(rows.Any(r=>r.OrganizationId==saved.OrganizationId&&r.Origin!=saved.Origin))throw new IOException("This organization identity was previously connected at a different address. Disconnect it before changing servers.");
+            if(rows.Any(r=>r.Id==id))throw new IOException("This connection identity is already saved. No existing authorization was replaced.");
             // Never overwrite an existing connection or credential. Both identities remain independently disconnectable.
             vault.Save(id,token.Credential);try{Write(rows.Where(r=>r.Id!=id).Append(saved).ToArray());}catch{vault.Remove(id);throw;}pending.Remove(id);
             return new{status="connected",connection=saved};

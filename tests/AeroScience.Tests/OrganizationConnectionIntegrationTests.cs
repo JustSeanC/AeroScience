@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using System.Net;
 using System.Net.Http.Json;
 using System.Net.Sockets;
@@ -32,7 +33,7 @@ public sealed class OrganizationConnectionIntegrationTests
     sealed class Server(WebApplication app,HttpClient browser,string origin,string database):IAsyncDisposable
     {
         public WebApplication App=>app;public string Origin=>origin;public string Database=>database;
-        public int AuthorizedReads;
+        public int AuthorizedReads;public Guid? ForcedDeviceIdentity;
         public async Task<JsonElement> Post(string path,object body)
         {
             var session=await browser.GetFromJsonAsync<JsonElement>("/api/session");var request=new HttpRequestMessage(HttpMethod.Post,path){Content=JsonContent.Create(body,options:WireJson.Options)};
@@ -51,7 +52,13 @@ public sealed class OrganizationConnectionIntegrationTests
         var secret=new string('s',48);var path=Path.Combine(directory,database);await File.WriteAllTextAsync(path,secret);OrganizationConfigurationTests.ProtectCredential(path);
         var app=OrganizationApplication.Build([],b=>{b.Environment.EnvironmentName="Testing";b.Configuration.AddInMemoryCollection(new Dictionary<string,string?>{["Organization:LocalDevelopment"]="true",["Organization:PublicOrigin"]=origin,["Organization:ConnectionString"]=admin.ConnectionString,["Organization:BootstrapSecretFile"]=path});b.Logging.SetMinimumLevel(LogLevel.Warning);});
         var browser=new HttpClient(new HttpClientHandler{UseCookies=true,AllowAutoRedirect=false}){BaseAddress=new(origin)};var server=new Server(app,browser,origin,database);
-        app.Use(async(c,next)=>{if(c.Request.Path=="/api/member/published")server.AuthorizedReads++;await next();});
+        app.Use(async(c,next)=>{
+            if(c.Request.Path=="/api/device/start"&&server.ForcedDeviceIdentity is {} collision){
+                // Adversarial response from the second isolated server; never a genuine provider fixture.
+                await c.Response.WriteAsJsonAsync(new OrganizationDevicePending(collision,new string('a',64),"ABCDE-12345",origin+"/#connect="+collision,DateTimeOffset.UtcNow.AddMinutes(10),5),WireJson.Options);return;
+            }
+            if(c.Request.Path=="/api/member/published")server.AuthorizedReads++;await next();
+        });
         await OrganizationApplication.Initialize(app);await app.StartAsync();
         await server.Post("/api/bootstrap",new OrganizationBootstrapRequest(secret,name,"Private local organization","administrator","ResearchOnly!2026Flight"));await server.Post("/api/sign-in",new OrganizationLoginRequest("administrator","ResearchOnly!2026Flight"));return server;
     }
@@ -74,7 +81,11 @@ public sealed class OrganizationConnectionIntegrationTests
             }
             var options=new EngineOptions{ConfigurationDirectory=root,OrganizationLoopbackDevelopment=true};Guid one,two;string? firstSecret;
             using(var desktop=new OrganizationConnections(options,new Environment(),vault)){
-                one=await Connect(desktop,servers[0]);firstSecret=vault.Read(one);two=await Connect(desktop,servers[1]);Assert.NotEqual(one,two);Assert.NotEqual(firstSecret,vault.Read(two));Assert.Equal(firstSecret,vault.Read(one));Assert.Equal(2,(await desktop.List(default)).Length);
+                one=await Connect(desktop,servers[0]);firstSecret=vault.Read(one);
+                servers[1].ForcedDeviceIdentity=one;var maliciousReview=await desktop.Review(servers[1].Origin,default);
+                await Assert.ThrowsAsync<IOException>(()=>desktop.Begin(new(maliciousReview.ReviewId,maliciousReview.Organization.Id,true),default));
+                Assert.Equal(one,Assert.Single(await desktop.List(default)).Id);Assert.Equal(firstSecret,vault.Read(one));servers[1].ForcedDeviceIdentity=null;
+                two=await Connect(desktop,servers[1]);Assert.NotEqual(one,two);Assert.NotEqual(firstSecret,vault.Read(two));Assert.Equal(firstSecret,vault.Read(one));Assert.Equal(2,(await desktop.List(default)).Length);
                 var firstPage=await desktop.Status(one,0,default);Assert.Equal("Connected",firstPage.Status);Assert.Equal(20,firstPage.Information!.Campaigns.Items.Length);
                 Assert.True(System.Text.Encoding.UTF8.GetByteCount(JsonSerializer.Serialize(firstPage.Information,WireJson.Options))>262144);
 Assert.Equal("Connected",(await desktop.Status(two,0,default)).Status);
