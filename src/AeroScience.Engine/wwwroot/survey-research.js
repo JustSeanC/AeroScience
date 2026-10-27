@@ -1,3 +1,4 @@
+import {organizationAssignmentSummary} from './organization-assignment-ui.js';
 import {node,button,table,chart,numeric,link,disclosure,dateTime,color} from './workstation-ui.js';
 import {ResearchMap} from './map.js';
 import {openOnlineAccess} from './online-access.js';
@@ -22,7 +23,7 @@ export function surveySourceReview(parent,api,plan){
  });link(parent,'Open Scientific Library','#library');
 }
 export function surveySummary(attempt){const s=attempt.survey,root=node('article',undefined,'panel research-panel');root.append(node('h3',`${attempt.card.name} — ${surveyOutcome(attempt.outcome)}`),node('p',attempt.card.survey.question),node('p',attempt.explanation),node('p',`${attempt.startUtc} → ${attempt.endUtc} · ${s.gaps} recorded gaps/pause edges · revision ${attempt.card.revision}`));
- table(root,'Survey objective outcomes',['Measurement','Outcome','Qualified samples','Excluded samples','Unavailable products'],s.objectives.map(o=>[surveyNames[o.measurement],surveyOutcome(o.outcome),o.validSamples,o.excludedSamples,o.unavailableProducts]));return root;}
+ table(root,'Survey objective outcomes',['Measurement','Outcome','Qualified samples','Excluded samples','Unavailable products'],s.objectives.map(o=>[surveyNames[o.measurement],surveyOutcome(o.outcome),o.validSamples,o.excludedSamples,o.unavailableProducts]));root.append(organizationAssignmentSummary(attempt.card,attempt));return root;}
 const exact=v=>Number.isFinite(v)?String(v):'Unknown';
 function plots(parent,entries,inspect){
  const label=node('label','Survey measurement'),select=node('select');select.setAttribute('aria-label','Survey measurement');label.append(select);parent.append(label);const region=node('div');parent.append(region);

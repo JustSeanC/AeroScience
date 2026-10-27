@@ -80,6 +80,7 @@ var app = EngineApplication.Create(args, services =>
 });
 var options=app.Services.GetRequiredService<EngineOptions>();
 app.MapPost("/api/testing/operating/input",(SensorTelemetryFixture fixture,BrowserTelemetryProvider provider)=>{provider.SensorFixture=fixture;return new{synthetic=true};});
+app.MapPost("/api/testing/operating/clear",(BrowserTelemetryProvider provider)=>{provider.SensorFixture=null;return new{synthetic=true};});
 app.MapPost("/api/testing/research/custom/{card:guid}/{revision:int}/{scenario}",(Guid card,int revision,string scenario,MissionStore missions,MissionCoordinator coordinator)=>CustomFlightTestFixture.Create(card,revision,scenario,missions,coordinator));
 app.MapPost("/api/testing/research/procedure/{card:guid}/{revision:int}/{scenario}",(Guid card,int revision,string scenario,MissionStore missions,MissionCoordinator coordinator)=>AeroScience.TestHost.FlightTestProcedureFixture.Create(card,revision,scenario,missions,coordinator));
 app.MapPost("/api/testing/research/automatic/{card:guid}/{revision:int}/{scenario}",(Guid card,int revision,string scenario,MissionStore missions,MissionCoordinator coordinator)=>AeroScience.TestHost.AutomaticAttemptFixture.Create(card,revision,scenario,missions,coordinator));

@@ -1,3 +1,4 @@
+import {organizationAssignmentSummary,organizationClaimReview} from './organization-assignment-ui.js';
 import {researchOrganizations} from './research-organizations.js';
 import {procedureExample,showProcedureResult} from './flight-test-procedure.js';
 import {customFlightRule,showCustomFlightEvidence} from './custom-flight-test.js';
@@ -84,6 +85,7 @@ export async function personalResearch(root, api) {
       }
       if (!active() || request !== reviewEpoch) return;
       review.replaceChildren(node('h2', `Review ${card.name}`), node('p', 'Each flight uses the card revision frozen when recording started. A later card edit cannot change that result.'));
+      if(card.organizationAssignment){const recorded=flights.find(f=>f.id===selectedFlight)||flights[0];review.append(organizationAssignmentSummary(card,recorded?{flightId:recorded.id,startUtc:recorded.startedUtc,endUtc:recorded.endedUtc}:{}));organizationClaimReview(review,api,card);}
       if (!flights.length) review.append(node('p', 'No completed flights on this page. Open this card in Mission Planner, select the plan for flight, record, and end your flight first.'));
       else {
         const label = node('label', 'Recorded flight'), select = node('select'); select.setAttribute('aria-label', 'Recorded flight'); label.append(select);
@@ -127,20 +129,22 @@ export async function personalResearch(root, api) {
         action(card.procedure?'Review Multi-Point Flight':card.experimentalSensor?'Review Sensor Checkout':card.observationFlight?'Review Scientific Observations':card.survey?'Review Terrain & Temperature Survey':card.atmosphericTransect?'Review Atmospheric Transect':card.atmosphericProfile?'Review Atmospheric Profile':'Review Recorded Flight', () => showReview(card)),
         action('Overview & Compare',()=>researchExperimentReview(experiment,api,card,active)),
         action('Edit Card', () => { draft = structuredClone(card); renderEditor(); editor.scrollIntoView({block:'start'}); editor.querySelector('input').focus(); }));
+      if(card.organizationAssignment){row.prepend(organizationAssignmentSummary(card));for(const b of row.querySelectorAll('button'))if(['Edit Card','Open in Mission Planner'].includes(b.textContent))b.remove();const open=node('a','Open Mission Planner','button secondary');open.href='#planner';row.append(open);organizationClaimReview(row,api,card);}
       root.append(row);
-      researchEntryActions(row,api,{card,starter:starters.find(s=>s.id===card.templateId)},active);
+      if(!card.organizationAssignment)researchEntryActions(row,api,{card,starter:starters.find(s=>s.id===card.templateId)},active);
     }
     root.append(action('Newer Cards', async () => {cardOffset = Math.max(0,cardOffset-20); await personalResearch(root,api);}), action('Older Cards', async () => {cardOffset += 20; await personalResearch(root,api);}), experiment, review);
     const saved=node('details',undefined,'panel research-panel');saved.append(node('summary','Saved Local Results — All Evaluations'),node('p','Every saved evaluation is retained here. Overview & Compare groups repeated evaluations into their original attempts.'));
     if (!attempts.length) saved.append(node('p', 'No saved results on this page. Review a completed card flight to evaluate its recorded evidence.'));
     for (const attempt of attempts) saved.append(attemptView(attempt,api));
     saved.append(action('Newer Results', async () => {resultOffset = Math.max(0,resultOffset-20); await personalResearch(root,api);}), action('Older Results', async () => {resultOffset += 20; await personalResearch(root,api);}));root.append(saved);
-    const selectedFlight = new URLSearchParams(location.hash.split('?')[1] || '').get('flight');
+    const query=new URLSearchParams(location.hash.split('?')[1]||'');const requestedCard=query.get('card');
+    const selectedFlight = query.get('flight');
     if (selectedFlight) {
       const research = await api(`/api/missions/${encodeURIComponent(selectedFlight)}/research`);
-      const ref = research.planSnapshot?.researchCards?.[0]??research.planSnapshot?.researchCard;
+      const refs=research.planSnapshot?.researchCards??(research.planSnapshot?.researchCard?[research.planSnapshot.researchCard]:[]);const ref=requestedCard?refs.find(r=>r.id===requestedCard):refs[0];
       if (active() && ref) await showReview(await api(`/api/research/cards/${ref.id}?revision=${ref.revision}`), selectedFlight);
-    }
+    }else if(requestedCard&&active())await showReview(await api(`/api/research/cards/${encodeURIComponent(requestedCard)}`));
   } catch (error) { if (active()) status.textContent = `Personal Research could not load: ${error.message}`; }
 }
 
@@ -159,7 +163,7 @@ export function attemptView(attempt,api) {
     node('p', `Evidence: ${attempt.startUtc} to ${attempt.endUtc} · ${attempt.evidence.sampleCount} recorded samples · ${attempt.evidence.source === 'simulator' ? 'Recorded simulator telemetry' : attempt.evidence.source === 'simulated' ? 'Synthetic/demo telemetry; not an installed MSFS test' : 'Source unavailable; no telemetry source type inferred'}`));
   const details = node('details'); details.append(node('summary', 'Evidence References'), node('p', `Flight ${attempt.flightId} · Original telemetry sequences ${attempt.evidence.firstSequence}–${attempt.evidence.lastSequence}`),
     node('p', `Evaluator ${attempt.evaluatorVersion} · Evidence SHA-256 ${attempt.evidence.sha256} · Plan SHA-256 ${attempt.evidence.planSha256}`));
-  panel.append(details);
+  panel.append(organizationAssignmentSummary(attempt.card,attempt),details);
   if(attempt.card.flightRegime.testPoint&&api){const button=node('button','Inspect Custom Test Evidence','secondary');button.type='button';const detail=node('div');button.onclick=()=>showCustomFlightEvidence(detail,api,attempt);panel.append(button,detail);}
   return panel;
 }

@@ -1,3 +1,4 @@
+import {organizationAssignmentSummary} from './organization-assignment-ui.js';
 import {node,button,table,chart,numeric,link,disclosure,dateTime,color} from './workstation-ui.js';
 import {ResearchMap} from './map.js';
 
@@ -9,6 +10,7 @@ export function atmosphericSummary(attempt){
  const temperature=s.quantities.find(q=>q.measurementId==='temperature');if(temperature?.validReadings)root.append(node('p',`Recorded air temperatures ranged from ${numeric(temperature.minimum)} to ${numeric(temperature.maximum)} degC along the sampled aircraft path. ${s.transect?'Sampled locations do not establish the conditions between them or in surrounding areas.':'Band values below show where readings were actually retained; they do not establish conditions between sampled altitudes.'}`));
  if(s.transect){const t=s.transect,r=attempt.card.atmosphericTransect;root.append(node('p',`${t.coveredStations} covered sampling locations (${r.requiredStations} required) · ${numeric(t.linkedDistanceMetres)} m supported path · greatest leg extent ${numeric(t.greatestLegExtentMetres)} m (${numeric(r.minimumExtentMetres)} m required) · ${t.totalLegs} supported legs. Both goals must be met in one leg; revisits do not add distinct locations.`));}
  root.append(node('p',`${s.validTemperatureReadings} valid temperature readings · sampled altitude ${s.minimumAltitudeFeetMsl==null?'Unavailable':numeric(s.minimumAltitudeFeetMsl)+'–'+numeric(s.maximumAltitudeFeetMsl)+' feet MSL'} · ${s.majorGaps} major gaps / pause edges · revision ${attempt.card.revision}`),node('p',`Source: ${attempt.evidence.source==='simulator'?'Recorded simulator observations':attempt.evidence.source==='simulated'?'Synthetic/demo observations — not an installed MSFS test':'Unknown; no simulator provenance inferred'}. ${dateTime(attempt.startUtc)} → ${dateTime(attempt.endUtc)} (local display; original evidence UTC retained).`));
+ root.append(organizationAssignmentSummary(attempt.card,attempt));
  const reference=disclosure(root,'Scientific Evidence References');reference.append(node('p',`Evaluator ${attempt.evaluatorVersion} · Library ${s.libraryId} · Original observation/event SHA-256 ${attempt.evidence.sha256} · Frozen plan SHA-256 ${attempt.evidence.planSha256}`));
  return root;
 }

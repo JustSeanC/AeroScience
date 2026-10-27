@@ -12,7 +12,7 @@ export function missionSelection(parent,api){
    for(let offset=0;offset<1000;offset+=100){const page=await api('/api/plans?limit=100&offset='+offset);plans.push(...page);if(page.length<100)break;}
    const plan=plans.find(p=>p.id===state.selectedPlanId),reference=plan?.researchCards?.[0]??plan?.researchCard;
    let card=null,cardError=null;
-   if(plan?.researchStarter&&reference)try{card=await api(`/api/research/cards/${reference.id}?revision=${reference.revision}`);}catch(error){cardError=error.message;}
+   if(reference)try{const selectedCard=await api(`/api/research/cards/${reference.id}?revision=${reference.revision}`);if(plan?.researchStarter||selectedCard.organizationAssignment)card=selectedCard;}catch(error){cardError=error.message;}
    if(own!==generation)return;selected=state.selectedPlanId;select.replaceChildren();
    const unplanned=el('option','Unplanned Flight');unplanned.value='';select.append(unplanned);
    for(const p of plans){const option=el('option',p.name);option.value=p.id;select.append(option);}

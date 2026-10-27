@@ -1,3 +1,4 @@
+import {organizationAssignmentSummary} from './organization-assignment-ui.js';
 import {openPilotObservations} from './observation-research.js';
 import {researchCardTargets} from './personal-research-start.js';
 import {node,button,newIdentity,table} from './workstation-ui.js';
@@ -28,7 +29,7 @@ export function researchFlightControls(parent,api){
  function apply(next){
   if(next.flightId!==flight||state&&next.revision<state.revision)return;state=next;
   const key=next.cards.map(c=>c.card.id).join('/');if(key!==signature){signature=key;rows.replaceChildren();controls.clear();
-   for(const selected of next.cards){const card=selected.card,row=node('article',undefined,'research-panel');row.setAttribute('aria-label',card.name);row.append(node('h3',`${card.name} · revision ${card.revision}`));
+   for(const selected of next.cards){const card=selected.card,row=node('article',undefined,'research-panel');row.setAttribute('aria-label',card.name);row.append(node('h3',`${card.name} · revision ${card.revision}`));row.tabIndex=-1;row.append(organizationAssignmentSummary(card));button(row,'Focus Card',()=>row.focus());
     if(card.procedure||card.version===7)row.append(node('p','Automatic detection is opt-in for the chosen point. Two near-target readings recognize an attempt; three readings beyond the wider exit band separate attempts. Begin Attempt takes manual priority. Detected does not mean passed or card complete.'));
     const info=node('p'),actions=node('div',undefined,'action-row');info.setAttribute('role','status');row.append(info,actions);const buttons={};let pointSelect=null;
     if(card.procedure){const label=node('label','Test point'),select=node('select');select.setAttribute('aria-label','Test point for '+card.name);for(const point of card.procedure.points){const option=node('option',point.conditions.testPoint.name);option.value=point.id;select.append(option);}pointSelect=select;label.append(select);row.insertBefore(label,actions);}
