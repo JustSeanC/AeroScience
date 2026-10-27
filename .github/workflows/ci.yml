@@ -118,6 +118,18 @@ jobs:
     needs: validation-scope
     if: needs.validation-scope.outputs.tier == 'full'
     runs-on: ubuntu-latest
+    services:
+      organization-postgres:
+        image: postgres:17.6-bookworm@sha256:f3bd19c606e442c3d7bdfa8002e03fe260a1023351e0ea4598032022b68dd6e3
+        env:
+          POSTGRES_USER: aeroscience_test
+          POSTGRES_PASSWORD: p13_disposable_loopback_only
+          POSTGRES_DB: aeroscience_org_tests
+        ports:
+          - 55437:5432
+        options: --health-cmd "pg_isready -U aeroscience_test -d aeroscience_org_tests" --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      AEROSCIENCE_ORG_TEST_DATABASE: Host=127.0.0.1;Port=55437;Database=aeroscience_org_tests;Username=aeroscience_test;Password=p13_disposable_loopback_only
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-dotnet@v6
@@ -178,6 +190,9 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: '22'
+      - name: Prepare isolated organization PostgreSQL when available
+        shell: pwsh
+        run: ./scripts/build/Start-OrganizationTestPostgres.ps1
       - name: Use runner scratch for durable Windows test fixtures
         shell: pwsh
         run: |

@@ -14,3 +14,5 @@ function check(folder) {
 }
 check('src/AeroScience.Engine/wwwroot');
 check('msfs-toolbar/PackageSources/html_ui/InGamePanels/AeroScience');
+
+check('src/AeroScience.Organization/wwwroot');

@@ -7,7 +7,7 @@
     "node": ">=22.12.0"
   },
   "scripts": {
-    "pretest:web": "dotnet build tests/AeroScience.TestHost -c Release --no-restore --nologo --output artifacts/browser-test-host",
+    "pretest:web": "dotnet build tests/AeroScience.TestHost -c Release --no-restore --nologo --output artifacts/browser-test-host && dotnet build src/AeroScience.Organization -c Release --no-restore --nologo --output artifacts/organization-test-host",
     "test:web": "playwright test",
     "check:web": "node scripts/build/check-web.mjs",
     "check:branding": "node scripts/build/generate-branding.mjs --check"
