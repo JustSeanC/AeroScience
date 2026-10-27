@@ -24,7 +24,8 @@ test('planned personal cards activate, record independent attempts, switch and r
  await rc.getByRole('button',{name:'Activate Card',exact:true}).click();await rc.getByRole('button',{name:'Begin Attempt',exact:true}).click();await rc.getByRole('button',{name:'End Attempt',exact:true}).click();
  expect((await(await request.get('/api/state')).json()).activeMission.id).toBe(flight.id);const after=(await(await request.get(`/api/missions/${flight.id}/collection`)).json()).state;expect(after.currentSessionId).toBe(science.currentSessionId);expect(after.phase).toBe('collecting');
  await page.setViewportSize({width:375,height:812});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy();expect((await new AxeBuilder({page}).include('#research-flight-controls').analyze()).violations).toEqual([]);
- await page.getByRole('button',{name:'End mission',exact:true}).click();await page.goto('/#my-research?flight='+flight.id);
+ const ending=page.waitForResponse(r=>new URL(r.url()).pathname===`/api/missions/${flight.id}/end`&&r.request().method()==='POST');
+ await page.getByRole('button',{name:'End mission',exact:true}).click();const ended=await ending;expect(ended.ok(),await ended.text()).toBeTruthy();expect((await ended.json()).status).toBe('completed');await expect(page.getByRole('button',{name:'Start mission',exact:true})).toBeVisible();await page.goto('/#my-research?flight='+flight.id);
  const timeline=page.getByRole('region',{name:'Test-card activity and evidence',exact:true});await expect(timeline).toContainText('Interrupted');await timeline.getByRole('button',{name:'Evaluate Attempt',exact:true}).first().click();await expect(timeline).toContainText('— Pass');
  const event=timeline.locator('.research-panel').filter({hasText:'research-card-BeginAttempt'}).first();await event.getByRole('button',{name:'Show Recorded Evidence',exact:true}).click();await expect(timeline.getByRole('region',{name:'Recorded flight samples',exact:true})).toBeVisible();await expect(timeline).toContainText('Science collection:');
  const marked=await(await request.get(`/api/missions/${flight.id}/research-attempts`)).json();expect(marked).toHaveLength(4);expect(new Set(marked.map(a=>a.id)).size).toBe(4);expect(marked.every(a=>a.beginEventId&&a.endEventId)).toBeTruthy();
@@ -55,4 +56,23 @@ test('a delayed mission-selection refresh cannot launch stale inputs and a synch
  }finally{release();}
  await expect(page.getByRole('combobox',{name:'Choose Mission',exact:true})).toHaveValue(plan.id);await expect(page.locator('#mission-name')).toHaveValue(plan.name);
  const response=page.waitForResponse(r=>new URL(r.url()).pathname==='/api/missions'&&r.request().method()==='POST');await page.getByRole('button',{name:'Start mission',exact:true}).click();const started=await response;expect(started.ok(),await started.text()).toBeTruthy();await expect(page.getByRole('button',{name:'End mission',exact:true})).toBeVisible();const state=await(await request.get('/api/state')).json();expect(state.activeMission.name).toBe(plan.name);expect((await(await request.get(`/api/missions/${state.activeMission.id}/research`)).json()).planSnapshot.id).toBe(plan.id);
+});
+
+
+test('postflight review waits for the real end acknowledgment and a held end cannot masquerade as a completed flight',async({page,request})=>{
+ const [card]=await cards(request);const plan=await post(request,`/api/research/cards/${card.id}/plan`,{id:card.id,revision:card.revision});const flight=await post(request,'/api/missions',{name:'P02 delayed flight end',planId:plan.id});
+ await page.goto('/#control');await expect(page.getByRole('button',{name:'End mission',exact:true})).toBeVisible();
+ let release;const gate=new Promise(resolve=>{release=resolve;});let intercepted=false;
+ await page.route(`**/api/missions/${flight.id}/end`,async route=>{intercepted=true;await gate;await route.continue();});
+ const response=page.waitForResponse(r=>new URL(r.url()).pathname===`/api/missions/${flight.id}/end`&&r.request().method()==='POST');
+ try{
+  await page.getByRole('button',{name:'End mission',exact:true}).click();await expect.poll(()=>intercepted).toBe(true);
+  // Hash navigation preserves the held request, unlike a full reload which can cancel it.
+  await page.evaluate(id=>{location.hash='#my-research?flight='+id;},flight.id);
+  await expect(page.locator('#my-research [role="status"]').first()).toContainText('End this flight before evaluating its recorded attempt.');
+  expect((await(await request.get('/api/state')).json()).activeMission.id).toBe(flight.id);
+  await expect(page.getByRole('region',{name:'Test-card activity and evidence',exact:true})).toHaveCount(0);
+ }finally{release();}
+ const ended=await response;expect(ended.ok(),await ended.text()).toBeTruthy();expect((await ended.json()).status).toBe('completed');
+ expect((await(await request.get('/api/state')).json()).activeMission).toBeNull();await page.reload();await expect(page.getByRole('region',{name:'Test-card activity and evidence',exact:true})).toBeVisible();
 });
