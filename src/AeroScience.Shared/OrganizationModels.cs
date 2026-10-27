@@ -23,7 +23,7 @@ public sealed record OrganizationProgramView(Guid Id,int Revision,string Name,st
     DateTimeOffset UpdatedUtc,Guid AuthorId,string AuthorName);
 public sealed record OrganizationCampaignView(Guid Id,Guid ProgramId,int Revision,string Name,string Description,string Objective,
     OrganizationFocus Focus,OrganizationPublication Status,int? PublishedRevision,OrganizationResearchDefinition Definition,
-    DateTimeOffset CreatedUtc,DateTimeOffset UpdatedUtc,Guid AuthorId,string AuthorName);
+    DateTimeOffset CreatedUtc,DateTimeOffset UpdatedUtc,Guid AuthorId,string AuthorName,int? ProgramRevision=null);
 public sealed record OrganizationPage<T>(int Version,T[] Items,int? NextOffset);
 
 public enum OrganizationMembershipState { PendingApproval, Active, Suspended, Removed }

@@ -94,10 +94,15 @@ public sealed class OrganizationDevices(OrganizationDatabase db,OrganizationMemb
         var result=new List<OrganizationPublishedCampaign>();var manager=new OrganizationManagement(db);
         foreach(var c in campaigns.Take(20)){
             var row=await manager.ReadRevision(c.Id,c.PublishedRevision!.Value,ct);var snapshot=System.Text.Json.JsonSerializer.Deserialize<OrganizationCampaignView>(row.SnapshotJson,WireJson.Options)!;
-            // Resolve program metadata as it existed when this campaign was published, never a later private edit.
-            var program=await db.Revisions.AsNoTracking().Where(r=>r.ResourceId==c.ProgramId&&r.Kind=="program"&&r.TimestampUtc<=row.TimestampUtc).OrderByDescending(r=>r.Revision).FirstOrDefaultAsync(ct)??throw new InvalidOperationException("Published program revision unavailable.");
-            var verified=await manager.ReadRevision(program.ResourceId,program.Revision,ct);var p=System.Text.Json.JsonSerializer.Deserialize<OrganizationProgramView>(verified.SnapshotJson,WireJson.Options)!;
-            result.Add(new(c.Id,c.ProgramId,p.Name,snapshot.Revision,snapshot.Name,snapshot.Description,snapshot.Objective,snapshot.Focus,snapshot.Definition.Template.Id));
+            // Pin the exact program revision, independent of wall-clock order across server instances.
+            // Historical P13 publications did not capture this identity. Never guess it or expose a later draft.
+            var programName="Program metadata unavailable for this historical publication";
+            if(snapshot.ProgramRevision is {} pinned){
+                var verified=await manager.ReadRevision(c.ProgramId,pinned,ct);
+                if(verified.Kind!="program")throw new InvalidOperationException("Published program revision is incompatible.");
+                programName=System.Text.Json.JsonSerializer.Deserialize<OrganizationProgramView>(verified.SnapshotJson,WireJson.Options)!.Name;
+            }
+            result.Add(new(c.Id,c.ProgramId,programName,snapshot.Revision,snapshot.Name,snapshot.Description,snapshot.Objective,snapshot.Focus,snapshot.Definition.Template.Id));
         }
         return new(await membership.Public(ct),member.Role,member.State,new(1,result.ToArray(),campaigns.Length>20?checked(offset+20):null));
     }

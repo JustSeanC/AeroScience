@@ -149,8 +149,23 @@ public sealed partial class OrganizationServerTests
     {
         await Bootstrap();await Login();var p=await Program();var draft=await Value<OrganizationCampaignView>(await browser.Send($"/api/organization/programs/{p.Id}/campaigns",Campaign()));var published=await Value<OrganizationCampaignView>(await browser.Send($"/api/organization/campaigns/{draft.Id}/publish",new OrganizationPublishRequest(1,Guid.NewGuid(),1)));
         await Value<OrganizationProgramView>(await browser.Send("/api/organization/programs/"+p.Id,new OrganizationProgramRequest(1,Guid.NewGuid(),1,"PRIVATE PROGRAM EDIT",""),"PUT"));await Value<OrganizationCampaignView>(await browser.Send($"/api/organization/programs/{p.Id}/campaigns/{draft.Id}",Campaign() with{ExpectedRevision=2,Name="PRIVATE CAMPAIGN DRAFT"},"PUT"));
-        using var pilot=await JoinPilot(invitation:InvitationSecret(await Invite()));var token=await Approved(pilot);var data=await Value<OrganizationMemberInformation>(await Bearer("/api/member/published",token.Credential!));Assert.Equal(p.Name,Assert.Single(data.Campaigns.Items).ProgramName);Assert.Equal(published.Name,data.Campaigns.Items[0].Name);Assert.DoesNotContain("PRIVATE",JsonSerializer.Serialize(data));
+        using(var scope=app.Services.CreateScope()){var db=scope.ServiceProvider.GetRequiredService<OrganizationDatabase>();await db.Database.ExecuteSqlInterpolatedAsync($"UPDATE organization.\"Revisions\" SET \"TimestampUtc\"={DateTimeOffset.UtcNow.AddDays(-1)} WHERE \"ResourceId\"={p.Id} AND \"Revision\"=2");}
+        using var pilot=await JoinPilot(invitation:InvitationSecret(await Invite()));var token=await Approved(pilot);var data=await Value<OrganizationMemberInformation>(await Bearer("/api/member/published",token.Credential!));Assert.Equal(1,published.ProgramRevision);Assert.Equal(p.Name,Assert.Single(data.Campaigns.Items).ProgramName);Assert.Equal(published.Name,data.Campaigns.Items[0].Name);Assert.DoesNotContain("PRIVATE",JsonSerializer.Serialize(data));
         await app.StopAsync();await app.DisposeAsync();await Start();browser.Connect(app);pilot.Connect(app);Assert.Equal(data.Organization.Id,(await Value<OrganizationMemberInformation>(await Bearer("/api/member/published",token.Credential!))).Organization.Id);Assert.Equal(HttpStatusCode.OK,(await pilot.Client.GetAsync("/api/membership")).StatusCode);
+    }
+    [PostgresFact]public async Task HistoricalPublicationsWithoutPinnedProgramMetadataRemainReadableWithoutGuessingPrivateDrafts()
+    {
+        await Bootstrap();await Login();var p=await Program();var draft=await Value<OrganizationCampaignView>(await browser.Send($"/api/organization/programs/{p.Id}/campaigns",Campaign()));
+        await Value<OrganizationCampaignView>(await browser.Send($"/api/organization/campaigns/{draft.Id}/publish",new OrganizationPublishRequest(1,Guid.NewGuid(),1)));
+        // Synthetic legacy-format fixture in this disposable database only; no genuine history is edited.
+        using(var scope=app.Services.CreateScope()){
+            var db=scope.ServiceProvider.GetRequiredService<OrganizationDatabase>();var row=await db.Revisions.AsNoTracking().SingleAsync(r=>r.ResourceId==draft.Id&&r.Revision==2);
+            var json=System.Text.Json.Nodes.JsonNode.Parse(row.SnapshotJson)!;json.AsObject().Remove("programRevision");var original=json.ToJsonString();var hash=Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(original)));
+            await db.Database.ExecuteSqlInterpolatedAsync($"UPDATE organization.\"Revisions\" SET \"SnapshotJson\"={original},\"Sha256\"={hash} WHERE \"ResourceId\"={draft.Id} AND \"Revision\"=2");
+        }
+        await Value<OrganizationProgramView>(await browser.Send("/api/organization/programs/"+p.Id,new OrganizationProgramRequest(1,Guid.NewGuid(),1,"PRIVATE NEW PROGRAM NAME",""),"PUT"));
+        using var pilot=await JoinPilot(invitation:InvitationSecret(await Invite()));var token=await Approved(pilot);var data=await Value<OrganizationMemberInformation>(await Bearer("/api/member/published",token.Credential!));
+        Assert.Equal("Program metadata unavailable for this historical publication",Assert.Single(data.Campaigns.Items).ProgramName);Assert.Equal(draft.Name,data.Campaigns.Items[0].Name);Assert.DoesNotContain("PRIVATE",JsonSerializer.Serialize(data));
     }
     [PostgresFact]public async Task P13DatabaseMigrationRetainsAdministratorRolesAndNeverReplacesItsIdentity()
     {
