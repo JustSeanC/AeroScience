@@ -1,0 +1,31 @@
+import {node,button} from './workstation-ui.js';
+
+export function researchOrganizations(root,api,active){
+ const section=node('section',undefined,'panel research-panel');section.id='research-organizations';section.append(node('h2','Organizations'),node('p','Connect only to organizations you trust. Joining does not share your flights, locations or scientific results. Personal Research works independently.'));
+ const content=node('div'),notice=node('p');notice.setAttribute('role','status');section.append(content,notice);root.append(section);
+ const fail=e=>{if(active())notice.textContent=e.message||'Unable to connect. Personal Research is unchanged.';};
+ const run=fn=>async()=>{try{await fn();}catch(e){fail(e);}};
+ function field(parent,label){const wrap=node('label',label),input=node('input');input.type='url';input.placeholder='https://your-organization.example';input.required=true;wrap.append(input);parent.append(wrap);return input;}
+ async function list(){const result=await api('/api/organizations');if(!active())return;content.replaceChildren();
+  const connect=button(content,'Connect to Organization',run(review));connect.classList.add('primary');
+  if(!result.vaultAvailable)content.append(node('p','Saving organization access requires the Windows companion and its secure credential vault.'));
+  for(const saved of result.connections){const card=node('article',undefined,'panel');card.append(node('h3',saved.name),node('p',saved.origin),node('p',`Authorization expires ${new Date(saved.expiresUtc).toLocaleString()}`));const detail=node('div');detail.append(node('p','Membership not checked. Select View Organization for current role and availability.'));card.append(detail);
+   button(card,'View Organization',run(async()=>show(saved.id,detail)));button(card,'Disconnect',run(async()=>{const result=await api(`/api/organizations/${saved.id}/disconnect`,{});await list();notice.textContent=result.message;}));content.append(card);
+  }
+  if(!result.connections.length)content.append(node('p','No organizations connected. Your personal experiments remain available below.'));
+ }
+ async function show(id,parent,offset=0){parent.replaceChildren(node('p','Checking membership…'));const result=await api(`/api/organizations/${id}?offset=${offset}`);if(!active())return;parent.replaceChildren(node('p',result.status));if(!result.information)return;const value=result.information;parent.append(node('p',`${value.state==='active'?'Active membership':'Membership unavailable'} · ${value.role}`),node('h4','Published Campaigns'));
+  for(const c of value.campaigns.items){const row=node('article');row.append(node('h4',c.name),node('p',c.programName),node('p',c.objective),node('p',c.description),node('p',`Published revision ${c.revision} · ${c.approach}`));parent.append(row);}
+  if(!value.campaigns.items.length)parent.append(node('p','No published campaigns on this page.'));if(offset)button(parent,'Previous Published Campaigns',run(()=>show(id,parent,Math.max(0,offset-20))));if(value.campaigns.nextOffset!==null)button(parent,'Next Published Campaigns',run(()=>show(id,parent,value.campaigns.nextOffset)));
+ }
+ function review(){content.replaceChildren();const form=node('form'),address=field(form,'Organization server address');content.append(form);const submit=node('button','Review Organization','primary');submit.type='submit';form.append(submit);button(form,'Cancel',run(list));form.onsubmit=async e=>{e.preventDefault();submit.disabled=true;try{const review=await api('/api/organizations/review',{address:address.value});if(!active())return;content.replaceChildren(node('h3',review.organization.name),node('p',review.organization.description),node('p',review.organization.origin),node('p','Check the name and address. This verifies the server identity at this HTTPS address, not an AeroScience endorsement. Your password is entered only on that organization’s browser page.'));
+    const confirm=node('label'),check=node('input');check.type='checkbox';confirm.append(check,document.createTextNode('I trust this organization and want to connect.'));content.append(confirm);const begin=button(content,'Continue to Browser Approval',run(async()=>{begin.disabled=true;try{const pending=await api('/api/organizations/begin',{reviewId:review.reviewId,organizationId:review.organization.id,confirm:check.checked});if(active())approval(pending);}finally{if(begin.isConnected)begin.disabled=!check.checked;}}));begin.disabled=true;check.onchange=()=>begin.disabled=!check.checked;button(content,'Cancel',run(list));
+   }catch(error){fail(error);}finally{if(submit.isConnected)submit.disabled=false;}};address.focus();
+ }
+ function approval(pending){content.replaceChildren(node('h3','Approve in Your Browser'),node('p',pending.organization.name),node('p',pending.organization.origin),node('p',`Compare this code on the organization page: ${pending.userCode}`,'notice'),node('p','Sign in there, confirm the matching code, and allow read-only access to published campaigns. Then return here. No callback or account password is sent to AeroScience.'));
+  button(content,'Open Secure Sign-In',run(()=>api(`/api/organizations/pending/${pending.pendingId}/open`,{})));
+  const link=node('a','Open Approval Page');link.href=pending.approvalUrl;link.target='_blank';link.rel='noopener noreferrer';content.append(link);
+  const finish=button(content,'Finish Connection',run(async()=>{finish.disabled=true;try{const result=await api('/api/organizations/finish',{pendingId:pending.pendingId});if(!active())return;if(result.status==='connected'){await list();notice.textContent='Organization connected. Select View Organization to check your membership and published campaigns.';}else notice.textContent=result.status==='slowDown'?'Wait a few seconds before checking again.':result.status==='pending'?'Waiting for your browser approval. Approve the matching code, then select Finish Connection.':'Connection expired or was denied. Start again.';}finally{if(finish.isConnected)finish.disabled=false;}}));button(content,'Cancel',run(list));
+ }
+ list().catch(fail);
+}

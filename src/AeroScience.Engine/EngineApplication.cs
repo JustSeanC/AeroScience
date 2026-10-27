@@ -40,6 +40,8 @@ public static class EngineApplication
             return options;
         });
         builder.Services.AddSingleton<AccessControl>();
+        builder.Services.AddSingleton<IOrganizationCredentials,UnavailableOrganizationCredentials>();
+        builder.Services.AddSingleton<OrganizationConnections>();
         builder.Services.AddSingleton(sp => new ScientificAccessSettings(sp.GetRequiredService<EngineOptions>().ConfigurationDirectory ?? sp.GetRequiredService<EngineOptions>().DataDirectory, NetworkCost.IsUnmetered));
         builder.Services.AddSingleton(sp => { _ = sp.GetRequiredService<StorageManagement>(); return new AutomaticScientificData(sp.GetRequiredService<ScienceStore>(),sp.GetRequiredService<ScientificAccessSettings>()); });
         builder.Services.AddSingleton<ScientificCatalog>();
@@ -231,6 +233,7 @@ public static class EngineApplication
             return Results.Stream(stream => missions.ExportJsonAsync(id, stream, context.RequestAborted), "application/json", $"AeroScience-mission-{id}.json");
         });
         app.MapResearchEndpoints();
+        app.MapOrganizationConnections();
         app.MapGet("/api/settings", (HttpContext c, AccessControl access) => new
         {
             version = ApplicationUpdates.CurrentVersion,

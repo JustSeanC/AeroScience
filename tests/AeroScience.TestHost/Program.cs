@@ -22,16 +22,22 @@ if (args.Length > 0 && args[0] == "--earthdata-vault-probe")
     var temporary=Path.Combine(Path.GetTempPath(),"aeroscience-vault-probe-"+Guid.NewGuid().ToString("N"));
     var first=new AeroScience.Desktop.WindowsEarthdataCredentials(Path.Combine(temporary,"production"));
     var isolated=new AeroScience.Desktop.WindowsEarthdataCredentials(Path.Combine(temporary,"validation"));
+    var organizations=new AeroScience.Desktop.WindowsOrganizationCredentials(Path.Combine(temporary,"production"));
+    var organizationProfile=new AeroScience.Desktop.WindowsOrganizationCredentials(Path.Combine(temporary,"validation"));
+    var firstOrganization=Guid.NewGuid();var secondOrganization=Guid.NewGuid();
     const string synthetic="synthetic_cloud_test_credential_not_a_nasa_token";
     try
     {
+        organizations.Save(firstOrganization,new string('a',64));organizations.Save(secondOrganization,new string('b',64));
+        if(organizations.Read(firstOrganization)!=new string('a',64)||organizations.Read(secondOrganization)!=new string('b',64)||organizationProfile.Read(firstOrganization) is not null)throw new IOException("Organization server/profile vault isolation failed.");
+        organizations.Remove(firstOrganization);if(organizations.Read(firstOrganization) is not null||organizations.Read(secondOrganization)!=new string('b',64))throw new IOException("Organization disconnect crossed credential identities.");
         first.Save(synthetic);
         if(first.ReadToken()!=synthetic||isolated.ReadToken() is not null)throw new IOException("OS credential round-trip/profile isolation failed.");
         isolated.Save(synthetic+"_isolated");isolated.Clear();
         if(first.ReadToken()!=synthetic||isolated.ReadToken() is not null)throw new IOException("Disconnect crossed profile identities.");
         first.Clear();if(first.ReadToken() is not null)throw new IOException("Windows credential removal failed.");
         Console.WriteLine("PASS: real Windows Credential Manager write/read/profile isolation/removal with disposable synthetic data; no NASA authorization or installed-device acceptance.");
-    }finally{first.Clear();isolated.Clear();}
+    }finally{first.Clear();isolated.Clear();organizations.Remove(firstOrganization);organizations.Remove(secondOrganization);organizationProfile.Remove(firstOrganization);}
     return;
 }
 if (args.Length > 0 && args[0] == "--profile-probe")
@@ -51,6 +57,7 @@ if (args.Length > 0 && args[0] == "--profile-probe")
 // This executable is built only for automated tests and never published with the app.
 var app = EngineApplication.Create(args, services =>
 {
+    services.AddSingleton<IOrganizationCredentials,AeroScience.TestHost.OrganizationConnectionFixture>();
     services.AddSingleton<AviationBrowserFixture>();
     services.AddSingleton(sp => new AviationReference(
         sp.GetRequiredService<EngineOptions>().ConfigurationDirectory ?? sp.GetRequiredService<EngineOptions>().DataDirectory,

@@ -121,7 +121,7 @@ public sealed class MainForm : BrandedForm, IDesktopActions, IScientificFolderOp
             "--AeroScience:EnableLan=" + preferences.EnableLan,
             "--AeroScience:LanAddress=" + preferences.LanAddress
         };
-        var app = EngineApplication.Create(args, services => {services.AddSingleton<IDesktopActions>(this);services.AddSingleton<IScientificFolderOpener>(this);services.AddSingleton<IEarthdataCredentials>(new WindowsEarthdataCredentials(Preferences.DirectoryPath));});
+        var app = EngineApplication.Create(args, services => {services.AddSingleton<IDesktopActions>(this);services.AddSingleton<IScientificFolderOpener>(this);services.AddSingleton<IEarthdataCredentials>(new WindowsEarthdataCredentials(Preferences.DirectoryPath));services.AddSingleton<IOrganizationCredentials>(new WindowsOrganizationCredentials(Preferences.DirectoryPath));});
         try { await app.StartAsync(); engine = app; }
         catch { await app.DisposeAsync(); throw; }
         dashboard.Enabled = true;
@@ -308,6 +308,7 @@ public sealed class MainForm : BrandedForm, IDesktopActions, IScientificFolderOp
         await engine.Services.GetRequiredService<EmitLibrary>().SelectLocal(picker.FileNames);
     });
     void IDesktopActions.ImportScientificSource() => Dispatch(() => ImportScientificSource());
+    void IDesktopActions.OpenOrganizationApproval(Uri address)=>Dispatch(()=>Process.Start(new ProcessStartInfo(address.AbsoluteUri){UseShellExecute=true}));
     void IDesktopActions.ConnectEarthdata()=>DispatchSourcePicker(owner=>
     {
         if(engine is not null){using var dialog=new EarthdataConnectionForm((WindowsEarthdataCredentials)engine.Services.GetRequiredService<IEarthdataCredentials>());dialog.ShowDialog(owner);}

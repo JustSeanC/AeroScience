@@ -1,3 +1,4 @@
+import {researchOrganizations} from './research-organizations.js';
 import {procedureExample,showProcedureResult} from './flight-test-procedure.js';
 import {customFlightRule,showCustomFlightEvidence} from './custom-flight-test.js';
 import {sensorSummary,showSensorResult} from './experimental-sensor.js';
@@ -17,6 +18,7 @@ export async function personalResearch(root, api) {
   root.replaceChildren(node('h1', 'My Research'), node('h2', 'Personal Research'),
     node('p', 'Your experiments stay on this computer. No organization, account or internet connection is needed.'));
   const status = node('p', 'Loading personal test cards…'); status.setAttribute('role', 'status'); root.append(status);
+  researchOrganizations(root,api,active);
   const action = (label, handler, style = 'secondary') => {
     const b = node('button', label, style); b.type = 'button';
     b.onclick = async () => {

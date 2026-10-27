@@ -5,7 +5,7 @@ import { resolve, join } from 'node:path';
 const data = mkdtempSync(join(tmpdir(), 'aeroscience-browser-'));
 const child = spawn(process.env.DOTNET || 'dotnet', [resolve('artifacts/browser-test-host/AeroScience.TestHost.dll')], {
   cwd: resolve('src/AeroScience.Engine'), stdio: 'inherit',
-  env: { ...process.env, AeroScience__DataDirectory: data, AeroScience__SamplingIntervalMs: '250', AeroScience__EnableLan: 'false', AeroScience__Port: '5080' }
+  env: { ...process.env, ASPNETCORE_ENVIRONMENT:'Testing', AeroScience__OrganizationLoopbackDevelopment:'true', AeroScience__DataDirectory: data, AeroScience__SamplingIntervalMs: '250', AeroScience__EnableLan: 'false', AeroScience__Port: '5080' }
 });
 const diagnostic=resolve('artifacts/browser-server');
 function captureLogs() {

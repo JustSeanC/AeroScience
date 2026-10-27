@@ -8,6 +8,7 @@ public sealed class EngineOptions
     public bool RequireExistingDatabase { get; set; }
     public string? ConfigurationDirectory { get; set; }
     public string? ScienceLibraryDirectory { get; set; }
+    public bool OrganizationLoopbackDevelopment {get;set;}
     public int Port { get; set; } = 5080;
     public int SamplingIntervalMs { get; set; } = 1000;
     public bool EnableLan { get; set; }

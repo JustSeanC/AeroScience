@@ -18,4 +18,5 @@ public interface IDesktopActions
     void ChooseScientificDataset(string kind);
     void CompactStorage(bool science);
     void ConnectEarthdata()=>throw new NotSupportedException("Connect Earthdata from the current Windows desktop companion.");
+    void OpenOrganizationApproval(Uri address)=>throw new NotSupportedException("Open the organization approval on the Windows companion PC.");
 }
