@@ -131,9 +131,11 @@ public sealed partial class MissionStore
         }
         var revisions=rows.Select(r=>r.Attempt.Card.Revision).Distinct().Count()>1;
         if(card.Procedure is not null){
+            var mixed=rows.Select(r=>r.Attempt.Result?.Evidence.Source).Where(s=>s is not null).Distinct().Count()>1;
             return new(card,rows.ToArray(),revisions,rows.Select(r=>PreflightReadiness.Hash(r.Attempt.Card.Procedure!)).Distinct().Count()>1,
-                rows.Where(r=>r.Attempt.Result is not null).Select(r=>r.Attempt.Result!.EvaluatorVersion).Distinct().Count()>1,false,
-                ["Each point and repetition belongs to its frozen revision and explicit marked evidence window. One long interval is never several repetitions.","Different sequences, condition groups or requirements remain separate. Completion is not aircraft certification; simulator/demo provenance remains explicit."]);
+                rows.Where(r=>r.Attempt.Result is not null).Select(r=>r.Attempt.Result!.EvaluatorVersion).Distinct().Count()>1,mixed,
+                ["Each point and repetition belongs to its frozen revision and explicit marked evidence window. One long interval is never several repetitions.","Different sequences, condition groups or requirements remain separate. Completion is not aircraft certification.",
+                 mixed?"Different simulator/demo sources are selected. Each original source remains separate; demo evidence does not demonstrate an installed simulator flight.":"Original simulator/demo source identity remains attached to each result; synthetic evidence is not installed MSFS acceptance."]);
         }
         if(card.ExperimentalSensor is not null){
             var mixed=rows.Select(r=>r.Attempt.Result?.Evidence.Source).Where(s=>s is not null).Distinct().Count()>1;
