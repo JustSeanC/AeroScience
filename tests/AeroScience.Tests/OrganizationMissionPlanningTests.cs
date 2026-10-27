@@ -83,7 +83,7 @@ public sealed class OrganizationMissionPlanningTests:IDisposable
     [Fact]public void MultipleClaimsManualSwitchingAndNativeProjectionKeepOneFlightAndIndependentScience()
     {
         var first=Prepare(Source("flight-regime",120));var second=Prepare(Source("flight-regime",150),first.Plan.Id,"update");var scientific=Prepare(Source(AtmosphericResearch.Template),second.Plan.Id,"update");
-        store.SavePlan(scientific.Plan with{Instruments=[new("ambient-temperature",true)],StartScienceArmed=false});var research=new ResearchOperations(store,science);var time=at;var coordinator=new MissionCoordinator(store,1000,research:research,utcNow:()=>time);
+        store.SavePlan(scientific.Plan with{Instruments=[new("ambient-temperature",true)],StartScienceArmed=false});using var research=new ResearchOperations(store,science);var time=at;var coordinator=new MissionCoordinator(store,1000,research:research,utcNow:()=>time);
         void Observe(int n,double speed=120){time=at.AddSeconds(n);var frame=Frame(time,speed);coordinator.Apply(new(new(ConnectionState.Connected,frame.Source,"Synthetic fixture",time),frame,new(time,12,29.9,5,270,.002)));}
         Observe(0);var flight=coordinator.Start(new("One organizational sortie",PlanId:second.Plan.Id));
         ResearchCardResult Control(PersonalResearchCard c,ResearchCardAction action){var state=coordinator.PersonalResearch(flight.Id);return coordinator.ControlPersonalResearch(new(1,flight.Id,Guid.NewGuid(),state.Revision,action,c.Id,state.Cards.Single(i=>i.Card.Id==c.Id).OpenAttempt?.Id));}
@@ -118,5 +118,5 @@ public sealed class OrganizationMissionPlanningTests:IDisposable
         foreach(var backup in Directory.GetFiles(Path.Combine(Path.GetDirectoryName(store.DatabasePath)!,"Backups"),"missions-schema10-*.db"))Assert.Equal(fingerprint,StorageManager.DatabaseFingerprint(backup));
         var prepared=Prepare(Source());Assert.Single(store.OrganizationPreparationHistory(prepared.Card.Id));
     }
-    public void Dispose(){SqliteConnection.ClearAllPools();Directory.Delete(root,true);}
+    public void Dispose(){science.Dispose();SqliteConnection.ClearAllPools();Directory.Delete(root,true);}
 }
