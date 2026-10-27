@@ -1,8 +1,13 @@
+import {membershipUi} from './organization-members.js';
 import {node,button,select,dateTime,disclosure} from './workstation-ui.js';
 
 const root=document.querySelector('#workspace'),account=document.querySelector('#account'),dialog=document.querySelector('#editor');
 let session,templates=[],programOffset=0,currentProgram=null,campaignOffset=0,epoch=0,returnFocus;
 const focusName={scientificResearch:'Scientific Research',experimentalFlightTest:'Experimental Flight Test',mixed:'Mixed'};
+let join=null,connect=null,enrollment=false;
+function takeEntry(){const fragment=new URLSearchParams(location.hash.slice(1));if(!fragment.has('join')&&!fragment.has('connect')&&!fragment.has('enroll'))return false;join=fragment.get('join');connect=fragment.get('connect');enrollment=fragment.has('enroll');window.history.replaceState(null,'',location.pathname);return true;}
+takeEntry();window.addEventListener('hashchange',()=>{if(takeEntry())load();});
+const membership=membershipUi({api,root,field,status,heading,submit,modal,dialog,session:()=>session,load,programs:showPrograms,identity:showIdentity,draftCommand,joined:()=>{join=null;enrollment=false;}});
 const admin=()=>session?.user?.roles.includes('Administrator');
 async function api(path,body,method=body?'POST':'GET'){
  const response=await fetch('/api'+path,{method,credentials:'same-origin',headers:{...(body?{'Content-Type':'application/json','X-AeroScience-Organization-CSRF':session?.csrf||''}:{})},...(body?{body:JSON.stringify(body)}:{})});
@@ -19,9 +24,10 @@ dialog.addEventListener('close',()=>{if(returnFocus?.isConnected)returnFocus.foc
 function draftCommand(){let prior='',id;return data=>{const key=JSON.stringify(data);if(key!==prior){prior=key;id=crypto.randomUUID();}return {...data,requestId:id};};}
 function submit(form,label,run){const b=node('button',label,'primary');b.type='submit';form.append(b);let busy=false;form.onsubmit=async event=>{event.preventDefault();if(busy)return;busy=true;b.disabled=true;form.querySelector(':scope > .action-error')?.remove();try{await run();}catch(e){failure(form,e);}finally{busy=false;b.disabled=false;}};return b;}
 function renderAccount(){account.replaceChildren();if(session?.user){account.append(node('span',session.user.name));button(account,'Sign Out',async()=>{await api('/sign-out',{});await load();});}}
-async function load(){const own=++epoch;try{const next=await api('/session');if(own!==epoch)return;session=next;renderAccount();if(!session.user){showIdentity();return;}if(!session.user.roles.some(r=>['Administrator','Manager'].includes(r))){heading('Management access is unavailable','This account does not have organization management permission. Your administrator controls access.');return;}templates=await api('/organization/templates');await showPrograms();}catch(e){heading('Organization server unavailable','No saved change was confirmed. Try reconnecting to this server.');failure(root,e);button(root,'Try Again',load);}}
+async function load(){const own=++epoch;try{const next=await api('/session');if(own!==epoch)return;session=next;renderAccount();if(!session.user){if(join||enrollment)await membership.enroll(join);else showIdentity();return;}if(connect){await membership.approve(connect);return;}if(join){await membership.enroll(join);return;}if(!session.user.roles.some(r=>['Administrator','Manager'].includes(r))){await membership.memberHome();return;}templates=await api('/organization/templates');await showPrograms();}catch(e){heading('Organization server unavailable','No saved change was confirmed. Try reconnecting to this server.');failure(root,e);button(root,'Try Again',load);}}
 function showIdentity(message=''){
  heading('Your organization’s research workspace','Plan scientific investigations and flight-test programs together. Personal Research remains local and independent.');
+ if(session.initialized)button(root,join?'Back to Invitation':'Join Organization',()=>membership.enroll(join));
  const panel=node('section',undefined,'panel auth'),form=node('form');panel.append(node('h2',session.initialized?'Sign In':'Set Up Your Organization'));panel.append(form);root.append(panel);
  if(message)status(form,message);
  let secret,name,description;
@@ -39,7 +45,7 @@ function showIdentity(message=''){
 async function showPrograms(){
  const own=++epoch;currentProgram=null;
  const [overview,page]=await Promise.all([api('/organization/overview'),api(`/organization/programs?offset=${programOffset}`)]);if(own!==epoch)return;
- heading('Organization Overview',overview.name);root.append(node('p',overview.description));const actions=node('div',undefined,'actions');root.append(actions);button(actions,'Create Program',()=>editProgram());
+ heading('Organization Overview',overview.name);root.append(node('p',overview.description));const actions=node('div',undefined,'actions');root.append(actions);button(actions,'Create Program',()=>editProgram());button(actions,'Members',()=>membership.members());
  const section=node('section');section.setAttribute('aria-label','Programs');section.append(node('h2','Programs'),node('p','Organize related scientific research and experimental flight tests.'));const grid=node('div',undefined,'grid');section.append(grid);root.append(section);
  if(!page.items.length)grid.append(node('p','No programs on this page. Create a program to begin.'));
  for(const program of page.items){const card=node('article');card.append(node('h3',program.name),node('p',program.description),node('p',`Revision ${program.revision} · Updated ${dateTime(program.updatedUtc)} · ${program.authorName}`,'metadata'));button(card,'Open Program',()=>showProgram(program));button(card,'Edit Program',()=>editProgram(program));grid.append(card);}

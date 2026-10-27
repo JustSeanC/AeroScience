@@ -71,10 +71,23 @@ public sealed class OrganizationDatabase(DbContextOptions<OrganizationDatabase> 
     public DbSet<OrganizationAudit> Audit=>Set<OrganizationAudit>();
     public DbSet<OrganizationCommandReceipt> Receipts=>Set<OrganizationCommandReceipt>();
     public DbSet<DataProtectionKey> DataProtectionKeys {get;set;}=null!;
+    public DbSet<EnrollmentPolicyRecord> EnrollmentPolicies=>Set<EnrollmentPolicyRecord>();
+    public DbSet<MembershipRecord> Memberships=>Set<MembershipRecord>();
+    public DbSet<InvitationRecord> Invitations=>Set<InvitationRecord>();
+    public DbSet<DeviceGrantRecord> DeviceGrants=>Set<DeviceGrantRecord>();
     protected override void OnModelCreating(ModelBuilder model)
     {
         base.OnModelCreating(model);
         model.HasDefaultSchema("organization");
+        model.Entity<EnrollmentPolicyRecord>().ToTable(t=>t.HasCheckConstraint("single_enrollment_policy","\"Id\" = 1"));
+        model.Entity<EnrollmentPolicyRecord>().Property(x=>x.Revision).IsConcurrencyToken();
+        model.Entity<MembershipRecord>().HasKey(x=>x.UserId);
+        model.Entity<MembershipRecord>().HasOne<OrganizationUser>().WithMany().HasForeignKey(x=>x.UserId).OnDelete(DeleteBehavior.Restrict);
+        model.Entity<MembershipRecord>().HasIndex(x=>new{x.UpdatedUtc,x.UserId});
+        model.Entity<MembershipRecord>().Property(x=>x.Revision).IsConcurrencyToken();
+        model.Entity<InvitationRecord>().HasIndex(x=>new{x.CreatedUtc,x.Id});
+        model.Entity<DeviceGrantRecord>().HasIndex(x=>x.UserId);
+        model.Entity<DeviceGrantRecord>().HasIndex(x=>x.CredentialHash).IsUnique();
         model.Entity<OrganizationRecord>().ToTable(t=>t.HasCheckConstraint("single_organization","\"Id\" = 1"));
         model.Entity<OrganizationRecord>().HasOne<OrganizationUser>().WithMany().HasForeignKey(x=>x.AdministratorId).OnDelete(DeleteBehavior.Restrict);
         model.Entity<ProgramRecord>().Property(x=>x.Revision).IsConcurrencyToken();

@@ -35,7 +35,7 @@ public sealed class OrganizationManagement(OrganizationDatabase db)
     static (Guid Id,string Name) Actor(ClaimsPrincipal user)=>
         (Guid.Parse(user.FindFirstValue(ClaimTypes.NameIdentifier)??throw new InvalidOperationException("Authenticated account identity is missing.")),user.Identity!.Name!);
     public void Audit(Guid actor,string name,string action,Guid resource,int? revision=null)=>db.Audit.Add(new(){ActorId=actor,ActorName=name,Action=action,ResourceId=resource,Revision=revision,TimestampUtc=OrganizationTime.UtcNow});
-    async Task<T> Mutate<T>(ClaimsPrincipal user,Guid request,object input,Func<Guid,string,Task<T>> change,CancellationToken token)
+    internal async Task<T> Mutate<T>(ClaimsPrincipal user,Guid request,object input,Func<Guid,string,Task<T>> change,CancellationToken token)
     {
         var actor=Actor(user);var hash=Hash(input);
         await using var tx=await db.Database.BeginTransactionAsync(token);
@@ -50,7 +50,7 @@ public sealed class OrganizationManagement(OrganizationDatabase db)
             await db.SaveChangesAsync(token);await tx.CommitAsync(token);return response;
         }catch(DbUpdateConcurrencyException){throw new OrganizationConflict("Someone saved a newer revision. Your draft is still here; reload the saved record before trying again.");}
     }
-    void Revision(Guid id,int revision,string kind,object snapshot,Guid author)
+    internal void Revision(Guid id,int revision,string kind,object snapshot,Guid author)
     {
         var json=JsonSerializer.Serialize(snapshot,WireJson.Options);
         db.Revisions.Add(new(){ResourceId=id,Revision=revision,Kind=kind,SnapshotJson=json,Sha256=Hash(snapshot),AuthorId=author,TimestampUtc=OrganizationTime.UtcNow});

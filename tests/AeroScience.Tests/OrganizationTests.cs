@@ -68,7 +68,7 @@ public sealed class PostgresFactAttribute:FactAttribute
 {
     public PostgresFactAttribute(){if(string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("AEROSCIENCE_ORG_TEST_DATABASE")))Skip="Isolated PostgreSQL is not configured on this platform; no in-memory substitute.";}
 }
-public sealed class OrganizationServerTests:IAsyncLifetime
+public sealed partial class OrganizationServerTests:IAsyncLifetime
 {
     const string Origin="http://127.0.0.1:5193",Password="ResearchOnly!2026Flight";
     readonly string directory=Path.Combine(Path.GetTempPath(),"aeroscience-org-test-"+Guid.NewGuid().ToString("N"));
@@ -125,7 +125,7 @@ public sealed class OrganizationServerTests:IAsyncLifetime
     {
         await Bootstrap();await Login();var p=await Program();var campaign=await Value<OrganizationCampaignView>(await browser.Send($"/api/organization/programs/{p.Id}/campaigns",Campaign()));
         foreach(var role in new[]{OrganizationRoles.Manager,OrganizationRoles.Reviewer,OrganizationRoles.Pilot}){
-            using(var scope=app.Services.CreateScope()){var users=scope.ServiceProvider.GetRequiredService<UserManager<OrganizationUser>>();var user=new OrganizationUser{Id=Guid.NewGuid(),UserName=role};Assert.True((await users.CreateAsync(user,Password)).Succeeded);Assert.True((await users.AddToRoleAsync(user,role)).Succeeded);}
+            using(var scope=app.Services.CreateScope()){var users=scope.ServiceProvider.GetRequiredService<UserManager<OrganizationUser>>();var user=new OrganizationUser{Id=Guid.NewGuid(),UserName=role};Assert.True((await users.CreateAsync(user,Password)).Succeeded);Assert.True((await users.AddToRoleAsync(user,role)).Succeeded);var db=scope.ServiceProvider.GetRequiredService<OrganizationDatabase>();db.Memberships.Add(new(){UserId=user.Id,Role=role,State=OrganizationMembershipState.Active,UpdatedUtc=DateTimeOffset.UtcNow});await db.SaveChangesAsync();}
             using var target=new Browser();target.Connect(app);await Login(target,role);
             Assert.Equal(role==OrganizationRoles.Manager?HttpStatusCode.OK:HttpStatusCode.Forbidden,(await target.Client.GetAsync("/api/organization/programs")).StatusCode);
             Assert.Equal(HttpStatusCode.Forbidden,(await target.Send($"/api/organization/campaigns/{campaign.Id}/publish",new OrganizationPublishRequest(1,Guid.NewGuid(),1))).StatusCode);
@@ -138,7 +138,7 @@ public sealed class OrganizationServerTests:IAsyncLifetime
         await Bootstrap();await Login();var command=new OrganizationProgramRequest(1,Guid.NewGuid(),0,"Exact retry","One program");var responses=await Task.WhenAll(browser.Send("/api/organization/programs",command),browser.Send("/api/organization/programs",command));var a=await Value<OrganizationProgramView>(responses[0]);Assert.Equal(a,await Value<OrganizationProgramView>(responses[1]));
         Assert.Equal(HttpStatusCode.Conflict,(await browser.Send("/api/organization/programs",command with{Name="Different payload"})).StatusCode);
         var edit=command with{RequestId=Guid.NewGuid(),ExpectedRevision=1,Name="First editor"};responses=await Task.WhenAll(browser.Send($"/api/organization/programs/{a.Id}",edit,"PUT"),browser.Send($"/api/organization/programs/{a.Id}",edit with{RequestId=Guid.NewGuid(),Name="Other editor"},"PUT"));Assert.Single(responses,r=>r.StatusCode==HttpStatusCode.OK);Assert.Single(responses,r=>r.StatusCode==HttpStatusCode.Conflict);
-        using var scope=app.Services.CreateScope();var db=scope.ServiceProvider.GetRequiredService<OrganizationDatabase>();Assert.Equal(1,await db.Programs.CountAsync());Assert.Equal(2,await db.Revisions.CountAsync());Assert.Equal(2,(await db.Programs.SingleAsync()).Revision);
+        using var scope=app.Services.CreateScope();var db=scope.ServiceProvider.GetRequiredService<OrganizationDatabase>();Assert.Equal(1,await db.Programs.CountAsync());Assert.Equal(2,await db.Revisions.CountAsync(r=>r.Kind=="program"));Assert.Equal(2,(await db.Programs.SingleAsync()).Revision);
     }
     [PostgresFact]public async Task PublicationFreezesDefinitionsAndNewDraftCannotRewriteThePublishedCampaign()
     {
