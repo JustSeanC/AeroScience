@@ -157,8 +157,9 @@ public sealed partial class MissionStore
         using var scienceLease=card.ExperimentalSensor is not null||AtmosphericResearch.IsCollectionCard(card)||card.Survey is not null||card.ObservationFlight is not null&&science?.AvailabilityError() is null?science?.BeginAnalysis():null;
         PersonalResearchAttempt attempt;
         if(card.Procedure is not null){
-            var c=CalculateProcedure(card,mission.Id,request.StartUtc,request.EndUtc,mission.Status!=MissionStatus.Completed,token);
-            attempt=new(8,request.RequestId,mission.Id,card,request.StartUtc,request.EndUtc,DateTimeOffset.UtcNow,FlightRegimeEvaluation.ProcedureVersion,c.Summary.Outcome,0,null,null,c.Evidence,c.Summary.Explanation,marked?.Id,Procedure:c.Summary);
+            if(marked is not null){var point=ReadPointEvidence(db,tx,card,marked,token);attempt=new(8,request.RequestId,mission.Id,card,request.StartUtc,request.EndUtc,DateTimeOffset.UtcNow,"flight-procedure-point-1",point.Outcome,point.LongestHoldSeconds,point.HoldStartUtc,point.HoldEndUtc,point.Evidence,"This is one point attempt; whole-card completion requires all required points and repetitions. "+point.Explanation,marked.Id,QuantitativePoint:point);}
+            else{var c=CalculateProcedure(card,mission.Id,request.StartUtc,request.EndUtc,mission.Status!=MissionStatus.Completed,token);
+            attempt=new(8,request.RequestId,mission.Id,card,request.StartUtc,request.EndUtc,DateTimeOffset.UtcNow,FlightRegimeEvaluation.ProcedureVersion,c.Summary.Outcome,0,null,null,c.Evidence,c.Summary.Explanation,marked?.Id,Procedure:c.Summary);}
         }else if(card.ExperimentalSensor is not null){
             if(ScienceDeleted(mission.Id))throw new InvalidOperationException("Collected science was permanently deleted; modeled inputs cannot be recreated from flight context.");
             if(science is null)throw new InvalidOperationException("Reconnect the Scientific Data Library to evaluate original inputs.");
@@ -186,10 +187,12 @@ public sealed partial class MissionStore
             attempt=new(card.Version,request.RequestId,mission.Id,card,request.StartUtc,request.EndUtc,DateTimeOffset.UtcNow,AtmosphericResearch.EvaluatorFor(card),outcome.Outcome,0,null,null,
                 new(0,0,calculated.Summary.OriginalObservations,calculated.Hash,PreflightReadiness.Hash(plan!),mission.Source),outcome.Explanation,marked?.Id,calculated.Summary);
         }else{
+        if(marked?.Automatic is not null||marked?.ManualSource is not null)_=ReadPointEvidence(db,tx,card,marked,token);
         var evaluation = new FlightRegimeEvaluation.Window(card.FlightRegime!, request.StartUtc, request.EndUtc);
         using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
         long first = 0, last = 0, count = 0; TelemetrySource? source = null;
-        cmd.CommandText = "SELECT sequence,payload_json FROM telemetry WHERE mission_id=$flight AND timestamp_utc >= $start AND timestamp_utc <= $end ORDER BY sequence";
+        cmd.CommandText = marked?.Automatic is null&&marked?.ManualSource is null?"SELECT sequence,payload_json FROM telemetry WHERE mission_id=$flight AND timestamp_utc >= $start AND timestamp_utc <= $end ORDER BY sequence":"SELECT sequence,payload_json FROM telemetry WHERE mission_id=$flight AND sequence >= $autoFirst AND sequence <= $autoLast ORDER BY sequence";
+        if(marked?.Automatic is not null||marked?.ManualSource is not null){cmd.Parameters.AddWithValue("$autoFirst",marked.Automatic?.FirstSequence??marked.ManualSource!.AfterSequence+1);cmd.Parameters.AddWithValue("$autoLast",marked.Automatic?.LastSequence??marked.ManualSource!.ThroughSequence!.Value);}
         cmd.Parameters.AddWithValue("$start", Stamp(request.StartUtc)); cmd.Parameters.AddWithValue("$end", Stamp(request.EndUtc));
         // Pause edges are retained by the existing event recorder, not copied telemetry.
         using var pauses = PersonalPauseTimes(mission.Id, request.StartUtc, request.EndUtc).GetEnumerator();
@@ -211,7 +214,7 @@ public sealed partial class MissionStore
             token.ThrowIfCancellationRequested(); evaluation.Break();
             AppendResearchBreak(hash,pauses.Current); hasPause = pauses.MoveNext();
         }
-        var result = evaluation.Finish(mission.Status != MissionStatus.Completed);
+        var result = evaluation.Finish(marked?.Automatic is not null?marked.Status!=ResearchAttemptStatus.Recorded:mission.Status != MissionStatus.Completed);
         if (marked?.Status == ResearchAttemptStatus.Interrupted)
             result = (ResearchAttemptOutcome.InsufficientEvidence,"Attempt interrupted: " + marked.EndReason + ". Retained samples remain available; no automatic success was inferred.");
         attempt = new PersonalResearchAttempt(card.Version, request.RequestId, mission.Id, card, request.StartUtc, request.EndUtc,
@@ -219,6 +222,7 @@ public sealed partial class MissionStore
             evaluation.HoldStart, evaluation.HoldEnd,
             new(first, last, count, Convert.ToHexString(hash.GetHashAndReset()).ToLowerInvariant(), PreflightReadiness.Hash(plan!), source), result.Explanation, marked?.Id);
         }
+        attempt=attempt with{Automatic=marked?.Automatic};
         tx.Commit(); // Release the read snapshot before acquiring a short publication write lock.
         using var publication = db.BeginTransaction(); cmd.Transaction = publication;
         cmd.CommandText = "SELECT request_sha256,payload_json FROM personal_research_attempts WHERE id=$id";

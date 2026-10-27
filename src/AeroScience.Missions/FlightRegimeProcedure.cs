@@ -31,12 +31,14 @@ public static partial class FlightRegimeEvaluation
         }
         public void Add(TelemetryFrame frame){combined.Add(frame);foreach(var b in branches)b.Window.Add(frame);}
         public void Break(){combined.Break();foreach(var b in branches)b.Window.Break();}
-        public FlightTestPointEvidence Finish(Guid pointId,ResearchEvidenceReference evidence,bool interrupted)
+        internal PointWindowState Snapshot()=>new(combined.Snapshot(),branches.Select(b=>b.Window.Snapshot()).ToArray());
+        internal void Restore(PointWindowState state){combined.Restore(state.Combined);if(state.Branches.Length!=branches.Count)throw new InvalidOperationException("Detection checkpoint differs from its frozen signals.");for(var i=0;i<branches.Count;i++)branches[i].Window.Restore(state.Branches[i]);}
+        public FlightTestPointEvidence Finish(Guid pointId,ResearchEvidenceReference evidence,bool interrupted,DateTimeOffset? endOverride=null)
         {
-            var conditions=branches.Select(b=>{var r=b.Window.Finish(interrupted);return new FlightTestConditionEvidence(b.Signal,r.Outcome,b.Window.LongestHold,r.Explanation);}).ToArray();
-            var chosen=combined;var result=combined.Finish(interrupted);
+            var conditions=branches.Select(b=>{var r=b.Window.Finish(interrupted,endOverride);return new FlightTestConditionEvidence(b.Signal,r.Outcome,b.Window.LongestHold,r.Explanation);}).ToArray();
+            var chosen=combined;var result=combined.Finish(interrupted,endOverride);
             if(rule.TestPoint!.Policy=="any"){
-                var pass=branches.Where(b=>b.Window.Finish(interrupted).Outcome==ResearchAttemptOutcome.Pass).OrderByDescending(b=>b.Window.LongestHold).FirstOrDefault();
+                var pass=branches.Where(b=>b.Window.Finish(interrupted,endOverride).Outcome==ResearchAttemptOutcome.Pass).OrderByDescending(b=>b.Window.LongestHold).FirstOrDefault();
                 chosen=pass.Window??branches.OrderByDescending(b=>b.Window.LongestHold).First().Window;
                 var outcome=conditions.Any(c=>c.Outcome==ResearchAttemptOutcome.Pass)?ResearchAttemptOutcome.Pass
                     :conditions.All(c=>c.Outcome==ResearchAttemptOutcome.Fail)?ResearchAttemptOutcome.Fail:ResearchAttemptOutcome.InsufficientEvidence;
@@ -54,7 +56,7 @@ internal sealed class FlightProcedureProgress(FlightTestProcedureDefinition defi
     readonly double[] holds=new double[definition.Points.Length];
     readonly bool[] failed=new bool[definition.Points.Length];
     readonly string[] reasons=definition.Points.Select(_=>"No qualifying marked attempt. Missing repetitions remain Insufficient Evidence.").ToArray();
-    DateTimeOffset? lastQualifiedEnd;TelemetrySource? qualifiedSource;string? qualifiedAircraft;long count;
+    DateTimeOffset? lastQualifiedEnd;long lastQualifiedSequence;TelemetrySource? qualifiedSource;string? qualifiedAircraft;long count;
     public (bool Qualified,string Reason) Add(RecordedResearchAttempt attempt)
     {
         count++;var i=Array.FindIndex(definition.Points,p=>p.Id==attempt.TestPointId);if(i<0)return(false,"Unknown point identity cannot qualify.");
@@ -62,9 +64,9 @@ internal sealed class FlightProcedureProgress(FlightTestProcedureDefinition defi
         holds[i]=Math.Max(holds[i],evidence.LongestHoldSeconds);failed[i]|=evidence.Outcome==ResearchAttemptOutcome.Fail;
         var compatible=evidence.Evidence.Source is not null&&!string.IsNullOrWhiteSpace(evidence.Aircraft)&&(qualifiedSource is null||qualifiedSource==evidence.Evidence.Source&&qualifiedAircraft==evidence.Aircraft);
         var eligible=compatible&&(!definition.Ordered||Enumerable.Range(0,i).All(j=>completed[j]>=definition.Points[j].Repetitions))
-            &&(lastQualifiedEnd is null||attempt.StartUtc>lastQualifiedEnd);
+            &&(lastQualifiedEnd is null||attempt.StartUtc>lastQualifiedEnd||attempt.StartUtc==lastQualifiedEnd&&evidence.Evidence.FirstSequence>lastQualifiedSequence);
         if(evidence.Outcome==ResearchAttemptOutcome.Pass&&attempt.Status==ResearchAttemptStatus.Recorded&&eligible&&completed[i]<definition.Points[i].Repetitions){
-            completed[i]++;lastQualifiedEnd=attempt.EndUtc;qualifiedSource??=evidence.Evidence.Source;qualifiedAircraft??=evidence.Aircraft;reasons[i]="Distinct marked interval qualified in the required order. Earlier failed/interrupted attempts remain in history.";return(true,reasons[i]);
+            completed[i]++;lastQualifiedEnd=attempt.EndUtc;lastQualifiedSequence=evidence.Evidence.LastSequence;qualifiedSource??=evidence.Evidence.Source;qualifiedAircraft??=evidence.Aircraft;reasons[i]="Distinct marked interval qualified in the required order. Earlier failed/interrupted attempts remain in history.";return(true,reasons[i]);
         }else reasons[i]=!compatible?"This point has missing or different original source/aircraft identity; it cannot be combined with prior qualifying repetitions.":!eligible?"This interval cannot qualify: required earlier points were incomplete or it overlaps an already counted interval. It is not retroactively qualified.":completed[i]>=definition.Points[i].Repetitions?"Required repetitions already complete; this extra attempt is preserved but is not counted again.":evidence.Explanation;
         return(false,reasons[i]);
     }

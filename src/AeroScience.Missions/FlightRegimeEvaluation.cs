@@ -73,13 +73,15 @@ public static partial class FlightRegimeEvaluation
             previous = at; previousSource = sample.Source; aircraft = sample.Aircraft;
         }
 
-        public (ResearchAttemptOutcome Outcome, string Explanation) Finish(bool interrupted)
+        internal HoldWindowState Snapshot()=>new(previous,continuousStart,holdStart,previousSource,aircraft,incomplete,observed,LongestHold,HoldStart,HoldEnd);
+        internal void Restore(HoldWindowState state){previous=state.Previous;continuousStart=state.ContinuousStart;holdStart=state.HoldStart;previousSource=state.Source;aircraft=state.Aircraft;incomplete=state.Incomplete;observed=state.Observed;LongestHold=state.Longest;HoldStart=state.LongestStart;HoldEnd=state.LongestEnd;}
+        public (ResearchAttemptOutcome Outcome, string Explanation) Finish(bool interrupted,DateTimeOffset? endOverride=null)
         {
-            if(rule.TestPoint is not null&&(interrupted||incomplete||previous is null||(end-previous.Value).TotalSeconds>MaximumGapSeconds))
+            if(rule.TestPoint is not null&&(interrupted||incomplete||previous is null||((endOverride??end)-previous.Value).TotalSeconds>MaximumGapSeconds))
                 return(ResearchAttemptOutcome.InsufficientEvidence,"The custom evidence interval contains missing/unsupported required measurements, pauses, gaps, changed source/aircraft or an interruption. Its longest retained segment is reported, but this incomplete attempt cannot pass.");
             if (LongestHold >= rule.HoldSeconds)
                 return rule.TestPoint is not null?(ResearchAttemptOutcome.Pass,"Recorded selected conditions satisfied simultaneous AND for the required continuous hold on supported evidence. Unselected signals are not requirements. This does not certify an aircraft."):(ResearchAttemptOutcome.Pass, "Recorded indicated airspeed and MSL altitude stayed inside both tolerances for the required continuous hold. This is a simulator test, not aircraft certification.");
-            if (interrupted || incomplete || previous is null || (end - previous.Value).TotalSeconds > MaximumGapSeconds
+            if (interrupted || incomplete || previous is null || ((endOverride??end) - previous.Value).TotalSeconds > MaximumGapSeconds
                 || observed < rule.HoldSeconds)
                 return (ResearchAttemptOutcome.InsufficientEvidence, "The selected interval cannot establish the required hold. Missing or invalid samples, simulator pauses, recording gaps, changed aircraft/source or an interrupted recording are not counted as success.");
             return rule.TestPoint is not null?(ResearchAttemptOutcome.Fail,"The supported interval is long enough to assess, but the selected simultaneous conditions did not meet the required continuous hold."):(ResearchAttemptOutcome.Fail, "The recorded interval is long enough to assess, but no continuous hold met both the indicated-airspeed and MSL-altitude tolerances.");

@@ -55,10 +55,12 @@ public sealed record PersonalResearchAttempt(int Version, Guid Id, Guid FlightId
     [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] SurveyResearchSummary? Survey=null,
     [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] ObservationResearchSummary? ObservationFlight=null,
     [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] ExperimentalSensorSummary? ExperimentalSensor=null,
-    [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] FlightTestProcedureSummary? Procedure=null);
+    [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] FlightTestProcedureSummary? Procedure=null,
+    [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] FlightTestPointEvidence? QuantitativePoint=null,
+    [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] AutomaticAttemptMetadata? Automatic=null);
 
-public enum ResearchCardAction { Unknown, Activate, Deactivate, BeginAttempt, EndAttempt }
-public enum ResearchAttemptStatus { Recording, Recorded, Interrupted }
+public enum ResearchCardAction { Unknown, Activate, Deactivate, BeginAttempt, EndAttempt, EnableAutomatic, DisableAutomatic }
+public enum ResearchAttemptStatus { Recording, Recorded, Interrupted, Finalizing }
 public sealed record ResearchCardControl([property: JsonRequired] int Version, Guid FlightId, Guid RequestId,
     [property: JsonRequired] long ExpectedRevision, ResearchCardAction Action, Guid CardId,
     [property: JsonRequired] Guid? ExpectedAttemptId,
@@ -67,10 +69,13 @@ public sealed record RecordedResearchAttempt(Guid Id, Guid FlightId, Guid CardId
     DateTimeOffset StartUtc, DateTimeOffset? EndUtc, ResearchAttemptStatus Status,
     long BeginEventId, long? EndEventId, string? EndReason,
     [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] Guid? TestPointId=null,
-    [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] FlightTestPointEvidence? PointEvidence=null);
+    [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] FlightTestPointEvidence? PointEvidence=null,
+    [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] AutomaticAttemptMetadata? Automatic=null,
+    [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] ManualAttemptSource? ManualSource=null);
 public sealed record ResearchFlightCard(PersonalResearchCard Card, bool Active,
     RecordedResearchAttempt? OpenAttempt, string? ActivationBlocked,
-    [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] FlightTestProcedureSummary? Procedure=null);
+    [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] FlightTestProcedureSummary? Procedure=null,
+    [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] AutomaticDetectionStatus? Detection=null);
 public sealed record ResearchFlightState(int Version, Guid FlightId, long Revision, bool Recording,
     ResearchFlightCard[] Cards, DateTimeOffset GeneratedUtc, bool CanBeginAttempt, string Message,
     int TotalCards, int? NextOffset = null,int PageSize=4);

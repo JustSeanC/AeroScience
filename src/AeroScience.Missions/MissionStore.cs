@@ -44,7 +44,9 @@ public sealed partial class MissionStore
         cmd.CommandText = "PRAGMA user_version;";
         if (Convert.ToInt32(cmd.ExecuteScalar(), CultureInfo.InvariantCulture) < 10) MigrateResearchOperations(db);
         cmd.CommandText="CREATE INDEX IF NOT EXISTS personal_card_attempts_card ON personal_card_attempts(card_id,started_utc DESC,id); CREATE INDEX IF NOT EXISTS personal_card_attempts_point_review ON personal_card_attempts(mission_id,card_id,started_utc,id)";
-        cmd.ExecuteNonQuery(); // Additive read index; no schema-version change or historical row rewrite.
+        cmd.ExecuteNonQuery();
+        cmd.CommandText="CREATE INDEX IF NOT EXISTS personal_detection_work ON collection_receipts(kind,json_extract(result_json,'$.complete'),mission_id,receipt_id) WHERE kind='personal-detection'; CREATE INDEX IF NOT EXISTS personal_detection_cards ON collection_receipts(mission_id,json_extract(result_json,'$.consent.cardId'),json_extract(result_json,'$.consent.eventId')) WHERE kind='personal-detection'";cmd.ExecuteNonQuery();
+        cmd.CommandText="CREATE INDEX IF NOT EXISTS personal_recorded_evaluations ON personal_research_attempts(json_extract(payload_json,'$.recordedAttemptId')) WHERE json_extract(payload_json,'$.recordedAttemptId') IS NOT NULL";cmd.ExecuteNonQuery(); // Additive read index; no schema-version change or historical row rewrite.
     }
 
     private void InitializeCore()

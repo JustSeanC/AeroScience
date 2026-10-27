@@ -107,6 +107,7 @@ public static class EngineApplication
         builder.Services.AddSingleton<ITelemetryProvider, SimConnectTelemetryProvider>();
         configureServices?.Invoke(builder.Services);
         builder.Services.AddHostedService<TelemetryWorker>();
+        builder.Services.AddHostedService<ResearchAttemptWorker>();
         builder.Services.AddSingleton(sp=>new ToolbarCommandHandler(sp.GetRequiredService<MissionCoordinator>(),sp.GetRequiredService<RouteMapService>(),
             (snapshot,collection)=>sp.GetRequiredService<MissionIntelligenceService>().Native(snapshot,collection), ApplicationProfile.Current.AuthorizeToolbar));
         builder.Services.AddSingleton<RouteMapService>();

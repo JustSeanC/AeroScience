@@ -64,7 +64,7 @@ public sealed partial class MissionStore
             }
             foreach(var table in new[]{"scientific_recovery","analysis_settings","collection_inputs","collection_receipts","science_intents","dataset_references"}){
                 command.Parameters.AddWithValue("$table",table);command.CommandText="SELECT COUNT(*) FROM sqlite_master WHERE name=$table";var exists=Convert.ToInt64(command.ExecuteScalar())>0;command.Parameters.RemoveAt("$table");if(!exists)continue;
-                command.CommandText=table=="dataset_references"?"UPDATE dataset_references SET available=0 WHERE mission_id=$id":$"DELETE FROM {table} WHERE mission_id=$id";command.ExecuteNonQuery();
+                command.CommandText=table=="collection_receipts"?"DELETE FROM collection_receipts WHERE mission_id=$id AND kind NOT IN ('personal-card','personal-detection')":table=="dataset_references"?"UPDATE dataset_references SET available=0 WHERE mission_id=$id":$"DELETE FROM {table} WHERE mission_id=$id";command.ExecuteNonQuery();
             }
             command.CommandText="SELECT EXISTS(SELECT 1 FROM events WHERE mission_id=$id AND kind='science-deleted')";
             if(Convert.ToInt64(command.ExecuteScalar())==0)Event(db,tx,mission,DateTimeOffset.UtcNow,"science-deleted","Collected scientific measurements and dependent analysis were permanently deleted by the user. Flight recording and external sources were preserved. No grade may be reconstructed from deleted evidence.");

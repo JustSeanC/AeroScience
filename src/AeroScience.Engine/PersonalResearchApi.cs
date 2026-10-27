@@ -55,6 +55,7 @@ public static class PersonalResearchApi
             }).ToArray()};
         });
         app.MapGet("/api/missions/{id:guid}/research-operations",(Guid id,MissionCoordinator coordinator)=>coordinator.PersonalResearch(id));
+        app.MapPost("/api/missions/{id:guid}/research-detection/recover",(Guid id,AutomaticDetectionScan request,MissionStore store)=>{if(request.RequestId==Guid.Empty)throw new ArgumentException("Choose a recovery request identity.");return store.RecoverAutomaticAttempts(id);});
         app.MapPost("/api/research/control",(ResearchCardControl request,MissionCoordinator coordinator)=>coordinator.ControlPersonalResearch(request));
         app.MapGet("/api/missions/{id:guid}/research-attempts",(Guid id,int? offset,MissionStore store)=>store.RecordedResearchAttempts(id,offset??0));
         app.MapPost("/api/research/recorded-attempts/{id:guid}/evaluate",(Guid id,ResearchEvaluationCommand request,MissionStore store,ScienceStore science,HttpContext context)=>store.EvaluateRecordedResearchAttempt(id,request.RequestId,context.RequestAborted,science));

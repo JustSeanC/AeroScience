@@ -20,5 +20,6 @@ public sealed record FlightTestPointProgress(Guid PointId,int RequiredRepetition
 public sealed record FlightTestProcedureSummary(int Version,bool Ordered,ResearchAttemptOutcome Outcome,
     FlightTestPointProgress[] Points,long AttemptCount,Guid? NextPointId,string Explanation);
 public sealed record FlightTestProcedureReview(bool MatchesSavedEvidence,FlightTestProcedureSummary Summary,
-    FlightTestMarkedReview[] Preview,bool MoreAttempts,string Message);
+    FlightTestMarkedReview[] Preview,bool MoreAttempts,string Message,
+    [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] FlightTestPointEvidence? SelectedPoint=null);
 public sealed record FlightTestMarkedReview(RecordedResearchAttempt Attempt,bool Qualified,string Qualification);

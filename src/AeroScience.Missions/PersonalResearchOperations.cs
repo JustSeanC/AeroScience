@@ -100,7 +100,7 @@ public sealed partial class MissionStore
         var cards = new List<ResearchFlightCard>();
         using (var reader = cmd.ExecuteReader()) while (reader.Read())
         { var card = JsonSerializer.Deserialize<PersonalResearchCard>(reader.GetString(0),WireJson.Options)!; cards.Add(new(card,reader.GetBoolean(1),opened.GetValueOrDefault(card.Id),null)); }
-        cards=cards.Select(c=>c.Card.Procedure is null?c:c with{Procedure=RetainedProcedureProgress(db,tx,flight,c.Card)}).ToList();
+        cards=cards.Select(c=>c with{Procedure=c.Card.Procedure is null?null:RetainedProcedureProgress(db,tx,flight,c.Card),Detection=DetectionStatus(db,tx,flight,c.Card)}).ToList();
         var selected = cards.Select(c => c with { ActivationBlocked = c.Active ? null : cards.FirstOrDefault(other => other.Active && !CompatibleResearchCards(c.Card,other.Card)) is {} conflict
             ? $"Deactivate {conflict.Card.Name} first: indicated-airspeed or MSL-altitude target ranges do not overlap." : null }).ToArray();
         return new(1,flight,revision,status=="Recording",selected,DateTimeOffset.UtcNow,false,
@@ -152,11 +152,24 @@ public sealed partial class MissionStore
         if(!state.Recording||state.Revision!=request.ExpectedRevision)throw new InvalidOperationException("Flight or test-card state changed. Synchronize before trying again.");
         var selected=state.Cards.SingleOrDefault(c=>c.Card.Id==request.CardId)??throw new ArgumentException("This card was not selected before this flight.");
         if(selected.OpenAttempt?.Id!=request.ExpectedAttemptId)throw new InvalidOperationException("The current card attempt changed. Synchronize before trying again.");
-        var attempt=selected.OpenAttempt;var attemptId=attempt?.Id;string message;
+        var attempt=selected.OpenAttempt;
+        if(request.Action==ResearchCardAction.BeginAttempt&&attempt?.Automatic is not null){DeferAutomaticOpen(db,tx,attempt);attempt=null;}
+        var automaticStop=request.Action is ResearchCardAction.Deactivate or ResearchCardAction.DisableAutomatic||request.Action==ResearchCardAction.EndAttempt&&attempt?.Automatic is not null;
+        if(automaticStop){StopAutomaticDetection(db,tx,request.FlightId,selected.Card.Id,at,"Detection was turned off or its card/attempt was stopped by the pilot.");if(attempt?.Automatic is not null)attempt=null;}
+        var attemptId=attempt?.Id;ManualAttemptSource? manualSource=attempt?.ManualSource;string message;long? detectionAfter=null;FlightTestProcedurePoint? detectionPoint=null;
         var point=selected.Card.Procedure?.Points.SingleOrDefault(p=>p.Id==request.TestPointId);
         if(request.Action==ResearchCardAction.BeginAttempt&&selected.Card.Procedure is not null&&point is null)throw new ArgumentException("Select an exact named test point before Begin Attempt.");
-        if(request.TestPointId is not null&&(selected.Card.Procedure is null||request.Action!=ResearchCardAction.BeginAttempt))throw new ArgumentException("A point selection is only valid when beginning a multi-point attempt.");
+        if(request.TestPointId is not null&&request.Action!=ResearchCardAction.EnableAutomatic&&(selected.Card.Procedure is null||request.Action!=ResearchCardAction.BeginAttempt))throw new ArgumentException("A point selection is only valid when beginning a multi-point attempt.");
         switch(request.Action){
+            case ResearchCardAction.EnableAutomatic:
+                if(!selected.Active||attempt is not null)throw new InvalidOperationException("Activate the card and finish its current attempt before enabling or changing automatic detection.");
+                detectionPoint=QuantitativePoint(selected.Card,request.TestPointId);
+                var previousDetection=DetectionSessions(db,tx,request.FlightId,selected.Card.Id).ToArray();
+                if(previousDetection.Any(s=>s.StopUtc is null&&s.Failure is null&&s.Consent.PointId==detectionPoint.Id)){detectionPoint=null;message="Automatic detection is already enabled for this point. Its recognition and separation state were preserved.";break;}
+                detectionAfter=LastDetectionSequence(db,tx,request.FlightId);
+                message=DetectionConsentMessage(selected.Card,request.RequestId,detectionPoint.Id,detectionAfter.Value,previousDetection.Any(s=>s.Consent.PointId==detectionPoint.Id));break;
+            case ResearchCardAction.DisableAutomatic:
+                message="Automatic detection is off. Manual attempts, flight recording and science controls remain available.";break;
             case ResearchCardAction.Activate:
                 if(selected.Active)throw new InvalidOperationException("This card is already active.");
                 if(selected.ActivationBlocked is {} conflict)throw new InvalidOperationException(conflict);
@@ -168,16 +181,20 @@ public sealed partial class MissionStore
                 if(!selected.Active||attempt is not null)throw new InvalidOperationException("Activate this card and end its current attempt before beginning another.");
                 attemptId=Guid.NewGuid();message=$"Begin Attempt · {selected.Card.Name} · revision {selected.Card.Revision}."+(point is null?"":$" Test point: {point.Conditions.TestPoint!.Name}.");break;
             case ResearchCardAction.EndAttempt:
-                if(attempt is null)throw new InvalidOperationException("This card has no open attempt.");
+                if(attempt is null&&!automaticStop)throw new InvalidOperationException("This card has no open attempt.");
                 message=$"End Attempt · {selected.Card.Name}. Recorded evidence awaits evaluation.";break;
             default:throw new ArgumentException("Unsupported card action.");
         }
+        if(request.Action==ResearchCardAction.BeginAttempt&&DetectionSessions(db,tx,request.FlightId,selected.Card.Id).Any(s=>s.StopUtc is null))manualSource=new(LastDetectionSequence(db,tx,request.FlightId));
+        else if(manualSource is not null&&request.Action is ResearchCardAction.EndAttempt or ResearchCardAction.Deactivate)manualSource=manualSource with{ThroughSequence=LastDetectionSequence(db,tx,request.FlightId)};
+        if(manualSource is not null)message+=ManualSourceIdentity(attemptId!.Value,manualSource);
         if(selected.Card.Procedure is not null&&(point?.Id??attempt?.TestPointId) is {} selectedPoint&&attemptId is {} selectedAttempt)
             message+=ProcedureEventIdentity(selectedPoint,selectedAttempt);
         var eventId=ResearchEvent(db,tx,request.FlightId,at,request.Action.ToString(),message);
-        if(request.Action==ResearchCardAction.BeginAttempt)SaveRecordedAttempt(db,tx,new(attemptId!.Value,request.FlightId,selected.Card.Id,selected.Card.Revision,at,null,ResearchAttemptStatus.Recording,eventId,null,null,point?.Id));
+        if(detectionPoint is not null)EnableAutomaticDetection(db,tx,request.FlightId,selected.Card,detectionPoint.Id,request.RequestId,at,eventId,detectionAfter!.Value);
+        if(request.Action==ResearchCardAction.BeginAttempt)SaveRecordedAttempt(db,tx,new(attemptId!.Value,request.FlightId,selected.Card.Id,selected.Card.Revision,at,null,ResearchAttemptStatus.Recording,eventId,null,null,point?.Id,ManualSource:manualSource));
         else if(attempt is not null && request.Action is ResearchCardAction.EndAttempt or ResearchCardAction.Deactivate){
-            var ended=attempt with{EndUtc=at<attempt.StartUtc?attempt.StartUtc:at,Status=request.Action==ResearchCardAction.EndAttempt?ResearchAttemptStatus.Recorded:ResearchAttemptStatus.Interrupted,EndEventId=eventId,EndReason=request.Action==ResearchCardAction.EndAttempt?"Ended by pilot":"Card deactivated before End Attempt"};
+            var ended=attempt with{ManualSource=manualSource,EndUtc=at<attempt.StartUtc?attempt.StartUtc:at,Status=request.Action==ResearchCardAction.EndAttempt?ResearchAttemptStatus.Recorded:ResearchAttemptStatus.Interrupted,EndEventId=eventId,EndReason=request.Action==ResearchCardAction.EndAttempt?"Ended by pilot":"Card deactivated before End Attempt"};
             if(selected.Card.Procedure is not null)ended=ended with{PointEvidence=ReadPointEvidence(db,tx,selected.Card,ended,CancellationToken.None)};
             SaveRecordedAttempt(db,tx,ended);
         }
@@ -202,12 +219,14 @@ public sealed partial class MissionStore
     {
         var state=ReadResearchOperations(db,tx,flight);
         foreach(var card in state.Cards){
-            if(card.OpenAttempt is {} attempt){
+            if(card.OpenAttempt is {Automatic:null} attempt){
                 var end=at<attempt.StartUtc?attempt.StartUtc:at;
-                var eventId=ResearchEvent(db,tx,flight,end,"Interrupted",$"Interrupted attempt · {card.Card.Name}. Flight ended or recording was recovered; no automatic pass."+(attempt.TestPointId is {} point?ProcedureEventIdentity(point,attempt.Id):""));
-                SaveRecordedAttempt(db,tx,attempt with{EndUtc=end,Status=ResearchAttemptStatus.Interrupted,EndEventId=eventId,EndReason="Flight ended or recording interrupted before End Attempt"});
+                var manual=attempt.ManualSource is null?null:attempt.ManualSource with{ThroughSequence=LastDetectionSequence(db,tx,flight)};
+                var eventId=ResearchEvent(db,tx,flight,end,"Interrupted",$"Interrupted attempt · {card.Card.Name}. Flight ended or recording was recovered; no automatic pass."+(manual is null?"":ManualSourceIdentity(attempt.Id,manual))+(attempt.TestPointId is {} point?ProcedureEventIdentity(point,attempt.Id):""));
+                SaveRecordedAttempt(db,tx,attempt with{ManualSource=manual,EndUtc=end,Status=ResearchAttemptStatus.Interrupted,EndEventId=eventId,EndReason="Flight ended or recording interrupted before End Attempt"});
             }
         }
+        StopAutomaticDetection(db,tx,flight,null,at,"The flight ended or recording was recovered; original automatic evidence awaits finalization.");
         using var cmd=db.CreateCommand();cmd.Transaction=tx;
         cmd.CommandText="UPDATE personal_flight_cards SET active=0 WHERE mission_id=$flight; UPDATE personal_research_state SET revision=revision+1 WHERE mission_id=$flight";
         cmd.Parameters.AddWithValue("$flight",flight.ToString());cmd.ExecuteNonQuery();

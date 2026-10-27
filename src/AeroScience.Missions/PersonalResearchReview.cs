@@ -90,12 +90,13 @@ public sealed partial class MissionStore
               COUNT(*) FILTER(WHERE status='Recording'),
               (SELECT COUNT(*) FROM personal_research_attempts WHERE card_id=$card),
               COUNT(*) FILTER(WHERE json_extract(card_json,'$.revision')=$revision AND status<>'Interrupted'
-                AND json_extract(result_json,'$.outcome')='pass' AND json_extract(result_json,'$.evidence.source')='simulator'
+                AND json_extract(result_json,'$.quantitativePoint') IS NULL AND json_extract(result_json,'$.outcome')='pass' AND json_extract(result_json,'$.evidence.source')='simulator'
                 AND json_extract(result_json,'$.evidence.sampleCount')>1
-                AND (SELECT COUNT(*) FROM telemetry t WHERE t.mission_id=selected.mission_id
-                  AND t.sequence BETWEEN json_extract(result_json,'$.evidence.firstSequence') AND json_extract(result_json,'$.evidence.lastSequence'))=json_extract(result_json,'$.evidence.sampleCount')),
+                AND ((json_extract(result_json,'$.procedure') IS NOT NULL AND (SELECT COUNT(*) FROM telemetry t WHERE t.mission_id=selected.mission_id)>=json_extract(result_json,'$.evidence.sampleCount'))
+                  OR (json_extract(result_json,'$.procedure') IS NULL AND (SELECT COUNT(*) FROM telemetry t WHERE t.mission_id=selected.mission_id
+                  AND t.sequence BETWEEN json_extract(result_json,'$.evidence.firstSequence') AND json_extract(result_json,'$.evidence.lastSequence'))=json_extract(result_json,'$.evidence.sampleCount')))),
               COUNT(*) FILTER(WHERE json_extract(card_json,'$.revision')=$revision AND status<>'Interrupted'
-                AND json_extract(result_json,'$.outcome')='pass' AND json_extract(result_json,'$.evidence.source')='simulated'),
+                AND json_extract(result_json,'$.quantitativePoint') IS NULL AND json_extract(result_json,'$.outcome')='pass' AND json_extract(result_json,'$.evidence.source')='simulated'),
               COUNT(*) FILTER(WHERE json_extract(result_json,'$.outcome')='collectionComplete'),
               COUNT(*) FILTER(WHERE json_extract(result_json,'$.outcome')='partialCollection')
             FROM selected
@@ -186,7 +187,9 @@ public sealed partial class MissionStore
         if(result.EndUtc<result.StartUtc||result.EndUtc-result.StartUtc>TimeSpan.FromHours(24))throw new NotSupportedException("This result exceeds the supported 24-hour evidence review window.");
         using var hash=IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
         using var cmd=db.CreateCommand();cmd.Transaction=tx;
-        cmd.CommandText="SELECT sequence,payload_json FROM telemetry WHERE mission_id=$flight AND timestamp_utc >= $start AND timestamp_utc <= $end ORDER BY sequence";
+        var autoMarked=result.RecordedAttemptId is {} markedId?RecordedResearchAttempt(markedId):null;
+        cmd.CommandText=autoMarked?.Automatic is null&&autoMarked?.ManualSource is null?"SELECT sequence,payload_json FROM telemetry WHERE mission_id=$flight AND timestamp_utc >= $start AND timestamp_utc <= $end ORDER BY sequence":"SELECT sequence,payload_json FROM telemetry WHERE mission_id=$flight AND sequence >= $autoFirst AND sequence <= $autoLast ORDER BY sequence";
+        if(autoMarked?.Automatic is not null||autoMarked?.ManualSource is not null){if(result.Card.Procedure is not null||autoMarked.Automatic is not null)_=ReadPointEvidence(db,tx,result.Card,autoMarked,token);cmd.Parameters.AddWithValue("$autoFirst",autoMarked.Automatic?.FirstSequence??autoMarked.ManualSource!.AfterSequence+1);cmd.Parameters.AddWithValue("$autoLast",autoMarked.Automatic?.LastSequence??autoMarked.ManualSource!.ThroughSequence!.Value);}
         cmd.Parameters.AddWithValue("$flight",result.FlightId.ToString());cmd.Parameters.AddWithValue("$start",Stamp(result.StartUtc));cmd.Parameters.AddWithValue("$end",Stamp(result.EndUtc));
         var custom=result.Card.FlightRegime?.TestPoint is not null;
         var evaluation=custom?new FlightRegimeEvaluation.Window(result.Card.FlightRegime!,result.StartUtc,result.EndUtc):null;
@@ -217,12 +220,12 @@ public sealed partial class MissionStore
         if(custom){
             cmd.CommandText="SELECT card_json FROM personal_flight_cards WHERE mission_id=$flight AND card_id=$card";cmd.Parameters.AddWithValue("$card",result.Card.Id.ToString());
             var frozen=cmd.ExecuteScalar() as string;
-            var interrupted=Detail(result.FlightId)?.Mission.Status!=MissionStatus.Completed
-                ||result.RecordedAttemptId is {} marked&&RecordedResearchAttempt(marked).Status==ResearchAttemptStatus.Interrupted;
+            var interrupted=autoMarked?.Automatic is not null?autoMarked.Status!=ResearchAttemptStatus.Recorded:Detail(result.FlightId)?.Mission.Status!=MissionStatus.Completed
+                ||autoMarked?.Status==ResearchAttemptStatus.Interrupted;
             var outcome=evaluation!.Finish(interrupted);
             matches &= result.Version==7&&result.EvaluatorVersion==FlightRegimeEvaluation.CustomVersion&&frozen is not null
                 &&PreflightReadiness.Hash(JsonSerializer.Deserialize<PersonalResearchCard>(frozen,WireJson.Options)!)==PreflightReadiness.Hash(result.Card)
-                &&outcome.Outcome==result.Outcome&&evaluation.LongestHold==result.LongestSupportedHoldSeconds
+                &&PreflightReadiness.Hash(autoMarked?.Automatic!)==PreflightReadiness.Hash(result.Automatic!)&&outcome.Outcome==result.Outcome&&evaluation.LongestHold==result.LongestSupportedHoldSeconds
                 &&evaluation.HoldStart==result.HoldStartUtc&&evaluation.HoldEnd==result.HoldEndUtc;
         }
         return new(matches,count,result.Evidence.SampleCount,gaps,edges,invalid,maxGap,sources.Order().ToArray(),preview.ToArray(),breaks.ToArray(),gaps+edges>breaks.Count);

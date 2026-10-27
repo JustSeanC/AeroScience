@@ -385,7 +385,7 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
             if(maintenance)throw new InvalidOperationException("Storage maintenance is in progress.");
             if(store.ResearchReceipt(request) is {} prior)return new(prior,PersonalResearch(request.FlightId));
             if(active?.Id!=request.FlightId)throw new InvalidOperationException("This flight is not currently recording. Synchronize before issuing card controls.");
-            if(request.Action==ResearchCardAction.BeginAttempt&&!PersonalResearch(request.FlightId).CanBeginAttempt)
+            if(request.Action is ResearchCardAction.BeginAttempt or ResearchCardAction.EnableAutomatic&&!PersonalResearch(request.FlightId).CanBeginAttempt)
                 throw new InvalidOperationException("Begin Attempt needs fresh, unpaused aircraft telemetry for this active flight.");
             var receipt=store.ControlResearchCard(request,ControlTime);
             return new(receipt,PersonalResearch(request.FlightId));
