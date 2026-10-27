@@ -24,12 +24,12 @@ public sealed class UnavailableOrganizationCredentials:IOrganizationCredentials
     public void Save(Guid id,string credential)=>throw new IOException("Connect on the Windows companion PC; secure organization credential storage is unavailable here.");
     public void Remove(Guid id)=>throw new IOException("Secure organization credential storage is unavailable here.");
 }
-public sealed record OrganizationSavedConnection(Guid Id,Guid OrganizationId,string Name,string Origin,DateTimeOffset ExpiresUtc);
+public sealed record OrganizationSavedConnection(Guid Id,Guid OrganizationId,string Name,string Origin,DateTimeOffset ExpiresUtc,OrganizationDesktopPermission Permission=OrganizationDesktopPermission.ReadPublished);
 public sealed record OrganizationConnectionStatus(OrganizationSavedConnection Connection,string Status,OrganizationMemberInformation? Information=null);
 public sealed record OrganizationConnectReview(Guid ReviewId,OrganizationPublicIdentity Organization,bool VaultAvailable);
-public sealed record OrganizationConnectBegin(Guid PendingId,OrganizationPublicIdentity Organization,string UserCode,string ApprovalUrl,DateTimeOffset ExpiresUtc,int PollSeconds);
+public sealed record OrganizationConnectBegin(Guid PendingId,OrganizationPublicIdentity Organization,string UserCode,string ApprovalUrl,DateTimeOffset ExpiresUtc,int PollSeconds,OrganizationDesktopPermission Permission=OrganizationDesktopPermission.ReadPublished);
 public sealed record OrganizationConnectRequest(string Address);
-public sealed record OrganizationConnectApproval(Guid ReviewId,Guid OrganizationId,bool Confirm);
+public sealed record OrganizationConnectApproval(Guid ReviewId,Guid OrganizationId,bool Confirm,OrganizationDesktopPermission Permission=OrganizationDesktopPermission.ReadPublished);
 public sealed record OrganizationConnectionFinish(Guid PendingId);
 
 // Explicitly user-initiated connections only. Never called by telemetry, acquisition or personal research evaluation.
@@ -82,6 +82,7 @@ public sealed class OrganizationConnections:IDisposable
         catch(HttpRequestException){throw new IOException("The organization could not be reached securely. Check its address or try again later.");}
         using var response=received;
         if(response.StatusCode is HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden)throw new UnauthorizedAccessException("Organization authorization is expired or revoked. Connect again if your membership is active.");
+        if(response.StatusCode==HttpStatusCode.Conflict)throw new IOException("The card or assignment changed, or its slots are held. Refresh Available Research and My Assignments before trying again. Your request did not change local research.");
         if(!response.IsSuccessStatusCode)throw new IOException("The organization could not complete this request. No local research was changed. Try again or contact its administrator.");
         return await response.Content.ReadFromJsonAsync<T>(WireJson.Options,ct)??throw new IOException("The organization returned an unsupported response.");
     }
@@ -97,15 +98,15 @@ public sealed class OrganizationConnections:IDisposable
     public async Task<OrganizationConnectBegin> Begin(OrganizationConnectApproval approval,CancellationToken ct)
     {
         await gate.WaitAsync(ct);try{
-            if(!approval.Confirm||!reviews.TryGetValue(approval.ReviewId,out var review)||review.Expires<=DateTimeOffset.UtcNow||review.Identity.Id!=approval.OrganizationId)throw new ArgumentException("Review and confirm the organization's identity first.");
+            if(!Enum.IsDefined(approval.Permission)||!approval.Confirm||!reviews.TryGetValue(approval.ReviewId,out var review)||review.Expires<=DateTimeOffset.UtcNow||review.Identity.Id!=approval.OrganizationId)throw new ArgumentException("Review and confirm the organization's identity first.");
             if(!vault.Available)throw new IOException("Connect on the Windows companion PC using its secure credential vault.");
             foreach(var id in pending.Where(p=>p.Value.Device.ExpiresUtc<DateTimeOffset.UtcNow).Select(p=>p.Key).ToArray())pending.Remove(id);if(pending.Count>=8)throw new IOException("Finish an earlier pending connection first.");
             var verifier=Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(32));var challenge=Convert.ToBase64String(SHA256.HashData(Encoding.ASCII.GetBytes(verifier))).TrimEnd('=').Replace('+','-').Replace('/','_');
-            var device=await Request<OrganizationDevicePending>(review.Identity.Origin,"/api/device/start",new OrganizationDeviceStart(review.Identity.Id,"AeroScience Desktop",challenge),ct);
-            if(device.Id==Guid.Empty||device.DeviceSecret is not {Length:64}||device.UserCode is not {Length:11}||device.ApprovalUrl!=review.Identity.Origin+"/#connect="+device.Id||device.ExpiresUtc<=DateTimeOffset.UtcNow||device.ExpiresUtc>DateTimeOffset.UtcNow.AddMinutes(11)||device.PollSeconds is <5 or >30)throw new IOException("Unsupported organization authorization response.");
+            var device=await Request<OrganizationDevicePending>(review.Identity.Origin,"/api/device/start",new OrganizationDeviceStart(review.Identity.Id,"AeroScience Desktop",challenge,approval.Permission),ct);
+            if(device.Permission!=approval.Permission||device.Id==Guid.Empty||device.DeviceSecret is not {Length:64}||device.UserCode is not {Length:11}||device.ApprovalUrl!=review.Identity.Origin+"/#connect="+device.Id||device.ExpiresUtc<=DateTimeOffset.UtcNow||device.ExpiresUtc>DateTimeOffset.UtcNow.AddMinutes(11)||device.PollSeconds is <5 or >30)throw new IOException("Unsupported organization authorization response.");
             if(Read().Any(c=>c.Id==device.Id)||pending.ContainsKey(device.Id))throw new IOException("The server reused an existing connection identity. No saved authorization was changed.");
             pending[device.Id]=(review.Identity,device,verifier);reviews.Remove(approval.ReviewId);
-            return new(device.Id,review.Identity,device.UserCode,device.ApprovalUrl,device.ExpiresUtc,device.PollSeconds);
+            return new(device.Id,review.Identity,device.UserCode,device.ApprovalUrl,device.ExpiresUtc,device.PollSeconds,device.Permission);
         }finally{gate.Release();}
     }
     public async Task<object> Finish(Guid id,CancellationToken ct)
@@ -114,8 +115,8 @@ public sealed class OrganizationConnections:IDisposable
             if(!pending.TryGetValue(id,out var item)||item.Device.ExpiresUtc<=DateTimeOffset.UtcNow)throw new ArgumentException("This pending connection expired. Start again.");
             var token=await Request<OrganizationDeviceToken>(item.Identity.Origin,"/api/device/poll",new OrganizationDevicePoll(id,item.Identity.Id,item.Device.DeviceSecret,item.Verifier),ct);
             if(token.Status!="approved")return new{status=token.Status};
-            if(token.ConnectionId!=id||token.Credential is not {Length:64}||token.Credential.Any(c=>!char.IsAsciiHexDigit(c))||token.ExpiresUtc is null||token.ExpiresUtc<=DateTimeOffset.UtcNow||token.ExpiresUtc>DateTimeOffset.UtcNow.AddHours(25))throw new IOException("Invalid organization credential response.");
-            var saved=new OrganizationSavedConnection(id,item.Identity.Id,item.Identity.Name,item.Identity.Origin,token.ExpiresUtc.Value);
+            if(token.Permission!=item.Device.Permission||token.ConnectionId!=id||token.Credential is not {Length:64}||token.Credential.Any(c=>!char.IsAsciiHexDigit(c))||token.ExpiresUtc is null||token.ExpiresUtc<=DateTimeOffset.UtcNow||token.ExpiresUtc>DateTimeOffset.UtcNow.AddHours(25))throw new IOException("Invalid organization credential response.");
+            var saved=new OrganizationSavedConnection(id,item.Identity.Id,item.Identity.Name,item.Identity.Origin,token.ExpiresUtc.Value,token.Permission);
             var rows=Read();if(rows.Any(r=>r.OrganizationId==saved.OrganizationId&&r.Origin!=saved.Origin))throw new IOException("This organization identity was previously connected at a different address. Disconnect it before changing servers.");
             if(rows.Any(r=>r.Id==id))throw new IOException("This connection identity is already saved. No existing authorization was replaced.");
             // Never overwrite an existing connection or credential. Both identities remain independently disconnectable.
@@ -140,6 +141,28 @@ public sealed class OrganizationConnections:IDisposable
         try{await VerifyIdentity(row,ct);var value=await Request<OrganizationMemberInformation>(row.Origin,"/api/member/published?offset="+Math.Max(0,offset),null,ct,credential);if(value.Organization.Id!=row.OrganizationId||value.Organization.Origin!=row.Origin)throw new IOException("Organization identity changed.");return new(row,"Connected",value);}
         catch(UnauthorizedAccessException){vault.Remove(id);return new(row,"Access Revoked / Reconnect");}
         catch(Exception e) when(e is HttpRequestException or IOException or TaskCanceledException){return new(row,"Offline / Unable to Connect");}
+    }
+    public async Task<object> Research(Guid id,bool assignments,int offset,CancellationToken ct)
+    {
+        var row=(await List(ct)).SingleOrDefault(r=>r.Id==id)??throw new ArgumentException("This connection was not found.");
+        var credential=vault.Read(id);if(credential is null||row.ExpiresUtc<=DateTimeOffset.UtcNow)return new{status="Expired / Reconnect",page=(object?)null};
+        try{
+            await VerifyIdentity(row,ct);
+            object page=assignments?await Request<OrganizationPage<OrganizationClaimView>>(row.Origin,"/api/member/claims?offset="+Math.Max(0,offset),null,ct,credential):await Request<OrganizationPage<OrganizationOpportunityView>>(row.Origin,"/api/member/opportunities?offset="+Math.Max(0,offset),null,ct,credential);
+            return new{status="Connected",page};
+        }catch(UnauthorizedAccessException){vault.Remove(id);return new{status="Access Revoked / Reconnect",page=(object?)null};}
+        catch(Exception e) when(e is IOException or HttpRequestException or TaskCanceledException){return new{status="Offline / Unable to Connect — claim actions disabled",page=(object?)null};}
+    }
+    public async Task<OrganizationClaimView> ClaimCommand(Guid id,OrganizationClaimCommand command,CancellationToken ct)
+    {
+        var row=(await List(ct)).SingleOrDefault(r=>r.Id==id)??throw new ArgumentException("This connection was not found.");
+        if(row.Permission!=OrganizationDesktopPermission.ManageOwnClaims)throw new IOException("This connection is read-only. Authorize Claim Management in your organization browser before claiming or releasing work.");
+        if(command.OrganizationId!=row.OrganizationId||command.PilotId is not null||command.Action is not(OrganizationClaimAction.Claim or OrganizationClaimAction.Accept or OrganizationClaimAction.Release))throw new ArgumentException("Only your own claim, acceptance or release is authorized from this desktop.");
+        var credential=vault.Read(id);if(credential is null||row.ExpiresUtc<=DateTimeOffset.UtcNow)throw new IOException("Reconnect and authorize claim management before continuing.");
+        await VerifyIdentity(row,ct);
+        var result=await Request<OrganizationClaimView>(row.Origin,"/api/member/claim-command",command,ct,credential);
+        if(result.OrganizationId!=row.OrganizationId||result.OpportunityId!=command.OpportunityId)throw new IOException("The returned claim identity did not match your reviewed request. Refresh the server state.");
+        return result;
     }
     public async Task<object> Disconnect(Guid id,CancellationToken ct)
     {

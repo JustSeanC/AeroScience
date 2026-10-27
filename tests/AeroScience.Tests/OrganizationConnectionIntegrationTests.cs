@@ -18,7 +18,7 @@ using Xunit;
 
 namespace AeroScience.Tests;
 
-public sealed class OrganizationConnectionIntegrationTests
+public sealed partial class OrganizationConnectionIntegrationTests
 {
     sealed class Environment:IHostEnvironment
     {
@@ -40,7 +40,7 @@ public sealed class OrganizationConnectionIntegrationTests
             request.Headers.Add("Origin",origin);request.Headers.Add("X-AeroScience-Organization-CSRF",session.GetProperty("csrf").GetString());using var response=await browser.SendAsync(request);
             Assert.True(response.IsSuccessStatusCode,await response.Content.ReadAsStringAsync());return await response.Content.ReadFromJsonAsync<JsonElement>();
         }
-        public async Task Approve(OrganizationConnectBegin pending)=>await Post("/api/connection/approval",new OrganizationDeviceApproval(pending.PendingId,pending.Organization.Id,true,true));
+        public async Task Approve(OrganizationConnectBegin pending)=>await Post("/api/connection/approval",new OrganizationDeviceApproval(pending.PendingId,pending.Organization.Id,true,true,pending.Permission==OrganizationDesktopPermission.ManageOwnClaims));
         public async ValueTask DisposeAsync(){browser.Dispose();await app.StopAsync();await app.DisposeAsync();}
     }
     static async Task<Server> Start(string database,string directory,string name)

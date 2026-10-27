@@ -1,3 +1,4 @@
+using AeroScience.Shared;
 namespace AeroScience.Engine;
 
 public static class OrganizationConnectionApi
@@ -18,6 +19,9 @@ public static class OrganizationConnectionApi
             desktop.OpenOrganizationApproval(await connections.ApprovalUri(id,c.RequestAborted));return Results.Ok(new{opened=true});
         });
         api.MapGet("/{id:guid}",(Guid id,int? offset,OrganizationConnections connections,HttpContext c)=>connections.Status(id,offset??0,c.RequestAborted));
+        api.MapGet("/{id:guid}/opportunities",(Guid id,int? offset,OrganizationConnections connections,HttpContext c)=>connections.Research(id,false,offset??0,c.RequestAborted));
+        api.MapGet("/{id:guid}/claims",(Guid id,int? offset,OrganizationConnections connections,HttpContext c)=>connections.Research(id,true,offset??0,c.RequestAborted));
+        api.MapPost("/{id:guid}/claim-command",(Guid id,OrganizationClaimCommand r,OrganizationConnections connections,HttpContext c)=>connections.ClaimCommand(id,r,c.RequestAborted));
         api.MapPost("/{id:guid}/disconnect",(Guid id,OrganizationConnections connections,HttpContext c)=>connections.Disconnect(id,c.RequestAborted));
     }
 }
