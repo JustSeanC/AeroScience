@@ -36,7 +36,7 @@ public static partial class FlightRegimeEvaluation
             var conditions=branches.Select(b=>{var r=b.Window.Finish(interrupted);return new FlightTestConditionEvidence(b.Signal,r.Outcome,b.Window.LongestHold,r.Explanation);}).ToArray();
             var chosen=combined;var result=combined.Finish(interrupted);
             if(rule.TestPoint!.Policy=="any"){
-                var pass=branches.FirstOrDefault(b=>b.Window.Finish(interrupted).Outcome==ResearchAttemptOutcome.Pass);
+                var pass=branches.Where(b=>b.Window.Finish(interrupted).Outcome==ResearchAttemptOutcome.Pass).OrderByDescending(b=>b.Window.LongestHold).FirstOrDefault();
                 chosen=pass.Window??branches.OrderByDescending(b=>b.Window.LongestHold).First().Window;
                 var outcome=conditions.Any(c=>c.Outcome==ResearchAttemptOutcome.Pass)?ResearchAttemptOutcome.Pass
                     :conditions.All(c=>c.Outcome==ResearchAttemptOutcome.Fail)?ResearchAttemptOutcome.Fail:ResearchAttemptOutcome.InsufficientEvidence;

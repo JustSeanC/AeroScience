@@ -102,5 +102,13 @@ public sealed class FlightTestProcedureTests:IDisposable
    cmd.Parameters.AddWithValue("$id",original.Id.ToString());cmd.Parameters.AddWithValue("$value",corruption=="point"?definition.Points[1].Id.ToString():corruption=="end"?time.ToString("O"):"interrupted");cmd.ExecuteNonQuery();}
   Assert.Throws<InvalidOperationException>(()=>store.EvaluateResearchAttempt(new(Guid.NewGuid(),flight.Id,flight.StartedUtc,time,CardId:card.Id)));
  }
+ [Fact]public void OrReportsTheLongestEligibleWholeSignalHoldWhenBothBranchesQualify()
+ {
+  var rule=Definition().Points[0].Conditions with{TestPoint=new(Policy:"any")};var window=new FlightRegimeEvaluation.PointWindow(rule,start,start.AddSeconds(20));
+  for(var i=0;i<=20;i++)window.Add(Frame(i,i<=12?120:150,3000));
+  var result=window.Finish(Guid.NewGuid(),new(1,21,21,"hash","plan",TelemetrySource.Simulated),false);
+  Assert.Equal(ResearchAttemptOutcome.Pass,result.Outcome);Assert.Equal(20,result.LongestHoldSeconds);Assert.Equal(start.AddSeconds(20),result.HoldEndUtc);
+  Assert.Equal(new[]{12d,20d},result.Conditions.Select(c=>c.LongestHoldSeconds));
+ }
  public void Dispose(){SqliteConnection.ClearAllPools();Directory.Delete(root,true);}
 }
