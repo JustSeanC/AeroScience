@@ -98,3 +98,12 @@ dialog.managed-popup{max-width:min(56rem,calc(100vw - 1.5rem));max-height:88dvh;
 #research-experiment-review input[type=checkbox]{width:24px;height:24px;flex:0 0 24px}
 #research-experiment-review section,#research-experiment-review article{min-width:0}
 #research-experiment-review .action-row{flex-wrap:wrap}
+
+/* The two custom authoring experiences edit one definition, with a bounded readable preview. */
+.custom-flight-authoring{grid-column:1/-1;min-width:0}
+.custom-flight-authoring .research-grid>:is(h3,p,section){grid-column:1/-1}
+.custom-flight-authoring label{display:grid;gap:.4rem;align-content:start;min-width:0}
+.custom-flight-authoring label:has(input[type=checkbox]){display:flex;align-items:center;min-height:44px}
+.custom-flight-authoring input[type=checkbox]{width:auto;flex:0 0 auto}
+.custom-flight-authoring textarea{width:100%;max-width:100%;min-height:44px;box-sizing:border-box}
+.custom-flight-authoring pre{white-space:pre-wrap;overflow-wrap:anywhere;max-width:100%}

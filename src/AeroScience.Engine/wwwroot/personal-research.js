@@ -1,3 +1,4 @@
+import {customFlightRule,showCustomFlightEvidence} from './custom-flight-test.js';
 import {sensorSummary,showSensorResult} from './experimental-sensor.js';
 import {observationSummary,showObservationResult} from './observation-research.js';
 import {surveySummary,showSurveyResult} from './survey-research.js';
@@ -36,31 +37,33 @@ export async function personalResearch(root, api) {
     researchStarterChoices(root,api,starters,active);
     const editor = node('section', undefined, 'panel research-panel');
     const renderEditor = () => {
-      const atmospheric=draft?.experimentalSensor||draft?.observationFlight||draft?.survey||draft?.atmosphericProfile||draft?.atmosphericTransect;editor.replaceChildren(node('h2',draft?.experimentalSensor?'Edit Experimental Sensor Checkout':draft?.observationFlight?'Edit Scientific Observation Flight':draft?.survey?'Edit Terrain & Temperature Survey':draft?.atmosphericTransect?'Edit Atmospheric Transect':atmospheric?'Edit Vertical Atmospheric Profile':draft?.id?'Edit Flight-Regime Validation':'Create Flight-Regime Validation'));
+      const custom=draft?.templateId==='custom-flight-test'||!!draft?.flightRegime?.testPoint;const atmospheric=draft?.experimentalSensor||draft?.observationFlight||draft?.survey||draft?.atmosphericProfile||draft?.atmosphericTransect;editor.replaceChildren(node('h2',custom?'Create or Edit Custom Test Card':draft?.experimentalSensor?'Edit Experimental Sensor Checkout':draft?.observationFlight?'Edit Scientific Observation Flight':draft?.survey?'Edit Terrain & Temperature Survey':draft?.atmosphericTransect?'Edit Atmospheric Transect':atmospheric?'Edit Vertical Atmospheric Profile':draft?.id?'Edit Flight-Regime Validation':'Create Flight-Regime Validation'));
       editor.append(node('p', atmospheric?'Choose achievable sampling goals. Collection coverage is not proof of a hypothesis.':'Choose targets appropriate for your aircraft. Results assess simulator evidence only; they are not aircraft certification.'));
       const form = node('form'); form.id = 'research-card-form';
       const fields = node('div', undefined, 'research-grid');
       const name = field(fields, 'Test card name', draft?.name || 'Flight-Regime Validation', 'text'); name.required = true; name.maxLength = 100;
       const rule=draft?.flightRegime||starters.find(s=>s.id==='flight-regime').example;
-      const targets=researchFields(fields,draft||{flightRegime:rule},{api});
-      const read = () => ({id:draft?.id, revision:draft?.revision, name:name.value,
+      const targets=researchFields(fields,draft||{flightRegime:rule},{api,revision:draft?.revision||0});
+      const read = () => ({...draft,id:draft?.id, revision:draft?.revision, name:name.value,
         flightRegime:atmospheric?null:targets.read(),atmosphericProfile:draft?.atmosphericProfile?targets.read():null,atmosphericTransect:draft?.atmosphericTransect?targets.read():null,survey:draft?.survey?targets.read():null,observationFlight:draft?.observationFlight?targets.read():null,experimentalSensor:draft?.experimentalSensor?targets.read():null});
       form.oninput = () => { draft = read(); };
-      const save = node('button', draft?.id ? 'Save New Revision' : 'Save Test Card', 'primary'); save.type = 'submit';
+      const save = node('button', draft?.id ? 'Save New Revision' : 'Save Test Card', 'primary'); save.type = 'submit';if(targets.isSupported?.()===false)save.disabled=true;
       form.onsubmit = async event => {
         event.preventDefault(); if (save.disabled) return; save.disabled = true;
         const value = read();
-        for (const input of fields.querySelectorAll('input')) input.disabled = true;
+        const editing=Array.from(fields.querySelectorAll('input,textarea,select,button'),control=>[control,control.disabled]);for(const [control]of editing)control.disabled=true;
         try {
           await api('/api/research/cards', {name:value.name, flightRegime:value.flightRegime,atmosphericProfile:value.atmosphericProfile,atmosphericTransect:value.atmosphericTransect,survey:value.survey,observationFlight:value.observationFlight,experimentalSensor:value.experimentalSensor, id:value.id || null, expectedRevision:value.revision || null});
           if (JSON.stringify(draft) === JSON.stringify(value)) draft = null;
           if (active()) { draft = null; await personalResearch(root, api); }
         } catch (error) { if (active()) status.textContent = error.message; }
-        finally { if (save.isConnected) { save.disabled = false; for (const input of fields.querySelectorAll('input')) input.disabled = false; } }
+        finally { if (save.isConnected) { save.disabled = false; for(const [control,disabled]of editing)control.disabled=disabled; } }
       };
       form.append(fields, save, node('p', 'Saving a revision keeps earlier cards, mission snapshots and results unchanged. No data download is needed.'));
       editor.append(form);
     };
+    const author=action('Create Custom Test Card',()=>{draft={name:'Flight Test: Stable Operating Conditions',flightRegime:customFlightRule()};renderEditor();editor.scrollIntoView({block:'start'});editor.querySelector('input').focus();},'primary');
+    root.insertBefore(author,root.querySelector('#research-starters'));
     renderEditor(); root.append(editor);
     const experiment=node('div');
     const review = node('section', undefined, 'panel research-panel'); review.id = 'personal-research-review';
@@ -145,9 +148,12 @@ export function attemptView(attempt,api) {
   const panel = node('article', undefined, 'panel research-panel');
   const outcome = {pass:'Pass', fail:'Fail', insufficientEvidence:'Insufficient Evidence'}[attempt.outcome] || 'Unknown';
   panel.append(node('h3', `${attempt.card.name} — ${outcome}`), node('p', attempt.explanation),
+    node('p', attempt.card.flightRegime.testPoint?`${researchCardTargets(attempt.card)} · Card revision ${attempt.card.revision}`:researchCardTargets(attempt.card)),
     node('p', `Longest supported hold: ${attempt.longestSupportedHoldSeconds.toFixed(1)} seconds · Required: ${attempt.card.flightRegime.holdSeconds} seconds · Card revision ${attempt.card.revision}`),
     node('p', `Evidence: ${attempt.startUtc} to ${attempt.endUtc} · ${attempt.evidence.sampleCount} recorded samples · ${attempt.evidence.source === 'simulator' ? 'Recorded simulator telemetry' : attempt.evidence.source === 'simulated' ? 'Synthetic/demo telemetry; not an installed MSFS test' : 'Source unavailable; no telemetry source type inferred'}`));
   const details = node('details'); details.append(node('summary', 'Evidence References'), node('p', `Flight ${attempt.flightId} · Original telemetry sequences ${attempt.evidence.firstSequence}–${attempt.evidence.lastSequence}`),
     node('p', `Evaluator ${attempt.evaluatorVersion} · Evidence SHA-256 ${attempt.evidence.sha256} · Plan SHA-256 ${attempt.evidence.planSha256}`));
-  panel.append(details); return panel;
+  panel.append(details);
+  if(attempt.card.flightRegime.testPoint&&api){const button=node('button','Inspect Custom Test Evidence','secondary');button.type='button';const detail=node('div');button.onclick=()=>showCustomFlightEvidence(detail,api,attempt);panel.append(button,detail);}
+  return panel;
 }

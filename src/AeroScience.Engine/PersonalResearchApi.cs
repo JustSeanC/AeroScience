@@ -22,6 +22,7 @@ public static class PersonalResearchApi
             var c=ExperimentalSensorResearch.Calculate(rows,card,Guid.Empty,[],new(data,flight,at,at.AddSeconds(120)),context.RequestAborted);
             return new{label="Synthetic example only — not recorded flight evidence; never saved",model=ExperimentalSensorResearch.Evaluator,points=c.Preview};
         });
+        app.MapGet("/api/research/attempts/{id:guid}/flight-test",(Guid id,MissionStore store,HttpContext context)=>{var result=store.ResearchAttempt(id);return new{result,evidence=store.ReviewFlightTestEvidence(result,context.RequestAborted)};});
         app.MapGet("/api/research/starters",()=>MissionStore.ResearchStarters());
         app.MapPost("/api/research/starters/prepare",(ResearchStarterRequest request,MissionStore store)=>store.PrepareResearchStarter(request));
         app.MapGet("/api/research/cards", (int? offset, MissionStore store) => store.ResearchCards(offset ?? 0));

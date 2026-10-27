@@ -1,3 +1,4 @@
+import {customFlightFields,customFlightTargets} from './custom-flight-test.js';
 import {sensorFields,sensorTargets} from './experimental-sensor.js';
 import {node,button,link,newIdentity,numeric} from './workstation-ui.js';
 import {observationFields,observationTargets,openPilotObservations} from './observation-research.js';
@@ -14,8 +15,8 @@ export const researchTargets=rule=>`${numeric(rule.airspeedKnots)} ± ${numeric(
 export const isAtmosphericResearch=card=>!!(card.atmosphericProfile||card.atmosphericTransect);
 export const isScienceResearch=card=>isAtmosphericResearch(card)||!!card.experimentalSensor||!!card.survey||!!card.observationFlight;
 export const researchDefinition=card=>card.experimentalSensor||card.observationFlight||card.survey||card.atmosphericTransect||card.atmosphericProfile||card.flightRegime;
-export const researchFields=(parent,card,options)=>card.experimentalSensor?sensorFields(parent,card.experimentalSensor,options):card.observationFlight?observationFields(parent,card.observationFlight,options):card.survey?surveyFields(parent,card.survey,options):card.atmosphericTransect?transectFields(parent,card.atmosphericTransect,options):card.atmosphericProfile?atmosphericFields(parent,card.atmosphericProfile,options):flightRegimeFields(parent,card.flightRegime,options);
-export const researchCardTargets=card=>card.experimentalSensor?sensorTargets(card.experimentalSensor):card.observationFlight?observationTargets(card.observationFlight):card.survey?surveyTargets(card.survey):card.atmosphericTransect?transectTargets(card.atmosphericTransect):card.atmosphericProfile?atmosphericTargets(card.atmosphericProfile):researchTargets(card.flightRegime);
+export const researchFields=(parent,card,options)=>card.templateId==='custom-flight-test'||card.flightRegime?.testPoint?customFlightFields(parent,card.flightRegime,{...options,cardVersion:card.version??7,cardFields:Object.fromEntries(Object.entries(card).filter(([key])=>key!=='flightRegime'))}):card.experimentalSensor?sensorFields(parent,card.experimentalSensor,options):card.observationFlight?observationFields(parent,card.observationFlight,options):card.survey?surveyFields(parent,card.survey,options):card.atmosphericTransect?transectFields(parent,card.atmosphericTransect,options):card.atmosphericProfile?atmosphericFields(parent,card.atmosphericProfile,options):flightRegimeFields(parent,card.flightRegime,options);
+export const researchCardTargets=card=>card.templateId==='custom-flight-test'||card.flightRegime?.testPoint?customFlightTargets(card.flightRegime):card.experimentalSensor?sensorTargets(card.experimentalSensor):card.observationFlight?observationTargets(card.observationFlight):card.survey?surveyTargets(card.survey):card.atmosphericTransect?transectTargets(card.atmosphericTransect):card.atmosphericProfile?atmosphericTargets(card.atmosphericProfile):researchTargets(card.flightRegime);
 export const atmosphericTargets=rule=>`${rule.requiredBands} neighboring ${numeric(rule.bandWidthFeet)}-foot MSL bands · ${rule.minimumReadingsPerBand} consecutive valid temperature readings per band · maximum gap ${numeric(rule.maximumGapSeconds)} seconds. Start at achievable altitudes anywhere; no fixed flight level.`;
 export const transectTargets=rule=>`${rule.requiredStations} distinct sampling locations at least ${numeric(rule.stationSpacingMetres)} m apart · ${rule.minimumReadingsPerStation} consecutive temperature readings per location · ${numeric(rule.minimumExtentMetres)} m extent in one supported leg · maximum gap ${numeric(rule.maximumGapSeconds)} seconds.`;
 export function transectFields(parent,rule,{prefix=''}={}){
@@ -42,6 +43,7 @@ export function flightRegimeFields(parent,rule,{prefix=''}={}){
 }
 
 export function researchEntryActions(parent,api,{starter,card,survey},isCurrent){
+ if(card?.templateId==='custom-flight-test')return null; // Custom cards use the existing Open in Mission Planner action, not a built-in starter.
  for(const control of controls)if(!control.isConnected)controls.delete(control);
  const actions=node('div',undefined,'action-row'),status=node('p');status.setAttribute('role','status');parent.append(actions,status);
  for(const [intent,title]of [['flyNow','Fly Now'],['customize','Customize']]){
