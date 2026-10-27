@@ -57,6 +57,7 @@ public sealed partial class MissionStore
     private static void SupportedCard(PersonalResearchCard card)
     {
         if(card.Extensions is {Count:>0})throw new NotSupportedException("This card contains unsupported fields. Its original definition must be preserved by a compatible editor.");
+        if(card.Procedure is not null){if(card.Version!=8||card.TemplateId!=FlightRegimeEvaluation.ProcedureTemplate||card.FlightRegime is not null||card.AtmosphericProfile is not null||card.AtmosphericTransect is not null||card.Survey is not null||card.ObservationFlight is not null||card.ExperimentalSensor is not null)throw new NotSupportedException("Unsupported multi-point card version.");FlightRegimeEvaluation.ValidateProcedure(card.Procedure);return;}
         if(card.Version==6&&card.TemplateId==ExperimentalSensorResearch.Template&&card.FlightRegime is null&&card.AtmosphericProfile is null&&card.AtmosphericTransect is null&&card.Survey is null&&card.ObservationFlight is null){ExperimentalSensorResearch.Validate(card.ExperimentalSensor);return;}
         if(card.ExperimentalSensor is not null)throw new NotSupportedException("Unsupported experimental-sensor definition version.");
         if(card.Version==5&&card.TemplateId==ObservationResearch.Template&&card.FlightRegime is null&&card.AtmosphericProfile is null&&card.AtmosphericTransect is null&&card.Survey is null){ObservationResearch.Validate(card.ObservationFlight);return;}
@@ -76,6 +77,7 @@ public sealed partial class MissionStore
         SupportedCard(first); SupportedCard(second);
         // Atmospheric collection sets no aircraft target constraint. Science controls remain separate.
         if(first.ExperimentalSensor is not null||second.ExperimentalSensor is not null||first.ObservationFlight is not null||second.ObservationFlight is not null||first.Survey is not null||second.Survey is not null||AtmosphericResearch.IsCollectionCard(first)||AtmosphericResearch.IsCollectionCard(second))return true;
+        if(first.Procedure is not null||second.Procedure is not null)return ProcedureCompatible(first,second);
         var a = first.FlightRegime!; var b = second.FlightRegime!;
         return (!FlightRegimeEvaluation.RequiresAirspeed(a)||!FlightRegimeEvaluation.RequiresAirspeed(b)
                 ||Math.Max(a.AirspeedKnots-a.AirspeedToleranceKnots,b.AirspeedKnots-b.AirspeedToleranceKnots)<=Math.Min(a.AirspeedKnots+a.AirspeedToleranceKnots,b.AirspeedKnots+b.AirspeedToleranceKnots))
@@ -98,6 +100,7 @@ public sealed partial class MissionStore
         var cards = new List<ResearchFlightCard>();
         using (var reader = cmd.ExecuteReader()) while (reader.Read())
         { var card = JsonSerializer.Deserialize<PersonalResearchCard>(reader.GetString(0),WireJson.Options)!; cards.Add(new(card,reader.GetBoolean(1),opened.GetValueOrDefault(card.Id),null)); }
+        cards=cards.Select(c=>c.Card.Procedure is null?c:c with{Procedure=RetainedProcedureProgress(db,tx,flight,c.Card)}).ToList();
         var selected = cards.Select(c => c with { ActivationBlocked = c.Active ? null : cards.FirstOrDefault(other => other.Active && !CompatibleResearchCards(c.Card,other.Card)) is {} conflict
             ? $"Deactivate {conflict.Card.Name} first: indicated-airspeed or MSL-altitude target ranges do not overlap." : null }).ToArray();
         return new(1,flight,revision,status=="Recording",selected,DateTimeOffset.UtcNow,false,
@@ -150,6 +153,9 @@ public sealed partial class MissionStore
         var selected=state.Cards.SingleOrDefault(c=>c.Card.Id==request.CardId)??throw new ArgumentException("This card was not selected before this flight.");
         if(selected.OpenAttempt?.Id!=request.ExpectedAttemptId)throw new InvalidOperationException("The current card attempt changed. Synchronize before trying again.");
         var attempt=selected.OpenAttempt;var attemptId=attempt?.Id;string message;
+        var point=selected.Card.Procedure?.Points.SingleOrDefault(p=>p.Id==request.TestPointId);
+        if(request.Action==ResearchCardAction.BeginAttempt&&selected.Card.Procedure is not null&&point is null)throw new ArgumentException("Select an exact named test point before Begin Attempt.");
+        if(request.TestPointId is not null&&(selected.Card.Procedure is null||request.Action!=ResearchCardAction.BeginAttempt))throw new ArgumentException("A point selection is only valid when beginning a multi-point attempt.");
         switch(request.Action){
             case ResearchCardAction.Activate:
                 if(selected.Active)throw new InvalidOperationException("This card is already active.");
@@ -160,16 +166,19 @@ public sealed partial class MissionStore
                 message=$"Deactivated {selected.Card.Name}. Flight and science controls are unchanged.";break;
             case ResearchCardAction.BeginAttempt:
                 if(!selected.Active||attempt is not null)throw new InvalidOperationException("Activate this card and end its current attempt before beginning another.");
-                attemptId=Guid.NewGuid();message=$"Begin Attempt · {selected.Card.Name} · revision {selected.Card.Revision}.";break;
+                attemptId=Guid.NewGuid();message=$"Begin Attempt · {selected.Card.Name} · revision {selected.Card.Revision}."+(point is null?"":$" Point {point.Id:D} · {point.Conditions.TestPoint!.Name}.");break;
             case ResearchCardAction.EndAttempt:
                 if(attempt is null)throw new InvalidOperationException("This card has no open attempt.");
                 message=$"End Attempt · {selected.Card.Name}. Recorded evidence awaits evaluation.";break;
             default:throw new ArgumentException("Unsupported card action.");
         }
         var eventId=ResearchEvent(db,tx,request.FlightId,at,request.Action.ToString(),message);
-        if(request.Action==ResearchCardAction.BeginAttempt)SaveRecordedAttempt(db,tx,new(attemptId!.Value,request.FlightId,selected.Card.Id,selected.Card.Revision,at,null,ResearchAttemptStatus.Recording,eventId,null,null));
-        else if(attempt is not null && request.Action is ResearchCardAction.EndAttempt or ResearchCardAction.Deactivate)
-            SaveRecordedAttempt(db,tx,attempt with{EndUtc=at<attempt.StartUtc?attempt.StartUtc:at,Status=request.Action==ResearchCardAction.EndAttempt?ResearchAttemptStatus.Recorded:ResearchAttemptStatus.Interrupted,EndEventId=eventId,EndReason=request.Action==ResearchCardAction.EndAttempt?"Ended by pilot":"Card deactivated before End Attempt"});
+        if(request.Action==ResearchCardAction.BeginAttempt)SaveRecordedAttempt(db,tx,new(attemptId!.Value,request.FlightId,selected.Card.Id,selected.Card.Revision,at,null,ResearchAttemptStatus.Recording,eventId,null,null,point?.Id));
+        else if(attempt is not null && request.Action is ResearchCardAction.EndAttempt or ResearchCardAction.Deactivate){
+            var ended=attempt with{EndUtc=at<attempt.StartUtc?attempt.StartUtc:at,Status=request.Action==ResearchCardAction.EndAttempt?ResearchAttemptStatus.Recorded:ResearchAttemptStatus.Interrupted,EndEventId=eventId,EndReason=request.Action==ResearchCardAction.EndAttempt?"Ended by pilot":"Card deactivated before End Attempt"};
+            if(selected.Card.Procedure is not null)ended=ended with{PointEvidence=ReadPointEvidence(db,tx,selected.Card,ended,CancellationToken.None)};
+            SaveRecordedAttempt(db,tx,ended);
+        }
         cmd.CommandText="UPDATE personal_flight_cards SET active=$active WHERE mission_id=$flight AND card_id=$card";
         cmd.Parameters.AddWithValue("$card",request.CardId.ToString());cmd.Parameters.AddWithValue("$active",request.Action==ResearchCardAction.Activate||selected.Active&&request.Action!=ResearchCardAction.Deactivate?1:0);cmd.ExecuteNonQuery();
         cmd.CommandText="UPDATE personal_research_state SET revision=revision+1 WHERE mission_id=$flight";cmd.ExecuteNonQuery();

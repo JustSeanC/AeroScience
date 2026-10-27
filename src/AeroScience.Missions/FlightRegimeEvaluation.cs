@@ -4,7 +4,7 @@ namespace AeroScience.Missions;
 
 // Small card-specific extension: the existing mission rubric grades different obligations.
 // No interpolation, accumulated disjoint holds, source conversion, or science grading changes.
-public static class FlightRegimeEvaluation
+public static partial class FlightRegimeEvaluation
 {
     public const string Version = "flight-regime-1",CustomVersion="flight-regime-custom-1",CustomTemplate="custom-flight-test";
     public static string VersionFor(FlightRegimeDefinition rule)=>rule.TestPoint is null?Version:CustomVersion;

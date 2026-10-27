@@ -22,7 +22,7 @@ public sealed record ResearchEvidenceBreak(DateTimeOffset TimestampUtc, string K
 public sealed record ResearchEvidenceAudit(bool MatchesSavedEvidence, long RetainedSamples, long ExpectedSamples,
     long GapCount, long PauseOrConnectionEdges, long InvalidSamples, double? MaximumGapSeconds,
     TelemetrySource[] Sources, ReplaySample[] Preview, ResearchEvidenceBreak[] Breaks, bool MoreBreaks);
-public sealed record ResearchComparisonEntry(ResearchHistoryItem Attempt, ResearchEvidenceAudit? Evidence,AtmosphericResearchReview? Atmosphere=null,SurveyResearchReview? Survey=null,ObservationResearchReview? ObservationFlight=null,ExperimentalSensorReview? ExperimentalSensor=null);
+public sealed record ResearchComparisonEntry(ResearchHistoryItem Attempt, ResearchEvidenceAudit? Evidence,AtmosphericResearchReview? Atmosphere=null,SurveyResearchReview? Survey=null,ObservationResearchReview? ObservationFlight=null,ExperimentalSensorReview? ExperimentalSensor=null,FlightTestProcedureReview? Procedure=null);
 public sealed record ResearchComparison(PersonalResearchCard Card, ResearchComparisonEntry[] Entries,
     bool DifferentRevisions, bool DifferentRequirements, bool DifferentEvaluators, bool DifferentSources, string[] Notices);
 
@@ -126,10 +126,15 @@ public sealed partial class MissionStore
             token.ThrowIfCancellationRequested();
             var row=chosen.GetValueOrDefault((selection.Kind,selection.Id))??throw new ArgumentException("An attempt or flight is no longer available in this experiment. Refresh its history.");
             if(row.Result?.Id!=selection.ResultId)throw new InvalidOperationException("A selected result changed. Refresh the experiment before comparing.");
-            rows.Add(card.ExperimentalSensor is not null?new(row,null,ExperimentalSensor:row.Result is {} sensor?ReviewExperimentalSensorEvidence(sensor,science,token):null):card.ObservationFlight is not null?new(row,null,ObservationFlight:row.Result is {} observation?ReviewObservationEvidence(observation,science,token):null):card.Survey is not null?new(row,null,Survey:row.Result is {} survey?ReviewSurveyEvidence(survey,science??throw new IOException("Reconnect the Scientific Data Library."),token):null):AtmosphericResearch.IsCollectionCard(card)?new(row,null,row.Result is {} atmospheric?ReviewAtmosphericEvidence(atmospheric,science,token):null)
+            rows.Add(card.Procedure is not null?new(row,null,Procedure:row.Result is {} procedure?ReviewProcedureEvidence(procedure,token):null):card.ExperimentalSensor is not null?new(row,null,ExperimentalSensor:row.Result is {} sensor?ReviewExperimentalSensorEvidence(sensor,science,token):null):card.ObservationFlight is not null?new(row,null,ObservationFlight:row.Result is {} observation?ReviewObservationEvidence(observation,science,token):null):card.Survey is not null?new(row,null,Survey:row.Result is {} survey?ReviewSurveyEvidence(survey,science??throw new IOException("Reconnect the Scientific Data Library."),token):null):AtmosphericResearch.IsCollectionCard(card)?new(row,null,row.Result is {} atmospheric?ReviewAtmosphericEvidence(atmospheric,science,token):null)
                 :new(row,row.Result is {} result?AuditResearchEvidence(db,tx,result,token):null));
         }
         var revisions=rows.Select(r=>r.Attempt.Card.Revision).Distinct().Count()>1;
+        if(card.Procedure is not null){
+            return new(card,rows.ToArray(),revisions,rows.Select(r=>PreflightReadiness.Hash(r.Attempt.Card.Procedure!)).Distinct().Count()>1,
+                rows.Where(r=>r.Attempt.Result is not null).Select(r=>r.Attempt.Result!.EvaluatorVersion).Distinct().Count()>1,false,
+                ["Each point and repetition belongs to its frozen revision and explicit marked evidence window. One long interval is never several repetitions.","Different sequences, condition groups or requirements remain separate. Completion is not aircraft certification; simulator/demo provenance remains explicit."]);
+        }
         if(card.ExperimentalSensor is not null){
             var mixed=rows.Select(r=>r.Attempt.Result?.Evidence.Source).Where(s=>s is not null).Distinct().Count()>1;
             if(mixed)throw new ArgumentException("Compare modeled experiments with the same simulator/demo input provenance.");

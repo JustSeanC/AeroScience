@@ -42,7 +42,7 @@ public sealed class ToolbarCommandHandler(MissionCoordinator coordinator, RouteM
                     var id=command.MissionId??coordinator.Snapshot().ActiveMission?.Id;
                     var state=id is {} flight?coordinator.PersonalResearch(flight):null;
                     // Validate page identity before any durable control side effect.
-                    var pageSize=state?.Cards.Any(c=>(AtmosphericResearch.IsCollectionCard(c.Card)||c.Card.Survey is not null||c.Card.ObservationFlight is not null||c.Card.ExperimentalSensor is not null||c.Card.FlightRegime?.TestPoint is not null))==true?1:4;
+                    var pageSize=state?.Cards.Any(c=>(AtmosphericResearch.IsCollectionCard(c.Card)||c.Card.Survey is not null||c.Card.ObservationFlight is not null||c.Card.ExperimentalSensor is not null||c.Card.FlightRegime?.TestPoint is not null||c.Card.Procedure is not null))==true?1:4;
                     if(command.Offset%pageSize!=0)throw new ArgumentException("Use bounded four-card pages.");
                     ResearchCardReceipt? receipt=null;
                     if(command.Op=="research-control"){
@@ -53,7 +53,7 @@ public sealed class ToolbarCommandHandler(MissionCoordinator coordinator, RouteM
                     }
                     // A full atmospheric question may contain 500 Unicode characters.
                     // Keep exact definitions and the same byte boundary by paging one card.
-                    if(state is not null)state=state with{Cards=state.Cards.Skip(command.Offset).Take(pageSize).ToArray(),NextOffset=command.Offset+pageSize<state.TotalCards?command.Offset+pageSize:null,PageSize=pageSize};
+                    if(state is not null)state=state with{Cards=state.Cards.Skip(command.Offset).Take(pageSize).Select(CompactProcedureCard).ToArray(),NextOffset=command.Offset+pageSize<state.TotalCards?command.Offset+pageSize:null,PageSize=pageSize};
                     var encoded=JsonSerializer.Serialize(new{protocol=1,command.RequestId,ok=true,research=state,receipt},NativeResearchJson);
                     if(Encoding.UTF8.GetByteCount(encoded)>8000)throw new InvalidOperationException("Personal card reply exceeds the native packet bound. Use the dashboard.");
                     return encoded;
@@ -150,4 +150,14 @@ public sealed class ToolbarCommandHandler(MissionCoordinator coordinator, RouteM
         completed.Add(id, (Digest(json), reply)); order.Enqueue(id);
         while (order.Count > 128) completed.Remove(order.Dequeue());
     }
+    private static ResearchFlightCard CompactProcedureCard(ResearchFlightCard item)
+    {
+        if(item.Card.Procedure is null)return item;
+        static string Clip(string value,int maximum)=>string.Concat(value.EnumerateRunes().Take(maximum));
+        // Display projection only. Commands always resolve the complete frozen definition in the store.
+        var definition=item.Card.Procedure with{Points=item.Card.Procedure.Points.Select(p=>p with{Conditions=p.Conditions with{TestPoint=p.Conditions.TestPoint! with{Name=Clip(p.Conditions.TestPoint.Name,40),Description="Full immutable definition in My Research"}}}).ToArray()};
+        var progress=item.Procedure is null?null:item.Procedure with{Explanation="Provisional progress; verify originals after flight.",Points=item.Procedure.Points.Select(p=>p with{Explanation=Clip(p.Explanation,80)}).ToArray()};
+        return item with{Card=item.Card with{Procedure=definition},Procedure=progress,OpenAttempt=item.OpenAttempt is null?null:item.OpenAttempt with{PointEvidence=null}};
+    }
+
 }

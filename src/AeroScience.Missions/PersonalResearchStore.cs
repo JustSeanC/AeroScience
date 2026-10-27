@@ -31,8 +31,9 @@ public sealed partial class MissionStore
     public PersonalResearchCard SaveResearchCard(SaveResearchCardRequest input)
     {
         if(input.Extensions is {Count:>0})throw new ArgumentException("Unsupported authoring fields cannot be discarded. Keep the original definition and use a compatible editor.");
-        if(new object?[]{input.FlightRegime,input.AtmosphericProfile,input.AtmosphericTransect,input.Survey,input.ObservationFlight,input.ExperimentalSensor}.Count(x=>x is not null)!=1)throw new ArgumentException("Choose exactly one experiment type.");
-        if(input.ExperimentalSensor is not null)ExperimentalSensorResearch.Validate(input.ExperimentalSensor);
+        if(new object?[]{input.FlightRegime,input.AtmosphericProfile,input.AtmosphericTransect,input.Survey,input.ObservationFlight,input.ExperimentalSensor,input.Procedure}.Count(x=>x is not null)!=1)throw new ArgumentException("Choose exactly one experiment type.");
+        if(input.Procedure is not null)FlightRegimeEvaluation.ValidateProcedure(input.Procedure);
+        else if(input.ExperimentalSensor is not null)ExperimentalSensorResearch.Validate(input.ExperimentalSensor);
         else if(input.ObservationFlight is not null)ObservationResearch.Validate(input.ObservationFlight);
         else if(input.Survey is not null)SurveyResearch.Validate(input.Survey);
         else if(input.AtmosphericTransect is not null)AtmosphericTransectResearch.Validate(input.AtmosphericTransect);
@@ -50,9 +51,9 @@ public sealed partial class MissionStore
         var revision = cmd.ExecuteScalar() is long value ? checked((int)value) : 0;
         if (input.Id.HasValue && (revision == 0 || input.ExpectedRevision != revision))
             throw new InvalidOperationException("This card changed. Reload it before saving a new revision.");
-        var template=input.FlightRegime?.TestPoint is not null?FlightRegimeEvaluation.CustomTemplate:input.ExperimentalSensor is not null?ExperimentalSensorResearch.Template:input.ObservationFlight is not null?ObservationResearch.Template:input.Survey is not null?SurveyResearch.Template:input.AtmosphericTransect is not null?AtmosphericTransectResearch.Template:input.AtmosphericProfile is null?"flight-regime":AtmosphericResearch.Template;
+        var template=input.Procedure is not null?FlightRegimeEvaluation.ProcedureTemplate:input.FlightRegime?.TestPoint is not null?FlightRegimeEvaluation.CustomTemplate:input.ExperimentalSensor is not null?ExperimentalSensorResearch.Template:input.ObservationFlight is not null?ObservationResearch.Template:input.Survey is not null?SurveyResearch.Template:input.AtmosphericTransect is not null?AtmosphericTransectResearch.Template:input.AtmosphericProfile is null?"flight-regime":AtmosphericResearch.Template;
         if(revision>0){var current=ResearchCard(id,revision);SupportedCard(current);if(current.TemplateId!=template)throw new ArgumentException("Keep an experiment's research type when revising it; prepare a separate experiment instead.");}
-        var card = new PersonalResearchCard(input.FlightRegime?.TestPoint is not null?7:input.ExperimentalSensor is not null?6:input.ObservationFlight is not null?5:input.Survey is not null?4:input.AtmosphericTransect is not null?3:input.AtmosphericProfile is null?1:2, id, revision + 1, name, template, input.FlightRegime, DateTimeOffset.UtcNow,input.AtmosphericProfile,input.AtmosphericTransect,input.Survey,input.ObservationFlight,input.ExperimentalSensor);
+        var card = new PersonalResearchCard(input.Procedure is not null?8:input.FlightRegime?.TestPoint is not null?7:input.ExperimentalSensor is not null?6:input.ObservationFlight is not null?5:input.Survey is not null?4:input.AtmosphericTransect is not null?3:input.AtmosphericProfile is null?1:2, id, revision + 1, name, template, input.FlightRegime, DateTimeOffset.UtcNow,input.AtmosphericProfile,input.AtmosphericTransect,input.Survey,input.ObservationFlight,input.ExperimentalSensor,input.Procedure);
         InsertResearchCard(db,tx,card);tx.Commit();return card;
     }
 
@@ -87,7 +88,7 @@ public sealed partial class MissionStore
         var card = ResearchCard(cardId, revision);SupportedCard(card);
         if(card.ExperimentalSensor is not null||AtmosphericResearch.IsCollectionCard(card)||card.Survey is not null||card.ObservationFlight is not null)return PrepareResearchStarter(new(1,Guid.NewGuid(),card.TemplateId,ResearchEntryIntent.FlyNow,new(cardId,revision))).Plan;
         return SavePlan(new(Guid.NewGuid(), card.Name, MissionTemplateKind.ObservationFlight,
-            Objective:card.FlightRegime?.TestPoint?.Description??"Hold the card's indicated airspeed and MSL altitude within its tolerances.",
+            Objective:card.Procedure is not null?"Complete the explicitly marked named points and repetitions; review each point in My Research.":card.FlightRegime?.TestPoint?.Description??"Hold the card's indicated airspeed and MSL altitude within its tolerances.",
             Instruments: [], ResearchCard: new(card.Id, card.Revision)));
     }
 
@@ -155,7 +156,10 @@ public sealed partial class MissionStore
         cmd.Parameters.AddWithValue("$flight", mission.Id.ToString());
         using var scienceLease=card.ExperimentalSensor is not null||AtmosphericResearch.IsCollectionCard(card)||card.Survey is not null||card.ObservationFlight is not null&&science?.AvailabilityError() is null?science?.BeginAnalysis():null;
         PersonalResearchAttempt attempt;
-        if(card.ExperimentalSensor is not null){
+        if(card.Procedure is not null){
+            var c=CalculateProcedure(card,mission.Id,request.StartUtc,request.EndUtc,mission.Status!=MissionStatus.Completed,token);
+            attempt=new(8,request.RequestId,mission.Id,card,request.StartUtc,request.EndUtc,DateTimeOffset.UtcNow,FlightRegimeEvaluation.ProcedureVersion,c.Summary.Outcome,0,null,null,c.Evidence,c.Summary.Explanation,marked?.Id,Procedure:c.Summary);
+        }else if(card.ExperimentalSensor is not null){
             if(ScienceDeleted(mission.Id))throw new InvalidOperationException("Collected science was permanently deleted; modeled inputs cannot be recreated from flight context.");
             if(science is null)throw new InvalidOperationException("Reconnect the Scientific Data Library to evaluate original inputs.");
             var c=ExperimentalSensorResearch.Calculate(science.ResearchObservationWindow(mission.Id,request.StartUtc,request.EndUtc),card,science.LibraryId,PersonalPauseTimes(mission.Id,request.StartUtc,request.EndUtc,true),request,token);
