@@ -8,7 +8,7 @@ export const customFlightTargets=r=>!editableFlightTest(r)?"Unsupported custom d
 
 // Both modes patch one complete definition. Unknown fields remain retained and read-only.
 export function customFlightFields(parent,initial,{prefix='',revision=0,cardVersion=7,cardFields={}}={}){
- let value=structuredClone(initial),mode='guided';const supported=editableFlightTest(value)&&cardVersion===7&&Object.keys(cardFields).every(key=>['version','id','revision','name','templateId','createdUtc','atmosphericProfile','atmosphericTransect','survey','observationFlight','experimentalSensor'].includes(key));
+ let value=structuredClone(initial),mode='guided';const supported=editableFlightTest(value)&&cardVersion===7&&Object.keys(cardFields).every(key=>['version','id','revision','name','templateId','createdUtc','atmosphericProfile','atmosphericTransect','survey','observationFlight','experimentalSensor'].includes(key)||key==='procedure'&&cardFields[key]==null);
  const root=node('section',undefined,'custom-flight-authoring');root.setAttribute('aria-label','Custom test-card definition');const tabs=node('div',undefined,'action-row'),body=node('div',undefined,'research-grid'),preview=node('details'),code=node('pre');preview.append(node('summary','Definition & Revision Preview'),code);tabs.setAttribute('role','group');tabs.setAttribute('aria-label','Editing experience');root.append(tabs,body,preview);parent.append(root);
  const refreshPreview=()=>{code.textContent=JSON.stringify({cardVersion,definitionVersion:value?.testPoint?.version,nextRevision:revision+1,flightRegime:value,cardFields},null,2);};
  function update(run){run();refreshPreview();}

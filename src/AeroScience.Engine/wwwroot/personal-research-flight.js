@@ -26,24 +26,26 @@ export function researchFlightControls(parent,api){
   if(next.flightId!==flight||state&&next.revision<state.revision)return;state=next;
   const key=next.cards.map(c=>c.card.id).join('/');if(key!==signature){signature=key;rows.replaceChildren();controls.clear();
    for(const selected of next.cards){const card=selected.card,row=node('article',undefined,'research-panel');row.setAttribute('aria-label',card.name);row.append(node('h3',`${card.name} · revision ${card.revision}`));
-    const info=node('p'),actions=node('div',undefined,'action-row');row.append(info,actions);const buttons={};
+    const info=node('p'),actions=node('div',undefined,'action-row');row.append(info,actions);const buttons={};let pointSelect=null;
+    if(card.procedure){const label=node('label','Test point'),select=node('select');select.setAttribute('aria-label','Test point for '+card.name);for(const point of card.procedure.points){const option=node('option',point.conditions.testPoint.name);option.value=point.id;select.append(option);}pointSelect=select;label.append(select);row.insertBefore(label,actions);}
     for(const [action,label] of [['activate','Activate Card'],['deactivate','Deactivate Card'],['beginAttempt','Begin Attempt'],['endAttempt','End Attempt']]){
      const b=node('button',label,action==='beginAttempt'?'primary':'secondary');b.type='button';buttons[action]=b;
      b.onclick=async()=>{if(busy||!state)return;const current=state.cards.find(c=>c.card.id===card.id);if(!current)return;
-      const input={version:1,flightId:flight,expectedRevision:state.revision,action,cardId:card.id,expectedAttemptId:current.openAttempt?.id||null};const key=JSON.stringify(input);
+      const input={version:1,flightId:flight,expectedRevision:state.revision,action,cardId:card.id,expectedAttemptId:current.openAttempt?.id||null,...(action==='beginAttempt'&&pointSelect?{testPointId:pointSelect.value}:{})};const key=JSON.stringify(input);
       if(lastCommand?.key!==key)lastCommand={key,body:{...input,requestId:newIdentity()}};
       const own=epoch;busy=true;refreshButtons();
       try{const result=await api('/api/research/control',lastCommand.body);if(own===epoch){apply(result.state);status.textContent=result.receipt.message;}}
       catch(error){if(own===epoch){status.textContent=error.message;lastRead=0;}}
       finally{if(own===epoch){busy=false;refreshButtons();}}
      };actions.append(b);
-    }if(card.observationFlight)button(actions,'Record Pilot Observation',openPilotObservations,'primary');controls.set(card.id,{info,buttons});rows.append(row);
+    }if(card.observationFlight)button(actions,'Record Pilot Observation',openPilotObservations,'primary');controls.set(card.id,{info,buttons,pointSelect,lastNext:null});rows.append(row);
    }
   }
   refreshButtons();
  }
  function refreshButtons(){if(!state)return;for(const card of state.cards){const view=controls.get(card.card.id);if(!view)continue;
-  view.info.textContent=`${card.openAttempt?'Attempt recording since '+card.openAttempt.startUtc:card.active?'Active — ready for an attempt':'Inactive'} · ${researchCardTargets(card.card)} ${card.activationBlocked||''}`;
+  if(view.pointSelect){const next=card.openAttempt?.testPointId||card.procedure?.nextPointId;if(next&&next!==view.lastNext){view.pointSelect.value=next;view.lastNext=next;}view.pointSelect.disabled=busy||!!card.openAttempt;}
+  view.info.textContent=`${card.openAttempt?'Attempt recording since '+card.openAttempt.startUtc:card.active?'Active — ready for an attempt':'Inactive'} · ${researchCardTargets(card.card)} ${card.activationBlocked||''}${card.procedure?' · Provisional repetitions: '+card.procedure.points.map(p=>p.completedRepetitions+'/'+p.requiredRepetitions).join(' · ')+'. Verify original evidence after flight.':''}`;
   for(const [action,b]of Object.entries(view.buttons))b.disabled=busy||!state.recording||action==='activate'&&(card.active||!!card.activationBlocked)||action==='deactivate'&&!card.active||action==='beginAttempt'&&(!card.active||!!card.openAttempt||!state.canBeginAttempt)||action==='endAttempt'&&!card.openAttempt;
  }}
  return {update(snapshot){
@@ -62,6 +64,7 @@ export async function researchFlightTimeline(parent,api,flight,{attemptId,at}={}
  async function loadAttempts(){const rows=selected?[selected]:await api(`/api/missions/${flight}/research-attempts?offset=${offset}`);if(!root.isConnected)return;attempts.replaceChildren(node('h3','Recorded Attempts'));
   if(!rows.length)attempts.append(node('p','No marked attempts on this page. Existing postflight-only P01 results remain available in My Research.'));
   for(const attempt of rows){const card=state.cards.find(c=>c.card.id===attempt.cardId)?.card;const label={recording:'Recording',recorded:'Recorded',interrupted:'Interrupted'}[attempt.status]||'Unknown';const row=node('article');row.append(node('strong',`${card?.name||'Personal test card'} · revision ${attempt.cardRevision} · ${label}`),node('p',`${attempt.startUtc} → ${attempt.endUtc||'Attempt still recording'} · ${attempt.endReason||'Explicit attempt boundaries'} · Events ${attempt.beginEventId} / ${attempt.endEventId??'pending'}`));
+   if(attempt.testPointId)row.append(node('p',`Named point ${attempt.testPointId} · ${attempt.pointEvidence?.outcome||'Insufficient Evidence'} · longest supported hold ${attempt.pointEvidence?.longestHoldSeconds||0} s. Review Multi-Point Flight verifies originals and the complete procedure.`));
    if(attempt.endUtc&&!state.recording){const command=newIdentity();button(row,'Evaluate Attempt',async()=>{const result=await api(`/api/research/recorded-attempts/${attempt.id}/evaluate`,{requestId:command});if(row.isConnected){row.querySelector('.attempt-result')?.remove();const shown=attemptView(result,api);shown.classList.add('attempt-result');row.append(shown);}});}
    attempts.append(row);
   }if(selected)button(attempts,'Show All Flight Attempts',()=>{selected=null;return loadAttempts();});else{button(attempts,'Newer Attempt Page',()=>{offset=Math.max(0,offset-20);return loadAttempts();});button(attempts,'Older Attempt Page',()=>{offset+=20;return loadAttempts();});}
