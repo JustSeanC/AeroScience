@@ -1,9 +1,5 @@
 # Third-party components
 
-## v0.7.0 standalone organization service
-
-The separate organization service uses Npgsql **10.0.3** and Npgsql.EntityFrameworkCore.PostgreSQL **10.0.3**, under the PostgreSQL license. Unmodified package integrity hashes are pinned in NuGet lock files. Exact upstream notices are retained in [licenses/Npgsql.txt](licenses/Npgsql.txt) and [licenses/Npgsql.EntityFrameworkCore.txt](licenses/Npgsql.EntityFrameworkCore.txt), sourced from the package repository commits `d3768398c17877b3a916c3c4d87e8e11698991fc` and `5e912bf071068a44e5abbdab497b313ba99d3ee1`. They are copied with the standalone server. ASP.NET Core Identity, Entity Framework Core and Data Protection **10.0.13** use Microsoft's MIT-licensed .NET components. EF Design is development migration tooling. These server dependencies do not add an account or PostgreSQL requirement to the desktop companion.
-
 ## v0.4.0 geometric analysis
 
 NetTopologySuite **2.6.0**, BSD 3-Clause, NetTopologySuite team and contributors. NuGet lock files pin the unmodified managed assembly. Its complete upstream license is bundled in [licenses/NetTopologySuite.txt](licenses/NetTopologySuite.txt). Source: <https://github.com/NetTopologySuite/NetTopologySuite/tree/v2.6.0>. Used for bounded vector polygon intersections/unions in scientific coverage; GeographicLib.NET continues to supply WGS84 geodesics. No external GIS executable is required.
