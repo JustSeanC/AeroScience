@@ -8,6 +8,20 @@ public static class PersonalResearchApi
     public static void MapPersonalResearchEndpoints(this WebApplication app)
     {
         // Existing host session, paired-display and CSRF middleware protects these routes.
+        app.MapGet("/api/research/attempts/{id:guid}/sensor",(Guid id,MissionStore store,ScienceStore science,HttpContext context)=>{var result=store.ResearchAttempt(id);return new{result,review=store.ReviewExperimentalSensorEvidence(result,science,context.RequestAborted)};});
+        app.MapGet("/api/research/attempts/{id:guid}/sensor/export",(Guid id,MissionStore store,ScienceStore science,HttpContext context)=>{
+            var result=store.ResearchAttempt(id);var review=store.ReviewExperimentalSensorEvidence(result,science,context.RequestAborted);
+            if(!review.MatchesSavedEvidence)throw new InvalidOperationException("Original evidence no longer matches; verified modeled values cannot be exported.");
+            return Results.File(System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(new{kind="Bounded experimental sensor analysis — model-derived, not original measurements",unit="degC",model=ExperimentalSensorResearch.Evaluator,result,review},WireJson.Options),"application/json",$"AeroScience-modeled-sensor-{id}.json");
+        });
+        app.MapPost("/api/research/sensor/preview",(ExperimentalSensorDefinition definition,HttpContext context)=>{
+            ExperimentalSensorResearch.Validate(definition);var at=DateTimeOffset.UnixEpoch;var flight=Guid.Parse("11111111-1111-4111-8111-111111111111");var data=Guid.Parse("22222222-2222-4222-8222-222222222222");
+            var card=new PersonalResearchCard(6,data,1,"Synthetic preview",ExperimentalSensorResearch.Template,null,at,ExperimentalSensor:definition);
+            var low=definition.MinimumInputCelsius+(definition.MaximumInputCelsius-definition.MinimumInputCelsius)*.4;var high=definition.MinimumInputCelsius+(definition.MaximumInputCelsius-definition.MinimumInputCelsius)*.6;
+            var rows=Enumerable.Range(0,121).Select(i=>new ScienceObservation(i+1,data,flight,"ambient-temperature",at.AddSeconds(i),"temperature",i<30?low:high,"degC",ScienceProvenance.SimulatorReported,"Explicit synthetic preview — never saved",null,null,null,ObservationQuality.Valid));
+            var c=ExperimentalSensorResearch.Calculate(rows,card,Guid.Empty,[],new(data,flight,at,at.AddSeconds(120)),context.RequestAborted);
+            return new{label="Synthetic example only — not recorded flight evidence; never saved",model=ExperimentalSensorResearch.Evaluator,points=c.Preview};
+        });
         app.MapGet("/api/research/starters",()=>MissionStore.ResearchStarters());
         app.MapPost("/api/research/starters/prepare",(ResearchStarterRequest request,MissionStore store)=>store.PrepareResearchStarter(request));
         app.MapGet("/api/research/cards", (int? offset, MissionStore store) => store.ResearchCards(offset ?? 0));
