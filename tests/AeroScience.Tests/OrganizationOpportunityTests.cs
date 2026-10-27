@@ -105,4 +105,25 @@ public sealed partial class OrganizationServerTests
         Assert.Equal(HttpStatusCode.Forbidden,(await pilot.Send("/api/membership/research/claim-command",Claim(card,OrganizationClaimAction.Assign,pilot:(await Member(manager)).UserId))).StatusCode);
     }
 
+    [PostgresFact]public Task ClaimRevalidatesCommittedRevocationAfterWaitingForItsTransactionLock()=>RevocationAfterWaiting(false);
+    [PostgresFact]public Task ClaimReceiptReplayRevalidatesCommittedRevocationAfterWaitingForItsRequestLock()=>RevocationAfterWaiting(true);
+    async Task RevocationAfterWaiting(bool replay)
+    {
+        await Bootstrap();await Login();var (_,card)=await Opportunity();using var pilot=await JoinPilot(invitation:InvitationSecret(await Invite()));
+        var verifier=new string('c',64);var challenge=Convert.ToBase64String(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.ASCII.GetBytes(verifier))).TrimEnd('=').Replace('+','-').Replace('/','_');
+        using var native=app.GetTestClient();native.BaseAddress=new(Origin);
+        var device=await Value<OrganizationDevicePending>(await native.PostAsJsonAsync("/api/device/start",new OrganizationDeviceStart(card.OrganizationId,"Revocation race fixture",challenge,OrganizationDesktopPermission.ManageOwnClaims),WireJson.Options));await Value<JsonElement>(await pilot.Send("/api/connection/approval",new OrganizationDeviceApproval(device.Id,card.OrganizationId,true,true,true)));var granted=await Poll(device,verifier);native.DefaultRequestHeaders.Authorization=new("Bearer",granted.Credential);
+        var command=Claim(card);long key=7014001; // Existing server membership/revocation lock.
+        if(replay){await Value<OrganizationClaimView>(await native.PostAsJsonAsync("/api/member/claim-command",command,WireJson.Options));key=System.Buffers.Binary.BinaryPrimitives.ReadInt64LittleEndian(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes((await Member(pilot)).UserId.ToString()+command.RequestId)));}
+        await using var holder=new Npgsql.NpgsqlConnection(connection);await holder.OpenAsync();await using var held=await holder.BeginTransactionAsync();await using(var cmd=new Npgsql.NpgsqlCommand("SELECT pg_advisory_xact_lock(@key)",holder,held)){cmd.Parameters.AddWithValue("key",key);await cmd.ExecuteNonQueryAsync();}
+        var attempted=native.PostAsJsonAsync("/api/member/claim-command",command,WireJson.Options);
+        // Observe the real PostgreSQL wait, proving the first authorization has completed.
+        await using var observer=new Npgsql.NpgsqlConnection(connection);await observer.OpenAsync();var waiting=false;var deadline=DateTime.UtcNow.AddSeconds(10);
+        while(DateTime.UtcNow<deadline){await using var check=new Npgsql.NpgsqlCommand("SELECT EXISTS (SELECT 1 FROM pg_stat_activity WHERE datname=current_database() AND wait_event='advisory' AND query LIKE '%pg_advisory_xact_lock%')",observer);waiting=(bool)(await check.ExecuteScalarAsync())!;if(waiting)break;await Task.Delay(20);}
+        Assert.True(waiting,"The controlled command must reach the real membership transaction lock.");
+        using(var scope=app.Services.CreateScope()){var db=scope.ServiceProvider.GetRequiredService<OrganizationDatabase>();await db.DeviceGrants.Where(g=>g.Id==device.Id).ExecuteUpdateAsync(s=>s.SetProperty(g=>g.Revoked,true));}
+        await held.CommitAsync();Assert.Equal(HttpStatusCode.Unauthorized,(await attempted).StatusCode);
+        using var final=app.Services.CreateScope();Assert.Equal(replay?1:0,await final.ServiceProvider.GetRequiredService<OrganizationDatabase>().Claims.CountAsync());
+    }
+
 }

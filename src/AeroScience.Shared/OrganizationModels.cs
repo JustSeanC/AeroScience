@@ -1,6 +1,6 @@
 namespace AeroScience.Shared;
 
-// Server-owned definition metadata only. No desktop membership, assignment or evidence transfer implied.
+// Versioned organization metadata only. No personal evidence transfer implied.
 public enum OrganizationFocus { Unknown, ScientificResearch, ExperimentalFlightTest, Mixed }
 public enum OrganizationPublication { Draft, Published }
 public static class OrganizationRoles
@@ -38,7 +38,8 @@ public sealed record OrganizationMemberRequest(int Version,Guid RequestId,int Ex
 public sealed record OrganizationPublicIdentity(int Version,Guid Id,string Name,string Description,string Origin,OrganizationEnrollmentPolicy Policy);
 public sealed record OrganizationPublishedCampaign(Guid Id,Guid ProgramId,string ProgramName,int Revision,string Name,string Description,string Objective,OrganizationFocus Focus,string Approach);
 public sealed record OrganizationMemberInformation(OrganizationPublicIdentity Organization,string Role,OrganizationMembershipState State,OrganizationPage<OrganizationPublishedCampaign> Campaigns);
-// Browser-approved, read-published-only device grant. This is not an OAuth/OIDC compliance claim.
+// Browser-approved scoped device grant; existing/default grants remain read-published-only.
+// This is not an OAuth/OIDC compliance claim.
 public sealed record OrganizationDeviceStart(Guid OrganizationId,string ClientName,string Challenge,OrganizationDesktopPermission Permission=OrganizationDesktopPermission.ReadPublished);
 public sealed record OrganizationDevicePending(Guid Id,string DeviceSecret,string UserCode,string ApprovalUrl,DateTimeOffset ExpiresUtc,int PollSeconds,OrganizationDesktopPermission Permission=OrganizationDesktopPermission.ReadPublished);
 public sealed record OrganizationDeviceApproval(Guid Id,Guid OrganizationId,bool Approve,bool ConfirmCode,bool ConfirmClaimManagement=false);

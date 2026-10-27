@@ -35,13 +35,15 @@ public sealed class OrganizationManagement(OrganizationDatabase db)
     static (Guid Id,string Name) Actor(ClaimsPrincipal user)=>
         (Guid.Parse(user.FindFirstValue(ClaimTypes.NameIdentifier)??throw new InvalidOperationException("Authenticated account identity is missing.")),user.Identity!.Name!);
     public void Audit(Guid actor,string name,string action,Guid resource,int? revision=null)=>db.Audit.Add(new(){ActorId=actor,ActorName=name,Action=action,ResourceId=resource,Revision=revision,TimestampUtc=OrganizationTime.UtcNow});
-    internal async Task<T> Mutate<T>(ClaimsPrincipal user,Guid request,object input,Func<Guid,string,Task<T>> change,CancellationToken token)
+    internal async Task<T> Mutate<T>(ClaimsPrincipal user,Guid request,object input,Func<Guid,string,Task<T>> change,CancellationToken token,Func<Task>? authorize=null)
     {
         var actor=Actor(user);var hash=Hash(input);
         await using var tx=await db.Database.BeginTransactionAsync(token);
         // The same command is serialized across processes. Other commands/records are independent.
         var bytes=SHA256.HashData(Encoding.UTF8.GetBytes(actor.Id.ToString()+request));var key=System.Buffers.Binary.BinaryPrimitives.ReadInt64LittleEndian(bytes);
         await db.Database.ExecuteSqlInterpolatedAsync($"SELECT pg_advisory_xact_lock({key})",token);
+        // Claim commands recheck current authorization after waiting, including receipt replays.
+        if(authorize is not null)await authorize();
         var receipt=await db.Receipts.FindAsync([actor.Id,request],token);
         if(receipt is not null){if(receipt.RequestSha256!=hash)throw new OrganizationConflict("That request identity already belongs to a different change. Your draft was not saved.");return JsonSerializer.Deserialize<T>(receipt.ResponseJson,WireJson.Options)!;}
         try{

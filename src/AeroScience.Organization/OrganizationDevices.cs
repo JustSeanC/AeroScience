@@ -78,15 +78,15 @@ public sealed class OrganizationDevices(OrganizationDatabase db,OrganizationMemb
         var header=c.Request.Headers.Authorization.ToString();
         if(!header.StartsWith("Bearer ",StringComparison.Ordinal)||header.Length!=71)throw new OrganizationUnauthorized();
         var credential=header[7..];if(credential.Any(ch=>!char.IsAsciiHexDigit(ch)))throw new OrganizationUnauthorized();
-        var hash=OrganizationMembership.Digest(credential);var row=await db.DeviceGrants.SingleOrDefaultAsync(g=>g.CredentialHash==hash,ct);
+        var hash=OrganizationMembership.Digest(credential);var row=await db.DeviceGrants.AsNoTracking().SingleOrDefaultAsync(g=>g.CredentialHash==hash,ct);
         if(row is null||row.Revoked||row.CredentialExpiresUtc<=OrganizationTime.UtcNow||row.UserId is null)throw new OrganizationUnauthorized();
         if(requireClaims&&row.Permission!=OrganizationDesktopPermission.ManageOwnClaims)throw new OrganizationForbidden();
-        var user=await users.FindByIdAsync(row.UserId.ToString()!);var member=await db.Memberships.AsNoTracking().SingleOrDefaultAsync(m=>m.UserId==row.UserId,ct);
-        if(user is null||member?.State!=OrganizationMembershipState.Active||row.SecurityStamp!=await users.GetSecurityStampAsync(user))throw new OrganizationUnauthorized();return row;
+        var user=await db.Users.AsNoTracking().SingleOrDefaultAsync(u=>u.Id==row.UserId,ct);var member=await db.Memberships.AsNoTracking().SingleOrDefaultAsync(m=>m.UserId==row.UserId,ct);
+        if(user is null||member?.State!=OrganizationMembershipState.Active||row.SecurityStamp!=user.SecurityStamp)throw new OrganizationUnauthorized();return row;
     }
     public async Task<object> Disconnect(HttpContext c,CancellationToken ct)
     {
-        var row=await Authorize(c,ct);row.Revoked=true;history.Audit(row.UserId!.Value,"desktop","desktop-disconnected",row.Id);await db.SaveChangesAsync(ct);return new{message="Desktop authorization revoked."};
+        var row=await Authorize(c,ct);await db.DeviceGrants.Where(g=>g.Id==row.Id).ExecuteUpdateAsync(s=>s.SetProperty(g=>g.Revoked,true),ct);history.Audit(row.UserId!.Value,"desktop","desktop-disconnected",row.Id);await db.SaveChangesAsync(ct);return new{message="Desktop authorization revoked."};
     }
     public async Task<OrganizationMemberInformation> Published(Guid userId,int offset,CancellationToken ct)
     {

@@ -138,9 +138,7 @@ public sealed class OrganizationOpportunities(OrganizationDatabase db,Organizati
         if(manager?request.Action is not(OrganizationClaimAction.Assign or OrganizationClaimAction.ManagerRelease):request.Action is not(OrganizationClaimAction.Claim or OrganizationClaimAction.Accept or OrganizationClaimAction.Release))throw new OrganizationForbidden();
         var actor=await Actor(c,desktop,ct);
         return await history.Mutate(actor,request.RequestId,new{operation="claim-command",request},async(user,author)=>{
-            await Lock(ct);if(desktop){var current=await Actor(c,true,ct);if(OrganizationMembership.Actor(current)!=user)throw new OrganizationForbidden();}
-            var member=await Active(actor,ct);if(manager)await Manager(actor,ct);
-            if((await members.Public(ct)).Id!=request.OrganizationId)throw new OrganizationForbidden();
+            var member=await Active(actor,ct);
             var opportunity=await db.Opportunities.SingleOrDefaultAsync(o=>o.Id==request.OpportunityId,ct)??throw new OrganizationNotFound();
             ClaimRecord row;
             if(request.Action is OrganizationClaimAction.Assign or OrganizationClaimAction.Claim){
@@ -168,7 +166,12 @@ public sealed class OrganizationOpportunities(OrganizationDatabase db,Organizati
             }
             db.ClaimEvents.Add(new(){ClaimId=row.Id,ClaimRevision=row.Revision,ActorId=user,Action=request.Action.ToString(),TimestampUtc=OrganizationTime.UtcNow});history.Audit(user,author,"claim-"+request.Action.ToString().ToLowerInvariant(),row.Id,row.Revision);
             return await ClaimView(row,manager,ct);
-        },ct);
+        },ct,async()=>{
+            await Lock(ct);
+            if(desktop&&OrganizationMembership.Actor(await Actor(c,true,ct))!=OrganizationMembership.Actor(actor))throw new OrganizationForbidden();
+            await Active(actor,ct);if(manager)await Manager(actor,ct);
+            if((await members.Public(ct)).Id!=request.OrganizationId)throw new OrganizationForbidden();
+        });
     }
     async Task<OrganizationClaimView> ClaimView(ClaimRecord row,bool manager,CancellationToken ct)
     {
