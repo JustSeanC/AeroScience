@@ -168,6 +168,12 @@ public sealed partial class MissionStore
         return new(card,rows.ToArray(),revisions,requirements,evaluators,sources.Length>1,notices.ToArray());
     }
 
+    public ResearchEvidenceAudit ReviewFlightTestEvidence(PersonalResearchAttempt result,CancellationToken token=default)
+    {
+        if(result.Card.FlightRegime is null)throw new ArgumentException("Choose a retained Flight-Regime or custom flight-test result.");
+        SupportedCard(result.Card);using var db=Open();using var tx=db.BeginTransaction(deferred:true);
+        return AuditResearchEvidence(db,tx,result,token);
+    }
     ResearchEvidenceAudit AuditResearchEvidence(SqliteConnection db,SqliteTransaction tx,PersonalResearchAttempt result,CancellationToken token)
     {
         if(result.EndUtc<result.StartUtc||result.EndUtc-result.StartUtc>TimeSpan.FromHours(24))throw new NotSupportedException("This result exceeds the supported 24-hour evidence review window.");
@@ -175,16 +181,18 @@ public sealed partial class MissionStore
         using var cmd=db.CreateCommand();cmd.Transaction=tx;
         cmd.CommandText="SELECT sequence,payload_json FROM telemetry WHERE mission_id=$flight AND timestamp_utc >= $start AND timestamp_utc <= $end ORDER BY sequence";
         cmd.Parameters.AddWithValue("$flight",result.FlightId.ToString());cmd.Parameters.AddWithValue("$start",Stamp(result.StartUtc));cmd.Parameters.AddWithValue("$end",Stamp(result.EndUtc));
+        var custom=result.Card.FlightRegime?.TestPoint is not null;
+        var evaluation=custom?new FlightRegimeEvaluation.Window(result.Card.FlightRegime!,result.StartUtc,result.EndUtc):null;
         long count=0,first=0,last=0,gaps=0,edges=0,invalid=0;DateTimeOffset? previous=null;double? maxGap=null;
         var sources=new HashSet<TelemetrySource>();var preview=new List<ReplaySample>();var tail=new Queue<ReplaySample>();var breaks=new List<ResearchEvidenceBreak>();
         using var pauses=PersonalPauseTimes(result.FlightId,result.StartUtc,result.EndUtc).GetEnumerator();var hasPause=pauses.MoveNext();
-        void Pause(){AppendResearchBreak(hash,pauses.Current);edges++;if(breaks.Count<20)breaks.Add(new(pauses.Current,"Recorded pause, connection or gap edge",null));hasPause=pauses.MoveNext();}
+        void Pause(){evaluation?.Break();AppendResearchBreak(hash,pauses.Current);edges++;if(breaks.Count<20)breaks.Add(new(pauses.Current,"Recorded pause, connection or gap edge",null));hasPause=pauses.MoveNext();}
         void Gap(DateTimeOffset at,double seconds,string kind){gaps++;maxGap=Math.Max(maxGap??0,seconds);if(breaks.Count<20)breaks.Add(new(at,kind,seconds));}
         using(var r=cmd.ExecuteReader())while(r.Read()){
             token.ThrowIfCancellationRequested();var sequence=r.GetInt64(0);var json=r.GetString(1);var frame=JsonSerializer.Deserialize<TelemetryFrame>(json,WireJson.Options)!;
             while(hasPause&&pauses.Current<=frame.TimestampUtc){token.ThrowIfCancellationRequested();Pause();}
-            AppendResearchSample(hash,sequence,json);if(count++==0)first=sequence;last=sequence;sources.Add(frame.Source);
-            if(!frame.IsValid||frame.IsPaused||!Enum.IsDefined(frame.Source)||frame.IndicatedAirspeedKnots<0)invalid++;
+            evaluation?.Add(frame);AppendResearchSample(hash,sequence,json);if(count++==0)first=sequence;last=sequence;sources.Add(frame.Source);
+            if(!FlightRegimeEvaluation.SupportedSample(frame,result.Card.FlightRegime!))invalid++;
             if(previous is {} prior){var gap=(frame.TimestampUtc-prior).TotalSeconds;maxGap=Math.Max(maxGap??0,gap);if(gap>FlightRegimeEvaluation.MaximumGapSeconds||gap<=0)Gap(frame.TimestampUtc,gap,"Recorded sample gap or non-increasing timestamp");}
             else if((frame.TimestampUtc-result.StartUtc).TotalSeconds>FlightRegimeEvaluation.MaximumGapSeconds)Gap(frame.TimestampUtc,(frame.TimestampUtc-result.StartUtc).TotalSeconds,"No sample near the beginning of this interval");
             previous=frame.TimestampUtc;var sample=new ReplaySample(sequence,frame);if(preview.Count<6)preview.Add(sample);tail.Enqueue(sample);if(tail.Count>6)tail.Dequeue();
@@ -199,6 +207,17 @@ public sealed partial class MissionStore
         var matches=count==result.Evidence.SampleCount&&first==result.Evidence.FirstSequence&&last==result.Evidence.LastSequence
             &&Convert.ToHexString(hash.GetHashAndReset()).Equals(result.Evidence.Sha256,StringComparison.OrdinalIgnoreCase)
             &&planHash==result.Evidence.PlanSha256;
+        if(custom){
+            cmd.CommandText="SELECT card_json FROM personal_flight_cards WHERE mission_id=$flight AND card_id=$card";cmd.Parameters.AddWithValue("$card",result.Card.Id.ToString());
+            var frozen=cmd.ExecuteScalar() as string;
+            var interrupted=Detail(result.FlightId)?.Mission.Status!=MissionStatus.Completed
+                ||result.RecordedAttemptId is {} marked&&RecordedResearchAttempt(marked).Status==ResearchAttemptStatus.Interrupted;
+            var outcome=evaluation!.Finish(interrupted);
+            matches &= result.Version==7&&result.EvaluatorVersion==FlightRegimeEvaluation.CustomVersion&&frozen is not null
+                &&PreflightReadiness.Hash(JsonSerializer.Deserialize<PersonalResearchCard>(frozen,WireJson.Options)!)==PreflightReadiness.Hash(result.Card)
+                &&outcome.Outcome==result.Outcome&&evaluation.LongestHold==result.LongestSupportedHoldSeconds
+                &&evaluation.HoldStart==result.HoldStartUtc&&evaluation.HoldEnd==result.HoldEndUtc;
+        }
         return new(matches,count,result.Evidence.SampleCount,gaps,edges,invalid,maxGap,sources.Order().ToArray(),preview.ToArray(),breaks.ToArray(),gaps+edges>breaks.Count);
     }
     static void AppendResearchSample(IncrementalHash hash,long sequence,string json)=>hash.AppendData(Encoding.UTF8.GetBytes(sequence.ToString(CultureInfo.InvariantCulture)+":"+json+"\n"));

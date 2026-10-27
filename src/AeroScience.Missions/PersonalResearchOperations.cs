@@ -56,6 +56,7 @@ public sealed partial class MissionStore
 
     private static void SupportedCard(PersonalResearchCard card)
     {
+        if(card.Extensions is {Count:>0})throw new NotSupportedException("This card contains unsupported fields. Its original definition must be preserved by a compatible editor.");
         if(card.Version==6&&card.TemplateId==ExperimentalSensorResearch.Template&&card.FlightRegime is null&&card.AtmosphericProfile is null&&card.AtmosphericTransect is null&&card.Survey is null&&card.ObservationFlight is null){ExperimentalSensorResearch.Validate(card.ExperimentalSensor);return;}
         if(card.ExperimentalSensor is not null)throw new NotSupportedException("Unsupported experimental-sensor definition version.");
         if(card.Version==5&&card.TemplateId==ObservationResearch.Template&&card.FlightRegime is null&&card.AtmosphericProfile is null&&card.AtmosphericTransect is null&&card.Survey is null){ObservationResearch.Validate(card.ObservationFlight);return;}
@@ -64,6 +65,8 @@ public sealed partial class MissionStore
         if(card.Survey is not null)throw new NotSupportedException("Unsupported survey definition version.");
         if(card.Version==3&&card.TemplateId==AtmosphericTransectResearch.Template&&card.FlightRegime is null&&card.AtmosphericProfile is null){AtmosphericTransectResearch.Validate(card.AtmosphericTransect);return;}
         if(card.Version==2&&card.TemplateId==AtmosphericResearch.Template&&card.FlightRegime is null&&card.AtmosphericTransect is null){AtmosphericResearch.Validate(card.AtmosphericProfile);return;}
+        if(card.Version==7&&card.TemplateId==FlightRegimeEvaluation.CustomTemplate&&card.FlightRegime?.TestPoint is not null&&card.AtmosphericProfile is null&&card.AtmosphericTransect is null){FlightRegimeEvaluation.Validate(card.FlightRegime);return;}
+        if(card.FlightRegime?.TestPoint is not null)throw new NotSupportedException("Unsupported custom flight-test card version.");
         if (card.Version != 1 || card.TemplateId != "flight-regime"||card.AtmosphericProfile is not null||card.AtmosphericTransect is not null) throw new NotSupportedException("Unsupported personal research definition version.");
         FlightRegimeEvaluation.Validate(card.FlightRegime);
     }
@@ -74,10 +77,10 @@ public sealed partial class MissionStore
         // Atmospheric collection sets no aircraft target constraint. Science controls remain separate.
         if(first.ExperimentalSensor is not null||second.ExperimentalSensor is not null||first.ObservationFlight is not null||second.ObservationFlight is not null||first.Survey is not null||second.Survey is not null||AtmosphericResearch.IsCollectionCard(first)||AtmosphericResearch.IsCollectionCard(second))return true;
         var a = first.FlightRegime!; var b = second.FlightRegime!;
-        return Math.Max(a.AirspeedKnots-a.AirspeedToleranceKnots,b.AirspeedKnots-b.AirspeedToleranceKnots)
-                <= Math.Min(a.AirspeedKnots+a.AirspeedToleranceKnots,b.AirspeedKnots+b.AirspeedToleranceKnots)
-            && Math.Max(a.AltitudeMslFeet-a.AltitudeToleranceFeet,b.AltitudeMslFeet-b.AltitudeToleranceFeet)
-                <= Math.Min(a.AltitudeMslFeet+a.AltitudeToleranceFeet,b.AltitudeMslFeet+b.AltitudeToleranceFeet);
+        return (!FlightRegimeEvaluation.RequiresAirspeed(a)||!FlightRegimeEvaluation.RequiresAirspeed(b)
+                ||Math.Max(a.AirspeedKnots-a.AirspeedToleranceKnots,b.AirspeedKnots-b.AirspeedToleranceKnots)<=Math.Min(a.AirspeedKnots+a.AirspeedToleranceKnots,b.AirspeedKnots+b.AirspeedToleranceKnots))
+            &&(!FlightRegimeEvaluation.RequiresAltitude(a)||!FlightRegimeEvaluation.RequiresAltitude(b)
+                ||Math.Max(a.AltitudeMslFeet-a.AltitudeToleranceFeet,b.AltitudeMslFeet-b.AltitudeToleranceFeet)<=Math.Min(a.AltitudeMslFeet+a.AltitudeToleranceFeet,b.AltitudeMslFeet+b.AltitudeToleranceFeet));
     }
 
     private ResearchFlightState ReadResearchOperations(SqliteConnection db, SqliteTransaction? tx, Guid flight)

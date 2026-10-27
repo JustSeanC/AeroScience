@@ -4,21 +4,38 @@ namespace AeroScience.Shared;
 // Definitions are local and organization-independent. New templates/rules require new versions.
 public sealed record ResearchCardReference(Guid Id, int Revision);
 public sealed record FlightRegimeDefinition(double AirspeedKnots, double AirspeedToleranceKnots,
-    double AltitudeMslFeet, double AltitudeToleranceFeet, double HoldSeconds);
+    double AltitudeMslFeet, double AltitudeToleranceFeet, double HoldSeconds,
+    [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] CustomFlightTestPoint? TestPoint=null)
+{
+    // Preserve unknown definitions on reads; refuse unsupported writes rather than silently stripping criteria.
+    [JsonExtensionData] public Dictionary<string,System.Text.Json.JsonElement>? Extensions {get;init;}
+}
+public sealed record CustomFlightTestPoint(int Version=1,string Name="Stable Operating Conditions",
+    string Description="Hold the selected conditions simultaneously for a continuous recorded interval.",
+    bool AirspeedRequired=true,bool AltitudeRequired=true,string Policy="all")
+{
+    [JsonExtensionData] public Dictionary<string,System.Text.Json.JsonElement>? Extensions {get;init;}
+}
 public sealed record PersonalResearchCard(int Version, Guid Id, int Revision, string Name,
     string TemplateId, [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] FlightRegimeDefinition? FlightRegime, DateTimeOffset CreatedUtc,
     [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] AtmosphericResearchDefinition? AtmosphericProfile=null,
     [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] AtmosphericTransectDefinition? AtmosphericTransect=null,
     [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] SurveyResearchDefinition? Survey=null,
     [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] ObservationResearchDefinition? ObservationFlight=null,
-    [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] ExperimentalSensorDefinition? ExperimentalSensor=null);
+    [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] ExperimentalSensorDefinition? ExperimentalSensor=null)
+{
+    [JsonExtensionData] public Dictionary<string,System.Text.Json.JsonElement>? Extensions {get;init;}
+}
 public sealed record SaveResearchCardRequest(string Name, FlightRegimeDefinition? FlightRegime,
     Guid? Id = null, int? ExpectedRevision = null,
     [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] AtmosphericResearchDefinition? AtmosphericProfile=null,
     [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] AtmosphericTransectDefinition? AtmosphericTransect=null,
     [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] SurveyResearchDefinition? Survey=null,
     [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] ObservationResearchDefinition? ObservationFlight=null,
-    [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] ExperimentalSensorDefinition? ExperimentalSensor=null);
+    [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] ExperimentalSensorDefinition? ExperimentalSensor=null)
+{
+    [JsonExtensionData] public Dictionary<string,System.Text.Json.JsonElement>? Extensions {get;init;}
+}
 public enum ResearchAttemptOutcome { Pass, Fail, InsufficientEvidence, CollectionComplete, PartialCollection }
 public sealed record ResearchAttemptRequest(Guid RequestId, Guid FlightId,
     DateTimeOffset StartUtc, DateTimeOffset EndUtc,

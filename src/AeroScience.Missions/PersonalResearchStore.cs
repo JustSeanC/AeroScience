@@ -30,6 +30,7 @@ public sealed partial class MissionStore
 
     public PersonalResearchCard SaveResearchCard(SaveResearchCardRequest input)
     {
+        if(input.Extensions is {Count:>0})throw new ArgumentException("Unsupported authoring fields cannot be discarded. Keep the original definition and use a compatible editor.");
         if(new object?[]{input.FlightRegime,input.AtmosphericProfile,input.AtmosphericTransect,input.Survey,input.ObservationFlight,input.ExperimentalSensor}.Count(x=>x is not null)!=1)throw new ArgumentException("Choose exactly one experiment type.");
         if(input.ExperimentalSensor is not null)ExperimentalSensorResearch.Validate(input.ExperimentalSensor);
         else if(input.ObservationFlight is not null)ObservationResearch.Validate(input.ObservationFlight);
@@ -49,9 +50,9 @@ public sealed partial class MissionStore
         var revision = cmd.ExecuteScalar() is long value ? checked((int)value) : 0;
         if (input.Id.HasValue && (revision == 0 || input.ExpectedRevision != revision))
             throw new InvalidOperationException("This card changed. Reload it before saving a new revision.");
-        var template=input.ExperimentalSensor is not null?ExperimentalSensorResearch.Template:input.ObservationFlight is not null?ObservationResearch.Template:input.Survey is not null?SurveyResearch.Template:input.AtmosphericTransect is not null?AtmosphericTransectResearch.Template:input.AtmosphericProfile is null?"flight-regime":AtmosphericResearch.Template;
-        if(revision>0&&ResearchCard(id,revision).TemplateId!=template)throw new ArgumentException("Keep an experiment's research type when revising it; prepare a separate experiment instead.");
-        var card = new PersonalResearchCard(input.ExperimentalSensor is not null?6:input.ObservationFlight is not null?5:input.Survey is not null?4:input.AtmosphericTransect is not null?3:input.AtmosphericProfile is null?1:2, id, revision + 1, name, template, input.FlightRegime, DateTimeOffset.UtcNow,input.AtmosphericProfile,input.AtmosphericTransect,input.Survey,input.ObservationFlight,input.ExperimentalSensor);
+        var template=input.FlightRegime?.TestPoint is not null?FlightRegimeEvaluation.CustomTemplate:input.ExperimentalSensor is not null?ExperimentalSensorResearch.Template:input.ObservationFlight is not null?ObservationResearch.Template:input.Survey is not null?SurveyResearch.Template:input.AtmosphericTransect is not null?AtmosphericTransectResearch.Template:input.AtmosphericProfile is null?"flight-regime":AtmosphericResearch.Template;
+        if(revision>0){var current=ResearchCard(id,revision);SupportedCard(current);if(current.TemplateId!=template)throw new ArgumentException("Keep an experiment's research type when revising it; prepare a separate experiment instead.");}
+        var card = new PersonalResearchCard(input.FlightRegime?.TestPoint is not null?7:input.ExperimentalSensor is not null?6:input.ObservationFlight is not null?5:input.Survey is not null?4:input.AtmosphericTransect is not null?3:input.AtmosphericProfile is null?1:2, id, revision + 1, name, template, input.FlightRegime, DateTimeOffset.UtcNow,input.AtmosphericProfile,input.AtmosphericTransect,input.Survey,input.ObservationFlight,input.ExperimentalSensor);
         InsertResearchCard(db,tx,card);tx.Commit();return card;
     }
 
@@ -83,10 +84,10 @@ public sealed partial class MissionStore
 
     public MissionPlan CreateResearchPlan(Guid cardId, int revision)
     {
-        var card = ResearchCard(cardId, revision);
+        var card = ResearchCard(cardId, revision);SupportedCard(card);
         if(card.ExperimentalSensor is not null||AtmosphericResearch.IsCollectionCard(card)||card.Survey is not null||card.ObservationFlight is not null)return PrepareResearchStarter(new(1,Guid.NewGuid(),card.TemplateId,ResearchEntryIntent.FlyNow,new(cardId,revision))).Plan;
         return SavePlan(new(Guid.NewGuid(), card.Name, MissionTemplateKind.ObservationFlight,
-            Objective: "Hold the card's indicated airspeed and MSL altitude within its tolerances.",
+            Objective:card.FlightRegime?.TestPoint?.Description??"Hold the card's indicated airspeed and MSL altitude within its tolerances.",
             Instruments: [], ResearchCard: new(card.Id, card.Revision)));
     }
 
@@ -209,8 +210,8 @@ public sealed partial class MissionStore
         var result = evaluation.Finish(mission.Status != MissionStatus.Completed);
         if (marked?.Status == ResearchAttemptStatus.Interrupted)
             result = (ResearchAttemptOutcome.InsufficientEvidence,"Attempt interrupted: " + marked.EndReason + ". Retained samples remain available; no automatic success was inferred.");
-        attempt = new PersonalResearchAttempt(1, request.RequestId, mission.Id, card, request.StartUtc, request.EndUtc,
-            DateTimeOffset.UtcNow, FlightRegimeEvaluation.Version, result.Outcome, evaluation.LongestHold,
+        attempt = new PersonalResearchAttempt(card.Version, request.RequestId, mission.Id, card, request.StartUtc, request.EndUtc,
+            DateTimeOffset.UtcNow, FlightRegimeEvaluation.VersionFor(card.FlightRegime!), result.Outcome, evaluation.LongestHold,
             evaluation.HoldStart, evaluation.HoldEnd,
             new(first, last, count, Convert.ToHexString(hash.GetHashAndReset()).ToLowerInvariant(), PreflightReadiness.Hash(plan!), source), result.Explanation, marked?.Id);
         }
