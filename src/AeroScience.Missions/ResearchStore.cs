@@ -81,7 +81,7 @@ public sealed partial class MissionStore
     {
         if(input.ResearchStarter is {} origin&&Plan(input.Id)?.ResearchStarter!=origin)
             throw new ArgumentException("Starter provenance must match the prepared plan. Prepare a separate copy from My Research.");
-        foreach (var card in SelectedResearchCards(input)) _ = ResearchCard(card.Id, card.Revision);
+        foreach (var card in SelectedResearchCards(input)) SupportedCard(ResearchCard(card.Id, card.Revision));
         var plan = MissionPlanning.Validate(input with { Id = input.Id == Guid.Empty ? Guid.NewGuid() : input.Id });
         using var db = Open();WritePlan(db,null,plan);return plan;
     }

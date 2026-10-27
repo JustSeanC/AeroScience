@@ -5,10 +5,10 @@ using Xunit;
 namespace AeroScience.Tests;
 public sealed partial class OrganizationConnectionIntegrationTests
 {
-    static async Task<OrganizationOpportunitySnapshot> RealOpportunity(Server server)
+    static async Task<OrganizationOpportunitySnapshot> RealOpportunity(Server server,string template="vertical-atmospheric-profile")
     {
         var p=await server.Post("/api/organization/programs",new OrganizationProgramRequest(1,Guid.NewGuid(),0,"Collaborative research",""));var program=p.GetProperty("id").GetGuid();
-        var c=await server.Post($"/api/organization/programs/{program}/campaigns",new OrganizationCampaignRequest(1,Guid.NewGuid(),0,"Shared campaign","","Investigate altitude and temperature",OrganizationFocus.ScientificResearch,new("vertical-atmospheric-profile",1)));var campaign=c.GetProperty("id").GetGuid();await server.Post($"/api/organization/campaigns/{campaign}/publish",new OrganizationPublishRequest(1,Guid.NewGuid(),1));
+        var c=await server.Post($"/api/organization/programs/{program}/campaigns",new OrganizationCampaignRequest(1,Guid.NewGuid(),0,"Shared campaign","","Investigate altitude and temperature",OrganizationFocus.ScientificResearch,new(template,1)));var campaign=c.GetProperty("id").GetGuid();await server.Post($"/api/organization/campaigns/{campaign}/publish",new OrganizationPublishRequest(1,Guid.NewGuid(),1));
         var card=await server.Post($"/api/organization/opportunities/campaigns/{campaign}",new OrganizationOpportunityRequest(1,Guid.NewGuid(),0,2,"Collaborative test card","","Investigate retained measurements","Do not upload data in P15",new(OrganizationParticipation.Exclusive,1,1,true,[OrganizationRoles.Administrator],"Future review required")));
         var published=await server.Post($"/api/organization/opportunities/{card.GetProperty("id").GetGuid()}/publish",new OrganizationPublishRequest(1,Guid.NewGuid(),1));return published.Deserialize<OrganizationOpportunitySnapshot>(WireJson.Options)!;
     }

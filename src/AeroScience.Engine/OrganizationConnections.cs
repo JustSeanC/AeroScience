@@ -33,7 +33,7 @@ public sealed record OrganizationConnectApproval(Guid ReviewId,Guid Organization
 public sealed record OrganizationConnectionFinish(Guid PendingId);
 
 // Explicitly user-initiated connections only. Never called by telemetry, acquisition or personal research evaluation.
-public sealed class OrganizationConnections:IDisposable
+public sealed partial class OrganizationConnections:IDisposable
 {
     readonly IOrganizationCredentials vault;
     readonly string file;

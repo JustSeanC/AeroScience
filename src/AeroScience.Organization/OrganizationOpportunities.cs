@@ -177,9 +177,21 @@ public sealed class OrganizationOpportunities(OrganizationDatabase db,Organizati
     {
         var source=await history.ReadRevision(row.OpportunityId,row.IssuedRevision,ct);if(source.Kind!="opportunity"||source.Sha256!=row.IssuedSha256)throw new InvalidOperationException("Issued claim source integrity is unavailable.");
         var issued=JsonSerializer.Deserialize<OrganizationOpportunitySnapshot>(source.SnapshotJson,WireJson.Options)!;var live=await db.Opportunities.AsNoTracking().SingleAsync(o=>o.Id==row.OpportunityId,ct);
-        var member=await db.Memberships.AsNoTracking().SingleAsync(m=>m.UserId==row.UserId,ct);var availability=live.Suspended?"Unavailable / publication withdrawn":member.State!=OrganizationMembershipState.Active?"Unavailable / membership "+member.State:"Retained assignment — mission preparation requires P16";
+        var member=await db.Memberships.AsNoTracking().SingleAsync(m=>m.UserId==row.UserId,ct);var availability=live.Suspended?"Unavailable / publication withdrawn":member.State!=OrganizationMembershipState.Active?"Unavailable / membership "+member.State:"Retained assignment — review current eligibility before mission preparation";
         var name=manager?await db.Users.Where(u=>u.Id==row.UserId).Select(u=>u.UserName).SingleAsync(ct):null;
         return new(row.Id,row.UserId,name,issued.OrganizationId,row.OpportunityId,row.Revision,row.IssuedRevision,row.IssuedSha256,row.State,row.AssignedUtc,row.AcceptedUtc,row.EndedUtc,row.EndReason,issued,live.PublishedRevision>row.IssuedRevision,live.PublishedRevision,availability);
+    }
+    public async Task<OrganizationClaimOriginal> Original(Guid claim,ClaimsPrincipal actor,CancellationToken ct)
+    {
+        var member=await Active(actor,ct);var user=OrganizationMembership.Actor(actor);
+        var row=await db.Claims.AsNoTracking().SingleOrDefaultAsync(r=>r.Id==claim&&r.UserId==user,ct)??throw new OrganizationNotFound();
+        var view=await ClaimView(row,false,ct);var source=await history.ReadRevision(row.OpportunityId,row.IssuedRevision,ct);
+        var live=await db.Opportunities.AsNoTracking().SingleAsync(o=>o.Id==row.OpportunityId,ct);
+        var campaignRevision=await history.ReadRevision(view.IssuedCard.CampaignId,view.IssuedCard.CampaignRevision,ct);
+        var campaign=JsonSerializer.Deserialize<OrganizationCampaignView>(campaignRevision.SnapshotJson,WireJson.Options)!;
+        return new(view,source.SnapshotJson,(await members.Public(ct)).Name,campaign.Name,
+            (await db.Users.AsNoTracking().SingleAsync(u=>u.Id==user,ct)).UserName!,
+            row.State==OrganizationClaimState.Claimed&&!live.Suspended&&Eligible(member,view.IssuedCard),OrganizationTime.UtcNow);
     }
     public async Task<OrganizationPage<OrganizationClaimView>> Claims(Guid? opportunity,int offset,ClaimsPrincipal actor,bool manager,CancellationToken ct)
     {

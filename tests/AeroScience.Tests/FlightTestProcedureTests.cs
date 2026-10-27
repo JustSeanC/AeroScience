@@ -88,7 +88,7 @@ public sealed class FlightTestProcedureTests:IDisposable
   var card=store.SaveResearchCard(new("Retained P10",new(120,5,3000,100,10,new())));var original=JsonSerializer.Serialize(card,WireJson.Options);
   using(var db=new SqliteConnection("Data Source="+store.DatabasePath)){db.Open();using var cmd=db.CreateCommand();cmd.CommandText="DROP INDEX personal_card_attempts_point_review";cmd.ExecuteNonQuery();}
   store.Initialize();Assert.Equal(original,JsonSerializer.Serialize(store.ResearchCard(card.Id),WireJson.Options));
-  using var reopened=new SqliteConnection("Data Source="+store.DatabasePath);reopened.Open();using var check=reopened.CreateCommand();check.CommandText="SELECT COUNT(*) FROM sqlite_master WHERE name='personal_card_attempts_point_review'";Assert.Equal(1L,check.ExecuteScalar());check.CommandText="PRAGMA user_version";Assert.Equal(10L,check.ExecuteScalar());
+  using var reopened=new SqliteConnection("Data Source="+store.DatabasePath);reopened.Open();using var check=reopened.CreateCommand();check.CommandText="SELECT COUNT(*) FROM sqlite_master WHERE name='personal_card_attempts_point_review'";Assert.Equal(1L,check.ExecuteScalar());check.CommandText="PRAGMA user_version";Assert.Equal((long)MissionStore.CurrentSchemaVersion,check.ExecuteScalar());
  }
  [Theory][InlineData("point")][InlineData("end")][InlineData("status")]
  public void OriginalControlEventsPreventRetaggedPointsExtendedWindowsOrInterruptedStatusUpgrades(string corruption)

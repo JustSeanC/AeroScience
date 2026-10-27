@@ -56,6 +56,7 @@ public sealed partial class MissionStore
 
     private static void SupportedCard(PersonalResearchCard card)
     {
+        ValidateOrganizationCard(card);
         if(card.Extensions is {Count:>0})throw new NotSupportedException("This card contains unsupported fields. Its original definition must be preserved by a compatible editor.");
         if(card.Procedure is not null){if(card.Version!=8||card.TemplateId!=FlightRegimeEvaluation.ProcedureTemplate||card.FlightRegime is not null||card.AtmosphericProfile is not null||card.AtmosphericTransect is not null||card.Survey is not null||card.ObservationFlight is not null||card.ExperimentalSensor is not null)throw new NotSupportedException("Unsupported multi-point card version.");FlightRegimeEvaluation.ValidateProcedure(card.Procedure);return;}
         if(card.Version==6&&card.TemplateId==ExperimentalSensorResearch.Template&&card.FlightRegime is null&&card.AtmosphericProfile is null&&card.AtmosphericTransect is null&&card.Survey is null&&card.ObservationFlight is null){ExperimentalSensorResearch.Validate(card.ExperimentalSensor);return;}

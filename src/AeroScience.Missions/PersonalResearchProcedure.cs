@@ -14,8 +14,10 @@ public sealed partial class MissionStore
         IEnumerable<FlightRegimeDefinition> Rules(PersonalResearchCard card)=>card.Procedure?.Points.Select(p=>p.Conditions with{TestPoint=p.Conditions.TestPoint! with{Policy="all"}})??[card.FlightRegime!];
         // Conservative for all selectable points; changing point cannot bypass an active-card conflict.
         return Rules(first).All(a=>Rules(second).All(b=>CompatibleResearchCards(
-            first with{Version=a.TestPoint is null?1:7,TemplateId=a.TestPoint is null?"flight-regime":FlightRegimeEvaluation.CustomTemplate,Procedure=null,FlightRegime=a},
-            second with{Version=b.TestPoint is null?1:7,TemplateId=b.TestPoint is null?"flight-regime":FlightRegimeEvaluation.CustomTemplate,Procedure=null,FlightRegime=b})));
+            // Originals were validated by CompatibleResearchCards. These are internal rule projections,
+            // never issued cards, evidence snapshots or new organizational authorizations.
+            first with{Version=a.TestPoint is null?1:7,TemplateId=a.TestPoint is null?"flight-regime":FlightRegimeEvaluation.CustomTemplate,Procedure=null,FlightRegime=a,OrganizationAssignment=null},
+            second with{Version=b.TestPoint is null?1:7,TemplateId=b.TestPoint is null?"flight-regime":FlightRegimeEvaluation.CustomTemplate,Procedure=null,FlightRegime=b,OrganizationAssignment=null})));
     }
     static IEnumerable<RecordedResearchAttempt> ProcedureAttempts(SqliteConnection db,SqliteTransaction? tx,Guid flight,Guid card)
     {

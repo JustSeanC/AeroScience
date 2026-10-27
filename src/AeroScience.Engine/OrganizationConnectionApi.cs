@@ -22,6 +22,14 @@ public static class OrganizationConnectionApi
         api.MapGet("/{id:guid}/opportunities",(Guid id,int? offset,OrganizationConnections connections,HttpContext c)=>connections.Research(id,false,offset??0,c.RequestAborted));
         api.MapGet("/{id:guid}/claims",(Guid id,int? offset,OrganizationConnections connections,HttpContext c)=>connections.Research(id,true,offset??0,c.RequestAborted));
         api.MapPost("/{id:guid}/claim-command",(Guid id,OrganizationClaimCommand r,OrganizationConnections connections,HttpContext c)=>connections.ClaimCommand(id,r,c.RequestAborted));
+        api.MapPost("/{id:guid}/claims/{claim:guid}/mission-preview",async(Guid id,Guid claim,OrganizationMissionPreviewRequest r,OrganizationConnections connections,AeroScience.Missions.MissionStore store,PreflightReadinessService readiness,HttpContext c)=>{var preview=await connections.PreviewMission(id,claim,r,store,c.RequestAborted);return new{preview,readiness=readiness.Assess(preview.Suggested)};});
+        api.MapPost("/{id:guid}/claims/{claim:guid}/prepare-mission",async(Guid id,Guid claim,OrganizationMissionSave r,OrganizationConnections connections,AeroScience.Missions.MissionStore store,ScientificPlanData preparation,HttpContext c)=>{var saved=await connections.PrepareMission(id,claim,r,store,c.RequestAborted);preparation.PlanChanged(saved.Plan);return saved;});
         api.MapPost("/{id:guid}/disconnect",(Guid id,OrganizationConnections connections,HttpContext c)=>connections.Disconnect(id,c.RequestAborted));
+        app.MapGet("/api/research/organization-cards",(int? offset,AeroScience.Missions.MissionStore store)=>store.OrganizationResearchCards(offset??0));
+        app.MapGet("/api/research/cards/{id:guid}/organization",(Guid id,int? offset,AeroScience.Missions.MissionStore store)=>new{assignment=store.ResearchCard(id).OrganizationAssignment,check=store.LatestOrganizationClaimCheck(id),history=store.OrganizationPreparationHistory(id,offset??0)});
+        app.MapPost("/api/research/cards/{id:guid}/organization/reconcile",async(Guid id,OrganizationClaimReconcile r,OrganizationConnections connections,AeroScience.Missions.MissionStore store,HttpContext c)=>{
+            if(!AccessControl.IsLoopback(c))return Results.Json(new{error="Refresh organization eligibility on the companion PC. Local flight evidence remains available here."},statusCode:403);
+            return Results.Ok(await connections.ReconcileMission(id,r,store,c.RequestAborted));
+        });
     }
 }

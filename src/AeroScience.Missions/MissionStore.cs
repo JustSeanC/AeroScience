@@ -7,7 +7,7 @@ namespace AeroScience.Missions;
 
 public sealed partial class MissionStore
 {
-    public const int CurrentSchemaVersion = 10;
+    public const int CurrentSchemaVersion = 11;
     private readonly string connectionString;
     public string DatabasePath { get; }
 
@@ -43,6 +43,8 @@ public sealed partial class MissionStore
         if (Convert.ToInt32(cmd.ExecuteScalar(), CultureInfo.InvariantCulture) < 9) MigratePersonalResearch(db);
         cmd.CommandText = "PRAGMA user_version;";
         if (Convert.ToInt32(cmd.ExecuteScalar(), CultureInfo.InvariantCulture) < 10) MigrateResearchOperations(db);
+        cmd.CommandText = "PRAGMA user_version;";
+        if (Convert.ToInt32(cmd.ExecuteScalar(), CultureInfo.InvariantCulture) < 11) MigrateOrganizationPlanning(db);
         cmd.CommandText="CREATE INDEX IF NOT EXISTS personal_card_attempts_card ON personal_card_attempts(card_id,started_utc DESC,id); CREATE INDEX IF NOT EXISTS personal_card_attempts_point_review ON personal_card_attempts(mission_id,card_id,started_utc,id)";
         cmd.ExecuteNonQuery();
         cmd.CommandText="CREATE INDEX IF NOT EXISTS personal_detection_work ON collection_receipts(kind,json_extract(result_json,'$.complete'),mission_id,receipt_id) WHERE kind='personal-detection'; CREATE INDEX IF NOT EXISTS personal_detection_cards ON collection_receipts(mission_id,json_extract(result_json,'$.consent.cardId'),json_extract(result_json,'$.consent.eventId')) WHERE kind='personal-detection'";cmd.ExecuteNonQuery();
@@ -76,7 +78,7 @@ public sealed partial class MissionStore
             // Already current: no JSON or historical sample is rewritten.
             return;
         }
-        if (version is 8 or 9) return;
+        if (version is 8 or 9 or 10) return;
         if (version == 7) { MigrateCollectionEvidence(db); return; }
         if (version == 6) { MigrateScientificReview(db); MigrateCollectionEvidence(db); return; }
         if (version == 5) { MigrateMissionScience(db); MigrateCollectionEvidence(db); return; }

@@ -52,7 +52,7 @@ public sealed partial class MissionStore
         if (input.Id.HasValue && (revision == 0 || input.ExpectedRevision != revision))
             throw new InvalidOperationException("This card changed. Reload it before saving a new revision.");
         var template=input.Procedure is not null?FlightRegimeEvaluation.ProcedureTemplate:input.FlightRegime?.TestPoint is not null?FlightRegimeEvaluation.CustomTemplate:input.ExperimentalSensor is not null?ExperimentalSensorResearch.Template:input.ObservationFlight is not null?ObservationResearch.Template:input.Survey is not null?SurveyResearch.Template:input.AtmosphericTransect is not null?AtmosphericTransectResearch.Template:input.AtmosphericProfile is null?"flight-regime":AtmosphericResearch.Template;
-        if(revision>0){var current=ResearchCard(id,revision);SupportedCard(current);if(current.TemplateId!=template)throw new ArgumentException("Keep an experiment's research type when revising it; prepare a separate experiment instead.");}
+        if(revision>0){var current=ResearchCard(id,revision);SupportedCard(current);if(current.OrganizationAssignment is not null)throw new ArgumentException("Issued organization definitions are immutable. Create an independent personal experiment to change requirements.");if(current.TemplateId!=template)throw new ArgumentException("Keep an experiment's research type when revising it; prepare a separate experiment instead.");}
         var card = new PersonalResearchCard(input.Procedure is not null?8:input.FlightRegime?.TestPoint is not null?7:input.ExperimentalSensor is not null?6:input.ObservationFlight is not null?5:input.Survey is not null?4:input.AtmosphericTransect is not null?3:input.AtmosphericProfile is null?1:2, id, revision + 1, name, template, input.FlightRegime, DateTimeOffset.UtcNow,input.AtmosphericProfile,input.AtmosphericTransect,input.Survey,input.ObservationFlight,input.ExperimentalSensor,input.Procedure);
         InsertResearchCard(db,tx,card);tx.Commit();return card;
     }
@@ -86,6 +86,7 @@ public sealed partial class MissionStore
     public MissionPlan CreateResearchPlan(Guid cardId, int revision)
     {
         var card = ResearchCard(cardId, revision);SupportedCard(card);
+        if(card.OrganizationAssignment is not null)throw new ArgumentException("Use Prepare Mission under My Assignments, or open an already prepared plan. Organization definitions cannot silently create a new authorization.");
         if(card.ExperimentalSensor is not null||AtmosphericResearch.IsCollectionCard(card)||card.Survey is not null||card.ObservationFlight is not null)return PrepareResearchStarter(new(1,Guid.NewGuid(),card.TemplateId,ResearchEntryIntent.FlyNow,new(cardId,revision))).Plan;
         return SavePlan(new(Guid.NewGuid(), card.Name, MissionTemplateKind.ObservationFlight,
             Objective:card.Procedure is not null?"Complete the explicitly marked named points and repetitions; review each point in My Research.":card.FlightRegime?.TestPoint?.Description??"Hold the card's indicated airspeed and MSL altitude within its tolerances.",

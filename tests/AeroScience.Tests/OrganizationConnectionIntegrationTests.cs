@@ -33,10 +33,10 @@ public sealed partial class OrganizationConnectionIntegrationTests
     sealed class Server(WebApplication app,HttpClient browser,string origin,string database):IAsyncDisposable
     {
         public WebApplication App=>app;public string Origin=>origin;public string Database=>database;
-        public int AuthorizedReads;public Guid? ForcedDeviceIdentity;
-        public async Task<JsonElement> Post(string path,object body)
+        public int AuthorizedReads,ClaimReads;public Guid? ForcedDeviceIdentity;
+        public async Task<JsonElement> Post(string path,object body,HttpMethod? method=null)
         {
-            var session=await browser.GetFromJsonAsync<JsonElement>("/api/session");var request=new HttpRequestMessage(HttpMethod.Post,path){Content=JsonContent.Create(body,options:WireJson.Options)};
+            var session=await browser.GetFromJsonAsync<JsonElement>("/api/session");var request=new HttpRequestMessage(method??HttpMethod.Post,path){Content=JsonContent.Create(body,options:WireJson.Options)};
             request.Headers.Add("Origin",origin);request.Headers.Add("X-AeroScience-Organization-CSRF",session.GetProperty("csrf").GetString());using var response=await browser.SendAsync(request);
             Assert.True(response.IsSuccessStatusCode,await response.Content.ReadAsStringAsync());return await response.Content.ReadFromJsonAsync<JsonElement>();
         }
@@ -57,7 +57,7 @@ public sealed partial class OrganizationConnectionIntegrationTests
                 // Adversarial response from the second isolated server; never a genuine provider fixture.
                 await c.Response.WriteAsJsonAsync(new OrganizationDevicePending(collision,new string('a',64),"ABCDE-12345",origin+"/#connect="+collision,DateTimeOffset.UtcNow.AddMinutes(10),5),WireJson.Options);return;
             }
-            if(c.Request.Path=="/api/member/published")server.AuthorizedReads++;await next();
+            if(c.Request.Path=="/api/member/published")server.AuthorizedReads++;if(c.Request.Path.StartsWithSegments("/api/member/claims"))server.ClaimReads++;await next();
         });
         await OrganizationApplication.Initialize(app);await app.StartAsync();
         await server.Post("/api/bootstrap",new OrganizationBootstrapRequest(secret,name,"Private local organization","administrator","ResearchOnly!2026Flight"));await server.Post("/api/sign-in",new OrganizationLoginRequest("administrator","ResearchOnly!2026Flight"));return server;

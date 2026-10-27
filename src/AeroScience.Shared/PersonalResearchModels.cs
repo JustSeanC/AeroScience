@@ -23,7 +23,8 @@ public sealed record PersonalResearchCard(int Version, Guid Id, int Revision, st
     [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] SurveyResearchDefinition? Survey=null,
     [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] ObservationResearchDefinition? ObservationFlight=null,
     [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] ExperimentalSensorDefinition? ExperimentalSensor=null,
-    [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] FlightTestProcedureDefinition? Procedure=null)
+    [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] FlightTestProcedureDefinition? Procedure=null,
+    [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] OrganizationAssignmentIdentity? OrganizationAssignment=null)
 {
     [JsonExtensionData] public Dictionary<string,System.Text.Json.JsonElement>? Extensions {get;init;}
 }
@@ -75,7 +76,8 @@ public sealed record RecordedResearchAttempt(Guid Id, Guid FlightId, Guid CardId
 public sealed record ResearchFlightCard(PersonalResearchCard Card, bool Active,
     RecordedResearchAttempt? OpenAttempt, string? ActivationBlocked,
     [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] FlightTestProcedureSummary? Procedure=null,
-    [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] AutomaticDetectionStatus? Detection=null);
+    [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] AutomaticDetectionStatus? Detection=null,
+    [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] OrganizationFlightLabel? Organization=null);
 public sealed record ResearchFlightState(int Version, Guid FlightId, long Revision, bool Recording,
     ResearchFlightCard[] Cards, DateTimeOffset GeneratedUtc, bool CanBeginAttempt, string Message,
     int TotalCards, int? NextOffset = null,int PageSize=4);

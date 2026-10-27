@@ -41,6 +41,8 @@ public sealed partial class MissionStore
             return new(plan,retained,true); // Preserve any later route, payload or card-revision edits.
         }
         var source=request.Card is {} selected?ResearchCard(selected.Id,selected.Revision):null;
+        if(source?.OrganizationAssignment is not null&&request.Intent!=ResearchEntryIntent.Customize)
+            throw new ArgumentException("Open a prepared mission or use Prepare Mission under My Assignments. A personal Fly Now shortcut cannot create a new organizational authorization.");
         if(source is not null&&source.TemplateId!=starter.Id)throw new ArgumentException("The selected card belongs to a different experiment.");
         if(source is null&&request.Intent==ResearchEntryIntent.FlyNow){
             // Repeating the unmodified starter remains the same local experiment.
@@ -75,19 +77,27 @@ public sealed partial class MissionStore
             card=new(sensor is not null?6:observation is not null?5:survey is not null?4:transect is not null?3:atmosphere is null?1:2,request.RequestId,1,source?.Name??starter.Name,starter.Id,rule,DateTimeOffset.UtcNow,atmosphere,transect,source?.Survey??survey,source?.ObservationFlight??observation,source?.ExperimentalSensor??sensor);SupportedCard(card);
             InsertResearchCard(db,tx,card);
         }else card=source!;
+        var prepared=SuggestedResearchPlan(card,request.RequestId) with{ResearchStarter=new(1,request.RequestId,hash,starter.Id,request.Intent,request.Card)};
+        WritePlan(db,tx,prepared);EvidenceFault?.Invoke("research-starter-before-commit");tx.Commit();
+        return new(prepared,card,false);
+    }
+    // Shared by personal starters and verified organization assignments. No acquisition or recording occurs.
+    static MissionPlan SuggestedResearchPlan(PersonalResearchCard card,Guid id)
+    {
+        var starter=ResearchStarters().SingleOrDefault(s=>s.Id==card.TemplateId)
+            ??new ResearchStarter(card.TemplateId,1,card.Name,"Recorded flight-test conditions; review each named point, sequence and repetition in My Research.",[],card.FlightRegime);
         var referenceCard=new ResearchCardReference(card.Id,card.Revision);
         var atmosphericCard=card.AtmosphericProfile;var geographicCard=card.AtmosphericTransect;var collection=AtmosphericResearch.IsCollectionCard(card)||card.Survey is not null;
         var template=card.Survey is not null?MissionTemplateKind.GeographicSurvey:geographicCard is not null?MissionTemplateKind.AtmosphericTransect:collection?MissionTemplateKind.AtmosphericProfile:MissionTemplateKind.ObservationFlight;
-        var prepared=MissionPlanning.Validate(new(request.RequestId,card.Name,template,
+        return MissionPlanning.Validate(new(id,card.Name,template,
             Description:card.ExperimentalSensor is not null?starter.Description:card.ObservationFlight is not null?starter.Description:!collection?"Personal research using saved simulator flight telemetry; no aircraft settings are changed.":starter.Description,
-            Objective:card.ExperimentalSensor?.Question??card.ObservationFlight?.Question??card.Survey?.Question??geographicCard?.Question??atmosphericCard?.Question??"Hold the selected indicated airspeed and MSL altitude within both card tolerances for its continuous hold duration.",
+            Objective:card.Procedure is not null?"Complete each issued test point, sequence and distinct repetition using original retained telemetry.":card.FlightRegime?.TestPoint is not null?card.FlightRegime.TestPoint.Description:card.ExperimentalSensor?.Question??card.ObservationFlight?.Question??card.Survey?.Question??geographicCard?.Question??atmosphericCard?.Question??"Hold the selected indicated airspeed and MSL altitude within both card tolerances for its continuous hold duration.",
             Instruments:card.ExperimentalSensor is not null?[new InstrumentConfiguration("ambient-temperature",true,1000)]:card.ObservationFlight is {} observations?observations.SelectedInstruments.Select(i=>new InstrumentConfiguration(i,true)).ToArray():card.Survey is {} selection?selection.Measurements.Select(m=>new InstrumentConfiguration(SurveyResearch.Instrument(m),true,m==SurveyMeasurement.AirTemperature?1000:2000)).ToArray():!collection?[]:ScienceCatalog.Templates.Single(t=>t.Id==template).Instruments,
             AtmosphericSettings:!collection||card.Survey is not null?null:new(AltitudeIntervalMetres:(atmosphericCard?.BandWidthFeet??500)*.3048,MaximumGapSeconds:geographicCard?.MaximumGapSeconds??atmosphericCard!.MaximumGapSeconds),
             StartScienceArmed:geographicCard is null&&card.Survey is null&&card.ObservationFlight is null&&card.ExperimentalSensor is null?null:true,
             PreflightNotes:card.ExperimentalSensor is not null?"Fictional modeled response requires original ambient-temperature science readings in degC. Start mission, then Start new science session. Card activation/attempt controls are separate. Change temperature conditions in normal flight; missing/paused collection cannot pass. No external scene, internet or account is needed.":card.ObservationFlight is not null?"Record Pilot Observations with a category and short note, or Save in-flight note. Optional instruments need an explicit science start to retain supporting readings. Written accounts are not sensor measurements or scientific proof; missing positions remain unavailable.":!collection?"Example targets require pilot review for the simulated aircraft. Free flight is supported; a route and extra scientific instruments are optional. Start mission, then Activate Card and Begin Attempt explicitly.":
                 card.Survey is not null?"Choose terrain elevation, historical land surface temperature and/or simulator air temperature. Use existing source readiness/preparation and Library reuse; no download is approved here. Start mission, then explicitly Start new science session. Missing external data never substitutes for another objective.":geographicCard is not null?"Fly from anywhere along a free-flight or pilot-reviewed route. Collect distinct sampling locations within a supported leg. Review geographic extent, sampling gaps, altitude and changing weather; no external scene or fixed airport is required.":"Fly from anywhere at pilot-chosen achievable altitudes. Use normal flight and science controls; valid temperature observations in neighboring MSL bands establish coverage, not proof of a hypothesis. Pressure, wind and density are optional. Historical surface imagery is not air temperature.",
-            ResearchCard:referenceCard,ResearchCards:[referenceCard],ResearchStarter:new(1,request.RequestId,hash,starter.Id,request.Intent,request.Card)));
-        WritePlan(db,tx,prepared);EvidenceFault?.Invoke("research-starter-before-commit");tx.Commit();
-        return new(prepared,card,false);
+            ResearchCard:referenceCard,ResearchCards:[referenceCard]));
     }
+
 }

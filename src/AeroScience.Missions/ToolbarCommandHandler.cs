@@ -42,7 +42,7 @@ public sealed class ToolbarCommandHandler(MissionCoordinator coordinator, RouteM
                     var id=command.MissionId??coordinator.Snapshot().ActiveMission?.Id;
                     var state=id is {} flight?coordinator.PersonalResearch(flight):null;
                     // Validate page identity before any durable control side effect.
-                    var pageSize=state?.Cards.Any(c=>(AtmosphericResearch.IsCollectionCard(c.Card)||c.Card.Survey is not null||c.Card.ObservationFlight is not null||c.Card.ExperimentalSensor is not null||c.Card.FlightRegime?.TestPoint is not null||c.Card.Procedure is not null))==true?1:4;
+                    var pageSize=state?.Cards.Any(c=>(c.Card.OrganizationAssignment is not null||AtmosphericResearch.IsCollectionCard(c.Card)||c.Card.Survey is not null||c.Card.ObservationFlight is not null||c.Card.ExperimentalSensor is not null||c.Card.FlightRegime?.TestPoint is not null||c.Card.Procedure is not null))==true?1:4;
                     if(command.Offset%pageSize!=0)throw new ArgumentException("Use bounded four-card pages.");
                     ResearchCardReceipt? receipt=null;
                     if(command.Op=="research-control"){
@@ -152,6 +152,7 @@ public sealed class ToolbarCommandHandler(MissionCoordinator coordinator, RouteM
     }
     private static ResearchFlightCard CompactProcedureCard(ResearchFlightCard item)
     {
+        if(item.Card.OrganizationAssignment is {} organization)item=item with{Card=item.Card with{OrganizationAssignment=null},Organization=new(string.Concat(organization.OrganizationName.EnumerateRunes().Take(60)),organization.ClaimId,organization.IssuedRevision,"Local monitoring; eligibility pending; Not Submitted")};
         if(item.Card.Procedure is null)return item;
         static string Clip(string value,int maximum)=>string.Concat(value.EnumerateRunes().Take(maximum));
         // Display projection only. Commands always resolve the complete frozen definition in the store.
