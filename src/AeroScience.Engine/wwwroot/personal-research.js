@@ -150,6 +150,7 @@ export function attemptView(attempt,api) {
   if(attempt.atmosphericProfile){const panel=atmosphericSummary(attempt);if(api){const button=node('button',attempt.card.atmosphericTransect?'Open Atmospheric Transect':'Open Atmospheric Profile','secondary');button.type='button';const detail=node('div');button.onclick=()=>showAtmosphericResult(detail,api,attempt);panel.append(button,detail);}return panel;}
   const panel = node('article', undefined, 'panel research-panel');
   const outcome = {pass:'Pass', fail:'Fail', insufficientEvidence:'Insufficient Evidence'}[attempt.outcome] || 'Unknown';
+  if(attempt.automatic)panel.append(node('p',`Automatic attempt · ${attempt.automatic.policyVersion} · original sequences ${attempt.automatic.firstSequence}–${attempt.automatic.lastSequence}. Recognition is not a deliberate-pilot-intent or certification claim.`));
   panel.append(node('h3', `${attempt.card.name} — ${outcome}`), node('p', attempt.explanation),
     node('p', attempt.card.flightRegime.testPoint?`${researchCardTargets(attempt.card)} · Card revision ${attempt.card.revision}`:researchCardTargets(attempt.card)),
     node('p', `Longest supported hold: ${attempt.longestSupportedHoldSeconds.toFixed(1)} seconds · Required: ${attempt.card.flightRegime.holdSeconds} seconds · Card revision ${attempt.card.revision}`),

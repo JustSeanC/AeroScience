@@ -3,7 +3,8 @@ import {researchCardTargets} from './personal-research-start.js';
 import {node,button,newIdentity,table} from './workstation-ui.js';
 import {attemptView} from './personal-research.js';
 
-const readableCardMessage=value=>value.replace(/ \[point:[0-9a-f-]{36}; attempt:[0-9a-f-]{36}\]$/i,'');
+const attemptOutcome=value=>({pass:'Pass',fail:'Fail',insufficientEvidence:'Insufficient Evidence'}[value]||'Insufficient Evidence');
+const readableCardMessage=value=>value.replace(/ \[manual:[^\]]+\]/g,'').replace(/ \[detection:[^\]]+\]/g,'').replace(/ \[point:[0-9a-f-]{36}; attempt:[0-9a-f-]{36}\]$/i,'');
 
 export function researchCardSelection(parent,api,references,changed){
  const selected=new Map(references.map(ref=>[ref.id,ref]));let offset=0,epoch=0;
@@ -28,12 +29,13 @@ export function researchFlightControls(parent,api){
   if(next.flightId!==flight||state&&next.revision<state.revision)return;state=next;
   const key=next.cards.map(c=>c.card.id).join('/');if(key!==signature){signature=key;rows.replaceChildren();controls.clear();
    for(const selected of next.cards){const card=selected.card,row=node('article',undefined,'research-panel');row.setAttribute('aria-label',card.name);row.append(node('h3',`${card.name} · revision ${card.revision}`));
-    const info=node('p'),actions=node('div',undefined,'action-row');row.append(info,actions);const buttons={};let pointSelect=null;
+    if(card.procedure||card.version===7)row.append(node('p','Automatic detection is opt-in for the chosen point. Two near-target readings recognize an attempt; three readings beyond the wider exit band separate attempts. Begin Attempt takes manual priority. Detected does not mean passed or card complete.'));
+    const info=node('p'),actions=node('div',undefined,'action-row');info.setAttribute('role','status');row.append(info,actions);const buttons={};let pointSelect=null;
     if(card.procedure){const label=node('label','Test point'),select=node('select');select.setAttribute('aria-label','Test point for '+card.name);for(const point of card.procedure.points){const option=node('option',point.conditions.testPoint.name);option.value=point.id;select.append(option);}pointSelect=select;label.append(select);row.insertBefore(label,actions);}
-    for(const [action,label] of [['activate','Activate Card'],['deactivate','Deactivate Card'],['beginAttempt','Begin Attempt'],['endAttempt','End Attempt']]){
+    for(const [action,label] of [['activate','Activate Card'],['deactivate','Deactivate Card'],['beginAttempt','Begin Attempt'],['endAttempt','End Attempt'],...((card.version===7&&card.flightRegime?.testPoint)||card.procedure?[['enableAutomatic','Enable Automatic Detection'],['disableAutomatic','Disable Automatic Detection']]:[])]){
      const b=node('button',label,action==='beginAttempt'?'primary':'secondary');b.type='button';buttons[action]=b;
      b.onclick=async()=>{if(busy||!state)return;const current=state.cards.find(c=>c.card.id===card.id);if(!current)return;
-      const input={version:1,flightId:flight,expectedRevision:state.revision,action,cardId:card.id,expectedAttemptId:current.openAttempt?.id||null,...(action==='beginAttempt'&&pointSelect?{testPointId:pointSelect.value}:{})};const key=JSON.stringify(input);
+      const input={version:1,flightId:flight,expectedRevision:state.revision,action,cardId:card.id,expectedAttemptId:current.openAttempt?.id||null,...(['beginAttempt','enableAutomatic'].includes(action)&&pointSelect?{testPointId:pointSelect.value}:{})};const key=JSON.stringify(input);
       if(lastCommand?.key!==key)lastCommand={key,body:{...input,requestId:newIdentity()}};
       const own=epoch;busy=true;refreshButtons();
       try{const result=await api('/api/research/control',lastCommand.body);if(own===epoch){apply(result.state);status.textContent=readableCardMessage(result.receipt.message);}}
@@ -47,8 +49,8 @@ export function researchFlightControls(parent,api){
  }
  function refreshButtons(){if(!state)return;for(const card of state.cards){const view=controls.get(card.card.id);if(!view)continue;
   if(view.pointSelect){const next=card.openAttempt?.testPointId||card.procedure?.nextPointId;if(next&&next!==view.lastNext){view.pointSelect.value=next;view.lastNext=next;}view.pointSelect.disabled=busy||!!card.openAttempt;}
-  view.info.textContent=`${card.openAttempt?'Attempt recording since '+card.openAttempt.startUtc:card.active?'Active — ready for an attempt':'Inactive'} · ${researchCardTargets(card.card)} ${card.activationBlocked||''}${card.procedure?' · Provisional repetitions: '+card.procedure.points.map(p=>p.completedRepetitions+'/'+p.requiredRepetitions).join(' · ')+'. Verify original evidence after flight.':''}`;
-  for(const [action,b]of Object.entries(view.buttons))b.disabled=busy||!state.recording||action==='activate'&&(card.active||!!card.activationBlocked)||action==='deactivate'&&!card.active||action==='beginAttempt'&&(!card.active||!!card.openAttempt||!state.canBeginAttempt)||action==='endAttempt'&&!card.openAttempt;
+  view.info.textContent=`${card.openAttempt?'Attempt recording since '+card.openAttempt.startUtc:card.active?'Active — ready for an attempt':'Inactive'} · ${card.detection?`${card.detection.status}${card.detection.lastOutcome?' — '+attemptOutcome(card.detection.lastOutcome):''} · ${card.detection.message} · `:''}${researchCardTargets(card.card)} ${card.activationBlocked||''}${card.procedure?' · Provisional repetitions: '+card.procedure.points.map(p=>p.completedRepetitions+'/'+p.requiredRepetitions).join(' · ')+'. Verify original evidence after flight.':''}`;
+  for(const [action,b]of Object.entries(view.buttons))b.disabled=busy||!state.recording||action==='activate'&&(card.active||!!card.activationBlocked)||action==='deactivate'&&!card.active||action==='beginAttempt'&&(!card.active||!!card.openAttempt&&!card.openAttempt.automatic||!state.canBeginAttempt)||action==='endAttempt'&&!card.openAttempt||action==='enableAutomatic'&&(!card.active||!!card.openAttempt||!state.canBeginAttempt)||action==='disableAutomatic'&&!card.detection?.enabled;
  }}
  return {update(snapshot){
   const id=snapshot.activeMission?.id||null;if(id!==flight){epoch++;readController?.abort();pending=false;flight=id;state=null;signature='';controls.clear();rows.replaceChildren();busy=false;lastRead=0;status.textContent=id?'Reading selected flight cards…':'Choose test cards in Mission Planner before your next flight. Card activation is separate from flight and science recording.';}
@@ -65,8 +67,8 @@ export async function researchFlightTimeline(parent,api,flight,{attemptId,at}={}
  let offset=0,after=selected?Math.max(0,selected.beginEventId-1):0,inspection=0;const attempts=node('div'),events=node('div'),evidence=node('div');evidence.setAttribute('role','status');root.append(attempts,events,evidence);
  async function loadAttempts(){const rows=selected?[selected]:await api(`/api/missions/${flight}/research-attempts?offset=${offset}`);if(!root.isConnected)return;attempts.replaceChildren(node('h3','Recorded Attempts'));
   if(!rows.length)attempts.append(node('p','No marked attempts on this page. Existing postflight-only P01 results remain available in My Research.'));
-  for(const attempt of rows){const card=state.cards.find(c=>c.card.id===attempt.cardId)?.card;const label={recording:'Recording',recorded:'Recorded',interrupted:'Interrupted'}[attempt.status]||'Unknown';const row=node('article');row.append(node('strong',`${card?.name||'Personal test card'} · revision ${attempt.cardRevision} · ${label}`),node('p',`${attempt.startUtc} → ${attempt.endUtc||'Attempt still recording'} · ${attempt.endReason||'Explicit attempt boundaries'} · Events ${attempt.beginEventId} / ${attempt.endEventId??'pending'}`));
-   if(attempt.testPointId)row.append(node('p',`Test point ${card?.procedure?.points.find(p=>p.id===attempt.testPointId)?.conditions.testPoint.name||'Unknown point'} · ${attempt.pointEvidence?.outcome||'Insufficient Evidence'} · longest supported hold ${attempt.pointEvidence?.longestHoldSeconds||0} s. Review Multi-Point Flight verifies originals and the complete procedure.`));
+  for(const attempt of rows){const card=state.cards.find(c=>c.card.id===attempt.cardId)?.card;const label={recording:'Recording',recorded:'Recorded',interrupted:'Interrupted',finalizing:'Verifying original evidence'}[attempt.status]||'Unknown';const row=node('article');row.append(node('strong',`${attempt.automatic?'Automatic':'Manual'} · ${card?.name||'Personal test card'} · revision ${attempt.cardRevision} · ${label}`),node('p',`${attempt.startUtc} → ${attempt.endUtc||'Attempt still recording'} · ${attempt.endReason||'Explicit attempt boundaries'} · Events ${attempt.beginEventId} / ${attempt.endEventId??'pending'}`));
+   if(attempt.testPointId)row.append(node('p',`Test point ${card?.procedure?.points.find(p=>p.id===attempt.testPointId)?.conditions.testPoint.name||card?.flightRegime?.testPoint?.name||'Unknown point'} · ${attemptOutcome(attempt.pointEvidence?.outcome)} · longest supported hold ${attempt.pointEvidence?.longestHoldSeconds||0} s. ${card?.procedure?'Review Multi-Point Flight verifies originals and the complete procedure.':'Inspect Custom Test Evidence verifies this original interval.'}`));
    if(attempt.endUtc&&!state.recording){const command=newIdentity();button(row,'Evaluate Attempt',async()=>{const result=await api(`/api/research/recorded-attempts/${attempt.id}/evaluate`,{requestId:command});if(row.isConnected){row.querySelector('.attempt-result')?.remove();const shown=attemptView(result,api);shown.classList.add('attempt-result');row.append(shown);}});}
    attempts.append(row);
   }if(selected)button(attempts,'Show All Flight Attempts',()=>{selected=null;return loadAttempts();});else{button(attempts,'Newer Attempt Page',()=>{offset=Math.max(0,offset-20);return loadAttempts();});button(attempts,'Older Attempt Page',()=>{offset+=20;return loadAttempts();});}
@@ -84,5 +86,6 @@ export async function researchFlightTimeline(parent,api,flight,{attemptId,at}={}
    if(technical||summary!==event.message){const details=node('details');details.append(node('summary','Technical Event Evidence'),node('pre',event.message));row.append(details);}
   }button(events,'First Event Page',()=>{after=0;return loadEvents();});if(rows.length===100)button(events,'Next Event Page',()=>{after=rows.at(-1).id;return loadEvents();});
  }
+ if(!state.recording&&state.cards.some(c=>c.detection)){const requestId=newIdentity();button(root,'Recover Automatic Attempts',async()=>{await api(`/api/missions/${flight}/research-detection/recover`,{requestId});status.textContent='Originally armed windows queued for bounded replay. Finished identities and requirements are preserved; reopen this view after verification.';});}
  try{await Promise.all([loadAttempts(),loadEvents()]);if(at)await inspect(at);status.textContent='Recorded events retain their original UTC and identities. An interrupted attempt cannot receive an automatic pass.';}catch(error){status.textContent=error.message;}
 }
