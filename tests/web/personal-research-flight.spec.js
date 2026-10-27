@@ -10,7 +10,10 @@ test('planned personal cards activate, record independent attempts, switch and r
  await page.reload();await page.getByLabel('Plan name',{exact:true}).fill('P02 continuous flight');
  const selection=page.locator('#plan-research-cards');for(const card of [a,b,c])await selection.locator('.plan-row').filter({hasText:card.name}).getByRole('button',{name:'Add Card',exact:true}).click();
  await expect(selection).toContainText('3 cards selected');await page.locator('#plan-form [data-instrument="ambient-temperature"]').check();await page.getByRole('button',{name:'Save mission plan',exact:true}).click();
- await page.locator('.plan-row').filter({hasText:'P02 continuous flight'}).getByRole('button',{name:'Select for Flight',exact:true}).click();await page.getByRole('button',{name:'Start mission',exact:true}).click();
+ await page.locator('.plan-row').filter({hasText:'P02 continuous flight'}).getByRole('button',{name:'Select for Flight',exact:true}).click();
+ // Selection navigation precedes the asynchronous Mission Control form refresh. Bind the visible launch inputs before submitting.
+ const selected=(await(await request.get('/api/state')).json()).selectedPlanId;await expect(page.getByRole('combobox',{name:'Choose Mission',exact:true})).toHaveValue(selected);await expect(page.locator('#mission-name')).toHaveValue('P02 continuous flight');
+ const response=page.waitForResponse(r=>new URL(r.url()).pathname==='/api/missions'&&r.request().method()==='POST');await page.getByRole('button',{name:'Start mission',exact:true}).click();const started=await response;expect(started.ok(),await started.text()).toBeTruthy();
  await expect(page.getByRole('button',{name:'End mission',exact:true})).toBeVisible();const flight=(await(await request.get('/api/state')).json()).activeMission;expect(flight).toBeTruthy();const science=(await(await request.get(`/api/missions/${flight.id}/collection`)).json()).state;
  const panel=page.locator('#research-flight-controls'),ra=panel.getByRole('article',{name:a.name}),rb=panel.getByRole('article',{name:b.name}),rc=panel.getByRole('article',{name:c.name});
  await ra.getByRole('button',{name:'Activate Card',exact:true}).click();await expect(rc.getByRole('button',{name:'Activate Card',exact:true})).toBeDisabled();await expect(rc).toContainText('do not overlap');
@@ -36,4 +39,20 @@ test('native toolbar and paired dashboard use the same flight-bound card command
  const begin=await page.evaluate(()=>window.bus.sent.find(x=>x.command.op==='research-control'&&x.command.researchControl.action==='beginAttempt').command);
  await post(request,'/api/testing/toolbar',begin);expect((await(await request.get(`/api/missions/${flight.id}/research-attempts`)).json())).toHaveLength(1);
  await dashboard.locator('#research-flight-controls').getByRole('button',{name:'End Attempt',exact:true}).click();await expect(native).toContainText('Active');expect((await(await request.get('/api/state')).json()).activeMission.id).toBe(flight.id);await dashboard.close();
+});
+
+test('a delayed mission-selection refresh cannot launch stale inputs and a synchronized retry starts the exact plan',async({page,request})=>{
+ const [card]=await cards(request);const plan=await post(request,`/api/research/cards/${card.id}/plan`,{id:card.id,revision:card.revision});
+ await page.goto('/#control');await expect(page.getByRole('button',{name:'Refresh Missions',exact:true})).toBeVisible();await expect(page.getByRole('combobox',{name:'Choose Mission',exact:true})).toHaveValue('');
+ let release;const gate=new Promise(resolve=>{release=resolve;});let intercepted=false;
+ await page.route('**/api/plans?limit=100&offset=0',async route=>{intercepted=true;await gate;await route.continue();});
+ try{
+  await post(request,'/api/mission-selection',{planId:plan.id});await page.evaluate(()=>window.dispatchEvent(new Event('aeroscience-selection')));await expect.poll(()=>intercepted).toBe(true);
+  // Before refresh, an empty required name suppresses the submit event entirely (the failed CI test clicked in this window).
+  await expect(page.locator('#mission-name')).toHaveValue('');await page.getByRole('button',{name:'Start mission',exact:true}).click();expect(await page.locator('#mission-name').evaluate(input=>input.validity.valueMissing)).toBe(true);expect((await(await request.get('/api/state')).json()).activeMission).toBeNull();
+  // Even a valid old free-flight name cannot bypass the exact selected-plan guard.
+  await page.locator('#mission-name').fill('Previous free-flight draft');await page.getByRole('button',{name:'Start mission',exact:true}).click();await expect(page.locator('#notice')).toContainText('selected mission plan changed');expect((await(await request.get('/api/state')).json()).activeMission).toBeNull();
+ }finally{release();}
+ await expect(page.getByRole('combobox',{name:'Choose Mission',exact:true})).toHaveValue(plan.id);await expect(page.locator('#mission-name')).toHaveValue(plan.name);
+ const response=page.waitForResponse(r=>new URL(r.url()).pathname==='/api/missions'&&r.request().method()==='POST');await page.getByRole('button',{name:'Start mission',exact:true}).click();const started=await response;expect(started.ok(),await started.text()).toBeTruthy();await expect(page.getByRole('button',{name:'End mission',exact:true})).toBeVisible();const state=await(await request.get('/api/state')).json();expect(state.activeMission.name).toBe(plan.name);expect((await(await request.get(`/api/missions/${state.activeMission.id}/research`)).json()).planSnapshot.id).toBe(plan.id);
 });
