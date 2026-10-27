@@ -113,7 +113,7 @@ public sealed class MissionEvidenceStoreTests : IDisposable
     [Fact]
     public void NewerDatabaseIsRefusedWithoutBackupOrMutation()
     {
-        Sql(store.DatabasePath, "PRAGMA user_version=11"); var hash = StorageManager.DatabaseFingerprint(store.DatabasePath);
+        Sql(store.DatabasePath, $"PRAGMA user_version={MissionStore.CurrentSchemaVersion + 1}"); var hash = StorageManager.DatabaseFingerprint(store.DatabasePath);
         Assert.Throws<InvalidOperationException>(store.Initialize);
         Assert.Equal(hash, StorageManager.DatabaseFingerprint(store.DatabasePath)); Assert.False(Directory.Exists(Path.Combine(root, "Backups")));
     }
