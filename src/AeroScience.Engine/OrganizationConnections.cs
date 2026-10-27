@@ -53,7 +53,7 @@ public sealed class OrganizationConnections:IDisposable
             if(addresses.Length==0||addresses.Any(a=>!PermittedAddress(a,localDevelopment)))throw new IOException("This organization address resolves to a protected or unsupported network. Use a public HTTPS server.");
             var socket=new Socket(SocketType.Stream,ProtocolType.Tcp);try{await socket.ConnectAsync(new IPEndPoint(addresses[0],context.DnsEndPoint.Port),ct);return new NetworkStream(socket,true);}catch{socket.Dispose();throw;}
         };
-        client=new(handler){Timeout=TimeSpan.FromSeconds(12),MaxResponseContentBufferSize=262144};
+        client=new(handler){Timeout=TimeSpan.FromSeconds(12),MaxResponseContentBufferSize=1048576};
     }
     public static bool PermittedAddress(IPAddress ip,bool development=false)
     {

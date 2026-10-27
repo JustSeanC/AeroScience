@@ -65,10 +65,19 @@ public sealed class OrganizationConnectionIntegrationTests
         var databases=new[]{"aeroscience_p13_"+Guid.NewGuid().ToString("N"),"aeroscience_p13_"+Guid.NewGuid().ToString("N")};var servers=new List<Server>();var vault=new Vault();
         try{
             servers.Add(await Start(databases[0],root,"First Independent Lab"));servers.Add(await Start(databases[1],root,"Second Independent Lab"));
+            var program=await servers[0].Post("/api/organization/programs",new OrganizationProgramRequest(1,Guid.NewGuid(),0,"Published research program",""));
+            var programId=program.GetProperty("id").GetGuid();
+            // A legitimate page of multilingual descriptions exceeds 256 KiB, but remains bounded below 1 MiB.
+            for(var i=0;i<20;i++){
+                var draft=await servers[0].Post($"/api/organization/programs/{programId}/campaigns",new OrganizationCampaignRequest(1,Guid.NewGuid(),0,"Published investigation "+i,new string('x',4000),new string('测',2000),OrganizationFocus.ScientificResearch,new("vertical-atmospheric-profile",1)));
+                await servers[0].Post("/api/organization/campaigns/"+draft.GetProperty("id").GetGuid()+"/publish",new OrganizationPublishRequest(1,Guid.NewGuid(),1));
+            }
             var options=new EngineOptions{ConfigurationDirectory=root,OrganizationLoopbackDevelopment=true};Guid one,two;string? firstSecret;
             using(var desktop=new OrganizationConnections(options,new Environment(),vault)){
                 one=await Connect(desktop,servers[0]);firstSecret=vault.Read(one);two=await Connect(desktop,servers[1]);Assert.NotEqual(one,two);Assert.NotEqual(firstSecret,vault.Read(two));Assert.Equal(firstSecret,vault.Read(one));Assert.Equal(2,(await desktop.List(default)).Length);
-                Assert.Equal("Connected",(await desktop.Status(one,0,default)).Status);Assert.Equal("Connected",(await desktop.Status(two,0,default)).Status);
+                var firstPage=await desktop.Status(one,0,default);Assert.Equal("Connected",firstPage.Status);Assert.Equal(20,firstPage.Information!.Campaigns.Items.Length);
+                Assert.True(System.Text.Encoding.UTF8.GetByteCount(JsonSerializer.Serialize(firstPage.Information,WireJson.Options))>262144);
+Assert.Equal("Connected",(await desktop.Status(two,0,default)).Status);
             }
             var metadata=await File.ReadAllTextAsync(Path.Combine(root,"organization-connections.json"));Assert.DoesNotContain(firstSecret!,metadata);Assert.DoesNotContain(vault.Read(two)!,metadata);Assert.DoesNotContain("ResearchOnly",metadata);
             using(var restarted=new OrganizationConnections(options,new Environment(),vault)){
