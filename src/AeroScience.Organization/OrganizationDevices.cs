@@ -22,6 +22,7 @@ public sealed class DeviceGrantRecord
     public string? CredentialHash {get;set;}
     public DateTimeOffset? CredentialExpiresUtc {get;set;}
     public bool Revoked {get;set;}
+    public OrganizationDesktopPermission Permission {get;set;}
 }
 
 // Device-authorization-shaped, Identity-backed first-party approval; no OAuth/OIDC claim.
@@ -30,18 +31,18 @@ public sealed class OrganizationDevices(OrganizationDatabase db,OrganizationMemb
 {
     public async Task<OrganizationDevicePending> Start(OrganizationDeviceStart request,CancellationToken ct)
     {
-        if(request.OrganizationId!=(await membership.Public(ct)).Id||request.ClientName is not {Length:>=1 and <=80}||request.ClientName.Any(char.IsControl)||request.Challenge is not {Length:43}||request.Challenge.Any(c=>!char.IsAsciiLetterOrDigit(c)&&c is not('-' or '_')))throw new ArgumentException("Confirm this organization's identity and a supported desktop request.");
+        if(!Enum.IsDefined(request.Permission)||request.OrganizationId!=(await membership.Public(ct)).Id||request.ClientName is not {Length:>=1 and <=80}||request.ClientName.Any(char.IsControl)||request.Challenge is not {Length:43}||request.Challenge.Any(c=>!char.IsAsciiLetterOrDigit(c)&&c is not('-' or '_')))throw new ArgumentException("Confirm this organization's identity and a supported desktop request.");
         var secret=OrganizationMembership.Secret();var code=Convert.ToHexString(RandomNumberGenerator.GetBytes(5));code=code[..5]+"-"+code[5..];
-        var row=new DeviceGrantRecord{Id=Guid.NewGuid(),ClientName=request.ClientName,DeviceHash=OrganizationMembership.Digest(secret),UserCode=code,Challenge=request.Challenge,ExpiresUtc=OrganizationTime.UtcNow.AddMinutes(10)};
+        var row=new DeviceGrantRecord{Permission=request.Permission,Id=Guid.NewGuid(),ClientName=request.ClientName,DeviceHash=OrganizationMembership.Digest(secret),UserCode=code,Challenge=request.Challenge,ExpiresUtc=OrganizationTime.UtcNow.AddMinutes(10)};
         db.DeviceGrants.Add(row);await db.SaveChangesAsync(ct);
-        return new(row.Id,secret,code,settings.Origin.GetLeftPart(UriPartial.Authority)+"/#connect="+row.Id,row.ExpiresUtc,5);
+        return new(row.Id,secret,code,settings.Origin.GetLeftPart(UriPartial.Authority)+"/#connect="+row.Id,row.ExpiresUtc,5,row.Permission);
     }
     public async Task<object> Review(Guid id,ClaimsPrincipal actor,CancellationToken ct)
     {
         if((await membership.Current(actor,ct))?.State!=OrganizationMembershipState.Active)throw new OrganizationForbidden();
         var row=await db.DeviceGrants.AsNoTracking().SingleOrDefaultAsync(g=>g.Id==id,ct);
         if(row is null||row.Revoked||row.ExpiresUtc<=OrganizationTime.UtcNow||row.UserId is not null)throw new OrganizationConflict("This desktop request is expired, unavailable or already handled. Start again in AeroScience.");
-        return new{organization=await membership.Public(ct),row.ClientName,row.UserCode,row.ExpiresUtc,scope="Read published programs and campaigns only. No administration, flights, locations or scientific data transfer."};
+        return new{organization=await membership.Public(ct),row.ClientName,row.UserCode,row.ExpiresUtc,permission=row.Permission,scope=row.Permission==OrganizationDesktopPermission.ManageOwnClaims?"Read published opportunities; claim, accept and release your own assignments. No management, flight preparation, uploads or simulator control.":"Read published programs and campaigns only. No administration, flights, locations or scientific data transfer."};
     }
     public async Task<object> Approve(OrganizationDeviceApproval request,ClaimsPrincipal actor,CancellationToken ct)
     {
@@ -50,8 +51,9 @@ public sealed class OrganizationDevices(OrganizationDatabase db,OrganizationMemb
         if(!request.ConfirmCode||request.OrganizationId!=(await membership.Public(ct)).Id)throw new ArgumentException("Compare the code with AeroScience and confirm this organization before approving.");
         var row=await db.DeviceGrants.SingleOrDefaultAsync(g=>g.Id==request.Id,ct)??throw new OrganizationNotFound();
         if(row.Revoked||row.ExpiresUtc<=OrganizationTime.UtcNow||row.UserId is not null)throw new OrganizationConflict("This connection request is no longer available. Start again in AeroScience.");
+        if(request.Approve&&row.Permission==OrganizationDesktopPermission.ManageOwnClaims&&!request.ConfirmClaimManagement)throw new ArgumentException("Explicitly authorize management of your own claims, or deny this connection.");
         var user=await users.GetUserAsync(actor)??throw new OrganizationForbidden();if(actor.FindFirstValue(users.Options.ClaimsIdentity.SecurityStampClaimType)!=await users.GetSecurityStampAsync(user))throw new OrganizationForbidden();row.UserId=user.Id;row.SecurityStamp=await users.GetSecurityStampAsync(user);row.Revoked=!request.Approve;
-        history.Audit(user.Id,user.UserName!,request.Approve?"desktop-approved-read-published":"desktop-denied",row.Id);
+        history.Audit(user.Id,user.UserName!,request.Approve?row.Permission==OrganizationDesktopPermission.ManageOwnClaims?"desktop-approved-manage-own-claims":"desktop-approved-read-published":"desktop-denied",row.Id);
         await db.SaveChangesAsync(ct);await tx.CommitAsync(ct);return new{message=request.Approve?"Desktop connection approved. Return to AeroScience and select Finish Connection.":"Desktop connection denied."};
     }
     public async Task<OrganizationDeviceToken> Poll(OrganizationDevicePoll request,CancellationToken ct)
@@ -67,17 +69,18 @@ public sealed class OrganizationDevices(OrganizationDatabase db,OrganizationMemb
         var user=await users.FindByIdAsync(row.UserId.ToString()!);var member=await db.Memberships.AsNoTracking().SingleOrDefaultAsync(m=>m.UserId==row.UserId,ct);
         if(user is null||member?.State!=OrganizationMembershipState.Active||row.SecurityStamp!=await users.GetSecurityStampAsync(user))return new("expiredOrRevoked");
         // Idempotent delivery after a lost reply; no raw bearer is stored, including receipts.
-        var bearer=OrganizationMembership.Digest("AeroScience/read-published/v1\0"+row.Id+"\0"+request.DeviceSecret+"\0"+request.Verifier);
+        var bearer=OrganizationMembership.Digest((row.Permission==OrganizationDesktopPermission.ReadPublished?"AeroScience/read-published/v1\0":"AeroScience/manage-own-claims/v1\0")+row.Id+"\0"+request.DeviceSecret+"\0"+request.Verifier);
         row.CredentialHash??=OrganizationMembership.Digest(bearer);row.CredentialExpiresUtc??=OrganizationTime.UtcNow.AddHours(24);
-        await db.SaveChangesAsync(ct);await tx.CommitAsync(ct);return new("approved",row.Id,bearer,row.CredentialExpiresUtc);
+        await db.SaveChangesAsync(ct);await tx.CommitAsync(ct);return new("approved",row.Id,bearer,row.CredentialExpiresUtc,row.Permission);
     }
-    internal async Task<DeviceGrantRecord> Authorize(HttpContext c,CancellationToken ct)
+    internal async Task<DeviceGrantRecord> Authorize(HttpContext c,CancellationToken ct,bool requireClaims=false)
     {
         var header=c.Request.Headers.Authorization.ToString();
         if(!header.StartsWith("Bearer ",StringComparison.Ordinal)||header.Length!=71)throw new OrganizationUnauthorized();
         var credential=header[7..];if(credential.Any(ch=>!char.IsAsciiHexDigit(ch)))throw new OrganizationUnauthorized();
         var hash=OrganizationMembership.Digest(credential);var row=await db.DeviceGrants.SingleOrDefaultAsync(g=>g.CredentialHash==hash,ct);
         if(row is null||row.Revoked||row.CredentialExpiresUtc<=OrganizationTime.UtcNow||row.UserId is null)throw new OrganizationUnauthorized();
+        if(requireClaims&&row.Permission!=OrganizationDesktopPermission.ManageOwnClaims)throw new OrganizationForbidden();
         var user=await users.FindByIdAsync(row.UserId.ToString()!);var member=await db.Memberships.AsNoTracking().SingleOrDefaultAsync(m=>m.UserId==row.UserId,ct);
         if(user is null||member?.State!=OrganizationMembershipState.Active||row.SecurityStamp!=await users.GetSecurityStampAsync(user))throw new OrganizationUnauthorized();return row;
     }

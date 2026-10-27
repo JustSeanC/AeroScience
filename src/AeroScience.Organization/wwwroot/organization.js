@@ -1,3 +1,4 @@
+import {opportunityUi} from './organization-opportunities.js';
 import {membershipUi} from './organization-members.js';
 import {node,button,select,dateTime,disclosure} from './workstation-ui.js';
 
@@ -8,6 +9,7 @@ let join=null,connect=null,enrollment=false;
 function takeEntry(){const fragment=new URLSearchParams(location.hash.slice(1));if(!fragment.has('join')&&!fragment.has('connect')&&!fragment.has('enroll'))return false;join=fragment.get('join');connect=fragment.get('connect');enrollment=fragment.has('enroll');window.history.replaceState(null,'',location.pathname);return true;}
 takeEntry();window.addEventListener('hashchange',()=>{if(takeEntry())load();});
 const membership=membershipUi({api,root,field,status,heading,submit,modal,dialog,session:()=>session,load,programs:showPrograms,identity:showIdentity,draftCommand,joined:()=>{join=null;enrollment=false;}});
+const opportunities=opportunityUi({api,root,heading,modal,field,submit,draftCommand,dialog,back:()=>showProgram(currentProgram)});
 const admin=()=>session?.user?.roles.includes('Administrator');
 async function api(path,body,method=body?'POST':'GET'){
  const response=await fetch('/api'+path,{method,credentials:'same-origin',headers:{...(body?{'Content-Type':'application/json','X-AeroScience-Organization-CSRF':session?.csrf||''}:{})},...(body?{body:JSON.stringify(body)}:{})});
@@ -60,7 +62,7 @@ async function showProgram(program){
  heading(program.name,program.description);const actions=node('div',undefined,'actions');root.append(actions);button(actions,'Back to Programs',()=>{campaignOffset=0;return showPrograms();});button(actions,'Edit Program',()=>editProgram(program));button(actions,'Create Campaign',()=>editCampaign(program));root.append(node('h2','Campaigns'));
  if(!page.items.length)root.append(node('p','No campaigns on this page. Start with a question or test objective.'));
  for(const campaign of page.items){const card=node('article');card.setAttribute('aria-label',campaign.name);card.append(node('h3',campaign.name),node('span',campaign.status==='published'?'Published':'Draft','badge'),node('span',focusName[campaign.focus],'badge'),node('p',campaign.objective||'Research question or test objective is still needed.'),node('p',campaign.description));const template=templates.find(t=>t.reference.id===campaign.definition.template.id);card.append(node('p',`${template?.name||'Saved research approach'} · approach version ${campaign.definition.template.version}`),node('p',`Revision ${campaign.revision}${campaign.publishedRevision?' · Retained published revision '+campaign.publishedRevision:''} · Updated ${dateTime(campaign.updatedUtc)} · ${campaign.authorName}`,'metadata'));
-  const actions=node('div',undefined,'actions');card.append(actions);button(actions,'Edit Campaign',()=>editCampaign(program,campaign));if(admin()&&campaign.status==='draft')button(actions,'Review & Publish',()=>publishCampaign(program,campaign),'primary');button(actions,'Revision History',()=>history(campaign));const details=disclosure(card,'Research Approach Details','Saved definition only. This does not include personal flights, scientific data or results.');details.append(node('pre',JSON.stringify(campaign.definition,null,2)));root.append(card);
+  const actions=node('div',undefined,'actions');card.append(actions);button(actions,'Edit Campaign',()=>editCampaign(program,campaign));if(campaign.publishedRevision)button(actions,'Campaign Test Cards',()=>opportunities.cards(campaign));if(admin()&&campaign.status==='draft')button(actions,'Review & Publish',()=>publishCampaign(program,campaign),'primary');button(actions,'Revision History',()=>history(campaign));const details=disclosure(card,'Research Approach Details','Saved definition only. This does not include personal flights, scientific data or results.');details.append(node('pre',JSON.stringify(campaign.definition,null,2)));root.append(card);
  }
  const pages=node('div',undefined,'actions');root.append(pages);if(campaignOffset)button(pages,'Previous Campaigns',()=>{campaignOffset=Math.max(0,campaignOffset-20);return showProgram(program);});if(page.nextOffset!==null)button(pages,'Next Campaigns',()=>{campaignOffset=page.nextOffset;return showProgram(program);});
 }

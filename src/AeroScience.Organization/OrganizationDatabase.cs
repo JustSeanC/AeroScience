@@ -75,10 +75,29 @@ public sealed class OrganizationDatabase(DbContextOptions<OrganizationDatabase> 
     public DbSet<MembershipRecord> Memberships=>Set<MembershipRecord>();
     public DbSet<InvitationRecord> Invitations=>Set<InvitationRecord>();
     public DbSet<DeviceGrantRecord> DeviceGrants=>Set<DeviceGrantRecord>();
+    public DbSet<OpportunityRecord> Opportunities=>Set<OpportunityRecord>();
+    public DbSet<ClaimRecord> Claims=>Set<ClaimRecord>();
+    public DbSet<ClaimEventRecord> ClaimEvents=>Set<ClaimEventRecord>();
     protected override void OnModelCreating(ModelBuilder model)
     {
         base.OnModelCreating(model);
         model.HasDefaultSchema("organization");
+        model.Entity<OpportunityRecord>().HasOne<CampaignRecord>().WithMany().HasForeignKey(x=>x.CampaignId).OnDelete(DeleteBehavior.Restrict);
+        model.Entity<OpportunityRecord>().HasIndex(x=>new{x.CampaignId,x.CreatedUtc,x.Id});
+        model.Entity<OpportunityRecord>().HasIndex(x=>new{x.CreatedUtc,x.Id});
+        model.Entity<OpportunityRecord>().Property(x=>x.Revision).IsConcurrencyToken();
+        model.Entity<OpportunityRecord>().Property(x=>x.AvailabilityRevision).IsConcurrencyToken();
+        model.Entity<ClaimRecord>().HasOne<OpportunityRecord>().WithMany().HasForeignKey(x=>x.OpportunityId).OnDelete(DeleteBehavior.Restrict);
+        model.Entity<ClaimRecord>().HasOne<OrganizationUser>().WithMany().HasForeignKey(x=>x.UserId).OnDelete(DeleteBehavior.Restrict);
+        model.Entity<ClaimRecord>().HasOne<DefinitionRevision>().WithMany().HasForeignKey(x=>new{x.OpportunityId,x.IssuedRevision}).HasPrincipalKey(x=>new{x.ResourceId,x.Revision}).OnDelete(DeleteBehavior.Restrict);
+        model.Entity<ClaimRecord>().Property(x=>x.Revision).IsConcurrencyToken();
+        model.Entity<ClaimRecord>().HasIndex(x=>new{x.OpportunityId,x.UserId}).IsUnique().HasFilter("\"State\" IN (0,1)");
+        model.Entity<ClaimRecord>().HasIndex(x=>new{x.OpportunityId,x.Slot}).IsUnique().HasFilter("\"State\" IN (0,1)");
+        model.Entity<ClaimRecord>().HasIndex(x=>new{x.UserId,x.AssignedUtc,x.Id});
+        model.Entity<ClaimRecord>().HasIndex(x=>new{x.OpportunityId,x.AssignedUtc,x.Id});
+        model.Entity<ClaimRecord>().ToTable(t=>{t.HasCheckConstraint("claim_state","\"State\" IN (0,1,2)");t.HasCheckConstraint("claim_slot","\"Slot\" > 0");t.HasCheckConstraint("claim_lifecycle","(\"State\" = 2) = (\"EndedUtc\" IS NOT NULL)");});
+        model.Entity<ClaimEventRecord>().HasOne<ClaimRecord>().WithMany().HasForeignKey(x=>x.ClaimId).OnDelete(DeleteBehavior.Restrict);
+        model.Entity<ClaimEventRecord>().HasIndex(x=>new{x.ClaimId,x.Id});
         model.Entity<EnrollmentPolicyRecord>().ToTable(t=>t.HasCheckConstraint("single_enrollment_policy","\"Id\" = 1"));
         model.Entity<EnrollmentPolicyRecord>().Property(x=>x.Revision).IsConcurrencyToken();
         model.Entity<MembershipRecord>().HasKey(x=>x.UserId);
@@ -105,7 +124,10 @@ public sealed class OrganizationDatabase(DbContextOptions<OrganizationDatabase> 
     public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess,CancellationToken cancellationToken=default){ProtectHistory();return base.SaveChangesAsync(acceptAllChangesOnSuccess,cancellationToken);}
     void ProtectHistory()
     {
-        if(ChangeTracker.Entries().Any(e=>(e.Entity is DefinitionRevision or OrganizationCommandReceipt or OrganizationAudit or OrganizationRecord)&&e.State is EntityState.Modified or EntityState.Deleted))
+        foreach(var entry in ChangeTracker.Entries<ClaimRecord>())
+            if(entry.State==EntityState.Deleted||entry.State==EntityState.Modified&&new[]{nameof(ClaimRecord.UserId),nameof(ClaimRecord.OpportunityId),nameof(ClaimRecord.IssuedRevision),nameof(ClaimRecord.IssuedSha256),nameof(ClaimRecord.AssignedUtc),nameof(ClaimRecord.Slot)}.Any(p=>entry.Property(p).IsModified))
+                throw new InvalidOperationException("Issued claim identity, definition and assignment boundaries are immutable.");
+        if(ChangeTracker.Entries().Any(e=>(e.Entity is DefinitionRevision or OrganizationCommandReceipt or OrganizationAudit or OrganizationRecord or ClaimEventRecord)&&e.State is EntityState.Modified or EntityState.Deleted))
             throw new InvalidOperationException("Organization identity, revision, audit and command history are append-only.");
     }
 }

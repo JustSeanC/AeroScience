@@ -39,8 +39,26 @@ public sealed record OrganizationPublicIdentity(int Version,Guid Id,string Name,
 public sealed record OrganizationPublishedCampaign(Guid Id,Guid ProgramId,string ProgramName,int Revision,string Name,string Description,string Objective,OrganizationFocus Focus,string Approach);
 public sealed record OrganizationMemberInformation(OrganizationPublicIdentity Organization,string Role,OrganizationMembershipState State,OrganizationPage<OrganizationPublishedCampaign> Campaigns);
 // Browser-approved, read-published-only device grant. This is not an OAuth/OIDC compliance claim.
-public sealed record OrganizationDeviceStart(Guid OrganizationId,string ClientName,string Challenge);
-public sealed record OrganizationDevicePending(Guid Id,string DeviceSecret,string UserCode,string ApprovalUrl,DateTimeOffset ExpiresUtc,int PollSeconds);
-public sealed record OrganizationDeviceApproval(Guid Id,Guid OrganizationId,bool Approve,bool ConfirmCode);
+public sealed record OrganizationDeviceStart(Guid OrganizationId,string ClientName,string Challenge,OrganizationDesktopPermission Permission=OrganizationDesktopPermission.ReadPublished);
+public sealed record OrganizationDevicePending(Guid Id,string DeviceSecret,string UserCode,string ApprovalUrl,DateTimeOffset ExpiresUtc,int PollSeconds,OrganizationDesktopPermission Permission=OrganizationDesktopPermission.ReadPublished);
+public sealed record OrganizationDeviceApproval(Guid Id,Guid OrganizationId,bool Approve,bool ConfirmCode,bool ConfirmClaimManagement=false);
 public sealed record OrganizationDevicePoll(Guid Id,Guid OrganizationId,string DeviceSecret,string Verifier);
-public sealed record OrganizationDeviceToken(string Status,Guid? ConnectionId=null,string? Credential=null,DateTimeOffset? ExpiresUtc=null);
+public sealed record OrganizationDeviceToken(string Status,Guid? ConnectionId=null,string? Credential=null,DateTimeOffset? ExpiresUtc=null,OrganizationDesktopPermission Permission=OrganizationDesktopPermission.ReadPublished);
+
+public enum OrganizationDesktopPermission { ReadPublished, ManageOwnClaims }
+public enum OrganizationParticipation { Exclusive, MultiPilot }
+public enum OrganizationClaimState { Reserved, Claimed, Released }
+public enum OrganizationClaimAction { Claim, Accept, Release, Assign, ManagerRelease }
+public sealed record OrganizationClaimPolicy(OrganizationParticipation Participation,int RequiredDistinctPilots,int MaximumActiveClaims,bool AllowVolunteers,string[] EligibleRoles,string ReviewPolicy);
+public sealed record OrganizationOpportunityRequest(int Version,Guid RequestId,int ExpectedRevision,int CampaignRevision,string Name,string Description,string Objective,string Instructions,OrganizationClaimPolicy Policy);
+public sealed record OrganizationOpportunitySnapshot(int Version,Guid Id,Guid OrganizationId,Guid ProgramId,Guid CampaignId,int CampaignRevision,int Revision,OrganizationPublication Status,string Name,string Description,string Objective,string Instructions,OrganizationClaimPolicy Policy,OrganizationResearchDefinition Definition,DateTimeOffset CreatedUtc,DateTimeOffset UpdatedUtc,Guid AuthorId,string AuthorName);
+public sealed record OrganizationOpportunityView(OrganizationOpportunitySnapshot Card,string Sha256,int? PublishedRevision,bool Suspended,int AvailabilityRevision,int HeldClaims,int AvailableSlots,bool Eligible,string Availability,OrganizationOpportunitySnapshot? PublishedCard=null);
+public sealed record OrganizationOpportunityAvailability(int Version,Guid RequestId,int ExpectedAvailabilityRevision,bool Suspended);
+public sealed record OrganizationClaimCommand(int Version,Guid RequestId,Guid OrganizationId,Guid OpportunityId,int PublishedRevision,OrganizationClaimAction Action,Guid? ClaimId=null,int? ExpectedClaimRevision=null,Guid? PilotId=null);
+public sealed record OrganizationClaimView(Guid Id,Guid PilotId,string? PilotName,Guid OrganizationId,Guid OpportunityId,int Revision,int IssuedRevision,string IssuedSha256,OrganizationClaimState State,DateTimeOffset AssignedUtc,DateTimeOffset? AcceptedUtc,DateTimeOffset? EndedUtc,string? EndReason,OrganizationOpportunitySnapshot IssuedCard,bool UpdateAvailable,int? LatestPublishedRevision,string Availability,string EvidenceStatus="Pending / Unverified — claiming is not a scientific contribution");
+public sealed record OrganizationClaimEventView(long Id,Guid ClaimId,int ClaimRevision,string Action,DateTimeOffset TimestampUtc,Guid ActorId);
+// Selection is explicitly opt-in, takes effect on the next flight only, and requires P16 integration.
+// P15 exposes the update offer but does not mutate an issued revision or execute this future contract.
+public sealed record OrganizationClaimRevisionSelection(int Version,Guid ClaimId,int ExpectedClaimRevision,int DesiredPublishedRevision,bool ExplicitConsent,string EffectiveBoundary="nextFlight");
+
+public sealed record OrganizationClaimEventPage(int Version,OrganizationClaimEventView[] Items,long? NextAfter);

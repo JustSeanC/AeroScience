@@ -53,6 +53,104 @@ namespace AeroScience.Organization.Migrations
                     b.ToTable("Campaigns", "organization");
                 });
 
+            modelBuilder.Entity("AeroScience.Organization.ClaimEventRecord", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("ActorId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ClaimId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("ClaimRevision")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("TimestampUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClaimId", "Id");
+
+                    b.ToTable("ClaimEvents", "organization");
+                });
+
+            modelBuilder.Entity("AeroScience.Organization.ClaimRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("AcceptedUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("AssignedUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("EndReason")
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset?>("EndedUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("IssuedRevision")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("IssuedSha256")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("OpportunityId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Revision")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Slot")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("State")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OpportunityId", "IssuedRevision");
+
+                    b.HasIndex("OpportunityId", "Slot")
+                        .IsUnique()
+                        .HasFilter("\"State\" IN (0,1)");
+
+                    b.HasIndex("OpportunityId", "UserId")
+                        .IsUnique()
+                        .HasFilter("\"State\" IN (0,1)");
+
+                    b.HasIndex("OpportunityId", "AssignedUtc", "Id");
+
+                    b.HasIndex("UserId", "AssignedUtc", "Id");
+
+                    b.ToTable("Claims", "organization", t =>
+                        {
+                            t.HasCheckConstraint("claim_lifecycle", "(\"State\" = 2) = (\"EndedUtc\" IS NOT NULL)");
+
+                            t.HasCheckConstraint("claim_slot", "\"Slot\" > 0");
+
+                            t.HasCheckConstraint("claim_state", "\"State\" IN (0,1,2)");
+                        });
+                });
+
             modelBuilder.Entity("AeroScience.Organization.DefinitionRevision", b =>
                 {
                     b.Property<Guid>("ResourceId")
@@ -113,6 +211,9 @@ namespace AeroScience.Organization.Migrations
 
                     b.Property<DateTimeOffset>("NextPollUtc")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Permission")
+                        .HasColumnType("integer");
 
                     b.Property<bool>("Revoked")
                         .HasColumnType("boolean");
@@ -223,6 +324,45 @@ namespace AeroScience.Organization.Migrations
                     b.HasIndex("UpdatedUtc", "UserId");
 
                     b.ToTable("Memberships", "organization");
+                });
+
+            modelBuilder.Entity("AeroScience.Organization.OpportunityRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("AvailabilityRevision")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("CampaignId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("PublishedRevision")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Revision")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer");
+
+                    b.Property<string>("SnapshotJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("Suspended")
+                        .HasColumnType("boolean");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedUtc", "Id");
+
+                    b.HasIndex("CampaignId", "CreatedUtc", "Id");
+
+                    b.ToTable("Opportunities", "organization");
                 });
 
             modelBuilder.Entity("AeroScience.Organization.OrganizationAudit", b =>
@@ -577,11 +717,50 @@ namespace AeroScience.Organization.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("AeroScience.Organization.ClaimEventRecord", b =>
+                {
+                    b.HasOne("AeroScience.Organization.ClaimRecord", null)
+                        .WithMany()
+                        .HasForeignKey("ClaimId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("AeroScience.Organization.ClaimRecord", b =>
+                {
+                    b.HasOne("AeroScience.Organization.OpportunityRecord", null)
+                        .WithMany()
+                        .HasForeignKey("OpportunityId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("AeroScience.Organization.OrganizationUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("AeroScience.Organization.DefinitionRevision", null)
+                        .WithMany()
+                        .HasForeignKey("OpportunityId", "IssuedRevision")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("AeroScience.Organization.MembershipRecord", b =>
                 {
                     b.HasOne("AeroScience.Organization.OrganizationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("AeroScience.Organization.OpportunityRecord", b =>
+                {
+                    b.HasOne("AeroScience.Organization.CampaignRecord", null)
+                        .WithMany()
+                        .HasForeignKey("CampaignId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });

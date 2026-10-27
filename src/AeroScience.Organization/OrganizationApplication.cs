@@ -91,7 +91,7 @@ public static class OrganizationApplication
             o.GlobalLimiter=PartitionedRateLimiter.Create<HttpContext,string>(_=>RateLimitPartition.GetConcurrencyLimiter("organization",_=>new(){PermitLimit=32,QueueLimit=0}));
         });
         builder.Services.AddScoped<OrganizationManagement>();
-        builder.Services.AddScoped<OrganizationMembership>();builder.Services.AddScoped<OrganizationDevices>();
+        builder.Services.AddScoped<OrganizationOpportunities>();builder.Services.AddScoped<OrganizationMembership>();builder.Services.AddScoped<OrganizationDevices>();
         builder.Logging.AddFilter("Microsoft.AspNetCore",LogLevel.Warning); // Never log invitation/connection input or credentials.
         var app=builder.Build();
         if(certificate is not null)app.Lifetime.ApplicationStopped.Register(certificate.Dispose);
@@ -121,7 +121,7 @@ public static class OrganizationApplication
         app.Use(async(context,next)=>{
             if(context.Request.Method is not("GET" or "HEAD" or "OPTIONS")){
                 // Native device client only. Browser actions retain Origin + antiforgery.
-                if(context.Request.Path is var path&&(path=="/api/device/start"||path=="/api/device/poll"||path=="/api/device/disconnect")){
+                if(context.Request.Path is var path&&(path=="/api/device/start"||path=="/api/device/poll"||path=="/api/device/disconnect"||path=="/api/member/claim-command")){
                     if(context.Request.Headers.ContainsKey("Origin")||context.Request.Headers.ContainsKey("Cookie")){context.Response.StatusCode=403;return;}
                     await next();return;
                 }
@@ -133,7 +133,7 @@ public static class OrganizationApplication
         });
         var assets=Path.Combine(AppContext.BaseDirectory,"organization-portal");
         if(Directory.Exists(assets)){var files=new PhysicalFileProvider(assets);app.UseDefaultFiles(new DefaultFilesOptions{FileProvider=files});app.UseStaticFiles(new StaticFileOptions{FileProvider=files});}
-        MapIdentity(app);MapManagement(app);OrganizationEnrollmentApi.Map(app);return app;
+        MapIdentity(app);MapManagement(app);OrganizationEnrollmentApi.Map(app);OrganizationOpportunityApi.Map(app);return app;
     }
     public static async Task Initialize(WebApplication app,CancellationToken token=default)
     {
