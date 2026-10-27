@@ -7,6 +7,7 @@ namespace AeroScience.Missions;
 
 public sealed partial class MissionStore
 {
+    static string ProcedureEventIdentity(Guid point,Guid attempt)=>$" [point:{point:D}; attempt:{attempt:D}]";
     static bool ProcedureCompatible(PersonalResearchCard first,PersonalResearchCard second)
     {
         IEnumerable<FlightRegimeDefinition> Rules(PersonalResearchCard card)=>card.Procedure?.Points.Select(p=>p.Conditions with{TestPoint=p.Conditions.TestPoint! with{Policy="all"}})??[card.FlightRegime!];
@@ -33,14 +34,23 @@ public sealed partial class MissionStore
         token.ThrowIfCancellationRequested();var point=card.Procedure!.Points.SingleOrDefault(p=>p.Id==attempt.TestPointId)??throw new InvalidOperationException("The marked point is absent from the frozen card.");
         if(attempt.EndUtc is not {} end||end<attempt.StartUtc)
             throw new InvalidOperationException("A marked point needs an ended evidence interval of at most 24 hours. Recording remains independent.");
-        if(end-attempt.StartUtc>TimeSpan.FromHours(2))return new(point.Id,ResearchAttemptOutcome.InsufficientEvidence,0,null,null,
-            new(0,0,0,Convert.ToHexString(SHA256.HashData([])).ToLowerInvariant(),PreflightReadiness.Hash(Research(attempt.FlightId).PlanSnapshot!),null),[],
-            "This marked interval exceeds the two-hour point-processing bound. It was closed without qualifying; start a shorter explicit attempt. Recording and science continue independently.");
         using var cmd=db.CreateCommand();cmd.Transaction=tx;
         cmd.CommandText="SELECT message FROM events WHERE id=$event AND mission_id=$flight AND timestamp_utc=$at AND kind='research-card-BeginAttempt'";
         cmd.Parameters.AddWithValue("$event",attempt.BeginEventId);cmd.Parameters.AddWithValue("$flight",attempt.FlightId.ToString());cmd.Parameters.AddWithValue("$at",Stamp(attempt.StartUtc));
         var begin=cmd.ExecuteScalar() as string;
-        if(begin is null||!begin.Contains(point.Id.ToString("D"),StringComparison.Ordinal))throw new InvalidOperationException("Original point-selection event does not match the marked attempt.");
+        var identity=ProcedureEventIdentity(point.Id,attempt.Id);
+        if(begin is null||!begin.EndsWith(identity,StringComparison.Ordinal))throw new InvalidOperationException("Original point-selection event does not match the marked point and attempt identity.");
+        cmd.CommandText="SELECT message,kind FROM events WHERE id=$endEvent AND mission_id=$flight AND timestamp_utc=$endAt";
+        cmd.Parameters.AddWithValue("$endEvent",(object?)attempt.EndEventId??DBNull.Value);cmd.Parameters.AddWithValue("$endAt",Stamp(end));
+        using(var originalEnd=cmd.ExecuteReader()){
+            if(!originalEnd.Read()||!originalEnd.GetString(0).EndsWith(identity,StringComparison.Ordinal)
+                ||(attempt.Status==ResearchAttemptStatus.Recorded?originalEnd.GetString(1)!="research-card-EndAttempt":originalEnd.GetString(1) is not("research-card-Deactivate" or "research-card-Interrupted")))
+                throw new InvalidOperationException("Original end event, status or UTC does not match this marked point and attempt.");
+        }
+        if(end-attempt.StartUtc>TimeSpan.FromHours(2))return new(point.Id,ResearchAttemptOutcome.InsufficientEvidence,0,null,null,
+            new(0,0,0,Convert.ToHexString(SHA256.HashData([])).ToLowerInvariant(),PreflightReadiness.Hash(Research(attempt.FlightId).PlanSnapshot!),null),[],
+            "This marked interval exceeds the two-hour point-processing bound. It was closed without qualifying; start a shorter explicit attempt. Recording and science continue independently.");
+
         var evaluation=new FlightRegimeEvaluation.PointWindow(point.Conditions,attempt.StartUtc,end);
         using var hash=IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
         using var pauses=PersonalPauseTimes(attempt.FlightId,attempt.StartUtc,end).GetEnumerator();var hasPause=pauses.MoveNext();

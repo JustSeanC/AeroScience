@@ -166,12 +166,14 @@ public sealed partial class MissionStore
                 message=$"Deactivated {selected.Card.Name}. Flight and science controls are unchanged.";break;
             case ResearchCardAction.BeginAttempt:
                 if(!selected.Active||attempt is not null)throw new InvalidOperationException("Activate this card and end its current attempt before beginning another.");
-                attemptId=Guid.NewGuid();message=$"Begin Attempt · {selected.Card.Name} · revision {selected.Card.Revision}."+(point is null?"":$" Point {point.Id:D} · {point.Conditions.TestPoint!.Name}.");break;
+                attemptId=Guid.NewGuid();message=$"Begin Attempt · {selected.Card.Name} · revision {selected.Card.Revision}."+(point is null?"":$" Test point: {point.Conditions.TestPoint!.Name}.");break;
             case ResearchCardAction.EndAttempt:
                 if(attempt is null)throw new InvalidOperationException("This card has no open attempt.");
                 message=$"End Attempt · {selected.Card.Name}. Recorded evidence awaits evaluation.";break;
             default:throw new ArgumentException("Unsupported card action.");
         }
+        if(selected.Card.Procedure is not null&&(point?.Id??attempt?.TestPointId) is {} selectedPoint&&attemptId is {} selectedAttempt)
+            message+=ProcedureEventIdentity(selectedPoint,selectedAttempt);
         var eventId=ResearchEvent(db,tx,request.FlightId,at,request.Action.ToString(),message);
         if(request.Action==ResearchCardAction.BeginAttempt)SaveRecordedAttempt(db,tx,new(attemptId!.Value,request.FlightId,selected.Card.Id,selected.Card.Revision,at,null,ResearchAttemptStatus.Recording,eventId,null,null,point?.Id));
         else if(attempt is not null && request.Action is ResearchCardAction.EndAttempt or ResearchCardAction.Deactivate){
@@ -202,7 +204,7 @@ public sealed partial class MissionStore
         foreach(var card in state.Cards){
             if(card.OpenAttempt is {} attempt){
                 var end=at<attempt.StartUtc?attempt.StartUtc:at;
-                var eventId=ResearchEvent(db,tx,flight,end,"Interrupted",$"Interrupted attempt · {card.Card.Name}. Flight ended or recording was recovered; no automatic pass.");
+                var eventId=ResearchEvent(db,tx,flight,end,"Interrupted",$"Interrupted attempt · {card.Card.Name}. Flight ended or recording was recovered; no automatic pass."+(attempt.TestPointId is {} point?ProcedureEventIdentity(point,attempt.Id):""));
                 SaveRecordedAttempt(db,tx,attempt with{EndUtc=end,Status=ResearchAttemptStatus.Interrupted,EndEventId=eventId,EndReason="Flight ended or recording interrupted before End Attempt"});
             }
         }

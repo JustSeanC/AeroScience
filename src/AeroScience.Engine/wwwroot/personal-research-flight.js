@@ -3,6 +3,8 @@ import {researchCardTargets} from './personal-research-start.js';
 import {node,button,newIdentity,table} from './workstation-ui.js';
 import {attemptView} from './personal-research.js';
 
+const readableCardMessage=value=>value.replace(/ \[point:[0-9a-f-]{36}; attempt:[0-9a-f-]{36}\]$/i,'');
+
 export function researchCardSelection(parent,api,references,changed){
  const selected=new Map(references.map(ref=>[ref.id,ref]));let offset=0,epoch=0;
  const section=node('section');section.id='plan-research-cards';section.append(node('h3','Personal Research Test Cards'),node('p','Choose cards before recording. Each flight freezes these revisions. You can activate compatible cards together or switch between different targets without stopping flight or science.'));
@@ -34,7 +36,7 @@ export function researchFlightControls(parent,api){
       const input={version:1,flightId:flight,expectedRevision:state.revision,action,cardId:card.id,expectedAttemptId:current.openAttempt?.id||null,...(action==='beginAttempt'&&pointSelect?{testPointId:pointSelect.value}:{})};const key=JSON.stringify(input);
       if(lastCommand?.key!==key)lastCommand={key,body:{...input,requestId:newIdentity()}};
       const own=epoch;busy=true;refreshButtons();
-      try{const result=await api('/api/research/control',lastCommand.body);if(own===epoch){apply(result.state);status.textContent=result.receipt.message;}}
+      try{const result=await api('/api/research/control',lastCommand.body);if(own===epoch){apply(result.state);status.textContent=readableCardMessage(result.receipt.message);}}
       catch(error){if(own===epoch){status.textContent=error.message;lastRead=0;}}
       finally{if(own===epoch){busy=false;refreshButtons();}}
      };actions.append(b);
@@ -64,7 +66,7 @@ export async function researchFlightTimeline(parent,api,flight,{attemptId,at}={}
  async function loadAttempts(){const rows=selected?[selected]:await api(`/api/missions/${flight}/research-attempts?offset=${offset}`);if(!root.isConnected)return;attempts.replaceChildren(node('h3','Recorded Attempts'));
   if(!rows.length)attempts.append(node('p','No marked attempts on this page. Existing postflight-only P01 results remain available in My Research.'));
   for(const attempt of rows){const card=state.cards.find(c=>c.card.id===attempt.cardId)?.card;const label={recording:'Recording',recorded:'Recorded',interrupted:'Interrupted'}[attempt.status]||'Unknown';const row=node('article');row.append(node('strong',`${card?.name||'Personal test card'} · revision ${attempt.cardRevision} · ${label}`),node('p',`${attempt.startUtc} → ${attempt.endUtc||'Attempt still recording'} · ${attempt.endReason||'Explicit attempt boundaries'} · Events ${attempt.beginEventId} / ${attempt.endEventId??'pending'}`));
-   if(attempt.testPointId)row.append(node('p',`Named point ${attempt.testPointId} · ${attempt.pointEvidence?.outcome||'Insufficient Evidence'} · longest supported hold ${attempt.pointEvidence?.longestHoldSeconds||0} s. Review Multi-Point Flight verifies originals and the complete procedure.`));
+   if(attempt.testPointId)row.append(node('p',`Test point ${card?.procedure?.points.find(p=>p.id===attempt.testPointId)?.conditions.testPoint.name||'Unknown point'} · ${attempt.pointEvidence?.outcome||'Insufficient Evidence'} · longest supported hold ${attempt.pointEvidence?.longestHoldSeconds||0} s. Review Multi-Point Flight verifies originals and the complete procedure.`));
    if(attempt.endUtc&&!state.recording){const command=newIdentity();button(row,'Evaluate Attempt',async()=>{const result=await api(`/api/research/recorded-attempts/${attempt.id}/evaluate`,{requestId:command});if(row.isConnected){row.querySelector('.attempt-result')?.remove();const shown=attemptView(result,api);shown.classList.add('attempt-result');row.append(shown);}});}
    attempts.append(row);
   }if(selected)button(attempts,'Show All Flight Attempts',()=>{selected=null;return loadAttempts();});else{button(attempts,'Newer Attempt Page',()=>{offset=Math.max(0,offset-20);return loadAttempts();});button(attempts,'Older Attempt Page',()=>{offset+=20;return loadAttempts();});}
@@ -77,9 +79,9 @@ export async function researchFlightTimeline(parent,api,flight,{attemptId,at}={}
   if(products.status==='fulfilled')evidence.append(node('p',`${products.value.length} retained acquisition products near this event. Original source provenance remains in Science Results & Analysis.`));else evidence.append(node('p','Acquisition evidence unavailable: '+products.reason.message));
  }
  async function loadEvents(){const rows=await api(`/api/missions/${flight}/replay/events?after=${after}`);if(!root.isConnected)return;events.replaceChildren(node('h3','Flight, Card and Science Events'));
-  for(const event of rows){const row=node('div',undefined,'research-panel');const technical=['payload-snapshot','instruments-configured','mission-performance-report','operating-assessment'].includes(event.kind);const summary=technical?'Configuration or assessment retained in the mission archive':event.message;
+  for(const event of rows){const row=node('div',undefined,'research-panel');const technical=['payload-snapshot','instruments-configured','mission-performance-report','operating-assessment'].includes(event.kind);const summary=technical?'Configuration or assessment retained in the mission archive':readableCardMessage(event.message);
    row.append(node('p',`${event.timestampUtc} · ${event.kind} · ${summary}`));button(row,'Show Recorded Evidence',()=>inspect(event.timestampUtc));events.append(row);
-   if(technical){const details=node('details');details.append(node('summary','Technical Event Evidence'),node('pre',event.message));row.append(details);}
+   if(technical||summary!==event.message){const details=node('details');details.append(node('summary','Technical Event Evidence'),node('pre',event.message));row.append(details);}
   }button(events,'First Event Page',()=>{after=0;return loadEvents();});if(rows.length===100)button(events,'Next Event Page',()=>{after=rows.at(-1).id;return loadEvents();});
  }
  try{await Promise.all([loadAttempts(),loadEvents()]);if(at)await inspect(at);status.textContent='Recorded events retain their original UTC and identities. An interrupted attempt cannot receive an automatic pass.';}catch(error){status.textContent=error.message;}

@@ -452,7 +452,7 @@ class IngamePanelAeroScience extends TemplateElement {
         if(pendingRequest.researchOffset!==this.researchOffset){this.requestResearch();return;}
         if(reply.research?.flightId===(this.state?.activeMission?.id||null)){
           if(!this.researchState||reply.research.revision>=this.researchState.revision||reply.research.flightId!==this.researchState.flightId){this.researchState=reply.research;this.renderPersonalResearch(Date.now()-this.lastReply<=6000);}
-          if(reply.receipt)this.byId('as-research-status').textContent=reply.receipt.message;
+          if(reply.receipt)this.byId('as-research-status').textContent=reply.receipt.message.replace(/ \[point:[0-9a-f-]{36}; attempt:[0-9a-f-]{36}\]$/i,'');
         }return;
       }
       if (

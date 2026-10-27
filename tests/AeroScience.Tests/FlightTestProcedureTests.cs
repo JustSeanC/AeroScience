@@ -90,5 +90,17 @@ public sealed class FlightTestProcedureTests:IDisposable
   store.Initialize();Assert.Equal(original,JsonSerializer.Serialize(store.ResearchCard(card.Id),WireJson.Options));
   using var reopened=new SqliteConnection("Data Source="+store.DatabasePath);reopened.Open();using var check=reopened.CreateCommand();check.CommandText="SELECT COUNT(*) FROM sqlite_master WHERE name='personal_card_attempts_point_review'";Assert.Equal(1L,check.ExecuteScalar());check.CommandText="PRAGMA user_version";Assert.Equal(10L,check.ExecuteScalar());
  }
+ [Theory][InlineData("point")][InlineData("end")][InlineData("status")]
+ public void OriginalControlEventsPreventRetaggedPointsExtendedWindowsOrInterruptedStatusUpgrades(string corruption)
+ {
+  var definition=Definition(hold:1);definition=definition with{Points=[definition.Points[0] with{Conditions=definition.Points[0].Conditions with{TestPoint=definition.Points[0].Conditions.TestPoint! with{Name=definition.Points[1].Id.ToString()}}},definition.Points[1]]};
+  Begin(definition);var original=Attempt(0,2);var r=Finish();
+  using(var db=new SqliteConnection("Data Source="+store.DatabasePath)){db.Open();using var cmd=db.CreateCommand();cmd.CommandText=corruption switch{
+    "point"=>"UPDATE personal_card_attempts SET payload_json=json_set(payload_json,'$.testPointId',$value) WHERE id=$id",
+    "end"=>"UPDATE personal_card_attempts SET payload_json=json_set(payload_json,'$.endUtc',$value) WHERE id=$id",
+    _=>"UPDATE personal_card_attempts SET payload_json=json_set(payload_json,'$.status',$value) WHERE id=$id"};
+   cmd.Parameters.AddWithValue("$id",original.Id.ToString());cmd.Parameters.AddWithValue("$value",corruption=="point"?definition.Points[1].Id.ToString():corruption=="end"?time.ToString("O"):"interrupted");cmd.ExecuteNonQuery();}
+  Assert.Throws<InvalidOperationException>(()=>store.EvaluateResearchAttempt(new(Guid.NewGuid(),flight.Id,flight.StartedUtc,time,CardId:card.Id)));
+ }
  public void Dispose(){SqliteConnection.ClearAllPools();Directory.Delete(root,true);}
 }
