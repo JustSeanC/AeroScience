@@ -215,7 +215,7 @@ export function initializeResearch(context) {
   scientificReadiness(control, ctx.api, liveMap).catch(() => {});
   $("instruments").append(text("div", undefined, "research-panel"));
   $("instruments").lastChild.id = "instrument-content";
-  operations=missionOperations($('operations'),ctx.api,{map:liveMap,livePanels:{flight:control.querySelector('.mission-panel'),cards:$('research-flight-controls'),science:$('mission-intelligence'),map:mapPanel,observations:markerPanel},refreshIntelligence:intelligence.refresh,currentSnapshot:()=>state,onRefreshMap:()=>{if(liveId&&!busy){lastFetch=0;}}});
+  operations=missionOperations($('operations'),ctx.api,{map:liveMap,livePanels:{flight:control.querySelector('.mission-panel'),cards:$('research-flight-controls'),science:$('mission-intelligence'),sensors:$('mission-intelligence-sensors'),map:mapPanel,observations:markerPanel},refreshIntelligence:intelligence.refresh,currentSnapshot:()=>state,onRefreshMap:()=>{if(liveId&&!busy){lastFetch=0;}}});
 }
 let operations;
 export function openMissionOperations(){return operations.open();}

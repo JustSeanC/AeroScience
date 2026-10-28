@@ -128,3 +128,14 @@ dialog.managed-popup{max-width:min(56rem,calc(100vw - 1.5rem));max-height:88dvh;
 .timeline-selection pre{max-height:18rem;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere}
 .timeline-selection .chart-wrap{max-height:24rem}.operations-recorded .operations-active{grid-column:1/-1}
 @media(max-width:850px){.operations-grid{grid-template-columns:minmax(0,1fr)}.operations-grid>*{grid-column:1}.evidence-lane{grid-template-columns:8rem minmax(0,1fr)}.timeline-filters>label{flex-basis:100%}}
+
+@media(min-width:851px){
+ .operations-live .operations-active,.operations-live .operations-objective{grid-row:1}
+ .operations-live .operations-attention{grid-row:2}
+ .operations-live .operations-research{grid-column:1;grid-row:3}
+ .operations-live .operations-science{grid-column:2;grid-row:3/span 2}
+ .operations-live .operations-map{grid-column:1;grid-row:4}
+}
+.operations-live #mission-intelligence>h2{display:none}
+.operations-instrument-details>summary{cursor:pointer;font-weight:600;padding:.75rem 0}
+.operations-instrument-summary .data-table-scroll{max-width:100%}
