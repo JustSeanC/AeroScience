@@ -349,3 +349,6 @@ select:focus-visible {
 #as-research-list>section{padding:.5rem 0;border-bottom:1px solid #385164}
 #as-research-list button{margin:.2rem;min-height:2.2rem}
 #as-research-list select{max-width:100%}
+
+/* Four tabs share the minimum 320px host width without adding another 48px row. */
+#as-root nav new-push-button{flex:1 1 0;min-width:0;padding:10px 2px;font-size:14px;white-space:nowrap}

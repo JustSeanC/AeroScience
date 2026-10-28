@@ -9,7 +9,8 @@ const activeMission = () => ({
 test('one responsive interface retains navigation, mission and mocked CommBus state', async ({ page }) => {
   await mountToolbar(page, { autoReply: true, activeMission: activeMission() });
   await expect(page.getByRole('checkbox')).toHaveCount(0);
-  await expect(page.locator('nav new-push-button')).toHaveText(['Mission', 'Payload', 'Map']);
+  await expect(page.locator('nav new-push-button')).toHaveText(['Mission', 'Payload', 'Map', 'Research']);
+  await page.locator('#as-research-page').click();await expect(page.locator('#as-research-cards')).toBeVisible();await expect(page.locator('#as-mission-view')).toBeHidden();
   await page.locator('#as-payload-page').click();
   await expect(page.locator('#as-payload-view')).toBeVisible();
   await expect(page.locator('#as-mission-view')).toBeHidden();
@@ -41,13 +42,14 @@ test('content follows supplied host bounds (browser fixture, not native dragging
       const content = scroll.getBoundingClientRect();
       return { x: frame.x, y: frame.y, width: frame.width, height: frame.height,
         right: frame.right, bottom: frame.bottom, rootRight: root.right, contentBottom: content.bottom,
-        scrollHeight: scroll.clientHeight, horizontalOverflow: scroll.scrollWidth > scroll.clientWidth };
+        scrollHeight: scroll.clientHeight, horizontalOverflow: scroll.scrollWidth > scroll.clientWidth, tabs:Array.from(document.querySelectorAll('nav new-push-button')).map(b=>({top:b.getBoundingClientRect().top,height:b.getBoundingClientRect().height})) };
     });
     expect(geometry.x).toBe(30); expect(geometry.y).toBe(20);
     expect(geometry.width).toBe(dimensions.width); expect(geometry.height).toBe(dimensions.height);
     expect(geometry.rootRight).toBeLessThanOrEqual(geometry.right + 1);
     expect(geometry.contentBottom).toBeLessThanOrEqual(geometry.bottom + 1);
     expect(geometry.scrollHeight).toBeGreaterThanOrEqual(48);
+    expect(new Set(geometry.tabs.map(t=>t.top)).size).toBe(1);for(const tab of geometry.tabs)expect(tab.height).toBeGreaterThanOrEqual(48);
     expect(geometry.horizontalOverflow).toBe(false);
   }
 });
