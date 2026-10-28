@@ -32,8 +32,17 @@ test('personal card uses the real planner, recorder, immutable evidence and offl
   await page.getByRole('button',{name:'Save mission plan',exact:true}).click();
   await expect(page.getByText('Mission plan saved · Ready to start mission',{exact:false})).toBeVisible();
   const plans=await(await request.get('/api/plans')).json();const plan=plans.find(p=>p.name===name);expect(plan.researchCard.revision).toBe(1);
+  // Selecting a plan commits first, then asynchronously fills the launch controls.
+  // Deliberately hold that refresh: route visibility is not proof that the required name is ready.
+  let releaseSelection,selectionRequested;const selectionGate=new Promise(resolve=>releaseSelection=resolve),requested=new Promise(resolve=>selectionRequested=resolve);let held=false;
+  const selectionPath='**/api/plans?limit=100&offset=0';
+  await page.route(selectionPath,async route=>{if(!held){held=true;selectionRequested();await selectionGate;}await route.continue();});
   await page.locator('.plan-row').filter({hasText:name}).getByRole('button',{name:'Select for Flight',exact:true}).click();
-  await page.getByRole('button',{name:'Start mission',exact:true}).click();await expect(page.locator('#active-name')).toHaveText(name);
+  try{await requested;await expect(page.locator('#mission-name')).toHaveValue('');expect(await page.locator('#start-form').evaluate(form=>form.checkValidity())).toBe(false);}finally{releaseSelection();}
+  await expect(page.getByLabel('Choose Mission',{exact:true})).toHaveValue(plan.id);
+  await expect(page.locator('#mission-name')).toHaveValue(name);await page.unroute(selectionPath);
+  const starting=page.waitForResponse(r=>new URL(r.url()).pathname==='/api/missions'&&r.request().method()==='POST');
+  await page.getByRole('button',{name:'Start mission',exact:true}).click();const started=await starting;expect(started.ok(),await started.text()).toBe(true);await expect(page.locator('#active-name')).toHaveText(name);
   const flight=(await(await request.get('/api/state')).json()).activeMission;
   await expect.poll(async()=>(await(await request.get(`/api/missions/${flight.id}`)).json()).mission.sampleCount).toBeGreaterThanOrEqual(9);
   await page.getByRole('button',{name:'End mission',exact:true}).click();
