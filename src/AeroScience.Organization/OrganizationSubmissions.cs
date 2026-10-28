@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 namespace AeroScience.Organization;
 
 public sealed class OrganizationSubmissions(OrganizationDatabase db,OrganizationMembership members,OrganizationDevices devices,
-    OrganizationManagement history,OrganizationSettings settings,OrganizationSubmissionOptions limits)
+    OrganizationManagement history,OrganizationSettings settings,OrganizationSubmissionOptions limits,OrganizationReviews reviews)
 {
     static SubmissionPolicy View(SubmissionPolicyRecord row)=>SubmissionEvidenceProtocol.DefaultPolicy(row.OpportunityId,row.PublishedUtc) with{Revision=row.Revision,Mode=row.Mode};
     async Task Lock(CancellationToken ct)=>await db.Database.ExecuteSqlRawAsync($"SELECT pg_advisory_xact_lock({OrganizationMembership.MembershipLock})",ct);
@@ -93,12 +93,12 @@ public sealed class OrganizationSubmissions(OrganizationDatabase db,Organization
         var usage=await db.SubmissionUsage.SingleAsync(ct);if(usage.PayloadBytes>limits.MaximumRetainedPayloadBytes-bytes)throw new OrganizationConflict("The organization's configured evidence-storage quota is full. Your approved local package was not received; ask the administrator to resolve storage.");
         var receipt=new SubmissionReceipt(1,Guid.NewGuid(),d.Manifest.Id,d.Manifest.OrganizationId,grant.UserId.Value,d.Manifest.CampaignId,manifestSha,payloadSha,bytes,OrganizationTime.UtcNow,"Received / Awaiting Review",SubmissionEvidenceProtocol.RetentionDisclosure);
         db.Submissions.Add(new(){PilotId=grant.UserId.Value,Id=d.Manifest.Id,ReceiptId=receipt.Id,CampaignId=d.Manifest.CampaignId,Name=d.Manifest.Name,SearchName=d.Manifest.Name.ToUpperInvariant(),ManifestSha256=manifestSha,PayloadSha256=payloadSha,PayloadBytes=bytes,PayloadJson=JsonSerializer.Serialize(d,WireJson.Options),ReceiptJson=JsonSerializer.Serialize(receipt,WireJson.Options),ReceivedUtc=receipt.ReceivedUtc});usage.PayloadBytes+=bytes;
-        history.Audit(grant.UserId.Value,"desktop","submission-received-awaiting-review",d.Manifest.Id,1);ct.ThrowIfCancellationRequested();await db.SaveChangesAsync(ct);await tx.CommitAsync(ct);return receipt;
+        await reviews.Received(d,receipt,ct);history.Audit(grant.UserId.Value,"desktop","submission-received-awaiting-review",d.Manifest.Id,1);ct.ThrowIfCancellationRequested();await db.SaveChangesAsync(ct);await tx.CommitAsync(ct);return receipt;
     }
     public async Task<OrganizationPage<SubmissionServerSummary>> Inventory(int offset,string? prefix,Guid? campaign,ClaimsPrincipal actor,CancellationToken ct)
     {
         await members.RequireManager(actor,false,ct);if(offset<0||prefix?.Length>100)throw new ArgumentException("Choose a valid page and a name prefix of up to 100 characters.");var rows=db.Submissions.AsNoTracking();if(campaign is {} campaignId)rows=rows.Where(r=>r.CampaignId==campaignId);if(!string.IsNullOrWhiteSpace(prefix)){var value=prefix.ToUpperInvariant();rows=rows.Where(r=>r.SearchName.StartsWith(value));}
-        var page=await rows.OrderByDescending(r=>r.ReceivedUtc).ThenBy(r=>r.Id).Skip(offset).Take(21).Select(r=>new SubmissionServerSummary(r.Id,r.Name,r.PilotId,r.CampaignId,r.ReceivedUtc,"Received / Awaiting Review",r.ManifestSha256,r.PayloadBytes)).ToArrayAsync(ct);return new(1,page.Take(20).ToArray(),page.Length>20?checked(offset+20):null);
+        var page=await rows.OrderByDescending(r=>r.ReceivedUtc).ThenBy(r=>r.Id).Skip(offset).Take(21).Select(r=>new SubmissionServerSummary(r.Id,r.Name,r.PilotId,r.CampaignId,r.ReceivedUtc,"Received / Awaiting Review",r.ManifestSha256,r.PayloadBytes,r.ReceiptId)).ToArrayAsync(ct);return new(1,page.Take(20).ToArray(),page.Length>20?checked(offset+20):null);
     }
     public async Task<SubmissionDocument> Inspect(Guid pilot,Guid id,ClaimsPrincipal actor,CancellationToken ct)
     {await members.RequireManager(actor,false,ct);var row=await Received(pilot,id,ct)??throw new OrganizationNotFound();var doc=JsonSerializer.Deserialize<SubmissionDocument>(row.PayloadJson,WireJson.Options)??throw new InvalidOperationException("Received evidence unavailable.");if(PreflightReadiness.Hash(doc)!=row.PayloadSha256)throw new InvalidOperationException("Stored evidence failed its integrity check.");return doc;}

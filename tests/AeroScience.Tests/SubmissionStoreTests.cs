@@ -7,7 +7,7 @@ using Xunit;
 namespace AeroScience.Tests;
 
 // Synthetic publications and recorded inputs, using real mission/science archives. No NASA or installed-MSFS claim.
-public sealed class SubmissionStoreTests:IDisposable
+public sealed partial class SubmissionStoreTests:IDisposable
 {
     readonly string root=Path.Combine(Path.GetTempPath(),"submission-store-"+Guid.NewGuid());
     readonly MissionStore store;readonly ScienceStore science;readonly DateTimeOffset at=DateTimeOffset.UtcNow.AddMinutes(-5);
@@ -89,7 +89,7 @@ public sealed class SubmissionStoreTests:IDisposable
     }
     [Fact]public void SchemaElevenMigrationRetainsOriginalEvidenceAndRollsBackOnInterruption()
     {
-        var f=Quantitative();using(var db=new SqliteConnection("Data Source="+store.DatabasePath)){db.Open();using var c=db.CreateCommand();c.CommandText="DROP TABLE submission_grants; DROP TABLE submission_policies; DROP TABLE submission_drafts; PRAGMA user_version=11";c.ExecuteNonQuery();}var before=StorageManager.DatabaseFingerprint(store.DatabasePath);store.EvidenceFault=p=>{if(p=="submission-migration-before-commit")throw new IOException("Controlled migration interruption");};Assert.Throws<IOException>(store.Initialize);Assert.Equal(before,StorageManager.DatabaseFingerprint(store.DatabasePath));store.EvidenceFault=null;store.Initialize();Assert.Equal(PreflightReadiness.Hash(f.Result),PreflightReadiness.Hash(store.ResearchAttempt(f.Result.Id)));Assert.Empty(store.SubmissionDrafts());Assert.Contains(Directory.GetFiles(Path.Combine(Path.GetDirectoryName(store.DatabasePath)!,"Backups"),"missions-schema11-*.db"),p=>StorageManager.DatabaseFingerprint(p)==before);
+        var f=Quantitative();using(var db=new SqliteConnection("Data Source="+store.DatabasePath)){db.Open();using var c=db.CreateCommand();c.CommandText="DROP TABLE IF EXISTS organization_review_cache; DROP TABLE submission_grants; DROP TABLE submission_policies; DROP TABLE submission_drafts; PRAGMA user_version=11";c.ExecuteNonQuery();}var before=StorageManager.DatabaseFingerprint(store.DatabasePath);store.EvidenceFault=p=>{if(p=="submission-migration-before-commit")throw new IOException("Controlled migration interruption");};Assert.Throws<IOException>(store.Initialize);Assert.Equal(before,StorageManager.DatabaseFingerprint(store.DatabasePath));store.EvidenceFault=null;store.Initialize();Assert.Equal(PreflightReadiness.Hash(f.Result),PreflightReadiness.Hash(store.ResearchAttempt(f.Result.Id)));Assert.Empty(store.SubmissionDrafts());Assert.Contains(Directory.GetFiles(Path.Combine(Path.GetDirectoryName(store.DatabasePath)!,"Backups"),"missions-schema11-*.db"),p=>StorageManager.DatabaseFingerprint(p)==before);
     }
 
     [Fact]public void PublishedPolicyCacheRejectsRollbackAndSameRevisionSubstitution()

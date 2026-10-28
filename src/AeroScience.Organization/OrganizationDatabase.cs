@@ -82,10 +82,44 @@ public sealed class OrganizationDatabase(DbContextOptions<OrganizationDatabase> 
     public DbSet<ReceivedSubmissionRecord> Submissions=>Set<ReceivedSubmissionRecord>();
     public DbSet<CancelledSubmissionRecord> CancelledSubmissions=>Set<CancelledSubmissionRecord>();
     public DbSet<SubmissionUsageRecord> SubmissionUsage=>Set<SubmissionUsageRecord>();
+    public DbSet<ResearchReviewCaseRecord> Reviews=>Set<ResearchReviewCaseRecord>();
+    public DbSet<ResearchReviewRequirementRecord> ReviewRequirements=>Set<ResearchReviewRequirementRecord>();
+    public DbSet<ResearchReviewEventRecord> ReviewEvents=>Set<ResearchReviewEventRecord>();
+    public DbSet<ResearchReviewRequestRecord> ReviewRequests=>Set<ResearchReviewRequestRecord>();
+    public DbSet<ResearchReviewPackageRecord> ReviewPackages=>Set<ResearchReviewPackageRecord>();
+    public DbSet<CampaignReviewGrantRecord> ReviewGrants=>Set<CampaignReviewGrantRecord>();
     protected override void OnModelCreating(ModelBuilder model)
     {
         base.OnModelCreating(model);
         model.HasDefaultSchema("organization");
+        model.Entity<ResearchReviewCaseRecord>().HasKey(r=>r.Id);
+        model.Entity<ResearchReviewCaseRecord>().Property(r=>r.Revision).IsConcurrencyToken();
+        model.Entity<ResearchReviewCaseRecord>().HasOne<ReceivedSubmissionRecord>().WithMany().HasForeignKey(r=>new{r.PilotId,r.SubmissionId}).HasPrincipalKey(r=>new{r.PilotId,SubmissionId=r.Id}).OnDelete(DeleteBehavior.Restrict);
+        model.Entity<ResearchReviewCaseRecord>().HasIndex(r=>new{r.State,r.UpdatedUtc,r.Id});
+        model.Entity<ResearchReviewCaseRecord>().HasIndex(r=>new{r.CampaignId,r.UpdatedUtc,r.Id});
+        model.Entity<ResearchReviewCaseRecord>().HasIndex(r=>new{r.UpdatedUtc,r.Id});
+        model.Entity<ResearchReviewCaseRecord>().HasIndex(r=>r.SearchName).HasOperators("text_pattern_ops");
+        model.Entity<ResearchReviewCaseRecord>().HasIndex(r=>r.SearchPilot).HasOperators("text_pattern_ops");
+        model.Entity<ResearchReviewCaseRecord>().HasIndex(r=>r.SearchCampaign).HasOperators("text_pattern_ops");
+        model.Entity<ResearchReviewCaseRecord>().HasIndex(r=>r.SearchProgram).HasOperators("text_pattern_ops");
+        model.Entity<ResearchReviewCaseRecord>().HasIndex(r=>new{r.PilotId,r.UpdatedUtc,r.Id});
+        model.Entity<ResearchReviewRequirementRecord>().HasKey(r=>new{r.RootId,r.CardId,r.Key});
+        model.Entity<ResearchReviewRequirementRecord>().HasOne<ResearchReviewCaseRecord>().WithMany().HasForeignKey(r=>r.RootId).OnDelete(DeleteBehavior.Restrict);
+        model.Entity<ResearchReviewEventRecord>().HasKey(r=>new{r.RootId,r.Sequence});
+        model.Entity<ResearchReviewEventRecord>().HasIndex(r=>r.Id).IsUnique();
+        model.Entity<ResearchReviewEventRecord>().HasOne<ResearchReviewCaseRecord>().WithMany().HasForeignKey(r=>r.RootId).OnDelete(DeleteBehavior.Restrict);
+        model.Entity<ResearchReviewRequestRecord>().HasKey(r=>r.Id);
+        model.Entity<ResearchReviewRequestRecord>().HasIndex(r=>new{r.RootId,r.State,r.CreatedUtc,r.Id});
+        model.Entity<ResearchReviewRequestRecord>().HasOne<ResearchReviewCaseRecord>().WithMany().HasForeignKey(r=>r.RootId).OnDelete(DeleteBehavior.Restrict);
+        model.Entity<ResearchReviewPackageRecord>().HasKey(r=>r.ReceiptId);
+        model.Entity<ResearchReviewPackageRecord>().HasOne<ResearchReviewCaseRecord>().WithMany().HasForeignKey(r=>r.RootId).OnDelete(DeleteBehavior.Restrict);
+        model.Entity<ResearchReviewPackageRecord>().HasOne<ReceivedSubmissionRecord>().WithMany().HasForeignKey(r=>new{r.PilotId,r.SubmissionId}).HasPrincipalKey(r=>new{r.PilotId,SubmissionId=r.Id}).OnDelete(DeleteBehavior.Restrict);
+        model.Entity<ResearchReviewPackageRecord>().HasIndex(r=>new{r.RootId,r.ReceivedUtc,r.ReceiptId});
+        model.Entity<CampaignReviewGrantRecord>().HasKey(r=>new{r.CampaignId,r.ReviewerId});
+        model.Entity<CampaignReviewGrantRecord>().Property(r=>r.Revision).IsConcurrencyToken();
+        model.Entity<CampaignReviewGrantRecord>().HasOne<CampaignRecord>().WithMany().HasForeignKey(r=>r.CampaignId).OnDelete(DeleteBehavior.Restrict);
+        model.Entity<CampaignReviewGrantRecord>().HasOne<OrganizationUser>().WithMany().HasForeignKey(r=>r.ReviewerId).OnDelete(DeleteBehavior.Restrict);
+        model.Entity<CampaignReviewGrantRecord>().HasIndex(r=>new{r.ReviewerId,r.Allowed,r.CampaignId});
         model.Entity<SubmissionPolicyRecord>().HasKey(x=>new{x.OpportunityId,x.Revision});
         model.Entity<SubmissionPolicyRecord>().HasOne<OpportunityRecord>().WithMany().HasForeignKey(x=>x.OpportunityId).OnDelete(DeleteBehavior.Restrict);
         model.Entity<ReceivedSubmissionRecord>().HasKey(x=>new{x.PilotId,x.Id});
@@ -143,7 +177,11 @@ public sealed class OrganizationDatabase(DbContextOptions<OrganizationDatabase> 
         foreach(var entry in ChangeTracker.Entries<ClaimRecord>())
             if(entry.State==EntityState.Deleted||entry.State==EntityState.Modified&&new[]{nameof(ClaimRecord.UserId),nameof(ClaimRecord.OpportunityId),nameof(ClaimRecord.IssuedRevision),nameof(ClaimRecord.IssuedSha256),nameof(ClaimRecord.AssignedUtc),nameof(ClaimRecord.Slot)}.Any(p=>entry.Property(p).IsModified))
                 throw new InvalidOperationException("Issued claim identity, definition and assignment boundaries are immutable.");
-        if(ChangeTracker.Entries().Any(e=>(e.Entity is DefinitionRevision or OrganizationCommandReceipt or OrganizationAudit or OrganizationRecord or ClaimEventRecord or SubmissionPolicyRecord or ReceivedSubmissionRecord or CancelledSubmissionRecord)&&e.State is EntityState.Modified or EntityState.Deleted))
+        foreach(var entry in ChangeTracker.Entries<ResearchReviewCaseRecord>())
+            if(entry.State==EntityState.Deleted||entry.State==EntityState.Modified&&new[]{nameof(ResearchReviewCaseRecord.Id),nameof(ResearchReviewCaseRecord.PilotId),nameof(ResearchReviewCaseRecord.SubmissionId),nameof(ResearchReviewCaseRecord.ProgramId),nameof(ResearchReviewCaseRecord.CampaignId),nameof(ResearchReviewCaseRecord.RootPayloadSha256),nameof(ResearchReviewCaseRecord.ReceivedUtc)}.Any(p=>entry.Property(p).IsModified))throw new InvalidOperationException("The received review identity and original source are immutable.");
+        foreach(var entry in ChangeTracker.Entries<ResearchReviewRequirementRecord>())
+            if(entry.State==EntityState.Deleted||entry.State==EntityState.Modified&&entry.Property(nameof(ResearchReviewRequirementRecord.DefinitionJson)).IsModified)throw new InvalidOperationException("Issued review requirements are immutable.");
+        if(ChangeTracker.Entries().Any(e=>(e.Entity is DefinitionRevision or OrganizationCommandReceipt or OrganizationAudit or OrganizationRecord or ClaimEventRecord or SubmissionPolicyRecord or ReceivedSubmissionRecord or CancelledSubmissionRecord or ResearchReviewEventRecord or ResearchReviewPackageRecord)&&e.State is EntityState.Modified or EntityState.Deleted))
             throw new InvalidOperationException("Organization identity, revision, audit and command history are append-only.");
     }
 }

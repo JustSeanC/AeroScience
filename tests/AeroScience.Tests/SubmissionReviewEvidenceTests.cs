@@ -1,0 +1,67 @@
+using System.Text.Json;
+using AeroScience.Missions;
+using AeroScience.Shared;
+using Microsoft.Data.Sqlite;
+using Xunit;
+namespace AeroScience.Tests;
+
+// Original evidence archives and recorded synthetic samples, not real aircraft/NASA acceptance.
+public sealed partial class SubmissionStoreTests
+{
+    SubmissionDocument ReviewDocument(PersonalResearchAttempt r){var row=Approve(store.SaveSubmissionDraft(Request(r),science));return store.ApprovedSubmissionDocument(row.Id,science);}
+    [Theory][InlineData(false)][InlineData(true)]public void ReviewerApprovalSeparatesReceivedMeasuredFailureFromSatisfiedRequirement(bool failed)
+    {
+        var f=Quantitative(failed);Policy(f.Source);var doc=ReviewDocument(f.Result);var rule=Assert.Single(SubmissionReviewEvidence.Requirements(doc));var a=SubmissionReviewEvidence.Assess(doc,[doc],rule.CardId,rule.Key);Assert.True(a.Supported);Assert.Equal(!failed,a.CanApprove);Assert.Contains(failed?ResearchAttemptOutcome.Fail:ResearchAttemptOutcome.Pass,a.OriginalOutcomes);Assert.Equal(f.Result.Outcome,store.ResearchAttempt(f.Result.Id).Outcome);
+    }
+    [Fact]public void ReviewerCannotApproveResultWithoutSelectedOriginalTelemetry()
+    {
+        var f=Quantitative();Policy(f.Source,SubmissionPolicyMode.AllowIncompleteSubmission);var request=Request(f.Result);var preview=store.PreviewSubmission(request,science);var row=Approve(store.SaveSubmissionDraft(request with{SelectedKeys=preview.Manifest.Items.Where(i=>i.Kind!=SubmissionEvidenceKind.Telemetry).Select(i=>i.Key).ToArray()},science));var doc=store.ApprovedSubmissionDocument(row.Id,science);var requirement=SubmissionReviewEvidence.Requirements(doc)[0];Assert.False(SubmissionReviewEvidence.Assess(doc,[doc],requirement.CardId,requirement.Key).CanApprove);
+    }
+    [Fact]public void SupplementalConsentChangesManifestWithoutChangingLegacyCanonicalJsonOrExistingDraft()
+    {
+        var f=Quantitative();Policy(f.Source);var request=Request(f.Result);var normal=store.SaveSubmissionDraft(request,science);var legacy=JsonSerializer.Serialize(normal.Manifest,WireJson.Options);Assert.DoesNotContain("reviewLink",legacy);Assert.Equal(PreflightReadiness.Hash(normal.Manifest),PreflightReadiness.Hash(JsonSerializer.Deserialize<SubmissionManifest>(legacy,WireJson.Options)!));
+        var link=new SubmissionReviewLink(1,Guid.NewGuid(),new('a',64),Guid.NewGuid());var supplement=store.SaveSubmissionDraft(request with{Id=Guid.NewGuid(),ReviewLink=link},science);Assert.NotEqual(normal.Id,supplement.Id);Assert.Equal(link,supplement.Manifest.ReviewLink);Assert.Equal(link,MissionStore.SubmissionRequest(supplement).ReviewLink);Assert.Null(supplement.Consent);Assert.Null(store.NextApprovedSubmission());Assert.Equal(legacy,JsonSerializer.Serialize(store.SubmissionDraft(normal.Id).Manifest,WireJson.Options));var approved=Approve(supplement);Assert.Contains("reviewLink",JsonSerializer.Serialize(store.ApprovedSubmissionDocument(approved.Id,science).Manifest,WireJson.Options));Assert.DoesNotContain(aircraft,QueueJson());
+    }
+    [Fact]public void ReviewCacheIsReceiptPilotOrganizationHashScopedAndContainsNoOriginalReadings()
+    {
+        var f=Quantitative();Policy(f.Source);var row=Approve(store.SaveSubmissionDraft(Request(f.Result),science));var c=row.Consent!;var receipt=new SubmissionReceipt(1,Guid.NewGuid(),row.Id,organization,pilot,campaign,c.ManifestSha256,c.PayloadSha256,c.PayloadBytes,at,"Received / Awaiting Review",SubmissionEvidenceProtocol.RetentionDisclosure);row=store.RecordSubmissionReceipt(row.Id,receipt);var summary=new ResearchReviewSummary(1,receipt.Id,row.Id,organization,"Lab",pilot,"Pilot",Guid.NewGuid(),"Program",campaign,"Campaign","Review","Card",c.PayloadSha256,1,ResearchReviewState.AwaitingReview,at,at,0,1,"Unknown evidence");var snap=new ResearchReviewSnapshot(summary,[],new(1,[],null));var cache=store.CacheReview(row,snap);Assert.Equal(receipt.Id,cache.RootReceiptId);Assert.Equal(1,store.CachedReview(row)!.Snapshot.Summary.Revision);
+        foreach(var bad in new[]{summary with{OrganizationId=Guid.NewGuid()},summary with{PilotId=Guid.NewGuid()},summary with{RootReceiptId=Guid.NewGuid()},summary with{RootPayloadSha256=new('f',64)}})Assert.Throws<IOException>(()=>store.CacheReview(row,snap with{Summary=bad}));store.CacheReview(row,snap with{Summary=summary with{Revision=2}});Assert.Throws<IOException>(()=>store.CacheReview(row,snap));
+        using var db=new SqliteConnection("Data Source="+store.DatabasePath);db.Open();using var q=db.CreateCommand();q.CommandText="SELECT payload_json FROM organization_review_cache";var text=(string)q.ExecuteScalar()!;Assert.DoesNotContain(aircraft,text);Assert.DoesNotContain("indicatedAirspeedKnots",text);Assert.DoesNotContain("samples",text);var restarted=new MissionStore(store.DatabasePath);restarted.Initialize();Assert.Equal(2,restarted.CachedReview(row)!.Snapshot.Summary.Revision);
+    }
+    [Fact]public void ReviewSchemaMigrationRollsBackKeepsHistoricalEvidenceAndReferenceOnlyQueue()
+    {
+        var f=Quantitative();Policy(f.Source);var row=store.SaveSubmissionDraft(Request(f.Result),science);using(var db=new SqliteConnection("Data Source="+store.DatabasePath)){db.Open();using var q=db.CreateCommand();q.CommandText="DROP TABLE organization_review_cache; PRAGMA user_version=12";q.ExecuteNonQuery();}var before=StorageManager.DatabaseFingerprint(store.DatabasePath);store.EvidenceFault=p=>{if(p=="review-cache-migration-before-commit")throw new IOException("Controlled P18 migration interruption");};Assert.Throws<IOException>(store.Initialize);Assert.Equal(before,StorageManager.DatabaseFingerprint(store.DatabasePath));store.EvidenceFault=null;store.Initialize();Assert.Equal(PreflightReadiness.Hash(row),PreflightReadiness.Hash(store.SubmissionDraft(row.Id)));Assert.Equal(PreflightReadiness.Hash(f.Result),PreflightReadiness.Hash(store.ResearchAttempt(f.Result.Id)));Assert.Contains(Directory.GetFiles(Path.Combine(Path.GetDirectoryName(store.DatabasePath)!,"Backups"),"missions-schema12-*.db"),p=>StorageManager.DatabaseFingerprint(p)==before);
+    }
+    [Fact]public void DuplicatePackagesDoNotDoubleCountOneOriginalHoldAndForeignClaimCannotQualify()
+    {
+        var f=Quantitative();Policy(f.Source);var doc=ReviewDocument(f.Result);var rule=SubmissionReviewEvidence.Requirements(doc)[0];var twice=SubmissionReviewEvidence.Assess(doc,[doc,doc],rule.CardId,rule.Key);Assert.True(twice.CanApprove);Assert.Equal(f.Result.LongestSupportedHoldSeconds,store.ResearchAttempt(f.Result.Id).LongestSupportedHoldSeconds);Assert.Throws<ArgumentException>(()=>SubmissionReviewEvidence.Assess(doc,[doc with{Manifest=doc.Manifest with{PilotId=Guid.NewGuid()}}],rule.CardId,rule.Key));Assert.Throws<ArgumentException>(()=>SubmissionReviewEvidence.Assess(doc,Enumerable.Repeat(doc,9).ToArray(),rule.CardId,rule.Key));
+    }
+    [Fact]public void PilotDocumentationCanBeReviewedWithoutTurningNotesIntoMeasurements()
+    {
+        var source=Source(ObservationResearch.Template);Policy(source);var p=Prepare(source);var flight=store.Create("Pilot review",Frame(0),at,plan:p.Plan);for(int i=0;i<=5;i++)store.Append(flight,Frame(i));for(int i=1;i<=3;i++)store.AddMarker(flight,new("observation","Original note "+i),at.AddSeconds(i),Frame(i),null);store.Finish(flight,MissionStatus.Completed,at.AddSeconds(5),"end");var result=store.EvaluateResearchAttempt(new(Guid.NewGuid(),flight,at,at.AddSeconds(5),CardId:p.Card.Id),science:science);var doc=ReviewDocument(result);Assert.True(SubmissionReviewEvidence.Assess(doc,[doc],p.Card.Id,"documentation").CanApprove);Assert.All(doc.Evidence.SelectMany(i=>i.Data.Documentation??[]),d=>Assert.StartsWith("Pilot Observation",d.Kind));
+    }
+    [Fact]public void ReceivedMultiPointEvidencePreservesOrderDistinctRepetitionsAndFailedAttempt()
+    {
+        var source=Source(FlightRegimeEvaluation.ProcedureTemplate);Policy(source,SubmissionPolicyMode.AllowIncompleteSubmission);var p=Prepare(source);var time=at;var coordinator=new MissionCoordinator(store,1000,utcNow:()=>time);int n=0;void Observe(double speed=120){time=at.AddSeconds(n++);var f=Frame(n-1,speed);coordinator.Apply(new(new(ConnectionState.Connected,f.Source,"Synthetic fixture",time),f));}Observe();var flight=coordinator.Start(new("Received multi-point synthetic procedure",PlanId:p.Plan.Id));
+        ResearchCardResult Control(ResearchCardAction action,int point=0){var s=coordinator.PersonalResearch(flight.Id);return coordinator.ControlPersonalResearch(new(1,flight.Id,Guid.NewGuid(),s.Revision,action,p.Card.Id,s.Cards.Single().OpenAttempt?.Id,action==ResearchCardAction.BeginAttempt?p.Card.Procedure!.Points[point].Id:null));}
+        Control(ResearchCardAction.Activate);void Attempt(int point,int seconds,double speed=120){Observe(speed);Control(ResearchCardAction.BeginAttempt,point);for(int i=0;i<seconds;i++)Observe(speed);Control(ResearchCardAction.EndAttempt);}
+        Attempt(0,10,150);Attempt(0,10);Attempt(1,10);Observe();coordinator.End(flight.Id);var result=store.EvaluateResearchAttempt(new(Guid.NewGuid(),flight.Id,at,time,CardId:p.Card.Id));var doc=ReviewDocument(result);var definitions=SubmissionReviewEvidence.Requirements(doc);Assert.Equal(2,definitions.Length);var first=SubmissionReviewEvidence.Assess(doc,[doc],p.Card.Id,definitions[0].Key);Assert.True(first.CanApprove,string.Join(";",first.Blockers));var second=SubmissionReviewEvidence.Assess(doc,[doc],p.Card.Id,definitions[1].Key);Assert.False(second.CanApprove);Assert.Equal(1,second.Procedure!.Points[1].CompletedRepetitions);Assert.Equal(3,second.Procedure.AttemptCount);Assert.Contains(doc.Evidence.SelectMany(i=>i.Data.Telemetry?.Attempts??[]),a=>a.PointEvidence?.Outcome==ResearchAttemptOutcome.Fail);Assert.Equal(ResearchAttemptOutcome.InsufficientEvidence,result.Outcome);
+    }
+}
+
+public sealed partial class SubmissionStoreTests
+{
+    [Theory][InlineData("complete",true)][InlineData("partial",false)][InlineData("missing-session",false)][InlineData("unselected-readings",false)]
+    public void AtmosphericReviewUsesActualCollectionMeasurementsAndRequiresTraceableSessions(string issue,bool expected)
+    {
+        var source=Source(AtmosphericResearch.Template);Policy(source,SubmissionPolicyMode.AllowIncompleteSubmission);var p=Prepare(source);var time=at;using var acquisition=new ResearchOperations(store,science);var coordinator=new MissionCoordinator(store,1000,research:acquisition,utcNow:()=>time);var plan=store.SavePlan(p.Plan with{Instruments=[new("ambient-temperature",true)],StartScienceArmed=false});
+        void Observe(int i){time=at.AddSeconds(i);var f=Frame(i) with{AltitudeMslFeet=1100+(issue=="partial"?0:Math.Min(2,i/4))*500};coordinator.Apply(new(new(ConnectionState.Connected,f.Source,"Explicit synthetic collection",time),f,new(time,17.1234567-Math.Min(2,i/4),29.9,5,270,.002)));}Observe(0);var flight=coordinator.Start(new("Supported collection-review fixture",PlanId:plan.Id));for(int i=1;i<=12;i++)Observe(i);coordinator.End(flight.Id);
+        var result=store.EvaluateResearchAttempt(new(Guid.NewGuid(),flight.Id,at,time,CardId:p.Card.Id),science:science);var request=Request(result);if(issue is "missing-session" or "unselected-readings"){var all=store.PreviewSubmission(request,science);request=request with{SelectedKeys=all.Manifest.Items.Where(i=>i.Kind!=(issue=="missing-session"?SubmissionEvidenceKind.CollectionSessions:SubmissionEvidenceKind.ScientificObservations)).Select(i=>i.Key).ToArray()};}
+        var row=Approve(store.SaveSubmissionDraft(request,science));var document=store.ApprovedSubmissionDocument(row.Id,science);var assessment=SubmissionReviewEvidence.Assess(document,[document],p.Card.Id,"collection");Assert.Equal(expected,assessment.CanApprove);if(issue=="missing-session")Assert.Contains(assessment.Blockers,b=>b.Contains("session"));if(expected){Assert.Equal(12,assessment.Atmospheric!.ValidTemperatureReadings);Assert.Equal(ResearchAttemptOutcome.CollectionComplete,result.Outcome);}else Assert.NotEmpty(assessment.Blockers);
+    }
+    [Theory][InlineData("terrain-temperature-survey")][InlineData("experimental-sensor-checkout")]
+    public void MissingLargeRasterOrModeledProductsRemainReadableButCannotReceiveAnApprovalWaiver(string template)
+    {
+        var source=Source(template);Policy(source,SubmissionPolicyMode.AllowIncompleteSubmission);var p=Prepare(source);var flight=store.Create("Explicit unsupported product fixture",Frame(0),at,plan:p.Plan);for(int i=0;i<=5;i++)store.Append(flight,Frame(i));store.Finish(flight,MissionStatus.Completed,at.AddSeconds(5),"end");var result=store.EvaluateResearchAttempt(new(Guid.NewGuid(),flight,at,at.AddSeconds(5),CardId:p.Card.Id),science:science);var document=ReviewDocument(result);foreach(var r in SubmissionReviewEvidence.Requirements(document)){Assert.False(r.ApprovalSupported);var a=SubmissionReviewEvidence.Assess(document,[document],r.CardId,r.Key);Assert.False(a.Supported);Assert.False(a.CanApprove);Assert.NotEmpty(a.Blockers);}
+    }
+}

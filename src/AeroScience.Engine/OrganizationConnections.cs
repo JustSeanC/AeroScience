@@ -71,7 +71,7 @@ public sealed partial class OrganizationConnections:IDisposable
         if(IPAddress.TryParse(uri.Host.Trim('[',']'),out var literal)&&!PermittedAddress(literal,development))throw new ArgumentException("Protected network addresses cannot be used as organization servers.");
         return new(uri.GetLeftPart(UriPartial.Authority));
     }
-    async Task<T> Request<T>(string origin,string path,object? body,CancellationToken ct,string? credential=null,bool evidence=false)
+    async Task<T> Request<T>(string origin,string path,object? body,CancellationToken ct,string? credential=null,bool evidence=false,bool review=false)
     {
         using var request=new HttpRequestMessage(body is null?HttpMethod.Get:HttpMethod.Post,new Uri(new Uri(origin),path));
         if(body is not null)request.Content=JsonContent.Create(body,options:WireJson.Options);
@@ -82,6 +82,8 @@ public sealed partial class OrganizationConnections:IDisposable
         catch(HttpRequestException){throw new IOException("The organization could not be reached securely. Check its address or try again later.");}
         using var response=received;
         if(response.StatusCode is HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden)throw new UnauthorizedAccessException("Organization authorization is expired or revoked. Connect again if your membership is active.");
+        if(review&&response.StatusCode is HttpStatusCode.Conflict or HttpStatusCode.BadRequest)throw new IOException("The review changed or the response was not valid for its exact request. Your unsent text is unchanged. Check Review Status, read the latest conversation, then send a new response explicitly.");
+        if(review&&response.StatusCode==HttpStatusCode.NotFound)throw new IOException("This received review or conversation is unavailable to this connection. No reply or evidence was sent.");
         if(evidence&&response.StatusCode is HttpStatusCode.Conflict or HttpStatusCode.BadRequest or HttpStatusCode.RequestEntityTooLarge)throw new OrganizationSubmissionReviewRequired("The organization could not receive this exact package because its policy, claim interval, evidence, cancellation or capacity changed. Review the package and current server requirements before retrying; no receipt was confirmed.");
         if(evidence&&response.StatusCode==HttpStatusCode.NotFound)throw new OrganizationSubmissionReviewRequired("This server has no compatible evidence-receipt capability for the selected claim. The local draft and original evidence remain unchanged.");
         if(response.StatusCode==HttpStatusCode.Conflict)throw new IOException("The card or assignment changed, or its slots are held. Refresh Available Research and My Assignments before trying again. Your request did not change local research.");

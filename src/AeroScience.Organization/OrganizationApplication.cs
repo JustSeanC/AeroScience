@@ -94,7 +94,7 @@ public static class OrganizationApplication
         });
         builder.Services.AddScoped<OrganizationManagement>();
         builder.Services.AddScoped<OrganizationOpportunities>();builder.Services.AddScoped<OrganizationMembership>();builder.Services.AddScoped<OrganizationDevices>();
-        builder.Services.AddScoped<OrganizationSubmissions>();
+        builder.Services.AddScoped<OrganizationSubmissions>();builder.Services.AddScoped<OrganizationReviews>();
         var submissionLimit=builder.Configuration.GetValue<long?>("Organization:MaximumRetainedEvidenceBytes")??1024L*1024*1024;
         if(submissionLimit<SubmissionEvidenceProtocol.MaximumPayloadBytes||submissionLimit>1024L*1024*1024*1024)throw new InvalidOperationException("Configure a bounded organization evidence-storage quota between 2 MiB and 1 TiB.");
         builder.Services.AddSingleton(new OrganizationSubmissionOptions{MaximumRetainedPayloadBytes=submissionLimit});
@@ -130,7 +130,7 @@ public static class OrganizationApplication
         app.Use(async(context,next)=>{
             if(context.Request.Method is not("GET" or "HEAD" or "OPTIONS")){
                 // Native device client only. Browser actions retain Origin + antiforgery.
-                if(context.Request.Path is var path&&(path=="/api/device/start"||path=="/api/device/poll"||path=="/api/device/disconnect"||path=="/api/member/claim-command"||path==OrganizationSubmissionApi.ReceivePath||path==OrganizationSubmissionApi.CancelPath)){
+                if(context.Request.Path is var path&&(path=="/api/device/start"||path=="/api/device/poll"||path=="/api/device/disconnect"||path=="/api/member/claim-command"||path==OrganizationSubmissionApi.ReceivePath||path==OrganizationSubmissionApi.CancelPath||OrganizationReviewApi.IsNativeResponse(path))){
                     if(context.Request.Headers.ContainsKey("Origin")||context.Request.Headers.ContainsKey("Cookie")){context.Response.StatusCode=403;return;}
                     await next();return;
                 }
@@ -142,7 +142,7 @@ public static class OrganizationApplication
         });
         var assets=Path.Combine(AppContext.BaseDirectory,"organization-portal");
         if(Directory.Exists(assets)){var files=new PhysicalFileProvider(assets);app.UseDefaultFiles(new DefaultFilesOptions{FileProvider=files});app.UseStaticFiles(new StaticFileOptions{FileProvider=files});}
-        MapIdentity(app);MapManagement(app);OrganizationEnrollmentApi.Map(app);OrganizationOpportunityApi.Map(app);OrganizationSubmissionApi.Map(app);return app;
+        MapIdentity(app);MapManagement(app);OrganizationEnrollmentApi.Map(app);OrganizationOpportunityApi.Map(app);OrganizationSubmissionApi.Map(app);OrganizationReviewApi.Map(app);return app;
     }
     public static async Task Initialize(WebApplication app,CancellationToken token=default)
     {
@@ -150,7 +150,7 @@ public static class OrganizationApplication
         try{
             var known=db.Database.GetMigrations().ToHashSet(StringComparer.Ordinal);
             if((await db.Database.GetAppliedMigrationsAsync(token)).Any(m=>!known.Contains(m)))throw new InvalidOperationException("Organization database schema is newer or incompatible.");
-            await db.Database.MigrateAsync(token);if(!await db.Organizations.AnyAsync(token))app.Services.GetRequiredService<BootstrapCredential>().Initialize(app.Services.GetRequiredService<OrganizationSettings>().ReadBootstrapSecret());
+            await db.Database.MigrateAsync(token);await scope.ServiceProvider.GetRequiredService<OrganizationReviews>().Backfill(token);if(!await db.Organizations.AnyAsync(token))app.Services.GetRequiredService<BootstrapCredential>().Initialize(app.Services.GetRequiredService<OrganizationSettings>().ReadBootstrapSecret());
         }
         catch(Exception ex) when(ex is not OperationCanceledException){throw new InvalidOperationException("Organization startup refused: database/schema, protected bootstrap or key configuration is unavailable. No personal-data fallback was used.");}
     }

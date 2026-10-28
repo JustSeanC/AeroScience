@@ -32,7 +32,7 @@ public sealed partial class OrganizationConnectionIntegrationTests
     }
     sealed class Server(WebApplication app,HttpClient browser,string origin,string database):IAsyncDisposable
     {
-        public WebApplication App=>app;public string Origin=>origin;public string Database=>database;
+        public HttpClient Browser=>browser;public WebApplication App=>app;public string Origin=>origin;public string Database=>database;
         public int AuthorizedReads,ClaimReads,SubmissionWrites;public bool DropNextSubmissionAcknowledgment,InterruptNextSubmission;public Guid? ForcedDeviceIdentity;
         public async Task<JsonElement> Post(string path,object body,HttpMethod? method=null)
         {

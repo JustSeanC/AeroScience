@@ -141,7 +141,7 @@ public sealed class PersonalResearchOperationsTests : IDisposable
     {
         Observe(1);var sample=Assert.Single(store.StreamSamples(flight.Id));
         using(var db=new SqliteConnection($"Data Source={store.DatabasePath};Pooling=False")){
-            db.Open();using var cmd=db.CreateCommand();cmd.CommandText="DROP TABLE submission_grants; DROP TABLE submission_policies; DROP TABLE submission_drafts; DROP TABLE organization_claim_checks; DROP TABLE organization_mission_preparations; DROP TABLE personal_card_attempts; DROP TABLE personal_research_state; DROP TABLE personal_flight_cards; PRAGMA user_version=9";cmd.ExecuteNonQuery();
+            db.Open();using var cmd=db.CreateCommand();cmd.CommandText="DROP TABLE IF EXISTS organization_review_cache; DROP TABLE submission_grants; DROP TABLE submission_policies; DROP TABLE submission_drafts; DROP TABLE organization_claim_checks; DROP TABLE organization_mission_preparations; DROP TABLE personal_card_attempts; DROP TABLE personal_research_state; DROP TABLE personal_flight_cards; PRAGMA user_version=9";cmd.ExecuteNonQuery();
         }
         var original=StorageManager.DatabaseFingerprint(store.DatabasePath);
         store.EvidenceFault=point=>{if(point=="research-operations-before-commit")throw new IOException("Synthetic migration interruption");};

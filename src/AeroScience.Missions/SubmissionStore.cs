@@ -50,7 +50,7 @@ public sealed partial class MissionStore
     {
         using var db=Open();using var c=db.CreateCommand();c.CommandText="SELECT state,COUNT(*) FROM submission_drafts WHERE ($flight IS NULL OR flight_id=$flight) AND EXISTS(SELECT 1 FROM json_each(payload_json,'$.manifest.cards') b WHERE json_extract(b.value,'$.cardId')=$card) GROUP BY state";c.Parameters.AddWithValue("$flight",(object?)flight?.ToString()??DBNull.Value);c.Parameters.AddWithValue("$card",card.ToString());var totals=new long[8];using(var r=c.ExecuteReader())while(r.Read()){var state=r.GetInt32(0);if(state is >=0 and <8)totals[state]=r.GetInt64(1);}return new(totals[6],totals[1]+totals[2]+totals[3],totals[0],totals[4]+totals[5],totals[7]);
     }
-    static string SubmissionScope(SubmissionManifest m)=>PreflightReadiness.Hash(new{m.FlightId,m.Origin,m.OrganizationId,m.PilotId,m.CampaignId});
+    static string SubmissionScope(SubmissionManifest m)=>m.ReviewLink is null?PreflightReadiness.Hash(new{m.FlightId,m.Origin,m.OrganizationId,m.PilotId,m.CampaignId}):PreflightReadiness.Hash(new{m.FlightId,m.Origin,m.OrganizationId,m.PilotId,m.CampaignId,m.ReviewLink});
     static void WriteSubmissionDraft(SqliteConnection db,SqliteTransaction tx,SubmissionDraft row,bool insert=false)
     {
         using var c=db.CreateCommand();c.Transaction=tx;c.CommandText=insert?"INSERT INTO submission_drafts VALUES($id,$flight,$scope,$revision,$state,$json,$due)":"UPDATE submission_drafts SET revision=$revision,state=$state,payload_json=$json,due_utc=$due WHERE id=$id";
@@ -69,7 +69,7 @@ public sealed partial class MissionStore
         }
         var row=new SubmissionDraft(request.Id,(previous?.Revision??0)+1,SubmissionDeliveryState.Draft,preview.Manifest,request.ConnectionId,null,null,DateTimeOffset.UtcNow,"Draft saved locally. No upload is authorized.");WriteSubmissionDraft(db,tx,row,previous is null);EvidenceFault?.Invoke("submission-draft-before-commit");tx.Commit();return row;
     }
-    public static SubmissionDraftRequest SubmissionRequest(SubmissionDraft row)=>new(1,row.Id,row.Revision,row.Manifest.FlightId,row.Manifest.ResultIds,row.Manifest.Items.Select(i=>i.Key).ToArray(),row.Manifest.Name,row.ConnectionId);
+    public static SubmissionDraftRequest SubmissionRequest(SubmissionDraft row)=>new(1,row.Id,row.Revision,row.Manifest.FlightId,row.Manifest.ResultIds,row.Manifest.Items.Select(i=>i.Key).ToArray(),row.Manifest.Name,row.ConnectionId,row.Manifest.ReviewLink);
     public SubmissionPreview PreviewSavedSubmission(Guid id,ScienceStore science,CancellationToken ct=default)=>PreviewSubmission(SubmissionRequest(SubmissionDraft(id)),science,ct);
     public SubmissionDocument ApprovedSubmissionDocument(Guid id,ScienceStore science,CancellationToken ct=default)
     {

@@ -3,6 +3,7 @@ using AeroScience.Shared;
 namespace AeroScience.Engine;
 
 public sealed record SubmissionPolicyRefresh(Guid ConnectionId);
+public sealed record SupplementalReviewRequest(Guid RequestEventId);
 public static class SubmissionApi
 {
     static SubmissionInventory SubmissionChoices(MissionStore store,Guid flight,Guid? card,int offset){var rows=store.SubmissionChoices(flight,card,offset,includeNext:true);return new(1,rows.Take(20).ToArray(),store.SubmissionDrafts(flight,offset),rows.Length>20?checked(offset+20):null);}
@@ -11,6 +12,11 @@ public static class SubmissionApi
         var api=app.MapGroup("/api/submissions");api.AddEndpointFilter(async(context,next)=>{
             if(!AccessControl.IsLoopback(context.HttpContext))return Results.Json(new{error="Review and authorize evidence sharing on the companion PC. Personal research and existing scientific results remain available here."},statusCode:403);return await next(context);
         });
+        api.MapGet("/drafts/{id:guid}/review-cache",(Guid id,MissionStore store)=>new LocalReviewStatus(store.CachedReview(store.SubmissionDraft(id)),false,"Previously checked review metadata only. Use Check Review Status for a current server decision."));
+        api.MapPost("/drafts/{id:guid}/review",(Guid id,LocalReviewCheck r,OrganizationConnections connections,MissionStore store,HttpContext c)=>connections.ReviewStatus(id,r,store,c.RequestAborted));
+        api.MapPost("/drafts/{id:guid}/review-history",(Guid id,LocalReviewCheck r,int? after,OrganizationConnections connections,MissionStore store,HttpContext c)=>connections.ReviewHistory(id,r,after??0,store,c.RequestAborted));
+        api.MapPost("/drafts/{id:guid}/review-response",(Guid id,LocalReviewResponse r,OrganizationConnections connections,MissionStore store,HttpContext c)=>connections.RespondToReview(id,r,store,c.RequestAborted));
+        api.MapPost("/drafts/{id:guid}/supplement",(Guid id,SupplementalReviewRequest r,OrganizationConnections connections,MissionStore store)=>new{reviewLink=connections.SupplementalReviewLink(id,r.RequestEventId,store)});
         api.MapGet("/context",(Guid cardId,Guid? flightId,MissionStore store)=>store.SubmissionStatusForCard(cardId,flightId));
         api.MapGet("/choices",(Guid flightId,Guid? cardId,int? offset,MissionStore store)=>SubmissionChoices(store,flightId,cardId,offset??0));
         api.MapGet("/drafts",(Guid? flightId,int? offset,MissionStore store)=>store.SubmissionDrafts(flightId,offset??0));
