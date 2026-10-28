@@ -1,3 +1,4 @@
+import {openSubmissionBuilder} from './submission-builder.js';
 import {scienceMap} from './science-map.js';
 import {comparison} from './science-compare.js';
 import {summaryView} from './science-analysis.js';
@@ -37,6 +38,7 @@ export async function scienceWorkspace(parent,api){
     if(!choice.value){const empty=el('div',undefined,'panel empty-state');empty.append(el('h2','Choose a recorded mission'),el('p','Review saved scientific measurements, replay the flight or export its research. MSFS and Internet access are not required.'));link(empty,'Find a mission','#history','button primary');body.append(empty);return;}
     const id=choice.value,summary=await safeApi(`/api/missions/${id}/science-summary`);
     body.append(el('h2',summary.mission.name));
+    if(summary.mission.status!=='recording'){try{const eligible=await safeApi(`/api/submissions/choices?flightId=${id}`);if(eligible.choices.length)button(body,'Submit Evidence',()=>openSubmissionBuilder(api,{flightId:id}));}catch(error){if(error.name==='AbortError'||error.message==='View changed.')throw error;}}
     if(summary.mission.status!=='recording'){const research=await safeApi(`/api/missions/${id}/research`);const starter=research.planSnapshot?.researchStarter?.starterId;if(starter==='experimental-sensor-checkout')link(body,'Review Sensor Checkout',`#my-research?flight=${id}`);if(starter==='scientific-observation-flight')link(body,'Review Scientific Observations',`#my-research?flight=${id}`);if(starter==='terrain-temperature-survey')link(body,'Review Terrain & Temperature Survey',`#my-research?flight=${id}`);if(['vertical-atmospheric-profile','atmospheric-transect'].includes(starter))link(body,starter==='atmospheric-transect'?'Review Atmospheric Transect':'Review Atmospheric Profile',`#my-research?flight=${id}`);}
     await downlink(body,id,safeApi,disposals,catalog);
     if(path==='replay'){await replay(body,id,summary.mission,safeApi,{},stop=>disposals.push(stop));return;}

@@ -1,3 +1,4 @@
+import {submissionUi} from './organization-submissions.js';
 import {opportunityUi} from './organization-opportunities.js';
 import {membershipUi} from './organization-members.js';
 import {node,button,select,dateTime,disclosure} from './workstation-ui.js';
@@ -9,7 +10,8 @@ let join=null,connect=null,enrollment=false;
 function takeEntry(){const fragment=new URLSearchParams(location.hash.slice(1));if(!fragment.has('join')&&!fragment.has('connect')&&!fragment.has('enroll'))return false;join=fragment.get('join');connect=fragment.get('connect');enrollment=fragment.has('enroll');window.history.replaceState(null,'',location.pathname);return true;}
 takeEntry();window.addEventListener('hashchange',()=>{if(takeEntry())load();});
 const membership=membershipUi({api,root,field,status,heading,submit,modal,dialog,session:()=>session,load,programs:showPrograms,identity:showIdentity,draftCommand,joined:()=>{join=null;enrollment=false;}});
-const opportunities=opportunityUi({api,root,heading,modal,field,submit,draftCommand,dialog,back:()=>showProgram(currentProgram)});
+const submissions=submissionUi({api,root,heading,modal,field,submit,draftCommand,dialog,back:showPrograms});
+const opportunities=opportunityUi({api,root,heading,modal,field,submit,draftCommand,dialog,submissionPolicy:submissions.policy,back:()=>showProgram(currentProgram)});
 const admin=()=>session?.user?.roles.includes('Administrator');
 async function api(path,body,method=body?'POST':'GET'){
  const response=await fetch('/api'+path,{method,credentials:'same-origin',headers:{...(body?{'Content-Type':'application/json','X-AeroScience-Organization-CSRF':session?.csrf||''}:{})},...(body?{body:JSON.stringify(body)}:{})});
@@ -47,7 +49,7 @@ function showIdentity(message=''){
 async function showPrograms(){
  const own=++epoch;currentProgram=null;
  const [overview,page]=await Promise.all([api('/organization/overview'),api(`/organization/programs?offset=${programOffset}`)]);if(own!==epoch)return;
- heading('Organization Overview',overview.name);root.append(node('p',overview.description));const actions=node('div',undefined,'actions');root.append(actions);button(actions,'Create Program',()=>editProgram());button(actions,'Members',()=>membership.members());
+ heading('Organization Overview',overview.name);root.append(node('p',overview.description));const actions=node('div',undefined,'actions');root.append(actions);button(actions,'Create Program',()=>editProgram());button(actions,'Members',()=>membership.members());button(actions,'Received Evidence',()=>submissions.inventory());
  const section=node('section');section.setAttribute('aria-label','Programs');section.append(node('h2','Programs'),node('p','Organize related scientific research and experimental flight tests.'));const grid=node('div',undefined,'grid');section.append(grid);root.append(section);
  if(!page.items.length)grid.append(node('p','No programs on this page. Create a program to begin.'));
  for(const program of page.items){const card=node('article');card.append(node('h3',program.name),node('p',program.description),node('p',`Revision ${program.revision} · Updated ${dateTime(program.updatedUtc)} · ${program.authorName}`,'metadata'));button(card,'Open Program',()=>showProgram(program));button(card,'Edit Program',()=>editProgram(program));grid.append(card);}

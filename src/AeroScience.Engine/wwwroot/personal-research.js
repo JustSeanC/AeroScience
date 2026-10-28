@@ -1,3 +1,4 @@
+import {openSubmissionBuilder,submissionHistory} from './submission-builder.js';
 import {organizationAssignmentSummary,organizationClaimReview} from './organization-assignment-ui.js';
 import {researchOrganizations} from './research-organizations.js';
 import {procedureExample,showProcedureResult} from './flight-test-procedure.js';
@@ -19,7 +20,7 @@ export async function personalResearch(root, api) {
   root.replaceChildren(node('h1', 'My Research'), node('h2', 'Personal Research'),
     node('p', 'Your experiments stay on this computer. No organization, account or internet connection is needed.'));
   const status = node('p', 'Loading personal test cards…'); status.setAttribute('role', 'status'); root.append(status);
-  researchOrganizations(root,api,active);
+  researchOrganizations(root,api,active);submissionHistory(root,api,active);const params=new URLSearchParams(location.hash.split('?')[1]||'');const submission=params.get('submissionDraft');if(submission&&!params.has('connectOrganization')){params.delete('submissionDraft');window.history.replaceState(null,'',location.pathname+location.search+'#my-research'+(params.size?'?'+params:''));queueMicrotask(()=>{if(active())openSubmissionBuilder(api,{draftId:submission});});}
   const action = (label, handler, style = 'secondary') => {
     const b = node('button', label, style); b.type = 'button';
     b.onclick = async () => {
@@ -85,7 +86,7 @@ export async function personalResearch(root, api) {
       }
       if (!active() || request !== reviewEpoch) return;
       review.replaceChildren(node('h2', `Review ${card.name}`), node('p', 'Each flight uses the card revision frozen when recording started. A later card edit cannot change that result.'));
-      if(card.organizationAssignment){const recorded=flights.find(f=>f.id===selectedFlight)||flights[0];review.append(organizationAssignmentSummary(card,recorded?{flightId:recorded.id,startUtc:recorded.startedUtc,endUtc:recorded.endedUtc}:{}));organizationClaimReview(review,api,card);}
+      if(card.organizationAssignment){const recorded=flights.find(f=>f.id===selectedFlight)||flights[0];review.append(organizationAssignmentSummary(card,recorded?{flightId:recorded.id,startUtc:recorded.startedUtc,endUtc:recorded.endedUtc}:{},api));organizationClaimReview(review,api,card);review.append(action('Submit Evidence',()=>openSubmissionBuilder(api,{cardId:card.id,flightId:recorded?.id})));}
       if (!flights.length) review.append(node('p', 'No completed flights on this page. Open this card in Mission Planner, select the plan for flight, record, and end your flight first.'));
       else {
         const label = node('label', 'Recorded flight'), select = node('select'); select.setAttribute('aria-label', 'Recorded flight'); label.append(select);
@@ -108,7 +109,7 @@ export async function personalResearch(root, api) {
             const key = JSON.stringify(input);
             if (lastEvaluation?.key !== key) lastEvaluation = {key, requestId:newIdentity()};
             const attempt = await api('/api/research/attempts', {requestId:lastEvaluation.requestId, ...input});
-            if (active() && request === reviewEpoch) { if(card.procedure)await showProcedureResult(result,api,attempt,()=>active()&&request===reviewEpoch);else if(card.experimentalSensor)await showSensorResult(result,api,attempt,()=>active()&&request===reviewEpoch);else if(card.observationFlight)await showObservationResult(result,api,attempt,()=>active()&&request===reviewEpoch);else if(card.survey)await showSurveyResult(result,api,attempt,()=>active()&&request===reviewEpoch);else if(isAtmosphericResearch(card))await showAtmosphericResult(result,api,attempt,()=>active()&&request===reviewEpoch);else result.replaceChildren(attemptView(attempt,api)); }
+            if (active() && request === reviewEpoch) { if(card.procedure)await showProcedureResult(result,api,attempt,()=>active()&&request===reviewEpoch);else if(card.experimentalSensor)await showSensorResult(result,api,attempt,()=>active()&&request===reviewEpoch);else if(card.observationFlight)await showObservationResult(result,api,attempt,()=>active()&&request===reviewEpoch);else if(card.survey)await showSurveyResult(result,api,attempt,()=>active()&&request===reviewEpoch);else if(isAtmosphericResearch(card))await showAtmosphericResult(result,api,attempt,()=>active()&&request===reviewEpoch);else result.replaceChildren(attemptView(attempt,api,{submission:false})); }
           }, 'primary'), result);
         const timeline=node('div');review.append(timeline);
         const showTimeline=async()=>{timeline.replaceChildren();const {researchFlightTimeline}=await import('./personal-research-flight.js');if(active()&&request===reviewEpoch)await researchFlightTimeline(timeline,api,select.value);};
@@ -129,7 +130,7 @@ export async function personalResearch(root, api) {
         action(card.procedure?'Review Multi-Point Flight':card.experimentalSensor?'Review Sensor Checkout':card.observationFlight?'Review Scientific Observations':card.survey?'Review Terrain & Temperature Survey':card.atmosphericTransect?'Review Atmospheric Transect':card.atmosphericProfile?'Review Atmospheric Profile':'Review Recorded Flight', () => showReview(card)),
         action('Overview & Compare',()=>researchExperimentReview(experiment,api,card,active)),
         action('Edit Card', () => { draft = structuredClone(card); renderEditor(); editor.scrollIntoView({block:'start'}); editor.querySelector('input').focus(); }));
-      if(card.organizationAssignment){row.prepend(organizationAssignmentSummary(card));for(const b of row.querySelectorAll('button'))if(['Edit Card','Open in Mission Planner'].includes(b.textContent))b.remove();const open=node('a','Open Mission Planner','button secondary');open.href='#planner';row.append(open);organizationClaimReview(row,api,card);}
+      if(card.organizationAssignment){row.prepend(organizationAssignmentSummary(card,{},api));for(const b of row.querySelectorAll('button'))if(['Edit Card','Open in Mission Planner'].includes(b.textContent))b.remove();const open=node('a','Open Mission Planner','button secondary');open.href='#planner';row.append(open);organizationClaimReview(row,api,card);}
       root.append(row);
       if(!card.organizationAssignment)researchEntryActions(row,api,{card,starter:starters.find(s=>s.id===card.templateId)},active);
     }
@@ -148,12 +149,13 @@ export async function personalResearch(root, api) {
   } catch (error) { if (active()) status.textContent = `Personal Research could not load: ${error.message}`; }
 }
 
-export function attemptView(attempt,api) {
-  if(attempt.card.procedure){const panel=node('section');if(api)showProcedureResult(panel,api,attempt);return panel;}
-  if(attempt.experimentalSensor){const panel=sensorSummary(attempt);if(api){const control=node('button','Open Sensor Checkout','secondary');control.type='button';const detail=node('div');control.onclick=()=>showSensorResult(detail,api,attempt);panel.append(control,detail);}return panel;}
-  if(attempt.observationFlight){const panel=observationSummary(attempt);if(api){const control=node('button','Open Scientific Observations','secondary');control.type='button';const detail=node('div');control.onclick=()=>showObservationResult(detail,api,attempt);panel.append(control,detail);}return panel;}
-  if(attempt.survey){const panel=surveySummary(attempt);if(api){const control=node('button','Open Survey Results','secondary');control.type='button';const detail=node('div');control.onclick=()=>showSurveyResult(detail,api,attempt);panel.append(control,detail);}return panel;}
-  if(attempt.atmosphericProfile){const panel=atmosphericSummary(attempt);if(api){const button=node('button',attempt.card.atmosphericTransect?'Open Atmospheric Transect':'Open Atmospheric Profile','secondary');button.type='button';const detail=node('div');button.onclick=()=>showAtmosphericResult(detail,api,attempt);panel.append(button,detail);}return panel;}
+export function attemptView(attempt,api,options={}) {
+  const share=panel=>{if(api&&options.submission!==false&&attempt.card.organizationAssignment){const b=node('button','Submit Evidence','secondary');b.type='button';b.onclick=()=>openSubmissionBuilder(api,{flightId:attempt.flightId,cardId:attempt.card.id,resultId:attempt.id});panel.append(b);}return panel;};
+  if(attempt.card.procedure){const panel=node('section');if(api)showProcedureResult(panel,api,attempt);return share(panel);}
+  if(attempt.experimentalSensor){const panel=sensorSummary(attempt);if(api){const control=node('button','Open Sensor Checkout','secondary');control.type='button';const detail=node('div');control.onclick=()=>showSensorResult(detail,api,attempt);panel.append(control,detail);}return share(panel);}
+  if(attempt.observationFlight){const panel=observationSummary(attempt);if(api){const control=node('button','Open Scientific Observations','secondary');control.type='button';const detail=node('div');control.onclick=()=>showObservationResult(detail,api,attempt);panel.append(control,detail);}return share(panel);}
+  if(attempt.survey){const panel=surveySummary(attempt);if(api){const control=node('button','Open Survey Results','secondary');control.type='button';const detail=node('div');control.onclick=()=>showSurveyResult(detail,api,attempt);panel.append(control,detail);}return share(panel);}
+  if(attempt.atmosphericProfile){const panel=atmosphericSummary(attempt);if(api){const button=node('button',attempt.card.atmosphericTransect?'Open Atmospheric Transect':'Open Atmospheric Profile','secondary');button.type='button';const detail=node('div');button.onclick=()=>showAtmosphericResult(detail,api,attempt);panel.append(button,detail);}return share(panel);}
   const panel = node('article', undefined, 'panel research-panel');
   const outcome = {pass:'Pass', fail:'Fail', insufficientEvidence:'Insufficient Evidence'}[attempt.outcome] || 'Unknown';
   if(attempt.automatic)panel.append(node('p',`Automatic attempt · ${attempt.automatic.policyVersion} · original sequences ${attempt.automatic.firstSequence}–${attempt.automatic.lastSequence}. Recognition is not a deliberate-pilot-intent or certification claim.`));
@@ -163,7 +165,7 @@ export function attemptView(attempt,api) {
     node('p', `Evidence: ${attempt.startUtc} to ${attempt.endUtc} · ${attempt.evidence.sampleCount} recorded samples · ${attempt.evidence.source === 'simulator' ? 'Recorded simulator telemetry' : attempt.evidence.source === 'simulated' ? 'Synthetic/demo telemetry; not an installed MSFS test' : 'Source unavailable; no telemetry source type inferred'}`));
   const details = node('details'); details.append(node('summary', 'Evidence References'), node('p', `Flight ${attempt.flightId} · Original telemetry sequences ${attempt.evidence.firstSequence}–${attempt.evidence.lastSequence}`),
     node('p', `Evaluator ${attempt.evaluatorVersion} · Evidence SHA-256 ${attempt.evidence.sha256} · Plan SHA-256 ${attempt.evidence.planSha256}`));
-  panel.append(organizationAssignmentSummary(attempt.card,attempt),details);
+  panel.append(organizationAssignmentSummary(attempt.card,attempt,api),details);
   if(attempt.card.flightRegime.testPoint&&api){const button=node('button','Inspect Custom Test Evidence','secondary');button.type='button';const detail=node('div');button.onclick=()=>showCustomFlightEvidence(detail,api,attempt);panel.append(button,detail);}
-  return panel;
+  return share(panel);
 }
