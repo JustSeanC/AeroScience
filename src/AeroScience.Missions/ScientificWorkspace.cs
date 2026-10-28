@@ -163,7 +163,7 @@ public static class ScientificMapLayer
             var corners = new[] { ScientificRaster.GridPoint(grid, x, y), ScientificRaster.GridPoint(grid, x + 1, y), ScientificRaster.GridPoint(grid, x + 1, y + 1), ScientificRaster.GridPoint(grid, x, y + 1), ScientificRaster.GridPoint(grid, x, y) };
             // Preserve numeric export even when a single display polygon spans the date line.
             if (corners.Max(p => p.Longitude) - corners.Min(p => p.Longitude) > 180) continue;
-            values.Add(value); features.Add(new { type = "Feature", geometry = new { type = "Polygon", coordinates = new[] { corners.Select(p => new[] { p.Longitude, p.Latitude }).ToArray() } }, properties = new { value, rgb = rgb?.Select(b => b.Values[i]).ToArray(), unit = band.Unit, productId = data.Product.Id, missionId = data.Product.MissionId, sourceId = data.Source.Id, flightUtc = data.Product.FlightPacketUtc, sourceUtc = data.Source.Manifest.ObservationUtc } });
+            values.Add(value); features.Add(new { type = "Feature", geometry = new { type = "Polygon", coordinates = new[] { corners.Select(p => new[] { p.Longitude, p.Latitude }).ToArray() } }, properties = new { value, rgb = rgb?.Select(b => b.Values[i]).ToArray(), unit = band.Unit, productId = data.Product.Id, missionId = data.Product.MissionId, sourceId = data.Source.Id, flightUtc = data.Product.FlightPacketUtc, sourceUtc = data.Source.Manifest.ObservationUtc, sampleLocation = data.SampleLocations[i] } });
         }
         return new
         {
@@ -174,6 +174,11 @@ public static class ScientificMapLayer
             unit = band.Unit,wavelengthNm=data.Source.Manifest.Bands.FirstOrDefault(b=>b.Id==band.Id)?.WavelengthNm,
             method = "Native cell containing a saved QA-valid sample; display of the full cell does not prove the whole cell was sensed. Duplicate positions in one native pixel counted once. Gaps are transparent. No retained-only source pixels or improved resolution are implied.",
             source = data.Source.Manifest,
+            // Metadata already retained with the original product/source. No raster
+            // re-read or inferred acquisition epoch is needed to explain this layer.
+            context = new { version = 1, sourceId = data.Source.Id, data.Source.ImportedUtc, data.Product.ProcessedUtc,
+                data.Product.FlightPacketUtc, data.Product.SourceClass, data.Product.Quality, data.Product.Warnings, grid,
+                displayedNativeCells = features.Count, data.Product.ValidSampleCount },
             provenance = data.Product.Provenance
         };
     }

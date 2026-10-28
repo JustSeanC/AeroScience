@@ -1,11 +1,13 @@
 import {organizationAssignmentSummary} from './organization-assignment-ui.js';
 import {node,button,table,chart,numeric,link,disclosure,dateTime,color} from './workstation-ui.js';
 import {ResearchMap} from './map.js';
+import {renderResearchContext} from './scientific-context.js';
 
 export const collectionOutcome=outcome=>({collectionComplete:'Completed collection — sufficient evidence',partialCollection:'Partial coverage',insufficientEvidence:'Insufficient or unavailable evidence'}[outcome]||'Unknown collection outcome');
 export function atmosphericSummary(attempt){
  const root=node('article',undefined,'panel research-panel'),s=attempt.atmosphericProfile;
  root.append(node('h3',`${attempt.card.name} — ${collectionOutcome(attempt.outcome)}`),node('p',attempt.explanation));
+ renderResearchContext(root,attempt.card,{source:attempt.evidence.source});
  if(attempt.card.atmosphericTransect)root.append(node('p','Research question: '+attempt.card.atmosphericTransect.question));
  const temperature=s.quantities.find(q=>q.measurementId==='temperature');if(temperature?.validReadings)root.append(node('p',`Recorded air temperatures ranged from ${numeric(temperature.minimum)} to ${numeric(temperature.maximum)} degC along the sampled aircraft path. ${s.transect?'Sampled locations do not establish the conditions between them or in surrounding areas.':'Band values below show where readings were actually retained; they do not establish conditions between sampled altitudes.'}`));
  if(s.transect){const t=s.transect,r=attempt.card.atmosphericTransect;root.append(node('p',`${t.coveredStations} covered sampling locations (${r.requiredStations} required) · ${numeric(t.linkedDistanceMetres)} m supported path · greatest leg extent ${numeric(t.greatestLegExtentMetres)} m (${numeric(r.minimumExtentMetres)} m required) · ${t.totalLegs} supported legs. Both goals must be met in one leg; revisits do not add distinct locations.`));}

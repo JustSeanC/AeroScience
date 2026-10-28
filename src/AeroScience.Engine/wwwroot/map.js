@@ -97,7 +97,12 @@ export class ResearchMap {
       ['mission-draft','Draft route and survey geometry',this.draftLayer,'Mission'],['mission-preview','Pattern preview and modeled geometry',this.previewLayer,'Mission'],
       ['observations','Observation markers',this.markers,'Science'],['sample-locations','Scientific sample locations',this.samples,'Science'],
       ['science-readiness','Scientific data readiness',this.readiness,'Science'],['science-footprints','Science footprints',this.footprints,'Science']
-    ].map(([id,name,layer,group])=>({id,name,layer,group}));
+    ].map(([id,name,layer,group])=>({id,name,layer,group,description:{
+      observations:'Pilot Observation: original notes and marked locations, where recorded. Human documentation is separate from sensor readings; missing positions are not invented.',
+      'sample-locations':'Actual saved scientific sample locations, not continuous sensor coverage. Inspect original values, units, times and provenance in Science Map or the synchronized evidence timeline.',
+      'science-readiness':'Scientific source availability and preparation context. Downloaded or geographically available data is not proof of compatible, QA-valid collected evidence. Review the mission’s original readiness warnings.',
+      'science-footprints':'Modeled Scientific Output: acquisition geometry from recorded aircraft position and configured instrument assumptions. These outlines are not validated sensor swaths or QA-valid pixel coverage. Historical source sampling does not acquire a new satellite image.'
+    }[id]}));
     const action = (name, fn) => {
       const b = document.createElement("button");
       b.type = "button";

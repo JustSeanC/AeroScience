@@ -3,6 +3,7 @@ import {atmosphere} from './mission-workspace.js';
 import {initialMeasurement} from './science-map.js';
 import {node as el,numeric as number,dateTime as local,metric,chart,table,link,disclosure,color,readableName} from './workstation-ui.js';
 import {displayReading} from './science-display.js';
+import {renderCategory,renderLayerContext} from './scientific-context.js';
 
 export async function summaryView(parent,summary,api,instrument,{disposals=[],catalog=[],analysis=false}={}){
   const header=el('div',undefined,'research-mission-header');parent.append(header);
@@ -14,6 +15,9 @@ export async function summaryView(parent,summary,api,instrument,{disposals=[],ca
   for(const review of chosen){
     const card=el('article',undefined,'panel instrument-result');cards.append(card);card.append(el('h3',review.name));
     const remote=review.remoteProducts>0,findings=el('div',undefined,'instrument-findings');card.append(findings);
+    // Instrument result groups retain their distinct source semantics; raw quality
+    // and provenance remain available in the existing exact-evidence inspector.
+    renderCategory(card,remote?'externalDataset':review.measurementValues>0?'simulatorReported':null);
     if(remote){metric(findings,'Recorded acquisitions',number(review.remoteProducts),`${number(review.validGeographicSamples)} saved valid sample positions; repeated packets are separate samples`);}
     else{metric(findings,'Recorded measurements',number(review.measurementValues),`${number(review.acquisitionTimestamps)} actual sampling timestamps; fields can share a timestamp`);}
     if(review.diagnostics){metric(findings,'Data quality',review.diagnostics.quality||'Not assessed',`${number(review.diagnostics.rejectedObservations)} rejected · ${number(review.diagnostics.missingIntervals)} missing intervals`);}
@@ -40,7 +44,7 @@ export async function summaryView(parent,summary,api,instrument,{disposals=[],ca
       if(page.products[0]){
         const source=review.sources?.find(source=>source.sourceId===page.products[0].sourceId),measurement=initialMeasurement(review.instrumentId);
         if(measurement){const layer=await api(`/api/science/products/${page.products[0].id}/map-layer?measurement=${encodeURIComponent(measurement)}`);const holder=el('div',undefined,'analysis-map');card.append(holder);const map=new ResearchMap(holder,null,{coverageOnly:true});disposals.push(()=>map.destroy());
-          const overlay=window.L.geoJSON(layer,{style:feature=>({stroke:false,fillOpacity:.85,fillColor:color(feature.properties.value,layer.minimum,layer.maximum)})}).addTo(map.map);map.layers.addOverlay({id:'analysis-native',name:'Analysis native scientific values',layer:overlay,group:'Science',description:layer.method||'Saved valid native samples; source dates, units and QA remain in the report.',setOpacity:value=>overlay.setStyle({fillOpacity:value}),opacity:.85});if(layer.features.length)map.map.fitBounds(overlay.getBounds(),{maxZoom:17});card.append(el('p',`${layer.features.length} valid native cells in the displayed acquisition. Missing geographic support remains transparent; this is historical source data.`));}
+          const overlay=window.L.geoJSON(layer,{style:feature=>({stroke:false,fillOpacity:.85,fillColor:color(feature.properties.value,layer.minimum,layer.maximum)})}).addTo(map.map);map.layers.addOverlay({id:'analysis-native',name:'Analysis native scientific values',layer:overlay,group:'Science',description:layer.method||'Saved valid native samples; source dates, units and QA remain in the report.',describe:target=>renderLayerContext(target,{source:layer.source,context:layer.context,measurement,unit:layer.unit,method:layer.method}),setOpacity:value=>overlay.setStyle({fillOpacity:value}),opacity:.85});if(layer.features.length)map.map.fitBounds(overlay.getBounds(),{maxZoom:17});card.append(el('p',`${layer.features.length} valid native cells in the displayed acquisition. Missing geographic support remains transparent; this is historical source data.`));}
         else card.append(el('p','Choose a retained wavelength on Science Map to inspect the actual hyperspectral measurements.'));
       }
     }

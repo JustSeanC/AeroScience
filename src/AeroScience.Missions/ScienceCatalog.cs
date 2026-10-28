@@ -17,7 +17,7 @@ public static class ScienceCatalog
         new("thermal-imager", "Thermal Imager", "Landsat Collection 2 surface temperature sampled along the simulated footprint; not ambient air temperature.", "Automatic Landsat C2 L2SP ST_B10 / QA_PIXEL / QA_RADSAT; advanced import also supported", []),
         new("multispectral-imager", "Multispectral Imager", "Natural color, infrared and NDVI from a real Sentinel-2 L2A scene.", "Automatic Sentinel-2 L2A reflectance COGs and SCL; advanced import also supported", []),
         new("hyperspectral-imager", "Hyperspectral Imager", "Real wavelength profiles from supported geographically referenced ENVI collections; limited source coverage.", "NASA catalog discovery only; automatic preparation unsupported. Advanced ENVI reflectance/radiance import", []),
-        new("terrain-scanner", "Terrain Scanner (LiDAR / Elevation)", "DEM-derived elevations with an explicit source vertical datum. These are not airborne LiDAR returns.", "Automatic USGS 3DEP bare-earth / Copernicus DSM fallback; advanced DEM import also supported", [])
+        new("terrain-scanner", "Terrain Scanner (DEM Elevation)", "DEM-derived elevations with an explicit source vertical datum. These are not airborne LiDAR returns.", "Automatic USGS 3DEP bare-earth / Copernicus DSM fallback; advanced DEM import also supported", [])
     ];
     public static readonly MissionTemplate[] Templates =
     [

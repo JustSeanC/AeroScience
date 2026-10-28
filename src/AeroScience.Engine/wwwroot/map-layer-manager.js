@@ -10,7 +10,7 @@ function saved(){try{const text=localStorage.getItem(preferenceKey);if(!text||te
 // One permanent map control: exactly one basemap; independently visible overlay groups.
 // Changing visibility neither changes source filters nor mutates the underlying mission/science.
 export function mapLayerManager(L,map,definitions,applyBasemap,{beginReadOnly=()=>()=>{}}={}){
- const overlays=new Map(),inputs=new Map(),groups=new Map();let dialog,disposed=false,preferences=saved();
+ const overlays=new Map(),inputs=new Map(),groups=new Map();let dialog,aboutDialog,disposed=false,preferences=saved();
  const Control=L.Control.extend({onAdd(){const box=el('div');box.className='leaflet-bar map-layer-manager';box.setAttribute('role','group');box.setAttribute('aria-label','Map layer manager');L.DomEvent.disableClickPropagation(box);L.DomEvent.disableScrollPropagation(box);return box;}});
  const control=new Control({position:'topright'}).addTo(map),box=control.getContainer();
  const stopBasemap=layerSelector(box,applyBasemap),open=el('button','Overlays & Legend');open.type='button';open.setAttribute('aria-haspopup','dialog');box.append(open);
@@ -19,6 +19,11 @@ export function mapLayerManager(L,map,definitions,applyBasemap,{beginReadOnly=()
  function sync(){map.getContainer().dataset.visibleOverlays=JSON.stringify([...overlays.values()].filter(item=>map.hasLayer(item.layer)).map(item=>item.id));for(const [id,input] of inputs)input.checked=map.hasLayer(overlays.get(id).layer);for(const [name,input] of groups){const list=[...overlays.values()].filter(i=>i.group===name),on=list.filter(i=>map.hasLayer(i.layer)).length;input.checked=on===list.length&&on>0;input.indeterminate=on>0&&on<list.length;}}
  function canRender(){return dialog?.open&&![...document.querySelectorAll('dialog[open]')].some(d=>d!==dialog);}
  function addOverlay(item){if(disposed||overlays.has(item.id))return;overlays.set(item.id,item);if(preferences[item.id]===false)map.removeLayer(item.layer);else if(preferences[item.id]===true)map.addLayer(item.layer);if(canRender())render();sync();}
+ function about(item,opener){
+  if(aboutDialog?.open)return;const child=el('dialog');aboutDialog=child;child.className='analysis-dialog scientific-layer-context';child.setAttribute('aria-label','About This Layer');child.append(el('h2','About This Layer'),el('h3',item.name));
+  if(item.describe)item.describe(child);else child.append(el('p',item.description||'No scientific source metadata was supplied for this overlay.'),el('p','Display geometry alone does not establish measurement provenance, valid source pixels or scientific suitability. Inspect the original recorded evidence for source details.'));
+  document.body.append(child);dialogHeader(child,{opener});child.addEventListener('close',()=>{child.remove();if(aboutDialog===child)aboutDialog=null;});child.showModal();
+ }
  function render(){
   if(!dialog)return;const content=dialog.querySelector('.map-overlay-content');content.replaceChildren();inputs.clear();groups.clear();
   content.append(el('p','Basemap supplies geographic context. Mission geometry, recorded science and FAA references are independent overlays. An outline or locally retained dataset does not prove valid scientific pixels.'));
@@ -27,6 +32,7 @@ export function mapLayerManager(L,map,definitions,applyBasemap,{beginReadOnly=()
    all.onchange=()=>{const visible=all.checked;for(const item of overlays.values())if(item.group===name)visibility(item,visible);sync();};
    for(const item of overlays.values()){if(item.group!==name)continue;const label=el('label'),input=el('input');input.type='checkbox';input.setAttribute('aria-label',item.name);label.className='checkbox-label';label.append(input,item.name);input.onchange=()=>{visibility(item,input.checked);sync();};inputs.set(item.id,input);set.append(label);
     if(item.description)set.append(el('p',item.description));
+    if(item.group==='Science'){const info=el('button','About This Layer');info.type='button';info.setAttribute('aria-label','About This Layer: '+item.name);info.onclick=()=>about(item,info);set.append(info);}
     if(item.inspect){const inspect=el('button','View '+item.name+' references');inspect.type='button';inspect.onclick=item.inspect;set.append(inspect);}
     if(item.setOpacity){const opacityLabel=el('label',item.name+' opacity'),opacity=el('input');opacity.type='range';opacity.min='0';opacity.max='1';opacity.step='.05';opacity.value=item.opacity??1;opacity.setAttribute('aria-label',item.name+' opacity');opacity.oninput=()=>{item.opacity=Number(opacity.value);item.setOpacity(item.opacity);};opacityLabel.append(opacity);set.append(opacityLabel);}
    }
@@ -43,5 +49,5 @@ export function mapLayerManager(L,map,definitions,applyBasemap,{beginReadOnly=()
   persistVisibility:visible=>persist('faa-tfr-boundaries',visible),
   isolateMission:()=>{const restoreInteraction=beginReadOnly();const shown=[...overlays.values()].filter(i=>['Mission','Science'].includes(i.group)&&map.hasLayer(i.layer));shown.forEach(i=>map.removeLayer(i.layer));return()=>{shown.forEach(i=>map.addLayer(i.layer));restoreInteraction();};}
  });
- return {addOverlay,dispose(){if(disposed)return;disposed=true;tfr.dispose();aviation.dispose();stopBasemap();if(dialog){dialog.close();dialog?.remove();}map.off('layeradd layerremove',sync);control.remove();}};
+ return {addOverlay,dispose(){if(disposed)return;disposed=true;aboutDialog?.close();tfr.dispose();aviation.dispose();stopBasemap();if(dialog){dialog.close();dialog?.remove();}map.off('layeradd layerremove',sync);control.remove();}};
 }

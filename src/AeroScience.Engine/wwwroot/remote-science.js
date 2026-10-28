@@ -1,3 +1,4 @@
+import {renderLayerContext} from './scientific-context.js';
 import { openHyperspectralImport, hyperspectralCard } from "./hyperspectral-import.js";
 import { scientificAccessSettings } from "./scientific-access.js";
 import { ResearchMap } from "./map.js";
@@ -97,6 +98,7 @@ export async function viewProduct(parent, data, api = null) {
       `Source: ${s.provider} · ${s.license} · Vertical datum: ${s.verticalDatum}`,
     ),
   );
+  const sourceContext=e('details');sourceContext.append(e('summary','About This Source & Measurement'));renderLayerContext(sourceContext,{source:data.source,product:p,sourceClass:p.sourceClass,unit:data.bands[0]?.unit,measurement:data.bands[0]?.id,context:{grid:data.bands[0]?.originalGrid}});parent.append(sourceContext);
   const mapHolder = e("div");
   parent.append(mapHolder);
   const map = new ResearchMap(mapHolder,undefined,{fitMaxZoom:19});

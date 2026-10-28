@@ -32,6 +32,33 @@ public sealed class ScientificWorkspaceTests : IDisposable
         var p=new RemoteProduct(id,dataset.Id,science.LibraryId,mission.Id,"terrain-scanner",source.Id,utc.AddSeconds(second),utc,source.Manifest.ObservationUtc,footprint,$"Products/{mission.Id:N}/{id:N}.json",0,"",2,1,["elevation"],"numeric fixture","fixture",[]);
         var values=new double?[]{first,secondValue};return science.Publish(new(1,p,source,[ScientificRaster.GridPoint(grid,.5,.5),ScientificRaster.GridPoint(grid,1.5,.5)],[new("elevation","m",null,values,"nearest native pixel",grid)],new(){["elevation"]=values},["fixture"],withEvidence?new(1,SimulatedTelemetryProvider.Generate(utc.AddSeconds(second),0),null,new("terrain-scanner",true),null,ScienceMode.Realistic,"Synthetic fixture time"):null));
     }
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void LayerContextKeepsOriginalEpochSeparateFromImportProcessingAndFlightWithoutChangingValidCells(bool unknownEpoch)
+    {
+        var product=Add(5);var original=science.ReadProduct(product.Id);
+        var data=unknownEpoch?original with{Source=original.Source with{Manifest=original.Source.Manifest with{ObservationUtc=null,PublicationUtc=utc.AddYears(-1)}}}:original;
+        var view=JsonSerializer.SerializeToElement(ScientificMapLayer.Create(data,"elevation"),WireJson.Options);
+        var context=view.GetProperty("context");
+        Assert.Equal(source.ImportedUtc,context.GetProperty("importedUtc").GetDateTimeOffset());
+        Assert.Equal(utc,context.GetProperty("processedUtc").GetDateTimeOffset());
+        Assert.Equal(utc.AddSeconds(5),context.GetProperty("flightPacketUtc").GetDateTimeOffset());
+        Assert.Equal("externalDataset",context.GetProperty("sourceClass").GetString());
+        Assert.Equal("EPSG:4326",context.GetProperty("grid").GetProperty("crs").GetString());
+        Assert.Equal("fixture datum",view.GetProperty("source").GetProperty("verticalDatum").GetString());
+        var feature=Assert.Single(view.GetProperty("features").EnumerateArray());
+        Assert.Equal(101,feature.GetProperty("properties").GetProperty("value").GetDouble());
+        Assert.Equal("m",feature.GetProperty("properties").GetProperty("unit").GetString());
+        var sample=feature.GetProperty("properties").GetProperty("sampleLocation");
+        Assert.Equal(original.SampleLocations[0].Longitude,sample.GetProperty("longitude").GetDouble());
+        Assert.Equal(original.SampleLocations[0].Latitude,sample.GetProperty("latitude").GetDouble());
+        Assert.Contains("does not prove the whole cell was sensed",view.GetProperty("method").GetString());
+        if(unknownEpoch){Assert.Equal(JsonValueKind.Null,view.GetProperty("source").GetProperty("observationUtc").ValueKind);Assert.Equal(JsonValueKind.Null,feature.GetProperty("properties").GetProperty("sourceUtc").ValueKind);}
+        else Assert.Equal(utc.AddYears(-2),view.GetProperty("source").GetProperty("observationUtc").GetDateTimeOffset());
+        Assert.False(view.TryGetProperty("areaCoveragePercent",out _));
+        Assert.Equal(product.Sha256,science.ReadProduct(product.Id).Product.Sha256);
+    }
     [Fact] public void CoverageUsesOnlySavedValidNativePixelsAndDuplicateAcquisitionsDoNotInflateArea()
     {
         Add(0);var plan=new MissionPlan(Guid.NewGuid(),"Survey",SurveyAreas:[new("Area",ScientificRaster.GridCoverage(grid))]);

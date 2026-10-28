@@ -2,12 +2,14 @@ import {ResearchMap} from './map.js';
 import {atmosphere} from './mission-workspace.js';
 import {measurements,initialMeasurement,layerSignature,measurementsFor} from './science-map.js';
 import {node as el,numeric as number,dateTime as local,select,button,link,status,legend,color,table,disclosure,metric,pointInCell,readableName,chart} from './workstation-ui.js';
+import {renderLayerContext,comparisonContext} from './scientific-context.js';
 
 export async function comparison(parent,api,missions,ids,disposals,catalog){
   parent.append(el('h2','Compare Scientific Results'),el('p','Choose two recorded datasets. Source dates stay separate from flight dates; a simulator revisit is not independently observed Earth change.'));
   const tools=el('div',undefined,'workspace-controls'),message=status(parent,'Loading saved comparison datasets…');parent.append(tools);
   const commonLabel=el('label',undefined,'checkbox-label'),common=el('input');common.type='checkbox';common.setAttribute('aria-label','Use shared numeric color scale');commonLabel.append(common,'Use shared numeric color scale');tools.append(commonLabel);
   const scaleStatus=el('p',undefined,'scale-state');tools.append(scaleStatus);
+  const compatibility=el('p',undefined,'scientific-comparison-context');compatibility.setAttribute('aria-label','Scientific comparison limitations');tools.append(compatibility);
   const grid=el('div',undefined,'comparison-grid');parent.append(grid);
   const columns=[];let syncing=false,stopped=false,sources;disposals.push(()=>stopped=true);
   const findPoint=point=>{
@@ -18,6 +20,7 @@ export async function comparison(parent,api,missions,ids,disposals,catalog){
   };
   function scales(){
     const active=columns.filter(column=>column.layer?.features.length);
+    compatibility.textContent=comparisonContext(columns.filter(column=>column.layer).map(column=>({...column.layer,measurement:column.quantity.value})))+(columns.some(column=>column.layer&&!column.layer.features.length)?' A selected dataset has no valid native cells to compare. Missing support remains missing.':'');
     const compatible=active.length>=2&&new Set(active.map(column=>layerSignature(column.layer)+'|'+column.quantity.value)).size===1;
     if(common.checked&&!compatible)common.checked=false;
     common.disabled=!compatible;
@@ -41,7 +44,7 @@ export async function comparison(parent,api,missions,ids,disposals,catalog){
     const subtitle=el('p',undefined,'comparison-source'),holder=el('div'),scale=el('section'),inspector=el('section');inspector.className='sample-inspector';inspector.setAttribute('aria-label',`Dataset ${String.fromCharCode(65+index)} selected value`);card.append(subtitle,holder,scale,inspector);
     const map=new ResearchMap(holder,null,{coverageOnly:true});window.L.control.scale({imperial:false,metric:true}).addTo(map.map);disposals.push(()=>map.destroy());
     const scientificGroup=window.L.layerGroup().addTo(map.map);
-    map.layers.addOverlay({id:'comparison-native',name:'Comparison native scientific values',layer:scientificGroup,group:'Science',description:'Recorded native cells for this selected acquisition. Hiding the display preserves the comparison, quantity, source and exported values.'});
+    map.layers.addOverlay({id:'comparison-native',name:'Comparison native scientific values',layer:scientificGroup,group:'Science',description:'Recorded native cells for this selected acquisition. Hiding the display preserves the comparison, quantity, source and exported values.',describe:target=>{if(column.layer)renderLayerContext(target,{source:column.layer.source,context:column.layer.context,measurement:quantity.value,unit:column.layer.unit,method:column.layer.method});else target.append(el('p','No supported source layer selected.'));}});
     const column={card,mission,acquisition,quantity,subtitle,map,legend:scale,inspector,layer:null,overlay:null,items:[],offset:0,generation:0,loadVersion:0};columns.push(column);
     map.map.on('moveend',()=>{if(syncing||stopped)return;syncing=true;for(const other of columns){if(other===column||other.map.destroyed)continue;const center=map.map.getCenter();if(other.map.map.getCenter().distanceTo(center)>.1||other.map.map.getZoom()!==map.map.getZoom())other.map.map.setView(center,map.map.getZoom(),{animate:false});}syncing=false;});
     map.map.on('click',event=>findPoint(event.latlng));

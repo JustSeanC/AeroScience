@@ -139,3 +139,13 @@ dialog.managed-popup{max-width:min(56rem,calc(100vw - 1.5rem));max-height:88dvh;
 .operations-live #mission-intelligence>h2{display:none}
 .operations-instrument-details>summary{cursor:pointer;font-weight:600;padding:.75rem 0}
 .operations-instrument-summary .data-table-scroll{max-width:100%}
+
+/* Shared scientific explanations: ordinary language first, exact retained metadata on demand. */
+.scientific-research-context{margin:.65rem 0;padding:.6rem .8rem;border-left:3px solid var(--accent,#62dec6);background:var(--panel-soft,rgba(98,222,198,.04));min-width:0}
+.scientific-source-label,.scientific-category>strong{color:var(--accent,#a7deda);font-weight:650}
+.scientific-category p{margin:.3rem 0 .65rem}
+.scientific-context-facts{display:grid;grid-template-columns:minmax(9rem,1fr) minmax(0,3fr);gap:.45rem 1rem;margin:.75rem 0}
+.scientific-context-facts dt{font-weight:650}.scientific-context-facts dd{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+.scientific-warning{padding:.5rem;border-left:3px solid #f4c36b}.scientific-layer-context{width:min(52rem,calc(100vw - 2rem));max-height:85vh;overflow:auto;box-sizing:border-box}
+.layer-context-disclosure{margin:.5rem 0}.scientific-comparison-context{max-width:72rem}
+@media(max-width:620px){.scientific-context-facts{grid-template-columns:minmax(0,1fr);gap:.25rem}.scientific-context-facts dd{margin-bottom:.65rem}.scientific-research-context{padding:.5rem}.scientific-layer-context{max-width:calc(100vw - 1rem)}}

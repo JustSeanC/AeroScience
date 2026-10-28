@@ -4,6 +4,7 @@ import {comparison} from './science-compare.js';
 import {summaryView} from './science-analysis.js';
 import {coverage,imagery,replay,exports as researchExports} from './mission-workspace.js';
 import {node as el,numeric as number,dateTime as local,select,button,link,disclosure,status,errorMessage,readableName} from './workstation-ui.js';
+import {renderResearchContext} from './scientific-context.js';
 let cleanup=()=>{},generation=0;
 const pages=[['map','Science Map'],['compare','Compare'],['analysis','Research Analysis'],['results','Results & Exports'],['replay','Replay Flight'],['timeline','Evidence Timeline']];
 export async function scienceWorkspace(parent,api){
@@ -32,8 +33,12 @@ export async function scienceWorkspace(parent,api){
     for(const mission of missions){const option=el('option',mission.name);option.value=mission.id;option.selected=ids.slice(1).includes(mission.id);additional.append(option);}multiple.append(el('p','The picker lists recent flights. Open older missions directly from the searchable Mission History.'),additional);link(multiple,'Search Mission History','#history');
     const change=()=>{const query=new URLSearchParams(params),list=[choice.value,...[...additional.selectedOptions].map(option=>option.value)].filter(Boolean);if(list.length)query.set('missions',[...new Set(list)].join(','));else query.delete('missions');if(sensor.value)query.set('instrument',sensor.value);else query.delete('instrument');query.delete('measurement');location.hash='#workspace/'+path+(query.size?'?'+query:'');};
     choice.onchange=()=>{if(!choice.value)for(const option of additional.options)option.selected=false;change();};sensor.onchange=additional.onchange=change;
-    feedback.remove();const body=el('section',undefined,'science-page');parent.append(body);
-    if(path==='map'){await scienceMap(body,safeApi,params,ids,instrument,disposals,catalog);return;}
+    feedback.remove();const body=el('section',undefined,'science-page');parent.append(body);let researchCards=[];
+    if(ids.length===1&&path!=='compare'){
+      const frozen=await safeApi(`/api/missions/${ids[0]}/research-operations`);researchCards=frozen.cards.map(row=>row.card);
+      if(frozen.cards.length){const context=el('section',undefined,'panel science-research-objectives');context.setAttribute('aria-label','Recorded research objectives');body.append(context);for(const [index,row]of frozen.cards.entries()){const target=index===0?context:disclosure(context,row.card.name+' · frozen revision '+row.card.revision);renderResearchContext(target,row.card);}}
+    }
+    if(path==='map'){await scienceMap(body,safeApi,params,ids,instrument,disposals,catalog,researchCards);return;}
     if(path==='compare'){await comparison(body,safeApi,missions,ids,disposals,catalog);return;}
     if(!choice.value){const empty=el('div',undefined,'panel empty-state');empty.append(el('h2','Choose a recorded mission'),el('p','Review saved scientific measurements, replay the flight or export its research. MSFS and Internet access are not required.'));link(empty,'Find a mission','#history','button primary');body.append(empty);return;}
     const id=choice.value,summary=await safeApi(`/api/missions/${id}/science-summary`);

@@ -1,4 +1,4 @@
-export const measurements = [['elevation','Terrain elevation'],['temperature','Thermal temperature (K)'],['temperature-celsius','Thermal temperature (°C)'],
+export const measurements = [['elevation','DEM-derived terrain elevation'],['temperature','Historical surface temperature (K)'],['temperature-celsius','Historical surface temperature (°C)'],
   ['natural-color','Natural color (reflectance)'],['false-color','False color — NIR / red / green'],['ndvi','Vegetation index (NDVI)'],['B04','Red reflectance'],['B08','Near-infrared reflectance']];
 export const initialMeasurement = (instrument, source) => instrument === 'thermal-imager' ? 'temperature-celsius'
   : instrument === 'multispectral-imager' ? 'ndvi' : instrument === 'hyperspectral-imager'

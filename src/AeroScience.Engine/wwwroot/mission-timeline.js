@@ -1,5 +1,6 @@
 import {node,button,select,table,disclosure,link,numeric,chart,errorMessage} from './workstation-ui.js';
 import {researchCardTargets} from './personal-research-start.js';
+import {renderCategory,renderResearchContext} from './scientific-context.js';
 
 const lanes=[['flight','Flight'],['researchCards','Research Cards'],['scienceSessions','Science Sessions'],['measurements','Measurements'],['observationsWarnings','Observations & Warnings']];
 const outcome=v=>({pass:'Pass',fail:'Fail',insufficientEvidence:'Insufficient Evidence',collectionComplete:'Collection Complete',partialCollection:'Partial Collection'}[v]||v||'Not evaluated');
@@ -36,6 +37,9 @@ export function missionEvidenceTimeline(parent,api,{onSelect=()=>{},active=()=>t
   if(!flight||disposed)return;const t=++selectionEpoch;evidenceController?.abort();const controller=new AbortController();evidenceController=controller;selected=reference;details.replaceChildren(node('h3','Reading selected original evidence…'));onSelect(null);
   try{const value=await api(`/api/missions/${flight}/timeline/evidence?${query({source:reference.source,referenceId:reference.id,sha256:reference.sha256,afterSequence})}`,undefined,{signal:controller.signal});if(!selectionOwn(t)||value.flightId!==flight||key(value.reference)!==key(reference))return;
    details.replaceChildren(node('h3','Selected Original Evidence'),node('p',value.timestampUtc),node('p',value.integrity,'notice'));const technical=disclosure(details,'Original evidence identity');technical.append(node('p',`${reference.source} · ${reference.id} · SHA-256 ${reference.sha256}`));let location=null,scientific=false;
+   if(value.card)renderResearchContext(details,value.card);
+   if(value.observation)renderCategory(details,value.observation.provenance,value.observation.source);
+   if(value.marker||value.note)renderCategory(details,'pilotObservation');
    if(value.attempt){const a=value.attempt;details.append(node('h4',(a.automatic?'Automatic':'Manual')+' test attempt'),node('p',`${a.startUtc} → ${a.endUtc||'Still recording'} · ${a.status} · ${a.endReason||''}`));if(value.card)details.append(node('p',`${value.card.name} · frozen revision ${a.cardRevision} · ${researchCardTargets(value.card)}`));if(a.pointEvidence)details.append(node('p',`Original saved point outcome: ${outcome(a.pointEvidence.outcome)} · Longest supported continuous hold ${numeric(a.pointEvidence.longestHoldSeconds)} seconds. ${a.pointEvidence.explanation||''}`));if(value.savedResult)details.append(node('p',`Saved local result: ${outcome(value.savedResult.outcome)}. Organization approval is separate.`));else details.append(node('p','Final evaluation not yet available. An interrupted, short or missing interval is not a Pass.'));
     if(a.endUtc&&!live)button(details,'Evaluate Original Attempt',async()=>{const {newIdentity}=await import('./workstation-ui.js');const r=await api(`/api/research/recorded-attempts/${a.id}/evaluate`,{requestId:newIdentity()});if(!selectionOwn(t))return;details.append(node('p',`Original attempt evaluated: ${outcome(r.outcome)}`));});
    }
