@@ -4,6 +4,7 @@ const origin='http://127.0.0.1:5080';
 async function post(request,path,data={}){const session=await(await request.post('/api/session',{headers:{Origin:origin},data:{}})).json();const response=await request.post(path,{data,headers:{Origin:origin,'X-AeroScience-CSRF':session.csrf}});expect(response.ok(),await response.text()).toBeTruthy();return response.json();}
 let fixture;
 test.beforeAll(async({request})=>{fixture=await post(request,'/api/testing/workstation',{acquisitions:144,observations:720});});
+test.afterEach(async({page},info)=>{if(info.status!==info.expectedStatus)await info.attach('selected-scientific-layer-state',{body:JSON.stringify(await page.locator('.comparison-card').evaluateAll(cards=>cards.map(card=>({mission:card.querySelector('select')?.value,selections:[...card.querySelectorAll('select')].map(s=>({label:s.getAttribute('aria-label'),value:s.value})),source:card.querySelector('.comparison-source')?.textContent})))),contentType:'application/json'});});
 test('All instruments represents the complete scope beyond old limits, with independent layers and direct record inspection',async({page,request})=>{
   const overview=await post(request,'/api/science/workspace/overview',{missions:fixture.missionIds});
   expect(overview.acquisitions).toBe(144);expect(overview.atmosphericValues).toBe(720);
@@ -124,7 +125,7 @@ test('instrument-compatible measurements, exact native values and composite opac
   test.setTimeout(45000);
   await page.goto('/#workspace/map?missions='+fixture.missionIds[1]+'&instrument=thermal-imager');
   await expect(page.locator('.workspace-status').first()).toContainText('1 geographically indexed');
-  const control=page.locator('.independent-layer-control').filter({hasText:'Thermal Imager'});await control.locator('summary').click();
+  const control=page.locator('.independent-layer-control').filter({hasText:'Thermal Imager'});await control.getByText('Measurement & details',{exact:true}).click();
   const measurement=page.getByLabel('Thermal Imager measurement',{exact:true});await expect(measurement).toHaveValue('temperature-celsius');
   await measurement.selectOption('temperature');await expect(page.locator('.raster-legend')).toContainText('285.721 K');
   await expect(measurement.locator('option')).toHaveCount(2);

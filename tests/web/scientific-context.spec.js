@@ -1,6 +1,17 @@
 import {test,expect} from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
-const origin='http://127.0.0.1:5080';
+import {spawn} from 'node:child_process';
+import {mkdtempSync,rmSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {resolve,join} from 'node:path';
+const origin='http://127.0.0.1:5127';let root,child,diagnostics='';
+test.use({baseURL:origin});
+// Cloud-mask originals deliberately remain available throughout these checks.
+// Keep their Library in an actual isolated Engine, as the other research suites
+// do, so they cannot become the newest candidate in another suite's load fixture.
+test.beforeAll(async()=>{root=mkdtempSync(join(tmpdir(),'aeroscience-context-ui-'));child=spawn(process.env.DOTNET||'dotnet',[resolve('artifacts/browser-test-host/AeroScience.TestHost.dll')],{env:{...process.env,AeroScience__DataDirectory:root,AeroScience__Port:'5127',AeroScience__EnableLan:'false',AeroScience__SamplingIntervalMs:'1000'},stdio:['ignore','pipe','pipe']});const capture=d=>diagnostics=(diagnostics+d.toString()).slice(-16000);child.stdout.on('data',capture);child.stderr.on('data',capture);child.on('error',e=>capture(e.message));await expect.poll(async()=>{try{return(await fetch(origin+'/api/health')).ok;}catch{return false;}},{timeout:15000}).toBeTruthy();});
+test.afterEach(async({},info)=>{if(info.status!==info.expectedStatus)await info.attach('scientific-context-engine-log',{body:diagnostics,contentType:'text/plain'});});
+test.afterAll(async()=>{if(child?.exitCode===null){const exited=new Promise(resolve=>child.once('exit',resolve));child.kill('SIGKILL');await exited;}if(root)rmSync(root,{recursive:true,force:true});});
 async function post(request,path,data={}){const session=await(await request.post('/api/session',{data:{},headers:{Origin:origin}})).json();const response=await request.post(path,{data,headers:{Origin:origin,'X-AeroScience-CSRF':session.csrf}});expect(response.ok(),await response.text()).toBeTruthy();return response.json();}
 async function get(request,path){const r=await request.get(path);expect(r.ok(),await r.text()).toBeTruthy();return r.json();}
 test.beforeEach(async({page})=>{await page.route('https://**',r=>r.abort());});
