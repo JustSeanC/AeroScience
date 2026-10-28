@@ -21,7 +21,7 @@ public sealed class PersonalResearchStarterTests : IDisposable
         Assert.DoesNotContain(prepared.Plan.Instruments!,i=>i.Enabled);Assert.Empty(prepared.Plan.Waypoints??[]);Assert.Empty(store.List());
         var coordinator=new MissionCoordinator(store,1000,requireFreshTelemetry:true);Assert.Null(coordinator.Snapshot().SelectedPlanId);Assert.Null(coordinator.Snapshot().ActiveMission);
         coordinator.SelectPlan(prepared.Plan.Id);Assert.Throws<InvalidOperationException>(()=>coordinator.Start(new(prepared.Plan.Name,PlanId:prepared.Plan.Id)));
-        Assert.Equal(prepared.Plan.Id,coordinator.Snapshot().SelectedPlanId);Assert.Empty(store.List());Assert.Equal(11,MissionStore.CurrentSchemaVersion);
+        Assert.Equal(prepared.Plan.Id,coordinator.Snapshot().SelectedPlanId);Assert.Empty(store.List());Assert.Equal(12,MissionStore.CurrentSchemaVersion);
     }
     [Fact]public async Task ConcurrentRetriesAndRestartReturnOnePreparedCopyWithoutDuplicateCardsOrPlans()
     {

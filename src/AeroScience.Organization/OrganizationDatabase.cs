@@ -78,10 +78,26 @@ public sealed class OrganizationDatabase(DbContextOptions<OrganizationDatabase> 
     public DbSet<OpportunityRecord> Opportunities=>Set<OpportunityRecord>();
     public DbSet<ClaimRecord> Claims=>Set<ClaimRecord>();
     public DbSet<ClaimEventRecord> ClaimEvents=>Set<ClaimEventRecord>();
+    public DbSet<SubmissionPolicyRecord> SubmissionPolicies=>Set<SubmissionPolicyRecord>();
+    public DbSet<ReceivedSubmissionRecord> Submissions=>Set<ReceivedSubmissionRecord>();
+    public DbSet<CancelledSubmissionRecord> CancelledSubmissions=>Set<CancelledSubmissionRecord>();
+    public DbSet<SubmissionUsageRecord> SubmissionUsage=>Set<SubmissionUsageRecord>();
     protected override void OnModelCreating(ModelBuilder model)
     {
         base.OnModelCreating(model);
         model.HasDefaultSchema("organization");
+        model.Entity<SubmissionPolicyRecord>().HasKey(x=>new{x.OpportunityId,x.Revision});
+        model.Entity<SubmissionPolicyRecord>().HasOne<OpportunityRecord>().WithMany().HasForeignKey(x=>x.OpportunityId).OnDelete(DeleteBehavior.Restrict);
+        model.Entity<ReceivedSubmissionRecord>().HasKey(x=>new{x.PilotId,x.Id});
+        model.Entity<ReceivedSubmissionRecord>().HasIndex(x=>x.ReceiptId).IsUnique();
+        model.Entity<ReceivedSubmissionRecord>().HasIndex(x=>new{x.CampaignId,x.ReceivedUtc,x.Id});
+        model.Entity<ReceivedSubmissionRecord>().HasIndex(x=>new{x.SearchName,x.ReceivedUtc,x.Id});
+        model.Entity<ReceivedSubmissionRecord>().HasIndex(x=>new{x.ReceivedUtc,x.Id});
+        model.Entity<ReceivedSubmissionRecord>().HasOne<OrganizationUser>().WithMany().HasForeignKey(x=>x.PilotId).OnDelete(DeleteBehavior.Restrict);
+        model.Entity<ReceivedSubmissionRecord>().HasOne<CampaignRecord>().WithMany().HasForeignKey(x=>x.CampaignId).OnDelete(DeleteBehavior.Restrict);
+        model.Entity<CancelledSubmissionRecord>().HasKey(x=>new{x.PilotId,x.Id});
+        model.Entity<CancelledSubmissionRecord>().HasOne<OrganizationUser>().WithMany().HasForeignKey(x=>x.PilotId).OnDelete(DeleteBehavior.Restrict);
+        model.Entity<SubmissionUsageRecord>().ToTable(t=>t.HasCheckConstraint("single_submission_usage","\"Id\" = 1 AND \"PayloadBytes\" >= 0"));
         model.Entity<OpportunityRecord>().HasOne<CampaignRecord>().WithMany().HasForeignKey(x=>x.CampaignId).OnDelete(DeleteBehavior.Restrict);
         model.Entity<OpportunityRecord>().HasIndex(x=>new{x.CampaignId,x.CreatedUtc,x.Id});
         model.Entity<OpportunityRecord>().HasIndex(x=>new{x.CreatedUtc,x.Id});
@@ -118,7 +134,7 @@ public sealed class OrganizationDatabase(DbContextOptions<OrganizationDatabase> 
         model.Entity<OrganizationCommandReceipt>().HasKey(x=>new{x.ActorId,x.RequestId});
         model.Entity<OrganizationAudit>().HasIndex(x=>x.Id);
         model.Entity<DefinitionRevision>().Property(x=>x.SnapshotJson).HasColumnType("text");
-        // Schema receives no flight/science/original-source tables or attachment storage.
+        // Only explicitly consented bounded submission payloads; no general science/flight archive.
     }
     public override int SaveChanges(bool acceptAllChangesOnSuccess){ProtectHistory();return base.SaveChanges(acceptAllChangesOnSuccess);}
     public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess,CancellationToken cancellationToken=default){ProtectHistory();return base.SaveChangesAsync(acceptAllChangesOnSuccess,cancellationToken);}
@@ -127,7 +143,7 @@ public sealed class OrganizationDatabase(DbContextOptions<OrganizationDatabase> 
         foreach(var entry in ChangeTracker.Entries<ClaimRecord>())
             if(entry.State==EntityState.Deleted||entry.State==EntityState.Modified&&new[]{nameof(ClaimRecord.UserId),nameof(ClaimRecord.OpportunityId),nameof(ClaimRecord.IssuedRevision),nameof(ClaimRecord.IssuedSha256),nameof(ClaimRecord.AssignedUtc),nameof(ClaimRecord.Slot)}.Any(p=>entry.Property(p).IsModified))
                 throw new InvalidOperationException("Issued claim identity, definition and assignment boundaries are immutable.");
-        if(ChangeTracker.Entries().Any(e=>(e.Entity is DefinitionRevision or OrganizationCommandReceipt or OrganizationAudit or OrganizationRecord or ClaimEventRecord)&&e.State is EntityState.Modified or EntityState.Deleted))
+        if(ChangeTracker.Entries().Any(e=>(e.Entity is DefinitionRevision or OrganizationCommandReceipt or OrganizationAudit or OrganizationRecord or ClaimEventRecord or SubmissionPolicyRecord or ReceivedSubmissionRecord or CancelledSubmissionRecord)&&e.State is EntityState.Modified or EntityState.Deleted))
             throw new InvalidOperationException("Organization identity, revision, audit and command history are append-only.");
     }
 }

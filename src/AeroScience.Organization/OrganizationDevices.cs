@@ -42,7 +42,7 @@ public sealed class OrganizationDevices(OrganizationDatabase db,OrganizationMemb
         if((await membership.Current(actor,ct))?.State!=OrganizationMembershipState.Active)throw new OrganizationForbidden();
         var row=await db.DeviceGrants.AsNoTracking().SingleOrDefaultAsync(g=>g.Id==id,ct);
         if(row is null||row.Revoked||row.ExpiresUtc<=OrganizationTime.UtcNow||row.UserId is not null)throw new OrganizationConflict("This desktop request is expired, unavailable or already handled. Start again in AeroScience.");
-        return new{organization=await membership.Public(ct),row.ClientName,row.UserCode,row.ExpiresUtc,permission=row.Permission,scope=row.Permission==OrganizationDesktopPermission.ManageOwnClaims?"Read published opportunities; claim, accept and release your own assignments. No management, flight preparation, uploads or simulator control.":"Read published programs and campaigns only. No administration, flights, locations or scientific data transfer."};
+        return new{organization=await membership.Public(ct),row.ClientName,row.UserCode,row.ExpiresUtc,permission=row.Permission,scope=row.Permission==OrganizationDesktopPermission.SubmitEvidence?"Submit only your explicitly reviewed and approved research packages; read your receipts. Selected locations, timestamps, original numeric evidence and notes may be shared. Drafts grant no upload permission. No claim management, organization administration or simulator control.":row.Permission==OrganizationDesktopPermission.ManageOwnClaims?"Read published opportunities; claim, accept and release your own assignments. No management, flight preparation, uploads or simulator control.":"Read published programs and campaigns only. No administration, flights, locations or scientific data transfer."};
     }
     public async Task<object> Approve(OrganizationDeviceApproval request,ClaimsPrincipal actor,CancellationToken ct)
     {
@@ -52,8 +52,9 @@ public sealed class OrganizationDevices(OrganizationDatabase db,OrganizationMemb
         var row=await db.DeviceGrants.SingleOrDefaultAsync(g=>g.Id==request.Id,ct)??throw new OrganizationNotFound();
         if(row.Revoked||row.ExpiresUtc<=OrganizationTime.UtcNow||row.UserId is not null)throw new OrganizationConflict("This connection request is no longer available. Start again in AeroScience.");
         if(request.Approve&&row.Permission==OrganizationDesktopPermission.ManageOwnClaims&&!request.ConfirmClaimManagement)throw new ArgumentException("Explicitly authorize management of your own claims, or deny this connection.");
+        if(request.Approve&&row.Permission==OrganizationDesktopPermission.SubmitEvidence&&!request.ConfirmSubmission)throw new ArgumentException("Explicitly authorize selective evidence submission, or deny this connection. Older grants cannot upload evidence.");
         var user=await users.GetUserAsync(actor)??throw new OrganizationForbidden();if(actor.FindFirstValue(users.Options.ClaimsIdentity.SecurityStampClaimType)!=await users.GetSecurityStampAsync(user))throw new OrganizationForbidden();row.UserId=user.Id;row.SecurityStamp=await users.GetSecurityStampAsync(user);row.Revoked=!request.Approve;
-        history.Audit(user.Id,user.UserName!,request.Approve?row.Permission==OrganizationDesktopPermission.ManageOwnClaims?"desktop-approved-manage-own-claims":"desktop-approved-read-published":"desktop-denied",row.Id);
+        history.Audit(user.Id,user.UserName!,request.Approve?row.Permission==OrganizationDesktopPermission.SubmitEvidence?"desktop-approved-submit-evidence":row.Permission==OrganizationDesktopPermission.ManageOwnClaims?"desktop-approved-manage-own-claims":"desktop-approved-read-published":"desktop-denied",row.Id);
         await db.SaveChangesAsync(ct);await tx.CommitAsync(ct);return new{message=request.Approve?"Desktop connection approved. Return to AeroScience and select Finish Connection.":"Desktop connection denied."};
     }
     public async Task<OrganizationDeviceToken> Poll(OrganizationDevicePoll request,CancellationToken ct)
@@ -69,11 +70,11 @@ public sealed class OrganizationDevices(OrganizationDatabase db,OrganizationMemb
         var user=await users.FindByIdAsync(row.UserId.ToString()!);var member=await db.Memberships.AsNoTracking().SingleOrDefaultAsync(m=>m.UserId==row.UserId,ct);
         if(user is null||member?.State!=OrganizationMembershipState.Active||row.SecurityStamp!=await users.GetSecurityStampAsync(user))return new("expiredOrRevoked");
         // Idempotent delivery after a lost reply; no raw bearer is stored, including receipts.
-        var bearer=OrganizationMembership.Digest((row.Permission==OrganizationDesktopPermission.ReadPublished?"AeroScience/read-published/v1\0":"AeroScience/manage-own-claims/v1\0")+row.Id+"\0"+request.DeviceSecret+"\0"+request.Verifier);
+        var bearer=OrganizationMembership.Digest((row.Permission switch{OrganizationDesktopPermission.ReadPublished=>"AeroScience/read-published/v1\0",OrganizationDesktopPermission.ManageOwnClaims=>"AeroScience/manage-own-claims/v1\0",OrganizationDesktopPermission.SubmitEvidence=>"AeroScience/submit-evidence/v1\0",_=>throw new OrganizationForbidden()})+row.Id+"\0"+request.DeviceSecret+"\0"+request.Verifier);
         row.CredentialHash??=OrganizationMembership.Digest(bearer);row.CredentialExpiresUtc??=OrganizationTime.UtcNow.AddHours(24);
         await db.SaveChangesAsync(ct);await tx.CommitAsync(ct);return new("approved",row.Id,bearer,row.CredentialExpiresUtc,row.Permission);
     }
-    internal async Task<DeviceGrantRecord> Authorize(HttpContext c,CancellationToken ct,bool requireClaims=false)
+    internal async Task<DeviceGrantRecord> Authorize(HttpContext c,CancellationToken ct,bool requireClaims=false,bool requireSubmission=false)
     {
         var header=c.Request.Headers.Authorization.ToString();
         if(!header.StartsWith("Bearer ",StringComparison.Ordinal)||header.Length!=71)throw new OrganizationUnauthorized();
@@ -81,6 +82,7 @@ public sealed class OrganizationDevices(OrganizationDatabase db,OrganizationMemb
         var hash=OrganizationMembership.Digest(credential);var row=await db.DeviceGrants.AsNoTracking().SingleOrDefaultAsync(g=>g.CredentialHash==hash,ct);
         if(row is null||row.Revoked||row.CredentialExpiresUtc<=OrganizationTime.UtcNow||row.UserId is null)throw new OrganizationUnauthorized();
         if(requireClaims&&row.Permission!=OrganizationDesktopPermission.ManageOwnClaims)throw new OrganizationForbidden();
+        if(requireSubmission&&row.Permission!=OrganizationDesktopPermission.SubmitEvidence)throw new OrganizationForbidden();
         var user=await db.Users.AsNoTracking().SingleOrDefaultAsync(u=>u.Id==row.UserId,ct);var member=await db.Memberships.AsNoTracking().SingleOrDefaultAsync(m=>m.UserId==row.UserId,ct);
         if(user is null||member?.State!=OrganizationMembershipState.Active||row.SecurityStamp!=user.SecurityStamp)throw new OrganizationUnauthorized();return row;
     }

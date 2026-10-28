@@ -17,6 +17,7 @@ public static class ObservationResearch
             throw new ArgumentException("Choose a question, observation description and approach (up to 500 characters each), known categories, a goal of 1–10,000 documented observations, and optional supported atmospheric instruments.");
     }
     public sealed record Calculation(ObservationResearchSummary Summary,PilotObservationEntry[] Preview,ScienceObservation[] SupportingPreview,bool Downsampled);
+    public static bool SupportedPosition(PilotObservationEntry entry)=>entry.Latitude is {} lat&&entry.Longitude is {} lon&&MissionPlanning.Position(lat,lon)&&entry.PositionTimestampUtc is {} at&&(entry.TimestampUtc-at).TotalSeconds is >=0 and <=6;
     public static Calculation Calculate(MissionStore missions,ScienceStore? science,PersonalResearchCard card,ResearchAttemptRequest window,CancellationToken token=default)
     {
         Validate(card.ObservationFlight);token.ThrowIfCancellationRequested();var rule=card.ObservationFlight!;using var hash=IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
@@ -25,7 +26,7 @@ public static class ObservationResearch
         foreach(var (original,entry) in missions.ObservationDocuments(window,card.Id,card.Revision)){
             token.ThrowIfCancellationRequested();if(++work>10000)throw new InvalidOperationException("This analysis exceeds 10,000 documentation records. Choose a shorter interval; retained research is not limited.");Hash(original);
             if(!counts.ContainsKey(entry.Category)||string.IsNullOrWhiteSpace(entry.Text)){excluded++;docs.Add(entry with{ExclusionReason=!counts.ContainsKey(entry.Category)?"Category not selected for this objective":"Location marker only; no written observation"});continue;}
-            documented++;var hasPosition=entry.Latitude is {} lat&&entry.Longitude is {} lon&&MissionPlanning.Position(lat,lon)&&entry.PositionTimestampUtc is {} positionUtc&&(entry.TimestampUtc-positionUtc).TotalSeconds is >=0 and <=6;if(hasPosition)located++;
+            documented++;var hasPosition=SupportedPosition(entry);if(hasPosition)located++;
             var valid=!rule.RequirePosition||hasPosition;var c=counts[entry.Category];counts[entry.Category]=(c.Documented+1,c.Qualified+(valid?1:0));if(valid)qualified++;
             docs.Add(entry with{Qualified=valid,ExclusionReason=valid?null:"Required recorded location is unavailable"});
         }

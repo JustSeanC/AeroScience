@@ -53,6 +53,26 @@ namespace AeroScience.Organization.Migrations
                     b.ToTable("Campaigns", "organization");
                 });
 
+            modelBuilder.Entity("AeroScience.Organization.CancelledSubmissionRecord", b =>
+                {
+                    b.Property<Guid>("PilotId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CancelledUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ManifestSha256")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("PilotId", "Id");
+
+                    b.ToTable("CancelledSubmissions", "organization");
+                });
+
             modelBuilder.Entity("AeroScience.Organization.ClaimEventRecord", b =>
                 {
                     b.Property<long>("Id")
@@ -559,6 +579,105 @@ namespace AeroScience.Organization.Migrations
                     b.ToTable("Programs", "organization");
                 });
 
+            modelBuilder.Entity("AeroScience.Organization.ReceivedSubmissionRecord", b =>
+                {
+                    b.Property<Guid>("PilotId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CampaignId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ManifestSha256")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("PayloadBytes")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("PayloadJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("PayloadSha256")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("ReceiptId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ReceiptJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset>("ReceivedUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("SearchName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("PilotId", "Id");
+
+                    b.HasIndex("ReceiptId")
+                        .IsUnique();
+
+                    b.HasIndex("ReceivedUtc", "Id");
+
+                    b.HasIndex("CampaignId", "ReceivedUtc", "Id");
+
+                    b.HasIndex("SearchName", "ReceivedUtc", "Id");
+
+                    b.ToTable("Submissions", "organization");
+                });
+
+            modelBuilder.Entity("AeroScience.Organization.SubmissionPolicyRecord", b =>
+                {
+                    b.Property<Guid>("OpportunityId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Revision")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("AuthorId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Mode")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("PublishedUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("OpportunityId", "Revision");
+
+                    b.ToTable("SubmissionPolicies", "organization");
+                });
+
+            modelBuilder.Entity("AeroScience.Organization.SubmissionUsageRecord", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<long>("PayloadBytes")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SubmissionUsage", "organization", t =>
+                        {
+                            t.HasCheckConstraint("single_submission_usage", "\"Id\" = 1 AND \"PayloadBytes\" >= 0");
+                        });
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.DataProtectionKey", b =>
                 {
                     b.Property<int>("Id")
@@ -717,6 +836,15 @@ namespace AeroScience.Organization.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("AeroScience.Organization.CancelledSubmissionRecord", b =>
+                {
+                    b.HasOne("AeroScience.Organization.OrganizationUser", null)
+                        .WithMany()
+                        .HasForeignKey("PilotId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("AeroScience.Organization.ClaimEventRecord", b =>
                 {
                     b.HasOne("AeroScience.Organization.ClaimRecord", null)
@@ -770,6 +898,30 @@ namespace AeroScience.Organization.Migrations
                     b.HasOne("AeroScience.Organization.OrganizationUser", null)
                         .WithMany()
                         .HasForeignKey("AdministratorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("AeroScience.Organization.ReceivedSubmissionRecord", b =>
+                {
+                    b.HasOne("AeroScience.Organization.CampaignRecord", null)
+                        .WithMany()
+                        .HasForeignKey("CampaignId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("AeroScience.Organization.OrganizationUser", null)
+                        .WithMany()
+                        .HasForeignKey("PilotId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("AeroScience.Organization.SubmissionPolicyRecord", b =>
+                {
+                    b.HasOne("AeroScience.Organization.OpportunityRecord", null)
+                        .WithMany()
+                        .HasForeignKey("OpportunityId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });

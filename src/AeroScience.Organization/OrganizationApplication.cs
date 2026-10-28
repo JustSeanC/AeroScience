@@ -6,6 +6,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
 using AeroScience.Shared;
+using AeroScience.Missions;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -88,10 +89,15 @@ public static class OrganizationApplication
             o.AddPolicy("identity",c=>RateLimitPartition.GetFixedWindowLimiter(c.Connection.RemoteIpAddress?.ToString()??"local-test",_=>new(){PermitLimit=12,Window=TimeSpan.FromMinutes(1),QueueLimit=0,AutoReplenishment=true}));
             o.AddPolicy("public",c=>RateLimitPartition.GetFixedWindowLimiter(c.Connection.RemoteIpAddress?.ToString()??"local-test",_=>new(){PermitLimit=60,Window=TimeSpan.FromMinutes(1),QueueLimit=0,AutoReplenishment=true}));
             o.AddPolicy("device-poll",c=>RateLimitPartition.GetFixedWindowLimiter(c.Connection.RemoteIpAddress?.ToString()??"local-test",_=>new(){PermitLimit=20,Window=TimeSpan.FromMinutes(1),QueueLimit=0,AutoReplenishment=true}));
+            o.AddPolicy("evidence-receive",c=>RateLimitPartition.GetFixedWindowLimiter(c.Connection.RemoteIpAddress?.ToString()??"local-test",_=>new(){PermitLimit=6,Window=TimeSpan.FromMinutes(1),QueueLimit=0,AutoReplenishment=true}));
             o.GlobalLimiter=PartitionedRateLimiter.Create<HttpContext,string>(_=>RateLimitPartition.GetConcurrencyLimiter("organization",_=>new(){PermitLimit=32,QueueLimit=0}));
         });
         builder.Services.AddScoped<OrganizationManagement>();
         builder.Services.AddScoped<OrganizationOpportunities>();builder.Services.AddScoped<OrganizationMembership>();builder.Services.AddScoped<OrganizationDevices>();
+        builder.Services.AddScoped<OrganizationSubmissions>();
+        var submissionLimit=builder.Configuration.GetValue<long?>("Organization:MaximumRetainedEvidenceBytes")??1024L*1024*1024;
+        if(submissionLimit<SubmissionEvidenceProtocol.MaximumPayloadBytes||submissionLimit>1024L*1024*1024*1024)throw new InvalidOperationException("Configure a bounded organization evidence-storage quota between 2 MiB and 1 TiB.");
+        builder.Services.AddSingleton(new OrganizationSubmissionOptions{MaximumRetainedPayloadBytes=submissionLimit});
         builder.Logging.AddFilter("Microsoft.AspNetCore",LogLevel.Warning); // Never log invitation/connection input or credentials.
         var app=builder.Build();
         if(certificate is not null)app.Lifetime.ApplicationStopped.Register(certificate.Dispose);
@@ -105,7 +111,10 @@ public static class OrganizationApplication
                 ||settings.LocalDevelopment&&context.Connection.RemoteIpAddress is {} remote&&!IPAddress.IsLoopback(remote)){
                 context.Response.StatusCode=400;await context.Response.WriteAsJsonAsync(new{error="Open the configured organization server address using its approved secure connection."});return;
             }
-            if(context.Request.ContentLength>32768){context.Response.StatusCode=413;await context.Response.WriteAsJsonAsync(new{error="The organization request is too large."});return;}
+            var evidence=context.Request.Method=="POST"&&context.Request.Path==OrganizationSubmissionApi.ReceivePath;
+            var bodyLimit=evidence?SubmissionEvidenceProtocol.MaximumWireBytes:32768;
+            if(evidence&&context.Features.Get<Microsoft.AspNetCore.Http.Features.IHttpMaxRequestBodySizeFeature>() is {IsReadOnly:false} feature)feature.MaxRequestBodySize=bodyLimit;
+            if(context.Request.ContentLength>bodyLimit){context.Response.StatusCode=413;await context.Response.WriteAsJsonAsync(new{error="The organization request is too large."});return;}
             try{await next();}
             catch(Exception ex) when(ex is ArgumentException or BadHttpRequestException or JsonException or OrganizationConflict or OrganizationNotFound){
                 if(context.Response.HasStarted){context.Abort();return;}
@@ -121,7 +130,7 @@ public static class OrganizationApplication
         app.Use(async(context,next)=>{
             if(context.Request.Method is not("GET" or "HEAD" or "OPTIONS")){
                 // Native device client only. Browser actions retain Origin + antiforgery.
-                if(context.Request.Path is var path&&(path=="/api/device/start"||path=="/api/device/poll"||path=="/api/device/disconnect"||path=="/api/member/claim-command")){
+                if(context.Request.Path is var path&&(path=="/api/device/start"||path=="/api/device/poll"||path=="/api/device/disconnect"||path=="/api/member/claim-command"||path==OrganizationSubmissionApi.ReceivePath||path==OrganizationSubmissionApi.CancelPath)){
                     if(context.Request.Headers.ContainsKey("Origin")||context.Request.Headers.ContainsKey("Cookie")){context.Response.StatusCode=403;return;}
                     await next();return;
                 }
@@ -133,7 +142,7 @@ public static class OrganizationApplication
         });
         var assets=Path.Combine(AppContext.BaseDirectory,"organization-portal");
         if(Directory.Exists(assets)){var files=new PhysicalFileProvider(assets);app.UseDefaultFiles(new DefaultFilesOptions{FileProvider=files});app.UseStaticFiles(new StaticFileOptions{FileProvider=files});}
-        MapIdentity(app);MapManagement(app);OrganizationEnrollmentApi.Map(app);OrganizationOpportunityApi.Map(app);return app;
+        MapIdentity(app);MapManagement(app);OrganizationEnrollmentApi.Map(app);OrganizationOpportunityApi.Map(app);OrganizationSubmissionApi.Map(app);return app;
     }
     public static async Task Initialize(WebApplication app,CancellationToken token=default)
     {

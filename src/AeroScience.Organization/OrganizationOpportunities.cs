@@ -108,6 +108,7 @@ public sealed class OrganizationOpportunities(OrganizationDatabase db,Organizati
             if(await db.Claims.CountAsync(c=>c.OpportunityId==id&&c.State!=OrganizationClaimState.Released,ct)>draft.Policy.MaximumActiveClaims)throw new OrganizationConflict("Current reservations/claims exceed this capacity. Explicitly release them or retain enough slots.");
             row.Revision++;row.PublishedRevision=row.Revision;row.AvailabilityRevision++;
             var published=draft with{Revision=row.Revision,Status=OrganizationPublication.Published,UpdatedUtc=OrganizationTime.UtcNow,AuthorId=user,AuthorName=author};row.SnapshotJson=JsonSerializer.Serialize(published,WireJson.Options);
+            if(!await db.SubmissionPolicies.AnyAsync(p=>p.OpportunityId==id,ct))db.SubmissionPolicies.Add(new(){OpportunityId=id,Revision=1,Mode=SubmissionPolicyMode.RequireMinimumEvidence,PublishedUtc=OrganizationTime.UtcNow,AuthorId=user});
             history.Revision(id,row.Revision,"opportunity",published,user);history.Audit(user,author,"opportunity-published",id,row.Revision);return published;
         },ct);
     }

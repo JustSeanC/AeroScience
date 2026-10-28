@@ -5,6 +5,7 @@ public static class OrganizationConnectionApi
 {
     public static void MapOrganizationConnections(this WebApplication app)
     {
+        app.MapSubmissions();
         var api=app.MapGroup("/api/organizations");
         api.AddEndpointFilter(async(context,next)=>{
             if(!AccessControl.IsLoopback(context.HttpContext))return Results.Json(new{error="Manage organization connections on the companion PC. Personal Research remains available here."},statusCode:403);

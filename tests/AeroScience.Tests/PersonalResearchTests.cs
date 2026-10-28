@@ -148,7 +148,7 @@ public sealed class PersonalResearchTests : IDisposable
         var flight = store.Create("Old flight", Frame(0), at); store.Append(flight, Frame(0));
         store.Finish(flight, MissionStatus.Completed, at.AddSeconds(1), "End");
         using (var db = new SqliteConnection($"Data Source={store.DatabasePath};Pooling=False"))
-        { db.Open(); using var cmd = db.CreateCommand(); cmd.CommandText = "DROP TABLE organization_claim_checks; DROP TABLE organization_mission_preparations; DROP TABLE personal_card_attempts; DROP TABLE personal_research_state; DROP TABLE personal_flight_cards; DROP TABLE personal_research_attempts; DROP TABLE personal_research_cards; PRAGMA user_version=8"; cmd.ExecuteNonQuery(); }
+        { db.Open(); using var cmd = db.CreateCommand(); cmd.CommandText = "DROP TABLE submission_grants; DROP TABLE submission_policies; DROP TABLE submission_drafts; DROP TABLE organization_claim_checks; DROP TABLE organization_mission_preparations; DROP TABLE personal_card_attempts; DROP TABLE personal_research_state; DROP TABLE personal_flight_cards; DROP TABLE personal_research_attempts; DROP TABLE personal_research_cards; PRAGMA user_version=8"; cmd.ExecuteNonQuery(); }
         var before = StorageManager.DatabaseFingerprint(store.DatabasePath);
         store.EvidenceFault = point => { if (point == "personal-research-before-commit") throw new IOException("Fixture crash"); };
         Assert.Throws<IOException>(store.Initialize); Assert.Equal(before, StorageManager.DatabaseFingerprint(store.DatabasePath));

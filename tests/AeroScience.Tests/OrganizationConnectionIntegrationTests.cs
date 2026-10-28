@@ -33,22 +33,22 @@ public sealed partial class OrganizationConnectionIntegrationTests
     sealed class Server(WebApplication app,HttpClient browser,string origin,string database):IAsyncDisposable
     {
         public WebApplication App=>app;public string Origin=>origin;public string Database=>database;
-        public int AuthorizedReads,ClaimReads;public Guid? ForcedDeviceIdentity;
+        public int AuthorizedReads,ClaimReads,SubmissionWrites;public bool DropNextSubmissionAcknowledgment,InterruptNextSubmission;public Guid? ForcedDeviceIdentity;
         public async Task<JsonElement> Post(string path,object body,HttpMethod? method=null)
         {
             var session=await browser.GetFromJsonAsync<JsonElement>("/api/session");var request=new HttpRequestMessage(method??HttpMethod.Post,path){Content=JsonContent.Create(body,options:WireJson.Options)};
             request.Headers.Add("Origin",origin);request.Headers.Add("X-AeroScience-Organization-CSRF",session.GetProperty("csrf").GetString());using var response=await browser.SendAsync(request);
             Assert.True(response.IsSuccessStatusCode,await response.Content.ReadAsStringAsync());return await response.Content.ReadFromJsonAsync<JsonElement>();
         }
-        public async Task Approve(OrganizationConnectBegin pending)=>await Post("/api/connection/approval",new OrganizationDeviceApproval(pending.PendingId,pending.Organization.Id,true,true,pending.Permission==OrganizationDesktopPermission.ManageOwnClaims));
+        public async Task Approve(OrganizationConnectBegin pending)=>await Post("/api/connection/approval",new OrganizationDeviceApproval(pending.PendingId,pending.Organization.Id,true,true,pending.Permission==OrganizationDesktopPermission.ManageOwnClaims,pending.Permission==OrganizationDesktopPermission.SubmitEvidence));
         public async ValueTask DisposeAsync(){browser.Dispose();await app.StopAsync();await app.DisposeAsync();}
     }
-    static async Task<Server> Start(string database,string directory,string name)
+    static async Task<Server> Start(string database,string directory,string name,bool existing=false,string? retainedOrigin=null)
     {
         var admin=new NpgsqlConnectionStringBuilder(System.Environment.GetEnvironmentVariable("AEROSCIENCE_ORG_TEST_DATABASE"));
         if(admin.Host is not("127.0.0.1" or "localhost" or "::1"))throw new InvalidOperationException("Explicit isolated loopback PostgreSQL is required.");
-        await using(var c=new NpgsqlConnection(admin.ConnectionString)){await c.OpenAsync();await using var cmd=new NpgsqlCommand($"CREATE DATABASE \"{database}\"",c);await cmd.ExecuteNonQueryAsync();}
-        admin.Database=database;var listener=new TcpListener(IPAddress.Loopback,0);listener.Start();var port=((IPEndPoint)listener.LocalEndpoint).Port;listener.Stop();var origin="http://127.0.0.1:"+port;
+        if(!existing)await using(var c=new NpgsqlConnection(admin.ConnectionString)){await c.OpenAsync();await using var cmd=new NpgsqlCommand($"CREATE DATABASE \"{database}\"",c);await cmd.ExecuteNonQueryAsync();}
+        admin.Database=database;var listener=new TcpListener(IPAddress.Loopback,0);listener.Start();var port=((IPEndPoint)listener.LocalEndpoint).Port;listener.Stop();var origin=retainedOrigin??"http://127.0.0.1:"+port;
         var secret=new string('s',48);var path=Path.Combine(directory,database);await File.WriteAllTextAsync(path,secret);OrganizationConfigurationTests.ProtectCredential(path);
         var app=OrganizationApplication.Build([],b=>{b.Environment.EnvironmentName="Testing";b.Configuration.AddInMemoryCollection(new Dictionary<string,string?>{["Organization:LocalDevelopment"]="true",["Organization:PublicOrigin"]=origin,["Organization:ConnectionString"]=admin.ConnectionString,["Organization:BootstrapSecretFile"]=path});b.Logging.SetMinimumLevel(LogLevel.Warning);});
         var browser=new HttpClient(new HttpClientHandler{UseCookies=true,AllowAutoRedirect=false}){BaseAddress=new(origin)};var server=new Server(app,browser,origin,database);
@@ -57,14 +57,15 @@ public sealed partial class OrganizationConnectionIntegrationTests
                 // Adversarial response from the second isolated server; never a genuine provider fixture.
                 await c.Response.WriteAsJsonAsync(new OrganizationDevicePending(collision,new string('a',64),"ABCDE-12345",origin+"/#connect="+collision,DateTimeOffset.UtcNow.AddMinutes(10),5),WireJson.Options);return;
             }
+            if(c.Request.Path==OrganizationSubmissionApi.ReceivePath){server.SubmissionWrites++;if(server.InterruptNextSubmission){server.InterruptNextSubmission=false;c.Abort();return;}if(server.DropNextSubmissionAcknowledgment){server.DropNextSubmissionAcknowledgment=false;var response=c.Response.Body;using var lost=new MemoryStream();c.Response.Body=lost;try{await next();}finally{c.Response.Body=response;}c.Abort();return;}}
             if(c.Request.Path=="/api/member/published")server.AuthorizedReads++;if(c.Request.Path.StartsWithSegments("/api/member/claims"))server.ClaimReads++;await next();
         });
         await OrganizationApplication.Initialize(app);await app.StartAsync();
-        await server.Post("/api/bootstrap",new OrganizationBootstrapRequest(secret,name,"Private local organization","administrator","ResearchOnly!2026Flight"));await server.Post("/api/sign-in",new OrganizationLoginRequest("administrator","ResearchOnly!2026Flight"));return server;
+        if(!existing)await server.Post("/api/bootstrap",new OrganizationBootstrapRequest(secret,name,"Private local organization","administrator","ResearchOnly!2026Flight"));await server.Post("/api/sign-in",new OrganizationLoginRequest("administrator","ResearchOnly!2026Flight"));return server;
     }
-    static async Task<Guid> Connect(OrganizationConnections desktop,Server server)
+    static async Task<Guid> Connect(OrganizationConnections desktop,Server server,OrganizationDesktopPermission permission=OrganizationDesktopPermission.ReadPublished)
     {
-        var review=await desktop.Review(server.Origin,default);var pending=await desktop.Begin(new(review.ReviewId,review.Organization.Id,true),default);await server.Approve(pending);var finished=await desktop.Finish(pending.PendingId,default);Assert.Equal("connected",JsonSerializer.SerializeToElement(finished,WireJson.Options).GetProperty("status").GetString());return pending.PendingId;
+        var review=await desktop.Review(server.Origin,default);var pending=await desktop.Begin(new(review.ReviewId,review.Organization.Id,true,permission),default);await server.Approve(pending);var finished=await desktop.Finish(pending.PendingId,default);Assert.Equal("connected",JsonSerializer.SerializeToElement(finished,WireJson.Options).GetProperty("status").GetString());return pending.PendingId;
     }
     [PostgresFact]public async Task IndependentRealServersPersistScopedConnectionsRevokeSeparatelyAndNeverReceiveAnotherServersAuthorization()
     {

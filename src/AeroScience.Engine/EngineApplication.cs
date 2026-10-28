@@ -42,6 +42,8 @@ public static class EngineApplication
         builder.Services.AddSingleton<AccessControl>();
         builder.Services.AddSingleton<IOrganizationCredentials,UnavailableOrganizationCredentials>();
         builder.Services.AddSingleton<OrganizationConnections>();
+        builder.Services.AddSingleton<SubmissionDelivery>();
+        builder.Services.AddHostedService<SubmissionDeliveryWorker>();
         builder.Services.AddSingleton(sp => new ScientificAccessSettings(sp.GetRequiredService<EngineOptions>().ConfigurationDirectory ?? sp.GetRequiredService<EngineOptions>().DataDirectory, NetworkCost.IsUnmetered));
         builder.Services.AddSingleton(sp => { _ = sp.GetRequiredService<StorageManagement>(); return new AutomaticScientificData(sp.GetRequiredService<ScienceStore>(),sp.GetRequiredService<ScientificAccessSettings>()); });
         builder.Services.AddSingleton<ScientificCatalog>();

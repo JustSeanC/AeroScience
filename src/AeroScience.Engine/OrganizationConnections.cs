@@ -71,7 +71,7 @@ public sealed partial class OrganizationConnections:IDisposable
         if(IPAddress.TryParse(uri.Host.Trim('[',']'),out var literal)&&!PermittedAddress(literal,development))throw new ArgumentException("Protected network addresses cannot be used as organization servers.");
         return new(uri.GetLeftPart(UriPartial.Authority));
     }
-    async Task<T> Request<T>(string origin,string path,object? body,CancellationToken ct,string? credential=null)
+    async Task<T> Request<T>(string origin,string path,object? body,CancellationToken ct,string? credential=null,bool evidence=false)
     {
         using var request=new HttpRequestMessage(body is null?HttpMethod.Get:HttpMethod.Post,new Uri(new Uri(origin),path));
         if(body is not null)request.Content=JsonContent.Create(body,options:WireJson.Options);
@@ -82,6 +82,8 @@ public sealed partial class OrganizationConnections:IDisposable
         catch(HttpRequestException){throw new IOException("The organization could not be reached securely. Check its address or try again later.");}
         using var response=received;
         if(response.StatusCode is HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden)throw new UnauthorizedAccessException("Organization authorization is expired or revoked. Connect again if your membership is active.");
+        if(evidence&&response.StatusCode is HttpStatusCode.Conflict or HttpStatusCode.BadRequest or HttpStatusCode.RequestEntityTooLarge)throw new OrganizationSubmissionReviewRequired("The organization could not receive this exact package because its policy, claim interval, evidence, cancellation or capacity changed. Review the package and current server requirements before retrying; no receipt was confirmed.");
+        if(evidence&&response.StatusCode==HttpStatusCode.NotFound)throw new OrganizationSubmissionReviewRequired("This server has no compatible evidence-receipt capability for the selected claim. The local draft and original evidence remain unchanged.");
         if(response.StatusCode==HttpStatusCode.Conflict)throw new IOException("The card or assignment changed, or its slots are held. Refresh Available Research and My Assignments before trying again. Your request did not change local research.");
         if(!response.IsSuccessStatusCode)throw new IOException("The organization could not complete this request. No local research was changed. Try again or contact its administrator.");
         return await response.Content.ReadFromJsonAsync<T>(WireJson.Options,ct)??throw new IOException("The organization returned an unsupported response.");
@@ -128,11 +130,11 @@ public sealed partial class OrganizationConnections:IDisposable
     {
         await gate.WaitAsync(ct);try{if(!pending.TryGetValue(id,out var item)||item.Device.ExpiresUtc<=DateTimeOffset.UtcNow)throw new ArgumentException("Start a new organization connection first.");return new(item.Device.ApprovalUrl);}finally{gate.Release();}
     }
-    async Task VerifyIdentity(OrganizationSavedConnection row,CancellationToken ct)
+    async Task VerifyIdentity(OrganizationSavedConnection row,CancellationToken ct,bool evidence=false)
     {
         _=Origin(row.Origin,localDevelopment);
         var identity=await Request<OrganizationPublicIdentity>(row.Origin,"/api/public/organization",null,ct);
-        if(identity.Id!=row.OrganizationId||identity.Origin!=row.Origin)throw new IOException("This server's organization identity has changed. No authorization was sent. Disconnect and review a new connection.");
+        if(identity.Id!=row.OrganizationId||identity.Origin!=row.Origin){const string message="This server's organization identity has changed. No authorization was sent. Disconnect and review a new connection.";if(evidence)throw new OrganizationSubmissionAuthorizationRequired(message);throw new IOException(message);}
     }
     public async Task<OrganizationConnectionStatus> Status(Guid id,int offset,CancellationToken ct)
     {

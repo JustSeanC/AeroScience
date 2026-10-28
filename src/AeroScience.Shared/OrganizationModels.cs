@@ -42,11 +42,11 @@ public sealed record OrganizationMemberInformation(OrganizationPublicIdentity Or
 // This is not an OAuth/OIDC compliance claim.
 public sealed record OrganizationDeviceStart(Guid OrganizationId,string ClientName,string Challenge,OrganizationDesktopPermission Permission=OrganizationDesktopPermission.ReadPublished);
 public sealed record OrganizationDevicePending(Guid Id,string DeviceSecret,string UserCode,string ApprovalUrl,DateTimeOffset ExpiresUtc,int PollSeconds,OrganizationDesktopPermission Permission=OrganizationDesktopPermission.ReadPublished);
-public sealed record OrganizationDeviceApproval(Guid Id,Guid OrganizationId,bool Approve,bool ConfirmCode,bool ConfirmClaimManagement=false);
+public sealed record OrganizationDeviceApproval(Guid Id,Guid OrganizationId,bool Approve,bool ConfirmCode,bool ConfirmClaimManagement=false,bool ConfirmSubmission=false);
 public sealed record OrganizationDevicePoll(Guid Id,Guid OrganizationId,string DeviceSecret,string Verifier);
 public sealed record OrganizationDeviceToken(string Status,Guid? ConnectionId=null,string? Credential=null,DateTimeOffset? ExpiresUtc=null,OrganizationDesktopPermission Permission=OrganizationDesktopPermission.ReadPublished);
 
-public enum OrganizationDesktopPermission { ReadPublished, ManageOwnClaims }
+public enum OrganizationDesktopPermission { ReadPublished, ManageOwnClaims, SubmitEvidence }
 public enum OrganizationParticipation { Exclusive, MultiPilot }
 public enum OrganizationClaimState { Reserved, Claimed, Released }
 public enum OrganizationClaimAction { Claim, Accept, Release, Assign, ManagerRelease }

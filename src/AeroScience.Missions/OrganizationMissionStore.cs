@@ -42,7 +42,13 @@ public sealed partial class MissionStore
             throw new ArgumentException("The issued definition does not belong to this exact organization claim.");
         return original;
     }
-    static Guid OrganizationCardId(OrganizationAssignmentIdentity s)=>new(SHA256.HashData(Encoding.UTF8.GetBytes($"organization-card-1:{s.Origin}:{s.OrganizationId}:{s.PilotId}:{s.ClaimId}:{s.IssuedSha256}"))[..16]);
+    public static Guid OrganizationLocalCardId(string origin,Guid organization,Guid pilot,Guid claim,string issuedSha256)=>new(SHA256.HashData(Encoding.UTF8.GetBytes($"organization-card-1:{origin}:{organization}:{pilot}:{claim}:{issuedSha256}"))[..16]);
+    static Guid OrganizationCardId(OrganizationAssignmentIdentity s)=>OrganizationLocalCardId(s.Origin,s.OrganizationId,s.PilotId,s.ClaimId,s.IssuedSha256);
+    public static bool MatchesSubmissionDefinition(PersonalResearchCard card,OrganizationOpportunitySnapshot original)
+    {
+        SupportedCard(card);var d=new OrganizationResearchDefinition(1,new(card.TemplateId,1),card.FlightRegime,card.AtmosphericProfile,card.AtmosphericTransect,card.Survey,card.ObservationFlight,card.ExperimentalSensor,card.Procedure);
+        return card.OrganizationAssignment is null&&card.Name==original.Name&&PreflightReadiness.Hash(d)==PreflightReadiness.Hash(original.Definition);
+    }
     static PersonalResearchCard OrganizationCard(OrganizationAssignmentIdentity s)
     {
         var original=OrganizationOriginal(s);var d=original.Definition;
