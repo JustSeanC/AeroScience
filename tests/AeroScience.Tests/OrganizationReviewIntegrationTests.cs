@@ -14,9 +14,9 @@ namespace AeroScience.Tests;
 public sealed partial class OrganizationConnectionIntegrationTests
 {
     static async Task<T> ReviewGet<T>(Server s,string path){using var response=await s.Browser.GetAsync(path);Assert.True(response.IsSuccessStatusCode,await response.Content.ReadAsStringAsync());return (await response.Content.ReadFromJsonAsync<T>(WireJson.Options))!;}
-    static async Task<HttpResponseMessage> ReviewSend(Server s,string path,object value,HttpClient? browser=null)
+    static async Task<HttpResponseMessage> ReviewSend(Server s,string path,object value,HttpClient? browser=null,HttpMethod? method=null)
     {
-        browser??=s.Browser;var session=await browser.GetFromJsonAsync<JsonElement>("/api/session");using var request=new HttpRequestMessage(HttpMethod.Post,path){Content=JsonContent.Create(value,options:WireJson.Options)};request.Headers.Add("Origin",s.Origin);request.Headers.Add("X-AeroScience-Organization-CSRF",session.GetProperty("csrf").GetString());return await browser.SendAsync(request);
+        browser??=s.Browser;var session=await browser.GetFromJsonAsync<JsonElement>("/api/session");using var request=new HttpRequestMessage(method??HttpMethod.Post,path){Content=JsonContent.Create(value,options:WireJson.Options)};request.Headers.Add("Origin",s.Origin);request.Headers.Add("X-AeroScience-Organization-CSRF",session.GetProperty("csrf").GetString());return await browser.SendAsync(request);
     }
     static string ReviewPath(Guid root)=>"/api/organization/reviews/"+root;
     static async Task<ResearchReviewCommandResult> ReviewCommand(SubmissionFixture f,SubmissionDraft row,ResearchReviewAction action,string note="",ReviewTarget? target=null,ReviewEvidenceReference[]? evidence=null,Guid[]? resolve=null)

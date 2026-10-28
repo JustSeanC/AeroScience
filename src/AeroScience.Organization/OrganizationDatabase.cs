@@ -92,10 +92,27 @@ public sealed class OrganizationDatabase(DbContextOptions<OrganizationDatabase> 
     public DbSet<CampaignProjectionRecord> CampaignProjections=>Set<CampaignProjectionRecord>();
     public DbSet<CampaignContributionRecord> CampaignContributions=>Set<CampaignContributionRecord>();
     public DbSet<CampaignMeasurementRecord> CampaignMeasurements=>Set<CampaignMeasurementRecord>();
+    public DbSet<CampaignCoverageIndex> CoverageIndexes=>Set<CampaignCoverageIndex>();
+    public DbSet<CampaignCoverageObservation> CoverageObservations=>Set<CampaignCoverageObservation>();
+    public DbSet<CampaignCoverageGoalRecord> CoverageGoals=>Set<CampaignCoverageGoalRecord>();
     protected override void OnModelCreating(ModelBuilder model)
     {
         base.OnModelCreating(model);
         model.HasDefaultSchema("organization");
+        model.Entity<CampaignCoverageIndex>().HasKey(r=>r.RootId);
+        model.Entity<CampaignCoverageIndex>().HasOne<ResearchReviewCaseRecord>().WithMany().HasForeignKey(r=>r.RootId).OnDelete(DeleteBehavior.Cascade);
+        model.Entity<CampaignCoverageObservation>().HasKey(r=>new{r.RootId,r.CardId,r.RequirementKey,r.IdentitySha256});
+        model.Entity<CampaignCoverageObservation>().HasOne<CampaignContributionRecord>().WithMany().HasForeignKey(r=>new{r.RootId,r.CardId}).OnDelete(DeleteBehavior.Cascade);
+        model.Entity<CampaignCoverageObservation>().HasIndex(r=>new{r.CampaignId,r.CompatibilityId,r.IdentitySha256});
+        model.Entity<CampaignCoverageObservation>().HasIndex(r=>new{r.CampaignId,r.OpportunityId,r.PublicationRevision,r.Variable,r.Category,r.TimestampUtc});
+        model.Entity<CampaignCoverageObservation>().HasIndex(r=>new{r.CompatibilityId,r.AltitudeFeetMsl});
+        model.Entity<CampaignCoverageObservation>().HasIndex(r=>new{r.CompatibilityId,r.Latitude,r.Longitude});
+        model.Entity<CampaignCoverageObservation>().HasIndex(r=>new{r.CampaignId,r.Date,r.FlightId});
+        model.Entity<CampaignCoverageGoalRecord>().HasKey(r=>r.Id);
+        model.Entity<CampaignCoverageGoalRecord>().Property(r=>r.Revision).IsConcurrencyToken();
+        model.Entity<CampaignCoverageGoalRecord>().HasOne<CampaignRecord>().WithMany().HasForeignKey(r=>r.CampaignId).OnDelete(DeleteBehavior.Restrict);
+        model.Entity<CampaignCoverageGoalRecord>().HasIndex(r=>new{r.CampaignId,r.Name,r.Id});
+        model.Entity<CampaignCoverageGoalRecord>().HasIndex(r=>r.SearchName).HasOperators("text_pattern_ops");
         model.Entity<CampaignProjectionRecord>().HasKey(r=>r.RootId);
         model.Entity<CampaignProjectionRecord>().HasOne<ResearchReviewCaseRecord>().WithMany().HasForeignKey(r=>r.RootId).OnDelete(DeleteBehavior.Cascade);
         model.Entity<CampaignContributionRecord>().HasKey(r=>new{r.RootId,r.CardId});

@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 namespace AeroScience.Organization;
 
 // Rebuildable index only. P15 publication/claim and P17/P18 receipt/findings stay authoritative.
-public sealed class CampaignProgressProjection(OrganizationDatabase db,OrganizationManagement history)
+public sealed class CampaignProgressProjection(OrganizationDatabase db,OrganizationManagement history,CampaignCoverageProjection coverage)
 {
     public const int Version=1;
     static T Read<T>(string json)=>JsonSerializer.Deserialize<T>(json,WireJson.Options)??throw new InvalidOperationException("Progress source unavailable.");
@@ -19,13 +19,15 @@ public sealed class CampaignProgressProjection(OrganizationDatabase db,Organizat
     }
     static ResearchReviewState State(ResearchReviewRequirementRecord[] requirements,ResearchReviewCaseRecord source)=>requirements.All(q=>q.State==ResearchReviewState.Approved)?ResearchReviewState.Approved:requirements.Any(q=>q.State==ResearchReviewState.MoreEvidenceRequested)?ResearchReviewState.MoreEvidenceRequested:requirements.Any(q=>q.State==ResearchReviewState.Rejected)?ResearchReviewState.Rejected:source.State==ResearchReviewState.UpdatedSubmission?ResearchReviewState.UpdatedSubmission:ResearchReviewState.AwaitingReview;
     internal async Task<(ReviewRequirementDefinition Definition,ReviewFinding Finding)> ApprovedFinding(ResearchReviewCaseRecord source,ResearchReviewRequirementRecord q,CancellationToken ct)
+        =>await ReadApprovedFinding(db,source,q,ct);
+    internal static async Task<(ReviewRequirementDefinition Definition,ReviewFinding Finding)> ReadApprovedFinding(OrganizationDatabase db,ResearchReviewCaseRecord source,ResearchReviewRequirementRecord q,CancellationToken ct)
     {
         var definition=Read<ReviewRequirementDefinition>(q.DefinitionJson);var finding=Read<ReviewFinding>(q.FindingJson??throw new InvalidOperationException("Approval has no original finding."));var row=await db.ReviewEvents.AsNoTracking().SingleOrDefaultAsync(e=>e.RootId==source.Id&&e.Id==finding.EventId,ct)??throw new InvalidOperationException("Original approval event unavailable.");var e=Read<ResearchReviewEvent>(row.PayloadJson);
         if(q.State!=ResearchReviewState.Approved||finding.State!=ResearchReviewState.Approved||e.Action!=ResearchReviewAction.Approve||e.RootReceiptId!=source.Id||e.Sequence!=finding.Sequence||e.Sequence>source.Revision||e.Target?.CardId!=q.CardId||e.Target.RequirementKey!=q.Key||e.ActorId!=finding.ReviewerId||e.TimestampUtc!=finding.TimestampUtc||e.PolicyVersion!=1||finding.PolicyVersion!=1||PreflightReadiness.Hash(e with{Sha256=""})!=row.Sha256||row.Sha256!=e.Sha256||PreflightReadiness.Hash(e.Evidence)!=PreflightReadiness.Hash(finding.Evidence))throw new InvalidOperationException("Current approved finding differs from its immutable source event.");return(definition,finding);
     }
     public async Task Sync(Guid root,CancellationToken ct,bool force=false)
     {
-        var source=await db.Reviews.AsNoTracking().SingleAsync(r=>r.Id==root,ct);var marker=await db.CampaignProjections.FindAsync([root],ct);if(marker?.Version>Version)throw new InvalidOperationException("A newer progress interpretation cannot be replaced.");if(!force&&marker?.Version==Version&&marker.ReviewRevision==source.Revision&&marker.HeadSha256==source.HeadSha256)return;
+        var source=await db.Reviews.AsNoTracking().SingleAsync(r=>r.Id==root,ct);var marker=await db.CampaignProjections.FindAsync([root],ct);if(marker?.Version>Version)throw new InvalidOperationException("A newer progress interpretation cannot be replaced.");if(!force&&marker?.Version==Version&&marker.ReviewRevision==source.Revision&&marker.HeadSha256==source.HeadSha256){await coverage.Sync(root,ct,force);return;}
         if(marker is null){marker=new(){RootId=root};db.CampaignProjections.Add(marker);}marker.Version=Version;marker.ReviewRevision=source.Revision;marker.HeadSha256=source.HeadSha256;marker.Valid=false;
         try{
             var document=await OrganizationReviews.ReadDocument(db,root,ct);SubmissionEvidenceProtocol.Validate(document,ct);var official=SubmissionReviewEvidence.Requirements(document);var requirements=await db.ReviewRequirements.AsNoTracking().Where(q=>q.RootId==root).ToArrayAsync(ct);if(requirements.Length!=official.Length||requirements.Any(q=>!official.Any(d=>d.CardId==q.CardId&&d.Key==q.Key&&d.DefinitionSha256==Read<ReviewRequirementDefinition>(q.DefinitionJson).DefinitionSha256)))throw new InvalidOperationException("Required findings differ from the frozen received definition.");
@@ -44,6 +46,6 @@ public sealed class CampaignProgressProjection(OrganizationDatabase db,Organizat
                 }catch(Exception e) when(e is ArgumentException or InvalidOperationException or IOException or JsonException){current.Valid=false;current.SummaryJson="";current.AcceptedUtc=null;}
             }marker.Valid=true;
         }catch(Exception e) when(e is ArgumentException or InvalidOperationException or IOException or JsonException){var rows=await db.CampaignContributions.Where(c=>c.RootId==root).ToArrayAsync(ct);foreach(var r in rows){r.Valid=false;r.SummaryJson="";r.AcceptedUtc=null;r.ReviewRevision=source.Revision;r.SourceHeadSha256=source.HeadSha256;}marker.Valid=false;}
-        await db.SaveChangesAsync(ct);
+        await db.SaveChangesAsync(ct);await coverage.Sync(root,ct,force);
     }
 }

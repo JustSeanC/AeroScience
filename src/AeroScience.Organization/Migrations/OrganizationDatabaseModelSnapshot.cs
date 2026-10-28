@@ -104,6 +104,186 @@ namespace AeroScience.Organization.Migrations
                     b.ToTable("CampaignContributions", "organization");
                 });
 
+            modelBuilder.Entity("AeroScience.Organization.CampaignCoverageGoalRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CampaignId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Revision")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer");
+
+                    b.Property<string>("SearchName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("SnapshotJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset>("UpdatedUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SearchName");
+
+                    NpgsqlIndexBuilderExtensions.HasOperators(b.HasIndex("SearchName"), new[] { "text_pattern_ops" });
+
+                    b.HasIndex("CampaignId", "Name", "Id");
+
+                    b.ToTable("CoverageGoals", "organization");
+                });
+
+            modelBuilder.Entity("AeroScience.Organization.CampaignCoverageIndex", b =>
+                {
+                    b.Property<Guid>("RootId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ApprovalSignature")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("HeadSha256")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("ReviewRevision")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("Valid")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer");
+
+                    b.HasKey("RootId");
+
+                    b.ToTable("CoverageIndexes", "organization");
+                });
+
+            modelBuilder.Entity("AeroScience.Organization.CampaignCoverageObservation", b =>
+                {
+                    b.Property<Guid>("RootId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CardId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("RequirementKey")
+                        .HasColumnType("text");
+
+                    b.Property<string>("IdentitySha256")
+                        .HasColumnType("text");
+
+                    b.Property<double?>("AltitudeFeetMsl")
+                        .HasColumnType("double precision");
+
+                    b.Property<Guid>("CampaignId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Category")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("CompatibilityId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ContentSha256")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Contributor")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<Guid>("FlightId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("FlightReference")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Instrument")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<double?>("Latitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<double?>("Longitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("OpportunityId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("OriginalReferenceJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("PilotId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Provenance")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("PublicationRevision")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("PublicationSha256")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ReferenceId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("SourceSemanticsSha256")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset>("TimestampUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Unit")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Variable")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("RootId", "CardId", "RequirementKey", "IdentitySha256");
+
+                    b.HasIndex("CompatibilityId", "AltitudeFeetMsl");
+
+                    b.HasIndex("CampaignId", "CompatibilityId", "IdentitySha256");
+
+                    b.HasIndex("CampaignId", "Date", "FlightId");
+
+                    b.HasIndex("CompatibilityId", "Latitude", "Longitude");
+
+                    b.HasIndex("CampaignId", "OpportunityId", "PublicationRevision", "Variable", "Category", "TimestampUtc");
+
+                    b.ToTable("CoverageObservations", "organization");
+                });
+
             modelBuilder.Entity("AeroScience.Organization.CampaignMeasurementRecord", b =>
                 {
                     b.Property<Guid>("RootId")
@@ -1276,6 +1456,33 @@ namespace AeroScience.Organization.Migrations
                     b.HasOne("AeroScience.Organization.ResearchReviewCaseRecord", null)
                         .WithMany()
                         .HasForeignKey("RootId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("AeroScience.Organization.CampaignCoverageGoalRecord", b =>
+                {
+                    b.HasOne("AeroScience.Organization.CampaignRecord", null)
+                        .WithMany()
+                        .HasForeignKey("CampaignId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("AeroScience.Organization.CampaignCoverageIndex", b =>
+                {
+                    b.HasOne("AeroScience.Organization.ResearchReviewCaseRecord", null)
+                        .WithMany()
+                        .HasForeignKey("RootId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("AeroScience.Organization.CampaignCoverageObservation", b =>
+                {
+                    b.HasOne("AeroScience.Organization.CampaignContributionRecord", null)
+                        .WithMany()
+                        .HasForeignKey("RootId", "CardId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

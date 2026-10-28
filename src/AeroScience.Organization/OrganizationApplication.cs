@@ -95,7 +95,7 @@ public static class OrganizationApplication
         });
         builder.Services.AddScoped<OrganizationManagement>();
         builder.Services.AddScoped<OrganizationOpportunities>();builder.Services.AddScoped<OrganizationMembership>();builder.Services.AddScoped<OrganizationDevices>();
-        builder.Services.AddScoped<CampaignProgressProjection>();builder.Services.AddScoped<OrganizationCampaignProgress>();builder.Services.AddScoped<OrganizationSubmissions>();builder.Services.AddScoped<OrganizationReviews>();
+        builder.Services.AddScoped<CampaignCoverageProjection>();builder.Services.AddScoped<CampaignProgressProjection>();builder.Services.AddScoped<OrganizationCampaignProgress>();builder.Services.AddScoped<OrganizationSubmissions>();builder.Services.AddScoped<OrganizationReviews>();
         var submissionLimit=builder.Configuration.GetValue<long?>("Organization:MaximumRetainedEvidenceBytes")??1024L*1024*1024;
         if(submissionLimit<SubmissionEvidenceProtocol.MaximumPayloadBytes||submissionLimit>1024L*1024*1024*1024)throw new InvalidOperationException("Configure a bounded organization evidence-storage quota between 2 MiB and 1 TiB.");
         builder.Services.AddSingleton(new OrganizationSubmissionOptions{MaximumRetainedPayloadBytes=submissionLimit});
@@ -143,7 +143,7 @@ public static class OrganizationApplication
         });
         var assets=Path.Combine(AppContext.BaseDirectory,"organization-portal");
         if(Directory.Exists(assets)){var files=new PhysicalFileProvider(assets);app.UseDefaultFiles(new DefaultFilesOptions{FileProvider=files});app.UseStaticFiles(new StaticFileOptions{FileProvider=files});}
-        MapIdentity(app);MapManagement(app);OrganizationEnrollmentApi.Map(app);OrganizationOpportunityApi.Map(app);OrganizationSubmissionApi.Map(app);OrganizationReviewApi.Map(app);CampaignProgressApi.Map(app);return app;
+        MapIdentity(app);MapManagement(app);OrganizationEnrollmentApi.Map(app);OrganizationOpportunityApi.Map(app);OrganizationSubmissionApi.Map(app);OrganizationReviewApi.Map(app);CampaignProgressApi.Map(app);CampaignCoverageApi.Map(app);return app;
     }
     public static async Task Initialize(WebApplication app,CancellationToken token=default)
     {
@@ -152,7 +152,7 @@ public static class OrganizationApplication
             if(await db.Database.SqlQueryRaw<string>("SELECT current_setting('server_encoding') AS \"Value\"").SingleAsync(token)!="UTF8")throw new OrganizationDatabaseEncodingException();
             var known=db.Database.GetMigrations().ToHashSet(StringComparer.Ordinal);
             if((await db.Database.GetAppliedMigrationsAsync(token)).Any(m=>!known.Contains(m)))throw new InvalidOperationException("Organization database schema is newer or incompatible.");
-            await db.Database.MigrateAsync(token);await scope.ServiceProvider.GetRequiredService<OrganizationReviews>().Backfill(token);await scope.ServiceProvider.GetRequiredService<CampaignProgressProjection>().Backfill(token);if(!await db.Organizations.AnyAsync(token))app.Services.GetRequiredService<BootstrapCredential>().Initialize(app.Services.GetRequiredService<OrganizationSettings>().ReadBootstrapSecret());
+            await db.Database.MigrateAsync(token);await scope.ServiceProvider.GetRequiredService<OrganizationReviews>().Backfill(token);await scope.ServiceProvider.GetRequiredService<CampaignProgressProjection>().Backfill(token);await scope.ServiceProvider.GetRequiredService<CampaignCoverageProjection>().Backfill(token);if(!await db.Organizations.AnyAsync(token))app.Services.GetRequiredService<BootstrapCredential>().Initialize(app.Services.GetRequiredService<OrganizationSettings>().ReadBootstrapSecret());
         }
         catch(OrganizationDatabaseEncodingException){throw;}
         catch(Exception ex) when(ex is not OperationCanceledException){throw new InvalidOperationException("Organization startup refused: database/schema, protected bootstrap or key configuration is unavailable. No personal-data fallback was used.");}

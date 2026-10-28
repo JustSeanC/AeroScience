@@ -6,7 +6,7 @@ using AeroScience.Shared;
 using Microsoft.EntityFrameworkCore;
 namespace AeroScience.Organization;
 
-public sealed class OrganizationCampaignProgress(OrganizationDatabase db,OrganizationMembership members,OrganizationManagement history,CampaignProgressProjection projection)
+public sealed partial class OrganizationCampaignProgress(OrganizationDatabase db,OrganizationMembership members,OrganizationManagement history,CampaignProgressProjection projection)
 {
     public const string CountingRule="A pilot counts once for the exact published card revision/hash and acceptance policy only when one received card review has every required finding currently approved. Claims, submitted packages, partial findings and repeated attempts are not additional independent contributions. Earlier versions remain separate.";
     public const string PrivacyPolicy="Active members see sanitized approved summaries and aggregate counts. Contributor labels are organization-scoped pseudonyms (policy 1); account names, private notes/conversations, aircraft details and raw packages are restricted. Distinct accounts are not proof of physical scientific independence.";
