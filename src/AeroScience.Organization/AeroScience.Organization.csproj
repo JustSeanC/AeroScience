@@ -9,6 +9,7 @@
   <ItemGroup>
     <Content Update="wwwroot/**" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" TargetPath="organization-portal/%(Filename)%(Extension)" />
     <Content Include="../AeroScience.Engine/wwwroot/workstation-ui.js" Link="organization-portal/workstation-ui.js" TargetPath="organization-portal/workstation-ui.js" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="../AeroScience.Engine/wwwroot/program-workflow-ui.js" Link="organization-portal/program-workflow-ui.js" TargetPath="organization-portal/program-workflow-ui.js" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Include="../AeroScience.Engine/wwwroot/campaign-coverage-ui.js" Link="organization-portal/campaign-coverage-ui.js" TargetPath="organization-portal/campaign-coverage-ui.js" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Include="../AeroScience.Engine/wwwroot/vendor/leaflet/**" Link="organization-portal/vendor/leaflet/%(RecursiveDir)%(Filename)%(Extension)" TargetPath="organization-portal/vendor/leaflet/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Include="../AeroScience.Engine/wwwroot/campaign-progress-ui.js" Link="organization-portal/campaign-progress-ui.js" TargetPath="organization-portal/campaign-progress-ui.js" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
