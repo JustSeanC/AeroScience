@@ -80,7 +80,9 @@ public sealed record ResearchFlightCard(PersonalResearchCard Card, bool Active,
     [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] OrganizationFlightLabel? Organization=null);
 public sealed record ResearchFlightState(int Version, Guid FlightId, long Revision, bool Recording,
     ResearchFlightCard[] Cards, DateTimeOffset GeneratedUtc, bool CanBeginAttempt, string Message,
-    int TotalCards, int? NextOffset = null,int PageSize=4);
+    int TotalCards, int? NextOffset = null,int PageSize=4,
+    [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] int? ActiveCardCount=null,
+    [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] string[]? ActiveCardNames=null);
 public sealed record ResearchCardReceipt(Guid RequestId, Guid FlightId, long Revision, long EventId,
     Guid CardId, Guid? AttemptId, DateTimeOffset TimestampUtc, string Message);
 public sealed record ResearchCardResult(ResearchCardReceipt Receipt, ResearchFlightState State);

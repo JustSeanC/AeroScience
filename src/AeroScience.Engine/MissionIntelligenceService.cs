@@ -31,6 +31,7 @@ public sealed class MissionIntelligenceService(MissionCoordinator coordinator, M
             performance.ProjectionFault is not null?"Unavailable: "+performance.ProjectionFault:report is null?"Pending":"Provisional",
             ["Up to 100 sessions shown; complete session evidence remains in the archived reports and paged session API.",
              "Provider footprints, modeled footprints, flown paths and scientifically valid acquired coverage are distinct.",
-             "No next-trigger order or active-area membership is inferred from map proximity; configured occurrences and backend event evidence are shown."],sensors);
+             "No next-trigger order or active-area membership is inferred from map proximity; configured occurrences and backend event evidence are shown."],sensors,
+             id is {} researchFlight?coordinator.PersonalResearch(researchFlight):null);
     }
 }

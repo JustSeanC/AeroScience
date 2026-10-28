@@ -61,7 +61,7 @@ public sealed class ApiTests : IAsyncLifetime
     [Fact] public async Task PersonalCardOperationsKeepHostAuthorityCsrfAndRequiredCommandIdentities()
     {
         var flight=Guid.NewGuid();
-        foreach(var path in new[]{ $"/api/missions/{flight}/research-operations",$"/api/missions/{flight}/research-attempts" })
+        foreach(var path in new[]{ $"/api/missions/{flight}/research-operations",$"/api/missions/{flight}/research-attempts",$"/api/missions/{flight}/operations",$"/api/missions/{flight}/timeline",$"/api/missions/{flight}/timeline/evidence?source=telemetry&referenceId=1&sha256={new string('0',64)}" })
             Assert.Equal(HttpStatusCode.Unauthorized,(await client.GetAsync(path)).StatusCode);
         await Pair(client);
         Assert.Equal(HttpStatusCode.BadRequest,(await client.PostAsJsonAsync("/api/research/control",new{flightId=flight,requestId=Guid.NewGuid(),action="activate",cardId=Guid.NewGuid()},WireJson.Options)).StatusCode);

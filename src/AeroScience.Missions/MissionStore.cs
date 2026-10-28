@@ -53,6 +53,7 @@ public sealed partial class MissionStore
         cmd.ExecuteNonQuery();
         cmd.CommandText="CREATE INDEX IF NOT EXISTS personal_detection_work ON collection_receipts(kind,json_extract(result_json,'$.complete'),mission_id,receipt_id) WHERE kind='personal-detection'; CREATE INDEX IF NOT EXISTS personal_detection_cards ON collection_receipts(mission_id,json_extract(result_json,'$.consent.cardId'),json_extract(result_json,'$.consent.eventId')) WHERE kind='personal-detection'";cmd.ExecuteNonQuery();
         cmd.CommandText="CREATE INDEX IF NOT EXISTS personal_recorded_evaluations ON personal_research_attempts(json_extract(payload_json,'$.recordedAttemptId')) WHERE json_extract(payload_json,'$.recordedAttemptId') IS NOT NULL";cmd.ExecuteNonQuery(); // Additive read index; no schema-version change or historical row rewrite.
+        InitializeTimelineIndexes(db);
     }
 
     private void InitializeCore()
