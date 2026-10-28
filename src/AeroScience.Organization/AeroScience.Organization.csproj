@@ -9,6 +9,9 @@
   <ItemGroup>
     <Content Update="wwwroot/**" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" TargetPath="organization-portal/%(Filename)%(Extension)" />
     <Content Include="../AeroScience.Engine/wwwroot/workstation-ui.js" Link="organization-portal/workstation-ui.js" TargetPath="organization-portal/workstation-ui.js" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="../AeroScience.Engine/wwwroot/received-evidence-ui.js" Link="organization-portal/received-evidence-ui.js" TargetPath="organization-portal/received-evidence-ui.js" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="../AeroScience.Engine/wwwroot/vendor/chart.js/chart.umd.min.js" Link="organization-portal/chart.umd.min.js" TargetPath="organization-portal/chart.umd.min.js" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="../AeroScience.Engine/wwwroot/vendor/chart.js/LICENSE.txt" Link="licenses/Chart.js.txt" TargetPath="licenses/Chart.js.txt" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Include="../../licenses/Npgsql.txt;../../licenses/Npgsql.EntityFrameworkCore.txt;../../licenses/OrganizationServer.md" Link="licenses/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>
