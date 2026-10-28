@@ -78,7 +78,7 @@ public sealed class AutomaticAttemptTests:IDisposable
  [Fact]public void DisconnectionWithoutAnotherRecordedFrameFinalizesAnIncompleteAttempt()
  {
   Begin();Observe(1,120);Observe(2,120);time=start.AddSeconds(3);tick=3;coordinator.Apply(new(new(ConnectionState.Disconnected,TelemetrySource.Simulated,"Disconnected fixture",time),null));store.ProcessAutomaticAttempts(flight.Id);
-  var a=Assert.Single(Attempts());Assert.Equal(ResearchAttemptStatus.Interrupted,a.Status);Assert.Equal(ResearchAttemptOutcome.InsufficientEvidence,a.PointEvidence!.Outcome);Assert.Equal(flight.Id,coordinator.Snapshot().ActiveMission!.Id);Finish();
+  var a=Assert.Single(Attempts());Assert.Equal(start.AddSeconds(3),Assert.Single(store.Detail(flight.Id)!.Events,e=>e.Kind=="connection").TimestampUtc);Assert.Equal(start.AddSeconds(3),a.EndUtc);Assert.Equal(ResearchAttemptStatus.Interrupted,a.Status);Assert.Equal(ResearchAttemptOutcome.InsufficientEvidence,a.PointEvidence!.Outcome);Assert.Equal(flight.Id,coordinator.Snapshot().ActiveMission!.Id);Finish();
  }
  [Theory][InlineData(121)][InlineData(200)]
  public void ReplayDetectsChangedOriginalNumbersEvenWhenTimingOrRecognitionDisappears(double changed)

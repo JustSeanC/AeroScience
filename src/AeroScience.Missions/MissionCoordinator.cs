@@ -72,7 +72,7 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
     {
         lock(gate)
         {
-            if(active is not null&&connection.State!=update.Connection.State)store.AddEvent(active.Id,DateTimeOffset.UtcNow,"connection",update.Connection.Message);
+            if(active is not null&&connection.State!=update.Connection.State)store.AddEvent(active.Id,Now,"connection",update.Connection.Message);
             connection=update.Connection;environment.Apply(update);
             if(update.Frame is {IsValid:true} incoming)update=update with{Frame=environment.Enrich(incoming)};
             frame=connection.State!=ConnectionState.Connected?null:update.Frame is {IsValid:true}?update.Frame:update.Frame is not null?null:frame;
