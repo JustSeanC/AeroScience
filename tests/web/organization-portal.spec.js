@@ -199,4 +199,12 @@ test('P18 stale reviewer decisions retain unsent explanations and rejection requ
  }finally{if(f){await f.p.ctx.close();await f.e.dispose();}}
 });
 
+ test('P18 a delayed cached approval cannot replace a freshly verified rejection',async({page,browser,playwright})=>{
+  let f,release=()=>{},handled=Promise.resolve();try{
+   f=await reviewFixture(page,browser,playwright);const {e,p,row,connectionId}=f,root=row.receipt.id;await session(page);let snapshot=await api(page,'/organization/reviews/'+root,null,'GET');const target={cardId:f.source.saved.card.id,requirementKey:'documentation'};await api(page,'/organization/reviews/'+root+'/commands',{version:1,requestId:randomUUID(),expectedRevision:snapshot.summary.revision,action:'approve',target,evidence:[{receiptId:root,key:'*'}],confirmApproval:true});await e.post(`/api/submissions/drafts/${row.id}/review`,{connectionId,rootReceiptId:root});snapshot=await api(page,'/organization/reviews/'+root,null,'GET');await api(page,'/organization/reviews/'+root+'/commands',{version:1,requestId:randomUUID(),expectedRevision:snapshot.summary.revision,action:'reject',target,note:'A subsequent authorized finding rejected the method. Original evidence is unchanged.'});
+   let seen,done;const intercepted=new Promise(r=>seen=r),gate=new Promise(r=>release=r);handled=new Promise(r=>done=r);const pattern=`**/api/submissions/drafts/${row.id}/review-cache`;await p.desktop.route(pattern,async route=>{try{const response=await route.fetch();const cached=await response.json();expect(cached.retained.snapshot.summary.state).toBe('approved');seen();await gate;await route.fulfill({response,json:cached});}finally{done();}});
+   await p.desktop.goto('http://127.0.0.1:5080/#my-research?submissionDraft='+row.id);await intercepted;const dialog=p.desktop.getByRole('dialog',{name:'Submit Evidence',exact:true});await dialog.getByRole('button',{name:'Check Review Status',exact:true}).click();await expect(dialog.getByRole('heading',{name:'Rejected',exact:true})).toBeVisible();release();await handled;await p.desktop.unroute(pattern);await expect(dialog.getByRole('heading',{name:'Rejected',exact:true})).toBeVisible();await expect(dialog.getByRole('heading',{name:'Approved',exact:true})).toHaveCount(0);await expect(dialog).toContainText('Current organization review metadata verified now');
+  }finally{release();await handled;if(f){await f.p.ctx.close();await f.e.dispose();}}
+ });
+
 });
