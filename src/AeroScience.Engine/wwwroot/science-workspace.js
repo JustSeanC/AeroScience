@@ -5,7 +5,7 @@ import {summaryView} from './science-analysis.js';
 import {coverage,imagery,replay,exports as researchExports} from './mission-workspace.js';
 import {node as el,numeric as number,dateTime as local,select,button,link,disclosure,status,errorMessage,readableName} from './workstation-ui.js';
 let cleanup=()=>{},generation=0;
-const pages=[['map','Science Map'],['compare','Compare'],['analysis','Research Analysis'],['results','Results & Exports'],['replay','Replay Flight']];
+const pages=[['map','Science Map'],['compare','Compare'],['analysis','Research Analysis'],['results','Results & Exports'],['replay','Replay Flight'],['timeline','Evidence Timeline']];
 export async function scienceWorkspace(parent,api){
   const own=++generation;cleanup();const disposals=[],controller=new AbortController();
   cleanup=()=>{controller.abort();disposals.splice(0).forEach(dispose=>dispose());};

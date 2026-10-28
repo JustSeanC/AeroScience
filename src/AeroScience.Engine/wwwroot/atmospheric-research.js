@@ -32,10 +32,10 @@ export async function showAtmosphericResult(parent,api,attempt,isCurrent=()=>tru
  const root=node('section',undefined,'panel research-panel');root.setAttribute('aria-label',attempt.card.atmosphericTransect?'Atmospheric transect report':'Atmospheric research profile');parent.replaceChildren(root);root.append(atmosphericSummary(attempt));
  const status=node('p','Verifying retained scientific observations…');status.setAttribute('role','status');root.append(status);
  const timeline=node('div');let inspection=0;
- const inspect=async at=>{const own=++inspection;timeline.replaceChildren();const {researchFlightTimeline}=await import('./personal-research-flight.js');if(isCurrent()&&root.isConnected&&own===inspection){await researchFlightTimeline(timeline,api,attempt.flightId,{at});if(own===inspection)timeline.scrollIntoView({block:'nearest'});}};
+ const inspect=async id=>{const own=++inspection;timeline.replaceChildren();const {researchFlightTimeline}=await import('./personal-research-flight.js');if(isCurrent()&&root.isConnected&&own===inspection){await researchFlightTimeline(timeline,api,attempt.flightId,{original:id?{source:'scienceObservation',id}:null});if(own===inspection)timeline.scrollIntoView({block:'nearest'});}};
  try{const {review}=await api(`/api/research/attempts/${attempt.id}/atmospheric`);if(!root.isConnected||!isCurrent())return;status.textContent=review.message;
   if(review.matchesSavedEvidence){
-   profiles(root,[{result:attempt,review,label:attempt.card.name}],(_,at)=>inspect(at));
+   profiles(root,[{result:attempt,review,label:attempt.card.name}],(_,id)=>inspect(id));
    if(review.retained.transect){const t=review.retained.transect;
     table(root,'Geographic sampling coverage',['Location','Anchor observation','Valid temperature readings','Longest consecutive run','Coverage'],t.stations.map(s=>[s.index+1,s.anchorObservationId,s.temperatureReadings,s.longestContinuousReadings,s.covered?'Covered':'Needs more consecutive readings']),{pageSize:20});
     table(root,'Supported sampling legs',['Leg','Temperature readings','Covered locations','Supported distance (m)','Extent from first sample (m)'],t.legs.map(l=>[l.id,l.temperatureReadings,l.coveredStations,exact(l.linkedDistanceMetres),exact(l.extentFromFirstSampleMetres)]),{pageSize:20});
@@ -43,7 +43,7 @@ export async function showAtmosphericResult(parent,api,attempt,isCurrent=()=>tru
    }else table(root,'Altitude sampling coverage',['MSL band (feet)','Valid temperature readings','Longest consecutive run','Coverage','Recorded temperature range (degC)'],review.retained.bands.map(b=>[`${numeric(b.lowerFeetMsl)}–${numeric(b.upperFeetMsl)} (upper bound excluded)`,b.temperatureReadings,b.longestContinuousReadings,b.covered?'Covered':b.temperatureReadings?'Partial':'Missing',b.minimumTemperatureCelsius==null?'Unavailable':exact(b.minimumTemperatureCelsius)+'–'+exact(b.maximumTemperatureCelsius)]));
    table(root,'Available atmospheric quantities',['Quantity','Original units','Valid readings','Excluded','Recorded minimum','Recorded maximum'],review.retained.quantities.map(q=>[quantityNames[q.measurementId],q.unit,q.validReadings,q.excludedReadings,exact(q.minimum),exact(q.maximum)]));
    const geographic=!!review.retained.transect;
-   table(root,'Original atmospheric observation preview',['Original UTC',...(geographic?['Latitude','Longitude']:[]),'Altitude (feet MSL)','Quantity','Original value','Original units','Quality','Source','Timeline'],review.preview.map(o=>{const action=node('div');button(action,'Inspect Reading',()=>inspect(o.timestampUtc));return[o.timestampUtc,...(geographic?[exact(o.latitude),exact(o.longitude)]:[]),numeric(o.altitudeMslFeet),quantityNames[o.measurementId],exact(o.value),o.unit,o.quality,o.source,action];}),{pageSize:20});
+   table(root,'Original atmospheric observation preview',['Original UTC',...(geographic?['Latitude','Longitude']:[]),'Altitude (feet MSL)','Quantity','Original value','Original units','Quality','Source','Timeline'],review.preview.map(o=>{const action=node('div');button(action,'Inspect Reading',()=>inspect(o.id));return[o.timestampUtc,...(geographic?[exact(o.latitude),exact(o.longitude)]:[]),numeric(o.altitudeMslFeet),quantityNames[o.measurementId],exact(o.value),o.unit,o.quality,o.source,action];}),{pageSize:20});
    root.append(node('p',review.downsampled?'This is a bounded preview of retained originals. Use Science Results & Analysis for all observations.':'Preview contains the verified compatible readings in this interval.'));
   }
   const limits=disclosure(root,'Interpretation and Sampling Limits');for(const text of review.retained.limitations)limits.append(node('p',text));
@@ -70,7 +70,7 @@ function transectMap(parent,entries,measurement,unit,inspect){
    if(Math.abs(o.latitude)>85.0511){flush();leg=null;continue;}
    const at=metadata.get(o.id);if(at?.legId!==leg||at?.legId==null){flush();longitude=undefined;leg=at?.legId;}
    longitude=longitude==null?o.longitude:longitude+window.AeroScienceGeo.wrap(o.longitude-longitude);const position=[o.latitude,longitude];all.push(position);if(at?.legId!=null)line.push(position);
-   const popup=node('div');popup.append(node('strong',entry.label),node('p',`${exact(o.value)} ${o.unit} · ${o.timestampUtc} · ${exact(o.altitudeMslFeet)} feet MSL`));if(inspect)button(popup,'Inspect Reading',()=>inspect(entry.result.flightId,o.timestampUtc));
+   const popup=node('div');popup.append(node('strong',entry.label),node('p',`${exact(o.value)} ${o.unit} · ${o.timestampUtc} · ${exact(o.altitudeMslFeet)} feet MSL`));if(inspect)button(popup,'Inspect Reading',()=>inspect(entry.result.flightId,o.id));
    L.circleMarker(position,{radius:5,color:color(o.value,low,high),fillOpacity:.85}).bindPopup(popup).addTo(points);
   }flush();
  }

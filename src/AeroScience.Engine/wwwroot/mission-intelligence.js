@@ -9,7 +9,7 @@ const semantic=s=>JSON.stringify([s?.missionId,s?.controlRevision,s?.currentSess
 const elapsed=(from,to)=>from?`${Math.max(0,Math.floor(((to?Date.parse(to):Date.now())-Date.parse(from))/1000))} s`:'Unknown';
 
 // Shared desktop/paired-browser presentation. Backend services own all decisions.
-export function missionIntelligence(parent,api,{id='mission-intelligence',after=false,sensorParent=null}={}){
+export function missionIntelligence(parent,api,{id='mission-intelligence',after=false,sensorParent=null,onState=()=>{},onStale=()=>{},acceptState=()=>true}={}){
  const panel=node('article',undefined,'panel research-panel mission-intelligence');panel.id=id;
  if(after)parent.after(panel);else parent.append(panel);panel.append(node('h2','Mission intelligence'));
  const status=node('p','Loading authoritative mission state…');status.setAttribute('role','status');
@@ -64,6 +64,7 @@ export function missionIntelligence(parent,api,{id='mission-intelligence',after=
    for(const t of data.triggers)body.append(node('p',`${t.trigger.action} · ${t.trigger.kind} · target ${t.trigger.targetId} · occurrence ${t.trigger.occurrenceId} · planned session ${t.trigger.plannedSessionKey||'none'} · ${t.status}`));if(!data.triggers.length)body.append(node('p','No automatic triggers configured. Use manual science controls.'));
   });
   if(eventMission!==m?.id){eventMission=m?.id;eventAfter=0;eventList.replaceChildren();more.hidden=!m;if(m)more.click();}
+  onState(data);
  }
  function invalidate(){generation++;markSensorOperatingStale(sensors,'Collection or configuration changed; waiting for current sensor evidence.');}
  async function control(action){if(busy||!current?.collection?.state)return;const visible=current.collection.state,mission=visible.missionId;busy=true;invalidate();for(const button of controls.values())button.disabled=true;
@@ -73,10 +74,10 @@ export function missionIntelligence(parent,api,{id='mission-intelligence',after=
   }catch(error){message.textContent=error.message+' Synchronize and issue a new command if still intended.';}finally{busy=false;await refresh();}
  }
  async function refresh(){if(inflight||busy||disposed||document.hidden||!panel.offsetParent)return;inflight=true;const own=++generation;
-  try{const data=await api('/api/mission-intelligence');if(own===generation&&panel.isConnected)draw(data);}catch(error){if(own===generation){status.textContent='Mission state unavailable or stale: '+error.message;markSensorOperatingStale(sensors);for(const button of controls.values())button.disabled=true;}}finally{inflight=false;}
+  try{const data=await api('/api/mission-intelligence');if(own===generation&&panel.isConnected){if(acceptState(data))draw(data);else{for(const button of controls.values())button.disabled=true;onStale("The recording flight changed while this response was in flight. Synchronizing the current flight.");}}}catch(error){if(own===generation){status.textContent='Mission state unavailable or stale: '+error.message;markSensorOperatingStale(sensors);for(const button of controls.values())button.disabled=true;onStale(error.message);}}finally{inflight=false;}
  }
  const wake=()=>refresh();window.addEventListener('hashchange',wake);document.addEventListener('visibilitychange',wake);
- const timer=setInterval(()=>{if(!panel.isConnected){dispose();return;}if(lastSuccess&&Date.now()-lastSuccess>6000){status.textContent='Mission state stale — reconnect before issuing collection commands.';for(const button of controls.values())button.disabled=true;}refresh();},2000);
+ const timer=setInterval(()=>{if(!panel.isConnected){dispose();return;}if(lastSuccess&&Date.now()-lastSuccess>6000){status.textContent='Mission state stale — reconnect before issuing collection commands.';for(const button of controls.values())button.disabled=true;onStale('Current mission state has not been confirmed for more than six seconds.');}refresh();},2000);
  function dispose(){disposed=true;generation++;clearInterval(timer);window.removeEventListener('hashchange',wake);document.removeEventListener('visibilitychange',wake);}
  refresh();return {refresh,dispose,invalidate};
 }

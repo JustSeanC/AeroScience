@@ -42,6 +42,7 @@
             <new-push-button id="as-mission-page">Mission</new-push-button
             ><new-push-button id="as-payload-page">Payload</new-push-button>
             <new-push-button id="as-map-page">Map</new-push-button>
+            <new-push-button id="as-research-page">Research</new-push-button>
           </nav>
           <p id="as-status" role="status">
             Loading simulator communication service...
@@ -53,7 +54,8 @@
             role="region"
             aria-label="Mission and payload content"
           >
-            <section id="as-research-cards" aria-label="Personal Research Test Cards">
+            <p id="as-operations-summary" class="as-note" role="status">Research state unavailable.</p>
+            <section id="as-research-cards" hidden aria-label="Personal Research Test Cards">
               <h3>Personal Research Test Cards</h3>
               <p id="as-research-status" role="status">Choose cards in Mission Planner before recording.</p>
               <div id="as-research-list"></div>

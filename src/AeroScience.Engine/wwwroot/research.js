@@ -7,6 +7,7 @@ import { preflightReadiness } from "./preflight-readiness.js";
 import { collectionPlanner } from "./collection-planner.js";
 import { initializeScienceSessions } from "./science-sessions.js";
 import { missionIntelligence } from "./mission-intelligence.js";
+import {missionOperations} from './mission-operations.js';
 import {openTfrReferences} from "./tfr-layers.js";
 import {reviewPreflight} from "./download-activity.js";
 import { hyperspectralCard } from "./hyperspectral-import.js";
@@ -160,9 +161,9 @@ function readConfigs(parent) {
 }
 export function initializeResearch(context) {
   ctx = context;
-  missionIntelligence($("control"),ctx.api);
+  const intelligence=missionIntelligence($("control"),ctx.api,{acceptState:data=>!state||(state.activeMission?.id||null)===(data.flight.activeMission?.id||null),onState:data=>{personalFlight?.feed(data.flight,data.researchCards);operations?.live(data);},onStale:message=>{personalFlight?.stale(message);operations?.stale(message);}});
   missionPerformance($("control"),ctx.api,()=>state?.activeMission?.id,{live:true});
-  personalFlight=researchFlightControls($("control"),ctx.api);
+  personalFlight=researchFlightControls($("control"),ctx.api,{shared:true,onFocus:id=>operations?.focus(id),onChange:cards=>operations?.cardsChanged(cards)});
   const control = $("control"),
     guidance = text("article", undefined, "panel research-panel");
   guidance.id = "flight-guidance";
@@ -214,7 +215,12 @@ export function initializeResearch(context) {
   scientificReadiness(control, ctx.api, liveMap).catch(() => {});
   $("instruments").append(text("div", undefined, "research-panel"));
   $("instruments").lastChild.id = "instrument-content";
+  operations=missionOperations($('operations'),ctx.api,{map:liveMap,livePanels:{flight:control.querySelector('.mission-panel'),cards:$('research-flight-controls'),science:$('mission-intelligence'),map:mapPanel,observations:markerPanel},refreshIntelligence:intelligence.refresh,currentSnapshot:()=>state,onRefreshMap:()=>{if(liveId&&!busy){lastFetch=0;}}});
 }
+let operations;
+export function openMissionOperations(){return operations.open();}
+export function closeMissionOperations(){operations?.close();}
+function setLiveMap(data){if(!operations?.mapData(data))liveMap?.set(data);}
 export async function loadResearch(page) {
   payloadCatalog ??= await ctx.api('/api/instrument-profiles');
   calibrationCatalog = await ctx.api('/api/instruments/calibration');
@@ -1093,6 +1099,7 @@ export function renderResearch(next) {
   if (!next) return;
   personalFlight?.update(next);
   state = next;
+  operations?.update(next);
   syncUnits(next.research?.units);
   guidance($("flight-guidance"), next.research?.guidance);
   const environment=$('environment-readings');
@@ -1246,7 +1253,7 @@ export function renderResearch(next) {
   }
   if(!next.activeMission && next.selectedPlanId && selectedPreview!==next.selectedPlanId && !selectingPreview){
     selectingPreview=true;const selected=next.selectedPlanId;
-    ctx.api(`/api/plans/${selected}`).then(plan=>{if(state?.selectedPlanId===selected&&!state.activeMission){livePlan=plan;selectedPreview=selected;liveMap?.set({plan,aircraft:aircraftFor(next)});liveMap?.fit();}}).catch(e=>ctx.notice(e.message)).finally(()=>selectingPreview=false);
+    ctx.api(`/api/plans/${selected}`).then(plan=>{if(state?.selectedPlanId===selected&&!state.activeMission){livePlan=plan;selectedPreview=selected;setLiveMap({plan,aircraft:aircraftFor(next)});if(!operations?.reviewing)liveMap?.fit();}}).catch(e=>ctx.notice(e.message)).finally(()=>selectingPreview=false);
   }else if(!next.activeMission&&!next.selectedPlanId){livePlan=null;selectedPreview=null;}
   const t = next.telemetry,
     fresh =
@@ -1261,7 +1268,7 @@ export function renderResearch(next) {
     samples: samplePositions(scienceRows),
     footprints: remoteFootprints,
   });
-  liveMap?.set({
+  setLiveMap({
     track,
     markers,
     samples: samplePositions(scienceRows),
@@ -1269,7 +1276,7 @@ export function renderResearch(next) {
     plan: livePlan || {},
     aircraft: fresh ? t : null,
   });
-  if (liveId && !busy && Date.now() - lastFetch > 4000) {
+  if (liveId && !busy && Date.now() - lastFetch > 4000 && ($('control').offsetParent||$('instruments').offsetParent||operations?.active&&!operations.reviewing)) {
     busy = true;
     lastFetch = Date.now();
     refreshLive(liveId)
@@ -1303,7 +1310,7 @@ async function refreshLive(id) {
   remoteFootprints=products.filter(p=>p.footprint?.boundary?.length>=3).map(p=>({vertices:p.footprint.boundary,label:`${p.instrumentId} derived footprint · flight ${p.flightPacketUtc} · external source ${p.sourceObservationUtc||"unknown date"}. Coverage may contain excluded cells.`}));
   scienceRows = [...scienceRows, ...science.observations].slice(-3000);
   cursor = science.next;
-  liveMap?.set({
+  setLiveMap({
     track,
     markers,
     samples: samplePositions(scienceRows),
@@ -1580,6 +1587,6 @@ export function invalidateResearch() {
         "Live measurements unavailable. Recorded science and flight history are preserved.",
       ),
     );
-  liveMap?.set({ track, markers, plan: livePlan || {}, aircraft: null });
+  setLiveMap({ track, markers, plan: livePlan || {}, aircraft: null });
   scienceMap?.set({ track, markers, plan: livePlan || {}, aircraft: null });
 }

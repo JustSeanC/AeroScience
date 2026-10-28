@@ -70,6 +70,7 @@ class IngamePanelAeroScience extends TemplateElement {
     this.byId("as-mission-page").onclick = () => this.page(false);
     this.byId("as-payload-page").onclick = () => this.page(true);
     this.byId("as-map-page").onclick = () => this.page("map");
+    this.byId("as-research-page").onclick = () => this.page("research");
     try {
       this.mapRenderer = new window.AeroScienceMovingMap(
         this.byId("as-map-canvas"),
@@ -320,6 +321,8 @@ class IngamePanelAeroScience extends TemplateElement {
   }
   page(payload) {
     this.mapVisible = payload === "map";
+    this.byId('as-research-cards').hidden=payload!=="research";
+    for(const [id,value]of [['as-mission-page',false],['as-payload-page',true],['as-map-page','map'],['as-research-page','research']])this.byId(id).setAttribute('aria-pressed',String(payload===value));
     this.byId("as-mission-view").hidden = payload !== false;
     this.byId("as-payload-view").hidden = payload !== true;
     this.byId("as-map-view").hidden = !this.mapVisible;
@@ -595,8 +598,8 @@ class IngamePanelAeroScience extends TemplateElement {
     this.byId('as-intelligence-asof').textContent='State as of '+i.generatedUtc+' · metrics '+(i.metricsUtc||'Pending')+(i.metricsUtc&&Date.now()-Date.parse(i.metricsUtc)>15000?' · Evidence cutoff is older than 15 s; metrics are not current.':'')+(i.detailsOmitted?' · Additional detail on dashboard.':'');
   }
   requestResearch(){
-    if(!this.capabilities.includes('personal-research-controls-1')||!this.state?.activeMission){this.researchState=null;this.researchOffset=0;this.renderPersonalResearch(false);return;}
-    if(this.researchState&&this.researchState.flightId!==this.state.activeMission.id)this.researchOffset=0;
+    if(!this.capabilities.includes('personal-research-controls-1')||!this.state?.activeMission){this.researchState=null;this.researchOffset=0;this.researchFocusedCard=null;this.focusedResearchSummary=null;this.renderPersonalResearch(false);return;}
+    if(this.researchState&&this.researchState.flightId!==this.state.activeMission.id){this.researchOffset=0;this.researchFocusedCard=null;this.focusedResearchSummary=null;this.researchPointChoices={};}
     if(Array.from(this.pending.values()).some(p=>['research-state','research-control'].includes(p.op)))return;
     this.send('research-state',{missionId:this.state.activeMission.id,offset:this.researchOffset});
   }
@@ -604,6 +607,10 @@ class IngamePanelAeroScience extends TemplateElement {
     const state=this.researchState,host=this.byId('as-research-list');
     const valid=fresh&&Date.now()-Date.parse(state?.generatedUtc)<6000&&state?.flightId===this.state?.activeMission?.id&&state?.recording;
     const pending=Array.from(this.pending.values()).some(p=>p.op==='research-control');
+    const summary=this.byId('as-operations-summary');
+    const selected=state?.cards.find(c=>c.card.id===this.researchFocusedCard);
+    if(selected)this.focusedResearchSummary=selected.card.name+' · '+(selected.openAttempt?'Attempt recording':selected.active?'Active':'Inactive')+(selected.procedure?.nextPointId?' · Next point '+(selected.card.procedure?.points.find(p=>p.id===selected.procedure.nextPointId)?.conditions.testPoint.name||'on dashboard'):'');
+    summary.textContent=!valid?'Research state unavailable or stale — no current progress inferred.':(this.focusedResearchSummary?'Focused: '+this.focusedResearchSummary+'. ':'Choose a card on Research. ')+(state.activeCardCount??state.cards.filter(c=>c.active).length)+' active card(s)'+(state.activeCardNames?.length?' · '+state.activeCardNames.join('; '):'')+'. Flight and science remain independent.';
     const signature=JSON.stringify([state?.flightId,state?.revision,this.researchOffset,valid,state?.canBeginAttempt,pending,this.researchFocusedCard]);
     if(this.researchView===signature)return;this.researchView=signature;
     const focusCard=document.activeElement?.dataset?.researchCard,focusAction=document.activeElement?.dataset?.researchAction;

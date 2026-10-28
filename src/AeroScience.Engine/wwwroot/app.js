@@ -21,6 +21,7 @@ import {
   renderResearch,
   researchDetail,
   invalidateResearch,
+  openMissionOperations,closeMissionOperations,
 } from "./research.js";
 import { unitControls, initializeUnits } from "./science-display.js";
 const $ = (id) => document.getElementById(id);
@@ -344,8 +345,9 @@ $("pair-form").addEventListener("submit", (event) => {
   command(event.submitter, () => connect($("pair-code").value));
 });
 async function navigate() {
-  const allowed = ["control", "planner", "history", "instruments", "settings", "science-workspace", "library", "help", "downloads", "my-research"];
+  const allowed = ["control", "operations", "planner", "history", "instruments", "settings", "science-workspace", "library", "help", "downloads", "my-research"];
   if(location.hash.startsWith("#settings/support")){location.replace("#help");return;}
+  if(location.hash.startsWith('#workspace/timeline')){const id=new URLSearchParams(location.hash.split('?')[1]||'').get('missions')?.split(',')[0];location.replace('#operations'+(id?'?flight='+encodeURIComponent(id):''));return;}
   const routePage=settingsLocation().page;
   const hash =
     settingsLocation().page === "science"
@@ -357,6 +359,7 @@ async function navigate() {
   if(page!=="library")disposeScientificLibrary();
   if(page!=="help")disposeHelpCenter();
   if(page!=="my-research")disposePersonalResearch();
+  if(page!=="operations")closeMissionOperations();
   for (const id of allowed) $(id).hidden = id !== page;
   for (const link of document.querySelectorAll(".nav-link")) {
     const selected =
@@ -367,6 +370,7 @@ async function navigate() {
   }
   $("breadcrumb").textContent = {
     control: "MISSION CONTROL",
+    operations: "MISSION OPERATIONS",
     history: "MISSION HISTORY",
     instruments: "INSTRUMENTS & COLLECTION",
     planner: "MISSION PLANNER",
@@ -381,6 +385,7 @@ async function navigate() {
   if (page === "library") await scientificLibrary($("library"),api);
   if (page === "downloads") await downloadWorkspace($("downloads"),api);
   if (page === "my-research") await personalResearch($("my-research"),api);
+  if (page === 'operations') await openMissionOperations();
   if (page === "control") selection?.refresh();
   if (page === "history") await loadHistory();
   if (page === "settings") await loadSettings();
@@ -433,7 +438,7 @@ async function loadHistory() {
     science.className="button primary";open.className="tertiary";
     const researchStatus=el("p","Scientific review status loading…","history-science-status");info.append(researchStatus);
     api(`/api/missions/${m.id}/archive-summary`).then(summary=>{if(request!==historyRequest)return;researchStatus.textContent=`Science: ${summary.review.status} · ${summary.instruments.map(id=>readableName(id)).join(", ")||"No enabled instruments in archived configuration"}`;}).catch(()=>{if(request===historyRequest)researchStatus.textContent="Scientific status unavailable; recorded flight details remain accessible.";});
-    meta.append(science,replayLink,open);
+    const operationsLink=el("a","Mission Operations","button secondary");operationsLink.href=`#operations?flight=${m.id}`;meta.append(science,operationsLink,replayLink,open);
     card.append(info, meta);
     list.append(card);
   }

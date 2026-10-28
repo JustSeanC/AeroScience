@@ -341,3 +341,11 @@ select:focus-visible {
 .as-panel.as-compact nav { margin:6px 0; }
 .as-panel.as-compact .as-metrics { gap:4px; }
 .as-panel.as-compact .as-note { font-size:12px; margin:5px 0; }
+
+/* Compact local operations: shared science summary, focused research and separate detail tab. */
+#as-operations-summary{padding:.4rem .6rem;border-left:3px solid #6ac9ee;overflow-wrap:anywhere}
+#as-root nav{display:flex;flex-wrap:wrap;gap:.3rem}
+#as-root nav [aria-pressed="true"]{border-bottom:3px solid #6ac9ee}
+#as-research-list>section{padding:.5rem 0;border-bottom:1px solid #385164}
+#as-research-list button{margin:.2rem;min-height:2.2rem}
+#as-research-list select{max-width:100%}

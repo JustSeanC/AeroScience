@@ -43,7 +43,7 @@ test('Fly Now collects actual atmospheric instruments and reviews original tempe
  const saved=(await get(request,`/api/research/attempts?flightId=${flight.id}`))[0],original=await get(request,`/api/research/attempts/${saved.id}/atmospheric`);
  expect(points).toEqual(original.review.preview.filter(o=>o.measurementId==='temperature').map(o=>({x:o.altitudeMslFeet,y:o.value})));
  await result.getByLabel('Atmospheric measurement',{exact:true}).selectOption('density');await expect(result).toContainText('No verified retained observations for this quantity');expect((await get(request,'/api/state')).activeMission).toBeNull();
- await result.getByRole('button',{name:'Inspect Reading',exact:true}).first().click();await expect(result).toContainText('Original Evidence Near');await expect(result.getByRole('region',{name:'Retained scientific observations',exact:true})).toBeVisible();
+ await result.getByRole('button',{name:'Inspect Reading',exact:true}).first().click();await expect(result).toContainText('Selected Original Evidence');await expect(result.getByRole('table',{name:'Original scientific observation',exact:true})).toBeVisible();
 });
 
 test('Customize edits independent atmospheric criteria in the full Planner with accessible narrow-screen controls',async({page,request})=>{
@@ -69,6 +69,6 @@ test('native toolbar renders atmospheric card criteria and keeps independent att
  const flight=await post(request,'/api/missions',{name:'Native atmospheric controls',planId:prepared.plan.id});
  await page.route('**/__native_atmosphere',r=>r.fulfill({contentType:'text/html',body:'<!doctype html><html><head></head><body></body></html>'}));await page.goto('/__native_atmosphere');await mountToolbar(page);
  await page.evaluate(async()=>{const s=await(await fetch('/api/session',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'})).json();window.bus.callSimConnect=function(event,payload){const command=JSON.parse(payload);this.sent.push({event,command});return fetch('/api/testing/toolbar',{method:'POST',headers:{'Content-Type':'application/json','X-AeroScience-CSRF':s.csrf},body:payload}).then(r=>r.text()).then(reply=>this.handlers['AeroScience.Reply.v1']?.(reply));};document.querySelector('ingamepanel-aeroscience').tick();});
- const native=page.locator('#as-research-cards');await expect(native).toContainText('3 neighboring 500-foot MSL bands');await expect(native).not.toContainText('undefined');await native.getByRole('button',{name:'Activate Card',exact:true}).click();await native.getByRole('button',{name:'Begin Attempt',exact:true}).click();await expect(native).toContainText('Attempt recording');
+ await page.locator('#as-research-page').click();const native=page.locator('#as-research-cards');await expect(native).toContainText('3 neighboring 500-foot MSL bands');await expect(native).not.toContainText('undefined');await native.getByRole('button',{name:'Activate Card',exact:true}).click();await native.getByRole('button',{name:'Begin Attempt',exact:true}).click();await expect(native).toContainText('Attempt recording');
  await native.getByRole('button',{name:'End Attempt',exact:true}).click();expect((await get(request,'/api/state')).activeMission.id).toBe(flight.id);expect((await get(request,`/api/missions/${flight.id}/collection`)).state.phase).toBe('collecting');
 });

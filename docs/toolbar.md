@@ -2,7 +2,7 @@
 
 The official MSFS 2024 SDK builds the Community package; source XML is not a compiled
 add-on. Follow [Windows build/installed acceptance](public-release-windows.md). The
-existing Mission/Payload/Map interface uses native SDK window controls and request/reply
+existing Mission/Payload/Map/Research interface uses native SDK window controls and request/reply
 CommBus, with no simulator write-control or localhost browser embedding.
 
 Historical diagnosis established that `/JS/dataStorage.js` must load before the native
@@ -22,6 +22,16 @@ Public evidence consulted (reference only; not a substitute for an official SDK/
 - [node-simconnect Communication API issue](https://github.com/EvenAR/node-simconnect/issues/120) and [native CommBus API reference implementation](https://github.com/mrlm-net/simconnect/blob/main/internal/simconnect/commbus.go).
 
 These establish a concrete SDK-format implementation path, not proof that AeroScience has been loaded in MSFS. No unsupported localhost access or browser embedding is assumed.
+
+## P22 local Mission Operations
+
+The **Research** tab contains the existing activation, point selection, manual/automatic
+attempt controls and frozen assigned-card labels. A compact persistent summary shows the
+focused card and other active cards without adding full evidence JSON. Switching tabs or
+focus does not alter flight recording or scientific collection. Mission, Payload, Map,
+Compact VR and native navigation retain their existing authority and protocol behavior.
+Detailed synchronized evidence stays on the dashboard's **Mission Operations** view;
+see [pilot workflow and exact-reference limits](v0.7.0-mission-operations.md).
 
 ## Transport
 
@@ -51,7 +61,7 @@ revision advance is tolerated; any intervening control/configuration/hold is not
 durable receipt survives handler restart/cache eviction. One timeout retry reuses the
 identical JSON, never a new target. Older replies cannot replace newer projections.
 
-Commands remain **at most 1,024 characters**. Replies are measured as **at most 8,000
+Commands remain **at most 1,024 UTF-8 bytes**. Replies are measured as **at most 8,000
 UTF-8 bytes** (transport allocation 8,192 including terminator). Optional display detail
 is removed in complete groups with `detailsOmitted`; IDs and scientific numbers are not
 shortened or altered. Map chunk limits remain unchanged. Tests measure multilingual
