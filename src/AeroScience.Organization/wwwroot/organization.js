@@ -15,7 +15,7 @@ const membership=membershipUi({api,root,field,status,heading,submit,modal,dialog
 const reviews=reviewUi({api,root,heading,modal,field,submit,draftCommand,dialog,back:load,campaigns:()=>membership.memberHome()});
 const submissions=submissionUi({api,root,heading,modal,field,submit,draftCommand,dialog,back:showPrograms,review:id=>reviews.workspace(id,null,true)});
 const opportunities=opportunityUi({api,root,heading,modal,field,submit,draftCommand,dialog,submissionPolicy:submissions.policy,back:()=>currentProgram?showProgram(currentProgram):load()});
-function progressView(){const view=node('section');root.replaceChildren(view);return campaignProgressUi({root:view,headingLevel:'h1',read:path=>api('/membership/research-progress'+path),back:load,review:id=>reviews.workspace(id,null,true),manage:v=>opportunities.cards({id:v.campaignId,publishedRevision:v.campaignRevision,name:v.name,objective:v.objective})});}
+function progressView(){const view=node('section');root.replaceChildren(view);return campaignProgressUi({root:view,headingLevel:'h1',read:path=>api('/membership/research-progress'+path),write:(path,body,method)=>api('/membership/research-progress'+path,body,method),back:load,review:id=>reviews.workspace(id,null,true),manage:v=>opportunities.cards({id:v.campaignId,publishedRevision:v.campaignRevision,name:v.name,objective:v.objective})});}
 function openProgress(id){return progressView().campaign(id);}
 function openApproved(id){return progressView().results(id);}
 const admin=()=>session?.user?.roles.includes('Administrator');

@@ -1,3 +1,4 @@
+import {campaignCoverageUi} from './campaign-coverage-ui.js';
 import {node,button,select,table,disclosure} from './workstation-ui.js';
 
 const states={notStarted:'Not Started',available:'Available',claimedInProgress:'Claimed / In Progress',evidenceReceived:'Evidence Received',awaitingReview:'Awaiting Review',moreEvidenceNeeded:'More Evidence Needed',partiallyFulfilled:'Partially Fulfilled',completedByApprovedEvidence:'Completed by Approved Evidence'};
@@ -5,7 +6,7 @@ const utc=value=>value||'Unavailable';
 const outcome=value=>({pass:'Pass',fail:'Fail',insufficientEvidence:'Insufficient Evidence',collectionComplete:'Collection Complete',partialCollection:'Partial Collection'}[value]||value);
 
 // One bounded, read-only presentation for the portal and desktop. Source values stay server-owned.
-export function campaignProgressUi({root,read,back,active=()=>true,review,manage,ownWork=false,headingLevel='h2'}){
+export function campaignProgressUi({root,read,write,back,active=()=>true,review,manage,ownWork=false,headingLevel='h2'}){
  const subTitle=headingLevel==='h1'?'h2':'h3';
  let epoch=0;
  const current=token=>token===epoch&&active()&&root.isConnected;
@@ -25,7 +26,7 @@ export function campaignProgressUi({root,read,back,active=()=>true,review,manage
    header(v);const totals=v.totals;
    root.append(node('p',`${totals.completedCards} of ${totals.publishedCards} cards completed by approved evidence`,'notice'),node('p',`${totals.approvedPilotContributions} approved pilot/card contributions · ${totals.requiredPilotContributions} required across current published cards`),node('p',`${totals.receivedCards} current-version card reviews · ${totals.receivedPackages} received packages across all versions (including supplements)`),node('p',`${totals.awaitingReview} awaiting review · ${totals.moreEvidenceNeeded} need more evidence/integrity checks · ${totals.rejected} rejected · ${totals.partiallyReviewed} partially reviewed`));
    if(totals.unavailableReviews)root.append(node('p',`${totals.unavailableReviews} received review(s) have unavailable progress integrity; they are excluded from completion until the original evidence/projection can be verified.`,'notice'));
-   const actions=node('div',undefined,'actions');root.append(actions);button(actions,'Approved Results',()=>results(id));button(actions,'Program Progress',()=>program(v.programId));if(v.canManage&&manage)button(actions,'Campaign Test Cards',()=>manage(v));
+   const actions=node('div',undefined,'actions');root.append(actions);button(actions,'Approved Results',()=>results(id));button(actions,'Scientific Coverage & Gaps',()=>{epoch++;return campaignCoverageUi({root,read,write,back:()=>campaign(id),active,headingLevel}).open(id);});button(actions,'Program Progress',()=>program(v.programId));if(v.canManage&&manage)button(actions,'Campaign Test Cards',()=>manage(v));
    disclosure(root,'How completion is counted',v.countingRule);disclosure(root,'Member privacy and scientific limits',v.privacyPolicy+' Completion describes accepted evidence for the published card, not aircraft certification, full geographic coverage or a proven hypothesis.');
    const form=node('form',undefined,'panel');root.append(form);const find=textInput(form,'Find test cards by name',search),order=select(form,'Sort test cards',[['name','Name'],['remaining','Most research needed'],['approved','Most approved pilots'],['newest','Newest cards'],['oldest','Oldest cards']],sort),filter=select(form,'Progress state',[['','All states'],...Object.entries(states)],state);const apply=node('button','Find Cards');apply.type='submit';form.append(apply);form.onsubmit=e=>{e.preventDefault();campaign(id,0,find.value,order.value,filter.value);};
    const list=node('section');list.setAttribute('aria-label','Campaign test card progress');root.append(list);
