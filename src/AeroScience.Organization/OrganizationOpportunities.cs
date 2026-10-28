@@ -7,6 +7,7 @@ namespace AeroScience.Organization;
 
 public sealed class OpportunityRecord
 {
+    public int ProgressIndexVersion {get;set;}public string PublishedName {get;set;}="";public string PublishedSearchName {get;set;}="";public int PublishedRequiredPilots {get;set;}public string PublishedSha256 {get;set;}="";
     public Guid Id {get;set;}
     public Guid CampaignId {get;set;}
     public int Revision {get;set;}
@@ -107,7 +108,7 @@ public sealed class OrganizationOpportunities(OrganizationDatabase db,Organizati
             if(JsonSerializer.Serialize(campaign.Definition,WireJson.Options)!=JsonSerializer.Serialize(draft.Definition,WireJson.Options))throw new OrganizationConflict("The saved definition differs from the authorized campaign publication.");
             if(await db.Claims.CountAsync(c=>c.OpportunityId==id&&c.State!=OrganizationClaimState.Released,ct)>draft.Policy.MaximumActiveClaims)throw new OrganizationConflict("Current reservations/claims exceed this capacity. Explicitly release them or retain enough slots.");
             row.Revision++;row.PublishedRevision=row.Revision;row.AvailabilityRevision++;
-            var published=draft with{Revision=row.Revision,Status=OrganizationPublication.Published,UpdatedUtc=OrganizationTime.UtcNow,AuthorId=user,AuthorName=author};row.SnapshotJson=JsonSerializer.Serialize(published,WireJson.Options);
+            var published=draft with{Revision=row.Revision,Status=OrganizationPublication.Published,UpdatedUtc=OrganizationTime.UtcNow,AuthorId=user,AuthorName=author};row.SnapshotJson=JsonSerializer.Serialize(published,WireJson.Options);CampaignProgressProjection.Index(row,published);
             if(!await db.SubmissionPolicies.AnyAsync(p=>p.OpportunityId==id,ct))db.SubmissionPolicies.Add(new(){OpportunityId=id,Revision=1,Mode=SubmissionPolicyMode.RequireMinimumEvidence,PublishedUtc=OrganizationTime.UtcNow,AuthorId=user});
             history.Revision(id,row.Revision,"opportunity",published,user);history.Audit(user,author,"opportunity-published",id,row.Revision);return published;
         },ct);

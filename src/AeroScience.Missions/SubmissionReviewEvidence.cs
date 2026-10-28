@@ -4,7 +4,7 @@ using AeroScience.Shared;
 namespace AeroScience.Missions;
 
 // Interprets ONLY received P17 documents. Uses existing scientific/continuous-hold evaluators.
-public static class SubmissionReviewEvidence
+public static partial class SubmissionReviewEvidence
 {
     public const int PolicyVersion=1,MaximumPackages=8;
     public static ReviewRequirementDefinition[] Requirements(SubmissionDocument d)
@@ -69,10 +69,11 @@ public static class SubmissionReviewEvidence
 
 public sealed partial class MissionStore
 {
+    public static IEnumerable<SubmissionTelemetrySample> ReceivedPointSamples(RecordedResearchAttempt attempt,IEnumerable<SubmissionTelemetrySample> samples)=>samples.Where(s=>attempt.Automatic is {} a?s.Sequence>=a.FirstSequence&&s.Sequence<=a.LastSequence:attempt.ManualSource is {} m?s.Sequence>m.AfterSequence&&s.Sequence<=m.ThroughSequence:s.Frame.TimestampUtc>=attempt.StartUtc&&s.Frame.TimestampUtc<=attempt.EndUtc);
     public static FlightTestPointEvidence? ReceivedPointEvidence(RecordedResearchAttempt attempt,FlightTestProcedurePoint point,SubmissionTelemetrySample[] samples,DateTimeOffset[] breaks,CancellationToken ct)
     {
         if(attempt.EndUtc is not {} end||attempt.PointEvidence is not {} saved||end<attempt.StartUtc||end-attempt.StartUtc>TimeSpan.FromHours(2))return null;
-        var selected=samples.Where(s=>attempt.Automatic is {} a?s.Sequence>=a.FirstSequence&&s.Sequence<=a.LastSequence:attempt.ManualSource is {} m?s.Sequence>m.AfterSequence&&s.Sequence<=m.ThroughSequence:s.Frame.TimestampUtc>=attempt.StartUtc&&s.Frame.TimestampUtc<=end).OrderBy(s=>s.Sequence).ToArray();
+        var selected=ReceivedPointSamples(attempt,samples).OrderBy(s=>s.Sequence).ToArray();
         var pauses=breaks.Where(b=>b>=attempt.StartUtc&&b<=end).Order().ToArray();var window=new FlightRegimeEvaluation.PointWindow(point.Conditions,attempt.StartUtc,end);using var hash=IncrementalHash.CreateHash(HashAlgorithmName.SHA256);int n=0;long first=0,last=0,count=0,gaps=0,invalid=0,edges=0;DateTimeOffset? prior=null;TelemetrySource? source=null;string? aircraft=null;
         foreach(var s in selected){ct.ThrowIfCancellationRequested();while(n<pauses.Length&&pauses[n]<=s.Frame.TimestampUtc){window.Break();edges++;AppendResearchBreak(hash,pauses[n++]);}if(prior is {} p){if((s.Frame.TimestampUtc-p).TotalSeconds is <=0 or >FlightRegimeEvaluation.MaximumGapSeconds)gaps++;}else if((s.Frame.TimestampUtc-attempt.StartUtc).TotalSeconds>FlightRegimeEvaluation.MaximumGapSeconds)gaps++;prior=s.Frame.TimestampUtc;if(!FlightRegimeEvaluation.SupportedSample(s.Frame,point.Conditions))invalid++;window.Add(s.Frame);AppendResearchSample(hash,s.Sequence,JsonSerializer.Serialize(s.Frame,WireJson.Options));if(count++==0)first=s.Sequence;last=s.Sequence;source??=s.Frame.Source;aircraft??=s.Frame.Aircraft;}
         while(n<pauses.Length){window.Break();edges++;AppendResearchBreak(hash,pauses[n++]);}if(prior is null||(end-prior.Value).TotalSeconds>FlightRegimeEvaluation.MaximumGapSeconds)gaps++;

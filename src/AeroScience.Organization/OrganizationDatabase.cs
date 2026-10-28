@@ -28,6 +28,7 @@ public sealed class ProgramRecord
 }
 public sealed class CampaignRecord
 {
+    public int ProgressIndexVersion {get;set;}public string PublishedName {get;set;}="";public string PublishedSearchName {get;set;}="";public string PublishedObjective {get;set;}="";
     public Guid Id {get;set;}
     public Guid ProgramId {get;set;}
     public int Revision {get;set;}
@@ -88,10 +89,26 @@ public sealed class OrganizationDatabase(DbContextOptions<OrganizationDatabase> 
     public DbSet<ResearchReviewRequestRecord> ReviewRequests=>Set<ResearchReviewRequestRecord>();
     public DbSet<ResearchReviewPackageRecord> ReviewPackages=>Set<ResearchReviewPackageRecord>();
     public DbSet<CampaignReviewGrantRecord> ReviewGrants=>Set<CampaignReviewGrantRecord>();
+    public DbSet<CampaignProjectionRecord> CampaignProjections=>Set<CampaignProjectionRecord>();
+    public DbSet<CampaignContributionRecord> CampaignContributions=>Set<CampaignContributionRecord>();
+    public DbSet<CampaignMeasurementRecord> CampaignMeasurements=>Set<CampaignMeasurementRecord>();
     protected override void OnModelCreating(ModelBuilder model)
     {
         base.OnModelCreating(model);
         model.HasDefaultSchema("organization");
+        model.Entity<CampaignProjectionRecord>().HasKey(r=>r.RootId);
+        model.Entity<CampaignProjectionRecord>().HasOne<ResearchReviewCaseRecord>().WithMany().HasForeignKey(r=>r.RootId).OnDelete(DeleteBehavior.Cascade);
+        model.Entity<CampaignContributionRecord>().HasKey(r=>new{r.RootId,r.CardId});
+        model.Entity<CampaignContributionRecord>().HasOne<ResearchReviewCaseRecord>().WithMany().HasForeignKey(r=>r.RootId).OnDelete(DeleteBehavior.Cascade);
+        model.Entity<CampaignContributionRecord>().HasIndex(r=>new{r.OpportunityId,r.PublicationRevision,r.PublicationSha256,r.State,r.PilotId});
+        model.Entity<CampaignContributionRecord>().HasIndex(r=>new{r.CampaignId,r.State,r.AcceptedUtc,r.RootId,r.CardId});
+        model.Entity<CampaignContributionRecord>().HasIndex(r=>new{r.PilotId,r.CampaignId,r.OpportunityId});
+        model.Entity<CampaignMeasurementRecord>().HasKey(r=>new{r.RootId,r.CardId,r.GroupId});
+        model.Entity<CampaignMeasurementRecord>().HasOne<CampaignContributionRecord>().WithMany().HasForeignKey(r=>new{r.RootId,r.CardId}).OnDelete(DeleteBehavior.Cascade);
+        model.Entity<OpportunityRecord>().HasIndex(r=>new{r.CampaignId,r.PublishedName,r.Id});
+        model.Entity<OpportunityRecord>().HasIndex(r=>r.PublishedSearchName).HasOperators("text_pattern_ops");
+        model.Entity<CampaignRecord>().HasIndex(r=>new{r.ProgramId,r.PublishedName,r.Id});
+        model.Entity<CampaignRecord>().HasIndex(r=>r.PublishedSearchName).HasOperators("text_pattern_ops");
         model.Entity<ResearchReviewCaseRecord>().HasKey(r=>r.Id);
         model.Entity<ResearchReviewCaseRecord>().Property(r=>r.Revision).IsConcurrencyToken();
         model.Entity<ResearchReviewCaseRecord>().HasOne<ReceivedSubmissionRecord>().WithMany().HasForeignKey(r=>new{r.PilotId,r.SubmissionId}).HasPrincipalKey(r=>new{r.PilotId,SubmissionId=r.Id}).OnDelete(DeleteBehavior.Restrict);

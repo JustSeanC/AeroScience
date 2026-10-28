@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 namespace AeroScience.Organization;
 
 public sealed class OrganizationSubmissions(OrganizationDatabase db,OrganizationMembership members,OrganizationDevices devices,
-    OrganizationManagement history,OrganizationSettings settings,OrganizationSubmissionOptions limits,OrganizationReviews reviews)
+    OrganizationManagement history,OrganizationSettings settings,OrganizationSubmissionOptions limits,OrganizationReviews reviews,CampaignProgressProjection progress)
 {
     static SubmissionPolicy View(SubmissionPolicyRecord row)=>SubmissionEvidenceProtocol.DefaultPolicy(row.OpportunityId,row.PublishedUtc) with{Revision=row.Revision,Mode=row.Mode};
     async Task Lock(CancellationToken ct)=>await db.Database.ExecuteSqlRawAsync($"SELECT pg_advisory_xact_lock({OrganizationMembership.MembershipLock})",ct);
@@ -93,7 +93,7 @@ public sealed class OrganizationSubmissions(OrganizationDatabase db,Organization
         var usage=await db.SubmissionUsage.SingleAsync(ct);if(usage.PayloadBytes>limits.MaximumRetainedPayloadBytes-bytes)throw new OrganizationConflict("The organization's configured evidence-storage quota is full. Your approved local package was not received; ask the administrator to resolve storage.");
         var receipt=new SubmissionReceipt(1,Guid.NewGuid(),d.Manifest.Id,d.Manifest.OrganizationId,grant.UserId.Value,d.Manifest.CampaignId,manifestSha,payloadSha,bytes,OrganizationTime.UtcNow,"Received / Awaiting Review",SubmissionEvidenceProtocol.RetentionDisclosure);
         db.Submissions.Add(new(){PilotId=grant.UserId.Value,Id=d.Manifest.Id,ReceiptId=receipt.Id,CampaignId=d.Manifest.CampaignId,Name=d.Manifest.Name,SearchName=d.Manifest.Name.ToUpperInvariant(),ManifestSha256=manifestSha,PayloadSha256=payloadSha,PayloadBytes=bytes,PayloadJson=JsonSerializer.Serialize(d,WireJson.Options),ReceiptJson=JsonSerializer.Serialize(receipt,WireJson.Options),ReceivedUtc=receipt.ReceivedUtc});usage.PayloadBytes+=bytes;
-        await reviews.Received(d,receipt,ct);history.Audit(grant.UserId.Value,"desktop","submission-received-awaiting-review",d.Manifest.Id,1);ct.ThrowIfCancellationRequested();await db.SaveChangesAsync(ct);await tx.CommitAsync(ct);return receipt;
+        await reviews.Received(d,receipt,ct);history.Audit(grant.UserId.Value,"desktop","submission-received-awaiting-review",d.Manifest.Id,1);ct.ThrowIfCancellationRequested();await db.SaveChangesAsync(ct);await progress.Sync(d.Manifest.ReviewLink?.RootReceiptId??receipt.Id,ct);await tx.CommitAsync(ct);return receipt;
     }
     public async Task<OrganizationPage<SubmissionServerSummary>> Inventory(int offset,string? prefix,Guid? campaign,ClaimsPrincipal actor,CancellationToken ct)
     {

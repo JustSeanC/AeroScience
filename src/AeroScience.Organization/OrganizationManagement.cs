@@ -124,7 +124,7 @@ public sealed class OrganizationManagement(OrganizationDatabase db)
             if(Hash(definition)!=Hash(previous.Definition))throw new OrganizationConflict("The saved research approach differs from the current supported definition. Save a reviewed draft before publishing.");
             row.Revision++;row.PublishedRevision=row.Revision;
             var view=previous with{Revision=row.Revision,PublishedRevision=row.Revision,Status=OrganizationPublication.Published,UpdatedUtc=OrganizationTime.UtcNow,AuthorId=actor,AuthorName=author,ProgramRevision=(await db.Programs.AsNoTracking().SingleAsync(p=>p.Id==row.ProgramId,token)).Revision};
-            row.SnapshotJson=JsonSerializer.Serialize(view,WireJson.Options);Revision(row.Id,row.Revision,"campaign",view,actor);Audit(actor,author,"campaign-published",row.Id,row.Revision);return view;
+            row.SnapshotJson=JsonSerializer.Serialize(view,WireJson.Options);CampaignProgressProjection.Index(row,view);Revision(row.Id,row.Revision,"campaign",view,actor);Audit(actor,author,"campaign-published",row.Id,row.Revision);return view;
         },token);
     }
     public async Task<DefinitionRevision> ReadRevision(Guid id,int revision,CancellationToken token)
