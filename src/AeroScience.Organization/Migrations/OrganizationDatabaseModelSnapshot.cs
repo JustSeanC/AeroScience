@@ -918,6 +918,24 @@ namespace AeroScience.Organization.Migrations
                     b.ToTable("AspNetUsers", "organization");
                 });
 
+            modelBuilder.Entity("AeroScience.Organization.PhaseCardRecord", b =>
+                {
+                    b.Property<Guid>("PhaseId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("OpportunityId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("PublicationRevision")
+                        .HasColumnType("integer");
+
+                    b.HasKey("PhaseId", "OpportunityId");
+
+                    b.HasIndex("OpportunityId");
+
+                    b.ToTable("PhaseCards", "organization");
+                });
+
             modelBuilder.Entity("AeroScience.Organization.ProgramRecord", b =>
                 {
                     b.Property<Guid>("Id")
@@ -954,6 +972,44 @@ namespace AeroScience.Organization.Migrations
                     b.HasIndex("CreatedUtc", "Id");
 
                     b.ToTable("Programs", "organization");
+                });
+
+            modelBuilder.Entity("AeroScience.Organization.ProgramWorkflowPolicyRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("AdministrativeHold")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("PhaseGatesEnabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("ProgramId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Revision")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer");
+
+                    b.Property<int>("RulesRevision")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("SnapshotJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("SnapshotSha256")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProgramId")
+                        .IsUnique();
+
+                    b.ToTable("WorkflowPolicies", "organization");
                 });
 
             modelBuilder.Entity("AeroScience.Organization.ReceivedSubmissionRecord", b =>
@@ -1302,6 +1358,202 @@ namespace AeroScience.Organization.Migrations
                         });
                 });
 
+            modelBuilder.Entity("AeroScience.Organization.TestPhaseRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("DefinitionRevision")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("Enabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("Held")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("ProgramId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("Released")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("Revision")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Sequence")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("SnapshotJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("SnapshotSha256")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProgramId", "Sequence")
+                        .IsUnique()
+                        .HasFilter("\"Enabled\"");
+
+                    b.HasIndex("ProgramId", "Sequence", "Id");
+
+                    b.ToTable("TestPhases", "organization");
+                });
+
+            modelBuilder.Entity("AeroScience.Organization.WorkflowExceptionRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("Active")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("CampaignId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("CardId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("ClaimId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("CountAsPartialContributor")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("Kind")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("OpportunityId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int?>("PhaseDefinitionRevision")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid?>("PhaseId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("PilotId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ProgramId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("PublicationRevision")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("PublicationSha256")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("RequirementKey")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Revision")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer");
+
+                    b.Property<Guid?>("RootReceiptId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("RulesRevision")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ScopeSha256")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("SnapshotJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("SnapshotSha256")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("SourceReviewHeadSha256")
+                        .HasColumnType("text");
+
+                    b.Property<int?>("SourceReviewRevision")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("SourceSignature")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int?>("SourceState")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("TimestampUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OpportunityId");
+
+                    b.HasIndex("ScopeSha256")
+                        .IsUnique()
+                        .HasFilter("\"Active\"");
+
+                    b.HasIndex("ProgramId", "TimestampUtc", "Id");
+
+                    b.HasIndex("ProgramId", "PhaseId", "OpportunityId", "PublicationRevision", "RequirementKey", "Active");
+
+                    b.ToTable("WorkflowExceptions", "organization");
+                });
+
+            modelBuilder.Entity("AeroScience.Organization.WorkflowRequirementApproval", b =>
+                {
+                    b.Property<Guid>("RootId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CardId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("RequirementKey")
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("FindingId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("FindingSha256")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("RootId", "CardId", "RequirementKey");
+
+                    b.ToTable("WorkflowRequirementApprovals", "organization");
+                });
+
+            modelBuilder.Entity("AeroScience.Organization.WorkflowReviewIndex", b =>
+                {
+                    b.Property<Guid>("RootId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("HeadSha256")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("ReviewRevision")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("Valid")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer");
+
+                    b.HasKey("RootId");
+
+                    b.ToTable("WorkflowReviewIndexes", "organization");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.DataProtectionKey", b =>
                 {
                     b.Property<int>("Id")
@@ -1595,6 +1847,30 @@ namespace AeroScience.Organization.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("AeroScience.Organization.PhaseCardRecord", b =>
+                {
+                    b.HasOne("AeroScience.Organization.OpportunityRecord", null)
+                        .WithMany()
+                        .HasForeignKey("OpportunityId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("AeroScience.Organization.TestPhaseRecord", null)
+                        .WithMany()
+                        .HasForeignKey("PhaseId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("AeroScience.Organization.ProgramWorkflowPolicyRecord", b =>
+                {
+                    b.HasOne("AeroScience.Organization.ProgramRecord", null)
+                        .WithMany()
+                        .HasForeignKey("ProgramId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("AeroScience.Organization.ReceivedSubmissionRecord", b =>
                 {
                     b.HasOne("AeroScience.Organization.CampaignRecord", null)
@@ -1667,6 +1943,48 @@ namespace AeroScience.Organization.Migrations
                         .WithMany()
                         .HasForeignKey("OpportunityId")
                         .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("AeroScience.Organization.TestPhaseRecord", b =>
+                {
+                    b.HasOne("AeroScience.Organization.ProgramRecord", null)
+                        .WithMany()
+                        .HasForeignKey("ProgramId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("AeroScience.Organization.WorkflowExceptionRecord", b =>
+                {
+                    b.HasOne("AeroScience.Organization.OpportunityRecord", null)
+                        .WithMany()
+                        .HasForeignKey("OpportunityId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("AeroScience.Organization.ProgramRecord", null)
+                        .WithMany()
+                        .HasForeignKey("ProgramId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("AeroScience.Organization.WorkflowRequirementApproval", b =>
+                {
+                    b.HasOne("AeroScience.Organization.CampaignContributionRecord", null)
+                        .WithMany()
+                        .HasForeignKey("RootId", "CardId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("AeroScience.Organization.WorkflowReviewIndex", b =>
+                {
+                    b.HasOne("AeroScience.Organization.ResearchReviewCaseRecord", null)
+                        .WithMany()
+                        .HasForeignKey("RootId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 

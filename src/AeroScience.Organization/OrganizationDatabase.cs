@@ -95,10 +95,41 @@ public sealed class OrganizationDatabase(DbContextOptions<OrganizationDatabase> 
     public DbSet<CampaignCoverageIndex> CoverageIndexes=>Set<CampaignCoverageIndex>();
     public DbSet<CampaignCoverageObservation> CoverageObservations=>Set<CampaignCoverageObservation>();
     public DbSet<CampaignCoverageGoalRecord> CoverageGoals=>Set<CampaignCoverageGoalRecord>();
+    public DbSet<WorkflowReviewIndex> WorkflowReviewIndexes=>Set<WorkflowReviewIndex>();
+    public DbSet<WorkflowRequirementApproval> WorkflowRequirementApprovals=>Set<WorkflowRequirementApproval>();
+    public DbSet<ProgramWorkflowPolicyRecord> WorkflowPolicies=>Set<ProgramWorkflowPolicyRecord>();
+    public DbSet<TestPhaseRecord> TestPhases=>Set<TestPhaseRecord>();
+    public DbSet<PhaseCardRecord> PhaseCards=>Set<PhaseCardRecord>();
+    public DbSet<WorkflowExceptionRecord> WorkflowExceptions=>Set<WorkflowExceptionRecord>();
     protected override void OnModelCreating(ModelBuilder model)
     {
         base.OnModelCreating(model);
         model.HasDefaultSchema("organization");
+        model.Entity<WorkflowReviewIndex>().HasKey(r=>r.RootId);
+        model.Entity<WorkflowReviewIndex>().HasOne<ResearchReviewCaseRecord>().WithMany().HasForeignKey(r=>r.RootId).OnDelete(DeleteBehavior.Cascade);
+        model.Entity<WorkflowRequirementApproval>().HasKey(r=>new{r.RootId,r.CardId,r.RequirementKey});
+        model.Entity<WorkflowRequirementApproval>().HasOne<CampaignContributionRecord>().WithMany().HasForeignKey(r=>new{r.RootId,r.CardId}).OnDelete(DeleteBehavior.Cascade);
+        model.Entity<ProgramWorkflowPolicyRecord>().HasKey(r=>r.Id);
+        model.Entity<ProgramWorkflowPolicyRecord>().HasIndex(r=>r.ProgramId).IsUnique();
+        model.Entity<ProgramWorkflowPolicyRecord>().Property(r=>r.Revision).IsConcurrencyToken();
+        model.Entity<ProgramWorkflowPolicyRecord>().HasOne<ProgramRecord>().WithMany().HasForeignKey(r=>r.ProgramId).OnDelete(DeleteBehavior.Restrict);
+        model.Entity<TestPhaseRecord>().HasKey(r=>r.Id);
+        model.Entity<TestPhaseRecord>().Property(r=>r.Revision).IsConcurrencyToken();
+        model.Entity<TestPhaseRecord>().HasOne<ProgramRecord>().WithMany().HasForeignKey(r=>r.ProgramId).OnDelete(DeleteBehavior.Restrict);
+        model.Entity<TestPhaseRecord>().HasIndex(r=>new{r.ProgramId,r.Sequence,r.Id});
+        model.Entity<TestPhaseRecord>().HasIndex(r=>new{r.ProgramId,r.Sequence}).IsUnique().HasFilter("\"Enabled\"");
+        model.Entity<PhaseCardRecord>().HasKey(r=>new{r.PhaseId,r.OpportunityId});
+        model.Entity<PhaseCardRecord>().HasOne<TestPhaseRecord>().WithMany().HasForeignKey(r=>r.PhaseId).OnDelete(DeleteBehavior.Restrict);
+        model.Entity<PhaseCardRecord>().HasOne<OpportunityRecord>().WithMany().HasForeignKey(r=>r.OpportunityId).OnDelete(DeleteBehavior.Restrict);
+        model.Entity<PhaseCardRecord>().HasIndex(r=>r.OpportunityId);
+        model.Entity<WorkflowExceptionRecord>().HasKey(r=>r.Id);
+        model.Entity<WorkflowExceptionRecord>().Property(r=>r.Revision).IsConcurrencyToken();
+        model.Entity<WorkflowExceptionRecord>().HasOne<ProgramRecord>().WithMany().HasForeignKey(r=>r.ProgramId).OnDelete(DeleteBehavior.Restrict);
+        model.Entity<WorkflowExceptionRecord>().HasOne<OpportunityRecord>().WithMany().HasForeignKey(r=>r.OpportunityId).OnDelete(DeleteBehavior.Restrict);
+        model.Entity<WorkflowExceptionRecord>().HasIndex(r=>r.ScopeSha256).IsUnique().HasFilter("\"Active\"");
+        model.Entity<WorkflowExceptionRecord>().HasIndex(r=>new{r.ProgramId,r.PhaseId,r.OpportunityId,r.PublicationRevision,r.RequirementKey,r.Active});
+        model.Entity<WorkflowExceptionRecord>().HasIndex(r=>new{r.ProgramId,r.TimestampUtc,r.Id});
+
         model.Entity<CampaignCoverageIndex>().HasKey(r=>r.RootId);
         model.Entity<CampaignCoverageIndex>().HasOne<ResearchReviewCaseRecord>().WithMany().HasForeignKey(r=>r.RootId).OnDelete(DeleteBehavior.Cascade);
         model.Entity<CampaignCoverageObservation>().HasKey(r=>new{r.RootId,r.CardId,r.RequirementKey,r.IdentitySha256});

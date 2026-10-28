@@ -51,12 +51,16 @@ public sealed partial class MissionStore
     }
     static PersonalResearchCard OrganizationCard(OrganizationAssignmentIdentity s)
     {
-        var original=OrganizationOriginal(s);var d=original.Definition;
+        var original=OrganizationOriginal(s);return PublishedResearchCard(original,OrganizationCardId(s),s.AcceptedUtc) with{OrganizationAssignment=s};
+    }
+    public static PersonalResearchCard PublishedResearchCard(OrganizationOpportunitySnapshot original,Guid id,DateTimeOffset at)
+    {
+        var d=original.Definition;
         if(new object?[]{d.FlightRegime,d.AtmosphericProfile,d.AtmosphericTransect,d.Survey,d.ObservationFlight,d.ExperimentalSensor,d.Procedure}.Count(v=>v is not null)!=1)
             throw new ArgumentException("An assignment must contain exactly one supported research definition.");
         var version=d.Procedure is not null?8:d.FlightRegime?.TestPoint is not null?7:d.ExperimentalSensor is not null?6:d.ObservationFlight is not null?5:d.Survey is not null?4:d.AtmosphericTransect is not null?3:d.AtmosphericProfile is not null?2:1;
-        var card=new PersonalResearchCard(version,OrganizationCardId(s),1,original.Name,d.Template.Id,d.FlightRegime,s.AcceptedUtc,d.AtmosphericProfile,d.AtmosphericTransect,d.Survey,d.ObservationFlight,d.ExperimentalSensor,d.Procedure);
-        SupportedCard(card);return card with{OrganizationAssignment=s};
+        var card=new PersonalResearchCard(version,id,1,original.Name,d.Template.Id,d.FlightRegime,at,d.AtmosphericProfile,d.AtmosphericTransect,d.Survey,d.ObservationFlight,d.ExperimentalSensor,d.Procedure);
+        SupportedCard(card);return card;
     }
     static void ValidateOrganizationCard(PersonalResearchCard card)
     {

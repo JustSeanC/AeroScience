@@ -5,9 +5,11 @@ using Microsoft.EntityFrameworkCore;
 namespace AeroScience.Organization;
 
 // Rebuildable index only. P15 publication/claim and P17/P18 receipt/findings stay authoritative.
-public sealed class CampaignProgressProjection(OrganizationDatabase db,OrganizationManagement history,CampaignCoverageProjection coverage)
+public sealed class CampaignProgressProjection(OrganizationDatabase db,OrganizationManagement history,CampaignCoverageProjection coverage,ProgramWorkflow workflow)
 {
     public const int Version=1;
+    internal static IQueryable<CampaignContributionRecord> Current(OrganizationDatabase db)=>from c in db.CampaignContributions.AsNoTracking() join r in db.Reviews.AsNoTracking() on c.RootId equals r.Id join p in db.CampaignProjections.AsNoTracking() on r.Id equals p.RootId where p.Version==1&&p.Valid&&p.ReviewRevision==r.Revision&&p.HeadSha256==r.HeadSha256&&c.ReviewRevision==r.Revision&&c.SourceHeadSha256==r.HeadSha256 select c;
+
     static T Read<T>(string json)=>JsonSerializer.Deserialize<T>(json,WireJson.Options)??throw new InvalidOperationException("Progress source unavailable.");
     public static void Index(OpportunityRecord row,OrganizationOpportunitySnapshot value){row.ProgressIndexVersion=Version;row.PublishedName=value.Name;row.PublishedSearchName=value.Name.ToUpperInvariant();row.PublishedRequiredPilots=value.Policy.RequiredDistinctPilots;row.PublishedSha256=PreflightReadiness.Hash(value);}
     public static void Index(CampaignRecord row,OrganizationCampaignView value){row.ProgressIndexVersion=Version;row.PublishedName=value.Name;row.PublishedSearchName=value.Name.ToUpperInvariant();row.PublishedObjective=value.Objective;}
@@ -27,7 +29,7 @@ public sealed class CampaignProgressProjection(OrganizationDatabase db,Organizat
     }
     public async Task Sync(Guid root,CancellationToken ct,bool force=false)
     {
-        var source=await db.Reviews.AsNoTracking().SingleAsync(r=>r.Id==root,ct);var marker=await db.CampaignProjections.FindAsync([root],ct);if(marker?.Version>Version)throw new InvalidOperationException("A newer progress interpretation cannot be replaced.");if(!force&&marker?.Version==Version&&marker.ReviewRevision==source.Revision&&marker.HeadSha256==source.HeadSha256){await coverage.Sync(root,ct,force);return;}
+        var source=await db.Reviews.AsNoTracking().SingleAsync(r=>r.Id==root,ct);var marker=await db.CampaignProjections.FindAsync([root],ct);if(marker?.Version>Version)throw new InvalidOperationException("A newer progress interpretation cannot be replaced.");if(!force&&marker?.Version==Version&&marker.ReviewRevision==source.Revision&&marker.HeadSha256==source.HeadSha256){await coverage.Sync(root,ct,force);await workflow.IndexReview(root,ct,force);await workflow.Reconcile(source.ProgramId,ct);return;}
         if(marker is null){marker=new(){RootId=root};db.CampaignProjections.Add(marker);}marker.Version=Version;marker.ReviewRevision=source.Revision;marker.HeadSha256=source.HeadSha256;marker.Valid=false;
         try{
             var document=await OrganizationReviews.ReadDocument(db,root,ct);SubmissionEvidenceProtocol.Validate(document,ct);var official=SubmissionReviewEvidence.Requirements(document);var requirements=await db.ReviewRequirements.AsNoTracking().Where(q=>q.RootId==root).ToArrayAsync(ct);if(requirements.Length!=official.Length||requirements.Any(q=>!official.Any(d=>d.CardId==q.CardId&&d.Key==q.Key&&d.DefinitionSha256==Read<ReviewRequirementDefinition>(q.DefinitionJson).DefinitionSha256)))throw new InvalidOperationException("Required findings differ from the frozen received definition.");
@@ -46,6 +48,6 @@ public sealed class CampaignProgressProjection(OrganizationDatabase db,Organizat
                 }catch(Exception e) when(e is ArgumentException or InvalidOperationException or IOException or JsonException){current.Valid=false;current.SummaryJson="";current.AcceptedUtc=null;}
             }marker.Valid=true;
         }catch(Exception e) when(e is ArgumentException or InvalidOperationException or IOException or JsonException){var rows=await db.CampaignContributions.Where(c=>c.RootId==root).ToArrayAsync(ct);foreach(var r in rows){r.Valid=false;r.SummaryJson="";r.AcceptedUtc=null;r.ReviewRevision=source.Revision;r.SourceHeadSha256=source.HeadSha256;}marker.Valid=false;}
-        await db.SaveChangesAsync(ct);await coverage.Sync(root,ct,force);
+        await db.SaveChangesAsync(ct);await coverage.Sync(root,ct,force);await workflow.IndexReview(root,ct,force);await workflow.Reconcile(source.ProgramId,ct);
     }
 }

@@ -19,7 +19,7 @@ public sealed partial class OrganizationCampaignProgress(OrganizationDatabase db
         var result=await action(new(id,m.Role,devicePilot is not null,(await members.Public(ct)).Id,OrganizationTime.UtcNow));await tx.CommitAsync(ct);return result;
     }
     static void Page(int offset,string? search=null,string sort="name"){if(offset<0||search?.Length>100||sort is not("name" or "remaining" or "approved" or "newest" or "oldest"))throw new ArgumentException("Choose a valid page, supported sort and search of up to 100 characters.");}
-    IQueryable<CampaignContributionRecord> Live()=>from c in db.CampaignContributions.AsNoTracking() join r in db.Reviews.AsNoTracking() on c.RootId equals r.Id join p in db.CampaignProjections.AsNoTracking() on r.Id equals p.RootId where p.Version==1&&p.Valid&&p.ReviewRevision==r.Revision&&p.HeadSha256==r.HeadSha256&&c.ReviewRevision==r.Revision&&c.SourceHeadSha256==r.HeadSha256 select c;
+    IQueryable<CampaignContributionRecord> Live()=>CampaignProgressProjection.Current(db);
     IQueryable<CampaignContributionRecord> Accepted()=>Live().Where(c=>c.Valid&&c.State==ResearchReviewState.Approved&&c.AcceptancePolicyVersion==1&&c.SummaryJson!="");
     async Task<bool> CanReview(Reader reader,Guid campaign,CancellationToken ct)=>!reader.Native&&(reader.Role is OrganizationRoles.Administrator or OrganizationRoles.Manager||reader.Role==OrganizationRoles.Reviewer&&await db.ReviewGrants.AsNoTracking().AnyAsync(g=>g.CampaignId==campaign&&g.ReviewerId==reader.Id&&g.Allowed,ct));
     sealed class Counts

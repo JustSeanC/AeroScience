@@ -11,7 +11,12 @@ public static partial class SubmissionReviewEvidence
     {
         return d.Manifest.Cards.SelectMany(b=>{
             var c=d.Evidence.Single(i=>i.Reference.CardId==b.CardId&&i.Data.Definition is not null).Data.Definition!;
-            ReviewRequirementDefinition R(string key,string name,string question,string criteria,Guid? point=null,bool supported=true)=>new(c.Id,key,c.Name,name,question,criteria,b.IssuedRevision,b.DefinitionSha256,point,supported);
+            return Requirements(c,b.IssuedRevision,b.DefinitionSha256);
+        }).ToArray();
+    }
+    public static ReviewRequirementDefinition[] Requirements(PersonalResearchCard c,int issuedRevision,string definitionSha256)
+    {
+            ReviewRequirementDefinition R(string key,string name,string question,string criteria,Guid? point=null,bool supported=true)=>new(c.Id,key,c.Name,name,question,criteria,issuedRevision,definitionSha256,point,supported);
             static string Rule(FlightRegimeDefinition r){var parts=new List<string>();if(FlightRegimeEvaluation.RequiresAirspeed(r))parts.Add($"{r.AirspeedKnots} ± {r.AirspeedToleranceKnots} knots IAS");if(FlightRegimeEvaluation.RequiresAltitude(r))parts.Add($"{r.AltitudeMslFeet} ± {r.AltitudeToleranceFeet} feet MSL");return string.Join(r.TestPoint?.Policy=="any"?" OR ":" AND ",parts)+$" for {r.HoldSeconds} continuous seconds. Gaps and pauses do not qualify.";}
             if(c.Procedure is {} p)return p.Points.Select(v=>R("point:"+v.Id,v.Conditions.TestPoint!.Name,v.Conditions.TestPoint.Description,Rule(v.Conditions)+$" {v.Repetitions} distinct attempt(s). "+(p.Ordered?"Required earlier points must qualify first in the same flight.":"Independent point execution."),v.Id)).ToArray();
             if(c.FlightRegime is {} f)return[R("conditions",f.TestPoint?.Name??"Flight-Regime Validation",f.TestPoint?.Description??"Establish the issued operating conditions.",Rule(f))];
@@ -20,7 +25,6 @@ public static partial class SubmissionReviewEvidence
             if(c.ObservationFlight is {} o)return[R("documentation","Pilot Observation Documentation",o.Question,$"{o.MinimumObservations} qualifying documented observations; categories {string.Join(", ",o.SelectedCategories)}. "+(o.RequireEveryCategory?"Every category is required. ":"")+(o.RequirePosition?"Supported recorded positions are required. ":"")+"Documentation is not proof of a hypothesis.")];
             if(c.Survey is {} s)return s.Measurements.Select(m=>R("survey:"+m,m.ToString(),s.Question,$"{s.MinimumValidSamples} valid samples at {s.MinimumLocations} distinct supported locations. Full original raster/QA/source-context completeness is not verifiable from P17's bounded scalar format.",supported:false)).ToArray();
             return[R("sensor","Modeled Sensor Evidence",c.ExperimentalSensor?.Question??c.Name,"Modeled response series are not supported in the P17 format. Original inputs and submitted metadata can be inspected; incomplete products cannot be approved as complete.",supported:false)];
-        }).ToArray();
     }
     public static SubmissionDocument Scoped(SubmissionDocument d,Guid card)
     {

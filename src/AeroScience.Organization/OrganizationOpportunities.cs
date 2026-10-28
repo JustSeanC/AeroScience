@@ -42,7 +42,7 @@ public sealed class ClaimEventRecord
     public Guid ActorId {get;set;}
 }
 
-public sealed class OrganizationOpportunities(OrganizationDatabase db,OrganizationManagement history,OrganizationMembership members,OrganizationDevices devices)
+public sealed class OrganizationOpportunities(OrganizationDatabase db,OrganizationManagement history,OrganizationMembership members,OrganizationDevices devices,ProgramWorkflow workflow)
 {
     const int PageSize=10;
     static void Command(int version,Guid id){if(version!=1||id==Guid.Empty)throw new ArgumentException("Use a supported command and a unique request identity.");}
@@ -129,8 +129,8 @@ public sealed class OrganizationOpportunities(OrganizationDatabase db,Organizati
         foreach(var row in rows.Take(PageSize)){
             var (card,hash)=manager?(Snapshot(row),""):await Published(row,ct);
             if(manager){var original=await history.ReadRevision(row.Id,row.Revision,ct);hash=original.Sha256;}
-            var held=await db.Claims.CountAsync(c=>c.OpportunityId==row.Id&&c.State!=OrganizationClaimState.Released,ct);var publishedCard=row.PublishedRevision is not null?(await Published(row,ct)).Card:null;var effective=publishedCard??card;var eligible=Eligible(member,effective);
-            result.Add(new(card,hash,row.PublishedRevision,row.Suspended,row.AvailabilityRevision,held,Math.Max(0,effective.Policy.MaximumActiveClaims-held),eligible,row.Suspended?"Unavailable / Suspended":row.PublishedRevision is null?"Draft — not claimable":!eligible?"Not eligible for this card":held>=effective.Policy.MaximumActiveClaims?"All slots reserved or claimed":!effective.Policy.AllowVolunteers?"Manager assignment only":"Available",manager?publishedCard:null));
+            var held=await db.Claims.CountAsync(c=>c.OpportunityId==row.Id&&c.State!=OrganizationClaimState.Released,ct);var publishedCard=row.PublishedRevision is not null?(await Published(row,ct)).Card:null;var effective=publishedCard??card;var eligible=Eligible(member,effective);var gate=row.PublishedRevision is not null?await workflow.ClaimGate(row.Id,effective.Revision,ct):null;eligible&=gate is null;
+            result.Add(new(card,hash,row.PublishedRevision,row.Suspended,row.AvailabilityRevision,held,Math.Max(0,effective.Policy.MaximumActiveClaims-held),eligible,row.Suspended?"Unavailable / Suspended":row.PublishedRevision is null?"Draft — not claimable":!eligible?gate??"Not eligible for this card":held>=effective.Policy.MaximumActiveClaims?"All slots reserved or claimed":!effective.Policy.AllowVolunteers?"Manager assignment only":"Available",manager?publishedCard:null));
         }
         return new(1,result.ToArray(),rows.Length>PageSize?checked(offset+PageSize):null);
     }
@@ -146,6 +146,7 @@ public sealed class OrganizationOpportunities(OrganizationDatabase db,Organizati
             if(request.Action is OrganizationClaimAction.Assign or OrganizationClaimAction.Claim){
                 var (card,hash)=await Published(opportunity,ct);
                 if(opportunity.Suspended||card.Revision!=request.PublishedRevision)throw new OrganizationConflict("This card is unavailable or its publication changed. Refresh and review the current requirements.");
+                var gate=await workflow.ClaimGate(opportunity.Id,card.Revision,ct);if(gate is not null)throw new OrganizationConflict(gate);
                 var pilot=manager?request.PilotId??throw new ArgumentException("Choose an eligible active member."):user;
                 if(!manager&&request.PilotId is not null&&request.PilotId!=user)throw new OrganizationForbidden();
                 var target=pilot==user?member:await db.Memberships.AsNoTracking().SingleOrDefaultAsync(m=>m.UserId==pilot,ct)??throw new OrganizationNotFound();
