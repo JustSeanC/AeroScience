@@ -90,7 +90,7 @@ public sealed partial class OrganizationServerTests:IAsyncLifetime
     {
         var admin=new NpgsqlConnectionStringBuilder(Environment.GetEnvironmentVariable("AEROSCIENCE_ORG_TEST_DATABASE"));
         if(admin.Host is not("127.0.0.1" or "localhost" or "::1"))throw new InvalidOperationException("Organization tests require an explicit local isolated PostgreSQL fixture.");
-        await using(var db=new NpgsqlConnection(admin.ConnectionString)){await db.OpenAsync();await using var command=new NpgsqlCommand($"CREATE DATABASE \"{database}\"",db);await command.ExecuteNonQueryAsync();}
+        await using(var db=new NpgsqlConnection(admin.ConnectionString)){await db.OpenAsync();await using var command=new NpgsqlCommand($"CREATE DATABASE \"{database}\" ENCODING 'UTF8' TEMPLATE template0",db);await command.ExecuteNonQueryAsync();}
         admin.Database=database;connection=admin.ConnectionString;Directory.CreateDirectory(directory);var path=Path.Combine(directory,"bootstrap-secret");await File.WriteAllTextAsync(path,secret);if(!OperatingSystem.IsWindows())File.SetUnixFileMode(path,UnixFileMode.UserRead|UnixFileMode.UserWrite);
         OrganizationConfigurationTests.ProtectCredential(path);await Start();browser=new();browser.Connect(app);await browser.Session();
     }

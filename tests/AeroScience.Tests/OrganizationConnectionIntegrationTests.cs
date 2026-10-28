@@ -47,7 +47,7 @@ public sealed partial class OrganizationConnectionIntegrationTests
     {
         var admin=new NpgsqlConnectionStringBuilder(System.Environment.GetEnvironmentVariable("AEROSCIENCE_ORG_TEST_DATABASE"));
         if(admin.Host is not("127.0.0.1" or "localhost" or "::1"))throw new InvalidOperationException("Explicit isolated loopback PostgreSQL is required.");
-        if(!existing)await using(var c=new NpgsqlConnection(admin.ConnectionString)){await c.OpenAsync();await using var cmd=new NpgsqlCommand($"CREATE DATABASE \"{database}\"",c);await cmd.ExecuteNonQueryAsync();}
+        if(!existing)await using(var c=new NpgsqlConnection(admin.ConnectionString)){await c.OpenAsync();await using var cmd=new NpgsqlCommand($"CREATE DATABASE \"{database}\" ENCODING 'UTF8' TEMPLATE template0",c);await cmd.ExecuteNonQueryAsync();}
         admin.Database=database;var listener=new TcpListener(IPAddress.Loopback,0);listener.Start();var port=((IPEndPoint)listener.LocalEndpoint).Port;listener.Stop();var origin=retainedOrigin??"http://127.0.0.1:"+port;
         var secret=new string('s',48);var path=Path.Combine(directory,database);await File.WriteAllTextAsync(path,secret);OrganizationConfigurationTests.ProtectCredential(path);
         var app=OrganizationApplication.Build([],b=>{b.Environment.EnvironmentName="Testing";b.Configuration.AddInMemoryCollection(new Dictionary<string,string?>{["Organization:LocalDevelopment"]="true",["Organization:PublicOrigin"]=origin,["Organization:ConnectionString"]=admin.ConnectionString,["Organization:BootstrapSecretFile"]=path});b.Logging.SetMinimumLevel(LogLevel.Warning);});

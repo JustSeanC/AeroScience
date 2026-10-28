@@ -14,13 +14,13 @@ New-Item $scratch -ItemType Directory | Out-Null
 $data = Join-Path $scratch 'data'
 $password = Join-Path $scratch 'password'
 Set-Content -LiteralPath $password -Value 'p13_disposable_loopback_only' -NoNewline
-& (Join-Path $pgbin 'initdb.exe') -D $data -U aeroscience_test --auth=scram-sha-256 --pwfile=$password
+& (Join-Path $pgbin 'initdb.exe') -D $data -U aeroscience_test --encoding=UTF8 --auth=scram-sha-256 --pwfile=$password
 if ($LASTEXITCODE -ne 0) { throw 'Isolated PostgreSQL initialization failed.' }
 & (Join-Path $pgbin 'pg_ctl.exe') -D $data -l (Join-Path $scratch 'postgres.log') -o '-h 127.0.0.1 -p 55437' -w start
 if ($LASTEXITCODE -ne 0) { throw 'Isolated loopback PostgreSQL startup failed.' }
 try {
     $env:PGPASSWORD = 'p13_disposable_loopback_only'
-    & (Join-Path $pgbin 'createdb.exe') -h 127.0.0.1 -p 55437 -U aeroscience_test aeroscience_org_tests
+    & (Join-Path $pgbin 'createdb.exe') -h 127.0.0.1 -p 55437 -U aeroscience_test --encoding=UTF8 --template=template0 aeroscience_org_tests
     if ($LASTEXITCODE -ne 0) { throw 'Isolated PostgreSQL test database creation failed.' }
 } finally { Remove-Item Env:PGPASSWORD -ErrorAction SilentlyContinue; Remove-Item -LiteralPath $password }
 Add-Content -LiteralPath $env:GITHUB_ENV -Value 'AEROSCIENCE_ORG_TEST_DATABASE=Host=127.0.0.1;Port=55437;Database=aeroscience_org_tests;Username=aeroscience_test;Password=p13_disposable_loopback_only'

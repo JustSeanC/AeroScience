@@ -28,6 +28,7 @@ public sealed class OrganizationProgram
 }
 public sealed record OrganizationBootstrapRequest(string Secret,string OrganizationName,string Description,string UserName,string Password);
 public sealed record OrganizationLoginRequest(string UserName,string Password);
+public sealed class OrganizationDatabaseEncodingException():InvalidOperationException("Organization PostgreSQL must use UTF8 to retain multilingual research names, objectives and provenance. Startup stopped before migration; existing records were not converted or changed.");
 public sealed class BootstrapCredential:IDisposable
 {
     byte[]? digest;
@@ -148,10 +149,12 @@ public static class OrganizationApplication
     {
         using var scope=app.Services.CreateScope();var db=scope.ServiceProvider.GetRequiredService<OrganizationDatabase>();
         try{
+            if(await db.Database.SqlQueryRaw<string>("SELECT current_setting('server_encoding') AS \"Value\"").SingleAsync(token)!="UTF8")throw new OrganizationDatabaseEncodingException();
             var known=db.Database.GetMigrations().ToHashSet(StringComparer.Ordinal);
             if((await db.Database.GetAppliedMigrationsAsync(token)).Any(m=>!known.Contains(m)))throw new InvalidOperationException("Organization database schema is newer or incompatible.");
             await db.Database.MigrateAsync(token);await scope.ServiceProvider.GetRequiredService<OrganizationReviews>().Backfill(token);await scope.ServiceProvider.GetRequiredService<CampaignProgressProjection>().Backfill(token);if(!await db.Organizations.AnyAsync(token))app.Services.GetRequiredService<BootstrapCredential>().Initialize(app.Services.GetRequiredService<OrganizationSettings>().ReadBootstrapSecret());
         }
+        catch(OrganizationDatabaseEncodingException){throw;}
         catch(Exception ex) when(ex is not OperationCanceledException){throw new InvalidOperationException("Organization startup refused: database/schema, protected bootstrap or key configuration is unavailable. No personal-data fallback was used.");}
     }
     static void MapManagement(WebApplication app)
