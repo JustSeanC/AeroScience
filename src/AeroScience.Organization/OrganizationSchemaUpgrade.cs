@@ -28,6 +28,7 @@ public static class OrganizationSchemaUpgrade
     }
     public static async Task ApplyPrepared(IServiceProvider services,Guid operationId,CancellationToken ct)
     {
+        using var deadline=CancellationTokenSource.CreateLinkedTokenSource(ct);deadline.CancelAfter(TimeSpan.FromMinutes(15));ct=deadline.Token;
         using var scope=services.CreateScope();var db=scope.ServiceProvider.GetRequiredService<OrganizationDatabase>();var options=scope.ServiceProvider.GetRequiredService<ServerOperationsOptions>();var settings=scope.ServiceProvider.GetRequiredService<OrganizationSettings>();
         var signed=options.Distribution()??throw new InvalidOperationException("No authenticated pinned update is configured.");var distribution=signed.Distribution;
         var version=OrganizationDeployment.ApplicationVersion;var source=version.Split('+').ElementAtOrDefault(1);
@@ -49,6 +50,7 @@ public static class OrganizationSchemaUpgrade
     public static Task ApplyKnownMigrations(OrganizationDatabase db,string expectedSourceSchemaHash,CancellationToken ct)=>Apply(db,expectedSourceSchemaHash,null,ct);
     static async Task Apply(OrganizationDatabase db,string expectedSourceSchemaHash,ServerOperationRecord? job,CancellationToken ct)
     {
+        using var deadline=CancellationTokenSource.CreateLinkedTokenSource(ct);deadline.CancelAfter(TimeSpan.FromMinutes(15));ct=deadline.Token;
         var known=db.Database.GetMigrations().ToArray();var applied=(await db.Database.GetAppliedMigrationsAsync(ct)).ToArray();
         if(applied.Length==0||!applied.SequenceEqual(known.Take(applied.Length))||SchemaHash(applied)!=expectedSourceSchemaHash)throw new InvalidOperationException("The exact approved source schema is unavailable. No update was applied.");
         if(applied.Length==known.Length)return;

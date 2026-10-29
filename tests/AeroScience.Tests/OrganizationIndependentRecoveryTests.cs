@@ -6,6 +6,7 @@ using AeroScience.Missions;
 using AeroScience.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Npgsql;
 using Xunit;
 namespace AeroScience.Tests;
 
@@ -19,8 +20,8 @@ public sealed partial class OrganizationConnectionIntegrationTests
         var enrollment=await f.Server.Post("/api/account-security/enroll",new AccountEnrollment("ResearchOnly!2026Flight"));var authenticator=enrollment.GetProperty("setupKey").GetString()!;
         var enabled=await f.Server.Post("/api/account-security/enable",new AccountCode(OrganizationServerTests.AuthenticatorCode(authenticator,DateTimeOffset.UtcNow.ToUnixTimeSeconds()/30+1)));await f.Server.Post("/api/account-security/confirm-recovery",new AccountRecoveryConfirmation(enabled.GetProperty("recoveryCodes")[0].GetString()!));
         var primary=Path.Combine(f.Root,"primary-repository");var independent=Path.Combine(Path.GetTempPath(),"aeroscience-account-loss-"+Guid.NewGuid().ToString("N"));
-        string Key(string name){var path=Path.Combine(f.Root,name);File.WriteAllText(path,Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(32)));OrganizationConfigurationTests.ProtectCredential(path);return path;}
-        var primaryKey=Key("primary-key");var independentKey=Key("independent-key");var work=Path.Combine(f.Root,"copy-work");
+        string Key(string name){var path=Path.IsPathFullyQualified(name)?name:Path.Combine(f.Root,name);File.WriteAllText(path,Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(32)));OrganizationConfigurationTests.ProtectCredential(path);return path;}
+        var primaryKey=Key("primary-key");var independentKey=Key(independent+".key");var work=Path.Combine(f.Root,"copy-work");
         var options=new ServerOperationsOptions(true,primary,primaryKey,"Disposable project and independent account",work,System.Environment.GetEnvironmentVariable("AEROSCIENCE_RECOVERY_RESTIC")!,System.Environment.GetEnvironmentVariable("AEROSCIENCE_RECOVERY_PG_DUMP")!,System.Environment.GetEnvironmentVariable("AEROSCIENCE_RECOVERY_PG_RESTORE")!,System.Environment.GetEnvironmentVariable("AEROSCIENCE_ORG_TEST_DATABASE"),null,64*1024*1024,null,null){Independent=new(independent,independentKey,null,null,"auto"),Clock=new RecoveryClock(DateTimeOffset.UtcNow.AddDays(30))};
         try{
             using var scope=f.Server.App.Services.CreateScope();var db=scope.ServiceProvider.GetRequiredService<OrganizationDatabase>();var settings=f.Server.App.Services.GetRequiredService<OrganizationSettings>();var engine=new OrganizationRecoveryEngine(db,settings,options);
@@ -36,11 +37,13 @@ public sealed partial class OrganizationConnectionIntegrationTests
             Assert.Equal(1,await engine.EnforceRetention(policy,default));Assert.NotNull(old.DeletedUtc);Assert.Null(latest.DeletedUtc);Assert.Null(unverified.DeletedUtc);Assert.Equal(0,await engine.EnforceRetention(policy,default));
             await Assert.ThrowsAsync<InvalidOperationException>(()=>engine.Discover(old.SnapshotId,default));Assert.Equal(2,await db.Audit.CountAsync(a=>a.ResourceId==old.Id&&a.Action.StartsWith("backup-retention-")));
             // Simulated complete project loss: remove original repository, key, protected PFX and received source records.
-            Directory.Delete(primary,true);File.Delete(primaryKey);File.Delete(settings.KeyCertificateFile!);await db.Database.ExecuteSqlRawAsync("TRUNCATE organization.\"Submissions\" CASCADE");
+            Directory.Delete(primary,true);File.Delete(primaryKey);File.Delete(settings.KeyCertificateFile!);await f.Server.App.StopAsync();
+            Assert.StartsWith("aeroscience_p17_",f.Database);Assert.True(Guid.TryParseExact(f.Database["aeroscience_p17_".Length..],"N",out _));
+            await using(var provisioner=new NpgsqlConnection(options.RecoveryConnectionString)){await provisioner.OpenAsync();await using var drop=new NpgsqlCommand("DROP DATABASE "+new NpgsqlCommandBuilder().QuoteIdentifier(f.Database)+" WITH (FORCE)",provisioner);await drop.ExecuteNonQueryAsync();}
             var recovery=new OrganizationRecoveryEngine(db,settings,options with{Repository=independent,PasswordFile=independentKey,Independent=null,InheritStorageCredentials=false});
             var recovered=await recovery.Discover(latest.IndependentSnapshotId!,default);Assert.Equal(latest.BundleSha256,recovered.BundleSha256);var verified=await recovery.VerifyRestore(recovered,default);Assert.Equal(1,verified.ReceivedPackages);Assert.Equal(latest.OrganizationId,verified.OrganizationId);Assert.Empty(Directory.GetFileSystemEntries(work));
             var wrong=Key("wrong-key");await Assert.ThrowsAsync<InvalidOperationException>(()=>new OrganizationRecoveryEngine(db,settings,options with{Repository=independent,PasswordFile=wrong,Independent=null}).Discover(latest.IndependentSnapshotId!,default));
             foreach(var file in Directory.EnumerateFiles(independent,"*",SearchOption.AllDirectories))if(new FileInfo(file).Length<4*1024*1024)Assert.DoesNotContain("Selected original pilot note",Encoding.UTF8.GetString(await File.ReadAllBytesAsync(file)));
-        }finally{if(Directory.Exists(independent))Directory.Delete(independent,true);}
+        }finally{if(Directory.Exists(independent))Directory.Delete(independent,true);if(File.Exists(independentKey))File.Delete(independentKey);}
     }
 }

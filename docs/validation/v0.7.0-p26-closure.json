@@ -157,6 +157,13 @@
       "failed": 2,
       "skipped": 0,
       "cause": "Exact exception subclass regression; implementation restored original public exception contract."
-    }
+    },
+    "finalAffectedValidation": {
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "scope": "Actual complete disposable primary database/repository/key/PFX loss; independent key saved outside source; compiled migration failure and exact-binary guard; overlaps earlier focused checks"
+    },
+    "interruptedLocalCheck": "Execution-session disconnect; no complete outcome. Preserved incomplete log; full rerun produced 3 passing tests."
   }
 }
