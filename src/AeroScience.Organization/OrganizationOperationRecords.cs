@@ -30,7 +30,7 @@ public sealed record ServerBackupManifest(int Version,Guid BackupId,Guid Organiz
 public sealed record ServerRestoreVerification(int Version,Guid BackupId,Guid OrganizationId,string DatabaseSha256,string CertificateSha256,string EvidenceDigest,long ReceivedPackages,string AuditDigest,long AuditEvents,string[] Migrations,DateTimeOffset VerifiedUtc,string Scope);
 public sealed record ServerDistribution(int Version,string ApplicationVersion,string SourceRevision,string Image,string MinimumVersion,string SchemaSha256,bool PairedRestoreRequired);
 public sealed record SignedServerDistribution(ServerDistribution Distribution,string Signature);
-public sealed record OrganizationRecoveryKit(int Version,Guid OrganizationId,string Origin,string Repository,string RepositoryPassword,string? AccessKeyId,string? SecretAccessKey,string? Region,string Instructions);
+public sealed record OrganizationRecoveryKit(int Version,Guid OrganizationId,string Origin,string Repository,string RepositoryPassword,string? AccessKeyId,string? SecretAccessKey,string? Region,string Instructions){public string S3BucketLookup {get;init;}="auto";}
 public static class ServerOperationsDatabase
 {
     public static void Configure(ModelBuilder model)

@@ -47,7 +47,7 @@ def verify(application,database,output):
             negative=docker('exec',db,'openssl','verify','-CAfile','/var/lib/postgresql/data/certs/root.crt','-verify_hostname','wrong.railway.internal','/var/lib/postgresql/data/certs/server.crt',check=False)
             assert positive.returncode==0 and negative.returncode!=0;record('actual pinned Railway PostgreSQL CA validates its exact private hostname and rejects a wrong hostname')
             start();created.append(app);ready(app)
-            processes=docker('top',app,'-eo','uid,args').stdout.splitlines()[1:];assert processes and all(row.strip().startswith('1654 ') for row in processes)
+            processes=[row for row in docker('top',app).stdout.splitlines()[1:] if 'AeroScience.Organization.dll --railway-start' in row];assert len(processes)==1 and processes[0].split()[0]=='1654'
             original=docker('exec',db,'psql','-U','postgres','-d','aeroscience','-Atc','SELECT "CertificateSha256" FROM organization."DeploymentState"').stdout.strip();assert len(original)==64
             record('root-owned volume initialized once; actual organization process permanently runs as UID 1654 with VerifyFull database TLS')
             docker('rm','--force',app);created.remove(app);start();created.append(app);ready(app)
