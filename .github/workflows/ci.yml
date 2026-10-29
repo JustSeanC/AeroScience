@@ -301,6 +301,16 @@ jobs:
         run: docker build -f deploy/organization/Dockerfile --build-arg SOURCE_REVISION="$GITHUB_SHA" -t aeroscience-organization:validation .
       - name: Verify HTTPS, PostgreSQL TLS, secure ownership, evidence receipt and container replacement
         run: python3 scripts/deployment/verify_organization_container.py --image aeroscience-organization:validation --output artifacts/organization-deployment/acceptance.json
+      - name: Build pinned recovery and Railway runtime candidates (not public distributions)
+        run: |
+          docker build -f deploy/organization/Dockerfile.operations --build-arg ORGANIZATION_IMAGE=aeroscience-organization:validation -t aeroscience-organization-operations:validation .
+          docker run --rm --entrypoint /operations/bin/restic aeroscience-organization-operations:validation version
+          docker run --rm -e LD_LIBRARY_PATH=/operations/lib --entrypoint /operations/bin/pg_dump aeroscience-organization-operations:validation --version
+          docker run --rm -e LD_LIBRARY_PATH=/operations/lib --entrypoint /operations/bin/pg_restore aeroscience-organization-operations:validation --version
+          docker build -f deploy/organization/railway/Dockerfile.application -t aeroscience-railway-application:validation .
+          docker build -f deploy/organization/railway/Dockerfile.database -t aeroscience-railway-postgres:validation .
+      - name: Verify real private database CA, root-owned volume and permanent non-root application
+        run: python3 scripts/deployment/verify_railway_runtime.py --application aeroscience-railway-application:validation --database aeroscience-railway-postgres:validation --output artifacts/organization-deployment/railway-runtime.json
       - name: Retain bounded deployment acceptance diagnostics
         if: always()
         uses: actions/upload-artifact@v7

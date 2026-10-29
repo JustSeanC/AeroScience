@@ -17,7 +17,7 @@ public sealed class OrganizationRecoveryEngine(OrganizationDatabase db,Organizat
 {
     internal static string Hash(ReadOnlySpan<byte> value)=>Convert.ToHexStringLower(SHA256.HashData(value));
     static JsonSerializerOptions Json=>WireJson.Options;
-    string[] ResticArguments(params string[] args)=>["--repo",options.Repository!,"--password-file",options.PasswordFile!,..options.RepositoryCaFile is {} ca?new[]{"--cacert",ca}:Array.Empty<string>(),..args];
+    string[] ResticArguments(params string[] args)=>["--repo",options.Repository!,"--password-file",options.PasswordFile!,..options.RepositoryCaFile is {} ca?new[]{"--cacert",ca}:Array.Empty<string>(),..(options.Repository?.StartsWith("s3:",StringComparison.Ordinal)==true?new[]{"-o","s3.bucket-lookup="+options.S3BucketLookup}:Array.Empty<string>()),..args];
     static FileStream CreatePrivate(string path){var o=new FileStreamOptions{Mode=FileMode.CreateNew,Access=FileAccess.ReadWrite,Share=FileShare.None};if(!OperatingSystem.IsWindows())o.UnixCreateMode=UnixFileMode.UserRead|UnixFileMode.UserWrite;return new(path,o);}
     static void MakePrivate(string path){Directory.CreateDirectory(path);for(var d=new DirectoryInfo(path);d is not null;d=d.Parent)if(d.LinkTarget is not null)throw new InvalidOperationException("Private recovery work cannot follow symbolic links.");if(!OperatingSystem.IsWindows())File.SetUnixFileMode(path,UnixFileMode.UserRead|UnixFileMode.UserWrite|UnixFileMode.UserExecute);}
     static Process Start(string executable,IEnumerable<string> args,IReadOnlyDictionary<string,string>? environment=null)

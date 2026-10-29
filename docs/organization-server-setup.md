@@ -1,21 +1,39 @@
-# Organization server setup — P25
+# Organization server setup — P26 Railway-first candidate
 
-Open **My Research → Organizations → Create an Organization Server**. The same hosting page is available as `/organization-hosting.html` in the organization portal. Review the three providers, their complete cost assumptions and actual readiness. **No provider is currently Ready for Verified Deployment.** The page cannot create a paid account or authorize billing. Personal research does not need a server.
+Open **My Research → Organizations → Create an Organization Server**. Railway is the primary **Deployment Candidate**. **Review Railway Candidate** explains costs, storage and limitations. No live **Deploy with Railway** action is offered: an official native template, verified ingress and fresh-account novice deployment remain unaccepted. Personal Research needs no server or provider account.
 
-After a legitimate hosting owner has provisioned a candidate, **Setup code** requires their protected one-time code. For the managed candidate the owner obtains it from their provider's **private service environment settings**, `Organization__BootstrapSecret`. They paste it into the password-style input, name the organization and create a strong administrator account. Never share the code publicly or put it in a URL. A first visitor without it cannot take ownership. The default managed window is 30 minutes, persisted in PostgreSQL; restarts do not reset it. Only an explicit hosting-owner secret rotation can renew an unused expired window. Successful setup consumes it transactionally with the administrator and organization.
+The owner-approved target has five stages: **Create Organization Server → Deploy with Railway and authenticate → Review actual charges → Secure ownership, MFA and recovery → Invite pilots**. It is a goal, not a completed acceptance claim. Each organization pays its own provider directly. No central AeroScience account or developer-funded hosting is required.
 
-Sign in, then open **Organization Setup**:
+## Secure an already provisioned candidate
 
-1. **Secure Your Organization** explains the saved account and remaining MFA/recovery requirement.
-2. **Your Organization** shows its saved identity and exact verified HTTPS address.
-3. **Start Research** opens **Create First Program** or **Open Research Programs**. Use the existing **Create Campaign** editor and normal publication controls.
-4. **Invite Pilots** opens **Members → Create Invitation**. Choose an expiry, select **Create Invitation Link**, then **Copy Invitation Link**. Share it yourself through any messaging method. No SMTP account is needed.
-5. **Connect AeroScience** explains the existing matching-code browser approval. **Open Management Portal** returns to the same portal; no second account system is created.
+A legitimate hosting-account owner must obtain the protected one-time setup code from the provider's private deployment settings. Paste it into **Setup code**, name the organization, and choose a strong administrator password. This private-dashboard action has not been eliminated by the Railway candidate; it is an explicitly remaining ownership-delivery step, not a hidden infrastructure prerequisite. Do not put the code in a link or public message. The managed lifetime is persisted, is 5–60 minutes, and does not reset on restart. Successful initialization consumes the code atomically. An anonymous first visitor cannot become administrator.
 
-**Server Health** is active-administrator-only, including its API. **Check Server Health** runs bounded real database/schema, TLS, received-storage and setup checks. It displays application/source version, the public origin, the check time and honest persistence/protection status. It never shows connection strings, certificate paths/passwords, bootstrap codes, member secrets or database internals. A manager/reviewer/pilot is not granted diagnostics authority just by seeing an organization page.
+After signing in, production administrators are directed to **Secure Your Organization**:
 
-**Deployment Starts** means the app launched. **Deployment Healthy** means relevant application/storage checks passed. **Production Ready** remains **No** until live-provider, administrator MFA/recovery, independent backup/restore, retention and recoverable upgrade acceptance pass. The page does not contain a switch to claim these passed.
+1. **Set Up Authenticator** using your current password. **Copy Setup Key** into your authenticator app; the key is masked and never placed in a URL.
+2. Enter its current code and choose **Enable Authenticator**.
+3. **Save Recovery Codes** somewhere separate from this server. Enter **One saved recovery code**, then **Confirm Saved Recovery**. That code is genuinely tested and consumed; nine remain.
 
-The server receives only explicitly selected and authorized P17 packages. Hosting does not access a pilot's private archive, start telemetry streaming or expand a read-only connection. A received remote copy is independent of the local original and follows the organization's disclosed retention policy. Local deletion before delivery still holds/cancels a queued transfer; there is no hidden deployment cache.
+Password alone cannot administer a production server after this change. Subsequent **Verify Your Sign In** accepts a fresh authenticator code or an unused saved recovery code. Using recovery revokes earlier sessions and desktop grants. **Account Security** supports deliberate replacement of an authenticator/recovery codes after recent second-factor verification and password confirmation. Replacing codes invalidates the old set. Passkeys, email recovery and unattended recovery are not implemented.
 
-No owner terminal or database acceptance checklist is required for P25. [Provider research](organization-hosting-providers.md), [security reference](architecture/organization-deployment.md), and the [advanced operator path](../deploy/organization/self-hosted/README.md) identify technical gates without pretending they are beginner steps.
+## Organization Setup
+
+**Organization Setup** brings together the saved name/address, **Account Security**, **Server Protection**, **Start Research** and **Invite Pilots**. These are sections within the hosting/security/invitation journey, not additional infrastructure setup stages. **Create First Program** / **Open Research Programs** and **Create Campaign** reuse the existing publication workflow.
+
+**Invite Pilots → Members → Create Invitation → Create Invitation Link** produces an expiring, single-use link. **Copy Invitation Link** and share it yourself; no email-server configuration is needed. Pilots connect from **My Research → Organizations** using the existing browser-approved matching-code permissions. Joining never shares private flight archives.
+
+## Server Health and Server Protection
+
+**Server Health → Check Server Health** checks real bounded schema, TLS, received-evidence storage, protected identity, active-administrator MFA and recovery-point metadata. **Production Ready: No** remains visible. A successful internal health probe establishes application/database availability, not a verified public deployment, recoverability or scientific acceptance.
+
+**Server Protection** shows actual logical database/evidence usage and the most recent recovery operations. Without a protected destination it shows **Recovery storage is not connected** and offers no fake backup action. Only an active administrator with verified MFA can inspect or operate protection.
+
+When recovery is configured by a supported operator/template, **Backup Schedule → Save Backup Settings** requires explicit organizational-backup consent and a password. **Back Up Now** queues a consistent encrypted PostgreSQL/identity snapshot. **Verify Restore** restores into an isolated disposable database and verifies original evidence/audit identities and encrypted MFA. It does not replace the live organization. **Download Recovery Key** is an explicit sensitive download: keep it separately from the server/account, and retain independently accessible encrypted backup storage as well.
+
+Retention targets are recorded, but **automatic pruning/deletion is not implemented**; snapshots can accumulate. Independently operated retention/deletion and account-loss recovery remain gates. **Prepare Verified Update** checks a configured signed pinned distribution and prepares a paired recovery checkpoint. It does not deploy an image, migrate production or claim rollback. Existing production schemas with pending migrations fail closed until an accepted paired-recovery upgrade path exists.
+
+## Privacy and acceptance
+
+Backups contain organization accounts, audit/review records, identity material and only evidence already expressly received through P17. They cannot access a pilot's private computer, unsent queue or scientific source library. Deleting local evidence before delivery still holds/cancels the queued upload. After authorized receipt the organization owns a separate disclosed copy; local deletion does not delete that remote copy or its backups.
+
+No owner developer QA or paid-account action is requested for the automated implementation checkpoint. Live paid hosting and novice recovery require a separate explicitly authorized acceptance stage. See [provider/cost research](organization-hosting-providers.md), [security/recovery reference](architecture/organization-recovery.md), [Railway candidate](../deploy/organization/railway/README.md) and [advanced self-hosting](../deploy/organization/self-hosted/README.md).

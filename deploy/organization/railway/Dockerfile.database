@@ -4,7 +4,8 @@ FROM ghcr.io/railwayapp-templates/postgres-ssl:17@sha256:5e806d28c18198f933d25e7
 # The official container must be built and its resulting immutable digest accepted before template publication.
 RUN --mount=type=secret,id=proxy_ca \
     if [ -f /run/secrets/proxy_ca ]; then export SSL_CERT_FILE=/run/secrets/proxy_ca; fi; \
-    apt-get update && apt-get install -y --no-install-recommends python3-minimal && rm -rf /var/lib/apt/lists/*
+    apt-get update && apt-get install -y --no-install-recommends python3 && python3 -c "import hashlib, hmac, json, http.server" && rm -rf /var/lib/apt/lists/*
+COPY --chmod=755 deploy/organization/railway/50-organization-roles.sh /docker-entrypoint-initdb.d/50-organization-roles.sh
 COPY --chmod=755 deploy/organization/railway/database-trust.py /usr/local/bin/database-trust.py
 COPY --chmod=755 deploy/organization/railway/database-start.sh /usr/local/bin/database-start.sh
 ENTRYPOINT ["/usr/bin/tini","-g","--","/usr/local/bin/database-start.sh"]

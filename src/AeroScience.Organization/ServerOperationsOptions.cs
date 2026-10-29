@@ -5,6 +5,7 @@ using AeroScience.Shared;
 namespace AeroScience.Organization;
 public sealed record ServerOperationsOptions(bool Enabled,string? Repository,string? PasswordFile,string Destination,string WorkDirectory,string ResticExecutable,string PgDumpExecutable,string PgRestoreExecutable,string? RecoveryConnectionString,string? RepositoryCaFile,long MaximumBundleBytes,string? DistributionFile,string? DistributionPublicKeyFile)
 {
+    public string S3BucketLookup {get;init;}="auto";
     public static ServerOperationsOptions Read(IConfiguration config,OrganizationSettings settings)
     {
         var c=config.GetSection("Organization:Operations");var enabled=c.GetValue<bool>("Enabled");var repository=c["Repository"];var password=c["PasswordFile"];var directory=c["WorkDirectory"]??"/tmp/aeroscience-operations";
@@ -18,7 +19,8 @@ public sealed record ServerOperationsOptions(bool Enabled,string? Repository,str
         }
         var limit=c.GetValue<long?>("MaximumBundleBytes")??2L*1024*1024*1024;if(limit<1048576||limit>1024L*1024*1024*1024)throw new InvalidOperationException("Choose a bounded recovery package size between 1 MiB and 1 TiB.");
         var destination=c["DestinationLabel"]??"Operator-configured recovery storage";if(destination.Length>120||destination.Any(char.IsControl))throw new InvalidOperationException("Choose a readable recovery destination label.");
-        return new(enabled,repository,password,destination,directory,c["ResticExecutable"]??"/operations/bin/restic",c["PgDumpExecutable"]??"/operations/bin/pg_dump",c["PgRestoreExecutable"]??"/operations/bin/pg_restore",c["RecoveryConnectionString"],c["RepositoryCaFile"],limit,c["DistributionFile"],c["DistributionPublicKeyFile"]);
+        var lookup=c["S3BucketLookup"]??"auto";if(lookup is not("auto" or "dns" or "path"))throw new InvalidOperationException("Choose a supported S3 bucket addressing style.");
+        return new(enabled,repository,password,destination,directory,c["ResticExecutable"]??"/operations/bin/restic",c["PgDumpExecutable"]??"/operations/bin/pg_dump",c["PgRestoreExecutable"]??"/operations/bin/pg_restore",c["RecoveryConnectionString"],c["RepositoryCaFile"],limit,c["DistributionFile"],c["DistributionPublicKeyFile"]){S3BucketLookup=lookup};
     }
     public static void ValidateRepository(string repository,bool local)
     {

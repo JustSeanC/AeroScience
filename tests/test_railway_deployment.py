@@ -22,5 +22,5 @@ class RailwayDeploymentTests(unittest.TestCase):
         for name in ('Organization__BootstrapSecret','Organization__KeyCertificatePassword'):self.assertTrue(value['services']['Organization']['variables'][name].startswith('${{secret('))
         self.assertEqual('${{PostgreSQL.AEROSCIENCE_DATABASE_TRUST_SECRET}}',value['services']['Organization']['variables']['AEROSCIENCE_DATABASE_TRUST_SECRET'])
     def test_recovery_and_application_profiles_keep_pins_and_privilege_boundary(self):
-        operations=(ROOT/'deploy/organization/Dockerfile.operations').read_text();self.assertEqual(2,operations.count('@sha256:'));self.assertIn('USER 1654:1654',operations);self.assertIn('sha256sum --check --status',operations)
+        operations=(ROOT/'deploy/organization/Dockerfile.operations').read_text();self.assertEqual(2,operations.count('@sha256:'));self.assertIn('USER 1654:1654',operations);self.assertIn('restic/restic:0.19.1@sha256:136600b6ff6843d61d355f7f71f460a166429f35de6fd11b568fece3c9a4d510',operations)
         runtime=(ROOT/'src/AeroScience.Organization/RailwayRuntime.cs').read_text();self.assertIn('setresuid(1654,1654,1654)',runtime);self.assertIn('SslMode.VerifyFull',runtime);self.assertNotIn('TrustServerCertificate',runtime)

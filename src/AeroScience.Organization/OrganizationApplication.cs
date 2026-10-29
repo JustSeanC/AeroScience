@@ -42,6 +42,7 @@ public sealed class BootstrapCredential:IDisposable
 }
 public static class OrganizationApplication
 {
+    static readonly SemaphoreSlim ReadinessLimit=new(2,2);
     public const string ManagePolicy="OrganizationManagement",PublishPolicy="OrganizationAdministration";
     public static WebApplication Build(string[] args,Action<WebApplicationBuilder>? configure=null)
     {
@@ -122,10 +123,11 @@ public static class OrganizationApplication
             if(!settings.LocalDevelopment)context.Response.Headers.StrictTransportSecurity="max-age=31536000";
             var authority=settings.Origin.GetLeftPart(UriPartial.Authority);
             // Only an in-container loopback probe bypasses public origin matching, and returns no details.
-            if(context.Request.Path=="/healthz/ready"&&context.Request.Method=="GET"&&context.Connection.RemoteIpAddress is {} probe&&IPAddress.IsLoopback(probe)&&context.Request.Host.Host=="127.0.0.1"){
+            if(context.Request.Path=="/healthz/ready"&&context.Request.Method=="GET"&&((context.Connection.RemoteIpAddress is {} probe&&IPAddress.IsLoopback(probe)&&context.Request.Host.Host=="127.0.0.1")||(settings.HostingProvider=="railway"&&context.Request.Host.Host=="healthcheck.railway.app"))){
+                if(!await ReadinessLimit.WaitAsync(0,context.RequestAborted)){context.Response.StatusCode=503;return;}
                 using var deadline=CancellationTokenSource.CreateLinkedTokenSource(context.RequestAborted);deadline.CancelAfter(TimeSpan.FromSeconds(3));
                 try{using var scope=app.Services.CreateScope();var database=scope.ServiceProvider.GetRequiredService<OrganizationDatabase>();context.Response.StatusCode=await database.Database.CanConnectAsync(deadline.Token)?200:503;}
-                catch{context.Response.StatusCode=503;}return;
+                catch{context.Response.StatusCode=503;}finally{ReadinessLimit.Release();}return;
             }
             if(!string.Equals(context.Request.Scheme+"://"+context.Request.Host,authority,StringComparison.OrdinalIgnoreCase)
                 ||settings.LocalDevelopment&&context.Connection.RemoteIpAddress is {} remote&&!IPAddress.IsLoopback(remote)){

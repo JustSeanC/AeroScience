@@ -1,4 +1,6 @@
-# Organization deployment security and persistence — P25
+# Organization deployment security and persistence — P25 foundation / P26 extension
+
+**P26 current extension:** required production administrator MFA/recovery, encrypted backup/isolated restore, signed pinned update preflight and fail-closed existing-schema migration now extend this foundation. See [P26 security/recovery](organization-recovery.md) and [Railway candidate](../../deploy/organization/railway/README.md). P25 descriptions below are historical where explicitly dated; production acceptance remains blocked.
 
 ## Reuse and storage ownership
 
