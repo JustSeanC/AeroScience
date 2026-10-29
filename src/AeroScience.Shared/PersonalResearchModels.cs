@@ -24,7 +24,8 @@ public sealed record PersonalResearchCard(int Version, Guid Id, int Revision, st
     [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] ObservationResearchDefinition? ObservationFlight=null,
     [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] ExperimentalSensorDefinition? ExperimentalSensor=null,
     [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] FlightTestProcedureDefinition? Procedure=null,
-    [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] OrganizationAssignmentIdentity? OrganizationAssignment=null)
+    [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] OrganizationAssignmentIdentity? OrganizationAssignment=null,
+    [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] PersonalTemplateProvenance? TemplateProvenance=null)
 {
     [JsonExtensionData] public Dictionary<string,System.Text.Json.JsonElement>? Extensions {get;init;}
 }

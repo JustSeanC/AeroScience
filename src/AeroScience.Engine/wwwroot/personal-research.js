@@ -1,3 +1,4 @@
+import {personalTemplateTools} from './research-templates.js';
 import {openSubmissionBuilder,submissionHistory} from './submission-builder.js';
 import {organizationAssignmentSummary,organizationClaimReview} from './organization-assignment-ui.js';
 import {researchOrganizations} from './research-organizations.js';
@@ -118,6 +119,7 @@ export async function personalResearch(root, api) {
       review.append(action('Newer Flights', () => showReview(card, null, Math.max(0, offset-20))), action('Older Flights', () => showReview(card, null, offset+20)));
       review.scrollIntoView({block:'nearest'});
     };
+    const templateActions=personalTemplateTools(root,api,{cards,starters,refresh:()=>personalResearch(root,api)});
     root.append(node('h2', 'Your Test Cards'));
     if (!cards.length) root.append(node('p', 'No test cards on this page. Create your first experiment above.'));
     for (const card of cards) {
@@ -131,7 +133,7 @@ export async function personalResearch(root, api) {
         action('Overview & Compare',()=>researchExperimentReview(experiment,api,card,active)),
         action('Edit Card', () => { draft = structuredClone(card); renderEditor(); editor.scrollIntoView({block:'start'}); editor.querySelector('input').focus(); }));
       if(card.organizationAssignment){row.prepend(organizationAssignmentSummary(card,{},api));for(const b of row.querySelectorAll('button'))if(['Edit Card','Open in Mission Planner'].includes(b.textContent))b.remove();const open=node('a','Open Mission Planner','button secondary');open.href='#planner';row.append(open);organizationClaimReview(row,api,card);}
-      root.append(row);
+      templateActions(row,card);root.append(row);
       if(!card.organizationAssignment)researchEntryActions(row,api,{card,starter:starters.find(s=>s.id===card.templateId)},active);
     }
     root.append(action('Newer Cards', async () => {cardOffset = Math.max(0,cardOffset-20); await personalResearch(root,api);}), action('Older Cards', async () => {cardOffset += 20; await personalResearch(root,api);}), experiment, review);

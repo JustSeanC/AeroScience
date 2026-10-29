@@ -28,7 +28,8 @@ public sealed partial class MissionStore
         cmd.ExecuteNonQuery(); EvidenceFault?.Invoke("personal-research-before-commit"); tx.Commit();
     }
 
-    public PersonalResearchCard SaveResearchCard(SaveResearchCardRequest input)
+    public PersonalResearchCard SaveResearchCard(SaveResearchCardRequest input)=>SaveResearchCard(input,null);
+    private PersonalResearchCard SaveResearchCard(SaveResearchCardRequest input,PersonalTemplateProvenance? provenance)
     {
         if(input.Extensions is {Count:>0})throw new ArgumentException("Unsupported authoring fields cannot be discarded. Keep the original definition and use a compatible editor.");
         if(new object?[]{input.FlightRegime,input.AtmosphericProfile,input.AtmosphericTransect,input.Survey,input.ObservationFlight,input.ExperimentalSensor,input.Procedure}.Count(x=>x is not null)!=1)throw new ArgumentException("Choose exactly one experiment type.");
@@ -54,6 +55,7 @@ public sealed partial class MissionStore
         var template=input.Procedure is not null?FlightRegimeEvaluation.ProcedureTemplate:input.FlightRegime?.TestPoint is not null?FlightRegimeEvaluation.CustomTemplate:input.ExperimentalSensor is not null?ExperimentalSensorResearch.Template:input.ObservationFlight is not null?ObservationResearch.Template:input.Survey is not null?SurveyResearch.Template:input.AtmosphericTransect is not null?AtmosphericTransectResearch.Template:input.AtmosphericProfile is null?"flight-regime":AtmosphericResearch.Template;
         if(revision>0){var current=ResearchCard(id,revision);SupportedCard(current);if(current.OrganizationAssignment is not null)throw new ArgumentException("Issued organization definitions are immutable. Create an independent personal experiment to change requirements.");if(current.TemplateId!=template)throw new ArgumentException("Keep an experiment's research type when revising it; prepare a separate experiment instead.");}
         var card = new PersonalResearchCard(input.Procedure is not null?8:input.FlightRegime?.TestPoint is not null?7:input.ExperimentalSensor is not null?6:input.ObservationFlight is not null?5:input.Survey is not null?4:input.AtmosphericTransect is not null?3:input.AtmosphericProfile is null?1:2, id, revision + 1, name, template, input.FlightRegime, DateTimeOffset.UtcNow,input.AtmosphericProfile,input.AtmosphericTransect,input.Survey,input.ObservationFlight,input.ExperimentalSensor,input.Procedure);
+        card=card with{TemplateProvenance=revision>0?ResearchCard(id,revision).TemplateProvenance:provenance};
         InsertResearchCard(db,tx,card);tx.Commit();return card;
     }
 

@@ -7,6 +7,15 @@ public static class PersonalResearchApi
 {
     public static void MapPersonalResearchEndpoints(this WebApplication app)
     {
+        app.MapPost("/api/research/templates/preview",(TemplateFileRequest request)=>PortableResearchTemplates.Read(request.Contents));
+        app.MapPost("/api/research/templates/import",(TemplateImportRequest request,MissionStore store)=>store.ImportResearchTemplate(request));
+        app.MapPost("/api/research/cards/{id:guid}/template",(Guid id,TemplateExportRequest request,MissionStore store)=>store.ExportResearchTemplate(id,request));
+        app.MapPost("/api/research/cards/{id:guid}/clone",(Guid id,TemplateCloneRequest request,MissionStore store)=>store.CloneResearchTemplate(id,request));
+        app.MapPost("/api/research/templates/starters/{id}/clone",(string id,TemplateCloneRequest request,MissionStore store)=>{
+            var s=MissionStore.ResearchStarters().SingleOrDefault(s=>s.Id==id&&s.Version==request.Revision)??throw new ArgumentException("Unsupported starter revision.");
+            var t=PortableResearchTemplates.Create(s.Name,s.Description,new(1,new(s.Id,s.Version),s.Example,s.AtmosphericExample,s.TransectExample,s.SurveyExample,s.ObservationExample,s.SensorExample));
+            return store.ImportResearchTemplate(new(System.Text.Json.JsonSerializer.Serialize(t,WireJson.Options),request.Name));
+        });
         // Existing host session, paired-display and CSRF middleware protects these routes.
         app.MapGet("/api/research/attempts/{id:guid}/sensor",(Guid id,MissionStore store,ScienceStore science,HttpContext context)=>{var result=store.ResearchAttempt(id);return new{result,review=store.ReviewExperimentalSensorEvidence(result,science,context.RequestAborted)};});
         app.MapGet("/api/research/attempts/{id:guid}/sensor/export",(Guid id,MissionStore store,ScienceStore science,HttpContext context)=>{
