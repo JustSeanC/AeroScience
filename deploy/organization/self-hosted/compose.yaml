@@ -1,0 +1,79 @@
+# Advanced operator path. No usable credentials or public database port are shipped.
+# Run prepare.py first. Use an accepted image digest for real operations, not a mutable tag.
+name: aeroscience-organization
+services:
+  configuration-permissions:
+    image: postgres:17-bookworm@sha256:839fbb5a4942a7758dd93e18b42ea5649807491a0545b5eeeb8f0b8bb11857a5
+    user: '0:0'
+    entrypoint: ['/bin/sh', '-ec', 'chown 1654:1654 /state && chmod 700 /state']
+    network_mode: none
+    volumes: [configuration:/state]
+    restart: 'no'
+  database:
+    image: postgres:17-bookworm@sha256:839fbb5a4942a7758dd93e18b42ea5649807491a0545b5eeeb8f0b8bb11857a5
+    environment:
+      POSTGRES_DB: aeroscience
+      POSTGRES_USER: bootstrap_owner
+      POSTGRES_PASSWORD_FILE: /tmp/database-owner-password
+      POSTGRES_INITDB_ARGS: --encoding=UTF8 --auth-host=scram-sha-256
+    secrets: [database_owner_password, database_tls_key, database_initialization]
+    entrypoint: ['/bin/sh', '-ec', 'install -m 600 -o postgres /run/secrets/database_tls_key /tmp/database.key; install -m 600 -o postgres /run/secrets/database_owner_password /tmp/database-owner-password; install -m 600 -o postgres /run/secrets/database_initialization /docker-entrypoint-initdb.d/initialize.sql; exec /usr/local/bin/docker-entrypoint.sh "$@"', '--']
+    command: ['postgres', '-c', 'ssl=on', '-c', 'ssl_cert_file=/configuration/database.crt', '-c', 'ssl_key_file=/tmp/database.key', '-c', 'log_statement=none', '-c', 'log_min_error_statement=panic']
+    volumes:
+      - database:/var/lib/postgresql/data
+      - ./protected/database.crt:/configuration/database.crt:ro
+    networks: [private]
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U bootstrap_owner -d aeroscience']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+  organization:
+    image: ${AEROSCIENCE_ORGANIZATION_IMAGE:?Set a locally verified image or an accepted immutable image digest}
+    env_file: ./protected/application.env
+    volumes:
+      - configuration:/configuration
+      - ./protected/database-ca.crt:/trust/database-ca.crt:ro
+    networks: [private]
+    depends_on:
+      database: {condition: service_healthy}
+      configuration-permissions: {condition: service_completed_successfully}
+    read_only: true
+    tmpfs: [/tmp]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    stop_grace_period: 40s
+    restart: unless-stopped
+  https:
+    environment:
+      NO_PROXY: organization,database,localhost,127.0.0.1
+      no_proxy: organization,database,localhost,127.0.0.1
+    image: caddy:2-alpine@sha256:eb4d35b7452d1ab6171fbdbe8d9275b2301dad6dad92115d91e19fb9b24d510f
+    env_file: ./protected/proxy.env
+    ports: ['80:80', '443:443']
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - proxy_data:/data
+      - proxy_config:/config
+    networks:
+      private: {ipv4_address: 172.29.251.2}
+      public: {}
+    depends_on:
+      organization: {condition: service_healthy}
+    restart: unless-stopped
+volumes:
+  database:
+  configuration:
+  proxy_data:
+  proxy_config:
+networks:
+  private:
+    internal: true
+    ipam:
+      config: [{subnet: 172.29.251.0/24, ip_range: 172.29.251.128/25}]
+  public: {}
+secrets:
+  database_owner_password: {file: ./protected/database-owner-password}
+  database_tls_key: {file: ./protected/database.key}
+  database_initialization: {file: ./protected/initialize.sql}

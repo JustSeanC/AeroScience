@@ -52,7 +52,9 @@ class DevelopmentValidationTests(unittest.TestCase):
         self.assertEqual('fast', ci.validation_tier('push', 'refs/heads/develop/v0.5.0', requested='windows-profile'))
         workflow = (ROOT/'.github/workflows/ci.yml').read_text(encoding='utf-8')
         self.assertIn("if: needs.validation-scope.outputs.tier == 'windows-profile'", workflow)
-        self.assertEqual(2, workflow.count("if: needs.validation-scope.outputs.tier == 'full'"))
+        self.assertEqual(3, workflow.count("if: needs.validation-scope.outputs.tier == 'full'"))
+        self.assertIn("  organization-deployment:", workflow)
+        self.assertIn("verify_organization_container.py", workflow)
         self.assertEqual(2, workflow.count('./scripts/build/Publish-ValidationCompanion.ps1 -ArtifactsPath artifacts/validation-probe'))
 
     def test_changed_tests_and_browser_specs_are_never_omitted(self):

@@ -4,7 +4,7 @@ import {organizationResearch} from './organization-research.js';
 import {node,button} from './workstation-ui.js';
 
 export function researchOrganizations(root,api,active){
- const section=node('section',undefined,'panel research-panel');section.id='research-organizations';section.append(node('h2','Organizations'),node('p','Connect only to organizations you trust. Joining does not share your flights, locations or scientific results. Personal Research works independently.'));
+ const section=node('section',undefined,'panel research-panel');section.id='research-organizations';const hosting=node('a','Create an Organization Server','button');hosting.href='/organization-hosting.html';hosting.target='_blank';hosting.rel='noopener';section.append(hosting);section.append(node('h2','Organizations'),node('p','Connect only to organizations you trust. Joining does not share your flights, locations or scientific results. Personal Research works independently.'));
  const content=node('div'),notice=node('p');notice.setAttribute('role','status');section.append(content,notice);root.append(section);
  const fail=e=>{if(active())notice.textContent=e.message||'Unable to connect. Personal Research is unchanged.';};
  const run=fn=>async()=>{try{await fn();}catch(e){fail(e);}};

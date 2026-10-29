@@ -1,0 +1,62 @@
+# DEPLOYMENT CANDIDATE ONLY. No public Deploy button is supported.
+# Public paid-provider acceptance is outstanding. See README.md in this directory.
+# Standard internal database URLs fail AeroScience VerifyFull. Do NOT replace it with Require.
+services:
+  - type: web
+    name: aeroscience-organization
+    runtime: docker
+    # Current official pricing calls the $7 plan 0.5c-512mb. The provider must validate
+    # this plan identifier and an immutable image/source before a live deployment.
+    plan: 0.5c-512mb
+    region: oregon
+    dockerfilePath: ./deploy/organization/Dockerfile
+    dockerContext: .
+    autoDeployTrigger: off
+    numInstances: 1
+    maxShutdownDelaySeconds: 40
+    # Provider checks must prove HTTPS/Host forwarding before using this endpoint.
+    healthCheckPath: /api/health
+    disk:
+      name: organization-configuration
+      mountPath: /configuration
+      sizeGB: 1
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: Organization__HostingProvider
+        value: render
+      - key: Organization__ManagedDeployment
+        value: 'true'
+      - key: Organization__PersistentStorageConfirmed
+        value: 'true'
+      - key: Organization__StateDirectory
+        value: /configuration
+      - key: Organization__BootstrapSecret
+        generateValue: true
+      - key: Organization__KeyCertificatePassword
+        generateValue: true
+      - key: Organization__BootstrapLifetimeMinutes
+        value: '30'
+      - key: Organization__DatabaseExposure
+        value: restricted-tls
+      # Explicit pending integration inputs, not beginner-accepted configuration:
+      - key: Organization__PublicOrigin
+        sync: false
+      - key: Organization__ConnectionString
+        sync: false
+      - key: Organization__TrustedProxies__0
+        sync: false
+      - key: SOURCE_REVISION
+        sync: false
+# Paid storage only. Received bounded evidence is in PostgreSQL; no attachment disk.
+databases:
+  - name: aeroscience-research
+    region: oregon
+    postgresMajorVersion: '17'
+    plan: 0.1c-256mb
+    diskSizeGB: 1
+    databaseName: aeroscience
+    user: aeroscience
+    # No public DB access by default. A verified, narrowly restricted endpoint path
+    # must be proven before this candidate can actually start. Never allow 0.0.0.0/0.
+    ipAllowList: []

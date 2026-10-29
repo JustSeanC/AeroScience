@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 FROM mcr.microsoft.com/dotnet/sdk:10.0.402-noble@sha256:747cbade5bfd918a175ac32f8f1d931edec2c7d0d5397a3de72eaef1ac1f66d2 AS build
 WORKDIR /source
-COPY global.json Directory.Build.props ./
+COPY global.json Directory.Build.props LICENSE THIRD-PARTY-NOTICES.md ./
 COPY src/AeroScience.Shared/ src/AeroScience.Shared/
 COPY src/AeroScience.Missions/ src/AeroScience.Missions/
 COPY src/AeroScience.Organization/ src/AeroScience.Organization/
@@ -23,6 +23,8 @@ LABEL org.opencontainers.image.title="AeroScience Organization Server" \
       org.opencontainers.image.source="https://github.com/JustSeanC/AeroScience"
 WORKDIR /app
 COPY --from=build --chown=1654:1654 /published/ ./
+COPY --from=build --chown=1654:1654 /source/licenses/ ./licenses/
+COPY --from=build --chown=1654:1654 /source/LICENSE /source/THIRD-PARTY-NOTICES.md ./
 ENV ASPNETCORE_ENVIRONMENT=Production ASPNETCORE_HTTP_PORTS=8080 DOTNET_EnableDiagnostics=0
 USER 1654:1654
 EXPOSE 8080

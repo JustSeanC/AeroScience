@@ -1,0 +1,36 @@
+# Organization deployment security and persistence — P25
+
+## Reuse and storage ownership
+
+The container runs **only `src/AeroScience.Organization`** with the existing Missions/Shared domain libraries, .NET 10 LTS, locked dependencies and existing PostgreSQL migrations. It does not contain the desktop, Windows companion, simulator bridge, local pairing tokens, Engine assembly, original personal archives or a second organization backend. Approved bounded P17 payload JSON, immutable manifests, receipts and metadata are already committed to PostgreSQL. No object-store migration, attachment spool or source archive is introduced.
+
+`deploy/organization/Dockerfile` pins SDK/runtime multi-architecture image digests and requires a full 40-hex source revision build argument. Its minimal chiseled-extra runtime executes as UID/GID 1654, has no shell/package manager, disables runtime diagnostics, handles SIGTERM with a 30-second application shutdown and uses the app's bounded loopback-only readiness command. No image or server release is published by P25. Source and final local/CI image identity are acceptance evidence, not a distribution promise. `.dockerignore` allowlists only required source/assets/licenses and excludes build artifacts, credentials and secret files. Session proxy CA trust is an optional BuildKit secret mount, never copied into image layers. Dependency locks are unchanged.
+
+## Managed candidate configuration
+
+Existing production rules remain: exact HTTPS root origin, PostgreSQL `SslMode=VerifyFull`, no detailed parameter/error logging, protected data-protection certificate, secure strict Identity/antiforgery cookies, explicit origin and trusted proxy checks. The managed profile additionally requires:
+
+- `Organization:ManagedDeployment=true`, `PersistentStorageConfirmed=true`, absolute private existing `StateDirectory` on the configuration volume.
+- Separate provider-generated `BootstrapSecret` and `KeyCertificatePassword` (32–256 characters); `BootstrapLifetimeMinutes` 5–60 (default 30).
+- `DatabaseExposure=private-network` or `restricted-tls`, an **operator declaration**, not proof of the provider firewall. No wildcard proxy is accepted; `ASPNETCORE_FORWARDEDHEADERS_ENABLED=true` is refused.
+- Known provider label only. Render private connection strings are not downgraded to unverified TLS. Password/TLS deployments explicitly disable optional GSS encryption negotiation so the minimal image does not need Kerberos libraries; certificate and hostname verification remain required.
+
+Use private provider settings/secret files, never credentials in command arguments, public URLs or browser-generated YAML. File-based advanced P13 hosting remains compatible. No managed secret is returned by an API. Startup errors print only a sanitized failure class and next-purpose hint, not raw database/credential exceptions.
+
+The app creates an RSA-3072 self-signed **data-protection** certificate on a fresh private volume. This is not the public HTTPS or PostgreSQL certificate. Its protected PFX is created exclusively, private and flushed, guarded by a file lock. Its public fingerprint is pinned in the additive singleton `DeploymentState` row; identity keys remain encrypted in PostgreSQL. Existing database tables plus a missing certificate fail closed instead of silently creating a replacement. A changed fingerprint fails before serving. Preserve volume, original certificate and separate password alongside database recovery. Automatic certificate rotation/restore is not implemented; certificate expiry is another operational gate.
+
+The same row stores only SHA-256 of the owner setup code, issued/expiry UTC and consumed UTC. Startup uses the existing bootstrap transaction lock. The same secret retains its original deadline across process restarts. Explicit operator rotation before initialization creates a new short-lived window. Bootstrap validates expiry and digest again **inside the organization/admin creation transaction**, under the same lock; concurrent successful ownership is impossible, and failure rolls back consumption. Existing password length/complexity, rate limiting, lockout, authentication, CSRF and origin rules are unchanged. Managed code is invalid after successful initialization; file-based legacy setup remains single-use through its existing organization transaction.
+
+## Proxy, health and disclosure
+
+Public requests must still exactly match the configured HTTPS origin. Only individually configured trusted proxy IPs may supply one hop of forwarded headers. The advanced Compose proxy has a fixed private address; PostgreSQL and the app have no public host port. A health command inside the container calls `/healthz/ready` on port 8080. Only the actual loopback peer and literal loopback Host bypass the public origin match, returning solely a 200/503 status. It cannot bootstrap, read evidence or reveal diagnostics.
+
+`/api/organization/server-health` uses the existing active-administrator policy. Checks use a five-second deadline and bounded indexed/schema reads, not flight archives or external providers. Public `/api/health` retains compatibility and is not a production-readiness assertion. Server Health reports source-aware version, exact public origin, live connection/schema/TLS status, existing P17 storage accessibility, setup, protected identity and explicit outstanding gates. Provider persistence/access restrictions remain operator-confirmed until acceptance. No administrator flag can mark production readiness true in P25.
+
+ASP.NET Core Identity already offers TOTP/recovery mechanisms, but current enrollment, recovery, safe administrative enforcement and passkeys have not been integrated/accepted. P25 does not add a misleading MFA switch, SMTP dependency or a second identity provider. MFA/passkeys and recovery are explicit blockers, alongside live-provider, retention, backup/off-server restore and recoverable-upgrade checks. These are not waived by CI or by an administrator sign-in.
+
+## Validation boundaries
+
+The real deployment probe builds/starts the image with real PostgreSQL, custom trusted database/public TLS certificates, the advanced Compose topology and durable volumes. It exercises first-owner denial/concurrency, invitation, scoped browser-approved device protocol, genuine retained **synthetic** pilot documentation built through P16/P17 mission/science stores, explicit consent, durable idempotent receipt, reviewer inventory and replacement/restart. Actual desktop Engine/browser organization workflows are separately covered by the established integration fixtures. Reserved local addresses are not exempted from the product's public-server/SSRF restrictions to make a container test pass. The provider boundary is not mocked into a claim of live-cloud acceptance.
+
+The probe stores disposable credentials only in a private temporary configuration fixture and destroys that fixture/volumes. It does not persist actual personal evidence or create a hidden queue/source backup. Its retained report contains check names, image/source identity and counters; failure logs are sanitized. Production database backups, off-server recovery and provider storage guarantees are **not** inferred from a restart test.

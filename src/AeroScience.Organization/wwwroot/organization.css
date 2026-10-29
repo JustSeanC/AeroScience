@@ -3,3 +3,5 @@
 input[type=checkbox]{display:inline-block;width:1.3rem;min-height:1.3rem;margin-right:.6rem;vertical-align:middle}label:has(input[type=checkbox]){min-height:44px;display:flex;align-items:center;gap:.5rem}
 
 .review-split{display:grid;grid-template-columns:minmax(230px,1fr) minmax(0,2fr);gap:1.2rem}.review-split>section{min-width:0}.review-requirements{align-self:start}.review-requirements button[aria-pressed=true]{outline:2px solid #ffe186}.data-table-scroll{overflow:auto;max-width:100%}th{white-space:normal;min-width:7rem}.scientific-chart{position:relative;height:300px;margin:1rem 0;padding-bottom:2rem}.review-evidence article{padding:1rem}@media(max-width:760px){.review-split{grid-template-columns:minmax(0,1fr)}.review-requirements article{margin:.5rem 0}.scientific-chart{height:260px}}
+
+main p,main h1,main h2{overflow-wrap:anywhere}

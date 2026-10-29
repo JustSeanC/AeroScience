@@ -1,0 +1,5 @@
+{$ORGANIZATION_HOST} {
+    # Caddy terminates public HTTPS. Only its fixed private IP is trusted by ASP.NET Core.
+    reverse_proxy organization:8080
+    # Deliberately no request/access logging: invitation and connection fragments remain private.
+}

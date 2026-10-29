@@ -1,3 +1,4 @@
+import {organizationSetup} from './organization-setup.js';
 import {researchTemplateUi} from './research-template-ui.js';
 import {programWorkflowUi} from './program-workflow-ui.js';
 import {campaignProgressUi} from './campaign-progress-ui.js';
@@ -23,6 +24,7 @@ function progressView(){const view=node('section');root.replaceChildren(view);re
 function workflowView(back=load){const view=node('section');root.replaceChildren(view);return programWorkflowUi({root:view,headingLevel:'h1',read:path=>api('/membership/research-progress'+path),write:(path,body,method)=>api('/membership/research-progress'+path,body,method),back,review:id=>reviews.workspace(id,null,true)});}
 function openProgress(id){return progressView().campaign(id);}
 function openApproved(id){return progressView().results(id);}
+const setupUi=organizationSetup({api,root,heading,navigate:()=>{epoch++;},programs:showPrograms,createProgram:()=>editProgram(),members:()=>membership.members(),health:()=>setupUi.health()});
 const admin=()=>session?.user?.roles.includes('Administrator');
 async function api(path,body,method=body?'POST':'GET'){
  const requestedView=epoch;
@@ -40,15 +42,16 @@ function modal(title){returnFocus=document.activeElement;dialog.replaceChildren(
 dialog.addEventListener('close',()=>{if(returnFocus?.isConnected)returnFocus.focus();});
 function draftCommand(){let prior='',id;return data=>{const key=JSON.stringify(data);if(key!==prior){prior=key;id=crypto.randomUUID();}return {...data,requestId:id};};}
 function submit(form,label,run){const b=node('button',label,'primary');b.type='submit';form.append(b);let busy=false;form.onsubmit=async event=>{event.preventDefault();if(busy)return;busy=true;b.disabled=true;form.querySelector(':scope > .action-error')?.remove();try{await run();}catch(e){failure(form,e);}finally{busy=false;b.disabled=false;}};return b;}
-function renderAccount(){account.replaceChildren();if(session?.user){account.append(node('span',session.user.name));templateUi.navigation(account);button(account,'Sign Out',async()=>{await api('/sign-out',{});await load();});}}
+function renderAccount(){account.replaceChildren();if(session?.user){account.append(node('span',session.user.name));templateUi.navigation(account);if(admin()){button(account,'Organization Setup',()=>setupUi.setup());button(account,'Server Health',()=>setupUi.health());}button(account,'Sign Out',async()=>{await api('/sign-out',{});await load();});}}
 async function load(){let own=++epoch;try{const next=await api('/session');if(own!==epoch)return;session=next;renderAccount();if(!session.user){if(join||enrollment)await membership.enroll(join);else showIdentity();return;}if(templateUi.hasPending()){await templateUi.proposalEntry();return;}if(connect){await membership.approve(connect);return;}if(join){await membership.enroll(join);return;}if(session.user.roles.includes('Reviewer')){await reviews.queue();return;}if(!session.user.roles.some(r=>['Administrator','Manager'].includes(r))){await membership.memberHome();return;}[templates,publishingPolicy]=await Promise.all([api('/organization/templates'),api('/research-templates/policy')]);if(own!==epoch)return;own=epoch+1;await showPrograms();}catch(e){if(own!==epoch)return;heading('Organization server unavailable','No saved change was confirmed. Try reconnecting to this server.');failure(root,e);button(root,'Try Again',load);}}
 function showIdentity(message=''){
  heading('Your organization’s research workspace','Plan scientific investigations and flight-test programs together. Personal Research remains local and independent.');
+ const hosting=node('a','Create an Organization Server','button');hosting.href='/organization-hosting.html';root.append(hosting);
  if(session.initialized)button(root,join?'Back to Invitation':'Join Organization',()=>membership.enroll(join));
  const panel=node('section',undefined,'panel auth'),form=node('form');panel.append(node('h2',session.initialized?'Sign In':'Set Up Your Organization'));panel.append(form);root.append(panel);
  if(message)status(form,message);
  let secret,name,description;
- if(!session.initialized){form.append(node('p','Use the protected setup code supplied by your server operator. Opening this page does not grant administrator access.'));secret=field(form,'Setup code','password','',256);secret.autocomplete='off';secret.required=true;name=field(form,'Organization name');name.required=true;description=field(form,'Organization description','textarea','',4000);}
+ if(!session.initialized){form.append(node('p','Use the protected setup code from your hosting-account owner. In a managed deployment, open the provider’s private service settings and copy Organization__BootstrapSecret. The code expires; only the owner can rotate it. Never put it in a link or public message. Opening this page does not grant administrator access.'));secret=field(form,'Setup code','password','',256);secret.autocomplete='off';secret.required=true;name=field(form,'Organization name');name.required=true;description=field(form,'Organization description','textarea','',4000);}
  const username=field(form,'Account name');username.maxLength=64;username.autocomplete='username';username.required=true;
  const password=field(form,'Password','password','',256);password.autocomplete=session.initialized?'current-password':'new-password';password.required=true;
  if(!session.initialized){password.minLength=14;form.append(node('p','Use at least 14 characters, including uppercase and lowercase letters, a number and a symbol.','help'));}

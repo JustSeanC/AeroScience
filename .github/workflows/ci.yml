@@ -281,3 +281,29 @@ jobs:
           # Compile only: no fake SDK receipt, executable launch, acceptance or artifact publication.
       # Public-repository CI validates builds without publishing alpha binaries.
       # Release publication is an explicit maintainer action, not a push side effect.
+  organization-deployment:
+    needs: validation-scope
+    if: needs.validation-scope.outputs.tier == 'full'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+      - name: Build real retained-evidence fixture with locked dependencies
+        run: |
+          dotnet restore tests/AeroScience.TestHost --locked-mode
+          dotnet build tests/AeroScience.TestHost -c Release --no-restore --nologo -o artifacts/browser-test-host
+      - name: Build pinned non-root organization container from accepted source
+        run: docker build -f deploy/organization/Dockerfile --build-arg SOURCE_REVISION="$GITHUB_SHA" -t aeroscience-organization:validation .
+      - name: Verify HTTPS, PostgreSQL TLS, secure ownership, evidence receipt and container replacement
+        run: python3 scripts/deployment/verify_organization_container.py --image aeroscience-organization:validation --output artifacts/organization-deployment/acceptance.json
+      - name: Retain bounded deployment acceptance diagnostics
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: organization-deployment-diagnostics
+          path: artifacts/organization-deployment/**
+          if-no-files-found: ignore
+          retention-days: 7
