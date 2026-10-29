@@ -49,10 +49,11 @@ test('a delayed mission-selection refresh cannot launch stale inputs and a synch
  await page.route('**/api/plans?limit=100&offset=0',async route=>{intercepted=true;await gate;await route.continue();});
  try{
   await post(request,'/api/mission-selection',{planId:plan.id});await page.evaluate(()=>window.dispatchEvent(new Event('aeroscience-selection')));await expect.poll(()=>intercepted).toBe(true);
-  // Before refresh, an empty required name suppresses the submit event entirely (the failed CI test clicked in this window).
-  await expect(page.locator('#mission-name')).toHaveValue('');await page.getByRole('button',{name:'Start mission',exact:true}).click();expect(await page.locator('#mission-name').evaluate(input=>input.validity.valueMissing)).toBe(true);expect((await(await request.get('/api/state')).json()).activeMission).toBeNull();
-  // Even a valid old free-flight name cannot bypass the exact selected-plan guard.
-  await page.locator('#mission-name').fill('Previous free-flight draft');await page.getByRole('button',{name:'Start mission',exact:true}).click();await expect(page.locator('#notice')).toContainText('selected mission plan changed');expect((await(await request.get('/api/state')).json()).activeMission).toBeNull();
+  // The UI blocks launch during binding. Native form submission still preserves required-name validation.
+  const start=page.getByRole('button',{name:'Start mission',exact:true});await expect(start).toBeDisabled();
+  await expect(page.locator('#mission-name')).toHaveValue('');await page.locator('#start-form').evaluate(form=>form.requestSubmit());expect(await page.locator('#mission-name').evaluate(input=>input.validity.valueMissing)).toBe(true);expect((await(await request.get('/api/state')).json()).activeMission).toBeNull();
+  // Bypass only the disabled UI control to prove the independent exact selected-plan submit guard remains authoritative.
+  await page.locator('#mission-name').fill('Previous free-flight draft');await expect(start).toBeDisabled();await page.locator('#start-form').evaluate(form=>form.requestSubmit());await expect(page.locator('#notice')).toContainText('selected mission plan changed');expect((await(await request.get('/api/state')).json()).activeMission).toBeNull();
  }finally{release();}
  await expect(page.getByRole('combobox',{name:'Choose Mission',exact:true})).toHaveValue(plan.id);await expect(page.locator('#mission-name')).toHaveValue(plan.name);
  const response=page.waitForResponse(r=>new URL(r.url()).pathname==='/api/missions'&&r.request().method()==='POST');await page.getByRole('button',{name:'Start mission',exact:true}).click();const started=await response;expect(started.ok(),await started.text()).toBeTruthy();await expect(page.getByRole('button',{name:'End mission',exact:true})).toBeVisible();const state=await(await request.get('/api/state')).json();expect(state.activeMission.name).toBe(plan.name);expect((await(await request.get(`/api/missions/${state.activeMission.id}/research`)).json()).planSnapshot.id).toBe(plan.id);

@@ -233,16 +233,53 @@
         "deploymentPassed": 17,
         "linuxHelpersAndRecovery": "not run after browser failure",
         "cause": "Existing selected-plan form binding race allowed premature Start before required name was populated; deterministic response gate reproduced and original control now waits for coherent binding."
+      },
+      {
+        "id": 40946333691,
+        "url": "https://github.com/JustSeanC/AeroScience/actions/runs/40946333691",
+        "source": "5227c029d3a64d7487bf6b33025459209e3c4a9c",
+        "conclusion": "failure",
+        "linuxDotnet": {
+          "passed": 1349,
+          "failed": 0,
+          "skipped": 0
+        },
+        "windowsDotnet": {
+          "passed": 1344,
+          "failed": 0,
+          "skipped": 5
+        },
+        "browser": {
+          "passed": 338,
+          "failed": 1,
+          "skipped": 2,
+          "flaky": 0
+        },
+        "deploymentPassed": 17,
+        "linuxHelpersAndRecovery": "not run after browser failure",
+        "windowsPython": {
+          "passed": 152,
+          "failed": 0,
+          "skipped": 2
+        },
+        "windowsProcessRecoveryFamiliesPassed": 5,
+        "cause": "Existing delayed-selection regression waited to click the intentionally disabled Start control. Corrected interaction asserts disabled state and uses native requestSubmit to retain required-name, stale-plan rejection, no-recording and exact-plan retry assertions. No production source or deadline changed."
       }
     ],
     "missionSelectionCorrection": {
       "affectedBrowser": {
-        "passed": 25,
+        "passed": 29,
         "failed": 0,
         "skipped": 0
       },
       "originalAssertionsAndDeadlinesPreserved": true,
-      "newFullAcceptance": "pending"
+      "newFullAcceptance": "pending after correcting obsolete disabled-button interaction; failed Full diagnostics retained",
+      "previousAffectedBrowser": {
+        "passed": 25,
+        "failed": 0,
+        "skipped": 0
+      },
+      "scope": "Personal card flight/native controls, P08, dashboard continuity and all start-readiness safeguards"
     },
     "privateImagePreparation": {
       "source": "7b8c2646d06be89091400fd1151e6fb8009e3531",
