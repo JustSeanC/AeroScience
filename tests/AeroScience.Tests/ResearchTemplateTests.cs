@@ -67,4 +67,15 @@ public sealed class ResearchTemplateTests:IDisposable
     }
     [Fact]public void MissingVersionOrCriteriaCannotBecomeExampleDefaults()
     {var json=JsonNode.Parse(Json(Example("vertical-atmospheric-profile")))!;json["definition"]!["atmosphericProfile"]!.AsObject().Remove("version");Assert.Throws<ArgumentException>(()=>PortableResearchTemplates.Read(json.ToJsonString()));}
+    [Fact]public void PortableIntegrityAndCapabilityOrderingDoNotDependOnTheComputersLanguage()
+    {
+        var prior=System.Globalization.CultureInfo.CurrentCulture;
+        try{var expected=OrganizationTemplates.All().Select(t=>PortableResearchTemplates.Create(t.Name,t.Description,t.Definition).Sha256).ToArray();foreach(var culture in new[]{"tr-TR","sv-SE","en-US"}){System.Globalization.CultureInfo.CurrentCulture=System.Globalization.CultureInfo.GetCultureInfo(culture);Assert.Equal(expected,OrganizationTemplates.All().Select(t=>PortableResearchTemplates.Create(t.Name,t.Description,t.Definition).Sha256));}}
+        finally{System.Globalization.CultureInfo.CurrentCulture=prior;}
+    }
+    [Fact]public void ImportedSharingMetadataRemainsFrozenButDoesNotInflateNativePackets()
+    {
+        var t=PortableResearchTemplates.Create(new string('漢',100),new string('漢',1500),Example("flight-regime").Definition,new string('漢',300));var card=store.ImportResearchTemplate(new(Json(t),t.Name));var plan=store.CreateResearchPlan(card.Id,card.Revision);var coordinator=new MissionCoordinator(store,1000);var flight=coordinator.Start(new("Imported native card",PlanId:plan.Id));
+        var encoded=new ToolbarCommandHandler(coordinator).Handle(Json(new ToolbarCommand(1,Guid.NewGuid(),"research-state",MissionId:flight.Id)));using var reply=JsonDocument.Parse(encoded);Assert.True(reply.RootElement.GetProperty("ok").GetBoolean(),encoded);Assert.InRange(System.Text.Encoding.UTF8.GetByteCount(encoded),1,8000);Assert.DoesNotContain("templateProvenance",encoded);Assert.Equal(card.TemplateProvenance,Assert.Single(store.ResearchOperations(flight.Id).Cards).Card.TemplateProvenance);coordinator.End(flight.Id);
+    }
 }

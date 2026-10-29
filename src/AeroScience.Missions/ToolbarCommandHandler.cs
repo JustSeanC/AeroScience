@@ -153,6 +153,9 @@ public sealed class ToolbarCommandHandler(MissionCoordinator coordinator, RouteM
     }
     private static ResearchFlightCard CompactProcedureCard(ResearchFlightCard item)
     {
+        // Sharing attribution belongs in the desktop template view, not the native packet.
+        // The authoritative frozen card and its evidence hash retain the complete metadata.
+        item=item with{Card=item.Card with{TemplateProvenance=null}};
         if(item.Card.OrganizationAssignment is {} organization)item=item with{Card=item.Card with{OrganizationAssignment=null},Organization=new(string.Concat(organization.OrganizationName.EnumerateRunes().Take(60)),organization.ClaimId,organization.IssuedRevision,"Local monitoring; eligibility pending; Not Submitted")};
         if(item.Card.Procedure is null)return item;
         static string Clip(string value,int maximum)=>string.Concat(value.EnumerateRunes().Take(maximum));

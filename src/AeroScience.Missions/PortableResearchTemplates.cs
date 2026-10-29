@@ -59,9 +59,9 @@ public static class PortableResearchTemplates
     static string[] Capabilities(OrganizationResearchDefinition d)
     {
         if(d.Procedure is not null||d.FlightRegime is not null)
-        {var rules=d.Procedure?.Points.Select(p=>p.Conditions)??[d.FlightRegime!];return rules.SelectMany(r=>new[]{FlightRegimeEvaluation.RequiresAirspeed(r)?"simulator:indicated-airspeed-knots":null,FlightRegimeEvaluation.RequiresAltitude(r)?"simulator:altitude-feet-msl":null}).OfType<string>().Distinct().Order().ToArray();}
-        if(d.Survey is not null)return d.Survey.Measurements.Select(m=>m switch{SurveyMeasurement.AirTemperature=>"simulator:ambient-temperature",SurveyMeasurement.TerrainElevation=>"historical:dem-elevation",_=>"historical:landsat-collection-2-surface-temperature"}).Order().ToArray();
-        if(d.ObservationFlight is not null)return new[]{"pilot:documented-observation"}.Concat(d.ObservationFlight.SelectedInstruments.Select(i=>"optional-instrument:"+i)).Order().ToArray();
+        {var rules=d.Procedure?.Points.Select(p=>p.Conditions)??[d.FlightRegime!];return rules.SelectMany(r=>new[]{FlightRegimeEvaluation.RequiresAirspeed(r)?"simulator:indicated-airspeed-knots":null,FlightRegimeEvaluation.RequiresAltitude(r)?"simulator:altitude-feet-msl":null}).OfType<string>().Distinct().Order(StringComparer.Ordinal).ToArray();}
+        if(d.Survey is not null)return d.Survey.Measurements.Select(m=>m switch{SurveyMeasurement.AirTemperature=>"simulator:ambient-temperature",SurveyMeasurement.TerrainElevation=>"historical:dem-elevation",_=>"historical:landsat-collection-2-surface-temperature"}).Order(StringComparer.Ordinal).ToArray();
+        if(d.ObservationFlight is not null)return new[]{"pilot:documented-observation"}.Concat(d.ObservationFlight.SelectedInstruments.Select(i=>"optional-instrument:"+i)).Order(StringComparer.Ordinal).ToArray();
         return ["simulator:ambient-temperature",d.ExperimentalSensor is not null?"model:experimental-temperature-v1":"simulator:altitude-feet-msl"];
     }
     static string[] Limits(OrganizationResearchDefinition d)=>[
@@ -111,7 +111,8 @@ public static class PortableResearchTemplates
             if(value.Format!=Format||value.Version!=1)throw new ArgumentException("Unsupported portable template format or version. The original file has not changed.");
             var expected=Create(value.Name,value.Description,value.Definition,value.Attribution);
             if(editing)return expected;
-            if(value.CardSchemaVersion!=expected.CardSchemaVersion||value.RequiredCapabilities is null||!value.RequiredCapabilities.SequenceEqual(expected.RequiredCapabilities)
+            if(value.Name!=expected.Name||value.Description!=expected.Description||value.Attribution!=expected.Attribution
+                ||value.CardSchemaVersion!=expected.CardSchemaVersion||value.RequiredCapabilities is null||!value.RequiredCapabilities.SequenceEqual(expected.RequiredCapabilities)
                 ||value.Limitations is null||!value.Limitations.SequenceEqual(expected.Limitations)||value.Sha256!=Hash(value with{Sha256=""}))
                 throw new ArgumentException("Template integrity, schema, capabilities or scientific limitations do not match. Keep the original file; no criteria were imported.");
             return value;
@@ -129,17 +130,17 @@ public sealed partial class MissionStore
     public PortableResearchTemplate ExportResearchTemplate(Guid id,TemplateExportRequest request)
     {
         var card=ResearchCard(id,request.Revision);SupportedCard(card);
-        return PortableResearchTemplates.Create(card.Name,request.Description,PortableResearchTemplates.Definition(card),
-            request.Attribution.Length>0?request.Attribution:card.TemplateProvenance?.Attribution??"");
+        return PortableResearchTemplates.Create(card.Name,request.Description??card.TemplateProvenance?.Description??"",PortableResearchTemplates.Definition(card),
+            request.Attribution??card.TemplateProvenance?.Attribution??"");
     }
     public PersonalResearchCard ImportResearchTemplate(TemplateImportRequest request)
     {
         var t=PortableResearchTemplates.Read(request.Contents);
-        return SaveResearchCard(PortableResearchTemplates.SaveRequest(t,request.Name),new(1,"Imported",t.Sha256,t.Attribution));
+        return SaveResearchCard(PortableResearchTemplates.SaveRequest(t,request.Name),new(1,"Imported",t.Sha256,t.Attribution,Description:t.Description,CardSchemaVersion:t.CardSchemaVersion));
     }
     public PersonalResearchCard CloneResearchTemplate(Guid id,TemplateCloneRequest request)
     {
         var t=ExportResearchTemplate(id,new(request.Revision));
-        return SaveResearchCard(PortableResearchTemplates.SaveRequest(t,request.Name),new(1,"Cloned",t.Sha256,t.Attribution));
+        return SaveResearchCard(PortableResearchTemplates.SaveRequest(t,request.Name),new(1,"Cloned",t.Sha256,t.Attribution,Description:t.Description,CardSchemaVersion:t.CardSchemaVersion));
     }
 }

@@ -19,6 +19,15 @@ export function scientificCategory(provenance,source){
 }
 export function renderCategory(parent,provenance,source){const c=scientificCategory(provenance,source),box=node('div',undefined,'scientific-category');box.dataset.sourceCategory=c.label;box.append(node('strong',c.label),node('p',c.explanation));if(c.synthetic)box.append(node('p','Synthetic fixture / demo evidence','scientific-warning'));parent.append(box);return box;}
 
+// Definition preview only; no attempt, evidence assessment or new scientific claim.
+export function renderTemplateCriteria(parent,definition){
+ const procedure=definition.procedure;
+ if(!procedure&&!definition.flightRegime)return;
+ parent.append(node('h4','Quantitative Requirements'),node('p',procedure?`${procedure.ordered?'Ordered sequence':'Independent points'} · AND / OR policies are preserved for each named point.`:'Supported recorded IAS and/or MSL conditions.'));
+ const points=procedure?.points||[{conditions:definition.flightRegime,repetitions:1}];
+ for(const [index,point]of points.entries()){const r=point.conditions,items=[];if(r.testPoint?.airspeedRequired!==false)items.push(`${r.airspeedKnots} ± ${r.airspeedToleranceKnots} knots IAS`);if(r.testPoint?.altitudeRequired!==false)items.push(`${r.altitudeMslFeet} ± ${r.altitudeToleranceFeet} feet MSL`);parent.append(node('p',`${index+1}. ${r.testPoint?.name||'Flight-Regime Validation'} — ${items.join(r.testPoint?.policy==='any'?' OR ':' AND ')}; ${r.holdSeconds} continuous seconds; ${point.repetitions} distinct qualifying repetition(s).`));}
+}
+
 export function researchContext(card={},plan){
  let question,variables,method,output,quality,limitation,categories=[];const a=card.atmosphericProfile,t=card.atmosphericTransect,s=card.survey,o=card.observationFlight,e=card.experimentalSensor,f=card.flightRegime,p=card.procedure;
  if([a,t,s,o,e,p,f?.testPoint].some(r=>r&&r.version!==1))return {question:'The original research definition uses an unsupported or unavailable version.',variables:'Not available from a supported definition.',method:'Not available; preserve the original definition and inspect it without rewriting its requirements.',output:'No scientific outcome is inferred.',quality:'Unsupported definition; sufficient evidence cannot be established.',limitation:'No supported method or sensor capability is invented.',categories:[],geometry:'Original planning information remains unchanged.'};
