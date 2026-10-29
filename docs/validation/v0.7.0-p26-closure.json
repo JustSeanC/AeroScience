@@ -1,0 +1,108 @@
+{
+  "version": 1,
+  "milestone": "v0.7.0 P26",
+  "status": "Engineering foundation technically accepted; complete five-stage managed hosting and production operation remain incomplete",
+  "branch": "develop/v0.7.0",
+  "testedSource": "1b0b3d61826f853f08c7e364ffec29f0e3a668b5",
+  "fullValidation": {
+    "id": 40909799415,
+    "url": "https://github.com/JustSeanC/AeroScience/actions/runs/40909799415",
+    "conclusion": "success"
+  },
+  "fastValidation": {
+    "id": 40906163511,
+    "source": "cec8b15f88cdce07d3b7089c5cf4aae3977912ff",
+    "conclusion": "success",
+    "dotnet": {
+      "passed": 1246,
+      "failed": 0,
+      "skipped": 100
+    },
+    "browser": {
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0
+    },
+    "python": {
+      "passed": 156,
+      "failed": 0,
+      "skipped": 1
+    }
+  },
+  "fullResults": {
+    "linuxDotnet": {
+      "passed": 1346,
+      "failed": 0,
+      "skipped": 0
+    },
+    "windowsDotnet": {
+      "passed": 1342,
+      "failed": 0,
+      "skipped": 4
+    },
+    "browser": {
+      "passed": 338,
+      "failed": 0,
+      "skipped": 2,
+      "flaky": 0
+    },
+    "linuxPython": {
+      "passed": 156,
+      "failed": 0,
+      "skipped": 1
+    },
+    "windowsPython": {
+      "passed": 152,
+      "failed": 0,
+      "skipped": 2
+    },
+    "productionLikeContainers": {
+      "passed": 12,
+      "failed": 0
+    },
+    "railwayShapedContainers": {
+      "passed": 5,
+      "failed": 0
+    },
+    "processRecoveryFamilies": {
+      "linuxPassed": 5,
+      "windowsPassed": 5
+    },
+    "windowsVaultNativeIsolationAndPackageStructure": "passed"
+  },
+  "preservedFailure": {
+    "run": 40906163068,
+    "source": "cec8b15f88cdce07d3b7089c5cf4aae3977912ff",
+    "linux": {
+      "passed": 1345,
+      "failed": 1,
+      "skipped": 0
+    },
+    "windows": {
+      "passed": 1341,
+      "failed": 1,
+      "skipped": 4
+    },
+    "cause": "Historical P13 fixture used current Identity queries before migration; corrected original-schema seed and strengthened identity/hash/stamp assertions. Production code unchanged."
+  },
+  "productionReady": false,
+  "fiveStageAccepted": false,
+  "liveProviderDeploymentPerformed": false,
+  "publicTemplateOrImagePublished": false,
+  "paidResourcesProvisioned": false,
+  "installedMsfsOrAuthenticNasaAcceptance": false,
+  "p27Started": false,
+  "protected": {
+    "ownerReadmeSha256": "f32cff962da446a6b10e411124155ec281a6cfc06664ca01dfc5754b44d13049",
+    "stableMainDevelop060AndTag": "9dd2d8cda7ddb6d73414808f75010726871205c2"
+  },
+  "remainingGates": [
+    "Published accepted native Railway template and immutable distribution identities",
+    "Verified finite Railway ingress/proxy contract",
+    "Fresh-account novice deployment within five ordinary stages",
+    "Independently controlled encrypted backup copy/key and account-loss recovery",
+    "Enforced retention/deletion, guided disaster restore, safe rollout and actual failed-migration paired recovery",
+    "Live certificate rotation, production SBOM/security/distribution and operator acceptance"
+  ],
+  "ownerAction": "No developer QA or paid-account action required for this automated checkpoint; future cloud acceptance needs separate explicit authorization."
+}
