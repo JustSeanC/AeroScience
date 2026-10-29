@@ -63,7 +63,7 @@
       "REGION"
     ],
     "independentDestinationRequired": true,
-    "automaticRetentionDeletion": false,
+    "automaticRetentionDeletion": "Implemented; disabled until administrator explicitly approves and separately keyed restores are verified",
     "blockers": [
       "Native bucket inclusion in reusable template not yet verified",
       "An independently controlled copy outside the Railway project/account is required",
@@ -89,5 +89,12 @@
     "No certificate verification bypass",
     "No paid provisioning or account login from this file",
     "No public Deploy Now URL until acceptance"
-  ]
+  ],
+  "nativeProjectSpecification": {
+    "path": "deploy/organization/railway/.railway/railway.ts",
+    "sdk": "railway@3.16.0",
+    "officialMechanism": "Railway Infrastructure as Code; private offline candidate, not a published reusable template",
+    "generatedPublicDomain": "Not declared by the documented IaC authoring API; account-side confirmation is required",
+    "independentRecovery": "An independently controlled destination is still required outside the project/account"
+  }
 }

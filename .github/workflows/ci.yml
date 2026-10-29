@@ -55,6 +55,8 @@ jobs:
       - run: dotnet build AeroScience.sln -c Release --no-restore --nologo
       - run: python3 scripts/build/development_validation.py dotnet
       - run: npm ci --ignore-scripts
+      - name: Validate native Railway configuration offline
+        run: npm ci --ignore-scripts --prefix deploy/organization/railway && npm test --prefix deploy/organization/railway
       - run: npm run check:branding
       - run: npm run check:web
       - run: python3 scripts/build/verify_web_assets.py
@@ -156,6 +158,8 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
       - run: npm ci --ignore-scripts
+      - name: Validate native Railway configuration offline
+        run: npm ci --ignore-scripts --prefix deploy/organization/railway && npm test --prefix deploy/organization/railway
       - run: npm run check:branding
       - run: npm run check:web
       - run: npx playwright install --with-deps chromium
