@@ -55,17 +55,24 @@ public sealed partial class OrganizationRecoveryEngine
             }
         }
         // Keep only the bounded selected daily/weekly IDs. Unverified rows are excluded in the candidate query.
-        var retained=new HashSet<Guid>();var days=new HashSet<DateOnly>();var weeks=new HashSet<(int,int)>();bool latest=false;
+        var retained=new HashSet<Guid>();var days=new HashSet<DateOnly>();var weeks=new HashSet<(int,int)>();Guid? safetyId=null;
         await foreach(var b in Metadata()){
             if(b.RetentionStartedUtc is not null||b.VerifiedRestoreUtc is null||b.IndependentVerifiedUtc is null)continue;
             var utc=b.CreatedUtc.UtcDateTime;
-            if(!latest){retained.Add(b.Id);latest=true;}
+            if(safetyId is null){retained.Add(b.Id);safetyId=b.Id;}
             if(days.Count<policy.RetainDaily&&days.Add(DateOnly.FromDateTime(utc)))retained.Add(b.Id);
             if(weeks.Count<policy.RetainWeekly&&weeks.Add((ISOWeek.GetYear(utc),ISOWeek.GetWeekOfYear(utc))))retained.Add(b.Id);
         }
-        if(!latest)throw new InvalidOperationException("Retention is held until an independently restored checkpoint exists.");
+        if(safetyId is null)throw new InvalidOperationException("Retention is held until an independently restored checkpoint exists.");
         var cutoff=now.AddHours(-24);
         var candidates=await db.ServerBackups.Where(b=>b.OrganizationId==org.PublicId&&b.DeletedUtc==null&&b.CreatedUtc<cutoff&&b.VerifiedRestoreUtc!=null&&b.IndependentVerifiedUtc!=null&&!retained.Contains(b.Id)).OrderBy(b=>b.CreatedUtc).ThenBy(b=>b.Id).Take(20).ToArrayAsync(ct);
+        if(candidates.Length==0)return 0;
+        var safety=await db.ServerBackups.AsNoTracking().SingleAsync(b=>b.Id==safetyId,ct);
+        if(safety.RepositorySha256!=Hash(Encoding.UTF8.GetBytes(options.Repository!))||safety.IndependentRepositorySha256!=Hash(Encoding.UTF8.GetBytes(options.Independent!.Repository))||safety.IndependentSnapshotId is null)throw new InvalidOperationException("Retention held: the protected survivor no longer belongs to the configured repositories.");
+        // A historical verification timestamp does not prove that the remaining copies still exist.
+        // Authenticate the exact protected survivor in both repositories before deleting any older point.
+        var originalSurvivor=await Discover(safety.SnapshotId,ct);var independentSurvivor=await other.Discover(safety.IndependentSnapshotId,ct);
+        if(originalSurvivor.BundleSha256!=safety.BundleSha256||independentSurvivor.BundleSha256!=safety.BundleSha256||originalSurvivor.ManifestJson!=safety.ManifestJson||independentSurvivor.ManifestJson!=safety.ManifestJson)throw new InvalidOperationException("Retention held: the protected survivor is missing, altered or cannot be authenticated.");
         foreach(var backup in candidates){
             if(backup.RepositorySha256!=Hash(Encoding.UTF8.GetBytes(options.Repository!))||backup.IndependentRepositorySha256!=Hash(Encoding.UTF8.GetBytes(options.Independent!.Repository)))throw new InvalidOperationException("Retention destination no longer matches this checkpoint. Deletion is held.");
             if(backup.IndependentSnapshotId is not {Length:64}||backup.SnapshotId.Length!=64)throw new InvalidOperationException("Retention requires exact source and independent identities.");

@@ -164,6 +164,49 @@
       "skipped": 0,
       "scope": "Actual complete disposable primary database/repository/key/PFX loss; independent key saved outside source; compiled migration failure and exact-binary guard; overlaps earlier focused checks"
     },
-    "interruptedLocalCheck": "Execution-session disconnect; no complete outcome. Preserved incomplete log; full rerun produced 3 passing tests."
+    "interruptedLocalCheck": "Execution-session disconnect; no complete outcome. Preserved incomplete log; full rerun produced 3 passing tests.",
+    "preCorrectionFast": {
+      "id": 40933987161,
+      "source": "fd8f9b83f2d92fdf653dec7faf40c4d903ab4e97",
+      "conclusion": "success",
+      "dotnet": {
+        "passed": 1247,
+        "failed": 0,
+        "skipped": 102
+      },
+      "browser": {
+        "passed": 4,
+        "failed": 0,
+        "skipped": 0
+      },
+      "officialSdk": {
+        "passed": 2,
+        "failed": 0,
+        "skipped": 0
+      },
+      "pythonRun": 0
+    },
+    "cancelledAcceptanceRuns": [
+      {
+        "id": 40935175380,
+        "source": "fd8f9b83f2d92fdf653dec7faf40c4d903ab4e97",
+        "conclusion": "cancelled",
+        "accepted": false,
+        "reason": "Stopped before passing acceptance to correct consent opt-out after destination removal and authenticate protected survivors before pruning."
+      }
+    ],
+    "correctedAffectedValidation": {
+      "browser": {
+        "passed": 9,
+        "failed": 0,
+        "skipped": 0
+      },
+      "nativePostgresSafety": {
+        "passed": 3,
+        "failed": 0,
+        "skipped": 0
+      },
+      "sdkDependencyAdvisories": 0
+    }
   }
 }
