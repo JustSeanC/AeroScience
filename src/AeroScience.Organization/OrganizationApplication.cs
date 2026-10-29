@@ -94,6 +94,7 @@ public static class OrganizationApplication
             o.GlobalLimiter=PartitionedRateLimiter.Create<HttpContext,string>(_=>RateLimitPartition.GetConcurrencyLimiter("organization",_=>new(){PermitLimit=32,QueueLimit=0}));
         });
         builder.Services.AddScoped<OrganizationManagement>();
+        builder.Services.AddScoped<OrganizationPublishing>();builder.Services.AddScoped<OrganizationResearchTemplates>();
         builder.Services.AddScoped<OrganizationOpportunities>();builder.Services.AddScoped<OrganizationMembership>();builder.Services.AddScoped<OrganizationDevices>();
         builder.Services.AddScoped<ProgramWorkflow>();builder.Services.AddScoped<CampaignCoverageProjection>();builder.Services.AddScoped<CampaignProgressProjection>();builder.Services.AddScoped<OrganizationCampaignProgress>();builder.Services.AddScoped<OrganizationSubmissions>();builder.Services.AddScoped<OrganizationReviews>();
         var submissionLimit=builder.Configuration.GetValue<long?>("Organization:MaximumRetainedEvidenceBytes")??1024L*1024*1024;
@@ -143,7 +144,7 @@ public static class OrganizationApplication
         });
         var assets=Path.Combine(AppContext.BaseDirectory,"organization-portal");
         if(Directory.Exists(assets)){var files=new PhysicalFileProvider(assets);app.UseDefaultFiles(new DefaultFilesOptions{FileProvider=files});app.UseStaticFiles(new StaticFileOptions{FileProvider=files});}
-        MapIdentity(app);MapManagement(app);OrganizationEnrollmentApi.Map(app);OrganizationOpportunityApi.Map(app);OrganizationSubmissionApi.Map(app);OrganizationReviewApi.Map(app);CampaignProgressApi.Map(app);CampaignCoverageApi.Map(app);ProgramWorkflowApi.Map(app);return app;
+        MapIdentity(app);MapManagement(app);ResearchTemplateApi.Map(app);OrganizationEnrollmentApi.Map(app);OrganizationOpportunityApi.Map(app);OrganizationSubmissionApi.Map(app);OrganizationReviewApi.Map(app);CampaignProgressApi.Map(app);CampaignCoverageApi.Map(app);ProgramWorkflowApi.Map(app);return app;
     }
     public static async Task Initialize(WebApplication app,CancellationToken token=default)
     {
@@ -172,7 +173,8 @@ public static class OrganizationApplication
         api.MapGet("/programs/{program:guid}/campaigns",(Guid program,int? offset,OrganizationManagement management,CancellationToken token)=>management.Campaigns(program,offset??0,token));
         api.MapPost("/programs/{program:guid}/campaigns",(Guid program,OrganizationCampaignRequest request,OrganizationManagement management,HttpContext c)=>management.SaveCampaign(program,null,request,c.User,c.RequestAborted));
         api.MapPut("/programs/{program:guid}/campaigns/{id:guid}",(Guid program,Guid id,OrganizationCampaignRequest request,OrganizationManagement management,HttpContext c)=>management.SaveCampaign(program,id,request,c.User,c.RequestAborted));
-        api.MapPost("/campaigns/{id:guid}/publish",(Guid id,OrganizationPublishRequest request,OrganizationManagement management,HttpContext c)=>management.Publish(id,request,c.User,c.RequestAborted)).RequireAuthorization(PublishPolicy);
+        // The service enforces the explicit legacy default or the administrator-selected policy.
+        api.MapPost("/campaigns/{id:guid}/publish",(Guid id,OrganizationPublishRequest request,OrganizationManagement management,HttpContext c)=>management.Publish(id,request,c.User,c.RequestAborted));
         api.MapGet("/definitions/{id:guid}/revisions/{revision:int}",(Guid id,int revision,OrganizationManagement management,CancellationToken token)=>management.ReadRevision(id,revision,token));
         api.MapGet("/audit",async(long? after,OrganizationDatabase db,CancellationToken token)=>{
             if(after<0)throw new ArgumentException("Choose a valid audit page.");return await db.Audit.AsNoTracking().Where(a=>a.Id>(after??0)).OrderBy(a=>a.Id).Take(100).ToArrayAsync(token);

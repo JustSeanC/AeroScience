@@ -71,6 +71,9 @@ public sealed class OrganizationDatabase(DbContextOptions<OrganizationDatabase> 
     public DbSet<DefinitionRevision> Revisions=>Set<DefinitionRevision>();
     public DbSet<OrganizationAudit> Audit=>Set<OrganizationAudit>();
     public DbSet<OrganizationCommandReceipt> Receipts=>Set<OrganizationCommandReceipt>();
+    public DbSet<ResearchTemplateRecord> ResearchTemplates=>Set<ResearchTemplateRecord>();
+    public DbSet<ResearchPublishingPolicyRecord> PublishingPolicies=>Set<ResearchPublishingPolicyRecord>();
+    public DbSet<PublicationReviewRecord> PublicationReviews=>Set<PublicationReviewRecord>();
     public DbSet<DataProtectionKey> DataProtectionKeys {get;set;}=null!;
     public DbSet<EnrollmentPolicyRecord> EnrollmentPolicies=>Set<EnrollmentPolicyRecord>();
     public DbSet<MembershipRecord> Memberships=>Set<MembershipRecord>();
@@ -104,6 +107,7 @@ public sealed class OrganizationDatabase(DbContextOptions<OrganizationDatabase> 
     protected override void OnModelCreating(ModelBuilder model)
     {
         base.OnModelCreating(model);
+        ResearchTemplateDatabase.Configure(model);
         model.HasDefaultSchema("organization");
         model.Entity<WorkflowReviewIndex>().HasKey(r=>r.RootId);
         model.Entity<WorkflowReviewIndex>().HasOne<ResearchReviewCaseRecord>().WithMany().HasForeignKey(r=>r.RootId).OnDelete(DeleteBehavior.Cascade);
@@ -239,6 +243,10 @@ public sealed class OrganizationDatabase(DbContextOptions<OrganizationDatabase> 
     public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess,CancellationToken cancellationToken=default){ProtectHistory();return base.SaveChangesAsync(acceptAllChangesOnSuccess,cancellationToken);}
     void ProtectHistory()
     {
+        foreach(var entry in ChangeTracker.Entries<ResearchTemplateRecord>())
+            if(entry.State==EntityState.Deleted||entry.State==EntityState.Modified&&new[]{nameof(ResearchTemplateRecord.OwnerId),nameof(ResearchTemplateRecord.Proposal),nameof(ResearchTemplateRecord.CreatedUtc)}.Any(p=>entry.Property(p).IsModified))throw new InvalidOperationException("Template ownership and original proposal identity are immutable.");
+        foreach(var entry in ChangeTracker.Entries<PublicationReviewRecord>())
+            if(entry.State==EntityState.Deleted||entry.State==EntityState.Modified&&(entry.Entity.Kind.StartsWith("publication:",StringComparison.Ordinal)||new[]{nameof(PublicationReviewRecord.ResourceId),nameof(PublicationReviewRecord.Kind),nameof(PublicationReviewRecord.DraftRevision),nameof(PublicationReviewRecord.CreatedUtc)}.Any(p=>entry.Property(p).IsModified)))throw new InvalidOperationException("Publication authorization and review targets are immutable.");
         foreach(var entry in ChangeTracker.Entries<ClaimRecord>())
             if(entry.State==EntityState.Deleted||entry.State==EntityState.Modified&&new[]{nameof(ClaimRecord.UserId),nameof(ClaimRecord.OpportunityId),nameof(ClaimRecord.IssuedRevision),nameof(ClaimRecord.IssuedSha256),nameof(ClaimRecord.AssignedUtc),nameof(ClaimRecord.Slot)}.Any(p=>entry.Property(p).IsModified))
                 throw new InvalidOperationException("Issued claim identity, definition and assignment boundaries are immutable.");

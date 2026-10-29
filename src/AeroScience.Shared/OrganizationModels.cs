@@ -18,12 +18,15 @@ public sealed record OrganizationTemplate(OrganizationTemplateReference Referenc
 public sealed record OrganizationProgramRequest(int Version,Guid RequestId,int ExpectedRevision,string Name,string Description);
 public sealed record OrganizationCampaignRequest(int Version,Guid RequestId,int ExpectedRevision,string Name,string Description,
     string Objective,OrganizationFocus Focus,OrganizationTemplateReference Template);
-public sealed record OrganizationPublishRequest(int Version,Guid RequestId,int ExpectedRevision);
+public sealed record OrganizationPublishRequest(int Version,Guid RequestId,int ExpectedRevision,
+    [property:System.Text.Json.Serialization.JsonIgnore(Condition=System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] string? DraftSha256=null,
+    [property:System.Text.Json.Serialization.JsonIgnore(Condition=System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] Guid? ApprovalId=null);
 public sealed record OrganizationProgramView(Guid Id,int Revision,string Name,string Description,DateTimeOffset CreatedUtc,
     DateTimeOffset UpdatedUtc,Guid AuthorId,string AuthorName);
 public sealed record OrganizationCampaignView(Guid Id,Guid ProgramId,int Revision,string Name,string Description,string Objective,
     OrganizationFocus Focus,OrganizationPublication Status,int? PublishedRevision,OrganizationResearchDefinition Definition,
-    DateTimeOffset CreatedUtc,DateTimeOffset UpdatedUtc,Guid AuthorId,string AuthorName,int? ProgramRevision=null);
+    DateTimeOffset CreatedUtc,DateTimeOffset UpdatedUtc,Guid AuthorId,string AuthorName,int? ProgramRevision=null,
+    [property:System.Text.Json.Serialization.JsonIgnore(Condition=System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] OrganizationTemplateReference? SourceTemplate=null);
 public sealed record OrganizationPage<T>(int Version,T[] Items,int? NextOffset);
 
 public enum OrganizationMembershipState { PendingApproval, Active, Suspended, Removed }

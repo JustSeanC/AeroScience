@@ -42,7 +42,7 @@ public sealed class ClaimEventRecord
     public Guid ActorId {get;set;}
 }
 
-public sealed class OrganizationOpportunities(OrganizationDatabase db,OrganizationManagement history,OrganizationMembership members,OrganizationDevices devices,ProgramWorkflow workflow)
+public sealed class OrganizationOpportunities(OrganizationDatabase db,OrganizationManagement history,OrganizationMembership members,OrganizationDevices devices,ProgramWorkflow workflow,OrganizationPublishing publishing)
 {
     const int PageSize=10;
     static void Command(int version,Guid id){if(version!=1||id==Guid.Empty)throw new ArgumentException("Use a supported command and a unique request identity.");}
@@ -102,7 +102,7 @@ public sealed class OrganizationOpportunities(OrganizationDatabase db,Organizati
     {
         Command(request.Version,request.RequestId);
         return await history.Mutate(actor,request.RequestId,new{operation="opportunity-publish",id,request},async(user,author)=>{
-            await Lock(ct);await Manager(actor,ct);var row=await db.Opportunities.SingleOrDefaultAsync(o=>o.Id==id,ct)??throw new OrganizationNotFound();var draft=Snapshot(row);
+            await Lock(ct);await Manager(actor,ct);var authorization=await publishing.Require("opportunity",id,request,actor,ct);var row=await db.Opportunities.SingleOrDefaultAsync(o=>o.Id==id,ct)??throw new OrganizationNotFound();var draft=Snapshot(row);
             if(row.Revision!=request.ExpectedRevision||draft.Status!=OrganizationPublication.Draft)throw new OrganizationConflict("Review the current saved draft before publication.");
             var campaign=await Campaign(row.CampaignId,draft.CampaignRevision,ct);
             if(JsonSerializer.Serialize(campaign.Definition,WireJson.Options)!=JsonSerializer.Serialize(draft.Definition,WireJson.Options))throw new OrganizationConflict("The saved definition differs from the authorized campaign publication.");
@@ -110,8 +110,8 @@ public sealed class OrganizationOpportunities(OrganizationDatabase db,Organizati
             row.Revision++;row.PublishedRevision=row.Revision;row.AvailabilityRevision++;
             var published=draft with{Revision=row.Revision,Status=OrganizationPublication.Published,UpdatedUtc=OrganizationTime.UtcNow,AuthorId=user,AuthorName=author};row.SnapshotJson=JsonSerializer.Serialize(published,WireJson.Options);CampaignProgressProjection.Index(row,published);
             if(!await db.SubmissionPolicies.AnyAsync(p=>p.OpportunityId==id,ct))db.SubmissionPolicies.Add(new(){OpportunityId=id,Revision=1,Mode=SubmissionPolicyMode.RequireMinimumEvidence,PublishedUtc=OrganizationTime.UtcNow,AuthorId=user});
-            history.Revision(id,row.Revision,"opportunity",published,user);history.Audit(user,author,"opportunity-published",id,row.Revision);return published;
-        },ct);
+            history.Revision(id,row.Revision,"opportunity",published,user);history.Audit(user,author,"opportunity-published",id,row.Revision);publishing.Record("opportunity",id,row.Revision,authorization);return published;
+        },ct,async()=>{await Lock(ct);await Manager(actor,ct);});
     }
     public Task<object> Availability(Guid id,OrganizationOpportunityAvailability request,ClaimsPrincipal actor,CancellationToken ct)
     {

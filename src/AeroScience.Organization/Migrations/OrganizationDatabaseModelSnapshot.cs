@@ -1012,6 +1012,48 @@ namespace AeroScience.Organization.Migrations
                     b.ToTable("WorkflowPolicies", "organization");
                 });
 
+            modelBuilder.Entity("AeroScience.Organization.PublicationReviewRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("DraftRevision")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<Guid>("ResourceId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Revision")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer");
+
+                    b.Property<string>("SnapshotJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ResourceId", "DraftRevision", "Kind");
+
+                    b.HasIndex("Status", "CreatedUtc", "Id");
+
+                    b.ToTable("PublicationReviews", "organization");
+                });
+
             modelBuilder.Entity("AeroScience.Organization.ReceivedSubmissionRecord", b =>
                 {
                     b.Property<Guid>("PilotId")
@@ -1068,6 +1110,26 @@ namespace AeroScience.Organization.Migrations
                     b.HasIndex("SearchName", "ReceivedUtc", "Id");
 
                     b.ToTable("Submissions", "organization");
+                });
+
+            modelBuilder.Entity("AeroScience.Organization.ResearchPublishingPolicyRecord", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Mode")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Revision")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PublishingPolicies", "organization");
                 });
 
             modelBuilder.Entity("AeroScience.Organization.ResearchReviewCaseRecord", b =>
@@ -1315,6 +1377,53 @@ namespace AeroScience.Organization.Migrations
                     b.HasKey("RootId", "CardId", "Key");
 
                     b.ToTable("ReviewRequirements", "organization");
+                });
+
+            modelBuilder.Entity("AeroScience.Organization.ResearchTemplateRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("Proposal")
+                        .HasColumnType("boolean");
+
+                    b.Property<int?>("PublishedRevision")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Revision")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer");
+
+                    b.Property<string>("SnapshotJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Proposal", "PublishedRevision");
+
+                    b.HasIndex("Proposal", "CreatedUtc", "Id");
+
+                    b.HasIndex("OwnerId", "Proposal", "CreatedUtc", "Id");
+
+                    b.ToTable("ResearchTemplates", "organization");
                 });
 
             modelBuilder.Entity("AeroScience.Organization.SubmissionPolicyRecord", b =>

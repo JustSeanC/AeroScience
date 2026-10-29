@@ -97,35 +97,38 @@ public sealed class OrganizationManagement(OrganizationDatabase db)
         Command(request.Version,request.RequestId,request.ExpectedRevision,id is null);
         var name=Text(request.Name,120,"Campaign name");var description=Text(request.Description,4000,"Campaign description",false);var question=Text(request.Objective,4000,"Research question or test objective",false);
         if(!Enum.IsDefined(request.Focus)||request.Focus==OrganizationFocus.Unknown||request.Template is null)throw new ArgumentException("Choose a supported campaign focus and research approach.");
-        var definition=OrganizationTemplates.Resolve(request.Template);
         return Mutate(user,request.RequestId,new{operation="campaign",program,id,request},async(actor,author)=>{
+            await new OrganizationPublishing(db).Lock(token);
+            var definition=await OrganizationPublishing.Resolve(db,request.Template,token);
             await LockResource(id,token);
             if(!await db.Programs.AnyAsync(p=>p.Id==program,token))throw new OrganizationNotFound();
             var now=OrganizationTime.UtcNow;
             var row=id is {} existing?await db.Campaigns.SingleOrDefaultAsync(c=>c.Id==existing&&c.ProgramId==program,token)??throw new OrganizationNotFound():new CampaignRecord{Id=Guid.NewGuid(),ProgramId=program,CreatedUtc=now};
             if(row.Revision!=request.ExpectedRevision)throw new OrganizationConflict("This campaign has a newer saved revision. Your draft remains unchanged; reload the saved campaign.");
             row.Revision++;
-            var view=new OrganizationCampaignView(row.Id,program,row.Revision,name,description,question,request.Focus,OrganizationPublication.Draft,row.PublishedRevision,definition,row.CreatedUtc,now,actor,author);
+            var view=new OrganizationCampaignView(row.Id,program,row.Revision,name,description,question,request.Focus,OrganizationPublication.Draft,row.PublishedRevision,definition,row.CreatedUtc,now,actor,author,SourceTemplate:request.Template.Id.StartsWith("published:",StringComparison.Ordinal)?request.Template:null);
             row.SnapshotJson=JsonSerializer.Serialize(view,WireJson.Options);if(id is null)db.Campaigns.Add(row);
             Revision(row.Id,row.Revision,"campaign",view,actor);Audit(actor,author,id is null?"campaign-created":"campaign-edited",row.Id,row.Revision);return view;
-        },token);
+        },token,async()=>{var gate=new OrganizationPublishing(db);await gate.Lock(token);await gate.RequireManager(user,false,token);});
     }
     public Task<OrganizationCampaignView> Publish(Guid id,OrganizationPublishRequest request,ClaimsPrincipal user,CancellationToken token)
     {
         Command(request.Version,request.RequestId,request.ExpectedRevision,false);
+        var publishing=new OrganizationPublishing(db);
         return Mutate(user,request.RequestId,new{operation="publish",id,request},async(actor,author)=>{
+            var authorization=await publishing.Require("campaign",id,request,user,token);
             await LockResource(id,token);
             var row=await db.Campaigns.SingleOrDefaultAsync(c=>c.Id==id,token)??throw new OrganizationNotFound();
             if(row.Revision!=request.ExpectedRevision)throw new OrganizationConflict("The campaign changed after your publication review. Reload and review its current saved revision.");
             var previous=View(row);
             if(previous.Status!=OrganizationPublication.Draft)throw new OrganizationConflict("This revision is already published. Edit a new draft to make changes.");
             if(string.IsNullOrWhiteSpace(previous.Objective))throw new ArgumentException("Add a research question or test objective before publishing this campaign.");
-            var definition=OrganizationTemplates.Resolve(previous.Definition.Template);
+            var definition=await OrganizationPublishing.Resolve(db,previous.SourceTemplate??previous.Definition.Template,token);
             if(Hash(definition)!=Hash(previous.Definition))throw new OrganizationConflict("The saved research approach differs from the current supported definition. Save a reviewed draft before publishing.");
             row.Revision++;row.PublishedRevision=row.Revision;
             var view=previous with{Revision=row.Revision,PublishedRevision=row.Revision,Status=OrganizationPublication.Published,UpdatedUtc=OrganizationTime.UtcNow,AuthorId=actor,AuthorName=author,ProgramRevision=(await db.Programs.AsNoTracking().SingleAsync(p=>p.Id==row.ProgramId,token)).Revision};
-            row.SnapshotJson=JsonSerializer.Serialize(view,WireJson.Options);CampaignProgressProjection.Index(row,view);Revision(row.Id,row.Revision,"campaign",view,actor);Audit(actor,author,"campaign-published",row.Id,row.Revision);return view;
-        },token);
+            row.SnapshotJson=JsonSerializer.Serialize(view,WireJson.Options);CampaignProgressProjection.Index(row,view);Revision(row.Id,row.Revision,"campaign",view,actor);Audit(actor,author,"campaign-published",row.Id,row.Revision);publishing.Record("campaign",id,row.Revision,authorization);return view;
+        },token,async()=>{await publishing.Lock(token);await publishing.RequireManager(user,false,token);});
     }
     public async Task<DefinitionRevision> ReadRevision(Guid id,int revision,CancellationToken token)
     {
