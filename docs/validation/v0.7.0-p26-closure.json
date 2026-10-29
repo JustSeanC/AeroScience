@@ -1,36 +1,40 @@
 {
   "version": 1,
   "milestone": "v0.7.0 P26",
-  "status": "Bounded completion-pass engineering and Full integration accepted; complete Railway hosting and production operation remain incomplete",
+  "status": "Feasible offline P26 additions Full-validated; production hosting, secure Railway ingress/owner delivery and P28 acceptance remain incomplete",
   "branch": "develop/v0.7.0",
-  "testedSource": "a1e565e464517382185510562ce255a68371f76d",
+  "testedSource": "f5edc733cfe02135d52bd3c2b2f00d586ec4d21e",
   "fullValidation": {
-    "id": 40953029040,
-    "url": "https://github.com/JustSeanC/AeroScience/actions/runs/40953029040",
-    "source": "a1e565e464517382185510562ce255a68371f76d",
+    "id": 40965344581,
+    "url": "https://github.com/JustSeanC/AeroScience/actions/runs/40965344581",
+    "source": "f5edc733cfe02135d52bd3c2b2f00d586ec4d21e",
     "conclusion": "success"
   },
   "fastValidation": {
-    "id": 40937183428,
-    "url": "https://github.com/JustSeanC/AeroScience/actions/runs/40937183428",
-    "source": "7b8c2646d06be89091400fd1151e6fb8009e3531",
+    "id": 40964836841,
+    "url": "https://github.com/JustSeanC/AeroScience/actions/runs/40964836841",
+    "source": "f5edc733cfe02135d52bd3c2b2f00d586ec4d21e",
     "conclusion": "success",
     "dotnet": {
-      "passed": 1247,
+      "passed": 90,
       "failed": 0,
-      "skipped": 102
+      "skipped": 0
     },
     "browser": {
       "passed": 4,
       "failed": 0,
-      "skipped": 4
+      "skipped": 12
     },
     "officialRailwaySdk": {
-      "passed": 2,
+      "passed": 5,
       "failed": 0,
       "skipped": 0
     },
-    "pythonRun": 0
+    "python": {
+      "passed": 161,
+      "failed": 0,
+      "skipped": 1
+    }
   },
   "fullResults": {
     "linuxDotnet": {
@@ -44,18 +48,18 @@
       "skipped": 5
     },
     "browser": {
-      "passed": 339,
+      "passed": 342,
       "failed": 0,
       "skipped": 2,
       "flaky": 0
     },
     "linuxPython": {
-      "passed": 156,
+      "passed": 161,
       "failed": 0,
       "skipped": 1
     },
     "windowsPython": {
-      "passed": 152,
+      "passed": 157,
       "failed": 0,
       "skipped": 2
     },
@@ -72,11 +76,12 @@
       "windowsPassed": 5
     },
     "officialRailwaySdk": {
-      "passed": 2,
+      "passed": 5,
       "failed": 0,
       "skipped": 0
     },
-    "windowsVaultNativeIsolationAndPackageStructure": "passed"
+    "windowsVaultNativeIsolationAndPackageStructure": "passed",
+    "privateImageRolesVerified": 4
   },
   "preservedFailure": {
     "run": 40906163068,
@@ -105,14 +110,14 @@
     "stableMainDevelop060AndTag": "9dd2d8cda7ddb6d73414808f75010726871205c2"
   },
   "remainingGates": [
-    "Supported authenticated finite Railway ingress boundary; no wildcard or informational-header substitute",
-    "Authorized account-side native plan/template/domain/secret validation and accepted immutable registry distribution",
-    "Validated owner-only browser verification and fresh-account novice five-stage completion",
-    "Independent account/destination/key ownership, live account-loss restore and guided disaster promotion",
-    "Complete provider maintenance/image/schema rollout, failed-image paired restoration and certificate rotation",
-    "Production SBOM/security/distribution, retention/immutability and operator acceptance"
+    "P28 prerequisite: supported authenticated finite Railway ingress or validated gateway path; no wildcard/header-only fallback",
+    "P28 prerequisite: secure owner-controlled delivery or verified owner replacement; sealed generated codes cannot be retrieved from Railway UI/API",
+    "P28 native account-side resource/variable/domain/persistence validation and approved immutable registry/template publication",
+    "P28 independent external account/key/object disaster recovery, guided restore promotion and recoverable provider/image/schema updates",
+    "P28 ordinary five-stage novice test and observed Railway-only provider costs",
+    "Production security/SBOM/license/distribution, retention/immutability, certificate rotation and P29 release acceptance"
   ],
-  "ownerAction": "None during routine P26 development. Owner performs the ordinary Railway browser/account/cost/ownership/invitation journey during integrated P28, after engineering prerequisites; no commands, accounts or paid authorization requested now.",
+  "ownerAction": "None now. Provider login, charge authorization and ordinary five-stage testing are reserved for owner-operated integrated P28 after engineering prerequisites. Railway alone handles billing/authentication; AeroScience collects no payment information.",
   "completionPass": {
     "date": "2026-10-29",
     "preservedBaselineSource": "1b0b3d61826f853f08c7e364ffec29f0e3a668b5",
@@ -481,11 +486,11 @@
   "fullSkipDetails": {
     "linuxDotnet": [],
     "windowsDotnet": [
-      "AeroScience.Tests.OrganizationConnectionIntegrationTests.EncryptedOffProcessBackupRestoresAuthorizedEvidenceAuditAndProtectedMfaAfterSourceLoss",
-      "AeroScience.Tests.AviationAcquisitionTests.RetainedOriginalFileLinksAreRejectedRatherThanFollowed",
       "AeroScience.Tests.ScientificLibraryFolderTests.LinkedSourceDirectoryIsRejected",
-      "AeroScience.Tests.OrganizationConnectionIntegrationTests.SeparatelyKeyedCopiesSurvivePrimaryRepositoryAndIdentityLossAndEnforceApprovedRetention",
-      "AeroScience.Tests.OrganizationServerTests.ExplicitBackupConsentPersistsScheduledPolicyIdempotentJobsAndVerifiedRestoreAcrossRestart"
+      "AeroScience.Tests.OrganizationConnectionIntegrationTests.EncryptedOffProcessBackupRestoresAuthorizedEvidenceAuditAndProtectedMfaAfterSourceLoss",
+      "AeroScience.Tests.OrganizationServerTests.ExplicitBackupConsentPersistsScheduledPolicyIdempotentJobsAndVerifiedRestoreAcrossRestart",
+      "AeroScience.Tests.AviationAcquisitionTests.RetainedOriginalFileLinksAreRejectedRatherThanFollowed",
+      "AeroScience.Tests.OrganizationConnectionIntegrationTests.SeparatelyKeyedCopiesSurvivePrimaryRepositoryAndIdentityLossAndEnforceApprovedRetention"
     ],
     "browser": [
       {
@@ -584,7 +589,12 @@
         "skipped": 0
       }
     },
-    "fullAcceptance": null,
+    "fullAcceptance": {
+      "id": 40965344581,
+      "url": "https://github.com/JustSeanC/AeroScience/actions/runs/40965344581",
+      "source": "f5edc733cfe02135d52bd3c2b2f00d586ec4d21e",
+      "conclusion": "success"
+    },
     "priorSandboxDiagnostic": "Node child-process spawning was refused with EPERM. Re-execution with permitted process access passed all five unchanged SDK/CLI tests. No product assertion or deadline was relaxed.",
     "productionReady": false,
     "fiveStageAccepted": false,
@@ -592,6 +602,247 @@
     "productionDisasterRecoveryAccepted": false,
     "productionUpdatesAccepted": false,
     "paidResourcesCreated": false,
-    "publicAssetsPublished": false
+    "publicAssetsPublished": false,
+    "fastAcceptance": {
+      "id": 40964836841,
+      "url": "https://github.com/JustSeanC/AeroScience/actions/runs/40964836841",
+      "source": "f5edc733cfe02135d52bd3c2b2f00d586ec4d21e",
+      "conclusion": "success",
+      "dotnet": {
+        "passed": 90,
+        "failed": 0,
+        "skipped": 0
+      },
+      "browser": {
+        "passed": 4,
+        "failed": 0,
+        "skipped": 12
+      },
+      "officialRailwaySdk": {
+        "passed": 5,
+        "failed": 0,
+        "skipped": 0
+      },
+      "python": {
+        "passed": 161,
+        "failed": 0,
+        "skipped": 1
+      }
+    },
+    "fullResults": {
+      "linuxDotnet": {
+        "passed": 1349,
+        "failed": 0,
+        "skipped": 0
+      },
+      "windowsDotnet": {
+        "passed": 1344,
+        "failed": 0,
+        "skipped": 5
+      },
+      "browser": {
+        "passed": 342,
+        "failed": 0,
+        "skipped": 2,
+        "flaky": 0
+      },
+      "linuxPython": {
+        "passed": 161,
+        "failed": 0,
+        "skipped": 1
+      },
+      "windowsPython": {
+        "passed": 157,
+        "failed": 0,
+        "skipped": 2
+      },
+      "productionLikeContainers": {
+        "passed": 12,
+        "failed": 0
+      },
+      "railwayShapedContainers": {
+        "passed": 5,
+        "failed": 0
+      },
+      "processRecoveryFamilies": {
+        "linuxPassed": 5,
+        "windowsPassed": 5
+      },
+      "officialRailwaySdk": {
+        "passed": 5,
+        "failed": 0,
+        "skipped": 0
+      },
+      "windowsVaultNativeIsolationAndPackageStructure": "passed",
+      "privateImageRolesVerified": 4
+    },
+    "feasibleRepositoryAdditionsAccepted": true,
+    "technicalP26Complete": false,
+    "readyForLiveFiveStageAcceptance": false,
+    "privateImageReview": {
+      "format": "aeroscience-private-image-review",
+      "version": 1,
+      "sourceRevision": "f5edc733cfe02135d52bd3c2b2f00d586ec4d21e",
+      "platform": "linux/amd64",
+      "images": {
+        "base": {
+          "dockerConfigId": "sha256:c18bda03b4106cd5053da9250bf090850e178324e7ce9db4eaa5148dc487820c",
+          "registryManifestDigest": null,
+          "layersSha256": "0405d8166c14e0351591321772fe24ebd5d47e298d183e3854019985ebc50b4f"
+        },
+        "operations": {
+          "dockerConfigId": "sha256:5b824ae93e2e3ec1cf567f033c8e11585323789fffb89219ec8b5df218ee7822",
+          "registryManifestDigest": null,
+          "layersSha256": "ecd340954f093c1406ed9ae3236a9146fabeb0c41d7dc9009842005c088b1d85"
+        },
+        "railway": {
+          "dockerConfigId": "sha256:c02b580bb13b16d555bb3afa23deaf1a10872d9f0b476d2717a17b1855ade1b1",
+          "registryManifestDigest": null,
+          "layersSha256": "ecd340954f093c1406ed9ae3236a9146fabeb0c41d7dc9009842005c088b1d85"
+        },
+        "database": {
+          "dockerConfigId": "sha256:3697333a24943bd2eef2153b480684a7593982e07c9de3bdf1cb95bdc0d30824",
+          "registryManifestDigest": null,
+          "layersSha256": "b74c3e0ce84696569774c97b30ed588d37bb98c568d7e81c2e9747b00fb33b4b"
+        }
+      },
+      "imageSet": null,
+      "published": false,
+      "publicationAuthorized": false,
+      "productionReady": false,
+      "limitations": [
+        "Docker config IDs are not registry manifest digests.",
+        "Labels and layer lineage are not signed build/source attestations.",
+        "Accepted runtime tests, SBOM/license/security review and explicit publication approval remain required.",
+        "Pinned base images and dependency locks do not establish bit-for-bit OS-package reproducibility."
+      ]
+    },
+    "remainingGates": [
+      "P28 prerequisite: supported authenticated finite Railway ingress or validated gateway path; no wildcard/header-only fallback",
+      "P28 prerequisite: secure owner-controlled delivery or verified owner replacement; sealed generated codes cannot be retrieved from Railway UI/API",
+      "P28 native account-side resource/variable/domain/persistence validation and approved immutable registry/template publication",
+      "P28 independent external account/key/object disaster recovery, guided restore promotion and recoverable provider/image/schema updates",
+      "P28 ordinary five-stage novice test and observed Railway-only provider costs",
+      "Production security/SBOM/license/distribution, retention/immutability, certificate rotation and P29 release acceptance"
+    ]
+  },
+  "priorEngineeringAcceptance": {
+    "testedSource": "a1e565e464517382185510562ce255a68371f76d",
+    "fullValidation": {
+      "id": 40953029040,
+      "url": "https://github.com/JustSeanC/AeroScience/actions/runs/40953029040",
+      "source": "a1e565e464517382185510562ce255a68371f76d",
+      "conclusion": "success"
+    },
+    "fullResults": {
+      "linuxDotnet": {
+        "passed": 1349,
+        "failed": 0,
+        "skipped": 0
+      },
+      "windowsDotnet": {
+        "passed": 1344,
+        "failed": 0,
+        "skipped": 5
+      },
+      "browser": {
+        "passed": 339,
+        "failed": 0,
+        "skipped": 2,
+        "flaky": 0
+      },
+      "linuxPython": {
+        "passed": 156,
+        "failed": 0,
+        "skipped": 1
+      },
+      "windowsPython": {
+        "passed": 152,
+        "failed": 0,
+        "skipped": 2
+      },
+      "productionLikeContainers": {
+        "passed": 12,
+        "failed": 0
+      },
+      "railwayShapedContainers": {
+        "passed": 5,
+        "failed": 0
+      },
+      "processRecoveryFamilies": {
+        "linuxPassed": 5,
+        "windowsPassed": 5
+      },
+      "officialRailwaySdk": {
+        "passed": 2,
+        "failed": 0,
+        "skipped": 0
+      },
+      "windowsVaultNativeIsolationAndPackageStructure": "passed"
+    },
+    "fastValidation": {
+      "id": 40937183428,
+      "url": "https://github.com/JustSeanC/AeroScience/actions/runs/40937183428",
+      "source": "7b8c2646d06be89091400fd1151e6fb8009e3531",
+      "conclusion": "success",
+      "dotnet": {
+        "passed": 1247,
+        "failed": 0,
+        "skipped": 102
+      },
+      "browser": {
+        "passed": 4,
+        "failed": 0,
+        "skipped": 4
+      },
+      "officialRailwaySdk": {
+        "passed": 2,
+        "failed": 0,
+        "skipped": 0
+      },
+      "pythonRun": 0
+    },
+    "fullSkipDetails": {
+      "linuxDotnet": [],
+      "windowsDotnet": [
+        "AeroScience.Tests.OrganizationConnectionIntegrationTests.EncryptedOffProcessBackupRestoresAuthorizedEvidenceAuditAndProtectedMfaAfterSourceLoss",
+        "AeroScience.Tests.AviationAcquisitionTests.RetainedOriginalFileLinksAreRejectedRatherThanFollowed",
+        "AeroScience.Tests.ScientificLibraryFolderTests.LinkedSourceDirectoryIsRejected",
+        "AeroScience.Tests.OrganizationConnectionIntegrationTests.SeparatelyKeyedCopiesSurvivePrimaryRepositoryAndIdentityLossAndEnforceApprovedRetention",
+        "AeroScience.Tests.OrganizationServerTests.ExplicitBackupConsentPersistsScheduledPolicyIdempotentJobsAndVerifiedRestoreAcrossRestart"
+      ],
+      "browser": [
+        {
+          "file": "aviation-charts.spec.js",
+          "test": "approved originals provide local chart overlays, independent science, offline tiles and exact edition selection",
+          "reasons": [
+            "Owner deferred the ordinary chart viewer; retained research renderer coverage remains in AviationChartTests."
+          ]
+        },
+        {
+          "file": "aviation-charts.spec.js",
+          "test": "unknown runtime is honest and chart inventory remains accessible at tablet width without altering saved data",
+          "reasons": [
+            "Owner deferred the ordinary chart viewer; the active deferral scenario checks retention, tablet accessibility and other overlays."
+          ]
+        }
+      ],
+      "linuxPython": [
+        {
+          "test": "test_pe_metadata_check_does_not_claim_runtime_exports_or_simulator_connection (test_windows_helpers.WindowsHelperTests.test_pe_metadata_check_does_not_claim_runtime_exports_or_simulator_connection)",
+          "reason": "'Publish the Windows companion first for the native PE fixture'"
+        }
+      ],
+      "windowsPython": [
+        {
+          "test": "test_generated_private_configuration_is_unique_bounded_and_never_prints_credentials (test_organization_deployment.OrganizationDeploymentTests.test_generated_private_configuration_is_unique_bounded_and_never_prints_credentials)",
+          "reason": "'POSIX OpenSSL/mode fixture; real Linux container acceptance verifies certificates.'"
+        },
+        {
+          "test": "test_case_colliding_files_cannot_share_one_layout_entry (test_packaging.PackagingTests.test_case_colliding_files_cannot_share_one_layout_entry)",
+          "reason": "'A case-sensitive filesystem is required to create both aliases.'"
+        }
+      ]
+    }
   }
 }
