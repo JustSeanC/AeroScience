@@ -18,6 +18,8 @@
 !deploy/
 !deploy/organization/
 !deploy/organization/Dockerfile
+!deploy/organization/railway/
+!deploy/organization/railway/**
 **/bin/**
 **/obj/**
 **/*.pfx

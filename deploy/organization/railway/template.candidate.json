@@ -1,0 +1,54 @@
+{
+  "format": "aeroscience-railway-native-template-candidate",
+  "version": 1,
+  "status": "Deployment Candidate",
+  "launchEnabled": false,
+  "nativeTemplateId": null,
+  "source": "develop/v0.7.0; replace with accepted immutable images before publication",
+  "stages": ["Create Organization Server", "Deploy with Railway and authenticate", "Review actual charges and approve deployment", "Secure organization ownership, MFA and recovery", "Invite pilots"],
+  "services": {
+    "PostgreSQL": {
+      "image": null,
+      "imageBuild": "deploy/organization/railway/Dockerfile.database",
+      "upstreamImage": "ghcr.io/railwayapp-templates/postgres-ssl:17@sha256:5e806d28c18198f933d25e79989470a47a938f465bf0634e030b416961b3463e",
+      "publicNetworking": false,
+      "volume": "/var/lib/postgresql/data",
+      "variables": {
+        "POSTGRES_DB": "aeroscience",
+        "POSTGRES_USER": "aeroscience",
+        "POSTGRES_PASSWORD": "${{secret(64, \"abcdef0123456789\")}}",
+        "POSTGRES_INITDB_ARGS": "--encoding=UTF8 --auth-host=scram-sha-256",
+        "AEROSCIENCE_DATABASE_TRUST_SECRET": "${{secret(64, \"abcdef0123456789\")}}"
+      }
+    },
+    "Organization": {
+      "image": null,
+      "imageBuild": "deploy/organization/railway/Dockerfile.application",
+      "publicNetworking": "Generated HTTPS domain; ingress trust acceptance blocked",
+      "healthcheckPath": "/healthz/ready",
+      "volume": "/configuration",
+      "variables": {
+        "RAILWAY_RUN_UID": "0",
+        "Organization__BootstrapSecret": "${{secret(64, \"abcdef0123456789\")}}",
+        "Organization__KeyCertificatePassword": "${{secret(64, \"abcdef0123456789\")}}",
+        "Organization__BootstrapLifetimeMinutes": "60",
+        "AEROSCIENCE_DATABASE_HOST": "${{PostgreSQL.RAILWAY_PRIVATE_DOMAIN}}",
+        "AEROSCIENCE_DATABASE_NAME": "${{PostgreSQL.POSTGRES_DB}}",
+        "AEROSCIENCE_DATABASE_USER": "${{PostgreSQL.POSTGRES_USER}}",
+        "AEROSCIENCE_DATABASE_PASSWORD": "${{PostgreSQL.POSTGRES_PASSWORD}}",
+        "AEROSCIENCE_DATABASE_TRUST_SECRET": "${{PostgreSQL.AEROSCIENCE_DATABASE_TRUST_SECRET}}"
+      }
+    }
+  },
+  "recovery": {
+    "engine": "restic 0.19.1 authenticated client-side encryption plus PostgreSQL native consistent dump",
+    "primaryCandidate": "Railway private Bucket",
+    "repository": "s3:<native Buckets ENDPOINT>/<BUCKET>/aeroscience",
+    "nativeCredentialReferences": ["BUCKET", "ENDPOINT", "ACCESS_KEY_ID", "SECRET_ACCESS_KEY", "REGION"],
+    "independentDestinationRequired": true,
+    "automaticRetentionDeletion": false,
+    "blockers": ["Native bucket inclusion in reusable template not yet verified", "An independently controlled copy outside the Railway project/account is required", "Bucket object locks, versioning and server-side encryption are unavailable; client encryption alone does not prevent deletion", "Recovery credentials and key must be saved outside the original account", "Provider-loss recovery and bounded retention/deletion need acceptance"]
+  },
+  "acceptanceBlockers": ["No official native Railway template has been created/published from an authenticated owner account", "Final application/database container identities have not been published as an accepted distribution", "Railway HTTPS edge proxy trust contract must be established without wildcard trust", "Fresh-account private DNS/CA attestation and certificate rotation require live acceptance", "Root-owned volume and permanently restricted application need provider acceptance", "First owner must still obtain the protected one-time setup code from private hosting settings", "Independent recovery destination and safe provider rollout/paired rollback require acceptance", "Five-stage fresh-account novice deployment has not been performed"],
+  "prohibitions": ["Do not treat this candidate as Railway's importable template schema", "No public PostgreSQL port", "No wildcard proxy trust", "No certificate verification bypass", "No paid provisioning or account login from this file", "No public Deploy Now URL until acceptance"]
+}

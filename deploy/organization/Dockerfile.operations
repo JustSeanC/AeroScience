@@ -1,0 +1,18 @@
+# syntax=docker/dockerfile:1
+# Build the same source with Dockerfile first. This adds only native recovery tools, not simulator components.
+ARG ORGANIZATION_IMAGE=aeroscience-organization:validation
+FROM postgres:17-bookworm@sha256:839fbb5a4942a7758dd93e18b42ea5649807491a0545b5eeeb8f0b8bb11857a5 AS postgres-tools
+RUN mkdir -p /export/bin /export/lib && \
+    cp /usr/lib/postgresql/17/bin/pg_dump /usr/lib/postgresql/17/bin/pg_restore /export/bin/ && \
+    ldd /export/bin/pg_dump /export/bin/pg_restore | awk '/=> \/.* \\(/ {print $3}' | sort -u | \
+    while read -r path; do case "$path" in */libc.so.*|*/libm.so.*|*/ld-linux*) ;; *) cp -L "$path" /export/lib/ ;; esac; done
+FROM mcr.microsoft.com/dotnet/sdk:10.0.402-noble@sha256:747cbade5bfd918a175ac32f8f1d931edec2c7d0d5397a3de72eaef1ac1f66d2 AS recovery-tools
+RUN --mount=type=secret,id=proxy_ca \
+    if [ -f /run/secrets/proxy_ca ]; then export CURL_CA_BUNDLE=/run/secrets/proxy_ca; fi; \
+    curl --fail --location --retry 3 https://github.com/restic/restic/releases/download/v0.19.1/restic_0.19.1_linux_amd64.bz2 -o /tmp/restic.bz2 && \
+    echo 'f415415624dcc452f2a02b8c33641791a8c6d6d3b65bbb3543fcf9a25151585c  /tmp/restic.bz2' | sha256sum --check --status && \
+    bzip2 -dc /tmp/restic.bz2 > /restic && chmod 755 /restic && rm /tmp/restic.bz2
+FROM ${ORGANIZATION_IMAGE}
+COPY --from=postgres-tools --chown=1654:1654 /export/ /operations/
+COPY --from=recovery-tools --chown=1654:1654 /restic /operations/bin/restic
+USER 1654:1654

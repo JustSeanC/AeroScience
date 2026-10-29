@@ -1,0 +1,4 @@
+ARG ORGANIZATION_OPERATIONS_IMAGE=aeroscience-organization-operations:validation
+FROM ${ORGANIZATION_OPERATIONS_IMAGE}
+USER 0:0
+ENTRYPOINT ["dotnet","AeroScience.Organization.dll","--railway-start"]
