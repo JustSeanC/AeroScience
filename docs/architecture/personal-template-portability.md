@@ -29,7 +29,7 @@ therefore execute the exact typed definition without a parallel execution path.
 
 Format: `AeroScience.ResearchTemplate`, version 1, UTF-8 JSON, maximum 16 KiB and
 16 nesting levels. Unknown fields (including nested future conditions), duplicate
-keys, unsupported versions/types, numeric enum values, executable content, filesystem
+keys, unsupported versions/types, quoted numeric tokens, numeric enum values, executable content, filesystem
 paths and invalid numeric/model criteria fail closed. The original imported file is
 never modified. SHA-256 covers canonical camel-case JSON with an empty `sha256` field.
 Capability declarations and limitations must match the supported typed definition.

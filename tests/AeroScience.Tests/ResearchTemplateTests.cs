@@ -67,6 +67,11 @@ public sealed class ResearchTemplateTests:IDisposable
     }
     [Fact]public void MissingVersionOrCriteriaCannotBecomeExampleDefaults()
     {var json=JsonNode.Parse(Json(Example("vertical-atmospheric-profile")))!;json["definition"]!["atmosphericProfile"]!.AsObject().Remove("version");Assert.Throws<ArgumentException>(()=>PortableResearchTemplates.Read(json.ToJsonString()));}
+    [Fact]public void PortableNumericTokensCannotBeCoercedFromStringsUnderAnOtherwiseMatchingDigest()
+    {
+        var json=JsonNode.Parse(Json(Example("flight-regime")))!;json["version"]="1";Assert.Throws<ArgumentException>(()=>PortableResearchTemplates.Read(json.ToJsonString()));
+        json=JsonNode.Parse(Json(Example("flight-regime")))!;json["definition"]!["flightRegime"]!["airspeedKnots"]="120";Assert.Throws<ArgumentException>(()=>PortableResearchTemplates.Read(json.ToJsonString()));
+    }
     [Fact]public void PortableIntegrityAndCapabilityOrderingDoNotDependOnTheComputersLanguage()
     {
         var prior=System.Globalization.CultureInfo.CurrentCulture;

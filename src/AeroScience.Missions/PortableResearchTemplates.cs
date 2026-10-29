@@ -13,7 +13,7 @@ public static class PortableResearchTemplates
     public const string Format="AeroScience.ResearchTemplate";
     public const int MaximumBytes=16384;
     static readonly JsonSerializerOptions Strict=new(JsonSerializerDefaults.Web){MaxDepth=16,
-        PropertyNameCaseInsensitive=false,UnmappedMemberHandling=JsonUnmappedMemberHandling.Disallow,
+        PropertyNameCaseInsensitive=false,NumberHandling=JsonNumberHandling.Strict,UnmappedMemberHandling=JsonUnmappedMemberHandling.Disallow,
         Converters={new JsonStringEnumConverter(JsonNamingPolicy.CamelCase,allowIntegerValues:false)}};
     public static string Hash(object value)=>Convert.ToHexStringLower(SHA256.HashData(JsonSerializer.SerializeToUtf8Bytes(value,WireJson.Options)));
     public static string Text(string? value,int max,string label,bool required=false)
