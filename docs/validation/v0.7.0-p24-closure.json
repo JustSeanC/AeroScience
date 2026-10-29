@@ -1,0 +1,88 @@
+{
+  "checkpoint": "P24",
+  "acceptedSource": "4b88a98523b3b6431967407d64ca41b8e7959254",
+  "fullRun": "https://github.com/JustSeanC/AeroScience/actions/runs/40856131670",
+  "conclusion": "success",
+  "dotnet": {
+    "linux": {
+      "passed": 1304,
+      "failed": 0,
+      "skipped": 0
+    },
+    "windows": {
+      "passed": 1302,
+      "failed": 0,
+      "skipped": 2
+    },
+    "p24CasesPerPlatform": 31
+  },
+  "browser": {
+    "passed": 330,
+    "failed": 0,
+    "skipped": 2,
+    "flaky": 0,
+    "p24Workflows": 10
+  },
+  "helpers": {
+    "linux": {
+      "passed": 149,
+      "failed": 0,
+      "skipped": 1
+    },
+    "windows": {
+      "passed": 146,
+      "failed": 0,
+      "skipped": 1
+    }
+  },
+  "recovery": {
+    "linux": "all five actual-process families passed",
+    "windows": "all five actual-process families passed"
+  },
+  "expectedSkips": {
+    "windowsDotnet": [
+      "ScientificLibraryFolderTests.LinkedSourceDirectoryIsRejected",
+      "AviationAcquisitionTests.RetainedOriginalFileLinksAreRejectedRatherThanFollowed"
+    ],
+    "browser": "two existing deferred FAA chart-interior checks",
+    "linuxHelpers": "Windows native PE fixture requires the published Windows companion",
+    "windowsHelpers": "case-colliding file fixture requires a case-sensitive filesystem"
+  },
+  "previousRuns": [
+    {
+      "id": 40802119359,
+      "scope": "Fast",
+      "conclusion": "success"
+    },
+    {
+      "id": 40807063432,
+      "scope": "Full candidate superseded after strict numeric-type regression",
+      "conclusion": "cancelled"
+    },
+    {
+      "id": 40809647168,
+      "scope": "Full candidate exposed late-response navigation race",
+      "conclusion": "failure",
+      "browser": {
+        "passed": 327,
+        "failed": 1,
+        "skipped": 2,
+        "flaky": 0
+      }
+    }
+  ],
+  "limits": [
+    "Synthetic scientific/flight fixtures, not authentic NASA-original or installed-MSFS acceptance",
+    "Current supported typed definitions only; unknown/future schemas and executable content rejected",
+    "Browser-authenticated organization proposals; no desktop grant widening",
+    "Claim revision adoption remains informational, with no mid-flight mutation",
+    "Existing large scientific evidence-product limitations and production hosting/backup/security gates remain"
+  ],
+  "readmeSha256": "58f11ea8a2a21bf8dfac437d2db8677a0d9555bf0a264031a2e91c1b9ae0634e",
+  "protectedStableRefs": "9dd2d8cda7ddb6d73414808f75010726871205c2",
+  "evidenceSha256": {
+    "full-ci-artifacts/windows/windows.trx": "88fee8dde3e0b92544016def424bf93fdff9dfa190bc62284d4ba701fdb7fe63",
+    "full-ci-artifacts/browser/web-results.json": "3371bdadca09b541c9e0766a4dd8d51baa25e767a31f8177cc47960ed6357f43",
+    "full-ci-artifacts/linux/_runnervm48cm3_2026-10-29_10_17_24_net10.0.trx": "82434156a9326f3dd473158dcbf72fdfd372d412e76de7d46fbfefe36dd25864"
+  }
+}
