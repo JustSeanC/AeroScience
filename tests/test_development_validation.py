@@ -82,6 +82,18 @@ class DevelopmentValidationTests(unittest.TestCase):
                      'src/AeroScience.Engine/wwwroot/shared-new-module.js', 'src/AeroScience.Engine/wwwroot/app.css'):
             self.assertEqual(['tests/web'], ci.plan([path])['browserSpecs'])
 
+    def test_standalone_hosting_page_is_targeted_without_shrinking_shared_or_full_validation(self):
+        for suffix in ('js', 'html', 'css'):
+            selected=ci.plan(['src/AeroScience.Engine/wwwroot/organization-hosting.'+suffix])
+            self.assertEqual(['tests/web/dashboard.spec.js','tests/web/organization-hosting.spec.js'],selected['browserSpecs'])
+        for path in ('src/AeroScience.Engine/wwwroot/app.js','src/AeroScience.Engine/wwwroot/shared-new-module.js'):
+            self.assertEqual(['tests/web'],ci.plan([path])['browserSpecs'])
+        self.assertEqual(['tests/web'],ci.plan(['src/AeroScience.Engine/wwwroot/organization-hosting.js'],uncertain=True)['browserSpecs'])
+        self.assertEqual('full',ci.validation_tier('workflow_dispatch','refs/heads/develop/v0.7.0',requested='full'))
+        # Changing this page's isolation requires revisiting the narrow mapping.
+        page=(ROOT/'src/AeroScience.Engine/wwwroot/organization-hosting.js').read_text()
+        self.assertNotRegex(page,r'(?m)^\s*import\b')
+
     def test_session_controls_and_collection_planner_keep_their_functional_browser_checks(self):
         for path in ('src/AeroScience.Engine/wwwroot/science-sessions.js','src/AeroScience.Engine/wwwroot/collection-planner.js'):
             self.assertIn('tests/web/science-sessions.spec.js',ci.plan([path])['browserSpecs'])

@@ -8,6 +8,7 @@ RUN mkdir -p /export/bin /export/lib && \
     while read -r path; do case "$path" in */libc.so.*|*/libm.so.*|*/ld-linux*) ;; *) cp -L "$path" /export/lib/ ;; esac; done && test -s /export/lib/libpq.so.5
 FROM restic/restic:0.19.1@sha256:136600b6ff6843d61d355f7f71f460a166429f35de6fd11b568fece3c9a4d510 AS recovery-tools
 FROM ${ORGANIZATION_IMAGE}
+LABEL com.aeroscience.organization.role="operations"
 COPY --from=postgres-tools --chown=1654:1654 /export/ /operations/
 COPY --from=recovery-tools --chown=1654:1654 /usr/bin/restic /operations/bin/restic
 USER 1654:1654

@@ -312,9 +312,11 @@ jobs:
           docker run --rm -e LD_LIBRARY_PATH=/operations/lib --entrypoint /operations/bin/pg_dump aeroscience-organization-operations:validation --version
           docker run --rm -e LD_LIBRARY_PATH=/operations/lib --entrypoint /operations/bin/pg_restore aeroscience-organization-operations:validation --version
           docker build -f deploy/organization/railway/Dockerfile.application -t aeroscience-railway-application:validation .
-          docker build -f deploy/organization/railway/Dockerfile.database -t aeroscience-railway-postgres:validation .
+          docker build -f deploy/organization/railway/Dockerfile.database --build-arg SOURCE_REVISION="$GITHUB_SHA" -t aeroscience-railway-postgres:validation .
       - name: Verify real private database CA, root-owned volume and permanent non-root application
         run: python3 scripts/deployment/verify_railway_runtime.py --application aeroscience-railway-application:validation --database aeroscience-railway-postgres:validation --output artifacts/organization-deployment/railway-runtime.json
+      - name: Verify exact private distribution image identities and parent layers (no publication)
+        run: python3 scripts/deployment/inspect_organization_images.py --source "$GITHUB_SHA" --output artifacts/organization-deployment/image-review.json
       - name: Retain bounded deployment acceptance diagnostics
         if: always()
         uses: actions/upload-artifact@v7

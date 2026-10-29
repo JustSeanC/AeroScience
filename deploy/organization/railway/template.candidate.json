@@ -47,7 +47,13 @@
         "AEROSCIENCE_DATABASE_PASSWORD": "${{PostgreSQL.AEROSCIENCE_APPLICATION_DATABASE_PASSWORD}}",
         "AEROSCIENCE_DATABASE_TRUST_SECRET": "${{PostgreSQL.AEROSCIENCE_DATABASE_TRUST_SECRET}}",
         "AEROSCIENCE_RECOVERY_DATABASE_USER": "aeroscience_recovery",
-        "AEROSCIENCE_RECOVERY_DATABASE_PASSWORD": "${{PostgreSQL.AEROSCIENCE_RECOVERY_DATABASE_PASSWORD}}"
+        "AEROSCIENCE_RECOVERY_DATABASE_PASSWORD": "${{PostgreSQL.AEROSCIENCE_RECOVERY_DATABASE_PASSWORD}}",
+        "AEROSCIENCE_RECOVERY_REPOSITORY": "s3:${{Recovery.ENDPOINT}}/${{Recovery.BUCKET}}/aeroscience",
+        "AEROSCIENCE_RECOVERY_REPOSITORY_PASSWORD": "${{secret(64, \"abcdef0123456789\")}}",
+        "AEROSCIENCE_RECOVERY_BUCKET_LOOKUP": "dns",
+        "AWS_ACCESS_KEY_ID": "${{Recovery.ACCESS_KEY_ID}}",
+        "AWS_SECRET_ACCESS_KEY": "${{Recovery.SECRET_ACCESS_KEY}}",
+        "AWS_DEFAULT_REGION": "${{Recovery.REGION}}"
       }
     }
   },
@@ -78,7 +84,7 @@
     "Railway HTTPS edge proxy trust contract must be established without wildcard trust",
     "Fresh-account private DNS/CA attestation and certificate rotation require live acceptance",
     "Root-owned volume and permanently restricted application need provider acceptance",
-    "First owner must still obtain the protected one-time setup code from private hosting settings",
+    "Sealed generated bootstrap values cannot be read in the Railway UI/API; secure owner-controlled delivery or a verified ownership replacement is still required",
     "Independent recovery destination and safe provider rollout/paired rollback require acceptance",
     "Five-stage fresh-account novice deployment has not been performed"
   ],
@@ -96,5 +102,10 @@
     "officialMechanism": "Railway Infrastructure as Code; private offline candidate, not a published reusable template",
     "generatedPublicDomain": "Not declared by the documented IaC authoring API; account-side confirmation is required",
     "independentRecovery": "An independently controlled destination is still required outside the project/account"
+  },
+  "validationTiming": {
+    "routineDevelopment": "Offline/isolated Focused and Fast; Full at material final security/integration boundaries",
+    "liveProviderAcceptance": "P28: owner-operated Railway deployment, networking, external recovery and actual costs; failures block P29",
+    "billing": "Railway interfaces only; AeroScience provides information and no payment or subscription service"
   }
 }

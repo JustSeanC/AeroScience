@@ -23,6 +23,7 @@ LABEL org.opencontainers.image.title="AeroScience Organization Server" \
       org.opencontainers.image.version="0.7.0-development" \
       org.opencontainers.image.revision="$SOURCE_REVISION" \
       org.opencontainers.image.source="https://github.com/JustSeanC/AeroScience"
+LABEL com.aeroscience.organization.role="base"
 WORKDIR /app
 COPY --from=build --chown=1654:1654 /published/ ./
 COPY --from=build --chown=1654:1654 /source/licenses/ ./licenses/

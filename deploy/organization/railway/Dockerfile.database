@@ -5,6 +5,13 @@ FROM ghcr.io/railwayapp-templates/postgres-ssl:17@sha256:5e806d28c18198f933d25e7
 RUN --mount=type=secret,id=proxy_ca \
     if [ -f /run/secrets/proxy_ca ]; then export SSL_CERT_FILE=/run/secrets/proxy_ca; fi; \
     apt-get update && apt-get install -y --no-install-recommends python3 && python3 -c "import hashlib, hmac, json, http.server" && rm -rf /var/lib/apt/lists/*
+ARG SOURCE_REVISION
+RUN test "${#SOURCE_REVISION}" = 40 && case "$SOURCE_REVISION" in *[!0-9a-f]*) exit 1;; esac
+LABEL org.opencontainers.image.title="AeroScience Organization PostgreSQL Adapter" \
+      org.opencontainers.image.version="0.7.0-development" \
+      org.opencontainers.image.revision="$SOURCE_REVISION" \
+      org.opencontainers.image.source="https://github.com/JustSeanC/AeroScience" \
+      com.aeroscience.organization.role="database"
 COPY --chmod=755 deploy/organization/railway/50-organization-roles.sh /docker-entrypoint-initdb.d/50-organization-roles.sh
 COPY --chmod=755 deploy/organization/railway/database-trust.py /usr/local/bin/database-trust.py
 COPY --chmod=755 deploy/organization/railway/database-start.sh /usr/local/bin/database-start.sh
