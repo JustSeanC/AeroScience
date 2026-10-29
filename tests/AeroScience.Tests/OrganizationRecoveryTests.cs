@@ -6,6 +6,7 @@ using AeroScience.Organization;
 using AeroScience.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Npgsql;
 using Xunit;
 namespace AeroScience.Tests;
 public sealed class RecoveryFactAttribute:FactAttribute
@@ -43,6 +44,16 @@ public sealed class ServerOperationsConfigurationTests
 
 public sealed class ServerDistributionTests
 {
+    [Fact]public async Task UpdateRunnerRejectsAnotherSignedBinaryBeforeOpeningAnyDatabase()
+    {
+        var root=Path.Combine(Path.GetTempPath(),"aeroscience-update-refusal-"+Guid.NewGuid().ToString("N"));Directory.CreateDirectory(root);
+        try{
+            using var signer=ECDsa.Create(ECCurve.NamedCurves.nistP256);var file=Path.Combine(root,"distribution.json");var key=Path.Combine(root,"publisher.pem");File.WriteAllText(key,signer.ExportSubjectPublicKeyInfoPem());OrganizationConfigurationTests.ProtectCredential(key);
+            var distribution=new ServerDistribution(1,"99.0.0",new string('a',40),"ghcr.io/justseanc/aeroscience-organization@sha256:"+new string('b',64),"0.7.0",new string('c',64),true);var signed=new SignedServerDistribution(distribution,Convert.ToBase64String(signer.SignData(JsonSerializer.SerializeToUtf8Bytes(distribution,WireJson.Options),HashAlgorithmName.SHA256)));File.WriteAllText(file,JsonSerializer.Serialize(signed,WireJson.Options));OrganizationConfigurationTests.ProtectCredential(file);
+            var services=new ServiceCollection();services.AddDbContext<OrganizationDatabase>(o=>o.UseNpgsql("Host=127.0.0.1;Port=1;Database=never_open;Username=unavailable"));services.AddSingleton(new ServerOperationsOptions(false,null,null,"test",root,"","","",null,null,1048576,file,key));services.AddSingleton(new OrganizationSettings("",new Uri("https://organization.example"),false,null,null,null,[]));await using var provider=services.BuildServiceProvider();
+            var failure=await Assert.ThrowsAsync<InvalidOperationException>(()=>OrganizationSchemaUpgrade.ApplyPrepared(provider,Guid.NewGuid(),default));Assert.Contains("not the exact signed update",failure.Message);
+        }finally{Directory.Delete(root,true);}
+    }
     [Fact]public void PinnedUpdateRequiresValidSignatureExactSchemaSourceAndPairedRecoveryPolicy()
     {
         var directory=Path.Combine(Path.GetTempPath(),"aeroscience-distribution-test-"+Guid.NewGuid().ToString("N"));Directory.CreateDirectory(directory);

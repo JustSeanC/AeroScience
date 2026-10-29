@@ -23,6 +23,10 @@ public sealed class OrganizationProgram
 {
     public static async Task Main(string[] args)
     {
+        if(args is ["--apply-prepared-update"]){
+            try{await using var updateApp=OrganizationApplication.Build([]);var id=updateApp.Configuration["Organization:Operations:ApplyOperationId"];if(!Guid.TryParse(id,out var operation))throw new InvalidOperationException("An exact protected approved operation is required.");await OrganizationSchemaUpgrade.ApplyPrepared(updateApp.Services,operation,CancellationToken.None);Console.WriteLine("Exact approved schema update completed. No public listener or provider rollout was started.");}
+            catch(Exception){Console.Error.WriteLine("Protected update refused or rolled back. Preserve the original image, identity and verified checkpoint; no credential values are disclosed.");Environment.ExitCode=1;}return;
+        }
         if(args is ["--health-check"]){
             try{using var client=new HttpClient(new SocketsHttpHandler{UseProxy=false}){Timeout=TimeSpan.FromSeconds(3)};using var response=await client.GetAsync("http://127.0.0.1:8080/healthz/ready");Environment.ExitCode=response.IsSuccessStatusCode?0:1;}catch{Environment.ExitCode=1;}return;
         }

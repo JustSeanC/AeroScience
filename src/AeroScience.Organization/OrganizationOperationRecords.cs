@@ -14,23 +14,26 @@ public sealed class ServerBackupRecord
 {
     public Guid Id{get;set;}public Guid OrganizationId{get;set;}public string SnapshotId{get;set;}="";public string BundleSha256{get;set;}="";public long Bytes{get;set;}
     public string ManifestJson{get;set;}="";public DateTimeOffset CreatedUtc{get;set;}public DateTimeOffset? VerifiedRestoreUtc{get;set;}public string? VerificationJson{get;set;}
+    public string? RepositorySha256{get;set;}public string? IndependentRepositorySha256{get;set;}public string? IndependentSnapshotId{get;set;}public DateTimeOffset? IndependentVerifiedUtc{get;set;}public DateTimeOffset? RetentionStartedUtc{get;set;}public DateTimeOffset? DeletedUtc{get;set;}
 }
 public sealed class ServerOperationsPolicyRecord
 {
     public int Id{get;set;}=1;public int Revision{get;set;}=1;public bool Scheduled{get;set;}public int IntervalHours{get;set;}=24;
     public int RetainDaily{get;set;}=14;public int RetainWeekly{get;set;}=8;public Guid ApprovedBy{get;set;}public DateTimeOffset ApprovedUtc{get;set;}public DateTimeOffset? RecoveryKitSavedUtc{get;set;}
+    public bool AutomaticRetention{get;set;}
 }
-public sealed record ServerOperationsPolicyCommand(Guid RequestId,int ExpectedRevision,bool Scheduled,int IntervalHours,int RetainDaily,int RetainWeekly,bool ConfirmOrganizationalBackup,string Password);
+public sealed record ServerOperationsPolicyCommand(Guid RequestId,int ExpectedRevision,bool Scheduled,int IntervalHours,int RetainDaily,int RetainWeekly,bool ConfirmOrganizationalBackup,string Password){public bool AutomaticRetention{get;init;}}
 public sealed record ServerOperationCommand(Guid RequestId,ServerOperationKind Kind,Guid? BackupId,string Password,bool Confirm);
 public sealed record ServerOperationView(Guid Id,int Revision,ServerOperationKind Kind,ServerOperationState State,DateTimeOffset CreatedUtc,DateTimeOffset? FinishedUtc,Guid? BackupId,string Message);
-public sealed record ServerBackupView(Guid Id,DateTimeOffset CreatedUtc,long Bytes,DateTimeOffset? VerifiedRestoreUtc,string Version,string SourceRevision,string IntegrityStatus);
+public sealed record ServerBackupView(Guid Id,DateTimeOffset CreatedUtc,long Bytes,DateTimeOffset? VerifiedRestoreUtc,string Version,string SourceRevision,string IntegrityStatus){public DateTimeOffset? IndependentVerifiedUtc{get;init;}public DateTimeOffset? DeletedUtc{get;init;}public bool RetentionPending{get;init;}}
 public sealed record ServerStorageUsage(long DatabaseBytes,long ReceivedEvidenceBytes,long EvidenceQuotaBytes,long? ConfigurationAvailableBytes,string Limitation);
-public sealed record ServerOperationsView(bool Configured,bool Scheduled,int IntervalHours,int RetainDaily,int RetainWeekly,int PolicyRevision,DateTimeOffset? RecoveryKitSavedUtc,ServerBackupView[] Backups,ServerOperationView[] Operations,int? NextOffset,ServerStorageUsage Storage,string Destination,string UpdateState,string[] Warnings);
+public sealed record ServerOperationsView(bool Configured,bool Scheduled,int IntervalHours,int RetainDaily,int RetainWeekly,int PolicyRevision,DateTimeOffset? RecoveryKitSavedUtc,ServerBackupView[] Backups,ServerOperationView[] Operations,int? NextOffset,ServerStorageUsage Storage,string Destination,string UpdateState,string[] Warnings){public bool IndependentConfigured{get;init;}public bool AutomaticRetention{get;init;}}
 public sealed record ServerBackupManifest(int Version,Guid BackupId,Guid OrganizationId,string PublicOrigin,string ApplicationVersion,string SourceRevision,string[] Migrations,string CertificateSha256,string DatabaseSha256,long DatabaseBytes,string EvidenceDigest,long ReceivedPackages,string AuditDigest,long AuditEvents,DateTimeOffset CreatedUtc);
 public sealed record ServerRestoreVerification(int Version,Guid BackupId,Guid OrganizationId,string DatabaseSha256,string CertificateSha256,string EvidenceDigest,long ReceivedPackages,string AuditDigest,long AuditEvents,string[] Migrations,DateTimeOffset VerifiedUtc,string Scope);
 public sealed record ServerDistribution(int Version,string ApplicationVersion,string SourceRevision,string Image,string MinimumVersion,string SchemaSha256,bool PairedRestoreRequired);
 public sealed record SignedServerDistribution(ServerDistribution Distribution,string Signature);
-public sealed record OrganizationRecoveryKit(int Version,Guid OrganizationId,string Origin,string Repository,string RepositoryPassword,string? AccessKeyId,string? SecretAccessKey,string? Region,string Instructions){public string S3BucketLookup {get;init;}="auto";}
+public sealed record OrganizationRecoveryKit(int Version,Guid OrganizationId,string Origin,string Repository,string RepositoryPassword,string? AccessKeyId,string? SecretAccessKey,string? Region,string Instructions){public string S3BucketLookup {get;init;}="auto";public IndependentRecoveryKey? Independent{get;init;}}
+public sealed record IndependentRecoveryKey(string Repository,string RepositoryPassword,Dictionary<string,string> Credentials,string S3BucketLookup);
 public static class ServerOperationsDatabase
 {
     public static void Configure(ModelBuilder model)

@@ -1480,12 +1480,30 @@ namespace AeroScience.Organization.Migrations
                     b.Property<DateTimeOffset>("CreatedUtc")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<DateTimeOffset?>("DeletedUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("IndependentRepositorySha256")
+                        .HasColumnType("text");
+
+                    b.Property<string>("RepositorySha256")
+                        .HasColumnType("text");
+
+                    b.Property<string>("IndependentSnapshotId")
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset?>("IndependentVerifiedUtc")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("ManifestJson")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<Guid>("OrganizationId")
                         .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("RetentionStartedUtc")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("SnapshotId")
                         .IsRequired()
@@ -1579,6 +1597,9 @@ namespace AeroScience.Organization.Migrations
 
                     b.Property<DateTimeOffset>("ApprovedUtc")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("AutomaticRetention")
+                        .HasColumnType("boolean");
 
                     b.Property<int>("IntervalHours")
                         .HasColumnType("integer");
