@@ -27,8 +27,8 @@ function workflowView(back=load){const view=node('section');root.replaceChildren
 function openProgress(id){return progressView().campaign(id);}
 function openApproved(id){return progressView().results(id);}
 const accountSecurity=accountSecurityUi({api,root,field,heading,submit,navigate:()=>{epoch++;},load});
-const operationsUi=serverOperationsUi({api,root,heading,field,submit,draftCommand,navigate:()=>{epoch++;},health:()=>setupUi.health()});
-const setupUi=organizationSetup({api,root,heading,navigate:()=>{epoch++;},programs:showPrograms,createProgram:()=>editProgram(),members:()=>membership.members(),health:()=>setupUi.health(),security:()=>accountSecurity.view(),protection:()=>operationsUi.view()});
+const operationsUi=serverOperationsUi({api,root,heading,field,submit,draftCommand,navigate:()=>++epoch,isCurrent:value=>value===epoch,signIn:load,health:()=>setupUi.health()});
+const setupUi=organizationSetup({api,root,heading,navigate:()=>++epoch,isCurrent:value=>value===epoch,signIn:load,programs:showPrograms,createProgram:()=>editProgram(),members:()=>membership.members(),health:()=>setupUi.health(),security:()=>accountSecurity.view(),protection:()=>operationsUi.view()});
 const admin=()=>session?.user?.roles.includes('Administrator');
 async function api(path,body,method=body?'POST':'GET'){
  const requestedView=epoch;
@@ -55,7 +55,7 @@ function showIdentity(message=''){
  const panel=node('section',undefined,'panel auth'),form=node('form');panel.append(node('h2',session.initialized?'Sign In':'Set Up Your Organization'));panel.append(form);root.append(panel);
  if(message)status(form,message);
  let secret,name,description;
- if(!session.initialized){form.append(node('p','Use the protected setup code from your hosting-account owner. The hosting-account owner obtains this one-time code from the provider’s private deployment settings. This ownership check is required; the current Railway candidate has not yet automated its owner-only delivery. The code expires; only the owner can rotate it. Never put it in a link or public message. Opening this page does not grant administrator access.'));secret=field(form,'Setup code','password','',256);secret.autocomplete='off';secret.required=true;name=field(form,'Organization name');name.required=true;description=field(form,'Organization description','textarea','',4000);}
+ if(!session.initialized){form.append(node('p','Use a protected one-time code supplied by your hosting-account owner. A generated sealed Railway code cannot be read from its settings or API; automatic owner-only delivery is not available in this candidate. Do not unseal secrets or use public logs as a workaround. The code expires; only the owner can rotate it. Never put it in a link or public message. Opening this page does not grant administrator access.'));secret=field(form,'Setup code','password','',256);secret.autocomplete='off';secret.required=true;name=field(form,'Organization name');name.required=true;description=field(form,'Organization description','textarea','',4000);}
  const username=field(form,'Account name');username.maxLength=64;username.autocomplete='username';username.required=true;
  const password=field(form,'Password','password','',256);password.autocomplete=session.initialized?'current-password':'new-password';password.required=true;
  if(!session.initialized){password.minLength=14;form.append(node('p','Use at least 14 characters, including uppercase and lowercase letters, a number and a symbol.','help'));}

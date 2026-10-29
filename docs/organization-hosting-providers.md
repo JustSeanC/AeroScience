@@ -35,7 +35,7 @@ Render offers paid managed PostgreSQL, a declarative Blueprint, generated secret
 
 A critical official constraint was found: **Render internal PostgreSQL uses self-signed TLS and does not support `verify-ca`/`verify-full`.** AeroScience requires `SslMode=VerifyFull`; the ordinary `fromDatabase.connectionString` is not safe to substitute. The candidate deliberately leaves its exact verified database endpoint/access rules, public origin and finite trusted proxy addresses unresolved. The paid DB starts with **no public allowlist**, rather than an open database. A provider-account integration must prove an appropriate hostname-verified/restricted endpoint, exact edge proxy behavior, non-root private disk ownership, accepted pinned source/image and dashboard-owned bootstrap. This is not yet a terminal-free deployment. No working button is advertised.
 
-The candidate's provider-generated owner secret can be obtained only from the hosting owner's private service environment dashboard. It is pasted into **Setup code**, expires after 30 minutes and is atomically consumed. Rotating that specific private value and redeploying before initialization deliberately creates a new window; restarting with the same value does not extend it. No secret URL, log output or anonymous-first-visitor ownership is used.
+For the historical Render candidate, the provider-generated owner secret was intended to be supplied through the hosting owner's private service environment dashboard. This is not a supported way to read a sealed generated Railway secret. It is pasted into **Setup code**, expires after 30 minutes and is atomically consumed. Rotating that specific private value and redeploying before initialization deliberately creates a new window; restarting with the same value does not extend it. No secret URL, log output or anonymous-first-visitor ownership is used.
 
 ## Official sources
 
@@ -47,3 +47,10 @@ The candidate's provider-generated owner secret can be obtained only from the ho
 P26 implements administrator MFA/recovery and encrypted PostgreSQL/identity restore verification, but independent recovery, retention, provider upgrades and native novice deployment remain gates. See [Railway native candidate](../deploy/organization/railway/README.md) and [recovery reference](architecture/organization-recovery.md). Live-cloud/billing and owner-operated novice deployment are separate explicitly authorized actions, not implied by P25's local technical validation.
 
 Railway Buckets currently lack object versioning, locks, lifecycle and server-side encryption. Restic supplies client-side encryption, not deletion protection. A same-project/account Bucket plus volume snapshots does not meet independent recovery. Actual native credentials, private TLS/SAN, provider ingress, public immutable images/template, retention and account-loss/novice acceptance remain unresolved. No real provider charge or fresh-account deployment was performed.
+
+
+## P26 offline clarification — Railway account and billing responsibilities
+
+Railway alone handles provider sign-in, billing setup and charge approval; AeroScience supplies informational/nonbinding estimates and a supported deployment entry only. No AeroScience checkout, billing API, subscription management or collection of payment information is planned or implemented. No provider account or paid resource was used in this offline pass.
+
+Official Railway variable documentation confirms sealed generated values cannot be retrieved through its UI/API. The bootstrap-delivery path therefore remains a technical blocker; do not ask the owner to reveal a sealed value. The native candidate's independent-copy/retention and schema safeguards pass isolated tests, but managed ingress, native provisioning/identity, external recovery, upgrades, actual costs and five-stage novice acceptance remain P28 gates before P29 release. The owner needs no account or computer action during P26 development.

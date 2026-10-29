@@ -112,7 +112,7 @@
     "Complete provider maintenance/image/schema rollout, failed-image paired restoration and certificate rotation",
     "Production SBOM/security/distribution, retention/immutability and operator acceptance"
   ],
-  "ownerAction": "No developer QA required. Separate authorization and protected sign-in to an organization-owned Railway workspace are needed for private provider feasibility; paid deployment and public assets require separate approval.",
+  "ownerAction": "None during routine P26 development. Owner performs the ordinary Railway browser/account/cost/ownership/invitation journey during integrated P28, after engineering prerequisites; no commands, accounts or paid authorization requested now.",
   "completionPass": {
     "date": "2026-10-29",
     "preservedBaselineSource": "1b0b3d61826f853f08c7e364ffec29f0e3a668b5",
@@ -525,5 +525,73 @@
   "localIntegrationValidationPassed": true,
   "realRailwayDeploymentAccepted": false,
   "productionDisasterRecoveryAccepted": false,
-  "productionUpdatesAccepted": false
+  "productionUpdatesAccepted": false,
+  "offlineReadiness": {
+    "date": "2026-10-29",
+    "preservedPriorSource": "a1e565e464517382185510562ce255a68371f76d",
+    "preservedPriorFull": 40953029040,
+    "documentationBaseline": "12fee003b28fd4b68c0debe8e27d2b23067af94b",
+    "billingProvider": "Railway only; no AeroScience payment processing, checkout, billing API, subscriptions or payment data",
+    "liveAcceptanceMilestone": "P28; failures block P29",
+    "noOwnerActionNow": true,
+    "ingressContractEstablished": false,
+    "ownerDeliveryEstablished": false,
+    "sealedBootstrapRetrievalSupported": false,
+    "gatewayImplemented": false,
+    "coreArchitectureInvalidated": false,
+    "p27MayProceedSeparatelyAfterFeasibleP26Acceptance": true,
+    "p27ImplementedByThisPass": false,
+    "focused": {
+      "dotnetDeploymentRuntimeHealth": {
+        "passed": 25,
+        "failed": 0,
+        "skipped": 0
+      },
+      "dotnetOriginIdentityNegatives": {
+        "passed": 2,
+        "failed": 0,
+        "skipped": 0
+      },
+      "browser": {
+        "passed": 12,
+        "failed": 0,
+        "skipped": 0
+      },
+      "finalOwnerWarningBrowser": {
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0,
+        "overlapsEarlierSuite": true
+      },
+      "officialSdkAndPreflight": {
+        "passed": 5,
+        "failed": 0,
+        "skipped": 0
+      },
+      "pythonImageReview": {
+        "passed": 4,
+        "failed": 0,
+        "skipped": 0
+      },
+      "pythonExistingDeployment": {
+        "passed": 7,
+        "failed": 0,
+        "skipped": 0
+      },
+      "fastSelector": {
+        "passed": 15,
+        "failed": 0,
+        "skipped": 0
+      }
+    },
+    "fullAcceptance": null,
+    "priorSandboxDiagnostic": "Node child-process spawning was refused with EPERM. Re-execution with permitted process access passed all five unchanged SDK/CLI tests. No product assertion or deadline was relaxed.",
+    "productionReady": false,
+    "fiveStageAccepted": false,
+    "realRailwayDeploymentAccepted": false,
+    "productionDisasterRecoveryAccepted": false,
+    "productionUpdatesAccepted": false,
+    "paidResourcesCreated": false,
+    "publicAssetsPublished": false
+  }
 }
