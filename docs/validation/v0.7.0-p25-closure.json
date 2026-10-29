@@ -1,0 +1,186 @@
+{
+  "milestone": "v0.7.0 P25",
+  "acceptedScope": "Shared organization-server deployment foundation and production-like local infrastructure; not production-ready managed hosting",
+  "acceptedSource": "8b40dde6019e85db2f9979587a172d5c32653fb4",
+  "branch": "develop/v0.7.0",
+  "fullValidation": {
+    "url": "https://github.com/JustSeanC/AeroScience/actions/runs/40872398568",
+    "runId": 40872398568,
+    "conclusion": "success"
+  },
+  "fastValidation": {
+    "url": "https://github.com/JustSeanC/AeroScience/actions/runs/40872399009",
+    "runId": 40872399009,
+    "conclusion": "success",
+    "dotnet": {
+      "passed": 90,
+      "failed": 0,
+      "skipped": 0
+    },
+    "browser": {
+      "passed": 4,
+      "failed": 0,
+      "skipped": 5,
+      "flaky": 0
+    },
+    "skipReason": "Fast has no PostgreSQL; all five skipped P25 workflows passed in Full and focused real-backend runs."
+  },
+  "p24StartingGate": {
+    "acceptedSource": "4b88a98523b3b6431967407d64ca41b8e7959254",
+    "fullRunId": 40856131670,
+    "closureCommit": "b70fa6b9ceb8eee6a417fe0c31a537e8e7f07ef4",
+    "conclusion": "success"
+  },
+  "fullResults": {
+    "linuxDotnet": {
+      "passed": 1323,
+      "failed": 0,
+      "skipped": 0,
+      "p25Passed": 19
+    },
+    "windowsDotnet": {
+      "passed": 1321,
+      "failed": 0,
+      "skipped": 2,
+      "p25Passed": 19
+    },
+    "browser": {
+      "passed": 335,
+      "failed": 0,
+      "skipped": 2,
+      "flaky": 0,
+      "p25Passed": 5
+    },
+    "linuxPython": {
+      "passed": 153,
+      "failed": 0,
+      "skipped": 1
+    },
+    "windowsPython": {
+      "passed": 149,
+      "failed": 0,
+      "skipped": 2
+    },
+    "deployment": {
+      "passed": 11,
+      "failed": 0
+    },
+    "processRecovery": "All five existing recovery families passed on Linux and Windows.",
+    "windowsSecurity": "Credential Manager isolation/removal, independent validation identity, unchanged dependency locks, native bounds and structural package checks passed."
+  },
+  "expectedSkips": {
+    "windowsDotnet": [
+      "ScientificLibraryFolderTests.LinkedSourceDirectoryIsRejected",
+      "AviationAcquisitionTests.RetainedOriginalFileLinksAreRejectedRatherThanFollowed"
+    ],
+    "browser": [
+      "Deferred FAA approved-original chart overlay interior",
+      "Deferred FAA unknown-runtime chart inventory acceptance"
+    ],
+    "linuxPython": [
+      "Windows PE fixture requires published Windows companion"
+    ],
+    "windowsPython": [
+      "POSIX OpenSSL/private-mode fixture covered by real Linux deployment",
+      "Case-colliding filename fixture requires case-sensitive filesystem"
+    ]
+  },
+  "deploymentEvidence": {
+    "productionReady": false,
+    "fixture": "Synthetic local infrastructure and pilot-documentation evidence; not cloud/MSFS/NASA acceptance",
+    "checks": [
+      "non-root versioned image contains no configured deployment credentials",
+      "unconfigured production startup refused without exception/secret disclosure",
+      "Compose starts with no published PostgreSQL port, private VerifyFull TLS and protected persistent volumes",
+      "anonymous takeover refused; concurrent owner bootstrap creates exactly one administrator",
+      "secure identity cookies, authenticated real schema/TLS/evidence checks and explicit production blockers",
+      "published campaign and single-use expiring invitation use original membership authorization",
+      "independent pilot claim and separately browser-approved Submit Evidence grant",
+      "real selected synthetic retained pilot evidence, explicit P17 consent, idempotent receipt and protected reviewer inventory",
+      "PostgreSQL restart and app-container replacement preserve cookies, exact receipt, received evidence, claims and audit history",
+      "consumed owner code cannot initialize another organization after replacement",
+      "deployment secrets and desktop bearer absent from application/proxy/database logs"
+    ],
+    "imageId": "sha256:125571b254381352bc954ed09585731cc7c978f4a256b213188cb89025175cc6",
+    "sourceRevision": "8b40dde6019e85db2f9979587a172d5c32653fb4",
+    "singleSyntheticSubmissionSnapshot": {
+      "organization": {
+        "memory": "164.4MiB / 15.61GiB",
+        "cpuSnapshot": "90.27%"
+      },
+      "database": {
+        "memory": "37.63MiB / 15.61GiB",
+        "cpuSnapshot": "0.04%"
+      }
+    },
+    "passed": 11,
+    "failed": 0
+  },
+  "supersededRuns": [
+    {
+      "runId": 40870714503,
+      "source": "29067b5dee7acd7d8ede40829b1e0ee393984782",
+      "conclusion": "cancelled",
+      "reason": "Controlled real-browser reproduction found an early-setup starter-catalog race; successful deployment diagnostics retained; corrected source received its own final Full acceptance."
+    },
+    {
+      "runId": 40870534035,
+      "source": "29067b5dee7acd7d8ede40829b1e0ee393984782",
+      "conclusion": "cancelled",
+      "reason": "Routine Fast run superseded by the corrected push."
+    }
+  ],
+  "retainedDevelopmentFailures": [
+    "Cross-platform UnixCreateMode analyzer diagnostics and fixture helper naming/capitalization",
+    "Private PostgreSQL init SQL ownership",
+    "Static proxy IP collided with dynamic Docker allocation",
+    "Local TLS probe omitted correct SNI",
+    "Executor proxy incorrectly used for private Docker service traffic",
+    "Test-only science fixture omitted existing StorageManager setup",
+    "Probe expected 409 where consumed restart bootstrap correctly returns 403",
+    "Full-job structural helper needed to require new third Full job",
+    "Controlled early-setup test failed before catalog loading fix"
+  ],
+  "artifactDigests": [
+    {
+      "name": "linux-browser-diagnostics",
+      "id": 12898612533,
+      "digest": "sha256:5df96729fcddb89a25407d2f23324f165343c7dd67a8a6a120e1424334e65e42"
+    },
+    {
+      "name": "linux-test-diagnostics",
+      "id": 12897452217,
+      "digest": "sha256:997f00c7dc572ff0d05d5e0306773f136f1b2b4a2b3faf26c7f6001ebfa2b468"
+    },
+    {
+      "name": "windows-test-diagnostics",
+      "id": 12896829710,
+      "digest": "sha256:67e236d946eac458c3b62cbc1ad9bbe1e20d13b9941a35f02a5086c193115e0c"
+    },
+    {
+      "name": "organization-deployment-diagnostics",
+      "id": 12896363556,
+      "digest": "sha256:bf63f8ca7344741a8e6b6d37bee5b5eac2d342816764dc9bcd435008c9efa925"
+    }
+  ],
+  "preservation": {
+    "README_SHA256": "58f11ea8a2a21bf8dfac437d2db8677a0d9555bf0a264031a2e91c1b9ae0634e",
+    "main": "9dd2d8cda7ddb6d73414808f75010726871205c2",
+    "develop/v0.6.0": "9dd2d8cda7ddb6d73414808f75010726871205c2",
+    "v0.6.0": "9dd2d8cda7ddb6d73414808f75010726871205c2"
+  },
+  "primaryManagedProvider": "Render \u2014 Deployment Candidate; no live accepted Deploy button",
+  "productionReady": false,
+  "unverifiedGates": [
+    "Live provider provisioning and billing authorization",
+    "Verified restricted Render database endpoint, finite trusted proxy contract and non-root persistent disk provisioning",
+    "Pinned public distribution image/template and novice-operated live acceptance",
+    "Administrator MFA/passkey enrollment and recovery",
+    "Independent off-server database and protected-certificate/password restore",
+    "Retention, certificate rotation and recoverable upgrades",
+    "Installed MSFS/SDK, authentic NASA-original and physical-device acceptance"
+  ],
+  "ownerActionRequired": false,
+  "p26Started": false,
+  "postAcceptanceChangePolicy": "Documentation-only closure; no runtime, test, build, package or configuration change after accepted source. No redundant successful Full rerun."
+}
