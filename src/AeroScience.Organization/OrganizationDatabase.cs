@@ -65,6 +65,7 @@ public sealed class OrganizationCommandReceipt
 }
 public sealed class OrganizationDatabase(DbContextOptions<OrganizationDatabase> options):IdentityDbContext<OrganizationUser,IdentityRole<Guid>,Guid>(options),IDataProtectionKeyContext
 {
+    public DbSet<DeploymentStateRecord> DeploymentState=>Set<DeploymentStateRecord>();
     public DbSet<OrganizationRecord> Organizations=>Set<OrganizationRecord>();
     public DbSet<ProgramRecord> Programs=>Set<ProgramRecord>();
     public DbSet<CampaignRecord> Campaigns=>Set<CampaignRecord>();
@@ -107,6 +108,9 @@ public sealed class OrganizationDatabase(DbContextOptions<OrganizationDatabase> 
     protected override void OnModelCreating(ModelBuilder model)
     {
         base.OnModelCreating(model);
+        model.Entity<DeploymentStateRecord>().HasKey(x=>x.Id);
+        model.Entity<DeploymentStateRecord>().Property(x=>x.CertificateSha256).HasMaxLength(64);
+        model.Entity<DeploymentStateRecord>().Property(x=>x.BootstrapSha256).HasMaxLength(64);
         ResearchTemplateDatabase.Configure(model);
         model.HasDefaultSchema("organization");
         model.Entity<WorkflowReviewIndex>().HasKey(r=>r.RootId);

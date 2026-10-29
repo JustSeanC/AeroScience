@@ -555,6 +555,38 @@ namespace AeroScience.Organization.Migrations
                     b.ToTable("Revisions", "organization");
                 });
 
+            modelBuilder.Entity("AeroScience.Organization.DeploymentStateRecord", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTimeOffset?>("BootstrapConsumedUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("BootstrapExpiresUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("BootstrapIssuedUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("BootstrapSha256")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("CertificateSha256")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("DeploymentState", "organization");
+                });
+
             modelBuilder.Entity("AeroScience.Organization.DeviceGrantRecord", b =>
                 {
                     b.Property<Guid>("Id")

@@ -23,7 +23,11 @@ public sealed class OrganizationProgram
 {
     public static async Task Main(string[] args)
     {
-        var app=OrganizationApplication.Build(args);await OrganizationApplication.Initialize(app);await app.RunAsync();
+        if(args is ["--health-check"]){
+            try{using var client=new HttpClient(new SocketsHttpHandler{UseProxy=false}){Timeout=TimeSpan.FromSeconds(3)};using var response=await client.GetAsync("http://127.0.0.1:8080/healthz/ready");Environment.ExitCode=response.IsSuccessStatusCode?0:1;}catch{Environment.ExitCode=1;}return;
+        }
+        try{var app=OrganizationApplication.Build(args);await OrganizationApplication.Initialize(app);await app.RunAsync();}
+        catch(Exception ex){Console.Error.WriteLine($"Organization startup stopped safely ({ex.GetType().Name}). Check protected deployment configuration and database/schema compatibility. No credential values are printed.");Environment.ExitCode=1;}
     }
 }
 public sealed record OrganizationBootstrapRequest(string Secret,string OrganizationName,string Description,string UserName,string Password);
@@ -31,9 +35,9 @@ public sealed record OrganizationLoginRequest(string UserName,string Password);
 public sealed class OrganizationDatabaseEncodingException():InvalidOperationException("Organization PostgreSQL must use UTF8 to retain multilingual research names, objectives and provenance. Startup stopped before migration; existing records were not converted or changed.");
 public sealed class BootstrapCredential:IDisposable
 {
-    byte[]? digest;
-    public void Initialize(byte[] secret){digest=SHA256.HashData(secret);CryptographicOperations.ZeroMemory(secret);}
-    public bool Matches(string? input)=>digest is not null&&input is {Length:>=32 and <=256}&&CryptographicOperations.FixedTimeEquals(digest,SHA256.HashData(Encoding.UTF8.GetBytes(input)));
+    byte[]? digest;DateTimeOffset expires=DateTimeOffset.MaxValue;
+    public void Initialize(byte[] secret,DateTimeOffset? expiresUtc=null){expires=expiresUtc??DateTimeOffset.MaxValue;digest=SHA256.HashData(secret);CryptographicOperations.ZeroMemory(secret);}
+    public bool Matches(string? input)=>digest is not null&&DateTimeOffset.UtcNow<expires&&input is {Length:>=32 and <=256}&&CryptographicOperations.FixedTimeEquals(digest,SHA256.HashData(Encoding.UTF8.GetBytes(input)));
     public void Dispose(){if(digest is not null)CryptographicOperations.ZeroMemory(digest);digest=null;}
 }
 public static class OrganizationApplication
@@ -44,6 +48,7 @@ public static class OrganizationApplication
         var builder=WebApplication.CreateBuilder(new WebApplicationOptions{Args=args,ApplicationName=typeof(OrganizationProgram).Assembly.FullName});
         configure?.Invoke(builder);
         var settings=OrganizationSettings.Read(builder.Configuration,builder.Environment);
+        OrganizationDeployment.PrepareCertificate(settings);
         if(settings.LocalDevelopment)builder.WebHost.UseUrls(settings.Origin.GetLeftPart(UriPartial.Authority));
         builder.WebHost.ConfigureKestrel(o=>{o.Limits.MaxRequestBodySize=32768;o.Limits.RequestHeadersTimeout=TimeSpan.FromSeconds(15);});
         builder.Services.ConfigureHttpJsonOptions(o=>{
@@ -51,6 +56,7 @@ public static class OrganizationApplication
             o.SerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase,allowIntegerValues:false));
             o.SerializerOptions.UnmappedMemberHandling=JsonUnmappedMemberHandling.Disallow;
         });
+        builder.Services.Configure<HostOptions>(o=>o.ShutdownTimeout=TimeSpan.FromSeconds(30));
         builder.Services.AddSingleton(settings);builder.Services.AddSingleton<BootstrapCredential>();
         builder.Services.AddDbContext<OrganizationDatabase>(o=>o.UseNpgsql(settings.ConnectionString,n=>n.CommandTimeout(15)));
         var keys=builder.Services.AddDataProtection().SetApplicationName("AeroScience.Organization.0.7").PersistKeysToDbContext<OrganizationDatabase>();
@@ -93,6 +99,7 @@ public static class OrganizationApplication
             o.AddPolicy("evidence-receive",c=>RateLimitPartition.GetFixedWindowLimiter(c.Connection.RemoteIpAddress?.ToString()??"local-test",_=>new(){PermitLimit=6,Window=TimeSpan.FromMinutes(1),QueueLimit=0,AutoReplenishment=true}));
             o.GlobalLimiter=PartitionedRateLimiter.Create<HttpContext,string>(_=>RateLimitPartition.GetConcurrencyLimiter("organization",_=>new(){PermitLimit=32,QueueLimit=0}));
         });
+        builder.Services.AddScoped<OrganizationServerDiagnostics>();
         builder.Services.AddScoped<OrganizationManagement>();
         builder.Services.AddScoped<OrganizationPublishing>();builder.Services.AddScoped<OrganizationResearchTemplates>();
         builder.Services.AddScoped<OrganizationOpportunities>();builder.Services.AddScoped<OrganizationMembership>();builder.Services.AddScoped<OrganizationDevices>();
@@ -109,6 +116,12 @@ public static class OrganizationApplication
             context.Response.Headers.ContentSecurityPolicy="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'self'; frame-ancestors 'none'; form-action 'self'; base-uri 'none'";
             if(!settings.LocalDevelopment)context.Response.Headers.StrictTransportSecurity="max-age=31536000";
             var authority=settings.Origin.GetLeftPart(UriPartial.Authority);
+            // Only an in-container loopback probe bypasses public origin matching, and returns no details.
+            if(context.Request.Path=="/healthz/ready"&&context.Request.Method=="GET"&&context.Connection.RemoteIpAddress is {} probe&&IPAddress.IsLoopback(probe)&&context.Request.Host.Host=="127.0.0.1"){
+                using var deadline=CancellationTokenSource.CreateLinkedTokenSource(context.RequestAborted);deadline.CancelAfter(TimeSpan.FromSeconds(3));
+                try{using var scope=app.Services.CreateScope();var database=scope.ServiceProvider.GetRequiredService<OrganizationDatabase>();context.Response.StatusCode=await database.Database.CanConnectAsync(deadline.Token)?200:503;}
+                catch{context.Response.StatusCode=503;}return;
+            }
             if(!string.Equals(context.Request.Scheme+"://"+context.Request.Host,authority,StringComparison.OrdinalIgnoreCase)
                 ||settings.LocalDevelopment&&context.Connection.RemoteIpAddress is {} remote&&!IPAddress.IsLoopback(remote)){
                 context.Response.StatusCode=400;await context.Response.WriteAsJsonAsync(new{error="Open the configured organization server address using its approved secure connection."});return;
@@ -153,7 +166,9 @@ public static class OrganizationApplication
             if(await db.Database.SqlQueryRaw<string>("SELECT current_setting('server_encoding') AS \"Value\"").SingleAsync(token)!="UTF8")throw new OrganizationDatabaseEncodingException();
             var known=db.Database.GetMigrations().ToHashSet(StringComparer.Ordinal);
             if((await db.Database.GetAppliedMigrationsAsync(token)).Any(m=>!known.Contains(m)))throw new InvalidOperationException("Organization database schema is newer or incompatible.");
-            await db.Database.MigrateAsync(token);scope.ServiceProvider.GetRequiredService<ProgramWorkflow>().Rebuilding=true;await scope.ServiceProvider.GetRequiredService<OrganizationReviews>().Backfill(token);await scope.ServiceProvider.GetRequiredService<CampaignProgressProjection>().Backfill(token);await scope.ServiceProvider.GetRequiredService<CampaignCoverageProjection>().Backfill(token);await scope.ServiceProvider.GetRequiredService<ProgramWorkflow>().Backfill(token);if(!await db.Organizations.AnyAsync(token))app.Services.GetRequiredService<BootstrapCredential>().Initialize(app.Services.GetRequiredService<OrganizationSettings>().ReadBootstrapSecret());
+            await db.Database.MigrateAsync(token);scope.ServiceProvider.GetRequiredService<ProgramWorkflow>().Rebuilding=true;await scope.ServiceProvider.GetRequiredService<OrganizationReviews>().Backfill(token);await scope.ServiceProvider.GetRequiredService<CampaignProgressProjection>().Backfill(token);await scope.ServiceProvider.GetRequiredService<CampaignCoverageProjection>().Backfill(token);await scope.ServiceProvider.GetRequiredService<ProgramWorkflow>().Backfill(token);var settings=app.Services.GetRequiredService<OrganizationSettings>();
+            await OrganizationDeployment.Initialize(db,settings,app.Services.GetRequiredService<BootstrapCredential>(),token);
+            if(!settings.ManagedDeployment&&!await db.Organizations.AnyAsync(token))app.Services.GetRequiredService<BootstrapCredential>().Initialize(settings.ReadBootstrapSecret());
         }
         catch(OrganizationDatabaseEncodingException){throw;}
         catch(Exception ex) when(ex is not OperationCanceledException){throw new InvalidOperationException("Organization startup refused: database/schema, protected bootstrap or key configuration is unavailable. No personal-data fallback was used.");}
@@ -162,6 +177,7 @@ public static class OrganizationApplication
     {
         app.MapGet("/api/health",()=>new{service="AeroScience Organization",version="0.7.0",schema=1});
         var api=app.MapGroup("/api/organization").RequireAuthorization(ManagePolicy);
+        api.MapGet("/server-health",(OrganizationServerDiagnostics diagnostics,CancellationToken token)=>diagnostics.Check(token)).RequireAuthorization(PublishPolicy);
         api.MapGet("/overview",async(OrganizationDatabase db,CancellationToken token)=>{
             var organization=await db.Organizations.AsNoTracking().SingleAsync(token);return new{version=1,id=organization.PublicId,organization.Name,organization.Description,organization.CreatedUtc};
         });
@@ -193,6 +209,7 @@ public static class OrganizationApplication
             await using var tx=await db.Database.BeginTransactionAsync(c.RequestAborted);
             await db.Database.ExecuteSqlRawAsync("SELECT pg_advisory_xact_lock(7013001)",c.RequestAborted);
             if(await db.Organizations.AnyAsync(c.RequestAborted))return Results.Conflict(new{error="Organization setup has already been completed. Sign in with the administrator account."});
+            await OrganizationDeployment.ConsumeBootstrap(db,c.RequestServices.GetRequiredService<OrganizationSettings>(),request.Secret,c.RequestAborted);
             foreach(var role in OrganizationRoles.All){var made=await roles.CreateAsync(new(role){Id=Guid.NewGuid()});if(!made.Succeeded)throw new InvalidOperationException("Organization role setup could not be completed.");}
             var admin=new OrganizationUser{Id=Guid.NewGuid(),UserName=request.UserName,SecurityStamp=Guid.NewGuid().ToString()};
             var created=await users.CreateAsync(admin,request.Password);if(!created.Succeeded)throw new ArgumentException("Choose a valid account name and a password with at least 14 characters, upper/lowercase letters, a number and a symbol.");
