@@ -1,47 +1,50 @@
 {
   "version": 1,
   "milestone": "v0.7.0 P26",
-  "status": "Engineering foundation technically accepted; complete five-stage managed hosting and production operation remain incomplete",
+  "status": "Bounded completion-pass engineering and Full integration accepted; complete Railway hosting and production operation remain incomplete",
   "branch": "develop/v0.7.0",
-  "testedSource": "1b0b3d61826f853f08c7e364ffec29f0e3a668b5",
+  "testedSource": "a1e565e464517382185510562ce255a68371f76d",
   "fullValidation": {
-    "id": 40909799415,
-    "url": "https://github.com/JustSeanC/AeroScience/actions/runs/40909799415",
+    "id": 40953029040,
+    "url": "https://github.com/JustSeanC/AeroScience/actions/runs/40953029040",
+    "source": "a1e565e464517382185510562ce255a68371f76d",
     "conclusion": "success"
   },
   "fastValidation": {
-    "id": 40906163511,
-    "source": "cec8b15f88cdce07d3b7089c5cf4aae3977912ff",
+    "id": 40937183428,
+    "url": "https://github.com/JustSeanC/AeroScience/actions/runs/40937183428",
+    "source": "7b8c2646d06be89091400fd1151e6fb8009e3531",
     "conclusion": "success",
     "dotnet": {
-      "passed": 1246,
+      "passed": 1247,
       "failed": 0,
-      "skipped": 100
+      "skipped": 102
     },
     "browser": {
       "passed": 4,
       "failed": 0,
+      "skipped": 4
+    },
+    "officialRailwaySdk": {
+      "passed": 2,
+      "failed": 0,
       "skipped": 0
     },
-    "python": {
-      "passed": 156,
-      "failed": 0,
-      "skipped": 1
-    }
+    "pythonRun": 0
   },
   "fullResults": {
     "linuxDotnet": {
-      "passed": 1346,
+      "passed": 1349,
       "failed": 0,
       "skipped": 0
     },
     "windowsDotnet": {
-      "passed": 1342,
+      "passed": 1344,
       "failed": 0,
-      "skipped": 4
+      "skipped": 5
     },
     "browser": {
-      "passed": 338,
+      "passed": 339,
       "failed": 0,
       "skipped": 2,
       "flaky": 0
@@ -67,6 +70,11 @@
     "processRecoveryFamilies": {
       "linuxPassed": 5,
       "windowsPassed": 5
+    },
+    "officialRailwaySdk": {
+      "passed": 2,
+      "failed": 0,
+      "skipped": 0
     },
     "windowsVaultNativeIsolationAndPackageStructure": "passed"
   },
@@ -97,14 +105,14 @@
     "stableMainDevelop060AndTag": "9dd2d8cda7ddb6d73414808f75010726871205c2"
   },
   "remainingGates": [
-    "Published accepted native Railway template and immutable distribution identities",
-    "Verified finite Railway ingress/proxy contract",
-    "Fresh-account novice deployment within five ordinary stages",
-    "Independently controlled encrypted backup copy/key and account-loss recovery",
-    "Enforced retention/deletion, guided disaster restore, safe rollout and actual failed-migration paired recovery",
-    "Live certificate rotation, production SBOM/security/distribution and operator acceptance"
+    "Supported authenticated finite Railway ingress boundary; no wildcard or informational-header substitute",
+    "Authorized account-side native plan/template/domain/secret validation and accepted immutable registry distribution",
+    "Validated owner-only browser verification and fresh-account novice five-stage completion",
+    "Independent account/destination/key ownership, live account-loss restore and guided disaster promotion",
+    "Complete provider maintenance/image/schema rollout, failed-image paired restoration and certificate rotation",
+    "Production SBOM/security/distribution, retention/immutability and operator acceptance"
   ],
-  "ownerAction": "No developer QA or paid-account action required for this automated checkpoint; future cloud acceptance needs separate explicit authorization.",
+  "ownerAction": "No developer QA required. Separate authorization and protected sign-in to an organization-owned Railway workspace are needed for private provider feasibility; paid deployment and public assets require separate approval.",
   "completionPass": {
     "date": "2026-10-29",
     "preservedBaselineSource": "1b0b3d61826f853f08c7e364ffec29f0e3a668b5",
@@ -136,7 +144,12 @@
       "failed": 0,
       "skipped": 0
     },
-    "currentSourceFullValidation": null,
+    "currentSourceFullValidation": {
+      "id": 40953029040,
+      "url": "https://github.com/JustSeanC/AeroScience/actions/runs/40953029040",
+      "source": "a1e565e464517382185510562ce255a68371f76d",
+      "conclusion": "success"
+    },
     "realRailwayDeploymentAccepted": false,
     "fiveStageNoviceSetupAccepted": false,
     "isolatedIndependentRecoveryPassed": true,
@@ -146,11 +159,12 @@
     "publicImagesOrTemplatePublished": false,
     "paidResourcesCreated": false,
     "remainingGates": [
-      "Finite authenticated Railway ingress contract",
-      "Account-side native plan/template/domain/secret validation and authorized immutable image distribution",
-      "Independent account/destination/key ownership and genuine cloud-loss recovery",
-      "Guided disaster restore promotion and complete provider/image/schema rollout rollback",
-      "Fresh-account novice five-stage acceptance"
+      "Supported authenticated finite Railway ingress boundary; no wildcard or informational-header substitute",
+      "Authorized account-side native plan/template/domain/secret validation and accepted immutable registry distribution",
+      "Validated owner-only browser verification and fresh-account novice five-stage completion",
+      "Independent account/destination/key ownership, live account-loss restore and guided disaster promotion",
+      "Complete provider maintenance/image/schema rollout, failed-image paired restoration and certificate rotation",
+      "Production SBOM/security/distribution, retention/immutability and operator acceptance"
     ],
     "preservedLocalFailure": {
       "passed": 8,
@@ -273,7 +287,12 @@
         "skipped": 0
       },
       "originalAssertionsAndDeadlinesPreserved": true,
-      "newFullAcceptance": "pending after correcting obsolete disabled-button interaction; failed Full diagnostics retained",
+      "newFullAcceptance": {
+        "id": 40953029040,
+        "url": "https://github.com/JustSeanC/AeroScience/actions/runs/40953029040",
+        "source": "a1e565e464517382185510562ce255a68371f76d",
+        "conclusion": "success"
+      },
       "previousAffectedBrowser": {
         "passed": 25,
         "failed": 0,
@@ -290,6 +309,221 @@
       "published": false,
       "publicationApproved": false,
       "status": "historical review candidates; overall source Full failed, not a corrected production distribution"
+    },
+    "localIntegrationFullValidationPassed": true,
+    "fullResults": {
+      "linuxDotnet": {
+        "passed": 1349,
+        "failed": 0,
+        "skipped": 0
+      },
+      "windowsDotnet": {
+        "passed": 1344,
+        "failed": 0,
+        "skipped": 5
+      },
+      "browser": {
+        "passed": 339,
+        "failed": 0,
+        "skipped": 2,
+        "flaky": 0
+      },
+      "linuxPython": {
+        "passed": 156,
+        "failed": 0,
+        "skipped": 1
+      },
+      "windowsPython": {
+        "passed": 152,
+        "failed": 0,
+        "skipped": 2
+      },
+      "productionLikeContainers": {
+        "passed": 12,
+        "failed": 0
+      },
+      "railwayShapedContainers": {
+        "passed": 5,
+        "failed": 0
+      },
+      "processRecoveryFamilies": {
+        "linuxPassed": 5,
+        "windowsPassed": 5
+      },
+      "officialRailwaySdk": {
+        "passed": 2,
+        "failed": 0,
+        "skipped": 0
+      },
+      "windowsVaultNativeIsolationAndPackageStructure": "passed"
+    },
+    "correctedFast": {
+      "id": 40937183428,
+      "url": "https://github.com/JustSeanC/AeroScience/actions/runs/40937183428",
+      "source": "7b8c2646d06be89091400fd1151e6fb8009e3531",
+      "conclusion": "success",
+      "dotnet": {
+        "passed": 1247,
+        "failed": 0,
+        "skipped": 102
+      },
+      "browser": {
+        "passed": 4,
+        "failed": 0,
+        "skipped": 4
+      },
+      "officialRailwaySdk": {
+        "passed": 2,
+        "failed": 0,
+        "skipped": 0
+      },
+      "pythonRun": 0
+    },
+    "exactSourceContainerAcceptance": {
+      "source": "a1e565e464517382185510562ce255a68371f76d",
+      "applicationDockerConfigId": "sha256:81bd72db9861bfb85355a5eef4196d73826d9411f0e0c5d0d723db4368ef6203",
+      "registryManifestDigests": null,
+      "publicDistributionPublished": false
     }
-  }
+  },
+  "acceptedBaseline": {
+    "testedSource": "1b0b3d61826f853f08c7e364ffec29f0e3a668b5",
+    "fullValidation": {
+      "id": 40909799415,
+      "url": "https://github.com/JustSeanC/AeroScience/actions/runs/40909799415",
+      "conclusion": "success"
+    },
+    "fastValidation": {
+      "id": 40906163511,
+      "source": "cec8b15f88cdce07d3b7089c5cf4aae3977912ff",
+      "conclusion": "success",
+      "dotnet": {
+        "passed": 1246,
+        "failed": 0,
+        "skipped": 100
+      },
+      "browser": {
+        "passed": 4,
+        "failed": 0,
+        "skipped": 0
+      },
+      "python": {
+        "passed": 156,
+        "failed": 0,
+        "skipped": 1
+      }
+    },
+    "fullResults": {
+      "linuxDotnet": {
+        "passed": 1346,
+        "failed": 0,
+        "skipped": 0
+      },
+      "windowsDotnet": {
+        "passed": 1342,
+        "failed": 0,
+        "skipped": 4
+      },
+      "browser": {
+        "passed": 338,
+        "failed": 0,
+        "skipped": 2,
+        "flaky": 0
+      },
+      "linuxPython": {
+        "passed": 156,
+        "failed": 0,
+        "skipped": 1
+      },
+      "windowsPython": {
+        "passed": 152,
+        "failed": 0,
+        "skipped": 2
+      },
+      "productionLikeContainers": {
+        "passed": 12,
+        "failed": 0
+      },
+      "railwayShapedContainers": {
+        "passed": 5,
+        "failed": 0
+      },
+      "processRecoveryFamilies": {
+        "linuxPassed": 5,
+        "windowsPassed": 5
+      },
+      "windowsVaultNativeIsolationAndPackageStructure": "passed"
+    },
+    "preservedFailure": {
+      "run": 40906163068,
+      "source": "cec8b15f88cdce07d3b7089c5cf4aae3977912ff",
+      "linux": {
+        "passed": 1345,
+        "failed": 1,
+        "skipped": 0
+      },
+      "windows": {
+        "passed": 1341,
+        "failed": 1,
+        "skipped": 4
+      },
+      "cause": "Historical P13 fixture used current Identity queries before migration; corrected original-schema seed and strengthened identity/hash/stamp assertions. Production code unchanged."
+    },
+    "remainingGates": [
+      "Published accepted native Railway template and immutable distribution identities",
+      "Verified finite Railway ingress/proxy contract",
+      "Fresh-account novice deployment within five ordinary stages",
+      "Independently controlled encrypted backup copy/key and account-loss recovery",
+      "Enforced retention/deletion, guided disaster restore, safe rollout and actual failed-migration paired recovery",
+      "Live certificate rotation, production SBOM/security/distribution and operator acceptance"
+    ]
+  },
+  "fullSkipDetails": {
+    "linuxDotnet": [],
+    "windowsDotnet": [
+      "AeroScience.Tests.OrganizationConnectionIntegrationTests.EncryptedOffProcessBackupRestoresAuthorizedEvidenceAuditAndProtectedMfaAfterSourceLoss",
+      "AeroScience.Tests.AviationAcquisitionTests.RetainedOriginalFileLinksAreRejectedRatherThanFollowed",
+      "AeroScience.Tests.ScientificLibraryFolderTests.LinkedSourceDirectoryIsRejected",
+      "AeroScience.Tests.OrganizationConnectionIntegrationTests.SeparatelyKeyedCopiesSurvivePrimaryRepositoryAndIdentityLossAndEnforceApprovedRetention",
+      "AeroScience.Tests.OrganizationServerTests.ExplicitBackupConsentPersistsScheduledPolicyIdempotentJobsAndVerifiedRestoreAcrossRestart"
+    ],
+    "browser": [
+      {
+        "file": "aviation-charts.spec.js",
+        "test": "approved originals provide local chart overlays, independent science, offline tiles and exact edition selection",
+        "reasons": [
+          "Owner deferred the ordinary chart viewer; retained research renderer coverage remains in AviationChartTests."
+        ]
+      },
+      {
+        "file": "aviation-charts.spec.js",
+        "test": "unknown runtime is honest and chart inventory remains accessible at tablet width without altering saved data",
+        "reasons": [
+          "Owner deferred the ordinary chart viewer; the active deferral scenario checks retention, tablet accessibility and other overlays."
+        ]
+      }
+    ],
+    "linuxPython": [
+      {
+        "test": "test_pe_metadata_check_does_not_claim_runtime_exports_or_simulator_connection (test_windows_helpers.WindowsHelperTests.test_pe_metadata_check_does_not_claim_runtime_exports_or_simulator_connection)",
+        "reason": "'Publish the Windows companion first for the native PE fixture'"
+      }
+    ],
+    "windowsPython": [
+      {
+        "test": "test_generated_private_configuration_is_unique_bounded_and_never_prints_credentials (test_organization_deployment.OrganizationDeploymentTests.test_generated_private_configuration_is_unique_bounded_and_never_prints_credentials)",
+        "reason": "'POSIX OpenSSL/mode fixture; real Linux container acceptance verifies certificates.'"
+      },
+      {
+        "test": "test_case_colliding_files_cannot_share_one_layout_entry (test_packaging.PackagingTests.test_case_colliding_files_cannot_share_one_layout_entry)",
+        "reason": "'A case-sensitive filesystem is required to create both aliases.'"
+      }
+    ]
+  },
+  "technicalImplementationComplete": false,
+  "boundedEngineeringAccepted": true,
+  "localIntegrationValidationPassed": true,
+  "realRailwayDeploymentAccepted": false,
+  "productionDisasterRecoveryAccepted": false,
+  "productionUpdatesAccepted": false
 }
