@@ -207,6 +207,52 @@
         "skipped": 0
       },
       "sdkDependencyAdvisories": 0
+    },
+    "failedAcceptanceRuns": [
+      {
+        "id": 40937992324,
+        "url": "https://github.com/JustSeanC/AeroScience/actions/runs/40937992324",
+        "source": "7b8c2646d06be89091400fd1151e6fb8009e3531",
+        "conclusion": "failure",
+        "linuxDotnet": {
+          "passed": 1349,
+          "failed": 0,
+          "skipped": 0
+        },
+        "windowsDotnet": {
+          "passed": 1344,
+          "failed": 0,
+          "skipped": 5
+        },
+        "browser": {
+          "passed": 338,
+          "failed": 1,
+          "skipped": 2,
+          "flaky": 0
+        },
+        "deploymentPassed": 17,
+        "linuxHelpersAndRecovery": "not run after browser failure",
+        "cause": "Existing selected-plan form binding race allowed premature Start before required name was populated; deterministic response gate reproduced and original control now waits for coherent binding."
+      }
+    ],
+    "missionSelectionCorrection": {
+      "affectedBrowser": {
+        "passed": 25,
+        "failed": 0,
+        "skipped": 0
+      },
+      "originalAssertionsAndDeadlinesPreserved": true,
+      "newFullAcceptance": "pending"
+    },
+    "privateImagePreparation": {
+      "source": "7b8c2646d06be89091400fd1151e6fb8009e3531",
+      "archives": 3,
+      "allConfigAndLayerHashesVerified": true,
+      "exactPrivateImageProbesPassed": 17,
+      "registryManifestDigests": null,
+      "published": false,
+      "publicationApproved": false,
+      "status": "historical review candidates; overall source Full failed, not a corrected production distribution"
     }
   }
 }

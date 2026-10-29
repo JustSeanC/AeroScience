@@ -187,6 +187,10 @@ function clearTelemetry() {
   $("horizon").setAttribute("transform", "translate(0 0)");
   $("connection-dot").classList.remove("live");
 }
+function updateStartButton(state) {
+  const t=state.telemetry,fresh=t&&Date.now()-Date.parse(t.timestampUtc)<6000;
+  $("start-button").disabled=starting||!fresh||state.connection.state!=="connected"||!!t?.isPaused||!selection.canStart(state);
+}
 function render(state) {
   let stopped = document.getElementById("recording-storage-stop");
   if (state.recordingStop) {
@@ -270,8 +274,7 @@ function render(state) {
       );
     }
   } else clearTelemetry();
-  $("start-button").disabled =
-    starting || !fresh || state.connection.state !== "connected" || !!t?.isPaused;
+  updateStartButton(state);
   const mission = state.activeMission;
   $("mission-idle").hidden = !!mission;
   $("mission-active").hidden = !mission;
@@ -571,7 +574,7 @@ setInterval(() => {
 }, 1000);
 initializeResearch({ api, notice, command });
 streamlineMissionControl();
-const selection=missionSelection($("mission-idle"),api);
+const selection=missionSelection($("mission-idle"),api,{onChange:()=>{if(current)updateStartButton(current);}});
 try {
   const access = await api("/api/access");
   if (access.requiresPairing) {
