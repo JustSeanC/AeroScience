@@ -169,11 +169,21 @@ public sealed partial class OrganizationServerTests
     }
     [PostgresFact]public async Task P13DatabaseMigrationRetainsAdministratorRolesAndNeverReplacesItsIdentity()
     {
+        var administrator=Guid.NewGuid();var organization=Guid.NewGuid();var stamp=Guid.NewGuid().ToString();string passwordHash;Guid roleId;
         using(var scope=app.Services.CreateScope()){
             var db=scope.ServiceProvider.GetRequiredService<OrganizationDatabase>();await db.GetService<IMigrator>().MigrateAsync("20261027120617_InitialOrganization");
-            var users=scope.ServiceProvider.GetRequiredService<UserManager<OrganizationUser>>();var roles=scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();foreach(var role in OrganizationRoles.All)Assert.True((await roles.CreateAsync(new(role){Id=Guid.NewGuid()})).Succeeded);
-            var user=new OrganizationUser{Id=Guid.NewGuid(),UserName="administrator"};Assert.True((await users.CreateAsync(user,Password)).Succeeded);Assert.True((await users.AddToRoleAsync(user,OrganizationRoles.Administrator)).Succeeded);db.Organizations.Add(new(){PublicId=Guid.NewGuid(),Name="P13 preserved organization",AdministratorId=user.Id,CreatedUtc=DateTimeOffset.UtcNow});await db.SaveChangesAsync();
+            // Seed the actual P13 Identity contract. Today's UserManager queries P26 columns that cannot exist yet.
+            Assert.Equal(0,await db.Database.SqlQueryRaw<int>("SELECT count(*)::int AS \"Value\" FROM information_schema.columns WHERE table_schema='organization' AND table_name='AspNetUsers' AND column_name IN ('AuthenticatorLastStep','RecoveryAcknowledgedUtc')").SingleAsync());
+            var roles=scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();foreach(var role in OrganizationRoles.All)Assert.True((await roles.CreateAsync(new(role){Id=Guid.NewGuid()})).Succeeded);
+            roleId=(await roles.FindByNameAsync(OrganizationRoles.Administrator))!.Id;
+            var user=new OrganizationUser{Id=administrator,UserName="administrator"};passwordHash=scope.ServiceProvider.GetRequiredService<IPasswordHasher<OrganizationUser>>().HashPassword(user,Password);var concurrency=Guid.NewGuid().ToString();
+            await db.Database.ExecuteSqlInterpolatedAsync($"INSERT INTO organization.\"AspNetUsers\" (\"Id\",\"UserName\",\"NormalizedUserName\",\"PasswordHash\",\"SecurityStamp\",\"ConcurrencyStamp\",\"EmailConfirmed\",\"PhoneNumberConfirmed\",\"TwoFactorEnabled\",\"LockoutEnabled\",\"AccessFailedCount\") VALUES ({administrator},{"administrator"},{"ADMINISTRATOR"},{passwordHash},{stamp},{concurrency},false,false,false,true,0)");
+            await db.Database.ExecuteSqlInterpolatedAsync($"INSERT INTO organization.\"AspNetUserRoles\" (\"UserId\",\"RoleId\") VALUES ({administrator},{roleId})");
+            db.Organizations.Add(new(){PublicId=organization,Name="P13 preserved organization",AdministratorId=administrator,CreatedUtc=DateTimeOffset.UtcNow});await db.SaveChangesAsync();
         }
-        await app.StopAsync();await app.DisposeAsync();await Start();browser.Connect(app);await Login();var identity=await Identity();Assert.Equal("P13 preserved organization",identity.Name);Assert.Equal(OrganizationEnrollmentMode.InvitationOnly,identity.Policy.Mode);Assert.True(identity.Policy.RequireApproval);var members=await Value<OrganizationPage<OrganizationMemberView>>(await browser.Client.GetAsync("/api/organization/members"));Assert.Equal(OrganizationRoles.Administrator,Assert.Single(members.Items).Role);
+        await app.StopAsync();await app.DisposeAsync();await Start();browser.Connect(app);await Login();var identity=await Identity();Assert.Equal(organization,identity.Id);Assert.Equal("P13 preserved organization",identity.Name);Assert.Equal(OrganizationEnrollmentMode.InvitationOnly,identity.Policy.Mode);Assert.True(identity.Policy.RequireApproval);var members=await Value<OrganizationPage<OrganizationMemberView>>(await browser.Client.GetAsync("/api/organization/members"));Assert.Equal(OrganizationRoles.Administrator,Assert.Single(members.Items).Role);
+        using(var scope=app.Services.CreateScope()){
+            var db=scope.ServiceProvider.GetRequiredService<OrganizationDatabase>();var retained=await db.Users.SingleAsync();Assert.Equal(administrator,retained.Id);Assert.Equal(passwordHash,retained.PasswordHash);Assert.Equal(stamp,retained.SecurityStamp);Assert.Equal(roleId,(await db.UserRoles.SingleAsync()).RoleId);Assert.False(retained.TwoFactorEnabled);Assert.Null(retained.RecoveryAcknowledgedUtc);Assert.Equal(administrator,(await db.Organizations.SingleAsync()).AdministratorId);
+        }
     }
 }
