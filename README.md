@@ -64,9 +64,11 @@ Ordinary scientific campaigns won't have to use advanced experimental-aircraft t
 
 ### 📡 Monitor participating research aircraft live — opt-in
 
-v0.7.0 also targets a **read-only, multi-aircraft organization live map**. When a pilot explicitly turns on sharing for a particular organization and flight, authorized managers can see participating aircraft, mission/campaign identity, current flight status, focused test-card progress, and a small science-collection status summary. Stale or disconnected aircraft will be labeled clearly.
+v0.7.0 also targets a **read-only, multi-aircraft live map available to every signed-in, active member of the same organization**, not just managers. A pilot must explicitly choose to share their flight with that organization. Participating members can then see aircraft, mission/campaign identity, flight status, focused research-card progress and basic science-collection health. Stale or disconnected aircraft will be labeled clearly.
 
-Sharing is **off by default**, can be stopped at any time, and is independent for each organization. Live positions and status are intended to be short-lived, not a permanently retained flight archive. They are **not** scientific submissions, sensor-validation proof, or permission to inspect the pilot's private recordings. Full remote Mission Control, commands to aircraft, and advanced multi-aircraft coordination remain outside v0.7.0.
+Live sharing is **off by default**, can be stopped at any time, and is independent for each organization. Live positions and status are temporary, not a permanently retained flight archive. They are **not** scientific submissions, sensor-validation proof or permission to inspect private recordings. Full remote Mission Control and aircraft commands remain outside v0.7.0.
+
+Organization owners/administrators will also be able to configure **optional Discord channel announcements**, built on a reusable organization event system. Planned events include a consenting pilot starting a flight, a research card reaching an accurately labeled completion/approval state, and approved scientific results becoming available to organization members. Admins choose which events to post; live-flight announcements need separate pilot disclosure/consent. No raw scientific data or private flight recordings are sent to Discord.
 
 ### 🔒 You choose what gets shared
 
