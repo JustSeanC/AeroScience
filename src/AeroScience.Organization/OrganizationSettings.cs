@@ -9,6 +9,7 @@ namespace AeroScience.Organization;
 public sealed record OrganizationSettings(string ConnectionString,Uri Origin,bool LocalDevelopment,string? BootstrapSecretFile,
     string? KeyCertificateFile,string? KeyCertificatePassword,IPAddress[] TrustedProxies)
 {
+    public bool RequireAdministratorMfa {get;init;}
     public bool ManagedDeployment {get;init;}
     public string? StateDirectory {get;init;}
     public string? BootstrapSecret {get;init;}
@@ -55,7 +56,7 @@ public sealed record OrganizationSettings(string ConnectionString,Uri Origin,boo
         if(proxies.Length>4||proxies.Any(p=>!IPAddress.TryParse(p,out _)))throw new InvalidOperationException("Configure at most four explicit trusted proxy IPs.");
         if(!local)pg.GssEncryptionMode=GssEncryptionMode.Disable; // Password/TLS deployment; no optional Kerberos runtime dependency.
         return new(pg.ConnectionString,origin,local,c["BootstrapSecretFile"],certificate,password,proxies.Select(IPAddress.Parse).ToArray()){
-            ManagedDeployment=managed,StateDirectory=state,BootstrapSecret=bootstrap,BootstrapLifetimeMinutes=lifetime,HostingProvider=provider,DatabaseExposure=exposure
+            RequireAdministratorMfa=!local||c.GetValue<bool>("RequireAdministratorMfa"),ManagedDeployment=managed,StateDirectory=state,BootstrapSecret=bootstrap,BootstrapLifetimeMinutes=lifetime,HostingProvider=provider,DatabaseExposure=exposure
         };
     }
     public byte[] ReadBootstrapSecret()

@@ -6,6 +6,8 @@ import argparse
 import base64
 import concurrent.futures
 import hashlib
+import hmac
+import struct
 import http.client
 from http.cookies import SimpleCookie
 import importlib.util
@@ -120,6 +122,14 @@ def verify(image, output):
             with concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool:assert sorted(pool.map(lambda _:own(),range(2)))==[200,409]
             record('anonymous takeover refused; concurrent owner bootstrap creates exactly one administrator')
             browser.post('/api/sign-in',{'userName':'administrator','password':payload['password']});assert browser.session()['user']['name']=='administrator'
+            browser.request('/api/organization/server-health',expected=428)
+            enrollment=browser.post('/api/account-security/enroll',{'password':payload['password']})
+            key=base64.b32decode(enrollment['setupKey'],casefold=True);step=int(time.time()/30)+1
+            digest=hmac.new(key,struct.pack('>Q',step),hashlib.sha1).digest();index=digest[-1]&15
+            code=str((struct.unpack('>I',digest[index:index+4])[0]&0x7fffffff)%1000000).zfill(6)
+            codes=browser.post('/api/account-security/enable',{'code':code})['recoveryCodes']
+            browser.post('/api/account-security/confirm-recovery',{'code':codes[0]})
+            record('password-only administration blocked; Identity authenticator and actual saved recovery-code verification required')
             health=browser.request('/api/organization/server-health');assert not health['productionReady'];assert any(c['name']=='Database transport' and c['state']=='healthy' for c in health['checks'])
             assert not any(value in json.dumps(health) for value in (payload['secret'],env['Organization__KeyCertificatePassword'],env['Organization__ConnectionString']))
             record('secure identity cookies, authenticated real schema/TLS/evidence checks and explicit production blockers')
@@ -168,7 +178,7 @@ def verify(image, output):
             browser.session();browser.request('/api/bootstrap',payload,expected=403)
             record('consumed owner code cannot initialize another organization after replacement')
             logs=compose_run('logs','--no-color').stdout
-            for value in (payload['secret'],payload['password'],env['Organization__KeyCertificatePassword'],env['Organization__ConnectionString'],bearer):assert value not in logs
+            for value in (payload['secret'],payload['password'],env['Organization__KeyCertificatePassword'],env['Organization__ConnectionString'],bearer,enrollment['setupKey'],*codes):assert value not in logs
             record('deployment secrets and desktop bearer absent from application/proxy/database logs')
             report['passed']=len(report['checks']);report['failed']=0
         except Exception:

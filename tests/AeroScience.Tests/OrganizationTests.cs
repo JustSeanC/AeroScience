@@ -73,6 +73,8 @@ public sealed partial class OrganizationServerTests:IAsyncLifetime
     const string Origin="http://127.0.0.1:5193",Password="ResearchOnly!2026Flight";
     readonly string directory=Path.Combine(Path.GetTempPath(),"aeroscience-org-test-"+Guid.NewGuid().ToString("N"));
     readonly string database="aeroscience_p13_"+Guid.NewGuid().ToString("N"),secret=new string('s',48);
+    Dictionary<string,string?>? deploymentOverrides;
+    bool requireAdministratorMfa;
     string connection="";WebApplication app=null!;Browser browser=null!;
     sealed class Cookies(CookieContainer jar):DelegatingHandler
     {
@@ -96,7 +98,7 @@ public sealed partial class OrganizationServerTests:IAsyncLifetime
     }
     async Task Start()
     {
-        app=OrganizationApplication.Build([],b=>{b.Environment.EnvironmentName="Testing";b.WebHost.UseTestServer();b.Configuration.AddInMemoryCollection(new Dictionary<string,string?>{["Organization:LocalDevelopment"]="true",["Organization:PublicOrigin"]=Origin,["Organization:ConnectionString"]=connection,["Organization:BootstrapSecretFile"]=Path.Combine(directory,"bootstrap-secret")});b.Logging.SetMinimumLevel(LogLevel.Warning);});
+        app=OrganizationApplication.Build([],b=>{b.Environment.EnvironmentName="Testing";b.WebHost.UseTestServer();b.Configuration.AddInMemoryCollection(new Dictionary<string,string?>{["Organization:LocalDevelopment"]="true",["Organization:PublicOrigin"]=Origin,["Organization:ConnectionString"]=connection,["Organization:RequireAdministratorMfa"]=requireAdministratorMfa.ToString(),["Organization:BootstrapSecretFile"]=Path.Combine(directory,"bootstrap-secret")});if(deploymentOverrides is not null)b.Configuration.AddInMemoryCollection(deploymentOverrides);b.Logging.SetMinimumLevel(LogLevel.Warning);});
         await OrganizationApplication.Initialize(app);await app.StartAsync();
     }
     object Setup(string code)=>new{secret=code,organizationName="Research Flight Lab",description="Private scientific research",userName="administrator",password=Password};

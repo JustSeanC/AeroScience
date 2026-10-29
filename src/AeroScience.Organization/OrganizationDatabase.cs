@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AeroScience.Organization;
 
-public sealed class OrganizationUser:IdentityUser<Guid> { }
+public sealed class OrganizationUser:IdentityUser<Guid> { public long AuthenticatorLastStep {get;set;}=-1; public DateTimeOffset? RecoveryAcknowledgedUtc {get;set;} }
 public sealed class OrganizationRecord
 {
     public int Id {get;set;}=1;
@@ -65,6 +65,9 @@ public sealed class OrganizationCommandReceipt
 }
 public sealed class OrganizationDatabase(DbContextOptions<OrganizationDatabase> options):IdentityDbContext<OrganizationUser,IdentityRole<Guid>,Guid>(options),IDataProtectionKeyContext
 {
+    public DbSet<ServerOperationRecord> ServerOperations=>Set<ServerOperationRecord>();
+    public DbSet<ServerBackupRecord> ServerBackups=>Set<ServerBackupRecord>();
+    public DbSet<ServerOperationsPolicyRecord> ServerOperationsPolicies=>Set<ServerOperationsPolicyRecord>();
     public DbSet<DeploymentStateRecord> DeploymentState=>Set<DeploymentStateRecord>();
     public DbSet<OrganizationRecord> Organizations=>Set<OrganizationRecord>();
     public DbSet<ProgramRecord> Programs=>Set<ProgramRecord>();
@@ -108,6 +111,7 @@ public sealed class OrganizationDatabase(DbContextOptions<OrganizationDatabase> 
     protected override void OnModelCreating(ModelBuilder model)
     {
         base.OnModelCreating(model);
+        ServerOperationsDatabase.Configure(model);
         model.Entity<DeploymentStateRecord>().HasKey(x=>x.Id);
         model.Entity<DeploymentStateRecord>().Property(x=>x.CertificateSha256).HasMaxLength(64);
         model.Entity<DeploymentStateRecord>().Property(x=>x.BootstrapSha256).HasMaxLength(64);

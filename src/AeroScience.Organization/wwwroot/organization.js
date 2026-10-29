@@ -1,3 +1,5 @@
+import {serverOperationsUi} from './server-operations.js';
+import {accountSecurityUi} from './account-security.js';
 import {organizationSetup} from './organization-setup.js';
 import {researchTemplateUi} from './research-template-ui.js';
 import {programWorkflowUi} from './program-workflow-ui.js';
@@ -24,7 +26,9 @@ function progressView(){const view=node('section');root.replaceChildren(view);re
 function workflowView(back=load){const view=node('section');root.replaceChildren(view);return programWorkflowUi({root:view,headingLevel:'h1',read:path=>api('/membership/research-progress'+path),write:(path,body,method)=>api('/membership/research-progress'+path,body,method),back,review:id=>reviews.workspace(id,null,true)});}
 function openProgress(id){return progressView().campaign(id);}
 function openApproved(id){return progressView().results(id);}
-const setupUi=organizationSetup({api,root,heading,navigate:()=>{epoch++;},programs:showPrograms,createProgram:()=>editProgram(),members:()=>membership.members(),health:()=>setupUi.health()});
+const accountSecurity=accountSecurityUi({api,root,field,heading,submit,navigate:()=>{epoch++;},load});
+const operationsUi=serverOperationsUi({api,root,heading,field,submit,draftCommand,navigate:()=>{epoch++;},health:()=>setupUi.health()});
+const setupUi=organizationSetup({api,root,heading,navigate:()=>{epoch++;},programs:showPrograms,createProgram:()=>editProgram(),members:()=>membership.members(),health:()=>setupUi.health(),security:()=>accountSecurity.view(),protection:()=>operationsUi.view()});
 const admin=()=>session?.user?.roles.includes('Administrator');
 async function api(path,body,method=body?'POST':'GET'){
  const requestedView=epoch;
@@ -42,8 +46,8 @@ function modal(title){returnFocus=document.activeElement;dialog.replaceChildren(
 dialog.addEventListener('close',()=>{if(returnFocus?.isConnected)returnFocus.focus();});
 function draftCommand(){let prior='',id;return data=>{const key=JSON.stringify(data);if(key!==prior){prior=key;id=crypto.randomUUID();}return {...data,requestId:id};};}
 function submit(form,label,run){const b=node('button',label,'primary');b.type='submit';form.append(b);let busy=false;form.onsubmit=async event=>{event.preventDefault();if(busy)return;busy=true;b.disabled=true;form.querySelector(':scope > .action-error')?.remove();try{await run();}catch(e){failure(form,e);}finally{busy=false;b.disabled=false;}};return b;}
-function renderAccount(){account.replaceChildren();if(session?.user){account.append(node('span',session.user.name));templateUi.navigation(account);if(admin()){button(account,'Organization Setup',()=>setupUi.setup());button(account,'Server Health',()=>setupUi.health());}button(account,'Sign Out',async()=>{await api('/sign-out',{});await load();});}}
-async function load(){let own=++epoch;try{const next=await api('/session');if(own!==epoch)return;session=next;renderAccount();if(!session.user){if(join||enrollment)await membership.enroll(join);else showIdentity();return;}if(templateUi.hasPending()){await templateUi.proposalEntry();return;}if(connect){await membership.approve(connect);return;}if(join){await membership.enroll(join);return;}if(session.user.roles.includes('Reviewer')){await reviews.queue();return;}if(!session.user.roles.some(r=>['Administrator','Manager'].includes(r))){await membership.memberHome();return;}[templates,publishingPolicy]=await Promise.all([api('/organization/templates'),api('/research-templates/policy')]);if(own!==epoch)return;own=epoch+1;await showPrograms();}catch(e){if(own!==epoch)return;heading('Organization server unavailable','No saved change was confirmed. Try reconnecting to this server.');failure(root,e);button(root,'Try Again',load);}}
+function renderAccount(){account.replaceChildren();if(session?.user){account.append(node('span',session.user.name));button(account,'Account Security',()=>accountSecurity.view());if(!session.accountSecurityRequired)templateUi.navigation(account);if(admin()&&!session.accountSecurityRequired){button(account,'Organization Setup',()=>setupUi.setup());button(account,'Server Health',()=>setupUi.health());button(account,'Server Protection',()=>operationsUi.view());}button(account,'Sign Out',async()=>{await api('/sign-out',{});await load();});}}
+async function load(){let own=++epoch;try{const next=await api('/session');if(own!==epoch)return;session=next;renderAccount();if(!session.user){if(join||enrollment)await membership.enroll(join);else showIdentity();return;}if(session.accountSecurityRequired){await accountSecurity.view();return;}if(templateUi.hasPending()){await templateUi.proposalEntry();return;}if(connect){await membership.approve(connect);return;}if(join){await membership.enroll(join);return;}if(session.user.roles.includes('Reviewer')){await reviews.queue();return;}if(!session.user.roles.some(r=>['Administrator','Manager'].includes(r))){await membership.memberHome();return;}[templates,publishingPolicy]=await Promise.all([api('/organization/templates'),api('/research-templates/policy')]);if(own!==epoch)return;own=epoch+1;await showPrograms();}catch(e){if(own!==epoch)return;heading('Organization server unavailable','No saved change was confirmed. Try reconnecting to this server.');failure(root,e);button(root,'Try Again',load);}}
 function showIdentity(message=''){
  heading('Your organization’s research workspace','Plan scientific investigations and flight-test programs together. Personal Research remains local and independent.');
  const hosting=node('a','Create an Organization Server','button');hosting.href='/organization-hosting.html';root.append(hosting);
@@ -51,15 +55,15 @@ function showIdentity(message=''){
  const panel=node('section',undefined,'panel auth'),form=node('form');panel.append(node('h2',session.initialized?'Sign In':'Set Up Your Organization'));panel.append(form);root.append(panel);
  if(message)status(form,message);
  let secret,name,description;
- if(!session.initialized){form.append(node('p','Use the protected setup code from your hosting-account owner. In a managed deployment, open the provider’s private service settings and copy Organization__BootstrapSecret. The code expires; only the owner can rotate it. Never put it in a link or public message. Opening this page does not grant administrator access.'));secret=field(form,'Setup code','password','',256);secret.autocomplete='off';secret.required=true;name=field(form,'Organization name');name.required=true;description=field(form,'Organization description','textarea','',4000);}
+ if(!session.initialized){form.append(node('p','Use the protected setup code from your hosting-account owner. The hosting-account owner obtains this one-time code from the provider’s private deployment settings. This ownership check is required; the current Railway candidate has not yet automated its owner-only delivery. The code expires; only the owner can rotate it. Never put it in a link or public message. Opening this page does not grant administrator access.'));secret=field(form,'Setup code','password','',256);secret.autocomplete='off';secret.required=true;name=field(form,'Organization name');name.required=true;description=field(form,'Organization description','textarea','',4000);}
  const username=field(form,'Account name');username.maxLength=64;username.autocomplete='username';username.required=true;
  const password=field(form,'Password','password','',256);password.autocomplete=session.initialized?'current-password':'new-password';password.required=true;
  if(!session.initialized){password.minLength=14;form.append(node('p','Use at least 14 characters, including uppercase and lowercase letters, a number and a symbol.','help'));}
  submit(form,session.initialized?'Sign In':'Create Organization',async()=>{
   const setup=!session.initialized;
-  try{await api(setup?'/bootstrap':'/sign-in',setup?{secret:secret.value,organizationName:name.value,description:description.value,userName:username.value,password:password.value}:{userName:username.value,password:password.value});}
+  let answer;try{answer=await api(setup?'/bootstrap':'/sign-in',setup?{secret:secret.value,organizationName:name.value,description:description.value,userName:username.value,password:password.value}:{userName:username.value,password:password.value});}
   finally{password.value='';if(secret)secret.value='';}
-  session=await api('/session');if(setup)showIdentity('Organization saved. Sign in with your new administrator account.');else await load();
+  session=await api('/session');if(answer.twoFactorRequired){accountSecurity.challenge();return;}if(setup)showIdentity('Organization saved. Sign in with your new administrator account.');else await load();
  });
 }
 async function showPrograms(){

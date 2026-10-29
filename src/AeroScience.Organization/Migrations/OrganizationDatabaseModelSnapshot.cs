@@ -894,6 +894,9 @@ namespace AeroScience.Organization.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("integer");
 
+                    b.Property<long>("AuthenticatorLastStep")
+                        .HasColumnType("bigint");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("text");
@@ -927,6 +930,9 @@ namespace AeroScience.Organization.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset?>("RecoveryAcknowledgedUtc")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("text");
@@ -1456,6 +1462,146 @@ namespace AeroScience.Organization.Migrations
                     b.HasIndex("OwnerId", "Proposal", "CreatedUtc", "Id");
 
                     b.ToTable("ResearchTemplates", "organization");
+                });
+
+            modelBuilder.Entity("AeroScience.Organization.ServerBackupRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("BundleSha256")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<long>("Bytes")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTimeOffset>("CreatedUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ManifestJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("SnapshotId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("VerificationJson")
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset?>("VerifiedRestoreUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedUtc");
+
+                    b.HasIndex("SnapshotId")
+                        .IsUnique();
+
+                    b.ToTable("ServerBackups", "organization");
+                });
+
+            modelBuilder.Entity("AeroScience.Organization.ServerOperationRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ActorId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ActorName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid?>("BackupId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DistributionJson")
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset?>("FinishedUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Kind")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("RequestId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("RequestSha256")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Revision")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset?>("StartedUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("State")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ActorId", "RequestId")
+                        .IsUnique();
+
+                    b.HasIndex("State", "CreatedUtc");
+
+                    b.ToTable("ServerOperations", "organization");
+                });
+
+            modelBuilder.Entity("AeroScience.Organization.ServerOperationsPolicyRecord", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<Guid>("ApprovedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("ApprovedUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("IntervalHours")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset?>("RecoveryKitSavedUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("RetainDaily")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("RetainWeekly")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Revision")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("Scheduled")
+                        .HasColumnType("boolean");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ServerOperationsPolicies", "organization");
                 });
 
             modelBuilder.Entity("AeroScience.Organization.SubmissionPolicyRecord", b =>

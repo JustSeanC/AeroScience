@@ -79,7 +79,7 @@ public static class OrganizationDeployment
 
 public sealed record ServerCheck(string Name,string State,string Message);
 public sealed record OrganizationServerHealth(string Version,string PublicOrigin,DateTimeOffset CheckedUtc,string DeploymentState,bool ProductionReady,ServerCheck[] Checks);
-public sealed class OrganizationServerDiagnostics(OrganizationDatabase db,OrganizationSettings settings)
+public sealed class OrganizationServerDiagnostics(OrganizationDatabase db,OrganizationSettings settings,ServerOperationsOptions operations)
 {
     public async Task<OrganizationServerHealth> Check(CancellationToken token)
     {
@@ -113,8 +113,13 @@ public sealed class OrganizationServerDiagnostics(OrganizationDatabase db,Organi
         }catch(Exception ex) when(ex is not OperationCanceledException||!token.IsCancellationRequested){healthy=false;checks.Add(new("Storage check","blocked","Storage checks could not complete. No research or secret details are exposed; retry or contact the hosting-account owner."));}
         finally{await db.Database.CloseConnectionAsync();}
         checks.Add(new("Configuration volume",settings.ManagedDeployment?"operator-confirmed":"unverified",settings.ManagedDeployment?"A private persistent configuration directory was declared and its certificate identity checked. Provider durability and off-server recovery still require acceptance.":"The operator must preserve the data-protection certificate and its separate protected credential."));
-        checks.Add(new("Backups & recovery","release-gate","Database and protected-configuration recovery, retention and recoverable upgrades have not been verified. P26 remains required before important production research."));
-        checks.Add(new("Administrator security","release-gate","Strong passwords and lockout are enforced. Administrator MFA/passkey enrollment and recovery are not yet accepted."));
+        checks.Add(new("Recovery configuration",operations.Enabled?"configured":"setup-needed",operations.Enabled?"Protected recovery tools and destination are configured. A successful restore and independent destination are still required.":"Recovery storage is not connected. This is not a production-ready deployment."));
+        var checkpoint=await db.ServerBackups.AsNoTracking().OrderByDescending(b=>b.CreatedUtc).FirstOrDefaultAsync(ct);
+        checks.Add(new("Backups & recovery",checkpoint?.VerifiedRestoreUtc is not null?"verified-local-restore":"release-gate",checkpoint is null?"No protected recovery point is recorded. Open Server Protection. Independent destination, retention and cloud-loss recovery remain acceptance gates.":$"Latest backup: {checkpoint.CreatedUtc:u}. Paired restore: {(checkpoint.VerifiedRestoreUtc is {} verified?verified.ToString("u"):"not verified")}. Same-account deletion, retention and actual cloud recovery still require acceptance."));
+        var administrators=await db.Memberships.AsNoTracking().Where(m=>m.Role=="Administrator"&&m.State==AeroScience.Shared.OrganizationMembershipState.Active).Select(m=>m.UserId).ToArrayAsync(ct);
+        var insecure=await db.Users.AnyAsync(u=>administrators.Contains(u.Id)&&(!u.TwoFactorEnabled||u.RecoveryAcknowledgedUtc==null),ct);
+        checks.Add(new("Administrator security",administrators.Length>0&&!insecure?"healthy":"setup-needed",administrators.Length>0&&!insecure?"Active administrators have Identity authenticators and verified saved recovery codes. Password-only production administration is blocked.":"Complete Account Security for each active administrator. Authenticator and tested recovery are required before production administration."));
+        checks.Add(new("Pinned updates","release-gate","Server Protection verifies signed pinned update manifests and can prepare a paired restore checkpoint. Provider rollout, automatic rollback and novice recovery are not accepted."));
         checks.Add(new("Live provider acceptance","release-gate","No provider deployment or billing authorization is implied. Production readiness remains blocked."));
         return new(OrganizationDeployment.ApplicationVersion,settings.Origin.GetLeftPart(UriPartial.Authority),DateTimeOffset.UtcNow,healthy?"Deployment Healthy":"Deployment Blocked",false,checks.ToArray());
     }

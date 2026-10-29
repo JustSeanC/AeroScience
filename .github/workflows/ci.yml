@@ -142,6 +142,8 @@ jobs:
       - run: dotnet restore AeroScience.sln --locked-mode
       - name: Verify independently compiled private validation identity
         run: dotnet run --project tests/AeroScience.TestHost -c Release --artifacts-path artifacts/validation-probe -p:AeroScienceValidation=true -p:RestoreLockedMode=true -- --profile-probe
+      - name: Install pinned native recovery tools for actual PostgreSQL restore acceptance
+        run: python3 scripts/deployment/install_recovery_test_tools.py
       - run: dotnet test AeroScience.sln -c Release --no-restore --logger trx --logger 'console;verbosity=normal' --blame-hang-timeout 2m --blame-hang-dump-type none
       - name: Retain Linux test diagnostics
         if: always()

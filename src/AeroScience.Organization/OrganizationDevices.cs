@@ -53,7 +53,7 @@ public sealed class OrganizationDevices(OrganizationDatabase db,OrganizationMemb
         if(row.Revoked||row.ExpiresUtc<=OrganizationTime.UtcNow||row.UserId is not null)throw new OrganizationConflict("This connection request is no longer available. Start again in AeroScience.");
         if(request.Approve&&row.Permission==OrganizationDesktopPermission.ManageOwnClaims&&!request.ConfirmClaimManagement)throw new ArgumentException("Explicitly authorize management of your own claims, or deny this connection.");
         if(request.Approve&&row.Permission==OrganizationDesktopPermission.SubmitEvidence&&!request.ConfirmSubmission)throw new ArgumentException("Explicitly authorize selective evidence submission, or deny this connection. Older grants cannot upload evidence.");
-        var user=await users.GetUserAsync(actor)??throw new OrganizationForbidden();if(actor.FindFirstValue(users.Options.ClaimsIdentity.SecurityStampClaimType)!=await users.GetSecurityStampAsync(user))throw new OrganizationForbidden();row.UserId=user.Id;row.SecurityStamp=await users.GetSecurityStampAsync(user);row.Revoked=!request.Approve;
+        var user=await users.GetUserAsync(actor)??throw new OrganizationForbidden();if(settings.RequireAdministratorMfa&&current.Role==OrganizationRoles.Administrator&&(!OrganizationAccountSecurity.Ready(user)||!OrganizationAccountSecurity.Verified(actor)))throw new OrganizationForbidden();if(actor.FindFirstValue(users.Options.ClaimsIdentity.SecurityStampClaimType)!=await users.GetSecurityStampAsync(user))throw new OrganizationForbidden();row.UserId=user.Id;row.SecurityStamp=await users.GetSecurityStampAsync(user);row.Revoked=!request.Approve;
         history.Audit(user.Id,user.UserName!,request.Approve?row.Permission==OrganizationDesktopPermission.SubmitEvidence?"desktop-approved-submit-evidence":row.Permission==OrganizationDesktopPermission.ManageOwnClaims?"desktop-approved-manage-own-claims":"desktop-approved-read-published":"desktop-denied",row.Id);
         await db.SaveChangesAsync(ct);await tx.CommitAsync(ct);return new{message=request.Approve?"Desktop connection approved. Return to AeroScience and select Finish Connection.":"Desktop connection denied."};
     }
@@ -84,7 +84,7 @@ public sealed class OrganizationDevices(OrganizationDatabase db,OrganizationMemb
         if(requireClaims&&row.Permission!=OrganizationDesktopPermission.ManageOwnClaims)throw new OrganizationForbidden();
         if(requireSubmission&&row.Permission!=OrganizationDesktopPermission.SubmitEvidence)throw new OrganizationForbidden();
         var user=await db.Users.AsNoTracking().SingleOrDefaultAsync(u=>u.Id==row.UserId,ct);var member=await db.Memberships.AsNoTracking().SingleOrDefaultAsync(m=>m.UserId==row.UserId,ct);
-        if(user is null||member?.State!=OrganizationMembershipState.Active||row.SecurityStamp!=user.SecurityStamp)throw new OrganizationUnauthorized();return row;
+        if(user is null||member?.State!=OrganizationMembershipState.Active||row.SecurityStamp!=user.SecurityStamp||settings.RequireAdministratorMfa&&member.Role==OrganizationRoles.Administrator&&!OrganizationAccountSecurity.Ready(user))throw new OrganizationUnauthorized();return row;
     }
     public async Task<object> Disconnect(HttpContext c,CancellationToken ct)
     {
