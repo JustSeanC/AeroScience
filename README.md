@@ -49,7 +49,7 @@ A synchronized **flight-and-evidence timeline** will connect original test attem
 
 ### 👥 Join a research organization — completely optional
 
-Organizations will be able to run their own AeroScience server and browser portal to coordinate shared airborne-science campaigns and fictional aircraft/system test programs. The goal is beginner-friendly managed hosting, with an advanced self-hosted option. Hosting may involve charges from the provider chosen by the organization; AeroScience itself does not require a central account for solo research.
+Organizations will be able to run their own AeroScience server and browser portal to coordinate shared airborne-science campaigns and fictional aircraft/system test programs. **A genuinely beginner-simple hosted deployment is a v0.7.0 release requirement:** choose a proven provider, sign in, approve its actual charges, complete guided secure setup, and invite pilots—no command line, Docker, database setup or manual certificates. The provider account belongs to and bills the organization; AeroScience itself does not require a central account for solo research. **No live public one-click deployment has passed final acceptance yet.**
 
 Organization features are planned to include:
 
@@ -61,6 +61,12 @@ Organization features are planned to include:
 - **Test-program management:** configure optional progression phases, record holds and authorized exceptions, and keep original measured failures separate from organizational waivers.
 
 Ordinary scientific campaigns won't have to use advanced experimental-aircraft test phases.
+
+### 📡 Monitor participating research aircraft live — opt-in
+
+v0.7.0 also targets a **read-only, multi-aircraft organization live map**. When a pilot explicitly turns on sharing for a particular organization and flight, authorized managers can see participating aircraft, mission/campaign identity, current flight status, focused test-card progress, and a small science-collection status summary. Stale or disconnected aircraft will be labeled clearly.
+
+Sharing is **off by default**, can be stopped at any time, and is independent for each organization. Live positions and status are intended to be short-lived, not a permanently retained flight archive. They are **not** scientific submissions, sensor-validation proof, or permission to inspect the pilot's private recordings. Full remote Mission Control, commands to aircraft, and advanced multi-aircraft coordination remain outside v0.7.0.
 
 ### 🔒 You choose what gets shared
 
@@ -79,7 +85,7 @@ A recorded flight track does **not** prove a sensor observed everything undernea
 ### 🚦 What v0.7.0 will *not* include
 
 - No required global AeroScience cloud account or automatic upload of complete flights.
-- No live organization-wide aircraft tracking, remote flight control, or real-time Mission Control; those ideas are deferred beyond v0.7.0.
+- No remote aircraft control, simulator commands, automatic flight-history upload, or full MTS-style real-time Mission Control. **Explicitly consented, temporary live monitoring** is planned for v0.7.0.
 - No claim of real-world aircraft certification, authentic instrument calibration, or validated scientific measurements beyond the evidence available.
 - Hurricane reconnaissance, dropsondes, wildfire/ocean research suites, and airborne radar are **future v0.9.0 plans**, not v0.7.0 features.
 - Full scientific-product support depends on validated source formats and data availability; some raster, QA, modeled-response, and NASA EMIT-original validation work remains a separate release gate.
