@@ -1,0 +1,224 @@
+{
+  "milestone": "v0.7.0 P27-A/B",
+  "branch": "develop/v0.7.0",
+  "testedSource": "4ede325c43bf2166213ef0da96d916c71c2aa53d",
+  "stageA": {
+    "implemented": true,
+    "fullAccepted": true
+  },
+  "stageB": {
+    "implemented": true,
+    "fullAccepted": true
+  },
+  "stageC": {
+    "implemented": false,
+    "accepted": false,
+    "status": "Explicitly separated P27-C secure notification integration checkpoint; no nominal working buttons, secrets, outbox or outbound posts."
+  },
+  "sourceFrozen": true,
+  "fullValidation": {
+    "id": 40985543972,
+    "url": "https://github.com/JustSeanC/AeroScience/actions/runs/40985543972",
+    "conclusion": "success",
+    "source": "4ede325c43bf2166213ef0da96d916c71c2aa53d"
+  },
+  "focused": {
+    "backendCore": {
+      "passed": 40,
+      "failed": 0,
+      "skipped": 0
+    },
+    "browser": {
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0
+    },
+    "brandingFiles": 24,
+    "source": "46fc52d7c2775c9244c077a0a10789994dadc2a1"
+  },
+  "fast": {
+    "id": 40980440084,
+    "conclusion": "cancelled",
+    "reason": "Completed build/.NET/SDK checks; remaining entire-browser selection superseded by same-source Full to avoid duplicate long suites. Not accepted as a complete Fast pass.",
+    "dotnet": {
+      "passed": 1250,
+      "failed": 0,
+      "skipped": 117
+    },
+    "sdk": {
+      "passed": 5,
+      "failed": 0,
+      "skipped": 0
+    },
+    "source": "46fc52d7c2775c9244c077a0a10789994dadc2a1",
+    "url": "https://github.com/JustSeanC/AeroScience/actions/runs/40980440084"
+  },
+  "preservedP26": {
+    "source": "f5edc733cfe02135d52bd3c2b2f00d586ec4d21e",
+    "full": 40965344581,
+    "productionReady": false
+  },
+  "ownerActionNow": "None",
+  "p28Started": false,
+  "paidResourcesCreated": false,
+  "publicDeploymentPerformed": false,
+  "releasePublished": false,
+  "realMsfsOrRailwayAcceptance": false,
+  "p26ReleaseBlockersWaived": false,
+  "version": 1,
+  "technicalAcceptanceScope": "P27-A/B only; Discord stage C unfinished",
+  "productionReady": false,
+  "realRailwayAccepted": false,
+  "installedMsfsAccepted": false,
+  "fiveStageAccepted": false,
+  "focusedSelectionsOverlap": true,
+  "correctedSourceAutomaticFast": {
+    "id": 40984587155,
+    "source": "969531366a11898aa0a5b63f9865513bac3ecf1d",
+    "conclusion": "cancelled",
+    "reason": "Redundant automatic Fast superseded by same-source corrected Full; not claimed passed."
+  },
+  "correctedFocused": {
+    "source": "969531366a11898aa0a5b63f9865513bac3ecf1d",
+    "passed": 21,
+    "failed": 0,
+    "skipped": 0
+  },
+  "finalSourceAutomaticFast": {
+    "id": 40985525982,
+    "source": "4ede325c43bf2166213ef0da96d916c71c2aa53d",
+    "conclusion": "cancelled",
+    "reason": "Duplicate automatic Fast superseded by same-source complete final Full."
+  },
+  "privacyFinalBrowser": {
+    "source": "4ede325c43bf2166213ef0da96d916c71c2aa53d",
+    "passed": 4,
+    "failed": 0,
+    "skipped": 0
+  },
+  "supersededFull": {
+    "id": 40984602575,
+    "source": "969531366a11898aa0a5b63f9865513bac3ecf1d",
+    "conclusion": "cancelled",
+    "reason": "Additional negative browser proved delayed successful responses could renew expired positions; corrected conservatively before final source freeze."
+  },
+  "preservedFullFailure": {
+    "id": 40981878771,
+    "url": "https://github.com/JustSeanC/AeroScience/actions/runs/40981878771",
+    "source": "46fc52d7c2775c9244c077a0a10789994dadc2a1",
+    "linux": {
+      "passed": 1366,
+      "failed": 1,
+      "skipped": 0
+    },
+    "windows": {
+      "passed": 1361,
+      "failed": 1,
+      "skipped": 5
+    },
+    "cause": "Existing rollback fixture selected latest P27 migration but checked an earlier P26 column. Corrected compiled-DDL assertions preserve original identity/evidence/audit/MFA/deadline checks; production implementation unchanged."
+  },
+  "status": "P27-A/B technically accepted; P27-C explicitly separate and unfinished; no P28 or production acceptance",
+  "fullResults": {
+    "linuxDotnet": {
+      "passed": 1367,
+      "failed": 0,
+      "skipped": 0
+    },
+    "windowsDotnet": {
+      "passed": 1362,
+      "failed": 0,
+      "skipped": 5
+    },
+    "browser": {
+      "passed": 346,
+      "failed": 0,
+      "skipped": 2,
+      "flaky": 0
+    },
+    "linuxPython": {
+      "passed": 161,
+      "failed": 0,
+      "skipped": 1
+    },
+    "windowsPython": {
+      "passed": 157,
+      "failed": 0,
+      "skipped": 2
+    },
+    "productionLikeContainers": {
+      "passed": 12,
+      "failed": 0
+    },
+    "railwayShapedContainers": {
+      "passed": 5,
+      "failed": 0
+    },
+    "processRecoveryFamilies": {
+      "linuxPassed": 5,
+      "windowsPassed": 5
+    },
+    "officialRailwaySdk": {
+      "passed": 5,
+      "failed": 0,
+      "skipped": 0
+    },
+    "windowsVaultNativeIsolationAndPackageStructure": "passed",
+    "privateImageRolesVerified": 4
+  },
+  "expectedDotnetSkips": {
+    "linuxDotnet": [],
+    "windowsDotnet": [
+      "AeroScience.Tests.OrganizationConnectionIntegrationTests.SeparatelyKeyedCopiesSurvivePrimaryRepositoryAndIdentityLossAndEnforceApprovedRetention",
+      "AeroScience.Tests.AviationAcquisitionTests.RetainedOriginalFileLinksAreRejectedRatherThanFollowed",
+      "AeroScience.Tests.OrganizationConnectionIntegrationTests.EncryptedOffProcessBackupRestoresAuthorizedEvidenceAuditAndProtectedMfaAfterSourceLoss",
+      "AeroScience.Tests.OrganizationServerTests.ExplicitBackupConsentPersistsScheduledPolicyIdempotentJobsAndVerifiedRestoreAcrossRestart",
+      "AeroScience.Tests.ScientificLibraryFolderTests.LinkedSourceDirectoryIsRejected"
+    ]
+  },
+  "limits": {
+    "applicationInstances": 1,
+    "activeSessions": 64,
+    "destinationsPerEngine": 4,
+    "updateSeconds": 5,
+    "staleSeconds": 15,
+    "positionTtlSeconds": 30,
+    "idleSeconds": 120,
+    "maximumConsentHours": 8,
+    "updateBytes": 16384,
+    "sharedCards": 8,
+    "instrumentSummaries": 8,
+    "concurrentHttpRequests": 32,
+    "queuedHttpRequests": 0,
+    "readsPerObservedIpPerMinute": 600,
+    "writesPerObservedIpPerMinute": 1000
+  },
+  "localResourceMeasurement": {
+    "source": "46fc52d7c2775c9244c077a0a10789994dadc2a1",
+    "syntheticSessions": 64,
+    "testPilotIdentities": 1,
+    "concurrentAuthorizedReads": 8,
+    "elapsedMs": 3566.8192,
+    "combinedClientServerCpuMs": 6780.199,
+    "managedHeapDeltaBytes": 23709912,
+    "combinedWorkingSetBytes": 445464576,
+    "meanUpdateBytes": 525.90625,
+    "dashboardBytes": 55706,
+    "estimatedIncomingBodyBytesPerSecond": 6731.6,
+    "estimatedEightReaderBodyBytesPerSecond": 89129.6,
+    "limitation": "Combined local integration process, not server-only RSS, 64 independent pilots, long-duration soak or Railway performance/cost; excludes HTTP/TLS overhead."
+  },
+  "preservedDevelopmentFailures": [
+    "Delayed successful-response negative browser: 1 failed, expired marker reappeared. First retry served stale host output (3 passes/1 failure); rebuilt both actual hosts, then all 4 passed with unchanged assertion/expiry/deadline.",
+    "Intermediate Full 40984602575 cancelled and superseded for demonstrated privacy correction, not accepted.",
+    "Unapplied stale-output migration: 2 unit passes / 8 integration startup refusals; regenerated from successfully compiled Release and retained model-match test.",
+    "Original browser: 2 passes / 1 semantic heading-level accessibility failure; corrected headings with unchanged axe assertions.",
+    "Intermediate corrected browser interrupted by workspace restart after one pass: no accepted aggregate.",
+    "Local reusable MSBuild child-node exits; sequential local builds succeeded; CI settings and deadlines unchanged.",
+    "Fast remaining whole-browser phase explicitly cancelled/superseded by the corresponding same-source Full; no complete Fast pass claimed."
+  ],
+  "protected": {
+    "ownerReadmeSha256": "f32cff962da446a6b10e411124155ec281a6cfc06664ca01dfc5754b44d13049",
+    "stableMainDevelop060AndTag": "9dd2d8cda7ddb6d73414808f75010726871205c2"
+  }
+}

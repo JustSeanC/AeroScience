@@ -38,10 +38,12 @@ Private receipt/review/exception events require contributor, actor or authorized
 
 ## P27-C acceptance boundary
 
-No webhook configuration, outbound delivery or secret is implemented in the A/B checkpoint. Discord is explicitly isolated per the owner's allowed staged integration. Both official documentation hosts returned HTTP 403 (older developer endpoint: error 1010), and the official source-document requests were unavailable during this pass. This is not proof of Discord API acceptance or a reason to invent an unsafe HTTP contract.
+No webhook configuration, outbound delivery or secret is implemented in the A/B checkpoint. Discord is explicitly isolated per the owner's allowed staged integration. During the original A/B pass, both official documentation hosts returned HTTP 403 (older developer endpoint: error 1010), and the official source-document requests were unavailable during this pass. This is not proof of Discord API acceptance or a reason to invent an unsafe HTTP contract.
 
 The follow-up must verify current official execution/allowed-mentions/rate-limit contracts, protect destination credentials with existing organization key material, validate public HTTPS targets against rebinding/redirect/private-address attacks, bind independent pilot external disclosure to destination/policy revisions, and implement a bounded restart-safe outbox. Lost acknowledgement cannot be silently treated as safe permission to duplicate an external message. Organization visibility alone never authorizes external science disclosure. Tests must cover revocation, rotation, stale consent, terminal/unknown outcomes, rate limits, duplicate commands and no secret logging. Do not expose nominal working buttons until this acceptance gate passes.
 
 ## Hosting and release gates
 
 The same unchanged P26 blockers remain: authenticated finite Railway ingress and secure owner-bootstrap delivery, real native provisioning, independent external disaster recovery/updates, actual costs and fresh-account five-stage novice acceptance. P27 local fixtures waive none of them. No paid resources, public images/templates, release or production installer is authorized here.
+
+Official Discord webhook, message and rate-limit documents were successfully retrieved in the A/B closure follow-up. The original refusal remains historical evidence; current documentation access is available. This does not constitute a completed outbound implementation or provider acceptance.
