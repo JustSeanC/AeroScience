@@ -698,6 +698,119 @@ namespace AeroScience.Organization.Migrations
                     b.ToTable("Invitations", "organization");
                 });
 
+            modelBuilder.Entity("AeroScience.Organization.LiveConsentRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ClaimsJson")
+                        .IsRequired()
+                        .HasMaxLength(400)
+                        .HasColumnType("character varying(400)");
+
+                    b.Property<string>("DisplayLabel")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.Property<string>("EndReason")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
+                    b.Property<DateTimeOffset?>("EndedUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("ExpiresUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("FlightId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("FlightStartedUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("GrantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("InstanceId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("LastSeenUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("LastSequence")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("LastUpdateSha256")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("PilotId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("PolicyRevision")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("RequestId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("RequestSha256")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<int>("Revision")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("StartedUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EndedUtc", "StartedUtc");
+
+                    b.HasIndex("PilotId", "RequestId")
+                        .IsUnique();
+
+                    b.HasIndex("GrantId", "FlightId", "EndedUtc");
+
+                    b.HasIndex("InstanceId", "EndedUtc", "LastSeenUtc");
+
+                    b.HasIndex("PilotId", "FlightId", "InstanceId", "EndedUtc");
+
+                    b.ToTable("LiveConsents", "organization");
+                });
+
+            modelBuilder.Entity("AeroScience.Organization.LivePolicyRecord", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Enabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("RestrictedCampaignsJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Revision")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("LivePolicies", "organization");
+                });
+
             modelBuilder.Entity("AeroScience.Organization.MembershipRecord", b =>
                 {
                     b.Property<Guid>("UserId")
@@ -848,6 +961,85 @@ namespace AeroScience.Organization.Migrations
                     b.HasKey("ActorId", "RequestId");
 
                     b.ToTable("Receipts", "organization");
+                });
+
+            modelBuilder.Entity("AeroScience.Organization.OrganizationEventRecord", b =>
+                {
+                    b.Property<long>("Sequence")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Sequence"));
+
+                    b.Property<Guid>("ActorId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Authority")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.Property<Guid?>("CampaignId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("CardId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("IdempotencyKey")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)");
+
+                    b.Property<string>("Meaning")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("RequirementKey")
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<Guid>("SourceId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int?>("SourceRevision")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid?>("SubjectId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("TimestampUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Visibility")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Sequence");
+
+                    b.HasIndex("Id")
+                        .IsUnique();
+
+                    b.HasIndex("IdempotencyKey")
+                        .IsUnique();
+
+                    b.HasIndex("ActorId", "Sequence");
+
+                    b.HasIndex("CampaignId", "Sequence");
+
+                    b.HasIndex("SubjectId", "Sequence");
+
+                    b.HasIndex("Visibility", "Sequence");
+
+                    b.ToTable("Events", "organization");
                 });
 
             modelBuilder.Entity("AeroScience.Organization.OrganizationRecord", b =>
@@ -1486,9 +1678,6 @@ namespace AeroScience.Organization.Migrations
                     b.Property<string>("IndependentRepositorySha256")
                         .HasColumnType("text");
 
-                    b.Property<string>("RepositorySha256")
-                        .HasColumnType("text");
-
                     b.Property<string>("IndependentSnapshotId")
                         .HasColumnType("text");
 
@@ -1501,6 +1690,9 @@ namespace AeroScience.Organization.Migrations
 
                     b.Property<Guid>("OrganizationId")
                         .HasColumnType("uuid");
+
+                    b.Property<string>("RepositorySha256")
+                        .HasColumnType("text");
 
                     b.Property<DateTimeOffset?>("RetentionStartedUtc")
                         .HasColumnType("timestamp with time zone");
@@ -2124,6 +2316,15 @@ namespace AeroScience.Organization.Migrations
                     b.HasOne("AeroScience.Organization.DefinitionRevision", null)
                         .WithMany()
                         .HasForeignKey("OpportunityId", "IssuedRevision")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("AeroScience.Organization.LiveConsentRecord", b =>
+                {
+                    b.HasOne("AeroScience.Organization.DeviceGrantRecord", null)
+                        .WithMany()
+                        .HasForeignKey("GrantId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });

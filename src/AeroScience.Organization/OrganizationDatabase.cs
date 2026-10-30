@@ -65,6 +65,9 @@ public sealed class OrganizationCommandReceipt
 }
 public sealed class OrganizationDatabase(DbContextOptions<OrganizationDatabase> options):IdentityDbContext<OrganizationUser,IdentityRole<Guid>,Guid>(options),IDataProtectionKeyContext
 {
+    public DbSet<LiveConsentRecord> LiveConsents=>Set<LiveConsentRecord>();
+    public DbSet<LivePolicyRecord> LivePolicies=>Set<LivePolicyRecord>();
+    public DbSet<OrganizationEventRecord> Events=>Set<OrganizationEventRecord>();
     public DbSet<ServerOperationRecord> ServerOperations=>Set<ServerOperationRecord>();
     public DbSet<ServerBackupRecord> ServerBackups=>Set<ServerBackupRecord>();
     public DbSet<ServerOperationsPolicyRecord> ServerOperationsPolicies=>Set<ServerOperationsPolicyRecord>();
@@ -111,6 +114,7 @@ public sealed class OrganizationDatabase(DbContextOptions<OrganizationDatabase> 
     protected override void OnModelCreating(ModelBuilder model)
     {
         base.OnModelCreating(model);
+        OrganizationLiveDatabase.Configure(model);
         ServerOperationsDatabase.Configure(model);
         model.Entity<DeploymentStateRecord>().HasKey(x=>x.Id);
         model.Entity<DeploymentStateRecord>().Property(x=>x.CertificateSha256).HasMaxLength(64);
@@ -251,6 +255,8 @@ public sealed class OrganizationDatabase(DbContextOptions<OrganizationDatabase> 
     public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess,CancellationToken cancellationToken=default){ProtectHistory();return base.SaveChangesAsync(acceptAllChangesOnSuccess,cancellationToken);}
     void ProtectHistory()
     {
+        foreach(var entry in ChangeTracker.Entries<LiveConsentRecord>())
+            if(entry.State==EntityState.Deleted||entry.State==EntityState.Modified&&(entry.Properties.Any(p=>p.IsModified&&p.Metadata.Name is not(nameof(LiveConsentRecord.LastSeenUtc) or nameof(LiveConsentRecord.LastSequence) or nameof(LiveConsentRecord.LastUpdateSha256) or nameof(LiveConsentRecord.EndedUtc) or nameof(LiveConsentRecord.EndReason)))||entry.Property(nameof(LiveConsentRecord.EndedUtc)).OriginalValue is not null))throw new InvalidOperationException("Original live consent is immutable and ended consent cannot be reopened.");
         foreach(var entry in ChangeTracker.Entries<ResearchTemplateRecord>())
             if(entry.State==EntityState.Deleted||entry.State==EntityState.Modified&&new[]{nameof(ResearchTemplateRecord.OwnerId),nameof(ResearchTemplateRecord.Proposal),nameof(ResearchTemplateRecord.CreatedUtc)}.Any(p=>entry.Property(p).IsModified))throw new InvalidOperationException("Template ownership and original proposal identity are immutable.");
         foreach(var entry in ChangeTracker.Entries<PublicationReviewRecord>())
@@ -262,7 +268,7 @@ public sealed class OrganizationDatabase(DbContextOptions<OrganizationDatabase> 
             if(entry.State==EntityState.Deleted||entry.State==EntityState.Modified&&new[]{nameof(ResearchReviewCaseRecord.Id),nameof(ResearchReviewCaseRecord.PilotId),nameof(ResearchReviewCaseRecord.SubmissionId),nameof(ResearchReviewCaseRecord.ProgramId),nameof(ResearchReviewCaseRecord.CampaignId),nameof(ResearchReviewCaseRecord.RootPayloadSha256),nameof(ResearchReviewCaseRecord.ReceivedUtc)}.Any(p=>entry.Property(p).IsModified))throw new InvalidOperationException("The received review identity and original source are immutable.");
         foreach(var entry in ChangeTracker.Entries<ResearchReviewRequirementRecord>())
             if(entry.State==EntityState.Deleted||entry.State==EntityState.Modified&&entry.Property(nameof(ResearchReviewRequirementRecord.DefinitionJson)).IsModified)throw new InvalidOperationException("Issued review requirements are immutable.");
-        if(ChangeTracker.Entries().Any(e=>(e.Entity is DefinitionRevision or OrganizationCommandReceipt or OrganizationAudit or OrganizationRecord or ClaimEventRecord or SubmissionPolicyRecord or ReceivedSubmissionRecord or CancelledSubmissionRecord or ResearchReviewEventRecord or ResearchReviewPackageRecord)&&e.State is EntityState.Modified or EntityState.Deleted))
+        if(ChangeTracker.Entries().Any(e=>(e.Entity is OrganizationEventRecord or DefinitionRevision or OrganizationCommandReceipt or OrganizationAudit or OrganizationRecord or ClaimEventRecord or SubmissionPolicyRecord or ReceivedSubmissionRecord or CancelledSubmissionRecord or ResearchReviewEventRecord or ResearchReviewPackageRecord)&&e.State is EntityState.Modified or EntityState.Deleted))
             throw new InvalidOperationException("Organization identity, revision, audit and command history are append-only.");
     }
 }

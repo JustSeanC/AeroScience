@@ -86,7 +86,7 @@ public sealed partial class MissionStore
                 ||Math.Max(a.AltitudeMslFeet-a.AltitudeToleranceFeet,b.AltitudeMslFeet-b.AltitudeToleranceFeet)<=Math.Min(a.AltitudeMslFeet+a.AltitudeToleranceFeet,b.AltitudeMslFeet+b.AltitudeToleranceFeet));
     }
 
-    private ResearchFlightState ReadResearchOperations(SqliteConnection db, SqliteTransaction? tx, Guid flight)
+    private ResearchFlightState ReadResearchOperations(SqliteConnection db, SqliteTransaction? tx, Guid flight,bool includeProgress=true)
     {
         using var cmd = db.CreateCommand(); cmd.Transaction = tx;
         cmd.CommandText = "SELECT status FROM missions WHERE id=$id"; cmd.Parameters.AddWithValue("$id", flight.ToString());
@@ -101,7 +101,7 @@ public sealed partial class MissionStore
         var cards = new List<ResearchFlightCard>();
         using (var reader = cmd.ExecuteReader()) while (reader.Read())
         { var card = JsonSerializer.Deserialize<PersonalResearchCard>(reader.GetString(0),WireJson.Options)!; cards.Add(new(card,reader.GetBoolean(1),opened.GetValueOrDefault(card.Id),null)); }
-        cards=cards.Select(c=>c with{Procedure=c.Card.Procedure is null?null:RetainedProcedureProgress(db,tx,flight,c.Card),Detection=DetectionStatus(db,tx,flight,c.Card)}).ToList();
+        if(includeProgress)cards=cards.Select(c=>c with{Procedure=c.Card.Procedure is null?null:RetainedProcedureProgress(db,tx,flight,c.Card),Detection=DetectionStatus(db,tx,flight,c.Card)}).ToList();
         var selected = cards.Select(c => c with { ActivationBlocked = c.Active ? null : cards.FirstOrDefault(other => other.Active && !CompatibleResearchCards(c.Card,other.Card)) is {} conflict
             ? $"Deactivate {conflict.Card.Name} first: indicated-airspeed or MSL-altitude target ranges do not overlap." : null }).ToArray();
         return new(1,flight,revision,status=="Recording",selected,DateTimeOffset.UtcNow,false,
@@ -109,6 +109,10 @@ public sealed partial class MissionStore
     }
     public ResearchFlightState ResearchOperations(Guid flight)
     { using var db = Open(); return ReadResearchOperations(db,null,flight); }
+
+    // Bounded current-card/open-attempt metadata only; no historical evaluation scan for live monitoring.
+    public ResearchFlightState LiveResearchCards(Guid flight)
+    {using var db=Open();return ReadResearchOperations(db,null,flight,includeProgress:false);}
 
     public RecordedResearchAttempt[] RecordedResearchAttempts(Guid flight, int offset = 0)
     {

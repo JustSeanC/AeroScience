@@ -57,11 +57,11 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
         }
     }
 
-    public (EngineSnapshot Flight, CollectionOverview? Collection, SensorOperatingOverview Sensors) OperatingIntelligence()
+    public (EngineSnapshot Flight, CollectionOverview? Collection, SensorOperatingOverview Sensors) OperatingIntelligence(bool includeHistory=true)
     {
         lock(gate)
         {
-            var flight=Snapshot();var overview=active is {} mission?ScienceCollection(mission.Id):null;
+            var flight=Snapshot();var overview=active is {} mission?(includeHistory?ScienceCollection(mission.Id):new CollectionOverview(store.CollectionCheckpoint(mission.Id),[],collectionFault,[],[],null)):null;
             var sensors=SensorOperatingProjection.Create(flight,overview?.State,research?.Configurations??[],
                 research?.EffectiveConfigurations??[],research?.OperatingReports??[],research?.OperatingContextUtc,Now,overview?.Fault==true);
             return (flight,overview,sensors);

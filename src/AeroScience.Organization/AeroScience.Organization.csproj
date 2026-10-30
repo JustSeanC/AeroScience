@@ -9,6 +9,7 @@
   <ItemGroup>
     <Content Update="wwwroot/**" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" TargetPath="organization-portal/%(Filename)%(Extension)" />
     <Content Include="../AeroScience.Engine/wwwroot/organization-hosting.*" Link="organization-portal/%(Filename)%(Extension)" TargetPath="organization-portal/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="../AeroScience.Engine/wwwroot/organization-live-ui.js" Link="organization-portal/organization-live-ui.js" TargetPath="organization-portal/organization-live-ui.js" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Include="../AeroScience.Engine/wwwroot/workstation-ui.js" Link="organization-portal/workstation-ui.js" TargetPath="organization-portal/workstation-ui.js" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Include="../AeroScience.Engine/wwwroot/scientific-context.js" Link="organization-portal/scientific-context.js" TargetPath="organization-portal/scientific-context.js" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <Content Include="../AeroScience.Engine/wwwroot/program-workflow-ui.js" Link="organization-portal/program-workflow-ui.js" TargetPath="organization-portal/program-workflow-ui.js" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />

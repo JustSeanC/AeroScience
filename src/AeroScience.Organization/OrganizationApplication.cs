@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.FileProviders;
 
 namespace AeroScience.Organization;
@@ -107,8 +108,11 @@ public static class OrganizationApplication
             o.AddPolicy("public",c=>RateLimitPartition.GetFixedWindowLimiter(c.Connection.RemoteIpAddress?.ToString()??"local-test",_=>new(){PermitLimit=60,Window=TimeSpan.FromMinutes(1),QueueLimit=0,AutoReplenishment=true}));
             o.AddPolicy("device-poll",c=>RateLimitPartition.GetFixedWindowLimiter(c.Connection.RemoteIpAddress?.ToString()??"local-test",_=>new(){PermitLimit=20,Window=TimeSpan.FromMinutes(1),QueueLimit=0,AutoReplenishment=true}));
             o.AddPolicy("evidence-receive",c=>RateLimitPartition.GetFixedWindowLimiter(c.Connection.RemoteIpAddress?.ToString()??"local-test",_=>new(){PermitLimit=6,Window=TimeSpan.FromMinutes(1),QueueLimit=0,AutoReplenishment=true}));
+            o.AddPolicy("live-read",c=>RateLimitPartition.GetFixedWindowLimiter(c.Connection.RemoteIpAddress?.ToString()??"live",_=>new(){PermitLimit=600,Window=TimeSpan.FromMinutes(1),QueueLimit=0,AutoReplenishment=true}));
+            o.AddPolicy("live-write",c=>RateLimitPartition.GetFixedWindowLimiter(c.Connection.RemoteIpAddress?.ToString()??"live",_=>new(){PermitLimit=1000,Window=TimeSpan.FromMinutes(1),QueueLimit=0,AutoReplenishment=true}));
             o.GlobalLimiter=PartitionedRateLimiter.Create<HttpContext,string>(_=>RateLimitPartition.GetConcurrencyLimiter("organization",_=>new(){PermitLimit=32,QueueLimit=0}));
         });
+        builder.Services.TryAddSingleton(TimeProvider.System);builder.Services.AddSingleton<OrganizationLiveRuntime>();builder.Services.AddScoped<OrganizationLiveFlights>();builder.Services.AddScoped<OrganizationEvents>();builder.Services.AddHostedService<OrganizationLiveWorker>();
         builder.Services.AddScoped<OrganizationServerDiagnostics>();
         builder.Services.AddScoped<OrganizationManagement>();
         builder.Services.AddScoped<OrganizationPublishing>();builder.Services.AddScoped<OrganizationResearchTemplates>();
@@ -157,7 +161,7 @@ public static class OrganizationApplication
         app.Use(async(context,next)=>{
             if(context.Request.Method is not("GET" or "HEAD" or "OPTIONS")){
                 // Native device client only. Browser actions retain Origin + antiforgery.
-                if(context.Request.Path is var path&&(path=="/api/device/start"||path=="/api/device/poll"||path=="/api/device/disconnect"||path=="/api/member/claim-command"||path==OrganizationSubmissionApi.ReceivePath||path==OrganizationSubmissionApi.CancelPath||OrganizationReviewApi.IsNativeResponse(path))){
+                if(context.Request.Path is var path&&(path=="/api/device/start"||path=="/api/device/poll"||path=="/api/device/disconnect"||path=="/api/member/claim-command"||path==OrganizationSubmissionApi.ReceivePath||path==OrganizationSubmissionApi.CancelPath||OrganizationReviewApi.IsNativeResponse(path)||OrganizationLiveApi.IsNativeWrite(path))){
                     if(context.Request.Headers.ContainsKey("Origin")||context.Request.Headers.ContainsKey("Cookie")){context.Response.StatusCode=403;return;}
                     await next();return;
                 }
@@ -177,7 +181,7 @@ public static class OrganizationApplication
         });
         var assets=Path.Combine(AppContext.BaseDirectory,"organization-portal");
         if(Directory.Exists(assets)){var files=new PhysicalFileProvider(assets);app.UseDefaultFiles(new DefaultFilesOptions{FileProvider=files});app.UseStaticFiles(new StaticFileOptions{FileProvider=files});}
-        MapIdentity(app);OrganizationAccountSecurityApi.Map(app);OrganizationOperationsApi.Map(app);MapManagement(app);ResearchTemplateApi.Map(app);OrganizationEnrollmentApi.Map(app);OrganizationOpportunityApi.Map(app);OrganizationSubmissionApi.Map(app);OrganizationReviewApi.Map(app);CampaignProgressApi.Map(app);CampaignCoverageApi.Map(app);ProgramWorkflowApi.Map(app);return app;
+        MapIdentity(app);OrganizationLiveApi.Map(app);OrganizationAccountSecurityApi.Map(app);OrganizationOperationsApi.Map(app);MapManagement(app);ResearchTemplateApi.Map(app);OrganizationEnrollmentApi.Map(app);OrganizationOpportunityApi.Map(app);OrganizationSubmissionApi.Map(app);OrganizationReviewApi.Map(app);CampaignProgressApi.Map(app);CampaignCoverageApi.Map(app);ProgramWorkflowApi.Map(app);return app;
     }
     public static async Task Initialize(WebApplication app,CancellationToken token=default)
     {
@@ -223,6 +227,7 @@ public static class OrganizationApplication
     static void MapIdentity(WebApplication app)
     {
         app.MapGet("/api/session",async(HttpContext c,OrganizationDatabase db,IAntiforgery csrf)=>new{
+            membershipState=c.User.Identity?.IsAuthenticated==true?await db.Memberships.Where(m=>m.UserId==Guid.Parse(c.User.FindFirstValue(ClaimTypes.NameIdentifier)!)).Select(m=>(OrganizationMembershipState?)m.State).SingleOrDefaultAsync(c.RequestAborted):null,
             initialized=await db.Organizations.AnyAsync(c.RequestAborted),csrf=csrf.GetAndStoreTokens(c).RequestToken,
             accountSecurityRequired=settingsFor(c).RequireAdministratorMfa&&c.User.IsInRole("Administrator")&&(!OrganizationAccountSecurity.Verified(c.User)||!OrganizationAccountSecurity.Ready((await db.Users.SingleAsync(u=>u.Id==Guid.Parse(c.User.FindFirstValue(ClaimTypes.NameIdentifier)!),c.RequestAborted)))),
             user=c.User.Identity?.IsAuthenticated==true?new{id=c.User.FindFirstValue(ClaimTypes.NameIdentifier),name=c.User.Identity.Name,roles=c.User.FindAll(ClaimTypes.Role).Select(r=>r.Value).ToArray()}:null

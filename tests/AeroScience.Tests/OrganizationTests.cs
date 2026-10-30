@@ -98,7 +98,7 @@ public sealed partial class OrganizationServerTests:IAsyncLifetime
     }
     async Task Start()
     {
-        app=OrganizationApplication.Build([],b=>{b.Environment.EnvironmentName="Testing";b.WebHost.UseTestServer();b.Configuration.AddInMemoryCollection(new Dictionary<string,string?>{["Organization:LocalDevelopment"]="true",["Organization:PublicOrigin"]=Origin,["Organization:ConnectionString"]=connection,["Organization:RequireAdministratorMfa"]=requireAdministratorMfa.ToString(),["Organization:BootstrapSecretFile"]=Path.Combine(directory,"bootstrap-secret")});if(deploymentOverrides is not null)b.Configuration.AddInMemoryCollection(deploymentOverrides);b.Logging.SetMinimumLevel(LogLevel.Warning);});
+        app=OrganizationApplication.Build([],b=>{b.Environment.EnvironmentName="Testing";b.WebHost.UseTestServer();b.Configuration.AddInMemoryCollection(new Dictionary<string,string?>{["Organization:LocalDevelopment"]="true",["Organization:PublicOrigin"]=Origin,["Organization:ConnectionString"]=connection,["Organization:RequireAdministratorMfa"]=requireAdministratorMfa.ToString(),["Organization:BootstrapSecretFile"]=Path.Combine(directory,"bootstrap-secret")});if(deploymentOverrides is not null)b.Configuration.AddInMemoryCollection(deploymentOverrides);if(liveClock is not null)b.Services.AddSingleton<TimeProvider>(liveClock);b.Logging.SetMinimumLevel(LogLevel.Warning);});
         await OrganizationApplication.Initialize(app);await app.StartAsync();
     }
     object Setup(string code)=>new{secret=code,organizationName="Research Flight Lab",description="Private scientific research",userName="administrator",password=Password};

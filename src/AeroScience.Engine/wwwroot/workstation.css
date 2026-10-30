@@ -149,3 +149,5 @@ dialog.managed-popup{max-width:min(56rem,calc(100vw - 1.5rem));max-height:88dvh;
 .scientific-warning{padding:.5rem;border-left:3px solid #f4c36b}.scientific-layer-context{width:min(52rem,calc(100vw - 2rem));max-height:85vh;overflow:auto;box-sizing:border-box}
 .layer-context-disclosure{margin:.5rem 0}.scientific-comparison-context{max-width:72rem}
 @media(max-width:620px){.scientific-context-facts{grid-template-columns:minmax(0,1fr);gap:.25rem}.scientific-context-facts dd{margin-bottom:.65rem}.scientific-research-context{padding:.5rem}.scientific-layer-context{max-width:calc(100vw - 1rem)}}
+
+.live-flight-layout{display:grid;grid-template-columns:minmax(0,3fr) minmax(260px,2fr);gap:1rem;margin-block:1rem}.live-flight-map{height:430px;min-width:0;background:#152936;border:1px solid #628398;border-radius:12px}.live-flight-layout section,.live-flight-layout article{min-width:0;overflow-wrap:anywhere}.live-flight-layout article{padding:.65rem;border-bottom:1px solid #628398}.live-flight-layout input{max-width:100%}@media(max-width:760px){.live-flight-layout{grid-template-columns:minmax(0,1fr)}.live-flight-map{height:300px}}

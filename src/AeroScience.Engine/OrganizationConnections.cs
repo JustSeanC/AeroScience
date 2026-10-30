@@ -71,7 +71,7 @@ public sealed partial class OrganizationConnections:IDisposable
         if(IPAddress.TryParse(uri.Host.Trim('[',']'),out var literal)&&!PermittedAddress(literal,development))throw new ArgumentException("Protected network addresses cannot be used as organization servers.");
         return new(uri.GetLeftPart(UriPartial.Authority));
     }
-    async Task<T> Request<T>(string origin,string path,object? body,CancellationToken ct,string? credential=null,bool evidence=false,bool review=false)
+    async Task<T> Request<T>(string origin,string path,object? body,CancellationToken ct,string? credential=null,bool evidence=false,bool review=false,bool live=false)
     {
         using var request=new HttpRequestMessage(body is null?HttpMethod.Get:HttpMethod.Post,new Uri(new Uri(origin),path));
         if(body is not null)request.Content=JsonContent.Create(body,options:WireJson.Options);
@@ -81,6 +81,8 @@ public sealed partial class OrganizationConnections:IDisposable
         catch(TaskCanceledException) when(!ct.IsCancellationRequested){throw new IOException("The organization did not respond in time. Personal Research is unchanged.");}
         catch(HttpRequestException){throw new IOException("The organization could not be reached securely. Check its address or try again later.");}
         using var response=received;
+        if(live&&response.StatusCode==HttpStatusCode.Forbidden)throw new IOException("Organization live policy or membership does not permit this share. Check Live Flights and any sensitive-campaign restrictions. Recording and science are unchanged.");
+        if(live&&response.StatusCode==HttpStatusCode.Conflict)throw new IOException("Live sharing changed or its capacity is full. Review Live Flights before explicitly starting again. No updates were queued.");
         if(response.StatusCode is HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden)throw new UnauthorizedAccessException("Organization authorization is expired or revoked. Connect again if your membership is active.");
         if(review&&response.StatusCode is HttpStatusCode.Conflict or HttpStatusCode.BadRequest)throw new IOException("The review changed or the response was not valid for its exact request. Your unsent text is unchanged. Check Review Status, read the latest conversation, then send a new response explicitly.");
         if(review&&response.StatusCode==HttpStatusCode.NotFound)throw new IOException("This received review or conversation is unavailable to this connection. No reply or evidence was sent.");

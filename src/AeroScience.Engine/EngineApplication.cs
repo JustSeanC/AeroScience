@@ -42,6 +42,7 @@ public static class EngineApplication
         builder.Services.AddSingleton<AccessControl>();
         builder.Services.AddSingleton<IOrganizationCredentials,UnavailableOrganizationCredentials>();
         builder.Services.AddSingleton<OrganizationConnections>();
+        builder.Services.AddSingleton<LiveFlightSharing>();builder.Services.AddHostedService<LiveFlightSharingWorker>();
         builder.Services.AddSingleton<SubmissionDelivery>();
         builder.Services.AddHostedService<SubmissionDeliveryWorker>();
         builder.Services.AddSingleton(sp => new ScientificAccessSettings(sp.GetRequiredService<EngineOptions>().ConfigurationDirectory ?? sp.GetRequiredService<EngineOptions>().DataDirectory, NetworkCost.IsUnmetered));

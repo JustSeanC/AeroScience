@@ -11,6 +11,11 @@ public static class OrganizationConnectionApi
             if(!AccessControl.IsLoopback(context.HttpContext))return Results.Json(new{error="Manage organization connections on the companion PC. Personal Research remains available here."},statusCode:403);
             return await next(context);
         });
+        api.MapGet("/live/status",(LiveFlightSharing sharing)=>sharing.Status());
+        api.MapGet("/{id:guid}/live",(Guid id,OrganizationConnections connections,HttpContext c)=>connections.LiveDashboard(id,c.RequestAborted));
+        api.MapGet("/{id:guid}/live/preview",(Guid id,LiveFlightSharing sharing,HttpContext c)=>sharing.Preview(id,c.RequestAborted));
+        api.MapPost("/live/start",(LocalLiveConsent r,LiveFlightSharing sharing,HttpContext c)=>sharing.Start(r,c.RequestAborted));
+        api.MapPost("/{id:guid}/live/stop",(Guid id,LiveFlightSharing sharing,HttpContext c)=>sharing.Stop(id,c.RequestAborted));
         api.MapGet("",async(OrganizationConnections connections,IOrganizationCredentials vault,HttpContext c)=>new{vaultAvailable=vault.Available,connections=await connections.List(c.RequestAborted)});
         api.MapPost("/review",(OrganizationConnectRequest r,OrganizationConnections connections,HttpContext c)=>connections.Review(r.Address,c.RequestAborted));
         api.MapPost("/begin",(OrganizationConnectApproval r,OrganizationConnections connections,HttpContext c)=>connections.Begin(r,c.RequestAborted));
@@ -34,7 +39,7 @@ public static class OrganizationConnectionApi
         api.MapGet("/{id:guid}/progress/approved/{root:guid}/{card:guid}/locations",(Guid id,Guid root,Guid card,int? offset,OrganizationConnections connections,HttpContext c)=>connections.ApprovedLocations(id,root,card,offset??0,c.RequestAborted));
         api.MapGet("/{id:guid}/progress/campaigns/{campaign:guid}/own",(Guid id,Guid campaign,int? offset,OrganizationConnections connections,HttpContext c)=>connections.CampaignOwn(id,campaign,offset??0,c.RequestAborted));
         OrganizationCoverageApi.Map(api);OrganizationWorkflowApi.Map(api);
-        api.MapPost("/{id:guid}/disconnect",(Guid id,OrganizationConnections connections,HttpContext c)=>connections.Disconnect(id,c.RequestAborted));
+        api.MapPost("/{id:guid}/disconnect",async(Guid id,LiveFlightSharing sharing,OrganizationConnections connections,HttpContext c)=>{await sharing.Stop(id,c.RequestAborted,"disconnected");return await connections.Disconnect(id,c.RequestAborted);});
         app.MapGet("/api/research/organization-cards",(int? offset,AeroScience.Missions.MissionStore store)=>store.OrganizationResearchCards(offset??0));
         app.MapGet("/api/research/cards/{id:guid}/organization",(Guid id,int? offset,AeroScience.Missions.MissionStore store)=>new{assignment=store.ResearchCard(id).OrganizationAssignment,check=store.LatestOrganizationClaimCheck(id),history=store.OrganizationPreparationHistory(id,offset??0)});
         app.MapPost("/api/research/cards/{id:guid}/organization/reconcile",async(Guid id,OrganizationClaimReconcile r,OrganizationConnections connections,AeroScience.Missions.MissionStore store,HttpContext c)=>{
