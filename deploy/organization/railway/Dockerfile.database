@@ -13,6 +13,8 @@ LABEL org.opencontainers.image.title="AeroScience Organization PostgreSQL Adapte
       org.opencontainers.image.source="https://github.com/JustSeanC/AeroScience" \
       com.aeroscience.organization.role="database"
 COPY --chmod=755 deploy/organization/railway/50-organization-roles.sh /docker-entrypoint-initdb.d/50-organization-roles.sh
+COPY deploy/organization/railway/harden-certificate-profile.py /tmp/harden-certificate-profile.py
+RUN python3 /tmp/harden-certificate-profile.py && rm /tmp/harden-certificate-profile.py
 COPY --chmod=755 deploy/organization/railway/database-trust.py /usr/local/bin/database-trust.py
 COPY --chmod=755 deploy/organization/railway/database-start.sh /usr/local/bin/database-start.sh
 ENTRYPOINT ["/usr/bin/tini","-g","--","/usr/local/bin/database-start.sh"]

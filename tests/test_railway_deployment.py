@@ -9,7 +9,23 @@ import unittest
 ROOT=Path(__file__).resolve().parents[1]
 SPEC=importlib.util.spec_from_file_location('database_trust',ROOT/'deploy/organization/railway/database-trust.py')
 TRUST=importlib.util.module_from_spec(SPEC);SPEC.loader.exec_module(TRUST)
+PROFILE_SPEC=importlib.util.spec_from_file_location('certificate_profile',ROOT/'deploy/organization/railway/harden-certificate-profile.py')
+PROFILE=importlib.util.module_from_spec(PROFILE_SPEC);PROFILE_SPEC.loader.exec_module(PROFILE)
 class RailwayDeploymentTests(unittest.TestCase):
+    def test_exact_pinned_certificate_paths_keep_ca_and_server_roles_distinct(self):
+        original=PROFILE.ROOT_COMMAND+' -days 90\n'+PROFILE.OLD_LEAF+'\nsubjectAltName = DNS:localhost\n'
+        result=PROFILE.harden(original,restored=True)
+        self.assertIn('basicConstraints=critical,CA:TRUE,pathlen:0',result);self.assertIn('keyUsage=critical,keyCertSign,cRLSign',result)
+        self.assertIn('basicConstraints = critical, CA:FALSE',result);self.assertIn('extendedKeyUsage = serverAuth',result)
+        self.assertIn('DNS:${RAILWAY_PRIVATE_DOMAIN:-localhost}',result)
+        native=PROFILE.harden(original.replace('subjectAltName = DNS:localhost','subjectAltName = ${SSL_SAN}'))
+        self.assertIn('subjectAltName = ${SSL_SAN}',native)
+    def test_unknown_or_repeated_upstream_certificate_generators_fail_closed(self):
+        original=PROFILE.ROOT_COMMAND+' -days 90\n'+PROFILE.OLD_LEAF+'\nsubjectAltName = DNS:localhost\n'
+        for changed in ['',original*2,original.replace(PROFILE.OLD_LEAF,'unknown'),PROFILE.harden(original),original+'x'*262145]:
+            with self.subTest():
+                with self.assertRaises(ValueError):PROFILE.harden(changed)
+        with self.assertRaises(ValueError):PROFILE.harden(original.replace('DNS:localhost','DNS:changed'),restored=True)
     def test_attestation_binds_exact_host_fresh_nonce_and_only_public_certificate(self):
         host='postgres.railway.internal';nonce='b'*64;secret='a'*64;certificate=b'public certificate fixture only'
         response=TRUST.attest(host,nonce,secret,certificate);encoded=base64.b64encode(certificate).decode();message=('aeroscience-railway-database-trust-v1\n'+host+'\n'+nonce+'\n'+encoded).encode()

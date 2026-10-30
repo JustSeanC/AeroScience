@@ -43,8 +43,8 @@ def verify(application,database,output):
             certificate=docker('exec',db,'openssl','x509','-in','/var/lib/postgresql/data/certs/server.crt','-noout','-ext','subjectAltName').stdout
             assert 'DNS:postgres.railway.internal' in certificate
             assert docker('exec',db,'psql','-U','postgres','-d','aeroscience','-Atc',"SELECT rolsuper OR rolcreatedb OR rolcreaterole FROM pg_roles WHERE rolname='aeroscience_application'").stdout.strip()=='f'
-            positive=docker('exec',db,'openssl','verify','-CAfile','/var/lib/postgresql/data/certs/root.crt','-verify_hostname','postgres.railway.internal','/var/lib/postgresql/data/certs/server.crt')
-            negative=docker('exec',db,'openssl','verify','-CAfile','/var/lib/postgresql/data/certs/root.crt','-verify_hostname','wrong.railway.internal','/var/lib/postgresql/data/certs/server.crt',check=False)
+            positive=docker('exec',db,'openssl','verify','-x509_strict','-purpose','sslserver','-CAfile','/var/lib/postgresql/data/certs/root.crt','-verify_hostname','postgres.railway.internal','/var/lib/postgresql/data/certs/server.crt')
+            negative=docker('exec',db,'openssl','verify','-x509_strict','-purpose','sslserver','-CAfile','/var/lib/postgresql/data/certs/root.crt','-verify_hostname','wrong.railway.internal','/var/lib/postgresql/data/certs/server.crt',check=False)
             assert positive.returncode==0 and negative.returncode!=0;record('actual pinned Railway PostgreSQL CA validates its exact private hostname and rejects a wrong hostname')
             start();created.append(app);ready(app)
             processes=[row for row in docker('top',app).stdout.splitlines()[1:] if 'AeroScience.Organization.dll --railway-start' in row];assert len(processes)==1 and processes[0].split()[0]=='1654'
@@ -53,6 +53,20 @@ def verify(application,database,output):
             docker('rm','--force',app);created.remove(app);start();created.append(app);ready(app)
             retained=docker('exec',db,'psql','-U','postgres','-d','aeroscience','-Atc','SELECT "CertificateSha256" FROM organization."DeploymentState"').stdout.strip();assert retained==original
             record('application replacement retains original protected identity and database state')
+            # Exercise the distinct pinned upstream restored-certificate branch on this
+            # disposable database only. Never remove a real organization's identity PFX.
+            docker('rm','--force',app);created.remove(app);docker('stop','--time','10',db)
+            docker('run','--rm','--network','none','--user','postgres','--mount','type=volume,src='+records+',dst=/var/lib/postgresql/data','--entrypoint','python3',database,'-c',"from pathlib import Path; Path('/var/lib/postgresql/data/certs/server.crt').unlink()")
+            docker('start',db)
+            until=time.monotonic()+90
+            while time.monotonic()<until:
+                if docker('exec',db,'pg_isready','-h','127.0.0.1','-U','postgres','-d','aeroscience',check=False).returncode==0:break
+                time.sleep(1)
+            else:raise RuntimeError('Restored-certificate fixture did not become ready within the original database readiness bound')
+            docker('exec',db,'openssl','verify','-x509_strict','-purpose','sslserver','-CAfile','/var/lib/postgresql/data/certs/root.crt','-verify_hostname','postgres.railway.internal','/var/lib/postgresql/data/certs/server.crt')
+            start();created.append(app);ready(app)
+            assert docker('exec',db,'psql','-U','postgres','-d','aeroscience','-Atc','SELECT "CertificateSha256" FROM organization."DeploymentState"').stdout.strip()==original
+            record('restored native database certificate retains strict private-hostname verification and original organization identity')
             # Fail closed without a proxy contract, not by trusting X-Railway-Edge or arbitrary forwarded headers.
             docker('rm','--force',app);created.remove(app);applicationEnv.write_text(applicationEnv.read_text().replace('Organization__TrustedProxies__0=127.0.0.1\n',''));start();created.append(app)
             until=time.monotonic()+30

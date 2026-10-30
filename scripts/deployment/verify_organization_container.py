@@ -77,7 +77,7 @@ def verify(image, output):
         # Reserved local test HTTPS certificate: verify against its CA, never disable TLS checks.
         def openssl(*args):execute(['openssl',*args],timeout=30)
         openssl('req','-newkey','rsa:2048','-nodes','-keyout',str(protected/'web.key'),'-out',str(protected/'web.csr'),'-subj','/CN=organization.test')
-        (protected/'web.ext').write_text('subjectAltName=DNS:organization.test,IP:127.0.0.1\nextendedKeyUsage=serverAuth\nbasicConstraints=CA:FALSE\n')
+        (protected/'web.ext').write_text('subjectAltName=DNS:organization.test,IP:127.0.0.1\nextendedKeyUsage=serverAuth\nbasicConstraints=critical,CA:FALSE\nkeyUsage=critical,digitalSignature,keyEncipherment\nsubjectKeyIdentifier=hash\nauthorityKeyIdentifier=keyid,issuer\n')
         openssl('x509','-req','-in',str(protected/'web.csr'),'-CA',str(protected/'database-ca.crt'),'-CAkey',str(protected/'database-ca.key'),'-CAcreateserial','-out',str(protected/'web.crt'),'-days','1','-extfile',str(protected/'web.ext'))
         (folder/'Caddyfile').write_text('organization.test {\n tls /configuration/web.crt /configuration/web.key\n reverse_proxy organization:8080\n}\n')
         with socket.socket() as listener:listener.bind(('127.0.0.1',0));port=listener.getsockname()[1]
@@ -108,6 +108,7 @@ def verify(image, output):
             db_id=compose_run('ps','--quiet','database').stdout.strip();db_info=json.loads(execute(DOCKER+['inspect',db_id]).stdout)[0]
             assert not db_info['HostConfig'].get('PortBindings')
             context=ssl.create_default_context(cafile=str(protected/'database-ca.crt'))
+            context.verify_flags|=ssl.VERIFY_X509_STRICT
             browser=Browser(port,context);assert not browser.session()['initialized']
             browser.request('/api/organization/server-health',expected=401)
             payload={'secret':'wrong-owner-code','organizationName':'P25 Synthetic Institute','description':'Local deployment acceptance only','userName':'administrator','password':'Synthetic-Only!P25-2026'}

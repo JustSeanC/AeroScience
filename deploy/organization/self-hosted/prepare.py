@@ -28,9 +28,10 @@ def prepare(directory: Path, hostname: str):
 
     write('database-owner-password', owner_password)
     write('initialize.sql', "CREATE ROLE aeroscience LOGIN PASSWORD '"+app_password+"' NOSUPERUSER NOCREATEDB NOCREATEROLE;\nALTER DATABASE aeroscience OWNER TO aeroscience;\nREVOKE ALL ON SCHEMA public FROM PUBLIC;\nALTER SCHEMA public OWNER TO aeroscience;\n")
-    openssl('req','-x509','-newkey','rsa:3072','-nodes','-keyout','database-ca.key','-out','database-ca.crt','-days','365','-subj','/CN=AeroScience Private Database CA')
+    openssl('req','-x509','-newkey','rsa:3072','-nodes','-keyout','database-ca.key','-out','database-ca.crt','-days','365','-subj','/CN=AeroScience Private Database CA',
+            '-addext','basicConstraints=critical,CA:TRUE,pathlen:0','-addext','keyUsage=critical,keyCertSign,cRLSign','-addext','subjectKeyIdentifier=hash','-addext','authorityKeyIdentifier=keyid:always')
     openssl('req','-newkey','rsa:3072','-nodes','-keyout','database.key','-out','database.csr','-subj','/CN=database')
-    write('database.ext', 'subjectAltName=DNS:database\nextendedKeyUsage=serverAuth\nbasicConstraints=CA:FALSE\n')
+    write('database.ext', 'subjectAltName=DNS:database\nextendedKeyUsage=serverAuth\nbasicConstraints=critical,CA:FALSE\nkeyUsage=critical,digitalSignature,keyEncipherment\nsubjectKeyIdentifier=hash\nauthorityKeyIdentifier=keyid,issuer\n')
     openssl('x509','-req','-in','database.csr','-CA','database-ca.crt','-CAkey','database-ca.key','-CAcreateserial','-out','database.crt','-days','90','-extfile','database.ext')
     for name in ('database-ca.key','database.key'):os.chmod(directory/name,0o600)
     for name in ('database-ca.crt','database.crt'):os.chmod(directory/name,0o644)

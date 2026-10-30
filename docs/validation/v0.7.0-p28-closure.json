@@ -90,6 +90,26 @@
       "passed": 5,
       "failed": 0,
       "skipped": 0
+    },
+    "strictCertificateRed": {
+      "passed": 3,
+      "failed": 1,
+      "skipped": 0
+    },
+    "strictCertificateCorrected": {
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0
+    },
+    "pinnedCertificateProfile": {
+      "passed": 5,
+      "failed": 0,
+      "skipped": 0
+    },
+    "retainedRuntimeComposeTls": {
+      "passed": 12,
+      "failed": 0,
+      "scope": "prior P26 runtime; corrected deployment configuration/strict TLS only, not final P28 runtime acceptance"
     }
   },
   "requirements": [
@@ -133,5 +153,30 @@
       "state": "Focused security regression passed; Full pending",
       "evidence": "100 actual PostgreSQL affected cases; P01-P27 preserved"
     }
-  ]
+  ],
+  "initialFast": {
+    "id": 41049568307,
+    "source": "5d6f671ad201482b11e958f2588664d9b50447aa",
+    "conclusion": "success",
+    "dotnet": {
+      "passed": 1303,
+      "failed": 0,
+      "skipped": 136
+    },
+    "browser": {
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0
+    },
+    "sdkPassed": 5,
+    "helpersExecuted": 0
+  },
+  "preservedFullFailure": {
+    "id": 41050291414,
+    "source": "5d6f671ad201482b11e958f2588664d9b50447aa",
+    "deploymentConclusion": "failure",
+    "completedDeploymentChecks": 3,
+    "failure": "SSLCertVerificationError: CA cert does not include key usage extension",
+    "remainingJobs": "still running; update final outcomes separately"
+  }
 }
