@@ -16,7 +16,7 @@ Limits: one server application instance; 64 active shared sessions; four indepen
 
 Faster writes coalesce without retaining a backlog. Accepted sequence and one current-payload hash persist as anti-replay metadata, including after position expiration; retries never refresh an old position's age. The hash is cleared when consent ends. Current coordinates, aircraft payloads and numerical values exist only in bounded process memory, never consent/audit/event rows. Positions expire at 30 seconds, stale begins at 15 seconds, inactive consent expires at 120 seconds and maximum consent is eight hours or credential expiry. Worker cleanup and reads enforce expiry; restart changes the instance identity and refuses old sharing sessions.
 
-The frontend clears failed/hidden views, expires its own current DTO/markers, and resets a selected expired map view. It uses the existing bundled Leaflet renderer with an offline reference grid, no track lines or invented sensor geometry. No browser storage or raw-evidence cache is introduced.
+The frontend clears failed/hidden views, expires its own current DTO/markers, and resets a selected expired map view. Freshness conservatively includes the full request duration, so delayed responses cannot renew expired positions; responses completed while hidden are discarded. This uses monotonic local elapsed time without assuming synchronized client/server clocks. It uses the existing bundled Leaflet renderer with an offline reference grid, no track lines or invented sensor geometry. No browser storage or raw-evidence cache is introduced.
 
 ## Consent and restrictions
 

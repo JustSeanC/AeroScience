@@ -50,6 +50,18 @@ test('administrator live policy revokes existing positions and member dashboards
 test('a stalled viewer request cannot retain expired positions in the map or selected-flight details',async({page,browser})=>{
  const pilotPage=await pilot(page,browser,'expiry-pilot'),e=await engine(5204),connection=await connect(e,pilotPage);await flight(e);await share(e,connection,'Expiry check');await expect.poll(async()=>(await orgApi(pilotPage,'/membership/live')).flights.filter(f=>f.current).length,{timeout:10000}).toBe(1);
  await pilotPage.clock.install({time:new Date()});await pilotPage.goto('/');await pilotPage.getByRole('button',{name:'Live Flights',exact:true}).click();await pilotPage.getByRole('button',{name:'Expiry check',exact:true}).click();const detail=pilotPage.getByRole('region',{name:'Selected shared flight',exact:true});await expect(detail).toContainText('Position:');
- let release;const held=new Promise(resolve=>release=resolve);await pilotPage.route('**/api/membership/live',async route=>{await held;await route.abort('failed');});
- try{await pilotPage.clock.fastForward(31000);await expect(pilotPage.locator('.leaflet-interactive')).toHaveCount(0);await expect(detail).toContainText('No fresh position available');await expect(detail).not.toContainText('40.00000');}finally{release();}
+ let release,captured;const held=new Promise(resolve=>release=resolve),ready=new Promise(resolve=>captured=resolve);
+ await pilotPage.route('**/api/membership/live',async route=>{
+  const response=await route.fetch(),body=await response.body();
+  expect(JSON.parse(body.toString()).flights.some(f=>f.current?.latitude!==null&&f.current?.latitude!==undefined)).toBe(true);
+  captured();await held;await route.fulfill({response,body});
+ });
+ try{
+  await pilotPage.getByRole('button',{name:'Refresh Live Flights',exact:true}).click();await ready;
+  await pilotPage.clock.fastForward(31000);await expect(pilotPage.locator('.leaflet-interactive')).toHaveCount(0);
+  await expect(detail).toContainText('No fresh position available');await expect(detail).not.toContainText('40.00000');
+  const delivered=pilotPage.waitForEvent('requestfinished',r=>r.url().endsWith('/api/membership/live'));release();await delivered;
+  await pilotPage.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+  await expect(pilotPage.locator('.leaflet-interactive')).toHaveCount(0);await expect(detail).not.toContainText('Position:');
+ }finally{release();}
 });
