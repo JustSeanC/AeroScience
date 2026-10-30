@@ -47,6 +47,8 @@ public static class OrganizationLiveDatabase
         m.Entity<LivePolicyRecord>().Property(x=>x.Revision).IsConcurrencyToken();
         m.Entity<OrganizationEventRecord>().HasKey(x=>x.Sequence);
         m.Entity<OrganizationEventRecord>().HasIndex(x=>x.Id).IsUnique();
+        m.Entity<OrganizationEventRecord>().HasIndex(x=>new{x.SourceId,x.Type,x.Sequence});
+        m.Entity<OrganizationEventRecord>().HasIndex(x=>new{x.Type,x.Sequence});
         m.Entity<OrganizationEventRecord>().HasIndex(x=>x.IdempotencyKey).IsUnique();
         m.Entity<OrganizationEventRecord>().HasIndex(x=>new{x.Visibility,x.Sequence});
         m.Entity<OrganizationEventRecord>().HasIndex(x=>new{x.ActorId,x.Sequence});

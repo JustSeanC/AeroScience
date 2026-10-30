@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "milestone": "v0.7.0 P27-C",
+  "branch": "develop/v0.7.0",
+  "status": "Implemented; focused acceptance passed; Full gate pending",
+  "implemented": true,
+  "technicallyAccepted": false,
+  "testedSource": null,
+  "full": null,
+  "preservedAB": {
+    "source": "4ede325c43bf2166213ef0da96d916c71c2aa53d",
+    "full": 40985543972,
+    "accepted": true
+  },
+  "focused": {
+    "affected": {
+      "passed": 70,
+      "failed": 0,
+      "skipped": 0
+    },
+    "cancellationConcurrency": {
+      "passed": 2,
+      "failed": 0,
+      "skipped": 0
+    },
+    "finalTransport": {
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0
+    },
+    "distinctTests": 72,
+    "overlap": true,
+    "browser": {
+      "passed": 9,
+      "failed": 0,
+      "skipped": 0
+    }
+  },
+  "realDiscordAccepted": false,
+  "installedMsfsAccepted": false,
+  "railwayAccepted": false,
+  "p28Started": false,
+  "productionReady": false,
+  "ownerActionNow": "None",
+  "limits": {
+    "organizationDestinations": 1,
+    "applicationInstances": 1,
+    "unfinishedIntents": 500,
+    "eventsPerTick": 100,
+    "historyPage": 20,
+    "announcementPage": 50,
+    "minimumSendSeconds": 2,
+    "maximumRateLimitAttempts": 5,
+    "connectionSeconds": 5,
+    "wholeRequestSeconds": 10,
+    "responseBytes": 16384
+  },
+  "protectedReadmeSha256": "f32cff962da446a6b10e411124155ec281a6cfc06664ca01dfc5754b44d13049"
+}

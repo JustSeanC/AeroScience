@@ -112,6 +112,7 @@ public static class OrganizationApplication
             o.AddPolicy("live-write",c=>RateLimitPartition.GetFixedWindowLimiter(c.Connection.RemoteIpAddress?.ToString()??"live",_=>new(){PermitLimit=1000,Window=TimeSpan.FromMinutes(1),QueueLimit=0,AutoReplenishment=true}));
             o.GlobalLimiter=PartitionedRateLimiter.Create<HttpContext,string>(_=>RateLimitPartition.GetConcurrencyLimiter("organization",_=>new(){PermitLimit=32,QueueLimit=0}));
         });
+        builder.Services.TryAddSingleton<IDiscordTransport,DiscordTransport>();builder.Services.AddSingleton<DiscordNotificationRuntime>();builder.Services.AddScoped<OrganizationNotifications>();builder.Services.AddHostedService<OrganizationNotificationWorker>();
         builder.Services.TryAddSingleton(TimeProvider.System);builder.Services.AddSingleton<OrganizationLiveRuntime>();builder.Services.AddScoped<OrganizationLiveFlights>();builder.Services.AddScoped<OrganizationEvents>();builder.Services.AddHostedService<OrganizationLiveWorker>();
         builder.Services.AddScoped<OrganizationServerDiagnostics>();
         builder.Services.AddScoped<OrganizationManagement>();
@@ -181,7 +182,7 @@ public static class OrganizationApplication
         });
         var assets=Path.Combine(AppContext.BaseDirectory,"organization-portal");
         if(Directory.Exists(assets)){var files=new PhysicalFileProvider(assets);app.UseDefaultFiles(new DefaultFilesOptions{FileProvider=files});app.UseStaticFiles(new StaticFileOptions{FileProvider=files});}
-        MapIdentity(app);OrganizationLiveApi.Map(app);OrganizationAccountSecurityApi.Map(app);OrganizationOperationsApi.Map(app);MapManagement(app);ResearchTemplateApi.Map(app);OrganizationEnrollmentApi.Map(app);OrganizationOpportunityApi.Map(app);OrganizationSubmissionApi.Map(app);OrganizationReviewApi.Map(app);CampaignProgressApi.Map(app);CampaignCoverageApi.Map(app);ProgramWorkflowApi.Map(app);return app;
+        MapIdentity(app);OrganizationNotificationApi.Map(app);OrganizationLiveApi.Map(app);OrganizationAccountSecurityApi.Map(app);OrganizationOperationsApi.Map(app);MapManagement(app);ResearchTemplateApi.Map(app);OrganizationEnrollmentApi.Map(app);OrganizationOpportunityApi.Map(app);OrganizationSubmissionApi.Map(app);OrganizationReviewApi.Map(app);CampaignProgressApi.Map(app);CampaignCoverageApi.Map(app);ProgramWorkflowApi.Map(app);return app;
     }
     public static async Task Initialize(WebApplication app,CancellationToken token=default)
     {

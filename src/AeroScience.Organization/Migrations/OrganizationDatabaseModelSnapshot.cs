@@ -643,6 +643,209 @@ namespace AeroScience.Organization.Migrations
                     b.ToTable("DeviceGrants", "organization");
                 });
 
+            modelBuilder.Entity("AeroScience.Organization.DiscordConsentRecord", b =>
+                {
+                    b.Property<Guid>("SessionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("Allowed")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("DestinationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("DestinationRevision")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("PilotId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Revision")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("UpdatedUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("SessionId");
+
+                    b.HasIndex("DestinationId", "DestinationRevision", "Allowed");
+
+                    b.ToTable("DiscordConsents", "organization");
+                });
+
+            modelBuilder.Entity("AeroScience.Organization.DiscordDeliveryRecord", b =>
+                {
+                    b.Property<long>("Sequence")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Sequence"));
+
+                    b.Property<int>("Attempts")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("ConsentRevision")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid?>("ConsentSessionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("DestinationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("DestinationRevision")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("DueUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("FinishedUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("MessageId")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<Guid?>("SenderInstance")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("State")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("Test")
+                        .HasColumnType("boolean");
+
+                    b.HasKey("Sequence");
+
+                    b.HasIndex("Id")
+                        .IsUnique();
+
+                    b.HasIndex("DestinationId", "Sequence");
+
+                    b.HasIndex("EventId", "DestinationId", "DestinationRevision")
+                        .IsUnique();
+
+                    b.HasIndex("State", "DueUtc", "Sequence");
+
+                    b.ToTable("DiscordDeliveries", "organization");
+                });
+
+            modelBuilder.Entity("AeroScience.Organization.DiscordDestinationRecord", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<Guid>("AuthorizerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AuthorizerStamp")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<int>("Categories")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("Deleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("Enabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<long>("EventCursor")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Label")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.Property<string>("MaskedIdentifier")
+                        .IsRequired()
+                        .HasMaxLength(24)
+                        .HasColumnType("character varying(24)");
+
+                    b.Property<DateTimeOffset>("NextSendUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ProtectedCredential")
+                        .IsRequired()
+                        .HasMaxLength(4096)
+                        .HasColumnType("character varying(4096)");
+
+                    b.Property<Guid>("PublicId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Revision")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("UpdatedUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PublicId")
+                        .IsUnique();
+
+                    b.ToTable("DiscordDestinations", "organization");
+                });
+
+            modelBuilder.Entity("AeroScience.Organization.DiscordDisclosureRecord", b =>
+                {
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("DestinationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("DestinationRevision")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("ApprovedUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("AuthorizerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AuthorizerStamp")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<string>("MessageSha256")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.HasKey("EventId", "DestinationId", "DestinationRevision");
+
+                    b.ToTable("DiscordDisclosures", "organization");
+                });
+
             modelBuilder.Entity("AeroScience.Organization.EnrollmentPolicyRecord", b =>
                 {
                     b.Property<int>("Id")
@@ -1037,7 +1240,11 @@ namespace AeroScience.Organization.Migrations
 
                     b.HasIndex("SubjectId", "Sequence");
 
+                    b.HasIndex("Type", "Sequence");
+
                     b.HasIndex("Visibility", "Sequence");
+
+                    b.HasIndex("SourceId", "Type", "Sequence");
 
                     b.ToTable("Events", "organization");
                 });

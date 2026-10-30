@@ -36,7 +36,7 @@ Implemented sources: explicit sharing start/end; authenticated reports of an ori
 
 Private receipt/review/exception events require contributor, actor or authorized campaign reviewer/manager access. Membership is current on every page. Live events have no coordinates; permanently retained audit metadata cannot reconstruct a route. Actual evidence remains solely in the original explicitly authorized P17 storage.
 
-## P27-C acceptance boundary
+## Historical A/B boundary — superseded by P27-C integration below
 
 No webhook configuration, outbound delivery or secret is implemented in the A/B checkpoint. Discord is explicitly isolated per the owner's allowed staged integration. During the original A/B pass, both official documentation hosts returned HTTP 403 (older developer endpoint: error 1010), and the official source-document requests were unavailable during this pass. This is not proof of Discord API acceptance or a reason to invent an unsafe HTTP contract.
 
@@ -47,3 +47,8 @@ The follow-up must verify current official execution/allowed-mentions/rate-limit
 The same unchanged P26 blockers remain: authenticated finite Railway ingress and secure owner-bootstrap delivery, real native provisioning, independent external disaster recovery/updates, actual costs and fresh-account five-stage novice acceptance. P27 local fixtures waive none of them. No paid resources, public images/templates, release or production installer is authorized here.
 
 Official Discord webhook, message and rate-limit documents were successfully retrieved in the A/B closure follow-up. The original refusal remains historical evidence; current documentation access is available. This does not constitute a completed outbound implementation or provider acceptance.
+
+
+## P27-C integrated delivery
+
+The previously absent C implementation now uses the existing server, PostgreSQL, Identity, key ring, event identities and portal. [Discord notification architecture](organization-discord-notifications.md) describes settings, separate external flight consent, explicit current approval/exception disclosure, encrypted credentials, pinned verified HTTPS, bounded durable processing and honest ambiguous outcomes. [P27-C validation](../validation/v0.7.0-p27c.md) is authoritative for its own final acceptance; A/B Full is preserved independently. No P26 release gate is waived.

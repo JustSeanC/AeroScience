@@ -4,6 +4,8 @@ using AeroScience.Missions;
 using AeroScience.Shared;
 using AeroScience.Tests;
 
+if(args is ["--organization-notification-fixture","--rate-limited"]){await AeroScience.TestHost.OrganizationNotificationFixture.Run(true);return;}
+if(args is ["--organization-notification-fixture"]){await AeroScience.TestHost.OrganizationNotificationFixture.Run();return;}
 if (ScientificHdfWorker.IsCommand(args)) { Environment.ExitCode=ScientificHdfWorker.Run(); return; }
 if(args is ["--deployment-evidence",var deploymentDirectory]){await AeroScience.TestHost.DeploymentEvidenceFixture.Run(deploymentDirectory);return;}
 if (args.Length > 0 && args[0] == "--organization-database") { await AeroScience.TestHost.OrganizationFixture.Run(args[1..]); return; }

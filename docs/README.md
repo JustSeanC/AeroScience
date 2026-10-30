@@ -85,3 +85,5 @@ questions, feature requests, and discussions with other pilots.
 [GitHub issue reporting](https://github.com/JustSeanC/AeroScience/issues) and application
 feedback/log collection remain available. Review private flight locations and credentials
 before sharing diagnostic files.
+
+- [Organization Discord notifications](v0.7.0-organization-notifications.md) — optional external consent, administrator settings and delivery states.

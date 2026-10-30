@@ -88,10 +88,11 @@ public sealed class OrganizationLiveFlights(OrganizationDatabase db,Organization
             history.Audit(row.PilotId,"live-sharing","live-sharing-started",row.Id,1);await db.SaveChangesAsync(ct);await tx.CommitAsync(ct);return Session(row);
         }finally{runtime.Gate.Release();}
     }
-    async Task Validate(LiveConsentRecord row,CancellationToken ct)
+    async Task Validate(LiveConsentRecord row,CancellationToken ct)=>await ValidateExternal(row,false,ct);
+    internal async Task ValidateExternal(LiveConsentRecord row,bool ended,CancellationToken ct)
     {
         var now=runtime.UtcNow;
-        if(row.EndedUtc is not null||row.InstanceId!=runtime.InstanceId||row.ExpiresUtc<=now||row.LastSeenUtc<=now.AddSeconds(-120))throw new OrganizationUnauthorized();
+        if((ended?row.EndedUtc is null||row.EndReason is not("pilotStopped" or "flightEnded"):row.EndedUtc is not null)||row.InstanceId!=runtime.InstanceId||row.ExpiresUtc<=now||row.LastSeenUtc<=now.AddSeconds(-120))throw new OrganizationUnauthorized();
         var grant=await db.DeviceGrants.AsNoTracking().SingleOrDefaultAsync(x=>x.Id==row.GrantId,ct);
         var user=await db.Users.AsNoTracking().SingleOrDefaultAsync(x=>x.Id==row.PilotId,ct);
         var member=await db.Memberships.AsNoTracking().SingleOrDefaultAsync(x=>x.UserId==row.PilotId,ct);
