@@ -3,9 +3,9 @@
   "milestone": "v0.7.0 P28",
   "branch": "develop/v0.7.0",
   "startingHead": "d0dfc3e4927557037567f4f1d9b1331016e99ce8",
-  "status": "Independent engineering in progress; final source-bound Full pending; hosting and external acceptance blocked",
-  "testedSource": null,
-  "automatedIntegrationAccepted": false,
+  "status": "Independent integration/security corrections Full-validated; P28 and production hosting remain unaccepted",
+  "testedSource": "2b4c9abc82862fd7040cdd0f9e1a6f0b75a6dd49",
+  "automatedIntegrationAccepted": true,
   "p28Accepted": false,
   "productionReady": false,
   "releaseReady": false,
@@ -16,7 +16,123 @@
     "accepted": true,
     "preserved": true
   },
-  "full": null,
+  "full": {
+    "id": 41052886109,
+    "source": "2b4c9abc82862fd7040cdd0f9e1a6f0b75a6dd49",
+    "url": "https://github.com/JustSeanC/AeroScience/actions/runs/41052886109",
+    "conclusion": "success",
+    "results": {
+      "linuxDotnet": {
+        "passed": 1439,
+        "failed": 0,
+        "skipped": 0
+      },
+      "windowsDotnet": {
+        "passed": 1434,
+        "failed": 0,
+        "skipped": 5
+      },
+      "browser": {
+        "passed": 351,
+        "failed": 0,
+        "skipped": 2,
+        "flaky": 0
+      },
+      "linuxPython": {
+        "passed": 163,
+        "failed": 0,
+        "skipped": 1
+      },
+      "processRecovery": {
+        "linuxPassed": 5,
+        "windowsPassed": 5
+      },
+      "windowsPython": {
+        "passed": 159,
+        "failed": 0,
+        "skipped": 2
+      },
+      "windowsVaultNativePackage": "passed",
+      "railwaySdk": {
+        "passed": 5,
+        "failed": 0,
+        "skipped": 0
+      },
+      "containers": {
+        "passed": 12,
+        "failed": 0
+      },
+      "railwayShapedContainers": {
+        "passed": 6,
+        "failed": 0
+      },
+      "privateImageRoles": 4
+    },
+    "expectedSkips": {
+      "linux": [],
+      "windows": [
+        "AeroScience.Tests.AviationAcquisitionTests.RetainedOriginalFileLinksAreRejectedRatherThanFollowed",
+        "AeroScience.Tests.OrganizationConnectionIntegrationTests.EncryptedOffProcessBackupRestoresAuthorizedEvidenceAuditAndProtectedMfaAfterSourceLoss",
+        "AeroScience.Tests.OrganizationConnectionIntegrationTests.SeparatelyKeyedCopiesSurvivePrimaryRepositoryAndIdentityLossAndEnforceApprovedRetention",
+        "AeroScience.Tests.OrganizationServerTests.ExplicitBackupConsentPersistsScheduledPolicyIdempotentJobsAndVerifiedRestoreAcrossRestart",
+        "AeroScience.Tests.ScientificLibraryFolderTests.LinkedSourceDirectoryIsRejected"
+      ]
+    },
+    "subsets": {
+      "linuxdiscordIntegrationPassed": 18,
+      "linuxliveEventsPassed": 18,
+      "linuxRecoverySnapshotPassed": 1,
+      "linuxPolicyPassed": 41,
+      "linuxP28HealthPassed": 3,
+      "linuxP28ResearchPassed": 1,
+      "linuxP28UpgradePassed": 1,
+      "linuxP28ProtectedSettingsPassed": 7,
+      "linuxEncryptedOffProcessBackupRestoresAuthorizedEvidenceAuditAndProtectedMfaAfterSourceLoss": "Passed",
+      "linuxSeparatelyKeyedCopiesSurvivePrimaryRepositoryAndIdentityLossAndEnforceApprovedRetention": "Passed",
+      "linuxExplicitBackupConsentPersistsScheduledPolicyIdempotentJobsAndVerifiedRestoreAcrossRestart": "Passed",
+      "windowsdiscordIntegrationPassed": 18,
+      "windowsliveEventsPassed": 18,
+      "windowsRecoverySnapshotPassed": 1,
+      "windowsPolicyPassed": 41,
+      "windowsP28HealthPassed": 3,
+      "windowsP28ResearchPassed": 1,
+      "windowsP28UpgradePassed": 1,
+      "windowsP28ProtectedSettingsPassed": 7,
+      "windowsEncryptedOffProcessBackupRestoresAuthorizedEvidenceAuditAndProtectedMfaAfterSourceLoss": "NotExecuted",
+      "windowsSeparatelyKeyedCopiesSurvivePrimaryRepositoryAndIdentityLossAndEnforceApprovedRetention": "NotExecuted",
+      "windowsExplicitBackupConsentPersistsScheduledPolicyIdempotentJobsAndVerifiedRestoreAcrossRestart": "NotExecuted",
+      "organization-notifications.spec.js": 5,
+      "organization-live.spec.js": 4
+    },
+    "artifactSha256": {
+      "run.json": "d0101be9ad7159c5a57b1816ebf5cd8028103b0153d8362600550bacc3a9cdc0",
+      "windows-tests/windows.trx": "5ff8c1b95fb584f48381ce885c006652a1fc661bbe2d3c30990e725404309510",
+      "linux-tests/_runnervmnwato_2026-10-30_12_08_15_net10.0.trx": "8fdd14b85d5aef7112366614cb5f0e78c4630737052c6cc04e6fae34e6a2bf1c",
+      "browser/web-results.json": "d15fe4d24f0a10b379c51d570a6ffae2523a489583d0d6a15b8cd6ef1bf33dd1",
+      "deployment/image-review.json": "a5fe79757c5775b801c98e047a8436c2337efd4ecaee798a68aec8180e6d1844",
+      "deployment/railway-runtime.json": "7fa354bbad9ae150af6d693bbd58871e71baa59be7cf16b3ee7ba455f495cbb2",
+      "deployment/acceptance.json": "e2a3e706b152467d9278ae05bc98b964c8f79676af1de486f41d02333649f318"
+    },
+    "browserSkipDetails": [
+      {
+        "file": "aviation-charts.spec.js",
+        "title": "approved originals provide local chart overlays, independent science, offline tiles and exact edition selection"
+      },
+      {
+        "file": "aviation-charts.spec.js",
+        "title": "unknown runtime is honest and chart inventory remains accessible at tablet width without altering saved data"
+      }
+    ],
+    "helperSkipDetails": {
+      "linux": [
+        "test_pe_metadata_check_does_not_claim_runtime_exports_or_simulator_connection (test_windows_helpers.WindowsHelperTests.test_pe_metadata_check_does_not_claim_runtime_exports_or_simulator_connection) ... skipped 'Publish the Windows companion first for the native PE fixture'"
+      ],
+      "windows": [
+        "test_generated_private_configuration_is_unique_bounded_and_never_prints_credentials (test_organization_deployment.OrganizationDeploymentTests.test_generated_private_configuration_is_unique_bounded_and_never_prints_credentials) ... skipped 'POSIX OpenSSL/mode fixture; real Linux container acceptance verifies certificates.'",
+        "test_case_colliding_files_cannot_share_one_layout_entry (test_packaging.PackagingTests.test_case_colliding_files_cannot_share_one_layout_entry) ... skipped 'A case-sensitive filesystem is required to create both aliases.'"
+      ]
+    }
+  },
   "externalAcceptance": {
     "windowsMsfs": "not performed",
     "realDiscord": "not performed",
@@ -24,7 +140,7 @@
     "railwayOwnerSetup": "blocked by sealed secret delivery and unproven project-owner replacement",
     "railwayDeployment": "not ready for owner testing",
     "independentCloudRecovery": "not performed; isolated infrastructure passed previously and focused P28",
-    "providerUpdatesAndRotation": "not performed; compiled transactional rollback tested",
+    "providerUpdatesAndRotation": "not accepted; guided provider rollout/restore promotion and protected Identity-certificate rollover require implementation after supported hosting/owner control; compiled schema rollback and private DB certificate regeneration tested",
     "fiveStageNovice": "not performed",
     "costObservation": "not performed",
     "nasaOriginal": "not performed; synthetic fixtures do not establish actual-source acceptance",
@@ -110,13 +226,25 @@
       "passed": 12,
       "failed": 0,
       "scope": "prior P26 runtime; corrected deployment configuration/strict TLS only, not final P28 runtime acceptance"
+    },
+    "allLocalPython": {
+      "passed": 164,
+      "failed": 0,
+      "skipped": 0
+    },
+    "nativeTlsCorrected": {
+      "passed": 6,
+      "failed": 0,
+      "databaseSource": "2b4c9abc82862fd7040cdd0f9e1a6f0b75a6dd49",
+      "applicationSource": "88f70b349818e89688b464ec6e8919636e3882d2",
+      "scope": "Focused private TLS and identity restart; final Full builds all roles from corrected source"
     }
   },
   "requirements": [
     {
       "id": "P28-A",
-      "state": "Implemented and focused technically validated; final Full pending",
-      "evidence": "real-process scientific/organization integration and original regression suites"
+      "state": "Implemented and technically validated",
+      "evidence": "[Full 41052886109](https://github.com/JustSeanC/AeroScience/actions/runs/41052886109), exact source `2b4c9abc82862fd7040cdd0f9e1a6f0b75a6dd49`"
     },
     {
       "id": "P28-B-ingress",
@@ -135,8 +263,8 @@
     },
     {
       "id": "P28-B-recovery-updates",
-      "state": "Local implementation technically exercised; provider acceptance blocked",
-      "evidence": "actual pg_dump/restic/pg_restore, separately keyed source loss, compiled migration rollback; no cloud promotion"
+      "state": "Blocked by a precise external dependency",
+      "evidence": "Local independent encrypted restore, protected notification decryption, compiled rollback and private DB certificate regeneration passed; supported provider owner/maintenance contract, guided restore/rollout and Identity rollover implementation plus real external acceptance remain required."
     },
     {
       "id": "P28-C-flight-discord",
@@ -150,8 +278,8 @@
     },
     {
       "id": "P28-D",
-      "state": "Focused security regression passed; Full pending",
-      "evidence": "100 actual PostgreSQL affected cases; P01-P27 preserved"
+      "state": "Implemented and technically validated",
+      "evidence": "[Full 41052886109](https://github.com/JustSeanC/AeroScience/actions/runs/41052886109), exact source `2b4c9abc82862fd7040cdd0f9e1a6f0b75a6dd49`"
     }
   ],
   "initialFast": {
@@ -177,6 +305,90 @@
     "deploymentConclusion": "failure",
     "completedDeploymentChecks": 3,
     "failure": "SSLCertVerificationError: CA cert does not include key usage extension",
-    "remainingJobs": "still running; update final outcomes separately"
-  }
+    "remainingJobs": "Linux overall and Windows cancelled as superseded; no completed whole-platform/browser/helper/recovery acceptance claimed",
+    "conclusion": "cancelled after confirmed organization-deployment failure",
+    "linuxDotnet": {
+      "passed": 1439,
+      "failed": 0,
+      "skipped": 0
+    }
+  },
+  "correctedFast": {
+    "id": 41052504431,
+    "source": "2b4c9abc82862fd7040cdd0f9e1a6f0b75a6dd49",
+    "conclusion": "success",
+    "dotnet": {
+      "passed": 90,
+      "failed": 0,
+      "skipped": 0
+    },
+    "browser": {
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0
+    },
+    "sdkPassed": 5,
+    "helpers": {
+      "passed": 163,
+      "failed": 0,
+      "skipped": 1
+    }
+  },
+  "sourceFrozen": true,
+  "releaseBlockers": [
+    {
+      "id": "HOST-INGRESS",
+      "kind": "provider security contract / engineering",
+      "status": "blocked",
+      "detail": "No proven exclusive/authenticated edge-to-service identity across replacement; no wildcard/header-only/private-mesh trust."
+    },
+    {
+      "id": "HOST-OWNER",
+      "kind": "provider ownership contract / engineering",
+      "status": "blocked",
+      "detail": "Generated sealed secret is inaccessible; secure deploy-bound owner delivery or authoritative current project-admin proof is not implemented."
+    },
+    {
+      "id": "HOST-DISTRIBUTION",
+      "kind": "authorization / distribution",
+      "status": "blocked",
+      "detail": "No authorized public immutable registry distribution or genuine native template; no fabricated IDs or deploy link."
+    },
+    {
+      "id": "OPS-EXTERNAL-RECOVERY",
+      "kind": "provider/account and engineering",
+      "status": "blocked",
+      "detail": "Independent cloud credentials/objects, guided restore promotion and original-origin/reconnection continuity after account loss are unaccepted; same-account Bucket insufficient."
+    },
+    {
+      "id": "OPS-UPDATES-IDENTITY",
+      "kind": "engineering and external acceptance",
+      "status": "blocked",
+      "detail": "Guided provider rollout/paired failed-image restore and general protected Identity certificate/key rollover remain unimplemented; current pinning refuses unexplained replacement. Local database CA regeneration is not Data Protection rollover."
+    },
+    {
+      "id": "NOVICE-COST",
+      "kind": "ordinary owner acceptance",
+      "status": "not performed",
+      "detail": "Five-stage fresh-account trial and actual bill cannot start before secure deployment prerequisites."
+    },
+    {
+      "id": "MSFS",
+      "kind": "installed Windows/MSFS/SDK",
+      "status": "not performed",
+      "detail": "Engineering-supplied authorized private candidate and actual native simulator/toolbar flight needed; structural fixtures are not installation acceptance."
+    },
+    {
+      "id": "DISCORD",
+      "kind": "real third-party delivery",
+      "status": "not performed",
+      "detail": "Real consenting flight and explicitly disclosed research messages on an authorized private Discord channel; controlled HTTPS is not Discord operational acceptance."
+    },
+    {
+      "id": "ORIGINAL-SOURCES-DEVICES",
+      "kind": "source/device acceptance where claimed",
+      "status": "not performed",
+      "detail": "Genuine authorized NASA/EMIT originals and physical devices are not established by synthetic retained fixtures."
+    }
+  ]
 }
