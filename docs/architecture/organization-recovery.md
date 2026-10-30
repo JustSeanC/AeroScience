@@ -1,5 +1,13 @@
 # Organization security, recovery and update contracts — P26
 
+## P28 integration corrections
+
+Paired restore now validates retained P27 Discord destination credentials using the original restored key ring, certificate and organization/destination protection purpose. It checks the masked endpoint identity, rejects unusable or cross-purpose ciphertext, and requires deleted destinations to contain no credential. Verification neither enables a destination nor sends an HTTP request. Older supported source schemas without P27 tables are not migrated during verification. Real encrypted restore and independent primary-loss tests include disabled protected notification configuration; a separately valid encrypted dump with damaged credential bytes fails verification.
+
+Compiled update verification additionally hashes original source-schema columns of live consent/policy, authoritative events and Discord destinations/consents/disclosures/outbox under the existing exclusive transaction. It streams rows using fixed table names and PostgreSQL-quoted original column metadata. A new additive column/table does not invalidate the original projection; changing original operational records does. A real PostgreSQL trigger that rewrites an event during compiled migration now rolls back the entire batch while preserving received evidence, schema and history. Existing identity/evidence/audit checks and lock/deadline limits remain unchanged.
+
+These checks do not reconcile externally posted messages after a historic backup is promoted. Keep recovery deployments isolated, with delivery disabled, until an authorized operator compares external receipt history and rotates/reapproves destinations. Actual provider promotion, account-loss recovery, certificate/key rotation and failed-image rollback remain [P28 release gates](../validation/v0.7.0-p28.md).
+
 ## Completion pass: independent copies and real retention
 
 `Organization:Operations:Independent` optionally configures a different protected repository, private password file, private credentials file, CA and bucket-addressing style. The encryption key must differ from the primary. Production requires independently scoped credentials, not inherited Railway account credentials. Credential files contain only the explicitly allowed AWS or authenticated REST fields. Restic subprocesses clear inherited AWS/restic configuration and password-command variables before applying the selected destination's configuration. Both encrypted repositories use `--no-cache`. An independently controlled account/failure domain remains an operator/provider acceptance requirement; merely using another URL is not proof.

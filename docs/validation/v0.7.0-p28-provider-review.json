@@ -1,0 +1,126 @@
+{
+  "format": "aeroscience-p28-provider-review",
+  "version": 1,
+  "checkedUtc": "2026-10-30T11:37:35.819561+00:00",
+  "authenticatedProviderCalls": 0,
+  "resourcesCreated": false,
+  "productionReady": false,
+  "conclusions": {
+    "ingress": "blocked: no documented authenticated/exclusive final upstream peer contract established",
+    "bootstrap": "blocked: sealed generated secret cannot be retrieved; selected-project access/OIDC identity is not project-owner authority",
+    "privateNetworking": "new environments support both IPv4 and IPv6; IPv4 binding alone is not an ingress isolation proof",
+    "distribution": "no registry manifest digests, template ID or public images published",
+    "billing": "Railway only; no AeroScience payment processing"
+  },
+  "sources": [
+    {
+      "name": "edge",
+      "url": "https://docs.railway.com/networking/edge-networking",
+      "final": "https://docs.railway.com/networking/edge-networking",
+      "status": 200,
+      "bytes": 272627,
+      "sha256": "213c6f026e2f90f9ed8222f9f47423c0db58c505c6757d0629f0d84784109c7f"
+    },
+    {
+      "name": "limits",
+      "url": "https://docs.railway.com/networking/public-networking/specs-and-limits",
+      "final": "https://docs.railway.com/networking/public-networking/specs-and-limits",
+      "status": 200,
+      "bytes": 222953,
+      "sha256": "b4d3c0d400b422cea7becee3d2f8a1286640b6830601583b7efe6677ed605f77"
+    },
+    {
+      "name": "rules",
+      "url": "https://docs.railway.com/networking/edge-rules",
+      "final": "https://docs.railway.com/networking/edge-rules",
+      "status": 200,
+      "bytes": 265769,
+      "sha256": "77f155ee3793241cbefa424cddb8a4808a997da147ed490bb9ffda2772b56044"
+    },
+    {
+      "name": "private",
+      "url": "https://docs.railway.com/networking/private-networking",
+      "final": "https://docs.railway.com/networking/private-networking",
+      "status": 200,
+      "bytes": 196102,
+      "sha256": "32d0cbd3c6a4d0238dd91a367a4430e4203ca547d844caad46d0335c3c14ebcc"
+    },
+    {
+      "name": "variables",
+      "url": "https://docs.railway.com/variables",
+      "final": "https://docs.railway.com/variables",
+      "status": 200,
+      "bytes": 265729,
+      "sha256": "d0a90b7bc012e8d9a8d8688bade233e1a4e62a9433792e8ff22ec1b672b591f2"
+    },
+    {
+      "name": "oauth",
+      "url": "https://docs.railway.com/integrations/oauth",
+      "final": "https://docs.railway.com/integrations/oauth",
+      "status": 200,
+      "bytes": 205544,
+      "sha256": "6dc40b9ece7a1b32becd5378a07e1435ad4611bed942b66495ac076c8c4aad42"
+    },
+    {
+      "name": "oauth-app",
+      "url": "https://docs.railway.com/integrations/oauth/creating-an-app",
+      "final": "https://docs.railway.com/integrations/oauth/creating-an-app",
+      "status": 200,
+      "bytes": 220501,
+      "sha256": "aeccfb134454b33e5b13d018e5b4d31d62c80135d87e2021293b5c0a3e7901ca"
+    },
+    {
+      "name": "scopes",
+      "url": "https://docs.railway.com/integrations/oauth/scopes-and-user-consent",
+      "final": "https://docs.railway.com/integrations/oauth/scopes-and-user-consent",
+      "status": 200,
+      "bytes": 216800,
+      "sha256": "4e2483f725a3b3b2fb5651fe66f39d67fdeb78bb88a5d544237348615af30172"
+    },
+    {
+      "name": "iac",
+      "url": "https://docs.railway.com/reference/railway-iac",
+      "error": "HTTPError"
+    },
+    {
+      "name": "iac-overview",
+      "url": "https://docs.railway.com/infrastructure-as-code",
+      "final": "https://docs.railway.com/infrastructure-as-code",
+      "status": 200,
+      "bytes": 390455,
+      "sha256": "8756d464b349b9209aaf57ad4c9fb0afa8148cee0defc40388e6eea0965097bc"
+    },
+    {
+      "name": "iac-reference",
+      "url": "https://docs.railway.com/infrastructure-as-code/reference",
+      "final": "https://docs.railway.com/infrastructure-as-code/reference",
+      "status": 200,
+      "bytes": 305174,
+      "sha256": "e6f3704196d45c2acc17374d18e21e7b1f7a6b65ec8bb18eb9a896466c393eba"
+    },
+    {
+      "name": "templates",
+      "url": "https://docs.railway.com/templates/create",
+      "final": "https://docs.railway.com/templates/create",
+      "status": 200,
+      "bytes": 251795,
+      "sha256": "df5086c9309be45e030fe31520a5bf3b16856939b91cfa5a90cf007248a635d4"
+    },
+    {
+      "name": "oauth-resources",
+      "url": "https://docs.railway.com/integrations/oauth/fetching-workspaces-or-projects",
+      "final": "https://docs.railway.com/integrations/oauth/fetching-workspaces-or-projects",
+      "status": 200,
+      "bytes": 209245,
+      "sha256": "91e65813a866cddbb1294f59f410a5d4d6a5062c64fe0af3dc8a9c9adf26573b"
+    },
+    {
+      "name": "private-detail",
+      "url": "https://docs.railway.com/networking/private-networking/how-it-works",
+      "final": "https://docs.railway.com/networking/private-networking/how-it-works",
+      "status": 200,
+      "bytes": 219855,
+      "sha256": "f6b7b8e15b4e93a3b1af27304df3150ba560c87062da78793b32a01580562b3d"
+    }
+  ]
+}

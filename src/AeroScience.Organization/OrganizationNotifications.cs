@@ -20,7 +20,7 @@ public sealed class OrganizationNotifications(OrganizationDatabase db,Organizati
 {
     DateTimeOffset Now=>new(clock.GetUtcNow().Ticks/10*10,TimeSpan.Zero);
     static DiscordDestinationView View(DiscordDestinationRecord? d)=>new(d?.PublicId??Guid.Empty,d?.Revision??0,d?.Label??"",d?.MaskedIdentifier??"",d?.Enabled??false,(int)(d?.Categories??DiscordCategories.None),"Discord channels may be visible outside this organization. Sharing with members is not external consent. No coordinates, raw science, notes or credentials are sent. Delivered means Discord acknowledged the post; it is not scientific certification.");
-    IDataProtector Protector(DiscordDestinationRecord d)=>protection.CreateProtector("AeroScience/Discord/v1",d.OrganizationId.ToString(),d.PublicId.ToString());
+    IDataProtector Protector(DiscordDestinationRecord d)=>DiscordCredentialProtection.Protector(protection,d.OrganizationId,d.PublicId);
     async Task Lock(CancellationToken ct)=>await db.Database.ExecuteSqlRawAsync($"SELECT pg_advisory_xact_lock({OrganizationMembership.MembershipLock})",ct);
     async Task<MembershipRecord> Member(ClaimsPrincipal actor,CancellationToken ct)
     {

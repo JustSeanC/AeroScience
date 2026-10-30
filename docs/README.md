@@ -87,3 +87,7 @@ feedback/log collection remain available. Review private flight locations and cr
 before sharing diagnostic files.
 
 - [Organization Discord notifications](v0.7.0-organization-notifications.md) — optional external consent, administrator settings and delivery states.
+
+## v0.7.0 integrated acceptance
+
+[P28 engineering evidence and remaining release gates](validation/v0.7.0-p28.md) distinguish automated integration from installed MSFS, Discord, Railway and owner acceptance. No owner action is requested while hosting trust and first-owner delivery remain blocked. The linked short tester pages contain app-only checks for later acceptance.

@@ -19,6 +19,8 @@ public sealed partial class OrganizationConnectionIntegrationTests
     {
         await using var f=await SubmissionFixture.Create(protectedIdentity:true);var card=await f.Card(ObservationResearch.Template);var attempt=await f.Record(card.Prepared,2,notes:true);var approved=await f.ReviewApprove(f.Draft(attempt));using var delivery=f.Delivery();Assert.Equal(SubmissionDeliveryState.ServerReceived,(await delivery.Send(approved.Id,default)).State);
         var enrollment=await f.Server.Post("/api/account-security/enroll",new AccountEnrollment("ResearchOnly!2026Flight"));var key=enrollment.GetProperty("setupKey").GetString()!;var code=OrganizationServerTests.AuthenticatorCode(key,DateTimeOffset.UtcNow.ToUnixTimeSeconds()/30+1);var enabled=await f.Server.Post("/api/account-security/enable",new AccountCode(code));var recovery=enabled.GetProperty("recoveryCodes")[0].GetString()!;await f.Server.Post("/api/account-security/confirm-recovery",new AccountRecoveryConfirmation(recovery));
+        var webhook="https://discord.com/api/webhooks/123456789012345678/"+new string('a',60);
+        await f.Server.Post(Notifications,new DiscordSettingsCommand(Guid.NewGuid(),0,"Protected restore fixture",false,0,webhook));
         var repository=Path.Combine(Path.GetTempPath(),"aeroscience-independent-recovery-"+Guid.NewGuid().ToString("N"));var work=Path.Combine(f.Root,"private-work");var password=Path.Combine(f.Root,"repository-key");File.WriteAllText(password,Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(32)));OrganizationConfigurationTests.ProtectCredential(password);
         var options=new ServerOperationsOptions(true,repository,password,"Disposable independent local repository",work,System.Environment.GetEnvironmentVariable("AEROSCIENCE_RECOVERY_RESTIC")!,System.Environment.GetEnvironmentVariable("AEROSCIENCE_RECOVERY_PG_DUMP")!,System.Environment.GetEnvironmentVariable("AEROSCIENCE_RECOVERY_PG_RESTORE")!,System.Environment.GetEnvironmentVariable("AEROSCIENCE_ORG_TEST_DATABASE"),null,64*1024*1024,null,null);
         try{
@@ -28,9 +30,19 @@ public sealed partial class OrganizationConnectionIntegrationTests
             await db.Database.ExecuteSqlRawAsync("TRUNCATE organization.\"Submissions\" CASCADE");Assert.Equal(0,await db.Submissions.CountAsync());var discovered=await engine.Discover(backup.SnapshotId,default);Assert.Equal(backup.BundleSha256,discovered.BundleSha256);Assert.Equal(backup.ManifestJson,discovered.ManifestJson);var verified=await engine.VerifyRestore(discovered,default);Assert.Equal(manifest.EvidenceDigest,verified.EvidenceDigest);Assert.Equal(manifest.AuditDigest,verified.AuditDigest);Assert.Equal(1,verified.ReceivedPackages);Assert.Equal(0,await db.Submissions.CountAsync());Assert.Empty(Directory.GetFileSystemEntries(work));
             // Authenticated encryption refuses an independently wrong repository key, and never creates replacement identity.
             var wrong=Path.Combine(f.Root,"wrong-repository-key");File.WriteAllText(wrong,new string('x',64));OrganizationConfigurationTests.ProtectCredential(wrong);await Assert.ThrowsAsync<InvalidOperationException>(()=>new OrganizationRecoveryEngine(db,settings,options with{PasswordFile=wrong}).VerifyRestore(backup,default));Assert.Equal(0,await db.Submissions.CountAsync());Assert.Empty(Directory.GetFileSystemEntries(work));
+            Assert.Contains("identity/notification-secret decryption",verified.Scope);
+            // A structurally valid encrypted dump can contain unusable protected settings.
+            // Verify their decryption too, without enabling notifications or making an HTTP request.
+            var protectedWebhook=(await db.DiscordDestinations.AsNoTracking().SingleAsync()).ProtectedCredential;
+            await db.DiscordDestinations.ExecuteUpdateAsync(s=>s.SetProperty(d=>d.ProtectedCredential,"invalid-protected-notification"));
+            var damagedSettings=await engine.Backup(Guid.NewGuid(),default);
+            var rejected=await Assert.ThrowsAsync<InvalidOperationException>(()=>engine.VerifyRestore(damagedSettings,default));
+            Assert.Contains("Restored notification credentials",rejected.Message);Assert.DoesNotContain(webhook,rejected.ToString());Assert.Null(rejected.InnerException);
+            await db.DiscordDestinations.ExecuteUpdateAsync(s=>s.SetProperty(d=>d.ProtectedCredential,protectedWebhook));Assert.Empty(Directory.GetFileSystemEntries(work));
+            Assert.False((await db.DiscordDestinations.AsNoTracking().SingleAsync()).Enabled);Assert.Empty(await db.DiscordDeliveries.ToArrayAsync());
             // Reject modified manifest/hash before touching any database.
             backup.BundleSha256=new string('0',64);await Assert.ThrowsAsync<InvalidOperationException>(()=>engine.VerifyRestore(backup,default));Assert.Empty(Directory.GetFileSystemEntries(work));
-            foreach(var file in Directory.EnumerateFiles(repository,"*",SearchOption.AllDirectories)){if(new FileInfo(file).Length>4*1024*1024)continue;var bytes=await File.ReadAllBytesAsync(file);Assert.DoesNotContain("Selected original pilot note",Encoding.UTF8.GetString(bytes));Assert.DoesNotContain(key,Encoding.UTF8.GetString(bytes));}
+            foreach(var file in Directory.EnumerateFiles(repository,"*",SearchOption.AllDirectories)){if(new FileInfo(file).Length>4*1024*1024)continue;var bytes=await File.ReadAllBytesAsync(file);Assert.DoesNotContain("Selected original pilot note",Encoding.UTF8.GetString(bytes));Assert.DoesNotContain(key,Encoding.UTF8.GetString(bytes));Assert.DoesNotContain(webhook,Encoding.UTF8.GetString(bytes));}
         }finally{if(Directory.Exists(repository))Directory.Delete(repository,true);}
     }
 }

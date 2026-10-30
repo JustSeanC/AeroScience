@@ -12,6 +12,33 @@ namespace AeroScience.Organization;
 // Provider image promotion and draining old replicas remain independently authorized operator work.
 public static class OrganizationSchemaUpgrade
 {
+    static async Task<string[]> OperationalQueries(NpgsqlConnection connection,NpgsqlTransaction transaction,CancellationToken ct)
+    {
+        var queries=new List<string>();
+        // Compare only columns present in the source schema. New additive tables/columns
+        // are allowed; existing consent, delivery and authority records cannot be rewritten.
+        foreach(var (table,order) in new[]{("Events","\"Sequence\""),("LiveConsents","\"Id\""),("LivePolicies","\"Id\""),("DiscordDestinations","\"Id\""),("DiscordConsents","\"SessionId\""),("DiscordDisclosures","\"EventId\",\"DestinationId\",\"DestinationRevision\""),("DiscordDeliveries","\"Sequence\"")}){
+            var columns=new List<string>();
+            await using(var metadata=new NpgsqlCommand("SELECT quote_ident(column_name) FROM information_schema.columns WHERE table_schema='organization' AND table_name=@table ORDER BY ordinal_position",connection,transaction)){
+                metadata.Parameters.AddWithValue("table",table);await using var reader=await metadata.ExecuteReaderAsync(ct);
+                while(await reader.ReadAsync(ct)){if(columns.Count>=128)throw new InvalidOperationException("Operational schema exceeds the bounded update contract.");columns.Add(reader.GetString(0));}
+            }
+            // Names are a compiled allowlist and PostgreSQL-quoted metadata, never input from
+            // a request, template, update manifest or external SQL script.
+            if(columns.Count>0)queries.Add("SELECT "+string.Join(',',columns)+" FROM organization.\""+table+"\" ORDER BY "+order);
+        }
+        return queries.ToArray();
+    }
+    static async Task<string> OperationalDigest(string[] queries,NpgsqlConnection connection,NpgsqlTransaction transaction,CancellationToken ct)
+    {
+        using var hash=IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
+        foreach(var query in queries){
+            hash.AppendData(System.Text.Encoding.UTF8.GetBytes(query));
+            await using var command=new NpgsqlCommand(query,connection,transaction);await using var reader=await command.ExecuteReaderAsync(ct);
+            while(await reader.ReadAsync(ct)){var row=new object[reader.FieldCount];reader.GetValues(row);hash.AppendData(JsonSerializer.SerializeToUtf8Bytes(row,WireJson.Options));}
+        }
+        return Convert.ToHexStringLower(hash.GetHashAndReset());
+    }
     static async Task<string> IdentityDigest(NpgsqlConnection connection,NpgsqlTransaction transaction,CancellationToken ct)
     {
         using var hash=IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
@@ -78,9 +105,11 @@ public static class OrganizationSchemaUpgrade
             if(job is not null)await RequireApprover(db,job,ct);
             var before=await OrganizationRecoveryEngine.Digests(connection,transaction,ct);
             var identity=await IdentityDigest(connection,transaction,ct);
+            var operationalQueries=await OperationalQueries(connection,transaction,ct);
+            var operational=await OperationalDigest(operationalQueries,connection,transaction,ct);
             await using(var command=new NpgsqlCommand(script,connection,transaction){CommandTimeout=900})await command.ExecuteNonQueryAsync(ct);
             var after=await OrganizationRecoveryEngine.Digests(connection,transaction,ct);
-            if(before!=after||identity!=await IdentityDigest(connection,transaction,ct)||!(await db.Database.GetAppliedMigrationsAsync(ct)).SequenceEqual(known))throw new InvalidOperationException("Upgrade changed original evidence/audit/administrator identity or failed exact schema verification. The complete transaction is rolled back.");
+            if(before!=after||identity!=await IdentityDigest(connection,transaction,ct)||operational!=await OperationalDigest(operationalQueries,connection,transaction,ct)||!(await db.Database.GetAppliedMigrationsAsync(ct)).SequenceEqual(known))throw new InvalidOperationException("Upgrade changed original evidence/audit/administrator identity or organization operational history, or failed exact schema verification. The complete transaction is rolled back.");
             if(job is not null){db.Audit.Add(new(){TimestampUtc=DateTimeOffset.UtcNow,ActorId=job.ActorId,ActorName=job.ActorName,Action="server-schema-update-applied",ResourceId=job.Id,Revision=known.Length});await db.SaveChangesAsync(ct);}
             await tx.CommitAsync(ct);
         }finally{await db.Database.CloseConnectionAsync();}

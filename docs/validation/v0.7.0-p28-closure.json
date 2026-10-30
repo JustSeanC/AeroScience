@@ -1,0 +1,137 @@
+{
+  "version": 1,
+  "milestone": "v0.7.0 P28",
+  "branch": "develop/v0.7.0",
+  "startingHead": "d0dfc3e4927557037567f4f1d9b1331016e99ce8",
+  "status": "Independent engineering in progress; final source-bound Full pending; hosting and external acceptance blocked",
+  "testedSource": null,
+  "automatedIntegrationAccepted": false,
+  "p28Accepted": false,
+  "productionReady": false,
+  "releaseReady": false,
+  "p29Started": false,
+  "baseline": {
+    "source": "62e564c2627963f117b439c5477c45cf3aa341f5",
+    "full": 41010892379,
+    "accepted": true,
+    "preserved": true
+  },
+  "full": null,
+  "externalAcceptance": {
+    "windowsMsfs": "not performed",
+    "realDiscord": "not performed",
+    "railwayIngress": "blocked by unproven exclusive/authenticated ingress contract",
+    "railwayOwnerSetup": "blocked by sealed secret delivery and unproven project-owner replacement",
+    "railwayDeployment": "not ready for owner testing",
+    "independentCloudRecovery": "not performed; isolated infrastructure passed previously and focused P28",
+    "providerUpdatesAndRotation": "not performed; compiled transactional rollback tested",
+    "fiveStageNovice": "not performed",
+    "costObservation": "not performed",
+    "nasaOriginal": "not performed; synthetic fixtures do not establish actual-source acceptance",
+    "physicalDevices": "not performed"
+  },
+  "ownerActionNow": "None",
+  "publicAssetsPublished": false,
+  "paidResourcesCreated": false,
+  "protectedReadmeSha256": "f32cff962da446a6b10e411124155ec281a6cfc06664ca01dfc5754b44d13049",
+  "focused": {
+    "authenticatedHealthRed": {
+      "passed": 1,
+      "failed": 2,
+      "skipped": 0
+    },
+    "healthCorrected": {
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0
+    },
+    "joinedResearch": {
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0
+    },
+    "protectedRecovery": {
+      "passed": 10,
+      "failed": 0,
+      "skipped": 0
+    },
+    "upgradeEventRed": {
+      "passed": 0,
+      "failed": 1,
+      "skipped": 0
+    },
+    "integratedCorrection": {
+      "passed": 13,
+      "failed": 0,
+      "skipped": 0
+    },
+    "securityRegression": {
+      "passed": 100,
+      "failed": 0,
+      "skipped": 0
+    },
+    "overlap": true,
+    "browser": {
+      "passed": 31,
+      "failed": 0,
+      "skipped": 0
+    },
+    "railwaySdk": {
+      "passed": 5,
+      "failed": 0,
+      "skipped": 0
+    },
+    "railwayPython": {
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0
+    },
+    "documentation": {
+      "passed": 5,
+      "failed": 0,
+      "skipped": 0
+    }
+  },
+  "requirements": [
+    {
+      "id": "P28-A",
+      "state": "Implemented and focused technically validated; final Full pending",
+      "evidence": "real-process scientific/organization integration and original regression suites"
+    },
+    {
+      "id": "P28-B-ingress",
+      "state": "Blocked by a precise external dependency",
+      "evidence": "official provider contract does not establish exclusive authenticated upstream identity"
+    },
+    {
+      "id": "P28-B-owner",
+      "state": "Blocked by a precise external dependency",
+      "evidence": "sealed values cannot be retrieved; authoritative deployment-owner handoff unproven"
+    },
+    {
+      "id": "P28-B-distribution",
+      "state": "Blocked by explicit publication authorization and security prerequisites",
+      "evidence": "private exact-source image preparation only; no published digest/template"
+    },
+    {
+      "id": "P28-B-recovery-updates",
+      "state": "Local implementation technically exercised; provider acceptance blocked",
+      "evidence": "actual pg_dump/restic/pg_restore, separately keyed source loss, compiled migration rollback; no cloud promotion"
+    },
+    {
+      "id": "P28-C-flight-discord",
+      "state": "Guides ready for later external owner testing",
+      "evidence": "short actual-label app-only guides; no owner action now"
+    },
+    {
+      "id": "P28-C-hosting",
+      "state": "Blocked before owner testing",
+      "evidence": "no supported Deploy with Railway button; no five-stage trial claimed"
+    },
+    {
+      "id": "P28-D",
+      "state": "Focused security regression passed; Full pending",
+      "evidence": "100 actual PostgreSQL affected cases; P01-P27 preserved"
+    }
+  ]
+}

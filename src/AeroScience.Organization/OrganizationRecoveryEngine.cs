@@ -166,8 +166,15 @@ public sealed partial class OrganizationRecoveryEngine(OrganizationDatabase db,O
                     foreach(var admin in administrators)if(await manager.GetAuthenticatorKeyAsync(admin) is null)throw new InvalidOperationException("Restored MFA could not be decrypted with the paired identity.");
                     if(administrators.Length<100)break;
                 }
+                // Older supported schema prefixes predate P27. Never invent or migrate their
+                // notification tables while verifying an exact historic checkpoint.
+                if(await context.Database.SqlQueryRaw<bool>("SELECT to_regclass('organization.\"DiscordDestinations\"') IS NOT NULL AS \"Value\"").SingleAsync(ct)){
+                    var destinations=await context.DiscordDestinations.AsNoTracking().Take(2).ToArrayAsync(ct);
+                    if(destinations.Length>1)throw new InvalidOperationException("Restored notification configuration exceeds the supported organization boundary.");
+                    foreach(var destination in destinations)DiscordCredentialProtection.VerifyRestored(destination,manifest.OrganizationId,scope.ServiceProvider.GetRequiredService<IDataProtectionProvider>());
+                }
             }
-            return new(1,backup.Id,manifest.OrganizationId,dumpHash,Hash(certificate.RawData),digests.Evidence,digests.Packages,digests.Audit,digests.Events,manifest.Migrations,DateTimeOffset.UtcNow,"Actual isolated PostgreSQL restore and original identity-secret decryption. Primary data were not modified. Provider/account loss and novice recovery still require external acceptance.");
+            return new(1,backup.Id,manifest.OrganizationId,dumpHash,Hash(certificate.RawData),digests.Evidence,digests.Packages,digests.Audit,digests.Events,manifest.Migrations,DateTimeOffset.UtcNow,"Actual isolated PostgreSQL restore and original identity/notification-secret decryption. Primary data were not modified; no notification was sent. Provider/account loss and novice recovery still require external acceptance.");
         }finally{
             // Only generated disposable databases may be removed, never the original organization database.
             try{await using var admin=new NpgsqlConnection(recovery);await admin.OpenAsync(CancellationToken.None);await using var drop=new NpgsqlCommand("DROP DATABASE IF EXISTS \""+temporaryDatabase+"\" WITH (FORCE)",admin);await drop.ExecuteNonQueryAsync(CancellationToken.None);}catch{ }
