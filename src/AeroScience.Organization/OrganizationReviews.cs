@@ -35,6 +35,8 @@ public sealed class OrganizationReviews(OrganizationDatabase db,OrganizationMemb
     {
         var e=new ResearchReviewEvent(1,Guid.NewGuid(),r.Id,checked(r.Revision+1),action,actor,name,role,at??OrganizationTime.UtcNow,target,note,evidence,resolved,respond,receipt,payload,1,r.HeadSha256,"");e=e with{Sha256=PreflightReadiness.Hash(e)};
         db.ReviewEvents.Add(new(){RootId=r.Id,Id=e.Id,Sequence=e.Sequence,PayloadJson=JsonSerializer.Serialize(e,WireJson.Options),Sha256=e.Sha256});r.Revision=e.Sequence;r.HeadSha256=e.Sha256;r.UpdatedUtc=OrganizationTime.UtcNow;
+        var eventType=action switch{ResearchReviewAction.Approve=>OrganizationEventType.RequirementApproved,ResearchReviewAction.Reject=>OrganizationEventType.RequirementRejected,ResearchReviewAction.RequestEvidence=>OrganizationEventType.MoreEvidenceRequested,_=>(OrganizationEventType?)null};
+        if(eventType is {} type)OrganizationEvents.Add(db,db.Organizations.Select(o=>o.PublicId).Single(),type,"P18/immutable-review-finding/v1",e.Id,e.Sequence,actor,"review:"+e.Id,OrganizationEventVisibility.AuthorizedReviewers,"Requirement-level human review decision. Original measured outcomes remain unchanged; no package-wide completion is implied.",r.PilotId,r.CampaignId,target?.CardId,target?.RequirementKey,e.TimestampUtc);
         audit.Audit(actor,name,"research-review-"+action.ToString().ToLowerInvariant(),r.Id,r.Revision);return e;
     }
     public async Task Received(SubmissionDocument d,SubmissionReceipt receipt,CancellationToken ct)
