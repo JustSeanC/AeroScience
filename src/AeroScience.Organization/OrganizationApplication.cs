@@ -31,7 +31,7 @@ public sealed class OrganizationProgram
         if(args is ["--health-check"]){
             try{using var client=new HttpClient(new SocketsHttpHandler{UseProxy=false}){Timeout=TimeSpan.FromSeconds(3)};using var response=await client.GetAsync("http://127.0.0.1:8080/healthz/ready");Environment.ExitCode=response.IsSuccessStatusCode?0:1;}catch{Environment.ExitCode=1;}return;
         }
-        try{if(args is ["--railway-volume-check"]){RailwayRuntime.InitializeVolumeAndDropPrivileges();RailwayRuntime.RefuseRootApplication();Console.WriteLine("Restricted service identity ready; no network listener started.");return;}if(args is ["--railway-start"]){RailwayRuntime.InitializeVolumeAndDropPrivileges();var configuration=new ConfigurationManager();configuration.AddEnvironmentVariables();await RailwayRuntime.Configure(configuration,CancellationToken.None);var railwayApp=OrganizationApplication.Build([],b=>b.Configuration.AddConfiguration(configuration));await OrganizationApplication.Initialize(railwayApp);await railwayApp.RunAsync();return;}var app=OrganizationApplication.Build(args);await OrganizationApplication.Initialize(app);await app.RunAsync();}
+        try{if(args is ["--railway-volume-check"]){RailwayRuntime.InitializeVolumeAndDropPrivileges();RailwayRuntime.RefuseRootApplication();Console.WriteLine("Restricted service identity ready; no network listener started.");return;}if(args is ["--railway-start"]){RailwayRuntime.InitializeVolumeAndDropPrivileges();var configuration=new ConfigurationManager();configuration.AddEnvironmentVariables();await RailwayRuntime.Configure(configuration,CancellationToken.None);var railwayApp=OrganizationApplication.Build([],b=>b.Configuration.AddConfiguration(configuration));await OrganizationSchemaUpgrade.ApplyConfigured(railwayApp.Services,CancellationToken.None);await OrganizationApplication.Initialize(railwayApp);await railwayApp.RunAsync();return;}var app=OrganizationApplication.Build(args);await OrganizationApplication.Initialize(app);await app.RunAsync();}
         catch(Exception ex){Console.Error.WriteLine($"Organization startup stopped safely ({ex.GetType().Name}). Check protected deployment configuration and database/schema compatibility. No credential values are printed.");Environment.ExitCode=1;}
     }
 }
@@ -58,6 +58,7 @@ public static class OrganizationApplication
         OrganizationDeployment.PrepareCertificate(settings);
         if(settings.LocalDevelopment)builder.WebHost.UseUrls(settings.Origin.GetLeftPart(UriPartial.Authority));
         builder.WebHost.ConfigureKestrel(o=>{o.Limits.MaxRequestBodySize=32768;o.Limits.RequestHeadersTimeout=TimeSpan.FromSeconds(15);});
+        if(settings.AuthenticatedLocalIngress){builder.WebHost.ConfigureKestrel(o=>{o.ListenAnyIP(settings.IngressPublicPort);o.Listen(IPAddress.Loopback,settings.IngressApplicationPort);});builder.Services.AddSingleton<OrganizationIngress>();}
         builder.Services.ConfigureHttpJsonOptions(o=>{
             o.SerializerOptions.PropertyNamingPolicy=JsonNamingPolicy.CamelCase;o.SerializerOptions.MaxDepth=24;
             o.SerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase,allowIntegerValues:false));
@@ -67,6 +68,8 @@ public static class OrganizationApplication
         builder.Services.AddSingleton(ServerOperationsOptions.Read(builder.Configuration,settings));
         builder.Services.AddScoped<OrganizationOperations>();builder.Services.AddScoped<OrganizationRecoveryEngine>();builder.Services.AddHostedService<OrganizationOperationsWorker>();
         builder.Services.AddSingleton(settings);builder.Services.AddSingleton<BootstrapCredential>();
+        builder.Services.AddScoped<OrganizationOwnerSetup>();
+        builder.Services.AddSingleton<OrganizationMaintenance>();
         builder.Services.AddDbContext<OrganizationDatabase>(o=>o.UseNpgsql(settings.ConnectionString,n=>n.CommandTimeout(15)));
         var keys=builder.Services.AddDataProtection().SetApplicationName("AeroScience.Organization.0.7").PersistKeysToDbContext<OrganizationDatabase>();
         var certificate=settings.LoadKeyCertificate();if(certificate is not null)keys.ProtectKeysWithCertificate(certificate);
@@ -124,9 +127,11 @@ public static class OrganizationApplication
         builder.Services.AddSingleton(new OrganizationSubmissionOptions{MaximumRetainedPayloadBytes=submissionLimit});
         builder.Logging.AddFilter("Microsoft.AspNetCore",LogLevel.Warning); // Never log invitation/connection input or credentials.
         var app=builder.Build();
+        if(settings.AuthenticatedLocalIngress){var ingress=app.Services.GetRequiredService<OrganizationIngress>();app.Use((context,next)=>ingress.Invoke(context,next));}
         if(certificate is not null)app.Lifetime.ApplicationStopped.Register(certificate.Dispose);
         if(settings.TrustedProxies.Length>0){var forwarded=new ForwardedHeadersOptions{ForwardedHeaders=ForwardedHeaders.XForwardedFor|ForwardedHeaders.XForwardedProto,ForwardLimit=1};forwarded.KnownIPNetworks.Clear();forwarded.KnownProxies.Clear();foreach(var proxy in settings.TrustedProxies)forwarded.KnownProxies.Add(proxy);app.UseForwardedHeaders(forwarded);}
         app.Use(async(context,next)=>{
+            if(app.Services.GetRequiredService<OrganizationMaintenance>().Active&&context.Request.Path!="/healthz/ready"){context.Response.StatusCode=503;await context.Response.WriteAsJsonAsync(new{error="A verified organization restore is activating. Reconnect and sign in after the server restarts."});return;}
             context.Response.Headers.CacheControl="no-store";context.Response.Headers.XContentTypeOptions="nosniff";context.Response.Headers["Referrer-Policy"]="no-referrer";
             context.Response.Headers.ContentSecurityPolicy="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'self'; frame-ancestors 'none'; form-action 'self'; base-uri 'none'";
             if(!settings.LocalDevelopment)context.Response.Headers.StrictTransportSecurity="max-age=31536000";
@@ -162,7 +167,7 @@ public static class OrganizationApplication
         app.Use(async(context,next)=>{
             if(context.Request.Method is not("GET" or "HEAD" or "OPTIONS")){
                 // Native device client only. Browser actions retain Origin + antiforgery.
-                if(context.Request.Path is var path&&(path=="/api/device/start"||path=="/api/device/poll"||path=="/api/device/disconnect"||path=="/api/member/claim-command"||path==OrganizationSubmissionApi.ReceivePath||path==OrganizationSubmissionApi.CancelPath||OrganizationReviewApi.IsNativeResponse(path)||OrganizationLiveApi.IsNativeWrite(path))){
+                if(context.Request.Path is var path&&(path=="/api/owner/approve"||path=="/api/device/start"||path=="/api/device/poll"||path=="/api/device/disconnect"||path=="/api/member/claim-command"||path==OrganizationSubmissionApi.ReceivePath||path==OrganizationSubmissionApi.CancelPath||OrganizationReviewApi.IsNativeResponse(path)||OrganizationLiveApi.IsNativeWrite(path))){
                     if(context.Request.Headers.ContainsKey("Origin")||context.Request.Headers.ContainsKey("Cookie")){context.Response.StatusCode=403;return;}
                     await next();return;
                 }
@@ -196,7 +201,7 @@ public static class OrganizationApplication
                 throw new InvalidOperationException("Existing production data require an accepted paired-recovery upgrade. Automatic production migration is blocked; no previous image alone can roll back a schema.");
             await db.Database.MigrateAsync(token);scope.ServiceProvider.GetRequiredService<ProgramWorkflow>().Rebuilding=true;await scope.ServiceProvider.GetRequiredService<OrganizationReviews>().Backfill(token);await scope.ServiceProvider.GetRequiredService<CampaignProgressProjection>().Backfill(token);await scope.ServiceProvider.GetRequiredService<CampaignCoverageProjection>().Backfill(token);await scope.ServiceProvider.GetRequiredService<ProgramWorkflow>().Backfill(token);var settings=app.Services.GetRequiredService<OrganizationSettings>();
             await OrganizationDeployment.Initialize(db,settings,app.Services.GetRequiredService<BootstrapCredential>(),token);
-            if(!settings.ManagedDeployment&&!await db.Organizations.AnyAsync(token))app.Services.GetRequiredService<BootstrapCredential>().Initialize(settings.ReadBootstrapSecret());
+            if(!settings.ManagedDeployment&&settings.OwnerPublicKey is null&&!await db.Organizations.AnyAsync(token))app.Services.GetRequiredService<BootstrapCredential>().Initialize(settings.ReadBootstrapSecret());
         }
         catch(OrganizationDatabaseEncodingException){throw;}
         catch(Exception ex) when(ex is not OperationCanceledException){throw new InvalidOperationException("Organization startup refused: database/schema, protected bootstrap or key configuration is unavailable. No personal-data fallback was used.");}
@@ -227,13 +232,16 @@ public static class OrganizationApplication
     static OrganizationSettings settingsFor(HttpContext context)=>context.RequestServices.GetRequiredService<OrganizationSettings>();
     static void MapIdentity(WebApplication app)
     {
+        OrganizationOwnerSetup.Map(app);
         app.MapGet("/api/session",async(HttpContext c,OrganizationDatabase db,IAntiforgery csrf)=>new{
+            ownerPairing=settingsFor(c).OwnerPublicKey is not null,
             membershipState=c.User.Identity?.IsAuthenticated==true?await db.Memberships.Where(m=>m.UserId==Guid.Parse(c.User.FindFirstValue(ClaimTypes.NameIdentifier)!)).Select(m=>(OrganizationMembershipState?)m.State).SingleOrDefaultAsync(c.RequestAborted):null,
             initialized=await db.Organizations.AnyAsync(c.RequestAborted),csrf=csrf.GetAndStoreTokens(c).RequestToken,
             accountSecurityRequired=settingsFor(c).RequireAdministratorMfa&&c.User.IsInRole("Administrator")&&(!OrganizationAccountSecurity.Verified(c.User)||!OrganizationAccountSecurity.Ready((await db.Users.SingleAsync(u=>u.Id==Guid.Parse(c.User.FindFirstValue(ClaimTypes.NameIdentifier)!),c.RequestAborted)))),
             user=c.User.Identity?.IsAuthenticated==true?new{id=c.User.FindFirstValue(ClaimTypes.NameIdentifier),name=c.User.Identity.Name,roles=c.User.FindAll(ClaimTypes.Role).Select(r=>r.Value).ToArray()}:null
         });
         app.MapPost("/api/bootstrap",async(OrganizationBootstrapRequest request,BootstrapCredential credential,OrganizationDatabase db,UserManager<OrganizationUser> users,RoleManager<IdentityRole<Guid>> roles,OrganizationManagement management,HttpContext c)=>{
+            if(settingsFor(c).OwnerPublicKey is not null)throw new OrganizationForbidden();
             if(!credential.Matches(request.Secret))return Results.Json(new{error="The protected organization setup credential was not accepted."},statusCode:403);
             ValidateIdentity(request.UserName,request.Password);
             if(string.IsNullOrWhiteSpace(request.OrganizationName)||request.OrganizationName.Length>120||request.OrganizationName.Any(char.IsControl)||request.Description is null||request.Description.Length>4000||request.Description.Any(c=>char.IsControl(c)&&c is not('\n' or '\r' or '\t')))throw new ArgumentException("Enter an organization name (up to 120 characters) and description (up to 4,000).");

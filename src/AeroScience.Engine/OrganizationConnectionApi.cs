@@ -11,6 +11,10 @@ public static class OrganizationConnectionApi
             if(!AccessControl.IsLoopback(context.HttpContext))return Results.Json(new{error="Manage organization connections on the companion PC. Personal Research remains available here."},statusCode:403);
             return await next(context);
         });
+        api.MapGet("/hosting/owners",(OrganizationConnections connections,CancellationToken ct)=>connections.OwnerPairings(ct));
+        api.MapPost("/hosting/owners",(OwnerPairingCreate r,OrganizationConnections connections,CancellationToken ct)=>connections.CreateOwnerPairing(r,ct));
+        api.MapPost("/hosting/owners/review",(OwnerPairingInspect r,OrganizationConnections connections,CancellationToken ct)=>connections.InspectOwnerPairing(r,ct));
+        api.MapPost("/hosting/owners/approve",(OwnerPairingConfirm r,OrganizationConnections connections,CancellationToken ct)=>connections.ApproveOwnerPairing(r,ct));
         api.MapGet("/live/status",(LiveFlightSharing sharing)=>sharing.Status());
         api.MapGet("/{id:guid}/live",(Guid id,OrganizationConnections connections,HttpContext c)=>connections.LiveDashboard(id,c.RequestAborted));
         api.MapGet("/{id:guid}/live/preview",(Guid id,LiveFlightSharing sharing,HttpContext c)=>sharing.Preview(id,c.RequestAborted));

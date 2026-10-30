@@ -35,7 +35,9 @@ class RailwayDeploymentTests(unittest.TestCase):
         with self.assertRaises(ValueError):TRUST.attest(host,'repeat',secret,certificate)
     def test_candidate_uses_native_secret_references_without_fake_launch_or_public_database(self):
         value=json.loads((ROOT/'deploy/organization/railway/template.candidate.json').read_text());self.assertFalse(value['launchEnabled']);self.assertIsNone(value['nativeTemplateId']);self.assertLessEqual(len(value['stages']),5);self.assertFalse(value['services']['PostgreSQL']['publicNetworking']);self.assertTrue(value['recovery']['independentDestinationRequired']);self.assertGreater(len(value['acceptanceBlockers']),0)
-        for name in ('Organization__BootstrapSecret','Organization__KeyCertificatePassword'):self.assertTrue(value['services']['Organization']['variables'][name].startswith('${{secret('))
+        self.assertTrue(value['services']['Organization']['variables']['Organization__KeyCertificatePassword'].startswith('${{secret('))
+        self.assertNotIn('Organization__BootstrapSecret',value['services']['Organization']['variables'])
+        self.assertEqual('OWNER_PAIRING_PUBLIC_VALUE',value['services']['Organization']['variables']['AEROSCIENCE_OWNER_PAIRING'])
         self.assertEqual('${{PostgreSQL.AEROSCIENCE_DATABASE_TRUST_SECRET}}',value['services']['Organization']['variables']['AEROSCIENCE_DATABASE_TRUST_SECRET'])
     def test_recovery_and_application_profiles_keep_pins_and_privilege_boundary(self):
         operations=(ROOT/'deploy/organization/Dockerfile.operations').read_text();self.assertEqual(2,operations.count('@sha256:'));self.assertIn('USER 1654:1654',operations);self.assertIn('restic/restic:0.19.1@sha256:136600b6ff6843d61d355f7f71f460a166429f35de6fd11b568fece3c9a4d510',operations)

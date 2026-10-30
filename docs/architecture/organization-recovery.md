@@ -1,5 +1,17 @@
 # Organization security, recovery and update contracts — P26
 
+## P28 final hosting implementation (2026-10-30)
+
+The current implementation supersedes the earlier unresolved ingress/sealed-bootstrap design. It uses an untrusted public gateway with an authenticated loopback application boundary and a per-deployment public ownership key approved from the companion vault. Guided replacement/cold recovery, certificate renewal, authorization quarantine and a signed source/schema update runner are implemented. See [the exact architecture and limits](organization-hosting-final-engineering.md).
+
+The accepted integration baseline remains `2b4c9abc82862fd7040cdd0f9e1a6f0b75a6dd49` / [Full 41052886109](https://github.com/JustSeanC/AeroScience/actions/runs/41052886109). The new material hosting source is **awaiting its final Full acceptance**; prior results do not accept these changes. No public images/template, paid project, production signing identity or owner-operated cloud deployment has been created.
+
+Local evidence includes real PostgreSQL/HTTPS processes, multiple container replacements, exact owner authorization, independently encrypted source-loss recovery with original MFA/received evidence, credential quarantine, scoped non-superuser recovery ownership and compiled migration rollback. An isolated accepted-old/synthetic-future two-binary test checks stale checkpoint refusal, deliberate SQL failure, old-process recovery, exact approved migration and idempotent new-process health. The future version and registry string are fixtures, not a release or published image.
+
+**The five-stage Railway test is not ready yet.** The genuine native target/immutable image publication and composer per-owner prompt/domain behavior require authorized provider work. Live ingress/CA/volume behavior, independently controlled storage enrollment and account-loss recovery, safe native provider rollout, observed cost and the novice journey remain unaccepted. The portal does not pretend to apply a provider update. No owner login, payment, commands or infrastructure setup is requested now. P29 remains unstarted.
+
+Historical decisions and acceptance below are preserved; statements that gateway/pairing/restore promotion were unimplemented describe the earlier source.
+
 ## P28 integration corrections
 
 Paired restore now validates retained P27 Discord destination credentials using the original restored key ring, certificate and organization/destination protection purpose. It checks the masked endpoint identity, rejects unusable or cross-purpose ciphertext, and requires deleted destinations to contain no credential. Verification neither enables a destination nor sends an HTTP request. Older supported source schemas without P27 tables are not migrated during verification. Real encrypted restore and independent primary-loss tests include disabled protected notification configuration; a separately valid encrypted dump with damaged credential bytes fails verification.

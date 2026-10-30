@@ -1,5 +1,13 @@
 # Railway-first native deployment candidate — P26
 
+## P28 current implementation (2026-10-30)
+
+The [final hosting architecture](../../../docs/architecture/organization-hosting-final-engineering.md) supersedes the historical ingress/sealed-code limitations below. The public listener trusts no peer or forwarding header; a separate loopback application requires per-request expiring authentication. The native template draft requires each owner's **public Ownership Key** instead of embedding a template author's verifier or retrieving a sealed setup secret. The private key stays in the companion vault. Exact origin/project/environment/service and account details are reviewed before one-use approval. MFA/recovery remain mandatory.
+
+`templateDraft(images)` emits official SDK required-variable metadata with no default owner. The documented DSL still cannot author the generated public domain. Authorized publisher validation must confirm the native prompt/domain and immutable distribution before a genuine deployment button is enabled. No template, image or domain is published here. Guided independent-file restore, protected certificate renewal and compiled paired updates are implemented and locally tested; independent storage enrollment/account-loss and actual provider update dispatch remain external/engineering gates. The portal does not pretend to perform provider rollout. See [P28 validation](../../../docs/validation/v0.7.0-p28.md) for exact source-bound acceptance.
+
+Historical candidate text is preserved below; statements that the local gateway, owner replacement, restore promotion or identity renewal are unimplemented refer to the earlier source.
+
 ## Completion-pass native specification
 
 The supported project specification is [`.railway/railway.ts`](.railway/railway.ts), using official `railway/iac` **3.16.0**, with its own exact dependency lock. Offline tests invoke the actual SDK and validate its resource graph. This supersedes the composer JSON as executable project intent; `template.candidate.json` remains a status/recipe document, **not** Railway's import schema.

@@ -31,7 +31,10 @@ public sealed partial class OrganizationRecoveryEngine
             var directory=Path.Combine(options.WorkDirectory,"backup-"+Guid.NewGuid().ToString("N"));MakePrivate(directory);
             try{
                 var path=Path.Combine(directory,"organization.aeroscience");await Download(backup,path,ct);
-                var output=await other.Restic(ct,"backup",path,"--json","--host",host,"--tag",tag);
+                // Match snapshot time to ORIGINAL checkpoint UTC, not copy/retry time.
+                // This permits bounded newest-point lookup without treating an old copy
+                // retried today as newer scientific history.
+                var output=await other.BackupFile(path,host,[tag,"aeroscience-independent-v2","backup-"+backup.Id.ToString("D"),"bundle-"+backup.BundleSha256,"checkpoint-"+backup.CreatedUtc.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture)],ct,backup.CreatedUtc);
                 snapshot="";foreach(var line in output.Split('\n',StringSplitOptions.RemoveEmptyEntries)){using var doc=JsonDocument.Parse(line);if(doc.RootElement.TryGetProperty("snapshot_id",out var id))snapshot=id.GetString()!;}
             }finally{if(Directory.Exists(directory))Directory.Delete(directory,true);}
         }
@@ -39,6 +42,25 @@ public sealed partial class OrganizationRecoveryEngine
         var copy=new ServerBackupRecord{Id=backup.Id,OrganizationId=backup.OrganizationId,SnapshotId=snapshot,ManifestJson=backup.ManifestJson,BundleSha256=backup.BundleSha256,Bytes=backup.Bytes,CreatedUtc=backup.CreatedUtc};
         var verification=await other.VerifyRestore(copy,ct);
         backup.IndependentRepositorySha256=independentHash;backup.IndependentSnapshotId=snapshot;backup.IndependentVerifiedUtc=verification.VerifiedUtc;
+    }
+    internal async Task<RecoveryPointReference> LatestIndependentPoint(Guid organization,CancellationToken ct)
+    {
+        var host="aeroscience-"+organization;
+        using var document=JsonDocument.Parse(await Restic(ct,"snapshots","--host",host,"--tag","aeroscience-independent-v2","--latest","2","--group-by","host","--json"));
+        var groups=document.RootElement;if(groups.ValueKind!=JsonValueKind.Array||groups.GetArrayLength()!=1)throw new InvalidOperationException("No unique recent guided recovery group is available. Choose the file's exact checkpoint instead.");
+        var snapshots=groups[0].GetProperty("snapshots");if(snapshots.GetArrayLength() is <1 or >2)throw new InvalidOperationException("The recent recovery inventory is unsupported.");
+        var points=new List<RecoveryPointReference>();
+        foreach(var snapshot in snapshots.EnumerateArray()){
+            if(snapshot.GetProperty("hostname").GetString()!=host)throw new InvalidOperationException("Recovery inventory organization mismatch.");
+            var tags=snapshot.GetProperty("tags").EnumerateArray().Select(t=>t.GetString()??"").ToArray();if(tags.Length>16)throw new InvalidOperationException("Recovery tags exceed the bounded format.");
+            string Tag(string prefix){var matches=tags.Where(t=>t.StartsWith(prefix,StringComparison.Ordinal)).ToArray();if(matches.Length!=1)throw new InvalidOperationException("Recovery identity tags are ambiguous.");return matches[0][prefix.Length..];}
+            if(!Guid.TryParse(Tag("backup-"),out var backup)||backup==Guid.Empty||!long.TryParse(Tag("checkpoint-"),System.Globalization.NumberStyles.None,CultureInfo.InvariantCulture,out var milliseconds))throw new InvalidOperationException("Recovery checkpoint identity is invalid.");
+            var hash=Tag("bundle-");var id=snapshot.GetProperty("id").GetString()!;var time=DateTimeOffset.FromUnixTimeMilliseconds(milliseconds);var snapshotTime=snapshot.GetProperty("time").GetDateTimeOffset();
+            if(hash.Length!=64||id.Length!=64||hash.Any(c=>!char.IsAsciiHexDigitLower(c))||id.Any(c=>!char.IsAsciiHexDigitLower(c))||time.ToUnixTimeSeconds()!=snapshotTime.ToUnixTimeSeconds())throw new InvalidOperationException("Recovery snapshot time or integrity identity does not match its original checkpoint.");
+            points.Add(new(backup,organization,id,hash,time));
+        }
+        if(points.Count==2&&points[0].CreatedUtc.ToUnixTimeSeconds()==points[1].CreatedUtc.ToUnixTimeSeconds())throw new InvalidOperationException("Recent checkpoints share an ambiguous snapshot time. Choose an exact saved checkpoint; no older point was silently selected.");
+        return points.OrderByDescending(p=>p.CreatedUtc).First();
     }
     public async Task<int> EnforceRetention(ServerOperationsPolicyRecord policy,CancellationToken ct)
     {

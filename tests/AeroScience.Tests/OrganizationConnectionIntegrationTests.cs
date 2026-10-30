@@ -29,6 +29,8 @@ public sealed partial class OrganizationConnectionIntegrationTests
     {
         readonly Dictionary<Guid,string> entries=[];public bool Available=>true;
         public string? Read(Guid id)=>entries.GetValueOrDefault(id);public void Save(Guid id,string value)=>entries[id]=value;public void Remove(Guid id)=>entries.Remove(id);
+        readonly Dictionary<Guid,string> ownerEntries=[];public bool OwnerKeyAvailable=>true;
+        public string? ReadOwnerKey(Guid id)=>ownerEntries.GetValueOrDefault(id);public void SaveOwnerKey(Guid id,string value)=>ownerEntries[id]=value;public void RemoveOwnerKey(Guid id)=>ownerEntries.Remove(id);
     }
     sealed class Server(WebApplication app,HttpClient browser,string origin,string database):IAsyncDisposable
     {
@@ -43,14 +45,14 @@ public sealed partial class OrganizationConnectionIntegrationTests
         public async Task Approve(OrganizationConnectBegin pending)=>await Post("/api/connection/approval",new OrganizationDeviceApproval(pending.PendingId,pending.Organization.Id,true,true,pending.Permission==OrganizationDesktopPermission.ManageOwnClaims,pending.Permission==OrganizationDesktopPermission.SubmitEvidence,pending.Permission==OrganizationDesktopPermission.ShareLiveFlight));
         public async ValueTask DisposeAsync(){browser.Dispose();await app.StopAsync();await app.DisposeAsync();}
     }
-    static async Task<Server> Start(string database,string directory,string name,bool existing=false,string? retainedOrigin=null,IDiscordTransport? notifications=null)
+    static async Task<Server> Start(string database,string directory,string name,bool existing=false,string? retainedOrigin=null,IDiscordTransport? notifications=null,Dictionary<string,string?>? settingsOverride=null,bool initializeOwner=true)
     {
         var admin=new NpgsqlConnectionStringBuilder(System.Environment.GetEnvironmentVariable("AEROSCIENCE_ORG_TEST_DATABASE"));
         if(admin.Host is not("127.0.0.1" or "localhost" or "::1"))throw new InvalidOperationException("Explicit isolated loopback PostgreSQL is required.");
         if(!existing)await using(var c=new NpgsqlConnection(admin.ConnectionString)){await c.OpenAsync();await using var cmd=new NpgsqlCommand($"CREATE DATABASE \"{database}\" ENCODING 'UTF8' TEMPLATE template0",c);await cmd.ExecuteNonQueryAsync();}
         admin.Database=database;var listener=new TcpListener(IPAddress.Loopback,0);listener.Start();var port=((IPEndPoint)listener.LocalEndpoint).Port;listener.Stop();var origin=retainedOrigin??"http://127.0.0.1:"+port;
         var secret=new string('s',48);var path=Path.Combine(directory,database);await File.WriteAllTextAsync(path,secret);OrganizationConfigurationTests.ProtectCredential(path);
-        var app=OrganizationApplication.Build([],b=>{b.Environment.EnvironmentName="Testing";b.Configuration.AddInMemoryCollection(new Dictionary<string,string?>{["Organization:LocalDevelopment"]="true",["Organization:PublicOrigin"]=origin,["Organization:ConnectionString"]=admin.ConnectionString,["Organization:BootstrapSecretFile"]=path,["Organization:KeyCertificateFile"]=File.Exists(Path.Combine(directory,"recovery-identity.pfx"))?Path.Combine(directory,"recovery-identity.pfx"):null,["Organization:KeyCertificatePassword"]=File.Exists(Path.Combine(directory,"recovery-identity.pfx"))?"P26-Only!Identity-Certificate-Key":null});if(notifications is not null)b.Services.AddSingleton<IDiscordTransport>(notifications);b.Logging.SetMinimumLevel(LogLevel.Warning);});
+        var app=OrganizationApplication.Build([],b=>{b.Environment.EnvironmentName="Testing";b.Configuration.AddInMemoryCollection(new Dictionary<string,string?>{["Organization:LocalDevelopment"]="true",["Organization:PublicOrigin"]=origin,["Organization:ConnectionString"]=admin.ConnectionString,["Organization:BootstrapSecretFile"]=path,["Organization:KeyCertificateFile"]=File.Exists(Path.Combine(directory,"recovery-identity.pfx"))?Path.Combine(directory,"recovery-identity.pfx"):null,["Organization:KeyCertificatePassword"]=File.Exists(Path.Combine(directory,"recovery-identity.pfx"))?"P26-Only!Identity-Certificate-Key":null});if(settingsOverride is not null)b.Configuration.AddInMemoryCollection(settingsOverride);if(notifications is not null)b.Services.AddSingleton<IDiscordTransport>(notifications);b.Logging.SetMinimumLevel(LogLevel.Warning);});
         var browser=new HttpClient(new HttpClientHandler{UseCookies=true,AllowAutoRedirect=false}){BaseAddress=new(origin)};var server=new Server(app,browser,origin,database);
         app.Use(async(c,next)=>{
             if(c.Request.Path=="/api/device/start"&&server.ForcedDeviceIdentity is {} collision){
@@ -62,7 +64,7 @@ public sealed partial class OrganizationConnectionIntegrationTests
         });
         await OrganizationApplication.Initialize(app);await app.StartAsync();
         if(notifications is not null)await app.Services.GetServices<IHostedService>().OfType<OrganizationNotificationWorker>().Single().StopAsync(default);
-        if(!existing)await server.Post("/api/bootstrap",new OrganizationBootstrapRequest(secret,name,"Private local organization","administrator","ResearchOnly!2026Flight"));await server.Post("/api/sign-in",new OrganizationLoginRequest("administrator","ResearchOnly!2026Flight"));return server;
+        if(initializeOwner){if(!existing)await server.Post("/api/bootstrap",new OrganizationBootstrapRequest(secret,name,"Private local organization","administrator","ResearchOnly!2026Flight"));await server.Post("/api/sign-in",new OrganizationLoginRequest("administrator","ResearchOnly!2026Flight"));}return server;
     }
     static async Task<Guid> Connect(OrganizationConnections desktop,Server server,OrganizationDesktopPermission permission=OrganizationDesktopPermission.ReadPublished)
     {

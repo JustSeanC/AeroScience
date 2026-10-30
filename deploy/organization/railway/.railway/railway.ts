@@ -1,6 +1,7 @@
 // Official Railway IaC authoring API (SDK locked in ../package-lock.json).
 // This declares a private candidate graph; it never authenticates, applies or publishes it.
 import { readFileSync, statSync } from 'node:fs';
+import {createPublicKey} from 'node:crypto';
 import { bucket, defineRailway, image, project, ref, service, volume } from 'railway/iac';
 
 const fields = ['version', 'sourceRevision', 'application', 'database', 'operations'];
@@ -13,8 +14,16 @@ export function validateImages(input) {
   if (new Set([input.application, input.database, input.operations]).size !== 3) throw Error('Application, database and operations must have independent image identities.');
   return input;
 }
-export function configuration(images) {
+export function validateOwnerPairing(value) {
+  if(typeof value!=='string'||value.length>256||!value.match(/^[a-f0-9-]{36}\.[A-Za-z0-9+/=]{100,200}$/))throw Error('Supply the public ownership pairing created in AeroScience. No private key or sealed setup secret belongs here.');
+  const [id,encoded]=value.split('.');if(!/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/.test(id)||id==='00000000-0000-0000-0000-000000000000')throw Error('Invalid ownership intent.');
+  const key=createPublicKey({key:Buffer.from(encoded,'base64'),format:'der',type:'spki'});
+  if(key.asymmetricKeyType!=='ec'||key.asymmetricKeyDetails.namedCurve!=='prime256v1')throw Error('Only supported public ownership keys can be deployed.');return value;
+}
+export function configuration(images,ownerPairing,templatePrompt=false) {
   validateImages(images);
+  if(!templatePrompt)validateOwnerPairing(ownerPairing);
+  else if(ownerPairing!==undefined)throw Error('A reusable template must never bake in an author ownership verifier.');
   const secret = () => ({ value: '${{secret(64, "abcdef0123456789")}}', isSealed: true });
   const data = volume('organization-database', { sizeMB: 4096 });
   const identity = volume('organization-identity', { sizeMB: 1024 });
@@ -38,8 +47,7 @@ export function configuration(images) {
     deploy: { requiredMountPath: '/configuration', restartPolicyType: 'ON_FAILURE', restartPolicyMaxRetries: 3, overlapSeconds: 0, drainingSeconds: 30 },
     env: {
       RAILWAY_RUN_UID: '0', // fixed volume initializer permanently drops to UID/GID 1654 before serving
-      Organization__BootstrapSecret: secret(), Organization__KeyCertificatePassword: secret(),
-      Organization__BootstrapLifetimeMinutes: '60',
+      AEROSCIENCE_OWNER_PAIRING: templatePrompt?{value:null,defaultValue:null,isOptional:false,description:'Ownership Key: paste the public value from Create Organization Server in AeroScience. A new key is required for your own server. No private key belongs here.'}:ownerPairing, Organization__KeyCertificatePassword: secret(),
       AEROSCIENCE_DATABASE_HOST: db.env.RAILWAY_PRIVATE_DOMAIN,
       AEROSCIENCE_DATABASE_NAME: db.env.POSTGRES_DB, AEROSCIENCE_DATABASE_USER: 'aeroscience_application',
       AEROSCIENCE_DATABASE_PASSWORD: db.env.AEROSCIENCE_APPLICATION_DATABASE_PASSWORD,
@@ -53,13 +61,18 @@ export function configuration(images) {
   });
   // Public generated domains are not authored by the documented IaC DSL. No fabricated
   // domain, proxy, template ID or independent-account credential is silently supplied.
-  // Startup remains blocked until the finite ingress contract and public origin are verified.
+  // The authenticated local gateway needs no provider proxy-address configuration.
+  // Template publication must still supply native generated-domain configuration.
   return project('AeroScience Organization', { resources: [db, app, data, identity, recovery] });
 }
+// Native SDK VariableConfig metadata for the publisher's reusable-template draft.
+// NOT a published marketplace template/import format. Native HTTPS domain/prompt
+// behavior must be checked in the authorized Railway composer before publication.
+export function templateDraft(images){return configuration(images,undefined,true);}
 export default defineRailway(() => {
   const path = process.env.AEROSCIENCE_RAILWAY_IMAGE_SET;
   if (!path) throw Error('No accepted immutable image distribution is configured. This candidate cannot be deployed.');
   const stat=statSync(path);if(!stat.isFile()||stat.size>16384)throw Error('Image distribution metadata must be a bounded regular file.');
   const bytes = readFileSync(path); if (bytes.length > 16384) throw Error('Image distribution metadata is too large.');
-  return configuration(validateImages(JSON.parse(bytes.toString('utf8'))));
+  return configuration(validateImages(JSON.parse(bytes.toString('utf8'))),process.env.AEROSCIENCE_OWNER_PAIRING);
 });

@@ -16,6 +16,10 @@ public interface IOrganizationCredentials
     string? Read(Guid connection);
     void Save(Guid connection,string credential);
     void Remove(Guid connection);
+    bool OwnerKeyAvailable=>false;
+    string? ReadOwnerKey(Guid intent)=>null;
+    void SaveOwnerKey(Guid intent,string privateKey)=>throw new IOException("Protected ownership-key storage is unavailable on this companion.");
+    void RemoveOwnerKey(Guid intent)=>throw new IOException("Protected ownership-key storage is unavailable on this companion.");
 }
 public sealed class UnavailableOrganizationCredentials:IOrganizationCredentials
 {

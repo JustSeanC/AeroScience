@@ -3,6 +3,8 @@
 Tests the real pinned PostgreSQL image's SAN/private CA and permanent application privilege drop.
 """
 import argparse
+import base64
+import subprocess
 import json
 import os
 from pathlib import Path
@@ -19,10 +21,14 @@ def verify(application,database,output):
     def docker(*args,**kwargs):return execute(DOCKER+list(args),**kwargs)
     def record(name):report['checks'].append(name);print('PASS: '+name,flush=True)
     with tempfile.TemporaryDirectory(prefix='aeroscience-p26-railway-') as temporary:
-        root=Path(temporary);os.chmod(root,0o700);trust=secrets.token_hex(32);password=secrets.token_hex(32);appPassword=secrets.token_hex(32);recoveryPassword=secrets.token_hex(32);owner=secrets.token_hex(32);key=secrets.token_hex(32)
+        root=Path(temporary);os.chmod(root,0o700);trust=secrets.token_hex(32);password=secrets.token_hex(32);appPassword=secrets.token_hex(32);recoveryPassword=secrets.token_hex(32);key=secrets.token_hex(32)
+        ownerKey=root/'owner.pem';subprocess.run(['openssl','ecparam','-name','prime256v1','-genkey','-noout','-out',str(ownerKey)],check=True,capture_output=True);ownerKey.chmod(0o600)
+        public=subprocess.run(['openssl','pkey','-in',str(ownerKey),'-pubout','-outform','DER'],check=True,capture_output=True).stdout
+        owner=str(uuid.uuid4())+'.'+base64.b64encode(public).decode()
+        project,environment,service=(str(uuid.uuid4()) for _ in range(3))
         databaseEnv=root/'database.env';databaseEnv.write_text('POSTGRES_DB=aeroscience\nPOSTGRES_USER=postgres\nPGUSER=postgres\nPOSTGRES_PASSWORD='+password+'\nAEROSCIENCE_APPLICATION_DATABASE_PASSWORD='+appPassword+'\nAEROSCIENCE_RECOVERY_DATABASE_PASSWORD='+recoveryPassword+'\nRAILWAY_PRIVATE_DOMAIN=postgres.railway.internal\nAEROSCIENCE_DATABASE_TRUST_SECRET='+trust+'\n');databaseEnv.chmod(0o600)
-        applicationEnv=root/'application.env';applicationEnv.write_text('RAILWAY_PUBLIC_DOMAIN=synthetic.up.railway.app\nAEROSCIENCE_DATABASE_HOST=postgres.railway.internal\nAEROSCIENCE_DATABASE_NAME=aeroscience\nAEROSCIENCE_DATABASE_USER=aeroscience_application\nAEROSCIENCE_DATABASE_PASSWORD='+appPassword+'\nAEROSCIENCE_DATABASE_TRUST_SECRET='+trust+'\nOrganization__BootstrapSecret='+owner+'\nOrganization__KeyCertificatePassword='+key+'\nOrganization__TrustedProxies__0=127.0.0.1\n');applicationEnv.chmod(0o600)
-        def start():docker('run','--detach','--name',app,'--network',network,'--env-file',str(applicationEnv),'--mount','type=volume,src='+state+',dst=/configuration',application)
+        applicationEnv=root/'application.env';applicationEnv.write_text('RAILWAY_PUBLIC_DOMAIN=synthetic.up.railway.app\nAEROSCIENCE_DATABASE_HOST=postgres.railway.internal\nAEROSCIENCE_DATABASE_NAME=aeroscience\nAEROSCIENCE_DATABASE_USER=aeroscience_application\nAEROSCIENCE_DATABASE_PASSWORD='+appPassword+'\nAEROSCIENCE_DATABASE_TRUST_SECRET='+trust+'\nAEROSCIENCE_OWNER_PAIRING='+owner+'\nOrganization__KeyCertificatePassword='+key+'\nRAILWAY_PROJECT_ID='+project+'\nRAILWAY_ENVIRONMENT_ID='+environment+'\nRAILWAY_SERVICE_ID='+service+'\n');applicationEnv.chmod(0o600)
+        def start(image=application):docker('run','--detach','--name',app,'--network',network,'--env-file',str(applicationEnv),'--mount','type=volume,src='+state+',dst=/configuration',image)
         def ready(name):
             until=time.monotonic()+90
             while time.monotonic()<until:
@@ -67,18 +73,76 @@ def verify(application,database,output):
             start();created.append(app);ready(app)
             assert docker('exec',db,'psql','-U','postgres','-d','aeroscience','-Atc','SELECT "CertificateSha256" FROM organization."DeploymentState"').stdout.strip()==original
             record('restored native database certificate retains strict private-hostname verification and original organization identity')
-            # Fail closed without a proxy contract, not by trusting X-Railway-Edge or arbitrary forwarded headers.
-            docker('rm','--force',app);created.remove(app);applicationEnv.write_text(applicationEnv.read_text().replace('Organization__TrustedProxies__0=127.0.0.1\n',''));start();created.append(app)
+            # An informational edge header never authenticates a user. The public socket
+            # remains untrusted and the separate application socket is loopback-only.
+            probe="""import http.client,json,sys
+x=json.load(sys.stdin);c=http.client.HTTPConnection(x['host'],x.get('port',8080),timeout=10)
+c.request(x.get('method','GET'),x['path'],json.dumps(x['body']) if 'body' in x else None,x.get('headers',{}))
+r=c.getresponse();print(json.dumps({'status':r.status,'headers':r.getheaders(),'body':r.read().decode()}))
+"""
+            def wire(path,body=None,headers=None):
+                value={'host':app,'path':path,'headers':{'Host':'synthetic.up.railway.app',**(headers or {})}}
+                if body is not None:value.update(method='POST',body=body);value['headers']['Content-Type']='application/json'
+                return json.loads(docker('exec','-i',db,'python3','-c',probe,stdin=json.dumps(value)).stdout)
+            assert wire('/api/session',headers={'Host':'attacker.invalid','X-Forwarded-Host':'synthetic.up.railway.app'})['status']==400
+            assert wire('/api/organization/overview',headers={'X-Forwarded-For':'127.0.0.1','X-Forwarded-Proto':'https','X-Railway-Edge':'forged','X-AeroScience-Ingress-Proof':'forged'})['status']==401
+            direct=docker('exec',db,'python3','-c',"import socket;socket.create_connection(('"+app+"',9001),timeout=3)",check=False)
+            assert direct.returncode!=0
+            record('hostile forwarded headers grant no identity; wrong Host and private direct application access are refused')
+            initial=wire('/api/session');assert initial['status']==200
+            session=json.loads(initial['body']);assert session['user'] is None and session['ownerPairing']
+            cookies='; '.join(v.split(';')[0] for k,v in initial['headers'] if k.lower()=='set-cookie')
+            browser={'Cookie':cookies,'Origin':'https://synthetic.up.railway.app','X-AeroScience-Organization-CSRF':session['csrf']}
+            pending=wire('/api/owner/setup',{'organizationName':'Native Runtime Fixture','description':'Synthetic, not provider acceptance','userName':'fixture-owner','password':'FixtureOnly!2026Ownership'},browser)
+            assert pending['status']==200;c=json.loads(pending['body'])
+            text='\n'.join(['AeroScience.owner-pairing.v1',c['id'],c['intentId'],c['origin'],c['projectId'],c['environmentId'],c['serviceId'],c['publicKeySha256'],c['organizationName'],c['userName'],c['payloadSha256'],c['nonce'],str(int(__import__('datetime').datetime.fromisoformat(c['expiresUtc']).timestamp()))])
+            signature=subprocess.run(['openssl','dgst','-sha256','-sign',str(ownerKey)],input=text.encode(),capture_output=True,check=True).stdout
+            assert signature[0]==48 and signature[2]==2
+            length=signature[3];r=int.from_bytes(signature[4:4+length],'big');position=4+length;assert signature[position]==2
+            length=signature[position+1];t=int.from_bytes(signature[position+2:position+2+length],'big')
+            approval={'id':c['id'],'signature':base64.b64encode(r.to_bytes(32,'big')+t.to_bytes(32,'big')).decode()}
+            assert wire('/api/owner/approve',approval,browser)['status']==403
+            assert wire('/api/owner/approve',approval)['status']==200
+            assert wire('/api/owner/approve',approval)['status']==200
+            assert json.loads(wire('/api/session')['body'])['initialized']
+            record('real restricted container and PostgreSQL complete exact signed owner initialization once; browser approval bypass refused')
+            docker('rm','--force',app);created.remove(app);start();created.append(app);ready(app)
+            assert json.loads(wire('/api/session')['body'])['initialized']
+            record('organization ownership and protected keys survive real container replacement')
+            # No fallback to legacy sealed setup, anonymous claiming, or a forged pairing.
+            acceptedConfiguration=applicationEnv.read_text()
+            docker('rm','--force',app);created.remove(app);applicationEnv.write_text(acceptedConfiguration.replace('AEROSCIENCE_OWNER_PAIRING='+owner+'\n',''));start();created.append(app)
             until=time.monotonic()+30
             while time.monotonic()<until:
                 if json.loads(docker('inspect',app).stdout)[0]['State']['Status']=='exited':break
                 time.sleep(.5)
-            else:raise AssertionError('Unverified proxy configuration did not fail closed')
+            else:raise AssertionError('Missing protected ownership configuration did not fail closed')
             assert json.loads(docker('inspect',app).stdout)[0]['State']['ExitCode']!=0
-            record('missing verified ingress contract refuses public startup; no wildcard proxy or header-only trust')
+            record('missing public ownership pairing refuses startup without legacy-secret or anonymous fallback')
             logs=docker('logs',app).stdout+docker('logs',app).stderr+docker('logs',db).stdout
             assert all(value not in logs for value in (trust,password,appPassword,recoveryPassword,owner,key))
             record('native setup, database and identity credentials absent from retained process logs')
+            # An actually different, deliberately unbootable LOCAL image must not corrupt
+            # persistence. This is image-start failure recovery, not a schema rollback.
+            docker('rm','--force',app);created.remove(app);applicationEnv.write_text(acceptedConfiguration)
+            build=root/'unbootable-build';build.mkdir(mode=0o700)
+            # The official chiseled image intentionally has no shell. Override only
+            # its entrypoint; retain the real non-root image and persistence contract.
+            (build/'Dockerfile').write_text('FROM '+application+'\nUSER 1654:1654\nENTRYPOINT ["dotnet", "Unavailable.Upgrade.Fixture.dll"]\n')
+            badImage=identity+'-unbootable:fixture'
+            try:
+                docker('build','--network=none','-t',badImage,str(build));start(badImage);created.append(app)
+                until=time.monotonic()+30
+                while time.monotonic()<until:
+                    if json.loads(docker('inspect',app).stdout)[0]['State']['Status']=='exited':break
+                    time.sleep(.5)
+                else:raise AssertionError('Unbootable candidate did not stop within the original startup refusal bound')
+                assert json.loads(docker('inspect',app).stdout)[0]['State']['ExitCode']!=0
+                docker('rm','--force',app);created.remove(app);start();created.append(app);ready(app)
+                assert json.loads(wire('/api/session')['body'])['initialized']
+                assert docker('exec',db,'psql','-U','postgres','-d','aeroscience','-Atc','SELECT "CertificateSha256" FROM organization."DeploymentState"').stdout.strip()==original
+                record('deliberately unbootable local image refused; prior application restored with protected identity and ownership intact, without claiming schema rollback')
+            finally:docker('image','rm',badImage,check=False)
             report.update(passed=len(report['checks']),failed=0)
         except Exception:
             report['failed']=1

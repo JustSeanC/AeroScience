@@ -16,6 +16,7 @@ public sealed class DeploymentStateRecord
     public DateTimeOffset BootstrapIssuedUtc {get;set;}
     public DateTimeOffset BootstrapExpiresUtc {get;set;}
     public DateTimeOffset? BootstrapConsumedUtc {get;set;}
+    public string OwnerBindingSha256 {get;set;}="";
 }
 public static class OrganizationDeployment
 {
@@ -60,7 +61,12 @@ public static class OrganizationDeployment
         var state=await db.DeploymentState.SingleOrDefaultAsync(token);
         if(state is null){state=new(){CertificateSha256=fingerprint};db.DeploymentState.Add(state);}
         else if(state.CertificateSha256!=fingerprint)throw new InvalidOperationException("Persistent key identity changed. Restore the original protected configuration before continuing.");
-        if(!await db.Organizations.AnyAsync(token)){
+        if(settings.OwnerPublicKey is not null){
+            var binding=Digest(Encoding.UTF8.GetBytes(string.Join('\n',settings.OwnerPublicKey,settings.OwnerIntentId,settings.OwnerProjectId,settings.OwnerEnvironmentId,settings.OwnerServiceId,settings.Origin.GetLeftPart(UriPartial.Authority))));
+            if(state.OwnerBindingSha256!=""&&state.OwnerBindingSha256!=binding)throw new InvalidOperationException("The persisted owner deployment binding changed. Restore the exact protected configuration; do not replace ownership implicitly.");
+            state.OwnerBindingSha256=binding;
+        }
+        else if(!await db.Organizations.AnyAsync(token)){
             var bytes=Encoding.UTF8.GetBytes(settings.BootstrapSecret!);var digest=Digest(bytes);
             if(state.BootstrapSha256!=digest){state.BootstrapSha256=digest;state.BootstrapIssuedUtc=DateTimeOffset.UtcNow;state.BootstrapExpiresUtc=state.BootstrapIssuedUtc.AddMinutes(settings.BootstrapLifetimeMinutes);state.BootstrapConsumedUtc=null;}
             credential.Initialize(bytes,state.BootstrapConsumedUtc is null?state.BootstrapExpiresUtc:DateTimeOffset.MinValue);

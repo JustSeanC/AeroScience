@@ -16,6 +16,14 @@ public sealed record OrganizationSettings(string ConnectionString,Uri Origin,boo
     public int BootstrapLifetimeMinutes {get;init;}=30;
     public string HostingProvider {get;init;}="self-hosted";
     public string DatabaseExposure {get;init;}="unverified";
+    public bool AuthenticatedLocalIngress {get;init;}
+    public int IngressPublicPort {get;init;}=8080;
+    public int IngressApplicationPort {get;init;}=9001;
+    public string? OwnerPublicKey {get;init;}
+    public Guid OwnerIntentId {get;init;}
+    public string OwnerProjectId {get;init;}="";
+    public string OwnerEnvironmentId {get;init;}="";
+    public string OwnerServiceId {get;init;}="";
     public static OrganizationSettings Read(IConfiguration configuration,IHostEnvironment environment)
     {
         var c=configuration.GetSection("Organization");
@@ -38,6 +46,9 @@ public sealed record OrganizationSettings(string ConnectionString,Uri Origin,boo
         var certificate=c["KeyCertificateFile"];
         var password=c["KeyCertificatePassword"];
         var bootstrap=c["BootstrapSecret"];
+        var ownerPublicKey=c["OwnerPublicKey"];var ownerIntent=Guid.Empty;
+        var ownerProject=c["OwnerProjectId"]??"";var ownerEnvironment=c["OwnerEnvironmentId"]??"";var ownerService=c["OwnerServiceId"]??"";
+        if(ownerPublicKey is not null&&(!AeroScience.Shared.OrganizationOwnerProtocol.ValidPublicKey(ownerPublicKey)||!Guid.TryParse(c["OwnerIntentId"],out ownerIntent)||ownerIntent==Guid.Empty||new[]{ownerProject,ownerEnvironment,ownerService}.Any(v=>!Guid.TryParse(v,out var id)||id==Guid.Empty)))throw new InvalidOperationException("Owner pairing requires a supported public key, intent and exact deployment project/environment/service identities.");
         var lifetime=c.GetValue<int?>("BootstrapLifetimeMinutes")??30;
         var provider=c["HostingProvider"]??"self-hosted";
         var exposure=c["DatabaseExposure"]??"unverified";
@@ -45,7 +56,7 @@ public sealed record OrganizationSettings(string ConnectionString,Uri Origin,boo
         if(managed){
             if(local)throw new InvalidOperationException("Managed deployment cannot use loopback development security.");
             if(!c.GetValue<bool>("PersistentStorageConfirmed")||string.IsNullOrWhiteSpace(state)||!Path.IsPathFullyQualified(state))throw new InvalidOperationException("Managed deployment requires an explicitly confirmed persistent private configuration volume.");
-            if(password is null||password.Length is <32 or >256||bootstrap is null||bootstrap.Length is <32 or >256||bootstrap.Any(char.IsWhiteSpace)||lifetime is <5 or >60)throw new InvalidOperationException("Use separate provider-generated protected setup and key credentials, with a setup lifetime between 5 and 60 minutes.");
+            if(password is null||password.Length is <32 or >256||ownerPublicKey is null&&(bootstrap is null||bootstrap.Length is <32 or >256||bootstrap.Any(char.IsWhiteSpace))||lifetime is <5 or >60)throw new InvalidOperationException("Use protected key credentials and owner pairing or a separate expiring operator setup credential.");
             if(string.Equals(password,bootstrap,StringComparison.Ordinal))throw new InvalidOperationException("Setup and key protection require independent credentials.");
             if(exposure is not("private-network" or "restricted-tls"))throw new InvalidOperationException("Confirm a private or explicitly restricted, hostname-verified database connection.");
             certificate=Path.Combine(state,"data-protection.pfx");
@@ -54,10 +65,13 @@ public sealed record OrganizationSettings(string ConnectionString,Uri Origin,boo
         if(!local&&string.IsNullOrWhiteSpace(certificate))throw new InvalidOperationException("Configure a persistent organization data-protection certificate before production startup.");
         var proxies=c.GetSection("TrustedProxies").Get<string[]>()??[];
         if(proxies.Length>4||proxies.Any(p=>!IPAddress.TryParse(p,out _)))throw new InvalidOperationException("Configure at most four explicit trusted proxy IPs.");
+        var ingress=c.GetValue<bool>("AuthenticatedLocalIngress");
+        var publicPort=c.GetValue<int?>("IngressPublicPort")??8080;var applicationPort=c.GetValue<int?>("IngressApplicationPort")??9001;
+        if(ingress&&(local||provider!="railway"||proxies.Length!=0||publicPort is <1024 or >65535||applicationPort is <1024 or >65535||publicPort==applicationPort))throw new InvalidOperationException("The Railway local gateway requires separate unprivileged ports and no forwarded-header proxy trust.");
         if(!local)pg.GssEncryptionMode=GssEncryptionMode.Disable; // Password/TLS deployment; no optional Kerberos runtime dependency.
-        return new(pg.ConnectionString,origin,local,c["BootstrapSecretFile"],certificate,password,proxies.Select(IPAddress.Parse).ToArray()){
-            RequireAdministratorMfa=!local||c.GetValue<bool>("RequireAdministratorMfa"),ManagedDeployment=managed,StateDirectory=state,BootstrapSecret=bootstrap,BootstrapLifetimeMinutes=lifetime,HostingProvider=provider,DatabaseExposure=exposure
-        };
+        return OrganizationRecoveryActivation.SelectActive(new(pg.ConnectionString,origin,local,c["BootstrapSecretFile"],certificate,password,proxies.Select(IPAddress.Parse).ToArray()){
+            RequireAdministratorMfa=!local||c.GetValue<bool>("RequireAdministratorMfa"),ManagedDeployment=managed,StateDirectory=state,BootstrapSecret=bootstrap,BootstrapLifetimeMinutes=lifetime,HostingProvider=provider,DatabaseExposure=exposure,AuthenticatedLocalIngress=ingress,IngressPublicPort=publicPort,IngressApplicationPort=applicationPort,OwnerPublicKey=ownerPublicKey,OwnerIntentId=ownerIntent,OwnerProjectId=ownerProject,OwnerEnvironmentId=ownerEnvironment,OwnerServiceId=ownerService
+        });
     }
     public byte[] ReadBootstrapSecret()
     {

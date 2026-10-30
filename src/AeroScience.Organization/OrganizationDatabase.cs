@@ -65,6 +65,7 @@ public sealed class OrganizationCommandReceipt
 }
 public sealed class OrganizationDatabase(DbContextOptions<OrganizationDatabase> options):IdentityDbContext<OrganizationUser,IdentityRole<Guid>,Guid>(options),IDataProtectionKeyContext
 {
+    public DbSet<OwnerSetupRecord> OwnerSetups=>Set<OwnerSetupRecord>();
     public DbSet<DiscordDestinationRecord> DiscordDestinations=>Set<DiscordDestinationRecord>();
     public DbSet<DiscordConsentRecord> DiscordConsents=>Set<DiscordConsentRecord>();
     public DbSet<DiscordDisclosureRecord> DiscordDisclosures=>Set<DiscordDisclosureRecord>();
@@ -124,6 +125,11 @@ public sealed class OrganizationDatabase(DbContextOptions<OrganizationDatabase> 
         model.Entity<DeploymentStateRecord>().HasKey(x=>x.Id);
         model.Entity<DeploymentStateRecord>().Property(x=>x.CertificateSha256).HasMaxLength(64);
         model.Entity<DeploymentStateRecord>().Property(x=>x.BootstrapSha256).HasMaxLength(64);
+        model.Entity<DeploymentStateRecord>().Property(x=>x.OwnerBindingSha256).HasMaxLength(64);
+        model.Entity<OwnerSetupRecord>().HasKey(x=>x.Id);
+        model.Entity<OwnerSetupRecord>().HasIndex(x=>new{x.ConsumedUtc,x.ExpiresUtc});
+        model.Entity<OwnerSetupRecord>().Property(x=>x.PasswordHash).HasMaxLength(1024);
+        model.Entity<OwnerSetupRecord>().Property(x=>x.ChallengeJson).HasMaxLength(8192);
         ResearchTemplateDatabase.Configure(model);
         model.HasDefaultSchema("organization");
         model.Entity<WorkflowReviewIndex>().HasKey(r=>r.RootId);

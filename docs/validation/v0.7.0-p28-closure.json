@@ -390,5 +390,23 @@
       "status": "not performed",
       "detail": "Genuine authorized NASA/EMIT originals and physical devices are not established by synthetic retained fixtures."
     }
-  ]
+  ],
+  "finalHostingEngineering": {
+    "status": "Implemented; final material Full gate pending",
+    "startingHead": "fa064ef4e122d25e5557d8638b60d667e707892c",
+    "testedSource": null,
+    "full": null,
+    "gateway": "Untrusted public listener; authenticated request-bound loopback application; no forwarded identity",
+    "owner": "Per-deployment P256 public verifier, OS-vault approval, exact binding, one-use request, existing MFA",
+    "recovery": "Independent native encryption, fresh-origin private-file restore, key renewal and access/credential quarantine",
+    "updates": "Signed exact approval, fresh independent point, compiled transaction, actual two-binary stale/failure/rollback/success/idempotence fixture",
+    "nativeTemplatePublished": false,
+    "registryDigestsPublished": false,
+    "realRailwayAccepted": false,
+    "fiveStageNoviceAccepted": false,
+    "externalAccountLossAccepted": false,
+    "providerUpdatesAccepted": false,
+    "productionReady": false,
+    "p29Started": false
+  }
 }

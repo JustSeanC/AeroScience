@@ -33,14 +33,12 @@
     "Organization": {
       "image": null,
       "imageBuild": "deploy/organization/railway/Dockerfile.application",
-      "publicNetworking": "Generated HTTPS domain; ingress trust acceptance blocked",
+      "publicNetworking": "Generated HTTPS domain to untrusted public gateway; actual native routing acceptance pending",
       "healthcheckPath": "/healthz/ready",
       "volume": "/configuration",
       "variables": {
         "RAILWAY_RUN_UID": "0",
-        "Organization__BootstrapSecret": "${{secret(64, \"abcdef0123456789\")}}",
         "Organization__KeyCertificatePassword": "${{secret(64, \"abcdef0123456789\")}}",
-        "Organization__BootstrapLifetimeMinutes": "60",
         "AEROSCIENCE_DATABASE_HOST": "${{PostgreSQL.RAILWAY_PRIVATE_DOMAIN}}",
         "AEROSCIENCE_DATABASE_NAME": "${{PostgreSQL.POSTGRES_DB}}",
         "AEROSCIENCE_DATABASE_USER": "aeroscience_application",
@@ -53,7 +51,8 @@
         "AEROSCIENCE_RECOVERY_BUCKET_LOOKUP": "dns",
         "AWS_ACCESS_KEY_ID": "${{Recovery.ACCESS_KEY_ID}}",
         "AWS_SECRET_ACCESS_KEY": "${{Recovery.SECRET_ACCESS_KEY}}",
-        "AWS_DEFAULT_REGION": "${{Recovery.REGION}}"
+        "AWS_DEFAULT_REGION": "${{Recovery.REGION}}",
+        "AEROSCIENCE_OWNER_PAIRING": "OWNER_PAIRING_PUBLIC_VALUE"
       }
     }
   },
@@ -81,10 +80,10 @@
   "acceptanceBlockers": [
     "No official native Railway template has been created/published from an authenticated owner account",
     "Final application/database container identities have not been published as an accepted distribution",
-    "Railway HTTPS edge proxy trust contract must be established without wildcard trust",
+    "Authenticated local ingress is implemented; real Railway HTTPS/Host/private-route/replacement behavior requires acceptance",
     "Fresh-account private DNS/CA attestation and certificate rotation require live acceptance",
     "Root-owned volume and permanently restricted application need provider acceptance",
-    "Sealed generated bootstrap values cannot be read in the Railway UI/API; secure owner-controlled delivery or a verified ownership replacement is still required",
+    "Required per-owner public-key prompt and exact deployment approval are implemented; native template prompt/domain and novice workflow require acceptance",
     "Independent recovery destination and safe provider rollout/paired rollback require acceptance",
     "Five-stage fresh-account novice deployment has not been performed"
   ],

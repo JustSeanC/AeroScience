@@ -582,6 +582,11 @@ namespace AeroScience.Organization.Migrations
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
+                    b.Property<string>("OwnerBindingSha256")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
                     b.HasKey("Id");
 
                     b.ToTable("DeploymentState", "organization");
@@ -1355,6 +1360,35 @@ namespace AeroScience.Organization.Migrations
                     b.ToTable("AspNetUsers", "organization");
                 });
 
+            modelBuilder.Entity("AeroScience.Organization.OwnerSetupRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ChallengeJson")
+                        .IsRequired()
+                        .HasMaxLength(8192)
+                        .HasColumnType("character varying(8192)");
+
+                    b.Property<DateTimeOffset?>("ConsumedUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("ExpiresUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasMaxLength(1024)
+                        .HasColumnType("character varying(1024)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ConsumedUtc", "ExpiresUtc");
+
+                    b.ToTable("OwnerSetups", "organization");
+                });
+
             modelBuilder.Entity("AeroScience.Organization.PhaseCardRecord", b =>
                 {
                     b.Property<Guid>("PhaseId")
@@ -1955,6 +1989,10 @@ namespace AeroScience.Organization.Migrations
                     b.Property<string>("Message")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<string>("ProtectedImportJson")
+                        .HasMaxLength(65536)
+                        .HasColumnType("character varying(65536)");
 
                     b.Property<Guid>("RequestId")
                         .HasColumnType("uuid");

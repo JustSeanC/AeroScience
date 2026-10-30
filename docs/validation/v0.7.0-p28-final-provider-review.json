@@ -1,0 +1,102 @@
+{
+  "checkedUtcDate": "2026-10-30",
+  "scope": "Official documentation only; no account, deployment, billing or public assets",
+  "sources": [
+    {
+      "name": "edge",
+      "url": "https://docs.railway.com/networking/edge-networking",
+      "final": "https://docs.railway.com/networking/edge-networking",
+      "status": 200,
+      "sha256": "8452c4b3dd9df7790fe82ddbedab5b1569757c78efc17256c9ff18d9dac62116"
+    },
+    {
+      "name": "limits",
+      "url": "https://docs.railway.com/networking/public-networking/specs-and-limits",
+      "final": "https://docs.railway.com/networking/public-networking/specs-and-limits",
+      "status": 200,
+      "sha256": "0bfa5dff963ff01c5d6d2bd885ba41ad27f7a8575cd866ae2c99b796420610da"
+    },
+    {
+      "name": "rules",
+      "url": "https://docs.railway.com/networking/edge-rules",
+      "final": "https://docs.railway.com/networking/edge-rules",
+      "status": 200,
+      "sha256": "2a92c16e0357de42fd4ee08e6e77a0375c14b6832520f6892634430f04d3176f"
+    },
+    {
+      "name": "private",
+      "url": "https://docs.railway.com/networking/private-networking",
+      "final": "https://docs.railway.com/networking/private-networking",
+      "status": 200,
+      "sha256": "1552d5cd3affd90fa1e38e3b8a4ec8d2db9d3ff875d5303a1e067b8aba85a8a0"
+    },
+    {
+      "name": "variables",
+      "url": "https://docs.railway.com/variables",
+      "final": "https://docs.railway.com/variables",
+      "status": 200,
+      "sha256": "7b0006e0a1aed8b02e30b6f530e5adc32b947f34c67942f81a0000236491dffc"
+    },
+    {
+      "name": "oauth",
+      "url": "https://docs.railway.com/integrations/oauth",
+      "final": "https://docs.railway.com/integrations/oauth",
+      "status": 200,
+      "sha256": "a990d4ed023eb97fe81527bacd0ec78a3380204cc20356a5499b15def97625e2"
+    },
+    {
+      "name": "oauth-app",
+      "url": "https://docs.railway.com/integrations/oauth/creating-an-app",
+      "final": "https://docs.railway.com/integrations/oauth/creating-an-app",
+      "status": 200,
+      "sha256": "9b8d64e1b350363e087d80832d7a582352ade7bf411758dee4607bcec746ffc6"
+    },
+    {
+      "name": "scopes",
+      "url": "https://docs.railway.com/integrations/oauth/scopes-and-user-consent",
+      "final": "https://docs.railway.com/integrations/oauth/scopes-and-user-consent",
+      "status": 200,
+      "sha256": "12f47aaddd36ede87aa29cafe31bbb93ab90cd81f948e9b858d798bb11553412"
+    },
+    {
+      "name": "iac",
+      "url": "https://docs.railway.com/reference/railway-iac",
+      "error": "HTTPError"
+    },
+    {
+      "name": "iac-overview",
+      "url": "https://docs.railway.com/infrastructure-as-code",
+      "final": "https://docs.railway.com/infrastructure-as-code",
+      "status": 200,
+      "sha256": "61d2f7503b6f686702436bd1d2e25c2f3bc5a7acc9d05e42fac095b2fd8c25ba"
+    },
+    {
+      "name": "iac-reference",
+      "url": "https://docs.railway.com/infrastructure-as-code/reference",
+      "final": "https://docs.railway.com/infrastructure-as-code/reference",
+      "status": 200,
+      "sha256": "cd280e8bb383c5a7c902ca0bb3197c0f0cc7cbe58c574b07c91a34eee54d61c6"
+    },
+    {
+      "name": "templates",
+      "url": "https://docs.railway.com/templates/create",
+      "final": "https://docs.railway.com/templates/create",
+      "status": 200,
+      "sha256": "97304afcf98c9c2f62b2cda1b1a262a86ce91334946dcf9691297ee99580f02f"
+    },
+    {
+      "name": "oauth-resources",
+      "url": "https://docs.railway.com/integrations/oauth/fetching-workspaces-or-projects",
+      "final": "https://docs.railway.com/integrations/oauth/fetching-workspaces-or-projects",
+      "status": 200,
+      "sha256": "bdf63ee884078bca51a226da2fdc1769146be0776793fc465ff6d11f8d5e4774"
+    },
+    {
+      "name": "private-detail",
+      "url": "https://docs.railway.com/networking/private-networking/how-it-works",
+      "final": "https://docs.railway.com/networking/private-networking/how-it-works",
+      "status": 200,
+      "sha256": "337366bdee766843d740c2933e7859e53fa93c9a7a0a2616c243eb0b1b8756c6"
+    }
+  ]
+}

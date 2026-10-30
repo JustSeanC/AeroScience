@@ -10,4 +10,6 @@ public sealed class OrganizationConnectionFixture:IOrganizationCredentials
     public string? Read(Guid id)=>values.GetValueOrDefault(id);
     public void Save(Guid id,string value)=>values[id]=value;
     public void Remove(Guid id)=>values.TryRemove(id,out _);
+    readonly ConcurrentDictionary<Guid,string> ownerKeys=new();public bool OwnerKeyAvailable=>true;
+    public string? ReadOwnerKey(Guid id)=>ownerKeys.GetValueOrDefault(id);public void SaveOwnerKey(Guid id,string value)=>ownerKeys[id]=value;public void RemoveOwnerKey(Guid id)=>ownerKeys.TryRemove(id,out _);
 }

@@ -12,6 +12,7 @@ SET log_statement = 'none';
 SET log_min_error_statement = 'panic';
 CREATE ROLE aeroscience_application LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE PASSWORD '$AEROSCIENCE_APPLICATION_DATABASE_PASSWORD';
 CREATE ROLE aeroscience_recovery LOGIN NOSUPERUSER CREATEDB NOCREATEROLE PASSWORD '$AEROSCIENCE_RECOVERY_DATABASE_PASSWORD';
+GRANT aeroscience_application TO aeroscience_recovery WITH INHERIT FALSE, SET TRUE;
 ALTER DATABASE aeroscience OWNER TO aeroscience_application;
 REVOKE ALL ON DATABASE aeroscience FROM PUBLIC;
 GRANT CONNECT ON DATABASE aeroscience TO aeroscience_application;

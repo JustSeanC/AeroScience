@@ -12,6 +12,22 @@ namespace AeroScience.Organization;
 // Provider image promotion and draining old replicas remain independently authorized operator work.
 public static class OrganizationSchemaUpgrade
 {
+    // A Railway volume deploy stops the old instance (overlap=0). Before opening either
+    // listener, only an exact pre-approved signed distribution may migrate an existing DB.
+    // This does not call Railway, select a mutable image, or roll back a migrated schema.
+    public static async Task ApplyConfigured(IServiceProvider services,CancellationToken ct)
+    {
+        var configuration=services.GetRequiredService<IConfiguration>();var value=configuration["Organization:Operations:ApplyOperationId"];
+        if(value is null)return;if(!Guid.TryParse(value,out var id)||id==Guid.Empty)throw new InvalidOperationException("An exact approved update operation identity is required.");
+        using(var scope=services.CreateScope()){
+            var db=scope.ServiceProvider.GetRequiredService<OrganizationDatabase>();var applied=(await db.Database.GetAppliedMigrationsAsync(ct)).ToArray();
+            if(applied.Length==0)throw new InvalidOperationException("A prepared update cannot initialize a different empty database.");
+            var options=scope.ServiceProvider.GetRequiredService<ServerOperationsOptions>();var signed=options.Distribution()??throw new InvalidOperationException("The exact signed update manifest is unavailable.");var distribution=signed.Distribution;
+            if(distribution.SourceRevision!=OrganizationDeployment.ApplicationVersion.Split('+').ElementAtOrDefault(1)||distribution.ApplicationVersion!=OrganizationDeployment.ApplicationVersion.Split('+')[0])throw new InvalidOperationException("This is not the exact approved update binary.");
+            if(await db.Audit.AnyAsync(a=>a.Action=="server-schema-update-applied"&&a.ResourceId==id,ct)&&SchemaHash(applied)==SchemaHash(db.Database.GetMigrations()))return;
+        }
+        await ApplyPrepared(services,id,ct);
+    }
     static async Task<string[]> OperationalQueries(NpgsqlConnection connection,NpgsqlTransaction transaction,CancellationToken ct)
     {
         var queries=new List<string>();
@@ -60,16 +76,21 @@ public static class OrganizationSchemaUpgrade
         var signed=options.Distribution()??throw new InvalidOperationException("No authenticated pinned update is configured.");var distribution=signed.Distribution;
         var version=OrganizationDeployment.ApplicationVersion;var source=version.Split('+').ElementAtOrDefault(1);
         if(distribution.ApplicationVersion!=version.Split('+')[0]||distribution.SourceRevision!=source)throw new InvalidOperationException("This application is not the exact signed update. No schema changes were applied.");
-        var job=await db.ServerOperations.AsNoTracking().SingleOrDefaultAsync(j=>j.Id==operationId,ct);
+        // A new binary must read the approval BEFORE its additive columns exist.
+        var job=await db.ServerOperations.AsNoTracking().Where(j=>j.Id==operationId).Select(j=>new ServerOperationRecord{Id=j.Id,Revision=j.Revision,ActorId=j.ActorId,ActorName=j.ActorName,Kind=j.Kind,State=j.State,BackupId=j.BackupId,DistributionJson=j.DistributionJson,RequestId=j.RequestId}).SingleOrDefaultAsync(ct);
         if(job is null||job.Kind!=ServerOperationKind.PrepareUpdate||job.State!=ServerOperationState.Completed||job.DistributionJson!=JsonSerializer.Serialize(signed,WireJson.Options)||job.BackupId is null)throw new InvalidOperationException("A completed administrator-approved checkpoint for this exact distribution is required.");
-        await RequireApprover(db,job,ct);
         if(await db.Audit.AnyAsync(a=>a.Action=="server-schema-update-applied"&&a.ResourceId==operationId,ct)&&SchemaHash(await db.Database.GetAppliedMigrationsAsync(ct))==SchemaHash(db.Database.GetMigrations()))return;
-        // Select only original P26 columns: the new binary must work before its additive migration.
-        var backup=await db.ServerBackups.AsNoTracking().Where(b=>b.Id==job.BackupId).Select(b=>new ServerBackupRecord{Id=b.Id,OrganizationId=b.OrganizationId,SnapshotId=b.SnapshotId,BundleSha256=b.BundleSha256,Bytes=b.Bytes,ManifestJson=b.ManifestJson,CreatedUtc=b.CreatedUtc,VerifiedRestoreUtc=b.VerifiedRestoreUtc}).SingleAsync(ct);
+        await RequireApprover(db,job,ct);
+        // These columns predate the accepted P28 source. Missing independent protection
+        // must block a production update rather than imply the primary bucket is sufficient.
+        var backup=await db.ServerBackups.AsNoTracking().Where(b=>b.Id==job.BackupId).Select(b=>new ServerBackupRecord{Id=b.Id,OrganizationId=b.OrganizationId,SnapshotId=b.SnapshotId,BundleSha256=b.BundleSha256,Bytes=b.Bytes,ManifestJson=b.ManifestJson,CreatedUtc=b.CreatedUtc,VerifiedRestoreUtc=b.VerifiedRestoreUtc,RepositorySha256=b.RepositorySha256,IndependentSnapshotId=b.IndependentSnapshotId,IndependentRepositorySha256=b.IndependentRepositorySha256,IndependentVerifiedUtc=b.IndependentVerifiedUtc}).SingleAsync(ct);
         var manifest=JsonSerializer.Deserialize<ServerBackupManifest>(backup.ManifestJson,WireJson.Options)!;
         using var certificate=settings.LoadKeyCertificate()??throw new InvalidOperationException("Original protected identity is required.");
         if(backup.VerifiedRestoreUtc is null||manifest.CertificateSha256!=OrganizationDeployment.Digest(certificate.RawData)||SchemaHash(manifest.Migrations)!=distribution.SchemaSha256)throw new InvalidOperationException("The signed source schema and verified paired identity do not match.");
-        await scope.ServiceProvider.GetRequiredService<OrganizationRecoveryEngine>().VerifyRestore(backup,ct,true);
+        if(options.Independent is null||backup.IndependentVerifiedUtc is null||backup.IndependentSnapshotId is null||backup.RepositorySha256!=OrganizationDeployment.Digest(System.Text.Encoding.UTF8.GetBytes(options.Repository!))||backup.IndependentRepositorySha256!=OrganizationDeployment.Digest(System.Text.Encoding.UTF8.GetBytes(options.Independent.Repository)))throw new InvalidOperationException("A separately keyed, verified independent recovery checkpoint is required before applying an update.");
+        if(settings.HostingProvider=="railway"&&!distribution.Image.StartsWith("ghcr.io/justseanc/aeroscience-organization-railway@sha256:",StringComparison.Ordinal))throw new InvalidOperationException("The signed update must select the exact supported Railway runtime role.");
+        var recovery=scope.ServiceProvider.GetRequiredService<OrganizationRecoveryEngine>();await recovery.VerifyRestore(backup,ct,true);var independent=recovery.IndependentEngine();var copy=await independent.Discover(backup.IndependentSnapshotId,ct);
+        if(copy.Id!=backup.Id||copy.BundleSha256!=backup.BundleSha256||copy.ManifestJson!=backup.ManifestJson)throw new InvalidOperationException("The independent update checkpoint no longer matches the exact original pair.");await independent.VerifyRestore(copy,ct,true);
         await Apply(db,distribution.SchemaSha256,job,ct);
     }
     static async Task RequireApprover(OrganizationDatabase db,ServerOperationRecord job,CancellationToken ct){if(!await db.Memberships.AnyAsync(m=>m.UserId==job.ActorId&&m.Role=="Administrator"&&m.State==OrganizationMembershipState.Active,ct)||!await db.Users.AnyAsync(u=>u.Id==job.ActorId&&u.TwoFactorEnabled&&u.RecoveryAcknowledgedUtc!=null,ct))throw new InvalidOperationException("The approving administrator no longer has the required authority.");}
@@ -104,6 +125,7 @@ public static class OrganizationSchemaUpgrade
             if(!(await db.Database.GetAppliedMigrationsAsync(ct)).SequenceEqual(applied))throw new InvalidOperationException("Another process changed the source schema. Refresh the approved update.");
             if(job is not null)await RequireApprover(db,job,ct);
             var before=await OrganizationRecoveryEngine.Digests(connection,transaction,ct);
+            if(job is not null){var checkpoint=JsonSerializer.Deserialize<ServerBackupManifest>(await db.ServerBackups.AsNoTracking().Where(b=>b.Id==job.BackupId).Select(b=>b.ManifestJson).SingleAsync(ct),WireJson.Options)!;var original=await OrganizationRecoveryEngine.Digests(connection,transaction,ct,job.Id);if(original.Evidence!=checkpoint.EvidenceDigest||original.Packages!=checkpoint.ReceivedPackages||original.Audit!=checkpoint.AuditDigest||original.Events!=checkpoint.AuditEvents)throw new InvalidOperationException("Organization evidence or history changed after update preparation. Prepare a fresh checkpoint before applying this update.");}
             var identity=await IdentityDigest(connection,transaction,ct);
             var operationalQueries=await OperationalQueries(connection,transaction,ct);
             var operational=await OperationalDigest(operationalQueries,connection,transaction,ct);

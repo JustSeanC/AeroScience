@@ -52,6 +52,10 @@ public static class RailwayRuntime
         // Only --railway-start enters this adapter. Ordinary self-hosted or local servers never adopt provider variables.
         var host=DatabaseHost(configuration["AEROSCIENCE_DATABASE_HOST"]??"");var secret=configuration["AEROSCIENCE_DATABASE_TRUST_SECRET"]??"";
         var origin=PublicOrigin(configuration["RAILWAY_PUBLIC_DOMAIN"]??"");
+        var owner=(configuration["AEROSCIENCE_OWNER_PAIRING"]??"").Split('.');
+        if(owner.Length!=2||!Guid.TryParse(owner[0],out var intent)||intent==Guid.Empty||!AeroScience.Shared.OrganizationOwnerProtocol.ValidPublicKey(owner[1]))throw new InvalidOperationException("Create an ownership key in AeroScience and supply its public pairing value in the Railway deployment form.");
+        configuration["Organization:OwnerIntentId"]=intent.ToString("D");configuration["Organization:OwnerPublicKey"]=owner[1];
+        configuration["Organization:OwnerProjectId"]=configuration["RAILWAY_PROJECT_ID"];configuration["Organization:OwnerEnvironmentId"]=configuration["RAILWAY_ENVIRONMENT_ID"];configuration["Organization:OwnerServiceId"]=configuration["RAILWAY_SERVICE_ID"];
         using var client=new HttpClient(new SocketsHttpHandler{UseProxy=false,AllowAutoRedirect=false}){Timeout=TimeSpan.FromSeconds(5)};byte[]? certificate=null;
         var nonce=Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(32));
         for(var attempt=0;attempt<30;attempt++){
@@ -72,7 +76,8 @@ public static class RailwayRuntime
             configuration["Organization:Operations:S3BucketLookup"]=configuration["AEROSCIENCE_RECOVERY_BUCKET_LOOKUP"]??"dns";configuration["Organization:Operations:Repository"]=repository;configuration["Organization:Operations:PasswordFile"]=passwordFile;configuration["Organization:Operations:Enabled"]="true";
         }
         configuration["Organization:PublicOrigin"]=origin;configuration["Organization:ConnectionString"]=pg.ConnectionString;configuration["Organization:ManagedDeployment"]="true";configuration["Organization:HostingProvider"]="railway";configuration["Organization:StateDirectory"]=State;configuration["Organization:DatabaseExposure"]="private-network";configuration["Organization:PersistentStorageConfirmed"]="true";
-        // An informational X-Railway-Edge header is not authentication. Exact trusted proxy configuration is still required.
-        if(!(configuration.GetSection("Organization:TrustedProxies").Get<string[]>()??[]).Any())throw new InvalidOperationException("Railway ingress trust has not been verified. The deployment candidate cannot accept public requests until its strict proxy contract is established.");
+        // Public traffic is always untrusted; no Railway informational/forwarding header
+        // authenticates a user or a peer. The loopback application requires per-request proof.
+        configuration["Organization:AuthenticatedLocalIngress"]="true";
     }
 }

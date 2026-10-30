@@ -21,13 +21,14 @@ public sealed partial class OrganizationRecoveryEngine(OrganizationDatabase db,O
     Dictionary<string,string> StorageEnvironment()
     {
         var result=options.StorageCredentials();
+        result["TZ"]="UTC";
         if(options.InheritStorageCredentials&&options.RepositoryCredentialsFile is null)foreach(var name in RecoveryRepositoryTarget.CredentialNames)if(Environment.GetEnvironmentVariable(name) is {} value)result[name]=value;
         return result;
     }
     Task<string> Restic(CancellationToken ct,params string[] args)=>Run(options.ResticExecutable,ResticArguments(args),ct,StorageEnvironment(),true);
     static FileStream CreatePrivate(string path){var o=new FileStreamOptions{Mode=FileMode.CreateNew,Access=FileAccess.ReadWrite,Share=FileShare.None};if(!OperatingSystem.IsWindows())o.UnixCreateMode=UnixFileMode.UserRead|UnixFileMode.UserWrite;return new(path,o);}
-    static void MakePrivate(string path){Directory.CreateDirectory(path);for(var d=new DirectoryInfo(path);d is not null;d=d.Parent)if(d.LinkTarget is not null)throw new InvalidOperationException("Private recovery work cannot follow symbolic links.");if(!OperatingSystem.IsWindows())File.SetUnixFileMode(path,UnixFileMode.UserRead|UnixFileMode.UserWrite|UnixFileMode.UserExecute);}
-    static Process Start(string executable,IEnumerable<string> args,IReadOnlyDictionary<string,string>? environment=null,bool isolateStorage=false)
+    internal static void MakePrivate(string path){Directory.CreateDirectory(path);for(var d=new DirectoryInfo(path);d is not null;d=d.Parent)if(d.LinkTarget is not null)throw new InvalidOperationException("Private recovery work cannot follow symbolic links.");if(!OperatingSystem.IsWindows())File.SetUnixFileMode(path,UnixFileMode.UserRead|UnixFileMode.UserWrite|UnixFileMode.UserExecute);}
+    static Process Start(string executable,IEnumerable<string> args,IReadOnlyDictionary<string,string>? environment=null,bool isolateStorage=false,bool keepInput=false)
     {
         var start=new ProcessStartInfo(executable){UseShellExecute=false,RedirectStandardOutput=true,RedirectStandardError=true,RedirectStandardInput=true,CreateNoWindow=true};
         foreach(var arg in args)start.ArgumentList.Add(arg);
@@ -35,7 +36,7 @@ public sealed partial class OrganizationRecoveryEngine(OrganizationDatabase db,O
         if(environment is not null)foreach(var entry in environment)start.Environment[entry.Key]=entry.Value;
         // The pinned client libraries are isolated to PostgreSQL subprocesses, not the application runtime.
         var clientLibraries=Directory.Exists("/operations/lib")?"/operations/lib":Environment.GetEnvironmentVariable("AEROSCIENCE_RECOVERY_PG_LIBRARY_PATH");if(executable.Contains("pg_",StringComparison.Ordinal)&&clientLibraries is not null)start.Environment["LD_LIBRARY_PATH"]=clientLibraries;
-        var process=Process.Start(start)??throw new InvalidOperationException("The protected recovery tool could not start.");process.StandardInput.Close();return process;
+        var process=Process.Start(start)??throw new InvalidOperationException("The protected recovery tool could not start.");if(!keepInput)process.StandardInput.Close();return process;
     }
     static async Task<string> BoundedText(StreamReader reader,int maximum,CancellationToken ct)
     {
@@ -47,6 +48,18 @@ public sealed partial class OrganizationRecoveryEngine(OrganizationDatabase db,O
             var stdout=BoundedText(process.StandardOutput,2097152,ct);var stderr=BoundedText(process.StandardError,262144,ct);await Task.WhenAll(stdout,stderr,process.WaitForExitAsync(ct));
             if(process.ExitCode!=0){var failure=new InvalidOperationException("The protected recovery tool refused this operation. No raw command, credential or evidence content is disclosed.");failure.Data["RecoveryToolExitCode"]=process.ExitCode;throw failure;}return await stdout;
         }finally{if(!process.HasExited)process.Kill(true);}
+    }
+    async Task<string> BackupFile(string path,string host,string[] tags,CancellationToken ct,DateTimeOffset? originalTime=null)
+    {
+        // One fixed logical path makes latest-per-host lookup independent of temporary
+        // work directories. Raw bytes stream directly into native authenticated restic.
+        var args=new List<string>{"backup","--stdin","--stdin-filename","organization.aeroscience","--json","--host",host};foreach(var tag in tags){args.Add("--tag");args.Add(tag);}if(originalTime is {} time){args.Add("--time");args.Add(time.UtcDateTime.ToString("yyyy-MM-dd HH:mm:ss",System.Globalization.CultureInfo.InvariantCulture));}
+        using var process=Start(options.ResticExecutable,ResticArguments(args.ToArray()),StorageEnvironment(),true,keepInput:true);
+        try{
+            var output=BoundedText(process.StandardOutput,2097152,ct);var errors=BoundedText(process.StandardError,262144,ct);
+            await using(var source=File.OpenRead(path))await CopyBounded(source,process.StandardInput.BaseStream,options.MaximumBundleBytes+2097152,null,ct);process.StandardInput.Close();await Task.WhenAll(output,errors,process.WaitForExitAsync(ct));
+            if(process.ExitCode!=0)throw new InvalidOperationException("The protected encrypted backup did not complete. No credential or source bytes are disclosed.");return await output;
+        }finally{process.StandardInput.Close();if(!process.HasExited)process.Kill(true);}
     }
     internal static Dictionary<string,string> PgEnvironment(string connection,string? database=null)
     {
@@ -60,7 +73,7 @@ public sealed partial class OrganizationRecoveryEngine(OrganizationDatabase db,O
     {
         var buffer=new byte[65536];long count=0;int n;while((n=await source.ReadAsync(buffer,ct))>0){count=checked(count+n);if(count>maximum)throw new InvalidOperationException("The approved recovery package exceeded its configured bound; no partial restore is accepted.");hash?.AppendData(buffer,0,n);await target.WriteAsync(buffer.AsMemory(0,n),ct);}return count;
     }
-    internal static async Task<(string Evidence,long Packages,string Audit,long Events)> Digests(NpgsqlConnection connection,NpgsqlTransaction? tx,CancellationToken ct)
+    internal static async Task<(string Evidence,long Packages,string Audit,long Events)> Digests(NpgsqlConnection connection,NpgsqlTransaction? tx,CancellationToken ct,Guid? completedOperation=null)
     {
         using var evidence=IncrementalHash.CreateHash(HashAlgorithmName.SHA256);long packages=0;
         await using(var command=new NpgsqlCommand("SELECT \"Id\",\"ReceiptId\",\"PayloadSha256\",\"PayloadJson\" FROM organization.\"Submissions\" ORDER BY \"Id\"",connection,tx)){
@@ -70,7 +83,8 @@ public sealed partial class OrganizationRecoveryEngine(OrganizationDatabase db,O
             }
         }
         using var audit=IncrementalHash.CreateHash(HashAlgorithmName.SHA256);long events=0;
-        await using(var command=new NpgsqlCommand("SELECT \"Id\",\"TimestampUtc\",\"ActorId\",\"ActorName\",\"Action\",\"ResourceId\",\"Revision\" FROM organization.\"Audit\" ORDER BY \"Id\"",connection,tx)){
+        await using(var command=new NpgsqlCommand("SELECT \"Id\",\"TimestampUtc\",\"ActorId\",\"ActorName\",\"Action\",\"ResourceId\",\"Revision\" FROM organization.\"Audit\""+(completedOperation is null?"":" WHERE NOT (\"Action\"='server-operation-completed' AND \"ResourceId\"=@operation)")+" ORDER BY \"Id\"",connection,tx)){
+            if(completedOperation is {} operation)command.Parameters.AddWithValue("operation",operation);
             await using var reader=await command.ExecuteReaderAsync(ct);while(await reader.ReadAsync(ct)){var row=new object[7];reader.GetValues(row);audit.AppendData(JsonSerializer.SerializeToUtf8Bytes(row,Json));events++;}
         }
         return(Convert.ToHexStringLower(evidence.GetHashAndReset()),packages,Convert.ToHexStringLower(audit.GetHashAndReset()),events);
@@ -85,6 +99,8 @@ public sealed partial class OrganizationRecoveryEngine(OrganizationDatabase db,O
             await using(var readOnly=new NpgsqlCommand("SET TRANSACTION READ ONLY",connection,tx))await readOnly.ExecuteNonQueryAsync(ct);
             string snapshot;await using(var export=new NpgsqlCommand("SELECT pg_export_snapshot()",connection,tx))snapshot=(string)(await export.ExecuteScalarAsync(ct))!;
             var org=await db.Organizations.AsNoTracking().SingleAsync(ct);var digests=await Digests(connection,tx,ct);using var certificate=settings.LoadKeyCertificate()??throw new InvalidOperationException("Original protected identity is missing.");
+            var applied=new List<string>();await using(var migrations=new NpgsqlCommand("SELECT \"MigrationId\" FROM public.\"__EFMigrationsHistory\" ORDER BY \"MigrationId\"",connection,tx)){await using var rows=await migrations.ExecuteReaderAsync(ct);while(await rows.ReadAsync(ct)){if(applied.Count>=256)throw new InvalidOperationException("Recovery schema metadata exceeded its supported processing bound.");applied.Add(rows.GetString(0));}}
+            var known=db.Database.GetMigrations().ToArray();if(applied.Count==0||!applied.SequenceEqual(known.Take(applied.Count)))throw new InvalidOperationException("The original schema is not a supported compiled migration prefix.");
             await using(var file=CreatePrivate(bundle)){
                 using var archive=new ZipArchive(file,ZipArchiveMode.Create,true);var entry=archive.CreateEntry("database.dump",CompressionLevel.NoCompression);
                 using var process=Start(options.PgDumpExecutable,["--format=custom","--no-owner","--no-acl","--snapshot="+snapshot],PgEnvironment(settings.ConnectionString));
@@ -92,7 +108,7 @@ public sealed partial class OrganizationRecoveryEngine(OrganizationDatabase db,O
                 try{await using(var target=entry.Open())size=await CopyBounded(process.StandardOutput.BaseStream,target,options.MaximumBundleBytes,hash,ct);await process.WaitForExitAsync(ct);await errors;if(process.ExitCode!=0)throw new InvalidOperationException("The consistent database snapshot could not complete.");}
                 finally{if(!process.HasExited)process.Kill(true);}
                 var source=OrganizationDeployment.ApplicationVersion.Split('+').ElementAtOrDefault(1)??"unpublished-development";
-                manifest=new(1,id,org.PublicId,settings.Origin.GetLeftPart(UriPartial.Authority),OrganizationDeployment.ApplicationVersion,source,db.Database.GetMigrations().ToArray(),Hash(certificate.RawData),Convert.ToHexStringLower(hash.GetHashAndReset()),size,digests.Evidence,digests.Packages,digests.Audit,digests.Events,DateTimeOffset.UtcNow);
+                manifest=new(1,id,org.PublicId,settings.Origin.GetLeftPart(UriPartial.Authority),OrganizationDeployment.ApplicationVersion,source,applied.ToArray(),Hash(certificate.RawData),Convert.ToHexStringLower(hash.GetHashAndReset()),size,digests.Evidence,digests.Packages,digests.Audit,digests.Events,DateTimeOffset.UtcNow);
                 async Task Add(string name,byte[] data){var e=archive.CreateEntry(name,CompressionLevel.NoCompression);await using var output=e.Open();await output.WriteAsync(data,ct);}
                 await Add("identity.pfx",await File.ReadAllBytesAsync(OrganizationSettings.PrivateFile(settings.KeyCertificateFile!,1,1048576).FullName,ct));
                 await Add("identity-password",Encoding.UTF8.GetBytes(settings.KeyCertificatePassword!));await Add("manifest.json",JsonSerializer.SerializeToUtf8Bytes(manifest,Json));
@@ -101,7 +117,7 @@ public sealed partial class OrganizationRecoveryEngine(OrganizationDatabase db,O
             string bundleHash;await using(var input=File.OpenRead(bundle))bundleHash=Convert.ToHexStringLower(await SHA256.HashDataAsync(input,ct));
             await InitializeRepository(ct);
             // Fixed host and filename keep repository records independent of source filesystem paths.
-            var outputJson=await Restic(ct,"backup",bundle,"--json","--host","aeroscience-"+org.PublicId,"--tag","operation-"+id);
+            var outputJson=await BackupFile(bundle,"aeroscience-"+org.PublicId,["operation-"+id],ct);
             string? snapshotId=null;foreach(var line in outputJson.Split('\n',StringSplitOptions.RemoveEmptyEntries)){using var doc=JsonDocument.Parse(line);if(doc.RootElement.TryGetProperty("snapshot_id",out var value))snapshotId=value.GetString();}
             if(snapshotId is not {Length:64}||snapshotId.Any(c=>!char.IsAsciiHexDigit(c)))throw new InvalidOperationException("The encrypted repository did not return a complete authoritative snapshot identity.");
             // restic records a private work path internally; only the exact signed-in owner can request recovery.
@@ -130,11 +146,12 @@ public sealed partial class OrganizationRecoveryEngine(OrganizationDatabase db,O
             file.Position=0;backup.Id=manifest.BackupId;backup.OrganizationId=manifest.OrganizationId;backup.ManifestJson=JsonSerializer.Serialize(manifest,Json);backup.BundleSha256=Convert.ToHexStringLower(await SHA256.HashDataAsync(file,ct));backup.Bytes=file.Length;backup.CreatedUtc=manifest.CreatedUtc;return backup;
         }finally{if(Directory.Exists(directory))Directory.Delete(directory,true);}
     }
-    public async Task<ServerRestoreVerification> VerifyRestore(ServerBackupRecord backup,CancellationToken ct,bool allowCompatibleSchemaPrefix=false)
+    public async Task<ServerRestoreVerification> VerifyRestore(ServerBackupRecord backup,CancellationToken ct,bool allowCompatibleSchemaPrefix=false,bool stageReplacement=false,bool renewIdentity=false,string? approvedOriginalOrigin=null,string? recoveryAdministrator=null)
     {
         var recovery=options.RecoveryConnectionString??throw new InvalidOperationException("An isolated recovery database provisioner is not configured. No primary database was changed.");
         var pg=new NpgsqlConnectionStringBuilder(recovery);if(!settings.LocalDevelopment&&pg.SslMode!=SslMode.VerifyFull)throw new InvalidOperationException("Recovery provisioning also requires hostname-verified database TLS.");
         var directory=Path.Combine(options.WorkDirectory,"restore-"+Guid.NewGuid().ToString("N"));MakePrivate(directory);var temporaryDatabase="aeroscience_recovery_"+Guid.NewGuid().ToString("N");
+        var retained=false;
         try{
             var package=Path.Combine(directory,"organization.aeroscience");await Download(backup,package,ct);
             await using(var input=File.OpenRead(package)){
@@ -143,19 +160,23 @@ public sealed partial class OrganizationRecoveryEngine(OrganizationDatabase db,O
             }
             var manifest=JsonSerializer.Deserialize<ServerBackupManifest>(await File.ReadAllBytesAsync(Path.Combine(directory,"manifest.json"),ct),Json)??throw new InvalidOperationException("Recovery manifest unavailable.");
             var known=db.Database.GetMigrations().ToArray();var compatible=manifest.Migrations.Length>0&&manifest.Migrations.SequenceEqual(allowCompatibleSchemaPrefix?known.Take(manifest.Migrations.Length):known);
-            if(manifest.Version!=1||manifest.BackupId!=backup.Id||manifest.OrganizationId!=backup.OrganizationId||manifest.PublicOrigin!=settings.Origin.GetLeftPart(UriPartial.Authority)||JsonSerializer.Serialize(manifest,Json)!=backup.ManifestJson||!compatible)throw new InvalidOperationException("Recovery source/schema identity does not match. Use its exact compatible pinned distribution; no automatic downgrade is attempted.");
+            if(approvedOriginalOrigin is not null&&!stageReplacement)throw new InvalidOperationException("Address relocation is available only for explicitly approved replacement recovery.");
+            if(manifest.Version!=1||manifest.BackupId!=backup.Id||manifest.OrganizationId!=backup.OrganizationId||manifest.PublicOrigin!=(approvedOriginalOrigin??settings.Origin.GetLeftPart(UriPartial.Authority))||JsonSerializer.Serialize(manifest,Json)!=backup.ManifestJson||!compatible)throw new InvalidOperationException("Recovery source/schema identity does not match. Use its exact compatible pinned distribution; no automatic downgrade is attempted.");
             var password=await File.ReadAllTextAsync(Path.Combine(directory,"identity-password"),ct);using var certificate=X509CertificateLoader.LoadPkcs12FromFile(Path.Combine(directory,"identity.pfx"),password,X509KeyStorageFlags.EphemeralKeySet);
             if(!certificate.HasPrivateKey||Hash(certificate.RawData)!=manifest.CertificateSha256)throw new InvalidOperationException("Paired recovery identity material is missing or incompatible. No replacement identity is created.");
             string dumpHash;await using(var stream=File.OpenRead(Path.Combine(directory,"database.dump")))dumpHash=Convert.ToHexStringLower(await SHA256.HashDataAsync(stream,ct));if(dumpHash!=manifest.DatabaseSha256)throw new InvalidOperationException("The original database snapshot hash failed.");
             await using var provisioner=new NpgsqlConnection(recovery);await provisioner.OpenAsync(ct);
-            await using(var create=new NpgsqlCommand("CREATE DATABASE \""+temporaryDatabase+"\" ENCODING 'UTF8' TEMPLATE template0",provisioner))await create.ExecuteNonQueryAsync(ct);
-            _=await Run(options.PgRestoreExecutable,["--no-owner","--no-acl","--exit-on-error","--dbname="+temporaryDatabase,Path.Combine(directory,"database.dump")],ct,PgEnvironment(recovery,temporaryDatabase));
-            pg.Database=temporaryDatabase;await using var restored=new NpgsqlConnection(pg.ConnectionString);await restored.OpenAsync(ct);var digests=await Digests(restored,null,ct);
+            var applicationRole=new NpgsqlConnectionStringBuilder(settings.ConnectionString).Username??throw new InvalidOperationException("An exact application database role is required.");var quotedRole="\""+applicationRole.Replace("\"","\"\"")+"\"";
+            await using(var create=new NpgsqlCommand("CREATE DATABASE \""+temporaryDatabase+"\" OWNER "+quotedRole+" ENCODING 'UTF8' TEMPLATE template0",provisioner))await create.ExecuteNonQueryAsync(ct);
+            _=await Run(options.PgRestoreExecutable,["--no-owner","--no-acl","--exit-on-error","--role="+applicationRole,"--dbname="+temporaryDatabase,Path.Combine(directory,"database.dump")],ct,PgEnvironment(recovery,temporaryDatabase));
+            pg.Database=temporaryDatabase;await using var restored=new NpgsqlConnection(pg.ConnectionString);await restored.OpenAsync(ct);await using(var role=new NpgsqlCommand("SET ROLE "+quotedRole,restored))await role.ExecuteNonQueryAsync(ct);var digests=await Digests(restored,null,ct);
             Guid restoredOrganization;await using(var original=new NpgsqlCommand("SELECT \"PublicId\" FROM organization.\"Organizations\"",restored))restoredOrganization=(Guid)(await original.ExecuteScalarAsync(ct))!;
             if(restoredOrganization!=manifest.OrganizationId||digests.Evidence!=manifest.EvidenceDigest||digests.Packages!=manifest.ReceivedPackages||digests.Audit!=manifest.AuditDigest||digests.Events!=manifest.AuditEvents)throw new InvalidOperationException("Restored organization/evidence/audit identity did not match the consistent snapshot.");
             // Verify encrypted Identity secrets using the original key ring and certificate, not merely SQL counts.
-            var services=new ServiceCollection();services.AddLogging();services.AddDbContext<OrganizationDatabase>(o=>o.UseNpgsql(pg.ConnectionString));
-            services.AddDataProtection().SetApplicationName("AeroScience.Organization.0.7").PersistKeysToDbContext<OrganizationDatabase>().ProtectKeysWithCertificate(certificate);
+            var applicationConnection=new NpgsqlConnectionStringBuilder(settings.ConnectionString){Database=temporaryDatabase}.ConnectionString;
+            async Task ValidateIdentity(X509Certificate2 identity){
+            var services=new ServiceCollection();services.AddLogging();services.AddDbContext<OrganizationDatabase>(o=>o.UseNpgsql(applicationConnection));
+            services.AddDataProtection().SetApplicationName("AeroScience.Organization.0.7").PersistKeysToDbContext<OrganizationDatabase>().ProtectKeysWithCertificate(identity);
             services.AddIdentityCore<OrganizationUser>().AddRoles<Microsoft.AspNetCore.Identity.IdentityRole<Guid>>().AddEntityFrameworkStores<OrganizationDatabase>().AddDefaultTokenProviders();
             services.AddScoped<Microsoft.AspNetCore.Identity.IUserStore<OrganizationUser>,ProtectedOrganizationUserStore>();
             await using(var validation=services.BuildServiceProvider()){
@@ -174,12 +195,27 @@ public sealed partial class OrganizationRecoveryEngine(OrganizationDatabase db,O
                     foreach(var destination in destinations)DiscordCredentialProtection.VerifyRestored(destination,manifest.OrganizationId,scope.ServiceProvider.GetRequiredService<IDataProtectionProvider>());
                 }
             }
-            return new(1,backup.Id,manifest.OrganizationId,dumpHash,Hash(certificate.RawData),digests.Evidence,digests.Packages,digests.Audit,digests.Events,manifest.Migrations,DateTimeOffset.UtcNow,"Actual isolated PostgreSQL restore and original identity/notification-secret decryption. Primary data were not modified; no notification was sent. Provider/account loss and novice recovery still require external acceptance.");
+            }
+            await ValidateIdentity(certificate);
+            X509Certificate2? renewed=null;
+            try{
+                if(renewIdentity){if(!stageReplacement||allowCompatibleSchemaPrefix)throw new InvalidOperationException("Protected identity renewal requires an isolated exact-schema replacement.");await using var candidate=new OrganizationDatabase(new DbContextOptionsBuilder<OrganizationDatabase>().UseNpgsql(applicationConnection).Options);renewed=await OrganizationIdentityRenewal.Renew(candidate,certificate,ct);await ValidateIdentity(renewed);}
+                if(stageReplacement){if(allowCompatibleSchemaPrefix)throw new InvalidOperationException("Replacement activation requires this exact compatible application schema.");await OrganizationRecoveryActivation.Stage(restored,settings,backup,renewed??certificate,ct,recoveryAdministrator);retained=true;}
+            }finally{renewed?.Dispose();}
+            return new(1,backup.Id,manifest.OrganizationId,dumpHash,Hash(certificate.RawData),digests.Evidence,digests.Packages,digests.Audit,digests.Events,manifest.Migrations,DateTimeOffset.UtcNow,stageReplacement?"Replacement database and original identity verified. Live sharing, device grants, scheduled deletion and notifications fenced. Explicit activation and restart required.":"Actual isolated PostgreSQL restore and original identity/notification-secret decryption. Primary data were not modified; no notification was sent. Provider/account loss and novice recovery still require external acceptance.");
         }finally{
             // Only generated disposable databases may be removed, never the original organization database.
-            try{await using var admin=new NpgsqlConnection(recovery);await admin.OpenAsync(CancellationToken.None);await using var drop=new NpgsqlCommand("DROP DATABASE IF EXISTS \""+temporaryDatabase+"\" WITH (FORCE)",admin);await drop.ExecuteNonQueryAsync(CancellationToken.None);}catch{ }
+            ClearCandidatePools(settings.ConnectionString,recovery,temporaryDatabase);
+            if(!retained)try{await using var admin=new NpgsqlConnection(recovery);await admin.OpenAsync(CancellationToken.None);var applicationRole=new NpgsqlConnectionStringBuilder(settings.ConnectionString).Username!;await using(var role=new NpgsqlCommand("SET ROLE \""+applicationRole.Replace("\"","\"\"")+"\"",admin))await role.ExecuteNonQueryAsync(CancellationToken.None);await using var drop=new NpgsqlCommand("DROP DATABASE IF EXISTS \""+temporaryDatabase+"\" WITH (FORCE)",admin);await drop.ExecuteNonQueryAsync(CancellationToken.None);}catch{ }
             if(Directory.Exists(directory))Directory.Delete(directory,true);
         }
+    }
+    internal static void ClearCandidatePools(string application,string recovery,string database)
+    {
+        // A returned connection can remain idle under its LOGIN identity even after SET
+        // ROLE. Do not grant pg_signal_backend/superuser to kill it. Close only these two
+        // generated candidate pools before dropping or handing over the isolated copy.
+        using var app=new NpgsqlConnection(new NpgsqlConnectionStringBuilder(application){Database=database}.ConnectionString);using var admin=new NpgsqlConnection(new NpgsqlConnectionStringBuilder(recovery){Database=database}.ConnectionString);NpgsqlConnection.ClearPool(app);NpgsqlConnection.ClearPool(admin);
     }
     internal static void CleanInterruptedWork(ServerOperationsOptions options)
     {
@@ -196,12 +232,19 @@ public sealed partial class OrganizationRecoveryEngine(OrganizationDatabase db,O
         if(!options.Enabled)return false;CleanInterruptedWork(options);await operations.Schedule(ct);var job=await operations.Take(ct);if(job is null)return false;
         using var deadline=CancellationTokenSource.CreateLinkedTokenSource(ct);deadline.CancelAfter(TimeSpan.FromMinutes(15));var token=deadline.Token;
         try{
+            if(job.Kind==ServerOperationKind.ImportRestore){
+                var recovered=await OrganizationRecoveryImport.Stage(db,scope.ServiceProvider.GetRequiredService<OrganizationSettings>(),options,job,scope.ServiceProvider.GetRequiredService<IDataProtectionProvider>(),token);job.BackupId=recovered.Id;job.State=ServerOperationState.Completed;job.Message="Independent replacement verified and staged. Original origin/claim/evidence history is unchanged. Review the new address, then explicitly activate and sign in with the recovered administrator and MFA.";
+            }else{
             ServerBackupRecord backup;
-            if(job.Kind is ServerOperationKind.Backup or ServerOperationKind.PrepareUpdate){backup=await engine.Backup(job.Id,token);db.ServerBackups.Add(backup);job.BackupId=backup.Id;await db.SaveChangesAsync(token);}else backup=await db.ServerBackups.SingleAsync(b=>b.Id==job.BackupId,token);
-            if(job.Kind is ServerOperationKind.VerifyRestore or ServerOperationKind.PrepareUpdate||options.Independent is not null){var verified=await engine.VerifyRestore(backup,token);backup.VerifiedRestoreUtc=verified.VerifiedUtc;backup.VerificationJson=JsonSerializer.Serialize(verified,Json);}
+            if(job.Kind is ServerOperationKind.Backup or ServerOperationKind.PrepareUpdate or ServerOperationKind.RenewIdentity){backup=await engine.Backup(job.Id,token);db.ServerBackups.Add(backup);job.BackupId=backup.Id;await db.SaveChangesAsync(token);}else backup=await db.ServerBackups.SingleAsync(b=>b.Id==job.BackupId,token);
+            if(job.Kind is ServerOperationKind.VerifyRestore or ServerOperationKind.PrepareUpdate or ServerOperationKind.StageRestore or ServerOperationKind.RenewIdentity||options.Independent is not null){
+                if(job.Kind is ServerOperationKind.StageRestore or ServerOperationKind.RenewIdentity&&!await db.Memberships.AnyAsync(m=>m.UserId==job.ActorId&&m.Role=="Administrator"&&m.State==OrganizationMembershipState.Active,token))throw new OrganizationForbidden();
+                var verified=await engine.VerifyRestore(backup,token,stageReplacement:job.Kind is ServerOperationKind.StageRestore or ServerOperationKind.RenewIdentity,renewIdentity:job.Kind==ServerOperationKind.RenewIdentity,recoveryAdministrator:job.ActorName);backup.VerifiedRestoreUtc=verified.VerifiedUtc;backup.VerificationJson=JsonSerializer.Serialize(verified,Json);}
             if(options.Independent is not null){await engine.CopyIndependent(backup,token);await db.SaveChangesAsync(token);var policy=await db.ServerOperationsPolicies.AsNoTracking().SingleAsync(token);await engine.EnforceRetention(policy,token);}
-            job.State=ServerOperationState.Completed;job.Message=job.Kind switch{ServerOperationKind.Backup=>options.Independent is null?"Encrypted backup received by the configured repository. Verify a restore before relying on it.":"Encrypted backup and separately keyed copy both restored successfully. Approved retention was checked. Independent account control still requires operator verification.",ServerOperationKind.VerifyRestore=>"Paired restore verified in an isolated database; original evidence and audit digests match. Primary records were not changed.",_=>"Pinned update preflight has a verified paired recovery checkpoint. Provider rollout is not implemented/authorized by this receipt; no migration or image was applied."};
+            job.State=ServerOperationState.Completed;job.Message=job.Kind switch{ServerOperationKind.Backup=>options.Independent is null?"Encrypted backup received by the configured repository. Verify a restore before relying on it.":"Encrypted backup and separately keyed copy both restored successfully. Approved retention was checked. Independent account control still requires operator verification.",ServerOperationKind.VerifyRestore=>"Paired restore verified in an isolated database; original evidence and audit digests match. Primary records were not changed.",ServerOperationKind.RenewIdentity=>"Protected identity renewed in a verified replacement. Existing MFA and protected notification secrets decrypt; explicit activation is required.",ServerOperationKind.StageRestore=>"Replacement verified and staged. Explicit Activate Restored Copy is required; the original database is unchanged.",_=>"Pinned update preflight has a verified paired recovery checkpoint. Provider rollout is not implemented/authorized by this receipt; no migration or image was applied."};
+            }
         }catch(Exception ex) when(ex is not OperationCanceledException||!ct.IsCancellationRequested){job.State=ServerOperationState.Failed;job.Message="Recovery did not complete. Existing primary records and earlier checkpoints remain unchanged. Check the protected destination, compatible keys/version and storage before retrying.";}
+        job.ProtectedImportJson=null;
         job.Revision++;job.FinishedUtc=DateTimeOffset.UtcNow;scope.ServiceProvider.GetRequiredService<OrganizationManagement>().Audit(job.ActorId,job.ActorName,"server-operation-"+job.State.ToString().ToLowerInvariant(),job.Id,job.Revision);await db.SaveChangesAsync(ct);return true;
     }
 }

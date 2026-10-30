@@ -28,9 +28,12 @@ if (args.Length > 0 && args[0] == "--earthdata-vault-probe")
     var organizations=new AeroScience.Desktop.WindowsOrganizationCredentials(Path.Combine(temporary,"production"));
     var organizationProfile=new AeroScience.Desktop.WindowsOrganizationCredentials(Path.Combine(temporary,"validation"));
     var firstOrganization=Guid.NewGuid();var secondOrganization=Guid.NewGuid();
+    using var ownership=System.Security.Cryptography.ECDsa.Create(System.Security.Cryptography.ECCurve.NamedCurves.nistP256);var privateOwnership=Convert.ToBase64String(ownership.ExportPkcs8PrivateKey());
     const string synthetic="synthetic_cloud_test_credential_not_a_nasa_token";
     try
     {
+        organizations.SaveOwnerKey(firstOrganization,privateOwnership);if(organizations.ReadOwnerKey(firstOrganization)!=privateOwnership||organizations.Read(firstOrganization) is not null||organizationProfile.ReadOwnerKey(firstOrganization) is not null)throw new IOException("Ownership key vault isolation failed.");
+        organizations.RemoveOwnerKey(firstOrganization);if(organizations.ReadOwnerKey(firstOrganization) is not null)throw new IOException("Ownership key deletion failed.");
         organizations.Save(firstOrganization,new string('a',64));organizations.Save(secondOrganization,new string('b',64));
         if(organizations.Read(firstOrganization)!=new string('a',64)||organizations.Read(secondOrganization)!=new string('b',64)||organizationProfile.Read(firstOrganization) is not null)throw new IOException("Organization server/profile vault isolation failed.");
         organizations.Remove(firstOrganization);if(organizations.Read(firstOrganization) is not null||organizations.Read(secondOrganization)!=new string('b',64))throw new IOException("Organization disconnect crossed credential identities.");
@@ -40,7 +43,7 @@ if (args.Length > 0 && args[0] == "--earthdata-vault-probe")
         if(first.ReadToken()!=synthetic||isolated.ReadToken() is not null)throw new IOException("Disconnect crossed profile identities.");
         first.Clear();if(first.ReadToken() is not null)throw new IOException("Windows credential removal failed.");
         Console.WriteLine("PASS: real Windows Credential Manager write/read/profile isolation/removal with disposable synthetic data; no NASA authorization or installed-device acceptance.");
-    }finally{first.Clear();isolated.Clear();organizations.Remove(firstOrganization);organizations.Remove(secondOrganization);organizationProfile.Remove(firstOrganization);}
+    }finally{first.Clear();isolated.Clear();organizations.Remove(firstOrganization);organizations.Remove(secondOrganization);organizationProfile.Remove(firstOrganization);organizations.RemoveOwnerKey(firstOrganization);organizationProfile.RemoveOwnerKey(firstOrganization);}
     return;
 }
 if (args.Length > 0 && args[0] == "--profile-probe")
