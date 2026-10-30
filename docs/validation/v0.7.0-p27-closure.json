@@ -11,9 +11,11 @@
     "fullAccepted": true
   },
   "stageC": {
-    "implemented": false,
-    "accepted": false,
-    "status": "Explicitly separated P27-C secure notification integration checkpoint; no nominal working buttons, secrets, outbox or outbound posts."
+    "implemented": true,
+    "accepted": true,
+    "source": "62e564c2627963f117b439c5477c45cf3aa341f5",
+    "full": 41010892379,
+    "details": "v0.7.0-p27c-closure.json"
   },
   "sourceFrozen": true,
   "fullValidation": {
@@ -66,7 +68,7 @@
   "realMsfsOrRailwayAcceptance": false,
   "p26ReleaseBlockersWaived": false,
   "version": 1,
-  "technicalAcceptanceScope": "P27-A/B only; Discord stage C unfinished",
+  "technicalAcceptanceScope": "Historical A/B Full evidence; combined A/B/C acceptance is linked in currentCombinedAcceptance",
   "productionReady": false,
   "realRailwayAccepted": false,
   "installedMsfsAccepted": false,
@@ -118,7 +120,7 @@
     },
     "cause": "Existing rollback fixture selected latest P27 migration but checked an earlier P26 column. Corrected compiled-DDL assertions preserve original identity/evidence/audit/MFA/deadline checks; production implementation unchanged."
   },
-  "status": "P27-A/B technically accepted; P27-C explicitly separate and unfinished; no P28 or production acceptance",
+  "status": "Historical A/B Full evidence preserved; C also technically accepted; P27 engineering complete, no P28 or production acceptance",
   "fullResults": {
     "linuxDotnet": {
       "passed": 1367,
@@ -220,5 +222,10 @@
   "protected": {
     "ownerReadmeSha256": "f32cff962da446a6b10e411124155ec281a6cfc06664ca01dfc5754b44d13049",
     "stableMainDevelop060AndTag": "9dd2d8cda7ddb6d73414808f75010726871205c2"
+  },
+  "currentCombinedAcceptance": {
+    "source": "62e564c2627963f117b439c5477c45cf3aa341f5",
+    "full": 41010892379,
+    "details": "v0.7.0-p27c-closure.json"
   }
 }

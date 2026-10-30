@@ -52,3 +52,6 @@ Official Discord webhook, message and rate-limit documents were successfully ret
 ## P27-C integrated delivery
 
 The previously absent C implementation now uses the existing server, PostgreSQL, Identity, key ring, event identities and portal. [Discord notification architecture](organization-discord-notifications.md) describes settings, separate external flight consent, explicit current approval/exception disclosure, encrypted credentials, pinned verified HTTPS, bounded durable processing and honest ambiguous outcomes. [P27-C validation](../validation/v0.7.0-p27c.md) is authoritative for its own final acceptance; A/B Full is preserved independently. No P26 release gate is waived.
+
+
+Combined P27 engineering acceptance: source `62e564c2627963f117b439c5477c45cf3aa341f5`, [Full 41010892379](https://github.com/JustSeanC/AeroScience/actions/runs/41010892379). A/B and C are technically accepted; real Discord/MSFS/hosting and all P26 operational gates remain separate. [Final evidence](../validation/v0.7.0-p27c.md).

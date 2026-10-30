@@ -2,11 +2,135 @@
   "version": 1,
   "milestone": "v0.7.0 P27-C",
   "branch": "develop/v0.7.0",
-  "status": "First Full failed; supported corrections focused-validated; Windows profile and corrected Full pending",
+  "status": "P27-C Technically Accepted; overall P27 Engineering Complete / Ready for P28 Integration Validation",
   "implemented": true,
-  "technicallyAccepted": false,
-  "testedSource": null,
-  "full": null,
+  "technicallyAccepted": true,
+  "testedSource": "62e564c2627963f117b439c5477c45cf3aa341f5",
+  "full": {
+    "id": 41010892379,
+    "url": "https://github.com/JustSeanC/AeroScience/actions/runs/41010892379",
+    "conclusion": "success",
+    "source": "62e564c2627963f117b439c5477c45cf3aa341f5",
+    "results": {
+      "linuxDotnet": {
+        "passed": 1427,
+        "failed": 0,
+        "skipped": 0
+      },
+      "windowsDotnet": {
+        "passed": 1422,
+        "failed": 0,
+        "skipped": 5
+      },
+      "browser": {
+        "passed": 351,
+        "failed": 0,
+        "skipped": 2,
+        "flaky": 0
+      },
+      "linuxPython": {
+        "passed": 161,
+        "failed": 0,
+        "skipped": 1
+      },
+      "processRecovery": {
+        "linuxPassed": 5,
+        "windowsPassed": 5
+      },
+      "windowsPython": {
+        "passed": 157,
+        "failed": 0,
+        "skipped": 2
+      },
+      "windowsVaultNativePackage": "passed",
+      "railwaySdk": {
+        "passed": 5,
+        "failed": 0,
+        "skipped": 0
+      },
+      "containers": {
+        "passed": 12,
+        "failed": 0
+      },
+      "railwayShapedContainers": {
+        "passed": 5,
+        "failed": 0
+      },
+      "privateImageRoles": 4
+    },
+    "expectedSkips": {
+      "linux": [],
+      "windows": [
+        "AeroScience.Tests.OrganizationConnectionIntegrationTests.SeparatelyKeyedCopiesSurvivePrimaryRepositoryAndIdentityLossAndEnforceApprovedRetention",
+        "AeroScience.Tests.AviationAcquisitionTests.RetainedOriginalFileLinksAreRejectedRatherThanFollowed",
+        "AeroScience.Tests.ScientificLibraryFolderTests.LinkedSourceDirectoryIsRejected",
+        "AeroScience.Tests.OrganizationConnectionIntegrationTests.EncryptedOffProcessBackupRestoresAuthorizedEvidenceAuditAndProtectedMfaAfterSourceLoss",
+        "AeroScience.Tests.OrganizationServerTests.ExplicitBackupConsentPersistsScheduledPolicyIdempotentJobsAndVerifiedRestoreAcrossRestart"
+      ]
+    },
+    "subsets": {
+      "linuxdiscordIntegrationPassed": 18,
+      "linuxliveEventsPassed": 18,
+      "linuxRecoverySnapshotPassed": 1,
+      "linuxPolicyPassed": 41,
+      "windowsdiscordIntegrationPassed": 18,
+      "windowsliveEventsPassed": 18,
+      "windowsRecoverySnapshotPassed": 1,
+      "windowsPolicyPassed": 41,
+      "organization-notifications.spec.js": 5,
+      "organization-live.spec.js": 4
+    },
+    "artifactSha256": {
+      "run.json": "d7bb0b95cdb5e792e233a6f457ed101936ea4ab96a3ed15e95ad901986bd6f7c",
+      "windows-tests/windows.trx": "a0ae5045862fa41ef0818a1cd46457a05b3a56a4f5ab108568a6ffe147ca6546",
+      "linux-tests/_runnervm48cm3_2026-10-30_05_55_11_net10.0.trx": "411255439aae229fdea3848ca5f0d88deb127872660f7496d84c0dd5436f72f6",
+      "browser/web-results.json": "fb7d3b5d25d70be01f21b91ac87f37787de86d8ade669d9806e4017968652ebb",
+      "deployment/image-review.json": "f692333cd188e43dd207fe9acca327fbcb5229f60ea6d4ca937eb379a515fe9c",
+      "deployment/railway-runtime.json": "d2e53d9b709af3b882c7ed5a16d26bd6f50456e22521509fd83bf1a7aaa8baba",
+      "deployment/acceptance.json": "d86539a09e6c2320797b1f323e4a95ea9175f84f8dee3448a00bdd9bc23026ed"
+    },
+    "expectedBrowserSkips": [
+      {
+        "file": "aviation-charts.spec.js",
+        "title": "approved originals provide local chart overlays, independent science, offline tiles and exact edition selection",
+        "annotations": [
+          {
+            "type": "skip",
+            "description": "Owner deferred the ordinary chart viewer; retained research renderer coverage remains in AviationChartTests.",
+            "location": {
+              "file": "/home/runner/work/AeroScience/AeroScience/tests/web/aviation-charts.spec.js",
+              "line": 16,
+              "column": 7
+            }
+          }
+        ]
+      },
+      {
+        "file": "aviation-charts.spec.js",
+        "title": "unknown runtime is honest and chart inventory remains accessible at tablet width without altering saved data",
+        "annotations": [
+          {
+            "type": "skip",
+            "description": "Owner deferred the ordinary chart viewer; the active deferral scenario checks retention, tablet accessibility and other overlays.",
+            "location": {
+              "file": "/home/runner/work/AeroScience/AeroScience/tests/web/aviation-charts.spec.js",
+              "line": 34,
+              "column": 7
+            }
+          }
+        ]
+      }
+    ],
+    "expectedHelperSkips": {
+      "linux": [
+        "test_pe_metadata_check_does_not_claim_runtime_exports_or_simulator_connection (test_windows_helpers.WindowsHelperTests.test_pe_metadata_check_does_not_claim_runtime_exports_or_simulator_connection) ... skipped 'Publish the Windows companion first for the native PE fixture'"
+      ],
+      "windows-companion": [
+        "test_generated_private_configuration_is_unique_bounded_and_never_prints_credentials (test_organization_deployment.OrganizationDeploymentTests.test_generated_private_configuration_is_unique_bounded_and_never_prints_credentials) ... skipped 'POSIX OpenSSL/mode fixture; real Linux container acceptance verifies certificates.'",
+        "test_case_colliding_files_cannot_share_one_layout_entry (test_packaging.PackagingTests.test_case_colliding_files_cannot_share_one_layout_entry) ... skipped 'A case-sensitive filesystem is required to create both aliases.'"
+      ]
+    }
+  },
   "preservedAB": {
     "source": "4ede325c43bf2166213ef0da96d916c71c2aa53d",
     "full": 40985543972,
@@ -149,5 +273,41 @@
       "skipped": 0
     },
     "overlap": true
+  },
+  "implementationSource": "688a2351e676f24ab79b89b6c3ce3b049690c22d",
+  "sourceFrozen": true,
+  "p27OverallEngineeringComplete": true,
+  "fast": {
+    "id": 41010312966,
+    "source": "62e564c2627963f117b439c5477c45cf3aa341f5",
+    "conclusion": "cancelled",
+    "dotnet": {
+      "passed": 1296,
+      "failed": 0,
+      "skipped": 131
+    },
+    "sdkPassed": 5,
+    "reason": "Only duplicate browser remainder superseded by same-source Full; not a complete Fast pass."
+  },
+  "windowsProfile": {
+    "id": 41010313094,
+    "source": "62e564c2627963f117b439c5477c45cf3aa341f5",
+    "conclusion": "success",
+    "passed": 94,
+    "failed": 0,
+    "skipped": 0,
+    "discordTlsPolicyPassed": 46,
+    "scope": "Focused diagnostic, not Full acceptance"
+  },
+  "supersededIntegrationFast": {
+    "id": 41005350989,
+    "source": "688a2351e676f24ab79b89b6c3ce3b049690c22d",
+    "conclusion": "cancelled",
+    "dotnet": {
+      "passed": 1295,
+      "failed": 0,
+      "skipped": 130
+    },
+    "reason": "Browser portion superseded by corrected documentation source before Full; no complete Fast pass claimed."
   }
 }
