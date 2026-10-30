@@ -2,7 +2,7 @@
   "version": 1,
   "milestone": "v0.7.0 P27-C",
   "branch": "develop/v0.7.0",
-  "status": "Implemented; focused acceptance passed; Full gate pending",
+  "status": "First Full failed; supported corrections focused-validated; Windows profile and corrected Full pending",
   "implemented": true,
   "technicallyAccepted": false,
   "testedSource": null,
@@ -55,5 +55,99 @@
     "wholeRequestSeconds": 10,
     "responseBytes": 16384
   },
-  "protectedReadmeSha256": "f32cff962da446a6b10e411124155ec281a6cfc06664ca01dfc5754b44d13049"
+  "protectedReadmeSha256": "f32cff962da446a6b10e411124155ec281a6cfc06664ca01dfc5754b44d13049",
+  "preservedFullFailure": {
+    "source": "38b644f39a3c25bfea04d5aa91a8ca0705ca9eca",
+    "run": 41006309284,
+    "url": "https://github.com/JustSeanC/AeroScience/actions/runs/41006309284",
+    "conclusion": "failure",
+    "browser": "Not performed because Linux .NET failed",
+    "deployment": {
+      "passed": 12,
+      "failed": 0,
+      "railwayShapedPassed": 5
+    },
+    "linux": {
+      "passed": 1424,
+      "failed": 1,
+      "skipped": 0,
+      "failures": [
+        {
+          "name": "AeroScience.Tests.OrganizationServerTests.ExplicitBackupConsentPersistsScheduledPolicyIdempotentJobsAndVerifiedRestoreAcrossRestart",
+          "error": "Assert.NotNull() Failure: Value of type 'Nullable<DateTimeOffset>' does not have a value"
+        }
+      ]
+    },
+    "windows": {
+      "passed": 1411,
+      "failed": 9,
+      "skipped": 5,
+      "failures": [
+        {
+          "name": "AeroScience.Tests.OrganizationConnectionIntegrationTests.DiscordRealReceivedScienceApprovalRequiresExactExternalDisclosureAndSupersedingReviewCancelsIt",
+          "error": "Assert.Single() Failure: The collection was empty"
+        },
+        {
+          "name": "AeroScience.Tests.DiscordTransportTests.ActualHttpsReceiverValidatesHostAndSendsBoundedMentionDisabledJsonWithoutFollowingRedirects",
+          "error": "Assert.Equal() Failure: Values differ\r\nExpected: Delivered\r\nActual:   Ambiguous"
+        },
+        {
+          "name": "AeroScience.Tests.OrganizationServerTests.DiscordProtectedCredentialRotationDeletionStaleCommandsAndExplicitTestsUseRealHttps",
+          "error": "Assert.Single() Failure: The collection was empty"
+        },
+        {
+          "name": "AeroScience.Tests.DiscordTransportTests.ActualHttpsBodyCannotStallPastTheWholeRequestDeadline",
+          "error": "Assert.Single() Failure: The collection was empty"
+        },
+        {
+          "name": "AeroScience.Tests.OrganizationServerTests.DiscordConsentedStartAndEndRemainDistinctAndUnsentIntentsSurviveRestartWithoutResendingUnknownPosts",
+          "error": "Assert.Single() Failure: The collection was empty"
+        },
+        {
+          "name": "AeroScience.Tests.OrganizationServerTests.DiscordRateLimitsAreBoundedAndAmbiguousAcknowledgmentsAreNeverRetriedAfterRestart",
+          "error": "Assert.Equal() Failure: Values differ\r\nExpected: Pending\r\nActual:   Ambiguous"
+        },
+        {
+          "name": "AeroScience.Tests.OrganizationConnectionIntegrationTests.DiscordAcceptedExceptionIsNotScientificPassAndOtherOrganizationCannotDiscloseIt",
+          "error": "Assert.Single() Failure: The collection was empty"
+        },
+        {
+          "name": "AeroScience.Tests.OrganizationServerTests.DiscordAdministratorCancellationStopsUnsentWorkAndPreservesAnUnknownOutcome",
+          "error": "Assert.Single() Failure: The collection was empty"
+        },
+        {
+          "name": "AeroScience.Tests.OrganizationServerTests.DiscordFlightAnnouncementsNeedIndependentPerFlightConsentRevocationWinsAndEndMeansOnlySharingEnded",
+          "error": "Assert.Single() Failure: The collection was empty"
+        }
+      ]
+    }
+  },
+  "correctedFocused": {
+    "dotnet": {
+      "passed": 62,
+      "failed": 0,
+      "skipped": 0
+    },
+    "securityAndDiscordBrowser": {
+      "passed": 10,
+      "failed": 0,
+      "skipped": 0
+    },
+    "portableDiscordBrowser": {
+      "passed": 5,
+      "failed": 0,
+      "skipped": 0
+    },
+    "hostnameDiagnostic": {
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0
+    },
+    "selector": {
+      "passed": 15,
+      "failed": 0,
+      "skipped": 0
+    },
+    "overlap": true
+  }
 }

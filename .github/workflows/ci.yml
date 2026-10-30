@@ -91,7 +91,7 @@ jobs:
         run: |
           dotnet restore AeroScience.sln --locked-mode
           if ($LASTEXITCODE -ne 0) { throw 'Locked dependency restore failed.' }
-          dotnet test tests/AeroScience.Tests -c Release --no-restore --filter 'FullyQualifiedName~ValidationIsolationTests|FullyQualifiedName~ModeAndToolbarTests|FullyQualifiedName~ToolbarInstallTests|FullyQualifiedName~ScientificHdfReaderTests' --logger 'trx;LogFileName=windows-profile.trx' --blame-hang-timeout 2m --blame-hang-dump-type none
+          dotnet test tests/AeroScience.Tests -c Release --no-restore --filter 'FullyQualifiedName~ValidationIsolationTests|FullyQualifiedName~ModeAndToolbarTests|FullyQualifiedName~ToolbarInstallTests|FullyQualifiedName~ScientificHdfReaderTests|FullyQualifiedName~DiscordTransportTests|FullyQualifiedName~DiscordWebhookPolicyTests' --logger 'trx;LogFileName=windows-profile.trx' --blame-hang-timeout 2m --blame-hang-dump-type none
           if ($LASTEXITCODE -ne 0) { throw 'Windows isolation/protocol tests failed.' }
       - name: Publish production and isolated validation graphs (not distributable)
         shell: pwsh

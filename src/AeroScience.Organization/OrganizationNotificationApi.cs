@@ -21,8 +21,10 @@ public sealed class OrganizationNotificationWorker(IServiceScopeFactory scopes,I
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         using var timer=new PeriodicTimer(TimeSpan.FromSeconds(2));
-        while(await timer.WaitForNextTickAsync(stoppingToken))try{using var scope=scopes.CreateScope();await scope.ServiceProvider.GetRequiredService<OrganizationNotifications>().Tick(stoppingToken);}
-        catch(OperationCanceledException)when(stoppingToken.IsCancellationRequested){return;}
-        catch(Exception){log.LogWarning("Notification processing unavailable. Durable intents remain retained; no credential or response is logged.");}
+        while(!stoppingToken.IsCancellationRequested){
+            try{if(!await timer.WaitForNextTickAsync(stoppingToken))return;using var scope=scopes.CreateScope();await scope.ServiceProvider.GetRequiredService<OrganizationNotifications>().Tick(stoppingToken);}
+            catch(OperationCanceledException)when(stoppingToken.IsCancellationRequested){return;}
+            catch(Exception){log.LogWarning("Notification processing unavailable. Durable intents remain retained; no credential or response is logged.");}
+        }
     }
 }

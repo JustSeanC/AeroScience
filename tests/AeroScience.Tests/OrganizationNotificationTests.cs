@@ -19,16 +19,16 @@ namespace AeroScience.Tests;
 // has no alternate host, root, proxy, callback or insecure TLS option in runtime configuration.
 public sealed class DiscordHttpsFixture:IDiscordTransport,IAsyncDisposable
 {
-    readonly WebApplication app;readonly X509Certificate2 certificate;readonly HttpClient client;
-    public readonly List<byte[]> Bodies=[];public int Status=200;public string Response="{\"id\":\"123456789012345678\"}";public bool Abort,StallAfterHeaders;
-    DiscordHttpsFixture(WebApplication app,X509Certificate2 certificate,HttpClient client){this.app=app;this.certificate=certificate;this.client=client;}
+    readonly WebApplication app;readonly DiscordFixtureCertificate certificate;readonly HttpClient client;
+    public string TlsDiagnostics="No TLS validation callback observed.";public readonly List<byte[]> Bodies=[];public int Status=200;public string Response="{\"id\":\"123456789012345678\"}";public bool Abort,StallAfterHeaders;
+    DiscordHttpsFixture(WebApplication app,DiscordFixtureCertificate certificate,HttpClient client){this.app=app;this.certificate=certificate;this.client=client;}
     public static async Task<DiscordHttpsFixture> Create(string host="discord.com")
     {
-        using var rsa=RSA.Create(2048);var request=new CertificateRequest("CN=discord.com",rsa,HashAlgorithmName.SHA256,RSASignaturePadding.Pkcs1);var names=new SubjectAlternativeNameBuilder();names.AddDnsName(host);request.CertificateExtensions.Add(names.Build());request.CertificateExtensions.Add(new X509BasicConstraintsExtension(false,false,0,true));var certificate=request.CreateSelfSigned(DateTimeOffset.UtcNow.AddMinutes(-5),DateTimeOffset.UtcNow.AddDays(1));
-        var builder=WebApplication.CreateBuilder();builder.Logging.ClearProviders();builder.WebHost.ConfigureKestrel(k=>k.Listen(IPAddress.Loopback,0,l=>l.UseHttps(certificate)));var app=builder.Build();DiscordHttpsFixture? fixture=null;
+        var certificate=DiscordFixtureCertificate.Create(host);
+        var builder=WebApplication.CreateBuilder();builder.Logging.ClearProviders();builder.WebHost.ConfigureKestrel(k=>k.Listen(IPAddress.Loopback,0,l=>l.UseHttps(certificate.Server)));var app=builder.Build();DiscordHttpsFixture? fixture=null;
         app.MapPost("/api/v10/webhooks/{id}/{token}",async(HttpContext c)=>{using var body=new MemoryStream();await c.Request.Body.CopyToAsync(body);lock(fixture!.Bodies)fixture.Bodies.Add(body.ToArray());Assert.Equal("true",c.Request.Query["wait"]);if(fixture.Abort){c.Abort();return;}c.Response.StatusCode=fixture.Status;if(fixture.StallAfterHeaders){await c.Response.StartAsync();try{await Task.Delay(Timeout.Infinite,c.RequestAborted);}catch(OperationCanceledException){}return;}if(fixture.Status==302)c.Response.Headers.Location="https://127.0.0.1/private";await c.Response.WriteAsync(fixture.Response);});await app.StartAsync();var port=new Uri(app.Urls.Single()).Port;
         var handler=new SocketsHttpHandler{UseProxy=false,AllowAutoRedirect=false,ConnectCallback=async(context,ct)=>{Assert.Equal("discord.com",context.DnsEndPoint.Host);Assert.Equal(443,context.DnsEndPoint.Port);var socket=new System.Net.Sockets.Socket(System.Net.Sockets.SocketType.Stream,System.Net.Sockets.ProtocolType.Tcp);await socket.ConnectAsync(IPAddress.Loopback,port,ct);return new System.Net.Sockets.NetworkStream(socket,true);}};
-        handler.SslOptions.CertificateChainPolicy=new(){TrustMode=X509ChainTrustMode.CustomRootTrust,RevocationMode=X509RevocationMode.NoCheck};handler.SslOptions.CertificateChainPolicy.CustomTrustStore.Add(certificate);
+        handler.SslOptions=certificate.ClientOptions(value=>fixture!.TlsDiagnostics=value);
         var client=new HttpClient(handler){Timeout=TimeSpan.FromSeconds(5)};fixture=new(app,certificate,client);return fixture;
     }
     public Task<DiscordResponse> Send(DiscordWebhookAddress d,byte[] body,CancellationToken ct)=>DiscordTransport.Execute(client,d,body,ct);
@@ -41,13 +41,23 @@ public sealed class DiscordTransportTests
     [Fact]public async Task ActualHttpsReceiverValidatesHostAndSendsBoundedMentionDisabledJsonWithoutFollowingRedirects()
     {
         await using var receiver=await DiscordHttpsFixture.Create();var d=DiscordWebhookAddress.Parse(Url);var body=DiscordWebhookPolicy.Message(DiscordWebhookPolicy.PlainText("@everyone **private** <@123> safe",2000));
-        Assert.Equal(DiscordAcknowledgment.Delivered,(await receiver.Send(d,body,default)).State);var sent=JsonDocument.Parse(Assert.Single(receiver.Bodies)).RootElement;Assert.Empty(sent.GetProperty("allowed_mentions").GetProperty("parse").EnumerateArray());Assert.DoesNotContain("@",sent.GetProperty("content").GetString());
+        var received=await receiver.Send(d,body,default);Assert.True(received.State==DiscordAcknowledgment.Delivered,"Controlled TLS fixture refused: "+receiver.TlsDiagnostics);var sent=JsonDocument.Parse(Assert.Single(receiver.Bodies)).RootElement;Assert.Empty(sent.GetProperty("allowed_mentions").GetProperty("parse").EnumerateArray());Assert.DoesNotContain("@",sent.GetProperty("content").GetString());
         receiver.Status=302;receiver.Response="";Assert.Equal(DiscordAcknowledgment.Ambiguous,(await receiver.Send(d,body,default)).State);Assert.Equal(2,receiver.Bodies.Count);
         receiver.Status=429;receiver.Response="{\"retry_after\":2.25}";Assert.Equal(3,(await receiver.Send(d,body,default)).RetryAfterSeconds);
         receiver.Status=200;receiver.Response=new string('x',20000);Assert.Equal(DiscordAcknowledgment.Ambiguous,(await receiver.Send(d,body,default)).State);
         receiver.Abort=true;Assert.Equal(DiscordAcknowledgment.Ambiguous,(await receiver.Send(d,body,default)).State);
     }
 
+    sealed class WorkerLoopProbe:IServiceScopeFactory
+    {
+        public TaskCompletionSource Reached {get;}=new(TaskCreationOptions.RunContinuationsAsynchronously);
+        public IServiceScope CreateScope(){Reached.TrySetResult();throw new InvalidOperationException("Controlled empty worker scope; no transport or database is used.");}
+    }
+    [Fact]public async Task DiscordNotificationWorkerExitsNormallyWhenStopped()
+    {
+        var scopes=new WorkerLoopProbe();using var worker=new OrganizationNotificationWorker(scopes,Microsoft.Extensions.Logging.Abstractions.NullLogger<OrganizationNotificationWorker>.Instance);
+        await worker.StartAsync(default);await scopes.Reached.Task.WaitAsync(TimeSpan.FromSeconds(5));await worker.StopAsync(default);Assert.Equal(TaskStatus.RanToCompletion,worker.ExecuteTask!.Status);
+    }
     [Fact]public async Task ActualHttpsBodyCannotStallPastTheWholeRequestDeadline()
     {
         await using var receiver=await DiscordHttpsFixture.Create();receiver.StallAfterHeaders=true;
@@ -56,7 +66,7 @@ public sealed class DiscordTransportTests
     }
     [Fact]public async Task RealHttpsRejectsAReceiverCertificateForAnotherHost()
     {
-        await using var receiver=await DiscordHttpsFixture.Create("wrong.example");Assert.Equal(DiscordAcknowledgment.Ambiguous,(await receiver.Send(DiscordWebhookAddress.Parse(Url),DiscordWebhookPolicy.Message("AeroScience test"),default)).State);Assert.Empty(receiver.Bodies);
+        await using var receiver=await DiscordHttpsFixture.Create("wrong.example");Assert.Equal(DiscordAcknowledgment.Ambiguous,(await receiver.Send(DiscordWebhookAddress.Parse(Url),DiscordWebhookPolicy.Message("AeroScience test"),default)).State);Assert.Empty(receiver.Bodies);Assert.Contains("RemoteCertificateNameMismatch",receiver.TlsDiagnostics,StringComparison.Ordinal);
     }
     [Fact]public async Task PinnedConnectorRejectsPrivateDnsMixedAnswersAlternateHostsAndActualPeerSubstitution()
     {

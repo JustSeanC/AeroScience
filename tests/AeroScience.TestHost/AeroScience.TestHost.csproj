@@ -2,6 +2,7 @@
   <ItemGroup>
     <ProjectReference Include="../../src/AeroScience.Engine/AeroScience.Engine.csproj" />
     <ProjectReference Include="../../src/AeroScience.Organization/AeroScience.Organization.csproj" />
+    <Compile Include="../AeroScience.Tests/DiscordFixtureCertificate.cs" Link="DiscordFixtureCertificate.cs" />
     <Compile Include="../AeroScience.Tests/SyntheticNasr.cs" Link="SyntheticNasr.cs" />
     <Compile Include="../AeroScience.Tests/SyntheticAirspace.cs" Link="SyntheticAirspace.cs" />
     <Compile Include="../AeroScience.Tests/SyntheticTfr.cs" Link="SyntheticTfr.cs" />
