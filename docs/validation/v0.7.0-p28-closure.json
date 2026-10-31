@@ -407,6 +407,30 @@
     "externalAccountLossAccepted": false,
     "providerUpdatesAccepted": false,
     "productionReady": false,
-    "p29Started": false
+    "p29Started": false,
+    "preservedFastFailure": {
+      "id": 41095486298,
+      "url": "https://github.com/JustSeanC/AeroScience/actions/runs/41095486298",
+      "source": "650638955fe3f420a9be0a07035c32bf989399c6",
+      "conclusion": "failure",
+      "dotnet": {
+        "passed": 1317,
+        "failed": 0,
+        "skipped": 145
+      },
+      "browser": {
+        "passed": 297,
+        "failed": 0,
+        "skipped": 57
+      },
+      "helpers": {
+        "passed": 162,
+        "failed": 1,
+        "skipped": 1
+      },
+      "cause": "Standalone hosting-page assumption invalidated by owner-setup module import",
+      "correction": "Remove narrow informational-page exception; hosting and owner dependencies conservatively select all browser tests",
+      "fullDispatched": false
+    }
   }
 }

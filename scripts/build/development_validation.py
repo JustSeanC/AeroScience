@@ -57,13 +57,10 @@ def plan(paths, uncertain=False):
             web.update({'tests/web/planner-units.spec.js', 'tests/web/planner-ux.spec.js'})
         elif name.endswith('.js') and ('science' in name or 'source' in name):
             web.add('tests/web/remote-science.spec.js')
-        elif name in {'src/AeroScience.Engine/wwwroot/organization-hosting.js',
-                      'src/AeroScience.Engine/wwwroot/organization-hosting.html',
-                      'src/AeroScience.Engine/wwwroot/organization-hosting.css'}:
-            # Standalone informational page, not a shared companion dependency.
-            # Full milestone/release coverage and unknown/shared UI expansion remain unchanged.
-            web.add('tests/web/organization-hosting.spec.js')
         elif name.startswith('src/AeroScience.Engine/wwwroot/') and name.endswith(('.js', '.css', '.html')):
+            # Hosting now imports the security-sensitive owner-pairing workflow.
+            # It no longer qualifies for the former standalone informational-page
+            # exception. Include every browser consumer, just as for other shared UI.
             web = {'tests/web'}  # Unknown shared browser dependency: expand rather than guess.
         if name.startswith('tests/test_') and name.endswith('.py'):
             helpers.add(path.stem)

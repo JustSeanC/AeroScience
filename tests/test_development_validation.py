@@ -82,17 +82,26 @@ class DevelopmentValidationTests(unittest.TestCase):
                      'src/AeroScience.Engine/wwwroot/shared-new-module.js', 'src/AeroScience.Engine/wwwroot/app.css'):
             self.assertEqual(['tests/web'], ci.plan([path])['browserSpecs'])
 
-    def test_standalone_hosting_page_is_targeted_without_shrinking_shared_or_full_validation(self):
-        for suffix in ('js', 'html', 'css'):
-            selected=ci.plan(['src/AeroScience.Engine/wwwroot/organization-hosting.'+suffix])
-            self.assertEqual(['tests/web/dashboard.spec.js','tests/web/organization-hosting.spec.js'],selected['browserSpecs'])
-        for path in ('src/AeroScience.Engine/wwwroot/app.js','src/AeroScience.Engine/wwwroot/shared-new-module.js'):
+    def test_hosting_and_owner_dependencies_expand_browser_coverage_without_shrinking_full_validation(self):
+        for path in ('src/AeroScience.Engine/wwwroot/organization-hosting.js',
+                     'src/AeroScience.Engine/wwwroot/organization-hosting.html',
+                     'src/AeroScience.Engine/wwwroot/organization-hosting.css',
+                     'src/AeroScience.Engine/wwwroot/organization-owner-setup.js',
+                     'src/AeroScience.Engine/wwwroot/app.js',
+                     'src/AeroScience.Engine/wwwroot/shared-new-module.js'):
             self.assertEqual(['tests/web'],ci.plan([path])['browserSpecs'])
         self.assertEqual(['tests/web'],ci.plan(['src/AeroScience.Engine/wwwroot/organization-hosting.js'],uncertain=True)['browserSpecs'])
         self.assertEqual('full',ci.validation_tier('workflow_dispatch','refs/heads/develop/v0.7.0',requested='full'))
-        # Changing this page's isolation requires revisiting the narrow mapping.
+        # Exercise the actual dependency which invalidated the old narrow mapping.
+        # Imports remain functional; both the importing page and its dependency must
+        # independently select the full browser suite, regardless of path ordering.
         page=(ROOT/'src/AeroScience.Engine/wwwroot/organization-hosting.js').read_text()
-        self.assertNotRegex(page,r'(?m)^\s*import\b')
+        self.assertRegex(page,r"(?m)^\s*import\s+.*['\"]\./organization-owner-setup\.js['\"]")
+        for paths in (['src/AeroScience.Engine/wwwroot/organization-owner-setup.js',
+                       'tests/web/organization-hosting.spec.js'],
+                      ['tests/web/organization-hosting.spec.js',
+                       'src/AeroScience.Engine/wwwroot/organization-owner-setup.js']):
+            self.assertEqual(['tests/web'],ci.plan(paths)['browserSpecs'])
 
     def test_session_controls_and_collection_planner_keep_their_functional_browser_checks(self):
         for path in ('src/AeroScience.Engine/wwwroot/science-sessions.js','src/AeroScience.Engine/wwwroot/collection-planner.js'):
