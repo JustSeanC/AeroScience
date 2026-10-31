@@ -431,6 +431,45 @@
       "cause": "Standalone hosting-page assumption invalidated by owner-setup module import",
       "correction": "Remove narrow informational-page exception; hosting and owner dependencies conservatively select all browser tests",
       "fullDispatched": false
+    },
+    "preservedHostingFullFailure": {
+      "id": 41216612470,
+      "url": "https://github.com/JustSeanC/AeroScience/actions/runs/41216612470",
+      "source": "74b26cd95d6fb30ba4b1b2f26ed6a4d7b771d487",
+      "conclusion": "failure",
+      "linuxDotnet": {
+        "passed": 1462,
+        "failed": 0,
+        "skipped": 0
+      },
+      "windowsDotnet": {
+        "passed": 1452,
+        "failed": 0,
+        "skipped": 10
+      },
+      "browser": {
+        "passed": 351,
+        "failed": 1,
+        "skipped": 2,
+        "flaky": 0
+      },
+      "containers": {
+        "passed": 12,
+        "failed": 0
+      },
+      "nativeContainers": {
+        "passed": 10,
+        "failed": 0
+      },
+      "linuxHelpers": "Not run after browser failure",
+      "linuxProcessRecovery": "Not run after browser failure",
+      "cause": "Deletion admission race with asynchronous end-flight analysis; preview is not a maintenance reservation. Exact historic lease-owner ID not retained; real evaluation queue deterministically reproduces and releases the same lease.",
+      "correction": "Await actual archived report before deletion review and complete fixture-owned end-flight evaluation during cleanup; retain all original deletion checks and deadlines",
+      "focusedDotnet": {
+        "passed": 53,
+        "failed": 0,
+        "skipped": 0
+      }
     }
   }
 }

@@ -131,5 +131,42 @@ public sealed class MissionPerformanceIntegrationTests:IDisposable
         while(true){await Task.Delay(10);try{if(System.Text.Json.JsonSerializer.SerializeToElement(worker.Read(flight.Id),WireJson.Options).GetProperty("state").GetString()=="Unavailable")break;}catch(NotSupportedException){}if(deadline.Elapsed>TimeSpan.FromSeconds(5))throw new TimeoutException("Expected the independent grading worker to report its fault without stopping the host.");}
         Assert.False(host.Services.GetRequiredService<IHostApplicationLifetime>().ApplicationStopping.IsCancellationRequested);Tick();Assert.Equal(1,store.Detail(flight.Id)!.Mission.SampleCount);Assert.Empty(store.PerformanceReports(flight.Id));await host.StopAsync();coordinator.End(flight.Id);
     }
+    sealed class HeldReportCapacity : IStorageCapacity,IDisposable
+    {
+        readonly ManualResetEventSlim released=new();
+        public TaskCompletionSource Entered {get;}=new(TaskCreationOptions.RunContinuationsAsynchronously);
+        public long FreeBytes(string directory){Entered.TrySetResult();if(!released.Wait(TimeSpan.FromSeconds(5)))throw new TimeoutException("The controlled report-capacity barrier was not released.");return long.MaxValue/2;}
+        public void Release()=>released.Set();
+        public void Dispose()=>released.Dispose();
+    }
+    [Fact] public async Task RunningArchivedEvaluationBlocksScienceDeletionThenReleasesItsLeaseAndRequiresFreshReview()
+    {
+        var flight=Start();Tick();Tick();coordinator.End(flight.Id);
+        var raw=store.StreamSamples(flight.Id).ToArray();var original=science.StreamObservations(flight.Id).ToArray();Assert.NotEmpty(original);
+        var review=science.PreviewCollectedDeletion(new([flight.Id]),store);Assert.Empty(review.Blockers);
+        using var capacity=new HeldReportCapacity();var storage=new StorageManagement(root,store,science,capacity);
+        using var analysis=new ScientificAnalysisJobs(store,science,storage);
+        var performance=new MissionPerformanceService(store,analysis,NullLogger<MissionPerformanceService>.Instance,science);
+        await analysis.StartAsync(default);
+        try{
+            // Same real queue/body used by the automatic end-flight service. Hold the
+            // existing capacity callback, not a fake analysis lease or a wall-clock race.
+            var job=performance.Recompute(flight.Id,"Controlled end-flight evaluation overlap");
+            await capacity.Entered.Task.WaitAsync(TimeSpan.FromSeconds(5));Assert.Equal("Running",analysis.Get(job.Id).State);
+            var error=Assert.Throws<InvalidOperationException>(()=>science.DeleteCollectedScience(new(review.Id,review.SelectionHash),store,coordinator.EnterMaintenance));
+            Assert.Equal("Finish active scientific acquisition, import or analysis before deleting external sources.",error.Message);
+            Assert.False(store.ScienceDeleted(flight.Id));Assert.Equal(raw,store.StreamSamples(flight.Id));Assert.Equal(original,science.StreamObservations(flight.Id));
+            capacity.Release();var deadline=System.Diagnostics.Stopwatch.StartNew();
+            while(analysis.Get(job.Id).State=="Running"){if(deadline.Elapsed>TimeSpan.FromSeconds(5))throw new TimeoutException("The real archived evaluation did not release its work.");await Task.Delay(10);}
+            Assert.Equal("Completed",analysis.Get(job.Id).State);Assert.Single(store.PerformanceReports(flight.Id));
+            // The newly saved report is part of the reviewed deletion fingerprint.
+            // An earlier approval must not silently delete that new scientific result.
+            Assert.Throws<InvalidOperationException>(()=>science.DeleteCollectedScience(new(review.Id,review.SelectionHash),store,coordinator.EnterMaintenance));
+            var fresh=science.PreviewCollectedDeletion(new([flight.Id]),store);Assert.Empty(fresh.Blockers);Assert.NotEqual(review.SelectionHash,fresh.SelectionHash);
+            Assert.Equal("Completed",science.DeleteCollectedScience(new(fresh.Id,fresh.SelectionHash),store,coordinator.EnterMaintenance).State);
+            Assert.True(store.ScienceDeleted(flight.Id));Assert.Empty(science.StreamObservations(flight.Id));Assert.Empty(store.PerformanceReports(flight.Id));Assert.Equal(raw,store.StreamSamples(flight.Id));
+            Assert.Throws<InvalidOperationException>(()=>performance.Recompute(flight.Id,"Deleted evidence must not be recreated"));
+        }finally{capacity.Release();await analysis.StopAsync(default);}
+    }
     public void Dispose(){research.Dispose();science.Dispose();if(Directory.Exists(root))Directory.Delete(root,true);}
 }
