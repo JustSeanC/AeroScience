@@ -4,6 +4,7 @@ import {readSuccessResponse} from './http-response.js';
 import {scienceWorkspace,disposeScienceWorkspace} from './science-workspace.js';
 import {helpCenter,disposeHelpCenter} from './help-center.js';
 import {missionSelection} from './mission-selection.js';
+import {scienceJourney} from './science-journey.js';
 import {startMissionWithReadiness} from './mission-start-advisory.js';
 import {personalResearch,disposePersonalResearch} from './personal-research.js';
 import {scientificLibrary,disposeScientificLibrary} from './scientific-library.js';
@@ -206,6 +207,7 @@ function render(state) {
   selection?.update(state);
   const wasActive = current?.activeMission?.id;
   current = state;
+  journey?.update(state);
   const t = state.telemetry;
   const fresh = t && Date.now() - Date.parse(t.timestampUtc) < 6000;
   const simulated = state.connection.source === "simulated";
@@ -574,7 +576,9 @@ setInterval(() => {
 }, 1000);
 initializeResearch({ api, notice, command });
 streamlineMissionControl();
-const selection=missionSelection($("mission-idle"),api,{onChange:()=>{if(current)updateStartButton(current);}});
+const journey=scienceJourney(document.querySelector('#control .mission-panel'),api);
+document.querySelector('#control .mission-panel').append($('mission-intelligence'));
+const selection=missionSelection($("mission-idle"),api,{onChange:()=>{if(current)updateStartButton(current);},onSelection:(plan,card)=>journey.selection(plan,card)});
 try {
   const access = await api("/api/access");
   if (access.requiresPairing) {

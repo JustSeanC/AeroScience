@@ -25,7 +25,7 @@ test('Fly Now uses prepared defaults, normal readiness/start, independent attemp
  await page.goto('/#my-research');const choice=starter(page);await expect(choice).toContainText('Example targets');await expect(choice).toContainText('No extra scientific instrument');
  await page.getByLabel('Test card name',{exact:true}).fill('Keep my unsaved card draft');
  let launches=0;page.on('request',r=>{if(r.method()==='POST'&&new URL(r.url()).pathname==='/api/missions')launches++;});
- await choice.getByRole('button',{name:'Fly Now',exact:true}).click();const guide=page.locator('#research-launch-guide');await expect(guide).toContainText('120 ± 5 knots IAS');await expect(guide).toContainText('30 second hold');expect(launches).toBe(0);expect((await state(request)).activeMission).toBeNull();
+ await choice.getByRole('button',{name:'Fly Now',exact:true}).click();await page.getByText('Research Definition & Source Details',{exact:true}).click();const guide=page.locator('#research-launch-guide');await expect(guide).toContainText('120 ± 5 knots IAS');await expect(guide).toContainText('30 second hold');expect(launches).toBe(0);expect((await state(request)).activeMission).toBeNull();
  const planId=(await state(request)).selectedPlanId;expect(planId).toBeTruthy();
  let release,captured;const held=new Promise(resolve=>captured=resolve),gate=new Promise(resolve=>release=resolve);
  await page.route('**/api/plans/readiness',async route=>{const response=await route.fetch();captured();await gate;await route.fulfill({response});});
@@ -35,7 +35,7 @@ test('Fly Now uses prepared defaults, normal readiness/start, independent attemp
   release();await expect(guide).toContainText('No data was downloaded');
  }finally{release();await page.unroute('**/api/plans/readiness');}
  let readiness=0;page.on('request',r=>{if(new URL(r.url()).pathname===`/api/plans/${planId}/preparation/start-readiness`)readiness++;});
- await page.getByRole('button',{name:'Start mission',exact:true}).click();await expect(page.getByRole('button',{name:'End mission',exact:true})).toBeVisible();expect(readiness).toBe(1);expect(launches).toBe(1);
+ await page.getByRole('button',{name:'Start Recording',exact:true}).click();await expect(page.getByRole('button',{name:'End mission',exact:true})).toBeVisible();expect(readiness).toBe(1);expect(launches).toBe(1);
  const flight=(await state(request)).activeMission;const controls=page.locator('#research-flight-controls');await controls.getByRole('button',{name:'Activate Card',exact:true}).click();await controls.getByRole('button',{name:'Begin Attempt',exact:true}).click();await controls.getByRole('button',{name:'End Attempt',exact:true}).click();expect((await state(request)).activeMission.id).toBe(flight.id);
  const ended=page.waitForResponse(r=>r.request().method()==='POST'&&new URL(r.url()).pathname===`/api/missions/${flight.id}/end`);await page.getByRole('button',{name:'End mission',exact:true}).click();expect((await ended).ok()).toBeTruthy();
  await page.goto('/#my-research?flight='+flight.id);await expect(page.getByLabel('Test card name',{exact:true})).toHaveValue('Keep my unsaved card draft');const timeline=page.getByRole('region',{name:'Test-card activity and evidence',exact:true});await timeline.getByRole('button',{name:'Evaluate Attempt',exact:true}).click();await expect(timeline).toContainText('Insufficient Evidence');
@@ -65,7 +65,7 @@ test('a lost preparation response, reload and repeated clicks reuse one card/pla
  await page.goto('/#my-research');const bodies=[];let lose=true;
  await page.route('**/api/research/starters/prepare',async route=>{bodies.push(route.request().postDataJSON());const response=await route.fetch();if(lose){lose=false;await route.abort('failed');}else await route.fulfill({response});});
  await starter(page).getByRole('button',{name:'Fly Now',exact:true}).click();await expect(starter(page).getByRole('status')).not.toHaveText('Preparing your local experiment…');expect((await state(request)).activeMission).toBeNull();
- await page.reload();await starter(page).getByRole('button',{name:'Fly Now',exact:true}).dblclick();await expect(page.locator('#research-launch-guide')).toBeVisible();expect(bodies).toHaveLength(2);expect(bodies[0].requestId).toBe(bodies[1].requestId);
+ await page.reload();await starter(page).getByRole('button',{name:'Fly Now',exact:true}).dblclick();await page.getByText('Research Definition & Source Details',{exact:true}).click();await expect(page.locator('#research-launch-guide')).toBeVisible();expect(bodies).toHaveLength(2);expect(bodies[0].requestId).toBe(bodies[1].requestId);
  const id=bodies[0].requestId,plan=await(await request.get(`/api/plans/${id}`)).json();expect(plan.researchStarter.requestId).toBe(id);expect((await state(request)).selectedPlanId).toBe(id);expect((await state(request)).activeMission).toBeNull();
  const card=await(await request.get(`/api/research/cards/${plan.researchCard.id}`)).json();expect(card.revision).toBe(plan.researchCard.revision);
 });
@@ -80,6 +80,6 @@ test('Customize preserves a declined mission draft and reopens the same prepared
 test('disconnected pilots can prepare offline and get honest guidance without bypassing recording requirements',async({page,request})=>{
  await post(request,'/api/testing/operating/input',{disconnected:true});await expect.poll(async()=>(await state(request)).connection.state).toBe('disconnected');await page.route('https://**',r=>r.abort());
  await page.setViewportSize({width:390,height:844});await page.goto('/#my-research');const choice=starter(page);await choice.getByRole('button',{name:'Fly Now',exact:true}).focus();await page.keyboard.press('Tab');await expect(choice.getByRole('button',{name:'Customize',exact:true})).toBeFocused();expect((await new AxeBuilder({page}).include('#research-starters').analyze()).violations).toEqual([]);
- await choice.getByRole('button',{name:'Fly Now',exact:true}).click();await expect(page.locator('#research-launch-guide')).toContainText('Connect MSFS 2024 and load an aircraft');await expect(page.getByRole('button',{name:'Start mission',exact:true})).toBeDisabled();expect((await state(request)).activeMission).toBeNull();
+ await choice.getByRole('button',{name:'Fly Now',exact:true}).click();await expect(page.locator('#research-launch-guide')).toContainText('Connect MSFS 2024 and load an aircraft');await expect(page.getByRole('button',{name:'Start Recording',exact:true})).toBeDisabled();expect((await state(request)).activeMission).toBeNull();
  await page.getByRole('button',{name:'Edit in Mission Planner',exact:true}).click();await expect(page.locator('#plan-form')).toContainText('Personal Research test card');await expect(page.getByRole('link',{name:'Back to My Research',exact:true})).toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy();
 });

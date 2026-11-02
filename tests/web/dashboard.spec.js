@@ -23,7 +23,7 @@ test('two displays share recording, history and safe mission detail', async ({ p
   await expect(page.getByLabel('SCIENCE OPERATING MODE')).toHaveValue('universal');
   await page.getByLabel('SCIENCE OPERATING MODE').selectOption('realistic');
   await expect(page.locator('#mode-help')).toContainText('Evidence-based operating advisories');
-  await page.getByRole('button', { name: 'Start mission', exact: true }).click();
+  await page.getByRole('button', { name: 'Start Recording', exact: true }).click();
   await expect(page.locator('#active-name')).toHaveText(name);
   await expect.poll(async () => Number((await page.locator('#active-samples').textContent()).replaceAll(',', ''))).toBeGreaterThan(1);
   const second = await context.newPage(); await second.goto('/');
@@ -56,7 +56,7 @@ for (const viewport of [{ width: 744, height: 1133 }, { width: 375, height: 812 
     await page.setViewportSize(viewport); await page.goto('/');
     await expect(page.locator('#altitude')).not.toHaveText('—');
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
-    expect((await page.getByRole('button', { name: 'Start mission', exact: true }).boundingBox()).height).toBeGreaterThanOrEqual(44);
+    expect((await page.getByRole('button', { name: 'Start Recording', exact: true }).boundingBox()).height).toBeGreaterThanOrEqual(44);
     await page.getByRole('button', { name: '☰ Menu', exact: true }).click();
     await page.getByRole('link', { name: 'Settings', exact: true }).click();
     await expect(page.locator('#settings-content')).toContainText('Disabled — localhost only');
@@ -66,7 +66,7 @@ for (const viewport of [{ width: 744, height: 1133 }, { width: 375, height: 812 
 
 test('display closure does not stop recording', async ({ page, context }) => {
   await page.goto('/'); await page.getByLabel('MISSION NAME', { exact: true }).fill('Display independence');
-  await page.getByRole('button', { name: 'Start mission', exact: true }).click();
+  await page.getByRole('button', { name: 'Start Recording', exact: true }).click();
   await expect(page.locator('#active-name')).toHaveText('Display independence');
   await page.close();
   const display = await context.newPage(); await display.goto('/');

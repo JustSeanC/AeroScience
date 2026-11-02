@@ -17,6 +17,22 @@ namespace AeroScience.Tests;
 
 public sealed class ApiTests : IAsyncLifetime
 {
+    [Fact]public async Task GuidedScienceProgressCountsRetainedRowsNotTelemetryAndMarksUnavailableCountsHonestly()
+    {
+        Assert.Equal(HttpStatusCode.Unauthorized,(await client.GetAsync("/api/mission-intelligence")).StatusCode);
+        await Pair(client);var missions=factory.Services.GetRequiredService<MissionStore>();var science=factory.Services.GetRequiredService<ScienceStore>();var coordinator=factory.Services.GetRequiredService<MissionCoordinator>();
+        var plan=missions.SavePlan(new(Guid.NewGuid(),"Guided atmospheric fixture",Instruments:[new("ambient-temperature",true)]));
+        var flight=coordinator.Start(new("Guided atmospheric fixture",PlanId:plan.Id,ArmScience:true));
+        var deadline=System.Diagnostics.Stopwatch.StartNew();while(coordinator.Snapshot().ActiveMission!.SampleCount<1){if(deadline.Elapsed>TimeSpan.FromSeconds(5))throw new TimeoutException("The existing synthetic telemetry fixture did not record.");await Task.Delay(25);}
+        var armed=(await client.GetFromJsonAsync<MissionIntelligence>("/api/mission-intelligence",WireJson.Options))!;
+        Assert.Equal(CollectionPhase.Armed,armed.Collection!.State!.Phase);Assert.True(armed.Flight.ActiveMission!.SampleCount>0);Assert.Equal(0,armed.RetainedScience!.OriginalObservations);Assert.Empty(science.StreamObservations(flight.Id));
+        var checkpoint=missions.CollectionCheckpoint(flight.Id)!;coordinator.ControlScience(new(1,flight.Id,Guid.NewGuid(),checkpoint.Revision,CollectionAction.StartData,checkpoint.CurrentSessionId));
+        deadline.Restart();MissionIntelligence collecting;
+        do{var at=DateTimeOffset.UtcNow;coordinator.Apply(new(new(ConnectionState.Connected,TelemetrySource.Simulated,"Explicit atmospheric fixture",at),SimulatedTelemetryProvider.Generate(at,0),new(at,12,29.9,8,270,.0023)));await Task.Delay(50);collecting=(await client.GetFromJsonAsync<MissionIntelligence>("/api/mission-intelligence",WireJson.Options))!;if(deadline.Elapsed>TimeSpan.FromSeconds(5))throw new TimeoutException("Original scientific records did not become available.");}while(collecting.RetainedScience?.OriginalObservations is not >0);
+        Assert.Equal(flight.Id,collecting.RetainedScience.MissionId);Assert.True(collecting.RetainedScience.OriginalObservations<=science.StreamObservations(flight.Id).LongCount());Assert.Equal(0,collecting.RetainedScience.DerivedObservations);Assert.Equal(0,collecting.RetainedScience.RemoteProducts);
+        var missing=new MissionIntelligenceService(coordinator,missions,factory.Services.GetRequiredService<ResearchOperations>(),factory.Services.GetRequiredService<MissionPerformanceService>());
+        Assert.Null(missing.Read().RetainedScience!.OriginalObservations);Assert.True(coordinator.Snapshot().ActiveMission!.SampleCount>0);coordinator.End(flight.Id);
+    }
     private readonly string directory = Path.Combine(Path.GetTempPath(), "aeroscience-api", Guid.NewGuid().ToString());
     private readonly WebApplicationFactory<Program> factory;
     private readonly HttpClient client;

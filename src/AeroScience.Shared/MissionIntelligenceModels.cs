@@ -10,4 +10,9 @@ public sealed record TriggerIntelligence(CollectionTrigger Trigger, string Statu
 public sealed record MissionIntelligence(int Version, DateTimeOffset GeneratedUtc, EngineSnapshot Flight,
     CollectionOverview? Collection, MissionPlan? Plan, TriggerIntelligence[] Triggers,
     InstrumentOperatingReport[] Operating, MissionPerformanceReport? Performance, string PerformanceState,
-    string[] Limitations, SensorOperatingOverview? SensorOperating = null,ResearchFlightState? ResearchCards = null);
+    string[] Limitations, SensorOperatingOverview? SensorOperating = null,ResearchFlightState? ResearchCards = null)
+{
+    public RetainedScienceProgress? RetainedScience {get;init;}
+}
+public sealed record RetainedScienceProgress(Guid MissionId,DateTimeOffset CheckedUtc,long? OriginalObservations,
+    long? DerivedObservations,long? RemoteProducts,string Status);

@@ -162,7 +162,7 @@ function readConfigs(parent) {
 }
 export function initializeResearch(context) {
   ctx = context;
-  const intelligence=missionIntelligence($("control"),ctx.api,{acceptState:data=>!state||(state.activeMission?.id||null)===(data.flight.activeMission?.id||null),onState:data=>{personalFlight?.feed(data.flight,data.researchCards);operations?.live(data);},onStale:message=>{personalFlight?.stale(message);operations?.stale(message);}});
+  const intelligence=missionIntelligence($("control"),ctx.api,{acceptState:data=>!state||(state.activeMission?.id||null)===(data.flight.activeMission?.id||null),onState:data=>{personalFlight?.feed(data.flight,data.researchCards);operations?.live(data);window.dispatchEvent(new CustomEvent('aeroscience-intelligence',{detail:data}));},onStale:message=>{personalFlight?.stale(message);operations?.stale(message);window.dispatchEvent(new Event('aeroscience-intelligence-stale'));}});
   missionPerformance($("control"),ctx.api,()=>state?.activeMission?.id,{live:true});
   personalFlight=researchFlightControls($("control"),ctx.api,{shared:true,onFocus:id=>operations?.focus(id),onChange:cards=>operations?.cardsChanged(cards)});
   const control = $("control"),

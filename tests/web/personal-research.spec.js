@@ -42,7 +42,7 @@ test('personal card uses the real planner, recorder, immutable evidence and offl
   await expect(page.getByLabel('Choose Mission',{exact:true})).toHaveValue(plan.id);
   await expect(page.locator('#mission-name')).toHaveValue(name);await page.unroute(selectionPath);
   const starting=page.waitForResponse(r=>new URL(r.url()).pathname==='/api/missions'&&r.request().method()==='POST');
-  await page.getByRole('button',{name:'Start mission',exact:true}).click();const started=await starting;expect(started.ok(),await started.text()).toBe(true);await expect(page.locator('#active-name')).toHaveText(name);
+  await page.getByRole('button',{name:'Start Recording',exact:true}).click();const started=await starting;expect(started.ok(),await started.text()).toBe(true);await expect(page.locator('#active-name')).toHaveText(name);
   const flight=(await(await request.get('/api/state')).json()).activeMission;
   await expect.poll(async()=>(await(await request.get(`/api/missions/${flight.id}`)).json()).mission.sampleCount).toBeGreaterThanOrEqual(9);
   const ending=page.waitForResponse(r=>new URL(r.url()).pathname===`/api/missions/${flight.id}/end`&&r.request().method()==='POST');
