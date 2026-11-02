@@ -11,7 +11,7 @@ export function scienceJourney(parent,api){
  root.prepend(title,steps,summary,connection,recording,collection,count,next,actions,results);parent.prepend(root);
  link(actions,'Choose Research','#my-research');const instruments=link(actions,'Review Instruments','#science');
  const show=button(actions,'Show Science Controls',()=>{const panel=document.getElementById('mission-intelligence');panel?.scrollIntoView({block:'center'});const control=[...panel?.querySelectorAll('button')||[]].find(b=>!b.disabled);control?.focus({preventScroll:true});});
- let flight=null,intelligence=null,plan=null,card=null,last=null,stale=false,recovered=false;
+ let flight=null,intelligence=null,plan=null,card=null,last=null,stale=false,recovered=false,recoveryEpoch=0;
  function paint(){
   const active=flight?.activeMission,telemetry=flight?.telemetry,age=telemetry?Date.now()-Date.parse(telemetry.timestampUtc):Infinity;
   const fresh=flight?.connection?.state==='connected'&&telemetry?.isValid!==false&&age>=-2000&&age<=6000;
@@ -41,7 +41,10 @@ export function scienceJourney(parent,api){
   const step=active?3:last?4:plan?2:0;[...steps.children].forEach((item,i)=>{if(i===step)item.setAttribute('aria-current','step');else item.removeAttribute('aria-current');});
   const identity=last?.id||'';if(results.dataset.flight!==identity){results.dataset.flight=identity;results.replaceChildren();if(last){results.append(node('p',`Saved flight: ${last.name}`));link(results,'Review Results',`#workspace/map?missions=${last.id}`);link(results,'Open Scientific Analysis',`#workspace/analysis?missions=${last.id}`);link(results,'Original Evidence Timeline',`#operations?flight=${last.id}`);}}
  }
- async function recover(){if(recovered)return;recovered=true;try{const rows=await api('/api/missions?limit=1');if(!flight?.activeMission&&rows[0]?.status!=='recording'){last=rows[0]||null;paint();}}catch{recovered=false;}}
+ async function recover(){if(recovered)return;recovered=true;const own=recoveryEpoch;try{const rows=await api('/api/missions?limit=1');if(own===recoveryEpoch&&!flight?.activeMission&&rows[0]?.status!=='recording'){last=rows[0]||null;paint();}}catch{if(own===recoveryEpoch)recovered=false;}}
+ // An explicit preparation/selection starts a new task. Late history is reference data,
+ // never authority to replace that intent. Original flights remain in the existing archive.
+ window.addEventListener('aeroscience-selection',()=>{recoveryEpoch++;recovered=true;last=null;paint();});
  window.addEventListener('aeroscience-intelligence',event=>{intelligence=event.detail;stale=false;paint();});
  window.addEventListener('aeroscience-intelligence-stale',()=>{stale=true;paint();});
  return {selection(p,c){plan=p;card=c;paint();},update(value){if(flight?.activeMission&&!value.activeMission)last=flight.activeMission;flight=value;paint();if(!value.activeMission)recover();}};
