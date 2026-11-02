@@ -205,10 +205,36 @@ public sealed partial class OrganizationRecoveryEngine(OrganizationDatabase db,O
             return new(1,backup.Id,manifest.OrganizationId,dumpHash,Hash(certificate.RawData),digests.Evidence,digests.Packages,digests.Audit,digests.Events,manifest.Migrations,DateTimeOffset.UtcNow,stageReplacement?"Replacement database and original identity verified. Live sharing, device grants, scheduled deletion and notifications fenced. Explicit activation and restart required.":"Actual isolated PostgreSQL restore and original identity/notification-secret decryption. Primary data were not modified; no notification was sent. Provider/account loss and novice recovery still require external acceptance.");
         }finally{
             // Only generated disposable databases may be removed, never the original organization database.
-            ClearCandidatePools(settings.ConnectionString,recovery,temporaryDatabase);
-            if(!retained)try{await using var admin=new NpgsqlConnection(recovery);await admin.OpenAsync(CancellationToken.None);var applicationRole=new NpgsqlConnectionStringBuilder(settings.ConnectionString).Username!;await using(var role=new NpgsqlCommand("SET ROLE \""+applicationRole.Replace("\"","\"\"")+"\"",admin))await role.ExecuteNonQueryAsync(CancellationToken.None);await using var drop=new NpgsqlCommand("DROP DATABASE IF EXISTS \""+temporaryDatabase+"\" WITH (FORCE)",admin);await drop.ExecuteNonQueryAsync(CancellationToken.None);}catch{ }
-            if(Directory.Exists(directory))Directory.Delete(directory,true);
+            try{
+                if(retained)ClearCandidatePools(settings.ConnectionString,recovery,temporaryDatabase);
+                else await DropVerificationDatabase(settings.ConnectionString,recovery,temporaryDatabase,CancellationToken.None);
+            }finally{if(Directory.Exists(directory))Directory.Delete(directory,true);}
         }
+    }
+    internal static async Task DropVerificationDatabase(string application,string recovery,string database,CancellationToken ct)
+    {
+        if(!System.Text.RegularExpressions.Regex.IsMatch(database,"\\Aaeroscience_recovery_[a-f0-9]{32}\\z",System.Text.RegularExpressions.RegexOptions.CultureInvariant))
+            throw new InvalidOperationException("Only a generated recovery verification database may be removed.");
+        var app=new NpgsqlConnectionStringBuilder(application);var control=new NpgsqlConnectionStringBuilder(recovery);
+        if(database==app.Database||database==control.Database)throw new InvalidOperationException("The application and recovery control databases cannot be removed by verification cleanup.");
+        var applicationRole=app.Username??throw new InvalidOperationException("An exact application database role is required.");
+        ClearCandidatePools(application,recovery,database);
+        // One fresh control connection guarantees the authenticated LOGIN role,
+        // independent of any pooled SET ROLE state from earlier operations.
+        await using var admin=new NpgsqlConnection(new NpgsqlConnectionStringBuilder(recovery){Pooling=false,Timeout=15}.ConnectionString);await admin.OpenAsync(ct);
+        // SET ROLE does not change a backend's LOGIN identity. Close this recovery
+        // login's candidate sessions while still that login; application-role DROP
+        // cannot signal them when membership deliberately has INHERIT FALSE.
+        // Wait for termination acknowledgement, not a timing-based sleep. No
+        // pg_signal_backend/superuser grant, unrelated database or other login.
+        await using(var terminate=new NpgsqlCommand("SELECT pg_terminate_backend(pid,5000) FROM pg_stat_activity WHERE datname=@database AND usename=session_user AND pid<>pg_backend_pid()",admin){CommandTimeout=15}){
+            terminate.Parameters.AddWithValue("database",database);await terminate.ExecuteNonQueryAsync(ct);
+        }
+        await using(var role=new NpgsqlCommand("SET ROLE \""+applicationRole.Replace("\"","\"\"")+"\"",admin){CommandTimeout=15})await role.ExecuteNonQueryAsync(ct);
+        await using var drop=new NpgsqlCommand("DROP DATABASE IF EXISTS \""+database+"\" WITH (FORCE)",admin){CommandTimeout=15};
+        // A failed cleanup must fail verification, never report a verified backup
+        // while silently retaining an untracked copy of received evidence.
+        await drop.ExecuteNonQueryAsync(ct);
     }
     internal static void ClearCandidatePools(string application,string recovery,string database)
     {
