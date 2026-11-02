@@ -5,6 +5,17 @@
     <link rel="stylesheet" href="/SCSS/common.css" />
     <link rel="stylesheet" href="AeroScience.css" />
     <script src="/JS/coherent.js"></script>
+    <script>
+      // ES5 fallback: a missing/unparseable application must not look like it
+      // is still connecting forever. This never sends a command or grants access.
+      setTimeout(function () {
+        var panel = document.querySelector('ingamepanel-aeroscience');
+        var status = document.getElementById('as-status');
+        if (panel && document.documentElement.contains(panel) && status && panel.getAttribute('data-initialization-state') !== 'ready') {
+          status.textContent = 'Toolbar did not initialize. Reopen the panel. If this continues, send a screenshot of Connection & Build Details.';
+        }
+      }, 10000);
+    </script>
     <script src="/JS/common.js"></script>
     <script src="/JS/dataStorage.js"></script>
     <script src="/JS/buttons.js"></script>

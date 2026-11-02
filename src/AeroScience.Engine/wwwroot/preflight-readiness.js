@@ -14,16 +14,18 @@ export function preflightReadiness(parent, readDraft, api,{id='preflight-readine
       const response=await api('/api/plans/readiness',draft);
       if(!panel.isConnected||ticket!==generation||hash!==fingerprint())return;
       current=response;results.replaceChildren();delete results.dataset.stale;
-      status.textContent=`Assessed ${new Date(response.assessedUtc).toLocaleTimeString()} · advisory, with unknowns shown explicitly. No data was downloaded.`;
+      const counts=['ready','caution','unavailable','notYetAssessed'].map(value=>response.checks.filter(c=>c.status===value).length);
+      status.textContent=`Assessed ${new Date(response.assessedUtc).toLocaleTimeString()} · ${counts[0]} ready · ${counts[1]} caution · ${counts[2]} unavailable · ${counts[3]} not assessed`;
       for(const category of [...new Set(response.checks.map(c=>c.category))]){
-        const group=document.createElement('details');group.open=true;const heading=document.createElement('summary');heading.textContent=category;group.append(heading);
+        const group=document.createElement('details');group.open=response.checks.some(c=>c.category===category&&c.status==='unavailable');const heading=document.createElement('summary');heading.textContent=category;group.append(heading);
         for(const check of response.checks.filter(c=>c.category===category)){
           const item=document.createElement('article');const label={ready:'Ready',caution:'Caution',unavailable:'Unavailable',notYetAssessed:'Not Yet Assessed'}[check.status]||check.status;
           const h=document.createElement('h4');h.textContent=`${label} · ${check.id}`;item.append(h);
-          for(const line of [...check.reasons,...check.actions,...(check.inputs||[])]){const p=document.createElement('p');p.textContent=line;item.append(p);}group.append(item);
+          for(const line of [...check.reasons,...check.actions]){const p=document.createElement('p');p.textContent=line;item.append(p);}
+          if(check.inputs?.length){const diagnostics=document.createElement('details'),title=document.createElement('summary');title.textContent='Advanced Diagnostics';diagnostics.append(title);for(const line of check.inputs){const p=document.createElement('p');p.textContent=line;diagnostics.append(p);}item.append(diagnostics);}group.append(item);
         }results.append(group);
       }
-      for(const line of response.limitations){const p=document.createElement('p');p.className='footnote';p.textContent=line;results.append(p);}
+      const method=document.createElement('details'),methodTitle=document.createElement('summary');methodTitle.textContent='Assessment method & limitations';method.append(methodTitle);for(const line of response.limitations){const p=document.createElement('p');p.textContent=line;method.append(p);}results.append(method);
     }catch(error){if(ticket===generation)status.textContent=error.message;}
   };
   async function observe(){

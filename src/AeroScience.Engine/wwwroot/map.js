@@ -129,11 +129,16 @@ export class ResearchMap {
     const results = document.createElement("select");
     results.setAttribute("aria-label", "Search results");results.hidden=true;results.size=5;tools.append(results);
     const searchStatus=document.createElement("p");searchStatus.setAttribute("role","status");tools.append(searchStatus);
+    const useAirport=this.options.onAirportSelect?action('Use Airport as Waypoint',()=>this.options.onAirportSelect(this.selectedAirport)):null;
+    if(useAirport)useAirport.hidden=true;
+    this.focusAirportSearch=()=>{search.scrollIntoView({block:'center'});search.focus();searchStatus.textContent='Find an airport, select it, then use it as a waypoint.';};
     const choose = p => {
       if(this.destroyed||!p)return;
+      this.selectedAirport=p.kind==='airport'?p:null;if(useAirport)useAirport.hidden=!this.selectedAirport;
       this.center(p);this.initialized=true;
       if(this.searchMarker)this.map.removeLayer(this.searchMarker);
       this.searchMarker=L.circleMarker(ll(p),{radius:8,color:"#ffffff"}).bindTooltip(label(locationLabel(p))).addTo(this.map);
+      if(this.selectedAirport&&useAirport)this.searchMarker.on('click',()=>{searchStatus.textContent='Selected: '+locationLabel(p);useAirport.focus();});
       searchStatus.textContent="Selected: "+locationLabel(p);
     };
     const find = async () => {
@@ -305,6 +310,23 @@ export class ResearchMap {
           .bringToBack();
         this.locations = [...places.features, ...airports.features];
         this.context = L.layerGroup();
+        // Bounded viewport reference points from the same retained search index.
+        // These are airport reference coordinates, never runway/nav or science data.
+        if(this.options.onAirportSelect){
+          const nearby=L.layerGroup().addTo(this.context);
+          // The general map uses canvas. Only these bounded interactive reference
+          // markers need SVG elements for keyboard focus and accessible names.
+          const airportRenderer=L.svg();
+          const updateAirports=()=>{nearby.clearLayers();if(this.destroyed||this.map.getZoom()<7)return;
+            const bounds=this.map.getBounds();let shown=0;
+            for(const airport of this.airportSearch){if(!bounds.contains([airport.latitude,airport.longitude]))continue;
+              const marker=L.circleMarker([airport.latitude,airport.longitude],{radius:5,color:'#acc7ee',bubblingMouseEvents:false,renderer:airportRenderer});
+              marker.bindTooltip(label(locationLabel(airport)));marker.on('click',()=>choose(airport));
+              marker.on('add',()=>{const target=marker.getElement();if(!target)return;target.setAttribute('role','button');target.setAttribute('tabindex','0');target.setAttribute('aria-label','Select airport '+locationLabel(airport));target.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();choose(airport);}});});
+              nearby.addLayer(marker);if(++shown>=150)break;
+            }
+          };this.map.on('moveend',updateAirports);updateAirports();
+        }
         for (const f of this.locations) {
           const airport = !!(f.properties.iata_code || f.properties.gps_code);
           const c = f.geometry.coordinates;
@@ -321,6 +343,10 @@ export class ResearchMap {
                 (f.properties.gps_code ? " · " + f.properties.gps_code : ""),
             ),
           );
+          if(airport&&this.options.onAirportSelect){m.options.bubblingMouseEvents=false;m.on('click',()=>{
+            const code=f.properties.gps_code||f.properties.iata_code;
+            choose(this.airportSearch.find(p=>p.icao===code||p.iata===code||p.id===code)||{kind:'airport',id:code,icao:f.properties.gps_code,iata:f.properties.iata_code,name:f.properties.name,latitude:c[1],longitude:c[0]});
+          });}
           this.context.addLayer(m);
         }
         const context = () => {

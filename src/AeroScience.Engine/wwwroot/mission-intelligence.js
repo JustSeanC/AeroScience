@@ -1,6 +1,6 @@
 import {node, numeric, dateTime, link, newIdentity,informationDetails,scientificNotice} from './workstation-ui.js';
 import {renderSensorOperating,markSensorOperatingStale} from './sensor-operating-status.js';
-const labels={startData:'Start new science session',pauseData:'Pause science collection',resumeData:'Resume science collection',endData:'End current science session',rearmAutomation:'Rearm automatic collection'};
+const labels={startData:'Start Science Collection',pauseData:'Pause science collection',resumeData:'Resume science collection',endData:'End current science session',rearmAutomation:'Rearm automatic collection'};
 export function metricText(m){
  const supported=['supported','caution'].includes(m.status)&&Number.isFinite(m.numerator)&&Number.isFinite(m.denominator)&&m.denominator>0;
  return `${m.id}: ${m.status}${supported?` · ${numeric(m.numerator)} / ${numeric(m.denominator)} ${m.unit} (${numeric(100*m.numerator/m.denominator)}%)`:Number.isFinite(m.numerator)?` · ${numeric(m.numerator)} ${m.unit}`:''}. Missing ${m.missing}; unassessed ${m.unassessed}. ${m.method}`;
@@ -15,11 +15,14 @@ export function missionIntelligence(parent,api,{id='mission-intelligence',after=
  const status=node('p','Loading authoritative mission state…');status.setAttribute('role','status');
  const summary=node('p'),sessionLine=node('p'),authority=node('p'),warning=node('p'),message=node('p');message.setAttribute('role','status');
  const actions=node('div',undefined,'mission-actions'),reasonLabel=node('label','Pause rationale '),reason=node('select');reason.setAttribute('aria-label','Science pause rationale');
+ actions.dataset.collectionActions='';message.dataset.collectionCommandStatus='';
  for(const [value,title]of [['','Unspecified (evidence stays uncertain)'],['safety','Pilot-declared safety pause']]){const option=node('option',title);option.value=value;reason.append(option);}reasonLabel.append(reason);
  const controls=new Map();let current=null,busy=false,inflight=false,generation=0,disposed=false,lastSuccess=0;
  for(const [action,label]of Object.entries(labels)){const button=node('button',label);button.type='button';button.disabled=true;button.onclick=()=>control(action);actions.append(button);controls.set(action,button);}
  const explanation=informationDetails(panel,'Collection options & status details',status,summary,authority,reasonLabel,node('p','End current science session preserves its results. Flight recording remains separate. Rearm does not start or resume science.'));
  panel.querySelector('h2').after(sessionLine,warning,actions,message);
+ const primary=id==='mission-intelligence'?document.getElementById('science-journey-controls'):null;
+ if(primary)primary.append(actions,message);
  const sections={};for(const [key,title]of [['sessions','Science sessions'],['instruments','Effective instruments & operating evidence'],['performance','Provisional flight performance & scientific yield'],['obligations','Frozen research objectives & obligations'],['triggers','Configured automation & recorded events']]){const detail=node('details');detail.append(node('summary',title));const body=node('div');detail.append(body);panel.append(detail);sections[key]=body;}
  const links=node('nav');links.setAttribute('aria-label','Mission intelligence tools');link(links,'Find & Download External Data','#library/download');link(links,'NASA AVIRIS Download & Import','#library/download?science=hyperspectral');link(links,'Review offline flight reports','#history');sections.instruments.after(links);
  const sensors=sensorParent||node('section');if(!sensorParent){sensors.id=id+'-sensors';panel.querySelector('details').before(sensors);}

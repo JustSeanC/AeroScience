@@ -592,6 +592,9 @@ setInterval(() => {
 initializeResearch({ api, notice, command });
 streamlineMissionControl();
 const journey=scienceJourney(document.querySelector('#control .mission-panel'),api);
+// The guide is created after the original controllers. Move, rather than clone,
+// their authoritative controls into the primary flight workflow.
+document.getElementById('science-journey-controls').append(...document.querySelectorAll('#mission-intelligence [data-collection-actions], #mission-intelligence [data-collection-command-status]'));
 document.querySelector('#control .mission-panel').append($('mission-intelligence'));
 const selection=missionSelection($("mission-idle"),api,{onChange:()=>{if(current)updateStartButton(current);},onSelection:(plan,card)=>journey.selection(plan,card)});
 try {

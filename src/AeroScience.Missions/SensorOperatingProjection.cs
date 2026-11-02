@@ -83,7 +83,7 @@ public static class SensorOperatingProjection
                 state==SensorOperatingState.Caution?checks.Where(c=>Concern(c.Status)).Skip(1).Select(c=>c.Explanation+" "+c.Guidance).ToArray():[],unknown.Distinct().ToArray(),
                 checks.Count(c => c.Status == AssessmentStatus.Supported || Concern(c.Status)), unassessed.Length+missing.Length,
                 Data(report, fresh && supportedVersion, flight.Research?.Instruments.FirstOrDefault(i => i.InstrumentId == config.InstrumentId), config, state, now,flight.Research?.ScienceStorageError),
-                report?.Assessment.AssessedUtc, evidenceUtc, fresh, report);
+                report?.Assessment.AssessedUtc, evidenceUtc, fresh, report){Acquisition=flight.Research?.Instruments.FirstOrDefault(i=>i.InstrumentId==config.InstrumentId)};
         }).ToArray();
         return new(1, now, flight.ActiveMission?.Id, session, collection?.Phase, cards,
             ["Operating status describes supported checks, not physical hardware health, certification or measurement accuracy.",

@@ -19,6 +19,7 @@ if (-not (Test-Path $tool)) { throw "Official SDK package builder missing: $tool
 if (-not (Test-Path "$include/SimConnect.h")) { throw 'Official SimConnect headers are missing.' }
 if (-not (Get-Command cl.exe -ErrorAction SilentlyContinue)) { throw 'Run from an x64 Visual Studio Native Tools shell (cl.exe is required for the SDK contract check).' }
 if (-not (Get-Command python -ErrorAction SilentlyContinue)) { throw 'Python 3 must be installed and available as python on PATH for package validation.' }
+if (-not (Get-Command node -ErrorAction SilentlyContinue)) { throw 'The maintained native toolbar build requires Node and the locked npm build dependencies.' }
 if ($ValidationProfile -and ($ProofOfConcept -or $WindowProbe)) { throw 'Validation requires the complete genuine toolbar.' }
 $variant = if ($ValidationProfile) { 'toolbar-validation' } elseif ($ProofOfConcept) { 'toolbar-poc' } elseif ($WindowProbe) { 'toolbar-window-probe' } else { 'toolbar-full' }
 $stageName = if ($ValidationProfile) { 'toolbar-validation-v070' } else { $variant }
@@ -53,6 +54,8 @@ if ($ValidationProfile) {
     python "$repo/scripts/release/private_validation.py" stage-toolbar --folder $stage --commit ((git -C $repo rev-parse HEAD).Trim())
     if ($LASTEXITCODE -ne 0) { throw 'Validation namespace staging failed.' }
 }
+node "$repo/scripts/build/native-javascript.mjs" $stage
+if ($LASTEXITCODE -ne 0) { throw 'Native ES2017 compilation/validation failed. No SDK package was built.' }
 $output = Join-Path $stage 'output'
 Push-Location $stage
 try {
@@ -77,6 +80,7 @@ $sourceCommit = if ((Get-Command git -ErrorAction SilentlyContinue) -and (Test-P
 $sourceDirty = if ($sourceCommit -ne 'unknown') { [bool](git -C $repo status --porcelain) } else { $true }
 @{ variant=$variant; source_commit=$sourceCommit; source_dirty=$sourceDirty; builder_sha256=(Get-FileHash $tool -Algorithm SHA256).Hash;
     sdk_header_sha256=(Get-FileHash (Join-Path $include 'SimConnect.h') -Algorithm SHA256).Hash;
-    sdk_contract='passed'; built_utc=[DateTime]::UtcNow.ToString('o'); files=$hashes } |
-    ConvertTo-Json -Depth 5 | Set-Content (Join-Path $stage 'sdk-build.json') -Encoding utf8
+    sdk_contract='passed'; native_javascript=(Get-Content (Join-Path $stage 'native-javascript.json') -Raw | ConvertFrom-Json);
+    built_utc=[DateTime]::UtcNow.ToString('o'); files=$hashes } |
+    ConvertTo-Json -Depth 8 | Set-Content (Join-Path $stage 'sdk-build.json') -Encoding utf8
 Write-Host "SDK-built output: $package. This build does not establish simulator, VR, or device acceptance. Complete docs/verification.md."

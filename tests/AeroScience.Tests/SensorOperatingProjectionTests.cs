@@ -28,6 +28,16 @@ public sealed class SensorOperatingProjectionTests
         Assert.Equal(SensorOperatingState.WithinCheckedLimits,card.OperatingStatus);Assert.Equal(SensorScientificDataState.Unavailable,card.ScientificData.Status);
         Assert.Contains(card.Uncertainty,s=>s.Contains("generic model"));Assert.Same(r,card.Report);Assert.True(card.EvidenceFresh);
     }
+    [Fact]public void DisplayCountsUseAcquisitionDiagnosticsAndNeverSubstituteFlightTelemetry()
+    {
+        var r=Report("ambient-temperature");var config=r.Configuration;
+        var acquisition=new InstrumentState("ambient-temperature",true,1000,ObservationQuality.Valid,At,9,2,3,1,[]);
+        var flight=new Mission(mission,"Count distinction",null,TelemetrySource.Simulated,At.AddMinutes(-1),null,MissionStatus.Recording,null,null,244,null,null);
+        var snapshot=new EngineSnapshot(new(ConnectionState.Connected,TelemetrySource.Simulated,"Fixture",At),r.Input.Frame,flight,1000,Research:new(null,null,[acquisition]));
+        SensorOperatingCard Read(EngineSnapshot value)=>Assert.Single(SensorOperatingProjection.Create(value,new(1,mission,1,CollectionPhase.Collecting,CollectionAuthority.Manual,session),[config.Settings],[config],[r],At.AddSeconds(-2),At).Instruments);
+        Assert.Same(acquisition,Read(snapshot).Acquisition);Assert.Equal(9,Read(snapshot).Acquisition!.ObservationCount);
+        Assert.Null(Read(snapshot with{Research=new(null,null,[])}).Acquisition);Assert.Equal(244,snapshot.ActiveMission!.SampleCount);
+    }
     [Fact]public void ValidScientificSourceCanCoexistWithUnassessableInternalTemperature()
     {
         var r=Report(profile:InstrumentProfiles.Catalog.First(p=>p.InstrumentId=="thermal-imager"),remote:new("thermal-imager",ObservationQuality.Valid,"Original historical source",At,1,0,0));var card=Project(r);

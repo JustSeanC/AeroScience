@@ -4,6 +4,8 @@ const AEROSCIENCE_TOOLBAR_IDENTITY = { profile: "production", source: null };
 class IngamePanelAeroScience extends TemplateElement {
   connectedCallback() {
     super.connectedCallback();
+    this.aeroScienceConnected=true;
+    this.connectionEpoch=(this.connectionEpoch||0)+1;
     this.initializationAttempts = 0;
     this.onDocumentReady = () => this.initialize();
     if (document.readyState === "loading")
@@ -13,7 +15,7 @@ class IngamePanelAeroScience extends TemplateElement {
     else this.initialize();
   }
   initialize() {
-    if (this.initialized || !this.isConnected) return;
+    if (this.initialized || !this.aeroScienceConnected) return;
     clearTimeout(this.initializationTimer);
     // TemplateElement may connect while the host document is already ready but
     // its imported panel children are still being parsed. Do not poison startup.
@@ -29,13 +31,15 @@ class IngamePanelAeroScience extends TemplateElement {
       return;
     }
     this.initialized = true;
-    this.setAttribute('data-initialization-state', 'ready');
+    this.setAttribute('data-initialization-state', 'binding-controls');
     this.pending = new Map();
     this.listener = null;
     this.state = null;
     this.lastReply = 0;
     this.serial=0;this.appliedSerial=0;this.seenEngines=new Set();this.intelligence=null;this.capabilities=[];this.mutationPending=false;
     this.byId = (id) => this.querySelector("#" + id);
+    this.status('Connecting to companion…');
+    this.busLoadClosed=false;
     this.byId('as-build-identity').textContent = AEROSCIENCE_TOOLBAR_IDENTITY.profile + ' toolbar · source ' + (AEROSCIENCE_TOOLBAR_IDENTITY.source || 'not supplied by this package') + ' · protocol 1';
     this.byId('as-link-detail').textContent = 'Commands: AeroScience.Command.v1 · Replies: AeroScience.Reply.v1 · No matching engine reply yet. Channel registration alone is not an engine connection.';
     this.researchState=null;this.researchOffset=0;this.researchSerial=0;
@@ -167,7 +171,9 @@ class IngamePanelAeroScience extends TemplateElement {
     };
     this.timer = setInterval(() => this.tick(), 1000);
     try {
-      Include.addScript("/JS/Services/CommBus.js", () => this.registerBus());
+      // The SDK does not promise an Include.addScript completion callback.
+      // Availability below, not a browser-only callback, owns registration.
+      Include.addScript("/JS/Services/CommBus.js");
     } catch (error) {
       this.status(
         "Unable to load the SDK CommBus service. Check the MSFS 2024 SDK/runtime version.",
@@ -178,10 +184,12 @@ class IngamePanelAeroScience extends TemplateElement {
     this.loadTimer = setInterval(() => {
       if (this.listener || attempts++ >= 50) {
         clearInterval(this.loadTimer);
-        if (!this.listener)
-          this.status("CommBus unavailable. MSFS 2024 SU5+ is required.");
+        if (!this.listener){this.busLoadClosed=true;
+          this.status("Simulator link unavailable. Reopen this panel; see Connection & Build Details.");
+          this.byId('as-link-detail').textContent='The SDK CommBus helper/listener did not become available. No engine reply was received. Check the matching Validation package and supported simulator runtime.';}
       } else this.registerBus();
     }, 100);
+    this.setAttribute('data-initialization-state', 'ready');
   }
   requestMapState() {
     if (
@@ -320,17 +328,21 @@ class IngamePanelAeroScience extends TemplateElement {
   registerBus() {
     if (
       this.listener ||
+      this.busLoadClosed ||
       typeof RegisterCommBusListener !== "function" ||
-      !this.isConnected
+      !this.aeroScienceConnected
     )
       return;
+    let candidate=null;const epoch=this.connectionEpoch;
     try {
-      this.listener = RegisterCommBusListener(() =>
-        this.status("Simulator channel ready; waiting for the Windows engine."),
-      );
-      this.listener.on("AeroScience.Reply.v1", this.onReply);
+      candidate = RegisterCommBusListener(() => {if(this.aeroScienceConnected&&epoch===this.connectionEpoch&&!this.lastReply)this.status("Simulator channel ready; waiting for the Windows engine.");});
+      candidate.on("AeroScience.Reply.v1", this.onReply);
+      this.listener=candidate;
       this.tick();
     } catch (error) {
+      // A partially registered listener must not permanently poison retries.
+      try{candidate?.unregister();}catch{}
+      this.listener=null;
       this.status("Unable to register the SDK CommBus listener.");
     }
   }
@@ -844,6 +856,8 @@ class IngamePanelAeroScience extends TemplateElement {
     }
   }
   disconnectedCallback() {
+    this.aeroScienceConnected=false;
+    this.connectionEpoch=(this.connectionEpoch||0)+1;
     clearTimeout(this.initializationTimer);
     document.removeEventListener("DOMContentLoaded", this.onDocumentReady);
     this.pending?.clear();

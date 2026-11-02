@@ -55,7 +55,9 @@ public static class InstrumentOperatingAssessment
                 catch (Exception e) when (e is ArgumentException or InvalidOperationException)
                 { geometry = frame!.AltitudeAglFeet is null ? AssessmentStatus.NotAssessed : AssessmentStatus.Invalid; geometryReason = e.Message; }
             }
-            Add("geometry.ground-intersection", "AGL / ray-plane intersection", "m", frame?.AltitudeAglFeet*.3048,
+            // The raw packet remains in report.Input for diagnostics. A rejected
+            // AGL is not a usable ray intersection or scientific measurement.
+            Add("geometry.ground-intersection", "AGL / ray-plane intersection", "m", footprint?.HeightAbovePlaneMetres,
                 geometry == AssessmentStatus.Invalid ? AssessmentStatus.Caution : geometry == AssessmentStatus.Supported ? AssessmentStatus.Supported : AssessmentStatus.Unknown,
                 geometry, AssessmentStatus.NotAssessed, geometryReason, "footprint", "geographic-product");
             Add("aircraft.msl", "altitude MSL", "ft", frame?.AltitudeMslFeet, AssessmentStatus.Unknown, AssessmentStatus.NotAssessed,

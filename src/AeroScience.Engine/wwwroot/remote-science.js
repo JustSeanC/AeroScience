@@ -1,4 +1,4 @@
-import {renderLayerContext} from './scientific-context.js';
+import {renderLayerContext,scientificCategory} from './scientific-context.js';
 import { openHyperspectralImport, hyperspectralCard } from "./hyperspectral-import.js";
 import { scientificAccessSettings } from "./scientific-access.js";
 import { ResearchMap } from "./map.js";
@@ -88,15 +88,15 @@ export async function viewProduct(parent, data, api = null) {
     s = data.source.manifest;
   parent.append(
     e("h3", `${names[p.instrumentId] || p.instrumentId} · ${s.name}`),
-    e("p", p.provenance),
     e(
       "p",
-      `Source observation: ${p.sourceObservationUtc || "Unknown"} · Flight packet: ${p.flightPacketUtc} · Processing: ${p.processedUtc}`,
+      `Source observation: ${p.sourceObservationUtc || "Unknown"} · Flight packet: ${p.flightPacketUtc}`,
     ),
     e(
       "p",
-      `Source: ${s.provider} · ${s.license} · Vertical datum: ${s.verticalDatum}`,
+      `Source: ${s.provider} · ${scientificCategory(p.sourceClass).label}`,
     ),
+    e('p',`${p.validSampleCount==null?'Valid sampled positions: Unavailable':p.validSampleCount+' valid sampled positions'} · ${p.quality}`),
   );
   const sourceContext=e('details');sourceContext.append(e('summary','About This Source & Measurement'));renderLayerContext(sourceContext,{source:data.source,product:p,sourceClass:p.sourceClass,unit:data.bands[0]?.unit,measurement:data.bands[0]?.id,context:{grid:data.bands[0]?.originalGrid}});parent.append(sourceContext);
   const mapHolder = e("div");
@@ -130,15 +130,13 @@ export async function viewProduct(parent, data, api = null) {
   const details = e("details");
   details.append(
     e("summary", "Provenance, quality and limitations"),
+    e('p',p.provenance),
+    e('p',`Processing: ${p.processedUtc} · Vertical datum: ${s.verticalDatum}`),
     e("p", p.quality),
     e("p", s.citation),
     e(
       "p",
       `Footprint: ${p.footprint.method}. Vertical reference: ${p.footprint.verticalReference}`,
-    ),
-    e(
-      "p",
-      `Integrity: ${p.sha256}; source collection ${data.source.manifestSha256}`,
     ),
   );
   for (const warning of [...p.warnings, ...data.processingMethods])
@@ -151,6 +149,7 @@ export async function viewProduct(parent, data, api = null) {
       ),
     );
   parent.append(details);
+  const advanced=e('details');advanced.append(e('summary','Advanced Diagnostics'),e('pre',JSON.stringify({product:p,sourceManifestSha256:data.source.manifestSha256,processingMethods:data.processingMethods},null,2)));parent.append(advanced);
   if (api) {
     const protection = await api(
       `/api/science/datasets/${p.datasetId}/protection`,

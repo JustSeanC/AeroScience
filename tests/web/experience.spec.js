@@ -128,7 +128,7 @@ test("science pause synchronizes displays while telemetry continues and unit pre
     .getByRole("button", { name: "Pause science collection", exact: true })
     .click();
   await expect(
-    second.getByRole("button", {
+    page.getByRole("button", {
       name: "Resume science collection",
       exact: true,
     }),
@@ -151,7 +151,7 @@ test("science pause synchronizes displays while telemetry continues and unit pre
       (i) => i.instrumentId === "ambient-temperature",
     ).observationCount,
   );
-  await second
+  await page
     .getByRole("button", { name: "Resume science collection", exact: true })
     .click();
   await expect(

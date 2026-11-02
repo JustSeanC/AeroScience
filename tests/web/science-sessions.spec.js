@@ -8,14 +8,14 @@ test('pilot arms, collects two science sessions and keeps one continuous flight'
  const flight=await post(request,'/api/missions',{name:'Synthetic browser multi-session flight',armScience:true});
  await page.goto('/#science');const panel=page.locator('#science-sessions');await expect(panel).toContainText('armed');
  await expect(page.locator('#flight-workspace h1')).toBeFocused();
- const start=panel.getByRole('button',{name:'Start new science session',exact:true});await start.focus();await page.waitForTimeout(2100);await expect(start).toBeFocused();
+ const start=page.getByRole('button',{name:'Start Science Collection',exact:true});await start.focus();await page.waitForTimeout(2100);await expect(start).toBeFocused();
  await page.waitForTimeout(1100);expect((await(await request.get(`/api/missions/${flight.id}/science`)).json()).observations).toHaveLength(0);
- await panel.getByRole('button',{name:'Start new science session',exact:true}).click();await expect(panel).toContainText('collecting');
+ await page.getByRole('button',{name:'Start Science Collection',exact:true}).click();await expect(panel).toContainText('collecting');
  await expect.poll(async()=>((await(await request.get(`/api/missions/${flight.id}/science`)).json()).observations).length).toBeGreaterThan(0);
- await panel.getByRole('button',{name:'Pause science collection',exact:true}).click();await expect(panel).toContainText('paused');await panel.getByRole('button',{name:'Resume science collection',exact:true}).click();await expect(panel).toContainText('collecting');
+ await page.getByRole('button',{name:'Pause science collection',exact:true}).click();await expect(panel).toContainText('paused');await page.getByRole('button',{name:'Resume science collection',exact:true}).click();await expect(panel).toContainText('collecting');
  const a=(await(await request.get(`/api/missions/${flight.id}/collection`)).json()).state.currentSessionId;
- await panel.getByRole('button',{name:'End current science session',exact:true}).click();await expect(panel).toContainText('betweenSessions');
- await panel.getByRole('button',{name:'Start new science session',exact:true}).click();await expect(panel).toContainText('Session 2');
+ await page.getByRole('button',{name:'End current science session',exact:true}).click();await expect(panel).toContainText('betweenSessions');
+ await page.getByRole('button',{name:'Start Science Collection',exact:true}).click();await expect(panel).toContainText('Session 2');
  const state=(await(await request.get(`/api/missions/${flight.id}/collection`)).json()).state;expect(state.currentSessionId).not.toBe(a);expect(state.manualAutomationHold).toBeTruthy();
  await expect.poll(async()=>((await(await request.get(`/api/missions/${flight.id}/science`)).json()).observations).some(r=>r.sessionId===state.currentSessionId)).toBeTruthy();
  const current=await(await request.get('/api/state')).json();expect(current.activeMission.id).toBe(flight.id);
@@ -38,7 +38,7 @@ test('Planner configures and preserves bounded collection actions without JSON e
 test('authoritative action availability prevents session start without instruments and leaves flight active',async({page,request})=>{
  await post(request,'/api/instruments',[]);await post(request,'/api/mission-selection',{planId:null});
  const flight=await post(request,'/api/missions',{name:'Synthetic no-instrument start',armScience:true});await page.goto('/#science');const panel=page.locator('#science-sessions');
- const start=panel.getByRole('button',{name:'Start new science session',exact:true});await expect(start).toBeDisabled();await expect(start).toHaveAttribute('title',/enabled instrument/);
+ const start=page.getByRole('button',{name:'Start Science Collection',exact:true});await expect(start).toBeDisabled();await expect(start).toHaveAttribute('title',/enabled instrument/);
  expect((await(await request.get(`/api/missions/${flight.id}/collection`)).json()).sessions).toHaveLength(0);expect((await(await request.get('/api/state')).json()).activeMission.id).toBe(flight.id);
 });
 

@@ -36,6 +36,30 @@ public sealed class OperatingAssessmentTests
         Assert.Equal(AssessmentStatus.NotAssessed,Assess(new("thermal-imager",true),Frame() with{TimestampUtc=At.AddSeconds(-20)}).Assessment.Rules.Single(r=>r.Rule.Id=="geometry.ground-intersection").DerivationValidity);
     }
     [Fact]
+    public void ImplausibleRawAglCannotBecomeAnIntersectionOrDependentOverlap()
+    {
+        const double reportedMetres=5230106138343769;
+        var frame=Frame(agl:reportedMetres/.3048);
+        var original=JsonSerializer.Serialize(frame,WireJson.Options);
+        var plan=new MissionPlan(Guid.NewGuid(),"Invalid AGL fixture",SensorPlanning:new("thermal-imager",300,100));
+        var report=Assess(new("thermal-imager",true),frame,plan:plan);
+        var geometry=Assert.Single(report.Assessment.Rules,r=>r.Rule.Id=="geometry.ground-intersection");
+        Assert.Equal(AssessmentStatus.Invalid,geometry.DerivationValidity);Assert.Null(geometry.ObservedValue);
+        Assert.DoesNotContain(report.Assessment.Rules,r=>r.Rule.Id=="planning.forward-overlap");
+        Assert.Throws<InvalidOperationException>(()=>SensorGeometry.ForInstrument(frame,new("thermal-imager",true)));
+        Assert.Equal(original,JsonSerializer.Serialize(report.Input.Frame,WireJson.Options));
+        Assert.Equal(frame.AltitudeAglFeet,report.Input.Frame!.AltitudeAglFeet);
+    }
+    [Theory]
+    [InlineData(89.999999999)]
+    [InlineData(90)]
+    [InlineData(90.000000001)]
+    public void NearParallelGroundRaysAreRejectedRatherThanGeneratingLongIntersections(double pitch)
+    {
+        var frame=Frame(pitch:pitch);Assert.Throws<InvalidOperationException>(()=>SensorGeometry.Footprint(frame));
+        Assert.Null(Assess(new("thermal-imager",true),frame).Assessment.Rules.Single(r=>r.Rule.Id=="geometry.ground-intersection").ObservedValue);
+    }
+    [Fact]
     public void AmbientTemperatureNeverBecomesInternalPayloadTemperature()
     {
         var profile=InstrumentProfiles.Catalog.First(p=>p.InstrumentId=="thermal-imager");

@@ -16,6 +16,23 @@ def hashes(folder):
             result[path.relative_to(folder).as_posix()] = hashlib.sha256(path.read_bytes()).hexdigest()
     return result
 
+def validate_native_javascript(proof, files):
+    """Bind the ES2017 compiler/parser proof to the actual SDK-delivered JS bytes."""
+    if not isinstance(proof,dict) or proof.get('target')!='ES2017' or proof.get('compiler')!='TypeScript 5.9.3' or proof.get('parser')!='Acorn 8.15.0':
+        raise ValueError('Validated native ES2017 build proof missing')
+    rows=proof.get('files')
+    if not isinstance(rows,list) or not 1<=len(rows)<=12:raise ValueError('Invalid native JavaScript proof')
+    expected={name:value for name,value in files.items() if name.endswith('.js')}
+    declared={}
+    for row in rows:
+        name=row.get('path','')
+        if not name.startswith('PackageSources/') or '..' in name.split('/') or not name.endswith('.js') or len(row.get('sourceSha256',''))!=64:
+            raise ValueError('Invalid native JavaScript asset identity')
+        name=name[len('PackageSources/'):]
+        if name in declared:raise ValueError('Duplicate native JavaScript proof')
+        declared[name]=row.get('compiledSha256')
+    if declared!=expected:raise ValueError('SDK JavaScript bytes differ from the validated ES2017 output')
+
 def stage_toolbar(stage, commit):
     """Namespace generated sources BEFORE the genuine SDK compilation."""
     if len(commit)!=40 or any(c not in "0123456789abcdef" for c in commit): raise ValueError("An exact source commit is required")
@@ -46,6 +63,8 @@ def stage_toolbar(stage, commit):
                 text=text.replace('const reply = JSON.parse(data);','const reply = JSON.parse(data); if(reply.error?.startsWith("Validation toolbar source mismatch")){this.pending.clear();this.setControls(false);this.renderIntelligence(false);this.status(reply.error);return;}')
             if path.name=='toolbar-compatibility.json':
                 value=json.loads(text);value.update(profile='validation',sourceCommit=commit);text=json.dumps(value)
+            if path.name=='AeroScience.html':
+                text=text.replace('Toolbar build not initialized.','AeroScience 0.7.0 Validation · source '+commit+' · toolbar initialization pending.')
             path.write_text(text,encoding='utf-8')
     for old,new in [('PackageDefinitions/aeroscience-toolbar.xml','PackageDefinitions/aeroscience-validation-v0-7-0-toolbar.xml'),
                     ('PackageSources/InGamePanels/aeroscience_panel.xml','PackageSources/InGamePanels/aeroscience_validation_v070_panel.xml'),
@@ -69,6 +88,7 @@ def record(folder,commit):
         raise ValueError('Genuine exact-source validation SDK receipt missing')
     if sdk['files']!=hashes(folder/'Toolbar/aeroscience-validation-v0-7-0-toolbar'):
         raise ValueError('SDK package bytes changed')
+    validate_native_javascript(sdk.get('native_javascript'),sdk['files'])
     receipt.write_text(json.dumps(dict(profile='validation',source_commit=commit,public_release_approved=False,
         installed_acceptance='Not tested',files=hashes(folder)),indent=2)+'\n',encoding='utf-8')
 

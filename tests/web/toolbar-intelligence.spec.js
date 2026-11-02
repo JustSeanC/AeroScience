@@ -16,9 +16,9 @@ test('mocked SDK transports real session controls between toolbar and dashboard 
  const flight=await post(request,'/api/missions',{name:'Synthetic real-handler native test',instruments:[{instrumentId:'ambient-temperature',enabled:true,intervalMs:1000}],armScience:true});
  await mountRealEngine(page);await expect(page.locator('#as-session-phase')).toContainText('armed');
  const dashboard=await context.newPage();await dashboard.goto('/#control');const intelligence=dashboard.locator('#mission-intelligence');
- await intelligence.getByRole('button',{name:'Start new science session',exact:true}).click();await expect(page.locator('#as-session-phase')).toContainText('Session 1');
+ await dashboard.getByRole('button',{name:'Start Science Collection',exact:true}).click();await expect(page.locator('#as-session-phase')).toContainText('Session 1');
  await page.getByText('Science session controls & evidence',{exact:true}).click();await page.locator('[data-science-action=pauseData]').click();await expect(intelligence).toContainText('Science: paused');
- await intelligence.getByRole('button',{name:'End current science session',exact:true}).click();await expect(page.locator('#as-session-phase')).toContainText('betweenSessions');
+ await dashboard.getByRole('button',{name:'End current science session',exact:true}).click();await expect(page.locator('#as-session-phase')).toContainText('betweenSessions');
  await page.locator('[data-science-action=startData]').click();await expect(page.locator('#as-session-phase')).toContainText('Session 2');await expect(intelligence).toContainText('Session 2');
  const state=(await(await request.get(`/api/missions/${flight.id}/collection`)).json()).state;await expect(page.locator('#as-session-identity')).toContainText(state.currentSessionId);
  const sent=await page.evaluate(()=>window.bus.sent.filter(s=>s.command.op==='science-control').map(s=>s.command));expect(sent).toHaveLength(2);expect(sent[0].control.expectedSessionId).not.toBe(state.currentSessionId);expect(sent[1].control.expectedSessionId).toBeNull();for(const c of sent){expect(c.requestId).toBe(c.control.requestId);expect(JSON.stringify(c).length).toBeLessThanOrEqual(1024);}

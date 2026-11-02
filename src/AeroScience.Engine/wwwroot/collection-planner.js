@@ -53,7 +53,7 @@ export function collectionPlanner(parent,initial,getPlan,api,dirty){
  group('Advanced — Position Reliability',[gap,age],true);
  const help=(field,text)=>{const note=node('small',text),id='automation-help-'+newIdentity();note.id=id;field.setAttribute('aria-describedby',id);field.closest('label').append(note);};
  help(enabled,'Configures draft automation only. It becomes eligible after plan review/save and a flight using that plan; editing never starts flight recording or collection.');
- help(policy,'Armed waits for an explicitly configured Start. Manual leaves the pilot in control. Manual End suspends automatic starts until explicit rearm; manual Start New Session remains possible.');
+ help(policy,'Armed waits for an explicitly configured Start. Manual leaves the pilot in control. Manual End suspends automatic starts until explicit rearm; manual Start Science Collection remains possible.');
  help(action,'Start creates a new science session; Pause/Resume retain the current session; End closes only that session. End Flight is separate. Automatic End is allowed only at an explicit waypoint or directional gate.');
  help(kind,'Waypoint proximity uses observed positions within tolerance. A gate requires a directional crossing. Area entry/exit uses supported boundary geometry and continuity, not the final waypoint.');
  help(target,'Choose a saved waypoint or named survey area. Stable IDs are preserved when targets are refreshed; removed targets must be corrected before review.');

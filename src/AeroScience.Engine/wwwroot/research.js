@@ -568,7 +568,7 @@ function editPlan(plan) {
       row.append(
         text(
           "strong",
-          `${i + 1}. ${w.name} · ${n(w.latitude, 6)}, ${n(w.longitude, 6)}`,
+          `${i + 1}. ${w.name}${w.navigationIdentifier?' ('+w.navigationIdentifier+')':''} · ${n(w.latitude, 6)}, ${n(w.longitude, 6)}`,
         ),
         button("Edit", () => waypointEditor(i)),
         button("Center on map", () => planMap.center(w)),
@@ -632,6 +632,7 @@ function editPlan(plan) {
     editor.replaceChildren(text("h4",index>=0?"Edit selected waypoint":"Draft waypoint — click the map to place it, or enter coordinates"));
     draftStatus.textContent="Draft waypoint only · Save Waypoint commits it to this plan draft; Save mission plan writes the plan.";
     const w = {...(waypoints[index] || {}),...position};
+    const airport=position.airport;
     const title = input(
         editor,
         "Waypoint name",
@@ -652,6 +653,8 @@ function editPlan(plan) {
         "Published navigation identifier (optional; not the science name)",
         w.navigationIdentifier,
       );
+    const airportRole=airport?select(editor,'Airport role',[['waypoint','Intermediate waypoint'],['departure','Departure'],['destination','Destination']],'waypoint'):null;
+    if(airport)editor.append(text('p','Airport reference point · OurAirports snapshot. This is not a runway threshold or navigation clearance.'));
     planningField(alt,"altitude",w.targetAltitudeFeet??null,"Target altitude","optional");
     lat.step = lon.step = "any";lat.min=-90;lat.max=90;lon.min=-180;lon.max=180;
     const updateMarker=()=>{if(lat.value!==""&&lon.value!==""&&lat.checkValidity()&&lon.checkValidity())planMap.draft([{latitude:Number(lat.value),longitude:Number(lon.value)}]);};
@@ -677,8 +680,11 @@ function editPlan(plan) {
         )
           throw Error("Enter valid latitude and longitude.");
         pattern.remember();
+        // The definition keeps its existing waypoint/identifier contract.
+        delete value.airport;delete value.fromMap;
         if (index >= 0) waypoints[index] = value;
-        else waypoints.push(value);
+        else if(airportRole?.value==='departure'){waypoints.unshift(value);departure.value=value.navigationIdentifier;}
+        else {waypoints.push(value);if(airportRole?.value==='destination')destination.value=value.navigationIdentifier;}
         cancelGeometry();drawList();dirty("Waypoint saved to draft · Save mission plan to keep this route.");
       }),
       button("Cancel Waypoint",cancelGeometry),
@@ -741,6 +747,7 @@ function editPlan(plan) {
   }
   locationSection.append(
     button("Add waypoint", beginWaypoint),
+    button("Add airport waypoint",()=>planMap.focusAirportSearch()),
     button("Draw Survey Area", startSurvey),
   );
   const map = text("div");
@@ -755,6 +762,7 @@ function editPlan(plan) {
     else if(clickMode==="survey"){areaVertices.push(p);planMap.draft(areaVertices);$("survey-draft-progress").textContent=`${areaVertices.length} vertices · Finish Area when ready`;}
     else if(clickMode==="pattern"){planMap.interaction(null);clickMode=null;selectPatternCenter?.(p);}
   }, {
+    onAirportSelect:airport=>{if(!canReplaceGeometry())return;cancelGeometry();waypointEditor(-1,{name:airport.name,navigationIdentifier:airport.icao||airport.id||airport.iata,latitude:airport.latitude,longitude:airport.longitude,airport});},
     onWaypointSelect:index=>waypointEditor(index),
     onWaypointsChange: (value) => {
       pattern.remember();
@@ -786,7 +794,7 @@ function editPlan(plan) {
   });
   const advancedCoordinates=text("details");advancedCoordinates.append(text("summary","Advanced: enter survey vertices manually"),button("Manual survey coordinates",()=>areaEditor()));locationSection.append(advancedCoordinates);
   const scienceSection=text("section");scienceSection.append(text("h3","4. Scientific instruments and data readiness"),selectedPayload);informationDetails(scienceSection,"Choose instruments & acquisition settings",configuration);scienceSection.append(presetSection);form.append(scienceSection);scientificReadiness(scienceSection,ctx.api).catch(()=>{});
-  const waitLabel=text('label','Wait for me to start science collection'),waitForScience=document.createElement('input');waitForScience.type='checkbox';waitForScience.checked=plan?.startScienceArmed===true;waitLabel.prepend(waitForScience);scienceSection.append(waitLabel);informationDetails(scienceSection,'Recording and science session behavior',text('p','When selected, Start Recording leaves science armed. Use Start new science session when ready. Card activation remains separate.'));
+  const waitLabel=text('label','Wait for me to start science collection'),waitForScience=document.createElement('input');waitForScience.type='checkbox';waitForScience.checked=plan?.startScienceArmed===true;waitLabel.prepend(waitForScience);scienceSection.append(waitLabel);informationDetails(scienceSection,'Recording and science session behavior',text('p','When selected, Start Recording leaves science armed. Use Start Science Collection when ready. Card activation remains separate.'));
   const atmosphericSection=text('details');atmosphericSection.append(text('summary','Atmospheric research settings'));
   const profileDirection=select(atmosphericSection,'Profile direction',[['both','Ascent and descent'],['ascent','Ascent'],['descent','Descent']],plan?.atmosphericSettings?.direction??'both');
   const profileInterval=input(atmosphericSection,'Altitude interval', (plan?.atmosphericSettings?.altitudeIntervalMetres??100)/.3048,'number');planningField(profileInterval,'altitude',(plan?.atmosphericSettings?.altitudeIntervalMetres??100)/.3048,'Altitude interval','interval');

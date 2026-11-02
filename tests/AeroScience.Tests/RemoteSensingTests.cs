@@ -27,6 +27,18 @@ public sealed class RemoteSensingTests : IDisposable
     }
     private static TelemetryFrame Frame(DateTimeOffset? time=null)=>new(time??DateTimeOffset.UtcNow,TelemetrySource.Simulator,"Fixture aircraft",40,-75,1000,328.0839895,140,150,160,0,0,0,0,0,MachNumber:.25);
     private void Apply(TelemetryFrame frame)=>coordinator.Apply(new(new(ConnectionState.Connected,TelemetrySource.Simulator,"Isolated fixture; no MSFS connection",frame.TimestampUtc),frame,new(frame.TimestampUtc,15,29,5,90,.002)));
+    [Fact]public async Task ImplausibleGroundInputCannotPublishAProductButKeepsOriginalTelemetryAndIndependentAtmosphere()
+    {
+        await science.ImportSourceAsync(RemoteFixtureFiles.Create(Path.Combine(root,"invalid-ground"),RemoteKind.Thermal));
+        var flight=coordinator.Start(new("Invalid ground evidence",Instruments:[new("thermal-imager",true),new("ambient-temperature",true)]));
+        var frame=Frame() with{AltitudeAglFeet=5230106138343769/.3048};Apply(frame);
+        await Wait(()=>missions.InstrumentDiagnostics(flight.Id).Any(d=>d.InstrumentId=="thermal-imager"&&d.RejectedObservations>0));
+        Assert.Empty(science.Products(flight.Id));Assert.Equal(frame.AltitudeAglFeet,Assert.Single(missions.StreamSamples(flight.Id)).AltitudeAglFeet);
+        var reading=Assert.Single(science.StreamObservations(flight.Id));Assert.Equal("ambient-temperature",reading.InstrumentId);Assert.Equal(15,reading.Value);
+        var report=Assert.Single(missions.OperatingReports(flight.Id),r=>r.Configuration.Settings.InstrumentId=="thermal-imager");
+        var geometry=Assert.Single(report.Assessment.Rules,r=>r.Rule.Id=="geometry.ground-intersection");Assert.Equal(AssessmentStatus.Invalid,geometry.DerivationValidity);Assert.Null(geometry.ObservedValue);
+        coordinator.End(flight.Id);
+    }
     private async Task<RemoteProduct> Acquire(RemoteKind kind,bool cloudy=false)
     {
         var clock = System.Diagnostics.Stopwatch.StartNew();

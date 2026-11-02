@@ -16,6 +16,15 @@ import private_validation as private
 p=fixtures.packaging
 
 class PrivateValidationTests(unittest.TestCase):
+    def test_native_syntax_proof_binds_every_sdk_javascript_asset(self):
+        files={'html_ui/InGamePanels/AeroScienceValidationV070/AeroScience.js':'b'*64}
+        proof={'target':'ES2017','compiler':'TypeScript 5.9.3','parser':'Acorn 8.15.0','files':[{'path':'PackageSources/'+next(iter(files)),'sourceSha256':'a'*64,'compiledSha256':'b'*64}]}
+        private.validate_native_javascript(proof,files)
+        with self.assertRaisesRegex(ValueError,'proof missing'):private.validate_native_javascript(None,files)
+        with self.assertRaisesRegex(ValueError,'bytes differ'):private.validate_native_javascript(proof,{**files,'unexpected.js':'c'*64})
+        with self.assertRaisesRegex(ValueError,'bytes differ'):private.validate_native_javascript(proof,{next(iter(files)):'c'*64})
+        proof['files'][0]['path']='PackageSources/../unexpected.js'
+        with self.assertRaisesRegex(ValueError,'asset identity'):private.validate_native_javascript(proof,files)
     def test_staged_namespace_is_complete_and_production_sources_unchanged(self):
         original=private.hashes(ROOT/'msfs-toolbar')
         with tempfile.TemporaryDirectory() as tmp:

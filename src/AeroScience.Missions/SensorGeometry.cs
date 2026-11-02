@@ -4,6 +4,8 @@ namespace AeroScience.Missions;
 
 public static class SensorGeometry
 {
+    // Bounds of the existing local-plane model, not an aircraft operating envelope.
+    public static bool SupportsAgl(double? feet)=>feet is {} value&&double.IsFinite(value)&&value is >=1 and <=200000;
     public static (double X,double Y,double Z) Direction(SensorMount mount,double pitch,double bank,double forward,double right)
     {
         static (double X,double Y,double Z) Rotate(double x,double y,double z,double pitch,double roll)
@@ -25,8 +27,9 @@ public static class SensorGeometry
     public static ObservationFootprint Footprint(TelemetryFrame frame, SensorMount? mount = null)
     {
         mount ??= new();
-        if (!frame.IsValid || frame.AltitudeAglFeet is not { } agl || !double.IsFinite(agl) || agl is < 1 or > 200000)
-            throw new InvalidOperationException("A current positive simulator altitude above ground is required. Ground intersection is unavailable.");
+        if (!frame.IsValid || !SupportsAgl(frame.AltitudeAglFeet))
+            throw new InvalidOperationException("Simulator AGL must be valid and within the ground-plane model's supported 1–200,000 ft range. Ground intersection is unavailable; MSL is not substituted.");
+        var agl=frame.AltitudeAglFeet!.Value;
         if (new[] { mount.HorizontalFovDegrees, mount.VerticalFovDegrees, mount.ForwardDegrees, mount.RightDegrees }.Any(v => !double.IsFinite(v))
             || mount.HorizontalFovDegrees is <= 0 or >= 120 || mount.VerticalFovDegrees is <= 0 or >= 120)
             throw new ArgumentException("Use a finite fixed sensor mount and field of view below 120 degrees.");
@@ -38,10 +41,10 @@ public static class SensorGeometry
         Coordinates Ray(double x, double y)
         {
             var body = Direction(mount,frame.PitchDegrees,frame.BankDegrees,x,y);
-            if (body.Z < .15) throw new InvalidOperationException("Sensor rays approach/point above the horizon; finite ground intersection is unavailable.");
+            if (!double.IsFinite(body.X)||!double.IsFinite(body.Y)||!double.IsFinite(body.Z)||body.Z < .15) throw new InvalidOperationException("Sensor rays approach/point above the horizon or are invalid; finite ground intersection is unavailable.");
             var forward = body.X * height / body.Z; var right = body.Y * height / body.Z;
             var distance = Math.Sqrt(forward * forward + right * right);
-            if (distance > 100000) throw new InvalidOperationException("Footprint exceeds the supported 100 km local-plane range.");
+            if (!double.IsFinite(distance)||distance > 100000) throw new InvalidOperationException("Footprint exceeds the supported finite 100 km local-plane range.");
             var bearing = frame.HeadingDegrees + Math.Atan2(right, forward) * 180 / Math.PI;
             return distance == 0 ? new(frame.Latitude, frame.Longitude) : Geodesy.Direct(new(frame.Latitude, frame.Longitude), bearing, distance);
         }

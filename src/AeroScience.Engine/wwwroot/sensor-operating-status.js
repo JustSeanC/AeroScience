@@ -25,15 +25,19 @@ export function renderSensorOperating(parent,overview,{compact=false,stale=null}
  for(const card of overview.instruments){
   let item=view.items.get(card.instrumentId);
   if(!item){
-   const root=node('article',undefined,'sensor-operating-card'),name=node('h3'),profile=node('p'),session=node('p'),operating=node('strong'),issue=node('p'),guidance=node('p'),uncertainty=node('p',undefined,'sensor-operating-uncertainty'),data=node('strong'),source=node('p'),acquisition=node('p'),time=node('p',undefined,'footnote');
+   const root=node('article',undefined,'sensor-operating-card'),name=node('h3'),profile=node('p'),session=node('p'),operating=node('strong'),issue=node('p'),guidance=node('p'),uncertainty=node('p',undefined,'sensor-operating-uncertainty'),data=node('strong'),source=node('p'),acquisition=node('p'),time=node('p',undefined,'footnote'),state=node('strong'),counts=node('p'),alert=node('p');
    root.dataset.sensor=card.instrumentId;root.setAttribute('aria-label',card.name);
    const opBlock=node('section'),dataBlock=node('section');opBlock.setAttribute('aria-label',card.name+' Operating Conditions');dataBlock.setAttribute('aria-label',card.name+' Scientific Data');opBlock.append(operating,issue,guidance);dataBlock.append(data,source,acquisition);
    const advice=node('ul');
-   const details=node('details'),summary=node('summary','View Technical Details · '+card.instrumentId),technical=node('div');details.append(summary,technical);
-   root.append(name,profile,session,opBlock,dataBlock,time,details);details.append(uncertainty,advice);item={root,name,profile,session,operating,issue,guidance,uncertainty,advice,data,source,acquisition,time,details,technical};view.items.set(card.instrumentId,item);
+   const scientific=node('details');scientific.append(node('summary','Sensor Details'),profile,session,opBlock,dataBlock,time,uncertainty,advice);
+   const details=node('details'),summary=node('summary','Advanced Diagnostics'),technical=node('div');details.append(summary,technical);
+   root.append(name,state,counts,alert,scientific,details);item={root,name,profile,session,operating,issue,guidance,uncertainty,advice,data,source,acquisition,time,details,technical,state,counts,alert};view.items.set(card.instrumentId,item);
   }
   remaining.delete(card.instrumentId);const holder=card.enabled?view.cards:view.disabledCards;if(item.root.parentNode!==holder)holder.append(item.root);if(card.enabled)enabled++;else disabledCount++;
   const status=stale&&card.operatingStatus!=='disabled'&&card.operatingStatus!=='notCollecting'?'cannotAssess':card.operatingStatus;
+  const remote=['thermal-imager','terrain-scanner','multispectral-imager','hyperspectral-imager'].includes(card.instrumentId),d=card.acquisition;
+  text(item.state,stale?'Status unavailable':!card.enabled?'Disabled':card.collectionState.split(' — ')[0]);
+  text(item.counts,`${remote?'Saved products':'Measurements'}: ${d?.observationCount??'Unavailable'} · Rejected: ${d?.rejectedObservations??'Unavailable'} · Missed intervals: ${d?.missingIntervals??'Unavailable'}`);
   item.root.dataset.operating=status;text(item.name,card.name);text(item.profile,`Reference profile: ${card.profileName}${card.profileVersion==null?'':` · version ${card.profileVersion}`}`);
   text(item.session,`Collection: ${stale?'Last known — ':''}${card.collectionState}${card.sessionId?' · Current science session':''}`);
   text(item.operating,'Operating Conditions: '+(operatingLabels[status]||'Cannot Assess'));
@@ -41,7 +45,9 @@ export function renderSensorOperating(parent,overview,{compact=false,stale=null}
   text(item.guidance,stale?'Check the companion connection and wait for fresh evidence.':card.guidance||'');item.guidance.hidden=!item.guidance.textContent;
   item.issue.hidden=!stale&&status==='withinCheckedLimits';if(!stale&&status==='withinCheckedLimits')item.guidance.hidden=true;
   item.root.dataset.scienceLevel=stale||status==='cannotAssess'||card.scientificData.status!=='ready'?'important':'information';
-  const invalid=(card.report?.assessment?.rules||[]).some(r=>r.derivationValidity==='invalid');if(card.enabled&&['collecting','Collecting'].includes(card.collectionState)&&invalid){scientificNotice(item.issue,'critical',{problem:card.primaryIssue||'Invalid measurement assessment.',consequence:'Affected measurements cannot qualify.',action:card.guidance||'Review calibration and operating evidence.'});item.root.dataset.scienceLevel='critical';}else {item.issue.classList.remove('science-notice');item.issue.removeAttribute('data-science-level');item.issue.removeAttribute('role');}
+  const invalid=(card.report?.assessment?.rules||[]).some(r=>r.derivationValidity==='invalid'),collecting=card.enabled&&card.collectionState==='Collecting';
+  if(collecting&&(invalid||card.scientificData.status==='unavailable')){scientificNotice(item.alert,'critical',{problem:invalid?'Invalid sensor geometry or calibration.':'Scientific source unavailable.',consequence:'Affected measurements cannot qualify.',action:invalid?'Review Sensor Details before continuing this collection.':'Prepare the required source or review Sensor Details.'});item.root.dataset.scienceLevel='critical';}
+  else scientificNotice(item.alert,'important',{problem:stale?'Current sensor status is unavailable. Reconnect the companion.':''});
   text(item.uncertainty,[`${card.checkedRules} checked operating rules; ${card.unassessedRules} applicable rules unassessed.`,...(compact?['Other capabilities, including undocumented hardware limits and detector sampling, remain unassessed.']:(card.uncertainty||[]))].join(' '));
   const advice=JSON.stringify(stale?[]:card.additionalAdvice||[]);if(item.advice.dataset.key!==advice){item.advice.dataset.key=advice;item.advice.replaceChildren(...JSON.parse(advice).map(value=>node('li',value)));}item.advice.hidden=!item.advice.children.length;
   text(item.data,'Scientific Data: '+(stale?'Unknown':dataLabels[card.scientificData.status]||'Unknown'));
