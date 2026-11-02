@@ -13,7 +13,7 @@ test.afterEach(async({request})=>{
 });
 test('personal card uses the real planner, recorder, immutable evidence and offline local results',async({page,request})=>{
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
-  await page.goto('/');await expect(page.locator('#altitude')).not.toHaveText('—');
+  await page.goto('/#control');await expect(page.locator('#altitude')).not.toHaveText('—');
   const state=await(await request.get('/api/state')).json();const frame=state.telemetry;
   await page.getByRole('link',{name:'My Research',exact:true}).click();
   await expect(page.getByRole('heading',{name:'Personal Research',exact:true})).toBeVisible();
@@ -64,7 +64,7 @@ test('personal card uses the real planner, recorder, immutable evidence and offl
   // Local host remains reachable while internet requests fail; there is no external research service.
   await page.route('https://**',route=>route.abort());await page.reload();
   await expect(page.locator('#my-research')).toContainText(name+' — Pass');
-  await page.getByRole('link',{name:'Mission History',exact:true}).click();await page.getByRole('button',{name:'View mission',exact:true}).first().click();
+  await page.getByRole('link',{name:'Results & History',exact:true}).click();await page.getByRole('button',{name:'View mission',exact:true}).first().click();
   await page.getByRole('link',{name:'Review Personal Research',exact:true}).click();
   await expect(page.getByLabel('Recorded flight',{exact:true})).toHaveValue(flight.id);
   expect(errors).toEqual([]);

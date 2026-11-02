@@ -61,7 +61,7 @@ test('tablet navigation is labeled, keyboard-operable and restores focus; core p
   await page.setViewportSize({width:820,height:1180});await page.goto('/#control');
   const menu=page.getByRole('button',{name:'☰ Menu',exact:true});await expect(menu).toBeVisible();
   await menu.focus();await page.keyboard.press('Enter');await expect(menu).toHaveAttribute('aria-expanded','true');
-  await expect(page.getByRole('navigation',{name:'Main navigation'}).getByRole('link',{name:'Mission History',exact:true})).toBeVisible();
+  await expect(page.getByRole('navigation',{name:'Main navigation'}).getByRole('link',{name:'Results & History',exact:true})).toBeVisible();
   await page.keyboard.press('Escape');await expect(menu).toBeFocused();await expect(menu).toHaveAttribute('aria-expanded','false');
   for(const route of ['#control','#workspace/map?missions='+fixture.missionId,'#workspace/analysis?missions='+fixture.missionId,'#workspace/compare?missions='+fixture.missionIds.slice(0,2).join(','),'#workspace/results?missions='+fixture.missionId,'#history','#downloads','#library','#help']){
     await page.goto('/'+route);await expect(page.locator('#workspace')).toBeVisible();await page.waitForTimeout(400);
@@ -103,7 +103,7 @@ test('desktop through narrow layouts and emulated 125/150/200 percent text zoom 
     await page.setViewportSize({width,height:1000});await page.goto('/#workspace/map?missions='+fixture.missionId);await expect(page.locator('.map-overview-counts')).toHaveAttribute('data-total-acquisitions','142');
     expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),String(width)).toBeTruthy();
     await expect(page.getByRole('button',{name:'Fit Data',exact:true})).toBeVisible();
-    if(width<=1100){await page.getByRole('button',{name:'☰ Menu',exact:true}).click();await expect(page.getByRole('link',{name:'Download Activity',exact:true})).toBeVisible();await page.keyboard.press('Escape');}
+    if(width<=1100){await page.getByRole('button',{name:'☰ Menu',exact:true}).click();await expect(page.getByRole('link',{name:'Scientific Library',exact:true})).toBeVisible();await page.keyboard.press('Escape');}
   }
   await page.setViewportSize({width:1440,height:1000});
   for(const zoom of [1.25,1.5,2]){

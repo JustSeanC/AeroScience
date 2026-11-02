@@ -28,7 +28,7 @@
   <body>
     <div class="app-shell">
       <aside class="sidebar">
-        <a class="brand" href="#control" aria-label="AeroScience home"
+        <a class="brand" href="#my-research" aria-label="AeroScience home"
           ><img src="/icon.svg" width="38" height="38" alt="" /><span
             >AERO<span class="brand-light">SCIENCE</span
             ><small>AIRBORNE RESEARCH SYSTEMS</small></span
@@ -36,32 +36,17 @@
         >
         <p class="nav-label">WORKSPACE</p>
         <nav aria-label="Main navigation">
-          <a
-            class="nav-link selected"
-            href="#control"
-            aria-label="Mission Control"
-            ><span aria-hidden="true">◈</span>Mission Control</a
-          >
-          <a class="nav-link" href="#planner" aria-label="Mission Planner"
-            ><span aria-hidden="true">◇</span>Mission Planner</a
-          >
-          <a class="nav-link" href="#operations" aria-label="Mission Operations"><span aria-hidden="true">◉</span>Mission Operations</a>
-          <a class="nav-link" href="#my-research" aria-label="My Research"><span aria-hidden="true">⌕</span>My Research</a>
-          <a class="nav-link" href="#history" aria-label="Mission History"
-            ><span aria-hidden="true">◷</span>Mission History</a
-          >
-          <a class="nav-link" href="#workspace/map" aria-label="Science Results &amp; Analysis"
-            ><span aria-hidden="true">⌁</span>Science Results &amp; Analysis</a
-          >
-        <a class="nav-link" href="#library">External Data Manager</a>
-        <a class="nav-link" href="#downloads"><span aria-hidden="true">↓</span>Download Activity</a>
-        <a class="nav-link" href="#science"><span aria-hidden="true">◉</span>Instruments &amp; Collection</a>
-        <a class="nav-link" href="#help">Help &amp; Support</a>
-          <a class="nav-link" href="#settings" aria-label="Settings"
-            ><span aria-hidden="true">⚙</span>Settings</a
-          >
-
-          </nav>
+          <a class="nav-link" href="#my-research">My Research</a>
+          <a class="nav-link" href="#planner">Flight Planner</a>
+          <a class="nav-link" href="#operations">Flight Operations</a>
+          <a class="nav-link" href="#results">Results &amp; History</a>
+          <a class="nav-link" href="#library">Scientific Library</a>
+        </nav>
+        <p class="nav-label">SUPPORT</p>
+        <nav aria-label="Settings and support">
+          <a class="nav-link" href="#settings">Settings</a>
+          <a class="nav-link" href="#help">Help &amp; Support</a>
+        </nav>
         <div class="sidebar-footer">
           <span class="eyebrow">SCIENCE ENGINE</span>
           <div>
@@ -103,9 +88,9 @@
             <div class="page-heading">
               <div>
                 <p class="eyebrow">AIRBORNE SCIENCE / OPERATIONS</p>
-                <h1>Mission Control</h1>
+                <h2>Flight Details &amp; Telemetry</h2>
                 <p class="subtitle">Record a flight, monitor live telemetry and operate the active mission.</p>
-                <a href="#operations" class="button primary">Open Mission Operations</a>
+                <a href="#operations" class="button primary">Back to Current Flight</a>
               </div>
               <span id="source-badge" class="badge amber"
                 >WAITING FOR DATA</span
@@ -351,7 +336,7 @@
             <div class="page-heading">
               <div>
                 <p class="eyebrow">SCIENCE OPERATIONS</p>
-                <h1>Mission Planner</h1>
+                <h1>Flight Planner</h1>
                 <p>
                   Prepare routes, survey areas, patterns and planned instruments. Plans are optional; start recording from Mission Control at any time. <a href="#help?guide=mission-planner.md">First mission walkthrough</a>
                 </p>
@@ -363,7 +348,7 @@
             <div class="page-heading">
               <div>
                 <p class="eyebrow">RESEARCH ARCHIVE</p>
-                <h1>Mission History</h1>
+                <h2>Recorded Flights</h2>
                 <p class="subtitle">Available offline.</p>
               </div>
               <button id="refresh-history" class="secondary">
@@ -382,7 +367,7 @@
             <div class="page-heading">
               <div>
                 <p class="eyebrow">SCIENCE PAYLOAD</p>
-                <h1>Instruments &amp; Collection</h1>
+                <h2>Instrument Setup</h2>
                 <p class="subtitle">Configure payloads and presets, check live readiness, and Start/Pause/Resume/End science sessions. Review recorded observations in Science Results &amp; Analysis.</p>
               </div>
               <span class="badge">SIMULATOR &amp; EXTERNAL DATA</span>

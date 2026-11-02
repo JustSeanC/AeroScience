@@ -181,9 +181,7 @@ test("hidden browser maps do not load online tiles", async ({
   ).toBeVisible();
   await page.waitForTimeout(1100);
   expect(tiles).toEqual([]);
-  await page
-    .getByRole("link", { name: "Mission Control", exact: true })
-    .click();
+  await page.goto('/#control');
   await expect.poll(() => tiles.length).toBeGreaterThan(0);
 });
 test("native Map browser fixture synchronizes cached chunks, pan/follow and bounded stale track", async ({

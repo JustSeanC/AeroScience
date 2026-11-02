@@ -62,7 +62,7 @@ export function researchEntryActions(parent,api,{starter,card,survey},isCurrent)
     if(intent==='customize'){status.textContent='An independent editable copy is prepared. Your other plans and historic results are unchanged.';location.hash=`#planner?researchPlan=${prepared.plan.id}`;}
     else{
      await api('/api/mission-selection',{planId:prepared.plan.id});if(!isCurrent())return;
-     forget(request.requestId);status.textContent='Mission prepared — Start Recording next. Recording and science have not started.';window.dispatchEvent(new Event('aeroscience-selection'));location.hash=`#control?researchPlan=${prepared.plan.id}`;
+     forget(request.requestId);status.textContent='Mission prepared — Start Recording next. Recording and science have not started.';window.dispatchEvent(new Event('aeroscience-selection'));location.hash=`#operations?researchPlan=${prepared.plan.id}`;
     }
    }catch(error){if(isCurrent()){
     status.textContent=error.message;

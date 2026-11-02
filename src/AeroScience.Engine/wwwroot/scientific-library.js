@@ -12,7 +12,7 @@ export async function scientificLibrary(parent,api){
  dispose();let stopped=false,timer,epoch=0;const maps=[],popups=[],selected=new Set();
  dispose=()=>{stopped=true;clearTimeout(timer);popups.splice(0).forEach(close=>close());maps.splice(0).forEach(map=>map.destroy());};
  parent.replaceChildren();if(location.hash.startsWith('#library/download')){const close=await libraryDownload(parent,api,()=>stopped);if(stopped)close();else dispose=()=>{stopped=true;close();};return;}
- const heading=el('div',undefined,'page-heading');heading.append(el('p','REUSABLE HISTORICAL SOURCES','eyebrow'),el('h1','External Data Manager'),el('p','Historical scientific datasets can be reused during future missions. Flight recordings remain separate.'));parent.append(heading);link(heading,'Find & Download Data','#library/download');
+ const heading=el('div',undefined,'page-heading');heading.append(el('p','REUSABLE HISTORICAL SOURCES','eyebrow'),el('h2','Data Sources'),el('p','Historical scientific datasets can be reused during future missions. Flight recordings remain separate.'));parent.append(heading);link(heading,'Find & Download Data','#library/download');
  await libraryLocation(parent,api,{stopped:()=>stopped});if(stopped)return;
  parent.append(el('h2','Manage Downloaded Data'));const deleteTools=el('div',undefined,'action-row');parent.append(deleteTools);
  async function changed(){window.dispatchEvent(new CustomEvent('aeroscience-sources-changed'));if(!stopped&&location.hash.startsWith('#library')&&parent.isConnected)await scientificLibrary(parent,api);}

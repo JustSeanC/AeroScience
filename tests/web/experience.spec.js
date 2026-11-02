@@ -110,7 +110,7 @@ test("science pause synchronizes displays while telemetry continues and unit pre
   });
   await page.goto("/#science");
   await expect(
-    page.getByRole("heading", { name: "Instruments & Collection", exact: true }),
+    page.getByRole("heading", { name: "Instrument Setup", exact: true }),
   ).toBeVisible();
   await expect
     .poll(
@@ -194,7 +194,7 @@ test("instrument presets can be created applied in planner and deleted without c
     "Slow wind reusable",
   );
   await page
-    .getByRole("link", { name: "Mission Planner", exact: true })
+    .getByRole("link", { name: "Flight Planner", exact: true })
     .click();
   await page.getByText("Apply an instrument preset", { exact: true }).click();
   await page
@@ -225,7 +225,7 @@ for (const zoom of [1.25, 1.5])
       await page.goto("/#" + hash);
       await expect(page.locator("#workspace")).toBeVisible();
       await expect(
-        page.locator(".view:not([hidden]) h1").first(),
+        page.locator("#workspace h1:visible").first(),
       ).toBeVisible();
       expect(
         await page.evaluate(

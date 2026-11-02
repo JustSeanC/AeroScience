@@ -25,7 +25,7 @@ async function seed(request){
 test.afterEach(async({request})=>{const s=await(await request.get('/api/state')).json();if(s.activeMission)await post(request,`/api/missions/${s.activeMission.id}/end`);await post(request,'/api/mission-selection',{planId:null});});
 
 test('offline experiment overview compares frozen cross-flight attempts with real hashes, chart gaps and original evidence',async({page,request})=>{
- test.setTimeout(60000);await page.goto('/');await expect(page.locator('#altitude')).not.toHaveText('—');const {card,attempts}=await seed(request);
+ test.setTimeout(60000);await page.goto('/#control');await expect(page.locator('#altitude')).not.toHaveText('—');const {card,attempts}=await seed(request);
  if(attempts.some((a,i)=>a.result.outcome!==['pass','fail'][i])){
   const diagnostic=await Promise.all(attempts.map(async a=>({result:a.result,events:(await(await request.get(`/api/missions/${a.flight.id}/replay/events?after=0`)).json()).filter(e=>['connection','telemetry-gap','simulator-paused'].includes(e.kind)),samples:await(await request.get(`/api/missions/${a.flight.id}/telemetry?limit=1000`)).json()})));
   await test.info().attach('unexpected-recorded-research-outcome',{body:JSON.stringify(diagnostic),contentType:'application/json'});
@@ -47,7 +47,7 @@ test('offline experiment overview compares frozen cross-flight attempts with rea
 });
 
 test('changed selection rejects a late comparison and a re-evaluated result requires fresh review',async({page,request})=>{
- test.setTimeout(60000);await page.goto('/');const {card,attempts}=await seed(request);
+ test.setTimeout(60000);await page.goto('/#control');const {card,attempts}=await seed(request);
  await page.goto('/#my-research');await page.locator('#my-research article').filter({has:page.getByRole('heading',{name:card.name,exact:true})}).getByRole('button',{name:'Overview & Compare',exact:true}).click();
  const root=page.locator('#research-experiment-review');await expect(root.getByRole('checkbox')).toHaveCount(4);for(const c of await root.getByRole('checkbox').all())await c.check();
  await post(request,`/api/research/recorded-attempts/${attempts[0].id}/evaluate`,{requestId:crypto.randomUUID()});await root.getByRole('button',{name:'Compare Selected Attempts',exact:true}).click();await expect(root.getByRole('status').first()).toContainText('selected result changed');

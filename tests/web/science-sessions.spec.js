@@ -43,7 +43,7 @@ test('authoritative action availability prevents session start without instrumen
 });
 
 test('LAN-compatible identities remain unique RFC 4122 v4 IDs without randomUUID',async({page})=>{
- await page.addInitScript(()=>Object.defineProperty(crypto,'randomUUID',{value:undefined,configurable:true}));await page.goto('/');
+ await page.addInitScript(()=>Object.defineProperty(crypto,'randomUUID',{value:undefined,configurable:true}));await page.goto('/#control');
  const values=await page.evaluate(async()=>{const {newIdentity}=await import('/workstation-ui.js');return Array.from({length:1000},()=>newIdentity());});
  expect(new Set(values).size).toBe(1000);for(const id of values)expect(id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
 });

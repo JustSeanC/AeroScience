@@ -12,7 +12,7 @@ test.afterEach(async ({ request }) => {
 test('two displays share recording, history and safe mission detail', async ({ page, context, request }) => {
   const errors = []; page.on('pageerror', error => errors.push(error.message));
   const {version} = await (await request.get('/api/health')).json();
-  await page.goto('/');
+  await page.goto('/#control');
   await expect(page.locator('.sidebar-footer small')).toHaveText(`v${version}`);
   await expect(page.locator('#source-badge')).toHaveText('SIMULATED TELEMETRY');
   await expect(page.locator('#altitude')).not.toHaveText('—');
@@ -26,14 +26,14 @@ test('two displays share recording, history and safe mission detail', async ({ p
   await page.getByRole('button', { name: 'Start Recording', exact: true }).click();
   await expect(page.locator('#active-name')).toHaveText(name);
   await expect.poll(async () => Number((await page.locator('#active-samples').textContent()).replaceAll(',', ''))).toBeGreaterThan(1);
-  const second = await context.newPage(); await second.goto('/');
+  const second = await context.newPage(); await second.goto('/#control');
   await expect(second.locator('.sidebar-footer small')).toHaveText(`v${version}`);
   await expect(second.locator('#active-name')).toHaveText(name);
   await expect(second.locator('#active-mode')).toContainText('Realistic Mode');
   await second.getByRole('button', { name: 'End mission', exact: true }).click();
-  await expect(page.locator('#mission-idle')).toBeVisible();
+  await expect(page.getByRole('link',{name:'Review Results',exact:true})).toBeVisible();
   await expect(page.getByLabel('SCIENCE OPERATING MODE')).toHaveValue('universal');
-  await page.getByRole('link', { name: 'Mission History' }).click();
+  await page.getByRole('link', { name: 'Results & History' }).click();
   await expect(page.getByRole('heading', { name, exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'View mission' }).first().click();
   await expect(page.getByRole('dialog')).toBeVisible();
@@ -53,7 +53,7 @@ test('two displays share recording, history and safe mission detail', async ({ p
 
 for (const viewport of [{ width: 744, height: 1133 }, { width: 375, height: 812 }]) {
   test(`responsive touch layout at ${viewport.width}px`, async ({ page }) => {
-    await page.setViewportSize(viewport); await page.goto('/');
+    await page.setViewportSize(viewport); await page.goto('/#control');
     await expect(page.locator('#altitude')).not.toHaveText('—');
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
     expect((await page.getByRole('button', { name: 'Start Recording', exact: true }).boundingBox()).height).toBeGreaterThanOrEqual(44);
@@ -65,13 +65,13 @@ for (const viewport of [{ width: 744, height: 1133 }, { width: 375, height: 812 
 }
 
 test('display closure does not stop recording', async ({ page, context }) => {
-  await page.goto('/'); await page.getByLabel('MISSION NAME', { exact: true }).fill('Display independence');
+  await page.goto('/#control'); await page.getByLabel('MISSION NAME', { exact: true }).fill('Display independence');
   await page.getByRole('button', { name: 'Start Recording', exact: true }).click();
   await expect(page.locator('#active-name')).toHaveText('Display independence');
   await page.close();
-  const display = await context.newPage(); await display.goto('/');
+  const display = await context.newPage(); await display.goto('/#control');
   await expect(display.locator('#active-name')).toHaveText('Display independence');
   await expect.poll(async () => Number(await display.locator('#active-samples').textContent())).toBeGreaterThan(1);
   await display.getByRole('button', { name: 'End mission', exact: true }).click();
-  await expect(display.locator('#mission-idle')).toBeVisible();
+  await expect(display.getByRole('link',{name:'Review Results',exact:true})).toBeVisible();
 });

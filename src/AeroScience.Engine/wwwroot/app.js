@@ -4,6 +4,7 @@ import {readSuccessResponse} from './http-response.js';
 import {scienceWorkspace,disposeScienceWorkspace} from './science-workspace.js';
 import {helpCenter,disposeHelpCenter} from './help-center.js';
 import {missionSelection} from './mission-selection.js';
+import {taskWorkspaces} from './task-workspaces.js';
 import {scienceJourney} from './science-journey.js';
 import {startMissionWithReadiness} from './mission-start-advisory.js';
 import {personalResearch,disposePersonalResearch} from './personal-research.js';
@@ -27,6 +28,7 @@ import {
 import { unitControls, initializeUnits } from "./science-display.js";
 const $ = (id) => document.getElementById(id);
 const workstationShell=initializeWorkstationShell();
+const workspaces=taskWorkspaces();
 const number = (v, digits = 0) =>
   Number.isFinite(v)
     ? v.toLocaleString("en-US", {
@@ -278,6 +280,7 @@ function render(state) {
   } else clearTelemetry();
   updateStartButton(state);
   const mission = state.activeMission;
+  if(mission&&!location.hash)location.hash='#operations';
   $("mission-idle").hidden = !!mission;
   $("mission-active").hidden = !mission;
   $("record-status").textContent = mission ? "● RECORDING" : "STANDBY";
@@ -332,6 +335,7 @@ $("start-form").addEventListener("submit", (event) => {
     $("mission-mode").value = "universal";
     $("mode-help").textContent = modeHelp("universal");
     render(await api("/api/state"));
+    location.hash="#operations";
     }finally{starting=false;if(current)render(current);}
   }).then(()=>{if(current)render(current);if(location.hash===startHash&&!current?.activeMission&&!document.querySelector("dialog[open]"))$("start-button").focus({preventScroll:true});});
 });
@@ -349,8 +353,10 @@ $("pair-form").addEventListener("submit", (event) => {
   event.preventDefault();
   command(event.submitter, () => connect($("pair-code").value));
 });
+let navigationEpoch=0;
 async function navigate() {
-  const allowed = ["control", "operations", "planner", "history", "instruments", "settings", "science-workspace", "library", "help", "downloads", "my-research"];
+  const ownNavigation=++navigationEpoch;
+  const allowed = ["control", "operations", "planner", "history", "instruments", "settings", "science-workspace", "library", "help", "downloads", "my-research", "library-storage"];
   if(location.hash.startsWith("#settings/support")){location.replace("#help");return;}
   if(location.hash.startsWith('#workspace/timeline')){const id=new URLSearchParams(location.hash.split('?')[1]||'').get('missions')?.split(',')[0];location.replace('#operations'+(id?'?flight='+encodeURIComponent(id):''));return;}
   const routePage=settingsLocation().page;
@@ -358,7 +364,7 @@ async function navigate() {
     settingsLocation().page === "science"
       ? "instruments"
       : settingsLocation().page;
-  const page = routePage === "workspace" ? "science-workspace" : allowed.includes(hash) ? hash : "control";
+  const page = routePage === "workspace" ? "science-workspace" : routePage === "results" ? "history" : location.hash.startsWith("#library/storage") ? "library-storage" : allowed.includes(hash) ? hash : "my-research";
   if(page!=="science-workspace")disposeScienceWorkspace();
   if(page!=="downloads")disposeDownloadWorkspace();
   if(page!=="library")disposeScientificLibrary();
@@ -366,24 +372,25 @@ async function navigate() {
   if(page!=="my-research")disposePersonalResearch();
   if(page!=="operations")closeMissionOperations();
   for (const id of allowed) $(id).hidden = id !== page;
+  const workspace=workspaces.show(page);
   for (const link of document.querySelectorAll(".nav-link")) {
     const selected =
-      link.hash === "#" + (page === "instruments" ? "science" : page) || page === "science-workspace" && link.hash.startsWith("#workspace/");
+      link.hash === "#" + workspaces.key(page);
     link.classList.toggle("selected", selected);
     if (selected) link.setAttribute("aria-current", "page");
     else link.removeAttribute("aria-current");
   }
   $("breadcrumb").textContent = {
-    control: "MISSION CONTROL",
-    operations: "MISSION OPERATIONS",
-    history: "MISSION HISTORY",
-    instruments: "INSTRUMENTS & COLLECTION",
-    planner: "MISSION PLANNER",
+    control: "FLIGHT OPERATIONS",
+    operations: "FLIGHT OPERATIONS",
+    history: "RESULTS & HISTORY",
+    instruments: "FLIGHT OPERATIONS",
+    planner: "FLIGHT PLANNER",
     "my-research": "MY RESEARCH",
     settings: "SETTINGS",
-    "science-workspace": "SCIENCE RESULTS & ANALYSIS",library:"EXTERNAL DATA MANAGER",help:"HELP & SUPPORT",downloads:"DOWNLOAD ACTIVITY",
+    "science-workspace": "RESULTS & HISTORY",library:"SCIENTIFIC LIBRARY",help:"HELP & SUPPORT",downloads:"SCIENTIFIC LIBRARY","library-storage":"SCIENTIFIC LIBRARY",
   }[page];
-  document.title = `AeroScience · ${{library:"External Data Manager", "science-workspace":"Science Results & Analysis", instruments:"Instruments & Collection", control:"Mission Control"}[page] || page[0].toUpperCase()+page.slice(1)}`;
+  document.title = `AeroScience · ${workspace?.querySelector('h1')?.textContent||({planner:'Flight Planner','my-research':'My Research',settings:'Settings',help:'Help & Support'}[page])||page}`;
   if (!authorized) return;
   if (page === "science-workspace") await scienceWorkspace($("science-workspace"),api);
   if (page === "help") await helpCenter($("help"),api);
@@ -394,8 +401,9 @@ async function navigate() {
   if (page === "control") selection?.refresh();
   if (page === "history") await loadHistory();
   if (page === "settings") await loadSettings();
+  if (page === "library-storage") await attachStorage();
   if (page === "planner" || page === "instruments") await loadResearch(page);
-  workstationShell.afterNavigation($(page));
+  if(ownNavigation===navigationEpoch)workstationShell.afterNavigation(workspace||$(page));
 }
 async function loadHistory() {
   const request = ++historyRequest;
@@ -510,10 +518,19 @@ async function showDetail(id) {
   await researchDetail(body, id, m);
   dialogHeader($("mission-detail"),{title:"Mission detail"});$("mission-detail").showModal();
 }
+let storagePanel=null,storageLoading=null;
+async function attachStorage(){
+ if(!storageLoading){storagePanel=el('section');storagePanel.setAttribute('aria-label','Storage and Data');storageLoading=(async()=>{
+  await storageManagement(storagePanel,api);const s=await api('/api/settings');
+  for(const [title,value]of [['Mission Database',s.missionStorage],['Scientific Data Library',s.scienceStorage]]){const item=el('article');item.append(el('h3',title));if(value)item.append(el('p',value.directory),el('p',value.available?`${number(value.usedBytes/1048576,1)} MiB used · ${number(value.freeBytes/1073741824,1)} GiB free`:value.error));storagePanel.append(item);}
+  for(const [title,action]of [['Change storage locations','storage'],['Data Management / Backups','data-management']]){const b=el('button',title,'secondary');b.disabled=!s.desktopAvailable;b.onclick=()=>command(b,()=>api('/api/desktop/'+action,{}));storagePanel.append(b);}
+ })().catch(error=>{storageLoading=null;throw error;});}
+ await storageLoading;const target=location.hash.startsWith('#library/storage')?$('library-storage'):location.hash.startsWith('#settings/storage')?settingsView?.panels.get('storage'):null;if(target)target.append(storagePanel);
+}
 let settingsView=null;
 async function loadSettings() {
   const container=$("settings-content");
-  if(settingsView){settingsView.show();return;}
+  if(settingsView){settingsView.show();if(settingsLocation().category==="storage")await attachStorage();return;}
   const s=await api("/api/settings");container.replaceChildren();
   const view=settingsNavigation(container),panels=view.panels;settingsView=view;view.show();
   function paragraph(category,value){panels.get(category).append(el("p",value));}
@@ -523,12 +540,8 @@ async function loadSettings() {
   paragraph("general","Mission History and exports remain available without MSFS while your selected storage is connected.");desktop("general","Open application settings","settings");
   await unitControls(panels.get("units"),api,()=>{});
   await mapSettingsUI(panels.get("maps"),api);
-  try{await storageManagement(panels.get("storage"),api);}catch(error){paragraph("storage",error.message);}
-  for(const [title,storage] of [["Mission Database",s.missionStorage],["Scientific Data Library",s.scienceStorage]]){
-    const section=el("article");section.append(el("h3",title));panels.get("storage").append(section);
-    if(storage)section.append(el("p",storage.directory),el("p",storage.available?`${number(storage.usedBytes/1048576,1)} MiB used · ${number(storage.freeBytes/1073741824,1)} GiB free`:storage.error));
-  }
-  desktop("storage","Change storage locations","storage");desktop("storage","Data Management / Backups","data-management");
+  panels.get("storage").append(el("p","Storage controls are shared with Scientific Library → Storage."));
+  if(settingsLocation().category==="storage")await attachStorage();
   await updateSettings(panels.get("updates"),api);
   try{await sourceSettings(panels.get("science"),api);}catch(error){paragraph("science","Scientific sources unavailable: "+error.message);}
   if(s.toolbarStatus){paragraph("toolbar",`Installed: ${s.toolbarStatus.installedVersion||"Missing / unknown"} · Bundled: ${s.toolbarStatus.bundledVersion||"Unknown"} · ${s.toolbarStatus.status}`);paragraph("toolbar",s.toolbarStatus.message);}

@@ -1,5 +1,13 @@
 import { test, expect } from "@playwright/test";
 import { mountToolbar } from "./helpers/toolbar.mjs";
+test.afterEach(async({request})=>{
+ const origin='http://127.0.0.1:5080',state=await(await request.get('/api/state')).json();
+ const {csrf}=await(await request.post('/api/session',{data:{},headers:{Origin:origin}})).json();
+ const headers={Origin:origin,'X-AeroScience-CSRF':csrf};
+ if(state.activeMission)expect((await request.post(`/api/missions/${state.activeMission.id}/end`,{data:{},headers})).ok()).toBe(true);
+ expect((await request.post('/api/mission-selection',{data:{planId:null},headers})).ok()).toBe(true);
+ expect((await request.post('/api/instruments',{data:[],headers})).ok()).toBe(true);
+});
 test("planner, actual stored science pages, map and complete exports work together in a test host", async ({
   page,
   request,
@@ -10,13 +18,13 @@ test("planner, actual stored science pages, map and complete exports work togeth
   page.on("request", (r) => {
     if (!r.url().startsWith("http://127.0.0.1:5080")) external.push(r.url());
   });
-  await page.goto("/");
+  await page.goto("/#control");
   await expect(page.locator("#altitude")).not.toHaveText("—");
   await expect(
     page.getByText("Ready for your next mission.", { exact: true }),
   ).toBeVisible();
   await page
-    .getByRole("link", { name: "Mission Planner", exact: true })
+    .getByRole("link", { name: "Flight Planner", exact: true })
     .click();
   await page
     .getByLabel("Plan name", { exact: true })
@@ -58,10 +66,11 @@ test("planner, actual stored science pages, map and complete exports work togeth
     .getByRole("button", { name: "Select for Flight", exact: true })
     .first()
     .click();
-  await page.getByRole("button",{name:"Start mission",exact:true}).click();
+  await page.getByRole("button",{name:"Start Recording",exact:true}).click();
   await expect(page.locator("#active-name")).toHaveText(
     "Browser atmospheric plan",
   );
+  await page.getByRole('link',{name:'Flight Details & Tools',exact:true}).click();
   await page.locator("#flight-tools > summary").click();
   await page.getByLabel("Notes", { exact: true }).fill("Weather observation");
   await page
@@ -81,15 +90,13 @@ test("planner, actual stored science pages, map and complete exports work togeth
     path: "artifacts/research-instruments-browser-fixture.png",
     fullPage: true,
   });
-  await page
-    .getByRole("link", { name: "Mission Control", exact: true })
-    .click();
+  await page.goto('/#control');
   await expect(page.locator("#flight-guidance")).toContainText("HDG");
   await expect(page.locator("#mach")).toHaveText("Mach 0.82");
   await page.getByRole("button", { name: "End mission", exact: true }).click();
-  await expect(page.locator("#mission-idle")).toBeVisible();
+  await expect(page.getByRole("link",{name:"Review Results",exact:true})).toBeVisible();
   await page
-    .getByRole("link", { name: "Mission History", exact: true })
+    .getByRole("link", { name: "Results & History", exact: true })
     .click();
   await page.getByRole("button", { name: "View mission" }).first().click();
   await expect(page.locator("#detail-content")).toContainText(
