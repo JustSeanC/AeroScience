@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "milestone": "P28-UX",
-  "status": "Final material corrections frozen after 25 broad browser/PostgreSQL passes; corrected Full pending",
+  "status": "Runtime simplification and focused corrections complete; same-fragment governance navigation test corrected; final Full pending",
   "previousAccepted": {
     "source": "021c4b8a092c179bef9307a28a16539a7d9fc5d2",
     "full": 41222464887
@@ -69,7 +69,13 @@
     "dPreparationHistoryCorrectionBrowsers": 12,
     "dPreparationKnownAndDelayedHistoryBrowser": 1,
     "dFinalControlsAndStableDisclosuresBrowsers": 16,
-    "dFinalBroadUiAndPostgresBrowsers": 25
+    "dFinalBroadUiAndPostgresBrowsers": 25,
+    "governanceNavigationBrowsers": 6,
+    "localLinuxPythonHelpers": {
+      "passed": 165,
+      "failed": 0,
+      "skipped": 0
+    }
   },
   "preservedLocalFailures": [
     "Delayed native template: null onclick, initialized=true, zero bus requests before correction.",
@@ -172,5 +178,38 @@
     "source": "e69d8819db037e3a7ed652c7fc337885e1d3af5e",
     "url": "https://github.com/JustSeanC/AeroScience/actions/runs/41393016235",
     "conclusion": "Cancelled early when the first interrupted Full diagnostics revealed the additional genuine rendering failure; not acceptance"
+  },
+  "preservedFailedFull": {
+    "id": 41394632368,
+    "source": "27d4ae441dbb7d986182b705dc892f73eed5a5d9",
+    "url": "https://github.com/JustSeanC/AeroScience/actions/runs/41394632368",
+    "conclusion": "failure",
+    "linuxDotnet": {
+      "passed": 1464,
+      "failed": 0,
+      "skipped": 0
+    },
+    "windowsDotnet": {
+      "passed": 1454,
+      "failed": 0,
+      "skipped": 10
+    },
+    "browser": {
+      "passed": 364,
+      "failed": 1,
+      "skipped": 2,
+      "flaky": 0
+    },
+    "windowsPython": {
+      "passed": 160,
+      "failed": 0,
+      "skipped": 2
+    },
+    "windowsJob": "success",
+    "deploymentJob": "success",
+    "linuxPython": "Not run after browser failure",
+    "linuxProcessRecovery": "Not run after browser failure",
+    "cause": "The governance test expected same-fragment goto to discard the currently open program. The portal correctly retained the program; Open Program belongs to the list, while Back to Programs was visible.",
+    "correction": "Assert the current program, use the visible Back to Programs action, reopen it, and retain all original immutable publication, claim, local preparation and exact criteria assertions. No runtime change or deadline/threshold relaxation."
   }
 }
