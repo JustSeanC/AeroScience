@@ -1,3 +1,4 @@
+import {revealControl} from './helpers/disclosures.mjs';
 import {test,expect} from '@playwright/test';
 const origin='http://127.0.0.1:5080';
 async function post(request,path,data={}){const s=await(await request.post('/api/session',{data:{},headers:{Origin:origin}})).json();const r=await request.post(path,{data,headers:{Origin:origin,'X-AeroScience-CSRF':s.csrf}});expect(r.ok(),await r.text()).toBeTruthy();return r.json();}
@@ -37,6 +38,6 @@ test('delayed End for session A cannot end a new session B; reconnect clears sta
 test('unknown metrics do not render a fabricated percentage and Library/History links use existing routes',async({page,request})=>{
  await begin(request);await page.goto('/#control');const panel=page.locator('#mission-intelligence');await expect(panel).toContainText('armed');
  const text=await page.evaluate(async()=>{const {metricText}=await import('/mission-intelligence.js');return metricText({id:'coverage',status:'unsupported',numerator:10,denominator:10,unit:'m²',missing:0,unassessed:1,method:'Unknown native support'});});expect(text).not.toContain('100%');expect(text).toContain('unsupported');
- await panel.getByRole('link',{name:'Find & Download External Data',exact:true}).click();await expect(page.getByRole('heading',{name:'Find & Download Data',exact:true})).toBeVisible();await page.goBack();await expect(panel).toBeVisible();
- await panel.getByRole('link',{name:'Review offline flight reports',exact:true}).click();await expect(page.locator('#history')).toBeVisible();
+ const sourceLink=panel.getByRole('link',{name:'Find & Download External Data',exact:true,includeHidden:true});await expect(sourceLink).toHaveCount(1);await revealControl(sourceLink);await expect(sourceLink).toBeVisible();await page.waitForResponse(r=>new URL(r.url()).pathname==='/api/mission-intelligence');await expect(sourceLink).toBeVisible();await sourceLink.click();await expect(page.getByRole('heading',{name:'Find & Download Data',exact:true})).toBeVisible();await page.goBack();await expect(panel).toBeVisible();
+ const historyLink=panel.getByRole('link',{name:'Review offline flight reports',exact:true,includeHidden:true});await expect(historyLink).toHaveCount(1);await revealControl(historyLink);await historyLink.click();await expect(page.locator('#history')).toBeVisible();
 });

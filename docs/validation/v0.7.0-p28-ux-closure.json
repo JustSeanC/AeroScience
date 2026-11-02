@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "milestone": "P28-UX",
-  "status": "A/B/C/D implemented; preparation-history correction focused-passed; corrected-source integrated Full pending",
+  "status": "Final material corrections frozen after 25 broad browser/PostgreSQL passes; corrected Full pending",
   "previousAccepted": {
     "source": "021c4b8a092c179bef9307a28a16539a7d9fc5d2",
     "full": 41222464887
@@ -67,7 +67,9 @@
     "dPayloadObservationCalibrationReadinessBrowsers": 36,
     "dFrozenTimelineAssignmentAndSimplicityBrowsers": 9,
     "dPreparationHistoryCorrectionBrowsers": 12,
-    "dPreparationKnownAndDelayedHistoryBrowser": 1
+    "dPreparationKnownAndDelayedHistoryBrowser": 1,
+    "dFinalControlsAndStableDisclosuresBrowsers": 16,
+    "dFinalBroadUiAndPostgresBrowsers": 25
   },
   "preservedLocalFailures": [
     "Delayed native template: null onclick, initialized=true, zero bus requests before correction.",
@@ -75,7 +77,8 @@
     "Initial restarted PostgreSQL run: 27 passed/nine failed (one database-readiness failure, eight relocated selector/postflight-state failures); all nine corrected cases passed.",
     "Navigation focused attempts retained obsolete labels, header targets and DOM-order assumptions; corrected focused checks passed.",
     "D initial core 24 passed/four stale navigation expectations; expanded 53 passed/three advanced-disclosure navigation failures; corrected subset 22 passed/one remaining reload calibration navigation failure. Corrected calibration 3/3 passes, all original scientific assertions retained.",
-    "New lifecycle check reproduced old recovered results overriding an explicit next preparation. Initial harness did not await start acknowledgment; corrected harness reproduced the real heading/step defect. Exact real start receipt, unchanged 30/5-second deadlines and all original-history assertions retained."
+    "New lifecycle check reproduced old recovered results overriding an explicit next preparation. Initial harness did not await start acknowledgment; corrected harness reproduced the real heading/step defect. Exact real start receipt, unchanged 30/5-second deadlines and all original-history assertions retained.",
+    "Initial link correction focus: 15 passed/one failed because an accessibility-role locator excluded closed disclosure descendants. The corrected test explicitly finds the exact named link, opens its real summary, asserts visibility before/after live refresh and checks both destinations; 16/16 pass with all original metric/session assertions."
   ],
   "full": null,
   "installedMsfs": false,
@@ -153,6 +156,21 @@
       "passed": 160,
       "failed": 0,
       "skipped": 2
-    }
+    },
+    "knownBrowserFailures": [
+      {
+        "file": "mission-intelligence.spec.js",
+        "test": "unknown metrics do not render a fabricated percentage and Library/History links use existing routes",
+        "outcome": "Failed before cancellation (30-second deadline)",
+        "cause": "The instrument evidence body was replaced on refresh, removing its nested tool links; additionally the intentional disclosure requires a visible summary click.",
+        "correction": "Place links beside the replaceable body inside its persistent disclosure; verify visibility after a real refresh and both actual route destinations."
+      }
+    ]
+  },
+  "preservedEarlyCancelledFull": {
+    "id": 41393016235,
+    "source": "e69d8819db037e3a7ed652c7fc337885e1d3af5e",
+    "url": "https://github.com/JustSeanC/AeroScience/actions/runs/41393016235",
+    "conclusion": "Cancelled early when the first interrupted Full diagnostics revealed the additional genuine rendering failure; not acceptance"
   }
 }

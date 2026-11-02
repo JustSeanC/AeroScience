@@ -38,7 +38,7 @@ export async function scientificAccessSettings(parent, api) {
   const days = input("Search lookback days", p.lookbackDays); days.min = 1; days.max = 3650;
   const cloud = input("Maximum scene cloud cover (%) — local quality masks still apply", p.maximumCloudPercent); cloud.min = 0; cloud.max = 100;
   const date = input("Preferred latest observation date (blank = now)", p.preferredDateUtc?.slice(0, 10), "date");
-  const policy = node("select"); for (const [value, label] of [["clear-recent", "Clearest scenes within the date window"], ["newest", "Newest acceptable scene"]]) { const o = node("option", label); o.value = value; o.selected = value === p.selectionPolicy; policy.append(o); } policy.disabled = !canConfigure; advanced.append(node("label", "Source date / quality policy "), policy);
+  const policy = node("select"); policy.setAttribute("aria-label","Source date / quality policy"); for (const [value, label] of [["clear-recent", "Clearest scenes within the date window"], ["newest", "Newest acceptable scene"]]) { const o = node("option", label); o.value = value; o.selected = value === p.selectionPolicy; policy.append(o); } policy.disabled = !canConfigure; advanced.append(node("label", "Source date / quality policy "), policy);
   const result = node("p");
   const combinedAccess=button("Review Combined Online Access",()=>openOnlineAccess(api,{opener:combinedAccess,onAllowed:state=>{
     if(!section.isConnected)return;
