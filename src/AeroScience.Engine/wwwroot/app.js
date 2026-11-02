@@ -115,6 +115,7 @@ async function connect(code = null) {
   authorized = true;
   const build=await api("/api/build");
   if(build.profile==="validation"){
+    dashboardTitle=build.name;
     document.title=build.name;
     let banner=document.getElementById("validation-identity");
     if(!banner){banner=el("p","","notice");banner.id="validation-identity";banner.setAttribute("role","status");document.body.prepend(banner);}
@@ -354,6 +355,7 @@ $("pair-form").addEventListener("submit", (event) => {
   command(event.submitter, () => connect($("pair-code").value));
 });
 let navigationEpoch=0;
+let dashboardTitle="AeroScience";
 async function navigate() {
   const ownNavigation=++navigationEpoch;
   const allowed = ["control", "operations", "planner", "history", "instruments", "settings", "science-workspace", "library", "help", "downloads", "my-research", "library-storage"];
@@ -390,7 +392,7 @@ async function navigate() {
     settings: "SETTINGS",
     "science-workspace": "RESULTS & HISTORY",library:"SCIENTIFIC LIBRARY",help:"HELP & SUPPORT",downloads:"SCIENTIFIC LIBRARY","library-storage":"SCIENTIFIC LIBRARY",
   }[page];
-  document.title = `AeroScience · ${workspace?.querySelector('h1')?.textContent||({planner:'Flight Planner','my-research':'My Research',settings:'Settings',help:'Help & Support'}[page])||page}`;
+  document.title = `${dashboardTitle} · ${workspace?.querySelector('h1')?.textContent||({planner:'Flight Planner','my-research':'My Research',settings:'Settings',help:'Help & Support'}[page])||page}`;
   if (!authorized) return;
   if (page === "science-workspace") await scienceWorkspace($("science-workspace"),api);
   if (page === "help") await helpCenter($("help"),api);

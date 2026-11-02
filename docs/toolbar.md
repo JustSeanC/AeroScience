@@ -103,3 +103,12 @@ panel/icon/custom element and CommBus namespace before official compilation. It 
 the candidate source identity before any native request is executed, uses validation-only
 backup ownership and retains production files. Only one desktop version is supported
 at a time. Actual installed coexistence and MSFS rendering remain workbook A/H checks.
+
+
+## P28 UX — initialization and Validation identity
+
+The obsolete Compact VR control/state is removed; responsive Mission/Payload/Map/Research remain. Panel initialization waits (bounded to fifty checks at 100 ms) for the final imported-template marker before binding controls. Disconnect cancels outstanding initialization and reply subscriptions; reconnect starts a fresh bounded initialization. This corrects a reproduced delayed-template null-control failure, not a proven diagnosis of every installed MSFS failure.
+
+**Connection & Build Details** shows production/validation profile, retained exact Validation source and command/reply channels. Channel registration is not an engine connection. Only a matching native request/reply updates confirmation time; stale replies keep controls unavailable. Private staging uses `AeroScience.Validation.0_7_0.Command.v1` / `AeroScience.Validation.0_7_0.Reply.v1`, exact `validationSource`, a separate panel identity and a separate build constant. The actual handler rejects a different source before any start/map/control command. No alternate HTTP bridge, simulator control or protocol-size expansion is introduced.
+
+[Simple installed retest and isolated build prerequisite](v0.7.0-p28-ux-owner-checks.md). Issue 24 remains open for genuine installed-MSFS confirmation and, by owner decision, does not block this bounded UX pass.

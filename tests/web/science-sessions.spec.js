@@ -7,7 +7,7 @@ test('pilot arms, collects two science sessions and keeps one continuous flight'
  await post(request,'/api/instruments',[{instrumentId:'ambient-temperature',enabled:true,intervalMs:1000}]);await post(request,'/api/mission-selection',{planId:null});
  const flight=await post(request,'/api/missions',{name:'Synthetic browser multi-session flight',armScience:true});
  await page.goto('/#science');const panel=page.locator('#science-sessions');await expect(panel).toContainText('armed');
- await expect(page.locator('#instruments h1')).toBeFocused();
+ await expect(page.locator('#flight-workspace h1')).toBeFocused();
  const start=panel.getByRole('button',{name:'Start new science session',exact:true});await start.focus();await page.waitForTimeout(2100);await expect(start).toBeFocused();
  await page.waitForTimeout(1100);expect((await(await request.get(`/api/missions/${flight.id}/science`)).json()).observations).toHaveLength(0);
  await panel.getByRole('button',{name:'Start new science session',exact:true}).click();await expect(panel).toContainText('collecting');

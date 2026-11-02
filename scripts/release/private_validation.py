@@ -38,6 +38,10 @@ def stage_toolbar(stage, commit):
             for old,new in substitutions:
                 text = text.replace(old,new)
             if path.name=='AeroScience.js':
+                marker='const AEROSCIENCE_TOOLBAR_IDENTITY = { profile: "production", source: null };'
+                if marker not in text: raise ValueError('Toolbar build identity marker missing')
+                text=text.replace(marker, 'const AEROSCIENCE_TOOLBAR_IDENTITY = '+json.dumps(dict(profile='validation',source=commit))+';')
+                text=text.replace('AEROSCIENCE_TOOLBAR_IDENTITY','AEROSCIENCE_VALIDATION_V070_TOOLBAR_IDENTITY')
                 text=text.replace('Object.assign({protocol:1,requestId,op}', 'Object.assign({protocol:1,requestId,op,validationSource:"'+commit+'"}')
                 text=text.replace('const reply = JSON.parse(data);','const reply = JSON.parse(data); if(reply.error?.startsWith("Validation toolbar source mismatch")){this.pending.clear();this.setControls(false);this.renderIntelligence(false);this.status(reply.error);return;}')
             if path.name=='toolbar-compatibility.json':

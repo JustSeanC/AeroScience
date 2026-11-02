@@ -29,10 +29,25 @@ class PrivateValidationTests(unittest.TestCase):
             self.assertNotIn('"AeroScience.Command.v1"',js);self.assertNotIn('"AeroScience.Reply.v1"',js)
             self.assertIn('AeroScience.Validation.0_7_0.Command.v1',js)
             self.assertIn('validationSource:"'+'a'*40+'"',js)
+            self.assertIn('"profile": "validation", "source": "'+'a'*40+'"',js)
+            for value in (js,html,css):
+                self.assertNotIn('as-compact',value)
+                self.assertNotIn('Compact VR',value)
+            self.assertIn('Connection &amp; Build Details',html)
+            self.assertNotIn('AEROSCIENCE_TOOLBAR_IDENTITY',js)
+            self.assertIn('AEROSCIENCE_VALIDATION_V070_TOOLBAR_IDENTITY',js)
             for value in (js,html,css):self.assertIn('ingamepanel-aeroscience-validation-v070',value)
             self.assertEqual((ROOT/'assets/branding/orbital-arc-toolbar-white.svg').read_bytes(),(stage/'PackageSources/html_ui/icons/toolbar/ICON_AEROSCIENCE_VALIDATION_V070.svg').read_bytes())
             self.assertTrue((stage/'PackageDefinitions/aeroscience-validation-v0-7-0-toolbar.xml').is_file())
         self.assertEqual(original,private.hashes(ROOT/'msfs-toolbar'))
+
+    def test_staging_refuses_a_missing_build_identity_marker(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            stage=Path(tmp)/'stage';shutil.copytree(ROOT/'msfs-toolbar',stage)
+            js=stage/'PackageSources/html_ui/InGamePanels/AeroScience/AeroScience.js'
+            js.write_text(js.read_text().replace('const AEROSCIENCE_TOOLBAR_IDENTITY =','const WRONG_BUILD_IDENTITY ='))
+            with self.assertRaisesRegex(ValueError,'Toolbar build identity marker missing'):
+                private.stage_toolbar(stage,'a'*40)
 
     def test_production_gate_rejects_private_identity_before_packaging(self):
         with tempfile.TemporaryDirectory() as tmp:

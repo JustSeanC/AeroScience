@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "milestone": "P28-UX",
+  "status": "Implemented; corrected-source Fast and final integrated Full pending",
+  "previousAccepted": {
+    "source": "021c4b8a092c179bef9307a28a16539a7d9fc5d2",
+    "full": 41222464887
+  },
+  "startingSource": "333850364cf82b02e628dd49fe78f83e31df266b",
+  "checkpoints": {
+    "A": "da662c093b8dcce75b6f35762313df02c74e4934",
+    "B": "1a120f4b4cac3d5a662ed8572135e28cf1b33f08",
+    "C": null
+  },
+  "preservedFastFailures": [
+    {
+      "run": 41377855379,
+      "source": "da662c093b8dcce75b6f35762313df02c74e4934",
+      "dotnet": {
+        "passed": 1319,
+        "failed": 0,
+        "skipped": 145
+      },
+      "browser": {
+        "passed": 298,
+        "failed": 1,
+        "skipped": 57
+      },
+      "cause": "Former Start mission test label; corrected in B."
+    },
+    {
+      "run": 41380141506,
+      "source": "1a120f4b4cac3d5a662ed8572135e28cf1b33f08",
+      "dotnet": {
+        "passed": 91,
+        "failed": 0,
+        "skipped": 0
+      },
+      "browser": {
+        "passed": 295,
+        "failed": 6,
+        "skipped": 57
+      },
+      "cause": "Five retired postflight-start-form assertions and one retired h1 focus target; corrected in final material source."
+    }
+  ],
+  "focused": {
+    "overlappingSelectionsNotFullTotals": true,
+    "guidedDotnet": 38,
+    "guidedBrowsers": 10,
+    "starterReadinessBrowsers": 26,
+    "correctedNavigationLaunchBrowsers": 9,
+    "nativeDotnet": 17,
+    "validationIsolationDotnet": 10,
+    "nativeAndNavigationBrowsers": 26,
+    "generatedValidationBrowsers": 2,
+    "nativeLayoutContractCaptureBrowsers": 7,
+    "minimumExpandedValidationLayoutBrowsers": 5,
+    "scientificWorkflowBrowsers": 21,
+    "postgresCorrectionBrowsers": 9,
+    "privatePackagingHelpers": 7,
+    "nativeBootstrapHelpers": 1
+  },
+  "preservedLocalFailures": [
+    "Delayed native template: null onclick, initialized=true, zero bus requests before correction.",
+    "Stopped local PostgreSQL: four Operations passed/36 connection refusals; no application acceptance claimed.",
+    "Initial restarted PostgreSQL run: 27 passed/nine failed (one database-readiness failure, eight relocated selector/postflight-state failures); all nine corrected cases passed.",
+    "Navigation focused attempts retained obsolete labels, header targets and DOM-order assumptions; corrected focused checks passed."
+  ],
+  "full": null,
+  "installedMsfs": false,
+  "realDiscord": false,
+  "realRailway": false,
+  "newPrivateWindowsSdkPackageBuilt": false,
+  "ownerInstalledCopyModified": false,
+  "ownerScienceModified": false,
+  "publicRelease": false,
+  "p29Started": false,
+  "issue24": "Open for installed-MSFS retest; owner explicitly permits this UX pass to proceed.",
+  "readmeSha256": "f32cff962da446a6b10e411124155ec281a6cfc06664ca01dfc5754b44d13049",
+  "remainingReleaseGates": [
+    "Authorized immutable Railway image/template distribution and native ownership prompt/domain behavior.",
+    "Actual Railway HTTPS ingress/private TLS/volume/replacement negatives.",
+    "Independent external recovery enrollment/account-loss and native rollout/failed-update operations.",
+    "Observed provider cost and five-stage novice deployment.",
+    "New source-bound private Windows/genuine SDK package and installed-MSFS toolbar/flight/science acceptance.",
+    "Genuine Discord/external source/NASA-original/device acceptance where applicable."
+  ]
+}

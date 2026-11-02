@@ -1,31 +1,46 @@
 /* Simulator-native UI. SDK globals are provided by MSFS, not a normal web browser.
  * See docs/toolbar.md for SDK sources, provenance, and outstanding simulator checks. */
+const AEROSCIENCE_TOOLBAR_IDENTITY = { profile: "production", source: null };
 class IngamePanelAeroScience extends TemplateElement {
   connectedCallback() {
     super.connectedCallback();
+    this.initializationAttempts = 0;
+    this.onDocumentReady = () => this.initialize();
     if (document.readyState === "loading")
-      document.addEventListener("DOMContentLoaded", () => this.initialize(), {
+      document.addEventListener("DOMContentLoaded", this.onDocumentReady, {
         once: true,
       });
     else this.initialize();
   }
   initialize() {
     if (this.initialized || !this.isConnected) return;
+    clearTimeout(this.initializationTimer);
+    // TemplateElement may connect while the host document is already ready but
+    // its imported panel children are still being parsed. Do not poison startup.
+    if (!this.querySelector('[data-aeroscience-template-ready]')) {
+      this.setAttribute('data-initialization-state', 'waiting-for-template');
+      if ((this.initializationAttempts = (this.initializationAttempts || 0) + 1) < 50)
+        this.initializationTimer = setTimeout(() => this.initialize(), 100);
+      else {
+        this.setAttribute('data-initialization-state', 'template-unavailable');
+        const status = this.querySelector('#as-status');
+        if (status) status.textContent = 'Toolbar template did not finish loading. Close and reopen this panel; report its title if this continues.';
+      }
+      return;
+    }
     this.initialized = true;
+    this.setAttribute('data-initialization-state', 'ready');
     this.pending = new Map();
     this.listener = null;
     this.state = null;
     this.lastReply = 0;
     this.serial=0;this.appliedSerial=0;this.seenEngines=new Set();this.intelligence=null;this.capabilities=[];this.mutationPending=false;
     this.byId = (id) => this.querySelector("#" + id);
+    this.byId('as-build-identity').textContent = AEROSCIENCE_TOOLBAR_IDENTITY.profile + ' toolbar · source ' + (AEROSCIENCE_TOOLBAR_IDENTITY.source || 'not supplied by this package') + ' · protocol 1';
+    this.byId('as-link-detail').textContent = 'Commands: AeroScience.Command.v1 · Replies: AeroScience.Reply.v1 · No matching engine reply yet. Channel registration alone is not an engine connection.';
     this.researchState=null;this.researchOffset=0;this.researchSerial=0;
     this.byId('as-research-previous').onclick=()=>{this.researchOffset=Math.max(0,this.researchOffset-(this.researchState?.pageSize||4));this.requestResearch();};
     this.byId('as-research-next').onclick=()=>{if(this.researchState?.nextOffset!=null){this.researchOffset=this.researchState.nextOffset;this.requestResearch();}};
-    this.byId('as-compact').onclick=()=>{
-      const compact=this.byId('as-root').classList.toggle('as-compact');
-      this.byId('as-compact').setAttribute('aria-pressed',String(compact));this.byId('as-compact').textContent='Compact VR: '+(compact?'On':'Off');
-      if(this.mapVisible&&this.mapRenderer)this.mapRenderer.resize();
-    };
     for(const button of this.querySelectorAll('[data-science-action]'))button.onclick=()=>{
       const i=this.intelligence;if(button.disabled||!i||!this.capabilities.includes('session-bound-controls-1'))return;
       const requestId=this.requestId();
@@ -405,6 +420,7 @@ class IngamePanelAeroScience extends TemplateElement {
       }
     if (Date.now() - this.lastReply > 6000) {
       this.setControls(false);
+      this.byId('as-link-detail').textContent = this.lastReply ? 'Last matching engine reply: ' + new Date(this.lastReply).toISOString() + '. Controls are unavailable until fresh synchronized state arrives.' : 'No matching engine reply. Check that the dashboard and toolbar have the same profile and source shown in Connection & Build Details.';
       this.status(
         "Windows engine unavailable. Launch AeroScience and check the SimConnect runtime.",
       );
@@ -493,6 +509,7 @@ class IngamePanelAeroScience extends TemplateElement {
       if(reply.intelligence&&this.intelligence&&reply.engineInstance===this.engineInstance&&reply.intelligence.missionId===this.intelligence.missionId&&reply.intelligence.revision<this.intelligence.revision)return;
       this.appliedSerial=pendingRequest.serial;
       this.lastReply = Date.now();
+      this.byId('as-link-detail').textContent = 'Matching engine reply received ' + new Date(this.lastReply).toISOString() + '. Aircraft telemetry and scientific collection have their own status below.';
       const engineChanged=this.state&&(this.state.version!==reply.state.version||reply.engineInstance&&this.engineInstance!==reply.engineInstance);
       if(reply.engineInstance){this.engineInstance=reply.engineInstance;this.seenEngines.add(reply.engineInstance);}
       this.capabilities=Array.isArray(reply.capabilities)?reply.capabilities:[];
@@ -827,6 +844,9 @@ class IngamePanelAeroScience extends TemplateElement {
     }
   }
   disconnectedCallback() {
+    clearTimeout(this.initializationTimer);
+    document.removeEventListener("DOMContentLoaded", this.onDocumentReady);
+    this.pending?.clear();
     if (this.mapRenderer) this.mapRenderer.destroy();
     clearInterval(this.timer);
     clearInterval(this.loadTimer);
