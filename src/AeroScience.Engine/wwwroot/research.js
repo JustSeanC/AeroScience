@@ -1,6 +1,6 @@
 import {renderResearchContext} from './scientific-context.js';
 import {reviewCollectedScienceDeletion} from "./collected-science-deletion.js";
-import { newIdentity } from "./workstation-ui.js";
+import { newIdentity,informationDetails } from "./workstation-ui.js";
 import {researchCardSelection,researchFlightControls,researchFlightTimeline} from './personal-research-flight.js';
 import {flightRegimeFields,atmosphericFields,researchFields,researchDefinition,isAtmosphericResearch,isScienceResearch,researchCardTargets} from './personal-research-start.js';
 import { missionPerformance } from "./mission-performance.js";
@@ -130,8 +130,8 @@ function configs(parent, selected = []) {
     enabled.dataset.instrument = d.id;
     const label = text("label", d.name);
     label.prepend(enabled);
-    const interval = input(
-      row,
+    const settings=informationDetails(row,"Instrument Settings"),interval = input(
+      settings,
       "Interval (seconds)",
       (selected.find((c) => c.instrumentId === d.id)?.intervalMs ?? 1000) /
         1000,
@@ -141,11 +141,11 @@ function configs(parent, selected = []) {
     interval.max = 60;
     interval.step = 1;
     interval.dataset.interval = d.id;
-    const cadenceHelp=text("small","Saved scientific acquisition interval: 1–60 seconds. Controls how often AeroScience attempts a recorded observation; separate from telemetry, physical line/pulse rates and spatial source resolution. No valid data is fabricated when coverage or quality is unavailable.");row.append(cadenceHelp);
+    const cadenceHelp=text("small","Saved scientific acquisition interval: 1–60 seconds. Controls how often AeroScience attempts a recorded observation; separate from telemetry, physical line/pulse rates and spatial source resolution. No valid data is fabricated when coverage or quality is unavailable.");settings.append(cadenceHelp);
     row.prepend(label);
     const config=selected.find(c=>c.instrumentId===d.id)??{instrumentId:d.id};
-    row.readPayload=payloadSettings(row,config,payloadCatalog,ctx.api);
-    row.readCalibration=calibrationSettings(row,config,calibrationCatalog,ctx.api);
+    row.readPayload=payloadSettings(settings,config,payloadCatalog,ctx.api);
+    row.readCalibration=calibrationSettings(settings,config,calibrationCatalog,ctx.api);
     row.dataset.payloadInstrument=d.id;
     parent.append(row);
   }
@@ -412,17 +412,11 @@ function editPlan(plan) {
     "textarea",
   );
   notes.maxLength = 4000;
-  form.append(
-    text(
-      "p",
-      "Realistic Mode supports documented sensor geometry, calibration provenance and operating assessments with any compatible aircraft. Unknown operating limits remain unknown; no physical hardware or sensor failures are simulated.",
-      "footnote",
-    ),
-  );
+  informationDetails(form,"Science modes explained",text("p","Realistic Mode supports documented sensor geometry, calibration provenance and operating assessments with any compatible aircraft. Unknown operating limits remain unknown; no physical hardware or sensor failures are simulated."));
   const advanced=text("details");advanced.append(text("summary","Advanced mission details & export settings"));
   for(const field of [description,aircraft,departure,destination,flightRules,cruise,low,high,duration,notes])advanced.append(field.closest("label"));
   form.append(advanced);
-  const configuration = text("div");
+  const configuration = text("div"),selectedPayload=text("p");
   form.append(configuration);
   configs(configuration, plan?.instruments || []);
   const recommended=text("section",undefined,"panel recommended-payload");recommended.setAttribute("aria-label","Recommended instrument payload");
@@ -501,6 +495,7 @@ function editPlan(plan) {
       const caveats=text("details",undefined,"recommended-explanation");caveats.append(text("summary","How recommendations work & scientific limitations"),text("p","Primary instruments match the template's research objective. Apply replaces the draft payload after confirmation; Merge only enables missing primary instruments and keeps current settings. Keep retains your current payload. Add enables one optional instrument without changing its settings."),text("p","Recommendations do not install hardware or confirm source readiness. Historical scientific datasets remain external observations. Save and reassess your actual plan; no download, science session or flight starts from this panel."));recommendations.append(caveats);
       recommendations.append(text("p",undefined,"payload-additional"));
     }
+    selectedPayload.textContent="Enabled instruments: "+(current.filter(c=>c.enabled).map(c=>definitions.find(d=>d.id===c.instrumentId)?.name||c.instrumentId).join(", ")||"None selected");
     for(const update of recommendationCards)update(current);
     const extra=current.filter(c=>c.enabled&&!recommendedIds.has(c.instrumentId)),additional=recommendations.querySelector(".payload-additional");
     additional.textContent=extra.length?"Additional/custom instruments enabled: "+extra.map(c=>definitions.find(d=>d.id===c.instrumentId)?.name||c.instrumentId).join(", "):"";
@@ -790,9 +785,9 @@ function editPlan(plan) {
     },
   });
   const advancedCoordinates=text("details");advancedCoordinates.append(text("summary","Advanced: enter survey vertices manually"),button("Manual survey coordinates",()=>areaEditor()));locationSection.append(advancedCoordinates);
-  const scienceSection=text("section");scienceSection.append(text("h3","4. Scientific instruments and data readiness"),configuration,presetSection);form.append(scienceSection);scientificReadiness(scienceSection,ctx.api).catch(()=>{});
-  const waitLabel=text('label','Wait for me to start science collection'),waitForScience=document.createElement('input');waitForScience.type='checkbox';waitForScience.checked=plan?.startScienceArmed===true;waitLabel.prepend(waitForScience);scienceSection.append(waitLabel,text('p','When selected, Start mission records the flight but leaves science armed. Use Start new science session when ready. Card activation remains separate.'));
-  const atmosphericSection=text('section');atmosphericSection.append(text('h3','Atmospheric research settings'));
+  const scienceSection=text("section");scienceSection.append(text("h3","4. Scientific instruments and data readiness"),selectedPayload);informationDetails(scienceSection,"Choose instruments & acquisition settings",configuration);scienceSection.append(presetSection);form.append(scienceSection);scientificReadiness(scienceSection,ctx.api).catch(()=>{});
+  const waitLabel=text('label','Wait for me to start science collection'),waitForScience=document.createElement('input');waitForScience.type='checkbox';waitForScience.checked=plan?.startScienceArmed===true;waitLabel.prepend(waitForScience);scienceSection.append(waitLabel);informationDetails(scienceSection,'Recording and science session behavior',text('p','When selected, Start Recording leaves science armed. Use Start new science session when ready. Card activation remains separate.'));
+  const atmosphericSection=text('details');atmosphericSection.append(text('summary','Atmospheric research settings'));
   const profileDirection=select(atmosphericSection,'Profile direction',[['both','Ascent and descent'],['ascent','Ascent'],['descent','Descent']],plan?.atmosphericSettings?.direction??'both');
   const profileInterval=input(atmosphericSection,'Altitude interval', (plan?.atmosphericSettings?.altitudeIntervalMetres??100)/.3048,'number');planningField(profileInterval,'altitude',(plan?.atmosphericSettings?.altitudeIntervalMetres??100)/.3048,'Altitude interval','interval');
   const profileGap=input(atmosphericSection,'Maximum contiguous gap (seconds)',plan?.atmosphericSettings?.maximumGapSeconds??5,'number');
@@ -880,12 +875,8 @@ function editPlan(plan) {
 async function instruments() {
   await initializeUnits(ctx.api);
   const p = $("instrument-content");
-  p.replaceChildren(
-    text(
-      "p",
-      "Atmospheric instruments use actual MSFS values at the user aircraft; remote instruments sample real automatically prepared or advanced imported geographic observations with their original source dates. Acquisition requires a recording mission. Flight telemetry is requested at 1 Hz; no independent calibrated or live-camera measurements are claimed.",
-    ),
-  );
+  p.replaceChildren();
+  informationDetails(p,'Collection methods & source types',text('p','Atmospheric instruments use simulator-reported values at the aircraft. Remote instruments sample compatible retained historical sources with their original observation dates. Acquisition requires a recording mission. Telemetry arrives at 1 Hz; this does not establish independent hardware calibration or live-camera measurements.'));
   const sourceLabel = text(
     "p",
     state?.connection?.source === "simulated"
@@ -896,7 +887,8 @@ async function instruments() {
   p.append(sourceLabel);
   const operating=text('section');operating.id='operating-reports';p.append(operating);await operatingAssessments(operating,ctx.api);
   await scientificReadiness(p, ctx.api);
-  await hyperspectralCard(p,ctx.api,state?.telemetry);
+  const hyperspectral=informationDetails(p,'Hyperspectral source preparation');
+  await hyperspectralCard(hyperspectral,ctx.api,state?.telemetry);
   await unitControls(p, ctx.api, () => instruments());
   const collection = text("div");
   collection.id = "collection-status";
@@ -981,7 +973,7 @@ async function instruments() {
       ),
     );
   await presetRows();
-  const configuration = text("div");
+  const configuration = text("div"),selectedPayload=text("p");
   configuration.id = "live-instrument-config";
   p.append(configuration);
   configs(configuration, await ctx.api('/api/instruments/configuration'));
@@ -1192,12 +1184,6 @@ export function renderResearch(next) {
       text(
         "strong",
         `Source availability: ${next.research?.collectionStatus || "stopped"}`,
-      ),
-    );
-    collection.append(
-      text(
-        "p",
-        "Pausing science keeps flight telemetry recording and preserves the current datasets and configuration.",
       ),
     );
   }

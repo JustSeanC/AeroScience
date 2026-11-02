@@ -1,3 +1,4 @@
+import {revealControl} from './helpers/disclosures.mjs';
 import { test, expect } from '@playwright/test';
 
 test.afterEach(async ({ request }) => {
@@ -21,7 +22,7 @@ test('two displays share recording, history and safe mission detail', async ({ p
   const name = '<img src=x onerror=alert(1)> · Browser survey';
   await page.getByLabel('MISSION NAME', { exact: true }).fill(name);
   await expect(page.getByLabel('SCIENCE OPERATING MODE')).toHaveValue('universal');
-  await page.getByLabel('SCIENCE OPERATING MODE').selectOption('realistic');
+  await revealControl(page.getByLabel('SCIENCE OPERATING MODE'));await page.getByLabel('SCIENCE OPERATING MODE').selectOption('realistic');
   await expect(page.locator('#mode-help')).toContainText('Evidence-based operating advisories');
   await page.getByRole('button', { name: 'Start Recording', exact: true }).click();
   await expect(page.locator('#active-name')).toHaveText(name);

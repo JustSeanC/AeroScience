@@ -1,3 +1,4 @@
+import {revealControl} from './helpers/disclosures.mjs';
 import {test,expect} from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import {mountToolbar} from './helpers/toolbar.mjs';
@@ -9,7 +10,7 @@ test('planned personal cards activate, record independent attempts, switch and r
  await page.goto('/#planner');await expect(page.locator('#plan-form')).toBeVisible();const [a,b,c]=await cards(request);
  await page.reload();await page.getByLabel('Plan name',{exact:true}).fill('P02 continuous flight');
  const selection=page.locator('#plan-research-cards');for(const card of [a,b,c])await selection.locator('.plan-row').filter({hasText:card.name}).getByRole('button',{name:'Add Card',exact:true}).click();
- await expect(selection).toContainText('3 cards selected');await page.locator('#plan-form [data-instrument="ambient-temperature"]').check();await page.getByRole('button',{name:'Save mission plan',exact:true}).click();
+ await expect(selection).toContainText('3 cards selected');await revealControl(page.locator('#plan-form [data-instrument="ambient-temperature"]'));await page.locator('#plan-form [data-instrument="ambient-temperature"]').check();await page.getByRole('button',{name:'Save mission plan',exact:true}).click();
  const selecting=page.waitForResponse(r=>new URL(r.url()).pathname==='/api/mission-selection'&&r.request().method()==='POST');await page.locator('.plan-row').filter({hasText:'P02 continuous flight'}).getByRole('button',{name:'Select for Flight',exact:true}).click();
  // A click also precedes the selection POST itself; bind the acknowledged selection before checking the refreshed launch form.
  const chosen=await selecting;expect(chosen.ok(),await chosen.text()).toBeTruthy();const selected=(await chosen.json()).planId;expect(selected).toBeTruthy();await expect(page.getByRole('combobox',{name:'Choose Mission',exact:true})).toHaveValue(selected);await expect(page.locator('#mission-name')).toHaveValue('P02 continuous flight');

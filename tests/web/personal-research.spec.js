@@ -16,7 +16,7 @@ test('personal card uses the real planner, recorder, immutable evidence and offl
   await page.goto('/#control');await expect(page.locator('#altitude')).not.toHaveText('—');
   const state=await(await request.get('/api/state')).json();const frame=state.telemetry;
   await page.getByRole('link',{name:'My Research',exact:true}).click();
-  await expect(page.getByRole('heading',{name:'Personal Research',exact:true})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'My Research',exact:true})).toBeVisible();await page.getByRole('button',{name:'Create Template',exact:true}).click();
   const name='Browser flight regime '+Date.now();
   await page.getByLabel('Test card name',{exact:true}).fill(name);
   await page.getByLabel('Indicated airspeed target (knots)',{exact:true}).fill(String(frame.indicatedAirspeedKnots));
@@ -72,7 +72,7 @@ test('personal card uses the real planner, recorder, immutable evidence and offl
 
 test('card revisions preserve old flights and the personal editor remains accessible at narrow widths',async({page,request})=>{
   const card=await post(request,'/api/research/cards',{name:'Accessible research '+Date.now(),flightRegime:{airspeedKnots:120,airspeedToleranceKnots:5,altitudeMslFeet:3000,altitudeToleranceFeet:100,holdSeconds:30}});
-  await page.setViewportSize({width:375,height:812});await page.goto('/#my-research');
+  await page.setViewportSize({width:375,height:812});await page.goto('/#my-research');await page.getByRole('button',{name:'Create Template',exact:true}).click();
   const row=page.locator('#my-research article').filter({has:page.getByRole('heading',{name:card.name,exact:true})});
   await row.getByRole('button',{name:'Edit Card',exact:true}).click();await expect(page.getByLabel('Test card name',{exact:true})).toBeFocused();
   await page.getByLabel('Required continuous hold (seconds)',{exact:true}).fill('45');
@@ -82,5 +82,5 @@ test('card revisions preserve old flights and the personal editor remains access
   await expect(page.locator('#my-research')).toBeVisible();
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy();
   const axe=await new AxeBuilder({page}).include('#my-research').analyze();expect(axe.violations).toEqual([]);
-  await page.getByLabel('Test card name',{exact:true}).focus();await page.keyboard.press('Tab');await expect(page.getByLabel('Indicated airspeed target (knots)',{exact:true})).toBeFocused();
+  await page.getByRole('button',{name:'Create Template',exact:true}).click();await page.getByLabel('Test card name',{exact:true}).focus();await page.keyboard.press('Tab');await expect(page.getByLabel('Indicated airspeed target (knots)',{exact:true})).toBeFocused();
 });

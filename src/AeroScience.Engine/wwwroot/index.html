@@ -115,11 +115,9 @@
                 </div>
                 <div id="mission-idle">
                   <h3>Ready for your next mission.</h3>
-                  <p>
-                    Start recording at any time. Your mission continues if this
-                    panel is closed.
-                  </p>
+
                   <form id="start-form">
+                    <details id="recording-options" class="science-information" data-science-level="information"><summary>Recording Options</summary>
                     <div class="mode-field">
                       <label for="mission-mode">SCIENCE OPERATING MODE</label
                       ><select id="mission-mode">
@@ -135,6 +133,7 @@
                       </p>
                     </div>
                     <label><input id="arm-science" type="checkbox" /> Arm science without starting collection (flight recording starts normally)</label>
+                    </details>
                     <label for="mission-name">MISSION NAME</label>
                     <div class="input-row">
                       <input
@@ -368,11 +367,10 @@
               <div>
                 <p class="eyebrow">SCIENCE PAYLOAD</p>
                 <h2>Instrument Setup</h2>
-                <p class="subtitle">Configure payloads and presets, check live readiness, and Start/Pause/Resume/End science sessions. Review recorded observations in Science Results &amp; Analysis.</p>
               </div>
               <span class="badge">SIMULATOR &amp; EXTERNAL DATA</span>
             </div>
-          <p><a href="#workspace/map">Science Results &amp; Analysis</a> · <a href="#history">Mission History</a> · <a href="#library">External Data Manager</a></p></section>
+          <details><summary>Related research tools</summary><p><a href="#workspace/map">Science Results &amp; Analysis</a> · <a href="#history">Mission History</a> · <a href="#library">External Data Manager</a></p></details></section>
           <section id="science-workspace" class="view" hidden></section>
           <section id="library" class="view" hidden></section>
           <section id="downloads" class="view" hidden></section>

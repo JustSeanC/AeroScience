@@ -1565,3 +1565,19 @@ dialog.managed-popup.tfr-review{width:min(92rem,calc(100vw - 1.5rem));max-width:
 .science-journey{border-bottom:1px solid var(--line,#43576a);padding-bottom:1rem;margin-bottom:1rem;overflow-wrap:anywhere}.science-journey ol{display:flex;flex-wrap:wrap;gap:.5rem 1.5rem;padding-left:1.4rem}.science-journey li{padding:.35rem}.science-journey li[aria-current=step]{font-weight:700;color:var(--accent,#6ac9ee);border-bottom:3px solid currentColor}.science-journey p{line-height:1.55}.science-journey [data-retained-science]{font-size:1.1rem;font-weight:650}.science-journey .action-row a,.science-journey button{min-height:44px}.mission-panel>.mission-intelligence{margin-top:1rem}.science-journey .action-row{flex-wrap:wrap}
 
 .task-workspace{min-width:0}.task-workspace>.workspace-subnav{gap:.5rem;margin:.5rem 0 1rem}.task-workspace>.workspace-subnav>a{min-height:44px}.task-workspace>.workspace-subnav>[aria-current=page]{border:2px solid var(--accent,#6ac9ee)}.task-workspace>.view>.page-heading h1,.task-workspace>.view>.page-heading h2{font-size:1.35rem}.task-workspace .view{min-width:0}
+
+/* P28-D: importance changes hierarchy, never the size or meaning of evidence. */
+.science-notice{line-height:1.5;margin:.6rem 0;overflow-wrap:anywhere}
+.science-notice[data-science-level="critical"]{border-left:4px solid #ef8f90;background:#342027;color:#ffe5e6;padding:.75rem 1rem}
+.science-notice[data-science-level="important"]{color:var(--text,#e6eef3);padding:.25rem 0}
+.science-information{margin:.65rem 0;min-width:0;overflow-wrap:anywhere}
+.science-information>summary{min-height:44px;cursor:pointer;padding:.5rem 0}
+.science-information[open]>:not(summary){margin-inline:.5rem}
+.science-journey .action-row{margin:.6rem 0}.science-journey ol{margin:.5rem 0}
+.scientific-category>strong,.scientific-source-label{display:inline-block}
+#research-starters{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,20rem),1fr));gap:1rem}
+#research-starters>h2,#research-starters>p{grid-column:1/-1}
+#research-starters>article{min-width:0;display:flex;flex-direction:column;gap:.5rem;margin:0}
+#research-starters>article>.action-row{margin-top:auto}
+#research-starters>article .scientific-research-context{border:0;padding:0;background:transparent}
+#research-starters>article p{margin:.4rem 0}

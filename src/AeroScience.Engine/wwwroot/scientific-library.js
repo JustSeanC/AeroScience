@@ -12,11 +12,11 @@ export async function scientificLibrary(parent,api){
  dispose();let stopped=false,timer,epoch=0;const maps=[],popups=[],selected=new Set();
  dispose=()=>{stopped=true;clearTimeout(timer);popups.splice(0).forEach(close=>close());maps.splice(0).forEach(map=>map.destroy());};
  parent.replaceChildren();if(location.hash.startsWith('#library/download')){const close=await libraryDownload(parent,api,()=>stopped);if(stopped)close();else dispose=()=>{stopped=true;close();};return;}
- const heading=el('div',undefined,'page-heading');heading.append(el('p','REUSABLE HISTORICAL SOURCES','eyebrow'),el('h2','Data Sources'),el('p','Historical scientific datasets can be reused during future missions. Flight recordings remain separate.'));parent.append(heading);link(heading,'Find & Download Data','#library/download');
+ const heading=el('div',undefined,'page-heading');heading.append(el('p','REUSABLE HISTORICAL SOURCES','eyebrow'),el('h2','Data Sources'),el('p','Retained historical datasets'));parent.append(heading);link(heading,'Find & Download Data','#library/download');
  await libraryLocation(parent,api,{stopped:()=>stopped});if(stopped)return;
- parent.append(el('h2','Manage Downloaded Data'));const deleteTools=el('div',undefined,'action-row');parent.append(deleteTools);
+ const management=disclosure(parent,'Manage Downloaded Data'),deleteTools=el('div',undefined,'action-row');management.append(deleteTools);
  async function changed(){window.dispatchEvent(new CustomEvent('aeroscience-sources-changed'));if(!stopped&&location.hash.startsWith('#library')&&parent.isConnected)await scientificLibrary(parent,api);}
- let canDelete=false;const selectionStatus=status(deleteTools,'0 source regions selected across pages.');const deleteSelected=button(deleteTools,'Delete Selected External Data',()=>reviewSourceDeletion(api,{sourceIds:[...selected]},changed),'danger');deleteSelected.disabled=true;function selectionChanged(){selectionStatus.textContent=`${selected.size} source regions selected across pages. The deletion preview reviews these exact identities.`;deleteSelected.disabled=!canDelete||selected.size===0;}button(deleteTools,'Clear source selection',()=>{selected.clear();for(const input of parent.querySelectorAll('input[data-source]'))input.checked=false;selectionChanged();},'secondary');button(deleteTools,'Delete All Downloaded External Data',()=>reviewSourceDeletion(api,{all:true},changed),'danger');
+ let canDelete=false;const selectionStatus=status(deleteTools,'0 source regions selected across pages.');const deleteSelected=button(deleteTools,'Delete Selected External Data',()=>reviewSourceDeletion(api,{sourceIds:[...selected]},changed),'danger');deleteSelected.disabled=true;function selectionChanged(){if(selected.size)management.open=true;selectionStatus.textContent=`${selected.size} source regions selected across pages. The deletion preview reviews these exact identities.`;deleteSelected.disabled=!canDelete||selected.size===0;}button(deleteTools,'Clear source selection',()=>{selected.clear();for(const input of parent.querySelectorAll('input[data-source]'))input.checked=false;selectionChanged();},'secondary');button(deleteTools,'Delete All Downloaded External Data',()=>reviewSourceDeletion(api,{all:true},changed),'danger');
  const controls=el('div',undefined,'workspace-controls'),label=el('label','Search collections'),search=el('input');search.type='search';search.placeholder='Provider, product, scene or datum';search.setAttribute('aria-label','Search External Data Manager');label.append(search);controls.append(label);
  const kind=select(controls,'Scientific category',[['','All scientific categories'],...['terrain','thermal','multispectral','hyperspectral'].map(value=>[value,readableName(value)])],'');
  const provider=select(controls,'Library provider',[['','All providers']],'');const sort=select(controls,'Sort collections',[['name','Name (A–Z)'],['date','Newest source observation'],['size','Largest storage usage']],'name');parent.append(controls);
@@ -28,13 +28,13 @@ export async function scientificLibrary(parent,api){
   const q=new URLSearchParams({sort:sort.value});if(kind.value)q.set('kind',kind.value);if(provider.value)q.set('provider',provider.value);if(search.value.trim())q.set('search',search.value.trim());if(cursor)q.set('after',cursor);
   const page=await api('/api/science/source-collections?'+q);if(stopped||current!==epoch)return;
   maps.splice(0).forEach(map=>map.destroy());list.replaceChildren();navigation.replaceChildren();
-  progress.textContent=`${page.total} matching collections in the complete Library. Showing ${page.items.length} collections on this page. Region totals below come from the full inventory; geographic extents are source footprints, not QA-valid pixels or aircraft observations.`;
+  progress.textContent=`${page.total} matching collections in the complete Library. Showing ${page.items.length} collections on this page.`;
   for(const group of page.items){
    if(![...provider.options].some(option=>option.value===group.provider)){const option=el('option',group.provider);option.value=group.provider;provider.append(option);}
    const box=el('article',undefined,'panel library-collection');box.append(el('h2',group.product),el('p',`${group.provider} · ${readableName(group.kind)} · ${group.regions} retained regions · ${bytes(group.bytes)} · ${group.latestObservation?'Newest source observation '+local(group.latestObservation):'Original observation dates unknown / composite'}`));if(group.matchingRegions<group.regions)box.append(el('p',`${group.matchingRegions} regions match this search; deleting the collection reviews all ${group.regions} regions.`));list.append(box);
-   const actions=el('div',undefined,'action-row');box.append(actions);
+   const actions=el('div',undefined,'action-row');
    button(actions,'Delete This Collection',()=>reviewSourceDeletion(api,{collectionId:group.id},changed),'danger').disabled=!access.canConfigure;
-   const regions=disclosure(box,'Individual Regions & Provenance'),rows=el('div');regions.append(rows);let loaded=false,regionEpoch=0;
+   const regions=disclosure(box,'Individual Regions & Provenance'),rows=el('div');regions.append(actions,rows);let loaded=false,regionEpoch=0;
    async function regionPage(after=0,through=null){
     const serial=++regionEpoch;rows.replaceChildren(el('p','Reading a bounded source page…'));
     const params=new URLSearchParams({collection:group.id,limit:20,after});if(through!=null)params.set('through',through);
@@ -66,6 +66,5 @@ export async function scientificLibrary(parent,api){
  function refresh(){render().catch(error=>{if(!stopped)progress.textContent=error.message;});}
  search.oninput=()=>{clearTimeout(timer);timer=setTimeout(refresh,200);};kind.onchange=provider.onchange=sort.onchange=refresh;
  await render();
- button(heading,'Import NASA EMIT Originals',()=>openEmitImport(api));
- const advanced=disclosure(parent,'Advanced — import and source configuration');link(heading,'Import Hyperspectral Dataset','#library/download?science=hyperspectral');button(advanced,'Import Files Already on My Computer',()=>openHyperspectralImport(api,'hyperspectral'));link(advanced,'Configure providers, consent and advanced import','#settings/science');
+ const advanced=disclosure(parent,'Advanced — import and source configuration');button(advanced,'Import NASA EMIT Originals',()=>openEmitImport(api));link(advanced,'Import Hyperspectral Dataset','#library/download?science=hyperspectral');button(advanced,'Import Files Already on My Computer',()=>openHyperspectralImport(api,'hyperspectral'));link(advanced,'Configure providers, consent and advanced import','#settings/science');
 }

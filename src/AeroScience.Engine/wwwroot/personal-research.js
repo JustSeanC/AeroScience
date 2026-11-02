@@ -8,7 +8,7 @@ import {sensorSummary,showSensorResult} from './experimental-sensor.js';
 import {observationSummary,showObservationResult} from './observation-research.js';
 import {surveySummary,showSurveyResult} from './survey-research.js';
 import {atmosphericSummary,showAtmosphericResult} from './atmospheric-research.js';
-import {newIdentity,node} from './workstation-ui.js';
+import {newIdentity,node,informationDetails} from './workstation-ui.js';
 import {researchExperimentReview} from './personal-research-review.js';
 import {flightRegimeFields,atmosphericFields,researchFields,researchDefinition,isAtmosphericResearch,isScienceResearch,researchCardTargets,researchStarterChoices,researchEntryActions} from './personal-research-start.js';
 let epoch = 0, cardOffset = 0, resultOffset = 0;
@@ -18,10 +18,9 @@ export function disposePersonalResearch() { epoch++; }
 export async function personalResearch(root, api) {
   const run = ++epoch;
   const active = () => run === epoch && !root.hidden;
-  root.replaceChildren(node('h1', 'My Research'), node('h2', 'Personal Research'),
-    node('p', 'Your experiments stay on this computer. No organization, account or internet connection is needed.'));
+  root.replaceChildren(node('h1', 'My Research'));informationDetails(root,'About Personal Research',node('p','Your experiments stay on this computer. No organization, account or internet connection is needed.'));
   const status = node('p', 'Loading personal test cards…'); status.setAttribute('role', 'status'); root.append(status);
-  researchOrganizations(root,api,active);submissionHistory(root,api,active);const params=new URLSearchParams(location.hash.split('?')[1]||'');const submission=params.get('submissionDraft');if(submission&&!params.has('connectOrganization')){params.delete('submissionDraft');window.history.replaceState(null,'',location.pathname+location.search+'#my-research'+(params.size?'?'+params:''));queueMicrotask(()=>{if(active())openSubmissionBuilder(api,{draftId:submission});});}
+  const collaboration=node('section');root.append(collaboration);researchOrganizations(collaboration,api,active);submissionHistory(collaboration,api,active);const params=new URLSearchParams(location.hash.split('?')[1]||'');const submission=params.get('submissionDraft');if(submission&&!params.has('connectOrganization')){params.delete('submissionDraft');window.history.replaceState(null,'',location.pathname+location.search+'#my-research'+(params.size?'?'+params:''));queueMicrotask(()=>{if(active())openSubmissionBuilder(api,{draftId:submission});});}
   const action = (label, handler, style = 'secondary') => {
     const b = node('button', label, style); b.type = 'button';
     b.onclick = async () => {
@@ -39,10 +38,11 @@ export async function personalResearch(root, api) {
   try {
     const [cards, attempts, starters] = await Promise.all([api(`/api/research/cards?offset=${cardOffset}`), api(`/api/research/attempts?offset=${resultOffset}`),api('/api/research/starters')]);
     if (!active()) return;
-    status.textContent = 'Choose an experiment below. Atmospheric research uses retained scientific observations; Flight-Regime Validation uses aircraft telemetry. Flight recording and science sessions keep their normal controls.';
+    status.textContent = '';
     researchStarterChoices(root,api,starters,active);
-    const editor = node('section', undefined, 'panel research-panel');
+    const editor = node('section', undefined, 'panel research-panel'),editorDetails=informationDetails(root,'Create or Edit a Personal Test Card');editorDetails.id='personal-card-editor';
     const renderEditor = () => {
+      if(draft)editorDetails.open=true;
       const custom=!!draft?.procedure||draft?.templateId==='custom-flight-test'||!!draft?.flightRegime?.testPoint;const atmospheric=draft?.experimentalSensor||draft?.observationFlight||draft?.survey||draft?.atmosphericProfile||draft?.atmosphericTransect;editor.replaceChildren(node('h2',custom?'Create or Edit Custom Test Card':draft?.experimentalSensor?'Edit Experimental Sensor Checkout':draft?.observationFlight?'Edit Scientific Observation Flight':draft?.survey?'Edit Terrain & Temperature Survey':draft?.atmosphericTransect?'Edit Atmospheric Transect':atmospheric?'Edit Vertical Atmospheric Profile':draft?.id?'Edit Flight-Regime Validation':'Create Flight-Regime Validation'));
       editor.append(node('p', atmospheric?'Choose achievable sampling goals. Collection coverage is not proof of a hypothesis.':'Choose targets appropriate for your aircraft. Results assess simulator evidence only; they are not aircraft certification.'));
       const form = node('form'); form.id = 'research-card-form';
@@ -69,9 +69,8 @@ export async function personalResearch(root, api) {
       editor.append(form);
     };
     const author=action('Create Custom Test Card',()=>{draft={name:'Flight Test: Stable Operating Conditions',flightRegime:customFlightRule()};renderEditor();editor.scrollIntoView({block:'start'});editor.querySelector('input').focus();},'primary');
-    root.insertBefore(author,root.querySelector('#research-starters'));
-    root.insertBefore(action('Create Multi-Point Test Card',()=>{draft={name:'Flight Test: Operating Envelope Demonstration',procedure:procedureExample()};renderEditor();editor.scrollIntoView({block:'start'});editor.querySelector('input').focus();},'primary'),root.querySelector('#research-starters'));
-    renderEditor(); root.append(editor);
+    const multiAuthor=action('Create Multi-Point Test Card',()=>{draft={name:'Flight Test: Operating Envelope Demonstration',procedure:procedureExample()};renderEditor();editor.scrollIntoView({block:'start'});editor.querySelector('input').focus();},'secondary');
+    renderEditor(); editorDetails.append(editor);
     const experiment=node('div');
     const review = node('section', undefined, 'panel research-panel'); review.id = 'personal-research-review';
     let reviewEpoch = 0;
@@ -119,7 +118,7 @@ export async function personalResearch(root, api) {
       review.append(action('Newer Flights', () => showReview(card, null, Math.max(0, offset-20))), action('Older Flights', () => showReview(card, null, offset+20)));
       review.scrollIntoView({block:'nearest'});
     };
-    const templateActions=personalTemplateTools(root,api,{cards,starters,refresh:()=>personalResearch(root,api)});
+    const templateActions=personalTemplateTools(root,api,{cards,starters,refresh:()=>personalResearch(root,api)});root.querySelector('#my-templates').append(author,multiAuthor);
     root.append(node('h2', 'Your Test Cards'));
     if (!cards.length) root.append(node('p', 'No test cards on this page. Create your first experiment above.'));
     for (const card of cards) {
@@ -140,7 +139,7 @@ export async function personalResearch(root, api) {
     const saved=node('details',undefined,'panel research-panel');saved.append(node('summary','Saved Local Results — All Evaluations'),node('p','Every saved evaluation is retained here. Overview & Compare groups repeated evaluations into their original attempts.'));
     if (!attempts.length) saved.append(node('p', 'No saved results on this page. Review a completed card flight to evaluate its recorded evidence.'));
     for (const attempt of attempts) saved.append(attemptView(attempt,api));
-    saved.append(action('Newer Results', async () => {resultOffset = Math.max(0,resultOffset-20); await personalResearch(root,api);}), action('Older Results', async () => {resultOffset += 20; await personalResearch(root,api);}));root.append(saved);
+    saved.append(action('Newer Results', async () => {resultOffset = Math.max(0,resultOffset-20); await personalResearch(root,api);}), action('Older Results', async () => {resultOffset += 20; await personalResearch(root,api);}));root.append(saved,collaboration);
     const query=new URLSearchParams(location.hash.split('?')[1]||'');const requestedCard=query.get('card');
     const selectedFlight = query.get('flight');
     if (selectedFlight) {

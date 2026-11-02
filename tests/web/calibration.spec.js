@@ -1,3 +1,4 @@
+import {revealControl} from './helpers/disclosures.mjs';
 import {test,expect} from '@playwright/test';
 const origin='http://127.0.0.1:5080';
 async function pair(request){return (await request.post('/api/session',{data:{},headers:{Origin:origin}})).json();}
@@ -18,7 +19,7 @@ test('user calibration revisions persist, preserve originals and require explici
  await page.goto('/#science');
  const instrument=page.locator('[data-payload-instrument="ambient-temperature"]');
  await instrument.getByLabel('Ambient thermometer',{exact:true}).check();
- const calibration=instrument.locator('.calibration-settings');await calibration.getByText('Calibration & provenance',{exact:true}).click();
+ const calibration=instrument.locator('.calibration-settings');await revealControl(calibration.getByText('Calibration & provenance',{exact:true}));await calibration.getByText('Calibration & provenance',{exact:true}).click();
  await expect(calibration).toContainText('Reference status: unknown');
  await calibration.getByRole('button',{name:'Create or revise user calibration',exact:true}).click();
  await calibration.getByLabel('Calibration author',{exact:true}).fill('Synthetic browser test author');
@@ -31,7 +32,7 @@ test('user calibration revisions persist, preserve originals and require explici
  await page.getByRole('button',{name:'Apply instrument configuration',exact:true}).click();
  await expect.poll(async()=>{const items=await(await request.get('/api/instruments/configuration')).json();return items.find(c=>c.instrumentId==='ambient-temperature').calibration?.revision;}).toBe(1);
  await page.reload({waitUntil:'domcontentloaded'});
- await page.locator('[data-calibration-instrument="ambient-temperature"] > summary').click();
+ const restoredCalibration=page.locator('[data-calibration-instrument="ambient-temperature"] > summary');await revealControl(restoredCalibration);await restoredCalibration.click();
  await expect(page.locator('[data-calibration-instrument="ambient-temperature"]')).toContainText('revision 1');
  const response=await post(request,'/api/missions',{name:'Synthetic calibrated browser flight',mode:'realistic'});const mission=await response.json();
  try{
@@ -46,7 +47,7 @@ test('user calibration revisions persist, preserve originals and require explici
  expect(original.provenance).toBe('simulatorReported');expect(derived.provenance).toBe('derived');
  expect(derived.value).toBeCloseTo(original.value+0.25,12);expect(derived.calibration.originalValue).toBe(original.value);
  expect(derived.source).toContain('Synthetic');expect(original.calibration).toBeUndefined();
- await page.goto('/#science');const revised=page.locator('[data-calibration-instrument="ambient-temperature"]');if(await revised.getAttribute('open')===null)await revised.locator('summary').click();
+ await page.goto('/#science');const revised=page.locator('[data-calibration-instrument="ambient-temperature"]');if(await revised.getAttribute('open')===null){await revealControl(revised.locator('summary'));await revised.locator('summary').click();}
  await revised.getByRole('button',{name:'Create or revise user calibration',exact:true}).click();
  await revised.getByLabel('Offset (original channel unit)',{exact:true}).fill('1');
  await revised.getByRole('button',{name:'Save calibration revision',exact:true}).click();await expect(revised.getByRole('status')).toContainText('revision 2');
@@ -56,7 +57,7 @@ test('user calibration revisions persist, preserve originals and require explici
 
 test('external calibration is metadata only and paired clients cannot create definitions',async({page})=>{
  await page.goto('/#science');
- const remote=page.locator('[data-calibration-instrument="thermal-imager"]');await remote.locator('summary').click();
+ const remote=page.locator('[data-calibration-instrument="thermal-imager"]');await revealControl(remote.locator('summary'));await remote.locator('summary').click();
  await expect(remote).toContainText('Reference status: unavailable');
  await remote.getByRole('button',{name:'Create or revise user calibration',exact:true}).click();
  await expect(remote.getByText('Add a separate user-adjusted scalar channel',{exact:true}).locator('input')).toBeDisabled();

@@ -122,3 +122,18 @@ export function newIdentity(){
  const value=Array.from(bytes,n=>n.toString(16).padStart(2,'0')).join('');
  return `${value.slice(0,8)}-${value.slice(8,12)}-${value.slice(12,16)}-${value.slice(16,20)}-${value.slice(20)}`;
 }
+
+// Three presentation levels; callers use authoritative state, never prose matching
+// or a new scientific evaluator. Critical notices must explain the next action.
+export function scientificNotice(element,level,{problem='',consequence='',action=''}={}){
+ const value=[problem,consequence,action].filter(Boolean).join(' ');
+ element.classList.add('science-notice');if(element.dataset.scienceLevel!==level)element.dataset.scienceLevel=level;
+ const role=level==='critical'?'alert':level==='important'?'status':'note';if(element.getAttribute('role')!==role)element.setAttribute('role',role);
+ element.hidden=!value;if(element.textContent!==value)element.textContent=value;
+}
+export function informationDetails(parent,title,...content){
+ const details=disclosure(parent,title);details.dataset.scienceLevel='information';details.classList.add('science-information');details.append(...content);return details;
+}
+export function revealDetails(element){
+ for(let parent=element?.parentElement;parent;parent=parent.parentElement)if(parent.tagName==='DETAILS')parent.open=true;
+}

@@ -1,3 +1,4 @@
+import {revealControl} from './helpers/disclosures.mjs';
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { mkdirSync } from 'node:fs';
@@ -73,7 +74,7 @@ test('Geographic Survey offers actual primary and optional science without autom
   await expect(details).toContainText('generic.terrain');
   await expect(details).toContainText('version 1');
   const cadence = instrument(page, 'terrain-scanner').locator('[data-interval]');
-  await cadence.fill('9');
+  await revealControl(cadence);await cadence.fill('9');
   await expect(cadence).toBeFocused();
   await expect(details).toHaveAttribute('open', '');
   await expect(details).toContainText('current configured interval 9 s');

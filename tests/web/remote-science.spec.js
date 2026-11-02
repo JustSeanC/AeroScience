@@ -1,3 +1,4 @@
+import {revealControl} from './helpers/disclosures.mjs';
 import { test, expect } from '@playwright/test';
 const origin='http://127.0.0.1:5080';
 async function post(request,path,data={}) {
@@ -87,11 +88,11 @@ test('scientific consent stays separate from maps and pilot readiness needs no m
   const section=page.getByRole('heading',{name:'Automatic Scientific Data Access',exact:true}).locator('..');
   await expect(section).toContainText('separate from online basemaps');
   await expect(section.getByLabel('Allow automatic scientific-data discovery and downloads')).not.toBeChecked();
-  await section.getByLabel('Maximum network transfer per preparation (MiB)').fill('8');
+  await revealControl(section.getByLabel('Maximum network transfer per preparation (MiB)'));await section.getByLabel('Maximum network transfer per preparation (MiB)').fill('8');
   await section.getByRole('button',{name:'Save scientific access preferences',exact:true}).click();
   await expect(section).toContainText('Offline-only scientific operation saved');
   const maps=await (await request.get('/api/maps/settings')).json();expect(maps.configuration.preferences.onlineEnabled).toBe(false);
-  await section.getByLabel('Prepare latitude').fill('40.005');await section.getByLabel('Prepare longitude').fill('-74.995');
+  await revealControl(section.getByLabel('Prepare latitude'));await section.getByLabel('Prepare latitude').fill('40.005');await section.getByLabel('Prepare longitude').fill('-74.995');
   await section.getByRole('button',{name:'Prepare a small area',exact:true}).click();
   await expect.poll(async()=> (await (await request.get('/api/science/readiness')).json()).length).toBeGreaterThan(0);
   await expect(section.locator('.scientific-readiness')).toContainText('Configure Scientific Data Access');

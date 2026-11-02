@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "milestone": "P28-UX",
-  "status": "Implemented; corrected-source Fast and final integrated Full pending",
+  "status": "A/B/C/D implemented; focused checks and corrected C Fast accepted; final integrated Full pending",
   "previousAccepted": {
     "source": "021c4b8a092c179bef9307a28a16539a7d9fc5d2",
     "full": 41222464887
@@ -10,7 +10,8 @@
   "checkpoints": {
     "A": "da662c093b8dcce75b6f35762313df02c74e4934",
     "B": "1a120f4b4cac3d5a662ed8572135e28cf1b33f08",
-    "C": null
+    "C": "42a6e2bcc4f0be05eb0f11cd969c35b68a9f90f0",
+    "D": null
   },
   "preservedFastFailures": [
     {
@@ -59,13 +60,19 @@
     "scientificWorkflowBrowsers": 21,
     "postgresCorrectionBrowsers": 9,
     "privatePackagingHelpers": 7,
-    "nativeBootstrapHelpers": 1
+    "nativeBootstrapHelpers": 1,
+    "dOriginalEvidenceAndNativeDotnet": 67,
+    "dCalibrationCorrectedBrowsers": 3,
+    "dPostgresConsentAndScienceBrowsers": 18,
+    "dPayloadObservationCalibrationReadinessBrowsers": 36,
+    "dFrozenTimelineAssignmentAndSimplicityBrowsers": 9
   },
   "preservedLocalFailures": [
     "Delayed native template: null onclick, initialized=true, zero bus requests before correction.",
     "Stopped local PostgreSQL: four Operations passed/36 connection refusals; no application acceptance claimed.",
     "Initial restarted PostgreSQL run: 27 passed/nine failed (one database-readiness failure, eight relocated selector/postflight-state failures); all nine corrected cases passed.",
-    "Navigation focused attempts retained obsolete labels, header targets and DOM-order assumptions; corrected focused checks passed."
+    "Navigation focused attempts retained obsolete labels, header targets and DOM-order assumptions; corrected focused checks passed.",
+    "D initial core 24 passed/four stale navigation expectations; expanded 53 passed/three advanced-disclosure navigation failures; corrected subset 22 passed/one remaining reload calibration navigation failure. Corrected calibration 3/3 passes, all original scientific assertions retained."
   ],
   "full": null,
   "installedMsfs": false,
@@ -85,5 +92,30 @@
     "Observed provider cost and five-stage novice deployment.",
     "New source-bound private Windows/genuine SDK package and installed-MSFS toolbar/flight/science acceptance.",
     "Genuine Discord/external source/NASA-original/device acceptance where applicable."
-  ]
+  ],
+  "correctedFast": {
+    "source": "42a6e2bcc4f0be05eb0f11cd969c35b68a9f90f0",
+    "run": 41382091012,
+    "url": "https://github.com/JustSeanC/AeroScience/actions/runs/41382091012",
+    "dotnet": {
+      "passed": 91,
+      "failed": 0,
+      "skipped": 0
+    },
+    "browser": {
+      "passed": 306,
+      "failed": 0,
+      "skipped": 57
+    },
+    "python": {
+      "passed": 164,
+      "failed": 0,
+      "skipped": 1
+    },
+    "railwaySdk": {
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0
+    }
+  }
 }

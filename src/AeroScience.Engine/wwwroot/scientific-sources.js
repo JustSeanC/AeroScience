@@ -8,7 +8,7 @@ function action(label,run){const b=el("button",label);b.type="button";b.classNam
 function link(parent,label,url){const a=el("a",label);a.href=url.startsWith("/help/")?"#help?guide="+encodeURIComponent(url.slice(6).split("#")[0])+(url.includes("#")?"&anchor="+encodeURIComponent(url.split("#")[1]):""):url;if(!url.startsWith("/help/")){a.target="_blank";a.rel="noopener";}parent.append(a,document.createTextNode(" · "));}
 export async function scientificSourcesSettings(parent,api){
   const root=el("section");root.id="scientific-data-sources";parent.append(root);
-  root.append(el("h2","Scientific Data Sources"),el("p","Automatic sources contact public providers only with your separate science-data permission. Imported datasets work offline within their actual coverage. Source selection does not enable or disable recording."));
+  root.append(el("h2","Scientific Data Sources"));
   const online=el("p"),configure=action("Enable Online Scientific Data Access",async()=>{document.getElementById("scientific-access-controls").open=true;document.getElementById("scientific-access-controls").scrollIntoView({block:"start"});});root.append(online,configure,action("View Download Activity",()=>openDownloadActivity(api)));
   let query=new URLSearchParams(location.hash.split("?")[1]||"");
   const categories=el("div"),checked=el("p");root.append(categories,checked);let maps=[],generation=0;
@@ -17,11 +17,11 @@ export async function scientificSourcesSettings(parent,api){
   const access=await api("/api/science/access");if(own!==generation||!root.isConnected)return;
   online.textContent="Online scientific data access: "+(access.configuration.preferences.onlineEnabled?"Enabled":"Disabled (local datasets remain available)");configure.textContent=access.configuration.preferences.onlineEnabled?"Configure Online Scientific Data Access":"Enable Online Scientific Data Access";
   for(const [kind,[title,provider,description,formats]] of Object.entries(kinds)){
-    const section=el("article");section.id="source-"+kind;section.className="panel source-category";categories.append(section);section.append(el("h3",title),el("p",provider),el("p",description));
+    const section=el("article");section.id="source-"+kind;section.className="panel source-category";categories.append(section);section.append(el("h3",title),el("p",provider));const explanation=el('details');explanation.append(el('summary','Source requirements & formats'),el('p',description),el('p',`Local input: ${formats}`));section.append(explanation);
     const label=el("label", "Source mode "),select=el("select");select.setAttribute("aria-label",title+" source mode");const choices=kind==="hyperspectral"?[["local","My Datasets Only"]]:[["automatic","Automatic"],["local","My Datasets Only"],["prefer-local","Prefer My Datasets, Allow Automatic Fallback"]];
     for(const [value,text] of choices){const o=el("option",text);o.value=value;o.selected=value===(access.configuration.preferences.sourceModes?.[kind]||(kind==="hyperspectral"?"local":"automatic"));select.append(o);}select.disabled=!access.canConfigure;
     const save=el("span");select.onchange=async()=>{try{await api("/api/science/source-mode",{kind,mode:select.value});save.textContent="Saved · datasets retained";}catch(e){save.textContent=e.message;}};label.append(select);section.append(label,save);
-    section.append(el("p",`Local input: ${formats}`),action(kind==="hyperspectral"?"Import Hyperspectral Dataset":"Find & Download Data",()=>{location.hash="#library/download?science="+kind;}),action("Import Files Already on My Computer",()=>openHyperspectralImport(api,kind)));
+    section.append(action(kind==="hyperspectral"?"Import Hyperspectral Dataset":"Find & Download Data",()=>{location.hash="#library/download?science="+kind;}),action("Import Files Already on My Computer",()=>openHyperspectralImport(api,kind)));
     link(section,"Open Beginner Guide",kind==="hyperspectral"?"/help/remote-sensing/using-your-own-hyperspectral-dataset.md":"/help/remote-sensing/scientific-data-sources.md#"+kind);
     const inventory=el("p","Reading complete Library counts…"),list=el("div");section.append(inventory,list);
     const collections=await api('/api/science/source-collections?kind='+kind);if(own!==generation||!section.isConnected)return;

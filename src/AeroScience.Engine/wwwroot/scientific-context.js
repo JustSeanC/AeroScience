@@ -1,4 +1,4 @@
-import {node,disclosure,numeric} from './workstation-ui.js';
+import {node,disclosure,numeric,informationDetails} from './workstation-ui.js';
 
 // Presentation of existing typed evidence only. These helpers neither assess a card
 // nor infer metadata from filenames, import times, aircraft paths or provider names.
@@ -17,7 +17,7 @@ export function scientificCategory(provenance,source){
   pilotObservation:'Written by a pilot. Documentation completeness does not establish scientific truth.'
  }[provenance]||'Supported provenance is unavailable. No simulator, historical or modeled origin is inferred.'};
 }
-export function renderCategory(parent,provenance,source){const c=scientificCategory(provenance,source),box=node('div',undefined,'scientific-category');box.dataset.sourceCategory=c.label;box.append(node('strong',c.label),node('p',c.explanation));if(c.synthetic)box.append(node('p','Synthetic fixture / demo evidence','scientific-warning'));parent.append(box);return box;}
+export function renderCategory(parent,provenance,source){const c=scientificCategory(provenance,source),box=node('div',undefined,'scientific-category');box.dataset.sourceCategory=c.label;box.append(node('strong',c.label));if(c.synthetic)box.append(node('span',' · Synthetic fixture / demo evidence'));informationDetails(box,'About this source category',node('p',c.explanation));parent.append(box);return box;}
 
 // Definition preview only; no attempt, evidence assessment or new scientific claim.
 export function renderTemplateCriteria(parent,definition){
