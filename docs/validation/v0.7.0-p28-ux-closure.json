@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "milestone": "P28-UX",
-  "status": "Runtime simplification and focused corrections complete; same-fragment governance navigation test corrected; final Full pending",
+  "status": "Retained-science fixture command race corrected; 72 focused .NET and 21 browsers passed; corrected-source Full pending",
   "previousAccepted": {
     "source": "021c4b8a092c179bef9307a28a16539a7d9fc5d2",
     "full": 41222464887
@@ -73,6 +73,17 @@
     "governanceNavigationBrowsers": 6,
     "localLinuxPythonHelpers": {
       "passed": 165,
+      "failed": 0,
+      "skipped": 0
+    },
+    "windowsConcurrencyCorrectionDotnet": {
+      "passed": 72,
+      "failed": 0,
+      "skipped": 0,
+      "scope": "API original-data/security, scientific sessions/control revision, live/progress and source-state projections"
+    },
+    "windowsCorrectionUxBrowsers": {
+      "passed": 21,
       "failed": 0,
       "skipped": 0
     }
@@ -211,5 +222,81 @@
     "linuxProcessRecovery": "Not run after browser failure",
     "cause": "The governance test expected same-fragment goto to discard the currently open program. The portal correctly retained the program; Open Program belongs to the list, while Back to Programs was visible.",
     "correction": "Assert the current program, use the visible Back to Programs action, reopen it, and retain all original immutable publication, claim, local preparation and exact criteria assertions. No runtime change or deadline/threshold relaxation."
+  },
+  "preservedWindowsFailedFull": {
+    "id": 41399520092,
+    "linuxDotnet": {
+      "passed": 1464,
+      "failed": 0,
+      "skipped": 0
+    },
+    "linuxFailures": [],
+    "windowsDotnet": {
+      "passed": 1453,
+      "failed": 1,
+      "skipped": 10
+    },
+    "windowsFailures": [
+      {
+        "name": "AeroScience.Tests.ApiTests.GuidedScienceProgressCountsRetainedRowsNotTelemetryAndMarksUnavailableCountsHonestly",
+        "detail": "System.TimeoutException : Original scientific records did not become available.\n             at AeroScience.Tests.ApiTests.GuidedScienceProgressCountsRetainedRowsNotTelemetryAndMarksUnavailableCountsHonestly() in /_/tests/AeroScience.Tests/ApiTests.cs:line 31\r\n--- End of stack trace from previous location ---"
+      }
+    ],
+    "browser": {
+      "passed": 365,
+      "failed": 0,
+      "skipped": 2,
+      "flaky": 0
+    },
+    "linuxPython": {
+      "passed": 164,
+      "failed": 0,
+      "skipped": 1
+    },
+    "linuxRecoveryPassed": 5,
+    "windowsDownstream": "Not run after .NET failure",
+    "conclusion": "failure",
+    "source": "375c83ef854c2c9e0701ed079bfbb463e48fadb1",
+    "url": "https://github.com/JustSeanC/AeroScience/actions/runs/41399520092",
+    "deploymentJob": "success",
+    "linuxJob": "success",
+    "windowsJob": "failure",
+    "cause": "StartData used only the captured ingress revision; a real telemetry commit could invalidate it before ControlScience. The unchecked Conflict left science Armed and the later retained-count wait timed out. The controlled regression forces that interleaving and reproduces Applied versus Conflict before correction.",
+    "correction": "Use the existing control/session revision contract used by the dashboard; assert both the legacy stale refusal and the successful StartData receipt. Stop the test producer before flight, inject one coherent explicit stream, verify the retained original directly, then poll the read-only cached projection under the original five-second bound. No production or scientific-rule change.",
+    "artifactSha256": {
+      "run.json": "ad0858d6092818ccbd111369ff002b6d7181255ed64688e5a805df6d7e42de94",
+      "failed-results.json": "fa3f57c01f0e1e715470c4d4f62cfaa3a1eeaf4523255594f859b5197eeebd55",
+      "windows-tests/windows.trx": "e11587b581e8d1d5ef67358c54d20cde2559aee10646789d747ba0ead8552b05",
+      "browser/web-results.json": "e96bbd4ac7ca4b075922cac56d0bec647f1c713e9f77370b7ee4d38a6b58e8a2",
+      "linux-tests/artifacts/organization-update-fixture/fixture.json": "6d67875fb562bbdd907707fa9f764e30a4c8c52ff0dfa197ab4f0bedf4d8d8b4",
+      "linux-tests/tests/AeroScience.Tests/TestResults/_runnervmnwato_2026-11-02_06_24_56_net10.0.trx": "54da26e2e542fbb71fdc9f615ac2f98653ab294d32b2624ca32df55a02c3a6cb"
+    }
+  },
+  "issueAudit": {
+    "22": {
+      "status": "Implemented; integrated validation pending corrected-source Full",
+      "automatedEvidence": "task-workspaces.spec.js; science-journey.spec.js; scientific-simplicity.spec.js",
+      "externalAcceptance": "New separate Windows validation candidate usability"
+    },
+    "23": {
+      "status": "Removed from source, state and styles",
+      "automatedEvidence": "toolbar-intelligence.spec.js; toolbar-validation-identity.spec.js; package structure checks",
+      "externalAcceptance": "Matching genuine SDK package in installed MSFS"
+    },
+    "24": {
+      "status": "Proven delayed-template initialization defect corrected; original installed symptom not yet confirmed resolved",
+      "automatedEvidence": "Bounded template initialization and reconnect cancellation, exact source/channel match and actual handler acknowledgments",
+      "externalAcceptance": "Matching new Validation panel must synchronize and execute in actual MSFS"
+    },
+    "25": {
+      "status": "Implemented; retained-original concurrency regression strengthened",
+      "automatedEvidence": "Guided API, science-journey, science-sessions, original evidence/timeline/deletion tests",
+      "externalAcceptance": "Actual simulator atmospheric observations and exact postflight result"
+    },
+    "26": {
+      "status": "Implemented; controls and warning standard audited",
+      "automatedEvidence": "scientific-simplicity, payload/calibration/readiness, privacy/submission/live/notification browser cases",
+      "externalAcceptance": "Owner visual/task acceptance of new candidate"
+    }
   }
 }

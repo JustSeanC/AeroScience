@@ -21,15 +21,41 @@ public sealed class ApiTests : IAsyncLifetime
     {
         Assert.Equal(HttpStatusCode.Unauthorized,(await client.GetAsync("/api/mission-intelligence")).StatusCode);
         await Pair(client);var missions=factory.Services.GetRequiredService<MissionStore>();var science=factory.Services.GetRequiredService<ScienceStore>();var coordinator=factory.Services.GetRequiredService<MissionCoordinator>();
+        // One input producer, stopped before the flight: stopping an active worker
+        // interrupts recording. Keep the actual coordinator, stores and HTTP projection.
+        foreach(var worker in factory.Services.GetServices<IHostedService>().OfType<TelemetryWorker>())await worker.StopAsync(default);
+        var origin=DateTimeOffset.UtcNow;
+        void Observe(bool withAtmosphere=false)
+        {
+            var at=DateTimeOffset.UtcNow;
+            coordinator.Apply(new(new(ConnectionState.Connected,TelemetrySource.Simulated,"Explicit atmospheric fixture",at),
+                SimulatedTelemetryProvider.Generate(origin,(at-origin).TotalSeconds),withAtmosphere?new(at,12,29.9,8,270,.0023):null));
+        }
+        Observe();
         var plan=missions.SavePlan(new(Guid.NewGuid(),"Guided atmospheric fixture",Instruments:[new("ambient-temperature",true)]));
         var flight=coordinator.Start(new("Guided atmospheric fixture",PlanId:plan.Id,ArmScience:true));
-        var deadline=System.Diagnostics.Stopwatch.StartNew();while(coordinator.Snapshot().ActiveMission!.SampleCount<1){if(deadline.Elapsed>TimeSpan.FromSeconds(5))throw new TimeoutException("The existing synthetic telemetry fixture did not record.");await Task.Delay(25);}
+        Observe();
         var armed=(await client.GetFromJsonAsync<MissionIntelligence>("/api/mission-intelligence",WireJson.Options))!;
         Assert.Equal(CollectionPhase.Armed,armed.Collection!.State!.Phase);Assert.True(armed.Flight.ActiveMission!.SampleCount>0);Assert.Equal(0,armed.RetainedScience!.OriginalObservations);Assert.Empty(science.StreamObservations(flight.Id));
-        var checkpoint=missions.CollectionCheckpoint(flight.Id)!;coordinator.ControlScience(new(1,flight.Id,Guid.NewGuid(),checkpoint.Revision,CollectionAction.StartData,checkpoint.CurrentSessionId));
-        deadline.Restart();MissionIntelligence collecting;
-        do{var at=DateTimeOffset.UtcNow;coordinator.Apply(new(new(ConnectionState.Connected,TelemetrySource.Simulated,"Explicit atmospheric fixture",at),SimulatedTelemetryProvider.Generate(at,0),new(at,12,29.9,8,270,.0023)));await Task.Delay(50);collecting=(await client.GetFromJsonAsync<MissionIntelligence>("/api/mission-intelligence",WireJson.Options))!;if(deadline.Elapsed>TimeSpan.FromSeconds(5))throw new TimeoutException("Original scientific records did not become available.");}while(collecting.RetainedScience?.OriginalObservations is not >0);
-        Assert.Equal(flight.Id,collecting.RetainedScience.MissionId);Assert.True(collecting.RetainedScience.OriginalObservations<=science.StreamObservations(flight.Id).LongCount());Assert.Equal(0,collecting.RetainedScience.DerivedObservations);Assert.Equal(0,collecting.RetainedScience.RemoteProducts);
+        var checkpoint=missions.CollectionCheckpoint(flight.Id)!;
+        // Force the packet/command interleaving that the hosted 250 ms producer
+        // could previously cause between checkpoint capture and StartData.
+        await Task.Delay(300);Observe();
+        var stale=coordinator.ControlScience(new(1,flight.Id,Guid.NewGuid(),checkpoint.Revision,CollectionAction.StartData,checkpoint.CurrentSessionId));
+        Assert.Equal(CollectionEventOutcome.Conflict,stale.Event.Outcome);
+        Assert.Equal(CollectionPhase.Armed,stale.CurrentState.Phase);Assert.Empty(science.StreamObservations(flight.Id));
+        // The real dashboard binds control/session authority independently of ingress.
+        // Do not ignore a rejected receipt and misdiagnose it as missing science.
+        var start=coordinator.ControlScience(new(1,flight.Id,Guid.NewGuid(),checkpoint.Revision,CollectionAction.StartData,checkpoint.CurrentSessionId,ExpectedControlRevision:checkpoint.ControlRevision));
+        Assert.Equal(CollectionEventOutcome.Applied,start.Event.Outcome);
+        Observe();Assert.Empty(science.StreamObservations(flight.Id));
+        Observe(withAtmosphere:true);
+        var original=Assert.Single(science.StreamObservations(flight.Id));
+        Assert.Equal(start.Session!.Id,original.SessionId);Assert.NotNull(original.IntentId);
+        Assert.Contains("Synthetic test fixture",original.Source);
+        var deadline=System.Diagnostics.Stopwatch.StartNew();MissionIntelligence collecting;
+        do{await Task.Delay(50);collecting=(await client.GetFromJsonAsync<MissionIntelligence>("/api/mission-intelligence",WireJson.Options))!;if(deadline.Elapsed>TimeSpan.FromSeconds(5))throw new TimeoutException($"Retained count did not refresh: phase={collecting.Collection?.State?.Phase}, originals={science.StreamObservations(flight.Id).LongCount()}.");}while(collecting.RetainedScience?.OriginalObservations is not >0);
+        Assert.Equal(flight.Id,collecting.RetainedScience.MissionId);Assert.Equal(science.StreamObservations(flight.Id).LongCount(),collecting.RetainedScience.OriginalObservations);Assert.Equal(1,collecting.RetainedScience.OriginalObservations);Assert.Equal(0,collecting.RetainedScience.DerivedObservations);Assert.Equal(0,collecting.RetainedScience.RemoteProducts);
         var missing=new MissionIntelligenceService(coordinator,missions,factory.Services.GetRequiredService<ResearchOperations>(),factory.Services.GetRequiredService<MissionPerformanceService>());
         Assert.Null(missing.Read().RetainedScience!.OriginalObservations);Assert.True(coordinator.Snapshot().ActiveMission!.SampleCount>0);coordinator.End(flight.Id);
     }
