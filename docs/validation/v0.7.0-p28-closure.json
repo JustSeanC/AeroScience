@@ -899,7 +899,7 @@
     },
     "sdkPassed": 6
   },
-  "checkedUtc": "2026-11-02T14:45:52.656674+00:00",
+  "checkedUtc": "2026-11-02T23:23:10.625778+00:00",
   "preservedHostingAcceptance": {
     "id": 41222464887,
     "source": "021c4b8a092c179bef9307a28a16539a7d9fc5d2",
@@ -1094,5 +1094,15 @@
     "issue24": "Delayed-template defect corrected and source/channel lifecycle tested; installed-MSFS retest remains open",
     "ownerBuildOrScienceModified": false,
     "readmeModified": false
+  },
+  "validatorFeedbackEngineering": {
+    "testedSource": "9cfd6aa97e365f4a4b30b7900945891444a25154",
+    "full": 41537881799,
+    "url": "https://github.com/JustSeanC/AeroScience/actions/runs/41537881799",
+    "engineeringAccepted": true,
+    "overallP28Accepted": false,
+    "installedMsfsAccepted": false,
+    "closure": "docs/validation/v0.7.0-p28-validator-feedback-closure.json",
+    "ownerChecks": "docs/v0.7.0-validator-feedback-owner-checks.md"
   }
 }
