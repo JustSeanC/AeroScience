@@ -74,9 +74,13 @@ test('operating reports show separate compliance and source QA and remain availa
  const flight=await(await post(request,'/api/missions',{name:'Synthetic operating assessment flight',mode:'realistic'})).json();
  await page.goto('/#science');
  await expect.poll(async()=>{const reports=await(await request.get('/api/instruments/operating')).json();return reports.length;}).toBe(2);
- await expect(page.locator('#operating-reports')).toContainText('thermal-imager');
- await page.locator('#operating-reports summary').filter({hasText:'thermal-imager'}).click();
- await expect(page.locator('#operating-reports')).toContainText('Operating:');await expect(page.locator('#operating-reports')).toContainText('Source QA:');
+ const thermal=page.locator('#operating-reports').getByRole('article',{name:'Thermal Imager',exact:true});
+ await expect(thermal.getByRole('heading',{name:'Thermal Imager',exact:true})).toBeVisible();
+ await thermal.getByText('Sensor Details',{exact:true}).click();
+ await expect(thermal.getByRole('region',{name:'Thermal Imager Operating Conditions',exact:true})).toContainText('Operating Conditions:');
+ await expect(thermal.getByRole('region',{name:'Thermal Imager Scientific Data',exact:true})).toContainText('Scientific Data:');
+ await thermal.getByText('Advanced Diagnostics',{exact:true}).click();
+ await expect(thermal).toContainText('Operating:');await expect(thermal).toContainText('Source QA:');
  await post(request,`/api/missions/${flight.id}/end`);
  const archived=await(await request.get(`/api/missions/${flight.id}/operating`)).json();expect(archived).toHaveLength(2);
  expect(archived[0].input.frame.source).toBe('simulated');expect(archived[0].assessment.evidence[0].sha256).toHaveLength(64);

@@ -1,6 +1,7 @@
 import {node, numeric, dateTime, link, newIdentity,informationDetails,scientificNotice} from './workstation-ui.js';
 import {renderSensorOperating,markSensorOperatingStale} from './sensor-operating-status.js';
 const labels={startData:'Start Science Collection',pauseData:'Pause science collection',resumeData:'Resume science collection',endData:'End current science session',rearmAutomation:'Rearm automatic collection'};
+const confirmations={startData:'Science collection started.',pauseData:'Science collection paused.',resumeData:'Science collection resumed.',endData:'Science session ended.',rearmAutomation:'Automatic collection rearmed.'};
 export function metricText(m){
  const supported=['supported','caution'].includes(m.status)&&Number.isFinite(m.numerator)&&Number.isFinite(m.denominator)&&m.denominator>0;
  return `${m.id}: ${m.status}${supported?` · ${numeric(m.numerator)} / ${numeric(m.denominator)} ${m.unit} (${numeric(100*m.numerator/m.denominator)}%)`:Number.isFinite(m.numerator)?` · ${numeric(m.numerator)} ${m.unit}`:''}. Missing ${m.missing}; unassessed ${m.unassessed}. ${m.method}`;
@@ -76,8 +77,8 @@ export function missionIntelligence(parent,api,{id='mission-intelligence',after=
  async function control(action){if(busy||!current?.collection?.state)return;const visible=current.collection.state,mission=visible.missionId;busy=true;invalidate();for(const button of controls.values())button.disabled=true;
   try{const fresh=await api(`/api/missions/${mission}/collection`);if(semantic(fresh.state)!==semantic(visible))throw Error('Science session or authority changed; no command was applied.');
    const request={version:1,missionId:mission,requestId:newIdentity(),expectedRevision:fresh.state.revision,expectedControlRevision:fresh.state.controlRevision??null,expectedSessionId:visible.currentSessionId??null,action,...(action==='pauseData'&&reason.value?{justification:reason.value}:{})};
-   let result;try{result=await api(`/api/missions/${mission}/collection/control`,request);}catch(error){if(!(error instanceof TypeError))throw error;result=await api(`/api/missions/${mission}/collection/control`,request);}message.textContent=result.event.reason;
-  }catch(error){message.textContent=error.message+' Synchronize and issue a new command if still intended.';}finally{busy=false;await refresh();}
+   let result;try{result=await api(`/api/missions/${mission}/collection/control`,request);}catch(error){if(!(error instanceof TypeError))throw error;result=await api(`/api/missions/${mission}/collection/control`,request);}message.textContent=result.event.outcome==='applied'?confirmations[action]:result.event.reason;
+  }catch(error){message.textContent=(error.status===409?'Science session or collection authority changed.':error.message)+' Synchronize and issue a new command if still intended.';}finally{busy=false;await refresh();}
  }
  async function refresh(){if(inflight||busy||disposed||document.hidden||!panel.offsetParent)return;inflight=true;const own=++generation;
   try{const data=await api('/api/mission-intelligence');if(own===generation&&panel.isConnected){if(acceptState(data))draw(data);else{for(const button of controls.values())button.disabled=true;onStale("The recording flight changed while this response was in flight. Synchronizing the current flight.");}}}catch(error){if(own===generation){status.textContent='Mission state unavailable or stale: '+error.message;scientificNotice(warning,'critical',{problem:'Mission state unavailable or stale.',consequence:'Collection commands are disabled.',action:'Reconnect the companion and wait for fresh state.'});markSensorOperatingStale(sensors);for(const button of controls.values())button.disabled=true;onStale(error.message);}}finally{inflight=false;}
