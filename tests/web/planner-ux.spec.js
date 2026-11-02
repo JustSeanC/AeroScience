@@ -47,3 +47,19 @@ test('late pattern responses cannot replace a newer heading or a new mission dra
 test('survey cancellation and rejected self-intersection leave committed geometry unchanged',async({page})=>{
  await page.goto('/#planner');await page.getByRole('button',{name:'Draw Survey Area',exact:true}).click();await point(page,140,90);await point(page,240,190);await point(page,140,190);await point(page,240,90);await page.getByRole('button',{name:'Finish Area',exact:true}).click();await expect(page.getByText('The polygon crosses or touches itself.',{exact:false})).toBeVisible();await page.getByRole('button',{name:'Cancel Drawing',exact:true}).click();await expect(page.getByRole('button',{name:'Remove area',exact:true})).toHaveCount(0);await expect(page.locator('.waypoint-row')).toHaveCount(0);
 });
+test('airport reference selection cannot steal survey vertices or change the view while drawing',async({page})=>{
+ await page.goto('/#planner');
+ const search=page.getByRole('searchbox',{name:'Offline geographic location search',exact:true}),results=page.getByRole('listbox',{name:'Search results',exact:true});
+ for(const query of ['NV93','35.885, -115.557']){const before=await map(page).getAttribute('data-center');await search.fill(query);await page.locator('#plan-editor').getByRole('button',{name:'Find',exact:true}).click();await results.selectOption('0');await expect(map(page)).not.toHaveAttribute('data-center',before);}
+ const airport=page.getByRole('button',{name:/Select airport .*\(NV93/});await expect(airport).toBeVisible();
+ const center=await map(page).getAttribute('data-center');
+ await page.getByRole('button',{name:'Draw Survey Area',exact:true}).click();
+ await airport.scrollIntoViewIfNeeded();
+ const hit=await airport.evaluate(target=>{const b=target.getBoundingClientRect(),x=b.x+b.width/2,y=b.y+b.height/2;return {x,y,airport:document.elementFromPoint(x,y)===target};});
+ expect(hit.airport).toBe(true);await page.mouse.click(hit.x,hit.y);
+ await expect(page.locator('#survey-draft-progress')).toContainText('1 vertices');await expect(map(page)).toHaveAttribute('data-center',center);await expect(page.getByRole('button',{name:'Use Airport as Waypoint',exact:true})).toBeHidden();
+ await expect(airport).toHaveAttribute('aria-disabled','true');await expect(airport).toHaveAttribute('tabindex','-1');
+ await airport.focus();await page.keyboard.press('Enter');await expect(page.locator('#survey-draft-progress')).toContainText('1 vertices');await expect(map(page)).toHaveAttribute('data-center',center);
+ await page.getByRole('button',{name:'Cancel Drawing',exact:true}).click();await expect(page.locator('.waypoint-row')).toHaveCount(0);await expect(page.getByRole('button',{name:'Remove area',exact:true})).toHaveCount(0);
+ await expect(airport).toHaveAttribute('aria-disabled','false');await expect(airport).toHaveAttribute('tabindex','0');await airport.focus();await page.keyboard.press('Enter');await expect(page.getByRole('button',{name:'Use Airport as Waypoint',exact:true})).toBeVisible();
+});

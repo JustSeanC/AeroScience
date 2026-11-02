@@ -138,9 +138,12 @@ export class ResearchMap {
       this.center(p);this.initialized=true;
       if(this.searchMarker)this.map.removeLayer(this.searchMarker);
       this.searchMarker=L.circleMarker(ll(p),{radius:8,color:"#ffffff"}).bindTooltip(label(locationLabel(p))).addTo(this.map);
-      if(this.selectedAirport&&useAirport)this.searchMarker.on('click',()=>{searchStatus.textContent='Selected: '+locationLabel(p);useAirport.focus();});
+      if(this.selectedAirport&&useAirport)this.searchMarker.on('click',()=>{if(this.interactionMode||this.drawing)return;searchStatus.textContent='Selected: '+locationLabel(p);useAirport.focus();});
       searchStatus.textContent="Selected: "+locationLabel(p);
     };
+    // Reference selection is idle-only. During geometry placement its click must
+    // bubble to the map's existing placement handler instead of recentering.
+    const chooseAirportReference=p=>{if(!this.interactionMode&&!this.drawing)choose(p);};
     const find = async () => {
       const q=search.value.trim();results.replaceChildren();results.hidden=true;
       if(!q){searchStatus.textContent="Enter an airport code, name, city or latitude, longitude. Your map position has not changed.";return;}
@@ -261,10 +264,10 @@ export class ResearchMap {
       );
       this.map.on(
         "draw:drawstart draw:editstart draw:deletestart",
-        () => (this.drawing = true),
+        () => {this.drawing=true;this.updateAirportActions();},
       );
       this.map.on("draw:drawstop draw:editstop draw:deletestop", () =>
-        setTimeout(() => (this.drawing = false), 0),
+        setTimeout(() => {this.drawing=false;this.updateAirportActions();}, 0),
       );
       this.map.on("draw:created", (e) => {
         e.layer.areaName = `Survey area ${this.areas.getLayers().length + 1}`;
@@ -320,9 +323,9 @@ export class ResearchMap {
           const updateAirports=()=>{nearby.clearLayers();if(this.destroyed||this.map.getZoom()<7)return;
             const bounds=this.map.getBounds();let shown=0;
             for(const airport of this.airportSearch){if(!bounds.contains([airport.latitude,airport.longitude]))continue;
-              const marker=L.circleMarker([airport.latitude,airport.longitude],{radius:5,color:'#acc7ee',bubblingMouseEvents:false,renderer:airportRenderer});
-              marker.bindTooltip(label(locationLabel(airport)));marker.on('click',()=>choose(airport));
-              marker.on('add',()=>{const target=marker.getElement();if(!target)return;target.setAttribute('role','button');target.setAttribute('tabindex','0');target.setAttribute('aria-label','Select airport '+locationLabel(airport));target.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();choose(airport);}});});
+              const marker=L.circleMarker([airport.latitude,airport.longitude],{radius:5,color:'#acc7ee',bubblingMouseEvents:true,renderer:airportRenderer,className:'airport-reference'});
+              marker.bindTooltip(label(locationLabel(airport)));marker.on('click',()=>chooseAirportReference(airport));
+              marker.on('add',()=>{const target=marker.getElement();if(!target)return;const disabled=Boolean(this.interactionMode||this.drawing);target.setAttribute('role','button');target.setAttribute('tabindex',disabled?'-1':'0');target.setAttribute('aria-disabled',String(disabled));target.setAttribute('aria-label','Select airport '+locationLabel(airport));target.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();chooseAirportReference(airport);}});});
               nearby.addLayer(marker);if(++shown>=150)break;
             }
           };this.map.on('moveend',updateAirports);updateAirports();
@@ -343,9 +346,9 @@ export class ResearchMap {
                 (f.properties.gps_code ? " · " + f.properties.gps_code : ""),
             ),
           );
-          if(airport&&this.options.onAirportSelect){m.options.bubblingMouseEvents=false;m.on('click',()=>{
+          if(airport&&this.options.onAirportSelect){m.on('click',()=>{
             const code=f.properties.gps_code||f.properties.iata_code;
-            choose(this.airportSearch.find(p=>p.icao===code||p.iata===code||p.id===code)||{kind:'airport',id:code,icao:f.properties.gps_code,iata:f.properties.iata_code,name:f.properties.name,latitude:c[1],longitude:c[0]});
+            chooseAirportReference(this.airportSearch.find(p=>p.icao===code||p.iata===code||p.id===code)||{kind:'airport',id:code,icao:f.properties.gps_code,iata:f.properties.iata_code,name:f.properties.name,latitude:c[1],longitude:c[0]});
           });}
           this.context.addLayer(m);
         }
@@ -448,6 +451,14 @@ export class ResearchMap {
     if(this.destroyed)return;
     this.interactionMode=mode;
     this.container.classList.toggle("map-placement-mode",!!mode);
+    this.updateAirportActions();
+  }
+  updateAirportActions() {
+    if(this.destroyed)return;
+    const disabled=Boolean(this.interactionMode||this.drawing);
+    for(const target of this.container.querySelectorAll('.airport-reference')){
+      target.setAttribute('tabindex',disabled?'-1':'0');target.setAttribute('aria-disabled',String(disabled));
+    }
   }
   draft(points=[],polygon=false) {
     if(this.destroyed)return;
