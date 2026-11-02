@@ -28,12 +28,14 @@ test('Fly Now uses prepared defaults, normal readiness/start, independent attemp
  let launches=0;page.on('request',r=>{if(r.method()==='POST'&&new URL(r.url()).pathname==='/api/missions')launches++;});
  await choice.getByRole('button',{name:'Fly Now',exact:true}).click();await page.getByText('Research Definition & Source Details',{exact:true}).click();const guide=page.locator('#research-launch-guide');await expect(guide).toContainText('120 ± 5 knots IAS');await expect(guide).toContainText('30 second hold');expect(launches).toBe(0);expect((await state(request)).activeMission).toBeNull();
  const planId=(await state(request)).selectedPlanId;expect(planId).toBeTruthy();
+ const sourcesBefore=(await(await request.get('/api/science/sources/page?limit=100')).json()).items.map(i=>i.source.id),jobsBefore=(await(await request.get('/api/science/library/jobs')).json()).jobs;
  let release,captured;const held=new Promise(resolve=>captured=resolve),gate=new Promise(resolve=>release=resolve);
  await page.route('**/api/plans/readiness',async route=>{const response=await route.fetch();captured();await gate;await route.fulfill({response});});
  try{
   await guide.getByText('Review Science and Storage Readiness',{exact:true}).click();await guide.getByRole('button',{name:'Evaluate science readiness',exact:true}).click();await held;
   await page.getByRole('button',{name:'Refresh Missions',exact:true}).click();await expect(page.locator('.mission-selection > [role="status"]')).toHaveText('Plan selected · Recording has not started');await expect(guide).toContainText('Assessing draft…');
-  release();await expect(guide).toContainText('No data was downloaded');
+  release();await guide.getByText('Assessment method & limitations',{exact:true}).click();await expect(guide).toContainText('No save, recording, collection or download occurs.');
+  expect((await state(request)).activeMission).toBeNull();expect(launches).toBe(0);expect((await(await request.get('/api/science/sources/page?limit=100')).json()).items.map(i=>i.source.id)).toEqual(sourcesBefore);expect((await(await request.get('/api/science/library/jobs')).json()).jobs).toEqual(jobsBefore);
  }finally{release();await page.unroute('**/api/plans/readiness');}
  let readiness=0;page.on('request',r=>{if(new URL(r.url()).pathname===`/api/plans/${planId}/preparation/start-readiness`)readiness++;});
  await page.getByRole('button',{name:'Start Recording',exact:true}).click();await expect(page.getByRole('button',{name:'End mission',exact:true})).toBeVisible();expect(readiness).toBe(1);expect(launches).toBe(1);
