@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "milestone": "P28-UX",
-  "status": "Retained-science fixture command race corrected; 72 focused .NET and 21 browsers passed; corrected-source Full pending",
+  "status": "A/B/C/D engineering accepted by final source-bound Full; installed and provider/production acceptance remain open",
   "previousAccepted": {
     "source": "021c4b8a092c179bef9307a28a16539a7d9fc5d2",
     "full": 41222464887
@@ -11,7 +11,7 @@
     "A": "da662c093b8dcce75b6f35762313df02c74e4934",
     "B": "1a120f4b4cac3d5a662ed8572135e28cf1b33f08",
     "C": "42a6e2bcc4f0be05eb0f11cd969c35b68a9f90f0",
-    "D": null
+    "D": "5b518f1e0761648355eb6fb330ee17898d600b1f"
   },
   "preservedFastFailures": [
     {
@@ -86,6 +86,12 @@
       "passed": 21,
       "failed": 0,
       "skipped": 0
+    },
+    "readOnlyDefaultComparison": "Predecessor static UI and current UI, same fresh real synthetic Engine; no operations or permission writes",
+    "nativeBootstrapAndValidationSelectionHelpers": {
+      "passed": 16,
+      "failed": 0,
+      "skipped": 0
     }
   },
   "preservedLocalFailures": [
@@ -97,7 +103,207 @@
     "New lifecycle check reproduced old recovered results overriding an explicit next preparation. Initial harness did not await start acknowledgment; corrected harness reproduced the real heading/step defect. Exact real start receipt, unchanged 30/5-second deadlines and all original-history assertions retained.",
     "Initial link correction focus: 15 passed/one failed because an accessibility-role locator excluded closed disclosure descendants. The corrected test explicitly finds the exact named link, opens its real summary, asserts visibility before/after live refresh and checks both destinations; 16/16 pass with all original metric/session assertions."
   ],
-  "full": null,
+  "full": {
+    "id": 41457756452,
+    "source": "5b518f1e0761648355eb6fb330ee17898d600b1f",
+    "url": "https://github.com/JustSeanC/AeroScience/actions/runs/41457756452",
+    "conclusion": "success",
+    "results": {
+      "linuxDotnet": {
+        "passed": 1464,
+        "failed": 0,
+        "skipped": 0
+      },
+      "windowsDotnet": {
+        "passed": 1454,
+        "failed": 0,
+        "skipped": 10
+      },
+      "browser": {
+        "passed": 365,
+        "failed": 0,
+        "skipped": 2,
+        "flaky": 0
+      },
+      "linuxPython": {
+        "passed": 164,
+        "failed": 0,
+        "skipped": 1
+      },
+      "processRecovery": {
+        "linuxPassed": 5,
+        "windowsPassed": 5
+      },
+      "windowsPython": {
+        "passed": 160,
+        "failed": 0,
+        "skipped": 2
+      },
+      "windowsVaultNativePackage": "passed",
+      "railwaySdk": {
+        "passed": 6,
+        "failed": 0,
+        "skipped": 0
+      },
+      "containers": {
+        "passed": 12,
+        "failed": 0
+      },
+      "railwayShapedContainers": {
+        "passed": 10,
+        "failed": 0
+      },
+      "privateImageRoles": 4
+    },
+    "expectedSkips": {
+      "linux": [],
+      "windows": [
+        "AeroScience.Tests.OrganizationConnectionIntegrationTests.IndependentRecoveryStagesAndActivatesAfterOriginalDatabaseAndIdentityAreLostWithoutExternalReplay",
+        "AeroScience.Tests.ScientificLibraryFolderTests.LinkedSourceDirectoryIsRejected",
+        "AeroScience.Tests.OrganizationConnectionIntegrationTests.GuidedPrivateFileImportRecoversIntoAFreshSecuredServerAtANewOriginAfterPrimaryLoss",
+        "AeroScience.Tests.OrganizationConnectionIntegrationTests.SeparatelyKeyedCopiesSurvivePrimaryRepositoryAndIdentityLossAndEnforceApprovedRetention",
+        "AeroScience.Tests.OrganizationConnectionIntegrationTests.ScopedNonSuperuserRecoveryRetainsApplicationOwnershipAndAllowsTheNextCompiledUpgrade",
+        "AeroScience.Tests.OrganizationConnectionIntegrationTests.ProtectedIdentityRenewalRecoversMfaAndDiscordSecretsWithANewCertificateWithoutTouchingTheOriginal",
+        "AeroScience.Tests.OrganizationConnectionIntegrationTests.EncryptedOffProcessBackupRestoresAuthorizedEvidenceAuditAndProtectedMfaAfterSourceLoss",
+        "AeroScience.Tests.OrganizationConnectionIntegrationTests.ActualOldAndNewProcessesRefuseStaleCheckpointRollbackFailedUpgradeAndApplyExactApprovedPair",
+        "AeroScience.Tests.OrganizationServerTests.ExplicitBackupConsentPersistsScheduledPolicyIdempotentJobsAndVerifiedRestoreAcrossRestart",
+        "AeroScience.Tests.AviationAcquisitionTests.RetainedOriginalFileLinksAreRejectedRatherThanFollowed"
+      ]
+    },
+    "browserSkipDetails": [
+      {
+        "file": "aviation-charts.spec.js",
+        "title": "approved originals provide local chart overlays, independent science, offline tiles and exact edition selection"
+      },
+      {
+        "file": "aviation-charts.spec.js",
+        "title": "unknown runtime is honest and chart inventory remains accessible at tablet width without altering saved data"
+      }
+    ],
+    "helperSkipDetails": {
+      "linux": [
+        "2026-11-02T14:44:09.5768127Z test_pe_metadata_check_does_not_claim_runtime_exports_or_simulator_connection (test_windows_helpers.WindowsHelperTests.test_pe_metadata_check_does_not_claim_runtime_exports_or_simulator_connection) ... skipped 'Publish the Windows companion first for the native PE fixture'"
+      ],
+      "windows": [
+        "2026-11-02T14:24:23.3101828Z test_generated_private_configuration_is_unique_bounded_and_never_prints_credentials (test_organization_deployment.OrganizationDeploymentTests.test_generated_private_configuration_is_unique_bounded_and_never_prints_credentials) ... skipped 'POSIX OpenSSL/mode fixture; real Linux container acceptance verifies certificates.'",
+        "2026-11-02T14:24:23.3226040Z test_case_colliding_files_cannot_share_one_layout_entry (test_packaging.PackagingTests.test_case_colliding_files_cannot_share_one_layout_entry) ... skipped 'A case-sensitive filesystem is required to create both aliases.'"
+      ]
+    },
+    "artifactSha256": {
+      "run.json": "5cb93dfbee2f2765e0df1235b1df85c19a3c5693af33795b7a4c2763242a53fc",
+      "windows-tests/windows.trx": "b32bdc416e29b854acd04cf66def5e6665a2b9b51a234c771bc6d2cb904cf332",
+      "deployment/railway-runtime.json": "9a5c58a49aeffd1c9f9be827211d75506c3e22ed17659a68d79486242685b1c9",
+      "deployment/image-review.json": "14333bbc1f5a6145cab51d3f901f5acb9056f595fba55f70a41027ce99e29b2a",
+      "deployment/acceptance.json": "31287dd0c38ea5c24516e71c3d4615291a97ad255fa08765ff5b32f38419a22f",
+      "browser/web-results.json": "bb86bc1220f7cd8ef684b2075a34832dc59439a249f42975653c74c97b8ad622",
+      "linux-tests/artifacts/organization-update-fixture/fixture.json": "35957fa7c71470a2abbe85c3d2ae22835ab4e35460757d12d581be70bbc14162",
+      "linux-tests/tests/AeroScience.Tests/TestResults/_runnervmnwato_2026-11-02_14_01_50_net10.0.trx": "241f4fa11173321982c30cc8a1ba0c97f7ec41db669d3d98a4082c5b5375e53f"
+    },
+    "subsets": {
+      "linuxdiscordIntegrationPassed": 18,
+      "linuxliveEventsPassed": 18,
+      "linuxRecoverySnapshotPassed": 1,
+      "linuxPolicyPassed": 41,
+      "linuxP28HealthPassed": 3,
+      "linuxP28ResearchPassed": 1,
+      "linuxP28UpgradePassed": 1,
+      "linuxP28ProtectedSettingsPassed": 7,
+      "linuxEncryptedOffProcessBackupRestoresAuthorizedEvidenceAuditAndProtectedMfaAfterSourceLoss": "Passed",
+      "linuxSeparatelyKeyedCopiesSurvivePrimaryRepositoryAndIdentityLossAndEnforceApprovedRetention": "Passed",
+      "linuxExplicitBackupConsentPersistsScheduledPolicyIdempotentJobsAndVerifiedRestoreAcrossRestart": "Passed",
+      "windowsdiscordIntegrationPassed": 18,
+      "windowsliveEventsPassed": 18,
+      "windowsRecoverySnapshotPassed": 1,
+      "windowsPolicyPassed": 41,
+      "windowsP28HealthPassed": 3,
+      "windowsP28ResearchPassed": 1,
+      "windowsP28UpgradePassed": 1,
+      "windowsP28ProtectedSettingsPassed": 7,
+      "windowsEncryptedOffProcessBackupRestoresAuthorizedEvidenceAuditAndProtectedMfaAfterSourceLoss": "NotExecuted",
+      "windowsSeparatelyKeyedCopiesSurvivePrimaryRepositoryAndIdentityLossAndEnforceApprovedRetention": "NotExecuted",
+      "windowsExplicitBackupConsentPersistsScheduledPolicyIdempotentJobsAndVerifiedRestoreAcrossRestart": "NotExecuted",
+      "linuxRetainedScienceProgress": "Passed",
+      "windowsRetainedScienceProgress": "Passed",
+      "linuxDeletionAnalysisOverlap": "Passed",
+      "linuxP28FinalHosting": {
+        "passed": 23,
+        "failed": 0,
+        "skipped": 0,
+        "outcomes": {
+          "AeroScience.Tests.OrganizationConnectionIntegrationTests.GuidedPrivateFileImportRecoversIntoAFreshSecuredServerAtANewOriginAfterPrimaryLoss": "Passed",
+          "AeroScience.Tests.RecoveryImportSecurityTests.GuidedRecoveryCannotConfigureArbitraryNetworkDestinations(repository: \"s3:https://internal.railway.internal/bucket\")": "Passed",
+          "AeroScience.Tests.OrganizationIngressTests.ProofIsRequestBoundExpiringSingleUseAndCannotSurviveReplacement": "Passed",
+          "AeroScience.Tests.OrganizationConnectionIntegrationTests.ActualOldAndNewProcessesRefuseStaleCheckpointRollbackFailedUpgradeAndApplyExactApprovedPair": "Passed",
+          "AeroScience.Tests.OrganizationServerTests.OwnerPairingSurvivesProcessRestartAndOnlyOneConcurrentAccountWins": "Passed",
+          "AeroScience.Tests.RecoveryImportSecurityTests.GuidedRecoveryCannotConfigureArbitraryNetworkDestinations(repository: \"s3:https://s3.us-east-1.amazonaws.com/bucket?redir\"\u00b7\u00b7\u00b7)": "Passed",
+          "AeroScience.Tests.OrganizationConnectionIntegrationTests.ScopedNonSuperuserRecoveryRetainsApplicationOwnershipAndAllowsTheNextCompiledUpgrade": "Passed",
+          "AeroScience.Tests.RecoveryImportSecurityTests.GuidedRecoveryCannotConfigureArbitraryNetworkDestinations(repository: \"/tmp/private-file\")": "Passed",
+          "AeroScience.Tests.RecoveryImportSecurityTests.GuidedRecoveryCannotConfigureArbitraryNetworkDestinations(repository: \"s3:https://s3.us-east-1.amazonaws.com.attacker.exa\"\u00b7\u00b7\u00b7)": "Passed",
+          "AeroScience.Tests.OrganizationConnectionIntegrationTests.RealDesktopOwnerPairingKeepsPrivateKeyInVaultRequiresReviewAndResumesAfterRestart": "Passed",
+          "AeroScience.Tests.RecoveryImportSecurityTests.GuidedRecoveryCannotConfigureArbitraryNetworkDestinations(repository: \"s3:https://user:secret@s3.us-east-1.amazonaws.com/\"\u00b7\u00b7\u00b7)": "Passed",
+          "AeroScience.Tests.RecoveryImportSecurityTests.GuidedRecoveryCannotConfigureArbitraryNetworkDestinations(repository: \"s3:https://s3.us-east-1.amazonaws.com/bucket/%2e%2\"\u00b7\u00b7\u00b7)": "Passed",
+          "AeroScience.Tests.OrganizationConnectionIntegrationTests.IndependentRecoveryStagesAndActivatesAfterOriginalDatabaseAndIdentityAreLostWithoutExternalReplay": "Passed",
+          "AeroScience.Tests.RecoveryImportSecurityTests.GuidedRecoveryCannotConfigureArbitraryNetworkDestinations(repository: \"s3:http://s3.us-east-1.amazonaws.com/bucket\")": "Passed",
+          "AeroScience.Tests.OrganizationIngressTests.GatewayUsesExactHostAndAuthenticatedLoopbackWithoutForwardedTrust": "Passed",
+          "AeroScience.Tests.RecoveryImportSecurityTests.GuidedRecoveryCannotConfigureArbitraryNetworkDestinations(repository: \"s3:https://169.254.169.254/bucket\")": "Passed",
+          "AeroScience.Tests.RecoveryImportSecurityTests.StandardS3ProfileStillRequiresExplicitRelocationAndIndependentIntegrityReferences": "Passed",
+          "AeroScience.Tests.RecoveryImportSecurityTests.GuidedRecoveryCannotConfigureArbitraryNetworkDestinations(repository: \"s3:https://s3.us-east-1.amazonaws.com:8443/bucket\")": "Passed",
+          "AeroScience.Tests.RecoveryImportSecurityTests.GuidedRecoveryCannotConfigureArbitraryNetworkDestinations(repository: \"rest:https://attacker.example/recovery\")": "Passed",
+          "AeroScience.Tests.OrganizationServerTests.OwnerPairingRefusesAnonymousTakeoverTamperingReplayAndKeepsMfaPath": "Passed",
+          "AeroScience.Tests.RecoveryImportSecurityTests.GuidedRecoveryCannotConfigureArbitraryNetworkDestinations(repository: \"s3:https://127.0.0.1/bucket\")": "Passed",
+          "AeroScience.Tests.OrganizationServerTests.OwnerPairingExpiredOrDifferentDeploymentApprovalIsRefused": "Passed",
+          "AeroScience.Tests.OrganizationConnectionIntegrationTests.ProtectedIdentityRenewalRecoversMfaAndDiscordSecretsWithANewCertificateWithoutTouchingTheOriginal": "Passed"
+        }
+      },
+      "windowsDeletionAnalysisOverlap": "Passed",
+      "windowsP28FinalHosting": {
+        "passed": 18,
+        "failed": 0,
+        "skipped": 5,
+        "outcomes": {
+          "AeroScience.Tests.OrganizationConnectionIntegrationTests.IndependentRecoveryStagesAndActivatesAfterOriginalDatabaseAndIdentityAreLostWithoutExternalReplay": "NotExecuted",
+          "AeroScience.Tests.RecoveryImportSecurityTests.GuidedRecoveryCannotConfigureArbitraryNetworkDestinations(repository: \"s3:https://user:secret@s3.us-east-1.amazonaws.com/\"\u00b7\u00b7\u00b7)": "Passed",
+          "AeroScience.Tests.RecoveryImportSecurityTests.GuidedRecoveryCannotConfigureArbitraryNetworkDestinations(repository: \"rest:https://attacker.example/recovery\")": "Passed",
+          "AeroScience.Tests.RecoveryImportSecurityTests.GuidedRecoveryCannotConfigureArbitraryNetworkDestinations(repository: \"s3:https://s3.us-east-1.amazonaws.com/bucket?redir\"\u00b7\u00b7\u00b7)": "Passed",
+          "AeroScience.Tests.RecoveryImportSecurityTests.GuidedRecoveryCannotConfigureArbitraryNetworkDestinations(repository: \"s3:https://s3.us-east-1.amazonaws.com/bucket/%2e%2\"\u00b7\u00b7\u00b7)": "Passed",
+          "AeroScience.Tests.RecoveryImportSecurityTests.StandardS3ProfileStillRequiresExplicitRelocationAndIndependentIntegrityReferences": "Passed",
+          "AeroScience.Tests.RecoveryImportSecurityTests.GuidedRecoveryCannotConfigureArbitraryNetworkDestinations(repository: \"s3:https://s3.us-east-1.amazonaws.com.attacker.exa\"\u00b7\u00b7\u00b7)": "Passed",
+          "AeroScience.Tests.OrganizationServerTests.OwnerPairingExpiredOrDifferentDeploymentApprovalIsRefused": "Passed",
+          "AeroScience.Tests.OrganizationConnectionIntegrationTests.GuidedPrivateFileImportRecoversIntoAFreshSecuredServerAtANewOriginAfterPrimaryLoss": "NotExecuted",
+          "AeroScience.Tests.OrganizationIngressTests.ProofIsRequestBoundExpiringSingleUseAndCannotSurviveReplacement": "Passed",
+          "AeroScience.Tests.RecoveryImportSecurityTests.GuidedRecoveryCannotConfigureArbitraryNetworkDestinations(repository: \"s3:https://internal.railway.internal/bucket\")": "Passed",
+          "AeroScience.Tests.RecoveryImportSecurityTests.GuidedRecoveryCannotConfigureArbitraryNetworkDestinations(repository: \"s3:https://169.254.169.254/bucket\")": "Passed",
+          "AeroScience.Tests.OrganizationConnectionIntegrationTests.ScopedNonSuperuserRecoveryRetainsApplicationOwnershipAndAllowsTheNextCompiledUpgrade": "NotExecuted",
+          "AeroScience.Tests.RecoveryImportSecurityTests.GuidedRecoveryCannotConfigureArbitraryNetworkDestinations(repository: \"s3:https://s3.us-east-1.amazonaws.com:8443/bucket\")": "Passed",
+          "AeroScience.Tests.OrganizationIngressTests.GatewayUsesExactHostAndAuthenticatedLoopbackWithoutForwardedTrust": "Passed",
+          "AeroScience.Tests.RecoveryImportSecurityTests.GuidedRecoveryCannotConfigureArbitraryNetworkDestinations(repository: \"/tmp/private-file\")": "Passed",
+          "AeroScience.Tests.RecoveryImportSecurityTests.GuidedRecoveryCannotConfigureArbitraryNetworkDestinations(repository: \"s3:https://127.0.0.1/bucket\")": "Passed",
+          "AeroScience.Tests.OrganizationServerTests.OwnerPairingRefusesAnonymousTakeoverTamperingReplayAndKeepsMfaPath": "Passed",
+          "AeroScience.Tests.OrganizationConnectionIntegrationTests.ProtectedIdentityRenewalRecoversMfaAndDiscordSecretsWithANewCertificateWithoutTouchingTheOriginal": "NotExecuted",
+          "AeroScience.Tests.RecoveryImportSecurityTests.GuidedRecoveryCannotConfigureArbitraryNetworkDestinations(repository: \"s3:http://s3.us-east-1.amazonaws.com/bucket\")": "Passed",
+          "AeroScience.Tests.OrganizationConnectionIntegrationTests.ActualOldAndNewProcessesRefuseStaleCheckpointRollbackFailedUpgradeAndApplyExactApprovedPair": "NotExecuted",
+          "AeroScience.Tests.OrganizationConnectionIntegrationTests.RealDesktopOwnerPairingKeepsPrivateKeyInVaultRequiresReviewAndResumesAfterRestart": "Passed",
+          "AeroScience.Tests.OrganizationServerTests.OwnerPairingSurvivesProcessRestartAndOnlyOneConcurrentAccountWins": "Passed"
+        }
+      },
+      "organization-notifications.spec.js": 5,
+      "organization-live.spec.js": 4,
+      "mission-operations.spec.js": 4,
+      "mission-performance.spec.js": 1,
+      "mission-intelligence.spec.js": 4,
+      "source-inspection.spec.js": 3,
+      "organization-template-sharing.spec.js": 6,
+      "science-sessions.spec.js": 4,
+      "science-journey.spec.js": 2,
+      "task-workspaces.spec.js": 2,
+      "toolbar-intelligence.spec.js": 7,
+      "toolbar-validation-identity.spec.js": 2,
+      "scientific-simplicity.spec.js": 4,
+      "calibration.spec.js": 3,
+      "payload-recommendations.spec.js": 4,
+      "start-readiness.spec.js": 16
+    }
+  },
   "installedMsfs": false,
   "realDiscord": false,
   "realRailway": false,
@@ -274,29 +480,81 @@
   },
   "issueAudit": {
     "22": {
-      "status": "Implemented; integrated validation pending corrected-source Full",
+      "status": "Implemented and accepted by corrected-source integrated Full; owner/installed acceptance remains open",
       "automatedEvidence": "task-workspaces.spec.js; science-journey.spec.js; scientific-simplicity.spec.js",
-      "externalAcceptance": "New separate Windows validation candidate usability"
+      "externalAcceptance": "New separate Windows validation candidate usability",
+      "technicalSource": "5b518f1e0761648355eb6fb330ee17898d600b1f",
+      "full": 41457756452
     },
     "23": {
       "status": "Removed from source, state and styles",
       "automatedEvidence": "toolbar-intelligence.spec.js; toolbar-validation-identity.spec.js; package structure checks",
-      "externalAcceptance": "Matching genuine SDK package in installed MSFS"
+      "externalAcceptance": "Matching genuine SDK package in installed MSFS",
+      "technicalSource": "5b518f1e0761648355eb6fb330ee17898d600b1f",
+      "full": 41457756452
     },
     "24": {
       "status": "Proven delayed-template initialization defect corrected; original installed symptom not yet confirmed resolved",
       "automatedEvidence": "Bounded template initialization and reconnect cancellation, exact source/channel match and actual handler acknowledgments",
-      "externalAcceptance": "Matching new Validation panel must synchronize and execute in actual MSFS"
+      "externalAcceptance": "Matching new Validation panel must synchronize and execute in actual MSFS",
+      "technicalSource": "5b518f1e0761648355eb6fb330ee17898d600b1f",
+      "full": 41457756452
     },
     "25": {
-      "status": "Implemented; retained-original concurrency regression strengthened",
+      "status": "Implemented and accepted by corrected-source integrated Full; owner/installed acceptance remains open",
       "automatedEvidence": "Guided API, science-journey, science-sessions, original evidence/timeline/deletion tests",
-      "externalAcceptance": "Actual simulator atmospheric observations and exact postflight result"
+      "externalAcceptance": "Actual simulator atmospheric observations and exact postflight result",
+      "technicalSource": "5b518f1e0761648355eb6fb330ee17898d600b1f",
+      "full": 41457756452
     },
     "26": {
       "status": "Implemented; controls and warning standard audited",
       "automatedEvidence": "scientific-simplicity, payload/calibration/readiness, privacy/submission/live/notification browser cases",
-      "externalAcceptance": "Owner visual/task acceptance of new candidate"
+      "externalAcceptance": "Owner visual/task acceptance of new candidate",
+      "technicalSource": "5b518f1e0761648355eb6fb330ee17898d600b1f",
+      "full": 41457756452
     }
+  },
+  "testedSource": "5b518f1e0761648355eb6fb330ee17898d600b1f",
+  "comparisonSha256": "be1740e3500329ae317508ab7a719e57893bcd9b1ad215f3f6e96e86d7becf4c",
+  "warningLevels": {
+    "critical": "Actual blocking/validity/storage problems, consequence and next action visible outside disclosures",
+    "important": "Neutral actual phase/count/completeness; unavailable remains unknown",
+    "information": "Accessible optional methods and advanced settings"
+  },
+  "checkedUtc": "2026-11-02T14:45:52.655386+00:00",
+  "uxEngineeringAccepted": true,
+  "overallP28Accepted": false,
+  "correctedSourceFast": {
+    "source": "5b518f1e0761648355eb6fb330ee17898d600b1f",
+    "id": 41457280916,
+    "url": "https://github.com/JustSeanC/AeroScience/actions/runs/41457280916",
+    "conclusion": "success",
+    "dotnet": {
+      "passed": 91,
+      "failed": 0,
+      "skipped": 0
+    },
+    "browser": {
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0
+    },
+    "python": {
+      "passed": 0,
+      "failed": 0,
+      "skipped": 0
+    },
+    "railwaySdk": {
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0
+    }
+  },
+  "checkpointImplementations": {
+    "A": "da662c093b8dcce75b6f35762313df02c74e4934",
+    "B": "1a120f4b4cac3d5a662ed8572135e28cf1b33f08",
+    "C": "42a6e2bcc4f0be05eb0f11cd969c35b68a9f90f0",
+    "D": "54357f0f800ad894fbb24363b87bff6e798a00fe"
   }
 }
