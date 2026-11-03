@@ -2,6 +2,7 @@ import {ResearchMap} from './map.js';
 import {atmosphere} from './mission-workspace.js';
 import {measurements,initialMeasurement,layerSignature,measurementsFor} from './science-map.js';
 import {node as el,numeric as number,dateTime as local,select,button,link,status,legend,color,table,disclosure,metric,pointInCell,readableName,chart} from './workstation-ui.js';
+import {displayReading,onUnitsChanged} from './science-display.js';
 import {renderLayerContext,comparisonContext} from './scientific-context.js';
 
 export async function comparison(parent,api,missions,ids,disposals,catalog){
@@ -11,11 +12,12 @@ export async function comparison(parent,api,missions,ids,disposals,catalog){
   const scaleStatus=el('p',undefined,'scale-state');tools.append(scaleStatus);
   const compatibility=el('p',undefined,'scientific-comparison-context');compatibility.setAttribute('aria-label','Scientific comparison limitations');tools.append(compatibility);
   const grid=el('div',undefined,'comparison-grid');parent.append(grid);
-  const columns=[];let syncing=false,stopped=false,sources;disposals.push(()=>stopped=true);
-  const findPoint=point=>{
+  const reading=(measurement,unit,value)=>measurement==='elevation'&&unit==='m'?displayReading('elevation',value,'m'):{value,unit};
+  const columns=[];let syncing=false,stopped=false,sources,lastPoint;disposals.push(()=>stopped=true);
+  const findPoint=point=>{lastPoint=point;
     for(const column of columns){
       const feature=column.layer?.features.find(feature=>pointInCell(point,feature));
-      const p=feature?.properties;column.inspector.replaceChildren(el('h4',`Same location · ${number(point.lat,5)}°, ${number(point.lng,5)}°`),el('p',p?`${number(p.value)} ${p.unit} · Flight ${local(p.flightUtc)} · Historical observation date ${local(p.sourceUtc)}`:'No valid recorded value at this location. No nearest-neighbor substitute or interpolation was used.'));
+      const p=feature?.properties;column.inspector.replaceChildren(el('h4',`Same location · ${number(point.lat,5)}°, ${number(point.lng,5)}°`),el('p',p?`${number(reading(column.quantity.value,p.unit,p.value).value)} ${reading(column.quantity.value,p.unit,p.value).unit} · Flight ${local(p.flightUtc)} · Historical observation date ${local(p.sourceUtc)}`:'No valid recorded value at this location. No nearest-neighbor substitute or interpolation was used.'));
     }
   };
   function scales(){
@@ -31,7 +33,7 @@ export async function comparison(parent,api,missions,ids,disposals,catalog){
       const min=common.checked?low:column.layer.minimum,max=common.checked?high:column.layer.maximum;
       column.overlay.eachLayer(path=>{const p=path.feature.properties;path.setStyle({fillColor:p.rgb?`rgb(${p.rgb.map(value=>Math.round(255*Math.max(0,Math.min(1,value/.3)))).join(',')})`:color(p.value,min,max)});});
       if(['natural-color','false-color'].includes(column.quantity.value))column.legend.replaceChildren(el('strong','RGB reflectance'),el('p','0–0.3 reflectance display stretch. No scalar subtraction of color images.'));
-      else legend(column.legend,(common.checked?'Shared':'Independent')+' scale',min,max,column.layer.unit,column.layer.wavelengthNm?`${column.layer.wavelengthNm} nm`:'Transparent missing data');
+      else legend(column.legend,(common.checked?'Shared':'Independent')+' scale',reading(column.quantity.value,column.layer.unit,min).value,reading(column.quantity.value,column.layer.unit,max).value,reading(column.quantity.value,column.layer.unit,0).unit,column.layer.wavelengthNm?`${column.layer.wavelengthNm} nm`:'Transparent missing data | '+(column.layer.source.verticalDatum||'Unknown vertical reference'));
     }
   }
   common.onchange=scales;
@@ -71,7 +73,7 @@ export async function comparison(parent,api,missions,ids,disposals,catalog){
         column.overlay=window.L.geoJSON(layer,{style:()=>({stroke:false,fillOpacity:.85}),onEachFeature:(feature,path)=>{path.feature=feature;path.on('click',event=>findPoint(event.latlng));}}).addTo(scientificGroup);
         if(layer.features.length)map.map.fitBounds(column.overlay.getBounds(),{maxZoom:17,padding:[12,12]});
         subtitle.textContent=`${readableName(product?.instrumentId,catalog)} · Flight ${local(product?.flightPacketUtc)} · Historical observation date ${local(layer.source.observationUtc)} · ${layer.source.provider} · ${layer.features.length} valid native cells · ${product?.quality||'Saved quality unavailable'}`;
-        table(values,'Dataset '+String.fromCharCode(65+index)+' recorded values',['Value','Units','Flight observation','Historical observation date'],layer.features.map(feature=>[number(feature.properties.value),feature.properties.unit,local(feature.properties.flightUtc),local(feature.properties.sourceUtc)]),{onSelect:i=>{const ring=layer.features[i].geometry.coordinates[0],point={lat:ring.slice(0,-1).reduce((v,p)=>v+p[1],0)/(ring.length-1),lng:ring.slice(0,-1).reduce((v,p)=>v+p[0],0)/(ring.length-1)};findPoint(point);inspector.tabIndex=-1;inspector.focus({preventScroll:true});}});
+        column.renderValues=()=>{values.replaceChildren();if(column.layer!==layer)return;table(values,'Dataset '+String.fromCharCode(65+index)+' recorded values',['Value','Units','Flight observation','Historical observation date'],layer.features.map(feature=>[number(reading(quantity.value,feature.properties.unit,feature.properties.value).value),reading(quantity.value,feature.properties.unit,feature.properties.value).unit,local(feature.properties.flightUtc),local(feature.properties.sourceUtc)]),{onSelect:i=>{const ring=layer.features[i].geometry.coordinates[0],point={lat:ring.slice(0,-1).reduce((v,p)=>v+p[1],0)/(ring.length-1),lng:ring.slice(0,-1).reduce((v,p)=>v+p[0],0)/(ring.length-1)};findPoint(point);inspector.tabIndex=-1;inspector.focus({preventScroll:true});}});};column.renderValues();
         evidence.textContent=JSON.stringify({source:layer.source,method:layer.method,provenance:layer.provenance},null,2);scales();
       }catch(error){if(!stopped&&generation===column.generation){subtitle.textContent=`This layer is unavailable: ${error.message} Choose a supported measurement; the recorded data is unchanged.`;scales();}}
     }
@@ -97,18 +99,22 @@ export async function comparison(parent,api,missions,ids,disposals,catalog){
   const comparisonControls=el('div',undefined,'workspace-controls');parent.append(comparisonControls);
   const field=select(comparisonControls,'Comparison measurement',measurements,columns[0].quantity.value);
   const result=el('section',undefined,'panel comparison-result');result.setAttribute('aria-label','Scientific comparison result');parent.append(result);
-  let differenceMap;disposals.push(()=>differenceMap?.destroy());
+  let differenceMap,lastComparison,comparisonVersion=0;disposals.push(()=>differenceMap?.destroy());
   button(comparisonControls,'Compare Recorded Values',async()=>{
-    result.replaceChildren(el('p','Checking scientific compatibility and common valid coverage…'));differenceMap?.destroy();differenceMap=null;
+    const own=++comparisonVersion;lastComparison=null;result.replaceChildren(el('p','Checking scientific compatibility and common valid coverage…'));differenceMap?.destroy();differenceMap=null;
     const selected=columns.map(column=>column.acquisition.value);if(selected.some(value=>!value))throw Error('Choose recorded geographic science in both datasets. Atmospheric profiles remain available separately.');
-    const compared=await api('/api/science/workspace/compare',{products:selected,measurement:field.value});if(stopped)return;
+    const measurement=field.value,compared=await api('/api/science/workspace/compare',{products:selected,measurement});if(stopped||own!==comparisonVersion)return;lastComparison={compared,selected,measurement};renderComparison();
+  },'primary');
+  function renderComparison(){
+    if(!lastComparison||stopped)return;differenceMap?.destroy();differenceMap=null;
+    const {compared,selected,measurement}=lastComparison,shown=value=>reading(measurement,compared.units[0],value),unit=shown(0).unit;
     result.replaceChildren(el('h3',compared.comparable?'Common native-pixel comparison':'Visual comparison only'));
     for(const reason of compared.reasons)result.append(el('p',reason));
     if(compared.comparable){
       const metrics=el('div',undefined,'review-kpis');result.append(metrics);
       metric(metrics,'Common valid coverage',number(compared.matchedNativeCells)+' native cells','Matched saved native support; not total survey area');
-      metric(metrics,'Mean difference',number(compared.meanDelta)+' '+compared.units.join(', '),'Compared dataset minus Dataset A');
-      metric(metrics,'Difference range',`${number(compared.minimumDelta)} to ${number(compared.maximumDelta)}`,compared.units.join(', '));
+      metric(metrics,'Mean difference',number(shown(compared.meanDelta).value)+' '+unit,'Compared dataset minus Dataset A');
+      metric(metrics,'Difference range',`${number(shown(compared.minimumDelta).value)} to ${number(shown(compared.maximumDelta).value)}`,unit);
       const cells=compared.differenceCells||[];
       if(cells.length){
         const holder=el('div'),key=el('section');result.append(el('h4','Difference map — actual common valid cells'),holder,key);
@@ -116,13 +122,16 @@ export async function comparison(parent,api,missions,ids,disposals,catalog){
         const deltaColor=value=>{if(!magnitude)return 'rgb(237,242,247)';const t=Math.min(1,Math.abs(value)/magnitude),end=value<0?[43,140,190]:[204,76,71];return `rgb(${end.map((v,i)=>Math.round([237,242,247][i]+(v-[237,242,247][i])*t)).join(',')})`;};
         const features=cells.filter(cell=>cell.productId===selected[1]).map(cell=>({type:'Feature',geometry:{type:'Polygon',coordinates:[cell.boundary.map(p=>[p.longitude,p.latitude])]},properties:cell}));
         const overlay=window.L.geoJSON({type:'FeatureCollection',features},{style:feature=>({stroke:false,fillOpacity:.9,fillColor:deltaColor(feature.properties.delta)})}).addTo(differenceMap.map);differenceMap.layers.addOverlay({id:'comparison-difference',name:'Scientific comparison differences',layer:overlay,group:'Science',description:'Dataset B minus Dataset A on actually comparable native cells. This derived difference is not an independent observation.',setOpacity:value=>overlay.setStyle({fillOpacity:value}),opacity:.9});if(features.length)differenceMap.map.fitBounds(overlay.getBounds(),{maxZoom:17});
-        key.className='scientific-legend';key.append(el('strong','Dataset B − Dataset A'),el('p',magnitude?`${number(-magnitude)} ${compared.units[0]} (blue) · 0 (white) · ${number(magnitude)} ${compared.units[0]} (red)`:`Constant difference: 0 ${compared.units[0]}. No numeric gradient.`));
+        key.className='scientific-legend';key.append(el('strong','Dataset B − Dataset A'),el('p',magnitude?`${number(shown(-magnitude).value)} ${unit} (blue) · 0 (white) · ${number(shown(magnitude).value)} ${unit} (red)`:`Constant difference: 0 ${unit}. No numeric gradient.`));
         const swatch=el('div',undefined,'legend-swatch');swatch.style.background=magnitude?'linear-gradient(90deg,#2b8cbe,#edf2f7,#cc4c47)':'#edf2f7';swatch.setAttribute('aria-hidden','true');key.append(swatch);
-        chart(result,'Matched recorded values: Dataset A versus Dataset B',[{label:'Common native cells',data:features.map(f=>({x:f.properties.baseline,y:f.properties.compared})),backgroundColor:'#62dec6',pointRadius:3}],{type:'scatter',xLabel:'Dataset A ('+compared.units[0]+')',yLabel:'Dataset B ('+compared.units[0]+')'});
-        table(result,'Matched scientific differences',['Dataset A','Compared value','Difference','Units','Compared dataset'],cells.map(cell=>[number(cell.baseline),number(cell.compared),number(cell.delta),compared.units[0],`Dataset ${String.fromCharCode(65+selected.indexOf(cell.productId))}`]));
+        chart(result,'Matched recorded values: Dataset A versus Dataset B',[{label:'Common native cells',data:features.map(f=>({x:shown(f.properties.baseline).value,y:shown(f.properties.compared).value})),backgroundColor:'#62dec6',pointRadius:3}],{type:'scatter',xLabel:'Dataset A ('+unit+')',yLabel:'Dataset B ('+unit+')'});
+        table(result,'Matched scientific differences',['Dataset A','Compared value','Difference','Units','Compared dataset'],cells.map(cell=>[number(shown(cell.baseline).value),number(shown(cell.compared).value),number(shown(cell.delta).value),unit,`Dataset ${String.fromCharCode(65+selected.indexOf(cell.productId))}`]));
         if(cells.length<compared.totalDifferenceValues)result.append(el('p',`Display shows ${cells.length} of ${compared.totalDifferenceValues} valid differences. The complete numeric summary uses all common valid native cells. Display geometry crossing the date line is omitted, not filled.`));
       }
     }
     const metadata=disclosure(result,'Advanced — source dates, quality, grids and comparison evidence');metadata.append(el('pre',JSON.stringify(compared.sources,null,2)));
-  },'primary');
+  }
+  disposals.push(onUnitsChanged(()=>{if(stopped)return;scales();for(const column of columns)column.renderValues?.();if(lastPoint)findPoint(lastPoint);renderComparison();}));
+  const invalidate=()=>{comparisonVersion++;lastPoint=null;lastComparison=null;differenceMap?.destroy();differenceMap=null;for(const column of columns){column.generation++;column.loadVersion++;column.layer=null;column.overlay?.clearLayers();column.renderValues?.();column.inspector.replaceChildren();column.legend.replaceChildren();}result.replaceChildren(el('p','Source inventory changed. Compare current saved acquisitions again.'));};
+  window.addEventListener('aeroscience-sources-changed',invalidate);disposals.push(()=>window.removeEventListener('aeroscience-sources-changed',invalidate));
 }

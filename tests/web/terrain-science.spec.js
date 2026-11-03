@@ -26,3 +26,12 @@ test('3805 native terrain cells use bounded canvas rendering and preserve explic
  await page.getByRole('checkbox',{name:'Detailed native terrain cells',exact:true}).check();await expect(page.locator('.terrain-elevation-surface')).toHaveCount(1);const opacity=page.getByRole('slider',{name:'Science layer opacity',exact:true});await opacity.focus();await opacity.press('Home');await opacity.press('ArrowRight');await expect(opacity).toHaveValue('0.05');
  expect((await(await request.get(`/api/science/products/${f.product.id}`)).json()).product.sha256).toBe(f.product.sha256);
 });
+test('terrain comparison presentation updates units without changing canonical differences or source evidence',async({page,request})=>{
+ const a=await post(request,'/api/testing/remote/Terrain'),b=await post(request,'/api/testing/remote/Terrain');await units(request,'feet');
+ await page.goto(`/#workspace/compare?missions=${a.missionId},${b.missionId}`);await expect(page.locator('.comparison-card').first().locator('.scientific-legend')).toContainText('ft');
+ await page.getByRole('button',{name:'Compare Recorded Values',exact:true}).click();const result=page.getByRole('region',{name:'Scientific comparison result',exact:true});await expect(result).toContainText('Constant difference: 0 ft');
+ const plotted=()=>result.getByRole('img',{name:'Matched recorded values: Dataset A versus Dataset B',exact:true}).evaluate(c=>{const plot=window.Chart.getChart(c);return {unit:plot.options.scales.y.title.text,value:plot.data.datasets[0].data[0].x};});expect((await plotted()).unit).toContain('(ft)');expect((await plotted()).value).toBeCloseTo(404.3635,3);
+ await units(request,'metres');await expect(result).toContainText('Constant difference: 0 m');await expect(page.locator('.comparison-card').first().locator('.scientific-legend')).toContainText(' m');expect((await plotted()).value).toBe(123.25);
+ const raw=await post(request,'/api/science/workspace/compare',{products:[a.product.id,b.product.id],measurement:'elevation'});expect(raw.units).toEqual(['m']);expect(raw.differenceCells[0].baseline).toBe(123.25);expect(raw.meanDelta).toBe(0);
+ expect((await(await request.get(`/api/science/products/${a.product.id}`)).json()).product.sha256).toBe(a.product.sha256);
+});
