@@ -53,7 +53,7 @@ public sealed class ToolbarCommandHandler(MissionCoordinator coordinator, RouteM
                     }
                     // A full atmospheric question may contain 500 Unicode characters.
                     // Keep exact definitions and the same byte boundary by paging one card.
-                    if(state is not null)state=state with{ActiveCardCount=state.Cards.Count(c=>c.Active),ActiveCardNames=state.Cards.Where(c=>c.Active).Take(3).Select(c=>c.Card.Name.Length>32?c.Card.Name[..32]+"…":c.Card.Name).ToArray(),Cards=state.Cards.Skip(command.Offset).Take(pageSize).Select(CompactProcedureCard).ToArray(),NextOffset=command.Offset+pageSize<state.TotalCards?command.Offset+pageSize:null,PageSize=pageSize};
+                    if(state is not null)state=state with{ActiveCardCount=state.Cards.Count(c=>c.Active),ActiveCardNames=state.Cards.Where(c=>c.Active).Take(3).Select(c=>string.Concat(c.Card.Name.EnumerateRunes().Take(32))+(c.Card.Name.EnumerateRunes().Count()>32?"...":"")).ToArray(),Cards=state.Cards.Skip(command.Offset).Take(pageSize).Select(CompactProcedureCard).ToArray(),NextOffset=command.Offset+pageSize<state.TotalCards?command.Offset+pageSize:null,PageSize=pageSize};
                     var encoded=JsonSerializer.Serialize(new{protocol=1,command.RequestId,ok=true,research=state,receipt},NativeResearchJson);
                     if(Encoding.UTF8.GetByteCount(encoded)>8000&&state is not null){state=state with{ActiveCardNames=[]};encoded=JsonSerializer.Serialize(new{protocol=1,command.RequestId,ok=true,research=state,receipt},NativeResearchJson);}
                     if(Encoding.UTF8.GetByteCount(encoded)>8000)throw new InvalidOperationException("Personal card reply exceeds the native packet bound. Use the dashboard.");
@@ -65,7 +65,9 @@ public sealed class ToolbarCommandHandler(MissionCoordinator coordinator, RouteM
                         "map-state" => navigation.State(command.PlanId, command.After, waypointIndex: command.WaypointIndex),
                         "map-chunk" => navigation.Chunk(command.PlanId, command.Revision ?? "", command.Offset),
                         _ => navigation.Plans(command.Offset) };
-                    var encoded = JsonSerializer.Serialize(new { protocol = 1, command.RequestId, ok = true, map = value }, WireJson.Options);
+                    var encoded = command.Op=="map-plans"
+                        ?JsonSerializer.Serialize(new { protocol=1,command.RequestId,ok=true,map=value,selectedPlan=navigation.SelectedPlan() },WireJson.Options)
+                        :JsonSerializer.Serialize(new { protocol = 1, command.RequestId, ok = true, map = value }, WireJson.Options);
                     if (Encoding.UTF8.GetByteCount(encoded) > 8000) throw new InvalidOperationException("Map response exceeds its safe packet bound. Resynchronize the map.");
                     return encoded;
                 }
@@ -115,7 +117,7 @@ public sealed class ToolbarCommandHandler(MissionCoordinator coordinator, RouteM
     }
     private string Reply(Guid id, bool ok, string? error,ToolbarControlReceipt? receipt=null)
     {
-        static string? Short(string? value, int length = 100) => value?.Length > length ? string.Concat(value.EnumerateRunes().Take(length).Select(r=>r.ToString())) + "…" : value;
+        static string? Short(string? value, int length = 100) => value?.EnumerateRunes().Count() > length ? string.Concat(value.EnumerateRunes().Take(length)) + "..." : value;
         var state = coordinator.Snapshot();
         var collection=state.ActiveMission is {} flight?coordinator.ScienceCollection(flight.Id):null;
         var summary=intelligence?.Invoke(state,collection)??ToolbarIntelligenceProjection.Create(state,collection);

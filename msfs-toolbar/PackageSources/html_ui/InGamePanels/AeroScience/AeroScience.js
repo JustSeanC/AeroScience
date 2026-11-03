@@ -33,15 +33,17 @@ class IngamePanelAeroScience extends TemplateElement {
     this.initialized = true;
     this.setAttribute('data-initialization-state', 'binding-controls');
     this.pending = new Map();
+    this.uiFaults = new Map();
+    this.replyFaults = 0;
     this.listener = null;
     this.state = null;
     this.lastReply = 0;
     this.serial=0;this.appliedSerial=0;this.seenEngines=new Set();this.intelligence=null;this.capabilities=[];this.mutationPending=false;
     this.byId = (id) => this.querySelector("#" + id);
-    this.status('Connecting to companion…');
+    this.status('Connecting to companion...');
     this.busLoadClosed=false;
-    this.byId('as-build-identity').textContent = AEROSCIENCE_TOOLBAR_IDENTITY.profile + ' toolbar · source ' + (AEROSCIENCE_TOOLBAR_IDENTITY.source || 'not supplied by this package') + ' · protocol 1';
-    this.byId('as-link-detail').textContent = 'Commands: AeroScience.Command.v1 · Replies: AeroScience.Reply.v1 · No matching engine reply yet. Channel registration alone is not an engine connection.';
+    this.byId('as-build-identity').textContent = AEROSCIENCE_TOOLBAR_IDENTITY.profile + ' toolbar | source ' + (AEROSCIENCE_TOOLBAR_IDENTITY.source || 'not supplied by this package') + ' | protocol 1';
+    this.byId('as-link-detail').textContent = 'Commands: AeroScience.Command.v1 | Replies: AeroScience.Reply.v1 | No matching engine reply yet. Channel registration alone is not an engine connection.';
     this.researchState=null;this.researchOffset=0;this.researchSerial=0;
     this.byId('as-research-previous').onclick=()=>{this.researchOffset=Math.max(0,this.researchOffset-(this.researchState?.pageSize||4));this.requestResearch();};
     this.byId('as-research-next').onclick=()=>{if(this.researchState?.nextOffset!=null){this.researchOffset=this.researchState.nextOffset;this.requestResearch();}};
@@ -117,6 +119,12 @@ class IngamePanelAeroScience extends TemplateElement {
     this.mapCursor = null;
     this.planOffset = 0;
     this.plansLoaded=false;
+    this.planRows=[];
+    this.planOptionsSignature=null;
+    this.mapPlan=null;
+    this.selectedPlan=null;
+    this.selectedPlanMissing=false;
+    this.planFormId=undefined;
     this.byId("as-plan-map").onclick=()=>this.page("map");
     this.byId("as-map-follow").onclick = () => {
       this.mapRenderer.follow = true;
@@ -141,33 +149,19 @@ class IngamePanelAeroScience extends TemplateElement {
     this.byId("as-map-plan").onchange = () => {
       const select = this.byId("as-map-plan"),
         option = select.options[select.selectedIndex];
-      this.mapPlan = select.value || null;
-      this.send("select-plan",{planId:this.mapPlan});
-      try{sessionStorage.setItem("aeroscience-selected-plan",JSON.stringify({id:this.mapPlan,name:option.textContent,mode:option.getAttribute("data-mode")}));}catch(e){}
-      this.mapPlanName = this.mapPlan ? option.textContent : null;
-      this.mapPlanMode = this.mapPlan ? option.getAttribute("data-mode") : null;
-      this.byId("as-start-plan").textContent = this.mapPlan
-        ? "Selected research plan: " +
-          this.mapPlanName +
-          ". "+(option.getAttribute("data-summary")||"Recording keeps its route, instruments and science mode.")
-        : "No saved plan selected. This will be an unplanned recording.";
-      this.byId("as-mode").disabled = !!this.mapPlan;
-      this.byId("as-mode").value = this.mapPlanMode || "universal";
-      this.byId("as-mode").onchange();
-      if (this.mapPlan) this.byId("as-name").value = this.mapPlanName;
-      this.routeRevision = null;
-      this.loadingRevision = null;
-      this.mapCursor = null;
-      this.requestMapState();
+      if(select.disabled||!option||this.state?.activeMission)return;
+      const id=this.send("select-plan",{planId:select.value||null});
+      if(id){this.byId('as-plan-status').textContent='Selecting '+option.textContent+'...';select.disabled=true;}
+      else this.renderPlanSelection();
     };
-    try{const saved=JSON.parse(sessionStorage.getItem("aeroscience-selected-plan")||"null");if(saved?.id){this.mapPlan=saved.id;this.mapPlanName=saved.name;this.mapPlanMode=saved.mode;}}catch(e){}
     this.byId("as-map-plans").onclick = () => {
       this.planOffset = 0;
-      this.send("map-plans", { offset: 0 });
+      this.requestPlans();
     };
+    this.byId('as-map-previous-plans').onclick=()=>{this.planOffset=Math.max(0,this.planOffset-10);this.requestPlans();};
     this.byId("as-map-more-plans").onclick = () => {
       this.planOffset += 10;
-      this.send("map-plans", { offset: this.planOffset });
+      this.requestPlans();
     };
     this.timer = setInterval(() => this.tick(), 1000);
     try {
@@ -213,7 +207,7 @@ class IngamePanelAeroScience extends TemplateElement {
   }
   requestMapChunk() {
     if (
-      !this.isConnected ||
+      !this.aeroScienceConnected ||
       !this.mapRenderer ||
       !this.mapVisible ||
       !this.loadingRevision ||
@@ -226,40 +220,67 @@ class IngamePanelAeroScience extends TemplateElement {
       offset: this.routeItems.length,
     });
   }
-  receiveMap(op, map) {
+  requestPlans(){
+    if(Array.from(this.pending.values()).some(p=>p.op==='map-plans'&&p.researchOffset===this.planOffset))return;
+    this.byId('as-plan-status').textContent='Loading saved mission plans...';
+    this.send('map-plans',{offset:this.planOffset});
+  }
+  synchronizePlan(state){
+    if(!('selectedPlanId' in state))return; // Older engines cannot establish a saved selection.
+    const id=state.selectedPlanId||null;
+    if(id!==this.mapPlan){
+      this.mapPlan=id;this.selectedPlan=this.planRows.find(p=>p.id===id)||null;
+      this.selectedPlanMissing=false;this.plansLoaded=false;
+      this.routeRevision=null;this.loadingRevision=null;this.mapCursor=null;
+    }
+    this.renderPlanSelection();
+  }
+  renderPlanSelection(){
+    const select=this.byId('as-map-plan');
+    const signature=JSON.stringify([this.planRows.map(p=>[p.id,p.name]),this.mapPlan,this.selectedPlan?.name]);
+    if(signature!==this.planOptionsSignature){
+      select.textContent='';
+      const add=(value,name)=>{const option=document.createElement('option');option.value=value;option.textContent=name;select.appendChild(option);};
+      add('','Unplanned Mission');
+      for(const plan of this.planRows)add(plan.id,plan.name);
+      if(this.mapPlan&&!this.planRows.some(p=>p.id===this.mapPlan))add(this.mapPlan,this.selectedPlan?.name||'Selected plan (details unavailable)');
+      this.planOptionsSignature=signature;
+    }
+    select.value=this.mapPlan||'';
+    const selecting=Array.from(this.pending.values()).some(p=>p.op==='select-plan');
+    const fresh=Date.now()-this.lastReply<=6000;
+    select.disabled=!fresh||!!this.state?.activeMission||selecting;
+    this.byId('as-map-previous-plans').disabled=!fresh||this.planOffset===0;
+    this.byId('as-map-more-plans').disabled=!fresh||this.planRows.length<10;
+    this.byId('as-plan-map').disabled=!!this.mapPlan&&!this.selectedPlan;
+    if(this.state?.activeMission)return;
+    const plan=this.selectedPlan;
+    this.byId('as-mode').disabled=!!this.mapPlan;
+    if(plan&&this.planFormId!==plan.id){this.byId('as-name').value=plan.name;this.byId('as-mode').value=plan.mode;this.byId('as-mode').onchange();this.planFormId=plan.id;}
+    if(plan&&this.byId('as-mode').value!==plan.mode){this.byId('as-mode').value=plan.mode;this.byId('as-mode').onchange();}
+    if(!this.mapPlan&&this.planFormId){this.byId('as-name').value='';this.byId('as-mode').value='universal';this.byId('as-mode').onchange();this.planFormId=null;}
+    this.byId('as-start-plan').textContent=this.selectedPlanMissing?'Selected plan is no longer available. Choose another plan or Unplanned Mission.':this.mapPlan
+      ?plan?'Selected: '+plan.name+' | '+plan.waypoints+' waypoints | '+plan.patterns+' patterns. Instruments: '+(plan.instruments||'None enabled')+'.':'Loading selected plan details...'
+      :'Unplanned Mission: record wherever you fly.';
+    if(!fresh||this.uiFaults.has('flight')||this.mutationPending||selecting||this.mapPlan&&!plan)this.byId('as-start').setAttribute('disabled','');
+    else this.byId('as-start').removeAttribute('disabled');
+  }
+  receiveMap(op, map, selectedPlan) {
+    this.updateView(op,()=>this.receiveMapView(op,map,selectedPlan));
+  }
+  receiveMapView(op, map, selectedPlan) {
     if (op === "map-plans") {
-      const select = this.byId("as-map-plan");
-      select.replaceChildren();
-      const empty = document.createElement("option");
-      empty.value = "";
-      empty.textContent = "Unplanned Mission";
-      select.appendChild(empty);
-      for (const plan of map) {
-        const option = document.createElement("option");
-        option.value = plan.id;
-        option.textContent = plan.name;
-        option.setAttribute("data-mode", plan.mode);
-        option.setAttribute("data-summary",(Number.isFinite(plan.waypoints)?plan.waypoints+" waypoints":"Route count unavailable")+" / "+(Number.isFinite(plan.patterns)?plan.patterns+" patterns":"pattern count unavailable")+". Instruments: "+(plan.instruments??"Not provided by this companion"));
-        select.appendChild(option);
-      }
-      if (this.mapPlan && !map.some((p) => p.id === this.mapPlan)) {
-        const keep = document.createElement("option");
-        keep.value = this.mapPlan;
-        keep.textContent = this.mapPlanName || "Selected research plan";
-        keep.setAttribute("data-mode", this.mapPlanMode || "universal");
-        select.appendChild(keep);
-      }
-      select.value = this.mapPlan || "";
-      this.byId("as-map-more-plans").disabled=map.length<10;
+      this.planRows=map;
+      const selected=map.find(p=>p.id===this.mapPlan)||selectedPlan;
+      if(selected?.id===this.mapPlan){this.selectedPlan=selected;this.selectedPlanMissing=false;}
+      else if(this.mapPlan&&selectedPlan===null){this.selectedPlan=null;this.selectedPlanMissing=true;}
       this.plansLoaded=true;
-      if(this.mapPlan&&!this.state?.activeMission)select.onchange();
-      if(this.mapRenderer)this.byId("as-map-status").textContent =
-        "Saved plans loaded via CommBus protocol 1; engine "+(this.state?.version||"unknown")+". An active mission uses its recorded plan snapshot.";
+      this.renderPlanSelection();
+      this.byId('as-plan-status').textContent=map.length?'Saved plans '+(this.planOffset+1)+'-'+(this.planOffset+map.length)+'. Selection is saved by the companion.':this.planOffset?'No more saved plans. Use Previous plans.':'No saved mission plans. Create one in the desktop Flight Planner.';
       return;
     }
     if (op === "map-state") {
       this.lastMapAt = Date.now();
-      this.byId("as-map-plan").disabled = !!map.missionId;
       const changed =
         map.revision !== this.routeRevision &&
         map.revision !== this.loadingRevision;
@@ -268,7 +289,7 @@ class IngamePanelAeroScience extends TemplateElement {
         this.routeItems = [];
         this.mapCursor = null;
         this.mapRenderer.route(map.revision, []);
-        this.byId("as-map-waypoint").replaceChildren();
+        this.byId("as-map-waypoint").textContent='';
         if (map.items === 0) {
           this.routeRevision = map.revision;
           this.loadingRevision = null;
@@ -311,7 +332,7 @@ class IngamePanelAeroScience extends TemplateElement {
         this.mapRenderer.route(map.revision, this.routeItems);
         if (this.lastMapState) this.mapRenderer.update(this.lastMapState);
         const select = this.byId("as-map-waypoint");
-        select.replaceChildren();
+        select.textContent='';
         for (const p of this.routeItems.filter((p) => p.kind === "waypoint")) {
           const o = document.createElement("option");
           o.value = p.index;
@@ -361,6 +382,27 @@ class IngamePanelAeroScience extends TemplateElement {
   status(text) {
     this.byId("as-status").textContent = text;
   }
+  updateView(component,update){
+    try{update();this.uiFaults.delete(component);}
+    catch(error){
+      const kind=['TypeError','RangeError','ReferenceError','SyntaxError'].includes(error?.name)?error.name:'Error';
+      this.uiFaults.set(component,kind);
+      const target={'map-plans':'as-plan-status','map-state':'as-map-status','map-chunk':'as-map-status',research:'as-operations-summary',science:'as-session-phase',payload:'as-science-state'}[component];
+      if(target)this.byId(target).textContent='This view could not update. See Connection & Build Details.';
+      if(component==='science')for(const button of this.querySelectorAll('[data-science-action]'))button.disabled=true;
+      if(component==='flight')this.setControls(false);
+      if(component==='research')this.researchView=null;
+      if(component==='plan selection'){this.byId('as-map-plan').disabled=true;this.byId('as-start').setAttribute('disabled','');}
+      if(component==='research'||component==='payload')for(const button of this.byId(component==='research'?'as-research-cards':'as-payload-view').querySelectorAll('button,select,new-push-button'))button.setAttribute('disabled','');
+    }
+    // Only fixed component names and exception classes; never message/stack/payload text.
+    this.byId('as-ui-detail').textContent=this.uiFaults.size?'Display faults: '+Array.from(this.uiFaults).map(([name,kind])=>name+' / '+kind).join('; '):'Display components synchronized.';
+  }
+  replyFault(code){
+    this.replyFaults++;
+    this.byId('as-reply-detail').textContent='Reply rejected: '+code+' | count '+this.replyFaults+'. Last valid state retained; freshness checks still apply.';
+    this.status('Companion reply could not be read. See Connection & Build Details.');
+  }
   requestId() {
     if (
       typeof crypto !== "undefined" &&
@@ -376,12 +418,12 @@ class IngamePanelAeroScience extends TemplateElement {
     if (!this.listener || this.pending.size >= 8) return;
     const requestId = fields?.requestId || this.requestId();
     const payload=JSON.stringify(Object.assign({protocol:1,requestId,op},fields||{}));
-    if(payload.length>1024){this.status('Command exceeds the native limit. Use the dashboard.');return;}
+    if(this.utf8Bytes(payload)>1024){this.status('Command exceeds the native limit. Use the dashboard.');return;}
     this.pending.set(requestId, {
       op: op,
       sent: Date.now(),
       planId: (fields && fields.planId) || null,
-      observationText:op==='marker'?fields?.notes:null,serial:++this.serial,payload,retries:0,researchOffset:fields?.offset??0,
+      observationText:op==='marker'?fields?.notes:null,serial:++this.serial,payload,retries:0,researchOffset:fields?.offset??0,selectionAtSend:this.mapPlan,engineAtSend:this.engineInstance,
     });
     if (op !== "state" && op !== "research-state" && !op.startsWith("map-")) {
       this.setControls(false);
@@ -405,6 +447,7 @@ class IngamePanelAeroScience extends TemplateElement {
       if(['science-control','research-control','marker'].includes(op)){const pending=this.pending.get(requestId);if(pending)pending.sent=Date.now()-5001;}else this.pending.delete(requestId);
       this.status("Simulator command delivery failed.");
     }
+    return requestId;
   }
   tick() {
     if(!this.listener){this.registerBus();return;}
@@ -423,7 +466,7 @@ class IngamePanelAeroScience extends TemplateElement {
         this.pending.delete(id);
         if(['science-control','research-control','marker'].includes(request.op))this.byId(request.op==='marker'?'as-observation-status':request.op==='research-control'?'as-research-status':'as-collection-message').textContent='No command confirmation after one identical retry. Review synchronized state before issuing a new command.';
         if (request.op.startsWith("map-"))
-          this.byId("as-map-status").textContent =
+          this.byId(request.op==='map-plans'?'as-plan-status':"as-map-status").textContent =
             "Map reply timed out; retrying with the cached route retained.";
         else if (request.op !== "state")
           this.status(
@@ -432,6 +475,7 @@ class IngamePanelAeroScience extends TemplateElement {
       }
     if (Date.now() - this.lastReply > 6000) {
       this.setControls(false);
+      this.byId('as-map-plan').disabled=true;
       this.byId('as-link-detail').textContent = this.lastReply ? 'Last matching engine reply: ' + new Date(this.lastReply).toISOString() + '. Controls are unavailable until fresh synchronized state arrives.' : 'No matching engine reply. Check that the dashboard and toolbar have the same profile and source shown in Connection & Build Details.';
       this.status(
         "Windows engine unavailable. Launch AeroScience and check the SimConnect runtime.",
@@ -448,7 +492,7 @@ class IngamePanelAeroScience extends TemplateElement {
       this.renderIntelligence(false);
       this.renderPersonalResearch(false);
       if (this.mapRenderer) {
-        this.mapRenderer.update({ aircraft: null, track: [], markers: [] });
+        this.updateView('map-state',()=>this.mapRenderer.update({ aircraft: null, track: [], markers: [] }));
         this.byId("as-map-status").textContent =
           "Companion disconnected  -  cached route retained; live aircraft unavailable.";
       }
@@ -469,9 +513,28 @@ class IngamePanelAeroScience extends TemplateElement {
     if(!enabled)for(const button of this.querySelectorAll('[data-science-action]'))button.disabled=true;
   }
   receive(data) {
-    try {
-      if (typeof data !== "string" || this.utf8Bytes(data) > 8000) return;
-      const reply = JSON.parse(data);
+    if(typeof data!=='string'){this.replyFault('non-text message');return;}
+    if(this.utf8Bytes(data)>8000){this.replyFault('message exceeds 8000 UTF-8 bytes');return;}
+    let reply;
+    try{reply=JSON.parse(data);}catch(error){this.replyFault('malformed JSON');return;}
+    if(!reply||typeof reply!=='object'||Array.isArray(reply)){this.replyFault('invalid reply envelope');return;}
+    const pending=this.pending.get(reply.requestId);
+    if(!pending)return; // Unsolicited, duplicate and late replies have no authority.
+    if(reply.protocol!==1){this.setControls(false);this.replyFault('unsupported protocol');return;}
+    if(typeof reply.ok!=='boolean'){this.replyFault('missing command outcome');return;}
+    if(typeof reply.error==='string'&&reply.error.indexOf('Validation toolbar source mismatch')===0){
+      this.pending.clear();this.lastReply=0;this.setControls(false);this.renderIntelligence(false);
+      this.byId('as-map-plan').disabled=true;this.byId('as-reply-detail').textContent='Validation source mismatch. No state accepted.';this.status(reply.error);return;
+    }
+    if(!pending.op.startsWith('map-')&&!['research-state','research-control'].includes(pending.op)&&
+      (!reply.state||typeof reply.state.connection?.message!=='string'||!reply.state.connection.source||
+       reply.state.activeMission!=null&&typeof reply.state.activeMission.id!=='string')){
+      this.replyFault('missing or invalid flight state');return;
+    }
+    if(reply.ok&&pending.op==='map-plans'&&(!Array.isArray(reply.map)||reply.map.length>10||reply.map.some(p=>!p||typeof p.id!=='string'||typeof p.name!=='string'))){this.replyFault('invalid saved-plan page');return;}
+    this.updateView('reply processing',()=>this.processReply(reply));
+  }
+  processReply(reply){
       const pendingRequest = this.pending.get(reply.requestId);
       if(reply.protocol===1&&pendingRequest&&['research-state','research-control'].includes(pendingRequest.op)){
         this.pending.delete(reply.requestId);
@@ -492,6 +555,7 @@ class IngamePanelAeroScience extends TemplateElement {
         pendingRequest.op.startsWith("map-")
       ) {
         this.pending.delete(reply.requestId);
+        if(pendingRequest.engineAtSend!==this.engineInstance||pendingRequest.op==='map-plans'&&pendingRequest.selectionAtSend!==this.mapPlan){if(pendingRequest.op==='map-plans')this.plansLoaded=false;return;}
         if (
           pendingRequest.op !== "map-plans" &&
           pendingRequest.planId !== (this.mapPlan || null)
@@ -499,10 +563,11 @@ class IngamePanelAeroScience extends TemplateElement {
           this.requestMapState();
           return;
         }
+        if(pendingRequest.op==='map-plans'&&pendingRequest.researchOffset!==this.planOffset)return;
         if (reply.ok && reply.map)
-          this.receiveMap(pendingRequest.op, reply.map);
+          this.receiveMap(pendingRequest.op, reply.map,reply.selectedPlan);
         else {
-          this.byId("as-map-status").textContent =
+          this.byId(pendingRequest.op==='map-plans'?'as-plan-status':"as-map-status").textContent =
             reply.error || "Map synchronization failed; waiting to retry.";
           this.loadingRevision = null;
         }
@@ -515,8 +580,11 @@ class IngamePanelAeroScience extends TemplateElement {
       )
         return;
       this.pending.delete(reply.requestId);
+      this.mutationPending=Array.from(this.pending.values()).some(p=>!['state','research-state'].includes(p.op)&&!p.op.startsWith('map-'));
+      this.setControls(!this.mutationPending&&Date.now()-this.lastReply<=6000);
+      if(pendingRequest.op==='select-plan')this.byId('as-plan-status').textContent=reply.ok?'Mission plan selection confirmed.':reply.error||'Plan selection was not confirmed. Refresh plans.';
       if(pendingRequest.op==='marker'){if(reply.ok&&this.byId('as-observation-note').value===pendingRequest.observationText)this.byId('as-observation-note').value='';this.byId('as-observation-status').textContent=reply.ok?'Pilot Observation saved. Flight and science continue independently.':reply.error||'Observation was not saved; your text is preserved.';}
-      if(pendingRequest.serial<this.appliedSerial){if(pendingRequest.op==='science-control')this.byId('as-collection-message').textContent=(reply.error||reply.receipt?.reason||'Earlier request acknowledged')+' · A newer authoritative view is already displayed.';return;}
+      if(pendingRequest.serial<this.appliedSerial){if(pendingRequest.op==='science-control')this.byId('as-collection-message').textContent=(reply.error||reply.receipt?.reason||'Earlier request acknowledged')+' | A newer authoritative view is already displayed.';return;}
       if(reply.engineInstance&&reply.engineInstance!==this.engineInstance&&this.seenEngines.has(reply.engineInstance))return;
       if(reply.intelligence&&this.intelligence&&reply.engineInstance===this.engineInstance&&reply.intelligence.missionId===this.intelligence.missionId&&reply.intelligence.revision<this.intelligence.revision)return;
       this.appliedSerial=pendingRequest.serial;
@@ -529,39 +597,32 @@ class IngamePanelAeroScience extends TemplateElement {
       this.intelligence=this.capabilities.includes('mission-intelligence-1')&&candidate?.version===1&&
         candidate.missionId===(reply.state.activeMission?.id??null)&&Array.isArray(candidate.actions)&&Array.isArray(candidate.metrics)&&Array.isArray(candidate.warnings)&&Number.isFinite(Date.parse(candidate.generatedUtc))?candidate:null;
       this.state = reply.state;
-      if(engineChanged)this.plansLoaded=false;
-      if("selectedPlanId" in reply.state && !reply.state.activeMission && reply.state.selectedPlanId!==this.mapPlan){
-        this.mapPlan=reply.state.selectedPlanId||null;this.plansLoaded=false;
-      }
+      if(engineChanged){this.plansLoaded=false;this.selectedPlan=null;this.planRows=[];this.planFormId=undefined;this.mapPlan=null;}
       const mutationPending = Array.from(this.pending.values()).some(
         (x) => x.op !== "state" && x.op !== "research-state" && !x.op.startsWith("map-"),
       );
       this.mutationPending=mutationPending;
       this.setControls(!mutationPending);
-      this.render(reply.state);
+      this.updateView('flight',()=>this.render(reply.state));
       this.renderIntelligence(true);
+      this.updateView('plan selection',()=>this.synchronizePlan(reply.state));
       if(pendingRequest.op==='science-control')this.byId('as-collection-message').textContent=reply.receipt?.reason||reply.error||'Session command confirmed. Review current state.';
-      if(!this.plansLoaded&&!Array.from(this.pending.values()).some(p=>p.op==="map-plans")){this.planOffset=0;this.send("map-plans",{offset:0});}
+      if(!this.plansLoaded&&!Array.from(this.pending.values()).some(p=>p.op==="map-plans")){this.planOffset=0;this.requestPlans();}
       if (!reply.ok)
         this.status(reply.error || "Mission command was rejected.");
-    } catch (error) {
-      this.status(
-        "Invalid engine reply. Check companion and toolbar versions.",
-      );
-    }
   }
   render(state) {
     const t = state.telemetry,
       mission = state.activeMission;
     if(mission){this.byId("as-start-plan").textContent="Active recording: its saved plan snapshot is fixed. Plan selection for the next recording is separate.";}
 
-    const fresh = t && Date.now() - Date.parse(t.timestampUtc) < 6000 && Date.now()-Date.parse(t.timestampUtc)>=-2000;
+    const fresh = t && (state.connection.state==='connected'||state.connection.source==='simulated'&&!state.connection.state) && Date.now() - Date.parse(t.timestampUtc) < 6000 && Date.now()-Date.parse(t.timestampUtc)>=-2000;
     this.byId("as-source").textContent =
       state.connection.source === "simulated"
         ? "SIMULATED TEST DATA"
         : fresh && state.connection.state === "connected"
           ? "SIMCONNECT TELEMETRY"
-          : "MSFS DISCONNECTED";
+          : state.connection.state==='connected'?'AIRCRAFT TELEMETRY UNAVAILABLE':"MSFS DISCONNECTED";
     this.status(state.recordingStop ? "RECORDING STOPPED  /  " + state.recordingStop.code + ": " + state.recordingStop.message : state.connection.message);
     this.byId("as-aircraft").textContent = fresh
       ? t.aircraft
@@ -586,6 +647,7 @@ class IngamePanelAeroScience extends TemplateElement {
     if (mission) {
       // Prepare the next mission with the safe default, independently of the active mission's mode.
       if(this.renderedMission!==mission.id){
+      this.planFormId=undefined;
       this.byId("as-mode").value = "universal";
       this.byId("as-mode-help").textContent =
         "All compatible aircraft can record missions.";
@@ -595,7 +657,7 @@ class IngamePanelAeroScience extends TemplateElement {
       this.byId("as-active-plan").textContent=state.research?.planId?"Active saved-plan snapshot (fixed for this recording). Fly the route reference on Map.":"Active unplanned mission: scientific preparation follows actual aircraft movement.";
       this.byId("as-active-mode").textContent =
         mission.mode === "realistic"
-          ? "Realistic Mode  /  advanced science features coming in a future release"
+          ? "Realistic Mode"
           : "Universal Mode  /  Fly Anything";
       this.byId("as-samples").textContent = mission.sampleCount + " samples";
       const seconds = Math.max(
@@ -612,19 +674,27 @@ class IngamePanelAeroScience extends TemplateElement {
     }
   }
   utf8Bytes(text){let bytes=0;for(const character of text){const cp=character.codePointAt(0);bytes+=cp<=0x7f?1:cp<=0x7ff?2:cp<=0xffff?3:4;}return bytes;}
+  nativeLabel(value){
+    const labels={unknown:'Unavailable',unavailable:'Unavailable',notGraded:'Not graded',betweenSessions:'Between sessions',insufficientEvidence:'Insufficient evidence',notAssessed:'Not assessed',valid:'Valid',invalid:'Invalid',stale:'Stale',missing:'Missing',armed:'Armed',collecting:'Collecting',paused:'Paused',stopped:'Stopped',awaitingSource:'Waiting for source',acquisitionGap:'Acquisition gap',sourceDisconnected:'Source disconnected',waiting:'Waiting',manual:'Manual',automatic:'Automatic',unsupported:'Unsupported',provisional:'Provisional',final:'Final',revised:'Revised',supported:'Supported',caution:'Caution',disabled:'Disabled',idle:'Idle',enabled:'Enabled',detecting:'Detecting',holding:'Holding',completed:'Complete',insufficient:'Insufficient evidence'};
+    return labels[value]||'Unavailable';
+  }
+  nativeUnit(unit){return String(unit||'').replace(/°/g,'deg').replace(/³/g,'^3').replace(/²/g,'^2').replace(/µ/g,'u');}
   renderIntelligence(connected){
+    this.updateView('science',()=>this.renderIntelligenceView(connected));
+  }
+  renderIntelligenceView(connected){
     const i=this.intelligence,supported=this.capabilities.includes('session-bound-controls-1')&&i?.version===1;
     const fresh=connected&&supported&&Date.now()-Date.parse(i.generatedUtc)<=6000&&Date.now()-Date.parse(i.generatedUtc)>=-2000;
     for(const button of this.querySelectorAll('[data-science-action]')){button.disabled=!fresh||this.mutationPending||!i.actions.includes(button.dataset.scienceAction);button.title=!supported?'This companion does not support session-bound native controls.':!fresh?'Stale engine state; synchronize before controlling science.':'Backend session and control revisions are checked before applying.';}
-    if(!supported){this.byId('as-session-phase').textContent='Science intelligence unsupported by this engine';this.byId('as-session-authority').textContent='Update the companion for multi-session native controls. Legacy Payload pause/resume remains available.';this.byId('as-grade').textContent='Grade and scientific yield unavailable.';this.byId('as-session-identity').textContent='No session identity supplied.';this.byId('as-next-trigger').textContent='Next trigger not assessed.';this.byId('as-science-yield').textContent='Scientific yield not assessed.';this.byId('as-intelligence-warning').textContent='';this.byId('as-intelligence-asof').textContent='';return;}
-    this.byId('as-session-phase').textContent=(fresh?'Science: ':'Stale science state: ')+i.phase+(i.sessionSequence?' · Session '+i.sessionSequence:' · No open session');
-    this.byId('as-session-authority').textContent='Automation: '+i.authority+(i.manualHold?' · pilot hold; rearm required':'')+(i.continuityHold?' · continuity hold':'');
-    this.byId('as-session-identity').textContent='Flight '+(i.missionId||'none')+' · Session '+(i.sessionId||'none')+' · revision '+(i.revision??'Unknown');
-    this.byId('as-grade').textContent=i.gradeStatus+' performance'+(Number.isFinite(i.scoreLower)&&Number.isFinite(i.scoreUpper)?' · bounds '+i.scoreLower.toFixed(1)+'–'+i.scoreUpper.toFixed(1)+' / 100':' · score unavailable')+'. Live bounds are not a final letter grade.';
-    this.byId('as-intelligence-warning').textContent=i.warnings?.[0]||'See dashboard for instrument/source limitations; no accuracy certification is inferred.';
+    if(!supported){this.byId('as-session-phase').textContent='Science status unavailable (unsupported companion)';this.byId('as-session-authority').textContent='Update the companion for science session controls.';this.byId('as-grade').textContent='No score available.';this.byId('as-session-identity').textContent='No session identity supplied.';this.byId('as-next-trigger').textContent='Next trigger not assessed.';this.byId('as-science-yield').textContent='Scientific yield not assessed.';this.byId('as-intelligence-warning').textContent='';this.byId('as-intelligence-asof').textContent='';return;}
+    this.byId('as-session-phase').textContent=(i.phase==='unknown'?'Science status unavailable':(fresh?'Science: ':'Last science status: ')+this.nativeLabel(i.phase))+(i.sessionSequence?' | Session '+i.sessionSequence:!i.sessionId&&i.phase==='armed'?' | Science not started':'')+(!fresh?' | Status is stale':'');
+    this.byId('as-session-authority').textContent='Collection control: '+this.nativeLabel(i.authority)+(i.manualHold?' | pilot hold; rearm required':'')+(i.continuityHold?' | continuity hold':'');
+    this.byId('as-session-identity').textContent='Flight '+(i.missionId||'none')+' | Session '+(i.sessionId||'none')+' | revision '+(i.revision??'Unknown');
+    this.byId('as-grade').textContent=this.nativeLabel(i.gradeStatus)+(Number.isFinite(i.scoreLower)&&Number.isFinite(i.scoreUpper)?' | score bounds '+i.scoreLower.toFixed(1)+'-'+i.scoreUpper.toFixed(1)+' / 100':' | No score available')+'.';
+    this.byId('as-intelligence-warning').textContent=i.warnings?.[0]||'';
     this.byId('as-next-trigger').textContent=i.triggerStatus;
-    this.byId('as-science-yield').textContent=i.metrics.length?i.metrics.map(m=>m.instrumentId+' · '+m.id+': '+m.status+(['supported','caution'].includes(m.status)&&Number.isFinite(m.numerator)&&m.denominator>0?' '+m.numerator+'/'+m.denominator+' assessed '+m.unit+' ('+(100*m.numerator/m.denominator).toFixed(1)+'%)':' — unassessed')+' · missing '+(m.missing??'Unknown')+'; unassessed '+(m.unassessed??'Unknown')+' · whole-flight scope').join('; '):'Good Data / valid scientific coverage not yet assessed. Flight path is not valid-pixel coverage.';
-    this.byId('as-intelligence-asof').textContent='State as of '+i.generatedUtc+' · metrics '+(i.metricsUtc||'Pending')+(i.metricsUtc&&Date.now()-Date.parse(i.metricsUtc)>15000?' · Evidence cutoff is older than 15 s; metrics are not current.':'')+(i.detailsOmitted?' · Additional detail on dashboard.':'');
+    this.byId('as-science-yield').textContent=i.metrics.length?i.metrics.map(m=>m.instrumentId+' | '+m.id+': '+m.status+(['supported','caution'].includes(m.status)&&Number.isFinite(m.numerator)&&m.denominator>0?' '+m.numerator+'/'+m.denominator+' assessed '+m.unit+' ('+(100*m.numerator/m.denominator).toFixed(1)+'%)':' - unassessed')+' | missing '+(m.missing??'Unknown')+'; unassessed '+(m.unassessed??'Unknown')+' | whole-flight scope').join('; '):'Good Data / valid scientific coverage not yet assessed. Flight path is not valid-pixel coverage.';
+    this.byId('as-intelligence-asof').textContent='State as of '+i.generatedUtc+' | metrics '+(i.metricsUtc||'Pending')+(i.metricsUtc&&Date.now()-Date.parse(i.metricsUtc)>15000?' | Evidence cutoff is older than 15 s; metrics are not current.':'')+(i.detailsOmitted?' | Additional detail on dashboard.':'');
   }
   requestResearch(){
     if(!this.capabilities.includes('personal-research-controls-1')||!this.state?.activeMission){this.researchState=null;this.researchOffset=0;this.researchFocusedCard=null;this.focusedResearchSummary=null;this.renderPersonalResearch(false);return;}
@@ -633,17 +703,20 @@ class IngamePanelAeroScience extends TemplateElement {
     this.send('research-state',{missionId:this.state.activeMission.id,offset:this.researchOffset});
   }
   renderPersonalResearch(fresh){
+    this.updateView('research',()=>this.renderPersonalResearchView(fresh));
+  }
+  renderPersonalResearchView(fresh){
     const state=this.researchState,host=this.byId('as-research-list');
     const valid=fresh&&Date.now()-Date.parse(state?.generatedUtc)<6000&&state?.flightId===this.state?.activeMission?.id&&state?.recording;
     const pending=Array.from(this.pending.values()).some(p=>p.op==='research-control');
     const summary=this.byId('as-operations-summary');
     const selected=state?.cards.find(c=>c.card.id===this.researchFocusedCard);
-    if(selected)this.focusedResearchSummary=selected.card.name+' · '+(selected.openAttempt?'Attempt recording':selected.active?'Active':'Inactive')+(selected.procedure?.nextPointId?' · Next point '+(selected.card.procedure?.points.find(p=>p.id===selected.procedure.nextPointId)?.conditions.testPoint.name||'on dashboard'):'');
-    summary.textContent=!valid?'Research state unavailable or stale — no current progress inferred.':(this.focusedResearchSummary?'Focused: '+this.focusedResearchSummary+'. ':'Choose a card on Research. ')+(state.activeCardCount??state.cards.filter(c=>c.active).length)+' active card(s)'+(state.activeCardNames?.length?' · '+state.activeCardNames.join('; '):'')+'. Flight and science remain independent.';
+    if(selected)this.focusedResearchSummary=selected.card.name+' | '+(selected.openAttempt?'Attempt recording':selected.active?'Active':'Inactive')+(selected.procedure?.nextPointId?' | Next point '+(selected.card.procedure?.points.find(p=>p.id===selected.procedure.nextPointId)?.conditions.testPoint.name||'on dashboard'):'');
+    summary.textContent=!valid?this.state?.activeMission?'Research status unavailable.':'Personal research cards: prepare in the desktop Flight Planner.':(this.focusedResearchSummary?'Focused: '+this.focusedResearchSummary+'. ':'Research: ')+(state.activeCardCount??state.cards.filter(c=>c.active).length)+' active card(s)'+(state.activeCardNames?.length?' | '+state.activeCardNames.join('; '):'')+'.';
     const signature=JSON.stringify([state?.flightId,state?.revision,this.researchOffset,valid,state?.canBeginAttempt,pending,this.researchFocusedCard]);
     if(this.researchView===signature)return;this.researchView=signature;
     const focusCard=document.activeElement?.dataset?.researchCard,focusAction=document.activeElement?.dataset?.researchAction;
-    host.replaceChildren();this.byId('as-research-previous').disabled=!valid||this.researchOffset===0;this.byId('as-research-next').disabled=!valid||state?.nextOffset==null;
+    host.textContent='';this.byId('as-research-previous').disabled=!valid||this.researchOffset===0;this.byId('as-research-next').disabled=!valid||state?.nextOffset==null;
     if(!valid){this.byId('as-research-status').textContent=this.state?.activeMission?'Waiting for synchronized personal card state. Flight and science remain independent.':'Choose personal cards in Mission Planner before recording.';return;}
     this.byId('as-research-status').textContent=state.cards.length?'Activate a card, then Begin Attempt / End Attempt. Deactivate Card does not stop flight or science.':'No personal cards selected for this flight.';
     for(const item of state.cards){
@@ -655,21 +728,24 @@ class IngamePanelAeroScience extends TemplateElement {
       const sensor=item.card.experimentalSensor;
       const point=item.card.flightRegime?.testPoint,rule=item.card.flightRegime;
       const procedure=item.card.procedure;
-      const requirements=procedure?(procedure.ordered?'Ordered':'Independent')+' procedure · '+(item.procedure?.points||[]).map(p=>p.completedRepetitions+'/'+p.requiredRepetitions).join(' · ')+' repetitions; verify originals after flight':point?[point.airspeedRequired?rule.airspeedKnots+' ± '+rule.airspeedToleranceKnots+' knots IAS':null,point.altitudeRequired?rule.altitudeMslFeet+' ± '+rule.altitudeToleranceFeet+' feet MSL':null].filter(Boolean).join(' AND ')+' · '+rule.holdSeconds+' continuous seconds':sensor?'Fictional modeled temperature · '+sensor.responseSeconds+' s response · '+sensor.minimumSamples+' original science samples required':observation?observation.minimumObservations+' documented Pilot Observations · notes are not sensor measurements':survey?'Survey: '+survey.measurements.map(m=>({airTemperature:'Air Temperature',terrainElevation:'Terrain Elevation',landSurfaceTemperature:'Land Surface Temperature'})[m]).join(' + ')+' · source-qualified samples required':transect?transect.requiredStations+' distinct sampling locations · '+transect.minimumExtentMetres+' m geographic extent · collect valid temperature readings':atmospheric?atmospheric.requiredBands+' neighboring '+atmospheric.bandWidthFeet+'-foot MSL bands · collect valid temperature readings':item.card.flightRegime.airspeedKnots+' knots IAS · '+item.card.flightRegime.altitudeMslFeet+' feet MSL';
-      title.textContent=item.card.name+' · revision '+item.card.revision;info.textContent=(item.openAttempt?'Attempt recording':item.active?'Active':'Inactive')+' · '+(item.detection?item.detection.status+(item.detection.lastOutcome?' — '+({pass:'Pass',fail:'Fail',insufficientEvidence:'Insufficient Evidence'}[item.detection.lastOutcome]||'Unknown'):'')+' · ':'')+requirements+'. '+(item.activationBlocked||'');row.append(title,info);
-      if(item.organization){const label=document.createElement('p');label.textContent=item.organization.organizationName+' · issued '+item.organization.issuedRevision+' · '+item.organization.status;row.append(label);}
-      const focus=document.createElement('button');focus.textContent=this.researchFocusedCard===item.card.id?'Focused in Toolbar':'Focus Card';focus.onclick=()=>{this.researchFocusedCard=item.card.id;this.researchView=null;this.renderPersonalResearch(true);this.byId('as-research-list').querySelector('[data-research-card="'+item.card.id+'"]')?.focus();};row.append(focus);
+      const requirements=procedure?(procedure.ordered?'Ordered':'Independent')+' procedure | '+(item.procedure?.points||[]).map(p=>p.completedRepetitions+'/'+p.requiredRepetitions).join(' | ')+' repetitions; verify originals after flight':point?[point.airspeedRequired?rule.airspeedKnots+' +/- '+rule.airspeedToleranceKnots+' knots IAS':null,point.altitudeRequired?rule.altitudeMslFeet+' +/- '+rule.altitudeToleranceFeet+' feet MSL':null].filter(Boolean).join(' AND ')+' | '+rule.holdSeconds+' continuous seconds':sensor?'Fictional modeled temperature | '+sensor.responseSeconds+' s response | '+sensor.minimumSamples+' original science samples required':observation?observation.minimumObservations+' documented Pilot Observations | notes are not sensor measurements':survey?'Survey: '+survey.measurements.map(m=>({airTemperature:'Air Temperature',terrainElevation:'Terrain Elevation',landSurfaceTemperature:'Land Surface Temperature'})[m]).join(' + ')+' | source-qualified samples required':transect?transect.requiredStations+' distinct sampling locations | '+transect.minimumExtentMetres+' m geographic extent | collect valid temperature readings':atmospheric?atmospheric.requiredBands+' neighboring '+atmospheric.bandWidthFeet+'-foot MSL bands | collect valid temperature readings':item.card.flightRegime.airspeedKnots+' knots IAS | '+item.card.flightRegime.altitudeMslFeet+' feet MSL';
+      title.textContent=item.card.name+' | revision '+item.card.revision;info.textContent=(item.openAttempt?'Attempt recording':item.active?'Active':'Inactive')+' | '+(item.detection?item.detection.status+(item.detection.lastOutcome?' - '+({pass:'Pass',fail:'Fail',insufficientEvidence:'Insufficient Evidence'}[item.detection.lastOutcome]||'Unknown'):'')+' | ':'')+requirements+'. '+(item.activationBlocked||'');row.appendChild(title);row.appendChild(info);
+      if(item.organization){const label=document.createElement('p');label.textContent=item.organization.organizationName+' | issued '+item.organization.issuedRevision+' | '+item.organization.status;row.appendChild(label);}
+      const focus=document.createElement('button');focus.textContent=this.researchFocusedCard===item.card.id?'Focused in Toolbar':'Focus Card';focus.onclick=()=>{this.researchFocusedCard=item.card.id;this.researchView=null;this.renderPersonalResearch(true);this.byId('as-research-list').querySelector('[data-research-card="'+item.card.id+'"]')?.focus();};row.appendChild(focus);
       let pointSelect=null;
-      if(procedure){const label=document.createElement('label');label.textContent='Test point';pointSelect=document.createElement('select');pointSelect.setAttribute('aria-label','Test point for '+item.card.name);this.researchPointChoices||={};for(const point of procedure.points){const option=document.createElement('option');option.value=point.id;option.textContent=point.conditions.testPoint.name+' · '+point.conditions.holdSeconds+' s · '+point.repetitions+' attempts';pointSelect.append(option);}pointSelect.value=item.openAttempt?.testPointId||this.researchPointChoices[item.card.id]||item.procedure?.nextPointId||procedure.points[0].id;pointSelect.disabled=pending||!!item.openAttempt;pointSelect.onchange=()=>this.researchPointChoices[item.card.id]=pointSelect.value;label.append(pointSelect);row.append(label);}
+      if(procedure){const label=document.createElement('label');label.textContent='Test point';pointSelect=document.createElement('select');pointSelect.setAttribute('aria-label','Test point for '+item.card.name);this.researchPointChoices||={};for(const point of procedure.points){const option=document.createElement('option');option.value=point.id;option.textContent=point.conditions.testPoint.name+' | '+point.conditions.holdSeconds+' s | '+point.repetitions+' attempts';pointSelect.appendChild(option);}pointSelect.value=item.openAttempt?.testPointId||this.researchPointChoices[item.card.id]||item.procedure?.nextPointId||procedure.points[0].id;pointSelect.disabled=pending||!!item.openAttempt;pointSelect.onchange=()=>this.researchPointChoices[item.card.id]=pointSelect.value;label.appendChild(pointSelect);row.appendChild(label);}
       for(const [action,label] of [['activate','Activate Card'],['deactivate','Deactivate Card'],['beginAttempt','Begin Attempt'],['endAttempt','End Attempt'],...((item.card.version===7&&point)||procedure?[['enableAutomatic','Enable Automatic Detection'],['disableAutomatic','Disable Automatic Detection']]:[])]){
         const b=document.createElement('button');b.textContent=label;b.dataset.researchCard=item.card.id;b.dataset.researchAction=action;
         b.disabled=pending||action==='activate'&&(item.active||!!item.activationBlocked)||action==='deactivate'&&!item.active||action==='beginAttempt'&&(!item.active||!!item.openAttempt&&!item.openAttempt.automatic||!state.canBeginAttempt)||action==='endAttempt'&&!item.openAttempt||action==='enableAutomatic'&&(!item.active||!!item.openAttempt||!state.canBeginAttempt)||action==='disableAutomatic'&&!item.detection?.enabled;
-        b.onclick=()=>{if(b.disabled)return;if(action==='endAttempt'&&this.researchPointChoices)delete this.researchPointChoices[item.card.id];const requestId=this.requestId();this.send('research-control',{requestId,missionId:state.flightId,offset:this.researchOffset,researchControl:{version:1,flightId:state.flightId,requestId,expectedRevision:state.revision,action,cardId:item.card.id,expectedAttemptId:item.openAttempt?.id||null,...(['beginAttempt','enableAutomatic'].includes(action)&&pointSelect?{testPointId:pointSelect.value}:{})}});this.renderPersonalResearch(true);};row.append(b);
-      }host.append(row);
+        b.onclick=()=>{if(b.disabled)return;if(action==='endAttempt'&&this.researchPointChoices)delete this.researchPointChoices[item.card.id];const requestId=this.requestId();this.send('research-control',{requestId,missionId:state.flightId,offset:this.researchOffset,researchControl:{version:1,flightId:state.flightId,requestId,expectedRevision:state.revision,action,cardId:item.card.id,expectedAttemptId:item.openAttempt?.id||null,...(['beginAttempt','enableAutomatic'].includes(action)&&pointSelect?{testPointId:pointSelect.value}:{})}});this.renderPersonalResearch(true);};row.appendChild(b);
+      }host.appendChild(row);
     }
     if(focusCard){const choices=Array.from(host.querySelectorAll('button')).filter(b=>b.dataset.researchCard===focusCard&&!b.disabled);const target=choices.find(b=>b.dataset.researchAction===focusAction)||choices[0]||Array.from(host.children).find(r=>r.dataset.researchCard===focusCard);target?.focus();}
   }
   renderResearch(research, fresh) {
+    this.updateView('payload',()=>this.renderResearchView(research,fresh));
+  }
+  renderResearchView(research, fresh) {
     const g = research && research.guidance;
     this.byId("as-guidance").textContent =
       !fresh || !g || g.quality !== "valid"
@@ -711,7 +787,7 @@ class IngamePanelAeroScience extends TemplateElement {
     const collection = this.byId("as-science-state");
     if (collection)
       collection.textContent = research
-        ? "Collection: " + research.collectionStatus
+        ? "Collection: " + this.nativeLabel(research.collectionStatus)
         : "Science unavailable";
     const holder = this.byId("as-instruments");
     if (!research) {
@@ -827,11 +903,11 @@ class IngamePanelAeroScience extends TemplateElement {
               )
             : "Unavailable") +
           " " +
-          (v.displayUnit || v.unit);
+          this.nativeUnit(v.displayUnit || v.unit);
         nodes.values.appendChild(value);
       }
       nodes.state.textContent = instrument.enabled
-        ? instrument.quality
+        ? this.nativeLabel(instrument.quality)
         : "Disabled";
       nodes.row.setAttribute(
         "data-state",

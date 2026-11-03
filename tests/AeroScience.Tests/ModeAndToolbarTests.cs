@@ -88,6 +88,46 @@ public sealed class ModeAndToolbarTests : IDisposable
     }
 
     [Fact]
+    public void NativePlanPagesResolveOffPageSelectionAndKeepActiveSnapshotAndMissingPlanGuards()
+    {
+        var store=Store();var coordinator=new MissionCoordinator(store,1000);var handler=new ToolbarCommandHandler(coordinator);
+        for(var i=0;i<12;i++)store.SavePlan(new(Guid.NewGuid(),$"Café 研究 {i}",Waypoints:[new("A",40,-75),new("B",40.1,-75.1)],Instruments:[new("ambient-temperature",true)]));
+        var selected=store.Plans(100).Last();coordinator.SelectPlan(selected.Id);
+        string Send(string op,Guid? planId=null,int offset=0)=>handler.Handle(JsonSerializer.Serialize(new ToolbarCommand(1,Guid.NewGuid(),op,Name:selected.Name,PlanId:planId,Offset:offset),WireJson.Options));
+        var encoded=Send("map-plans");using(var reply=JsonDocument.Parse(encoded))
+        {
+            Assert.Equal(10,reply.RootElement.GetProperty("map").GetArrayLength());
+            Assert.DoesNotContain(reply.RootElement.GetProperty("map").EnumerateArray(),p=>p.GetProperty("id").GetGuid()==selected.Id);
+            Assert.Equal(selected.Id,reply.RootElement.GetProperty("selectedPlan").GetProperty("id").GetGuid());
+            Assert.Equal(selected.Name,reply.RootElement.GetProperty("selectedPlan").GetProperty("name").GetString());
+            Assert.Contains("ambient-temperature",reply.RootElement.GetProperty("selectedPlan").GetProperty("instruments").GetString());
+        }
+        Assert.True(Encoding.UTF8.GetByteCount(encoded)<=8000);Assert.Null(coordinator.Snapshot().ActiveMission);
+        Assert.Equal(selected.Id,new MissionCoordinator(store,1000).Snapshot().SelectedPlanId);
+        using(var page=JsonDocument.Parse(Send("map-plans",offset:10)))Assert.Equal(2,page.RootElement.GetProperty("map").GetArrayLength());
+        Assert.Equal(selected.Id,coordinator.Snapshot().SelectedPlanId);
+        var start=JsonSerializer.Deserialize<ToolbarReply>(Send("start",selected.Id),WireJson.Options)!;Assert.True(start.Ok,start.Error);
+        var mission=start.State.ActiveMission!;store.SavePlan(selected with{Name="Edited next flight",Waypoints=[]});
+        var other=store.Plans(100).First(p=>p.Id!=selected.Id);
+        Assert.False(JsonSerializer.Deserialize<ToolbarReply>(Send("select-plan",other.Id),WireJson.Options)!.Ok);
+        using(var map=JsonDocument.Parse(Send("map-state",other.Id))){Assert.Equal(selected.Name,map.RootElement.GetProperty("map").GetProperty("name").GetString());Assert.Equal(2,map.RootElement.GetProperty("map").GetProperty("waypoints").GetInt32());}
+        Assert.Equal(selected.Waypoints,store.Research(mission.Id).PlanSnapshot!.Waypoints);coordinator.End(mission.Id);
+        store.DeletePlan(selected.Id);using(var missing=JsonDocument.Parse(Send("map-plans")))Assert.Equal(JsonValueKind.Null,missing.RootElement.GetProperty("selectedPlan").ValueKind);
+        Assert.False(JsonSerializer.Deserialize<ToolbarReply>(Send("start",selected.Id),WireJson.Options)!.Ok);Assert.Null(coordinator.Snapshot().ActiveMission);
+        Assert.True(JsonSerializer.Deserialize<ToolbarReply>(Send("select-plan"),WireJson.Options)!.Ok);Assert.Null(coordinator.Snapshot().SelectedPlanId);
+    }
+
+    [Fact]
+    public void NativeDisplayClippingKeepsWholeUnicodeCharactersWithoutChangingSavedPlanNames()
+    {
+        var store=Store();var coordinator=new MissionCoordinator(store,1000);
+        var name=new string('A',79)+"😀 research";var plan=store.SavePlan(new(Guid.NewGuid(),name));coordinator.SelectPlan(plan.Id);
+        var encoded=new ToolbarCommandHandler(coordinator).Handle(JsonSerializer.Serialize(new ToolbarCommand(1,Guid.NewGuid(),"map-plans"),WireJson.Options));
+        using var reply=JsonDocument.Parse(encoded);var display=reply.RootElement.GetProperty("selectedPlan").GetProperty("name").GetString()!;
+        Assert.EndsWith("😀...",display);Assert.DoesNotContain("\uFFFD",display);Assert.Equal(name,store.Plan(plan.Id)!.Name);Assert.True(Encoding.UTF8.GetByteCount(encoded)<=8000);
+    }
+
+    [Fact]
     public void CommBusDecoderRejectsMalformedFragmentedAndOversizedPackets()
     {
         var json = Encoding.UTF8.GetBytes("{\"protocol\":1}\0"); var packet = new byte[32 + json.Length];

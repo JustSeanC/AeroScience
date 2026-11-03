@@ -65,6 +65,14 @@ class PrivateValidationTests(unittest.TestCase):
             (root/'VALIDATION-RECEIPT.json').write_text('{}')
             with self.assertRaisesRegex(ValueError,'cannot become public'):p.validate_companion(root)
 
+    def test_staging_refuses_a_missing_source_rejection_handler(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            stage=Path(tmp)/'stage';shutil.copytree(ROOT/'msfs-toolbar',stage)
+            js=stage/'PackageSources/html_ui/InGamePanels/AeroScience/AeroScience.js'
+            js.write_text(js.read_text().replace('Validation toolbar source mismatch','Missing handler fixture'))
+            with self.assertRaisesRegex(ValueError,'Toolbar validation source rejection handler missing'):
+                private.stage_toolbar(stage,'a'*40)
+
     def test_validation_structural_checks_reject_production_channels_and_bad_layout(self):
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp);fixtures.PackagingTests().community_fixture(root,'1.9.18')

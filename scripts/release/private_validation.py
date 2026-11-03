@@ -60,11 +60,12 @@ def stage_toolbar(stage, commit):
                 text=text.replace(marker, 'const AEROSCIENCE_TOOLBAR_IDENTITY = '+json.dumps(dict(profile='validation',source=commit))+';')
                 text=text.replace('AEROSCIENCE_TOOLBAR_IDENTITY','AEROSCIENCE_VALIDATION_V070_TOOLBAR_IDENTITY')
                 text=text.replace('Object.assign({protocol:1,requestId,op}', 'Object.assign({protocol:1,requestId,op,validationSource:"'+commit+'"}')
-                text=text.replace('const reply = JSON.parse(data);','const reply = JSON.parse(data); if(reply.error?.startsWith("Validation toolbar source mismatch")){this.pending.clear();this.setControls(false);this.renderIntelligence(false);this.status(reply.error);return;}')
+                if "reply.error.indexOf('Validation toolbar source mismatch')===0" not in text:
+                    raise ValueError('Toolbar validation source rejection handler missing')
             if path.name=='toolbar-compatibility.json':
                 value=json.loads(text);value.update(profile='validation',sourceCommit=commit);text=json.dumps(value)
             if path.name=='AeroScience.html':
-                text=text.replace('Toolbar build not initialized.','AeroScience 0.7.0 Validation · source '+commit+' · toolbar initialization pending.')
+                text=text.replace('Toolbar build not initialized.','AeroScience 0.7.0 Validation | source '+commit+' | toolbar initialization pending.')
             path.write_text(text,encoding='utf-8')
     for old,new in [('PackageDefinitions/aeroscience-toolbar.xml','PackageDefinitions/aeroscience-validation-v0-7-0-toolbar.xml'),
                     ('PackageSources/InGamePanels/aeroscience_panel.xml','PackageSources/InGamePanels/aeroscience_validation_v070_panel.xml'),

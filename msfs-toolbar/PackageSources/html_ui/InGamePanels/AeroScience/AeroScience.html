@@ -67,12 +67,15 @@
           <details class="as-note">
             <summary>Connection &amp; Build Details</summary>
             <p id="as-build-identity">Toolbar build not initialized.</p>
-            <p id="as-channel-identity">Commands: AeroScience.Command.v1 · Replies: AeroScience.Reply.v1</p>
+            <p id="as-channel-identity">Commands: AeroScience.Command.v1 | Replies: AeroScience.Reply.v1</p>
             <p id="as-link-detail">No matching engine reply yet.</p>
+            <p id="as-reply-detail">No reply faults recorded.</p>
+            <p id="as-ui-detail">Display components waiting for state.</p>
           </details>
             <p id="as-operations-summary" class="as-note" role="status">Research state unavailable.</p>
             <section id="as-research-cards" hidden aria-label="Personal Research Test Cards">
               <h3>Personal Research Test Cards</h3>
+              <p class="as-note">Cards describe experiments. Save routes as mission plans in the desktop Flight Planner.</p>
               <p id="as-research-status" role="status">Choose cards in Mission Planner before recording.</p>
               <div id="as-research-list"></div>
               <button id="as-research-previous">Previous Cards</button><button id="as-research-next">Next Cards</button>
@@ -134,7 +137,8 @@
                   </select>
                 </label>
                 <button id="as-map-plans">Refresh Plans</button
-                ><button id="as-map-more-plans">Next plans</button>
+                ><button id="as-map-previous-plans" disabled>Previous plans</button><button id="as-map-more-plans" disabled>Next plans</button>
+                <p id="as-plan-status" class="as-note" role="status">Waiting for saved mission plans.</p>
               </div>
                 <button id="as-plan-map">View Route on Map</button>
                 <p class="as-note">Save a plan in the dashboard, select it here, start recording, fly and review Mission History. Use the moving map or an exported compatible flight plan; AeroScience does not command aircraft navigation.</p>
@@ -214,7 +218,7 @@
                 North up  /  Gold: planned  /  Turquoise: recorded  /  Pink: markers.
                 Recent track display is bounded to 512 points; full recordings
                 remain in Mission History. Offline geography is coarse and
-                Mercator is clipped at ±85.0511 deg. No aircraft controls are
+                Mercator is clipped at +/-85.0511 deg. No aircraft controls are
                 changed.
               </p>
             </section>

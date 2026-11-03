@@ -14,11 +14,11 @@ test.afterEach(async({request})=>{const s=await(await request.get('/api/state'))
 test('mocked SDK transports real session controls between toolbar and dashboard without retargeting',async({page,context,request})=>{
  await post(request,'/api/mission-selection',{planId:null});
  const flight=await post(request,'/api/missions',{name:'Synthetic real-handler native test',instruments:[{instrumentId:'ambient-temperature',enabled:true,intervalMs:1000}],armScience:true});
- await mountRealEngine(page);await expect(page.locator('#as-session-phase')).toContainText('armed');
+ await mountRealEngine(page);await expect(page.locator('#as-session-phase')).toContainText('Science: Armed');
  const dashboard=await context.newPage();await dashboard.goto('/#control');const intelligence=dashboard.locator('#mission-intelligence');
  await dashboard.getByRole('button',{name:'Start Science Collection',exact:true}).click();await expect(page.locator('#as-session-phase')).toContainText('Session 1');
  await page.getByText('Science session controls & evidence',{exact:true}).click();await page.locator('[data-science-action=pauseData]').click();await expect(intelligence).toContainText('Science: paused');
- await dashboard.getByRole('button',{name:'End current science session',exact:true}).click();await expect(page.locator('#as-session-phase')).toContainText('betweenSessions');
+ await dashboard.getByRole('button',{name:'End current science session',exact:true}).click();await expect(page.locator('#as-session-phase')).toContainText('Between sessions');
  await page.locator('[data-science-action=startData]').click();await expect(page.locator('#as-session-phase')).toContainText('Session 2');await expect(intelligence).toContainText('Session 2');
  const state=(await(await request.get(`/api/missions/${flight.id}/collection`)).json()).state;await expect(page.locator('#as-session-identity')).toContainText(state.currentSessionId);
  const sent=await page.evaluate(()=>window.bus.sent.filter(s=>s.command.op==='science-control').map(s=>s.command));expect(sent).toHaveLength(2);expect(sent[0].control.expectedSessionId).not.toBe(state.currentSessionId);expect(sent[1].control.expectedSessionId).toBeNull();for(const c of sent){expect(c.requestId).toBe(c.control.requestId);expect(JSON.stringify(c).length).toBeLessThanOrEqual(1024);}
@@ -58,10 +58,32 @@ test('missing template initialization is bounded and disconnect clears its pendi
 test('late replies cannot replace a newer authoritative native projection and UTF-8 byte bounds are enforced',async({page})=>{
  await mountToolbar(page);await page.evaluate(()=>{const panel=document.querySelector('ingamepanel-aeroscience');panel.send('state');const requests=window.bus.sent.filter(s=>s.command.op==='state');const base={protocol:1,ok:true,engineInstance:'11111111-1111-4111-8111-111111111111',capabilities:['mission-intelligence-1','session-bound-controls-1'],state:{connection:{source:'simulated',message:'fixture'},activeMission:null,telemetry:null},intelligence:{version:1,generatedUtc:new Date().toISOString(),missionId:null,revision:5,controlRevision:5,sessionId:null,phase:'betweenSessions',authority:'manual',manualHold:true,actions:[],metrics:[],warnings:[],gradeStatus:'notGraded',triggerStatus:'No predicted next trigger'}};
  window.bus.handlers['AeroScience.Reply.v1'](JSON.stringify({...base,requestId:requests.at(-1).command.requestId}));window.bus.handlers['AeroScience.Reply.v1'](JSON.stringify({...base,requestId:requests[0].command.requestId,intelligence:{...base.intelligence,phase:'collecting',revision:1}}));
- });await expect(page.locator('#as-session-phase')).toContainText('betweenSessions');
+ });await expect(page.locator('#as-session-phase')).toContainText('Between sessions');
  const bytes=await page.evaluate(()=>document.querySelector('ingamepanel-aeroscience').utf8Bytes('研究😀'));expect(bytes).toBe(10);
  await page.evaluate(()=>{const panel=document.querySelector('ingamepanel-aeroscience');panel.send('state');const id=window.bus.sent.filter(s=>s.command.op==='state').at(-1).command.requestId;panel.receive(JSON.stringify({protocol:1,requestId:id,ok:true,state:{connection:{source:'simulated',message:'😀'.repeat(2200)},activeMission:null,telemetry:null}}));});
- await expect(page.locator('#as-session-phase')).toContainText('betweenSessions');
+ await expect(page.locator('#as-session-phase')).toContainText('Between sessions');
  await page.evaluate(()=>{const panel=document.querySelector('ingamepanel-aeroscience');panel.send('state');const id=window.bus.sent.filter(s=>s.command.op==='state').at(-1).command.requestId;panel.receive(JSON.stringify({protocol:1,requestId:id,ok:true,capabilities:['mission-intelligence-1','session-bound-controls-1'],state:{connection:{source:'simulated',message:'Future fixture'},activeMission:null,telemetry:null},intelligence:{version:2,missionId:null}}));});
  await expect(page.locator('#as-session-phase')).toContainText('unsupported');await expect(page.locator('[data-science-action=endData]')).toBeDisabled();
+});
+
+test('real native handler synchronizes off-page saved plans, preview and recording across panel reopen',async({page,request})=>{
+ await post(request,'/api/mission-selection',{planId:null});const plans=[];
+ for(let index=0;index<12;index++)plans.push(await post(request,'/api/plans',{name:'Native repair '+index,mode:'universal',template:'generalResearch',waypoints:[{name:'First',latitude:40,longitude:-75},{name:'Second',latitude:40.1,longitude:-75.1}],surveyAreas:[],patterns:[],instruments:[]}));
+ await mountRealEngine(page);await expect(page.locator('#as-map-plan option')).toHaveCount(11);
+ await page.locator('#as-map-more-plans').click();await expect(page.locator('#as-plan-status')).toContainText('Saved plans 11-');
+ await page.locator('#as-map-previous-plans').click();await expect(page.locator('#as-plan-status')).toContainText('Saved plans 1-10');
+ const target=plans[0];await post(request,'/api/mission-selection',{planId:target.id});
+ await expect(page.locator('#as-map-plan')).toHaveValue(target.id);await expect(page.locator('#as-start-plan')).toContainText(target.name);await expect(page.locator('#as-name')).toHaveValue(target.name);
+ expect(await page.evaluate(()=>window.bus.sent.filter(s=>s.command.op==='select-plan'))).toEqual([]);
+ await page.locator('#as-map-plans').click();await expect(page.locator('#as-plan-status')).toContainText('Saved plans 1-10');expect(await page.evaluate(()=>window.bus.sent.filter(s=>s.command.op==='select-plan'))).toEqual([]);
+ // Native selection is an explicit acknowledged command; it never records by itself.
+ await page.locator('#as-map-plan').selectOption('');await expect(page.locator('#as-start-plan')).toContainText('Unplanned Mission');
+ await page.locator('#as-map-plan').selectOption(plans[11].id);await expect(page.locator('#as-start-plan')).toContainText(plans[11].name);
+ expect((await(await request.get('/api/state')).json()).activeMission).toBeNull();
+ await page.evaluate(()=>{const panel=document.querySelector('ingamepanel-aeroscience');panel.remove();document.body.appendChild(panel);Object.defineProperty(panel,'isConnected',{value:undefined});});
+ await expect(page.locator('#as-map-plan')).toHaveValue(plans[11].id);await expect(page.locator('#as-name')).toHaveValue(plans[11].name);
+ await page.locator('#as-plan-map').click();await expect(page.locator('#as-map-waypoint option')).toHaveText(['1. First','2. Second']);await expect(page.locator('#as-map-status')).toContainText('Route synchronized');
+ await page.locator('#as-mission-page').click();await page.locator('#as-start').click();await expect(page.locator('#as-active-name')).toHaveText(plans[11].name);await expect(page.locator('#as-map-plan')).toBeHidden();
+ const flight=(await(await request.get('/api/state')).json()).activeMission;const research=await(await request.get(`/api/missions/${flight.id}/research`)).json();expect(research.planSnapshot.id).toBe(plans[11].id);expect(research.planSnapshot.waypoints).toHaveLength(2);
+ await page.locator('#as-map-page').click();await expect(page.locator('#as-map-status')).toContainText('Route synchronized');
 });

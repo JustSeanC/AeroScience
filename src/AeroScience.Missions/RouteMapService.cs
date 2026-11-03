@@ -11,6 +11,7 @@ public sealed record RouteMapAircraft(double Latitude, double Longitude, double 
 public sealed record RouteMapState(string Revision, string Name, Guid? MissionId, int Items, int Waypoints, int NextWaypoint,
     RouteMapAircraft? Aircraft, TrackPoint[] Track, long NextSequence, bool HasMore, bool Downsampled, MissionMarker[] Markers, string ProgressExplanation, int? SelectedWaypoint = null, double? DistanceMetres = null, double? BearingDegrees = null);
 public sealed record RouteMapChunk(string Revision, int Offset, RouteMapItem[] Items, int NextOffset, bool Complete);
+public sealed record RouteMapPlan(Guid Id,string Name,ScienceMode Mode,int Waypoints,int Patterns,string Instruments);
 
 // Immutable plan snapshot geometry is cached; live messages contain only bounded updates.
 public sealed class RouteMapService(MissionCoordinator coordinator)
@@ -22,7 +23,7 @@ public sealed class RouteMapService(MissionCoordinator coordinator)
     private int nextWaypoint;
     private DateTimeOffset? observed;
     private DateTimeOffset loaded;
-    private static string Short(string? s, int limit) => s is null ? "" : s.Length <= limit ? s : s[..limit] + "…";
+    private static string Short(string? s, int limit) => s is null ? "" : s.EnumerateRunes().Count()<=limit ? s : string.Concat(s.EnumerateRunes().Take(limit))+"...";
     private void Load(Guid? selected)
     {
         var state = coordinator.Snapshot(); var mission = state.ActiveMission?.Id;
@@ -80,5 +81,8 @@ public sealed class RouteMapService(MissionCoordinator coordinator)
             return new(revision, offset, page.ToArray(), offset + page.Count, offset + page.Count == items.Length);
         }
     }
-    public object Plans(int offset) => coordinator.Store.Plans(10, Math.Max(0, offset)).Select(p => new { p.Id, p.Name, p.Mode,Waypoints=p.Waypoints?.Length??0,Patterns=p.Patterns?.Length??0,Instruments=Short(string.Join(", ",(p.Instruments??[]).Where(i=>i.Enabled).Select(i=>i.InstrumentId)),100) }).ToArray();
+    private static RouteMapPlan Summary(MissionPlan p)=>new(p.Id,Short(p.Name,80),p.Mode,p.Waypoints?.Length??0,p.Patterns?.Length??0,Short(string.Join(", ",(p.Instruments??[]).Where(i=>i.Enabled).Select(i=>i.InstrumentId)),100));
+    public RouteMapPlan[] Plans(int offset) => coordinator.Store.Plans(10, Math.Max(0, offset)).Select(Summary).ToArray();
+    // Include the authoritative selection even when it is outside the current ten-plan page.
+    public RouteMapPlan? SelectedPlan()=>coordinator.Snapshot().SelectedPlanId is {} id&&coordinator.Store.Plan(id) is {} selected?Summary(selected):null;
 }
