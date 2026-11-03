@@ -185,6 +185,11 @@ def validate_companion(root, require_simconnect=False):
     require(not (root/'VALIDATION-RECEIPT.json').exists(), 'Private validation artifacts cannot become public release payloads.')
     if (root/'build-info.json').exists():
         require(read_json(root/'build-info.json').get('profile') != 'validation', 'Private validation binaries are not a production release candidate.')
+    return validate_windows_payload(root, require_simconnect)
+
+
+def validate_windows_payload(root, require_simconnect=False):
+    """Technical file checks shared by production and explicitly isolated tester builds."""
     found = files(root)
     expected = {"AeroScience.exe", "AeroScience.dll", "AeroScience.deps.json",
                 "AeroScience.runtimeconfig.json", "AeroScience.Engine.dll", "coreclr.dll", "hostpolicy.dll",
