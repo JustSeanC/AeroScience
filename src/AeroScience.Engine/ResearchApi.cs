@@ -196,6 +196,10 @@ public static class ResearchApi
         app.MapPost("/api/science/workspace/map",(ScienceMapQuery query,ScienceStore science)=>science.MapPage(query));
         app.MapPost("/api/science/workspace/overview",(ScienceMapQuery query,ScienceStore science,HttpContext context)=>Task.Run(()=>science.MapOverview(query,context.RequestAborted),context.RequestAborted));
         app.MapPost("/api/science/workspace/compare",(ScientificComparisonRequest request,ScienceStore science)=>science.Compare(request));
+        app.MapPost("/api/science/workspace/terrain-profile",async (TerrainProfileRequest request,ScienceStore science,MissionStore missions,AutomaticScientificData automatic,MissionCoordinator coordinator,HttpContext context)=>{
+            if(coordinator.Snapshot().ActiveMission is not null)return (IResult)Results.Conflict(new{error="Terrain source analysis yields to flight recording. Open the elevation profile after ending the flight."});
+            return Results.Ok(await Task.Run(()=>TerrainProfiles.Create(request,missions,science,s=>automatic.VerifyRetainedSource(s,context.RequestAborted),context.RequestAborted),context.RequestAborted));
+        });
         app.MapGet("/api/missions/{id:guid}/science-interpretation",(Guid id,MissionStore missions)=>ScientificInterpretation.Describe(missions.StreamSamples(id)));
         app.MapGet("/api/missions/{id:guid}/science-summary",(Guid id,MissionStore missions,ScienceStore science)=>ScientificResearchSummary.Build(missions,science,id));
         app.MapGet("/api/missions/{id:guid}/archive-summary",(Guid id,MissionStore missions)=>new { instruments=missions.Research(id).Instruments.Where(i=>i.Enabled).Select(i=>i.InstrumentId).ToArray(),review=missions.ScientificReview(id) });

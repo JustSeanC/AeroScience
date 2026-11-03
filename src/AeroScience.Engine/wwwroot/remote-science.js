@@ -170,7 +170,7 @@ export async function viewProduct(parent, data, api = null) {
     );
     parent.append(protect);
   }
-  if (s.kind !== "hyperspectral")
+  if (s.kind !== "hyperspectral" && s.kind !== "terrain")
     link(
       parent,
       "PNG scalar preview (regenerable cache)",
@@ -287,7 +287,7 @@ export async function viewProduct(parent, data, api = null) {
                 ? null
                 : displayReading("temperature", k - 273.15, "°C").value,
             )
-          : data.derived[view];
+          : view === 'elevation' ? data.derived.elevation.map(value=>displayReading('elevation',value,'m').value) : data.derived[view];
     const finite = (values || []).filter(Number.isFinite),
       min = finite.length ? Math.min(...finite) : 0,
       max = finite.length ? Math.max(...finite) : 1;
@@ -295,7 +295,7 @@ export async function viewProduct(parent, data, api = null) {
       view === "temperature"
         ? displayReading("temperature", 0, "°C").unit
         : view === "elevation"
-          ? "m (" + s.verticalDatum + ")"
+          ? displayReading('elevation',0,'m').unit + ' (' + s.verticalDatum + ')'
           : view === "ndvi"
             ? "NDVI (unitless)"
             : "Scaled source reflectance; fixed 0–0.3 display stretch";
@@ -371,39 +371,11 @@ export async function viewProduct(parent, data, api = null) {
       }),
     );
     if (view === "elevation") {
-      const line = e("div"),
-        profile = e("canvas");
-      line.className = "science-chart";
-      line.append(profile);
-      output.append(line);
-      const row = Math.floor(p.height / 2),
-        profileValues = values.slice(row * p.width, (row + 1) * p.width);
-      chart = new window.Chart(profile, {
-        type: "line",
-        data: {
-          labels: profileValues.map((_, i) => i + 1),
-          datasets: [
-            {
-              label: "Elevation (m), " + s.verticalDatum,
-              data: profileValues,
-              spanGaps: false,
-              borderColor: "#e0c070",
-            },
-          ],
-        },
-        options: {
-          animation: false,
-          scales: {
-            x: {
-              title: {
-                display: true,
-                text: "Footprint center-row sample (not distance)",
-              },
-            },
-            y: { title: { display: true, text: "Elevation (m)" } },
-          },
-        },
-      });
+      output.append(action('Download elevation display CSV',async()=>{
+        const rows=[['Latitude','Longitude','Display elevation','Display units','Vertical reference','Original elevation (m)'],...data.sampleLocations.map((location,index)=>[location.latitude,location.longitude,values[index],displayReading('elevation',0,'m').unit,s.verticalDatum,data.derived.elevation[index]])];
+        const csv=rows.map(row=>row.map(value=>'"'+String(typeof value==='string'&&/^[=+@-]/.test(value)?"'"+value:value??'').replaceAll('"','""')+'"').join(',')).join('\r\n');const a=e('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='AeroScience-terrain-display.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+      }));
+      link(output,'Open Elevation Profile along a flight, route or drawn line',`#workspace/map?missions=${p.missionId}&instrument=terrain-scanner&source=${p.sourceId}`);
     }
   };
   select.onchange = draw;

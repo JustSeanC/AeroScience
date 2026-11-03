@@ -88,6 +88,11 @@ ingamepanel-aeroscience .as-panel {
   border-bottom: 1px solid #395064;
   padding-bottom: 10px;
 }
+.as-collection-banner { flex: 0 0 auto; padding: 8px 10px; margin-top: 8px; border: 1px solid #cfb67f; background: #302b22; }
+.as-collection-banner strong { display: block; font-size: 20px; line-height: 1.25; color: #ffdc9e; }
+.as-collection-banner span { display: block; font-size: 13px; margin-top: 4px; }
+.as-collection-banner[data-active="true"] { border-color: #5bd2b9; background: #173d35; }
+.as-collection-banner[data-active="true"] strong { color: #9ff2dd; }
 .as-panel .as-identity {
   display: flex;
   flex-direction: column;

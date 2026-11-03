@@ -125,12 +125,12 @@ public sealed class ScienceCollectionController(MissionStore store, Guid mission
     public void ConfigurationChanged(DateTimeOffset at,InstrumentConfiguration[]? updated=null)
     {
         var current=State;var session=Session;
-        var added=session is null?[]:(updated??settings()).Select(c=>InstrumentCalibration.Effective(c,Guid.NewGuid(),
+        var added=session is null?[]:(updated??settings()).Where(c=>JsonSerializer.Serialize(session.Configurations.Where(p=>p.Settings.InstrumentId==c.InstrumentId).MaxBy(p=>p.Revision)!.Settings,WireJson.Options)!=JsonSerializer.Serialize(c,WireJson.Options)).Select(c=>InstrumentCalibration.Effective(c,Guid.NewGuid(),
             session.Configurations.Where(p=>p.Settings.InstrumentId==c.InstrumentId).Max(p=>p.Revision)+1,at)).ToArray();
         var next=current with{Revision=current.Revision+1,ControlRevision=current.Revision+1};
         var transition=new CollectionEvent(1,missionId,next.Revision,at,at,session?.Id,CollectionAction.Unknown,CollectionEventOrigin.Engine,
             CollectionEventOutcome.Applied,current.Phase,current.Phase,current.Authority,"Frozen effective instrument configuration changed.",[],ExpectedSessionId:session?.Id);
         store.CommitCollectionEvidence(new(next,transition,session is null?null:session with{Configurations=[..session.Configurations,..added]},EngineDecisionId:Guid.NewGuid()));
-        schedule.Clear();epoch=next.Revision;
+        foreach(var config in added)schedule.Remove(config.Settings.InstrumentId);epoch=next.Revision;
     }
 }

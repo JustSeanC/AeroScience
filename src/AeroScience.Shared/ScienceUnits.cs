@@ -28,6 +28,7 @@ public static class ScienceUnits
     }
     public static UnitConversion Conversion(string measurement, ScienceUnitPreferences preferences)
     {
+        if(measurement=="elevation")return preferences.Altitude=="feet"?new("feet","ft",1/.3048):new("metres","m",1);
         var original = measurement.EndsWith(".user-adjusted", StringComparison.Ordinal) ? measurement[..^14] : measurement;
         var (category, id) = original switch
         {

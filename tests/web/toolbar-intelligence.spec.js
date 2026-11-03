@@ -31,6 +31,14 @@ test('an already open native panel follows real dashboard mission selection with
  for(const plan of plans){await dashboard.getByRole('combobox',{name:'Choose Mission',exact:true}).selectOption(plan.id);await expect(page.locator('#as-map-plan')).toHaveValue(plan.id);await expect(page.locator('#as-start-plan')).toContainText(plan.name);await expect(page.locator('#as-name')).toHaveValue(plan.name);expect((await(await request.get('/api/state')).json()).activeMission).toBeNull();}
  expect(await page.evaluate(()=>window.bus.sent.filter(x=>['start','science-control'].includes(x.command.op)))).toEqual([]);await dashboard.close();
 });
+test('real engine confirms native interval changes and retained dashboard values survive panel reopen',async({page,request})=>{
+ await post(request,'/api/mission-selection',{planId:null});const flight=await post(request,'/api/missions',{name:'Native interval integration fixture',instruments:[{instrumentId:'ambient-temperature',enabled:true,intervalMs:1000},{instrumentId:'ambient-pressure',enabled:true,intervalMs:5000}],armScience:true});
+ await mountRealEngine(page);await page.locator('#as-payload-page').click();const interval=page.getByLabel('Ambient temperature collection interval',{exact:true});await interval.selectOption('2000');await page.getByRole('button',{name:'Apply Ambient temperature interval',exact:true}).click();await expect(page.locator('#as-instruments')).toContainText('Confirmed: 2 s.');
+ const current=await(await request.get('/api/instruments/configuration')).json();expect(current.find(i=>i.instrumentId==='ambient-temperature').intervalMs).toBe(2000);expect(current.find(i=>i.instrumentId==='ambient-pressure').intervalMs).toBe(5000);
+ await post(request,'/api/instruments',current.map(i=>i.instrumentId==='ambient-temperature'?{...i,intervalMs:3500}:i));await expect(interval).toHaveValue('3500');
+ await page.evaluate(()=>{const panel=document.querySelector('ingamepanel-aeroscience');panel.remove();document.body.appendChild(panel);});await page.locator('#as-payload-page').click();await expect(page.getByLabel('Ambient temperature collection interval',{exact:true})).toHaveValue('3500');
+ const state=await(await request.get('/api/state')).json(),collection=await(await request.get(`/api/missions/${flight.id}/collection`)).json();expect(state.activeMission.id).toBe(flight.id);expect(collection.state.phase).toBe('armed');expect(collection.sessions).toEqual([]);
+});
 test('native timeout retries identical persisted work and cannot create a duplicate session',async({page,request})=>{
  await post(request,'/api/mission-selection',{planId:null});const flight=await post(request,'/api/missions',{name:'Synthetic native lost reply',instruments:[{instrumentId:'ambient-temperature',enabled:true,intervalMs:1000}],armScience:true});
  await mountRealEngine(page);await page.getByText('Science session controls & evidence',{exact:true}).click();

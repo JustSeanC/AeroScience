@@ -30,6 +30,7 @@ export function syncUnits(preferences) {
   }
 }
 export function displayReading(id, value, fallback = "") {
+  if(id==='elevation')return {value:Number.isFinite(value)?value*(settings?.preferences.altitude==='feet'?1/.3048:1):null,unit:settings?.preferences.altitude==='feet'?'ft':'m',decimals:settings?.preferences.altitude==='feet'?0:1};
   const category = categories[id.replace(/\.user-adjusted$/, '')],
     options = settings?.options[category],
     choice =

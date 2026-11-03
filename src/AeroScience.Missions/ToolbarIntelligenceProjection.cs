@@ -22,6 +22,6 @@ public static class ToolbarIntelligenceProjection
             collection?.Actions.Where(a=>a.Available).Select(a=>a.Action).ToArray()??[],
             report?.Grade.Status??MissionGradeStatus.NotGraded,report?.SupportedScoreLower,report?.SupportedScoreUpper,
             report?.Grade.EvidenceWeightFraction,report?.Input.AsOfUtc,metrics.Take(4).ToArray(),warnings.Take(3).ToArray(),triggerStatus,
-            metrics.Length>4||warnings.Count>3);
+            metrics.Length>4||warnings.Count>3,collection?.Fault==true||flight.Research?.ScienceStorageError is not null);
     }
 }

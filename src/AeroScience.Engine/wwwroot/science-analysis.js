@@ -2,7 +2,7 @@ import {ResearchMap} from './map.js';
 import {atmosphere} from './mission-workspace.js';
 import {initialMeasurement} from './science-map.js';
 import {node as el,numeric as number,dateTime as local,metric,chart,table,link,disclosure,color,readableName} from './workstation-ui.js';
-import {displayReading} from './science-display.js';
+import {displayReading,onUnitsChanged} from './science-display.js';
 import {renderCategory,renderLayerContext} from './scientific-context.js';
 
 export async function summaryView(parent,summary,api,instrument,{disposals=[],catalog=[],analysis=false}={}){
@@ -27,11 +27,13 @@ export async function summaryView(parent,summary,api,instrument,{disposals=[],ca
     for(const statistic of primary.slice(0,3)){
       const source=review.sources?.find(source=>source.sourceId===statistic.sourceId);
       const section=el('section',undefined,'result-visualization');card.append(section);
-      const title=readableName(statistic.measurement);section.append(el('h4',title),el('p',`${number(statistic.minimum)}–${number(statistic.maximum)} ${statistic.unit} · ${statistic.count} saved sample values`,'scientific-range'));
-      chart(section,`${title} — recorded minimum, mean and maximum`,[{label:statistic.unit,data:[statistic.minimum,statistic.mean,statistic.maximum].map((value,index)=>({x:index,y:value})),backgroundColor:['#7fa4ed','#62dec6','#e9bd79'],borderColor:'#62dec6'}],{type:'bar',categories:['Minimum','Mean','Maximum'],xLabel:'Saved sample statistics',yLabel:statistic.unit});
-      table(section,title+' recorded statistics',['Statistic','Value','Units','Sample values'],[['Minimum',number(statistic.minimum),statistic.unit,statistic.count],['Mean',number(statistic.mean),statistic.unit,statistic.count],['Maximum',number(statistic.maximum),statistic.unit,statistic.count]]);
-      section.append(el('p',`These saved samples range from ${number(statistic.minimum)} to ${number(statistic.maximum)} ${statistic.unit}. Repeated positions may occur at different flight packets; this is not an area-wide mean.`,'finding-interpretation'));
+      const drawStatistic=()=>{section.replaceChildren();const shown=value=>statistic.measurement==='elevation'&&statistic.unit==='m'?displayReading('elevation',value,'m'):{value,unit:statistic.unit};const shownUnit=shown(0).unit;
+      const title=readableName(statistic.measurement);section.append(el('h4',title),el('p',`${number(shown(statistic.minimum).value)}–${number(shown(statistic.maximum).value)} ${shownUnit} · ${statistic.count} saved sample values`,'scientific-range'));
+      chart(section,`${title} — recorded minimum, mean and maximum`,[{label:shownUnit,data:[statistic.minimum,statistic.mean,statistic.maximum].map((value,index)=>({x:index,y:shown(value).value})),backgroundColor:['#7fa4ed','#62dec6','#e9bd79'],borderColor:'#62dec6'}],{type:'bar',categories:['Minimum','Mean','Maximum'],xLabel:'Saved sample statistics',yLabel:shownUnit});
+      table(section,title+' recorded statistics',['Statistic','Value','Units','Sample values'],[['Minimum',number(shown(statistic.minimum).value),shownUnit,statistic.count],['Mean',number(shown(statistic.mean).value),shownUnit,statistic.count],['Maximum',number(shown(statistic.maximum).value),shownUnit,statistic.count]]);
+      section.append(el('p',`These saved samples range from ${number(shown(statistic.minimum).value)} to ${number(shown(statistic.maximum).value)} ${shownUnit}. Repeated positions may occur at different flight packets; this is not an area-wide mean.`,'finding-interpretation'));
       section.append(el('p',`${source?.provider||'Source provider unavailable'} · Historical observation date ${local(source?.observedUtc)} · ${source?.verticalDatum||'Vertical reference unavailable'}`,'source-date'));
+      };drawStatistic();disposals.push(onUnitsChanged(drawStatistic));
     }
     if(!remote&&review.measurements.length){
       const rows=review.measurements.map(measurement=>{const low=displayReading(measurement.measurementId,measurement.minimum,measurement.unit),high=displayReading(measurement.measurementId,measurement.maximum,measurement.unit),mean=displayReading(measurement.measurementId,measurement.mean,measurement.unit);return [readableName(measurement.measurementId),number(low.value),number(mean.value),number(high.value),low.unit,measurement.count];});

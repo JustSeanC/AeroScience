@@ -101,6 +101,7 @@ public sealed class ResearchOperations : IDisposable
         var next = InstrumentProfiles.Freeze(ScienceCatalog.Normalize(input));
         if (JsonSerializer.Serialize(configurations,WireJson.Options)==JsonSerializer.Serialize(next,WireJson.Options)) return;
         if (mission is not null) EnsureCanStart(next);
+        var changed=next.Where(c=>JsonSerializer.Serialize(configurations.First(p=>p.InstrumentId==c.InstrumentId),WireJson.Options)!=JsonSerializer.Serialize(c,WireJson.Options)).Select(c=>c.InstrumentId).ToArray();
         foreach (var config in next)
         {
             var previous = configurations.First(c => c.InstrumentId == config.InstrumentId);
@@ -111,7 +112,7 @@ public sealed class ResearchOperations : IDisposable
         }
         configurations = next;
         OperatingContextUtc=DateTimeOffset.UtcNow;
-        remote.Reset(intentionallyPaused);
+        foreach(var id in changed)remote.ResetInstrument(id);
         if (mission is not null)
         {
             missions.SetInstruments(mission.Id, next);

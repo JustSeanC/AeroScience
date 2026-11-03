@@ -22,13 +22,16 @@ public sealed class RemoteAcquisition : IDisposable
     private readonly Dictionary<string, (DateTimeOffset Anchor, long Slot, DateTimeOffset Last)> schedule = [];
     private readonly ConcurrentDictionary<string, (long Size, DateTime Modified)> verifiedFiles = new();
     private long generation;
+    private readonly ConcurrentDictionary<string,long> instrumentGeneration=new();
+    private long Generation(string id)=>Volatile.Read(ref generation)+instrumentGeneration.GetValueOrDefault(id);
+    public void ResetInstrument(string id){instrumentGeneration.AddOrUpdate(id,1,(_,value)=>value+1);schedule.Remove(id);processingBegan.TryRemove(id,out _);if(states.ContainsKey(id))states.AddOrUpdate(id,Status(id),(_,state)=>state with{Processing=false});}
     private bool paused;
     private int disposed;
     public RemoteAcquisition(MissionStore missions, ScienceStore science,Func<ScientificAccessPreferences>? sourcePreferences=null,Func<RemoteAcquisitionRequest,IDisposable>? publicationLease=null)
     { this.publicationLease=publicationLease;this.missions = missions; this.science = science;this.sourcePreferences=sourcePreferences; worker = Task.WhenAll(queues.Values.Select(q=>Task.Run(()=>Run(q)))); }
     public void Reset(bool pause = false)
     {
-        Interlocked.Increment(ref generation); paused = pause; schedule.Clear();
+        Interlocked.Increment(ref generation); paused = pause; schedule.Clear();processingBegan.Clear();
         foreach (var id in states.Keys) states.AddOrUpdate(id, Status(id), (_, s) => s with { Processing = false });
     }
     private readonly ConcurrentDictionary<string,long> processingBegan=new();
@@ -52,7 +55,7 @@ public sealed class RemoteAcquisition : IDisposable
             var missed = run.Slot < 0 ? 0 : Math.Max(0, slot - run.Slot - 1);
             schedule[config.InstrumentId] = (run.Anchor, slot, frame.TimestampUtc);
             states.AddOrUpdate(config.InstrumentId, existing with { MissingIntervals = missed }, (_, s) => s with { MissingIntervals = s.MissingIntervals + missed });
-            if (!queues[config.InstrumentId].Writer.TryWrite(new(mission, research, config, frame, Volatile.Read(ref generation), frame.Atmosphere??update.Atmosphere,intent?.SessionId,intent?.Id)))
+            if (!queues[config.InstrumentId].Writer.TryWrite(new(mission, research, config, frame, Generation(config.InstrumentId), frame.Atmosphere??update.Atmosphere,intent?.SessionId,intent?.Id)))
                 states.AddOrUpdate(config.InstrumentId, existing, (_, s) => s with { Quality = ObservationQuality.AcquisitionGap, Message = "Processing delayed: this instrument queue is full; flight recording continues.", Status="Processing delayed", MissingIntervals = s.MissingIntervals + 1 });
         }
     }
@@ -62,14 +65,14 @@ public sealed class RemoteAcquisition : IDisposable
         {
             await foreach (var request in queue.Reader.ReadAllAsync(stop.Token))
             {
-                if (request.Generation != Volatile.Read(ref generation)) continue;
+                if (request.Generation != Generation(request.Configuration.InstrumentId)) continue;
                 var id = request.Configuration.InstrumentId;
                 states.AddOrUpdate(id, Status(id), (_, s) => s with { Processing = true });processingBegan[id]=System.Diagnostics.Stopwatch.GetTimestamp();
                 var began=System.Diagnostics.Stopwatch.StartNew();
                 try
                 {
                     var product = Process(request);
-                    if (request.Generation != Volatile.Read(ref generation)) continue;
+                    if (request.Generation != Generation(request.Configuration.InstrumentId)) continue;
                     states.AddOrUpdate(id, Status(id), (_, s) => s with { Quality = ObservationQuality.Valid, Message = "Historical geographic source sampled along simulated flight; open View Data for source date, quality and units.", LastSuccessfulUtc = product.FlightPacketUtc, Products = s.Products + 1, Processing = false,Status="Ready",ProcessingSeconds=began.Elapsed.TotalSeconds,ValidMeasurements=s.ValidMeasurements+(product.ValidSampleCount??0) });
                 }
                 catch (Exception e) when (e is not OutOfMemoryException)
@@ -79,12 +82,12 @@ public sealed class RemoteAcquisition : IDisposable
                         try { missions.SaveRecovery(request,e.Message,e is ScientificObservationUnavailableException unavailableSource&&unavailableSource.Status is "Preparing data" or "Outside coverage"); }
                         catch(Exception persist)when(persist is IOException or Microsoft.Data.Sqlite.SqliteException){ScientificDiagnostics.Record("recovery-evidence-not-saved",request.Mission.Id.ToString(),"flight",Instruments[id],result:persist.Message);}
                     }
-                    if (request.Generation != Volatile.Read(ref generation)) continue;
+                    if (request.Generation != Generation(request.Configuration.InstrumentId)) continue;
                     ScientificDiagnostics.Record("acquisition-unavailable",request.Mission.Id.ToString(),"flight",Instruments[id],result:e is ScientificObservationUnavailableException u?u.Status+": "+u.Message:e.GetType().Name+": "+e.Message);
                     states.AddOrUpdate(id, Status(id), (_, s) => s with { Quality = ObservationQuality.Unavailable, Message = e.Message,Status=e is ScientificObservationUnavailableException unavailable?unavailable.Status:"Error",ProcessingSeconds=began.Elapsed.TotalSeconds, Rejected = s.Rejected + 1, MissingIntervals=s.MissingIntervals+1, Processing = false });
                 }
                 processingBegan.TryRemove(id,out _);
-                if (request.Generation == Volatile.Read(ref generation))
+                if (request.Generation == Generation(request.Configuration.InstrumentId))
                 {
                     var state = Status(id);
                     try { missions.SaveInstrumentState(request.Mission.Id, new(id, true, request.Configuration.IntervalMs, state.Quality, state.LastSuccessfulUtc, state.Products, state.Rejected, state.MissingIntervals, null, [], state.Message, state.Products)); }
@@ -103,7 +106,7 @@ public sealed class RemoteAcquisition : IDisposable
     private RemoteProduct Process(RemoteAcquisitionRequest request,bool reconstruction=false,CancellationToken token=default,Action? authorize=null)
     {
         using var sourceOperation=science.BeginAnalysis();
-        void Check() { authorize?.Invoke();token.ThrowIfCancellationRequested(); if (!reconstruction)stop.Token.ThrowIfCancellationRequested(); if (!reconstruction && request.Generation != Volatile.Read(ref generation)) throw new OperationCanceledException("Science paused/stopped or configuration changed."); }
+        void Check() { authorize?.Invoke();token.ThrowIfCancellationRequested(); if (!reconstruction)stop.Token.ThrowIfCancellationRequested(); if (!reconstruction && request.Generation != Generation(request.Configuration.InstrumentId)) throw new OperationCanceledException("Science paused/stopped or configuration changed."); }
         Check();
         science.Management?.RequireScienceCapacity();
         var mount=InstrumentProfiles.Mount(request.Configuration);

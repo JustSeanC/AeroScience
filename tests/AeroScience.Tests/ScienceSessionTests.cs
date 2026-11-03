@@ -69,6 +69,18 @@ public sealed class ScienceSessionTests:IDisposable
         Assert.True(legacy.Ok);Assert.True(legacy.Intelligence!.ManualHold);Assert.Equal(CollectionPhase.Paused,legacy.Intelligence.Phase);
         coordinator.End(flight.Id);
     }
+    [Fact] public void NativeIntervalChangeKeepsOtherCadenceSessionAndOriginalEvidenceAndRejectsAnotherFlight()
+    {
+        var flight=coordinator.Start(new("Native interval fixture",Instruments:[new("ambient-temperature",true,1000),new("ambient-pressure",true,5000)],ArmScience:true));
+        Do(flight.Id,CollectionAction.StartData);Observe(1);var session=coordinator.ScienceCollection(flight.Id).State!.CurrentSessionId;
+        var originals=science.StreamObservations(flight.Id).ToArray();var pressure=originals.Count(p=>p.InstrumentId=="ambient-pressure");var toolbar=new ToolbarCommandHandler(coordinator);
+        ToolbarReply Change(Guid target,int interval)=>JsonSerializer.Deserialize<ToolbarReply>(toolbar.Handle(JsonSerializer.Serialize(new ToolbarCommand(1,Guid.NewGuid(),"instrument",MissionId:target,InstrumentId:"ambient-temperature",IntervalMs:interval,CheckMission:true),WireJson.Options)),WireJson.Options)!;
+        Assert.True(Change(flight.Id,2000).Ok);var current=coordinator.ScienceCollection(flight.Id);Assert.Equal(CollectionPhase.Collecting,current.State!.Phase);Assert.Equal(session,current.State!.CurrentSessionId);
+        Assert.Equal(5000,coordinator.Snapshot().Research!.Instruments.Single(i=>i.InstrumentId=="ambient-pressure").IntervalMs);Assert.Equal(originals,science.StreamObservations(flight.Id).ToArray());
+        Observe(1);Assert.Equal(pressure,science.StreamObservations(flight.Id).Count(p=>p.InstrumentId=="ambient-pressure"));
+        Assert.False(Change(flight.Id,0).Ok);Assert.Equal(2000,coordinator.Snapshot().Research!.Instruments.Single(i=>i.InstrumentId=="ambient-temperature").IntervalMs);
+        coordinator.End(flight.Id);var next=Start();Assert.False(Change(flight.Id,10000).Ok);Assert.Equal(next.Id,coordinator.Snapshot().ActiveMission!.Id);Assert.Equal(CollectionPhase.Armed,coordinator.ScienceCollection(next.Id).State!.Phase);coordinator.End(next.Id);
+    }
     [Fact] public void NativeBudgetReductionPreservesStableIdentitiesAndOriginalUnicodeEvidence()
     {
         var flight=Start();Do(flight.Id,CollectionAction.StartData);Observe(1);

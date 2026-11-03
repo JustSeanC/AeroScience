@@ -231,10 +231,11 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
             catch{collectionFault=true;research.HoldCollection();throw;}
         }
     }
-    public void ConfigureInstrument(string id,bool? enabled,int? intervalMs)
+    public void ConfigureInstrument(string id,bool? enabled,int? intervalMs,bool checkMission=false,Guid? expectedMission=null)
     {
         lock(gate)
         {
+            if(checkMission&&expectedMission!=active?.Id)throw new InvalidOperationException("The active flight changed. Synchronize instrument settings before applying.");
             if(research is null)throw new InvalidOperationException("Scientific acquisition is unavailable in this host.");
             var current=research.Configurations;if(!current.Any(c=>c.InstrumentId==id))throw new ArgumentException("Unknown instrument.");
             ConfigureInstruments(current.Select(c=>c.InstrumentId==id?c with{Enabled=enabled??c.Enabled,IntervalMs=intervalMs??c.IntervalMs}:c).ToArray());

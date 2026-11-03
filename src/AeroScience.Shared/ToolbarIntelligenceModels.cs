@@ -12,5 +12,5 @@ public sealed record ToolbarIntelligence(int Version,DateTimeOffset GeneratedUtc
     [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] double? ScoreUpper,
     [property: JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] double? EvidenceFraction,
     DateTimeOffset? MetricsUtc,ToolbarScienceMetric[] Metrics,string[] Warnings,string TriggerStatus,
-    bool DetailsOmitted=false);
+    bool DetailsOmitted=false,bool CollectionFault=false);
 public sealed record ToolbarControlReceipt(long Sequence,CollectionEventOutcome Outcome,Guid? SessionId,string Reason);

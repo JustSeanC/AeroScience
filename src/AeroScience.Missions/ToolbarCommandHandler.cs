@@ -7,7 +7,7 @@ namespace AeroScience.Missions;
 public sealed record ToolbarCommand(int Protocol, Guid RequestId, string Op, string? Name = null, Guid? MissionId = null,
     ScienceMode Mode = ScienceMode.Universal, string? InstrumentId = null, bool? Enabled = null, int? IntervalMs = null,
     string? Category = null, string? Notes = null, Guid? PlanId = null, string? Revision = null, int Offset = 0, long? After = null, int? WaypointIndex = null,
-    CollectionControlRequest? Control=null,ResearchCardControl? ResearchControl=null);
+    CollectionControlRequest? Control=null,ResearchCardControl? ResearchControl=null,bool CheckMission=false);
 public sealed record ToolbarReply(int Protocol, Guid RequestId, bool Ok, string? Error, EngineSnapshot State,
     string[]? Capabilities=null,ToolbarIntelligence? Intelligence=null,ToolbarControlReceipt? Receipt=null,Guid? EngineInstance=null);
 
@@ -100,7 +100,7 @@ public sealed class ToolbarCommandHandler(MissionCoordinator coordinator, RouteM
                     case "science-pause" when command.MissionId is { } pauseMission: coordinator.SetSciencePaused(pauseMission, true); break;
                     case "science-resume" when command.MissionId is { } resumeMission: coordinator.SetSciencePaused(resumeMission, false); break;
                     case "instrument" when command.InstrumentId is { } instrument:
-                        coordinator.ConfigureInstrument(instrument,command.Enabled,command.IntervalMs);break;
+                        coordinator.ConfigureInstrument(instrument,command.Enabled,command.IntervalMs,command.CheckMission,command.MissionId);break;
                     default: throw new ArgumentException("Unknown toolbar command or missing mission ID.");
                 }
                 var reply = Reply(command.RequestId, true, null);
