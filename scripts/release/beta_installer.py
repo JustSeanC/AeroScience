@@ -11,23 +11,28 @@ import private_validation as private
 VERSION = '0.7.0-beta.1'
 SETUP = f'AeroScience-Setup-v{VERSION}.exe'
 RECEIPT = 'BETA-INSTALLER-RECEIPT.json'
+SOURCE_RECEIPT = 'SOURCE-VALIDATION-RECEIPT.json'
+# The production publisher already removes these root-level build/runtime tools.
+# Never generalize this to test assemblies, arbitrary executables or user files.
+BUILD_EXECUTABLES = frozenset({'aeroscience.engine.exe', 'createdump.exe'})
 
 
 def write(path, value):
     installer.write_json(path, value)
 
 
-def verify_application(folder, expected):
+def verify_application(folder, expected, receipt=None):
     p.require(p.valid_commit(expected), 'An exact payload source commit is required.')
-    private.verify(folder)
+    if receipt is None:
+        private.verify(folder)
+        receipt = p.read_json(folder/'VALIDATION-RECEIPT.json')
     info = p.read_json(folder/'build-info.json')
-    receipt = p.read_json(folder/'VALIDATION-RECEIPT.json')
     p.require(info.get('version') == '0.7.0' and info.get('profile') == 'validation'
               and info.get('target') == 'win-x64' and info.get('source_dirty') is False
               and info.get('source_commit') == expected and receipt.get('source_commit') == expected
+              and receipt.get('profile') == 'validation'
               and receipt.get('public_release_approved') is False,
               'Beta 1 requires an exact-source isolated v0.7.0 Windows validation payload.')
-    p.validate_windows_payload(folder, require_simconnect=True)
     p.require(not (folder/'ChartRuntime').exists(), 'Optional private chart runtimes are outside this tester installer.')
     for name in ('LICENSE', 'THIRD-PARTY-NOTICES.md'):
         p.require((folder/name).is_file() and installer.sha(folder/name) == installer.sha(p.REPO/name), 'Required licence/notice differs: '+name)
@@ -45,29 +50,55 @@ def verify_application(folder, expected):
     return info
 
 
+def omitted_files(receipt):
+    files = receipt.get('files')
+    p.require(isinstance(files, dict) and all(isinstance(name, str) for name in files), 'Source validation inventory is invalid.')
+    return {name: digest for name, digest in files.items() if name.casefold() in BUILD_EXECUTABLES}
+
+
+def verify_deployment(folder, expected, receipt, omitted):
+    p.require(omitted == omitted_files(receipt), 'Only the declared root build executables may be omitted.')
+    projected = {name: digest for name, digest in receipt['files'].items() if name not in omitted}
+    p.require(private.hashes(folder) == projected, 'Beta application differs from the verified source file projection.')
+    verify_application(folder, expected, receipt)
+    # Remains strict: test assemblies, unknown EXEs, source and personal data fail.
+    p.validate_windows_payload(folder, require_simconnect=True)
+
+
 def stage(folder, destination, expected, runtime_report):
     verify_application(folder, expected)
     report, _ = p.validate_runtime(folder, runtime_report, folder/'RUNTIME-AUTHORIZATION.json')
     p.require(not destination.exists(), 'Beta payload already exists; preserve it and use a new output folder.')
-    # Preserve the original receipt and bytes in their own directory. Beta metadata
-    # never changes/re-stamps an existing validator or claims installed acceptance.
-    shutil.copytree(folder, destination/'application')
-    verify_application(destination/'application', expected)
+    original_receipt = folder/'VALIDATION-RECEIPT.json'
+    receipt = p.read_json(original_receipt)
+    omitted = omitted_files(receipt)
+    # Preserve the source receipt outside the deployment subset; never re-stamp it
+    # as if removed files were still installed. All copied bytes must match it.
+    def ignore(directory, names):
+        return [name for name in names if name == 'VALIDATION-RECEIPT.json' or name in omitted] if Path(directory) == folder else []
+    shutil.copytree(folder, destination/'application', ignore=ignore)
+    shutil.copyfile(original_receipt, destination/SOURCE_RECEIPT)
+    verify_deployment(destination/'application', expected, receipt, omitted)
     public_report = {key: report[key] for key in ('architecture', 'sha256', 'export_check', 'exports', 'file_version', 'checked_utc') if key in report}
     write(destination/'RUNTIME-CHECK.json', public_report)
-    write(destination/'BETA-BUILD.json', dict(version=VERSION, source_commit=expected, profile='validation',
+    write(destination/'BETA-BUILD.json', dict(format_version=2, version=VERSION, source_commit=expected, profile='validation',
         distribution='private-tester-beta', installed_acceptance='Not verified', public_release_approved=False,
-        scientific_release_approved=False))
+        scientific_release_approved=False, source_validation_receipt_sha256=installer.sha(destination/SOURCE_RECEIPT),
+        omitted_build_files=omitted))
     shutil.copyfile(p.REPO/'docs/v0.7.0-beta1-testers.md', destination/'START-HERE.md')
+    for name in omitted:
+        print('Omitted build executable from installer copy: '+name)
     return expected
 
 
 def payload(folder, expected):
     meta = p.read_json(folder/'BETA-BUILD.json')
-    p.require(meta.get('version') == VERSION and meta.get('distribution') == 'private-tester-beta'
+    p.require(meta.get('format_version') == 2 and meta.get('version') == VERSION and meta.get('distribution') == 'private-tester-beta'
               and meta.get('public_release_approved') is False and meta.get('scientific_release_approved') is False
               and meta.get('source_commit') == expected, 'Private beta identity differs.')
-    verify_application(folder/'application', expected)
+    source_receipt = folder/SOURCE_RECEIPT
+    p.require(meta.get('source_validation_receipt_sha256') == installer.sha(source_receipt), 'Original validation receipt changed.')
+    verify_deployment(folder/'application', expected, p.read_json(source_receipt), meta.get('omitted_build_files'))
     p.validate_runtime(folder/'application', folder/'RUNTIME-CHECK.json', folder/'application/RUNTIME-AUTHORIZATION.json')
 
 

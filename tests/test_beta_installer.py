@@ -63,17 +63,18 @@ class BetaInstallerTests(unittest.TestCase):
         receipt['files'] = found
         beta.write(self.app/'VALIDATION-RECEIPT.json', receipt)
 
-    def test_staging_keeps_exact_validator_and_sanitizes_runtime_paths_without_public_approval(self):
+    def test_staging_keeps_exact_source_and_sanitizes_runtime_paths_without_public_approval(self):
         before = beta.private.hashes(self.app)
         self.stage()
         self.assertEqual(before, beta.private.hashes(self.app))
-        self.assertEqual(before, beta.private.hashes(self.output/'payload/application'))
+        self.assertEqual({name: digest for name, digest in before.items() if name != 'VALIDATION-RECEIPT.json'}, beta.private.hashes(self.output/'payload/application'))
+        self.assertEqual(before['VALIDATION-RECEIPT.json'], beta.installer.sha(self.output/'payload'/beta.SOURCE_RECEIPT))
         beta.payload(self.output/'payload', flow.COMMIT)
         report = (self.output/'payload/RUNTIME-CHECK.json').read_text()
         self.assertNotIn('runtime_file', report)
         self.assertNotIn('private', report)
         self.assertFalse(beta.p.read_json(self.output/'payload/BETA-BUILD.json')['public_release_approved'])
-        with self.assertRaisesRegex(ValueError, 'cannot become public'):
+        with self.assertRaisesRegex(ValueError, 'not a production release'):
             beta.p.validate_companion(self.output/'payload/application')
         with self.assertRaisesRegex(ValueError, 'already exists'):
             self.stage()
@@ -85,6 +86,44 @@ class BetaInstallerTests(unittest.TestCase):
         (self.app/'AeroScience.Engine.dll').write_bytes(b'changed fixture')
         with self.assertRaisesRegex(ValueError, 'differ'):
             self.stage()
+
+    def test_published_engine_apphost_is_omitted_without_rebuilding_or_changing_validator(self):
+        # Desktop references the Engine executable project. The validation publish
+        # used to retain its redundant apphost, unlike the production cleanup.
+        for name in ('AeroScience.Engine.exe', 'createdump.exe'):
+            (self.app/name).write_bytes(installer_fixtures.executable_fixture())
+        self.refresh_receipt()
+        before = beta.private.hashes(self.app)
+        self.stage()
+        self.assertEqual(before, beta.private.hashes(self.app))
+        for name in ('AeroScience.Engine.exe', 'createdump.exe'):
+            self.assertFalse((self.output/'payload/application'/name).exists())
+        meta = beta.p.read_json(self.output/'payload/BETA-BUILD.json')
+        self.assertEqual({name: before[name] for name in ('AeroScience.Engine.exe', 'createdump.exe')}, meta['omitted_build_files'])
+        self.assertEqual(before['VALIDATION-RECEIPT.json'], beta.installer.sha(self.output/'payload'/beta.SOURCE_RECEIPT))
+        self.assertEqual(before['AeroScience.Engine.dll'], beta.installer.sha(self.output/'payload/application/AeroScience.Engine.dll'))
+        beta.payload(self.output/'payload', flow.COMMIT)
+
+    def test_unexpected_test_assembly_still_fails_and_is_not_silently_filtered(self):
+        (self.app/'AeroScience.TestHost.dll').write_bytes(b'SYNTHETIC TEST ASSEMBLY')
+        self.refresh_receipt()
+        with self.assertRaisesRegex(ValueError, 'AeroScience.TestHost.dll'):
+            self.stage()
+
+    def test_projection_cannot_drop_dll_or_lose_original_receipt(self):
+        self.stage()
+        meta_path = self.output/'payload/BETA-BUILD.json'
+        meta = beta.p.read_json(meta_path)
+        meta['omitted_build_files']['AeroScience.Engine.dll'] = beta.installer.sha(self.app/'AeroScience.Engine.dll')
+        beta.write(meta_path, meta)
+        with self.assertRaisesRegex(ValueError, 'Only the declared root'):
+            beta.payload(self.output/'payload', flow.COMMIT)
+        meta['omitted_build_files'] = {}
+        beta.write(meta_path, meta)
+        original = self.output/'payload'/beta.SOURCE_RECEIPT
+        original.write_bytes(original.read_bytes()+b' ')
+        with self.assertRaisesRegex(ValueError, 'Original validation receipt changed'):
+            beta.payload(self.output/'payload', flow.COMMIT)
 
     def test_changed_sdk_receipt_and_personal_data_remain_refused_after_rehashing_outer_receipt(self):
         sdk_file = self.app/'Toolbar/sdk-build.json'

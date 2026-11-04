@@ -20,6 +20,12 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'Compiled validation profile isolation failed.' }
     dotnet publish src/AeroScience.Desktop -c $Configuration -r win-x64 --self-contained true --no-restore --artifacts-path $ArtifactsPath '-p:AeroScienceValidation=true' -o $OutputDirectory
     if ($LASTEXITCODE -ne 0) { throw 'Validation-profile Windows compilation failed.' }
+    # Desktop loads Engine.dll directly. Match production cleanup before a new
+    # validation receipt is recorded; redundant apphosts cannot ship to testers.
+    foreach ($buildExecutable in @('AeroScience.Engine.exe', 'createdump.exe')) {
+        $path = Join-Path $OutputDirectory $buildExecutable
+        if (Test-Path -LiteralPath $path) { Remove-Item -LiteralPath $path }
+    }
     python scripts/build/verify_desktop_branding.py --folder $OutputDirectory
     if ($LASTEXITCODE -ne 0) { throw 'Validation-profile Windows icon resources failed verification.' }
     if ($ChartRuntimeDirectory) {

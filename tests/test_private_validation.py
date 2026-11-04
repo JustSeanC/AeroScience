@@ -141,26 +141,43 @@ class PrivateValidationTests(unittest.TestCase):
                 self.assertNotEqual(0, result.returncode)
                 self.assertEqual(count, len(commands))
 
-    def publish_commands(self, failure=''):
+    @unittest.skipUnless(shutil.which('pwsh'), 'PowerShell is required to exercise publish cleanup')
+    def test_validation_publish_cleans_only_redundant_hosts_before_recording(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            output = Path(tmp)/'validation output'
+            result, _ = self.publish_commands(output=str(output), apphosts=True)
+            self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+            self.assertFalse((output/'AeroScience.Engine.exe').exists())
+            self.assertFalse((output/'createdump.exe').exists())
+            for name in ('AeroScience.exe', 'AeroScience.Engine.dll'):
+                self.assertEqual('SYNTHETIC PUBLISH FILE', (output/name).read_text().strip())
+
+    def publish_commands(self, failure='', output='validation output', apphosts=False):
         # Execute the production PowerShell script with recording native-command
         # substitutes. This checks argument boundaries/ordering/error handling;
         # hosted Windows separately executes real restore, probe and PE publishing.
         with tempfile.TemporaryDirectory() as tmp:
             log = Path(tmp)/'commands.json'
-            environment = dict(os.environ, VALIDATION_TEST_ROOT=str(ROOT), VALIDATION_TEST_LOG=str(log), VALIDATION_FAIL_COMMAND=failure)
+            environment = dict(os.environ, VALIDATION_TEST_ROOT=str(ROOT), VALIDATION_TEST_LOG=str(log), VALIDATION_FAIL_COMMAND=failure, VALIDATION_TEST_OUTPUT=output, VALIDATION_TEST_APPHOSTS='1' if apphosts else '')
             driver = r'''
 $global:commands = [Collections.Generic.List[object]]::new()
 function global:dotnet {
     $global:commands.Add(@{tool='dotnet'; argv=@($args)})
     $global:LASTEXITCODE=0
     if ($args[0] -eq $env:VALIDATION_FAIL_COMMAND) { $global:LASTEXITCODE=23 }
+    if ($args[0] -eq 'publish' -and $env:VALIDATION_TEST_APPHOSTS -eq '1') {
+        [IO.Directory]::CreateDirectory($env:VALIDATION_TEST_OUTPUT) | Out-Null
+        foreach ($name in 'AeroScience.Engine.exe','createdump.exe','AeroScience.exe','AeroScience.Engine.dll') {
+            Set-Content -LiteralPath (Join-Path $env:VALIDATION_TEST_OUTPUT $name) -Value 'SYNTHETIC PUBLISH FILE'
+        }
+    }
 }
 function global:python {
     $global:commands.Add(@{tool='python'; argv=@($args)})
     $global:LASTEXITCODE=0
 }
 try {
-    & (Join-Path $env:VALIDATION_TEST_ROOT 'scripts/build/Publish-ValidationCompanion.ps1') -ArtifactsPath 'isolated artifacts' -OutputDirectory 'validation output'
+    & (Join-Path $env:VALIDATION_TEST_ROOT 'scripts/build/Publish-ValidationCompanion.ps1') -ArtifactsPath 'isolated artifacts' -OutputDirectory $env:VALIDATION_TEST_OUTPUT
     $code=0
 } catch { $code=1 }
 ConvertTo-Json -InputObject @($global:commands) -Depth 8 | Set-Content -LiteralPath $env:VALIDATION_TEST_LOG -Encoding utf8

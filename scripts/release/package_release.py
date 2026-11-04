@@ -223,7 +223,8 @@ def validate_windows_payload(root, require_simconnect=False):
             and struct.unpack_from("<H", image, offset+92)[0] == 2,
             "Companion must be a graphical Windows application, not a console launcher.")
     forbidden = ("Launch-Simulated.cmd", "Launch-SimConnect.cmd", "AeroScience.Engine.exe", "AeroScience.TestHost.dll", "AeroScience.Tests.dll")
-    require(not any(PurePosixPath(name).name.casefold() in {item.casefold() for item in forbidden} for name in found), "Release contains developer/test launchers or test assemblies.")
+    forbidden_found = sorted(name for name in found if PurePosixPath(name).name.casefold() in {item.casefold() for item in forbidden})
+    require(not forbidden_found, "Release contains developer/test launchers or test assemblies: "+', '.join(forbidden_found))
     require([name for name in found if name.casefold().endswith('.exe')] == ['AeroScience.exe'],
             'Only AeroScience.exe should be included as an executable entry point.')
     require(not any(PurePosixPath(name).suffix.casefold() in {".db", ".sqlite", ".log"}
