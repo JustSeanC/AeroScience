@@ -1,6 +1,6 @@
 import {dialogHeader,requestDialogClose,markDialogSaved} from './dialog-ui.js';
 import {readableName} from './workstation-ui.js';
-import {initializePresentation,presentationControls} from './presentation-settings.js';
+import {initializePresentation,presentationControls,connectPresentationHost} from './presentation-settings.js';
 import {resolveRoute,viewPages} from './navigation-routes.js';
 import {localizeTree} from './i18n.js';
 import {readSuccessResponse} from './http-response.js';
@@ -117,6 +117,7 @@ async function connect(code = null) {
   const session = await api("/api/session", { code });
   csrf = session.csrf;
   authorized = true;
+  await connectPresentationHost(api);
   const build=await api("/api/build");
   if(build.profile==="validation"){
     dashboardTitle=build.name;

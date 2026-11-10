@@ -54,6 +54,7 @@ if ($ValidationProfile) {
     python "$repo/scripts/release/private_validation.py" stage-toolbar --folder $stage --commit ((git -C $repo rev-parse HEAD).Trim())
     if ($LASTEXITCODE -ne 0) { throw 'Validation namespace staging failed.' }
 }
+# Generate canonical locale assets only inside the copied stage, then compile every classic script to ES2017.
 node "$repo/scripts/build/native-javascript.mjs" $stage
 if ($LASTEXITCODE -ne 0) { throw 'Native ES2017 compilation/validation failed. No SDK package was built.' }
 $output = Join-Path $stage 'output'

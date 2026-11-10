@@ -40,6 +40,12 @@ public static class EngineApplication
             return options;
         });
         builder.Services.AddSingleton<AccessControl>();
+        builder.Services.AddSingleton(sp => {
+            var value = sp.GetRequiredService<EngineOptions>();
+            return new PreferenceStore(value.ConfigurationDirectory ?? value.DataDirectory,
+                ApplicationProfile.Current.Validation ? ApplicationProfile.Current.ConfigurationDirectory : null,
+                new(value.DataDirectory, value.ScienceLibraryDirectory ?? Path.Combine(value.DataDirectory,"ScienceLibrary"), EnableLan:value.EnableLan, LanAddress:value.LanAddress, SamplingIntervalMs:value.SamplingIntervalMs));
+        });
         builder.Services.AddSingleton<IOrganizationCredentials,UnavailableOrganizationCredentials>();
         builder.Services.AddSingleton<OrganizationConnections>();
         builder.Services.AddSingleton<LiveFlightSharing>();builder.Services.AddHostedService<LiveFlightSharingWorker>();
@@ -114,7 +120,9 @@ public static class EngineApplication
         builder.Services.AddHostedService<TelemetryWorker>();
         builder.Services.AddHostedService<ResearchAttemptWorker>();
         builder.Services.AddSingleton(sp=>new ToolbarCommandHandler(sp.GetRequiredService<MissionCoordinator>(),sp.GetRequiredService<RouteMapService>(),
-            (snapshot,collection)=>sp.GetRequiredService<MissionIntelligenceService>().Native(snapshot,collection), ApplicationProfile.Current.AuthorizeToolbar));
+            (snapshot,collection)=>sp.GetRequiredService<MissionIntelligenceService>().Native(snapshot,collection), ApplicationProfile.Current.AuthorizeToolbar,
+            ()=>{var saved=sp.GetRequiredService<PreferenceStore>().Load().Presentation;if(saved is {Version:not 1})return null;
+                var value=PresentationPreferences.Effective(saved);return new ToolbarPresentation(1, PresentationText.CatalogVersion, value.Locale,value.Revision);}));
         builder.Services.AddSingleton<RouteMapService>();
         builder.Services.AddSingleton<ToolbarBridgeStatus>();
         builder.Services.AddHostedService<ToolbarWorker>();
@@ -236,6 +244,7 @@ public static class EngineApplication
             return Results.Stream(stream => missions.ExportJsonAsync(id, stream, context.RequestAborted), "application/json", $"AeroScience-mission-{id}.json");
         });
         app.MapResearchEndpoints();
+        app.MapPresentationSettings();
         app.MapOrganizationConnections();
         app.MapGet("/api/settings", (HttpContext c, AccessControl access) => new
         {

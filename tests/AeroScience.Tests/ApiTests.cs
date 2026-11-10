@@ -15,7 +15,7 @@ using Microsoft.Extensions.Hosting;
 
 namespace AeroScience.Tests;
 
-public sealed class ApiTests : IAsyncLifetime
+public sealed partial class ApiTests : IAsyncLifetime
 {
     [Fact]public async Task GuidedScienceProgressCountsRetainedRowsNotTelemetryAndMarksUnavailableCountsHonestly()
     {

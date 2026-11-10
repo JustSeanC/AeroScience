@@ -110,9 +110,9 @@
 
 /* The plot palette and its data ramp stay independent of the chrome theme. */
 .scientific-chart canvas,.chart-viewport { background: var(--as-plot-bg); border-radius: 6px; }
-.presentation-settings { max-width: 48rem; margin-block: 1rem 2rem; }
-.presentation-settings .presentation-fields { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(15rem,100%),1fr)); gap: 1rem; }
-.presentation-settings select { width: 100%; min-height: var(--control-height); }
+:is(.presentation-settings,.host-presentation-settings) { max-width: 48rem; margin-block: 1rem 2rem; }
+:is(.presentation-settings,.host-presentation-settings) .presentation-fields { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(15rem,100%),1fr)); gap: 1rem; }
+:is(.presentation-settings,.host-presentation-settings) select { width: 100%; min-height: var(--control-height); }
 .status-pill,.source-badge,.evidence-badge { display: inline-flex; align-items: center; gap: .4rem; padding: .3rem .6rem; border: 1px solid var(--line); border-radius: 6px; color: var(--text); background: var(--surface); white-space: normal; overflow-wrap: anywhere; }
 [data-tone="danger"] { color: var(--as-danger-text); background: var(--as-danger-bg); border-color: var(--as-danger-border); }
 [data-tone="warning"] { color: var(--as-warning-text); background: var(--as-warning-bg); border-color: var(--as-warning-border); }

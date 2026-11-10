@@ -123,6 +123,8 @@ public sealed class SettingsForm : BrandedForm
     }
     private void BuildGeneral(Control panel)
     {
+        var appearance = new PresentationPanel(app.Preferences, () => app.RefreshAppearance(true));
+        panel.Controls.Add(appearance); pendingEdits.Add(() => appearance.HasChanges);
         var preferences = app.Preferences.Load();
         Label(panel, "AeroScience " + Application.ProductVersion);
         Button(panel, "Run guided setup…", (_, _) => app.ShowSetup(this));

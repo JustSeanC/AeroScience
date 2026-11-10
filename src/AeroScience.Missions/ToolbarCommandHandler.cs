@@ -9,11 +9,13 @@ public sealed record ToolbarCommand(int Protocol, Guid RequestId, string Op, str
     string? Category = null, string? Notes = null, Guid? PlanId = null, string? Revision = null, int Offset = 0, long? After = null, int? WaypointIndex = null,
     CollectionControlRequest? Control=null,ResearchCardControl? ResearchControl=null,bool CheckMission=false);
 public sealed record ToolbarReply(int Protocol, Guid RequestId, bool Ok, string? Error, EngineSnapshot State,
-    string[]? Capabilities=null,ToolbarIntelligence? Intelligence=null,ToolbarControlReceipt? Receipt=null,Guid? EngineInstance=null);
+    string[]? Capabilities=null,ToolbarIntelligence? Intelligence=null,ToolbarControlReceipt? Receipt=null,Guid? EngineInstance=null,
+    [property:System.Text.Json.Serialization.JsonIgnore(Condition=System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] ToolbarPresentation? Presentation=null);
 
 // The simulator-native channel reaches the same coordinator as the authenticated browser API.
 public sealed class ToolbarCommandHandler(MissionCoordinator coordinator, RouteMapService? maps = null,
-    Func<EngineSnapshot,CollectionOverview?,ToolbarIntelligence>? intelligence=null, Func<string,string?>? authorize=null)
+    Func<EngineSnapshot,CollectionOverview?,ToolbarIntelligence>? intelligence=null, Func<string,string?>? authorize=null,
+    Func<ToolbarPresentation?>? presentation=null)
 {
     // Native JSON is transported as UTF-8, never inserted as HTML. Preserve safe
     // JSON/HTML escaping while avoiding needless ASCII escapes for research text.
@@ -133,9 +135,15 @@ public sealed class ToolbarCommandHandler(MissionCoordinator coordinator, RouteM
                 Instruments = r.Instruments.Select(i => i with { Message = Short(i.Message, 80) }).ToArray()
             } : null
         };
+        ToolbarPresentation? locale = null;
+        try { var candidate = presentation?.Invoke(); if (ok && candidate is { Version: 1 } && PresentationText.Locales.Any(l=>l.Id==candidate.Locale)) locale=candidate; }
+        catch(Exception e) when(e is IOException or UnauthorizedAccessException or JsonException or ArgumentException) { /* Optional appearance must never interrupt telemetry. */ }
         string Encode()=>JsonSerializer.Serialize(new ToolbarReply(1,id,ok,Short(error,180),state,
-            ["mission-intelligence-1","session-bound-controls-1","control-revision-1","personal-research-controls-1"],summary,receipt is null?null:receipt with{Reason=Short(receipt.Reason,120)!},engineInstance),WireJson.Options);
+            locale is null?["mission-intelligence-1","session-bound-controls-1","control-revision-1","personal-research-controls-1"]:
+                ["mission-intelligence-1","session-bound-controls-1","control-revision-1","personal-research-controls-1","presentation-1"],summary,receipt is null?null:receipt with{Reason=Short(receipt.Reason,120)!},engineInstance,locale),WireJson.Options);
         var encoded=Encode();
+        // Appearance yields its bytes before any existing scientific detail reduction.
+        if(Encoding.UTF8.GetByteCount(encoded)>8000 && locale is not null){locale=null;encoded=Encode();}
         if(Encoding.UTF8.GetByteCount(encoded)>8000)
         {
             // Scientific diagnostics remain on the dashboard; avoid losing the entire native bridge.

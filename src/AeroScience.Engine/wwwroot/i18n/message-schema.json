@@ -307,6 +307,80 @@
         "count"
       ],
       "plural": "count"
+    },
+    "settings.hostTitle": {
+      "context": "P02b host preference or native adapter presentation copy; never scientific data or permission state.",
+      "parameters": []
+    },
+    "settings.hostTheme": {
+      "context": "P02b host preference or native adapter presentation copy; never scientific data or permission state.",
+      "parameters": []
+    },
+    "settings.hostLanguage": {
+      "context": "P02b host preference or native adapter presentation copy; never scientific data or permission state.",
+      "parameters": []
+    },
+    "settings.hostScope": {
+      "context": "P02b host preference or native adapter presentation copy; never scientific data or permission state.",
+      "parameters": []
+    },
+    "settings.hostSave": {
+      "context": "P02b host preference or native adapter presentation copy; never scientific data or permission state.",
+      "parameters": []
+    },
+    "settings.hostFollow": {
+      "context": "P02b host preference or native adapter presentation copy; never scientific data or permission state.",
+      "parameters": []
+    },
+    "settings.hostReadOnly": {
+      "context": "P02b host preference or native adapter presentation copy; never scientific data or permission state.",
+      "parameters": []
+    },
+    "settings.hostUnavailable": {
+      "context": "P02b host preference or native adapter presentation copy; never scientific data or permission state.",
+      "parameters": []
+    },
+    "settings.hostSaved": {
+      "context": "P02b host preference or native adapter presentation copy; never scientific data or permission state.",
+      "parameters": []
+    },
+    "settings.hostNativeNotice": {
+      "context": "P02b host preference or native adapter presentation copy; never scientific data or permission state.",
+      "parameters": []
+    },
+    "toolbar.mission": {
+      "context": "P02b host preference or native adapter presentation copy; never scientific data or permission state.",
+      "parameters": []
+    },
+    "toolbar.payload": {
+      "context": "P02b host preference or native adapter presentation copy; never scientific data or permission state.",
+      "parameters": []
+    },
+    "toolbar.map": {
+      "context": "P02b host preference or native adapter presentation copy; never scientific data or permission state.",
+      "parameters": []
+    },
+    "toolbar.research": {
+      "context": "P02b host preference or native adapter presentation copy; never scientific data or permission state.",
+      "parameters": []
+    },
+    "toolbar.catalogFallback": {
+      "context": "P02b host preference or native adapter presentation copy; never scientific data or permission state.",
+      "parameters": []
+    },
+    "toolbar.catalogPreview": {
+      "context": "P02b host preference or native adapter presentation copy; never scientific data or permission state.",
+      "parameters": [
+        "name"
+      ]
+    },
+    "toolbar.catalogEnglish": {
+      "context": "P02b host preference or native adapter presentation copy; never scientific data or permission state.",
+      "parameters": []
+    },
+    "settings.hostReload": {
+      "context": "Reload the current profile defaults after a revision conflict. Does not apply unsaved edits.",
+      "parameters": []
     }
   }
 }

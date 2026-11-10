@@ -2,7 +2,7 @@
 export const localeData = {
   "manifest": {
     "version": 1,
-    "catalogVersion": 1,
+    "catalogVersion": 2,
     "fallback": "en-US",
     "locales": [
       {
@@ -346,12 +346,86 @@ export const localeData = {
           "count"
         ],
         "plural": "count"
+      },
+      "settings.hostTitle": {
+        "context": "P02b host preference or native adapter presentation copy; never scientific data or permission state.",
+        "parameters": []
+      },
+      "settings.hostTheme": {
+        "context": "P02b host preference or native adapter presentation copy; never scientific data or permission state.",
+        "parameters": []
+      },
+      "settings.hostLanguage": {
+        "context": "P02b host preference or native adapter presentation copy; never scientific data or permission state.",
+        "parameters": []
+      },
+      "settings.hostScope": {
+        "context": "P02b host preference or native adapter presentation copy; never scientific data or permission state.",
+        "parameters": []
+      },
+      "settings.hostSave": {
+        "context": "P02b host preference or native adapter presentation copy; never scientific data or permission state.",
+        "parameters": []
+      },
+      "settings.hostFollow": {
+        "context": "P02b host preference or native adapter presentation copy; never scientific data or permission state.",
+        "parameters": []
+      },
+      "settings.hostReadOnly": {
+        "context": "P02b host preference or native adapter presentation copy; never scientific data or permission state.",
+        "parameters": []
+      },
+      "settings.hostUnavailable": {
+        "context": "P02b host preference or native adapter presentation copy; never scientific data or permission state.",
+        "parameters": []
+      },
+      "settings.hostSaved": {
+        "context": "P02b host preference or native adapter presentation copy; never scientific data or permission state.",
+        "parameters": []
+      },
+      "settings.hostNativeNotice": {
+        "context": "P02b host preference or native adapter presentation copy; never scientific data or permission state.",
+        "parameters": []
+      },
+      "toolbar.mission": {
+        "context": "P02b host preference or native adapter presentation copy; never scientific data or permission state.",
+        "parameters": []
+      },
+      "toolbar.payload": {
+        "context": "P02b host preference or native adapter presentation copy; never scientific data or permission state.",
+        "parameters": []
+      },
+      "toolbar.map": {
+        "context": "P02b host preference or native adapter presentation copy; never scientific data or permission state.",
+        "parameters": []
+      },
+      "toolbar.research": {
+        "context": "P02b host preference or native adapter presentation copy; never scientific data or permission state.",
+        "parameters": []
+      },
+      "toolbar.catalogFallback": {
+        "context": "P02b host preference or native adapter presentation copy; never scientific data or permission state.",
+        "parameters": []
+      },
+      "toolbar.catalogPreview": {
+        "context": "P02b host preference or native adapter presentation copy; never scientific data or permission state.",
+        "parameters": [
+          "name"
+        ]
+      },
+      "toolbar.catalogEnglish": {
+        "context": "P02b host preference or native adapter presentation copy; never scientific data or permission state.",
+        "parameters": []
+      },
+      "settings.hostReload": {
+        "context": "Reload the current profile defaults after a revision conflict. Does not apply unsaved edits.",
+        "parameters": []
       }
     }
   },
   "catalogs": {
     "en-US": {
-      "version": 1,
+      "version": 2,
       "locale": "en-US",
       "messages": {
         "common.messageUnavailable": "Details are unavailable. Refresh to review the current information.",
@@ -430,7 +504,25 @@ export const localeData = {
         "science.savedObservations": {
           "one": "{count} saved observation",
           "other": "{count} saved observations"
-        }
+        },
+        "settings.hostTitle": "Companion defaults",
+        "settings.hostTheme": "Default appearance",
+        "settings.hostLanguage": "Companion default language",
+        "settings.hostScope": "Saved for this companion profile across restarts. Browser overrides stay in this browser. Units, scientific data and permissions are unchanged.",
+        "settings.hostSave": "Save companion defaults",
+        "settings.hostFollow": "Use companion defaults in this browser",
+        "settings.hostReadOnly": "Companion defaults are read-only on paired devices. Change them on the companion PC.",
+        "settings.hostUnavailable": "Companion defaults are unavailable. Reconnect to review them; browser choices remain available.",
+        "settings.hostSaved": "Companion defaults saved. Reopen existing Windows dialogs to refresh their appearance. Other Windows dialog text remains English.",
+        "settings.hostNativeNotice": "The MSFS toolbar retains its readable dark appearance. Non-English choices are English previews, not complete translations.",
+        "toolbar.mission": "Mission",
+        "toolbar.payload": "Payload",
+        "toolbar.map": "Map",
+        "toolbar.research": "Research",
+        "toolbar.catalogFallback": "English fallback: the companion or catalog version is unavailable or incompatible.",
+        "toolbar.catalogPreview": "{name} preview uses bundled English; full translations are not available.",
+        "toolbar.catalogEnglish": "Bundled English catalog active.",
+        "settings.hostReload": "Reload companion defaults"
       }
     }
   }

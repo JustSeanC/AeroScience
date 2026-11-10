@@ -5,6 +5,7 @@ import {readFileSync,writeFileSync,readdirSync,lstatSync,realpathSync} from 'nod
 import {resolve,relative,join,dirname,isAbsolute,sep} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
+import {nativeCatalogAssets} from './build-locales.mjs';
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'../..');
 const hash=value=>createHash('sha256').update(value).digest('hex');
 export function compileNative(source,name='panel.js'){
@@ -18,15 +19,24 @@ export function compileStage(folder){
  const stage=realpathSync(folder),original=join(root,'msfs-toolbar');
  const underOriginal=relative(original,stage);
  if((!underOriginal||!underOriginal.startsWith('..')&&!isAbsolute(underOriginal))||!lstatSync(join(stage,'AeroScience.xml')).isFile())throw Error('Use a copied SDK staging project; original sources are preserved.');
- const files=[];
+ const files=[],panels=new Set();
  function visit(dir){for(const item of readdirSync(dir,{withFileTypes:true})){
   const path=join(dir,item.name);if(item.isSymbolicLink())throw Error('Native staging must not contain links.');
   if(item.isDirectory())visit(path);else if(item.isFile()&&item.name.endsWith('.js')){
    const input=readFileSync(path);if(input.length>16*1024*1024)throw Error('Native script exceeds the build size bound.');
    files.push({path,name:relative(stage,path).split(sep).join('/'),input,output:compileNative(input.toString('utf8'),item.name)});
+   if(item.name==='AeroScience.I18n.js')panels.add(dir);
   }
  }}
- visit(join(stage,'PackageSources/html_ui/InGamePanels'));
+ let panelRoot=stage;
+ for(const name of ['PackageSources','html_ui','InGamePanels']){panelRoot=join(panelRoot,name);if(lstatSync(panelRoot).isSymbolicLink())throw Error('Native staging must not contain links.');}
+ visit(panelRoot);
+ // Discover the actual copied panel directory: private validation deliberately
+ // renames it. Validate links/all input first; never generate through a link.
+ for(const panel of panels)for(const [name,source]of Object.entries(nativeCatalogAssets())){
+  const path=join(panel,name),input=Buffer.from(source),file={path,name:relative(stage,path).split(sep).join('/'),input,output:compileNative(source,name)};
+  const existing=files.findIndex(f=>f.path===path);if(existing>=0)files[existing]=file;else files.push(file);
+ }
  if(!files.length)throw Error('No native panel JavaScript was staged.');
  // Validate the entire set before replacing any generated asset.
  for(const f of files)writeFileSync(f.path,f.output);

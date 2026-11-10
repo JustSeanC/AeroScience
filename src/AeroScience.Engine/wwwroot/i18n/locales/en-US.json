@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "locale": "en-US",
   "messages": {
     "common.messageUnavailable": "Details are unavailable. Refresh to review the current information.",
@@ -78,6 +78,24 @@
     "science.savedObservations": {
       "one": "{count} saved observation",
       "other": "{count} saved observations"
-    }
+    },
+    "settings.hostTitle": "Companion defaults",
+    "settings.hostTheme": "Default appearance",
+    "settings.hostLanguage": "Companion default language",
+    "settings.hostScope": "Saved for this companion profile across restarts. Browser overrides stay in this browser. Units, scientific data and permissions are unchanged.",
+    "settings.hostSave": "Save companion defaults",
+    "settings.hostFollow": "Use companion defaults in this browser",
+    "settings.hostReadOnly": "Companion defaults are read-only on paired devices. Change them on the companion PC.",
+    "settings.hostUnavailable": "Companion defaults are unavailable. Reconnect to review them; browser choices remain available.",
+    "settings.hostSaved": "Companion defaults saved. Reopen existing Windows dialogs to refresh their appearance. Other Windows dialog text remains English.",
+    "settings.hostNativeNotice": "The MSFS toolbar retains its readable dark appearance. Non-English choices are English previews, not complete translations.",
+    "toolbar.mission": "Mission",
+    "toolbar.payload": "Payload",
+    "toolbar.map": "Map",
+    "toolbar.research": "Research",
+    "toolbar.catalogFallback": "English fallback: the companion or catalog version is unavailable or incompatible.",
+    "toolbar.catalogPreview": "{name} preview uses bundled English; full translations are not available.",
+    "toolbar.catalogEnglish": "Bundled English catalog active.",
+    "settings.hostReload": "Reload companion defaults"
   }
 }

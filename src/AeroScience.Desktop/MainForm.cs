@@ -24,6 +24,18 @@ public sealed class MainForm : BrandedForm, IDesktopActions, IScientificFolderOp
     private Form? auxiliary;
     private int focusQueued;
     private bool busy,choosingSource;
+    private string? appearanceKey;
+    public void RefreshAppearance(bool force = false)
+    {
+        PresentationPreferences value;
+        try{value=Preferences.Presentation();}
+        catch(Exception error)when(error is IOException or UnauthorizedAccessException or JsonException){return;}
+        var dark = WindowsPresentation.Dark(value.Theme);
+        var key = value.Theme + dark + SystemInformation.HighContrast;
+        if (!force && key == appearanceKey) return;
+        appearanceKey = key; WindowsPresentation.Apply(this, dark);
+        if (auxiliary is SettingsForm or SetupWizardForm) WindowsPresentation.Apply(auxiliary, dark);
+    }
     public bool Busy { get => busy || choosingSource || (engine?.Services.GetService<ScientificImportSession>()?.IsBusy ?? false); private set => busy=value; }
     public bool Recording => engine?.Services.GetRequiredService<MissionCoordinator>().Snapshot().ActiveMission is not null;
     private readonly ToolbarPromptPolicy toolbarPrompts = new();
@@ -64,7 +76,14 @@ public sealed class MainForm : BrandedForm, IDesktopActions, IScientificFolderOp
                 })); }catch(Exception error){ShowError(error);}
             });
         AddButton(panel, "Exit", Close); Controls.Add(panel);
-        timer.Tick += (_, _) => RefreshStatus();
+        timer.Tick += (_, _) => { RefreshStatus(); RefreshAppearance(); };
+        Microsoft.Win32.UserPreferenceChangedEventHandler appearanceChanged = (_, _) => {
+            if(!IsHandleCreated||IsDisposed)return;
+            try{BeginInvoke(() => RefreshAppearance(true));}catch(InvalidOperationException)when(IsDisposed||Disposing){ }
+        };
+        Microsoft.Win32.SystemEvents.UserPreferenceChanged += appearanceChanged;
+        Disposed += (_, _) => Microsoft.Win32.SystemEvents.UserPreferenceChanged -= appearanceChanged;
+        RefreshAppearance(true);
         Shown += async (_, _) =>
         {
             try
@@ -214,6 +233,7 @@ public sealed class MainForm : BrandedForm, IDesktopActions, IScientificFolderOp
         if (auxiliary is { IsDisposed: false } && owner != auxiliary) { FocusAuxiliary(); return DialogResult.Cancel; }
         var previous = auxiliary;
         auxiliary = form;
+        if(form is SettingsForm or SetupWizardForm)WindowsPresentation.Apply(form, WindowsPresentation.Dark(Preferences.Presentation().Theme));
         try { return form.ShowDialog(owner ?? this); }
         finally { auxiliary = previous is { IsDisposed: false } ? previous : null; }
     }

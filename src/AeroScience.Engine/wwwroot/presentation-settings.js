@@ -1,12 +1,32 @@
 import {localeManifest,supportedLocale,useLocale,t,localizeTree} from './i18n.js';
 import {node,formField,status} from './workstation-ui.js';
 
-// P02a is browser-scoped only. P02b will wire the existing profile preference
-// store and native adapters; no mission/science/organization settings are read.
+// Browser overrides remain local. Host defaults use only the authenticated,
+// revisioned presentation API; no migration/upload of browser preferences.
 export const preferenceKey='AeroScience.presentation.v1';
 let settings={theme:'auto',locale:'en-US'},started=false,persistent=true;
 const subscribers=new Set();
 let media;
+let host=null,hostApi=null,hostError='',hostLoading=false,hostTimer,hostGeneration=0;
+const hostSubscribers=new Set();
+function hasOverride(){try{return JSON.parse(localStorage.getItem(preferenceKey)||'null')?.version===1;}catch{return false;}}
+function publishHost(){for(const callback of hostSubscribers)callback();}
+export async function refreshPresentationHost(){
+  if(!hostApi||hostLoading)return;hostLoading=true;
+  const ownGeneration=hostGeneration;
+  try{
+    const value=await hostApi('/api/settings/presentation');
+    if(ownGeneration!==hostGeneration||host&&host.instanceId===value.instanceId&&value.preferences?.revision<host.preferences.revision)return;
+    if(value.version!==1||value.preferences?.version!==1)throw Error(t('settings.hostUnavailable'));
+    host=value;hostError=value.warning||(value.catalogVersion!==localeManifest.catalogVersion?t('toolbar.catalogFallback'):'');
+    if(!hasOverride()){settings={theme:host.preferences.theme,locale:supportedLocale(host.preferences.locale)};apply();}
+  }catch(error){if(ownGeneration===hostGeneration)hostError=error.message||t('settings.hostUnavailable');}
+  finally{hostLoading=false;publishHost();}
+}
+export async function connectPresentationHost(api){
+  hostApi=api;hostGeneration++;await refreshPresentationHost();
+  if(!hostTimer){hostTimer=setInterval(()=>{if(!document.hidden)refreshPresentationHost();},10000);window.addEventListener('focus',refreshPresentationHost);}
+}
 function read() {
   let saved;
   try {saved=JSON.parse(localStorage.getItem(preferenceKey)||'null');} catch {persistent=false;}
@@ -27,7 +47,7 @@ function apply() {
 export function initializePresentation() {
   if(started)return;started=true;settings=read();media=window.matchMedia('(prefers-color-scheme: dark)');
   media.addEventListener('change',apply);apply();
-  window.addEventListener('storage',event=>{if(event.key===preferenceKey){settings=read();apply();}});
+  window.addEventListener('storage',event=>{if(event.key===preferenceKey){settings=!hasOverride()&&host?{theme:host.preferences.theme,locale:host.preferences.locale}:read();apply();}});
 }
 export function presentationPreferences() {return {...settings,persistent};}
 export function updatePresentation(change) {
@@ -57,5 +77,34 @@ export function presentationControls(parent) {
   }
   theme.onchange=()=>updatePresentation({theme:theme.value});language.onchange=()=>updatePresentation({locale:language.value});
   subscribers.add(refresh);refresh(presentationPreferences());
-  return {element:section,dispose:()=>subscribers.delete(refresh)};
+  const hostSection=node('section',undefined,'host-presentation-settings');parent.append(hostSection);
+  const hostTitle=node('h2',t('settings.hostTitle')),hostScope=node('p',t('settings.hostScope'));
+  const hostFields=node('div',undefined,'presentation-fields');hostSection.append(hostTitle,hostScope,hostFields);
+  const hostTheme=theme.cloneNode(true),hostLanguage=language.cloneNode(true);
+  for(const control of [hostTheme,hostLanguage]){control.removeAttribute('id');control.removeAttribute('aria-describedby');}
+  formField(hostFields,t('settings.hostTheme'),hostTheme);formField(hostFields,t('settings.hostLanguage'),hostLanguage);
+  const save=node('button',t('settings.hostSave')),reload=node('button',t('settings.hostReload')),follow=node('button',t('settings.hostFollow'));
+  save.type=reload.type=follow.type='button';hostSection.append(save,reload,follow);
+  const hostFeedback=status(hostSection,''),nativeNotice=node('p',t('settings.hostNativeNotice'));hostSection.append(nativeNotice);
+  let draft=false,saving=false,revision=null;
+  hostTheme.onchange=hostLanguage.onchange=()=>{draft=true;};
+  function refreshHost(){
+    if(host&&!draft){hostTheme.value=host.preferences.theme;hostLanguage.value=host.preferences.locale;revision=host.preferences.revision;}
+    hostTheme.disabled=hostLanguage.disabled=save.disabled=saving||!host?.canWrite||!!hostError;
+    hostFeedback.textContent=hostError||(!host?t('settings.hostUnavailable'):!host.canWrite?t('settings.hostReadOnly'):t('settings.hostScope'));
+  }
+  save.onclick=async()=>{
+    const ownGeneration=++hostGeneration;
+    saving=true;refreshHost();
+    try{const result=await hostApi('/api/settings/presentation',{expectedRevision:revision,theme:hostTheme.value,locale:hostLanguage.value});if(ownGeneration!==hostGeneration)return;
+      hostGeneration++;host=result;draft=false;hostError='';
+      if(!hasOverride()){settings={theme:host.preferences.theme,locale:host.preferences.locale};apply();}refreshHost();hostFeedback.textContent=t('settings.hostSaved');
+    }catch(error){hostFeedback.textContent=error.message;hostFeedback.setAttribute('role','alert');}
+    finally{saving=false;save.disabled=!host?.canWrite;hostTheme.disabled=hostLanguage.disabled=!host?.canWrite;}
+  };
+  reload.onclick=async()=>{draft=false;await refreshPresentationHost();};
+  follow.onclick=()=>{if(!host)return;try{localStorage.removeItem(preferenceKey);persistent=true;}catch{persistent=false;}
+    settings={theme:host.preferences.theme,locale:host.preferences.locale};apply();};
+  hostSubscribers.add(refreshHost);refreshHost();
+  return {element:section,dispose:()=>{subscribers.delete(refresh);hostSubscribers.delete(refreshHost);}};
 }

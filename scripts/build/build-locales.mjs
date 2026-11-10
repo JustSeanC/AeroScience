@@ -62,6 +62,15 @@ export function generatedModule(bundle) {
     +'export const localeData = '+JSON.stringify(bundle,null,2)+';\n';
 }
 
+export function nativeCatalogAssets(bundle = localeBundle()) {
+  validateCatalogs(bundle);
+  const formatter=readFileSync(resolve(folder,'../i18n-format.js'),'utf8').replace(/\r\n/g,'\n').replace(/^export /gm,'');
+  return {
+    'AeroScience.LocaleData.js':'// Generated canonical catalog; do not edit.\nvar AeroScienceLocaleData = '+JSON.stringify(bundle)+';\n',
+    'AeroScience.LocaleFormat.js':'// Generated shared formatter; do not edit.\nvar AeroScienceLocaleFormat = (function(){\n'+formatter+'\nreturn {createTranslator:createTranslator,supportedLocale:supportedLocale};\n}());\n'
+  };
+}
+
 export function validateReferences(schema,sources) {
   const referenced=new Set();
   for(const [name,source]of Object.entries(sources)){
@@ -94,9 +103,10 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     if (!process.argv[option+1]) throw new Error('Provide an output directory.');
     const output = resolve(process.argv[option+1]);mkdirSync(output,{recursive:true});
     writeFileSync(resolve(output,'browser-catalog.js'),content);
-    writeFileSync(resolve(output,'AeroScience.LocaleData.js'),'// Generated catalog data; adapter wiring is P02b.\nvar AeroScienceLocaleData = '+JSON.stringify(bundle)+';\n');
-    const formatter=readFileSync(resolve(folder,'../i18n-format.js'),'utf8').replace(/\r\n/g,'\n').replace(/^export /gm,'');
-    writeFileSync(resolve(output,'AeroScience.I18n.js'),'// Generated shared formatter; native integration is P02b.\nvar AeroScienceI18n = (function(){\n'+formatter+'\nreturn {createTranslator:createTranslator,supportedLocale:supportedLocale};\n}());\n');
+    const assets=nativeCatalogAssets(bundle);
+    for(const [name,source]of Object.entries(assets))writeFileSync(resolve(output,name),source);
+    // Preserve the P02a standalone formatter API while shipping the same P02b adapter.
+    writeFileSync(resolve(output,'AeroScience.I18n.js'),assets['AeroScience.LocaleFormat.js']+readFileSync(resolve(root,'msfs-toolbar/PackageSources/html_ui/InGamePanels/AeroScience/AeroScience.I18n.js'),'utf8'));
     writeFileSync(resolve(output,'catalog-bundle.json'),JSON.stringify(bundle,null,2)+'\n');
   }
   console.log(JSON.stringify({...result,references:references.references,unused:references.unusedKeys.length}));

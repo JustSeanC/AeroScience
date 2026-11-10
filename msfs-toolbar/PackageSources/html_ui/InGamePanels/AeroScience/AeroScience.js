@@ -41,6 +41,7 @@ class IngamePanelAeroScience extends TemplateElement {
     this.lastReply = 0;
     this.serial=0;this.appliedSerial=0;this.seenEngines=new Set();this.intelligence=null;this.capabilities=[];this.mutationPending=false;
     this.byId = (id) => this.querySelector("#" + id);
+    if(typeof AeroScienceI18n !== 'undefined')AeroScienceI18n.apply(this,null);
     this.byId('as-instruments').textContent='';
     this.status('Connecting to companion...');
     this.busLoadClosed=false;
@@ -629,6 +630,15 @@ class IngamePanelAeroScience extends TemplateElement {
       this.intelligence=this.capabilities.includes('mission-intelligence-1')&&candidate?.version===1&&
         candidate.missionId===(reply.state.activeMission?.id??null)&&Array.isArray(candidate.actions)&&Array.isArray(candidate.metrics)&&Array.isArray(candidate.warnings)&&Number.isFinite(Date.parse(candidate.generatedUtc))?candidate:null;
       this.state = reply.state;
+      // Only accepted, correlated, current-engine replies can select a catalog.
+      if(typeof AeroScienceI18n !== 'undefined'){
+        if(this.presentationEngine!==this.engineInstance){this.presentationEngine=this.engineInstance;this.presentationRevision=-1;}
+        const metadata=this.capabilities.includes('presentation-1')?reply.presentation:null;
+        const revision=metadata&&Number.isFinite(metadata.revision)?metadata.revision:0;
+        if(!metadata||revision>=(this.presentationRevision==null?-1:this.presentationRevision)){
+          AeroScienceI18n.apply(this,metadata);if(metadata)this.presentationRevision=revision;
+        }
+      }
       if(engineChanged){this.plansLoaded=false;this.selectedPlan=null;this.planRows=[];this.planFormId=undefined;this.mapPlan=null;}
       const mutationPending = Array.from(this.pending.values()).some(
         (x) => x.op !== "state" && x.op !== "research-state" && !x.op.startsWith("map-"),

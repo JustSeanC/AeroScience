@@ -1,6 +1,7 @@
 import { expect } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import {compileNative} from '../../../scripts/build/native-javascript.mjs';
+import {nativeCatalogAssets} from '../../../scripts/build/build-locales.mjs';
 import {parse} from 'acorn';
 
 const folder = 'msfs-toolbar/PackageSources/html_ui/InGamePanels/AeroScience/';
@@ -58,6 +59,8 @@ export async function mountToolbar(page, { autoReply = false, activeMission = nu
     frame.classList.remove('panelInvisible');
   }, { autoReply, activeMission,busDelay,includeCallback,registrationFailures,legacyConnectivity });
   await page.evaluate(data => {window.AeroScienceCountries=data[0];window.AeroSciencePlaces=data[1];window.AeroScienceAirports=data[2];}, ['countries','places','airports'].map(name=>JSON.parse(readFileSync('src/AeroScience.Engine/wwwroot/geography/'+name+'.geojson','utf8'))));
+  for(const [name,content]of Object.entries(nativeCatalogAssets()))await page.addScriptTag({content:compileNative(content,name)});
+  await page.addScriptTag({content:compileNative(readFileSync(folder+'AeroScience.I18n.js','utf8'))});
   await page.addScriptTag({ content: compileNative(readFileSync('src/AeroScience.Engine/wwwroot/geographic-view.js', 'utf8')) });
   if(mapFails)await page.evaluate(()=>{window.AeroScienceMovingMap=class{constructor(){throw Error('Injected browser fixture renderer failure');}};});
   if(templateDelay)await page.evaluate(()=>{const panel=document.querySelector('ingamepanel-aeroscience');window.delayedToolbarChildren=Array.from(panel.childNodes);panel.replaceChildren();});

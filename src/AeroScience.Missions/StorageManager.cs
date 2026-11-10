@@ -8,7 +8,7 @@ namespace AeroScience.Missions;
 public enum StorageKind { Missions, ScienceLibrary }
 public sealed record AppPreferences(string MissionDirectory, string ScienceLibraryDirectory,
     bool Initialized = false, bool EnableLan = false, string? LanAddress = null, int SamplingIntervalMs = 1000,
-    string? CommunityDirectory = null, bool SetupCompleted = false);
+    string? CommunityDirectory = null, bool SetupCompleted = false, PresentationPreferences? Presentation = null);
 public sealed record StorageStatus(string Directory, bool Available, long? UsedBytes, long? FreeBytes, string? Error);
 public sealed record MigrationJournal(StorageKind Kind, string Source, string Destination, string Phase,
     string? Fingerprint = null);
@@ -25,22 +25,27 @@ public sealed class LocalStorageCapacity : IStorageCapacity
 }
 
 // Settings stay in a stable local folder independently of either movable store.
-public sealed class PreferenceStore(string configurationDirectory, string? confinementRoot = null)
+public sealed partial class PreferenceStore(string configurationDirectory, string? confinementRoot = null, AppPreferences? defaults = null)
 {
-    public string DirectoryPath { get; } = Path.GetFullPath(configurationDirectory);
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, object> SettingsGates = new(StringComparer.OrdinalIgnoreCase);
+    private object SettingsGate => SettingsGates.GetOrAdd(DirectoryPath, _ => new());
+    public string DirectoryPath { get; } = Path.TrimEndingDirectorySeparator(Path.GetFullPath(configurationDirectory));
     public bool IsConfined => confinementRoot is not null;
     public string SettingsPath => Path.Combine(DirectoryPath, "settings.json");
     public string JournalPath => Path.Combine(DirectoryPath, "storage-migration.json");
-    public string DefaultMissionDirectory => DirectoryPath;
-    public string DefaultLibraryDirectory => Path.Combine(DirectoryPath, "ScienceLibrary");
+    public string DefaultMissionDirectory => defaults?.MissionDirectory ?? DirectoryPath;
+    public string DefaultLibraryDirectory => defaults?.ScienceLibraryDirectory ?? Path.Combine(DirectoryPath, "ScienceLibrary");
     public AppPreferences Load()
     {
+        lock (SettingsGate)
+        {
         ValidateDirectory(DirectoryPath);
         var result = File.Exists(SettingsPath)
         ? JsonSerializer.Deserialize<AppPreferences>(File.ReadAllText(SettingsPath))
             ?? throw new IOException("Application settings are invalid. Restore a settings backup; no archive was replaced.")
-        : new(DefaultMissionDirectory, DefaultLibraryDirectory);
+        : defaults ?? new(DefaultMissionDirectory, DefaultLibraryDirectory);
         ValidateDirectory(result.MissionDirectory); ValidateDirectory(result.ScienceLibraryDirectory); return result;
+        }
     }
     public void ValidateDirectory(string directory)
     {
@@ -56,7 +61,7 @@ public sealed class PreferenceStore(string configurationDirectory, string? confi
                 throw new IOException("Validation storage cannot traverse a link or junction.");
     }
     public void Save(AppPreferences settings)
-    { ValidateDirectory(DirectoryPath); ValidateDirectory(settings.MissionDirectory); ValidateDirectory(settings.ScienceLibraryDirectory); WriteAtomic(SettingsPath, settings); }
+    { lock (SettingsGate) { ValidateDirectory(DirectoryPath); ValidateDirectory(settings.MissionDirectory); ValidateDirectory(settings.ScienceLibraryDirectory); WriteAtomic(SettingsPath, settings); } }
     public static void WriteAtomic<T>(string path, T value)
     {
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);

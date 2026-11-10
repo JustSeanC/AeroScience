@@ -21,6 +21,7 @@ public sealed class SetupWizardForm : BrandedForm
     private readonly CheckBox scientificOnline = new() { Text = "Allow automatic scientific-data discovery and bounded downloads", AutoSize = true };
     private int page;
     private bool working;
+    private readonly PresentationPanel presentation;
 
     public SetupWizardForm(MainForm app)
     {
@@ -28,6 +29,7 @@ public sealed class SetupWizardForm : BrandedForm
         Text = "Welcome to AeroScience · Setup"; Size = new(800, 680); MinimumSize = new(760, 600);
         StartPosition = FormStartPosition.CenterParent; AutoScaleMode = AutoScaleMode.Dpi;
         var settings = app.Preferences.Load();
+        presentation = new(app.Preferences, () => app.RefreshAppearance(true), showSave: false);
         scientificOnline.Checked = new ScientificAccessSettings(app.Preferences.DirectoryPath).Get().Preferences.OnlineEnabled;
         mission.Text = Path.Combine(settings.MissionDirectory, "missions.db"); library.Text = settings.ScienceLibraryDirectory;
         community.Items.AddRange(ToolbarInstaller.DiscoverCommunityFolders().Select(p => (object)p).ToArray());
@@ -42,7 +44,7 @@ public sealed class SetupWizardForm : BrandedForm
         library.TextChanged += (_, _) => Capacity(library.Text, librarySpace, false);
         var initialMission=mission.Text;var initialLibrary=library.Text;var initialCommunity=community.Text;var initialOnline=scientificOnline.Checked;var initialInstall=install.Checked;
         FormClosing += (_, e) => { if (working) e.Cancel = true;
-            else if(DialogResult!=DialogResult.OK&&(mission.Text!=initialMission||library.Text!=initialLibrary||community.Text!=initialCommunity||scientificOnline.Checked!=initialOnline||install.Checked!=initialInstall)&&MessageBox.Show(this,"Close setup with unapplied choices? Choose No to keep editing. Previously saved settings and verified user data remain intact.","Unfinished setup",MessageBoxButtons.YesNo,MessageBoxIcon.Question)!=DialogResult.Yes)e.Cancel=true; };
+            else if(DialogResult!=DialogResult.OK&&(presentation.HasChanges||mission.Text!=initialMission||library.Text!=initialLibrary||community.Text!=initialCommunity||scientificOnline.Checked!=initialOnline||install.Checked!=initialInstall)&&MessageBox.Show(this,"Close setup with unapplied choices? Choose No to keep editing. Previously saved settings and verified user data remain intact.","Unfinished setup",MessageBoxButtons.YesNo,MessageBoxIcon.Question)!=DialogResult.Yes)e.Cancel=true; };
         Render();
     }
 
@@ -77,6 +79,7 @@ public sealed class SetupWizardForm : BrandedForm
         content.Controls.Add(panel); back.Enabled = page > 0; skip.Visible = page == 2; next.Text = page == 3 ? "Finish Setup" : "Next";
         if (page == 0)
         {
+            panel.Controls.Add(presentation);
             panel.Controls.Add(TextLabel("Set up local mission storage and the MSFS 2024 toolbar. The app will then start its services and open your dashboard automatically."));
             panel.Controls.Add(TextLabel("Existing locations and settings are preselected. Updates keep them. Changing a location copies and verifies existing data only after your confirmation; originals are retained."));
             panel.Controls.Add(TextLabel("Mission History works without MSFS or internet. Live recording becomes available when an aircraft is connected."));
@@ -143,6 +146,9 @@ public sealed class SetupWizardForm : BrandedForm
                 new SetupCoordinator(app.Preferences, app.Storage, AppContext.BaseDirectory).ConfigureStorage(missionFolder, libraryFolder, true, reporter);
                 app.Preferences.Save(app.Preferences.Load() with { SetupCompleted = true });
             }));
+            // Update the picker snapshot on the UI thread, so an optional toolbar
+            // retry cannot re-use the revision from before this successful save.
+            presentation.Save(); app.RefreshAppearance(true);
             working = false;
             if (installToolbar && !app.InstallToolbar(this, selectedCommunity)) { back.Enabled = next.Enabled = cancel.Enabled = true; return; }
             new ScientificAccessSettings(app.Preferences.DirectoryPath).Save(new ScientificAccessSettings(app.Preferences.DirectoryPath).Get().Preferences with { OnlineEnabled = scientificOnline.Checked, PrivacyAccepted = scientificOnline.Checked });
