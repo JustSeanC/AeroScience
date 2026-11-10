@@ -1,0 +1,77 @@
+{
+  "kind": "Synthetic browser fixture; no Windows/MSFS/device or real-source acceptance",
+  "baseCommit": "6677f8035e813c7bddd1a99546df75218dd6157a",
+  "branch": "develop/v0.8.0",
+  "workingTreeCapture": true,
+  "test": "tests/web/presentation-080.spec.js: light and dark primary chrome",
+  "actualLanguage": "en-US",
+  "expandedText": "Synthetic expanded English; not a translated release locale",
+  "captures": [
+    {
+      "path": "docs/images/v080-p02a/settings-light-390-synthetic-browser.png",
+      "theme": "light",
+      "viewport": [
+        390,
+        844
+      ],
+      "cssZoom": 1,
+      "imageSize": [
+        390,
+        1421
+      ],
+      "sha256": "0b6e1efc20b2527058aef55358063e6e913ce6ceaed050af2ef342578ee92d64"
+    },
+    {
+      "path": "docs/images/v080-p02a/settings-dark-390-synthetic-browser.png",
+      "theme": "dark",
+      "viewport": [
+        390,
+        844
+      ],
+      "cssZoom": 1,
+      "imageSize": [
+        390,
+        1421
+      ],
+      "sha256": "83abf979f83aea5a31e541ae026309165795aedfdb39b332e42f5b33a8bd6e4f"
+    },
+    {
+      "path": "docs/images/v080-p02a/settings-expanded-200-percent-synthetic-browser.png",
+      "theme": "dark",
+      "viewport": [
+        1440,
+        1000
+      ],
+      "cssZoom": 2,
+      "imageSize": [
+        1440,
+        3216
+      ],
+      "sha256": "153e84f352ecb219e9584e1b9e2b7a78699da54d8507f19111fdbb4f62701d8f"
+    }
+  ],
+  "sourceSha256": {
+    "src/AeroScience.Engine/wwwroot/app.css": "3c37576ac40611f17ae1663a48c4b524c17d9d6282b5d9d336456aac2815d29e",
+    "src/AeroScience.Engine/wwwroot/app.js": "cf9d18fac730baaa48e25d1a8767fea928f1967106353c02881e52b752b9c8ef",
+    "src/AeroScience.Engine/wwwroot/dialog-ui.js": "b068d5b2f527f0a8885394aa36e187be7413e31dfa16ab994eb9367b367c2a01",
+    "src/AeroScience.Engine/wwwroot/i18n-format.js": "90703757d05d4001fea1e2fccc1303413c546cc6caabee976e527d9236376c0c",
+    "src/AeroScience.Engine/wwwroot/i18n.js": "4e232e50c9cfa26b9829a7ca5725b41acec47cb2f5ca4c84871b7b9f4fcc7043",
+    "src/AeroScience.Engine/wwwroot/i18n/catalog.generated.js": "0556d276f81ec38a505b687832f3fdfe226ec72de0b8e3697892983b4051cbd3",
+    "src/AeroScience.Engine/wwwroot/i18n/locale-manifest.json": "c639d697c7e187ea331e1444706147c464f54f2274c424d8a7307c6725e2f7ba",
+    "src/AeroScience.Engine/wwwroot/i18n/locales/en-US.json": "afd1e516980f77e7d085455e87e71b886405f1d703d1e9a47720bb39268b26f6",
+    "src/AeroScience.Engine/wwwroot/i18n/message-schema.json": "8df1e55c334e4f671e82acd93dd3eac4f08b43ac70ee3a19642261ce04ecaeba",
+    "src/AeroScience.Engine/wwwroot/index.html": "2170ca715805b2911c963aed2320b5baa3b8b59905aa82ae12034a3846217cd0",
+    "src/AeroScience.Engine/wwwroot/navigation-routes.js": "c53aa56003745bacf2e801751d2a9f976e2f9195a9322ccc9accfa0bc3533be8",
+    "src/AeroScience.Engine/wwwroot/presentation-settings.js": "ab52c9c36a20e9bfa93bb12f590db3304883ac94addd9265ed152c354057aa02",
+    "src/AeroScience.Engine/wwwroot/presentation-state.js": "02ee6df143386c2f119e6936e552bfa07ef1850d6d7fe98ca9fdb3c36319eb71",
+    "src/AeroScience.Engine/wwwroot/science-compare.js": "92d5807facf64cc972eaf1736ad071015d6045f4ed4315b8e05dd79ff3258c20",
+    "src/AeroScience.Engine/wwwroot/science-journey.js": "b355bbdf20205f125d4b3cc203610fa940ac1b625a4705798574d9008a792a30",
+    "src/AeroScience.Engine/wwwroot/settings-navigation.js": "55a4ea27ff922724bd6ec4261658845fe15342dfe9dbfeae1a5daf76af028da1",
+    "src/AeroScience.Engine/wwwroot/task-workspaces.js": "0e9f3791cdca6223c73f975301ca4225417a7401eebf54168f748aa906c83b63",
+    "src/AeroScience.Engine/wwwroot/ui-tokens.css": "37a1bfba9ab80760a6460169344e32ca729e96588546bd1bd52008fdb2128b3c",
+    "src/AeroScience.Engine/wwwroot/workstation-shell.js": "bf45f3d6d296daf048f1e3ce1e16ff1940df497eb7732a6828713d5717bf755e",
+    "src/AeroScience.Engine/wwwroot/workstation-ui.js": "61fb12e247fd888e37ceb3af336c40e66e65d074be5213e58f6d027a0b5c8d6a",
+    "src/AeroScience.Engine/wwwroot/workstation.css": "3a92b2b83da562942992b82b612bd9431c53d629c73808d389a7dced4c2f7022",
+    "tests/web/presentation-080.spec.js": "4255055c6a640bcb8fead132dc272ac8cc4c65f93659aba964a6f71cba3efffa"
+  }
+}

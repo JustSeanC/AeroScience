@@ -1,5 +1,8 @@
 import {dialogHeader,requestDialogClose,markDialogSaved} from './dialog-ui.js';
 import {readableName} from './workstation-ui.js';
+import {initializePresentation,presentationControls} from './presentation-settings.js';
+import {resolveRoute,viewPages} from './navigation-routes.js';
+import {localizeTree} from './i18n.js';
 import {readSuccessResponse} from './http-response.js';
 import {scienceWorkspace,disposeScienceWorkspace} from './science-workspace.js';
 import {helpCenter,disposeHelpCenter} from './help-center.js';
@@ -27,6 +30,7 @@ import {
 } from "./research.js";
 import { unitControls, initializeUnits } from "./science-display.js";
 const $ = (id) => document.getElementById(id);
+initializePresentation();
 const workstationShell=initializeWorkstationShell();
 const workspaces=taskWorkspaces();
 const number = (v, digits = 0) =>
@@ -358,22 +362,16 @@ let navigationEpoch=0;
 let dashboardTitle="AeroScience";
 async function navigate() {
   const ownNavigation=++navigationEpoch;
-  const allowed = ["control", "operations", "planner", "history", "instruments", "settings", "science-workspace", "library", "help", "downloads", "my-research", "library-storage"];
-  if(location.hash.startsWith("#settings/support")){location.replace("#help");return;}
-  if(location.hash.startsWith('#workspace/timeline')){const id=new URLSearchParams(location.hash.split('?')[1]||'').get('missions')?.split(',')[0];location.replace('#operations'+(id?'?flight='+encodeURIComponent(id):''));return;}
-  const routePage=settingsLocation().page;
-  const hash =
-    settingsLocation().page === "science"
-      ? "instruments"
-      : settingsLocation().page;
-  const page = routePage === "workspace" ? "science-workspace" : routePage === "results" ? "history" : location.hash.startsWith("#library/storage") ? "library-storage" : allowed.includes(hash) ? hash : "my-research";
+  const route=resolveRoute(location.hash);
+  if(route.redirect){location.replace(route.redirect);return;}
+  const page=route.page;
   if(page!=="science-workspace")disposeScienceWorkspace();
   if(page!=="downloads")disposeDownloadWorkspace();
   if(page!=="library")disposeScientificLibrary();
   if(page!=="help")disposeHelpCenter();
   if(page!=="my-research")disposePersonalResearch();
   if(page!=="operations")closeMissionOperations();
-  for (const id of allowed) $(id).hidden = id !== page;
+  for (const id of viewPages) $(id).hidden = id !== page;
   const workspace=workspaces.show(page);
   for (const link of document.querySelectorAll(".nav-link")) {
     const selected =
@@ -405,7 +403,7 @@ async function navigate() {
   if (page === "settings") await loadSettings();
   if (page === "library-storage") await attachStorage();
   if (page === "planner" || page === "instruments") await loadResearch(page);
-  if(ownNavigation===navigationEpoch)workstationShell.afterNavigation(workspace||$(page));
+  if(ownNavigation===navigationEpoch){localizeTree(workspace||$(page));workstationShell.afterNavigation(workspace||$(page));}
 }
 async function loadHistory() {
   const request = ++historyRequest;
@@ -535,6 +533,7 @@ async function loadSettings() {
   if(settingsView){settingsView.show();if(settingsLocation().category==="storage")await attachStorage();return;}
   const s=await api("/api/settings");container.replaceChildren();
   const view=settingsNavigation(container),panels=view.panels;settingsView=view;view.show();
+  presentationControls(panels.get('general'));
   function paragraph(category,value){panels.get(category).append(el("p",value));}
   function desktop(category,label,action){const b=el("button",label,"secondary");b.disabled=!s.desktopAvailable;b.onclick=()=>command(b,()=>api(`/api/desktop/${action}`,{}));panels.get(category).append(b);}
   paragraph("general",`AeroScience ${s.version}`);

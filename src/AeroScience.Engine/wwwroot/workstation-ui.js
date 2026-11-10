@@ -1,4 +1,5 @@
 // Shared presentation only. Scientific values, units and provenance remain server-owned.
+import {t} from './i18n.js';
 export function node(tag, text, className) {
   const element = document.createElement(tag);
   if (text !== undefined) element.textContent = text;
@@ -27,9 +28,9 @@ export function link(parent, title, href, className = 'button secondary') {
 export function errorMessage(parent, error, retry) {
   let box = parent.querySelector(':scope > .action-error');
   if (!box) { box = node('div', undefined, 'action-error'); box.setAttribute('role', 'alert'); parent.prepend(box); }
-  box.replaceChildren(node('strong', 'This view could not finish loading.'), node('p',
-    error?.message === 'Failed to fetch' ? 'The companion connection was lost. Your saved data has not been deleted. Reconnect to the companion and try again.' : error?.message || 'The operation was not confirmed. Your saved records remain available.'));
-  if (retry) button(box, 'Try again', async () => { box.remove(); await retry(); });
+  box.replaceChildren(node('strong', t('error.loadingTitle')), node('p',
+    error?.message === 'Failed to fetch' ? t('error.connectionLost') : error?.message || t('error.notConfirmed')));
+  if (retry) button(box, t('common.tryAgain'), async () => { box.remove(); await retry(); });
   return box;
 }
 export function button(parent, title, run, className = 'secondary') {
@@ -48,7 +49,7 @@ export function disclosure(parent, title, text) {
   const details = node('details', undefined, 'advanced-details'); details.append(node('summary', title));
   if (text) details.append(node('p', text)); parent.append(details); return details;
 }
-export function status(parent, title = 'Loading saved results…') {
+export function status(parent, title = t('common.loadingSavedResults')) {
   const element = node('p', title, 'workspace-status'); element.setAttribute('role', 'status');
   element.setAttribute('aria-live', 'polite'); element.setAttribute('aria-atomic', 'true'); parent.append(element); return element;
 }
@@ -136,4 +137,53 @@ export function informationDetails(parent,title,...content){
 }
 export function revealDetails(element){
  for(let parent=element?.parentElement;parent;parent=parent.parentElement)if(parent.tagName==='DETAILS')parent.open=true;
+}
+
+// Additive primitives: existing scientific renderers and command handlers keep
+// ownership. Callers supply confirmed meaning; colors do not determine validity.
+export function statusPill(parent,title,{tone='neutral',live=false}={}) {
+  const element=node('span',title,'status-pill');
+  element.dataset.tone=['neutral','warning','danger'].includes(tone)?tone:'neutral';
+  if(live){element.setAttribute('role','status');element.setAttribute('aria-atomic','true');}
+  parent.append(element);return element;
+}
+export function emptyState(parent,{title=t('components.emptyTitle'),description='',action}={}) {
+  const element=node('section',undefined,'empty-state');element.setAttribute('aria-label',title);
+  element.append(node('h2',title));if(description)element.append(node('p',description));
+  if(action)nextAction(element,action.title,action.run||action.href);
+  parent.append(element);return element;
+}
+export function nextAction(parent,title,runOrHref) {
+  const element=node('div',undefined,'next-action');parent.append(element);
+  return typeof runOrHref==='string'?link(element,title,runOrHref,'button primary'):button(element,title,runOrHref,'primary');
+}
+export function loadingState(parent,title=t('common.loading')) {
+  const element=status(parent,title);element.classList.add('loading-state');element.setAttribute('aria-busy','true');return element;
+}
+let fieldSequence=0;
+export function formField(parent,title,control=node('input'),{help='',error=''}={}) {
+  const element=node('div',undefined,'form-field'),label=node('label',title);
+  if(!control.id)control.id='as-field-'+(++fieldSequence);
+  label.htmlFor=control.id;const description=node('p',help,'form-field-help'),feedback=node('p',undefined,'form-field-error');
+  description.id=control.id+'-help';feedback.id=control.id+'-error';feedback.setAttribute('aria-live','polite');
+  const described=[control.getAttribute('aria-describedby'),help?description.id:null,feedback.id].filter(Boolean);
+  control.setAttribute('aria-describedby',described.join(' '));element.append(label,control);
+  if(help)element.append(description);element.append(feedback);parent.append(element);
+  const setError=message=>{feedback.textContent=message;control.setAttribute('aria-invalid',String(!!message));};
+  setError(error);return {element,control,label,setError};
+}
+export function sourceBadge(parent,category) {
+  const known=['simulator','historical','modeled','pilot','unavailable','synthetic'];
+  const kind=known.includes(category)?category:'unavailable';
+  const badge=statusPill(parent,t('source.'+kind));badge.classList.add('source-badge');badge.dataset.sourceCategory=kind;return badge;
+}
+export function evidenceBadge(parent,assessment) {
+  const known=['valid','invalid','partial','pending','unassessed','unavailable'];
+  const state=known.includes(assessment)?assessment:'unassessed';
+  const badge=statusPill(parent,t('evidence.'+state),{tone:state==='invalid'?'danger':['partial','unavailable'].includes(state)?'warning':'neutral'});
+  badge.classList.add('evidence-badge');badge.dataset.evidenceState=state;return badge;
+}
+export function notification(parent,message,{critical=false}={}) {
+  const element=node('p',message,'workspace-notification');element.setAttribute('role',critical?'alert':'status');
+  element.setAttribute('aria-atomic','true');parent.append(element);return element;
 }

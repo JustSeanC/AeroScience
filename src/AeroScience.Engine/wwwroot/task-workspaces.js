@@ -1,12 +1,33 @@
 import {node,link} from './workstation-ui.js';
+import {workspaceDefinitions,workspaceKey,resolveRoute} from './navigation-routes.js';
+import {t} from './i18n.js';
 
-// Reparent existing views; their stores, event streams and controllers stay intact.
+// Mount original nodes once. View-specific controllers retain all subscriptions,
+// command callbacks and their existing close/dispose/restore lifecycle.
 export function taskWorkspaces(){
- const groups=[
-  ['flight-workspace','Flight Operations',['control','operations','instruments'],[['Current Flight','#operations'],['Instrument Setup','#science'],['Flight Details & Tools','#control']]],
-  ['results-workspace','Results & History',['history','science-workspace'],[['Recorded Flights','#results'],['Science Results','#workspace/map']]],
-  ['library-workspace','Scientific Library',['library','downloads','library-storage'],[['Data Sources','#library'],['Downloads','#downloads'],['Storage','#library/storage']]]
- ];
- for(const [id,title,views,links]of groups){const group=node('section',undefined,'task-workspace');group.id=id;group.hidden=true;const heading=node('header',undefined,'page-heading');heading.append(node('h1',title));const nav=node('nav',undefined,'workspace-subnav');nav.setAttribute('aria-label',title+' sections');for(const [label,href]of links)link(nav,label,href);group.append(heading,nav);document.getElementById('workspace').insertBefore(group,document.getElementById(views[0]));for(const view of views){let child=document.getElementById(view);if(!child){child=node('section',undefined,'view');child.id=view;child.hidden=true;}group.append(child);}}
- return {show(page){let current=null;for(const [id,title,views]of groups){const group=document.getElementById(id),selected=views.includes(page);group.hidden=!selected;if(selected)current=group;for(const a of group.querySelectorAll(':scope>nav>a')){const target=a.hash.split('?')[0],active=selected&&(target==='#results'?page==='history':target==='#library/storage'?page==='library-storage':target==='#science'?page==='instruments':target.startsWith('#workspace/')?page==='science-workspace':target==='#'+page);if(active)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');}}return current;},key(page){return ['control','operations','instruments'].includes(page)?'operations':['history','science-workspace'].includes(page)?'results':['library','downloads','library-storage'].includes(page)?'library':page;}};
+  for(const group of workspaceDefinitions){
+    if(document.getElementById(group.id))continue;
+    const section=node('section',undefined,'task-workspace');section.id=group.id;section.hidden=true;
+    const heading=node('header',undefined,'page-heading'),title=node('h1',t(group.titleKey));
+    title.dataset.i18n=group.titleKey;heading.append(title);
+    const nav=node('nav',undefined,'workspace-subnav');nav.setAttribute('aria-label',t('nav.sections',{name:t(group.titleKey)}));
+    for(const [key,href] of group.links){const entry=link(nav,t(key),href);entry.dataset.i18n=key;}
+    section.append(heading,nav);document.getElementById('workspace').insertBefore(section,document.getElementById(group.pages[0]));
+    for(const page of group.pages){let view=document.getElementById(page);
+      if(!view){view=node('section',undefined,'view');view.id=page;view.hidden=true;}
+      section.append(view);
+    }
+  }
+  return {show(page){
+    let current=null;
+    for(const group of workspaceDefinitions){
+      const section=document.getElementById(group.id),selected=group.pages.includes(page);section.hidden=!selected;
+      if(selected)current=section;
+      for(const entry of section.querySelectorAll(':scope > nav > a')){
+        const active=selected&&resolveRoute(entry.hash).page===page;
+        if(active)entry.setAttribute('aria-current','page');else entry.removeAttribute('aria-current');
+      }
+    }
+    return current;
+  },key:workspaceKey};
 }

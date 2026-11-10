@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "catalogVersion": 1,
+  "fallback": "en-US",
+  "locales": [
+    {
+      "id": "en-US",
+      "name": "English",
+      "review": "source",
+      "direction": "ltr"
+    },
+    {
+      "id": "es-ES",
+      "name": "Español",
+      "review": "preview",
+      "direction": "ltr"
+    },
+    {
+      "id": "fr-FR",
+      "name": "Français",
+      "review": "preview",
+      "direction": "ltr"
+    },
+    {
+      "id": "de-DE",
+      "name": "Deutsch",
+      "review": "preview",
+      "direction": "ltr"
+    },
+    {
+      "id": "pt-BR",
+      "name": "Português (Brasil)",
+      "review": "preview",
+      "direction": "ltr"
+    }
+  ]
+}

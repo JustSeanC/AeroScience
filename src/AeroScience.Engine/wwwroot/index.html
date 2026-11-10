@@ -17,6 +17,7 @@
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="stylesheet" href="/vendor/leaflet/leaflet.css" />
     <link rel="stylesheet" href="/vendor/leaflet-draw/leaflet.draw.css" />
+    <link rel="stylesheet" href="/ui-tokens.css" />
     <link rel="stylesheet" href="/app.css" />
     <link rel="stylesheet" href="/workstation.css" />
     <script src="/vendor/leaflet/leaflet.js"></script>
@@ -34,18 +35,18 @@
             ><small>AIRBORNE RESEARCH SYSTEMS</small></span
           ></a
         >
-        <p class="nav-label">WORKSPACE</p>
-        <nav aria-label="Main navigation">
-          <a class="nav-link" href="#my-research">My Research</a>
-          <a class="nav-link" href="#planner">Flight Planner</a>
-          <a class="nav-link" href="#operations">Flight Operations</a>
-          <a class="nav-link" href="#results">Results &amp; History</a>
-          <a class="nav-link" href="#library">Scientific Library</a>
+        <p class="nav-label" data-i18n="nav.workspace">WORKSPACE</p>
+        <nav aria-label="Main navigation" data-i18n-aria-label="nav.main" data-nav-scope="main">
+          <a class="nav-link" data-i18n="nav.myResearch" href="#my-research">My Research</a>
+          <a class="nav-link" data-i18n="nav.planner" href="#planner">Flight Planner</a>
+          <a class="nav-link" data-i18n="nav.flightOperations" href="#operations">Flight Operations</a>
+          <a class="nav-link" data-i18n="nav.results" href="#results">Results &amp; History</a>
+          <a class="nav-link" data-i18n="nav.library" href="#library">Scientific Library</a>
         </nav>
-        <p class="nav-label">SUPPORT</p>
-        <nav aria-label="Settings and support">
-          <a class="nav-link" href="#settings">Settings</a>
-          <a class="nav-link" href="#help">Help &amp; Support</a>
+        <p class="nav-label" data-i18n="nav.support">SUPPORT</p>
+        <nav aria-label="Settings and support" data-i18n-aria-label="nav.utilities" data-nav-scope="utilities">
+          <a class="nav-link" data-i18n="nav.settings" href="#settings">Settings</a>
+          <a class="nav-link" data-i18n="nav.help" href="#help">Help &amp; Support</a>
         </nav>
         <div class="sidebar-footer">
           <span class="eyebrow">SCIENCE ENGINE</span>

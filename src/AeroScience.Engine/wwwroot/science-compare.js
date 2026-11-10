@@ -10,7 +10,7 @@ export async function comparison(parent,api,missions,ids,disposals,catalog){
   const tools=el('div',undefined,'workspace-controls'),message=status(parent,'Loading saved comparison datasets…');parent.append(tools);
   const commonLabel=el('label',undefined,'checkbox-label'),common=el('input');common.type='checkbox';common.setAttribute('aria-label','Use shared numeric color scale');commonLabel.append(common,'Use shared numeric color scale');tools.append(commonLabel);
   const scaleStatus=el('p',undefined,'scale-state');tools.append(scaleStatus);
-  const compatibility=el('p',undefined,'scientific-comparison-context');compatibility.setAttribute('aria-label','Scientific comparison limitations');tools.append(compatibility);
+  const compatibility=el('p',undefined,'scientific-comparison-context');compatibility.setAttribute('role','note');compatibility.setAttribute('aria-label','Scientific comparison limitations');tools.append(compatibility);
   const grid=el('div',undefined,'comparison-grid');parent.append(grid);
   const reading=(measurement,unit,value)=>measurement==='elevation'&&unit==='m'?displayReading('elevation',value,'m'):{value,unit};
   const columns=[];let syncing=false,stopped=false,sources,lastPoint;disposals.push(()=>stopped=true);

@@ -1,9 +1,10 @@
 // One dismissal pattern. Closing a view never owns/cancels its background operation.
+import {t} from './i18n.js';
 const states=new WeakMap();
 export function popupHeader(name,onClose,heading=null,close=null){
  const header=document.createElement('header');header.className='popup-header';
  heading ||= document.createElement('h2');if(!heading.textContent)heading.textContent=name;
- close ||= document.createElement('button');close.type='button';close.className='popup-close secondary';close.textContent='×';if(!close.hasAttribute('aria-label'))close.setAttribute('aria-label','Close '+name);close.onclick=onClose;
+ close ||= document.createElement('button');close.type='button';close.className='popup-close secondary';close.textContent='×';if(!close.hasAttribute('aria-label'))close.setAttribute('aria-label',t('common.closeNamed',{name}));close.onclick=onClose;
  header.append(heading,close);return {header,close};
 }
 export function layerPopup(control){
@@ -20,11 +21,11 @@ export function dialogHeader(dialog,{title,opener=document.activeElement,protect
  let dirty=false,confirming=false,returnTo=opener;
  dialog.addEventListener('beforetoggle',event=>{if(event.newState==='open'&&document.activeElement!==document.body&&!dialog.contains(document.activeElement))returnTo=document.activeElement;});
  const requestClose=()=>{
-  if(dirty&&protectEdits){if(confirming)return;confirming=true;const warning=document.createElement('dialog');warning.setAttribute('aria-label','Unsaved changes');
-   const text=document.createElement('p');text.textContent='Closing will discard the unsaved edits in this window. Saved data and ongoing operations will be preserved.';warning.append(text);
-   const keep=document.createElement('button');keep.type='button';keep.textContent='Keep editing';keep.autofocus=true;keep.onclick=()=>warning.close();
-   const discard=document.createElement('button');discard.type='button';discard.textContent='Discard unsaved changes';discard.className='danger';discard.onclick=()=>{dirty=false;warning.close();finish();};warning.append(keep,discard);
-   warning.addEventListener('close',()=>{confirming=false;warning.remove();});document.body.append(warning);dialogHeader(warning,{title:'Unsaved changes',opener:close});warning.showModal();return;
+  if(dirty&&protectEdits){if(confirming)return;confirming=true;const warning=document.createElement('dialog');warning.setAttribute('aria-label',t('dialog.unsaved'));
+   const text=document.createElement('p');text.textContent=t('dialog.unsavedWarning');warning.append(text);
+   const keep=document.createElement('button');keep.type='button';keep.textContent=t('dialog.keepEditing');keep.autofocus=true;keep.onclick=()=>warning.close();
+   const discard=document.createElement('button');discard.type='button';discard.textContent=t('dialog.discardEdits');discard.className='danger';discard.onclick=()=>{dirty=false;warning.close();finish();};warning.append(keep,discard);
+   warning.addEventListener('close',()=>{confirming=false;warning.remove();});document.body.append(warning);dialogHeader(warning,{title:t('dialog.unsaved'),opener:close});warning.showModal();return;
   }finish();
  };
  function finish(){if(onDismiss)onDismiss();else dialog.close();}

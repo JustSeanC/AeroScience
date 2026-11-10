@@ -1,10 +1,11 @@
+import {splitFragment} from './navigation-routes.js';
 export const settingsCategories = [
   ["general","General"],["maps","Maps & Basemaps"],["science","Scientific Data Sources"],
   ["units","Units & Display"],["storage","Storage & Data"],["toolbar","MSFS Toolbar"],
   ["updates","Updates"],["advanced","Advanced & Diagnostics"],["support","Help & Support"]
 ];
 export function settingsLocation(hash=location.hash){
-  const [path,query=""]=hash.replace(/^#/,"").split("?");
+  const {path,search:query}=splitFragment(hash);
   return {page:path.split("/")[0],category:settingsCategories.some(([id])=>id===path.split("/")[1])?path.split("/")[1]:"general",query:new URLSearchParams(query)};
 }
 export function settingsNavigation(parent){

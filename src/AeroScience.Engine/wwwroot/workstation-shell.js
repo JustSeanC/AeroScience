@@ -1,11 +1,12 @@
 import {node} from './workstation-ui.js';
+import {t} from './i18n.js';
 
 export function initializeWorkstationShell(){
   const sidebar=document.querySelector('.sidebar'),main=document.querySelector('main'),header=document.querySelector('.topbar');
-  main.id='main-content';main.tabIndex=-1;sidebar.id='app-navigation';sidebar.setAttribute('aria-label','Application navigation');
-  const skip=node('a','Skip to main content','skip-link');skip.href='#main-content';skip.onclick=event=>{event.preventDefault();main.focus();};document.body.prepend(skip);
-  const toggle=node('button','☰ Menu','navigation-toggle secondary');toggle.type='button';toggle.setAttribute('aria-controls',sidebar.id);toggle.setAttribute('aria-expanded','false');header.prepend(toggle);
-  const close=node('button','×','navigation-close popup-close secondary');close.type='button';close.setAttribute('aria-label','Close navigation');sidebar.prepend(close);
+  main.id='main-content';main.tabIndex=-1;sidebar.id='app-navigation';sidebar.setAttribute('aria-label',t('shell.applicationNavigation'));sidebar.dataset.i18nAriaLabel='shell.applicationNavigation';
+  const skip=node('a',t('shell.skip'),'skip-link');skip.dataset.i18n='shell.skip';skip.href='#main-content';skip.onclick=event=>{event.preventDefault();main.focus();};document.body.prepend(skip);
+  const toggle=node('button',t('shell.menu'),'navigation-toggle secondary');toggle.dataset.i18n='shell.menu';toggle.type='button';toggle.setAttribute('aria-controls',sidebar.id);toggle.setAttribute('aria-expanded','false');header.prepend(toggle);
+  const close=node('button','×','navigation-close popup-close secondary');close.type='button';close.setAttribute('aria-label',t('shell.closeNavigation'));close.dataset.i18nAriaLabel='shell.closeNavigation';sidebar.prepend(close);
   const backdrop=node('div',undefined,'navigation-backdrop');backdrop.hidden=true;document.body.append(backdrop);
   const compact=matchMedia('(max-width:1100px)');let open=false;
   function setOpen(value,restore=true){
@@ -24,7 +25,7 @@ export function initializeWorkstationShell(){
   window.addEventListener('hashchange',()=>setOpen(false,false));
   compact.addEventListener('change',()=>setOpen(false,false));setOpen(false,false);
   const links=document.querySelectorAll('.nav-link');for(const link of links){link.title=link.textContent.trim();}
-  return {afterNavigation(parent){if(open||document.activeElement===toggle||sidebar.contains(document.activeElement)||parent?.contains(document.activeElement)){window.dispatchEvent(new Event('resize'));return;}setOpen(false,false);const heading=parent?.querySelector('h1');if(heading){heading.tabIndex=-1;heading.focus({preventScroll:true});}window.dispatchEvent(new Event('resize'));}};
+  return {afterNavigation(parent){if(open||document.activeElement===toggle||parent?.contains(document.activeElement)){window.dispatchEvent(new Event('resize'));return;}setOpen(false,false);const heading=parent?.querySelector('h1,h2');if(heading){heading.tabIndex=-1;heading.focus({preventScroll:true});}window.dispatchEvent(new Event('resize'));}};
 }
 
 export function streamlineMissionControl(){
