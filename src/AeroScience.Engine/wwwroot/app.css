@@ -34,7 +34,8 @@ button {
   border-radius: 7px;
   padding: 11px 18px;
   font-weight: 650;
-  transition: background 0.15s;
+  /* Theme foreground and background must change together: interpolating just
+     the background briefly puts dark-theme text on the light-theme surface. */
 }
 button:disabled {
   opacity: 0.5;

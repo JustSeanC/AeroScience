@@ -22,6 +22,17 @@ const campaignInput=()=>({version:1,requestId:randomUUID(),expectedRevision:0,na
 test.beforeEach(async()=>{serverDiagnostics='';ownedConnections=[];ownedResearchFlight=null;ownedResearchSelection=false;directory=mkdtempSync(join(tmpdir(),'aeroscience-org-browser-'));database='aeroscience_p13_'+randomUUID().replaceAll('-','');secret=randomBytes(32).toString('hex');secretFile=join(directory,'bootstrap-secret');writeFileSync(secretFile,secret,{mode:0o600});await databaseCommand('create');await boot();});
 test.afterEach(async({playwright},info)=>{if(info.status!==info.expectedStatus)await info.attach('organization-server.log',{body:serverDiagnostics,contentType:'text/plain'});if(ownedConnections.length&&child&&(child.exitCode!==null||child.signalCode!==null))await boot();await clearOwnedConnections(playwright);await stop();if(database)await databaseCommand('drop');if(directory)rmSync(directory,{recursive:true,force:true});});
 
+test('organization package serves the shared localization import chain before authentication',async({page})=>{
+ for(const path of ['/workstation-ui.js','/i18n.js','/i18n-format.js','/i18n/catalog.generated.js']){
+  const response=await page.request.get(path);expect(response.ok(),path+' must be included in the organization package').toBe(true);
+  expect(response.headers()['content-type'],path).toMatch(/(?:java|ecma)script/);
+ }
+ const errors=[];page.on('pageerror',error=>errors.push(error.message));
+ await page.goto('/');await expect(page.getByRole('heading',{name:'Set Up Your Organization',exact:true})).toBeVisible();
+ expect(await page.evaluate(async()=>(await import('/i18n.js')).t('science.armed'))).toBe('Science armed / not started');
+ expect(errors).toEqual([]);expect((await page.request.get('/api/organization/overview')).status()).toBe(401);
+});
+
 test('administrator securely sets up, signs in, creates a program and publishes an immutable campaign through the real portal',async({page})=>{
  expect((await page.request.get('/api/organization/overview')).status()).toBe(401);await page.goto('/#control');await expect(page.getByRole('heading',{name:'Set Up Your Organization',exact:true})).toBeVisible();
  await page.getByLabel('Setup code',{exact:true}).fill(secret);await page.getByLabel('Organization name',{exact:true}).fill('Flight Research Lab');await page.getByLabel('Organization description',{exact:true}).fill('Private scientific investigation');await page.getByLabel('Account name',{exact:true}).fill('administrator');await page.getByLabel('Password',{exact:true}).fill(password);await page.getByRole('button',{name:'Create Organization',exact:true}).click();await expect(page.getByRole('heading',{name:'Sign In',exact:true})).toBeVisible();

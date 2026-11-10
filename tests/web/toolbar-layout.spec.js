@@ -72,6 +72,26 @@ test('browser wheel scrolls bounded content and exposes mission controls', async
     .toBe('00000000-0000-4000-8000-000000000002');
 });
 
+test('long status details keep minimum-size content scrollable with the recording/science banner visible', async ({ page }) => {
+  await mountToolbar(page, { autoReply: true, activeMission: activeMission() });
+  await page.locator('#aeroscience-frame').evaluate(frame => Object.assign(frame.style, { width: '320px', height: '360px' }));
+  const warning='Synthetic recording warning: review storage status before continuing. '.repeat(12);
+  await page.evaluate(message => {
+    window.bus.state.connection.message=message;
+    document.querySelector('ingamepanel-aeroscience').status(message);
+  }, warning);
+  await expect(page.locator('#as-status')).toHaveText(warning.trim());
+  const scroll=page.getByRole('region', { name: 'Mission and payload content' });
+  expect(await scroll.evaluate(node => node.clientHeight)).toBeGreaterThanOrEqual(48);
+  await scroll.hover();await page.mouse.wheel(0, 1200);
+  await expect.poll(() => scroll.evaluate(node => node.scrollTop)).toBeGreaterThan(0);
+  await expect(page.locator('header')).toBeInViewport();
+  await expect(page.locator('#as-collection-banner')).toBeInViewport();
+  await expect(page.locator('#as-collection-summary')).toContainText('Flight recording: Active');
+  expect(await page.evaluate(() => window.scrollY)).toBe(0);
+  expect(await page.evaluate(() => window.bus.sent.filter(x => x.command.op !== 'state' && !x.command.op.startsWith('map-')))).toEqual([]);
+});
+
 test('hiding and reconnecting the mocked panel retains the central mission', async ({ page }) => {
   await mountToolbar(page, { autoReply: true, activeMission: activeMission() });
   await page.locator('#aeroscience-frame').evaluate(frame => frame.classList.add('panelInvisible'));

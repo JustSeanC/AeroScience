@@ -18,14 +18,16 @@ export function dialogHeader(dialog,{title,opener=document.activeElement,protect
  const name=title||dialog.getAttribute('aria-label')||dialog.querySelector('h1,h2,h3')?.textContent||'dialog';
  if(!dialog.hasAttribute('aria-label')&&!dialog.hasAttribute('aria-labelledby'))dialog.setAttribute('aria-label',name);
  const {header,close}=popupHeader(name,()=>requestClose(),reuseHeading?dialog.querySelector('h1,h2,h3'):null,dialog.querySelector('#close-detail'));dialog.prepend(header);dialog.classList.add('managed-popup');
- let dirty=false,confirming=false,returnTo=opener;
+ let dirty=false,confirmation=null,returnTo=opener;
  dialog.addEventListener('beforetoggle',event=>{if(event.newState==='open'&&document.activeElement!==document.body&&!dialog.contains(document.activeElement))returnTo=document.activeElement;});
  const requestClose=()=>{
-  if(dirty&&protectEdits){if(confirming)return;confirming=true;const warning=document.createElement('dialog');warning.setAttribute('aria-label',t('dialog.unsaved'));
+  // close() clears open before its queued close event. A new dismissal in that
+  // gap still needs a warning; an older close event must not clear the new one.
+  if(dirty&&protectEdits){if(confirmation?.open)return;const warning=document.createElement('dialog');confirmation=warning;warning.setAttribute('aria-label',t('dialog.unsaved'));
    const text=document.createElement('p');text.textContent=t('dialog.unsavedWarning');warning.append(text);
    const keep=document.createElement('button');keep.type='button';keep.textContent=t('dialog.keepEditing');keep.autofocus=true;keep.onclick=()=>warning.close();
    const discard=document.createElement('button');discard.type='button';discard.textContent=t('dialog.discardEdits');discard.className='danger';discard.onclick=()=>{dirty=false;warning.close();finish();};warning.append(keep,discard);
-   warning.addEventListener('close',()=>{confirming=false;warning.remove();});document.body.append(warning);dialogHeader(warning,{title:t('dialog.unsaved'),opener:close});warning.showModal();return;
+   warning.addEventListener('close',()=>{if(confirmation===warning)confirmation=null;warning.remove();});document.body.append(warning);dialogHeader(warning,{title:t('dialog.unsaved'),opener:close});warning.showModal();return;
   }finish();
  };
  function finish(){if(onDismiss)onDismiss();else dialog.close();}

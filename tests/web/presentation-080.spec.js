@@ -83,6 +83,29 @@ test('shared components render text safely and managed dialogs retain cancel, di
   await page.keyboard.press('Escape');await page.getByRole('button',{name:'Discard unsaved changes',exact:true}).click();await expect(opener).toBeFocused();
 });
 
+test('dirty dialog dismissal stays protected while an earlier confirmation close event is pending',async({page})=>{
+  await page.goto('/#settings');
+  await page.evaluate(async()=>{
+    const {dialogHeader}=await import('/dialog-ui.js');
+    const dialog=document.createElement('dialog');dialog.setAttribute('aria-label','Synthetic pending-close editor');
+    const input=document.createElement('input');input.setAttribute('aria-label','Pending-close draft');dialog.append(input);document.body.append(dialog);
+    dialogHeader(dialog,{protectEdits:true});dialog.showModal();
+  });
+  const editor=page.getByRole('dialog',{name:'Synthetic pending-close editor',exact:true});
+  await page.getByLabel('Pending-close draft',{exact:true}).fill('Retain these unsaved edits');await page.keyboard.press('Escape');
+  const warning=page.getByRole('dialog',{name:'Unsaved changes',exact:true});await expect(warning).toBeVisible();
+  // close() changes open/focus synchronously; its close event is a later task.
+  // Exercise another dismissal in that gap, without sleeps or discarding the draft.
+  await warning.getByRole('button',{name:'Keep editing',exact:true}).evaluate(button=>{
+    button.click();document.querySelector('dialog[aria-label="Synthetic pending-close editor"] .popup-close').click();
+  });
+  await expect(warning).toBeVisible();await expect(warning).toHaveCount(1);await expect(editor).toBeVisible();
+  await page.keyboard.press('Escape');await expect(warning).toHaveCount(0);
+  await expect(page.getByLabel('Pending-close draft',{exact:true})).toHaveValue('Retain these unsaved edits');
+  await page.keyboard.press('Escape');await expect(warning).toBeVisible();
+  await warning.getByRole('button',{name:'Discard unsaved changes',exact:true}).click();await expect(editor).toBeHidden();
+});
+
 test('both themes retain readable text across existing flight, scientific, history and utility workspaces',async({page,request})=>{
   test.setTimeout(120000);
   const origin='http://127.0.0.1:5080',session=await(await request.post('/api/session',{data:{},headers:{Origin:origin}})).json();
