@@ -15,6 +15,14 @@ export function compileNative(source,name='panel.js'){
  parse(result.outputText,{ecmaVersion:2017,sourceType:'script'});
  return result.outputText;
 }
+// One read-only state projection on both surfaces. Generate a classic-script
+// wrapper from the canonical ES modules, then independently parse ES2017 output.
+export function nativeFlightStatus(){
+ const files=['presentation-state.js','current-flight-state.js'];
+ const source=files.map(name=>readFileSync(join(root,'src/AeroScience.Engine/wwwroot',name),'utf8')
+   .replace(/^import .*;\r?\n/gm,'').replace(/^export /gm,'')).join('\n');
+ return 'var AeroScienceFlightStatus = (function () {\n'+source+'\nreturn {present:currentFlightPresentation};\n}());\n';
+}
 export function compileStage(folder){
  const stage=realpathSync(folder),original=join(root,'msfs-toolbar');
  const underOriginal=relative(original,stage);
@@ -33,7 +41,7 @@ export function compileStage(folder){
  visit(panelRoot);
  // Discover the actual copied panel directory: private validation deliberately
  // renames it. Validate links/all input first; never generate through a link.
- for(const panel of panels)for(const [name,source]of Object.entries(nativeCatalogAssets())){
+ for(const panel of panels)for(const [name,source]of Object.entries({...nativeCatalogAssets(),'AeroScience.FlightStatus.js':nativeFlightStatus()})){
   const path=join(panel,name),input=Buffer.from(source),file={path,name:relative(stage,path).split(sep).join('/'),input,output:compileNative(source,name)};
   const existing=files.findIndex(f=>f.path===path);if(existing>=0)files[existing]=file;else files.push(file);
  }

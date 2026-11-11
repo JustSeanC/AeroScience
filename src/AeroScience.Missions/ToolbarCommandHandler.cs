@@ -151,6 +151,7 @@ public sealed class ToolbarCommandHandler(MissionCoordinator coordinator, RouteM
             summary=summary with{DetailsOmitted=true};encoded=Encode();
         }
         if(Encoding.UTF8.GetByteCount(encoded)>8000){summary=summary with{Metrics=[],Warnings=[],TriggerStatus="Open dashboard for details.",DetailsOmitted=true};encoded=Encode();}
+        if(Encoding.UTF8.GetByteCount(encoded)>8000&&summary.RetainedScience is not null){summary=summary with{RetainedScience=null,DetailsOmitted=true};encoded=Encode();}
         if(Encoding.UTF8.GetByteCount(encoded)>8000)throw new InvalidOperationException("Native reply exceeds 8 KiB even after display-only reduction. Open bridge diagnostics.");
         return encoded;
     }

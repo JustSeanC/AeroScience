@@ -72,11 +72,11 @@ test('prepared personal cards and empty states render with legacy DOM methods un
  await mountToolbar(page,{script:legacyScript()});
  const flight={id:'11111111-1111-4111-8111-111111111111',name:'Card fixture flight',mode:'universal',startedUtc:new Date().toISOString(),sampleCount:0};
  await page.evaluate(flight=>window.bus.state.activeMission=flight,flight);await stateReply(page,{capabilities:['personal-research-controls-1']});
- await page.locator('#as-research-page').click();
+ await expect(page.locator('#as-research-page')).toBeHidden();
  await page.evaluate(flight=>{const p=document.querySelector('ingamepanel-aeroscience');p.researchState={flightId:flight.id,generatedUtc:new Date().toISOString(),revision:1,recording:true,canBeginAttempt:true,cards:[{card:{id:'card-one',version:1,name:'Café 研究 test card',revision:1,flightRegime:{airspeedKnots:100,altitudeMslFeet:5000}},active:false}],nextOffset:null};p.renderPersonalResearch(true);},flight);
- await expect(page.locator('#as-research-list')).toContainText('Café 研究 test card');await expect(page.getByRole('button',{name:'Activate Card',exact:true})).toBeEnabled();
+ await page.locator('#as-research-page').click();await expect(page.locator('#as-research-list')).toContainText('Café 研究 test card');await expect(page.getByRole('button',{name:'Activate Card',exact:true})).toBeEnabled();
  await page.evaluate(()=>{const p=document.querySelector('ingamepanel-aeroscience');p.researchState={...p.researchState,revision:2,cards:[]};p.renderPersonalResearch(true);});
- await expect(page.locator('#as-research-status')).toHaveText('No personal cards selected for this flight.');await expect(page.locator('#as-research-list')).toBeEmpty();
+ await expect(page.locator('#as-research-status')).toHaveText('No personal cards selected for this flight.');await expect(page.locator('#as-research-list')).toBeEmpty();await expect(page.locator('#as-research-page')).toBeHidden();await expect(page.locator('#as-mission-view')).toBeVisible();
 });
 
 test('a missing saved plan cannot start an accidental unplanned flight and refresh never selects it',async({page})=>{

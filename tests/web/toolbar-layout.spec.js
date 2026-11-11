@@ -9,8 +9,8 @@ const activeMission = () => ({
 test('one responsive interface retains navigation, mission and mocked CommBus state', async ({ page }) => {
   await mountToolbar(page, { autoReply: true, activeMission: activeMission() });
   await expect(page.getByRole('checkbox')).toHaveCount(0);
-  await expect(page.locator('nav new-push-button')).toHaveText(['Mission', 'Payload', 'Map', 'Research']);
-  await page.locator('#as-research-page').click();await expect(page.locator('#as-research-cards')).toBeVisible();await expect(page.locator('#as-mission-view')).toBeHidden();
+  await expect(page.locator('nav [data-native-section]')).toHaveText(['Flight', 'Science', 'Cards']);
+  await expect(page.locator('#as-research-page')).toBeHidden();await expect(page.locator('#as-research-cards')).toBeHidden();
   await page.locator('#as-payload-page').click();
   await expect(page.locator('#as-payload-view')).toBeVisible();
   await expect(page.locator('#as-mission-view')).toBeHidden();
@@ -42,7 +42,7 @@ test('content follows supplied host bounds (browser fixture, not native dragging
       const content = scroll.getBoundingClientRect();
       return { x: frame.x, y: frame.y, width: frame.width, height: frame.height,
         right: frame.right, bottom: frame.bottom, rootRight: root.right, contentBottom: content.bottom,
-        scrollHeight: scroll.clientHeight, horizontalOverflow: scroll.scrollWidth > scroll.clientWidth, tabs:Array.from(document.querySelectorAll('nav new-push-button')).map(b=>({top:b.getBoundingClientRect().top,height:b.getBoundingClientRect().height})) };
+        scrollHeight: scroll.clientHeight, horizontalOverflow: scroll.scrollWidth > scroll.clientWidth, tabs:Array.from(document.querySelectorAll('nav [data-native-section]:not([hidden])')).map(b=>({top:b.getBoundingClientRect().top,height:b.getBoundingClientRect().height})) };
     });
     expect(geometry.x).toBe(30); expect(geometry.y).toBe(20);
     expect(geometry.width).toBe(dimensions.width); expect(geometry.height).toBe(dimensions.height);
@@ -94,6 +94,7 @@ test('long status details keep minimum-size content scrollable with the recordin
 
 test('hiding and reconnecting the mocked panel retains the central mission', async ({ page }) => {
   await mountToolbar(page, { autoReply: true, activeMission: activeMission() });
+  await page.locator('#as-payload-page').click();
   await page.locator('#aeroscience-frame').evaluate(frame => frame.classList.add('panelInvisible'));
   const beforeHidden = await page.evaluate(() => window.bus.sent.length);
   await page.waitForTimeout(1100); // Cover one real one-second poll interval while hidden.
@@ -108,6 +109,7 @@ test('hiding and reconnecting the mocked panel retains the central mission', asy
   });
   await expect(page.locator('#as-samples')).toHaveText('18 samples');
   await expect(page.locator('#as-active-name')).toHaveText('Toolbar layout recording');
+  await expect(page.locator('#as-payload-view')).toBeVisible();await expect(page.locator('#as-payload-page')).toHaveAttribute('aria-pressed','true');await expect(page.locator('#as-mission-page')).toHaveAttribute('aria-pressed','false');
   expect(await page.evaluate(() => window.bus.unregistered)).toBe(1);
   expect(await page.evaluate(() => window.listenerRegistrations)).toBe(2);
   expect(await page.evaluate(() => window.bus.sent.filter(x => x.command.op !== 'state' && !x.command.op.startsWith('map-')))).toEqual([]);

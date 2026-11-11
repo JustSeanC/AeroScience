@@ -2,7 +2,7 @@
 export const localeData = {
   "manifest": {
     "version": 1,
-    "catalogVersion": 5,
+    "catalogVersion": 6,
     "fallback": "en-US",
     "locales": [
       {
@@ -1276,12 +1276,109 @@ export const localeData = {
           "derived",
           "products"
         ]
+      },
+      "toolbar.flight": {
+        "context": "P04 native toolbar presentation; retain recording/science distinction and unknown counts. toolbar.flight",
+        "parameters": []
+      },
+      "toolbar.science": {
+        "context": "P04 native toolbar presentation; retain recording/science distinction and unknown counts. toolbar.science",
+        "parameters": []
+      },
+      "toolbar.cards": {
+        "context": "P04 native toolbar presentation; retain recording/science distinction and unknown counts. toolbar.cards",
+        "parameters": []
+      },
+      "toolbar.collectionActive": {
+        "context": "P04 native toolbar presentation; retain recording/science distinction and unknown counts. toolbar.collectionActive",
+        "parameters": []
+      },
+      "toolbar.collectionInactive": {
+        "context": "P04 native toolbar presentation; retain recording/science distinction and unknown counts. toolbar.collectionInactive",
+        "parameters": []
+      },
+      "toolbar.retained": {
+        "context": "P04 native toolbar presentation; retain recording/science distinction and unknown counts. toolbar.retained",
+        "parameters": [
+          "derived",
+          "original",
+          "products"
+        ]
+      },
+      "toolbar.countsUnavailable": {
+        "context": "P04 native toolbar presentation; retain recording/science distinction and unknown counts. toolbar.countsUnavailable",
+        "parameters": []
+      },
+      "toolbar.acquisitionSummary": {
+        "context": "P04 native instrument diagnostic summary; do not equate diagnostic counts to retained valid science. toolbar.acquisitionSummary",
+        "parameters": [
+          "interval",
+          "missed",
+          "recorded",
+          "rejected"
+        ]
+      },
+      "toolbar.sourceUnknown": {
+        "context": "P04 native instrument diagnostic summary; do not equate diagnostic counts to retained valid science. toolbar.sourceUnknown",
+        "parameters": []
+      },
+      "toolbar.disabledInstruments": {
+        "context": "Native toolbar disclosure retaining original disabled instrument controls; opening never enables an instrument.",
+        "parameters": [
+          "count"
+        ]
+      },
+      "flight.action.startData": {
+        "context": "P04 critical flight/science control label; preserve independent operations and explicit authorization. flight.action.startData",
+        "parameters": []
+      },
+      "flight.action.pauseData": {
+        "context": "P04 critical flight/science control label; preserve independent operations and explicit authorization. flight.action.pauseData",
+        "parameters": []
+      },
+      "flight.action.resumeData": {
+        "context": "P04 critical flight/science control label; preserve independent operations and explicit authorization. flight.action.resumeData",
+        "parameters": []
+      },
+      "flight.action.endData": {
+        "context": "P04 critical flight/science control label; preserve independent operations and explicit authorization. flight.action.endData",
+        "parameters": []
+      },
+      "flight.action.rearmAutomation": {
+        "context": "P04 critical flight/science control label; preserve independent operations and explicit authorization. flight.action.rearmAutomation",
+        "parameters": []
+      },
+      "flight.action.record": {
+        "context": "P04 critical flight/science control label; preserve independent operations and explicit authorization. flight.action.record",
+        "parameters": []
+      },
+      "flight.action.endFlight": {
+        "context": "P04 critical flight/science control label; preserve independent operations and explicit authorization. flight.action.endFlight",
+        "parameters": []
+      },
+      "toolbar.terrainScanner": {
+        "context": "P04 critical flight/science control label; preserve independent operations and explicit authorization. toolbar.terrainScanner",
+        "parameters": []
+      },
+      "toolbar.acquisitionState": {
+        "context": "Legacy instrument acquisition aggregate is separate from authoritative collection/session phase; do not label it Collection.",
+        "parameters": [
+          "status"
+        ]
+      },
+      "science.stopped": {
+        "context": "Stopped is an authoritative collection phase; flight recording remains independent.",
+        "parameters": []
+      },
+      "home.science.stopped": {
+        "context": "Stopped is an authoritative collection phase; flight recording remains independent.",
+        "parameters": []
       }
     }
   },
   "catalogs": {
     "en-US": {
-      "version": 5,
+      "version": 6,
       "locale": "en-US",
       "messages": {
         "common.messageUnavailable": "Details are unavailable. Refresh to review the current information.",
@@ -1579,7 +1676,28 @@ export const localeData = {
         "flight.scanner.source": "Scientific source: {status} · rejected acquisitions: {rejected} · missed intervals: {missed}. Source readiness and acquisition timing are independent.",
         "flight.enabledInstruments": "Enabled instruments: {names}",
         "flight.noneEnabled": "None enabled",
-        "flight.retainedProducts": "Saved external products: {products} · modeled/derived observations: {derived}"
+        "flight.retainedProducts": "Saved external products: {products} · modeled/derived observations: {derived}",
+        "toolbar.flight": "Flight",
+        "toolbar.science": "Science",
+        "toolbar.cards": "Cards",
+        "toolbar.collectionActive": "SCIENCE COLLECTION ACTIVE",
+        "toolbar.collectionInactive": "SCIENCE COLLECTION INACTIVE",
+        "toolbar.retained": "Retained original scientific observations: {original} | modeled/derived observations: {derived} | saved external products: {products}. Counts do not establish quality or objective completion.",
+        "toolbar.countsUnavailable": "Saved scientific counts unavailable; no count inferred from flight samples.",
+        "toolbar.acquisitionSummary": "Acquisition diagnostics: {recorded} recorded rows/products | {rejected} rejected | {missed} missed intervals | actual average interval: {interval} s. These counts are separate from retained original evidence.",
+        "toolbar.sourceUnknown": "Source/quality details unavailable; review the dashboard.",
+        "toolbar.disabledInstruments": "Disabled instruments ({count})",
+        "flight.action.startData": "Start Science Collection",
+        "flight.action.pauseData": "Pause science collection",
+        "flight.action.resumeData": "Resume science collection",
+        "flight.action.endData": "End current science session",
+        "flight.action.rearmAutomation": "Rearm automatic collection",
+        "flight.action.record": "Start Recording",
+        "flight.action.endFlight": "End mission",
+        "toolbar.terrainScanner": "Terrain Scanner (DEM Elevation)",
+        "toolbar.acquisitionState": "Instrument acquisition status: {status} (separate from the collection phase).",
+        "science.stopped": "Science stopped",
+        "home.science.stopped": "Stopped"
       }
     }
   }

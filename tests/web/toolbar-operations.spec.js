@@ -9,7 +9,8 @@ test('science header is authoritative and fixed across pages, scroll, stale stat
  await mountToolbar(page);for(const phase of ['armed','paused','betweenSessions','unknown','stopped']){await emit(page,{phase});await expect(page.locator('#as-collection-headline')).toHaveText('SCIENCE COLLECTION INACTIVE');}
  await emit(page);await expect(page.locator('#as-collection-headline')).toHaveText('SCIENCE COLLECTION ACTIVE');
  await page.evaluate(()=>{const p=document.querySelector('ingamepanel-aeroscience');p.intelligence.sessionId=null;p.renderCollectionBanner(true);});await expect(page.locator('#as-collection-summary')).toContainText('status unavailable');await expect(page.locator('#as-collection-headline')).toHaveText('SCIENCE COLLECTION INACTIVE');await emit(page);
- for(const tab of ['as-mission-page','as-payload-page','as-map-page','as-research-page']){await page.locator('#'+tab).click();await page.locator('#as-scroll').evaluate(n=>n.scrollTop=n.scrollHeight);await expect(page.locator('#as-collection-banner')).toBeInViewport();}
+ for(const tab of ['as-mission-page','as-payload-page','as-map-page']){await page.locator('#'+tab).click();await page.locator('#as-scroll').evaluate(n=>n.scrollTop=n.scrollHeight);await expect(page.locator('#as-collection-banner')).toBeInViewport();}
+ await expect(page.locator('#as-research-page')).toBeHidden();
  for(const connection of ['disconnected','unavailable','initializing']){await emit(page,{connection});await expect(page.locator('#as-collection-headline')).toHaveText('SCIENCE COLLECTION INACTIVE');}
  await emit(page,{stale:true});await expect(page.locator('#as-collection-headline')).toHaveText('SCIENCE COLLECTION INACTIVE');
  await emit(page,{collectionFault:true});await expect(page.locator('#as-collection-summary')).toContainText('storage unavailable');

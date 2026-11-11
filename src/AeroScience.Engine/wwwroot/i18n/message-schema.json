@@ -1237,6 +1237,103 @@
         "derived",
         "products"
       ]
+    },
+    "toolbar.flight": {
+      "context": "P04 native toolbar presentation; retain recording/science distinction and unknown counts. toolbar.flight",
+      "parameters": []
+    },
+    "toolbar.science": {
+      "context": "P04 native toolbar presentation; retain recording/science distinction and unknown counts. toolbar.science",
+      "parameters": []
+    },
+    "toolbar.cards": {
+      "context": "P04 native toolbar presentation; retain recording/science distinction and unknown counts. toolbar.cards",
+      "parameters": []
+    },
+    "toolbar.collectionActive": {
+      "context": "P04 native toolbar presentation; retain recording/science distinction and unknown counts. toolbar.collectionActive",
+      "parameters": []
+    },
+    "toolbar.collectionInactive": {
+      "context": "P04 native toolbar presentation; retain recording/science distinction and unknown counts. toolbar.collectionInactive",
+      "parameters": []
+    },
+    "toolbar.retained": {
+      "context": "P04 native toolbar presentation; retain recording/science distinction and unknown counts. toolbar.retained",
+      "parameters": [
+        "derived",
+        "original",
+        "products"
+      ]
+    },
+    "toolbar.countsUnavailable": {
+      "context": "P04 native toolbar presentation; retain recording/science distinction and unknown counts. toolbar.countsUnavailable",
+      "parameters": []
+    },
+    "toolbar.acquisitionSummary": {
+      "context": "P04 native instrument diagnostic summary; do not equate diagnostic counts to retained valid science. toolbar.acquisitionSummary",
+      "parameters": [
+        "interval",
+        "missed",
+        "recorded",
+        "rejected"
+      ]
+    },
+    "toolbar.sourceUnknown": {
+      "context": "P04 native instrument diagnostic summary; do not equate diagnostic counts to retained valid science. toolbar.sourceUnknown",
+      "parameters": []
+    },
+    "toolbar.disabledInstruments": {
+      "context": "Native toolbar disclosure retaining original disabled instrument controls; opening never enables an instrument.",
+      "parameters": [
+        "count"
+      ]
+    },
+    "flight.action.startData": {
+      "context": "P04 critical flight/science control label; preserve independent operations and explicit authorization. flight.action.startData",
+      "parameters": []
+    },
+    "flight.action.pauseData": {
+      "context": "P04 critical flight/science control label; preserve independent operations and explicit authorization. flight.action.pauseData",
+      "parameters": []
+    },
+    "flight.action.resumeData": {
+      "context": "P04 critical flight/science control label; preserve independent operations and explicit authorization. flight.action.resumeData",
+      "parameters": []
+    },
+    "flight.action.endData": {
+      "context": "P04 critical flight/science control label; preserve independent operations and explicit authorization. flight.action.endData",
+      "parameters": []
+    },
+    "flight.action.rearmAutomation": {
+      "context": "P04 critical flight/science control label; preserve independent operations and explicit authorization. flight.action.rearmAutomation",
+      "parameters": []
+    },
+    "flight.action.record": {
+      "context": "P04 critical flight/science control label; preserve independent operations and explicit authorization. flight.action.record",
+      "parameters": []
+    },
+    "flight.action.endFlight": {
+      "context": "P04 critical flight/science control label; preserve independent operations and explicit authorization. flight.action.endFlight",
+      "parameters": []
+    },
+    "toolbar.terrainScanner": {
+      "context": "P04 critical flight/science control label; preserve independent operations and explicit authorization. toolbar.terrainScanner",
+      "parameters": []
+    },
+    "toolbar.acquisitionState": {
+      "context": "Legacy instrument acquisition aggregate is separate from authoritative collection/session phase; do not label it Collection.",
+      "parameters": [
+        "status"
+      ]
+    },
+    "science.stopped": {
+      "context": "Stopped is an authoritative collection phase; flight recording remains independent.",
+      "parameters": []
+    },
+    "home.science.stopped": {
+      "context": "Stopped is an authoritative collection phase; flight recording remains independent.",
+      "parameters": []
     }
   }
 }

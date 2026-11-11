@@ -87,7 +87,7 @@ public sealed class ScienceSessionTests:IDisposable
         var original=coordinator.Snapshot().Telemetry!;var unicode=string.Concat(Enumerable.Repeat("研究😀",200));
         clock=clock.AddSeconds(1);coordinator.Apply(new(new(ConnectionState.Connected,TelemetrySource.Simulated,unicode,clock),original with{Aircraft=unicode,TimestampUtc=clock}));
         var expected=store.CollectionCheckpoint(flight.Id)!;
-        var toolbar=new ToolbarCommandHandler(coordinator,intelligence:(snapshot,collection)=>ToolbarIntelligenceProjection.Create(snapshot,collection) with{Warnings=[unicode,unicode,unicode],TriggerStatus=unicode});
+        var toolbar=new ToolbarCommandHandler(coordinator,intelligence:(snapshot,collection)=>ToolbarIntelligenceProjection.Create(snapshot,collection) with{Warnings=[unicode,unicode,unicode],TriggerStatus=unicode,RetainedScience=new(flight.Id,clock,1,0,0,"Saved original records; quality remains separate.")});
         var encoded=toolbar.Handle(JsonSerializer.Serialize(new ToolbarCommand(1,Guid.NewGuid(),"state"),WireJson.Options));
         var bytes=System.Text.Encoding.UTF8.GetByteCount(encoded);Console.WriteLine($"Native multilingual reduced reply: {bytes} UTF-8 bytes; limit 8000.");Assert.True(bytes<=8000);var reply=JsonSerializer.Deserialize<ToolbarReply>(encoded,WireJson.Options)!;
         Assert.Equal(1,reply.Protocol);Assert.Equal(expected.CurrentSessionId,reply.Intelligence!.SessionId);Assert.Equal(expected.Revision,reply.Intelligence.Revision);Assert.True(reply.Intelligence.DetailsOmitted);

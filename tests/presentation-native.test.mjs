@@ -40,7 +40,7 @@ test('SDK staging ships and records canonical catalogs in both original and rena
   const stage=join(temporary,name);cpSync('msfs-toolbar',stage,{recursive:true});const panels=join(stage,'PackageSources/html_ui/InGamePanels');
   if(name!=='AeroScience')renameSync(join(panels,'AeroScience'),join(panels,name));
   const receipt=compileStage(stage);
-  for(const asset of ['AeroScience.LocaleData.js','AeroScience.LocaleFormat.js','AeroScience.I18n.js']){
+  for(const asset of ['AeroScience.LocaleData.js','AeroScience.LocaleFormat.js','AeroScience.I18n.js','AeroScience.FlightStatus.js']){
    const file=join(panels,name,asset);assert.ok(existsSync(file));parse(readFileSync(file,'utf8'),{ecmaVersion:2017});
    assert.ok(receipt.files.some(f=>f.path.endsWith('/'+name+'/'+asset)));
   }

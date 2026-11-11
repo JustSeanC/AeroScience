@@ -1,15 +1,7 @@
 import {test,expect} from '@playwright/test';
-import {mountToolbar} from './helpers/toolbar.mjs';
+import {mountToolbar,mountRealEngine} from './helpers/toolbar.mjs';
 const origin='http://127.0.0.1:5080';
 async function post(request,path,data={}){const s=await(await request.post('/api/session',{data:{},headers:{Origin:origin}})).json();const r=await request.post(path,{data,headers:{Origin:origin,'X-AeroScience-CSRF':s.csrf}});expect(r.ok(),await r.text()).toBeTruthy();return r.json();}
-async function mountRealEngine(page){
- // The simulator SDK document is a separate host, not the dashboard CSP. Supply a
- // test-only document for native inline wrappers; production CSP remains unchanged.
- await page.route('**/__native_sdk_fixture',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><html><head></head><body></body></html>'}));await page.goto('/__native_sdk_fixture');await mountToolbar(page);await page.evaluate(async()=>{
- const session=await(await fetch('/api/session',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'})).json();
- window.bus.callSimConnect=function(event,payload){const command=JSON.parse(payload);this.sent.push({event,command});return fetch('/api/testing/toolbar',{method:'POST',headers:{'Content-Type':'application/json','X-AeroScience-CSRF':session.csrf},body:payload}).then(r=>r.text()).then(reply=>this.handlers['AeroScience.Reply.v1']?.(reply));};
- document.querySelector('ingamepanel-aeroscience').tick();
- });await expect(page.locator('#as-source')).toHaveText('SIMULATED TEST DATA');}
 test.afterEach(async({request})=>{const s=await(await request.get('/api/state')).json();if(s.activeMission)await post(request,`/api/missions/${s.activeMission.id}/end`);await post(request,'/api/instruments',[]);});
 test('mocked SDK transports real session controls between toolbar and dashboard without retargeting',async({page,context,request})=>{
  await post(request,'/api/mission-selection',{planId:null});
@@ -17,7 +9,7 @@ test('mocked SDK transports real session controls between toolbar and dashboard 
  await mountRealEngine(page);await expect(page.locator('#as-session-phase')).toContainText('Science: Armed');
  const dashboard=await context.newPage();await dashboard.goto('/#control');const intelligence=dashboard.locator('#mission-intelligence');
  await dashboard.getByRole('button',{name:'Start Science Collection',exact:true}).click();await expect(page.locator('#as-session-phase')).toContainText('Session 1');
- await page.getByText('Science session controls & evidence',{exact:true}).click();await page.locator('[data-science-action=pauseData]').click();await expect(intelligence).toContainText('Science: paused');
+ await page.locator('#as-payload-page').click();await page.getByText('Science session controls & evidence',{exact:true}).click();await page.locator('[data-science-action=pauseData]').click();await expect(intelligence).toContainText('Science: paused');
  await dashboard.getByRole('button',{name:'End current science session',exact:true}).click();await expect(page.locator('#as-session-phase')).toContainText('Between sessions');
  await page.locator('[data-science-action=startData]').click();await expect(page.locator('#as-session-phase')).toContainText('Session 2');await expect(intelligence).toContainText('Session 2');
  const state=(await(await request.get(`/api/missions/${flight.id}/collection`)).json()).state;await expect(page.locator('#as-session-identity')).toContainText(state.currentSessionId);
@@ -41,7 +33,7 @@ test('real engine confirms native interval changes and retained dashboard values
 });
 test('native timeout retries identical persisted work and cannot create a duplicate session',async({page,request})=>{
  await post(request,'/api/mission-selection',{planId:null});const flight=await post(request,'/api/missions',{name:'Synthetic native lost reply',instruments:[{instrumentId:'ambient-temperature',enabled:true,intervalMs:1000}],armScience:true});
- await mountRealEngine(page);await page.getByText('Science session controls & evidence',{exact:true}).click();
+ await mountRealEngine(page);await page.locator('#as-payload-page').click();await page.getByText('Science session controls & evidence',{exact:true}).click();
  await page.evaluate(()=>{const original=window.bus.handlers['AeroScience.Reply.v1'];let drop=true;window.bus.handlers['AeroScience.Reply.v1']=data=>{const reply=JSON.parse(data);if(reply.receipt&&drop){drop=false;return;}original(data);};});
  await page.locator('[data-science-action=startData]').click();await expect.poll(async()=>((await(await request.get(`/api/missions/${flight.id}/collection`)).json()).sessions).length).toBe(1);
  await page.evaluate(()=>{const panel=document.querySelector('ingamepanel-aeroscience');for(const request of panel.pending.values())if(request.op==='science-control')request.sent=Date.now()-5001;panel.tick();});

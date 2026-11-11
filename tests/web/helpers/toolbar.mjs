@@ -1,6 +1,6 @@
 import { expect } from '@playwright/test';
 import { readFileSync } from 'node:fs';
-import {compileNative} from '../../../scripts/build/native-javascript.mjs';
+import {compileNative,nativeFlightStatus} from '../../../scripts/build/native-javascript.mjs';
 import {nativeCatalogAssets} from '../../../scripts/build/build-locales.mjs';
 import {parse} from 'acorn';
 
@@ -61,6 +61,7 @@ export async function mountToolbar(page, { autoReply = false, activeMission = nu
   await page.evaluate(data => {window.AeroScienceCountries=data[0];window.AeroSciencePlaces=data[1];window.AeroScienceAirports=data[2];}, ['countries','places','airports'].map(name=>JSON.parse(readFileSync('src/AeroScience.Engine/wwwroot/geography/'+name+'.geojson','utf8'))));
   for(const [name,content]of Object.entries(nativeCatalogAssets()))await page.addScriptTag({content:compileNative(content,name)});
   await page.addScriptTag({content:compileNative(readFileSync(folder+'AeroScience.I18n.js','utf8'))});
+  await page.addScriptTag({content:compileNative(nativeFlightStatus(),'AeroScience.FlightStatus.js')});
   await page.addScriptTag({ content: compileNative(readFileSync('src/AeroScience.Engine/wwwroot/geographic-view.js', 'utf8')) });
   if(mapFails)await page.evaluate(()=>{window.AeroScienceMovingMap=class{constructor(){throw Error('Injected browser fixture renderer failure');}};});
   if(templateDelay)await page.evaluate(()=>{const panel=document.querySelector('ingamepanel-aeroscience');window.delayedToolbarChildren=Array.from(panel.childNodes);panel.replaceChildren();});
@@ -70,3 +71,12 @@ export async function mountToolbar(page, { autoReply = false, activeMission = nu
   await expect.poll(() => page.evaluate(() => window.bus.sent.length)).toBeGreaterThan(0);
   if (autoReply) await expect(page.locator('#as-source')).toHaveText('SIMULATED TEST DATA');
 }
+
+export async function mountRealEngine(page){
+ // The simulator SDK document is a separate host, not the dashboard CSP. Supply a
+ // test-only document for native inline wrappers; production CSP remains unchanged.
+ await page.route('**/__native_sdk_fixture',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><html><head></head><body></body></html>'}));await page.goto('/__native_sdk_fixture');await mountToolbar(page);await page.evaluate(async()=>{
+ const session=await(await fetch('/api/session',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'})).json();
+ window.bus.callSimConnect=function(event,payload){const command=JSON.parse(payload);this.sent.push({event,command});return fetch('/api/testing/toolbar',{method:'POST',headers:{'Content-Type':'application/json','X-AeroScience-CSRF':session.csrf},body:payload}).then(r=>r.text()).then(reply=>this.handlers['AeroScience.Reply.v1']?.(reply));};
+ document.querySelector('ingamepanel-aeroscience').tick();
+ });await expect(page.locator('#as-source')).toHaveText('SIMULATED TEST DATA');}

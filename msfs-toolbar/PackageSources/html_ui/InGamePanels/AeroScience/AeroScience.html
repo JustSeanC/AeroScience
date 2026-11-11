@@ -26,6 +26,7 @@
     <script src="AeroScience.LocaleData.js"></script>
     <script src="AeroScience.LocaleFormat.js"></script>
     <script src="AeroScience.I18n.js"></script>
+    <script src="AeroScience.FlightStatus.js"></script>
     <script src="AeroScience.Geography.js"></script>
     <script src="AeroScience.Map.js"></script>
     <script src="AeroScience.js"></script>
@@ -50,16 +51,15 @@
               <strong>AEROSCIENCE</strong>
               <span id="as-source">WAITING FOR ENGINE</span>
             </div>
+            <button type="button" id="as-map-page" data-native-i18n="toolbar.map" aria-label="Map, route &amp; waypoints" data-native-i18n-aria-label="flight.map">Map</button>
           </header>
           <section id="as-collection-banner" class="as-collection-banner" data-active="false" role="status" aria-live="polite" aria-atomic="true">
             <strong id="as-collection-headline">SCIENCE COLLECTION INACTIVE</strong>
             <span id="as-collection-summary">Science status unavailable</span>
           </section>
           <nav aria-label="AeroScience pages">
-            <new-push-button id="as-mission-page" data-native-i18n="toolbar.mission">Mission</new-push-button
-            ><new-push-button id="as-payload-page" data-native-i18n="toolbar.payload">Payload</new-push-button>
-            <new-push-button id="as-map-page" data-native-i18n="toolbar.map">Map</new-push-button>
-            <new-push-button id="as-research-page" data-native-i18n="toolbar.research">Research</new-push-button>
+            <button type="button" data-native-section id="as-mission-page" data-native-i18n="toolbar.flight">Flight</button><button type="button" data-native-section id="as-payload-page" data-native-i18n="toolbar.science">Science</button>
+            <button type="button" data-native-section id="as-research-page" data-native-i18n="toolbar.cards" hidden>Cards</button>
           </nav>
           <div
             id="as-scroll"
@@ -89,28 +89,6 @@
               <p id="as-research-status" role="status">Choose cards in Mission Planner before recording.</p>
               <div id="as-research-list"></div>
               <button id="as-research-previous">Previous Cards</button><button id="as-research-next">Next Cards</button>
-            </section>
-            <section id="as-intelligence" aria-label="Scientific mission intelligence">
-              <h3 id="as-session-phase">Science intelligence unavailable</h3>
-              <p id="as-session-authority" class="as-note"></p>
-              <p id="as-grade" class="as-note"></p>
-              <p id="as-intelligence-warning" class="as-note"></p>
-              <details>
-                <summary>Science session controls & evidence</summary>
-                <p id="as-session-identity" class="as-note"></p>
-                <div id="as-session-actions">
-                  <button data-science-action="startData" disabled>Start new science session</button>
-                  <button data-science-action="pauseData" disabled>Pause science collection</button>
-                  <button data-science-action="resumeData" disabled>Resume science collection</button>
-                  <button data-science-action="endData" disabled>End current science session</button>
-                  <button data-science-action="rearmAutomation" disabled>Rearm automatic collection</button>
-                </div>
-                <p id="as-collection-message" role="status"></p>
-                <p id="as-next-trigger" class="as-note"></p>
-                <p id="as-science-yield" class="as-note"></p>
-                <p id="as-intelligence-asof" class="as-note"></p>
-                <p class="as-note">End science closes this session. End mission below ends the continuous flight. Detailed calibration, grading and source evidence remain on the companion dashboard.</p>
-              </details>
             </section>
             <section id="as-mission-view">
               <h2 id="as-aircraft">Awaiting aircraft telemetry</h2>
@@ -170,7 +148,7 @@
                   id="as-name"
                   maxlength="100"
                   placeholder="Research mission"
-                /><new-push-button id="as-start" class="as-primary" disabled
+                /><new-push-button id="as-start" data-native-i18n="flight.action.record" class="as-primary" disabled
                   >Start Recording</new-push-button
                 >
               </div>
@@ -193,7 +171,7 @@
                 <new-push-button id="as-marker" disabled
                   >Add observation marker</new-push-button
                 >
-                <new-push-button id="as-end" class="as-danger" disabled
+                <new-push-button id="as-end" data-native-i18n="flight.action.endFlight" class="as-danger" disabled
                   >End mission</new-push-button
                 >
               </div>
@@ -233,7 +211,31 @@
               </p>
             </section>
             <section id="as-payload-view" hidden>
-              <h2>Science payload</h2>
+              <h2 data-native-i18n="toolbar.science">Science</h2>
+            <section id="as-intelligence" aria-label="Scientific mission intelligence">
+              <h3 id="as-session-phase">Science intelligence unavailable</h3>
+              <p id="as-session-authority" class="as-note"></p>
+              <p id="as-intelligence-warning" class="as-note"></p>
+              <div id="as-session-actions" role="group" aria-label="Science collection actions">
+                <button data-science-action="startData" data-native-i18n="flight.action.startData" disabled>Start Science Collection</button>
+                <button data-science-action="pauseData" data-native-i18n="flight.action.pauseData" disabled>Pause science collection</button>
+                <button data-science-action="resumeData" data-native-i18n="flight.action.resumeData" disabled>Resume science collection</button>
+                <button data-science-action="endData" data-native-i18n="flight.action.endData" disabled>End current science session</button>
+                <button data-science-action="rearmAutomation" data-native-i18n="flight.action.rearmAutomation" disabled>Rearm automatic collection</button>
+              </div>
+              <p id="as-collection-message" role="status"></p>
+              <p id="as-next-trigger" class="as-note"></p>
+              <p id="as-retained-science" class="as-note" role="status"></p>
+              <details>
+                <summary>Science session controls &amp; evidence</summary>
+              <p id="as-grade" class="as-note"></p>
+                <p id="as-session-identity" class="as-note"></p>
+                <p id="as-science-yield" class="as-note"></p>
+                <p id="as-intelligence-asof" class="as-note"></p>
+                <p class="as-note">End science closes this session. End mission below ends the continuous flight. Detailed calibration, grading and source evidence remain on the companion dashboard.</p>
+              </details>
+            </section>
+
               <p id="as-science-state">Collection: stopped</p>
               <new-push-button id="as-science-pause"
                 >Pause science collection</new-push-button

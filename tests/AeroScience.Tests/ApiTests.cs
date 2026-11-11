@@ -56,8 +56,16 @@ public sealed partial class ApiTests : IAsyncLifetime
         var deadline=System.Diagnostics.Stopwatch.StartNew();MissionIntelligence collecting;
         do{await Task.Delay(50);collecting=(await client.GetFromJsonAsync<MissionIntelligence>("/api/mission-intelligence",WireJson.Options))!;if(deadline.Elapsed>TimeSpan.FromSeconds(5))throw new TimeoutException($"Retained count did not refresh: phase={collecting.Collection?.State?.Phase}, originals={science.StreamObservations(flight.Id).LongCount()}.");}while(collecting.RetainedScience?.OriginalObservations is not >0);
         Assert.Equal(flight.Id,collecting.RetainedScience.MissionId);Assert.Equal(science.StreamObservations(flight.Id).LongCount(),collecting.RetainedScience.OriginalObservations);Assert.Equal(1,collecting.RetainedScience.OriginalObservations);Assert.Equal(0,collecting.RetainedScience.DerivedObservations);Assert.Equal(0,collecting.RetainedScience.RemoteProducts);
+        var service=factory.Services.GetRequiredService<MissionIntelligenceService>();
+        var native=service.Native(collecting.Flight,collecting.Collection);
+        Assert.Equal(collecting.RetainedScience,native.RetainedScience);Assert.Equal(Assert.IsType<CollectionOverview>(collecting.Collection).State!.CurrentSessionId,native.SessionId);
+        var handler=new ToolbarCommandHandler(coordinator,intelligence:service.Native);
+        var encoded=handler.Handle(JsonSerializer.Serialize(new ToolbarCommand(1,Guid.NewGuid(),"state"),WireJson.Options));
+        Assert.True(System.Text.Encoding.UTF8.GetByteCount(encoded)<=8000);
+        var reply=JsonSerializer.Deserialize<ToolbarReply>(encoded,WireJson.Options)!;
+        Assert.Equal(collecting.RetainedScience,reply.Intelligence!.RetainedScience);Assert.Equal(flight.Id,reply.State.ActiveMission!.Id);
         var missing=new MissionIntelligenceService(coordinator,missions,factory.Services.GetRequiredService<ResearchOperations>(),factory.Services.GetRequiredService<MissionPerformanceService>());
-        Assert.Null(missing.Read().RetainedScience!.OriginalObservations);Assert.True(coordinator.Snapshot().ActiveMission!.SampleCount>0);coordinator.End(flight.Id);
+        Assert.Null(missing.Read().RetainedScience!.OriginalObservations);Assert.Null(missing.Native(collecting.Flight,collecting.Collection).RetainedScience!.OriginalObservations);Assert.True(coordinator.Snapshot().ActiveMission!.SampleCount>0);coordinator.End(flight.Id);
     }
     private readonly string directory = Path.Combine(Path.GetTempPath(), "aeroscience-api", Guid.NewGuid().ToString());
     private readonly WebApplicationFactory<Program> factory;

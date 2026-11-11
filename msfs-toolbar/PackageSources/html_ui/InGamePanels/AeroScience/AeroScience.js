@@ -95,6 +95,10 @@ class IngamePanelAeroScience extends TemplateElement {
     this.byId("as-payload-page").onclick = () => this.page(true);
     this.byId("as-map-page").onclick = () => this.page("map");
     this.byId("as-research-page").onclick = () => this.page("research");
+    this.currentPage=!this.byId('as-mission-view').hidden?false:!this.byId('as-payload-view').hidden?true:!this.byId('as-map-view').hidden?'map':'research';
+    for(const [id,value]of [['as-mission-page',false],['as-payload-page',true],['as-map-page','map'],['as-research-page','research']])this.byId(id).setAttribute('aria-pressed',String(this.currentPage===value||id==='as-mission-page'&&this.currentPage==='map'));
+    const navigation=this.byId('as-mission-page').parentNode;
+    navigation.onkeydown=event=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;const buttons=Array.from(navigation.querySelectorAll('[data-native-section]')).filter(b=>!b.hidden);const at=buttons.indexOf(document.activeElement);if(at<0)return;event.preventDefault();const next=event.key==='Home'?0:event.key==='End'?buttons.length-1:(at+(event.key==='ArrowRight'?1:buttons.length-1))%buttons.length;buttons[next].focus();};
     try {
       this.mapRenderer = new window.AeroScienceMovingMap(
         this.byId("as-map-canvas"),
@@ -371,12 +375,15 @@ class IngamePanelAeroScience extends TemplateElement {
     }
   }
   page(payload) {
+    if(payload==='research'&&this.byId('as-research-page').hidden)payload=false;
+    const changed=this.currentPage!==payload;this.currentPage=payload;
     this.mapVisible = payload === "map";
     this.byId('as-research-cards').hidden=payload!=="research";
-    for(const [id,value]of [['as-mission-page',false],['as-payload-page',true],['as-map-page','map'],['as-research-page','research']])this.byId(id).setAttribute('aria-pressed',String(payload===value));
+    for(const [id,value]of [['as-mission-page',false],['as-payload-page',true],['as-map-page','map'],['as-research-page','research']])this.byId(id).setAttribute('aria-pressed',String(payload===value||id==='as-mission-page'&&payload==='map'));
     this.byId("as-mission-view").hidden = payload !== false;
     this.byId("as-payload-view").hidden = payload !== true;
     this.byId("as-map-view").hidden = !this.mapVisible;
+    if(changed){const view=this.byId(this.state?.recordingStop?'as-status':payload===true?'as-payload-view':payload==='research'?'as-research-cards':payload==='map'?'as-map-view':'as-mission-view');this.byId('as-scroll').scrollTop=view.offsetTop;}
     if (this.mapVisible && this.mapRenderer) {
       this.mapRenderer.resize();
       this.requestMapState();
@@ -393,14 +400,23 @@ class IngamePanelAeroScience extends TemplateElement {
     while(rest){let index=-1,name='';for(const item of names){const at=rest.indexOf(item);if(at>=0&&(index<0||at<index)){index=at;name=item;}}if(index<0){result+=format(rest);break;}result+=format(rest.slice(0,index))+name;rest=rest.slice(index+name.length);}
     return result;
   }
+  flightPresentation(connected){
+    const i=this.intelligence;
+    if(typeof AeroScienceFlightStatus==='undefined'||typeof AeroScienceFlightStatus.present!=='function')return{fresh:false,science:'unknown',scienceActions:[],sessionId:null,counts:null,connection:'unknown'};
+    return AeroScienceFlightStatus.present({version:i?.version,generatedUtc:i?.generatedUtc,flight:this.state,
+      collection:{state:{missionId:i?.missionId,phase:i?.phase,currentSessionId:i?.sessionId,continuityHold:i?.continuityHold},
+        currentSession:i?.sessionId?{id:i.sessionId,sequence:i.sessionSequence}:null,fault:i?.collectionFault,
+        actions:(i?.actions||[]).map(action=>({action,available:true}))},retainedScience:i?.retainedScience},this.state,
+      {stale:!connected||Date.now()-this.lastReply>6000});
+  }
+  text(key,fallback,values){return typeof AeroScienceI18n==='undefined'?fallback:AeroScienceI18n.text(key,fallback,values);}
   renderCollectionBanner(connected){
-    const i=this.intelligence,flight=this.state?.activeMission;
-    const fresh=connected&&Date.now()-this.lastReply<=6000&&i?.version===1&&i.missionId===(flight?.id||null)&&Date.now()-Date.parse(i.generatedUtc)<=6000&&Date.now()-Date.parse(i.generatedUtc)>=-2000;
-    const unavailable=this.state?.connection?.state!=='connected';
-    const active=!!(fresh&&!unavailable&&flight&&i.sessionId&&i.phase==='collecting'&&!i.collectionFault&&!this.state?.research?.scienceStorageError);
-    const phase=!connected?'Stale status / companion unavailable':unavailable?'Disconnected / unavailable':!fresh?'Science status unavailable':i.collectionFault||this.state?.research?.scienceStorageError?'Scientific storage unavailable':!flight?'No active mission':i.phase==='collecting'&&!i.sessionId?'Science status unavailable':i.phase==='armed'?'Armed / Not started':i.phase==='betweenSessions'?'Session ended':this.nativeLabel(i.phase);
+    const i=this.intelligence,flight=this.state?.activeMission,model=this.flightPresentation(connected);
+    const active=model.science==='collecting';
+    const phase=!connected?'Stale status / companion unavailable':i?.collectionFault||this.state?.research?.scienceStorageError?'Scientific storage unavailable':!model.fresh?'Science status unavailable':!flight?'No active mission':model.connection==='disconnected'?'Disconnected / unavailable':model.connection==='stale'?'Telemetry stale / unavailable':model.connection==='paused'?'Simulator paused / science unconfirmed':model.science==='unknown'?'Science status unavailable':model.science==='armed'?'Armed / Not started':model.science==='betweenSessions'?'Session ended':this.nativeLabel(model.science);
     this.byId('as-collection-banner').setAttribute('data-active',String(active));
-    this.byId('as-collection-headline').textContent=active?'SCIENCE COLLECTION ACTIVE':'SCIENCE COLLECTION INACTIVE';
+    this.byId('as-root').dataset.recording=connected?(flight?'active':'inactive'):'unknown';this.byId('as-root').dataset.science=model.science;this.byId('as-root').dataset.sessionId=model.sessionId||'';this.byId('as-root').dataset.connection=model.connection;
+    this.byId('as-collection-headline').textContent=this.text(active?'toolbar.collectionActive':'toolbar.collectionInactive',active?'SCIENCE COLLECTION ACTIVE':'SCIENCE COLLECTION INACTIVE');
     this.byId('as-collection-summary').textContent='Flight recording: '+(connected?(flight?'Active':'Inactive'):'Unavailable')+' | Science: '+(active?'Collecting':phase);
   }
   updateView(component,update){
@@ -658,7 +674,7 @@ class IngamePanelAeroScience extends TemplateElement {
       mission = state.activeMission;
     if(mission){this.byId("as-start-plan").textContent="Active recording: its saved plan snapshot is fixed. Plan selection for the next recording is separate.";}
 
-    const fresh = t && (state.connection.state==='connected'||state.connection.source==='simulated'&&!state.connection.state) && Date.now() - Date.parse(t.timestampUtc) < 6000 && Date.now()-Date.parse(t.timestampUtc)>=-2000;
+    const fresh = t && t.isValid!==false&&!t.isPaused&&(state.connection.state==='connected'||state.connection.source==='simulated'&&!state.connection.state) && Date.now() - Date.parse(t.timestampUtc) < 6000 && Date.now()-Date.parse(t.timestampUtc)>=-2000;
     this.byId("as-source").textContent =
       state.connection.source === "simulated"
         ? "SIMULATED TEST DATA"
@@ -728,7 +744,12 @@ class IngamePanelAeroScience extends TemplateElement {
   renderIntelligenceView(connected){
     const i=this.intelligence,supported=this.capabilities.includes('session-bound-controls-1')&&i?.version===1;
     const fresh=connected&&supported&&Date.now()-Date.parse(i.generatedUtc)<=6000&&Date.now()-Date.parse(i.generatedUtc)>=-2000;
-    for(const button of this.querySelectorAll('[data-science-action]')){button.disabled=!fresh||this.mutationPending||!i.actions.includes(button.dataset.scienceAction);button.title=!supported?'This companion does not support session-bound native controls.':!fresh?'Stale engine state; synchronize before controlling science.':'Backend session and control revisions are checked before applying.';}
+    const model=this.flightPresentation(connected),phase=i?.phase,preferred=phase==='collecting'?'pauseData':phase==='paused'?'resumeData':'startData';
+    const primary=model.scienceActions.includes(preferred)?preferred:model.scienceActions.includes('rearmAutomation')?'rearmAutomation':null;
+    for(const button of this.querySelectorAll('[data-science-action]')){const action=button.dataset.scienceAction;button.disabled=!fresh||this.mutationPending||!model.scienceActions.includes(action)||!i.actions.includes(action);button.classList.toggle('as-primary',action===primary);button.hidden=!this.state?.activeMission||(action==='startData'?!!i?.sessionId:action==='pauseData'?phase!=='collecting':action==='resumeData'?phase!=='paused':action==='endData'?!i?.sessionId:!i?.manualHold&&!i?.continuityHold&&i?.authority!=='automatic');button.title=!supported?'This companion does not support session-bound native controls.':!fresh?'Stale engine state; synchronize before controlling science.':'Backend session and control revisions are checked before applying.';}
+    const counts=model.counts,age=Date.now()-Date.parse(counts?.checkedUtc),validCounts=counts&&age>=-2000&&age<=6000&&['originalObservations','derivedObservations','remoteProducts'].every(key=>Number.isSafeInteger(counts[key])&&counts[key]>=0);
+    this.byId('as-retained-science').textContent=validCounts?this.text('toolbar.retained','Saved science counts supplied by companion.',{original:counts.originalObservations,derived:counts.derivedObservations,products:counts.remoteProducts}):this.text('toolbar.countsUnavailable','Saved scientific counts unavailable; no count inferred from flight samples.');
+    this.byId('as-retained-science').dataset.originalObservations=validCounts?String(counts.originalObservations):'';this.byId('as-retained-science').dataset.remoteProducts=validCounts?String(counts.remoteProducts):'';
     if(!supported){this.byId('as-session-phase').textContent='Science status unavailable (unsupported companion)';this.byId('as-session-authority').textContent='Update the companion for science session controls.';this.byId('as-grade').textContent='No score available.';this.byId('as-session-identity').textContent='No session identity supplied.';this.byId('as-next-trigger').textContent='Next trigger not assessed.';this.byId('as-science-yield').textContent='Scientific yield not assessed.';this.byId('as-intelligence-warning').textContent='';this.byId('as-intelligence-asof').textContent='';return;}
     this.byId('as-session-phase').textContent=(i.phase==='unknown'?'Science status unavailable':(fresh?'Science: ':'Last science status: ')+this.nativeLabel(i.phase))+(i.sessionSequence?' | Session '+i.sessionSequence:!i.sessionId&&i.phase==='armed'?' | Science not started':'')+(!fresh?' | Status is stale':'');
     this.byId('as-session-authority').textContent='Collection control: '+this.nativeLabel(i.authority)+(i.manualHold?' | pilot hold; rearm required':'')+(i.continuityHold?' | continuity hold':'');
@@ -750,9 +771,13 @@ class IngamePanelAeroScience extends TemplateElement {
   }
   renderPersonalResearchView(fresh){
     const state=this.researchState,host=this.byId('as-research-list');
+    const relevant=!!this.state?.activeMission&&state?.flightId===this.state.activeMission.id&&(state.totalCards>0||state.cards?.length>0||state.activeCardCount>0);
+    const cardTab=this.byId('as-research-page');cardTab.hidden=!relevant;
+    if(!relevant&&this.currentPage==='research'){this.page(false);cardTab===document.activeElement&&this.byId('as-mission-page').focus();}
     const valid=fresh&&Date.now()-Date.parse(state?.generatedUtc)<6000&&state?.flightId===this.state?.activeMission?.id&&state?.recording;
     const pending=Array.from(this.pending.values()).some(p=>p.op==='research-control');
     const summary=this.byId('as-operations-summary');
+    summary.hidden=!relevant;
     const selected=state?.cards.find(c=>c.card.id===this.researchFocusedCard);
     if(selected)this.focusedResearchSummary=selected.card.name+' | '+(selected.openAttempt?'Attempt recording':selected.active?'Active':'Inactive')+(selected.procedure?.nextPointId?' | Next point '+(selected.card.procedure?.points.find(p=>p.id===selected.procedure.nextPointId)?.conditions.testPoint.name||'on dashboard'):'');
     summary.textContent=!valid?this.state?.activeMission?'Research status unavailable.':'Personal research cards: prepare in the desktop Flight Planner.':(this.focusedResearchSummary?'Focused: '+this.focusedResearchSummary+'. ':'Research: ')+(state.activeCardCount??state.cards.filter(c=>c.active).length)+' active card(s)'+(state.activeCardNames?.length?' | '+state.activeCardNames.join('; '):'')+'.';
@@ -830,7 +855,7 @@ class IngamePanelAeroScience extends TemplateElement {
     const collection = this.byId("as-science-state");
     if (collection)
       collection.textContent = research
-        ? "Collection: " + this.nativeLabel(research.collectionStatus)
+        ? this.text('toolbar.acquisitionState','Instrument acquisition status: '+this.nativeLabel(research.collectionStatus),{status:this.nativeLabel(research.collectionStatus)})
         : "Science unavailable";
     const holder = this.byId("as-instruments");
     if (!research) {
@@ -839,7 +864,11 @@ class IngamePanelAeroScience extends TemplateElement {
     }
     if (!this.instrumentNodes) this.instrumentNodes = {};
     if (!holder.querySelector(".as-instrument")) holder.textContent = "";
+    let disabled=holder.querySelector('[data-disabled-instruments]');
+    if(!disabled){disabled=document.createElement('details');disabled.dataset.disabledInstruments='';const title=document.createElement('summary'),body=document.createElement('div');body.className='as-disabled-instruments';disabled.appendChild(title);disabled.appendChild(body);holder.appendChild(disabled);}
+    const remaining=new Set(Object.keys(this.instrumentNodes));let disabledCount=0;
     for (const instrument of research.instruments || []) {
+      remaining.delete(instrument.instrumentId);
       let nodes = this.instrumentNodes[instrument.instrumentId];
       if (!nodes || !nodes.row.parentNode) {
         const row = document.createElement("div");
@@ -854,7 +883,7 @@ class IngamePanelAeroScience extends TemplateElement {
             "thermal-imager": "Thermal Imager",
             "multispectral-imager": "Multispectral Imager",
             "hyperspectral-imager": "Hyperspectral Imager",
-            "terrain-scanner": "Terrain Scanner (LiDAR / Elevation)",
+            "terrain-scanner": this.text("toolbar.terrainScanner","Terrain Scanner (DEM Elevation)"),
           }[instrument.instrumentId] || "Science instrument";
         const stateLabel = document.createElement("span");
         stateLabel.className = "as-science-state";
@@ -867,13 +896,15 @@ class IngamePanelAeroScience extends TemplateElement {
           interval.appendChild(option);
         }
         const values = document.createElement("div"),
-          status = document.createElement("p");
+          status = document.createElement("p"),acquisitionSummary=document.createElement('p'),sourceSummary=document.createElement('p');
+        acquisitionSummary.className=sourceSummary.className='as-note';
         values.className = "as-science-values";
         const details = document.createElement("details"),
           summary = document.createElement("summary");
         summary.textContent = "Diagnostics";
         details.appendChild(summary);
         details.appendChild(status);
+        details.appendChild(values);
         const intervalLabel = document.createElement("label");
         intervalLabel.textContent = "Collection interval ";
         intervalLabel.appendChild(interval);
@@ -883,12 +914,12 @@ class IngamePanelAeroScience extends TemplateElement {
         cancel.textContent='Use confirmed interval';cancel.type='button';cancel.hidden=true;cancel.setAttribute('aria-label','Use confirmed '+title.textContent+' interval');
         row.appendChild(title);
         row.appendChild(stateLabel);
+        row.appendChild(acquisitionSummary);row.appendChild(sourceSummary);
         row.appendChild(toggle);
         row.appendChild(intervalLabel);
         row.appendChild(apply);row.appendChild(cancel);row.appendChild(confirmed);row.appendChild(feedback);
-        row.appendChild(values);
         row.appendChild(details);
-        holder.appendChild(row);
+        holder.insertBefore(row,disabled);
         nodes = {
           row: row,
           state: stateLabel,
@@ -896,10 +927,12 @@ class IngamePanelAeroScience extends TemplateElement {
           interval: interval,
           values: values,
           status: status,
+          acquisitionSummary,sourceSummary,
           apply,cancel,confirmed,feedback,editing:false,draft:null,pending:null,confirmAfter:null,
         };
         this.instrumentNodes[instrument.instrumentId] = nodes;
         toggle.onclick = () => {
+          if(toggle.hasAttribute("disabled")||nodes.pending||!this.state?.research)return;
           const current = this.state.research.instruments.find(
             (i) => i.instrumentId === instrument.instrumentId,
           );
@@ -932,6 +965,8 @@ class IngamePanelAeroScience extends TemplateElement {
       if(nodes.confirmAfter!=null&&this.appliedSerial>nodes.confirmAfter)nodes.confirmAfter=null;
       if(!nodes.editing&&!nodes.pending&&nodes.confirmAfter==null)nodes.interval.value=instrument.intervalMs;
       nodes.confirmed.textContent='Companion interval: '+instrument.intervalMs/1000+' s';
+      nodes.acquisitionSummary.textContent=this.text('toolbar.acquisitionSummary','Acquisition diagnostics unavailable.',{recorded:instrument.observationCount??'Unknown',rejected:instrument.rejectedObservations??'Unknown',missed:instrument.missingIntervals??'Unknown',interval:Number.isFinite(instrument.actualAverageIntervalSeconds)?instrument.actualAverageIntervalSeconds.toFixed(2):'Unavailable'});
+      nodes.sourceSummary.textContent=this.nativeMessage(instrument.message||this.text('toolbar.sourceUnknown','Source/quality details unavailable; review the dashboard.'));
       nodes.apply.disabled=!fresh||!!nodes.pending||nodes.confirmAfter!=null||Number(nodes.interval.value)===instrument.intervalMs;
       nodes.interval.disabled=!fresh||!!nodes.pending||nodes.confirmAfter!=null;
       nodes.cancel.hidden=!nodes.editing&&!nodes.pending;nodes.cancel.disabled=!fresh||!!nodes.pending;
@@ -992,7 +1027,11 @@ class IngamePanelAeroScience extends TemplateElement {
           : "unavailable") +
         "  /  last " +
         (instrument.lastSuccessfulUtc || "none");
+      const target=instrument.enabled?holder:disabled.lastChild;if(!instrument.enabled)disabledCount++;
+      if(nodes.row.parentNode!==target){const focus=nodes.row.contains(document.activeElement)?document.activeElement:null;if(focus&&!instrument.enabled)disabled.open=true;if(target===holder)holder.insertBefore(nodes.row,disabled);else target.appendChild(nodes.row);if(focus)focus.focus();}
     }
+    for(const id of remaining){const row=this.instrumentNodes[id].row;if(row.parentNode)row.parentNode.removeChild(row);delete this.instrumentNodes[id];}
+    disabled.hidden=!disabledCount;disabled.firstChild.textContent=this.text('toolbar.disabledInstruments','Disabled instruments',{count:disabledCount});
   }
   disconnectedCallback() {
     this.aeroScienceConnected=false;

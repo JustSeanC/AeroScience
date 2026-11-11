@@ -1,6 +1,7 @@
 import {node, numeric, dateTime, link, newIdentity,informationDetails,scientificNotice} from './workstation-ui.js';
 import {renderSensorOperating,markSensorOperatingStale} from './sensor-operating-status.js';
-import {missionPresentation} from './presentation-state.js';
+import {t} from './i18n.js';
+import {currentFlightPresentation} from './current-flight-state.js';
 const labels={startData:'Start Science Collection',pauseData:'Pause science collection',resumeData:'Resume science collection',endData:'End current science session',rearmAutomation:'Rearm automatic collection'};
 const confirmations={startData:'Science collection started.',pauseData:'Science collection paused.',resumeData:'Science collection resumed.',endData:'Science session ended.',rearmAutomation:'Automatic collection rearmed.'};
 export function metricText(m){
@@ -20,7 +21,7 @@ export function missionIntelligence(parent,api,{id='mission-intelligence',after=
  actions.dataset.collectionActions='';message.dataset.collectionCommandStatus='';
  for(const [value,title]of [['','Unspecified (evidence stays uncertain)'],['safety','Pilot-declared safety pause']]){const option=node('option',title);option.value=value;reason.append(option);}reasonLabel.append(reason);
  const controls=new Map();let current=null,busy=false,inflight=false,generation=0,disposed=false,lastSuccess=0;
- for(const [action,label]of Object.entries(labels)){const button=node('button',label);button.type='button';button.disabled=true;button.onclick=()=>control(action);actions.append(button);controls.set(action,button);}
+ for(const [action,label]of Object.entries(labels)){const button=node('button',t('flight.action.'+action,{},label));button.type='button';button.disabled=true;button.onclick=()=>control(action);actions.append(button);controls.set(action,button);}
  const explanation=informationDetails(panel,'Collection options & status details',status,summary,authority,reasonLabel,node('p','End current science session preserves its results. Flight recording remains separate. Rearm does not start or resume science.'));
  panel.querySelector('h2').after(sessionLine,warning,actions,message);
  const primary=id==='mission-intelligence'?document.getElementById('science-journey-controls'):null;
@@ -42,7 +43,7 @@ export function missionIntelligence(parent,api,{id='mission-intelligence',after=
   const session=collection?.currentSession;
   sessionLine.textContent=s?`Science: ${s.phase}${session?' · Session '+session.sequence:''}`:'Start recording before collecting science.';
   authority.textContent=s?`Automation: ${s.authority}${s.manualAutomationHold?' · pilot override — rearm required':''}${s.continuityHold?' · continuity hold':''}${collection.fault?' · storage hold; resolve storage before rearm':''}. ${(s.holds||[]).map(h=>h.reason).join(' ')}`:'';
-  const view=missionPresentation(data,{pending:busy});
+  const view=currentFlightPresentation(data);
   const preferred=s?.phase==='collecting'?'pauseData':s?.phase==='paused'?'resumeData':'startData';
   const nextAction=view.scienceActions.includes(preferred)?preferred:view.scienceActions.includes('rearmAutomation')?'rearmAutomation':preferred;
   for(const [action,button]of controls){const available=collection?.actions?.find(a=>a.action===action);button.disabled=busy||!view.scienceActions.includes(action)||!available?.available;button.classList.toggle('primary',action===nextAction);button.dataset.collectionAction=action;button.title=available?.reason||'No active flight.';button.hidden=!m||(action==='startData'?!!s?.currentSessionId:action==='pauseData'?s?.phase!=='collecting':action==='resumeData'?s?.phase!=='paused':action==='endData'?!s?.currentSessionId:!s?.manualAutomationHold&&!s?.continuityHold&&!data.triggers.length);}

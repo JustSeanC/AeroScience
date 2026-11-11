@@ -5,7 +5,7 @@ export function missionPresentation(data, {now = Date.now(), pending = false} = 
   const knownFlight = !!data?.flight && (flight === null || typeof flight?.id === 'string' && !!flight.id);
   const fresh = knownFlight && Number.isFinite(age) && age >= -2000 && age <= 6000;
   const bound = fresh && !!flight && state?.missionId === flight.id;
-  const phases = ['armed','collecting','paused','betweenSessions','ended'];
+  const phases = ['armed','collecting','paused','betweenSessions','stopped','ended'];
   let science = !fresh ? 'unknown' : !flight ? 'notStarted' : !bound ? 'unknown'
     : collection.fault || data.flight.research?.scienceStorageError || data.flight.connection?.state !== 'connected'
       ? 'unavailable' : phases.includes(state.phase) ? state.phase : 'unknown';

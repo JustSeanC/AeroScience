@@ -68,6 +68,7 @@ ingamepanel-aeroscience .as-panel {
   overflow: hidden;
 }
 .as-scroll {
+  position:relative;
   flex: 1 1 auto;
   min-width: 0;
   min-height: 0;
@@ -89,7 +90,7 @@ ingamepanel-aeroscience .as-panel {
   padding-bottom: 10px;
 }
 .as-collection-banner { flex: 0 0 auto; padding: 8px 10px; margin-top: 8px; border: 1px solid #cfb67f; background: #302b22; }
-.as-collection-banner strong { display: block; font-size: 20px; line-height: 1.25; color: #ffdc9e; }
+.as-collection-banner strong { display: block; font-size: 16px; line-height: 1.25; color: #ffdc9e; }
 .as-collection-banner span { display: block; font-size: 13px; margin-top: 4px; }
 .as-collection-banner[data-active="true"] { border-color: #5bd2b9; background: #173d35; }
 .as-collection-banner[data-active="true"] strong { color: #9ff2dd; }
@@ -350,7 +351,29 @@ select:focus-visible {
 #as-research-list button{margin:.2rem;min-height:2.2rem}
 #as-research-list select{max-width:100%}
 
-/* Four tabs share the minimum 320px host width without adding another 48px row. */
-#as-root nav new-push-button{flex:1 1 0;min-width:0;padding:10px 2px;font-size:14px;white-space:nowrap}
+/* Three principal sections; Map retains its contextual control and original tools. */
+#as-root nav [data-native-section]{flex:1 1 0;min-width:0;min-height:48px;padding:10px 4px;font-size:16px;line-height:1.35;white-space:normal;word-wrap:break-word;background:#213548;color:#eff7fc;border:1px solid #647e94;border-radius:4px;cursor:pointer}
+#as-root nav [data-native-section]:focus{outline:3px solid #75ead1;outline-offset:-3px}
+#as-root #as-map-page{font-size:14px;min-height:44px;white-space:normal;background:#213548;color:#eff7fc;border:1px solid #647e94;padding:8px;border-radius:4px;cursor:pointer}
+#as-root .as-scroll:focus{outline:2px solid #75ead1;outline-offset:-2px}
+#as-root #as-session-actions .as-primary{background:#59d5bc;color:#08271f;border-color:#59d5bc;font-weight:bold}
+#as-root #as-session-actions [data-science-action=endData]{background:#213548;color:#ffd3ce;border-color:#ac6b73}
+#as-root #as-session-actions{margin:12px 0}
+#as-root #as-session-actions .as-primary{grid-column:1/-1}
+#as-root #as-intelligence-warning:empty{display:none}
+#as-root #as-retained-science{border-left:3px solid #6ac9ee;padding:8px;overflow-wrap:break-word}
+#as-root #as-research-cards h3{font-size:20px}
+#as-instruments>[data-disabled-instruments]{flex:1 1 100%;width:100%;min-width:0}
+.as-disabled-instruments{display:flex;flex-wrap:wrap;gap:12px;min-width:0}
+/* Leave usable scrolling at 320x360; long scientific details scroll with content. */
+@media(max-height:480px){
+ ingamepanel-aeroscience .as-panel{padding:8px}
+ .as-panel header{padding-bottom:4px}
+ .as-collection-banner{padding:6px;margin-top:4px}
+ .as-collection-banner strong{font-size:15px}
+ .as-collection-banner span{font-size:12px;line-height:1.3;margin-top:3px}
+ .as-panel nav{margin:6px 0}
+}
+@media(prefers-reduced-motion:reduce){#as-root *,#as-root *:before,#as-root *:after{animation:none!important;transition:none!important}}
 
 #as-build-identity,#as-link-detail,#as-channel-identity{overflow-wrap:anywhere}

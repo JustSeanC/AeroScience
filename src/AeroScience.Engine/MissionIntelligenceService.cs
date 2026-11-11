@@ -29,7 +29,7 @@ public sealed class MissionIntelligenceService(MissionCoordinator coordinator, M
         var consumed=(collection?.State?.FiredOccurrenceIds??[]).Concat(collection?.State?.SuppressedOccurrenceIds??[]).ToHashSet();
         var remaining=plan?.Collection?.Triggers.Count(t=>!consumed.Contains(t.OccurrenceId))??0;
         return ToolbarIntelligenceProjection.Create(flight,collection,id is {} current?performance.CachedProjection(current):null,research.OperatingReports,
-            $"{remaining} configured occurrences remain. Next crossing/order/ETA not assessed; see dashboard.");
+            $"{remaining} configured occurrences remain. Next crossing/order/ETA not assessed; see dashboard.") with{RetainedScience=Retained(id)};
     }
     public MissionIntelligence Read()
     {

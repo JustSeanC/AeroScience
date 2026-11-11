@@ -27,6 +27,8 @@ var AeroScienceI18n = (function () {
       var node = nodes[i];
       node.textContent = text(node.getAttribute('data-native-i18n'), node.textContent);
     }
+    var named = root.querySelectorAll('[data-native-i18n-aria-label]');
+    for (var j = 0; j < named.length; j++) named[j].setAttribute('aria-label',text(named[j].getAttribute('data-native-i18n-aria-label'),named[j].getAttribute('aria-label')));
     var notice = root.querySelector('#as-language-detail'); if (notice) notice.textContent = state.message;
     root.setAttribute('lang', state.effectiveLocale); return state;
   }

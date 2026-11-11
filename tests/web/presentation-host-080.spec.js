@@ -27,7 +27,7 @@ test('native adapter accepts only current correlated replies and uses English fo
  await reply({version:1,catalogVersion,locale:'pt-BR',revision:1});await expect(page.locator('#as-language-detail')).toContainText('Français');
  await reply({version:1,catalogVersion:999,locale:'pt-BR'},'00000000-0000-4000-8000-000000000009');await expect(page.locator('#as-language-detail')).toContainText('Français');
  await reply({version:1,catalogVersion:999,locale:'pt-BR',revision:5});await expect(page.locator('#as-language-detail')).toContainText('English fallback');
- await reply(null);await expect(page.locator('nav new-push-button')).toHaveText(['Mission','Payload','Map','Research']);
+ await reply(null);await expect(page.locator('nav [data-native-section]')).toHaveText(['Flight','Science','Cards']);
  await expect(page.locator('ingamepanel-aeroscience')).toHaveAttribute('lang','en-US');
  expect(await page.evaluate(()=>window.bus.sent.filter(x=>x.command.op!=='state'&&!x.command.op.startsWith('map-')))).toEqual([]);
 });

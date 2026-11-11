@@ -121,7 +121,7 @@ dialog.managed-popup{max-width:min(56rem,calc(100vw - 1.5rem));max-height:88dvh;
 .evidence-lane{display:grid;grid-template-columns:11rem minmax(0,1fr);gap:.75rem;min-height:3rem;align-items:center;border-bottom:1px solid var(--border,#324958)}
 .evidence-lane-points{position:relative;min-height:3rem;border-left:1px solid #6a8796}
 .evidence-lane-points>span{display:block;padding:.6rem;color:var(--muted,#b8c8d2)}
-.evidence-time-point{position:absolute;top:.15rem;transform:translateX(-30%);padding:.25rem;min-width:2.3rem;min-height:2.5rem;background:transparent;color:var(--as-blue);border:1px solid transparent}
+.evidence-time-point{position:absolute;top:.25rem;padding:.25rem;width:44px;height:44px;min-width:44px;min-height:44px;background:transparent;color:var(--as-blue);border:1px solid transparent}
 .evidence-time-point[aria-pressed=true]{border-color:var(--as-amber);color:var(--as-amber)}
 .evidence-time-point:focus-visible{z-index:5;outline:3px solid var(--as-amber);outline-offset:2px}
 .timeline-selection{border-top:1px solid var(--border,#324958);padding-top:1rem}.timeline-selection:empty{display:none}
