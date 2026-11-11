@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased — v0.7.1 maintenance candidate
+
+- Read retained STAC metadata correctly and evaluate valid alternative catalog candidates when another candidate is incompatible. Keep original scaling, dates, masks and provenance.
+- Add explicit retries for failed selected regions while preserving post-flight approval, user pauses, consent, budgets and verified local sources.
+- Explain paused post-flight preparation and show complete instrument-region readiness counts, measured live network speed and honest unknown-size progress.
+- Keep bounded acquisition extent outlines and locations visible at broad map zoom, with original native terrain detail and missing-data masks on inspection.
+- No release is published and genuine Windows/MSFS acceptance remains required. See `docs/roadmap/v0.7.1-maintenance-release.md`.
+
 ## Unreleased — v0.6.0 development checkpoint
 
 - Remove overall Library source-count ceilings; add indexed/paged retained collections, physical-

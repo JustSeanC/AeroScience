@@ -61,6 +61,7 @@ public sealed class AutomaticScientificDataTests : IDisposable
         var original=provider.Describe(feature.RootElement,kind,Area)!;using var saved=JsonDocument.Parse(original.ProviderMetadataJson!);
         var restored=provider.Describe(saved.RootElement,kind,Area)!;
         Assert.Equal(original.Manifest,restored.Manifest with{Bands=original.Manifest.Bands});Assert.Equal(original.Assets,restored.Assets);
+        Assert.NotNull(ScientificCatalog.DiscoveryRevision(original));Assert.NotNull(ScientificCatalog.DiscoveryRevision(restored));
         Assert.Equal(ScientificCatalog.DiscoveryRevision(original),ScientificCatalog.DiscoveryRevision(restored));
         Assert.Equal(original.ProviderMetadataJson,restored.ProviderMetadataJson);
     }
@@ -152,6 +153,14 @@ public sealed class AutomaticScientificDataTests : IDisposable
         var signs=0;var ranges=0;var bytes=new byte[1000];
         var handler=new Handler((r,_)=>{if(r.RequestUri!.Host=="planetarycomputer.microsoft.com")return Json(new{href="https://landsateuwest.blob.core.windows.net/test.tif?sig=private-"+(++signs)});if(++ranges==1)return new(HttpStatusCode.Forbidden);return Range(r,bytes);});
         using var signed=new ScientificHttp(handler);using var stream=new ScientificRangeStream(signed,new("https://landsateuwest.blob.core.windows.net/test.tif"),new(1048576),default);Assert.Equal(2,signs);Assert.Equal(1000,stream.Length);
+    }
+    [Theory][InlineData(429)][InlineData(503)]
+    public async Task StacDiscoveryHonorsTransientProviderRetryWithoutChangingTheScientificRecipe(int status)
+    {
+        var feature=Metadata("sentinel");var handler=new Handler((_,n)=>{if(n>1)return Json(new{features=new[]{feature}});var response=new HttpResponseMessage((HttpStatusCode)status);response.Headers.RetryAfter=new RetryConditionHeaderValue(TimeSpan.FromMilliseconds(1));return response;});
+        using var http=new ScientificHttp(handler);var budget=new ScientificDownloadBudget(1048576);
+        var discovery=await new StacScientificProvider(http,"earth-search").Discover(RemoteKind.Multispectral,new(-75,40,-74.98,40.02),Preferences,budget,default);
+        Assert.NotNull(discovery);Assert.Equal(2,handler.Count);Assert.Equal(.0001,discovery.Manifest.Bands[0].Scale);Assert.Equal(-.1,discovery.Manifest.Bands[0].Offset);Assert.Equal("SCL",discovery.Manifest.Bands.Last().Id);Assert.Equal(budget.Bytes,http.NetworkActivity().Bytes);Assert.Empty(science.Sources());
     }
     [Fact]public async Task AutomaticManifestFeedsExistingLibraryAndManualImportWithoutFabricatingFlightHistory()
     {

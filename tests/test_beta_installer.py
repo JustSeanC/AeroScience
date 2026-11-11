@@ -5,6 +5,7 @@ import shutil
 import subprocess
 import sys
 import unittest
+from unittest import mock
 import installer_fixtures
 import test_release_flow as flow
 
@@ -14,6 +15,12 @@ import beta_installer as beta
 
 class BetaInstallerTests(unittest.TestCase):
     def setUp(self):
+        # The legacy Beta 1 builder remains pinned to v0.7.0; its fixtures must not
+        # silently track a newer maintenance release's SDK/application identity.
+        for module in (beta.p, flow.p):
+            version = mock.patch.object(module, 'RELEASE_VERSION', '0.7.0')
+            version.start()
+            self.addCleanup(version.stop)
         self.flow = flow.ReleaseFlowTests()
         self.flow.setUp()
         self.addCleanup(self.flow.tearDown)
@@ -55,6 +62,14 @@ class BetaInstallerTests(unittest.TestCase):
 
     def stage(self):
         return beta.stage(self.app, self.output/'payload', flow.COMMIT, self.flow.report)
+
+    def test_maintenance_payload_cannot_enter_the_legacy_v070_installer(self):
+        info = beta.p.read_json(self.app/'build-info.json')
+        info['version'] = '0.7.1'
+        beta.write(self.app/'build-info.json', info)
+        self.refresh_receipt()
+        with self.assertRaisesRegex(ValueError, 'v0.7.0'):
+            self.stage()
 
     def refresh_receipt(self):
         receipt = beta.p.read_json(self.app/'VALIDATION-RECEIPT.json')

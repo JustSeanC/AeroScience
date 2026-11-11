@@ -92,6 +92,7 @@ def identity(version=RELEASE_VERSION):
     if base == '0.4.1': title = f'AeroScience v{base} — Scientific Review & Mission Readiness' + (' Prerelease' if preview else '')
     if base == '0.4.0': title = f'AeroScience v{base} — Scientific Mission Planning, Sensor Modeling & Analysis' + (' Prerelease' if preview else '')
     if base == '0.5.0': title = f'AeroScience v{base} — Scientific Mission Operations' + (' Prerelease' if preview else '')
+    if base == '0.7.1': title = f'AeroScience v{base} — Stability, Downloads & Scientific Map Fixes' + (' Prerelease' if preview else '')
     if base == '0.7.0': title = f'AeroScience v{base} — Organizations & Research Campaigns' + (' Prerelease' if preview else '')
     if base == '0.6.0': title = f'AeroScience v{base} — Aviation Mapping & Scientific Data Expansion' + (' Prerelease' if preview else '')
     return dict(version=version, package_version=base, tag='v'+version, root_name=root,
