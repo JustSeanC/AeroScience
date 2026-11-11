@@ -1,0 +1,71 @@
+{
+  "checkpoint": "v0.8.0 P05a",
+  "branch": "develop/v0.8.0",
+  "baselineCommit": "e6317fadee1abd7ae9110a983effb4e2270e4544",
+  "scope": "Modeled terrain corridor and evidence contracts only; no P05b/c/d",
+  "sdk": "10.0.402",
+  "environment": "Debian 13 Linux, isolated synthetic archives and retained synthetic DEM product; no installed MSFS",
+  "command": "dotnet test tests/AeroScience.Tests -c Release --no-restore --filter 'FullyQualifiedName~TerrainSurvey|FullyQualifiedName~ScientificWorkspaceTests|FullyQualifiedName~ScienceSessionTests|FullyQualifiedName~GeographicCollectionTests|FullyQualifiedName~MissionPerformanceIntegrationTests|FullyQualifiedName~MissionEvidenceStoreTests|FullyQualifiedName~EvidenceContractsTests|FullyQualifiedName~RemoteSensingTests|FullyQualifiedName~CalibrationTests|FullyQualifiedName~ModeAndToolbarTests|FullyQualifiedName~ScientificConcurrencyTests|FullyQualifiedName~ExternalSourceDeletionTests|FullyQualifiedName~ObservationResearchTests' --logger 'trx;LogFileName=p05a-checkpoint.trx' --results-directory artifacts/p05a-dotnet -m:1 -nr:false -v:quiet",
+  "dotnet": {
+    "total": 250,
+    "executed": 250,
+    "passed": 250,
+    "failed": 0,
+    "error": 0,
+    "timeout": 0,
+    "aborted": 0,
+    "inconclusive": 0,
+    "passedButRunAborted": 0,
+    "notRunnable": 0,
+    "notExecuted": 0,
+    "disconnected": 0,
+    "warning": 0,
+    "completed": 0,
+    "inProgress": 0,
+    "pending": 0
+  },
+  "newP05aCases": 47,
+  "timesUtc": {
+    "creation": "2026-11-11T19:31:24.5207795+00:00",
+    "queuing": "2026-11-11T19:31:24.5207796+00:00",
+    "start": "2026-11-11T19:31:22.2135865+00:00",
+    "finish": "2026-11-11T19:31:59.1425451+00:00"
+  },
+  "trxPath": "artifacts/p05a-dotnet/p05a-checkpoint.trx",
+  "trxSha256": "db2d5c662e276d6adf657d4a7c6b08eda0860fa79ca0d48f0ccec717d25d3b26",
+  "earlierFocusedReceipts": [
+    {
+      "name": "p05a-geometry-first.trx",
+      "passed": 19,
+      "failed": 0
+    },
+    {
+      "name": "p05a-archive-second.trx",
+      "passed": 37,
+      "failed": 3,
+      "finding": "New fixtures assumed Pending after session end, IOException for maintenance refusal, and payload-null after modern normalization. Corrected fixtures to retain original Cancelled state/InvalidOperationException and explicitly simulate legacy JSON; no production assertion was weakened."
+    },
+    {
+      "name": "p05a-core.trx",
+      "passed": 41,
+      "failed": 0
+    },
+    {
+      "name": "p05a-expanded.trx",
+      "passed": 45,
+      "failed": 0
+    },
+    {
+      "name": "p05a-integration.trx",
+      "passed": 171,
+      "failed": 0
+    }
+  ],
+  "countsOverlap": true,
+  "installedWindowsMsfsAcceptance": "Not Tested",
+  "protectedRefsBefore": {
+    "main": "9dd2d8cda7ddb6d73414808f75010726871205c2",
+    "develop/v0.7.0": "695a385ec40b177c763ffc0945234a1e2b54b77e",
+    "develop/v0.7.1": "8e972d8e402f165ab9ad7c41dc9e744250f8f52e"
+  }
+}

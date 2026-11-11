@@ -7,19 +7,21 @@ namespace AeroScience.Engine;
 public sealed record AnalysisJob(Guid Id,Guid MissionId,string Kind,string State,long Completed,long? Total,Guid[] Artifacts,string? Message=null);
 public sealed class ScientificAnalysisJobs(MissionStore missions,ScienceStore science,StorageManagement? storage=null) : BackgroundService
 {
-    private sealed record Work(Guid Id,Guid Mission,ScientificCoverageRequest? Coverage,CompositeRequest? Composite,CancellationTokenSource Cancel,string? PerformanceReason=null);
+    private sealed record Work(Guid Id,Guid Mission,ScientificCoverageRequest? Coverage,CompositeRequest? Composite,CancellationTokenSource Cancel,string? PerformanceReason=null,TerrainSurveyOptions? Terrain=null);
     private readonly Channel<Work> queue=Channel.CreateBounded<Work>(4);
     private readonly object gate=new();private readonly Dictionary<Guid,AnalysisJob> states=[];private readonly Dictionary<Guid,CancellationTokenSource> cancellations=[];
-    public AnalysisJob Enqueue(Guid mission,ScientificCoverageRequest? coverage=null,CompositeRequest? composite=null)
+    public AnalysisJob Enqueue(Guid mission,ScientificCoverageRequest? coverage=null,CompositeRequest? composite=null,TerrainSurveyOptions? terrain=null)
     {
-        ResearchExports.RequireCompleted(missions,mission);if(missions.ScienceDeleted(mission))throw new InvalidOperationException("Collected science was permanently deleted. Analysis and historical grades cannot be recreated from missing evidence.");if((coverage is null)==(composite is null))throw new ArgumentException("Choose one analysis operation.");
-        var id=Guid.NewGuid();var cancel=new CancellationTokenSource();var job=new AnalysisJob(id,mission,coverage is null?"composite":"coverage","Queued",0,null,[]);
+        if(terrain is not null)missions.RequireArchivedTerrainSurvey(mission);else ResearchExports.RequireCompleted(missions,mission);
+        if(missions.ScienceDeleted(mission))throw new InvalidOperationException("Collected science was permanently deleted. Analysis and historical grades cannot be recreated from missing evidence.");if((coverage is null?0:1)+(composite is null?0:1)+(terrain is null?0:1)!=1)throw new ArgumentException("Choose one analysis operation.");
+        if(terrain is not null)ContinuousTerrainSurveys.ValidateOptions(terrain);
+        var id=Guid.NewGuid();var cancel=new CancellationTokenSource();var job=new AnalysisJob(id,mission,terrain is not null?"terrain-corridor":coverage is null?"composite":"coverage","Queued",0,null,[]);
         lock(gate)
         {
             foreach(var old in states.Values.Where(s=>s.State is "Completed" or "Failed" or "Cancelled").Take(Math.Max(0,states.Count-95)).ToArray())states.Remove(old.Id);
             if(states.Count>=100){cancel.Dispose();throw new InvalidOperationException("Analysis history is full. Restart AeroScience after current work completes.");}
             states.Add(id,job);cancellations.Add(id,cancel);
-            if(!queue.Writer.TryWrite(new(id,mission,coverage,composite,cancel))){states.Remove(id);cancellations.Remove(id);cancel.Dispose();throw new InvalidOperationException("Analysis queue is full. Wait for current work to finish.");}
+            if(!queue.Writer.TryWrite(new(id,mission,coverage,composite,cancel,Terrain:terrain))){states.Remove(id);cancellations.Remove(id);cancel.Dispose();throw new InvalidOperationException("Analysis queue is full. Wait for current work to finish.");}
         }
         return job;
     }
@@ -60,6 +62,8 @@ public sealed class ScientificAnalysisJobs(MissionStore missions,ScienceStore sc
                         missions.SavePerformanceReport(evidence,reason,bytes=>storage?.RequireFlightCapacity(bytes));return Array.Empty<ScientificArtifact>();
                     }
                     using var lease=science.BeginAnalysis();
+                    if(work.Terrain is {} terrain)
+                        return new[]{ContinuousTerrainSurveys.Build(science,missions,work.Mission,terrain,linked.Token,n=>Update(work.Id,s=>s with{Completed=n}))};
                     if(work.Coverage is {} request)
                     {
                         var result=ScientificCoverage.Calculate(science,missions.Research(work.Mission).PlanSnapshot,work.Mission,request,linked.Token,n=>Update(work.Id,s=>s with{Completed=n}));
@@ -71,7 +75,7 @@ public sealed class ScientificAnalysisJobs(MissionStore missions,ScienceStore sc
                 },linked.Token);
                 Update(work.Id,s=>s with{State="Completed",Artifacts=results.Select(r=>r.Id).ToArray(),Message="Verified local analysis outputs published. Originals and recorder were not modified."});
             }
-            catch(OperationCanceledException){Update(work.Id,s=>s with{State="Cancelled",Message="Cancelled. Already completed tiles remain individually identified; no complete operation is claimed."});}
+            catch(OperationCanceledException){Update(work.Id,s=>s with{State="Cancelled",Message=work.Terrain is not null?"Cancelled before corridor publication. No complete terrain product is claimed.":"Cancelled. Already completed tiles remain individually identified; no complete operation is claimed."});}
             catch(Exception e)when(e is not OutOfMemoryException){Update(work.Id,s=>s with{State="Failed",Message=e.Message});}
             finally{lock(gate)cancellations.Remove(work.Id);work.Cancel.Dispose();}
         }}catch(OperationCanceledException)when(stoppingToken.IsCancellationRequested){}

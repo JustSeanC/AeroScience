@@ -9,7 +9,7 @@ namespace AeroScience.Missions;
 // Query projection only. The six original stores remain authoritative; no new history or raw cache.
 public sealed partial class MissionStore
 {
-    const string IngressReason="Committed exact ingress and eligible acquisition opportunities; no interpolated observations.";
+    internal const string IngressReason="Committed exact ingress and eligible acquisition opportunities; no interpolated observations.";
     internal const int TimelineRowBytes=262144;
     internal static string TimelineBoundedColumn(string column)=>$"CASE WHEN length(CAST({column} AS BLOB))<={TimelineRowBytes} THEN {column} END";
     internal static string TimelineOriginal(SqliteDataReader rows,int index)=>rows.IsDBNull(index)?throw new NotSupportedException("An original record exceeds the bounded timeline limit. Narrow the UTC interval or use the existing archive/export view."):rows.GetString(index);
