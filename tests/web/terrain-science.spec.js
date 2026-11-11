@@ -35,3 +35,28 @@ test('terrain comparison presentation updates units without changing canonical d
  const raw=await post(request,'/api/science/workspace/compare',{products:[a.product.id,b.product.id],measurement:'elevation'});expect(raw.units).toEqual(['m']);expect(raw.differenceCells[0].baseline).toBe(123.25);expect(raw.meanDelta).toBe(0);
  expect((await(await request.get(`/api/science/products/${a.product.id}`)).json()).product.sha256).toBe(a.product.sha256);
 });
+
+test('retained terrain has truthful bounded acquisition outlines at whole-flight, regional and detailed zoom',async({page,request})=>{
+ const f=await post(request,'/api/testing/remote/Terrain');let release,started,first=true;
+ const barrier=new Promise(resolve=>{release=resolve;}),held=new Promise(resolve=>{started=resolve;});
+ await page.route(`**/api/science/products/${f.product.id}/map-layer?measurement=elevation`,async route=>{if(first){first=false;started();await barrier;}await route.continue();});
+ // ResearchMap deliberately uses Leaflet canvas. Inspect actual mounted/projected layers,
+ // rather than assuming its marker class names create individual SVG DOM elements.
+ await page.addInitScript(()=>{let leaflet;Object.defineProperty(window,'L',{configurable:true,get:()=>leaflet,set(value){leaflet=value;value?.Map?.addInitHook(function(){if(this.getContainer().closest('.workspace-map'))window.maintenanceScienceMap=this;});}});});
+ const loaded=page.waitForResponse(response=>response.url().endsWith('/api/science/workspace/overview')&&response.ok()&&response.request().postDataJSON()?.area);
+ await page.goto(`/#workspace/map?missions=${f.missionId}&instrument=terrain-scanner`);await loaded;await held;const map=page.locator('.workspace-map');
+ // Change scale while the first native request is held: the old implementation
+ // discarded this moveend during initialization and kept the zoom-17 inventory.
+ await page.evaluate(()=>{window.maintenanceScienceMap.setZoom(5,{animate:false});});release();
+ const overview=()=>page.evaluate(()=>{const map=window.maintenanceScienceMap,markers=[],extents=[];map.eachLayer(layer=>{const name=layer.options?.className;if(name==='science-overview-location')markers.push(!!(map.hasLayer(layer)&&map.getBounds().contains(layer.getLatLng())&&layer.getRadius()>=6&&layer.options.opacity>0&&map.getRenderer(layer)._container.isConnected));if(name==='science-acquisition-extent')extents.push({fill:layer.options.fill,mounted:map.hasLayer(layer)});});return {markers,extents};});
+ for(const zoom of [5,9,15]){
+  await expect.poll(()=>page.evaluate(()=>!!window.maintenanceScienceMap)).toBe(true);
+  await page.evaluate(zoom=>{window.maintenanceScienceMap.setZoom(zoom,{animate:false});},zoom);
+  await expect(map).toHaveAttribute('data-overview-zoom',String(zoom));
+  await expect.poll(async()=>{const value=await overview();return value.markers.filter(Boolean).length;}).toBeGreaterThan(0);
+  const rendered=await overview();expect(rendered.extents.length).toBeGreaterThan(0);expect(rendered.extents.length).toBeLessThanOrEqual(96);expect(rendered.extents.every(e=>e.mounted&&!e.fill)).toBe(true);
+  expect(await map.locator('svg path').count()).toBeLessThan(100);await expect(page.locator('.raster-legend')).toContainText('Zoom in for individual collected points');
+ }
+ await expect(page.locator('.terrain-elevation-surface')).not.toHaveCount(0);expect((await(await request.get(`/api/science/products/${f.product.id}`)).json()).product.sha256).toBe(f.product.sha256);
+ await map.screenshot({path:'artifacts/terrain-maintenance-overview.png'});
+});
