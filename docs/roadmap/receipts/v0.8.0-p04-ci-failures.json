@@ -178,5 +178,40 @@
     "probeReceiptSha256": "4b7b0f572ee262d35e1c601939e3d3bbeef9e25c7bbb2fa01f24a5c6a77d16cd",
     "signatureNegativeAndPreservationTestsPassed": 7,
     "existingCiPolicyTestsPassed": 15
+  },
+  "signedTransportSourceWindowsFailure": {
+    "sourceCommit": "7fc0bb0a4158a7b38d076462ba44bbf7c127dfb0",
+    "runId": 43053037347,
+    "jobId": 130635113239,
+    "url": "https://github.com/JustSeanC/AeroScience/actions/runs/43053037347",
+    "diagnosis": "New helper test imported scripts.build, but the existing Windows script runner omits repository root from sys.path. ModuleNotFoundError prevented seven tests from loading.",
+    "logSha256": "d66aff39aa6645104166c376fb10127b9deb0d5c85e9161e8a60c5d6ec5d5b48",
+    "failedHelperResults": {
+      "total": 176,
+      "errors": 1,
+      "skipped": 3
+    },
+    "targetedReproduction": "python3 -I -m unittest discover -s tests -p test_ci_ubuntu_mirror.py",
+    "correctedImport": "Explicit file-based import matching other repository helpers; original seven assertions/cases retained",
+    "correctedIsolatedTestsPassed": 7,
+    "correctedExistingHelperEntrypointTestsPassed": 7,
+    "existingCiPolicyTestsPassed": 15,
+    "linuxBrowser": {
+      "passed": 439,
+      "failed": 0,
+      "flaky": 0,
+      "existingSkips": 2,
+      "baselineCasesRetained": 429,
+      "added": 12,
+      "artifactId": 13871914825,
+      "reportSha256": "ee4387dc874a5936dcab64f26633e8abe4645515c3cd0b9a5e17a3c1cb9ff037"
+    },
+    "linuxJobConclusion": "success",
+    "linuxHelpers": {
+      "total": 185,
+      "passed": 184,
+      "existingSkips": 1,
+      "failed": 0
+    }
   }
 }

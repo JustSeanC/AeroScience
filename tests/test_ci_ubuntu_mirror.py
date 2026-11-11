@@ -1,10 +1,15 @@
 import os
+import importlib.util
 from pathlib import Path
 import subprocess
 import tempfile
 import unittest
 from unittest.mock import patch
-from scripts.build import prepare_ci_ubuntu_mirror as mirror
+
+spec = importlib.util.spec_from_file_location('prepare_ci_ubuntu_mirror',
+    Path(__file__).resolve().parents[1] / 'scripts/build/prepare_ci_ubuntu_mirror.py')
+mirror = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(mirror)
 
 
 class CiUbuntuMirrorTests(unittest.TestCase):

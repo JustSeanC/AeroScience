@@ -165,6 +165,18 @@
     {
       "path": "artifacts/p04-ci/ubuntu-mirror-tests.log",
       "sha256": "512d73ef330c5504e4b538e21625a9c7d62d8e65219196e4b3bebdb7369ff07b"
+    },
+    {
+      "path": "artifacts/p04-ci/windows-import-before.log",
+      "sha256": "5a9119eada93d7c48dec5897a5d93ceb763b5a4ec75bf44f34b3e59baaec6d08"
+    },
+    {
+      "path": "artifacts/p04-ci/windows-import-after.log",
+      "sha256": "d70cedbbea14bb6f18a3114ebb76c3aa0e12b54ee244a4a4814851d1e0c36a3a"
+    },
+    {
+      "path": "artifacts/p04-ci/windows-helper-entrypoint-after.log",
+      "sha256": "1a5e3ab1118307d2d674e5533fa5fa52f8c886c7956d4d1142a42693f3af82b8"
     }
   ],
   "catalog": {
@@ -173,7 +185,7 @@
     "nonEnglishLocales": "en-US fallback previews; not full translations"
   },
   "fullCi": {
-    "status": "final UI checks passed; three apt-DNS failures retained; signed CI dependency transport recovery awaits exact-source Full CI",
+    "status": "Linux and organization full jobs green on 7fc0bb0; corrected Windows test loader awaits exact-source Full CI",
     "initial": {
       "sourceCommit": "55d4604a211802835940bccbb8e412902e2374a6",
       "runId": 43024543058,
@@ -272,6 +284,13 @@
       "runtimeUiChangedFrom534405b": false,
       "aptTlsSignatureExpiryAndPackageHashChecksPreserved": true,
       "scientificSourcesOrOwnerDataChanged": false
+    },
+    "windowsHelperPortability": {
+      "isolatedImportFailureReproduced": true,
+      "isolatedTestsPassed": 7,
+      "existingHelperEntrypointTestsPassed": 7,
+      "existingCiPolicyTestsPassed": 15,
+      "runtimeOrCiSignatureChecksChanged": false
     }
   },
   "captures": [
