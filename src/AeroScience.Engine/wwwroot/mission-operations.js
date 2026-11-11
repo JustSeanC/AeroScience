@@ -24,7 +24,7 @@ export function missionOperations(parent,api,{map,livePanels,refreshIntelligence
  const tools=node('nav',undefined,'current-flight-tools');tools.setAttribute('aria-label',t('flight.tools'));cockpit.append(tools);
  function reveal(element){if(!element)return;if(element.tagName==='DETAILS')element.open=true;element.scrollIntoView({block:'start'});const focus=element.querySelector('summary,button,a,input');focus?.focus({preventScroll:true});}
  button(tools,t('flight.map'),()=>reveal(mapHost));const observe=button(tools,t('flight.observation'),()=>reveal(observations));button(tools,t('flight.evidence'),()=>reveal(timelineHost));
- link(tools,t('flight.instrumentSetup'),'#science','button tertiary');link(tools,t('nav.flightDetails'),'#control','button tertiary');link(tools,t('nav.planner'),'#planner','button tertiary');
+ link(tools,t('flight.instrumentSetup'),'#science','button tertiary');
  const scanner=scannerGuidance(science);
  let opened=false,reviewing=false,selectedFlight=null,metadata=null,latest=null,epoch=0,controller=null,archiveOffset=0,focused=null,lastActive=null,lastMap=null,selectedEvidence=null,lastStatusRead=0,statusPending=false,archiveSignature='',panned=null;const anchors=new Map();
  const timeline=missionEvidenceTimeline(timelineHost,api,{active:()=>opened&&!parent.hidden,onSelect:value=>{selectedEvidence=value;paintMap();}});

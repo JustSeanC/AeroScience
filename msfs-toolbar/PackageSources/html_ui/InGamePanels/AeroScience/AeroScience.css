@@ -355,7 +355,6 @@ select:focus-visible {
 #as-root nav [data-native-section]{flex:1 1 0;min-width:0;min-height:48px;padding:10px 4px;font-size:16px;line-height:1.35;white-space:normal;word-wrap:break-word;background:#213548;color:#eff7fc;border:1px solid #647e94;border-radius:4px;cursor:pointer}
 #as-root nav [data-native-section]:focus{outline:3px solid #75ead1;outline-offset:-3px}
 #as-root #as-map-page{font-size:14px;min-height:44px;white-space:normal;background:#213548;color:#eff7fc;border:1px solid #647e94;padding:8px;border-radius:4px;cursor:pointer}
-#as-root .as-scroll:focus{outline:2px solid #75ead1;outline-offset:-2px}
 #as-root #as-session-actions .as-primary{background:#59d5bc;color:#08271f;border-color:#59d5bc;font-weight:bold}
 #as-root #as-session-actions [data-science-action=endData]{background:#213548;color:#ffd3ce;border-color:#ac6b73}
 #as-root #as-session-actions{margin:12px 0}

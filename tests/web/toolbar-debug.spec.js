@@ -14,7 +14,12 @@ test('opt-in capture observes targets, bounds and scrolling without consuming in
   await expect(page.locator('#as-payload-view')).toBeVisible();
   await page.locator('#as-mission-page').click();
   const scroll = page.locator('#as-scroll');
+  const beforeWheel = await scroll.evaluate(node => node.scrollTop);
   await scroll.hover(); await page.mouse.wheel(0, 800);
+  // Section navigation can already have scrolled to its content. Wait for the
+  // actual asynchronous wheel dispatch before stopping the passive observer.
+  await expect.poll(() => page.evaluate(() => JSON.parse(window.AeroScienceWindowDebug.report()).entries.some(e => e.kind === 'input' && e.type === 'wheel'))).toBe(true);
+  await expect.poll(() => scroll.evaluate(node => node.scrollTop)).toBeGreaterThan(beforeWheel);
   await expect.poll(() => scroll.evaluate(node => node.scrollTop)).toBeGreaterThan(0);
   const report = await page.evaluate(() => {
     window.AeroScienceWindowDebug.snapshot('after-wheel');

@@ -129,6 +129,18 @@
     {
       "path": "artifacts/p04-automation-waiting.log",
       "sha256": "e76adb42eec276edb79d8b46be0be87651a8bde6fcf014dc6aae132e7b341757"
+    },
+    {
+      "path": "artifacts/p04-ci/remediation-targeted.json",
+      "sha256": "b5c22f2ed395c30c7f972dcbd3f0aa437a9f49d531bfcdb3e2071c1471db5081"
+    },
+    {
+      "path": "artifacts/p04-ci/remediation-debug-repeat.json",
+      "sha256": "d79b20e0e54a9a1f4681a99e1a2fc9c00c4066524a811a99f268b03270c6a0eb"
+    },
+    {
+      "path": "artifacts/p04-ci/remediation-check-web.log",
+      "sha256": "21e8b94448735f981280c73f8c5c5e4e2b6a2240dce6e6a39ea8a699e18608cc"
     }
   ],
   "catalog": {
@@ -137,7 +149,66 @@
     "nonEnglishLocales": "en-US fallback previews; not full translations"
   },
   "fullCi": {
-    "status": "pending on completed integration source; completion receipt must supply exact SHA, run and job URLs"
+    "status": "initial full run failed; corrected-source full CI pending",
+    "initial": {
+      "sourceCommit": "55d4604a211802835940bccbb8e412902e2374a6",
+      "runId": 43024543058,
+      "url": "https://github.com/JustSeanC/AeroScience/actions/runs/43024543058",
+      "conclusion": "failure",
+      "linuxDotnetPassed": 1495,
+      "windowsDotnetPassed": 1485,
+      "windowsExistingSkips": 10,
+      "browser": {
+        "passed": 435,
+        "failed": 3,
+        "skipped": 2,
+        "flaky": 0
+      },
+      "browserArtifactId": 13860954091,
+      "allP03bBrowserCasesRetained": 429,
+      "newP04BrowserCases": 11
+    },
+    "confirmedRemediation": {
+      "runtimeChanges": [
+        "Remove redundant cockpit links while retaining original workspace navigation",
+        "Restore native no-container-focus-border contract"
+      ],
+      "testSynchronization": "Wait for observed asynchronous wheel input and additional scroll movement; all original debug assertions retained",
+      "unchangedFailureReproduction": {
+        "startTime": "2026-11-11T13:49:02.019Z",
+        "duration": 18977.591,
+        "expected": 3,
+        "skipped": 0,
+        "unexpected": 2,
+        "flaky": 0
+      },
+      "debugRaceBefore": {
+        "startTime": "2026-11-11T13:51:41.717Z",
+        "duration": 27982.556,
+        "expected": 6,
+        "skipped": 0,
+        "unexpected": 4,
+        "flaky": 0
+      },
+      "correctedTargeted": {
+        "startTime": "2026-11-11T13:55:00.789Z",
+        "duration": 126386.11399999999,
+        "expected": 31,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "debugRaceAfter": {
+        "startTime": "2026-11-11T13:58:33.538Z",
+        "duration": 27992.266,
+        "expected": 10,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "nodePassed": 37,
+      "nativeCompilationStagingCasesPassed": 4
+    }
   },
   "captures": [
     "../images/p04a/capture-manifest.json",
