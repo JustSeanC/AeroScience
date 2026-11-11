@@ -29,6 +29,14 @@ public sealed class ScientificCatalogTests:IDisposable
         if(kind==RemoteKind.Terrain){Assert.Null(item.ObservationUtc);Assert.Contains("DSM",item.VerticalDatum);}
         var cached=await catalog.Search(new(provider,new(-75,40,-74.98,40.02),DateTimeOffset.Parse("2024-01-01Z"),DateTimeOffset.Parse("2024-12-31Z"),CachedOnly:true));Assert.True(cached.Cached);Assert.Equal(result.AsOfUtc,cached.AsOfUtc);Assert.Equal(1,handler.Count);
     }
+    [Fact]public async Task OptionalNullAndUnexpectedDisplayMetadataDoesNotDiscardValidScientificBands()
+    {
+        var feature=Metadata("sentinel");feature["bbox"]=null;feature["properties"]!["updated"]=17;feature["properties"]!["proj:code"]=null;
+        foreach(var key in new[]{"blue","green","red","nir","scl"}){feature["assets"]![key]!["file:size"]="unknown";feature["assets"]![key]!["proj:epsg"]=null;feature["assets"]![key]!["proj:code"]=17;}
+        using var auto=new AutomaticScientificData(science,settings,new(new Handler(_=>Json(new{features=new object?[]{null,feature},links=Array.Empty<object>()}))));
+        var result=await new ScientificCatalog(auto,science,settings).Search(new("sentinel-2",new(-75,40,-74.98,40.02),DateTimeOffset.Parse("2024-01-01Z"),DateTimeOffset.Parse("2024-12-31Z")));
+        var item=Assert.Single(result.Items);Assert.All(item.Bands,b=>Assert.Null(b.OriginalAssetBytes));Assert.Equal(-.1,item.Bands[0].Offset);Assert.NotNull(item.Geometry);
+    }
     [Fact]public async Task PaginationUsesActualOpaqueNextLinkAndBindsFilters()
     {
         var feature=Metadata("sentinel");var handler=new Handler(r=>Json(new{features=new[]{feature},links=r.RequestUri!.Query.Contains("token=")?Array.Empty<object>():new object[]{new{rel="next",href="https://earth-search.aws.element84.com/v1/search?token=real-provider-token",method="GET"}}}));

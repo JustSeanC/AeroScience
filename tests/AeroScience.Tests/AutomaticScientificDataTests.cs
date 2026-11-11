@@ -53,6 +53,31 @@ public sealed class AutomaticScientificDataTests : IDisposable
         if(kind==RemoteKind.Multispectral){Assert.Equal(.0001,d.Manifest.Bands[0].Scale);Assert.Equal(-.1,d.Manifest.Bands[0].Offset);Assert.Equal("SCL",d.Manifest.Bands.Last().Id);Assert.Equal(1,d.Manifest.Bands.Last().Scale);}
         if(kind==RemoteKind.Terrain){Assert.Null(d.Manifest.ObservationUtc);Assert.NotNull(d.Manifest.PublicationUtc);Assert.Contains("EGM2008",d.Manifest.VerticalDatum);Assert.Contains("surface model",d.Manifest.Notes);}
     }
+    [Theory][InlineData("sentinel","earth-search",RemoteKind.Multispectral)][InlineData("landsat","planetary-computer",RemoteKind.Thermal)][InlineData("copdem","planetary-computer",RemoteKind.Terrain)]
+    public void RetainedStacMetadataCanDescribeTheSameSceneForAMissingWindow(string file,string id,RemoteKind kind)
+    {
+        using var http=new ScientificHttp(new Handler((_,_)=>throw new InvalidOperationException("No discovery network expected")));
+        var provider=new StacScientificProvider(http,id);using var feature=JsonDocument.Parse(Metadata(file).ToJsonString());
+        var original=provider.Describe(feature.RootElement,kind,Area)!;using var saved=JsonDocument.Parse(original.ProviderMetadataJson!);
+        var restored=provider.Describe(saved.RootElement,kind,Area)!;
+        Assert.Equal(original.Manifest,restored.Manifest with{Bands=original.Manifest.Bands});Assert.Equal(original.Assets,restored.Assets);
+        Assert.Equal(ScientificCatalog.DiscoveryRevision(original),ScientificCatalog.DiscoveryRevision(restored));
+        Assert.Equal(original.ProviderMetadataJson,restored.ProviderMetadataJson);
+    }
+    [Theory][InlineData("assets")][InlineData("href")][InlineData("type")][InlineData("raster:bands")][InlineData("scale")][InlineData("offset")][InlineData("nodata")]
+    public async Task IncompatibleStacCandidateDoesNotHideALaterValidScene(string field)
+    {
+        var valid=Metadata("sentinel");var malformed=valid.DeepClone();
+        if(field=="assets")malformed["assets"]=null;
+        else if(field=="href")malformed["assets"]!["blue"]!.AsObject().Remove(field);
+        else if(field=="type")malformed["assets"]!["blue"]![field]=17;
+        else if(field=="raster:bands")malformed["assets"]!["blue"]![field]=new JsonObject();
+        else malformed["assets"]!["blue"]!["raster:bands"]![0]![field]="invalid";
+        using var http=new ScientificHttp(new Handler((_,_)=>Json(new{features=new[]{malformed,valid}})));
+        var discovery=await new StacScientificProvider(http,"earth-search").Discover(RemoteKind.Multispectral,new(-75,40,-74.98,40.02),Preferences,new(1048576),default);
+        Assert.NotNull(discovery);Assert.Equal(.0001,discovery.Manifest.Bands[0].Scale);Assert.Equal(-.1,discovery.Manifest.Bands[0].Offset);
+        Assert.Equal("SCL",discovery.Manifest.Bands.Last().Id);
+    }
     [Fact]public async Task DateQualityGeographyMissingThermalProductAndMissingScaleAreEnforced()
     {
         var feature=Metadata("landsat");var handler=new Handler((_,_)=>Json(new{features=new[]{feature}}));using var http=new ScientificHttp(handler,cacheEnabled:false);var provider=new StacScientificProvider(http,"planetary-computer");
@@ -61,6 +86,20 @@ public sealed class AutomaticScientificDataTests : IDisposable
         feature["properties"]!["landsat:correction"]="L2SP";feature["properties"]!["eo:cloud_cover"]=80;Assert.Null(await provider.Discover(RemoteKind.Thermal,Area,Preferences,new(1048576),default));
         feature["properties"]!["eo:cloud_cover"]=0;Assert.Null(await provider.Discover(RemoteKind.Thermal,Area,Preferences with{PreferredDateUtc=DateTimeOffset.Parse("2020-01-01Z")},new(1048576),default));
         feature["assets"]!["lwir11"]!["raster:bands"]![0]!.AsObject().Remove("scale");await Assert.ThrowsAsync<IOException>(()=>provider.Discover(RemoteKind.Thermal,Area,Preferences,new(1048576),default));
+    }
+    [Fact]public async Task UnsupportedMetadataHasARedactedActionableFieldAndNeverBecomesReady()
+    {
+        var feature=Metadata("sentinel");feature["assets"]!["blue"]!.AsObject().Remove("href");feature["properties"]!["private-token"]="secret-do-not-display";
+        using var http=new ScientificHttp(new Handler((_,_)=>Json(new{features=new[]{feature}})));
+        var error=await Assert.ThrowsAsync<IOException>(()=>new StacScientificProvider(http,"earth-search").Discover(RemoteKind.Multispectral,new(-75,40,-74.98,40.02),Preferences,new(1048576),default));
+        Assert.Contains("assets.blue.href",error.Message);Assert.Contains("earth-search.aws.element84.com",error.Message);Assert.Contains("Retry failed regions",error.Message);Assert.DoesNotContain("secret-do-not-display",error.Message);Assert.Empty(science.Sources());
+        using var invalid=JsonDocument.Parse("{\"scene\":null,\"collection\":\"sentinel-2-l2a\",\"properties\":{},\"assets\":{}}");
+        Assert.Throws<IOException>(()=>new StacScientificProvider(http,"earth-search").Describe(invalid.RootElement,RemoteKind.Multispectral,Area));
+    }
+    [Fact]public async Task MissingCloudQualityIsNotGuessedAsClearSky()
+    {
+        var feature=Metadata("sentinel");feature["properties"]!.AsObject().Remove("eo:cloud_cover");using var http=new ScientificHttp(new Handler((_,_)=>Json(new{features=new[]{feature}})));
+        Assert.Null(await new StacScientificProvider(http,"earth-search").Discover(RemoteKind.Multispectral,new(-75,40,-74.98,40.02),Preferences,new(1048576),default));
     }
     [Fact]public void RangeRequestsAreExactBoundedCachedAndRejectFullDownloadsOrChangedAssets()
     {

@@ -96,13 +96,13 @@ public sealed partial class ScientificCatalog(AutomaticScientificData automatic,
             }
             else
             {
-                using var json=await automatic.Http.Json(url,budget,token,refresh:query.Refresh);var features=json.RootElement.GetProperty("features");
-                if(features.ValueKind!=JsonValueKind.Array||features.GetArrayLength()>100)throw new IOException("Provider exceeded bounded catalog response limits.");
+                using var json=await automatic.Http.Json(url,budget,token,refresh:query.Refresh);
+                if(json.RootElement.ValueKind!=JsonValueKind.Object||!json.RootElement.TryGetProperty("features",out var features)||features.ValueKind!=JsonValueKind.Array||features.GetArrayLength()>100)throw new IOException("Unsupported provider metadata at features, or bounded catalog response limit exceeded.");
                 foreach(var feature in features.EnumerateArray().Take(query.PageSize))
                 {
-                    if(provider.Id=="landsat"&&(!feature.GetProperty("properties").TryGetProperty("landsat:correction",out var correction)||correction.GetString()!="L2SP"))continue;
                     try
                     {
+                        if(provider.Id=="landsat"&&(!feature.GetProperty("properties").TryGetProperty("landsat:correction",out var correction)||correction.ValueKind!=JsonValueKind.String||correction.GetString()!="L2SP"))continue;
                         var d=Stac(provider.Id).Describe(feature,provider.Kind,query.Area);if(d is null)continue;
                         if(provider.SceneDates)
                         {
@@ -113,12 +113,12 @@ public sealed partial class ScientificCatalog(AutomaticScientificData automatic,
                         }
                         items.Add(Describe(provider,d,feature));
                     }
-                    catch(Exception e)when(e is IOException or JsonException or ArgumentException or KeyNotFoundException or InvalidOperationException){limitations.Add("An item lacked supported numeric assets or scientific metadata and was excluded.");}
+                    catch(Exception e)when(e is IOException or JsonException or ArgumentException or KeyNotFoundException or InvalidOperationException or FormatException){limitations.Add("An item lacked supported numeric assets or scientific metadata and was excluded.");}
                 }
-                if(json.RootElement.TryGetProperty("links",out var links))foreach(var link in links.EnumerateArray())if(link.GetProperty("rel").GetString()=="next")
+                if(json.RootElement.TryGetProperty("links",out var links)&&links.ValueKind==JsonValueKind.Array)foreach(var link in links.EnumerateArray())if(link.ValueKind==JsonValueKind.Object&&link.TryGetProperty("rel",out var rel)&&rel.ValueKind==JsonValueKind.String&&rel.GetString()=="next")
                 {
-                    if(link.TryGetProperty("method",out var method)&&method.GetString()!="GET"){limitations.Add("Provider pagination method unsupported; narrow this search.");break;}
-                    var uri=new Uri(new Uri(url),link.GetProperty("href").GetString()!);ScientificHttp.ValidateUrl(uri);
+                    if(link.TryGetProperty("method",out var method)&&(method.ValueKind!=JsonValueKind.String||method.GetString()!="GET")){limitations.Add("Provider pagination method unsupported; narrow this search.");break;}
+                    if(!link.TryGetProperty("href",out var href)||href.ValueKind!=JsonValueKind.String||!Uri.TryCreate(new Uri(url),href.GetString(),out var uri))throw new IOException("Unsupported provider metadata at links.next.href.");ScientificHttp.ValidateUrl(uri);
                     if(uri.GetLeftPart(UriPartial.Path)!=Root(provider.Id)+"/search"||uri.Query.Contains("sig=",StringComparison.OrdinalIgnoreCase))throw new IOException("Unsafe catalog pagination link refused.");next=uri.AbsoluteUri;break;
                 }
             }
@@ -133,7 +133,7 @@ public sealed partial class ScientificCatalog(AutomaticScientificData automatic,
         catch(OperationCanceledException)when(!token.IsCancellationRequested)
         {return new("Unavailable",[],null,DateTimeOffset.UtcNow,DateTimeOffset.UtcNow,false,["Provider request timed out; retained sources and cached metadata remain available."],"Provider timeout. Retry later or use cached-only review.");}
         catch(Exception e)when(e is HttpRequestException or IOException or JsonException or KeyNotFoundException)
-        {return new("Unavailable",[],null,DateTimeOffset.UtcNow,DateTimeOffset.UtcNow,false,["This search did not establish current availability. Retained sources remain separate."],e is HttpRequestException?"Provider network unavailable.":e is JsonException or KeyNotFoundException?"Unsupported provider metadata.":e.Message);}
+        {return new("Unavailable",[],null,DateTimeOffset.UtcNow,DateTimeOffset.UtcNow,false,["This search did not establish current availability. Retained sources remain separate."],e is HttpRequestException?"Provider network unavailable.":e is JsonException or KeyNotFoundException?"Unsupported provider metadata. Retry later or review source settings; no scientific values were guessed.":e.Message);}
         finally{gate.Release();}
     }
     private StacScientificProvider Stac(string provider)=>(StacScientificProvider)automatic.Provider(provider=="sentinel-2"?"earth-search":"planetary-computer");
@@ -205,24 +205,24 @@ public sealed partial class ScientificCatalog(AutomaticScientificData automatic,
     internal static ScientificCatalogItem Describe(ScientificCatalogProvider provider,ScientificDiscovery d,JsonElement? feature)
     {
         var props=feature?.GetProperty("properties");var geometry=feature?.GetProperty("geometry").Clone();var bounds=d.Area;
-        if(feature is {} f&&f.TryGetProperty("bbox",out var box)&&box.GetArrayLength()==4)bounds=new(box[0].GetDouble(),box[1].GetDouble(),box[2].GetDouble(),box[3].GetDouble());
+        if(feature is {} f&&f.TryGetProperty("bbox",out var box)&&box.ValueKind==JsonValueKind.Array&&box.GetArrayLength()==4&&box.EnumerateArray().All(v=>v.ValueKind==JsonValueKind.Number&&v.TryGetDouble(out var n)&&double.IsFinite(n)))bounds=new(box[0].GetDouble(),box[1].GetDouble(),box[2].GetDouble(),box[3].GetDouble());
         var details=d.ProviderMetadataJson is {} sourceMetadata?JsonSerializer.Deserialize<JsonElement>(sourceMetadata):default;
-        string? crs=null;if(props is {} p){if(p.TryGetProperty("proj:epsg",out var epsg))crs="EPSG:"+epsg;if(p.TryGetProperty("proj:code",out var code))crs=code.GetString();}
+        string? crs=null;if(props is {} p){if(p.TryGetProperty("proj:epsg",out var epsg)&&epsg.ValueKind==JsonValueKind.Number&&epsg.TryGetInt32(out var epsgNumber)&&epsgNumber>0)crs="EPSG:"+epsgNumber;if(p.TryGetProperty("proj:code",out var code)&&code.ValueKind==JsonValueKind.String)crs=code.GetString();}
         var bands=d.Manifest.Bands.Select(b=>
         {
             long? size=null;
-            if(details.ValueKind==JsonValueKind.Object&&details.TryGetProperty("assets",out var assets)&&assets.TryGetProperty(b.Id,out var asset))
+            if(details.ValueKind==JsonValueKind.Object&&details.TryGetProperty("assets",out var assets)&&assets.ValueKind==JsonValueKind.Object&&assets.TryGetProperty(b.Id,out var asset)&&asset.ValueKind==JsonValueKind.Object)
             {
-                if(asset.TryGetProperty("file:size",out var bytes)&&bytes.TryGetInt64(out var length)&&length>0)size=length;
-                if(crs is null&&asset.TryGetProperty("proj:epsg",out var epsg))crs="EPSG:"+epsg;
-                if(crs is null&&asset.TryGetProperty("proj:code",out var code))crs=code.GetString();
+                if(asset.TryGetProperty("file:size",out var bytes)&&bytes.ValueKind==JsonValueKind.Number&&bytes.TryGetInt64(out var length)&&length>0)size=length;
+                if(crs is null&&asset.TryGetProperty("proj:epsg",out var epsg)&&epsg.ValueKind==JsonValueKind.Number&&epsg.TryGetInt32(out var epsgNumber)&&epsgNumber>0)crs="EPSG:"+epsgNumber;
+                if(crs is null&&asset.TryGetProperty("proj:code",out var code)&&code.ValueKind==JsonValueKind.String)crs=code.GetString();
             }
             return new ScientificCatalogBand(b.Id,b.Unit,b.Scale,b.Offset,b.NoData,provider.Id=="sentinel-2"?(b.Id=="SCL"?20:10):provider.Id=="landsat"||provider.Id=="copernicus"?30:null,b.Format,size);
         }).ToArray();
         var composite=d.ProviderMetadataJson is {} raw?JsonSerializer.Deserialize<JsonElement>(raw):default;
         var revision=Hash(new{provider.Id,compositeDescription=provider.Id=="usgs-3dep"?composite.GetProperty("description").GetString():null,scene=provider.Id=="usgs-3dep"?"composite":d.Manifest.SceneId,d.Manifest.ObservationUtc,d.Manifest.PublicationUtc,d.Manifest.VerticalDatum,bands=d.Manifest.Bands.Select(b=>b with{SceneId=provider.Id=="usgs-3dep"?"composite":b.SceneId}),metadata=feature is {} ff?new{properties=ff.GetProperty("properties"),assets=ff.GetProperty("assets"),geometry=ff.GetProperty("geometry")}:null});
         DateTimeOffset? published=d.Manifest.PublicationUtc;
-        if(props is {} properties&&properties.TryGetProperty("updated",out var updated)&&DateTimeOffset.TryParse(updated.GetString(),CultureInfo.InvariantCulture,DateTimeStyles.AssumeUniversal,out var timestamp))published=timestamp.ToUniversalTime();
+        if(props is {} properties&&properties.TryGetProperty("updated",out var updated)&&updated.ValueKind==JsonValueKind.String&&DateTimeOffset.TryParse(updated.GetString(),CultureInfo.InvariantCulture,DateTimeStyles.AssumeUniversal,out var timestamp))published=timestamp.ToUniversalTime();
         var cloud=props is {} propertiesWithCloud?StacScientificProvider.Number(propertiesWithCloud,"eo:cloud_cover",double.NaN):double.NaN;
         return new(provider.Id,provider.Product,provider.Id=="usgs-3dep"?"3dep-composite":d.Manifest.SceneId,revision,provider.Kind,bounds,geometry,d.Manifest.ObservationUtc,published,bands,crs,d.Manifest.VerticalDatum,d.Quality,d.Resolution,d.Manifest.License,d.Manifest.Citation,provider.Id=="usgs-3dep"?"Bounded F32 numeric export":"HTTP range COG native-grid subset",d.Limitations??[],CloudPercent:double.IsFinite(cloud)&&cloud is >=0 and <=100?cloud:null);
     }
