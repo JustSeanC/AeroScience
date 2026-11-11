@@ -21,6 +21,15 @@ concurrency:
 permissions:
   contents: read
 jobs:
+  private-beta-recipe-diagnostic:
+    # Diagnostic only. Existing scope policy still requires Full on packaging refs.
+    if: github.event_name == 'workflow_dispatch' && inputs.validation == 'windows-profile'
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Inspect private recipe resources without installing or publishing
+        shell: pwsh
+        run: ./scripts/build/Test-BetaInstallerRecipe.ps1
   validation-scope:
     runs-on: ubuntu-latest
     outputs:
