@@ -19,7 +19,7 @@ try {
     if ($PrivateBetaVersion) { $privateArguments = @('--beta-version',$PrivateBetaVersion); $profileArguments.PrivateBetaVersion=$PrivateBetaVersion }
     $identity = (python scripts/release/private_validation.py identity @privateArguments) | ConvertFrom-Json
     if ($LASTEXITCODE -ne 0) { throw 'Unsupported private build identity.' }
-    $branch = (git branch --show-current).Trim()
+    $branch = "$(git branch --show-current)".Trim()
     $revision = (git rev-parse HEAD).Trim()
     $sourceSelected = $branch -eq $identity.branch -or ($PrivateBetaVersion -and -not $branch -and $ExpectedSourceCommit -eq $revision)
     if ($LASTEXITCODE -ne 0 -or -not $sourceSelected -or $revision -notmatch '^[a-f0-9]{40}$' -or (git status --porcelain)) { throw "Use clean $($identity.branch) source, or its explicit exact-source detached private-beta checkout. Nothing was merged or published." }
