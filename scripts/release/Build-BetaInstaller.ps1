@@ -94,7 +94,7 @@ try {
         $setup = Join-Path $destination "AeroScience-Setup-v$PrivateBetaVersion.exe"
         $setupInfo = [Diagnostics.FileVersionInfo]::GetVersionInfo($setup)
         $numeric = "$($setupInfo.FileMajorPart).$($setupInfo.FileMinorPart).$($setupInfo.FileBuildPart).$($setupInfo.FilePrivatePart)"
-        if ($setupInfo.ProductVersion -ne $PrivateBetaVersion -or $setupInfo.ProductName -ne $identity.title -or $numeric -ne '0.7.1.2') { throw 'Compiled beta installer version metadata differs. No acceptance receipt was created.' }
+        if ($setupInfo.ProductVersion -ne $PrivateBetaVersion -or $setupInfo.ProductName -ne $identity.title -or $numeric -ne '0.7.1.2') { throw "Compiled beta installer metadata differs: product='$($setupInfo.ProductName)', version='$($setupInfo.ProductVersion)', numeric='$numeric'. No acceptance receipt was created." }
         $tools = Get-Content -LiteralPath $toolReport -Raw | ConvertFrom-Json -AsHashtable
         $tools.setup_product_version=$setupInfo.ProductVersion; $tools.setup_product_name=$setupInfo.ProductName
         $tools.setup_numeric_version=$numeric; $tools.setup_sha256=(Get-FileHash $setup -Algorithm SHA256).Hash.ToLowerInvariant()

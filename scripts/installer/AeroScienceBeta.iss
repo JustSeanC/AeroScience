@@ -53,6 +53,7 @@ OutputDir={#OutputDirectory}
 OutputBaseFilename=AeroScience-Setup-v{#BetaVersion}
 VersionInfoVersion={#BetaNumericVersion}
 VersionInfoProductVersion={#BetaNumericVersion}
+VersionInfoProductName={#BetaName}
 VersionInfoProductTextVersion={#BetaVersion}
 VersionInfoTextVersion={#BetaVersion}
 UninstallDisplayName={#BetaName}
