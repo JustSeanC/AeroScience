@@ -1,0 +1,480 @@
+{
+  "checkpoint": "v0.8.0 P05a",
+  "branch": "develop/v0.8.0",
+  "baselineCommit": "e6317fadee1abd7ae9110a983effb4e2270e4544",
+  "implementationCommit": "4938545c6f65d0367ffa0fc9202b5bd28208c850",
+  "runtimeSourceCommit": "80357e85c07e9b2d690a6c9f5d7007da20588d65",
+  "algorithm": "continuous-terrain-corridor-2/sensor-plane-2",
+  "milestoneAcceptance": "Blocked: Full CI is not green",
+  "targeted": {
+    "passed": 252,
+    "failed": 0,
+    "newP05aCases": 49,
+    "receipt": "v0.8.0-p05a-targeted.json"
+  },
+  "runtimeCi": {
+    "id": 43092959501,
+    "url": "https://github.com/JustSeanC/AeroScience/actions/runs/43092959501",
+    "sourceCommit": "80357e85c07e9b2d690a6c9f5d7007da20588d65",
+    "reportedStatus": "in_progress",
+    "reportedConclusion": null,
+    "jobs": [
+      {
+        "name": "validation-scope",
+        "status": "completed",
+        "conclusion": "success",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@v7",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run python3 scripts/build/development_validation.py tier",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Post Run actions/checkout@v7",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          }
+        ]
+      },
+      {
+        "name": "windows-companion",
+        "status": "in_progress",
+        "conclusion": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@v7",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run actions/setup-dotnet@v6",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Run actions/setup-node@v7",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Prepare isolated organization PostgreSQL when available",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Use runner scratch for durable Windows test fixtures",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Run ./scripts/build/Build-Companion.ps1",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Compile isolated validation identity and Windows application (not distributable)",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Verify Windows Earthdata vault with disposable synthetic credentials",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          },
+          {
+            "name": "Verify dependency locks remain unchanged",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10
+          },
+          {
+            "name": "Retain Windows test diagnostics",
+            "status": "completed",
+            "conclusion": "failure",
+            "number": 11
+          },
+          {
+            "name": "Check Windows-sensitive helpers and installer packaging",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 12
+          },
+          {
+            "name": "Run dotnet build tests/AeroScience.TestHost -c Release --no-restore --nologo --output artifacts/recovery-test-host",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 13
+          },
+          {
+            "name": "Compile installer recipe with structural fixtures only",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 14
+          },
+          {
+            "name": "Post Run actions/setup-node@v7",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 26
+          },
+          {
+            "name": "Post Run actions/setup-dotnet@v6",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 27
+          },
+          {
+            "name": "Post Run actions/checkout@v7",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 28
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 29
+          }
+        ]
+      },
+      {
+        "name": "linux",
+        "status": "in_progress",
+        "conclusion": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Initialize containers",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run actions/checkout@v7",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Run actions/setup-dotnet@v6",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Run actions/setup-node@v7",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Verify signed Ubuntu dependency transport fallback on disposable runner",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Run dotnet restore AeroScience.sln --locked-mode",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Verify independently compiled private validation identity",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Install pinned native recovery tools for actual PostgreSQL restore acceptance",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          },
+          {
+            "name": "Prepare accepted baseline and isolated future binary for actual update recovery",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10
+          },
+          {
+            "name": "Run dotnet test AeroScience.sln -c Release --no-restore --logger trx --logger 'console;verbosity=normal' --blame-hang-timeout 2m --blame-hang-dump-type none",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 11
+          },
+          {
+            "name": "Retain Linux test diagnostics",
+            "status": "completed",
+            "conclusion": "failure",
+            "number": 12
+          },
+          {
+            "name": "Run npm ci --ignore-scripts",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 13
+          },
+          {
+            "name": "Validate native Railway configuration offline",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 14
+          },
+          {
+            "name": "Run npm run check:branding",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 15
+          },
+          {
+            "name": "Run npm run check:web",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 16
+          },
+          {
+            "name": "Run npx playwright install --with-deps chromium",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 17
+          },
+          {
+            "name": "Run npm run test:web",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 18
+          },
+          {
+            "name": "Retain browser diagnostics",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 19
+          },
+          {
+            "name": "Run python3 -m unittest discover -s tests -p 'test_*.py' -v",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 20
+          },
+          {
+            "name": "Build and exercise real recovery test host",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 21
+          },
+          {
+            "name": "Post Run actions/setup-node@v7",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 39
+          },
+          {
+            "name": "Post Run actions/setup-dotnet@v6",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 40
+          },
+          {
+            "name": "Post Run actions/checkout@v7",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 41
+          },
+          {
+            "name": "Stop containers",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 42
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 43
+          }
+        ]
+      },
+      {
+        "name": "organization-deployment",
+        "status": "completed",
+        "conclusion": "success",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@v7",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run actions/setup-dotnet@v6",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Build real retained-evidence fixture with locked dependencies",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Build pinned non-root organization container from accepted source",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Verify HTTPS, PostgreSQL TLS, secure ownership, evidence receipt and container replacement",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Build pinned recovery and Railway runtime candidates (not public distributions)",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Verify real private database CA, root-owned volume and permanent non-root application",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Verify exact private distribution image identities and parent layers (no publication)",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          },
+          {
+            "name": "Retain bounded deployment acceptance diagnostics",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10
+          },
+          {
+            "name": "Post Run actions/setup-dotnet@v6",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 19
+          },
+          {
+            "name": "Post Run actions/checkout@v7",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 20
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 21
+          }
+        ]
+      },
+      {
+        "name": "development",
+        "status": "completed",
+        "conclusion": "skipped",
+        "steps": null
+      },
+      {
+        "name": "windows-profile",
+        "status": "completed",
+        "conclusion": "skipped",
+        "steps": null
+      }
+    ],
+    "verifiedFullDotnetSteps": {
+      "linux": "success",
+      "windowsCompanion": "success",
+      "numericCounts": "Final TRXs unavailable because diagnostic uploads failed; no counts inferred."
+    },
+    "remainingChecks": "Browser, Python/helper and final recovery/structural checks skipped after failed diagnostic-upload steps; not claimed passed.",
+    "cancellation": {
+      "normal": "GitHub HTTP 409: Cannot cancel a workflow run that is not in progress.",
+      "force": "GitHub HTTP 409: Cannot cancel a workflow run that is not in progress.",
+      "failedJobRetry": "GitHub HTTP 403: This workflow is already running."
+    },
+    "logAvailability": "Job/run log endpoints returned 404 or ReadTimeout while the run remained in_progress. No underlying upload-error cause is asserted."
+  },
+  "manualFullFallback": {
+    "id": 43097889252,
+    "url": "https://github.com/JustSeanC/AeroScience/actions/runs/43097889252",
+    "sourceCommit": "80357e85c07e9b2d690a6c9f5d7007da20588d65",
+    "conclusion": "startup_failure",
+    "jobsStarted": 0,
+    "rerunRequested": true,
+    "reportedRunAttempt": 1,
+    "annotation": "An unexpected error has occurred and we've been automatically notified. Errors are sometimes temporary, so please try again.",
+    "supportRequestId": "76988dfd-de11-11f1-8931-8b98038b53c6",
+    "evidence": "Public GitHub run summary annotation; gh run view's generic suggestion of a workflow-file issue was not treated as a proven YAML defect. No workflow or test was weakened."
+  },
+  "initialFailureReceipt": "v0.8.0-p05a-ci-failures.json",
+  "installedWindowsMsfsAcceptance": "Not Tested",
+  "p05bStarted": false,
+  "protectedRefsAfter": [
+    {
+      "branch": "main",
+      "sha": "9dd2d8cda7ddb6d73414808f75010726871205c2"
+    },
+    {
+      "branch": "develop/v0.7.0",
+      "sha": "695a385ec40b177c763ffc0945234a1e2b54b77e"
+    },
+    {
+      "branch": "develop/v0.7.1",
+      "sha": "8e972d8e402f165ab9ad7c41dc9e744250f8f52e"
+    }
+  ],
+  "releasePublished": false,
+  "ownerDataModified": false,
+  "nextAction": "When GitHub can finalize/cancel the stuck run and execute workflows, run Full CI on runtime source 80357e85c07e9b2d690a6c9f5d7007da20588d65. Retain failed-upload diagnostics if they become available; do not start P05b or claim P05a acceptance until the required checks are green."
+}
