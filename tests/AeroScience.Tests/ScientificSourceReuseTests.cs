@@ -105,6 +105,7 @@ public sealed class ScientificSourceReuseTests:IDisposable
   settings.Save(new());var preparation=new ScientificPlanData(automatic,settings);preparation.Prepare(plan,true);using var deadline=new CancellationTokenSource(TimeSpan.FromSeconds(10));
   while(!deadline.IsCancellationRequested){preparation.Tick();if(preparation.Regions(plan.Id).Any(r=>r.Status=="Ready"&&r.SourceIds?.Length==4))break;try{await Task.Delay(20,deadline.Token);}catch(OperationCanceledException){break;}}
   Assert.True(preparation.Regions(plan.Id).Any(r=>r.Status=="Ready"&&r.SourceIds?.Length==4),System.Text.Json.JsonSerializer.Serialize(new{regions=preparation.Regions(plan.Id),activity=automatic.Snapshot()},WireJson.Options));
+  var sourceHashes=originals.SelectMany(s=>s.Files).Select(f=>f.Sha256).ToArray();preparation.Control(plan.Id,"retry");preparation.Tick();Assert.Equal(0,preparation.Snapshot().Single().Retryable);Assert.Equal(0,handler.Numeric);Assert.Equal(sourceHashes,originals.SelectMany(s=>science.Source(s.Id)!.Files).Select(f=>f.Sha256));
   Assert.All(originals,s=>Assert.NotEmpty(preparation.SourceDeletionDependencies(s)));preparation.Control(plan.Id,"pause");Assert.All(originals,s=>Assert.Empty(preparation.SourceDeletionDependencies(s)));automatic.ForgetDeletedSources();preparation.SourcesRemoved([originals[0].Id]);Assert.Contains(preparation.Regions(plan.Id),r=>r.Status=="Dataset Required"&&r.SourceIds is null);
  }
  [Fact]public async Task OfficialStyleRoundedTiffEdgesUseExistingRequestCoverageWithoutChangingOriginalGrid()

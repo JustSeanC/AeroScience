@@ -84,6 +84,36 @@ public sealed class PreparationScopeTests:IDisposable
         sessions.Tick(false);await Wait(()=>automatic.QueueSummary().Downloading==0);Assert.Equal("Awaiting future-flight approval",sessions.Snapshot().Single().Status);sessions.Tick(false);Assert.Equal(0,automatic.QueueSummary().Downloading);
         sessions.Control(plan.Id,"continue");sessions.Tick();await Wait(()=>automatic.QueueSummary().Downloading>0);
     }
+    [Theory][InlineData("metadata")][InlineData("network")][InlineData("rejected")][InlineData("rate-limit")]
+    public async Task FailedRowsRequireExplicitRetryAndRemainTerminalAcrossRestart(string failure)
+    {
+        settings.Save(new(true,true));var provider=new Failing(failure);using var automatic=new AutomaticScientificData(science,settings,providers:[provider]);
+        var plan=new MissionPlan(Guid.NewGuid(),"Bounded retry fixture",Waypoints:[new("A",40.001,-74.999)],Instruments:[new("terrain-scanner",true)]);
+        var plans=new ScientificPlanData(automatic,settings);plans.Prepare(plan,true);
+        await Wait(()=>automatic.Snapshot().Any(r=>r.Status=="Unavailable"));plans.Tick();Assert.Equal(1,plans.Snapshot().Single().Retryable);Assert.Equal(1,provider.Calls);
+        plans.Tick(true,plan.Id);plans.Tick(false);plans.Control(plan.Id,"continue");plans.Tick();Assert.Equal(1,provider.Calls);Assert.Equal("Unavailable",plans.Regions(plan.Id).Single().Status);
+        var restored=new ScientificPlanData(automatic,settings);restored.Tick();Assert.Equal("Unavailable",restored.Regions(plan.Id).Single().Status);Assert.Equal(1,provider.Calls);
+        restored.Control(plan.Id,"pause");restored.Control(plan.Id,"retry");restored.Control(plan.Id,"retry");restored.Tick();Assert.Equal(1,provider.Calls);Assert.Equal("Paused",restored.Snapshot().Single().Status);
+        restored.Control(plan.Id,"resume");restored.Tick();await Wait(()=>provider.Calls==2&&automatic.Snapshot().Any(r=>r.Status=="Unavailable"));restored.Tick();
+        Assert.Equal(1,restored.Snapshot().Single().Retryable);Assert.Empty(science.Sources());Assert.Empty(science.Products());
+    }
+    private sealed class Failing(string failure):IScientificDataProvider
+    {
+        public string Id=>"bounded-failure-fixture";public int Calls;public bool Supports(RemoteKind kind)=>true;
+        public Task<ScientificDiscovery?> Discover(RemoteKind kind,GeographicBounds area,ScientificAccessPreferences preferences,ScientificDownloadBudget budget,CancellationToken token)
+        {
+            Interlocked.Increment(ref Calls);
+            throw failure switch{"metadata"=>new System.Text.Json.JsonException("fixture"),"network"=>new HttpRequestException("fixture"),"rate-limit"=>new IOException("Provider rate limit: retry later."),_=>new IOException("Unsupported source format")};
+        }
+    }
+    [Fact]public async Task RetryingDuringPostFlightHoldDoesNotApproveNetworkOrBypassConsent()
+    {
+        settings.Save(new(true,true));var provider=new NoCoverage();using var automatic=new AutomaticScientificData(science,settings,providers:[provider]);
+        var plans=new ScientificPlanData(automatic,settings);var plan=new MissionPlan(Guid.NewGuid(),"Post-flight retry",Waypoints:[new("A",40.001,-74.999)],Instruments:[new("terrain-scanner",true)]);plans.Prepare(plan,true);
+        await Wait(()=>automatic.Snapshot().Any(r=>r.Status=="Unavailable"));plans.Tick(true,plan.Id);plans.Tick(false);plans.Control(plan.Id,"retry");plans.Tick();Assert.Equal(1,provider.Calls);Assert.Equal("Awaiting future-flight approval",plans.Snapshot().Single().Status);
+        var before=automatic.QueueSummary().CombinedNetworkBytes;plans.Control(plan.Id,"continue");plans.Tick();await Wait(()=>provider.Calls==2&&automatic.Snapshot().Any(r=>r.Status=="Unavailable"));Assert.Equal(before,automatic.QueueSummary().CombinedNetworkBytes);
+        settings.Save(new());plans.Control(plan.Id,"retry");plans.Tick();await Wait(()=>automatic.Snapshot().Any(r=>r.Status=="Offline"));Assert.Equal(2,provider.Calls);
+    }
     private static async Task Wait(Func<bool> condition){using var timeout=new CancellationTokenSource(TimeSpan.FromSeconds(4));while(!condition())await Task.Delay(20,timeout.Token);}
     [Fact]public void NewPreflightApprovalAfterFlightEndDoesNotInheritTheEarlierFlightHold()
     {

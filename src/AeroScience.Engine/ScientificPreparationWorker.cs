@@ -5,7 +5,7 @@ namespace AeroScience.Engine;
 
 public sealed record PlanDataPreparation(int AreasQueued,bool LimitedCoverage,string Message,ScientificDataReadiness[] Readiness);
 public sealed record ScientificPlanReadiness(Guid PlanId,string PlanName,int AreasQueued,bool LimitedCoverage,string Message,
-    string Status="Preparing",int Ready=0,int Unavailable=0,int Awaiting=0,long DownloadedBytes=0,long? AdditionalTransferCeiling=null,string Scope="entire",int SelectedUnits=0,int SelectedReady=0,int SelectedAwaiting=0,int SelectedUnavailable=0,bool PlanStale=false);
+    string Status="Preparing",int Ready=0,int Unavailable=0,int Awaiting=0,long DownloadedBytes=0,long? AdditionalTransferCeiling=null,string Scope="entire",int SelectedUnits=0,int SelectedReady=0,int SelectedAwaiting=0,int SelectedUnavailable=0,bool PlanStale=false,int Retryable=0);
 
 public static class ScientificPlanPreparation
 {
@@ -45,7 +45,7 @@ public sealed class ScientificPlanData
             var saved=System.Text.Json.JsonSerializer.Deserialize<SavedSession[]>(File.ReadAllText(Path),WireJson.Options)??[];
             foreach(var item in saved.Take(16)){
                 if(item.Version!=1)throw new IOException("Unsupported preparation-session format; review with a compatible version.");
-                var restored=item with{Regions=item.Regions.Select(r=>r with{Status="Queued",Message="Rechecking retained data after restart"}).ToArray()};
+                var restored=item with{Regions=item.Regions.Select(r=>Terminal(r.Status)&&!Ready(r.Status)?r:r with{Status="Queued",Message="Rechecking retained data after restart"}).ToArray()};
                 sessions[item.Plan.Id]=new(restored);if(missions is not null&&missions.Plan(item.Plan.Id) is {} current&&ScientificPreparationScope.Revision(current)!=ScientificPreparationScope.Revision(item.Plan))sessions[item.Plan.Id].PlanStale=true;automatic.PauseScope("plan:"+item.Plan.Id,item.Paused||item.Cancelled||item.AfterFlight||item.InFlight||sessions[item.Plan.Id].PlanStale);
             }
         }catch(Exception error)when(error is System.Text.Json.JsonException or IOException or UnauthorizedAccessException or ArgumentException)
@@ -94,15 +94,27 @@ public sealed class ScientificPlanData
             if(action=="pause")s.Paused=true;
             else if(action is "resume" or "continue"){
                 if(s.PlanStale&&!s.InFlight)throw new InvalidOperationException("The saved plan changed. Review and approve the current preparation scope instead of resuming an old revision.");
-                s.Paused=false;s.Cancelled=false;s.AfterFlight=false;s.Explicit=true;automatic.RetryScope("plan:"+id);
-                foreach(var r in s.Regions.Values.Where(r=>r.Status is "Cancelled" or "Offline" or "Superseded").ToArray())s.Regions[r.Key]=r with{Status="Queued"};
+                var interrupted=s.Regions.Values.Where(r=>(s.InFlight||r.Selected)&&r.Status is "Cancelled" or "Offline" or "Superseded").ToArray();
+                automatic.RetryScope("plan:"+id,interrupted.Select(r=>r.Key).ToHashSet());
+                s.Paused=false;s.Cancelled=false;s.AfterFlight=false;s.Explicit=true;
+                foreach(var r in interrupted)s.Regions[r.Key]=r with{Status="Queued"};
+            }else if(action=="retry"){
+                if(s.PlanStale)throw new InvalidOperationException("The saved plan changed. Review and approve the current preparation scope before retrying.");
+                var current=automatic.Snapshot().ToDictionary(r=>r.Key);
+                var failed=s.Regions.Values.Where(r=>r.Selected&&Retryable(current.GetValueOrDefault(r.Key)?.Status??r.Status)).ToArray();
+                automatic.RetryScope("plan:"+id,failed.Select(r=>r.Key).ToHashSet());
+                foreach(var r in failed)s.Regions[r.Key]=r with{Status="Queued",Message="Explicit retry requested. Existing pause, consent and resource limits still apply."};
+                // Retrying never approves a post-flight continuation or resumes a user pause.
+                // Pump keeps both holds in force, and only schedules the approved selected scope.
+                Pump(s);
             }else if(action=="cancel"){
                 s.Cancelled=true;automatic.CancelScope("plan:"+id);foreach(var r in s.Regions.Values.Where(r=>!Terminal(r.Status)).ToArray())s.Regions[r.Key]=r with{Status="Cancelled"};
-            }else throw new ArgumentException("Choose pause, resume, continue or cancel.");
+            }else throw new ArgumentException("Choose pause, resume, continue, retry or cancel.");
             automatic.PauseScope("plan:"+id,s.Paused||s.Cancelled||s.Preempted||s.AfterFlight||s.PlanStale&&!s.InFlight);Save();
         }
     }
     private static bool Ready(string state)=>state is "Ready" or "Dataset Ready";
+    private static bool Retryable(string state)=>state is "Unavailable" or "Failed" or "Offline" or "Dataset Required" or "Dataset Invalid" or "Dataset Outside Coverage";
     private static bool Terminal(string state)=>Ready(state)||state is "Unavailable" or "Limited Coverage" or "Partially usable" or "Dataset Required" or "Dataset Invalid" or "Dataset Outside Coverage" or "Failed" or "Cancelled";
     private void Pump(Session s)
     {
@@ -171,7 +183,7 @@ public sealed class ScientificPlanData
     {
         lock(gate)return sessions.Values.Select(s=>{
             var instruments=Instruments(s.Plan.Id);var ready=instruments.Sum(i=>i.Ready);var awaiting=instruments.Sum(i=>i.Awaiting);var unavailable=instruments.Sum(i=>i.Unavailable);var chosen=s.Regions.Values.Where(r=>r.Selected).ToArray();var chosenReady=chosen.Count(r=>Ready(r.Status));var chosenUnavailable=chosen.Count(r=>Terminal(r.Status)&&!Ready(r.Status));var chosenAwaiting=chosen.Length-chosenReady-chosenUnavailable;
-            return new ScientificPlanReadiness(s.Plan.Id,s.Plan.Name,s.Regions.Values.Select(r=>r.Area).Distinct().Count(),unavailable>0||s.Regions.Count>=4096,(s.PlanStale?"Plan changed: this inventory belongs to the previously approved revision; review scope again. ":"")+"Complete logical instrument × region inventory, separate from the recent queue window. Scope: "+s.Scope.Mode+". "+s.Regions.Values.Count(r=>r.Selected)+" selected preflight units. Incomplete external data does not prevent departure. During flight upcoming data is attempted under consent, budgets and flight priority; late data never creates past observations.",s.Cancelled?"Cancelled":s.Paused?"Paused":s.PlanStale&&!s.InFlight?"Plan revision changed — review scope":s.AfterFlight?"Awaiting future-flight approval":s.Preempted?"Waiting for Flight Priority":!s.InFlight&&chosen.Length<s.Regions.Count&&chosenAwaiting==0?(chosenUnavailable>0?"Selected preflight scope limited/unavailable":"Selected preflight scope ready"):awaiting==0?(s.Regions.Count==0?"No supported remote-data regions":unavailable>0?"Partially Ready":"Ready"):"Preparing",ready,unavailable,awaiting,instruments.Sum(i=>i.DownloadedBytes),Scope:s.Scope.Mode,SelectedUnits:s.Regions.Values.Count(r=>r.Selected),SelectedReady:chosenReady,SelectedAwaiting:chosenAwaiting,SelectedUnavailable:chosenUnavailable,PlanStale:s.PlanStale&&!s.InFlight);
+            return new ScientificPlanReadiness(s.Plan.Id,s.Plan.Name,s.Regions.Values.Select(r=>r.Area).Distinct().Count(),unavailable>0||s.Regions.Count>=4096,(s.PlanStale?"Plan changed: this inventory belongs to the previously approved revision; review scope again. ":"")+"Complete logical instrument × region inventory, separate from the recent queue window. Scope: "+s.Scope.Mode+". "+s.Regions.Values.Count(r=>r.Selected)+" selected preflight units. Incomplete external data does not prevent departure. During flight upcoming data is attempted under consent, budgets and flight priority; late data never creates past observations.",s.Cancelled?"Cancelled":s.Paused?"Paused":s.PlanStale&&!s.InFlight?"Plan revision changed — review scope":s.AfterFlight?"Awaiting future-flight approval":s.Preempted?"Waiting for Flight Priority":!s.InFlight&&chosen.Length<s.Regions.Count&&chosenAwaiting==0?(chosenUnavailable>0?"Selected preflight scope limited/unavailable":"Selected preflight scope ready"):awaiting==0?(s.Regions.Count==0?"No supported remote-data regions":unavailable>0?"Partially Ready":"Ready"):"Preparing",ready,unavailable,awaiting,instruments.Sum(i=>i.DownloadedBytes),Scope:s.Scope.Mode,SelectedUnits:s.Regions.Values.Count(r=>r.Selected),SelectedReady:chosenReady,SelectedAwaiting:chosenAwaiting,SelectedUnavailable:chosenUnavailable,PlanStale:s.PlanStale&&!s.InFlight,Retryable:chosen.Count(r=>Retryable(r.Status)));
         }).ToArray();
     }
 }

@@ -153,7 +153,7 @@ public sealed partial class AutomaticScientificData : IDisposable
         var candidate=cancellations.FirstOrDefault(p=>scopes.GetValueOrDefault(p.Key)?.StartsWith("plan:",StringComparison.Ordinal)==true&&!urgentFlightKeys.Contains(p.Key)&&!urgentFlightKeys.Any(key=>states.TryGetValue(key,out var wanted)&&states.TryGetValue(p.Key,out var current)&&wanted.Kind==current.Kind&&wanted.Area.West<current.Area.East&&wanted.Area.East>current.Area.West&&wanted.Area.South<current.Area.North&&wanted.Area.North>current.Area.South)&&!p.Value.IsCancellationRequested&&states.GetValueOrDefault(p.Key)?.Status=="Downloading");
         if(candidate.Value is null)return;lastPreemption=DateTimeOffset.UtcNow;preempted.Add(candidate.Key);candidate.Value.Cancel();
     }
-    public void RetryScope(string scope,IReadOnlySet<string>? explicitlyRequestedKeys=null){lock(gate)foreach(var key in states.Where(p=>(p.Value.Scope==scope||explicitlyRequestedKeys?.Contains(p.Key)==true)&&p.Value.Status is not("Ready" or "Dataset Ready" or "Downloading" or "Queued")).Select(p=>p.Key).ToArray()){states.Remove(key);tickets.Remove(key);retryAfter.Remove(key);}}
+    public void RetryScope(string scope,IReadOnlySet<string>? explicitlyRequestedKeys=null){lock(gate)foreach(var key in states.Where(p=>(explicitlyRequestedKeys is null?p.Value.Scope==scope:explicitlyRequestedKeys.Contains(p.Key))&&p.Value.Status is not("Ready" or "Dataset Ready" or "Downloading" or "Queued" or "Waiting for download allowance")).Select(p=>p.Key).ToArray()){states.Remove(key);tickets.Remove(key);retryAfter.Remove(key);}}
     public void ForgetDeletedSources(){http.ClearNumericCache();verified.Clear();RefreshLocalReadiness();}
     public void RefreshLocalReadiness()
     {Interlocked.Increment(ref configurationRevision);lock(gate)foreach(var key in states.Where(p=>p.Value.Status is not("Queued" or "Downloading" or "Waiting for download allowance")).Select(p=>p.Key).ToArray()){states.Remove(key);tickets.Remove(key);}}
@@ -191,7 +191,7 @@ public sealed partial class AutomaticScientificData : IDisposable
                 active.RemoveAll(t=>t.IsCompleted);
                 Job? job=null;
                 lock(gate)if(!paused&&active.Count<(flightActive?1:settings.Get().Preferences.ConcurrentDownloads)&&queue.Count>0)
-                {job=queue.Values.Where(j=>!pausedScopes.Contains(j.Scope)).Where(j=>!(flightActive&&(j.Scope.StartsWith("library:")||flightResourceHold is not null))).Where(j=>!retryAfter.TryGetValue(j.Key,out var after)||after<=DateTimeOffset.UtcNow).MinBy(j=>j.Priority);if(job is not null)queue.Remove(job.Key);}
+                {job=queue.Values.Where(j=>!cancellations.ContainsKey(j.Key)&&!pausedScopes.Contains(j.Scope)).Where(j=>!(flightActive&&(j.Scope.StartsWith("library:")||flightResourceHold is not null))).Where(j=>!retryAfter.TryGetValue(j.Key,out var after)||after<=DateTimeOffset.UtcNow).MinBy(j=>j.Priority);if(job is not null)queue.Remove(job.Key);}
                 if(job is not null){active.Add(Task.Run(()=>Execute(job),stopping.Token));continue;}
                 await wake.WaitAsync(TimeSpan.FromMilliseconds(200),stopping.Token);
             }
