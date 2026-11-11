@@ -1,0 +1,262 @@
+{
+  "checkpoint": "v0.8.0 P04 exact-source Full CI",
+  "branch": "develop/v0.8.0",
+  "sourceCommit": "92310ffb305f2401ea1d190d6fb7d6595ecfd8c3",
+  "runId": 43060891405,
+  "runAttempt": 1,
+  "url": "https://github.com/JustSeanC/AeroScience/actions/runs/43060891405",
+  "status": "completed",
+  "conclusion": "success",
+  "createdUtc": "2026-11-11T16:42:02Z",
+  "jobs": [
+    {
+      "name": "validation-scope",
+      "id": 130662836084,
+      "conclusion": "success",
+      "url": "https://github.com/JustSeanC/AeroScience/actions/runs/43060891405/job/130662836084"
+    },
+    {
+      "name": "organization-deployment",
+      "id": 130662907363,
+      "conclusion": "success",
+      "url": "https://github.com/JustSeanC/AeroScience/actions/runs/43060891405/job/130662907363"
+    },
+    {
+      "name": "linux",
+      "id": 130662907551,
+      "conclusion": "success",
+      "url": "https://github.com/JustSeanC/AeroScience/actions/runs/43060891405/job/130662907551"
+    },
+    {
+      "name": "windows-companion",
+      "id": 130662907560,
+      "conclusion": "success",
+      "url": "https://github.com/JustSeanC/AeroScience/actions/runs/43060891405/job/130662907560"
+    },
+    {
+      "name": "windows-profile",
+      "id": 130662910266,
+      "conclusion": "skipped",
+      "url": "https://github.com/JustSeanC/AeroScience/actions/runs/43060891405/job/130662910266"
+    },
+    {
+      "name": "development",
+      "id": 130662910513,
+      "conclusion": "skipped",
+      "url": "https://github.com/JustSeanC/AeroScience/actions/runs/43060891405/job/130662910513"
+    }
+  ],
+  "linuxDotnet": {
+    "counters": {
+      "total": 1495,
+      "executed": 1495,
+      "passed": 1495,
+      "failed": 0,
+      "error": 0,
+      "timeout": 0,
+      "aborted": 0,
+      "inconclusive": 0,
+      "passedButRunAborted": 0,
+      "notRunnable": 0,
+      "notExecuted": 0,
+      "disconnected": 0,
+      "warning": 0,
+      "completed": 0,
+      "inProgress": 0,
+      "pending": 0
+    },
+    "skipped": [],
+    "sha256": "f1e2cb24f62b1b7254a568e0d07e2f0034431635a37e7502222cdad140da3966"
+  },
+  "windowsDotnet": {
+    "counters": {
+      "total": 1495,
+      "executed": 1485,
+      "passed": 1485,
+      "failed": 0,
+      "error": 0,
+      "timeout": 0,
+      "aborted": 0,
+      "inconclusive": 0,
+      "passedButRunAborted": 0,
+      "notRunnable": 0,
+      "notExecuted": 0,
+      "disconnected": 0,
+      "warning": 0,
+      "completed": 0,
+      "inProgress": 0,
+      "pending": 0
+    },
+    "skipped": [
+      "AeroScience.Tests.AviationAcquisitionTests.RetainedOriginalFileLinksAreRejectedRatherThanFollowed",
+      "AeroScience.Tests.OrganizationConnectionIntegrationTests.ActualOldAndNewProcessesRefuseStaleCheckpointRollbackFailedUpgradeAndApplyExactApprovedPair",
+      "AeroScience.Tests.OrganizationConnectionIntegrationTests.EncryptedOffProcessBackupRestoresAuthorizedEvidenceAuditAndProtectedMfaAfterSourceLoss",
+      "AeroScience.Tests.OrganizationConnectionIntegrationTests.GuidedPrivateFileImportRecoversIntoAFreshSecuredServerAtANewOriginAfterPrimaryLoss",
+      "AeroScience.Tests.OrganizationConnectionIntegrationTests.IndependentRecoveryStagesAndActivatesAfterOriginalDatabaseAndIdentityAreLostWithoutExternalReplay",
+      "AeroScience.Tests.OrganizationConnectionIntegrationTests.ProtectedIdentityRenewalRecoversMfaAndDiscordSecretsWithANewCertificateWithoutTouchingTheOriginal",
+      "AeroScience.Tests.OrganizationConnectionIntegrationTests.ScopedNonSuperuserRecoveryRetainsApplicationOwnershipAndAllowsTheNextCompiledUpgrade",
+      "AeroScience.Tests.OrganizationConnectionIntegrationTests.SeparatelyKeyedCopiesSurvivePrimaryRepositoryAndIdentityLossAndEnforceApprovedRetention",
+      "AeroScience.Tests.OrganizationServerTests.ExplicitBackupConsentPersistsScheduledPolicyIdempotentJobsAndVerifiedRestoreAcrossRestart",
+      "AeroScience.Tests.ScientificLibraryFolderTests.LinkedSourceDirectoryIsRejected"
+    ],
+    "sha256": "d9f40c4f3882c83dcce9c2890812a73d117b4d234d007ea2367a4949c28cb34e"
+  },
+  "browser": {
+    "startTime": "2026-11-11T17:01:29.893Z",
+    "duration": 1402460.207,
+    "expected": 439,
+    "skipped": 2,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "browserBaselineComparison": {
+    "p03bTotal": 429,
+    "p04Total": 441,
+    "removed": 0,
+    "added": 12,
+    "unchangedExistingSkips": [
+      "aviation-charts.spec.js/approved originals provide local chart overlays, independent science, offline tiles and exact edition selection",
+      "aviation-charts.spec.js/unknown runtime is honest and chart inventory remains accessible at tablet width without altering saved data"
+    ]
+  },
+  "organization": {
+    "deploymentPassed": 12,
+    "runtimePassed": 10,
+    "failed": 0,
+    "published": false,
+    "productionReady": false
+  },
+  "browserArtifact": {
+    "id": 13876712398,
+    "archiveSha256": "1a1b3ab5be633734957fbc9065991df2f098710105e9011a199fdcbb08d90ec0"
+  },
+  "initialFailedRun": {
+    "id": 43024543058,
+    "sourceCommit": "55d4604a211802835940bccbb8e412902e2374a6",
+    "url": "https://github.com/JustSeanC/AeroScience/actions/runs/43024543058",
+    "browserDiagnosticsArtifactId": 13860954091
+  },
+  "intermediateSourceAttempt1": {
+    "sourceCommit": "70a406673237581de83e7819fee9aa32af35d5d1",
+    "runId": 43034356531,
+    "runAttempt": 1,
+    "conclusion": "failure",
+    "linuxJobId": 130569282515,
+    "reason": "Playwright apt dependency installation failed to resolve azure.archive.ubuntu.com, archive.ubuntu.com and security.ubuntu.com; browser/helper/recovery steps did not run",
+    "preservedLogSha256": "a7a74bcd7758bb2c63d1f0da353044f81d74a19081bded9d5410e35ca79e9d58",
+    "passedJobsReusedInIntermediateAttempt2": {
+      "windows-companion": 130569282486,
+      "organization-deployment": 130569282494,
+      "validation-scope": 130569186431
+    },
+    "windowsArtifactId": 13865345275,
+    "linuxDotnetArtifactId": 13863426783,
+    "organizationArtifactId": 13861354223,
+    "retryScope": "Failed Linux job only; exact same source, original assertions and deadlines"
+  },
+  "nodePresentationPassed": 38,
+  "nativeCompilationStagingCasesPassed": 4,
+  "runtimeUiCommit": "534405b52b443904724e44739c94af9e18c70141",
+  "signedCiTransportCommit": "7fc0bb0a4158a7b38d076462ba44bbf7c127dfb0",
+  "portableTestLoaderCommit": "92310ffb305f2401ea1d190d6fb7d6595ecfd8c3",
+  "priorSignedTransportSource": {
+    "sourceCommit": "7fc0bb0a4158a7b38d076462ba44bbf7c127dfb0",
+    "runId": 43053037347,
+    "windowsJobId": 130635113239,
+    "conclusion": "failure",
+    "reason": "New test package import failed under the original Windows helper runner; corrected by explicit file loading with all assertions retained",
+    "windowsLogSha256": "d66aff39aa6645104166c376fb10127b9deb0d5c85e9161e8a60c5d6ec5d5b48",
+    "linuxJobConclusion": "success",
+    "linuxBrowserPassed": 439,
+    "linuxBrowserExistingSkips": 2,
+    "linuxHelpersPassed": 184,
+    "linuxHelperExistingSkips": 1
+  },
+  "priorLtsSourceFailure": {
+    "sourceCommit": "534405b52b443904724e44739c94af9e18c70141",
+    "runId": 43045556963,
+    "linuxJobId": 130608527840,
+    "reason": "Same public Ubuntu mirror DNS failure before browser execution; changing runner image alone did not recover it",
+    "logSha256": "81d60e13271617549400632175688f8ac74a4b6fc3fc554ac7b5be2667a5b6fc"
+  },
+  "intermediateSourceAttempt2": {
+    "sourceCommit": "70a406673237581de83e7819fee9aa32af35d5d1",
+    "runId": 43034356531,
+    "runAttempt": 2,
+    "linuxJobId": 130588171979,
+    "conclusion": "failure",
+    "reason": "Same apt mirror DNS failure before browser execution",
+    "preservedLogSha256": "e27d62963c38ffe568bd11d2acbf46ecfc46f39e00c000a43c7ae8e95d67ffce"
+  },
+  "installedWindowsMsfsAcceptance": "NOT TESTED",
+  "v071ForwardPortPerformed": false,
+  "note": "The following closure commit changes only roadmap documentation, receipts and synthetic CI captures. This source is the frozen runtime/test/workflow acceptance source.",
+  "linuxHelpers": {
+    "total": 185,
+    "passed": 184,
+    "skipped": 1,
+    "failed": 0
+  },
+  "windowsHelpers": {
+    "total": 182,
+    "passed": 179,
+    "skipped": 3,
+    "failed": 0
+  },
+  "ubuntuDependencyTransport": {
+    "source": "https://mirror.math.princeton.edu/pub/ubuntu/",
+    "signatureTrust": "Stock Ubuntu archive keyring; existing apt signature/expiry/package hash checks retained",
+    "verifiedInReleaseSha256": {
+      "noble": "cdb2f31d809f589719a53c6ad15f255b27569c4059542ada282aaa21b8e164b0",
+      "noble-updates": "6d5462566e9b374cc5a97ee2264fb690a7ce4b3a5f4c23154e06e495d0ee9b53",
+      "noble-backports": "c2d1ccd3b315d5298b194178519c9ec9ca722fbec3fc1a6b57ec9a72b905266b",
+      "noble-security": "9a12307d1c800f934e68704f9c311bc3d30a166971300aec189684348acf8df4"
+    }
+  },
+  "protectedBranches": {
+    "main": "9dd2d8cda7ddb6d73414808f75010726871205c2",
+    "develop/v0.7.0": "695a385ec40b177c763ffc0945234a1e2b54b77e",
+    "develop/v0.7.1": "8e972d8e402f165ab9ad7c41dc9e744250f8f52e"
+  },
+  "ciArtifacts": [
+    {
+      "id": 13876712398,
+      "name": "linux-browser-diagnostics",
+      "sizeInBytes": 9918319,
+      "digest": "sha256:1a1b3ab5be633734957fbc9065991df2f098710105e9011a199fdcbb08d90ec0",
+      "createdUtc": "2026-11-11T17:24:53Z",
+      "expiresUtc": "2026-11-18T17:24:52Z",
+      "sourceCommit": "92310ffb305f2401ea1d190d6fb7d6595ecfd8c3"
+    },
+    {
+      "id": 13876086584,
+      "name": "windows-test-diagnostics",
+      "sizeInBytes": 430860,
+      "digest": "sha256:c30013695225c549fd67b3dbe28cc697a4ae7f473aaea49dfdebbd6353c9c9b0",
+      "createdUtc": "2026-11-11T17:12:28Z",
+      "expiresUtc": "2026-11-18T17:12:27Z",
+      "sourceCommit": "92310ffb305f2401ea1d190d6fb7d6595ecfd8c3"
+    },
+    {
+      "id": 13875500390,
+      "name": "linux-test-diagnostics",
+      "sizeInBytes": 425496,
+      "digest": "sha256:0d4c59b647440238506d4acb91f5faaa4f71fa0f528e268c71f6510c48026539",
+      "createdUtc": "2026-11-11T17:00:41Z",
+      "expiresUtc": "2026-11-18T17:00:40Z",
+      "sourceCommit": "92310ffb305f2401ea1d190d6fb7d6595ecfd8c3"
+    },
+    {
+      "id": 13873268404,
+      "name": "organization-deployment-diagnostics",
+      "sizeInBytes": 2763,
+      "digest": "sha256:2b5f09488b498a5b1e7ab199c2283a62b399b4ec8e8e06c1ef653f208e761fbd",
+      "createdUtc": "2026-11-11T16:45:37Z",
+      "expiresUtc": "2026-11-18T16:45:35Z",
+      "sourceCommit": "92310ffb305f2401ea1d190d6fb7d6595ecfd8c3"
+    }
+  ],
+  "allOriginalWindowsSkipNamesRetained": true,
+  "allOriginalBrowserCasesRetained": true,
+  "runtimeTestsWorkflowUnchangedByDocumentationClosure": true
+}

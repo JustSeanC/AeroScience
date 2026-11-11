@@ -21,54 +21,66 @@
   "images": [
     {
       "file": "synthetic-browser-current-flight-dark-1440.png",
-      "sha256": "9c16553b4065b60ae73b9f6349ce985821b2e31f8a8f124135a556ebdcee2c1e"
+      "sha256": "2ba3ec5a692404522af7dd20fd95c3f7cfa7d5fff5fe49163949e23e0b047705"
     },
     {
       "file": "synthetic-browser-current-flight-dark-390.png",
-      "sha256": "46b1cdbfd7e2817ebd80a688b2ece849e6acb85df2aaa8f8236e675bcd6fdb42"
+      "sha256": "fc52a16ea6c2ba24d2f93f4d786bd4eee5ce5d9e8b8599e2431fb4aecfc54e8f"
     },
     {
       "file": "synthetic-browser-current-flight-light-1440.png",
-      "sha256": "02add8d78d6012de6d0151f27369c75fb7f2642b63f41ebf1c9f36cd5ee23ac6"
+      "sha256": "a0be4e73f77b0d9092c905bcd03432f4c9e1c49c940505e240a91bde66bb8f73"
     },
     {
       "file": "synthetic-browser-current-flight-light-390.png",
-      "sha256": "8aff643877c25f4774f668a28d08fb2cd4eccb79835f2f8cb5c21738be7e39a2"
+      "sha256": "8d99328f59758396dc9759a9532fbf6ef051c95eab121204bc9a53ee9da2ee44"
     },
     {
       "file": "synthetic-browser-toolbar-science-dark-320.png",
-      "sha256": "40ddab96a369319b8abf3dc3955144b9adbe76b87e4a832319f418a2570cd180"
+      "sha256": "c257cd08c8c8b919d8a432f53c77aa87c09c11668691297353017c11d90afe23"
     },
     {
       "file": "synthetic-browser-toolbar-science-dark-640.png",
-      "sha256": "6ec6bcb406393ac0cc3cd381fd3a17b17048258ac44a19967a1d5d8cd0ec3a61"
+      "sha256": "0b3bbbddb0ee8aa48e00b166d6460a0c8cbb932df10d69d96ac45cc399b3cb4c"
     },
     {
       "file": "synthetic-browser-toolbar-science-light-320.png",
-      "sha256": "209ad54f9450289579481d057cc3a60c6e077d49f644bb671ee84e3dc237518e"
+      "sha256": "293734a11d3fe26d8297f0ddabd1642530cb37facb41182d49ae66ab6ce92127"
     },
     {
       "file": "synthetic-browser-toolbar-science-light-640.png",
-      "sha256": "451b9c479778d6b3d75ee23d448d458280a6d086bf6e7f142ee5642bee14375b"
+      "sha256": "afd19aae7b07459e17251b564d289d1f6b1f3673875e86c15235a8e7ed42c9b9"
     }
   ],
   "sourceFiles": {
     "msfs-toolbar/PackageSources/html_ui/InGamePanels/AeroScience/AeroScience.I18n.js": "ec94d814774a725a7cb54159011900d75f1af94db61046489f726777c41be15e",
-    "msfs-toolbar/PackageSources/html_ui/InGamePanels/AeroScience/AeroScience.css": "69215df85f7698d98b420ed3492c7b72449b4cb5826fe5ef29d376b0ac0dbbfa",
+    "msfs-toolbar/PackageSources/html_ui/InGamePanels/AeroScience/AeroScience.css": "8a7ef530f7d327142220360afa21b9ea1a8decd34b52df174fa95009fb9cd6aa",
     "msfs-toolbar/PackageSources/html_ui/InGamePanels/AeroScience/AeroScience.html": "a3ffea26898f0dcf2999d19deb3db945433c57a3bdca97ae30fbb85b0e99f606",
     "msfs-toolbar/PackageSources/html_ui/InGamePanels/AeroScience/AeroScience.js": "5c3f5964082d881ffcb4e83f21f083649e28646bd59b937e8d355ef6783afe5f",
     "scripts/build/native-javascript.mjs": "897487ab6c1162bc4c3adc6800293101f3d1649b094d00eabe7f2fb54225721b",
     "src/AeroScience.Engine/MissionIntelligenceService.cs": "fbe0d24475544309150314bb87a21bbc3f76dd05bb529689de12a7a23180ac14",
-    "src/AeroScience.Engine/wwwroot/i18n/catalog.generated.js": "4ec1f8a179970059688d0df48859ec920aee46fd17c053aab3d3dcb6504e2024",
+    "src/AeroScience.Engine/wwwroot/i18n/catalog.generated.js": "c3d3556f2e4c3b583c9d9b9692fb7df0b7d14c4d26c448bad1a6c8d385b82fd5",
     "src/AeroScience.Engine/wwwroot/i18n/locale-manifest.json": "f6dbf0c4b69c2506a2457932698a01b02ba67a72e3dbc0faab2213cd72e90d9f",
-    "src/AeroScience.Engine/wwwroot/i18n/locales/en-US.json": "14c284b46488050fc102d7468ec614037fdd1422b8b79f59d7450191f07ad865",
-    "src/AeroScience.Engine/wwwroot/i18n/message-schema.json": "f2e106e60b06cd25723a8e39bfd47f0cad59024290b5948689eb4eb3d6156bb6",
+    "src/AeroScience.Engine/wwwroot/i18n/locales/en-US.json": "d08033ab741890e9b851b6cd4438918a77ae5d119c2dab88da262e8a1d91a636",
+    "src/AeroScience.Engine/wwwroot/i18n/message-schema.json": "d8b16dd39e13aa174ab6162889a2aa4c96765cd01ce6cfbcaca75bc1c349dfd0",
     "src/AeroScience.Engine/wwwroot/mission-intelligence.js": "059114a452a9eaae0b5b81191d856351fc9720f88d33bba76740977da5ca6584",
-    "src/AeroScience.Engine/wwwroot/mission-operations.js": "85c83d5d70f6b0110e6c067cc76373227256e5f8feabb03b1f4237fe844af9ad",
+    "src/AeroScience.Engine/wwwroot/mission-operations.js": "03fad81087ea2268c5072790a956273299925ec580b1f9fc177af2b64503f9e6",
     "src/AeroScience.Engine/wwwroot/mission-timeline.js": "76983a69fabbb30d3d928a066b1a19cdd8ce8c3dd7872f0658e671187954d8d9",
     "src/AeroScience.Engine/wwwroot/presentation-state.js": "4d969ca266dbaa5eb34884785b3c8cd253cc168a7c072c6ecf185397fa0d0e97",
     "src/AeroScience.Engine/wwwroot/workstation.css": "144a35b56c3fa16742d65e765a1ff1fe32f11439a996a6485f8c37f005594d51",
     "src/AeroScience.Missions/ToolbarCommandHandler.cs": "9d7a20e18c3f882e4cf5107a61e36bcd79ec449986d4d876fd1addfea9e6a376",
-    "src/AeroScience.Shared/ToolbarIntelligenceModels.cs": "ca4144694704588f56871e77e13557b6d79cb980a0ac72e2de87171ca18c3cee"
-  }
+    "src/AeroScience.Shared/ToolbarIntelligenceModels.cs": "ca4144694704588f56871e77e13557b6d79cb980a0ac72e2de87171ca18c3cee",
+    "src/AeroScience.Engine/wwwroot/current-flight-state.js": "4de4cb83b6c90319d8e3bd75c96c9327fe05f3f12285e622ff9e4906f46d704d",
+    "src/AeroScience.Engine/wwwroot/scanner-guidance.js": "da088e6e3e5ab1bf48c075602f88b42b631b97f2b75c2c087fc4263aa2fc736e",
+    "src/AeroScience.Engine/wwwroot/science-journey.js": "f531597bf48db06af746bad674e3175782e7e7cf71b5e779cc5795eff73b1954",
+    "src/AeroScience.Missions/SensorOperatingProjection.cs": "3fffc3c232a4744192e415b20bbfb7094646f75f3b84b7816283bfe3398b1ea6",
+    "src/AeroScience.Shared/SensorOperatingModels.cs": "a0bd7344267ca8bd3947119c231ca4e8179e7d862adefb1d11e21341a702893e",
+    "tests/web/current-flight-080.spec.js": "6d437ea5fd57ec19bf45361d76a360b4502d87c3b075ed5742bb951be6c08224",
+    "tests/web/toolbar-080.spec.js": "a8fcc809fe3c8cbc84dc7d6ee950bee862ba96efaff95df80998806db3467a6d"
+  },
+  "sourceCommit": "92310ffb305f2401ea1d190d6fb7d6595ecfd8c3",
+  "workflowRunId": 43060891405,
+  "workflowUrl": "https://github.com/JustSeanC/AeroScience/actions/runs/43060891405",
+  "browserArtifactId": 13876712398,
+  "browserArchiveSha256": "1a1b3ab5be633734957fbc9065991df2f098710105e9011a199fdcbb08d90ec0"
 }

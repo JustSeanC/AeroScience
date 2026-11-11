@@ -185,7 +185,7 @@
     "nonEnglishLocales": "en-US fallback previews; not full translations"
   },
   "fullCi": {
-    "status": "Linux and organization full jobs green on 7fc0bb0; corrected Windows test loader awaits exact-source Full CI",
+    "status": "success on exact completed runtime/test/workflow source",
     "initial": {
       "sourceCommit": "55d4604a211802835940bccbb8e412902e2374a6",
       "runId": 43024543058,
@@ -243,7 +243,8 @@
         "flaky": 0
       },
       "nodePassed": 37,
-      "nativeCompilationStagingCasesPassed": 4
+      "nativeCompilationStagingCasesPassed": 4,
+      "sourceCommit": "70a406673237581de83e7819fee9aa32af35d5d1"
     },
     "postCiContractReview": {
       "reason": "Unavailable acquisition status must preserve original fresh server-authorized Pause/End/Rearm availability",
@@ -276,21 +277,32 @@
         "skipped": 0,
         "unexpected": 0,
         "flaky": 0
-      }
+      },
+      "sourceCommit": "534405b52b443904724e44739c94af9e18c70141"
     },
     "signedDependencyRecovery": {
       "newHelperTestsPassed": 7,
       "existingCiPolicyTestsPassed": 15,
       "runtimeUiChangedFrom534405b": false,
       "aptTlsSignatureExpiryAndPackageHashChecksPreserved": true,
-      "scientificSourcesOrOwnerDataChanged": false
+      "scientificSourcesOrOwnerDataChanged": false,
+      "sourceCommit": "7fc0bb0a4158a7b38d076462ba44bbf7c127dfb0"
     },
     "windowsHelperPortability": {
       "isolatedImportFailureReproduced": true,
       "isolatedTestsPassed": 7,
       "existingHelperEntrypointTestsPassed": 7,
       "existingCiPolicyTestsPassed": 15,
-      "runtimeOrCiSignatureChecksChanged": false
+      "runtimeOrCiSignatureChecksChanged": false,
+      "sourceCommit": "92310ffb305f2401ea1d190d6fb7d6595ecfd8c3"
+    },
+    "accepted": {
+      "sourceCommit": "92310ffb305f2401ea1d190d6fb7d6595ecfd8c3",
+      "runId": 43060891405,
+      "runAttempt": 1,
+      "url": "https://github.com/JustSeanC/AeroScience/actions/runs/43060891405",
+      "receipt": "v0.8.0-p04-ci.json",
+      "failureDiagnostics": "v0.8.0-p04-ci-failures.json"
     }
   },
   "captures": [
@@ -300,5 +312,5 @@
   "installedWindowsMsfsAcceptance": "NOT TESTED",
   "v071ForwardPortPerformed": false,
   "protectedBranchesReleasesInstallersOwnerDataChanged": false,
-  "note": "Local selections overlap and were run against the evolving working tree; exact completed-source Full CI is the final integration gate."
+  "note": "Local selections overlap. Final exact-source Full CI is recorded separately; the subsequent closure commit contains only roadmap documentation, receipts and synthetic CI captures. Installed acceptance remains NOT TESTED."
 }
