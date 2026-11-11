@@ -1,0 +1,28 @@
+/* Shared tokens and existing controls; scientific methods and command owners stay intact. */
+.missions-steps ol { display:flex; flex-wrap:wrap; gap: .75rem 2rem; padding: .8rem 1.4rem; }
+.missions-steps [aria-current=step] { font-weight:700; color:var(--as-selected-text); }
+.missions-steps { background:var(--as-selected); border-radius:var(--radius); margin-block:var(--space-3); }
+.missions-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:var(--space-4); margin-block:var(--space-4); }
+.mission-experiment-card { display:flex; flex-direction:column; gap:.75rem; padding:var(--space-4); min-width:0; margin:0; overflow-wrap:anywhere; }
+.mission-experiment-card h3 { margin:0; font-size:1.3rem; }
+.mission-question { font-weight:600; }
+.mission-experiment-card p { line-height:1.6; }
+.mission-requirements { display:grid; grid-template-columns:minmax(0,.8fr) minmax(0,1.6fr); gap:.75rem 1rem; }
+.mission-requirements dt { color:var(--as-muted); font-size:var(--font-support); }
+.mission-requirements dd { margin:0; font-family:inherit; font-size:var(--font-support); line-height:1.5; }
+.mission-source,.mission-boundary { color:var(--as-muted); font-size:var(--font-support); }
+.mission-experiment-card > .action-row { margin:0; }
+.mission-experiment-card .action-row > button { min-height:44px; white-space:normal; }
+.missions-tools { display:flex; flex-direction:row; flex-wrap:wrap; gap:.75rem; margin-block:var(--space-4); }
+.missions-selection,.mission-preparation-summary,.mission-readiness { padding:var(--space-4); margin-block:var(--space-3); overflow-wrap:anywhere; }
+.mission-identity { font-size:var(--font-support); overflow-wrap:anywhere; }
+#missions-search { width:min(100%,36rem); min-height:44px; }
+#missions-explorer > label { display:block; }
+#mission-preparation > [role=status] { padding:var(--space-3); border:1px solid var(--as-warning-border); background:var(--as-warning-bg); color:var(--as-warning-text); border-radius:var(--radius); }
+#mission-preparation button,#mission-preparation .button { white-space:normal; max-width:100%; }
+@media(max-width:900px) { .missions-grid { grid-template-columns:minmax(0,1fr); } }
+@media(max-width:480px) { .mission-requirements { grid-template-columns:minmax(0,1fr); gap:.4rem; } .mission-requirements dd { margin-bottom:.6rem; } }
+
+.missions-saved { padding:var(--space-4); margin-block:var(--space-4); }
+.mission-saved-card { padding-block:var(--space-3); border-top:1px solid var(--as-line); }
+#mission-preparation[data-preparation-state=connected] > [role=status] { background:var(--as-quiet); color:var(--as-text); border-color:var(--as-line); }

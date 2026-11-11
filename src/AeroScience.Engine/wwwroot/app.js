@@ -4,6 +4,7 @@ import {initializePresentation,presentationControls,connectPresentationHost} fro
 import {resolveRoute,viewPages} from './navigation-routes.js';
 import {localizeTree} from './i18n.js';
 import {homeDashboard} from './home.js';
+import {missionsExplorer,missionPreparation} from './missions.js';
 import {readSuccessResponse} from './http-response.js';
 import {scienceWorkspace,disposeScienceWorkspace} from './science-workspace.js';
 import {helpCenter,disposeHelpCenter} from './help-center.js';
@@ -75,6 +76,7 @@ let csrf = "",
 let authorized = false,
   streamAlive = false;
 let homeView=null;
+let explorerView=null,preparationView=null;
 function selectNavigation(route){
   const organization=route.page==='my-research'&&route.query.get('section')==='organizations'&&!$('organizations-navigation').hidden;
   for(const link of document.querySelectorAll('.nav-link')){
@@ -160,6 +162,7 @@ async function connect(code = null) {
   stream.onerror = async () => {
     streamAlive = false;
     homeView?.update();
+    preparationView?.stale();
     $("engine-link").textContent = "Reconnecting";
     $("engine-dot").classList.remove("live");
     notice(
@@ -231,6 +234,7 @@ function render(state) {
   const wasActive = current?.activeMission?.id;
   current = state;
   homeView?.update();
+  preparationView?.update(state);
   journey?.update(state);
   const t = state.telemetry;
   const fresh = t && Date.now() - Date.parse(t.timestampUtc) < 6000;
@@ -383,6 +387,7 @@ async function navigate() {
   if(route.redirect){location.replace(route.redirect);return;}
   const page=route.page;
   homeView?.dispose();homeView=null;
+  explorerView?.dispose();explorerView=null;preparationView?.dispose();preparationView=null;
   if(page!=="science-workspace")disposeScienceWorkspace();
   if(page!=="downloads")disposeDownloadWorkspace();
   if(page!=="library")disposeScientificLibrary();
@@ -394,6 +399,7 @@ async function navigate() {
   selectNavigation(route);
   $("breadcrumb").textContent = {
     home: "HOME",
+    'missions-explorer':'MISSIONS', 'mission-preparation':'MISSIONS / PREPARE',
     control: "FLIGHT OPERATIONS",
     operations: "FLIGHT OPERATIONS",
     history: "RESULTS & HISTORY",
@@ -406,6 +412,15 @@ async function navigate() {
   document.title = `${dashboardTitle} · ${workspace?.querySelector('h1')?.textContent||({home:'Home',planner:'Flight Planner','my-research':'My Research',settings:'Settings',help:'Help & Support'}[page])||page}`;
   if (!authorized) return;
   if(page==='home')homeView=homeDashboard($('home'),api,{snapshot:()=>current,draft:plannerDraft});
+  if(page==='missions-explorer')explorerView=missionsExplorer($('missions-explorer'),api,{draft:plannerDraft});
+  if(page==='mission-preparation')preparationView=missionPreparation($('mission-preparation'),api,{snapshot:()=>current,draft:plannerDraft,
+    continueToFlight:({planId,armScience})=>{
+      // Only the original form's conservative draft changes. Start Recording
+      // still submits through its original readiness/revision/identity controller.
+      if(armScience){$('arm-science').checked=true;const details=$('arm-science').closest('details');if(details)details.open=true;}
+      location.hash='#operations?researchPlan='+encodeURIComponent(planId);
+      window.scrollTo(0,0);
+    }});
   if (page === "science-workspace") await scienceWorkspace($("science-workspace"),api);
   if (page === "help") await helpCenter($("help"),api);
   if (page === "library") await scientificLibrary($("library"),api);

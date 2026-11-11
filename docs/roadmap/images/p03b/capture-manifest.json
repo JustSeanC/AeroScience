@@ -1,0 +1,135 @@
+{
+  "label": "P03b synthetic browser fixtures; not installed Windows/MSFS acceptance",
+  "baselineCommit": "f00c627817d589ec31df91d36598332ce7f4430a",
+  "capturedAtUtc": "2026-11-11T02:31:17.779814+00:00",
+  "playwright": "1.64.1",
+  "chromium": "156.0.8078.4 (Playwright build 1248)",
+  "sourceFilesSha256": {
+    "app.js": "54ed155dd91f1eb42f7bab7378e84f6973cdc85f24b71cb0cafccd013a704bf2",
+    "index.html": "06c3bec62c3fe2d0ed2a8cf4252fc6079b196f46f87229dfad5f11d14435222c",
+    "home.js": "8e05aeaa10d0132c5ee12c112626e49742538b15cd2773d79a924564dcb0907a",
+    "missions.js": "fce12f42ffb6761bc309efbf12aae32a41ac58ac09a150e9f9680e6de94f047b",
+    "mission-discovery.js": "0db3a184401ae648bb0034177617edc1ac997371831cd7e1a6240ba06ec80642",
+    "missions.css": "801c73e11c9db06e20b96ff23e65913aad92da6a0e4e7457916901280eb1ed1f",
+    "navigation-routes.js": "6a836b4bf4c509f75f5763bf73c4adb50b3fda2f73532e569266a0e2864daaa6",
+    "task-workspaces.js": "a2a623fcc95cde762722fffc5bed1b95cd2720bf70d2e8054395fe66c742fd5f",
+    "personal-research-start.js": "a052d37dd2d47880262ef5eb51b5be189c5c4c93d39aa183345110f5dbcca862",
+    "preflight-readiness.js": "b1b9eb30343dcab5fde09e94bccea38f72e5a647adb5dedbada232bfc8b050ea",
+    "i18n/catalog.generated.js": "04f929c3b493a2a31691201ffaaad6e4b8b87d1491d1ed209371435e24827a7a"
+  },
+  "images": [
+    {
+      "file": "synthetic-browser-explore-light-1440.png",
+      "view": "explore",
+      "theme": "Auto / OS light",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "fullPagePixels": [
+        1440,
+        4028
+      ],
+      "sha256": "3573eeb19ccf4e1048bd69c0ab7da3b3fe60db8cf154144dea4f3a35065bf501"
+    },
+    {
+      "file": "synthetic-browser-explore-light-390.png",
+      "view": "explore",
+      "theme": "Auto / OS light",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "fullPagePixels": [
+        390,
+        8050
+      ],
+      "sha256": "71427c90a1ee172270651696b02a8c05b994b8fd590dd23d1142068e852a698c"
+    },
+    {
+      "file": "synthetic-browser-prepare-light-1440.png",
+      "view": "prepare",
+      "theme": "Auto / OS light",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "fullPagePixels": [
+        1440,
+        1343
+      ],
+      "sha256": "fb49901150cdcd2d337a8da951699dc5d4092e0307c18d00bbb51a56285ca55e"
+    },
+    {
+      "file": "synthetic-browser-prepare-light-390.png",
+      "view": "prepare",
+      "theme": "Auto / OS light",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "fullPagePixels": [
+        390,
+        2012
+      ],
+      "sha256": "f06d7b73734e6ba10ce814418ff6592020c60c25d836d5fbb5d6cd6f139ee9e2"
+    },
+    {
+      "file": "synthetic-browser-explore-dark-1440.png",
+      "view": "explore",
+      "theme": "Auto / OS dark",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "fullPagePixels": [
+        1440,
+        4028
+      ],
+      "sha256": "0623f8d4accf9f0a07bdafe994663bb08671fa7066eaa01ea24f098a86340d47"
+    },
+    {
+      "file": "synthetic-browser-explore-dark-390.png",
+      "view": "explore",
+      "theme": "Auto / OS dark",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "fullPagePixels": [
+        390,
+        8050
+      ],
+      "sha256": "ee1aad6e7d4bf9952177bcb36ad252ee84ed701c5f4efaf2e1d9b408883ff3be"
+    },
+    {
+      "file": "synthetic-browser-prepare-dark-1440.png",
+      "view": "prepare",
+      "theme": "Auto / OS dark",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "fullPagePixels": [
+        1440,
+        1343
+      ],
+      "sha256": "615b6fe1a6a3ce347e437b46f6695b8878c6b0d92f850d133388938d4c087b82"
+    },
+    {
+      "file": "synthetic-browser-prepare-dark-390.png",
+      "view": "prepare",
+      "theme": "Auto / OS dark",
+      "viewport": {
+        "width": 390,
+        "height": 1000
+      },
+      "fullPagePixels": [
+        390,
+        2012
+      ],
+      "sha256": "798c2dcb238a554842ff2cdcef4d6587a2d608b3b2e1ea631adaf9dce85a985c"
+    }
+  ],
+  "preservedIncomingCommit": "422dd0fb7c792d2edcc45efa084d09426cbd3e71"
+}

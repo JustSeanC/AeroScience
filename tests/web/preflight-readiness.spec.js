@@ -8,6 +8,6 @@ test('unsaved Planner assesses real draft inputs without save, flight or downloa
 test('an old concurrent readiness response cannot overwrite a newer draft assessment',async({page})=>{
  await page.goto('/#planner');await page.getByRole('button',{name:'New mission plan',exact:true}).click();
  let release;const held=new Promise(r=>release=r);let calls=0;
- await page.route('**/api/plans/readiness',async route=>{if(++calls===1)await held;const draft=route.request().postDataJSON();await route.fulfill({json:{assessedUtc:new Date().toISOString(),checks:[{id:draft.objective||'old',category:'Fixture',status:'caution',reasons:[draft.objective||'old result'],actions:[]}],limitations:[]}});});
+ await page.route('**/api/plans/readiness',async route=>{if(++calls===1)await held;const draft=route.request().postDataJSON();await route.fulfill({json:{version:1,assessedUtc:new Date().toISOString(),checks:[{id:draft.objective||'old',category:'Fixture',status:'caution',reasons:[draft.objective||'old result'],actions:[]}],limitations:[]}});});
  const panel=page.locator('#preflight-readiness');await panel.getByRole('button').click();await expect.poll(()=>calls).toBe(1);await page.getByLabel('Objective',{exact:true}).fill('Newer evidence');await panel.getByRole('button').click();await expect(panel).toContainText('Newer evidence');release();await page.waitForResponse(r=>r.url().endsWith('/api/plans/readiness'));await expect(panel).toContainText('Newer evidence');await expect(panel).not.toContainText('old result');
 });

@@ -41,6 +41,7 @@ export function homeDashboard(root,api,{snapshot,draft}) {
     nextTitle.textContent=t('home.nextTitle.'+model.next);detail.textContent=t('home.nextDetail.'+model.next);
     primary.textContent=t('home.action.'+model.next);
     primary.href={active:'#flight',draft:'#planner',plan:'#operations',idle:'#missions',connect:'#help?guide=v0.4.1-windows-testing.md',unavailable:'#help?guide=v0.4.1-windows-testing.md'}[model.next];
+    if(model.next==='plan')primary.href='#missions/prepare?researchPlan='+encodeURIComponent(model.selectionId);
     connection.textContent=t('home.connection.'+model.connection);
     source.textContent=t(model.source==='simulated' ? 'home.synthetic' : model.source==='simulator' ? 'home.simulator' : 'home.sourceUnknown');
     identity.textContent=model.activeFlight ? t('home.activeName',{name:model.activeFlight.name}) : model.aircraft || '';

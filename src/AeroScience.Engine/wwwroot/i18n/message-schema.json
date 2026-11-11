@@ -676,6 +676,435 @@
     "home.collectionWarning": {
       "context": "Read-only Home status; preserve recording/science separation. No readiness or scientific quality is inferred.",
       "parameters": []
+    },
+    "missions.workflow": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.step.explore": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.step.prepare": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.step.record": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.explore": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.exploreTitle": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.exploreIntro": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.advanced": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.myResearch": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.savedPlans": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.customPlan": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.sensors": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.resumeDraft": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.search": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.catalog": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.refresh": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.catalogCount": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": [
+        "count"
+      ],
+      "plural": "count"
+    },
+    "missions.noMatches": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.emptyCatalog": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.catalogUnavailable": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.savedExperiments": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.savedUnavailable": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.noSavedExperiments": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.reviewExperiment": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.allExperiments": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.flyNow": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.customize": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.preparing": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.receiptMismatch": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.selectionMismatch": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.activeFlight": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": [
+        "name"
+      ]
+    },
+    "missions.selectionLoading": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.selectionUnavailable": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.selectedPlan": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": [
+        "name"
+      ]
+    },
+    "missions.reviewPreparation": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.noSelection": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.unknown": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.unsupported": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.requirements": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.objective": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": [
+        "objective"
+      ]
+    },
+    "missions.experience": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.experience.guided": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.experience.altitudes": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.experience.locations": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.experience.sources": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.experience.model": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.aircraftLabel": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.aircraft": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.inputs": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.input.flight": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.input.atmosphere": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.input.survey": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.input.notes": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.input.model": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.instruments": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.noInstruments": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.instrumentsUnknown": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.sources": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.externalSources": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.localSources": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.metadataUnavailable": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.modelWarning": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.notesWarning": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.prepareOnly": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.prepareTitle": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.prepareIntro": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.openControls": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.separateScience": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.customizePlan": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.exploreAgain": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.planUnavailable": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.stateUnavailable": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.selectionDifferent": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.connection.connected": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.connection.disconnected": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.connection.paused": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.connection.stale": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.connection.unknown": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.planIdentity": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": [
+        "id"
+      ]
+    },
+    "missions.objectiveUnknown": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.geometry": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": [
+        "areas",
+        "waypoints"
+      ]
+    },
+    "missions.savedInstruments": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": [
+        "instruments"
+      ]
+    },
+    "missions.cardRevision": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": [
+        "name",
+        "revision"
+      ]
+    },
+    "missions.cardMismatch": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.dataPreparation": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.refreshPreparation": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.choosePlan": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.readinessUnassessed": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.invalidReadiness": {
+      "context": "P03b Missions presentation; guidance is not aircraft approval or readiness. Preserve exact original names, IDs, revisions, units, consent and separate recording/science actions.",
+      "parameters": []
+    },
+    "missions.title.flight": {
+      "context": "P03b plain-language presentation title only; never rename stored experiments or alter their revisions or source requirements.",
+      "parameters": []
+    },
+    "missions.title.atmosphereProfile": {
+      "context": "P03b plain-language presentation title only; never rename stored experiments or alter their revisions or source requirements.",
+      "parameters": []
+    },
+    "missions.title.atmosphereTransect": {
+      "context": "P03b plain-language presentation title only; never rename stored experiments or alter their revisions or source requirements.",
+      "parameters": []
+    },
+    "missions.title.survey": {
+      "context": "P03b plain-language presentation title only; never rename stored experiments or alter their revisions or source requirements.",
+      "parameters": []
+    },
+    "missions.title.notes": {
+      "context": "P03b plain-language presentation title only; never rename stored experiments or alter their revisions or source requirements.",
+      "parameters": []
+    },
+    "missions.title.model": {
+      "context": "P03b plain-language presentation title only; never rename stored experiments or alter their revisions or source requirements.",
+      "parameters": []
+    },
+    "missions.originalTemplate": {
+      "context": "P03b plain-language presentation title only; never rename stored experiments or alter their revisions or source requirements.",
+      "parameters": [
+        "name"
+      ]
+    },
+    "missions.goal.flight": {
+      "context": "P03b plain-language objective summary; exact saved targets remain in Requirements and preparation. This is not a result, grade or readiness assessment.",
+      "parameters": []
+    },
+    "missions.goal.atmosphere": {
+      "context": "P03b plain-language objective summary; exact saved targets remain in Requirements and preparation. This is not a result, grade or readiness assessment.",
+      "parameters": []
+    },
+    "missions.goal.survey": {
+      "context": "P03b plain-language objective summary; exact saved targets remain in Requirements and preparation. This is not a result, grade or readiness assessment.",
+      "parameters": []
+    },
+    "missions.goal.notes": {
+      "context": "P03b plain-language objective summary; exact saved targets remain in Requirements and preparation. This is not a result, grade or readiness assessment.",
+      "parameters": []
+    },
+    "missions.goal.model": {
+      "context": "P03b plain-language objective summary; exact saved targets remain in Requirements and preparation. This is not a result, grade or readiness assessment.",
+      "parameters": []
+    },
+    "missions.preparationChanged": {
+      "context": "Late/stale preparation context warning. A server-side saved preparation may exist; do not imply recording, collection or a new selection succeeded.",
+      "parameters": []
     }
   }
 }

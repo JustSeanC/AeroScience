@@ -16,7 +16,7 @@ test('legacy and canonical entries mount existing views without unsafe commands 
     ['#workspace/compare','science-workspace'],['#workspace/analysis','science-workspace'],['#workspace/results','science-workspace'],['#workspace/replay','science-workspace'],
     ['#library','library'],['#library/download?science=hyperspectral','library'],['#downloads','downloads'],['#library/storage','library-storage'],
     ['#settings/units','settings'],['#settings/storage','settings'],['#help','help'],['#unknown','my-research'],
-    ['#missions','my-research'],['#missions/plans','planner'],['#flight','operations'],['#flight/details','control'],['#flight/instruments','instruments'],
+    ['#missions','missions-explorer'],['#missions/plans','planner'],['#flight','operations'],['#flight/details','control'],['#flight/instruments','instruments'],
     ['#results/explore/map','science-workspace'],['#results/overview','science-workspace']];
   for(const [hash,pageId]of routes){
     await page.evaluate(value=>{location.hash=value;},hash);await expect(page.locator('#'+pageId)).toBeVisible();

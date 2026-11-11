@@ -7,13 +7,15 @@ import {observationFields,observationTargets,openPilotObservations} from './obse
 import {surveyFields,surveyTargets,surveySourceReview} from './survey-research.js';
 import {preflightReadiness} from './preflight-readiness.js';
 import {renderResearchContext} from './scientific-context.js';
+import {t} from './i18n.js';
 
-const pendingKey='AeroScience.personalResearch.preparation';let memory={},busy=false,storage=true;const controls=new Set();
+const pendingKey='AeroScience.personalResearch.preparation';let memory={},busy=false,storage=true;const controls=new Set(),availability=new WeakMap();
 function pending(){if(!storage)return memory;try{const value=JSON.parse(sessionStorage.getItem(pendingKey)||'{}');return value&&typeof value==='object'&&!Array.isArray(value)?value:{};}catch{storage=false;return memory;}}
 function savePending(value){memory=value;try{sessionStorage.setItem(pendingKey,JSON.stringify(value));}catch{storage=false;/* Current-view retries remain available without browser storage. */}}
 function forget(id){const saved=pending();for(const key of Object.keys(saved))if(saved[key]===id)delete saved[key];savePending(saved);}
 window.addEventListener('aeroscience-research-plan-opened',event=>forget(event.detail.planId));
-function setBusy(value){busy=value;for(const control of controls){if(!control.isConnected)controls.delete(control);else control.disabled=value;}}
+function setBusy(value){busy=value;for(const control of controls){if(!control.isConnected)controls.delete(control);else control.disabled=value||availability.get(control)?.()===false;}}
+export function refreshResearchEntryActions(actions){for(const control of controls)if(actions.contains(control))control.disabled=busy||availability.get(control)?.()===false;}
 export const researchTargets=rule=>`${numeric(rule.airspeedKnots)} ± ${numeric(rule.airspeedToleranceKnots)} knots IAS · ${numeric(rule.altitudeMslFeet)} ± ${numeric(rule.altitudeToleranceFeet)} feet MSL · ${numeric(rule.holdSeconds)} second hold`;
 export const isAtmosphericResearch=card=>!!(card.atmosphericProfile||card.atmosphericTransect);
 export const isScienceResearch=card=>isAtmosphericResearch(card)||!!card.experimentalSensor||!!card.survey||!!card.observationFlight;
@@ -45,30 +47,33 @@ export function flightRegimeFields(parent,rule,{prefix=''}={}){
  return {read:()=>Object.fromEntries(Object.entries(fields).map(([key,input])=>[key,Number(input.value)]))};
 }
 
-export function researchEntryActions(parent,api,{starter,card,survey},isCurrent){
+export function researchEntryActions(parent,api,{starter,card,survey},isCurrent,{prepareHref,canPrepare=()=>true,navigate=href=>{location.hash=href;}}={}){
  if(card?.procedure||card?.templateId==='custom-flight-test')return null; // Custom cards use the existing Open in Mission Planner action, not a built-in starter.
  for(const control of controls)if(!control.isConnected)controls.delete(control);
  const actions=node('div',undefined,'action-row'),status=node('p');status.setAttribute('role','status');parent.append(actions,status);
- for(const [intent,title]of [['flyNow','Fly Now'],['customize','Customize']]){
+ for(const [intent,title]of [['flyNow',t('missions.flyNow')],['customize',t('missions.customize')]]){
   const control=button(actions,title,async()=>{
-   if(busy||!isCurrent())return;setBusy(true);status.textContent='Preparing your local experiment…';
-   const selectedSurvey=survey?.read();const key=JSON.stringify([selectedSurvey||null,starter?.id||card.templateId,starter?.version||card.version,card?.id||null,card?.revision||null,intent]);
+   if(busy||!isCurrent()||!canPrepare())return;setBusy(true);status.textContent=t('missions.preparing');
+   const locked=[...parent.querySelectorAll('fieldset')].map(field=>[field,field.disabled]);for(const [field]of locked)field.disabled=true;
+   const selectedSurvey=survey?.read();const currentDraft=()=>isCurrent()&&JSON.stringify(survey?.read()||null)===JSON.stringify(selectedSurvey||null);const keepCurrent=()=>{const current=currentDraft();if(!current&&isCurrent())status.textContent=t('missions.preparationChanged');return current;};const key=JSON.stringify([selectedSurvey||null,starter?.id||card.templateId,starter?.version||card.version,card?.id||null,card?.revision||null,intent]);
    const saved=pending();saved[key]||=newIdentity();savePending(saved);
    const request={version:1,requestId:saved[key],starterVersion:starter?.version||1,starterId:starter?.id||card.templateId,intent,card:card?{id:card.id,revision:card.revision}:null,...(selectedSurvey?{survey:selectedSurvey}:{})};
    try{
-    const state=await api('/api/state');if(!isCurrent())return;
+    const state=await api('/api/state');if(!keepCurrent())return;
     if(intent==='flyNow'&&state.activeMission){status.textContent='A flight is already recording. Keep using its cards, or choose Customize to prepare a later flight. Nothing was stopped.';return;}
-    const prepared=await api('/api/research/starters/prepare',request);if(!isCurrent())return;
-    if(intent==='customize'){status.textContent='An independent editable copy is prepared. Your other plans and historic results are unchanged.';location.hash=`#planner?researchPlan=${prepared.plan.id}`;}
+    const prepared=await api('/api/research/starters/prepare',request);if(!keepCurrent())return;
+    if(prepared?.plan?.id!==request.requestId||prepared.plan.researchStarter?.requestId!==request.requestId)throw Error(t('missions.receiptMismatch'));
+    if(intent==='customize'){status.textContent='An independent editable copy is prepared. Your other plans and historic results are unchanged.';navigate(`#planner?researchPlan=${prepared.plan.id}`);}
     else{
-     await api('/api/mission-selection',{planId:prepared.plan.id});if(!isCurrent())return;
-     forget(request.requestId);status.textContent='Mission prepared — Start Recording next. Recording and science have not started.';window.dispatchEvent(new Event('aeroscience-selection'));location.hash=`#operations?researchPlan=${prepared.plan.id}`;
+     const selection=await api('/api/mission-selection',{planId:prepared.plan.id});if(!keepCurrent())return;
+     if(selection?.planId!==prepared.plan.id)throw Error(t('missions.selectionMismatch'));
+     forget(request.requestId);status.textContent='Mission prepared — Start Recording next. Recording and science have not started.';window.dispatchEvent(new Event('aeroscience-selection'));navigate(prepareHref?prepareHref(prepared.plan):`#operations?researchPlan=${prepared.plan.id}`);
     }
    }catch(error){if(isCurrent()){
     status.textContent=error.message;
     if(!actions.querySelector('[data-new-preparation]')){const reset=button(actions,'Start a New Preparation',()=>{forget(request.requestId);reset.remove();status.textContent='Choose Fly Now or Customize again. Existing saved plans are unchanged.';});reset.dataset.newPreparation='true';controls.add(reset);}
-   }}finally{setBusy(false);}
-  },intent==='flyNow'?'primary':'secondary');control.disabled=busy;controls.add(control);
+   }}finally{for(const [field,disabled]of locked)field.disabled=disabled;setBusy(false);}
+  },intent==='flyNow'?'primary':'secondary');availability.set(control,canPrepare);control.disabled=busy||!canPrepare();controls.add(control);
  }
  return actions;
 }

@@ -10,7 +10,7 @@
     "pretest:web": "dotnet build tests/AeroScience.TestHost -c Release --no-restore --nologo --output artifacts/browser-test-host && dotnet build src/AeroScience.Organization -c Release --no-restore --nologo --output artifacts/organization-test-host",
     "test:web": "playwright test",
     "check:web": "node scripts/build/build-locales.mjs --check && node scripts/build/check-web.mjs && node tests/native-javascript.test.mjs && npm run test:presentation",
-    "test:presentation": "node --test tests/home-state.test.mjs tests/presentation-i18n.test.mjs tests/presentation-native.test.mjs",
+    "test:presentation": "node --test tests/mission-discovery.test.mjs tests/home-state.test.mjs tests/presentation-i18n.test.mjs tests/presentation-native.test.mjs",
     "check:branding": "node scripts/build/generate-branding.mjs --check"
   },
   "devDependencies": {

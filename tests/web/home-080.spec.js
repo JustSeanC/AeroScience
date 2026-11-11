@@ -21,7 +21,7 @@ test('empty Home is the default landing and connected idle action only opens exi
   await expect(home(page)).toHaveAttribute('data-home-state','idle');await expect(home(page)).toContainText('No saved flights to show yet');
   await expect(home(page).locator('a.primary')).toHaveCount(1);await expect(home(page)).toContainText('Flight recording inactive');
   await expect(home(page)).toContainText('Not started');await expect(home(page)).not.toContainText('Retained original observations: 0');
-  await home(page).getByRole('link',{name:'Explore science missions',exact:true}).click();await expect(page.locator('#my-research')).toBeVisible();
+  await home(page).getByRole('link',{name:'Explore science missions',exact:true}).click();await expect(page.locator('#missions-explorer')).toBeVisible();
   await expect(page.getByRole('article',{name:'Vertical Atmospheric Profile starter',exact:true})).toBeVisible();expect(writes).toEqual([]);
 });
 test('an unsaved draft survives Home and resumes the original full planner without replacement',async({page})=>{
@@ -36,7 +36,7 @@ test('a saved selected plan continues original setup; missing selection never be
   const state=await get(request,'/api/state');expect(state.selectedPlanId).toBeTruthy();expect(state.activeMission).toBeNull();
   const plan=await get(request,'/api/plans/'+state.selectedPlanId);
   await go(page,'#home');await expect(home(page)).toHaveAttribute('data-home-state','plan');await expect(home(page)).toContainText('Selected saved plan: '+plan.name);
-  await home(page).getByRole('link',{name:'Continue mission setup',exact:true}).click();await expect(page.locator('#operations')).toBeVisible();
+  await home(page).getByRole('link',{name:'Continue mission setup',exact:true}).click();await expect(page.locator('#mission-preparation')).toBeVisible();await page.locator('#mission-preparation').getByRole('button',{name:'Review recording controls',exact:true}).click();await expect(page.locator('#operations')).toBeVisible();
   expect((await get(request,'/api/state')).selectedPlanId).toBe(state.selectedPlanId);
   await page.route('**/api/plans/'+state.selectedPlanId,r=>r.fulfill({status:404,json:{error:'Synthetic unavailable selection'}}));
   await go(page,'#home');await expect(home(page)).toContainText('no unplanned flight was substituted');await expect(home(page)).toHaveAttribute('data-home-state','plan');
@@ -47,7 +47,7 @@ test('Home navigation preserves one stream and exactly one original recording co
     if(path==='/api/events')streams.push(r.url());if(r.method()==='POST'&&path==='/api/missions')starts.push(r.postDataJSON());
     if(r.method()==='POST'&&path.endsWith('/collection/control'))collection.push(r.postDataJSON());});
   await page.goto('/#home');await expect(home(page)).toHaveAttribute('data-home-state','idle');
-  for(let round=0;round<3;round++)for(const hash of ['#missions','#control','#home']){await go(page,hash);await expect(page.locator('#'+(hash==='#missions'?'my-research':hash.slice(1)))).toBeVisible();}
+  for(let round=0;round<3;round++)for(const hash of ['#missions','#control','#home']){await go(page,hash);await expect(page.locator('#'+(hash==='#missions'?'missions-explorer':hash.slice(1)))).toBeVisible();}
   await go(page,'#control');await page.getByLabel('MISSION NAME',{exact:true}).fill('P03a single command fixture');
   await page.getByRole('button',{name:'Start Recording',exact:true}).click();await expect(page.getByRole('button',{name:'End mission',exact:true})).toBeVisible();
   const flight=(await get(request,'/api/state')).activeMission;expect(starts).toHaveLength(1);expect(collection).toEqual([]);expect(streams).toHaveLength(1);
@@ -119,5 +119,5 @@ for(const theme of ['light','dark'])test(`Home ${theme} is accessible and respon
   });expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
   await page.evaluate(()=>{document.documentElement.style.zoom='1';});await page.setViewportSize({width:390,height:844});
   await page.getByRole('button',{name:'Menu',exact:false}).click();await page.getByRole('navigation',{name:'Main navigation',exact:true}).getByRole('link',{name:'Missions',exact:true}).focus();await page.keyboard.press('Enter');
-  await expect(page.locator('#my-research')).toBeVisible();await expect(page.getByRole('button',{name:'Menu',exact:false})).toHaveAttribute('aria-expanded','false');
+  await expect(page.locator('#missions-explorer')).toBeVisible();await expect(page.getByRole('button',{name:'Menu',exact:false})).toHaveAttribute('aria-expanded','false');
 });
