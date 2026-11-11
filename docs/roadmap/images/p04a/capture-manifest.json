@@ -1,0 +1,53 @@
+{
+  "checkpoint": "P04a",
+  "label": "Synthetic Chromium browser fixture; NOT installed Windows/MSFS acceptance",
+  "browser": "Playwright 1.64.1 / Chromium 156.0.8078.4",
+  "viewports": [
+    {
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "width": 390,
+      "height": 1000
+    }
+  ],
+  "themes": [
+    "light",
+    "dark"
+  ],
+  "images": [
+    {
+      "file": "synthetic-browser-current-flight-dark-1440.png",
+      "sha256": "57cc5181b176614eb87c63cb73f33d5a9be731168c03fa20a3545423a0392e02"
+    },
+    {
+      "file": "synthetic-browser-current-flight-dark-390.png",
+      "sha256": "b4f9b92feb5135a235ea05a394186f460d231be7f4277b159c502b1d93db117a"
+    },
+    {
+      "file": "synthetic-browser-current-flight-light-1440.png",
+      "sha256": "de5ba40d6318972a7ac19a85bca826872c21db56f5fba4d586c7b5088d4bd0d2"
+    },
+    {
+      "file": "synthetic-browser-current-flight-light-390.png",
+      "sha256": "900537ad30bcfd3e2d8a1029b47229319594ed5403b16e4fc57a2a4fe37fa3eb"
+    }
+  ],
+  "sourceFiles": {
+    "src/AeroScience.Engine/wwwroot/current-flight-state.js": "1862597f40bb4ce88c904756bc450f6f5eb9930be084a0bc23c1237b650da024",
+    "src/AeroScience.Engine/wwwroot/scanner-guidance.js": "da088e6e3e5ab1bf48c075602f88b42b631b97f2b75c2c087fc4263aa2fc736e",
+    "package.json": "b8c68ef0a35b6dd035ce7509e1d738cd20a1f7055f6cfa37474a8d04d9516046",
+    "src/AeroScience.Engine/wwwroot/i18n/catalog.generated.js": "b6357eec1a587606e6c3b03954ce058c82d96dddc36835d2bf6afce9c94d1539",
+    "src/AeroScience.Engine/wwwroot/i18n/locale-manifest.json": "97144cd1837d9292641f545e9d8421d7b09822e2437e081bb1616a39b4987e9c",
+    "src/AeroScience.Engine/wwwroot/i18n/locales/en-US.json": "c38c6767bd6cd410a1b9c7faabaa9ef956aa77d61e5323f177e8166dec886681",
+    "src/AeroScience.Engine/wwwroot/i18n/message-schema.json": "2b990794d577e673b1099b3dc3d684199bbc1060972aadfa0d1b877cb5c16091",
+    "src/AeroScience.Engine/wwwroot/mission-intelligence.js": "d04bcbdfedfd95aa48f402dd98e76428f74fb512edfa43adf3b96c7c2887fe8d",
+    "src/AeroScience.Engine/wwwroot/mission-operations.js": "e14718351c3743acf9d60eb4e27e5c426a55020e1a6e1145a18dc4b8cd72d576",
+    "src/AeroScience.Engine/wwwroot/research.js": "53c7a73d4f5ede998628e590ec1e82e5e4fb80094c6c7234f35fcf8f1ac225e4",
+    "src/AeroScience.Engine/wwwroot/science-journey.js": "f531597bf48db06af746bad674e3175782e7e7cf71b5e779cc5795eff73b1954",
+    "src/AeroScience.Engine/wwwroot/workstation.css": "a80076db6e272853b441bc6779a97c037829d044883f3f25655657926b96b9e9",
+    "src/AeroScience.Missions/SensorOperatingProjection.cs": "3fffc3c232a4744192e415b20bbfb7094646f75f3b84b7816283bfe3398b1ea6",
+    "src/AeroScience.Shared/SensorOperatingModels.cs": "a0bd7344267ca8bd3947119c231ca4e8179e7d862adefb1d11e21341a702893e"
+  }
+}

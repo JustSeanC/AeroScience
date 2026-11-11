@@ -1,35 +1,46 @@
 import {node,link,button,informationDetails,scientificNotice} from './workstation-ui.js';
 import {researchCardTargets} from './personal-research-start.js';
+import {currentFlightPresentation} from './current-flight-state.js';
+import {t} from './i18n.js';
 
 // A view of existing recording/collection controllers, never a recorder or evaluator.
 export function scienceJourney(parent,api){
  const root=node('section',undefined,'science-journey');root.id='science-journey';root.setAttribute('aria-label','Your research flight');
  const title=node('h2','Ready to Start'),steps=node('ol'),summary=node('p'),connection=node('p'),recording=node('p'),collection=node('p'),count=node('p'),next=node('p'),actions=node('div',undefined,'action-row'),results=node('div',undefined,'action-row');
+ const name=node('h3',undefined,'current-flight-name'),aircraft=node('p',undefined,'current-flight-aircraft'),session=node('p',undefined,'current-flight-session'),payload=node('p',undefined,'current-flight-payload');
+ const statuses=node('div',undefined,'current-flight-statuses');statuses.append(recording,collection);
+ recording.dataset.flightRecording='';collection.dataset.flightScience='';connection.dataset.flightConnection='';session.dataset.flightSession='';
  // The existing collection controller moves its own command buttons here.
  // This is one command authority, not another recorder or optimistic shortcut.
   const collectionControls=node('div');collectionControls.id='science-journey-controls';collectionControls.setAttribute('role','group');collectionControls.setAttribute('aria-label','Science collection actions');
  for(const label of ['Choose Research','Prepare for Flight','Start Recording','Collect Science','Review Results'])steps.append(node('li',label));
  recording.setAttribute('role','status');collection.setAttribute('role','status');count.dataset.retainedScience='';
  const explanation=informationDetails(root,'Recording, source & count details',node('p','Flight samples are recorded aircraft telemetry. Original scientific observations, modeled/derived observations and remote products are separate retained records. Counts alone do not establish quality or research completion.'));
- root.prepend(title,steps,summary,connection,recording,collection,count,next,collectionControls,actions,results);parent.prepend(root);
+ root.prepend(title,name,aircraft,steps,summary,connection,statuses,session,payload,count,next,collectionControls,actions,results);parent.prepend(root);
  link(actions,'Choose Research','#my-research');const instruments=link(actions,'Review Instruments','#science');
   const show=button(actions,'Science Details',()=>{const panel=document.getElementById('mission-intelligence');panel?.scrollIntoView({block:'center'});const details=panel?.querySelector('details');if(details){details.open=true;details.querySelector('summary')?.focus({preventScroll:true});}});
  let flight=null,intelligence=null,plan=null,card=null,last=null,stale=false,recovered=false,recoveryEpoch=0;
  function paint(){
+  const cockpit=currentFlightPresentation(intelligence,flight,{stale});
   const active=flight?.activeMission,telemetry=flight?.telemetry,age=telemetry?Date.now()-Date.parse(telemetry.timestampUtc):Infinity;
   const fresh=flight?.connection?.state==='connected'&&telemetry?.isValid!==false&&age>=-2000&&age<=6000;
   const same=intelligence?.flight?.activeMission?.id===active?.id&&active;
   const state=same&&!stale?intelligence.collection?.state:null,enabled=(same?intelligence.flight.research?.instruments:(plan?.instruments??flight?.research?.instruments))||[];
   const needed=enabled.filter(i=>i.enabled),fault=same&&intelligence.collection?.fault;
-  const unavailable=active&&(!fresh||telemetry?.isPaused||stale||!state||fault);
+  payload.textContent=t('flight.enabledInstruments',{names:needed.length?needed.map(i=>intelligence?.sensorOperating?.instruments?.find(s=>s.instrumentId===i.instrumentId)?.name||i.instrumentId).join(', '):t('flight.noneEnabled')});
+  const unavailable=active&&(!fresh||telemetry?.isPaused||stale||!state||fault||!cockpit.fresh||['unknown','unavailable'].includes(cockpit.science));
   title.textContent=active?'Your Research Flight':last?'Flight Saved — Review Results':'Prepare for Flight';
+  name.textContent=active?.name||plan?.name||'';
+  aircraft.textContent=t('flight.aircraftElapsed',{aircraft:telemetry?.aircraft||active?.aircraft||t('common.unavailable'),elapsed:cockpit.elapsedSeconds===null?t('common.unavailable'):t('flight.elapsed',{seconds:cockpit.elapsedSeconds})});
+  session.textContent=cockpit.sessionId?t('flight.session',{sequence:cockpit.sessionSequence,id:cockpit.sessionId}):t('flight.noSession');
+  root.dataset.connection=cockpit.connection;root.dataset.recording=cockpit.recording;root.dataset.science=cockpit.science;root.dataset.sessionId=cockpit.sessionId||'';
   summary.textContent=card?(card.atmosphericProfile?.question||card.atmosphericTransect?.question||card.survey?.question||card.observationFlight?.question||card.experimentalSensor?.question||card.name):plan?plan.name:'Choose a starter or select a saved mission.';
-  connection.textContent=`${flight?.connection?.source==='simulated'?'Synthetic test fixture':fresh?'Simulator-reported observations':'Simulator unavailable'}${telemetry?.isPaused?' · MSFS paused':''}`;
+  connection.textContent=t('flight.connection.'+cockpit.connection)+` · ${flight?.connection?.source==='simulated'?'Synthetic test fixture':fresh?'Simulator-reported observations':'Simulator unavailable'}`;
   recording.textContent=active?`Recording · ${active.sampleCount} retained flight samples`:'Not recording';
   const phases={armed:'Armed — science has not started',collecting:'Collecting',paused:'Paused',betweenSessions:'Session ended — ready for another session',stopped:'Stopped'};
   collection.textContent=`Science collection: ${!active?'Not started':unavailable?'Unavailable — check the connection, session or storage hold':phases[state.phase]||'Unavailable'}`;
   const retained=same?intelligence.retainedScience:null;
-  count.textContent=!active?'':retained?.missionId===active.id&&Number.isFinite(retained.originalObservations)?`Retained original scientific observations: ${retained.originalObservations}${stale?' · last checked count':''}`:'Retained scientific observations: unavailable';
+  count.textContent=!active?'':retained?.missionId===active.id&&Number.isFinite(retained.originalObservations)?`Retained original scientific observations: ${retained.originalObservations}${stale?' · last checked count':''} · ${t('flight.retainedProducts',{products:retained.remoteProducts??t('common.unavailable'),derived:retained.derivedObservations??t('common.unavailable')})}`:'Retained scientific observations: unavailable';
   let retainedDetail=explanation.querySelector('[data-derived-counts]');if(!retainedDetail){retainedDetail=node('p');retainedDetail.dataset.derivedCounts='';explanation.append(retainedDetail);}
   retainedDetail.textContent=retained&&active&&retained.missionId===active.id?`Modeled/derived observations: ${retained.derivedObservations??'Unavailable'} · saved remote products: ${retained.remoteProducts??'Unavailable'}. ${stale?'Last checked count; connection is stale.':''}`:'';
   const requiredScience=!!(card?.atmosphericProfile||card?.atmosphericTransect||card?.survey||card?.experimentalSensor);

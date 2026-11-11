@@ -140,6 +140,32 @@ dialog.managed-popup{max-width:min(56rem,calc(100vw - 1.5rem));max-height:88dvh;
 .operations-instrument-details>summary{cursor:pointer;font-weight:600;padding:.75rem 0}
 .operations-instrument-summary .data-table-scroll{max-width:100%}
 
+/* P04: the original controls share one task-focused cockpit, without cloning handlers. */
+.operations-cockpit{grid-column:1/-1;min-width:0;padding:1.5rem}
+.operations-active,.operations-objective{padding:1.25rem}
+.operations-cockpit .science-journey{border:0;padding:0;margin:0}
+.operations-cockpit .science-journey>ol{display:none}
+.current-flight-name{font-size:clamp(1.35rem,2vw,1.85rem);margin:.5rem 0;overflow-wrap:anywhere}
+.current-flight-statuses{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
+.current-flight-statuses>p{background:var(--as-quiet);border:1px solid var(--as-line);border-radius:var(--radius);padding:1rem;margin:.5rem 0;font-size:1.15rem;font-weight:650}
+.current-flight-aircraft,.current-flight-session{color:var(--as-muted);overflow-wrap:anywhere}
+.current-flight-tools{display:flex;flex-direction:row;flex-wrap:wrap;justify-content:flex-start;gap:.5rem;margin:0 0 1rem}
+.current-flight-tools>*{min-height:44px;white-space:normal;max-width:100%}
+.operations-live .operations-flight-controls #end-button{background:var(--as-danger-bg);color:var(--as-danger-text);border:1px solid var(--as-danger-border)}
+.operations-live #mission-intelligence{margin-top:1rem}
+.scanner-guidance{border:1px solid var(--as-line);border-radius:var(--radius);background:var(--as-quiet);padding:1rem;margin-bottom:1rem;overflow-wrap:anywhere;line-height:1.55}
+.scanner-guidance[data-prediction=gaps]{border-inline-start:4px solid var(--as-warning-border)}
+@media(min-width:851px){
+ .operations-live .operations-cockpit{grid-row:1}
+ .operations-live .operations-attention{grid-row:2}
+ .operations-live .operations-active{grid-column:1;grid-row:3}
+ .operations-live .operations-objective{grid-column:2;grid-row:3}
+ .operations-live .operations-map{grid-column:1;grid-row:4}
+ .operations-live .operations-science{grid-column:2;grid-row:4}
+ .operations-live .operations-research{grid-column:1/-1;grid-row:5}
+}
+@media(max-width:600px){.current-flight-statuses{grid-template-columns:minmax(0,1fr);gap:0}.current-flight-tools>*{flex:1 1 12rem}.operations-cockpit{padding:1rem}}
+
 /* Shared scientific explanations: ordinary language first, exact retained metadata on demand. */
 .scientific-research-context{margin:.65rem 0;padding:.6rem .8rem;border-left:3px solid var(--accent,#62dec6);background:var(--panel-soft,rgba(98,222,198,.04));min-width:0}
 .scientific-source-label,.scientific-category>strong{color:var(--accent,#a7deda);font-weight:650}

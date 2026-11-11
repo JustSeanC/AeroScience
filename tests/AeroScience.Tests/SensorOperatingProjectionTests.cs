@@ -9,6 +9,29 @@ public sealed class SensorOperatingProjectionTests
 {
     static readonly DateTimeOffset At=DateTimeOffset.UtcNow;
     readonly Guid mission=Guid.NewGuid(),session=Guid.NewGuid();
+    [Fact]public void ScannerGuidanceReusesExactGeometryAndCannotClaimSourceAvailability()
+    {
+        var report=Report("terrain-scanner",Frame(1000) with{GroundspeedKnots=250},remote:new("terrain-scanner",ObservationQuality.Unavailable,"No source",null,0,2,3));
+        var before=JsonSerializer.Serialize(report,WireJson.Options);var card=Project(report);var g=Assert.IsType<ScannerSpacingGuidance>(card.ScannerSpacing);
+        var b=SensorGeometry.ForInstrument(report.Input.Frame!,report.Configuration.Settings).Boundary;
+        Assert.Equal((Geodesy.Distance(b[0],b[3])+Geodesy.Distance(b[1],b[2]))/2,g.ModeledAlongTrackMetres);
+        Assert.Equal(250*.5144444444444445,g.PredictedSpacingMetres);
+        Assert.Equal(g.PredictedSpacingMetres>g.ModeledAlongTrackMetres,g.MayNotOverlap);
+        Assert.Equal(mission,g.MissionId);Assert.Equal(session,g.SessionId);Assert.Equal(report.Configuration.Id,g.ConfigurationId);
+        Assert.Equal(SensorScientificDataState.Unavailable,card.ScientificData.Status);
+        Assert.Equal(before,JsonSerializer.Serialize(report,WireJson.Options));
+    }
+    [Fact]public void ScannerGuidanceWithholdsStalePausedWrongSessionAndInvalidGeometryClaims()
+    {
+        var report=Report("terrain-scanner");
+        Assert.Null(Project(report,now:At.AddSeconds(7)).ScannerSpacing);
+        Assert.Null(Project(report,phase:CollectionPhase.Paused).ScannerSpacing);
+        Assert.Null(Project(report,currentSession:Guid.NewGuid()).ScannerSpacing);
+        Assert.Null(Project(report,connection:ConnectionState.Disconnected).ScannerSpacing);
+        Assert.Null(Project(Report()).ScannerSpacing);
+        var invalid=Assert.IsType<ScannerSpacingGuidance>(Project(Report("terrain-scanner",Frame(null))).ScannerSpacing);
+        Assert.Null(invalid.ModeledAlongTrackMetres);Assert.Null(invalid.MayNotOverlap);
+    }
     TelemetryFrame Frame(double? agl=1000,double pitch=0)=>SimulatedTelemetryProvider.Generate(At,0) with{AltitudeAglFeet=agl,PitchDegrees=pitch,BankDegrees=0};
     InstrumentOperatingReport Report(string id="thermal-imager",TelemetryFrame? frame=null,InstrumentProfile? profile=null,MissionPlan? plan=null,RemoteInstrumentStatus? remote=null,double? interval=null)
     {

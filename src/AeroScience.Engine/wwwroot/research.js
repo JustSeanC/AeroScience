@@ -1297,6 +1297,7 @@ async function refreshLive(id) {
     ctx.api(`/api/science/products?limit=30&missionId=${id}`),
   ]);
   if (liveId !== id) return;
+  operations?.scannerProducts?.(products);
   track = trackCursor ? [...track, ...points.points] : points.points;
   if (track.length > 3000)
     track = track.filter((_, i) => i % 2 === 0 || i === track.length - 1);

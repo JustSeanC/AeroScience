@@ -2,7 +2,7 @@
 export const localeData = {
   "manifest": {
     "version": 1,
-    "catalogVersion": 4,
+    "catalogVersion": 5,
     "fallback": "en-US",
     "locales": [
       {
@@ -1144,12 +1144,144 @@ export const localeData = {
       "missions.preparationChanged": {
         "context": "Late/stale preparation context warning. A server-side saved preparation may exist; do not imply recording, collection or a new selection succeeded.",
         "parameters": []
+      },
+      "flight.cockpit": {
+        "context": "P04 flight presentation only; preserve recording/science separation and scientific uncertainty. flight.cockpit",
+        "parameters": []
+      },
+      "flight.tools": {
+        "context": "P04 flight presentation only; preserve recording/science separation and scientific uncertainty. flight.tools",
+        "parameters": []
+      },
+      "flight.map": {
+        "context": "P04 flight presentation only; preserve recording/science separation and scientific uncertainty. flight.map",
+        "parameters": []
+      },
+      "flight.observation": {
+        "context": "P04 flight presentation only; preserve recording/science separation and scientific uncertainty. flight.observation",
+        "parameters": []
+      },
+      "flight.evidence": {
+        "context": "P04 flight presentation only; preserve recording/science separation and scientific uncertainty. flight.evidence",
+        "parameters": []
+      },
+      "flight.instrumentSetup": {
+        "context": "P04 flight presentation only; preserve recording/science separation and scientific uncertainty. flight.instrumentSetup",
+        "parameters": []
+      },
+      "flight.aircraftElapsed": {
+        "context": "P04 flight presentation only; preserve recording/science separation and scientific uncertainty. flight.aircraftElapsed",
+        "parameters": [
+          "aircraft",
+          "elapsed"
+        ]
+      },
+      "flight.elapsed": {
+        "context": "P04 flight presentation only; preserve recording/science separation and scientific uncertainty. flight.elapsed",
+        "parameters": [
+          "seconds"
+        ]
+      },
+      "flight.session": {
+        "context": "P04 flight presentation only; preserve recording/science separation and scientific uncertainty. flight.session",
+        "parameters": [
+          "id",
+          "sequence"
+        ]
+      },
+      "flight.noSession": {
+        "context": "P04 flight presentation only; preserve recording/science separation and scientific uncertainty. flight.noSession",
+        "parameters": []
+      },
+      "flight.connection.connected": {
+        "context": "P04 flight presentation only; preserve recording/science separation and scientific uncertainty. flight.connection.connected",
+        "parameters": []
+      },
+      "flight.connection.disconnected": {
+        "context": "P04 flight presentation only; preserve recording/science separation and scientific uncertainty. flight.connection.disconnected",
+        "parameters": []
+      },
+      "flight.connection.stale": {
+        "context": "P04 flight presentation only; preserve recording/science separation and scientific uncertainty. flight.connection.stale",
+        "parameters": []
+      },
+      "flight.connection.paused": {
+        "context": "P04 flight presentation only; preserve recording/science separation and scientific uncertainty. flight.connection.paused",
+        "parameters": []
+      },
+      "flight.connection.unknown": {
+        "context": "P04 flight presentation only; preserve recording/science separation and scientific uncertainty. flight.connection.unknown",
+        "parameters": []
+      },
+      "flight.scanner.title": {
+        "context": "P04 flight presentation only; preserve recording/science separation and scientific uncertainty. flight.scanner.title",
+        "parameters": []
+      },
+      "flight.scanner.limits": {
+        "context": "P04 flight presentation only; preserve recording/science separation and scientific uncertainty. flight.scanner.limits",
+        "parameters": []
+      },
+      "flight.scanner.gaps": {
+        "context": "P04 flight presentation only; preserve recording/science separation and scientific uncertainty. flight.scanner.gaps",
+        "parameters": [
+          "footprint",
+          "interval",
+          "spacing"
+        ]
+      },
+      "flight.scanner.prediction": {
+        "context": "P04 flight presentation only; preserve recording/science separation and scientific uncertainty. flight.scanner.prediction",
+        "parameters": [
+          "footprint",
+          "interval",
+          "spacing"
+        ]
+      },
+      "flight.scanner.unknown": {
+        "context": "P04 flight presentation only; preserve recording/science separation and scientific uncertainty. flight.scanner.unknown",
+        "parameters": []
+      },
+      "flight.scanner.recorded": {
+        "context": "P04 flight presentation only; preserve recording/science separation and scientific uncertainty. flight.scanner.recorded",
+        "parameters": [
+          "metres",
+          "seconds"
+        ]
+      },
+      "flight.scanner.noRecorded": {
+        "context": "P04 flight presentation only; preserve recording/science separation and scientific uncertainty. flight.scanner.noRecorded",
+        "parameters": []
+      },
+      "flight.scanner.source": {
+        "context": "P04 flight presentation only; preserve recording/science separation and scientific uncertainty. flight.scanner.source",
+        "parameters": [
+          "missed",
+          "rejected",
+          "status"
+        ]
+      },
+      "flight.enabledInstruments": {
+        "context": "P04 flight presentation; enabled is separate from operating or scientifically valid. flight.enabledInstruments",
+        "parameters": [
+          "names"
+        ]
+      },
+      "flight.noneEnabled": {
+        "context": "P04 flight presentation; enabled is separate from operating or scientifically valid. flight.noneEnabled",
+        "parameters": []
+      },
+      "flight.retainedProducts": {
+        "context": "P04 flight presentation; enabled is separate from operating or scientifically valid. flight.retainedProducts",
+        "parameters": [
+          "derived",
+          "products"
+        ]
       }
     }
   },
   "catalogs": {
     "en-US": {
-      "version": 4,
+      "version": 5,
       "locale": "en-US",
       "messages": {
         "common.messageUnavailable": "Details are unavailable. Refresh to review the current information.",
@@ -1421,7 +1553,33 @@ export const localeData = {
         "missions.goal.survey": "Investigate each selected quantity using its own qualified sampled locations and sources.",
         "missions.goal.notes": "Document observations with notes and available position; keep optional measurements separate.",
         "missions.goal.model": "Compare original temperature input with the declared fictional response model.",
-        "missions.preparationChanged": "The preparation context changed while the request was pending. Review the original selection and explicitly prepare the current choices; no recording or science was started."
+        "missions.preparationChanged": "The preparation context changed while the request was pending. Review the original selection and explicitly prepare the current choices; no recording or science was started.",
+        "flight.cockpit": "Flight recording & science collection",
+        "flight.tools": "Flight tools",
+        "flight.map": "Map, route & waypoints",
+        "flight.observation": "Record a pilot observation",
+        "flight.evidence": "Timeline & original evidence",
+        "flight.instrumentSetup": "Instruments, intervals & calibration",
+        "flight.aircraftElapsed": "Aircraft: {aircraft} · Flight duration: {elapsed}",
+        "flight.elapsed": "{seconds} s",
+        "flight.session": "Science session {sequence} · {id}",
+        "flight.noSession": "No confirmed active scientific session.",
+        "flight.connection.connected": "MSFS connected · current aircraft telemetry",
+        "flight.connection.disconnected": "MSFS disconnected · recording and science are separate",
+        "flight.connection.stale": "MSFS telemetry is stale · live aircraft position unavailable",
+        "flight.connection.paused": "MSFS paused · new qualifying science is unconfirmed",
+        "flight.connection.unknown": "Current simulator state is unconfirmed · synchronize the companion",
+        "flight.scanner.title": "Terrain Scanner spacing guidance",
+        "flight.scanner.limits": "Advisory only. Modeled footprint overlap is not measured coverage. A shorter interval cannot guarantee uninterrupted acquisitions. DEM/DSM elevations are historical external data, not live LiDAR returns.",
+        "flight.scanner.gaps": "Predicted spacing: {spacing} m at the configured {interval} s interval; modeled along-track footprint: {footprint} m. At this speed, altitude and orientation, individual acquisitions may not overlap.",
+        "flight.scanner.prediction": "Predicted spacing: {spacing} m at the configured {interval} s interval; modeled along-track footprint: {footprint} m. Source masks, turns and delays can still leave gaps.",
+        "flight.scanner.unknown": "Predicted spacing is unavailable. Fresh aircraft, AGL, orientation and matching scanner configuration evidence are required; flight recording alone cannot establish coverage.",
+        "flight.scanner.recorded": "Saved product packet spacing: {metres} m between centers over {seconds} s for the last two supported products in this session and source. This is straight-line spacing, not measured coverage or current-profile compliance; packet time differs from processing time.",
+        "flight.scanner.noRecorded": "Saved product spacing is unavailable: two distinct supported products from the same session and source are required. No acquisition is inferred from the flight track.",
+        "flight.scanner.source": "Scientific source: {status} · rejected acquisitions: {rejected} · missed intervals: {missed}. Source readiness and acquisition timing are independent.",
+        "flight.enabledInstruments": "Enabled instruments: {names}",
+        "flight.noneEnabled": "None enabled",
+        "flight.retainedProducts": "Saved external products: {products} · modeled/derived observations: {derived}"
       }
     }
   }

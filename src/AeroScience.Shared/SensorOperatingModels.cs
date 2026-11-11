@@ -12,6 +12,11 @@ public sealed record SensorOperatingCard(string InstrumentId, string Name, bool 
 {
     // Original acquisition diagnostics; never derived from ordinary flight telemetry.
     public InstrumentState? Acquisition {get;init;}
+    // Advisory geometry only. Never an acquisition, coverage, readiness or command decision.
+    public ScannerSpacingGuidance? ScannerSpacing {get;init;}
 }
+public sealed record ScannerSpacingGuidance(int Version, Guid MissionId, Guid SessionId, Guid ConfigurationId,
+    DateTimeOffset EvidenceUtc, double ConfiguredIntervalSeconds, double? PredictedSpacingMetres,
+    double? ModeledAlongTrackMetres, bool? MayNotOverlap);
 public sealed record SensorOperatingOverview(int Version, DateTimeOffset GeneratedUtc, Guid? MissionId,
     Guid? SessionId, CollectionPhase? Phase, SensorOperatingCard[] Instruments, string[] Limitations);

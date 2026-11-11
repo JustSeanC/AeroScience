@@ -1,5 +1,6 @@
 import {node, numeric, dateTime, link, newIdentity,informationDetails,scientificNotice} from './workstation-ui.js';
 import {renderSensorOperating,markSensorOperatingStale} from './sensor-operating-status.js';
+import {missionPresentation} from './presentation-state.js';
 const labels={startData:'Start Science Collection',pauseData:'Pause science collection',resumeData:'Resume science collection',endData:'End current science session',rearmAutomation:'Rearm automatic collection'};
 const confirmations={startData:'Science collection started.',pauseData:'Science collection paused.',resumeData:'Science collection resumed.',endData:'Science session ended.',rearmAutomation:'Automatic collection rearmed.'};
 export function metricText(m){
@@ -41,7 +42,10 @@ export function missionIntelligence(parent,api,{id='mission-intelligence',after=
   const session=collection?.currentSession;
   sessionLine.textContent=s?`Science: ${s.phase}${session?' · Session '+session.sequence:''}`:'Start recording before collecting science.';
   authority.textContent=s?`Automation: ${s.authority}${s.manualAutomationHold?' · pilot override — rearm required':''}${s.continuityHold?' · continuity hold':''}${collection.fault?' · storage hold; resolve storage before rearm':''}. ${(s.holds||[]).map(h=>h.reason).join(' ')}`:'';
-  for(const [action,button]of controls){const available=collection?.actions?.find(a=>a.action===action);button.disabled=busy||!available?.available;button.title=available?.reason||'No active flight.';button.hidden=!m||(action==='startData'?!!s?.currentSessionId:action==='pauseData'?s?.phase!=='collecting':action==='resumeData'?s?.phase!=='paused':action==='endData'?!s?.currentSessionId:!s?.manualAutomationHold&&!s?.continuityHold&&!data.triggers.length);}
+  const view=missionPresentation(data,{pending:busy});
+  const preferred=s?.phase==='collecting'?'pauseData':s?.phase==='paused'?'resumeData':'startData';
+  const nextAction=view.scienceActions.includes(preferred)?preferred:view.scienceActions.includes('rearmAutomation')?'rearmAutomation':preferred;
+  for(const [action,button]of controls){const available=collection?.actions?.find(a=>a.action===action);button.disabled=busy||!view.scienceActions.includes(action)||!available?.available;button.classList.toggle('primary',action===nextAction);button.dataset.collectionAction=action;button.title=available?.reason||'No active flight.';button.hidden=!m||(action==='startData'?!!s?.currentSessionId:action==='pauseData'?s?.phase!=='collecting':action==='resumeData'?s?.phase!=='paused':action==='endData'?!s?.currentSessionId:!s?.manualAutomationHold&&!s?.continuityHold&&!data.triggers.length);}
   actions.hidden=!m;reasonLabel.hidden=!m||s?.phase!=='collecting';
   if(collection?.fault||s?.continuityHold)scientificNotice(warning,'critical',{problem:collection.fault||'Collection is held for missing continuity evidence.',consequence:'Qualifying collection cannot continue normally.',action:'Review the hold and explicitly rearm when ready.'});else scientificNotice(warning,'important',{problem:''});
   replace(sections.sessions,JSON.stringify(collection?.sessions),body=>{for(const item of collection?.sessions||[])body.append(node('p',`Session ${item.sequence} · ${item.id} · ${item.status} · ${dateTime(item.startedUtc)} → ${item.endedUtc?dateTime(item.endedUtc):'open'} · ${item.endReason||'not ended'}`));});

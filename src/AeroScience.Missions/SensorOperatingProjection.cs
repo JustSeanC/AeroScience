@@ -77,18 +77,36 @@ public static class SensorOperatingProjection
             var guidance = state == SensorOperatingState.Caution ? caution!.Guidance :
                 state == SensorOperatingState.CannotAssess && fresh ? unassessed.FirstOrDefault()?.Guidance :
                 state == SensorOperatingState.CannotAssess ? "Check the simulator connection and wait for fresh evidence. No flight maneuver can be recommended from missing evidence." : null;
+            var acquisition=flight.Research?.Instruments.FirstOrDefault(i=>i.InstrumentId==config.InstrumentId);
             return new SensorOperatingCard(config.InstrumentId, ScienceCatalog.Definitions.Single(d => d.Id == config.InstrumentId).Name,
                 config.Enabled, config.Payload is {} payload ? (payload.Custom ? "Custom · " : "") + payload.Profile.Name : "Simulator channels — no physical hardware profile",
                 config.Payload?.Profile.Version, phase, session, effective, state, primary, guidance,
                 state==SensorOperatingState.Caution?checks.Where(c=>Concern(c.Status)).Skip(1).Select(c=>c.Explanation+" "+c.Guidance).ToArray():[],unknown.Distinct().ToArray(),
                 checks.Count(c => c.Status == AssessmentStatus.Supported || Concern(c.Status)), unassessed.Length+missing.Length,
                 Data(report, fresh && supportedVersion, flight.Research?.Instruments.FirstOrDefault(i => i.InstrumentId == config.InstrumentId), config, state, now,flight.Research?.ScienceStorageError),
-                report?.Assessment.AssessedUtc, evidenceUtc, fresh, report){Acquisition=flight.Research?.Instruments.FirstOrDefault(i=>i.InstrumentId==config.InstrumentId)};
+                report?.Assessment.AssessedUtc, evidenceUtc, fresh, report){Acquisition=acquisition,
+                    ScannerSpacing=config.InstrumentId=="terrain-scanner"&&config.Enabled&&fresh&&collection?.Phase==CollectionPhase.Collecting&&supportedVersion&&session is {} currentSession&&report is not null
+                        ? Spacing(report,flight.ActiveMission!.Id,currentSession) : null};
         }).ToArray();
         return new(1, now, flight.ActiveMission?.Id, session, collection?.Phase, cards,
             ["Operating status describes supported checks, not physical hardware health, certification or measurement accuracy.",
              "Unknown internal temperature is not a failure. Source QA is independent of aircraft/instrument operation.",
              "Historical Landsat observations are not live FLIR imagery; imported elevation is not airborne RIEGL laser returns."]);
+    }
+    private static ScannerSpacingGuidance Spacing(InstrumentOperatingReport report,Guid mission,Guid session)
+    {
+        var frame=report.Input.Frame!;var settings=report.Configuration.Settings;
+        var interval=settings.IntervalMs/1000d;
+        double? spacing=double.IsFinite(frame.GroundspeedKnots)&&frame.GroundspeedKnots>=0
+            ? frame.GroundspeedKnots*.5144444444444445*interval : null;
+        double? along=null;
+        // Reuse the existing sensor-plane geometry; do not invent a second scanner model.
+        try{var b=SensorGeometry.ForInstrument(frame,settings).Boundary;
+            var length=(Geodesy.Distance(b[0],b[3])+Geodesy.Distance(b[1],b[2]))/2;
+            if(double.IsFinite(length)&&length>0)along=length;
+        }catch(Exception e)when(e is ArgumentException or InvalidOperationException){/* Missing/invalid AGL or orientation is not measured coverage. */}
+        return new(1,mission,session,report.Configuration.Id,frame.TimestampUtc,interval,spacing,along,
+            spacing is {} distance&&along is {} footprint?distance>footprint:null);
     }
     private static bool Same<T>(T a, T b) => JsonSerializer.Serialize(a, WireJson.Options) == JsonSerializer.Serialize(b, WireJson.Options);
     private static bool Fresh(DateTimeOffset time, DateTimeOffset now) => (now - time).TotalSeconds is >= -2 and <= 6;

@@ -1105,6 +1105,138 @@
     "missions.preparationChanged": {
       "context": "Late/stale preparation context warning. A server-side saved preparation may exist; do not imply recording, collection or a new selection succeeded.",
       "parameters": []
+    },
+    "flight.cockpit": {
+      "context": "P04 flight presentation only; preserve recording/science separation and scientific uncertainty. flight.cockpit",
+      "parameters": []
+    },
+    "flight.tools": {
+      "context": "P04 flight presentation only; preserve recording/science separation and scientific uncertainty. flight.tools",
+      "parameters": []
+    },
+    "flight.map": {
+      "context": "P04 flight presentation only; preserve recording/science separation and scientific uncertainty. flight.map",
+      "parameters": []
+    },
+    "flight.observation": {
+      "context": "P04 flight presentation only; preserve recording/science separation and scientific uncertainty. flight.observation",
+      "parameters": []
+    },
+    "flight.evidence": {
+      "context": "P04 flight presentation only; preserve recording/science separation and scientific uncertainty. flight.evidence",
+      "parameters": []
+    },
+    "flight.instrumentSetup": {
+      "context": "P04 flight presentation only; preserve recording/science separation and scientific uncertainty. flight.instrumentSetup",
+      "parameters": []
+    },
+    "flight.aircraftElapsed": {
+      "context": "P04 flight presentation only; preserve recording/science separation and scientific uncertainty. flight.aircraftElapsed",
+      "parameters": [
+        "aircraft",
+        "elapsed"
+      ]
+    },
+    "flight.elapsed": {
+      "context": "P04 flight presentation only; preserve recording/science separation and scientific uncertainty. flight.elapsed",
+      "parameters": [
+        "seconds"
+      ]
+    },
+    "flight.session": {
+      "context": "P04 flight presentation only; preserve recording/science separation and scientific uncertainty. flight.session",
+      "parameters": [
+        "id",
+        "sequence"
+      ]
+    },
+    "flight.noSession": {
+      "context": "P04 flight presentation only; preserve recording/science separation and scientific uncertainty. flight.noSession",
+      "parameters": []
+    },
+    "flight.connection.connected": {
+      "context": "P04 flight presentation only; preserve recording/science separation and scientific uncertainty. flight.connection.connected",
+      "parameters": []
+    },
+    "flight.connection.disconnected": {
+      "context": "P04 flight presentation only; preserve recording/science separation and scientific uncertainty. flight.connection.disconnected",
+      "parameters": []
+    },
+    "flight.connection.stale": {
+      "context": "P04 flight presentation only; preserve recording/science separation and scientific uncertainty. flight.connection.stale",
+      "parameters": []
+    },
+    "flight.connection.paused": {
+      "context": "P04 flight presentation only; preserve recording/science separation and scientific uncertainty. flight.connection.paused",
+      "parameters": []
+    },
+    "flight.connection.unknown": {
+      "context": "P04 flight presentation only; preserve recording/science separation and scientific uncertainty. flight.connection.unknown",
+      "parameters": []
+    },
+    "flight.scanner.title": {
+      "context": "P04 flight presentation only; preserve recording/science separation and scientific uncertainty. flight.scanner.title",
+      "parameters": []
+    },
+    "flight.scanner.limits": {
+      "context": "P04 flight presentation only; preserve recording/science separation and scientific uncertainty. flight.scanner.limits",
+      "parameters": []
+    },
+    "flight.scanner.gaps": {
+      "context": "P04 flight presentation only; preserve recording/science separation and scientific uncertainty. flight.scanner.gaps",
+      "parameters": [
+        "footprint",
+        "interval",
+        "spacing"
+      ]
+    },
+    "flight.scanner.prediction": {
+      "context": "P04 flight presentation only; preserve recording/science separation and scientific uncertainty. flight.scanner.prediction",
+      "parameters": [
+        "footprint",
+        "interval",
+        "spacing"
+      ]
+    },
+    "flight.scanner.unknown": {
+      "context": "P04 flight presentation only; preserve recording/science separation and scientific uncertainty. flight.scanner.unknown",
+      "parameters": []
+    },
+    "flight.scanner.recorded": {
+      "context": "P04 flight presentation only; preserve recording/science separation and scientific uncertainty. flight.scanner.recorded",
+      "parameters": [
+        "metres",
+        "seconds"
+      ]
+    },
+    "flight.scanner.noRecorded": {
+      "context": "P04 flight presentation only; preserve recording/science separation and scientific uncertainty. flight.scanner.noRecorded",
+      "parameters": []
+    },
+    "flight.scanner.source": {
+      "context": "P04 flight presentation only; preserve recording/science separation and scientific uncertainty. flight.scanner.source",
+      "parameters": [
+        "missed",
+        "rejected",
+        "status"
+      ]
+    },
+    "flight.enabledInstruments": {
+      "context": "P04 flight presentation; enabled is separate from operating or scientifically valid. flight.enabledInstruments",
+      "parameters": [
+        "names"
+      ]
+    },
+    "flight.noneEnabled": {
+      "context": "P04 flight presentation; enabled is separate from operating or scientifically valid. flight.noneEnabled",
+      "parameters": []
+    },
+    "flight.retainedProducts": {
+      "context": "P04 flight presentation; enabled is separate from operating or scientifically valid. flight.retainedProducts",
+      "parameters": [
+        "derived",
+        "products"
+      ]
     }
   }
 }
