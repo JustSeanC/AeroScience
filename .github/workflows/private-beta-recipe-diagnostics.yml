@@ -1,0 +1,13 @@
+name: private-beta-recipe-diagnostics
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  structural-recipe:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Compile and inspect private recipes without installing or publishing
+        shell: pwsh
+        run: ./scripts/build/Test-BetaInstallerRecipe.ps1
