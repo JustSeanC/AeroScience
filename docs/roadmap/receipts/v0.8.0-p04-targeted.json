@@ -1,0 +1,150 @@
+{
+  "checkpoint": "v0.8.0 P04",
+  "branch": "develop/v0.8.0",
+  "baselineCommit": "56c4d478ffe456db5806d730ca2384e5e3e2b6bc",
+  "p04aCommit": "34825b2e0b9d1de44995c638f1a07a0fd7c6a424",
+  "p04bImplementationCommit": "fde825a29fa0f79f1dea42db4248f24af86b2f7f",
+  "p04a": {
+    "dotnet": {
+      "total": 52,
+      "executed": 52,
+      "passed": 52,
+      "failed": 0,
+      "error": 0,
+      "timeout": 0,
+      "aborted": 0,
+      "inconclusive": 0,
+      "passedButRunAborted": 0,
+      "notRunnable": 0,
+      "notExecuted": 0,
+      "disconnected": 0,
+      "warning": 0,
+      "completed": 0,
+      "inProgress": 0,
+      "pending": 0
+    },
+    "nodePassed": 36,
+    "browser": {
+      "startTime": "2026-11-11T12:01:42.001Z",
+      "duration": 208834.02,
+      "expected": 47,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    }
+  },
+  "p04b": {
+    "dotnet": {
+      "total": 52,
+      "executed": 52,
+      "passed": 52,
+      "failed": 0,
+      "error": 0,
+      "timeout": 0,
+      "aborted": 0,
+      "inconclusive": 0,
+      "passedButRunAborted": 0,
+      "notRunnable": 0,
+      "notExecuted": 0,
+      "disconnected": 0,
+      "warning": 0,
+      "completed": 0,
+      "inProgress": 0,
+      "pending": 0
+    },
+    "nodePassed": 37,
+    "nativeCompilationStagingCasesPassed": 4,
+    "initialBroaderBrowser": {
+      "startTime": "2026-11-11T12:19:42.838Z",
+      "duration": 274654.34699999995,
+      "expected": 67,
+      "skipped": 0,
+      "unexpected": 2,
+      "flaky": 0
+    },
+    "correctedIntegrationBrowser": {
+      "startTime": "2026-11-11T12:28:01.565Z",
+      "duration": 159291.927,
+      "expected": 49,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "completedNativeBrowser": {
+      "startTime": "2026-11-11T12:37:31.669Z",
+      "duration": 70262.001,
+      "expected": 30,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "completedDashboardBrowser": {
+      "startTime": "2026-11-11T12:41:15.990Z",
+      "duration": 25625.179,
+      "expected": 5,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "automaticWaiting": {
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "receipt": "artifacts/p04-automation-waiting.log"
+    }
+  },
+  "receiptFiles": [
+    {
+      "path": "artifacts/p04a-dotnet/p04a-contracts.trx",
+      "sha256": "6b6a22c4169f7356b7f4a803c12efabccc9249cd31545fb918448d6a7ed169a7"
+    },
+    {
+      "path": "artifacts/p04b-dotnet/p04b-contracts.trx",
+      "sha256": "3406329cf23bde69f5d511327b3efd04b6f1be5ab94171b3bee5071d7ea6e5ab"
+    },
+    {
+      "path": "artifacts/p04a-browser-final.json",
+      "sha256": "96ed7a95e818d2ba7b592160f46438ba9297070d9425e03a45b895d8efe6b540"
+    },
+    {
+      "path": "artifacts/p04b-browser-first.json",
+      "sha256": "ec82d33f9af326872fae4563bf9adc2c1ce28510d9fe5c4481ea1f24c165a6a9"
+    },
+    {
+      "path": "artifacts/p04b-browser-final.json",
+      "sha256": "8d74165b3b95042acb8d9faa0b4a46f14d2a77e6e0f275f824a0078d039d8aaf"
+    },
+    {
+      "path": "artifacts/p04b-toolbar-completed.json",
+      "sha256": "3e831be40249560a5f035d31ba7ec08ce512307b7cca6fe022117dc2ae4bf2b7"
+    },
+    {
+      "path": "artifacts/p04-completed-dashboard.json",
+      "sha256": "c74204e856c346009d7b06c753ddea5c6b52b2db1e722ba37c17fdd44f76cf67"
+    },
+    {
+      "path": "artifacts/p04b-check-web-completed.log",
+      "sha256": "40dacbe83112d22cf499d9e3e86a84027cfbfa85a3295cf9bb045aab5acf2676"
+    },
+    {
+      "path": "artifacts/p04-automation-waiting.log",
+      "sha256": "e76adb42eec276edb79d8b46be0be87651a8bde6fcf014dc6aae132e7b341757"
+    }
+  ],
+  "catalog": {
+    "version": 6,
+    "englishMessages": 311,
+    "nonEnglishLocales": "en-US fallback previews; not full translations"
+  },
+  "fullCi": {
+    "status": "pending on completed integration source; completion receipt must supply exact SHA, run and job URLs"
+  },
+  "captures": [
+    "../images/p04a/capture-manifest.json",
+    "../images/p04b/capture-manifest.json"
+  ],
+  "installedWindowsMsfsAcceptance": "NOT TESTED",
+  "v071ForwardPortPerformed": false,
+  "protectedBranchesReleasesInstallersOwnerDataChanged": false,
+  "note": "Local selections overlap and were run against the evolving working tree; exact completed-source Full CI is the final integration gate."
+}
