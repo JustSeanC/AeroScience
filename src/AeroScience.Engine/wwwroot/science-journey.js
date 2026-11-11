@@ -7,7 +7,7 @@ export function scienceJourney(parent,api){
  const title=node('h2','Ready to Start'),steps=node('ol'),summary=node('p'),connection=node('p'),recording=node('p'),collection=node('p'),count=node('p'),next=node('p'),actions=node('div',undefined,'action-row'),results=node('div',undefined,'action-row');
  // The existing collection controller moves its own command buttons here.
  // This is one command authority, not another recorder or optimistic shortcut.
- const collectionControls=node('div');collectionControls.id='science-journey-controls';collectionControls.setAttribute('aria-label','Science collection actions');
+ const collectionControls=node('div');collectionControls.id='science-journey-controls';collectionControls.setAttribute('role','group');collectionControls.setAttribute('aria-label','Science collection actions');
  for(const label of ['Choose Research','Prepare for Flight','Start Recording','Collect Science','Review Results'])steps.append(node('li',label));
  recording.setAttribute('role','status');collection.setAttribute('role','status');count.dataset.retainedScience='';
  const explanation=informationDetails(root,'Recording, source & count details',node('p','Flight samples are recorded aircraft telemetry. Original scientific observations, modeled/derived observations and remote products are separate retained records. Counts alone do not establish quality or research completion.'));
