@@ -137,6 +137,8 @@ jobs:
       AEROSCIENCE_ORG_TEST_DATABASE: Host=127.0.0.1;Port=55437;Database=aeroscience_org_tests;Username=aeroscience_test;Password=p13_disposable_loopback_only
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
       - uses: actions/setup-dotnet@v6
         with:
           global-json-file: global.json
@@ -147,6 +149,8 @@ jobs:
       - run: dotnet restore AeroScience.sln --locked-mode
       - name: Verify independently compiled private validation identity
         run: dotnet run --project tests/AeroScience.TestHost -c Release --artifacts-path artifacts/validation-probe -p:AeroScienceValidation=true -p:RestoreLockedMode=true -- --profile-probe
+      - name: Verify independently compiled 0.7.1-beta.2 isolation and explicit toolbar switch
+        run: dotnet run --project tests/AeroScience.TestHost -c Release --artifacts-path artifacts/private-beta2-probe -p:AeroScienceValidation=true -p:AeroSciencePrivateBetaVersion=0.7.1-beta.2 -p:RestoreLockedMode=true -- --profile-probe
       - name: Install pinned native recovery tools for actual PostgreSQL restore acceptance
         run: python3 scripts/deployment/install_recovery_test_tools.py
       - name: Prepare accepted baseline and isolated future binary for actual update recovery
@@ -200,6 +204,8 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
       - uses: actions/setup-dotnet@v6
         with:
           global-json-file: global.json
@@ -238,6 +244,9 @@ jobs:
       - name: Compile isolated validation identity and Windows application (not distributable)
         shell: pwsh
         run: ./scripts/build/Publish-ValidationCompanion.ps1 -ArtifactsPath artifacts/validation-probe -OutputDirectory artifacts/Windows-Validation-Structural
+      - name: Compile 0.7.1-beta.2 identity and Windows application (structural, not distributable)
+        shell: pwsh
+        run: ./scripts/build/Publish-ValidationCompanion.ps1 -PrivateBetaVersion 0.7.1-beta.2 -ArtifactsPath artifacts/private-beta2-probe -OutputDirectory artifacts/Windows-0.7.1-beta.2-Structural
       - name: Verify Windows Earthdata vault with disposable synthetic credentials
         shell: pwsh
         run: |
@@ -298,6 +307,16 @@ jobs:
           Set-Content "$fixture\VC_redist.x64.exe" 'NOT A RUNTIME; NEVER EXECUTE THIS FIXTURE INSTALLER'
           & $compiler "/DPayloadDir=$fixture" "/DVcRuntime=$fixture\VC_redist.x64.exe" "/DReleaseVersion=$(([xml](Get-Content Directory.Build.props -Raw)).Project.PropertyGroup.Version)" "/DPackageVersion=$(([xml](Get-Content Directory.Build.props -Raw)).Project.PropertyGroup.Version)" "/DOutputDirectory=$fixture\output" scripts/installer/AeroScience.iss
           if ($LASTEXITCODE -ne 0) { throw 'Installer recipe compilation failed.' }
+          $betaFixture = Join-Path $fixture 'private-beta'
+          New-Item "$betaFixture\application" -ItemType Directory -Force | Out-Null
+          Set-Content "$betaFixture\application\LICENSE" 'STRUCTURAL COMPILER TEST ONLY; NOT A DISTRIBUTION'
+          Set-Content "$betaFixture\START-HERE.md" 'STRUCTURAL 0.7.1-beta.2 FIXTURE; NEVER INSTALL'
+          & $compiler "/DPayloadDir=$betaFixture" "/DVcRuntime=$fixture\VC_redist.x64.exe" "/DBetaVersion=0.7.1-beta.2" "/DOutputDirectory=$fixture\beta2-output" scripts/installer/AeroScienceBeta.iss
+          if ($LASTEXITCODE -ne 0) { throw '0.7.1-beta.2 installer recipe compilation failed.' }
+          $betaInfo = [Diagnostics.FileVersionInfo]::GetVersionInfo("$fixture\beta2-output\AeroScience-Setup-v0.7.1-beta.2.exe")
+          if ($betaInfo.ProductVersion -ne '0.7.1-beta.2' -or $betaInfo.ProductName -ne 'AeroScience 0.7.1-beta.2') { throw 'Compiled beta recipe version metadata differs.' }
+          & $compiler "/DPayloadDir=$betaFixture" "/DVcRuntime=$fixture\VC_redist.x64.exe" "/DOutputDirectory=$fixture\legacy-beta-output" scripts/installer/AeroScienceBeta.iss
+          if ($LASTEXITCODE -ne 0) { throw 'Historical v0.7.0 Beta 1 installer recipe compilation failed.' }
           # Compile only: no fake SDK receipt, executable launch, acceptance or artifact publication.
       # Public-repository CI validates builds without publishing alpha binaries.
       # Release publication is an explicit maintainer action, not a push side effect.

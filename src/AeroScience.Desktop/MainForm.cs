@@ -37,7 +37,7 @@ public sealed class MainForm : BrandedForm, IDesktopActions, IScientificFolderOp
         Preferences = new(configurationDirectory, ApplicationProfile.Current.Validation ? ApplicationProfile.Current.ConfigurationDirectory : null); Storage = new(Preferences);
         Preferences.ValidateDirectory(configurationDirectory);
         new MapSettings(configurationDirectory).InitializeDefaults(File.Exists(Preferences.SettingsPath) || File.Exists(Path.Combine(configurationDirectory, "missions.db")));
-        Text = ApplicationProfile.Current.Name + " " + Application.ProductVersion.Split('+')[0]; MinimumSize = new(560, 290); Size = new(760, 350);
+        Text = ApplicationProfile.Current.Name + (ApplicationProfile.Current.PrivateBeta ? "" : " " + Application.ProductVersion.Split('+')[0]); MinimumSize = new(560, 290); Size = new(760, 350);
         AutoScaleMode = AutoScaleMode.Dpi;
         var panel = new FlowLayoutPanel { Dock = DockStyle.Fill, Padding = new(24), FlowDirection = FlowDirection.TopDown, WrapContents = false, AutoScroll = true };
         var brand=new FlowLayoutPanel{AutoSize=true,WrapContents=false};brand.Controls.Add(PrimaryMark());

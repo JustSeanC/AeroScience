@@ -4,6 +4,7 @@ param(
     [Parameter(Mandatory)][string]$SdkRoot,
     [switch]$ProofOfConcept,
     [switch]$ValidationProfile,
+    [ValidateSet('0.7.1-beta.2')][string]$PrivateBetaVersion,
     [switch]$WindowProbe,
     [string]$PackageToolPath,
     [string]$HeaderDirectory
@@ -21,8 +22,15 @@ if (-not (Get-Command cl.exe -ErrorAction SilentlyContinue)) { throw 'Run from a
 if (-not (Get-Command python -ErrorAction SilentlyContinue)) { throw 'Python 3 must be installed and available as python on PATH for package validation.' }
 if (-not (Get-Command node -ErrorAction SilentlyContinue)) { throw 'The maintained native toolbar build requires Node and the locked npm build dependencies.' }
 if ($ValidationProfile -and ($ProofOfConcept -or $WindowProbe)) { throw 'Validation requires the complete genuine toolbar.' }
+if ($PrivateBetaVersion -and -not $ValidationProfile) { throw 'Private beta requires the isolated validation toolbar.' }
+$privateArguments = @()
+if ($PrivateBetaVersion) { $privateArguments = @('--beta-version', $PrivateBetaVersion) }
+if ($ValidationProfile) {
+    $identity = (python "$repo/scripts/release/private_validation.py" identity @privateArguments) | ConvertFrom-Json
+    if ($LASTEXITCODE -ne 0) { throw 'Unsupported private toolbar identity.' }
+}
 $variant = if ($ValidationProfile) { 'toolbar-validation' } elseif ($ProofOfConcept) { 'toolbar-poc' } elseif ($WindowProbe) { 'toolbar-window-probe' } else { 'toolbar-full' }
-$stageName = if ($ValidationProfile) { 'toolbar-validation-v070' } else { $variant }
+$stageName = if ($ValidationProfile) { $identity.stage } else { $variant }
 $stage = Join-Path $repo "artifacts/$stageName"
 # This is an isolated generated build directory. No SDK or checkout sources are modified.
 if (Test-Path $stage) { Remove-Item $stage -Recurse -Force }
@@ -51,7 +59,7 @@ if ($ProofOfConcept -or $WindowProbe) {
     (Get-Content $definition -Raw).Replace('AeroScience/AeroScience.html', "AeroScience/$entryPage") | Set-Content $definition -Encoding utf8
 }
 if ($ValidationProfile) {
-    python "$repo/scripts/release/private_validation.py" stage-toolbar --folder $stage --commit ((git -C $repo rev-parse HEAD).Trim())
+    python "$repo/scripts/release/private_validation.py" stage-toolbar --folder $stage --commit ((git -C $repo rev-parse HEAD).Trim()) @privateArguments
     if ($LASTEXITCODE -ne 0) { throw 'Validation namespace staging failed.' }
 }
 node "$repo/scripts/build/native-javascript.mjs" $stage
@@ -63,11 +71,13 @@ try {
     $packageExit = $LASTEXITCODE
     if ($packageExit -ne 0) { throw "Official SDK package build failed (exit $packageExit). Inspect build.log in the staged build directory." }
 } finally { Pop-Location }
-$packageName = if ($ValidationProfile) { 'aeroscience-validation-v0-7-0-toolbar' } else { 'aeroscience-toolbar' }
+$packageName = if ($ValidationProfile) { $identity.toolbar_package } else { 'aeroscience-toolbar' }
 $packages = @(Get-ChildItem $output -Filter manifest.json -Recurse | Where-Object { $_.Directory.Name -eq $packageName })
 if ($packages.Count -ne 1) { throw 'Expected one SDK-built aeroscience-toolbar package.' }
 $package = $packages[0].Directory.FullName
-if ($ValidationProfile) {
+if ($PrivateBetaVersion) {
+    python -c "import sys;from pathlib import Path;sys.path.insert(0,sys.argv[2]);from package_release import validate_community;validate_community(Path(sys.argv[1]),validation=True,private_beta_version=sys.argv[3])" $package "$repo/scripts/release" $PrivateBetaVersion
+} elseif ($ValidationProfile) {
     python -c "import sys; from pathlib import Path; sys.path.insert(0, sys.argv[2]); from package_release import validate_community; validate_community(Path(sys.argv[1]), validation=True)" $package "$repo/scripts/release"
 } else { python "$repo/scripts/release/package_release.py" validate --community $package }
 if ($LASTEXITCODE -ne 0) { throw 'SDK output failed package validation.' }
@@ -78,9 +88,10 @@ Get-ChildItem $package -File -Recurse | ForEach-Object {
 }
 $sourceCommit = if ((Get-Command git -ErrorAction SilentlyContinue) -and (Test-Path (Join-Path $repo '.git'))) { (git -C $repo rev-parse HEAD).Trim() } else { 'unknown' }
 $sourceDirty = if ($sourceCommit -ne 'unknown') { [bool](git -C $repo status --porcelain) } else { $true }
-@{ variant=$variant; source_commit=$sourceCommit; source_dirty=$sourceDirty; builder_sha256=(Get-FileHash $tool -Algorithm SHA256).Hash;
+$receipt = @{ variant=$variant; source_commit=$sourceCommit; source_dirty=$sourceDirty; builder_sha256=(Get-FileHash $tool -Algorithm SHA256).Hash;
     sdk_header_sha256=(Get-FileHash (Join-Path $include 'SimConnect.h') -Algorithm SHA256).Hash;
     sdk_contract='passed'; native_javascript=(Get-Content (Join-Path $stage 'native-javascript.json') -Raw | ConvertFrom-Json);
-    built_utc=[DateTime]::UtcNow.ToString('o'); files=$hashes } |
-    ConvertTo-Json -Depth 8 | Set-Content (Join-Path $stage 'sdk-build.json') -Encoding utf8
+    built_utc=[DateTime]::UtcNow.ToString('o'); files=$hashes }
+if ($PrivateBetaVersion) { $receipt.private_beta_version=$PrivateBetaVersion; $receipt.package_version=$identity.package_version }
+$receipt | ConvertTo-Json -Depth 8 | Set-Content (Join-Path $stage 'sdk-build.json') -Encoding utf8
 Write-Host "SDK-built output: $package. This build does not establish simulator, VR, or device acceptance. Complete docs/verification.md."

@@ -117,6 +117,7 @@ async function connect(code = null) {
   if(build.profile==="validation"){
     dashboardTitle=build.name;
     document.title=build.name;
+    if(build.privateBetaVersion)document.getElementById('application-version').textContent='v'+build.privateBetaVersion;
     let banner=document.getElementById("validation-identity");
     if(!banner){banner=el("p","","notice");banner.id="validation-identity";banner.setAttribute("role","status");document.body.prepend(banner);}
     banner.textContent=`${build.name} · private test profile · port ${build.port} · source ${build.sourceCommit}`;

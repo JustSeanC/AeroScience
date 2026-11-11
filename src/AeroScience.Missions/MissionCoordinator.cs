@@ -49,7 +49,7 @@ public sealed class MissionCoordinator(MissionStore store, int samplingIntervalM
         {
             var count = active?.SampleCount ?? 0;
             var seconds = (lastRecordedUtc - firstRecordedUtc)?.TotalSeconds;
-            return new(connection, frame, active, samplingIntervalMs, Sampling: new(received, count, skipped, missing,
+            return new(connection, frame, active, samplingIntervalMs, Version: ApplicationBuild.Version, Sampling: new(received, count, skipped, missing,
                 count > 1 && seconds > 0 ? (count - 1) / seconds : null, firstRecordedUtc, lastRecordedUtc,
                 active is not null && active.DurationSeconds >= 1 ? count / active.DurationSeconds : null,
                 active is not null && firstRecordedUtc is not null ? Math.Max(0, (firstRecordedUtc.Value - active.StartedUtc).TotalSeconds) : null),

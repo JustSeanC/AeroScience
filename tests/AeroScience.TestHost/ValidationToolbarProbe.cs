@@ -18,22 +18,32 @@ internal static class ValidationToolbarProbe
             var panels=Path.Combine(package,"InGamePanels");Directory.CreateDirectory(panels);
             // Independent literal from SDK staging; do not derive the fixture's
             // filename from the runtime lookup being tested.
-            var registration=Path.Combine(panels,"aeroscience_validation_v070_panel.spb");File.WriteAllBytes(registration,new byte[64]);
+            var registrationName=profile.PrivateBeta?"aeroscience_beta_v071_beta2_panel.spb":"aeroscience_validation_v070_panel.spb";
+            var registration=Path.Combine(panels,registrationName);File.WriteAllBytes(registration,new byte[64]);
             var web=Path.Combine(package,"html_ui","InGamePanels",profile.ToolbarFolder);Directory.CreateDirectory(web);
             File.WriteAllText(Path.Combine(web,"toolbar-compatibility.json"),JsonSerializer.Serialize(new{profile="validation",sourceCommit=ApplicationProfile.SourceCommit,protocol=1}));
             Receipt(input,package);
             var community=Path.Combine(root,"Packages","Community");var production=Path.Combine(community,"aeroscience-toolbar");Directory.CreateDirectory(production);
             var marker=Path.Combine(production,"manifest.json");File.WriteAllText(marker,"{\"title\":\"AeroScience\",\"package_version\":\"0.5.0\"}");var before=File.ReadAllBytes(marker);
+            var old=Path.Combine(community,"aeroscience-validation-v0-7-0-toolbar","preserved.txt");
+            if(profile.PrivateBeta){Directory.CreateDirectory(Path.GetDirectoryName(old)!);File.WriteAllText(old,"Existing v0.7.0 toolbar");}
             void Install()=>ToolbarInstaller.Install(input,community,()=>false,discoverCommunityFolders:()=>[]);
+            if(profile.PrivateBeta){
+                var conflict=false;try{Install();}catch(IOException e){conflict=e.Message.Contains("explicit toolbar switch",StringComparison.Ordinal);}
+                Check(conflict&&File.ReadAllText(old)=="Existing v0.7.0 toolbar"&&before.SequenceEqual(File.ReadAllBytes(marker)),"A toolbar conflict did not preserve the old installations.");
+                var savedProduction=Path.Combine(root,"saved-production");Directory.Move(production,savedProduction);marker=Path.Combine(savedProduction,"manifest.json");
+                var savedValidation=Path.Combine(root,"saved-v070");Directory.Move(Path.GetDirectoryName(old)!,savedValidation);old=Path.Combine(savedValidation,"preserved.txt");
+            }
             Install();Install();
-            var installed=Path.Combine(community,profile.ToolbarPackage,"InGamePanels","aeroscience_validation_v070_panel.spb");
+            var installed=Path.Combine(community,profile.ToolbarPackage,"InGamePanels",registrationName);
             Check(File.Exists(installed)&&ToolbarVersions.Inspect(input,community).Status==ToolbarInstallState.Current,"Validation registration was not installed/verified.");
             var original=File.ReadAllBytes(installed);
             File.Move(registration,Path.Combine(panels,"aeroscience_validation_panel.spb"));Receipt(input,package);
             var rejected=false;try{Install();}catch(IOException e){rejected=e.Message.Contains("registration",StringComparison.OrdinalIgnoreCase);}
             Check(rejected,"A legacy registration name was not rejected clearly.");
             Check(original.SequenceEqual(File.ReadAllBytes(installed))&&before.SequenceEqual(File.ReadAllBytes(marker)),"A rejected package changed the installed validation or production toolbar.");
-            Console.WriteLine("PASS: compiled 0.6 validation toolbar first/repeat install and legacy registration rejection preserve production. Structural fixtures only; no genuine SDK/MSFS acceptance.");
+            if(profile.PrivateBeta)Check(File.ReadAllText(old)=="Existing v0.7.0 toolbar","Beta 2 changed the old validation toolbar.");
+            Console.WriteLine($"PASS: compiled {profile.Name} toolbar first/repeat install and legacy registration rejection preserve existing packages. Structural fixtures only; no genuine SDK/MSFS acceptance.");
         }
         finally{if(Directory.Exists(root))Directory.Delete(root,true);}
     }

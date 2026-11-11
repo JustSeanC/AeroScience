@@ -2,6 +2,7 @@
   <PropertyGroup><RuntimeIdentifiers>win-x64</RuntimeIdentifiers></PropertyGroup>
   <ItemGroup>
     <AssemblyMetadata Include="AeroScienceProfile" Value="validation" Condition="'$(AeroScienceValidation)' == 'true'" />
+    <AssemblyMetadata Include="AeroSciencePrivateBetaVersion" Value="$(AeroSciencePrivateBetaVersion)" Condition="'$(AeroSciencePrivateBetaVersion)' != ''" />
     <ProjectReference Include="../AeroScience.Shared/AeroScience.Shared.csproj" />
     <ProjectReference Include="../AeroScience.Telemetry/AeroScience.Telemetry.csproj" />
     <ProjectReference Include="../AeroScience.Missions/AeroScience.Missions.csproj" />

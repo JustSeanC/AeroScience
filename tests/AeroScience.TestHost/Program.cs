@@ -49,13 +49,17 @@ if (args.Length > 0 && args[0] == "--earthdata-vault-probe")
 if (args.Length > 0 && args[0] == "--profile-probe")
 {
     var profile=ApplicationProfile.Current;
-    if(!profile.Validation || profile.Port!=5086 || profile.ToolbarPackage!="aeroscience-validation-v0-7-0-toolbar" || profile.CommandEvent==AeroScience.SimConnect.CommBusTransport.CommandEvent)
+    if(!profile.Validation || profile.Port!=(profile.PrivateBeta?5087:5086) || profile.ToolbarPackage!=(profile.PrivateBeta?"aeroscience-beta-v0-7-1-beta-2-toolbar":"aeroscience-validation-v0-7-0-toolbar") || profile.CommandEvent==AeroScience.SimConnect.CommBusTransport.CommandEvent)
         throw new InvalidOperationException("The compiled validation profile was not isolated.");
     var preferences=profile.Preferences();var defaults=preferences.Load();
     profile.EngineOptions(defaults with{EnableLan=true,LanAddress="192.168.1.5"}).Validate();
     if(new AccessControl().SessionCookieName==AccessControl.CookieName)throw new InvalidOperationException("Validation reused the production browser cookie.");
     preferences.ValidateDirectory(defaults.MissionDirectory);preferences.ValidateDirectory(defaults.ScienceLibraryDirectory);
     try { preferences.ValidateDirectory(new ApplicationProfile(false).ConfigurationDirectory);throw new InvalidOperationException("Production path accepted."); } catch(IOException){}
+    if(profile.PrivateBeta){
+        if(profile.Version!="0.7.1-beta.2" || profile.Name!="AeroScience 0.7.1-beta.2" || ApplicationUpdates.CurrentVersion!="0.7.1-beta.2")throw new InvalidOperationException("Private beta version was not compiled consistently.");
+        try{preferences.ValidateDirectory(new ApplicationProfile(true).ConfigurationDirectory);throw new InvalidOperationException("v0.7.0 validation path accepted.");}catch(IOException){}
+    }
     ValidationToolbarProbe.Run();
     Console.WriteLine("Compiled validation profile verified: separate roots, port, package and CommBus; shared one-active desktop mutex. No installation or MSFS acceptance claimed.");return;
 }

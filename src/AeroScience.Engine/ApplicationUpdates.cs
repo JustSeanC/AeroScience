@@ -15,7 +15,7 @@ public static class ReleaseVersions
 }
 public sealed class ApplicationUpdates
 {
-    public const string CurrentVersion = "0.7.1";
+    public static string CurrentVersion => ApplicationProfile.Current.Version;
     private readonly string path;
     private readonly HttpClient http;
     private readonly SemaphoreSlim check = new(1, 1);
@@ -50,7 +50,7 @@ public sealed class ApplicationUpdates
     {
         if (ApplicationProfile.Current.Validation)
         {
-            lock (gate) return state = state with { Available=null, Preferences=new(false), Message="Private validation profile. Rebuild from develop/v0.7.0; public installers do not update this profile." };
+            lock (gate) return state = state with { Available=null, Preferences=new(false), Message=ApplicationProfile.Current.PrivateBeta ? "Private 0.7.1-beta.2. Rebuild from build/v0.7.1-beta2; scientific and installed acceptance are pending. Public installers do not update this profile." : "Private validation profile. Rebuild from develop/v0.7.0; public installers do not update this profile." };
         }
         await check.WaitAsync(token);
         try

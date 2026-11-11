@@ -152,13 +152,23 @@ class PrivateValidationTests(unittest.TestCase):
             for name in ('AeroScience.exe', 'AeroScience.Engine.dll'):
                 self.assertEqual('SYNTHETIC PUBLISH FILE', (output/name).read_text().strip())
 
-    def publish_commands(self, failure='', output='validation output', apphosts=False):
+    @unittest.skipUnless(shutil.which('pwsh'), 'PowerShell is required to exercise beta profile propagation')
+    def test_beta2_profile_is_identical_across_locked_restore_probe_and_publish(self):
+        result, commands = self.publish_commands(beta_version='0.7.1-beta.2')
+        self.assertEqual(['restore','run','publish'],[c['argv'][0] for c in commands[:3]])
+        for command in commands[:3]:
+            self.assertIn('-p:AeroScienceValidation=true',command['argv'])
+            self.assertIn('-p:AeroSciencePrivateBetaVersion=0.7.1-beta.2',command['argv'])
+        # Recording command substitutes cannot manufacture real binary metadata.
+        self.assertNotEqual(0,result.returncode)
+
+    def publish_commands(self, failure='', output='validation output', apphosts=False, beta_version=''):
         # Execute the production PowerShell script with recording native-command
         # substitutes. This checks argument boundaries/ordering/error handling;
         # hosted Windows separately executes real restore, probe and PE publishing.
         with tempfile.TemporaryDirectory() as tmp:
             log = Path(tmp)/'commands.json'
-            environment = dict(os.environ, VALIDATION_TEST_ROOT=str(ROOT), VALIDATION_TEST_LOG=str(log), VALIDATION_FAIL_COMMAND=failure, VALIDATION_TEST_OUTPUT=output, VALIDATION_TEST_APPHOSTS='1' if apphosts else '')
+            environment = dict(os.environ, VALIDATION_TEST_ROOT=str(ROOT), VALIDATION_TEST_LOG=str(log), VALIDATION_FAIL_COMMAND=failure, VALIDATION_TEST_OUTPUT=output, VALIDATION_TEST_APPHOSTS='1' if apphosts else '', VALIDATION_TEST_BETA=beta_version)
             driver = r'''
 $global:commands = [Collections.Generic.List[object]]::new()
 function global:dotnet {
@@ -177,7 +187,9 @@ function global:python {
     $global:LASTEXITCODE=0
 }
 try {
-    & (Join-Path $env:VALIDATION_TEST_ROOT 'scripts/build/Publish-ValidationCompanion.ps1') -ArtifactsPath 'isolated artifacts' -OutputDirectory $env:VALIDATION_TEST_OUTPUT
+    $betaArguments=@{}
+    if($env:VALIDATION_TEST_BETA){$betaArguments.PrivateBetaVersion=$env:VALIDATION_TEST_BETA}
+    & (Join-Path $env:VALIDATION_TEST_ROOT 'scripts/build/Publish-ValidationCompanion.ps1') -ArtifactsPath 'isolated artifacts' -OutputDirectory $env:VALIDATION_TEST_OUTPUT @betaArguments
     $code=0
 } catch { $code=1 }
 ConvertTo-Json -InputObject @($global:commands) -Depth 8 | Set-Content -LiteralPath $env:VALIDATION_TEST_LOG -Encoding utf8

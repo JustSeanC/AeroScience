@@ -89,7 +89,8 @@ public static class ToolbarInstaller
         using (var manifest = JsonDocument.Parse(File.ReadAllText(files["manifest.json"])))
         {
             var version = typeof(ToolbarInstaller).Assembly.GetName().Version!;
-            if (manifest.RootElement.GetProperty("package_version").GetString() != $"{version.Major}.{version.Minor}.{version.Build}") throw new IOException("Toolbar/app package versions do not match.");
+            var expectedVersion=$"{version.Major}.{version.Minor}.{version.Build}";
+            if (manifest.RootElement.GetProperty("package_version").GetString() != expectedVersion) throw new IOException("Toolbar/app package versions do not match.");
         }
         if (!files.TryGetValue(ApplicationProfile.Current.ToolbarRegistrationPath, out var registration))
             throw new IOException("The bundled toolbar is missing this profile's SDK-compiled registration. Rebuild the matching toolbar package; the installed toolbar was not changed.");
@@ -100,6 +101,8 @@ public static class ToolbarInstaller
         foreach (var directory in Directory.EnumerateDirectories(community))
         {
             if (Path.GetFileName(directory).Equals(ApplicationProfile.Current.ToolbarPackage, StringComparison.OrdinalIgnoreCase)) continue;
+            if(ApplicationProfile.Current.PrivateBeta && Path.GetFileName(directory).StartsWith("aeroscience-",StringComparison.OrdinalIgnoreCase) && Path.GetFileName(directory).EndsWith("-toolbar",StringComparison.OrdinalIgnoreCase))
+                throw new IOException("Private 0.7.1-beta.2 requires an explicit toolbar switch. With MSFS closed, move other AeroScience toolbar folders to a backup outside Community, then retry. No existing add-on was changed.");
             var manifestPath = Path.Combine(directory, "manifest.json");
             if (!File.Exists(manifestPath)) continue;
             try

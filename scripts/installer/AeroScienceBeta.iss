@@ -8,16 +8,32 @@
 #ifndef OutputDirectory
   #error OutputDirectory is required
 #endif
+#ifndef BetaVersion
+  #define BetaVersion "0.7.0-beta.1"
+#endif
+#if BetaVersion == "0.7.1-beta.2"
+  #define BetaName "AeroScience 0.7.1-beta.2"
+  #define BetaAppId "{{54CD1188-2D18-4E77-B8F5-CAD530C332F6}"
+  #define BetaNumericVersion "0.7.1.2"
+  #define OwnRegistryIndex 3
+#elif BetaVersion == "0.7.0-beta.1"
+  #define BetaName "AeroScience 0.7.0 Beta 1"
+  #define BetaAppId "{{6F9DE035-3672-4865-8EE2-E8E38573D14A}"
+  #define BetaNumericVersion "0.7.0.1"
+  #define OwnRegistryIndex 2
+#else
+  #error Unsupported private beta identity
+#endif
 
 [Setup]
-AppId={{6F9DE035-3672-4865-8EE2-E8E38573D14A}
-AppName=AeroScience 0.7.0 Beta 1
-AppVersion=0.7.0-beta.1
-AppVerName=AeroScience 0.7.0 Beta 1
+AppId={#BetaAppId}
+AppName={#BetaName}
+AppVersion={#BetaVersion}
+AppVerName={#BetaName}
 AppPublisher=AeroScience contributors
 AppSupportURL=https://github.com/JustSeanC/AeroScience/issues
-DefaultDirName={localappdata}\Programs\AeroScience-Beta-v0.7.0-beta.1
-DefaultGroupName=AeroScience 0.7.0 Beta 1
+DefaultDirName={localappdata}\Programs\AeroScience-Beta-v{#BetaVersion}
+DefaultGroupName={#BetaName}
 DisableProgramGroupPage=yes
 DisableWelcomePage=no
 PrivilegesRequired=lowest
@@ -34,30 +50,33 @@ SetupLogging=yes
 LicenseFile={#PayloadDir}\application\LICENSE
 InfoBeforeFile={#PayloadDir}\START-HERE.md
 OutputDir={#OutputDirectory}
-OutputBaseFilename=AeroScience-Setup-v0.7.0-beta.1
-VersionInfoVersion=0.7.0.1
-UninstallDisplayName=AeroScience 0.7.0 Beta 1
+OutputBaseFilename=AeroScience-Setup-v{#BetaVersion}
+VersionInfoVersion={#BetaNumericVersion}
+VersionInfoProductVersion={#BetaNumericVersion}
+VersionInfoProductTextVersion={#BetaVersion}
+VersionInfoTextVersion={#BetaVersion}
+UninstallDisplayName={#BetaName}
 UninstallDisplayIcon={app}\application\AeroScience.exe
 Compression=lzma2
 SolidCompression=yes
 
 [Tasks]
-Name: desktopicon; Description: "Create a Beta 1 desktop shortcut"; GroupDescription: "Shortcuts:"; Flags: unchecked
+Name: desktopicon; Description: "Create an {#BetaName} desktop shortcut"; GroupDescription: "Shortcuts:"; Flags: unchecked
 
 [Files]
 Source: "{#PayloadDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "{#VcRuntime}"; DestName: "VC_redist.x64.exe"; Flags: dontcopy
 
 [Icons]
-Name: "{userprograms}\AeroScience 0.7.0 Beta 1\AeroScience 0.7.0 Beta 1"; Filename: "{app}\application\AeroScience.exe"; WorkingDir: "{app}\application"
-Name: "{userdesktop}\AeroScience 0.7.0 Beta 1"; Filename: "{app}\application\AeroScience.exe"; WorkingDir: "{app}\application"; Tasks: desktopicon
-Name: "{userprograms}\AeroScience 0.7.0 Beta 1\Tester guide"; Filename: "{app}\START-HERE.md"
+Name: "{userprograms}\{#BetaName}\{#BetaName}"; Filename: "{app}\application\AeroScience.exe"; WorkingDir: "{app}\application"
+Name: "{userdesktop}\{#BetaName}"; Filename: "{app}\application\AeroScience.exe"; WorkingDir: "{app}\application"; Tasks: desktopicon
+Name: "{userprograms}\{#BetaName}\Tester guide"; Filename: "{app}\START-HERE.md"
 
 [Registry]
-Root: HKCU; Subkey: "Software\AeroScience\Beta\v0.7.0-beta.1"; ValueType: string; ValueName: "InstallDirectory"; ValueData: "{app}"; Flags: uninsdeletevalue
+Root: HKCU; Subkey: "Software\AeroScience\Beta\v{#BetaVersion}"; ValueType: string; ValueName: "InstallDirectory"; ValueData: "{app}"; Flags: uninsdeletevalue
 
 [Run]
-Filename: "{app}\application\AeroScience.exe"; Description: "Launch AeroScience 0.7.0 Beta 1"; Flags: postinstall nowait skipifsilent
+Filename: "{app}\application\AeroScience.exe"; Description: "Launch {#BetaName}"; Flags: postinstall nowait skipifsilent
 
 [Code]
 function WithinPath(Child, Parent: String): Boolean;
@@ -96,13 +115,18 @@ begin
     Overlaps(Folder, ExpandConstant('{localappdata}\AeroScience-Validation-v0.5.0')) or
     Overlaps(Folder, ExpandConstant('{localappdata}\AeroScience-Validation-v0.6.0')) or
     Overlaps(Folder, ExpandConstant('{localappdata}\AeroScience-Validation-v0.7.0')) or
+    Overlaps(Folder, ExpandConstant('{localappdata}\AeroScience-Beta-v0.7.1-beta.2')) or
+#if BetaVersion == "0.7.1-beta.2"
+    Overlaps(Folder, ExpandConstant('{localappdata}\Programs\AeroScience-Beta-v0.7.0-beta.1')) or
+#endif
     FileExists(AddBackslash(Folder) + 'missions.db') or FileExists(AddBackslash(Folder) + 'library.json'));
-  SetArrayLength(Keys, 3); SetArrayLength(Values, 3);
+  SetArrayLength(Keys, 4); SetArrayLength(Values, 3);
   Keys[0] := 'Software\AeroScience'; Keys[1] := 'Software\AeroScience\Validation\v0.7.0'; Keys[2] := 'Software\AeroScience\Beta\v0.7.0-beta.1';
+  Keys[3] := 'Software\AeroScience\Beta\v0.7.1-beta.2';
   Values[0] := 'InstallDirectory'; Values[1] := 'MissionDirectory'; Values[2] := 'ScienceLibraryDirectory';
-  for I := 0 to 2 do
+  for I := 0 to 3 do
     for J := 0 to 2 do
-      if not ((I = 2) and (J = 0)) then
+      if not ((I = {#OwnRegistryIndex}) and (J = 0)) then
         if RegQueryStringValue(HKCU, Keys[I], Values[J], Saved) and Overlaps(Folder, Saved) then Result := False;
   if not Result then
   begin
@@ -110,7 +134,7 @@ begin
   end;
   ExistingBeta := FileExists(AddBackslash(Folder) + 'application\AeroScience.exe') and FileExists(AddBackslash(Folder) + 'application\AeroScience.runtimeconfig.json');
   if ExistingBeta then ExistingBeta := LoadStringFromFile(AddBackslash(Folder) + 'BETA-BUILD.json', Metadata);
-  if ExistingBeta then ExistingBeta := Pos('"version": "0.7.0-beta.1"', Metadata) > 0;
+  if ExistingBeta then ExistingBeta := Pos('"version": "{#BetaVersion}"', Metadata) > 0;
   if FolderHasContents(Folder) and not ExistingBeta then
   begin
     Result := False;
@@ -123,7 +147,7 @@ begin
   if CurPageID = wpSelectDir then
   begin
     Result := InstallationAllowed(WizardDirValue);
-    if not Result then MsgBox('Choose an empty Beta 1 application folder, separate from stable installations, validation data and scientific libraries.', mbError, MB_OK);
+    if not Result then MsgBox('Choose an empty {#BetaName} application folder, separate from existing installations, validation data and scientific libraries.', mbError, MB_OK);
   end;
 end;
 
@@ -149,7 +173,7 @@ begin
   Result := '';
   if not InstallationAllowed(ExpandConstant('{app}')) then
   begin
-    Result := 'Choose a separate Beta 1 application folder. Existing applications and data were not replaced.'; Exit;
+    Result := 'Choose a separate {#BetaName} application folder. Existing applications and data were not replaced.'; Exit;
   end;
   if VcRuntimeNeeded then
   begin

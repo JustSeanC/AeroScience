@@ -189,6 +189,8 @@ public static class EngineApplication
         app.MapGet("/api/build", () => new {
             profile = ApplicationProfile.Current.Validation ? "validation" : "production",
             name = ApplicationProfile.Current.Name,
+            version = ApplicationProfile.Current.Version,
+            privateBetaVersion = ApplicationProfile.Current.PrivateBetaVersion,
             sourceCommit = typeof(EngineApplication).Assembly.GetCustomAttributes<System.Reflection.AssemblyInformationalVersionAttribute>()
                 .FirstOrDefault()?.InformationalVersion.Split('+').LastOrDefault(),
             port = options.Port,

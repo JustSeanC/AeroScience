@@ -6,6 +6,38 @@ namespace AeroScience.Tests;
 
 public sealed class ValidationIsolationTests : IDisposable
 {
+    [Fact] public void PrivateBeta2HasIndependentIdentityAndCannotSelectExistingProfiles()
+    {
+        var beta=new ApplicationProfile(true,"0.7.1-beta.2");var old=new ApplicationProfile(true);var production=new ApplicationProfile(false);
+        Assert.Equal("AeroScience 0.7.1-beta.2",beta.Name);Assert.Equal("0.7.1-beta.2",beta.Version);
+        Assert.Equal("AeroScience-Beta-v0.7.1-beta.2",beta.Folder);Assert.Equal(5087,beta.Port);
+        Assert.Equal(@"Software\AeroScience\Beta\v0.7.1-beta.2",beta.RegistryKey);
+        Assert.Equal("aeroscience-beta-v0-7-1-beta-2-toolbar",beta.ToolbarPackage);
+        Assert.Equal("InGamePanels/aeroscience_beta_v071_beta2_panel.spb",beta.ToolbarRegistrationPath);
+        Assert.Equal("AeroScience.Beta.0_7_1_beta_2.Command.v1",beta.CommandEvent);
+        Assert.Equal("AeroScience.Beta.0_7_1_beta_2.Reply.v1",beta.ReplyEvent);
+        Assert.Equal("AeroScience.Beta.0_7_1_beta_2.Session",beta.SessionCookieName);
+        Assert.Equal(@"Local\AeroScience.Desktop",ApplicationProfile.DesktopMutex);
+        foreach(var other in new[]{old,production}){
+            Assert.NotEqual(other.ConfigurationDirectory,beta.ConfigurationDirectory);Assert.NotEqual(other.Port,beta.Port);
+            Assert.NotEqual(other.SessionCookieName,beta.SessionCookieName);Assert.NotEqual(other.CommandEvent,beta.CommandEvent);
+            Assert.Throws<IOException>(()=>beta.Preferences().ValidateDirectory(other.ConfigurationDirectory));
+        }
+        Assert.NotNull(beta.AuthorizeToolbar("{}"));Assert.NotNull(beta.AuthorizeToolbar("{\"validationSource\":\"wrong\"}"));
+        Assert.Null(beta.AuthorizeToolbar(System.Text.Json.JsonSerializer.Serialize(new{validationSource=ApplicationProfile.SourceCommit})));
+        Assert.Throws<ArgumentException>(()=>new ApplicationProfile(false,"0.7.1-beta.2"));
+        Assert.Throws<ArgumentException>(()=>new ApplicationProfile(true,"0.7.1-beta.1"));
+    }
+    [Fact] public void PrivateBetaNumericToolbarVersionCannotBeMistakenForProductionOrBeta1()
+    {
+        var beta=new ApplicationProfile(true,"0.7.1-beta.2");var folder=Path.Combine(root,"beta-toolbar");Directory.CreateDirectory(folder);
+        File.WriteAllText(Path.Combine(folder,"manifest.json"),System.Text.Json.JsonSerializer.Serialize(new{title=beta.Name,package_version="0.7.1"}));
+        Assert.Equal(new Version(0,7,1),ToolbarVersions.ReadVersion(folder,beta));
+        Assert.Null(ToolbarVersions.ReadVersion(folder,new ApplicationProfile(false)));
+        Assert.Null(ToolbarVersions.ReadVersion(folder,new ApplicationProfile(true)));
+        File.WriteAllText(Path.Combine(folder,"manifest.json"),System.Text.Json.JsonSerializer.Serialize(new{title=beta.Name,package_version="0.7.1.2"}));
+        Assert.Null(ToolbarVersions.ReadVersion(folder,beta));
+    }
     private readonly string root=Path.Combine(Path.GetTempPath(),"aeroscience-isolation",Guid.NewGuid().ToString("N"));
     private PreferenceStore Confined => new(Path.Combine(root,"Validation"),Path.Combine(root,"Validation"));
 

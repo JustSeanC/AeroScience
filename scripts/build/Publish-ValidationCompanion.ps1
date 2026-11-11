@@ -4,22 +4,36 @@ param(
     [Parameter(Mandatory)][string]$ArtifactsPath,
     [Parameter(Mandatory)][string]$OutputDirectory,
     [string]$Configuration = 'Release',
-    [string]$ChartRuntimeDirectory
+    [string]$ChartRuntimeDirectory,
+    [ValidateSet('0.7.1-beta.2')][string]$PrivateBetaVersion
 )
 $ErrorActionPreference = 'Stop'
 $repo = (Resolve-Path "$PSScriptRoot/../..").Path
 Push-Location $repo
 try {
+    $profileArguments = @('-p:AeroScienceValidation=true')
+    if ($PrivateBetaVersion) { $profileArguments += "-p:AeroSciencePrivateBetaVersion=$PrivateBetaVersion" }
     # Match Build-Companion: a solution restore honors each project's declared RIDs.
     # A publish-time restore with global -r win-x64 instead changes runtime-neutral
     # libraries' dependency graphs and fails NU1004 against their committed locks.
     # Use the SAME isolated artifacts/profile for restore, probe and publish.
-    dotnet restore AeroScience.sln --locked-mode --artifacts-path $ArtifactsPath '-p:AeroScienceValidation=true'
+    dotnet restore AeroScience.sln --locked-mode --artifacts-path $ArtifactsPath @profileArguments
     if ($LASTEXITCODE -ne 0) { throw 'Validation-profile locked dependency restore failed.' }
-    dotnet run --project tests/AeroScience.TestHost -c $Configuration --no-restore --artifacts-path $ArtifactsPath '-p:AeroScienceValidation=true' -- --profile-probe
+    dotnet run --project tests/AeroScience.TestHost -c $Configuration --no-restore --artifacts-path $ArtifactsPath @profileArguments -- --profile-probe
     if ($LASTEXITCODE -ne 0) { throw 'Compiled validation profile isolation failed.' }
-    dotnet publish src/AeroScience.Desktop -c $Configuration -r win-x64 --self-contained true --no-restore --artifacts-path $ArtifactsPath '-p:AeroScienceValidation=true' -o $OutputDirectory
+    dotnet publish src/AeroScience.Desktop -c $Configuration -r win-x64 --self-contained true --no-restore --artifacts-path $ArtifactsPath @profileArguments -o $OutputDirectory
     if ($LASTEXITCODE -ne 0) { throw 'Validation-profile Windows compilation failed.' }
+    if ($PrivateBetaVersion) {
+        $revision = (git rev-parse HEAD).Trim()
+        $versions = @{}
+        foreach ($name in 'AeroScience.dll','AeroScience.Engine.dll') {
+            $binary = Join-Path $OutputDirectory $name
+            $info = [Diagnostics.FileVersionInfo]::GetVersionInfo($binary)
+            if ($info.ProductVersion -ne "$PrivateBetaVersion+$revision" -or $info.FileVersion -ne '0.7.1.2') { throw "Published beta version/source differs: $name" }
+            $versions[$name] = @{ product_version=$info.ProductVersion; file_version=$info.FileVersion; sha256=(Get-FileHash $binary -Algorithm SHA256).Hash.ToLowerInvariant() }
+        }
+        @{version=$PrivateBetaVersion; source_commit=$revision; binaries=$versions} | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $OutputDirectory 'PRIVATE-PROFILE.json') -Encoding utf8
+    }
     # Desktop loads Engine.dll directly. Match production cleanup before a new
     # validation receipt is recorded; redundant apphosts cannot ship to testers.
     foreach ($buildExecutable in @('AeroScience.Engine.exe', 'createdump.exe')) {

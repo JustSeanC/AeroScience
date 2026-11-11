@@ -5,8 +5,15 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <Version>0.7.1</Version>
+    <InformationalVersion Condition="'$(AeroSciencePrivateBetaVersion)' == '0.7.1-beta.2'">0.7.1-beta.2</InformationalVersion>
+    <FileVersion Condition="'$(AeroSciencePrivateBetaVersion)' == '0.7.1-beta.2'">0.7.1.2</FileVersion>
     <ReleaseChannel>prerelease</ReleaseChannel>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
   </PropertyGroup>
+  <Target Name="ValidatePrivateBetaIdentity" BeforeTargets="PrepareForBuild"
+          Condition="'$(AeroSciencePrivateBetaVersion)' != ''">
+    <Error Condition="'$(AeroSciencePrivateBetaVersion)' != '0.7.1-beta.2' Or '$(AeroScienceValidation)' != 'true'"
+           Text="Private beta requires the explicit 0.7.1-beta.2 isolated validation build. Production identity cannot be selected at runtime." />
+  </Target>
 </Project>
