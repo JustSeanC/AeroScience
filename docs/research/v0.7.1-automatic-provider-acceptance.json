@@ -1,0 +1,11 @@
+{
+  "formatVersion": 1,
+  "version": "0.7.1",
+  "evidenceType": "pending-genuine-provider-network",
+  "windowsMsfs": "not tested",
+  "workflows": [],
+  "canonicalLfSourceSha256": {},
+  "runProvenance": [],
+  "finalNetworkRerun": "pending",
+  "finalNetworkRerunReason": "v0.7.1 maintenance source. Current-source genuine acceptance remains pending. Deterministic regression/CI evidence and one live metadata check do not approve numeric provider, guided ENVI, workspace or Windows/MSFS acceptance. Historical v0.7.0/v0.6.0 records remain unchanged."
+}
