@@ -1,0 +1,155 @@
+{
+  "checkpoint": "v0.8.0 P04 retained CI failure diagnostics",
+  "initialRun": {
+    "runId": 43024543058,
+    "sourceCommit": "55d4604a211802835940bccbb8e412902e2374a6",
+    "url": "https://github.com/JustSeanC/AeroScience/actions/runs/43024543058",
+    "browserArtifactId": 13860954091,
+    "reportSha256": "7ce7be80db59d39a148bb523687e7804c9ae1d91f0307a652de06dd36d987aa8",
+    "stats": {
+      "startTime": "2026-11-11T13:17:26.155Z",
+      "duration": 1655768.9549999998,
+      "expected": 435,
+      "skipped": 2,
+      "unexpected": 3,
+      "flaky": 0
+    },
+    "failures": [
+      {
+        "file": "tests/web/research.spec.js",
+        "line": 11,
+        "title": "planner, actual stored science pages, map and complete exports work together in a test host",
+        "errors": [
+          "Error: locator.click: Error: strict mode violation: getByRole('link', { name: 'Flight Details & Tools', exact: true }) resolved to 2 elements:\n    1) <a href=\"#control\" class=\"button secondary\" data-i18n=\"nav.flightDetails\">Flight Details & Tools</a> aka getByRole('navigation', { name: 'Flight Operations sections' }).getByRole('link', { name: 'Flight Details & Tools' })\n    2) <a href=\"#control\" class=\"button tertiary\">Flight Details & Tools</a> aka getByRole('navigation', { name: 'Flight tools' }).getByRole('link', { name: 'Flight Details & Tools' })\n\nCall log:\n  - waiting for getByRole('link', { name: 'Flight Details & Tools', exact: true })\n\n\n  71 |     \"Browser atmospheric plan\",\n  72 |   );\n> 73 |   await page.getByRole('link',{name:'Flight Details & Tools',exact:true}).click();\n     |                                                                           ^\n  74 |   await page.locator(\"#flight-tools > summary\").click();\n  75 |   await page.getByLabel(\"Notes\", { exact: true }).fill(\"Weather observation\");\n  76 |   await page\n    at /home/runner/work/AeroScience/AeroScience/tests/web/research.spec.js:73:75"
+        ],
+        "retainedAttachments": [
+          {
+            "path": "browser-tests/research-planner-actual-st-b01ac-ork-together-in-a-test-host/test-failed-1.png",
+            "sha256": "dc3ec3fb7a2df6a22fc47776399a9ff3453b71f2bb0fd8b75bde864b2c610f0b"
+          },
+          {
+            "path": "browser-tests/research-planner-actual-st-b01ac-ork-together-in-a-test-host/error-context.md",
+            "sha256": "964e6940f03af7f93263e0abb5f6e3bcf33bbb4dd905ef7696327529b73170d1"
+          }
+        ]
+      },
+      {
+        "file": "tests/web/research.spec.js",
+        "line": 145,
+        "title": "toolbar container has no focus border while controls retain keyboard focus styling",
+        "errors": [
+          "Error: expect(received).toBe(expected) // Object.is equality\n\nExpected: \"none\"\nReceived: \"solid\"\n\n  152 |       .locator(\"#as-scroll\")\n  153 |       .evaluate((e) => getComputedStyle(e).outlineStyle),\n> 154 |   ).toBe(\"none\");\n      |     ^\n  155 |   await page.locator(\"#as-name\").focus();\n  156 |   expect(\n  157 |     await page\n    at /home/runner/work/AeroScience/AeroScience/tests/web/research.spec.js:154:5"
+        ],
+        "retainedAttachments": [
+          {
+            "path": "browser-tests/research-toolbar-container-9106c-tain-keyboard-focus-styling/test-failed-1.png",
+            "sha256": "f0cede52d094df9919473647c971274e215bb0faee1f7f0fe557289d98f3dbd6"
+          },
+          {
+            "path": "browser-tests/research-toolbar-container-9106c-tain-keyboard-focus-styling/error-context.md",
+            "sha256": "5769bcf02c200c780133629da41384041d75f61f3f24d6a70d400cc77099455c"
+          }
+        ]
+      },
+      {
+        "file": "tests/web/toolbar-debug.spec.js",
+        "line": 7,
+        "title": "opt-in capture observes targets, bounds and scrolling without consuming input or mission state",
+        "errors": [
+          "TypeError: Cannot read properties of undefined (reading 'path')\n\n  25 |   expect(report.entries.some(e => e.kind === 'input' && e.type === 'mousedown' && e.target.includes('as-payload-page'))).toBe(true);\n  26 |   const wheel = report.entries.find(e => e.kind === 'input' && e.type === 'wheel');\n> 27 |   expect(wheel.path).toContain('div#as-scroll.as-scroll');\n     |                ^\n  28 |   expect(wheel.defaultPreventedAtCapture).toBe(false);\n  29 |   expect(wheel.frame).toEqual({ x: 0, y: 0, width: 320, height: 360 });\n  30 |   const last = report.entries.at(-1);\n    at /home/runner/work/AeroScience/AeroScience/tests/web/toolbar-debug.spec.js:27:16"
+        ],
+        "retainedAttachments": [
+          {
+            "path": "browser-tests/toolbar-debug-opt-in-captu-6c530-ming-input-or-mission-state/test-failed-1.png",
+            "sha256": "ca373c5c2642a029f2d1274382d3b00b45008401af87bd5a158aa45b338baff4"
+          },
+          {
+            "path": "browser-tests/toolbar-debug-opt-in-captu-6c530-ming-input-or-mission-state/error-context.md",
+            "sha256": "4e11a573c6ce4660cb7dedecfae464306760d1682c2c21d53bea6184fded0c95"
+          }
+        ]
+      }
+    ]
+  },
+  "correctedSourceAttempt1": {
+    "runId": 43034356531,
+    "attempt": 1,
+    "sourceCommit": "70a406673237581de83e7819fee9aa32af35d5d1",
+    "jobId": 130569282515,
+    "url": "https://github.com/JustSeanC/AeroScience/actions/runs/43034356531/attempts/1",
+    "failedStep": "Run npx playwright install --with-deps chromium",
+    "startedUtc": "2026-11-11T14:18:36Z",
+    "failedUtc": "2026-11-11T14:28:39Z",
+    "dependencyExitCode": 100,
+    "diagnosis": "apt DNS resolution failed for all configured Ubuntu mirrors before browser execution",
+    "mirrors": [
+      "azure.archive.ubuntu.com",
+      "archive.ubuntu.com",
+      "security.ubuntu.com"
+    ],
+    "logSha256": "a7a74bcd7758bb2c63d1f0da353044f81d74a19081bded9d5410e35ca79e9d58",
+    "linuxDotnetPassed": 1495,
+    "browserExecuted": false,
+    "retryScope": "Only the failed Linux job; exact same source and unchanged tests/deadlines"
+  },
+  "localRepairEvidence": {
+    "targetedBrowserPassed": 31,
+    "debugRaceBefore": {
+      "passed": 6,
+      "failed": 4
+    },
+    "debugRaceAfter": {
+      "passed": 10,
+      "failed": 0
+    },
+    "nodePassed": 37,
+    "nativeCompilationStagingPassed": 4
+  },
+  "notes": [
+    "Runtime failures were reproduced before repair; original research/focus assertions are unchanged.",
+    "Wheel capture now waits for the observed input and additional scrolling, retaining every original assertion.",
+    "Original full reports, screenshots and contexts remain in workspace artifacts and the linked CI run; local reproductions also retain traces."
+  ],
+  "correctedSourceAttempt2": {
+    "runId": 43034356531,
+    "attempt": 2,
+    "sourceCommit": "70a406673237581de83e7819fee9aa32af35d5d1",
+    "jobId": 130588171979,
+    "url": "https://github.com/JustSeanC/AeroScience/actions/runs/43034356531/attempts/2",
+    "failedStep": "Run npx playwright install --with-deps chromium",
+    "startedUtc": "2026-11-11T14:51:42Z",
+    "failedUtc": "2026-11-11T15:01:45Z",
+    "dependencyExitCode": 100,
+    "diagnosis": "apt DNS resolution failed for all configured Ubuntu mirrors before browser execution",
+    "mirrors": [
+      "azure.archive.ubuntu.com",
+      "archive.ubuntu.com",
+      "security.ubuntu.com"
+    ],
+    "logSha256": "e27d62963c38ffe568bd11d2acbf46ecfc46f39e00c000a43c7ae8e95d67ffce",
+    "linuxDotnetPassed": 1495,
+    "browserExecuted": false,
+    "retryScope": "Two independent Ubuntu 26.04 runners reproduced apt mirror DNS failure; full Linux job subsequently pinned to supported Ubuntu 24.04 with all original tests and dependency checks retained"
+  },
+  "permissionRegressionDevelopment": {
+    "initialBrowser": {
+      "startTime": "2026-11-11T15:03:04.095Z",
+      "duration": 105109.816,
+      "expected": 28,
+      "skipped": 0,
+      "unexpected": 1,
+      "flaky": 0
+    },
+    "diagnosis": "A new fixture clicked Rearm using the native projection from before a dashboard Pause; original handler refused stale controller revision/session. Test now waits for confirmed native Pause.",
+    "retainedDiagnostics": "artifacts/p04-ci/permission-first-diagnostics",
+    "correctedBrowser": {
+      "startTime": "2026-11-11T15:05:52.959Z",
+      "duration": 97602.25200000001,
+      "expected": 29,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "originalControllerRefusalPreserved": true
+  }
+}

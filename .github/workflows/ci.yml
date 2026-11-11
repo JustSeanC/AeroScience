@@ -122,7 +122,9 @@ jobs:
   linux:
     needs: validation-scope
     if: needs.validation-scope.outputs.tier == 'full'
-    runs-on: ubuntu-latest
+    # Use an explicit supported LTS for deterministic browser dependencies.
+    # ubuntu-latest's 26.04 mirror DNS failed on two independent P04 runners.
+    runs-on: ubuntu-24.04
     services:
       organization-postgres:
         image: postgres:17.6-bookworm@sha256:f3bd19c606e442c3d7bdfa8002e03fe260a1023351e0ea4598032022b68dd6e3

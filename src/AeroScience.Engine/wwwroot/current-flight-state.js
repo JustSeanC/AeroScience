@@ -14,12 +14,17 @@ export function currentFlightPresentation(data, snapshot=data?.flight, {now=Date
   const bound=fresh&&!!flight&&data?.collection?.state?.missionId===flight.id;
   if(science==='collecting'&&session?.id!==data?.collection?.state?.currentSessionId)science='unknown';
   if(science==='collecting'&&(data.collection?.state?.continuityHold||data.collection?.state?.holds?.length))science='unavailable';
+  // An unavailable acquisition/status is not a command permission. Preserve the
+  // coordinator's explicit recovery/end actions with fresh, matching identities.
+  const state=data?.collection?.state,sessionMatches=state?.currentSessionId?session?.id===state.currentSessionId:!session;
+  const commandBound=bound&&sessionMatches&&['armed','collecting','paused','betweenSessions','stopped','ended'].includes(state?.phase)&&(!['collecting','paused'].includes(state.phase)||!!state.currentSessionId);
+  const actions=commandBound?(Array.isArray(data.collection.actions)?data.collection.actions:[]).filter(a=>a?.available===true&&typeof a.action==='string').map(a=>a.action):[];
   const started=Date.parse(flight?.startedUtc),elapsed=fresh&&Number.isFinite(started)&&now>=started?Math.floor((now-started)/1000):null;
   return Object.freeze({fresh,connection,position,flightId:fresh?flight?.id||null:null,
     recording:fresh?model.recording:'unknown',science,elapsedSeconds:elapsed,
     sessionId:bound&&session?.id===data?.collection?.state?.currentSessionId?session.id:null,
     sessionSequence:bound&&session?.id===data?.collection?.state?.currentSessionId?session.sequence:null,
-    counts,scienceActions:connection==='connected'&&fresh&&!['unknown','unavailable'].includes(science)?model.scienceActions:[]});
+    counts,scienceActions:Object.freeze(actions)});
 }
 
 // Bounded saved metadata only. This is center-to-center packet spacing, never

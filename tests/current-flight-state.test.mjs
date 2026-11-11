@@ -19,9 +19,16 @@ test('cockpit presents actual recording, phase, session, zero counts and duratio
  for(const phase of ['armed','paused','betweenSessions']){d.collection.state.phase=phase;assert.equal(currentFlightPresentation(d,d.flight,{now}).science,phase);assert.equal(currentFlightPresentation(d,d.flight,{now}).recording,'active');}
 });
 test('stale, disconnected, paused, invalid, wrong mission and future data cannot become current science',()=>{
- for(const change of [d=>d.generatedUtc=time(-7),d=>d.generatedUtc=time(3),d=>d.flight.connection.state='disconnected',d=>d.flight.telemetry.timestampUtc=time(-7),d=>d.flight.telemetry.isPaused=true,d=>d.flight.telemetry.isValid=false,d=>d.collection.state.missionId='other',d=>d.collection.state.currentSessionId=null,d=>d.collection.fault=true]){const d=fixture();change(d);const m=currentFlightPresentation(d,d.flight,{now});assert.notEqual(m.science,'collecting');assert.deepEqual(m.scienceActions,[]);}
+ for(const change of [d=>d.generatedUtc=time(-7),d=>d.generatedUtc=time(3),d=>d.flight.connection.state='disconnected',d=>d.flight.telemetry.timestampUtc=time(-7),d=>d.flight.telemetry.isPaused=true,d=>d.flight.telemetry.isValid=false,d=>d.collection.state.missionId='other',d=>d.collection.state.currentSessionId=null,d=>d.collection.fault=true]){const d=fixture();change(d);const m=currentFlightPresentation(d,d.flight,{now});assert.notEqual(m.science,'collecting');}
+ for(const change of [d=>d.generatedUtc=time(-7),d=>d.generatedUtc=time(3),d=>d.collection.state.missionId='other',d=>d.collection.state.currentSessionId=null,d=>d.collection.currentSession.id='wrong',d=>d.collection.state.phase='unknown']){const d=fixture();change(d);assert.deepEqual(currentFlightPresentation(d,d.flight,{now}).scienceActions,[]);}
  const d=fixture();assert.equal(currentFlightPresentation(d,{...d.flight,activeMission:{id:'other'}},{now}).recording,'unknown');assert.equal(currentFlightPresentation(d,d.flight,{now,stale:true}).counts,null);
  d.collection.currentSession.id='other';assert.equal(currentFlightPresentation(d,d.flight,{now}).sessionId,null);
+});
+test('unavailable acquisition never suppresses fresh server-authorized recovery commands or invents permission',()=>{
+ for(const change of [d=>d.flight.connection.state='disconnected',d=>d.flight.telemetry.timestampUtc=time(-7),d=>d.flight.telemetry.isPaused=true,d=>d.flight.telemetry.isValid=false,d=>d.collection.fault=true,d=>d.collection.state.continuityHold=true]){
+  const d=fixture();d.collection.actions=[{action:'pauseData',available:true},{action:'endData',available:true},{action:'rearmAutomation',available:true},{action:'resumeData',available:false}];change(d);const m=currentFlightPresentation(d,d.flight,{now});assert.notEqual(m.science,'collecting');assert.deepEqual(m.scienceActions,['pauseData','endData','rearmAutomation']);assert.equal(m.recording,'active');
+  d.collection.actions[1].available=false;assert.deepEqual(currentFlightPresentation(d,d.flight,{now}).scienceActions,['pauseData','rearmAutomation']);
+ }
 });
 test('idle and ended state never borrows a previous scientific session or saved counts',()=>{
  const d=fixture();d.flight.activeMission=null;const m=currentFlightPresentation(d,d.flight,{now});assert.equal(m.recording,'inactive');assert.equal(m.science,'notStarted');assert.equal(m.counts,null);assert.equal(m.sessionId,null);assert.equal(m.elapsedSeconds,null);

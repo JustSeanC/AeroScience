@@ -141,6 +141,26 @@
     {
       "path": "artifacts/p04-ci/remediation-check-web.log",
       "sha256": "21e8b94448735f981280c73f8c5c5e4e2b6a2240dce6e6a39ea8a699e18608cc"
+    },
+    {
+      "path": "artifacts/p04-ci/permission-check-web.log",
+      "sha256": "3f49bdb7dd8c0b81c6f8d6ae8e94e384fe57791814cb3ab6e0c6f5e9c565e8e1"
+    },
+    {
+      "path": "artifacts/p04-ci/permission-browser.json",
+      "sha256": "ddb06623ea14be41f4f11fae0e15ed5b7fe5e2dc85fb475f524bd932c8d7da10"
+    },
+    {
+      "path": "artifacts/p04-ci/permission-browser-final.json",
+      "sha256": "326d24b8fc3eaf6bb1582e4ac3f16df02b6bad128c378b3cd4a07d6e30826a63"
+    },
+    {
+      "path": "artifacts/p04-ci/runner-policy-tests.log",
+      "sha256": "432e764160c5b06b41e1864e05386aaf72bcdcdfe2465d19c35fe57144567754"
+    },
+    {
+      "path": "artifacts/p04-ci/permission-repeat.json",
+      "sha256": "5561f59917768bba554a95748165e24663f9cecdec5aa61ad2dae00aea360a91"
     }
   ],
   "catalog": {
@@ -149,7 +169,7 @@
     "nonEnglishLocales": "en-US fallback previews; not full translations"
   },
   "fullCi": {
-    "status": "initial full run failed; corrected-source full CI pending",
+    "status": "confirmed runtime repairs and two apt-DNS failures preserved; final command-availability/runner correction awaits exact-source Full CI",
     "initial": {
       "sourceCommit": "55d4604a211802835940bccbb8e412902e2374a6",
       "runId": 43024543058,
@@ -208,6 +228,39 @@
       },
       "nodePassed": 37,
       "nativeCompilationStagingCasesPassed": 4
+    },
+    "postCiContractReview": {
+      "reason": "Unavailable acquisition status must preserve original fresh server-authorized Pause/End/Rearm availability",
+      "originalServerOwner": "MissionCoordinator.ScienceCollection and original command controllers",
+      "nodePassed": 38,
+      "nativeCompilationStagingCasesPassed": 4,
+      "runnerPolicyTestsPassed": 15,
+      "firstBrowser": {
+        "startTime": "2026-11-11T15:03:04.095Z",
+        "duration": 105109.816,
+        "expected": 28,
+        "skipped": 0,
+        "unexpected": 1,
+        "flaky": 0
+      },
+      "correctedBrowser": {
+        "startTime": "2026-11-11T15:05:52.959Z",
+        "duration": 97602.25200000001,
+        "expected": 29,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "firstFailure": "New test clicked native Rearm before receiving the dashboard Pause revision; original server correctly refused the stale command. Test now waits for confirmed native phase.",
+      "ciRunner": "Full Linux job pinned from ubuntu-latest (26.04) to supported ubuntu-24.04 after two independently logged apt mirror DNS failures; test scope/assertions/deadlines unchanged",
+      "repeatedRecovery": {
+        "startTime": "2026-11-11T15:08:12.084Z",
+        "duration": 41753.753,
+        "expected": 5,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      }
     }
   },
   "captures": [
