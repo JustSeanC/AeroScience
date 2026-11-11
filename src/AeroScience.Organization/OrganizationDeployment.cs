@@ -20,7 +20,7 @@ public sealed class DeploymentStateRecord
 }
 public static class OrganizationDeployment
 {
-    public static string ApplicationVersion=>typeof(OrganizationProgram).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion??"0.7.0";
+    public static string ApplicationVersion=>typeof(OrganizationProgram).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion??"0.7.1";
     public static string Digest(ReadOnlySpan<byte> bytes)=>Convert.ToHexStringLower(SHA256.HashData(bytes));
     public static void PrepareCertificate(OrganizationSettings settings)
     {

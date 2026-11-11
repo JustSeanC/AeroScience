@@ -208,7 +208,7 @@ public static class OrganizationApplication
     }
     static void MapManagement(WebApplication app)
     {
-        app.MapGet("/api/health",()=>new{service="AeroScience Organization",version="0.7.0",schema=1});
+        app.MapGet("/api/health",()=>new{service="AeroScience Organization",version="0.7.1",schema=1});
         var api=app.MapGroup("/api/organization").RequireAuthorization(ManagePolicy);
         api.MapGet("/server-health",(OrganizationServerDiagnostics diagnostics,CancellationToken token)=>diagnostics.Check(token)).RequireAuthorization(PublishPolicy);
         api.MapGet("/overview",async(OrganizationDatabase db,CancellationToken token)=>{

@@ -79,8 +79,8 @@ public sealed class ApiTests : IAsyncLifetime
     [Fact] public async Task HealthReportsTheDevelopmentAssemblyVersionWithoutStartingRecording()
     {
         using var health=JsonDocument.Parse(await client.GetStringAsync("/api/health"));
-        Assert.Equal("0.7.0",health.RootElement.GetProperty("version").GetString());
-        Assert.Equal(new Version(0,7,0,0),typeof(EngineApplication).Assembly.GetName().Version);
+        Assert.Equal("0.7.1",health.RootElement.GetProperty("version").GetString());
+        Assert.Equal(new Version(0,7,1,0),typeof(EngineApplication).Assembly.GetName().Version);
         await Pair(client);
         using var missions=JsonDocument.Parse(await client.GetStringAsync("/api/missions"));
         Assert.Equal(0,missions.RootElement.GetArrayLength());
