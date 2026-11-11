@@ -10,7 +10,7 @@ export function researchOrganizations(root,api,active){
  const fail=e=>{if(active())notice.textContent=e.message||'Unable to connect. Personal Research is unchanged.';};
  const run=fn=>async()=>{try{await fn();}catch(e){fail(e);}};
  function field(parent,label){const wrap=node('label',label),input=node('input');input.type='url';input.placeholder='https://your-organization.example';input.required=true;wrap.append(input);parent.append(wrap);return input;}
- async function list(){const result=await api('/api/organizations');if(!active())return;content.replaceChildren();
+ async function list(){const result=await api('/api/organizations');if(!active())return;window.dispatchEvent(new CustomEvent('aeroscience-organizations',{detail:result.connections}));content.replaceChildren();
   const connect=button(content,'Connect to Organization',run(review));connect.classList.add('primary');
   if(!result.vaultAvailable)content.append(node('p','Saving organization access requires the Windows companion and its secure credential vault.'));
   for(const saved of result.connections){const card=node('article',undefined,'panel');card.append(node('h3',saved.name),node('p',saved.origin),node('p',`Authorization expires ${new Date(saved.expiresUtc).toLocaleString()}`));const detail=node('div');detail.append(node('p','Select View Organization to check membership and assignments.'));card.append(detail);

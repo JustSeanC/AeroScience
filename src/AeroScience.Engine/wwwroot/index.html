@@ -20,6 +20,7 @@
     <link rel="stylesheet" href="/ui-tokens.css" />
     <link rel="stylesheet" href="/app.css" />
     <link rel="stylesheet" href="/workstation.css" />
+    <link rel="stylesheet" href="/home.css" />
     <script src="/vendor/leaflet/leaflet.js"></script>
     <script src="/vendor/leaflet-draw/leaflet.draw.js"></script>
     <script src="/vendor/chart.js/chart.umd.min.js"></script>
@@ -29,7 +30,7 @@
   <body>
     <div class="app-shell">
       <aside class="sidebar">
-        <a class="brand" href="#my-research" aria-label="AeroScience home"
+        <a class="brand" href="#home" aria-label="AeroScience home"
           ><img src="/icon.svg" width="38" height="38" alt="" /><span
             >AERO<span class="brand-light">SCIENCE</span
             ><small>AIRBORNE RESEARCH SYSTEMS</small></span
@@ -37,14 +38,15 @@
         >
         <p class="nav-label" data-i18n="nav.workspace">WORKSPACE</p>
         <nav aria-label="Main navigation" data-i18n-aria-label="nav.main" data-nav-scope="main">
-          <a class="nav-link" data-i18n="nav.myResearch" href="#my-research">My Research</a>
-          <a class="nav-link" data-i18n="nav.planner" href="#planner">Flight Planner</a>
-          <a class="nav-link" data-i18n="nav.flightOperations" href="#operations">Flight Operations</a>
+          <a class="nav-link" data-i18n="nav.home" href="#home">Home</a>
+          <a class="nav-link" data-i18n="nav.missions" href="#missions">Missions</a>
+          <a class="nav-link" data-i18n="nav.currentFlight" href="#flight">Current Flight</a>
           <a class="nav-link" data-i18n="nav.results" href="#results">Results &amp; History</a>
-          <a class="nav-link" data-i18n="nav.library" href="#library">Scientific Library</a>
+          <a class="nav-link" id="organizations-navigation" data-i18n="nav.organizations" href="#organizations" hidden>Organizations</a>
         </nav>
         <p class="nav-label" data-i18n="nav.support">SUPPORT</p>
         <nav aria-label="Settings and support" data-i18n-aria-label="nav.utilities" data-nav-scope="utilities">
+          <a class="nav-link" data-i18n="nav.library" href="#library">Scientific Library</a>
           <a class="nav-link" data-i18n="nav.settings" href="#settings">Settings</a>
           <a class="nav-link" data-i18n="nav.help" href="#help">Help &amp; Support</a>
         </nav>
@@ -83,6 +85,7 @@
           </form>
         </section>
         <div id="workspace" hidden>
+          <section id="home" class="view" hidden></section>
           <section id="operations" class="view" hidden aria-label="Mission Operations"></section>
           <section id="my-research" class="view" hidden aria-label="My Research"></section>
           <section id="control" class="view">

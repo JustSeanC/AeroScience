@@ -11,7 +11,7 @@ test('legacy and canonical entries mount existing views without unsafe commands 
   page.on('request',request=>{if(new URL(request.url()).pathname==='/api/events')streams.push(request.url());});
   page.on('request',request=>{if(request.method()==='POST'&&/\/api\/(missions(?:$|\?)|.*\/collection\/control|.*\/approve|.*\/execute|organizations\/live\/start|.*\/send)/.test(request.url()))unsafe.push(request.url());});
   await page.goto('/#my-research');await expect(page.locator('#workspace')).toBeVisible();
-  const routes=[['#planner','planner'],['#control','control'],['#science','instruments'],['#instruments','instruments'],
+  const routes=[['#home','home'],['#organizations?future=x','my-research'],['#missions/templates?card=fixture','my-research'],['#planner','planner'],['#control','control'],['#science','instruments'],['#instruments','instruments'],
     ['#operations','operations'],['#results','history'],['#history','history'],['#workspace/map','science-workspace'],
     ['#workspace/compare','science-workspace'],['#workspace/analysis','science-workspace'],['#workspace/results','science-workspace'],['#workspace/replay','science-workspace'],
     ['#library','library'],['#library/download?science=hyperspectral','library'],['#downloads','downloads'],['#library/storage','library-storage'],

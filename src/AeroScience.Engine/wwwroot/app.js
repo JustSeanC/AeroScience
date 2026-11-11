@@ -3,6 +3,7 @@ import {readableName} from './workstation-ui.js';
 import {initializePresentation,presentationControls,connectPresentationHost} from './presentation-settings.js';
 import {resolveRoute,viewPages} from './navigation-routes.js';
 import {localizeTree} from './i18n.js';
+import {homeDashboard} from './home.js';
 import {readSuccessResponse} from './http-response.js';
 import {scienceWorkspace,disposeScienceWorkspace} from './science-workspace.js';
 import {helpCenter,disposeHelpCenter} from './help-center.js';
@@ -22,6 +23,7 @@ import { storageManagement } from "./storage-management.js";
 setInterval(()=>{if(authorized&&!document.hidden)notifyUpdates(api);},60000);
 import {
   initializeResearch,
+  plannerDraft,
   loadResearch,
   renderResearch,
   researchDetail,
@@ -72,6 +74,17 @@ let csrf = "",
   historyRequest = 0;
 let authorized = false,
   streamAlive = false;
+let homeView=null;
+function selectNavigation(route){
+  const organization=route.page==='my-research'&&route.query.get('section')==='organizations'&&!$('organizations-navigation').hidden;
+  for(const link of document.querySelectorAll('.nav-link')){
+    const selected=link.hash==='#organizations' ? organization : !organization&&resolveRoute(link.hash).workspaceKey===workspaces.key(route.page);
+    link.classList.toggle('selected',selected);
+    if(selected)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');
+  }
+}
+function organizationNavigation(connections){$('organizations-navigation').hidden=!Array.isArray(connections)||!connections.length;selectNavigation(resolveRoute(location.hash));}
+window.addEventListener('aeroscience-organizations',event=>organizationNavigation(event.detail));
 function notice(message = "") {
   $("notice").textContent = message;
   $("notice").hidden = !message;
@@ -118,6 +131,7 @@ async function connect(code = null) {
   csrf = session.csrf;
   authorized = true;
   await connectPresentationHost(api);
+  api('/api/organizations').then(value=>organizationNavigation(value.connections)).catch(()=>organizationNavigation([]));
   const build=await api("/api/build");
   if(build.profile==="validation"){
     dashboardTitle=build.name;
@@ -145,6 +159,7 @@ async function connect(code = null) {
   });
   stream.onerror = async () => {
     streamAlive = false;
+    homeView?.update();
     $("engine-link").textContent = "Reconnecting";
     $("engine-dot").classList.remove("live");
     notice(
@@ -215,6 +230,7 @@ function render(state) {
   selection?.update(state);
   const wasActive = current?.activeMission?.id;
   current = state;
+  homeView?.update();
   journey?.update(state);
   const t = state.telemetry;
   const fresh = t && Date.now() - Date.parse(t.timestampUtc) < 6000;
@@ -366,6 +382,7 @@ async function navigate() {
   const route=resolveRoute(location.hash);
   if(route.redirect){location.replace(route.redirect);return;}
   const page=route.page;
+  homeView?.dispose();homeView=null;
   if(page!=="science-workspace")disposeScienceWorkspace();
   if(page!=="downloads")disposeDownloadWorkspace();
   if(page!=="library")disposeScientificLibrary();
@@ -373,15 +390,10 @@ async function navigate() {
   if(page!=="my-research")disposePersonalResearch();
   if(page!=="operations")closeMissionOperations();
   for (const id of viewPages) $(id).hidden = id !== page;
-  const workspace=workspaces.show(page);
-  for (const link of document.querySelectorAll(".nav-link")) {
-    const selected =
-      link.hash === "#" + workspaces.key(page);
-    link.classList.toggle("selected", selected);
-    if (selected) link.setAttribute("aria-current", "page");
-    else link.removeAttribute("aria-current");
-  }
+  const workspace=workspaces.show(page,route);
+  selectNavigation(route);
   $("breadcrumb").textContent = {
+    home: "HOME",
     control: "FLIGHT OPERATIONS",
     operations: "FLIGHT OPERATIONS",
     history: "RESULTS & HISTORY",
@@ -391,8 +403,9 @@ async function navigate() {
     settings: "SETTINGS",
     "science-workspace": "RESULTS & HISTORY",library:"SCIENTIFIC LIBRARY",help:"HELP & SUPPORT",downloads:"SCIENTIFIC LIBRARY","library-storage":"SCIENTIFIC LIBRARY",
   }[page];
-  document.title = `${dashboardTitle} · ${workspace?.querySelector('h1')?.textContent||({planner:'Flight Planner','my-research':'My Research',settings:'Settings',help:'Help & Support'}[page])||page}`;
+  document.title = `${dashboardTitle} · ${workspace?.querySelector('h1')?.textContent||({home:'Home',planner:'Flight Planner','my-research':'My Research',settings:'Settings',help:'Help & Support'}[page])||page}`;
   if (!authorized) return;
+  if(page==='home')homeView=homeDashboard($('home'),api,{snapshot:()=>current,draft:plannerDraft});
   if (page === "science-workspace") await scienceWorkspace($("science-workspace"),api);
   if (page === "help") await helpCenter($("help"),api);
   if (page === "library") await scientificLibrary($("library"),api);
@@ -404,7 +417,12 @@ async function navigate() {
   if (page === "settings") await loadSettings();
   if (page === "library-storage") await attachStorage();
   if (page === "planner" || page === "instruments") await loadResearch(page);
-  if(ownNavigation===navigationEpoch){localizeTree(workspace||$(page));workstationShell.afterNavigation(workspace||$(page));}
+  if(ownNavigation===navigationEpoch){
+    localizeTree(workspace||$(page));
+    const organization=page==='my-research'&&route.query.get('section')==='organizations' ? $('research-organizations') : null;
+    if(organization){organization.scrollIntoView();workstationShell.afterNavigation(organization);}
+    else workstationShell.afterNavigation(workspace||$(page));
+  }
 }
 async function loadHistory() {
   const request = ++historyRequest;

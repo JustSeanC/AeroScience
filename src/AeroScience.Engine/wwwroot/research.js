@@ -248,6 +248,8 @@ let payloadCatalog;
 let personalFlight;
 let calibrationCatalog;
 let plannerDirty=false, pendingGeometry=false;
+// Expose the existing in-memory draft for Home; never a second draft/plan store.
+export function plannerDraft(){return (plannerDirty||pendingGeometry)&&$("plan-form") ? {id:editing?.id||null,name:$("plan-name")?.value||''} : null;}
 window.addEventListener("beforeunload",event=>{if(plannerDirty||pendingGeometry){event.preventDefault();event.returnValue="";}});
 async function planner() {
   if((plannerDirty||pendingGeometry)&&$("plan-form"))return;

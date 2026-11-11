@@ -381,6 +381,301 @@
     "settings.hostReload": {
       "context": "Reload the current profile defaults after a revision conflict. Does not apply unsaved edits.",
       "parameters": []
+    },
+    "nav.home": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "nav.missions": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "nav.organizations": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.intro": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.next": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.status": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.preparation": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.choose": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.recent": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.resultsMeaning": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.allResults": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.tools": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.organizations": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.refresh": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.nextTitle.active": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.nextDetail.active": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.nextTitle.draft": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.nextDetail.draft": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.nextTitle.plan": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.nextDetail.plan": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.nextTitle.idle": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.nextDetail.idle": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.nextTitle.connect": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.nextDetail.connect": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.nextTitle.unavailable": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.nextDetail.unavailable": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.action.active": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.action.draft": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.action.plan": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.action.idle": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.action.connect": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.action.unavailable": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.connection.connected": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.connection.disconnected": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.connection.stale": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.connection.paused": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.connection.unknown": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.recording": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.science": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.science.unknown": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.science.unavailable": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.science.notStarted": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.science.armed": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.science.collecting": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.science.paused": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.science.betweenSessions": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.science.ended": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.synthetic": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.simulator": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.sourceUnknown": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.activeName": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": [
+        "name"
+      ]
+    },
+    "home.selectedName": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": [
+        "name"
+      ]
+    },
+    "home.draftName": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": [
+        "name"
+      ]
+    },
+    "home.unnamedDraft": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.retained": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": [
+        "original",
+        "derived",
+        "products"
+      ]
+    },
+    "home.countsUnknown": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.stale": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.telemetryWarning": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.recordingStopped": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": [
+        "code",
+        "message"
+      ]
+    },
+    "home.planUnavailable": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.planLoading": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.noPlan": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.archiveAvailable": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.archiveEmpty": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.archiveUnavailable": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.resultStatus.completed": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.resultStatus.interrupted": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": []
+    },
+    "home.reviewNamed": {
+      "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
+      "parameters": [
+        "name"
+      ]
+    },
+    "home.noActiveCounts": {
+      "context": "Read-only Home status; preserve recording/science separation. No readiness or scientific quality is inferred.",
+      "parameters": []
+    },
+    "home.collectionWarning": {
+      "context": "Read-only Home status; preserve recording/science separation. No readiness or scientific quality is inferred.",
+      "parameters": []
     }
   }
 }

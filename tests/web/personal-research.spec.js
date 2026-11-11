@@ -15,7 +15,7 @@ test('personal card uses the real planner, recorder, immutable evidence and offl
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.goto('/#control');await expect(page.locator('#altitude')).not.toHaveText('—');
   const state=await(await request.get('/api/state')).json();const frame=state.telemetry;
-  await page.getByRole('link',{name:'My Research',exact:true}).click();
+  await page.getByRole('link',{name:'Missions',exact:true}).click();
   await expect(page.getByRole('heading',{name:'My Research',exact:true})).toBeVisible();await page.getByRole('button',{name:'Create Template',exact:true}).click();
   const name='Browser flight regime '+Date.now();
   await page.getByLabel('Test card name',{exact:true}).fill(name);

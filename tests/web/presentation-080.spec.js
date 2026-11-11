@@ -24,7 +24,7 @@ test('five named language previews use English safely, survive reload and recove
   for(const [locale,name] of [['es-ES','Español'],['fr-FR','Français'],['de-DE','Deutsch'],['pt-BR','Português (Brasil)']]){
     await language.selectOption(locale);await expect(page.locator('html')).toHaveAttribute('lang','en-US');
     await expect(page.locator('.presentation-settings [role=status]')).toContainText(name+' preview uses English');
-    await expect(page.getByRole('link',{name:'My Research',exact:true})).toBeAttached();
+    await expect(page.getByRole('link',{name:'Missions',exact:true})).toBeVisible();await expect(page.locator('#missions-workspace').getByRole('link',{name:'My Research',exact:true,includeHidden:true})).toBeAttached();
   }
   await page.reload();await expect(language).toHaveValue('pt-BR');
   expect(await page.evaluate(()=>localStorage.getItem('unrelated-fixture'))).toBe('retain me');

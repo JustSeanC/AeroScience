@@ -112,7 +112,8 @@ test('canonical and historical redirects retain parameters and never turn archiv
     assert.equal(destination.query.get('card'),'c');assert.equal(destination.query.get('future'),'x');
   }
   assert.equal(resolveRoute(resolveRoute('#results/evidence').redirect).page,'history');
-  assert.equal(resolveRoute('#home').known,false);assert.equal(resolveRoute('#organizations').known,false);
+  assert.equal(resolveRoute('#home').known,true);assert.equal(resolveRoute('').page,'home');assert.equal(resolveRoute('#organizations').known,true);
+  const org=resolveRoute(resolveRoute('#organizations?permission=shareLiveFlight&future=x').redirect);assert.equal(org.page,'my-research');assert.equal(org.query.get('section'),'organizations');assert.equal(org.query.get('permission'),'shareLiveFlight');assert.equal(org.query.get('future'),'x');
 });
 test('presentation state keeps recording independent, fails closed when stale/unbound and never mutates authority',()=>{
   const now=Date.parse('2026-11-10T12:00:00Z');

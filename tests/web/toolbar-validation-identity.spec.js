@@ -18,5 +18,5 @@ test('generated validation panel uses matching isolated channels and exact sourc
 
 test('validation dashboard retains its profile and exact source while navigating the new workspaces',async({page,request})=>{
  const build=await(await request.get('/api/build')).json();await page.route('**/api/build',r=>r.fulfill({json:{...build,profile:'validation',name:'AeroScience 0.7.0 Validation',sourceCommit:'a'.repeat(40),port:5086}}));await page.goto('/#my-research');await expect(page.locator('#validation-identity')).toContainText('source '+'a'.repeat(40));
- for(const name of ['Flight Planner','Flight Operations','Results & History','Scientific Library']){await page.getByRole('navigation',{name:'Main navigation',exact:true}).getByRole('link',{name,exact:true}).click();await expect(page).toHaveTitle('AeroScience 0.7.0 Validation · '+name);await expect(page.locator('#validation-identity')).toBeVisible();}
+ for(const [name,title] of [['Home','Home'],['Missions','Missions'],['Current Flight','Flight Operations'],['Results & History','Results & History'],['Scientific Library','Scientific Library']]){await page.locator('.sidebar').getByRole('link',{name,exact:true}).click();await expect(page).toHaveTitle('AeroScience 0.7.0 Validation · '+title);await expect(page.locator('#validation-identity')).toBeVisible();}
 });

@@ -1,0 +1,29 @@
+/* Home uses the shared Auto/light/dark tokens. No scientific visualization. */
+#home { max-width: 1280px; margin-inline: auto; }
+#home .page-heading { display: block; margin-bottom: var(--space-4); }
+#home h1 { font-size: var(--font-title); }
+#home h2 { font-size: 1.35rem; margin-block: 0 var(--space-3); }
+#home h3 { margin: 0; font-size: 1rem; }
+#home p { line-height: 1.6; }
+.home-grid { display: grid; grid-template-columns: minmax(0,1.3fr) minmax(0,1fr); gap: var(--space-4); }
+#home .panel { padding: var(--space-4); margin-bottom: var(--space-4); min-width: 0; overflow-wrap: anywhere; }
+.home-next { border-top: 4px solid var(--as-accent); display: flex; flex-direction: column; align-items: start; }
+.home-next > .primary { margin-top: auto; }
+.home-next > p:not(.eyebrow) { margin-bottom: var(--space-5); max-width: 60ch; }
+.home-health .workspace-status { margin-top: 0; font-weight: 600; }
+.home-source { color: var(--as-muted); font-size: var(--font-support); }
+.home-facts { display: grid; gap: var(--space-2); margin-block: var(--space-3); }
+.home-facts > div { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.4fr); gap: var(--space-3); }
+.home-facts dt { color: var(--as-muted); }
+.home-facts dd { margin: 0; font-weight: 600; }
+#home .home-warning { padding: var(--space-3); border: 1px solid var(--as-warning-border); border-radius: var(--radius); background: var(--as-warning-bg); color: var(--as-warning-text); }
+.home-recent { list-style: none; padding: 0; margin-block: var(--space-3); }
+.home-recent li { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding-block: var(--space-3); border-top: 1px solid var(--as-line); }
+.home-recent p { margin-block: var(--space-1); }
+.home-recent time { color: var(--as-muted); font-size: var(--font-support); }
+.home-tools { display: flex; flex-direction: row; flex-wrap: wrap; gap: var(--space-2); }
+.home-tools > *, .home-next > a { min-height: 44px; white-space: normal; max-width: 100%; }
+@media(max-width: 800px) {
+  .home-grid { grid-template-columns: minmax(0,1fr); gap: 0; }
+  .home-recent li { flex-direction: column; align-items: start; }
+}
