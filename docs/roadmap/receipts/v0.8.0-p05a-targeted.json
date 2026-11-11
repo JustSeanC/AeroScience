@@ -67,5 +67,38 @@
     "main": "9dd2d8cda7ddb6d73414808f75010726871205c2",
     "develop/v0.7.0": "695a385ec40b177c763ffc0945234a1e2b54b77e",
     "develop/v0.7.1": "8e972d8e402f165ab9ad7c41dc9e744250f8f52e"
+  },
+  "postCiRemediation": {
+    "baselineSource": "4938545c6f65d0367ffa0fc9202b5bd28208c850",
+    "algorithm": "continuous-terrain-corridor-2/sensor-plane-2",
+    "dotnet": {
+      "total": 252,
+      "executed": 252,
+      "passed": 252,
+      "failed": 0,
+      "error": 0,
+      "timeout": 0,
+      "aborted": 0,
+      "inconclusive": 0,
+      "passedButRunAborted": 0,
+      "notRunnable": 0,
+      "notExecuted": 0,
+      "disconnected": 0,
+      "warning": 0,
+      "completed": 0,
+      "inProgress": 0,
+      "pending": 0
+    },
+    "newP05aCases": 49,
+    "trxPath": "artifacts/p05a-dotnet/p05a-subdivision-fixed.trx",
+    "trxSha256": "af03e31fdc0dc486dcc8bdf169023e9222b04d70f8e7c30b8fac3a401a2d034a",
+    "timesUtc": {
+      "creation": "2026-11-11T20:01:44.7236224+00:00",
+      "queuing": "2026-11-11T20:01:44.7236225+00:00",
+      "start": "2026-11-11T20:01:42.9067654+00:00",
+      "finish": "2026-11-11T20:02:18.8351573+00:00"
+    },
+    "command": "Same focused filter as the implementation checkpoint, with LogFileName=p05a-subdivision-fixed.trx",
+    "originalAssertionsChanged": false
   }
 }

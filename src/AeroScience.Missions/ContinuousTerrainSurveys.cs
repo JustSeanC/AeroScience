@@ -5,7 +5,7 @@ namespace AeroScience.Missions;
 
 public static class ContinuousTerrainSurveys
 {
-    public const string Algorithm = "continuous-terrain-corridor-1/sensor-plane-2";
+    public const string Algorithm = "continuous-terrain-corridor-2/sensor-plane-2";
     public const string ArtifactKind = "continuous-terrain-survey";
     public static void ValidateOptions(TerrainSurveyOptions options) => TerrainSurveyGeometryBuilder.Validate(options);
     public static readonly string[] Limitations = [

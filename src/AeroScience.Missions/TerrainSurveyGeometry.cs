@@ -57,13 +57,18 @@ internal sealed class TerrainSurveyGeometryBuilder(TerrainSurveyOptions options,
         if (distance > options.MaximumLegMetres || distance > Math.Max(300, Math.Max(a.GroundspeedKnots, b.GroundspeedKnots) * .514444 * dt * 3 + 100)) return "Position jump/teleport or unsupported leg length";
         return null;
     }
+    // GeographicLib direct/inverse and platform libm can straddle an exact step
+    // boundary by nanometres. Stabilize only the subdivision decision, never the
+    // original coordinates, measured distance or sensor rays. At supported step
+    // sizes this permits at most 0.2 micrometres of boundary equivalence, far below
+    // the existing geographic export snap. A real 1 micrometre excess still splits.
     int Steps(TelemetryFrame a, TelemetryFrame b, double distance) => Math.Max(1, (int)Math.Ceiling(new[] {
-        distance / options.InterpolationStepMetres,
+        Math.Max(0,distance - 1e-7) / options.InterpolationStepMetres,
         Math.Abs(Angle(a.HeadingDegrees, b.HeadingDegrees)) / options.InterpolationAngleDegrees,
         Math.Abs(b.PitchDegrees-a.PitchDegrees) / options.InterpolationAngleDegrees,
         Math.Abs(b.BankDegrees-a.BankDegrees) / options.InterpolationAngleDegrees,
         Math.Abs(b.AltitudeAglFeet!.Value-a.AltitudeAglFeet!.Value) / (Math.Min(a.AltitudeAglFeet.Value,b.AltitudeAglFeet.Value)*options.MaximumRelativeHeightStep)
-    }.Max()));
+    }.Max() - 1e-9));
     TelemetryFrame Interpolate(TelemetryFrame a, TelemetryFrame b, double fraction, double distance)
     {
         var p = Geodesy.Direct(Point(a), Geodesy.Bearing(Point(a), Point(b)), distance * fraction);

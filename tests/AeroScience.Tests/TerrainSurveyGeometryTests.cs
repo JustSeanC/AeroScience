@@ -54,6 +54,13 @@ public sealed class TerrainSurveyGeometryTests
         Assert.Equal(20,Assert.Single(chunk.Legs).InterpolatedSteps);Assert.InRange(chunk.Legs[0].GeodesicMetres,999.999,1000.001);
         Assert.Equal("generic.terrain",chunk.GeometryProfile.Profile.Id);Assert.False(chunk.UsesLegacyDefaultProfile);
     }
+    [Theory][InlineData(.00000001,20)][InlineData(.000001,21)]
+    public void SubdivisionBoundaryRejectsFloatingRoundoffButRetainsRealFidelityExcess(double excessMetres,int expectedSteps)
+    {
+        var chunk=Assert.Single(Chunks(Build([Input(Frame(0)),Input(Frame(5,1000+excessMetres))])));Valid(chunk);
+        Assert.Equal(expectedSteps,Assert.Single(chunk.Legs).InterpolatedSteps);
+        Assert.InRange(chunk.Legs[0].GeodesicMetres,1000+excessMetres-.000000005,1000+excessMetres+.000000005);
+    }
     [Fact] public void HeadingOrientsInstrumentRatherThanSubstitutingGpsTrack()
     {
         var a=Frame(0);var b=Frame(2,100);
