@@ -1,0 +1,54 @@
+{
+  "checkpoint": "v0.8.0 P03b",
+  "branch": "develop/v0.8.0",
+  "implementationCommit": "c15671d7bf69ee59aae740f0d9b5a571e4113626",
+  "baselineCommit": "f00c627817d589ec31df91d36598332ce7f4430a",
+  "preservedIncomingCommit": "422dd0fb7c792d2edcc45efa084d09426cbd3e71",
+  "node": {
+    "passed": 32,
+    "skipped": 0,
+    "failed": 0,
+    "newDiscoveryTests": 5,
+    "command": "npm run check:web",
+    "receipt": "artifacts/p03b-check-web.log"
+  },
+  "browser": {
+    "passed": 99,
+    "skipped": 0,
+    "flaky": 0,
+    "newMissionsTests": 13,
+    "durationMinutes": 5.4,
+    "receipt": "artifacts/p03b-focused-browser.json"
+  },
+  "finalAffectedBrowser": {
+    "passed": 34,
+    "skipped": 0,
+    "flaky": 0,
+    "durationMinutes": 1.6,
+    "receipt": "artifacts/p03b-final-browser.json"
+  },
+  "dotnet": {
+    "passed": 26,
+    "skipped": 0,
+    "failed": 0,
+    "receipt": "artifacts/p03b-dotnet/p03b-contracts.trx"
+  },
+  "nativeJavaScript": "compile and independent ES2017 parse passed",
+  "offlineAssets": {
+    "verifiedFiles": 28
+  },
+  "catalog": {
+    "version": 4,
+    "englishMessages": 264,
+    "previewLocalesUseEnglish": [
+      "es-ES",
+      "fr-FR",
+      "de-DE",
+      "pt-BR"
+    ]
+  },
+  "captures": "../images/p03b/capture-manifest.json",
+  "fullCi": "Required once on the complete handoff checkpoint; final task receipt identifies the exact checkpoint SHA and run.",
+  "installedWindowsMsfsAcceptance": "NOT TESTED",
+  "releasesInstallersOwnerDataChanged": false
+}
