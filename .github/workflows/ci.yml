@@ -146,6 +146,10 @@ jobs:
         with:
           node-version: '22'
           cache: npm
+      - name: Verify signed Ubuntu dependency transport fallback on disposable runner
+        run: |
+          sudo --preserve-env=GITHUB_ACTIONS,RUNNER_OS python3 scripts/build/prepare_ci_ubuntu_mirror.py
+          sudo apt-get update
       - run: dotnet restore AeroScience.sln --locked-mode
       - name: Verify independently compiled private validation identity
         run: dotnet run --project tests/AeroScience.TestHost -c Release --artifacts-path artifacts/validation-probe -p:AeroScienceValidation=true -p:RestoreLockedMode=true -- --profile-probe

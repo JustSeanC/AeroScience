@@ -161,6 +161,10 @@
     {
       "path": "artifacts/p04-ci/permission-repeat.json",
       "sha256": "5561f59917768bba554a95748165e24663f9cecdec5aa61ad2dae00aea360a91"
+    },
+    {
+      "path": "artifacts/p04-ci/ubuntu-mirror-tests.log",
+      "sha256": "512d73ef330c5504e4b538e21625a9c7d62d8e65219196e4b3bebdb7369ff07b"
     }
   ],
   "catalog": {
@@ -169,7 +173,7 @@
     "nonEnglishLocales": "en-US fallback previews; not full translations"
   },
   "fullCi": {
-    "status": "confirmed runtime repairs and two apt-DNS failures preserved; final command-availability/runner correction awaits exact-source Full CI",
+    "status": "final UI checks passed; three apt-DNS failures retained; signed CI dependency transport recovery awaits exact-source Full CI",
     "initial": {
       "sourceCommit": "55d4604a211802835940bccbb8e412902e2374a6",
       "runId": 43024543058,
@@ -261,6 +265,13 @@
         "unexpected": 0,
         "flaky": 0
       }
+    },
+    "signedDependencyRecovery": {
+      "newHelperTestsPassed": 7,
+      "existingCiPolicyTestsPassed": 15,
+      "runtimeUiChangedFrom534405b": false,
+      "aptTlsSignatureExpiryAndPackageHashChecksPreserved": true,
+      "scientificSourcesOrOwnerDataChanged": false
     }
   },
   "captures": [

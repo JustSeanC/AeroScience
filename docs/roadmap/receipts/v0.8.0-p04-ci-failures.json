@@ -117,7 +117,7 @@
     "jobId": 130588171979,
     "url": "https://github.com/JustSeanC/AeroScience/actions/runs/43034356531/attempts/2",
     "failedStep": "Run npx playwright install --with-deps chromium",
-    "startedUtc": "2026-11-11T14:51:42Z",
+    "startedUtc": "2026-11-11T14:51:41.8467622Z",
     "failedUtc": "2026-11-11T15:01:45Z",
     "dependencyExitCode": 100,
     "diagnosis": "apt DNS resolution failed for all configured Ubuntu mirrors before browser execution",
@@ -151,5 +151,32 @@
       "flaky": 0
     },
     "originalControllerRefusalPreserved": true
+  },
+  "ltsSourceAttempt": {
+    "sourceCommit": "534405b52b443904724e44739c94af9e18c70141",
+    "runId": 43045556963,
+    "url": "https://github.com/JustSeanC/AeroScience/actions/runs/43045556963",
+    "jobId": 130608527840,
+    "runner": "ubuntu-24.04",
+    "conclusion": "failure",
+    "startedUtc": "2026-11-11T15:28:18.6509871Z",
+    "failedUtc": "2026-11-11T15:38:23.7246070Z",
+    "reason": "Same apt mirror DNS failure before browser execution; changing runner image alone did not recover Ubuntu public DNS",
+    "logSha256": "81d60e13271617549400632175688f8ac74a4b6fc3fc554ac7b5be2667a5b6fc",
+    "linuxDotnetPassed": 1495,
+    "browserExecuted": false,
+    "windowsJobConclusion": "success",
+    "organizationJobConclusion": "success",
+    "linuxDotnetArtifactId": 13868756660,
+    "windowsArtifactId": 13869595174,
+    "organizationArtifactId": 13866339373
+  },
+  "dependencyRecovery": {
+    "diagnostics": "System and public HTTPS DNS failed to recover official Ubuntu mirror names; experimental DNS repair was discarded without commit",
+    "httpsTransportProbe": "Princeton mirror served all four Ubuntu Noble InRelease documents over normal verified HTTPS; Canonical registry was inaccessible, so authenticity must be established with the stock Ubuntu archive keyring",
+    "provenanceGate": "gpgv with the existing Ubuntu archive keyring must verify each of noble/noble-updates/noble-backports/noble-security before extending the disposable runner mirror list; actual apt signature, expiry and package checksum checks remain mandatory",
+    "probeReceiptSha256": "4b7b0f572ee262d35e1c601939e3d3bbeef9e25c7bbb2fa01f24a5c6a77d16cd",
+    "signatureNegativeAndPreservationTestsPassed": 7,
+    "existingCiPolicyTestsPassed": 15
   }
 }
