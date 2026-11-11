@@ -12,6 +12,25 @@ PWSH = os.environ.get('PWSH') or shutil.which('pwsh')
 
 @unittest.skipUnless(PWSH, 'PowerShell 7 is required for Inno preflight checks')
 class InnoPreflightTests(unittest.TestCase):
+    def test_resource_padding_is_removed_without_relabeling_other_versions_or_names(self):
+        script=r'''
+param($Helper)
+. $Helper
+$raw=[pscustomobject]@{ProductName='AeroScience 0.7.1-beta.2   ';ProductVersion="0.7.1-beta.2  `0";FileVersion='0.7.1-beta.2 ';FileMajorPart=0;FileMinorPart=7;FileBuildPart=1;FilePrivatePart=2}
+$value=ConvertFrom-InnoVersionInfo $raw
+if($value.product_name -cne 'AeroScience 0.7.1-beta.2' -or $value.product_version -cne '0.7.1-beta.2' -or $value.numeric_version -cne '0.7.1.2'){throw 'Padding was not normalized exactly.'}
+if($value.raw_product_name -cne $raw.ProductName -or $value.raw_product_version -cne $raw.ProductVersion){throw 'Raw resource evidence changed.'}
+foreach($wrong in '0.7.1-beta.1',' 0.7.1-beta.2','0.7.1-beta. 2',"0.7.1-beta.2`t"){
+    $raw.ProductVersion=$wrong
+    if((ConvertFrom-InnoVersionInfo $raw).product_version -ceq '0.7.1-beta.2'){throw 'A different version was relabeled.'}
+}
+Write-Host 'Exact semantic checks retain non-padding differences and raw evidence.'
+'''
+        with tempfile.TemporaryDirectory() as tmp:
+            driver=Path(tmp)/'padding.ps1';driver.write_text(script)
+            result=subprocess.run([PWSH,'-NoProfile','-File',str(driver),str(REPO/'scripts/release/InnoSetup.ps1')],capture_output=True,text=True,timeout=30)
+            self.assertEqual(0,result.returncode,result.stdout+result.stderr)
+
     def invoke(self, root, output, exit_code=0):
         # This unversioned PowerShell process stands in for ISCC.exe's launcher.
         # Its stdout models the official compiler engine report, never SDK/setup evidence.

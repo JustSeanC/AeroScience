@@ -55,3 +55,19 @@ Output=no
     }
     finally { if (Test-Path -LiteralPath $directory) { Remove-Item -LiteralPath $directory -Recurse -Force } }
 }
+
+function ConvertFrom-InnoVersionInfo {
+    param([Parameter(Mandatory)]$VersionInfo)
+    # Inno reserves padded string-resource slots. Remove only trailing SPACE/NUL,
+    # retaining raw values and all leading/internal characters for exact checks.
+    $padding=[char[]]@([char]32,[char]0)
+    return @{
+        product_name=([string]$VersionInfo.ProductName).TrimEnd($padding)
+        product_version=([string]$VersionInfo.ProductVersion).TrimEnd($padding)
+        file_version=([string]$VersionInfo.FileVersion).TrimEnd($padding)
+        raw_product_name=[string]$VersionInfo.ProductName
+        raw_product_version=[string]$VersionInfo.ProductVersion
+        raw_file_version=[string]$VersionInfo.FileVersion
+        numeric_version="$($VersionInfo.FileMajorPart).$($VersionInfo.FileMinorPart).$($VersionInfo.FileBuildPart).$($VersionInfo.FilePrivatePart)"
+    }
+}

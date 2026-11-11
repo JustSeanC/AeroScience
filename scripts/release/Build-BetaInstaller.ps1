@@ -93,10 +93,12 @@ try {
     if ($PrivateBetaVersion) {
         $setup = Join-Path $destination "AeroScience-Setup-v$PrivateBetaVersion.exe"
         $setupInfo = [Diagnostics.FileVersionInfo]::GetVersionInfo($setup)
-        $numeric = "$($setupInfo.FileMajorPart).$($setupInfo.FileMinorPart).$($setupInfo.FileBuildPart).$($setupInfo.FilePrivatePart)"
-        if ($setupInfo.ProductVersion -ne $PrivateBetaVersion -or $setupInfo.ProductName -ne $identity.title -or $numeric -ne '0.7.1.2') { throw "Compiled beta installer metadata differs: product='$($setupInfo.ProductName)', version='$($setupInfo.ProductVersion)', numeric='$numeric'. No acceptance receipt was created." }
+        $setupMetadata = ConvertFrom-InnoVersionInfo -VersionInfo $setupInfo
+        $numeric = $setupMetadata.numeric_version
+        if ($setupMetadata.product_version -ne $PrivateBetaVersion -or $setupMetadata.product_name -ne $identity.title -or $numeric -ne '0.7.1.2') { throw "Compiled beta installer metadata differs: product='$($setupMetadata.raw_product_name)', version='$($setupMetadata.raw_product_version)', numeric='$numeric'. No acceptance receipt was created." }
         $tools = Get-Content -LiteralPath $toolReport -Raw | ConvertFrom-Json -AsHashtable
-        $tools.setup_product_version=$setupInfo.ProductVersion; $tools.setup_product_name=$setupInfo.ProductName
+        $tools.setup_product_version=$setupMetadata.product_version; $tools.setup_product_name=$setupMetadata.product_name
+        $tools.setup_raw_product_version=$setupMetadata.raw_product_version; $tools.setup_raw_product_name=$setupMetadata.raw_product_name
         $tools.setup_numeric_version=$numeric; $tools.setup_sha256=(Get-FileHash $setup -Algorithm SHA256).Hash.ToLowerInvariant()
         $tools | ConvertTo-Json | Set-Content -LiteralPath $toolReport -Encoding utf8
     }
