@@ -118,6 +118,15 @@ public sealed class AutomaticScientificDataTests : IDisposable
     {
         var bytes=new byte[1000];using var http=new ScientificHttp(new Handler((_,_)=>new(HttpStatusCode.OK){Content=new ByteArrayContent(bytes)}));var budget=new ScientificDownloadBudget(1000);
         var actual=await http.Bytes(new("https://earth-search.aws.element84.com/v1/exact-fixture"),1000,budget,default);Assert.Equal(bytes,actual);Assert.Equal(1000,budget.Bytes);
+        Assert.Equal(1000,http.NetworkActivity().Bytes);Assert.Equal(0,http.NetworkActivity().ActiveTransfers);
+    }
+    [Fact]public async Task NetworkActivityCountsReceivedBytesAndExcludesMetadataCacheReuse()
+    {
+        var handler=new Handler((_,_)=>Json(new{fixture="metadata only"}));using var http=new ScientificHttp(handler);var before=http.NetworkActivity();
+        using(var first=await http.Json("https://earth-search.aws.element84.com/v1/activity-fixture",new(1048576),default))Assert.Equal("metadata only",first.RootElement.GetProperty("fixture").GetString());
+        var after=http.NetworkActivity();Assert.True(after.Bytes>0);Assert.Equal(before.SessionId,after.SessionId);Assert.True(after.ElapsedSeconds>=before.ElapsedSeconds);Assert.Equal(0,after.ActiveTransfers);
+        using(var cached=await http.Json("https://earth-search.aws.element84.com/v1/activity-fixture",new(1048576),default))Assert.NotNull(cached);
+        Assert.Equal(after.Bytes,http.NetworkActivity().Bytes);Assert.Equal(1,handler.Count);using var restarted=new ScientificHttp(new Handler((_,_)=>Json(new{})));Assert.NotEqual(after.SessionId,restarted.NetworkActivity().SessionId);
     }
     [Fact]public void NeighboringReadsReuseOnlyVersionMatchedNativeScientificBlocks()
     {

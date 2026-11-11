@@ -72,6 +72,7 @@ public sealed partial class AutomaticScientificData : IDisposable
     internal IScientificDataProvider Provider(string id)=>providers.Single(p=>p.Id==id);
     public string? AvailabilityError => science.AvailabilityError();
     public object NetworkDiagnostics()=>http.Diagnostics();
+    public ScientificNetworkActivity NetworkActivity()=>http.NetworkActivity();
     public double EstimatedPreparationSeconds {get{lock(gate)return preparationSeconds;}}
     public static string AreaKey(RemoteKind kind,GeographicBounds area)=>kind+":"+StacScientificProvider.Bounds(area);
     private void Wake(){if(wake.CurrentCount==0)try{wake.Release();}catch(SemaphoreFullException){}}
@@ -129,9 +130,10 @@ public sealed partial class AutomaticScientificData : IDisposable
                 string? reason=!p.OnlineEnabled||!p.PrivacyAccepted?"Scientific online access is disabled. Enable it separately from basemaps in Settings. Verified local sources still work.":background&&!p.BackgroundRetrieval?"Background retrieval is disabled. Prepare this area explicitly before flight.":p.UnmeteredOnly&&settings.IsUnmetered()!=true?"Waiting for a reliably detected unmetered connection. Change the unmetered-only control to proceed on this connection.":null;
                 // Local hyperspectral checks run without online consent and never trigger NASA downloading.
                 if(kind==RemoteKind.Hyperspectral)reason=null;
-                Set(new(key,kind,"Queued","Checking retained sources before any external request. "+reason,area,EstimatedDownloadBytes:kind==RemoteKind.Hyperspectral?0:null,EstimatedStorageBytes:StorageBound(kind),SamplePoint:samplePoint,Scope:scope));
+                var ticket=Guid.NewGuid();
+                Set(new(key,kind,"Queued","Checking retained sources before any external request. "+reason,area,EstimatedDownloadBytes:kind==RemoteKind.Hyperspectral?0:null,EstimatedStorageBytes:StorageBound(kind),SamplePoint:samplePoint,Scope:scope,AttemptId:ticket));
                 {
-                    var ticket=Guid.NewGuid();tickets[key]=ticket;scopes[key]=scope;
+                    tickets[key]=ticket;scopes[key]=scope;
                     if(queue.Count>=64)
                     {
                         var least=queue.Values.MaxBy(j=>j.Priority)!;

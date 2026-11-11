@@ -105,7 +105,7 @@ public sealed partial class ScientificHttp
         if(file.Bytes-offset>budget.Maximum-budget.Bytes)throw new IOException("The remaining NASA original exceeds this attempt's approved transfer allowance. Review the job budget; no limit was enlarged.");
         await using var output=new FileStream(partial,offset==0?FileMode.Create:FileMode.Open,FileAccess.ReadWrite,FileShare.None,1048576,FileOptions.Asynchronous);
         output.SetLength(offset);output.Position=offset;progress?.Invoke(offset);
-        await using var inputStream=await response.Content.ReadAsStreamAsync(token);var buffer=new byte[1048576];var checkpointAt=offset;
+        using var receiving=Receiving();await using var inputStream=await response.Content.ReadAsStreamAsync(token);var buffer=new byte[1048576];var checkpointAt=offset;
         void SaveCheckpoint()
         {
             output.Flush(true);

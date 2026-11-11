@@ -1,15 +1,29 @@
 import {node as el,bytes} from './workstation-ui.js';
-const preparationRates=new Map();
-export function preparationTransfer(row,now=Date.now()){
- const time=Date.parse(row.updatedUtc),previous=preparationRates.get(row.key);let samples=previous?.samples||[],smooth=previous?.smooth??null;
- if(row.status!=='Downloading'||previous&&row.downloadedBytes<previous.bytes){samples=[];smooth=null;}
- if(row.status==='Downloading'&&Number.isFinite(time)&&(!previous||time!==previous.time)){
-  if(previous&&time>previous.time&&row.downloadedBytes>previous.bytes){const rate=(row.downloadedBytes-previous.bytes)/((time-previous.time)/1000);smooth=smooth==null?rate:.25*rate+.75*smooth;}
-  samples.push({time,bytes:row.downloadedBytes});samples=samples.filter(s=>time-s.time<=15000).slice(-64);
+// Both combined and regional rates use bounded actual-byte windows. Provider totals,
+// local cache hits and verification never enter a network-speed estimate.
+const rateWindows=new Map();
+function measuredRate(key,bytes,stamp,active,now,clock=now/1000){
+ let previous=rateWindows.get(key),samples=previous?.samples||[],lastAdvance=previous?.lastAdvance??now,advancing=previous?.advancing??false;
+ const changed=!previous||stamp!==previous.stamp;
+ if(!active||!Number.isFinite(bytes)||!previous?.active||bytes<previous.bytes||changed&&clock<=previous.clock){samples=[];advancing=false;lastAdvance=now;}
+ if(active&&Number.isFinite(bytes)&&changed){
+  advancing=!!previous?.active&&bytes>previous.bytes;
+  if(advancing)lastAdvance=now;
+  samples.push({time:clock,bytes});samples=samples.filter(s=>clock-s.time<=15).slice(-32);
  }
- if(preparationRates.size>=256&&!preparationRates.has(row.key))preparationRates.delete(preparationRates.keys().next().value);preparationRates.set(row.key,{samples,smooth,time,bytes:row.downloadedBytes});
- const fresh=row.status==='Downloading'&&now-time<8000&&samples.length>=3&&time-samples[0].time>=2000&&row.downloadedBytes-samples[0].bytes>=65536;
- return {stage:row.status==='Downloading'?now-time>=8000?'Waiting for Network':row.stage==='Saving'?'Importing':row.stage==='Validating'?'Verifying':row.stage:row.status==='Offline'?'Waiting for Network':row.status,measuredNetworkBytes:row.downloadedBytes,totalOriginalBytes:null,preparedOriginalBytes:null,bytesPerSecond:fresh?smooth:null,remainingSecondsLow:null,remainingSecondsHigh:null,basis:'Numeric subsets: original transfer total remains Unknown until the provider determines required native blocks. Transfer caps and footprint candidates are not size estimates.'};
+ if(rateWindows.size>=256&&!rateWindows.has(key))rateWindows.delete(rateWindows.keys().next().value);
+ rateWindows.set(key,{samples,lastAdvance,advancing,active,bytes,stamp,clock:changed?clock:previous.clock});
+ const elapsed=samples.length? samples.at(-1).time-samples[0].time:0,delta=samples.length?samples.at(-1).bytes-samples[0].bytes:0;
+ return active&&advancing&&now-lastAdvance<6500&&samples.length>=3&&elapsed>=2&&delta>=65536?delta/elapsed:null;
+}
+export function networkTransfer(snapshot,now=performance.now()){
+ if(!snapshot)return {bytesPerSecond:null,active:0,bytes:0};
+ return {bytesPerSecond:measuredRate('network:'+snapshot.sessionId,snapshot.bytes,snapshot.elapsedSeconds,snapshot.activeTransfers>0,now,snapshot.elapsedSeconds),active:snapshot.activeTransfers,bytes:snapshot.bytes};
+}
+export function preparationTransfer(row,now=performance.now()){
+ const active=row.status==='Downloading'&&row.stage==='Downloading';
+ const rate=measuredRate('preparation:'+row.key+'|'+(row.attemptId||''),row.downloadedBytes,row.updatedUtc,active,now);
+ return {stage:row.status==='Downloading'?row.stage==='Saving'?'Importing':row.stage==='Validating'?'Verifying':row.stage:row.status==='Offline'?'Waiting for Network':row.status,measuredNetworkBytes:row.downloadedBytes,totalOriginalBytes:null,preparedOriginalBytes:null,currentBytesPerSecond:rate,bytesPerSecond:rate,remainingSecondsLow:null,remainingSecondsHigh:null,basis:'Numeric subsets: original transfer total remains Unknown until the provider determines required native blocks. Transfer caps and footprint candidates are not size estimates.'};
 }
 export function timeRange(low,high){
  if(!Number.isFinite(low)||!Number.isFinite(high))return 'Time estimate available after download starts';
@@ -23,6 +37,7 @@ export function renderTransferProgress(parent,progress,state='Queued'){
  const known=Number.isFinite(progress.totalOriginalBytes),prepared=Number.isFinite(progress.preparedOriginalBytes)?progress.preparedOriginalBytes:null;
  box.append(el('p',`Original file bytes present: ${prepared==null?'Unknown':bytes(prepared)} / ${known?bytes(progress.totalOriginalBytes):'Unknown'}. Actual network bytes this attempt: ${bytes(progress.measuredNetworkBytes)}; retries may transfer the same bytes again.`));
  if(known&&progress.totalOriginalBytes>0&&prepared!=null){const indicator=el('progress');indicator.max=progress.totalOriginalBytes;indicator.value=Math.min(prepared,progress.totalOriginalBytes);indicator.setAttribute('aria-label','Original file transfer completion, not scientific verification');box.append(indicator,el('span',` ${(100*prepared/progress.totalOriginalBytes).toFixed(1)}% original bytes present`));}
+ else if(progress.stage==='Downloading'){const indicator=el('progress');indicator.setAttribute('aria-label','Downloading — transfer size unknown');box.append(indicator);}
  box.append(el('p',`Current measured speed: ${Number.isFinite(progress.currentBytesPerSecond)?bytes(progress.currentBytesPerSecond)+'/s':'Calculating / not transferring'} · Smoothed recent speed: ${Number.isFinite(progress.bytesPerSecond)?bytes(progress.bytesPerSecond)+'/s':'Not established'}`),el('p',progress.stage==='Verifying'||progress.stage==='Importing'?`${progress.stage} scientific files — time remaining unknown`:timeRange(progress.remainingSecondsLow,progress.remainingSecondsHigh)),el('p',progress.totalFiles?`${progress.completedFiles}/${progress.totalFiles} original files transferred${progress.currentFile?' · current file '+progress.currentFile:''}. File transfer complete does not imply Dataset ready.`:'Original file count unknown; bounded numeric subsets are selected by the provider worker.'),el('p',progress.basis));return box;
 }
 export function renderQueueTransfers(parent,jobs=[]){

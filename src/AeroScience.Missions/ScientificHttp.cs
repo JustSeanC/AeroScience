@@ -4,6 +4,8 @@ using System.Text.Json;
 
 namespace AeroScience.Missions;
 
+public sealed record ScientificNetworkActivity(Guid SessionId,long Bytes,double ElapsedSeconds,int ActiveTransfers);
+
 public sealed class ScientificDownloadBudget(long maximum,Action<long>? progress=null,Action<long>? ensureCapacity=null)
 {
     private long consumed,authorized;
@@ -33,6 +35,17 @@ public sealed partial class ScientificHttp : IDisposable
     private readonly Dictionary<string,(DateTimeOffset At,byte[] Bytes)> metadata=[];
     private readonly Func<DateTimeOffset> cacheClock;
     private long cacheBytes,metadataBytes;
+    private readonly Guid networkSession=Guid.NewGuid();
+    private readonly System.Diagnostics.Stopwatch networkClock=System.Diagnostics.Stopwatch.StartNew();
+    private int activeTransfers;
+    public ScientificNetworkActivity NetworkActivity(){lock(metricsGate)return new(networkSession,counters.Values.Sum(c=>c.Metadata+c.Numeric),networkClock.Elapsed.TotalSeconds,Volatile.Read(ref activeTransfers));}
+    internal IDisposable Receiving()=>new ReceivingLease(this);
+    private sealed class ReceivingLease:IDisposable
+    {
+        private ScientificHttp? owner;
+        public ReceivingLease(ScientificHttp owner){this.owner=owner;Interlocked.Increment(ref owner.activeTransfers);}
+        public void Dispose(){if(Interlocked.Exchange(ref owner,null) is {} previous)Interlocked.Decrement(ref previous.activeTransfers);}
+    }
     private void Count(string host,long requests=0,long meta=0,long numeric=0,long retries=0,long hits=0,long reused=0)
     {lock(metricsGate){var c=counters.GetValueOrDefault(host);counters[host]=(c.Requests+requests,c.Metadata+meta,c.Numeric+numeric,c.Retries+retries,c.Hits+hits,c.Reused+reused);}}
     public object Diagnostics(){lock(metricsGate)return counters.Select(c=>new{providerHost=c.Key,requests=c.Value.Requests,metadataBytes=c.Value.Metadata,numericBytes=c.Value.Numeric,retries=c.Value.Retries,cacheHits=c.Value.Hits,reusedBytes=c.Value.Reused}).ToArray();}
@@ -98,7 +111,7 @@ public sealed partial class ScientificHttp : IDisposable
         using var response=await Send(uri,null,null,null,token);
         if(!response.IsSuccessStatusCode)throw new IOException($"Scientific provider request failed (HTTP {(int)response.StatusCode}). Retry later; local history remains available.");
         if(response.Content.Headers.ContentLength>maximum)throw new IOException("Provider response exceeds the supported bounded size.");
-        using var stream=await response.Content.ReadAsStreamAsync(token);using var output=new MemoryStream();var buffer=new byte[65536];
+        using var receiving=Receiving();using var stream=await response.Content.ReadAsStreamAsync(token);using var output=new MemoryStream();var buffer=new byte[65536];
         var declared=response.Content.Headers.ContentLength;
         while(true)
         {
@@ -174,6 +187,7 @@ public sealed class ScientificRangeStream : Stream
             if(response.Content.Headers.ContentLength is {} declared&&declared!=count)throw new IOException("Provider range body length differs from its Content-Range.");
             budget.EnsureCapacity(count);
             var bytes=new byte[count];using var stream=response.Content.ReadAsStream(token);var received=0;
+            using var receiving=http.Receiving();
             while(received<count){var n=stream.ReadAsync(bytes.AsMemory(received,count-received),token).AsTask().GetAwaiter().GetResult();if(n==0)throw new EndOfStreamException("Provider range ended early; actual received bytes remain accounted.");budget.Charge(n);http.Received(original,n,true);received+=n;}
             if(response.Content.Headers.ContentLength is null)
             {
