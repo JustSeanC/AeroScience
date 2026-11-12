@@ -1,6 +1,6 @@
 {
   "checkpoint": "v0.8.0 P05b",
-  "source": "Implementation commit recorded by the completed CI receipt; no source changes after these focused checks.",
+  "source": "2b830dafe9bc58f2827c21f181222168bfe72669",
   "dotnet": {
     "command": "dotnet test tests/AeroScience.Tests -c Release --no-restore --filter FullyQualifiedName~TerrainElevation|FullyQualifiedName~TerrainSurvey|FullyQualifiedName~ScientificWorkspaceTests|FullyQualifiedName~ExternalSourceDeletionTests|FullyQualifiedName~ScientificLibraryJobsTests|FullyQualifiedName~ScientificSourceReuseTests",
     "counts": {
@@ -86,7 +86,7 @@
   },
   "genuineSourceComparison": {
     "state": "Passed",
-    "verifiedUtc": "2026-11-12T06:10:54.825785+00:00",
+    "verifiedUtc": "2026-11-12T06:30:06.509249+00:00",
     "scope": "Genuine bounded USGS composite delivered values/grid; synthetic archived flight corridor; fully offline application processing",
     "reference": "GDAL 3.10.3 / OGR GEOS overlays",
     "originalSha256": "4c043d10024c8af4077c45d9ed6778141ccaf0837298ea8a521c9f832ce9a7f0",
@@ -96,7 +96,7 @@
     "clippedCellsCompared": 576,
     "partialCells": 66,
     "maximumCellFractionDifference": 1.9593626721103874e-10,
-    "derivedIndexSha256": "3214bdaace31cbe2a75398ca7d7aa530a9201d964b14784d657cc0e7056ff2fc",
+    "derivedIndexSha256": "24382d367868ebb5cb0f7983e2a8538b59e0c5b44ddb4b3ff04b1e261749acbd",
     "unknowns": [
       "historical survey date",
       "native per-pixel resolution",
@@ -107,13 +107,14 @@
       "genuine UTM provider source",
       "installed Windows/MSFS",
       "provider-wide availability"
-    ]
+    ],
+    "compiledSourceCommit": "2b830dafe9bc58f2827c21f181222168bfe72669"
   },
   "genuineProbeFiles": {
     "sourceOriginal": "artifacts/p05b-genuine/usgs-composite-original.tif",
     "request": "artifacts/p05b-genuine/request.json",
     "serviceMetadata": "artifacts/p05b-genuine/service-metadata.json",
-    "applicationOutput": "artifacts/p05b-genuine/application-final"
+    "applicationOutput": "artifacts/p05b-genuine/application-2b830da"
   },
   "failedFocusedDiagnostics": {
     "files": [
@@ -168,5 +169,55 @@
     "tests/AeroScience.Tests/TerrainElevationApiTests.cs": "2efc547b2488396ff838cde84b20a316a0e13e6e7ad9e754cb22eb64b124bcdd",
     "tests/web/terrain-completion.spec.js": "1b5199067c1390c01eac0485eaa5a704c246c85677c333e2e4c7ecf926f6859f",
     "scripts/validation/verify-terrain-elevation.py": "8365cc369de945481690938bcd491ff4759ec64b5de35d9d6f09a9c91e15e9ca"
+  },
+  "ciRemediation": {
+    "source": "Corrective checkpoint source recorded in CI receipt",
+    "cause": "SQLite physical checkpoint reports busy as a result row; a transient archive reader could leave the one-shot deletion pending.",
+    "realReaderBeforeFix": {
+      "counts": {
+        "total": "2",
+        "executed": "2",
+        "passed": "1",
+        "failed": "1",
+        "error": "0",
+        "timeout": "0",
+        "aborted": "0",
+        "inconclusive": "0",
+        "passedButRunAborted": "0",
+        "notRunnable": "0",
+        "notExecuted": "0",
+        "disconnected": "0",
+        "warning": "0",
+        "completed": "0",
+        "inProgress": "0",
+        "pending": "0"
+      },
+      "trxSha256": "85583bc2b933498adcd0bcc82bf6e34803dff0cb6c3c1e6ea9b0d411584c8c58",
+      "scope": "Transient reader failed original completion condition; persistently pinned reader stayed pending."
+    },
+    "afterFix": {
+      "counts": {
+        "total": "132",
+        "executed": "132",
+        "passed": "132",
+        "failed": "0",
+        "error": "0",
+        "timeout": "0",
+        "aborted": "0",
+        "inconclusive": "0",
+        "passedButRunAborted": "0",
+        "notRunnable": "0",
+        "notExecuted": "0",
+        "disconnected": "0",
+        "warning": "0",
+        "completed": "0",
+        "inProgress": "0",
+        "pending": "0"
+      },
+      "trxSha256": "6a4e2f161652e0ebadaae48b1030ade0233719a480e77becbd54a5e3841eba7a",
+      "scope": "Original deletion API assertion, 129 earlier focused cases, transient and persistent real-reader regression cases."
+    },
+    "originalApiAssertionChanged": false,
+    "permanentDeletionSuccessConditionWeakened": false
   }
 }

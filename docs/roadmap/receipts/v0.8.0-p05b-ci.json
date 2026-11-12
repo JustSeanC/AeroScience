@@ -1,8 +1,8 @@
 {
   "checkpoint": "v0.8.0 P05b",
   "branch": "develop/v0.8.0",
-  "status": "Pending milestone Full CI",
-  "implementationCommit": null,
+  "status": "Initial Full CI failed; confirmed corrective checkpoint ready for exact-source validation",
+  "implementationCommit": "2b830dafe9bc58f2827c21f181222168bfe72669",
   "p05aGate": {
     "runtimeCommit": "80357e85c07e9b2d690a6c9f5d7007da20588d65",
     "documentationCommit": "1beb337c5822d15ee32b16cb654a3cf0f1b9da0b",
@@ -24,5 +24,15 @@
   "publishedRelease": false,
   "builtInstaller": false,
   "ownerArchivesModified": false,
-  "p05cStarted": false
+  "p05cStarted": false,
+  "fullCi": {
+    "id": 43168225022,
+    "attempt": 1,
+    "url": "https://github.com/JustSeanC/AeroScience/actions/runs/43168225022",
+    "event": "push",
+    "status": "completed",
+    "conclusion": "failure"
+  },
+  "initialImplementationCommit": "2b830dafe9bc58f2827c21f181222168bfe72669",
+  "failureReceipt": "v0.8.0-p05b-ci-failures.json"
 }

@@ -1,0 +1,33 @@
+{
+  "checkpoint": "v0.8.0 P05b",
+  "runs": [
+    {
+      "id": 43168225022,
+      "source": "2b830dafe9bc58f2827c21f181222168bfe72669",
+      "url": "https://github.com/JustSeanC/AeroScience/actions/runs/43168225022",
+      "linux": {
+        "total": 1569,
+        "passed": 1568,
+        "failed": 1,
+        "failure": "ApiTests.CollectedScienceDeletionRequiresReviewedHashAndCsrfAndPreservesRawRecording",
+        "message": "Mission database cleanup is busy; permanent deletion remains pending.",
+        "artifactId": 13922216872,
+        "artifactSha256": "1bee062a7c5ce407c6e88bba21434e9a16ef90ac7c8e0cd5c9ed62e2f82f3b08",
+        "trxSha256": "545329fab5b2dfd414e5805fa50b585954fcc61ca472e371c6d205d35c22f118",
+        "decodedLogSha256": "776e1b0b4e9c49d272c5a4178672f62e0ce481d80fea8ec504ed5c79b46dc80a",
+        "newP05bCases": "All passed; the one failure is the existing physical-deletion API assertion."
+      },
+      "windows": {
+        "total": 1569,
+        "passed": 1559,
+        "skipped": 10,
+        "failed": 0,
+        "conclusion": "success"
+      },
+      "organizationDeployment": "success",
+      "browser": "Skipped after Linux .NET failure",
+      "status": "Confirmed local physical-checkpoint contention; bounded retry preserves persistent pending state, selection, authorization and original API assertion.",
+      "localReproduction": "Real pinned SQLite WAL reader reproduced transient cleanup pending; before/after TRX hashes recorded in targeted receipt."
+    }
+  ]
+}

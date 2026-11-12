@@ -71,7 +71,24 @@ public sealed partial class MissionStore
             tx.Commit();command.Transaction=null;
         }
         command.Parameters.Clear();command.CommandText="PRAGMA wal_checkpoint(TRUNCATE)";
-        using(var rows=command.ExecuteReader())if(!rows.Read()||rows.GetInt32(0)!=0)throw new IOException("Mission database cleanup is busy; permanent deletion remains pending.");
+        // A concurrent archive/background reader can outlive the authorized purge
+        // transaction briefly. SQLite reports checkpoint contention as a result row,
+        // so the connection's ordinary command busy retry does not cover this path.
+        // Retry only that physical checkpoint, never the selection/authorization,
+        // and keep deletion pending if it cannot actually finish within one second.
+        var checkpointWait=System.Diagnostics.Stopwatch.StartNew();
+        while(true)
+        {
+            bool busy;
+            using(var rows=command.ExecuteReader())
+            {
+                if(!rows.Read())throw new IOException("Mission database cleanup returned no verification result; permanent deletion remains pending.");
+                busy=rows.GetInt32(0)!=0;
+            }
+            if(!busy)break;
+            if(checkpointWait.Elapsed>=TimeSpan.FromSeconds(1))throw new IOException("Mission database cleanup is busy; permanent deletion remains pending.");
+            Thread.Sleep(20);
+        }
         command.CommandText="VACUUM";command.ExecuteNonQuery();command.CommandText="PRAGMA integrity_check";if(command.ExecuteScalar() as string!="ok")throw new IOException("Mission scientific purge failed integrity verification.");
     }
 }
