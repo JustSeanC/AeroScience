@@ -59,5 +59,13 @@
       },
       "status": "Real transient source-in-use lease can arrive between preview and execution. Reproduced with active analysis leases; preserving exclusive acquisition and post-wait selection revalidation."
     }
-  ]
+  ],
+  "resolvedBy": {
+    "source": "0b445e5f674a6a9110eef53e9b1f7ce2da195bb9",
+    "runId": 43180995819,
+    "url": "https://github.com/JustSeanC/AeroScience/actions/runs/43180995819",
+    "conclusion": "success",
+    "originalAssertionsUnchanged": true,
+    "diagnosticsPreserved": true
+  }
 }

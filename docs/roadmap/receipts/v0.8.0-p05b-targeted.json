@@ -1,6 +1,6 @@
 {
   "checkpoint": "v0.8.0 P05b",
-  "source": "cc2ce9692cbcb3f2318c3fc98a7aca948679cf24",
+  "source": "0b445e5f674a6a9110eef53e9b1f7ce2da195bb9",
   "dotnet": {
     "command": "dotnet test tests/AeroScience.Tests -c Release --no-restore --filter FullyQualifiedName~TerrainElevation|FullyQualifiedName~TerrainSurvey|FullyQualifiedName~ScientificWorkspaceTests|FullyQualifiedName~ExternalSourceDeletionTests|FullyQualifiedName~ScientificLibraryJobsTests|FullyQualifiedName~ScientificSourceReuseTests",
     "counts": {
@@ -86,7 +86,7 @@
   },
   "genuineSourceComparison": {
     "state": "Passed",
-    "verifiedUtc": "2026-11-12T07:06:31.872041+00:00",
+    "verifiedUtc": "2026-11-12T08:14:13.299481+00:00",
     "scope": "Genuine bounded USGS composite delivered values/grid; synthetic archived flight corridor; fully offline application processing",
     "reference": "GDAL 3.10.3 / OGR GEOS overlays",
     "originalSha256": "4c043d10024c8af4077c45d9ed6778141ccaf0837298ea8a521c9f832ce9a7f0",
@@ -96,7 +96,7 @@
     "clippedCellsCompared": 576,
     "partialCells": 66,
     "maximumCellFractionDifference": 1.9593626721103874e-10,
-    "derivedIndexSha256": "55a3567d454bdedf1095f9426d21426b5e9320bd59f8109c880427463fd85ef7",
+    "derivedIndexSha256": "18690375b420562fed572eb587a5530150ac5d81cb852baee91e78071c43a91c",
     "unknowns": [
       "historical survey date",
       "native per-pixel resolution",
@@ -108,13 +108,13 @@
       "installed Windows/MSFS",
       "provider-wide availability"
     ],
-    "compiledSourceCommit": "cc2ce9692cbcb3f2318c3fc98a7aca948679cf24"
+    "compiledSourceCommit": "0b445e5f674a6a9110eef53e9b1f7ce2da195bb9"
   },
   "genuineProbeFiles": {
     "sourceOriginal": "artifacts/p05b-genuine/usgs-composite-original.tif",
     "request": "artifacts/p05b-genuine/request.json",
     "serviceMetadata": "artifacts/p05b-genuine/service-metadata.json",
-    "applicationOutput": "artifacts/p05b-genuine/application-cc2ce96"
+    "applicationOutput": "artifacts/p05b-genuine/application-0b445e5"
   },
   "failedFocusedDiagnostics": {
     "files": [
@@ -155,7 +155,14 @@
     "provider-wide availability",
     "real LiDAR point clouds (P05c)"
   ],
-  "fullCi": "Pending; see v0.8.0-p05b-ci.json",
+  "fullCi": {
+    "source": "0b445e5f674a6a9110eef53e9b1f7ce2da195bb9",
+    "runId": 43180995819,
+    "attempt": 1,
+    "conclusion": "success",
+    "url": "https://github.com/JustSeanC/AeroScience/actions/runs/43180995819",
+    "receipt": "v0.8.0-p05b-ci.json"
+  },
   "sourceFileSha256": {
     "src/AeroScience.Missions/TerrainElevationStore.cs": "11b9df96ce86669cb2aca28058291c7543ca4ee8e3897928ec5c07d4aafde5a8",
     "src/AeroScience.Missions/TerrainElevations.cs": "834bbf0efadf9fb6f91faa9430adbf8c9ae7cb4eeb8a4c9edeadc81ee0e0f5fd",
@@ -170,7 +177,9 @@
     "tests/web/terrain-completion.spec.js": "1b5199067c1390c01eac0485eaa5a704c246c85677c333e2e4c7ecf926f6859f",
     "scripts/validation/verify-terrain-elevation.py": "8365cc369de945481690938bcd491ff4759ec64b5de35d9d6f09a9c91e15e9ca",
     "src/AeroScience.Missions/MissionScienceDeletion.cs": "0771e0cfbaee01c368abb49f19430b8bebc85da76f63a461c203768478b7d393",
-    "tests/AeroScience.Tests/MissionScienceCleanupTests.cs": "8afdfbf18ff75e7c98c7d02f64a4489c50c15f0e6041646a34de31ca3e2d9af7"
+    "tests/AeroScience.Tests/MissionScienceCleanupTests.cs": "ba5e6e489220e5f22082f64cfef26df105b442651b06a60fe24507a5e3f13055",
+    "src/AeroScience.Missions/ExternalSourceDeletion.cs": "a13f4be7d683db4d826e39344687fb6fa589c7edea22cf6cff39d2037527197a",
+    "src/AeroScience.Missions/CollectedScienceDeletion.cs": "9bfafbeb935d4d4054e4a9406300bedd3ecfa80ad133dd2799e08d3b331cecae"
   },
   "ciRemediation": {
     "source": "cc2ce9692cbcb3f2318c3fc98a7aca948679cf24",
@@ -223,7 +232,7 @@
     "permanentDeletionSuccessConditionWeakened": false
   },
   "exclusiveLeaseRemediation": {
-    "source": "Corrective source recorded in final CI receipt",
+    "source": "0b445e5f674a6a9110eef53e9b1f7ce2da195bb9",
     "before": {
       "counts": {
         "total": "3",

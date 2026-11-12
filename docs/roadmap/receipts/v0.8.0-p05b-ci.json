@@ -1,8 +1,8 @@
 {
   "checkpoint": "v0.8.0 P05b",
   "branch": "develop/v0.8.0",
-  "status": "Second confirmed coordination correction ready for exact-source validation",
-  "implementationCommit": "cc2ce9692cbcb3f2318c3fc98a7aca948679cf24",
+  "status": "Accepted: completed exact-source Full CI passed; installed Windows/MSFS acceptance remains Not Tested",
+  "implementationCommit": "0b445e5f674a6a9110eef53e9b1f7ce2da195bb9",
   "p05aGate": {
     "runtimeCommit": "80357e85c07e9b2d690a6c9f5d7007da20588d65",
     "documentationCommit": "1beb337c5822d15ee32b16cb654a3cf0f1b9da0b",
@@ -41,5 +41,293 @@
     "url": "https://github.com/JustSeanC/AeroScience/actions/runs/43172577632",
     "status": "completed",
     "conclusion": "failure"
-  }
+  },
+  "fullCi": {
+    "id": 43180995819,
+    "attempt": 1,
+    "url": "https://github.com/JustSeanC/AeroScience/actions/runs/43180995819",
+    "status": "completed",
+    "conclusion": "success",
+    "source": "0b445e5f674a6a9110eef53e9b1f7ce2da195bb9",
+    "branch": "develop/v0.8.0",
+    "event": "push",
+    "createdAt": "2026-11-12T08:12:05Z",
+    "updatedAt": "2026-11-12T09:03:00Z",
+    "jobs": [
+      {
+        "id": 131056652050,
+        "name": "validation-scope",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 131056704790,
+        "name": "windows-companion",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 131056704880,
+        "name": "organization-deployment",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 131056704992,
+        "name": "linux",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 131056706587,
+        "name": "development",
+        "status": "completed",
+        "conclusion": "skipped"
+      },
+      {
+        "id": 131056706963,
+        "name": "windows-profile",
+        "status": "completed",
+        "conclusion": "skipped"
+      }
+    ]
+  },
+  "validation": {
+    "linuxDotnet": {
+      "artifactId": 13927497173,
+      "artifactSha256": "3ac675c1dfaf2a92eb743427fcab31a12fca71cf1afd9483433b9beae39c7011",
+      "trxSha256": "f4c85ab19a0a7f97180b69573da1b93ab9bedfd0a7ea4574b5dd3d83b6e5c920",
+      "counts": {
+        "total": "1574",
+        "executed": "1574",
+        "passed": "1574",
+        "failed": "0",
+        "error": "0",
+        "timeout": "0",
+        "aborted": "0",
+        "inconclusive": "0",
+        "passedButRunAborted": "0",
+        "notRunnable": "0",
+        "notExecuted": "0",
+        "disconnected": "0",
+        "warning": "0",
+        "completed": "0",
+        "inProgress": "0",
+        "pending": "0"
+      },
+      "p05bAndCleanupCases": 31,
+      "p05bAndCleanupAllPassed": true
+    },
+    "windowsDotnet": {
+      "artifactId": 13926879614,
+      "artifactSha256": "936be99f51638d9a22df452939a70b890e0119d727332cb5422b7df625573ca6",
+      "trxSha256": "a9aecb69e6cbd5e3b5ce312dc224fa6605aa19ba6aeaa61c92a191dff9eb4df4",
+      "counts": {
+        "total": "1574",
+        "executed": "1564",
+        "passed": "1564",
+        "failed": "0",
+        "error": "0",
+        "timeout": "0",
+        "aborted": "0",
+        "inconclusive": "0",
+        "passedButRunAborted": "0",
+        "notRunnable": "0",
+        "notExecuted": "0",
+        "disconnected": "0",
+        "warning": "0",
+        "completed": "0",
+        "inProgress": "0",
+        "pending": "0"
+      },
+      "existingPlatformSkips": 10
+    },
+    "browser": {
+      "artifactId": 13929596633,
+      "zipSha256": "05366521187e2c8c17ccc5c8664073b10a3cd5b4a1e72563d0a972b643382d2e",
+      "resultsSha256": "31598a127cecb9ac7869311edd02572c99efa098117beda915da1c96b2a86d81",
+      "stats": {
+        "startTime": "2026-11-12T08:33:50.294Z",
+        "duration": 1639318.341,
+        "expected": 447,
+        "skipped": 2,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "skipped": [
+        {
+          "title": "approved originals provide local chart overlays, independent science, offline tiles and exact edition selection",
+          "file": "aviation-charts.spec.js",
+          "expectedStatus": "skipped",
+          "status": "skipped",
+          "results": [
+            "skipped"
+          ]
+        },
+        {
+          "title": "unknown runtime is honest and chart inventory remains accessible at tablet width without altering saved data",
+          "file": "aviation-charts.spec.js",
+          "expectedStatus": "skipped",
+          "status": "skipped",
+          "results": [
+            "skipped"
+          ]
+        }
+      ],
+      "notOk": [],
+      "p05bTests": [
+        {
+          "title": "retained terrain processes through the real queue, survives navigation, and grants no original science",
+          "file": "terrain-completion.spec.js",
+          "expectedStatus": "passed",
+          "status": "expected",
+          "results": [
+            "passed"
+          ]
+        },
+        {
+          "title": "coverage review only prepares one explicitly selected Library search rectangle; it never starts discovery or transfer",
+          "file": "terrain-completion.spec.js",
+          "expectedStatus": "passed",
+          "status": "expected",
+          "results": [
+            "passed"
+          ]
+        },
+        {
+          "title": "repeated clicks send one command and a late reply cannot replace a reopened authoritative job",
+          "file": "terrain-completion.spec.js",
+          "expectedStatus": "passed",
+          "status": "expected",
+          "results": [
+            "passed"
+          ]
+        },
+        {
+          "title": "unsupported preparation bounds fail before any catalog call or substituted area",
+          "file": "terrain-completion.spec.js",
+          "expectedStatus": "passed",
+          "status": "expected",
+          "results": [
+            "passed"
+          ]
+        },
+        {
+          "title": "a late coverage review cannot repopulate controls after its corridor selection changes",
+          "file": "terrain-completion.spec.js",
+          "expectedStatus": "passed",
+          "status": "expected",
+          "results": [
+            "passed"
+          ]
+        },
+        {
+          "title": "an unavailable terrain job store cannot hide original Results and exports",
+          "file": "terrain-completion.spec.js",
+          "expectedStatus": "passed",
+          "status": "expected",
+          "results": [
+            "passed"
+          ]
+        },
+        {
+          "title": "terrain completion light: keyboard, narrow layout, safe locale fallback and labeled synthetic capture",
+          "file": "terrain-completion.spec.js",
+          "expectedStatus": "passed",
+          "status": "expected",
+          "results": [
+            "passed"
+          ]
+        },
+        {
+          "title": "terrain completion dark: keyboard, narrow layout, safe locale fallback and labeled synthetic capture",
+          "file": "terrain-completion.spec.js",
+          "expectedStatus": "passed",
+          "status": "expected",
+          "results": [
+            "passed"
+          ]
+        }
+      ]
+    },
+    "linuxPython": {
+      "total": 185,
+      "passed": 184,
+      "skipped": 1,
+      "failed": 0,
+      "scope": "One existing Windows native PE fixture skip"
+    },
+    "windowsPython": {
+      "total": 182,
+      "passed": 179,
+      "skipped": 3,
+      "failed": 0,
+      "scope": "Existing platform-dependent skips"
+    },
+    "nativeCompilationAndStaging": {
+      "passed": 4,
+      "failed": 0
+    },
+    "presentationAndCatalogs": {
+      "passed": 38,
+      "failed": 0,
+      "catalogVersion": 7,
+      "messages": 363
+    },
+    "organizationDeployment": {
+      "artifactId": 13925744943,
+      "artifactSha256": "4cbad9f0c2705743472d4670baaaa3f78a87541057c0740d4ce48b9f5747de19",
+      "source": "0b445e5f674a6a9110eef53e9b1f7ce2da195bb9",
+      "securityPassed": 12,
+      "runtimePassed": 10,
+      "failed": 0,
+      "productionReady": false
+    },
+    "windowsStructuralAndPackaging": "Passed; no public/tester installer produced, installed acceptance not established",
+    "actualRecoveryHost": "Passed on Linux and Windows"
+  },
+  "artifacts": [
+    {
+      "id": 13929596633,
+      "name": "linux-browser-diagnostics",
+      "bytes": 11237275,
+      "digest": "sha256:05366521187e2c8c17ccc5c8664073b10a3cd5b4a1e72563d0a972b643382d2e",
+      "expiresAt": "2026-11-19T09:01:09Z"
+    },
+    {
+      "id": 13927497173,
+      "name": "linux-test-diagnostics",
+      "bytes": 446764,
+      "digest": "sha256:3ac675c1dfaf2a92eb743427fcab31a12fca71cf1afd9483433b9beae39c7011",
+      "expiresAt": "2026-11-19T08:32:50Z"
+    },
+    {
+      "id": 13926879614,
+      "name": "windows-test-diagnostics",
+      "bytes": 453051,
+      "digest": "sha256:936be99f51638d9a22df452939a70b890e0119d727332cb5422b7df625573ca6",
+      "expiresAt": "2026-11-19T08:43:29Z"
+    },
+    {
+      "id": 13925744943,
+      "name": "organization-deployment-diagnostics",
+      "bytes": 2762,
+      "digest": "sha256:4cbad9f0c2705743472d4670baaaa3f78a87541057c0740d4ce48b9f5747de19",
+      "expiresAt": "2026-11-19T08:15:30Z"
+    }
+  ],
+  "normalizedLocalLogs": {
+    "artifacts/p05b-final-ci/linux-full.log": "8016e6ceea2edc80cdc3abfb618ebc5ff28dca0f5dcb98e55a082d048eac3a5a",
+    "artifacts/p05b-final-ci/windows-full.log": "9317659a93981500712348a3114d62ca23614a641dfc600f8ab03feec6800648"
+  },
+  "protectedRefsAfter": {
+    "main": "9dd2d8cda7ddb6d73414808f75010726871205c2",
+    "develop/v0.7.0": "695a385ec40b177c763ffc0945234a1e2b54b77e",
+    "develop/v0.7.1": "8e972d8e402f165ab9ad7c41dc9e744250f8f52e"
+  },
+  "protectedRefsUnchanged": true,
+  "initialHeadAndP05aPreserved": true,
+  "existingAssertionsWeakened": false,
+  "documentationClosure": "Subsequent docs/roadmap-only acceptance commit; runtime, workflow and test files remain byte-identical to the exact-source Full CI commit. Existing workflow paths-ignore excludes this documentation-only closure.",
+  "verifiedAtUtc": "2026-11-12T09:06:48.178389+00:00"
 }
