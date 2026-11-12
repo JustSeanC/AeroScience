@@ -27,7 +27,7 @@ public static class TerrainElevationSources
         if(new FileInfo(ownership).Length>1048576||ScientificCatalog.Hash(JsonSerializer.Deserialize<ScientificSource>(File.ReadAllText(ownership),WireJson.Options))!=ScientificCatalog.Hash(source))
             throw new IOException("Original source ownership metadata differs from its retained catalog.");
         var m=source.Manifest;
-        if(m.Kind!=RemoteKind.Terrain||m.Swath is not null)throw new InvalidOperationException("Select an explicitly declared affine terrain source; an elevation-like band name is insufficient.");
+        if(m.Kind!=RemoteKind.Terrain||m.Swath is not null||m.PointCloud is not null)throw new InvalidOperationException("Select an explicitly declared affine terrain source; historical LiDAR points and elevation-like band names are not raster elevation bands.");
         if(ScientificSourceSelection.Select([new(source,true,true,null)],RemoteKind.Terrain,preferences) is null)
             throw new InvalidOperationException("The selected source is excluded by the current scientific source policy.");
         var band=m.Bands.SingleOrDefault(b=>b.Id==choice.BandId)??throw new ArgumentException("The selected native elevation band is not retained.");

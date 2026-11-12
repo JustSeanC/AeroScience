@@ -47,8 +47,9 @@ public static class LidarLas
         {
             var b=Convert.FromBase64String(keys.Base64);if(b.Length<8||b.Length%2!=0)throw new InvalidDataException("Corrupt LAS GeoKey directory.");
             int Key(int key){var n=BinaryPrimitives.ReadUInt16LittleEndian(b.AsSpan(6));if(n>128||8+n*8>b.Length)throw new InvalidDataException("LAS GeoKeys exceed original metadata.");for(var k=0;k<n;k++){var i=8+k*8;if(BinaryPrimitives.ReadUInt16LittleEndian(b.AsSpan(i))==key){if(BinaryPrimitives.ReadUInt16LittleEndian(b.AsSpan(i+2))!=0||BinaryPrimitives.ReadUInt16LittleEndian(b.AsSpan(i+4))!=1)return 0;return BinaryPrimitives.ReadUInt16LittleEndian(b.AsSpan(i+6));}}return 0;}
-            var projected=Key(3072);var geographic=Key(2048);if(projected is >0 and <32767)crs="EPSG:"+projected;else if(geographic is >0 and <32767)crs="EPSG:"+geographic;
+            var projected=Key(3072);var geographic=Key(2048);if(projected is >0 and <32767){if(projected==4326)throw new InvalidDataException("Geographic authority cannot be declared as projected coordinates.");crs="EPSG:"+projected;}else if(geographic is >0 and <32767){if(geographic!=4326)throw new InvalidDataException("Only original WGS84 geographic coordinates are supported.");crs="EPSG:"+geographic;}
             var unit=Key(3076);if(unit!=0&&unit!=9001)throw new InvalidDataException("Projected horizontal units are unsupported; no feet/metres conversion is inferred.");
+            if(crs=="EPSG:4326"&&Key(2054) is not(0 or 9102))throw new InvalidDataException("Original geographic angular units must be degrees; no radians/degrees substitution.");
             var v=Key(4096);if(v is >0 and <32767)vertical="EPSG:"+v;zunit=Key(4099) switch{9001=>"m",9002=>"ft",9003=>"US survey ft",_=>"unknown"};
         }
         if(wkt is not null)
@@ -56,9 +57,15 @@ public static class LidarLas
             var matches=Regex.Matches(wkt,"(?:AUTHORITY|ID)\\[\\s*\"EPSG\"\\s*,\\s*\"?(\\d+)\"?\\s*\\]",RegexOptions.CultureInvariant,TimeSpan.FromSeconds(1));
             var known=matches.Select(m=>"EPSG:"+m.Groups[1].Value).Where(LidarCoordinates.Supported).Distinct().ToArray();
             // A nested geographic base CRS cannot replace the outer projected CRS.
-            if(wkt.StartsWith("PROJCS[",StringComparison.Ordinal)||wkt.StartsWith("PROJCRS[",StringComparison.Ordinal))known=known.Where(c=>c!="EPSG:4326").ToArray();
+            if(wkt.Contains("PROJCS[",StringComparison.Ordinal)||wkt.Contains("PROJCRS[",StringComparison.Ordinal))known=known.Where(c=>c!="EPSG:4326").ToArray();
             if(known.Length!=1)throw new InvalidDataException("WKT horizontal reference is missing, ambiguous or unsupported; no transformation was guessed.");
             if(crs is not null&&crs!=known[0])throw new InvalidDataException("LAS WKT/GeoKey horizontal references disagree.");crs=known[0];
+            var start=wkt.IndexOf("PROJCS[",StringComparison.Ordinal);if(start<0)start=wkt.IndexOf("PROJCRS[",StringComparison.Ordinal);if(start<0)start=wkt.IndexOf("GEOGCS[",StringComparison.Ordinal);if(start<0)start=wkt.IndexOf("GEOGCRS[",StringComparison.Ordinal);
+            if(start<0)throw new InvalidDataException("Original horizontal WKT structure is unsupported.");var depth=0;var quote=false;var end=-1;
+            for(var k=start;k<wkt.Length;k++){var c=wkt[k];if(c=='\"'){if(quote&&k+1<wkt.Length&&wkt[k+1]=='\"'){k++;continue;}quote=!quote;}if(quote)continue;if(c=='[')depth++;if(c==']'&&--depth==0){end=k+1;break;}}
+            if(end<0)throw new InvalidDataException("Original WKT brackets are incomplete.");
+            var units=Regex.Matches(wkt[start..end],"(?:LENGTHUNIT|ANGLEUNIT|UNIT)\\[\\s*\"[^\"]*\"\\s*,\\s*([-+0-9.eE]+)",RegexOptions.CultureInvariant,TimeSpan.FromSeconds(1));
+            if(units.Count==0||!double.TryParse(units[^1].Groups[1].Value,System.Globalization.NumberStyles.Float,System.Globalization.CultureInfo.InvariantCulture,out var factor)||Math.Abs(factor-(crs=="EPSG:4326"?Math.PI/180:1))>1e-14)throw new InvalidDataException("Original WKT horizontal units conflict with the supported authority; no unit conversion is guessed.");
             // Preserve compound vertical WKT without guessing units or a conversion.
             if(wkt.Contains("VERT_CS[",StringComparison.Ordinal)||wkt.Contains("VERTCRS[",StringComparison.Ordinal))vertical="Original compound vertical WKT retained; transformations unverified";
         }
@@ -70,6 +77,8 @@ public static class LidarLas
 
 public static class LidarCoordinates
 {
+    public static void ValidateDomain(GeographicBounds b)
+    {ArgumentNullException.ThrowIfNull(b);if(new[]{b.West,b.East,b.South,b.North}.Any(x=>!double.IsFinite(x))||b.West< -180||b.East>180||b.South< -90||b.North>90||b.West>b.East||b.South>b.North)throw new InvalidDataException("Historical source index bounds must be finite and ordered; split the dateline. Bounds are candidates, not measured corridor coverage.");}
     public static bool Supported(string value)=>value is "EPSG:4326" or "EPSG:3857"||int.TryParse(value.Replace("EPSG:",""),out var e)&&(e is >=32601 and <=32660 or >=32701 and <=32760);
     public static Coordinates Geographic(string crs,double x,double y)
     {

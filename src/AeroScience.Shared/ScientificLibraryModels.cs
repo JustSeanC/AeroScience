@@ -22,7 +22,8 @@ public sealed record LibraryWorkUnit(int Index,ScientificSceneSelection Scene,Ge
 public sealed record LibraryDownloadPreview(int Version,Guid Id,ScientificLibrarySelection Selection,string SelectionHash,
     string SettingsHash,DateTimeOffset CreatedUtc,DateTimeOffset ExpiresUtc,LibraryWorkUnit[] Work,
     ScientificCatalogItem[] Products,long MaximumTransferBytes,long PerItemTransferLimit,long TemporaryStorageAllowanceBytes,
-    long ReusableBytes,long? EstimatedTransferBytes,long? EstimatedRetainedBytes,string[] Warnings,int UncoveredCells=0,long? AvailableDriveBytes=null,long? ScientificStorageLimitBytes=null,long? ScientificStorageUsedBytes=null,long? PreparationBudgetRemainingBytes=null,NasaDownloadBundle? Nasa=null);
+    long ReusableBytes,long? EstimatedTransferBytes,long? EstimatedRetainedBytes,string[] Warnings,int UncoveredCells=0,long? AvailableDriveBytes=null,long? ScientificStorageLimitBytes=null,long? ScientificStorageUsedBytes=null,long? PreparationBudgetRemainingBytes=null,NasaDownloadBundle? Nasa=null,
+    [property:System.Text.Json.Serialization.JsonIgnore(Condition=System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] LidarDownloadBundle? Lidar=null);
 public sealed record LibraryDownloadItem(int Index,string State,long DownloadedBytes,long UncertainBytes,long ReservedBytes,
     int Attempts,Guid? SourceId,long VerifiedBytes,string? Error,DateTimeOffset UpdatedUtc);
 public sealed record LibraryTransferProgress(string Stage,long? TotalOriginalBytes,long? PreparedOriginalBytes,long MeasuredNetworkBytes,

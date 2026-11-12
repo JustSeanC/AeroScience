@@ -71,6 +71,46 @@ public sealed class LidarCatalog(AutomaticScientificData automatic,ScienceStore 
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);PreferenceStore.WriteAtomic(path,result);foreach(var old in new DirectoryInfo(Path.GetDirectoryName(path)!).GetFiles("*.json").Where(f=>ScientificCatalog.IsCacheFileName(f.Name)).OrderByDescending(f=>f.LastWriteTimeUtc).Skip(128))old.Delete();return result;
     }
     internal static bool Intersects(GeographicBounds a,GeographicBounds b)=>a.West<=b.East&&a.East>=b.West&&a.South<=b.North&&a.North>=b.South;
+    public async Task<LidarDownloadBundle> Plan(LidarDownloadRequest request,CancellationToken token=default)
+    {
+        ScientificCatalog.ValidateBounds(request.Area);Project(request.Project);
+        if(request.MetadataSha256?.Length!=64||request.MaximumTransferBytes is <1048576 or >536870912||request.MaximumNodes is <1 or >64||request.MaximumCandidatePoints is <1 or >2000000||request.Area.East-request.Area.West>.1||request.Area.North-request.Area.South>.1)throw new ArgumentException("Review an exact public EPT revision, region ≤0.1 degree per side, 1–64 nodes, at most 2 million candidate points and an explicit transfer cap.");
+        var budget=new ScientificDownloadBudget(Math.Min(8388608,settings.Get().Preferences.MaximumDownloadBytes));var source=await Verify(request.Project,budget,token);
+        if(source.MetadataSha256!=request.MetadataSha256)throw new InvalidOperationException("Selected EPT metadata changed. Discover/review it again; no alternative survey is selected.");
+        if(!Intersects(source.Bounds,request.Area))throw new InvalidOperationException("The selected EPT source does not intersect this bounded study region.");
+        using var doc=JsonDocument.Parse(source.MetadataJson);var bounds=doc.RootElement.GetProperty("bounds").EnumerateArray().Select(x=>x.GetDouble()).ToArray();
+        var nodes=new SortedDictionary<string,long>(StringComparer.Ordinal);var hierarchy=new List<string>();var pending=new Queue<string>();var visited=new HashSet<string>(StringComparer.Ordinal);pending.Enqueue("0-0-0-0");
+        bool Relevant(string key)
+        {
+            var v=key.Split('-');if(v.Length!=4||v.Any(s=>s.Length==0||s.Any(c=>!char.IsAsciiDigit(c))))throw new IOException("Unsupported EPT node identity.");
+            var d=int.Parse(v[0],CultureInfo.InvariantCulture);if(d is <0 or >24)throw new IOException("EPT hierarchy depth exceeds the bounded reader.");var size=1L<<d;var xyz=v.Skip(1).Select(s=>long.Parse(s,CultureInfo.InvariantCulture)).ToArray();if(xyz.Any(n=>n<0||n>=size))throw new IOException("EPT node coordinate is outside its depth.");
+            // Supported XY transforms are monotonic for Mercator/geographic. UTM
+            // uses a conservative domain so candidates are never excluded by corners.
+            if(source.HorizontalCrs is not("EPSG:4326" or "EPSG:3857"))return true;
+            var x0=bounds[0]+(bounds[3]-bounds[0])*xyz[0]/size;var x1=bounds[0]+(bounds[3]-bounds[0])*(xyz[0]+1)/size;var y0=bounds[1]+(bounds[4]-bounds[1])*xyz[1]/size;var y1=bounds[1]+(bounds[4]-bounds[1])*(xyz[1]+1)/size;
+            // Octree cube may extend beyond the valid projection domain. Clip the
+            // prefilter only; actual decoded points must pass the strict transform.
+            if(source.HorizontalCrs=="EPSG:3857"){x0=Math.Max(x0,-20037508.34278925);x1=Math.Min(x1,20037508.34278925);y0=Math.Max(y0,-20037508.34278925);y1=Math.Min(y1,20037508.34278925);}else{x0=Math.Max(x0,-180);x1=Math.Min(x1,180);y0=Math.Max(y0,-90);y1=Math.Min(y1,90);}
+            if(x0>x1||y0>y1)return false;var lo=LidarCoordinates.Geographic(source.HorizontalCrs,x0,y0);var hi=LidarCoordinates.Geographic(source.HorizontalCrs,x1,y1);return Intersects(new(lo.Longitude,lo.Latitude,hi.Longitude,hi.Latitude),request.Area);
+        }
+        while(pending.TryDequeue(out var file))
+        {
+            token.ThrowIfCancellationRequested();if(!visited.Add(file))continue;if(visited.Count>8)throw new IOException("EPT hierarchy exceeds eight bounded pages. Select a smaller region.");
+            var data=await automatic.Http.LidarBytes(new(Bucket+request.Project+"/ept-hierarchy/"+file+".json"),2097152,budget,token);hierarchy.Add(System.Text.Encoding.UTF8.GetString(data));
+            using var json=JsonDocument.Parse(data,new JsonDocumentOptions{MaxDepth=4});if(json.RootElement.ValueKind!=JsonValueKind.Object)throw new IOException("EPT hierarchy is not a supported object.");var entries=0;
+            foreach(var property in json.RootElement.EnumerateObject())
+            {
+                if(++entries>100000)throw new IOException("EPT hierarchy entry bound exceeded.");if(!Relevant(property.Name))continue;var count=property.Value.GetInt64();
+                if(count==-1){if(pending.Count+visited.Count>=16)throw new IOException("EPT hierarchy requires too many child pages; narrow the region.");pending.Enqueue(property.Name);continue;}
+                if(count<0||count>LidarLas.MaximumPoints)throw new IOException("Unsupported EPT node point count.");if(count==0)continue;
+                if(nodes.TryGetValue(property.Name,out var previous)&&previous!=count)throw new IOException("EPT hierarchy changes the same node count.");nodes[property.Name]=count;
+                if(nodes.Count>request.MaximumNodes||nodes.Values.Sum()>request.MaximumCandidatePoints)throw new IOException("The full-density candidates exceed the reviewed node/point limits. Use a smaller study region; no lower-resolution level is silently substituted.");
+            }
+        }
+        if(nodes.Count==0)throw new IOException("No supported EPT point nodes intersect this bounded region.");
+        var selected=nodes.Select(p=>new LidarDownloadNode(p.Key,p.Value)).ToArray();var revision=ScientificCatalog.Hash(new{source.MetadataSha256,request.Area,nodes=selected,hierarchy});
+        return new(source,request.Area,selected,hierarchy.ToArray(),revision,nodes.Values.Sum(),true,request.MaximumTransferBytes,["All hierarchy nodes intersecting the selected XY rectangle are included within the explicit caps. Rectangle/node candidates are overfetch; exact modeled-corridor clipping is a separate offline operation.","Compressed node byte sizes are unknown before transfer; the explicit job cap includes metadata/retries and may stop the job before all nodes complete. No invented ETA or density.","Delivery hashes bind retained bytes; EPT metadata and hierarchy snapshots do not invent contractor dates or vertical reference."]);
+    }
 }
 
 public sealed partial class ScientificHttp

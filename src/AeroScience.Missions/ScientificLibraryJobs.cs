@@ -149,7 +149,7 @@ public sealed partial class ScientificLibraryJobs:IDisposable
                     var item=job.Items.FirstOrDefault(i=>i.State!="Completed");
                     if(item is null){science.SetLibraryState(job.Id,"Completed",runningOnly:true);continue;}
                     var work=job.Preview.Work[item.Index];var key=job.Id+"/"+item.Index;
-                    await automatic.ScheduleLibrary(key,ScientificCatalog.Provider(work.Scene.Provider).Kind,work.Area,token=>Execute(job,work,item,token));
+                    await automatic.ScheduleLibrary(key,job.Preview.Lidar is not null?RemoteKind.Terrain:ScientificCatalog.Provider(work.Scene.Provider).Kind,work.Area,token=>Execute(job,work,item,token));
                 }
             }
             catch(OperationCanceledException)when(stopping.IsCancellationRequested){break;}
@@ -181,6 +181,7 @@ public sealed partial class ScientificLibraryJobs:IDisposable
         var measured=new ScientificTransferProgress();progress[job.Id]=measured;measured.Begin(job.Preview.EstimatedTransferBytes,job.Preview.EstimatedTransferBytes==0?0:job.Preview.Nasa?.Files.Length??0);
         try
         {
+            if(job.Preview.Lidar is {} lidar){await ExecuteLidar(job,work,previous,lidar,token);return;}
             using var operation=science.BeginAnalysis();
             var current=science.LibraryJob(job.Id);if(current.State!="Queued"||current.ApprovalId is null)return;
             if(current.Preview.SettingsHash!=SettingsHash(current.Preview.Nasa is not null))throw new InvalidOperationException("Scientific access limits/consent changed; create a new preview before further downloading.");
