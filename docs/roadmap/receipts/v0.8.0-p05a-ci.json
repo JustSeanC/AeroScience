@@ -5,7 +5,7 @@
   "implementationCommit": "4938545c6f65d0367ffa0fc9202b5bd28208c850",
   "runtimeSourceCommit": "80357e85c07e9b2d690a6c9f5d7007da20588d65",
   "algorithm": "continuous-terrain-corridor-2/sensor-plane-2",
-  "milestoneAcceptance": "Blocked: Full CI is not green",
+  "milestoneAcceptance": "Accepted: exact-source Full CI green",
   "targeted": {
     "passed": 252,
     "failed": 0,
@@ -476,5 +476,163 @@
   ],
   "releasePublished": false,
   "ownerDataModified": false,
-  "nextAction": "When GitHub can finalize/cancel the stuck run and execute workflows, run Full CI on runtime source 80357e85c07e9b2d690a6c9f5d7007da20588d65. Retain failed-upload diagnostics if they become available; do not start P05b or claim P05a acceptance until the required checks are green."
+  "nextAction": "P05a automated gate accepted. P05b may proceed under its bounded source/provenance/deletion/consent scope. Installed Windows/MSFS acceptance remains Not Tested.",
+  "validationRecoveryRefresh": {
+    "observedUtc": "2026-11-12T04:09:46.298402+00:00",
+    "branchHeadBeforeRecovery": "0a0231be3ff8620a3d8dfc2a91a66620a5d760a2",
+    "runtimeSourceCommit": "80357e85c07e9b2d690a6c9f5d7007da20588d65",
+    "runId": 43092959501,
+    "attempt1Conclusion": "failure",
+    "failedPhase": "actions/upload-artifact@v7 CreateArtifact API",
+    "exactError": "Failed to CreateArtifact: Failed to make request after 5 attempts: Unexpected token '<', \"<!DOCTYPE \"... is not valid JSON",
+    "classification": "Artifact service/API response failure before data upload; no failing application tests or confirmed repository/workflow defect. Underlying HTTP/HTML response cause not available in these logs.",
+    "linuxDotnet": {
+      "total": 1544,
+      "passed": 1544,
+      "failed": 0,
+      "skipped": 0
+    },
+    "windowsDotnet": {
+      "total": 1544,
+      "passed": 1534,
+      "failed": 0,
+      "existingPlatformSkips": 10
+    },
+    "logs": [
+      {
+        "platform": "linux",
+        "path": "artifacts/p05a-gate/linux-attempt1.log",
+        "bytes": 1318134,
+        "sha256": "ad3e7815ae74a733679b3c1b41371f53ea1b36706173c925294af4f9d551ac25"
+      },
+      {
+        "platform": "windows",
+        "path": "artifacts/p05a-gate/windows-attempt1.log",
+        "bytes": 1070868,
+        "sha256": "49957021f8372998409b4440d489b674f52d4f58ab64c614eb9ec0f58fe6fbd9"
+      }
+    ],
+    "controlledRetry": {
+      "operation": "rerun failed jobs",
+      "runId": 43092959501,
+      "attempt": 2,
+      "accepted": true,
+      "status": "completed",
+      "sourceChanged": false,
+      "assertionsWeakened": false,
+      "dotnetReceipts": [
+        {
+          "platform": "windows",
+          "artifactId": 13915656264,
+          "zipPath": "artifacts/p05a-gate/windows-attempt2.zip",
+          "zipSha256": "3b66b17ad58b3c1e08595139d202a10ef9e6bd1587964cfc35afd0275f7646ff",
+          "trxName": "windows.trx",
+          "trxSha256": "9db906530daafe86dc69072d43ab8a7f10100404de62223911cab8396fdfe2fa",
+          "counters": {
+            "total": 1544,
+            "executed": 1534,
+            "passed": 1534,
+            "failed": 0,
+            "error": 0,
+            "timeout": 0,
+            "aborted": 0,
+            "inconclusive": 0,
+            "passedButRunAborted": 0,
+            "notRunnable": 0,
+            "notExecuted": 0,
+            "disconnected": 0,
+            "warning": 0,
+            "completed": 0,
+            "inProgress": 0,
+            "pending": 0
+          },
+          "newP05aCases": 49
+        },
+        {
+          "platform": "linux",
+          "artifactId": 13914818629,
+          "zipPath": "artifacts/p05a-gate/linux-attempt2.zip",
+          "zipSha256": "de3d4cf13d1ab94ce07f3bcdaafa16ea45b21f741a54e7802d5d4b6cd8661984",
+          "trxName": "tests/AeroScience.Tests/TestResults/_runnervm7aw5e_2026-11-12_04_08_03_net10.0.trx",
+          "trxSha256": "5fb6f2a15450118cd9210fa93c7e7fae74ceac7b8272de71d744852af786b93c",
+          "counters": {
+            "total": 1544,
+            "executed": 1544,
+            "passed": 1544,
+            "failed": 0,
+            "error": 0,
+            "timeout": 0,
+            "aborted": 0,
+            "inconclusive": 0,
+            "passedButRunAborted": 0,
+            "notRunnable": 0,
+            "notExecuted": 0,
+            "disconnected": 0,
+            "warning": 0,
+            "completed": 0,
+            "inProgress": 0,
+            "pending": 0
+          },
+          "newP05aCases": 49
+        }
+      ],
+      "diagnosticUploads": "Linux and Windows succeeded; original blocker cleared; awaiting remaining Full checks",
+      "conclusion": "success"
+    },
+    "p05bImplementationStarted": false
+  },
+  "acceptedFullCi": {
+    "runId": 43092959501,
+    "attempt": 2,
+    "sourceCommit": "80357e85c07e9b2d690a6c9f5d7007da20588d65",
+    "url": "https://github.com/JustSeanC/AeroScience/actions/runs/43092959501/attempts/2",
+    "status": "completed",
+    "conclusion": "success",
+    "runtimeAndWorkflowChangedForRetry": false,
+    "dotnet": {
+      "linux": {
+        "passed": 1544,
+        "skipped": 0
+      },
+      "windows": {
+        "passed": 1534,
+        "existingPlatformSkips": 10
+      }
+    },
+    "browser": {
+      "startTime": "2026-11-12T04:25:22.392Z",
+      "duration": 1421377.307,
+      "expected": 439,
+      "skipped": 2,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "browserArtifact": {
+      "id": 13915938649,
+      "zipSha256": "ce0618e5007838cb466e909d180c161d45eec377030e46bb6f8ac9c7d61b4734",
+      "jsonSha256": "6cc06fbccafcae79e62669798d9d9a611d2b8843cecc96eaa80337c8bb4b6a5e"
+    },
+    "node": {
+      "presentationPassed": 38,
+      "nativeCompilationStagingPassed": 4,
+      "railwayOfflinePassed": 6
+    },
+    "python": {
+      "linux": {
+        "total": 185,
+        "passed": 184,
+        "existingSkips": 1
+      },
+      "windows": {
+        "total": 182,
+        "passed": 179,
+        "existingSkips": 3
+      }
+    },
+    "organization": {
+      "securityPassed": 12,
+      "runtimePassed": 10
+    },
+    "allRecoveryAndStructuralSteps": "success"
+  }
 }
