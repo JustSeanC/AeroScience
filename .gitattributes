@@ -27,3 +27,11 @@
 
 # Genuine public FAA XML/AIXM/JSON receipts refer to these exact upstream bytes.
 /tests/AeroScience.Tests/TfrOriginals/*.original -text -diff
+
+# Pinned LASzip and genuine point-cloud acceptance originals are byte-exact.
+/native/lidar/laszip/** -text
+/licenses/LASzip.txt -text
+/native/lidar/reader.cpp text eol=lf
+/native/lidar/source-policy.json text eol=lf
+/scripts/build/lidar_runtime.py text eol=lf
+/tests/AeroScience.Tests/LidarOriginals/** -text
