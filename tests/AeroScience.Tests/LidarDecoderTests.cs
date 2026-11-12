@@ -25,6 +25,11 @@ public sealed class LidarDecoderTests:IDisposable
         Assert.Contains("COPC",Assert.Throws<InvalidDataException>(()=>LidarLas.Inspect(LidarFixture.Write(root,copc:true))).Message);
         var path=LidarFixture.Write(root);using(var s=new FileStream(path,FileMode.Open,FileAccess.Write)){s.Position=131;s.Write(new byte[8]);}Assert.Throws<InvalidDataException>(()=>LidarLas.Inspect(path));
     }
+    [Theory][InlineData(6)][InlineData(7)][InlineData(8)]public async Task Las14PreservesExtendedClassesReturnsFlagsAngleAndExtraDimensions(int format)
+    {
+        var path=LidarFixture.Modern(root,format);var h=LidarLas.Inspect(path);Assert.Equal(4,h.VersionMinor);Assert.Equal(3,h.PointCount);var p=(await LidarDecoder.Read(path,h,0,1))[0];Assert.Equal(200,p.Classification);Assert.Equal(9,p.ReturnNumber);Assert.Equal(12,p.NumberOfReturns);Assert.Equal(13,p.ClassificationFlags);Assert.Equal((byte)3,p.ScannerChannel);Assert.Equal(-1234,p.RawScanAngle);Assert.Equal(-7.404,p.ScanAngleDegrees,10);Assert.Equal(50000,p.PointSourceId);Assert.Equal(1234.567,p.GpsTime);Assert.Equal(BitConverter.GetBytes(12345U),p.OriginalExtraBytes);
+        if(format>=7)Assert.Equal(new ushort[]{1000,2000,3000},p.Rgb);else Assert.Null(p.Rgb);if(format==8)Assert.Equal((ushort)4000,p.Infrared);else Assert.Null(p.Infrared);
+    }
     [Theory][InlineData("https://usgs-lidar.s3.amazonaws.com/project/file.laz")][InlineData("https://usgs-lidar-public.s3-us-west-2.amazonaws.com/IA_FullState/ept.json?x-amz-request-payer=requester")][InlineData("https://127.0.0.1/ept.json")][InlineData("https://usgs-lidar-public.s3-us-west-2.amazonaws.com/IA_FullState/../secret")]
     public void UnsafeOrPaidEndpointsAreRejected(string uri)=>Assert.Throws<IOException>(()=>LidarCatalog.ValidateUrl(new(uri)));
     [Fact]public async Task GenuineDeliveredEptLazDecodesAgainstIndependentRecordedReference()

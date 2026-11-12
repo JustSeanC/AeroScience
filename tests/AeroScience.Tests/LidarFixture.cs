@@ -4,6 +4,14 @@ namespace AeroScience.Tests;
 // SYNTHETIC LAS records for deterministic format/attribute/geometry edge cases.
 internal static class LidarFixture
 {
+    internal static string Modern(string root,int format)
+    {
+        Directory.CreateDirectory(root);var path=Path.Combine(root,Guid.NewGuid().ToString("N")+".las");var wkt=Encoding.UTF8.GetBytes("GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563]],PRIMEM[\"Greenwich\",0],UNIT[\"degree\",0.0174532925199433],AUTHORITY[\"EPSG\",\"4326\"]]\0");
+        var h=new byte[375];using(var w=new BinaryWriter(new MemoryStream(h))){w.Write(Encoding.ASCII.GetBytes("LASF"));w.BaseStream.Position=6;w.Write((ushort)16);w.BaseStream.Position=24;w.Write((byte)1);w.Write((byte)4);w.BaseStream.Position=94;w.Write((ushort)375);w.Write((uint)(375+54+wkt.Length));w.Write((uint)1);w.Write((byte)format);w.Write((ushort)((format==6?30:format==7?36:38)+4));w.BaseStream.Position=131;foreach(var x in new[]{.000001,.000001,.01,-75d,40d,0d,-74.99998,-75d,40.00002,40d,123.45,123.45})w.Write(x);w.BaseStream.Position=247;w.Write(3UL);w.BaseStream.Position=319;w.Write(3UL);}
+        using var file=File.Create(path);using var writer=new BinaryWriter(file);writer.Write(h);writer.Write((ushort)0);writer.Write(Encoding.ASCII.GetBytes("LASF_Projection".PadRight(16,'\0')));writer.Write((ushort)2112);writer.Write((ushort)wkt.Length);writer.Write(new byte[32]);writer.Write(wkt);
+        for(var i=0;i<3;i++){writer.Write(i*10);writer.Write(i*10);writer.Write(12345);writer.Write((ushort)40000);writer.Write((byte)(9|(12<<4)));writer.Write((byte)(13|(3<<4)|64|128));writer.Write((byte)200);writer.Write((byte)50);writer.Write((short)-1234);writer.Write((ushort)50000);writer.Write(1234.567);if(format>=7)foreach(ushort c in new ushort[]{1000,2000,3000})writer.Write(c);if(format==8)writer.Write((ushort)4000);writer.Write(12345U);}
+        return path;
+    }
     internal static string Write(string root,int format=1,int epsg=4326,int unit=9001,(int X,int Y,int Z)[]? points=null,bool copc=false)
     {
         Directory.CreateDirectory(root);var path=Path.Combine(root,Guid.NewGuid().ToString("N")+".las");

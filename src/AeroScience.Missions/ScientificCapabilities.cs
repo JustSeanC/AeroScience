@@ -8,6 +8,7 @@ public static class ScientificCapabilities
     public static SourceCapabilitySummary Describe(ScientificSource source)
     {
         var m=source.Manifest;
+        if(m.PointCloud is not null)return new(source.Id,[],m.Provider,m.SceneId,["Historical LiDAR point records require the explicit post-flight point workflow. They are not raster sensor bands, new airborne acquisitions or a live instrument-readiness claim."]);
         ScientificCapability[] capabilities=m.Kind switch
         {
             RemoteKind.Thermal=>[ScientificCapability.SurfaceTemperature],

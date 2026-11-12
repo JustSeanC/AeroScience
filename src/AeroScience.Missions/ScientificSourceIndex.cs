@@ -7,7 +7,7 @@ using Microsoft.Data.Sqlite;
 namespace AeroScience.Missions;
 
 public sealed record SourceQuery(RemoteKind? Kind = null, Coordinates? Point = null, GeographicBounds? Area = null,
-    string? Provider = null, string? Scene = null, string? ManifestKey = null, string? Fingerprint = null, string? Collection = null, string? Search = null);
+    string? Provider = null, string? Scene = null, string? ManifestKey = null, string? Fingerprint = null, string? Collection = null, string? Search = null,bool? PointCloud=null);
 public sealed record ScientificSourcePage(ScientificSource[] Items, long? Next, long Through, long Total);
 // Compatibility enumeration is lazy and uses keyset pages. Length never truncates inventory.
 public sealed class ScientificSourceInventory(ScienceStore store, SourceQuery? query = null) : IReadOnlyCollection<ScientificSource>
@@ -139,6 +139,7 @@ public sealed partial class ScienceStore
         query ??= new(); var conditions=new List<string>();
         void Equal(string column,object? value){if(value is null)return;var name="$"+column;conditions.Add("i."+column+"="+name);command.Parameters.AddWithValue(name,value);}
         Equal("kind",query.Kind is {} k?(int)k:null);Equal("provider",query.Provider);Equal("scene",query.Scene);Equal("manifest_key",query.ManifestKey);Equal("fingerprint",query.Fingerprint);Equal("collection_key",query.Collection);
+        if(query.PointCloud is {} cloud)conditions.Add((cloud?"":"NOT ")+"EXISTS(SELECT 1 FROM remote_sources s WHERE s.id=i.source_id AND json_type(s.payload_json,'$.manifest.pointCloud')='object')");
         if(query.Search is {} search){if(search.Length>200)throw new ArgumentException("Use a search up to 200 characters.");conditions.Add("instr(i.search_text,$search)>0");command.Parameters.AddWithValue("$search",search.ToLowerInvariant());}
         var region=query.Area??(query.Point is {} point?new GeographicBounds(point.Longitude,point.Latitude,point.Longitude,point.Latitude):null);
         if(region is not null)

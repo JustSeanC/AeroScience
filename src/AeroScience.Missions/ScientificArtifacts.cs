@@ -65,8 +65,8 @@ public sealed partial class ScienceStore
         using var operation=BeginAnalysis();using var reservation=Management?.ReserveScience(maximumBytes+65536);
         if(disk.FreeBytes(DirectoryPath)<maximumBytes+StorageManager.MinimumFreeBytes)throw new IOException("Insufficient space for the analysis product and reserve.");
         var id=Guid.NewGuid();var relative=$"Products/{mission:N}/Derived/{id:N}.{format}";var path=StorageManager.ResolveDataset(DirectoryPath,LibraryId,relative);Directory.CreateDirectory(Path.GetDirectoryName(path)!);
-        if(retainedSourceOwner is {} owner&&(owner==Guid.Empty||kind!=TerrainElevations.TileKind))throw new ArgumentException("Explicit retained-source ownership is only supported for individual terrain cell tiles.");
-        var partial=path+".partial";var ledger=BeginManagedWrite(retainedSourceOwner is {} sourceOwner?TerrainElevations.SourceWriteOperation(sourceOwner):"Scientific analysis",[relative,relative+".partial"]);
+        if(retainedSourceOwner is {} owner&&(owner==Guid.Empty||kind is not(TerrainElevations.TileKind or LidarProcessing.TileKind)))throw new ArgumentException("Explicit retained-source ownership requires an individual terrain-cell or historical-point tile.");
+        var partial=path+".partial";var ledger=BeginManagedWrite(retainedSourceOwner is {} sourceOwner?(kind==LidarProcessing.TileKind?LidarProcessing.SourceWriteOperation(sourceOwner):TerrainElevations.SourceWriteOperation(sourceOwner)):"Scientific analysis",[relative,relative+".partial"]);
         try
         {
             token.ThrowIfCancellationRequested();write(partial);token.ThrowIfCancellationRequested();

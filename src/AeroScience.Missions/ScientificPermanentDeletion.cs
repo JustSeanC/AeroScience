@@ -29,7 +29,7 @@ public sealed partial class ScienceStore
         // final/partial paths, so permanent deletion cannot leave those values behind.
         foreach(var ledger in pending.Ledgers)
         {
-            var work=ReadCatalog<ManagedScientificWork>(File.ReadAllText(ledger));if(work.Operation!=TerrainElevations.SourceWriteOperation(source.Id))continue;
+            var work=ReadCatalog<ManagedScientificWork>(File.ReadAllText(ledger));var lidar=work.Operation==LidarProcessing.SourceWriteOperation(source.Id);if(!lidar&&work.Operation!=TerrainElevations.SourceWriteOperation(source.Id))continue;
             foreach(var relative in work.Paths)
             {
                 var parts=relative.Split('/');var name=parts.LastOrDefault()??"";var stem=name.EndsWith(".json.partial",StringComparison.Ordinal)?name[..^13]:name.EndsWith(".json",StringComparison.Ordinal)?name[..^5]:"";
@@ -38,7 +38,8 @@ public sealed partial class ScienceStore
                 if(new FileInfo(path).Length>16777216)throw new IOException("Interrupted terrain tile exceeds its declared bound; deletion review is incomplete.");
                 if(!name.EndsWith(".partial",StringComparison.Ordinal))
                 {
-                    var tile=ReadCatalog<TerrainElevationTile>(File.ReadAllText(path));if(tile.Source?.Original?.Id!=source.Id||tile.Source.Original.ManifestSha256!=source.ManifestSha256)throw new IOException("Interrupted terrain tile/source identity differs; unrelated values were preserved.");
+                    if(lidar){var tile=ReadCatalog<LidarPointTile>(File.ReadAllText(path));if(tile.Source?.Id!=source.Id||tile.Source.ManifestSha256!=source.ManifestSha256)throw new IOException("Interrupted historical-point tile/source identity differs; unrelated values were preserved.");}
+                    else{var tile=ReadCatalog<TerrainElevationTile>(File.ReadAllText(path));if(tile.Source?.Original?.Id!=source.Id||tile.Source.Original.ManifestSha256!=source.ManifestSha256)throw new IOException("Interrupted terrain tile/source identity differs; unrelated values were preserved.");}
                 }
                 copies.TryAdd(relative,new(relative,new FileInfo(path).Length,Digest(path)));
             }
@@ -72,7 +73,7 @@ public sealed partial class ScienceStore
             var relative=Path.GetRelativePath(DirectoryPath,path).Replace('\\','/');
             if(relative.StartsWith("Downloads/",StringComparison.Ordinal))copies.TryAdd(relative,new(relative,new FileInfo(path).Length,Digest(path)));
         }
-        foreach(var artifact in Artifacts().Where(a=>a.Kind is "retained-source" or TerrainElevations.TileKind)){
+        foreach(var artifact in Artifacts().Where(a=>a.Kind is "retained-source" or TerrainElevations.TileKind or LidarProcessing.TileKind)){
             using var metadata=JsonDocument.Parse(artifact.MetadataJson);var node=metadata.RootElement;
             var sourceIds=node.TryGetProperty("sourceIds",out var set)&&set.ValueKind==JsonValueKind.Array?set.EnumerateArray().Select(v=>v.GetGuid()).ToArray():node.TryGetProperty("sourceId",out var one)?[one.GetGuid()]:[];
             if(!sourceIds.Contains(source.Id))continue;
@@ -82,7 +83,7 @@ public sealed partial class ScienceStore
         }
         foreach(var copy in RegisteredCopies().Where(c=>c.Kind=="recovery")){
             var database=RegisteredCopies().FirstOrDefault(c=>c.Kind=="database"&&Path.GetDirectoryName(c.Path)==copy.Path)??throw new IOException("Managed recovery copy ownership is incomplete.");
-            using var backup=OpenDeletionBackup(database.Path,false);using var read=backup.CreateCommand();read.CommandText="SELECT payload_json FROM scientific_artifacts WHERE json_extract(payload_json,'$.kind') IN ('retained-source','terrain-elevation-tile')";using var artifacts=read.ExecuteReader();while(artifacts.Read()){
+            using var backup=OpenDeletionBackup(database.Path,false);using var read=backup.CreateCommand();read.CommandText="SELECT payload_json FROM scientific_artifacts WHERE json_extract(payload_json,'$.kind') IN ('retained-source','terrain-elevation-tile','lidar-point-tile')";using var artifacts=read.ExecuteReader();while(artifacts.Read()){
                 var artifact=ReadCatalog<ScientificArtifact>(artifacts.GetString(0));using var metadata=JsonDocument.Parse(artifact.MetadataJson);var node=metadata.RootElement;
                 var ids=node.TryGetProperty("sourceIds",out var set)&&set.ValueKind==JsonValueKind.Array?set.EnumerateArray().Select(v=>v.GetGuid()).ToArray():node.TryGetProperty("sourceId",out var one)?[one.GetGuid()]:[];
                 if(!ids.Contains(source.Id))continue;if(ids.Any(id=>!selected(id)))throw new IOException("A shared recovery mosaic includes unselected sources. Review all contributors before permanent deletion.");if(ids.Order().First()!=source.Id)continue;
@@ -107,7 +108,7 @@ public sealed partial class ScienceStore
     {
         foreach(var ledger in PendingArtifacts().Ledgers)
         {
-            var work=ReadCatalog<ManagedScientificWork>(File.ReadAllText(ledger));const string prefix="Terrain elevation cells: source=";
+            var work=ReadCatalog<ManagedScientificWork>(File.ReadAllText(ledger));var prefix=work.Operation.StartsWith("Historical LiDAR points: source=",StringComparison.Ordinal)?"Historical LiDAR points: source=":"Terrain elevation cells: source=";
             if(!work.Operation.StartsWith(prefix,StringComparison.Ordinal)||!Guid.TryParseExact(work.Operation[prefix.Length..],"N",out var source)||!DeletionContains(preview,source))continue;
             if(work.Paths.Any(relative=>File.Exists(StorageManager.ResolveDataset(DirectoryPath,LibraryId,relative))))throw new IOException("A deleted source still has an owned terrain write; cleanup remains pending.");
             File.Delete(ledger);
@@ -147,7 +148,7 @@ public sealed partial class ScienceStore
             var affected=0;using(var transaction=db.BeginTransaction()){
                 command.Transaction=transaction;command.CommandText="DELETE FROM remote_sources WHERE id=$id";command.Parameters.Add("$id",SqliteType.Text);
                 foreach(var source in sources){command.CommandText="DELETE FROM remote_sources WHERE id=$id";command.Parameters["$id"].Value=source.ToString();affected+=command.ExecuteNonQuery();
-                    using var table= db.CreateCommand();table.Transaction=transaction;table.CommandText="SELECT count(*) FROM sqlite_master WHERE name='scientific_artifacts'";if(Convert.ToInt64(table.ExecuteScalar())>0){command.CommandText="DELETE FROM scientific_artifacts WHERE json_extract(payload_json,'$.kind') IN ('retained-source','terrain-elevation-tile') AND (json_extract(json_extract(payload_json,'$.metadataJson'),'$.sourceId')=$id OR EXISTS(SELECT 1 FROM json_each(json_extract(payload_json,'$.metadataJson'),'$.sourceIds') WHERE value=$id))";affected+=command.ExecuteNonQuery();}
+                    using var table= db.CreateCommand();table.Transaction=transaction;table.CommandText="SELECT count(*) FROM sqlite_master WHERE name='scientific_artifacts'";if(Convert.ToInt64(table.ExecuteScalar())>0){command.CommandText="DELETE FROM scientific_artifacts WHERE json_extract(payload_json,'$.kind') IN ('retained-source','terrain-elevation-tile','lidar-point-tile') AND (json_extract(json_extract(payload_json,'$.metadataJson'),'$.sourceId')=$id OR EXISTS(SELECT 1 FROM json_each(json_extract(payload_json,'$.metadataJson'),'$.sourceIds') WHERE value=$id))";affected+=command.ExecuteNonQuery();}
                 }
                 transaction.Commit();command.Transaction=null;
             }

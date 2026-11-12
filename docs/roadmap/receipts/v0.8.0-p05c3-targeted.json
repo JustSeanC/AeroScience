@@ -1,0 +1,30 @@
+{
+  "checkpoint": "P05c.3",
+  "counts": {
+    "total": "54",
+    "executed": "54",
+    "passed": "54",
+    "failed": "0",
+    "error": "0",
+    "timeout": "0",
+    "aborted": "0",
+    "inconclusive": "0",
+    "passedButRunAborted": "0",
+    "notRunnable": "0",
+    "notExecuted": "0",
+    "disconnected": "0",
+    "warning": "0",
+    "completed": "0",
+    "inProgress": "0",
+    "pending": "0"
+  },
+  "trxSha256": "c69c92bcaf8eb71531de6fb5de5f8c5e15ba5df03b0c157f9e6a32ef36ec69a0",
+  "scope": "Exact point clipping, source identity, LAS formats/attributes, durable recovery/receipts, source deletion and original DEM processing",
+  "failedNewTestDiagnostic": {
+    "path": "artifacts/p05c-targeted/p05c3-clipping.trx",
+    "sha256": "77bb1c89524bcefa5af980d046241a5154c81d00d783a2d9ef2cbbaaac89bc62",
+    "cause": "Record-reference equality does not compare deserialized arrays; exact full serialized receipt equality now required"
+  },
+  "originalAssertionsWeakened": false,
+  "fullCi": "Pending final integration"
+}
