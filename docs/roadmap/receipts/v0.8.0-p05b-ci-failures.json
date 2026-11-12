@@ -28,6 +28,36 @@
       "browser": "Skipped after Linux .NET failure",
       "status": "Confirmed local physical-checkpoint contention; bounded retry preserves persistent pending state, selection, authorization and original API assertion.",
       "localReproduction": "Real pinned SQLite WAL reader reproduced transient cleanup pending; before/after TRX hashes recorded in targeted receipt."
+    },
+    {
+      "id": 43172577632,
+      "source": "cc2ce9692cbcb3f2318c3fc98a7aca948679cf24",
+      "url": "https://github.com/JustSeanC/AeroScience/actions/runs/43172577632",
+      "linuxDotnet": {
+        "total": 1571,
+        "passed": 1571,
+        "failed": 0
+      },
+      "windowsDotnet": {
+        "total": 1571,
+        "passed": 1561,
+        "skipped": 10,
+        "failed": 0
+      },
+      "organizationDeployment": "success",
+      "browser": {
+        "passed": 446,
+        "failed": 1,
+        "skipped": 2,
+        "flaky": 0,
+        "artifactId": 13925417332,
+        "artifactSha256": "15df0263e5c08b227477ff418260f089c11063020e53e6d88df263ab8a366787",
+        "resultsSha256": "b2ee5bb08e55d6c17c44a3bad60b36584041db07d25d126150ce0c6ae8215b51",
+        "failure": "mission-operations: original measurement selection coordinates chart/map and deletion clears displayed science",
+        "message": "Finish active scientific acquisition, import or analysis before deleting external sources.",
+        "newP05bBrowserScenarios": "All eight passed."
+      },
+      "status": "Real transient source-in-use lease can arrive between preview and execution. Reproduced with active analysis leases; preserving exclusive acquisition and post-wait selection revalidation."
     }
   ]
 }

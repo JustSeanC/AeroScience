@@ -25,9 +25,23 @@ public sealed partial class ScienceStore
     private readonly Dictionary<Guid,SourceDeletionPreview> sourceDeletionPreviews=[];
     internal Action<string>? SourceDeletionFault;
     public string? SourceDeletionWarning {get;private set;}
-    public IDisposable EnterSourceMaintenance()
+    public IDisposable EnterSourceMaintenance()=>EnterSourceMaintenance(TimeSpan.Zero);
+    private IDisposable EnterSourceMaintenance(TimeSpan waitForIdle)
     {
-        Initialize();lock(gate){if(sourceMaintenance||activeAnalyses>0)throw new InvalidOperationException("Finish active scientific acquisition, import or analysis before deleting external sources.");sourceMaintenance=true;return new AnalysisLease(()=>{lock(gate)sourceMaintenance=false;});}
+        if(waitForIdle<TimeSpan.Zero||waitForIdle>TimeSpan.FromSeconds(1))throw new ArgumentOutOfRangeException(nameof(waitForIdle));
+        Initialize();var waiting=System.Diagnostics.Stopwatch.StartNew();
+        while(true)
+        {
+            lock(gate)
+            {
+                if(sourceMaintenance)throw new InvalidOperationException("Finish active scientific acquisition, import or analysis before deleting external sources.");
+                if(activeAnalyses==0){sourceMaintenance=true;return new AnalysisLease(()=>{lock(gate)sourceMaintenance=false;});}
+            }
+            // Do not reserve maintenance while an existing analysis is active:
+            // it may need nested original-reader/writer leases to finish safely.
+            if(waiting.Elapsed>=waitForIdle)throw new InvalidOperationException("Finish active scientific acquisition, import or analysis before deleting external sources.");
+            Thread.Sleep(20);
+        }
     }
     private string SourceDeletionFolder(Guid id)=>StorageManager.ResolveDataset(DirectoryPath,LibraryId,$"Metadata/SourceDeletions/{id:N}");
     private static bool ContainsIdentity(string json,Guid id)=>json.Contains(id.ToString(),StringComparison.OrdinalIgnoreCase)||json.Contains(id.ToString("N"),StringComparison.OrdinalIgnoreCase);

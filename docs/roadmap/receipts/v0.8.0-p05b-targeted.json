@@ -1,6 +1,6 @@
 {
   "checkpoint": "v0.8.0 P05b",
-  "source": "2b830dafe9bc58f2827c21f181222168bfe72669",
+  "source": "cc2ce9692cbcb3f2318c3fc98a7aca948679cf24",
   "dotnet": {
     "command": "dotnet test tests/AeroScience.Tests -c Release --no-restore --filter FullyQualifiedName~TerrainElevation|FullyQualifiedName~TerrainSurvey|FullyQualifiedName~ScientificWorkspaceTests|FullyQualifiedName~ExternalSourceDeletionTests|FullyQualifiedName~ScientificLibraryJobsTests|FullyQualifiedName~ScientificSourceReuseTests",
     "counts": {
@@ -86,7 +86,7 @@
   },
   "genuineSourceComparison": {
     "state": "Passed",
-    "verifiedUtc": "2026-11-12T06:30:06.509249+00:00",
+    "verifiedUtc": "2026-11-12T07:06:31.872041+00:00",
     "scope": "Genuine bounded USGS composite delivered values/grid; synthetic archived flight corridor; fully offline application processing",
     "reference": "GDAL 3.10.3 / OGR GEOS overlays",
     "originalSha256": "4c043d10024c8af4077c45d9ed6778141ccaf0837298ea8a521c9f832ce9a7f0",
@@ -96,7 +96,7 @@
     "clippedCellsCompared": 576,
     "partialCells": 66,
     "maximumCellFractionDifference": 1.9593626721103874e-10,
-    "derivedIndexSha256": "24382d367868ebb5cb0f7983e2a8538b59e0c5b44ddb4b3ff04b1e261749acbd",
+    "derivedIndexSha256": "55a3567d454bdedf1095f9426d21426b5e9320bd59f8109c880427463fd85ef7",
     "unknowns": [
       "historical survey date",
       "native per-pixel resolution",
@@ -108,13 +108,13 @@
       "installed Windows/MSFS",
       "provider-wide availability"
     ],
-    "compiledSourceCommit": "2b830dafe9bc58f2827c21f181222168bfe72669"
+    "compiledSourceCommit": "cc2ce9692cbcb3f2318c3fc98a7aca948679cf24"
   },
   "genuineProbeFiles": {
     "sourceOriginal": "artifacts/p05b-genuine/usgs-composite-original.tif",
     "request": "artifacts/p05b-genuine/request.json",
     "serviceMetadata": "artifacts/p05b-genuine/service-metadata.json",
-    "applicationOutput": "artifacts/p05b-genuine/application-2b830da"
+    "applicationOutput": "artifacts/p05b-genuine/application-cc2ce96"
   },
   "failedFocusedDiagnostics": {
     "files": [
@@ -168,10 +168,12 @@
     "tests/AeroScience.Tests/TerrainElevationTests.cs": "78b5a06432f6772360e311ea9ce84983cf073e858ce86f18becabf17d85a9ed8",
     "tests/AeroScience.Tests/TerrainElevationApiTests.cs": "2efc547b2488396ff838cde84b20a316a0e13e6e7ad9e754cb22eb64b124bcdd",
     "tests/web/terrain-completion.spec.js": "1b5199067c1390c01eac0485eaa5a704c246c85677c333e2e4c7ecf926f6859f",
-    "scripts/validation/verify-terrain-elevation.py": "8365cc369de945481690938bcd491ff4759ec64b5de35d9d6f09a9c91e15e9ca"
+    "scripts/validation/verify-terrain-elevation.py": "8365cc369de945481690938bcd491ff4759ec64b5de35d9d6f09a9c91e15e9ca",
+    "src/AeroScience.Missions/MissionScienceDeletion.cs": "0771e0cfbaee01c368abb49f19430b8bebc85da76f63a461c203768478b7d393",
+    "tests/AeroScience.Tests/MissionScienceCleanupTests.cs": "8afdfbf18ff75e7c98c7d02f64a4489c50c15f0e6041646a34de31ca3e2d9af7"
   },
   "ciRemediation": {
-    "source": "Corrective checkpoint source recorded in CI receipt",
+    "source": "cc2ce9692cbcb3f2318c3fc98a7aca948679cf24",
     "cause": "SQLite physical checkpoint reports busy as a result row; a transient archive reader could leave the one-shot deletion pending.",
     "realReaderBeforeFix": {
       "counts": {
@@ -219,5 +221,70 @@
     },
     "originalApiAssertionChanged": false,
     "permanentDeletionSuccessConditionWeakened": false
+  },
+  "exclusiveLeaseRemediation": {
+    "source": "Corrective source recorded in final CI receipt",
+    "before": {
+      "counts": {
+        "total": "3",
+        "executed": "3",
+        "passed": "1",
+        "failed": "2",
+        "error": "0",
+        "timeout": "0",
+        "aborted": "0",
+        "inconclusive": "0",
+        "passedButRunAborted": "0",
+        "notRunnable": "0",
+        "notExecuted": "0",
+        "disconnected": "0",
+        "warning": "0",
+        "completed": "0",
+        "inProgress": "0",
+        "pending": "0"
+      },
+      "trxSha256": "90902d4c3e542fe30397fbd4603e5755427dfc17d437bca5cc044ce3ff90e4da"
+    },
+    "after": {
+      "counts": {
+        "total": "135",
+        "executed": "135",
+        "passed": "135",
+        "failed": "0",
+        "error": "0",
+        "timeout": "0",
+        "aborted": "0",
+        "inconclusive": "0",
+        "passedButRunAborted": "0",
+        "notRunnable": "0",
+        "notExecuted": "0",
+        "disconnected": "0",
+        "warning": "0",
+        "completed": "0",
+        "inProgress": "0",
+        "pending": "0"
+      },
+      "trxSha256": "f5c31a7048538c326640f740dbc50ca0bea96879b2122e386b73d63eedb67a6f"
+    },
+    "protections": [
+      "No maintenance reservation while existing analysis is active",
+      "Persistent analysis still refuses deletion",
+      "Original approved selection is revalidated after actual exclusive acquisition",
+      "Selection changed during wait is rejected",
+      "Original Operations browser assertions unchanged"
+    ],
+    "browser": {
+      "stats": {
+        "startTime": "2026-11-12T08:09:54.732Z",
+        "duration": 51518.229999999996,
+        "expected": 12,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "resultsSha256": "59dc4ac53dd84ec0c5f6ab11cb56a5e430bd4f184cd3926576f008547fa9e221",
+      "scope": "Unchanged mission-operations.spec.js plus all eight P05b browser scenarios",
+      "originalOperationsTestSha256": "9f5a4365e8a38df5ef9a6d0f00c870c07610beb6b91534387f4d8b7556d02533"
+    }
   }
 }

@@ -109,7 +109,10 @@ public sealed partial class ScienceStore
     public CollectedScienceDeletionResult DeleteCollectedScience(SourceDeletionExecution request,MissionStore missions,Func<IDisposable> missionMaintenance)
     {
         var review=CollectedReview(request.PreviewId);if(review.SelectionHash!=request.SelectionHash)throw new InvalidOperationException("Approve the exact collected-science selection.");
-        using var held=missionMaintenance();using var maintenance=EnterSourceMaintenance();
+        // A preview is not an exclusive reservation. Allow a short background
+        // original-reader/analysis lease to finish, then acquire the same real
+        // exclusion and revalidate the exact reviewed selection below.
+        using var held=missionMaintenance();using var maintenance=EnterSourceMaintenance(TimeSpan.FromSeconds(1));
         using(var db=Open(true))using(var command=db.CreateCommand())
         {
             command.CommandText="SELECT state FROM science_delete_reviews WHERE id=$id";command.Parameters.AddWithValue("$id",review.Id.ToString());var state=command.ExecuteScalar() as string;
