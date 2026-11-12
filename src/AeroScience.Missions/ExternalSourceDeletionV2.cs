@@ -116,7 +116,7 @@ public sealed partial class ScienceStore
                 foreach(var item in DeletionItems(preview.Id)){token.ThrowIfCancellationRequested();command.Parameters["$id"].Value=item.Id.ToString();command.Parameters["$sha"].Value=item.ManifestSha256;if(command.ExecuteNonQuery()!=1)throw new IOException("Source identity changed before atomic deletion commit.");}
                 command.Parameters.Clear();command.CommandText="UPDATE library_job_items SET state='Source deleted',verified=0,error='Verified source permanently removed by the user; a new approved job is required to acquire it again.' WHERE source_id=$id";command.Parameters.Add("$id",SqliteType.Text);
                 foreach(var item in DeletionItems(preview.Id)){command.Parameters["$id"].Value=item.Id.ToString();command.ExecuteNonQuery();}
-                command.Parameters.Clear();command.CommandText="DELETE FROM scientific_artifacts WHERE json_extract(payload_json,'$.kind')='retained-source' AND json_extract(payload_json,'$.relativePath')=$path";command.Parameters.Add("$path",SqliteType.Text);
+                command.Parameters.Clear();command.CommandText="DELETE FROM scientific_artifacts WHERE json_extract(payload_json,'$.kind') IN ('retained-source','terrain-elevation-tile') AND json_extract(payload_json,'$.relativePath')=$path";command.Parameters.Add("$path",SqliteType.Text);
                 foreach(var file in DeletionItems(preview.Id).SelectMany(item=>item.AdditionalFiles??[]).Where(f=>f.RelativePath.StartsWith("Products/",StringComparison.Ordinal)||f.RelativePath.StartsWith("ManagedCopies/",StringComparison.Ordinal))){command.Parameters["$path"].Value=file.RelativePath;command.ExecuteNonQuery();}
                 command.Parameters.Clear();command.CommandText="INSERT INTO metadata VALUES($key,$hash)";command.Parameters.AddWithValue("$key","source_delete:"+preview.Id.ToString("N"));command.Parameters.AddWithValue("$hash",preview.SelectionHash);command.ExecuteNonQuery();SourceDeletionFault?.Invoke("before-commit");transaction.Commit();
             }
@@ -149,7 +149,7 @@ public sealed partial class ScienceStore
                 catch(Exception error)when(error is IOException or UnauthorizedAccessException){pending=checked(pending+file.Bytes);warning=error.Message;}
             }
         }
-        if(committed&&pending==0)try{CheckpointDeletedContent();}catch(Exception error)when(error is IOException or SqliteException){metadataPending=true;warning=error.Message;}
+        if(committed&&pending==0)try{RemoveDeletedTerrainLedgers(preview.Id);CheckpointDeletedContent();}catch(Exception error)when(error is IOException or UnauthorizedAccessException or SqliteException){metadataPending=true;warning=error.Message;}
         var state=committed?(pending==0&&!metadataPending?"Completed":"Cleanup pending"):"Rolled back";
         PreferenceStore.WriteAtomic(path,journal with{State=state,Warning=warning});SaveDeletionPreview(preview,state);
         if(pending==0)

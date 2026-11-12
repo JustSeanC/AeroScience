@@ -1334,6 +1334,221 @@
     "home.science.stopped": {
       "context": "Stopped is an authoritative collection phase; flight recording remains independent.",
       "parameters": []
+    },
+    "terrain.title": {
+      "context": "P05b post-flight terrain completion: title",
+      "parameters": []
+    },
+    "terrain.separation": {
+      "context": "P05b post-flight terrain completion: separation",
+      "parameters": []
+    },
+    "terrain.initial": {
+      "context": "P05b post-flight terrain completion: initial",
+      "parameters": []
+    },
+    "terrain.geometry": {
+      "context": "P05b post-flight terrain completion: geometry",
+      "parameters": []
+    },
+    "terrain.chooseGeometry": {
+      "context": "P05b post-flight terrain completion: chooseGeometry",
+      "parameters": []
+    },
+    "terrain.buildGeometry": {
+      "context": "P05b post-flight terrain completion: buildGeometry",
+      "parameters": []
+    },
+    "terrain.geometryQueued": {
+      "context": "P05b post-flight terrain completion: geometryQueued",
+      "parameters": []
+    },
+    "terrain.review": {
+      "context": "P05b post-flight terrain completion: review",
+      "parameters": []
+    },
+    "terrain.reviewed": {
+      "context": "P05b post-flight terrain completion: reviewed",
+      "parameters": []
+    },
+    "terrain.gridWarning": {
+      "context": "P05b post-flight terrain completion: gridWarning",
+      "parameters": []
+    },
+    "terrain.limitations": {
+      "context": "P05b post-flight terrain completion: limitations",
+      "parameters": []
+    },
+    "terrain.searchArea": {
+      "context": "P05b post-flight terrain completion: searchArea",
+      "parameters": []
+    },
+    "terrain.prepare": {
+      "context": "P05b post-flight terrain completion: prepare",
+      "parameters": []
+    },
+    "terrain.noSearchArea": {
+      "context": "P05b post-flight terrain completion: noSearchArea",
+      "parameters": []
+    },
+    "terrain.downloadConsent": {
+      "context": "P05b post-flight terrain completion: downloadConsent",
+      "parameters": []
+    },
+    "terrain.band": {
+      "context": "P05b post-flight terrain completion: band",
+      "parameters": []
+    },
+    "terrain.surface": {
+      "context": "P05b post-flight terrain completion: surface",
+      "parameters": []
+    },
+    "terrain.definitionRequired": {
+      "context": "P05b post-flight terrain completion: definitionRequired",
+      "parameters": []
+    },
+    "terrain.localDefinition": {
+      "context": "P05b post-flight terrain completion: localDefinition",
+      "parameters": []
+    },
+    "terrain.datumConsent": {
+      "context": "P05b post-flight terrain completion: datumConsent",
+      "parameters": []
+    },
+    "terrain.qualityBand": {
+      "context": "P05b post-flight terrain completion: qualityBand",
+      "parameters": []
+    },
+    "terrain.none": {
+      "context": "P05b post-flight terrain completion: none",
+      "parameters": []
+    },
+    "terrain.qualityValues": {
+      "context": "P05b post-flight terrain completion: qualityValues",
+      "parameters": []
+    },
+    "terrain.useSource": {
+      "context": "P05b post-flight terrain completion: useSource",
+      "parameters": []
+    },
+    "terrain.gridMasks": {
+      "context": "P05b post-flight terrain completion: gridMasks",
+      "parameters": []
+    },
+    "terrain.moreSources": {
+      "context": "P05b post-flight terrain completion: moreSources",
+      "parameters": []
+    },
+    "terrain.nextRegion": {
+      "context": "P05b post-flight terrain completion: nextRegion",
+      "parameters": []
+    },
+    "terrain.refresh": {
+      "context": "P05b post-flight terrain completion: refresh",
+      "parameters": []
+    },
+    "terrain.budgets": {
+      "context": "P05b post-flight terrain completion: budgets",
+      "parameters": []
+    },
+    "terrain.budgetExplanation": {
+      "context": "P05b post-flight terrain completion: budgetExplanation",
+      "parameters": []
+    },
+    "terrain.cellLimit": {
+      "context": "P05b post-flight terrain completion: cellLimit",
+      "parameters": []
+    },
+    "terrain.outputLimit": {
+      "context": "P05b post-flight terrain completion: outputLimit",
+      "parameters": []
+    },
+    "terrain.tileSize": {
+      "context": "P05b post-flight terrain completion: tileSize",
+      "parameters": []
+    },
+    "terrain.createJob": {
+      "context": "P05b post-flight terrain completion: createJob",
+      "parameters": []
+    },
+    "terrain.jobReviewed": {
+      "context": "P05b post-flight terrain completion: jobReviewed",
+      "parameters": []
+    },
+    "terrain.job": {
+      "context": "P05b post-flight terrain completion: job",
+      "parameters": []
+    },
+    "terrain.validCells": {
+      "context": "P05b post-flight terrain completion: validCells",
+      "parameters": []
+    },
+    "terrain.missingCells": {
+      "context": "P05b post-flight terrain completion: missingCells",
+      "parameters": []
+    },
+    "terrain.process": {
+      "context": "P05b post-flight terrain completion: process",
+      "parameters": []
+    },
+    "terrain.pause": {
+      "context": "P05b post-flight terrain completion: pause",
+      "parameters": []
+    },
+    "terrain.resume": {
+      "context": "P05b post-flight terrain completion: resume",
+      "parameters": []
+    },
+    "terrain.retry": {
+      "context": "P05b post-flight terrain completion: retry",
+      "parameters": []
+    },
+    "terrain.cancel": {
+      "context": "P05b post-flight terrain completion: cancel",
+      "parameters": []
+    },
+    "terrain.openIndex": {
+      "context": "P05b post-flight terrain completion: openIndex",
+      "parameters": []
+    },
+    "terrain.tiles": {
+      "context": "P05b post-flight terrain completion: tiles",
+      "parameters": []
+    },
+    "terrain.unsupportedSearchRegion": {
+      "context": "P05b source-search bounds and region paging",
+      "parameters": []
+    },
+    "terrain.firstRegion": {
+      "context": "P05b source-search bounds and region paging",
+      "parameters": []
+    },
+    "terrain.searchRetained": {
+      "context": "P05b bounded retained-source name/provider/scene search",
+      "parameters": []
+    },
+    "terrain.firstChunk": {
+      "context": "P05b explicit regional processing bounds and retained originals review",
+      "parameters": []
+    },
+    "terrain.lastChunk": {
+      "context": "P05b explicit regional processing bounds and retained originals review",
+      "parameters": []
+    },
+    "terrain.reviewBounds": {
+      "context": "P05b explicit regional processing bounds and retained originals review",
+      "parameters": [
+        "first",
+        "last",
+        "tiles",
+        "cells",
+        "output",
+        "scratch"
+      ]
+    },
+    "terrain.selectedSources": {
+      "context": "P05b explicit regional processing bounds and retained originals review",
+      "parameters": []
     }
   }
 }

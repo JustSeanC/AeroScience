@@ -161,7 +161,7 @@ public sealed partial class ScienceStore
     {
         using var command=db.CreateCommand();command.CommandText="PRAGMA secure_delete=ON; PRAGMA foreign_keys=ON";command.ExecuteNonQuery();
         using var tx=db.BeginTransaction();command.Transaction=tx;
-        foreach(var table in new[]{"scientific_statistics","remote_cache","remote_products","scientific_artifacts","observations","datasets"})
+        foreach(var table in new[]{"terrain_elevation_jobs","scientific_statistics","remote_cache","remote_products","scientific_artifacts","observations","datasets"})
         {
             command.Parameters.Clear();command.CommandText="SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name=$table";command.Parameters.AddWithValue("$table",table);if(Convert.ToInt64(command.ExecuteScalar())==0)continue;
             command.Parameters.Clear();command.Parameters.AddWithValue("$id",mission.ToString());

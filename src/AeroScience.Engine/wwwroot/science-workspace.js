@@ -5,6 +5,7 @@ import {summaryView} from './science-analysis.js';
 import {coverage,imagery,replay,exports as researchExports} from './mission-workspace.js';
 import {node as el,numeric as number,dateTime as local,select,button,link,disclosure,status,errorMessage,readableName} from './workstation-ui.js';
 import {renderResearchContext} from './scientific-context.js';
+import {terrainCompletion} from './terrain-completion.js';
 let cleanup=()=>{},generation=0;
 const pages=[['map','Science Map'],['compare','Compare'],['analysis','Research Analysis'],['results','Results & Exports'],['replay','Replay Flight'],['timeline','Evidence Timeline']];
 export async function scienceWorkspace(parent,api){
@@ -48,6 +49,10 @@ export async function scienceWorkspace(parent,api){
     await downlink(body,id,safeApi,disposals,catalog);
     if(path==='replay'){await replay(body,id,summary.mission,safeApi,{},stop=>disposals.push(stop));return;}
     if(path==='analysis'){await summaryView(body,summary,safeApi,instrument,{disposals,catalog,analysis:true});return;}
+    if(path==='results'&&summary.mission.status!=='recording'){
+      const terrain=el('div');body.append(terrain);
+      try{await terrainCompletion(terrain,id,safeApi,disposals);}catch(error){if(error.name==='AbortError'||error.message==='View changed.')throw error;errorMessage(terrain,error);}
+    }
     const exports=el('section',undefined,'panel export-workspace');body.append(exports);
     exports.append(el('h3','Take your research with you'),el('p',summary.review.provisional?'Science processing is incomplete. Exports are labeled provisional; export again after review finishes to include the later derived results.':'Export recorded flight and science without changing your archive. Historical source dates remain independent of flight time.'));
     if(summary.mission.status!=='recording')researchExports(exports,id);else exports.append(el('p','End the mission before exporting a completed research package.'));

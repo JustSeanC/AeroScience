@@ -1,6 +1,7 @@
 import {openEmitImport} from './emit-library.js';
 import {libraryLocation} from './library-location.js';
 import {openOnlineAccess} from './online-access.js';
+import {t} from './i18n.js';
 import {renderTransferProgress} from './transfer-progress.js';
 import { openHyperspectralImport } from "./hyperspectral-import.js";
 import { ResearchMap } from "./map.js";
@@ -19,7 +20,8 @@ import {
 
 // Every catalog/preview/control operates on the shared backend; UI state never
 // pretends a download has completed. Geographic map drawing is optional.
-export async function libraryDownload(parent, api, isDisposed = () => false) {
+export async function libraryDownload(parent, api, isDisposed = () => false, options = {}) {
+  if(options.area){const a=options.area;if(![a.west,a.south,a.east,a.north].every(Number.isFinite)||a.west< -180||a.east>180||a.south< -80||a.north>84||a.east<=a.west||a.north<=a.south||a.east-a.west>15||a.north-a.south>15)throw Error(t('terrain.unsupportedSearchRegion'));}
   let map,
     stopped = false,
     timer,
@@ -77,7 +79,7 @@ export async function libraryDownload(parent, api, isDisposed = () => false) {
   parent.append(form);
   const providers = await api("/api/science/library/providers");
   if (stopped || isDisposed()) return cleanup;
-  const requestedScience = new URLSearchParams(location.hash.split("?")[1] || "").get("science");
+  const requestedScience = options.science || new URLSearchParams(location.hash.split("?")[1] || "").get("science");
   const initialScience = scienceTypes.some(t => t[0] === requestedScience) ? requestedScience : scienceTypes.some(t => t[0] === remembered?.science) ? remembered.science : "terrain";
   const scienceChoice = select(form, "What scientific data do you need?", scienceTypes.map(t => [t[0], t[1]]), initialScience);
   const scienceDescription = el("p");form.append(scienceDescription);
@@ -596,7 +598,7 @@ export async function libraryDownload(parent, api, isDisposed = () => false) {
     filtersChanged();dateScope.value=scope;
   };
   scienceChoice.onchange();
-  if(remembered?.area){const a=remembered.area;
+  if(options.area||remembered?.area){const a=options.area||remembered.area;
     if([a.west,a.south,a.east,a.north].every(Number.isFinite)&&a.west>=-180&&a.east<=180&&a.south>=-80&&a.north<=84&&a.east>a.west&&a.north>a.south&&a.east-a.west<=15&&a.north-a.south<=15){setBounds(a);areas=[a];changed();fitSelection();}
   }
   filtersChanged();

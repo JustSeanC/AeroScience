@@ -97,6 +97,11 @@ public static class ContinuousTerrainSurveys
         if (status.State != "Current") throw new InvalidOperationException("Derived terrain survey invalidated: " + status.Reason);
         return science.VerifiedArtifactPath(artifact);
     }
+    public static IEnumerable<TerrainSurveyChunk> StreamCurrentChunks(ScienceStore science,MissionStore missions,ScientificArtifact artifact,CancellationToken token=default)
+    {
+        var path=RequireCurrent(science,missions,artifact,token);
+        foreach(var record in Read(path,token))if(record.Chunk is {} chunk)yield return chunk;
+    }
     // Up to eight bounded regional chunks, each with <=128 search rectangles and
     // exact RFC 7946 MultiPolygon clipping geometry (including holes/dateline splits).
     // P05b/P05c must still apply original source consent, CRS/datum, QA and quotas.

@@ -6,6 +6,7 @@ using AeroScience.Tests;
 
 if(args is ["--organization-notification-fixture","--rate-limited"]){await AeroScience.TestHost.OrganizationNotificationFixture.Run(true);return;}
 if(args is ["--organization-notification-fixture"]){await AeroScience.TestHost.OrganizationNotificationFixture.Run();return;}
+if(args is ["--terrain-elevation-probe",var terrainOriginal,var terrainOutput]){await AeroScience.TestHost.TerrainElevationProbe.Run(terrainOriginal,terrainOutput);return;}
 if (ScientificHdfWorker.IsCommand(args)) { Environment.ExitCode=ScientificHdfWorker.Run(); return; }
 if(args is ["--deployment-evidence",var deploymentDirectory]){await AeroScience.TestHost.DeploymentEvidenceFixture.Run(deploymentDirectory);return;}
 if (args.Length > 0 && args[0] == "--organization-database") { await AeroScience.TestHost.OrganizationFixture.Run(args[1..]); return; }
@@ -210,4 +211,5 @@ app.MapPost("/api/testing/sources/regions",async(ScienceStore science,string? ba
     for(var i=0;i<32;i++){var folder=Path.Combine(options.DataDirectory,"grouped-test-regions",Guid.NewGuid().ToString("N"));var manifest=RemoteFixtureFiles.Create(folder,RemoteKind.Terrain);var value=System.Text.Json.JsonSerializer.Deserialize<ScientificSourceManifest>(File.ReadAllText(manifest),WireJson.Options)!;PreferenceStore.WriteAtomic(manifest,value with{Notes="SYNTHETIC grouping fixture region "+i+" "+(batch is {Length:<=32}&&batch.All(char.IsAsciiLetterOrDigit)?batch:"")});await science.ImportSourceAsync(manifest);}
     return new{synthetic=true,imported=32};
 });
+app.MapPost("/api/testing/terrain-completion",(MissionStore missions,ScienceStore science)=>AeroScience.TestHost.TerrainCompletionFixture.Create(missions,science,options.DataDirectory));
 app.Run();

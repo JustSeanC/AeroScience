@@ -9,6 +9,10 @@ namespace AeroScience.Missions;
 // Narrow, explicit readers. No file extension is treated as proof of format.
 public sealed partial class ScientificRaster : IDisposable
 {
+    // P05b may not silently ignore alpha/internal masks, sub-IFDs or alternate
+    // directories. Legacy point readers are unchanged; the terrain adapter refuses
+    // these ambiguous retained layouts until a mask-aware adapter is approved.
+    public bool RequiresTerrainMaskReview=>tiff is not null&&(!tiff.LastDirectory()||tiff.GetField(TiffTag.SUBIFD) is not null||tiff.GetField(TiffTag.EXTRASAMPLES) is {} extra&&extra[0].ToInt()>0);
     private static readonly Tiff.TiffExtendProc? previousExtender;
     static ScientificRaster()
     {
@@ -268,6 +272,14 @@ public sealed partial class ScientificRaster : IDisposable
         if(band.BadBand||!Covers(point))return null;
         var pixel=Pixel(point);
         var col=Math.Min(Grid.Width-1,(int)Math.Floor(pixel.Column+1e-8));var row=Math.Min(Grid.Height-1,(int)Math.Floor(pixel.Row+1e-8));
+        return ReadNativeCell(col,row)?.Value;
+    }
+    // Original point sampling above retains its original projection and rounding.
+    // Post-flight native-cell processing addresses the original integer cell directly.
+    public NativeRasterValue? ReadNativeCell(int col,int row)
+    {
+        if(col<0||row<0||col>=Grid.Width||row>=Grid.Height)throw new ArgumentOutOfRangeException(nameof(col),"Choose an original raster cell.");
+        if(band.BadBand)return null;
         var size = bits / 8; Span<byte> bytes = stackalloc byte[8];
         if (envi is not null)
         {
@@ -296,7 +308,7 @@ public sealed partial class ScientificRaster : IDisposable
             : bits == 8 ? bytes[0] : bits == 16 ? BinaryPrimitives.ReadUInt16LittleEndian(bytes) : BinaryPrimitives.ReadUInt32LittleEndian(bytes);
         bool Missing(double? declared) => declared is {} n && (value == n || sampleFormat == 3 && bits == 32 && value == (double)(float)n);
         if (!double.IsFinite(value) || Missing(band.NoData) || Missing(NativeNoData)) return null;
-        var scaled = value * band.Scale + band.Offset; return double.IsFinite(scaled) ? scaled : null;
+        var scaled = value * band.Scale + band.Offset; return double.IsFinite(scaled) ? new(value,scaled) : null;
     }
     // Copy native samples into a bounded, lossless GeoTIFF. No resampling, RGB rendering,
     // radiometric scaling or overview substitution occurs during preparation.

@@ -1,0 +1,172 @@
+{
+  "checkpoint": "v0.8.0 P05b",
+  "source": "Implementation commit recorded by the completed CI receipt; no source changes after these focused checks.",
+  "dotnet": {
+    "command": "dotnet test tests/AeroScience.Tests -c Release --no-restore --filter FullyQualifiedName~TerrainElevation|FullyQualifiedName~TerrainSurvey|FullyQualifiedName~ScientificWorkspaceTests|FullyQualifiedName~ExternalSourceDeletionTests|FullyQualifiedName~ScientificLibraryJobsTests|FullyQualifiedName~ScientificSourceReuseTests",
+    "counts": {
+      "total": "129",
+      "executed": "129",
+      "passed": "129",
+      "failed": "0",
+      "error": "0",
+      "timeout": "0",
+      "aborted": "0",
+      "inconclusive": "0",
+      "passedButRunAborted": "0",
+      "notRunnable": "0",
+      "notExecuted": "0",
+      "disconnected": "0",
+      "warning": "0",
+      "completed": "0",
+      "inProgress": "0",
+      "pending": "0"
+    },
+    "trxSha256": "f438c1901f03a3c78543d2ef59aaf8b9ca2fb0e111faae48fcafb15233aba692",
+    "receipt": "artifacts/p05b-dotnet/p05b-targeted.trx"
+  },
+  "browser": {
+    "p05b": {
+      "startTime": "2026-11-12T06:24:36.515Z",
+      "duration": 17505.322,
+      "expected": 8,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "resultsSha256": "b1237e82bd9756e2f727dca9dc909d1f6e4a8f5037e5ef0c9c408c4df97b469c",
+    "reusedLibraryAndTerrainRegressionRun": {
+      "passed": 21,
+      "failed": 0,
+      "log": "artifacts/p05b-browser-reused/library-and-terrain-regressions.log",
+      "note": "Includes 7 initial P05b scenarios, 11 original Library download scenarios and 3 original terrain display scenarios. The final P05b run adds the stale-review regression and verifies all final staged assets."
+    },
+    "stagedAssetsEqualSource": true,
+    "screenshots": [
+      {
+        "path": "docs/roadmap/images/p05b/synthetic-browser-terrain-completion-light-1440.png",
+        "sha256": "49835c7d89c36c02acb8efeb05462510e7f9e760a20c7cae25b7e6c0a6741783",
+        "bytes": 272333,
+        "evidence": "synthetic Chromium; not genuine source/installed MSFS acceptance"
+      },
+      {
+        "path": "docs/roadmap/images/p05b/synthetic-browser-terrain-completion-light-390.png",
+        "sha256": "aeaaa5c3dfd680eaff6b77458a2e410d7fe5467fe3ca2dcc1b8078859a954a3a",
+        "bytes": 244437,
+        "evidence": "synthetic Chromium; not genuine source/installed MSFS acceptance"
+      },
+      {
+        "path": "docs/roadmap/images/p05b/synthetic-browser-terrain-completion-dark-1440.png",
+        "sha256": "96e803374c765803a163d3605b2227048ea9293f66c13d48fdb42750ca362011",
+        "bytes": 276667,
+        "evidence": "synthetic Chromium; not genuine source/installed MSFS acceptance"
+      },
+      {
+        "path": "docs/roadmap/images/p05b/synthetic-browser-terrain-completion-dark-390.png",
+        "sha256": "c95a8135c07d0a8efdde26ffe6a7ee8cf63e295b614c73d954555ec5c339162b",
+        "bytes": 249501,
+        "evidence": "synthetic Chromium; not genuine source/installed MSFS acceptance"
+      }
+    ]
+  },
+  "javascript": {
+    "nativeCompilationAndStagingPassed": 4,
+    "presentationPassed": 38,
+    "catalogMessages": 363,
+    "catalogVersion": 7,
+    "locales": [
+      "en-US",
+      "es-ES",
+      "fr-FR",
+      "de-DE",
+      "pt-BR"
+    ],
+    "completeTranslations": [
+      "en-US"
+    ]
+  },
+  "genuineSourceComparison": {
+    "state": "Passed",
+    "verifiedUtc": "2026-11-12T06:10:54.825785+00:00",
+    "scope": "Genuine bounded USGS composite delivered values/grid; synthetic archived flight corridor; fully offline application processing",
+    "reference": "GDAL 3.10.3 / OGR GEOS overlays",
+    "originalSha256": "4c043d10024c8af4077c45d9ed6778141ccaf0837298ea8a521c9f832ce9a7f0",
+    "sourceManifestSha256": "6cda61df0cde7f96e4f27fbee60eb4fe6d26be5a71e893ce2ceaf26a1bc15445",
+    "algorithm": "terrain-native-cells-1/pixel-clip-1",
+    "nativeCellsCompared": 1024,
+    "clippedCellsCompared": 576,
+    "partialCells": 66,
+    "maximumCellFractionDifference": 1.9593626721103874e-10,
+    "derivedIndexSha256": "3214bdaace31cbe2a75398ca7d7aa530a9201d964b14784d657cc0e7056ff2fc",
+    "unknowns": [
+      "historical survey date",
+      "native per-pixel resolution",
+      "vertical datum / transformations"
+    ],
+    "notTested": [
+      "genuine Copernicus DSM",
+      "genuine UTM provider source",
+      "installed Windows/MSFS",
+      "provider-wide availability"
+    ]
+  },
+  "genuineProbeFiles": {
+    "sourceOriginal": "artifacts/p05b-genuine/usgs-composite-original.tif",
+    "request": "artifacts/p05b-genuine/request.json",
+    "serviceMetadata": "artifacts/p05b-genuine/service-metadata.json",
+    "applicationOutput": "artifacts/p05b-genuine/application-final"
+  },
+  "failedFocusedDiagnostics": {
+    "files": [
+      {
+        "path": "artifacts/p05b-failed-targeted/browser-route-harness-context.md",
+        "sha256": "9a5524f9bd321b9704d4e686834074306a582de14d568e69b717e20e5462437d"
+      },
+      {
+        "path": "artifacts/p05b-failed-targeted/browser-route-harness-results.json",
+        "sha256": "5b90ad806973c39c8bda330fdc0ebff07e6bfe3cb81a3c9b31813242a60ba7f5"
+      },
+      {
+        "path": "artifacts/p05b-failed-targeted/browser-route-harness.log",
+        "sha256": "6395d8cb79aabea35231e5e91b5b94223147ebe3f8eaebbed4d2e8c5ac83dfe4"
+      },
+      {
+        "path": "artifacts/p05b-failed-targeted/browser-stale-staged-assets-context.md",
+        "sha256": "0c0ece1243054ce20f64838a9cd3e3dabf5a9bf81d7eae98e69bdeb03cfebfe0"
+      },
+      {
+        "path": "artifacts/p05b-failed-targeted/browser-stale-staged-assets-results.json",
+        "sha256": "c38d0da7248eea3bee5664d290b59006d08d5d0a275254273e1ab49ec1f858f8"
+      },
+      {
+        "path": "artifacts/p05b-failed-targeted/browser-stale-staged-assets.log",
+        "sha256": "d8fc50644552a3526efb1f893fce493e30ffc29ea7a7021faa9b97a42d4fe357"
+      }
+    ],
+    "causes": [
+      "Initial delayed-route test tried to fulfill an aborted request; replaced with a held real completed response, retaining all behavior assertions.",
+      "New stale-review regression ran against older copied web assets; rebuilt host, confirmed staged/source byte equality, and passed the unchanged regression."
+    ]
+  },
+  "notTested": [
+    "installed Windows/MSFS",
+    "genuine Copernicus DSM numerical acceptance",
+    "genuine UTM provider raster numerical acceptance",
+    "provider-wide availability",
+    "real LiDAR point clouds (P05c)"
+  ],
+  "fullCi": "Pending; see v0.8.0-p05b-ci.json",
+  "sourceFileSha256": {
+    "src/AeroScience.Missions/TerrainElevationStore.cs": "11b9df96ce86669cb2aca28058291c7543ca4ee8e3897928ec5c07d4aafde5a8",
+    "src/AeroScience.Missions/TerrainElevations.cs": "834bbf0efadf9fb6f91faa9430adbf8c9ae7cb4eeb8a4c9edeadc81ee0e0f5fd",
+    "src/AeroScience.Missions/TerrainElevationSources.cs": "a9ee9bab37f7a91c00b61c611a9de01f997876ce8150b81c6ca3a4b63d19455f",
+    "src/AeroScience.Missions/TerrainNativeGeometry.cs": "09d1de96fa4b8790fbce73aacbe555318f57bab2bfb7634b7343518ee16badb5",
+    "src/AeroScience.Missions/TerrainElevationModels.cs": "48874e773d360af77588e2f6bc7e2e5eb88e7a0257f324f84a717284ad3adc8f",
+    "src/AeroScience.Engine/wwwroot/terrain-completion.js": "27bdbdbc58f2eb10c1f241bc2988b6fae1ef0b4dc17d7acf742404ac81970eb9",
+    "tests/AeroScience.TestHost/TerrainCompletionFixture.cs": "d58cfb1ebf623cfc18ff44f06daaa31a77f7a7475b6740b5d3766d606ba4bbc7",
+    "tests/AeroScience.TestHost/TerrainElevationProbe.cs": "11475bb5e832935d5d60fb8aadd2b6604377445ee409ce2fec7706af04138db1",
+    "tests/AeroScience.Tests/TerrainElevationTests.cs": "78b5a06432f6772360e311ea9ce84983cf073e858ce86f18becabf17d85a9ed8",
+    "tests/AeroScience.Tests/TerrainElevationApiTests.cs": "2efc547b2488396ff838cde84b20a316a0e13e6e7ad9e754cb22eb64b124bcdd",
+    "tests/web/terrain-completion.spec.js": "1b5199067c1390c01eac0485eaa5a704c246c85677c333e2e4c7ecf926f6859f",
+    "scripts/validation/verify-terrain-elevation.py": "8365cc369de945481690938bcd491ff4759ec64b5de35d9d6f09a9c91e15e9ca"
+  }
+}

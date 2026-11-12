@@ -59,13 +59,14 @@ public sealed partial class ScienceStore
     }
     private sealed class AnalysisLease(Action release):IDisposable
     {private int done;public void Dispose(){if(Interlocked.Exchange(ref done,1)==0)release();}}
-    public ScientificArtifact PublishArtifact(Guid mission,string kind,string format,string inputIdentity,object metadata,long maximumBytes,Action<string> write,CancellationToken token=default)
+    public ScientificArtifact PublishArtifact(Guid mission,string kind,string format,string inputIdentity,object metadata,long maximumBytes,Action<string> write,CancellationToken token=default,Guid? retainedSourceOwner=null)
     {
         if(format is not("json" or "tif")||kind.Length>100||maximumBytes is <=0 or >536870912)throw new ArgumentException("Unsupported or unbounded analysis product.");
         using var operation=BeginAnalysis();using var reservation=Management?.ReserveScience(maximumBytes+65536);
         if(disk.FreeBytes(DirectoryPath)<maximumBytes+StorageManager.MinimumFreeBytes)throw new IOException("Insufficient space for the analysis product and reserve.");
         var id=Guid.NewGuid();var relative=$"Products/{mission:N}/Derived/{id:N}.{format}";var path=StorageManager.ResolveDataset(DirectoryPath,LibraryId,relative);Directory.CreateDirectory(Path.GetDirectoryName(path)!);
-        var partial=path+".partial";var ledger=BeginManagedWrite("Scientific analysis",[relative,relative+".partial"]);
+        if(retainedSourceOwner is {} owner&&(owner==Guid.Empty||kind!=TerrainElevations.TileKind))throw new ArgumentException("Explicit retained-source ownership is only supported for individual terrain cell tiles.");
+        var partial=path+".partial";var ledger=BeginManagedWrite(retainedSourceOwner is {} sourceOwner?TerrainElevations.SourceWriteOperation(sourceOwner):"Scientific analysis",[relative,relative+".partial"]);
         try
         {
             token.ThrowIfCancellationRequested();write(partial);token.ThrowIfCancellationRequested();

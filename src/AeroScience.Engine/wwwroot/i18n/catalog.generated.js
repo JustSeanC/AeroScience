@@ -2,7 +2,7 @@
 export const localeData = {
   "manifest": {
     "version": 1,
-    "catalogVersion": 6,
+    "catalogVersion": 7,
     "fallback": "en-US",
     "locales": [
       {
@@ -1373,12 +1373,227 @@ export const localeData = {
       "home.science.stopped": {
         "context": "Stopped is an authoritative collection phase; flight recording remains independent.",
         "parameters": []
+      },
+      "terrain.title": {
+        "context": "P05b post-flight terrain completion: title",
+        "parameters": []
+      },
+      "terrain.separation": {
+        "context": "P05b post-flight terrain completion: separation",
+        "parameters": []
+      },
+      "terrain.initial": {
+        "context": "P05b post-flight terrain completion: initial",
+        "parameters": []
+      },
+      "terrain.geometry": {
+        "context": "P05b post-flight terrain completion: geometry",
+        "parameters": []
+      },
+      "terrain.chooseGeometry": {
+        "context": "P05b post-flight terrain completion: chooseGeometry",
+        "parameters": []
+      },
+      "terrain.buildGeometry": {
+        "context": "P05b post-flight terrain completion: buildGeometry",
+        "parameters": []
+      },
+      "terrain.geometryQueued": {
+        "context": "P05b post-flight terrain completion: geometryQueued",
+        "parameters": []
+      },
+      "terrain.review": {
+        "context": "P05b post-flight terrain completion: review",
+        "parameters": []
+      },
+      "terrain.reviewed": {
+        "context": "P05b post-flight terrain completion: reviewed",
+        "parameters": []
+      },
+      "terrain.gridWarning": {
+        "context": "P05b post-flight terrain completion: gridWarning",
+        "parameters": []
+      },
+      "terrain.limitations": {
+        "context": "P05b post-flight terrain completion: limitations",
+        "parameters": []
+      },
+      "terrain.searchArea": {
+        "context": "P05b post-flight terrain completion: searchArea",
+        "parameters": []
+      },
+      "terrain.prepare": {
+        "context": "P05b post-flight terrain completion: prepare",
+        "parameters": []
+      },
+      "terrain.noSearchArea": {
+        "context": "P05b post-flight terrain completion: noSearchArea",
+        "parameters": []
+      },
+      "terrain.downloadConsent": {
+        "context": "P05b post-flight terrain completion: downloadConsent",
+        "parameters": []
+      },
+      "terrain.band": {
+        "context": "P05b post-flight terrain completion: band",
+        "parameters": []
+      },
+      "terrain.surface": {
+        "context": "P05b post-flight terrain completion: surface",
+        "parameters": []
+      },
+      "terrain.definitionRequired": {
+        "context": "P05b post-flight terrain completion: definitionRequired",
+        "parameters": []
+      },
+      "terrain.localDefinition": {
+        "context": "P05b post-flight terrain completion: localDefinition",
+        "parameters": []
+      },
+      "terrain.datumConsent": {
+        "context": "P05b post-flight terrain completion: datumConsent",
+        "parameters": []
+      },
+      "terrain.qualityBand": {
+        "context": "P05b post-flight terrain completion: qualityBand",
+        "parameters": []
+      },
+      "terrain.none": {
+        "context": "P05b post-flight terrain completion: none",
+        "parameters": []
+      },
+      "terrain.qualityValues": {
+        "context": "P05b post-flight terrain completion: qualityValues",
+        "parameters": []
+      },
+      "terrain.useSource": {
+        "context": "P05b post-flight terrain completion: useSource",
+        "parameters": []
+      },
+      "terrain.gridMasks": {
+        "context": "P05b post-flight terrain completion: gridMasks",
+        "parameters": []
+      },
+      "terrain.moreSources": {
+        "context": "P05b post-flight terrain completion: moreSources",
+        "parameters": []
+      },
+      "terrain.nextRegion": {
+        "context": "P05b post-flight terrain completion: nextRegion",
+        "parameters": []
+      },
+      "terrain.refresh": {
+        "context": "P05b post-flight terrain completion: refresh",
+        "parameters": []
+      },
+      "terrain.budgets": {
+        "context": "P05b post-flight terrain completion: budgets",
+        "parameters": []
+      },
+      "terrain.budgetExplanation": {
+        "context": "P05b post-flight terrain completion: budgetExplanation",
+        "parameters": []
+      },
+      "terrain.cellLimit": {
+        "context": "P05b post-flight terrain completion: cellLimit",
+        "parameters": []
+      },
+      "terrain.outputLimit": {
+        "context": "P05b post-flight terrain completion: outputLimit",
+        "parameters": []
+      },
+      "terrain.tileSize": {
+        "context": "P05b post-flight terrain completion: tileSize",
+        "parameters": []
+      },
+      "terrain.createJob": {
+        "context": "P05b post-flight terrain completion: createJob",
+        "parameters": []
+      },
+      "terrain.jobReviewed": {
+        "context": "P05b post-flight terrain completion: jobReviewed",
+        "parameters": []
+      },
+      "terrain.job": {
+        "context": "P05b post-flight terrain completion: job",
+        "parameters": []
+      },
+      "terrain.validCells": {
+        "context": "P05b post-flight terrain completion: validCells",
+        "parameters": []
+      },
+      "terrain.missingCells": {
+        "context": "P05b post-flight terrain completion: missingCells",
+        "parameters": []
+      },
+      "terrain.process": {
+        "context": "P05b post-flight terrain completion: process",
+        "parameters": []
+      },
+      "terrain.pause": {
+        "context": "P05b post-flight terrain completion: pause",
+        "parameters": []
+      },
+      "terrain.resume": {
+        "context": "P05b post-flight terrain completion: resume",
+        "parameters": []
+      },
+      "terrain.retry": {
+        "context": "P05b post-flight terrain completion: retry",
+        "parameters": []
+      },
+      "terrain.cancel": {
+        "context": "P05b post-flight terrain completion: cancel",
+        "parameters": []
+      },
+      "terrain.openIndex": {
+        "context": "P05b post-flight terrain completion: openIndex",
+        "parameters": []
+      },
+      "terrain.tiles": {
+        "context": "P05b post-flight terrain completion: tiles",
+        "parameters": []
+      },
+      "terrain.unsupportedSearchRegion": {
+        "context": "P05b source-search bounds and region paging",
+        "parameters": []
+      },
+      "terrain.firstRegion": {
+        "context": "P05b source-search bounds and region paging",
+        "parameters": []
+      },
+      "terrain.searchRetained": {
+        "context": "P05b bounded retained-source name/provider/scene search",
+        "parameters": []
+      },
+      "terrain.firstChunk": {
+        "context": "P05b explicit regional processing bounds and retained originals review",
+        "parameters": []
+      },
+      "terrain.lastChunk": {
+        "context": "P05b explicit regional processing bounds and retained originals review",
+        "parameters": []
+      },
+      "terrain.reviewBounds": {
+        "context": "P05b explicit regional processing bounds and retained originals review",
+        "parameters": [
+          "first",
+          "last",
+          "tiles",
+          "cells",
+          "output",
+          "scratch"
+        ]
+      },
+      "terrain.selectedSources": {
+        "context": "P05b explicit regional processing bounds and retained originals review",
+        "parameters": []
       }
     }
   },
   "catalogs": {
     "en-US": {
-      "version": 6,
+      "version": 7,
       "locale": "en-US",
       "messages": {
         "common.messageUnavailable": "Details are unavailable. Refresh to review the current information.",
@@ -1697,7 +1912,59 @@ export const localeData = {
         "toolbar.terrainScanner": "Terrain Scanner (DEM Elevation)",
         "toolbar.acquisitionState": "Instrument acquisition status: {status} (separate from the collection phase).",
         "science.stopped": "Science stopped",
-        "home.science.stopped": "Stopped"
+        "home.science.stopped": "Stopped",
+        "terrain.title": "Post-flight terrain completion",
+        "terrain.separation": "Populate modeled scanner support with retained historical DEM/DSM cells. This creates derived terrain, never new airborne observations, LiDAR returns or research credit.",
+        "terrain.initial": "Review a saved corridor first. No sources are downloaded automatically.",
+        "terrain.geometry": "Modeled corridor",
+        "terrain.chooseGeometry": "Choose a verified corridor",
+        "terrain.buildGeometry": "Build modeled corridor",
+        "terrain.geometryQueued": "Corridor queued in the existing analysis service.",
+        "terrain.review": "Review Coverage",
+        "terrain.reviewed": "Review retained sources and one bounded search region. Native grid intersections are candidates; valid pixel coverage is established only during processing.",
+        "terrain.gridWarning": "A delivered source grid may contain nodata or excluded pixels. Source dates and vertical references can be unknown. Different sources and DEM/DSM classes remain separate.",
+        "terrain.limitations": "Scientific limitations and provenance",
+        "terrain.searchArea": "Bounded source-search region",
+        "terrain.prepare": "Prepare Missing Sources",
+        "terrain.noSearchArea": "This page has no supported source-search region.",
+        "terrain.downloadConsent": "This opens the existing Library workflow for the selected rectangle only. Search, transfer preview and Download & Import approval remain explicit. The rectangle is not the survey footprint.",
+        "terrain.band": "Original elevation band",
+        "terrain.surface": "Local source definition",
+        "terrain.definitionRequired": "Review DEM/DSM definition",
+        "terrain.localDefinition": "I reviewed the local source documentation and its DEM/DSM definition.",
+        "terrain.datumConsent": "I accept a separate result with an unverified vertical reference when the retained metadata is insufficient. No datum transformation or comparable surface is implied.",
+        "terrain.qualityBand": "Original quality band",
+        "terrain.none": "No separate quality band",
+        "terrain.qualityValues": "Accepted original QA values, separated by commas",
+        "terrain.useSource": "Use this exact retained source",
+        "terrain.gridMasks": "Potential native grid intersections (not valid-pixel coverage)",
+        "terrain.moreSources": "More retained sources",
+        "terrain.nextRegion": "Next corridor region",
+        "terrain.refresh": "Refresh retained sources",
+        "terrain.budgets": "Processing bounds",
+        "terrain.budgetExplanation": "The displayed corridor region is the default processing scope. Review chunk bounds, candidate cells, output and scratch space before starting. Other chunks are not evaluated; processing never triggers a download.",
+        "terrain.cellLimit": "Maximum candidate native cells",
+        "terrain.outputLimit": "Maximum total output (MiB)",
+        "terrain.tileSize": "Native cells per tile edge (1–32)",
+        "terrain.createJob": "Verify sources and review processing",
+        "terrain.jobReviewed": "Sources and bounded work verified. Start processing explicitly when ready.",
+        "terrain.job": "Terrain job",
+        "terrain.validCells": "valid source cells (separate grids)",
+        "terrain.missingCells": "nodata / excluded cells",
+        "terrain.process": "Process retained terrain",
+        "terrain.pause": "Pause processing",
+        "terrain.resume": "Resume processing",
+        "terrain.retry": "Retry processing",
+        "terrain.cancel": "Cancel processing",
+        "terrain.openIndex": "Open derived terrain index",
+        "terrain.tiles": "Open completed source tiles (first 100)",
+        "terrain.unsupportedSearchRegion": "This corridor search region is outside the existing Library providers’ bounded geographic limits. No different region was substituted. Use compatible retained local sources or review a supported region.",
+        "terrain.firstRegion": "First corridor region",
+        "terrain.searchRetained": "Find retained terrain sources",
+        "terrain.firstChunk": "First corridor chunk to process",
+        "terrain.lastChunk": "Last corridor chunk to process",
+        "terrain.reviewBounds": "Chunks {first}–{last}: {tiles} candidate tiles, at most {cells} candidate cells (including empty bins). Output bound {output}; scratch reservation {scratch}.",
+        "terrain.selectedSources": "Reviewed original sources and references"
       }
     }
   }

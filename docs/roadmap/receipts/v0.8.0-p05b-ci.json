@@ -1,0 +1,28 @@
+{
+  "checkpoint": "v0.8.0 P05b",
+  "branch": "develop/v0.8.0",
+  "status": "Pending milestone Full CI",
+  "implementationCommit": null,
+  "p05aGate": {
+    "runtimeCommit": "80357e85c07e9b2d690a6c9f5d7007da20588d65",
+    "documentationCommit": "1beb337c5822d15ee32b16cb654a3cf0f1b9da0b",
+    "runId": 43092959501,
+    "attempt": 2,
+    "conclusion": "success",
+    "url": "https://github.com/JustSeanC/AeroScience/actions/runs/43092959501/attempts/2"
+  },
+  "protectedRefsBefore": {
+    "main": "9dd2d8cda7ddb6d73414808f75010726871205c2",
+    "develop/v0.7.0": "695a385ec40b177c763ffc0945234a1e2b54b77e",
+    "develop/v0.7.1": "8e972d8e402f165ab9ad7c41dc9e744250f8f52e"
+  },
+  "notTested": [
+    "installed Windows/MSFS",
+    "genuine Copernicus DSM numerical acceptance",
+    "genuine UTM provider raster numerical acceptance"
+  ],
+  "publishedRelease": false,
+  "builtInstaller": false,
+  "ownerArchivesModified": false,
+  "p05cStarted": false
+}
