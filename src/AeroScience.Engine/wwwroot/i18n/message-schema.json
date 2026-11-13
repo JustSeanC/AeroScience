@@ -2105,6 +2105,158 @@
     "results.provenance": {
       "context": "Scientific Results: Source lineage, algorithms and limitations",
       "parameters": []
+    },
+    "results.cloudTitle": {
+      "context": "Scientific Results: Historical LiDAR — 3D point view",
+      "parameters": []
+    },
+    "results.cloudKeys": {
+      "context": "Scientific Results: Historical LiDAR point view. Drag to orbit; Shift-drag to pan; arrows orbit; plus and minus zoom; Enter inspects the first visible record. All points are also available in the evidence table.",
+      "parameters": []
+    },
+    "results.gpuChecking": {
+      "context": "Scientific Results: Checking point-rendering support…",
+      "parameters": []
+    },
+    "results.gpuFallback": {
+      "context": "Scientific Results: 3D rendering is unavailable. The 2D map and keyboard-accessible evidence table below remain usable; no records were replaced.",
+      "parameters": []
+    },
+    "results.exaggeration": {
+      "context": "Scientific Results: Vertical display exaggeration (not original elevation)",
+      "parameters": []
+    },
+    "results.orbitLeft": {
+      "context": "Scientific Results: Orbit left",
+      "parameters": []
+    },
+    "results.orbitRight": {
+      "context": "Scientific Results: Orbit right",
+      "parameters": []
+    },
+    "results.zoomIn": {
+      "context": "Scientific Results: Zoom points in",
+      "parameters": []
+    },
+    "results.zoomOut": {
+      "context": "Scientific Results: Zoom points out",
+      "parameters": []
+    },
+    "results.resetCloud": {
+      "context": "Scientific Results: Reset point view",
+      "parameters": []
+    },
+    "results.localOrigin": {
+      "context": "Scientific Results: Local rendering origin; original coordinates remain in Evidence:",
+      "parameters": []
+    },
+    "results.metricDisplay": {
+      "context": "Scientific Results: Z display converts documented feet to metres, without a vertical datum conversion.",
+      "parameters": []
+    },
+    "results.unknownAspect": {
+      "context": "Scientific Results: Z units are unknown. Vertical display range is normalized to one quarter of the horizontal range; aspect is illustrative, not a metric height comparison.",
+      "parameters": []
+    },
+    "results.geographicDisplay": {
+      "context": "Scientific Results: Geographic XY uses a local tangent approximation for display only.",
+      "parameters": []
+    },
+    "results.nativeDisplay": {
+      "context": "Scientific Results: XY uses the original projected coordinate differences; projection scale distortion remains.",
+      "parameters": []
+    },
+    "results.renderedPoints": {
+      "context": "Scientific Results: actual source records drawn",
+      "parameters": []
+    },
+    "results.filteredPoints": {
+      "context": "Scientific Results: loaded records match filters",
+      "parameters": []
+    },
+    "results.lod": {
+      "context": "Scientific Results: View-dependent representatives are actual records, never interpolated points or filled coverage. Zoom for more loaded detail.",
+      "parameters": []
+    },
+    "results.elevation": {
+      "context": "Scientific Results: Original source elevation / Z",
+      "parameters": []
+    },
+    "results.classification": {
+      "context": "Scientific Results: Original classification",
+      "parameters": []
+    },
+    "results.intensity": {
+      "context": "Scientific Results: Original intensity",
+      "parameters": []
+    },
+    "results.return": {
+      "context": "Scientific Results: Original return number",
+      "parameters": []
+    },
+    "results.rgb": {
+      "context": "Scientific Results: Original RGB (16-bit display scale)",
+      "parameters": []
+    },
+    "results.heightAboveGround": {
+      "context": "Scientific Results: Height above ground",
+      "parameters": []
+    },
+    "results.pointColor": {
+      "context": "Scientific Results: Point coloring",
+      "parameters": []
+    },
+    "results.noCompatibleHeight": {
+      "context": "Scientific Results: No verified common terrain/point vertical reference for HAG",
+      "parameters": []
+    },
+    "results.attributeAbsent": {
+      "context": "Scientific Results: Attribute absent from this original source",
+      "parameters": []
+    },
+    "results.groundOnly": {
+      "context": "Scientific Results: Ground only (original class 2)",
+      "parameters": []
+    },
+    "results.classificationFilter": {
+      "context": "Scientific Results: Original classification filter",
+      "parameters": []
+    },
+    "results.allClasses": {
+      "context": "Scientific Results: All original classes",
+      "parameters": []
+    },
+    "results.returnFilter": {
+      "context": "Scientific Results: Original return filter",
+      "parameters": []
+    },
+    "results.allReturns": {
+      "context": "Scientific Results: All original returns",
+      "parameters": []
+    },
+    "results.pointLimits": {
+      "context": "Scientific Results: Sparse points remain sparse. Source Z/date/datum may be unknown. RGB uses the original 16-bit channels. HAG is unavailable without proven compatible terrain. COPC access remains unsupported.",
+      "parameters": []
+    },
+    "results.viewMode": {
+      "context": "Scientific Results: Point view",
+      "parameters": []
+    },
+    "results.map2d": {
+      "context": "Scientific Results: 2D map",
+      "parameters": []
+    },
+    "results.cloud3d": {
+      "context": "Scientific Results: 3D point cloud",
+      "parameters": []
+    },
+    "results.historicalLayer": {
+      "context": "Scientific Results: Historical LiDAR point locations",
+      "parameters": []
+    },
+    "results.budgetLimit": {
+      "context": "Scientific Results: Viewer memory limit reached. Narrow the map window or choose another source; this display is a subset.",
+      "parameters": []
     }
   }
 }

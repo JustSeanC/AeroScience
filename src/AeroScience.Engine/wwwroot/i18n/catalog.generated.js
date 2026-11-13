@@ -2,7 +2,7 @@
 export const localeData = {
   "manifest": {
     "version": 1,
-    "catalogVersion": 9,
+    "catalogVersion": 10,
     "fallback": "en-US",
     "locales": [
       {
@@ -2144,12 +2144,164 @@ export const localeData = {
       "results.provenance": {
         "context": "Scientific Results: Source lineage, algorithms and limitations",
         "parameters": []
+      },
+      "results.cloudTitle": {
+        "context": "Scientific Results: Historical LiDAR — 3D point view",
+        "parameters": []
+      },
+      "results.cloudKeys": {
+        "context": "Scientific Results: Historical LiDAR point view. Drag to orbit; Shift-drag to pan; arrows orbit; plus and minus zoom; Enter inspects the first visible record. All points are also available in the evidence table.",
+        "parameters": []
+      },
+      "results.gpuChecking": {
+        "context": "Scientific Results: Checking point-rendering support…",
+        "parameters": []
+      },
+      "results.gpuFallback": {
+        "context": "Scientific Results: 3D rendering is unavailable. The 2D map and keyboard-accessible evidence table below remain usable; no records were replaced.",
+        "parameters": []
+      },
+      "results.exaggeration": {
+        "context": "Scientific Results: Vertical display exaggeration (not original elevation)",
+        "parameters": []
+      },
+      "results.orbitLeft": {
+        "context": "Scientific Results: Orbit left",
+        "parameters": []
+      },
+      "results.orbitRight": {
+        "context": "Scientific Results: Orbit right",
+        "parameters": []
+      },
+      "results.zoomIn": {
+        "context": "Scientific Results: Zoom points in",
+        "parameters": []
+      },
+      "results.zoomOut": {
+        "context": "Scientific Results: Zoom points out",
+        "parameters": []
+      },
+      "results.resetCloud": {
+        "context": "Scientific Results: Reset point view",
+        "parameters": []
+      },
+      "results.localOrigin": {
+        "context": "Scientific Results: Local rendering origin; original coordinates remain in Evidence:",
+        "parameters": []
+      },
+      "results.metricDisplay": {
+        "context": "Scientific Results: Z display converts documented feet to metres, without a vertical datum conversion.",
+        "parameters": []
+      },
+      "results.unknownAspect": {
+        "context": "Scientific Results: Z units are unknown. Vertical display range is normalized to one quarter of the horizontal range; aspect is illustrative, not a metric height comparison.",
+        "parameters": []
+      },
+      "results.geographicDisplay": {
+        "context": "Scientific Results: Geographic XY uses a local tangent approximation for display only.",
+        "parameters": []
+      },
+      "results.nativeDisplay": {
+        "context": "Scientific Results: XY uses the original projected coordinate differences; projection scale distortion remains.",
+        "parameters": []
+      },
+      "results.renderedPoints": {
+        "context": "Scientific Results: actual source records drawn",
+        "parameters": []
+      },
+      "results.filteredPoints": {
+        "context": "Scientific Results: loaded records match filters",
+        "parameters": []
+      },
+      "results.lod": {
+        "context": "Scientific Results: View-dependent representatives are actual records, never interpolated points or filled coverage. Zoom for more loaded detail.",
+        "parameters": []
+      },
+      "results.elevation": {
+        "context": "Scientific Results: Original source elevation / Z",
+        "parameters": []
+      },
+      "results.classification": {
+        "context": "Scientific Results: Original classification",
+        "parameters": []
+      },
+      "results.intensity": {
+        "context": "Scientific Results: Original intensity",
+        "parameters": []
+      },
+      "results.return": {
+        "context": "Scientific Results: Original return number",
+        "parameters": []
+      },
+      "results.rgb": {
+        "context": "Scientific Results: Original RGB (16-bit display scale)",
+        "parameters": []
+      },
+      "results.heightAboveGround": {
+        "context": "Scientific Results: Height above ground",
+        "parameters": []
+      },
+      "results.pointColor": {
+        "context": "Scientific Results: Point coloring",
+        "parameters": []
+      },
+      "results.noCompatibleHeight": {
+        "context": "Scientific Results: No verified common terrain/point vertical reference for HAG",
+        "parameters": []
+      },
+      "results.attributeAbsent": {
+        "context": "Scientific Results: Attribute absent from this original source",
+        "parameters": []
+      },
+      "results.groundOnly": {
+        "context": "Scientific Results: Ground only (original class 2)",
+        "parameters": []
+      },
+      "results.classificationFilter": {
+        "context": "Scientific Results: Original classification filter",
+        "parameters": []
+      },
+      "results.allClasses": {
+        "context": "Scientific Results: All original classes",
+        "parameters": []
+      },
+      "results.returnFilter": {
+        "context": "Scientific Results: Original return filter",
+        "parameters": []
+      },
+      "results.allReturns": {
+        "context": "Scientific Results: All original returns",
+        "parameters": []
+      },
+      "results.pointLimits": {
+        "context": "Scientific Results: Sparse points remain sparse. Source Z/date/datum may be unknown. RGB uses the original 16-bit channels. HAG is unavailable without proven compatible terrain. COPC access remains unsupported.",
+        "parameters": []
+      },
+      "results.viewMode": {
+        "context": "Scientific Results: Point view",
+        "parameters": []
+      },
+      "results.map2d": {
+        "context": "Scientific Results: 2D map",
+        "parameters": []
+      },
+      "results.cloud3d": {
+        "context": "Scientific Results: 3D point cloud",
+        "parameters": []
+      },
+      "results.historicalLayer": {
+        "context": "Scientific Results: Historical LiDAR point locations",
+        "parameters": []
+      },
+      "results.budgetLimit": {
+        "context": "Scientific Results: Viewer memory limit reached. Narrow the map window or choose another source; this display is a subset.",
+        "parameters": []
       }
     }
   },
   "catalogs": {
     "en-US": {
-      "version": 9,
+      "version": 10,
       "locale": "en-US",
       "messages": {
         "common.messageUnavailable": "Details are unavailable. Refresh to review the current information.",
@@ -2659,7 +2811,45 @@ export const localeData = {
         "results.analysis": "Instrument-specific research analysis",
         "results.compare": "Compare original acquisitions",
         "results.library": "Scientific Library",
-        "results.provenance": "Source lineage, algorithms and limitations"
+        "results.provenance": "Source lineage, algorithms and limitations",
+        "results.cloudTitle": "Historical LiDAR — 3D point view",
+        "results.cloudKeys": "Historical LiDAR point view. Drag to orbit; Shift-drag to pan; arrows orbit; plus and minus zoom; Enter inspects the first visible record. All points are also available in the evidence table.",
+        "results.gpuChecking": "Checking point-rendering support…",
+        "results.gpuFallback": "3D rendering is unavailable. The 2D map and keyboard-accessible evidence table below remain usable; no records were replaced.",
+        "results.exaggeration": "Vertical display exaggeration (not original elevation)",
+        "results.orbitLeft": "Orbit left",
+        "results.orbitRight": "Orbit right",
+        "results.zoomIn": "Zoom points in",
+        "results.zoomOut": "Zoom points out",
+        "results.resetCloud": "Reset point view",
+        "results.localOrigin": "Local rendering origin; original coordinates remain in Evidence:",
+        "results.metricDisplay": "Z display converts documented feet to metres, without a vertical datum conversion.",
+        "results.unknownAspect": "Z units are unknown. Vertical display range is normalized to one quarter of the horizontal range; aspect is illustrative, not a metric height comparison.",
+        "results.geographicDisplay": "Geographic XY uses a local tangent approximation for display only.",
+        "results.nativeDisplay": "XY uses the original projected coordinate differences; projection scale distortion remains.",
+        "results.renderedPoints": "actual source records drawn",
+        "results.filteredPoints": "loaded records match filters",
+        "results.lod": "View-dependent representatives are actual records, never interpolated points or filled coverage. Zoom for more loaded detail.",
+        "results.elevation": "Original source elevation / Z",
+        "results.classification": "Original classification",
+        "results.intensity": "Original intensity",
+        "results.return": "Original return number",
+        "results.rgb": "Original RGB (16-bit display scale)",
+        "results.heightAboveGround": "Height above ground",
+        "results.pointColor": "Point coloring",
+        "results.noCompatibleHeight": "No verified common terrain/point vertical reference for HAG",
+        "results.attributeAbsent": "Attribute absent from this original source",
+        "results.groundOnly": "Ground only (original class 2)",
+        "results.classificationFilter": "Original classification filter",
+        "results.allClasses": "All original classes",
+        "results.returnFilter": "Original return filter",
+        "results.allReturns": "All original returns",
+        "results.pointLimits": "Sparse points remain sparse. Source Z/date/datum may be unknown. RGB uses the original 16-bit channels. HAG is unavailable without proven compatible terrain. COPC access remains unsupported.",
+        "results.viewMode": "Point view",
+        "results.map2d": "2D map",
+        "results.cloud3d": "3D point cloud",
+        "results.historicalLayer": "Historical LiDAR point locations",
+        "results.budgetLimit": "Viewer memory limit reached. Narrow the map window or choose another source; this display is a subset."
       }
     }
   }

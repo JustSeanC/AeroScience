@@ -47,4 +47,16 @@ public sealed class SurveyResultsTests
         var track=SurveyResults.Track(f.Missions,f.Id,limit:2);Assert.Equal(2,track.Points.Length);Assert.Equal(2,track.NextAfter);Assert.True(track.Points[0].BreakBefore);Assert.Equal(0,track.Points[0].Ordinal);
         Assert.Equal(2,SurveyResults.Track(f.Missions,f.Id,after:2,limit:2).Points[0].Ordinal);
     }
+    [Fact] public async Task HistoricalViewerPagesAreExactOriginalRecordsAndPreserveEverySessionBinding()
+    {
+        using var f=new TerrainSurveyFixture();f.Control(CollectionAction.StartData,0);f.Pose(0);f.Pose(1,100);f.Control(CollectionAction.EndData,2);f.Control(CollectionAction.StartData,3);f.Pose(3);f.Pose(4,100);f.Finish(5);var g=f.Build();
+        var s=await LidarImports.Import(f.Science,LidarFixture.Write(Path.Combine(f.Root,"synthetic-las"),points:[(0,450,12345),(0,550,23456),(100000,100000,99999)]),new("SYNTHETIC viewer fixture","synthetic-points","Synthetic tests only","Not genuine source acceptance"));
+        var j=LidarProcessing.Create(f.Science,f.Missions,f.Id,new(g.Id,[new(s.Id,s.ManifestSha256,true)],new(RecordsPerTile:2,MaximumScratchBytes:4194304),Guid.NewGuid()));f.Science.ControlLidarJob(j.Id,new(Guid.NewGuid(),j.Revision,"start"));var a=await LidarProcessing.Process(f.Science,f.Missions,j.Id);
+        var originals=f.Science.LidarCheckpoints(j.Id).SelectMany(t=>LidarProcessing.ReadTile(f.Science,f.Science.Artifact(t.ArtifactId)).Points).ToArray();Assert.Equal(2,originals.Length);
+        var values=new List<SurveyViewValue>();long? cursor=0;do{var page=SurveyResults.Page(f.Science,f.Missions,a.Id,new(a.Sha256,cursor.Value,1,s.Id));Assert.InRange(page.Values.Length,0,1);values.AddRange(page.Values);cursor=page.NextCursor;}while(cursor is not null);
+        Assert.Equal(originals.Length,values.Count);
+        foreach(var v in values){var p=Assert.Single(originals,p=>p.Original.Record==v.Point!.Original.Record);Assert.Equal(ScientificCatalog.Hash(p),ScientificCatalog.Hash(v.Point!));Assert.Equal(p.Original.RawZ,v.DecodedSourceValue);Assert.Equal(p.Original.Z,v.Value);Assert.Equal(p.Geographic,v.Position);Assert.Equal(2,v.Sessions.Length);Assert.Null(v.Geometry);Assert.Contains(p.Original.Record.ToString(),v.Id);}
+        Assert.False(SurveyResults.Manifest(f.Science,f.Missions,a.Id).OriginalScienceCredit);
+        using var cancelled=new CancellationTokenSource();cancelled.Cancel();Assert.ThrowsAny<OperationCanceledException>(()=>SurveyResults.Page(f.Science,f.Missions,a.Id,new(a.Sha256),token:cancelled.Token));
+    }
 }
