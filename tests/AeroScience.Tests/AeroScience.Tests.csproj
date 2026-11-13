@@ -21,4 +21,5 @@
 <ItemGroup><None Include="../AeroScience.EmitApplicationFixtures/**/*.nc" Link="EmitApplicationFixtures/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" /></ItemGroup>
 <ItemGroup><None Include="TfrOriginals/*.original" Link="TfrOriginals/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" /></ItemGroup>
 <ItemGroup><None Update="LidarOriginals/**" CopyToOutputDirectory="PreserveNewest" /></ItemGroup>
+<ItemGroup><Compile Include="../AeroScience.TestHost/LidarWorkflowFixture.cs" Link="LidarWorkflowFixture.cs" /></ItemGroup>
 </Project>

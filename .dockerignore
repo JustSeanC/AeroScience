@@ -15,6 +15,15 @@
 !src/AeroScience.Engine/wwwroot/**
 !licenses/
 !licenses/**
+!native/
+!native/lidar/
+!native/lidar/source-policy.json
+!native/lidar/reader.cpp
+!native/lidar/laszip/
+!native/lidar/laszip/**
+!scripts/
+!scripts/build/
+!scripts/build/lidar_runtime.py
 !deploy/
 !deploy/organization/
 !deploy/organization/Dockerfile

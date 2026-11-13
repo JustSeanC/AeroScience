@@ -1,0 +1,217 @@
+{
+  "state": "Passed",
+  "verifiedUtc": "2026-11-12T23:55:27.521035+00:00",
+  "reference": {
+    "laspy": "2.6.1",
+    "lazrs": "0.7.0",
+    "pyproj": "3.7.2",
+    "proj": "9.5.1",
+    "shapely": "2.1.2",
+    "geos": "3.13.1"
+  },
+  "scope": "Genuine historical source points; synthetic archived flight geometry; independent original record/attribute/PROJ/GEOS corridor comparison",
+  "scannedOriginalPoints": 447556,
+  "retainedOriginalPoints": 109,
+  "maximumGeographicDifferenceDegrees": 2.842170943040401e-14,
+  "sources": [
+    {
+      "id": "b6806eff-3b3d-40b7-a247-1b15e303c70f",
+      "project": "IA_FullState/0-0-0-0",
+      "fileSha256": "68c4b0ed247501a15d020d9a758d0345904f38785235732bd8e3386a3fca71c1",
+      "originalPointCount": 34923,
+      "retainedPoints": 1,
+      "horizontalCrs": "EPSG:3857",
+      "verticalReference": "Unknown (not established by delivered original metadata)",
+      "verticalUnit": "unknown",
+      "acquisitionUtc": null
+    },
+    {
+      "id": "72e26b5b-f43e-4428-9ceb-89f4b153033c",
+      "project": "IA_FullState/1-0-0-0",
+      "fileSha256": "ef55350db7631f72c22305216449d944b12657be717e596bbf5ce8c96d4ebd5b",
+      "originalPointCount": 35,
+      "retainedPoints": 0,
+      "horizontalCrs": "EPSG:3857",
+      "verticalReference": "Unknown (not established by delivered original metadata)",
+      "verticalUnit": "unknown",
+      "acquisitionUtc": null
+    },
+    {
+      "id": "9b683390-3eed-4323-9fca-f5bbf5cc1099",
+      "project": "IA_FullState/1-0-0-1",
+      "fileSha256": "5f5145f199211f1ae4017035b0a3662aa3396687ce1fd0223587103a79101ba7",
+      "originalPointCount": 30122,
+      "retainedPoints": 0,
+      "horizontalCrs": "EPSG:3857",
+      "verticalReference": "Unknown (not established by delivered original metadata)",
+      "verticalUnit": "unknown",
+      "acquisitionUtc": null
+    },
+    {
+      "id": "408aba3a-f99a-40d9-8d7d-7e491d37976a",
+      "project": "IA_FullState/10-239-338-512",
+      "fileSha256": "0e31423010d513ad924cc32fec2d621e0b6e50b3192d12aefa4444c5c7f999b9",
+      "originalPointCount": 38260,
+      "retainedPoints": 43,
+      "horizontalCrs": "EPSG:3857",
+      "verticalReference": "Unknown (not established by delivered original metadata)",
+      "verticalUnit": "unknown",
+      "acquisitionUtc": null
+    },
+    {
+      "id": "316cb8ac-76ad-4250-a900-a58470c01718",
+      "project": "IA_FullState/11-478-676-1024",
+      "fileSha256": "b973af6d27a5fdedf66d3dfb00e5b7c36e8453625480eed32062796e6ac996aa",
+      "originalPointCount": 3253,
+      "retainedPoints": 19,
+      "horizontalCrs": "EPSG:3857",
+      "verticalReference": "Unknown (not established by delivered original metadata)",
+      "verticalUnit": "unknown",
+      "acquisitionUtc": null
+    },
+    {
+      "id": "5f43d778-6d65-4de6-9f6c-581dfc144444",
+      "project": "IA_FullState/2-0-1-1",
+      "fileSha256": "b91540452a41245ce302d24920604fb400da9164696bbac14ab5363841e324c6",
+      "originalPointCount": 47,
+      "retainedPoints": 0,
+      "horizontalCrs": "EPSG:3857",
+      "verticalReference": "Unknown (not established by delivered original metadata)",
+      "verticalUnit": "unknown",
+      "acquisitionUtc": null
+    },
+    {
+      "id": "e469bda0-06fb-4a7b-be97-bbc1074a83c7",
+      "project": "IA_FullState/2-0-1-2",
+      "fileSha256": "b46d451ddf9491fa7fdcacfa74cf7a5fe2b0b7d108f18927aa6f5259844d1c23",
+      "originalPointCount": 39257,
+      "retainedPoints": 0,
+      "horizontalCrs": "EPSG:3857",
+      "verticalReference": "Unknown (not established by delivered original metadata)",
+      "verticalUnit": "unknown",
+      "acquisitionUtc": null
+    },
+    {
+      "id": "f732e906-e2ac-441f-9af0-3733ee6012d0",
+      "project": "IA_FullState/3-1-2-3",
+      "fileSha256": "21b1cc0ae7ea3d2153dbc5f24e65689ea2c6a00030a0c1a5b7165b75d877b1d6",
+      "originalPointCount": 84,
+      "retainedPoints": 0,
+      "horizontalCrs": "EPSG:3857",
+      "verticalReference": "Unknown (not established by delivered original metadata)",
+      "verticalUnit": "unknown",
+      "acquisitionUtc": null
+    },
+    {
+      "id": "074caaad-2f56-4ac7-9f7c-5f849489bfaf",
+      "project": "IA_FullState/3-1-2-4",
+      "fileSha256": "894fd2af5dc083dedb530485e0aea37b7fb24fde67ec63f4ea16ca8da3a8d67f",
+      "originalPointCount": 65561,
+      "retainedPoints": 1,
+      "horizontalCrs": "EPSG:3857",
+      "verticalReference": "Unknown (not established by delivered original metadata)",
+      "verticalUnit": "unknown",
+      "acquisitionUtc": null
+    },
+    {
+      "id": "e2225005-fc70-40d0-8b15-0e975316db55",
+      "project": "IA_FullState/4-3-5-7",
+      "fileSha256": "ce42574e59946eaa57a6fa2e19cc7499fe467d916ce04585e9f4828d5d715db5",
+      "originalPointCount": 37,
+      "retainedPoints": 0,
+      "horizontalCrs": "EPSG:3857",
+      "verticalReference": "Unknown (not established by delivered original metadata)",
+      "verticalUnit": "unknown",
+      "acquisitionUtc": null
+    },
+    {
+      "id": "94710804-8355-4106-a4f7-75f3212e1c7b",
+      "project": "IA_FullState/4-3-5-8",
+      "fileSha256": "58853378459b6619f8175ae7a72dcb5523ec9c2a49a42233820f0ab1192355f5",
+      "originalPointCount": 62800,
+      "retainedPoints": 1,
+      "horizontalCrs": "EPSG:3857",
+      "verticalReference": "Unknown (not established by delivered original metadata)",
+      "verticalUnit": "unknown",
+      "acquisitionUtc": null
+    },
+    {
+      "id": "24549c9e-54fe-442e-8923-d5294758c5ed",
+      "project": "IA_FullState/5-7-10-15",
+      "fileSha256": "e2fcc3595271e06924fb22115de40f29526197bfe9072a8c07ed80c8c1b1bbd2",
+      "originalPointCount": 3307,
+      "retainedPoints": 0,
+      "horizontalCrs": "EPSG:3857",
+      "verticalReference": "Unknown (not established by delivered original metadata)",
+      "verticalUnit": "unknown",
+      "acquisitionUtc": null
+    },
+    {
+      "id": "5e9097c9-bd02-4ec6-b657-92c181010dc5",
+      "project": "IA_FullState/5-7-10-16",
+      "fileSha256": "157ed139eaa7b391141f34a658bea45f3a840c597e48f80021eaa026484f0ca1",
+      "originalPointCount": 59029,
+      "retainedPoints": 1,
+      "horizontalCrs": "EPSG:3857",
+      "verticalReference": "Unknown (not established by delivered original metadata)",
+      "verticalUnit": "unknown",
+      "acquisitionUtc": null
+    },
+    {
+      "id": "ae4d6573-5c48-4d88-a9b6-571ca3ed2b34",
+      "project": "IA_FullState/6-14-21-32",
+      "fileSha256": "737ced93c8ff1dd70e96990aab9fbb017190d404b2b2497110401b8cb5e0bcf8",
+      "originalPointCount": 47336,
+      "retainedPoints": 3,
+      "horizontalCrs": "EPSG:3857",
+      "verticalReference": "Unknown (not established by delivered original metadata)",
+      "verticalUnit": "unknown",
+      "acquisitionUtc": null
+    },
+    {
+      "id": "15d82e33-dd2b-430c-8e76-8da1c613bdb6",
+      "project": "IA_FullState/7-29-42-64",
+      "fileSha256": "0467591d749a42d5cbbff45743513c0702636a26fbdc0b687e876c61c2ba88ef",
+      "originalPointCount": 32348,
+      "retainedPoints": 6,
+      "horizontalCrs": "EPSG:3857",
+      "verticalReference": "Unknown (not established by delivered original metadata)",
+      "verticalUnit": "unknown",
+      "acquisitionUtc": null
+    },
+    {
+      "id": "bee52174-5652-4403-aaef-b09ec50c3ee0",
+      "project": "IA_FullState/8-59-84-128",
+      "fileSha256": "04b3253e6e153076dca3a2570e9ec2b53db2c27998baa40e1f951738e51c8c0c",
+      "originalPointCount": 10429,
+      "retainedPoints": 11,
+      "horizontalCrs": "EPSG:3857",
+      "verticalReference": "Unknown (not established by delivered original metadata)",
+      "verticalUnit": "unknown",
+      "acquisitionUtc": null
+    },
+    {
+      "id": "9df7acfe-350a-45b1-be09-1ef655c73375",
+      "project": "IA_FullState/9-119-169-256",
+      "fileSha256": "7df5439ef9f3af2fee7cf4574afb9c0dfda6e500903f8e12198ab480fd1e6d29",
+      "originalPointCount": 20728,
+      "retainedPoints": 23,
+      "horizontalCrs": "EPSG:3857",
+      "verticalReference": "Unknown (not established by delivered original metadata)",
+      "verticalUnit": "unknown",
+      "acquisitionUtc": null
+    }
+  ],
+  "approvedNetwork": null,
+  "unknowns": [
+    "Original survey date and vertical datum/unit where not established by actual retained metadata",
+    "Original contractor coordinates before Entwine reprojection"
+  ],
+  "notTested": [
+    "Installed Windows/MSFS",
+    "Native COPC spatial index",
+    "Provider-wide coverage or density"
+  ],
+  "originalScienceObservations": 0,
+  "originalScienceProducts": 0
+}

@@ -4,7 +4,9 @@ namespace AeroScience.Shared;
 public sealed record LidarVlr(string UserId,int RecordId,string Description,string Base64,bool Extended=false);
 public sealed record LidarLasHeader(int VersionMinor,int PointFormat,int RecordLength,long PointCount,bool Compressed,
     double[] Scale,double[] Offset,double[] NativeBounds,string? HorizontalCrs,string VerticalReference,string VerticalUnit,
-    string? Wkt,LidarVlr[] Vlrs,bool Copc,string[] Dimensions,string[] Limitations);
+    string? Wkt,LidarVlr[] Vlrs,bool Copc,string[] Dimensions,string[] Limitations,
+    [property:System.Text.Json.Serialization.JsonIgnore(Condition=System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)] int GlobalEncoding=0,
+    [property:System.Text.Json.Serialization.JsonIgnore(Condition=System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] string? OriginalHeaderBase64=null);
 public sealed record LidarOriginal(string File,LidarLasHeader Header,string? EptNode=null);
 public sealed record LidarSourceDefinition(int Version,string Format,GeographicBounds Domain,LidarOriginal[] Originals,
     string? EptProject=null,string? EptMetadataSha256=null,string? EptMetadataJson=null,

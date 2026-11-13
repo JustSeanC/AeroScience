@@ -7,6 +7,9 @@ using AeroScience.Tests;
 if(args is ["--organization-notification-fixture","--rate-limited"]){await AeroScience.TestHost.OrganizationNotificationFixture.Run(true);return;}
 if(args is ["--organization-notification-fixture"]){await AeroScience.TestHost.OrganizationNotificationFixture.Run();return;}
 if(args is ["--terrain-elevation-probe",var terrainOriginal,var terrainOutput]){await AeroScience.TestHost.TerrainElevationProbe.Run(terrainOriginal,terrainOutput);return;}
+if(args is ["--lidar-probe",var lidarMode,var lidarOriginal,var lidarOutput]){await AeroScience.TestHost.LidarProbe.Run(lidarMode,lidarOriginal,lidarOutput);return;}
+if(args is ["--lidar-retained-probe",var lidarPrevious,var lidarRetainedOutput]){await AeroScience.TestHost.LidarProbe.Retained(lidarPrevious,lidarRetainedOutput);return;}
+if(args is ["--lidar-delete-probe",var lidarDeletePrevious,var lidarDeleteReceipt]){AeroScience.TestHost.LidarProbe.DeleteManaged(lidarDeletePrevious,lidarDeleteReceipt);return;}
 if (ScientificHdfWorker.IsCommand(args)) { Environment.ExitCode=ScientificHdfWorker.Run(); return; }
 if(args is ["--deployment-evidence",var deploymentDirectory]){await AeroScience.TestHost.DeploymentEvidenceFixture.Run(deploymentDirectory);return;}
 if (args.Length > 0 && args[0] == "--organization-database") { await AeroScience.TestHost.OrganizationFixture.Run(args[1..]); return; }
@@ -212,4 +215,6 @@ app.MapPost("/api/testing/sources/regions",async(ScienceStore science,string? ba
     return new{synthetic=true,imported=32};
 });
 app.MapPost("/api/testing/terrain-completion",(MissionStore missions,ScienceStore science)=>AeroScience.TestHost.TerrainCompletionFixture.Create(missions,science,options.DataDirectory));
+app.MapPost("/api/testing/lidar-workflow",(MissionStore missions,ScienceStore science)=>AeroScience.TestHost.LidarWorkflowFixture.Create(missions,science,options.DataDirectory));
+app.MapPost("/api/testing/lidar-import-selection",async(LidarImportSession session)=>{var path=AeroScience.Tests.LidarFixture.Write(Path.Combine(options.DataDirectory,"synthetic-lidar-local-picker"));await session.Select(path);return session.Snapshot();});
 app.Run();

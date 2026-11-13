@@ -5,6 +5,11 @@ namespace AeroScience.Missions;
 
 public static class LidarImports
 {
+    internal static bool SameHeader(LidarLasHeader actual,LidarLasHeader retained)
+    {
+        var a=actual with{Limitations=[],GlobalEncoding=retained.OriginalHeaderBase64 is null?0:actual.GlobalEncoding,OriginalHeaderBase64=retained.OriginalHeaderBase64 is null?null:actual.OriginalHeaderBase64};
+        var b=retained with{Limitations=[]};return ScientificCatalog.Hash(a)==ScientificCatalog.Hash(b);
+    }
     public static ScientificSourceManifest Inspect(string path,LidarImportMetadata metadata,LidarEptProject? ept=null,string? node=null)
     {
         var h=LidarLas.Inspect(path);var name=Path.GetFileName(path);var domain=LidarCoordinates.Domain(h);
@@ -27,7 +32,7 @@ public static class LidarImports
         foreach(var original in definition.Originals)
         {
             var path=ScientificRaster.SafeFile(root,original.File);var h=LidarLas.Inspect(path);
-            if(ScientificCatalog.Hash(h)!=ScientificCatalog.Hash(original.Header)||LidarCoordinates.Domain(h)!=definition.Domain)throw new IOException("Copied point-cloud structure/CRS differs from its reviewed original.");
+            if(!SameHeader(h,original.Header)||LidarCoordinates.Domain(h)!=definition.Domain)throw new IOException("Copied point-cloud structure/CRS differs from its reviewed original.");
             if(checked(h.PointCount*(long)h.RecordLength)>1073741824)throw new IOException("Decoded original exceeds the 1 GiB streaming work bound. Import smaller geographic tiles.");
             for(var first=0L;first<h.PointCount;first+=4096)
             {
@@ -46,6 +51,6 @@ public static class LidarImports
         var root=Path.Combine(science.DirectoryPath,s.RelativeDirectory);var ownership=ScientificRaster.SafeFile(root,"source.json");
         if(new FileInfo(ownership).Length>2097152||ScientificCatalog.Hash(JsonSerializer.Deserialize<ScientificSource>(File.ReadAllText(ownership),WireJson.Options))!=ScientificCatalog.Hash(s))throw new IOException("Original point-cloud ownership metadata differs.");
         long bytes=0;foreach(var file in s.Files){token.ThrowIfCancellationRequested();bytes=checked(bytes+file.Bytes);if(bytes>LidarLas.MaximumOriginalBytes+2097152)throw new IOException("Point source verification bound exceeded.");var path=ScientificRaster.SafeFile(root,file.RelativePath);using var input=File.OpenRead(path);if(input.Length!=file.Bytes||Convert.ToHexStringLower(SHA256.HashData(input))!=file.Sha256)throw new IOException("Historical original hash/length changed; no checkpoint or point is trusted.");}
-        foreach(var o in cloud.Originals)if(ScientificCatalog.Hash(LidarLas.Inspect(ScientificRaster.SafeFile(root,o.File)))!=ScientificCatalog.Hash(o.Header))throw new IOException("Retained LAS metadata differs from its frozen structure.");return s;
+        foreach(var o in cloud.Originals)if(!SameHeader(LidarLas.Inspect(ScientificRaster.SafeFile(root,o.File)),o.Header))throw new IOException("Retained LAS metadata differs from its frozen structure.");return s;
     }
 }

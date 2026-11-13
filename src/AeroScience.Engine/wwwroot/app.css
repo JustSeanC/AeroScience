@@ -1575,3 +1575,14 @@ dialog.managed-popup.tfr-review{width:min(92rem,calc(100vw - 1.5rem));max-width:
 #research-starters>article>.action-row{margin-top:auto}
 #research-starters>article .scientific-research-context{border:0;padding:0;background:transparent}
 #research-starters>article p{margin:.4rem 0}
+
+/* Bounded historical point inspection; full Results visualization belongs to P05d. */
+.lidar-completion { min-width:0; padding:var(--space-4); margin-block:var(--space-4); }
+.lidar-completion pre,.lidar-completion code { white-space:pre-wrap; overflow-wrap:anywhere; }
+.lidar-completion label { display:block; margin-block:.65rem; }
+.lidar-completion .check-row { display:flex; align-items:flex-start; gap:.5rem; }
+.lidar-completion input:not([type=checkbox]),.lidar-completion select { max-width:100%; box-sizing:border-box; }
+.lidar-table-scroll { max-width:100%; overflow:auto; border:1px solid var(--as-line); }
+.lidar-table-scroll table { width:100%; border-collapse:collapse; }
+.lidar-table-scroll th,.lidar-table-scroll td { padding:.6rem; text-align:left; vertical-align:top; overflow-wrap:anywhere; }
+.lidar-table-scroll td { min-width:5rem; }

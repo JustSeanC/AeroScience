@@ -25,7 +25,8 @@ public static class LidarLas
         if(count is <1 or >MaximumPoints||!compressed&&checked(count*recordLength)>f.Length-offset)throw new InvalidDataException("Original point count/record bounds exceed the verified local-reader limits.");
         double[] scale=[D(131),D(139),D(147)],shift=[D(155),D(163),D(171)],bounds=[D(187),D(203),D(219),D(179),D(195),D(211)];
         if(scale.Any(x=>!double.IsFinite(x)||x<=0)||shift.Concat(bounds).Any(x=>!double.IsFinite(x))||Enumerable.Range(0,3).Any(i=>bounds[i]>bounds[i+3]))throw new InvalidDataException("Original coordinate scale, offset or bounds are invalid.");
-        var vlrs=new List<LidarVlr>();long metadata=0;
+        f.Position=0;var originalHeader=r.ReadBytes(headerSize);if(originalHeader.Length!=headerSize)throw new EndOfStreamException();
+        var vlrs=new List<LidarVlr>();long metadata=headerSize;
         string Text(byte[] b)=>Encoding.UTF8.GetString(b).TrimEnd('\0',' ');
         void Vlr(bool extended)
         {
@@ -64,6 +65,8 @@ public static class LidarLas
             if(start<0)throw new InvalidDataException("Original horizontal WKT structure is unsupported.");var depth=0;var quote=false;var end=-1;
             for(var k=start;k<wkt.Length;k++){var c=wkt[k];if(c=='\"'){if(quote&&k+1<wkt.Length&&wkt[k+1]=='\"'){k++;continue;}quote=!quote;}if(quote)continue;if(c=='[')depth++;if(c==']'&&--depth==0){end=k+1;break;}}
             if(end<0)throw new InvalidDataException("Original WKT brackets are incomplete.");
+            var axes=Regex.Matches(wkt[start..end],"AXIS\\[\\s*\"[^\"]*\"\\s*,\\s*(NORTH|SOUTH|EAST|WEST)",RegexOptions.CultureInvariant|RegexOptions.IgnoreCase,TimeSpan.FromSeconds(1));
+            if(axes.Count>0&&(axes.Count<2||!axes[^2].Groups[1].Value.Equals("EAST",StringComparison.OrdinalIgnoreCase)||!axes[^1].Groups[1].Value.Equals("NORTH",StringComparison.OrdinalIgnoreCase)))throw new InvalidDataException("Explicit WKT horizontal axis order is unsupported. No northing/easting or latitude/longitude swap is guessed.");
             var units=Regex.Matches(wkt[start..end],"(?:LENGTHUNIT|ANGLEUNIT|UNIT)\\[\\s*\"[^\"]*\"\\s*,\\s*([-+0-9.eE]+)",RegexOptions.CultureInvariant,TimeSpan.FromSeconds(1));
             if(units.Count==0||!double.TryParse(units[^1].Groups[1].Value,System.Globalization.NumberStyles.Float,System.Globalization.CultureInfo.InvariantCulture,out var factor)||Math.Abs(factor-(crs=="EPSG:4326"?Math.PI/180:1))>1e-14)throw new InvalidDataException("Original WKT horizontal units conflict with the supported authority; no unit conversion is guessed.");
             // Preserve compound vertical WKT without guessing units or a conversion.
@@ -71,7 +74,8 @@ public static class LidarLas
         }
         if(crs is null||!LidarCoordinates.Supported(crs))throw new InvalidDataException("A supported original horizontal CRS is required: WGS84 geographic, Web Mercator or WGS84 UTM. No NAD83/state-plane substitution or datum guessing.");
         string[] dimensions=["X","Y","Z","Intensity","ReturnNumber","NumberOfReturns","Classification","ClassificationFlags","ScanDirectionFlag","EdgeOfFlightLine","ScanAngle","UserData","PointSourceId",..(format is 1 or 3 or >=6?new[]{"GpsTime"}:[]),..(format is 2 or 3 or 7 or 8?new[]{"Red","Green","Blue"}:[]),..(format==8?new[]{"Infrared"}:[]),..(format>=6?new[]{"ScannerChannel"}:[]),..(recordLength>sizes[format]?new[]{"OriginalExtraBytes (descriptors retained in VLRs)"}:[])];
-        return new(minor,format,recordLength,count,compressed,scale,shift,bounds,crs,vertical,zunit,wkt,vlrs.ToArray(),false,dimensions,["Delivered historical source XYZ and raw integer coordinates retained. No vertical/unit transformation or simulator MSL equivalence.","LAS header creation date is not a survey acquisition date. Missing survey dates remain unknown.","Local unindexed LAS/LAZ reads are bounded sequential/chunk-seek work; no COPC spatial-index claim."]);
+        return new(minor,format,recordLength,count,compressed,scale,shift,bounds,crs,vertical,zunit,wkt,vlrs.ToArray(),false,dimensions,["Delivered historical source XYZ and raw integer coordinates retained. No vertical/unit transformation or simulator MSL equivalence.","LAS header creation date is not a survey acquisition date. Missing survey dates remain unknown.","Local unindexed LAS/LAZ reads are bounded sequential/chunk-seek work; no COPC spatial-index claim.",
+            (U16(6)&1)!=0?"GPS field uses the original adjusted-standard-time declaration; raw bits retained, no UTC conversion.":"GPS field uses the original week-time declaration; the original week epoch is not established. No UTC timestamp is invented."],U16(6),Convert.ToBase64String(originalHeader));
     }
 }
 

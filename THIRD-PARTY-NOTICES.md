@@ -34,7 +34,7 @@ Esri ArcGIS Location Platform satellite/labels services are optional authenticat
 ## v0.3.0 scientific raster decoding
 
 BitMiracle.LibTiff.NET **2.4.660**, Bit Miracle, BSD 3-Clause and upstream component notices. The unmodified managed NuGet package is hash-pinned in lock files. Its complete published license, including ComponentAce and upstream acknowledgments, is bundled in [licenses/LibTiff.NET.txt](licenses/LibTiff.NET.txt). Official package license: <https://bitmiracle.github.io/libtiff.net/help/articles/license.html>. No GDAL, Python, rasterio, external scientific data archive, or satellite imagery is installed as an AeroScience runtime dependency. Users retain responsibility for the licenses of collections they import. Native SimConnect redistribution uses the separately documented, DLL-hash-bound maintainer authorization; original correspondence stays private.
-# P05c pinned LiDAR decoder
+## P05c pinned LiDAR decoder
 
 LASzip source at tag 3.5.0, commit `fa089bd8b2b4ca5631e199d257374c32a125f73f`,
 is vendored unmodified under `native/lidar/laszip` under Apache-2.0.

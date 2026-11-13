@@ -2,7 +2,7 @@
 export const localeData = {
   "manifest": {
     "version": 1,
-    "catalogVersion": 7,
+    "catalogVersion": 8,
     "fallback": "en-US",
     "locales": [
       {
@@ -1588,12 +1588,312 @@ export const localeData = {
       "terrain.selectedSources": {
         "context": "P05b explicit regional processing bounds and retained originals review",
         "parameters": []
+      },
+      "lidar.title": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.separation": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.initial": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.localImport": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.localHelp": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.geometry": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.chooseGeometry": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.sourceSearch": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.review": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.refresh": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.chooseLocal": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.dialogOpened": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.refreshLocal": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.reviewed": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.boundsWarning": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.details": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.studyRegion": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.prefix": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.exactProject": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.find": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.noRegion": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.originalRecords": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.verticalAck": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.useSource": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.metadata": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.noSources": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.moreSources": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.nextRegion": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.budgets": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.firstChunk": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.lastChunk": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.pointCap": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.outputCap": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.tileRecords": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.create": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.jobReviewed": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.discovered": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.discoveryOnly": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.officialMetadata": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.projectPoints": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.transferCap": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.previewDownload": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.moreProjects": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.downloadReview": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.nodes": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.candidates": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.transferUnknown": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.approve": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.transferred": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.job": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.retained": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.scanned": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.tiles": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.start": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.pause": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.resume": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.retry": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.cancel": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.openIndex": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.inspect": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.noPoints": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.pointTile": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.pointTable": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.record": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.location": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.xyz": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.attributes": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.nextPoints": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.sourceName": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.projectId": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.license": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.citation": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.acquiredFrom": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.acquiredTo": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
+      },
+      "lidar.import": {
+        "context": "Historical source LiDAR workflow. Preserve source/aircraft evidence separation, explicit approval and unknown metadata.",
+        "parameters": []
       }
     }
   },
   "catalogs": {
     "en-US": {
-      "version": 7,
+      "version": 8,
       "locale": "en-US",
       "messages": {
         "common.messageUnavailable": "Details are unavailable. Refresh to review the current information.",
@@ -1964,7 +2264,82 @@ export const localeData = {
         "terrain.firstChunk": "First corridor chunk to process",
         "terrain.lastChunk": "Last corridor chunk to process",
         "terrain.reviewBounds": "Chunks {first}–{last}: {tiles} candidate tiles, at most {cells} candidate cells (including empty bins). Output bound {output}; scratch reservation {scratch}.",
-        "terrain.selectedSources": "Reviewed original sources and references"
+        "terrain.selectedSources": "Reviewed original sources and references",
+        "lidar.title": "Historical LiDAR corridor processing",
+        "lidar.separation": "Historical LiDAR returns, modeled scanner corridors, raster terrain and original flight acquisitions are separate evidence. Processing points starts no recording or science collection and grants no mission credit.",
+        "lidar.initial": "Review a saved modeled corridor and exact historical originals. No point data is downloaded automatically.",
+        "lidar.localImport": "Import a local LAS/LAZ original",
+        "lidar.localHelp": "Choose the original on the Windows companion PC. No upload or source substitution.",
+        "lidar.geometry": "Modeled scanner corridor",
+        "lidar.chooseGeometry": "Choose a verified saved corridor",
+        "lidar.sourceSearch": "Search retained historical sources",
+        "lidar.review": "Review retained LiDAR sources",
+        "lidar.refresh": "Refresh processing jobs",
+        "lidar.chooseLocal": "Choose local LAS/LAZ on companion",
+        "lidar.dialogOpened": "Choose the original in the Windows file dialog, then review its metadata here.",
+        "lidar.refreshLocal": "Refresh local import selection",
+        "lidar.reviewed": "Retained candidates reviewed. Verify sources and start processing explicitly.",
+        "lidar.boundsWarning": "Source bounds and EPT node rectangles are candidates. Exact corridor polygons, holes and gaps determine which original points are retained.",
+        "lidar.details": "Scientific limitations and methods",
+        "lidar.studyRegion": "Selected bounded study region",
+        "lidar.prefix": "Optional public EPT project prefix",
+        "lidar.exactProject": "Optional exact public EPT project ID",
+        "lidar.find": "Find public LiDAR sources",
+        "lidar.noRegion": "No supported search region is selected. Review a valid corridor page.",
+        "lidar.originalRecords": "original point records",
+        "lidar.verticalAck": "I acknowledge unknown or unverified vertical references/height units. Keep these historical points separate; no simulator MSL comparison.",
+        "lidar.useSource": "Use this retained point source",
+        "lidar.metadata": "Original metadata and provenance",
+        "lidar.noSources": "No compatible retained point originals are listed in this region. Import a supported LAS/LAZ or explicitly review public EPT access.",
+        "lidar.moreSources": "More retained point sources",
+        "lidar.nextRegion": "Next modeled corridor region",
+        "lidar.budgets": "Advanced regional and processing bounds",
+        "lidar.firstChunk": "First geometry chunk",
+        "lidar.lastChunk": "Last geometry chunk",
+        "lidar.pointCap": "Maximum candidate records to scan",
+        "lidar.outputCap": "Maximum derived output (MiB)",
+        "lidar.tileRecords": "Original records per output tile",
+        "lidar.create": "Verify originals and review point processing",
+        "lidar.jobReviewed": "Verified processing review saved. Start processing is a separate explicit action.",
+        "lidar.discovered": "Public point-cloud source review",
+        "lidar.discoveryOnly": "Only project metadata was requested. Review a bounded retrieval preview before approving point data. Unknown dates and vertical references remain unknown.",
+        "lidar.officialMetadata": "Official USGS work-unit footprints, dates and quality statements",
+        "lidar.projectPoints": "points reported for the whole project; local density unknown",
+        "lidar.transferCap": "Explicit transfer cap (MiB)",
+        "lidar.previewDownload": "Preview bounded EPT retrieval",
+        "lidar.moreProjects": "Next bounded public-project page",
+        "lidar.downloadReview": "Review exact EPT nodes and transfer limits",
+        "lidar.nodes": "candidate nodes",
+        "lidar.candidates": "candidate records before exact clipping",
+        "lidar.transferUnknown": "Compressed transfer size is unknown; the cap includes metadata and retries.",
+        "lidar.approve": "Approve this EPT download and import",
+        "lidar.transferred": "actually transferred",
+        "lidar.job": "Historical point job",
+        "lidar.retained": "retained historical points",
+        "lidar.scanned": "original records scanned",
+        "lidar.tiles": "source record tiles",
+        "lidar.start": "Process retained historical points",
+        "lidar.pause": "Pause",
+        "lidar.resume": "Resume",
+        "lidar.retry": "Retry",
+        "lidar.cancel": "Cancel",
+        "lidar.openIndex": "Open historical LiDAR index",
+        "lidar.inspect": "Inspect retained original points",
+        "lidar.noPoints": "No retained historical points in this tile or no completed tiles yet. No points were invented.",
+        "lidar.pointTile": "Completed original-record tile",
+        "lidar.pointTable": "Retained historical point records",
+        "lidar.record": "Original record",
+        "lidar.location": "Geographic location",
+        "lidar.xyz": "Delivered source XYZ",
+        "lidar.attributes": "Original attributes and session associations",
+        "lidar.nextPoints": "Next retained point page",
+        "lidar.sourceName": "Source name",
+        "lidar.projectId": "Original project / source identifier",
+        "lidar.license": "Original license / permitted use",
+        "lidar.citation": "Source citation / reference",
+        "lidar.acquiredFrom": "Original acquisition start (UTC ISO, blank if unknown)",
+        "lidar.acquiredTo": "Original acquisition end (UTC ISO, blank if unknown)",
+        "lidar.import": "Import and verify this original"
       }
     }
   }

@@ -7,11 +7,14 @@ RUN --mount=type=bind,source=.,target=/input,readonly \
     --mount=type=secret,id=proxy_ca \
     --mount=type=cache,target=/root/.nuget/packages \
     set -eu; \
+    apt-get update; apt-get install -y --no-install-recommends python3 g++; rm -rf /var/lib/apt/lists/*; \
     cp /input/global.json /input/Directory.Build.props /input/LICENSE /input/THIRD-PARTY-NOTICES.md ./; \
     mkdir -p src/AeroScience.Engine; \
     cp -a /input/src/AeroScience.Shared /input/src/AeroScience.Missions /input/src/AeroScience.Organization src/; \
     cp -a /input/src/AeroScience.Engine/wwwroot src/AeroScience.Engine/; \
     cp -a /input/licenses ./; \
+    mkdir -p native scripts/build; cp -a /input/native/lidar native/; \
+    cp /input/scripts/build/lidar_runtime.py scripts/build/; \
     if [ -f /run/secrets/proxy_ca ]; then export SSL_CERT_FILE=/run/secrets/proxy_ca; fi; \
     test "${#SOURCE_REVISION}" = 40; case "$SOURCE_REVISION" in *[!0-9a-f]*) exit 1;; esac; \
     dotnet restore src/AeroScience.Organization --locked-mode; \

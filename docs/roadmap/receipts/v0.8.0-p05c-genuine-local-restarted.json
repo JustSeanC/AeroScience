@@ -1,0 +1,41 @@
+{
+  "state": "Passed",
+  "verifiedUtc": "2026-11-12T23:55:26.932666+00:00",
+  "reference": {
+    "laspy": "2.6.1",
+    "lazrs": "0.7.0",
+    "pyproj": "3.7.2",
+    "proj": "9.5.1",
+    "shapely": "2.1.2",
+    "geos": "3.13.1"
+  },
+  "scope": "Genuine historical source points; synthetic archived flight geometry; independent original record/attribute/PROJ/GEOS corridor comparison",
+  "scannedOriginalPoints": 34923,
+  "retainedOriginalPoints": 1,
+  "maximumGeographicDifferenceDegrees": 7.105427357601002e-15,
+  "sources": [
+    {
+      "id": "ddb07bef-17da-4ab5-8a10-39ae22c48e9c",
+      "project": "IA_FullState/0-0-0-0",
+      "fileSha256": "68c4b0ed247501a15d020d9a758d0345904f38785235732bd8e3386a3fca71c1",
+      "originalPointCount": 34923,
+      "retainedPoints": 1,
+      "horizontalCrs": "EPSG:3857",
+      "verticalReference": "Unknown (not established by delivered original metadata)",
+      "verticalUnit": "unknown",
+      "acquisitionUtc": null
+    }
+  ],
+  "approvedNetwork": null,
+  "unknowns": [
+    "Original survey date and vertical datum/unit where not established by actual retained metadata",
+    "Original contractor coordinates before Entwine reprojection"
+  ],
+  "notTested": [
+    "Installed Windows/MSFS",
+    "Native COPC spatial index",
+    "Provider-wide coverage or density"
+  ],
+  "originalScienceObservations": 0,
+  "originalScienceProducts": 0
+}

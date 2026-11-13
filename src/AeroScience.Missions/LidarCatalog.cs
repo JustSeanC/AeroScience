@@ -58,7 +58,7 @@ public sealed class LidarCatalog(AutomaticScientificData automatic,ScienceStore 
         if(!official.RootElement.TryGetProperty("features",out var fs)||fs.GetArrayLength()>5)throw new IOException("Official USGS discovery response is unsupported; no availability was inferred.");var work=fs.EnumerateArray().Select(f=>f.Clone()).ToArray();
         var chosen=request.Prefix??work.Select(f=>f.GetProperty("properties").GetProperty("project").GetString()).Where(p=>p is not null&&Regex.IsMatch(p,"^[A-Z]{2}_",RegexOptions.CultureInvariant,TimeSpan.FromSeconds(1))).Select(p=>p![..3]).FirstOrDefault();
         var projects=new List<LidarEptProject>();var unavailable=new List<string>();string? next=null;
-        if(request.Project is {} exact)projects.Add(await Verify(exact,budget,token));
+        if(request.Project is {} exact){var item=await Verify(exact,budget,token);if(Intersects(item.Bounds,a))projects.Add(item);else unavailable.Add(exact+": verified source bounds do not intersect this study region.");}
         else if(chosen is not null)
         {
             var query=Bucket+"?list-type=2&prefix="+Uri.EscapeDataString(chosen)+"&delimiter=%2F&max-keys=5"+(request.Cursor is null?"":"&continuation-token="+Uri.EscapeDataString(request.Cursor));

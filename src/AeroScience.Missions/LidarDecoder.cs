@@ -6,7 +6,10 @@ namespace AeroScience.Missions;
 public sealed record LidarDecodedPoint(long Record,int RawX,int RawY,int RawZ,double X,double Y,double Z,
     ushort Intensity,byte ReturnNumber,byte NumberOfReturns,byte Classification,byte ClassificationFlags,
     byte ScanDirectionFlag,byte EdgeOfFlightLine,byte UserData,ushort PointSourceId,short RawScanAngle,double ScanAngleDegrees,
-    byte? ScannerChannel,double? GpsTime,long? RawGpsTimeBits,ushort[]? Rgb,ushort? Infrared,byte[] OriginalExtraBytes);
+    byte? ScannerChannel,double? GpsTime,long? RawGpsTimeBits,ushort[]? Rgb,ushort? Infrared,byte[] OriginalExtraBytes)
+{
+    public string? RawGpsTimeHex=>RawGpsTimeBits is {} bits?unchecked((ulong)bits).ToString("x16",System.Globalization.CultureInfo.InvariantCulture):null;
+}
 
 public static class LidarDecoder
 {

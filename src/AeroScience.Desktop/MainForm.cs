@@ -36,7 +36,7 @@ public sealed class MainForm : BrandedForm, IDesktopActions, IScientificFolderOp
         appearanceKey = key; WindowsPresentation.Apply(this, dark);
         if (auxiliary is SettingsForm or SetupWizardForm) WindowsPresentation.Apply(auxiliary, dark);
     }
-    public bool Busy { get => busy || choosingSource || (engine?.Services.GetService<ScientificImportSession>()?.IsBusy ?? false); private set => busy=value; }
+    public bool Busy { get => busy || choosingSource || (engine?.Services.GetService<ScientificImportSession>()?.IsBusy ?? false) || (engine?.Services.GetService<LidarImportSession>()?.IsBusy ?? false); private set => busy=value; }
     public bool Recording => engine?.Services.GetRequiredService<MissionCoordinator>().Snapshot().ActiveMission is not null;
     private readonly ToolbarPromptPolicy toolbarPrompts = new();
     public ToolbarVersionStatus Toolbar => ToolbarVersions.Inspect(Path.Combine(AppContext.BaseDirectory, "Toolbar"), PreferredCommunity());
@@ -306,6 +306,11 @@ public sealed class MainForm : BrandedForm, IDesktopActions, IScientificFolderOp
         }catch(InvalidOperationException){lease.Dispose();}
     }
     void IDesktopActions.ChooseScientificDataset(string kind)=>DispatchSourcePicker(owner=>ChooseScientificDataset(kind,owner));
+    void IDesktopActions.ChooseLidarOriginal()=>DispatchSourcePicker(async owner=>
+    {
+        if(engine is null)return;using var picker=new OpenFileDialog{Title="Choose a historical LAS/LAZ original",Filter="Historical LAS/LAZ (*.las;*.laz)|*.las;*.laz",CheckFileExists=true};if(picker.ShowDialog(owner)!=DialogResult.OK)return;
+        await engine.Services.GetRequiredService<LidarImportSession>().Select(picker.FileName);
+    });
     private async Task ChooseScientificDataset(string kind,IWin32Window owner)
     {
         if(engine is null)return;string path;var type=Enum.Parse<RemoteKind>(kind,true);

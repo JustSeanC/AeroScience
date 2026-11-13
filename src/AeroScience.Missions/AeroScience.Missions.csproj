@@ -11,6 +11,8 @@
     <LidarBuildDirectory>$(MSBuildProjectDirectory)/obj/native-lidar/$(Configuration)/$(RuntimeIdentifier)</LidarBuildDirectory>
     <LidarExecutable>AeroScience.LidarReader</LidarExecutable>
     <LidarExecutable Condition="$([MSBuild]::IsOSPlatform('Windows'))">AeroScience.LidarReader.exe</LidarExecutable>
+    <LidarPython>python3</LidarPython>
+    <LidarPython Condition="$([MSBuild]::IsOSPlatform('Windows'))">python</LidarPython>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(LidarBuildDirectory)/LidarRuntimeIdentity.g.cs" />
@@ -18,6 +20,6 @@
     <None Include="$(LidarBuildDirectory)/LASzip.txt" Link="LidarRuntime/LASzip.txt" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
   <Target Name="BuildVerifiedLidarRuntime" BeforeTargets="CoreCompile;GetCopyToOutputDirectoryItems">
-    <Exec Command="python &quot;$(MSBuildThisFileDirectory)../../scripts/build/lidar_runtime.py&quot; --output &quot;$(LidarBuildDirectory)&quot;" />
+    <Exec Command="$(LidarPython) &quot;$(MSBuildThisFileDirectory)../../scripts/build/lidar_runtime.py&quot; --output &quot;$(LidarBuildDirectory)&quot;" />
   </Target>
 </Project>

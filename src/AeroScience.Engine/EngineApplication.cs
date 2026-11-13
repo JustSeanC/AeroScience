@@ -54,6 +54,8 @@ public static class EngineApplication
         builder.Services.AddSingleton(sp => new ScientificAccessSettings(sp.GetRequiredService<EngineOptions>().ConfigurationDirectory ?? sp.GetRequiredService<EngineOptions>().DataDirectory, NetworkCost.IsUnmetered));
         builder.Services.AddSingleton(sp => { _ = sp.GetRequiredService<StorageManagement>(); return new AutomaticScientificData(sp.GetRequiredService<ScienceStore>(),sp.GetRequiredService<ScientificAccessSettings>()); });
         builder.Services.AddSingleton<ScientificCatalog>();
+        builder.Services.AddSingleton<LidarCatalog>();
+        builder.Services.AddSingleton<LidarImportSession>();
         builder.Services.AddSingleton<ScientificHdfReader>();
         builder.Services.AddSingleton<EmitProductDecoder>();
         builder.Services.AddSingleton<EmitLibrary>();
@@ -281,6 +283,7 @@ public static class EngineApplication
                 case "hyperspectral-header": desktop.ChooseHyperspectral(false); break;
                 case "hyperspectral-folder": desktop.ChooseHyperspectral(true); break;
                 case "emit-originals": desktop.ChooseEmitOriginals(); break;
+                case "lidar-original": desktop.ChooseLidarOriginal(); break;
                 case "earthdata-connect": desktop.ConnectEarthdata(); break;
                 case "compact-flight": desktop.CompactStorage(false); break;
                 case "compact-science": desktop.CompactStorage(true); break;

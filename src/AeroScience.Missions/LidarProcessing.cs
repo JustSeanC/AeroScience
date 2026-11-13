@@ -110,7 +110,13 @@ public static class LidarProcessing
         if(j.GetProperty("version").GetInt32()!=1||j.GetProperty("missionId").GetGuid()!=artifact.MissionId||j.GetProperty("algorithm").GetString()!=Algorithm||j.GetProperty("decoderSource").GetString()!=LidarDecoder.SourceIdentity||j.GetProperty("grantsOriginalScienceCredit").GetBoolean())throw new IOException("Historical point product evidence/algorithm identity differs.");
         var geometry=science.Artifact(j.GetProperty("geometryArtifactId").GetGuid());if(geometry.MissionId!=artifact.MissionId||geometry.Sha256!=j.GetProperty("geometrySha256").GetString()||geometry.InputIdentity!=j.GetProperty("geometryInputFingerprint").GetString())throw new IOException("Historical point geometry dependency changed.");_=ContinuousTerrainSurveys.RequireCurrent(science,missions,geometry,token);
         if(artifact.Kind==TileKind){var s=j.GetProperty("source");_=LidarImports.Bind(science,s.GetProperty("id").GetGuid(),s.GetProperty("manifestSha256").GetString()!,true,preferences,token);}
-        else foreach(var s in j.GetProperty("sources").EnumerateArray())_=LidarImports.Bind(science,s.GetProperty("id").GetGuid(),s.GetProperty("manifestSha256").GetString()!,true,preferences,token);
+        else
+        {
+            foreach(var s in j.GetProperty("sources").EnumerateArray())_=LidarImports.Bind(science,s.GetProperty("id").GetGuid(),s.GetProperty("manifestSha256").GetString()!,true,preferences,token);
+            var index=j.Deserialize<LidarPointIndex>(WireJson.Options)??throw new IOException("Invalid historical point index.");Validate(index.Options);
+            if(index.Tiles.Length>index.Options.MaximumTiles||index.Tiles.Select(t=>t.ArtifactId).Distinct().Count()!=index.Tiles.Length||index.Tiles.Sum(t=>t.RecordsRead)!=index.ScannedPoints||index.Tiles.Sum(t=>t.RetainedPoints)!=index.RetainedPoints||index.Tiles.Sum(t=>t.Bytes)>index.Options.MaximumOutputBytes)throw new IOException("Historical point index references/counts exceed the frozen scope.");
+            foreach(var t in index.Tiles){token.ThrowIfCancellationRequested();var a=science.Artifact(t.ArtifactId);if(a.Kind!=TileKind||a.MissionId!=artifact.MissionId||a.Sha256!=t.Sha256||a.Bytes!=t.Bytes)throw new IOException("Historical point index tile identity changed.");_=science.VerifiedArtifactPath(a);}
+        }
         return path;
     }
     static void Write<T>(string path,T value,long maximum,CancellationToken token)

@@ -7,7 +7,7 @@ namespace AeroScience.Engine;
 public sealed record AnalysisJob(Guid Id,Guid MissionId,string Kind,string State,long Completed,long? Total,Guid[] Artifacts,string? Message=null);
 public sealed class ScientificAnalysisJobs(MissionStore missions,ScienceStore science,StorageManagement? storage=null,ScientificAccessSettings? settings=null,ILogger<ScientificAnalysisJobs>? logger=null) : BackgroundService
 {
-    private sealed record Work(Guid Id,Guid Mission,ScientificCoverageRequest? Coverage,CompositeRequest? Composite,CancellationTokenSource Cancel,string? PerformanceReason=null,TerrainSurveyOptions? Terrain=null,Guid? Elevation=null);
+    private sealed record Work(Guid Id,Guid Mission,ScientificCoverageRequest? Coverage,CompositeRequest? Composite,CancellationTokenSource Cancel,string? PerformanceReason=null,TerrainSurveyOptions? Terrain=null,Guid? Elevation=null,Guid? Lidar=null);
     private readonly Channel<Work> queue=Channel.CreateBounded<Work>(4);
     private readonly object gate=new();private readonly Dictionary<Guid,AnalysisJob> states=[];private readonly Dictionary<Guid,CancellationTokenSource> cancellations=[];
     public AnalysisJob Enqueue(Guid mission,ScientificCoverageRequest? coverage=null,CompositeRequest? composite=null,TerrainSurveyOptions? terrain=null)
@@ -58,6 +58,24 @@ public sealed class ScientificAnalysisJobs(MissionStore missions,ScienceStore sc
             return receipt;
         }
     }
+    public LidarProcessingJob ControlLidar(Guid id,TerrainElevationControl request)
+    {
+        EnsureLidarRecovered();lock(gate)
+        {
+            if(request.Action is "resume" or "retry"&&cancellations.ContainsKey(id))throw new InvalidOperationException("The previous historical-point worker is still stopping. Refresh before resuming.");
+            var receipt=science.ControlLidarJob(id,request);var current=science.LidarJob(id);
+            if(current.State=="Queued"&&!cancellations.ContainsKey(id))
+            {
+                foreach(var old in states.Values.Where(s=>s.State is "Completed" or "Failed" or "Cancelled").Take(Math.Max(0,states.Count-95)).ToArray())states.Remove(old.Id);
+                if(states.Count>=100&&!states.ContainsKey(id))return science.ChangeLidarJob(id,j=>j with{State="Failed",Message="Analysis history is full; retry after current work finishes/restart."});
+                var cancel=new CancellationTokenSource();states[id]=new(id,current.MissionId,"historical-lidar","Queued",current.CompletedTiles,current.TotalTiles,[]);cancellations.Add(id,cancel);
+                if(!queue.Writer.TryWrite(new(id,current.MissionId,null,null,cancel,Lidar:id)))
+                {cancellations.Remove(id);cancel.Dispose();states.Remove(id);return science.ChangeLidarJob(id,j=>j with{State="Failed",Message="Analysis queue is full. Retained sources/checkpoints are preserved; retry explicitly."});}
+            }
+            else if(current.State is "Pausing" or "Paused" or "Cancelled"&&cancellations.TryGetValue(id,out var active))active.Cancel();
+            return receipt;
+        }
+    }
     public AnalysisJob Cancel(Guid id){lock(gate){if(cancellations.TryGetValue(id,out var source))source.Cancel();return Get(id);}}
     private void Update(Guid id,Func<AnalysisJob,AnalysisJob> change){lock(gate)states[id]=change(states[id]);}
     private void StopTerrain(Guid id,string? error=null)
@@ -69,9 +87,23 @@ public sealed class ScientificAnalysisJobs(MissionStore missions,ScienceStore sc
         catch(ArgumentException){/* A permanent collected-science deletion removed this queued job. Never recreate it. */}
         catch(Exception e)when(e is IOException or Microsoft.Data.Sqlite.SqliteException or JsonException){logger?.LogWarning(e,"Terrain job stop could not be persisted. Explicit recovery is required when the Library returns.");}
     }
+    private void StopLidar(Guid id,string? error=null)
+    {
+        try
+        {
+            var job=science.LidarJob(id);if(job.State is "Queued" or "Running" or "Pausing")science.ChangeLidarJob(id,j=>j with{State=error is not null?"Failed":j.State=="Pausing"?"Paused":"Interrupted",Message=error??"Worker stopped. Explicit resume verifies originals and completed checkpoints; no download resumes automatically."});
+        }
+        catch(ArgumentException){/* A permanent collected-science deletion removed this queued job. Never recreate it. */}
+        catch(Exception e)when(e is IOException or Microsoft.Data.Sqlite.SqliteException or JsonException){logger?.LogWarning(e,"Historical point job stop could not be persisted. Explicit recovery is required when the Library returns.");}
+    }
+    private bool lidarRecovered;
+    public void EnsureLidarRecovered()
+    {
+        lock(gate){if(lidarRecovered)return;science.RecoverLidarJobs();lidarRecovered=true;}
+    }
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        try{if(science.AvailabilityError() is null)science.RecoverTerrainJobs();}
+        try{if(science.AvailabilityError() is null){science.RecoverTerrainJobs();EnsureLidarRecovered();}}
         catch(Exception e)when(e is IOException or Microsoft.Data.Sqlite.SqliteException or JsonException){logger?.LogWarning(e,"Terrain recovery unavailable. Existing recording operations remain independent; terrain commands require a usable Library.");}
         try{await foreach(var work in queue.Reader.ReadAllAsync(stoppingToken))
         {
@@ -91,6 +123,8 @@ public sealed class ScientificAnalysisJobs(MissionStore missions,ScienceStore sc
                         missions.SavePerformanceReport(evidence,reason,bytes=>storage?.RequireFlightCapacity(bytes));return Array.Empty<ScientificArtifact>();
                     }
                     using var lease=science.BeginAnalysis();
+                    if(work.Lidar is {} lidar)
+                        return new[]{LidarProcessing.Process(science,missions,lidar,settings?.Get().Preferences,linked.Token,(n,total)=>Update(work.Id,s=>s with{Completed=n,Total=total})).GetAwaiter().GetResult()};
                     if(work.Elevation is {} elevation)
                         return new[]{TerrainElevations.Process(science,missions,elevation,settings?.Get().Preferences,linked.Token,(n,total)=>Update(work.Id,s=>s with{Completed=n,Total=total}))};
                     if(work.Terrain is {} terrain)
@@ -106,10 +140,10 @@ public sealed class ScientificAnalysisJobs(MissionStore missions,ScienceStore sc
                 },linked.Token);
                 Update(work.Id,s=>s with{State="Completed",Artifacts=results.Select(r=>r.Id).ToArray(),Message="Verified local analysis outputs published. Originals and recorder were not modified."});
             }
-            catch(OperationCanceledException){if(work.Elevation is {} e)StopTerrain(e);Update(work.Id,s=>s with{State="Cancelled",Message=work.Terrain is not null?"Cancelled before corridor publication. No complete terrain product is claimed.":"Cancelled. Already completed tiles remain individually identified; no complete operation is claimed."});}
-            catch(Exception e)when(e is not OutOfMemoryException){if(work.Elevation is {} elevation)StopTerrain(elevation,e.Message);Update(work.Id,s=>s with{State="Failed",Message=e.Message});}
+            catch(OperationCanceledException){if(work.Lidar is {} lidar)StopLidar(lidar);if(work.Elevation is {} e)StopTerrain(e);Update(work.Id,s=>s with{State="Cancelled",Message=work.Terrain is not null?"Cancelled before corridor publication. No complete terrain product is claimed.":"Cancelled. Already completed tiles remain individually identified; no complete operation is claimed."});}
+            catch(Exception e)when(e is not OutOfMemoryException){if(work.Lidar is {} lidar)StopLidar(lidar,e.Message);if(work.Elevation is {} elevation)StopTerrain(elevation,e.Message);Update(work.Id,s=>s with{State="Failed",Message=e.Message});}
             finally{lock(gate)cancellations.Remove(work.Id);work.Cancel.Dispose();}
         }}catch(OperationCanceledException)when(stoppingToken.IsCancellationRequested){}
-        finally{while(queue.Reader.TryRead(out var pending)){if(pending.Elevation is {} e)StopTerrain(e);Update(pending.Id,s=>s with{State="Cancelled",Message="Application stopped before this operation began."});lock(gate)cancellations.Remove(pending.Id);pending.Cancel.Dispose();}}
+        finally{while(queue.Reader.TryRead(out var pending)){if(pending.Lidar is {} lidar)StopLidar(lidar);if(pending.Elevation is {} e)StopTerrain(e);Update(pending.Id,s=>s with{State="Cancelled",Message="Application stopped before this operation began."});lock(gate)cancellations.Remove(pending.Id);pending.Cancel.Dispose();}}
     }
 }
