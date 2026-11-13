@@ -1,0 +1,316 @@
+{
+  "checkpoint": "v0.8.0 P05d.4",
+  "scope": "Genuine USGS original values; explicitly synthetic flight; bounded browser visualization, not Windows/MSFS acceptance",
+  "lidarOriginalOracle": {
+    "state": "Passed",
+    "verifiedUtc": "2026-11-13T14:26:17.266856+00:00",
+    "reference": {
+      "laspy": "2.6.1",
+      "lazrs": "0.7.0",
+      "pyproj": "3.7.2",
+      "proj": "9.5.1",
+      "shapely": "2.1.2",
+      "geos": "3.13.1"
+    },
+    "scope": "Genuine historical source points; synthetic archived flight geometry; independent original record/attribute/PROJ/GEOS corridor comparison",
+    "scannedOriginalPoints": 38260,
+    "retainedOriginalPoints": 38260,
+    "maximumGeographicDifferenceDegrees": 2.842170943040401e-14,
+    "sources": [
+      {
+        "id": "d3fb4ed6-7d57-41c3-930a-eb2ce02affd3",
+        "project": "IA_FullState/10-239-338-512",
+        "fileSha256": "0e31423010d513ad924cc32fec2d621e0b6e50b3192d12aefa4444c5c7f999b9",
+        "originalPointCount": 38260,
+        "retainedPoints": 38260,
+        "horizontalCrs": "EPSG:3857",
+        "verticalReference": "Unknown (not established by delivered original metadata)",
+        "verticalUnit": "unknown",
+        "acquisitionUtc": null
+      }
+    ],
+    "approvedNetwork": null,
+    "unknowns": [
+      "Original survey date and vertical datum/unit where not established by actual retained metadata",
+      "Original contractor coordinates before Entwine reprojection"
+    ],
+    "notTested": [
+      "Installed Windows/MSFS",
+      "Native COPC spatial index",
+      "Provider-wide coverage or density"
+    ],
+    "originalScienceObservations": 0,
+    "originalScienceProducts": 0
+  },
+  "terrainOriginalOracle": {
+    "state": "Passed",
+    "verifiedUtc": "2026-11-13T13:55:16.348121+00:00",
+    "scope": "Genuine bounded USGS composite delivered values/grid; synthetic archived flight corridor; fully offline application processing",
+    "reference": "GDAL 3.10.3 / OGR GEOS overlays",
+    "originalSha256": "4c043d10024c8af4077c45d9ed6778141ccaf0837298ea8a521c9f832ce9a7f0",
+    "sourceManifestSha256": "6cda61df0cde7f96e4f27fbee60eb4fe6d26be5a71e893ce2ceaf26a1bc15445",
+    "algorithm": "terrain-native-cells-1/pixel-clip-1",
+    "nativeCellsCompared": 1024,
+    "clippedCellsCompared": 576,
+    "partialCells": 66,
+    "maximumCellFractionDifference": 1.9593626721103874e-10,
+    "derivedIndexSha256": "603563d120883c7fb31fed163519aeb57ed3bc0879f7f0bbdbdb8dc411f69e0f",
+    "unknowns": [
+      "historical survey date",
+      "native per-pixel resolution",
+      "vertical datum / transformations"
+    ],
+    "notTested": [
+      "genuine Copernicus DSM",
+      "genuine UTM provider source",
+      "installed Windows/MSFS",
+      "provider-wide availability"
+    ]
+  },
+  "browser": {
+    "scope": "Explicit isolated fixture; no owner Library or network retrieval",
+    "performance": {
+      "scope": "Genuine IA_FullState delivered historical node; synthetic archived flight. Headless Chromium software GPU, not installed Windows/MSFS.",
+      "renderOrigin": {
+        "x": -10588403.19,
+        "y": 5032159.58,
+        "z": 381.14,
+        "geographic": {
+          "latitude": 41.13422198748264,
+          "longitude": -95.11724419996898
+        },
+        "crs": "EPSG:3857",
+        "zUnit": "unknown",
+        "verticalReference": "Unknown (not established by delivered original metadata)"
+      },
+      "originalPointRecords": 38260,
+      "loadedRecords": 12084,
+      "encodedNumericalBytes": 16776250,
+      "initialExploreMs": 2300.76484,
+      "pageLatenciesMs": [
+        383.98249399999986,
+        375.787198,
+        401.87246099999993,
+        532.7183340000001,
+        532.9256500000001,
+        532.6317580000004,
+        626.9860229999995,
+        542.5887359999997,
+        682.7821809999987,
+        575.9483020000007,
+        590.0094669999999
+      ],
+      "webglReadyMs": 365.5080710000002,
+      "orbitInteractionMs": [
+        63.88174000000072,
+        75.11863999999878,
+        64.39975500000037,
+        59.65375099999983,
+        69.43443400000069,
+        63.11171700000159,
+        65.67466500000046,
+        78.37555199999952
+      ],
+      "heapUsedBytes": 50790080,
+      "heapTotalBytes": 53313536,
+      "gpuBytes": 119496,
+      "canvasPixels": 541000,
+      "renderedRepresentatives": 4979,
+      "budgets": {
+        "records": 32768,
+        "encodedBytes": 16777216,
+        "gpuBytes": 1572864,
+        "canvasPixels": 2097152,
+        "heapUsedBytes": 268435456,
+        "initialExploreMs": 10000,
+        "interactionMs": 1000
+      }
+    },
+    "screenshots": [
+      {
+        "file": "genuine-browser-terrain-light-1440.png",
+        "theme": "light",
+        "width": 1440,
+        "kind": "terrain",
+        "sourceEvidence": "Genuine retained USGS originals; synthetic archived flight; browser rendering only"
+      },
+      {
+        "file": "genuine-browser-lidar2d-light-1440.png",
+        "theme": "light",
+        "width": 1440,
+        "kind": "lidar2d",
+        "sourceEvidence": "Genuine retained USGS originals; synthetic archived flight; browser rendering only"
+      },
+      {
+        "file": "genuine-browser-lidar3d-light-1440.png",
+        "theme": "light",
+        "width": 1440,
+        "kind": "lidar3d",
+        "sourceEvidence": "Genuine retained USGS originals; synthetic archived flight; browser rendering only"
+      },
+      {
+        "file": "genuine-browser-terrain-light-390.png",
+        "theme": "light",
+        "width": 390,
+        "kind": "terrain",
+        "sourceEvidence": "Genuine retained USGS originals; synthetic archived flight; browser rendering only"
+      },
+      {
+        "file": "genuine-browser-lidar2d-light-390.png",
+        "theme": "light",
+        "width": 390,
+        "kind": "lidar2d",
+        "sourceEvidence": "Genuine retained USGS originals; synthetic archived flight; browser rendering only"
+      },
+      {
+        "file": "genuine-browser-lidar3d-light-390.png",
+        "theme": "light",
+        "width": 390,
+        "kind": "lidar3d",
+        "sourceEvidence": "Genuine retained USGS originals; synthetic archived flight; browser rendering only"
+      },
+      {
+        "file": "genuine-browser-terrain-dark-1440.png",
+        "theme": "dark",
+        "width": 1440,
+        "kind": "terrain",
+        "sourceEvidence": "Genuine retained USGS originals; synthetic archived flight; browser rendering only"
+      },
+      {
+        "file": "genuine-browser-lidar2d-dark-1440.png",
+        "theme": "dark",
+        "width": 1440,
+        "kind": "lidar2d",
+        "sourceEvidence": "Genuine retained USGS originals; synthetic archived flight; browser rendering only"
+      },
+      {
+        "file": "genuine-browser-lidar3d-dark-1440.png",
+        "theme": "dark",
+        "width": 1440,
+        "kind": "lidar3d",
+        "sourceEvidence": "Genuine retained USGS originals; synthetic archived flight; browser rendering only"
+      },
+      {
+        "file": "genuine-browser-terrain-dark-390.png",
+        "theme": "dark",
+        "width": 390,
+        "kind": "terrain",
+        "sourceEvidence": "Genuine retained USGS originals; synthetic archived flight; browser rendering only"
+      },
+      {
+        "file": "genuine-browser-lidar2d-dark-390.png",
+        "theme": "dark",
+        "width": 390,
+        "kind": "lidar2d",
+        "sourceEvidence": "Genuine retained USGS originals; synthetic archived flight; browser rendering only"
+      },
+      {
+        "file": "genuine-browser-lidar3d-dark-390.png",
+        "theme": "dark",
+        "width": 390,
+        "kind": "lidar3d",
+        "sourceEvidence": "Genuine retained USGS originals; synthetic archived flight; browser rendering only"
+      }
+    ],
+    "sourceDeletion": {
+      "id": "5805c946-d4fc-4da3-b8ec-398a448b0734",
+      "removedSources": 1,
+      "removedManagedBytes": 29697721,
+      "pendingManagedBytes": 0,
+      "physicalFreeSpaceChangeBytes": 29487104,
+      "state": "Completed",
+      "warning": null,
+      "removedSourceIds": null,
+      "metadataCleanupPending": false
+    },
+    "loadedRecordComparisons": [
+      12084
+    ],
+    "installedWindowsMsfs": "Not Tested"
+  },
+  "deletedManagedOriginalAbsent": true,
+  "unrelatedTerrainOriginalPreserved": true,
+  "sourceEvaluationUnchanged": true,
+  "networkDownloads": 0,
+  "images": [
+    {
+      "path": "docs/roadmap/images/p05d/genuine-browser-lidar2d-dark-1440.png",
+      "sha256": "bb7a4e35b49ea10c74fd38d61c4d0efc27389a3a93372551b41a67162d3254a4",
+      "bytes": 133733,
+      "scope": "Genuine historical originals, synthetic archived flight, Chromium browser; not installed MSFS"
+    },
+    {
+      "path": "docs/roadmap/images/p05d/genuine-browser-lidar2d-dark-390.png",
+      "sha256": "5d3d9a70c94aebc9ea6ac84be2fdc356e11d980e8e309cfd45e47e76fdf8f230",
+      "bytes": 73552,
+      "scope": "Genuine historical originals, synthetic archived flight, Chromium browser; not installed MSFS"
+    },
+    {
+      "path": "docs/roadmap/images/p05d/genuine-browser-lidar2d-light-1440.png",
+      "sha256": "b1af3fc848bfc5c42f84f862d0d569e94b0ec47db0e4fa0341c95f280a0f2c77",
+      "bytes": 133328,
+      "scope": "Genuine historical originals, synthetic archived flight, Chromium browser; not installed MSFS"
+    },
+    {
+      "path": "docs/roadmap/images/p05d/genuine-browser-lidar2d-light-390.png",
+      "sha256": "7e13ffde8f62730c38b63206217a479d568c9291576075716ce50a828c314d7d",
+      "bytes": 73452,
+      "scope": "Genuine historical originals, synthetic archived flight, Chromium browser; not installed MSFS"
+    },
+    {
+      "path": "docs/roadmap/images/p05d/genuine-browser-lidar3d-dark-1440.png",
+      "sha256": "1dcbab45d8d65f8919fe03bd6defccc3e70429849bc95cddbf4a1a748a292997",
+      "bytes": 170916,
+      "scope": "Genuine historical originals, synthetic archived flight, Chromium browser; not installed MSFS"
+    },
+    {
+      "path": "docs/roadmap/images/p05d/genuine-browser-lidar3d-dark-390.png",
+      "sha256": "ab6713dfe8fba6806b7e03d9d0afa656e34455f9ead63d8fd6c86d51c3f49fe2",
+      "bytes": 66068,
+      "scope": "Genuine historical originals, synthetic archived flight, Chromium browser; not installed MSFS"
+    },
+    {
+      "path": "docs/roadmap/images/p05d/genuine-browser-lidar3d-light-1440.png",
+      "sha256": "cd2d2dce0c3211fe1840bb17f37f805055bba3dda589fa2c4616d11b3241da8b",
+      "bytes": 170750,
+      "scope": "Genuine historical originals, synthetic archived flight, Chromium browser; not installed MSFS"
+    },
+    {
+      "path": "docs/roadmap/images/p05d/genuine-browser-lidar3d-light-390.png",
+      "sha256": "ae118d2abf33dabea4348ea0e759d1298ef8cfafba37301f375716ca27781641",
+      "bytes": 66767,
+      "scope": "Genuine historical originals, synthetic archived flight, Chromium browser; not installed MSFS"
+    },
+    {
+      "path": "docs/roadmap/images/p05d/genuine-browser-terrain-dark-1440.png",
+      "sha256": "0df2b5d26e518f4b29a2b0d104987315848746ae7017d5f046df834cc690e7e8",
+      "bytes": 123678,
+      "scope": "Genuine historical originals, synthetic archived flight, Chromium browser; not installed MSFS"
+    },
+    {
+      "path": "docs/roadmap/images/p05d/genuine-browser-terrain-dark-390.png",
+      "sha256": "7f4b216c0e6881bfc1aded29bfb0ee1416e27ec1aab49855087abbc52abfee2b",
+      "bytes": 61413,
+      "scope": "Genuine historical originals, synthetic archived flight, Chromium browser; not installed MSFS"
+    },
+    {
+      "path": "docs/roadmap/images/p05d/genuine-browser-terrain-light-1440.png",
+      "sha256": "9982a4844ff71d14e05119de271d10e89f2e0b42c0015ecb7c193a22a53a3343",
+      "bytes": 122778,
+      "scope": "Genuine historical originals, synthetic archived flight, Chromium browser; not installed MSFS"
+    },
+    {
+      "path": "docs/roadmap/images/p05d/genuine-browser-terrain-light-390.png",
+      "sha256": "4fa928c22ff990b8761dec98f5366a05121a88aa7493b36ba80400edc3cf170a",
+      "bytes": 61080,
+      "scope": "Genuine historical originals, synthetic archived flight, Chromium browser; not installed MSFS"
+    }
+  ],
+  "numericViewReceipts": "v0.8.0-p05d-terrain-view.json and v0.8.0-p05d-lidar-view.json",
+  "limitations": [
+    "Unknown historical date/vertical reference/native DEM survey scale; no MSL/HAG inference",
+    "COPC unsupported",
+    "Native helper release payload/signing/installer approval deferred to P08",
+    "Installed Windows/MSFS Not Tested"
+  ]
+}

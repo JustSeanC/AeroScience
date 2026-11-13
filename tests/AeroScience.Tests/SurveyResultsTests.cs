@@ -85,4 +85,12 @@ public sealed class SurveyResultsTests
         using var sources=new StreamReader(zip.GetEntry("sources.json")!.Open());var json=await sources.ReadToEndAsync();Assert.Contains(s.ManifestSha256,json);Assert.Contains(s.Id.ToString(),json);Assert.DoesNotContain(zip.Entries,e=>e.FullName.EndsWith(".tif",StringComparison.OrdinalIgnoreCase));
         using var methods=new StreamReader(zip.GetEntry("methods.txt")!.Open());Assert.Contains("post-flight derived reconstruction",await methods.ReadToEndAsync());
     }
+    [Fact] public async Task IncompatibleSourcesRequireExplicitSelectionAndNeverConvertUnknownDatumToConfirmed()
+    {
+        using var f=new TerrainSurveyFixture();var g=Flight(f);var (_,first)=await Terrain(f,g);var path=Path.Combine(f.Root,"different-source");Directory.CreateDirectory(path);var grid=first.Grids["elevation"];ScientificRaster.WriteGeoTiff(Path.Combine(path,"dsm.tif"),grid,[Enumerable.Repeat((double?)1700,grid.Width*grid.Height).ToArray()],["m"],new{synthetic=true});
+        var second=await f.Science.ImportSourceAsync(new(1,"SYNTHETIC DSM unknown height reference",RemoteKind.Terrain,"SYNTHETIC source","Synthetic only","Not genuine acceptance","different-reference",null,"Unknown vertical datum",[new("elevation","dsm.tif","geotiff",Unit:"m")]),path);
+        var j=TerrainElevations.Create(f.Science,f.Missions,f.Id,new(g.Id,[new(first.Id,first.ManifestSha256,Surface:"dem",LocalDefinitionAcknowledged:true),new(second.Id,second.ManifestSha256,Surface:"dsm",LocalDefinitionAcknowledged:true,UnverifiedDatumAcknowledged:true)],new(TileSize:4,MaximumScratchBytes:4194304)));f.Science.ControlTerrainJob(j.Id,new(Guid.NewGuid(),j.Revision,"start"));var a=TerrainElevations.Process(f.Science,f.Missions,j.Id);
+        var m=SurveyResults.Manifest(f.Science,f.Missions,a.Id);Assert.Equal(2,m.Sources.Length);Assert.False(Assert.Single(m.Sources,s=>s.Id==second.Id).ReferenceVerified);Assert.Throws<ArgumentException>(()=>SurveyResults.Page(f.Science,f.Missions,a.Id,new(a.Sha256)));
+        var page=SurveyResults.Page(f.Science,f.Missions,a.Id,new(a.Sha256,SourceId:second.Id));Assert.NotEmpty(page.Values);Assert.All(page.Values,v=>{Assert.Equal(second.Id,v.SourceId);Assert.Equal("m",v.Unit);Assert.Equal(1700,v.Value);});
+    }
 }

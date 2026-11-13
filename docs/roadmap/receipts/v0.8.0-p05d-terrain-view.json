@@ -1,0 +1,14 @@
+{
+  "state": "Passed",
+  "utc": "2026-11-13T14:28:35.727929+00:00",
+  "scope": "Genuine historical originals; synthetic archived flight and browser analysis, not MSFS acceptance",
+  "reference": "GDAL 3.10.3",
+  "nativeCells": 1024,
+  "apiNativeCells": 576,
+  "profileValid": 143,
+  "profileGaps": 114,
+  "csvSamples": 513,
+  "maximumCenterDifferenceDegrees": 0,
+  "originalSha256": "4c043d10024c8af4077c45d9ed6778141ccaf0837298ea8a521c9f832ce9a7f0",
+  "datum": "Unknown, unchanged; no MSL/HAG inference"
+}

@@ -1,0 +1,63 @@
+{
+  "checkpoint": "P05d.4",
+  "dotnet": {
+    "counts": {
+      "total": "141",
+      "executed": "141",
+      "passed": "141",
+      "failed": "0",
+      "error": "0",
+      "timeout": "0",
+      "aborted": "0",
+      "inconclusive": "0",
+      "passedButRunAborted": "0",
+      "notRunnable": "0",
+      "notExecuted": "0",
+      "disconnected": "0",
+      "warning": "0",
+      "completed": "0",
+      "inProgress": "0",
+      "pending": "0"
+    },
+    "trxSha256": "62110ce89a3363ea1f0bcebfe09c75b90287a81fa5ca0949263f63497612940a",
+    "path": "artifacts/p05d-dotnet/p05d-integration-final.trx",
+    "selection": "SurveyResults|TerrainSurvey|TerrainElevation|LidarProcessing|LidarDecoder|PresentationPreferences|ExternalSourceDeletion|ScientificWorkspace"
+  },
+  "browser": {
+    "finalNewScenarios": {
+      "passed": 17,
+      "failed": 0,
+      "log": "artifacts/p05d4-browser-gate.log"
+    },
+    "originalOperationalNavigationTerrainScenarios": {
+      "passed": 12,
+      "failed": 0,
+      "log": "artifacts/p05d4-browser.log"
+    },
+    "initialIntegration": {
+      "passed": 28,
+      "failed": 1,
+      "cause": "Hidden numerical Results markup survived navigation; fixed removal on disposal, original delayed-reply assertion retained."
+    }
+  },
+  "presentationAndNative": {
+    "passed": 42,
+    "failed": 0,
+    "log": "artifacts/p05d4-presentation-gate.log"
+  },
+  "pythonToolbarSourceContract": {
+    "passed": 1,
+    "log": "artifacts/p05d4-toolbar-source.log"
+  },
+  "documentation": {
+    "passed": 5,
+    "log": "artifacts/p05d4-documentation-final.log"
+  },
+  "checks": {
+    "hostBuild": "zero warnings/errors",
+    "syntax": "all three existing UI surfaces + new validation scripts passed",
+    "locales": "583 canonical English messages, version 13, five locales; four remain preview/fallback",
+    "fullCI": "Pending exact completed integration commit"
+  },
+  "installedWindowsMsfs": "Not Tested"
+}

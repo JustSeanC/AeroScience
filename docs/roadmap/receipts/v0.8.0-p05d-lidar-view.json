@@ -1,0 +1,13 @@
+{
+  "state": "Passed",
+  "utc": "2026-11-13T14:28:37.158672+00:00",
+  "scope": "Genuine historical originals; synthetic archived flight and browser analysis, not MSFS acceptance",
+  "reference": "laspy 2.6.1 / PROJ 9.5.1",
+  "nativePointRecords": 38260,
+  "loadedApiRecords": 12084,
+  "csvRecords": 12084,
+  "maximumGeographicDifferenceDegrees": 2.842170943040401e-14,
+  "maximumGroundDistanceErrorMetres": 1.5443646361745778e-09,
+  "originalSha256": "0e31423010d513ad924cc32fec2d621e0b6e50b3192d12aefa4444c5c7f999b9",
+  "sourceDatumAndZUnits": "Unknown, unchanged; illustrative aspect only"
+}

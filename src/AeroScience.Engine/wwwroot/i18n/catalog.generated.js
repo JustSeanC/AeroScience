@@ -2,7 +2,7 @@
 export const localeData = {
   "manifest": {
     "version": 1,
-    "catalogVersion": 11,
+    "catalogVersion": 13,
     "fallback": "en-US",
     "locales": [
       {
@@ -2460,12 +2460,20 @@ export const localeData = {
       "results.boundsMeaning": {
         "context": "Scientific Results: Source search bounds only; QA/nodata and actual retained cell/point support determine scientific coverage.",
         "parameters": []
+      },
+      "results.reliefLayer": {
+        "context": "Display-only relief using adjacent valid native cells; never fills gaps",
+        "parameters": []
+      },
+      "results.loadOverview": {
+        "context": "Explicit bounded local paged reading; no external retrieval or new science",
+        "parameters": []
       }
     }
   },
   "catalogs": {
     "en-US": {
-      "version": 11,
+      "version": 13,
       "locale": "en-US",
       "messages": {
         "common.messageUnavailable": "Details are unavailable. Refresh to review the current information.",
@@ -2950,7 +2958,7 @@ export const localeData = {
         "results.quality": "QA / evidence class",
         "results.missing": "Missing",
         "results.terrainLegend": "Historical source elevation",
-        "results.legendScope": "Scale for this loaded source only. At wide zoom, hollow dots mark actual cell locations, not area coverage; zoom to inspect native masks. Transparent gaps remain missing. The source reference is independent of aircraft MSL.",
+        "results.legendScope": "Scale for this loaded source only. At wide zoom, hollow dots mark actual cell locations, not area coverage; zoom to inspect native masks. Transparent gaps remain missing. The source reference is independent of aircraft MSL. Optional relief is approximate display illumination from adjacent valid native cells; it adds no measurements or missing terrain.",
         "results.loaded": "actual records loaded",
         "results.retainedValues": "valid records retained in this product",
         "results.missingCells": "known missing cells",
@@ -2962,7 +2970,7 @@ export const localeData = {
         "results.corridorLayer": "Modeled corridor outline",
         "results.trackLayer": "Archived flight path",
         "results.originalsLayer": "Original acquisition footprints (modeled outlines)",
-        "results.opacity": "Terrain opacity",
+        "results.opacity": "Layer opacity (2D map)",
         "results.nextPage": "Load next retained page",
         "results.viewWindow": "Load detail in current map window",
         "results.geometryBound": "Map outlines are bounded to the first 256 retained records. Inspect the original corridor artifact for the complete geometry.",
@@ -3054,7 +3062,9 @@ export const localeData = {
         "results.pointPolicyEnabled": "Source eligible for post-flight LiDAR analysis; no aircraft acquisition or live laser simulation is enabled.",
         "results.pointMetadata": "Inspect original point metadata",
         "results.sourceBounds": "View source search bounds (not coverage)",
-        "results.boundsMeaning": "Source search bounds only; QA/nodata and actual retained cell/point support determine scientific coverage."
+        "results.boundsMeaning": "Source search bounds only; QA/nodata and actual retained cell/point support determine scientific coverage.",
+        "results.reliefLayer": "Relief shading — loaded valid neighbors only",
+        "results.loadOverview": "Load bounded local overview (actual records)"
       }
     }
   }

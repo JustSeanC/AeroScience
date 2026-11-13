@@ -62,7 +62,7 @@ export async function scienceWorkspace(parent,api){
     const exports=el('section',undefined,'panel export-workspace');body.append(exports);
     exports.append(el('h3','Take your research with you'),el('p',summary.review.provisional?'Science processing is incomplete. Exports are labeled provisional; export again after review finishes to include the later derived results.':'Export recorded flight and science without changing your archive. Historical source dates remain independent of flight time.'));
     if(summary.mission.status!=='recording')researchExports(exports,id);else exports.append(el('p','End the mission before exporting a completed research package.'));
-    const review=disclosure(body,'Recorded instruments and source quality');await summaryView(review,summary,safeApi,instrument,{disposals,catalog});
+    const review=disclosure(body,'Recorded instruments and source quality');if(path==='results'&&params.get('view')==='evidence')review.open=true;await summaryView(review,summary,safeApi,instrument,{disposals,catalog});
     const technical=disclosure(body,'Advanced — coverage, native-grid composites and retained imagery');let built=false;
     technical.addEventListener('toggle',async()=>{if(technical.open&&!built){built=true;try{await coverage(technical,id,safeApi,{});await imagery(technical,id,safeApi);}catch(error){built=false;errorMessage(technical,error);}}});
   }catch(error){if(error.name==='AbortError'||error.message==='View changed.')return;feedback.remove();errorMessage(parent,error,()=>scienceWorkspace(parent,api));}

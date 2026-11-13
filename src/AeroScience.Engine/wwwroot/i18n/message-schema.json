@@ -2421,6 +2421,14 @@
     "results.boundsMeaning": {
       "context": "Scientific Results: Source search bounds only; QA/nodata and actual retained cell/point support determine scientific coverage.",
       "parameters": []
+    },
+    "results.reliefLayer": {
+      "context": "Display-only relief using adjacent valid native cells; never fills gaps",
+      "parameters": []
+    },
+    "results.loadOverview": {
+      "context": "Explicit bounded local paged reading; no external retrieval or new science",
+      "parameters": []
     }
   }
 }
