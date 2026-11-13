@@ -97,6 +97,7 @@ public static class ResearchApi
         app.MapPost("/api/science/library/nasa/preview",(NasaDownloadRequest request,ScientificLibraryJobs jobs,HttpContext c)=>ProjectLibraryPreview(jobs.PreviewNasa(request,c.RequestAborted),jobs));
         app.MapEmitEndpoints();
         app.MapLidarEndpoints();
+        app.MapSurveyResults();
         app.MapGet("/api/science/earthdata",(IEarthdataCredentials credentials)=>EarthdataConnection.Status(credentials));
         app.MapPost("/api/science/earthdata/disconnect",async(ScientificLibraryJobs jobs,IEarthdataCredentials credentials,HttpContext c)=>
         {

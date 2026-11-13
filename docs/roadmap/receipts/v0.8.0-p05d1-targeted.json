@@ -1,0 +1,50 @@
+{
+  "checkpoint": "P05d.1",
+  "baseline": "4b6cc0752b3bd8dca10d64d04ac1d904819a19cf",
+  "dotnet": {
+    "counts": {
+      "total": "77",
+      "executed": "77",
+      "passed": "77",
+      "failed": "0",
+      "error": "0",
+      "timeout": "0",
+      "aborted": "0",
+      "inconclusive": "0",
+      "passedButRunAborted": "0",
+      "notRunnable": "0",
+      "notExecuted": "0",
+      "disconnected": "0",
+      "warning": "0",
+      "completed": "0",
+      "inProgress": "0",
+      "pending": "0"
+    },
+    "trxSha256": "74701f20dc52190484c70788e5d04d6083ff0b27a1aed93c6b070e7f746a96bf",
+    "path": "artifacts/p05d-dotnet/p05d1.trx",
+    "selection": "SurveyResults|TerrainSurvey|TerrainElevation"
+  },
+  "browser": {
+    "newResults": {
+      "passed": 4,
+      "failed": 0,
+      "log": "artifacts/p05d1-browser-fixed.log"
+    },
+    "originalTerrainAndLidar": {
+      "passed": 14,
+      "failed": 0,
+      "log": "artifacts/p05d1-browser.log"
+    },
+    "initialNewResultsFailures": {
+      "count": 2,
+      "reason": "Narrow layout min-content overflow; fixed by constraining grid children, assertions unchanged."
+    }
+  },
+  "checks": {
+    "testHostBuild": "passed, zero warnings",
+    "localeBuild": "502 messages, five locales, only en-US complete",
+    "jsSyntax": "passed",
+    "fullCI": "Not run: reserved for completed P05d integration"
+  },
+  "installedWindowsMsfs": "Not Tested"
+}

@@ -7,6 +7,7 @@ import {node as el,numeric as number,dateTime as local,select,button,link,disclo
 import {renderResearchContext} from './scientific-context.js';
 import {terrainCompletion} from './terrain-completion.js';
 import {lidarWorkflow} from './lidar-workflow.js';
+import {surveyResults} from './survey-results.js';
 let cleanup=()=>{},generation=0;
 const pages=[['map','Science Map'],['compare','Compare'],['analysis','Research Analysis'],['results','Results & Exports'],['replay','Replay Flight'],['timeline','Evidence Timeline']];
 export async function scienceWorkspace(parent,api){
@@ -51,9 +52,11 @@ export async function scienceWorkspace(parent,api){
     if(path==='replay'){await replay(body,id,summary.mission,safeApi,{},stop=>disposals.push(stop));return;}
     if(path==='analysis'){await summaryView(body,summary,safeApi,instrument,{disposals,catalog,analysis:true});return;}
     if(path==='results'&&summary.mission.status!=='recording'){
-      const terrain=el('div');body.append(terrain);
+      let result;try{result=await surveyResults(body,safeApi,{id,summary,params,disposals});}catch(error){if(error.name==='AbortError'||error.message==='View changed.')throw error;errorMessage(body,error);}
+      const preparation=result?.legacy?body:disclosure(body,'Prepare source-backed terrain and historical LiDAR');
+      const terrain=el('div');preparation.append(terrain);
       try{await terrainCompletion(terrain,id,safeApi,disposals);}catch(error){if(error.name==='AbortError'||error.message==='View changed.')throw error;errorMessage(terrain,error);}
-      const lidar=el('div');body.append(lidar);
+      const lidar=el('div');preparation.append(lidar);
       try{await lidarWorkflow(lidar,id,safeApi,disposals);}catch(error){if(error.name==='AbortError'||error.message==='View changed.')throw error;errorMessage(lidar,error);}
     }
     const exports=el('section',undefined,'panel export-workspace');body.append(exports);
