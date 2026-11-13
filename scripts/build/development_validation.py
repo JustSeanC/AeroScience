@@ -17,6 +17,8 @@ def validation_tier(event, ref, base='', requested='full', message='', head=''):
     if event == 'workflow_dispatch':
         if requested not in {'fast', 'full', 'windows-profile'}:
             raise ValueError('Unknown validation tier; refusing an empty validation run.')
+        if requested == 'windows-profile' and ref == 'refs/heads/develop/v0.8.0':
+            return 'windows-profile'  # Explicit manual native diagnostics only; pushes/milestones still require full.
         return requested if ref.removeprefix('refs/heads/') in DEVELOPMENT_BRANCHES else 'full'
     if event == 'pull_request' and head.startswith('integration/'):
         return 'full'  # History integration must pass both platforms before merging into develop.

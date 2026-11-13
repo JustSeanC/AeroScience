@@ -11,7 +11,15 @@ def msvc_environment(bat):
     bat=str(bat)
     if any(c in bat for c in ('"','%','\r','\n')):raise ValueError('Unsupported Visual Studio batch path')
     text=subprocess.check_output('cmd.exe /d /s /c ""'+bat+'" -no_logo -arch=x64 >nul && set"',text=True,stderr=subprocess.STDOUT)
-    return dict(line.split('=',1) for line in text.splitlines() if '=' in line and not line.startswith('='))
+    # Windows keys are case-insensitive; a plain dict must not retain both the
+    # inherited PATH and the developer prompt's Path with different values.
+    return {name.upper():value for name,value in (line.split('=',1) for line in text.splitlines() if '=' in line and not line.startswith('='))}
+def msvc_compiler(env):
+    # CreateProcess does not use env['PATH'] to resolve the initial executable.
+    # Resolve against the new developer environment before launching cl directly.
+    compiler=shutil.which('cl.exe',path=env.get('PATH'))
+    if not compiler or not pathlib.Path(compiler).is_absolute():raise ValueError('Verified x64 Visual Studio compiler is unavailable in the developer environment')
+    return compiler
 def build(output):
     policy=json.loads((NATIVE/'source-policy.json').read_text())
     if {p.relative_to(NATIVE/'laszip').as_posix() for p in (NATIVE/'laszip').rglob('*') if p.is_file()}!=set(policy['files']):raise ValueError('Unreviewed file in pinned LASzip source tree')
@@ -25,13 +33,13 @@ def build(output):
     if not exe.exists() or not stamp.exists() or json.loads(stamp.read_text()).get('source')!=identity or json.loads(stamp.read_text()).get('sha256')!=digest(exe):
         if os.name=='nt':
             env=os.environ.copy()
-            if not shutil.which('cl'):
+            if not shutil.which('cl') or env.get('VSCMD_ARG_TGT_ARCH','').lower()!='x64':
                 where=pathlib.Path(os.environ.get('ProgramFiles(x86)',r'C:\Program Files (x86)'))/'Microsoft Visual Studio/Installer/vswhere.exe'
                 vs=subprocess.check_output([str(where),'-latest','-products','*','-requires','Microsoft.VisualStudio.Component.VC.Tools.x86.x64','-property','installationPath'],text=True).strip()
                 bat=pathlib.Path(vs)/'Common7/Tools/VsDevCmd.bat'
                 if not bat.is_file():raise ValueError('Install Visual Studio x64 C++ build tools; no downloaded binary is substituted')
                 env.update(msvc_environment(bat))
-            args=['cl','/nologo','/std:c++17','/O2','/MT','/EHsc','/DWIN32','/DLASZIPDLL_EXPORTS','/DHAVE_UNORDERED_MAP=1','/DAS_LIDAR_ID="'+identity+'"','/I'+str(NATIVE/'laszip/include/laszip'),'/Fe:'+str(exe)]+list(map(str,src))
+            args=[msvc_compiler(env),'/nologo','/std:c++17','/O2','/MT','/EHsc','/DWIN32','/DLASZIPDLL_EXPORTS','/DHAVE_UNORDERED_MAP=1','/DAS_LIDAR_ID="'+identity+'"','/I'+str(NATIVE/'laszip/include/laszip'),'/Fe:'+str(exe)]+list(map(str,src))
         else:
             env=os.environ.copy();args=['g++','-std=c++17','-O2','-pthread','-DLASZIPDLL_EXPORTS','-DHAVE_UNORDERED_MAP=1','-DAS_LIDAR_ID="'+identity+'"','-I'+str(NATIVE/'laszip/include/laszip'),'-o',str(exe)]+list(map(str,src))
         subprocess.run(args,cwd=output,env=env,check=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,timeout=180)

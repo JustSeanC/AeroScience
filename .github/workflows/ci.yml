@@ -89,12 +89,17 @@ jobs:
       - uses: actions/setup-dotnet@v6
         with:
           global-json-file: global.json
-      - name: Test profile isolation, toolbar installation and HDF worker protocol
+      - name: Execute native compiler bootstrap regression on Windows
+        shell: pwsh
+        run: |
+          python -m unittest discover -s tests -p test_lidar_runtime.py -v
+          if ($LASTEXITCODE -ne 0) { throw 'Native compiler bootstrap regression failed.' }
+      - name: Test profile isolation, toolbar installation, HDF and genuine LiDAR decoder contracts
         shell: pwsh
         run: |
           dotnet restore AeroScience.sln --locked-mode
           if ($LASTEXITCODE -ne 0) { throw 'Locked dependency restore failed.' }
-          dotnet test tests/AeroScience.Tests -c Release --no-restore --filter 'FullyQualifiedName~ValidationIsolationTests|FullyQualifiedName~ModeAndToolbarTests|FullyQualifiedName~ToolbarInstallTests|FullyQualifiedName~ScientificHdfReaderTests|FullyQualifiedName~DiscordTransportTests|FullyQualifiedName~DiscordWebhookPolicyTests' --logger 'trx;LogFileName=windows-profile.trx' --blame-hang-timeout 2m --blame-hang-dump-type none
+          dotnet test tests/AeroScience.Tests -c Release --no-restore --filter 'FullyQualifiedName~ValidationIsolationTests|FullyQualifiedName~ModeAndToolbarTests|FullyQualifiedName~ToolbarInstallTests|FullyQualifiedName~ScientificHdfReaderTests|FullyQualifiedName~DiscordTransportTests|FullyQualifiedName~DiscordWebhookPolicyTests|FullyQualifiedName~Lidar|FullyQualifiedName~HistoricalPointApi' --logger 'trx;LogFileName=windows-profile.trx' --blame-hang-timeout 2m --blame-hang-dump-type none
           if ($LASTEXITCODE -ne 0) { throw 'Windows isolation/protocol tests failed.' }
       - name: Publish production and isolated validation graphs (not distributable)
         shell: pwsh
@@ -115,7 +120,9 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: windows-profile-diagnostics
-          path: tests/AeroScience.Tests/TestResults/**/*.trx
+          path: |
+            tests/AeroScience.Tests/TestResults/**/*.trx
+            src/AeroScience.Missions/obj/native-lidar/**/build.json
           if-no-files-found: ignore
           retention-days: 7
       # Manual diagnostic scope only; never substitutes for either full platform job.
@@ -263,6 +270,7 @@ jobs:
           path: |
             tests/AeroScience.Tests/TestResults/**/*.trx
             tests/AeroScience.Tests/TestResults/**/Sequence_*.xml
+            src/AeroScience.Missions/obj/native-lidar/**/build.json
           if-no-files-found: ignore
           retention-days: 7
       - name: Check Windows-sensitive helpers and installer packaging

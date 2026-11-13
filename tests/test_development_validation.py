@@ -57,6 +57,14 @@ class DevelopmentValidationTests(unittest.TestCase):
         self.assertIn("verify_organization_container.py", workflow)
         self.assertEqual(2, workflow.count('./scripts/build/Publish-ValidationCompanion.ps1 -ArtifactsPath artifacts/validation-probe'))
 
+    def test_v080_manual_native_diagnostics_cannot_replace_full_push_or_milestone_validation(self):
+        branch='refs/heads/develop/v0.8.0'
+        self.assertEqual('windows-profile',ci.validation_tier('workflow_dispatch',branch,requested='windows-profile'))
+        self.assertEqual('full',ci.validation_tier('workflow_dispatch',branch,requested='full'))
+        self.assertEqual('full',ci.validation_tier('workflow_dispatch',branch,requested='fast'))
+        self.assertEqual('full',ci.validation_tier('push',branch,requested='windows-profile'))
+        self.assertEqual('full',ci.validation_tier('push',branch,message='P05c [full-validation]'))
+
     def test_changed_tests_and_browser_specs_are_never_omitted(self):
         selected = ci.plan(['tests/AeroScience.Tests/RemoteSensingTests.cs', 'tests/web/new-feature.spec.js', 'tests/test_packaging.py'])
         self.assertIn('RemoteSensingTests', selected['dotnetFilter'])
