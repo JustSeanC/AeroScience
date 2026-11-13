@@ -105,12 +105,12 @@ export function pointInCell(point, feature) {
 export function chart(parent, title, datasets, {xLabel = 'Recorded position', yLabel = 'Value', type = 'line', categories,onSelect,xTick} = {}) {
   const holder = node('figure', undefined, 'scientific-chart'), caption = node('figcaption', title), canvas = node('canvas');
   canvas.setAttribute('role', 'img'); canvas.setAttribute('aria-label', title); holder.append(caption, canvas); parent.append(holder);
-  let instance;
+  let instance;const ink=getComputedStyle(parent).getPropertyValue('--text').trim()||'#c9d6e4',muted=getComputedStyle(parent).getPropertyValue('--muted').trim()||'#a6bbce';
   if (window.Chart) instance = new window.Chart(canvas, {type, data:{datasets,labels:categories}, options:{animation:false,maintainAspectRatio:false,parsing:false,
     onClick:onSelect?(_event,elements)=>{const hit=elements[0];if(hit)onSelect(datasets[hit.datasetIndex].data[hit.index]);}:undefined,
-    spanGaps:false,plugins:{legend:{labels:{color:'#c9d6e4'}}},scales:{x:{type:categories?'category':'linear',title:{display:true,text:xLabel,color:'#c9d6e4'},ticks:{color:'#a6bbce',callback:xTick}},y:{title:{display:true,text:yLabel,color:'#c9d6e4'},ticks:{color:'#a6bbce'}}}}});
+    spanGaps:false,plugins:{legend:{labels:{color:ink}}},scales:{x:{type:categories?'category':'linear',title:{display:true,text:xLabel,color:ink},ticks:{color:muted,callback:xTick}},y:{title:{display:true,text:yLabel,color:ink},ticks:{color:muted}}}}});
   const observer = new MutationObserver(() => { if (!holder.isConnected) { instance?.destroy(); observer.disconnect(); } });
-  observer.observe(document.body, {childList:true,subtree:true}); return holder;
+  observer.observe(document.body, {childList:true,subtree:true});holder.disposeChart=()=>{instance?.destroy();observer.disconnect();};return holder;
 }
 
 // randomUUID is limited to secure contexts; paired LAN HTTP clients still expose

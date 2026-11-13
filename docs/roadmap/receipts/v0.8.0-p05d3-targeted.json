@@ -1,0 +1,50 @@
+{
+  "checkpoint": "P05d.3",
+  "previousCheckpoint": "6e1d268",
+  "dotnet": {
+    "counts": {
+      "total": "42",
+      "executed": "42",
+      "passed": "42",
+      "failed": "0",
+      "error": "0",
+      "timeout": "0",
+      "aborted": "0",
+      "inconclusive": "0",
+      "passedButRunAborted": "0",
+      "notRunnable": "0",
+      "notExecuted": "0",
+      "disconnected": "0",
+      "warning": "0",
+      "completed": "0",
+      "inProgress": "0",
+      "pending": "0"
+    },
+    "trxSha256": "a97589912ea9435e0a437275b567762fe2b8788352121c3876e48c29fd42cc48",
+    "path": "artifacts/p05d-dotnet/p05d3-checkpoint.trx",
+    "selection": "SurveyResults|TerrainProfile|ExternalSourceDeletion|SourceReuse|PresentationPreferences"
+  },
+  "browser": {
+    "profileAndLibrary": {
+      "passed": 4,
+      "failed": 0,
+      "log": "artifacts/p05d3-browser-fixed.log"
+    },
+    "originalDownloadAndResults": {
+      "passed": 15,
+      "failed": 0,
+      "log": "artifacts/p05d3-browser.log"
+    },
+    "initialFailure": {
+      "reason": "New test clicked the previous inventory before the search debounce completed. It now waits for the exact search response/render and identifies the historical source collection, retaining the original assertions."
+    }
+  },
+  "checks": {
+    "testHostBuild": "passed, zero warnings",
+    "localeBuild": "581 source messages; catalog version 11; four non-English locales remain previews/fallback",
+    "jsSyntax": "passed"
+  },
+  "exports": "Original research package exact artifact SHA/source references verified; new bounded CSV/GeoJSON/provenance exports are derived analysis subsets. Transient profiles remain explicit CSV sidecars, not hidden artifacts.",
+  "fullCI": "Reserved for P05d.4",
+  "installedWindowsMsfs": "Not Tested"
+}

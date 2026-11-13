@@ -16,6 +16,7 @@ public sealed partial class ApiTests
         var manifest=await client.GetFromJsonAsync<SurveyViewManifest>($"/api/science/artifacts/{a.Id}/survey-manifest",WireJson.Options);Assert.Equal(a.Sha256,manifest!.Sha256);
         client.DefaultRequestHeaders.Remove("X-AeroScience-CSRF");Assert.Equal(HttpStatusCode.Forbidden,(await client.PostAsJsonAsync($"/api/science/artifacts/{a.Id}/survey-page",new SurveyViewQuery(a.Sha256),WireJson.Options)).StatusCode);await Pair(client);
         var page=await client.PostAsJsonAsync($"/api/science/artifacts/{a.Id}/survey-page",new SurveyViewQuery(a.Sha256,Limit:4),WireJson.Options);page.EnsureSuccessStatusCode();Assert.InRange((await page.Content.ReadFromJsonAsync<SurveyViewPage>(WireJson.Options))!.Values.Length,1,4);
+        var profile=await client.PostAsJsonAsync($"/api/science/artifacts/{a.Id}/survey-profile",new SurveyProfileQuery(a.Sha256,f.SourceId,MaximumSamples:11),WireJson.Options);profile.EnsureSuccessStatusCode();Assert.Equal(11,(await profile.Content.ReadFromJsonAsync<SurveyProfileResult>(WireJson.Options))!.Samples.Length);
         Assert.Equal(HttpStatusCode.BadRequest,(await client.PostAsJsonAsync($"/api/science/artifacts/{a.Id}/survey-page",new SurveyViewQuery(a.Sha256,Limit:1025),WireJson.Options)).StatusCode);
         Assert.Equal(before,ScientificCatalog.Hash(MissionEvaluationArchive.Build(missions,science,f.MissionId)));Assert.Empty(science.LibraryJobs());
     }

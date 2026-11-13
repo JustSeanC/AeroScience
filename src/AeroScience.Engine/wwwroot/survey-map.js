@@ -11,7 +11,7 @@ export function surveyMap(parent,onInspect){
  const L=window.L,base=new ResearchMap(parent,()=>{},{coverageOnly:true}),map=base.map;
  base.container.setAttribute('aria-label','Retained terrain survey map. Arrow keys pan; plus and minus zoom. Exact values are available in the evidence table.');
  const layers={corridor:L.layerGroup().addTo(map),track:L.layerGroup().addTo(map),originals:L.layerGroup().addTo(map),selection:L.layerGroup().addTo(map)};
- let values=[],options={},surface,frame,disposed=false,selected=null,intervals=[],renderedPoints=[];
+ let values=[],options={},surface,frame,disposed=false,selected=null,intervals=[],renderedPoints=[],lineCallback=null,linePoints=[];
  const Layer=L.Layer.extend({onAdd(m){this.canvas=L.DomUtil.create('canvas','survey-canvas');this.canvas.setAttribute('aria-hidden','true');this.canvas.style.pointerEvents='none';m.getPane('overlayPane').append(this.canvas);m.on('moveend zoomend resize',redraw);redraw();},onRemove(m){m.off('moveend zoomend resize',redraw);cancelAnimationFrame(frame);this.canvas.remove();}});
  surface=new Layer().addTo(map);
  function redraw(){cancelAnimationFrame(frame);if(disposed)return;frame=requestAnimationFrame(draw);}
@@ -26,7 +26,8 @@ export function surveyMap(parent,onInspect){
   parent.dataset.renderedPoints=renderedPoints.length;
   parent.dataset.displayedCells=values.filter(v=>v.geometry&&v.value!=null).length;parent.dataset.canvasPixels=c.width*c.height;parent.dataset.representation=overview?'native-masks-and-location-overview':'native-cell-masks';
  }
- const click=e=>{const p={latitude:e.latlng.lat,longitude:e.latlng.lng};let hit=values.find(v=>v.geometry&&contains(p,v.geometry));if(!hit){let distance=8;const position=map.latLngToContainerPoint(e.latlng);for(const v of renderedPoints){const d=Math.hypot(v.screen[0]-position.x,v.screen[1]-position.y);if(d<distance){hit=v.value;distance=d;}}}if(hit)onInspect(hit);};map.on('click',click);
+ const analysis=L.layerGroup().addTo(map),cursor=L.layerGroup().addTo(map);
+ const click=e=>{const p={latitude:e.latlng.lat,longitude:e.latlng.lng};if(lineCallback){linePoints.push(p);L.circleMarker(e.latlng,{radius:5,color:'#ad5b34',fill:false}).addTo(analysis);if(linePoints.length===2){L.polyline(linePoints.map(p=>[p.latitude,p.longitude]),{color:'#ad5b34',weight:2,dashArray:'6 4'}).addTo(analysis);const done=lineCallback;lineCallback=null;done(linePoints);}return;}let hit=values.find(v=>v.geometry&&contains(p,v.geometry));if(!hit){let distance=8;const position=map.latLngToContainerPoint(e.latlng);for(const v of renderedPoints){const d=Math.hypot(v.screen[0]-position.x,v.screen[1]-position.y);if(d<distance){hit=v.value;distance=d;}}}if(hit)onInspect(hit);};map.on('click',click);
  const tools=el('div',undefined,'action-row');parent.prepend(tools);button(tools,'Fit retained survey',()=>fit());
  const bounds=[];
  function fit(){const b=bounds.length?bounds:values.map(v=>[v.position.latitude,v.position.longitude]);if(b.length)map.fitBounds(L.latLngBounds(b),{padding:[24,24],maxZoom:18,animate:false});}
@@ -37,6 +38,8 @@ export function surveyMap(parent,onInspect){
   originals(products){layers.originals.clearLayers();for(const p of products){const ring=p.footprint?.boundary;if(ring?.length)L.polygon(ring.map(v=>[v.latitude,v.longitude]),{color:'#b07300',fill:false,weight:1}).addTo(layers.originals).bindTooltip(el('span',`${p.instrumentId} · ${p.flightPacketUtc} · modeled footprint of original acquisition ${p.id}`));}},
   show(name,show){if(layers[name]){if(show)layers[name].addTo(map);else map.removeLayer(layers[name]);}redraw();},
   select(value){selected=value;layers.selection.clearLayers();if(value){L.circleMarker([value.position.latitude,value.position.longitude],{radius:7,color:'#d95825',fill:false,weight:3}).addTo(layers.selection);}},
+  pickLine(callback){lineCallback=callback;linePoints=[];analysis.clearLayers();if(callback)base.container.focus();},
+  cursor(position){cursor.clearLayers();if(position)L.circleMarker([position.latitude,position.longitude],{radius:5,color:'#9a73d8',fill:false,weight:3}).addTo(cursor);},
   fit,redraw,destroy(){disposed=true;values=[];selected=null;cancelAnimationFrame(frame);map.off('click',click);base.destroy();}
  };
 }

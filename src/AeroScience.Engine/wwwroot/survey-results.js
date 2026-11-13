@@ -4,6 +4,8 @@ import {displayReading,onUnitsChanged} from './science-display.js';
 import {surveyMap,elevation} from './survey-map.js';
 import {modeAvailable,pointModes,pointRange,filteredPoints} from './survey-points.js';
 import {cloudView} from './survey-cloud.js';
+import {surveyProfile} from './survey-profile.js';
+import {surveyExports} from './survey-exports.js';
 const text=key=>t('results.'+key),terrainKind='terrain-elevation-index',lidarKind='lidar-point-index';
 const preferenceKey='AeroScience.survey-view.v1';
 function preferences(){try{const p=JSON.parse(localStorage.getItem(preferenceKey));return {terrain:p?.terrain!==false,gaps:p?.gaps!==false,corridor:p?.corridor!==false,track:p?.track!==false,originals:p?.originals===true,opacity:Number.isFinite(p?.opacity)?Math.max(.1,Math.min(1,p.opacity)):.85};}catch{return {terrain:true,gaps:true,corridor:true,track:true,originals:false,opacity:.85};}}
@@ -33,12 +35,12 @@ export async function surveyResults(parent,api,{id,summary,params,disposals}){
   const product=select(tools,text('product'),[['',text('choose')],...choices.map(p=>[p.id,`${kindName(p.kind)} · ${p.sha256.slice(0,12)} · ${p.state}`])],params.get('product')||choices.find(p=>p.state==='Retained')?.id||'');
   const source=select(tools,text('source'),[['',text('choose')]],''),session=select(tools,text('session'),[['',text('allSessions')]],params.get('session')||'');
   const pane=el('div');root.append(pane);const readStatus=status(root,text('loading'));
-  let generation=0,controller,stopped=false,manifest,values=[],geometry=[],track=[],next=null,map=null,cloud=null,windowQuery={},memoryBytes=0,budgetLimited=false,disposeView=()=>{};
+  let generation=0,controller,stopped=false,manifest,values=[],geometry=[],track=[],next=null,map=null,cloud=null,profile=null,windowQuery={},memoryBytes=0,budgetLimited=false,disposeView=()=>{};
   const prefs=preferences();
-  const cancel=()=>{generation++;controller?.abort();disposeView();disposeView=()=>{};cloud?.destroy();cloud=null;map?.destroy();map=null;values=[];geometry=[];track=[];next=null;memoryBytes=0;budgetLimited=false;windowQuery={};};
+  const cancel=()=>{generation++;controller?.abort();disposeView();disposeView=()=>{};profile?.destroy();profile=null;cloud?.destroy();cloud=null;map?.destroy();map=null;values=[];geometry=[];track=[];next=null;memoryBytes=0;budgetLimited=false;windowQuery={};};
   disposals.push(()=>{stopped=true;cancel();clearInterval(poll);window.removeEventListener('aeroscience-sources-changed',revalidate);});
   const reading=v=>elevation(v.value,v.unit,displayReading);
-  function inspect(value){if(!value)return;map?.select(value);evidence.replaceChildren();evidence.append(el('h4',text('selected')),el('p',`${numeric(reading(value).value)} ${reading(value).unit} · ${value.quality}`));
+  function inspect(value){if(!value)return;map?.select(value);profile?.highlight(value);evidence.replaceChildren();evidence.append(el('h4',text('selected')),el('p',`${numeric(reading(value).value)} ${reading(value).unit} · ${value.quality}`));
    const raw={...value};if(raw.point)raw.point={...raw.point,original:{...raw.point.original,rawGpsTimeBits:undefined}};
    evidence.append(el('pre',JSON.stringify(raw,null,2)));link(evidence,text('originalArtifact'),`/api/science/artifacts/${value.artifactId}`);if(manifest){const s=manifest.sources.find(s=>s.id===value.sourceId);if(s)evidence.append(el('p',`${s.name} · ${s.surface.toUpperCase()} · ${s.verticalReference} · ${s.unit} · ${dateTime(s.observationUtc)}`));}
   }
@@ -83,7 +85,9 @@ export async function surveyResults(parent,api,{id,summary,params,disposals}){
     const gaps=geometry.filter(r=>r.gap);if(gaps.length){const detail=disclosure(pane,text('gaps'));detail.append(el('pre',JSON.stringify(gaps.map(r=>r.gap),null,2)));}
     let after=0,trackPages=0;do{const page=await request(`/api/missions/${id}/survey-track?after=${after}&limit=2048`);track.push(...page.points);after=page.nextAfter;trackPages++;}while(after!=null&&trackPages<4);map?.track(track);if(after!=null)pane.append(el('p',text('trackBound')));
     const originals=await request('/api/science/workspace/map',{missions:[id],instrument:params.get('instrument')||null,limit:100});map?.originals(originals.products);if(originals.hasMore)pane.append(el('p',text('originalBound')));
-    await readPage(own,request);disposeView=onUnitsChanged(render);
+    await readPage(own,request);surveyExports(actions,()=>({manifest,values,geometry}));
+    if(manifest.kind===terrainKind&&view==='explore')profile=surveyProfile(pane,request,{manifest,source:manifest.sources.find(s=>s.id===source.value),session:()=>session.value,track,pickLine:callback=>map?.pickLine(callback),onSelect:async sample=>{map?.cursor(sample.position);if(sample.column==null){evidence.replaceChildren(el('p',text('missing')));return;}const loaded=values.find(v=>v.column===sample.column&&v.row===sample.row&&v.sourceId===source.value);if(loaded){inspect(loaded);return;}const p=sample.position,page=await request(`/api/science/artifacts/${manifest.id}/survey-page`,{expectedSha256:manifest.sha256,limit:32,sourceId:source.value,sessionId:session.value||null,west:p.longitude-1e-8,east:p.longitude+1e-8,south:p.latitude-1e-8,north:p.latitude+1e-8});const value=page.values.find(v=>v.column===sample.column&&v.row===sample.row);if(value)inspect(value);}});
+    disposeView=onUnitsChanged(render);
    }catch(e){if(e.name!=='AbortError'&&e.message!=='View changed.'){values=[];map?.update([],prefs);rows.replaceChildren();evidence.replaceChildren();readStatus.textContent=text('invalidated');errorMessage(pane,e);}}
   }
   function save(){try{localStorage.setItem(preferenceKey,JSON.stringify(prefs));}catch{/* Display preferences are optional. */}}

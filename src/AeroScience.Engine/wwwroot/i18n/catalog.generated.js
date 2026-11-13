@@ -2,7 +2,7 @@
 export const localeData = {
   "manifest": {
     "version": 1,
-    "catalogVersion": 10,
+    "catalogVersion": 11,
     "fallback": "en-US",
     "locales": [
       {
@@ -2296,12 +2296,176 @@ export const localeData = {
       "results.budgetLimit": {
         "context": "Scientific Results: Viewer memory limit reached. Narrow the map window or choose another source; this display is a subset.",
         "parameters": []
+      },
+      "results.exportBound": {
+        "context": "Scientific Results: Choose a smaller bounded analysis export (maximum 32 MiB).",
+        "parameters": []
+      },
+      "results.exportTable": {
+        "context": "Scientific Results: Download loaded source-analysis table",
+        "parameters": []
+      },
+      "results.exportGeo": {
+        "context": "Scientific Results: Download loaded survey analysis GeoJSON",
+        "parameters": []
+      },
+      "results.exportProvenance": {
+        "context": "Scientific Results: Download source provenance report",
+        "parameters": []
+      },
+      "results.profile": {
+        "context": "Scientific Results: Source-backed elevation profile",
+        "parameters": []
+      },
+      "results.profileMeaning": {
+        "context": "Scientific Results: Historical native-cell elevations along the archived ground path or an explicit analysis transect. No interpolation, new observations or equivalence to aircraft MSL. Gaps and source/session boundaries remain disconnected.",
+        "parameters": []
+      },
+      "results.profilePath": {
+        "context": "Scientific Results: Profile ground path",
+        "parameters": []
+      },
+      "results.archivedTrack": {
+        "context": "Scientific Results: Archived aircraft ground track",
+        "parameters": []
+      },
+      "results.analysisLine": {
+        "context": "Scientific Results: Two-point analysis transect (not a flown route)",
+        "parameters": []
+      },
+      "results.profileBounds": {
+        "context": "Scientific Results: Profile scope and transect coordinates",
+        "parameters": []
+      },
+      "results.afterPose": {
+        "context": "Scientific Results: Start at archived pose ordinal",
+        "parameters": []
+      },
+      "results.profileSamples": {
+        "context": "Scientific Results: Bounded profile samples (2–1025)",
+        "parameters": []
+      },
+      "results.startLat": {
+        "context": "Scientific Results: Transect start latitude",
+        "parameters": []
+      },
+      "results.startLon": {
+        "context": "Scientific Results: Transect start longitude",
+        "parameters": []
+      },
+      "results.endLat": {
+        "context": "Scientific Results: Transect end latitude",
+        "parameters": []
+      },
+      "results.endLon": {
+        "context": "Scientific Results: Transect end longitude",
+        "parameters": []
+      },
+      "results.pickLine": {
+        "context": "Scientific Results: Choose two transect points on map",
+        "parameters": []
+      },
+      "results.cancelLine": {
+        "context": "Scientific Results: Cancel map transect selection",
+        "parameters": []
+      },
+      "results.lineReady": {
+        "context": "Scientific Results: Analysis transect selected. Build the profile to read verified source values.",
+        "parameters": []
+      },
+      "results.profileNotBuilt": {
+        "context": "Scientific Results: Build a source-backed profile first. Original source values and gaps will be verified.",
+        "parameters": []
+      },
+      "results.profileCursor": {
+        "context": "Scientific Results: Profile position — arrow keys inspect native cells",
+        "parameters": []
+      },
+      "results.groundDistance": {
+        "context": "Scientific Results: Ground distance along selected path",
+        "parameters": []
+      },
+      "results.sourceElevation": {
+        "context": "Scientific Results: Historical source elevation",
+        "parameters": []
+      },
+      "results.aircraftAltitude": {
+        "context": "Scientific Results: Recorded aircraft altitude — separate context",
+        "parameters": []
+      },
+      "results.mslSeparate": {
+        "context": "Scientific Results: Recorded simulator MSL altitude is independent of the historical terrain reference. No cross-datum comparison or height above ground is inferred.",
+        "parameters": []
+      },
+      "results.simulatedAltitude": {
+        "context": "Scientific Results: Recorded simulator altitude",
+        "parameters": []
+      },
+      "results.profileEvidence": {
+        "context": "Scientific Results: Profile native-cell evidence",
+        "parameters": []
+      },
+      "results.nativeCell": {
+        "context": "Scientific Results: Original native column, row",
+        "parameters": []
+      },
+      "results.buildProfile": {
+        "context": "Scientific Results: Build source-backed profile",
+        "parameters": []
+      },
+      "results.exportProfile": {
+        "context": "Scientific Results: Download native-cell profile analysis CSV",
+        "parameters": []
+      },
+      "results.libraryMeaning": {
+        "context": "Scientific Results: Sources | Downloads | Storage. Retained DEM/DSM grids, historical LAS/LAZ and public EPT nodes keep their original identities. Search bounds are not complete measured coverage. Downloads and permanent deletion use their existing explicit approval and ownership controls.",
+        "parameters": []
+      },
+      "results.terrainAndLidar": {
+        "context": "Scientific Results: Terrain elevation & historical LiDAR",
+        "parameters": []
+      },
+      "results.pointSource": {
+        "context": "Scientific Results: Historical LiDAR source",
+        "parameters": []
+      },
+      "results.pointSourceMeaning": {
+        "context": "Scientific Results: Delivered historical point records for post-flight analysis, not new aircraft acquisitions. Project/node bounds do not establish point density or complete scientific coverage.",
+        "parameters": []
+      },
+      "results.originalPointRecords": {
+        "context": "Scientific Results: original point records in the delivered file",
+        "parameters": []
+      },
+      "results.retainedPointQuality": {
+        "context": "Scientific Results: Original point records retained; attributes and source/reference limitations remain independently verified on analysis",
+        "parameters": []
+      },
+      "results.allowPointProcessing": {
+        "context": "Scientific Results: Allow post-flight LiDAR processing",
+        "parameters": []
+      },
+      "results.pointPolicyEnabled": {
+        "context": "Scientific Results: Source eligible for post-flight LiDAR analysis; no aircraft acquisition or live laser simulation is enabled.",
+        "parameters": []
+      },
+      "results.pointMetadata": {
+        "context": "Scientific Results: Inspect original point metadata",
+        "parameters": []
+      },
+      "results.sourceBounds": {
+        "context": "Scientific Results: View source search bounds (not coverage)",
+        "parameters": []
+      },
+      "results.boundsMeaning": {
+        "context": "Scientific Results: Source search bounds only; QA/nodata and actual retained cell/point support determine scientific coverage.",
+        "parameters": []
       }
     }
   },
   "catalogs": {
     "en-US": {
-      "version": 10,
+      "version": 11,
       "locale": "en-US",
       "messages": {
         "common.messageUnavailable": "Details are unavailable. Refresh to review the current information.",
@@ -2326,7 +2490,7 @@ export const localeData = {
         "nav.flightDetails": "Flight Details & Tools",
         "nav.recordedFlights": "Recorded Flights",
         "nav.scienceResults": "Science Results",
-        "nav.dataSources": "Data Sources",
+        "nav.dataSources": "Sources",
         "nav.downloads": "Downloads",
         "nav.storage": "Storage",
         "nav.workspace": "WORKSPACE",
@@ -2849,7 +3013,48 @@ export const localeData = {
         "results.map2d": "2D map",
         "results.cloud3d": "3D point cloud",
         "results.historicalLayer": "Historical LiDAR point locations",
-        "results.budgetLimit": "Viewer memory limit reached. Narrow the map window or choose another source; this display is a subset."
+        "results.budgetLimit": "Viewer memory limit reached. Narrow the map window or choose another source; this display is a subset.",
+        "results.exportBound": "Choose a smaller bounded analysis export (maximum 32 MiB).",
+        "results.exportTable": "Download loaded source-analysis table",
+        "results.exportGeo": "Download loaded survey analysis GeoJSON",
+        "results.exportProvenance": "Download source provenance report",
+        "results.profile": "Source-backed elevation profile",
+        "results.profileMeaning": "Historical native-cell elevations along the archived ground path or an explicit analysis transect. No interpolation, new observations or equivalence to aircraft MSL. Gaps and source/session boundaries remain disconnected.",
+        "results.profilePath": "Profile ground path",
+        "results.archivedTrack": "Archived aircraft ground track",
+        "results.analysisLine": "Two-point analysis transect (not a flown route)",
+        "results.profileBounds": "Profile scope and transect coordinates",
+        "results.afterPose": "Start at archived pose ordinal",
+        "results.profileSamples": "Bounded profile samples (2–1025)",
+        "results.startLat": "Transect start latitude",
+        "results.startLon": "Transect start longitude",
+        "results.endLat": "Transect end latitude",
+        "results.endLon": "Transect end longitude",
+        "results.pickLine": "Choose two transect points on map",
+        "results.cancelLine": "Cancel map transect selection",
+        "results.lineReady": "Analysis transect selected. Build the profile to read verified source values.",
+        "results.profileNotBuilt": "Build a source-backed profile first. Original source values and gaps will be verified.",
+        "results.profileCursor": "Profile position — arrow keys inspect native cells",
+        "results.groundDistance": "Ground distance along selected path",
+        "results.sourceElevation": "Historical source elevation",
+        "results.aircraftAltitude": "Recorded aircraft altitude — separate context",
+        "results.mslSeparate": "Recorded simulator MSL altitude is independent of the historical terrain reference. No cross-datum comparison or height above ground is inferred.",
+        "results.simulatedAltitude": "Recorded simulator altitude",
+        "results.profileEvidence": "Profile native-cell evidence",
+        "results.nativeCell": "Original native column, row",
+        "results.buildProfile": "Build source-backed profile",
+        "results.exportProfile": "Download native-cell profile analysis CSV",
+        "results.libraryMeaning": "Sources | Downloads | Storage. Retained DEM/DSM grids, historical LAS/LAZ and public EPT nodes keep their original identities. Search bounds are not complete measured coverage. Downloads and permanent deletion use their existing explicit approval and ownership controls.",
+        "results.terrainAndLidar": "Terrain elevation & historical LiDAR",
+        "results.pointSource": "Historical LiDAR source",
+        "results.pointSourceMeaning": "Delivered historical point records for post-flight analysis, not new aircraft acquisitions. Project/node bounds do not establish point density or complete scientific coverage.",
+        "results.originalPointRecords": "original point records in the delivered file",
+        "results.retainedPointQuality": "Original point records retained; attributes and source/reference limitations remain independently verified on analysis",
+        "results.allowPointProcessing": "Allow post-flight LiDAR processing",
+        "results.pointPolicyEnabled": "Source eligible for post-flight LiDAR analysis; no aircraft acquisition or live laser simulation is enabled.",
+        "results.pointMetadata": "Inspect original point metadata",
+        "results.sourceBounds": "View source search bounds (not coverage)",
+        "results.boundsMeaning": "Source search bounds only; QA/nodata and actual retained cell/point support determine scientific coverage."
       }
     }
   }

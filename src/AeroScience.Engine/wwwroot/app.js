@@ -21,6 +21,7 @@ import { mapSettingsUI, syncBasemaps } from "./basemaps.js";
 import { sourceSettings } from "./remote-science.js";
 import { updateSettings, notifyUpdates } from "./application-updates.js";
 import { storageManagement } from "./storage-management.js";
+import {libraryLocation} from './library-location.js';
 setInterval(()=>{if(authorized&&!document.hidden)notifyUpdates(api);},60000);
 import {
   initializeResearch,
@@ -559,7 +560,7 @@ async function attachStorage(){
   for(const [title,value]of [['Mission Database',s.missionStorage],['Scientific Data Library',s.scienceStorage]]){const item=el('article');item.append(el('h3',title));if(value)item.append(el('p',value.directory),el('p',value.available?`${number(value.usedBytes/1048576,1)} MiB used · ${number(value.freeBytes/1073741824,1)} GiB free`:value.error));storagePanel.append(item);}
   for(const [title,action]of [['Change storage locations','storage'],['Data Management / Backups','data-management']]){const b=el('button',title,'secondary');b.disabled=!s.desktopAvailable;b.onclick=()=>command(b,()=>api('/api/desktop/'+action,{}));storagePanel.append(b);}
  })().catch(error=>{storageLoading=null;throw error;});}
- await storageLoading;const target=location.hash.startsWith('#library/storage')?$('library-storage'):location.hash.startsWith('#settings/storage')?settingsView?.panels.get('storage'):null;if(target)target.append(storagePanel);
+ await storageLoading;const target=location.hash.startsWith('#library/storage')?$('library-storage'):location.hash.startsWith('#settings/storage')?settingsView?.panels.get('storage'):null;if(target){target.append(storagePanel);if(!storagePanel.querySelector('.library-location'))await libraryLocation(storagePanel,api);}
 }
 let settingsView=null;
 async function loadSettings() {
