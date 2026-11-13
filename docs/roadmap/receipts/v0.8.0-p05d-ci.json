@@ -1,0 +1,279 @@
+{
+  "checkpoint": "v0.8.0 P05d acceptance",
+  "source": "b11507d046da3b071767b6ca082e70d09cde43df",
+  "branch": "develop/v0.8.0",
+  "run": 43453983062,
+  "attempt": 1,
+  "url": "https://github.com/JustSeanC/AeroScience/actions/runs/43453983062",
+  "validation": "full",
+  "event": "workflow_dispatch",
+  "conclusion": "success",
+  "startedAt": "2026-11-13T15:34:34Z",
+  "completedAt": "2026-11-13T16:29:09Z",
+  "subcheckpoints": {
+    "P05d.1": "74ff8322461954ba064ef1b2f4edaca214751098",
+    "P05d.2": "6e1d26826b1e0f408ab7eeea797ec17bf0f0e697",
+    "P05d.3": "32e3628e6cb66998027f216f87b708e313182cf4",
+    "P05d.4 integration": "0f8dda713b57b1122627bc4c5cad4b32acc0f58a",
+    "CI navigation repair": "b11507d046da3b071767b6ca082e70d09cde43df"
+  },
+  "jobs": [
+    {
+      "id": 131983186462,
+      "name": "validation-scope",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 131983290231,
+      "name": "linux",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 131983290355,
+      "name": "windows-companion",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 131983290837,
+      "name": "organization-deployment",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 131983292886,
+      "name": "windows-profile",
+      "status": "completed",
+      "conclusion": "skipped"
+    },
+    {
+      "id": 131983293503,
+      "name": "development",
+      "status": "completed",
+      "conclusion": "skipped"
+    }
+  ],
+  "conditionalJobSkips": "development and windows-profile are alternative validation scopes, intentionally inactive for validation=full. Both complete platform jobs ran.",
+  "dotnet": {
+    "linux": {
+      "outcomes": {
+        "Passed": 1628
+      },
+      "trxName": "tests/AeroScience.Tests/TestResults/_runnervm8axu0_2026-11-13_15_37_59_net10.0.trx",
+      "trxSha256": "0d1baa899d152c7863e42d92954987562966fb3db7895561117c21fe1d9c1be1",
+      "existingPlatformSkips": []
+    },
+    "windows": {
+      "outcomes": {
+        "Passed": 1618,
+        "NotExecuted": 10
+      },
+      "trxName": "tests/AeroScience.Tests/TestResults/windows.trx",
+      "trxSha256": "e9142e717e43e625100eba1f898c8bb3d80e240c86cbc78d14562b4660eb8dcf",
+      "existingPlatformSkips": [
+        "AeroScience.Tests.OrganizationConnectionIntegrationTests.SeparatelyKeyedCopiesSurvivePrimaryRepositoryAndIdentityLossAndEnforceApprovedRetention",
+        "AeroScience.Tests.ScientificLibraryFolderTests.LinkedSourceDirectoryIsRejected",
+        "AeroScience.Tests.OrganizationConnectionIntegrationTests.ProtectedIdentityRenewalRecoversMfaAndDiscordSecretsWithANewCertificateWithoutTouchingTheOriginal",
+        "AeroScience.Tests.OrganizationConnectionIntegrationTests.IndependentRecoveryStagesAndActivatesAfterOriginalDatabaseAndIdentityAreLostWithoutExternalReplay",
+        "AeroScience.Tests.AviationAcquisitionTests.RetainedOriginalFileLinksAreRejectedRatherThanFollowed",
+        "AeroScience.Tests.OrganizationConnectionIntegrationTests.EncryptedOffProcessBackupRestoresAuthorizedEvidenceAuditAndProtectedMfaAfterSourceLoss",
+        "AeroScience.Tests.OrganizationConnectionIntegrationTests.ActualOldAndNewProcessesRefuseStaleCheckpointRollbackFailedUpgradeAndApplyExactApprovedPair",
+        "AeroScience.Tests.OrganizationConnectionIntegrationTests.ScopedNonSuperuserRecoveryRetainsApplicationOwnershipAndAllowsTheNextCompiledUpgrade",
+        "AeroScience.Tests.OrganizationServerTests.ExplicitBackupConsentPersistsScheduledPolicyIdempotentJobsAndVerifiedRestoreAcrossRestart",
+        "AeroScience.Tests.OrganizationConnectionIntegrationTests.GuidedPrivateFileImportRecoversIntoAFreshSecuredServerAtANewOriginAfterPrimaryLoss"
+      ]
+    }
+  },
+  "browser": {
+    "stats": {
+      "startTime": "2026-11-13T15:57:40.501Z",
+      "duration": 1761660.1800000002,
+      "expected": 474,
+      "skipped": 2,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "existingOwnerDeferrals": [
+      {
+        "file": "aviation-charts.spec.js",
+        "line": 13,
+        "title": "approved originals provide local chart overlays, independent science, offline tiles and exact edition selection",
+        "reason": "Owner deferred the ordinary chart viewer; retained research renderer coverage remains in AviationChartTests."
+      },
+      {
+        "file": "aviation-charts.spec.js",
+        "line": 31,
+        "title": "unknown runtime is honest and chart inventory remains accessible at tablet width without altering saved data",
+        "reason": "Owner deferred the ordinary chart viewer; the active deferral scenario checks retention, tablet accessibility and other overlays."
+      }
+    ],
+    "report": {
+      "path": "artifacts/p05d-ci/run2/web-results.json",
+      "sha256": "e44cc2332e9dbbae7599d3a7504b1684f54c2f506655b325181d3b47f1a86394",
+      "bytes": 548512
+    }
+  },
+  "python": {
+    "linux": {
+      "passed": 186,
+      "skipped": 2,
+      "failed": 0,
+      "durationSeconds": 71.174,
+      "existingPlatformSkips": [
+        "test_installed_compiler_batch_with_spaces_runs_and_retains_x64_environment (test_lidar_runtime.LidarRuntimeTests.test_installed_compiler_batch_with_spaces_runs_and_retains_x64_environment) ... skipped 'Actual Windows cmd.exe execution; native Linux decoding is tested separately.'",
+        "test_pe_metadata_check_does_not_claim_runtime_exports_or_simulator_connection (test_windows_helpers.WindowsHelperTests.test_pe_metadata_check_does_not_claim_runtime_exports_or_simulator_connection) ... skipped 'Publish the Windows companion first for the native PE fixture'"
+      ]
+    },
+    "windows": {
+      "passed": 182,
+      "skipped": 3,
+      "failed": 0,
+      "durationSeconds": 106.524,
+      "existingPlatformSkips": [
+        "test_windows_requirement_stops_before_creating_any_output (test_beta_installer.BetaInstallerTests.test_windows_requirement_stops_before_creating_any_output) ... skipped 'Linux PowerShell platform preflight'",
+        "test_generated_private_configuration_is_unique_bounded_and_never_prints_credentials (test_organization_deployment.OrganizationDeploymentTests.test_generated_private_configuration_is_unique_bounded_and_never_prints_credentials) ... skipped 'POSIX OpenSSL/mode fixture; real Linux container acceptance verifies certificates.'",
+        "test_case_colliding_files_cannot_share_one_layout_entry (test_packaging.PackagingTests.test_case_colliding_files_cannot_share_one_layout_entry) ... skipped 'A case-sensitive filesystem is required to create both aliases.'"
+      ]
+    }
+  },
+  "nativeAndPresentation": {
+    "linux": {
+      "nativePassed": 4,
+      "presentationPassed": 38,
+      "failed": 0
+    },
+    "windows": {
+      "nativePassed": 4,
+      "presentationPassed": 38,
+      "failed": 0
+    }
+  },
+  "railwayOfflineConfiguration": {
+    "passed": 6,
+    "failed": 0
+  },
+  "organization": {
+    "containerSecurityPassed": 12,
+    "nativeRuntimePassed": 10,
+    "failed": 0,
+    "source": "b11507d046da3b071767b6ca082e70d09cde43df",
+    "limitations": "Disposable local containers; productionReady=false. Not Railway provider, installed MSFS, NASA source or production acceptance."
+  },
+  "linuxRealRecoverySmokeTests": [
+    {
+      "script": "smoke_recovery.py",
+      "outcome": "passed"
+    },
+    {
+      "script": "smoke_evidence_recovery.py",
+      "outcome": "passed"
+    },
+    {
+      "script": "smoke_library_recovery.py",
+      "outcome": "passed"
+    },
+    {
+      "script": "smoke_source_deletion.py",
+      "outcome": "passed"
+    },
+    {
+      "script": "smoke_aviation_recovery.py",
+      "outcome": "passed"
+    }
+  ],
+  "diagnosticArtifacts": [
+    {
+      "id": 14055574616,
+      "name": "linux-browser-diagnostics",
+      "sha256": "b46da551d5f13a2613d39e9e6d111d1090f564f2c05c3fb21ac3c52a31d68f42",
+      "bytes": 12736448,
+      "url": "https://github.com/JustSeanC/AeroScience/actions/runs/43453983062/artifacts/14055574616",
+      "githubExpiresAt": "2026-11-20T16:27:02Z"
+    },
+    {
+      "id": 14054901114,
+      "name": "linux-test-diagnostics",
+      "sha256": "664262c60c7ba725c5ab844517abdd0a3b72e25c67b456bc1f93000bbce50219",
+      "bytes": 462904,
+      "url": "https://github.com/JustSeanC/AeroScience/actions/runs/43453983062/artifacts/14054901114",
+      "githubExpiresAt": "2026-11-20T15:56:32Z"
+    },
+    {
+      "id": 14054467968,
+      "name": "windows-test-diagnostics",
+      "sha256": "54ab07310823e3e32eaa4fd019c0864f79f870e248b29ac94cbad26add4d9d7b",
+      "bytes": 468215,
+      "url": "https://github.com/JustSeanC/AeroScience/actions/runs/43453983062/artifacts/14054467968",
+      "githubExpiresAt": "2026-11-20T15:59:29Z"
+    },
+    {
+      "id": 14053342373,
+      "name": "organization-deployment-diagnostics",
+      "sha256": "031669d8c386b22b11d10a2056a5143220d40e1e3516fa1c4873886e5c3bb641",
+      "bytes": 2765,
+      "url": "https://github.com/JustSeanC/AeroScience/actions/runs/43453983062/artifacts/14053342373",
+      "githubExpiresAt": "2026-11-20T15:39:37Z"
+    }
+  ],
+  "retainedLogs": [
+    {
+      "path": "artifacts/p05d-ci/run2/linux-job.log",
+      "sha256": "3776f2a4127411072cd2df6a83a8759cae9f405e63ed2fd29a5b78f7d9f3738f",
+      "bytes": 1593625
+    },
+    {
+      "path": "artifacts/p05d-ci/run2/windows-job.log",
+      "sha256": "34aa147153f822bbc3f4da4f4c3a4ee29ed5296cc5bcb18035fa33fd8bae7356",
+      "bytes": 1147864
+    },
+    {
+      "path": "artifacts/p05d-ci/run2/organization-job.log",
+      "sha256": "5f6ca9e3d6fa770db4eb71ba34f8bd9f37f1b3f0ab2a2c79f69ab7a59f4f2f14",
+      "bytes": 124823
+    }
+  ],
+  "failedHistory": {
+    "run": 43443385688,
+    "source": "0f8dda713b57b1122627bc4c5cad4b32acc0f58a",
+    "receipt": "v0.8.0-p05d-ci-failed-run1.json",
+    "repairTargetedReceipt": "v0.8.0-p05d-ci-navigation-targeted.json",
+    "reason": "Confirmed late end-flight navigation race, locally reproduced. Four deterministic real-controller regressions added; original failing test/assertions unchanged. No timeout increases, retries or new skips."
+  },
+  "additionalEvidence": {
+    "targeted": [
+      "v0.8.0-p05d1-targeted.json",
+      "v0.8.0-p05d2-targeted.json",
+      "v0.8.0-p05d3-targeted.json",
+      "v0.8.0-p05d4-targeted.json"
+    ],
+    "genuine": [
+      "v0.8.0-p05d-genuine.json",
+      "v0.8.0-p05d-terrain-view.json",
+      "v0.8.0-p05d-lidar-view.json"
+    ]
+  },
+  "closure": "Subsequent closure commit changes docs/roadmap only. Runtime, workflow, dependency locks and test source remain exactly the accepted source above.",
+  "documentationClosureChecks": {
+    "command": "python3 -m unittest discover -s tests -p test_documentation.py -v",
+    "passed": 5,
+    "failed": 0,
+    "checks": [
+      "Markdown paths and anchors resolve",
+      "Protected QA/science/legal committed bytes unchanged",
+      "Exact subcheckpoint SHAs and retained final log/browser hashes verified",
+      "git diff --check passed"
+    ]
+  },
+  "installedWindowsMsfs": "Not Tested",
+  "releaseApproval": false,
+  "remainingBlockers": [
+    "Installed Windows/MSFS and hardware GPU acceptance",
+    "P08 native LiDAR helper payload/license/signing/installer review",
+    "Genuine indexed COPC unsupported",
+    "Genuine Copernicus DSM and UTM provider acceptance outstanding",
+    "Four non-English catalogs remain preview/fallback"
+  ],
+  "boundaries": "No P06/P07, release/installer, protected branch, v0.7.1 Beta 2 packaging or owner-data change."
+}
