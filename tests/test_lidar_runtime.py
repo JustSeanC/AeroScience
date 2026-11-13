@@ -17,10 +17,12 @@ class LidarRuntimeTests(unittest.TestCase):
     def test_installed_compiler_batch_with_spaces_runs_and_retains_x64_environment(self):
         with tempfile.TemporaryDirectory(prefix='aeroscience lidar compiler ') as temporary:
             batch=Path(temporary)/'VS build tools with spaces.cmd'
-            batch.write_text('@echo off\nset "AS_LIDAR_FIXTURE_VALUE=value with spaces"\nset "AS_LIDAR_FIXTURE_ARCH=%~2"\nset "Path=%~dp0;%Path%"\nexit /b 0\n')
+            batch.write_text('@echo off\nset "AS_LIDAR_FIXTURE_VALUE=value with spaces"\nset "AS_LIDAR_FIXTURE_ARGS=%*"\nset "Path=%~dp0;%Path%"\nexit /b 0\n')
             values=RUNTIME.msvc_environment(batch)
             self.assertEqual('value with spaces',values['AS_LIDAR_FIXTURE_VALUE'])
-            self.assertEqual('-arch=x64',values['AS_LIDAR_FIXTURE_ARCH'])
+            # Batch positional parameters split at '='; inspect the complete
+            # original command payload so neither option nor its value is lost.
+            self.assertEqual('-no_logo -arch=x64',values['AS_LIDAR_FIXTURE_ARGS'])
             self.assertNotIn('AS_LIDAR_FIXTURE_VALUE',os.environ)
             self.assertEqual(1,len([key for key in values if key.upper()=='PATH']))
             # A real OS executable with a compiler name exists only in the child

@@ -1,0 +1,11 @@
+{
+  "runUrl": "https://github.com/JustSeanC/AeroScience/actions/runs/43337201491",
+  "sourceCommit": "67906a66a3a75fc2b62f94a26e1250d77bd6168a",
+  "scope": "Manual targeted Windows diagnostic, not Full CI",
+  "conclusion": "failure in new regression fixture before native compile",
+  "logSha256": "9ae7583018180d6eaefd36125d019d3fb073db32521e07930bfd02fc5c655624",
+  "cause": "cmd batch positional parameters split at =, so %~2 returns -arch. The production -arch=x64 payload is the documented VS syntax.",
+  "correction": "Capture %* and assert the complete exact -no_logo -arch=x64 payload; retain real quoted batch execution, normalized PATH, isolated absolute compiler execution and parent-environment assertions.",
+  "productionBehaviorChanged": false,
+  "originalAssertionsWeakened": false
+}
