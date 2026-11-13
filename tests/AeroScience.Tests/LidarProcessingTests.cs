@@ -31,6 +31,15 @@ public sealed class LidarProcessingTests
     {
         using var f=new TerrainSurveyFixture();f.Control(CollectionAction.StartData,0);f.Pose(0);f.Pose(1,100);f.Control(CollectionAction.PauseData,2);f.Control(CollectionAction.ResumeData,4);f.Pose(4,400);f.Pose(5,500);f.Finish(6);var geometry=f.Build();var s=await Source(f,[(0,450,1),(0,2250,2),(0,4050,3)]);var job=Create(f,geometry,s);await Run(f,job);var p=Tiles(f.Science,job.Id).SelectMany(t=>t.Points).ToArray();Assert.Equal(new[]{1,3},p.Select(v=>v.Original.RawZ).Order().ToArray());
     }
+    [Fact]public async Task AntimeridianCorridorRetainsBothSeamRepresentationsWithoutIncludingTheWorldRectangle()
+    {
+        using var f=new TerrainSurveyFixture();var origin=new Coordinates(40,179.9998);f.Control(CollectionAction.StartData,0);
+        f.Pose(0,frame:TerrainSurveyGeometryTests.Frame(0,heading:90,origin:origin));f.Pose(1,frame:TerrainSurveyGeometryTests.Frame(1,east:100,heading:90,origin:origin));f.Finish(2);var geometry=f.Build();
+        Assert.Contains(ContinuousTerrainSurveys.StreamCurrentChunks(f.Science,f.Missions,geometry),c=>c.Geometry.Coordinates.Length>=2);
+        var file=LidarFixture.Write(Path.Combine(f.Root,"synthetic-seam-las"),points:[(179999950,40000000,10),(-179999950,40000000,20),(0,40000000,30),(180000000,40000000,40),(-180000000,40000000,50)],coordinateOffset:(0,0,0));
+        var source=await LidarImports.Import(f.Science,file,new("SYNTHETIC seam source","synthetic-seam","Synthetic fixture only","Controlled antimeridian record membership, not genuine-provider acceptance"));var job=Create(f,geometry,source);await Run(f,job);
+        var retained=Tiles(f.Science,job.Id).SelectMany(t=>t.Points).OrderBy(p=>p.Original.Record).ToArray();Assert.Equal(new long[]{0,1,3,4},retained.Select(p=>p.Original.Record));Assert.Equal(4,retained.Select(p=>p.Original.Record).Distinct().Count());Assert.All(retained,p=>Assert.NotEmpty(p.Support));Assert.Equal(5,f.Science.LidarJob(job.Id).ScannedPoints);Assert.Empty(f.Science.Products());
+    }
     [Fact]public async Task ActualTurningCorridorHoleDoesNotBecomeABoundingRectangle()
     {
         using var f=new TerrainSurveyFixture();f.Control(CollectionAction.StartData,0);(double N,double E,double H)[] poses=[(0,0,90),(0,500,0),(500,500,270),(500,0,180),(0,0,90)];for(var i=0;i<poses.Length;i++){var p=poses[i];f.Pose(i,frame:TerrainSurveyGeometryTests.Frame(i,p.N,p.E,heading:p.H));}f.Finish(5);var g=f.Build();Assert.True(ContinuousTerrainSurveys.StreamCurrentChunks(f.Science,f.Missions,g).Sum(c=>c.Geometry.Coordinates.Sum(p=>p.Length-1))>0);

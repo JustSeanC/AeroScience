@@ -1,0 +1,31 @@
+{
+  "scope": "P05c final regression coverage: decoded antimeridian records and UTM domain/hemisphere boundaries",
+  "counts": {
+    "total": "12",
+    "executed": "12",
+    "passed": "12",
+    "failed": "0",
+    "error": "0",
+    "timeout": "0",
+    "aborted": "0",
+    "inconclusive": "0",
+    "passedButRunAborted": "0",
+    "notRunnable": "0",
+    "notExecuted": "0",
+    "disconnected": "0",
+    "warning": "0",
+    "completed": "0",
+    "inProgress": "0",
+    "pending": "0"
+  },
+  "trxSha256": "a44130f4ebcda7b4a3cfb25af19225e1ad72c332dabe60f155d02a13429aebbe",
+  "reference": "Independent PROJ 9.5.1 / pyproj 3.7.2 always_xy values for UTM zones 1/60 north/south at +/-180 degrees and a known zone-18 point",
+  "sourceAcceptance": "Controlled coordinate/LAS fixtures; not genuine-provider UTM acceptance",
+  "checks": [
+    "Both seam representations retained by original record identity with real P05a split geometry",
+    "An unrelated point inside the global source bounding rectangle remains excluded",
+    "Duplicate physical coordinates with different original ordinals are not collapsed",
+    "Unsupported UTM extent and hemisphere refused rather than guessed"
+  ],
+  "originalAssertionsWeakened": false
+}

@@ -1,0 +1,52 @@
+{
+  "scope": "Manual Windows diagnostic; not Full CI or installed acceptance",
+  "sourceCommit": "811ba9c5bd6ad8e5d1e82187f44ffff8f0f04cd8",
+  "runUrl": "https://github.com/JustSeanC/AeroScience/actions/runs/43337480839",
+  "conclusion": "success",
+  "backend": [
+    {
+      "path": "artifacts/p05c-ci/native-green/tests/AeroScience.Tests/TestResults/windows-profile.trx",
+      "counts": {
+        "total": "130",
+        "executed": "130",
+        "passed": "130",
+        "failed": "0",
+        "error": "0",
+        "timeout": "0",
+        "aborted": "0",
+        "inconclusive": "0",
+        "passedButRunAborted": "0",
+        "notRunnable": "0",
+        "notExecuted": "0",
+        "disconnected": "0",
+        "warning": "0",
+        "completed": "0",
+        "inProgress": "0",
+        "pending": "0"
+      },
+      "sha256": "5f6602e37e70ac46cbeea4b1c06c03ba616e76f541c6872a2007d40df87ccf8b"
+    }
+  ],
+  "windowsBootstrapTests": {
+    "passed": 2,
+    "skipped": 0
+  },
+  "nativeBuilds": [
+    {
+      "path": "artifacts/p05c-ci/native-green/src/AeroScience.Missions/obj/native-lidar/Release/build.json",
+      "identity": {
+        "source": "d8f02c47343dab429af8d6ef33e31fb5a2fe7e7cdee11de17ad6e9e2ab03f258",
+        "sha256": "a558b6dd4dd6fff294bf5075381992a57d63c7ca9a80ddc7cf6de8e364d9f2fc",
+        "upstreamCommit": "fa089bd8b2b4ca5631e199d257374c32a125f73f"
+      }
+    }
+  ],
+  "publishGraphs": [
+    "Production win-x64 self-contained",
+    "Isolated validation win-x64 self-contained"
+  ],
+  "nativeHelperBytes": 627200,
+  "installedWindowsMsfs": "Not Tested",
+  "installerSigningAllowlist": "Unaccepted release gate",
+  "artifactSha256": "3476a97116e81eed58411c4a94114024fa6a3f48d637c4ddd49928cb536db284"
+}
