@@ -18,6 +18,8 @@ import tarfile
 ROOT = Path(__file__).resolve().parents[2]
 BASELINE = '2b4c9abc82862fd7040cdd0f9e1a6f0b75a6dd49'
 DIRECTORIES = ('src/AeroScience.Organization', 'src/AeroScience.Missions', 'src/AeroScience.Shared', 'src/AeroScience.Engine/wwwroot', 'licenses')
+CURRENT_DIRECTORIES = (*DIRECTORIES, 'native/lidar')
+CURRENT_FILES = ('Directory.Build.props', 'global.json', 'scripts/build/lidar_runtime.py')
 
 def run(arguments, log):
     result = subprocess.run(arguments, cwd=ROOT, capture_output=True, text=True, timeout=90)
@@ -48,14 +50,17 @@ def prepare(output):
                 raise ValueError('Unsupported trusted source archive layout.')
         tar.extractall(old, filter='data')
     archive.unlink()
-    for name in DIRECTORIES:
+    # Keep the accepted old archive unchanged. Only the current source graph has
+    # the pinned native decoder; include it in the same witnessed isolated build.
+    for name in CURRENT_DIRECTORIES:
         shutil.copytree(ROOT/name, new/name, ignore=shutil.ignore_patterns('bin', 'obj', 'node_modules', '__pycache__'))
-    for name in ('Directory.Build.props', 'global.json'):
+    for name in CURRENT_FILES:
+        (new/name).parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(ROOT/name, new/name)
     witness=hashlib.sha256()
     for path in sorted(p for p in new.rglob('*') if p.is_file()):
         witness.update(path.relative_to(new).as_posix().encode()+b'\0');witness.update(hashlib.sha256(path.read_bytes()).digest())
-    dirty=bool(subprocess.run(['git','status','--porcelain','--',*DIRECTORIES,'Directory.Build.props','global.json'],cwd=ROOT,capture_output=True,text=True,check=True).stdout.strip())
+    dirty=bool(subprocess.run(['git','status','--porcelain','--',*CURRENT_DIRECTORIES,*CURRENT_FILES],cwd=ROOT,capture_output=True,text=True,check=True).stdout.strip())
     def build(pair):
         directory, version, revision, role = pair
         project = directory/'src/AeroScience.Organization/AeroScience.Organization.csproj'

@@ -1,0 +1,90 @@
+{
+  "runUrl": "https://github.com/JustSeanC/AeroScience/actions/runs/43334865879",
+  "sourceCommit": "eec0021b8a04ac63c90df95f9170ff42dc7071a8",
+  "conclusion": "failure",
+  "jobs": {
+    "linux": "failure before tests: isolated future-source fixture omitted newly required scripts/build/lidar_runtime.py and native/lidar",
+    "windows-companion": "failure before tests: Python list2cmdline CRT escaping invalid for quoted cmd.exe /c Visual Studio batch path",
+    "organization-deployment": "success: real non-root HTTPS/TLS/ownership/evidence/replacement/Railway/image identity checks"
+  },
+  "diagnostics": [
+    {
+      "path": "artifacts/p05c-ci/run1/acceptance.json",
+      "sha256": "e68a94a065ac76538d07bf8a272966acc9da0fd8c04b42e80f8bfd4f3d36c760"
+    },
+    {
+      "path": "artifacts/p05c-ci/run1/image-review.json",
+      "sha256": "4d14ae9d400783d9fc595270ed220f6c4e5ad67b12eb0848ccbf332965e0111c"
+    },
+    {
+      "path": "artifacts/p05c-ci/run1/linux.log",
+      "sha256": "8ddbb14642f758e13725c1c0e78362fcb849d57ec70ca5ca4670b147189a379f"
+    },
+    {
+      "path": "artifacts/p05c-ci/run1/new-build.log",
+      "sha256": "732ff28f2bec3268c695b177de0b1707e84a59363215f2fe2e375bc0061dacc1"
+    },
+    {
+      "path": "artifacts/p05c-ci/run1/old-build.log",
+      "sha256": "f9492013702e74472a3b629379adcaa8dbe57c8eebcf33fea5abe103f3e770cc"
+    },
+    {
+      "path": "artifacts/p05c-ci/run1/prepare.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/p05c-ci/run1/preserved.txt",
+      "sha256": "ac1897c72310b64a32633354c5f2f1d73c89e5c2d61d5d0a4ac133bf0e58b797"
+    },
+    {
+      "path": "artifacts/p05c-ci/run1/railway-runtime.json",
+      "sha256": "9a5c58a49aeffd1c9f9be827211d75506c3e22ed17659a68d79486242685b1c9"
+    },
+    {
+      "path": "artifacts/p05c-ci/run1/windows.log",
+      "sha256": "0136d33a1005c1eb384520130b701c9f490270c57b098e3f4d5999504b55c010"
+    }
+  ],
+  "corrections": [
+    "Pass the trusted, validated VS batch path as a cmd-native quoted command line; retain no-shell argument lists for the actual decoder/compiler",
+    "Include and hash pinned native sources/build script in only the current isolated update graph; accepted old baseline archive and recovery contracts unchanged"
+  ],
+  "localReproduction": {
+    "format": "aeroscience-isolated-update-fixture",
+    "version": 1,
+    "oldSource": "2b4c9abc82862fd7040cdd0f9e1a6f0b75a6dd49",
+    "newSource": "eec0021b8a04ac63c90df95f9170ff42dc7071a8",
+    "copiedSourceSha256": "0ea43824d0cc5c18f5c8a95eddb843199c9821bc2ded0a909cddf3653fc6d58d",
+    "workingTreeDirty": true,
+    "newVersion": "0.7.1",
+    "syntheticFutureVersion": true,
+    "productionDistribution": false,
+    "registryIdentityVerified": false,
+    "cloudCalls": 0
+  },
+  "windowsCmdRegression": "Added real cmd.exe test under spaces; Windows-only execution pending next CI, not counted as local pass",
+  "originalAssertionsWeakened": false,
+  "remediationFocused": {
+    "counts": {
+      "total": "34",
+      "executed": "34",
+      "passed": "34",
+      "failed": "0",
+      "error": "0",
+      "timeout": "0",
+      "aborted": "0",
+      "inconclusive": "0",
+      "passedButRunAborted": "0",
+      "notRunnable": "0",
+      "notExecuted": "0",
+      "disconnected": "0",
+      "warning": "0",
+      "completed": "0",
+      "inProgress": "0",
+      "pending": "0"
+    },
+    "trxSha256": "7484d349decc9e0a45110e81d8744c12565c5f10099e4a3fa46835e9abe4d436",
+    "linuxOldNewGraph": "Both locked old and current isolated graphs restored and published successfully",
+    "pythonActualWindowsTest": "Not executed locally; platform skip is explicit"
+  }
+}

@@ -4,6 +4,14 @@ import argparse, hashlib, json, os, pathlib, platform, shutil, subprocess
 ROOT=pathlib.Path(__file__).resolve().parents[2]
 NATIVE=ROOT/'native/lidar'
 def digest(p):return hashlib.sha256(p.read_bytes()).hexdigest()
+def msvc_environment(bat):
+    # cmd.exe parses /c itself. Passing this payload through list2cmdline adds
+    # CRT backslash-escaped quotes, which cmd treats as a literal command name.
+    # This path comes only from the installed VS tool locator, never source data.
+    bat=str(bat)
+    if any(c in bat for c in ('"','%','\r','\n')):raise ValueError('Unsupported Visual Studio batch path')
+    text=subprocess.check_output('cmd.exe /d /s /c ""'+bat+'" -no_logo -arch=x64 >nul && set"',text=True,stderr=subprocess.STDOUT)
+    return dict(line.split('=',1) for line in text.splitlines() if '=' in line and not line.startswith('='))
 def build(output):
     policy=json.loads((NATIVE/'source-policy.json').read_text())
     if {p.relative_to(NATIVE/'laszip').as_posix() for p in (NATIVE/'laszip').rglob('*') if p.is_file()}!=set(policy['files']):raise ValueError('Unreviewed file in pinned LASzip source tree')
@@ -22,8 +30,7 @@ def build(output):
                 vs=subprocess.check_output([str(where),'-latest','-products','*','-requires','Microsoft.VisualStudio.Component.VC.Tools.x86.x64','-property','installationPath'],text=True).strip()
                 bat=pathlib.Path(vs)/'Common7/Tools/VsDevCmd.bat'
                 if not bat.is_file():raise ValueError('Install Visual Studio x64 C++ build tools; no downloaded binary is substituted')
-                text=subprocess.check_output(['cmd.exe','/d','/s','/c','"'+str(bat)+'" -no_logo -arch=x64 >nul && set'],text=True)
-                env.update(line.split('=',1) for line in text.splitlines() if '=' in line and not line.startswith('='))
+                env.update(msvc_environment(bat))
             args=['cl','/nologo','/std:c++17','/O2','/MT','/EHsc','/DWIN32','/DLASZIPDLL_EXPORTS','/DHAVE_UNORDERED_MAP=1','/DAS_LIDAR_ID="'+identity+'"','/I'+str(NATIVE/'laszip/include/laszip'),'/Fe:'+str(exe)]+list(map(str,src))
         else:
             env=os.environ.copy();args=['g++','-std=c++17','-O2','-pthread','-DLASZIPDLL_EXPORTS','-DHAVE_UNORDERED_MAP=1','-DAS_LIDAR_ID="'+identity+'"','-I'+str(NATIVE/'laszip/include/laszip'),'-o',str(exe)]+list(map(str,src))
