@@ -1,0 +1,222 @@
+{
+  "checkpoint": "v0.8.0 P05c development/experimental runtime",
+  "sourceCommit": "d1d2bbb309fec79aa71de3fe53e8cc264e6a6eda",
+  "branch": "develop/v0.8.0",
+  "startingHead": "8d5a39c4dfa34ed93ed05e2222e14accb09cecaf",
+  "acceptedUtc": "2026-11-13T02:20:09.488474+00:00",
+  "ci": {
+    "run": 43343448542,
+    "attempt": 1,
+    "event": "workflow_dispatch",
+    "requestedValidation": "full",
+    "url": "https://github.com/JustSeanC/AeroScience/actions/runs/43343448542",
+    "status": "completed",
+    "conclusion": "success",
+    "jobs": {
+      "validation-scope": "success",
+      "linux": "success",
+      "windows-companion": "success",
+      "organization-deployment": "success"
+    },
+    "unselectedJobScopes": {
+      "development": "skipped because Full selected",
+      "windows-profile": "skipped because Full selected; separate focused acceptance is documented"
+    }
+  },
+  "linuxBackend": [
+    {
+      "path": "artifacts/p05c-ci/run4/linux-diagnostics/tests/AeroScience.Tests/TestResults/_runnervm7aw5e_2026-11-13_01_20_06_net10.0.trx",
+      "counts": {
+        "total": "1619",
+        "executed": "1619",
+        "passed": "1619",
+        "failed": "0",
+        "error": "0",
+        "timeout": "0",
+        "aborted": "0",
+        "inconclusive": "0",
+        "passedButRunAborted": "0",
+        "notRunnable": "0",
+        "notExecuted": "0",
+        "disconnected": "0",
+        "warning": "0",
+        "completed": "0",
+        "inProgress": "0",
+        "pending": "0"
+      },
+      "sha256": "32e58945d0323b11c9b61c41e2269a7d87ea6721f6584a4697526e39a9e2719e"
+    }
+  ],
+  "windowsBackend": [
+    {
+      "path": "artifacts/p05c-ci/run4/windows-diagnostics/tests/AeroScience.Tests/TestResults/windows.trx",
+      "counts": {
+        "total": "1619",
+        "executed": "1609",
+        "passed": "1609",
+        "failed": "0",
+        "error": "0",
+        "timeout": "0",
+        "aborted": "0",
+        "inconclusive": "0",
+        "passedButRunAborted": "0",
+        "notRunnable": "0",
+        "notExecuted": "0",
+        "disconnected": "0",
+        "warning": "0",
+        "completed": "0",
+        "inProgress": "0",
+        "pending": "0"
+      },
+      "skippedTests": [
+        "AeroScience.Tests.OrganizationConnectionIntegrationTests.GuidedPrivateFileImportRecoversIntoAFreshSecuredServerAtANewOriginAfterPrimaryLoss",
+        "AeroScience.Tests.OrganizationConnectionIntegrationTests.ScopedNonSuperuserRecoveryRetainsApplicationOwnershipAndAllowsTheNextCompiledUpgrade",
+        "AeroScience.Tests.OrganizationConnectionIntegrationTests.EncryptedOffProcessBackupRestoresAuthorizedEvidenceAuditAndProtectedMfaAfterSourceLoss",
+        "AeroScience.Tests.OrganizationConnectionIntegrationTests.ActualOldAndNewProcessesRefuseStaleCheckpointRollbackFailedUpgradeAndApplyExactApprovedPair",
+        "AeroScience.Tests.AviationAcquisitionTests.RetainedOriginalFileLinksAreRejectedRatherThanFollowed",
+        "AeroScience.Tests.OrganizationServerTests.ExplicitBackupConsentPersistsScheduledPolicyIdempotentJobsAndVerifiedRestoreAcrossRestart",
+        "AeroScience.Tests.OrganizationConnectionIntegrationTests.SeparatelyKeyedCopiesSurvivePrimaryRepositoryAndIdentityLossAndEnforceApprovedRetention",
+        "AeroScience.Tests.ScientificLibraryFolderTests.LinkedSourceDirectoryIsRejected",
+        "AeroScience.Tests.OrganizationConnectionIntegrationTests.IndependentRecoveryStagesAndActivatesAfterOriginalDatabaseAndIdentityAreLostWithoutExternalReplay",
+        "AeroScience.Tests.OrganizationConnectionIntegrationTests.ProtectedIdentityRenewalRecoversMfaAndDiscordSecretsWithANewCertificateWithoutTouchingTheOriginal"
+      ],
+      "sha256": "748c0f9fae4a7a80e6c8efd2d8099fc7c06f83780fc6d5828257d94e56e73a3a"
+    }
+  ],
+  "browser": {
+    "source": "d1d2bbb309fec79aa71de3fe53e8cc264e6a6eda",
+    "run": 43343448542,
+    "stats": {
+      "startTime": "2026-11-13T01:41:33.629Z",
+      "duration": 1925292.208,
+      "expected": 453,
+      "skipped": 2,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "existingSkipped": [
+      {
+        "file": "aviation-charts.spec.js",
+        "title": "approved originals provide local chart overlays, independent science, offline tiles and exact edition selection"
+      },
+      {
+        "file": "aviation-charts.spec.js",
+        "title": "unknown runtime is honest and chart inventory remains accessible at tablet width without altering saved data"
+      }
+    ],
+    "path": "artifacts/p05c-ci/run4/browser/web-results.json",
+    "sha256": "ac767291bb7dc5c9f00a001d96303fecb5b7c8926b80e3b355f606044149fc1d",
+    "artifactSha256": "dd2a93eca6bdfe1b242299f1ca812bdebeedd4475aab7e5bdba98d3ba322b5dd"
+  },
+  "nativeAndPresentation": {
+    "nativeEs2017Passed": 4,
+    "presentationPassed": 38,
+    "railwayConfigurationPassed": 6,
+    "catalogVersion": 8,
+    "englishMessages": 438,
+    "localeIdentities": [
+      "en-US",
+      "es-ES",
+      "fr-FR",
+      "de-DE",
+      "pt-BR"
+    ],
+    "bundledCompleteLocales": [
+      "en-US"
+    ],
+    "fullLinuxLogSha256": "6a6f3b7192e2354e0cbd8f2e69604b0d1168e469f07f49e7018970c0b626aa36"
+  },
+  "helpers": {
+    "linux": {
+      "total": 188,
+      "passed": 186,
+      "skipped": 2,
+      "failed": 0
+    },
+    "windows": {
+      "total": 185,
+      "passed": 182,
+      "skipped": 3,
+      "failed": 0
+    },
+    "windowsLogSha256": "a3a65ff77ce5898185ae9e5b809e73343cb8bed776188ec8b29f1bd6c19129df"
+  },
+  "organization": {
+    "syntheticContainerChecksPassed": 12,
+    "failed": 0,
+    "railwayRuntimeChecksPassed": 10,
+    "providerProductionAcceptance": false,
+    "artifactReceipts": [
+      {
+        "path": "artifacts/p05c-ci/run4/organization/acceptance.json",
+        "sha256": "9c9c64a5e84ba9ee694a072dd292a0b2d96b02a11e2560f3ca0537deabfc7788"
+      },
+      {
+        "path": "artifacts/p05c-ci/run4/organization/image-review.json",
+        "sha256": "136d265ed2120f3384cb41b19af81407edf7a82b0ca8306a5c8f9e5cd7b5d18c"
+      },
+      {
+        "path": "artifacts/p05c-ci/run4/organization/railway-runtime.json",
+        "sha256": "9a5c58a49aeffd1c9f9be827211d75506c3e22ed17659a68d79486242685b1c9"
+      }
+    ]
+  },
+  "nativeBuilds": [
+    {
+      "path": "artifacts/p05c-ci/run4/windows-diagnostics/src/AeroScience.Missions/obj/native-lidar/Release/build.json",
+      "identity": {
+        "source": "d8f02c47343dab429af8d6ef33e31fb5a2fe7e7cdee11de17ad6e9e2ab03f258",
+        "sha256": "449b40ba84273695ab8bcfd3da840d15269c396980634e494e0429244aeadf6f",
+        "upstreamCommit": "fa089bd8b2b4ca5631e199d257374c32a125f73f"
+      }
+    }
+  ],
+  "recovery": "Original recovery, evidence, Library, source-deletion and aviation smoke checks passed on both platform jobs",
+  "genuineSourceReceipt": "v0.8.0-p05c-genuine-final.json",
+  "genuineSourceReceiptSha256": "8aca34c9c4585edf904935074afb6d388cdd65ac0dc2a730b3d1080482ef7ad4",
+  "artifacts": [
+    {
+      "id": 14003443160,
+      "name": "linux-browser-diagnostics",
+      "sha256": "dd2a93eca6bdfe1b242299f1ca812bdebeedd4475aab7e5bdba98d3ba322b5dd"
+    },
+    {
+      "id": 14002032140,
+      "name": "windows-test-diagnostics",
+      "sha256": "90ca595cad4056f4619e759b828cc19228a1690ac53c3f6378df745ff2c0ecc2"
+    },
+    {
+      "id": 14001445309,
+      "name": "organization-deployment-diagnostics",
+      "sha256": "b939619896834c4c9cf5c276b201029ac9dff6f26fb8690d59e33a5b0c2a23b4"
+    },
+    {
+      "id": 14001154219,
+      "name": "linux-test-diagnostics",
+      "sha256": "7afc23076ff4d2f8aa3dc26e2acc3de22f2bf93ba662adf09d605f0ff5649d44"
+    }
+  ],
+  "failedRunReceipts": [
+    "v0.8.0-p05c-ci-failed-run1.json",
+    "v0.8.0-p05c-ci-failed-run2.json",
+    "v0.8.0-p05c-ci-failed-run3.json",
+    "v0.8.0-p05c-native-probe1.json",
+    "v0.8.0-p05c-ci-legal-remediation.json"
+  ],
+  "protectedLegalSha256": "ae01ce20f49b8fffa428c94dc3968a987b1be554ada04d205deaf4af7ec8453e",
+  "originalAssertionsOrProtectedInventoryWeakened": false,
+  "protectedBranches": {
+    "main": "9dd2d8cda7ddb6d73414808f75010726871205c2",
+    "develop/v0.7.0": "695a385ec40b177c763ffc0945234a1e2b54b77e",
+    "develop/v0.7.1": "8e972d8e402f165ab9ad7c41dc9e744250f8f52e"
+  },
+  "noReleaseInstallerDeploymentOrOwnerDataChange": true,
+  "p05d": "Not started; handoff in v0.8.0-p05c-lidar-pointclouds.md",
+  "releaseGates": [
+    "Installed Windows/MSFS picker, storage, actual simulator and visual acceptance: Not Tested",
+    "v0.8-specific native executable payload allowlist/signing/installer acceptance remains required; existing v0.7 verifiers unchanged",
+    "Indexed COPC is unsupported pending genuine index/CRS/range/resource validation",
+    "Genuine provider UTM acceptance and unsupported CRS/vertical transforms not claimed"
+  ],
+  "completeNonEnglishTranslations": false
+}

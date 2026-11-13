@@ -30,5 +30,14 @@
   },
   "manualDiagnosticScope": "Existing windows-profile may be explicitly dispatched on develop/v0.8.0; genuine LiDAR cases and compiler regression added. Full push/milestone policy and all original test filters retained. Diagnostic green does not count as Full CI.",
   "remainingJobs": "Linux Full continues to retain further diagnostics; organization deployment passed. Final corrected exact-source Full remains mandatory.",
-  "originalAssertionsWeakened": false
+  "originalAssertionsWeakened": false,
+  "completedLinuxResult": {
+    "backendPassed": 1607,
+    "backendSkipped": 0,
+    "browserPassed": 453,
+    "browserSkipped": 2,
+    "browserFailed": 0,
+    "helperFailure": "Only protected THIRD-PARTY-NOTICES.md original-blob assertion failed; same confirmed legal-record defect as run3, subsequently fixed without changing the assertion",
+    "logSha256": "8a2a0d6c1eeed310a838000a85635d2f256bea33746b311cc30a5da855d055c6"
+  }
 }

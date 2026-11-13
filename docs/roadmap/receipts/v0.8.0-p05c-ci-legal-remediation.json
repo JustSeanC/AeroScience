@@ -1,0 +1,20 @@
+{
+  "sourceCommit": "d1d2bbb309fec79aa71de3fe53e8cc264e6a6eda",
+  "previousFailedRun": 43338531865,
+  "reason": "New LASzip addendum was appended to protected legal evidence. Original ae01... blob is restored exactly; no preservation hashes/assertions changed.",
+  "documentationTestsPassed": 5,
+  "allHelpersExit": 0,
+  "helperLogSha256": "3eb46a1eae055fc6cc29c4be9dbd014942c8dc6462e4571458cf771a9cd68ccd",
+  "publishGraph": "Actual TestHost/Engine/Missions transitive publish passed; separate notice and Apache license bytes verified",
+  "protectedLegalSha256": "ae01ce20f49b8fffa428c94dc3968a987b1be554ada04d205deaf4af7ec8453e",
+  "bundledNoticeSha256": "9ee8a7c25b3dffdf8fd54b42b90d3aeef240989d92eb8c4d3f6e214bc975b1ee",
+  "decoderSourceUnchanged": "d8f02c47343dab429af8d6ef33e31fb5a2fe7e7cdee11de17ad6e9e2ab03f258",
+  "scientificCodeChanged": false,
+  "originalAssertionsWeakened": false,
+  "allHelpersCounts": {
+    "total": 188,
+    "passed": 186,
+    "skipped": 2,
+    "failed": 0
+  }
+}

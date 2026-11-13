@@ -1,0 +1,14 @@
+{
+  "runUrl": "https://github.com/JustSeanC/AeroScience/actions/runs/43338531865",
+  "sourceCommit": "eef78c0c3d54ab64d47b398c5841c39ed2f82b8c",
+  "windowsBackendPassed": 1609,
+  "windowsExistingSkipped": 10,
+  "linuxBackendPassed": 1619,
+  "windowsFailure": "Protected legal record SHA changed by new LASzip addendum; full helper suite detected it",
+  "windowsLogSha256": "10ad77b7f43b830e49c9ec2a4cc39d4a92adada829c78331600cf8188689386f",
+  "remainingLinuxCancelled": "Superseded confirmed-failed source blocked corrected run in concurrency group; partial browser diagnostics retained and never counted as full acceptance",
+  "cancelledBrowserArtifactSha256": "135de35bd1242aa842804aafbd75447c767a62a71289bf7b1c400c9ca9d1fa23",
+  "correctionSource": "d1d2bbb309fec79aa71de3fe53e8cc264e6a6eda",
+  "assertionsOrProtectedInventoryChanged": false,
+  "correction": "Restore exact original legal blob and move new addendum into separately bundled LidarRuntime/NOTICE.md."
+}
