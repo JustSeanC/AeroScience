@@ -18,6 +18,7 @@
     <Compile Include="$(LidarBuildDirectory)/LidarRuntimeIdentity.g.cs" />
     <None Include="$(LidarBuildDirectory)/$(LidarExecutable)" Link="LidarRuntime/$(LidarExecutable)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     <None Include="$(LidarBuildDirectory)/LASzip.txt" Link="LidarRuntime/LASzip.txt" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <None Include="../../licenses/AeroScience.LidarReader.NOTICE.md" Link="LidarRuntime/NOTICE.md" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
   <Target Name="BuildVerifiedLidarRuntime" BeforeTargets="CoreCompile;GetCopyToOutputDirectoryItems">
     <Exec Command="$(LidarPython) &quot;$(MSBuildThisFileDirectory)../../scripts/build/lidar_runtime.py&quot; --output &quot;$(LidarBuildDirectory)&quot;" />
