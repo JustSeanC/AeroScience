@@ -1,0 +1,55 @@
+{
+  "checkpoint": "P05d Full CI navigation remediation",
+  "failedRun": 43443385688,
+  "base": "0f8dda713b57b1122627bc4c5cad4b32acc0f58a",
+  "changes": "Presentation route ownership only; normal archived review and query parameters preserved. No original recording/collection/evidence/source permissions changed.",
+  "targetedBrowser": {
+    "passed": 17,
+    "failed": 0,
+    "selection": [
+      "mission-operations",
+      "navigation-080",
+      "operations-navigation-race",
+      "personal-research-start"
+    ]
+  },
+  "originalFailingScenarioAfterFix": {
+    "passed": 3,
+    "failed": 0,
+    "repeats": 3
+  },
+  "controlledRegressionBeforeFix": {
+    "failed": 4,
+    "passed": 0
+  },
+  "hostBuild": "zero warnings/errors",
+  "syntax": "passed",
+  "documentation": {
+    "passed": 5,
+    "failed": 0
+  },
+  "assertions": "Original test unchanged; four deterministic lifecycle cases added. No timeout increases, retries, skips or loosened scientific assertions.",
+  "receipts": [
+    {
+      "path": "artifacts/p05d-ci/navigation-race-before.log",
+      "sha256": "2ecf02c1f004cd5d7104273447f5c17c1432747a11bc9dfadd92e6c3fae8cd28"
+    },
+    {
+      "path": "artifacts/p05d-ci/navigation-fix-targeted.log",
+      "sha256": "751c994d27d2fa9dcc018be2c87e536d1aa71010fc5c83be97ca0dfa83073a8e"
+    },
+    {
+      "path": "artifacts/p05d-ci/personal-start-after-fix.log",
+      "sha256": "de02a86a38bc340e757802ca353457749f3b9050013da3ad0c919ae6afca935a"
+    },
+    {
+      "path": "artifacts/p05d-ci/navigation-fix-build-final.log",
+      "sha256": "859b80856a953654629cc5993b69df40cbff7aace9c5418eda5c2c3a7b7ef55b"
+    },
+    {
+      "path": "artifacts/p05d-ci/navigation-fix-documentation.log",
+      "sha256": "cb40445f329256800c2bba2efc41b419c79a3f800648317b4d6008d44250a810"
+    }
+  ],
+  "fullCI": "Corrective exact-source run follows this commit."
+}

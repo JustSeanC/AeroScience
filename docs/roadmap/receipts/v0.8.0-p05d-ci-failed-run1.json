@@ -1,0 +1,128 @@
+{
+  "source": "0f8dda713b57b1122627bc4c5cad4b32acc0f58a",
+  "run": 43443385688,
+  "attempt": 1,
+  "url": "https://github.com/JustSeanC/AeroScience/actions/runs/43443385688",
+  "conclusion": "failure",
+  "dotnet": {
+    "linux": {
+      "zipSha256": "664376dab5c95ebf8fa2c8f9d46e4f3d94bee65a34355019a33a29bc378cc6d8",
+      "trx": [
+        {
+          "path": "artifacts/p05d-ci/linux-_runnervm8axu0_2026-11-13_14_34_18_net10.0.trx",
+          "sha256": "920c739406490f5773b63724bc91fdf131910bad08a9016bbe572291fce41f71",
+          "counts": {
+            "total": "1628",
+            "executed": "1628",
+            "passed": "1628",
+            "failed": "0",
+            "error": "0",
+            "timeout": "0",
+            "aborted": "0",
+            "inconclusive": "0",
+            "passedButRunAborted": "0",
+            "notRunnable": "0",
+            "notExecuted": "0",
+            "disconnected": "0",
+            "warning": "0",
+            "completed": "0",
+            "inProgress": "0",
+            "pending": "0"
+          },
+          "failed": []
+        }
+      ]
+    },
+    "windows": {
+      "zipSha256": "9a476d3aed4433c86755e52ed78cf8b964bbb709a88baa545b7e2dfb320c300e",
+      "trx": [
+        {
+          "path": "artifacts/p05d-ci/windows-windows.trx",
+          "sha256": "b5205a598ac6fc2ab0142b5de81cb41a474b44d229d3b41916ac884d5eb23f7d",
+          "counts": {
+            "total": "1628",
+            "executed": "1618",
+            "passed": "1618",
+            "failed": "0",
+            "error": "0",
+            "timeout": "0",
+            "aborted": "0",
+            "inconclusive": "0",
+            "passedButRunAborted": "0",
+            "notRunnable": "0",
+            "notExecuted": "0",
+            "disconnected": "0",
+            "warning": "0",
+            "completed": "0",
+            "inProgress": "0",
+            "pending": "0"
+          },
+          "failed": []
+        }
+      ]
+    }
+  },
+  "browser": {
+    "startTime": "2026-11-13T14:54:25.811Z",
+    "duration": 1851092.442,
+    "expected": 469,
+    "skipped": 2,
+    "unexpected": 1,
+    "flaky": 0
+  },
+  "failedTest": "personal-research-start.spec.js: Fly Now uses prepared defaults, normal readiness/start, independent attempts and recorded review",
+  "failedControl": "Test-card activity and evidence / Evaluate Attempt",
+  "diagnosis": "A late no-active-flight snapshot redirected to archived Current Flight while an explicit My Research hash was already assigned but its hashchange task had not closed the old Operations controller. The retained screenshot shows Current Flight. This is a presentation navigation race, not an assumed environment or scientific engine failure.",
+  "localReproduction": {
+    "originalCase": {
+      "passed": 2,
+      "failed": 1,
+      "log": "artifacts/p05d-ci/reproduce-personal-start.log"
+    },
+    "controlledRealController": {
+      "beforeFixFailures": 4,
+      "cases": [
+        "My Research route",
+        "Results route",
+        "another explicit archived flight",
+        "preserve existing query parameters"
+      ],
+      "log": "artifacts/p05d-ci/navigation-race-before.log"
+    }
+  },
+  "repair": "Gate automatic recorded-review navigation on current visible route ownership and selected-flight identity, preserving query parameters. Recording, collection, attempts, evaluation and source/security controllers remain unchanged.",
+  "unchangedPassedJobs": [
+    "windows-companion",
+    "organization-deployment"
+  ],
+  "skippedAfterBrowserFailure": [
+    "Linux Python checks",
+    "Linux real recovery host checks"
+  ],
+  "diagnostics": [
+    {
+      "path": "artifacts/p05d-ci/run1/browser-diagnostics.zip",
+      "sha256": "10b9a5666787ebbe766cc5704219093027d416b205bfe9f30cbfca17a91d6dfb"
+    },
+    {
+      "path": "artifacts/p05d-ci/run1/web-results.json",
+      "sha256": "84c32546ed773b8dffe034d186109b358c27e6bb8121cbe9c91a753c55472525"
+    },
+    {
+      "path": "artifacts/p05d-ci/run1/browser-tests/personal-research-start-Fl-f286c-ttempts-and-recorded-review/test-failed-1.png",
+      "sha256": "a49d4550dfa4e901c3f120dfa597599a14c30cd5b23f77db3a48500c4e3814e6"
+    },
+    {
+      "path": "artifacts/p05d-ci/linux-job-failed.log",
+      "sha256": "427f6daa905679435c43fb93a0eb93d7aad53a8e6a455438d7f8d23021399b6f"
+    },
+    {
+      "path": "artifacts/p05d-ci/reproduce-personal-start.log",
+      "sha256": "337eb2925f5b52f4a078dcc5171254c368b1373c32659a84bff66103b4c687ba"
+    },
+    {
+      "path": "artifacts/p05d-ci/navigation-race-before.log",
+      "sha256": "2ecf02c1f004cd5d7104273447f5c17c1432747a11bc9dfadd92e6c3fae8cd28"
+    }
+  ]
+}
