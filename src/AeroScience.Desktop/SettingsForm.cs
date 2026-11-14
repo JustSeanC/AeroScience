@@ -100,11 +100,9 @@ public sealed class SettingsForm : BrandedForm
         var marker = kind == StorageKind.Missions ? "missions.db" : StorageManager.LibraryManifest;
         var existing = File.Exists(Path.Combine(destination, marker));
         string capacity;
-        try { capacity = "\nAvailable destination capacity: " + SizeText(new LocalStorageCapacity().FreeBytes(destination)); }
+        try { capacity = WindowsPresentation.Text("windows.storage.capacity", new Dictionary<string, object> { ["size"] = SizeText(new LocalStorageCapacity().FreeBytes(destination)) }); }
         catch (Exception error) { app.ShowError(error); return; }
-        var message = existing
-            ? $"This folder already contains a store:\n{destination}\n\nOpen that existing store instead? It may contain a different/older archive. Current data at {current} will be retained. Nothing will be merged or overwritten. Choose No to select another empty folder."
-            : $"Copy and verify data from:\n{current}\n\nto:\n{destination}\n\nThe app will pause its local services. Originals remain intact after successful migration. Continue?";
+        var message = WindowsPresentation.Text(existing ? "windows.storage.openExisting" : "windows.storage.migrate", new Dictionary<string, object> { ["destination"] = destination, ["current"] = current });
         message += capacity;
         if (MessageBox.Show(this, message, WindowsPresentation.Text("windows.settingsForm.confirmStorageChange"), MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes) return;
         await Execute(async () => await app.RunStoppedAsync(() => Task.Run(() =>

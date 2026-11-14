@@ -1,0 +1,17 @@
+{
+  "version": 22,
+  "sourceIdentity": "c871f36c92c40f3e195f35c762e9b9d6d415c522c475027296fb3dd87dba839c",
+  "bundleIdentity": "7000359050b2f809d94178ad889605d43aa458ba777b2c4b0795634fe4058761",
+  "canonicalKeys": 6711,
+  "nativeProjectedKeys": 370,
+  "nativeAssets": {
+    "AeroScience.LocaleData.js": {
+      "bytes": 178815,
+      "sha256": "cf5c9bae7c0de9404228b027f428f4bd893e8e8d8bc93863b1c75ab076431369"
+    },
+    "AeroScience.LocaleFormat.js": {
+      "bytes": 3860,
+      "sha256": "fe20e9e0a484d9fd54da9dbcb6aa7f389dad4e6f7eb1d916726e0c5dbf7c536d"
+    }
+  }
+}

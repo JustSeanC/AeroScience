@@ -1,0 +1,308 @@
+{
+  "Armed": [
+    "Preparada",
+    "Prête",
+    "Bereit",
+    "Preparada"
+  ],
+  "Armed / Not started": [
+    "Preparada / Sin iniciar",
+    "Prête / Non démarrée",
+    "Bereit / Nicht gestartet",
+    "Preparada / Não iniciada"
+  ],
+  "Armed — waiting to collect": [
+    "Preparada: esperando para adquirir datos",
+    "Prête : en attente de collecte",
+    "Bereit: wartet auf Datenerfassung",
+    "Preparada: aguardando a coleta"
+  ],
+  "SCIENCE COLLECTION ACTIVE": [
+    "ADQUISICIÓN CIENTÍFICA ACTIVA",
+    "COLLECTE SCIENTIFIQUE ACTIVE",
+    "WISSENSCHAFTLICHE DATENERFASSUNG AKTIV",
+    "COLETA CIENTÍFICA ATIVA"
+  ],
+  "SCIENCE COLLECTION INACTIVE": [
+    "ADQUISICIÓN CIENTÍFICA INACTIVA",
+    "COLLECTE SCIENTIFIQUE INACTIVE",
+    "WISSENSCHAFTLICHE DATENERFASSUNG INAKTIV",
+    "COLETA CIENTÍFICA INATIVA"
+  ],
+  "Collecting": [
+    "Adquiriendo datos",
+    "Collecte en cours",
+    "Datenerfassung läuft",
+    "Coletando dados"
+  ],
+  "Stale": [
+    "Desactualizado",
+    "Périmé",
+    "Veraltet",
+    "Desatualizado"
+  ],
+  "Stopped": [
+    "Detenida",
+    "Arrêtée",
+    "Beendet",
+    "Interrompida"
+  ],
+  "Between sessions": [
+    "Entre sesiones",
+    "Entre deux sessions",
+    "Zwischen Sitzungen",
+    "Entre sessões"
+  ],
+  "Session ended": [
+    "Sesión finalizada",
+    "Session terminée",
+    "Sitzung beendet",
+    "Sessão encerrada"
+  ],
+  "Not started": [
+    "Sin iniciar",
+    "Non démarrée",
+    "Nicht gestartet",
+    "Não iniciada"
+  ],
+  "No active mission": [
+    "Ninguna misión activa",
+    "Aucune mission active",
+    "Keine aktive Mission",
+    "Nenhuma missão ativa"
+  ],
+  "Mission recording": [
+    "Grabación de la misión en curso",
+    "Enregistrement de la mission en cours",
+    "Missionsaufzeichnung läuft",
+    "Gravação da missão em andamento"
+  ],
+  "Start Science Collection": [
+    "Iniciar adquisición científica",
+    "Démarrer la collecte scientifique",
+    "Wissenschaftliche Datenerfassung starten",
+    "Iniciar coleta científica"
+  ],
+  "Pause science collection": [
+    "Pausar la adquisición científica",
+    "Mettre la collecte scientifique en pause",
+    "Wissenschaftliche Datenerfassung pausieren",
+    "Pausar coleta científica"
+  ],
+  "Resume science collection": [
+    "Reanudar la adquisición científica",
+    "Reprendre la collecte scientifique",
+    "Wissenschaftliche Datenerfassung fortsetzen",
+    "Retomar coleta científica"
+  ],
+  "End current science session": [
+    "Finalizar la sesión científica actual",
+    "Terminer la session scientifique en cours",
+    "Aktuelle wissenschaftliche Sitzung beenden",
+    "Encerrar a sessão científica atual"
+  ],
+  "Rearm automatic collection": [
+    "Reactivar la adquisición automática",
+    "Réarmer la collecte automatique",
+    "Automatische Datenerfassung erneut bereitstellen",
+    "Rearmar a coleta automática"
+  ],
+  "Arm Automatic Collection": [
+    "Preparar la adquisición automática",
+    "Armer la collecte automatique",
+    "Automatische Datenerfassung bereitstellen",
+    "Preparar coleta automática"
+  ],
+  "Waiting for source": [
+    "Esperando la fuente",
+    "En attente de la source",
+    "Warten auf Quelle",
+    "Aguardando a fonte"
+  ],
+  "Source disconnected": [
+    "Fuente desconectada",
+    "Source déconnectée",
+    "Quelle getrennt",
+    "Fonte desconectada"
+  ],
+  "Acquisition gap": [
+    "Intervalo sin adquisición",
+    "Lacune d’acquisition",
+    "Erfassungslücke",
+    "Lacuna de aquisição"
+  ],
+  "Focus Card": [
+    "Enfocar ficha",
+    "Afficher cette fiche",
+    "Karte fokussieren",
+    "Focar cartão"
+  ],
+  "Activate Card": [
+    "Activar ficha",
+    "Activer la fiche",
+    "Karte aktivieren",
+    "Ativar cartão"
+  ],
+  "Deactivate Card": [
+    "Desactivar ficha",
+    "Désactiver la fiche",
+    "Karte deaktivieren",
+    "Desativar cartão"
+  ],
+  "Begin Attempt": [
+    "Iniciar intento",
+    "Commencer une tentative",
+    "Versuch beginnen",
+    "Iniciar tentativa"
+  ],
+  "End Attempt": [
+    "Finalizar intento",
+    "Terminer la tentative",
+    "Versuch beenden",
+    "Encerrar tentativa"
+  ],
+  "Enable Automatic Detection": [
+    "Activar detección automática",
+    "Activer la détection automatique",
+    "Automatische Erkennung aktivieren",
+    "Ativar detecção automática"
+  ],
+  "Disable Automatic Detection": [
+    "Desactivar detección automática",
+    "Désactiver la détection automatique",
+    "Automatische Erkennung deaktivieren",
+    "Desativar detecção automática"
+  ],
+  "About {low}–{count} second": [
+    "Aproximadamente {low}–{count} segundo",
+    "Environ {low}–{count} seconde",
+    "Etwa {low}–{count} Sekunde",
+    "Cerca de {low}–{count} segundo"
+  ],
+  "About {low}–{count} seconds": [
+    "Aproximadamente {low}–{count} segundos",
+    "Environ {low}–{count} secondes",
+    "Etwa {low}–{count} Sekunden",
+    "Cerca de {low}–{count} segundos"
+  ],
+  "About {low}–{count} minute": [
+    "Aproximadamente {low}–{count} minuto",
+    "Environ {low}–{count} minute",
+    "Etwa {low}–{count} Minute",
+    "Cerca de {low}–{count} minuto"
+  ],
+  "About {low}–{count} minutes": [
+    "Aproximadamente {low}–{count} minutos",
+    "Environ {low}–{count} minutes",
+    "Etwa {low}–{count} Minuten",
+    "Cerca de {low}–{count} minutos"
+  ],
+  "About {low}–{count} hour": [
+    "Aproximadamente {low}–{count} hora",
+    "Environ {low}–{count} heure",
+    "Etwa {low}–{count} Stunde",
+    "Cerca de {low}–{count} hora"
+  ],
+  "About {low}–{count} hours": [
+    "Aproximadamente {low}–{count} horas",
+    "Environ {low}–{count} heures",
+    "Etwa {low}–{count} Stunden",
+    "Cerca de {low}–{count} horas"
+  ],
+  "Science: {phase}": [
+    "Adquisición científica: {phase}",
+    "Collecte scientifique : {phase}",
+    "Datenerfassung: {phase}",
+    "Coleta científica: {phase}"
+  ],
+  "Last science status: {phase}": [
+    "Último estado de la adquisición científica: {phase}",
+    "Dernier état de la collecte scientifique : {phase}",
+    "Letzter Erfassungsstatus: {phase}",
+    "Último estado da coleta científica: {phase}"
+  ],
+  "{status} | Session {number}": [
+    "{status} | Sesión {number}",
+    "{status} | Session {number}",
+    "{status} | Sitzung {number}",
+    "{status} | Sessão {number}"
+  ],
+  "{status} | Science not started": [
+    "{status} | Adquisición científica sin iniciar",
+    "{status} | Collecte scientifique non démarrée",
+    "{status} | Datenerfassung nicht gestartet",
+    "{status} | Coleta científica não iniciada"
+  ],
+  "{status} | Status is stale": [
+    "{status} | Estado desactualizado",
+    "{status} | État périmé",
+    "{status} | Status veraltet",
+    "{status} | Estado desatualizado"
+  ],
+  "Flight recording: Active | Science: {phase}": [
+    "Grabación del vuelo: activa | Adquisición científica: {phase}",
+    "Enregistrement du vol : actif | Collecte scientifique : {phase}",
+    "Flugaufzeichnung: aktiv | Datenerfassung: {phase}",
+    "Gravação do voo: ativa | Coleta científica: {phase}"
+  ],
+  "Flight recording: Inactive | Science: {phase}": [
+    "Grabación del vuelo: inactiva | Adquisición científica: {phase}",
+    "Enregistrement du vol : inactif | Collecte scientifique : {phase}",
+    "Flugaufzeichnung: inaktiv | Datenerfassung: {phase}",
+    "Gravação do voo: inativa | Coleta científica: {phase}"
+  ],
+  "Flight recording: Unavailable | Science: {phase}": [
+    "Grabación del vuelo: no disponible | Adquisición científica: {phase}",
+    "Enregistrement du vol : indisponible | Collecte scientifique : {phase}",
+    "Flugaufzeichnung: nicht verfügbar | Datenerfassung: {phase}",
+    "Gravação do voo: indisponível | Coleta científica: {phase}"
+  ],
+  "Retained survey product": [
+    "Producto de levantamiento conservado",
+    "Produit de relevé conservé",
+    "Gespeichertes Vermessungsprodukt",
+    "Produto de levantamento retido"
+  ],
+  "Source-backed DEM / DSM cells": [
+    "Celdas DEM / DSM respaldadas por fuentes",
+    "Cellules DEM / DSM issues des sources",
+    "DEM-/DSM-Zellen aus Quelldaten",
+    "Células DEM / DSM com respaldo das fontes"
+  ],
+  "All instruments": [
+    "Todos los instrumentos",
+    "Tous les instruments",
+    "Alle Instrumente",
+    "Todos os instrumentos"
+  ],
+  "Valid retained native cells in the latest product. Gaps remain missing.": [
+    "Celdas válidas de la cuadrícula original conservadas en el producto más reciente. Los huecos siguen sin datos.",
+    "Cellules valides de la grille d’origine conservées dans le dernier produit. Les lacunes restent sans données.",
+    "Gültige Zellen des ursprünglichen Rasters im neuesten gespeicherten Produkt. Datenlücken bleiben bestehen.",
+    "Células válidas da grade original retidas no produto mais recente. As lacunas continuam sem dados."
+  ],
+  "Original acquisition footprints (modeled outlines)": [
+    "Huellas de adquisición originales (contornos modelados)",
+    "Emprises des acquisitions d’origine (contours modélisés)",
+    "Ursprüngliche Aufnahmebereiche (modellierte Umrisse)",
+    "Áreas de aquisição originais (contornos modelados)"
+  ],
+  "Historical native-cell elevations along the archived ground path or an explicit analysis transect. No interpolation, new observations or equivalence to aircraft MSL. Gaps and source/session boundaries remain disconnected.": [
+    "Elevaciones históricas de las celdas de la cuadrícula original a lo largo de la trayectoria sobre el terreno archivada o de un transecto de análisis explícito. Sin interpolación, nuevas observaciones ni equivalencia con la altitud MSL de la aeronave. Los huecos y los límites entre fuentes o sesiones permanecen separados.",
+    "Altitudes historiques des cellules de la grille d’origine le long de la trace au sol archivée ou d’un transect d’analyse explicite. Aucune interpolation, nouvelle observation ou équivalence avec l’altitude MSL de l’aéronef. Les lacunes et limites entre sources ou sessions restent disjointes.",
+    "Historische Höhenwerte der Zellen des ursprünglichen Rasters entlang der archivierten Bodenspur oder eines ausdrücklich festgelegten Analyseprofils. Keine Interpolation, neuen Beobachtungen oder Gleichsetzung mit der MSL-Flughöhe. Lücken sowie Quellen- und Sitzungsgrenzen bleiben unverbunden.",
+    "Elevações históricas das células da grade original ao longo da trajetória no solo arquivada ou de um transecto de análise explícito. Sem interpolação, novas observações ou equivalência com a altitude MSL da aeronave. As lacunas e os limites entre fontes ou sessões permanecem desconectados."
+  ],
+  "Native cell / original record": [
+    "Celda de la cuadrícula original / registro original",
+    "Cellule de la grille d’origine / enregistrement original",
+    "Zelle des ursprünglichen Rasters / Originaldatensatz",
+    "Célula da grade original / registro original"
+  ],
+  "Profile native-cell evidence": [
+    "Pruebas del perfil de celdas de la cuadrícula original",
+    "Preuves du profil des cellules de la grille d’origine",
+    "Nachweise des Profils aus ursprünglichen Rasterzellen",
+    "Evidências do perfil de células da grade original"
+  ]
+}

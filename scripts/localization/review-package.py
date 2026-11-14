@@ -14,11 +14,11 @@ if quality['version'] != english['version']:
 for locale in ['es-ES', 'fr-FR', 'de-DE', 'pt-BR']:
     catalog = json.loads((base / 'locales' / (locale + '.json')).read_text())
     with (output / ('messages.' + locale + '.tsv')).open('w', newline='', encoding='utf-8') as stream:
-        writer = csv.writer(stream, delimiter='\t')
+        writer = csv.writer(stream, delimiter='\t', lineterminator='\n')
         writer.writerow(['key', 'surface', 'critical', 'context', 'parameters', 'canonical_English', 'bundled_candidate', 'explicit_English_fallback_reason', 'human_review'])
         for key, message in english['messages'].items():
             rule = schema['messages'][key]
             writer.writerow([key, rule.get('surface', ''), rule.get('critical', False), rule['context'], ','.join(rule['parameters']), json.dumps(message, ensure_ascii=False), json.dumps(catalog['messages'][key], ensure_ascii=False), quality['pending'][locale].get(key, ''), 'PENDING'])
-report = {'catalogVersion': english['version'], 'catalogIdentity': quality['sourceHash'], 'keyCoverage': {locale: len(english['messages']) for locale in ['en-US', 'es-ES', 'fr-FR', 'de-DE', 'pt-BR']}, 'candidateReceipts': quality['receipts'], 'fallbacks': quality['pending'], 'renderedCoverage': 'Sampled browser receipts are separate; a complete catalog does not prove all rendered views.', 'humanReview': 'PENDING', 'installedWindows': 'NOT TESTED', 'installedMSFS': 'NOT TESTED'}
-(output / 'p07b-candidate-coverage.json').write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
+report = {'catalogVersion': english['version'], 'catalogIdentity': quality['sourceHash'], 'bundleIdentity': json.loads((base / 'locale-manifest.json').read_text()).get('bundleIdentity'), 'keyCoverage': {locale: len(english['messages']) for locale in ['en-US', 'es-ES', 'fr-FR', 'de-DE', 'pt-BR']}, 'candidateReceipts': quality['receipts'], 'fallbacks': quality['pending'], 'renderedCoverage': 'Sampled browser receipts are separate; a complete catalog does not prove all rendered views.', 'humanReview': 'PENDING', 'installedWindows': 'NOT TESTED', 'installedMSFS': 'NOT TESTED'}
+(output / 'candidate-coverage.json').write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
 print('Wrote four complete candidate/context review tables and explicit fallback report.')

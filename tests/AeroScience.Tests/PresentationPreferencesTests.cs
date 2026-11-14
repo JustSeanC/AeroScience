@@ -92,6 +92,7 @@ public sealed class PresentationPreferencesTests : IDisposable
     [Fact] public void NativeTranslationsUseFiveResourcesWithExactParametersAndBoundedPluralParity()
     {
         var culture=System.Globalization.CultureInfo.CurrentCulture;
+        Assert.NotEqual(PresentationText.SourceIdentity,PresentationText.CatalogIdentity);
         var immutable="Zoë 東京 <x> $& µm 2026-11-14T01:02:03.123Z "+new string('a',64);
         var closes=new[]{"Close","Cerrar","Fermer","Schließen","Fechar"};
         for(var index=0;index<PresentationText.Locales.Count;index++)

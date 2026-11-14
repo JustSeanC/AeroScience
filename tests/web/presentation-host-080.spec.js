@@ -23,7 +23,7 @@ test('companion defaults persist across browser contexts while explicit browser 
  }finally{await save(original.theme,original.locale);}
 });
 test('native adapter accepts only current correlated replies and uses English for old or mismatched catalogs',async({page})=>{
- await mountToolbar(page,{autoReply:false});const {catalogVersion,catalogIdentity}=await page.evaluate(()=>AeroScienceLocaleData.manifest);
+ await mountToolbar(page,{autoReply:false});const {catalogVersion,bundleIdentity:catalogIdentity}=await page.evaluate(()=>AeroScienceLocaleData.manifest);
  async function reply(metadata,requestId=null){await page.evaluate(({metadata,requestId})=>{const p=document.querySelector('ingamepanel-aeroscience');p.send('state');const req=window.bus.sent.filter(x=>x.command.op==='state').at(-1).command;
   p.receive(JSON.stringify({protocol:1,requestId:requestId||req.requestId,ok:true,state:window.bus.state,capabilities:['presentation-1'],presentation:metadata}));}, {metadata,requestId});}
  await reply({version:1,catalogVersion,catalogIdentity,locale:'fr-FR',revision:4});await expect(page.locator('#as-language-detail')).toContainText('Français');

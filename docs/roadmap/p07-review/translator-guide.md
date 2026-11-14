@@ -2,6 +2,10 @@
 
 These catalogs are **candidate translations**, prepared with automated offline drafts and explicit developer-authored terminology/safety overrides. No qualified fluent human review has been supplied. Passing tests is engineering evidence, not human language acceptance or installed Windows/MSFS acceptance.
 
+Operational QA corrected literal military translations of *armed* and an incorrect German collection headline. Use “prepared/waiting” for an armed instrument; this must never mean active collection. `critical-candidate-overrides.json` records these developer-authored candidates separately from machine drafts, without conferring human approval. Review them in both the recording and science states.
+
+In terrain contexts, *native cell* means a cell of the source's original grid. German wording should use **Zelle des ursprünglichen Rasters**, not a word for indigenous people. *Modeled acquisition footprint* is **modellierter Aufnahmebereich**, never measured scientific coverage. Original source descriptions and campaign/evidence contents remain in their original language; review the translated explanation around them separately.
+
 ## Resources and reproducible checks
 
 The sole source is `src/AeroScience.Engine/wwwroot/i18n/locales/en-US.json`, with `message-schema.json` context, required parameters, surface, critical flag, source locations and code-point limit. Edit the peer `es-ES`, `fr-FR`, `de-DE` and `pt-BR` catalogs. Keep keys, original identifiers, number precision, literal units, hashes and retained UTC unchanged. Do not translate user names, source/product identities, ICAO codes or original evidence. Translate display explanations around those values.

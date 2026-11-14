@@ -485,7 +485,7 @@ function editPlan(plan) {
     const t=templates.find(t=>t.id===template.value),current=readConfigs(configuration),recommendedIds=new Set((t?.instruments||[]).filter(c=>c.enabled).map(c=>c.instrumentId));
     if(recommendationTemplate!==t){
       recommendationTemplate=t;recommendationCards=[];
-      recommendations.replaceChildren(text("h3",localizedCopy("ui.research.messageRecommendedSciencePayload")),text("p",`${t?.name||"No template"}: ${t?.objective||"No objective supplied"}`));
+      recommendations.replaceChildren(text("h3",localizedCopy("ui.research.messageRecommendedSciencePayload")),text("p",`${t?.name||textForUI("ui.research.messageNoTemplate")}: ${t?.objective||textForUI("ui.research.messageNoObjectiveSupplied")}`));
       const primary=text("div",undefined,"recommended-payload-grid");recommendations.append(primary);
       for(const c of(t?.instruments||[]).filter(c=>c.enabled))recommendationCards.push(recommendationCard(c,"primary",primary));
       if(!primary.childElementCount)primary.append(text("p",localizedCopy("ui.research.messageNoFixedPrimaryPayloadChooseInstrumentsFor")));
@@ -1093,7 +1093,7 @@ function guidance(parent, g) {
     grid.append(
       text(
         "div",
-        `${label}: ${m.mode || "Unavailable"}${Number.isFinite(m.target) ? " · " + n(m.target, 3) + " " + m.unit : ""}${m.armed ? " · Armed: " + m.armed : ""}${m.status ? " · " + m.status : ""}`,
+        `${label}: ${m.mode || textForUI("map.native.unavailable")}${Number.isFinite(m.target) ? " · " + n(m.target, 3) + " " + m.unit : ""}${m.armed ? textForUI("ui.research.messageArmed",{value1:(m.armed)}) : ""}${m.status ? " · " + m.status : ""}`,
       ),
     );
   parent.append(grid, text("p", `${g.timestampUtc} · ${g.source}`, "footnote"));
@@ -1398,7 +1398,7 @@ export async function researchDetail(body, id, mission) {
     text("p", localizedCopy("ui.research.messageRecordingSource",{value1:(String(mission.source || "Unavailable"))})),
     text(
       "p",
-      `${review.research.template} · ${review.research.objective || "No objective supplied"}`,
+      `${review.research.template} · ${review.research.objective || textForUI("ui.research.messageNoObjectiveSupplied")}`,
     ),
   );
   for (const pause of review.sciencePauses || [])

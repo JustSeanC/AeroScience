@@ -582,7 +582,7 @@ export class ResearchMap {
       for (const p of (d.markers || []).filter(valid))
         L.circleMarker(ll(p, base), { radius: 6, color: "#eb9bbd" })
           .bindTooltip(
-            label(`${p.category || "Marker"} · ${p.timestampUtc || ""}`),
+            label(`${p.category || textForUI("ui.map.messageMarker")} · ${p.timestampUtc || ""}`),
           )
           .addTo(this.markers);
       for (const p of (d.samples || []).filter(valid))

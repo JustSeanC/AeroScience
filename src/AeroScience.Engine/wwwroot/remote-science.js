@@ -100,7 +100,7 @@ export async function viewProduct(parent, data, api = null) {
       "p",
       localizedCopy("ui.remoteScience.messageSource",{value1:(String(s.provider)),value2:(String(scientificCategory(p.sourceClass).label))}),
     ),
-    e('p',`${p.validSampleCount==null?'Valid sampled positions: Unavailable':p.validSampleCount+' valid sampled positions'} · ${p.quality}`),
+    e('p',`${p.validSampleCount==null?textForUI("ui.remoteScience.messageValidSampledPositionsUnavailable"):textForUI("ui.remoteScience.messageValidSampledPositions",{value1:(p.validSampleCount)})} · ${p.quality}`),
   );
   const sourceContext=e('details');sourceContext.append(e('summary',localizedCopy("ui.remoteScience.messageAboutThisSourceMeasurement")));renderLayerContext(sourceContext,{source:data.source,product:p,sourceClass:p.sourceClass,unit:data.bands[0]?.unit,measurement:data.bands[0]?.id,context:{grid:data.bands[0]?.originalGrid}});parent.append(sourceContext);
   const mapHolder = e("div");

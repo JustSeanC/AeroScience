@@ -62,7 +62,11 @@ public sealed class DataManagementForm : BrandedForm
         if (!science) return new MissionStore(Path.Combine(settings.MissionDirectory, "missions.db")).PreviewFlightClear(plans.Checked);
         using var store = new ScienceStore(settings.ScienceLibraryDirectory);store.MissionIsProtected=new MissionStore(Path.Combine(settings.MissionDirectory,"missions.db")).IsProtected;return store.PreviewClear();
     }
-    private static string Describe(DataClearPreview p) => (p.Kind == "flight" ? $"{p.Missions} recorded missions will be deleted." : $"{p.Datasets} scientific datasets, {p.Observations} observations and {p.ManagedProductFiles} generated product files will be deleted.") + $"\nData to delete from: {p.Directory}\nProtected missions/datasets included in this deliberate clear: {p.ProtectedItems}\nSaved plans to delete: {p.Plans}\nApproximate managed size: {p.ApproximateBytes / 1048576d:0.00} MiB including SQLite companion files and indexed products (clearing rows may retain allocation)\nGenerated product files: {p.ManagedProductFiles} ({p.ManagedProductBytes / 1048576d:0.00} MiB)\n" + string.Join("\n", p.ProductPathPreview ?? []) + $"\nRemoves: {p.Removes}\nPreserves: {p.Preserves}";
+    private static string Describe(DataClearPreview p) => WindowsPresentation.Text("windows.deletion.archiveDetails", new Dictionary<string, object> {
+        ["summary"] = p.Kind == "flight" ? WindowsPresentation.Text("windows.deletion.archiveFlightSummary", new Dictionary<string, object> { ["missions"] = p.Missions }) : WindowsPresentation.Text("windows.deletion.archiveScienceSummary", new Dictionary<string, object> { ["datasets"] = p.Datasets, ["observations"] = p.Observations, ["files"] = p.ManagedProductFiles }),
+        ["directory"] = p.Directory, ["protected"] = p.ProtectedItems, ["plans"] = p.Plans,
+        ["size"] = WindowsPresentation.Format($"{p.ApproximateBytes / 1048576d:0.00}"), ["files"] = p.ManagedProductFiles,
+        ["productSize"] = WindowsPresentation.Format($"{p.ManagedProductBytes / 1048576d:0.00}"), ["paths"] = string.Join("\n", p.ProductPathPreview ?? []), ["removes"] = p.Removes, ["preserves"] = p.Preserves });
     private async Task DeleteCollected()
     {
         if(working||app.Busy||app.Recording){MessageBox.Show(this,WindowsPresentation.Text("windows.dataManagementForm.endRecordingAndWaitForActiveOperationsFirst"));return;}

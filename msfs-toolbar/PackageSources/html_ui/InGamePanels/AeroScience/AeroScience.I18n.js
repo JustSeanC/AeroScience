@@ -18,7 +18,7 @@ var AeroScienceI18n = (function () {
       data.catalogs && data.catalogs['en-US'] && data.manifest.version === 1 && data.schema.version === 1 &&
       data.catalogs['en-US'].version === data.manifest.catalogVersion);
     var compatible = !!(valid && metadata && metadata.version === 1 && metadata.catalogVersion === data.manifest.catalogVersion &&
-      (data.manifest.qualityContract !== 1 || metadata.catalogIdentity === data.manifest.catalogIdentity) &&
+      (data.manifest.qualityContract !== 1 || metadata.catalogIdentity === (data.manifest.bundleIdentity || data.manifest.catalogIdentity)) &&
       data.manifest.locales.some(function (locale) { return locale.id === metadata.locale; }));
     translator = valid ? format.createTranslator(data, compatible ? metadata.locale : 'en-US') : null;
     var requested = compatible ? metadata.locale : 'en-US', name = requested;

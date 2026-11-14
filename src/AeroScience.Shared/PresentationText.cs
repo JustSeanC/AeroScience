@@ -21,7 +21,8 @@ public static class PresentationText
     private static readonly IReadOnlyDictionary<string, JsonElement> Catalogs = LoadCatalogs();
     public const int ContractVersion = 1;
     public static int CatalogVersion => Manifest.GetProperty("catalogVersion").GetInt32();
-    public static string CatalogIdentity => Manifest.GetProperty("catalogIdentity").GetString()!;
+    public static string SourceIdentity => Manifest.GetProperty("catalogIdentity").GetString()!;
+    public static string CatalogIdentity => Manifest.TryGetProperty("bundleIdentity",out var bundle) ? bundle.GetString()! : SourceIdentity;
     public static IReadOnlyList<PresentationLocale> Locales { get; } = Manifest.GetProperty("locales").EnumerateArray()
         .Select(l => new PresentationLocale(l.GetProperty("id").GetString()!, l.GetProperty("name").GetString()!, l.GetProperty("review").GetString() is "preview" or "candidate", l.GetProperty("review").GetString()!)).ToArray();
     private static IReadOnlyDictionary<string, JsonElement> LoadCatalogs()
@@ -39,7 +40,7 @@ public static class PresentationText
     public static bool IsCompatibleCatalog(JsonElement catalog, string locale) => catalog.ValueKind == JsonValueKind.Object
         && catalog.TryGetProperty("version", out var version) && version.ValueKind == JsonValueKind.Number && version.TryGetInt32(out var number) && number == CatalogVersion
         && catalog.TryGetProperty("locale", out var identity) && identity.ValueKind == JsonValueKind.String && identity.GetString() == locale
-        && catalog.TryGetProperty("sourceHash", out var source) && source.ValueKind == JsonValueKind.String && source.GetString() == CatalogIdentity
+        && catalog.TryGetProperty("sourceHash", out var source) && source.ValueKind == JsonValueKind.String && source.GetString() == SourceIdentity
         && catalog.TryGetProperty("messages", out var messages) && messages.ValueKind == JsonValueKind.Object;
     public static string EffectiveLocale(string? requested) => Catalogs.ContainsKey(Locale(requested)) ? Locale(requested) : "en-US";
     public static string PluralCategory(string locale, long count) => locale is "es-ES" or "fr-FR" or "pt-BR" && count != 0 && count % 1000000 == 0 ? "many"

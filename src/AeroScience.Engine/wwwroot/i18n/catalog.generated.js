@@ -2,7 +2,7 @@
 export const localeData = {
   "manifest": {
     "version": 1,
-    "catalogVersion": 20,
+    "catalogVersion": 22,
     "fallback": "en-US",
     "locales": [
       {
@@ -37,7 +37,8 @@ export const localeData = {
       }
     ],
     "qualityContract": 1,
-    "catalogIdentity": "24325d6cd2282e6667cce945669b271811652f8627707a2d627de0b92e3822f9"
+    "catalogIdentity": "c871f36c92c40f3e195f35c762e9b9d6d415c522c475027296fb3dd87dba839c",
+    "bundleIdentity": "7000359050b2f809d94178ad889605d43aa458ba777b2c4b0795634fe4058761"
   },
   "schema": {
     "version": 1,
@@ -23162,9 +23163,6 @@ export const localeData = {
           "value3"
         ]
       },
-      "native.enableautomatic": {
-        "parameters": []
-      },
       "native.flightGuidanceUnavailable": {
         "parameters": []
       },
@@ -23448,14 +23446,374 @@ export const localeData = {
       },
       "native.instrument.hyperspectralImager": {
         "parameters": []
+      },
+      "ui.app.messageNoAircraftData": {
+        "parameters": []
+      },
+      "ui.app.messageSIMULATED": {
+        "parameters": []
+      },
+      "ui.app.messageSIMULATOR": {
+        "parameters": []
+      },
+      "ui.app.messageNOTELEMETRY": {
+        "parameters": []
+      },
+      "ui.aviationReference.messagePublishedNotices": {
+        "parameters": []
+      },
+      "ui.aviationReference.messageCatalogRecords": {
+        "parameters": []
+      },
+      "ui.aviationReference.messageLastRefreshPreviousSuccessfulRecordsAre": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "ui.downloadActivity.messageFindingSource": {
+        "parameters": []
+      },
+      "ui.flightTestProcedure.messagePointAttempt": {
+        "parameters": []
+      },
+      "ui.flightTestProcedure.messageOverallCard": {
+        "parameters": []
+      },
+      "ui.flightTestProcedure.messageQualifiedRepetition": {
+        "parameters": []
+      },
+      "ui.flightTestProcedure.messageNotCounted": {
+        "parameters": []
+      },
+      "ui.flightTestProcedure.messageOpen": {
+        "parameters": []
+      },
+      "ui.libraryDownload.messageOriginalObservation": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "ui.libraryDownload.messageCompositeOriginalObservationDateUnknown": {
+        "parameters": []
+      },
+      "ui.libraryDownload.messageRetainedCandidateOnTheLoadedInventoryPage": {
+        "parameters": []
+      },
+      "ui.libraryDownload.messageDiscoveredNotConfirmedInTheLoaded": {
+        "parameters": []
+      },
+      "ui.libraryDownload.messageSceneCloudInformationUnknownNotApplicable": {
+        "parameters": []
+      },
+      "ui.libraryDownload.messageReportedSceneCloudNotAValidPixel": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "ui.map.messageMarker": {
+        "parameters": []
+      },
+      "ui.missionIntelligence.messageWholeFlight": {
+        "parameters": []
+      },
+      "ui.missionPerformance.messageUnknownEnd": {
+        "parameters": []
+      },
+      "ui.missionTimeline.messageStillRecording": {
+        "parameters": []
+      },
+      "ui.missionWorkspace.messageProfileNotArchived": {
+        "parameters": []
+      },
+      "ui.missionWorkspace.messageDateUnknown": {
+        "parameters": []
+      },
+      "ui.missionWorkspace.messageOriginalsDeletedSavedValuesRetained": {
+        "parameters": []
+      },
+      "ui.missionWorkspace.messageAGL": {
+        "parameters": []
+      },
+      "ui.missionWorkspace.messageObservedEntry": {
+        "parameters": []
+      },
+      "ui.missionWorkspace.messageCloudPresentEntryUnknown": {
+        "parameters": []
+      },
+      "ui.missionWorkspace.messageObservedExit": {
+        "parameters": []
+      },
+      "ui.missionWorkspace.messageExitNotEstablished": {
+        "parameters": []
+      },
+      "ui.onlineAccess.messageAllowed": {
+        "parameters": []
+      },
+      "ui.onlineAccess.messageNotAllowed": {
+        "parameters": []
+      },
+      "ui.organizationLiveUi.messageActivated": {
+        "parameters": []
+      },
+      "ui.organizationLiveUi.messageNotActivated": {
+        "parameters": []
+      },
+      "ui.patterns.messageEditableGeneratedRoute": {
+        "parameters": []
+      },
+      "ui.personalResearchFlight.messageAttemptRecordingSince": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "ui.personalResearchFlight.messageActiveReadyForAnAttempt": {
+        "parameters": []
+      },
+      "ui.personalResearchFlight.messageProvisionalRepetitionsVerifyOriginal": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "ui.receivedEvidenceUi.messageRecordedLocationUnavailable": {
+        "parameters": []
+      },
+      "ui.receivedEvidenceUi.messageAltitudeUnavailable": {
+        "parameters": []
+      },
+      "ui.remoteScience.messageValidSampledPositionsUnavailable": {
+        "parameters": []
+      },
+      "ui.remoteScience.messageValidSampledPositions": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "ui.researchOrganizations.messageActiveMembership": {
+        "parameters": []
+      },
+      "ui.researchOrganizations.messageMembershipUnavailable": {
+        "parameters": []
+      },
+      "ui.researchOrganizations.messageSent": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "ui.research.messageNoTemplate": {
+        "parameters": []
+      },
+      "ui.research.messageNoObjectiveSupplied": {
+        "parameters": []
+      },
+      "ui.research.messageArmed": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "ui.scienceJourney.messageSimulatorUnavailable": {
+        "parameters": []
+      },
+      "ui.scienceMapView.messageRecordedEnvironmentalValues": {
+        "parameters": []
+      },
+      "ui.scienceMapView.messageHistoricalSourceAcquisitions": {
+        "parameters": []
+      },
+      "ui.scienceMapView.messageLocationOverviewActualPacketQualityRemainsVisible": {
+        "parameters": []
+      },
+      "ui.scienceMapView.messageModeledAcquisitionFootprintsNotContinuousValidPixelCoverage": {
+        "parameters": []
+      },
+      "ui.scientificLibrary.messageUnavailableReconnectStorageOrRestoreThe": {
+        "parameters": []
+      },
+      "ui.scientificLibrary.messageOriginalsRetainedCheckedPreviewHasNoUsable": {
+        "parameters": []
+      },
+      "ui.scientificLibrary.messageOriginalsRetainedActualPixelQualityIsAssessed": {
+        "parameters": []
+      },
+      "ui.sourceInspection.messageDerivedQuantity": {
+        "parameters": []
+      },
+      "ui.sourceInspection.messageDecodedSourceQuantity": {
+        "parameters": []
+      },
+      "ui.submissionBuilder.messageSubmitEvidenceAuthorized": {
+        "parameters": []
+      },
+      "ui.submissionBuilder.messageReadReferencePermissionCannotUpload": {
+        "parameters": []
+      },
+      "ui.submissionBuilder.messagePublishedPolicy": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "ui.submissionBuilder.messagePolicyUnknown": {
+        "parameters": []
+      },
+      "ui.submissionBuilder.messageOriginalRecordS": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "ui.surveyResearch.messageHistoricalSource": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "ui.surveyResearch.messageSimulatorObservation": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "ui.organizationReviews.messageRevoked": {
+        "parameters": []
+      },
+      "windows.deletion.archiveFlightSummary": {
+        "parameters": [
+          "missions"
+        ]
+      },
+      "windows.deletion.archiveScienceSummary": {
+        "parameters": [
+          "datasets",
+          "observations",
+          "files"
+        ]
+      },
+      "windows.deletion.archiveDetails": {
+        "parameters": [
+          "summary",
+          "directory",
+          "protected",
+          "plans",
+          "size",
+          "files",
+          "productSize",
+          "paths",
+          "removes",
+          "preserves"
+        ]
+      },
+      "windows.storage.openExisting": {
+        "parameters": [
+          "destination",
+          "current"
+        ]
+      },
+      "windows.storage.migrate": {
+        "parameters": [
+          "current",
+          "destination"
+        ]
+      },
+      "windows.storage.capacity": {
+        "parameters": [
+          "size"
+        ]
+      },
+      "portal.organization.name": {
+        "parameters": []
+      },
+      "ui.missionIntelligence.messageRefreshed": {
+        "parameters": [
+          "value1",
+          "value2",
+          "value3",
+          "value4"
+        ]
+      },
+      "ui.scienceDisplay.messageActualMeasurementValuesMin": {
+        "parameters": [
+          "value1",
+          "value2",
+          "value3",
+          "value4",
+          "value5",
+          "value6"
+        ]
+      },
+      "transfer.estimate.second": {
+        "parameters": [
+          "low",
+          "count"
+        ],
+        "plural": "count"
+      },
+      "transfer.estimate.minute": {
+        "parameters": [
+          "low",
+          "count"
+        ],
+        "plural": "count"
+      },
+      "transfer.estimate.hour": {
+        "parameters": [
+          "low",
+          "count"
+        ],
+        "plural": "count"
+      },
+      "transfer.stage.awaitingApproval": {
+        "parameters": []
+      },
+      "transfer.stage.waitingForAuthorization": {
+        "parameters": []
+      },
+      "transfer.stage.offline": {
+        "parameters": []
+      },
+      "native.phase.current": {
+        "parameters": [
+          "phase"
+        ]
+      },
+      "native.phase.previous": {
+        "parameters": [
+          "phase"
+        ]
+      },
+      "native.phase.session": {
+        "parameters": [
+          "status",
+          "number"
+        ]
+      },
+      "native.phase.notStarted": {
+        "parameters": [
+          "status"
+        ]
+      },
+      "native.phase.stale": {
+        "parameters": [
+          "status"
+        ]
+      },
+      "native.banner.recordingActive": {
+        "parameters": [
+          "phase"
+        ]
+      },
+      "native.banner.recordingInactive": {
+        "parameters": [
+          "phase"
+        ]
+      },
+      "native.banner.recordingUnknown": {
+        "parameters": [
+          "phase"
+        ]
       }
     }
   },
   "catalogs": {
     "de-DE": {
-      "version": 20,
+      "version": 22,
       "locale": "de-DE",
-      "sourceHash": "24325d6cd2282e6667cce945669b271811652f8627707a2d627de0b92e3822f9",
+      "sourceHash": "c871f36c92c40f3e195f35c762e9b9d6d415c522c475027296fb3dd87dba839c",
       "pendingEnglishFallbackKeys": [
         "contextHelp.terrain.title",
         "flight.elapsed",
@@ -23473,13 +23831,10 @@ export const localeData = {
         "native.collectionControl",
         "native.commandDeliveryFailedTheIntervalIsNotConfirmed",
         "native.neighboringFootMslBandsCollectValidTemperatureReadings",
-        "native.stale",
         "native.stateAsOfMetrics",
         "native.static.iasKts",
         "native.static.northUpGoldPlannedTurquoiseRecordedPinkMarkersRecentTrack",
         "native.static.vsFtMin",
-        "results.product",
-        "results.terrainCells",
         "submissions.noSupportingProducts",
         "terrain.definitionRequired",
         "terrain.gridWarning",
@@ -23524,6 +23879,7 @@ export const localeData = {
         "ui.libraryDownload.messageAsOfExpires",
         "ui.libraryDownload.messageDownloadManager",
         "ui.libraryDownload.messageOfficialCensusStatesSelectA",
+        "ui.libraryDownload.messageReportedSceneCloudNotAValidPixel",
         "ui.libraryDownload.messageSearchingObservationsThroughEarlierYearsRemain",
         "ui.libraryDownload.messageSelectedNumericSourceCellsAre",
         "ui.locationSearch.messageNFD",
@@ -23552,6 +23908,7 @@ export const localeData = {
         "ui.missionTimeline.messageOriginalRecordsOnThisPage",
         "ui.missionTimeline.messagePositionUTC",
         "ui.missionTimeline.messageSHA256",
+        "ui.missionWorkspace.messageAGL",
         "ui.missionWorkspace.messageActualPacketSource",
         "ui.missionWorkspace.messageAlongTrackGroundSlopeDegrees",
         "ui.missionWorkspace.messageDensitySlugFt",
@@ -23683,6 +24040,7 @@ export const localeData = {
         "ui.surveyProfile.messageIndexSHA256",
         "ui.surveyProfile.messageMSL",
         "ui.surveyResearch.messageDatum",
+        "ui.surveyResearch.messageSimulatorObservation",
         "ui.surveyResearch.messageSimulatorReportedAirTemperatureDegCWorksWithoutExternal",
         "ui.terrainProfile.messageDEMOrDSMSurfaceIdentityAndVertical",
         "ui.terrainProfile.messageDEMUnavailable",
@@ -23722,6 +24080,7 @@ export const localeData = {
         "windows.science.category11Description",
         "windows.science.category11Title",
         "windows.setupWizardForm.missionDatabaseFileChooseItsFolderFilenameRemainsMissions",
+        "windows.storage.openExisting",
         "windows.toolbarProgressForm.aeroscienceMsfsToolbar"
       ],
       "messages": {
@@ -23810,7 +24169,7 @@ export const localeData = {
         "settings.hostFollow": "Verwenden Sie die Standardeinstellungen für den Begleiter in diesem Browser",
         "settings.hostReadOnly": "Die Standardeinstellungen für Vergleichsgeräte sind nur auf gekoppelten Geräten lesbar. Ändern Sie sie auf dem Begleit-PC.",
         "settings.hostUnavailable": "Die Standardeinstellungen für Vergleichseinstellungen sind nicht verfügbar. Verbinden Sie sich erneut, um sie zu überprüfen; Browser-Auswahlen bleiben verfügbar.",
-        "settings.hostSaved": "Standardeinstellungen gespeicherter Vergleich. Bestehende Windows-Dialoge wieder öffnen, um ihr Aussehen zu aktualisieren. Andere Windows-Dialogtexte bleiben Englisch.",
+        "settings.hostSaved": "Standardeinstellungen gespeichert. Bestehende Windows-Dialoge erneut öffnen, um die ausgewählte Sprache und das Erscheinungsbild zu verwenden. Aufnahme und Wissenschaftssammlung sind unverändert.",
         "settings.hostNativeNotice": "Die native Windows/MSFS-Lokalisierung erfordert passende gebündelte Kataloge. Die sprachkundige menschliche Prüfung und die Abnahme in der installierten Umgebung stehen aus.",
         "toolbar.mission": "Mission",
         "toolbar.payload": "Zahlbarkeit",
@@ -23861,11 +24220,11 @@ export const localeData = {
         "home.science": "Sammlung Wissenschaft",
         "home.science.unknown": "Status nicht verfügbar",
         "home.science.unavailable": "Nicht verfügbar — Überprüfung des aktuellen Flugs",
-        "home.science.notStarted": "Nicht begonnen",
-        "home.science.armed": "Bewaffnet — warten auf die Einsammlung",
-        "home.science.collecting": "Sammeln",
+        "home.science.notStarted": "Nicht gestartet",
+        "home.science.armed": "Bereit: wartet auf Datenerfassung",
+        "home.science.collecting": "Datenerfassung läuft",
         "home.science.paused": "Nicht mehr als 1 %",
-        "home.science.betweenSessions": "Zwischen den Sitzungen",
+        "home.science.betweenSessions": "Zwischen Sitzungen",
         "home.science.ended": "Sitzung beendet",
         "home.synthetic": "SIMULIERTE TELEMETRIE — kein installierter MSFS-Flug",
         "home.simulator": "Quelle: Microsoft Flug 1950",
@@ -24024,8 +24383,8 @@ export const localeData = {
         "toolbar.flight": "Flug",
         "toolbar.science": "Wissenschaft",
         "toolbar.cards": "Karten",
-        "toolbar.collectionActive": "WISSENSCHAFTLICHES VERBINDUNGSWESEN",
-        "toolbar.collectionInactive": "WISSENSCHAFTLICHES UMWELTUNAKTIV",
+        "toolbar.collectionActive": "WISSENSCHAFTLICHE DATENERFASSUNG AKTIV",
+        "toolbar.collectionInactive": "WISSENSCHAFTLICHE DATENERFASSUNG INAKTIV",
         "toolbar.retained": "Originale wissenschaftliche Beobachtungen: {original}, modellierte/abgeleitete Beobachtungen: {derived}, gespeicherte externe Produkte: {products}. Zählt nicht die Qualität oder objektive Fertigstellung zu ermitteln.",
         "toolbar.countsUnavailable": "Gespeicherte wissenschaftliche Zählungen nicht verfügbar; keine Zählung aus Flugproben abgeleitet.",
         "toolbar.acquisitionSummary": "Erfassungsdiagnostik: {recorded} aufgezeichnete Reihen/Produkte, {rejected} abgelehnt, {missed} verpasste Intervalle, tatsächliches Durchschnittsintervall: {interval} s. Diese Zählungen sind getrennt von den ursprünglichen Belegen.",
@@ -24035,13 +24394,13 @@ export const localeData = {
         "flight.action.pauseData": "Wissenschaftliche Datenerfassung pausieren",
         "flight.action.resumeData": "Wissenschaftliche Datenerfassung fortsetzen",
         "flight.action.endData": "Aktuelle wissenschaftliche Sitzung beenden",
-        "flight.action.rearmAutomation": "Automatische Sammlung wieder aufrüsten",
+        "flight.action.rearmAutomation": "Automatische Datenerfassung erneut bereitstellen",
         "flight.action.record": "Flugaufzeichnung starten",
         "flight.action.endFlight": "Mission beenden",
         "toolbar.terrainScanner": "Bodenscanner (DEM-Elevation)",
         "toolbar.acquisitionState": "Instrumentenerwerbsstatus: {status} (Separat aus der Sammlungsphase).",
         "science.stopped": "Wissenschaft beendet",
-        "home.science.stopped": "nicht gestreckt",
+        "home.science.stopped": "Beendet",
         "terrain.title": "Fertigstellung des Fluggeländes nach dem Flug",
         "terrain.separation": "Populate modeled scanner support with retained historical DEM/DSM cells. This creates derived terrain, never new airborne observations, LiDAR returns or research credit.",
         "terrain.initial": "Überprüfen Sie zuerst einen gesicherten Korridor. Es werden keine Quellen automatisch heruntergeladen.",
@@ -24182,8 +24541,8 @@ export const localeData = {
         "results.available": "Verfügbar",
         "results.unavailable": "Nicht verfügbar",
         "results.modeledOnly": "Modellierte Sensorunterstützung; nicht gemessenes Gelände oder Laserabdeckung.",
-        "results.terrainCells": "Source-backed DEM / DSM cells",
-        "results.historicalCells": "Gültige Eingeborenenzellen im neuesten Produkt. Lücken bleiben verschwunden.",
+        "results.terrainCells": "DEM-/DSM-Zellen aus Quelldaten",
+        "results.historicalCells": "Gültige Zellen des ursprünglichen Rasters im neuesten gespeicherten Produkt. Datenlücken bleiben bestehen.",
         "results.lidarPoints": "Historische LiDAR kehrt zurück",
         "results.historicalReturns": "Originale historische Quellenaufzeichnungen, keine Rückgaben, die von den simulierten Flugzeugen erzeugt werden.",
         "results.separate": "Flugbeobachtungen, modellierte Unterstützung, historische Höhenzellen und historische LiDAR-Rückgaben sind separate Beweise. Post-Flight-Produkte erhöhen nicht wissenschaftlichen Ertrag oder komplette Forschungskarten.",
@@ -24192,7 +24551,7 @@ export const localeData = {
         "results.reviewOriginal": "Überprüfung der ursprünglichen Beweise",
         "results.prepare": "Quellenunterstützung vorbereiten",
         "results.noProducts": "Es wird kein unterstütztes Post-Flight-Produkt beibehalten. Originalbeobachtungen und fortgeschrittene Analysen bleiben weiter unten verfügbar.",
-        "results.product": "Retained survey product",
+        "results.product": "Gespeichertes Vermessungsprodukt",
         "results.choose": "Vorbehaltene Daten auswählen",
         "results.source": "Ursprüngliche Quelle / Referenz",
         "results.session": "Wissenschaftliche Sitzung",
@@ -24201,7 +24560,7 @@ export const localeData = {
         "results.selected": "Ausgewählter Original-Aufzeichnungssatz",
         "results.originalArtifact": "Verifiziertes Artefakt JSON öffnen",
         "results.values": "Beladene quellengestützte Beweise",
-        "results.identity": "Native Zelle / Originalaufnahme",
+        "results.identity": "Zelle des ursprünglichen Rasters / Originaldatensatz",
         "results.value": "Höhe anzeigen / Z",
         "results.raw": "Ursprünglicher dekodierter Wert",
         "results.quality": "QA / Beweisklasse",
@@ -24218,7 +24577,7 @@ export const localeData = {
         "results.gapsLayer": "Bekannte Nodata / ausgeschlossene Zellenkanten",
         "results.corridorLayer": "Modellierte Korridorstruktur",
         "results.trackLayer": "Gespeicherte Flugbahn",
-        "results.originalsLayer": "Originale Fußabdrücke (gemusterte Umrisse)",
+        "results.originalsLayer": "Ursprüngliche Aufnahmebereiche (modellierte Umrisse)",
         "results.opacity": "Lagenlage (2D-Karte)",
         "results.nextPage": "Nächste Seite laden",
         "results.viewWindow": "Details im aktuellen Kartenfenster laden",
@@ -24276,7 +24635,7 @@ export const localeData = {
         "results.exportGeo": "Laden Sie geladene Umfrageanalyse GeoJSON herunter",
         "results.exportProvenance": "Quelle herunterladen Provenienzbericht",
         "results.profile": "Quellengestütztes Höhenprofil",
-        "results.profileMeaning": "Historische Eingeborenenzellen-Höhen entlang des archivierten Bodenpfads oder einer expliziten Analyse transekt. Keine Interpolation, neue Beobachtungen oder Äquivalenz mit Flugzeug MSL. Lücken und Quell-/Sessionsgrenzen bleiben getrennt.",
+        "results.profileMeaning": "Historische Höhenwerte der Zellen des ursprünglichen Rasters entlang der archivierten Bodenspur oder eines ausdrücklich festgelegten Analyseprofils. Keine Interpolation, neuen Beobachtungen oder Gleichsetzung mit der MSL-Flughöhe. Lücken sowie Quellen- und Sitzungsgrenzen bleiben unverbunden.",
         "results.profilePath": "Profil-Bodenpfad",
         "results.archivedTrack": "Archivierte Flugzeug-Bodenspur",
         "results.analysisLine": "Zwei-Punkt-Analyse transekt (keine geflogene Route)",
@@ -24297,7 +24656,7 @@ export const localeData = {
         "results.aircraftAltitude": "Aufgenommene Flughöhe — getrennter Kontext",
         "results.mslSeparate": "Der aufgezeichnete Simulator MSL-Höhenmeter ist unabhängig von der historischen Geländereferenz. Es wird kein kreuz-alternischer Vergleich oder eine Höhe über dem Boden abgeleitet.",
         "results.simulatedAltitude": "Aufgezeichnete Simulatorhöhe",
-        "results.profileEvidence": "Profil-Namen-Zell-Beweis",
+        "results.profileEvidence": "Nachweise des Profils aus ursprünglichen Rasterzellen",
         "results.nativeCell": "Originale native Spalte, Zeile",
         "results.buildProfile": "Quell-gebackenes Profil erstellen",
         "results.exportProfile": "native-cell Profilanalyse herunterladen CSV",
@@ -24493,7 +24852,7 @@ export const localeData = {
         "ui.app.messageAboveGroundFt": "Oberer Boden {value1} ft",
         "ui.app.messageRECORDING": "● EINBEZIEHUNG",
         "ui.app.messageSTANDBY": "STANDBY",
-        "ui.app.messageMissionRecording": "Auftragsaufzeichnung",
+        "ui.app.messageMissionRecording": "Missionsaufzeichnung läuft",
         "ui.app.messageMissionActiveWaitingForFreshTelemetry": "Mission aktiv · Warten auf frische Telemetrie",
         "ui.app.messageHOME": "Start",
         "ui.app.messageMISSIONS": "Missionen",
@@ -25613,7 +25972,7 @@ export const localeData = {
         "ui.missionOperations.messageFlightEndedInspectSavedOutcomesAndOriginal": "Die Untersuchung der gespeicherten Ergebnisse und der ursprünglichen Beweise; keine Genehmigung der Organisation ist impliziert.",
         "ui.missionOperations.messageMapShowsABoundedRecordedTrackPreview": "Karte zeigt eine limitierte Track-Vorschau. Öffnen Sie die Wiederholung für zusätzliche Original-Flugproben.",
         "ui.missionOperations.messageFrozenRevisionInactiveAfterFlight": "Frozen Revision {value1} · Nach dem Flug inaktiv",
-        "ui.missionOperations.messageFocusCard": "Karte im Fokus",
+        "ui.missionOperations.messageFocusCard": "Karte fokussieren",
         "ui.missionOperations.messageReviewLocalResults": "Lokale Ergebnisse überprüfen",
         "ui.missionOperations.messageScientificOriginalsAndDependentOutputsWerePermanently": "Wissenschaftliche Originale und abhängige Ausgänge wurden dauerhaft gelöscht. Aus der Flugzeugtelemetrie werden keine Werte rekonstruiert.",
         "ui.missionOperations.messageRecordedInstrumentConfiguration": "Aufgezeichnete Gerätekonfiguration",
@@ -28975,8 +29334,8 @@ export const localeData = {
         "ui.personalResearchFlight.messageChooseAtMost16CardsForThis": "Wählen Sie für diesen Flug maximal 16 Karten. Ihre gespeicherte Kartenbibliothek ist nicht begrenzt.",
         "ui.personalResearchFlight.messageActivateCard": "Karte aktivieren",
         "ui.personalResearchFlight.messageDeactivateCard": "Karte deaktivieren",
-        "ui.personalResearchFlight.messageBeginAttempt": "Beginnen Sie den Versuch",
-        "ui.personalResearchFlight.messageEndAttempt": "Endbehalt",
+        "ui.personalResearchFlight.messageBeginAttempt": "Versuch beginnen",
+        "ui.personalResearchFlight.messageEndAttempt": "Versuch beenden",
         "ui.personalResearchFlight.messageEnableAutomaticDetection": "Automatische Erkennung aktivieren",
         "ui.personalResearchFlight.messageDisableAutomaticDetection": "Automatische Erkennung deaktivieren",
         "ui.personalResearchFlight.messageTheSelectedAttemptBelongsToAnotherFlight": "Der ausgewählte Versuch gehört zu einem anderen Flug. Aktualisieren Sie das Experiment.",
@@ -30118,7 +30477,7 @@ export const localeData = {
         "windows.science.datasetRequired": "· Datensatz erforderlich",
         "windows.feedback.notes": "Optionale Reproduktionsschritte und Anmerkungen",
         "windows.flight.noMission": "Keine aktive Mission",
-        "windows.flight.recording": "Auftragsaufzeichnung",
+        "windows.flight.recording": "Missionsaufzeichnung läuft",
         "windows.science.category11Title": "Terrain & Elevation",
         "windows.science.category11Description": "Numeric DEM/DSM elevation, not aircraft laser returns. Local: single-band elevation GeoTIFF.",
         "windows.science.category12Title": "Wärmebildgebung",
@@ -30160,7 +30519,7 @@ export const localeData = {
         "native.disconnectedUnavailable": "Nicht verbunden / nicht verfügbar",
         "native.telemetryStaleUnavailable": "Telemetrie veraltet / nicht verfügbar",
         "native.simulatorPausedScienceUnconfirmed": "1972 Pause / Wissenschaft unbestätigt",
-        "native.armedNotStarted": "Bewaffnet / Nicht gestartet",
+        "native.armedNotStarted": "Bereit / Nicht gestartet",
         "native.inactive": "Nichterwerbstätig",
         "native.flightRecordingScience": "Flugaufzeichnung: {value1}, Wissenschaft: {value2}",
         "native.thisViewCouldNotUpdateSeeConnectionBuildDetails": "Diese Ansicht konnte nicht aktualisiert werden. Siehe Verbindungs- & Build-Details.",
@@ -30211,10 +30570,10 @@ export const localeData = {
         "native.samples": "{value1} Proben",
         "native.notGraded": "Nicht bewertet",
         "native.insufficientEvidence": "Unzureichende Beweise",
-        "native.stale": "Stale",
-        "native.armed": "Bewaffnet",
+        "native.stale": "Veraltet",
+        "native.armed": "Bereit",
         "native.waitingForSource": "Warten auf Quelle",
-        "native.acquisitionGap": "Erwerblücke",
+        "native.acquisitionGap": "Erfassungslücke",
         "native.sourceDisconnected": "Quelle getrennt",
         "native.waiting": "Warten",
         "native.manual": "Handbuch",
@@ -30267,7 +30626,6 @@ export const localeData = {
         "native.issued": "{value1}, ausgestellt {value2}, {value3}",
         "native.focusedInToolbar": "Fokussiert in der Werkzeugleiste",
         "native.sAttempts": "{value1}, {value2} s, {value3} Versuche",
-        "native.enableautomatic": "Automatisch aktivieren",
         "native.flightGuidanceUnavailable": "Flugführung nicht verfügbar",
         "native.ap": "AP: {value1}, {value2}",
         "native.scientificSourceUnavailable": "Wissenschaftliche Quelle nicht verfügbar",
@@ -30352,11 +30710,110 @@ export const localeData = {
         "native.instrument.ambientDensity": "Luftdichte",
         "native.instrument.thermalImager": "Wärmebildbild",
         "native.instrument.multispectralImager": "Multispektraler Bildträger",
-        "native.instrument.hyperspectralImager": "Hyperspektraler Bildträger"
+        "native.instrument.hyperspectralImager": "Hyperspektraler Bildträger",
+        "ui.app.messageNoAircraftData": "Keine Daten über Luftfahrzeuge",
+        "ui.app.messageSIMULATED": "VEREINIGTE",
+        "ui.app.messageSIMULATOR": "UMWELT",
+        "ui.app.messageNOTELEMETRY": "KEINE TELEMETRIE",
+        "ui.aviationReference.messagePublishedNotices": "veröffentlichten Bekanntmachungen",
+        "ui.aviationReference.messageCatalogRecords": "Katalogaufzeichnungen",
+        "ui.aviationReference.messageLastRefreshPreviousSuccessfulRecordsAre": "Letzte Aktualisierung: {value1}. Bisherige erfolgreiche Rekorde werden beibehalten.",
+        "ui.downloadActivity.messageFindingSource": "Quelle finden",
+        "ui.flightTestProcedure.messagePointAttempt": "Punktversuch",
+        "ui.flightTestProcedure.messageOverallCard": "Gesamtkarte",
+        "ui.flightTestProcedure.messageQualifiedRepetition": "Qualifizierte Wiederholung",
+        "ui.flightTestProcedure.messageNotCounted": "Nicht gezählt",
+        "ui.flightTestProcedure.messageOpen": "Öffnen",
+        "ui.libraryDownload.messageOriginalObservation": "Originalbemerkung {value1}",
+        "ui.libraryDownload.messageCompositeOriginalObservationDateUnknown": "Verbund-/Originalbeobachtungsdatum unbekannt",
+        "ui.libraryDownload.messageRetainedCandidateOnTheLoadedInventoryPage": "Auf der geladenen Inventarseite gespeicherter Kandidat — Integrität und exakte Wiederverwendung geprüft bei Vorschau",
+        "ui.libraryDownload.messageDiscoveredNotConfirmedInTheLoaded": "Entdeckt — nicht auf der geladenen lokalen Seite bestätigt; vollständige indexierte Wiederverwendung wird bei der Vorschau überprüft",
+        "ui.libraryDownload.messageSceneCloudInformationUnknownNotApplicable": "Szene Cloud Informationen unbekannt / nicht zutreffend",
+        "ui.libraryDownload.messageReportedSceneCloudNotAValidPixel": "Reported scene cloud {value1}% (not a valid-pixel percentage)",
+        "ui.map.messageMarker": "Markierung",
+        "ui.missionIntelligence.messageWholeFlight": "Gesamter Flug",
+        "ui.missionPerformance.messageUnknownEnd": "Unbekanntes Ende",
+        "ui.missionTimeline.messageStillRecording": "Noch aufnehmen",
+        "ui.missionWorkspace.messageProfileNotArchived": "Profil nicht archiviert",
+        "ui.missionWorkspace.messageDateUnknown": "Datum unbekannt",
+        "ui.missionWorkspace.messageOriginalsDeletedSavedValuesRetained": "· Originale gelöscht; gespeicherte Werte beibehalten",
+        "ui.missionWorkspace.messageAGL": " AGL",
+        "ui.missionWorkspace.messageObservedEntry": "Beobachteter Eintrag",
+        "ui.missionWorkspace.messageCloudPresentEntryUnknown": "Cloud vorhanden / Eintrag unbekannt",
+        "ui.missionWorkspace.messageObservedExit": "beobachteter Ausgang",
+        "ui.missionWorkspace.messageExitNotEstablished": "Ausstieg nicht festgestellt",
+        "ui.onlineAccess.messageAllowed": "Zulässig",
+        "ui.onlineAccess.messageNotAllowed": "Nicht erlaubt",
+        "ui.organizationLiveUi.messageActivated": "Aktiviert",
+        "ui.organizationLiveUi.messageNotActivated": "Nicht aktiviert",
+        "ui.patterns.messageEditableGeneratedRoute": "Bearbeitender erzeugter Weg",
+        "ui.personalResearchFlight.messageAttemptRecordingSince": "Attention Aufnahme seit {value1}",
+        "ui.personalResearchFlight.messageActiveReadyForAnAttempt": "Aktiv — bereit für einen Versuch",
+        "ui.personalResearchFlight.messageProvisionalRepetitionsVerifyOriginal": "· Vorläufige Wiederholungen: {value1}. Originale Nachweise nach dem Flug überprüfen.",
+        "ui.receivedEvidenceUi.messageRecordedLocationUnavailable": "Aufgenommener Ort nicht verfügbar",
+        "ui.receivedEvidenceUi.messageAltitudeUnavailable": "Höhe nicht verfügbar",
+        "ui.remoteScience.messageValidSampledPositionsUnavailable": "Gültig in die Stichprobe einbezogene Positionen: nicht verfügbar",
+        "ui.remoteScience.messageValidSampledPositions": "{value1} gültige Probenpositionen",
+        "ui.researchOrganizations.messageActiveMembership": "Aktive Mitgliedschaft",
+        "ui.researchOrganizations.messageMembershipUnavailable": "Nicht verfügbar",
+        "ui.researchOrganizations.messageSent": "· geschickt {value1}",
+        "ui.research.messageNoTemplate": "Kein Meldebogen",
+        "ui.research.messageNoObjectiveSupplied": "Kein Ziel geliefert",
+        "ui.research.messageArmed": "· Bewaffnet: {value1}",
+        "ui.scienceJourney.messageSimulatorUnavailable": "1972 nicht verfügbar",
+        "ui.scienceMapView.messageRecordedEnvironmentalValues": "erfasste Umweltwerte",
+        "ui.scienceMapView.messageHistoricalSourceAcquisitions": "Erwerb von historischen Quellen",
+        "ui.scienceMapView.messageLocationOverviewActualPacketQualityRemainsVisible": "Standortübersicht; tatsächliche Paketqualität bleibt sichtbar.",
+        "ui.scienceMapView.messageModeledAcquisitionFootprintsNotContinuousValidPixelCoverage": "Modellierte Erfassungsflächen; nicht kontinuierliche gültige Abdeckung von Pixel.",
+        "ui.scientificLibrary.messageUnavailableReconnectStorageOrRestoreThe": "Nicht verfügbar — Speicher wieder verbinden oder Wiederherstellen der Originaldateien",
+        "ui.scientificLibrary.messageOriginalsRetainedCheckedPreviewHasNoUsable": "Originale behalten; Check-Vorschau hat keine nutzbaren Pixel — Qualität prüfen",
+        "ui.scientificLibrary.messageOriginalsRetainedActualPixelQualityIsAssessed": "Originale erhalten; tatsächliche Pixelqualität wird separat bewertet",
+        "ui.sourceInspection.messageDerivedQuantity": "Abgeleitete Menge",
+        "ui.sourceInspection.messageDecodedSourceQuantity": "Dekodierte Quellmenge",
+        "ui.submissionBuilder.messageSubmitEvidenceAuthorized": "Nachweise einreichen",
+        "ui.submissionBuilder.messageReadReferencePermissionCannotUpload": "Lese-/Referenzberechtigung — kann nicht hochgeladen werden",
+        "ui.submissionBuilder.messagePublishedPolicy": "Veröffentlichte Politik {value1}",
+        "ui.submissionBuilder.messagePolicyUnknown": "Politisches Unbekanntes",
+        "ui.submissionBuilder.messageOriginalRecordS": "{value1} Originalaufzeichnung(en)",
+        "ui.surveyResearch.messageHistoricalSource": "Historische Quelle {value1}",
+        "ui.surveyResearch.messageSimulatorObservation": "Simulator observation {value1}",
+        "ui.organizationReviews.messageRevoked": "Wiederaufgebaut",
+        "windows.deletion.archiveFlightSummary": "{missions} aufgezeichnete Missionen werden gelöscht.",
+        "windows.deletion.archiveScienceSummary": "{datasets} wissenschaftliche Datensätze, {observations} Beobachtungen und {files} generierte Produktdateien werden gelöscht.",
+        "windows.deletion.archiveDetails": "{summary} Daten löschen aus: {directory} Geschützte Missionen/Datensätze in diesem bewussten Klartext enthalten: {protected} Gespeicherte Pläne zu löschen: {plans} Ungefähre verwaltete Größe: {size} MiB einschließlich SQLite Begleitdateien und indexierte Produkte (Clearing Zeilen können die Zuweisung beibehalten) Generierte Produktdateien: {files} ({productSize} MiB) {paths} Entfernt: {removes} Preserves: {preserves}",
+        "windows.storage.openExisting": "This folder already contains a store:\n{destination}\n\nOpen that existing store instead? It may contain a different/older archive. Current data at {current} will be retained. Nothing will be merged or overwritten. Choose No to select another empty folder.",
+        "windows.storage.migrate": "Kopieren und Verifizieren von Daten von: {current} bis: {destination} Die App hält ihre lokalen Dienste an. Originale bleiben nach erfolgreicher Migration intakt. Weiter?",
+        "windows.storage.capacity": "Verfügbare Zielkapazität: {size}",
+        "portal.organization.name": "Name der Organisation",
+        "ui.missionIntelligence.messageRefreshed": "{value1} · {value2} · {value3} · erneuert {value4}",
+        "ui.scienceDisplay.messageActualMeasurementValuesMin": "{value1} tatsächliche Messwerte · Min {value2} {value3} · Max {value4} {value5}. {value6}Keine Interpolation oder Glättung. Beobachtungsmarker lassen Aufnahmelücken leer; wiederholte Höhen behalten in Tooltips die Zeitreihenfolge.",
+        "transfer.estimate.second": {
+          "one": "Etwa {low}–{count} Sekunde",
+          "other": "Etwa {low}–{count} Sekunden"
+        },
+        "transfer.estimate.minute": {
+          "one": "Etwa {low}–{count} Minute",
+          "other": "Etwa {low}–{count} Minuten"
+        },
+        "transfer.estimate.hour": {
+          "one": "Etwa {low}–{count} Stunde",
+          "other": "Etwa {low}–{count} Stunden"
+        },
+        "transfer.stage.awaitingApproval": "Genehmigung abwarten",
+        "transfer.stage.waitingForAuthorization": "Warten auf Autorisierung",
+        "transfer.stage.offline": "INSGESAMT",
+        "native.phase.current": "Datenerfassung: {phase}",
+        "native.phase.previous": "Letzter Erfassungsstatus: {phase}",
+        "native.phase.session": "{status} | Sitzung {number}",
+        "native.phase.notStarted": "{status} | Datenerfassung nicht gestartet",
+        "native.phase.stale": "{status} | Status veraltet",
+        "native.banner.recordingActive": "Flugaufzeichnung: aktiv | Datenerfassung: {phase}",
+        "native.banner.recordingInactive": "Flugaufzeichnung: inaktiv | Datenerfassung: {phase}",
+        "native.banner.recordingUnknown": "Flugaufzeichnung: nicht verfügbar | Datenerfassung: {phase}"
       }
     },
     "en-US": {
-      "version": 20,
+      "version": 22,
       "locale": "en-US",
       "messages": {
         "common.messageUnavailable": "Details are unavailable. Refresh to review the current information.",
@@ -30444,7 +30901,7 @@ export const localeData = {
         "settings.hostFollow": "Use companion defaults in this browser",
         "settings.hostReadOnly": "Companion defaults are read-only on paired devices. Change them on the companion PC.",
         "settings.hostUnavailable": "Companion defaults are unavailable. Reconnect to review them; browser choices remain available.",
-        "settings.hostSaved": "Companion defaults saved. Reopen existing Windows dialogs to refresh their appearance. Other Windows dialog text remains English.",
+        "settings.hostSaved": "Companion defaults saved. Reopen existing Windows dialogs to use the selected language and appearance. Recording and science collection are unchanged.",
         "settings.hostNativeNotice": "Native Windows/MSFS localization requires matching bundled catalogs. Fluent human review and installed acceptance are pending.",
         "toolbar.mission": "Mission",
         "toolbar.payload": "Payload",
@@ -36901,7 +37358,6 @@ export const localeData = {
         "native.issued": "{value1} | issued {value2} | {value3}",
         "native.focusedInToolbar": "Focused in Toolbar",
         "native.sAttempts": "{value1} | {value2} s | {value3} attempts",
-        "native.enableautomatic": "enableAutomatic",
         "native.flightGuidanceUnavailable": "Flight Guidance unavailable",
         "native.ap": "AP: {value1} | {value2}",
         "native.scientificSourceUnavailable": "Scientific source unavailable",
@@ -36986,13 +37442,112 @@ export const localeData = {
         "native.instrument.ambientDensity": "Air density",
         "native.instrument.thermalImager": "Thermal Imager",
         "native.instrument.multispectralImager": "Multispectral Imager",
-        "native.instrument.hyperspectralImager": "Hyperspectral Imager"
+        "native.instrument.hyperspectralImager": "Hyperspectral Imager",
+        "ui.app.messageNoAircraftData": "No aircraft data",
+        "ui.app.messageSIMULATED": "SIMULATED",
+        "ui.app.messageSIMULATOR": "SIMULATOR",
+        "ui.app.messageNOTELEMETRY": "NO TELEMETRY",
+        "ui.aviationReference.messagePublishedNotices": "published notices",
+        "ui.aviationReference.messageCatalogRecords": "catalog records",
+        "ui.aviationReference.messageLastRefreshPreviousSuccessfulRecordsAre": "Last refresh: {value1}. Previous successful records are retained.",
+        "ui.downloadActivity.messageFindingSource": "Finding source",
+        "ui.flightTestProcedure.messagePointAttempt": "Point attempt",
+        "ui.flightTestProcedure.messageOverallCard": "Overall card",
+        "ui.flightTestProcedure.messageQualifiedRepetition": "Qualified repetition",
+        "ui.flightTestProcedure.messageNotCounted": "Not counted",
+        "ui.flightTestProcedure.messageOpen": "Open",
+        "ui.libraryDownload.messageOriginalObservation": "original observation {value1}",
+        "ui.libraryDownload.messageCompositeOriginalObservationDateUnknown": "Composite / original observation date unknown",
+        "ui.libraryDownload.messageRetainedCandidateOnTheLoadedInventoryPage": "Retained candidate on the loaded inventory page — integrity and exact reuse checked at preview",
+        "ui.libraryDownload.messageDiscoveredNotConfirmedInTheLoaded": "Discovered — not confirmed in the loaded local page; full indexed reuse is checked at preview",
+        "ui.libraryDownload.messageSceneCloudInformationUnknownNotApplicable": "Scene cloud information unknown / not applicable",
+        "ui.libraryDownload.messageReportedSceneCloudNotAValidPixel": "Reported scene cloud {value1}% (not a valid-pixel percentage)",
+        "ui.map.messageMarker": "Marker",
+        "ui.missionIntelligence.messageWholeFlight": "Whole flight",
+        "ui.missionPerformance.messageUnknownEnd": "Unknown end",
+        "ui.missionTimeline.messageStillRecording": "Still recording",
+        "ui.missionWorkspace.messageProfileNotArchived": "profile not archived",
+        "ui.missionWorkspace.messageDateUnknown": "date unknown",
+        "ui.missionWorkspace.messageOriginalsDeletedSavedValuesRetained": " · originals deleted; saved values retained",
+        "ui.missionWorkspace.messageAGL": " AGL",
+        "ui.missionWorkspace.messageObservedEntry": "Observed entry",
+        "ui.missionWorkspace.messageCloudPresentEntryUnknown": "Cloud present / entry unknown",
+        "ui.missionWorkspace.messageObservedExit": "observed exit",
+        "ui.missionWorkspace.messageExitNotEstablished": "exit not established",
+        "ui.onlineAccess.messageAllowed": "Allowed",
+        "ui.onlineAccess.messageNotAllowed": "Not allowed",
+        "ui.organizationLiveUi.messageActivated": "Activated",
+        "ui.organizationLiveUi.messageNotActivated": "Not activated",
+        "ui.patterns.messageEditableGeneratedRoute": "Editable generated route",
+        "ui.personalResearchFlight.messageAttemptRecordingSince": "Attempt recording since {value1}",
+        "ui.personalResearchFlight.messageActiveReadyForAnAttempt": "Active — ready for an attempt",
+        "ui.personalResearchFlight.messageProvisionalRepetitionsVerifyOriginal": " · Provisional repetitions: {value1}. Verify original evidence after flight.",
+        "ui.receivedEvidenceUi.messageRecordedLocationUnavailable": "Recorded location unavailable",
+        "ui.receivedEvidenceUi.messageAltitudeUnavailable": "Altitude unavailable",
+        "ui.remoteScience.messageValidSampledPositionsUnavailable": "Valid sampled positions: Unavailable",
+        "ui.remoteScience.messageValidSampledPositions": "{value1} valid sampled positions",
+        "ui.researchOrganizations.messageActiveMembership": "Active membership",
+        "ui.researchOrganizations.messageMembershipUnavailable": "Membership unavailable",
+        "ui.researchOrganizations.messageSent": " · sent {value1}",
+        "ui.research.messageNoTemplate": "No template",
+        "ui.research.messageNoObjectiveSupplied": "No objective supplied",
+        "ui.research.messageArmed": " · Armed: {value1}",
+        "ui.scienceJourney.messageSimulatorUnavailable": "Simulator unavailable",
+        "ui.scienceMapView.messageRecordedEnvironmentalValues": "recorded environmental values",
+        "ui.scienceMapView.messageHistoricalSourceAcquisitions": "historical-source acquisitions",
+        "ui.scienceMapView.messageLocationOverviewActualPacketQualityRemainsVisible": "Location overview; actual packet quality remains visible.",
+        "ui.scienceMapView.messageModeledAcquisitionFootprintsNotContinuousValidPixelCoverage": "Modeled acquisition footprints; not continuous valid-pixel coverage.",
+        "ui.scientificLibrary.messageUnavailableReconnectStorageOrRestoreThe": "Unavailable — reconnect storage or restore the original files",
+        "ui.scientificLibrary.messageOriginalsRetainedCheckedPreviewHasNoUsable": "Originals retained; checked preview has no usable pixels — inspect quality",
+        "ui.scientificLibrary.messageOriginalsRetainedActualPixelQualityIsAssessed": "Originals retained; actual pixel quality is assessed separately",
+        "ui.sourceInspection.messageDerivedQuantity": "Derived quantity",
+        "ui.sourceInspection.messageDecodedSourceQuantity": "Decoded source quantity",
+        "ui.submissionBuilder.messageSubmitEvidenceAuthorized": "Submit Evidence authorized",
+        "ui.submissionBuilder.messageReadReferencePermissionCannotUpload": "Read/reference permission — cannot upload",
+        "ui.submissionBuilder.messagePublishedPolicy": "Published policy {value1}",
+        "ui.submissionBuilder.messagePolicyUnknown": "Policy Unknown",
+        "ui.submissionBuilder.messageOriginalRecordS": "{value1} original record(s)",
+        "ui.surveyResearch.messageHistoricalSource": "Historical source {value1}",
+        "ui.surveyResearch.messageSimulatorObservation": "Simulator observation {value1}",
+        "ui.organizationReviews.messageRevoked": "Revoked",
+        "windows.deletion.archiveFlightSummary": "{missions} recorded missions will be deleted.",
+        "windows.deletion.archiveScienceSummary": "{datasets} scientific datasets, {observations} observations and {files} generated product files will be deleted.",
+        "windows.deletion.archiveDetails": "{summary}\nData to delete from: {directory}\nProtected missions/datasets included in this deliberate clear: {protected}\nSaved plans to delete: {plans}\nApproximate managed size: {size} MiB including SQLite companion files and indexed products (clearing rows may retain allocation)\nGenerated product files: {files} ({productSize} MiB)\n{paths}\nRemoves: {removes}\nPreserves: {preserves}",
+        "windows.storage.openExisting": "This folder already contains a store:\n{destination}\n\nOpen that existing store instead? It may contain a different/older archive. Current data at {current} will be retained. Nothing will be merged or overwritten. Choose No to select another empty folder.",
+        "windows.storage.migrate": "Copy and verify data from:\n{current}\n\nto:\n{destination}\n\nThe app will pause its local services. Originals remain intact after successful migration. Continue?",
+        "windows.storage.capacity": "\nAvailable destination capacity: {size}",
+        "portal.organization.name": "Organization name",
+        "ui.missionIntelligence.messageRefreshed": "{value1} · {value2} · {value3} · refreshed {value4}",
+        "ui.scienceDisplay.messageActualMeasurementValuesMin": "{value1} actual measurement values · Min {value2} {value3} · Max {value4} {value5}. {value6}No interpolation or smoothing. Observation markers leave recording gaps empty; repeated altitudes retain time order in tooltips.",
+        "transfer.estimate.second": {
+          "one": "About {low}–{count} second",
+          "other": "About {low}–{count} seconds"
+        },
+        "transfer.estimate.minute": {
+          "one": "About {low}–{count} minute",
+          "other": "About {low}–{count} minutes"
+        },
+        "transfer.estimate.hour": {
+          "one": "About {low}–{count} hour",
+          "other": "About {low}–{count} hours"
+        },
+        "transfer.stage.awaitingApproval": "Awaiting Approval",
+        "transfer.stage.waitingForAuthorization": "Waiting for Authorization",
+        "transfer.stage.offline": "Offline",
+        "native.phase.current": "Science: {phase}",
+        "native.phase.previous": "Last science status: {phase}",
+        "native.phase.session": "{status} | Session {number}",
+        "native.phase.notStarted": "{status} | Science not started",
+        "native.phase.stale": "{status} | Status is stale",
+        "native.banner.recordingActive": "Flight recording: Active | Science: {phase}",
+        "native.banner.recordingInactive": "Flight recording: Inactive | Science: {phase}",
+        "native.banner.recordingUnknown": "Flight recording: Unavailable | Science: {phase}"
       }
     },
     "es-ES": {
-      "version": 20,
+      "version": 22,
       "locale": "es-ES",
-      "sourceHash": "24325d6cd2282e6667cce945669b271811652f8627707a2d627de0b92e3822f9",
+      "sourceHash": "c871f36c92c40f3e195f35c762e9b9d6d415c522c475027296fb3dd87dba839c",
       "pendingEnglishFallbackKeys": [
         "contextHelp.coverage.body",
         "contextHelp.lidar.body",
@@ -37017,7 +37572,6 @@ export const localeData = {
         "native.knotsIasFeetMsl",
         "native.manual",
         "native.provisional",
-        "native.stale",
         "native.static.iasKts",
         "native.static.mslFt",
         "native.static.vsFtMin",
@@ -37224,7 +37778,7 @@ export const localeData = {
         "settings.hostFollow": "Usar los valores predeterminados de compañero en este navegador",
         "settings.hostReadOnly": "Los valores predeterminados de Compañero son solo de lectura en dispositivos emparejados. Cambielos en el PC acompañante.",
         "settings.hostUnavailable": "Los valores predeterminados del compañero no están disponibles. Reconéctese para revisarlos; las opciones del navegador permanecen disponibles.",
-        "settings.hostSaved": "Compañeros guardados por defecto. Reabrir los diálogos de Windows existentes para actualizar su apariencia. Otro texto del diálogo de Windows permanece en inglés.",
+        "settings.hostSaved": "Compañeros guardados por defecto. Reabrir los diálogos de Windows existentes para utilizar el idioma y apariencia seleccionados. La grabación y la adquisición de datos científicos no cambian.",
         "settings.hostNativeNotice": "La localización nativa de Windows/MSFS requiere catálogos incluidos compatibles. La revisión humana del idioma y la aceptación en el entorno instalado están pendientes.",
         "toolbar.mission": "Misión",
         "toolbar.payload": "Carga útil",
@@ -37275,11 +37829,11 @@ export const localeData = {
         "home.science": "Colección de ciencias",
         "home.science.unknown": "Estado no disponible",
         "home.science.unavailable": "No disponible: comprobar vuelo actual",
-        "home.science.notStarted": "No iniciado",
-        "home.science.armed": "Armados — esperando a recoger",
-        "home.science.collecting": "Recogida",
+        "home.science.notStarted": "Sin iniciar",
+        "home.science.armed": "Preparada: esperando para adquirir datos",
+        "home.science.collecting": "Adquiriendo datos",
         "home.science.paused": "Pausa",
-        "home.science.betweenSessions": "Entre períodos de sesiones",
+        "home.science.betweenSessions": "Entre sesiones",
         "home.science.ended": "Sesión finalizada",
         "home.synthetic": "TELÉMETROS DE ENSAYO SIMULADOS — no un vuelo MSFS instalado",
         "home.simulator": "Fuente: Microsoft Flight Simulator",
@@ -37439,24 +37993,24 @@ export const localeData = {
         "toolbar.flight": "Vuelo",
         "toolbar.science": "Ciencia",
         "toolbar.cards": "Fichas",
-        "toolbar.collectionActive": "COLECCIÓN DE CIENCIA ACTIVA",
-        "toolbar.collectionInactive": "COLECCIÓN CIENCIA INACTIVA",
+        "toolbar.collectionActive": "ADQUISICIÓN CIENTÍFICA ACTIVA",
+        "toolbar.collectionInactive": "ADQUISICIÓN CIENTÍFICA INACTIVA",
         "toolbar.retained": "Observaciones científicas originales retenidas: {original}, observaciones modeladas/derivadas: {derived}, productos externos guardados: {products}. Los recuentos no establecen la calidad ni la terminación objetiva.",
         "toolbar.countsUnavailable": "No se dispone de conteos científicos guardados; no se infiere ningún conteo de muestras de vuelo.",
         "toolbar.acquisitionSummary": "Diagnósticos de adquisición: {recorded} filas/productos registrados, {rejected} rechazados, {missed} intervalos perdidos, intervalo promedio real: {interval} s. Estos recuentos son independientes de la evidencia original conservada.",
         "toolbar.sourceUnknown": "No se dispone de datos de fuente/calidad; revise el tablero de instrumentos.",
         "toolbar.disabledInstruments": "Instrumentos de discapacidad ({count})",
         "flight.action.startData": "Iniciar adquisición científica",
-        "flight.action.pauseData": "Pausar adquisición científica",
-        "flight.action.resumeData": "Reanudar adquisición científica",
+        "flight.action.pauseData": "Pausar la adquisición científica",
+        "flight.action.resumeData": "Reanudar la adquisición científica",
         "flight.action.endData": "Finalizar la sesión científica actual",
-        "flight.action.rearmAutomation": "Rearme colección automática",
+        "flight.action.rearmAutomation": "Reactivar la adquisición automática",
         "flight.action.record": "Iniciar grabación del vuelo",
         "flight.action.endFlight": "Finalizar misión",
         "toolbar.terrainScanner": "Escáner de terreno (Alzador DEM)",
         "toolbar.acquisitionState": "Estado de la adquisición de instrumentos: {status} (separado de la fase de recogida).",
         "science.stopped": "La ciencia se detuvo",
-        "home.science.stopped": "Detenido",
+        "home.science.stopped": "Detenida",
         "terrain.title": "Finalización del terreno después del vuelo",
         "terrain.separation": "Popular soporte de escáner modelado con celdas DEM/DSM históricas retenidas. Esto crea terreno derivado, nunca nuevas observaciones aéreas, devoluciones LiDAR o crédito de investigación.",
         "terrain.initial": "Revisa primero un corredor guardado. No hay fuentes que se descarguen automáticamente.",
@@ -37597,8 +38151,8 @@ export const localeData = {
         "results.available": "Disponible",
         "results.unavailable": "No disponible",
         "results.modeledOnly": "Soporte de sensores modelado; no se mide el terreno ni la cobertura láser.",
-        "results.terrainCells": "Células DEM/DSM respaldadas por fuentes",
-        "results.historicalCells": "Las células nativas retenidas válidas en el último producto. Faltan lagunas.",
+        "results.terrainCells": "Celdas DEM / DSM respaldadas por fuentes",
+        "results.historicalCells": "Celdas válidas de la cuadrícula original conservadas en el producto más reciente. Los huecos siguen sin datos.",
         "results.lidarPoints": "Devuelve LiDAR histórico",
         "results.historicalReturns": "Registros originales de fuentes históricas, no retornos generados por la aeronave simulada.",
         "results.separate": "Las observaciones de vuelo, el soporte modelado, las células de elevación históricas y los retornos históricos de LiDAR son pruebas separadas. Los productos posteriores al vuelo no aumentan el rendimiento científico ni completan las tarjetas de investigación.",
@@ -37607,7 +38161,7 @@ export const localeData = {
         "results.reviewOriginal": "Revisar las pruebas originales",
         "results.prepare": "Preparar soporte de fuente",
         "results.noProducts": "No se conserva ningún producto post-vuelo soportado. Las observaciones originales y el análisis avanzado siguen disponibles a continuación. Preparación de soporte de fuente es una acción separada explícita.",
-        "results.product": "Producto de la encuesta retenido",
+        "results.product": "Producto de levantamiento conservado",
         "results.choose": "Elija los datos retenidos",
         "results.source": "Fuente original / referencia",
         "results.session": "Reunión científica",
@@ -37616,7 +38170,7 @@ export const localeData = {
         "results.selected": "Registro original seleccionado",
         "results.originalArtifact": "Abrir artefacto verificado JSON",
         "results.values": "Pruebas de origen cargadas",
-        "results.identity": "Celda nativa / registro original",
+        "results.identity": "Celda de la cuadrícula original / registro original",
         "results.value": "Altura de la pantalla / Z",
         "results.raw": "Valor decodificado original",
         "results.quality": "Clase de evaluación de calidad/prueba",
@@ -37633,7 +38187,7 @@ export const localeData = {
         "results.gapsLayer": "Nodatos conocidos / bordes de celdas excluidos",
         "results.corridorLayer": "Perfil del corredor modelado",
         "results.trackLayer": "Ruta de vuelo archivada",
-        "results.originalsLayer": "Huellas originales de adquisición (esquemas modelados)",
+        "results.originalsLayer": "Huellas de adquisición originales (contornos modelados)",
         "results.opacity": "Opacidad de capa (2D mapa)",
         "results.nextPage": "Cargar la siguiente página retenida",
         "results.viewWindow": "Cargar detalles en la ventana de mapa actual",
@@ -37691,7 +38245,7 @@ export const localeData = {
         "results.exportGeo": "Descargar análisis de encuestas cargado GeoJSON",
         "results.exportProvenance": "Descargar el informe de procedencia de la fuente",
         "results.profile": "Perfil de elevación respaldado por fuentes",
-        "results.profileMeaning": "Las elevaciones históricas de células nativas a lo largo de la trayectoria de tierra archivada o un análisis explícito transecto. No hay interpolación, nuevas observaciones o equivalencia con MSL de aeronaves.",
+        "results.profileMeaning": "Elevaciones históricas de las celdas de la cuadrícula original a lo largo de la trayectoria sobre el terreno archivada o de un transecto de análisis explícito. Sin interpolación, nuevas observaciones ni equivalencia con la altitud MSL de la aeronave. Los huecos y los límites entre fuentes o sesiones permanecen separados.",
         "results.profilePath": "Perfil de la trayectoria del suelo",
         "results.archivedTrack": "Aviones de vía terrestre archivados",
         "results.analysisLine": "Transecto de análisis de dos puntos (no una ruta de vuelo)",
@@ -37712,7 +38266,7 @@ export const localeData = {
         "results.aircraftAltitude": "Altura de las aeronaves grabadas: contexto separado",
         "results.mslSeparate": "El simulador grabado de altitud MSL es independiente de la referencia histórica del terreno. No se infiere comparación de cruz-datum o altura sobre el suelo.",
         "results.simulatedAltitude": "Altura del simulador grabada",
-        "results.profileEvidence": "Pruebas de células nativas del perfil",
+        "results.profileEvidence": "Pruebas del perfil de celdas de la cuadrícula original",
         "results.nativeCell": "Columna original nativa, fila",
         "results.buildProfile": "Construir perfil respaldado por el origen",
         "results.exportProfile": "Descargar análisis de perfil de células nativas CSV",
@@ -37908,7 +38462,7 @@ export const localeData = {
         "ui.app.messageAboveGroundFt": "Above ground {value1} ft",
         "ui.app.messageRECORDING": "● Grabación",
         "ui.app.messageSTANDBY": "Standby",
-        "ui.app.messageMissionRecording": "Registro de la misión",
+        "ui.app.messageMissionRecording": "Grabación de la misión en curso",
         "ui.app.messageMissionActiveWaitingForFreshTelemetry": "Misión activa · esperando por telemetría fresca",
         "ui.app.messageHOME": "Inicio",
         "ui.app.messageMISSIONS": "Misiones",
@@ -39028,7 +39582,7 @@ export const localeData = {
         "ui.missionOperations.messageFlightEndedInspectSavedOutcomesAndOriginal": "Inspeccione los resultados guardados y las pruebas originales; no hay aprobación de organización implícita.",
         "ui.missionOperations.messageMapShowsABoundedRecordedTrackPreview": "El mapa muestra una vista previa de la pista grabada con un límite. Abra la reproducción para otras muestras de vuelo originales.",
         "ui.missionOperations.messageFrozenRevisionInactiveAfterFlight": "Revisión congelada {value1} · Inactivo después del vuelo",
-        "ui.missionOperations.messageFocusCard": "Tarjeta de enfoque",
+        "ui.missionOperations.messageFocusCard": "Enfocar ficha",
         "ui.missionOperations.messageReviewLocalResults": "Revisar los resultados locales",
         "ui.missionOperations.messageScientificOriginalsAndDependentOutputsWerePermanently": "Los originales científicos y los productos dependientes se eliminaron permanentemente. No se reconstruyen valores de telemetría de aeronaves.",
         "ui.missionOperations.messageRecordedInstrumentConfiguration": "Configuración del instrumento grabado",
@@ -41894,7 +42448,7 @@ export const localeData = {
         "ui.campaignCoverageUi.messageChooseAPublishedCardOnThisPage": "Elija una tarjeta publicada en esta página.",
         "ui.campaignCoverageUi.messageChooseASupportedOriginalVariable": "Elija una variable original soportada.",
         "ui.campaignCoverageUi.messageTargetCell": "Celda objetivo {value1}/{value2}: {value3}",
-        "ui.campaignProgressUi.messageNotStarted": "No iniciado",
+        "ui.campaignProgressUi.messageNotStarted": "Sin iniciar",
         "ui.campaignProgressUi.messageClaimedInProgress": "Reclamados / en curso",
         "ui.campaignProgressUi.messageEvidenceReceived": "Pruebas recibidas",
         "ui.campaignProgressUi.messageAwaitingReview": "Esperando revisión",
@@ -42388,12 +42942,12 @@ export const localeData = {
         "ui.payloadSettings.messagePreviewGroundspeedMS": "Previsualizar velocidad de tierra (m/s)",
         "ui.payloadSettings.messageAssumedGroundspeedUsedByTheExistingPlanning": "Se supone que la velocidad de tierra utilizada por el solucionador de planificación existente, no IAS o TAS.",
         "ui.personalResearchFlight.messageChooseAtMost16CardsForThis": "Elija como máximo 16 tarjetas para este vuelo. La biblioteca de tarjetas guardadas no está limitada.",
-        "ui.personalResearchFlight.messageActivateCard": "Activar tarjeta",
-        "ui.personalResearchFlight.messageDeactivateCard": "Desactivar la tarjeta",
-        "ui.personalResearchFlight.messageBeginAttempt": "Comenzar intento",
-        "ui.personalResearchFlight.messageEndAttempt": "Fin del intento",
-        "ui.personalResearchFlight.messageEnableAutomaticDetection": "Habilitar la detección automática",
-        "ui.personalResearchFlight.messageDisableAutomaticDetection": "Desactivar la detección automática",
+        "ui.personalResearchFlight.messageActivateCard": "Activar ficha",
+        "ui.personalResearchFlight.messageDeactivateCard": "Desactivar ficha",
+        "ui.personalResearchFlight.messageBeginAttempt": "Iniciar intento",
+        "ui.personalResearchFlight.messageEndAttempt": "Finalizar intento",
+        "ui.personalResearchFlight.messageEnableAutomaticDetection": "Activar detección automática",
+        "ui.personalResearchFlight.messageDisableAutomaticDetection": "Desactivar detección automática",
         "ui.personalResearchFlight.messageTheSelectedAttemptBelongsToAnotherFlight": "El intento seleccionado pertenece a otro vuelo. Refresque el experimento.",
         "ui.personalResearchFlight.messageRecorded": "Grabado",
         "ui.personalResearchFlight.messageVerifyingOriginalEvidence": "Verificación de las pruebas originales",
@@ -43533,7 +44087,7 @@ export const localeData = {
         "windows.science.datasetRequired": "· Se requiere el conjunto de datos",
         "windows.feedback.notes": "Pasos y notas de reproducción opcionales",
         "windows.flight.noMission": "Ninguna misión activa",
-        "windows.flight.recording": "Registro de la misión",
+        "windows.flight.recording": "Grabación de la misión en curso",
         "windows.science.category11Title": "Terreno y elevación",
         "windows.science.category11Description": "La elevación numérica DEM/DSM, no laser de aviones. Local: elevación de una sola banda GeoTIFF.",
         "windows.science.category12Title": "Imágenes térmicas",
@@ -43575,7 +44129,7 @@ export const localeData = {
         "native.disconnectedUnavailable": "Desconectado / no disponible",
         "native.telemetryStaleUnavailable": "rancio de telemetría / no disponible",
         "native.simulatorPausedScienceUnconfirmed": "Simulador pausado / ciencia no confirmada",
-        "native.armedNotStarted": "Armados/no iniciados",
+        "native.armedNotStarted": "Preparada / Sin iniciar",
         "native.inactive": "Inactivo",
         "native.flightRecordingScience": "Registro de vuelo: {value1}, Ciencia: {value2}",
         "native.thisViewCouldNotUpdateSeeConnectionBuildDetails": "Esta vista no se pudo actualizar. Vea Conexión y Detalles de construcción.",
@@ -43626,10 +44180,10 @@ export const localeData = {
         "native.samples": "{value1} muestras",
         "native.notGraded": "Sin clasificar",
         "native.insufficientEvidence": "Pruebas insuficientes",
-        "native.stale": "Stale",
-        "native.armed": "Armados",
+        "native.stale": "Desactualizado",
+        "native.armed": "Preparada",
         "native.waitingForSource": "Esperando la fuente",
-        "native.acquisitionGap": "Diferencia de adquisición",
+        "native.acquisitionGap": "Intervalo sin adquisición",
         "native.sourceDisconnected": "Fuente desconectada",
         "native.waiting": "Esperando",
         "native.manual": "Manual",
@@ -43682,7 +44236,6 @@ export const localeData = {
         "native.issued": "{value1}, expedido {value2}, {value3}",
         "native.focusedInToolbar": "Centrado en la barra de herramientas",
         "native.sAttempts": "{value1}, {value2} s, {value3} intentos",
-        "native.enableautomatic": "habilitarAutomático",
         "native.flightGuidanceUnavailable": "No se dispone de directrices de vuelo",
         "native.ap": "AP: {value1}, {value2}",
         "native.scientificSourceUnavailable": "Fuente científica no disponible",
@@ -43767,13 +44320,115 @@ export const localeData = {
         "native.instrument.ambientDensity": "Densidad del aire",
         "native.instrument.thermalImager": "Imagen térmica",
         "native.instrument.multispectralImager": "Imagen multiespectral",
-        "native.instrument.hyperspectralImager": "Imagen hiperespectral"
+        "native.instrument.hyperspectralImager": "Imagen hiperespectral",
+        "ui.app.messageNoAircraftData": "No hay datos de aeronaves",
+        "ui.app.messageSIMULATED": "SIMULADOS",
+        "ui.app.messageSIMULATOR": "SIM-LATOR",
+        "ui.app.messageNOTELEMETRY": "No hay telémetría",
+        "ui.aviationReference.messagePublishedNotices": "anuncios publicados",
+        "ui.aviationReference.messageCatalogRecords": "registros de catálogo",
+        "ui.aviationReference.messageLastRefreshPreviousSuccessfulRecordsAre": "Última actualización: {value1}. Los registros anteriores exitosos se conservan.",
+        "ui.downloadActivity.messageFindingSource": "Fuente de búsqueda",
+        "ui.flightTestProcedure.messagePointAttempt": "Intentemos con puntos",
+        "ui.flightTestProcedure.messageOverallCard": "Tarjeta general",
+        "ui.flightTestProcedure.messageQualifiedRepetition": "Repetición cualitativa",
+        "ui.flightTestProcedure.messageNotCounted": "No contabilizado",
+        "ui.flightTestProcedure.messageOpen": "Abrir",
+        "ui.libraryDownload.messageOriginalObservation": "Observación original {value1}",
+        "ui.libraryDownload.messageCompositeOriginalObservationDateUnknown": "Fecha compuesta / original de observación desconocida",
+        "ui.libraryDownload.messageRetainedCandidateOnTheLoadedInventoryPage": "Candidato retenido en la página de inventario cargada — integridad y reutilización exacta comprobada en la vista previa",
+        "ui.libraryDownload.messageDiscoveredNotConfirmedInTheLoaded": "Descubierto — no confirmado en la página local cargada; la reutilización indexada completa se comprueba en la vista previa",
+        "ui.libraryDownload.messageSceneCloudInformationUnknownNotApplicable": "Información sobre la nube de escena desconocida / no aplicable",
+        "ui.libraryDownload.messageReportedSceneCloudNotAValidPixel": "Nube de la escena reportada {value1}% (porcentaje no válido)",
+        "ui.map.messageMarker": "Marcador",
+        "ui.missionIntelligence.messageWholeFlight": "Vuelo completo",
+        "ui.missionPerformance.messageUnknownEnd": "Fin desconocido",
+        "ui.missionTimeline.messageStillRecording": "Grabación fija",
+        "ui.missionWorkspace.messageProfileNotArchived": "perfil no archivado",
+        "ui.missionWorkspace.messageDateUnknown": "fecha desconocida",
+        "ui.missionWorkspace.messageOriginalsDeletedSavedValuesRetained": "· originales eliminados; valores guardados retenidos",
+        "ui.missionWorkspace.messageAGL": "AGL",
+        "ui.missionWorkspace.messageObservedEntry": "Entrada observada",
+        "ui.missionWorkspace.messageCloudPresentEntryUnknown": "Nube presente / entrada desconocida",
+        "ui.missionWorkspace.messageObservedExit": "salida observada",
+        "ui.missionWorkspace.messageExitNotEstablished": "salida no establecida",
+        "ui.onlineAccess.messageAllowed": "Permitido",
+        "ui.onlineAccess.messageNotAllowed": "No se permite",
+        "ui.organizationLiveUi.messageActivated": "%/%",
+        "ui.organizationLiveUi.messageNotActivated": "No activado",
+        "ui.patterns.messageEditableGeneratedRoute": "Ruta generada editable",
+        "ui.personalResearchFlight.messageAttemptRecordingSince": "Intento de grabación desde {value1}",
+        "ui.personalResearchFlight.messageActiveReadyForAnAttempt": "Activa — lista para un intento",
+        "ui.personalResearchFlight.messageProvisionalRepetitionsVerifyOriginal": "· Repeticiones provisionales: {value1}. Verificar evidencia original después del vuelo.",
+        "ui.receivedEvidenceUi.messageRecordedLocationUnavailable": "Ubicación grabada no disponible",
+        "ui.receivedEvidenceUi.messageAltitudeUnavailable": "Altura no disponible",
+        "ui.remoteScience.messageValidSampledPositionsUnavailable": "Posiciones válidas de muestreo: no disponibles",
+        "ui.remoteScience.messageValidSampledPositions": "{value1} posiciones válidas de muestreo",
+        "ui.researchOrganizations.messageActiveMembership": "Miembros activos",
+        "ui.researchOrganizations.messageMembershipUnavailable": "Miembros no disponibles",
+        "ui.researchOrganizations.messageSent": "· Enviado {value1}",
+        "ui.research.messageNoTemplate": "Sin plantilla",
+        "ui.research.messageNoObjectiveSupplied": "No se ha proporcionado ningún objetivo",
+        "ui.research.messageArmed": "· Armados: {value1}",
+        "ui.scienceJourney.messageSimulatorUnavailable": "Simulador no disponible",
+        "ui.scienceMapView.messageRecordedEnvironmentalValues": "valores ambientales registrados",
+        "ui.scienceMapView.messageHistoricalSourceAcquisitions": "adquisiciones de fuentes históricas",
+        "ui.scienceMapView.messageLocationOverviewActualPacketQualityRemainsVisible": "Vista general de la ubicación; la calidad real del paquete permanece visible.",
+        "ui.scienceMapView.messageModeledAcquisitionFootprintsNotContinuousValidPixelCoverage": "Huellas de adquisición modeladas; no cobertura de píxeles válidos continuas.",
+        "ui.scientificLibrary.messageUnavailableReconnectStorageOrRestoreThe": "No disponible — reconectar el almacenamiento o restaurar los archivos originales",
+        "ui.scientificLibrary.messageOriginalsRetainedCheckedPreviewHasNoUsable": "Originales retenidos; vista previa revisada no tiene píxeles utilizables — inspeccionar calidad",
+        "ui.scientificLibrary.messageOriginalsRetainedActualPixelQualityIsAssessed": "Originales retenidos; calidad real de los píxeles se evalúa por separado",
+        "ui.sourceInspection.messageDerivedQuantity": "Cantidad derivada",
+        "ui.sourceInspection.messageDecodedSourceQuantity": "Cantidad de origen decodificada",
+        "ui.submissionBuilder.messageSubmitEvidenceAuthorized": "Presentar pruebas autorizadas",
+        "ui.submissionBuilder.messageReadReferencePermissionCannotUpload": "Permiso de lectura/referencia — no se puede cargar",
+        "ui.submissionBuilder.messagePublishedPolicy": "Política publicada {value1}",
+        "ui.submissionBuilder.messagePolicyUnknown": "Política desconocida",
+        "ui.submissionBuilder.messageOriginalRecordS": "{value1} registro(s) original(es)",
+        "ui.surveyResearch.messageHistoricalSource": "Fuente histórica {value1}",
+        "ui.surveyResearch.messageSimulatorObservation": "Observación del simulador {value1}",
+        "ui.organizationReviews.messageRevoked": "Revocado",
+        "windows.deletion.archiveFlightSummary": "Se suprimirán las misiones registradas {missions}.",
+        "windows.deletion.archiveScienceSummary": "Se eliminarán los conjuntos de datos científicos {datasets}, las observaciones {observations} y los archivos de productos generados {files}.",
+        "windows.deletion.archiveDetails": "{summary} Datos que se deben eliminar de: {directory} Misiones protegidas/datos incluidos en este claro deliberado: {protected} Planes guardados para eliminar: {plans} Tamaño aproximado gestionado: {size} MiB incluyendo archivos de acompañamiento de SQLite y productos indexados (las filas de limpieza pueden retener la asignación) Archivos de producto generados: {files} ({productSize} MiB) {paths} Remove: {removes} Preserva: {preserves}",
+        "windows.storage.openExisting": "Esta carpeta ya contiene una tienda: {destination} ¿Abrir esa tienda existente en su lugar? Puede contener un archivo diferente/más antiguo. Los datos actuales en {current} se conservarán. Nada se fusionará o sobreescribirá. Elija No para seleccionar otra carpeta vacía.",
+        "windows.storage.migrate": "Copiar y verificar los datos desde: {current} a: {destination} La aplicación pausará sus servicios locales. Los originales permanecen intactos después de la migración exitosa. ¿Continúa?",
+        "windows.storage.capacity": "Capacidad de destino disponible: {size}",
+        "portal.organization.name": "Nombre de la organización",
+        "ui.missionIntelligence.messageRefreshed": "{value1} · {value2} · {value3} · renovado {value4}",
+        "ui.scienceDisplay.messageActualMeasurementValuesMin": "{value1} valores reales de medición · Min {value2} {value3} · Max {value4} {value5}. {value6}Sin interpolación ni alisado.Los marcadores de observación dejan vacíos en el registro; las altitudes repetidas retienen el orden del tiempo en los tooltips.",
+        "transfer.estimate.second": {
+          "one": "Aproximadamente {low}–{count} segundo",
+          "other": "Aproximadamente {low}–{count} segundos",
+          "many": "Aproximadamente {low}–{count} segundos"
+        },
+        "transfer.estimate.minute": {
+          "one": "Aproximadamente {low}–{count} minuto",
+          "other": "Aproximadamente {low}–{count} minutos",
+          "many": "Aproximadamente {low}–{count} minutos"
+        },
+        "transfer.estimate.hour": {
+          "one": "Aproximadamente {low}–{count} hora",
+          "other": "Aproximadamente {low}–{count} horas",
+          "many": "Aproximadamente {low}–{count} horas"
+        },
+        "transfer.stage.awaitingApproval": "Esperando aprobación",
+        "transfer.stage.waitingForAuthorization": "Esperando autorización",
+        "transfer.stage.offline": "Desconectado",
+        "native.phase.current": "Adquisición científica: {phase}",
+        "native.phase.previous": "Último estado de la adquisición científica: {phase}",
+        "native.phase.session": "{status} | Sesión {number}",
+        "native.phase.notStarted": "{status} | Adquisición científica sin iniciar",
+        "native.phase.stale": "{status} | Estado desactualizado",
+        "native.banner.recordingActive": "Grabación del vuelo: activa | Adquisición científica: {phase}",
+        "native.banner.recordingInactive": "Grabación del vuelo: inactiva | Adquisición científica: {phase}",
+        "native.banner.recordingUnknown": "Grabación del vuelo: no disponible | Adquisición científica: {phase}"
       }
     },
     "fr-FR": {
-      "version": 20,
+      "version": 22,
       "locale": "fr-FR",
-      "sourceHash": "24325d6cd2282e6667cce945669b271811652f8627707a2d627de0b92e3822f9",
+      "sourceHash": "c871f36c92c40f3e195f35c762e9b9d6d415c522c475027296fb3dd87dba839c",
       "pendingEnglishFallbackKeys": [
         "contextHelp.coverage.body",
         "contextHelp.lidar.body",
@@ -43800,6 +44455,7 @@ export const localeData = {
         "native.idle",
         "native.msfsDisconnected",
         "native.noCommandConfirmationCheckMissionStateBeforeRetrying",
+        "native.phase.session",
         "native.recordingStopped",
         "native.stateAsOfMetrics",
         "native.static.aerosciencePages",
@@ -44014,6 +44670,7 @@ export const localeData = {
         "ui.supportingProductUi.messageSourceManifestSHA256",
         "ui.surveyProfile.messageMSL",
         "ui.surveyProfile.messageTileSHA256",
+        "ui.surveyResearch.messageHistoricalSource",
         "ui.surveyResearch.messageOriginalCRSPixelSpacing",
         "ui.surveyResearch.messageOriginals",
         "ui.surveyResearch.messageProvenance",
@@ -44133,7 +44790,7 @@ export const localeData = {
         "settings.hostFollow": "Utiliser les paramètres par défaut de l'accompagnement dans ce navigateur",
         "settings.hostReadOnly": "Les paramètres par défaut de Companion sont en lecture seule sur les appareils appariés. Changez-les sur le PC compagnon.",
         "settings.hostUnavailable": "Les par défaut de compagnon ne sont pas disponibles. Reconnectez-vous pour les examiner; les choix du navigateur restent disponibles.",
-        "settings.hostSaved": "Réouvrir les dialogues Windows existants pour les rafraîchir. D'autres textes de dialogue Windows restent en anglais.",
+        "settings.hostSaved": "Réouvrir les dialogues Windows existants pour utiliser la langue et l'apparence sélectionnées. La collection d'enregistrement et de science est inchangée.",
         "settings.hostNativeNotice": "La localisation native Windows/MSFS nécessite des catalogues intégrés compatibles. La révision humaine linguistique et l’acceptation dans l’environnement installé sont en attente.",
         "toolbar.mission": "Mission",
         "toolbar.payload": "Charge utile",
@@ -44184,12 +44841,12 @@ export const localeData = {
         "home.science": "Collection scientifique",
         "home.science.unknown": "État non disponible",
         "home.science.unavailable": "Indisponible — vérifier Vol actuel",
-        "home.science.notStarted": "Pas commencé",
-        "home.science.armed": "Armés — attendant de se faire",
-        "home.science.collecting": "Collecte",
+        "home.science.notStarted": "Non démarrée",
+        "home.science.armed": "Prête : en attente de collecte",
+        "home.science.collecting": "Collecte en cours",
         "home.science.paused": "Paus",
-        "home.science.betweenSessions": "Entre les sessions",
-        "home.science.ended": "Séance terminée",
+        "home.science.betweenSessions": "Entre deux sessions",
+        "home.science.ended": "Session terminée",
         "home.synthetic": "TÉLÉMETRIE D'ESSAI SIMULÉE — pas un vol MSFS installé",
         "home.simulator": "Source: Simulateur de vol Microsoft",
         "home.sourceUnknown": "Source de télémétrie non disponible",
@@ -44348,8 +45005,8 @@ export const localeData = {
         "toolbar.flight": "Vol",
         "toolbar.science": "Science",
         "toolbar.cards": "Fiches",
-        "toolbar.collectionActive": "LA COLLECTE DE SCIENCES ACTIVE",
-        "toolbar.collectionInactive": "COLLECTE DE SCIENCES INACTIVE",
+        "toolbar.collectionActive": "COLLECTE SCIENTIFIQUE ACTIVE",
+        "toolbar.collectionInactive": "COLLECTE SCIENTIFIQUE INACTIVE",
         "toolbar.retained": "Observations scientifiques originales conservées: {original}, observations modélisées/dérivées: {derived}, produits externes sauvegardés: {products}. Les dénombrements n'établissent pas la qualité ou l'achèvement objectif.",
         "toolbar.countsUnavailable": "Nombres scientifiques enregistrés non disponibles; aucun nombre n'est déduit des échantillons de vol.",
         "toolbar.acquisitionSummary": "Diagnostic d'acquisition : {recorded} rangées/produits enregistrés, {rejected} rejeté, {missed} intervalles manqués, intervalle moyen réel : {interval} s. Ces chiffres sont distincts des éléments de preuve originaux conservés.",
@@ -44359,13 +45016,13 @@ export const localeData = {
         "flight.action.pauseData": "Mettre la collecte scientifique en pause",
         "flight.action.resumeData": "Reprendre la collecte scientifique",
         "flight.action.endData": "Terminer la session scientifique en cours",
-        "flight.action.rearmAutomation": "Collecte automatique des armatures",
+        "flight.action.rearmAutomation": "Réarmer la collecte automatique",
         "flight.action.record": "Démarrer l’enregistrement du vol",
         "flight.action.endFlight": "Terminer la mission",
         "toolbar.terrainScanner": "Scanner de la surface (élévation du DEM)",
         "toolbar.acquisitionState": "État de l'acquisition d'instruments : {status} (séparer de la phase de collecte).",
         "science.stopped": "La science s'arrête",
-        "home.science.stopped": "Arrêt",
+        "home.science.stopped": "Arrêtée",
         "terrain.title": "Achèvement du terrain après le vol",
         "terrain.separation": "Popular support de scanner modélisé avec des cellules DEM/DSM historiques conservées. Cela crée terrain dérivé, jamais nouvelles observations aéroportées, retour LiDAR ou crédit de recherche.",
         "terrain.initial": "Examiner d'abord un corridor enregistré. Aucune source n'est téléchargée automatiquement.",
@@ -44506,8 +45163,8 @@ export const localeData = {
         "results.available": "Disponible",
         "results.unavailable": "Indisponible",
         "results.modeledOnly": "Support de capteur modélisé; non mesuré terrain ou couverture laser.",
-        "results.terrainCells": "Cellules DEM/DSM soutenues par des sources",
-        "results.historicalCells": "Validation des cellules indigènes conservées dans le dernier produit. Les lacunes restent manquantes.",
+        "results.terrainCells": "Cellules DEM / DSM issues des sources",
+        "results.historicalCells": "Cellules valides de la grille d’origine conservées dans le dernier produit. Les lacunes restent sans données.",
         "results.lidarPoints": "Retours historiques LiDAR",
         "results.historicalReturns": "Les enregistrements originaux des sources historiques, et non les retours générés par l'avion simulé.",
         "results.separate": "Les observations de vol, le support modélisé, les cellules d'élévation historiques et les retours historiques LiDAR sont des preuves distinctes.",
@@ -44516,7 +45173,7 @@ export const localeData = {
         "results.reviewOriginal": "Examiner les éléments de preuve originaux",
         "results.prepare": "Préparer l'appui à la source",
         "results.noProducts": "Aucun produit après le vol n'est retenu. Les observations originales et les analyses avancées sont disponibles ci-dessous. La préparation du support source est une action distincte explicite.",
-        "results.product": "Produit d'enquête retenu",
+        "results.product": "Produit de relevé conservé",
         "results.choose": "Choisissez les données conservées",
         "results.source": "Source originale/référence",
         "results.session": "Séance scientifique",
@@ -44525,7 +45182,7 @@ export const localeData = {
         "results.selected": "Enregistrement original sélectionné",
         "results.originalArtifact": "Ouvrir l'artefact vérifié JSON",
         "results.values": "Preuves à l'appui de la source",
-        "results.identity": "Cellule autochtone / enregistrement original",
+        "results.identity": "Cellule de la grille d’origine / enregistrement original",
         "results.value": "Hauteur de l'affichage / Z",
         "results.raw": "Valeur décodée originale",
         "results.quality": "Classe QA / preuve",
@@ -44542,7 +45199,7 @@ export const localeData = {
         "results.gapsLayer": "Nodata connu / bords de cellules exclus",
         "results.corridorLayer": "Esquisse de couloir modélisée",
         "results.trackLayer": "Voie aérienne archivée",
-        "results.originalsLayer": "Empreintes d'acquisition originales (dessinés)",
+        "results.originalsLayer": "Emprises des acquisitions d’origine (contours modélisés)",
         "results.opacity": "Opacité des couches (carte 2D)",
         "results.nextPage": "Charger la page suivante conservée",
         "results.viewWindow": "Charger les détails dans la fenêtre de la carte actuelle",
@@ -44600,7 +45257,7 @@ export const localeData = {
         "results.exportGeo": "Télécharger l'analyse de levés chargés GeoJSON",
         "results.exportProvenance": "Télécharger le rapport source source source",
         "results.profile": "Profil d'élévation avec l'appui de la source",
-        "results.profileMeaning": "Les élévations historiques des cellules indigènes le long du chemin de terre archivé ou d'un transect d'analyse explicite. Aucune interpolation, aucune nouvelle observation ou équivalence avec le MSL de l'aéronef.",
+        "results.profileMeaning": "Altitudes historiques des cellules de la grille d’origine le long de la trace au sol archivée ou d’un transect d’analyse explicite. Aucune interpolation, nouvelle observation ou équivalence avec l’altitude MSL de l’aéronef. Les lacunes et limites entre sources ou sessions restent disjointes.",
         "results.profilePath": "Profil de l'emplacement du sol",
         "results.archivedTrack": "Voie au sol d'un aéronef archivée",
         "results.analysisLine": "Transect d'analyse en deux points (pas une route de vol)",
@@ -44621,7 +45278,7 @@ export const localeData = {
         "results.aircraftAltitude": "Altitude des aéronefs enregistrée — contexte distinct",
         "results.mslSeparate": "L'altitude du simulateur MSL est indépendante de la référence historique du terrain. Aucune comparaison entre les valeurs de référence ou de hauteur au-dessus du sol n'est déduite.",
         "results.simulatedAltitude": "Altitude du simulateur enregistrée",
-        "results.profileEvidence": "Profil des preuves de cellules indigènes",
+        "results.profileEvidence": "Preuves du profil des cellules de la grille d’origine",
         "results.nativeCell": "Colonne originale native, ligne",
         "results.buildProfile": "Créer un profil soutenu par la source",
         "results.exportProfile": "Télécharger l'analyse de profil de cellules natives CSV",
@@ -44817,7 +45474,7 @@ export const localeData = {
         "ui.app.messageAboveGroundFt": "Au-dessus du sol {value1} ft",
         "ui.app.messageRECORDING": "● ENREGISTREMENT",
         "ui.app.messageSTANDBY": "- Non. - Non.",
-        "ui.app.messageMissionRecording": "Enregistrement de la mission",
+        "ui.app.messageMissionRecording": "Enregistrement de la mission en cours",
         "ui.app.messageMissionActiveWaitingForFreshTelemetry": "Mission active · en attente de télémétrie fraîche",
         "ui.app.messageHOME": "Accueil",
         "ui.app.messageMISSIONS": "Missions",
@@ -45937,7 +46594,7 @@ export const localeData = {
         "ui.missionOperations.messageFlightEndedInspectSavedOutcomesAndOriginal": "Vol terminé. Inspecter les résultats enregistrés et les preuves originales; aucune approbation organisationnelle n'est implicite.",
         "ui.missionOperations.messageMapShowsABoundedRecordedTrackPreview": "La carte montre un aperçu de piste enregistré délimité. Ouvrez le replay pour des échantillons de vol originaux supplémentaires.",
         "ui.missionOperations.messageFrozenRevisionInactiveAfterFlight": "Révision surgelée {value1} · Inactif après vol",
-        "ui.missionOperations.messageFocusCard": "Carte de mise au point",
+        "ui.missionOperations.messageFocusCard": "Afficher cette fiche",
         "ui.missionOperations.messageReviewLocalResults": "Examiner les résultats locaux",
         "ui.missionOperations.messageScientificOriginalsAndDependentOutputsWerePermanently": "Les originaux scientifiques et les sorties dépendantes ont été supprimés en permanence. Aucune valeur n'est reconstituée à partir de la télémétrie des aéronefs.",
         "ui.missionOperations.messageRecordedInstrumentConfiguration": "Configuration des instruments enregistrés",
@@ -48803,7 +49460,7 @@ export const localeData = {
         "ui.campaignCoverageUi.messageChooseAPublishedCardOnThisPage": "Choisissez une carte publiée sur cette page.",
         "ui.campaignCoverageUi.messageChooseASupportedOriginalVariable": "Choisissez une variable d'origine prise en charge.",
         "ui.campaignCoverageUi.messageTargetCell": "Cellule cible {value1}/{value2} : {value3}",
-        "ui.campaignProgressUi.messageNotStarted": "Pas commencé",
+        "ui.campaignProgressUi.messageNotStarted": "Non démarrée",
         "ui.campaignProgressUi.messageClaimedInProgress": "Réclamation / En cours",
         "ui.campaignProgressUi.messageEvidenceReceived": "Preuves reçues",
         "ui.campaignProgressUi.messageAwaitingReview": "Examen en cours",
@@ -49297,10 +49954,10 @@ export const localeData = {
         "ui.payloadSettings.messagePreviewGroundspeedMS": "Vitesse au sol (m/s)",
         "ui.payloadSettings.messageAssumedGroundspeedUsedByTheExistingPlanning": "Vitesse au sol présumée utilisée par le solveur de planification existant, et non par IAS ou TAS.",
         "ui.personalResearchFlight.messageChooseAtMost16CardsForThis": "Choisissez au plus 16 cartes pour ce vol. Votre bibliothèque de cartes sauvegardées n'est pas limitée.",
-        "ui.personalResearchFlight.messageActivateCard": "Activer la carte",
-        "ui.personalResearchFlight.messageDeactivateCard": "Désactiver la carte",
-        "ui.personalResearchFlight.messageBeginAttempt": "Début de la tentative",
-        "ui.personalResearchFlight.messageEndAttempt": "Tentative de fin",
+        "ui.personalResearchFlight.messageActivateCard": "Activer la fiche",
+        "ui.personalResearchFlight.messageDeactivateCard": "Désactiver la fiche",
+        "ui.personalResearchFlight.messageBeginAttempt": "Commencer une tentative",
+        "ui.personalResearchFlight.messageEndAttempt": "Terminer la tentative",
         "ui.personalResearchFlight.messageEnableAutomaticDetection": "Activer la détection automatique",
         "ui.personalResearchFlight.messageDisableAutomaticDetection": "Désactiver la détection automatique",
         "ui.personalResearchFlight.messageTheSelectedAttemptBelongsToAnotherFlight": "La tentative sélectionnée appartient à un autre vol. Rafraîchir l'expérience.",
@@ -50442,7 +51099,7 @@ export const localeData = {
         "windows.science.datasetRequired": "· Ensemble de données requis",
         "windows.feedback.notes": "Étapes et notes de reproduction facultatives",
         "windows.flight.noMission": "Aucune mission active",
-        "windows.flight.recording": "Enregistrement de la mission",
+        "windows.flight.recording": "Enregistrement de la mission en cours",
         "windows.science.category11Title": "et élévation",
         "windows.science.category11Description": "Numeric DEM/DSM elevation, not aircraft laser returns. Local: single-band elevation GeoTIFF.",
         "windows.science.category12Title": "Thermal Imaging",
@@ -50484,7 +51141,7 @@ export const localeData = {
         "native.disconnectedUnavailable": "Déconnecté/indisponible",
         "native.telemetryStaleUnavailable": "Tente de télémétrie / indisponible",
         "native.simulatorPausedScienceUnconfirmed": "Simulator pause / science non confirmée",
-        "native.armedNotStarted": "Armé/Non démarré",
+        "native.armedNotStarted": "Prête / Non démarrée",
         "native.inactive": "Inactif",
         "native.flightRecordingScience": "Enregistrement de vol: {value1}, Science: {value2}",
         "native.thisViewCouldNotUpdateSeeConnectionBuildDetails": "Cette vue ne pouvait pas être mise à jour. Voir les détails de connexion et de construction.",
@@ -50535,10 +51192,10 @@ export const localeData = {
         "native.samples": "{value1} échantillons",
         "native.notGraded": "Non classé",
         "native.insufficientEvidence": "Preuves insuffisantes",
-        "native.stale": "Étalon",
-        "native.armed": "Armés",
+        "native.stale": "Périmé",
+        "native.armed": "Prête",
         "native.waitingForSource": "En attente de la source",
-        "native.acquisitionGap": "Écart d'acquisition",
+        "native.acquisitionGap": "Lacune d’acquisition",
         "native.sourceDisconnected": "Source déconnectée",
         "native.waiting": "Attendre",
         "native.manual": "Manuel",
@@ -50591,7 +51248,6 @@ export const localeData = {
         "native.issued": "{value1}, délivré {value2}, {value3}",
         "native.focusedInToolbar": "Concentré dans la barre d'outils",
         "native.sAttempts": "{value1}, {value2} s, {value3} tentatives",
-        "native.enableautomatic": "activerAutomatique",
         "native.flightGuidanceUnavailable": "Guide de vol non disponible",
         "native.ap": "AP: {value1} | {value2}",
         "native.scientificSourceUnavailable": "Source scientifique non disponible",
@@ -50676,13 +51332,115 @@ export const localeData = {
         "native.instrument.ambientDensity": "Densité de l'air",
         "native.instrument.thermalImager": "Imageur thermique",
         "native.instrument.multispectralImager": "Imageur multispectral",
-        "native.instrument.hyperspectralImager": "Imageur hyperspectral"
+        "native.instrument.hyperspectralImager": "Imageur hyperspectral",
+        "ui.app.messageNoAircraftData": "Pas de données d'aéronef",
+        "ui.app.messageSIMULATED": "SIMULÉ",
+        "ui.app.messageSIMULATOR": "SIMULATEUR",
+        "ui.app.messageNOTELEMETRY": "Pas de TÉLÉMÉTRIE",
+        "ui.aviationReference.messagePublishedNotices": "avis publiés",
+        "ui.aviationReference.messageCatalogRecords": "catalogue des enregistrements",
+        "ui.aviationReference.messageLastRefreshPreviousSuccessfulRecordsAre": "Dernier rafraîchissement : {value1}. Les dossiers précédents retenus sont conservés.",
+        "ui.downloadActivity.messageFindingSource": "Recherche de la source",
+        "ui.flightTestProcedure.messagePointAttempt": "Essai de point",
+        "ui.flightTestProcedure.messageOverallCard": "Carte globale",
+        "ui.flightTestProcedure.messageQualifiedRepetition": "Redoublement qualifié",
+        "ui.flightTestProcedure.messageNotCounted": "Non compté",
+        "ui.flightTestProcedure.messageOpen": "Ouvrir",
+        "ui.libraryDownload.messageOriginalObservation": "observation originale {value1}",
+        "ui.libraryDownload.messageCompositeOriginalObservationDateUnknown": "date d'observation originale ou de la Composite inconnue",
+        "ui.libraryDownload.messageRetainedCandidateOnTheLoadedInventoryPage": "Candidat retenu sur la page d'inventaire chargée — intégrité et réutilisation exacte vérifiées lors de l'aperçu",
+        "ui.libraryDownload.messageDiscoveredNotConfirmedInTheLoaded": "Découvert — non confirmé dans la page locale chargée; la réutilisation totale indexée est vérifiée lors de l'aperçu",
+        "ui.libraryDownload.messageSceneCloudInformationUnknownNotApplicable": "Informations sur le nuage de scène inconnues / sans objet",
+        "ui.libraryDownload.messageReportedSceneCloudNotAValidPixel": "Nuage de scène signalé {value1}% (pas un pourcentage de pointage valide)",
+        "ui.map.messageMarker": "Marqueur",
+        "ui.missionIntelligence.messageWholeFlight": "Vol complet",
+        "ui.missionPerformance.messageUnknownEnd": "Fin inconnue",
+        "ui.missionTimeline.messageStillRecording": "Enregistrement",
+        "ui.missionWorkspace.messageProfileNotArchived": "profil non archivé",
+        "ui.missionWorkspace.messageDateUnknown": "date inconnue",
+        "ui.missionWorkspace.messageOriginalsDeletedSavedValuesRetained": "· les originaux supprimés; les valeurs enregistrées sont conservées",
+        "ui.missionWorkspace.messageAGL": "AGL",
+        "ui.missionWorkspace.messageObservedEntry": "Entrée observée",
+        "ui.missionWorkspace.messageCloudPresentEntryUnknown": "Nuage présent / entrée inconnue",
+        "ui.missionWorkspace.messageObservedExit": "sortie observée",
+        "ui.missionWorkspace.messageExitNotEstablished": "sortie non établie",
+        "ui.onlineAccess.messageAllowed": "Autorisé",
+        "ui.onlineAccess.messageNotAllowed": "Non autorisé",
+        "ui.organizationLiveUi.messageActivated": "Activer",
+        "ui.organizationLiveUi.messageNotActivated": "Non activé",
+        "ui.patterns.messageEditableGeneratedRoute": "Route générée par édition",
+        "ui.personalResearchFlight.messageAttemptRecordingSince": "Tentative d'enregistrement depuis {value1}",
+        "ui.personalResearchFlight.messageActiveReadyForAnAttempt": "Active — prêt à une tentative",
+        "ui.personalResearchFlight.messageProvisionalRepetitionsVerifyOriginal": "· Redoublements provisoires : {value1}. Vérifier la preuve originale après le vol.",
+        "ui.receivedEvidenceUi.messageRecordedLocationUnavailable": "Emplacement non disponible",
+        "ui.receivedEvidenceUi.messageAltitudeUnavailable": "Altitude non disponible",
+        "ui.remoteScience.messageValidSampledPositionsUnavailable": "Positions retenues dans l'échantillon: Indisponible",
+        "ui.remoteScience.messageValidSampledPositions": "{value1} positions retenues dans l'échantillon",
+        "ui.researchOrganizations.messageActiveMembership": "Membre actif",
+        "ui.researchOrganizations.messageMembershipUnavailable": "Membres non disponibles",
+        "ui.researchOrganizations.messageSent": "· envoyé {value1}",
+        "ui.research.messageNoTemplate": "Pas de modèle",
+        "ui.research.messageNoObjectiveSupplied": "Aucun objectif fourni",
+        "ui.research.messageArmed": "· Armés : {value1}",
+        "ui.scienceJourney.messageSimulatorUnavailable": "Simulator non disponible",
+        "ui.scienceMapView.messageRecordedEnvironmentalValues": "Valeurs environnementales enregistrées",
+        "ui.scienceMapView.messageHistoricalSourceAcquisitions": "la construction de sources historiques",
+        "ui.scienceMapView.messageLocationOverviewActualPacketQualityRemainsVisible": "Aperçu de l'emplacement; la qualité réelle du paquet reste visible.",
+        "ui.scienceMapView.messageModeledAcquisitionFootprintsNotContinuousValidPixelCoverage": "Empreintes d'acquisition modélisées; pas de couverture continue valide-pixel.",
+        "ui.scientificLibrary.messageUnavailableReconnectStorageOrRestoreThe": "Indisponible — reconnecter le stockage ou restaurer les fichiers originaux",
+        "ui.scientificLibrary.messageOriginalsRetainedCheckedPreviewHasNoUsable": "Originals conservés; l'aperçu vérifié n'a pas de pixels utilisables — contrôle de la qualité",
+        "ui.scientificLibrary.messageOriginalsRetainedActualPixelQualityIsAssessed": "Originals conservés; la qualité réelle du pixel est évaluée séparément",
+        "ui.sourceInspection.messageDerivedQuantity": "Quantité déterminée",
+        "ui.sourceInspection.messageDecodedSourceQuantity": "Quantité de source décodée",
+        "ui.submissionBuilder.messageSubmitEvidenceAuthorized": "Soumettre les preuves autorisées",
+        "ui.submissionBuilder.messageReadReferencePermissionCannotUpload": "Licence de lecture/référence — ne peut pas télécharger",
+        "ui.submissionBuilder.messagePublishedPolicy": "Politique publiée {value1}",
+        "ui.submissionBuilder.messagePolicyUnknown": "Politique inconnue",
+        "ui.submissionBuilder.messageOriginalRecordS": "{value1} enregistrement(s) original(s)",
+        "ui.surveyResearch.messageHistoricalSource": "Historical source {value1}",
+        "ui.surveyResearch.messageSimulatorObservation": "Observation du simulateur {value1}",
+        "ui.organizationReviews.messageRevoked": "Révisé",
+        "windows.deletion.archiveFlightSummary": "Les missions enregistrées {missions} seront supprimées.",
+        "windows.deletion.archiveScienceSummary": "Les ensembles de données scientifiques {datasets}, {observations} observations et {files} fichiers produits générés seront supprimés.",
+        "windows.deletion.archiveDetails": "{summary} Données à supprimer de: {directory} Missions/ensembles de données protégés inclus dans ce clair délibéré: {protected} Plans sauvegardés à supprimer: {plans} Taille gérée approximative: {size} MiB incluant les fichiers de compagnon SQLite et les produits indexés (le nettoyage des lignes peut conserver l'allocation) Fichiers produits générés: {files} ({productSize} MiB) {paths} Enlever: {removes} Préservations: {preserves}",
+        "windows.storage.openExisting": "Ce dossier contient déjà un magasin : {destination} Ouvrez plutôt ce magasin existant? Il peut contenir une archive différente/ancienne. Les données actuelles à {current} seront conservées. Rien ne sera fusionné ou écrasé. Choisissez Non pour sélectionner un autre dossier vide.",
+        "windows.storage.migrate": "Copiez et vérifiez les données de: {current} à: {destination} L'application fera une pause sur ses services locaux. Les originaux restent intacts après une migration réussie.",
+        "windows.storage.capacity": "Capacité de destination disponible: {size}",
+        "portal.organization.name": "Nom de l'organisation",
+        "ui.missionIntelligence.messageRefreshed": "{value1} · {value2} · {value3} · rafraîchi {value4}",
+        "ui.scienceDisplay.messageActualMeasurementValuesMin": "{value1} valeurs de mesure réelles · Min {value2} {value3} · Max {value4} {value5}. {value6}Aucune interpolation ou lissage. Les marqueurs d'observation laissent vide les espaces d'enregistrement; les altitudes répétées conservent la commande de temps en bout de main.",
+        "transfer.estimate.second": {
+          "one": "Environ {low}–{count} seconde",
+          "other": "Environ {low}–{count} secondes",
+          "many": "Environ {low}–{count} secondes"
+        },
+        "transfer.estimate.minute": {
+          "one": "Environ {low}–{count} minute",
+          "other": "Environ {low}–{count} minutes",
+          "many": "Environ {low}–{count} minutes"
+        },
+        "transfer.estimate.hour": {
+          "one": "Environ {low}–{count} heure",
+          "other": "Environ {low}–{count} heures",
+          "many": "Environ {low}–{count} heures"
+        },
+        "transfer.stage.awaitingApproval": "Agrément",
+        "transfer.stage.waitingForAuthorization": "En attente d'autorisation",
+        "transfer.stage.offline": "Hors ligne",
+        "native.phase.current": "Collecte scientifique : {phase}",
+        "native.phase.previous": "Dernier état de la collecte scientifique : {phase}",
+        "native.phase.session": "{status} | Session {number}",
+        "native.phase.notStarted": "{status} | Collecte scientifique non démarrée",
+        "native.phase.stale": "{status} | État périmé",
+        "native.banner.recordingActive": "Enregistrement du vol : actif | Collecte scientifique : {phase}",
+        "native.banner.recordingInactive": "Enregistrement du vol : inactif | Collecte scientifique : {phase}",
+        "native.banner.recordingUnknown": "Enregistrement du vol : indisponible | Collecte scientifique : {phase}"
       }
     },
     "pt-BR": {
-      "version": 20,
+      "version": 22,
       "locale": "pt-BR",
-      "sourceHash": "24325d6cd2282e6667cce945669b271811652f8627707a2d627de0b92e3822f9",
+      "sourceHash": "c871f36c92c40f3e195f35c762e9b9d6d415c522c475027296fb3dd87dba839c",
       "pendingEnglishFallbackKeys": [
         "contextHelp.coverage.body",
         "contextHelp.lidar.body",
@@ -50745,6 +51503,7 @@ export const localeData = {
         "ui.missionStartAdvisory.messageEntireMissionReadyPlannedInstrumentRegionUnits",
         "ui.missionStartAdvisory.messageReadinessCheckedPreparationCanChangeConfirmation",
         "ui.missionTimeline.messageSHA256",
+        "ui.missionWorkspace.messageAGL",
         "ui.missionWorkspace.messageFt",
         "ui.missionWorkspace.messageIndependentPackets",
         "ui.missionWorkspace.messageKt",
@@ -50895,7 +51654,7 @@ export const localeData = {
         "settings.hostFollow": "Usar padrão companheira neste navegador",
         "settings.hostReadOnly": "Os padrão do companhão são apenas leitura em dispositivos pareados. Altere- os no PC do companhão.",
         "settings.hostUnavailable": "Os padrão do Companion não estão disponíveis. Reconecte-se para revisá-los; opções do navegador permanecem disponíveis.",
-        "settings.hostSaved": "O Companheiro salvou a predefinição. Reabrir as janelas existentes do Windows para atualizar a aparência. Outro texto da janela permanece inglês.",
+        "settings.hostSaved": "O Companion salva por omissão. Reabrir as janelas existentes do Windows para usar a linguagem e aparência selecionada. A gravação e a coleção de ciência não são mudadas.",
         "settings.hostNativeNotice": "A localização nativa do Windows/MSFS requer catálogos compatíveis incluídos. A revisão humana por pessoa fluente e a aceitação no ambiente instalado estão pendentes.",
         "toolbar.mission": "Missão",
         "toolbar.payload": "Carga útil",
@@ -50946,12 +51705,12 @@ export const localeData = {
         "home.science": "Coleção de ciências",
         "home.science.unknown": "Estatus não disponível",
         "home.science.unavailable": "Não disponível — verificar o voo atual",
-        "home.science.notStarted": "Não começou",
-        "home.science.armed": "Armado — esperando para coletar",
-        "home.science.collecting": "Recolhendo",
+        "home.science.notStarted": "Não iniciada",
+        "home.science.armed": "Preparada: aguardando a coleta",
+        "home.science.collecting": "Coletando dados",
         "home.science.paused": "Pausa",
-        "home.science.betweenSessions": "Entre as sessões",
-        "home.science.ended": "A sessão terminou.",
+        "home.science.betweenSessions": "Entre sessões",
+        "home.science.ended": "Sessão encerrada",
         "home.synthetic": "TELEMETRIA DE ENSAIO SIMULADA — Não um voo MSFS instalado",
         "home.simulator": "Fonte: Simulador de vôo Microsoft",
         "home.sourceUnknown": "Fonte de telemetria não disponível",
@@ -51110,8 +51869,8 @@ export const localeData = {
         "toolbar.flight": "Voo",
         "toolbar.science": "Ciência",
         "toolbar.cards": "Fichas",
-        "toolbar.collectionActive": "COLECÇÃO DE CIÊNCIA ACTIVA",
-        "toolbar.collectionInactive": "COLECÇÃO DE CIÊNCIA INATIVO",
+        "toolbar.collectionActive": "COLETA CIENTÍFICA ATIVA",
+        "toolbar.collectionInactive": "COLETA CIENTÍFICA INATIVA",
         "toolbar.retained": "Observações científicas retenidas: {original}, observações modeladas/de origem: {derived}, produtos externos salvos: {products}. Contagem não estabelece qualidade ou a conclusão objetiva.",
         "toolbar.countsUnavailable": "Não foram guardadas contagens científicas; nenhuma contagem inferida de amostras de vôo.",
         "toolbar.acquisitionSummary": "Diagnóstico de aquisição: {recorded} linhas registradas/produtos, {rejected} rejeitadas, {missed} intervalos perdidos, intervalo médio real: {interval} s. Esses conteios são separados da evidência original retida.",
@@ -51121,13 +51880,13 @@ export const localeData = {
         "flight.action.pauseData": "Pausar coleta científica",
         "flight.action.resumeData": "Retomar coleta científica",
         "flight.action.endData": "Encerrar a sessão científica atual",
-        "flight.action.rearmAutomation": "Rearm coleção automática",
+        "flight.action.rearmAutomation": "Rearmar a coleta automática",
         "flight.action.record": "Iniciar gravação do voo",
         "flight.action.endFlight": "Encerrar missão",
         "toolbar.terrainScanner": "Escanner de Terrain (Evasão DEM)",
         "toolbar.acquisitionState": "Estado de aquisição do instrumento: {status} (separado da fase de coleta).",
         "science.stopped": "A ciência parou.",
-        "home.science.stopped": "Detenha",
+        "home.science.stopped": "Interrompida",
         "terrain.title": "Completamento do terreno após o voo",
         "terrain.separation": "Popular suporte modelado scanner com células DEM/DSM históricas retenidas. Isso cria terrenos derivados, nunca novas observações aéreas, LiDAR devolve ou crédito de pesquisa.",
         "terrain.initial": "Revise um corredor salvo primeiro. Nenhuma fonte é baixada automaticamente.",
@@ -51268,8 +52027,8 @@ export const localeData = {
         "results.available": "Disponível",
         "results.unavailable": "Indisponível",
         "results.modeledOnly": "Suporte modelado ao sensor; não medido terreno ou cobertura a laser.",
-        "results.terrainCells": "Células DEM/DSM apoiadas na fonte",
-        "results.historicalCells": "Celulas nativas válidas no último produto.",
+        "results.terrainCells": "Células DEM / DSM com respaldo das fontes",
+        "results.historicalCells": "Células válidas da grade original retidas no produto mais recente. As lacunas continuam sem dados.",
         "results.lidarPoints": "Histórico LiDAR volta",
         "results.historicalReturns": "Registros originais históricos, não retornos gerados pelo avião simulado.",
         "results.separate": "Observações de voo, suporte modelado, células históricas de elevação e retornos históricos LiDAR são evidências separadas. Os produtos pós-vôo não aumentam o rendimento científico ou completam cartões de pesquisa.",
@@ -51278,7 +52037,7 @@ export const localeData = {
         "results.reviewOriginal": "Revisar a evidência original",
         "results.prepare": "Prepare suporte de fonte",
         "results.noProducts": "Nenhum produto pós-viagem é mantido. Observações originais e análise avançada permanecem disponíveis abaixo. A preparação do suporte fonte é uma ação explícita separada.",
-        "results.product": "Produto de pesquisa retenido",
+        "results.product": "Produto de levantamento retido",
         "results.choose": "Escolha os dados conservados",
         "results.source": "Origem/referência original",
         "results.session": "Sessão científica",
@@ -51287,7 +52046,7 @@ export const localeData = {
         "results.selected": "Registro original selecionado",
         "results.originalArtifact": "Aberto artefato verificado JSON",
         "results.values": "Provas carregadas com base na fonte",
-        "results.identity": "Célula nativa / registro original",
+        "results.identity": "Célula da grade original / registro original",
         "results.value": "Altura da exposição / Z",
         "results.raw": "Valor original decodificado",
         "results.quality": "QA / classe de evidência",
@@ -51304,7 +52063,7 @@ export const localeData = {
         "results.gapsLayer": "Nodata conhecido / extremidades celulares excluídas",
         "results.corridorLayer": "Modelo do contorno do corredor",
         "results.trackLayer": "Rastreamento de voo arquivado",
-        "results.originalsLayer": "Peças originais de aquisição (delineados)",
+        "results.originalsLayer": "Áreas de aquisição originais (contornos modelados)",
         "results.opacity": "Opacidade da camada (2D mapa)",
         "results.nextPage": "Carregue a página seguinte.",
         "results.viewWindow": "Carregue detalhes na janela atual do mapa",
@@ -51362,7 +52121,7 @@ export const localeData = {
         "results.exportGeo": "Baixar a análise de pesquisa carregada GeoJSON",
         "results.exportProvenance": "Relatório de download do source",
         "results.profile": "Perfil de elevação apoiado por fonte",
-        "results.profileMeaning": "Alturas históricas de células nativas ao longo da trajetória de terra arquivada ou uma análise explicita transect. Nenhuma interpolação, novas observações ou equivalência a aeronave MSL. Lapsos e limites fonte/sessões permanecem desconectados.",
+        "results.profileMeaning": "Elevações históricas das células da grade original ao longo da trajetória no solo arquivada ou de um transecto de análise explícito. Sem interpolação, novas observações ou equivalência com a altitude MSL da aeronave. As lacunas e os limites entre fontes ou sessões permanecem desconectados.",
         "results.profilePath": "Percurso de perfis no solo",
         "results.archivedTrack": "Rastreamento terrestre de aeronaves arquivadas",
         "results.analysisLine": "Transecto de análise de dois pontos (não uma rota volada)",
@@ -51383,7 +52142,7 @@ export const localeData = {
         "results.aircraftAltitude": "Altitude da aeronave registada — contexto separado",
         "results.mslSeparate": "A altitude do MSL do simulador registrado é independente da referência histórica do terreno. Nenhuma comparação cruzada ou altura acima do solo é inferida.",
         "results.simulatedAltitude": "Altitude do simulador gravada",
-        "results.profileEvidence": "Perfil de evidências de células nativas",
+        "results.profileEvidence": "Evidências do perfil de células da grade original",
         "results.nativeCell": "Coluna original nativa, linha",
         "results.buildProfile": "Construir um perfil apoiado por fonte",
         "results.exportProfile": "Baixar análise de perfil de células nativas CSV",
@@ -51579,7 +52338,7 @@ export const localeData = {
         "ui.app.messageAboveGroundFt": "Acima do solo {value1} ft",
         "ui.app.messageRECORDING": "● ENREGISTRAMENTO",
         "ui.app.messageSTANDBY": "APORAS",
-        "ui.app.messageMissionRecording": "Registro da missão",
+        "ui.app.messageMissionRecording": "Gravação da missão em andamento",
         "ui.app.messageMissionActiveWaitingForFreshTelemetry": "Missão ativa · esperando por uma nova telemetria",
         "ui.app.messageHOME": "Início",
         "ui.app.messageMISSIONS": "Missões",
@@ -52699,7 +53458,7 @@ export const localeData = {
         "ui.missionOperations.messageFlightEndedInspectSavedOutcomesAndOriginal": "Inspeccione resultados salvos e evidências originais, nenhuma aprovação da organização está implícita.",
         "ui.missionOperations.messageMapShowsABoundedRecordedTrackPreview": "Mapa mostra uma visualização gravada da faixa. Abra a reprodução para amostras de voo originais adicionais.",
         "ui.missionOperations.messageFrozenRevisionInactiveAfterFlight": "Revisão gelada {value1} · Inativa após o voo",
-        "ui.missionOperations.messageFocusCard": "Cartão de Foco",
+        "ui.missionOperations.messageFocusCard": "Focar cartão",
         "ui.missionOperations.messageReviewLocalResults": "Revisar os resultados locais",
         "ui.missionOperations.messageScientificOriginalsAndDependentOutputsWerePermanently": "Originales científicos e saídas dependentes foram excluídas permanentemente. Nenhum valor é reconstruído da telemetria de aeronaves.",
         "ui.missionOperations.messageRecordedInstrumentConfiguration": "Configuração do instrumento gravado",
@@ -55565,7 +56324,7 @@ export const localeData = {
         "ui.campaignCoverageUi.messageChooseAPublishedCardOnThisPage": "Escolha um cartão publicado nesta página. O que?",
         "ui.campaignCoverageUi.messageChooseASupportedOriginalVariable": "Escolha uma variável original compatível.",
         "ui.campaignCoverageUi.messageTargetCell": "Célula-alvo {value1}/{value2}: {value3}",
-        "ui.campaignProgressUi.messageNotStarted": "Não começou",
+        "ui.campaignProgressUi.messageNotStarted": "Não iniciada",
         "ui.campaignProgressUi.messageClaimedInProgress": "Aclamado/em curso",
         "ui.campaignProgressUi.messageEvidenceReceived": "Recebidas provas",
         "ui.campaignProgressUi.messageAwaitingReview": "Aguardando Revisão",
@@ -56059,12 +56818,12 @@ export const localeData = {
         "ui.payloadSettings.messagePreviewGroundspeedMS": "Velocidade de antecedência (m/s)",
         "ui.payloadSettings.messageAssumedGroundspeedUsedByTheExistingPlanning": "Supõe-se que a velocidade de terra utilizada pelo solver de planejamento existente, não a IAS ou a TAS.",
         "ui.personalResearchFlight.messageChooseAtMost16CardsForThis": "Escolha no máximo 16 cartas para este voo. Sua biblioteca de cartas salva não é limitada.",
-        "ui.personalResearchFlight.messageActivateCard": "Activar a carta",
-        "ui.personalResearchFlight.messageDeactivateCard": "Cartão de Deactivate",
-        "ui.personalResearchFlight.messageBeginAttempt": "Comece a tentar",
-        "ui.personalResearchFlight.messageEndAttempt": "Fim da tentativa",
-        "ui.personalResearchFlight.messageEnableAutomaticDetection": "Activar a detecção automática",
-        "ui.personalResearchFlight.messageDisableAutomaticDetection": "Desativar a Detecção Automática",
+        "ui.personalResearchFlight.messageActivateCard": "Ativar cartão",
+        "ui.personalResearchFlight.messageDeactivateCard": "Desativar cartão",
+        "ui.personalResearchFlight.messageBeginAttempt": "Iniciar tentativa",
+        "ui.personalResearchFlight.messageEndAttempt": "Encerrar tentativa",
+        "ui.personalResearchFlight.messageEnableAutomaticDetection": "Ativar detecção automática",
+        "ui.personalResearchFlight.messageDisableAutomaticDetection": "Desativar detecção automática",
         "ui.personalResearchFlight.messageTheSelectedAttemptBelongsToAnotherFlight": "A tentativa selecionada pertence a outro voo. Actualize o experimento. O que foi?",
         "ui.personalResearchFlight.messageRecorded": "Gravado",
         "ui.personalResearchFlight.messageVerifyingOriginalEvidence": "Verificando evidências originais",
@@ -57204,7 +57963,7 @@ export const localeData = {
         "windows.science.datasetRequired": "· Conjunto de dados requerido",
         "windows.feedback.notes": "Passos e notas de reprodução opcionais",
         "windows.flight.noMission": "Nenhuma missão ativa",
-        "windows.flight.recording": "Registro da missão",
+        "windows.flight.recording": "Gravação da missão em andamento",
         "windows.science.category11Title": "Terra e elevação",
         "windows.science.category11Description": "Altura de DEM/DSM, não retornos de laser de aeronaves. Local: elevação de banda única GeoTIFF.",
         "windows.science.category12Title": "Aço inoxidável",
@@ -57246,7 +58005,7 @@ export const localeData = {
         "native.disconnectedUnavailable": "Desconectado/Inexistente",
         "native.telemetryStaleUnavailable": "Estale de telemetria / não disponível",
         "native.simulatorPausedScienceUnconfirmed": "Simulador pausado / ciência não confirmada",
-        "native.armedNotStarted": "Armado / Não começou",
+        "native.armedNotStarted": "Preparada / Não iniciada",
         "native.inactive": "Inativos",
         "native.flightRecordingScience": "Registro de voo: {value1}, Ciência: {value2}",
         "native.thisViewCouldNotUpdateSeeConnectionBuildDetails": "Esta visão não pôde atualizar. Veja Conexão & Construir Detalhes.",
@@ -57297,11 +58056,11 @@ export const localeData = {
         "native.samples": "{value1} amostras",
         "native.notGraded": "Não classificado",
         "native.insufficientEvidence": "Insuficiente evidência",
-        "native.stale": "Aguarde.",
-        "native.armed": "Armado",
+        "native.stale": "Desatualizado",
+        "native.armed": "Preparada",
         "native.waitingForSource": "Aguardando a fonte",
         "native.acquisitionGap": "Lacuna de aquisição",
-        "native.sourceDisconnected": "Fonte desligada",
+        "native.sourceDisconnected": "Fonte desconectada",
         "native.waiting": "Esperando",
         "native.manual": "Manual",
         "native.unsupported": "Não apoiado",
@@ -57353,7 +58112,6 @@ export const localeData = {
         "native.issued": "{value1}, emitido {value2}, {value3}",
         "native.focusedInToolbar": "Focada em Barra de Ferramentas",
         "native.sAttempts": "{value1}, {value2} s, {value3} tentativas",
-        "native.enableautomatic": "activarAutomático",
         "native.flightGuidanceUnavailable": "Orientação de vôo não disponível",
         "native.ap": "AP: {value1}, {value2}",
         "native.scientificSourceUnavailable": "Fonte científica não disponível",
@@ -57438,7 +58196,109 @@ export const localeData = {
         "native.instrument.ambientDensity": "Densidade do ar",
         "native.instrument.thermalImager": "Imageiro térmico",
         "native.instrument.multispectralImager": "Imageiro multispectral",
-        "native.instrument.hyperspectralImager": "Imageiro hiperspectral"
+        "native.instrument.hyperspectralImager": "Imageiro hiperspectral",
+        "ui.app.messageNoAircraftData": "Sem dados de aeronaves",
+        "ui.app.messageSIMULATED": "SIMULADO",
+        "ui.app.messageSIMULATOR": "SIMULADOR",
+        "ui.app.messageNOTELEMETRY": "NÃO TEMETRIA",
+        "ui.aviationReference.messagePublishedNotices": "publicações publicações",
+        "ui.aviationReference.messageCatalogRecords": "Registros de catálogo",
+        "ui.aviationReference.messageLastRefreshPreviousSuccessfulRecordsAre": "Última atualização: {value1}. Os registros anteriores são conservados.",
+        "ui.downloadActivity.messageFindingSource": "Encontrar a fonte",
+        "ui.flightTestProcedure.messagePointAttempt": "Tentação de ponta",
+        "ui.flightTestProcedure.messageOverallCard": "Cartão geral",
+        "ui.flightTestProcedure.messageQualifiedRepetition": "Repetição qualificada",
+        "ui.flightTestProcedure.messageNotCounted": "Não contado",
+        "ui.flightTestProcedure.messageOpen": "Abra.",
+        "ui.libraryDownload.messageOriginalObservation": "Observação original {value1}",
+        "ui.libraryDownload.messageCompositeOriginalObservationDateUnknown": "Composita/data de observação original desconhecida",
+        "ui.libraryDownload.messageRetainedCandidateOnTheLoadedInventoryPage": "Candidato retenido na página de inventário carregada — integridade e reutilização exacta verificada na pré-visualização",
+        "ui.libraryDownload.messageDiscoveredNotConfirmedInTheLoaded": "Descoberto — não confirmado na página local carregada; o reuso indexado completo é verificado na pré-visualização",
+        "ui.libraryDownload.messageSceneCloudInformationUnknownNotApplicable": "Informação sobre nuvens cenárias desconhecida/não aplicável",
+        "ui.libraryDownload.messageReportedSceneCloudNotAValidPixel": "Nuvem de cena reportada {value1}% (não uma porcentagem de pixel válido)",
+        "ui.map.messageMarker": "Marcador",
+        "ui.missionIntelligence.messageWholeFlight": "Voo inteiro",
+        "ui.missionPerformance.messageUnknownEnd": "Fim desconhecido",
+        "ui.missionTimeline.messageStillRecording": "Ainda está gravando.",
+        "ui.missionWorkspace.messageProfileNotArchived": "perfil não arquivado",
+        "ui.missionWorkspace.messageDateUnknown": "Data desconhecida",
+        "ui.missionWorkspace.messageOriginalsDeletedSavedValuesRetained": "· originais excluídos; valores salvos conservados",
+        "ui.missionWorkspace.messageAGL": " AGL",
+        "ui.missionWorkspace.messageObservedEntry": "Ingresso observado",
+        "ui.missionWorkspace.messageCloudPresentEntryUnknown": "Nuvem presente / entrada desconhecida",
+        "ui.missionWorkspace.messageObservedExit": "saída observada",
+        "ui.missionWorkspace.messageExitNotEstablished": "saída não estabelecida",
+        "ui.onlineAccess.messageAllowed": "Permitidos",
+        "ui.onlineAccess.messageNotAllowed": "Não é permitido.",
+        "ui.organizationLiveUi.messageActivated": "Ativado",
+        "ui.organizationLiveUi.messageNotActivated": "Não ativado",
+        "ui.patterns.messageEditableGeneratedRoute": "Ruta gerada editável",
+        "ui.personalResearchFlight.messageAttemptRecordingSince": "A tentativa de gravação desde {value1}",
+        "ui.personalResearchFlight.messageActiveReadyForAnAttempt": "Ativo — pronto para uma tentativa",
+        "ui.personalResearchFlight.messageProvisionalRepetitionsVerifyOriginal": "· Repetição provisória: {value1}. Verifique a evidência original após o voo.",
+        "ui.receivedEvidenceUi.messageRecordedLocationUnavailable": "Localização registrada não disponível",
+        "ui.receivedEvidenceUi.messageAltitudeUnavailable": "Altitude não disponível",
+        "ui.remoteScience.messageValidSampledPositionsUnavailable": "Posições válidas da amostra: Não disponíveis",
+        "ui.remoteScience.messageValidSampledPositions": "{value1} posições amostradas válidas",
+        "ui.researchOrganizations.messageActiveMembership": "Associação ativa",
+        "ui.researchOrganizations.messageMembershipUnavailable": "Adesão não disponível",
+        "ui.researchOrganizations.messageSent": "· enviado {value1}",
+        "ui.research.messageNoTemplate": "Nenhum modelo",
+        "ui.research.messageNoObjectiveSupplied": "Nenhum objetivo fornecido",
+        "ui.research.messageArmed": "· Armado: {value1}",
+        "ui.scienceJourney.messageSimulatorUnavailable": "Simulador não disponível",
+        "ui.scienceMapView.messageRecordedEnvironmentalValues": "valores ambientais registrados",
+        "ui.scienceMapView.messageHistoricalSourceAcquisitions": "Aquisições de fonte histórica",
+        "ui.scienceMapView.messageLocationOverviewActualPacketQualityRemainsVisible": "Visão geral da localização; a qualidade real do pacote permanece visível.",
+        "ui.scienceMapView.messageModeledAcquisitionFootprintsNotContinuousValidPixelCoverage": "Modelo de pegadas de aquisição; não é uma cobertura contínua de pixels válidos.",
+        "ui.scientificLibrary.messageUnavailableReconnectStorageOrRestoreThe": "Não disponível — reconecte o armazenamento ou restaure os arquivos originais",
+        "ui.scientificLibrary.messageOriginalsRetainedCheckedPreviewHasNoUsable": "Originals conservados; a visualização verificada não tem pixels utilizáveis — inspecione a qualidade",
+        "ui.scientificLibrary.messageOriginalsRetainedActualPixelQualityIsAssessed": "Originales conservados; a qualidade real do pixel é avaliada separadamente",
+        "ui.sourceInspection.messageDerivedQuantity": "Quantidade devida",
+        "ui.sourceInspection.messageDecodedSourceQuantity": "Quantidade de fonte decodificada",
+        "ui.submissionBuilder.messageSubmitEvidenceAuthorized": "Envie provas autorizadas",
+        "ui.submissionBuilder.messageReadReferencePermissionCannotUpload": "Permissão de leitura/referência — não pode ser carregado",
+        "ui.submissionBuilder.messagePublishedPolicy": "Política publicada {value1}",
+        "ui.submissionBuilder.messagePolicyUnknown": "Política Desconhecida",
+        "ui.submissionBuilder.messageOriginalRecordS": "{value1} registo(s) original(es)",
+        "ui.surveyResearch.messageHistoricalSource": "Origem histórica {value1}",
+        "ui.surveyResearch.messageSimulatorObservation": "Observação do simulador {value1}",
+        "ui.organizationReviews.messageRevoked": "Revogado",
+        "windows.deletion.archiveFlightSummary": "{missions} as missões registradas serão excluídas.",
+        "windows.deletion.archiveScienceSummary": "{datasets} conjuntos de dados científicos, {observations} observações e {files} gerados arquivos de produtos serão excluídos.",
+        "windows.deletion.archiveDetails": "{summary} Dados a excluir de: {directory} Missões/sets de dados protegidos incluídos neste deliberado claro: {protected} Planos guardados a excluir: {plans} Tamanho aproximado gerenciado: {size} MiB incluindo arquivos SQLite companheiras e produtos indexados (limpiando linhas podem manter alocação) Arquivos de produtos gerados: {files} ({productSize} MiB) {paths} Remove: {removes} Preservas: {preserves}",
+        "windows.storage.openExisting": "Este pasta já contém uma loja: {destination} Abra a loja existente em vez disso? Pode conter um arquivo mais antigo/diferente. Os dados atuais em {current} serão conservados. Nada será fundido ou sobrescrito. Escolha Não para seleccionar outra pasta vazia.",
+        "windows.storage.migrate": "Copiar e verificar dados de: {current} a: {destination} O aplicativo irá pausar seus serviços locais. Os originais permanecem intactos após a migração bem sucedida. Continuar?",
+        "windows.storage.capacity": "Capacidade de destino disponível: {size}",
+        "portal.organization.name": "Nome da organização",
+        "ui.missionIntelligence.messageRefreshed": "{value1} · {value2} · {value3} · renovado {value4}",
+        "ui.scienceDisplay.messageActualMeasurementValuesMin": "{value1} valores reais de medição · Min {value2} {value3} · Max {value4} {value5}. {value6}Nenhuma interpolação ou suavização. Os marcadores de observação deixam vazios nas aberturas de registro; as altitudes repetidas mantêm o tempo no tooltips.",
+        "transfer.estimate.second": {
+          "one": "Cerca de {low}–{count} segundo",
+          "other": "Cerca de {low}–{count} segundos",
+          "many": "Cerca de {low}–{count} segundos"
+        },
+        "transfer.estimate.minute": {
+          "one": "Cerca de {low}–{count} minuto",
+          "other": "Cerca de {low}–{count} minutos",
+          "many": "Cerca de {low}–{count} minutos"
+        },
+        "transfer.estimate.hour": {
+          "one": "Cerca de {low}–{count} hora",
+          "other": "Cerca de {low}–{count} horas",
+          "many": "Cerca de {low}–{count} horas"
+        },
+        "transfer.stage.awaitingApproval": "Aguardando a aprovação",
+        "transfer.stage.waitingForAuthorization": "Esperando a autorização",
+        "transfer.stage.offline": "Desligada",
+        "native.phase.current": "Coleta científica: {phase}",
+        "native.phase.previous": "Último estado da coleta científica: {phase}",
+        "native.phase.session": "{status} | Sessão {number}",
+        "native.phase.notStarted": "{status} | Coleta científica não iniciada",
+        "native.phase.stale": "{status} | Estado desatualizado",
+        "native.banner.recordingActive": "Gravação do voo: ativa | Coleta científica: {phase}",
+        "native.banner.recordingInactive": "Gravação do voo: inativa | Coleta científica: {phase}",
+        "native.banner.recordingUnknown": "Gravação do voo: indisponível | Coleta científica: {phase}"
       }
     }
   }

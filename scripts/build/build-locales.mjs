@@ -99,12 +99,19 @@ export function nativeCatalogAssets(bundle = localeBundle()) {
 export function validateReferences(schema,sources) {
   const referenced=new Set();
   for(const [name,source]of Object.entries(sources)){
-    const keys=[...source.matchAll(/data-i18n(?:-aria-label|-aria-description|-placeholder|-title|-alt)?="([^"]+)"/g)].map(match=>match[1]);
+    const keys=[...source.matchAll(/data-(?:native-)?i18n(?:-aria-label|-aria-description|-placeholder|-title|-alt)?="([^"]+)"/g)].map(match=>match[1]);
+    keys.push(...[...source.matchAll(/\b(?:nativeText|nativeBind|WindowsPresentation\.Text|PresentationText\.Text|this\.text)\(\s*['"]([^'"]+)['"]/g)].map(match=>match[1]));
     if(source.includes("from './i18n.js'")){
       keys.push(...[...source.matchAll(/\b(?:t|textForUI|localizedCopy|message)\(\s*['"]([^'"]+)['"]\s*(?=[,)])/g)].map(match=>match[1]));
       keys.push(...[...source.matchAll(/\.i18n(?:AriaLabel|Placeholder)?\s*=\s*['"]([^'"]+)['"]/g)].map(match=>match[1]));
     }
     if(name.endsWith('navigation-routes.js'))keys.push(...[...source.matchAll(/['"](nav\.[a-zA-Z]+)['"]/g)].map(match=>match[1]));
+    // Dictionaries, ternary key selection and bounded namespace adapters are
+    // consumers too. Report true absence separately from computed references.
+    for(const match of source.matchAll(/['"]([a-z][A-Za-z0-9]*(?:\.[A-Za-z0-9]+)+\.?)["']/g)){
+      if(Object.hasOwn(schema.messages,match[1]))referenced.add(match[1]);
+      else if(match[1].endsWith('.'))for(const key of Object.keys(schema.messages))if(key.startsWith(match[1]))referenced.add(key);
+    }
     for(const key of keys){
       if(!Object.hasOwn(schema.messages,key))throw new Error('Undefined message reference: '+name+' / '+key);
       referenced.add(key);
@@ -117,7 +124,8 @@ export function validateReferences(schema,sources) {
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const bundle = localeBundle(), result = validateCatalogs(bundle);
-  const web=resolve(folder,'..'),sources=Object.fromEntries(readdirSync(web).filter(name=>/\.(html|js)$/.test(name)).map(name=>[name,readFileSync(resolve(web,name),'utf8')]));
+  const sourceRoots=[resolve(folder,'..'),resolve(root,'src/AeroScience.Organization/wwwroot'),resolve(root,'src/AeroScience.Desktop'),resolve(root,'msfs-toolbar/PackageSources/html_ui/InGamePanels/AeroScience')];
+  const sources=Object.fromEntries(sourceRoots.flatMap(web=>readdirSync(web).filter(name=>/\.(html|js|cs)$/.test(name)).map(name=>[web+'/'+name,readFileSync(resolve(web,name),'utf8')])));
   const references=validateReferences(bundle.schema,sources);
   const target = resolve(folder,'catalog.generated.js'), content = generatedModule(bundle);
   if (process.argv.includes('--check')) {

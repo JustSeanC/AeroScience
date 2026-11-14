@@ -407,7 +407,7 @@ async function navigate() {
     settings: localizedCopy("ui.app.messageSETTINGS"),
     "science-workspace": localizedCopy("ui.app.messageRESULTSHISTORY"),library:localizedCopy("ui.app.messageSCIENTIFICLIBRARY"),help:localizedCopy("ui.app.messageHELPSUPPORT"),downloads:localizedCopy("ui.app.messageSCIENTIFICLIBRARY"),"library-storage":localizedCopy("ui.app.messageSCIENTIFICLIBRARY"),
   }[page]);
-  setPresentationText(document,`${dashboardTitle} · ${workspace?.querySelector('h1')?.textContent||({home:'Home',planner:'Flight Planner','my-research':'My Research',settings:'Settings',help:'Help & Support'}[page])||page}`,"title",true);
+  setPresentationText(document,`${dashboardTitle} · ${workspace?.querySelector('h1')?.textContent||({home:textForUI("nav.home"),planner:textForUI("nav.planner"),'my-research':textForUI("nav.myResearch"),settings:textForUI("nav.settings"),help:'Help & Support'}[page])||page}`,"title",true);
   if (!authorized) return;
   if(page==='home')homeView=homeDashboard($('home'),api,{snapshot:()=>current,draft:plannerDraft});
   if(page==='missions-explorer')explorerView=missionsExplorer($('missions-explorer'),api,{draft:plannerDraft});
@@ -465,7 +465,7 @@ async function loadHistory() {
       el("h2", m.name),
       el(
         "p",
-        `${m.aircraft || "No aircraft data"} · ${date(m.startedUtc)} · ${modeLabel(m.mode)} · ${m.source === "simulated" ? "SIMULATED" : m.source === "simulator" ? "SIMULATOR" : "NO TELEMETRY"}`,
+        `${m.aircraft || textForUI("ui.app.messageNoAircraftData")} · ${date(m.startedUtc)} · ${modeLabel(m.mode)} · ${m.source === "simulated" ? textForUI("ui.app.messageSIMULATED") : m.source === "simulator" ? textForUI("ui.app.messageSIMULATOR") : textForUI("ui.app.messageNOTELEMETRY")}`,
       ),
     );
     const meta = el("div", undefined, "history-meta");

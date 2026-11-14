@@ -690,10 +690,10 @@ export async function libraryDownload(parent, api, isDisposed = () => false, opt
         label,
         el(
           "p",
-          `${item.product} · ${item.observationUtc?"original observation "+dateTime(item.observationUtc):"Composite / original observation date unknown"} · ${item.resolution}`,
+          `${item.product} · ${item.observationUtc?textForUI("ui.libraryDownload.messageOriginalObservation",{value1:(dateTime(item.observationUtc))}):textForUI("ui.libraryDownload.messageCompositeOriginalObservationDateUnknown")} · ${item.resolution}`,
         ),
         el("p", item.quality),
-        el("p",`${retained?"Retained candidate on the loaded inventory page — integrity and exact reuse checked at preview":"Discovered — not confirmed in the loaded local page; full indexed reuse is checked at preview"} · ${item.cloudPercent==null?"Scene cloud information unknown / not applicable":`Reported scene cloud ${item.cloudPercent}% (not a valid-pixel percentage)`}`),
+        el("p",`${retained?textForUI("ui.libraryDownload.messageRetainedCandidateOnTheLoadedInventoryPage"):textForUI("ui.libraryDownload.messageDiscoveredNotConfirmedInTheLoaded")} · ${item.cloudPercent==null?textForUI("ui.libraryDownload.messageSceneCloudInformationUnknownNotApplicable"):textForUI("ui.libraryDownload.messageReportedSceneCloudNotAValidPixel",{value1:(item.cloudPercent)})}`),
         el("p",localizedCopy("ui.libraryDownload.messageCatalogFootprintIntersectsTheSelectedSearchBounds",{value1:(String(Math.max(item.bounds.west,query.area.west).toFixed(3))),value2:(String(Math.min(item.bounds.east,query.area.east).toFixed(3))),value3:(String(Math.max(item.bounds.south,query.area.south).toFixed(3))),value4:(String(Math.min(item.bounds.north,query.area.north).toFixed(3)))})),
       );
       if(!item.nasa)button(row,localizedCopy("ui.libraryDownload.messageSelectThisDataset"),()=>{check.checked=true;check.onchange();});

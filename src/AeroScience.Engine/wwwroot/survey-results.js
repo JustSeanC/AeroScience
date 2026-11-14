@@ -1,5 +1,5 @@
 import {presentationTextNode} from './i18n.js';
-import {setPresentationText} from './i18n.js';
+import {message as localizedCopy,setPresentationText} from './i18n.js';
 import {contextualHelp} from './contextual-help.js';
 import {node as el,button,select,link,disclosure,metric,status,errorMessage,numeric,table,legend,dateTime} from './workstation-ui.js';
 import {t as textForUI,t} from './i18n.js';
@@ -9,7 +9,7 @@ import {modeAvailable,pointModes,pointRange,pointColor,filteredPoints} from './s
 import {cloudView} from './survey-cloud.js';
 import {surveyProfile} from './survey-profile.js';
 import {surveyExports} from './survey-exports.js';
-const text=key=>t('results.'+key),terrainKind='terrain-elevation-index',lidarKind='lidar-point-index';
+const text=key=>localizedCopy('results.'+key),terrainKind='terrain-elevation-index',lidarKind='lidar-point-index';
 const preferenceKey='AeroScience.survey-view.v1';
 function preferences(){try{const p=JSON.parse(localStorage.getItem(preferenceKey));return {terrain:p?.terrain!==false,relief:p?.relief===true,gaps:p?.gaps!==false,corridor:p?.corridor!==false,track:p?.track!==false,originals:p?.originals===true,opacity:Number.isFinite(p?.opacity)?Math.max(.1,Math.min(1,p.opacity)):.85};}catch{return {terrain:true,relief:false,gaps:true,corridor:true,track:true,originals:false,opacity:.85};}}
 export function resultsHref(params,view){const q=new URLSearchParams(params);q.set('view',view);return '#workspace/results?'+q;}
@@ -70,7 +70,7 @@ export async function surveyResults(parent,api,{id,summary,params,disposals}){
     const explanation=el('section',undefined,'survey-source');pane.append(explanation);describeManifest(explanation,manifest,source.value);
     const layerTools=el('fieldset',undefined,'survey-layers');layerTools.append(el('legend',text('layers')));pane.append(layerTools);
     prefs.historical=true;prefs.mode='elevation';prefs.ground=false;prefs.classification='';prefs.returns='';
-    for(const key of [manifest.kind===lidarKind?'historical':'terrain',...(manifest.kind===terrainKind?['relief']:[]),'gaps','corridor','track','originals']){const label=el('label'),input=el('input');input.type='checkbox';input.checked=prefs[key];label.append(input,presentationTextNode(text(textForUI("ui.surveyResults.messageLayer",{value1:(String(key))}))));layerTools.append(label);input.onchange=()=>{prefs[key]=input.checked;save();render();};}
+    for(const key of [manifest.kind===lidarKind?'historical':'terrain',...(manifest.kind===terrainKind?['relief']:[]),'gaps','corridor','track','originals']){const label=el('label'),input=el('input');input.type='checkbox';input.dataset.surveyLayer=key;input.checked=prefs[key];label.append(input,presentationTextNode(text(key+'Layer')));layerTools.append(label);input.onchange=()=>{prefs[key]=input.checked;save();render();};}
     if(manifest.kind===lidarKind){
      const originalSource=manifest.sources.find(s=>s.id===source.value),mode=select(layerTools,text('pointColor'),pointModes.map(v=>[v,text(v)]),'elevation');for(const o of mode.options){o.disabled=!modeAvailable(o.value,originalSource);if(o.disabled)o.textContent+=' — '+text(o.value==='heightAboveGround'?'noCompatibleHeight':'attributeAbsent');}mode.onchange=()=>{if(!modeAvailable(mode.value,originalSource))mode.value='elevation';prefs.mode=mode.value;render();};
      const ground=el('input');ground.type='checkbox';const label=el('label',text('groundOnly'));label.prepend(ground);layerTools.append(label);ground.disabled=!modeAvailable('classification',originalSource);ground.onchange=()=>{prefs.ground=ground.checked;render();};

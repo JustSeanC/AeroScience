@@ -239,7 +239,7 @@ export async function replay(parent, id, mission, api, review, setStop) {
           el("h4", localizedCopy("ui.missionWorkspace.messageSavedAcquisitionsWithin3Seconds")),
         );
         acquisitions.append(el('p',localizedCopy("ui.missionWorkspace.messageInstrumentStateConfigurationTime",{value1:(String(context.instruments.scienceState)),value2:(String(context.instruments.configurationUtc??'not archived'))})));
-        for(const c of context.instruments.instruments??[])if(c.enabled)acquisitions.append(el('p',`${c.instrumentId} · ${c.intervalMs/1000}s · ${c.payload?.profile.name??'profile not archived'}`));
+        for(const c of context.instruments.instruments??[])if(c.enabled)acquisitions.append(el('p',`${c.instrumentId} · ${c.intervalMs/1000}s · ${c.payload?.profile.name??textForUI("ui.missionWorkspace.messageProfileNotArchived")}`));
         if(context.error||available.error)acquisitions.append(el('p',localizedCopy("ui.missionWorkspace.messageScientificLibraryUnavailable",{value1:(String(context.error??available.error))})));
         for(const row of (context.observations??[]).slice(0,200))acquisitions.append(el('p',`${row.measurementId}: ${format(row.value,5)} ${row.unit} · ${row.timestampUtc} · ${row.quality}`));
         if(context.observations?.length>200)acquisitions.append(el('p',localizedCopy("ui.missionWorkspace.messageObservationAlignmentWindowTruncatedAt200Values")));
@@ -554,7 +554,7 @@ export async function imagery(parent, id, api) {
     const s = item.source;
     const o = el(
       "option",
-      `${s.manifest.name} · ${s.manifest.observationUtc ?? "date unknown"}${item.originalsRetained?"":" · originals deleted; saved values retained"}`,
+      `${s.manifest.name} · ${s.manifest.observationUtc ?? textForUI("ui.missionWorkspace.messageDateUnknown")}${item.originalsRetained?"":textForUI("ui.missionWorkspace.messageOriginalsDeletedSavedValuesRetained")}`,
     );
     o.value = s.id;
     source.append(o);
@@ -732,7 +732,7 @@ export async function atmosphere(parent, id, api) {
     ["groundSlopeDegrees", textForUI("ui.missionWorkspace.messageAlongTrackGroundSlopeDegrees")],
     ["lapseKelvinPerKilometre", textForUI("ui.missionWorkspace.messageLocalLapseKKm")],
   ]) {
-    const o = el("option", `${title.split(" (")[0]} (${convert(value, 0).unit.replace(" MSL", "")}${value==="clearanceMetres"?" AGL":""})`);
+    const o = el("option", `${title.split(" (")[0]} (${convert(value, 0).unit.replace(" MSL", "")}${value==="clearanceMetres"?textForUI("ui.missionWorkspace.messageAGL"):""})`);
     o.value = value;
     y.append(o);
   }
@@ -787,7 +787,7 @@ export async function atmosphere(parent, id, api) {
     advanced.append(
       el(
         "p",
-        `${c.entryObserved ? "Observed entry" : "Cloud present / entry unknown"} ${c.entryUtc} · ${format(convert("altitudeMetres",c.entryAltitudeMetres).value)} ${convert("altitudeMetres",0).unit} → ${c.exitObserved ? "observed exit" : "exit not established"} ${c.exitUtc ?? ""} ${format(convert("altitudeMetres",c.exitAltitudeMetres).value)} ${convert("altitudeMetres",0).unit}`,
+        `${c.entryObserved ? textForUI("ui.missionWorkspace.messageObservedEntry") : textForUI("ui.missionWorkspace.messageCloudPresentEntryUnknown")} ${c.entryUtc} · ${format(convert("altitudeMetres",c.entryAltitudeMetres).value)} ${convert("altitudeMetres",0).unit} → ${c.exitObserved ? textForUI("ui.missionWorkspace.messageObservedExit") : textForUI("ui.missionWorkspace.messageExitNotEstablished")} ${c.exitUtc ?? ""} ${format(convert("altitudeMetres",c.exitAltitudeMetres).value)} ${convert("altitudeMetres",0).unit}`,
       ),
     );
   advanced.append(el("h4", localizedCopy("ui.missionWorkspace.messageAltitudeIntervalSummaries")));

@@ -1,4 +1,4 @@
-import {message as localizedCopy,setPresentationText} from './i18n.js';
+import {messageKey,message as localizedCopy,setPresentationText} from './i18n.js';
 import {t as textForUI} from './i18n.js';
 import {updatePortalIdentity} from './organization-appearance.js';
 import {contextualHelp} from './contextual-help.js';
@@ -52,7 +52,7 @@ function failure(parent,error){let box=parent.querySelector(':scope > .action-er
 function field(parent,label,type='text',value='',maximum=120){const wrap=node('label',label),input=node(type==='textarea'?'textarea':'input');if(type!=='textarea')input.type=type;input.value=value;input.maxLength=maximum;setPresentationText(input,label,"aria-label");wrap.append(input);parent.append(wrap);return input;}
 function status(parent,message=''){const p=node('p',message,'workspace-status');p.setAttribute('role','status');parent.append(p);return p;}
 function taskNavigation(){organizationPortalNavigation(root,session,{research:()=>{epoch++;return membership.memberHome();},reviews:()=>{epoch++;return reviews.queue();},programs:showPrograms,live:openLive,events:openEvents,notifications:()=>notifications.settings()});}
-function heading(title,description){root.replaceChildren(node('h1',title));if(description)root.append(node('p',description,'lead'));taskNavigation();contextualHelp(root,/evidence|review/i.test(title)?'evidence':'assignments',{guideHref:'/organization-help.html'});}
+function heading(title,description){root.replaceChildren(node('h1',title));if(description)root.append(node('p',description,'lead'));taskNavigation();contextualHelp(root,/evidence|review|submission/i.test(messageKey(title)||'')?'evidence':'assignments',{guideHref:'/organization-help.html'});}
 function modal(title){returnFocus=document.activeElement;dialog.replaceChildren();const head=node('div',undefined,'dialog-head'),h=node('h2',title);h.id='dialog-title';head.append(h);const close=button(head,'×',()=>dialog.close());setPresentationText(close,localizedCopy("ui.organization.messageCloseDialog"),"aria-label");dialog.append(head);dialog.showModal();return dialog;}
 dialog.addEventListener('close',()=>{if(returnFocus?.isConnected)returnFocus.focus();});
 function draftCommand(){let prior='',id;return data=>{const key=JSON.stringify(data);if(key!==prior){prior=key;id=crypto.randomUUID();}return {...data,requestId:id};};}
@@ -66,7 +66,7 @@ function showIdentity(message=''){
  const panel=node('section',undefined,'panel auth'),form=node('form');panel.append(node('h2',session.initialized?localizedCopy("ui.organizationMembers.messageSignIn"):localizedCopy("ui.organization.messageSetUpYourOrganization")));panel.append(form);root.append(panel);
  if(message)status(form,message);
  let secret,name,description;
- if(!session.initialized){form.append(node('p',session.ownerPairing?localizedCopy("ui.organization.messageChooseYourOrganizationAndAdministratorDetailsThen"):localizedCopy("ui.organization.messageUseTheProtectedOneTimeCodeSuppliedBy")));if(!session.ownerPairing){secret=field(form,localizedCopy("ui.organization.messageSetupCode"),'password','',256);secret.autocomplete='off';secret.required=true;}name=field(form,'Organization name');name.required=true;description=field(form,localizedCopy("ui.organization.messageOrganizationDescription"),'textarea','',4000);}
+ if(!session.initialized){form.append(node('p',session.ownerPairing?localizedCopy("ui.organization.messageChooseYourOrganizationAndAdministratorDetailsThen"):localizedCopy("ui.organization.messageUseTheProtectedOneTimeCodeSuppliedBy")));if(!session.ownerPairing){secret=field(form,localizedCopy("ui.organization.messageSetupCode"),'password','',256);secret.autocomplete='off';secret.required=true;}name=field(form,localizedCopy('portal.organization.name'));name.required=true;description=field(form,localizedCopy("ui.organization.messageOrganizationDescription"),'textarea','',4000);}
  const username=field(form,localizedCopy("ui.organization.messageAccountName"));username.maxLength=64;username.autocomplete='username';username.required=true;
  const password=field(form,localizedCopy("ui.organization.messagePassword"),'password','',256);password.autocomplete=session.initialized?'current-password':'new-password';password.required=true;
  if(!session.initialized){password.minLength=14;form.append(node('p',localizedCopy("ui.organization.messageUseAtLeast14CharactersIncludingUppercase"),'help'));}

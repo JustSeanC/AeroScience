@@ -31,7 +31,7 @@ walk(ast,n=>{
  if(n.type==='VariableDeclarator'&&['phase','requirements','label'].includes(n.id.name)&&n.init)select(n.init);
  if(n.type==='ObjectExpression'&&n.properties.some(p=>['ambient-temperature','airTemperature','pass'].includes(p.key?.value||p.key?.name)))for(const p of n.properties)select(p.value);
  if(n.type==='VariableDeclarator'&&n.id.name==='labels'&&n.init?.type==='ObjectExpression')for(const p of n.init.properties)select(p.value);
- if(n.type==='ArrayExpression'&&n.elements.length===2&&['activate','deactivate','beginAttempt','endAttempt','enableAutomatic','disableAutomatic'].includes(n.elements[0]?.value)&&n.elements[1]?.type==='Literal')select(n.elements[1]);
+ if(n.type==='ArrayExpression'&&n.elements.length===2&&['activate','deactivate','beginAttempt','endAttempt','enableAutomatic','disableAutomatic'].includes(n.elements[0]?.value)&&n.elements[1]?.type==='Literal'&&(/\s/.test(n.elements[1].value)||/^[A-Z][a-z]+$/.test(n.elements[1].value)))select(n.elements[1]);
 });
 let result=source,last=source.length+1;
 // Keep the outer complete message when boundaries nest; parameter rendering is recursive.

@@ -10,7 +10,7 @@ const roots=['src/AeroScience.Engine/wwwroot','src/AeroScience.Organization/wwwr
 const skip=/\/(?:vendor|geography|help|i18n|bin|obj|artifacts)\//;
 const camel=s=>s.replace(/[^a-zA-Z0-9]+(.)?/g,(_,c)=>c?c.toUpperCase():'').replace(/^[A-Z]/,c=>c.toLowerCase());
 function files(folder){return readdirSync(folder,{withFileTypes:true}).flatMap(e=>{const p=resolve(folder,e.name),n=relative(root,p).replaceAll('\\','/');return skip.test(n)?[]:e.isDirectory()?files(p):/\.(js|html|cs)$/.test(p)?[p]:[];});}
-function surface(file){
+export function surface(file){
  if(file.startsWith('msfs-toolbar/'))return 'nativeToolbar';
  if(file.startsWith('src/AeroScience.Desktop/'))return 'windowsCompanion';
  if(file.startsWith('src/AeroScience.Organization/'))return 'organizations';
@@ -32,6 +32,7 @@ function disposition(node,ancestors,source,contracts){
  const call=chain.find(n=>n.type==='CallExpression'),callName=property(call?.callee);
  if(chain.some(n=>n.type==='ImportDeclaration'||n.type==='ExportNamedDeclaration'&&n.source))return ['protected-identifier','module identity'];
  if(['t','textForUI','localizedCopy','message'].includes(callName)||callName==='text'&&source.slice(call.callee.start,call.callee.end).includes('i18n'))return ['catalog-reference','existing translation call'];
+ if(['nativeText','nativeBind'].includes(callName)||callName==='text'&&/\b(?:AeroScienceI18n|this)\.text$/.test(source.slice(call.callee.start,call.callee.end)))return ['catalog-reference','explicit native catalog reference with intentional English fallback'];
  if(parent?.type==='MemberExpression'||parent?.type==='BinaryExpression'&&['===','!==','==','!='].includes(parent.operator)||parent?.type==='SwitchCase')return ['protected-identifier','state/API/selector comparison'];
  if(parent?.type==='Property'&&parent.key===node&&!parent.computed)return ['protected-identifier','object/wire property identity'];
  if(chain.some(n=>n.type==='AssignmentExpression'&&['className','id','font','fontFamily','cssText','href','src','value','type','role','name'].includes(property(n.left))))return ['protected-value','style, identifier, input value or source name assignment'];
@@ -76,7 +77,9 @@ export function inventoryOther(source,file){
  for(const pattern of patterns)for(const match of source.matchAll(pattern)){
   const raw=match[0],text=isCs?raw.replace(/^\$?@?"|"$/g,'').replaceAll('\\n','\n'):raw.startsWith('>')?raw.slice(1,-1).trim():raw.slice(raw.indexOf('"')+1,-1);
   if(!human(text))continue;const prefix=source.slice(Math.max(0,match.index-160),match.index),display=isCs?/\b(?:Text|HeaderText|AccessibleName|Description|Title)\s*=\s*$|\b(?:MessageBox\.Show|AddText|Label|Field|Button|AddColumn)\([^;{}]*$/.test(prefix):true;
-  rows.push({file,line:source.slice(0,match.index).split('\n').length,start:match.index,end:match.index+raw.length,surface:surface(file),kind:isCs?'csharp':'html',text,parameters:[],decision:display?'presentation':'review',reason:isCs?'C# lexical candidate; verify display boundary versus data/protocol':'HTML text/accessible-name candidate; verify original values',critical:critical(text)});
+  const opening=!isCs?source.slice(source.lastIndexOf('<',match.index),match.index):'',attribute=raw.startsWith('>')?'':raw.slice(0,raw.indexOf('='));
+  const annotated=!isCs&&(attribute?opening.includes('data-i18n-'+attribute+'=')||opening.includes('data-native-i18n-'+attribute+'='):/\bdata-(?:native-)?i18n=/.test(opening));
+  rows.push({file,line:source.slice(0,match.index).split('\n').length,start:match.index,end:match.index+raw.length,surface:surface(file),kind:isCs?'csharp':'html',text,parameters:[],decision:annotated?'catalog-reference':display?'presentation':'review',reason:annotated?'explicit localized HTML binding':isCs?'C# lexical candidate; verify display boundary versus data/protocol':'HTML text/accessible-name candidate; verify original values',critical:critical(text)});
  }
  return rows;
 }

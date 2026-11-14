@@ -4,7 +4,7 @@ import{presentationContracts,argumentPosition}from'./presentation-contracts.mjs'
 const base='src/AeroScience.Engine/wwwroot/i18n/',en=JSON.parse(fs.readFileSync(base+'locales/en-US.json','utf8')).messages;
 const tag=/^(?:a|article|aside|b|button|canvas|caption|code|dd|details|dialog|div|dl|dt|em|fieldset|figcaption|figure|footer|form|h[1-6]|header|hr|i|img|input|label|legend|li|main|nav|ol|option|p|pre|section|select|small|span|strong|summary|svg|table|tbody|td|textarea|th|thead|tr|ul)$/;
 const token=/^(?:GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS|CONNECT|TRACE|JSON|JSONL|CSV|PNG|XML|AIXM|NOTAM|KML|GPX|ZIP|DEM|DSM|LAS|LAZ|COPC|EPT|NDVI|NDWI|NDMI|MSL|AGL|IAS|TAS|MSFS|FAA|UTC|ICAO|IATA|AND|OR|GeoJSON|FeatureCollection|Feature|Point|MultiPoint|Polygon|MultiPolygon|LineString|MultiLineString|EPSG:\d+)$/;
-const protectedFields=new Set(['method','type','id','value','key','kind','role','scope','code','unit','instrumentId','sensorId','sourceId','namespace','sourceClass','contentType','requestId','category','group','state','status','stage','phase','mode','permission','actionId','trigger','operation','projection','sourceType','sourceKind','productKind','tab','section','view','route','resource','providerId','projectionId','grade','outcome','policy','endpoint','provider','product','service','format','crs','datum','url','href','src','className','prefix','experience','density','theme','locale']);
+const protectedFields=new Set(['method','type','id','value','key','kind','role','scope','code','unit','instrumentId','sensorId','sourceId','namespace','sourceClass','contentType','requestId','category','group','state','status','stage','phase','mode','permission','actionId','op','missionId','sessionId','trigger','operation','projection','sourceType','sourceKind','productKind','tab','section','view','route','resource','providerId','projectionId','grade','outcome','policy','endpoint','provider','product','service','format','crs','datum','url','href','src','className','prefix','experience','density','theme','locale']);
 const prop=n=>n?.type==='MemberExpression'?prop(n.property):n?.name??n?.value;
 export function protectedTranslation(source,messages=en){const rows=[],comparisons=new Set(),substrings=new Set(),ast=parse(source,{ecmaVersion:'latest',sourceType:'module'}),contracts=presentationContracts(ast,source);
  function identities(n){if(!n||!n.type)return;if(n.type==='BinaryExpression'&&['===','!==','==','!='].includes(n.operator))for(const value of[n.left,n.right])if(value.type==='Literal'&&typeof value.value==='string')comparisons.add(value.value);
@@ -13,15 +13,17 @@ export function protectedTranslation(source,messages=en){const rows=[],compariso
   for(const[k,v]of Object.entries(n))if(!['start','end'].includes(k)){if(Array.isArray(v))v.forEach(identities);else if(v&&typeof v==='object')identities(v);}}
  identities(ast);
  function walk(n,parents){if(!n||!n.type)return;
- if(n.type==='CallExpression'&&['textForUI','localizedCopy'].includes(n.callee.name)&&n.arguments[0]?.type==='Literal'){
+ if(n.type==='CallExpression'&&['textForUI','localizedCopy','nativeText'].includes(n.callee.name)&&n.arguments[0]?.type==='Literal'){
   const key=n.arguments[0].value,text=messages[key],ancestors=[...parents].reverse(),boundary=ancestors.findIndex(p=>/Function/.test(p.type)),chain=boundary<0?ancestors:ancestors.slice(0,boundary);let reason;
   if(typeof text==='string'&&token.test(text))reason='Stable protocol/format/geometry token';
-  const parameterProperty=p=>chain.some(call=>call.type==='CallExpression'&&['textForUI','localizedCopy'].includes(prop(call.callee))&&call.arguments[1]?.start<=p.start&&call.arguments[1]?.end>=p.end);
+  const parameterProperty=p=>chain.some(call=>call.type==='CallExpression'&&['textForUI','localizedCopy','nativeText'].includes(prop(call.callee))&&call.arguments[1]?.start<=p.start&&call.arguments[1]?.end>=p.end);
   const getterVariable=ancestors.find(p=>p.type==='VariableDeclarator')?.id?.name||'',displayDictionary=/(?:Names|Labels|Titles|Texts|Copy|^names)$/i.test(getterVariable);
   const property=chain.find(p=>p.type==='Property'&&!parameterProperty(p));if(property&&protectedFields.has(prop(property.key))&&!displayDictionary)reason='Protected object field '+prop(property.key);
+  if(property&&prop(property.key)==='action'&&typeof text==='string'&&!/\s/.test(text))reason='Protected command action identity';
   const getter=ancestors.find(p=>p.type==='Property'&&p.kind==='get');if(getter&&protectedFields.has(prop(getter.key))&&!displayDictionary)reason='Protected getter field '+prop(getter.key);
   const assignment=chain.find(p=>p.type==='AssignmentExpression');if(assignment?.left.type==='MemberExpression'&&protectedFields.has(prop(assignment.left)))reason='Protected assignment '+prop(assignment.left);
   for(const call of chain.filter(p=>p.type==='CallExpression')){
+   if(['includes','indexOf','startsWith','endsWith'].includes(prop(call.callee))&&call.callee.type==='MemberExpression'&&call.callee.object.start<=n.start&&call.callee.object.end>=n.end)reason='Stable identity search receiver';
    if(call.arguments[0]?.type==='Literal'&&tag.test(call.arguments[0].value)&&!['fetch','api','querySelector','getElementById'].includes(prop(call.callee))){const pos=call.arguments.findIndex(a=>a.start<=n.start&&a.end>=n.end);if(pos===0||pos>=2)reason='DOM tag/style/helper identity';break;}
    const contract=contracts(prop(call.callee),call);
    if(contract?.values?.includes(argumentPosition(call,n)))reason='Protected helper value argument';
@@ -40,7 +42,7 @@ export function protectedTranslation(source,messages=en){const rows=[],compariso
  for(const[k,v]of Object.entries(n))if(!['start','end'].includes(k)){if(Array.isArray(v))v.forEach(c=>walk(c,[...parents,n]));else if(v&&typeof v==='object')walk(v,[...parents,n]);}}
  walk(ast,[]);return rows;}
 if(process.argv[1]?.endsWith('audit-display-bindings.mjs')){
- const rows=[];for(const folder of['src/AeroScience.Engine/wwwroot','src/AeroScience.Organization/wwwroot'])for(const name of fs.readdirSync(folder).filter(n=>n.endsWith('.js')&&!/i18n/.test(n))){const file=folder+'/'+name;let source=fs.readFileSync(file,'utf8');const found=protectedTranslation(source);for(const row of found)rows.push({file,...row});
+ const rows=[];for(const folder of['src/AeroScience.Engine/wwwroot','src/AeroScience.Organization/wwwroot','msfs-toolbar/PackageSources/html_ui/InGamePanels/AeroScience'])for(const name of fs.readdirSync(folder).filter(n=>n.endsWith('.js')&&!/i18n/.test(n))){const file=folder+'/'+name;let source=fs.readFileSync(file,'utf8');const found=protectedTranslation(source);for(const row of found)rows.push({file,...row});
   if(process.argv.includes('--repair')){const safe=found.filter(row=>!row.parameterized&&!found.some(outer=>outer!==row&&outer.start<=row.start&&outer.end>=row.end));for(const row of safe.sort((a,b)=>b.start-a.start))source=source.slice(0,row.start)+JSON.stringify(row.text)+source.slice(row.end);fs.writeFileSync(file,source);}}
  fs.writeFileSync('artifacts/p07-protected-display-bindings.json',JSON.stringify(rows,null,2)+'\n');console.log(JSON.stringify({protectedReferences:rows.length,repaired:process.argv.includes('--repair')}));if(rows.length&&!process.argv.includes('--repair'))process.exitCode=1;
 }

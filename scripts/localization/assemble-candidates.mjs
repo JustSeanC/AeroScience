@@ -1,10 +1,10 @@
 // Assemble auditable, offline candidate resources. English fallbacks are explicit;
 // neither machine output nor developer overrides constitute qualified human review.
 import fs from'node:fs';import{createHash}from'node:crypto';
-import{sourceFingerprint,messageFingerprint,validUnicode,preservedTokens}from'../build/localization-quality.mjs';
+import{sourceFingerprint,messageFingerprint,bundleFingerprint,validUnicode,preservedTokens}from'../build/localization-quality.mjs';
 const base='src/AeroScience.Engine/wwwroot/i18n/',read=p=>JSON.parse(fs.readFileSync(base+p,'utf8'));
 const english=read('locales/en-US.json'),schema=read('message-schema.json'),manifest=read('locale-manifest.json');
-const overrides=JSON.parse(fs.readFileSync('scripts/localization/candidate-overrides.json','utf8')),sourceHash=sourceFingerprint(english.messages),pending={},receipts={};
+const overrides={...JSON.parse(fs.readFileSync('scripts/localization/candidate-overrides.json','utf8')),...JSON.parse(fs.readFileSync('scripts/localization/critical-candidate-overrides.json','utf8'))},sourceHash=sourceFingerprint(english.messages),pending={},receipts={};
 const foldedOverrides=new Map(Object.entries(overrides).map(([source,translations])=>[source.toLowerCase(),translations]));
 if(manifest.locales.some(locale=>locale.review==='reviewed'))throw Error('Do not overwrite a human-reviewed catalog with machine candidates. Preserve the reviewed edits and evidence.');
 for(const [key,source]of Object.entries(english.messages))schema.messages[key].preservedTokens=[...new Set((typeof source==='string'?[source]:Object.values(source)).flatMap(preservedTokens))];
@@ -50,6 +50,7 @@ for(const [index,locale]of ['es-ES','fr-FR','de-DE','pt-BR'].entries()){
  manifest.locales.find(l=>l.id===locale).review='candidate';pending[locale]=Object.fromEntries(fallbacks);receipts[locale]={keys:Object.keys(messages).length,explicitCandidateForms:explicit,machineDraftForms:drafted,englishFallbackKeys:fallbacks.size,humanReview:'PENDING — no qualified human review supplied',installedWindows:'NOT TESTED',installedMSFS:'NOT TESTED'};
 }
 manifest.catalogIdentity=sourceHash;manifest.qualityContract=1;
+manifest.bundleIdentity=bundleFingerprint(manifest,Object.fromEntries(manifest.locales.map(l=>[l.id,read("locales/"+l.id+".json")])));
 for(const [path,value]of[['locale-manifest.json',manifest],['message-schema.json',schema]])fs.writeFileSync(base+path,JSON.stringify(value,null,2)+'\n');
 fs.mkdirSync('docs/roadmap/p07-review',{recursive:true});fs.writeFileSync('artifacts/p07-candidate-qa.json',JSON.stringify({version:manifest.catalogVersion,sourceHash,receipts,pending},null,2)+'\n');
 console.log(JSON.stringify(receipts));

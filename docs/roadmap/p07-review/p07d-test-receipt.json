@@ -1,0 +1,40 @@
+{
+  "stage": "P07d",
+  "catalogVersion": 22,
+  "sourceIdentity": "c871f36c92c40f3e195f35c762e9b9d6d415c522c475027296fb3dd87dba839c",
+  "bundleIdentity": "7000359050b2f809d94178ad889605d43aa458ba777b2c4b0795634fe4058761",
+  "tests": {
+    "presentationPassed": 54,
+    "originalNativePassed": 4,
+    "dotnetPassed": 12,
+    "dotnetSkipped": 0,
+    "browserPassed": 46,
+    "browserFailed": 0,
+    "browserSkipped": 0,
+    "browserFlaky": 0,
+    "windowsCrossCompile": "passed; 0 warnings; 0 errors"
+  },
+  "receipts": [
+    {
+      "path": "artifacts/p07d-final-web-checks.log",
+      "sha256": "00407a3c630e1ea14f24b132e1555236fe6f40cd0fe46a2b287682a751bf0d5c"
+    },
+    {
+      "path": "artifacts/p07d-dotnet-tests.log",
+      "sha256": "22b6ef96fc0e903a491060a6bcd4ce464ea47da05d57652fc94e7197498282cc"
+    },
+    {
+      "path": "artifacts/p07d-final-browser-tests.log",
+      "sha256": "1aec77fc42c51d671d8e3ab5c76eb4bcfdb22318caa1555f1847276e2392b1fb"
+    },
+    {
+      "path": "artifacts/p07d-desktop-build.log",
+      "sha256": "63f72520038c53db76c32dbc30681772e82356fa698bea0f8eb67d3ad477fe35"
+    }
+  ],
+  "screenshots": "41 labeled synthetic Chromium captures: 40 Results/native combinations plus pseudolocale",
+  "humanReview": "PENDING",
+  "installedWindows": "NOT TESTED",
+  "installedMSFS": "NOT TESTED",
+  "fullCI": "Pending exact-source milestone run after commit"
+}

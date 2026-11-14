@@ -16,6 +16,12 @@ export function presentationContracts(ast,source){
    const parent=parents.at(-1),name=n.id?.name||(parent?.type==='VariableDeclarator'?parent.id.name:null);
    const parameters=n.params.map(p=>prop(p.type==='AssignmentPattern'?p.left:p));
    const code=source.slice(n.body.start,n.body.end),ui=/createElement|textContent|setPresentationText|\b(?:node|el|element|field|formField|button|link)\(/.test(code);
+   // A local namespace adapter consumes a stable message-key suffix, not a
+   // display label (for example text(key) => t('results.' + key)).
+   if(name&&parameters.length===1&&/\b(?:t|textForUI|localizedCopy|message)\(\s*['"][a-zA-Z][\w.]*\.['"]\s*\+/.test(code)&&!ui){
+    const scope=parents.findLast(p=>/Function/.test(p.type)||p.type==='Program');
+    declarations.push({name,scope,contract:{display:[],values:[0],messageKey:true}});
+   }
    if(name&&ui){const display=[],values=[];for(const[index,parameter]of parameters.entries()){
      if(/^(?:label|title|text|message|caption|description|help|heading|headings|subtitle|options|choices)$/.test(parameter)||parameter==='name'&&['input','field','formField','heading','button','link'].includes(name))display.push(index);
      if(/^(?:value|type|className|kind|selected|selectedValue)$/.test(parameter))values.push(index);

@@ -3,6 +3,11 @@ import {createHash} from 'node:crypto';
 
 export const sourceFingerprint=messages=>createHash('sha256').update(JSON.stringify(Object.fromEntries(Object.keys(messages).sort().map(key=>[key,messages[key]])))).digest('hex');
 export const messageFingerprint=message=>createHash('sha256').update(JSON.stringify(message)).digest('hex');
+export function bundleFingerprint(manifest,catalogs){
+ const payload={version:manifest.catalogVersion,locales:manifest.locales.map(l=>({id:l.id,name:l.name,direction:l.direction,review:l.review})),
+  catalogs:Object.fromEntries(Object.keys(catalogs).sort().map(id=>[id,{messages:Object.fromEntries(Object.keys(catalogs[id].messages).sort().map(k=>[k,catalogs[id].messages[k]])),pending:[...(catalogs[id].pendingEnglishFallbackKeys||[])].sort()}]))};
+ return createHash('sha256').update(JSON.stringify(payload)).digest('hex');
+}
 export function preservedTokens(text){
  const tokens=['AeroScience','MSFS','NASA','AVIRIS','EMIT','DEM','DSM','LiDAR','LAS','LAZ','COPC','EPT','GeoTIFF','SHA-256','UTC','ICAO','IATA','NoData','NDVI','NDWI','NDMI','NIR','CRS','EPSG','GDAL','MSL','AGL','IAS','TAS','Hz','kHz','MHz','KiB','MiB','GiB','TiB','°C','°F','µm','μm','m²','m³','m/s','ft/min','kts','ft','km'];
  return tokens.filter(token=>new RegExp('(^|[^A-Za-z0-9])'+token.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'(?=$|[^A-Za-z0-9])').test(text));
@@ -20,6 +25,7 @@ export function validUnicode(text){
 export function validateQuality({manifest,schema,catalogs}){
  const failures=[],require=(ok,reason)=>{if(!ok)failures.push(reason);},english=catalogs['en-US'],fingerprint=sourceFingerprint(english.messages),coverage={};
  const enabled=manifest.qualityContract===1;
+ if(enabled&&(manifest.catalogVersion>=22||manifest.bundleIdentity))require(manifest.bundleIdentity===bundleFingerprint(manifest,catalogs),'Stale complete locale bundle identity. Regenerate all surfaces after any candidate change.');
  if(enabled){require(manifest.catalogIdentity===fingerprint,'Stale canonical catalog identity.');require(manifest.locales.filter(l=>l.review==='reviewed').every(l=>l.humanReview?.qualifiedReviewer&&l.humanReview?.evidence&&l.humanReview?.sourceHash===fingerprint),'Reviewed locale requires documented qualified human review of this source.');}
  for(const [locale,catalog]of Object.entries(catalogs)){
   const metadata=manifest.locales.find(l=>l.id===locale),pending=new Set(catalog.pendingEnglishFallbackKeys||[]);let translated=0,retained=0,critical=0;

@@ -169,7 +169,7 @@ export function scienceCharts(parent, rows) {
       o.value = value;
       select.append(o);
     }
-    const preferenceKey = (parent.id || "archive") + ":" + title;
+    const preferenceKey = (parent.id || "archive") + ":" + id + ":" + xkey;
     const preferences = chartPreferences.get(preferenceKey) || {
       range: "all",
       points: true,
@@ -208,7 +208,7 @@ export function scienceCharts(parent, rows) {
       const reduced = reduceExtrema(selected);
       const min = Math.min(...selected.map((p) => p.y)),
         max = Math.max(...selected.map((p) => p.y));
-      setPresentationText(summary,`${selected.length} actual measurement values · Min ${min.toFixed(2)} ${unit} · Max ${max.toFixed(2)} ${unit}. ${reduced.length < selected.length ? localizedCopy("ui.scienceDisplay.messageDisplayReductionPreservesEachTimeBucketSMinima") : ""}No interpolation or smoothing. Observation markers leave recording gaps empty; repeated altitudes retain time order in tooltips.`);
+      setPresentationText(summary,textForUI("ui.scienceDisplay.messageActualMeasurementValuesMin",{value1:(selected.length),value2:(min.toFixed(2)),value3:(unit),value4:(max.toFixed(2)),value5:(unit),value6:(reduced.length < selected.length ? localizedCopy("ui.scienceDisplay.messageDisplayReductionPreservesEachTimeBucketSMinima") : "")}));
       const datasets = [];
       if (xkey === "timestampUtc") {
         let segment = [],

@@ -11,7 +11,7 @@ export const effectiveLocale = () => current.effectiveLocale;
 const copies=new WeakMap(),bindings=new WeakMap(),ownedListeners=new WeakMap(),listeners=new Set();
 let observer;
 function walk(root,visit){if(!root)return;const pending=[root];while(pending.length){const node=pending.pop();visit(node);if(node.childNodes)for(let i=node.childNodes.length-1;i>=0;i--)pending.push(node.childNodes[i]);}}
-function refreshBindings(root){walk(root,node=>{for(const render of bindings.get(node)?.values()||[])render();for(const callback of ownedListeners.get(node)||[])callback(current);});}
+function refreshBindings(root,translate=t){walk(root,node=>{for(const render of bindings.get(node)?.values()||[])render(translate);if(translate===t)for(const callback of ownedListeners.get(node)||[])callback(current);});}
 function observeBindings(){
   if(observer||typeof document==='undefined'||typeof MutationObserver==='undefined')return;
   observer=new MutationObserver(records=>{for(const record of records)for(const node of record.addedNodes)if(node.isConnected)refreshBindings(node);});
@@ -21,8 +21,9 @@ function observeBindings(){
 // notes, original evidence, hashes and UTC) never acquire translation metadata.
 export function message(key,values,fallback){
   const copy={toString:()=>t(key,values,fallback)};
-  const render=()=>t(key,values,fallback);render.key=key;copies.set(copy,render);return Object.freeze(copy);
+  const render=(translate=t)=>translate(key,values&&Object.fromEntries(Object.entries(values).map(([name,value])=>[name,copies.has(value)?String(value):value])),fallback);render.key=key;copies.set(copy,render);return Object.freeze(copy);
 }
+export function messageKey(value){return copies.get(value)?.key;}
 export function presentationTextNode(value){const node=document.createTextNode(String(value));if(copies.has(value))setPresentationText(node,value);return node;}
 export function setPresentationText(element,value,attribute='textContent',property=false,staticBinding=false){
   observeBindings();
@@ -30,7 +31,7 @@ export function setPresentationText(element,value,attribute='textContent',proper
   // language/theme refresh must never restore the initial aircraft/status text.
   if(!staticBinding)element.removeAttribute?.(attribute==='textContent'?'data-i18n':'data-i18n-'+attribute);
   let textNode,initial=true;
-  const render=()=>{const text=copies.has(value)?copies.get(value)():value??'';
+  const render=(translate=t)=>{const text=copies.has(value)?copies.get(value)(translate):value??'';
     if(attribute==='textContent'&&copies.has(value)&&element.nodeType===1){element.lang=current.messageLocale(copies.get(value).key);element.dataset.localeFallback=String(element.lang!==current.locale);}
     if(attribute==='textContent'){
       if(element.nodeType===3)element.nodeValue=String(text);
@@ -64,6 +65,9 @@ export function useLocale(locale,{root=typeof document==='undefined'?null:docume
 // Only explicit bindings change. Original values are never matched as prose.
 // Weak ownership also prevents removed live views from becoming location history.
 export function localizeTree(root = document, translate = t) {
+  // Internal pseudolocale QA also exercises existing explicit bindings. Keep
+  // their ownership/focus and original-value exclusions, not just initial HTML.
+  if(translate!==t)refreshBindings(root,translate);
   const attributes=['aria-label','aria-description','placeholder','title','alt'];
   const selector = '[data-i18n],'+attributes.map(name=>'[data-i18n-'+name+']').join(',');
   const elements = Array.from(root.querySelectorAll(selector));

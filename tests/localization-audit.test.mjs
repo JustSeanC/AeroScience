@@ -38,3 +38,22 @@ test('source tracking rejects copied critical English, stale translations and fa
  data.catalogs['es-ES'].sourceMessages['warning.delete']='outdated';assert.throws(()=>validateQuality(data),/Stale message source/);
  data.manifest.locales[1].review='reviewed';assert.throws(()=>validateQuality(data),/qualified human review/);
 });
+
+test('native command membership cannot use a translated action even when it resembles a two-label tuple',()=>{
+ const source=`const labels=[['beginAttempt',nativeText('label','Begin attempt')]]; const allowed=['beginAttempt',nativeText('command','enableAutomatic')].includes(action);`;
+ const found=protectedTranslation(source,{label:'Begin attempt',command:'enableAutomatic'});
+ assert.equal(found.length,1);assert.equal(found[0].key,'command');assert.match(found[0].reason,/identity search/);
+});
+
+test('namespace adapters consume stable key suffixes rather than translated presentation text',()=>{
+ const source=`const text=key=>t('results.'+key); text(localizedCopy('incorrect',{name:kind}));`;
+ const found=protectedTranslation(source,{incorrect:'{name}Layer'});
+ assert.equal(found.length,1);assert.match(found[0].reason,/Protected helper value/);
+ const inventory=inventoryJavaScript(`const text=key=>t('results.'+key); text(key+'Layer');`,'src/AeroScience.Engine/wwwroot/survey-results.js');
+ assert.equal(inventory.find(row=>row.text==='Layer').decision,'protected-value');
+});
+
+test('same-version translated resource edits invalidate the complete bundle identity even when English is unchanged',async()=>{
+ const{localeBundle}=await import('../scripts/build/build-locales.mjs');const data=localeBundle();data.catalogs['de-DE'].messages['native.armed']='Bereit (geändert)';
+ assert.throws(()=>validateQuality(data),/Stale complete locale bundle identity/);
+});

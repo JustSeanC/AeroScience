@@ -79,4 +79,4 @@ export async function mountRealEngine(page){
  const session=await(await fetch('/api/session',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'})).json();
  window.bus.callSimConnect=function(event,payload){const command=JSON.parse(payload);this.sent.push({event,command});return fetch('/api/testing/toolbar',{method:'POST',headers:{'Content-Type':'application/json','X-AeroScience-CSRF':session.csrf},body:payload}).then(r=>r.text()).then(reply=>this.handlers['AeroScience.Reply.v1']?.(reply));};
  document.querySelector('ingamepanel-aeroscience').tick();
- });await expect(page.locator('#as-source')).toHaveText('SIMULATED TEST DATA');}
+ });await expect.poll(()=>page.evaluate(()=>{const panel=document.querySelector('ingamepanel-aeroscience');return panel.state?.connection.source==='simulated'&&document.querySelector('#as-source').textContent===AeroScienceI18n.text('native.simulatedTestData','SIMULATED TEST DATA');})).toBe(true);}

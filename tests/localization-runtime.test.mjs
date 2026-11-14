@@ -31,3 +31,15 @@ test('locale selection cannot change authoritative preparation phases, transfer 
  const now=new Date().toISOString(),rows=Object.freeze([Object.freeze({kind:'terrain-scanner',status:'Ready',downloadedBytes:16,reusedBytes:32,updatedUtc:now}),Object.freeze({kind:'terrain-scanner',status:'Downloading',stage:'Receiving',downloadedBytes:128,reusedBytes:0,updatedUtc:now})]),before=JSON.stringify(rows);
  for(const locale of data.manifest.locales){useLocale(locale.id);assert.equal(preparationPhase(rows[1]),'Downloading');const [summary]=instrumentSummaries(rows);assert.equal(summary.status,'Partially Ready');assert.equal(summary.activelyDownloading,true);assert.equal(summary.downloadedBytes,144);assert.equal(summary.reusedBytes,32);assert.equal(summary.ready,1);assert.equal(JSON.stringify(rows),before);}useLocale('en-US');
 });
+
+test('operational candidate terminology distinguishes waiting from active collection in all four languages',()=>{
+ for(const[locale,armed,collecting,inactive]of [['es-ES','Preparada','ADQUISICIÓN CIENTÍFICA ACTIVA','ADQUISICIÓN CIENTÍFICA INACTIVA'],['fr-FR','Prête','COLLECTE SCIENTIFIQUE ACTIVE','COLLECTE SCIENTIFIQUE INACTIVE'],['de-DE','Bereit','WISSENSCHAFTLICHE DATENERFASSUNG AKTIV','WISSENSCHAFTLICHE DATENERFASSUNG INAKTIV'],['pt-BR','Preparada','COLETA CIENTÍFICA ATIVA','COLETA CIENTÍFICA INATIVA']]){
+  const tr=createTranslator(data,locale);assert.equal(tr.text('native.armed'),armed);assert.equal(tr.text('toolbar.collectionActive'),collecting);assert.equal(tr.text('toolbar.collectionInactive'),inactive);assert.notEqual(armed,collecting);
+ }
+});
+
+test('remaining-time ranges use correct units and plurals without changing measured transfer state',async()=>{
+ const{timeRange,preparationTransfer}=await import('../src/AeroScience.Engine/wwwroot/transfer-progress.js');
+ const expected={'en-US':['second','seconds'],'es-ES':['segundo','segundos'],'fr-FR':['seconde','secondes'],'de-DE':['Sekunde','Sekunden'],'pt-BR':['segundo','segundos']};
+ for(const[locale,[one,other]]of Object.entries(expected)){useLocale(locale);assert.ok(timeRange(1,1).endsWith(' '+one));assert.ok(timeRange(1,2).endsWith(' '+other));assert.ok(timeRange(60,120).includes('1'));assert.ok(timeRange(3600,7200).includes('2'));const row={key:'immutable-'+locale,status:'Downloading',stage:'Validating',updatedUtc:new Date().toISOString(),downloadedBytes:12345};const before=JSON.stringify(row);assert.equal(preparationTransfer(row).stage,'Verifying');assert.equal(JSON.stringify(row),before);}useLocale('en-US');
+});

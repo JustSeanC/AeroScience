@@ -33,7 +33,7 @@ export function openOnlineAccess(api,{opener=document.activeElement,onAllowed=()
    [textForUI("ui.onlineAccess.messageScientificDiscoveryAndDownloads"),s.science.configuration.preferences.onlineEnabled&&s.science.configuration.preferences.privacyAccepted,s.science.configuration.privacy],
    [textForUI("ui.onlineAccess.messageFAAReferences"),s.aviation.configuration.onlineEnabled,s.aviation.configuration.privacy],
    [textForUI("ui.onlineAccess.messageAutomaticTFRNoticesAndBoundaries"),s.aviation.configuration.onlineEnabled&&s.tfr.tfrMonitoringEnabled,s.tfr.privacy]
-  ])states.append(el('h3',`${title}: ${enabled?'Allowed':'Not allowed'}`),el('p',text));
+  ])states.append(el('h3',`${title}: ${enabled?textForUI("ui.onlineAccess.messageAllowed"):textForUI("ui.onlineAccess.messageNotAllowed")}`),el('p',text));
   states.append(el('p',localizedCopy("ui.onlineAccess.messageYouCanChangeThesePermissionsIndividuallyLater")));
  }
  const allow=button(actions,localizedCopy("ui.onlineAccess.messageAllowOnlineAccess"),async()=>{

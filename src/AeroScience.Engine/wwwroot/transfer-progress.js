@@ -16,11 +16,13 @@ export function preparationTransfer(row,now=Date.now()){
 export function timeRange(low,high){
  if(!Number.isFinite(low)||!Number.isFinite(high))return textForUI("ui.transferProgress.messageTimeEstimateAvailableAfterDownloadStarts");
  const unit=high>=3600?'hours':high>=60?'minutes':'seconds',divisor=high>=3600?3600:high>=60?60:1;
- return textForUI("ui.transferProgress.messageAbout",{value1:(String(Math.max(1,Math.floor(low/divisor)))),value2:(String(Math.max(1,Math.ceil(high/divisor)))),value3:(String(unit))});
+ return textForUI('transfer.estimate.'+({hours:'hour',minutes:'minute',seconds:'second'}[unit]),{low:Math.max(1,Math.floor(low/divisor)),count:Math.max(1,Math.ceil(high/divisor))});
 }
-export function renderTransferProgress(parent,progress,state=textForUI("ui.downloadActivity.messageQueued")){
+const transferMessages={"Queued":"ui.downloadActivity.messageQueued","Downloading":"preparation.status.downloading","Finding source":"ui.downloadActivity.messageFindingSource","Waiting for Network":"ui.preparationSummary.messageWaitingForNetwork","Waiting for Allowance":"ui.preparationSummary.messageWaitingForAllowance","Awaiting Approval":"transfer.stage.awaitingApproval","Waiting for Authorization":"transfer.stage.waitingForAuthorization","Verifying":"ui.transferProgress.messageVerifying","Importing":"ui.transferProgress.messageImporting","Completed":"ui.downloadActivity.messageCompleted","Cancelled":"ui.submissionBuilder.messageCancelled","Failed":"ui.downloadActivity.messageFailed","Paused":"home.science.paused","Ready":"ui.missionOperations.messageReady","Dataset Ready":"ui.hyperspectralImport.messageDatasetReady","Offline":"transfer.stage.offline","Unavailable":"common.unavailable"};
+const transferLabel=code=>Object.hasOwn(transferMessages,code)?localizedCopy(transferMessages[code]):code;
+export function renderTransferProgress(parent,progress,state='Queued'){
  const box=el('div',undefined,'transfer-progress');setPresentationText(box,localizedCopy("ui.transferProgress.messageMeasuredTransferStatus"),"aria-label");parent.append(box);
- box.append(el('strong',progress?.stage||state));
+ box.append(el('strong',transferLabel(progress?.stage||state)));
  if(!progress){box.append(el('p',state==='Completed'?localizedCopy("ui.transferProgress.messageDatasetReadyVerifiedLibraryPublicationComplete"):localizedCopy("ui.transferProgress.messageTransferSizeTimeRemainingUnknownQueueAuthorizationAllowance")));return box;}
  const known=Number.isFinite(progress.totalOriginalBytes),prepared=Number.isFinite(progress.preparedOriginalBytes)?progress.preparedOriginalBytes:null;
  box.append(el('p',localizedCopy("ui.transferProgress.messageOriginalFileBytesPresentActual",{value1:(String(prepared==null?'Unknown':bytes(prepared))),value2:(String(known?bytes(progress.totalOriginalBytes):'Unknown')),value3:(String(bytes(progress.measuredNetworkBytes)))})));

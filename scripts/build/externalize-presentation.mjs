@@ -34,11 +34,15 @@ function rewrite(file){
    &&!/^[\w.-]+\.[\w.-]+$|\b(?:px|rem|sans-serif)\b|^View changed\.$|^Failed to fetch$|^AbortError$|^NetworkError$|^SyntaxError$|^TypeError$/.test(row.text)
    &&!/^[A-Z][a-z]+[A-Z]/.test(row.text)
    &&!/\b(?:Content-Type|Content-Disposition|Authorization|Bearer|X-CSRF|AeroScience\.[A-Za-z]+\.v\d)/.test(row.text);
-  if(row.decision!=='presentation'&&!reviewed)continue;let n=nodes.get(row.start+':'+row.end);if(!n)continue;
+  if(row.decision!=='presentation'&&!reviewed)continue;
+  if(row.kind==='template'&&!/[A-Za-z]{2}/.test(row.text.replace(/\{value\d+\}/g,'')))continue;
+  if(/^(?:DEM|DSM|MSL|AGL|UTC|WGS84|ICAO|IATA|SHA-256|NoData|NDVI|NM|FAA)$/.test(row.text))continue;
+  let n=nodes.get(row.start+':'+row.end);if(!n)continue;
   if(reviewed){const parent=parents.get(n);if(parent?.type==='Property'&&['name','provider','product','source','sourceClass','state','status','value','id','kind','unit','code','version','type','category','namespace'].includes(parent.key.name??parent.key.value))continue;}
-  while(parents.get(n)?.type==='BinaryExpression'&&parents.get(n).operator==='+')n=parents.get(n);
+  function prose(e){return e.type==='Literal'&&typeof e.value==='string'?e.value:e.type==='TemplateLiteral'?e.quasis.map(q=>q.value.cooked).join(''):e.type==='BinaryExpression'&&e.operator==='+'?prose(e.left)+prose(e.right):'';}
+  while(parents.get(n)?.type==='BinaryExpression'&&parents.get(n).operator==='+'&&/[A-Za-z]{2}/.test(prose(parents.get(n))))n=parents.get(n);
   // Do not rewrite strings used as syntax, markup, data types or drawing formulas.
-  if(n.type==='TemplateLiteral'&&source.slice(n.start,n.end).includes('<'))continue;
+  if(n.type==='TemplateLiteral'&&n.quasis.some(q=>/<\/?[A-Za-z][^>]*>/.test(q.value.cooked)))continue;
   chosen.set(n.start,n);
  }
  const edits=[];
@@ -69,7 +73,7 @@ function rewrite(file){
 const files=[...new Set(audit().rows.filter(r=>r.file.endsWith('.js')&&!r.file.startsWith('msfs-toolbar/')&&!/i18n|presentation-settings|geographic-view/.test(r.file)).map(r=>r.file))];
 for(const file of files)rewrite(file);
 if(process.argv.includes('--apply')){
- manifest.catalogVersion=19;english.version=19;manifest.catalogIdentity=sourceFingerprint(english.messages);
+ const versionIndex=process.argv.indexOf("--catalog-version");const version=versionIndex<0?manifest.catalogVersion:Number(process.argv[versionIndex+1]);if(!Number.isSafeInteger(version)||version<manifest.catalogVersion)throw Error("Use the current or a newer explicit catalog version.");manifest.catalogVersion=version;english.version=version;manifest.catalogIdentity=sourceFingerprint(english.messages);
  for(const [path,value]of [['message-schema.json',schema],['locales/en-US.json',english],['locale-manifest.json',manifest]])writeFileSync(folder+path,JSON.stringify(value,null,2)+'\n');
 }
 writeFileSync('artifacts/p07-externalization.json',JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify({bindings:report.length,keys:Object.keys(english.messages).length,files:new Set(report.map(r=>r.file)).size,applied:process.argv.includes('--apply')}));

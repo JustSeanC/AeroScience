@@ -259,7 +259,7 @@ export function patternEditor(parent, { api, notice, get, set, aircraft, pickCen
       row.append(
         element(
           "strong",
-          `${d.kind} · ${d.notes || "Editable generated route"}`,
+          `${d.kind} · ${d.notes || textForUI("ui.patterns.messageEditableGeneratedRoute")}`,
         ),
       );
       for (const [name, fn] of [

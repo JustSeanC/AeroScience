@@ -19,7 +19,7 @@ export async function refreshPresentationHost(){
     const value=await hostApi('/api/settings/presentation');
     if(ownGeneration!==hostGeneration||host&&host.instanceId===value.instanceId&&value.preferences?.revision<host.preferences.revision)return;
     if(value.version!==1||value.preferences?.version!==1)throw Error(t('settings.hostUnavailable'));
-    host=value;hostError=value.warning||(value.catalogVersion!==localeManifest.catalogVersion?t('toolbar.catalogFallback'):'');
+    host=value;hostError=value.warning||(value.catalogVersion!==localeManifest.catalogVersion||value.catalogIdentity!==(localeManifest.bundleIdentity||localeManifest.catalogIdentity)?t('toolbar.catalogFallback'):'');
     if(!hasOverride()){settings={theme:host.preferences.theme,locale:supportedLocale(host.preferences.locale)};apply();}
   }catch(error){if(ownGeneration===hostGeneration)hostError=error.message||t('settings.hostUnavailable');}
   finally{hostLoading=false;publishHost();}
