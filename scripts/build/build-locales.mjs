@@ -1,10 +1,11 @@
 import {readFileSync, writeFileSync, readdirSync, mkdirSync} from 'node:fs';
 import {resolve, dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {strictJson,validateQuality} from './localization-quality.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const folder = resolve(root, 'src/AeroScience.Engine/wwwroot/i18n');
-const read = path => JSON.parse(readFileSync(path, 'utf8'));
+const read = path => strictJson(readFileSync(path, 'utf8'),path);
 const placeholders = text => [...text.matchAll(/\{([a-z][a-zA-Z0-9]*)\}/g)].map(match => match[1]).sort();
 const same = (a,b) => JSON.stringify([...new Set(a)].sort()) === JSON.stringify([...new Set(b)].sort());
 
@@ -15,7 +16,7 @@ export function validateCatalogs({manifest, schema, catalogs}) {
   require(manifest.fallback === 'en-US', 'English must remain the fallback.');
   require(same(manifest.locales.map(locale => locale.id),approved) && manifest.locales.length === approved.length,
     'The five approved locale identities must be unique and unchanged.');
-  require(manifest.locales.every(locale => locale.name && ['ltr','rtl'].includes(locale.direction) && ['source','preview','reviewed'].includes(locale.review)), 'Locale name/direction/review status required.');
+  require(manifest.locales.every(locale => locale.name && ['ltr','rtl'].includes(locale.direction) && ['source','preview','candidate','reviewed'].includes(locale.review)), 'Locale name/direction/review status required.');
   require(!!catalogs['en-US'], 'Missing canonical English catalog.');
   for (const [key,rule] of Object.entries(schema.messages)) {
     require(/^[a-z][a-zA-Z0-9]*(\.[a-zA-Z][a-zA-Z0-9]*)+$/.test(key), 'Invalid semantic key: '+key);
@@ -33,14 +34,14 @@ export function validateCatalogs({manifest, schema, catalogs}) {
       if (!rule) {failures.push('Extra key in '+locale+': '+key);continue;}
       const forms = typeof message === 'string' ? [message] : Object.values(message || {});
       require(rule.plural ? typeof message === 'object' && message !== null && Object.hasOwn(message,'one') && Object.hasOwn(message,'other')
-        && Object.keys(message).every(form => ['one','other'].includes(form)) : typeof message === 'string', 'Invalid message/plural forms: '+locale+'/'+key);
+        && Object.keys(message).every(form => ['one','other',...(['fr-FR','pt-BR','es-ES'].includes(locale)?['many']:[])].includes(form)) : typeof message === 'string', 'Invalid message/plural forms: '+locale+'/'+key);
       require(forms.length > 0 && forms.every(text => typeof text === 'string' && text.trim()
         && same(placeholders(text),rule.parameters) && !/[{}]/.test(text.replace(/\{[a-z][a-zA-Z0-9]*\}/g,''))), 'Invalid placeholders/empty text: '+locale+'/'+key);
     }
   }
   require(manifest.locales.every(locale => locale.review === 'preview' || !!catalogs[locale.id]), 'Reviewed locale must have a complete bundled catalog.');
   if (failures.length) throw new Error(failures.join('\n'));
-  return {messages:Object.keys(schema.messages).length, locales:manifest.locales.length, bundled:Object.keys(catalogs)};
+  return {messages:Object.keys(schema.messages).length, locales:manifest.locales.length, bundled:Object.keys(catalogs),...validateQuality({manifest,schema,catalogs})};
 }
 
 export function pseudoCatalog(catalog) {

@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "sourcePolicy": "Presentation candidates only. Original evidence, names, IDs, units, UTC, hashes, paths, numeric values and protocol semantics must remain untouched. Review rows are not claimed localized.",
+  "sourceDigest": "e1ed835cc121e10da5143f7ea0109b5c070d81a43dfe2e54d2db38d849b8f93b",
+  "totals": {
+    "occurrences": 8938,
+    "bySurface": {
+      "contextualHelp": 230,
+      "currentFlight": 407,
+      "dashboard": 1923,
+      "libraryDownloads": 888,
+      "missions": 1677,
+      "nativeToolbar": 450,
+      "organizations": 2040,
+      "scientificResults": 988,
+      "windowsCompanion": 335
+    },
+    "byDisposition": {
+      "catalog-reference": 3,
+      "presentation": 5574,
+      "protected-identifier": 303,
+      "protected-value": 430,
+      "review": 2085,
+      "review-error": 125,
+      "review-presentation": 418
+    },
+    "criticalCandidates": 1047
+  },
+  "baselineCommit": "f2f98284a1df3151199cf888a3b628b6facca8d2",
+  "reviewStatus": "Inventory candidates, not measured rendered coverage or human review."
+}
