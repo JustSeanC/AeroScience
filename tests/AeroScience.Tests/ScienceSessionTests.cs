@@ -157,6 +157,40 @@ public sealed class ScienceSessionTests:IDisposable
         Do(flight.Id,CollectionAction.EndData);var b=Do(flight.Id,CollectionAction.StartData).Session!;
         Assert.Equal(2000,b.Configurations.Single(c=>c.Settings.InstrumentId=="ambient-temperature").Settings.IntervalMs);Assert.All(b.Configurations,c=>Assert.Equal(1,c.Revision));
     }
+    [Theory]
+    [InlineData("ambient-temperature")]
+    [InlineData("thermal-imager")]
+    public void PacketQueuedBeforeConfigurationChangeDoesNotFaultOrUseTheNewConfiguration(string instrument)
+    {
+        clock=DateTimeOffset.UtcNow.AddSeconds(-2);
+        var config=new InstrumentConfiguration(instrument,true,1000);
+        var flight=coordinator.Start(new("Queued configuration fixture",Instruments:[config],ArmScience:true));
+        var session=Do(flight.Id,CollectionAction.StartData).Session!;
+        void Packet(DateTimeOffset utc)
+        {
+            var frame=SimulatedTelemetryProvider.Generate(utc,0) with{AltitudeAglFeet=1000,PitchDegrees=0,BankDegrees=0};
+            coordinator.Apply(new(new(ConnectionState.Connected,TelemetrySource.Simulated,"Synthetic queued configuration packet",utc),frame,new(utc,17,29,5,90,.002)));
+        }
+        clock=clock.AddMilliseconds(250);Packet(clock);
+        var original=JsonSerializer.Serialize(store.ScienceIntents(flight.Id),WireJson.Options);
+        var originalObservations=JsonSerializer.Serialize(science.StreamObservations(flight.Id).ToArray(),WireJson.Options);
+        var queued=clock.AddMilliseconds(1250);
+        clock=clock.AddMilliseconds(1300);coordinator.ConfigureInstruments([config with{IntervalMs=2000}]);
+        var changed=store.CollectionSession(flight.Id,session.Id)!.Configurations.Single(c=>c.Settings.InstrumentId==instrument&&c.Revision==2);
+        // The packet was captured before the command but reaches the command gate after it.
+        Packet(queued);
+        var holds=store.StreamEvents(flight.Id).Where(e=>e.Kind=="collection-storage-hold").ToArray();
+        Assert.True(!coordinator.ScienceCollection(flight.Id).Fault,string.Join("; ",holds.Select(e=>e.Message)));
+        Assert.Empty(holds);
+        Assert.Contains(store.StreamSamples(flight.Id),sample=>sample.TimestampUtc==queued);
+        Assert.Equal(original,JsonSerializer.Serialize(store.ScienceIntents(flight.Id),WireJson.Options));
+        Assert.Equal(originalObservations,JsonSerializer.Serialize(science.StreamObservations(flight.Id).ToArray(),WireJson.Options));
+        Assert.Equal(CollectionPhase.Collecting,coordinator.ScienceCollection(flight.Id).State!.Phase);
+        clock=clock.AddMilliseconds(250);Packet(clock);
+        var current=store.ScienceIntents(flight.Id).Single(i=>i.Intent.ConfigurationId==changed.Id);
+        Assert.Equal(clock,current.Intent.ExposureUtc);Assert.Equal(0,current.Intent.Slot);Assert.Equal(session.Id,current.Intent.SessionId);
+        Assert.Equal(originalObservations,JsonSerializer.Serialize(science.StreamObservations(flight.Id).Where(o=>o.TimestampUtc<=queued).ToArray(),WireJson.Options));
+    }
     [Fact] public void CommittedObservationReconcilesAfterAckCrashWithoutCreatingOrReattributingRows()
     {
         var flight=Start();var a=Do(flight.Id,CollectionAction.StartData).Session!;Observe(1);var original=science.StreamObservations(flight.Id).Single();

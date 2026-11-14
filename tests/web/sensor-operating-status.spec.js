@@ -17,7 +17,14 @@ test.beforeAll(async()=>{
  await expect.poll(async()=>{try{return(await fetch(origin+'/api/health')).ok;}catch{return false;}},{timeout:15000}).toBeTruthy();client=await playwrightRequest.newContext({baseURL:origin});csrf=(await(await client.post('/api/session',{headers:{Origin:origin},data:{}})).json()).csrf;
 });
 test.beforeEach(async()=>{const s=await get('/api/state');if(s.activeMission)await post(`/api/missions/${s.activeMission.id}/end`);await post('/api/mission-selection',{planId:null});await post('/api/instruments',[]);await post('/api/testing/operating/input',{});await expect.poll(async()=>{const state=await get('/api/state');return state.connection.state==='connected'&&!!state.telemetry&&Date.now()-Date.parse(state.telemetry.timestampUtc)<6000;}).toBeTruthy();});
-test.afterEach(async()=>{const s=await get('/api/state');if(s.activeMission)await post(`/api/missions/${s.activeMission.id}/end`);});
+test.afterEach(async({},testInfo)=>{
+ const s=await get('/api/state');
+ if(testInfo.status!==testInfo.expectedStatus&&s.activeMission){
+  const id=s.activeMission.id;
+  await testInfo.attach('synthetic-sensor-controller-evidence',{contentType:'application/json',body:JSON.stringify({state:s,collection:await get(`/api/missions/${id}/collection`),sensors:await get('/api/instruments/operating-status'),flight:await get(`/api/missions/${id}`)},null,2)});
+ }
+ if(s.activeMission)await post(`/api/missions/${s.activeMission.id}/end`);
+});
 test.afterAll(async()=>{await client?.dispose();if(child&&child.exitCode===null){const done=new Promise(r=>child.once('exit',r));child.kill('SIGKILL');await done;}if(folder)rmSync(folder,{recursive:true,force:true});});
 
 test('both pages use real supported geometry with separate missing external data and collapsed technical evidence',async({browser})=>{

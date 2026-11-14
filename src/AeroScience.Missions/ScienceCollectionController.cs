@@ -104,7 +104,10 @@ public sealed class ScienceCollectionController(MissionStore store, Guid mission
             if(!remote&&input.Frame is not null)continue; // caller splits auxiliary ingress explicitly
             var time=remote?input.Frame is {IsValid:true,IsPaused:false} frame?frame.TimestampUtc:(DateTimeOffset?)null:
                 input.Atmosphere is {Quality:ObservationQuality.Valid} atmosphere?atmosphere.TimestampUtc:null;
-            if(time is not {} utc||utc<session.StartedUtc||input.Frame?.IsPaused==true||remote&&(DateTimeOffset.UtcNow-utc).TotalSeconds is < -2 or >6
+            // A provider packet can wait at the command gate while configuration changes.
+            // It cannot establish a new-cadence exposure before that configuration existed.
+            // Keep raw telemetry, but never backfill or relabel science with current settings.
+            if(time is not {} utc||utc<session.StartedUtc||utc<config.EffectiveUtc||input.Frame?.IsPaused==true||remote&&(DateTimeOffset.UtcNow-utc).TotalSeconds is < -2 or >6
                 ||lastExposure.TryGetValue(config.Settings.InstrumentId,out var previous)&&utc<=previous)continue;
             var run=schedule.GetValueOrDefault(config.Settings.InstrumentId,(utc,-1));
             var slot=(long)Math.Floor(((utc-run.Anchor).TotalMilliseconds+Math.Min(100,config.Settings.IntervalMs*.1))/config.Settings.IntervalMs);

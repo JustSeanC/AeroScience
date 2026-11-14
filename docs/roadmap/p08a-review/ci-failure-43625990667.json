@@ -1,0 +1,209 @@
+{
+  "runId": 43625990667,
+  "url": "https://github.com/JustSeanC/AeroScience/actions/runs/43625990667",
+  "source": "18ed61418487f120dd8f8e73aeba42262656ddd2",
+  "conclusion": "failure",
+  "accepted": false,
+  "jobs": {
+    "validation-scope": "success",
+    "windows-companion": "success",
+    "organization-deployment": "success",
+    "linux": "failure",
+    "windows-profile": "scoped-out",
+    "development": "scoped-out"
+  },
+  "linux": {
+    "dotnetPassed": 1662,
+    "dotnetFailed": 0,
+    "browserPassed": 517,
+    "browserFailed": 1,
+    "browserSkipped": 2,
+    "pythonAndRecovery": "not reached"
+  },
+  "windows": {
+    "dotnetPassed": 1652,
+    "dotnetPlatformToolSkips": 10,
+    "pythonRun": 185,
+    "pythonSkipped": 3
+  },
+  "failure": {
+    "test": "armed paused resumed ended and new sessions never reuse the wrong favorable assessment",
+    "file": "tests/web/sensor-operating-status.spec.js",
+    "originalLine": 54,
+    "condition": "report.assessment.configurationId === configuration.id",
+    "timeoutMs": 5000,
+    "retainedScreenshot": "collection evidence hold while raw recording continues",
+    "deterministicRedCases": [
+      "thermal-imager",
+      "ambient-temperature"
+    ],
+    "error": "Acquisition must use the enabled configuration actually effective at its exposure time.",
+    "correction": "Do not create a new-cadence science intent for an input captured before its configuration effective UTC; retain eligible raw telemetry. No ledger validation or original browser assertion weakened."
+  },
+  "artifact": {
+    "browserId": 14128406051,
+    "sha256": "362ca96824c7811e2fbc87450bbf65f3d3fdd9b6a48131285d1e34d37727713a",
+    "bytes": 39316388
+  },
+  "linuxTrx": [
+    {
+      "platform": "linux",
+      "artifactId": 14127012913,
+      "zipSha256": "f445d54589a7634173a670ab7e099cc9347e6cf4ed50cb4ab3b9aeb465128f2b",
+      "trx": "artifacts/p08a/linux-tests-43625990667/tests/AeroScience.Tests/TestResults/_runnervm8axu0_2026-11-14_18_22_44_net10.0.trx",
+      "trxSha256": "2c7ccaacbc78b692e7b4d3eccbe2204562e95fcfe0c6a37ffc3eccaad101c613",
+      "counters": {
+        "total": "1662",
+        "executed": "1662",
+        "passed": "1662",
+        "failed": "0",
+        "error": "0",
+        "timeout": "0",
+        "aborted": "0",
+        "inconclusive": "0",
+        "passedButRunAborted": "0",
+        "notRunnable": "0",
+        "notExecuted": "0",
+        "disconnected": "0",
+        "warning": "0",
+        "completed": "0",
+        "inProgress": "0",
+        "pending": "0"
+      },
+      "skippedTests": []
+    }
+  ],
+  "windowsTrx": [
+    {
+      "platform": "windows",
+      "artifactId": 14127182180,
+      "zipSha256": "697a7dca5cc3d56bbf4a31c599fa64203640b3166ca7a79ff64fc4ae8191ee89",
+      "trx": "artifacts/p08a/windows-tests-43625990667/tests/AeroScience.Tests/TestResults/windows.trx",
+      "trxSha256": "e9f408b8fd49992d5e8e48a97a5a030e214678600c6531ba52992eed9f6cde24",
+      "counters": {
+        "total": "1662",
+        "executed": "1652",
+        "passed": "1652",
+        "failed": "0",
+        "error": "0",
+        "timeout": "0",
+        "aborted": "0",
+        "inconclusive": "0",
+        "passedButRunAborted": "0",
+        "notRunnable": "0",
+        "notExecuted": "0",
+        "disconnected": "0",
+        "warning": "0",
+        "completed": "0",
+        "inProgress": "0",
+        "pending": "0"
+      },
+      "skippedTests": [
+        "AeroScience.Tests.AviationAcquisitionTests.RetainedOriginalFileLinksAreRejectedRatherThanFollowed",
+        "AeroScience.Tests.OrganizationConnectionIntegrationTests.ScopedNonSuperuserRecoveryRetainsApplicationOwnershipAndAllowsTheNextCompiledUpgrade",
+        "AeroScience.Tests.ScientificLibraryFolderTests.LinkedSourceDirectoryIsRejected",
+        "AeroScience.Tests.OrganizationConnectionIntegrationTests.IndependentRecoveryStagesAndActivatesAfterOriginalDatabaseAndIdentityAreLostWithoutExternalReplay",
+        "AeroScience.Tests.OrganizationConnectionIntegrationTests.GuidedPrivateFileImportRecoversIntoAFreshSecuredServerAtANewOriginAfterPrimaryLoss",
+        "AeroScience.Tests.OrganizationConnectionIntegrationTests.ActualOldAndNewProcessesRefuseStaleCheckpointRollbackFailedUpgradeAndApplyExactApprovedPair",
+        "AeroScience.Tests.OrganizationConnectionIntegrationTests.ProtectedIdentityRenewalRecoversMfaAndDiscordSecretsWithANewCertificateWithoutTouchingTheOriginal",
+        "AeroScience.Tests.OrganizationServerTests.ExplicitBackupConsentPersistsScheduledPolicyIdempotentJobsAndVerifiedRestoreAcrossRestart",
+        "AeroScience.Tests.OrganizationConnectionIntegrationTests.EncryptedOffProcessBackupRestoresAuthorizedEvidenceAuditAndProtectedMfaAfterSourceLoss",
+        "AeroScience.Tests.OrganizationConnectionIntegrationTests.SeparatelyKeyedCopiesSurvivePrimaryRepositoryAndIdentityLossAndEnforceApprovedRetention"
+      ]
+    }
+  ],
+  "retainedFiles": [
+    {
+      "path": "artifacts/p08a/linux-43625990667.log",
+      "sha256": "83a09508a2763b8632e9fd5c726c9d57f9eb1ed89ce3d98b69fd37dd50a89597",
+      "bytes": 1648721
+    },
+    {
+      "path": "artifacts/p08a/windows-43625990667.log",
+      "sha256": "13b13aec500f72af17db2b8dfbd773c60fc2a7466cdc890e93247779abf5ea4e",
+      "bytes": 1236565
+    },
+    {
+      "path": "artifacts/p08a/organization-deployment-43625990667.log",
+      "sha256": "159132dbe139ccd8b0b9c015d30f2a5e37ecec7bfba0aa8b40d36411601b1dbf",
+      "bytes": 121381
+    },
+    {
+      "path": "artifacts/p08a/browser-failed-43625990667/web-results.json",
+      "sha256": "9d307279eeb37b20c87e1d944fe3acbc3dda9482217d928540608777c8c9d675",
+      "bytes": 2733557
+    },
+    {
+      "path": "artifacts/p08a/browser-failed-43625990667/browser-tests/sensor-operating-status-ar-52d76--wrong-favorable-assessment/error-context.md",
+      "sha256": "43365528cc74f84f3866231e5084774010d30f15e46021fb727c00d1c6390efd",
+      "bytes": 17780
+    },
+    {
+      "path": "artifacts/p08a/browser-failed-43625990667/browser-tests/sensor-operating-status-ar-52d76--wrong-favorable-assessment/test-failed-1.png",
+      "sha256": "5e0e2df0ea97b2e930dbb78372d8ba87310a10099e7866e1f51762aaee7c3c57",
+      "bytes": 158206
+    },
+    {
+      "path": "artifacts/p08a/config-race-red.log",
+      "sha256": "bb7e6c001281fd993b3f936926d8ca50eb50ae59c7adb75bcbe24e547a71a731",
+      "bytes": 3577
+    },
+    {
+      "path": "artifacts/p08a/config-race-red/p08a-config-race-red.trx",
+      "sha256": "ca43a465c8a28bd31530386fbc075312620ccac36bef7a7b3a25398c42783a41",
+      "bytes": 8106
+    },
+    {
+      "path": "artifacts/p08a/sensor-ci-reproduction.log",
+      "sha256": "070bdce537cc3d693eae764f0a690776fa110c5c142702221d185eb63a01a19b",
+      "bytes": 2127
+    },
+    {
+      "path": "artifacts/p08a/sensor-config-repeat-before.log",
+      "sha256": "5807e0745dca832c3ea2700c67f291434081690be16261dc36ec8f110866ccd1",
+      "bytes": 1652
+    },
+    {
+      "path": "artifacts/p08a/config-race-final.log",
+      "sha256": "91b0d5e55f51ff2c0acbd95b4735d0ca613f815fadc91f9d77c805744f6058a2",
+      "bytes": 1686
+    },
+    {
+      "path": "artifacts/p08a/config-race-final/p08a-config-race-final.trx",
+      "sha256": "77da3aeac7a1c1f3e6a8903a08ff3ea44efc939e698dea55b0b8fd7299d61df3",
+      "bytes": 104051
+    },
+    {
+      "path": "artifacts/p08a/sensor-host-rebuild.log",
+      "sha256": "2d05f67ded78575af329dcd90c5a5d108c37c4f88bc3d5883d934509cf5b7709",
+      "bytes": 1207
+    },
+    {
+      "path": "artifacts/p08a/sensor-flight-toolbar-green.log",
+      "sha256": "013fed08f91867b65448cad638ee4803f91830243c667ee8d4192e1bae44da8e",
+      "bytes": 3896
+    }
+  ],
+  "correctionFocusedDotnet": {
+    "passed": 72,
+    "failed": 0,
+    "skipped": 0,
+    "selections": [
+      "ScienceSessionTests",
+      "SensorOperating*",
+      "OperatingAssessmentTests",
+      "GeographicCollectionTests"
+    ]
+  },
+  "originalSensorTestBodiesAndDeadlinesUnchanged": true,
+  "correctionFocusedBrowser": {
+    "passed": 23,
+    "failed": 0,
+    "skipped": 0,
+    "files": [
+      "sensor-operating-status.spec.js",
+      "current-flight-080.spec.js",
+      "toolbar-080.spec.js"
+    ]
+  }
+}
