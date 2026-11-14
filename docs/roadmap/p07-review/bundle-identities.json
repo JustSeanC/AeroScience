@@ -1,13 +1,13 @@
 {
-  "version": 23,
-  "sourceIdentity": "2e497b5e380eefe0acc09c924121b57ad145e56c8e85d78639b27b338adbc3dc",
-  "bundleIdentity": "82535d4cf1ffb6e0d75516066084bc6a44c667ed19b0bc344bc05380c0202f1d",
+  "version": 24,
+  "sourceIdentity": "dd22b60677d9729e0816aec7b8c14487b0d7741ba174dedf255461992cfdb855",
+  "bundleIdentity": "bd208d571cdf0eee75c8b2b5a6cebe4e24cf1f86f94e4da4f821a05ae05c84fb",
   "canonicalKeys": 7040,
   "nativeProjectedKeys": 370,
   "nativeAssets": {
     "AeroScience.LocaleData.js": {
       "bytes": 178815,
-      "sha256": "4fde4da5c8f8a2a408b98eb8d185f470ce7fc3f6080e369db4bcd991df827aa7"
+      "sha256": "689fba5b445813e68465979b559e0f5bd78f597538960c6a6f8140c888e02b2e"
     },
     "AeroScience.LocaleFormat.js": {
       "bytes": 3860,

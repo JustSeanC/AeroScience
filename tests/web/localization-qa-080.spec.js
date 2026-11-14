@@ -5,6 +5,8 @@ import{createTranslator}from'../../src/AeroScience.Engine/wwwroot/i18n-format.js
 import{localeBundle}from'../../scripts/build/build-locales.mjs';
 import{readFile}from'node:fs/promises';
 const bundle=localeBundle(),origin='http://127.0.0.1:5080';
+const applicationErrors=new WeakMap();
+test.beforeEach(async({page})=>{const errors=[];applicationErrors.set(page,errors);page.on('pageerror',error=>errors.push(error.message));});
 async function get(request,path){const response=await request.get(path);expect(response.ok(),await response.text()).toBe(true);return response.json();}
 async function post(request,path,data={}){const {csrf}=await(await request.post('/api/session',{headers:{Origin:origin},data:{}})).json();const response=await request.post(path,{headers:{Origin:origin,'X-AeroScience-CSRF':csrf},data});expect(response.ok(),await response.text()).toBe(true);return response.json();}
 async function host(request,locale){const saved=await get(request,'/api/settings/presentation');return post(request,'/api/settings/presentation',{expectedRevision:saved.preferences.revision,theme:'auto',locale});}
@@ -13,7 +15,7 @@ async function evidence(page,surface){return page.evaluate(async surface=>{const
 async function noOverflow(page){expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);}
 async function accessible(page,include){const builder=new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa','wcag22aa']);if(include)builder.include(include);const report=await builder.analyze();expect(report.violations.map(v=>({id:v.id,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))}))).toEqual([]);}
 
-test.afterEach(async({request})=>{const state=await get(request,'/api/state');if(state.activeMission)await post(request,`/api/missions/${state.activeMission.id}/end`);await post(request,'/api/instruments',[]);await host(request,'en-US');});
+test.afterEach(async({request,page})=>{const state=await get(request,'/api/state');if(state.activeMission)await post(request,`/api/missions/${state.activeMission.id}/end`);await post(request,'/api/instruments',[]);await host(request,'en-US');expect(applicationErrors.get(page)||[]).toEqual([]);});
 test('real Chart.js receives primitive localized labels and refreshes without changing points or canvas identity',async({page})=>{
  await page.goto('/#home');await expect(page.getByRole('heading',{name:'Home',exact:true})).toBeVisible();
  await page.evaluate(async()=>{const{chart}=await import('/workstation-ui.js'),{message}=await import('/i18n.js');const points=[{x:1,y:123.25},{x:2,y:124.125}],figure=chart(document.body,message('ui.receivedEvidenceUi.messageReceivedIASSamplesNoInterpolation'),[{label:message('ui.receivedEvidenceUi.messageRecordedIAS'),data:points}],{type:'scatter',xLabel:message('ui.missionTimeline.messageOriginalSequence'),yLabel:message('ui.receivedEvidenceUi.messageRecordedIAS')});figure.id='p07-chart-boundary';figure.originalPoints=JSON.stringify(points);figure.originalCanvas=figure.querySelector('canvas');figure.originalChart=Chart.getChart(figure.originalCanvas);figure.originalCanvas.tabIndex=0;figure.originalCanvas.focus();});await expect(page.locator('#p07-chart-boundary canvas')).toBeVisible();await page.locator('#p07-chart-boundary canvas').focus();await expect(page.locator('#p07-chart-boundary canvas')).toBeFocused();

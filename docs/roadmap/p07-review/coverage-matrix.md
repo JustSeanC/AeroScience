@@ -1,6 +1,6 @@
 # P07 localization coverage matrix
 
-Catalog **23**, **7,040 messages per locale**. Complete bundle identity: `82535d4cf1ffb6e0d75516066084bc6a44c667ed19b0bc344bc05380c0202f1d`.
+Catalog **24**, **7,040 messages per locale**. Complete bundle identity: `bd208d571cdf0eee75c8b2b5a6cebe4e24cf1f86f94e4da4f821a05ae05c84fb`.
 
 Each language cell shows **bundled referenced keys / explicit English fallback keys** for that surface. These are source references, including computed families; they are not a percentage of visible interface coverage. Retained proper names and scientific terms are distinct from English fallbacks.
 

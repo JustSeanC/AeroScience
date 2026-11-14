@@ -1,7 +1,7 @@
 {
-  "catalogVersion": 23,
-  "sourceIdentity": "2e497b5e380eefe0acc09c924121b57ad145e56c8e85d78639b27b338adbc3dc",
-  "bundleIdentity": "82535d4cf1ffb6e0d75516066084bc6a44c667ed19b0bc344bc05380c0202f1d",
+  "catalogVersion": 24,
+  "sourceIdentity": "dd22b60677d9729e0816aec7b8c14487b0d7741ba174dedf255461992cfdb855",
+  "bundleIdentity": "bd208d571cdf0eee75c8b2b5a6cebe4e24cf1f86f94e4da4f821a05ae05c84fb",
   "humanReview": "PENDING — every candidate, including non-fallback messages, needs qualified review",
   "priority": "Review explicit critical English fallbacks first, then all critical candidates in their actual authoritative state and surface.",
   "locales": {

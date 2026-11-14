@@ -2,7 +2,7 @@
 export const localeData = {
   "manifest": {
     "version": 1,
-    "catalogVersion": 23,
+    "catalogVersion": 24,
     "fallback": "en-US",
     "locales": [
       {
@@ -37,8 +37,8 @@ export const localeData = {
       }
     ],
     "qualityContract": 1,
-    "catalogIdentity": "2e497b5e380eefe0acc09c924121b57ad145e56c8e85d78639b27b338adbc3dc",
-    "bundleIdentity": "82535d4cf1ffb6e0d75516066084bc6a44c667ed19b0bc344bc05380c0202f1d"
+    "catalogIdentity": "dd22b60677d9729e0816aec7b8c14487b0d7741ba174dedf255461992cfdb855",
+    "bundleIdentity": "bd208d571cdf0eee75c8b2b5a6cebe4e24cf1f86f94e4da4f821a05ae05c84fb"
   },
   "schema": {
     "version": 1,
@@ -24873,9 +24873,9 @@ export const localeData = {
   },
   "catalogs": {
     "de-DE": {
-      "version": 23,
+      "version": 24,
       "locale": "de-DE",
-      "sourceHash": "2e497b5e380eefe0acc09c924121b57ad145e56c8e85d78639b27b338adbc3dc",
+      "sourceHash": "dd22b60677d9729e0816aec7b8c14487b0d7741ba174dedf255461992cfdb855",
       "pendingEnglishFallbackKeys": [
         "contextHelp.terrain.title",
         "flight.elapsed",
@@ -32219,7 +32219,7 @@ export const localeData = {
       }
     },
     "en-US": {
-      "version": 23,
+      "version": 24,
       "locale": "en-US",
       "messages": {
         "common.messageUnavailable": "Details are unavailable. Refresh to review the current information.",
@@ -38953,20 +38953,20 @@ export const localeData = {
         "map.atmosphericSamples": "Actual atmospheric sample points",
         "map.sampledPathLinks": "Supported sampled path links",
         "map.openStreetMapStreets": "OpenStreetMap / Streets",
-        "map.analysisSourceValues": "Original source-grid values for analysis",
-        "map.comparisonSourceValues": "Original source-grid values for comparison",
+        "map.analysisSourceValues": "Analysis native scientific values",
+        "map.comparisonSourceValues": "Comparison native scientific values",
         "map.scientificDifferences": "Scientific comparison differences",
         "map.retainedArtifact": "Retained scientific artifact",
         "map.savedObservations": "Saved scientific observations",
         "map.verifiedRasters": "Verified scientific raster views",
         "map.demElevation": "DEM-derived terrain elevation",
         "map.inspectedSourceValues": "Inspected source values",
-        "map.inspectedSourceLimit": "Quality-checked original source-grid cells in the selected window; these are not flight observations or sensor coverage.",
-        "map.originalFootprintLimit": "Original footprint; not quality-checked coverage",
-        "map.pilotRecordedPoints": "Pilot observations — recorded points only",
+        "map.inspectedSourceLimit": "QA-valid native source cells in the explicitly read window; no flight observation or sensor swath.",
+        "map.originalFootprintLimit": "Original footprint; not QA-valid coverage",
+        "map.pilotRecordedPoints": "Pilot Observation — recorded points only",
         "map.flightPathContext": "Flight path context — not scientific coverage",
         "route.simbriefCoordinates": "SimBrief documented degrees/minutes/seconds",
-        "map.faaTfrUnknown": "FAA TFR boundaries · activation unknown",
+        "map.faaTfrUnknown": "FAA TFR boundaries · activation Unknown",
         "preparation.liveTelemetryRequirement": "Live simulator telemetry required; no remote preparation",
         "map.qualifiedSamples": "{measurement} — actual qualified samples",
         "ui.analysis.messageRecordedPathObservedWithinTolerance": "Recorded path observed within tolerance",
@@ -39280,9 +39280,9 @@ export const localeData = {
       }
     },
     "es-ES": {
-      "version": 23,
+      "version": 24,
       "locale": "es-ES",
-      "sourceHash": "2e497b5e380eefe0acc09c924121b57ad145e56c8e85d78639b27b338adbc3dc",
+      "sourceHash": "dd22b60677d9729e0816aec7b8c14487b0d7741ba174dedf255461992cfdb855",
       "pendingEnglishFallbackKeys": [
         "contextHelp.coverage.body",
         "contextHelp.lidar.body",
@@ -46497,9 +46497,9 @@ export const localeData = {
       }
     },
     "fr-FR": {
-      "version": 23,
+      "version": 24,
       "locale": "fr-FR",
-      "sourceHash": "2e497b5e380eefe0acc09c924121b57ad145e56c8e85d78639b27b338adbc3dc",
+      "sourceHash": "dd22b60677d9729e0816aec7b8c14487b0d7741ba174dedf255461992cfdb855",
       "pendingEnglishFallbackKeys": [
         "contextHelp.coverage.body",
         "contextHelp.lidar.body",
@@ -53846,9 +53846,9 @@ export const localeData = {
       }
     },
     "pt-BR": {
-      "version": 23,
+      "version": 24,
       "locale": "pt-BR",
-      "sourceHash": "2e497b5e380eefe0acc09c924121b57ad145e56c8e85d78639b27b338adbc3dc",
+      "sourceHash": "dd22b60677d9729e0816aec7b8c14487b0d7741ba174dedf255461992cfdb855",
       "pendingEnglishFallbackKeys": [
         "contextHelp.coverage.body",
         "contextHelp.lidar.body",

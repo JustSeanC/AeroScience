@@ -440,4 +440,6 @@ export async function planningUnitControls(parent,api) {
   };
   label.append(select,status);parent.append(label);refresh();const unsubscribe=onUnitsChanged(refresh);planningBindings.set(select,unsubscribe);
 }
-new MutationObserver(()=>{for(const [node,unsubscribe] of planningBindings)if(!node.isConnected){unsubscribe();planningBindings.delete(node);}}).observe(document.documentElement,{childList:true,subtree:true});
+// A WeakMap is intentionally not enumerable. Inspect removed subtrees so unit
+// listeners are released without retaining detached planning views or values.
+new MutationObserver(records=>{for(const record of records)for(const removed of record.removedNodes){const pending=[removed];while(pending.length){const node=pending.pop();if(node.isConnected)continue;planningBindings.get(node)?.();planningBindings.delete(node);if(node.childNodes)pending.push(...node.childNodes);}}}).observe(document.documentElement,{childList:true,subtree:true});

@@ -7,7 +7,13 @@ import{fileURLToPath}from'node:url';
 import{execFileSync}from'node:child_process';
 import {inventoryJavaScript} from '../scripts/build/audit-localization.mjs';
 import {strictJson,validUnicode,validateQuality,sourceFingerprint,messageFingerprint} from '../scripts/build/localization-quality.mjs';
-import {protectedTranslation} from '../scripts/build/audit-display-bindings.mjs';
+import {protectedTranslation,unboundPresentationHelpers} from '../scripts/build/audit-display-bindings.mjs';
+
+test('presentation helper calls require an import or declaration before packaging',()=>{
+ assert.deepEqual(unboundPresentationHelpers("label.append(input,presentationTextNode(copy));").map(r=>r.name),['presentationTextNode']);
+ assert.equal(unboundPresentationHelpers("import {presentationTextNode} from './i18n.js';label.append(input,presentationTextNode(copy));").length,0);
+ assert.equal(unboundPresentationHelpers("function render(presentationTextNode){return presentationTextNode(copy);}").length,0);
+});
 
 test('audit CLI creates diagnostics on a fresh checkout and still rejects protected translations',()=>{
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'aeroscience-localization-audit-'));
@@ -19,7 +25,7 @@ test('audit CLI creates diagnostics on a fresh checkout and still rejects protec
   const run=()=>execFileSync(process.execPath,[script],{cwd:root,encoding:'utf8',stdio:'pipe'});
   assert.equal(JSON.parse(run()).protectedReferences,0);
   const receipt=path.join(root,'artifacts/p07-protected-display-bindings.json');assert.deepEqual(JSON.parse(fs.readFileSync(receipt,'utf8')),[]);
-  fs.writeFileSync(path.join(root,'src/AeroScience.Engine/wwwroot/fixture.js'),"const command={method:textForUI('test.method')};");
+  fs.writeFileSync(path.join(root,'src/AeroScience.Engine/wwwroot/fixture.js'),"import {t as textForUI} from './i18n.js';const command={method:textForUI('test.method')};");
   assert.throws(run,error=>error.status===1);const rejected=JSON.parse(fs.readFileSync(receipt,'utf8'));assert.equal(rejected.length,1);assert.equal(rejected[0].key,'test.method');
  }finally{fs.rmSync(root,{recursive:true,force:true});}
 });

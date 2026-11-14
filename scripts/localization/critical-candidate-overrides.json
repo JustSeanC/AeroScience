@@ -484,5 +484,41 @@
     "OU — une condition sélectionnée pendant toute sa durée de maintien",
     "ODER — eine ausgewählte Bedingung während ihrer gesamten Haltezeit",
     "OU — uma condição selecionada durante todo o período de manutenção"
+  ],
+  "Analysis native scientific values": [
+    "Valores de la cuadrícula original para el análisis",
+    "Valeurs de la grille source d’origine pour l’analyse",
+    "Werte des ursprünglichen Quellrasters für die Analyse",
+    "Valores da grade original da fonte para análise"
+  ],
+  "Comparison native scientific values": [
+    "Valores de la cuadrícula original para la comparación",
+    "Valeurs de la grille source d’origine pour la comparaison",
+    "Werte des ursprünglichen Quellrasters für den Vergleich",
+    "Valores da grade original da fonte para comparação"
+  ],
+  "QA-valid native source cells in the explicitly read window; no flight observation or sensor swath.": [
+    "Celdas de la cuadrícula original con control de calidad en la ventana seleccionada; no son observaciones de vuelo ni cobertura del sensor.",
+    "Cellules de la grille source d’origine contrôlées dans la fenêtre sélectionnée ; ce ne sont ni des observations de vol ni une couverture du capteur.",
+    "Qualitätsgeprüfte Zellen des ursprünglichen Quellrasters im ausgewählten Fenster; dies sind keine Flugbeobachtungen und keine Sensorabdeckung.",
+    "Células da grade original da fonte com qualidade verificada na janela selecionada; não são observações de voo nem cobertura do sensor."
+  ],
+  "Original footprint; not QA-valid coverage": [
+    "Huella original; no es cobertura con calidad verificada",
+    "Emprise d’origine ; ce n’est pas une couverture dont la qualité a été vérifiée",
+    "Ursprünglicher Erfassungsbereich; keine qualitätsgeprüfte Abdeckung",
+    "Área original; não representa cobertura com qualidade verificada"
+  ],
+  "Pilot Observation — recorded points only": [
+    "Observaciones del piloto: solo puntos registrados",
+    "Observations du pilote — points enregistrés uniquement",
+    "Pilotenbeobachtungen — nur aufgezeichnete Punkte",
+    "Observações do piloto — somente pontos registrados"
+  ],
+  "FAA TFR boundaries · activation Unknown": [
+    "Límites TFR de la FAA · activación desconocida",
+    "Limites TFR de la FAA · activation inconnue",
+    "FAA-TFR-Grenzen · Aktivierung unbekannt",
+    "Limites TFR da FAA · ativação desconhecida"
   ]
 }

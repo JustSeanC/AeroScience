@@ -1,24 +1,24 @@
 {
-  "catalogVersion": 23,
-  "sourceIdentity": "2e497b5e380eefe0acc09c924121b57ad145e56c8e85d78639b27b338adbc3dc",
-  "bundleIdentity": "82535d4cf1ffb6e0d75516066084bc6a44c667ed19b0bc344bc05380c0202f1d",
+  "catalogVersion": 24,
+  "sourceIdentity": "dd22b60677d9729e0816aec7b8c14487b0d7741ba174dedf255461992cfdb855",
+  "bundleIdentity": "bd208d571cdf0eee75c8b2b5a6cebe4e24cf1f86f94e4da4f821a05ae05c84fb",
   "captures": [
     {
       "file": "browser-results-de-DE-dark-1440.png",
-      "sha256": "ae492f87b700b170baa65bca743afaecfa71ba4eac303500e6d8dd7d6e65dc80",
-      "bytes": 567088,
+      "sha256": "284039caccd26f2411eab0887cca9ee8540aa5c0d67f62dc7b3d6de10cf74d04",
+      "bytes": 567639,
       "evidence": "Synthetic Chromium fixture; NOT installed Windows/MSFS acceptance"
     },
     {
       "file": "browser-results-de-DE-dark-390.png",
-      "sha256": "fa13e645f1bbf23dea40c36d388e6f38e7c981e6bb78bc44f18917e80e8fcddb",
-      "bytes": 500249,
+      "sha256": "036afee81c0e902e13b575c8f525c1e083f25b8d043719d15e35f6151facd634",
+      "bytes": 500001,
       "evidence": "Synthetic Chromium fixture; NOT installed Windows/MSFS acceptance"
     },
     {
       "file": "browser-toolbar-de-DE-dark-320.png",
-      "sha256": "9382231ffdf289b89d1bca6aa9a6b2ebc70ffcfe5ebd2d5009ecc4d2be2b8dc9",
-      "bytes": 27587,
+      "sha256": "10c0b9b34ff35f6a8bafe03967fd0f7a1c9e5ce2925467382ef1787771f8bf46",
+      "bytes": 27574,
       "evidence": "Synthetic Chromium fixture; NOT installed Windows/MSFS acceptance"
     },
     {
@@ -29,14 +29,14 @@
     },
     {
       "file": "browser-results-de-DE-light-1440.png",
-      "sha256": "05d470b2babbebd4acbce739b85da0c0e46fa90fa3d6a24a6e0f3e0a97286260",
-      "bytes": 563809,
+      "sha256": "d66126933a51ecde95e84db8e300fb0cbd9df53cb731b039874cb0c96ad2ac0b",
+      "bytes": 564548,
       "evidence": "Synthetic Chromium fixture; NOT installed Windows/MSFS acceptance"
     },
     {
       "file": "browser-results-de-DE-light-390.png",
-      "sha256": "dc8f14e351230b2063d4e67e39921f965348fffdbb47c6ff1b344f88bdcf9bea",
-      "bytes": 496299,
+      "sha256": "9fe32d8fd529ca7319a8061f592bd365cf1842bca507be86adf4a0643339f602",
+      "bytes": 496452,
       "evidence": "Synthetic Chromium fixture; NOT installed Windows/MSFS acceptance"
     },
     {
@@ -53,20 +53,20 @@
     },
     {
       "file": "browser-results-en-US-dark-1440.png",
-      "sha256": "fc93e07a8170a7f14d3c735e432266892e4a616adadbeab7b47f27f13598aab1",
-      "bytes": 522955,
+      "sha256": "908a07a473188f539799c8d1abd3d2380c961bdb2692e4af778cbce9fd2f27d2",
+      "bytes": 524483,
       "evidence": "Synthetic Chromium fixture; NOT installed Windows/MSFS acceptance"
     },
     {
       "file": "browser-results-en-US-dark-390.png",
-      "sha256": "d79e3ed523b4b21d19b23f5540dc7ece2465bf6a5f1de316c3747a27e3472ee0",
-      "bytes": 454244,
+      "sha256": "35880632d2712c11f8428b53f0bbe98719ecad99474d4b8cb1e66917d3091b46",
+      "bytes": 454551,
       "evidence": "Synthetic Chromium fixture; NOT installed Windows/MSFS acceptance"
     },
     {
       "file": "browser-toolbar-en-US-dark-320.png",
-      "sha256": "5e8911f5dc06b100845af124887b4d23190f358b292f40cbaef7fe74dd366a23",
-      "bytes": 24843,
+      "sha256": "5b7d5b1f4ddeedf97f45d11d3db34b3e9eb8a2129064e4ed016f89db38f3cd07",
+      "bytes": 24849,
       "evidence": "Synthetic Chromium fixture; NOT installed Windows/MSFS acceptance"
     },
     {
@@ -77,20 +77,20 @@
     },
     {
       "file": "browser-results-en-US-light-1440.png",
-      "sha256": "94585c7f774ee7aff469e7df16b079962f2855e469ab43169da27e6b9f7bf60d",
-      "bytes": 519632,
+      "sha256": "981d80d70617056c2dd5428293d0bdc26b4c8d8f654a39f01f7c5215d200a9dd",
+      "bytes": 521512,
       "evidence": "Synthetic Chromium fixture; NOT installed Windows/MSFS acceptance"
     },
     {
       "file": "browser-results-en-US-light-390.png",
-      "sha256": "feca6d521ae437b660ed39ce1ac629adc84b642c668f8d53c3e95ffe2255d601",
-      "bytes": 451363,
+      "sha256": "232cae373a41725798c9e01324c3cd9e85bcd4921c26111f01e0252d726e0ecd",
+      "bytes": 452005,
       "evidence": "Synthetic Chromium fixture; NOT installed Windows/MSFS acceptance"
     },
     {
       "file": "browser-toolbar-en-US-light-320.png",
-      "sha256": "eb8305aec12d7ad33312e9c69947e26ef7d491c709572538a1c20dbb37af6d00",
-      "bytes": 24517,
+      "sha256": "cb2d493ec8956f96c220ab18f9fe1e484d3946a3d44d4e536a6f44307b386a31",
+      "bytes": 24524,
       "evidence": "Synthetic Chromium fixture; NOT installed Windows/MSFS acceptance"
     },
     {
@@ -101,14 +101,14 @@
     },
     {
       "file": "browser-results-es-ES-light-1440.png",
-      "sha256": "6de35d892527073ef8e0cfdc65ffd54c3015bd2c3fb8293ba1d0031e16c40c54",
-      "bytes": 554814,
+      "sha256": "a7aea9c6537be9af01d349c3084c519659f06916029e75ad4683d92d1a63ea4f",
+      "bytes": 556436,
       "evidence": "Synthetic Chromium fixture; NOT installed Windows/MSFS acceptance"
     },
     {
       "file": "browser-results-es-ES-light-390.png",
-      "sha256": "d519247cb57d89e8c3a975234bcb77a2af0db81c2b7fc39331df9aa667271d3d",
-      "bytes": 497020,
+      "sha256": "bd1004a880d34b34bf0e7d700464a7c9b35b3a089805cbaa1be12b3558915c54",
+      "bytes": 497101,
       "evidence": "Synthetic Chromium fixture; NOT installed Windows/MSFS acceptance"
     },
     {
@@ -119,44 +119,44 @@
     },
     {
       "file": "browser-toolbar-es-ES-light-640.png",
-      "sha256": "b72a66e48170c47de9a4964abda2b0045617e8ac591ffccea43c31f0114dacc6",
-      "bytes": 68279,
+      "sha256": "457bc69bdbf2cd5d6c92d855d9a6f87cd2a755357d6376f17aee1f5dfaca4010",
+      "bytes": 68284,
       "evidence": "Synthetic Chromium fixture; NOT installed Windows/MSFS acceptance"
     },
     {
       "file": "browser-results-es-ES-dark-1440.png",
-      "sha256": "10bbe4d07e73617d2f7cfdcb55bdd8e74a703f1635b7a3470a4e76163ee65a1d",
-      "bytes": 557607,
+      "sha256": "7ef517840517baadebbc32470f5884c438c427b42a5d41fdee50d6aa0d0104a7",
+      "bytes": 558736,
       "evidence": "Synthetic Chromium fixture; NOT installed Windows/MSFS acceptance"
     },
     {
       "file": "browser-results-es-ES-dark-390.png",
-      "sha256": "18385df436e3c715a7a6c9c27bd3b53fed77e96e5dd8c029a3ee3ae1839cd23c",
-      "bytes": 502623,
+      "sha256": "6c2dcb7c42d9eaea84a3de9bc58369c3275a37e02c73853c462c011a60b0c6d7",
+      "bytes": 502804,
       "evidence": "Synthetic Chromium fixture; NOT installed Windows/MSFS acceptance"
     },
     {
       "file": "browser-toolbar-es-ES-dark-320.png",
-      "sha256": "a79ae42f4211326ad3434d0b40e275d43536840a6fd42da384a4ed78bca292d3",
-      "bytes": 26964,
+      "sha256": "a7730b88d7881535a2fee3194a8f7271943b801ef9cbacc1c8198b802a08245f",
+      "bytes": 26952,
       "evidence": "Synthetic Chromium fixture; NOT installed Windows/MSFS acceptance"
     },
     {
       "file": "browser-toolbar-es-ES-dark-640.png",
-      "sha256": "29802a74aa8a4b3462e3a4a8a11b4fccad49daca036db5c83854534d72a670c7",
-      "bytes": 68600,
+      "sha256": "c23f0f180831cbdda872f6cedf5cd645d12d212af672aeb0eb0bed540787232e",
+      "bytes": 68605,
       "evidence": "Synthetic Chromium fixture; NOT installed Windows/MSFS acceptance"
     },
     {
       "file": "browser-results-fr-FR-light-1440.png",
-      "sha256": "243a78d417590391b235abef59b0c06aaece9428ec766fd4c5eade3431a19bd7",
-      "bytes": 544831,
+      "sha256": "6ace10fa777b3fdd451007f34ac1f41d705bb53a107223e94f563255af545497",
+      "bytes": 540816,
       "evidence": "Synthetic Chromium fixture; NOT installed Windows/MSFS acceptance"
     },
     {
       "file": "browser-results-fr-FR-light-390.png",
-      "sha256": "32158856954571546dfa0782881772d002a131d62a7a9075d8d5e4e8eed5661a",
-      "bytes": 472425,
+      "sha256": "73df227cf3539150137a7a08a62e45eec85eee568b547e29c2a512e3cd51baa3",
+      "bytes": 472727,
       "evidence": "Synthetic Chromium fixture; NOT installed Windows/MSFS acceptance"
     },
     {
@@ -167,20 +167,20 @@
     },
     {
       "file": "browser-toolbar-fr-FR-light-640.png",
-      "sha256": "b351991d8f4bece41211ad943183d3d375a1f69d8c496f493be5c3e15db8b444",
-      "bytes": 66995,
+      "sha256": "5fcfe53501709866605dedb03c874460edc531b7c91f0efe833ae1be4aed54da",
+      "bytes": 66997,
       "evidence": "Synthetic Chromium fixture; NOT installed Windows/MSFS acceptance"
     },
     {
       "file": "browser-results-fr-FR-dark-1440.png",
-      "sha256": "423bf57312396a53a07b5baa94eb533c21f53a4d9b59fdcf3a5e6ad15cf83546",
-      "bytes": 546169,
+      "sha256": "f81c9b834a35381d6ee222c53ff31d327e186e6af597151dbdef9e142166d795",
+      "bytes": 543254,
       "evidence": "Synthetic Chromium fixture; NOT installed Windows/MSFS acceptance"
     },
     {
       "file": "browser-results-fr-FR-dark-390.png",
-      "sha256": "0e2c5acaf3beeb8fd236622340dec06b7d525e016ecadee29b9c4084d132ad22",
-      "bytes": 477201,
+      "sha256": "2758c78c88b7462ae3c7f82cc54ce637eaeb62a4c0f615bba67044f50883ba61",
+      "bytes": 477247,
       "evidence": "Synthetic Chromium fixture; NOT installed Windows/MSFS acceptance"
     },
     {
@@ -191,50 +191,50 @@
     },
     {
       "file": "browser-toolbar-fr-FR-dark-640.png",
-      "sha256": "f5308379c1fbdecf22c474cde67c89bef5a3b57188a11a3289622180a4f9d61a",
-      "bytes": 66832,
+      "sha256": "20d37ba8d7063d86cf206b79d1e14deb75644dfdd865270b05cb47d799e2db15",
+      "bytes": 66826,
       "evidence": "Synthetic Chromium fixture; NOT installed Windows/MSFS acceptance"
     },
     {
       "file": "browser-pseudolocale-200-percent.png",
-      "sha256": "288781e9170f219680612a5dc94ebcf373bbea491351c289b097d2252972b283",
-      "bytes": 736997,
+      "sha256": "7ab2ea676fea8ea7585736e91414614913770b5706147b7cc52d46754c87e90b",
+      "bytes": 733704,
       "evidence": "Synthetic Chromium fixture; NOT installed Windows/MSFS acceptance"
     },
     {
       "file": "browser-results-pt-BR-dark-1440.png",
-      "sha256": "c31ba0967a2a7ac27f515e0957a05d9d89dd50450ee929d3518800c5199a82cd",
-      "bytes": 555448,
+      "sha256": "5ce9ff922b8e3e12d8def27cbb83953aaf9e4d5da811e77516d6d78ec48e75e3",
+      "bytes": 555272,
       "evidence": "Synthetic Chromium fixture; NOT installed Windows/MSFS acceptance"
     },
     {
       "file": "browser-results-pt-BR-dark-390.png",
-      "sha256": "d03eb9a3490d0a3b41501a6b4340a5336b00fb53d11a042064299d6c19ea70c0",
-      "bytes": 495555,
+      "sha256": "4dda1ab5fea3ea58dd025c13689b9277b5cb1f2879c32ab3c07984aba02b8268",
+      "bytes": 495880,
       "evidence": "Synthetic Chromium fixture; NOT installed Windows/MSFS acceptance"
     },
     {
       "file": "browser-toolbar-pt-BR-dark-320.png",
-      "sha256": "e88fda959f7c82d9b3933e14a9c2e7cb74b67086c940c28ed04d81dfe6e72c44",
-      "bytes": 26563,
+      "sha256": "c9d7854a5aa910b7e6ca4bb041be20d5159289d1d926d03c2a9656745167f343",
+      "bytes": 26572,
       "evidence": "Synthetic Chromium fixture; NOT installed Windows/MSFS acceptance"
     },
     {
       "file": "browser-toolbar-pt-BR-dark-640.png",
-      "sha256": "8d61bfc1052f0d67a60ea2a82de429a847213116009cfa4b439ac7f24d2de9d7",
-      "bytes": 64355,
+      "sha256": "0cb499bdf7e9750725b571e79e2d844be0743747a74278cfba8ad416c42541d0",
+      "bytes": 64359,
       "evidence": "Synthetic Chromium fixture; NOT installed Windows/MSFS acceptance"
     },
     {
       "file": "browser-results-pt-BR-light-1440.png",
-      "sha256": "13b21be57fa3d9cf2e08631f9e37459964d5aa522d130683f8c455efd1feca89",
-      "bytes": 552926,
+      "sha256": "5b88d04182b4f9c83f0f3c1b4c06754f11379e6c0bda321b060b0c28340a8cfe",
+      "bytes": 552838,
       "evidence": "Synthetic Chromium fixture; NOT installed Windows/MSFS acceptance"
     },
     {
       "file": "browser-results-pt-BR-light-390.png",
-      "sha256": "760e4f0168fae56ccc38a06375ae5c86b92300d68970f50af73b2f33dd2cd590",
-      "bytes": 489530,
+      "sha256": "ad025e48a9eeae183b5b06323be61b0b4126ee7026c9d88749fe5f500988bbb8",
+      "bytes": 489920,
       "evidence": "Synthetic Chromium fixture; NOT installed Windows/MSFS acceptance"
     },
     {

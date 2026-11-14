@@ -1,10 +1,10 @@
 {
   "stage": "P07 final coverage/export correction",
-  "catalogVersion": 23,
-  "sourceIdentity": "2e497b5e380eefe0acc09c924121b57ad145e56c8e85d78639b27b338adbc3dc",
-  "bundleIdentity": "82535d4cf1ffb6e0d75516066084bc6a44c667ed19b0bc344bc05380c0202f1d",
+  "catalogVersion": 24,
+  "sourceIdentity": "dd22b60677d9729e0816aec7b8c14487b0d7741ba174dedf255461992cfdb855",
+  "bundleIdentity": "bd208d571cdf0eee75c8b2b5a6cebe4e24cf1f86f94e4da4f821a05ae05c84fb",
   "tests": {
-    "presentationPassed": 57,
+    "presentationPassed": 59,
     "originalNativePassed": 4,
     "dotnetPassed": 12,
     "dotnetSkipped": 0,
@@ -29,7 +29,14 @@
       },
       "combinedCorrectedUniqueScenarios": 16,
       "skipped": 0,
-      "flaky": 0
+      "flaky": 0,
+      "finalCatalog24": {
+        "passed": 52,
+        "failed": 0,
+        "skipped": 0,
+        "flaky": 0,
+        "scope": "All retained aviation/map/dashboard/experience failures, original map-name contracts and all-five-locale QA with no application errors."
+      }
     }
   },
   "receipts": [
@@ -60,6 +67,22 @@
     {
       "path": "artifacts/p07-final-audit-review-debug-promises.log",
       "sha256": "0a98c0665d35dc76a3ff2a0062c7bccbb5a61e62671a90070e9e659e7ce2f820"
+    },
+    {
+      "path": "artifacts/p07-full-ci/catalog24-helper-checks.log",
+      "sha256": "c63f3de6973124a9ed4ab539ef0317c982c8bc4bad55fa5f9cf3541829a5091f"
+    },
+    {
+      "path": "artifacts/p07-full-ci/catalog24-dotnet.log",
+      "sha256": "c1b51104a519aa64ce82230c5b3ef371247cd4e1c878c90e7ab5c5795447770c"
+    },
+    {
+      "path": "artifacts/p07-full-ci/catalog24-desktop.log",
+      "sha256": "9f88f9214f633500e32cd03ccb3daacd4bd9c9907fb7832a39ec99fadb71f3e7"
+    },
+    {
+      "path": "artifacts/p07-full-ci/browser-remediation.log",
+      "sha256": "bf766becbb720510740edf9f2379287218832bdee681f9c26b4d1c51a6591f17"
     }
   ],
   "humanReview": "PENDING",
@@ -84,7 +107,7 @@
   "screenshots": {
     "index": "screenshots/index.json",
     "count": 41,
-    "indexSha256": "7075180c81847305ccddcdb1023ca4a0f3a38b3272fb917956276d36246045de",
+    "indexSha256": "4a9258086356c40e66793a58a897e7f8bceb19705462d9cd1658e8a8976574ef",
     "category": "Synthetic Chromium only; not installed Windows/MSFS"
   }
 }

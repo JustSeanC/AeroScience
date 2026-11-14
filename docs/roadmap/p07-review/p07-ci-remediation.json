@@ -209,8 +209,21 @@
         "sha256": "16100a148a362dfd1bad53e3ce8251685d9cf283e6ab574d6ced42d8d26d50c7"
       }
     },
-    "linux": "Full .NET step passed; remaining stages pending at corrective commit",
-    "organizationDeployment": "success; isolated CI contracts only, no production deployment"
+    "linux": {
+      "dotnetPassed": 1640,
+      "dotnetFailed": 0,
+      "dotnetSkipped": 0,
+      "retainedFailedBrowserCases": 21,
+      "browserCorpus": 508,
+      "stopped": "Obsolete source stopped after confirmed defects; not acceptance.",
+      "logSha256": "3e1209a2ea606eb1141c336dac896373353ab0053bc14902253986b41fab84e2",
+      "browserArtifact": {
+        "id": 14114273030,
+        "sha256": "86b2797c481b9d55382004ff1ab9a511c54e2c08be1c6fda84f4228b22d9fcfb"
+      }
+    },
+    "organizationDeployment": "success; isolated CI contracts only, no production deployment",
+    "conclusion": "cancelled after Windows tooling failure and confirmed obsolete browser regressions"
   },
   "freshCheckoutCorrection": {
     "reproducedExitBefore": 1,
@@ -231,5 +244,35 @@
         "sha256": "31fc68bf3c77f62dec33a9b88651e8a9309d2b0ec1a6fa6fe77e9a1357580994"
       }
     ]
+  },
+  "finalBrowserCorrection": {
+    "catalogVersion": 24,
+    "causes": [
+      "WeakMap planning bindings were incorrectly iterated by the removal observer.",
+      "Six modules called presentationTextNode without importing it.",
+      "Original English map accessible names were unnecessarily reworded."
+    ],
+    "changes": [
+      "Inspect removed disconnected subtrees and release original unit listeners without enumerating or strongly retaining planning views.",
+      "Import the existing helper and reject unbound localization helpers during packaging.",
+      "Restore original English labels/disclosures while retaining candidate translations and unchanged test assertions.",
+      "Assert no application errors throughout locale QA."
+    ],
+    "targetedBrowser": {
+      "passed": 52,
+      "failed": 0,
+      "skipped": 0
+    },
+    "presentation": {
+      "passed": 59,
+      "nativeChecks": 4,
+      "skipped": 0
+    },
+    "dotnet": {
+      "passed": 12,
+      "skipped": 0
+    },
+    "windowsCrossCompile": "0 warnings; 0 errors",
+    "scientificOrPermissionChanges": false
   }
 }
