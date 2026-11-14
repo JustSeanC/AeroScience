@@ -5,12 +5,12 @@ import {node,formField,status} from './workstation-ui.js';
 // Browser overrides remain local. Host defaults use only the authenticated,
 // revisioned presentation API; no migration/upload of browser preferences.
 export const preferenceKey='AeroScience.presentation.v1';
-let settings={theme:'auto',locale:'en-US'},started=false,persistent=true;
+let settings={theme:'auto',locale:'en-US'},started=false,persistent=true,storageKey=preferenceKey,localeOverride=null;
 const subscribers=new Set();
 let media;
 let host=null,hostApi=null,hostError='',hostLoading=false,hostTimer,hostGeneration=0;
 const hostSubscribers=new Set();
-function hasOverride(){try{return JSON.parse(localStorage.getItem(preferenceKey)||'null')?.version===1;}catch{return false;}}
+function hasOverride(){try{return JSON.parse(localStorage.getItem(storageKey)||'null')?.version===1;}catch{return false;}}
 function publishHost(){for(const callback of hostSubscribers)callback();}
 export async function refreshPresentationHost(){
   if(!hostApi||hostLoading)return;hostLoading=true;
@@ -30,32 +30,33 @@ export async function connectPresentationHost(api){
 }
 function read() {
   let saved;
-  try {saved=JSON.parse(localStorage.getItem(preferenceKey)||'null');} catch {persistent=false;}
+  try {saved=JSON.parse(localStorage.getItem(storageKey)||'null');} catch {persistent=false;}
   const candidate=saved?.version===1?saved:{};
   const preferred=(navigator.languages||[navigator.language]).find(value=>localeManifest.locales.some(item=>item.id.toLowerCase()===String(value).toLowerCase()));
   return {theme:['auto','light','dark'].includes(candidate.theme)?candidate.theme:'auto',locale:supportedLocale(candidate.locale||preferred)};
 }
 function apply() {
-  const translated=useLocale(settings.locale),root=document.documentElement;
+  const language=localeOverride||settings.locale,translated=useLocale(language),root=document.documentElement;
   root.dataset.theme=settings.theme;
   root.dataset.resolvedTheme=settings.theme==='auto'?(media?.matches?'dark':'light'):settings.theme;
-  root.dataset.requestedLocale=settings.locale;root.lang=translated.effectiveLocale;
-  root.dataset.localeReview=localeManifest.locales.find(item=>item.id===settings.locale).review;
+  root.dataset.requestedLocale=language;root.lang=translated.effectiveLocale;
+  root.dataset.localeReview=localeManifest.locales.find(item=>item.id===language).review;
   root.dir=localeManifest.locales.find(item=>item.id===translated.effectiveLocale).direction;
   const color=document.querySelector('meta[name="theme-color"]');
   if(color)color.content=root.dataset.resolvedTheme==='dark'?'#0b1118':'#f1f5f9';
   localizeTree();for(const callback of subscribers)callback({...settings,persistent});
 }
-export function initializePresentation() {
-  if(started)return;started=true;settings=read();media=window.matchMedia('(prefers-color-scheme: dark)');
+export function setPresentationLocaleOverride(locale) {localeOverride=locale==null?null:supportedLocale(locale);apply();}
+export function initializePresentation({scope='dashboard'}={}) {
+  if(started)return;started=true;storageKey=scope==='organization'?'AeroScience.organization.presentation.v1':preferenceKey;settings=read();media=window.matchMedia('(prefers-color-scheme: dark)');
   media.addEventListener('change',apply);apply();
-  window.addEventListener('storage',event=>{if(event.key===preferenceKey){settings=!hasOverride()&&host?{theme:host.preferences.theme,locale:host.preferences.locale}:read();apply();}});
+  window.addEventListener('storage',event=>{if(event.key===storageKey){settings=!hasOverride()&&host?{theme:host.preferences.theme,locale:host.preferences.locale}:read();apply();}});
 }
 export function presentationPreferences() {return {...settings,persistent};}
 export function updatePresentation(change) {
   settings={theme:['auto','light','dark'].includes(change.theme)?change.theme:settings.theme,
     locale:change.locale===undefined?settings.locale:supportedLocale(change.locale)};
-  try {localStorage.setItem(preferenceKey,JSON.stringify({version:1,...settings}));persistent=true;}catch {persistent=false;}
+  try {localStorage.setItem(storageKey,JSON.stringify({version:1,...settings}));persistent=true;}catch {persistent=false;}
   apply();return presentationPreferences();
 }
 export function presentationControls(parent,{includeHost=true}={}) {
@@ -108,7 +109,7 @@ export function presentationControls(parent,{includeHost=true}={}) {
     finally{saving=false;save.disabled=!host?.canWrite;hostTheme.disabled=hostLanguage.disabled=!host?.canWrite;}
   };
   reload.onclick=async()=>{draft=false;await refreshPresentationHost();};
-  follow.onclick=()=>{if(!host)return;try{localStorage.removeItem(preferenceKey);persistent=true;}catch{persistent=false;}
+  follow.onclick=()=>{if(!host)return;try{localStorage.removeItem(storageKey);persistent=true;}catch{persistent=false;}
     settings={theme:host.preferences.theme,locale:host.preferences.locale};apply();};
   hostSubscribers.add(refreshHost);refreshHost();
   return {element:section,dispose:()=>{subscribers.delete(refresh);hostSubscribers.delete(refreshHost);}};

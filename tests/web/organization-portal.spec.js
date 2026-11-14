@@ -322,3 +322,24 @@ test('P18 stale reviewer decisions retain unsent explanations and rejection requ
  });
 
 });
+
+test('portal account language is independent of companion storage, survives sign-in and clears to browser language on sign-out',async({page})=>{
+ await administrator(page);
+ await page.goto('/');
+ await page.evaluate(()=>localStorage.setItem('AeroScience.presentation.v1',JSON.stringify({version:1,theme:'dark',locale:'fr-FR'})));
+ await page.reload();await expect(page.locator('html')).toHaveAttribute('lang','en-US');
+ await page.locator('#appearance > summary').click();await expect(page.locator('#organization-member-language')).toBeVisible();
+ await page.locator('#presentation-language').selectOption('es-ES');
+ await expect(page.locator('html')).toHaveAttribute('lang','es-ES');
+ await page.locator('#organization-member-language').selectOption('de-DE');await page.locator('.member-language button').first().click();
+ await expect(page.locator('html')).toHaveAttribute('lang','de-DE');
+ const preference=await(await page.request.get('/api/account/presentation')).json();expect(preference.locale).toBe('de-DE');expect(preference.revision).toBe(1);
+ await page.reload();await expect(page.locator('html')).toHaveAttribute('lang','de-DE');
+ await session(page);await api(page,'/sign-out',{});await page.reload();
+ await expect(page.locator('html')).toHaveAttribute('lang','es-ES');await expect(page.locator('#organization-member-language')).toHaveCount(0);
+ await session(page);await api(page,'/sign-in',{userName:'administrator',password});await page.reload();
+ await expect(page.locator('html')).toHaveAttribute('lang','de-DE');
+ expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('AeroScience.presentation.v1')))).toEqual({version:1,theme:'dark',locale:'fr-FR'});
+ expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('AeroScience.organization.presentation.v1')).locale)).toBe('es-ES');
+ expect((await session(page)).user.roles).toEqual(['Administrator']);
+});

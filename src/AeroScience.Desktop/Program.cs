@@ -11,24 +11,26 @@ internal static class Program
         if (ScientificHdfWorker.IsCommand(args)) return ScientificHdfWorker.Run();
         ApplicationConfiguration.Initialize();
         var profile = ApplicationProfile.Current;
+        try { WindowsPresentation.SetLocale(profile.Preferences().Presentation().Locale); }
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException or System.Text.Json.JsonException or InvalidOperationException) { WindowsPresentation.SetLocale("en-US"); }
         var directory = profile.ConfigurationDirectory;
         using var instance = new Mutex(true, ApplicationProfile.DesktopMutex, out var created);
-        if (!created) { MessageBox.Show("AeroScience is already running. Close it before installation or removal.", "AeroScience"); return 1; }
+        if (!created) { MessageBox.Show(WindowsPresentation.Text("windows.program.aeroscienceIsAlreadyRunningCloseItBeforeInstallationOr"), "AeroScience"); return 1; }
         if (args.Contains("--uninstall-toolbar"))
         {
             try
             {
                 var path = profile.Preferences().Load().CommunityDirectory;
                 if (path is not null && Directory.Exists(Path.Combine(path, profile.ToolbarPackage))
-                    && MessageBox.Show("Remove the AeroScience MSFS toolbar too?\n\n" + path + "\n\nOnly AeroScience will be moved to a backup outside Community. Mission history, scientific data, configuration and unrelated add-ons will be retained. Choose No to keep the toolbar.", "Uninstall AeroScience", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) == DialogResult.Yes)
+                    && MessageBox.Show(WindowsPresentation.Text("windows.program.removeTheAeroscienceMsfsToolbarTooOnlyAeroscienceWill", new Dictionary<string, object> { ["value1"] = Convert.ToString((path), System.Globalization.CultureInfo.InvariantCulture) ?? "" }), WindowsPresentation.Text("windows.program.uninstallAeroscience"), MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) == DialogResult.Yes)
                 {
                     while (ToolbarInstaller.SimulatorRunning())
-                        if (MessageBox.Show("Close MSFS before removing the AeroScience toolbar, then choose Retry. Cancel keeps the toolbar and continues uninstalling the application.", "Close MSFS", MessageBoxButtons.RetryCancel, MessageBoxIcon.Information) != DialogResult.Retry) return 0;
+                        if (MessageBox.Show(WindowsPresentation.Text("windows.program.closeMsfsBeforeRemovingTheAeroscienceToolbarThenChoose"), WindowsPresentation.Text("windows.program.closeMsfs"), MessageBoxButtons.RetryCancel, MessageBoxIcon.Information) != DialogResult.Retry) return 0;
                     ToolbarInstaller.Remove(path, true);
                 }
                 return 0;
             }
-            catch (Exception error) { MessageBox.Show("Toolbar removal did not complete. Existing files were preserved.\n" + error.Message, "AeroScience uninstall"); return 1; }
+            catch (Exception error) { MessageBox.Show(WindowsPresentation.Text("windows.program.toolbarRemovalDidNotCompleteExistingFilesWerePreserved", new Dictionary<string, object> { ["value1"] = Convert.ToString((error.Message), System.Globalization.CultureInfo.InvariantCulture) ?? "" }), WindowsPresentation.Text("windows.program.aeroscienceUninstall")); return 1; }
         }
         Application.Run(new MainForm(directory, args.Contains("--setup")));
         return 0;

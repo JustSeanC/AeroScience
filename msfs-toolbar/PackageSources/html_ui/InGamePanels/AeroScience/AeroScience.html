@@ -57,7 +57,7 @@
             <strong id="as-collection-headline">SCIENCE COLLECTION INACTIVE</strong>
             <span id="as-collection-summary">Science status unavailable</span>
           </section>
-          <nav aria-label="AeroScience pages">
+          <nav aria-label="AeroScience pages" data-native-i18n-aria-label="native.static.aerosciencePages">
             <button type="button" data-native-section id="as-mission-page" data-native-i18n="toolbar.flight">Flight</button><button type="button" data-native-section id="as-payload-page" data-native-i18n="toolbar.science">Science</button>
             <button type="button" data-native-section id="as-research-page" data-native-i18n="toolbar.cards" hidden>Cards</button>
           </nav>
@@ -67,14 +67,14 @@
             tabindex="0"
             role="region"
             aria-label="Mission and payload content"
-          >
+           data-native-i18n-aria-label="native.static.missionAndPayloadContent">
           <!-- Keep the connection identity and recording/science banner fixed.
                Detailed status can wrap inside the scroll area at minimum bounds. -->
           <p id="as-status" role="status">
             Loading simulator communication service...
           </p>
           <details class="as-note">
-            <summary>Connection &amp; Build Details</summary>
+            <summary data-native-i18n="native.static.connectionBuildDetails">Connection &amp; Build Details</summary>
             <p id="as-build-identity">Toolbar build not initialized.</p>
             <p id="as-channel-identity">Commands: AeroScience.Command.v1 | Replies: AeroScience.Reply.v1</p>
             <p id="as-link-detail">No matching engine reply yet.</p>
@@ -83,60 +83,60 @@
             <p id="as-language-detail">Bundled English fallback until matching companion settings arrive.</p>
           </details>
             <p id="as-operations-summary" class="as-note" role="status">Research state unavailable.</p>
-            <section id="as-research-cards" hidden aria-label="Personal Research Test Cards">
-              <h3>Personal Research Test Cards</h3>
-              <p class="as-note">Cards describe experiments. Save routes as mission plans in the desktop Flight Planner.</p>
+            <section id="as-research-cards" hidden aria-label="Personal Research Test Cards" data-native-i18n-aria-label="ui.personalResearchFlight.messagePersonalResearchTestCards">
+              <h3 data-native-i18n="ui.personalResearchFlight.messagePersonalResearchTestCards">Personal Research Test Cards</h3>
+              <p class="as-note" data-native-i18n="native.static.cardsDescribeExperimentsSaveRoutesAsMissionPlansInThe">Cards describe experiments. Save routes as mission plans in the desktop Flight Planner.</p>
               <p id="as-research-status" role="status">Choose cards in Mission Planner before recording.</p>
               <div id="as-research-list"></div>
-              <button id="as-research-previous">Previous Cards</button><button id="as-research-next">Next Cards</button>
+              <button id="as-research-previous" data-native-i18n="native.static.previousCards">Previous Cards</button><button id="as-research-next" data-native-i18n="native.static.nextCards">Next Cards</button>
             </section>
             <section id="as-mission-view">
               <h2 id="as-aircraft">Awaiting aircraft telemetry</h2>
               <div class="as-metrics">
                 <div>
-                  <span>MSL / FT</span><strong id="as-altitude"> - </strong>
+                  <span data-native-i18n="native.static.mslFt">MSL / FT</span><strong id="as-altitude"> - </strong>
                 </div>
                 <div>
-                  <span>IAS / KTS</span><strong id="as-airspeed"> - </strong
+                  <span data-native-i18n="native.static.iasKts">IAS / KTS</span><strong id="as-airspeed"> - </strong
                   ><small id="as-mach">Mach  - </small>
                 </div>
                 <div>
-                  <span>HEADING /  degT</span><strong id="as-heading"> - </strong>
+                  <span data-native-i18n="native.static.headingDegt">HEADING /  degT</span><strong id="as-heading"> - </strong>
                 </div>
                 <div>
-                  <span>VS / FT/MIN</span><strong id="as-vspeed"> - </strong>
+                  <span data-native-i18n="native.static.vsFtMin">VS / FT/MIN</span><strong id="as-vspeed"> - </strong>
                 </div>
               </div>
               <div id="as-guidance" class="as-guidance">
                 Flight Guidance unavailable
               </div>
               <div id="as-idle">
-                <h3>Ready for your next mission.</h3>
-                <p>
+                <h3 data-native-i18n="html.index.textReadyForYourNextMission">Ready for your next mission.</h3>
+                <p data-native-i18n="native.static.startRecordingAtAnyTimeYourMissionContinuesIfThis">
                   Start recording at any time. Your mission continues if this
                   panel is closed.
                 </p>
               <div class="as-plan-selector">
-                <h3>Saved Mission Plan</h3>
+                <h3 data-native-i18n="native.static.savedMissionPlan">Saved Mission Plan</h3>
                 <label
                   >Saved Mission Plan
                   <select id="as-map-plan">
-                    <option value="">Unplanned Mission</option>
+                    <option value="" data-native-i18n="native.static.unplannedMission">Unplanned Mission</option>
                   </select>
                 </label>
                 <button id="as-map-plans">Refresh Plans</button
-                ><button id="as-map-previous-plans" disabled>Previous plans</button><button id="as-map-more-plans" disabled>Next plans</button>
+                ><button id="as-map-previous-plans" disabled data-native-i18n="native.static.previousPlans">Previous plans</button><button id="as-map-more-plans" disabled data-native-i18n="native.static.nextPlans">Next plans</button>
                 <p id="as-plan-status" class="as-note" role="status">Waiting for saved mission plans.</p>
               </div>
-                <button id="as-plan-map">View Route on Map</button>
-                <p class="as-note">Save a plan in the dashboard, select it here, start recording, fly and review Mission History. Use the moving map or an exported compatible flight plan; AeroScience does not command aircraft navigation.</p>
+                <button id="as-plan-map" data-native-i18n="native.static.viewRouteOnMap">View Route on Map</button>
+                <p class="as-note" data-native-i18n="native.static.saveAPlanInTheDashboardSelectItHereStart">Save a plan in the dashboard, select it here, start recording, fly and review Mission History. Use the moving map or an exported compatible flight plan; AeroScience does not command aircraft navigation.</p>
                 <p id="as-start-plan" class="as-note">
                   Unplanned Mission: record wherever you fly.
                 </p>
                 <label for="as-mode">Science operating mode</label
                 ><select id="as-mode">
-                  <option value="universal">Universal  -  Fly Anything</option>
-                  <option value="realistic">
+                  <option value="universal" data-native-i18n="native.static.universalFlyAnything">Universal  -  Fly Anything</option>
+                  <option value="realistic" data-native-i18n="native.static.realisticAuthenticResearch">
                     Realistic  -  Authentic Research
                   </option>
                 </select>
@@ -148,7 +148,7 @@
                   id="as-name"
                   maxlength="100"
                   placeholder="Research mission"
-                /><new-push-button id="as-start" data-native-i18n="flight.action.record" class="as-primary" disabled
+                / data-native-i18n-placeholder="native.static.researchMission"><new-push-button id="as-start" data-native-i18n="flight.action.record" class="as-primary" disabled
                   >Start Recording</new-push-button
                 >
               </div>
@@ -160,11 +160,11 @@
                   ><span id="as-samples">0 samples</span>
                 </div>
                 <details>
-                  <summary>Pilot Observation</summary>
-                  <p class="as-note">Your written account, not a sensor reading. Missing locations stay unavailable. Use the dashboard for longer notes.</p>
-                  <label for="as-observation-category">Observation category</label>
-                  <select id="as-observation-category"><option value="observation">Observation</option><option value="finding">Finding</option><option value="interesting-weather">Interesting weather</option><option value="equipment-note">Equipment note</option><option value="note">Note</option><option value="start-survey">Start survey</option><option value="end-survey">End survey</option></select>
-                  <label for="as-observation-note">Short observation (120 characters)</label>
+                  <summary data-native-i18n="ui.observationResearch.messagePilotObservation">Pilot Observation</summary>
+                  <p class="as-note" data-native-i18n="native.static.yourWrittenAccountNotASensorReadingMissingLocationsStay">Your written account, not a sensor reading. Missing locations stay unavailable. Use the dashboard for longer notes.</p>
+                  <label for="as-observation-category" data-native-i18n="native.static.observationCategory">Observation category</label>
+                  <select id="as-observation-category"><option value="observation" data-native-i18n="ui.observationResearch.messageObservation">Observation</option><option value="finding" data-native-i18n="ui.observationResearch.messageFinding">Finding</option><option value="interesting-weather" data-native-i18n="ui.observationResearch.messageInterestingWeather">Interesting weather</option><option value="equipment-note" data-native-i18n="ui.observationResearch.messageEquipmentNote">Equipment note</option><option value="note" data-native-i18n="ui.observationResearch.messageNote">Note</option><option value="start-survey" data-native-i18n="ui.observationResearch.messageStartSurvey">Start survey</option><option value="end-survey" data-native-i18n="ui.observationResearch.messageEndSurvey">End survey</option></select>
+                  <label for="as-observation-note" data-native-i18n="native.static.shortObservation120Characters">Short observation (120 characters)</label>
                   <textarea id="as-observation-note" maxlength="120" rows="2"></textarea>
                   <p id="as-observation-status" class="as-note" role="status" aria-live="polite"></p>
                 </details>
@@ -175,34 +175,34 @@
                   >End mission</new-push-button
                 >
               </div>
-              <p class="as-note">
+              <p class="as-note" data-native-i18n="native.static.recordingContinuesWhenThisPanelClosesOpenTheCompanionDashboard">
                 Recording continues when this panel closes. Open the companion
                 dashboard for mission history.
               </p>
             </section>
             <section id="as-map-view" hidden>
-              <h2>Research Mission Map</h2>
+              <h2 data-native-i18n="native.static.researchMissionMap">Research Mission Map</h2>
               <p id="as-map-status" role="status">
                 Waiting for route synchronization.
               </p>
               <div class="as-map-actions">
                 <button id="as-map-follow">Follow Aircraft</button
-                ><button id="as-map-free">Free Pan</button>
+                ><button id="as-map-free" data-native-i18n="native.static.freePan">Free Pan</button>
                 <button id="as-map-fit">Fit Mission</button
                 ><button id="as-map-in">Zoom +</button
-                ><button id="as-map-out">Zoom -</button>
+                ><button id="as-map-out" data-native-i18n="native.static.zoom">Zoom -</button>
               </div>
               <div id="as-map-canvas" class="as-map-canvas"></div>
               <label
                 >Inspect waypoint
                 <select id="as-map-waypoint"></select
               ></label>
-              <button id="as-waypoint-prev">Previous Waypoint</button><button id="as-waypoint-next">Next Waypoint</button><button id="as-waypoint-target">Next Observed Target</button><p id="as-map-waypoint-info"></p>
+              <button id="as-waypoint-prev" data-native-i18n="native.static.previousWaypoint">Previous Waypoint</button><button id="as-waypoint-next" data-native-i18n="native.static.nextWaypoint">Next Waypoint</button><button id="as-waypoint-target" data-native-i18n="native.static.nextObservedTarget">Next Observed Target</button><p id="as-map-waypoint-info"></p>
               <details>
-                <summary>Progress and map limits</summary>
+                <summary data-native-i18n="native.static.progressAndMapLimits">Progress and map limits</summary>
                 <p id="as-map-progress" class="as-note"></p>
               </details>
-              <p class="as-note">
+              <p class="as-note" data-native-i18n="native.static.northUpGoldPlannedTurquoiseRecordedPinkMarkersRecentTrack">
                 North up  /  Gold: planned  /  Turquoise: recorded  /  Pink: markers.
                 Recent track display is bounded to 512 points; full recordings
                 remain in Mission History. Offline geography is coarse and
@@ -212,11 +212,11 @@
             </section>
             <section id="as-payload-view" hidden>
               <h2 data-native-i18n="toolbar.science">Science</h2>
-            <section id="as-intelligence" aria-label="Scientific mission intelligence">
+            <section id="as-intelligence" aria-label="Scientific mission intelligence" data-native-i18n-aria-label="native.static.scientificMissionIntelligence">
               <h3 id="as-session-phase">Science intelligence unavailable</h3>
               <p id="as-session-authority" class="as-note"></p>
               <p id="as-intelligence-warning" class="as-note"></p>
-              <div id="as-session-actions" role="group" aria-label="Science collection actions">
+              <div id="as-session-actions" role="group" aria-label="Science collection actions" data-native-i18n-aria-label="ui.scienceJourney.messageScienceCollectionActions">
                 <button data-science-action="startData" data-native-i18n="flight.action.startData" disabled>Start Science Collection</button>
                 <button data-science-action="pauseData" data-native-i18n="flight.action.pauseData" disabled>Pause science collection</button>
                 <button data-science-action="resumeData" data-native-i18n="flight.action.resumeData" disabled>Resume science collection</button>
@@ -227,12 +227,12 @@
               <p id="as-next-trigger" class="as-note"></p>
               <p id="as-retained-science" class="as-note" role="status"></p>
               <details>
-                <summary>Science session controls &amp; evidence</summary>
+                <summary data-native-i18n="native.static.scienceSessionControlsEvidence">Science session controls &amp; evidence</summary>
               <p id="as-grade" class="as-note"></p>
                 <p id="as-session-identity" class="as-note"></p>
                 <p id="as-science-yield" class="as-note"></p>
                 <p id="as-intelligence-asof" class="as-note"></p>
-                <p class="as-note">End science closes this session. End mission below ends the continuous flight. Detailed calibration, grading and source evidence remain on the companion dashboard.</p>
+                <p class="as-note" data-native-i18n="native.static.endScienceClosesThisSessionEndMissionBelowEndsThe">End science closes this session. End mission below ends the continuous flight. Detailed calibration, grading and source evidence remain on the companion dashboard.</p>
               </details>
             </section>
 
@@ -242,8 +242,8 @@
               >
               <div id="as-instruments"></div>
               <details>
-                <summary>Source and limitations</summary>
-                <p>
+                <summary data-native-i18n="native.static.sourceAndLimitations">Source and limitations</summary>
+                <p data-native-i18n="native.static.simulatorReportedAtmosphericObservationsAnActiveMissionIsRequiredTo">
                   Simulator-reported atmospheric observations. An active mission
                   is required to save science. Flight telemetry continues when
                   science collection is paused. Documented calibration and operating

@@ -73,3 +73,6 @@ export function localizeTree(root = document, translate = t) {
     for(const attribute of attributes){const key=element.getAttribute('data-i18n-'+attribute);if(key&&!bindings.get(element)?.has(attribute))setPresentationText(element,translate===t?message(key):translate(key),attribute,false,true);}
   }
 }
+
+// Optional classic moving-map presentation bridge; original values stay parameters.
+if(typeof window!=="undefined")window.AeroScienceMapText=(key,fallback,values)=>t(key,values,fallback);

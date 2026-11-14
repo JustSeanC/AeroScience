@@ -1335,6 +1335,13 @@ namespace AeroScience.Organization.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("boolean");
 
+                    b.Property<string>("PresentationLocale")
+                        .HasMaxLength(5)
+                        .HasColumnType("character varying(5)");
+
+                    b.Property<long>("PresentationRevision")
+                        .HasColumnType("bigint");
+
                     b.Property<DateTimeOffset?>("RecoveryAcknowledgedUtc")
                         .HasColumnType("timestamp with time zone");
 

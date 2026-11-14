@@ -125,7 +125,7 @@ public static class EngineApplication
         builder.Services.AddSingleton(sp=>new ToolbarCommandHandler(sp.GetRequiredService<MissionCoordinator>(),sp.GetRequiredService<RouteMapService>(),
             (snapshot,collection)=>sp.GetRequiredService<MissionIntelligenceService>().Native(snapshot,collection), ApplicationProfile.Current.AuthorizeToolbar,
             ()=>{var saved=sp.GetRequiredService<PreferenceStore>().Load().Presentation;if(saved is {Version:not 1})return null;
-                var value=PresentationPreferences.Effective(saved);return new ToolbarPresentation(1, PresentationText.CatalogVersion, value.Locale,value.Revision);}));
+                var value=PresentationPreferences.Effective(saved);return new ToolbarPresentation(1, PresentationText.CatalogVersion, value.Locale,value.Revision,PresentationText.CatalogIdentity);}));
         builder.Services.AddSingleton<RouteMapService>();
         builder.Services.AddSingleton<ToolbarBridgeStatus>();
         builder.Services.AddHostedService<ToolbarWorker>();

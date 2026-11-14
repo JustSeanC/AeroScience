@@ -26,7 +26,7 @@ class IngamePanelAeroScience extends TemplateElement {
       else {
         this.setAttribute('data-initialization-state', 'template-unavailable');
         const status = this.querySelector('#as-status');
-        if (status) status.textContent = 'Toolbar template did not finish loading. Close and reopen this panel; report its title if this continues.';
+        if (status) status.textContent = nativeText("native.toolbarTemplateDidNotFinishLoadingCloseAndReopen","Toolbar template did not finish loading. Close and reopen this panel; report its title if this continues.");
       }
       return;
     }
@@ -43,10 +43,10 @@ class IngamePanelAeroScience extends TemplateElement {
     this.byId = (id) => this.querySelector("#" + id);
     if(typeof AeroScienceI18n !== 'undefined')AeroScienceI18n.apply(this,null);
     this.byId('as-instruments').textContent='';
-    this.status('Connecting to companion...');
+    this.status(nativeText("native.connectingToCompanion","Connecting to companion..."));
     this.busLoadClosed=false;
-    this.byId('as-build-identity').textContent = AEROSCIENCE_TOOLBAR_IDENTITY.profile + ' toolbar | source ' + (AEROSCIENCE_TOOLBAR_IDENTITY.source || 'not supplied by this package') + ' | protocol 1';
-    this.byId('as-link-detail').textContent = 'Commands: AeroScience.Command.v1 | Replies: AeroScience.Reply.v1 | No matching engine reply yet. Channel registration alone is not an engine connection.';
+    this.byId('as-build-identity').textContent = nativeText("native.toolbarSourceProtocol1","{value1} toolbar | source {value2} | protocol 1",{value1:AEROSCIENCE_TOOLBAR_IDENTITY.profile,value2:(AEROSCIENCE_TOOLBAR_IDENTITY.source||nativeText("native.notSuppliedByThisPackage","not supplied by this package"))});
+    this.byId('as-link-detail').textContent = nativeText("native.commandsAeroscienceCommandV1RepliesAeroscienceReplyV1No","Commands: AeroScience.Command.v1 | Replies: AeroScience.Reply.v1 | No matching engine reply yet. Channel registration alone is not an engine connection.");
     this.researchState=null;this.researchOffset=0;this.researchSerial=0;
     this.byId('as-research-previous').onclick=()=>{this.researchOffset=Math.max(0,this.researchOffset-(this.researchState?.pageSize||4));this.requestResearch();};
     this.byId('as-research-next').onclick=()=>{if(this.researchState?.nextOffset!=null){this.researchOffset=this.researchState.nextOffset;this.requestResearch();}};
@@ -87,9 +87,7 @@ class IngamePanelAeroScience extends TemplateElement {
     };
     this.byId("as-mode").onchange = () => {
       this.byId("as-mode-help").textContent =
-        this.byId("as-mode").value === "realistic"
-          ? "Evidence-based assessments depend on the companion's capabilities. Any compatible aircraft can record."
-          : "All compatible aircraft can record missions.";
+        (((this.byId("as-mode").value === "realistic"?nativeText("native.evidenceBasedAssessmentsDependOnTheCompanionSCapabilities","Evidence-based assessments depend on the companion's capabilities. Any compatible aircraft can record."):nativeText("native.allCompatibleAircraftCanRecordMissions","All compatible aircraft can record missions."))));
     };
     this.byId("as-mission-page").onclick = () => this.page(false);
     this.byId("as-payload-page").onclick = () => this.page(true);
@@ -112,7 +110,7 @@ class IngamePanelAeroScience extends TemplateElement {
             String((error && error.message) || error),
         );
       this.byId("as-map-status").textContent =
-        "The map renderer is unavailable in this UI context. Mission and Payload remain available; report the simulator version and Coherent console error.";
+        nativeText("native.theMapRendererIsUnavailableInThisUiContext","The map renderer is unavailable in this UI context. Mission and Payload remain available; report the simulator version and Coherent console error.");
       for (const control of this.byId("as-map-view").querySelectorAll(
         "button,select",
       ))
@@ -140,7 +138,7 @@ class IngamePanelAeroScience extends TemplateElement {
     this.byId("as-map-free").onclick = () => {
       this.mapRenderer.follow = false;
       this.byId("as-map-status").textContent =
-        "Free Pan  -  drag the map or use arrow keys. Aircraft follow is off.";
+        nativeText("native.freePanDragTheMapOrUseArrowKeys","Free Pan  -  drag the map or use arrow keys. Aircraft follow is off.");
     };
     this.byId("as-map-fit").onclick = () => this.mapRenderer.fit();
     this.byId("as-map-in").onclick = () => this.mapRenderer.zoomBy(1.4);
@@ -158,7 +156,7 @@ class IngamePanelAeroScience extends TemplateElement {
         option = select.options[select.selectedIndex];
       if(select.disabled||!option||this.state?.activeMission)return;
       const id=this.send("select-plan",{planId:select.value||null});
-      if(id){this.byId('as-plan-status').textContent='Selecting '+option.textContent+'...';select.disabled=true;}
+      if(id){this.byId('as-plan-status').textContent=nativeText("native.selecting","Selecting {value1}...",{value1:option.textContent});select.disabled=true;}
       else this.renderPlanSelection();
     };
     this.byId("as-map-plans").onclick = () => {
@@ -177,7 +175,7 @@ class IngamePanelAeroScience extends TemplateElement {
       Include.addScript("/JS/Services/CommBus.js");
     } catch (error) {
       this.status(
-        "Unable to load the SDK CommBus service. Check the MSFS 2024 SDK/runtime version.",
+        nativeText("native.unableToLoadTheSdkCommbusServiceCheckThe","Unable to load the SDK CommBus service. Check the MSFS 2024 SDK/runtime version."),
       );
     }
     // Loading order differs between simulator UI contexts. Bound the fallback wait; never create sockets.
@@ -186,8 +184,8 @@ class IngamePanelAeroScience extends TemplateElement {
       if (this.listener || attempts++ >= 50) {
         clearInterval(this.loadTimer);
         if (!this.listener){this.busLoadClosed=true;
-          this.status("Simulator link unavailable. Reopen this panel; see Connection & Build Details.");
-          this.byId('as-link-detail').textContent='The SDK CommBus helper/listener did not become available. No engine reply was received. Check the matching Validation package and supported simulator runtime.';}
+          this.status(nativeText("native.simulatorLinkUnavailableReopenThisPanelSeeConnectionBuild","Simulator link unavailable. Reopen this panel; see Connection & Build Details."));
+          this.byId('as-link-detail').textContent=nativeText("native.theSdkCommbusHelperListenerDidNotBecomeAvailable","The SDK CommBus helper/listener did not become available. No engine reply was received. Check the matching Validation package and supported simulator runtime.");}
       } else this.registerBus();
     }, 100);
     this.setAttribute('data-initialization-state', 'ready');
@@ -229,7 +227,7 @@ class IngamePanelAeroScience extends TemplateElement {
   }
   requestPlans(){
     if(Array.from(this.pending.values()).some(p=>p.op==='map-plans'&&p.researchOffset===this.planOffset))return;
-    this.byId('as-plan-status').textContent='Loading saved mission plans...';
+    this.byId('as-plan-status').textContent=nativeText("native.loadingSavedMissionPlans","Loading saved mission plans...");
     this.send('map-plans',{offset:this.planOffset});
   }
   synchronizePlan(state){
@@ -266,9 +264,7 @@ class IngamePanelAeroScience extends TemplateElement {
     if(plan&&this.planFormId!==plan.id){this.byId('as-name').value=plan.name;this.byId('as-mode').value=plan.mode;this.byId('as-mode').onchange();this.planFormId=plan.id;}
     if(plan&&this.byId('as-mode').value!==plan.mode){this.byId('as-mode').value=plan.mode;this.byId('as-mode').onchange();}
     if(!this.mapPlan&&this.planFormId){this.byId('as-name').value='';this.byId('as-mode').value='universal';this.byId('as-mode').onchange();this.planFormId=null;}
-    this.byId('as-start-plan').textContent=this.selectedPlanMissing?'Selected plan is no longer available. Choose another plan or Unplanned Mission.':this.mapPlan
-      ?plan?'Selected: '+plan.name+' | '+plan.waypoints+' waypoints | '+plan.patterns+' patterns. Instruments: '+(plan.instruments||'None enabled')+'.':'Loading selected plan details...'
-      :'Unplanned Mission: record wherever you fly.';
+    this.byId('as-start-plan').textContent=(((this.selectedPlanMissing?nativeText("native.selectedPlanIsNoLongerAvailableChooseAnotherPlan","Selected plan is no longer available. Choose another plan or Unplanned Mission."):(this.mapPlan?(plan?nativeText("native.selectedWaypointsPatternsInstruments","Selected: {value1} | {value2} waypoints | {value3} patterns. Instruments: {value4}.",{value1:plan.name,value2:plan.waypoints,value3:plan.patterns,value4:(plan.instruments||nativeText("flight.noneEnabled","None enabled"))}):nativeText("native.loadingSelectedPlanDetails","Loading selected plan details...")):nativeText("native.unplannedMissionRecordWhereverYouFly","Unplanned Mission: record wherever you fly.")))));
     if(!fresh||this.uiFaults.has('flight')||this.mutationPending||selecting||this.mapPlan&&!plan)this.byId('as-start').setAttribute('disabled','');
     else this.byId('as-start').removeAttribute('disabled');
   }
@@ -283,7 +279,7 @@ class IngamePanelAeroScience extends TemplateElement {
       else if(this.mapPlan&&selectedPlan===null){this.selectedPlan=null;this.selectedPlanMissing=true;}
       this.plansLoaded=true;
       this.renderPlanSelection();
-      this.byId('as-plan-status').textContent=map.length?'Saved plans '+(this.planOffset+1)+'-'+(this.planOffset+map.length)+'. Selection is saved by the companion.':this.planOffset?'No more saved plans. Use Previous plans.':'No saved mission plans. Create one in the desktop Flight Planner.';
+      this.byId('as-plan-status').textContent=(((map.length?nativeText("native.savedPlansSelectionIsSavedByTheCompanion","Saved plans {value1}-{value2}. Selection is saved by the companion.",{value1:this.planOffset+1,value2:this.planOffset+map.length}):(this.planOffset?nativeText("native.noMoreSavedPlansUsePreviousPlans","No more saved plans. Use Previous plans."):nativeText("native.noSavedMissionPlansCreateOneInTheDesktop","No saved mission plans. Create one in the desktop Flight Planner.")))));
       return;
     }
     if (op === "map-state") {
@@ -310,16 +306,7 @@ class IngamePanelAeroScience extends TemplateElement {
       this.lastMapState = map;
       this.mapRenderer.update(map);
       this.byId("as-map-status").textContent =
-        (map.name ||
-          "No active planned mission  -  select a saved plan or record one from the companion.") +
-        "  /  " +
-        (this.loadingRevision
-          ? "Loading route " + this.routeItems.length + " / " + map.items
-          : "Route synchronized  /  " +
-            map.waypoints +
-            " waypoints  /  next observed target " +
-            (map.nextWaypoint < map.waypoints ? map.nextWaypoint + 1 : "end")) +
-        ".";
+        (((((map.name||nativeText("native.noActivePlannedMissionSelectASavedPlanOr","No active planned mission  -  select a saved plan or record one from the companion."))+"  /  ")+(this.loadingRevision?nativeText("native.loadingRoute","Loading route {value1} / {value2}",{value1:this.routeItems.length,value2:map.items}):nativeText("native.routeSynchronizedWaypointsNextObservedTarget","Route synchronized  /  {value1} waypoints  /  next observed target {value2}",{value1:map.waypoints,value2:(map.nextWaypoint < map.waypoints?map.nextWaypoint + 1:nativeText("native.end","end"))})))+"."));
       this.byId("as-map-progress").textContent = map.progressExplanation;
       return;
     }
@@ -343,13 +330,11 @@ class IngamePanelAeroScience extends TemplateElement {
         for (const p of this.routeItems.filter((p) => p.kind === "waypoint")) {
           const o = document.createElement("option");
           o.value = p.index;
-          o.textContent = p.index + 1 + ". " + p.name;
+          o.textContent = (((p.index + 1+". ")+p.name));
           select.appendChild(o);
         }
         this.byId("as-map-status").textContent =
-          "Route synchronized: " +
-          select.options.length +
-          " ordered waypoints. Offline geography; no online tile requests.";
+          nativeText("native.routeSynchronizedOrderedWaypointsOfflineGeographyNoOnlineTile","Route synchronized: {value1} ordered waypoints. Offline geography; no online tile requests.",{value1:select.options.length});
       } else setTimeout(() => this.requestMapChunk(), 100);
     }
   }
@@ -363,7 +348,7 @@ class IngamePanelAeroScience extends TemplateElement {
       return;
     let candidate=null;const epoch=this.connectionEpoch;
     try {
-      candidate = RegisterCommBusListener(() => {if(this.aeroScienceConnected&&epoch===this.connectionEpoch&&!this.lastReply)this.status("Simulator channel ready; waiting for the Windows engine.");});
+      candidate = RegisterCommBusListener(() => {if(this.aeroScienceConnected&&epoch===this.connectionEpoch&&!this.lastReply)this.status(nativeText("native.simulatorChannelReadyWaitingForTheWindowsEngine","Simulator channel ready; waiting for the Windows engine."));});
       candidate.on("AeroScience.Reply.v1", this.onReply);
       this.listener=candidate;
       this.tick();
@@ -371,7 +356,7 @@ class IngamePanelAeroScience extends TemplateElement {
       // A partially registered listener must not permanently poison retries.
       try{candidate?.unregister();}catch{}
       this.listener=null;
-      this.status("Unable to register the SDK CommBus listener.");
+      this.status(nativeText("native.unableToRegisterTheSdkCommbusListener","Unable to register the SDK CommBus listener."));
     }
   }
   page(payload) {
@@ -413,11 +398,11 @@ class IngamePanelAeroScience extends TemplateElement {
   renderCollectionBanner(connected){
     const i=this.intelligence,flight=this.state?.activeMission,model=this.flightPresentation(connected);
     const active=model.science==='collecting';
-    const phase=!connected?'Stale status / companion unavailable':i?.collectionFault||this.state?.research?.scienceStorageError?'Scientific storage unavailable':!model.fresh?'Science status unavailable':!flight?'No active mission':model.connection==='disconnected'?'Disconnected / unavailable':model.connection==='stale'?'Telemetry stale / unavailable':model.connection==='paused'?'Simulator paused / science unconfirmed':model.science==='unknown'?'Science status unavailable':model.science==='armed'?'Armed / Not started':model.science==='betweenSessions'?'Session ended':this.nativeLabel(model.science);
+    const phase=(((!connected?nativeText("native.staleStatusCompanionUnavailable","Stale status / companion unavailable"):(i?.collectionFault||this.state?.research?.scienceStorageError?nativeText("native.scientificStorageUnavailable","Scientific storage unavailable"):(!model.fresh?nativeText("science.unknown","Science status unavailable"):(!flight?nativeText("windows.flight.noMission","No active mission"):(model.connection==='disconnected'?nativeText("native.disconnectedUnavailable","Disconnected / unavailable"):(model.connection==='stale'?nativeText("native.telemetryStaleUnavailable","Telemetry stale / unavailable"):(model.connection==='paused'?nativeText("native.simulatorPausedScienceUnconfirmed","Simulator paused / science unconfirmed"):(model.science==='unknown'?nativeText("science.unknown","Science status unavailable"):(model.science==='armed'?nativeText("native.armedNotStarted","Armed / Not started"):(model.science==='betweenSessions'?nativeText("home.science.ended","Session ended"):this.nativeLabel(model.science)))))))))))));
     this.byId('as-collection-banner').setAttribute('data-active',String(active));
     this.byId('as-root').dataset.recording=connected?(flight?'active':'inactive'):'unknown';this.byId('as-root').dataset.science=model.science;this.byId('as-root').dataset.sessionId=model.sessionId||'';this.byId('as-root').dataset.connection=model.connection;
     this.byId('as-collection-headline').textContent=this.text(active?'toolbar.collectionActive':'toolbar.collectionInactive',active?'SCIENCE COLLECTION ACTIVE':'SCIENCE COLLECTION INACTIVE');
-    this.byId('as-collection-summary').textContent='Flight recording: '+(connected?(flight?'Active':'Inactive'):'Unavailable')+' | Science: '+(active?'Collecting':phase);
+    this.byId('as-collection-summary').textContent=nativeText("native.flightRecordingScience","Flight recording: {value1} | Science: {value2}",{value1:(connected?(flight?nativeText("ui.downloadActivity.messageActive","Active"):nativeText("native.inactive","Inactive")):nativeText("localization.unavailableValue","Unavailable")),value2:(active?nativeText("home.science.collecting","Collecting"):phase)});
   }
   updateView(component,update){
     try{update();this.uiFaults.delete(component);}
@@ -425,7 +410,7 @@ class IngamePanelAeroScience extends TemplateElement {
       const kind=['TypeError','RangeError','ReferenceError','SyntaxError'].includes(error?.name)?error.name:'Error';
       this.uiFaults.set(component,kind);
       const target={'map-plans':'as-plan-status','map-state':'as-map-status','map-chunk':'as-map-status',research:'as-operations-summary',science:'as-session-phase',payload:'as-science-state'}[component];
-      if(target)this.byId(target).textContent='This view could not update. See Connection & Build Details.';
+      if(target)this.byId(target).textContent=nativeText("native.thisViewCouldNotUpdateSeeConnectionBuildDetails","This view could not update. See Connection & Build Details.");
       if(component==='science')for(const button of this.querySelectorAll('[data-science-action]'))button.disabled=true;
       if(component==='flight')this.setControls(false);
       if(component==='research')this.researchView=null;
@@ -433,12 +418,12 @@ class IngamePanelAeroScience extends TemplateElement {
       if(component==='research'||component==='payload')for(const button of this.byId(component==='research'?'as-research-cards':'as-payload-view').querySelectorAll('button,select,new-push-button'))button.setAttribute('disabled','');
     }
     // Only fixed component names and exception classes; never message/stack/payload text.
-    this.byId('as-ui-detail').textContent=this.uiFaults.size?'Display faults: '+Array.from(this.uiFaults).map(([name,kind])=>name+' / '+kind).join('; '):'Display components synchronized.';
+    this.byId('as-ui-detail').textContent=(((this.uiFaults.size?nativeText("native.displayFaults","Display faults: {value1}",{value1:Array.from(this.uiFaults).map(([name,kind])=>name+' / '+kind).join('; ')}):nativeText("native.displayComponentsSynchronized","Display components synchronized."))));
   }
   replyFault(code){
     this.replyFaults++;
-    this.byId('as-reply-detail').textContent='Reply rejected: '+code+' | count '+this.replyFaults+'. Last valid state retained; freshness checks still apply.';
-    this.status('Companion reply could not be read. See Connection & Build Details.');
+    this.byId('as-reply-detail').textContent=nativeText("native.replyRejectedCountLastValidStateRetainedFreshnessChecks","Reply rejected: {value1} | count {value2}. Last valid state retained; freshness checks still apply.",{value1:code,value2:this.replyFaults});
+    this.status(nativeText("native.companionReplyCouldNotBeReadSeeConnectionBuild","Companion reply could not be read. See Connection & Build Details."));
   }
   requestId() {
     if (
@@ -455,7 +440,7 @@ class IngamePanelAeroScience extends TemplateElement {
     if (!this.listener || this.pending.size >= 8) return;
     const requestId = fields?.requestId || this.requestId();
     const payload=JSON.stringify(Object.assign({protocol:1,requestId,op},fields||{}));
-    if(this.utf8Bytes(payload)>1024){this.status('Command exceeds the native limit. Use the dashboard.');return;}
+    if(this.utf8Bytes(payload)>1024){this.status(nativeText("native.commandExceedsTheNativeLimitUseTheDashboard","Command exceeds the native limit. Use the dashboard."));return;}
     this.pending.set(requestId, {
       op: op,
       sent: Date.now(),
@@ -466,7 +451,7 @@ class IngamePanelAeroScience extends TemplateElement {
       this.setControls(false);
       this.mutationPending=true;
       this.renderIntelligence(true);
-      this.status("Sending mission command...");
+      this.status(nativeText("native.sendingMissionCommand","Sending mission command..."));
     }
     try {
       const result = this.listener.callSimConnect(
@@ -476,15 +461,15 @@ class IngamePanelAeroScience extends TemplateElement {
       if (result && typeof result.catch === "function")
         result.catch(() => {
           if(['science-control','research-control','marker'].includes(op)){const pending=this.pending.get(requestId);if(pending)pending.sent=Date.now()-5001;}else this.pending.delete(requestId);
-          if(op==='instrument'){const nodes=this.instrumentNodes[fields?.instrumentId];if(nodes){nodes.pending=null;nodes.editing=true;nodes.feedback.textContent='Command delivery failed. The interval is not confirmed.';}}
+          if(op==='instrument'){const nodes=this.instrumentNodes[fields?.instrumentId];if(nodes){nodes.pending=null;nodes.editing=true;nodes.feedback.textContent=nativeText("native.commandDeliveryFailedTheIntervalIsNotConfirmed","Command delivery failed. The interval is not confirmed.");}}
           this.mutationPending=Array.from(this.pending.values()).some(p=>!['state','research-state'].includes(p.op)&&!p.op.startsWith('map-'));
           this.status(
-            "Simulator command delivery failed. Check the engine connection.",
+            nativeText("native.simulatorCommandDeliveryFailedCheckTheEngineConnection","Simulator command delivery failed. Check the engine connection."),
           );
         });
     } catch (error) {
       if(['science-control','research-control','marker'].includes(op)){const pending=this.pending.get(requestId);if(pending)pending.sent=Date.now()-5001;}else this.pending.delete(requestId);
-      this.status("Simulator command delivery failed.");
+      this.status(nativeText("native.simulatorCommandDeliveryFailed","Simulator command delivery failed."));
       return;
     }
     return requestId;
@@ -501,25 +486,25 @@ class IngamePanelAeroScience extends TemplateElement {
         if(['science-control','research-control','marker'].includes(request.op)&&request.retries===0){
           request.retries++;request.sent=Date.now();
           try{const retry=this.listener.callSimConnect('AeroScience.Command.v1',request.payload);if(retry?.catch)retry.catch(()=>{request.sent=Date.now()-5001;});}catch(error){request.sent=Date.now()-5001;}
-          this.byId(request.op==='marker'?'as-observation-status':request.op==='research-control'?'as-research-status':'as-collection-message').textContent='Retrying the identical flight-bound request; no new command target.';continue;
+          this.byId(request.op==='marker'?'as-observation-status':request.op==='research-control'?'as-research-status':'as-collection-message').textContent=nativeText("native.retryingTheIdenticalFlightBoundRequestNoNewCommand","Retrying the identical flight-bound request; no new command target.");continue;
         }
         this.pending.delete(id);
-        if(request.op==='instrument'){const nodes=this.instrumentNodes[request.instrumentId];if(nodes){nodes.pending=null;nodes.editing=true;nodes.feedback.textContent='No confirmation received. Review the confirmed interval before trying again.';}}
-        if(['science-control','research-control','marker'].includes(request.op))this.byId(request.op==='marker'?'as-observation-status':request.op==='research-control'?'as-research-status':'as-collection-message').textContent='No command confirmation after one identical retry. Review synchronized state before issuing a new command.';
+        if(request.op==='instrument'){const nodes=this.instrumentNodes[request.instrumentId];if(nodes){nodes.pending=null;nodes.editing=true;nodes.feedback.textContent=nativeText("native.noConfirmationReceivedReviewTheConfirmedIntervalBeforeTrying","No confirmation received. Review the confirmed interval before trying again.");}}
+        if(['science-control','research-control','marker'].includes(request.op))this.byId(request.op==='marker'?'as-observation-status':request.op==='research-control'?'as-research-status':'as-collection-message').textContent=nativeText("native.noCommandConfirmationAfterOneIdenticalRetryReviewSynchronized","No command confirmation after one identical retry. Review synchronized state before issuing a new command.");
         if (request.op.startsWith("map-"))
           this.byId(request.op==='map-plans'?'as-plan-status':"as-map-status").textContent =
-            "Map reply timed out; retrying with the cached route retained.";
+            nativeText("native.mapReplyTimedOutRetryingWithTheCachedRoute","Map reply timed out; retrying with the cached route retained.");
         else if (request.op !== "state")
           this.status(
-            "No command confirmation. Check mission state before retrying.",
+            nativeText("native.noCommandConfirmationCheckMissionStateBeforeRetrying","No command confirmation. Check mission state before retrying."),
           );
       }
     if (Date.now() - this.lastReply > 6000) {
       this.setControls(false);
       this.byId('as-map-plan').disabled=true;
-      this.byId('as-link-detail').textContent = this.lastReply ? 'Last matching engine reply: ' + new Date(this.lastReply).toISOString() + '. Controls are unavailable until fresh synchronized state arrives.' : 'No matching engine reply. Check that the dashboard and toolbar have the same profile and source shown in Connection & Build Details.';
+      this.byId('as-link-detail').textContent = (((this.lastReply?nativeText("native.lastMatchingEngineReplyControlsAreUnavailableUntilFresh","Last matching engine reply: {value1}. Controls are unavailable until fresh synchronized state arrives.",{value1:new Date(this.lastReply).toISOString()}):nativeText("native.noMatchingEngineReplyCheckThatTheDashboardAnd","No matching engine reply. Check that the dashboard and toolbar have the same profile and source shown in Connection & Build Details."))));
       this.status(
-        "Windows engine unavailable. Launch AeroScience and check the SimConnect runtime.",
+        nativeText("native.windowsEngineUnavailableLaunchAeroscienceAndCheckTheSimconnect","Windows engine unavailable. Launch AeroScience and check the SimConnect runtime."),
       );
       for (const id of [
         "as-altitude",
@@ -528,14 +513,14 @@ class IngamePanelAeroScience extends TemplateElement {
         "as-vspeed",
       ])
         this.byId(id).textContent = " - ";
-      this.byId("as-mach").textContent = "Mach  - ";
+      this.byId("as-mach").textContent = nativeText("native.mach","Mach  - ");
       this.renderResearch(null, false);
       this.renderIntelligence(false);
       this.renderPersonalResearch(false);
       if (this.mapRenderer) {
         this.updateView('map-state',()=>this.mapRenderer.update({ aircraft: null, track: [], markers: [] }));
         this.byId("as-map-status").textContent =
-          "Companion disconnected  -  cached route retained; live aircraft unavailable.";
+          nativeText("native.companionDisconnectedCachedRouteRetainedLiveAircraftUnavailable","Companion disconnected  -  cached route retained; live aircraft unavailable.");
       }
     }
     this.send("state");
@@ -565,7 +550,7 @@ class IngamePanelAeroScience extends TemplateElement {
     if(typeof reply.ok!=='boolean'){this.replyFault('missing command outcome');return;}
     if(typeof reply.error==='string'&&reply.error.indexOf('Validation toolbar source mismatch')===0){
       this.pending.clear();this.lastReply=0;this.setControls(false);this.renderIntelligence(false);
-      this.byId('as-map-plan').disabled=true;this.byId('as-reply-detail').textContent='Validation source mismatch. No state accepted.';this.status(reply.error);return;
+      this.byId('as-map-plan').disabled=true;this.byId('as-reply-detail').textContent=nativeText("native.validationSourceMismatchNoStateAccepted","Validation source mismatch. No state accepted.");this.status(reply.error);return;
     }
     if(!pending.op.startsWith('map-')&&!['research-state','research-control'].includes(pending.op)&&
       (!reply.state||typeof reply.state.connection?.message!=='string'||!reply.state.connection.source||
@@ -583,9 +568,11 @@ class IngamePanelAeroScience extends TemplateElement {
         this.researchSerial=pendingRequest.serial;
         this.mutationPending=Array.from(this.pending.values()).some(p=>!['state','research-state'].includes(p.op)&&!p.op.startsWith('map-'));
         this.setControls(!this.mutationPending&&Date.now()-this.lastReply<=6000);this.renderIntelligence(Date.now()-this.lastReply<=6000);
-        if(!reply.ok){this.byId('as-research-status').textContent=this.nativeMessage(reply.error||'Card command not confirmed. Synchronize before retrying.');this.requestResearch();return;}
+        if(!reply.ok){this.byId('as-research-status').textContent=this.nativeMessage((((reply.error||nativeText("native.cardCommandNotConfirmedSynchronizeBeforeRetrying","Card command not confirmed. Synchronize before retrying.")))));this.requestResearch();return;}
         if(pendingRequest.researchOffset!==this.researchOffset){this.requestResearch();return;}
         if(reply.research?.flightId===(this.state?.activeMission?.id||null)){
+          if(pendingRequest.op==='research-state'&&reply.engineInstance===this.engineInstance&&pendingRequest.engineAtSend===this.engineInstance)
+            this.applyPresentation(reply.presentation,reply.engineInstance);
           if(!this.researchState||reply.research.revision>=this.researchState.revision||reply.research.flightId!==this.researchState.flightId){this.researchState=reply.research;this.renderPersonalResearch(Date.now()-this.lastReply<=6000);}
           if(reply.receipt)this.byId('as-research-status').textContent=this.nativeMessage(reply.receipt.message.replace(/ \[manual:[^\]]+\]/g,'').replace(/ \[detection:[^\]]+\]/g,'').replace(/ \[point:[0-9a-f-]{36}; attempt:[0-9a-f-]{36}\]$/i,''));
         }return;
@@ -609,7 +596,7 @@ class IngamePanelAeroScience extends TemplateElement {
           this.receiveMap(pendingRequest.op, reply.map,reply.selectedPlan);
         else {
           this.byId(pendingRequest.op==='map-plans'?'as-plan-status':"as-map-status").textContent =
-            reply.error || "Map synchronization failed; waiting to retry.";
+            (((reply.error||nativeText("native.mapSynchronizationFailedWaitingToRetry","Map synchronization failed; waiting to retry."))));
           this.loadingRevision = null;
         }
         return;
@@ -625,20 +612,20 @@ class IngamePanelAeroScience extends TemplateElement {
         const nodes=this.instrumentNodes[pendingRequest.instrumentId],confirmed=reply.state.research?.instruments?.find(i=>i.instrumentId===pendingRequest.instrumentId);
         if(nodes){nodes.pending=null;nodes.editing=false;nodes.confirmAfter=this.serial;nodes.draft=null;
           const accepted=reply.ok&&confirmed?.intervalMs===pendingRequest.intervalMs&&pendingRequest.engineAtSend===this.engineInstance&&pendingRequest.missionAtSend===(this.state?.activeMission?.id||null);
-          nodes.feedback.textContent=accepted?'Confirmed: '+confirmed.intervalMs/1000+' s.':this.nativeMessage(reply.error||'Interval was not confirmed. Review current settings.');
-          if(confirmed){nodes.interval.value=confirmed.intervalMs;nodes.confirmed.textContent='Companion interval: '+confirmed.intervalMs/1000+' s';}
+          nodes.feedback.textContent=(((accepted?nativeText("native.confirmedS","Confirmed: {value1} s.",{value1:confirmed.intervalMs/1000}):this.nativeMessage(reply.error||'Interval was not confirmed. Review current settings.'))));
+          if(confirmed){nodes.interval.value=confirmed.intervalMs;nodes.confirmed.textContent=nativeText("native.companionIntervalS","Companion interval: {value1} s",{value1:confirmed.intervalMs/1000});}
         }
       }
       this.mutationPending=Array.from(this.pending.values()).some(p=>!['state','research-state'].includes(p.op)&&!p.op.startsWith('map-'));
       this.setControls(!this.mutationPending&&Date.now()-this.lastReply<=6000);
-      if(pendingRequest.op==='select-plan')this.byId('as-plan-status').textContent=reply.ok?'Mission plan selection confirmed.':reply.error||'Plan selection was not confirmed. Refresh plans.';
-      if(pendingRequest.op==='marker'){if(reply.ok&&this.byId('as-observation-note').value===pendingRequest.observationText)this.byId('as-observation-note').value='';this.byId('as-observation-status').textContent=reply.ok?'Pilot Observation saved. Flight and science continue independently.':reply.error||'Observation was not saved; your text is preserved.';}
-      if(pendingRequest.serial<this.appliedSerial){if(pendingRequest.op==='science-control')this.byId('as-collection-message').textContent=(reply.error||reply.receipt?.reason||'Earlier request acknowledged')+' | A newer authoritative view is already displayed.';return;}
+      if(pendingRequest.op==='select-plan')this.byId('as-plan-status').textContent=(((reply.ok?nativeText("native.missionPlanSelectionConfirmed","Mission plan selection confirmed."):(reply.error||nativeText("native.planSelectionWasNotConfirmedRefreshPlans","Plan selection was not confirmed. Refresh plans.")))));
+      if(pendingRequest.op==='marker'){if(reply.ok&&this.byId('as-observation-note').value===pendingRequest.observationText)this.byId('as-observation-note').value='';this.byId('as-observation-status').textContent=(((reply.ok?nativeText("native.pilotObservationSavedFlightAndScienceContinueIndependently","Pilot Observation saved. Flight and science continue independently."):(reply.error||nativeText("native.observationWasNotSavedYourTextIsPreserved","Observation was not saved; your text is preserved.")))));}
+      if(pendingRequest.serial<this.appliedSerial){if(pendingRequest.op==='science-control')this.byId('as-collection-message').textContent=nativeText("native.aNewerAuthoritativeViewIsAlreadyDisplayed","{value1} | A newer authoritative view is already displayed.",{value1:((reply.error||reply.receipt?.reason)||nativeText("native.earlierRequestAcknowledged","Earlier request acknowledged"))});return;}
       if(reply.engineInstance&&reply.engineInstance!==this.engineInstance&&this.seenEngines.has(reply.engineInstance))return;
       if(reply.intelligence&&this.intelligence&&reply.engineInstance===this.engineInstance&&reply.intelligence.missionId===this.intelligence.missionId&&reply.intelligence.revision<this.intelligence.revision)return;
       this.appliedSerial=pendingRequest.serial;
       this.lastReply = Date.now();
-      this.byId('as-link-detail').textContent = 'Matching engine reply received ' + new Date(this.lastReply).toISOString() + '. Aircraft telemetry and scientific collection have their own status below.';
+      this.byId('as-link-detail').textContent = nativeText("native.matchingEngineReplyReceivedAircraftTelemetryAndScientificCollection","Matching engine reply received {value1}. Aircraft telemetry and scientific collection have their own status below.",{value1:new Date(this.lastReply).toISOString()});
       const engineChanged=this.state&&(this.state.version!==reply.state.version||reply.engineInstance&&this.engineInstance!==reply.engineInstance);
       if(reply.engineInstance){this.engineInstance=reply.engineInstance;this.seenEngines.add(reply.engineInstance);}
       this.capabilities=Array.isArray(reply.capabilities)?reply.capabilities:[];
@@ -647,14 +634,7 @@ class IngamePanelAeroScience extends TemplateElement {
         candidate.missionId===(reply.state.activeMission?.id??null)&&Array.isArray(candidate.actions)&&Array.isArray(candidate.metrics)&&Array.isArray(candidate.warnings)&&Number.isFinite(Date.parse(candidate.generatedUtc))?candidate:null;
       this.state = reply.state;
       // Only accepted, correlated, current-engine replies can select a catalog.
-      if(typeof AeroScienceI18n !== 'undefined'){
-        if(this.presentationEngine!==this.engineInstance){this.presentationEngine=this.engineInstance;this.presentationRevision=-1;}
-        const metadata=this.capabilities.includes('presentation-1')?reply.presentation:null;
-        const revision=metadata&&Number.isFinite(metadata.revision)?metadata.revision:0;
-        if(!metadata||revision>=(this.presentationRevision==null?-1:this.presentationRevision)){
-          AeroScienceI18n.apply(this,metadata);if(metadata)this.presentationRevision=revision;
-        }
-      }
+      this.applyPresentation(this.capabilities.includes('presentation-1')?reply.presentation:null,this.engineInstance);
       if(engineChanged){this.plansLoaded=false;this.selectedPlan=null;this.planRows=[];this.planFormId=undefined;this.mapPlan=null;}
       const mutationPending = Array.from(this.pending.values()).some(
         (x) => x.op !== "state" && x.op !== "research-state" && !x.op.startsWith("map-"),
@@ -664,40 +644,29 @@ class IngamePanelAeroScience extends TemplateElement {
       this.updateView('flight',()=>this.render(reply.state));
       this.renderIntelligence(true);
       this.updateView('plan selection',()=>this.synchronizePlan(reply.state));
-      if(pendingRequest.op==='science-control')this.byId('as-collection-message').textContent=reply.receipt?.reason||reply.error||'Session command confirmed. Review current state.';
+      if(pendingRequest.op==='science-control')this.byId('as-collection-message').textContent=((((reply.receipt?.reason||reply.error)||nativeText("native.sessionCommandConfirmedReviewCurrentState","Session command confirmed. Review current state."))));
       if(!this.plansLoaded&&!Array.from(this.pending.values()).some(p=>p.op==="map-plans")){this.planOffset=0;this.requestPlans();}
       if (!reply.ok)
-        this.status(reply.error || "Mission command was rejected.");
+        this.status((((reply.error||nativeText("native.missionCommandWasRejected","Mission command was rejected.")))));
   }
   render(state) {
     const t = state.telemetry,
       mission = state.activeMission;
-    if(mission){this.byId("as-start-plan").textContent="Active recording: its saved plan snapshot is fixed. Plan selection for the next recording is separate.";}
+    if(mission){this.byId("as-start-plan").textContent=nativeText("native.activeRecordingItsSavedPlanSnapshotIsFixedPlan","Active recording: its saved plan snapshot is fixed. Plan selection for the next recording is separate.");}
 
     const fresh = t && t.isValid!==false&&!t.isPaused&&(state.connection.state==='connected'||state.connection.source==='simulated'&&!state.connection.state) && Date.now() - Date.parse(t.timestampUtc) < 6000 && Date.now()-Date.parse(t.timestampUtc)>=-2000;
     this.byId("as-source").textContent =
-      state.connection.source === "simulated"
-        ? "SIMULATED TEST DATA"
-        : fresh && state.connection.state === "connected"
-          ? "SIMCONNECT TELEMETRY"
-          : state.connection.state==='connected'?'AIRCRAFT TELEMETRY UNAVAILABLE':"MSFS DISCONNECTED";
-    this.status(state.recordingStop ? "RECORDING STOPPED  /  " + state.recordingStop.code + ": " + state.recordingStop.message : state.connection.message);
-    this.byId("as-aircraft").textContent = fresh
-      ? t.aircraft
-      : "Awaiting initialized aircraft telemetry";
+      (((state.connection.source === "simulated"?nativeText("native.simulatedTestData","SIMULATED TEST DATA"):(fresh && state.connection.state === "connected"?nativeText("native.simconnectTelemetry","SIMCONNECT TELEMETRY"):(state.connection.state==='connected'?nativeText("native.aircraftTelemetryUnavailable","AIRCRAFT TELEMETRY UNAVAILABLE"):nativeText("native.msfsDisconnected","MSFS DISCONNECTED"))))));
+    this.status((((state.recordingStop?nativeText("native.recordingStopped","RECORDING STOPPED  /  {value1}: {value2}",{value1:state.recordingStop.code,value2:state.recordingStop.message}):state.connection.message))));
+    this.byId("as-aircraft").textContent = (((fresh?t.aircraft:nativeText("native.awaitingInitializedAircraftTelemetry","Awaiting initialized aircraft telemetry"))));
     const fmt = (v) =>
       Number.isFinite(v) ? Math.round(v).toLocaleString("en-US") : " - ";
-    this.byId("as-altitude").textContent = fresh ? fmt(t.altitudeMslFeet) : " - ";
-    this.byId("as-airspeed").textContent = fresh
-      ? fmt(t.indicatedAirspeedKnots)
-      : " - ";
+    this.byId("as-altitude").textContent = (((fresh?fmt(t.altitudeMslFeet):" - ")));
+    this.byId("as-airspeed").textContent = (((fresh?fmt(t.indicatedAirspeedKnots):" - ")));
     this.byId("as-mach").textContent =
-      "Mach " +
-      (fresh && Number.isFinite(t.machNumber) ? t.machNumber.toFixed(2) : " - ");
-    this.byId("as-heading").textContent = fresh ? fmt(t.headingDegrees) : " - ";
-    this.byId("as-vspeed").textContent = fresh
-      ? fmt(t.verticalSpeedFeetPerMinute)
-      : " - ";
+      nativeText("ui.app.messageMachc8e9ec1f","Mach {value1}",{value1:(fresh && Number.isFinite(t.machNumber)?t.machNumber.toFixed(2):" - ")});
+    this.byId("as-heading").textContent = (((fresh?fmt(t.headingDegrees):" - ")));
+    this.byId("as-vspeed").textContent = (((fresh?fmt(t.verticalSpeedFeetPerMinute):" - ")));
     this.renderResearch(state.research, fresh);
     if (!mission) this.byId("as-marker").setAttribute("disabled", "");
     this.byId("as-idle").hidden = !!mission;
@@ -708,16 +677,14 @@ class IngamePanelAeroScience extends TemplateElement {
       this.planFormId=undefined;
       this.byId("as-mode").value = "universal";
       this.byId("as-mode-help").textContent =
-        "All compatible aircraft can record missions.";
+        nativeText("native.allCompatibleAircraftCanRecordMissions","All compatible aircraft can record missions.");
       this.byId("as-name").value = "";
       }this.renderedMission=mission.id;
       this.byId("as-active-name").textContent = mission.name;
-      this.byId("as-active-plan").textContent=state.research?.planId?"Active saved-plan snapshot (fixed for this recording). Fly the route reference on Map.":"Active unplanned mission: scientific preparation follows actual aircraft movement.";
+      this.byId("as-active-plan").textContent=(((state.research?.planId?nativeText("native.activeSavedPlanSnapshotFixedForThisRecordingFly","Active saved-plan snapshot (fixed for this recording). Fly the route reference on Map."):nativeText("native.activeUnplannedMissionScientificPreparationFollowsActualAircraftMovement","Active unplanned mission: scientific preparation follows actual aircraft movement."))));
       this.byId("as-active-mode").textContent =
-        mission.mode === "realistic"
-          ? "Realistic Mode"
-          : "Universal Mode  /  Fly Anything";
-      this.byId("as-samples").textContent = mission.sampleCount + " samples";
+        (((mission.mode === "realistic"?nativeText("ui.app.messageRealisticMode","Realistic Mode"):nativeText("native.universalModeFlyAnything","Universal Mode  /  Fly Anything"))));
+      this.byId("as-samples").textContent = nativeText("native.samples","{value1} samples",{value1:mission.sampleCount});
       const seconds = Math.max(
         0,
         Math.floor((Date.now() - Date.parse(mission.startedUtc)) / 1000),
@@ -731,9 +698,30 @@ class IngamePanelAeroScience extends TemplateElement {
         .join(":");
     }
   }
+  applyPresentation(metadata,engine){
+    if(typeof AeroScienceI18n==='undefined')return;
+    const changed=this.presentationEngine!==engine;
+    if(changed){this.presentationEngine=engine;this.presentationRevision=-1;AeroScienceI18n.apply(this,null);}
+    // Missing optional metadata in a full packet is not a catalog mismatch.
+    // Keep an accepted same-engine choice until a newer explicit identity arrives.
+    if(!metadata)return;
+    const revision=Number.isSafeInteger(metadata.revision)&&metadata.revision>=0?metadata.revision:0;
+    if(revision<(this.presentationRevision==null?-1:this.presentationRevision))return;
+    AeroScienceI18n.apply(this,metadata);this.presentationRevision=revision;
+  }
   utf8Bytes(text){let bytes=0;for(const character of text){const cp=character.codePointAt(0);bytes+=cp<=0x7f?1:cp<=0x7ff?2:cp<=0xffff?3:4;}return bytes;}
+  instrumentTitle(id){return ((({
+            "ambient-temperature": nativeText("native.instrument.ambientTemperature","Ambient temperature"),
+            "ambient-pressure": nativeText("native.instrument.ambientPressure","Ambient pressure"),
+            "ambient-wind": nativeText("native.instrument.ambientWind","Ambient wind"),
+            "ambient-density": nativeText("native.instrument.ambientDensity","Air density"),
+            "thermal-imager": nativeText("native.instrument.thermalImager","Thermal Imager"),
+            "multispectral-imager": nativeText("native.instrument.multispectralImager","Multispectral Imager"),
+            "hyperspectral-imager": nativeText("native.instrument.hyperspectralImager","Hyperspectral Imager"),
+            "terrain-scanner": this.text("toolbar.terrainScanner","Terrain Scanner (DEM Elevation)"),
+          }[id]||nativeText("native.scienceInstrument","Science instrument"))));}
   nativeLabel(value){
-    const labels={unknown:'Unavailable',unavailable:'Unavailable',notGraded:'Not graded',betweenSessions:'Between sessions',insufficientEvidence:'Insufficient evidence',notAssessed:'Not assessed',valid:'Valid',invalid:'Invalid',stale:'Stale',missing:'Missing',armed:'Armed',collecting:'Collecting',paused:'Paused',stopped:'Stopped',awaitingSource:'Waiting for source',acquisitionGap:'Acquisition gap',sourceDisconnected:'Source disconnected',waiting:'Waiting',manual:'Manual',automatic:'Automatic',unsupported:'Unsupported',provisional:'Provisional',final:'Final',revised:'Revised',supported:'Supported',caution:'Caution',disabled:'Disabled',idle:'Idle',enabled:'Enabled',detecting:'Detecting',holding:'Holding',completed:'Complete',insufficient:'Insufficient evidence'};
+    const labels={unknown:nativeText("localization.unavailableValue","Unavailable"),unavailable:nativeText("localization.unavailableValue","Unavailable"),notGraded:nativeText("native.notGraded","Not graded"),betweenSessions:nativeText("home.science.betweenSessions","Between sessions"),insufficientEvidence:nativeText("native.insufficientEvidence","Insufficient evidence"),notAssessed:nativeText("ui.scienceAnalysis.messageNotAssessed","Not assessed"),valid:nativeText("evidence.valid","Valid"),invalid:nativeText("evidence.invalid","Invalid"),stale:nativeText("native.stale","Stale"),missing:nativeText("results.missing","Missing"),armed:nativeText("native.armed","Armed"),collecting:nativeText("home.science.collecting","Collecting"),paused:nativeText("home.science.paused","Paused"),stopped:nativeText("home.science.stopped","Stopped"),awaitingSource:nativeText("native.waitingForSource","Waiting for source"),acquisitionGap:nativeText("native.acquisitionGap","Acquisition gap"),sourceDisconnected:nativeText("native.sourceDisconnected","Source disconnected"),waiting:nativeText("native.waiting","Waiting"),manual:nativeText("native.manual","Manual"),automatic:nativeText("windows.science.modeAutomatic","Automatic"),unsupported:nativeText("native.unsupported","Unsupported"),provisional:nativeText("native.provisional","Provisional"),final:nativeText("native.final","Final"),revised:nativeText("native.revised","Revised"),supported:nativeText("native.supported","Supported"),caution:nativeText("ui.missionOperations.messageCaution","Caution"),disabled:nativeText("ui.research.messageDisabled","Disabled"),idle:nativeText("native.idle","Idle"),enabled:nativeText("ui.missionOperations.messageEnabled","Enabled"),detecting:nativeText("native.detecting","Detecting"),holding:nativeText("native.holding","Holding"),completed:nativeText("native.complete","Complete"),insufficient:nativeText("native.insufficientEvidence","Insufficient evidence")};
     return labels[value]||'Unavailable';
   }
   nativeUnit(unit){return String(unit||'').replace(/°/g,'deg').replace(/³/g,'^3').replace(/²/g,'^2').replace(/µ/g,'u');}
@@ -746,19 +734,19 @@ class IngamePanelAeroScience extends TemplateElement {
     const fresh=connected&&supported&&Date.now()-Date.parse(i.generatedUtc)<=6000&&Date.now()-Date.parse(i.generatedUtc)>=-2000;
     const model=this.flightPresentation(connected),phase=i?.phase,preferred=phase==='collecting'?'pauseData':phase==='paused'?'resumeData':'startData';
     const primary=model.scienceActions.includes(preferred)?preferred:model.scienceActions.includes('rearmAutomation')?'rearmAutomation':null;
-    for(const button of this.querySelectorAll('[data-science-action]')){const action=button.dataset.scienceAction;button.disabled=!fresh||this.mutationPending||!model.scienceActions.includes(action)||!i.actions.includes(action);button.classList.toggle('as-primary',action===primary);button.hidden=!this.state?.activeMission||(action==='startData'?!!i?.sessionId:action==='pauseData'?phase!=='collecting':action==='resumeData'?phase!=='paused':action==='endData'?!i?.sessionId:!i?.manualHold&&!i?.continuityHold&&i?.authority!=='automatic');button.title=!supported?'This companion does not support session-bound native controls.':!fresh?'Stale engine state; synchronize before controlling science.':'Backend session and control revisions are checked before applying.';}
+    for(const button of this.querySelectorAll('[data-science-action]')){const action=button.dataset.scienceAction;button.disabled=!fresh||this.mutationPending||!model.scienceActions.includes(action)||!i.actions.includes(action);button.classList.toggle('as-primary',action===primary);button.hidden=!this.state?.activeMission||(action==='startData'?!!i?.sessionId:action==='pauseData'?phase!=='collecting':action==='resumeData'?phase!=='paused':action==='endData'?!i?.sessionId:!i?.manualHold&&!i?.continuityHold&&i?.authority!=='automatic');button.title=(((!supported?nativeText("native.thisCompanionDoesNotSupportSessionBoundNativeControls","This companion does not support session-bound native controls."):(!fresh?nativeText("native.staleEngineStateSynchronizeBeforeControllingScience","Stale engine state; synchronize before controlling science."):nativeText("native.backendSessionAndControlRevisionsAreCheckedBeforeApplying","Backend session and control revisions are checked before applying.")))));}
     const counts=model.counts,age=Date.now()-Date.parse(counts?.checkedUtc),validCounts=counts&&age>=-2000&&age<=6000&&['originalObservations','derivedObservations','remoteProducts'].every(key=>Number.isSafeInteger(counts[key])&&counts[key]>=0);
-    this.byId('as-retained-science').textContent=validCounts?this.text('toolbar.retained','Saved science counts supplied by companion.',{original:counts.originalObservations,derived:counts.derivedObservations,products:counts.remoteProducts}):this.text('toolbar.countsUnavailable','Saved scientific counts unavailable; no count inferred from flight samples.');
+    this.byId('as-retained-science').textContent=(((validCounts?this.text('toolbar.retained','Saved science counts supplied by companion.',{original:counts.originalObservations,derived:counts.derivedObservations,products:counts.remoteProducts}):this.text('toolbar.countsUnavailable','Saved scientific counts unavailable; no count inferred from flight samples.'))));
     this.byId('as-retained-science').dataset.originalObservations=validCounts?String(counts.originalObservations):'';this.byId('as-retained-science').dataset.remoteProducts=validCounts?String(counts.remoteProducts):'';
-    if(!supported){this.byId('as-session-phase').textContent='Science status unavailable (unsupported companion)';this.byId('as-session-authority').textContent='Update the companion for science session controls.';this.byId('as-grade').textContent='No score available.';this.byId('as-session-identity').textContent='No session identity supplied.';this.byId('as-next-trigger').textContent='Next trigger not assessed.';this.byId('as-science-yield').textContent='Scientific yield not assessed.';this.byId('as-intelligence-warning').textContent='';this.byId('as-intelligence-asof').textContent='';return;}
+    if(!supported){this.byId('as-session-phase').textContent=nativeText("native.scienceStatusUnavailableUnsupportedCompanion","Science status unavailable (unsupported companion)");this.byId('as-session-authority').textContent=nativeText("native.updateTheCompanionForScienceSessionControls","Update the companion for science session controls.");this.byId('as-grade').textContent=nativeText("native.noScoreAvailable","No score available.");this.byId('as-session-identity').textContent=nativeText("native.noSessionIdentitySupplied","No session identity supplied.");this.byId('as-next-trigger').textContent=nativeText("native.nextTriggerNotAssessed","Next trigger not assessed.");this.byId('as-science-yield').textContent=nativeText("native.scientificYieldNotAssessed","Scientific yield not assessed.");this.byId('as-intelligence-warning').textContent='';this.byId('as-intelligence-asof').textContent='';return;}
     this.byId('as-session-phase').textContent=(i.phase==='unknown'?'Science status unavailable':(fresh?'Science: ':'Last science status: ')+this.nativeLabel(i.phase))+(i.sessionSequence?' | Session '+i.sessionSequence:!i.sessionId&&i.phase==='armed'?' | Science not started':'')+(!fresh?' | Status is stale':'');
-    this.byId('as-session-authority').textContent='Collection control: '+this.nativeLabel(i.authority)+(i.manualHold?' | pilot hold; rearm required':'')+(i.continuityHold?' | continuity hold':'');
-    this.byId('as-session-identity').textContent='Flight '+(i.missionId||'none')+' | Session '+(i.sessionId||'none')+' | revision '+(i.revision??'Unknown');
-    this.byId('as-grade').textContent=this.nativeLabel(i.gradeStatus)+(Number.isFinite(i.scoreLower)&&Number.isFinite(i.scoreUpper)?' | score bounds '+i.scoreLower.toFixed(1)+'-'+i.scoreUpper.toFixed(1)+' / 100':' | No score available')+'.';
-    this.byId('as-intelligence-warning').textContent=this.nativeMessage(i.warnings?.[0]||'');
+    this.byId('as-session-authority').textContent=nativeText("native.collectionControl","Collection control: {value1}{value2}{value3}",{value1:this.nativeLabel(i.authority),value2:(i.manualHold?nativeText("native.pilotHoldRearmRequired"," | pilot hold; rearm required"):''),value3:(i.continuityHold?nativeText("native.continuityHold"," | continuity hold"):'')});
+    this.byId('as-session-identity').textContent=nativeText("native.flightSessionRevision","Flight {value1} | Session {value2} | revision {value3}",{value1:(i.missionId||nativeText("native.none","none")),value2:(i.sessionId||nativeText("native.none","none")),value3:(i.revision??nativeText("localization.unknownValue","Unknown"))});
+    this.byId('as-grade').textContent=((this.nativeLabel(i.gradeStatus)+(Number.isFinite(i.scoreLower)&&Number.isFinite(i.scoreUpper)?' | score bounds '+i.scoreLower.toFixed(1)+'-'+i.scoreUpper.toFixed(1)+' / 100':' | No score available')+'.'));
+    this.byId('as-intelligence-warning').textContent=this.nativeMessage((((i.warnings?.[0]||''))));
     this.byId('as-next-trigger').textContent=this.nativeMessage(i.triggerStatus);
-    this.byId('as-science-yield').textContent=i.metrics.length?i.metrics.map(m=>m.instrumentId+' | '+m.id+': '+m.status+(['supported','caution'].includes(m.status)&&Number.isFinite(m.numerator)&&m.denominator>0?' '+m.numerator+'/'+m.denominator+' assessed '+m.unit+' ('+(100*m.numerator/m.denominator).toFixed(1)+'%)':' - unassessed')+' | missing '+(m.missing??'Unknown')+'; unassessed '+(m.unassessed??'Unknown')+' | whole-flight scope').join('; '):'Good Data / valid scientific coverage not yet assessed. Flight path is not valid-pixel coverage.';
-    this.byId('as-intelligence-asof').textContent='State as of '+i.generatedUtc+' | metrics '+(i.metricsUtc||'Pending')+(i.metricsUtc&&Date.now()-Date.parse(i.metricsUtc)>15000?' | Evidence cutoff is older than 15 s; metrics are not current.':'')+(i.detailsOmitted?' | Additional detail on dashboard.':'');
+    this.byId('as-science-yield').textContent=(((i.metrics.length?i.metrics.map(m=>m.instrumentId+' | '+m.id+': '+m.status+(['supported','caution'].includes(m.status)&&Number.isFinite(m.numerator)&&m.denominator>0?' '+m.numerator+'/'+m.denominator+' assessed '+m.unit+' ('+(100*m.numerator/m.denominator).toFixed(1)+'%)':' - unassessed')+' | missing '+(m.missing??'Unknown')+'; unassessed '+(m.unassessed??'Unknown')+' | whole-flight scope').join('; '):nativeText("native.goodDataValidScientificCoverageNotYetAssessedFlight","Good Data / valid scientific coverage not yet assessed. Flight path is not valid-pixel coverage."))));
+    this.byId('as-intelligence-asof').textContent=nativeText("native.stateAsOfMetrics","State as of {value1} | metrics {value2}{value3}{value4}",{value1:i.generatedUtc,value2:(i.metricsUtc||nativeText("evidence.pending","Pending")),value3:(i.metricsUtc&&Date.now()-Date.parse(i.metricsUtc)>15000?nativeText("native.evidenceCutoffIsOlderThan15SMetricsAre"," | Evidence cutoff is older than 15 s; metrics are not current."):''),value4:(i.detailsOmitted?nativeText("native.additionalDetailOnDashboard"," | Additional detail on dashboard."):'')});
   }
   requestResearch(){
     if(!this.capabilities.includes('personal-research-controls-1')||!this.state?.activeMission){this.researchState=null;this.researchOffset=0;this.researchFocusedCard=null;this.focusedResearchSummary=null;this.renderPersonalResearch(false);return;}
@@ -780,15 +768,15 @@ class IngamePanelAeroScience extends TemplateElement {
     summary.hidden=!relevant;
     const selected=state?.cards.find(c=>c.card.id===this.researchFocusedCard);
     if(selected)this.focusedResearchSummary=selected.card.name+' | '+(selected.openAttempt?'Attempt recording':selected.active?'Active':'Inactive')+(selected.procedure?.nextPointId?' | Next point '+(selected.card.procedure?.points.find(p=>p.id===selected.procedure.nextPointId)?.conditions.testPoint.name||'on dashboard'):'');
-    summary.textContent=!valid?this.state?.activeMission?'Research status unavailable.':'Personal research cards: prepare in the desktop Flight Planner.':(this.focusedResearchSummary?'Focused: '+this.focusedResearchSummary+'. ':'Research: ')+(state.activeCardCount??state.cards.filter(c=>c.active).length)+' active card(s)'+(state.activeCardNames?.length?' | '+state.activeCardNames.join('; '):'')+'.';
+    summary.textContent=(((!valid?(this.state?.activeMission?nativeText("native.researchStatusUnavailable","Research status unavailable."):nativeText("native.personalResearchCardsPrepareInTheDesktopFlightPlanner","Personal research cards: prepare in the desktop Flight Planner.")):nativeText("native.activeCardS","{value1} active card(s){value2}.",{value1:(this.focusedResearchSummary?'Focused: '+this.focusedResearchSummary+'. ':'Research: ')+(state.activeCardCount??state.cards.filter(c=>c.active).length),value2:(state.activeCardNames?.length?' | '+state.activeCardNames.join('; '):'')}))));
     // A telemetry render can run after offset changes but before that page reply.
     // Same-revision pages still carry distinct authoritative card identities.
-    const signature=JSON.stringify([state?.flightId,state?.revision,this.researchOffset,state?.cards?.map(item=>[item.card.id,item.card.revision]),state?.nextOffset,state?.pageSize,valid,state?.canBeginAttempt,pending,this.researchFocusedCard]);
+    const signature=JSON.stringify([this.getAttribute("lang"),state?.flightId,state?.revision,this.researchOffset,state?.cards?.map(item=>[item.card.id,item.card.revision]),state?.nextOffset,state?.pageSize,valid,state?.canBeginAttempt,pending,this.researchFocusedCard]);
     if(this.researchView===signature)return;this.researchView=signature;
     const focusCard=document.activeElement?.dataset?.researchCard,focusAction=document.activeElement?.dataset?.researchAction;
     host.textContent='';this.byId('as-research-previous').disabled=!valid||this.researchOffset===0;this.byId('as-research-next').disabled=!valid||state?.nextOffset==null;
-    if(!valid){this.byId('as-research-status').textContent=this.state?.activeMission?'Waiting for synchronized personal card state. Flight and science remain independent.':'Choose personal cards in Mission Planner before recording.';return;}
-    this.byId('as-research-status').textContent=state.cards.length?'Activate a card, then Begin Attempt / End Attempt. Deactivate Card does not stop flight or science.':'No personal cards selected for this flight.';
+    if(!valid){this.byId('as-research-status').textContent=(((this.state?.activeMission?nativeText("native.waitingForSynchronizedPersonalCardStateFlightAndScience","Waiting for synchronized personal card state. Flight and science remain independent."):nativeText("native.choosePersonalCardsInMissionPlannerBeforeRecording","Choose personal cards in Mission Planner before recording."))));return;}
+    this.byId('as-research-status').textContent=(((state.cards.length?nativeText("native.activateACardThenBeginAttemptEndAttemptDeactivate","Activate a card, then Begin Attempt / End Attempt. Deactivate Card does not stop flight or science."):nativeText("native.noPersonalCardsSelectedForThisFlight","No personal cards selected for this flight."))));
     for(const item of state.cards){
       const row=document.createElement('section'),title=document.createElement('h4'),info=document.createElement('p');row.setAttribute('aria-label',item.card.name);row.tabIndex=-1;row.dataset.researchCard=item.card.id;
       const atmospheric=item.card.atmosphericProfile;
@@ -798,16 +786,16 @@ class IngamePanelAeroScience extends TemplateElement {
       const sensor=item.card.experimentalSensor;
       const point=item.card.flightRegime?.testPoint,rule=item.card.flightRegime;
       const procedure=item.card.procedure;
-      const requirements=procedure?(procedure.ordered?'Ordered':'Independent')+' procedure | '+(item.procedure?.points||[]).map(p=>p.completedRepetitions+'/'+p.requiredRepetitions).join(' | ')+' repetitions; verify originals after flight':point?[point.airspeedRequired?rule.airspeedKnots+' +/- '+rule.airspeedToleranceKnots+' knots IAS':null,point.altitudeRequired?rule.altitudeMslFeet+' +/- '+rule.altitudeToleranceFeet+' feet MSL':null].filter(Boolean).join(' AND ')+' | '+rule.holdSeconds+' continuous seconds':sensor?'Fictional modeled temperature | '+sensor.responseSeconds+' s response | '+sensor.minimumSamples+' original science samples required':observation?observation.minimumObservations+' documented Pilot Observations | notes are not sensor measurements':survey?'Survey: '+survey.measurements.map(m=>({airTemperature:'Air Temperature',terrainElevation:'Terrain Elevation',landSurfaceTemperature:'Land Surface Temperature'})[m]).join(' + ')+' | source-qualified samples required':transect?transect.requiredStations+' distinct sampling locations | '+transect.minimumExtentMetres+' m geographic extent | collect valid temperature readings':atmospheric?atmospheric.requiredBands+' neighboring '+atmospheric.bandWidthFeet+'-foot MSL bands | collect valid temperature readings':item.card.flightRegime.airspeedKnots+' knots IAS | '+item.card.flightRegime.altitudeMslFeet+' feet MSL';
-      title.textContent=item.card.name+' | revision '+item.card.revision;info.textContent=(item.openAttempt?'Attempt recording':item.active?'Active':'Inactive')+' | '+(item.detection?item.detection.status+(item.detection.lastOutcome?' - '+({pass:'Pass',fail:'Fail',insufficientEvidence:'Insufficient Evidence'}[item.detection.lastOutcome]||'Unknown'):'')+' | ':'')+requirements+'. '+(item.activationBlocked||'');info.textContent=this.nativeMessage(info.textContent);row.appendChild(title);row.appendChild(info);
-      if(item.organization){const label=document.createElement('p');label.textContent=item.organization.organizationName+' | issued '+item.organization.issuedRevision+' | '+item.organization.status;row.appendChild(label);}
-      const focus=document.createElement('button');focus.textContent=this.researchFocusedCard===item.card.id?'Focused in Toolbar':'Focus Card';focus.onclick=()=>{this.researchFocusedCard=item.card.id;this.researchView=null;this.renderPersonalResearch(true);this.byId('as-research-list').querySelector('[data-research-card="'+item.card.id+'"]')?.focus();};row.appendChild(focus);
+      const requirements=(((procedure?nativeText("native.procedureRepetitionsVerifyOriginalsAfterFlight","{value1} procedure | {value2} repetitions; verify originals after flight",{value1:(procedure.ordered?nativeText("native.ordered","Ordered"):nativeText("native.independent","Independent")),value2:(item.procedure?.points||[]).map(p=>p.completedRepetitions+'/'+p.requiredRepetitions).join(' | ')}):(point?nativeText("native.continuousSeconds","{value1} | {value2} continuous seconds",{value1:[point.airspeedRequired?rule.airspeedKnots+' +/- '+rule.airspeedToleranceKnots+' knots IAS':null,point.altitudeRequired?rule.altitudeMslFeet+' +/- '+rule.altitudeToleranceFeet+' feet MSL':null].filter(Boolean).join(' AND '),value2:rule.holdSeconds}):(sensor?nativeText("native.fictionalModeledTemperatureSResponseOriginalScienceSamplesRequired","Fictional modeled temperature | {value1} s response | {value2} original science samples required",{value1:sensor.responseSeconds,value2:sensor.minimumSamples}):(observation?nativeText("native.documentedPilotObservationsNotesAreNotSensorMeasurements","{value1} documented Pilot Observations | notes are not sensor measurements",{value1:observation.minimumObservations}):(survey?nativeText("native.surveySourceQualifiedSamplesRequired","Survey: {value1} | source-qualified samples required",{value1:survey.measurements.map(m=>({airTemperature:'Air Temperature',terrainElevation:'Terrain Elevation',landSurfaceTemperature:'Land Surface Temperature'})[m]).join(' + ')}):(transect?nativeText("native.distinctSamplingLocationsMGeographicExtentCollectValidTemperature","{value1} distinct sampling locations | {value2} m geographic extent | collect valid temperature readings",{value1:transect.requiredStations,value2:transect.minimumExtentMetres}):(atmospheric?nativeText("native.neighboringFootMslBandsCollectValidTemperatureReadings","{value1} neighboring {value2}-foot MSL bands | collect valid temperature readings",{value1:atmospheric.requiredBands,value2:atmospheric.bandWidthFeet}):nativeText("native.knotsIasFeetMsl","{value1} knots IAS | {value2} feet MSL",{value1:item.card.flightRegime.airspeedKnots,value2:item.card.flightRegime.altitudeMslFeet}))))))))));
+      title.textContent=nativeText("native.revision","{value1} | revision {value2}",{value1:item.card.name,value2:item.card.revision});info.textContent=(((((((item.openAttempt?nativeText("native.attemptRecording","Attempt recording"):(item.active?nativeText("ui.downloadActivity.messageActive","Active"):nativeText("native.inactive","Inactive")))+' | ')+(item.detection?(item.detection.status+(item.detection.lastOutcome?' - '+({pass:'Pass',fail:'Fail',insufficientEvidence:'Insufficient Evidence'}[item.detection.lastOutcome]||'Unknown'):'')+' | '):''))+requirements)+'. ')+(item.activationBlocked||'')));info.textContent=this.nativeMessage(info.textContent);row.appendChild(title);row.appendChild(info);
+      if(item.organization){const label=document.createElement('p');label.textContent=nativeText("native.issued","{value1} | issued {value2} | {value3}",{value1:item.organization.organizationName,value2:item.organization.issuedRevision,value3:item.organization.status});row.appendChild(label);}
+      const focus=document.createElement('button');focus.textContent=(((this.researchFocusedCard===item.card.id?nativeText("native.focusedInToolbar","Focused in Toolbar"):nativeText("ui.missionOperations.messageFocusCard","Focus Card"))));focus.onclick=()=>{this.researchFocusedCard=item.card.id;this.researchView=null;this.renderPersonalResearch(true);this.byId('as-research-list').querySelector('[data-research-card="'+item.card.id+'"]')?.focus();};row.appendChild(focus);
       let pointSelect=null;
-      if(procedure){const label=document.createElement('label');label.textContent='Test point';pointSelect=document.createElement('select');pointSelect.setAttribute('aria-label','Test point for '+item.card.name);this.researchPointChoices||={};for(const point of procedure.points){const option=document.createElement('option');option.value=point.id;option.textContent=point.conditions.testPoint.name+' | '+point.conditions.holdSeconds+' s | '+point.repetitions+' attempts';pointSelect.appendChild(option);}pointSelect.value=item.openAttempt?.testPointId||this.researchPointChoices[item.card.id]||item.procedure?.nextPointId||procedure.points[0].id;pointSelect.disabled=pending||!!item.openAttempt;pointSelect.onchange=()=>this.researchPointChoices[item.card.id]=pointSelect.value;label.appendChild(pointSelect);row.appendChild(label);}
-      for(const [action,label] of [['activate','Activate Card'],['deactivate','Deactivate Card'],['beginAttempt','Begin Attempt'],['endAttempt','End Attempt'],...((item.card.version===7&&point)||procedure?[['enableAutomatic','Enable Automatic Detection'],['disableAutomatic','Disable Automatic Detection']]:[])]){
+      if(procedure){const label=document.createElement('label');label.textContent=nativeText("ui.personalResearchFlight.messageTestPoint","Test point");pointSelect=document.createElement('select');pointSelect.setAttribute('aria-label',nativeText("ui.personalResearchFlight.messageTestPointFor","Test point for {value1}",{value1:item.card.name}));this.researchPointChoices||={};for(const point of procedure.points){const option=document.createElement('option');option.value=point.id;option.textContent=nativeText("native.sAttempts","{value1} | {value2} s | {value3} attempts",{value1:point.conditions.testPoint.name,value2:point.conditions.holdSeconds,value3:point.repetitions});pointSelect.appendChild(option);}pointSelect.value=item.openAttempt?.testPointId||this.researchPointChoices[item.card.id]||item.procedure?.nextPointId||procedure.points[0].id;pointSelect.disabled=pending||!!item.openAttempt;pointSelect.onchange=()=>this.researchPointChoices[item.card.id]=pointSelect.value;label.appendChild(pointSelect);row.appendChild(label);}
+      for(const [action,label] of [['activate',nativeText("ui.personalResearchFlight.messageActivateCard","Activate Card")],['deactivate',nativeText("ui.personalResearchFlight.messageDeactivateCard","Deactivate Card")],['beginAttempt',nativeText("ui.personalResearchFlight.messageBeginAttempt","Begin Attempt")],['endAttempt',nativeText("ui.personalResearchFlight.messageEndAttempt","End Attempt")],...((item.card.version===7&&point)||procedure?[['enableAutomatic',nativeText("ui.personalResearchFlight.messageEnableAutomaticDetection","Enable Automatic Detection")],['disableAutomatic',nativeText("ui.personalResearchFlight.messageDisableAutomaticDetection","Disable Automatic Detection")]]:[])]){
         const b=document.createElement('button');b.textContent=label;b.dataset.researchCard=item.card.id;b.dataset.researchAction=action;
         b.disabled=pending||action==='activate'&&(item.active||!!item.activationBlocked)||action==='deactivate'&&!item.active||action==='beginAttempt'&&(!item.active||!!item.openAttempt&&!item.openAttempt.automatic||!state.canBeginAttempt)||action==='endAttempt'&&!item.openAttempt||action==='enableAutomatic'&&(!item.active||!!item.openAttempt||!state.canBeginAttempt)||action==='disableAutomatic'&&!item.detection?.enabled;
-        b.onclick=()=>{if(b.disabled)return;if(action==='endAttempt'&&this.researchPointChoices)delete this.researchPointChoices[item.card.id];const requestId=this.requestId();this.send('research-control',{requestId,missionId:state.flightId,offset:this.researchOffset,researchControl:{version:1,flightId:state.flightId,requestId,expectedRevision:state.revision,action,cardId:item.card.id,expectedAttemptId:item.openAttempt?.id||null,...(['beginAttempt','enableAutomatic'].includes(action)&&pointSelect?{testPointId:pointSelect.value}:{})}});this.renderPersonalResearch(true);};row.appendChild(b);
+        b.onclick=()=>{if(b.disabled)return;if(action==='endAttempt'&&this.researchPointChoices)delete this.researchPointChoices[item.card.id];const requestId=this.requestId();this.send('research-control',{requestId,missionId:state.flightId,offset:this.researchOffset,researchControl:{version:1,flightId:state.flightId,requestId,expectedRevision:state.revision,action,cardId:item.card.id,expectedAttemptId:item.openAttempt?.id||null,...(['beginAttempt',nativeText("native.enableautomatic","enableAutomatic")].includes(action)&&pointSelect?{testPointId:pointSelect.value}:{})}});this.renderPersonalResearch(true);};row.appendChild(b);
       }host.appendChild(row);
     }
     if(focusCard){const choices=Array.from(host.querySelectorAll('button')).filter(b=>b.dataset.researchCard===focusCard&&!b.disabled);const target=choices.find(b=>b.dataset.researchAction===focusAction)||choices[0]||Array.from(host.children).find(r=>r.dataset.researchCard===focusCard);target?.focus();}
@@ -818,12 +806,7 @@ class IngamePanelAeroScience extends TemplateElement {
   renderResearchView(research, fresh) {
     const g = research && research.guidance;
     this.byId("as-guidance").textContent =
-      !fresh || !g || g.quality !== "valid"
-        ? "Flight Guidance unavailable"
-        : "AP: " +
-          g.autopilot +
-          " | " +
-          [g.lateral, g.vertical, g.speed]
+      (((!fresh || !g || g.quality !== "valid"?nativeText("native.flightGuidanceUnavailable","Flight Guidance unavailable"):nativeText("native.ap","AP: {value1} | {value2}",{value1:g.autopilot,value2:[g.lateral, g.vertical, g.speed]
             .map(
               (m) =>
                 (m.mode || "Unavailable") +
@@ -835,14 +818,12 @@ class IngamePanelAeroScience extends TemplateElement {
                   : "") +
                 (m.armed ? " (Armed: " + m.armed + ")" : ""),
             )
-            .join(" | ");
+            .join(" | ")}))));
     const control = this.byId("as-science-pause");
     if (control) {
       control.hidden=this.capabilities.includes('session-bound-controls-1')&&this.intelligence?.version===1;
       control.textContent =
-        research && research.intentionallyPaused
-          ? "Resume science collection"
-          : "Pause science collection";
+        (((research && research.intentionallyPaused?nativeText("flight.action.resumeData","Resume science collection"):nativeText("flight.action.pauseData","Pause science collection"))));
       control.disabled = !(this.state && this.state.activeMission);
       control.onclick = () => {
         if (!this.state || !this.state.activeMission) return;
@@ -856,12 +837,10 @@ class IngamePanelAeroScience extends TemplateElement {
     }
     const collection = this.byId("as-science-state");
     if (collection)
-      collection.textContent = research
-        ? this.text('toolbar.acquisitionState','Instrument acquisition status: '+this.nativeLabel(research.collectionStatus),{status:this.nativeLabel(research.collectionStatus)})
-        : "Science unavailable";
+      collection.textContent = (((research?this.text('toolbar.acquisitionState','Instrument acquisition status: '+this.nativeLabel(research.collectionStatus),{status:this.nativeLabel(research.collectionStatus)}):nativeText("science.unavailable","Science unavailable"))));
     const holder = this.byId("as-instruments");
     if (!research) {
-      holder.textContent = "Scientific source unavailable";
+      holder.textContent = nativeText("native.scientificSourceUnavailable","Scientific source unavailable");
       return;
     }
     if (!this.instrumentNodes) this.instrumentNodes = {};
@@ -876,17 +855,7 @@ class IngamePanelAeroScience extends TemplateElement {
         const row = document.createElement("div");
         row.className = "as-instrument";
         const title = document.createElement("strong");
-        title.textContent =
-          {
-            "ambient-temperature": "Ambient temperature",
-            "ambient-pressure": "Ambient pressure",
-            "ambient-wind": "Ambient wind",
-            "ambient-density": "Air density",
-            "thermal-imager": "Thermal Imager",
-            "multispectral-imager": "Multispectral Imager",
-            "hyperspectral-imager": "Hyperspectral Imager",
-            "terrain-scanner": this.text("toolbar.terrainScanner","Terrain Scanner (DEM Elevation)"),
-          }[instrument.instrumentId] || "Science instrument";
+        title.textContent = this.instrumentTitle(instrument.instrumentId);
         const stateLabel = document.createElement("span");
         stateLabel.className = "as-science-state";
         const toggle = document.createElement("new-push-button");
@@ -894,7 +863,7 @@ class IngamePanelAeroScience extends TemplateElement {
         for (const seconds of [1, 2, 5, 10, 30, 60]) {
           const option = document.createElement("option");
           option.value = seconds * 1000;
-          option.textContent = seconds + " s";
+          option.textContent = ((seconds+" s"));
           interval.appendChild(option);
         }
         const values = document.createElement("div"),
@@ -903,17 +872,17 @@ class IngamePanelAeroScience extends TemplateElement {
         values.className = "as-science-values";
         const details = document.createElement("details"),
           summary = document.createElement("summary");
-        summary.textContent = "Diagnostics";
+        nativeBind(summary,"native.diagnostics","Diagnostics");
         details.appendChild(summary);
         details.appendChild(status);
         details.appendChild(values);
         const intervalLabel = document.createElement("label");
-        intervalLabel.textContent = "Collection interval ";
+        nativeBind(intervalLabel,"native.collectionInterval","Collection interval ");
         intervalLabel.appendChild(interval);
-        interval.setAttribute('aria-label',title.textContent+' collection interval');
+        interval.setAttribute('aria-label',nativeText("native.collectionInterval2","{value1} collection interval",{value1:title.textContent}));
         const apply=document.createElement('button'),cancel=document.createElement('button'),confirmed=document.createElement('p'),feedback=document.createElement('p');
-        apply.textContent='Apply interval';apply.type='button';apply.setAttribute('aria-label','Apply '+title.textContent+' interval');feedback.setAttribute('role','status');
-        cancel.textContent='Use confirmed interval';cancel.type='button';cancel.hidden=true;cancel.setAttribute('aria-label','Use confirmed '+title.textContent+' interval');
+        nativeBind(apply,"native.applyInterval","Apply interval");apply.type='button';apply.setAttribute('aria-label',nativeText("native.applyInterval2","Apply {value1} interval",{value1:title.textContent}));feedback.setAttribute('role','status');
+        nativeBind(cancel,"native.useConfirmedInterval","Use confirmed interval");cancel.type='button';cancel.hidden=true;cancel.setAttribute('aria-label',nativeText("native.useConfirmedInterval2","Use confirmed {value1} interval",{value1:title.textContent}));
         row.appendChild(title);
         row.appendChild(stateLabel);
         row.appendChild(acquisitionSummary);row.appendChild(sourceSummary);
@@ -924,6 +893,7 @@ class IngamePanelAeroScience extends TemplateElement {
         holder.insertBefore(row,disabled);
         nodes = {
           row: row,
+          title: title,
           state: stateLabel,
           toggle: toggle,
           interval: interval,
@@ -944,31 +914,35 @@ class IngamePanelAeroScience extends TemplateElement {
           });
         };
         const edit=()=>{nodes.editing=true;cancel.hidden=false;};interval.onmousedown=edit;interval.onkeydown=edit;
-        interval.onchange=()=>{nodes.editing=true;nodes.draft=Number(interval.value);feedback.textContent='Choose Apply interval to confirm this change.';apply.disabled=false;};
+        interval.onchange=()=>{nodes.editing=true;nodes.draft=Number(interval.value);feedback.textContent=nativeText("native.chooseApplyIntervalToConfirmThisChange","Choose Apply interval to confirm this change.");apply.disabled=false;};
         apply.onclick=()=>{
           const value=Number(interval.value);if(apply.disabled||nodes.pending||![1000,2000,5000,10000,30000,60000].includes(value))return;
           nodes.draft=value;nodes.pending=this.send('instrument',{instrumentId:instrument.instrumentId,intervalMs:value,missionId:this.state?.activeMission?.id||null,checkMission:true});
-          feedback.textContent=nodes.pending?'Applying interval...':'Command unavailable. Synchronize with the companion.';apply.disabled=true;
+          feedback.textContent=(((nodes.pending?nativeText("native.applyingInterval","Applying interval..."):nativeText("native.commandUnavailableSynchronizeWithTheCompanion","Command unavailable. Synchronize with the companion."))));apply.disabled=true;
         };
-        cancel.onclick=()=>{if(nodes.pending)return;const current=this.state?.research?.instruments.find(i=>i.instrumentId===instrument.instrumentId);if(current){nodes.editing=false;nodes.draft=null;interval.value=current.intervalMs;feedback.textContent='Using confirmed interval: '+current.intervalMs/1000+' s.';cancel.hidden=true;apply.disabled=true;}};
+        cancel.onclick=()=>{if(nodes.pending)return;const current=this.state?.research?.instruments.find(i=>i.instrumentId===instrument.instrumentId);if(current){nodes.editing=false;nodes.draft=null;interval.value=current.intervalMs;feedback.textContent=nativeText("native.usingConfirmedIntervalS","Using confirmed interval: {value1} s.",{value1:current.intervalMs/1000});cancel.hidden=true;apply.disabled=true;}};
       }
-      nodes.toggle.textContent = instrument.enabled ? "On" : "Off";
+      nodes.title.textContent = this.instrumentTitle(instrument.instrumentId);
+      nodes.interval.setAttribute('aria-label',nativeText('native.collectionInterval2','{value1} collection interval',{value1:nodes.title.textContent}));
+      nodes.apply.setAttribute('aria-label',nativeText('native.applyInterval2','Apply {value1} interval',{value1:nodes.title.textContent}));
+      nodes.cancel.setAttribute('aria-label',nativeText('native.useConfirmedInterval2','Use confirmed {value1} interval',{value1:nodes.title.textContent}));
+      nodes.toggle.textContent = (((instrument.enabled?nativeText("native.on","On"):nativeText("native.off","Off"))));
       nodes.toggle.setAttribute(
         "aria-label",
-        instrument.enabled ? "Disable instrument" : "Enable instrument",
+        (((instrument.enabled?nativeText("native.disableInstrument","Disable instrument"):nativeText("native.enableInstrument","Enable instrument")))),
       );
       // The dashboard can retain a supported interval outside the toolbar's quick choices.
       // Keep that authoritative value visible without offering arbitrary new frequencies.
       const retained=Array.from(nodes.interval.options).find(o=>o.dataset.retained==='true');
       if(retained&&Number(retained.value)!==instrument.intervalMs&&!nodes.editing&&!nodes.pending)retained.remove();
       if(!Array.from(nodes.interval.options).some(o=>Number(o.value)===instrument.intervalMs)){
-        const option=document.createElement('option');option.value=instrument.intervalMs;option.textContent=instrument.intervalMs/1000+' s (confirmed)';option.dataset.retained='true';nodes.interval.appendChild(option);
+        const option=document.createElement('option');option.value=instrument.intervalMs;option.textContent=nativeText("native.sConfirmed","{value1} s (confirmed)",{value1:instrument.intervalMs/1000});option.dataset.retained='true';nodes.interval.appendChild(option);
       }
       if(nodes.confirmAfter!=null&&this.appliedSerial>nodes.confirmAfter)nodes.confirmAfter=null;
       if(!nodes.editing&&!nodes.pending&&nodes.confirmAfter==null)nodes.interval.value=instrument.intervalMs;
-      nodes.confirmed.textContent='Companion interval: '+instrument.intervalMs/1000+' s';
+      nodes.confirmed.textContent=nativeText("native.companionIntervalS","Companion interval: {value1} s",{value1:instrument.intervalMs/1000});
       nodes.acquisitionSummary.textContent=this.text('toolbar.acquisitionSummary','Acquisition diagnostics unavailable.',{recorded:instrument.observationCount??'Unknown',rejected:instrument.rejectedObservations??'Unknown',missed:instrument.missingIntervals??'Unknown',interval:Number.isFinite(instrument.actualAverageIntervalSeconds)?instrument.actualAverageIntervalSeconds.toFixed(2):'Unavailable'});
-      nodes.sourceSummary.textContent=this.nativeMessage(instrument.message||this.text('toolbar.sourceUnknown','Source/quality details unavailable; review the dashboard.'));
+      nodes.sourceSummary.textContent=this.nativeMessage((((instrument.message||this.text('toolbar.sourceUnknown','Source/quality details unavailable; review the dashboard.')))));
       nodes.apply.disabled=!fresh||!!nodes.pending||nodes.confirmAfter!=null||Number(nodes.interval.value)===instrument.intervalMs;
       nodes.interval.disabled=!fresh||!!nodes.pending||nodes.confirmAfter!=null;
       nodes.cancel.hidden=!nodes.editing&&!nodes.pending;nodes.cancel.disabled=!fresh||!!nodes.pending;
@@ -978,57 +952,35 @@ class IngamePanelAeroScience extends TemplateElement {
         const value = document.createElement("div");
         value.className = "as-science-reading";
         const label =
-          {
+          ((({
             temperature: "Temperature",
             pressure: "Pressure",
             "wind-speed": "Wind speed",
             "wind-direction": "Wind direction",
             density: "Density",
-          }[v.measurementId] || "Measurement";
+          }[v.measurementId]||nativeText("ui.missionTimeline.messageMeasurement","Measurement"))));
         const display = Number.isFinite(v.displayValue)
           ? v.displayValue
           : v.value;
         value.textContent =
-          label +
-          ": " +
-          (fresh &&
+          (((((label+": ")+(fresh &&
           instrument.enabled &&
           instrument.quality === "valid" &&
           v.quality === "valid" &&
-          Number.isFinite(display)
-            ? display.toFixed(
+          Number.isFinite(display)?display.toFixed(
                 v.measurementId === "density" && v.displayUnit === "slug/ft³"
                   ? 6
                   : 2,
-              )
-            : "Unavailable") +
-          " " +
-          this.nativeUnit(v.displayUnit || v.unit);
+              ):nativeText("localization.unavailableValue","Unavailable")))+" ")+this.nativeUnit(v.displayUnit || v.unit)));
         nodes.values.appendChild(value);
       }
-      nodes.state.textContent = instrument.enabled
-        ? this.nativeLabel(instrument.quality)
-        : "Disabled";
+      nodes.state.textContent = (((instrument.enabled?this.nativeLabel(instrument.quality):nativeText("ui.research.messageDisabled","Disabled"))));
       nodes.row.setAttribute(
         "data-state",
         instrument.enabled ? instrument.quality : "disabled",
       );
       nodes.status.textContent =
-        (instrument.enabled ? instrument.quality : "disabled") +
-        "  /  " +
-        instrument.acquisitionSets +
-        " acquisition sets  /  " +
-        instrument.observationCount +
-        (instrument.instrumentId.indexOf("imager") >= 0 || instrument.instrumentId === "terrain-scanner" ? " saved products  /  " : " measurement values  /  ") +
-        instrument.rejectedObservations +
-        " rejected  /  " +
-        instrument.missingIntervals +
-        " unexpected missing  /  actual " +
-        (Number.isFinite(instrument.actualAverageIntervalSeconds)
-          ? instrument.actualAverageIntervalSeconds.toFixed(2) + " s"
-          : "unavailable") +
-        "  /  last " +
-        (instrument.lastSuccessfulUtc || "none");
+        nativeText("native.acquisitionSetsRejectedUnexpectedMissingActualLast","{value1}  /  {value2} acquisition sets  /  {value3}{value4}{value5} rejected  /  {value6} unexpected missing  /  actual {value7}  /  last {value8}",{value1:(instrument.enabled?instrument.quality:nativeText("native.disabled","disabled")),value2:instrument.acquisitionSets,value3:instrument.observationCount,value4:(instrument.instrumentId.indexOf("imager") >= 0 || instrument.instrumentId === "terrain-scanner"?nativeText("native.savedProducts"," saved products  /  "):nativeText("native.measurementValues"," measurement values  /  ")),value5:instrument.rejectedObservations,value6:instrument.missingIntervals,value7:(Number.isFinite(instrument.actualAverageIntervalSeconds)?instrument.actualAverageIntervalSeconds.toFixed(2) + " s":nativeText("native.unavailable","unavailable")),value8:(instrument.lastSuccessfulUtc||nativeText("native.none","none"))});
       const target=instrument.enabled?holder:disabled.lastChild;if(!instrument.enabled)disabledCount++;
       if(nodes.row.parentNode!==target){const focus=nodes.row.contains(document.activeElement)?document.activeElement:null;if(focus&&!instrument.enabled)disabled.open=true;if(target===holder)holder.insertBefore(nodes.row,disabled);else target.appendChild(nodes.row);if(focus)focus.focus();}
     }
@@ -1055,3 +1007,7 @@ class IngamePanelAeroScience extends TemplateElement {
 }
 window.customElements.define("ingamepanel-aeroscience", IngamePanelAeroScience);
 checkAutoload();
+
+function nativeText(key,fallback,values){return typeof AeroScienceI18n==='undefined'?fallback.replace(/\{(value\d+)\}/g,function(_,name){return String(values&&values[name]!==undefined?values[name]:_);}):AeroScienceI18n.text(key,fallback,values);}
+
+function nativeBind(node,key,fallback){if(typeof AeroScienceI18n!=="undefined"&&AeroScienceI18n.bind)AeroScienceI18n.bind(node,key,fallback);else node.textContent=fallback;}

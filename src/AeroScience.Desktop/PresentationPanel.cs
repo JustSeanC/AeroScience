@@ -16,21 +16,22 @@ public sealed class PresentationPanel : FlowLayoutPanel
     public PresentationPanel(PreferenceStore store, Action changed, bool showSave = true)
     {
         this.store = store; saved = store.Presentation(); AutoSize = true; FlowDirection = FlowDirection.TopDown; WrapContents = false;
-        AddText(PresentationText.Text("settings.presentation")); AddText(PresentationText.Text("settings.hostScope"));
-        foreach (var item in new[] { new Choice("auto", PresentationText.Text("settings.themeAuto")), new Choice("light", PresentationText.Text("settings.themeLight")), new Choice("dark", PresentationText.Text("settings.themeDark")) }) theme.Items.Add(item);
-        foreach (var locale in PresentationText.Locales) language.Items.Add(new Choice(locale.Id, locale.Preview ? PresentationText.Text("settings.previewOption", new Dictionary<string, object> { ["name"] = locale.Name }) : locale.Name));
-        AddText(PresentationText.Text("settings.hostTheme")); theme.AccessibleName = PresentationText.Text("settings.hostTheme"); Controls.Add(theme);
-        AddText(PresentationText.Text("settings.hostLanguage")); language.AccessibleName = PresentationText.Text("settings.hostLanguage"); Controls.Add(language);
-        SelectSaved(); AddText(PresentationText.Text("settings.hostNativeNotice")); Controls.Add(feedback);
+        WindowsPresentation.SetLocale(saved.Locale);
+        AddText(WindowsPresentation.Text("settings.presentation")); AddText(WindowsPresentation.Text("settings.hostScope"));
+        foreach (var item in new[] { new Choice("auto", WindowsPresentation.Text("settings.themeAuto")), new Choice("light", WindowsPresentation.Text("settings.themeLight")), new Choice("dark", WindowsPresentation.Text("settings.themeDark")) }) theme.Items.Add(item);
+        foreach (var locale in PresentationText.Locales) language.Items.Add(new Choice(locale.Id, locale.Review == "candidate" ? WindowsPresentation.Text("localization.candidateOption", new Dictionary<string, object> { ["name"] = locale.Name }) : locale.Name));
+        AddText(WindowsPresentation.Text("settings.hostTheme")); theme.AccessibleName = WindowsPresentation.Text("settings.hostTheme"); Controls.Add(theme);
+        AddText(WindowsPresentation.Text("settings.hostLanguage")); language.AccessibleName = WindowsPresentation.Text("settings.hostLanguage"); Controls.Add(language);
+        SelectSaved(); AddText(WindowsPresentation.Text("settings.hostNativeNotice")); Controls.Add(feedback);
         if (showSave)
         {
-            var apply = new Button { Text = PresentationText.Text("settings.hostSave"), AutoSize = true };
-            apply.Click += (_, _) => { try { Save(); changed(); feedback.Text = PresentationText.Text("settings.hostSaved"); }
+            var apply = new Button { Text = WindowsPresentation.Text("settings.hostSave"), AutoSize = true };
+            apply.Click += (_, _) => { try { Save(); changed(); feedback.Text = WindowsPresentation.Text("windows.language.reopen"); }
                 catch (Exception error) when (error is IOException or InvalidOperationException or ArgumentException or UnauthorizedAccessException or System.Text.Json.JsonException) { feedback.Text = error.Message; } };
             Controls.Add(apply);
         }
-        var reload = new Button { Text = PresentationText.Text("settings.hostReload"), AutoSize = true };
-        reload.Click += (_, _) => { try { saved = store.Presentation(); SelectSaved(); feedback.Text = PresentationText.Text("settings.hostScope"); } catch (Exception e) { feedback.Text = e.Message; } }; Controls.Add(reload);
+        var reload = new Button { Text = WindowsPresentation.Text("settings.hostReload"), AutoSize = true };
+        reload.Click += (_, _) => { try { saved = store.Presentation(); SelectSaved(); feedback.Text = WindowsPresentation.Text("settings.hostScope"); } catch (Exception e) { feedback.Text = e.Message; } }; Controls.Add(reload);
     }
     private void AddText(string text) => Controls.Add(new Label { Text = text, AutoSize = true, MaximumSize = new(660, 0) });
     private void SelectSaved()
@@ -41,12 +42,17 @@ public sealed class PresentationPanel : FlowLayoutPanel
     public void Save()
     {
         if (Change() is { } change) saved = store.SetPresentation(change);
+        WindowsPresentation.SetLocale(saved.Locale);
     }
     public PresentationChange? Change() => HasChanges ? new(saved.Revision, ((Choice)theme.SelectedItem!).Id, ((Choice)language.SelectedItem!).Id) : null;
 }
 
 internal static class WindowsPresentation
 {
+    public static string Locale { get; private set; } = "en-US";
+    public static void SetLocale(string? locale) => Locale = PresentationText.EffectiveLocale(locale);
+    public static string Text(string key, IReadOnlyDictionary<string, object>? values = null) => PresentationText.Text(key, values, Locale);
+    public static string Format(FormattableString value) => value.ToString(System.Globalization.CultureInfo.GetCultureInfo(Locale));
     public static bool Dark(string theme)
     {
         if (theme != "auto") return theme == "dark";

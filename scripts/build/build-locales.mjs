@@ -72,11 +72,26 @@ export function runtimeBundle(bundle){
     catalogs:Object.fromEntries(Object.entries(bundle.catalogs).map(([locale,catalog])=>[locale,{version:catalog.version,locale:catalog.locale,...(catalog.sourceHash?{sourceHash:catalog.sourceHash}:{}),...(catalog.pendingEnglishFallbackKeys?{pendingEnglishFallbackKeys:catalog.pendingEnglishFallbackKeys}:{}),messages:catalog.messages}]))};
 }
 
+export function nativeLocaleBundle(bundle){
+  // Full canonical resources are validated before this deterministic projection.
+  // A native panel does not need thousands of dashboard/portal-only messages.
+  // Keep the global source identity: every retained message is the same catalog.
+  const sources=[readFileSync(resolve(root,'msfs-toolbar/PackageSources/html_ui/InGamePanels/AeroScience/AeroScience.js'),'utf8'),
+    readFileSync(resolve(root,'msfs-toolbar/PackageSources/html_ui/InGamePanels/AeroScience/AeroScience.I18n.js'),'utf8'),
+    readFileSync(resolve(root,'msfs-toolbar/PackageSources/html_ui/InGamePanels/AeroScience/AeroScience.html'),'utf8'),
+    readFileSync(resolve(root,'src/AeroScience.Engine/wwwroot/geographic-view.js'),'utf8')].join('\n');
+  const keys=new Set(Object.keys(bundle.schema.messages).filter(key=>/^(?:toolbar|native|map\.native|common|science|nav|localization)\./.test(key)));
+  for(const match of sources.matchAll(/(?:nativeText|nativeBind|\.text)\(\s*['"]([a-z][\w.]*)['"]|data-native-i18n(?:-[a-z-]+)?="([a-z][\w.]*)"/g))keys.add(match[1]||match[2]);
+  for(const key of keys)if(!bundle.schema.messages[key])throw Error('Undefined native message: '+key);
+  const pick=messages=>Object.fromEntries(Object.entries(messages).filter(([key])=>keys.has(key)));
+  return {...bundle,schema:{...bundle.schema,messages:pick(bundle.schema.messages)},catalogs:Object.fromEntries(Object.entries(bundle.catalogs).map(([id,catalog])=>[id,{...catalog,
+    pendingEnglishFallbackKeys:(catalog.pendingEnglishFallbackKeys||[]).filter(key=>keys.has(key)),messages:pick(catalog.messages)}]))};
+}
 export function nativeCatalogAssets(bundle = localeBundle()) {
   validateCatalogs(bundle);
   const formatter=readFileSync(resolve(folder,'../i18n-format.js'),'utf8').replace(/\r\n/g,'\n').replace(/^export /gm,'');
   return {
-    'AeroScience.LocaleData.js':'// Generated canonical catalog; do not edit.\nvar AeroScienceLocaleData = '+scriptJson(runtimeBundle(bundle))+';\n',
+    'AeroScience.LocaleData.js':'// Generated native projection of canonical catalog; do not edit.\nvar AeroScienceLocaleData = '+scriptJson(runtimeBundle(nativeLocaleBundle(bundle)))+';\n',
     'AeroScience.LocaleFormat.js':'// Generated shared formatter; do not edit.\nvar AeroScienceLocaleFormat = (function(){\n'+formatter+'\nreturn {createTranslator:createTranslator,supportedLocale:supportedLocale};\n}());\n'
   };
 }

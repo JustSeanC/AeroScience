@@ -23,7 +23,7 @@ export function createTranslator(data, requestedLocale = 'en-US', {development =
     let message = own(selected.messages,key) ? selected.messages[key] : undefined;
     if(message===null||typeof message!=='string'&&typeof message!=='object'){selected=english;message=english.messages[key];}
     const rule = own(data.schema.messages,key) ? data.schema.messages[key] : null;
-    const missing = !rule || message === undefined || rule.plural && (!Number.isInteger(values[rule.plural]) || values[rule.plural] < 0) || rule.parameters.some(name => !own(values,name)
+    const missing = !rule || message === undefined || rule.plural && (!Number.isSafeInteger(values[rule.plural]) || values[rule.plural] < 0) || rule.parameters.some(name => !own(values,name)
       || !['string','number'].includes(typeof values[name]) || typeof values[name] === 'number' && !Number.isFinite(values[name]));
     if (missing) {
       if (development) {if (onMissing) onMissing(key);return '['+key+']';}

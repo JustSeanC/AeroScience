@@ -1,0 +1,40 @@
+{
+  "stage": "P07c",
+  "catalogVersion": 20,
+  "catalogIdentity": "24325d6cd2282e6667cce945669b271811652f8627707a2d627de0b92e3822f9",
+  "tests": {
+    "presentation": 49,
+    "originalNative": 4,
+    "dotnetPassed": 12,
+    "dotnetSkipped": 0,
+    "browserPassed": 7,
+    "windowsCrossCompile": "passed; 0 warnings; 0 errors"
+  },
+  "receipts": [
+    {
+      "path": "artifacts/p07c-final-web-checks.log",
+      "sha256": "867a0f45cb553542f8fb2e0f67f507e578ce7a6c21726edd1e40dc7f1f50ea64"
+    },
+    {
+      "path": "artifacts/p07c-dotnet-tests.log",
+      "sha256": "72fa0cbcb9aaf97212224d8af2f2bd56f8ed62a0ffb56e850f587942660f132f"
+    },
+    {
+      "path": "artifacts/p07c-browser-tests.log",
+      "sha256": "67f8a760bcd1d83ac7597d2a99853343c30460de8a75b98228df9df0a5da4d8f"
+    },
+    {
+      "path": "artifacts/p07c-desktop-build.log",
+      "sha256": "01d15759a86330b754daaf17a081d2dd26d8eb5a893dca2439f70d8e3320a9a4"
+    }
+  ],
+  "failedDiagnostics": [
+    "artifacts/p07c-first-browser-failure",
+    "artifacts/p07c-placeholder-failure",
+    "artifacts/p07c-first-dotnet-failure.log"
+  ],
+  "humanReview": "PENDING",
+  "installedWindows": "NOT TESTED",
+  "installedMSFS": "NOT TESTED",
+  "fullCI": "Reserved for completed P07 integration"
+}

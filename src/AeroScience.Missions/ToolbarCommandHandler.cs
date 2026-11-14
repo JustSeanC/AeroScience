@@ -57,6 +57,14 @@ public sealed class ToolbarCommandHandler(MissionCoordinator coordinator, RouteM
                     // Keep exact definitions and the same byte boundary by paging one card.
                     if(state is not null)state=state with{ActiveCardCount=state.Cards.Count(c=>c.Active),ActiveCardNames=state.Cards.Where(c=>c.Active).Take(3).Select(c=>string.Concat(c.Card.Name.EnumerateRunes().Take(32))+(c.Card.Name.EnumerateRunes().Count()>32?"...":"")).ToArray(),Cards=state.Cards.Skip(command.Offset).Take(pageSize).Select(CompactProcedureCard).ToArray(),NextOffset=command.Offset+pageSize<state.TotalCards?command.Offset+pageSize:null,PageSize=pageSize};
                     var encoded=JsonSerializer.Serialize(new{protocol=1,command.RequestId,ok=true,research=state,receipt},NativeResearchJson);
+                    // Appearance still yields before science in the full flight
+                    // packet. The existing correlated read-only card poll offers
+                    // a second, usually smaller envelope; never a new command or
+                    // collection controller. Preserve every original evidence byte.
+                    if(command.Op=="research-state" && ReadPresentation() is {} display){
+                        var localized=JsonSerializer.Serialize(new{protocol=1,command.RequestId,ok=true,research=state,receipt,engineInstance,presentation=display},NativeResearchJson);
+                        if(Encoding.UTF8.GetByteCount(localized)<=8000)return localized;
+                    }
                     if(Encoding.UTF8.GetByteCount(encoded)>8000&&state is not null){state=state with{ActiveCardNames=[]};encoded=JsonSerializer.Serialize(new{protocol=1,command.RequestId,ok=true,research=state,receipt},NativeResearchJson);}
                     if(Encoding.UTF8.GetByteCount(encoded)>8000)throw new InvalidOperationException("Personal card reply exceeds the native packet bound. Use the dashboard.");
                     return encoded;
@@ -135,9 +143,7 @@ public sealed class ToolbarCommandHandler(MissionCoordinator coordinator, RouteM
                 Instruments = r.Instruments.Select(i => i with { Message = Short(i.Message, 80) }).ToArray()
             } : null
         };
-        ToolbarPresentation? locale = null;
-        try { var candidate = presentation?.Invoke(); if (ok && candidate is { Version: 1 } && PresentationText.Locales.Any(l=>l.Id==candidate.Locale)) locale=candidate; }
-        catch(Exception e) when(e is IOException or UnauthorizedAccessException or JsonException or ArgumentException) { /* Optional appearance must never interrupt telemetry. */ }
+        ToolbarPresentation? locale = ok ? ReadPresentation() : null;
         string Encode()=>JsonSerializer.Serialize(new ToolbarReply(1,id,ok,Short(error,180),state,
             locale is null?["mission-intelligence-1","session-bound-controls-1","control-revision-1","personal-research-controls-1"]:
                 ["mission-intelligence-1","session-bound-controls-1","control-revision-1","personal-research-controls-1","presentation-1"],summary,receipt is null?null:receipt with{Reason=Short(receipt.Reason,120)!},engineInstance,locale),WireJson.Options);
@@ -154,6 +160,11 @@ public sealed class ToolbarCommandHandler(MissionCoordinator coordinator, RouteM
         if(Encoding.UTF8.GetByteCount(encoded)>8000&&summary.RetainedScience is not null){summary=summary with{RetainedScience=null,DetailsOmitted=true};encoded=Encode();}
         if(Encoding.UTF8.GetByteCount(encoded)>8000)throw new InvalidOperationException("Native reply exceeds 8 KiB even after display-only reduction. Open bridge diagnostics.");
         return encoded;
+    }
+    private ToolbarPresentation? ReadPresentation()
+    {
+        try { var candidate=presentation?.Invoke();return candidate is {Version:1}&&PresentationText.Locales.Any(l=>l.Id==candidate.Locale)?candidate:null; }
+        catch(Exception e) when(e is IOException or UnauthorizedAccessException or JsonException or ArgumentException) { return null; }
     }
     private static string Digest(string json)=>Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(Encoding.UTF8.GetBytes(json)));
     private void Remember(Guid id, string json, string reply)

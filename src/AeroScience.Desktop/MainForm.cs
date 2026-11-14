@@ -17,7 +17,7 @@ public sealed class MainForm : BrandedForm, IDesktopActions, IScientificFolderOp
     public StorageManager Storage { get; }
     private WebApplication? engine;
     private readonly Label status = new() { AutoSize = true, MaximumSize = new(700, 0) };
-    private readonly Button dashboard = new() { Text = "Open Dashboard", AutoSize = true };
+    private readonly Button dashboard = new() { Text = WindowsPresentation.Text("windows.mainForm.openDashboard"), AutoSize = true };
     private readonly System.Windows.Forms.Timer timer = new() { Interval = 1000 };
     private bool closing;
     private readonly DesktopActionGate desktopActions = new();
@@ -30,10 +30,13 @@ public sealed class MainForm : BrandedForm, IDesktopActions, IScientificFolderOp
         PresentationPreferences value;
         try{value=Preferences.Presentation();}
         catch(Exception error)when(error is IOException or UnauthorizedAccessException or JsonException){return;}
+        WindowsPresentation.SetLocale(value.Locale);
         var dark = WindowsPresentation.Dark(value.Theme);
-        var key = value.Theme + dark + SystemInformation.HighContrast;
+        var key = value.Theme + dark + SystemInformation.HighContrast + value.Locale;
         if (!force && key == appearanceKey) return;
         appearanceKey = key; WindowsPresentation.Apply(this, dark);
+        dashboard.Text = WindowsPresentation.Text("windows.mainForm.openDashboard");
+        foreach (var (button, messageKey) in presentationButtons) button.Text = WindowsPresentation.Text(messageKey);
         if (auxiliary is SettingsForm or SetupWizardForm) WindowsPresentation.Apply(auxiliary, dark);
     }
     public bool Busy { get => busy || choosingSource || (engine?.Services.GetService<ScientificImportSession>()?.IsBusy ?? false) || (engine?.Services.GetService<LidarImportSession>()?.IsBusy ?? false); private set => busy=value; }
@@ -53,21 +56,21 @@ public sealed class MainForm : BrandedForm, IDesktopActions, IScientificFolderOp
         AutoScaleMode = AutoScaleMode.Dpi;
         var panel = new FlowLayoutPanel { Dock = DockStyle.Fill, Padding = new(24), FlowDirection = FlowDirection.TopDown, WrapContents = false, AutoScroll = true };
         var brand=new FlowLayoutPanel{AutoSize=true,WrapContents=false};brand.Controls.Add(PrimaryMark());
-        brand.Controls.Add(new Label { Text = ApplicationProfile.Current.Name + " · Science Mission Operations", AutoSize = true, Margin=new(8,12,0,0), Font = new(Font.FontFamily, 16) });panel.Controls.Add(brand);
+        brand.Controls.Add(new Label { Text = WindowsPresentation.Text("windows.mainForm.scienceMissionOperations", new Dictionary<string, object> { ["value1"] = Convert.ToString((ApplicationProfile.Current.Name), System.Globalization.CultureInfo.InvariantCulture) ?? "" }), AutoSize = true, Margin=new(8,12,0,0), Font = new(Font.FontFamily, 16) });panel.Controls.Add(brand);
         panel.Controls.Add(status); panel.Controls.Add(dashboard);
         dashboard.Click += (_, _) => OpenDashboard();
-        AddButton(panel, "Settings", () => ShowSettings(false));
-        AddButton(panel, "Storage", () => ShowSettings(true));
-        AddButton(panel, "Collect Feedback", ShowFeedback);
+        AddPresentationButton(panel, "nav.settings", () => ShowSettings(false));
+        AddPresentationButton(panel, "nav.storage", () => ShowSettings(true));
+        AddPresentationButton(panel, "windows.mainForm.collectFeedback", ShowFeedback);
         if (ApplicationProfile.Current.Validation)
-            AddButton(panel, "Copy archives for validation", async () =>
+            AddPresentationButton(panel, "windows.mainForm.copyArchivesForValidation", async () =>
             {
                 if (Busy || Recording) return;
-                using var mission = new FolderBrowserDialog { Description="Choose the ORIGINAL mission database folder to COPY. It will not be migrated.", UseDescriptionForTitle=true };
+                using var mission = new FolderBrowserDialog { Description=WindowsPresentation.Text("windows.mainForm.chooseTheOriginalMissionDatabaseFolderToCopyIt"), UseDescriptionForTitle=true };
                 if(mission.ShowDialog(this)!=DialogResult.OK)return;
-                using var science = new FolderBrowserDialog { Description="Choose the ORIGINAL Science Library folder to COPY. Originals will be preserved.", UseDescriptionForTitle=true };
+                using var science = new FolderBrowserDialog { Description=WindowsPresentation.Text("windows.mainForm.chooseTheOriginalScienceLibraryFolderToCopyOriginals"), UseDescriptionForTitle=true };
                 if(science.ShowDialog(this)!=DialogResult.OK)return;
-                if(MessageBox.Show(this,"Create a verified disposable copy of both archives inside the Validation profile, then open it with online scientific access disabled? Enable access later in Settings when ready. Originals and production settings are retained. Close other applications using these archives first.","Copy archives for validation",MessageBoxButtons.YesNo,MessageBoxIcon.Question,MessageBoxDefaultButton.Button2)!=DialogResult.Yes)return;
+                if(MessageBox.Show(this,WindowsPresentation.Text("windows.mainForm.createAVerifiedDisposableCopyOfBothArchivesInside"),WindowsPresentation.Text("windows.mainForm.copyArchivesForValidation"),MessageBoxButtons.YesNo,MessageBoxIcon.Question,MessageBoxDefaultButton.Button2)!=DialogResult.Yes)return;
                 try { await RunStoppedAsync(()=>Task.Run(()=>
                 {
                     var destination=Path.Combine(Preferences.DirectoryPath,"Copies",DateTime.UtcNow.ToString("yyyyMMdd-HHmmss")+"-"+Guid.NewGuid().ToString("N"));
@@ -75,7 +78,7 @@ public sealed class MainForm : BrandedForm, IDesktopActions, IScientificFolderOp
                     ValidationArchiveCopy.Select(Preferences,copy);
                 })); }catch(Exception error){ShowError(error);}
             });
-        AddButton(panel, "Exit", Close); Controls.Add(panel);
+        AddPresentationButton(panel, "windows.mainForm.exit", Close); Controls.Add(panel);
         timer.Tick += (_, _) => { RefreshStatus(); RefreshAppearance(); };
         Microsoft.Win32.UserPreferenceChangedEventHandler appearanceChanged = (_, _) => {
             if(!IsHandleCreated||IsDisposed)return;
@@ -89,7 +92,7 @@ public sealed class MainForm : BrandedForm, IDesktopActions, IScientificFolderOp
             try
             {
                 var recovery = Storage.RecoverInterrupted();
-                if (recovery is not null) MessageBox.Show(this, recovery, "Storage recovery");
+                if (recovery is not null) MessageBox.Show(this, recovery, WindowsPresentation.Text("windows.mainForm.storageRecovery"));
                 if (showSetup || !Preferences.Load().SetupCompleted)
                 {
                     using var wizard = new SetupWizardForm(this);
@@ -106,8 +109,8 @@ public sealed class MainForm : BrandedForm, IDesktopActions, IScientificFolderOp
         {
             if (closing) return;
             e.Cancel = true;
-            if (Busy) { MessageBox.Show(this, "Wait for the storage/setup operation to finish."); return; }
-            if (Recording && MessageBox.Show(this, "A mission is recording. Exit and preserve it as interrupted?", "Exit AeroScience", MessageBoxButtons.YesNo) != DialogResult.Yes) return;
+            if (Busy) { MessageBox.Show(this, WindowsPresentation.Text("windows.mainForm.waitForTheStorageSetupOperationToFinish")); return; }
+            if (Recording && MessageBox.Show(this, WindowsPresentation.Text("windows.mainForm.aMissionIsRecordingExitAndPreserveItAs"), WindowsPresentation.Text("windows.mainForm.exitAeroscience"), MessageBoxButtons.YesNo) != DialogResult.Yes) return;
             timer.Stop();
             try { await StopEngineAsync(); }
             catch (Exception error) { ShowError(error); }
@@ -117,6 +120,12 @@ public sealed class MainForm : BrandedForm, IDesktopActions, IScientificFolderOp
 
     private static void AddButton(Control panel, string label, Action action)
     { var button = new Button { Text = label, AutoSize = true }; button.Click += (_, _) => action(); panel.Controls.Add(button); }
+    private readonly List<(Button Button, string Key)> presentationButtons = [];
+    private void AddPresentationButton(Control panel, string key, Action action)
+    {
+        var button = new Button { Text = WindowsPresentation.Text(key), AutoSize = true };
+        button.Click += (_, _) => action(); panel.Controls.Add(button); presentationButtons.Add((button, key));
+    }
     public async Task StartEngineAsync()
     {
         if (engine is not null) return;
@@ -179,15 +188,15 @@ public sealed class MainForm : BrandedForm, IDesktopActions, IScientificFolderOp
     private void RefreshStatus()
     {
         if (Busy) return;
-        if (engine is null) { status.Text = "Engine stopped. Open Storage/Settings to resolve startup or storage errors. Your existing archive has not been replaced."; dashboard.Enabled = false; return; }
+        if (engine is null) { status.Text = WindowsPresentation.Text("windows.mainForm.engineStoppedOpenStorageSettingsToResolveStartupOr"); dashboard.Enabled = false; return; }
         if (engine.Lifetime.ApplicationStopped.IsCancellationRequested)
-        { status.Text = "The local engine stopped after an error. Collect Feedback and check Storage/Settings; existing records are retained."; dashboard.Enabled = false; return; }
+        { status.Text = WindowsPresentation.Text("windows.mainForm.theLocalEngineStoppedAfterAnErrorCollectFeedback"); dashboard.Enabled = false; return; }
         var snapshot = engine.Services.GetRequiredService<MissionCoordinator>().Snapshot();
-        status.Text = $"{ApplicationProfile.Current.Name} · Engine running · {snapshot.Connection.Message}\n{(snapshot.ActiveMission is null ? "No active mission" : "Mission recording")} · Toolbar: {Toolbar.Message}";
+        status.Text = WindowsPresentation.Text("windows.mainForm.engineRunningToolbar", new Dictionary<string, object> { ["value1"] = WindowsPresentation.Format($"{ApplicationProfile.Current.Name}"), ["value2"] = WindowsPresentation.Format($"{snapshot.Connection.Message}"), ["value3"] = WindowsPresentation.Format($"{(snapshot.ActiveMission is null ? WindowsPresentation.Text("windows.flight.noMission") : WindowsPresentation.Text("windows.flight.recording"))}"), ["value4"] = WindowsPresentation.Format($"{Toolbar.Message}") });
     }
     public void OpenDashboard(bool settings = false)
     {
-        if (engine is null) { MessageBox.Show(this, "The engine is stopped. Check Storage/Settings."); return; }
+        if (engine is null) { MessageBox.Show(this, WindowsPresentation.Text("windows.mainForm.theEngineIsStoppedCheckStorageSettings")); return; }
         Process.Start(new ProcessStartInfo("http://127.0.0.1:" + ApplicationProfile.Current.Port + (settings ? "/#settings" : "")) { UseShellExecute = true });
     }
     private void ShowSettings(bool storage)
@@ -203,22 +212,22 @@ public sealed class MainForm : BrandedForm, IDesktopActions, IScientificFolderOp
     }
     public void ShowSetup(IWin32Window? owner = null)
     {
-        if (Busy || Recording) { MessageBox.Show(this, "End recording and wait for current operations before running setup."); return; }
+        if (Busy || Recording) { MessageBox.Show(this, WindowsPresentation.Text("windows.mainForm.endRecordingAndWaitForCurrentOperationsBeforeRunning")); return; }
         using var wizard = new SetupWizardForm(this);
         if (ShowAuxiliary(wizard, owner) == DialogResult.OK) OpenDashboard();
     }
     public bool InstallToolbar(IWin32Window owner, string? community)
     {
-        if (Busy || Recording) { MessageBox.Show(owner, "End recording and wait for other operations before updating the toolbar."); return false; }
+        if (Busy || Recording) { MessageBox.Show(owner, WindowsPresentation.Text("windows.mainForm.endRecordingAndWaitForOtherOperationsBeforeUpdating")); return false; }
         if (string.IsNullOrWhiteSpace(community) || !Directory.Exists(community))
         {
-            using var browse = new FolderBrowserDialog { Description = "Choose your MSFS 2024 Community folder", UseDescriptionForTitle = true };
+            using var browse = new FolderBrowserDialog { Description = WindowsPresentation.Text("windows.mainForm.chooseYourMsfs2024CommunityFolder"), UseDescriptionForTitle = true };
             if (browse.ShowDialog(owner) != DialogResult.OK) return false; community = browse.SelectedPath;
         }
         var toolbarStatus=ToolbarVersions.Inspect(Path.Combine(AppContext.BaseDirectory,"Toolbar"),community);
         if(!toolbarStatus.CanInstall&&!toolbarStatus.CanRepair){MessageBox.Show(owner,toolbarStatus.Message);return false;}
-        if (ToolbarInstaller.SimulatorRunning()) { MessageBox.Show(owner, "Close MSFS before installing or updating AeroScience's toolbar."); return false; }
-        if (MessageBox.Show(owner, $"Install the bundled AeroScience toolbar in:\n{community}\n\nIts previous files will be backed up outside Community. Unrelated add-ons are preserved.", "Confirm toolbar installation", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return false;
+        if (ToolbarInstaller.SimulatorRunning()) { MessageBox.Show(owner, WindowsPresentation.Text("windows.mainForm.closeMsfsBeforeInstallingOrUpdatingAeroscienceSToolbar")); return false; }
+        if (MessageBox.Show(owner, WindowsPresentation.Text("windows.mainForm.installTheBundledAeroscienceToolbarInItsPreviousFiles", new Dictionary<string, object> { ["value1"] = WindowsPresentation.Format($"{community}") }), WindowsPresentation.Text("windows.mainForm.confirmToolbarInstallation"), MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return false;
         using var form = new ToolbarProgressForm(this, community); return ShowAuxiliary(form, owner) == DialogResult.OK;
     }
     private void FocusAuxiliary()
@@ -308,27 +317,27 @@ public sealed class MainForm : BrandedForm, IDesktopActions, IScientificFolderOp
     void IDesktopActions.ChooseScientificDataset(string kind)=>DispatchSourcePicker(owner=>ChooseScientificDataset(kind,owner));
     void IDesktopActions.ChooseLidarOriginal()=>DispatchSourcePicker(async owner=>
     {
-        if(engine is null)return;using var picker=new OpenFileDialog{Title="Choose a historical LAS/LAZ original",Filter="Historical LAS/LAZ (*.las;*.laz)|*.las;*.laz",CheckFileExists=true};if(picker.ShowDialog(owner)!=DialogResult.OK)return;
+        if(engine is null)return;using var picker=new OpenFileDialog{Title=WindowsPresentation.Text("windows.mainForm.chooseAHistoricalLasLazOriginal"),Filter="Historical LAS/LAZ (*.las;*.laz)|*.las;*.laz",CheckFileExists=true};if(picker.ShowDialog(owner)!=DialogResult.OK)return;
         await engine.Services.GetRequiredService<LidarImportSession>().Select(picker.FileName);
     });
     private async Task ChooseScientificDataset(string kind,IWin32Window owner)
     {
         if(engine is null)return;string path;var type=Enum.Parse<RemoteKind>(kind,true);
-        if(type==RemoteKind.Terrain){using var picker=new OpenFileDialog{Title="Choose a numeric elevation DEM GeoTIFF",Filter="Numeric GeoTIFF (*.tif;*.tiff)|*.tif;*.tiff"};if(picker.ShowDialog(owner)!=DialogResult.OK)return;path=picker.FileName;}
-        else{using var picker=new FolderBrowserDialog{Description="Choose the "+kind+" collection folder",UseDescriptionForTitle=true};if(picker.ShowDialog(owner)!=DialogResult.OK)return;path=picker.SelectedPath;}
+        if(type==RemoteKind.Terrain){using var picker=new OpenFileDialog{Title=WindowsPresentation.Text("windows.mainForm.chooseANumericElevationDemGeotiff"),Filter="Numeric GeoTIFF (*.tif;*.tiff)|*.tif;*.tiff"};if(picker.ShowDialog(owner)!=DialogResult.OK)return;path=picker.FileName;}
+        else{using var picker=new FolderBrowserDialog{Description=WindowsPresentation.Text("windows.mainForm.chooseTheCollectionFolder", new Dictionary<string, object> { ["value1"] = Convert.ToString((kind), System.Globalization.CultureInfo.InvariantCulture) ?? "" }),UseDescriptionForTitle=true};if(picker.ShowDialog(owner)!=DialogResult.OK)return;path=picker.SelectedPath;}
         await engine.Services.GetRequiredService<ScientificImportSession>().Select(path,type);
     }
     void IDesktopActions.ChooseHyperspectral(bool folder)=>DispatchSourcePicker(async owner=>
     {
         if(engine is null)return;string path;
-        if(folder){using var picker=new FolderBrowserDialog{Description="Choose the folder containing an ENVI .hdr and its original hyperspectral binary",UseDescriptionForTitle=true};if(picker.ShowDialog(owner)!=DialogResult.OK)return;path=picker.SelectedPath;}
-        else{using var picker=new OpenFileDialog{Title="Choose the original hyperspectral ENVI header",Filter="ENVI header (*.hdr)|*.hdr",CheckFileExists=true};if(picker.ShowDialog(owner)!=DialogResult.OK)return;path=picker.FileName;}
+        if(folder){using var picker=new FolderBrowserDialog{Description=WindowsPresentation.Text("windows.mainForm.chooseTheFolderContainingAnEnviHdrAndIts"),UseDescriptionForTitle=true};if(picker.ShowDialog(owner)!=DialogResult.OK)return;path=picker.SelectedPath;}
+        else{using var picker=new OpenFileDialog{Title=WindowsPresentation.Text("windows.mainForm.chooseTheOriginalHyperspectralEnviHeader"),Filter="ENVI header (*.hdr)|*.hdr",CheckFileExists=true};if(picker.ShowDialog(owner)!=DialogResult.OK)return;path=picker.FileName;}
         await engine.Services.GetRequiredService<ScientificImportSession>().Select(path);
     });
     void IDesktopActions.ChooseEmitOriginals()=>DispatchSourcePicker(async owner=>
     {
         if(engine is null)return;
-        using var picker=new OpenFileDialog{Title="Select matching EMIT RFL002, RFLUNCERT002 and MASK003 originals",Filter="Original NetCDF (*.nc)|*.nc",Multiselect=true,CheckFileExists=true};
+        using var picker=new OpenFileDialog{Title=WindowsPresentation.Text("windows.mainForm.selectMatchingEmitRfl002Rfluncert002AndMask003Originals"),Filter="Original NetCDF (*.nc)|*.nc",Multiselect=true,CheckFileExists=true};
         if(picker.ShowDialog(owner)!=DialogResult.OK)return;
         await engine.Services.GetRequiredService<EmitLibrary>().SelectLocal(picker.FileNames);
     });
@@ -341,9 +350,9 @@ public sealed class MainForm : BrandedForm, IDesktopActions, IScientificFolderOp
     });
     void IDesktopActions.CompactStorage(bool science) => Dispatch(async () =>
     {
-        if(Busy||Recording){MessageBox.Show(this,"End recording and wait for active setup/storage work before compacting.");return;}
-        if(MessageBox.Show(this,"Compact the "+(science?"science":"flight")+" database? Services will stop temporarily. A verified backup and sufficient temporary space are required. Original observations are retained; actual recovered database bytes will be reported.","Confirm database maintenance",MessageBoxButtons.YesNo,MessageBoxIcon.Question,MessageBoxDefaultButton.Button2)!=DialogResult.Yes)return;
-        try{var result="";await RunStoppedAsync(()=>Task.Run(()=>result=Storage.Compact(science?StorageKind.ScienceLibrary:StorageKind.Missions,true,false)));MessageBox.Show(this,result,"Compaction completed");}catch(Exception error){ShowError(error);}
+        if(Busy||Recording){MessageBox.Show(this,WindowsPresentation.Text("windows.mainForm.endRecordingAndWaitForActiveSetupStorageWork"));return;}
+        if(MessageBox.Show(this,WindowsPresentation.Text("windows.mainForm.compactTheDatabaseServicesWillStopTemporarilyAVerified", new Dictionary<string, object> { ["value1"] = Convert.ToString(((science?"science":"flight")), System.Globalization.CultureInfo.InvariantCulture) ?? "" }),WindowsPresentation.Text("windows.mainForm.confirmDatabaseMaintenance"),MessageBoxButtons.YesNo,MessageBoxIcon.Question,MessageBoxDefaultButton.Button2)!=DialogResult.Yes)return;
+        try{var result="";await RunStoppedAsync(()=>Task.Run(()=>result=Storage.Compact(science?StorageKind.ScienceLibrary:StorageKind.Missions,true,false)));MessageBox.Show(this,result,WindowsPresentation.Text("windows.mainForm.compactionCompleted"));}catch(Exception error){ShowError(error);}
     });
     public async void ImportScientificSource(IWin32Window? owner = null)
     {
@@ -353,18 +362,18 @@ public sealed class MainForm : BrandedForm, IDesktopActions, IScientificFolderOp
     private async Task ImportScientificSourceAsync(IWin32Window? owner)
     {
         if (auxiliary is { IsDisposed: false } && owner != auxiliary) { FocusAuxiliary(); return; }
-        if (Busy || engine is null) { MessageBox.Show(owner ?? this, "Wait for current setup/storage work and start the local engine first."); return; }
-        using var picker = new OpenFileDialog { Title = "Import a real scientific source collection manifest", Filter = "AeroScience source manifest (*.json)|*.json", CheckFileExists = true };
+        if (Busy || engine is null) { MessageBox.Show(owner ?? this, WindowsPresentation.Text("windows.mainForm.waitForCurrentSetupStorageWorkAndStartThe")); return; }
+        using var picker = new OpenFileDialog { Title = WindowsPresentation.Text("windows.mainForm.importARealScientificSourceCollectionManifest"), Filter = "AeroScience source manifest (*.json)|*.json", CheckFileExists = true };
         if (picker.ShowDialog(owner ?? this) != DialogResult.OK) return;
         try
         {
             var inspection = ScienceStore.InspectImport(picker.FileName);
             var science = engine.Services.GetRequiredService<ScienceStore>();
-            if (MessageBox.Show(owner ?? this, $"Import {inspection.Manifest.Name}?\n\nSource: {inspection.Manifest.Provider}\nObservation: {inspection.Manifest.ObservationUtc?.ToString("u") ?? "Unknown (not live)"}\nCopy {inspection.Bytes / 1048576d:0.0} MiB into {science.DirectoryPath}\nAvailable: {new LocalStorageCapacity().FreeBytes(science.DirectoryPath) / 1073741824d:0.0} GiB\n\nOriginal files remain untouched. No files are downloaded and no data are uploaded. Review the source license: {inspection.Manifest.License}", "Confirm scientific source import", MessageBoxButtons.YesNo, MessageBoxIcon.Information, MessageBoxDefaultButton.Button2) != DialogResult.Yes) return;
+            if (MessageBox.Show(owner ?? this, WindowsPresentation.Text("windows.mainForm.importSourceObservationCopyMibIntoAvailableGibOriginal", new Dictionary<string, object> { ["value1"] = WindowsPresentation.Format($"{inspection.Manifest.Name}"), ["value2"] = WindowsPresentation.Format($"{inspection.Manifest.Provider}"), ["value3"] = WindowsPresentation.Format($"{inspection.Manifest.ObservationUtc?.ToString("u") ?? "Unknown (not live)"}"), ["value4"] = WindowsPresentation.Format($"{inspection.Bytes / 1048576d:0.0}"), ["value5"] = WindowsPresentation.Format($"{science.DirectoryPath}"), ["value6"] = WindowsPresentation.Format($"{new LocalStorageCapacity().FreeBytes(science.DirectoryPath) / 1073741824d:0.0}"), ["value7"] = WindowsPresentation.Format($"{inspection.Manifest.License}") }), "Confirm scientific source import", MessageBoxButtons.YesNo, MessageBoxIcon.Information, MessageBoxDefaultButton.Button2) != DialogResult.Yes) return;
             Busy = true;
             var progress = new Progress<string>(value => status.Text = value);
             var imported = await Task.Run(() => science.ImportSourceAsync(picker.FileName, progress: progress));
-            MessageBox.Show(owner ?? this, "Imported " + imported.Manifest.Name + ". Open dashboard Settings → Scientific Data Sources to inspect coverage and metadata.");
+            MessageBox.Show(owner ?? this, WindowsPresentation.Text("windows.mainForm.importedOpenDashboardSettingsScientificDataSourcesToInspect", new Dictionary<string, object> { ["value1"] = Convert.ToString((imported.Manifest.Name), System.Globalization.CultureInfo.InvariantCulture) ?? "" }));
         }
         catch (Exception error) { ShowError(error); }
         finally { Busy = false; RefreshStatus(); }
@@ -372,13 +381,13 @@ public sealed class MainForm : BrandedForm, IDesktopActions, IScientificFolderOp
     public void ShowError(Exception error) => MessageBox.Show(this, error.Message, "AeroScience", MessageBoxButtons.OK, MessageBoxIcon.Error);
     private void ShowFeedback()
     {
-        using var notes = new BrandedForm { Text = "Collect Feedback", Width = 560, Height = 300, StartPosition = FormStartPosition.CenterParent };
-        var text = new TextBox { Multiline = true, Dock = DockStyle.Fill, PlaceholderText = "Optional reproduction steps and notes" };
-        var save = new Button { Text = "Save feedback ZIP…", Dock = DockStyle.Bottom, Height = 42 };
+        using var notes = new BrandedForm { Text = WindowsPresentation.Text("windows.mainForm.collectFeedback"), Width = 560, Height = 300, StartPosition = FormStartPosition.CenterParent };
+        var text = new TextBox { Multiline = true, Dock = DockStyle.Fill, PlaceholderText = WindowsPresentation.Text("windows.feedback.notes") };
+        var save = new Button { Text = WindowsPresentation.Text("windows.mainForm.saveFeedbackZip"), Dock = DockStyle.Bottom, Height = 42 };
         notes.Controls.Add(text); notes.Controls.Add(save);
         save.Click += (_, _) =>
         {
-            if(MessageBox.Show(notes,"The bundle includes geographic preparation areas, instrument/provider timing, errors and local logs. Review it before sharing. No scientific originals, databases or credentials are included. Continue?","Diagnostic privacy",MessageBoxButtons.OKCancel)!=DialogResult.OK)return;
+            if(MessageBox.Show(notes,WindowsPresentation.Text("windows.mainForm.theBundleIncludesGeographicPreparationAreasInstrumentProviderTiming"),"Diagnostic privacy",MessageBoxButtons.OKCancel)!=DialogResult.OK)return;
             using var dialog = new SaveFileDialog { Filter = "Feedback ZIP (*.zip)|*.zip", FileName = $"AeroScience-feedback-{DateTime.UtcNow:yyyyMMdd-HHmmss}.zip", OverwritePrompt = true };
             if (dialog.ShowDialog(notes) != DialogResult.OK) return;
             try
@@ -404,7 +413,7 @@ public sealed class MainForm : BrandedForm, IDesktopActions, IScientificFolderOp
                             if(new FileInfo(file).Length<5_000_001)Add("toolbar-logs/"+Path.GetFileName(file),File.ReadAllText(file));
                 }
                 File.Move(dialog.FileName + ".partial", dialog.FileName, overwrite: true);
-                MessageBox.Show(notes, "Saved locally. Review the ZIP before sharing it."); notes.Close();
+                MessageBox.Show(notes, WindowsPresentation.Text("windows.mainForm.savedLocallyReviewTheZipBeforeSharingIt")); notes.Close();
             }
             catch (Exception error) { ShowError(error); }
         };

@@ -232,6 +232,7 @@ public static class OrganizationApplication
     static OrganizationSettings settingsFor(HttpContext context)=>context.RequestServices.GetRequiredService<OrganizationSettings>();
     static void MapIdentity(WebApplication app)
     {
+        OrganizationPresentationApi.Map(app);
         OrganizationOwnerSetup.Map(app);
         app.MapGet("/api/session",async(HttpContext c,OrganizationDatabase db,IAntiforgery csrf)=>new{
             ownerPairing=settingsFor(c).OwnerPublicKey is not null,

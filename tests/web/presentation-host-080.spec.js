@@ -1,4 +1,7 @@
 import {test,expect} from '@playwright/test';
+import {createTranslator} from '../../src/AeroScience.Engine/wwwroot/i18n-format.js';
+import {localeBundle} from '../../scripts/build/build-locales.mjs';
+const pt=createTranslator(localeBundle(),'pt-BR').text;
 import {mountToolbar} from './helpers/toolbar.mjs';
 test('companion defaults persist across browser contexts while explicit browser overrides remain local',async({page,request,browser})=>{
  const origin='http://127.0.0.1:5080';const session=await(await request.post('/api/session',{data:{},headers:{Origin:origin}})).json();
@@ -9,22 +12,22 @@ test('companion defaults persist across browser contexts while explicit browser 
   await page.goto('/#settings');await expect(page.getByLabel('Default appearance',{exact:true})).toHaveValue(original.theme);
   await page.getByLabel('Default appearance',{exact:true}).selectOption('dark');await page.getByLabel('Companion default language',{exact:true}).selectOption('pt-BR');
   await page.getByRole('button',{name:'Save companion defaults',exact:true}).click();await expect(page.locator('html')).toHaveAttribute('data-resolved-theme','dark');
-  await expect(page.locator('html')).toHaveAttribute('data-requested-locale','pt-BR');await expect(page.locator('html')).toHaveAttribute('lang','en-US');
+  await expect(page.locator('html')).toHaveAttribute('data-requested-locale','pt-BR');await expect(page.locator('html')).toHaveAttribute('lang','pt-BR');
   const context=await browser.newContext({storageState:await request.storageState()});try{
-   const other=await context.newPage();await other.goto(origin+'/#settings');await expect(other.getByLabel('Theme',{exact:true})).toHaveValue('dark');await expect(other.getByLabel('Language',{exact:true})).toHaveValue('pt-BR');
-   await other.getByLabel('Theme',{exact:true}).selectOption('light');await other.reload();await expect(other.getByLabel('Theme',{exact:true})).toHaveValue('light');
+   const other=await context.newPage();await other.goto(origin+'/#settings');await expect(other.getByLabel(pt('settings.theme'),{exact:true})).toHaveValue('dark');await expect(other.getByLabel(pt('settings.language'),{exact:true})).toHaveValue('pt-BR');
+   await other.getByLabel(pt('settings.theme'),{exact:true}).selectOption('light');await other.reload();await expect(other.getByLabel(pt('settings.theme'),{exact:true})).toHaveValue('light');
    expect((await(await request.get('/api/settings/presentation')).json()).preferences.theme).toBe('dark');
-   await other.getByRole('button',{name:'Use companion defaults in this browser',exact:true}).click();await expect(other.getByLabel('Theme',{exact:true})).toHaveValue('dark');
+   await other.getByRole('button',{name:pt('settings.hostFollow'),exact:true}).click();await expect(other.getByLabel(pt('settings.theme'),{exact:true})).toHaveValue('dark');
   }finally{await context.close();}
-  await page.reload();await expect(page.getByLabel('Default appearance',{exact:true})).toHaveValue('dark');
+  await page.reload();await expect(page.getByLabel(pt('settings.hostTheme'),{exact:true})).toHaveValue('dark');
  }finally{await save(original.theme,original.locale);}
 });
 test('native adapter accepts only current correlated replies and uses English for old or mismatched catalogs',async({page})=>{
- await mountToolbar(page,{autoReply:false});const catalogVersion=await page.evaluate(()=>AeroScienceLocaleData.manifest.catalogVersion);
+ await mountToolbar(page,{autoReply:false});const {catalogVersion,catalogIdentity}=await page.evaluate(()=>AeroScienceLocaleData.manifest);
  async function reply(metadata,requestId=null){await page.evaluate(({metadata,requestId})=>{const p=document.querySelector('ingamepanel-aeroscience');p.send('state');const req=window.bus.sent.filter(x=>x.command.op==='state').at(-1).command;
   p.receive(JSON.stringify({protocol:1,requestId:requestId||req.requestId,ok:true,state:window.bus.state,capabilities:['presentation-1'],presentation:metadata}));}, {metadata,requestId});}
- await reply({version:1,catalogVersion,locale:'fr-FR',revision:4});await expect(page.locator('#as-language-detail')).toContainText('Français preview uses bundled English');
- await reply({version:1,catalogVersion,locale:'pt-BR',revision:1});await expect(page.locator('#as-language-detail')).toContainText('Français');
+ await reply({version:1,catalogVersion,catalogIdentity,locale:'fr-FR',revision:4});await expect(page.locator('#as-language-detail')).toContainText('Français');
+ await reply({version:1,catalogVersion,catalogIdentity,locale:'pt-BR',revision:1});await expect(page.locator('#as-language-detail')).toContainText('Français');
  await reply({version:1,catalogVersion:999,locale:'pt-BR'},'00000000-0000-4000-8000-000000000009');await expect(page.locator('#as-language-detail')).toContainText('Français');
  await reply({version:1,catalogVersion:999,locale:'pt-BR',revision:5});await expect(page.locator('#as-language-detail')).toContainText('English fallback');
  await reply(null);await expect(page.locator('nav [data-native-section]')).toHaveText(['Flight','Science','Cards']);

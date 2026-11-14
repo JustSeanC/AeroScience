@@ -16,6 +16,11 @@
     constructor(container, info) {
       this.container = container;
       this.info = info;
+      // Optional bridge into the existing surface adapter; classic script, no
+      // locale fetch, module, Intl, geometry or evidence changes.
+      this.text = (key, fallback, values) => typeof root.AeroScienceMapText === "function" ? root.AeroScienceMapText(key, fallback, values)
+        : typeof root.AeroScienceI18n !== "undefined" ? root.AeroScienceI18n.text(key, fallback, values)
+        : fallback.replace(/\{([a-z][a-zA-Z0-9]*)\}/g, (_, name) => String(values[name]));
       this.center = [0, 0];
       this.zoom = 1;
       this.follow = true;
@@ -35,7 +40,7 @@
       this.base.setAttribute("aria-hidden", "true");
       this.live.setAttribute(
         "aria-label",
-        "Offline north-up mission map. Drag to pan, wheel to zoom.",
+        this.text("map.native.accessible","Offline north-up mission map. Drag to pan, wheel to zoom."),
       );
       this.live.tabIndex = 0;
       this.drag = null;
@@ -195,8 +200,8 @@
         p = route[this.selected],
         a = this.aircraft;
       let detail = p
-        ? `${p.index + 1}. ${p.name}  /  ${p.latitude.toFixed(7)}, ${p.longitude.toFixed(7)}  /  ${p.targetAltitudeFeet == null ? "Altitude unspecified" : p.targetAltitudeFeet + " ft MSL"}  /  ${p.instructions || ""}`
-        : "No planned waypoint selected.";
+        ? `${p.index + 1}. ${p.name}  /  ${p.latitude.toFixed(7)}, ${p.longitude.toFixed(7)}  /  ${p.targetAltitudeFeet == null ? this.text("map.native.altitudeUnknown","Altitude unspecified") : p.targetAltitudeFeet + " ft MSL"}  /  ${p.instructions || ""}`
+        : this.text("map.native.noWaypoint","No planned waypoint selected.");
       if (
         p &&
         a &&
@@ -205,11 +210,11 @@
         Number.isFinite(this.state.distanceMetres)
       )
         detail += `  /  WGS84 ${(this.state.distanceMetres / 1852).toFixed(2)} NM / ${this.state.bearingDegrees.toFixed(1)} deg true`;
-      if(a)detail+=` / Ground track ${Number.isFinite(a.groundTrackDegrees)?a.groundTrackDegrees.toFixed(1)+" deg true":"unavailable"} / GS ${Number.isFinite(a.groundspeedKnots)?a.groundspeedKnots.toFixed(0)+" kt":"unavailable"}`;
+      if(a)detail+=this.text("map.native.track"," / Ground track {track} / GS {speed}",{track:Number.isFinite(a.groundTrackDegrees)?a.groundTrackDegrees.toFixed(1)+" deg true":this.text("map.native.unavailable","Unavailable"),speed:Number.isFinite(a.groundspeedKnots)?a.groundspeedKnots.toFixed(0)+" kt":this.text("map.native.unavailable","Unavailable")});
       this.info.textContent =
         detail +
-        (a ? "" : "  /  Live position unavailable/stale.") +
-        " Display labels and instructions may be abbreviated; full values remain in the companion plan.";
+        (a ? "" : this.text("map.native.liveUnavailable","  /  Live position unavailable/stale.")) +
+        this.text("map.native.abbreviated"," Display labels and instructions may be abbreviated; full values remain in the companion plan.");
     }
     path(ctx, points, color, width) {
       if (!points.length) return;
@@ -315,7 +320,7 @@
         if(important||!lastLabel||Math.hypot(q[0]-lastLabel[0],q[1]-lastLabel[1])>65){c.fillText(String(p.index+1),q[0]+7,q[1]-7);lastLabel=q;}
       }
       c.fillStyle = "#c8d9e3";
-      c.fillText("N ^ / Offline Natural Earth / Geographic reference", 8, 17);
+      c.fillText(this.text("map.native.legend","N ^ / Offline Natural Earth / Geographic reference"), 8, 17);
       const lat =
           ((2 * Math.atan(Math.exp((-this.center[1] * Math.PI) / 180)) -
             Math.PI / 2) *

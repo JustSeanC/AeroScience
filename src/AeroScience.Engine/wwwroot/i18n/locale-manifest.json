@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "catalogVersion": 19,
+  "catalogVersion": 20,
   "fallback": "en-US",
   "locales": [
     {
@@ -35,5 +35,5 @@
     }
   ],
   "qualityContract": 1,
-  "catalogIdentity": "cb25b591a8ea973a4079dbac869815ee99dc5ca1da5aa26c23574fab8d3e2eb6"
+  "catalogIdentity": "24325d6cd2282e6667cce945669b271811652f8627707a2d627de0b92e3822f9"
 }

@@ -2,7 +2,7 @@
 export const localeData = {
   "manifest": {
     "version": 1,
-    "catalogVersion": 19,
+    "catalogVersion": 20,
     "fallback": "en-US",
     "locales": [
       {
@@ -37,7 +37,7 @@ export const localeData = {
       }
     ],
     "qualityContract": 1,
-    "catalogIdentity": "cb25b591a8ea973a4079dbac869815ee99dc5ca1da5aa26c23574fab8d3e2eb6"
+    "catalogIdentity": "24325d6cd2282e6667cce945669b271811652f8627707a2d627de0b92e3822f9"
   },
   "schema": {
     "version": 1,
@@ -21891,14 +21891,1571 @@ export const localeData = {
       },
       "ui.sensorPlanning.messageForwardOverlap": {
         "parameters": []
+      },
+      "windows.brandedForm.aeroscienceOrbitalArcLogo": {
+        "parameters": []
+      },
+      "windows.toolbarProgressForm.aeroscienceToolbarInstallation": {
+        "parameters": []
+      },
+      "windows.toolbarProgressForm.installedAvailableCommunity": {
+        "parameters": [
+          "value1",
+          "value2",
+          "value3"
+        ]
+      },
+      "windows.toolbarProgressForm.installationCompleted": {
+        "parameters": []
+      },
+      "windows.toolbarProgressForm.theInstalledPackageAndVersionWereVerifiedStartOr": {
+        "parameters": []
+      },
+      "windows.toolbarProgressForm.installationStopped": {
+        "parameters": []
+      },
+      "windows.toolbarProgressForm.previousFilesAreRestoredWhenPossibleDetailsAreIn": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "windows.toolbarProgressForm.aeroscienceMsfsToolbar": {
+        "parameters": []
+      },
+      "windows.toolbarProgressForm.closeMsfsBeforeUpdatingTheCompanionCanContinueWhen": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "windows.toolbarProgressForm.installToolbar": {
+        "parameters": []
+      },
+      "windows.toolbarProgressForm.updateToolbar": {
+        "parameters": []
+      },
+      "windows.mainForm.openDashboard": {
+        "parameters": []
+      },
+      "windows.mainForm.scienceMissionOperations": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "windows.mainForm.chooseTheOriginalMissionDatabaseFolderToCopyIt": {
+        "parameters": []
+      },
+      "windows.mainForm.chooseTheOriginalScienceLibraryFolderToCopyOriginals": {
+        "parameters": []
+      },
+      "windows.mainForm.engineStoppedOpenStorageSettingsToResolveStartupOr": {
+        "parameters": []
+      },
+      "windows.mainForm.theLocalEngineStoppedAfterAnErrorCollectFeedback": {
+        "parameters": []
+      },
+      "windows.mainForm.engineRunningToolbar": {
+        "parameters": [
+          "value1",
+          "value2",
+          "value3",
+          "value4"
+        ]
+      },
+      "windows.mainForm.chooseYourMsfs2024CommunityFolder": {
+        "parameters": []
+      },
+      "windows.mainForm.chooseAHistoricalLasLazOriginal": {
+        "parameters": []
+      },
+      "windows.mainForm.chooseANumericElevationDemGeotiff": {
+        "parameters": []
+      },
+      "windows.mainForm.chooseTheCollectionFolder": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "windows.mainForm.chooseTheFolderContainingAnEnviHdrAndIts": {
+        "parameters": []
+      },
+      "windows.mainForm.chooseTheOriginalHyperspectralEnviHeader": {
+        "parameters": []
+      },
+      "windows.mainForm.selectMatchingEmitRfl002Rfluncert002AndMask003Originals": {
+        "parameters": []
+      },
+      "windows.mainForm.importARealScientificSourceCollectionManifest": {
+        "parameters": []
+      },
+      "windows.mainForm.collectFeedback": {
+        "parameters": []
+      },
+      "windows.mainForm.saveFeedbackZip": {
+        "parameters": []
+      },
+      "windows.mainForm.copyArchivesForValidation": {
+        "parameters": []
+      },
+      "windows.mainForm.createAVerifiedDisposableCopyOfBothArchivesInside": {
+        "parameters": []
+      },
+      "windows.mainForm.exit": {
+        "parameters": []
+      },
+      "windows.mainForm.storageRecovery": {
+        "parameters": []
+      },
+      "windows.mainForm.waitForTheStorageSetupOperationToFinish": {
+        "parameters": []
+      },
+      "windows.mainForm.aMissionIsRecordingExitAndPreserveItAs": {
+        "parameters": []
+      },
+      "windows.mainForm.exitAeroscience": {
+        "parameters": []
+      },
+      "windows.mainForm.theEngineIsStoppedCheckStorageSettings": {
+        "parameters": []
+      },
+      "windows.mainForm.endRecordingAndWaitForCurrentOperationsBeforeRunning": {
+        "parameters": []
+      },
+      "windows.mainForm.endRecordingAndWaitForOtherOperationsBeforeUpdating": {
+        "parameters": []
+      },
+      "windows.mainForm.closeMsfsBeforeInstallingOrUpdatingAeroscienceSToolbar": {
+        "parameters": []
+      },
+      "windows.mainForm.installTheBundledAeroscienceToolbarInItsPreviousFiles": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "windows.mainForm.confirmToolbarInstallation": {
+        "parameters": []
+      },
+      "windows.mainForm.endRecordingAndWaitForActiveSetupStorageWork": {
+        "parameters": []
+      },
+      "windows.mainForm.compactTheDatabaseServicesWillStopTemporarilyAVerified": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "windows.mainForm.confirmDatabaseMaintenance": {
+        "parameters": []
+      },
+      "windows.mainForm.compactionCompleted": {
+        "parameters": []
+      },
+      "windows.mainForm.waitForCurrentSetupStorageWorkAndStartThe": {
+        "parameters": []
+      },
+      "windows.mainForm.importSourceObservationCopyMibIntoAvailableGibOriginal": {
+        "parameters": [
+          "value1",
+          "value2",
+          "value3",
+          "value4",
+          "value5",
+          "value6",
+          "value7"
+        ]
+      },
+      "windows.mainForm.importedOpenDashboardSettingsScientificDataSourcesToInspect": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "windows.mainForm.theBundleIncludesGeographicPreparationAreasInstrumentProviderTiming": {
+        "parameters": []
+      },
+      "windows.mainForm.savedLocallyReviewTheZipBeforeSharingIt": {
+        "parameters": []
+      },
+      "windows.setupWizardForm.next": {
+        "parameters": []
+      },
+      "windows.setupWizardForm.skipForNow": {
+        "parameters": []
+      },
+      "windows.setupWizardForm.installUpdateTheIncludedMsfs2024Toolbar": {
+        "parameters": []
+      },
+      "windows.setupWizardForm.allowAutomaticScientificDataDiscoveryAndBoundedDownloads": {
+        "parameters": []
+      },
+      "windows.setupWizardForm.welcomeToAeroscienceSetup": {
+        "parameters": []
+      },
+      "windows.setupWizardForm.chooseTheFolderForMissionsDb": {
+        "parameters": []
+      },
+      "windows.setupWizardForm.chooseAScientificDataLibraryFolder": {
+        "parameters": []
+      },
+      "windows.setupWizardForm.availableDriveSpaceGib": {
+        "parameters": [
+          "value1",
+          "value2"
+        ]
+      },
+      "windows.setupWizardForm.keepThisLocationToPreserveTheUnavailableLibraryReconnect": {
+        "parameters": []
+      },
+      "windows.setupWizardForm.aeroscienceStepOf4": {
+        "parameters": [
+          "value1",
+          "value2"
+        ]
+      },
+      "windows.setupWizardForm.finishSetup": {
+        "parameters": []
+      },
+      "windows.setupWizardForm.browseMissionDatabaseFolder": {
+        "parameters": []
+      },
+      "windows.setupWizardForm.browseScienceLibraryFolder": {
+        "parameters": []
+      },
+      "windows.setupWizardForm.browseCommunityFolder": {
+        "parameters": []
+      },
+      "windows.setupWizardForm.selectMsfs2024SConfiguredCommunityFolder": {
+        "parameters": []
+      },
+      "windows.setupWizardForm.closeSetupWithUnappliedChoicesChooseNoToKeep": {
+        "parameters": []
+      },
+      "windows.setupWizardForm.unfinishedSetup": {
+        "parameters": []
+      },
+      "windows.setupWizardForm.setUpLocalMissionStorageAndTheMsfs2024": {
+        "parameters": []
+      },
+      "windows.setupWizardForm.existingLocationsAndSettingsArePreselectedUpdatesKeepThem": {
+        "parameters": []
+      },
+      "windows.setupWizardForm.missionHistoryWorksWithoutMsfsOrInternetLiveRecording": {
+        "parameters": []
+      },
+      "windows.setupWizardForm.missionDatabaseFileChooseItsFolderFilenameRemainsMissions": {
+        "parameters": []
+      },
+      "windows.setupWizardForm.scientificDataLibraryMayBeOnADifferentInternal": {
+        "parameters": []
+      },
+      "windows.setupWizardForm.keepTheSuggestedFoldersToPreserveCurrentStorageNew": {
+        "parameters": []
+      },
+      "windows.setupWizardForm.confirmTheMsfs2024CommunityFolderDetectionReadsSteam": {
+        "parameters": []
+      },
+      "windows.setupWizardForm.closeMsfsBeforeInstallingOrUpdatingOnlyAeroscienceIs": {
+        "parameters": []
+      },
+      "windows.setupWizardForm.msfsIsCurrentlyRunningCloseItBeforeContinuingWith": {
+        "parameters": []
+      },
+      "windows.setupWizardForm.missionDatabaseScientificDataLibraryToolbar": {
+        "parameters": [
+          "value1",
+          "value2",
+          "value3"
+        ]
+      },
+      "windows.setupWizardForm.finishSetupConfirmsTheseChoicesChangedStorageLocationsUse": {
+        "parameters": []
+      },
+      "windows.setupWizardForm.optionalAndSeparateFromOnlineMapsLeaveUncheckedFor": {
+        "parameters": []
+      },
+      "windows.setupWizardForm.theScienceLibraryDriveHasLimitedFreeSpaceFuture": {
+        "parameters": []
+      },
+      "windows.setupWizardForm.storageCapacity": {
+        "parameters": []
+      },
+      "windows.settingsForm.aeroscienceSettings": {
+        "parameters": []
+      },
+      "windows.settingsForm.chooseAnEmptyDestinationOrAnExistingAeroscienceStore": {
+        "parameters": []
+      },
+      "windows.settingsForm.working": {
+        "parameters": []
+      },
+      "windows.settingsForm.completeOriginalDataRetained": {
+        "parameters": []
+      },
+      "windows.settingsForm.enablePrivateLanIpadAccess": {
+        "parameters": []
+      },
+      "windows.settingsForm.selectTheConfiguredMsfsCommunityFolder": {
+        "parameters": []
+      },
+      "windows.settingsForm.installedAvailableStatus": {
+        "parameters": [
+          "value1",
+          "value2",
+          "value3",
+          "value4"
+        ]
+      },
+      "windows.settingsForm.newInstallationsSuggestOpenstreetmapStreetsAfterAPrivacyChoice": {
+        "parameters": []
+      },
+      "windows.settingsForm.openMapsBasemapsSettings": {
+        "parameters": []
+      },
+      "windows.settingsForm.aeroscienceDashboardSettingsUpdatesShowsYourInstalledVersionAnd": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "windows.settingsForm.openUpdateSettingsCheckForUpdates": {
+        "parameters": []
+      },
+      "windows.settingsForm.waitForTheCurrentOperationToFinish": {
+        "parameters": []
+      },
+      "windows.settingsForm.discardUnappliedSettingsAndCloseChooseNoToKeep": {
+        "parameters": []
+      },
+      "windows.settingsForm.unsavedSettings": {
+        "parameters": []
+      },
+      "windows.settingsForm.usedAvailable": {
+        "parameters": [
+          "value1",
+          "value2"
+        ]
+      },
+      "windows.settingsForm.unavailable": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "windows.settingsForm.limitedAvailableCapacityConsiderAnotherDriveThisIsA": {
+        "parameters": []
+      },
+      "windows.settingsForm.browseChangeLocation": {
+        "parameters": []
+      },
+      "windows.settingsForm.openFolder": {
+        "parameters": []
+      },
+      "windows.settingsForm.restoreDefault": {
+        "parameters": []
+      },
+      "windows.settingsForm.dataManagement": {
+        "parameters": []
+      },
+      "windows.settingsForm.storageManagementLimitsPreviewCleanup": {
+        "parameters": []
+      },
+      "windows.settingsForm.recoverOriginalLocationFromInterruptedMigration": {
+        "parameters": []
+      },
+      "windows.settingsForm.noInterruptedMigrationNeedsRollback": {
+        "parameters": []
+      },
+      "windows.settingsForm.restoreTheOriginalVerifiedStorageSettingBothCopiesWill": {
+        "parameters": []
+      },
+      "windows.settingsForm.endTheMissionBeforeChangingEitherStorageLocation": {
+        "parameters": []
+      },
+      "windows.settingsForm.scienceLibraryCapacity": {
+        "parameters": []
+      },
+      "windows.settingsForm.availableCapacityThisDriveHasLimitedFreeSpaceFuture": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "windows.settingsForm.limitedCapacity": {
+        "parameters": []
+      },
+      "windows.settingsForm.confirmStorageChange": {
+        "parameters": []
+      },
+      "windows.settingsForm.runGuidedSetup": {
+        "parameters": []
+      },
+      "windows.settingsForm.recordingIntervalMillisecondsSimconnectIsRequestedAt1Hz": {
+        "parameters": []
+      },
+      "windows.settingsForm.applyConnectionSettings": {
+        "parameters": []
+      },
+      "windows.settingsForm.lanIsOptionalAllowAeroscienceOnTheWindowsPrivate": {
+        "parameters": []
+      },
+      "windows.settingsForm.msfsCommunityFolder": {
+        "parameters": []
+      },
+      "windows.settingsForm.browseCommunityFolder": {
+        "parameters": []
+      },
+      "windows.settingsForm.installUpdateRepairToolbar": {
+        "parameters": []
+      },
+      "windows.settingsForm.removeAeroscienceToolbar": {
+        "parameters": []
+      },
+      "windows.settingsForm.noCommunityFolderHasBeenConfigured": {
+        "parameters": []
+      },
+      "windows.settingsForm.removeOnlyAeroscienceFromThisCommunityFolderItsFiles": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "windows.settingsForm.removeToolbar": {
+        "parameters": []
+      },
+      "windows.settingsForm.theToolbarWasNotInstalledInThatFolder": {
+        "parameters": []
+      },
+      "windows.settingsForm.toolbarRemovedBackupRetainedAt": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "windows.settingsForm.theNativeSimconnectRuntimeIsIncludedConnectionStatusIs": {
+        "parameters": []
+      },
+      "windows.settingsForm.theNativeSimconnectRuntimeIsMissingRunAeroscienceSetup": {
+        "parameters": []
+      },
+      "windows.settingsForm.microsoftVisualCPrerequisite": {
+        "parameters": []
+      },
+      "windows.settingsForm.ifWindowsReportsAMissingVisualCDependencyUse": {
+        "parameters": []
+      },
+      "windows.settingsForm.toolbar": {
+        "parameters": []
+      },
+      "windows.earthdataConnectionForm.connectNasaEarthdata": {
+        "parameters": []
+      },
+      "windows.earthdataConnectionForm.signInOnlyOnNasaSOfficialWebsiteGenerate": {
+        "parameters": []
+      },
+      "windows.earthdataConnectionForm.openNasaSignInTokenPage": {
+        "parameters": []
+      },
+      "windows.earthdataConnectionForm.pasteNasaUserTokenStoredInWindowsCredentialManager": {
+        "parameters": []
+      },
+      "windows.earthdataConnectionForm.nasaEarthdataUserToken": {
+        "parameters": []
+      },
+      "windows.earthdataConnectionForm.theBrowserDashboardAndPairedDevicesNeverReceiveThis": {
+        "parameters": []
+      },
+      "windows.earthdataConnectionForm.saveEarthdataConnection": {
+        "parameters": []
+      },
+      "windows.earthdataConnectionForm.earthdataConnection": {
+        "parameters": []
+      },
+      "windows.earthdataConnectionForm.discardTheEnteredTokenAndCloseChooseNoTo": {
+        "parameters": []
+      },
+      "windows.earthdataConnectionForm.unsavedEarthdataConnection": {
+        "parameters": []
+      },
+      "windows.program.aeroscienceIsAlreadyRunningCloseItBeforeInstallationOr": {
+        "parameters": []
+      },
+      "windows.program.removeTheAeroscienceMsfsToolbarTooOnlyAeroscienceWill": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "windows.program.uninstallAeroscience": {
+        "parameters": []
+      },
+      "windows.program.closeMsfsBeforeRemovingTheAeroscienceToolbarThenChoose": {
+        "parameters": []
+      },
+      "windows.program.closeMsfs": {
+        "parameters": []
+      },
+      "windows.program.toolbarRemovalDidNotCompleteExistingFilesWerePreserved": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "windows.program.aeroscienceUninstall": {
+        "parameters": []
+      },
+      "windows.dataManagementForm.alsoRemoveSavedMissionPlansAndTheirPreflightNotes": {
+        "parameters": []
+      },
+      "windows.dataManagementForm.aeroscienceStorageDataDataManagement": {
+        "parameters": []
+      },
+      "windows.dataManagementForm.exportIndividualCompletedMissionsFromMissionHistoryTheseOperations": {
+        "parameters": []
+      },
+      "windows.dataManagementForm.clearScientificData": {
+        "parameters": []
+      },
+      "windows.dataManagementForm.clearFlightMissionData": {
+        "parameters": []
+      },
+      "windows.dataManagementForm.deleteCollectedScientificData": {
+        "parameters": []
+      },
+      "windows.dataManagementForm.deletionOptions": {
+        "parameters": []
+      },
+      "windows.dataManagementForm.permanentlyDeleteWithoutCreatingANewBackup": {
+        "parameters": []
+      },
+      "windows.dataManagementForm.createARecoveryBackupThenDelete": {
+        "parameters": []
+      },
+      "windows.dataManagementForm.deleteScientificData": {
+        "parameters": []
+      },
+      "windows.dataManagementForm.deleteFlightData": {
+        "parameters": []
+      },
+      "windows.dataManagementForm.reviewingTheExactCollectedScienceSelectionBackgroundOperationsAre": {
+        "parameters": []
+      },
+      "windows.dataManagementForm.missionsDatasetsObservationsGeneratedProductsEstimatedManagedFileSpace": {
+        "parameters": [
+          "value1",
+          "value2",
+          "value3",
+          "value4",
+          "value5",
+          "value6"
+        ]
+      },
+      "windows.dataManagementForm.cancelledNoScientificDataWasChanged": {
+        "parameters": []
+      },
+      "windows.dataManagementForm.permanentlyDeletingReviewedCollectedScience": {
+        "parameters": []
+      },
+      "windows.dataManagementForm.filesRemovedPending": {
+        "parameters": [
+          "value1",
+          "value2",
+          "value3",
+          "value4"
+        ]
+      },
+      "windows.dataManagementForm.deletionIsNotComplete": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "windows.dataManagementForm.chooseARecoveryBackupDestinationForScientificDataNot": {
+        "parameters": []
+      },
+      "windows.dataManagementForm.chooseARecoveryBackupDestinationForFlightMissionData": {
+        "parameters": []
+      },
+      "windows.dataManagementForm.stoppingServicesAndClearingTransactionallyWithoutANewBackup": {
+        "parameters": []
+      },
+      "windows.dataManagementForm.stoppingServicesVerifyingTheRecoveryBackupAndClearingTransactionally": {
+        "parameters": []
+      },
+      "windows.dataManagementForm.completed": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "windows.dataManagementForm.operationStoppedCommittedRecordsAndReferenceAvailabilityAreReconciled": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "windows.dataManagementForm.endRecordingAndWaitForActiveOperationsFirst": {
+        "parameters": []
+      },
+      "windows.dataManagementForm.endRecordingAndWaitForOtherOperationsFirst": {
+        "parameters": []
+      },
+      "windows.dataManagementForm.thisDeliberateArchiveClearIncludesProtectedMissionSDataset": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "windows.dataManagementForm.protectedResearchData": {
+        "parameters": []
+      },
+      "windows.dataManagementForm.permanentlyDeleteTheseRecords": {
+        "parameters": [
+          "value1",
+          "value2"
+        ]
+      },
+      "windows.dataManagementForm.confirmScientificDataDeletion": {
+        "parameters": []
+      },
+      "windows.dataManagementForm.confirmFlightDataDeletion": {
+        "parameters": []
+      },
+      "windows.scientificSourcesPanel.savedExistingDataAndProductsAreRetained": {
+        "parameters": []
+      },
+      "windows.scientificSourcesPanel.sourceDiagnosticsReviewBeforeSharing": {
+        "parameters": []
+      },
+      "windows.scientificSourcesPanel.historicalExternalDataRetainTheirOriginalObservationDatesAnd": {
+        "parameters": []
+      },
+      "windows.scientificSourcesPanel.onlineScientificDataAccess": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "windows.scientificSourcesPanel.enableConfigureOnlineScientificDataAccess": {
+        "parameters": []
+      },
+      "windows.scientificSourcesPanel.sourceModeAppliesToSelectionNotTheRecordingSwitch": {
+        "parameters": []
+      },
+      "windows.scientificSourcesPanel.importedPreparedDatasetsMibRetained": {
+        "parameters": [
+          "value1",
+          "value2",
+          "value3"
+        ]
+      },
+      "windows.scientificSourcesPanel.preparedRegionsMibExpand": {
+        "parameters": [
+          "value1",
+          "value2",
+          "value3"
+        ]
+      },
+      "windows.scientificSourcesPanel.providerSceneObservedKindBandsVerticalReferenceTermsSource": {
+        "parameters": [
+          "value1",
+          "value2",
+          "value3",
+          "value4",
+          "value5",
+          "value6",
+          "value7",
+          "value8",
+          "value9"
+        ]
+      },
+      "windows.scientificSourcesPanel.advancedDiagnosticsExactSourceMetadata": {
+        "parameters": []
+      },
+      "windows.scientificSourcesPanel.viewAllRegionsAndCollectionCoverage": {
+        "parameters": []
+      },
+      "windows.scientificSourcesPanel.importHyperspectralDataset": {
+        "parameters": []
+      },
+      "windows.scientificSourcesPanel.importDataset": {
+        "parameters": []
+      },
+      "windows.scientificSourcesPanel.onlineScientificDataPrivacyAndPredictiveControls": {
+        "parameters": []
+      },
+      "windows.scientificSourcesPanel.advancedJsonSourceCollectionImport": {
+        "parameters": []
+      },
+      "portal.language.memberTitle": {
+        "parameters": []
+      },
+      "portal.language.scope": {
+        "parameters": []
+      },
+      "portal.language.followBrowser": {
+        "parameters": []
+      },
+      "portal.language.memberLabel": {
+        "parameters": []
+      },
+      "portal.language.save": {
+        "parameters": []
+      },
+      "portal.language.saved": {
+        "parameters": []
+      },
+      "portal.language.conflict": {
+        "parameters": []
+      },
+      "portal.language.unavailable": {
+        "parameters": []
+      },
+      "windows.language.reopen": {
+        "parameters": []
+      },
+      "windows.science.modeAutomatic": {
+        "parameters": []
+      },
+      "windows.science.modeLocal": {
+        "parameters": []
+      },
+      "windows.science.modePreferLocal": {
+        "parameters": []
+      },
+      "windows.science.localAvailable": {
+        "parameters": []
+      },
+      "windows.science.spaceLimited": {
+        "parameters": []
+      },
+      "windows.science.datasetRequired": {
+        "parameters": []
+      },
+      "windows.feedback.notes": {
+        "parameters": []
+      },
+      "windows.flight.noMission": {
+        "parameters": []
+      },
+      "windows.flight.recording": {
+        "parameters": []
+      },
+      "windows.science.category11Title": {
+        "parameters": []
+      },
+      "windows.science.category11Description": {
+        "parameters": []
+      },
+      "windows.science.category12Title": {
+        "parameters": []
+      },
+      "windows.science.category12Description": {
+        "parameters": []
+      },
+      "windows.science.category13Title": {
+        "parameters": []
+      },
+      "windows.science.category13Description": {
+        "parameters": []
+      },
+      "windows.science.category14Title": {
+        "parameters": []
+      },
+      "windows.science.category14Description": {
+        "parameters": []
+      },
+      "native.toolbarTemplateDidNotFinishLoadingCloseAndReopen": {
+        "parameters": []
+      },
+      "native.connectingToCompanion": {
+        "parameters": []
+      },
+      "native.notSuppliedByThisPackage": {
+        "parameters": []
+      },
+      "native.toolbarSourceProtocol1": {
+        "parameters": [
+          "value1",
+          "value2"
+        ]
+      },
+      "native.commandsAeroscienceCommandV1RepliesAeroscienceReplyV1No": {
+        "parameters": []
+      },
+      "native.evidenceBasedAssessmentsDependOnTheCompanionSCapabilities": {
+        "parameters": []
+      },
+      "native.allCompatibleAircraftCanRecordMissions": {
+        "parameters": []
+      },
+      "native.theMapRendererIsUnavailableInThisUiContext": {
+        "parameters": []
+      },
+      "native.freePanDragTheMapOrUseArrowKeys": {
+        "parameters": []
+      },
+      "native.selecting": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "native.unableToLoadTheSdkCommbusServiceCheckThe": {
+        "parameters": []
+      },
+      "native.simulatorLinkUnavailableReopenThisPanelSeeConnectionBuild": {
+        "parameters": []
+      },
+      "native.theSdkCommbusHelperListenerDidNotBecomeAvailable": {
+        "parameters": []
+      },
+      "native.loadingSavedMissionPlans": {
+        "parameters": []
+      },
+      "native.selectedPlanIsNoLongerAvailableChooseAnotherPlan": {
+        "parameters": []
+      },
+      "native.selectedWaypointsPatternsInstruments": {
+        "parameters": [
+          "value1",
+          "value2",
+          "value3",
+          "value4"
+        ]
+      },
+      "native.loadingSelectedPlanDetails": {
+        "parameters": []
+      },
+      "native.unplannedMissionRecordWhereverYouFly": {
+        "parameters": []
+      },
+      "native.savedPlansSelectionIsSavedByTheCompanion": {
+        "parameters": [
+          "value1",
+          "value2"
+        ]
+      },
+      "native.noMoreSavedPlansUsePreviousPlans": {
+        "parameters": []
+      },
+      "native.noSavedMissionPlansCreateOneInTheDesktop": {
+        "parameters": []
+      },
+      "native.noActivePlannedMissionSelectASavedPlanOr": {
+        "parameters": []
+      },
+      "native.loadingRoute": {
+        "parameters": [
+          "value1",
+          "value2"
+        ]
+      },
+      "native.end": {
+        "parameters": []
+      },
+      "native.routeSynchronizedWaypointsNextObservedTarget": {
+        "parameters": [
+          "value1",
+          "value2"
+        ]
+      },
+      "native.routeSynchronizedOrderedWaypointsOfflineGeographyNoOnlineTile": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "native.simulatorChannelReadyWaitingForTheWindowsEngine": {
+        "parameters": []
+      },
+      "native.unableToRegisterTheSdkCommbusListener": {
+        "parameters": []
+      },
+      "native.staleStatusCompanionUnavailable": {
+        "parameters": []
+      },
+      "native.scientificStorageUnavailable": {
+        "parameters": []
+      },
+      "native.disconnectedUnavailable": {
+        "parameters": []
+      },
+      "native.telemetryStaleUnavailable": {
+        "parameters": []
+      },
+      "native.simulatorPausedScienceUnconfirmed": {
+        "parameters": []
+      },
+      "native.armedNotStarted": {
+        "parameters": []
+      },
+      "native.inactive": {
+        "parameters": []
+      },
+      "native.flightRecordingScience": {
+        "parameters": [
+          "value1",
+          "value2"
+        ]
+      },
+      "native.thisViewCouldNotUpdateSeeConnectionBuildDetails": {
+        "parameters": []
+      },
+      "native.displayFaults": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "native.displayComponentsSynchronized": {
+        "parameters": []
+      },
+      "native.replyRejectedCountLastValidStateRetainedFreshnessChecks": {
+        "parameters": [
+          "value1",
+          "value2"
+        ]
+      },
+      "native.companionReplyCouldNotBeReadSeeConnectionBuild": {
+        "parameters": []
+      },
+      "native.commandExceedsTheNativeLimitUseTheDashboard": {
+        "parameters": []
+      },
+      "native.sendingMissionCommand": {
+        "parameters": []
+      },
+      "native.commandDeliveryFailedTheIntervalIsNotConfirmed": {
+        "parameters": []
+      },
+      "native.simulatorCommandDeliveryFailedCheckTheEngineConnection": {
+        "parameters": []
+      },
+      "native.simulatorCommandDeliveryFailed": {
+        "parameters": []
+      },
+      "native.retryingTheIdenticalFlightBoundRequestNoNewCommand": {
+        "parameters": []
+      },
+      "native.noConfirmationReceivedReviewTheConfirmedIntervalBeforeTrying": {
+        "parameters": []
+      },
+      "native.noCommandConfirmationAfterOneIdenticalRetryReviewSynchronized": {
+        "parameters": []
+      },
+      "native.mapReplyTimedOutRetryingWithTheCachedRoute": {
+        "parameters": []
+      },
+      "native.noCommandConfirmationCheckMissionStateBeforeRetrying": {
+        "parameters": []
+      },
+      "native.lastMatchingEngineReplyControlsAreUnavailableUntilFresh": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "native.noMatchingEngineReplyCheckThatTheDashboardAnd": {
+        "parameters": []
+      },
+      "native.windowsEngineUnavailableLaunchAeroscienceAndCheckTheSimconnect": {
+        "parameters": []
+      },
+      "native.mach": {
+        "parameters": []
+      },
+      "native.companionDisconnectedCachedRouteRetainedLiveAircraftUnavailable": {
+        "parameters": []
+      },
+      "native.validationSourceMismatchNoStateAccepted": {
+        "parameters": []
+      },
+      "native.cardCommandNotConfirmedSynchronizeBeforeRetrying": {
+        "parameters": []
+      },
+      "native.mapSynchronizationFailedWaitingToRetry": {
+        "parameters": []
+      },
+      "native.confirmedS": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "native.intervalWasNotConfirmedReviewCurrentSettings": {
+        "parameters": []
+      },
+      "native.companionIntervalS": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "native.missionPlanSelectionConfirmed": {
+        "parameters": []
+      },
+      "native.planSelectionWasNotConfirmedRefreshPlans": {
+        "parameters": []
+      },
+      "native.pilotObservationSavedFlightAndScienceContinueIndependently": {
+        "parameters": []
+      },
+      "native.observationWasNotSavedYourTextIsPreserved": {
+        "parameters": []
+      },
+      "native.earlierRequestAcknowledged": {
+        "parameters": []
+      },
+      "native.aNewerAuthoritativeViewIsAlreadyDisplayed": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "native.matchingEngineReplyReceivedAircraftTelemetryAndScientificCollection": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "native.sessionCommandConfirmedReviewCurrentState": {
+        "parameters": []
+      },
+      "native.missionCommandWasRejected": {
+        "parameters": []
+      },
+      "native.activeRecordingItsSavedPlanSnapshotIsFixedPlan": {
+        "parameters": []
+      },
+      "native.simulatedTestData": {
+        "parameters": []
+      },
+      "native.simconnectTelemetry": {
+        "parameters": []
+      },
+      "native.aircraftTelemetryUnavailable": {
+        "parameters": []
+      },
+      "native.msfsDisconnected": {
+        "parameters": []
+      },
+      "native.recordingStopped": {
+        "parameters": [
+          "value1",
+          "value2"
+        ]
+      },
+      "native.awaitingInitializedAircraftTelemetry": {
+        "parameters": []
+      },
+      "native.activeSavedPlanSnapshotFixedForThisRecordingFly": {
+        "parameters": []
+      },
+      "native.activeUnplannedMissionScientificPreparationFollowsActualAircraftMovement": {
+        "parameters": []
+      },
+      "native.universalModeFlyAnything": {
+        "parameters": []
+      },
+      "native.samples": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "native.notGraded": {
+        "parameters": []
+      },
+      "native.insufficientEvidence": {
+        "parameters": []
+      },
+      "native.stale": {
+        "parameters": []
+      },
+      "native.armed": {
+        "parameters": []
+      },
+      "native.waitingForSource": {
+        "parameters": []
+      },
+      "native.acquisitionGap": {
+        "parameters": []
+      },
+      "native.sourceDisconnected": {
+        "parameters": []
+      },
+      "native.waiting": {
+        "parameters": []
+      },
+      "native.manual": {
+        "parameters": []
+      },
+      "native.unsupported": {
+        "parameters": []
+      },
+      "native.provisional": {
+        "parameters": []
+      },
+      "native.final": {
+        "parameters": []
+      },
+      "native.revised": {
+        "parameters": []
+      },
+      "native.supported": {
+        "parameters": []
+      },
+      "native.idle": {
+        "parameters": []
+      },
+      "native.detecting": {
+        "parameters": []
+      },
+      "native.holding": {
+        "parameters": []
+      },
+      "native.complete": {
+        "parameters": []
+      },
+      "native.thisCompanionDoesNotSupportSessionBoundNativeControls": {
+        "parameters": []
+      },
+      "native.staleEngineStateSynchronizeBeforeControllingScience": {
+        "parameters": []
+      },
+      "native.backendSessionAndControlRevisionsAreCheckedBeforeApplying": {
+        "parameters": []
+      },
+      "native.scienceStatusUnavailableUnsupportedCompanion": {
+        "parameters": []
+      },
+      "native.updateTheCompanionForScienceSessionControls": {
+        "parameters": []
+      },
+      "native.noScoreAvailable": {
+        "parameters": []
+      },
+      "native.noSessionIdentitySupplied": {
+        "parameters": []
+      },
+      "native.nextTriggerNotAssessed": {
+        "parameters": []
+      },
+      "native.scientificYieldNotAssessed": {
+        "parameters": []
+      },
+      "native.pilotHoldRearmRequired": {
+        "parameters": []
+      },
+      "native.continuityHold": {
+        "parameters": []
+      },
+      "native.collectionControl": {
+        "parameters": [
+          "value1",
+          "value2",
+          "value3"
+        ]
+      },
+      "native.none": {
+        "parameters": []
+      },
+      "native.flightSessionRevision": {
+        "parameters": [
+          "value1",
+          "value2",
+          "value3"
+        ]
+      },
+      "native.goodDataValidScientificCoverageNotYetAssessedFlight": {
+        "parameters": []
+      },
+      "native.evidenceCutoffIsOlderThan15SMetricsAre": {
+        "parameters": []
+      },
+      "native.additionalDetailOnDashboard": {
+        "parameters": []
+      },
+      "native.stateAsOfMetrics": {
+        "parameters": [
+          "value1",
+          "value2",
+          "value3",
+          "value4"
+        ]
+      },
+      "native.researchStatusUnavailable": {
+        "parameters": []
+      },
+      "native.personalResearchCardsPrepareInTheDesktopFlightPlanner": {
+        "parameters": []
+      },
+      "native.activeCardS": {
+        "parameters": [
+          "value1",
+          "value2"
+        ]
+      },
+      "native.waitingForSynchronizedPersonalCardStateFlightAndScience": {
+        "parameters": []
+      },
+      "native.choosePersonalCardsInMissionPlannerBeforeRecording": {
+        "parameters": []
+      },
+      "native.activateACardThenBeginAttemptEndAttemptDeactivate": {
+        "parameters": []
+      },
+      "native.noPersonalCardsSelectedForThisFlight": {
+        "parameters": []
+      },
+      "native.ordered": {
+        "parameters": []
+      },
+      "native.independent": {
+        "parameters": []
+      },
+      "native.procedureRepetitionsVerifyOriginalsAfterFlight": {
+        "parameters": [
+          "value1",
+          "value2"
+        ]
+      },
+      "native.continuousSeconds": {
+        "parameters": [
+          "value1",
+          "value2"
+        ]
+      },
+      "native.fictionalModeledTemperatureSResponseOriginalScienceSamplesRequired": {
+        "parameters": [
+          "value1",
+          "value2"
+        ]
+      },
+      "native.documentedPilotObservationsNotesAreNotSensorMeasurements": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "native.surveySourceQualifiedSamplesRequired": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "native.distinctSamplingLocationsMGeographicExtentCollectValidTemperature": {
+        "parameters": [
+          "value1",
+          "value2"
+        ]
+      },
+      "native.neighboringFootMslBandsCollectValidTemperatureReadings": {
+        "parameters": [
+          "value1",
+          "value2"
+        ]
+      },
+      "native.knotsIasFeetMsl": {
+        "parameters": [
+          "value1",
+          "value2"
+        ]
+      },
+      "native.revision": {
+        "parameters": [
+          "value1",
+          "value2"
+        ]
+      },
+      "native.attemptRecording": {
+        "parameters": []
+      },
+      "native.issued": {
+        "parameters": [
+          "value1",
+          "value2",
+          "value3"
+        ]
+      },
+      "native.focusedInToolbar": {
+        "parameters": []
+      },
+      "native.sAttempts": {
+        "parameters": [
+          "value1",
+          "value2",
+          "value3"
+        ]
+      },
+      "native.enableautomatic": {
+        "parameters": []
+      },
+      "native.flightGuidanceUnavailable": {
+        "parameters": []
+      },
+      "native.ap": {
+        "parameters": [
+          "value1",
+          "value2"
+        ]
+      },
+      "native.scientificSourceUnavailable": {
+        "parameters": []
+      },
+      "native.scienceInstrument": {
+        "parameters": []
+      },
+      "native.diagnostics": {
+        "parameters": []
+      },
+      "native.collectionInterval": {
+        "parameters": []
+      },
+      "native.collectionInterval2": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "native.applyInterval": {
+        "parameters": []
+      },
+      "native.applyInterval2": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "native.useConfirmedInterval": {
+        "parameters": []
+      },
+      "native.useConfirmedInterval2": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "native.chooseApplyIntervalToConfirmThisChange": {
+        "parameters": []
+      },
+      "native.applyingInterval": {
+        "parameters": []
+      },
+      "native.commandUnavailableSynchronizeWithTheCompanion": {
+        "parameters": []
+      },
+      "native.usingConfirmedIntervalS": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "native.on": {
+        "parameters": []
+      },
+      "native.off": {
+        "parameters": []
+      },
+      "native.disableInstrument": {
+        "parameters": []
+      },
+      "native.enableInstrument": {
+        "parameters": []
+      },
+      "native.sConfirmed": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "native.disabled": {
+        "parameters": []
+      },
+      "native.savedProducts": {
+        "parameters": []
+      },
+      "native.measurementValues": {
+        "parameters": []
+      },
+      "native.unavailable": {
+        "parameters": []
+      },
+      "native.acquisitionSetsRejectedUnexpectedMissingActualLast": {
+        "parameters": [
+          "value1",
+          "value2",
+          "value3",
+          "value4",
+          "value5",
+          "value6",
+          "value7",
+          "value8"
+        ]
+      },
+      "native.static.connectionBuildDetails": {
+        "parameters": []
+      },
+      "native.static.commandsAeroscienceCommandV1RepliesAeroscienceReplyV1": {
+        "parameters": []
+      },
+      "native.static.bundledEnglishFallbackUntilMatchingCompanionSettingsArrive": {
+        "parameters": []
+      },
+      "native.static.researchStateUnavailable": {
+        "parameters": []
+      },
+      "native.static.cardsDescribeExperimentsSaveRoutesAsMissionPlansInThe": {
+        "parameters": []
+      },
+      "native.static.previousCards": {
+        "parameters": []
+      },
+      "native.static.nextCards": {
+        "parameters": []
+      },
+      "native.static.mslFt": {
+        "parameters": []
+      },
+      "native.static.iasKts": {
+        "parameters": []
+      },
+      "native.static.headingDegt": {
+        "parameters": []
+      },
+      "native.static.vsFtMin": {
+        "parameters": []
+      },
+      "native.static.startRecordingAtAnyTimeYourMissionContinuesIfThis": {
+        "parameters": []
+      },
+      "native.static.savedMissionPlan": {
+        "parameters": []
+      },
+      "native.static.unplannedMission": {
+        "parameters": []
+      },
+      "native.static.previousPlans": {
+        "parameters": []
+      },
+      "native.static.nextPlans": {
+        "parameters": []
+      },
+      "native.static.viewRouteOnMap": {
+        "parameters": []
+      },
+      "native.static.saveAPlanInTheDashboardSelectItHereStart": {
+        "parameters": []
+      },
+      "native.static.universalFlyAnything": {
+        "parameters": []
+      },
+      "native.static.realisticAuthenticResearch": {
+        "parameters": []
+      },
+      "native.static.yourWrittenAccountNotASensorReadingMissingLocationsStay": {
+        "parameters": []
+      },
+      "native.static.observationCategory": {
+        "parameters": []
+      },
+      "native.static.shortObservation120Characters": {
+        "parameters": []
+      },
+      "native.static.recordingContinuesWhenThisPanelClosesOpenTheCompanionDashboard": {
+        "parameters": []
+      },
+      "native.static.researchMissionMap": {
+        "parameters": []
+      },
+      "native.static.freePan": {
+        "parameters": []
+      },
+      "native.static.zoom": {
+        "parameters": []
+      },
+      "native.static.previousWaypoint": {
+        "parameters": []
+      },
+      "native.static.nextWaypoint": {
+        "parameters": []
+      },
+      "native.static.nextObservedTarget": {
+        "parameters": []
+      },
+      "native.static.progressAndMapLimits": {
+        "parameters": []
+      },
+      "native.static.northUpGoldPlannedTurquoiseRecordedPinkMarkersRecentTrack": {
+        "parameters": []
+      },
+      "native.static.scienceSessionControlsEvidence": {
+        "parameters": []
+      },
+      "native.static.endScienceClosesThisSessionEndMissionBelowEndsThe": {
+        "parameters": []
+      },
+      "native.static.collectionStopped": {
+        "parameters": []
+      },
+      "native.static.sourceAndLimitations": {
+        "parameters": []
+      },
+      "native.static.simulatorReportedAtmosphericObservationsAnActiveMissionIsRequiredTo": {
+        "parameters": []
+      },
+      "native.static.aerosciencePages": {
+        "parameters": []
+      },
+      "native.static.missionAndPayloadContent": {
+        "parameters": []
+      },
+      "native.static.researchMission": {
+        "parameters": []
+      },
+      "native.static.scientificMissionIntelligence": {
+        "parameters": []
+      },
+      "native.ambientTemperature": {
+        "parameters": []
+      },
+      "native.ambientWind": {
+        "parameters": []
+      },
+      "map.native.unavailable": {
+        "parameters": []
+      },
+      "map.native.accessible": {
+        "parameters": []
+      },
+      "map.native.noWaypoint": {
+        "parameters": []
+      },
+      "map.native.altitudeUnknown": {
+        "parameters": []
+      },
+      "map.native.liveUnavailable": {
+        "parameters": []
+      },
+      "map.native.abbreviated": {
+        "parameters": []
+      },
+      "map.native.legend": {
+        "parameters": []
+      },
+      "map.native.track": {
+        "parameters": [
+          "track",
+          "speed"
+        ]
+      },
+      "windows.deletion.confirmation": {
+        "parameters": [
+          "phrase"
+        ]
+      },
+      "windows.deletion.typePhrase": {
+        "parameters": [
+          "phrase"
+        ]
+      },
+      "native.instrument.ambientTemperature": {
+        "parameters": []
+      },
+      "native.instrument.ambientPressure": {
+        "parameters": []
+      },
+      "native.instrument.ambientWind": {
+        "parameters": []
+      },
+      "native.instrument.ambientDensity": {
+        "parameters": []
+      },
+      "native.instrument.thermalImager": {
+        "parameters": []
+      },
+      "native.instrument.multispectralImager": {
+        "parameters": []
+      },
+      "native.instrument.hyperspectralImager": {
+        "parameters": []
       }
     }
   },
   "catalogs": {
     "de-DE": {
-      "version": 19,
+      "version": 20,
       "locale": "de-DE",
-      "sourceHash": "cb25b591a8ea973a4079dbac869815ee99dc5ca1da5aa26c23574fab8d3e2eb6",
+      "sourceHash": "24325d6cd2282e6667cce945669b271811652f8627707a2d627de0b92e3822f9",
       "pendingEnglishFallbackKeys": [
         "contextHelp.terrain.title",
         "flight.elapsed",
@@ -21911,6 +23468,16 @@ export const localeData = {
         "html.index.textUtc",
         "html.index.textWgs84",
         "missions.connection.paused",
+        "native.acquisitionSetsRejectedUnexpectedMissingActualLast",
+        "native.activeCardS",
+        "native.collectionControl",
+        "native.commandDeliveryFailedTheIntervalIsNotConfirmed",
+        "native.neighboringFootMslBandsCollectValidTemperatureReadings",
+        "native.stale",
+        "native.stateAsOfMetrics",
+        "native.static.iasKts",
+        "native.static.northUpGoldPlannedTurquoiseRecordedPinkMarkersRecentTrack",
+        "native.static.vsFtMin",
         "results.product",
         "results.terrainCells",
         "submissions.noSupportingProducts",
@@ -22146,7 +23713,16 @@ export const localeData = {
         "ui.tfrLayers.messageUnableToDetermineGeographic",
         "ui.tfrLayers.messageXMLSHA256AIXMSHA256",
         "ui.transferProgress.messageAbout",
-        "ui.transferProgress.messageOriginalBytesPresent"
+        "ui.transferProgress.messageOriginalBytesPresent",
+        "windows.earthdataConnectionForm.signInOnlyOnNasaSOfficialWebsiteGenerate",
+        "windows.mainForm.chooseANumericElevationDemGeotiff",
+        "windows.mainForm.endRecordingAndWaitForActiveSetupStorageWork",
+        "windows.mainForm.importSourceObservationCopyMibIntoAvailableGibOriginal",
+        "windows.program.removeTheAeroscienceMsfsToolbarTooOnlyAeroscienceWill",
+        "windows.science.category11Description",
+        "windows.science.category11Title",
+        "windows.setupWizardForm.missionDatabaseFileChooseItsFolderFilenameRemainsMissions",
+        "windows.toolbarProgressForm.aeroscienceMsfsToolbar"
       ],
       "messages": {
         "common.messageUnavailable": "Details sind nicht verfügbar. Aktualisieren Sie die Ansicht, um die aktuellen Informationen zu prüfen.",
@@ -28333,11 +29909,454 @@ export const localeData = {
         "ui.scientificAccess.messagePrepareASmallArea": "Bereiten Sie eine kleine Fläche vor",
         "ui.sensorPlanning.messageSurveyAltitudeAboveGround": "Höhenmessung über dem Boden",
         "ui.sensorPlanning.messageSideOverlap": "Seitenüberlappung (%)",
-        "ui.sensorPlanning.messageForwardOverlap": "Vorläufige Überschneidungen (%)"
+        "ui.sensorPlanning.messageForwardOverlap": "Vorläufige Überschneidungen (%)",
+        "windows.brandedForm.aeroscienceOrbitalArcLogo": "AeroScience Orbital Arc Logo",
+        "windows.toolbarProgressForm.aeroscienceToolbarInstallation": "AeroScience · Toolbar-Installation",
+        "windows.toolbarProgressForm.installedAvailableCommunity": "Installation: {value1} Verfügbar: {value2} Gemeinschaft: {value3}",
+        "windows.toolbarProgressForm.installationCompleted": "Installation abgeschlossen",
+        "windows.toolbarProgressForm.theInstalledPackageAndVersionWereVerifiedStartOr": "Das installierte Paket und die installierte Version wurden überprüft. Starten oder starten Sie MSFS, um die aktualisierte Symbolleiste zu laden.",
+        "windows.toolbarProgressForm.installationStopped": "Anhalten der Installation",
+        "windows.toolbarProgressForm.previousFilesAreRestoredWhenPossibleDetailsAreIn": "{value1} Frühere Dateien werden, wenn möglich, wiederhergestellt. Details sind in AeroSciences Werkzeugleistenprotokollen.",
+        "windows.toolbarProgressForm.aeroscienceMsfsToolbar": "AeroScience MSFS Toolbar",
+        "windows.toolbarProgressForm.closeMsfsBeforeUpdatingTheCompanionCanContinueWhen": "{value1} Schließen Sie MSFS vor der Aktualisierung. Der Begleiter kann fortfahren, wenn Sie diese Aktion verschieben.",
+        "windows.toolbarProgressForm.installToolbar": "Werkzeugleiste installieren",
+        "windows.toolbarProgressForm.updateToolbar": "Werkzeugleiste aktualisieren",
+        "windows.mainForm.openDashboard": "Öffnen Sie dashboard",
+        "windows.mainForm.scienceMissionOperations": "{value1} · Wissenschaftsmissionen",
+        "windows.mainForm.chooseTheOriginalMissionDatabaseFolderToCopyIt": "Wählen Sie den ORIGINAL Mission Datenbankordner zu COPY. Es wird nicht migriert.",
+        "windows.mainForm.chooseTheOriginalScienceLibraryFolderToCopyOriginals": "Wählen Sie den Ordner ORIGINAL Science Library zu COPY. Originale werden erhalten bleiben.",
+        "windows.mainForm.engineStoppedOpenStorageSettingsToResolveStartupOr": "Engine gestoppt. Öffnen Sie Storage/Settings, um Start- oder Speicherfehler zu beheben. Ihr vorhandenes Archiv wurde nicht ersetzt.",
+        "windows.mainForm.theLocalEngineStoppedAfterAnErrorCollectFeedback": "Die lokale Engine hat nach einem Fehler aufgehört. Sammeln Sie Feedback und überprüfen Sie Storage/Settings; vorhandene Datensätze werden beibehalten.",
+        "windows.mainForm.engineRunningToolbar": "{value1} · Motor läuft · {value2} {value3} · Werkzeugleiste: {value4}",
+        "windows.mainForm.chooseYourMsfs2024CommunityFolder": "Wählen Sie Ihren MSFS 2024 Community Ordner",
+        "windows.mainForm.chooseAHistoricalLasLazOriginal": "Wählen Sie ein historisches LAS/LAZ Original",
+        "windows.mainForm.chooseANumericElevationDemGeotiff": "Choose a numeric elevation DEM GeoTIFF",
+        "windows.mainForm.chooseTheCollectionFolder": "Wählen Sie den Ordner {value1}",
+        "windows.mainForm.chooseTheFolderContainingAnEnviHdrAndIts": "Wählen Sie den Ordner mit einem ENVI.hdr und seinem ursprünglichen hyperspektralen Binär",
+        "windows.mainForm.chooseTheOriginalHyperspectralEnviHeader": "Wählen Sie den originalen hyperspektralen ENVI-Header",
+        "windows.mainForm.selectMatchingEmitRfl002Rfluncert002AndMask003Originals": "Wählen Sie passende EMIT RFL002, RFLUNCERT002 und MASK003 Originale",
+        "windows.mainForm.importARealScientificSourceCollectionManifest": "Importieren einer echten wissenschaftlichen Datenerfassung",
+        "windows.mainForm.collectFeedback": "Rückkopplung sammeln",
+        "windows.mainForm.saveFeedbackZip": "Rückmeldung speichern ZIP...",
+        "windows.mainForm.copyArchivesForValidation": "Archiv kopieren zur Validierung",
+        "windows.mainForm.createAVerifiedDisposableCopyOfBothArchivesInside": "Erstellen Sie eine verifizierte Einwegkopie beider Archive innerhalb des Validierungsprofils und öffnen Sie diese dann mit deaktiviertem wissenschaftlichen Online-Zugriff? Aktivieren Sie später in den Einstellungen, wenn dies möglich ist. Originale und Produktionseinstellungen werden beibehalten.",
+        "windows.mainForm.exit": "Beenden",
+        "windows.mainForm.storageRecovery": "Wiederauffüllung der Speicher",
+        "windows.mainForm.waitForTheStorageSetupOperationToFinish": "Warten Sie, bis der Speicher/Setup-Betrieb beendet ist.",
+        "windows.mainForm.aMissionIsRecordingExitAndPreserveItAs": "Eine Mission ist Aufnahme. Verlassen und bewahren Sie es wie unterbrochen?",
+        "windows.mainForm.exitAeroscience": "AeroScience verlassen",
+        "windows.mainForm.theEngineIsStoppedCheckStorageSettings": "Der Motor wird gestoppt. Lager/Settings überprüfen.",
+        "windows.mainForm.endRecordingAndWaitForCurrentOperationsBeforeRunning": "Die Aufnahme beenden und auf die laufenden Operationen warten, bevor die Einrichtung ausgeführt wird.",
+        "windows.mainForm.endRecordingAndWaitForOtherOperationsBeforeUpdating": "Die Aufnahme beenden und auf andere Operationen warten, bevor die Symbolleiste aktualisiert wird.",
+        "windows.mainForm.closeMsfsBeforeInstallingOrUpdatingAeroscienceSToolbar": "Schließen Sie MSFS vor der Installation oder Aktualisierung der AeroScience-Symbolleiste.",
+        "windows.mainForm.installTheBundledAeroscienceToolbarInItsPreviousFiles": "Installieren Sie die gebündelte AeroScience-Symbolleiste in: {value1} Seine vorherigen Dateien werden außerhalb der Community gesichert.",
+        "windows.mainForm.confirmToolbarInstallation": "Symbolleisten-Installation bestätigen",
+        "windows.mainForm.endRecordingAndWaitForActiveSetupStorageWork": "End recording and wait for active setup/storage work before compacting.",
+        "windows.mainForm.compactTheDatabaseServicesWillStopTemporarilyAVerified": "Kompakt die {value1} Datenbank? Dienste werden vorübergehend gestoppt. Es wird ein verifiziertes Backup und ausreichend Zeitaufwand benötigt. Originalbeobachtungen werden beibehalten; tatsächlich wiederhergestellte Datenbankbytes werden gemeldet..",
+        "windows.mainForm.confirmDatabaseMaintenance": "Datenbankwartung bestätigen",
+        "windows.mainForm.compactionCompleted": "Verdichtung abgeschlossen",
+        "windows.mainForm.waitForCurrentSetupStorageWorkAndStartThe": "Warten Sie auf die aktuelle Installation/Speicherung und starten Sie zuerst die lokale Engine.",
+        "windows.mainForm.importSourceObservationCopyMibIntoAvailableGibOriginal": "Import {value1}?\n\nSource: {value2}\nObservation: {value3}\nCopy {value4} MiB into {value5}\nAvailable: {value6} GiB\n\nOriginal files remain untouched. No files are downloaded and no data are uploaded. Review the source license: {value7}",
+        "windows.mainForm.importedOpenDashboardSettingsScientificDataSourcesToInspect": "Importiert {value1}. Dashboard öffnen Einstellungen → Wissenschaftliche Datenquellen zur Überprüfung der Abdeckung und Metadaten.",
+        "windows.mainForm.theBundleIncludesGeographicPreparationAreasInstrumentProviderTiming": "Das Bündel umfasst geografische Vorbereitungsbereiche, Instrument/Anbieter Timing, Fehler und lokale Protokolle. Überprüfen Sie es vor der Freigabe. Es sind keine wissenschaftlichen Originale, Datenbanken oder Anmeldeinformationen enthalten. Weiter?",
+        "windows.mainForm.savedLocallyReviewTheZipBeforeSharingIt": "Lokal gespeichert. Überprüfen Sie die ZIP vor der Freigabe.",
+        "windows.setupWizardForm.next": "Nächster",
+        "windows.setupWizardForm.skipForNow": "Jetzt überspringen",
+        "windows.setupWizardForm.installUpdateTheIncludedMsfs2024Toolbar": "Installieren / Aktualisieren der mitgelieferten MSFS 2024 Symbolleiste",
+        "windows.setupWizardForm.allowAutomaticScientificDataDiscoveryAndBoundedDownloads": "Automatische wissenschaftliche Datenerkennung und beschränkte Downloads ermöglichen",
+        "windows.setupWizardForm.welcomeToAeroscienceSetup": "Willkommen bei AeroScience · Setup",
+        "windows.setupWizardForm.chooseTheFolderForMissionsDb": "Wählen Sie den Ordner für missions.db",
+        "windows.setupWizardForm.chooseAScientificDataLibraryFolder": "Wählen Sie einen Ordner für wissenschaftliche Datenbibliotheken",
+        "windows.setupWizardForm.availableDriveSpaceGib": "Verfügbare Antriebsfläche: {value1} GiB{value2}",
+        "windows.setupWizardForm.keepThisLocationToPreserveTheUnavailableLibraryReconnect": "· Halten Sie diesen Speicherort, um die nicht verfügbare Bibliothek zu erhalten; verbinden Sie das Laufwerk später wieder. Ihr verfügbares Missionsarchiv kann noch geöffnet werden.",
+        "windows.setupWizardForm.aeroscienceStepOf4": "AeroScience {value1} · Schritt {value2} von 4",
+        "windows.setupWizardForm.finishSetup": "Einrichtung beenden",
+        "windows.setupWizardForm.browseMissionDatabaseFolder": "Suchen Sie den Datenbankordner für die Mission...",
+        "windows.setupWizardForm.browseScienceLibraryFolder": "Wissenschaftsbibliothek Ordner durchsuchen...",
+        "windows.setupWizardForm.browseCommunityFolder": "Community Ordner durchsuchen...",
+        "windows.setupWizardForm.selectMsfs2024SConfiguredCommunityFolder": "Wählen Sie MSFS 2024s konfigurierten Gemeinschaftsordner",
+        "windows.setupWizardForm.closeSetupWithUnappliedChoicesChooseNoToKeep": "Schließen Sie die Einrichtung mit unapplieden Einstellungen? Wählen Sie Nein, um die Bearbeitung zu halten.",
+        "windows.setupWizardForm.unfinishedSetup": "Unfertige Einrichtung",
+        "windows.setupWizardForm.setUpLocalMissionStorageAndTheMsfs2024": "Stellen Sie lokalen Missionsspeicher und die MSFS 2024 Toolbar ein. Die App startet dann ihre Dienste und öffnet Ihr Dashboard automatisch.",
+        "windows.setupWizardForm.existingLocationsAndSettingsArePreselectedUpdatesKeepThem": "Bestehende Standorte und Einstellungen werden vorab ausgewählt. Die Updates behalten sie. Änderungen einer Standortkopie und Überprüfungen bestehender Daten erst nach Ihrer Bestätigung; Originale werden gespeichert.",
+        "windows.setupWizardForm.missionHistoryWorksWithoutMsfsOrInternetLiveRecording": "Mission History funktioniert ohne MSFS oder Internet. Live-Aufnahmen werden verfügbar, wenn ein Flugzeug angeschlossen ist.",
+        "windows.setupWizardForm.missionDatabaseFileChooseItsFolderFilenameRemainsMissions": "Mission Database file (choose its folder; filename remains missions.db)",
+        "windows.setupWizardForm.scientificDataLibraryMayBeOnADifferentInternal": "Wissenschaftliche Datenbibliothek — kann auf einem anderen internen oder externen Laufwerk sein",
+        "windows.setupWizardForm.keepTheSuggestedFoldersToPreserveCurrentStorageNew": "Behalten Sie die vorgeschlagenen Ordner, um den aktuellen Speicher zu erhalten. Neue Ziele müssen leer sein. Bestehende Speicher können explizit über Einstellungen → Speicher nach dem Setup ausgewählt werden.",
+        "windows.setupWizardForm.confirmTheMsfs2024CommunityFolderDetectionReadsSteam": "Bestätigen Sie den MSFS 2024 Community Ordner. Erkennung liest Steam / Microsoft Store Konfiguration, einschließlich benutzerdefinierter Paketpfade. Verwenden Sie Suchen, wenn nötig.",
+        "windows.setupWizardForm.closeMsfsBeforeInstallingOrUpdatingOnlyAeroscienceIs": "Schließen Sie MSFS vor der Installation oder Aktualisierung. Nur AeroScience wird geändert; das vorherige AeroScience Paket wird außerhalb der Community gesichert. Skip for Now lässt Community unberührt; Installation bleibt in Einstellungen verfügbar.",
+        "windows.setupWizardForm.msfsIsCurrentlyRunningCloseItBeforeContinuingWith": "MSFS läuft gerade. Schließen Sie es, bevor Sie mit der Symbolleiste-Installation fortfahren, oder wählen Sie \"Springe für Jetzt\".",
+        "windows.setupWizardForm.missionDatabaseScientificDataLibraryToolbar": "Missionsdatenbank: {value1} Wissenschaftliche Datenbibliothek: {value2} Werkzeugleiste: {value3}",
+        "windows.setupWizardForm.finishSetupConfirmsTheseChoicesChangedStorageLocationsUse": "Fertiges Setup bestätigt diese Auswahl. Verifizierte Speicherorte verwenden verifizierte Migration mit Originalen behalten. Bestehende Zieldaten werden nie überschrieben oder stillschweigend zusammengeführt. Sie können das Setup und die Speicherung über Einstellungen erneut besuchen.",
+        "windows.setupWizardForm.optionalAndSeparateFromOnlineMapsLeaveUncheckedFor": "Optional und getrennt von Online-Karten. Lassen Sie unbeprüft für Offline-Nur-Wissenschaft. Ändern Sie Bandbreite, Datum / Qualitätspolitik und Zugriff später in Einstellungen → Scientific Data Sources. Bereite wissenschaftliche Originale werden innerhalb Ihrer Bibliothek Speicher begrenzt behalten.",
+        "windows.setupWizardForm.theScienceLibraryDriveHasLimitedFreeSpaceFuture": "Das Science Library Laufwerk hat nur wenig Platz. Künftige Wissenschaftsformate und Datenraten sind nicht implementiert; keine Größenprognose ist verfügbar. Weiter?",
+        "windows.setupWizardForm.storageCapacity": "Speicherkapazität",
+        "windows.settingsForm.aeroscienceSettings": "AeroScience-Einstellungen",
+        "windows.settingsForm.chooseAnEmptyDestinationOrAnExistingAeroscienceStore": "Wählen Sie ein leeres Ziel oder einen bestehenden AeroScience Store",
+        "windows.settingsForm.working": "Arbeiten...",
+        "windows.settingsForm.completeOriginalDataRetained": "Vollständige. Originaldaten gespeichert.",
+        "windows.settingsForm.enablePrivateLanIpadAccess": "Private-LAN / iPad-Zugang aktivieren",
+        "windows.settingsForm.selectTheConfiguredMsfsCommunityFolder": "Wählen Sie den konfigurierten MSFS Community Ordner",
+        "windows.settingsForm.installedAvailableStatus": "Installation: {value1} · Verfügbar: {value2} Status: {value3} {value4}",
+        "windows.settingsForm.newInstallationsSuggestOpenstreetmapStreetsAfterAPrivacyChoice": "Neue Installationen schlagen OpenStreetMap / Streets nach einer Auswahl der Privatsphäre vor der ersten Kachel-Anfrage vor. Wählen Sie nur offline auf dieser Eingabeaufforderung oder ändern Sie Karten und Basiskarten im Dashboard. Bestehende Einstellungen sind erhalten. Offline-Geographie bleibt ohne Konto verfügbar. Optional Esri Satellitenbilder erfordern Ihre eigenen konfigurierten Anmeldeinformationen.",
+        "windows.settingsForm.openMapsBasemapsSettings": "Einstellungen für Karten & Basiskarten öffnen",
+        "windows.settingsForm.aeroscienceDashboardSettingsUpdatesShowsYourInstalledVersionAnd": "AeroScience {value1}. Dashboard Einstellungen → Updates zeigt Ihre installierte Version und optionale GitHub Release-Benachrichtigungen. Die Überprüfungen werden täglich zwischengespeichert, blockieren keine Offline-Archive und führen niemals automatisch einen Installer aus. Sie können dort automatische Überprüfungen deaktivieren oder Alpha-Releases ein- bzw. ausschließen.",
+        "windows.settingsForm.openUpdateSettingsCheckForUpdates": "Updateeinstellungen öffnen / Updates überprüfen",
+        "windows.settingsForm.waitForTheCurrentOperationToFinish": "Warten Sie, bis die aktuelle Operation beendet ist.",
+        "windows.settingsForm.discardUnappliedSettingsAndCloseChooseNoToKeep": "Nicht applied Einstellungen entfernen und schließen? Wählen Sie Nein, um die Bearbeitung zu halten. Gespeicherte Einstellungen, Aufnahme und Hintergrundarbeit werden beibehalten.",
+        "windows.settingsForm.unsavedSettings": "Einstellungen für die Unsaved-Einstellungen",
+        "windows.settingsForm.usedAvailable": "Verwendet: {value1} · Verfügbar: {value2}",
+        "windows.settingsForm.unavailable": "Nicht verfügbar: {value1}",
+        "windows.settingsForm.limitedAvailableCapacityConsiderAnotherDriveThisIsA": "Begrenzte verfügbare Kapazität. Betrachten Sie einen weiteren Antrieb; dies ist eine Kapazitätswarnung, nicht eine Vorhersage der Größe von Wissenschaft-Daten.",
+        "windows.settingsForm.browseChangeLocation": "Standort durchsuchen / ändern...",
+        "windows.settingsForm.openFolder": "Ordner öffnen",
+        "windows.settingsForm.restoreDefault": "Standard zurücksetzen...",
+        "windows.settingsForm.dataManagement": "Datenverwaltung...",
+        "windows.settingsForm.storageManagementLimitsPreviewCleanup": "Speicherverwaltung / Grenzen / Vorschau Bereinigung",
+        "windows.settingsForm.recoverOriginalLocationFromInterruptedMigration": "Wiederherstellen der ursprünglichen Position von unterbrochenen Migration...",
+        "windows.settingsForm.noInterruptedMigrationNeedsRollback": "Keine unterbrochene Migration braucht Rückwärtsrutsche.",
+        "windows.settingsForm.restoreTheOriginalVerifiedStorageSettingBothCopiesWill": "Wiederherstellen Sie die ursprüngliche verifizierte Speichereinstellung? Beide Kopien werden beibehalten.",
+        "windows.settingsForm.endTheMissionBeforeChangingEitherStorageLocation": "Beenden Sie die Mission, bevor Sie die Speicherposition wechseln.",
+        "windows.settingsForm.scienceLibraryCapacity": "Kapazität der Wissenschaftsbibliothek",
+        "windows.settingsForm.availableCapacityThisDriveHasLimitedFreeSpaceFuture": "Verfügbare Kapazität: {value1}. Dieses Laufwerk hat begrenzten freien Platz. Zukünftige wissenschaftliche Datenanforderungen sind unbekannt. Weiter?",
+        "windows.settingsForm.limitedCapacity": "Begrenzte Kapazität",
+        "windows.settingsForm.confirmStorageChange": "Speicheränderung bestätigen",
+        "windows.settingsForm.runGuidedSetup": "Führen Sie die Führung durch...",
+        "windows.settingsForm.recordingIntervalMillisecondsSimconnectIsRequestedAt1Hz": "Aufnahmeintervall (Millisekunden; SimConnect wird bei 1 Hz angefordert).",
+        "windows.settingsForm.applyConnectionSettings": "Verbindungseinstellungen anwenden",
+        "windows.settingsForm.lanIsOptionalAllowAeroscienceOnTheWindowsPrivate": "LAN ist optional. AeroScience darf nur bei Verwendung des iPad/LANs auf dem Netzwerkprofil von Windows Private verwendet werden. Der Pairing-Code befindet sich im Dashboard-Einstellungen.",
+        "windows.settingsForm.msfsCommunityFolder": "MSFS Gemeinschaftsordner",
+        "windows.settingsForm.browseCommunityFolder": "Community-Ordner durchsuchen...",
+        "windows.settingsForm.installUpdateRepairToolbar": "Installieren / Aktualisieren / Repair Toolbar...",
+        "windows.settingsForm.removeAeroscienceToolbar": "AeroScience Symbolleiste entfernen...",
+        "windows.settingsForm.noCommunityFolderHasBeenConfigured": "Es wurde kein Gemeinschaftsordner konfiguriert.",
+        "windows.settingsForm.removeOnlyAeroscienceFromThisCommunityFolderItsFiles": "Entfernen Sie nur AeroScience aus diesem Gemeinschaftsordner? Seine Dateien werden in ein Backup außerhalb der Community verschoben. Schließen Sie zuerst MSFS. {value1}",
+        "windows.settingsForm.removeToolbar": "Werkzeugleiste entfernen",
+        "windows.settingsForm.theToolbarWasNotInstalledInThatFolder": "Die Symbolleiste wurde nicht in diesem Ordner installiert.",
+        "windows.settingsForm.toolbarRemovedBackupRetainedAt": "Werkzeugleiste entfernt. Backup beibehalten bei: {value1}",
+        "windows.settingsForm.theNativeSimconnectRuntimeIsIncludedConnectionStatusIs": "Die native SimConnect Laufzeit ist enthalten. Verbindungsstatus wird im Hauptfenster und Dashboard von AeroScience angezeigt.",
+        "windows.settingsForm.theNativeSimconnectRuntimeIsMissingRunAeroscienceSetup": "Die native SimConnect Laufzeit fehlt. Führen Sie AeroScience Setup erneut aus, um die Installation zu reparieren; halten Sie Ihre Missionsdaten und Einstellungen.",
+        "windows.settingsForm.microsoftVisualCPrerequisite": "Microsoft Visual C++ Voraussetzung...",
+        "windows.settingsForm.ifWindowsReportsAMissingVisualCDependencyUse": "Wenn Windows eine fehlende Visual C++ Abhängigkeit meldet, verwenden Sie Microsofts offizielle Seite oben, um die x64 grafisch umverteilbar zu installieren, dann starten Sie AeroScience neu.",
+        "windows.settingsForm.toolbar": "Werkzeugleiste",
+        "windows.earthdataConnectionForm.connectNasaEarthdata": "NASA-Erddaten verbinden",
+        "windows.earthdataConnectionForm.signInOnlyOnNasaSOfficialWebsiteGenerate": "Sign in only on NASA's official website. Generate a User Token from your NASA profile (NASA documents a 60-day lifetime). Approve ORNL DAAC access there if requested. AeroScience never needs your NASA password.",
+        "windows.earthdataConnectionForm.openNasaSignInTokenPage": "NASA-Einloggen / Token-Seite öffnen",
+        "windows.earthdataConnectionForm.pasteNasaUserTokenStoredInWindowsCredentialManager": "Einfügen NASA User Token (gespeichert in Windows Credential Manager für dieses Profil):",
+        "windows.earthdataConnectionForm.nasaEarthdataUserToken": "NASA Earthdata Benutzer Token",
+        "windows.earthdataConnectionForm.theBrowserDashboardAndPairedDevicesNeverReceiveThis": "Das Browser-Dashboard und die gekoppelten Geräte erhalten diese Berechtigung nie. Der Zugriff wird von der NASA während der Vorschau und des Downloads überprüft. Disconnect entfernt das gespeicherte Token; die Profilseite der NASA kann es widerrufen.",
+        "windows.earthdataConnectionForm.saveEarthdataConnection": "Erddatenverbindung speichern",
+        "windows.earthdataConnectionForm.earthdataConnection": "Erddatenverbindung",
+        "windows.earthdataConnectionForm.discardTheEnteredTokenAndCloseChooseNoTo": "Verwerfen Sie das eingegebene Token und schließen Sie? Wählen Sie Nein, um die Bearbeitung zu halten. Gespeicherte Verbindungen und Downloads werden sich nicht ändern.",
+        "windows.earthdataConnectionForm.unsavedEarthdataConnection": "Verbindung mit Erddaten",
+        "windows.program.aeroscienceIsAlreadyRunningCloseItBeforeInstallationOr": "AeroScience läuft bereits. Schließen Sie es vor der Installation oder Entfernung.",
+        "windows.program.removeTheAeroscienceMsfsToolbarTooOnlyAeroscienceWill": "Remove the AeroScience MSFS toolbar too?\n\n{value1}\n\nOnly AeroScience will be moved to a backup outside Community. Mission history, scientific data, configuration and unrelated add-ons will be retained. Choose No to keep the toolbar.",
+        "windows.program.uninstallAeroscience": "Deinstallieren AeroScience",
+        "windows.program.closeMsfsBeforeRemovingTheAeroscienceToolbarThenChoose": "Schließen Sie MSFS vor dem Entfernen der AeroScience-Symbolleiste, dann wählen Sie Retry. Abbrechen hält die Symbolleiste und die Anwendung weiterhin deinstallieren.",
+        "windows.program.closeMsfs": "Schließen MSFS",
+        "windows.program.toolbarRemovalDidNotCompleteExistingFilesWerePreserved": "Toolbar-Entfernung nicht abgeschlossen. Bestehende Dateien wurden erhalten. {value1}",
+        "windows.program.aeroscienceUninstall": "AeroScience deinstallieren",
+        "windows.dataManagementForm.alsoRemoveSavedMissionPlansAndTheirPreflightNotes": "Auch entfernen Sie gespeicherte Missionspläne und ihre Vorflug-Notizen bei der Clearing von Flugdaten",
+        "windows.dataManagementForm.aeroscienceStorageDataDataManagement": "AeroScience · Speicherung und Daten · Datenmanagement",
+        "windows.dataManagementForm.exportIndividualCompletedMissionsFromMissionHistoryTheseOperations": "Exportieren Sie einzelne abgeschlossene Missionen aus Mission History. Diese Operationen löschen ganze Archive unabhängig. Permanente wissenschaftliche Löschung reinigt ausgewählte wissenschaftliche Inhalte aus verwalteten Backups; nicht verwandte Inhalte werden erhalten.",
+        "windows.dataManagementForm.clearScientificData": "Wissenschaftliche Daten löschen",
+        "windows.dataManagementForm.clearFlightMissionData": "Flug- und Missionsdaten löschen",
+        "windows.dataManagementForm.deleteCollectedScientificData": "Gesammelte wissenschaftliche Daten löschen",
+        "windows.dataManagementForm.deletionOptions": "Optionen für die Löschung:",
+        "windows.dataManagementForm.permanentlyDeleteWithoutCreatingANewBackup": "Dauerhaft löschen, ohne ein neues Backup zu erstellen",
+        "windows.dataManagementForm.createARecoveryBackupThenDelete": "Erstellen Sie eine Wiederherstellungssicherung, dann löschen",
+        "windows.dataManagementForm.deleteScientificData": "Wissenschaftliche Daten löschen",
+        "windows.dataManagementForm.deleteFlightData": "Flugdaten löschen",
+        "windows.dataManagementForm.reviewingTheExactCollectedScienceSelectionBackgroundOperationsAre": "Die genaue Auswahl der gesammelten Wissenschaft wird überprüft; Hintergrundoperationen sind unverändert...",
+        "windows.dataManagementForm.missionsDatasetsObservationsGeneratedProductsEstimatedManagedFileSpace": "{value1} Missionen · {value2} Datensätze · {value3} Beobachtungen · {value4} generierte Produkte. Geschätzter verwalteter Dateiraum: {value5} MiB. Deletion ist permanent. Wissenschaftliche Messungen, generierte Analysen und abhängige Noten werden gesäubert, einschließlich deren verwaltete Kopien. Es wird keine Wiederherstellungssicherung erstellt. Flugaufzeichnungen und externe Quelldatensätze bleiben unberührt. {value6}",
+        "windows.dataManagementForm.cancelledNoScientificDataWasChanged": "Es wurden keine wissenschaftlichen Daten geändert.",
+        "windows.dataManagementForm.permanentlyDeletingReviewedCollectedScience": "Ständiges Löschen der überprüften gesammelten Wissenschaft...",
+        "windows.dataManagementForm.filesRemovedPending": "{value1}: {value2} Dateien entfernt, {value3} anhängig. {value4}",
+        "windows.dataManagementForm.deletionIsNotComplete": "Die Deletion ist nicht vollständig: {value1}",
+        "windows.dataManagementForm.chooseARecoveryBackupDestinationForScientificDataNot": "Wählen Sie ein Erholung BACKUP Ziel für wissenschaftliche Daten - kein neuer Standort der Science Library",
+        "windows.dataManagementForm.chooseARecoveryBackupDestinationForFlightMissionData": "Wählen Sie ein Recovery BACKUP Ziel für Flug- & Missionsdaten - kein neuer Missionsspeicherort",
+        "windows.dataManagementForm.stoppingServicesAndClearingTransactionallyWithoutANewBackup": "Dienstleistungen und Clearing transaktionslos ohne ein neues Backup.....",
+        "windows.dataManagementForm.stoppingServicesVerifyingTheRecoveryBackupAndClearingTransactionally": "Stoppen Sie Dienste, überprüfen Sie die Wiederherstellung Backup und Clearing Transaktion...",
+        "windows.dataManagementForm.completed": "Erledigt. {value1}",
+        "windows.dataManagementForm.operationStoppedCommittedRecordsAndReferenceAvailabilityAreReconciled": "Betrieb eingestellt: {value1} Die zugesagten Datensätze und die Referenzverfügbarkeit werden beim Neustart der Dienste miteinander in Einklang gebracht.",
+        "windows.dataManagementForm.endRecordingAndWaitForActiveOperationsFirst": "Die Aufnahme beenden und erst auf aktive Operationen warten.",
+        "windows.dataManagementForm.endRecordingAndWaitForOtherOperationsFirst": "Die Aufnahme beenden und erst auf andere Operationen warten.",
+        "windows.dataManagementForm.thisDeliberateArchiveClearIncludesProtectedMissionSDataset": "Dieses bewusste Archiv enthält {value1} geschützte Missionen/Datensätze. Schutz verhindert die automatische Reinigung; diese explizite Typisierungsoperation wird sie löschen. Weiter zur endgültigen Bestätigung?",
+        "windows.dataManagementForm.protectedResearchData": "Geschützte Forschungsdaten",
+        "windows.dataManagementForm.permanentlyDeleteTheseRecords": "{value1} {value2} Diese Datensätze dauerhaft löschen?..",
+        "windows.dataManagementForm.confirmScientificDataDeletion": "Löschen wissenschaftlicher Daten bestätigen",
+        "windows.dataManagementForm.confirmFlightDataDeletion": "Löschen von Flugdaten bestätigen",
+        "windows.scientificSourcesPanel.savedExistingDataAndProductsAreRetained": "Gespeichert. Bestehende Daten und Produkte werden gespeichert.",
+        "windows.scientificSourcesPanel.sourceDiagnosticsReviewBeforeSharing": "Quellendiagnostik — Überprüfung vor der Weitergabe",
+        "windows.scientificSourcesPanel.historicalExternalDataRetainTheirOriginalObservationDatesAnd": "Historische externe Daten behalten ihre ursprünglichen Beobachtungstermine und Herkunft. Lokale Datensätze arbeiten offline innerhalb ihrer realen Abdeckung. Automatisches Abrufen nutzt separate wissenschaftliche Daten-Einwilligung.",
+        "windows.scientificSourcesPanel.onlineScientificDataAccess": "Online-Zugriff auf wissenschaftliche Daten: {value1}",
+        "windows.scientificSourcesPanel.enableConfigureOnlineScientificDataAccess": "Online-Zugriff auf wissenschaftliche Daten aktivieren / konfigurieren",
+        "windows.scientificSourcesPanel.sourceModeAppliesToSelectionNotTheRecordingSwitch": "Der Quellmodus gilt für die Auswahl, nicht für den Aufnahmeschalter.",
+        "windows.scientificSourcesPanel.importedPreparedDatasetsMibRetained": "{value1} importierte/vorbereitete Datensätze · {value2} MiB einbehalten{value3}",
+        "windows.scientificSourcesPanel.preparedRegionsMibExpand": "{value1} — {value2} präparierte Regionen — {value3} MiB (Ausdehnung)",
+        "windows.scientificSourcesPanel.providerSceneObservedKindBandsVerticalReferenceTermsSource": "{value1} Anbieter: {value2} Szene: {value3} Beobachtet: {value4} Kind: {value5} · Bands: {value6} Vertikale Referenz: {value7} Terms: {value8} Source ID: {value9} Historische externe Quelle; keine Beobachtung eines lebenden Flugzeugs.",
+        "windows.scientificSourcesPanel.advancedDiagnosticsExactSourceMetadata": "Erweiterte Diagnose — genaue Metadaten der Quelle",
+        "windows.scientificSourcesPanel.viewAllRegionsAndCollectionCoverage": "Alle Regionen und Sammlungsabdeckung anzeigen",
+        "windows.scientificSourcesPanel.importHyperspectralDataset": "Hyperspektraler Datensatz importieren...",
+        "windows.scientificSourcesPanel.importDataset": "Datensatz importieren...",
+        "windows.scientificSourcesPanel.onlineScientificDataPrivacyAndPredictiveControls": "Online-Datenschutz und vorausschauende Kontrollen",
+        "windows.scientificSourcesPanel.advancedJsonSourceCollectionImport": "Erweiterte JSON-Quellensammlung importieren...",
+        "portal.language.memberTitle": "Sprache des Organisationskontos",
+        "portal.language.scope": "Diese Sprache gilt nur für Ihr angemeldetes Konto auf diesem Organisationsserver. Browser-Theme und die dazugehörigen Einstellungen bleiben unabhängig...",
+        "portal.language.followBrowser": "Folgen Sie diesem Browser",
+        "portal.language.memberLabel": "Sprache für diese Organisation Konto",
+        "portal.language.save": "Kontosprache speichern",
+        "portal.language.saved": "Kontosprache gespeichert. Keine Recherche, Freigabe oder Berechtigungen geändert.",
+        "portal.language.conflict": "Ihre Kontosprache hat sich woanders geändert. Laden Sie vor dem Speichern wieder neu.",
+        "portal.language.unavailable": "Die Sprache des Benutzerkontos ist nicht verfügbar. Ihre Browsersprache bleibt verfügbar; melden Sie sich erneut an, wenn Ihre Autorisierung abgelaufen ist.",
+        "windows.language.reopen": "Die Sprache wird gespeichert. Einstellungen oder andere offene Begleitfenster öffnen, um ihre vorhandenen Bedienelemente zu übersetzen. Aufzeichnung und Wissenschaftssammlung sind unverändert.",
+        "windows.science.modeAutomatic": "Automatisch",
+        "windows.science.modeLocal": "Nur meine Datensätze",
+        "windows.science.modePreferLocal": "Meine Datensätze bevorzugen, automatisches Zurückfallen zulassen",
+        "windows.science.localAvailable": "Deaktiviert — lokale Datensätze bleiben verfügbar",
+        "windows.science.spaceLimited": "· Begrenzter freier Platz",
+        "windows.science.datasetRequired": "· Datensatz erforderlich",
+        "windows.feedback.notes": "Optionale Reproduktionsschritte und Anmerkungen",
+        "windows.flight.noMission": "Keine aktive Mission",
+        "windows.flight.recording": "Auftragsaufzeichnung",
+        "windows.science.category11Title": "Terrain & Elevation",
+        "windows.science.category11Description": "Numeric DEM/DSM elevation, not aircraft laser returns. Local: single-band elevation GeoTIFF.",
+        "windows.science.category12Title": "Wärmebildgebung",
+        "windows.science.category12Description": "Historische Oberflächentemperatur und originale QA-Masken. Lokal: ST_B10 + QA_PIXEL (+ QA_RADSAT), mit Original-Metadaten.",
+        "windows.science.category13Title": "Multispektrale Bildgebung",
+        "windows.science.category13Description": "Historische Reflexion, RGB und NDVI. Lokale: B02/B03/B04/B08 und SCL GeoTIFFs mit Original-Skalierungs-Metadaten.",
+        "windows.science.category14Title": "Hyperspektrale Bildgebung",
+        "windows.science.category14Description": "Verwendung Externer Datenmanager → Daten finden & herunterladen → Hyperspektrale Forschung für genehmigte Earthdata Download & Import. Original ENVI Handbuch/Browser-Import bleibt verfügbar. EMIT ist nur Entdeckung.",
+        "native.toolbarTemplateDidNotFinishLoadingCloseAndReopen": "Werkzeugleisten-Vorlage nicht beendet Laden. Schließen und öffnen Sie dieses Panel; melden Sie seinen Titel, wenn dies weitergeht.",
+        "native.connectingToCompanion": "Verbindung mit dem Begleiter...",
+        "native.notSuppliedByThisPackage": "nicht von diesem Paket geliefert",
+        "native.toolbarSourceProtocol1": "{value1} Symbolleiste, Quelle {value2}, Protokoll 1",
+        "native.commandsAeroscienceCommandV1RepliesAeroscienceReplyV1No": "Kommandos: AeroScience.Command.v1, Antworten: AeroScience.Reply.v1, Noch keine passende Antwort auf die Triebwerkssteuerung. Kanalregistrierung allein ist kein Motoranschluss.",
+        "native.evidenceBasedAssessmentsDependOnTheCompanionSCapabilities": "Evidenzbasierte Bewertungen hängen von den Fähigkeiten des Begleiters ab. Jedes kompatible Flugzeug kann aufzeichnen.",
+        "native.allCompatibleAircraftCanRecordMissions": "Alle kompatiblen Flugzeuge können Missionen aufzeichnen...",
+        "native.theMapRendererIsUnavailableInThisUiContext": "Der Kartenrender ist in diesem Kontext nicht verfügbar. Mission und Payload bleiben verfügbar; melden Sie die Simulatorversion und den Coherent-Konsolefehler.",
+        "native.freePanDragTheMapOrUseArrowKeys": "Free Pan - ziehen Sie die Karte oder verwenden Sie Pfeiltasten. Flugzeug folgen ist aus.",
+        "native.selecting": "Auswahl von {value1}...",
+        "native.unableToLoadTheSdkCommbusServiceCheckThe": "Der SDK CommBus-Dienst kann nicht geladen werden. Überprüfen Sie die MSFS 2024 SDK/Laufzeit-Version.",
+        "native.simulatorLinkUnavailableReopenThisPanelSeeConnectionBuild": "Diese Seite erneut öffnen; siehe Verbindungs- & Build-Details.",
+        "native.theSdkCommbusHelperListenerDidNotBecomeAvailable": "Der SDK CommBus Helfer/Limateur wurde nicht verfügbar. Es wurde keine Motorantwort empfangen. Überprüfen Sie das passende Validationspaket und die unterstützte Simulatorlaufzeit.",
+        "native.loadingSavedMissionPlans": "Gespeicherte Missionspläne werden geladen...",
+        "native.selectedPlanIsNoLongerAvailableChooseAnotherPlan": "Ausgewählter Plan ist nicht mehr verfügbar. Wählen Sie einen anderen Plan oder eine ungeplante Mission.",
+        "native.selectedWaypointsPatternsInstruments": "Ausgewählt: {value1}, {value2} Wegpunkte, {value3} Muster. Instrumente: {value4}.",
+        "native.loadingSelectedPlanDetails": "Ausgewählte Plandetails werden geladen...",
+        "native.unplannedMissionRecordWhereverYouFly": "Unplaned Mission: notieren Sie, wo Sie fliegen.",
+        "native.savedPlansSelectionIsSavedByTheCompanion": "Gespeicherte Pläne {value1}-{value2}. Die Auswahl wird vom Begleiter gespeichert.",
+        "native.noMoreSavedPlansUsePreviousPlans": "Keine gespeicherten Pläne mehr. Verwenden Sie frühere Pläne.",
+        "native.noSavedMissionPlansCreateOneInTheDesktop": "Keine gespeicherten Missionspläne. Erstellen Sie einen im Desktop-Flugplaner.",
+        "native.noActivePlannedMissionSelectASavedPlanOr": "Keine aktive geplante Mission - wählen Sie einen gespeicherten Plan oder einen vom Begleiter aufzeichnen.",
+        "native.loadingRoute": "Route {value1} / {value2} wird geladen",
+        "native.end": "Ende",
+        "native.routeSynchronizedWaypointsNextObservedTarget": "Route synchronisiert / {value1} Wegpunkte / nächstes beobachtetes Ziel {value2}",
+        "native.routeSynchronizedOrderedWaypointsOfflineGeographyNoOnlineTile": "Route synchronisiert: {value1} bestellte Wegpunkte. Offline Geographie; keine Online-Kachel Anfragen.",
+        "native.simulatorChannelReadyWaitingForTheWindowsEngine": "Der Kanal ist im Kanal, der Windows-Engine.",
+        "native.unableToRegisterTheSdkCommbusListener": "Der SDK CommBus-Hörer kann nicht registriert werden.",
+        "native.staleStatusCompanionUnavailable": "Status des Zustands / Begleiter nicht verfügbar",
+        "native.scientificStorageUnavailable": "Wissenschaftliche Lagerung nicht verfügbar",
+        "native.disconnectedUnavailable": "Nicht verbunden / nicht verfügbar",
+        "native.telemetryStaleUnavailable": "Telemetrie veraltet / nicht verfügbar",
+        "native.simulatorPausedScienceUnconfirmed": "1972 Pause / Wissenschaft unbestätigt",
+        "native.armedNotStarted": "Bewaffnet / Nicht gestartet",
+        "native.inactive": "Nichterwerbstätig",
+        "native.flightRecordingScience": "Flugaufzeichnung: {value1}, Wissenschaft: {value2}",
+        "native.thisViewCouldNotUpdateSeeConnectionBuildDetails": "Diese Ansicht konnte nicht aktualisiert werden. Siehe Verbindungs- & Build-Details.",
+        "native.displayFaults": "Anzeigefehler: {value1}",
+        "native.displayComponentsSynchronized": "Komponenten synchronisiert anzeigen.",
+        "native.replyRejectedCountLastValidStateRetainedFreshnessChecks": "Antwort abgelehnt: {value1}, Anzahl {value2}. Letzter gültiger Zustand beibehalten; Frischekontrollen gelten noch.",
+        "native.companionReplyCouldNotBeReadSeeConnectionBuild": "Die Antwort auf den Vergleich konnte nicht gelesen werden. Siehe Details zur Verbindung & Build.",
+        "native.commandExceedsTheNativeLimitUseTheDashboard": "Befehl überschreitet die native Grenze. Verwenden Sie das Dashboard.",
+        "native.sendingMissionCommand": "Befehl der Mission senden...",
+        "native.commandDeliveryFailedTheIntervalIsNotConfirmed": "Command delivery failed. The interval is not confirmed.",
+        "native.simulatorCommandDeliveryFailedCheckTheEngineConnection": "Die Lieferung des Befehls ist nicht möglich.",
+        "native.simulatorCommandDeliveryFailed": "Die Befehlslieferung von 196 ist fehlgeschlagen.",
+        "native.retryingTheIdenticalFlightBoundRequestNoNewCommand": "Die gleiche fluggebundene Anfrage erneut testen; kein neues Kommandoziel.",
+        "native.noConfirmationReceivedReviewTheConfirmedIntervalBeforeTrying": "Keine Bestätigung erhalten. Überprüfen Sie das bestätigte Intervall, bevor Sie es erneut versuchen.",
+        "native.noCommandConfirmationAfterOneIdenticalRetryReviewSynchronized": "Keine Befehlsbestätigung nach einer identischen Wiederholung. Überprüfung synchronisierten Zustand vor der Ausgabe eines neuen Befehls.",
+        "native.mapReplyTimedOutRetryingWithTheCachedRoute": "Die Antwort der Karte wurde abgekürzt; die Wiederholung mit der zwischengespeicherten Route wurde beibehalten.",
+        "native.noCommandConfirmationCheckMissionStateBeforeRetrying": "Keine Befehlsbestätigung. Prüfen Sie den Missionszustand vor der Wiederholung.",
+        "native.lastMatchingEngineReplyControlsAreUnavailableUntilFresh": "Letzte passende Motorantwort: {value1}. Steuerungen sind nicht verfügbar, bis frisch synchronisierter Zustand eintrifft.",
+        "native.noMatchingEngineReplyCheckThatTheDashboardAnd": "Keine passende Antwort auf die Engine. Überprüfen Sie, ob das Dashboard und die Symbolleiste dasselbe Profil und dieselbe Quelle haben, die in Connection & Build Details angezeigt werden.",
+        "native.windowsEngineUnavailableLaunchAeroscienceAndCheckTheSimconnect": "Windows-Engine nicht verfügbar. Starten Sie AeroScience und überprüfen Sie die SimConnect Laufzeit.",
+        "native.mach": "- Mach...",
+        "native.companionDisconnectedCachedRouteRetainedLiveAircraftUnavailable": "Vergleich getrennt - zwischengespeicherte Route beibehalten; Live-Flugzeuge nicht verfügbar.",
+        "native.validationSourceMismatchNoStateAccepted": "Validierungsquelle-Mismatch. Kein Staat akzeptiert..",
+        "native.cardCommandNotConfirmedSynchronizeBeforeRetrying": "Kartenbefehl nicht bestätigt. Automatisieren vor dem erneuten Versuch.",
+        "native.mapSynchronizationFailedWaitingToRetry": "Die Kartensynchronisation ist fehlgeschlagen; warten auf Wiederholung.",
+        "native.confirmedS": "Bestätigt: {value1} s.",
+        "native.intervalWasNotConfirmedReviewCurrentSettings": "Intervall wurde nicht bestätigt. Überprüfen Sie die aktuellen Einstellungen.",
+        "native.companionIntervalS": "Vergleichsintervall: {value1} s",
+        "native.missionPlanSelectionConfirmed": "Missionsplanauswahl bestätigt.",
+        "native.planSelectionWasNotConfirmedRefreshPlans": "Die Planauswahl wurde nicht bestätigt.",
+        "native.pilotObservationSavedFlightAndScienceContinueIndependently": "Pilotbeobachtung gerettet. Flug und Wissenschaft gehen unabhängig weiter.",
+        "native.observationWasNotSavedYourTextIsPreserved": "Die Beobachtung wurde nicht gespeichert; Ihr Text ist erhalten.",
+        "native.earlierRequestAcknowledged": "Früherer Antrag bestätigt",
+        "native.aNewerAuthoritativeViewIsAlreadyDisplayed": "{value1}, Eine neuere maßgebliche Ansicht ist bereits angezeigt..",
+        "native.matchingEngineReplyReceivedAircraftTelemetryAndScientificCollection": "Passende Triebwerksantwort erhielt {value1}. Flugzeugtelemetrie und wissenschaftliche Datenerfassung haben ihren eigenen Status unten.",
+        "native.sessionCommandConfirmedReviewCurrentState": "Sitzungsbefehl bestätigt. Prüfen Sie den aktuellen Zustand.",
+        "native.missionCommandWasRejected": "Das Missionskommando wurde abgelehnt.",
+        "native.activeRecordingItsSavedPlanSnapshotIsFixedPlan": "Aktive Aufzeichnung: Der gespeicherte Plan-Snapshot ist behoben. Die Planauswahl für die nächste Aufnahme ist getrennt.",
+        "native.simulatedTestData": "SIMULIERTE PRÜFDATEN",
+        "native.simconnectTelemetry": "EINZELNES TELEMETRIE",
+        "native.aircraftTelemetryUnavailable": "URBANTEN TELEMETRIE UNVERFÜGBAR",
+        "native.msfsDisconnected": "VERSCHIEDENE MSFS",
+        "native.recordingStopped": "RÜCKFORDERUNG / {value1}: {value2}",
+        "native.awaitingInitializedAircraftTelemetry": "Warten auf initialisierte Telemetrie",
+        "native.activeSavedPlanSnapshotFixedForThisRecordingFly": "Aktiver Snapshot mit gespeichertem Plan (behoben für diese Aufnahme). Fliegen Sie die Routenreferenz auf Map.",
+        "native.activeUnplannedMissionScientificPreparationFollowsActualAircraftMovement": "Aktive, ungeplante Mission: wissenschaftliche Vorbereitung folgt der tatsächlichen Flugzeugbewegung.",
+        "native.universalModeFlyAnything": "Universalmodus / Fliegen Sie alles",
+        "native.samples": "{value1} Proben",
+        "native.notGraded": "Nicht bewertet",
+        "native.insufficientEvidence": "Unzureichende Beweise",
+        "native.stale": "Stale",
+        "native.armed": "Bewaffnet",
+        "native.waitingForSource": "Warten auf Quelle",
+        "native.acquisitionGap": "Erwerblücke",
+        "native.sourceDisconnected": "Quelle getrennt",
+        "native.waiting": "Warten",
+        "native.manual": "Handbuch",
+        "native.unsupported": "Nicht unterstützt",
+        "native.provisional": "Vorläufig",
+        "native.final": "Schluß",
+        "native.revised": "Überarbeitet",
+        "native.supported": "Unterstützt",
+        "native.idle": "Leerlauf",
+        "native.detecting": "Erkennung",
+        "native.holding": "Betriebe",
+        "native.complete": "Komplett",
+        "native.thisCompanionDoesNotSupportSessionBoundNativeControls": "Dieser Begleiter unterstützt keine sitzungsgebundenen nativen Controls....",
+        "native.staleEngineStateSynchronizeBeforeControllingScience": "Stale Motor Zustand; Synchronisieren, bevor die Wissenschaft zu kontrollieren..",
+        "native.backendSessionAndControlRevisionsAreCheckedBeforeApplying": "Vor der Anwendung werden die Änderungen für die Backend-Sitzung und die Steuerung überprüft.",
+        "native.scienceStatusUnavailableUnsupportedCompanion": "Wissenschaftlicher Status nicht verfügbar (nicht unterstützter Begleiter)",
+        "native.updateTheCompanionForScienceSessionControls": "Aktualisieren Sie den Begleiter für die Kontrolle der Wissenschaft..",
+        "native.noScoreAvailable": "Keine Punktzahl verfügbar.",
+        "native.noSessionIdentitySupplied": "Keine Sitzungsidentität angegeben.",
+        "native.nextTriggerNotAssessed": "Nächster Auslöser nicht bewertet.",
+        "native.scientificYieldNotAssessed": "Wissenschaftlicher Ertrag nicht bewertet.",
+        "native.pilotHoldRearmRequired": ", Pilotenhalter; Auffahrsperre erforderlich",
+        "native.continuityHold": ", Kontinuität",
+        "native.collectionControl": "Collection control: {value1}{value2}{value3}",
+        "native.none": "keine",
+        "native.flightSessionRevision": "Flug {value1}, Sitzung {value2}, Revision {value3}",
+        "native.goodDataValidScientificCoverageNotYetAssessedFlight": "Gute Daten / gültige wissenschaftliche Abdeckung noch nicht bewertet. Flugweg ist nicht gültig-Pixel Abdeckung.",
+        "native.evidenceCutoffIsOlderThan15SMetricsAre": ", Evidence Cutoff ist älter als 15 s; Metriken sind nicht aktuell.",
+        "native.additionalDetailOnDashboard": ", Zusätzliche Details auf dem Dashboard.",
+        "native.stateAsOfMetrics": "State as of {value1} | metrics {value2}{value3}{value4}",
+        "native.researchStatusUnavailable": "Forschungsstatus nicht verfügbar.",
+        "native.personalResearchCardsPrepareInTheDesktopFlightPlanner": "Persönliche Recherchekarten: Im Desktop-Flight Planner vorbereiten.",
+        "native.activeCardS": "{value1} active card(s){value2}.",
+        "native.waitingForSynchronizedPersonalCardStateFlightAndScience": "Warten auf synchronisierte Personal Card State. Flug und Wissenschaft bleiben unabhängig..",
+        "native.choosePersonalCardsInMissionPlannerBeforeRecording": "Wählen Sie Personal Cards in Mission Planner vor der Aufnahme.",
+        "native.activateACardThenBeginAttemptEndAttemptDeactivate": "Aktiviere eine Karte, dann Begin Attempf / End Attempf. Deaktiviere Karte nicht stoppen Flug oder Wissenschaft.",
+        "native.noPersonalCardsSelectedForThisFlight": "Keine persönlichen Karten für diesen Flug ausgewählt.",
+        "native.ordered": "Angerufen",
+        "native.independent": "Unabhängig",
+        "native.procedureRepetitionsVerifyOriginalsAfterFlight": "{value1} Verfahren, {value2} Wiederholungen; Originale nach dem Flug überprüfen",
+        "native.continuousSeconds": "{value1}, {value2} Dauersekunden",
+        "native.fictionalModeledTemperatureSResponseOriginalScienceSamplesRequired": "Fictional modellierte Temperatur, {value1} s Antwort, {value2} Original-Wissenschaft Proben erforderlich",
+        "native.documentedPilotObservationsNotesAreNotSensorMeasurements": "{value1} dokumentierte Pilotbeobachtungen, Hinweise sind keine Sensormessungen",
+        "native.surveySourceQualifiedSamplesRequired": "Umfrage: {value1}, quellenqualifizierte Proben erforderlich",
+        "native.distinctSamplingLocationsMGeographicExtentCollectValidTemperature": "{value1} verschiedene Probenahmestellen, {value2} m geografische Ausdehnung, sammeln gültige Temperaturwerte",
+        "native.neighboringFootMslBandsCollectValidTemperatureReadings": "{value1} neighboring {value2}-foot MSL bands | collect valid temperature readings",
+        "native.knotsIasFeetMsl": "{value1} Knoten IAS, {value2} Fuß MSL",
+        "native.revision": "{value1}, Revision {value2}",
+        "native.attemptRecording": "Versuch der Aufnahme",
+        "native.issued": "{value1}, ausgestellt {value2}, {value3}",
+        "native.focusedInToolbar": "Fokussiert in der Werkzeugleiste",
+        "native.sAttempts": "{value1}, {value2} s, {value3} Versuche",
+        "native.enableautomatic": "Automatisch aktivieren",
+        "native.flightGuidanceUnavailable": "Flugführung nicht verfügbar",
+        "native.ap": "AP: {value1}, {value2}",
+        "native.scientificSourceUnavailable": "Wissenschaftliche Quelle nicht verfügbar",
+        "native.scienceInstrument": "Wissenschaftliches Instrument",
+        "native.diagnostics": "Diagnose",
+        "native.collectionInterval": "Erhebungsintervall",
+        "native.collectionInterval2": "{value1} Sammelintervall",
+        "native.applyInterval": "Intervall anwenden",
+        "native.applyInterval2": "{value1} Intervall anwenden",
+        "native.useConfirmedInterval": "Verwende bestätigte Intervall",
+        "native.useConfirmedInterval2": "Anwendung bestätigt {value1} Intervall",
+        "native.chooseApplyIntervalToConfirmThisChange": "Wählen Sie Intervall anwenden, um diese Änderung zu bestätigen.",
+        "native.applyingInterval": "Intervall anwenden...",
+        "native.commandUnavailableSynchronizeWithTheCompanion": "Befehl nicht verfügbar. Automatisieren Sie mit dem Begleiter.",
+        "native.usingConfirmedIntervalS": "Unter Verwendung bestätigter Intervall: {value1} s.",
+        "native.on": "An",
+        "native.off": "Aus",
+        "native.disableInstrument": "Instrument deaktivieren",
+        "native.enableInstrument": "Instrument aktivieren",
+        "native.sConfirmed": "{value1} s (bestätigt)",
+        "native.disabled": "deaktiviert",
+        "native.savedProducts": "gespeicherte Produkte /",
+        "native.measurementValues": "Messwerte /",
+        "native.unavailable": "Nicht verfügbar",
+        "native.acquisitionSetsRejectedUnexpectedMissingActualLast": "{value1}  /  {value2} acquisition sets  /  {value3}{value4}{value5} rejected  /  {value6} unexpected missing  /  actual {value7}  /  last {value8}",
+        "native.static.connectionBuildDetails": "Verbindungsdetails & Build",
+        "native.static.commandsAeroscienceCommandV1RepliesAeroscienceReplyV1": "Befehlszeile: AeroScience.Command.v1, Antworten: AeroScience.Reply.v1",
+        "native.static.bundledEnglishFallbackUntilMatchingCompanionSettingsArrive": "Gebündelte englische Rückfall, bis passende Begleitereinstellungen ankommen.",
+        "native.static.researchStateUnavailable": "Forschungsstand nicht verfügbar.",
+        "native.static.cardsDescribeExperimentsSaveRoutesAsMissionPlansInThe": "Karten beschreiben Experimente. Speichern Sie Routen als Missionspläne im Desktop-Flugplaner.",
+        "native.static.previousCards": "Vorherige Karten",
+        "native.static.nextCards": "Nächste Karten",
+        "native.static.mslFt": "MSL/FT",
+        "native.static.iasKts": "IAS / KTS",
+        "native.static.headingDegt": "GESUNDHEIT / DEGT",
+        "native.static.vsFtMin": "VS / FT/MIN",
+        "native.static.startRecordingAtAnyTimeYourMissionContinuesIfThis": "Beginnen Sie die Aufnahme zu jeder Zeit. Ihre Mission wird fortgesetzt, wenn dieses Panel geschlossen ist.",
+        "native.static.savedMissionPlan": "Gespeicherter Missionsplan",
+        "native.static.unplannedMission": "Nicht geplante Mission",
+        "native.static.previousPlans": "Frühere Pläne",
+        "native.static.nextPlans": "Nächste Pläne",
+        "native.static.viewRouteOnMap": "Route auf der Karte anzeigen",
+        "native.static.saveAPlanInTheDashboardSelectItHereStart": "Speichern Sie einen Plan im Dashboard, wählen Sie ihn hier aus, starten Sie die Aufzeichnung, fliegen und überprüfen Sie die Missionshistorie. Verwenden Sie die bewegte Karte oder einen exportierten kompatiblen Flugplan; AeroScience verfügt nicht über die Flugzeugnavigation.",
+        "native.static.universalFlyAnything": "Universal - Fliegen Sie alles",
+        "native.static.realisticAuthenticResearch": "Realistisch - Authentische Forschung",
+        "native.static.yourWrittenAccountNotASensorReadingMissingLocationsStay": "Ihr schriftliches Konto, kein Sensor-Lesegerät. Fehlende Orte bleiben nicht verfügbar. Verwenden Sie das Dashboard für längere Notizen.",
+        "native.static.observationCategory": "Beobachtungskategorie",
+        "native.static.shortObservation120Characters": "Kurze Beobachtung (120 Zeichen)",
+        "native.static.recordingContinuesWhenThisPanelClosesOpenTheCompanionDashboard": "Die Aufnahme wird fortgesetzt, wenn dieses Panel geschlossen wird. Öffnen Sie das Begleit-Dashboard für die Missionshistorie.",
+        "native.static.researchMissionMap": "Forschungsmissionskarte",
+        "native.static.freePan": "Freier Schwenk",
+        "native.static.zoom": "Vergrößern -",
+        "native.static.previousWaypoint": "Vorheriger Wegpunkt",
+        "native.static.nextWaypoint": "Nächster Wegpunkt",
+        "native.static.nextObservedTarget": "Nächstes beobachtetes Ziel",
+        "native.static.progressAndMapLimits": "Fortschritt und Kartengrenzen",
+        "native.static.northUpGoldPlannedTurquoiseRecordedPinkMarkersRecentTrack": "North up  /  Gold: planned  /  Turquoise: recorded  /  Pink: markers.\n                Recent track display is bounded to 512 points; full recordings\n                remain in Mission History. Offline geography is coarse and\n                Mercator is clipped at +/-85.0511 deg. No aircraft controls are\n                changed.",
+        "native.static.scienceSessionControlsEvidence": "Wissenschaft Sitzungssteuerung & Beweise",
+        "native.static.endScienceClosesThisSessionEndMissionBelowEndsThe": "Die Endwissenschaft schließt diese Sitzung. Die Endmission unten endet den Dauerflug. Detaillierte Kalibrierung, Einstufung und Nachweise bleiben auf dem Begleit-Dashboard.",
+        "native.static.collectionStopped": "Erhebung: eingestellt",
+        "native.static.sourceAndLimitations": "Quelle und Grenzen",
+        "native.static.simulatorReportedAtmosphericObservationsAnActiveMissionIsRequiredTo": "Die Flugtelemetrie wird weitergeführt, wenn die Sammlung innegehalten wird. Dokumentierte Kalibrierung und operative Nachweise stehen auf dem Begleit-Dashboard zur Verfügung. Unbekannte Einschränkungen sind nicht die erfolgreiche Einhaltung oder zertifizierte wissenschaftliche Genauigkeit.",
+        "native.static.aerosciencePages": "Seite AeroScience",
+        "native.static.missionAndPayloadContent": "Inhalt der Mission und der Nutzlast",
+        "native.static.researchMission": "Forschungsauftrag",
+        "native.static.scientificMissionIntelligence": "Wissenschaftliche Missions-Intelligenz",
+        "native.ambientTemperature": "Umgebungstemperatur",
+        "native.ambientWind": "Umgebungswind",
+        "map.native.unavailable": "Nicht verfügbar",
+        "map.native.accessible": "Offline Nord-Up Missionskarte. Ziehen Sie in die Pfanne, Rad zum Zoomen.",
+        "map.native.noWaypoint": "Kein geplanter Wegpunkt ausgewählt.",
+        "map.native.altitudeUnknown": "Höhe nicht spezifiziert",
+        "map.native.liveUnavailable": "/ Live-Position nicht verfügbar/stale.",
+        "map.native.abbreviated": "Anzeigeetiketten und Anweisungen können abgekürzt werden; die vollen Werte bleiben im Begleitplan.",
+        "map.native.legend": "N ^ / Offline Natürliche Erde / Geografische Referenz",
+        "map.native.track": "/ Grundspur {track} / GS {speed}",
+        "windows.deletion.confirmation": "Bestätigung: {phrase}",
+        "windows.deletion.typePhrase": "Typ {phrase}",
+        "native.instrument.ambientTemperature": "Umgebungstemperatur",
+        "native.instrument.ambientPressure": "Umgebungsdruck",
+        "native.instrument.ambientWind": "Umgebungswind",
+        "native.instrument.ambientDensity": "Luftdichte",
+        "native.instrument.thermalImager": "Wärmebildbild",
+        "native.instrument.multispectralImager": "Multispektraler Bildträger",
+        "native.instrument.hyperspectralImager": "Hyperspektraler Bildträger"
       }
     },
     "en-US": {
-      "version": 19,
+      "version": 20,
       "locale": "en-US",
       "messages": {
         "common.messageUnavailable": "Details are unavailable. Refresh to review the current information.",
@@ -34524,13 +36543,456 @@ export const localeData = {
         "ui.scientificAccess.messagePrepareASmallArea": "Prepare a small area",
         "ui.sensorPlanning.messageSurveyAltitudeAboveGround": "Survey altitude above ground",
         "ui.sensorPlanning.messageSideOverlap": "Side overlap (%)",
-        "ui.sensorPlanning.messageForwardOverlap": "Forward overlap (%)"
+        "ui.sensorPlanning.messageForwardOverlap": "Forward overlap (%)",
+        "windows.brandedForm.aeroscienceOrbitalArcLogo": "AeroScience Orbital Arc logo",
+        "windows.toolbarProgressForm.aeroscienceToolbarInstallation": "AeroScience · Toolbar installation",
+        "windows.toolbarProgressForm.installedAvailableCommunity": "Installed: {value1}\nAvailable: {value2}\nCommunity: {value3}",
+        "windows.toolbarProgressForm.installationCompleted": "Installation completed",
+        "windows.toolbarProgressForm.theInstalledPackageAndVersionWereVerifiedStartOr": "The installed package and version were verified. Start or restart MSFS to load the updated toolbar.",
+        "windows.toolbarProgressForm.installationStopped": "Installation stopped",
+        "windows.toolbarProgressForm.previousFilesAreRestoredWhenPossibleDetailsAreIn": "{value1}\nPrevious files are restored when possible. Details are in AeroScience's toolbar logs.",
+        "windows.toolbarProgressForm.aeroscienceMsfsToolbar": "AeroScience MSFS Toolbar",
+        "windows.toolbarProgressForm.closeMsfsBeforeUpdatingTheCompanionCanContinueWhen": "{value1}\n\nClose MSFS before updating. The companion can continue when you postpone this action.",
+        "windows.toolbarProgressForm.installToolbar": "Install Toolbar",
+        "windows.toolbarProgressForm.updateToolbar": "Update Toolbar",
+        "windows.mainForm.openDashboard": "Open Dashboard",
+        "windows.mainForm.scienceMissionOperations": "{value1} · Science Mission Operations",
+        "windows.mainForm.chooseTheOriginalMissionDatabaseFolderToCopyIt": "Choose the ORIGINAL mission database folder to COPY. It will not be migrated.",
+        "windows.mainForm.chooseTheOriginalScienceLibraryFolderToCopyOriginals": "Choose the ORIGINAL Science Library folder to COPY. Originals will be preserved.",
+        "windows.mainForm.engineStoppedOpenStorageSettingsToResolveStartupOr": "Engine stopped. Open Storage/Settings to resolve startup or storage errors. Your existing archive has not been replaced.",
+        "windows.mainForm.theLocalEngineStoppedAfterAnErrorCollectFeedback": "The local engine stopped after an error. Collect Feedback and check Storage/Settings; existing records are retained.",
+        "windows.mainForm.engineRunningToolbar": "{value1} · Engine running · {value2}\n{value3} · Toolbar: {value4}",
+        "windows.mainForm.chooseYourMsfs2024CommunityFolder": "Choose your MSFS 2024 Community folder",
+        "windows.mainForm.chooseAHistoricalLasLazOriginal": "Choose a historical LAS/LAZ original",
+        "windows.mainForm.chooseANumericElevationDemGeotiff": "Choose a numeric elevation DEM GeoTIFF",
+        "windows.mainForm.chooseTheCollectionFolder": "Choose the {value1} collection folder",
+        "windows.mainForm.chooseTheFolderContainingAnEnviHdrAndIts": "Choose the folder containing an ENVI .hdr and its original hyperspectral binary",
+        "windows.mainForm.chooseTheOriginalHyperspectralEnviHeader": "Choose the original hyperspectral ENVI header",
+        "windows.mainForm.selectMatchingEmitRfl002Rfluncert002AndMask003Originals": "Select matching EMIT RFL002, RFLUNCERT002 and MASK003 originals",
+        "windows.mainForm.importARealScientificSourceCollectionManifest": "Import a real scientific source collection manifest",
+        "windows.mainForm.collectFeedback": "Collect Feedback",
+        "windows.mainForm.saveFeedbackZip": "Save feedback ZIP…",
+        "windows.mainForm.copyArchivesForValidation": "Copy archives for validation",
+        "windows.mainForm.createAVerifiedDisposableCopyOfBothArchivesInside": "Create a verified disposable copy of both archives inside the Validation profile, then open it with online scientific access disabled? Enable access later in Settings when ready. Originals and production settings are retained. Close other applications using these archives first.",
+        "windows.mainForm.exit": "Exit",
+        "windows.mainForm.storageRecovery": "Storage recovery",
+        "windows.mainForm.waitForTheStorageSetupOperationToFinish": "Wait for the storage/setup operation to finish.",
+        "windows.mainForm.aMissionIsRecordingExitAndPreserveItAs": "A mission is recording. Exit and preserve it as interrupted?",
+        "windows.mainForm.exitAeroscience": "Exit AeroScience",
+        "windows.mainForm.theEngineIsStoppedCheckStorageSettings": "The engine is stopped. Check Storage/Settings.",
+        "windows.mainForm.endRecordingAndWaitForCurrentOperationsBeforeRunning": "End recording and wait for current operations before running setup.",
+        "windows.mainForm.endRecordingAndWaitForOtherOperationsBeforeUpdating": "End recording and wait for other operations before updating the toolbar.",
+        "windows.mainForm.closeMsfsBeforeInstallingOrUpdatingAeroscienceSToolbar": "Close MSFS before installing or updating AeroScience's toolbar.",
+        "windows.mainForm.installTheBundledAeroscienceToolbarInItsPreviousFiles": "Install the bundled AeroScience toolbar in:\n{value1}\n\nIts previous files will be backed up outside Community. Unrelated add-ons are preserved.",
+        "windows.mainForm.confirmToolbarInstallation": "Confirm toolbar installation",
+        "windows.mainForm.endRecordingAndWaitForActiveSetupStorageWork": "End recording and wait for active setup/storage work before compacting.",
+        "windows.mainForm.compactTheDatabaseServicesWillStopTemporarilyAVerified": "Compact the {value1} database? Services will stop temporarily. A verified backup and sufficient temporary space are required. Original observations are retained; actual recovered database bytes will be reported.",
+        "windows.mainForm.confirmDatabaseMaintenance": "Confirm database maintenance",
+        "windows.mainForm.compactionCompleted": "Compaction completed",
+        "windows.mainForm.waitForCurrentSetupStorageWorkAndStartThe": "Wait for current setup/storage work and start the local engine first.",
+        "windows.mainForm.importSourceObservationCopyMibIntoAvailableGibOriginal": "Import {value1}?\n\nSource: {value2}\nObservation: {value3}\nCopy {value4} MiB into {value5}\nAvailable: {value6} GiB\n\nOriginal files remain untouched. No files are downloaded and no data are uploaded. Review the source license: {value7}",
+        "windows.mainForm.importedOpenDashboardSettingsScientificDataSourcesToInspect": "Imported {value1}. Open dashboard Settings → Scientific Data Sources to inspect coverage and metadata.",
+        "windows.mainForm.theBundleIncludesGeographicPreparationAreasInstrumentProviderTiming": "The bundle includes geographic preparation areas, instrument/provider timing, errors and local logs. Review it before sharing. No scientific originals, databases or credentials are included. Continue?",
+        "windows.mainForm.savedLocallyReviewTheZipBeforeSharingIt": "Saved locally. Review the ZIP before sharing it.",
+        "windows.setupWizardForm.next": "Next",
+        "windows.setupWizardForm.skipForNow": "Skip for Now",
+        "windows.setupWizardForm.installUpdateTheIncludedMsfs2024Toolbar": "Install / update the included MSFS 2024 toolbar",
+        "windows.setupWizardForm.allowAutomaticScientificDataDiscoveryAndBoundedDownloads": "Allow automatic scientific-data discovery and bounded downloads",
+        "windows.setupWizardForm.welcomeToAeroscienceSetup": "Welcome to AeroScience · Setup",
+        "windows.setupWizardForm.chooseTheFolderForMissionsDb": "Choose the folder for missions.db",
+        "windows.setupWizardForm.chooseAScientificDataLibraryFolder": "Choose a Scientific Data Library folder",
+        "windows.setupWizardForm.availableDriveSpaceGib": "Available drive space: {value1} GiB{value2}",
+        "windows.setupWizardForm.keepThisLocationToPreserveTheUnavailableLibraryReconnect": " · Keep this location to preserve the unavailable library; reconnect its drive later. Your available mission archive can still open.",
+        "windows.setupWizardForm.aeroscienceStepOf4": "AeroScience {value1} · Step {value2} of 4",
+        "windows.setupWizardForm.finishSetup": "Finish Setup",
+        "windows.setupWizardForm.browseMissionDatabaseFolder": "Browse Mission Database Folder…",
+        "windows.setupWizardForm.browseScienceLibraryFolder": "Browse Science Library Folder…",
+        "windows.setupWizardForm.browseCommunityFolder": "Browse Community Folder…",
+        "windows.setupWizardForm.selectMsfs2024SConfiguredCommunityFolder": "Select MSFS 2024's configured Community folder",
+        "windows.setupWizardForm.closeSetupWithUnappliedChoicesChooseNoToKeep": "Close setup with unapplied choices? Choose No to keep editing. Previously saved settings and verified user data remain intact.",
+        "windows.setupWizardForm.unfinishedSetup": "Unfinished setup",
+        "windows.setupWizardForm.setUpLocalMissionStorageAndTheMsfs2024": "Set up local mission storage and the MSFS 2024 toolbar. The app will then start its services and open your dashboard automatically.",
+        "windows.setupWizardForm.existingLocationsAndSettingsArePreselectedUpdatesKeepThem": "Existing locations and settings are preselected. Updates keep them. Changing a location copies and verifies existing data only after your confirmation; originals are retained.",
+        "windows.setupWizardForm.missionHistoryWorksWithoutMsfsOrInternetLiveRecording": "Mission History works without MSFS or internet. Live recording becomes available when an aircraft is connected.",
+        "windows.setupWizardForm.missionDatabaseFileChooseItsFolderFilenameRemainsMissions": "Mission Database file (choose its folder; filename remains missions.db)",
+        "windows.setupWizardForm.scientificDataLibraryMayBeOnADifferentInternal": "Scientific Data Library — may be on a different internal or external drive",
+        "windows.setupWizardForm.keepTheSuggestedFoldersToPreserveCurrentStorageNew": "Keep the suggested folders to preserve current storage. New destinations must be empty. Existing stores can be selected explicitly through Settings → Storage after setup.",
+        "windows.setupWizardForm.confirmTheMsfs2024CommunityFolderDetectionReadsSteam": "Confirm the MSFS 2024 Community folder. Detection reads Steam / Microsoft Store configuration, including custom package paths. Use Browse if necessary.",
+        "windows.setupWizardForm.closeMsfsBeforeInstallingOrUpdatingOnlyAeroscienceIs": "Close MSFS before installing or updating. Only AeroScience is changed; the previous AeroScience package is backed up outside Community. Skip for Now leaves Community untouched; installation remains available in Settings.",
+        "windows.setupWizardForm.msfsIsCurrentlyRunningCloseItBeforeContinuingWith": "MSFS is currently running. Close it before continuing with toolbar installation, or choose Skip for Now.",
+        "windows.setupWizardForm.missionDatabaseScientificDataLibraryToolbar": "Mission Database: {value1}\n\nScientific Data Library: {value2}\n\nToolbar: {value3}",
+        "windows.setupWizardForm.finishSetupConfirmsTheseChoicesChangedStorageLocationsUse": "Finish Setup confirms these choices. Changed storage locations use verified migration with originals retained. Existing destination data is never overwritten or silently merged. You can revisit setup and storage through Settings.",
+        "windows.setupWizardForm.optionalAndSeparateFromOnlineMapsLeaveUncheckedFor": "Optional and separate from online maps. Leave unchecked for offline-only science. Change bandwidth, date/quality policy and access later in Settings → Scientific Data Sources. Prepared scientific originals are retained within your library storage limits.",
+        "windows.setupWizardForm.theScienceLibraryDriveHasLimitedFreeSpaceFuture": "The Science Library drive has limited free space. Future science formats and data rates are not implemented; no size forecast is available. Continue?",
+        "windows.setupWizardForm.storageCapacity": "Storage capacity",
+        "windows.settingsForm.aeroscienceSettings": "AeroScience Settings",
+        "windows.settingsForm.chooseAnEmptyDestinationOrAnExistingAeroscienceStore": "Choose an empty destination or an existing AeroScience store",
+        "windows.settingsForm.working": "Working…",
+        "windows.settingsForm.completeOriginalDataRetained": "Complete. Original data retained.",
+        "windows.settingsForm.enablePrivateLanIpadAccess": "Enable private-LAN / iPad access",
+        "windows.settingsForm.selectTheConfiguredMsfsCommunityFolder": "Select the configured MSFS Community folder",
+        "windows.settingsForm.installedAvailableStatus": "Installed: {value1} · Available: {value2}\nStatus: {value3}\n{value4}",
+        "windows.settingsForm.newInstallationsSuggestOpenstreetmapStreetsAfterAPrivacyChoice": "New installations suggest OpenStreetMap / Streets after a privacy choice before the first tile request. Choose offline-only at that prompt or change Maps & Basemaps in the dashboard. Existing preferences are preserved. Offline geography remains available without an account. Optional Esri satellite imagery requires your own configured credentials.",
+        "windows.settingsForm.openMapsBasemapsSettings": "Open Maps & Basemaps settings",
+        "windows.settingsForm.aeroscienceDashboardSettingsUpdatesShowsYourInstalledVersionAnd": "AeroScience {value1}. Dashboard Settings → Updates shows your installed version and optional GitHub release notifications. Checks are cached daily, never block offline archives, and never execute an installer automatically. You can disable automatic checks or include/exclude alpha releases there.",
+        "windows.settingsForm.openUpdateSettingsCheckForUpdates": "Open update settings / Check for updates",
+        "windows.settingsForm.waitForTheCurrentOperationToFinish": "Wait for the current operation to finish.",
+        "windows.settingsForm.discardUnappliedSettingsAndCloseChooseNoToKeep": "Discard unapplied settings and close? Choose No to keep editing. Saved settings, recording and background work will be preserved.",
+        "windows.settingsForm.unsavedSettings": "Unsaved settings",
+        "windows.settingsForm.usedAvailable": "Used: {value1} · Available: {value2}",
+        "windows.settingsForm.unavailable": "Unavailable: {value1}",
+        "windows.settingsForm.limitedAvailableCapacityConsiderAnotherDriveThisIsA": "Limited available capacity. Consider another drive; this is a capacity warning, not a prediction of science-data size.",
+        "windows.settingsForm.browseChangeLocation": "Browse / Change Location…",
+        "windows.settingsForm.openFolder": "Open Folder",
+        "windows.settingsForm.restoreDefault": "Restore Default…",
+        "windows.settingsForm.dataManagement": "Data Management…",
+        "windows.settingsForm.storageManagementLimitsPreviewCleanup": "Storage Management / Limits / Preview Cleanup",
+        "windows.settingsForm.recoverOriginalLocationFromInterruptedMigration": "Recover original location from interrupted migration…",
+        "windows.settingsForm.noInterruptedMigrationNeedsRollback": "No interrupted migration needs rollback.",
+        "windows.settingsForm.restoreTheOriginalVerifiedStorageSettingBothCopiesWill": "Restore the original verified storage setting? Both copies will be retained.",
+        "windows.settingsForm.endTheMissionBeforeChangingEitherStorageLocation": "End the mission before changing either storage location.",
+        "windows.settingsForm.scienceLibraryCapacity": "Science Library capacity",
+        "windows.settingsForm.availableCapacityThisDriveHasLimitedFreeSpaceFuture": "Available capacity: {value1}. This drive has limited free space. Future science-data requirements are unknown. Continue?",
+        "windows.settingsForm.limitedCapacity": "Limited capacity",
+        "windows.settingsForm.confirmStorageChange": "Confirm storage change",
+        "windows.settingsForm.runGuidedSetup": "Run guided setup…",
+        "windows.settingsForm.recordingIntervalMillisecondsSimconnectIsRequestedAt1Hz": "Recording interval (milliseconds; SimConnect is requested at 1 Hz).",
+        "windows.settingsForm.applyConnectionSettings": "Apply connection settings",
+        "windows.settingsForm.lanIsOptionalAllowAeroscienceOnTheWindowsPrivate": "LAN is optional. Allow AeroScience on the Windows Private network profile only when using iPad/LAN. The pairing code is in dashboard Settings. Local operation requires no firewall change.",
+        "windows.settingsForm.msfsCommunityFolder": "MSFS Community folder",
+        "windows.settingsForm.browseCommunityFolder": "Browse Community folder…",
+        "windows.settingsForm.installUpdateRepairToolbar": "Install / Update / Repair Toolbar…",
+        "windows.settingsForm.removeAeroscienceToolbar": "Remove AeroScience toolbar…",
+        "windows.settingsForm.noCommunityFolderHasBeenConfigured": "No Community folder has been configured.",
+        "windows.settingsForm.removeOnlyAeroscienceFromThisCommunityFolderItsFiles": "Remove only AeroScience from this Community folder? Its files will be moved to a backup outside Community. Close MSFS first.\n{value1}",
+        "windows.settingsForm.removeToolbar": "Remove toolbar",
+        "windows.settingsForm.theToolbarWasNotInstalledInThatFolder": "The toolbar was not installed in that folder.",
+        "windows.settingsForm.toolbarRemovedBackupRetainedAt": "Toolbar removed. Backup retained at:\n{value1}",
+        "windows.settingsForm.theNativeSimconnectRuntimeIsIncludedConnectionStatusIs": "The native SimConnect runtime is included. Connection status is shown in the main AeroScience window and dashboard.",
+        "windows.settingsForm.theNativeSimconnectRuntimeIsMissingRunAeroscienceSetup": "The native SimConnect runtime is missing. Run AeroScience Setup again to repair the installation; keep your mission data and settings.",
+        "windows.settingsForm.microsoftVisualCPrerequisite": "Microsoft Visual C++ prerequisite…",
+        "windows.settingsForm.ifWindowsReportsAMissingVisualCDependencyUse": "If Windows reports a missing Visual C++ dependency, use Microsoft's official page above to install the x64 redistributable graphically, then restart AeroScience.",
+        "windows.settingsForm.toolbar": "Toolbar",
+        "windows.earthdataConnectionForm.connectNasaEarthdata": "Connect NASA Earthdata",
+        "windows.earthdataConnectionForm.signInOnlyOnNasaSOfficialWebsiteGenerate": "Sign in only on NASA's official website. Generate a User Token from your NASA profile (NASA documents a 60-day lifetime). Approve ORNL DAAC access there if requested. AeroScience never needs your NASA password.",
+        "windows.earthdataConnectionForm.openNasaSignInTokenPage": "Open NASA sign-in / token page",
+        "windows.earthdataConnectionForm.pasteNasaUserTokenStoredInWindowsCredentialManager": "Paste NASA User Token (stored in Windows Credential Manager for this profile):",
+        "windows.earthdataConnectionForm.nasaEarthdataUserToken": "NASA Earthdata User Token",
+        "windows.earthdataConnectionForm.theBrowserDashboardAndPairedDevicesNeverReceiveThis": "The browser dashboard and paired devices never receive this credential. Access is checked by NASA during preview and download. Disconnect removes the saved token; NASA's profile page can revoke it.",
+        "windows.earthdataConnectionForm.saveEarthdataConnection": "Save Earthdata connection",
+        "windows.earthdataConnectionForm.earthdataConnection": "Earthdata connection",
+        "windows.earthdataConnectionForm.discardTheEnteredTokenAndCloseChooseNoTo": "Discard the entered token and close? Choose No to keep editing. Saved connections and downloads will not change.",
+        "windows.earthdataConnectionForm.unsavedEarthdataConnection": "Unsaved Earthdata connection",
+        "windows.program.aeroscienceIsAlreadyRunningCloseItBeforeInstallationOr": "AeroScience is already running. Close it before installation or removal.",
+        "windows.program.removeTheAeroscienceMsfsToolbarTooOnlyAeroscienceWill": "Remove the AeroScience MSFS toolbar too?\n\n{value1}\n\nOnly AeroScience will be moved to a backup outside Community. Mission history, scientific data, configuration and unrelated add-ons will be retained. Choose No to keep the toolbar.",
+        "windows.program.uninstallAeroscience": "Uninstall AeroScience",
+        "windows.program.closeMsfsBeforeRemovingTheAeroscienceToolbarThenChoose": "Close MSFS before removing the AeroScience toolbar, then choose Retry. Cancel keeps the toolbar and continues uninstalling the application.",
+        "windows.program.closeMsfs": "Close MSFS",
+        "windows.program.toolbarRemovalDidNotCompleteExistingFilesWerePreserved": "Toolbar removal did not complete. Existing files were preserved.\n{value1}",
+        "windows.program.aeroscienceUninstall": "AeroScience uninstall",
+        "windows.dataManagementForm.alsoRemoveSavedMissionPlansAndTheirPreflightNotes": "Also remove saved mission plans and their preflight notes when clearing flight data",
+        "windows.dataManagementForm.aeroscienceStorageDataDataManagement": "AeroScience · Storage & Data · Data Management",
+        "windows.dataManagementForm.exportIndividualCompletedMissionsFromMissionHistoryTheseOperations": "Export individual completed missions from Mission History. These operations clear whole archives independently. Permanent scientific deletion purges selected scientific content from managed backups; unrelated content is preserved.",
+        "windows.dataManagementForm.clearScientificData": "Clear Scientific Data",
+        "windows.dataManagementForm.clearFlightMissionData": "Clear Flight & Mission Data",
+        "windows.dataManagementForm.deleteCollectedScientificData": "Delete Collected Scientific Data",
+        "windows.dataManagementForm.deletionOptions": "Deletion options:",
+        "windows.dataManagementForm.permanentlyDeleteWithoutCreatingANewBackup": "Permanently delete without creating a new backup",
+        "windows.dataManagementForm.createARecoveryBackupThenDelete": "Create a recovery backup, then delete",
+        "windows.dataManagementForm.deleteScientificData": "Delete Scientific Data",
+        "windows.dataManagementForm.deleteFlightData": "Delete Flight Data",
+        "windows.dataManagementForm.reviewingTheExactCollectedScienceSelectionBackgroundOperationsAre": "Reviewing the exact collected-science selection; background operations are unchanged…",
+        "windows.dataManagementForm.missionsDatasetsObservationsGeneratedProductsEstimatedManagedFileSpace": "{value1} missions · {value2} datasets · {value3} observations · {value4} generated products. Estimated managed file space: {value5} MiB.\n\nDeletion is permanent. Scientific measurements, generated analysis and dependent grades are purged, including their managed copies. No recovery backup is created. Flight recordings and external source datasets remain untouched.\n\n{value6}",
+        "windows.dataManagementForm.cancelledNoScientificDataWasChanged": "Cancelled. No scientific data was changed.",
+        "windows.dataManagementForm.permanentlyDeletingReviewedCollectedScience": "Permanently deleting reviewed collected science…",
+        "windows.dataManagementForm.filesRemovedPending": "{value1}: {value2} files removed, {value3} pending. {value4}",
+        "windows.dataManagementForm.deletionIsNotComplete": "Deletion is not complete: {value1}",
+        "windows.dataManagementForm.chooseARecoveryBackupDestinationForScientificDataNot": "Choose a recovery BACKUP destination for Scientific Data — not a new Science Library location",
+        "windows.dataManagementForm.chooseARecoveryBackupDestinationForFlightMissionData": "Choose a recovery BACKUP destination for Flight & Mission Data — not a new mission storage location",
+        "windows.dataManagementForm.stoppingServicesAndClearingTransactionallyWithoutANewBackup": "Stopping services and clearing transactionally without a new backup…",
+        "windows.dataManagementForm.stoppingServicesVerifyingTheRecoveryBackupAndClearingTransactionally": "Stopping services, verifying the recovery backup and clearing transactionally…",
+        "windows.dataManagementForm.completed": "Completed. {value1}",
+        "windows.dataManagementForm.operationStoppedCommittedRecordsAndReferenceAvailabilityAreReconciled": "Operation stopped: {value1} Committed records and reference availability are reconciled when services restart.",
+        "windows.dataManagementForm.endRecordingAndWaitForActiveOperationsFirst": "End recording and wait for active operations first.",
+        "windows.dataManagementForm.endRecordingAndWaitForOtherOperationsFirst": "End recording and wait for other operations first.",
+        "windows.dataManagementForm.thisDeliberateArchiveClearIncludesProtectedMissionSDataset": "This deliberate archive clear includes {value1} protected mission(s)/dataset(s). Protection prevents automatic cleanup; this explicit typed-confirmation operation will delete them. Continue to final confirmation?",
+        "windows.dataManagementForm.protectedResearchData": "Protected research data",
+        "windows.dataManagementForm.permanentlyDeleteTheseRecords": "{value1}\n\n{value2}\n\nPermanently delete these records?",
+        "windows.dataManagementForm.confirmScientificDataDeletion": "Confirm scientific data deletion",
+        "windows.dataManagementForm.confirmFlightDataDeletion": "Confirm flight data deletion",
+        "windows.scientificSourcesPanel.savedExistingDataAndProductsAreRetained": "Saved. Existing data and products are retained.",
+        "windows.scientificSourcesPanel.sourceDiagnosticsReviewBeforeSharing": "Source diagnostics — review before sharing",
+        "windows.scientificSourcesPanel.historicalExternalDataRetainTheirOriginalObservationDatesAnd": "Historical external data retain their original observation dates and provenance. Local datasets work offline within their real coverage. Automatic retrieval uses separate scientific-data consent.",
+        "windows.scientificSourcesPanel.onlineScientificDataAccess": "Online Scientific Data Access: {value1}",
+        "windows.scientificSourcesPanel.enableConfigureOnlineScientificDataAccess": "Enable / Configure Online Scientific Data Access",
+        "windows.scientificSourcesPanel.sourceModeAppliesToSelectionNotTheRecordingSwitch": "Source mode applies to selection, not the recording switch.",
+        "windows.scientificSourcesPanel.importedPreparedDatasetsMibRetained": "{value1} imported/prepared datasets · {value2} MiB retained{value3}",
+        "windows.scientificSourcesPanel.preparedRegionsMibExpand": "{value1} — {value2} prepared regions — {value3} MiB (expand)",
+        "windows.scientificSourcesPanel.providerSceneObservedKindBandsVerticalReferenceTermsSource": "{value1}\nProvider: {value2}\nScene: {value3}\nObserved: {value4}\nKind: {value5} · Bands: {value6}\nVertical reference: {value7}\nTerms: {value8}\nSource ID: {value9}\nHistorical external source; not a live aircraft observation.",
+        "windows.scientificSourcesPanel.advancedDiagnosticsExactSourceMetadata": "Advanced Diagnostics — exact source metadata",
+        "windows.scientificSourcesPanel.viewAllRegionsAndCollectionCoverage": "View All Regions and Collection Coverage",
+        "windows.scientificSourcesPanel.importHyperspectralDataset": "Import Hyperspectral Dataset…",
+        "windows.scientificSourcesPanel.importDataset": "Import Dataset…",
+        "windows.scientificSourcesPanel.onlineScientificDataPrivacyAndPredictiveControls": "Online scientific-data privacy and predictive controls",
+        "windows.scientificSourcesPanel.advancedJsonSourceCollectionImport": "Advanced JSON source collection import…",
+        "portal.language.memberTitle": "Organization account language",
+        "portal.language.scope": "This language applies only to your signed-in account on this organization server. Browser theme and companion settings stay independent.",
+        "portal.language.followBrowser": "Follow this browser",
+        "portal.language.memberLabel": "Language for this organization account",
+        "portal.language.save": "Save account language",
+        "portal.language.saved": "Account language saved. No research, sharing or permissions changed.",
+        "portal.language.conflict": "Your account language changed elsewhere. Reload before saving again.",
+        "portal.language.unavailable": "Account language is unavailable. Your browser language remains available; sign in again if your authorization expired.",
+        "windows.language.reopen": "The language is saved. Reopen Settings or other open companion windows to translate their existing controls. Recording and science collection are unchanged.",
+        "windows.science.modeAutomatic": "Automatic",
+        "windows.science.modeLocal": "My Datasets Only",
+        "windows.science.modePreferLocal": "Prefer My Datasets, Allow Automatic Fallback",
+        "windows.science.localAvailable": "Disabled — local datasets remain available",
+        "windows.science.spaceLimited": " · Limited free space",
+        "windows.science.datasetRequired": " · Dataset Required",
+        "windows.feedback.notes": "Optional reproduction steps and notes",
+        "windows.flight.noMission": "No active mission",
+        "windows.flight.recording": "Mission recording",
+        "windows.science.category11Title": "Terrain & Elevation",
+        "windows.science.category11Description": "Numeric DEM/DSM elevation, not aircraft laser returns. Local: single-band elevation GeoTIFF.",
+        "windows.science.category12Title": "Thermal Imaging",
+        "windows.science.category12Description": "Historical satellite surface temperature and original QA masks. Local: ST_B10 + QA_PIXEL (+ QA_RADSAT), with original metadata.",
+        "windows.science.category13Title": "Multispectral Imaging",
+        "windows.science.category13Description": "Historical reflectance, RGB and NDVI. Local: B02/B03/B04/B08 and SCL GeoTIFFs with original scaling metadata.",
+        "windows.science.category14Title": "Hyperspectral Imaging",
+        "windows.science.category14Description": "Use External Data Manager → Find & Download Data → Hyperspectral Research for approved Earthdata Download & Import. Original ENVI manual/browser import remains available. EMIT is discovery only.",
+        "native.toolbarTemplateDidNotFinishLoadingCloseAndReopen": "Toolbar template did not finish loading. Close and reopen this panel; report its title if this continues.",
+        "native.connectingToCompanion": "Connecting to companion...",
+        "native.notSuppliedByThisPackage": "not supplied by this package",
+        "native.toolbarSourceProtocol1": "{value1} toolbar | source {value2} | protocol 1",
+        "native.commandsAeroscienceCommandV1RepliesAeroscienceReplyV1No": "Commands: AeroScience.Command.v1 | Replies: AeroScience.Reply.v1 | No matching engine reply yet. Channel registration alone is not an engine connection.",
+        "native.evidenceBasedAssessmentsDependOnTheCompanionSCapabilities": "Evidence-based assessments depend on the companion's capabilities. Any compatible aircraft can record.",
+        "native.allCompatibleAircraftCanRecordMissions": "All compatible aircraft can record missions.",
+        "native.theMapRendererIsUnavailableInThisUiContext": "The map renderer is unavailable in this UI context. Mission and Payload remain available; report the simulator version and Coherent console error.",
+        "native.freePanDragTheMapOrUseArrowKeys": "Free Pan  -  drag the map or use arrow keys. Aircraft follow is off.",
+        "native.selecting": "Selecting {value1}...",
+        "native.unableToLoadTheSdkCommbusServiceCheckThe": "Unable to load the SDK CommBus service. Check the MSFS 2024 SDK/runtime version.",
+        "native.simulatorLinkUnavailableReopenThisPanelSeeConnectionBuild": "Simulator link unavailable. Reopen this panel; see Connection & Build Details.",
+        "native.theSdkCommbusHelperListenerDidNotBecomeAvailable": "The SDK CommBus helper/listener did not become available. No engine reply was received. Check the matching Validation package and supported simulator runtime.",
+        "native.loadingSavedMissionPlans": "Loading saved mission plans...",
+        "native.selectedPlanIsNoLongerAvailableChooseAnotherPlan": "Selected plan is no longer available. Choose another plan or Unplanned Mission.",
+        "native.selectedWaypointsPatternsInstruments": "Selected: {value1} | {value2} waypoints | {value3} patterns. Instruments: {value4}.",
+        "native.loadingSelectedPlanDetails": "Loading selected plan details...",
+        "native.unplannedMissionRecordWhereverYouFly": "Unplanned Mission: record wherever you fly.",
+        "native.savedPlansSelectionIsSavedByTheCompanion": "Saved plans {value1}-{value2}. Selection is saved by the companion.",
+        "native.noMoreSavedPlansUsePreviousPlans": "No more saved plans. Use Previous plans.",
+        "native.noSavedMissionPlansCreateOneInTheDesktop": "No saved mission plans. Create one in the desktop Flight Planner.",
+        "native.noActivePlannedMissionSelectASavedPlanOr": "No active planned mission  -  select a saved plan or record one from the companion.",
+        "native.loadingRoute": "Loading route {value1} / {value2}",
+        "native.end": "end",
+        "native.routeSynchronizedWaypointsNextObservedTarget": "Route synchronized  /  {value1} waypoints  /  next observed target {value2}",
+        "native.routeSynchronizedOrderedWaypointsOfflineGeographyNoOnlineTile": "Route synchronized: {value1} ordered waypoints. Offline geography; no online tile requests.",
+        "native.simulatorChannelReadyWaitingForTheWindowsEngine": "Simulator channel ready; waiting for the Windows engine.",
+        "native.unableToRegisterTheSdkCommbusListener": "Unable to register the SDK CommBus listener.",
+        "native.staleStatusCompanionUnavailable": "Stale status / companion unavailable",
+        "native.scientificStorageUnavailable": "Scientific storage unavailable",
+        "native.disconnectedUnavailable": "Disconnected / unavailable",
+        "native.telemetryStaleUnavailable": "Telemetry stale / unavailable",
+        "native.simulatorPausedScienceUnconfirmed": "Simulator paused / science unconfirmed",
+        "native.armedNotStarted": "Armed / Not started",
+        "native.inactive": "Inactive",
+        "native.flightRecordingScience": "Flight recording: {value1} | Science: {value2}",
+        "native.thisViewCouldNotUpdateSeeConnectionBuildDetails": "This view could not update. See Connection & Build Details.",
+        "native.displayFaults": "Display faults: {value1}",
+        "native.displayComponentsSynchronized": "Display components synchronized.",
+        "native.replyRejectedCountLastValidStateRetainedFreshnessChecks": "Reply rejected: {value1} | count {value2}. Last valid state retained; freshness checks still apply.",
+        "native.companionReplyCouldNotBeReadSeeConnectionBuild": "Companion reply could not be read. See Connection & Build Details.",
+        "native.commandExceedsTheNativeLimitUseTheDashboard": "Command exceeds the native limit. Use the dashboard.",
+        "native.sendingMissionCommand": "Sending mission command...",
+        "native.commandDeliveryFailedTheIntervalIsNotConfirmed": "Command delivery failed. The interval is not confirmed.",
+        "native.simulatorCommandDeliveryFailedCheckTheEngineConnection": "Simulator command delivery failed. Check the engine connection.",
+        "native.simulatorCommandDeliveryFailed": "Simulator command delivery failed.",
+        "native.retryingTheIdenticalFlightBoundRequestNoNewCommand": "Retrying the identical flight-bound request; no new command target.",
+        "native.noConfirmationReceivedReviewTheConfirmedIntervalBeforeTrying": "No confirmation received. Review the confirmed interval before trying again.",
+        "native.noCommandConfirmationAfterOneIdenticalRetryReviewSynchronized": "No command confirmation after one identical retry. Review synchronized state before issuing a new command.",
+        "native.mapReplyTimedOutRetryingWithTheCachedRoute": "Map reply timed out; retrying with the cached route retained.",
+        "native.noCommandConfirmationCheckMissionStateBeforeRetrying": "No command confirmation. Check mission state before retrying.",
+        "native.lastMatchingEngineReplyControlsAreUnavailableUntilFresh": "Last matching engine reply: {value1}. Controls are unavailable until fresh synchronized state arrives.",
+        "native.noMatchingEngineReplyCheckThatTheDashboardAnd": "No matching engine reply. Check that the dashboard and toolbar have the same profile and source shown in Connection & Build Details.",
+        "native.windowsEngineUnavailableLaunchAeroscienceAndCheckTheSimconnect": "Windows engine unavailable. Launch AeroScience and check the SimConnect runtime.",
+        "native.mach": "Mach  - ",
+        "native.companionDisconnectedCachedRouteRetainedLiveAircraftUnavailable": "Companion disconnected  -  cached route retained; live aircraft unavailable.",
+        "native.validationSourceMismatchNoStateAccepted": "Validation source mismatch. No state accepted.",
+        "native.cardCommandNotConfirmedSynchronizeBeforeRetrying": "Card command not confirmed. Synchronize before retrying.",
+        "native.mapSynchronizationFailedWaitingToRetry": "Map synchronization failed; waiting to retry.",
+        "native.confirmedS": "Confirmed: {value1} s.",
+        "native.intervalWasNotConfirmedReviewCurrentSettings": "Interval was not confirmed. Review current settings.",
+        "native.companionIntervalS": "Companion interval: {value1} s",
+        "native.missionPlanSelectionConfirmed": "Mission plan selection confirmed.",
+        "native.planSelectionWasNotConfirmedRefreshPlans": "Plan selection was not confirmed. Refresh plans.",
+        "native.pilotObservationSavedFlightAndScienceContinueIndependently": "Pilot Observation saved. Flight and science continue independently.",
+        "native.observationWasNotSavedYourTextIsPreserved": "Observation was not saved; your text is preserved.",
+        "native.earlierRequestAcknowledged": "Earlier request acknowledged",
+        "native.aNewerAuthoritativeViewIsAlreadyDisplayed": "{value1} | A newer authoritative view is already displayed.",
+        "native.matchingEngineReplyReceivedAircraftTelemetryAndScientificCollection": "Matching engine reply received {value1}. Aircraft telemetry and scientific collection have their own status below.",
+        "native.sessionCommandConfirmedReviewCurrentState": "Session command confirmed. Review current state.",
+        "native.missionCommandWasRejected": "Mission command was rejected.",
+        "native.activeRecordingItsSavedPlanSnapshotIsFixedPlan": "Active recording: its saved plan snapshot is fixed. Plan selection for the next recording is separate.",
+        "native.simulatedTestData": "SIMULATED TEST DATA",
+        "native.simconnectTelemetry": "SIMCONNECT TELEMETRY",
+        "native.aircraftTelemetryUnavailable": "AIRCRAFT TELEMETRY UNAVAILABLE",
+        "native.msfsDisconnected": "MSFS DISCONNECTED",
+        "native.recordingStopped": "RECORDING STOPPED  /  {value1}: {value2}",
+        "native.awaitingInitializedAircraftTelemetry": "Awaiting initialized aircraft telemetry",
+        "native.activeSavedPlanSnapshotFixedForThisRecordingFly": "Active saved-plan snapshot (fixed for this recording). Fly the route reference on Map.",
+        "native.activeUnplannedMissionScientificPreparationFollowsActualAircraftMovement": "Active unplanned mission: scientific preparation follows actual aircraft movement.",
+        "native.universalModeFlyAnything": "Universal Mode  /  Fly Anything",
+        "native.samples": "{value1} samples",
+        "native.notGraded": "Not graded",
+        "native.insufficientEvidence": "Insufficient evidence",
+        "native.stale": "Stale",
+        "native.armed": "Armed",
+        "native.waitingForSource": "Waiting for source",
+        "native.acquisitionGap": "Acquisition gap",
+        "native.sourceDisconnected": "Source disconnected",
+        "native.waiting": "Waiting",
+        "native.manual": "Manual",
+        "native.unsupported": "Unsupported",
+        "native.provisional": "Provisional",
+        "native.final": "Final",
+        "native.revised": "Revised",
+        "native.supported": "Supported",
+        "native.idle": "Idle",
+        "native.detecting": "Detecting",
+        "native.holding": "Holding",
+        "native.complete": "Complete",
+        "native.thisCompanionDoesNotSupportSessionBoundNativeControls": "This companion does not support session-bound native controls.",
+        "native.staleEngineStateSynchronizeBeforeControllingScience": "Stale engine state; synchronize before controlling science.",
+        "native.backendSessionAndControlRevisionsAreCheckedBeforeApplying": "Backend session and control revisions are checked before applying.",
+        "native.scienceStatusUnavailableUnsupportedCompanion": "Science status unavailable (unsupported companion)",
+        "native.updateTheCompanionForScienceSessionControls": "Update the companion for science session controls.",
+        "native.noScoreAvailable": "No score available.",
+        "native.noSessionIdentitySupplied": "No session identity supplied.",
+        "native.nextTriggerNotAssessed": "Next trigger not assessed.",
+        "native.scientificYieldNotAssessed": "Scientific yield not assessed.",
+        "native.pilotHoldRearmRequired": " | pilot hold; rearm required",
+        "native.continuityHold": " | continuity hold",
+        "native.collectionControl": "Collection control: {value1}{value2}{value3}",
+        "native.none": "none",
+        "native.flightSessionRevision": "Flight {value1} | Session {value2} | revision {value3}",
+        "native.goodDataValidScientificCoverageNotYetAssessedFlight": "Good Data / valid scientific coverage not yet assessed. Flight path is not valid-pixel coverage.",
+        "native.evidenceCutoffIsOlderThan15SMetricsAre": " | Evidence cutoff is older than 15 s; metrics are not current.",
+        "native.additionalDetailOnDashboard": " | Additional detail on dashboard.",
+        "native.stateAsOfMetrics": "State as of {value1} | metrics {value2}{value3}{value4}",
+        "native.researchStatusUnavailable": "Research status unavailable.",
+        "native.personalResearchCardsPrepareInTheDesktopFlightPlanner": "Personal research cards: prepare in the desktop Flight Planner.",
+        "native.activeCardS": "{value1} active card(s){value2}.",
+        "native.waitingForSynchronizedPersonalCardStateFlightAndScience": "Waiting for synchronized personal card state. Flight and science remain independent.",
+        "native.choosePersonalCardsInMissionPlannerBeforeRecording": "Choose personal cards in Mission Planner before recording.",
+        "native.activateACardThenBeginAttemptEndAttemptDeactivate": "Activate a card, then Begin Attempt / End Attempt. Deactivate Card does not stop flight or science.",
+        "native.noPersonalCardsSelectedForThisFlight": "No personal cards selected for this flight.",
+        "native.ordered": "Ordered",
+        "native.independent": "Independent",
+        "native.procedureRepetitionsVerifyOriginalsAfterFlight": "{value1} procedure | {value2} repetitions; verify originals after flight",
+        "native.continuousSeconds": "{value1} | {value2} continuous seconds",
+        "native.fictionalModeledTemperatureSResponseOriginalScienceSamplesRequired": "Fictional modeled temperature | {value1} s response | {value2} original science samples required",
+        "native.documentedPilotObservationsNotesAreNotSensorMeasurements": "{value1} documented Pilot Observations | notes are not sensor measurements",
+        "native.surveySourceQualifiedSamplesRequired": "Survey: {value1} | source-qualified samples required",
+        "native.distinctSamplingLocationsMGeographicExtentCollectValidTemperature": "{value1} distinct sampling locations | {value2} m geographic extent | collect valid temperature readings",
+        "native.neighboringFootMslBandsCollectValidTemperatureReadings": "{value1} neighboring {value2}-foot MSL bands | collect valid temperature readings",
+        "native.knotsIasFeetMsl": "{value1} knots IAS | {value2} feet MSL",
+        "native.revision": "{value1} | revision {value2}",
+        "native.attemptRecording": "Attempt recording",
+        "native.issued": "{value1} | issued {value2} | {value3}",
+        "native.focusedInToolbar": "Focused in Toolbar",
+        "native.sAttempts": "{value1} | {value2} s | {value3} attempts",
+        "native.enableautomatic": "enableAutomatic",
+        "native.flightGuidanceUnavailable": "Flight Guidance unavailable",
+        "native.ap": "AP: {value1} | {value2}",
+        "native.scientificSourceUnavailable": "Scientific source unavailable",
+        "native.scienceInstrument": "Science instrument",
+        "native.diagnostics": "Diagnostics",
+        "native.collectionInterval": "Collection interval ",
+        "native.collectionInterval2": "{value1} collection interval",
+        "native.applyInterval": "Apply interval",
+        "native.applyInterval2": "Apply {value1} interval",
+        "native.useConfirmedInterval": "Use confirmed interval",
+        "native.useConfirmedInterval2": "Use confirmed {value1} interval",
+        "native.chooseApplyIntervalToConfirmThisChange": "Choose Apply interval to confirm this change.",
+        "native.applyingInterval": "Applying interval...",
+        "native.commandUnavailableSynchronizeWithTheCompanion": "Command unavailable. Synchronize with the companion.",
+        "native.usingConfirmedIntervalS": "Using confirmed interval: {value1} s.",
+        "native.on": "On",
+        "native.off": "Off",
+        "native.disableInstrument": "Disable instrument",
+        "native.enableInstrument": "Enable instrument",
+        "native.sConfirmed": "{value1} s (confirmed)",
+        "native.disabled": "disabled",
+        "native.savedProducts": " saved products  /  ",
+        "native.measurementValues": " measurement values  /  ",
+        "native.unavailable": "unavailable",
+        "native.acquisitionSetsRejectedUnexpectedMissingActualLast": "{value1}  /  {value2} acquisition sets  /  {value3}{value4}{value5} rejected  /  {value6} unexpected missing  /  actual {value7}  /  last {value8}",
+        "native.static.connectionBuildDetails": "Connection & Build Details",
+        "native.static.commandsAeroscienceCommandV1RepliesAeroscienceReplyV1": "Commands: AeroScience.Command.v1 | Replies: AeroScience.Reply.v1",
+        "native.static.bundledEnglishFallbackUntilMatchingCompanionSettingsArrive": "Bundled English fallback until matching companion settings arrive.",
+        "native.static.researchStateUnavailable": "Research state unavailable.",
+        "native.static.cardsDescribeExperimentsSaveRoutesAsMissionPlansInThe": "Cards describe experiments. Save routes as mission plans in the desktop Flight Planner.",
+        "native.static.previousCards": "Previous Cards",
+        "native.static.nextCards": "Next Cards",
+        "native.static.mslFt": "MSL / FT",
+        "native.static.iasKts": "IAS / KTS",
+        "native.static.headingDegt": "HEADING /  degT",
+        "native.static.vsFtMin": "VS / FT/MIN",
+        "native.static.startRecordingAtAnyTimeYourMissionContinuesIfThis": "Start recording at any time. Your mission continues if this\n                  panel is closed.",
+        "native.static.savedMissionPlan": "Saved Mission Plan",
+        "native.static.unplannedMission": "Unplanned Mission",
+        "native.static.previousPlans": "Previous plans",
+        "native.static.nextPlans": "Next plans",
+        "native.static.viewRouteOnMap": "View Route on Map",
+        "native.static.saveAPlanInTheDashboardSelectItHereStart": "Save a plan in the dashboard, select it here, start recording, fly and review Mission History. Use the moving map or an exported compatible flight plan; AeroScience does not command aircraft navigation.",
+        "native.static.universalFlyAnything": "Universal  -  Fly Anything",
+        "native.static.realisticAuthenticResearch": "Realistic  -  Authentic Research",
+        "native.static.yourWrittenAccountNotASensorReadingMissingLocationsStay": "Your written account, not a sensor reading. Missing locations stay unavailable. Use the dashboard for longer notes.",
+        "native.static.observationCategory": "Observation category",
+        "native.static.shortObservation120Characters": "Short observation (120 characters)",
+        "native.static.recordingContinuesWhenThisPanelClosesOpenTheCompanionDashboard": "Recording continues when this panel closes. Open the companion\n                dashboard for mission history.",
+        "native.static.researchMissionMap": "Research Mission Map",
+        "native.static.freePan": "Free Pan",
+        "native.static.zoom": "Zoom -",
+        "native.static.previousWaypoint": "Previous Waypoint",
+        "native.static.nextWaypoint": "Next Waypoint",
+        "native.static.nextObservedTarget": "Next Observed Target",
+        "native.static.progressAndMapLimits": "Progress and map limits",
+        "native.static.northUpGoldPlannedTurquoiseRecordedPinkMarkersRecentTrack": "North up  /  Gold: planned  /  Turquoise: recorded  /  Pink: markers.\n                Recent track display is bounded to 512 points; full recordings\n                remain in Mission History. Offline geography is coarse and\n                Mercator is clipped at +/-85.0511 deg. No aircraft controls are\n                changed.",
+        "native.static.scienceSessionControlsEvidence": "Science session controls & evidence",
+        "native.static.endScienceClosesThisSessionEndMissionBelowEndsThe": "End science closes this session. End mission below ends the continuous flight. Detailed calibration, grading and source evidence remain on the companion dashboard.",
+        "native.static.collectionStopped": "Collection: stopped",
+        "native.static.sourceAndLimitations": "Source and limitations",
+        "native.static.simulatorReportedAtmosphericObservationsAnActiveMissionIsRequiredTo": "Simulator-reported atmospheric observations. An active mission\n                  is required to save science. Flight telemetry continues when\n                  science collection is paused. Documented calibration and operating\n                  evidence are available on the companion dashboard. Unknown constraints\n                  are not successful compliance or certified scientific accuracy.",
+        "native.static.aerosciencePages": "AeroScience pages",
+        "native.static.missionAndPayloadContent": "Mission and payload content",
+        "native.static.researchMission": "Research mission",
+        "native.static.scientificMissionIntelligence": "Scientific mission intelligence",
+        "native.ambientTemperature": "Ambient temperature",
+        "native.ambientWind": "Ambient wind",
+        "map.native.unavailable": "Unavailable",
+        "map.native.accessible": "Offline north-up mission map. Drag to pan, wheel to zoom.",
+        "map.native.noWaypoint": "No planned waypoint selected.",
+        "map.native.altitudeUnknown": "Altitude unspecified",
+        "map.native.liveUnavailable": "  /  Live position unavailable/stale.",
+        "map.native.abbreviated": " Display labels and instructions may be abbreviated; full values remain in the companion plan.",
+        "map.native.legend": "N ^ / Offline Natural Earth / Geographic reference",
+        "map.native.track": " / Ground track {track} / GS {speed}",
+        "windows.deletion.confirmation": "Confirmation: {phrase}",
+        "windows.deletion.typePhrase": "Type {phrase}",
+        "native.instrument.ambientTemperature": "Ambient temperature",
+        "native.instrument.ambientPressure": "Ambient pressure",
+        "native.instrument.ambientWind": "Ambient wind",
+        "native.instrument.ambientDensity": "Air density",
+        "native.instrument.thermalImager": "Thermal Imager",
+        "native.instrument.multispectralImager": "Multispectral Imager",
+        "native.instrument.hyperspectralImager": "Hyperspectral Imager"
       }
     },
     "es-ES": {
-      "version": 19,
+      "version": 20,
       "locale": "es-ES",
-      "sourceHash": "cb25b591a8ea973a4079dbac869815ee99dc5ca1da5aa26c23574fab8d3e2eb6",
+      "sourceHash": "24325d6cd2282e6667cce945669b271811652f8627707a2d627de0b92e3822f9",
       "pendingEnglishFallbackKeys": [
         "contextHelp.coverage.body",
         "contextHelp.lidar.body",
@@ -34548,6 +37010,18 @@ export const localeData = {
         "lidar.noSources",
         "lidar.pause",
         "missions.input.notes",
+        "native.activeRecordingItsSavedPlanSnapshotIsFixedPlan",
+        "native.evidenceBasedAssessmentsDependOnTheCompanionSCapabilities",
+        "native.final",
+        "native.holding",
+        "native.knotsIasFeetMsl",
+        "native.manual",
+        "native.provisional",
+        "native.stale",
+        "native.static.iasKts",
+        "native.static.mslFt",
+        "native.static.vsFtMin",
+        "native.theSdkCommbusHelperListenerDidNotBecomeAvailable",
         "results.libraryMeaning",
         "ui.analysis.messageSegmentPositions",
         "ui.app.messageAboveGroundFt",
@@ -34659,7 +37133,9 @@ export const localeData = {
         "ui.tfrLayers.messageReadRetainedOperationalDetails",
         "ui.tfrLayers.messageXMLSHA256AIXMSHA256",
         "ui.tfrPresentation.messageFtMSLSaved",
-        "ui.transferProgress.messageOriginalBytesPresent"
+        "ui.transferProgress.messageOriginalBytesPresent",
+        "windows.earthdataConnectionForm.signInOnlyOnNasaSOfficialWebsiteGenerate",
+        "windows.mainForm.chooseAHistoricalLasLazOriginal"
       ],
       "messages": {
         "common.messageUnavailable": "Los detalles no están disponibles. Actualiza la vista para consultar la información actual.",
@@ -40848,13 +43324,456 @@ export const localeData = {
         "ui.scientificAccess.messagePrepareASmallArea": "Preparar un área pequeña",
         "ui.sensorPlanning.messageSurveyAltitudeAboveGround": "Altura de la encuesta sobre el suelo",
         "ui.sensorPlanning.messageSideOverlap": "Sobreposición lateral (%)",
-        "ui.sensorPlanning.messageForwardOverlap": "Repercusión de los resultados (%)"
+        "ui.sensorPlanning.messageForwardOverlap": "Repercusión de los resultados (%)",
+        "windows.brandedForm.aeroscienceOrbitalArcLogo": "Logotipo AeroScience Orbital Arc",
+        "windows.toolbarProgressForm.aeroscienceToolbarInstallation": "AeroScience · Instalación de barra de herramientas",
+        "windows.toolbarProgressForm.installedAvailableCommunity": "Instalado: {value1} Disponible: {value2} Comunidad: {value3}",
+        "windows.toolbarProgressForm.installationCompleted": "Instalación completada",
+        "windows.toolbarProgressForm.theInstalledPackageAndVersionWereVerifiedStartOr": "Se verificaron el paquete y la versión instalados. Inicie o reinicie MSFS para cargar la barra de herramientas actualizada.",
+        "windows.toolbarProgressForm.installationStopped": "Instalación detenida",
+        "windows.toolbarProgressForm.previousFilesAreRestoredWhenPossibleDetailsAreIn": "{value1} Los archivos anteriores se restauran cuando es posible. Los detalles están en los registros de la barra de herramientas de AeroScience.",
+        "windows.toolbarProgressForm.aeroscienceMsfsToolbar": "Barra de herramientas MSFS de AeroScience",
+        "windows.toolbarProgressForm.closeMsfsBeforeUpdatingTheCompanionCanContinueWhen": "{value1} Cerrar MSFS antes de actualizar. El compañero puede continuar cuando se pospone esta acción.",
+        "windows.toolbarProgressForm.installToolbar": "Barra de herramientas de instalación",
+        "windows.toolbarProgressForm.updateToolbar": "Barra de herramientas de actualización",
+        "windows.mainForm.openDashboard": "Abrir Dashboard",
+        "windows.mainForm.scienceMissionOperations": "{value1} · Operaciones de la misión científica",
+        "windows.mainForm.chooseTheOriginalMissionDatabaseFolderToCopyIt": "Elija la carpeta de base de datos de misión ORIGINAL a COPY. No se migrará.",
+        "windows.mainForm.chooseTheOriginalScienceLibraryFolderToCopyOriginals": "Elija la carpeta de la Biblioteca de Ciencias ORIGINAL a COPY. Se conservarán los originales.",
+        "windows.mainForm.engineStoppedOpenStorageSettingsToResolveStartupOr": "Se detuvo el motor. Abra Almacenamiento/Settings para resolver errores de inicio o almacenamiento. Su archivo existente no ha sido reemplazado.",
+        "windows.mainForm.theLocalEngineStoppedAfterAnErrorCollectFeedback": "El motor local se detuvo después de un error. Recopilar comentarios y comprobar almacenamiento / settings; registros existentes se conservan.",
+        "windows.mainForm.engineRunningToolbar": "{value1} · Motor en marcha · {value2} {value3} · Barra de herramientas: {value4}",
+        "windows.mainForm.chooseYourMsfs2024CommunityFolder": "Elija su carpeta comunitaria MSFS 2024",
+        "windows.mainForm.chooseAHistoricalLasLazOriginal": "Choose a historical LAS/LAZ original",
+        "windows.mainForm.chooseANumericElevationDemGeotiff": "Elija una elevación de la estación de emergencia DEM GeoTIFF",
+        "windows.mainForm.chooseTheCollectionFolder": "Elija la carpeta de colección {value1}",
+        "windows.mainForm.chooseTheFolderContainingAnEnviHdrAndIts": "Elija la carpeta que contiene un.hdr ENVI y su binario hiperespectral original",
+        "windows.mainForm.chooseTheOriginalHyperspectralEnviHeader": "Elija el encabezado original de ENVI hiperespectral",
+        "windows.mainForm.selectMatchingEmitRfl002Rfluncert002AndMask003Originals": "Seleccione los originales EMIT RFL002, RFLUNCERT002 y MASK003 que coincidan",
+        "windows.mainForm.importARealScientificSourceCollectionManifest": "Importar un manifiesto de colección de fuentes científicas reales",
+        "windows.mainForm.collectFeedback": "Recopilar comentarios",
+        "windows.mainForm.saveFeedbackZip": "Guarde los comentarios ZIP...",
+        "windows.mainForm.copyArchivesForValidation": "Copiar archivos para validación",
+        "windows.mainForm.createAVerifiedDisposableCopyOfBothArchivesInside": "Crear una copia desechable verificada de ambos archivos dentro del perfil de Validación, y luego abrirlo con acceso científico en línea desactivado? Habilitar el acceso más tarde en Configuración cuando esté listo. Los originales y la configuración de producción se conservan. Cerrar otras aplicaciones usando estos archivos primero.",
+        "windows.mainForm.exit": "Salida",
+        "windows.mainForm.storageRecovery": "Recuperación del almacenamiento",
+        "windows.mainForm.waitForTheStorageSetupOperationToFinish": "Espere a que termine la operación de almacenamiento/configuración.",
+        "windows.mainForm.aMissionIsRecordingExitAndPreserveItAs": "Una misión está grabando. ¿Salir y conservarlo como interrumpido?",
+        "windows.mainForm.exitAeroscience": "Salga de AeroScience",
+        "windows.mainForm.theEngineIsStoppedCheckStorageSettings": "El motor está parado. Compruebe almacenamiento / settings.",
+        "windows.mainForm.endRecordingAndWaitForCurrentOperationsBeforeRunning": "Fin de la grabación y espere a las operaciones actuales antes de ejecutar la configuración.",
+        "windows.mainForm.endRecordingAndWaitForOtherOperationsBeforeUpdating": "Finalizar la grabación y esperar a que otras operaciones antes de actualizar la barra de herramientas.",
+        "windows.mainForm.closeMsfsBeforeInstallingOrUpdatingAeroscienceSToolbar": "Cierre MSFS antes de instalar o actualizar la barra de herramientas de AeroScience.",
+        "windows.mainForm.installTheBundledAeroscienceToolbarInItsPreviousFiles": "Instale la barra de herramientas de AeroScience en: {value1} Sus archivos anteriores serán copia de seguridad fuera de la Comunidad.s no relacionados se conservan.s",
+        "windows.mainForm.confirmToolbarInstallation": "Confirmar instalación de la barra de herramientas",
+        "windows.mainForm.endRecordingAndWaitForActiveSetupStorageWork": "Terminar la grabación y esperar a que se establezca/se anore el trabajo activo antes de compactar.",
+        "windows.mainForm.compactTheDatabaseServicesWillStopTemporarilyAVerified": "Compacta la base de datos {value1}? Los servicios se detendrán temporalmente. Se requiere una copia de seguridad verificada y suficiente espacio temporal. Las observaciones originales se conservan; se informarán los bytes de la base de datos recuperados.",
+        "windows.mainForm.confirmDatabaseMaintenance": "Confirmar el mantenimiento de la base de datos",
+        "windows.mainForm.compactionCompleted": "Compactación completada",
+        "windows.mainForm.waitForCurrentSetupStorageWorkAndStartThe": "Esperar a que se preparen/se arruine el motor local primero.",
+        "windows.mainForm.importSourceObservationCopyMibIntoAvailableGibOriginal": "Importar {value1}? Fuente: {value2} Observación: {value3} Copiar {value4} MiB en {value5} Disponible: {value6} GiB Los archivos originales permanecen intactos. No se descargan archivos y no se cargan datos. Revise la licencia de origen: {value7}",
+        "windows.mainForm.importedOpenDashboardSettingsScientificDataSourcesToInspect": "Importado {value1}. Abrir el panel Configuración → Fuentes de datos científicos para inspeccionar la cobertura y los metadatos.",
+        "windows.mainForm.theBundleIncludesGeographicPreparationAreasInstrumentProviderTiming": "El paquete incluye áreas de preparación geográfica, tiempo de instrumentos/proveedores, errores y registros locales. Revise antes de compartirlo. No hay originales científicos, bases de datos o credenciales incluidas. ¿Continúa?",
+        "windows.mainForm.savedLocallyReviewTheZipBeforeSharingIt": "Salvado localmente. Revise el ZIP antes de compartirlo.",
+        "windows.setupWizardForm.next": "Siguiente",
+        "windows.setupWizardForm.skipForNow": "Saltar por ahora",
+        "windows.setupWizardForm.installUpdateTheIncludedMsfs2024Toolbar": "Instalar / actualizar la barra de herramientas MSFS 2024 incluida",
+        "windows.setupWizardForm.allowAutomaticScientificDataDiscoveryAndBoundedDownloads": "Permitir el descubrimiento automático de datos científicos y descargas limitadas",
+        "windows.setupWizardForm.welcomeToAeroscienceSetup": "Bienvenido a AeroScience · Configuración",
+        "windows.setupWizardForm.chooseTheFolderForMissionsDb": "Elija la carpeta para missions.db",
+        "windows.setupWizardForm.chooseAScientificDataLibraryFolder": "Elija una carpeta de la Biblioteca de Datos Científicos",
+        "windows.setupWizardForm.availableDriveSpaceGib": "Espacio disponible para la unidad: {value1} GiB{value2}",
+        "windows.setupWizardForm.keepThisLocationToPreserveTheUnavailableLibraryReconnect": "· Mantenga esta ubicación para preservar la biblioteca no disponible; vuelva a conectar su unidad más tarde. Su archivo de misión disponible puede seguir abierto.",
+        "windows.setupWizardForm.aeroscienceStepOf4": "AeroScience {value1} · Paso {value2} de 4",
+        "windows.setupWizardForm.finishSetup": "Finalizar la configuración",
+        "windows.setupWizardForm.browseMissionDatabaseFolder": "Buscar carpeta de base de datos de misión...",
+        "windows.setupWizardForm.browseScienceLibraryFolder": "Examinar la carpeta de la biblioteca de ciencias...",
+        "windows.setupWizardForm.browseCommunityFolder": "Buscar carpeta comunitaria...",
+        "windows.setupWizardForm.selectMsfs2024SConfiguredCommunityFolder": "Seleccione la carpeta comunitaria configurada de MSFS 2024",
+        "windows.setupWizardForm.closeSetupWithUnappliedChoicesChooseNoToKeep": "¿Cerrar la configuración con opciones no satisfechas? Elija No para seguir editando. La configuración guardada previamente y los datos de usuario verificados permanecen intactos.",
+        "windows.setupWizardForm.unfinishedSetup": "Configuración sin terminar",
+        "windows.setupWizardForm.setUpLocalMissionStorageAndTheMsfs2024": "Configure el almacenamiento local de la misión y la barra de herramientas MSFS 2024. La aplicación iniciará sus servicios y abrirá su panel automáticamente.",
+        "windows.setupWizardForm.existingLocationsAndSettingsArePreselectedUpdatesKeepThem": "Las ubicaciones y configuraciones existentes están preseleccionadas. Las actualizaciones las mantienen. Cambiar las copias de una ubicación y verificar los datos existentes sólo después de su confirmación; los originales se conservan.",
+        "windows.setupWizardForm.missionHistoryWorksWithoutMsfsOrInternetLiveRecording": "Mission History funciona sin MSFS o internet. La grabación en vivo está disponible cuando un avión está conectado.",
+        "windows.setupWizardForm.missionDatabaseFileChooseItsFolderFilenameRemainsMissions": "Archivo de base de datos de misiones (elegir su carpeta; nombre de archivo permanece missions.db)",
+        "windows.setupWizardForm.scientificDataLibraryMayBeOnADifferentInternal": "Biblioteca de datos científicos — puede estar en una unidad interna o externa diferente",
+        "windows.setupWizardForm.keepTheSuggestedFoldersToPreserveCurrentStorageNew": "Mantenga las carpetas sugeridas para conservar el almacenamiento actual. Los nuevos destinos deben estar vacíos. Las tiendas existentes pueden seleccionarse explícitamente a través de Configuración → Almacenamiento después de la configuración.",
+        "windows.setupWizardForm.confirmTheMsfs2024CommunityFolderDetectionReadsSteam": "Confirme la carpeta comunitaria MSFS 2024. La detección lee la configuración de Steam / Microsoft Store, incluyendo rutas de paquetes personalizadas.e si es necesario.e.",
+        "windows.setupWizardForm.closeMsfsBeforeInstallingOrUpdatingOnlyAeroscienceIs": "Cierre MSFS antes de instalar o actualizar. Sólo AeroScience se cambia; el paquete anterior de AeroScience está respaldado fuera de Community. Saltar por Ahora deja Comunidad intacta; la instalación permanece disponible en Configuración.",
+        "windows.setupWizardForm.msfsIsCurrentlyRunningCloseItBeforeContinuingWith": "MSFS está en ejecución. Cierre antes de continuar con la instalación de la barra de herramientas, o seleccione Saltar por Ahora.",
+        "windows.setupWizardForm.missionDatabaseScientificDataLibraryToolbar": "Base de datos de la misión: {value1} Biblioteca de datos científicos: {value2} Barra de herramientas: {value3}",
+        "windows.setupWizardForm.finishSetupConfirmsTheseChoicesChangedStorageLocationsUse": "Finalizar Configuración confirma estas opciones. Los lugares de almacenamiento cambiados utilizan migración verificada con originales retenidos. Los datos de destino existentes nunca se sobrescriben o se fusionan silenciosamente. Puede volver a configurar y almacenar a través de Configuración.",
+        "windows.setupWizardForm.optionalAndSeparateFromOnlineMapsLeaveUncheckedFor": "Opcional y separado de los mapas en línea. No se puede controlar para la ciencia offline-solamente. Cambie el ancho de banda, la política de fecha/calidad y el acceso más tarde en Configuración → Fuentes de datos científicos.",
+        "windows.setupWizardForm.theScienceLibraryDriveHasLimitedFreeSpaceFuture": "La unidad de la Biblioteca de Ciencias tiene espacio libre limitado. Los formatos científicos futuros y las tasas de datos no se implementan; no hay pronóstico de tamaño disponible. ¿Continúa?",
+        "windows.setupWizardForm.storageCapacity": "Capacidad de almacenamiento",
+        "windows.settingsForm.aeroscienceSettings": "Configuración de AeroScience",
+        "windows.settingsForm.chooseAnEmptyDestinationOrAnExistingAeroscienceStore": "Elija un destino vacío o una tienda AeroScience existente",
+        "windows.settingsForm.working": "Trabajando......",
+        "windows.settingsForm.completeOriginalDataRetained": "Datos originales conservados.",
+        "windows.settingsForm.enablePrivateLanIpadAccess": "Habilitar acceso privado a LAN / iPad",
+        "windows.settingsForm.selectTheConfiguredMsfsCommunityFolder": "Seleccione la carpeta MSFS Community configurada",
+        "windows.settingsForm.installedAvailableStatus": "Instalado: {value1} · Disponible: {value2} Estado: {value3} {value4}",
+        "windows.settingsForm.newInstallationsSuggestOpenstreetmapStreetsAfterAPrivacyChoice": "Nuevas instalaciones sugieren OpenStreetMap / Calles después de una opción de privacidad antes de la primera solicitud de ficha. Elija sólo offline-en ese aviso o cambie Mapas y mapas de base en el panel de control. Las preferencias existentes se conservan. Geografía fuera de línea permanece disponible sin una cuenta. Esri imágenes de satélite opcionales requiere sus propias credenciales configuradas.",
+        "windows.settingsForm.openMapsBasemapsSettings": "Abrir la configuración de mapas y mapas de base",
+        "windows.settingsForm.aeroscienceDashboardSettingsUpdatesShowsYourInstalledVersionAnd": "AeroScience {value1}. Configuración del panel de control → Actualizaciones muestra la versión instalada y las notificaciones de versión GitHub opcionales. Las comprobaciones se guardan en caché diariamente, nunca bloquean archivos sin conexión y nunca ejecutan un instalador automáticamente. Puede desactivar las comprobaciones automáticas o incluir/excluir las versiones alfa allí.",
+        "windows.settingsForm.openUpdateSettingsCheckForUpdates": "Abrir la configuración de actualización / Comprobar si hay actualizaciones",
+        "windows.settingsForm.waitForTheCurrentOperationToFinish": "Espera a que termine la operación actual.",
+        "windows.settingsForm.discardUnappliedSettingsAndCloseChooseNoToKeep": "¿Desechar los ajustes sin desmontar y cerrar? Elija No para seguir editando. Se conservarán los ajustes guardados, la grabación y el trabajo de fondo.",
+        "windows.settingsForm.unsavedSettings": "Configuración sin saturar",
+        "windows.settingsForm.usedAvailable": "Utilizado: {value1} · Disponible: {value2}",
+        "windows.settingsForm.unavailable": "No disponible: {value1}",
+        "windows.settingsForm.limitedAvailableCapacityConsiderAnotherDriveThisIsA": "Capacidad disponible limitada. Considere otra unidad; esta es una advertencia de capacidad, no una predicción del tamaño de los datos científicos.",
+        "windows.settingsForm.browseChangeLocation": "Examinar / Cambiar ubicación...",
+        "windows.settingsForm.openFolder": "Abrir carpeta",
+        "windows.settingsForm.restoreDefault": "Restaurar predeterminado...",
+        "windows.settingsForm.dataManagement": "Gestión de datos...",
+        "windows.settingsForm.storageManagementLimitsPreviewCleanup": "Gestión de almacenamiento / Límites / Vista previa Limpieza",
+        "windows.settingsForm.recoverOriginalLocationFromInterruptedMigration": "Recuperar ubicación original de la migración interrumpida...",
+        "windows.settingsForm.noInterruptedMigrationNeedsRollback": "No hay migración interrumpida que necesite retroceso.",
+        "windows.settingsForm.restoreTheOriginalVerifiedStorageSettingBothCopiesWill": "¿Restaurar la configuración de almacenamiento verificada original? Ambas copias serán conservadas.",
+        "windows.settingsForm.endTheMissionBeforeChangingEitherStorageLocation": "Finalice la misión antes de cambiar cualquier ubicación de almacenamiento.",
+        "windows.settingsForm.scienceLibraryCapacity": "Capacidad de la Biblioteca Científica",
+        "windows.settingsForm.availableCapacityThisDriveHasLimitedFreeSpaceFuture": "Capacidad disponible: {value1}. Esta unidad tiene espacio libre limitado. Se desconocen los futuros requisitos de datos científicos. ¿Continúa?",
+        "windows.settingsForm.limitedCapacity": "Capacidad limitada",
+        "windows.settingsForm.confirmStorageChange": "Confirmar cambio de almacenamiento",
+        "windows.settingsForm.runGuidedSetup": "Ejecutar la configuración guiada...",
+        "windows.settingsForm.recordingIntervalMillisecondsSimconnectIsRequestedAt1Hz": "Intervalo de grabación (millisegundos; SimConnect se solicita a 1 Hz).",
+        "windows.settingsForm.applyConnectionSettings": "Aplicar los ajustes de conexión",
+        "windows.settingsForm.lanIsOptionalAllowAeroscienceOnTheWindowsPrivate": "LAN es opcional. Permitir AeroScience en el perfil de red privada de Windows sólo cuando se utiliza iPad/LAN. El código de emparejamiento está en la configuración del panel. Operación local no requiere cambio de firewall.",
+        "windows.settingsForm.msfsCommunityFolder": "Carpeta comunitaria MSFS",
+        "windows.settingsForm.browseCommunityFolder": "Buscar carpeta Comunidad...",
+        "windows.settingsForm.installUpdateRepairToolbar": "Instalar / Actualizar / Reparar barra de herramientas...",
+        "windows.settingsForm.removeAeroscienceToolbar": "Eliminar la barra de herramientas AeroScience...",
+        "windows.settingsForm.noCommunityFolderHasBeenConfigured": "No se ha configurado ninguna carpeta de la comunidad.",
+        "windows.settingsForm.removeOnlyAeroscienceFromThisCommunityFolderItsFiles": "¿Retire sólo AeroScience de esta carpeta comunitaria? Sus archivos se moverán a una copia de seguridad fuera de la comunidad. Cerrar MSFS primero. {value1}",
+        "windows.settingsForm.removeToolbar": "Eliminar barra de herramientas",
+        "windows.settingsForm.theToolbarWasNotInstalledInThatFolder": "La barra de herramientas no se instaló en esa carpeta.",
+        "windows.settingsForm.toolbarRemovedBackupRetainedAt": "Barra de herramientas eliminada. Copia de seguridad retenida en: {value1}",
+        "windows.settingsForm.theNativeSimconnectRuntimeIsIncludedConnectionStatusIs": "El tiempo de ejecución nativo de SimConnect está incluido. El estado de conexión se muestra en la ventana principal de AeroScience y el panel de control.",
+        "windows.settingsForm.theNativeSimconnectRuntimeIsMissingRunAeroscienceSetup": "Falta el tiempo de ejecución nativo de SimConnect. Ejecute AeroScience Setup de nuevo para reparar la instalación; mantenga los datos y la configuración de su misión.",
+        "windows.settingsForm.microsoftVisualCPrerequisite": "Prerrequisito de Microsoft Visual C++...",
+        "windows.settingsForm.ifWindowsReportsAMissingVisualCDependencyUse": "Si Windows informa de una dependencia de Visual C++ faltante, utilice la página oficial de Microsoft arriba para instalar la x64 redistribuible gráficamente, a continuación, reinicie AeroScience.",
+        "windows.settingsForm.toolbar": "Barra de herramientas",
+        "windows.earthdataConnectionForm.connectNasaEarthdata": "Conectar datos de la NASA",
+        "windows.earthdataConnectionForm.signInOnlyOnNasaSOfficialWebsiteGenerate": "Sign in only on NASA's official website. Generate a User Token from your NASA profile (NASA documents a 60-day lifetime). Approve ORNL DAAC access there if requested. AeroScience never needs your NASA password.",
+        "windows.earthdataConnectionForm.openNasaSignInTokenPage": "Abrir la página de inicio de sesión / token de NASA",
+        "windows.earthdataConnectionForm.pasteNasaUserTokenStoredInWindowsCredentialManager": "Paste NASA User Token (almacenado en Windows Credential Manager para este perfil):",
+        "windows.earthdataConnectionForm.nasaEarthdataUserToken": "Token de usuario de datos de la NASA",
+        "windows.earthdataConnectionForm.theBrowserDashboardAndPairedDevicesNeverReceiveThis": "El panel de control del navegador y los dispositivos emparejados nunca reciben esta credencial. El acceso es revisado por NASA durante la vista previa y descarga. Desconecta quita el token guardado; la página de perfil de NASA puede revocarlo.",
+        "windows.earthdataConnectionForm.saveEarthdataConnection": "Guardar conexión Earthdata",
+        "windows.earthdataConnectionForm.earthdataConnection": "Conexión de datos de la Tierra",
+        "windows.earthdataConnectionForm.discardTheEnteredTokenAndCloseChooseNoTo": "¿Desechar el token introducido y cerrar? Elija No para seguir editando. Las conexiones y descargas guardadas no cambiarán.",
+        "windows.earthdataConnectionForm.unsavedEarthdataConnection": "Conexión de datos terrestres sin saturar",
+        "windows.program.aeroscienceIsAlreadyRunningCloseItBeforeInstallationOr": "AeroScience ya está en marcha. Cierre antes de la instalación o eliminación.",
+        "windows.program.removeTheAeroscienceMsfsToolbarTooOnlyAeroscienceWill": "¿Quitar la barra de herramientas de AeroScience MSFS también? {value1} Sólo AeroScience se moverá a una copia de seguridad fuera de la Comunidad. Historia de misión, datos científicos, configuración y complementos no relacionados se conservarán. Elija No para mantener la barra de herramientas.",
+        "windows.program.uninstallAeroscience": "Desinstalar AeroScience",
+        "windows.program.closeMsfsBeforeRemovingTheAeroscienceToolbarThenChoose": "Cierre MSFS antes de eliminar la barra de herramientas de AeroScience, luego seleccione Retry. Cancele mantiene la barra de herramientas y continúa desinstalando la aplicación.",
+        "windows.program.closeMsfs": "Cerrar MSFS",
+        "windows.program.toolbarRemovalDidNotCompleteExistingFilesWerePreserved": "La eliminación de la barra de herramientas no se completó. Los archivos existentes se preservaron. {value1}",
+        "windows.program.aeroscienceUninstall": "Desinstalar AeroScience",
+        "windows.dataManagementForm.alsoRemoveSavedMissionPlansAndTheirPreflightNotes": "También elimine los planes de misión guardados y sus notas de prevuelo al limpiar los datos de vuelo",
+        "windows.dataManagementForm.aeroscienceStorageDataDataManagement": "AeroScience · Almacenamiento y datos · Gestión de datos",
+        "windows.dataManagementForm.exportIndividualCompletedMissionsFromMissionHistoryTheseOperations": "Exportar misiones individuales terminadas de Historial de la Misión. Estas operaciones limpian archivos completos de forma independiente. La eliminación científica permanente purga el contenido científico seleccionado de copias de seguridad administradas; el contenido no relacionado se conserva.",
+        "windows.dataManagementForm.clearScientificData": "Borrar datos científicos",
+        "windows.dataManagementForm.clearFlightMissionData": "Limpiar datos de vuelo y misión",
+        "windows.dataManagementForm.deleteCollectedScientificData": "Eliminar datos científicos recopilados",
+        "windows.dataManagementForm.deletionOptions": "Opciones de supresión:",
+        "windows.dataManagementForm.permanentlyDeleteWithoutCreatingANewBackup": "Eliminar permanentemente sin crear una nueva copia de seguridad",
+        "windows.dataManagementForm.createARecoveryBackupThenDelete": "Crear una copia de seguridad de recuperación, y luego eliminar",
+        "windows.dataManagementForm.deleteScientificData": "Eliminar datos científicos",
+        "windows.dataManagementForm.deleteFlightData": "Eliminar datos de vuelo",
+        "windows.dataManagementForm.reviewingTheExactCollectedScienceSelectionBackgroundOperationsAre": "Revisando la selección exacta de la ciencia recopilada; las operaciones de fondo no cambian...",
+        "windows.dataManagementForm.missionsDatasetsObservationsGeneratedProductsEstimatedManagedFileSpace": "{value1} misiones · {value2} datasets · {value3} observaciones · {value4} productos generados. Espacio estimado de archivos gestionados: {value5} MiB. La eliminación es permanente. Se purgan las mediciones científicas, los análisis generados y las categorías dependientes, incluyendo sus copias administradas. No se crea copia de seguridad de recuperación. Las grabaciones de vuelo y los conjuntos de datos externos permanecen intactos. {value6}",
+        "windows.dataManagementForm.cancelledNoScientificDataWasChanged": "Cancelado. No se cambiaron los datos científicos.",
+        "windows.dataManagementForm.permanentlyDeletingReviewedCollectedScience": "Eliminando permanentemente la ciencia recopilada revisada...",
+        "windows.dataManagementForm.filesRemovedPending": "{value1}: {value2} archivos retirados, {value3} pendientes. {value4}",
+        "windows.dataManagementForm.deletionIsNotComplete": "La supresión no ha terminado: {value1}",
+        "windows.dataManagementForm.chooseARecoveryBackupDestinationForScientificDataNot": "Elija un destino de recuperación de datos científicos — no una nueva ubicación de la Biblioteca de Ciencias",
+        "windows.dataManagementForm.chooseARecoveryBackupDestinationForFlightMissionData": "Elija un destino de recuperación de backup para datos de vuelo y misión, no una nueva ubicación de almacenamiento de misión",
+        "windows.dataManagementForm.stoppingServicesAndClearingTransactionallyWithoutANewBackup": "Detener los servicios y la compensación de transacciones sin un nuevo respaldo...",
+        "windows.dataManagementForm.stoppingServicesVerifyingTheRecoveryBackupAndClearingTransactionally": "Detener los servicios, verificar la recuperación de respaldo y la transacción de compensación...",
+        "windows.dataManagementForm.completed": "Terminado. {value1}",
+        "windows.dataManagementForm.operationStoppedCommittedRecordsAndReferenceAvailabilityAreReconciled": "Operación detenida: {value1} Los registros comprometidos y la disponibilidad de referencia se reconcilian cuando los servicios se reinician.",
+        "windows.dataManagementForm.endRecordingAndWaitForActiveOperationsFirst": "Terminar la grabación y esperar a que las operaciones estén activas primero.",
+        "windows.dataManagementForm.endRecordingAndWaitForOtherOperationsFirst": "Terminar la grabación y esperar a que otras operaciones en primer lugar.",
+        "windows.dataManagementForm.thisDeliberateArchiveClearIncludesProtectedMissionSDataset": "Este fichero desactivado incluye {value1} misión(s)/dataset(s) protegida(s). La protección evita la limpieza automática; esta operación explícita de confirmación tecleada los eliminará. Continuar hasta la confirmación final?",
+        "windows.dataManagementForm.protectedResearchData": "Datos de investigación protegidos",
+        "windows.dataManagementForm.permanentlyDeleteTheseRecords": "{value1} {value2} ¿Borrar permanentemente estos registros?",
+        "windows.dataManagementForm.confirmScientificDataDeletion": "Confirmar la eliminación de datos científicos",
+        "windows.dataManagementForm.confirmFlightDataDeletion": "Confirmar la eliminación de datos de vuelo",
+        "windows.scientificSourcesPanel.savedExistingDataAndProductsAreRetained": "Guardar. Los datos y productos existentes se conservan.",
+        "windows.scientificSourcesPanel.sourceDiagnosticsReviewBeforeSharing": "Diagnósticos de fuentes: revisión antes de compartir",
+        "windows.scientificSourcesPanel.historicalExternalDataRetainTheirOriginalObservationDatesAnd": "Los datos externos históricos conservan sus fechas de observación y procedencia originales. Los conjuntos de datos locales funcionan fuera de línea dentro de su cobertura real. La recuperación automática utiliza el consentimiento científico-datos separado.",
+        "windows.scientificSourcesPanel.onlineScientificDataAccess": "Acceso a los datos científicos en línea: {value1}",
+        "windows.scientificSourcesPanel.enableConfigureOnlineScientificDataAccess": "Activar / configurar el acceso a datos científicos en línea",
+        "windows.scientificSourcesPanel.sourceModeAppliesToSelectionNotTheRecordingSwitch": "El modo fuente se aplica a la selección, no al interruptor de grabación.",
+        "windows.scientificSourcesPanel.importedPreparedDatasetsMibRetained": "{value1} conjuntos de datos importados/preparados · {value2} MiB retenido{value3}",
+        "windows.scientificSourcesPanel.preparedRegionsMibExpand": "{value1} — {value2} regiones preparadas — {value3} MiB (38d)",
+        "windows.scientificSourcesPanel.providerSceneObservedKindBandsVerticalReferenceTermsSource": "{value1} Proveedor: {value2} Escena: {value3} Observado: {value4} Tipo: {value5} · Bandas: {value6} Referencia vertical: {value7} Términos: {value8} Fuente: {value9} Fuente externa histórica; no una observación de aviones en vivo.",
+        "windows.scientificSourcesPanel.advancedDiagnosticsExactSourceMetadata": "Diagnósticos avanzados: metadatos de origen exactos",
+        "windows.scientificSourcesPanel.viewAllRegionsAndCollectionCoverage": "Ver todas las regiones y la cobertura de colecciones",
+        "windows.scientificSourcesPanel.importHyperspectralDataset": "Importar el conjunto de datos hiperespectrales...",
+        "windows.scientificSourcesPanel.importDataset": "Importar conjunto de datos...",
+        "windows.scientificSourcesPanel.onlineScientificDataPrivacyAndPredictiveControls": "Privacidad de datos científicos y controles predictivos en línea",
+        "windows.scientificSourcesPanel.advancedJsonSourceCollectionImport": "Importación avanzada de la colección de fuentes JSON...",
+        "portal.language.memberTitle": "Idioma de la cuenta de la organización",
+        "portal.language.scope": "Este idioma se aplica sólo a su cuenta de inicio de sesión en este servidor de organización. El tema del navegador y la configuración de compañero permanecen independientes.",
+        "portal.language.followBrowser": "Siga este navegador",
+        "portal.language.memberLabel": "Idioma de esta cuenta de organización",
+        "portal.language.save": "Guardar idioma de la cuenta",
+        "portal.language.saved": "No se ha cambiado ninguna investigación, ni la posibilidad de compartir o permisos.",
+        "portal.language.conflict": "Su idioma de cuenta cambió en otro lugar. Recargar antes de guardar de nuevo.",
+        "portal.language.unavailable": "El idioma de la cuenta no está disponible. Su idioma del navegador permanece disponible; vuelva a iniciar sesión si su autorización ha expirado.",
+        "windows.language.reopen": "El idioma se guarda. Reabrir Configuración u otras ventanas de acompañamiento abiertas para traducir sus controles existentes. La grabación y la adquisición de datos científicos no cambian.",
+        "windows.science.modeAutomatic": "Automático",
+        "windows.science.modeLocal": "Sólo mis conjuntos de datos",
+        "windows.science.modePreferLocal": "Prefiere mis conjuntos de datos, Permitir una caída automática",
+        "windows.science.localAvailable": "Desactivado: siguen disponibles conjuntos de datos locales",
+        "windows.science.spaceLimited": "· Espacio libre limitado",
+        "windows.science.datasetRequired": "· Se requiere el conjunto de datos",
+        "windows.feedback.notes": "Pasos y notas de reproducción opcionales",
+        "windows.flight.noMission": "Ninguna misión activa",
+        "windows.flight.recording": "Registro de la misión",
+        "windows.science.category11Title": "Terreno y elevación",
+        "windows.science.category11Description": "La elevación numérica DEM/DSM, no laser de aviones. Local: elevación de una sola banda GeoTIFF.",
+        "windows.science.category12Title": "Imágenes térmicas",
+        "windows.science.category12Description": "Temperatura de superficie del satélite histórico y máscaras originales de QA. Local: ST_B10 + QA_PIXEL (+ QA_RADSAT), con metadatos originales.",
+        "windows.science.category13Title": "Imágenes multiespectrales",
+        "windows.science.category13Description": "Reflejancia histórica, RGB y NDVI. Local: B02/B03/B04/B08 y SCL GeoTIFFs con metadatos de escalado originales.",
+        "windows.science.category14Title": "Imágenes hiperespectrales",
+        "windows.science.category14Description": "Utilice el Administrador de Datos Externos → Buscar y descargar datos → Investigación hiperespectral para descargar e importar datos de la Tierra aprobados. La importación original de manual/mover de ENVI permanece disponible.EMIT es sólo descubrimiento.",
+        "native.toolbarTemplateDidNotFinishLoadingCloseAndReopen": "La plantilla de barra de herramientas no terminó de cargar. Cierre y vuelva a abrir este panel; informe su título si esto continúa.",
+        "native.connectingToCompanion": "Conectando con el compañero...",
+        "native.notSuppliedByThisPackage": "no suministrados por este envase",
+        "native.toolbarSourceProtocol1": "Barra de herramientas {value1}, fuente {value2}, protocolo 1",
+        "native.commandsAeroscienceCommandV1RepliesAeroscienceReplyV1No": "Comandos: AeroScience.Command.v1, Respuestas: AeroScience.Respuesta.v1, No hay respuesta del motor que coincida todavía. de registro por sí solo no es una conexión del motor.",
+        "native.evidenceBasedAssessmentsDependOnTheCompanionSCapabilities": "Evidence-based assessments depend on the companion's capabilities. Any compatible aircraft can record.",
+        "native.allCompatibleAircraftCanRecordMissions": "Todos los aviones compatibles pueden registrar misiones.",
+        "native.theMapRendererIsUnavailableInThisUiContext": "El renderizador de mapas no está disponible en este contexto de la UI. Misión y carga útil permanecen disponibles; informe de la versión del simulador y error de consola coherente.",
+        "native.freePanDragTheMapOrUseArrowKeys": "Free Pan - arrastre el mapa o utilizar las teclas de flecha. Aviones siguen está apagado.",
+        "native.selecting": "Seleccionando {value1}...",
+        "native.unableToLoadTheSdkCommbusServiceCheckThe": "No se puede cargar el servicio SDK Comm Bus. Compruebe la versión MSFS 2024 SDK/runtime.",
+        "native.simulatorLinkUnavailableReopenThisPanelSeeConnectionBuild": "Enlace del simulador no disponible. Reabrir este panel; ver Conexión & Construir detalles.",
+        "native.theSdkCommbusHelperListenerDidNotBecomeAvailable": "The SDK CommBus helper/listener did not become available. No engine reply was received. Check the matching Validation package and supported simulator runtime.",
+        "native.loadingSavedMissionPlans": "Cargando los planes de misión guardados...",
+        "native.selectedPlanIsNoLongerAvailableChooseAnotherPlan": "El plan seleccionado ya no está disponible. Elija otro plan o Misión no planificada.",
+        "native.selectedWaypointsPatternsInstruments": "Seleccionado: {value1}, {value2} waypoints, {value3} patrones. Instrumentos: {value4}.",
+        "native.loadingSelectedPlanDetails": "Cargando los detalles del plan seleccionado...",
+        "native.unplannedMissionRecordWhereverYouFly": "Misión no planeada: registra donde vueles.",
+        "native.savedPlansSelectionIsSavedByTheCompanion": "Planes guardados {value1}-{value2}. La selección es guardada por el compañero.",
+        "native.noMoreSavedPlansUsePreviousPlans": "No más planes guardados. Use planes anteriores.",
+        "native.noSavedMissionPlansCreateOneInTheDesktop": "No hay planes de misión guardados. Cree uno en el planificador de vuelo de escritorio.",
+        "native.noActivePlannedMissionSelectASavedPlanOr": "Ninguna misión planeada activa - seleccione un plan guardado o registre uno del compañero.",
+        "native.loadingRoute": "Ruta de carga {value1} / {value2}",
+        "native.end": "fin",
+        "native.routeSynchronizedWaypointsNextObservedTarget": "Ruta sincronizada / {value1} waypoints / siguiente objetivo observado {value2}",
+        "native.routeSynchronizedOrderedWaypointsOfflineGeographyNoOnlineTile": "Ruta sincronizada: {value1} ordenó puntos de referencia. Geografia offline; no hay solicitudes de azulejos en línea.",
+        "native.simulatorChannelReadyWaitingForTheWindowsEngine": "Canal del simulador listo; esperando el motor de Windows.",
+        "native.unableToRegisterTheSdkCommbusListener": "No se puede registrar el oyente de bus de comunicación SDK..",
+        "native.staleStatusCompanionUnavailable": "Stale status / compañero no disponible",
+        "native.scientificStorageUnavailable": "Almacenamiento científico no disponible",
+        "native.disconnectedUnavailable": "Desconectado / no disponible",
+        "native.telemetryStaleUnavailable": "rancio de telemetría / no disponible",
+        "native.simulatorPausedScienceUnconfirmed": "Simulador pausado / ciencia no confirmada",
+        "native.armedNotStarted": "Armados/no iniciados",
+        "native.inactive": "Inactivo",
+        "native.flightRecordingScience": "Registro de vuelo: {value1}, Ciencia: {value2}",
+        "native.thisViewCouldNotUpdateSeeConnectionBuildDetails": "Esta vista no se pudo actualizar. Vea Conexión y Detalles de construcción.",
+        "native.displayFaults": "Fallas en la pantalla: {value1}",
+        "native.displayComponentsSynchronized": "Mostrar componentes sincronizados.",
+        "native.replyRejectedCountLastValidStateRetainedFreshnessChecks": "Respuesta rechazada: {value1}, cuenta {value2}. Último estado válido retenido; cheques de frescura siguen vigentes.",
+        "native.companionReplyCouldNotBeReadSeeConnectionBuild": "No se pudo leer la respuesta del compañero. Vea Conexión y Detalles de construcción.",
+        "native.commandExceedsTheNativeLimitUseTheDashboard": "El comando supera el límite nativo. Use el tablero.",
+        "native.sendingMissionCommand": "Enviando el comando de la misión...",
+        "native.commandDeliveryFailedTheIntervalIsNotConfirmed": "Falló la entrega de órdenes. El intervalo no está confirmado.",
+        "native.simulatorCommandDeliveryFailedCheckTheEngineConnection": "Falló la entrega de órdenes del simulador. Compruebe la conexión del motor.",
+        "native.simulatorCommandDeliveryFailed": "Falló la entrega de órdenes del simulador.",
+        "native.retryingTheIdenticalFlightBoundRequestNoNewCommand": "Reintentar la petición de vuelo con destino idéntico; no hay nuevo objetivo de comando.",
+        "native.noConfirmationReceivedReviewTheConfirmedIntervalBeforeTrying": "No se recibió confirmación. Revise el intervalo confirmado antes de intentarlo de nuevo.",
+        "native.noCommandConfirmationAfterOneIdenticalRetryReviewSynchronized": "No hay confirmación de órdenes después de un reintento idéntico. Revise el estado sincronizado antes de emitir un nuevo comando.",
+        "native.mapReplyTimedOutRetryingWithTheCachedRoute": "Respuesta de mapa cronometrada; reintentar con la ruta en caché conservada.",
+        "native.noCommandConfirmationCheckMissionStateBeforeRetrying": "No hay confirmación de comandos, compruebe el estado de la misión antes de volver a intentarlo.",
+        "native.lastMatchingEngineReplyControlsAreUnavailableUntilFresh": "Última respuesta del motor: {value1}. Los controles no están disponibles hasta que llegue un estado sincronizado fresco.",
+        "native.noMatchingEngineReplyCheckThatTheDashboardAnd": "No hay respuesta del motor que coincida. Compruebe que el panel de control y la barra de herramientas tienen el mismo perfil y fuente mostrados en Connection & Build Details.",
+        "native.windowsEngineUnavailableLaunchAeroscienceAndCheckTheSimconnect": "Motor de Windows no disponible. Inicie AeroScience y compruebe el tiempo de ejecución SimConnect.",
+        "native.mach": "Mach...",
+        "native.companionDisconnectedCachedRouteRetainedLiveAircraftUnavailable": "Compañero desconectado - ruta en caché retenida; aviones en vivo no disponibles.",
+        "native.validationSourceMismatchNoStateAccepted": "No se acepta estado de origen de validación.",
+        "native.cardCommandNotConfirmedSynchronizeBeforeRetrying": "Orden de tarjeta no confirmada. Sincronice antes de volver a intentarlo.",
+        "native.mapSynchronizationFailedWaitingToRetry": "La sincronización del mapa falló; esperando para volver a intentarlo.",
+        "native.confirmedS": "Confirmado: {value1} s.",
+        "native.intervalWasNotConfirmedReviewCurrentSettings": "El intervalo no fue confirmado. Revise los ajustes actuales.",
+        "native.companionIntervalS": "Intervalo de acompañante: {value1} s",
+        "native.missionPlanSelectionConfirmed": "Se confirmó la selección del plan de misión.",
+        "native.planSelectionWasNotConfirmedRefreshPlans": "No se confirmó la selección del plan. Refrescar los planes.",
+        "native.pilotObservationSavedFlightAndScienceContinueIndependently": "Observación Piloto salvada. Vuelo y ciencia continúan independientemente.",
+        "native.observationWasNotSavedYourTextIsPreserved": "La observación no se salvó; su texto se conserva.",
+        "native.earlierRequestAcknowledged": "Solicitud anterior aceptada",
+        "native.aNewerAuthoritativeViewIsAlreadyDisplayed": "{value1}, Una nueva vista autorizada ya está mostrada.",
+        "native.matchingEngineReplyReceivedAircraftTelemetryAndScientificCollection": "Respuesta del motor que coincide recibió {value1}. Telemetría de aeronaves y adquisición de datos científicos tienen su propio estado a continuación.",
+        "native.sessionCommandConfirmedReviewCurrentState": "Comando de sesión confirmado. Revise el estado actual.",
+        "native.missionCommandWasRejected": "El mando de la misión fue rechazado.",
+        "native.activeRecordingItsSavedPlanSnapshotIsFixedPlan": "Active recording: its saved plan snapshot is fixed. Plan selection for the next recording is separate.",
+        "native.simulatedTestData": "DATOS SIMULADOS DE ENSAYO",
+        "native.simconnectTelemetry": "TELEMETRÍA SIMCONECTA",
+        "native.aircraftTelemetryUnavailable": "CALENDARIO DE AERONAVES",
+        "native.msfsDisconnected": "MSFS DESCONECted",
+        "native.recordingStopped": "DE LA CONTABILIDAD DE LA DETENCIÓN / {value1}: {value2}",
+        "native.awaitingInitializedAircraftTelemetry": "A la espera de la telemetría inicializada de aeronaves",
+        "native.activeSavedPlanSnapshotFixedForThisRecordingFly": "Activo de la instantánea del plan guardado (fijado para esta grabación). Vuela la referencia de ruta en Mapa.",
+        "native.activeUnplannedMissionScientificPreparationFollowsActualAircraftMovement": "Misión activa no planificada: preparación científica tras el movimiento real de las aeronaves.",
+        "native.universalModeFlyAnything": "Modo universal / volar cualquier cosa",
+        "native.samples": "{value1} muestras",
+        "native.notGraded": "Sin clasificar",
+        "native.insufficientEvidence": "Pruebas insuficientes",
+        "native.stale": "Stale",
+        "native.armed": "Armados",
+        "native.waitingForSource": "Esperando la fuente",
+        "native.acquisitionGap": "Diferencia de adquisición",
+        "native.sourceDisconnected": "Fuente desconectada",
+        "native.waiting": "Esperando",
+        "native.manual": "Manual",
+        "native.unsupported": "Sin soporte",
+        "native.provisional": "Provisional",
+        "native.final": "Final",
+        "native.revised": "Revisado",
+        "native.supported": "Apoyados",
+        "native.idle": "Inactivo",
+        "native.detecting": "Detección",
+        "native.holding": "Holding",
+        "native.complete": "Completa",
+        "native.thisCompanionDoesNotSupportSessionBoundNativeControls": "Este compañero no soporta controles nativos de sesión.",
+        "native.staleEngineStateSynchronizeBeforeControllingScience": "Estado del motor de estanqueidad; sincronice antes de controlar la ciencia.",
+        "native.backendSessionAndControlRevisionsAreCheckedBeforeApplying": "Las revisiones de la sesión de backend y del control se comprueban antes de aplicar.",
+        "native.scienceStatusUnavailableUnsupportedCompanion": "No se dispone del estado científico (compañero no soportado)",
+        "native.updateTheCompanionForScienceSessionControls": "Actualizar el compañero para los controles de sesión de ciencia.",
+        "native.noScoreAvailable": "No hay puntuación disponible.",
+        "native.noSessionIdentitySupplied": "No se proporcionó identidad de sesión.",
+        "native.nextTriggerNotAssessed": "El siguiente gatillo no fue evaluado.",
+        "native.scientificYieldNotAssessed": "El rendimiento científico no se evaluó.",
+        "native.pilotHoldRearmRequired": ", bodega piloto; rearme necesario",
+        "native.continuityHold": ", continuidad",
+        "native.collectionControl": "Control de la recogida: {value1}{value2}{value3}",
+        "native.none": "ninguno",
+        "native.flightSessionRevision": "Vuelo {value1}, Sesión {value2}, revisión {value3}",
+        "native.goodDataValidScientificCoverageNotYetAssessedFlight": "Buena cobertura científica / buena cobertura científica válida aún no evaluada. La ruta de vuelo no es cobertura válida-píxeles.",
+        "native.evidenceCutoffIsOlderThan15SMetricsAre": ", el corte de evidencia es mayor de 15 s; las métricas no son actuales.",
+        "native.additionalDetailOnDashboard": ", Detalles adicionales en el tablero.",
+        "native.stateAsOfMetrics": "Estado a {value1}, métricas {value2}{value3}{value4}",
+        "native.researchStatusUnavailable": "No se dispone del estado de investigación.",
+        "native.personalResearchCardsPrepareInTheDesktopFlightPlanner": "Tarjetas de investigación personales: preparar en el planificador de vuelo de escritorio.",
+        "native.activeCardS": "{value1} tarjeta(s) activa(s){value2}.",
+        "native.waitingForSynchronizedPersonalCardStateFlightAndScience": "Esperando el estado de la tarjeta personal sincronizada. Vuelo y ciencia permanecen independientes.",
+        "native.choosePersonalCardsInMissionPlannerBeforeRecording": "Elija tarjetas personales en Mission Planner antes de grabar.",
+        "native.activateACardThenBeginAttemptEndAttemptDeactivate": "Activar una carta, luego comenzar el intento / fin del intento. Desactivar la tarjeta no para el vuelo o la ciencia.",
+        "native.noPersonalCardsSelectedForThisFlight": "No hay tarjetas personales seleccionadas para este vuelo.",
+        "native.ordered": "Ordenado",
+        "native.independent": "Independiente",
+        "native.procedureRepetitionsVerifyOriginalsAfterFlight": "{value1} procedimiento, {value2} repeticiones; verificar originales después del vuelo",
+        "native.continuousSeconds": "{value1}, {value2} segundos continuos",
+        "native.fictionalModeledTemperatureSResponseOriginalScienceSamplesRequired": "Temperatura de modelado ficcional, respuesta {value1} s, {value2} muestras científicas originales requeridas",
+        "native.documentedPilotObservationsNotesAreNotSensorMeasurements": "{value1} observaciones piloto documentadas, las notas no son mediciones de sensores",
+        "native.surveySourceQualifiedSamplesRequired": "Encuesta: {value1}, se requieren muestras de origen",
+        "native.distinctSamplingLocationsMGeographicExtentCollectValidTemperature": "{value1} lugares de muestreo distintos, {value2} m de extensión geográfica, recoger lecturas de temperatura válidas",
+        "native.neighboringFootMslBandsCollectValidTemperatureReadings": "{value1} bandas de MSL de {value2} pies, recoger lecturas de temperatura válidas",
+        "native.knotsIasFeetMsl": "{value1} knots IAS | {value2} feet MSL",
+        "native.revision": "{value1}, revisión {value2}",
+        "native.attemptRecording": "Intento de grabación",
+        "native.issued": "{value1}, expedido {value2}, {value3}",
+        "native.focusedInToolbar": "Centrado en la barra de herramientas",
+        "native.sAttempts": "{value1}, {value2} s, {value3} intentos",
+        "native.enableautomatic": "habilitarAutomático",
+        "native.flightGuidanceUnavailable": "No se dispone de directrices de vuelo",
+        "native.ap": "AP: {value1}, {value2}",
+        "native.scientificSourceUnavailable": "Fuente científica no disponible",
+        "native.scienceInstrument": "Instrumento científico",
+        "native.diagnostics": "Diagnósticos",
+        "native.collectionInterval": "Intervalo de recogida",
+        "native.collectionInterval2": "Intervalo de recogida {value1}",
+        "native.applyInterval": "Aplicar intervalo",
+        "native.applyInterval2": "Aplicar intervalo {value1}",
+        "native.useConfirmedInterval": "Usar intervalo confirmado",
+        "native.useConfirmedInterval2": "Uso confirmado intervalo {value1}",
+        "native.chooseApplyIntervalToConfirmThisChange": "Elija Aplicar intervalo para confirmar este cambio.",
+        "native.applyingInterval": "Aplicando intervalo...",
+        "native.commandUnavailableSynchronizeWithTheCompanion": "Comando no disponible. Sincronice con el compañero.",
+        "native.usingConfirmedIntervalS": "Uso del intervalo confirmado: {value1} s.",
+        "native.on": "Activar",
+        "native.off": "Desactivado",
+        "native.disableInstrument": "Desactivar instrumento",
+        "native.enableInstrument": "Habilitar instrumento",
+        "native.sConfirmed": "{value1} s (confirmado)",
+        "native.disabled": "desactivado",
+        "native.savedProducts": "productos guardados /",
+        "native.measurementValues": "valores de medición /",
+        "native.unavailable": "No disponible",
+        "native.acquisitionSetsRejectedUnexpectedMissingActualLast": "{value1} / {value2} equipos de adquisición / {value3}{value4}{value5} rechazado / {value6} inesperado desaparecido / {value7} real / último {value8}",
+        "native.static.connectionBuildDetails": "& Construir detalles de conexión",
+        "native.static.commandsAeroscienceCommandV1RepliesAeroscienceReplyV1": "Comandos: AeroScience.Command.v1, Respuestas: AeroScience.Respuesta.v1",
+        "native.static.bundledEnglishFallbackUntilMatchingCompanionSettingsArrive": "Agrupado Inglés de reserva hasta que la configuración de compañero de juego llegan.",
+        "native.static.researchStateUnavailable": "Estado de investigación no disponible.",
+        "native.static.cardsDescribeExperimentsSaveRoutesAsMissionPlansInThe": "Las tarjetas describen experimentos. Guardar rutas como planes de misión en el planificador de vuelo de escritorio.",
+        "native.static.previousCards": "Tarjetas anteriores",
+        "native.static.nextCards": "Siguientes cartas",
+        "native.static.mslFt": "MSL / FT",
+        "native.static.iasKts": "IAS / KTS",
+        "native.static.headingDegt": "CABEZA/DEGENTE",
+        "native.static.vsFtMin": "VS / FT/MIN",
+        "native.static.startRecordingAtAnyTimeYourMissionContinuesIfThis": "Comience a grabar en cualquier momento. Su misión continúa si este panel está cerrado.",
+        "native.static.savedMissionPlan": "Plan de Misión Salvada",
+        "native.static.unplannedMission": "Misión no planificada",
+        "native.static.previousPlans": "Planes anteriores",
+        "native.static.nextPlans": "Próximos planes",
+        "native.static.viewRouteOnMap": "Ver ruta en el mapa",
+        "native.static.saveAPlanInTheDashboardSelectItHereStart": "Guarde un plan en el panel, selecciónelo aquí, comience a grabar, volar y revisar el historial de la misión. Use el mapa en movimiento o un plan de vuelo compatible exportado; AeroScience no comanda la navegación de aeronaves.",
+        "native.static.universalFlyAnything": "Universal - Vuela cualquier cosa",
+        "native.static.realisticAuthenticResearch": "Realista - Investigación Auténtica",
+        "native.static.yourWrittenAccountNotASensorReadingMissingLocationsStay": "Su cuenta escrita, no una lectura del sensor. Las ubicaciones perdidas permanecen indisponibles. Utilice el panel para notas más largas.",
+        "native.static.observationCategory": "Categoría de observación",
+        "native.static.shortObservation120Characters": "Observación corta (120 caracteres)",
+        "native.static.recordingContinuesWhenThisPanelClosesOpenTheCompanionDashboard": "La grabación continúa cuando este panel se cierra. Abra el tablero de instrumentos para la historia de la misión.",
+        "native.static.researchMissionMap": "Mapa de la misión de investigación",
+        "native.static.freePan": "Pan libre",
+        "native.static.zoom": "Ampliar -",
+        "native.static.previousWaypoint": "Punto de ruta anterior",
+        "native.static.nextWaypoint": "Punto siguiente",
+        "native.static.nextObservedTarget": "Siguiente objetivo observado",
+        "native.static.progressAndMapLimits": "Progresos y límites de los mapas",
+        "native.static.northUpGoldPlannedTurquoiseRecordedPinkMarkersRecentTrack": "Norte arriba / Oro: planificado / Turquesa: grabado / Rosa: marcadores. La exhibición reciente de la pista está limitada a 512 puntos; las grabaciones completas permanecen en la historia de la Misión. Fuera de la geografía es gruesa y Mercator se corta en +/-85.0511 grados. No se cambian los controles de la aeronave.",
+        "native.static.scienceSessionControlsEvidence": "Controles de sesión científica y pruebas",
+        "native.static.endScienceClosesThisSessionEndMissionBelowEndsThe": "Final de la ciencia cierra esta sesión. Final de la misión abajo termina el vuelo continuo. Calibración detallada, clasificación y evidencia de la fuente permanecen en el tablero de instrumentos acompañante.",
+        "native.static.collectionStopped": "Colección: parada",
+        "native.static.sourceAndLimitations": "Fuente y limitaciones",
+        "native.static.simulatorReportedAtmosphericObservationsAnActiveMissionIsRequiredTo": "Observaciones atmosféricas reportadas por el simulador. Se requiere una misión activa para salvar la ciencia. La telemetría de vuelo continúa cuando se pausa la readquisición de datos científicos. La calibración documentada y la evidencia operativa están disponibles en el tablero de control de acompañantes. Las restricciones desconocidas no son satisfactorias ni son precisas científicamente certificadas.",
+        "native.static.aerosciencePages": "Páginas de AeroScience",
+        "native.static.missionAndPayloadContent": "Contenido de la misión y la carga útil",
+        "native.static.researchMission": "Misión de investigación",
+        "native.static.scientificMissionIntelligence": "Inteligencia científica de la misión",
+        "native.ambientTemperature": "Temperatura ambiente",
+        "native.ambientWind": "Viento ambiente",
+        "map.native.unavailable": "No disponible",
+        "map.native.accessible": "Mapa de misión desconectado hacia el norte. Arrastre para pan, rueda para zoom.",
+        "map.native.noWaypoint": "No se ha seleccionado ningún punto de partida previsto.",
+        "map.native.altitudeUnknown": "Altura no especificada",
+        "map.native.liveUnavailable": "/ Posición en vivo no disponible/cuento.",
+        "map.native.abbreviated": "Las etiquetas de visualización y las instrucciones pueden abreviarse; los valores completos permanecen en el plan de acompañamiento.",
+        "map.native.legend": "N ^ / Sin conexión Tierra Natural / Referencia geográfica",
+        "map.native.track": "Vía terrestre {track}/SG {speed}",
+        "windows.deletion.confirmation": "Confirmación: {phrase}",
+        "windows.deletion.typePhrase": "Tipo {phrase}",
+        "native.instrument.ambientTemperature": "Temperatura ambiente",
+        "native.instrument.ambientPressure": "Presión ambiente",
+        "native.instrument.ambientWind": "Viento ambiente",
+        "native.instrument.ambientDensity": "Densidad del aire",
+        "native.instrument.thermalImager": "Imagen térmica",
+        "native.instrument.multispectralImager": "Imagen multiespectral",
+        "native.instrument.hyperspectralImager": "Imagen hiperespectral"
       }
     },
     "fr-FR": {
-      "version": 19,
+      "version": 20,
       "locale": "fr-FR",
-      "sourceHash": "cb25b591a8ea973a4079dbac869815ee99dc5ca1da5aa26c23574fab8d3e2eb6",
+      "sourceHash": "24325d6cd2282e6667cce945669b271811652f8627707a2d627de0b92e3822f9",
       "pendingEnglishFallbackKeys": [
         "contextHelp.coverage.body",
         "contextHelp.lidar.body",
@@ -40875,6 +43794,18 @@ export const localeData = {
         "lidar.downloadReview",
         "lidar.pause",
         "missions.input.notes",
+        "native.ap",
+        "native.collectionControl",
+        "native.diagnostics",
+        "native.idle",
+        "native.msfsDisconnected",
+        "native.noCommandConfirmationCheckMissionStateBeforeRetrying",
+        "native.recordingStopped",
+        "native.stateAsOfMetrics",
+        "native.static.aerosciencePages",
+        "native.static.mslFt",
+        "native.static.simulatorReportedAtmosphericObservationsAnActiveMissionIsRequiredTo",
+        "native.static.zoom",
         "nav.missions",
         "nav.sections",
         "results.exportBound",
@@ -41098,7 +44029,22 @@ export const localeData = {
         "ui.tfrLayers.messagePublishedUTCWindowTo",
         "ui.tfrLayers.messageRealWorldPlannedUTC",
         "ui.tfrLayers.messageUTCSubmittedToLocalDisplayOnly",
-        "ui.tfrLayers.messageXMLSHA256AIXMSHA256"
+        "ui.tfrLayers.messageXMLSHA256AIXMSHA256",
+        "windows.dataManagementForm.missionsDatasetsObservationsGeneratedProductsEstimatedManagedFileSpace",
+        "windows.deletion.confirmation",
+        "windows.deletion.typePhrase",
+        "windows.mainForm.chooseANumericElevationDemGeotiff",
+        "windows.mainForm.closeMsfsBeforeInstallingOrUpdatingAeroscienceSToolbar",
+        "windows.mainForm.importSourceObservationCopyMibIntoAvailableGibOriginal",
+        "windows.mainForm.theBundleIncludesGeographicPreparationAreasInstrumentProviderTiming",
+        "windows.program.closeMsfsBeforeRemovingTheAeroscienceToolbarThenChoose",
+        "windows.science.category11Description",
+        "windows.science.category12Title",
+        "windows.science.category14Description",
+        "windows.settingsForm.aeroscienceSettings",
+        "windows.setupWizardForm.aeroscienceStepOf4",
+        "windows.setupWizardForm.closeMsfsBeforeInstallingOrUpdatingOnlyAeroscienceIs",
+        "windows.toolbarProgressForm.aeroscienceMsfsToolbar"
       ],
       "messages": {
         "common.messageUnavailable": "Les détails sont indisponibles. Actualisez la vue pour consulter les informations actuelles.",
@@ -47287,13 +50233,456 @@ export const localeData = {
         "ui.scientificAccess.messagePrepareASmallArea": "Préparer une petite zone",
         "ui.sensorPlanning.messageSurveyAltitudeAboveGround": "Altitude de l'enquête au-dessus du sol",
         "ui.sensorPlanning.messageSideOverlap": "Recoupement latéral (%)",
-        "ui.sensorPlanning.messageForwardOverlap": "Recoupement ultérieur (%)"
+        "ui.sensorPlanning.messageForwardOverlap": "Recoupement ultérieur (%)",
+        "windows.brandedForm.aeroscienceOrbitalArcLogo": "Logo AeroScience Orbital Arc",
+        "windows.toolbarProgressForm.aeroscienceToolbarInstallation": "AeroScience · Installation de barres d'outils",
+        "windows.toolbarProgressForm.installedAvailableCommunity": "Installé: {value1} Disponible: {value2} Communauté: {value3}",
+        "windows.toolbarProgressForm.installationCompleted": "Installation terminée",
+        "windows.toolbarProgressForm.theInstalledPackageAndVersionWereVerifiedStartOr": "Le paquet et la version installés ont été vérifiés. Démarrer ou redémarrer MSFS pour charger la barre d'outils mise à jour.",
+        "windows.toolbarProgressForm.installationStopped": "Arrêt de l'installation",
+        "windows.toolbarProgressForm.previousFilesAreRestoredWhenPossibleDetailsAreIn": "{value1} Les fichiers précédents sont restaurés lorsque c'est possible. Les détails sont dans les journaux de barre d'outils d'AeroScience.",
+        "windows.toolbarProgressForm.aeroscienceMsfsToolbar": "AeroScience MSFS Toolbar",
+        "windows.toolbarProgressForm.closeMsfsBeforeUpdatingTheCompanionCanContinueWhen": "{value1} Fermer MSFS avant mise à jour. Le compagnon peut continuer lorsque vous reportez cette action.",
+        "windows.toolbarProgressForm.installToolbar": "Installer la barre d' outils",
+        "windows.toolbarProgressForm.updateToolbar": "Mettre à jour la barre d'outils",
+        "windows.mainForm.openDashboard": "Ouvrir le tableau de bord",
+        "windows.mainForm.scienceMissionOperations": "{value1} · Opérations de la mission scientifique",
+        "windows.mainForm.chooseTheOriginalMissionDatabaseFolderToCopyIt": "Choisissez le dossier de la base de données ORIGINAL de mission vers COPY. Il ne sera pas migré.",
+        "windows.mainForm.chooseTheOriginalScienceLibraryFolderToCopyOriginals": "Choisissez le dossier ORIGINAL Science Library à COPY. Les originaux seront conservés.",
+        "windows.mainForm.engineStoppedOpenStorageSettingsToResolveStartupOr": "Moteur arrêté. Ouvrez Stockage/Settings pour résoudre les erreurs de démarrage ou de stockage. Votre archive existante n'a pas été remplacée.",
+        "windows.mainForm.theLocalEngineStoppedAfterAnErrorCollectFeedback": "Le moteur local s'est arrêté après une erreur. Recueillir la rétroaction et vérifier le stockage/la configuration; les dossiers existants sont conservés.",
+        "windows.mainForm.engineRunningToolbar": "{value1} · Roulement du moteur · {value2} {value3} · Barre d'outils: {value4}",
+        "windows.mainForm.chooseYourMsfs2024CommunityFolder": "Choisissez votre dossier communautaire MSFS 2024",
+        "windows.mainForm.chooseAHistoricalLasLazOriginal": "Choisissez un LAS/LAZ historique original",
+        "windows.mainForm.chooseANumericElevationDemGeotiff": "Choose a numeric elevation DEM GeoTIFF",
+        "windows.mainForm.chooseTheCollectionFolder": "Choisissez le dossier de collecte {value1}",
+        "windows.mainForm.chooseTheFolderContainingAnEnviHdrAndIts": "Choisissez le dossier contenant un.hdr ENVI et son binaire hyperspectral original",
+        "windows.mainForm.chooseTheOriginalHyperspectralEnviHeader": "Choisissez l'en-tête hyperspectral ENVI original",
+        "windows.mainForm.selectMatchingEmitRfl002Rfluncert002AndMask003Originals": "Sélectionnez les originaux EMIT RFL002, RFLUNCERT002 et MASK003 correspondants",
+        "windows.mainForm.importARealScientificSourceCollectionManifest": "Importer un véritable manifeste de collecte de sources scientifiques",
+        "windows.mainForm.collectFeedback": "Recueillir les commentaires",
+        "windows.mainForm.saveFeedbackZip": "Enregistrer les commentaires ZIP...",
+        "windows.mainForm.copyArchivesForValidation": "Copier les archives pour validation",
+        "windows.mainForm.createAVerifiedDisposableCopyOfBothArchivesInside": "Créer une copie jetable vérifiée des deux archives dans le profil Validation, puis l'ouvrir avec un accès scientifique en ligne désactivé? Activer l'accès plus tard dans Paramètres quand prêt. Les originaux et les paramètres de production sont conservés. Fermer d'autres applications utilisant ces archives d'abord.",
+        "windows.mainForm.exit": "Sortie",
+        "windows.mainForm.storageRecovery": "Récupération de stockage",
+        "windows.mainForm.waitForTheStorageSetupOperationToFinish": "Attendez que l'opération de stockage/mise en place soit terminée.",
+        "windows.mainForm.aMissionIsRecordingExitAndPreserveItAs": "Une mission est en train d'enregistrer.",
+        "windows.mainForm.exitAeroscience": "Sortie AeroScience",
+        "windows.mainForm.theEngineIsStoppedCheckStorageSettings": "Le moteur est arrêté. Vérifiez le stockage/la mise en place.",
+        "windows.mainForm.endRecordingAndWaitForCurrentOperationsBeforeRunning": "Fin de l'enregistrement et attendre les opérations courantes avant de lancer la configuration.",
+        "windows.mainForm.endRecordingAndWaitForOtherOperationsBeforeUpdating": "Terminer l'enregistrement et attendre d'autres opérations avant de mettre à jour la barre d'outils.",
+        "windows.mainForm.closeMsfsBeforeInstallingOrUpdatingAeroscienceSToolbar": "Close MSFS before installing or updating AeroScience's toolbar.",
+        "windows.mainForm.installTheBundledAeroscienceToolbarInItsPreviousFiles": "Installez la barre d'outils AeroScience dans: {value1} Ses fichiers précédents seront sauvegardés en dehors de la Communauté.",
+        "windows.mainForm.confirmToolbarInstallation": "Confirmer l'installation de la barre d'outils",
+        "windows.mainForm.endRecordingAndWaitForActiveSetupStorageWork": "Finissez l'enregistrement et attendez que la configuration active/l'arrêt fonctionne avant de compacter.",
+        "windows.mainForm.compactTheDatabaseServicesWillStopTemporarilyAVerified": "Compactez la base de données {value1}? Les services s'arrêteront temporairement. Une sauvegarde vérifiée et un espace temporaire suffisant sont nécessaires. Les observations originales sont conservées; les octets de la base de données récupérés seront déclarés.",
+        "windows.mainForm.confirmDatabaseMaintenance": "Confirmer la maintenance de la base de données",
+        "windows.mainForm.compactionCompleted": "Compaction terminée",
+        "windows.mainForm.waitForCurrentSetupStorageWorkAndStartThe": "Attendez que le démarrage/l'arrêt du moteur local fonctionne et démarrez d'abord.",
+        "windows.mainForm.importSourceObservationCopyMibIntoAvailableGibOriginal": "Import {value1}?\n\nSource: {value2}\nObservation: {value3}\nCopy {value4} MiB into {value5}\nAvailable: {value6} GiB\n\nOriginal files remain untouched. No files are downloaded and no data are uploaded. Review the source license: {value7}",
+        "windows.mainForm.importedOpenDashboardSettingsScientificDataSourcesToInspect": "Importé {value1}. Ouvrir les paramètres du tableau de bord → Sources de données scientifiques pour inspecter la couverture et les métadonnées.",
+        "windows.mainForm.theBundleIncludesGeographicPreparationAreasInstrumentProviderTiming": "The bundle includes geographic preparation areas, instrument/provider timing, errors and local logs. Review it before sharing. No scientific originals, databases or credentials are included. Continue?",
+        "windows.mainForm.savedLocallyReviewTheZipBeforeSharingIt": "Sauvé localement. Passez en revue le ZIP avant de le partager.",
+        "windows.setupWizardForm.next": "Suivant",
+        "windows.setupWizardForm.skipForNow": "Passez au moment venu",
+        "windows.setupWizardForm.installUpdateTheIncludedMsfs2024Toolbar": "Installer / mettre à jour la barre d'outils MSFS 2024 incluse",
+        "windows.setupWizardForm.allowAutomaticScientificDataDiscoveryAndBoundedDownloads": "Autoriser la découverte automatique de données scientifiques et de téléchargements limités",
+        "windows.setupWizardForm.welcomeToAeroscienceSetup": "Bienvenue dans AeroScience · Installation",
+        "windows.setupWizardForm.chooseTheFolderForMissionsDb": "Choisissez le dossier pour missions.db",
+        "windows.setupWizardForm.chooseAScientificDataLibraryFolder": "Choisissez un dossier de bibliothèque de données scientifiques",
+        "windows.setupWizardForm.availableDriveSpaceGib": "Espace disponible pour conduire: {value1} GiB{value2}",
+        "windows.setupWizardForm.keepThisLocationToPreserveTheUnavailableLibraryReconnect": "· Gardez cet emplacement pour préserver la bibliothèque non disponible; reconnectez son lecteur plus tard. Votre archive de mission disponible peut encore s'ouvrir.",
+        "windows.setupWizardForm.aeroscienceStepOf4": "AeroScience {value1} · Step {value2} of 4",
+        "windows.setupWizardForm.finishSetup": "Configuration de finition",
+        "windows.setupWizardForm.browseMissionDatabaseFolder": "Explorer le dossier de la base de données de mission...",
+        "windows.setupWizardForm.browseScienceLibraryFolder": "Explorer le dossier de la bibliothèque scientifique...",
+        "windows.setupWizardForm.browseCommunityFolder": "Parcourir le dossier communautaire...",
+        "windows.setupWizardForm.selectMsfs2024SConfiguredCommunityFolder": "Sélectionnez le dossier communautaire configuré par MSFS 2024",
+        "windows.setupWizardForm.closeSetupWithUnappliedChoicesChooseNoToKeep": "Fermer la configuration avec des choix non acceptés? Choisissez Non pour continuer à modifier. Les paramètres enregistrés antérieurement et les données utilisateur vérifiées restent intacts.",
+        "windows.setupWizardForm.unfinishedSetup": "Configuration non achevée",
+        "windows.setupWizardForm.setUpLocalMissionStorageAndTheMsfs2024": "Configurez le stockage de mission local et la barre d'outils MSFS 2024. L'application démarrera ensuite ses services et ouvrira automatiquement votre tableau de bord.",
+        "windows.setupWizardForm.existingLocationsAndSettingsArePreselectedUpdatesKeepThem": "Les emplacements et les paramètres existants sont présélectionnés. Les mises à jour les conservent. Modifier une copie de localisation et vérifier les données existantes seulement après votre confirmation; les originaux sont conservés.",
+        "windows.setupWizardForm.missionHistoryWorksWithoutMsfsOrInternetLiveRecording": "L'histoire de la mission fonctionne sans MSFS ou Internet. L'enregistrement en direct devient disponible lorsqu'un avion est connecté.",
+        "windows.setupWizardForm.missionDatabaseFileChooseItsFolderFilenameRemainsMissions": "Fichier de la base de données de mission (choisir son dossier; le nom du fichier reste missions.db)",
+        "windows.setupWizardForm.scientificDataLibraryMayBeOnADifferentInternal": "Bibliothèque de données scientifiques — peut être sur un disque intérieur ou externe différent",
+        "windows.setupWizardForm.keepTheSuggestedFoldersToPreserveCurrentStorageNew": "Gardez les dossiers suggérés pour préserver le stockage courant. Les nouvelles destinations doivent être vides. Les magasins existants peuvent être sélectionnés explicitement via Paramètres → Stockage après configuration.",
+        "windows.setupWizardForm.confirmTheMsfs2024CommunityFolderDetectionReadsSteam": "Confirmez le dossier communautaire MSFS 2024. La détection lit la configuration de Steam / Microsoft Store, y compris les chemins de paquets personnalisés.",
+        "windows.setupWizardForm.closeMsfsBeforeInstallingOrUpdatingOnlyAeroscienceIs": "Close MSFS before installing or updating. Only AeroScience is changed; the previous AeroScience package is backed up outside Community. Skip for Now leaves Community untouched; installation remains available in Settings.",
+        "windows.setupWizardForm.msfsIsCurrentlyRunningCloseItBeforeContinuingWith": "MSFS est en cours d'exécution. Fermez-le avant de continuer avec l'installation de la barre d'outils, ou choisissez Skip for Now.",
+        "windows.setupWizardForm.missionDatabaseScientificDataLibraryToolbar": "Base de données de la mission: {value1} Bibliothèque de données scientifiques: {value2} Barre d'outils: {value3}",
+        "windows.setupWizardForm.finishSetupConfirmsTheseChoicesChangedStorageLocationsUse": "Finish Setup confirme ces choix. Les emplacements de stockage modifiés utilisent une migration vérifiée avec des originaux conservés. Les données de destination existantes ne sont jamais écrasées ou fusionnées silencieusement. Vous pouvez revoir la configuration et le stockage via Paramètres.",
+        "windows.setupWizardForm.optionalAndSeparateFromOnlineMapsLeaveUncheckedFor": "En option et séparément des cartes en ligne. Laissez non vérifié pour la science hors ligne seulement. Changez la bande passante, la date/politique de qualité et l'accès plus tard dans Paramètres → Sources de données scientifiques. Les originaux scientifiques préparés sont conservés dans les limites de stockage de votre bibliothèque.",
+        "windows.setupWizardForm.theScienceLibraryDriveHasLimitedFreeSpaceFuture": "La bibliothèque scientifique a limité l'espace libre. Les formats scientifiques futurs et les taux de données ne sont pas mis en oeuvre; aucune prévision de taille n'est disponible.",
+        "windows.setupWizardForm.storageCapacity": "Capacité de stockage",
+        "windows.settingsForm.aeroscienceSettings": "AeroScience Settings",
+        "windows.settingsForm.chooseAnEmptyDestinationOrAnExistingAeroscienceStore": "Choisissez une destination vide ou un magasin AeroScience existant",
+        "windows.settingsForm.working": "Travailler...",
+        "windows.settingsForm.completeOriginalDataRetained": "Complétée. Données originales conservées.",
+        "windows.settingsForm.enablePrivateLanIpadAccess": "Activer l'accès au réseau privé / iPad",
+        "windows.settingsForm.selectTheConfiguredMsfsCommunityFolder": "Sélectionnez le dossier communautaire MSFS configuré",
+        "windows.settingsForm.installedAvailableStatus": "Installé: {value1} · Disponible: {value2} Statut: {value3} {value4}",
+        "windows.settingsForm.newInstallationsSuggestOpenstreetmapStreetsAfterAPrivacyChoice": "Les nouvelles installations suggèrent OpenStreetMap / Streets après un choix de confidentialité avant la première demande de tuile. Choisissez hors ligne seulement à cette invitation ou changez Maps & Basemaps dans le tableau de bord. Les préférences existantes sont préservées. La géographie hors ligne reste disponible sans compte.",
+        "windows.settingsForm.openMapsBasemapsSettings": "Ouvrez les paramètres des cartes et des cartes de base",
+        "windows.settingsForm.aeroscienceDashboardSettingsUpdatesShowsYourInstalledVersionAnd": "AeroScience {value1}. Paramètres du tableau de bord → Des mises à jour montrent votre version installée et les notifications de sortie optionnelles de GitHub. Les vérifications sont mises en cache quotidiennement, ne bloquent jamais les archives hors ligne et n'exécutent jamais automatiquement un installateur. Vous pouvez désactiver les vérifications automatiques ou y inclure/exclusionner les versions alpha.",
+        "windows.settingsForm.openUpdateSettingsCheckForUpdates": "Ouvrir les paramètres de mise à jour / Vérifier les mises à jour",
+        "windows.settingsForm.waitForTheCurrentOperationToFinish": "Attendez que l'opération actuelle soit terminée.",
+        "windows.settingsForm.discardUnappliedSettingsAndCloseChooseNoToKeep": "Jeter les paramètres non utilisés et fermer? Choisissez Non pour continuer à éditer. Les paramètres enregistrés, l'enregistrement et le travail de fond seront conservés.",
+        "windows.settingsForm.unsavedSettings": "Paramètres non enregistrés",
+        "windows.settingsForm.usedAvailable": "Utilisé: {value1} · Disponible: {value2}",
+        "windows.settingsForm.unavailable": "Indisponible: {value1}",
+        "windows.settingsForm.limitedAvailableCapacityConsiderAnotherDriveThisIsA": "Envisagez un autre moyen, c'est un avertissement de capacité, et non une prédiction de la taille des données scientifiques.",
+        "windows.settingsForm.browseChangeLocation": "Parcourir / Changer de lieu...",
+        "windows.settingsForm.openFolder": "Ouvrir le dossier",
+        "windows.settingsForm.restoreDefault": "Restaurer par défaut...",
+        "windows.settingsForm.dataManagement": "Gestion des données...",
+        "windows.settingsForm.storageManagementLimitsPreviewCleanup": "Gestion du stockage / Limites / Nettoyage de prévisualisation",
+        "windows.settingsForm.recoverOriginalLocationFromInterruptedMigration": "Récupérer l'emplacement original de la migration interrompue...",
+        "windows.settingsForm.noInterruptedMigrationNeedsRollback": "Aucun éloignement de la migration n'a besoin d'être interrompu.",
+        "windows.settingsForm.restoreTheOriginalVerifiedStorageSettingBothCopiesWill": "Restaurer le paramètre de stockage vérifié original? Les deux copies seront conservées.",
+        "windows.settingsForm.endTheMissionBeforeChangingEitherStorageLocation": "Terminer la mission avant de changer l'un ou l'autre emplacement de stockage.",
+        "windows.settingsForm.scienceLibraryCapacity": "Capacités de la bibliothèque scientifique",
+        "windows.settingsForm.availableCapacityThisDriveHasLimitedFreeSpaceFuture": "Capacité disponible: {value1}. Ce lecteur a limité l'espace libre. Les besoins futurs en données scientifiques sont inconnus.",
+        "windows.settingsForm.limitedCapacity": "Capacité limitée",
+        "windows.settingsForm.confirmStorageChange": "Confirmer le changement de stockage",
+        "windows.settingsForm.runGuidedSetup": "Lancer la configuration guidée...",
+        "windows.settingsForm.recordingIntervalMillisecondsSimconnectIsRequestedAt1Hz": "Intervalle d'enregistrement (millisecondes; SimConnect est demandé à 1 Hz).",
+        "windows.settingsForm.applyConnectionSettings": "Appliquer les paramètres de connexion",
+        "windows.settingsForm.lanIsOptionalAllowAeroscienceOnTheWindowsPrivate": "Le LAN est facultatif. Autoriser AeroScience sur le profil réseau privé Windows uniquement lorsque vous utilisez iPad/LAN. Le code d'appariement est dans les paramètres du tableau de bord.",
+        "windows.settingsForm.msfsCommunityFolder": "Dossier communautaire MSFS",
+        "windows.settingsForm.browseCommunityFolder": "Parcourir le dossier Communauté...",
+        "windows.settingsForm.installUpdateRepairToolbar": "Installer / Mettre à jour / Réparation de la barre d'outils...",
+        "windows.settingsForm.removeAeroscienceToolbar": "Supprimer la barre d'outils AeroScience...",
+        "windows.settingsForm.noCommunityFolderHasBeenConfigured": "Aucun dossier communautaire n'a été configuré.",
+        "windows.settingsForm.removeOnlyAeroscienceFromThisCommunityFolderItsFiles": "Enlever seulement AeroScience de ce dossier communautaire? Ses fichiers seront déplacés vers une sauvegarde en dehors de la Communauté. Fermer MSFS en premier. {value1}",
+        "windows.settingsForm.removeToolbar": "Supprimer la barre d'outils",
+        "windows.settingsForm.theToolbarWasNotInstalledInThatFolder": "La barre d'outils n'a pas été installée dans ce dossier.",
+        "windows.settingsForm.toolbarRemovedBackupRetainedAt": "Barre d'outils enlevée. Sauvegarde conservée à: {value1}",
+        "windows.settingsForm.theNativeSimconnectRuntimeIsIncludedConnectionStatusIs": "Le temps d'exécution natif de SimConnect est inclus. Le statut de connexion est affiché dans la fenêtre principale et le tableau de bord de l'AeroScience.",
+        "windows.settingsForm.theNativeSimconnectRuntimeIsMissingRunAeroscienceSetup": "L'exécution native SimConnect est manquante. Exécutez à nouveau AeroScience Setup pour réparer l'installation; conservez vos données de mission et vos paramètres.",
+        "windows.settingsForm.microsoftVisualCPrerequisite": "Prérequis Microsoft Visual C++...",
+        "windows.settingsForm.ifWindowsReportsAMissingVisualCDependencyUse": "Si Windows signale une dépendance Visual C++ manquante, utilisez la page officielle de Microsoft ci-dessus pour installer la redistribuable x64 graphiquement, puis redémarrez AeroScience.",
+        "windows.settingsForm.toolbar": "Barre d'outils",
+        "windows.earthdataConnectionForm.connectNasaEarthdata": "Connecter les données de la NASA sur la Terre",
+        "windows.earthdataConnectionForm.signInOnlyOnNasaSOfficialWebsiteGenerate": "Connectez-vous uniquement sur le site officiel de la NASA. Générez un jeton utilisateur à partir de votre profil NASA (la NASA documente une durée de vie de 60 jours). Approuvez l'accès ORNL D224 sur demande. AeroScience n'a jamais besoin de votre mot de passe NASA.",
+        "windows.earthdataConnectionForm.openNasaSignInTokenPage": "Ouvrir la page de connexion / jeton de la NASA",
+        "windows.earthdataConnectionForm.pasteNasaUserTokenStoredInWindowsCredentialManager": "Collez le token de l'utilisateur NASA (mis en stock dans Windows Credential Manager pour ce profil) :",
+        "windows.earthdataConnectionForm.nasaEarthdataUserToken": "Jeton utilisateur de données terrestres de la NASA",
+        "windows.earthdataConnectionForm.theBrowserDashboardAndPairedDevicesNeverReceiveThis": "Le tableau de bord du navigateur et les appareils appariés ne reçoivent jamais ce certificat. L'accès est vérifié par la NASA lors de l'aperçu et du téléchargement. Déconnecte supprime le jeton enregistré; la page de profil de la NASA peut le révoquer.",
+        "windows.earthdataConnectionForm.saveEarthdataConnection": "Enregistrer la connexion EarthData",
+        "windows.earthdataConnectionForm.earthdataConnection": "Connexion de données de la Terre",
+        "windows.earthdataConnectionForm.discardTheEnteredTokenAndCloseChooseNoTo": "Jeter le jeton entré et fermer? Choisissez Non pour continuer à éditer. Les connexions et téléchargements enregistrés ne changeront pas.",
+        "windows.earthdataConnectionForm.unsavedEarthdataConnection": "Connexion de données de la Terre non sauvée",
+        "windows.program.aeroscienceIsAlreadyRunningCloseItBeforeInstallationOr": "AeroScience est déjà en marche. Fermer avant l'installation ou l'enlèvement.",
+        "windows.program.removeTheAeroscienceMsfsToolbarTooOnlyAeroscienceWill": "Enlever la barre d'outils de l'AeroScience MSFS aussi? {value1} Seul AeroScience sera déplacé vers une sauvegarde en dehors de la Communauté. L'historique de la mission, les données scientifiques, la configuration et les add-ons non liés seront conservés.",
+        "windows.program.uninstallAeroscience": "Désinstaller AeroScience",
+        "windows.program.closeMsfsBeforeRemovingTheAeroscienceToolbarThenChoose": "Close MSFS before removing the AeroScience toolbar, then choose Retry. Cancel keeps the toolbar and continues uninstalling the application.",
+        "windows.program.closeMsfs": "Fermer MSFS",
+        "windows.program.toolbarRemovalDidNotCompleteExistingFilesWerePreserved": "La suppression de la barre d'outils n'a pas été terminée. Les fichiers existants ont été conservés. {value1}",
+        "windows.program.aeroscienceUninstall": "AeroScience désinstaller",
+        "windows.dataManagementForm.alsoRemoveSavedMissionPlansAndTheirPreflightNotes": "Enlever également les plans de mission enregistrés et leurs notes de prévol lors de l'échange des données de vol",
+        "windows.dataManagementForm.aeroscienceStorageDataDataManagement": "AeroScience · Stockage et données · Gestion des données",
+        "windows.dataManagementForm.exportIndividualCompletedMissionsFromMissionHistoryTheseOperations": "Exporter des missions individuelles de l'historique de la mission. Ces opérations permettent de dégager des archives entières indépendamment. Suppression scientifique permanente des micro-organismes micro-organismes sélectionnés dans des sauvegardes gérées; le contenu non lié est préservé.",
+        "windows.dataManagementForm.clearScientificData": "Données scientifiques claires",
+        "windows.dataManagementForm.clearFlightMissionData": "Effacer les données de vol et de mission",
+        "windows.dataManagementForm.deleteCollectedScientificData": "Supprimer les données scientifiques recueillies",
+        "windows.dataManagementForm.deletionOptions": "Options de délétion:",
+        "windows.dataManagementForm.permanentlyDeleteWithoutCreatingANewBackup": "Supprimer définitivement sans créer une nouvelle sauvegarde",
+        "windows.dataManagementForm.createARecoveryBackupThenDelete": "Créer une sauvegarde de récupération, puis supprimer",
+        "windows.dataManagementForm.deleteScientificData": "Supprimer les données scientifiques",
+        "windows.dataManagementForm.deleteFlightData": "Supprimer les données de vol",
+        "windows.dataManagementForm.reviewingTheExactCollectedScienceSelectionBackgroundOperationsAre": "Examiner la sélection exacte des sciences recueillies; les opérations de base sont inchangées...",
+        "windows.dataManagementForm.missionsDatasetsObservationsGeneratedProductsEstimatedManagedFileSpace": "{value1} missions · {value2} datasets · {value3} observations · {value4} generated products. Estimated managed file space: {value5} MiB.\n\nDeletion is permanent. Scientific measurements, generated analysis and dependent grades are purged, including their managed copies. No recovery backup is created. Flight recordings and external source datasets remain untouched.\n\n{value6}",
+        "windows.dataManagementForm.cancelledNoScientificDataWasChanged": "Annulé. Aucune donnée scientifique n'a été modifiée.",
+        "windows.dataManagementForm.permanentlyDeletingReviewedCollectedScience": "Suppression permanente de la science collectée...",
+        "windows.dataManagementForm.filesRemovedPending": "{value1}: {value2} dossiers supprimés, {value3} en attente. {value4}",
+        "windows.dataManagementForm.deletionIsNotComplete": "La délétion n'est pas terminée : {value1}",
+        "windows.dataManagementForm.chooseARecoveryBackupDestinationForScientificDataNot": "Choisissez une destination de récupération BACKUP pour les données scientifiques — pas un nouvel emplacement de la bibliothèque scientifique",
+        "windows.dataManagementForm.chooseARecoveryBackupDestinationForFlightMissionData": "Choisissez une destination de récupération BACKUP pour les données de vol et de mission — pas un nouvel emplacement de stockage de mission",
+        "windows.dataManagementForm.stoppingServicesAndClearingTransactionallyWithoutANewBackup": "Arrêter les services et se déconnecter de façon transactionnelle sans une nouvelle sauvegarde...",
+        "windows.dataManagementForm.stoppingServicesVerifyingTheRecoveryBackupAndClearingTransactionally": "Services d'arrêt, vérification de la sauvegarde de récupération et de compensation transactionnelle...",
+        "windows.dataManagementForm.completed": "Terminé. {value1}",
+        "windows.dataManagementForm.operationStoppedCommittedRecordsAndReferenceAvailabilityAreReconciled": "Opération arrêtée : {value1} Les dossiers engagés et la disponibilité des références sont rapprochés lorsque les services redémarrent.",
+        "windows.dataManagementForm.endRecordingAndWaitForActiveOperationsFirst": "Terminer l'enregistrement et attendre les opérations actives d'abord.",
+        "windows.dataManagementForm.endRecordingAndWaitForOtherOperationsFirst": "Terminer l'enregistrement et attendre d'autres opérations d'abord.",
+        "windows.dataManagementForm.thisDeliberateArchiveClearIncludesProtectedMissionSDataset": "Cette archive délibérée est claire, y compris {value1} mission(s)/dataset(s) protégée(s). La protection empêche le nettoyage automatique; cette opération de confirmation explicite par type les supprimera.",
+        "windows.dataManagementForm.protectedResearchData": "Données de recherche protégées",
+        "windows.dataManagementForm.permanentlyDeleteTheseRecords": "{value1} {value2} Supprimer définitivement ces enregistrements?",
+        "windows.dataManagementForm.confirmScientificDataDeletion": "Confirmer la suppression des données scientifiques",
+        "windows.dataManagementForm.confirmFlightDataDeletion": "Confirmer la suppression des données de vol",
+        "windows.scientificSourcesPanel.savedExistingDataAndProductsAreRetained": "Sauvé. Les données et les produits existants sont conservés.",
+        "windows.scientificSourcesPanel.sourceDiagnosticsReviewBeforeSharing": "Diagnostics de sources — examen avant partage",
+        "windows.scientificSourcesPanel.historicalExternalDataRetainTheirOriginalObservationDatesAnd": "Les données externes historiques conservent leurs dates d'observation et leur provenance originales. Les ensembles de données locaux fonctionnent hors ligne dans leur couverture réelle.",
+        "windows.scientificSourcesPanel.onlineScientificDataAccess": "Accès aux données scientifiques en ligne: {value1}",
+        "windows.scientificSourcesPanel.enableConfigureOnlineScientificDataAccess": "Activer / Configurer l'accès aux données scientifiques en ligne",
+        "windows.scientificSourcesPanel.sourceModeAppliesToSelectionNotTheRecordingSwitch": "Le mode source s'applique à la sélection, et non au commutateur d'enregistrement.",
+        "windows.scientificSourcesPanel.importedPreparedDatasetsMibRetained": "{value1} ensembles de données importés/préparés · {value2} MiB conservé{value3}",
+        "windows.scientificSourcesPanel.preparedRegionsMibExpand": "{value1} — {value2} régions préparées — {value3} MiB (dépôt)",
+        "windows.scientificSourcesPanel.providerSceneObservedKindBandsVerticalReferenceTermsSource": "{value1} Fournisseur : {value2} Scène : {value3}Observé : {value4} Genre : {value5} · Bandes : {value6} Référence verticale : {value7} Termes : {value8} Numéro de source : {value9} Source externe historique; pas une observation d'aéronef en direct.",
+        "windows.scientificSourcesPanel.advancedDiagnosticsExactSourceMetadata": "Diagnostics avancés — métadonnées exactes des sources",
+        "windows.scientificSourcesPanel.viewAllRegionsAndCollectionCoverage": "Voir toutes les régions et couverture de la collection",
+        "windows.scientificSourcesPanel.importHyperspectralDataset": "Importer un ensemble de données hyperspectrales...",
+        "windows.scientificSourcesPanel.importDataset": "Importer un ensemble de données...",
+        "windows.scientificSourcesPanel.onlineScientificDataPrivacyAndPredictiveControls": "Confidentialité des données scientifiques et contrôles prédictifs en ligne",
+        "windows.scientificSourcesPanel.advancedJsonSourceCollectionImport": "Importation de la collection de sources JSON...",
+        "portal.language.memberTitle": "Langue du compte d'organisation",
+        "portal.language.scope": "Cette langue s'applique uniquement à votre compte connecté sur ce serveur d'organisation. Le thème du navigateur et les paramètres de votre compagnon restent indépendants.",
+        "portal.language.followBrowser": "Suivez ce navigateur",
+        "portal.language.memberLabel": "Langue pour ce compte d'organisation",
+        "portal.language.save": "Langue de compte d'enregistrement",
+        "portal.language.saved": "Langue du compte sauvegardée. Aucune recherche, partage ou permissions n'a été changée.",
+        "portal.language.conflict": "Votre langue de compte a changé ailleurs. Rechargez avant de réenregistrer.",
+        "portal.language.unavailable": "La langue du compte n'est pas disponible. Votre langue du navigateur reste disponible; connectez-vous à nouveau si votre autorisation a expiré.",
+        "windows.language.reopen": "La langue est sauvegardée. Réouvrir les paramètres ou d'autres fenêtres de compagnon ouvert pour traduire leurs contrôles existants.",
+        "windows.science.modeAutomatic": "Automatique",
+        "windows.science.modeLocal": "Mes ensembles de données seulement",
+        "windows.science.modePreferLocal": "Préférez Mes ensembles de données, Autorisez le repli automatique",
+        "windows.science.localAvailable": "Handicapés — des ensembles de données locaux restent disponibles",
+        "windows.science.spaceLimited": "· Espace libre limité",
+        "windows.science.datasetRequired": "· Ensemble de données requis",
+        "windows.feedback.notes": "Étapes et notes de reproduction facultatives",
+        "windows.flight.noMission": "Aucune mission active",
+        "windows.flight.recording": "Enregistrement de la mission",
+        "windows.science.category11Title": "et élévation",
+        "windows.science.category11Description": "Numeric DEM/DSM elevation, not aircraft laser returns. Local: single-band elevation GeoTIFF.",
+        "windows.science.category12Title": "Thermal Imaging",
+        "windows.science.category12Description": "Température de surface du satellite historique et masques d'origine QA. Local: ST_B10 + QA_PIXEL (+ QA_RADSAT), avec métadonnées originales.",
+        "windows.science.category13Title": "Multispectral-imaging",
+        "windows.science.category13Description": "Reflectance historique, RGB et NDVI. Local: B02/B03/B04/B08 et SCL GeoTIFFs avec métadonnées de mise à l'échelle originales.",
+        "windows.science.category14Title": "Hyperspectrale",
+        "windows.science.category14Description": "Use External Data Manager → Find & Download Data → Hyperspectral Research for approved Earthdata Download & Import. Original ENVI manual/browser import remains available. EMIT is discovery only.",
+        "native.toolbarTemplateDidNotFinishLoadingCloseAndReopen": "Le modèle de barre d'outils n'a pas fini le chargement. Fermer et rouvrir ce panneau; signaler son titre si cela continue.",
+        "native.connectingToCompanion": "Connexion à un compagnon...",
+        "native.notSuppliedByThisPackage": "non fournie par ce colis",
+        "native.toolbarSourceProtocol1": "{value1} barre d'outils, source {value2}, protocole 1",
+        "native.commandsAeroscienceCommandV1RepliesAeroscienceReplyV1No": "Commandes: AeroScience.command.v1, Réponses: AeroScience.Reply.v1, Pas encore de réponse de moteur correspondante. L'enregistrement de la chaîne seule n'est pas une connexion de moteur.",
+        "native.evidenceBasedAssessmentsDependOnTheCompanionSCapabilities": "Les évaluations fondées sur des données probantes dépendent des capacités du compagnon.",
+        "native.allCompatibleAircraftCanRecordMissions": "Tous les aéronefs compatibles peuvent enregistrer des missions.",
+        "native.theMapRendererIsUnavailableInThisUiContext": "Le rendu de carte n'est pas disponible dans ce contexte d'assurance-chômage. Mission et charge utile restent disponibles; signalez la version du simulateur et l'erreur de console Coherent.",
+        "native.freePanDragTheMapOrUseArrowKeys": "Pan libre - faites glisser la carte ou utilisez les touches fléchées.",
+        "native.selecting": "Sélection de {value1}...",
+        "native.unableToLoadTheSdkCommbusServiceCheckThe": "Impossible de charger le service SDK CommBus. Vérifiez la version SDK/runtime de MSFS 2024.",
+        "native.simulatorLinkUnavailableReopenThisPanelSeeConnectionBuild": "Lien de simulation non disponible. Réouvrir ce panneau; voir les détails de connexion et de construction.",
+        "native.theSdkCommbusHelperListenerDidNotBecomeAvailable": "Le SDK CommBus helper/listener n'est pas devenu disponible. Aucune réponse n'a été reçue. Vérifiez le paquet Validation correspondant et le temps d'exécution du simulateur pris en charge.",
+        "native.loadingSavedMissionPlans": "Chargement des plans de mission sauvegardés...",
+        "native.selectedPlanIsNoLongerAvailableChooseAnotherPlan": "Le plan sélectionné n'est plus disponible. Choisissez un autre plan ou une mission non planifiée.",
+        "native.selectedWaypointsPatternsInstruments": "Sélectionné: {value1}, {value2} points, {value3} modèles. Instruments: {value4}.",
+        "native.loadingSelectedPlanDetails": "Chargement des détails du plan sélectionnés...",
+        "native.unplannedMissionRecordWhereverYouFly": "Mission imprévue : enregistrez où que vous voliez.",
+        "native.savedPlansSelectionIsSavedByTheCompanion": "Plans sauvegardés {value1}-{value2}. La sélection est enregistrée par le compagnon.",
+        "native.noMoreSavedPlansUsePreviousPlans": "Plus de plans enregistrés. Utilisez les plans précédents.",
+        "native.noSavedMissionPlansCreateOneInTheDesktop": "Pas de plans de mission enregistrés. Créez un planificateur de vol dans le bureau.",
+        "native.noActivePlannedMissionSelectASavedPlanOr": "Aucune mission active planifiée - sélectionnez un plan enregistré ou enregistrez-en un dans le compagnon.",
+        "native.loadingRoute": "Route de chargement {value1} / {value2}",
+        "native.end": "fin",
+        "native.routeSynchronizedWaypointsNextObservedTarget": "Route synchronisée / {value1} points de points / cible observée suivante {value2}",
+        "native.routeSynchronizedOrderedWaypointsOfflineGeographyNoOnlineTile": "Route synchronisée : {value1} points de commandes. Géographie hors ligne; pas de demandes de tuiles en ligne.",
+        "native.simulatorChannelReadyWaitingForTheWindowsEngine": "Canal de simulation prêt; en attente du moteur Windows.",
+        "native.unableToRegisterTheSdkCommbusListener": "Impossible d'enregistrer l'auditeur SDK CommBus.",
+        "native.staleStatusCompanionUnavailable": "Statut de la stale / compagnon non disponible",
+        "native.scientificStorageUnavailable": "Stockage scientifique non disponible",
+        "native.disconnectedUnavailable": "Déconnecté/indisponible",
+        "native.telemetryStaleUnavailable": "Tente de télémétrie / indisponible",
+        "native.simulatorPausedScienceUnconfirmed": "Simulator pause / science non confirmée",
+        "native.armedNotStarted": "Armé/Non démarré",
+        "native.inactive": "Inactif",
+        "native.flightRecordingScience": "Enregistrement de vol: {value1}, Science: {value2}",
+        "native.thisViewCouldNotUpdateSeeConnectionBuildDetails": "Cette vue ne pouvait pas être mise à jour. Voir les détails de connexion et de construction.",
+        "native.displayFaults": "Défauts d'affichage: {value1}",
+        "native.displayComponentsSynchronized": "Affiche les composants synchronisés.",
+        "native.replyRejectedCountLastValidStateRetainedFreshnessChecks": "Réponse rejetée: {value1}, numéro {value2}. Dernier état valide conservé; des contrôles de fraîcheur sont toujours en vigueur.",
+        "native.companionReplyCouldNotBeReadSeeConnectionBuild": "La réponse de l'associé n'a pas pu être lue. Voir les détails de connexion et de construction.",
+        "native.commandExceedsTheNativeLimitUseTheDashboard": "Commande dépassant la limite native. Utilisez le tableau de bord.",
+        "native.sendingMissionCommand": "Envoi de la commande mission...",
+        "native.commandDeliveryFailedTheIntervalIsNotConfirmed": "La livraison du commandement a échoué. L'intervalle n'est pas confirmé.",
+        "native.simulatorCommandDeliveryFailedCheckTheEngineConnection": "La livraison de la commande Simulateur a échoué. Vérifiez la connexion du moteur.",
+        "native.simulatorCommandDeliveryFailed": "La livraison de la commande de simulation a échoué.",
+        "native.retryingTheIdenticalFlightBoundRequestNoNewCommand": "Reprise de la requête liée au vol identique; aucune nouvelle cible de commande.",
+        "native.noConfirmationReceivedReviewTheConfirmedIntervalBeforeTrying": "Aucune confirmation reçue. Examiner l'intervalle confirmé avant d'essayer à nouveau.",
+        "native.noCommandConfirmationAfterOneIdenticalRetryReviewSynchronized": "Aucune confirmation de commande après une ré-essai identique. Examiner l'état synchronisé avant d'émettre une nouvelle commande.",
+        "native.mapReplyTimedOutRetryingWithTheCachedRoute": "Réponse de carte chronométrée; réessayer avec la route en cache conservée.",
+        "native.noCommandConfirmationCheckMissionStateBeforeRetrying": "No command confirmation. Check mission state before retrying.",
+        "native.lastMatchingEngineReplyControlsAreUnavailableUntilFresh": "Dernière réponse correspondante du moteur : {value1}. Les commandes ne sont pas disponibles jusqu'à ce que l'état de synchronisation soit rétabli.",
+        "native.noMatchingEngineReplyCheckThatTheDashboardAnd": "Pas de réponse correspondante du moteur. Vérifiez que le tableau de bord et la barre d'outils ont le même profil et la même source montrés dans les détails de connexion et de construction.",
+        "native.windowsEngineUnavailableLaunchAeroscienceAndCheckTheSimconnect": "Moteur Windows non disponible. Lancez AeroScience et vérifiez l'exécution SimConnect.",
+        "native.mach": "- C'est pas vrai.",
+        "native.companionDisconnectedCachedRouteRetainedLiveAircraftUnavailable": "Compagnon déconnecté - voie en cache conservée; aéronef en direct non disponible.",
+        "native.validationSourceMismatchNoStateAccepted": "Inadéquation de la source de validation. Aucun état accepté.",
+        "native.cardCommandNotConfirmedSynchronizeBeforeRetrying": "Commande de carte non confirmée. Synchronisez avant de réessayer.",
+        "native.mapSynchronizationFailedWaitingToRetry": "La synchronisation de la carte a échoué; attendre de réessayer.",
+        "native.confirmedS": "Confirmé : {value1} s.",
+        "native.intervalWasNotConfirmedReviewCurrentSettings": "L'intervalle n'a pas été confirmé.",
+        "native.companionIntervalS": "Intervalle de la compagne: {value1} s",
+        "native.missionPlanSelectionConfirmed": "Le choix du plan de mission est confirmé.",
+        "native.planSelectionWasNotConfirmedRefreshPlans": "La sélection du plan n'a pas été confirmée.",
+        "native.pilotObservationSavedFlightAndScienceContinueIndependently": "Observation du pilote sauvée. Vol et la science continuent indépendamment.",
+        "native.observationWasNotSavedYourTextIsPreserved": "L'observation n'a pas été sauvegardée; votre texte est conservé.",
+        "native.earlierRequestAcknowledged": "Demande antérieure reconnue",
+        "native.aNewerAuthoritativeViewIsAlreadyDisplayed": "{value1}, Une vue plus récente faisant autorité est déjà affichée.",
+        "native.matchingEngineReplyReceivedAircraftTelemetryAndScientificCollection": "La réponse du moteur correspondant a reçu {value1}. La télémétrie et la collecte scientifique des aéronefs ont leur propre statut ci-dessous.",
+        "native.sessionCommandConfirmedReviewCurrentState": "Commande de session confirmée.",
+        "native.missionCommandWasRejected": "Le commandement de la mission a été rejeté.",
+        "native.activeRecordingItsSavedPlanSnapshotIsFixedPlan": "Enregistrement actif : son plan enregistré est corrigé. La sélection du plan pour le prochain enregistrement est séparée.",
+        "native.simulatedTestData": "DONNÉES D'ESSAI SIMULÉES",
+        "native.simconnectTelemetry": "TÉLÉMÉTRIE SIMCONNECT",
+        "native.aircraftTelemetryUnavailable": "TÉLÉMÉTRIE AÉROCRAFTE NON AVILIABLE",
+        "native.msfsDisconnected": "MSFS DISCONNECTED",
+        "native.recordingStopped": "RECORDING STOPPED  /  {value1}: {value2}",
+        "native.awaitingInitializedAircraftTelemetry": "Télémétrie initiale des aéronefs en attente",
+        "native.activeSavedPlanSnapshotFixedForThisRecordingFly": "Snaphot actif du plan enregistré (fixé pour cet enregistrement). Déplacez la référence de route sur Map.",
+        "native.activeUnplannedMissionScientificPreparationFollowsActualAircraftMovement": "Mission active non planifiée : la préparation scientifique suit le mouvement réel des aéronefs.",
+        "native.universalModeFlyAnything": "Mode universel / Voler n'importe quoi",
+        "native.samples": "{value1} échantillons",
+        "native.notGraded": "Non classé",
+        "native.insufficientEvidence": "Preuves insuffisantes",
+        "native.stale": "Étalon",
+        "native.armed": "Armés",
+        "native.waitingForSource": "En attente de la source",
+        "native.acquisitionGap": "Écart d'acquisition",
+        "native.sourceDisconnected": "Source déconnectée",
+        "native.waiting": "Attendre",
+        "native.manual": "Manuel",
+        "native.unsupported": "Non pris en charge",
+        "native.provisional": "Provisoire",
+        "native.final": "Finale",
+        "native.revised": "Révisé",
+        "native.supported": "Appui",
+        "native.idle": "Idle",
+        "native.detecting": "Détection",
+        "native.holding": "Exploitation",
+        "native.complete": "Complété",
+        "native.thisCompanionDoesNotSupportSessionBoundNativeControls": "Ce compagnon ne prend pas en charge les contrôles natifs liés à la session.",
+        "native.staleEngineStateSynchronizeBeforeControllingScience": "État du moteur de la stale; synchroniser avant de contrôler la science.",
+        "native.backendSessionAndControlRevisionsAreCheckedBeforeApplying": "Les révisions de session et de contrôle sont vérifiées avant de les appliquer.",
+        "native.scienceStatusUnavailableUnsupportedCompanion": "Statut scientifique non disponible (compagnon non soutenu)",
+        "native.updateTheCompanionForScienceSessionControls": "Mettre à jour le compagne pour les contrôles de la session scientifique.",
+        "native.noScoreAvailable": "Pas de score disponible.",
+        "native.noSessionIdentitySupplied": "Aucune identité de session fournie.",
+        "native.nextTriggerNotAssessed": "Le prochain déclencheur n'est pas évalué.",
+        "native.scientificYieldNotAssessed": "Le rendement scientifique n'est pas évalué.",
+        "native.pilotHoldRearmRequired": ", cale du pilote; réarmement requis",
+        "native.continuityHold": ", maintien de la continuité",
+        "native.collectionControl": "Collection control: {value1}{value2}{value3}",
+        "native.none": "aucune",
+        "native.flightSessionRevision": "Vol {value1}, Session {value2}, révision {value3}",
+        "native.goodDataValidScientificCoverageNotYetAssessedFlight": "Bonnes données / couverture scientifique valide non encore évaluée. Le chemin de vol n'est pas une couverture valide-pixel.",
+        "native.evidenceCutoffIsOlderThan15SMetricsAre": ", La limite de preuve est supérieure à 15 s; les mesures ne sont pas courantes.",
+        "native.additionalDetailOnDashboard": ", Détails supplémentaires sur le tableau de bord.",
+        "native.stateAsOfMetrics": "State as of {value1} | metrics {value2}{value3}{value4}",
+        "native.researchStatusUnavailable": "Statut de recherche non disponible.",
+        "native.personalResearchCardsPrepareInTheDesktopFlightPlanner": "Cartes de recherche personnelles : préparez-vous dans le planificateur de vol de bureau.",
+        "native.activeCardS": "{value1} carte(s) active(s){value2}.",
+        "native.waitingForSynchronizedPersonalCardStateFlightAndScience": "En attendant l'état de la carte personnelle synchronisée. Vol et science restent indépendants.",
+        "native.choosePersonalCardsInMissionPlannerBeforeRecording": "Choisissez des cartes personnelles dans Mission Planner avant d'enregistrer.",
+        "native.activateACardThenBeginAttemptEndAttemptDeactivate": "Activer une carte, puis commencer la tentative / fin de la tentative. Désactiver la carte n'arrête pas le vol ou la science.",
+        "native.noPersonalCardsSelectedForThisFlight": "Aucune carte personnelle sélectionnée pour ce vol.",
+        "native.ordered": "Commande",
+        "native.independent": "Indépendant",
+        "native.procedureRepetitionsVerifyOriginalsAfterFlight": "{value1} procédure, {value2} répétitions; vérifier les originaux après vol",
+        "native.continuousSeconds": "{value1}, {value2} secondes continues",
+        "native.fictionalModeledTemperatureSResponseOriginalScienceSamplesRequired": "Température de modélisation par fiction, réponse {value1} s, {value2} échantillons scientifiques originaux requis",
+        "native.documentedPilotObservationsNotesAreNotSensorMeasurements": "{value1} documenté Observations pilotes, les notes ne sont pas des mesures de capteur",
+        "native.surveySourceQualifiedSamplesRequired": "Enquête : {value1}, échantillons qualifiés de source requis",
+        "native.distinctSamplingLocationsMGeographicExtentCollectValidTemperature": "{value1} emplacements d'échantillonnage distincts, {value2} m étendue géographique, recueillir des valeurs de température valides",
+        "native.neighboringFootMslBandsCollectValidTemperatureReadings": "{value1} voisin {value2}-pied bandes MSL, collecter des valeurs de température valides",
+        "native.knotsIasFeetMsl": "{value1} noeuds IAS, {value2} pieds MSL",
+        "native.revision": "{value1}, révision {value2}",
+        "native.attemptRecording": "Enregistrement des tentatives",
+        "native.issued": "{value1}, délivré {value2}, {value3}",
+        "native.focusedInToolbar": "Concentré dans la barre d'outils",
+        "native.sAttempts": "{value1}, {value2} s, {value3} tentatives",
+        "native.enableautomatic": "activerAutomatique",
+        "native.flightGuidanceUnavailable": "Guide de vol non disponible",
+        "native.ap": "AP: {value1} | {value2}",
+        "native.scientificSourceUnavailable": "Source scientifique non disponible",
+        "native.scienceInstrument": "Instrument scientifique",
+        "native.diagnostics": "Diagnostics",
+        "native.collectionInterval": "Intervalle de collecte",
+        "native.collectionInterval2": "{value1} intervalle de collecte",
+        "native.applyInterval": "Appliquer l'intervalle",
+        "native.applyInterval2": "Appliquer l'intervalle {value1}",
+        "native.useConfirmedInterval": "Utiliser l'intervalle confirmé",
+        "native.useConfirmedInterval2": "Utilisation confirmée {value1} intervalle",
+        "native.chooseApplyIntervalToConfirmThisChange": "Choisissez l'intervalle d'application pour confirmer ce changement.",
+        "native.applyingInterval": "Appliquer l'intervalle...",
+        "native.commandUnavailableSynchronizeWithTheCompanion": "Commande non disponible. Synchronisez avec le compagnon.",
+        "native.usingConfirmedIntervalS": "En utilisant l'intervalle confirmé : {value1} s.",
+        "native.on": "À",
+        "native.off": "Hors",
+        "native.disableInstrument": "Désactive l'instrument",
+        "native.enableInstrument": "Activer l'instrument",
+        "native.sConfirmed": "{value1} s (confirmé)",
+        "native.disabled": "handicapés",
+        "native.savedProducts": "produits enregistrés /",
+        "native.measurementValues": "valeurs mesurées /",
+        "native.unavailable": "Indisponible",
+        "native.acquisitionSetsRejectedUnexpectedMissingActualLast": "{value1} / {value2} ensembles d'acquisition / {value3}{value4}{value5} rejeté / {value6} manquant imprévu / effectif {value7} / dernier {value8}",
+        "native.static.connectionBuildDetails": "Détails de connexion et de construction",
+        "native.static.commandsAeroscienceCommandV1RepliesAeroscienceReplyV1": "Commandes: AeroScience.command.v1, Réponses: AeroScience.Reply.v1",
+        "native.static.bundledEnglishFallbackUntilMatchingCompanionSettingsArrive": "Recul anglais en bloc jusqu'à ce que les paramètres correspondants de compagnon arrivent.",
+        "native.static.researchStateUnavailable": "État de recherche non disponible.",
+        "native.static.cardsDescribeExperimentsSaveRoutesAsMissionPlansInThe": "Les cartes décrivent les expériences. Enregistrer les itinéraires comme plans de mission dans le planificateur de vol de bureau.",
+        "native.static.previousCards": "Cartes précédentes",
+        "native.static.nextCards": "Cartes suivantes",
+        "native.static.mslFt": "MSL / FT",
+        "native.static.iasKts": "IAS / SCT",
+        "native.static.headingDegt": "TÊTE / DEGT",
+        "native.static.vsFtMin": "VS/FT/MIN",
+        "native.static.startRecordingAtAnyTimeYourMissionContinuesIfThis": "Commencez à enregistrer à tout moment. Votre mission se poursuit si ce panneau est fermé.",
+        "native.static.savedMissionPlan": "Plan de mission sauvegardé",
+        "native.static.unplannedMission": "Mission non planifiée",
+        "native.static.previousPlans": "Plans antérieurs",
+        "native.static.nextPlans": "Prochains plans",
+        "native.static.viewRouteOnMap": "Voir l'itinéraire sur la carte",
+        "native.static.saveAPlanInTheDashboardSelectItHereStart": "Enregistrer un plan dans le tableau de bord, le sélectionner ici, commencer à enregistrer, voler et revoir l'historique de la mission. Utilisez la carte mobile ou un plan de vol compatible exporté; AeroScience ne commande pas la navigation aérienne.",
+        "native.static.universalFlyAnything": "Universel - Volez n'importe quoi",
+        "native.static.realisticAuthenticResearch": "Réaliste - Recherche authentique",
+        "native.static.yourWrittenAccountNotASensorReadingMissingLocationsStay": "Votre compte écrit, pas un relevé de capteur. Les endroits manquants restent indisponibles. Utilisez le tableau de bord pour des notes plus longues.",
+        "native.static.observationCategory": "Catégorie d'observation",
+        "native.static.shortObservation120Characters": "Observation courte (120 caractères)",
+        "native.static.recordingContinuesWhenThisPanelClosesOpenTheCompanionDashboard": "L'enregistrement se poursuit lorsque ce panneau se ferme. Ouvrez le tableau de bord compagnon pour l'historique de la mission.",
+        "native.static.researchMissionMap": "Carte de la mission de recherche",
+        "native.static.freePan": "Pan libre",
+        "native.static.zoom": "Zoom -",
+        "native.static.previousWaypoint": "Précédente",
+        "native.static.nextWaypoint": "Suivant",
+        "native.static.nextObservedTarget": "Objectif observé suivant",
+        "native.static.progressAndMapLimits": "Progrès réalisés et limites de la carte",
+        "native.static.northUpGoldPlannedTurquoiseRecordedPinkMarkersRecentTrack": "Nord vers le haut / Or: prévu / Turquoise: enregistré / Rose: marqueurs. L'affichage de la piste récente est limité à 512 points; les enregistrements complets restent dans l'histoire de la mission. La géographie hors ligne est grossière et Mercator est coupé au +/-85.0511 deg. Aucune commande d'aéronef n'est modifiée.",
+        "native.static.scienceSessionControlsEvidence": "Contrôles et preuves de la session scientifique",
+        "native.static.endScienceClosesThisSessionEndMissionBelowEndsThe": "Fin de la science clôture cette session. Fin de la mission ci-dessous termine le vol continu. L'étalonnage, le classement et les preuves de source détaillées restent sur le tableau de bord compagnon.",
+        "native.static.collectionStopped": "Recouvrement: arrêté",
+        "native.static.sourceAndLimitations": "Source et limites",
+        "native.static.simulatorReportedAtmosphericObservationsAnActiveMissionIsRequiredTo": "Simulator-reported atmospheric observations. An active mission\n                  is required to save science. Flight telemetry continues when\n                  science collection is paused. Documented calibration and operating\n                  evidence are available on the companion dashboard. Unknown constraints\n                  are not successful compliance or certified scientific accuracy.",
+        "native.static.aerosciencePages": "AeroScience pages",
+        "native.static.missionAndPayloadContent": "Contenu de la mission et de la charge utile",
+        "native.static.researchMission": "Mission de recherche",
+        "native.static.scientificMissionIntelligence": "Renseignements scientifiques des missions",
+        "native.ambientTemperature": "Température ambiante",
+        "native.ambientWind": "Vent ambiant",
+        "map.native.unavailable": "Indisponible",
+        "map.native.accessible": "Plan de mission en ligne nord-haut. Faites glisser vers le panoramique, roulez pour zoomer.",
+        "map.native.noWaypoint": "Aucun point d'accès prévu sélectionné.",
+        "map.native.altitudeUnknown": "Altitude non précisée",
+        "map.native.liveUnavailable": "/ Position en direct non disponible/existante.",
+        "map.native.abbreviated": "Les étiquettes et les instructions d'affichage peuvent être abréviées; les valeurs complètes demeurent dans le plan d'accompagnement.",
+        "map.native.legend": "N ^ / Terre naturelle hors ligne / Référence géographique",
+        "map.native.track": "Voie terrestre {track} / GS {speed}",
+        "windows.deletion.confirmation": "Confirmation: {phrase}",
+        "windows.deletion.typePhrase": "Type {phrase}",
+        "native.instrument.ambientTemperature": "Température ambiante",
+        "native.instrument.ambientPressure": "Pression ambiante",
+        "native.instrument.ambientWind": "Vent ambiant",
+        "native.instrument.ambientDensity": "Densité de l'air",
+        "native.instrument.thermalImager": "Imageur thermique",
+        "native.instrument.multispectralImager": "Imageur multispectral",
+        "native.instrument.hyperspectralImager": "Imageur hyperspectral"
       }
     },
     "pt-BR": {
-      "version": 19,
+      "version": 20,
       "locale": "pt-BR",
-      "sourceHash": "cb25b591a8ea973a4079dbac869815ee99dc5ca1da5aa26c23574fab8d3e2eb6",
+      "sourceHash": "24325d6cd2282e6667cce945669b271811652f8627707a2d627de0b92e3822f9",
       "pendingEnglishFallbackKeys": [
         "contextHelp.coverage.body",
         "contextHelp.lidar.body",
@@ -47306,6 +50695,11 @@ export const localeData = {
         "lidar.chooseLocal",
         "lidar.localImport",
         "lidar.noSources",
+        "native.cardCommandNotConfirmedSynchronizeBeforeRetrying",
+        "native.final",
+        "native.manual",
+        "native.static.iasKts",
+        "native.static.mslFt",
         "results.libraryMeaning",
         "submissions.permissionGranted",
         "ui.analysis.messageSegmentPositions",
@@ -47409,7 +50803,10 @@ export const localeData = {
         "ui.tfrLayers.messageNOTAM",
         "ui.tfrLayers.messageNOTAM8271f8dc",
         "ui.tfrLayers.messageNOTAMd48d7167",
-        "ui.tfrLayers.messageOriginalIssuanceTextTimezoneNotSuppliedIn"
+        "ui.tfrLayers.messageOriginalIssuanceTextTimezoneNotSuppliedIn",
+        "windows.mainForm.chooseAHistoricalLasLazOriginal",
+        "windows.science.category14Description",
+        "windows.scientificSourcesPanel.historicalExternalDataRetainTheirOriginalObservationDatesAnd"
       ],
       "messages": {
         "common.messageUnavailable": "Os detalhes estão indisponíveis. Atualize a visualização para consultar as informações atuais.",
@@ -53598,7 +56995,450 @@ export const localeData = {
         "ui.scientificAccess.messagePrepareASmallArea": "Prepare uma área pequena.Obrigada.Obrigada.Obrigada.O",
         "ui.sensorPlanning.messageSurveyAltitudeAboveGround": "Altitude da pesquisa acima do solo",
         "ui.sensorPlanning.messageSideOverlap": "Sobreposição lateral (%)",
-        "ui.sensorPlanning.messageForwardOverlap": "Sobreposição a prazo (%)"
+        "ui.sensorPlanning.messageForwardOverlap": "Sobreposição a prazo (%)",
+        "windows.brandedForm.aeroscienceOrbitalArcLogo": "Logotipo AeroScience Orbital Arc",
+        "windows.toolbarProgressForm.aeroscienceToolbarInstallation": "AeroScience · Instalação da barra de ferramentas",
+        "windows.toolbarProgressForm.installedAvailableCommunity": "Instalado: {value1} Disponível: {value2} Comunidade: {value3}",
+        "windows.toolbarProgressForm.installationCompleted": "Instalação concluída",
+        "windows.toolbarProgressForm.theInstalledPackageAndVersionWereVerifiedStartOr": "O pacote e a versão instalados foram verificados. Iniciar ou reiniciar MSFS para carregar a barra de ferramentas atualizada.",
+        "windows.toolbarProgressForm.installationStopped": "A instalação parou.",
+        "windows.toolbarProgressForm.previousFilesAreRestoredWhenPossibleDetailsAreIn": "{value1} Arquivos anteriores são restaurados sempre que possível. Os detalhes estão nos logs da barra de ferramentas da AeroScience.",
+        "windows.toolbarProgressForm.aeroscienceMsfsToolbar": "AeroScience MSFS Barra de Ferramentas",
+        "windows.toolbarProgressForm.closeMsfsBeforeUpdatingTheCompanionCanContinueWhen": "{value1} Fechar MSFS antes da atualização. O companheiro pode continuar quando você adiar essa ação.",
+        "windows.toolbarProgressForm.installToolbar": "Instalar a barra de ferramentas",
+        "windows.toolbarProgressForm.updateToolbar": "Barra de Ferramentas de Atualização",
+        "windows.mainForm.openDashboard": "Abrir o Painel de Atenção",
+        "windows.mainForm.scienceMissionOperations": "{value1} · Operações da missão científica",
+        "windows.mainForm.chooseTheOriginalMissionDatabaseFolderToCopyIt": "Escolha o arquivo de base de dados da missão ORIGINAL para COPY. Não será migrado.",
+        "windows.mainForm.chooseTheOriginalScienceLibraryFolderToCopyOriginals": "Escolha a pasta da Biblioteca de Ciências ORIGINAL para COPY. Os originais serão preservados.",
+        "windows.mainForm.engineStoppedOpenStorageSettingsToResolveStartupOr": "O motor parou. Abra Storage/Settings para resolver erros de inicialização ou de armazenamento. Seu arquivo existente não foi substituído.",
+        "windows.mainForm.theLocalEngineStoppedAfterAnErrorCollectFeedback": "O motor local parou após um erro. Recolha comentários e verifique Storage/Configurations; os registros existentes são conservados.",
+        "windows.mainForm.engineRunningToolbar": "{value1} · Motor a funcionar · {value2} {value3} · Barra de Ferramentas: {value4}",
+        "windows.mainForm.chooseYourMsfs2024CommunityFolder": "Escolha seu pasta da comunidade MSFS 2024",
+        "windows.mainForm.chooseAHistoricalLasLazOriginal": "Choose a historical LAS/LAZ original",
+        "windows.mainForm.chooseANumericElevationDemGeotiff": "Escolha um DEM GeoTIFF de elevação nórdica",
+        "windows.mainForm.chooseTheCollectionFolder": "Escolha o pasta de coleta {value1}",
+        "windows.mainForm.chooseTheFolderContainingAnEnviHdrAndIts": "Escolha a pasta contendo um ENVI.hdr e seu original binário hiperspectral",
+        "windows.mainForm.chooseTheOriginalHyperspectralEnviHeader": "Escolha o cabeçalho original da ENVI hiperspectral",
+        "windows.mainForm.selectMatchingEmitRfl002Rfluncert002AndMask003Originals": "Selecione os originais EMIT RFL002, RFLUNCERT002 e MASK003",
+        "windows.mainForm.importARealScientificSourceCollectionManifest": "Importar um manifesto de coleta de fontes científicas",
+        "windows.mainForm.collectFeedback": "Recolha comentários",
+        "windows.mainForm.saveFeedbackZip": "Guarde feedback ZIP...",
+        "windows.mainForm.copyArchivesForValidation": "Copiar arquivos para validação",
+        "windows.mainForm.createAVerifiedDisposableCopyOfBothArchivesInside": "Crie uma cópia verificada dos dois arquivos dentro do perfil de validação, e abra- o com acesso científico online desativado? Habilite o acesso mais tarde em Configurações quando estiver pronto. Os originais e as configurações de produção são mantidos. Feche outras aplicações usando estes arquivos primeiro.",
+        "windows.mainForm.exit": "Saia",
+        "windows.mainForm.storageRecovery": "Recuperação de armazenamento",
+        "windows.mainForm.waitForTheStorageSetupOperationToFinish": "Espere a operação de armazenamento/instalação para terminar. O que?",
+        "windows.mainForm.aMissionIsRecordingExitAndPreserveItAs": "Uma missão está gravando. Sair e preservar como interrompido?",
+        "windows.mainForm.exitAeroscience": "Sair da AeroScience",
+        "windows.mainForm.theEngineIsStoppedCheckStorageSettings": "O motor está parado. Verifique o armazenamento/ajustes.",
+        "windows.mainForm.endRecordingAndWaitForCurrentOperationsBeforeRunning": "Termine a gravação e espere pelas operações atuais antes de executar a configuração.",
+        "windows.mainForm.endRecordingAndWaitForOtherOperationsBeforeUpdating": "Termine a gravação e espere por outras operações antes de atualizar a barra de ferramentas.",
+        "windows.mainForm.closeMsfsBeforeInstallingOrUpdatingAeroscienceSToolbar": "Feche a MSFS antes de instalar ou atualizar a barra de ferramentas da AeroScience.",
+        "windows.mainForm.installTheBundledAeroscienceToolbarInItsPreviousFiles": "Instale a barra de ferramentas AeroScience em: {value1} Seus arquivos anteriores serão salvas fora da Comunidade. complementos não relacionados são preservados.",
+        "windows.mainForm.confirmToolbarInstallation": "Confirme a instalação da barra de ferramentas",
+        "windows.mainForm.endRecordingAndWaitForActiveSetupStorageWork": "Termine a gravação e espere pelo trabalho de configuração/estocagem ativa antes de compactar.",
+        "windows.mainForm.compactTheDatabaseServicesWillStopTemporarilyAVerified": "Compact a base de dados {value1}? Os serviços pararão temporariamente. É necessário um backup verificado e espaço temporário suficiente. Observações originais são mantidas; os bytes reais da base de dados recuperados serão reportados.",
+        "windows.mainForm.confirmDatabaseMaintenance": "Confirme a manutenção da base de dados",
+        "windows.mainForm.compactionCompleted": "Compañía concluída",
+        "windows.mainForm.waitForCurrentSetupStorageWorkAndStartThe": "Espere pelo trabalho atual de configuração/estocagem e ligue o motor local primeiro.",
+        "windows.mainForm.importSourceObservationCopyMibIntoAvailableGibOriginal": "Importar {value1}? Fonte: {value2} Observação: {value3} Cópia {value4} MiB em {value5} Disponível: {value6} GiB Arquivos originais permanecem sem toques. Nenhum arquivo é baixado e nenhum dado é carregado. Revise a licença fonte: {value7}",
+        "windows.mainForm.importedOpenDashboardSettingsScientificDataSourcesToInspect": "Importado {value1}. Abrir configurações do painel → Fontes de dados científicos para inspecionar cobertura e metadados.",
+        "windows.mainForm.theBundleIncludesGeographicPreparationAreasInstrumentProviderTiming": "O pacote inclui áreas de preparação geográfica, tempo de apresentação do instrumento/fornecedor, erros e registros locais. Revise-o antes de compartilhar. Nenhum original científico, banco de dados ou credenciais estão incluídos. Continuar?",
+        "windows.mainForm.savedLocallyReviewTheZipBeforeSharingIt": "Revise o ZIP antes de compartilhar.Os dados são de uma forma diferente.Os dados são de uma forma diferente.Os dados são de",
+        "windows.setupWizardForm.next": "Próxima",
+        "windows.setupWizardForm.skipForNow": "Salte agora",
+        "windows.setupWizardForm.installUpdateTheIncludedMsfs2024Toolbar": "Instale / atualize a barra de ferramentas MSFS 2024 incluída",
+        "windows.setupWizardForm.allowAutomaticScientificDataDiscoveryAndBoundedDownloads": "Permitir a descoberta automática de dados científicos e downloads limitados",
+        "windows.setupWizardForm.welcomeToAeroscienceSetup": "Bem-vindo a AeroScience · Setup",
+        "windows.setupWizardForm.chooseTheFolderForMissionsDb": "Escolha a pasta para as missões.db",
+        "windows.setupWizardForm.chooseAScientificDataLibraryFolder": "Escolha um pasta de biblioteca de dados científicos",
+        "windows.setupWizardForm.availableDriveSpaceGib": "Espaço de unidade disponível: {value1} GiB{value2}",
+        "windows.setupWizardForm.keepThisLocationToPreserveTheUnavailableLibraryReconnect": "· Mantenha este local para preservar a biblioteca não disponível; reconecte sua unidade mais tarde. Seu arquivo de missão disponível ainda pode abrir.",
+        "windows.setupWizardForm.aeroscienceStepOf4": "AeroScience {value1} · Passo {value2} de 4",
+        "windows.setupWizardForm.finishSetup": "Definição de acabamento",
+        "windows.setupWizardForm.browseMissionDatabaseFolder": "Navegue na pasta de dados da missão...",
+        "windows.setupWizardForm.browseScienceLibraryFolder": "Navegar na pasta da biblioteca científica...",
+        "windows.setupWizardForm.browseCommunityFolder": "Navegue na pasta da comunidade...",
+        "windows.setupWizardForm.selectMsfs2024SConfiguredCommunityFolder": "Selecione a pasta configurável da Comunidade MSFS 2024",
+        "windows.setupWizardForm.closeSetupWithUnappliedChoicesChooseNoToKeep": "Fechar a configuração com opções não aplicadas? Escolha Não para manter a edição. Configurações anteriormente salvas e dados verificados do usuário permanecem intactos.",
+        "windows.setupWizardForm.unfinishedSetup": "Configuração inacabada",
+        "windows.setupWizardForm.setUpLocalMissionStorageAndTheMsfs2024": "Configure o armazenamento local da missão e a barra de ferramentas MSFS 2024. O aplicativo iniciará seus serviços e abrirá seu painel automaticamente.",
+        "windows.setupWizardForm.existingLocationsAndSettingsArePreselectedUpdatesKeepThem": "Os locais e configurações existentes são anti-eleitos. Os atualizações mantêm-nos. Mudando uma cópia de localização e verificando dados existentes apenas após a sua confirmação; os originais são conservados.",
+        "windows.setupWizardForm.missionHistoryWorksWithoutMsfsOrInternetLiveRecording": "A história da missão funciona sem MSFS ou internet. A gravação ao vivo fica disponível quando um avião está conectado.",
+        "windows.setupWizardForm.missionDatabaseFileChooseItsFolderFilenameRemainsMissions": "Arquivo do banco de dados da missão (escolha seu pasta; o nome do arquivo permanece missions.db)",
+        "windows.setupWizardForm.scientificDataLibraryMayBeOnADifferentInternal": "Biblioteca de dados científicos — pode estar em uma unidade interna ou externa diferente",
+        "windows.setupWizardForm.keepTheSuggestedFoldersToPreserveCurrentStorageNew": "Manter as pastas sugeridas para preservar o armazenamento atual. Os novos destinos devem estar vazios. As lojas existentes podem ser selecionadas explicitamente através da Configuração → Armazenamento após a configuração.",
+        "windows.setupWizardForm.confirmTheMsfs2024CommunityFolderDetectionReadsSteam": "Confirme a pasta da Comunidade MSFS 2024. A detecção lê a configuração do Steam / Microsoft Store, incluindo os caminhos personalizados do pacote. Use Navegar se necessário.",
+        "windows.setupWizardForm.closeMsfsBeforeInstallingOrUpdatingOnlyAeroscienceIs": "Feche a MSFS antes de instalar ou atualizar. Só AeroScience é alterado; o pacote anterior AeroScience é backup fora da Comunidade. Skip for Now deixa a Comunidade sem toque; a instalação permanece disponível em Configurações.",
+        "windows.setupWizardForm.msfsIsCurrentlyRunningCloseItBeforeContinuingWith": "MSFS está atualmente em execução. Feche-o antes de continuar com a instalação da barra de ferramentas, ou escolha Saltar para agora.",
+        "windows.setupWizardForm.missionDatabaseScientificDataLibraryToolbar": "Base de dados da missão: {value1} Biblioteca de dados científicos: {value2} Barra de ferramentas: {value3}",
+        "windows.setupWizardForm.finishSetupConfirmsTheseChoicesChangedStorageLocationsUse": "A configuração de acabamento confirma essas opções. Os locais de armazenamento alterados usam a migração verificada com os originais conservados. Os dados de destino existentes nunca são sobrescritos ou silenciosamente fundidos. Você pode revisitar a configuração e o armazenamento através da configuração.",
+        "windows.setupWizardForm.optionalAndSeparateFromOnlineMapsLeaveUncheckedFor": "Opcional e separado dos mapas online. Deixe sem marcação para a ciência offline. Altere a largura de banda, a política de data/qualidade e o acesso mais tarde em Configuração → Fontes de dados científicos. Os originais científicos preparados são conservados dentro dos limites de armazenamento da sua biblioteca.",
+        "windows.setupWizardForm.theScienceLibraryDriveHasLimitedFreeSpaceFuture": "A unidade de Biblioteca de Ciências tem espaço livre limitado. Futuros formatos científicos e taxas de dados não são implementados; nenhuma previsão de tamanho está disponível.",
+        "windows.setupWizardForm.storageCapacity": "Capacidade de armazenamento",
+        "windows.settingsForm.aeroscienceSettings": "Configuração AeroScience",
+        "windows.settingsForm.chooseAnEmptyDestinationOrAnExistingAeroscienceStore": "Escolha um destino vazio ou uma loja existente da AeroScience",
+        "windows.settingsForm.working": "Trabalhando...",
+        "windows.settingsForm.completeOriginalDataRetained": "Os dados originais foram conservados.",
+        "windows.settingsForm.enablePrivateLanIpadAccess": "Habilite acesso privado-LAN / iPad",
+        "windows.settingsForm.selectTheConfiguredMsfsCommunityFolder": "Selecione a pasta configurada da comunidade MSFS",
+        "windows.settingsForm.installedAvailableStatus": "Instalado: {value1} · Disponível: {value2} Estado: {value3} {value4}",
+        "windows.settingsForm.newInstallationsSuggestOpenstreetmapStreetsAfterAPrivacyChoice": "As novas instalações sugerem OpenStreetMap / Ruas após uma opção de privacidade antes da primeira solicitação de telha. Escolha apenas offline ou modifique Mapas e Mapas de Base no painel. As preferências existentes são preservadas. A geografia offline permanece disponível sem uma conta. Imagem do satélite Esri opcional requer suas próprias credenciais configuradas.",
+        "windows.settingsForm.openMapsBasemapsSettings": "Configuração de mapas abertos e mapas de base",
+        "windows.settingsForm.aeroscienceDashboardSettingsUpdatesShowsYourInstalledVersionAnd": "AeroScience {value1}. Configurações do painel de dados → Atualizações mostra a versão instalada e as notificações opcionais de liberação do GitHub. As verificações são feitas diariamente, nunca bloqueiam arquivos offline e nunca executam um instalador automaticamente. Você pode desativar as verificações automáticas ou incluir/excluir as liberações alfa lá.",
+        "windows.settingsForm.openUpdateSettingsCheckForUpdates": "Abrir as configurações de atualização / Verifique se há atualizações",
+        "windows.settingsForm.waitForTheCurrentOperationToFinish": "Espere a operação atual para terminar. O quê? Espere.",
+        "windows.settingsForm.discardUnappliedSettingsAndCloseChooseNoToKeep": "Descarregue as configurações não aplicadas e feche? Escolha Não para manter a edição. As configurações guardadas, a gravação e o trabalho de fundo serão preservados.",
+        "windows.settingsForm.unsavedSettings": "Configurações não-conseguidas",
+        "windows.settingsForm.usedAvailable": "Usado: {value1} · Disponível: {value2}",
+        "windows.settingsForm.unavailable": "Não disponível: {value1}",
+        "windows.settingsForm.limitedAvailableCapacityConsiderAnotherDriveThisIsA": "Considere outra unidade, este é um aviso de capacidade, não uma previsão do tamanho dos dados científicos.Os dados são uma fonte de informação.Os dados são uma fonte de informação.Os dados são uma fonte de informação.Os dados são uma fonte de",
+        "windows.settingsForm.browseChangeLocation": "Navegar / Alterar Localização...",
+        "windows.settingsForm.openFolder": "Abrir pasta",
+        "windows.settingsForm.restoreDefault": "Restaurar a predefinição...",
+        "windows.settingsForm.dataManagement": "Gerenciamento de dados...",
+        "windows.settingsForm.storageManagementLimitsPreviewCleanup": "Gestão de armazenamento / Limpeza de pré-visualização",
+        "windows.settingsForm.recoverOriginalLocationFromInterruptedMigration": "Recuperar a localização original da migração interrompida...",
+        "windows.settingsForm.noInterruptedMigrationNeedsRollback": "Nenhuma migração interrompida precisa de regresso. Não. Não. Não.",
+        "windows.settingsForm.restoreTheOriginalVerifiedStorageSettingBothCopiesWill": "Restaure a configuração original de armazenamento verificada?",
+        "windows.settingsForm.endTheMissionBeforeChangingEitherStorageLocation": "Termine a missão antes de mudar de lugar de armazenamento.",
+        "windows.settingsForm.scienceLibraryCapacity": "Capacidade da Biblioteca de Ciências",
+        "windows.settingsForm.availableCapacityThisDriveHasLimitedFreeSpaceFuture": "Capacidade disponível: {value1}. Esta unidade tem espaço livre limitado. Futuros requisitos de dados científicos são desconhecidos. Continue?",
+        "windows.settingsForm.limitedCapacity": "Capacidade limitada",
+        "windows.settingsForm.confirmStorageChange": "Confirme a mudança de armazenamento",
+        "windows.settingsForm.runGuidedSetup": "Faça uma configuração guiada...",
+        "windows.settingsForm.recordingIntervalMillisecondsSimconnectIsRequestedAt1Hz": "Intervalo de gravação (milissegundos; SimConnect é solicitado a 1 Hz).",
+        "windows.settingsForm.applyConnectionSettings": "Aplicar as configurações de conexão",
+        "windows.settingsForm.lanIsOptionalAllowAeroscienceOnTheWindowsPrivate": "A LAN é opcional. Permitir AeroScience no Windows O perfil da rede privada só quando se usa o iPad/LAN. O código de pareamento está nas configurações do painel de borda. A operação local não requer alteração do firewall.",
+        "windows.settingsForm.msfsCommunityFolder": "Arquivo da Comunidade MSFS",
+        "windows.settingsForm.browseCommunityFolder": "Procurar no pasta da comunidade...",
+        "windows.settingsForm.installUpdateRepairToolbar": "Instalar / atualizar / Reparar a barra de ferramentas...",
+        "windows.settingsForm.removeAeroscienceToolbar": "Remova a barra de ferramentas AeroScience...",
+        "windows.settingsForm.noCommunityFolderHasBeenConfigured": "Nenhuma pasta da Comunidade foi configurada.O quê?O quê?O quê?",
+        "windows.settingsForm.removeOnlyAeroscienceFromThisCommunityFolderItsFiles": "Remover apenas AeroScience desta pasta da Comunidade? Seus arquivos serão movidos para um backup fora da Comunidade. Fechar MSFS primeiro. {value1}",
+        "windows.settingsForm.removeToolbar": "Remover barra de ferramentas",
+        "windows.settingsForm.theToolbarWasNotInstalledInThatFolder": "A barra de ferramentas não foi instalada naquela pasta. Não. Não.",
+        "windows.settingsForm.toolbarRemovedBackupRetainedAt": "Barra de ferramentas removido. Retirado em: {value1}",
+        "windows.settingsForm.theNativeSimconnectRuntimeIsIncludedConnectionStatusIs": "O tempo de execução nativo do SimConnect é incluído. O estado da conexão é mostrado na janela e no painel de dados AeroScience.",
+        "windows.settingsForm.theNativeSimconnectRuntimeIsMissingRunAeroscienceSetup": "O tempo de execução nativo do SimConnect está faltando. Execute AeroScience Setup novamente para reparar a instalação; mantenha seus dados e configurações da missão.",
+        "windows.settingsForm.microsoftVisualCPrerequisite": "Prerequisito C++ da Microsoft Visual... Sim.",
+        "windows.settingsForm.ifWindowsReportsAMissingVisualCDependencyUse": "Se o Windows reportar uma dependência de Visual C++ faltando, use a página oficial da Microsoft acima para instalar o x64 redistributable graficamente, então reinicie AeroScience.",
+        "windows.settingsForm.toolbar": "Barra de ferramentas",
+        "windows.earthdataConnectionForm.connectNasaEarthdata": "Conecte dados da NASA",
+        "windows.earthdataConnectionForm.signInOnlyOnNasaSOfficialWebsiteGenerate": "Faça login apenas no site oficial da NASA. Grave um token de usuário do seu perfil da NASA (documentos da NASA com 60 dias de vida). Approve ORNL DAAC acesso lá se solicitado. AeroScience nunca precisa da sua senha da NASA.",
+        "windows.earthdataConnectionForm.openNasaSignInTokenPage": "Abra a página de login / token da NASA",
+        "windows.earthdataConnectionForm.pasteNasaUserTokenStoredInWindowsCredentialManager": "Paste Token de usuário da NASA (locada no Windows Credential Manager para este perfil):",
+        "windows.earthdataConnectionForm.nasaEarthdataUserToken": "Token de usuário de dados da NASA",
+        "windows.earthdataConnectionForm.theBrowserDashboardAndPairedDevicesNeverReceiveThis": "O painel do navegador e dispositivos pareados nunca recebem esteCrecial. O acesso é verificado pela NASA durante a visualização e o download. Desconecte remove o token salvado; a página do perfil da NASA pode revogar.",
+        "windows.earthdataConnectionForm.saveEarthdataConnection": "Salvar a conexão Earthdata",
+        "windows.earthdataConnectionForm.earthdataConnection": "Conexão Earthdata",
+        "windows.earthdataConnectionForm.discardTheEnteredTokenAndCloseChooseNoTo": "Descarregue o token digitado e feche? Escolha Não para manter a edição. Conexões guardadas e downloads não irão mudar.",
+        "windows.earthdataConnectionForm.unsavedEarthdataConnection": "Conexão de dados da Terra não-aved",
+        "windows.program.aeroscienceIsAlreadyRunningCloseItBeforeInstallationOr": "AeroScience já está funcionando. Feche-o antes da instalação ou remoção. O que é isso? AeroScience já está funcionando. Feche-",
+        "windows.program.removeTheAeroscienceMsfsToolbarTooOnlyAeroscienceWill": "Remova a barra de ferramentas AeroScience MSFS também? {value1} Somente AeroScience será movido para um backup fora da Comunidade. História da missão, dados científicos, configuração e complementos não relacionados serão mantidos. Escolha Não para manter a barra de ferramentas.",
+        "windows.program.uninstallAeroscience": "Desinstale AeroScience",
+        "windows.program.closeMsfsBeforeRemovingTheAeroscienceToolbarThenChoose": "Feche a MSFS antes de remover a barra de ferramentas AeroScience, então escolha Retry. Cancele mantenha a barra de ferramentas e continue desinstalando a aplicação.",
+        "windows.program.closeMsfs": "Fechar MSFS",
+        "windows.program.toolbarRemovalDidNotCompleteExistingFilesWerePreserved": "A remoção da barra de ferramentas não foi completada. Os arquivos existentes foram preservados. {value1}",
+        "windows.program.aeroscienceUninstall": "Desinstalação AeroScience",
+        "windows.dataManagementForm.alsoRemoveSavedMissionPlansAndTheirPreflightNotes": "Também remova os planos da missão salvas e suas notas pré-voo quando apagar dados de voo",
+        "windows.dataManagementForm.aeroscienceStorageDataDataManagement": "AeroScience · Armazenamento e dados · Gestão de dados",
+        "windows.dataManagementForm.exportIndividualCompletedMissionsFromMissionHistoryTheseOperations": "Exportar missões individuais concluídas do histórico da missão. Essas operações limpam arquivos inteiros independentemente. Deleção científica permanente purge conteúdos científicos selecionados de backups gerenciados; conteúdo não relacionado é preservado.",
+        "windows.dataManagementForm.clearScientificData": "Dados Científicos Limpos",
+        "windows.dataManagementForm.clearFlightMissionData": "Limpar os dados do voo e da missão",
+        "windows.dataManagementForm.deleteCollectedScientificData": "Apagar dados científicos coletados",
+        "windows.dataManagementForm.deletionOptions": "Opções de eliminação:",
+        "windows.dataManagementForm.permanentlyDeleteWithoutCreatingANewBackup": "Excluir permanentemente sem criar um novo backup",
+        "windows.dataManagementForm.createARecoveryBackupThenDelete": "Crie um backup de recuperação, então exclua",
+        "windows.dataManagementForm.deleteScientificData": "Apagar dados científicos",
+        "windows.dataManagementForm.deleteFlightData": "Apagar dados de voo",
+        "windows.dataManagementForm.reviewingTheExactCollectedScienceSelectionBackgroundOperationsAre": "Revisando a seleção exata de ciências coletadas; operações de fundo são inalteradas...",
+        "windows.dataManagementForm.missionsDatasetsObservationsGeneratedProductsEstimatedManagedFileSpace": "{value1} missões · {value2} datasets · {value3} observações · {value4} produtos gerados. Espaço estimado dos arquivos gerenciados: {value5} MiB. A deleção é permanente. Medições científicas, análise gerada e graus dependentes são purgados, incluindo suas cópias gerenciadas. Não é criada qualquer backup de recuperação. Registros de voo e conjuntos de dados fonte externa permanecem intactos. {value6}",
+        "windows.dataManagementForm.cancelledNoScientificDataWasChanged": "Nenhuma informação científica foi alterada. Não.",
+        "windows.dataManagementForm.permanentlyDeletingReviewedCollectedScience": "Retirando permanentemente revistas de ciências coletadas...",
+        "windows.dataManagementForm.filesRemovedPending": "{value1}: {value2} arquivos removidos, {value3} pendente. {value4}",
+        "windows.dataManagementForm.deletionIsNotComplete": "A deleção não está completa: {value1}",
+        "windows.dataManagementForm.chooseARecoveryBackupDestinationForScientificDataNot": "Escolha um destino de recuperação para dados científicos — não um novo local da Biblioteca de Ciências",
+        "windows.dataManagementForm.chooseARecoveryBackupDestinationForFlightMissionData": "Escolha um destino de recuperação para os dados de voo e missão — não um novo local de armazenamento da missão",
+        "windows.dataManagementForm.stoppingServicesAndClearingTransactionallyWithoutANewBackup": "Parando os serviços e compensando transacionalmente sem um novo backup... Não.",
+        "windows.dataManagementForm.stoppingServicesVerifyingTheRecoveryBackupAndClearingTransactionally": "Parar serviços, verificar o backup de recuperação e compensação transacional...",
+        "windows.dataManagementForm.completed": "Concluído. {value1}",
+        "windows.dataManagementForm.operationStoppedCommittedRecordsAndReferenceAvailabilityAreReconciled": "Operação parada: {value1} Os registros e a disponibilidade de referência são conciliados quando os serviços reataram.",
+        "windows.dataManagementForm.endRecordingAndWaitForActiveOperationsFirst": "Termine a gravação e espere pelas operações ativas primeiro.",
+        "windows.dataManagementForm.endRecordingAndWaitForOtherOperationsFirst": "Termine a gravação e espere outras operações primeiro.",
+        "windows.dataManagementForm.thisDeliberateArchiveClearIncludesProtectedMissionSDataset": "Este arquivo deliberado é claro inclui {value1} proteção de missão/conjunto de dados. Proteção impede a limpeza automática; esta operação de confirmação digitada explícita irá eliminá-los. Continuar até a confirmação final?",
+        "windows.dataManagementForm.protectedResearchData": "Dados de pesquisa protegidos",
+        "windows.dataManagementForm.permanentlyDeleteTheseRecords": "{value1} {value2} Delete permanentemente esses registros?",
+        "windows.dataManagementForm.confirmScientificDataDeletion": "Confirme a exclusão de dados científicos",
+        "windows.dataManagementForm.confirmFlightDataDeletion": "Confirme a exclusão dos dados de voo",
+        "windows.scientificSourcesPanel.savedExistingDataAndProductsAreRetained": "Os dados e produtos existentes são conservados.Os dados são conservados.",
+        "windows.scientificSourcesPanel.sourceDiagnosticsReviewBeforeSharing": "Diagnóstico de fonte — revisão antes de compartilhar",
+        "windows.scientificSourcesPanel.historicalExternalDataRetainTheirOriginalObservationDatesAnd": "Historical external data retain their original observation dates and provenance. Local datasets work offline within their real coverage. Automatic retrieval uses separate scientific-data consent.",
+        "windows.scientificSourcesPanel.onlineScientificDataAccess": "Acesso online aos dados científicos: {value1}",
+        "windows.scientificSourcesPanel.enableConfigureOnlineScientificDataAccess": "Activar / Configurar o acesso aos dados científicos online",
+        "windows.scientificSourcesPanel.sourceModeAppliesToSelectionNotTheRecordingSwitch": "O modo fonte aplica-se à seleção, não ao interruptor de gravação.",
+        "windows.scientificSourcesPanel.importedPreparedDatasetsMibRetained": "{value1} importado/preparado conjuntos de dados · {value2} MiB conservado{value3}",
+        "windows.scientificSourcesPanel.preparedRegionsMibExpand": "{value1} — {value2} — {value3} MiB (empréstimo) {value3} MiB {value3} MiB {value3} MiB - {value2} {value3} MiB - {value3} Mi",
+        "windows.scientificSourcesPanel.providerSceneObservedKindBandsVerticalReferenceTermsSource": "{value1} Fornecedor: {value2} Cena: {value3} Observado: {value4} Tipo: {value5} · Bandas: {value6} Referência vertical: {value7} Termos: {value8} Fonte ID: {value9} Fonte externa histórica; não uma observação de aeronaves ao vivo.",
+        "windows.scientificSourcesPanel.advancedDiagnosticsExactSourceMetadata": "Diagnóstico Avançado — metadados fonte exacta",
+        "windows.scientificSourcesPanel.viewAllRegionsAndCollectionCoverage": "Ver todas as regiões e coberta de coleção",
+        "windows.scientificSourcesPanel.importHyperspectralDataset": "Importar o conjunto de dados hiperspectrais...",
+        "windows.scientificSourcesPanel.importDataset": "Importar conjunto de dados...",
+        "windows.scientificSourcesPanel.onlineScientificDataPrivacyAndPredictiveControls": "Privacidade científica online e controles preditivos dados",
+        "windows.scientificSourcesPanel.advancedJsonSourceCollectionImport": "Importação avançada de fontes JSON...",
+        "portal.language.memberTitle": "Idioma da conta da organização",
+        "portal.language.scope": "Este idioma aplica-se apenas a sua conta de acesso neste servidor da organização. O tema do navegador e as configurações do companheiro permanecem independentes.",
+        "portal.language.followBrowser": "Siga este navegador",
+        "portal.language.memberLabel": "Idioma para esta conta da organização",
+        "portal.language.save": "Gravar idioma da conta",
+        "portal.language.saved": "Nenhuma pesquisa, compartilhamento ou permissão mudou.",
+        "portal.language.conflict": "Sua linguagem mudou em outra área.",
+        "portal.language.unavailable": "A linguagem da conta está indisponível. Sua língua do navegador permanece disponível; entre novamente se sua autorização expirar.",
+        "windows.language.reopen": "A linguagem é salva. Reabrir Configurações ou outras janelas de companheira abertas para traduzir seus controles existentes.",
+        "windows.science.modeAutomatic": "Automático",
+        "windows.science.modeLocal": "Só minhas sets de dados",
+        "windows.science.modePreferLocal": "Preferir meus conjuntos de dados, Permitir retrocesso automático",
+        "windows.science.localAvailable": "Discapacitados — Os conjuntos de dados locais permanecem disponíveis",
+        "windows.science.spaceLimited": "· Espaço livre limitado",
+        "windows.science.datasetRequired": "· Conjunto de dados requerido",
+        "windows.feedback.notes": "Passos e notas de reprodução opcionais",
+        "windows.flight.noMission": "Nenhuma missão ativa",
+        "windows.flight.recording": "Registro da missão",
+        "windows.science.category11Title": "Terra e elevação",
+        "windows.science.category11Description": "Altura de DEM/DSM, não retornos de laser de aeronaves. Local: elevação de banda única GeoTIFF.",
+        "windows.science.category12Title": "Aço inoxidável",
+        "windows.science.category12Description": "Temperatura da superfície do satélite histórica e máscaras QA originais. Local: ST_B10 + QA_PIXEL (+ QA_RADSAT), com metadados originais. Apresentamos uma série de dados.",
+        "windows.science.category13Title": "Congênere multispectral",
+        "windows.science.category13Description": "Reflexão histórica, RGB e NDVI. Local: B02/B03/B04/B08 e SCL GeoTIFFs com metadados de escala original.",
+        "windows.science.category14Title": "Congênere hiperspectral",
+        "windows.science.category14Description": "Use External Data Manager → Find & Download Data → Hyperspectral Research for approved Earthdata Download & Import. Original ENVI manual/browser import remains available. EMIT is discovery only.",
+        "native.toolbarTemplateDidNotFinishLoadingCloseAndReopen": "O modelo da barra de ferramentas não terminou o carregamento. Feche e reabrir este painel; informe o seu título se isso continuar.",
+        "native.connectingToCompanion": "Conectando-se com a companheira...",
+        "native.notSuppliedByThisPackage": "não fornecido por este pacote",
+        "native.toolbarSourceProtocol1": "Ferramenta de ferramentas {value1}, fonte {value2}, protocolo 1",
+        "native.commandsAeroscienceCommandV1RepliesAeroscienceReplyV1No": "Comandos: AeroScience.Command.v1, Respostas: AeroScience.Reply.v1, Nenhuma resposta do motor correspondente ainda. Inscrição do canal sozinho não é uma conexão do motor.",
+        "native.evidenceBasedAssessmentsDependOnTheCompanionSCapabilities": "Avaliações baseadas em evidências dependem da capacidade do companheiro. Qualquer aeronave compatível pode registrar.",
+        "native.allCompatibleAircraftCanRecordMissions": "Todos os aviões compatíveis podem gravar missões. Não.",
+        "native.theMapRendererIsUnavailableInThisUiContext": "O mapa ORS não está disponível neste contexto da UI. A missão e a carga útil permanecem disponíveis; informem a versão do simulador e o erro do console coerente.",
+        "native.freePanDragTheMapOrUseArrowKeys": "Free Pan - arraste o mapa ou use as setas. O aviões seguir estão desligados.",
+        "native.selecting": "Selecionando {value1}...",
+        "native.unableToLoadTheSdkCommbusServiceCheckThe": "Não foi possível carregar o serviço SDK CommBus. Verifique a versão SDK/runtime MSFS 2024.",
+        "native.simulatorLinkUnavailableReopenThisPanelSeeConnectionBuild": "Ligação do simulador não disponível. Reabrir este painel; ver Ligação & Construir Detalhes.",
+        "native.theSdkCommbusHelperListenerDidNotBecomeAvailable": "O SDK CommBus helper/lister não ficou disponível. Nenhuma resposta do motor foi recebida. Verifique o pacote de validação correspondente e o tempo de execução do simulador suportado.",
+        "native.loadingSavedMissionPlans": "Carregando planos de missão salvas...",
+        "native.selectedPlanIsNoLongerAvailableChooseAnotherPlan": "O plano selecionado não está mais disponível. Escolha outro plano ou missão não planejada.",
+        "native.selectedWaypointsPatternsInstruments": "Selecionado: {value1}, {value2} Coordenadas, {value3} padrões. Instrumentos: {value4}.",
+        "native.loadingSelectedPlanDetails": "Carregando detalhes do plano selecionado...",
+        "native.unplannedMissionRecordWhereverYouFly": "Missão não planejada: registrar onde quer que voe.",
+        "native.savedPlansSelectionIsSavedByTheCompanion": "Planos salvos {value1}-{value2}. A seleção é salva pelo companheiro.",
+        "native.noMoreSavedPlansUsePreviousPlans": "Não há mais planos salvos. Use planos anteriores.",
+        "native.noSavedMissionPlansCreateOneInTheDesktop": "Não há planos de missão salvas. Crie um no desktop Planner de vôo.",
+        "native.noActivePlannedMissionSelectASavedPlanOr": "Nenhuma missão ativa planejada - selecione um plano salvo ou grave um do companheiro.Obrigado.Obrigado.",
+        "native.loadingRoute": "Ruta de carga {value1} / {value2}",
+        "native.end": "fim",
+        "native.routeSynchronizedWaypointsNextObservedTarget": "Rota sincronizada / {value1} Coordenadas / próximo alvo observado {value2}",
+        "native.routeSynchronizedOrderedWaypointsOfflineGeographyNoOnlineTile": "Rota sincronizada: {value1} pedidos de pontos. Geografia offline; sem solicitações de azulejos online.",
+        "native.simulatorChannelReadyWaitingForTheWindowsEngine": "Canal de simulação pronto, esperando o motor Windows.Obrigado.",
+        "native.unableToRegisterTheSdkCommbusListener": "Não foi possível registrar o ouvinte SDK CommBus.",
+        "native.staleStatusCompanionUnavailable": "Estatus de estrela / companheira não disponível",
+        "native.scientificStorageUnavailable": "Armazenamento científico não disponível",
+        "native.disconnectedUnavailable": "Desconectado/Inexistente",
+        "native.telemetryStaleUnavailable": "Estale de telemetria / não disponível",
+        "native.simulatorPausedScienceUnconfirmed": "Simulador pausado / ciência não confirmada",
+        "native.armedNotStarted": "Armado / Não começou",
+        "native.inactive": "Inativos",
+        "native.flightRecordingScience": "Registro de voo: {value1}, Ciência: {value2}",
+        "native.thisViewCouldNotUpdateSeeConnectionBuildDetails": "Esta visão não pôde atualizar. Veja Conexão & Construir Detalhes.",
+        "native.displayFaults": "Falhas da exposição: {value1}",
+        "native.displayComponentsSynchronized": "Display de componentes sincronizados.",
+        "native.replyRejectedCountLastValidStateRetainedFreshnessChecks": "Resposta rejeitada: {value1}, conta {value2}. Último estado válido conservado; cheques de frescura ainda aplicam.",
+        "native.companionReplyCouldNotBeReadSeeConnectionBuild": "A resposta do Companion não foi lida. Veja detalhes da conexão e da construção.",
+        "native.commandExceedsTheNativeLimitUseTheDashboard": "Comando excede o limite nativo.",
+        "native.sendingMissionCommand": "Enviando o comando da missão...",
+        "native.commandDeliveryFailedTheIntervalIsNotConfirmed": "A entrega do comando falhou, o intervalo não foi confirmado. O intervalo não foi confirmado. O intervalo foi confirmado. O intervalo foi confirmado. O intervalo",
+        "native.simulatorCommandDeliveryFailedCheckTheEngineConnection": "O comando do simulador falhou. Verifique a conexão do motor.",
+        "native.simulatorCommandDeliveryFailed": "A entrega do comando do simulador falhou.",
+        "native.retryingTheIdenticalFlightBoundRequestNoNewCommand": "Repetindo o pedido idêntico de vôo, sem novo alvo de comando.",
+        "native.noConfirmationReceivedReviewTheConfirmedIntervalBeforeTrying": "Revise o intervalo confirmado antes de tentar novamente. Não.",
+        "native.noCommandConfirmationAfterOneIdenticalRetryReviewSynchronized": "Nenhuma confirmação de comando após uma repetição idêntica. Revisar estado sincronizado antes de emitir um novo comando.",
+        "native.mapReplyTimedOutRetryingWithTheCachedRoute": "A resposta do mapa foi adiada; voltando a tentar com a rota caché conservada.",
+        "native.noCommandConfirmationCheckMissionStateBeforeRetrying": "Não confirmou o comando. Verifique o estado da missão antes de tentar novamente.",
+        "native.lastMatchingEngineReplyControlsAreUnavailableUntilFresh": "Última resposta do motor correspondente: {value1}. Os controles não estão disponíveis até o estado sincronizado fresco chegar.",
+        "native.noMatchingEngineReplyCheckThatTheDashboardAnd": "Não há resposta correspondente ao motor. Verifique se o painel e a barra de ferramentas têm o mesmo perfil e fonte mostrados em Conexão & Construir Detalhes.",
+        "native.windowsEngineUnavailableLaunchAeroscienceAndCheckTheSimconnect": "Ativar AeroScience e verificar a execução do SimConnect.",
+        "native.mach": "Mach -",
+        "native.companionDisconnectedCachedRouteRetainedLiveAircraftUnavailable": "Companheiro desconectado - rota em cache conservada; aeronaves vivas não disponíveis. Atenção.",
+        "native.validationSourceMismatchNoStateAccepted": "Não aceitamos nenhum estado. Não. Não aceitamos nenhum estado.",
+        "native.cardCommandNotConfirmedSynchronizeBeforeRetrying": "Card command not confirmed. Synchronize before retrying.",
+        "native.mapSynchronizationFailedWaitingToRetry": "Sincronização do mapa falhou; esperando para tentar novamente. O quê? O quê?",
+        "native.confirmedS": "Confirmado: {value1} s.",
+        "native.intervalWasNotConfirmedReviewCurrentSettings": "Não foi confirmada a interrupção. Revise as configurações atuais.",
+        "native.companionIntervalS": "Intervalo de acompanhamento: {value1} s",
+        "native.missionPlanSelectionConfirmed": "Seleção do plano da missão confirmada.",
+        "native.planSelectionWasNotConfirmedRefreshPlans": "A seleção do plano não foi confirmada. Reatualize os planos. O quê?",
+        "native.pilotObservationSavedFlightAndScienceContinueIndependently": "Observação do piloto salvo. Vôo e ciência continuam independentemente.",
+        "native.observationWasNotSavedYourTextIsPreserved": "Observação não foi salva; seu texto é preservado. Não.",
+        "native.earlierRequestAcknowledged": "Pedido anterior reconhecido",
+        "native.aNewerAuthoritativeViewIsAlreadyDisplayed": "{value1}, Uma visão mais recente autoritativa já está exibida.",
+        "native.matchingEngineReplyReceivedAircraftTelemetryAndScientificCollection": "A resposta do motor correspondente recebeu {value1}. A telemetria e a coleta científica dos aviões têm seu próprio estado abaixo.",
+        "native.sessionCommandConfirmedReviewCurrentState": "Comando da sessão confirmado.",
+        "native.missionCommandWasRejected": "O comando da missão foi rejeitado.",
+        "native.activeRecordingItsSavedPlanSnapshotIsFixedPlan": "Gravação ativa: o istantaneo do plano salvo foi corrigido. Seleção do plano para a próxima gravação é separada.",
+        "native.simulatedTestData": "DATAS DE ENSAIO SIMULADOS",
+        "native.simconnectTelemetry": "TELEMETRIA SIMCONNECTA",
+        "native.aircraftTelemetryUnavailable": "TELEMETRIA AERÓFRICA DISPONIBIL",
+        "native.msfsDisconnected": "MSFS DESCONECTADAS",
+        "native.recordingStopped": "APROVAÇÃO DO REGISTO / {value1}: {value2}",
+        "native.awaitingInitializedAircraftTelemetry": "Aguardando a telemetria inicializada da aeronave",
+        "native.activeSavedPlanSnapshotFixedForThisRecordingFly": "Snapshot do plano de gravação activa (fixado para esta gravação). Voe a referência da rota no Mapa.",
+        "native.activeUnplannedMissionScientificPreparationFollowsActualAircraftMovement": "Missão não planejada: a preparação científica segue o movimento real da aeronave.",
+        "native.universalModeFlyAnything": "Modo universal / Voar qualquer coisa",
+        "native.samples": "{value1} amostras",
+        "native.notGraded": "Não classificado",
+        "native.insufficientEvidence": "Insuficiente evidência",
+        "native.stale": "Aguarde.",
+        "native.armed": "Armado",
+        "native.waitingForSource": "Aguardando a fonte",
+        "native.acquisitionGap": "Lacuna de aquisição",
+        "native.sourceDisconnected": "Fonte desligada",
+        "native.waiting": "Esperando",
+        "native.manual": "Manual",
+        "native.unsupported": "Não apoiado",
+        "native.provisional": "Provisório",
+        "native.final": "Final",
+        "native.revised": "Revisado",
+        "native.supported": "Apoiado",
+        "native.idle": "Devagar",
+        "native.detecting": "Detecção",
+        "native.holding": "Atenção",
+        "native.complete": "Completo",
+        "native.thisCompanionDoesNotSupportSessionBoundNativeControls": "Este companheiro não apoia controles nativos.",
+        "native.staleEngineStateSynchronizeBeforeControllingScience": "Estale o estado do motor; sincronize antes de controlar a ciência.",
+        "native.backendSessionAndControlRevisionsAreCheckedBeforeApplying": "Revisões de sessão e controle do motor são verificadas antes de se aplicar.",
+        "native.scienceStatusUnavailableUnsupportedCompanion": "Estado científico indisponível (companhão não apoiado)",
+        "native.updateTheCompanionForScienceSessionControls": "Actualize o companhão para controles de sessão científica.",
+        "native.noScoreAvailable": "Não há pontuação disponível. Não.",
+        "native.noSessionIdentitySupplied": "Nenhuma identidade da sessão fornecida.",
+        "native.nextTriggerNotAssessed": "O próximo gatilho não foi avaliado.",
+        "native.scientificYieldNotAssessed": "Rendimento científico não avaliado.",
+        "native.pilotHoldRearmRequired": ", aguarde o piloto; rearme necessário",
+        "native.continuityHold": ", aguarde a continuidade",
+        "native.collectionControl": "Controlo de cobrança: {value1}{value2}{value3}",
+        "native.none": "Nenhum",
+        "native.flightSessionRevision": "Voo {value1}, Sessão {value2}, revisão {value3}",
+        "native.goodDataValidScientificCoverageNotYetAssessedFlight": "Boa cobertura científica de dados/valid ainda não avaliada. A trajetória de vôo não é cobertura de pixels válida.",
+        "native.evidenceCutoffIsOlderThan15SMetricsAre": ", Evidência corte é mais de 15 s; métricas não são atuais.",
+        "native.additionalDetailOnDashboard": "Detalhe adicional no painel de borda.",
+        "native.stateAsOfMetrics": "Estado em {value1}, métricas {value2}{value3}{value4} {value4}",
+        "native.researchStatusUnavailable": "O estado da pesquisa não está disponível.",
+        "native.personalResearchCardsPrepareInTheDesktopFlightPlanner": "Cartões de pesquisa pessoal: prepare-se no desktop Planner de vôo.",
+        "native.activeCardS": "{value1} cartão(s) activo(s) {value2}.",
+        "native.waitingForSynchronizedPersonalCardStateFlightAndScience": "Aguardando pelo estado do cartão pessoal sincronizado.Voo e ciência permanecem independentes.",
+        "native.choosePersonalCardsInMissionPlannerBeforeRecording": "Escolha cartões pessoais no Mission Planner antes de gravar.",
+        "native.activateACardThenBeginAttemptEndAttemptDeactivate": "Ativar um cartão, então Comece a Tentativa / Encerrar a Tentativa. O cartão Deactivate não impede o voo ou a ciência.",
+        "native.noPersonalCardsSelectedForThisFlight": "Nenhum cartão pessoal selecionado para este voo.",
+        "native.ordered": "Ordem",
+        "native.independent": "Independente",
+        "native.procedureRepetitionsVerifyOriginalsAfterFlight": "{value1} procedimento, {value2} repetições; verificar originais após o voo",
+        "native.continuousSeconds": "{value1}, {value2} segundos contínuos",
+        "native.fictionalModeledTemperatureSResponseOriginalScienceSamplesRequired": "Temperatura fictícia modelada, {value1} s resposta, {value2} amostras científicas originais necessárias",
+        "native.documentedPilotObservationsNotesAreNotSensorMeasurements": "{value1} Observações Pilotas documentadas, notas não são medições de sensores",
+        "native.surveySourceQualifiedSamplesRequired": "Pesquisa: {value1}, amostras qualificadas fonte necessárias",
+        "native.distinctSamplingLocationsMGeographicExtentCollectValidTemperature": "{value1} locais de amostragem distintos, {value2} m extensão geográfica, coletar leituras de temperatura válidas",
+        "native.neighboringFootMslBandsCollectValidTemperatureReadings": "{value1} vizinho {value2}-pé bandas MSL, coletar leituras de temperatura válidas",
+        "native.knotsIasFeetMsl": "{value1} nós IAS, {value2} pés MSL",
+        "native.revision": "{value1}, revisão {value2}",
+        "native.attemptRecording": "Tentar gravar",
+        "native.issued": "{value1}, emitido {value2}, {value3}",
+        "native.focusedInToolbar": "Focada em Barra de Ferramentas",
+        "native.sAttempts": "{value1}, {value2} s, {value3} tentativas",
+        "native.enableautomatic": "activarAutomático",
+        "native.flightGuidanceUnavailable": "Orientação de vôo não disponível",
+        "native.ap": "AP: {value1}, {value2}",
+        "native.scientificSourceUnavailable": "Fonte científica não disponível",
+        "native.scienceInstrument": "Instrumento de ciência",
+        "native.diagnostics": "Diagnóstico",
+        "native.collectionInterval": "Intervalo de recolha",
+        "native.collectionInterval2": "Intervalo de coleta {value1}",
+        "native.applyInterval": "Aplicar o intervalo",
+        "native.applyInterval2": "Aplicar o intervalo {value1}",
+        "native.useConfirmedInterval": "Usar o intervalo confirmado",
+        "native.useConfirmedInterval2": "Uso confirmado {value1} intervalo",
+        "native.chooseApplyIntervalToConfirmThisChange": "Escolha Aplicar intervalo para confirmar essa mudança.",
+        "native.applyingInterval": "Intervalo de aplicação...",
+        "native.commandUnavailableSynchronizeWithTheCompanion": "Comando indisponível. Sincronize com o companheiro. O que foi? O que foi? O que foi?",
+        "native.usingConfirmedIntervalS": "Usando o intervalo confirmado: {value1} s.",
+        "native.on": "A partir",
+        "native.off": "Desligar",
+        "native.disableInstrument": "Desativar o instrumento",
+        "native.enableInstrument": "Activar o instrumento",
+        "native.sConfirmed": "{value1} s (confirmado)",
+        "native.disabled": "Desativado",
+        "native.savedProducts": "produtos salvas /",
+        "native.measurementValues": "valores de medida /",
+        "native.unavailable": "Indisponível",
+        "native.acquisitionSetsRejectedUnexpectedMissingActualLast": "{value1} / {value2} conjuntos de aquisição / {value3}{value4}{value5} rejeitado / {value6} falta inesperada / real {value7} / último {value8}",
+        "native.static.connectionBuildDetails": "& Construir detalhes da conexão",
+        "native.static.commandsAeroscienceCommandV1RepliesAeroscienceReplyV1": "Comandos: AeroScience.Command.v1, Respostas: AeroScience.Reply.v1 AeroScience.",
+        "native.static.bundledEnglishFallbackUntilMatchingCompanionSettingsArrive": "Recuoolha inglesa até a combinação de ajustes companheiro chegar.",
+        "native.static.researchStateUnavailable": "Pesquisa não disponível. Não. Não.",
+        "native.static.cardsDescribeExperimentsSaveRoutesAsMissionPlansInThe": "As cartas descrevem experiências. Guarde rotas como planos de missão no desktop Planner.",
+        "native.static.previousCards": "Cartões anteriores",
+        "native.static.nextCards": "Próximo cartão",
+        "native.static.mslFt": "MSL / FT",
+        "native.static.iasKts": "IAS / KTS",
+        "native.static.headingDegt": "RUPO / DOT",
+        "native.static.vsFtMin": "VS/FT/MIN",
+        "native.static.startRecordingAtAnyTimeYourMissionContinuesIfThis": "Sua missão continua se este painel estiver fechado.",
+        "native.static.savedMissionPlan": "Plano da missão salva",
+        "native.static.unplannedMission": "Missão não planejada",
+        "native.static.previousPlans": "Planos anteriores",
+        "native.static.nextPlans": "Próximos planos",
+        "native.static.viewRouteOnMap": "Visualizar a rota no mapa",
+        "native.static.saveAPlanInTheDashboardSelectItHereStart": "Guarde um plano no painel de bordo, selecione-o aqui, comece a gravar, voar e revise o histórico da missão. Use o mapa em movimento ou um plano de voo compatível exportado; AeroScience não comanda a navegação da aeronave.",
+        "native.static.universalFlyAnything": "Universal - Voar qualquer coisa",
+        "native.static.realisticAuthenticResearch": "Realista - Pesquisa Autêntica",
+        "native.static.yourWrittenAccountNotASensorReadingMissingLocationsStay": "Sua conta escrita, não uma leitura de sensores, os locais perdidos não estão disponíveis, use o painel de dados para notas mais longas.O que quer dizer?",
+        "native.static.observationCategory": "Categoria de observação",
+        "native.static.shortObservation120Characters": "Observação curta (120 caracteres)",
+        "native.static.recordingContinuesWhenThisPanelClosesOpenTheCompanionDashboard": "A gravação continua quando este painel fechar. Abra o painel de acompanhamento para o histórico da missão.",
+        "native.static.researchMissionMap": "Mapa da missão de pesquisa",
+        "native.static.freePan": "Pana Livre",
+        "native.static.zoom": "Zoom",
+        "native.static.previousWaypoint": "Ponto anterior",
+        "native.static.nextWaypoint": "Próximo ponto de caminhada",
+        "native.static.nextObservedTarget": "Próximo Alvo Observado",
+        "native.static.progressAndMapLimits": "Progresso e limites de mapa",
+        "native.static.northUpGoldPlannedTurquoiseRecordedPinkMarkersRecentTrack": "North up / Gold: planed / Turquoise: recorded / Pink: marquers. A exibição da faixa atual está limitada a 512 pontos; gravações completas permanecem no histórico da missão. A geografia offline é grossa e o Mercator é cortado em +/-85.0511 g. Nenhuma aeronave é alterada.",
+        "native.static.scienceSessionControlsEvidence": "Controles de sessão científica & evidências",
+        "native.static.endScienceClosesThisSessionEndMissionBelowEndsThe": "A final da missão termina o voo contínuo. A calibração, a classificação e a fonte permanecem no painel de bordo do companheiro.",
+        "native.static.collectionStopped": "Recolha: parada",
+        "native.static.sourceAndLimitations": "Fonte e limitações",
+        "native.static.simulatorReportedAtmosphericObservationsAnActiveMissionIsRequiredTo": "Observações atmosféricas comunicadas pelo simulador. Uma missão ativa é necessária para salvar a ciência. A telemetria de vôo continua quando a coleta de ciência é pausada. A calibração documentada e evidências operacionais estão disponíveis no painel de bordo do companheiro. Condições desconhecidas não são cumprimento com sucesso ou precisão científica certificada.",
+        "native.static.aerosciencePages": "Páginas AeroScience",
+        "native.static.missionAndPayloadContent": "Missão e conteúdo da carga útil",
+        "native.static.researchMission": "Missão de pesquisa",
+        "native.static.scientificMissionIntelligence": "Inteligência científica da missão",
+        "native.ambientTemperature": "Temperatura ambiente",
+        "native.ambientWind": "Vento ambiente",
+        "map.native.unavailable": "Indisponível",
+        "map.native.accessible": "Desligar o mapa da missão norte.",
+        "map.native.noWaypoint": "Nenhum ponto de passagem planejado foi selecionado.",
+        "map.native.altitudeUnknown": "Altitude não especificada",
+        "map.native.liveUnavailable": "/ Posição ao vivo indisponível/estado.",
+        "map.native.abbreviated": "Exibir etiquetas e instruções podem ser abreviadas; valores completos permanecem no plano de companhia.",
+        "map.native.legend": "N ^ / Terra natural offline / Referência geográfica",
+        "map.native.track": "/ Via terrestre {track} / GS {speed}",
+        "windows.deletion.confirmation": "Confirmação: {phrase}",
+        "windows.deletion.typePhrase": "Tipo {phrase}",
+        "native.instrument.ambientTemperature": "Temperatura ambiente",
+        "native.instrument.ambientPressure": "Pressão ambiente Pressão ambiente",
+        "native.instrument.ambientWind": "Vento ambiente",
+        "native.instrument.ambientDensity": "Densidade do ar",
+        "native.instrument.thermalImager": "Imageiro térmico",
+        "native.instrument.multispectralImager": "Imageiro multispectral",
+        "native.instrument.hyperspectralImager": "Imageiro hiperspectral"
       }
     }
   }

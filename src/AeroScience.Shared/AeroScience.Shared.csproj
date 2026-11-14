@@ -2,6 +2,6 @@
   <ItemGroup>
     <EmbeddedResource Include="../AeroScience.Engine/wwwroot/i18n/locale-manifest.json" LogicalName="AeroScience.Presentation.manifest.json" />
     <EmbeddedResource Include="../AeroScience.Engine/wwwroot/i18n/message-schema.json" LogicalName="AeroScience.Presentation.schema.json" />
-    <EmbeddedResource Include="../AeroScience.Engine/wwwroot/i18n/locales/en-US.json" LogicalName="AeroScience.Presentation.en-US.json" />
+    <EmbeddedResource Include="../AeroScience.Engine/wwwroot/i18n/locales/*.json" LogicalName="AeroScience.Presentation.%(Filename)%(Extension)" />
   </ItemGroup>
 </Project>

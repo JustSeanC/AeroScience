@@ -5,10 +5,17 @@ import {readFileSync,cpSync,mkdtempSync,renameSync,rmSync,existsSync} from 'node
 import {join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {parse} from 'acorn';
-import {nativeCatalogAssets,localeBundle} from '../scripts/build/build-locales.mjs';
+import {nativeCatalogAssets,nativeLocaleBundle,localeBundle} from '../scripts/build/build-locales.mjs';
 import {compileNative,compileStage} from '../scripts/build/native-javascript.mjs';
-const catalogVersion=localeBundle().manifest.catalogVersion;
+const {catalogVersion,catalogIdentity}=localeBundle().manifest;
 const adapter=readFileSync('msfs-toolbar/PackageSources/html_ui/InGamePanels/AeroScience/AeroScience.I18n.js','utf8');
+test('native projection retains exact catalog identity and messages without dashboard-only payload',()=>{
+ const full=localeBundle(),native=nativeLocaleBundle(full);
+ assert.equal(native.manifest.catalogIdentity,full.manifest.catalogIdentity);
+ assert.ok(Object.keys(native.schema.messages).length<Object.keys(full.schema.messages).length/2);
+ for(const [locale,catalog]of Object.entries(native.catalogs))for(const [key,value]of Object.entries(catalog.messages))assert.deepEqual(value,full.catalogs[locale].messages[key]);
+ assert.ok(Buffer.byteLength(nativeCatalogAssets(full)['AeroScience.LocaleData.js'])<1024*1024);
+});
 function load(bundle=localeBundle()){
  const context=vm.createContext({Intl:undefined});
  for(const [name,source]of Object.entries(nativeCatalogAssets(bundle))){const compiled=compileNative(source,name);parse(compiled,{ecmaVersion:2017});vm.runInContext(compiled,context);}
@@ -17,14 +24,14 @@ function load(bundle=localeBundle()){
 test('classic ES2017 native catalogs run without Intl or Object.hasOwn and preserve text parameters',()=>{
  const c=load();
  for(const [locale,mission] of [['en-US','Mission'],['es-ES','Misión'],['fr-FR','Mission'],['de-DE','Mission'],['pt-BR','Missão']]){
-  const result=c.AeroScienceI18n.use({version:1,catalogVersion,locale});assert.equal(result.effectiveLocale,locale);assert.equal(result.fallback,false);
+  const result=c.AeroScienceI18n.use({version:1,catalogVersion,catalogIdentity,locale});assert.equal(result.effectiveLocale,locale);assert.equal(result.fallback,false);
   if(locale!=='en-US'){assert.ok(result.message.includes(localeBundle().manifest.locales.find(l=>l.id===locale).name));assert.ok(!result.message.includes('uses English'));}
   assert.equal(c.AeroScienceI18n.text('toolbar.mission','fallback'),mission);
  }
  const name='Zoë 東京 <img> $& µm';assert.equal(c.AeroScienceI18n.text('common.closeNamed','Close',{name}),'Fechar '+name);
 });
 test('old companions, unknown locales and catalog/contract mismatches fall back to bundled English',()=>{
- const c=load();for(const metadata of [null,{}, {version:1,catalogVersion:catalogVersion-1,locale:'fr-FR'}, {version:2,catalogVersion,locale:'fr-FR'},{version:1,catalogVersion:999,locale:'fr-FR'},{version:1,catalogVersion,locale:'xx'}]){
+ const c=load();for(const metadata of [null,{}, {version:1,catalogVersion,locale:"fr-FR"}, {version:1,catalogVersion,catalogIdentity:"wrong",locale:"fr-FR"}, {version:1,catalogVersion:catalogVersion-1,locale:'fr-FR'}, {version:2,catalogVersion,catalogIdentity,locale:'fr-FR'},{version:1,catalogVersion:999,locale:'fr-FR'},{version:1,catalogVersion,catalogIdentity,locale:'xx'}]){
   const state=c.AeroScienceI18n.use(metadata);assert.equal(state.fallback,true);assert.equal(state.effectiveLocale,'en-US');assert.match(state.message,/English fallback/);assert.equal(c.AeroScienceI18n.text('toolbar.payload','fallback'),'Payload');
  }
 });
@@ -45,6 +52,6 @@ test('SDK staging ships and records canonical catalogs in both original and rena
    assert.ok(receipt.files.some(f=>f.path.endsWith('/'+name+'/'+asset)));
   }
   const context=vm.createContext({Intl:undefined});for(const asset of ['AeroScience.LocaleData.js','AeroScience.LocaleFormat.js','AeroScience.I18n.js'])vm.runInContext(readFileSync(join(panels,name,asset),'utf8'),context);
-  assert.equal(context.AeroScienceI18n.use({version:1,catalogVersion,locale:'de-DE'}).effectiveLocale,'de-DE');
+  assert.equal(context.AeroScienceI18n.use({version:1,catalogVersion,catalogIdentity,locale:'de-DE'}).effectiveLocale,'de-DE');
  }}finally{rmSync(temporary,{recursive:true,force:true});}
 });

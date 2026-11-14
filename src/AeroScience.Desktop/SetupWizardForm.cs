@@ -7,18 +7,18 @@ public sealed class SetupWizardForm : BrandedForm
 {
     private readonly MainForm app;
     private readonly Panel content = new() { Dock = DockStyle.Fill, Padding = new(24), AutoScroll = true };
-    private readonly Button back = new() { Text = "Back", AutoSize = true };
-    private readonly Button next = new() { Text = "Next", AutoSize = true };
-    private readonly Button cancel = new() { Text = "Cancel", AutoSize = true };
-    private readonly Button skip = new() { Text = "Skip for Now", AutoSize = true };
+    private readonly Button back = new() { Text = WindowsPresentation.Text("ui.organizationLiveUi.messageBack"), AutoSize = true };
+    private readonly Button next = new() { Text = WindowsPresentation.Text("windows.setupWizardForm.next"), AutoSize = true };
+    private readonly Button cancel = new() { Text = WindowsPresentation.Text("lidar.cancel"), AutoSize = true };
+    private readonly Button skip = new() { Text = WindowsPresentation.Text("windows.setupWizardForm.skipForNow"), AutoSize = true };
     private readonly TextBox mission = new() { Width = 650 };
     private readonly TextBox library = new() { Width = 650 };
     private readonly ComboBox community = new() { Width = 650 };
-    private readonly CheckBox install = new() { Text = "Install / update the included MSFS 2024 toolbar", Checked = true, AutoSize = true };
+    private readonly CheckBox install = new() { Text = WindowsPresentation.Text("windows.setupWizardForm.installUpdateTheIncludedMsfs2024Toolbar"), Checked = true, AutoSize = true };
     private readonly Label missionSpace = new() { AutoSize = true };
     private readonly Label librarySpace = new() { AutoSize = true };
     private readonly Label progress = new() { AutoSize = true, MaximumSize = new(690, 0) };
-    private readonly CheckBox scientificOnline = new() { Text = "Allow automatic scientific-data discovery and bounded downloads", AutoSize = true };
+    private readonly CheckBox scientificOnline = new() { Text = WindowsPresentation.Text("windows.setupWizardForm.allowAutomaticScientificDataDiscoveryAndBoundedDownloads"), AutoSize = true };
     private int page;
     private bool working;
     private readonly PresentationPanel presentation;
@@ -26,7 +26,7 @@ public sealed class SetupWizardForm : BrandedForm
     public SetupWizardForm(MainForm app)
     {
         this.app = app;
-        Text = "Welcome to AeroScience · Setup"; Size = new(800, 680); MinimumSize = new(760, 600);
+        Text = WindowsPresentation.Text("windows.setupWizardForm.welcomeToAeroscienceSetup"); Size = new(800, 680); MinimumSize = new(760, 600);
         StartPosition = FormStartPosition.CenterParent; AutoScaleMode = AutoScaleMode.Dpi;
         var settings = app.Preferences.Load();
         presentation = new(app.Preferences, () => app.RefreshAppearance(true), showSave: false);
@@ -44,14 +44,14 @@ public sealed class SetupWizardForm : BrandedForm
         library.TextChanged += (_, _) => Capacity(library.Text, librarySpace, false);
         var initialMission=mission.Text;var initialLibrary=library.Text;var initialCommunity=community.Text;var initialOnline=scientificOnline.Checked;var initialInstall=install.Checked;
         FormClosing += (_, e) => { if (working) e.Cancel = true;
-            else if(DialogResult!=DialogResult.OK&&(presentation.HasChanges||mission.Text!=initialMission||library.Text!=initialLibrary||community.Text!=initialCommunity||scientificOnline.Checked!=initialOnline||install.Checked!=initialInstall)&&MessageBox.Show(this,"Close setup with unapplied choices? Choose No to keep editing. Previously saved settings and verified user data remain intact.","Unfinished setup",MessageBoxButtons.YesNo,MessageBoxIcon.Question)!=DialogResult.Yes)e.Cancel=true; };
+            else if(DialogResult!=DialogResult.OK&&(presentation.HasChanges||mission.Text!=initialMission||library.Text!=initialLibrary||community.Text!=initialCommunity||scientificOnline.Checked!=initialOnline||install.Checked!=initialInstall)&&MessageBox.Show(this,WindowsPresentation.Text("windows.setupWizardForm.closeSetupWithUnappliedChoicesChooseNoToKeep"),WindowsPresentation.Text("windows.setupWizardForm.unfinishedSetup"),MessageBoxButtons.YesNo,MessageBoxIcon.Question)!=DialogResult.Yes)e.Cancel=true; };
         Render();
     }
 
     private static Label TextLabel(string text) => new() { Text = text, AutoSize = true, MaximumSize = new(690, 0), Margin = new(3, 10, 3, 10) };
     private void Browse(TextBox path, bool database)
     {
-        using var dialog = new FolderBrowserDialog { Description = database ? "Choose the folder for missions.db" : "Choose a Scientific Data Library folder", UseDescriptionForTitle = true };
+        using var dialog = new FolderBrowserDialog { Description = database ? WindowsPresentation.Text("windows.setupWizardForm.chooseTheFolderForMissionsDb") : WindowsPresentation.Text("windows.setupWizardForm.chooseAScientificDataLibraryFolder"), UseDescriptionForTitle = true };
         if (dialog.ShowDialog(this) == DialogResult.OK) path.Text = database ? Path.Combine(dialog.SelectedPath, "missions.db") : dialog.SelectedPath;
     }
     private void Capacity(string path, Label label, bool database)
@@ -61,55 +61,55 @@ public sealed class SetupWizardForm : BrandedForm
             var folder = database ? Path.GetDirectoryName(path)! : path;
             SetupCoordinator.ValidateDataLocation(folder, AppContext.BaseDirectory);
             var bytes = new LocalStorageCapacity().FreeBytes(folder);
-            label.Text = $"Available drive space: {bytes / 1073741824.0:0.00} GiB" + (bytes < StorageManager.LibraryLowSpaceWarningBytes ? " · Limited free space" : "");
+            label.Text = WindowsPresentation.Text("windows.setupWizardForm.availableDriveSpaceGib", new Dictionary<string, object> { ["value1"] = WindowsPresentation.Format($"{bytes / 1073741824.0:0.00}"), ["value2"] = Convert.ToString(((bytes < StorageManager.LibraryLowSpaceWarningBytes ? WindowsPresentation.Text("windows.science.spaceLimited") : "")), System.Globalization.CultureInfo.InvariantCulture) ?? "" });
         }
         catch (Exception error) when (error is IOException or ArgumentException or UnauthorizedAccessException)
         {
             label.Text = error.Message;
             var current = app.Preferences.Load();
             if (!database && current.Initialized && SamePath(path, current.ScienceLibraryDirectory))
-                label.Text += " · Keep this location to preserve the unavailable library; reconnect its drive later. Your available mission archive can still open.";
+                label.Text += WindowsPresentation.Text("windows.setupWizardForm.keepThisLocationToPreserveTheUnavailableLibraryReconnect");
         }
     }
     private void Render()
     {
         content.Controls.Clear();
         var panel = new FlowLayoutPanel { Dock = DockStyle.Top, AutoSize = true, FlowDirection = FlowDirection.TopDown, WrapContents = false };
-        panel.Controls.Add(new Label { Text = $"AeroScience {Application.ProductVersion.Split('+')[0]} · Step {page + 1} of 4", AutoSize = true, Font = new(Font.FontFamily, 16) });
-        content.Controls.Add(panel); back.Enabled = page > 0; skip.Visible = page == 2; next.Text = page == 3 ? "Finish Setup" : "Next";
+        panel.Controls.Add(new Label { Text = WindowsPresentation.Text("windows.setupWizardForm.aeroscienceStepOf4", new Dictionary<string, object> { ["value1"] = WindowsPresentation.Format($"{Application.ProductVersion.Split('+')[0]}"), ["value2"] = WindowsPresentation.Format($"{page + 1}") }), AutoSize = true, Font = new(Font.FontFamily, 16) });
+        content.Controls.Add(panel); back.Enabled = page > 0; skip.Visible = page == 2; next.Text = page == 3 ? WindowsPresentation.Text("windows.setupWizardForm.finishSetup") : WindowsPresentation.Text("windows.setupWizardForm.next");
         if (page == 0)
         {
             panel.Controls.Add(presentation);
-            panel.Controls.Add(TextLabel("Set up local mission storage and the MSFS 2024 toolbar. The app will then start its services and open your dashboard automatically."));
-            panel.Controls.Add(TextLabel("Existing locations and settings are preselected. Updates keep them. Changing a location copies and verifies existing data only after your confirmation; originals are retained."));
-            panel.Controls.Add(TextLabel("Mission History works without MSFS or internet. Live recording becomes available when an aircraft is connected."));
+            panel.Controls.Add(TextLabel(WindowsPresentation.Text("windows.setupWizardForm.setUpLocalMissionStorageAndTheMsfs2024")));
+            panel.Controls.Add(TextLabel(WindowsPresentation.Text("windows.setupWizardForm.existingLocationsAndSettingsArePreselectedUpdatesKeepThem")));
+            panel.Controls.Add(TextLabel(WindowsPresentation.Text("windows.setupWizardForm.missionHistoryWorksWithoutMsfsOrInternetLiveRecording")));
         }
         else if (page == 1)
         {
-            panel.Controls.Add(TextLabel("Mission Database file (choose its folder; filename remains missions.db)")); panel.Controls.Add(mission);
-            var missionBrowse = new Button { Text = "Browse Mission Database Folder…", AutoSize = true }; missionBrowse.Click += (_, _) => Browse(mission, true); panel.Controls.Add(missionBrowse); panel.Controls.Add(missionSpace);
-            panel.Controls.Add(TextLabel("Scientific Data Library — may be on a different internal or external drive")); panel.Controls.Add(library);
-            var libraryBrowse = new Button { Text = "Browse Science Library Folder…", AutoSize = true }; libraryBrowse.Click += (_, _) => Browse(library, false); panel.Controls.Add(libraryBrowse); panel.Controls.Add(librarySpace);
+            panel.Controls.Add(TextLabel(WindowsPresentation.Text("windows.setupWizardForm.missionDatabaseFileChooseItsFolderFilenameRemainsMissions"))); panel.Controls.Add(mission);
+            var missionBrowse = new Button { Text = WindowsPresentation.Text("windows.setupWizardForm.browseMissionDatabaseFolder"), AutoSize = true }; missionBrowse.Click += (_, _) => Browse(mission, true); panel.Controls.Add(missionBrowse); panel.Controls.Add(missionSpace);
+            panel.Controls.Add(TextLabel(WindowsPresentation.Text("windows.setupWizardForm.scientificDataLibraryMayBeOnADifferentInternal"))); panel.Controls.Add(library);
+            var libraryBrowse = new Button { Text = WindowsPresentation.Text("windows.setupWizardForm.browseScienceLibraryFolder"), AutoSize = true }; libraryBrowse.Click += (_, _) => Browse(library, false); panel.Controls.Add(libraryBrowse); panel.Controls.Add(librarySpace);
             panel.Controls.Add(TextLabel(StorageManager.LargeDataWarning));
-            panel.Controls.Add(TextLabel("Keep the suggested folders to preserve current storage. New destinations must be empty. Existing stores can be selected explicitly through Settings → Storage after setup."));
+            panel.Controls.Add(TextLabel(WindowsPresentation.Text("windows.setupWizardForm.keepTheSuggestedFoldersToPreserveCurrentStorageNew")));
             Capacity(mission.Text, missionSpace, true); Capacity(library.Text, librarySpace, false);
         }
         else if (page == 2)
         {
-            panel.Controls.Add(install); panel.Controls.Add(TextLabel("Confirm the MSFS 2024 Community folder. Detection reads Steam / Microsoft Store configuration, including custom package paths. Use Browse if necessary."));
+            panel.Controls.Add(install); panel.Controls.Add(TextLabel(WindowsPresentation.Text("windows.setupWizardForm.confirmTheMsfs2024CommunityFolderDetectionReadsSteam")));
             panel.Controls.Add(community);
-            var browse = new Button { Text = "Browse Community Folder…", AutoSize = true };
-            browse.Click += (_, _) => { using var dialog = new FolderBrowserDialog { Description = "Select MSFS 2024's configured Community folder", UseDescriptionForTitle = true }; if (dialog.ShowDialog(this) == DialogResult.OK) community.Text = dialog.SelectedPath; }; panel.Controls.Add(browse);
-            panel.Controls.Add(TextLabel("Close MSFS before installing or updating. Only AeroScience is changed; the previous AeroScience package is backed up outside Community. Skip for Now leaves Community untouched; installation remains available in Settings."));
-            if (ToolbarInstaller.SimulatorRunning()) panel.Controls.Add(TextLabel("MSFS is currently running. Close it before continuing with toolbar installation, or choose Skip for Now."));
+            var browse = new Button { Text = WindowsPresentation.Text("windows.setupWizardForm.browseCommunityFolder"), AutoSize = true };
+            browse.Click += (_, _) => { using var dialog = new FolderBrowserDialog { Description = WindowsPresentation.Text("windows.setupWizardForm.selectMsfs2024SConfiguredCommunityFolder"), UseDescriptionForTitle = true }; if (dialog.ShowDialog(this) == DialogResult.OK) community.Text = dialog.SelectedPath; }; panel.Controls.Add(browse);
+            panel.Controls.Add(TextLabel(WindowsPresentation.Text("windows.setupWizardForm.closeMsfsBeforeInstallingOrUpdatingOnlyAeroscienceIs")));
+            if (ToolbarInstaller.SimulatorRunning()) panel.Controls.Add(TextLabel(WindowsPresentation.Text("windows.setupWizardForm.msfsIsCurrentlyRunningCloseItBeforeContinuingWith")));
         }
         else
         {
-            panel.Controls.Add(TextLabel($"Mission Database: {mission.Text}\n\nScientific Data Library: {library.Text}\n\nToolbar: {(install.Checked ? "Install/update in " + community.Text : "Skipped — configure later in Settings")}"));
-            panel.Controls.Add(TextLabel("Finish Setup confirms these choices. Changed storage locations use verified migration with originals retained. Existing destination data is never overwritten or silently merged. You can revisit setup and storage through Settings."));
+            panel.Controls.Add(TextLabel(WindowsPresentation.Text("windows.setupWizardForm.missionDatabaseScientificDataLibraryToolbar", new Dictionary<string, object> { ["value1"] = WindowsPresentation.Format($"{mission.Text}"), ["value2"] = WindowsPresentation.Format($"{library.Text}"), ["value3"] = WindowsPresentation.Format($"{(install.Checked ? "Install/update in " + community.Text : "Skipped — configure later in Settings")}") })));
+            panel.Controls.Add(TextLabel(WindowsPresentation.Text("windows.setupWizardForm.finishSetupConfirmsTheseChoicesChangedStorageLocationsUse")));
             panel.Controls.Add(TextLabel(ScientificAccessSettings.Privacy));
             panel.Controls.Add(scientificOnline);
-            panel.Controls.Add(TextLabel("Optional and separate from online maps. Leave unchecked for offline-only science. Change bandwidth, date/quality policy and access later in Settings → Scientific Data Sources. Prepared scientific originals are retained within your library storage limits."));
+            panel.Controls.Add(TextLabel(WindowsPresentation.Text("windows.setupWizardForm.optionalAndSeparateFromOnlineMapsLeaveUncheckedFor")));
             panel.Controls.Add(progress);
         }
     }
@@ -129,7 +129,7 @@ public sealed class SetupWizardForm : BrandedForm
                     if (!unchanged && new LocalStorageCapacity().FreeBytes(folders[index]) < StorageManager.MinimumFreeBytes) throw new IOException("There is insufficient free space on a selected storage drive.");
                 }
                 if (!(settings.Initialized && SamePath(library.Text, settings.ScienceLibraryDirectory)) && new LocalStorageCapacity().FreeBytes(library.Text) < StorageManager.LibraryLowSpaceWarningBytes
-                    && MessageBox.Show(this, "The Science Library drive has limited free space. Future science formats and data rates are not implemented; no size forecast is available. Continue?", "Storage capacity", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes) return;
+                    && MessageBox.Show(this, WindowsPresentation.Text("windows.setupWizardForm.theScienceLibraryDriveHasLimitedFreeSpaceFuture"), WindowsPresentation.Text("windows.setupWizardForm.storageCapacity"), MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes) return;
             }
             if (page == 2 && install.Checked)
             {

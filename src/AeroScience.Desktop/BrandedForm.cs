@@ -15,7 +15,7 @@ public class BrandedForm:Form
         using var stream=typeof(BrandedForm).Assembly.GetManifestResourceStream("AeroScience.Branding.Primary")
             ??throw new InvalidOperationException("Packaged AeroScience branding resource is missing.");
         using var source=Image.FromStream(stream);var owned=new Bitmap(source);
-        var image=new PictureBox{Image=owned,Size=new(48,48),SizeMode=PictureBoxSizeMode.Zoom,AccessibleName="AeroScience Orbital Arc logo",TabStop=false};
+        var image=new PictureBox{Image=owned,Size=new(48,48),SizeMode=PictureBoxSizeMode.Zoom,AccessibleName=WindowsPresentation.Text("windows.brandedForm.aeroscienceOrbitalArcLogo"),TabStop=false};
         image.Disposed+=(_,_)=>owned.Dispose();return image;
     }
 }

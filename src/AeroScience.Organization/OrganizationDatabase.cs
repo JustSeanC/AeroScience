@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AeroScience.Organization;
 
-public sealed class OrganizationUser:IdentityUser<Guid> { public long AuthenticatorLastStep {get;set;}=-1; public DateTimeOffset? RecoveryAcknowledgedUtc {get;set;} }
+public sealed class OrganizationUser:IdentityUser<Guid> { public long AuthenticatorLastStep {get;set;}=-1; public DateTimeOffset? RecoveryAcknowledgedUtc {get;set;} public string? PresentationLocale {get;set;} public long PresentationRevision {get;set;} }
 public sealed class OrganizationRecord
 {
     public int Id {get;set;}=1;
@@ -119,6 +119,7 @@ public sealed class OrganizationDatabase(DbContextOptions<OrganizationDatabase> 
     protected override void OnModelCreating(ModelBuilder model)
     {
         base.OnModelCreating(model);
+        model.Entity<OrganizationUser>().Property(u=>u.PresentationLocale).HasMaxLength(5);
         OrganizationLiveDatabase.Configure(model);
         OrganizationNotificationDatabase.Configure(model);
         ServerOperationsDatabase.Configure(model);
