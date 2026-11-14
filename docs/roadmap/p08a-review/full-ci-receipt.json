@@ -1,0 +1,761 @@
+{
+  "acceptedRuntime": "5ae81ce396d566c404b213f4db86d640ef4c4fca",
+  "initialRepairCommit": "18ed61418487f120dd8f8e73aeba42262656ddd2",
+  "startingHead": "2fa2de99805c61363f1d78e065a3e33e9d25cdd5",
+  "run": {
+    "conclusion": "success",
+    "createdAt": "2026-11-14T19:30:03Z",
+    "databaseId": 43632410809,
+    "event": "workflow_dispatch",
+    "headBranch": "develop/v0.8.0",
+    "headSha": "5ae81ce396d566c404b213f4db86d640ef4c4fca",
+    "status": "completed",
+    "updatedAt": "2026-11-14T20:37:37Z",
+    "url": "https://github.com/JustSeanC/AeroScience/actions/runs/43632410809",
+    "workflowName": "foundation"
+  },
+  "validationScope": "full",
+  "jobs": [
+    {
+      "id": 132561743371,
+      "name": "validation-scope",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@v7",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python3 scripts/build/development_validation.py tier",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/checkout@v7",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 132561786160,
+      "name": "organization-deployment",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@v7",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-dotnet@v6",
+          "conclusion": "success"
+        },
+        {
+          "name": "Build real retained-evidence fixture with locked dependencies",
+          "conclusion": "success"
+        },
+        {
+          "name": "Build pinned non-root organization container from accepted source",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify HTTPS, PostgreSQL TLS, secure ownership, evidence receipt and container replacement",
+          "conclusion": "success"
+        },
+        {
+          "name": "Build pinned recovery and Railway runtime candidates (not public distributions)",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify real private database CA, root-owned volume and permanent non-root application",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify exact private distribution image identities and parent layers (no publication)",
+          "conclusion": "success"
+        },
+        {
+          "name": "Retain bounded deployment acceptance diagnostics",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-dotnet@v6",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/checkout@v7",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 132561786214,
+      "name": "windows-companion",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@v7",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-dotnet@v6",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-node@v7",
+          "conclusion": "success"
+        },
+        {
+          "name": "Prepare isolated organization PostgreSQL when available",
+          "conclusion": "success"
+        },
+        {
+          "name": "Use runner scratch for durable Windows test fixtures",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run ./scripts/build/Build-Companion.ps1",
+          "conclusion": "success"
+        },
+        {
+          "name": "Compile isolated validation identity and Windows application (not distributable)",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify Windows Earthdata vault with disposable synthetic credentials",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify dependency locks remain unchanged",
+          "conclusion": "success"
+        },
+        {
+          "name": "Retain Windows test diagnostics",
+          "conclusion": "success"
+        },
+        {
+          "name": "Check Windows-sensitive helpers and installer packaging",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run dotnet build tests/AeroScience.TestHost -c Release --no-restore --nologo --output artifacts/recovery-test-host",
+          "conclusion": "success"
+        },
+        {
+          "name": "Compile installer recipe with structural fixtures only",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-node@v7",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-dotnet@v6",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/checkout@v7",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 132561786219,
+      "name": "linux",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Initialize containers",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@v7",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-dotnet@v6",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-node@v7",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify signed Ubuntu dependency transport fallback on disposable runner",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run dotnet restore AeroScience.sln --locked-mode",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify independently compiled private validation identity",
+          "conclusion": "success"
+        },
+        {
+          "name": "Install pinned native recovery tools for actual PostgreSQL restore acceptance",
+          "conclusion": "success"
+        },
+        {
+          "name": "Prepare accepted baseline and isolated future binary for actual update recovery",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run dotnet test AeroScience.sln -c Release --no-restore --logger trx --logger 'console;verbosity=normal' --blame-hang-timeout 2m --blame-hang-dump-type none",
+          "conclusion": "success"
+        },
+        {
+          "name": "Retain Linux test diagnostics",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run npm ci --ignore-scripts",
+          "conclusion": "success"
+        },
+        {
+          "name": "Validate native Railway configuration offline",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run npm run check:branding",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run npm run check:web",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run npx playwright install --with-deps chromium",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run npm run test:web",
+          "conclusion": "success"
+        },
+        {
+          "name": "Retain browser diagnostics",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run python3 -m unittest discover -s tests -p 'test_*.py' -v",
+          "conclusion": "success"
+        },
+        {
+          "name": "Build and exercise real recovery test host",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-node@v7",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-dotnet@v6",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/checkout@v7",
+          "conclusion": "success"
+        },
+        {
+          "name": "Stop containers",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        }
+      ]
+    },
+    {
+      "id": 132561787453,
+      "name": "windows-profile",
+      "conclusion": "skipped",
+      "steps": []
+    },
+    {
+      "id": 132561788111,
+      "name": "development",
+      "conclusion": "skipped",
+      "steps": []
+    }
+  ],
+  "dotnet": {
+    "linux": [
+      {
+        "platform": "linux",
+        "artifactId": 14129296922,
+        "zipSha256": "9da1fe5879530c4d5c8234fe1a2ce77b4f1c7b4a611742fb95faa4df1a9e99ab",
+        "trx": "artifacts/p08a/linux-tests-43632410809/tests/AeroScience.Tests/TestResults/_runnervm8axu0_2026-11-14_19_33_39_net10.0.trx",
+        "trxSha256": "2d2111dd222dcdcc2ccaaa96e92c9d71e623188c0584e6fa18d909e90748d9a7",
+        "counters": {
+          "total": "1664",
+          "executed": "1664",
+          "passed": "1664",
+          "failed": "0",
+          "error": "0",
+          "timeout": "0",
+          "aborted": "0",
+          "inconclusive": "0",
+          "passedButRunAborted": "0",
+          "notRunnable": "0",
+          "notExecuted": "0",
+          "disconnected": "0",
+          "warning": "0",
+          "completed": "0",
+          "inProgress": "0",
+          "pending": "0"
+        },
+        "skippedTests": []
+      }
+    ],
+    "windows": [
+      {
+        "platform": "windows",
+        "artifactId": 14129376189,
+        "zipSha256": "c1438f947adb52151c0b0b1d090be5abc5213c9494fa1f1ea272ee6201efb658",
+        "trx": "artifacts/p08a/windows-tests-43632410809/tests/AeroScience.Tests/TestResults/windows.trx",
+        "trxSha256": "f2619f127d9e3c1efd94acdaf89730c7753473013ea87faa18acc7e573bec0e8",
+        "counters": {
+          "total": "1664",
+          "executed": "1654",
+          "passed": "1654",
+          "failed": "0",
+          "error": "0",
+          "timeout": "0",
+          "aborted": "0",
+          "inconclusive": "0",
+          "passedButRunAborted": "0",
+          "notRunnable": "0",
+          "notExecuted": "0",
+          "disconnected": "0",
+          "warning": "0",
+          "completed": "0",
+          "inProgress": "0",
+          "pending": "0"
+        },
+        "skippedTests": [
+          "AeroScience.Tests.OrganizationConnectionIntegrationTests.SeparatelyKeyedCopiesSurvivePrimaryRepositoryAndIdentityLossAndEnforceApprovedRetention",
+          "AeroScience.Tests.OrganizationConnectionIntegrationTests.IndependentRecoveryStagesAndActivatesAfterOriginalDatabaseAndIdentityAreLostWithoutExternalReplay",
+          "AeroScience.Tests.ScientificLibraryFolderTests.LinkedSourceDirectoryIsRejected",
+          "AeroScience.Tests.OrganizationConnectionIntegrationTests.ScopedNonSuperuserRecoveryRetainsApplicationOwnershipAndAllowsTheNextCompiledUpgrade",
+          "AeroScience.Tests.AviationAcquisitionTests.RetainedOriginalFileLinksAreRejectedRatherThanFollowed",
+          "AeroScience.Tests.OrganizationConnectionIntegrationTests.ActualOldAndNewProcessesRefuseStaleCheckpointRollbackFailedUpgradeAndApplyExactApprovedPair",
+          "AeroScience.Tests.OrganizationConnectionIntegrationTests.EncryptedOffProcessBackupRestoresAuthorizedEvidenceAuditAndProtectedMfaAfterSourceLoss",
+          "AeroScience.Tests.OrganizationServerTests.ExplicitBackupConsentPersistsScheduledPolicyIdempotentJobsAndVerifiedRestoreAcrossRestart",
+          "AeroScience.Tests.OrganizationConnectionIntegrationTests.GuidedPrivateFileImportRecoversIntoAFreshSecuredServerAtANewOriginAfterPrimaryLoss",
+          "AeroScience.Tests.OrganizationConnectionIntegrationTests.ProtectedIdentityRenewalRecoversMfaAndDiscordSecretsWithANewCertificateWithoutTouchingTheOriginal"
+        ]
+      }
+    ]
+  },
+  "browser": {
+    "statistics": {
+      "startTime": "2026-11-14T19:55:42.004Z",
+      "duration": 2352181.8529999997,
+      "expected": 518,
+      "skipped": 2,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "skipped": [
+      {
+        "file": "aviation-charts.spec.js",
+        "title": "approved originals provide local chart overlays, independent science, offline tiles and exact edition selection",
+        "status": "skipped",
+        "results": [
+          {
+            "status": "skipped",
+            "durationMs": 2030,
+            "retry": 0
+          }
+        ],
+        "annotations": [
+          {
+            "type": "skip",
+            "description": "Owner deferred the ordinary chart viewer; retained research renderer coverage remains in AviationChartTests.",
+            "location": {
+              "file": "/home/runner/work/AeroScience/AeroScience/tests/web/aviation-charts.spec.js",
+              "line": 16,
+              "column": 7
+            }
+          }
+        ]
+      },
+      {
+        "file": "aviation-charts.spec.js",
+        "title": "unknown runtime is honest and chart inventory remains accessible at tablet width without altering saved data",
+        "status": "skipped",
+        "results": [
+          {
+            "status": "skipped",
+            "durationMs": 122,
+            "retry": 0
+          }
+        ],
+        "annotations": [
+          {
+            "type": "skip",
+            "description": "Owner deferred the ordinary chart viewer; the active deferral scenario checks retention, tablet accessibility and other overlays.",
+            "location": {
+              "file": "/home/runner/work/AeroScience/AeroScience/tests/web/aviation-charts.spec.js",
+              "line": 34,
+              "column": 7
+            }
+          }
+        ]
+      }
+    ],
+    "p08aCases": [
+      {
+        "file": "p08a-downloads.spec.js",
+        "title": "P08a activity exposes one read-only process identity and actual reader counters",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 264,
+            "retry": 0
+          }
+        ],
+        "annotations": []
+      },
+      {
+        "file": "p08a-downloads.spec.js",
+        "title": "P08a Downloads keeps Retry separate from future-flight approval and repeated clicks",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 942,
+            "retry": 0
+          }
+        ],
+        "annotations": []
+      },
+      {
+        "file": "p08a-downloads.spec.js",
+        "title": "P08a quick status keeps Retry separate from future-flight approval and repeated clicks",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 1446,
+            "retry": 0
+          }
+        ],
+        "annotations": []
+      },
+      {
+        "file": "p08a-downloads.spec.js",
+        "title": "P08a combined speed expires locally during a held status request without faster network polling",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 953,
+            "retry": 0
+          }
+        ],
+        "annotations": []
+      },
+      {
+        "file": "p08a-downloads.spec.js",
+        "title": "P08a en-US preserves candidate wording, source diagnostics and narrow keyboard operation",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 4291,
+            "retry": 0
+          }
+        ],
+        "annotations": []
+      },
+      {
+        "file": "p08a-downloads.spec.js",
+        "title": "P08a es-ES preserves candidate wording, source diagnostics and narrow keyboard operation",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 4570,
+            "retry": 0
+          }
+        ],
+        "annotations": []
+      },
+      {
+        "file": "p08a-downloads.spec.js",
+        "title": "P08a fr-FR preserves candidate wording, source diagnostics and narrow keyboard operation",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 4423,
+            "retry": 0
+          }
+        ],
+        "annotations": []
+      },
+      {
+        "file": "p08a-downloads.spec.js",
+        "title": "P08a de-DE preserves candidate wording, source diagnostics and narrow keyboard operation",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 4481,
+            "retry": 0
+          }
+        ],
+        "annotations": []
+      },
+      {
+        "file": "p08a-downloads.spec.js",
+        "title": "P08a pt-BR preserves candidate wording, source diagnostics and narrow keyboard operation",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 4406,
+            "retry": 0
+          }
+        ],
+        "annotations": []
+      },
+      {
+        "file": "p08a-science-map.spec.js",
+        "title": "P08a legacy Science Map honors zoom while initial native records are held",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 1285,
+            "retry": 0
+          }
+        ],
+        "annotations": []
+      },
+      {
+        "file": "p08a-science-map.spec.js",
+        "title": "P08a legacy Science Map honors zoom-back while initial native records are held",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 1093,
+            "retry": 0
+          }
+        ],
+        "annotations": []
+      },
+      {
+        "file": "p08a-science-map.spec.js",
+        "title": "P08a legacy Science Map honors pan while initial native records are held",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 1212,
+            "retry": 0
+          }
+        ],
+        "annotations": []
+      }
+    ],
+    "originalSensorLifecycle": {
+      "file": "sensor-operating-status.spec.js",
+      "title": "armed paused resumed ended and new sessions never reuse the wrong favorable assessment",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "durationMs": 12816,
+          "retry": 0
+        }
+      ],
+      "annotations": []
+    },
+    "originalSensorAssertionsAndDeadlinesUnchanged": true
+  },
+  "python": {
+    "linux": {
+      "run": 188,
+      "passed": 186,
+      "skipped": 2,
+      "failed": 0,
+      "skipDetails": [
+        "test_installed_compiler_batch_with_spaces_runs_and_retains_x64_environment (test_lidar_runtime.LidarRuntimeTests.test_installed_compiler_batch_with_spaces_runs_and_retains_x64_environment) ... skipped 'Actual Windows cmd.exe execution; native Linux decoding is tested separately.'",
+        "test_pe_metadata_check_does_not_claim_runtime_exports_or_simulator_connection (test_windows_helpers.WindowsHelperTests.test_pe_metadata_check_does_not_claim_runtime_exports_or_simulator_connection) ... skipped 'Publish the Windows companion first for the native PE fixture'"
+      ]
+    },
+    "windows": {
+      "run": 185,
+      "passed": 182,
+      "skipped": 3,
+      "failed": 0,
+      "skipDetails": [
+        "test_windows_requirement_stops_before_creating_any_output (test_beta_installer.BetaInstallerTests.test_windows_requirement_stops_before_creating_any_output) ... skipped 'Linux PowerShell platform preflight'",
+        "test_generated_private_configuration_is_unique_bounded_and_never_prints_credentials (test_organization_deployment.OrganizationDeploymentTests.test_generated_private_configuration_is_unique_bounded_and_never_prints_credentials) ... skipped 'POSIX OpenSSL/mode fixture; real Linux container acceptance verifies certificates.'",
+        "test_case_colliding_files_cannot_share_one_layout_entry (test_packaging.PackagingTests.test_case_colliding_files_cannot_share_one_layout_entry) ... skipped 'A case-sensitive filesystem is required to create both aliases.'"
+      ]
+    }
+  },
+  "node": {
+    "presentation": {
+      "passedPerPlatform": 66,
+      "failed": 0
+    },
+    "nativeClassicSyntaxES2017": {
+      "passedPerPlatform": 4,
+      "failed": 0,
+      "windowsIsolatedValidationAlsoRepeatsTheseChecks": true
+    },
+    "railwayOfflineLinux": {
+      "passed": 6,
+      "failed": 0
+    }
+  },
+  "recovery": {
+    "linux": "All five existing scripts passed",
+    "windows": "All five existing scripts passed",
+    "scripts": [
+      "smoke_recovery.py",
+      "smoke_evidence_recovery.py",
+      "smoke_library_recovery.py",
+      "smoke_source_deletion.py",
+      "smoke_aviation_recovery.py"
+    ]
+  },
+  "verifiedArtifacts": [
+    {
+      "id": 14131560313,
+      "name": "linux-browser-diagnostics",
+      "digest": "sha256:efe302536dc848ba4e68e41f3108204f90d7d10f014f991846f8373f667d2075",
+      "size_in_bytes": 39150300
+    },
+    {
+      "id": 14129376189,
+      "name": "windows-test-diagnostics",
+      "digest": "sha256:c1438f947adb52151c0b0b1d090be5abc5213c9494fa1f1ea272ee6201efb658",
+      "size_in_bytes": 476385
+    },
+    {
+      "id": 14129296922,
+      "name": "linux-test-diagnostics",
+      "digest": "sha256:9da1fe5879530c4d5c8234fe1a2ce77b4f1c7b4a611742fb95faa4df1a9e99ab",
+      "size_in_bytes": 474568
+    },
+    {
+      "id": 14129016644,
+      "name": "organization-deployment-diagnostics",
+      "digest": "sha256:94539221416c9050880e8ea03c08cdc9d954da6f1d4da9b00927834fdaaf381f",
+      "size_in_bytes": 2763
+    }
+  ],
+  "retainedFiles": [
+    {
+      "path": "artifacts/p08a/linux-43632410809.log",
+      "sha256": "b8adc73cb6008445e7c1e79e30929cf56d1fb0c04e79a8a29796b15d79b44d03",
+      "bytes": 1693480
+    },
+    {
+      "path": "artifacts/p08a/windows-43632410809.log",
+      "sha256": "97518db601bfc61edcd39b6798fe592f4fa0e37963f5910d83254340b20321b9",
+      "bytes": 1228832
+    },
+    {
+      "path": "artifacts/p08a/organization-deployment-43632410809.log",
+      "sha256": "cacb535f5ee6bd16970dbd8c70b29435d9b3b30c700025a7a69a889c10a73268",
+      "bytes": 121823
+    },
+    {
+      "path": "artifacts/p08a/run-43632410809.json",
+      "sha256": "ddf3c4434701169586497bf49ad6322c51a70eacd9663d716f2f9f8892d6c2b8",
+      "bytes": 354
+    },
+    {
+      "path": "artifacts/p08a/jobs-43632410809.json",
+      "sha256": "5d17b637dc084cc73db5d9235bd740fda936ee375c2db24c4d4832291fd4afcb",
+      "bytes": 11264
+    },
+    {
+      "path": "artifacts/p08a/artifacts-43632410809.json",
+      "sha256": "4476ab79fc8fee0333eb34a095b6f85a39e108361698593e7ac023fd998bcc33",
+      "bytes": 769
+    },
+    {
+      "path": "artifacts/p08a/browser-43632410809/web-results.json",
+      "sha256": "dd90133451e5a8dba45e3c69c50cedb29a20a876df130d80f78998f8fd19ea3e",
+      "bytes": 2748720
+    }
+  ],
+  "firstFailedRun": {
+    "id": 43625990667,
+    "source": "18ed61418487f120dd8f8e73aeba42262656ddd2",
+    "receipt": "ci-failure-43625990667.json",
+    "preserved": true
+  },
+  "catalog": {
+    "version": 25,
+    "messages": 7056,
+    "sourceIdentity": "22470c27a539c47d116032f26f29072ec90c780f21232e7cafc8ca9cc41db10c",
+    "bundleIdentity": "16a732d4a2426b4faccd8cc89083da5880eb5d9c11d723a9dd60227d24ad6ffa",
+    "nativeKeys": 370,
+    "nativeAssets": {
+      "AeroScience.LocaleData.js": {
+        "bytes": 178815,
+        "sha256": "ada385a2617398adc31d11ad7789fcd097a18af3dcb85a3d2c0f155b9596eb20"
+      },
+      "AeroScience.LocaleFormat.js": {
+        "bytes": 3860,
+        "sha256": "fe20e9e0a484d9fd54da9dbcb6aa7f389dad4e6f7eb1d916726e0c5dbf7c536d"
+      }
+    },
+    "qualifiedHumanReview": "PENDING for all four non-English candidates",
+    "installedWindows": "NOT TESTED",
+    "installedMSFS": "NOT TESTED"
+  },
+  "screenshots": "screenshots.json",
+  "protectedRemoteRefsBeforeDocumentationClosure": {
+    "develop/v0.7.0": "695a385ec40b177c763ffc0945234a1e2b54b77e",
+    "develop/v0.7.1": "8e972d8e402f165ab9ad7c41dc9e744250f8f52e",
+    "develop/v0.8.0": "5ae81ce396d566c404b213f4db86d640ef4c4fca",
+    "main": "9dd2d8cda7ddb6d73414808f75010726871205c2"
+  },
+  "rootThirdPartyNoticeSha256": "ae01ce20f49b8fffa428c94dc3968a987b1be554ada04d205deaf4af7ec8453e",
+  "engineeringAcceptance": "P08a automated software checkpoint only",
+  "qualifiedHumanReview": "PENDING all four non-English candidates",
+  "installedWindows": "NOT TESTED",
+  "installedMSFS": "NOT TESTED",
+  "genuineProviderAcceptance": "NOT TESTED in P08a",
+  "nativeLidarInstallerVerification": "OPEN for separately authorized P08b",
+  "publicInstallerOrReleaseAuthorized": false,
+  "P08bExecuted": false
+}

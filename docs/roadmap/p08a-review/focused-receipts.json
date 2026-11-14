@@ -217,8 +217,23 @@
       "sha256": "70c26c2dfd2a954fd833c13cae32fb7168409fd6fecac74bbdd812ac93672fcb"
     }
   ],
-  "fullCI": "PENDING on committed candidate; no acceptance before completion.",
+  "fullCI": {
+    "acceptedRuntime": "5ae81ce396d566c404b213f4db86d640ef4c4fca",
+    "url": "https://github.com/JustSeanC/AeroScience/actions/runs/43632410809",
+    "conclusion": "success",
+    "receipt": "full-ci-receipt.json",
+    "firstFailedRun": 43625990667
+  },
   "qualifiedHumanReview": "PENDING all four non-English candidates",
   "installedWindows": "NOT TESTED",
-  "installedMSFS": "NOT TESTED"
+  "installedMSFS": "NOT TESTED",
+  "correctiveFocused": {
+    "dotnetPassed": 72,
+    "dotnetFailed": 0,
+    "dotnetSkipped": 0,
+    "browserPassed": 23,
+    "browserFailed": 0,
+    "browserSkipped": 0,
+    "receipt": "ci-failure-43625990667.json"
+  }
 }

@@ -1,0 +1,216 @@
+{
+  "source": "5ae81ce396d566c404b213f4db86d640ef4c4fca",
+  "runId": 43632410809,
+  "artifactId": 14131560313,
+  "zipSha256": "efe302536dc848ba4e68e41f3108204f90d7d10f014f991846f8373f667d2075",
+  "captures": [
+    {
+      "name": "p08a-downloads-de-DE-dark-1440.png",
+      "artifactRelativePath": "browser-tests/p08a-downloads-P08a-de-DE--1b481-d-narrow-keyboard-operation/p08a-downloads-de-DE-dark-1440.png",
+      "sha256": "1b8c8a8a1c0e8b64a87836d10315bc12e277965c869f44e6f75d0bb1dd5de4dd",
+      "bytes": 714547,
+      "width": 1440,
+      "height": 4679,
+      "textScale": "200%",
+      "type": "synthetic browser fixture"
+    },
+    {
+      "name": "p08a-downloads-de-DE-dark-390.png",
+      "artifactRelativePath": "browser-tests/p08a-downloads-P08a-de-DE--1b481-d-narrow-keyboard-operation/p08a-downloads-de-DE-dark-390.png",
+      "sha256": "65eb8901e50c94499512dec17297dfa0b957de9afba480bdb95c8f5b39ab63b1",
+      "bytes": 786174,
+      "width": 390,
+      "height": 11118,
+      "textScale": "200%",
+      "type": "synthetic browser fixture"
+    },
+    {
+      "name": "p08a-downloads-de-DE-light-1440.png",
+      "artifactRelativePath": "browser-tests/p08a-downloads-P08a-de-DE--1b481-d-narrow-keyboard-operation/p08a-downloads-de-DE-light-1440.png",
+      "sha256": "3d34d544fead861731851669f687f7ac1755df9fc6c576d7ee4ede61940e3ad9",
+      "bytes": 715931,
+      "width": 1440,
+      "height": 4679,
+      "textScale": "200%",
+      "type": "synthetic browser fixture"
+    },
+    {
+      "name": "p08a-downloads-de-DE-light-390.png",
+      "artifactRelativePath": "browser-tests/p08a-downloads-P08a-de-DE--1b481-d-narrow-keyboard-operation/p08a-downloads-de-DE-light-390.png",
+      "sha256": "9ed16cace348bb8af0d15569baf0656089e5306cb2104604a83d28939d3c2366",
+      "bytes": 787051,
+      "width": 390,
+      "height": 11118,
+      "textScale": "200%",
+      "type": "synthetic browser fixture"
+    },
+    {
+      "name": "p08a-downloads-en-US-dark-1440.png",
+      "artifactRelativePath": "browser-tests/p08a-downloads-P08a-en-US--1add3-d-narrow-keyboard-operation/p08a-downloads-en-US-dark-1440.png",
+      "sha256": "9ac40a73a91f8f1ccc74a6c00b79a6af9a1bb2dfe1f56dc7c0d326ef5941b7c7",
+      "bytes": 628086,
+      "width": 1440,
+      "height": 4381,
+      "textScale": "200%",
+      "type": "synthetic browser fixture"
+    },
+    {
+      "name": "p08a-downloads-en-US-dark-390.png",
+      "artifactRelativePath": "browser-tests/p08a-downloads-P08a-en-US--1add3-d-narrow-keyboard-operation/p08a-downloads-en-US-dark-390.png",
+      "sha256": "87ac3412a1bcdf2c233300c6901720c1b9fe1dbbf6e50058496e980234ae0517",
+      "bytes": 704433,
+      "width": 390,
+      "height": 10082,
+      "textScale": "200%",
+      "type": "synthetic browser fixture"
+    },
+    {
+      "name": "p08a-downloads-en-US-light-1440.png",
+      "artifactRelativePath": "browser-tests/p08a-downloads-P08a-en-US--1add3-d-narrow-keyboard-operation/p08a-downloads-en-US-light-1440.png",
+      "sha256": "e41e0d0c9c4a1d08aa4d84d503bba02ac7eabc598a578d3bb9376c0476684f8e",
+      "bytes": 627933,
+      "width": 1440,
+      "height": 4381,
+      "textScale": "200%",
+      "type": "synthetic browser fixture"
+    },
+    {
+      "name": "p08a-downloads-en-US-light-390.png",
+      "artifactRelativePath": "browser-tests/p08a-downloads-P08a-en-US--1add3-d-narrow-keyboard-operation/p08a-downloads-en-US-light-390.png",
+      "sha256": "baad88e40f1aff170ed005f03f9bed6c4777cb88993df57168dd4633e86bf839",
+      "bytes": 704322,
+      "width": 390,
+      "height": 10082,
+      "textScale": "200%",
+      "type": "synthetic browser fixture"
+    },
+    {
+      "name": "p08a-downloads-es-ES-dark-1440.png",
+      "artifactRelativePath": "browser-tests/p08a-downloads-P08a-es-ES--6dd13-d-narrow-keyboard-operation/p08a-downloads-es-ES-dark-1440.png",
+      "sha256": "d3696c371f4aa7ed5aadac5d2815a68d4e83fde042b586a6421778cac56c255a",
+      "bytes": 682143,
+      "width": 1440,
+      "height": 4769,
+      "textScale": "200%",
+      "type": "synthetic browser fixture"
+    },
+    {
+      "name": "p08a-downloads-es-ES-dark-390.png",
+      "artifactRelativePath": "browser-tests/p08a-downloads-P08a-es-ES--6dd13-d-narrow-keyboard-operation/p08a-downloads-es-ES-dark-390.png",
+      "sha256": "092e5d0155481c547592b49a368d289f6fbc999778cc3341f97d962774d34ff4",
+      "bytes": 767515,
+      "width": 390,
+      "height": 10626,
+      "textScale": "200%",
+      "type": "synthetic browser fixture"
+    },
+    {
+      "name": "p08a-downloads-es-ES-light-1440.png",
+      "artifactRelativePath": "browser-tests/p08a-downloads-P08a-es-ES--6dd13-d-narrow-keyboard-operation/p08a-downloads-es-ES-light-1440.png",
+      "sha256": "47e3a67bc767ced52430a1783ebefe5e1d52bbe48519aad055ade0be8a2d9b42",
+      "bytes": 681530,
+      "width": 1440,
+      "height": 4769,
+      "textScale": "200%",
+      "type": "synthetic browser fixture"
+    },
+    {
+      "name": "p08a-downloads-es-ES-light-390.png",
+      "artifactRelativePath": "browser-tests/p08a-downloads-P08a-es-ES--6dd13-d-narrow-keyboard-operation/p08a-downloads-es-ES-light-390.png",
+      "sha256": "870bf122f495279432eb272631d4ebf17aa2e16852919d576a9cbe8c0916c2ab",
+      "bytes": 765677,
+      "width": 390,
+      "height": 10626,
+      "textScale": "200%",
+      "type": "synthetic browser fixture"
+    },
+    {
+      "name": "p08a-downloads-fr-FR-dark-1440.png",
+      "artifactRelativePath": "browser-tests/p08a-downloads-P08a-fr-FR--e7d7e-d-narrow-keyboard-operation/p08a-downloads-fr-FR-dark-1440.png",
+      "sha256": "e527f267fe341a264df12e365f42ee0bc1bbbc7a4232dff58dd101785157f312",
+      "bytes": 661845,
+      "width": 1440,
+      "height": 4621,
+      "textScale": "200%",
+      "type": "synthetic browser fixture"
+    },
+    {
+      "name": "p08a-downloads-fr-FR-dark-390.png",
+      "artifactRelativePath": "browser-tests/p08a-downloads-P08a-fr-FR--e7d7e-d-narrow-keyboard-operation/p08a-downloads-fr-FR-dark-390.png",
+      "sha256": "1fd1f3330ab745c88007f73b55410b5d116ecd7311ad91fb27a797c22da11601",
+      "bytes": 754424,
+      "width": 390,
+      "height": 10739,
+      "textScale": "200%",
+      "type": "synthetic browser fixture"
+    },
+    {
+      "name": "p08a-downloads-fr-FR-light-1440.png",
+      "artifactRelativePath": "browser-tests/p08a-downloads-P08a-fr-FR--e7d7e-d-narrow-keyboard-operation/p08a-downloads-fr-FR-light-1440.png",
+      "sha256": "f860636ba4f8a2e781f90212c3a614054303e35e62dd97b739a3aca63333c1cb",
+      "bytes": 661527,
+      "width": 1440,
+      "height": 4621,
+      "textScale": "200%",
+      "type": "synthetic browser fixture"
+    },
+    {
+      "name": "p08a-downloads-fr-FR-light-390.png",
+      "artifactRelativePath": "browser-tests/p08a-downloads-P08a-fr-FR--e7d7e-d-narrow-keyboard-operation/p08a-downloads-fr-FR-light-390.png",
+      "sha256": "fc22fa9ce52457ae029c7c38a0d5950bc2c2b6feb36b0977ed347442a0124dde",
+      "bytes": 751130,
+      "width": 390,
+      "height": 10739,
+      "textScale": "200%",
+      "type": "synthetic browser fixture"
+    },
+    {
+      "name": "p08a-downloads-pt-BR-dark-1440.png",
+      "artifactRelativePath": "browser-tests/p08a-downloads-P08a-pt-BR--166ae-d-narrow-keyboard-operation/p08a-downloads-pt-BR-dark-1440.png",
+      "sha256": "289ab974256b2937e3655ecb3d0c35215ed61f23652c18f1ea256019cd372e1f",
+      "bytes": 681122,
+      "width": 1440,
+      "height": 4603,
+      "textScale": "200%",
+      "type": "synthetic browser fixture"
+    },
+    {
+      "name": "p08a-downloads-pt-BR-dark-390.png",
+      "artifactRelativePath": "browser-tests/p08a-downloads-P08a-pt-BR--166ae-d-narrow-keyboard-operation/p08a-downloads-pt-BR-dark-390.png",
+      "sha256": "b95e688e62f871f80a4a6c9989b3b599d279836c7644464253d89082598b1e36",
+      "bytes": 770908,
+      "width": 390,
+      "height": 10553,
+      "textScale": "200%",
+      "type": "synthetic browser fixture"
+    },
+    {
+      "name": "p08a-downloads-pt-BR-light-1440.png",
+      "artifactRelativePath": "browser-tests/p08a-downloads-P08a-pt-BR--166ae-d-narrow-keyboard-operation/p08a-downloads-pt-BR-light-1440.png",
+      "sha256": "22fca09a7e97fcea61c783bac306f7763f73e7adab2b4fecaa840d4ba26b01d8",
+      "bytes": 679429,
+      "width": 1440,
+      "height": 4603,
+      "textScale": "200%",
+      "type": "synthetic browser fixture"
+    },
+    {
+      "name": "p08a-downloads-pt-BR-light-390.png",
+      "artifactRelativePath": "browser-tests/p08a-downloads-P08a-pt-BR--166ae-d-narrow-keyboard-operation/p08a-downloads-pt-BR-light-390.png",
+      "sha256": "69d01f7c8a16de61679f408073107c60ed993541ac03609a60e8b92f15577fa0",
+      "bytes": 769917,
+      "width": 390,
+      "height": 10553,
+      "textScale": "200%",
+      "type": "synthetic browser fixture"
+    }
+  ],
+  "qualifiedHumanReview": "PENDING",
+  "installedWindowsMSFS": "NOT TESTED",
+  "firstFailedCICapture": {
+    "source": "18ed61418487f120dd8f8e73aeba42262656ddd2",
+    "runId": 43625990667,
+    "path": "first-ci-sensor-hold.png",
+    "sha256": "5e0e2df0ea97b2e930dbb78372d8ba87310a10099e7866e1f51762aaee7c3c57"
+  }
+}

@@ -38,7 +38,9 @@
       "ambient-temperature"
     ],
     "error": "Acquisition must use the enabled configuration actually effective at its exposure time.",
-    "correction": "Do not create a new-cadence science intent for an input captured before its configuration effective UTC; retain eligible raw telemetry. No ledger validation or original browser assertion weakened."
+    "correction": "Do not create a new-cadence science intent for an input captured before its configuration effective UTC; retain eligible raw telemetry. No ledger validation or original browser assertion weakened.",
+    "originalCIControllerExceptionCaptured": false,
+    "errorEvidence": "Exact rejection recorded by both deterministic coordinator regressions; original CI screenshot establishes hold but original archive lacks that isolated host controller-event JSON."
   },
   "artifact": {
     "browserId": 14128406051,
