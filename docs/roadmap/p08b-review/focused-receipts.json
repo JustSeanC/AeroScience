@@ -164,9 +164,25 @@
       "path": "artifacts/p08b/unchanged-contracts.json",
       "sha256": "b87d4076e92d5b5299099600b85e7dbbed42825a3aff874a9a8b84ca27b0bebd",
       "bytes": 1303
+    },
+    {
+      "path": "artifacts/p08b/linux-preflight-2c6b545.json",
+      "sha256": "765d6f1c5ef865dec5335cbade3dfa2412ac0a1f9dafc7b10e8050da31aebad2",
+      "bytes": 4920
+    },
+    {
+      "path": "artifacts/p08b/owner-commands-parse.log",
+      "sha256": "c10365f0e6b5a9e841b1bafe8cf3f1474771d13165eac74ab024dd4bdc231395",
+      "bytes": 56
     }
   ],
-  "fullCI": "Final corrected-source Full CI pending after both reproduced Windows encoding and Linux history defects. Cancelled intermediate run receives no acceptance credit.",
+  "fullCI": {
+    "source_commit": "2c6b5454732f06cd60cebb6030605e9c5bc1c9b7",
+    "run": "https://github.com/JustSeanC/AeroScience/actions/runs/43650825716",
+    "conclusion": "success",
+    "receipt": "full-ci-receipt.json",
+    "scope": "Engineering preparation only; owner SDK/installed native acceptance remains Not Tested."
+  },
   "installedWindows": "Not Tested",
   "installedMSFS": "Not Tested",
   "genuineOwnerSDKPackage": "Not Built",

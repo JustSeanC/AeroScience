@@ -1,0 +1,825 @@
+{
+  "format_version": 1,
+  "source_commit": "2c6b5454732f06cd60cebb6030605e9c5bc1c9b7",
+  "branch": "develop/v0.8.0",
+  "workflow_run": 43650825716,
+  "url": "https://github.com/JustSeanC/AeroScience/actions/runs/43650825716",
+  "status": "completed",
+  "conclusion": "success",
+  "engineering_accepted": true,
+  "recorded_utc": "2026-11-14T23:57:56.579203+00:00",
+  "linux_dotnet": [
+    {
+      "path": "tests/AeroScience.Tests/TestResults/_runnervm8axu0_2026-11-14_23_01_24_net10.0.trx",
+      "counters": {
+        "total": "1668",
+        "executed": "1668",
+        "passed": "1668",
+        "failed": "0",
+        "error": "0",
+        "timeout": "0",
+        "aborted": "0",
+        "inconclusive": "0",
+        "passedButRunAborted": "0",
+        "notRunnable": "0",
+        "notExecuted": "0",
+        "disconnected": "0",
+        "warning": "0",
+        "completed": "0",
+        "inProgress": "0",
+        "pending": "0"
+      },
+      "otherOutcomes": []
+    }
+  ],
+  "organization": {
+    "conclusion": "success",
+    "source_commit": "2c6b5454732f06cd60cebb6030605e9c5bc1c9b7",
+    "deployment_checks": 12,
+    "runtime_checks": 10,
+    "scope": "Disposable local infrastructure fixtures only; no production deployment, paid action or provider/native acceptance."
+  },
+  "artifacts": [
+    {
+      "id": 14136483357,
+      "name": "linux-test-diagnostics",
+      "sha256": "0df158434b17d68c8bfdf64aa4897f17e070ef527440d5b4c81dcee495180530",
+      "bytes": 476542,
+      "local_inventory": "artifacts/p08b/linux-43650825716-inventory.json"
+    },
+    {
+      "id": 14135869745,
+      "name": "organization-deployment-diagnostics",
+      "sha256": "d89f493633051fb7b2a887dd4ced12dd902c3d2a5d39ad277a473438d86fc865",
+      "bytes": 2764,
+      "local_inventory": "artifacts/p08b/organization-43650825716-inventory.json"
+    },
+    {
+      "id": 14136991894,
+      "name": "windows-test-diagnostics",
+      "sha256": "411459cf42d283c76294fe8bf8df30549d85bbf950a2269af8cd3f0ad22d5e55",
+      "bytes": 482503,
+      "local_inventory": "artifacts/p08b/windows-43650825716-inventory.json"
+    },
+    {
+      "id": 14136799885,
+      "name": "linux-browser-diagnostics",
+      "sha256": "ff1d509432d7a890ffcb81b4fd4b84781f3d253fcfdb0a138d4b3d4a5b69921e",
+      "bytes": 39125515,
+      "local_inventory": "artifacts/p08b/browser-43650825716-inventory.json"
+    }
+  ],
+  "prior_runs": [
+    {
+      "run": 43645458797,
+      "source_commit": "90c4f35eb10f54d33b6bbf7098f7cab1b4cf07ad",
+      "conclusion": "failure",
+      "diagnostics": "focused-receipts.json#/ciRemediation",
+      "confirmed_causes": [
+        "Windows implicit cp1252 geography read",
+        "Linux shallow history prevented original-baseline recipe guard"
+      ]
+    },
+    {
+      "run": 43648632945,
+      "source_commit": "b2d1f532a7e5bb784a39782425941edc1be8c202",
+      "conclusion": "cancelled",
+      "reason": "Stopped early after completed initial Linux diagnostics exposed separate missing-history prerequisite. No acceptance credit."
+    }
+  ],
+  "owner_sdk_package": "Not Built",
+  "owner_windows_acceptance": "Not Tested",
+  "installed_msfs_acceptance": "Not Tested",
+  "current_provider_smoke_acceptance": "Not Tested",
+  "qualified_fluent_translation_review": "Pending",
+  "public_release_approved": false,
+  "p08c_started": false,
+  "windows_dotnet": [
+    {
+      "path": "tests/AeroScience.Tests/TestResults/windows.trx",
+      "counters": {
+        "total": "1668",
+        "executed": "1658",
+        "passed": "1658",
+        "failed": "0",
+        "error": "0",
+        "timeout": "0",
+        "aborted": "0",
+        "inconclusive": "0",
+        "passedButRunAborted": "0",
+        "notRunnable": "0",
+        "notExecuted": "0",
+        "disconnected": "0",
+        "warning": "0",
+        "completed": "0",
+        "inProgress": "0",
+        "pending": "0"
+      },
+      "otherOutcomes": [
+        {
+          "test": "AeroScience.Tests.ScientificLibraryFolderTests.LinkedSourceDirectoryIsRejected",
+          "outcome": "NotExecuted",
+          "reason": "Unix symlink fixture; installed Windows junction/privilege acceptance remains pending."
+        },
+        {
+          "test": "AeroScience.Tests.OrganizationConnectionIntegrationTests.SeparatelyKeyedCopiesSurvivePrimaryRepositoryAndIdentityLossAndEnforceApprovedRetention",
+          "outcome": "NotExecuted",
+          "reason": "Actual PostgreSQL/restic/pg_dump/pg_restore tools are not configured on this platform. No simulated backup acceptance."
+        },
+        {
+          "test": "AeroScience.Tests.OrganizationConnectionIntegrationTests.ProtectedIdentityRenewalRecoversMfaAndDiscordSecretsWithANewCertificateWithoutTouchingTheOriginal",
+          "outcome": "NotExecuted",
+          "reason": "Actual PostgreSQL/restic/pg_dump/pg_restore tools are not configured on this platform. No simulated backup acceptance."
+        },
+        {
+          "test": "AeroScience.Tests.OrganizationConnectionIntegrationTests.ScopedNonSuperuserRecoveryRetainsApplicationOwnershipAndAllowsTheNextCompiledUpgrade",
+          "outcome": "NotExecuted",
+          "reason": "Actual PostgreSQL/restic/pg_dump/pg_restore tools are not configured on this platform. No simulated backup acceptance."
+        },
+        {
+          "test": "AeroScience.Tests.AviationAcquisitionTests.RetainedOriginalFileLinksAreRejectedRatherThanFollowed",
+          "outcome": "NotExecuted",
+          "reason": "Unix symlink fixture; Windows junction/privilege behavior requires separate installed acceptance."
+        },
+        {
+          "test": "AeroScience.Tests.OrganizationConnectionIntegrationTests.EncryptedOffProcessBackupRestoresAuthorizedEvidenceAuditAndProtectedMfaAfterSourceLoss",
+          "outcome": "NotExecuted",
+          "reason": "Actual PostgreSQL/restic/pg_dump/pg_restore tools are not configured on this platform. No simulated backup acceptance."
+        },
+        {
+          "test": "AeroScience.Tests.OrganizationConnectionIntegrationTests.GuidedPrivateFileImportRecoversIntoAFreshSecuredServerAtANewOriginAfterPrimaryLoss",
+          "outcome": "NotExecuted",
+          "reason": "Actual PostgreSQL/restic/pg_dump/pg_restore tools are not configured on this platform. No simulated backup acceptance."
+        },
+        {
+          "test": "AeroScience.Tests.OrganizationConnectionIntegrationTests.ActualOldAndNewProcessesRefuseStaleCheckpointRollbackFailedUpgradeAndApplyExactApprovedPair",
+          "outcome": "NotExecuted",
+          "reason": "Isolated old/new update binaries and real PostgreSQL/native recovery tools are not configured. No simulated update acceptance."
+        },
+        {
+          "test": "AeroScience.Tests.OrganizationServerTests.ExplicitBackupConsentPersistsScheduledPolicyIdempotentJobsAndVerifiedRestoreAcrossRestart",
+          "outcome": "NotExecuted",
+          "reason": "Actual PostgreSQL/restic/pg_dump/pg_restore tools are not configured on this platform. No simulated backup acceptance."
+        },
+        {
+          "test": "AeroScience.Tests.OrganizationConnectionIntegrationTests.IndependentRecoveryStagesAndActivatesAfterOriginalDatabaseAndIdentityAreLostWithoutExternalReplay",
+          "outcome": "NotExecuted",
+          "reason": "Actual PostgreSQL/restic/pg_dump/pg_restore tools are not configured on this platform. No simulated backup acceptance."
+        }
+      ]
+    }
+  ],
+  "windows_private_publication": {
+    "scope": "Actual Windows x64 CI publication, compiled resource/identity probe and pinned native decoder execution only; no SDK-built or installed owner package.",
+    "compiled_profile": {
+      "profile": "validation",
+      "version": "0.8.0",
+      "source_commit": "2c6b5454732f06cd60cebb6030605e9c5bc1c9b7",
+      "instance": "537cca3138b144bc9d741e639dd5b7f9",
+      "configuration_directory": "C:\\Users\\runneradmin\\AppData\\Local\\AeroScience-Validation-v0.8.0\\537cca3138b144bc9d741e639dd5b7f9",
+      "registry_key": "Software\\AeroScience\\Validation\\v0.8.0\\537cca3138b144bc9d741e639dd5b7f9",
+      "port": 5088,
+      "cookie": "AeroScience.Validation.0_8_0.537cca3138b144bc9d741e639dd5b7f9.Session",
+      "command_event": "AeroScience.Validation.0_8_0.Command.v1",
+      "reply_event": "AeroScience.Validation.0_8_0.Reply.v1",
+      "mutex": "Local\\AeroScience.Desktop",
+      "engine_sha256": "91d1791d965d376d781e70d4979dc0826d328e942e675656992473daa18395f0",
+      "lidar_source": "d8f02c47343dab429af8d6ef33e31fb5a2fe7e7cdee11de17ad6e9e2ab03f258",
+      "lidar_sha256": "c408ac5105289ef9f68919125330f1e52f9dc57f755e72c27631d2e8e71500d7",
+      "presentation_resources": {
+        "manifest": "74d82b73d13ff78bc3ba7fa413ee953b3ef242167d06f5c57e1ba472cbf851b7",
+        "schema": "81ab9eef7a8e53c4dfdb1f34bba2eba7a4c529ac951820ce82f5c43f69d72d0f",
+        "en-US": "841cd2f360e234b28fd22383f44a34258fd8f2c09578084dafe17200c8905f95",
+        "es-ES": "93a4f5551d32a7b8f39de3f96e60c13546cd707259f7c4156c239a53e0b747dd",
+        "fr-FR": "cedf928463e183ae15f44a032cc7ec8cc3dcb297f260c5c437677b48b1d87717",
+        "de-DE": "08ba91d6f6be1c6e6be523da48ed65272d944fbc0118cbcea0e5cc47a768346a",
+        "pt-BR": "bb2e741a9cee39408a49003467e791061bc0626228aba4670635c104325ddbee"
+      },
+      "installed_acceptance": "Not Tested"
+    },
+    "genuine_retained_laz": {
+      "platform": "Windows",
+      "source_sha256": "68c4b0ed247501a15d020d9a758d0345904f38785235732bd8e3386a3fca71c1",
+      "metadata_sha256": "c33bff450876950e5fdc2e3c80ba2383fbfa2ea7f888529cdbce87dcaefff4bc",
+      "reference_sha256": "2169c84ab1187c7b9124546e51492f6e90e3d1356cbc1cefb1949062da05cadd",
+      "points": 34923,
+      "raw_protocol_sha256": "bedf4986d31ef0874e7dd380532094f5dc2056a3b0d269afeadd621725ad9eef",
+      "source": "Retained IA_FullState public historical EPT root tile; sparse delivered subset. Dates/vertical datum unknown. No current-provider or in-flight acquisition acceptance."
+    },
+    "sdk_or_installed_acceptance": "Not Tested"
+  },
+  "windows": {
+    "conclusion": "success",
+    "job_id": 132618748789,
+    "python": {
+      "run": 201,
+      "passed": 198,
+      "skipped": 3,
+      "failed": 0,
+      "skips": [
+        "test_windows_requirement_stops_before_creating_any_output (test_beta_installer.BetaInstallerTests.test_windows_requirement_stops_before_creating_any_output) ... skipped 'Linux PowerShell platform preflight'",
+        "test_generated_private_configuration_is_unique_bounded_and_never_prints_credentials (test_organization_deployment.OrganizationDeploymentTests.test_generated_private_configuration_is_unique_bounded_and_never_prints_credentials) ... skipped 'POSIX OpenSSL/mode fixture; real Linux container acceptance verifies certificates.'",
+        "test_case_colliding_files_cannot_share_one_layout_entry (test_packaging.PackagingTests.test_case_colliding_files_cannot_share_one_layout_entry) ... skipped 'A case-sensitive filesystem is required to create both aliases.'"
+      ]
+    },
+    "legacy_private_validation": "passed",
+    "private080_publication_and_retained_laz": "passed",
+    "history_and_utf8_regressions": "passed",
+    "recovery_smoke": "passed",
+    "installer_recipe": "structural fixtures only; no tester/public installer approval",
+    "log": "artifacts/p08b/windows-43650825716.log",
+    "log_sha256": "c05a25f2adbc413309d1c3bf03700e531124eec587249465a7c5a5ee429f5898"
+  },
+  "workflow": {
+    "conclusion": "success",
+    "createdAt": "2026-11-14T22:58:20Z",
+    "databaseId": 43650825716,
+    "event": "workflow_dispatch",
+    "headBranch": "develop/v0.8.0",
+    "headSha": "2c6b5454732f06cd60cebb6030605e9c5bc1c9b7",
+    "status": "completed",
+    "updatedAt": "2026-11-14T23:55:11Z",
+    "url": "https://github.com/JustSeanC/AeroScience/actions/runs/43650825716",
+    "workflowName": "foundation"
+  },
+  "jobs": [
+    {
+      "id": 132618683224,
+      "name": "validation-scope",
+      "status": "completed",
+      "conclusion": "success",
+      "run_id": 43650825716,
+      "logs_url": null,
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Run actions/checkout@v7",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Run python3 scripts/build/development_validation.py tier",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Post Run actions/checkout@v7",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        }
+      ]
+    },
+    {
+      "id": 132618748782,
+      "name": "linux",
+      "status": "completed",
+      "conclusion": "success",
+      "run_id": 43650825716,
+      "logs_url": null,
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Initialize containers",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Run actions/checkout@v7",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Run actions/setup-dotnet@v6",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Run actions/setup-node@v7",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Verify signed Ubuntu dependency transport fallback on disposable runner",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Run dotnet restore AeroScience.sln --locked-mode",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Verify independently compiled private validation identity",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        },
+        {
+          "name": "Install pinned native recovery tools for actual PostgreSQL restore acceptance",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9
+        },
+        {
+          "name": "Prepare accepted baseline and isolated future binary for actual update recovery",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "Run dotnet test AeroScience.sln -c Release --no-restore --logger trx --logger 'console;verbosity=normal' --blame-hang-timeout 2m --blame-hang-dump-type none",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        },
+        {
+          "name": "Retain Linux test diagnostics",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12
+        },
+        {
+          "name": "Run npm ci --ignore-scripts",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13
+        },
+        {
+          "name": "Validate native Railway configuration offline",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14
+        },
+        {
+          "name": "Run npm run check:branding",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15
+        },
+        {
+          "name": "Run npm run check:web",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16
+        },
+        {
+          "name": "Run npx playwright install --with-deps chromium",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17
+        },
+        {
+          "name": "Run npm run test:web",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 18
+        },
+        {
+          "name": "Retain browser diagnostics",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19
+        },
+        {
+          "name": "Run python3 -m unittest discover -s tests -p 'test_*.py' -v",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 20
+        },
+        {
+          "name": "Build and exercise real recovery test host",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 21
+        },
+        {
+          "name": "Post Run actions/setup-node@v7",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 39
+        },
+        {
+          "name": "Post Run actions/setup-dotnet@v6",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 40
+        },
+        {
+          "name": "Post Run actions/checkout@v7",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 41
+        },
+        {
+          "name": "Stop containers",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 42
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 43
+        }
+      ]
+    },
+    {
+      "id": 132618748789,
+      "name": "windows-companion",
+      "status": "completed",
+      "conclusion": "success",
+      "run_id": 43650825716,
+      "logs_url": null,
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Run actions/checkout@v7",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Run actions/setup-dotnet@v6",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Run actions/setup-node@v7",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Prepare isolated organization PostgreSQL when available",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Use runner scratch for durable Windows test fixtures",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Run ./scripts/build/Build-Companion.ps1",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Compile isolated validation identity and Windows application (not distributable)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        },
+        {
+          "name": "Verify Windows Earthdata vault with disposable synthetic credentials",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9
+        },
+        {
+          "name": "Compile separate 0.8 private profile and check retained genuine LAZ (no SDK or installed acceptance)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "Verify dependency locks remain unchanged",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        },
+        {
+          "name": "Retain Windows test diagnostics",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12
+        },
+        {
+          "name": "Check Windows-sensitive helpers and installer packaging",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13
+        },
+        {
+          "name": "Run dotnet build tests/AeroScience.TestHost -c Release --no-restore --nologo --output artifacts/recovery-test-host",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14
+        },
+        {
+          "name": "Compile installer recipe with structural fixtures only",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15
+        },
+        {
+          "name": "Post Run actions/setup-node@v7",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 28
+        },
+        {
+          "name": "Post Run actions/setup-dotnet@v6",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 29
+        },
+        {
+          "name": "Post Run actions/checkout@v7",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 30
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 31
+        }
+      ]
+    },
+    {
+      "id": 132618748837,
+      "name": "organization-deployment",
+      "status": "completed",
+      "conclusion": "success",
+      "run_id": 43650825716,
+      "logs_url": null,
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Run actions/checkout@v7",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Run actions/setup-dotnet@v6",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Build real retained-evidence fixture with locked dependencies",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Build pinned non-root organization container from accepted source",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Verify HTTPS, PostgreSQL TLS, secure ownership, evidence receipt and container replacement",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Build pinned recovery and Railway runtime candidates (not public distributions)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Verify real private database CA, root-owned volume and permanent non-root application",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        },
+        {
+          "name": "Verify exact private distribution image identities and parent layers (no publication)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9
+        },
+        {
+          "name": "Retain bounded deployment acceptance diagnostics",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "Post Run actions/setup-dotnet@v6",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19
+        },
+        {
+          "name": "Post Run actions/checkout@v7",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 20
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 21
+        }
+      ]
+    },
+    {
+      "id": 132618750166,
+      "name": "windows-profile",
+      "status": "completed",
+      "conclusion": "skipped",
+      "run_id": 43650825716,
+      "logs_url": null,
+      "steps": null
+    },
+    {
+      "id": 132618750263,
+      "name": "development",
+      "status": "completed",
+      "conclusion": "skipped",
+      "run_id": 43650825716,
+      "logs_url": null,
+      "steps": null
+    }
+  ],
+  "browser": {
+    "stats": {
+      "startTime": "2026-11-14T23:20:31.879Z",
+      "duration": 1945572.2200000002,
+      "expected": 519,
+      "skipped": 2,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "skips": [
+      {
+        "file": "aviation-charts.spec.js",
+        "title": "approved originals provide local chart overlays, independent science, offline tiles and exact edition selection",
+        "annotations": [
+          {
+            "type": "skip",
+            "description": "Owner deferred the ordinary chart viewer; retained research renderer coverage remains in AviationChartTests.",
+            "location": {
+              "file": "/home/runner/work/AeroScience/AeroScience/tests/web/aviation-charts.spec.js",
+              "line": 16,
+              "column": 7
+            }
+          }
+        ]
+      },
+      {
+        "file": "aviation-charts.spec.js",
+        "title": "unknown runtime is honest and chart inventory remains accessible at tablet width without altering saved data",
+        "annotations": [
+          {
+            "type": "skip",
+            "description": "Owner deferred the ordinary chart viewer; the active deferral scenario checks retention, tablet accessibility and other overlays.",
+            "location": {
+              "file": "/home/runner/work/AeroScience/AeroScience/tests/web/aviation-charts.spec.js",
+              "line": 34,
+              "column": 7
+            }
+          }
+        ]
+      }
+    ],
+    "scope": "Synthetic browser/controller fixtures; not installed MSFS/Windows visual acceptance."
+  },
+  "linux": {
+    "conclusion": "success",
+    "job_id": 132618748782,
+    "python": {
+      "run": 204,
+      "passed": 202,
+      "skipped": 2,
+      "failed": 0,
+      "skips": [
+        "test_installed_compiler_batch_with_spaces_runs_and_retains_x64_environment (test_lidar_runtime.LidarRuntimeTests.test_installed_compiler_batch_with_spaces_runs_and_retains_x64_environment) ... skipped 'Actual Windows cmd.exe execution; native Linux decoding is tested separately.'",
+        "test_pe_metadata_check_does_not_claim_runtime_exports_or_simulator_connection (test_windows_helpers.WindowsHelperTests.test_pe_metadata_check_does_not_claim_runtime_exports_or_simulator_connection) ... skipped 'Publish the Windows companion first for the native PE fixture'"
+      ]
+    },
+    "history_and_utf8_regressions": "passed",
+    "recovery_smoke": "passed",
+    "log": "artifacts/p08b/linux-43650825716.log",
+    "log_sha256": "73131ab1273fb7c380a4954055bc400f285cb8aeafe8178f517b850ddb1b966d"
+  },
+  "diagnostic_files": [
+    {
+      "path": "artifacts/p08b/linux-43650825716.log",
+      "sha256": "73131ab1273fb7c380a4954055bc400f285cb8aeafe8178f517b850ddb1b966d",
+      "bytes": 1700615
+    },
+    {
+      "path": "artifacts/p08b/windows-43650825716.log",
+      "sha256": "c05a25f2adbc413309d1c3bf03700e531124eec587249465a7c5a5ee429f5898",
+      "bytes": 1240596
+    },
+    {
+      "path": "artifacts/p08b/organization-43650825716.log",
+      "sha256": "355038613ed48016b8885eb14d816488d703b9b150f097eb1d53642d2e9f747f",
+      "bytes": 124088
+    },
+    {
+      "path": "artifacts/p08b/jobs-43650825716.json",
+      "sha256": "1253cb73322d33380099b71fa3b99e6d2780671852db865e7b0102905e66a567",
+      "bytes": 7784
+    },
+    {
+      "path": "artifacts/p08b/run-43650825716.json",
+      "sha256": "baa1c9ecb691f13d26ffa8882a5dc61908eb47c287b7b5189d10a0c0c1e99dd4",
+      "bytes": 354
+    },
+    {
+      "path": "artifacts/p08b/linux-43650825716-inventory.json",
+      "sha256": "26dffe34c2c4a937280665d3cc77ae8f5ee509a2a5a2ead3dc2d19438e805f03",
+      "bytes": 1717
+    },
+    {
+      "path": "artifacts/p08b/windows-43650825716-inventory.json",
+      "sha256": "c7cb1ef368f0a9b7f99643859b6dc9935763e8cee6cee29c668f979418439b5c",
+      "bytes": 5162
+    },
+    {
+      "path": "artifacts/p08b/browser-43650825716-inventory.json",
+      "sha256": "3b9fd562db090c3003a155cd8b3245e2a449611006adf53ce7516cdeff33ba7a",
+      "bytes": 24747
+    },
+    {
+      "path": "artifacts/p08b/organization-43650825716-inventory.json",
+      "sha256": "d550682a902054668d867918693b81cc4743129af4a8d45440ef30ea673d4738",
+      "bytes": 623
+    },
+    {
+      "path": "artifacts/p08b/linux-preflight-2c6b545.json",
+      "sha256": "765d6f1c5ef865dec5335cbade3dfa2412ac0a1f9dafc7b10e8050da31aebad2",
+      "bytes": 4920
+    },
+    {
+      "path": "artifacts/p08b/owner-commands-parse.log",
+      "sha256": "c10365f0e6b5a9e841b1bafe8cf3f1474771d13165eac74ab024dd4bdc231395",
+      "bytes": 56
+    }
+  ],
+  "preflight": {
+    "source_commit": "2c6b5454732f06cd60cebb6030605e9c5bc1c9b7",
+    "ready": false,
+    "source_ancestry_output_tools_locks_pinned_source": "Passed",
+    "blocked": [
+      "Windows x64",
+      "Visual Studio x64",
+      "12 GiB disk requirement",
+      "Actual SDK inputs",
+      "Owner simulator process state",
+      "Native runtime loading/exports/authorization"
+    ],
+    "build_attempt_created": false,
+    "owner_profile_created": false
+  },
+  "preserved_protected_refs": {
+    "main": "9dd2d8cda7ddb6d73414808f75010726871205c2",
+    "develop/v0.7.0": "695a385ec40b177c763ffc0945234a1e2b54b77e",
+    "develop/v0.7.1": "8e972d8e402f165ab9ad7c41dc9e744250f8f52e"
+  },
+  "unchanged_notices": {
+    "THIRD-PARTY-NOTICES.md": "ae01ce20f49b8fffa428c94dc3968a987b1be554ada04d205deaf4af7ec8453e",
+    "licenses/AeroScience.LidarReader.NOTICE.md": "9ee8a7c25b3dffdf8fd54b42b90d3aeef240989d92eb8c4d3f6e214bc975b1ee"
+  }
+}
