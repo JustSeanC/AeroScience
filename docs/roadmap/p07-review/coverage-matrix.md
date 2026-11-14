@@ -29,3 +29,5 @@ The [detailed matrix](coverage-matrix.json) contains exact key lists and sampled
 | Installed MSFS 2024 / Coherent GT / real native Unicode and lifecycle | **NOT TESTED**; classic ES2017 and synthetic panels are separate evidence. |
 
 The source audit retains **490 manual classifications** and **267 computed/unreferenced-key review items**. They are not credited as localized or rendered. Original source/evidence/mission text, identifiers, UTC, hashes, units and technical diagnostics can remain in their original language. See the [critical review index](critical-review-index.json) and [reviewer guide](translator-guide.md) before any localization release acceptance.
+
+Milestone automation: [Full CI 43604189721](https://github.com/JustSeanC/AeroScience/actions/runs/43604189721) passed on `fef75b7bd0a56ab5a99c2ce1d4b9f7b66c0b98c7`. See the [exact-source receipt](p07-full-ci-receipt.json) for counts and existing skips. This result does not change the human-review, manual-audit or installed-acceptance categories above.

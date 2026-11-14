@@ -43,6 +43,16 @@
       "presentation": 60,
       "nativeOriginalChecks": 4,
       "note": "Individual initial failures and subsequent corrections are retained in p07-ci-remediation.json; the final Full CI determines whole-suite acceptance."
+    },
+    "fullMilestone": {
+      "source": "fef75b7bd0a56ab5a99c2ce1d4b9f7b66c0b98c7",
+      "receipt": "p07-full-ci-receipt.json",
+      "conclusion": "success",
+      "browserPassed": 506,
+      "browserExistingSkipped": 2,
+      "linuxDotnetPassed": 1640,
+      "windowsDotnetPassed": 1630,
+      "windowsDotnetExistingSkipped": 10
     }
   },
   "receipts": [
@@ -109,12 +119,64 @@
     {
       "path": "artifacts/p07-full-ci/native-fallback-reproduction.log",
       "sha256": "1337f8b6f999a405281045f113dc288cfd51e2623ec387b352fcf52ff6fe8187"
+    },
+    {
+      "path": "artifacts/p07-full-ci/linux-43604189721.log",
+      "sha256": "32c66f77536b310d975fe5cf52860fa9fc9385807f306986362ac1d4a077eefc"
+    },
+    {
+      "path": "artifacts/p07-full-ci/windows-43604189721.log",
+      "sha256": "7079f18c0817ccc9dc3664164c73ec3a5e69a89cab7cb7c1bc629020bee2f23c"
+    },
+    {
+      "path": "artifacts/p07-full-ci/organization-deployment-43604189721.log",
+      "sha256": "61b39be0998bc54a0f191223376e6c70ca55b326af00d41c549d9232c53503b5"
     }
   ],
   "humanReview": "PENDING",
   "installedWindows": "NOT TESTED",
   "installedMSFS": "NOT TESTED",
-  "fullCI": "Pending final exact-source milestone run",
+  "fullCI": {
+    "runId": 43604189721,
+    "url": "https://github.com/JustSeanC/AeroScience/actions/runs/43604189721",
+    "source": "fef75b7bd0a56ab5a99c2ce1d4b9f7b66c0b98c7",
+    "status": "completed",
+    "conclusion": "success",
+    "createdAt": "2026-11-14T14:18:42Z",
+    "updatedAt": "2026-11-14T15:21:38Z",
+    "jobs": [
+      {
+        "name": "validation-scope",
+        "id": 132475175294,
+        "conclusion": "success"
+      },
+      {
+        "name": "linux",
+        "id": 132475220401,
+        "conclusion": "success"
+      },
+      {
+        "name": "windows-companion",
+        "id": 132475220409,
+        "conclusion": "success"
+      },
+      {
+        "name": "organization-deployment",
+        "id": 132475220412,
+        "conclusion": "success"
+      },
+      {
+        "name": "development",
+        "id": 132475221639,
+        "conclusion": "skipped"
+      },
+      {
+        "name": "windows-profile",
+        "id": 132475221818,
+        "conclusion": "skipped"
+      }
+    ]
+  },
   "coverage": {
     "messagesPerLocale": 7040,
     "nativeProjectedKeys": 370,
@@ -131,9 +193,12 @@
     }
   },
   "screenshots": {
-    "index": "screenshots/index.json",
     "count": 41,
-    "indexSha256": "4a9258086356c40e66793a58a897e7f8bceb19705462d9cd1658e8a8976574ef",
-    "category": "Synthetic Chromium only; not installed Windows/MSFS"
+    "index": "screenshots/index.json",
+    "indexSha256": "58b2e05be7cd5a80d3063040b55f74e0ebfbae6e27e4a0464c77986f7a574888",
+    "source": "fef75b7bd0a56ab5a99c2ce1d4b9f7b66c0b98c7",
+    "ci": "https://github.com/JustSeanC/AeroScience/actions/runs/43604189721",
+    "artifactId": 14119174705,
+    "evidence": "Original synthetic Chromium PNGs from accepted exact-source CI; not installed Windows/MSFS or human-review evidence."
   }
 }

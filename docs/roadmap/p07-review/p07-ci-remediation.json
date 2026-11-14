@@ -153,7 +153,47 @@
   "humanReview": "PENDING",
   "installedWindows": "NOT TESTED",
   "installedMSFS": "NOT TESTED",
-  "correctiveFullCI": "Pending final integrated exact-source run after export/coverage correction",
+  "correctiveFullCI": {
+    "runId": 43604189721,
+    "url": "https://github.com/JustSeanC/AeroScience/actions/runs/43604189721",
+    "source": "fef75b7bd0a56ab5a99c2ce1d4b9f7b66c0b98c7",
+    "status": "completed",
+    "conclusion": "success",
+    "createdAt": "2026-11-14T14:18:42Z",
+    "updatedAt": "2026-11-14T15:21:38Z",
+    "jobs": [
+      {
+        "name": "validation-scope",
+        "id": 132475175294,
+        "conclusion": "success"
+      },
+      {
+        "name": "linux",
+        "id": 132475220401,
+        "conclusion": "success"
+      },
+      {
+        "name": "windows-companion",
+        "id": 132475220409,
+        "conclusion": "success"
+      },
+      {
+        "name": "organization-deployment",
+        "id": 132475220412,
+        "conclusion": "success"
+      },
+      {
+        "name": "development",
+        "id": 132475221639,
+        "conclusion": "skipped"
+      },
+      {
+        "name": "windows-profile",
+        "id": 132475221818,
+        "conclusion": "skipped"
+      }
+    ]
+  },
   "intermediateRun": {
     "url": "https://github.com/JustSeanC/AeroScience/actions/runs/43589237836",
     "source": "e2feb43d16ea7a81c9e037d0757416fe1f2f9490",
@@ -294,7 +334,8 @@
     "linuxBrowser": {
       "passed": 499,
       "failed": 7,
-      "total": 508
+      "total": 508,
+      "skipped": 2
     },
     "diagnostics": {
       "artifactId": 14117380606,
@@ -319,7 +360,7 @@
         "fix": "Assert exact shared candidate translations and effective language, retain original science/consent/commands/keyboard/overflow/axe checks; mount the synthetic evidence fixture visibly and additionally assert unchanged full reference JSON."
       }
     ],
-    "status": "All 28 affected browser scenarios passed across focused reruns; 60 presentation tests and four original native checks pass. Exact-source corrective Full CI still required.",
+    "status": "All confirmed failures corrected. Full CI 43604189721 passed on fef75b7bd0a56ab5a99c2ce1d4b9f7b66c0b98c7; see p07-full-ci-receipt.json for exact counts, original skips and hashes.",
     "focusedValidation": {
       "initialBrowser": {
         "passed": 25,

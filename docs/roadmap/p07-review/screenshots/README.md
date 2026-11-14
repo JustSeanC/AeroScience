@@ -13,3 +13,5 @@ All captures use synthetic browser fixtures. They are not genuine MSFS or Window
 All 40 light/dark, desktop/narrow Results/native combinations are included, plus the pseudolocale 200% capture. For native panels, light/dark identifies the simulator-host fixture; the existing readable native panel palette remains in use.
 
 Review operational wording first, then scientific source-grid and modeled-versus-measured distinctions. Record the exact bundle identity and reviewed keys in the fluent-review receipt. Expanded candidate strings and English fallbacks require review; automation is separate evidence.
+
+These 41 original PNGs were refreshed from successful [Full CI 43604189721](https://github.com/JustSeanC/AeroScience/actions/runs/43604189721), exact runtime `fef75b7bd0a56ab5a99c2ce1d4b9f7b66c0b98c7`. `index.json` records the source artifact, catalog/bundle identity and each file hash. No image editing or installed-native acceptance is implied.
