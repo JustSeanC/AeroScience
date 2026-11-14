@@ -2429,6 +2429,116 @@
     "results.loadOverview": {
       "context": "Explicit bounded local paged reading; no external retrieval or new science",
       "parameters": []
+    },
+    "organizations.navigation": {
+      "context": "P06 guided organization workflow; presentation only, preserve scientific and permission boundaries.",
+      "parameters": []
+    },
+    "organizations.section.mine": {
+      "context": "P06 guided organization workflow; presentation only, preserve scientific and permission boundaries.",
+      "parameters": []
+    },
+    "organizations.section.available": {
+      "context": "P06 guided organization workflow; presentation only, preserve scientific and permission boundaries.",
+      "parameters": []
+    },
+    "organizations.section.assignments": {
+      "context": "P06 guided organization workflow; presentation only, preserve scientific and permission boundaries.",
+      "parameters": []
+    },
+    "organizations.section.campaigns": {
+      "context": "P06 guided organization workflow; presentation only, preserve scientific and permission boundaries.",
+      "parameters": []
+    },
+    "organizations.section.live": {
+      "context": "P06 guided organization workflow; presentation only, preserve scientific and permission boundaries.",
+      "parameters": []
+    },
+    "organizations.section.evidence": {
+      "context": "P06 guided organization workflow; presentation only, preserve scientific and permission boundaries.",
+      "parameters": []
+    },
+    "organizations.section.reviews": {
+      "context": "P06 guided organization workflow; presentation only, preserve scientific and permission boundaries.",
+      "parameters": []
+    },
+    "organizations.introduction": {
+      "context": "P06 guided organization workflow; presentation only, preserve scientific and permission boundaries.",
+      "parameters": []
+    },
+    "organizations.journey": {
+      "context": "P06 guided organization workflow; presentation only, preserve scientific and permission boundaries.",
+      "parameters": []
+    },
+    "organizations.connectFirst": {
+      "context": "P06 guided organization workflow; presentation only, preserve scientific and permission boundaries.",
+      "parameters": []
+    },
+    "organizations.connection": {
+      "context": "P06 guided organization workflow; presentation only, preserve scientific and permission boundaries.",
+      "parameters": []
+    },
+    "organizations.permission": {
+      "context": "P06 guided organization workflow; presentation only, preserve scientific and permission boundaries.",
+      "parameters": [
+        "permission"
+      ]
+    },
+    "organizations.portal": {
+      "context": "P06 guided organization workflow; presentation only, preserve scientific and permission boundaries.",
+      "parameters": []
+    },
+    "organizations.administration": {
+      "context": "P06 guided organization workflow; presentation only, preserve scientific and permission boundaries.",
+      "parameters": []
+    },
+    "organizations.reviewPortal": {
+      "context": "P06 guided organization workflow; presentation only, preserve scientific and permission boundaries.",
+      "parameters": []
+    },
+    "organizations.requirements": {
+      "context": "P06 guided organization workflow; presentation only, preserve scientific and permission boundaries.",
+      "parameters": []
+    },
+    "organizations.unsupportedDefinition": {
+      "context": "P06 guided organization workflow; presentation only, preserve scientific and permission boundaries.",
+      "parameters": []
+    },
+    "organizations.aircraftUnspecified": {
+      "context": "P06 guided organization workflow; presentation only, preserve scientific and permission boundaries.",
+      "parameters": []
+    },
+    "organizations.requirement.aircraft": {
+      "context": "P06 guided organization workflow; presentation only, preserve scientific and permission boundaries.",
+      "parameters": []
+    },
+    "organizations.requirement.measurements": {
+      "context": "P06 guided organization workflow; presentation only, preserve scientific and permission boundaries.",
+      "parameters": []
+    },
+    "organizations.requirement.method": {
+      "context": "P06 guided organization workflow; presentation only, preserve scientific and permission boundaries.",
+      "parameters": []
+    },
+    "organizations.requirement.evidence": {
+      "context": "P06 guided organization workflow; presentation only, preserve scientific and permission boundaries.",
+      "parameters": []
+    },
+    "organizations.requirement.quality": {
+      "context": "P06 guided organization workflow; presentation only, preserve scientific and permission boundaries.",
+      "parameters": []
+    },
+    "organizations.reviewPolicy": {
+      "context": "P06 guided organization workflow; presentation only, preserve scientific and permission boundaries.",
+      "parameters": []
+    },
+    "organizations.assignmentBoundary": {
+      "context": "P06 guided organization workflow; presentation only, preserve scientific and permission boundaries.",
+      "parameters": []
+    },
+    "organizations.manageCampaigns": {
+      "context": "P06 campaign manager navigation; does not grant administrator permissions.",
+      "parameters": []
     }
   }
 }

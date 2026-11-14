@@ -86,7 +86,7 @@ function selectNavigation(route){
     if(selected)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');
   }
 }
-function organizationNavigation(connections){$('organizations-navigation').hidden=!Array.isArray(connections)||!connections.length;selectNavigation(resolveRoute(location.hash));}
+function organizationNavigation(connections){$('organizations-navigation').hidden=false;selectNavigation(resolveRoute(location.hash));}
 window.addEventListener('aeroscience-organizations',event=>organizationNavigation(event.detail));
 function notice(message = "") {
   $("notice").textContent = message;

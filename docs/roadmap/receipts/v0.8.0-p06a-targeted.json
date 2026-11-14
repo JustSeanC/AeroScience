@@ -1,0 +1,93 @@
+{
+  "checkpoint": "P06a",
+  "base": "d7b66bc1615664a96b76fff018b1a40cfc8fe2b3",
+  "dotnet": {
+    "passed": 49,
+    "failed": 0,
+    "skipped": 0,
+    "selection": [
+      "OrganizationMembershipTests",
+      "OrganizationOpportunityTests",
+      "OrganizationClaimConnectionTests",
+      "OrganizationMissionPlanningTests",
+      "OrganizationConnectionTests"
+    ],
+    "trx": {
+      "path": "artifacts/p06a-dotnet/p06a-targeted.trx",
+      "sha256": "d2622ffe43f59962d161ee474ca63e2a53d1023b2dcb1cc2b5fe6153a3cf6af3",
+      "bytes": 73474
+    }
+  },
+  "browser": {
+    "distinctPassed": 7,
+    "actualOrganizationPostgresFlows": 3,
+    "syntheticPresentationScenarios": 4,
+    "finalSyntheticRun": {
+      "passed": 4,
+      "failed": 0
+    },
+    "initialRun": {
+      "passed": 6,
+      "failed": 1,
+      "cause": "New scaling harness addStyleTag was correctly blocked by original CSP. It now uses existing CSSOM text scaling and asserts the actual doubled font size; CSP unchanged."
+    }
+  },
+  "javascript": {
+    "nativePassed": 4,
+    "presentationPassed": 38,
+    "failed": 0,
+    "catalogVersion": 14,
+    "englishMessages": 610,
+    "previewLocales": [
+      "es-ES",
+      "fr-FR",
+      "de-DE",
+      "pt-BR"
+    ]
+  },
+  "additionalDiagnosis": "Unchanged native formatter test exposed sandbox spawnSync EPERM; direct diagnostics retained, same test passes outside command sandbox. No assertions or application protections changed.",
+  "receipts": [
+    {
+      "path": "artifacts/p06a-dotnet.log",
+      "sha256": "3440f3f83bef8e628bf762e6e122444df847a19a6e69730b026625baa9f7d4f3",
+      "bytes": 1666
+    },
+    {
+      "path": "artifacts/p06a-browser.log",
+      "sha256": "45f5bb088eb771dce70af1a08c24c9f7e0046c40b8ed0d8e735ca0ba6c29ebf1",
+      "bytes": 4353
+    },
+    {
+      "path": "artifacts/p06a-browser-final.log",
+      "sha256": "e051ab9aa67ffb8575cab0defa2faab8fa49fc6961ce73144b109f9094a2f474",
+      "bytes": 907
+    },
+    {
+      "path": "artifacts/p06a-javascript.log",
+      "sha256": "61d34345f05662c5e5c9f1f13a814a6805f8ef56905ac2013769b8cc7423049b",
+      "bytes": 1548
+    },
+    {
+      "path": "artifacts/p06a-javascript-final.log",
+      "sha256": "1a7dd075484d120933efc8b1e81432b0f2e4e76e01d25c20fee2bb8f9a7a0084",
+      "bytes": 4975
+    },
+    {
+      "path": "artifacts/p06a-i18n-direct.log",
+      "sha256": "ab9a922e0c6c2782362b17ae172e39b2b5fb02a34f1b3bec0905159d8ffe20d3",
+      "bytes": 3112
+    },
+    {
+      "path": "artifacts/p06a-i18n-outer.log",
+      "sha256": "c595aaad4abdd0625f1379c3b00232f85b869203859676cd8422200798e600e9",
+      "bytes": 3851
+    },
+    {
+      "path": "artifacts/p06a-failed-browser/web-results.json",
+      "sha256": "783d96adc5fdad0910b49831743aefc8cb5b2b10fb7cf8cc014f8bc84b64853a",
+      "bytes": 16415
+    }
+  ],
+  "installedWindowsMsfs": "Not Tested",
+  "fullCI": "Reserved for completed P06 integration; no Full run at individual stage."
+}

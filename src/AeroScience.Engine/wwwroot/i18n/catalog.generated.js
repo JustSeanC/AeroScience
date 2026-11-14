@@ -2,7 +2,7 @@
 export const localeData = {
   "manifest": {
     "version": 1,
-    "catalogVersion": 13,
+    "catalogVersion": 14,
     "fallback": "en-US",
     "locales": [
       {
@@ -2468,12 +2468,122 @@ export const localeData = {
       "results.loadOverview": {
         "context": "Explicit bounded local paged reading; no external retrieval or new science",
         "parameters": []
+      },
+      "organizations.navigation": {
+        "context": "P06 guided organization workflow; presentation only, preserve scientific and permission boundaries.",
+        "parameters": []
+      },
+      "organizations.section.mine": {
+        "context": "P06 guided organization workflow; presentation only, preserve scientific and permission boundaries.",
+        "parameters": []
+      },
+      "organizations.section.available": {
+        "context": "P06 guided organization workflow; presentation only, preserve scientific and permission boundaries.",
+        "parameters": []
+      },
+      "organizations.section.assignments": {
+        "context": "P06 guided organization workflow; presentation only, preserve scientific and permission boundaries.",
+        "parameters": []
+      },
+      "organizations.section.campaigns": {
+        "context": "P06 guided organization workflow; presentation only, preserve scientific and permission boundaries.",
+        "parameters": []
+      },
+      "organizations.section.live": {
+        "context": "P06 guided organization workflow; presentation only, preserve scientific and permission boundaries.",
+        "parameters": []
+      },
+      "organizations.section.evidence": {
+        "context": "P06 guided organization workflow; presentation only, preserve scientific and permission boundaries.",
+        "parameters": []
+      },
+      "organizations.section.reviews": {
+        "context": "P06 guided organization workflow; presentation only, preserve scientific and permission boundaries.",
+        "parameters": []
+      },
+      "organizations.introduction": {
+        "context": "P06 guided organization workflow; presentation only, preserve scientific and permission boundaries.",
+        "parameters": []
+      },
+      "organizations.journey": {
+        "context": "P06 guided organization workflow; presentation only, preserve scientific and permission boundaries.",
+        "parameters": []
+      },
+      "organizations.connectFirst": {
+        "context": "P06 guided organization workflow; presentation only, preserve scientific and permission boundaries.",
+        "parameters": []
+      },
+      "organizations.connection": {
+        "context": "P06 guided organization workflow; presentation only, preserve scientific and permission boundaries.",
+        "parameters": []
+      },
+      "organizations.permission": {
+        "context": "P06 guided organization workflow; presentation only, preserve scientific and permission boundaries.",
+        "parameters": [
+          "permission"
+        ]
+      },
+      "organizations.portal": {
+        "context": "P06 guided organization workflow; presentation only, preserve scientific and permission boundaries.",
+        "parameters": []
+      },
+      "organizations.administration": {
+        "context": "P06 guided organization workflow; presentation only, preserve scientific and permission boundaries.",
+        "parameters": []
+      },
+      "organizations.reviewPortal": {
+        "context": "P06 guided organization workflow; presentation only, preserve scientific and permission boundaries.",
+        "parameters": []
+      },
+      "organizations.requirements": {
+        "context": "P06 guided organization workflow; presentation only, preserve scientific and permission boundaries.",
+        "parameters": []
+      },
+      "organizations.unsupportedDefinition": {
+        "context": "P06 guided organization workflow; presentation only, preserve scientific and permission boundaries.",
+        "parameters": []
+      },
+      "organizations.aircraftUnspecified": {
+        "context": "P06 guided organization workflow; presentation only, preserve scientific and permission boundaries.",
+        "parameters": []
+      },
+      "organizations.requirement.aircraft": {
+        "context": "P06 guided organization workflow; presentation only, preserve scientific and permission boundaries.",
+        "parameters": []
+      },
+      "organizations.requirement.measurements": {
+        "context": "P06 guided organization workflow; presentation only, preserve scientific and permission boundaries.",
+        "parameters": []
+      },
+      "organizations.requirement.method": {
+        "context": "P06 guided organization workflow; presentation only, preserve scientific and permission boundaries.",
+        "parameters": []
+      },
+      "organizations.requirement.evidence": {
+        "context": "P06 guided organization workflow; presentation only, preserve scientific and permission boundaries.",
+        "parameters": []
+      },
+      "organizations.requirement.quality": {
+        "context": "P06 guided organization workflow; presentation only, preserve scientific and permission boundaries.",
+        "parameters": []
+      },
+      "organizations.reviewPolicy": {
+        "context": "P06 guided organization workflow; presentation only, preserve scientific and permission boundaries.",
+        "parameters": []
+      },
+      "organizations.assignmentBoundary": {
+        "context": "P06 guided organization workflow; presentation only, preserve scientific and permission boundaries.",
+        "parameters": []
+      },
+      "organizations.manageCampaigns": {
+        "context": "P06 campaign manager navigation; does not grant administrator permissions.",
+        "parameters": []
       }
     }
   },
   "catalogs": {
     "en-US": {
-      "version": 13,
+      "version": 14,
       "locale": "en-US",
       "messages": {
         "common.messageUnavailable": "Details are unavailable. Refresh to review the current information.",
@@ -3064,7 +3174,34 @@ export const localeData = {
         "results.sourceBounds": "View source search bounds (not coverage)",
         "results.boundsMeaning": "Source search bounds only; QA/nodata and actual retained cell/point support determine scientific coverage.",
         "results.reliefLayer": "Relief shading — loaded valid neighbors only",
-        "results.loadOverview": "Load bounded local overview (actual records)"
+        "results.loadOverview": "Load bounded local overview (actual records)",
+        "organizations.navigation": "Organization tasks",
+        "organizations.section.mine": "My Organizations",
+        "organizations.section.available": "Available Research",
+        "organizations.section.assignments": "My Assignments",
+        "organizations.section.campaigns": "Active Campaigns",
+        "organizations.section.live": "Live Flights",
+        "organizations.section.evidence": "Evidence Submissions",
+        "organizations.section.reviews": "Reviews & Results",
+        "organizations.introduction": "Work together on published research. Your personal flights and science stay on this computer until you separately approve sharing.",
+        "organizations.journey": "Find research → review requirements → claim or accept → prepare and fly → review evidence → submit when approved.",
+        "organizations.connectFirst": "Connect to an organization to check current research. Saved personal work and prepared assignments remain available offline.",
+        "organizations.connection": "Research organization connection",
+        "organizations.permission": "Desktop permission: {permission}. Browser approval, assignment participation, evidence delivery and live sharing are independent.",
+        "organizations.portal": "Open organization portal",
+        "organizations.administration": "Organization Administration",
+        "organizations.reviewPortal": "Review Organization Evidence",
+        "organizations.requirements": "Issued research requirements",
+        "organizations.unsupportedDefinition": "This definition version cannot be explained here. Inspect the exact publication; no requirements or readiness have been inferred.",
+        "organizations.aircraftUnspecified": "This typed definition does not specify an aircraft model. Review its original conditions and instructions before choosing an aircraft.",
+        "organizations.requirement.aircraft": "Aircraft and flight conditions",
+        "organizations.requirement.measurements": "Instruments and measurements",
+        "organizations.requirement.method": "What to do",
+        "organizations.requirement.evidence": "Evidence to retain",
+        "organizations.requirement.quality": "Required conditions",
+        "organizations.reviewPolicy": "Published review policy",
+        "organizations.assignmentBoundary": "Claiming confirms participation only. Prepare Mission remains a separate step; recording, science collection, local evaluation and organization approval stay separate.",
+        "organizations.manageCampaigns": "Manage Campaigns"
       }
     }
   }

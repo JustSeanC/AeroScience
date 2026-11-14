@@ -109,6 +109,19 @@ async function claimedPilot(page,browser,template='vertical-atmospheric-profile'
 }
 async function saveMissionDialog(desktop,action){const response=desktop.waitForResponse(r=>new URL(r.url()).pathname.endsWith('/prepare-mission')&&r.request().method()==='POST');await desktop.getByRole('dialog',{name:'Prepare Mission',exact:true}).getByRole('button',{name:action,exact:true}).click();const reply=await response;expect(reply.ok(),await reply.text()).toBe(true);return reply.json();}
 
+test('v0.8 P06a guided research navigation preserves actual issued claims and prepares without recording or sharing',async({page,browser})=>{
+ await administrator(page);const campaign=await publishedCampaign(page,'flight-regime'),opportunity=await publishedOpportunity(page,campaign),invite=await invitation(page);
+ const ctx=await browser.newContext({storageState:{cookies:[],origins:[]}});try{
+  const pilot=await ctx.newPage();await joinOrganization(pilot,invite.link);const desktop=await ctx.newPage(),panel=await connectDesktop(desktop,pilot,true);
+  const before=await(await desktop.request.get('http://127.0.0.1:5080/api/state')).json();
+  await panel.getByRole('link',{name:'Available Research',exact:true}).click();await expect(panel.getByRole('region',{name:'Issued research requirements'})).toContainText(opportunity.instructions);
+  await panel.getByRole('button',{name:'Claim Test Card',exact:true}).click();const dialog=desktop.getByRole('dialog',{name:'Claim Test Card'});await expect(dialog).toContainText('does not prepare or start a mission');await dialog.getByRole('button',{name:'Claim Test Card',exact:true}).click();
+  await expect(panel.getByRole('link',{name:'My Assignments',exact:true})).toHaveAttribute('aria-current','page');await expect(panel).toContainText('issued revision '+opportunity.revision);
+  await panel.getByRole('button',{name:'Prepare Mission',exact:true}).click();const prep=desktop.getByRole('dialog',{name:'Prepare Mission'});await prep.getByRole('button',{name:'Create Suggested Mission',exact:true}).click();await expect(prep).toContainText('Review Suggested Mission');await prep.getByRole('button',{name:'Save as New Plan',exact:true}).click();await expect(prep).toContainText('Mission Prepared');await expect(prep).toContainText('Nothing is recording or collecting science yet.');await prep.getByRole('button',{name:'Done',exact:true}).click();
+  const after=await(await desktop.request.get('http://127.0.0.1:5080/api/state')).json();expect(after.activeMission).toEqual(before.activeMission);expect(await(await desktop.request.get('http://127.0.0.1:5080/api/organizations/live/status')).json()).toEqual([]);await expect(panel.getByRole('link',{name:'Organization Administration',exact:true})).toHaveCount(0);
+ }finally{await ctx.close();}
+});
+
 test('claimed scientific work prepares a suggested mission and reopens original local atmospheric results offline',async({page,browser,playwright})=>{
  const e=await engineFixture(playwright);let p;
  try{p=await claimedPilot(page,browser);const {desktop,row,claim}=p;await row.getByRole('button',{name:'Prepare Mission',exact:true}).click();const dialog=desktop.getByRole('dialog',{name:'Prepare Mission',exact:true});await dialog.getByRole('button',{name:'Create Suggested Mission',exact:true}).click();await expect(dialog.getByRole('heading',{name:'Review Suggested Mission',exact:true})).toBeVisible();await desktop.setViewportSize({width:390,height:844});expect((await new AxeBuilder({page:desktop}).include('dialog[open]').analyze()).violations).toEqual([]);const saved=await saveMissionDialog(desktop,'Save as New Plan');expect(saved.card.organizationAssignment.claimId).toBe(claim.id);expect(saved.plan.instruments.filter(i=>i.enabled)).toHaveLength(4);expect((await e.get('/api/state')).activeMission).toBeNull();

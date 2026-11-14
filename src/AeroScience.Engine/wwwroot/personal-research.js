@@ -20,7 +20,7 @@ export async function personalResearch(root, api) {
   const active = () => run === epoch && !root.hidden;
   root.replaceChildren(node('h1', 'My Research'));informationDetails(root,'About Personal Research',node('p','Your experiments stay on this computer. No organization, account or internet connection is needed.'));
   const status = node('p', 'Loading personal test cards…'); status.setAttribute('role', 'status'); root.append(status);
-  const collaboration=node('section');root.append(collaboration);researchOrganizations(collaboration,api,active);submissionHistory(collaboration,api,active);const params=new URLSearchParams(location.hash.split('?')[1]||'');const submission=params.get('submissionDraft');if(submission&&!params.has('connectOrganization')){params.delete('submissionDraft');window.history.replaceState(null,'',location.pathname+location.search+'#my-research'+(params.size?'?'+params:''));queueMicrotask(()=>{if(active())openSubmissionBuilder(api,{draftId:submission});});}
+  const collaboration=node('section');root.append(collaboration);researchOrganizations(collaboration,api,active);const params=new URLSearchParams(location.hash.split('?')[1]||'');if(params.get('section')!=='organizations')submissionHistory(collaboration,api,active);const submission=params.get('submissionDraft');if(submission&&!params.has('connectOrganization')){params.delete('submissionDraft');window.history.replaceState(null,'',location.pathname+location.search+'#my-research'+(params.size?'?'+params:''));queueMicrotask(()=>{if(active())openSubmissionBuilder(api,{draftId:submission});});}
   const action = (label, handler, style = 'secondary') => {
     const b = node('button', label, style); b.type = 'button';
     b.onclick = async () => {

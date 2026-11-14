@@ -1,8 +1,10 @@
 import {prepareOrganizationMission} from './organization-mission-preparation.js';
 import {node,button,disclosure,dateTime} from './workstation-ui.js';
 import {dialogHeader} from './dialog-ui.js';
+import {assignmentRequirements} from './organization-guided-ui.js';
+import {t} from './i18n.js';
 
-export function organizationResearch(parent,api,saved,active,authorize){
+export function organizationResearch(parent,api,saved,active,authorize,{initialView=null,onAssignmentChanged=null}={}){
  let epoch=0;const markUnconfirmed=message=>{const prior=parent.querySelector(':scope > p');if(prior)prior.textContent=message+' Earlier organization details are reference only.';};const actions=node('div',undefined,'actions'),content=node('section');content.setAttribute('aria-label','Organization research assignments');parent.append(actions,content);
  const manage=saved.permission==='manageOwnClaims';
  if(!manage)button(actions,'Authorize Claim Management',authorize);
@@ -17,7 +19,8 @@ export function organizationResearch(parent,api,saved,active,authorize){
      if(v.state==='claimed')button(row,'Prepare Mission',()=>prepareOrganizationMission(api,saved,v),'primary');
      if(v.state==='reserved')action(row,'Accept Assignment','accept',c,v);if(v.state!=='released')action(row,'Release Claim','release',c,v);
     }else{row.append(node('p',`${v.availability} · ${v.availableSlots} slots available · published revision ${c.revision}`));if(v.eligible&&!v.suspended&&v.availableSlots>0&&c.policy.allowVolunteers)action(row,'Claim Test Card','claim',c);}
-    const instructions=disclosure(row,'Assignment Details');instructions.append(node('p',c.description),node('p',c.instructions));
+    assignmentRequirements(row,c);row.append(node('p',t('organizations.assignmentBoundary')));
+    const instructions=disclosure(row,'Assignment Details');instructions.append(node('p',c.description));
     const details=disclosure(row,'Issued Criteria & Provenance',`Organization ${c.organizationId} · Campaign revision ${c.campaignRevision} · Card revision ${c.revision}. Definitions are versioned source references, not collected evidence.`);details.append(node('pre',JSON.stringify(c.definition,null,2)));content.append(row);
    }
    if(!result.page.items.length)content.append(node('p',assignments?'No assignments on this page.':'No published opportunities on this page.'));
@@ -26,6 +29,7 @@ export function organizationResearch(parent,api,saved,active,authorize){
  }
  function action(row,label,kind,c,claim){const b=button(row,label,()=>review(label,kind,c,claim));b.disabled=!manage;if(!manage)b.title='Authorize Claim Management in your organization browser first.';}
  function review(label,kind,c,claim){const box=node('dialog');box.setAttribute('aria-label',label);document.body.append(box);box.append(node('h2',label),node('h3',c.name),node('p',c.objective),node('p',`Issued publication ${c.revision}. ${kind==='release'?'Release only this assignment. Your personal science and flight history remain unchanged.':'This confirms participation only; it does not prepare or start a mission, collect science or upload evidence.'}`));dialogHeader(box,{title:label});const controls=node('div',undefined,'actions'),message=node('p');message.setAttribute('role','status');box.append(message,controls);const requestId=crypto.randomUUID();
-  const confirm=button(controls,label,async()=>{confirm.disabled=true;try{await api(`/api/organizations/${saved.id}/claim-command`,{version:1,requestId,organizationId:saved.organizationId,opportunityId:c.id,publishedRevision:claim?.issuedRevision||c.revision,action:kind,claimId:claim?.id||null,expectedClaimRevision:claim?.revision||null});box.close();await show(true);status.textContent='Server confirmed your assignment change. No flight or scientific contribution was completed.';}catch(e){message.textContent=e.message;markUnconfirmed('Assignment ownership has not been reconfirmed.');for(const b of content.querySelectorAll('button'))b.disabled=true;status.textContent='Ownership has not been reconfirmed. Refresh Available Research or My Assignments before another action.';}finally{if(confirm.isConnected)confirm.disabled=false;}});button(controls,'Cancel',()=>box.close());box.addEventListener('close',()=>box.remove(),{once:true});box.showModal();
+  const confirm=button(controls,label,async()=>{confirm.disabled=true;try{await api(`/api/organizations/${saved.id}/claim-command`,{version:1,requestId,organizationId:saved.organizationId,opportunityId:c.id,publishedRevision:claim?.issuedRevision||c.revision,action:kind,claimId:claim?.id||null,expectedClaimRevision:claim?.revision||null});box.close();if(onAssignmentChanged){onAssignmentChanged();return;}await show(true);status.textContent='Server confirmed your assignment change. No flight or scientific contribution was completed.';}catch(e){message.textContent=e.message;markUnconfirmed('Assignment ownership has not been reconfirmed.');for(const b of content.querySelectorAll('button'))b.disabled=true;status.textContent='Ownership has not been reconfirmed. Refresh Available Research or My Assignments before another action.';}finally{if(confirm.isConnected)confirm.disabled=false;}});button(controls,'Cancel',()=>box.close());box.addEventListener('close',()=>box.remove(),{once:true});box.showModal();
  }
+ if(initialView)show(initialView==='assignments');
 }
