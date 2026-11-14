@@ -18,7 +18,7 @@ public sealed class OrganizationSubmissions(OrganizationDatabase db,Organization
     public async Task<SubmissionCapabilities> Capabilities(Guid claimId,HttpContext c,CancellationToken ct)
     {
         var grant=await devices.Authorize(c,ct);var claim=await db.Claims.AsNoTracking().SingleOrDefaultAsync(r=>r.Id==claimId&&r.UserId==grant.UserId,ct)??throw new OrganizationNotFound();
-        return new((await members.Public(ct)).Id,grant.UserId!.Value,await Policy(claim.OpportunityId,ct),grant.Permission);
+        return new((await members.Public(ct)).Id,grant.UserId!.Value,await Policy(claim.OpportunityId,ct),grant.Permission,SubmissionSupportingProducts.Version);
     }
     public async Task<SubmissionPolicy> ManagerPolicy(Guid opportunity,ClaimsPrincipal actor,CancellationToken ct)
     {await members.RequireManager(actor,false,ct);return await Policy(opportunity,ct);}

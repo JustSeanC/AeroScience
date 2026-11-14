@@ -4,10 +4,11 @@ namespace AeroScience.Shared;
 // Local persistence contains these references/consent only, never SubmissionEvidenceData.
 public enum SubmissionPolicyMode { RequireMinimumEvidence, AllowIncompleteSubmission }
 public enum SubmissionDeliveryState { Draft, ApprovedQueued, Sending, RetryAvailable, HeldEvidenceMissing, HeldAuthorization, ServerReceived, Cancelled }
-public enum SubmissionEvidenceKind { Definition, Result, Telemetry, ScientificObservations, PilotDocumentation, CollectionSessions, MissionConfiguration }
+public enum SubmissionEvidenceKind { Definition, Result, Telemetry, ScientificObservations, PilotDocumentation, CollectionSessions, MissionConfiguration, SupportingProductReference }
 public sealed record SubmissionPolicy(int Version,Guid OpportunityId,int Revision,SubmissionPolicyMode Mode,string MinimumRule,int MaximumPayloadBytes,DateTimeOffset PublishedUtc,string RetentionDisclosure);
 public sealed record SubmissionPolicyCommand(int Version,Guid RequestId,int ExpectedRevision,SubmissionPolicyMode Mode);
-public sealed record SubmissionCapabilities(Guid OrganizationId,Guid PilotId,SubmissionPolicy Policy,OrganizationDesktopPermission Permission);
+public sealed record SubmissionCapabilities(Guid OrganizationId,Guid PilotId,SubmissionPolicy Policy,OrganizationDesktopPermission Permission,
+    [property:JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingDefault)] int SupportingProductsVersion=0);
 public sealed record SubmissionCardBinding(Guid ClaimId,Guid OpportunityId,Guid CampaignId,int IssuedRevision,string IssuedSha256,
     Guid CardId,int CardRevision,string DefinitionSha256,DateTimeOffset StartUtc,DateTimeOffset EndUtc,long KnownRecordedAttempts);
 public sealed record SubmissionEvidenceReference(string Key,SubmissionEvidenceKind Kind,Guid CardId,Guid ResultId,Guid FlightId,
@@ -33,7 +34,8 @@ public sealed record SubmissionEvidenceData(
     [property:JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] ScienceObservation[]? Observations=null,
     [property:JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] PilotObservationEntry[]? Documentation=null,
     [property:JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] ScienceCollectionSession[]? Sessions=null,
-    [property:JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] SubmissionConfiguration? Configuration=null);
+    [property:JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] SubmissionConfiguration? Configuration=null,
+    [property:JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] SubmissionSupportingProduct? SupportingProduct=null);
 public sealed record SubmissionEvidenceItem(SubmissionEvidenceReference Reference,SubmissionEvidenceData Data);
 public sealed record SubmissionDocument(SubmissionManifest Manifest,SubmissionEvidenceItem[] Evidence);
 public sealed record SubmissionUpload(SubmissionDocument Document,SubmissionConsent Consent);
@@ -44,7 +46,8 @@ public sealed record SubmissionDraft(Guid Id,int Revision,SubmissionDeliveryStat
 public sealed record SubmissionBuilderRequest(Guid FlightId,Guid? CardId=null);
 public sealed record SubmissionDraftRequest(int Version,Guid Id,int ExpectedRevision,Guid FlightId,Guid[] ResultIds,string[]? SelectedKeys,
     string Name,Guid? ConnectionId=null,
-    [property:JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] SubmissionReviewLink? ReviewLink=null);
+    [property:JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] SubmissionReviewLink? ReviewLink=null,
+    [property:JsonIgnore(Condition=JsonIgnoreCondition.WhenWritingNull)] Guid[]? SupportingProductIds=null);
 public sealed record SubmissionApproval(int Version,int ExpectedRevision,string ManifestSha256,string PayloadSha256,int PayloadBytes,Guid ConnectionId,bool ExplicitApproval);
 public sealed record SubmissionChange(int ExpectedRevision);
 public sealed record SubmissionChoice(Guid ResultId,Guid CardId,string CardName,Guid ClaimId,Guid OrganizationId,string OrganizationName,

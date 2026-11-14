@@ -2539,6 +2539,137 @@
     "organizations.manageCampaigns": {
       "context": "P06 campaign manager navigation; does not grant administrator permissions.",
       "parameters": []
+    },
+    "submissions.journey": {
+      "context": "P06 explicit evidence sharing; source metadata and derived references never grant original science or approval.",
+      "parameters": []
+    },
+    "submissions.supportingTitle": {
+      "context": "P06 explicit evidence sharing; source metadata and derived references never grant original science or approval.",
+      "parameters": []
+    },
+    "submissions.referenceOnly": {
+      "context": "P06 explicit evidence sharing; source metadata and derived references never grant original science or approval.",
+      "parameters": []
+    },
+    "submissions.noSourceValues": {
+      "context": "P06 explicit evidence sharing; source metadata and derived references never grant original science or approval.",
+      "parameters": []
+    },
+    "submissions.field.product": {
+      "context": "P06 explicit evidence sharing; source metadata and derived references never grant original science or approval.",
+      "parameters": []
+    },
+    "submissions.field.processed": {
+      "context": "P06 explicit evidence sharing; source metadata and derived references never grant original science or approval.",
+      "parameters": []
+    },
+    "submissions.field.method": {
+      "context": "P06 explicit evidence sharing; source metadata and derived references never grant original science or approval.",
+      "parameters": []
+    },
+    "submissions.field.corridor": {
+      "context": "P06 explicit evidence sharing; source metadata and derived references never grant original science or approval.",
+      "parameters": []
+    },
+    "submissions.field.scope": {
+      "context": "P06 explicit evidence sharing; source metadata and derived references never grant original science or approval.",
+      "parameters": []
+    },
+    "submissions.referenceCounts": {
+      "context": "P06 explicit evidence sharing; source metadata and derived references never grant original science or approval.",
+      "parameters": [
+        "values",
+        "missing"
+      ]
+    },
+    "submissions.sourceDate": {
+      "context": "P06 explicit evidence sharing; source metadata and derived references never grant original science or approval.",
+      "parameters": [
+        "date"
+      ]
+    },
+    "submissions.sourceAttributes": {
+      "context": "P06 explicit evidence sharing; source metadata and derived references never grant original science or approval.",
+      "parameters": [
+        "attributes"
+      ]
+    },
+    "submissions.originalReferences": {
+      "context": "P06 explicit evidence sharing; source metadata and derived references never grant original science or approval.",
+      "parameters": []
+    },
+    "submissions.fileOrdinal": {
+      "context": "P06 explicit evidence sharing; source metadata and derived references never grant original science or approval.",
+      "parameters": []
+    },
+    "submissions.fileSize": {
+      "context": "P06 explicit evidence sharing; source metadata and derived references never grant original science or approval.",
+      "parameters": []
+    },
+    "submissions.exactReference": {
+      "context": "P06 explicit evidence sharing; source metadata and derived references never grant original science or approval.",
+      "parameters": []
+    },
+    "submissions.definitionIneligible": {
+      "context": "P06 explicit evidence sharing; source metadata and derived references never grant original science or approval.",
+      "parameters": []
+    },
+    "submissions.supportingBound": {
+      "context": "P06 explicit evidence sharing; source metadata and derived references never grant original science or approval.",
+      "parameters": []
+    },
+    "submissions.noSupportingProducts": {
+      "context": "P06 explicit evidence sharing; source metadata and derived references never grant original science or approval.",
+      "parameters": []
+    },
+    "submissions.supportingUnavailable": {
+      "context": "P06 explicit evidence sharing; source metadata and derived references never grant original science or approval.",
+      "parameters": []
+    },
+    "submissions.permissionUnknown": {
+      "context": "P06 explicit evidence sharing; source metadata and derived references never grant original science or approval.",
+      "parameters": []
+    },
+    "submissions.permissionExpired": {
+      "context": "P06 explicit evidence sharing; source metadata and derived references never grant original science or approval.",
+      "parameters": []
+    },
+    "submissions.permissionGranted": {
+      "context": "P06 explicit evidence sharing; source metadata and derived references never grant original science or approval.",
+      "parameters": [
+        "expiry"
+      ]
+    },
+    "submissions.permissionReadOnly": {
+      "context": "P06 explicit evidence sharing; source metadata and derived references never grant original science or approval.",
+      "parameters": []
+    },
+    "submissions.readyForReview": {
+      "context": "P06 explicit evidence sharing; source metadata and derived references never grant original science or approval.",
+      "parameters": []
+    },
+    "submissions.reviewNeeded": {
+      "context": "P06 explicit evidence sharing; source metadata and derived references never grant original science or approval.",
+      "parameters": []
+    },
+    "submissions.removeSupporting": {
+      "context": "Explicitly remove selected reference attachments only; never delete source data or downgrade an approved package silently.",
+      "parameters": []
+    },
+    "submissions.sourceFlight": {
+      "context": "Exact selected local result identity before explicit submission approval; never a server scientific decision.",
+      "parameters": [
+        "id"
+      ]
+    },
+    "submissions.selectedResult": {
+      "context": "Exact selected local result identity before explicit submission approval; never a server scientific decision.",
+      "parameters": [
+        "name",
+        "outcome",
+        "id"
+      ]
     }
   }
 }

@@ -44,8 +44,10 @@ public static partial class SubmissionReviewEvidence
             foreach(var item in group.SelectMany(d=>d.Evidence).Where(i=>i.Reference.CardId==card)){
                 if(items.TryGetValue(item.Reference.Key,out var previous)&&PreflightReadiness.Hash(previous)!=PreflightReadiness.Hash(item)){blockers.Add("Conflicting versions of the same original received evidence identity cannot be combined.");continue;}items[item.Reference.Key]=item;
             }
-            if(blockers.Count>0)continue;var all=items.Values.OrderBy(i=>i.Reference.Key,StringComparer.Ordinal).ToArray();var min=group.SelectMany(d=>d.Manifest.Cards).Where(c=>c.CardId==card).Min(c=>c.StartUtc);var max=group.SelectMany(d=>d.Manifest.Cards).Where(c=>c.CardId==card).Max(c=>c.EndUtc);
-            var merged=first with{Manifest=first.Manifest with{Cards=[binding with{StartUtc=min,EndUtc=max}],ResultIds=group.SelectMany(d=>d.Manifest.ResultIds).Distinct().ToArray(),Items=all.Select(i=>i.Reference).ToArray()},Evidence=all};
+            // Supporting references remain visible in received packages, but never
+            // enter original measurement/documentation completeness or credit.
+            if(blockers.Count>0)continue;var all=items.Values.Where(i=>i.Data.SupportingProduct is null).OrderBy(i=>i.Reference.Key,StringComparer.Ordinal).ToArray();var min=group.SelectMany(d=>d.Manifest.Cards).Where(c=>c.CardId==card).Min(c=>c.StartUtc);var max=group.SelectMany(d=>d.Manifest.Cards).Where(c=>c.CardId==card).Max(c=>c.EndUtc);
+            var merged=first with{Manifest=first.Manifest with{Version=all.Any(i=>i.Data.SupportingProduct is not null)?SubmissionSupportingProducts.DocumentVersion:first.Manifest.Version,Cards=[binding with{StartUtc=min,EndUtc=max}],ResultIds=group.SelectMany(d=>d.Manifest.ResultIds).Distinct().ToArray(),Items=all.Select(i=>i.Reference).ToArray()},Evidence=all};
             if(all.Length>SubmissionEvidenceProtocol.MaximumItems||SubmissionEvidenceProtocol.Bytes(merged)>SubmissionEvidenceProtocol.MaximumPayloadBytes){blockers.Add("The selected combined flight exceeds the bounded assessment size. Select fewer received packages; no evidence was truncated.");continue;}
             if(definition.Procedure is {} rules){
                 var samples=all.SelectMany(i=>i.Data.Telemetry?.Samples??[]).GroupBy(s=>s.Sequence).OrderBy(g=>g.Key).ToArray();if(samples.Any(g=>g.Select(s=>PreflightReadiness.Hash(s)).Distinct().Count()>1)){blockers.Add("Conflicting original telemetry at one sequence cannot qualify.");continue;}

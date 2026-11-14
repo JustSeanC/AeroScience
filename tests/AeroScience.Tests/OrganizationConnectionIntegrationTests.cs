@@ -35,7 +35,7 @@ public sealed partial class OrganizationConnectionIntegrationTests
     sealed class Server(WebApplication app,HttpClient browser,string origin,string database):IAsyncDisposable
     {
         public HttpClient Browser=>browser;public WebApplication App=>app;public string Origin=>origin;public string Database=>database;
-        public int AuthorizedReads,ClaimReads,SubmissionWrites;public bool DropNextSubmissionAcknowledgment,InterruptNextSubmission;public Guid? ForcedDeviceIdentity;
+        public int AuthorizedReads,ClaimReads,SubmissionWrites;public bool DropNextSubmissionAcknowledgment,InterruptNextSubmission;public Guid? ForcedDeviceIdentity;public int? SupportingFormatOverride;
         public async Task<JsonElement> Post(string path,object body,HttpMethod? method=null)
         {
             var session=await browser.GetFromJsonAsync<JsonElement>("/api/session");var request=new HttpRequestMessage(method??HttpMethod.Post,path){Content=JsonContent.Create(body,options:WireJson.Options)};
@@ -60,7 +60,14 @@ public sealed partial class OrganizationConnectionIntegrationTests
                 await c.Response.WriteAsJsonAsync(new OrganizationDevicePending(collision,new string('a',64),"ABCDE-12345",origin+"/#connect="+collision,DateTimeOffset.UtcNow.AddMinutes(10),5),WireJson.Options);return;
             }
             if(c.Request.Path==OrganizationSubmissionApi.ReceivePath){server.SubmissionWrites++;if(server.InterruptNextSubmission){server.InterruptNextSubmission=false;c.Abort();return;}if(server.DropNextSubmissionAcknowledgment){server.DropNextSubmissionAcknowledgment=false;var response=c.Response.Body;using var lost=new MemoryStream();c.Response.Body=lost;try{await next();}finally{c.Response.Body=response;}c.Abort();return;}}
-            if(c.Request.Path=="/api/member/published")server.AuthorizedReads++;if(c.Request.Path.StartsWithSegments("/api/member/claims"))server.ClaimReads++;await next();
+            if(c.Request.Path=="/api/member/published")server.AuthorizedReads++;if(c.Request.Path.StartsWithSegments("/api/member/claims"))server.ClaimReads++;
+            if(server.SupportingFormatOverride is {} format&&c.Request.Path.Value?.EndsWith("/submission-policy",StringComparison.Ordinal)==true){
+                var output=c.Response.Body;using var captured=new MemoryStream();c.Response.Body=captured;
+                try{await next();}finally{c.Response.Body=output;}
+                if(c.Response.StatusCode==200){var capability=JsonSerializer.Deserialize<SubmissionCapabilities>(captured.ToArray(),WireJson.Options)!;c.Response.ContentLength=null;await c.Response.WriteAsJsonAsync(capability with{SupportingProductsVersion=format},WireJson.Options);}
+                else{captured.Position=0;await captured.CopyToAsync(output);}return;
+            }
+            await next();
         });
         await OrganizationApplication.Initialize(app);await app.StartAsync();
         if(notifications is not null)await app.Services.GetServices<IHostedService>().OfType<OrganizationNotificationWorker>().Single().StopAsync(default);

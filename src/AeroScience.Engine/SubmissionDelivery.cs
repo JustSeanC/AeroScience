@@ -24,7 +24,7 @@ public sealed class SubmissionDelivery(MissionStore store,ScienceStore science,O
             if(coordinator.Snapshot().ActiveMission is not null)return start;
             // Read leases prevent scientific deletion from reporting completion while approved original bytes are in flight.
             readingOriginals=true;
-            using var originals=start.Manifest.Items.Any(i=>i.Kind is SubmissionEvidenceKind.ScientificObservations or SubmissionEvidenceKind.PilotDocumentation)&&science.AvailabilityError() is null?science.BeginAnalysis():null;
+            using var originals=start.Manifest.Items.Any(i=>i.Kind is SubmissionEvidenceKind.ScientificObservations or SubmissionEvidenceKind.PilotDocumentation or SubmissionEvidenceKind.SupportingProductReference)&&science.AvailabilityError() is null?science.BeginAnalysis():null;
             var document=store.ApprovedSubmissionDocument(id,science,transfer.Token);
             readingOriginals=false;
             var sending=store.ChangeSubmission(id,start.Revision,r=>r with{State=SubmissionDeliveryState.Sending,DeliveryAttempts=r.DeliveryAttempts+1,NextAttemptUtc=null,Message="Sending the exact explicitly approved package. Flight recording and scientific collection remain independent."});

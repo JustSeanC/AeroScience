@@ -1,0 +1,125 @@
+{
+  "checkpoint": "P06b",
+  "base": "a11f76ac8f8bff8d7f73166537594df728f27a02",
+  "dotnet": {
+    "passed": 57,
+    "failed": 0,
+    "skipped": 0,
+    "trx": {
+      "path": "artifacts/p06b-dotnet/p06b-final.trx",
+      "sha256": "ab36bab7a9af6c3dbde8bb29d9239f1f0717d1a73ec288b2fe853080fd64b892",
+      "bytes": 103260
+    },
+    "finalLegacyCodecRepeat": {
+      "passed": 1,
+      "failed": 0,
+      "trx": {
+        "path": "artifacts/p06b-dotnet/p06b-legacy-shape.trx",
+        "sha256": "d7e549c750d718642665a53225336a558799b1dac6458ef23aaeb200168132c2",
+        "bytes": 2974
+      }
+    },
+    "selection": "SubmissionSupportingTests, P06 actual PostgreSQL/Engine receive/negotiation/source-loss cases, SubmissionStoreTests, SubmissionReviewEvidenceTests, SurveyResultsTests, ExternalSourceDeletionTests, original policy/scope and pilot-documentation submission regressions",
+    "initialRun": {
+      "passed": 51,
+      "failed": 6,
+      "trx": {
+        "path": "artifacts/p06b-dotnet/p06b-first.trx",
+        "sha256": "c5cb2f481c81577687ff8e539fbf50c409135d92070d5bc212754c1aabdf109a",
+        "bytes": 124414
+      },
+      "cause": "New fixtures omitted explicit DEM/DSM type. Existing importer correctly refused unknown surface. Fixtures explicitly select DEM; production guard unchanged."
+    }
+  },
+  "browser": {
+    "distinctPassed": 4,
+    "actualServerJourneys": 3,
+    "syntheticMetadataRenderer": 1,
+    "firstRun": {
+      "passed": 3,
+      "failed": 1,
+      "cause": "Isolated rendering fixture remained in main across same-document theme visits. Harness now removes its own previous root and asserts exactly one."
+    },
+    "finalRenderer": {
+      "passed": 1,
+      "failed": 0
+    }
+  },
+  "javascript": {
+    "nativePassed": 4,
+    "presentationPassed": 38,
+    "failed": 0,
+    "catalogVersion": 15,
+    "englishMessages": 639
+  },
+  "format": {
+    "legacyDocumentVersion": 1,
+    "supportingDocumentVersion": 2,
+    "supportingReferenceVersion": 1,
+    "referenceOnly": true,
+    "originalScienceCredit": false,
+    "noAutomaticDowngrade": true,
+    "maximumReferences": 3,
+    "maximumReferenceBytes": 262144,
+    "maximumTilesPerReference": 256,
+    "maximumOriginalFilesPerSource": 64,
+    "maximumDocumentBytes": 2097152,
+    "maximumDocumentItems": 512,
+    "numericalProductsAttached": false
+  },
+  "compatibility": "Original v1 null/default omission and legacy response-codec shape verified; unsupported peers refuse approval/delivery before evidence bytes. P18 original completeness ignores supporting references.",
+  "receipts": [
+    {
+      "path": "artifacts/p06b-dotnet-first.log",
+      "sha256": "860ede10b05ec490e88e9abfbfd8e4f20fd085f9f59a60d703bf781495d7b1f9",
+      "bytes": 12333
+    },
+    {
+      "path": "artifacts/p06b-dotnet-final.log",
+      "sha256": "f132dea1d6e6522df720a730db9f54cd399201d6bbb17e4884a42147a77e0df5",
+      "bytes": 1664
+    },
+    {
+      "path": "artifacts/p06b-legacy-shape.log",
+      "sha256": "7252cf2b7276d42d4d793b5380c6233c707ec58070b847739fe2c8328de9103d",
+      "bytes": 5486
+    },
+    {
+      "path": "artifacts/p06b-legacy-shape-final.log",
+      "sha256": "a45abfc4925fd7321d4bfd043920aab06cdc153cf61f05f5f281bfded096ad7b",
+      "bytes": 1673
+    },
+    {
+      "path": "artifacts/p06b-browser-first.log",
+      "sha256": "82b45fc1a41c307ef1485c5b2faff281acc56d3e509e13a404f71876c43f6afe",
+      "bytes": 4981
+    },
+    {
+      "path": "artifacts/p06b-browser-render-final.log",
+      "sha256": "d246e70791da2973a7558a1d5b13312167c2822d198e1538f7b6483c7aaaf575",
+      "bytes": 416
+    },
+    {
+      "path": "artifacts/p06b-javascript.log",
+      "sha256": "9338769e6c906aab3cd296697a1ffecfdb0f9818fff6ab1597bf7fbfbc10f8af",
+      "bytes": 4985
+    },
+    {
+      "path": "artifacts/p06b-browser-hosts-final.log",
+      "sha256": "e278210e756cdf29fe8730d90309b3515b71fa9619c4eb729c11a3b0857a6c3a",
+      "bytes": 1808
+    },
+    {
+      "path": "artifacts/p06b-failed-browser/web-results.json",
+      "sha256": "456182a1de8ffe4aa7239b6ae76f1d2f6834d0a636f61f752cc5c5a84b506d40",
+      "bytes": 16714
+    }
+  ],
+  "knownLimitations": [
+    "References include selected source/project/date/CRS/hash/algorithm metadata only, not original source files, DEM cells, point records, profile arrays or exact LAS/LAZ subsets.",
+    "Complete terrain/raster/model products remain unsupported for complete-product approval.",
+    "Scientific fixtures are controlled synthetic data; genuine P05 originals remain separately verified and immutable.",
+    "Installed Windows/MSFS acceptance Not Tested; four non-English locales remain preview/fallback."
+  ],
+  "fullCI": "Reserved for completed P06 integration; no Full run for this stage."
+}

@@ -19,6 +19,7 @@ public static class SubmissionApi
         api.MapPost("/drafts/{id:guid}/supplement",(Guid id,SupplementalReviewRequest r,OrganizationConnections connections,MissionStore store)=>new{reviewLink=connections.SupplementalReviewLink(id,r.RequestEventId,store)});
         api.MapGet("/context",(Guid cardId,Guid? flightId,MissionStore store)=>store.SubmissionStatusForCard(cardId,flightId));
         api.MapGet("/choices",(Guid flightId,Guid? cardId,int? offset,MissionStore store)=>SubmissionChoices(store,flightId,cardId,offset??0));
+        api.MapPost("/supporting-products",(SubmissionSupportingRequest r,MissionStore store,ScienceStore science,HttpContext c)=>store.SupportingSubmissionChoices(science,r,c.RequestAborted));
         api.MapGet("/drafts",(Guid? flightId,int? offset,MissionStore store)=>store.SubmissionDrafts(flightId,offset??0));
         api.MapGet("/drafts/{id:guid}/status",(Guid id,MissionStore store)=>{var r=store.SubmissionDraft(id);return new{r.Id,r.Revision,r.State,r.Message,r.UpdatedUtc,r.Consent,r.Receipt,r.NextAttemptUtc,r.DeliveryAttempts};});
         api.MapPost("/preview",(SubmissionDraftRequest r,MissionStore store,ScienceStore science,HttpContext c)=>store.PreviewSubmission(r,science,c.RequestAborted));

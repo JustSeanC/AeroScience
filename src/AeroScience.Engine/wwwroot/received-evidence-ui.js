@@ -1,8 +1,10 @@
 import {node,table,disclosure,numeric,chart} from './workstation-ui.js';
+import {supportingProductEvidence} from './supporting-product-ui.js';
 // Preserve the original ISO timestamp, UTC offset and fractional precision; browser timezone never rewrites it.
 const dateTime=value=>value?String(value):'Unavailable';
 // Presentation of explicitly received/selected typed evidence only. Never fetches a pilot's source archive.
 export function receivedEvidence(parent,item,{totalRecords=item.reference.records}={}){
+ if(item.data.supportingProduct){supportingProductEvidence(parent,item.data.supportingProduct);return;}
  const {reference:r,data:d}=item;parent.append(node('p',`${r.description} · ${totalRecords} original record(s)`),node('p',`${dateTime(r.startUtc)} → ${dateTime(r.endUtc)} · ${r.privacy}`));
  if(d.definition){const c=d.definition;parent.append(node('h4',c.name),node('p',`Frozen local revision ${c.revision} · ${c.template?.id||c.template||'Research definition'}`));const details=disclosure(parent,'Exact frozen definition');details.append(node('pre',JSON.stringify(c,null,2)));}
  if(d.result){const v=d.result;if(v.experimentalSensor)parent.append(node('p','Experimental sensor results are modeled outputs derived from retained inputs, not hardware or simulator-reported sensor measurements. Full modeled-response products are not supported in P17.'));if(v.survey)parent.append(node('p','External terrain/thermal references describe historical scientific sources; they are not airborne LiDAR or newly acquired satellite imagery. Full raster/QA products are not included.'));parent.append(node('h4','Original client evaluation'),node('p',`${v.outcome} · ${v.explanation}`),node('p',`Original result ${v.id}. This outcome is unchanged by a human review decision.`));const details=disclosure(parent,'Original evaluation and evidence boundaries');details.append(node('pre',JSON.stringify(v,null,2)));}

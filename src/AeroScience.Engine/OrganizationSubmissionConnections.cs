@@ -24,7 +24,9 @@ public sealed partial class OrganizationConnections
             var value=await Request<SubmissionCapabilities>(saved.Origin,$"/api/member/claims/{card.ClaimId}/submission-policy",null,ct,credential,evidence:true);
             if(value.OrganizationId!=draft.Manifest.OrganizationId||value.PilotId!=draft.Manifest.PilotId||value.Policy.OpportunityId!=card.OpportunityId||value.Permission!=saved.Permission)throw new OrganizationSubmissionAuthorizationRequired("This connection belongs to a different pilot or scope. The original claim cannot be substituted.");
             store.CacheSubmissionCapabilities(connection,saved.Origin,value);results.Add(value);
-        }return results.ToArray();
+        }
+        if(draft.Manifest.Version==SubmissionSupportingProducts.DocumentVersion&&results.Any(c=>c.SupportingProductsVersion!=SubmissionSupportingProducts.Version))throw new OrganizationSubmissionReviewRequired("This server does not advertise the selected supporting-product format. Keep the draft or explicitly remove these references and review a new package; no upload was attempted.");
+        return results.ToArray();
     }
     public async Task<SubmissionDraft> ApproveSubmission(Guid id,SubmissionApproval request,MissionStore store,ScienceStore science,CancellationToken ct)
     {
@@ -36,6 +38,7 @@ public sealed partial class OrganizationConnections
         }
         var cached=store.CachedSubmissionCapabilities(connection.Id,connection.Origin);
         if(cached is null||cached.OrganizationId!=draft.Manifest.OrganizationId||cached.PilotId!=draft.Manifest.PilotId||cached.Permission!=OrganizationDesktopPermission.SubmitEvidence)throw new OrganizationSubmissionAuthorizationRequired("Connect once with Submit Evidence permission to verify this pilot and policy. You can keep the offline draft; no upload is authorized yet.");
+        if(draft.Manifest.Version==SubmissionSupportingProducts.DocumentVersion&&cached.SupportingProductsVersion!=SubmissionSupportingProducts.Version)throw new OrganizationSubmissionReviewRequired("This server has not advertised the supporting-product reference format. Keep these products local or remove them and review a new original-evidence-only package. No downgrade or upload was attempted.");
         return store.ApproveSubmission(id,request,science,cached.PilotId,cached.OrganizationId,ct);
     }
     internal async Task<SubmissionRemoteState> SubmissionStatus(SubmissionDraft draft,CancellationToken ct)
@@ -46,6 +49,13 @@ public sealed partial class OrganizationConnections
     internal async Task<SubmissionReceipt> SendSubmission(SubmissionDraft draft,SubmissionDocument document,CancellationToken ct)
     {
         var (saved,credential)=await SubmissionConnection(draft.ConnectionId??Guid.Empty,draft.Manifest,ct);
+        if(document.Manifest.Version==SubmissionSupportingProducts.DocumentVersion){
+            foreach(var card in document.Manifest.Cards){
+                var current=await Request<SubmissionCapabilities>(saved.Origin,$"/api/member/claims/{card.ClaimId}/submission-policy",null,ct,credential,evidence:true);
+                if(current.OrganizationId!=document.Manifest.OrganizationId||current.PilotId!=document.Manifest.PilotId||current.Permission!=OrganizationDesktopPermission.SubmitEvidence||current.SupportingProductsVersion!=SubmissionSupportingProducts.Version)
+                    throw new OrganizationSubmissionReviewRequired("The server does not currently support this exact reference format/identity. Delivery is held; no replacement or downgrade was sent.");
+            }
+        }
         return await Request<SubmissionReceipt>(saved.Origin,"/api/member/submissions/receive",new SubmissionUpload(document,draft.Consent!),ct,credential,evidence:true);
     }
     internal async Task<SubmissionRemoteState> CancelSubmission(SubmissionDraft draft,CancellationToken ct)

@@ -38,7 +38,7 @@ public sealed partial class MissionStore
     {using var db=Open();using var c=db.CreateCommand();c.CommandText="SELECT payload_json FROM submission_grants WHERE connection_id=$id AND origin=$origin";c.Parameters.AddWithValue("$id",connection.ToString());c.Parameters.AddWithValue("$origin",origin);return c.ExecuteScalar() is string json?JsonSerializer.Deserialize<SubmissionCapabilities>(json,WireJson.Options):null;}
     static SubmissionDraft? ReadSubmissionDraft(SqliteConnection db,SqliteTransaction? tx,Guid id)
     {
-        using var c=db.CreateCommand();c.Transaction=tx;c.CommandText="SELECT payload_json,revision,state FROM submission_drafts WHERE id=$id";c.Parameters.AddWithValue("$id",id.ToString());if(c.ExecuteReader() is not {} r)return null;using(r){if(!r.Read())return null;var row=JsonSerializer.Deserialize<SubmissionDraft>(r.GetString(0),WireJson.Options)!;if(row.Id!=id||row.Revision!=r.GetInt32(1)||(int)row.State!=r.GetInt32(2)||row.Manifest.Id!=id||row.Manifest.Version!=1)throw new IOException("The retained submission metadata failed its identity check.");return row;}
+        using var c=db.CreateCommand();c.Transaction=tx;c.CommandText="SELECT payload_json,revision,state FROM submission_drafts WHERE id=$id";c.Parameters.AddWithValue("$id",id.ToString());if(c.ExecuteReader() is not {} r)return null;using(r){if(!r.Read())return null;var row=JsonSerializer.Deserialize<SubmissionDraft>(r.GetString(0),WireJson.Options)!;if(row.Id!=id||row.Revision!=r.GetInt32(1)||(int)row.State!=r.GetInt32(2)||row.Manifest.Id!=id||row.Manifest.Version is not(1 or SubmissionSupportingProducts.DocumentVersion))throw new IOException("The retained submission metadata failed its identity check.");return row;}
     }
     public SubmissionDraft SubmissionDraft(Guid id)
     {using var db=Open();return ReadSubmissionDraft(db,null,id)??throw new ArgumentException("This local submission was not found.");}
@@ -69,7 +69,8 @@ public sealed partial class MissionStore
         }
         var row=new SubmissionDraft(request.Id,(previous?.Revision??0)+1,SubmissionDeliveryState.Draft,preview.Manifest,request.ConnectionId,null,null,DateTimeOffset.UtcNow,"Draft saved locally. No upload is authorized.");WriteSubmissionDraft(db,tx,row,previous is null);EvidenceFault?.Invoke("submission-draft-before-commit");tx.Commit();return row;
     }
-    public static SubmissionDraftRequest SubmissionRequest(SubmissionDraft row)=>new(1,row.Id,row.Revision,row.Manifest.FlightId,row.Manifest.ResultIds,row.Manifest.Items.Select(i=>i.Key).ToArray(),row.Manifest.Name,row.ConnectionId,row.Manifest.ReviewLink);
+    public static SubmissionDraftRequest SubmissionRequest(SubmissionDraft row)=>new(row.Manifest.Version,row.Id,row.Revision,row.Manifest.FlightId,row.Manifest.ResultIds,row.Manifest.Items.Select(i=>i.Key).ToArray(),row.Manifest.Name,row.ConnectionId,row.Manifest.ReviewLink,
+        row.Manifest.Version==SubmissionSupportingProducts.DocumentVersion?row.Manifest.Items.Where(i=>i.Kind==SubmissionEvidenceKind.SupportingProductReference).Select(i=>Guid.Parse(i.OriginalId)).ToArray():null);
     public SubmissionPreview PreviewSavedSubmission(Guid id,ScienceStore science,CancellationToken ct=default)=>PreviewSubmission(SubmissionRequest(SubmissionDraft(id)),science,ct);
     public SubmissionDocument ApprovedSubmissionDocument(Guid id,ScienceStore science,CancellationToken ct=default)
     {
@@ -82,6 +83,11 @@ public sealed partial class MissionStore
     {
         if(request.Version!=1||!request.ExplicitApproval||request.ConnectionId==Guid.Empty)throw new ArgumentException("Review the exact destination, evidence, privacy and size, then explicitly approve this package.");
         var preview=PreviewSavedSubmission(id,science,ct);
+        if(preview.Manifest.Version==SubmissionSupportingProducts.DocumentVersion){
+            var capabilities=CachedSubmissionCapabilities(request.ConnectionId,preview.Manifest.Origin);
+            if(capabilities is null||capabilities.SupportingProductsVersion!=SubmissionSupportingProducts.Version||capabilities.Permission!=OrganizationDesktopPermission.SubmitEvidence
+                ||capabilities.OrganizationId!=verifiedOrganization||capabilities.PilotId!=verifiedPilot)throw new InvalidOperationException("This exact Submit Evidence connection must advertise supporting-product references before approval. No legacy-format downgrade is authorized.");
+        }
         if(!preview.PolicyVerified||preview.Manifest.PilotId!=verifiedPilot||preview.Manifest.OrganizationId!=verifiedOrganization||request.ManifestSha256!=preview.ManifestSha256||request.PayloadSha256!=preview.PayloadSha256||request.PayloadBytes!=preview.PayloadBytes)throw new InvalidOperationException("The exact package or authorized pilot changed. Review it again before approval.");
         if(!preview.CanApprove)throw new InvalidOperationException("This organization requires its supported minimum evidence. Save the incomplete draft or include the required originals; no Pass was invented.");
         using var db=Open();using var tx=db.BeginTransaction();var row=ReadSubmissionDraft(db,tx,id)??throw new ArgumentException("Draft missing.");

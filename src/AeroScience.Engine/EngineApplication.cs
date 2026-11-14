@@ -95,6 +95,7 @@ public static class EngineApplication
             }
             var science = new ScienceStore(directory){ManagedReplicaRoots=()=>StorageManager.KnownScientificReplicaRoots(settings.ConfigurationDirectory??settings.DataDirectory,directory)};
             var missions = sp.GetRequiredService<MissionStore>(); missions.ScienceLibrary = science;
+            missions.SupportingProductPreferences=()=>sp.GetRequiredService<ScientificAccessSettings>().Get().Preferences;
             if (science.AvailabilityError() is null)
                 try { science.Initialize(); science.RecoverCollectedDeletion(missions); missions.ReconcileDatasetReferences(science.LibraryId, science.ContainsDataset); }
                 catch (Exception error) when (error is IOException or Microsoft.Data.Sqlite.SqliteException)

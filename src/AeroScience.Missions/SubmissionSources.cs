@@ -20,7 +20,9 @@ public sealed partial class MissionStore
     }
     public (SubmissionDocument Document,string[] Unsupported,bool PolicyVerified) MaterializeSubmission(SubmissionDraftRequest request,ScienceStore science,CancellationToken ct=default)
     {
-        if(request.Version!=1||request.Id==Guid.Empty||request.ResultIds is not {Length:>=1 and <=16}||request.ResultIds.Distinct().Count()!=request.ResultIds.Length||request.ResultIds.Any(i=>i==Guid.Empty)
+        if(request.Version is not(1 or SubmissionSupportingProducts.DocumentVersion)||request.Version==1&&request.SupportingProductIds is {Length:>0}||request.SupportingProductIds is {Length:>SubmissionSupportingProducts.MaximumProducts}
+            ||request.SupportingProductIds?.Any(id=>id==Guid.Empty)==true||request.SupportingProductIds?.Distinct().Count()!=request.SupportingProductIds?.Length
+            ||request.Id==Guid.Empty||request.ResultIds is not {Length:>=1 and <=16}||request.ResultIds.Distinct().Count()!=request.ResultIds.Length||request.ResultIds.Any(i=>i==Guid.Empty)
             ||request.SelectedKeys?.Length>SubmissionEvidenceProtocol.MaximumItems||string.IsNullOrWhiteSpace(request.Name)||request.Name.Length>120||request.Name.Any(char.IsControl))throw new ArgumentException("Choose a named submission and 1–16 saved results from one completed flight.");
         var mission=Detail(request.FlightId)?.Mission??throw new IOException("The original flight is missing; no evidence can be reconstructed.");
         if(mission.Status==MissionStatus.Recording||mission.EndedUtc is null)throw new InvalidOperationException("End the recorded flight before selecting evidence for submission. Recording and science remain independent.");
@@ -30,7 +32,7 @@ public sealed partial class MissionStore
         var groups=results.GroupBy(r=>r.Card.Id).ToArray();if(groups.Length>4)throw new ArgumentException("Choose at most four claimed cards in one bounded package; retained submissions are not limited.");
         var bindings=new List<SubmissionCardBinding>();var policies=new List<SubmissionPolicy>();var items=new List<SubmissionEvidenceItem>();var unsupported=new List<string>();
         var libraryAvailable=science.AvailabilityError() is null;
-        using var analysis=results.Any(r=>r.Card.FlightRegime is null&&r.Card.Procedure is null&&(r.Card.ObservationFlight is null||r.Card.ObservationFlight.SelectedInstruments.Length>0&&libraryAvailable))?science.BeginAnalysis():null;
+        using var analysis=request.SupportingProductIds is {Length:>0}||results.Any(r=>r.Card.FlightRegime is null&&r.Card.Procedure is null&&(r.Card.ObservationFlight is null||r.Card.ObservationFlight.SelectedInstruments.Length>0&&libraryAvailable))?science.BeginAnalysis():null;
         foreach(var group in groups){
             var card=group.First().Card;var s=card.OrganizationAssignment!;var start=group.Min(r=>r.StartUtc);var end=group.Max(r=>r.EndUtc);var scoped=SubmissionEvidenceProtocol.ScopedCard(card);
             var frozen=ResearchOperations(mission.Id).Cards.SingleOrDefault(c=>c.Card.Id==card.Id)?.Card;
@@ -79,9 +81,21 @@ public sealed partial class MissionStore
                 }
             }
         }
+        if(request.SupportingProductIds is {Length:>0} ids){
+            if(items.Count+ids.Length>SubmissionEvidenceProtocol.MaximumItems)throw new NotSupportedException("This selection exceeds the existing 512-item package bound. Remove optional items or choose a shorter evidence interval.");
+            var eligible=groups.Where(g=>SubmissionSupportingProducts.Eligible(g.First().Card)).OrderBy(g=>g.Key).FirstOrDefault()
+                ??throw new ArgumentException("Supporting terrain/LiDAR references require an issued survey or terrain-instrument observation card. References are context only and never satisfy its original measurement requirements.");
+            var binding=bindings.Single(b=>b.CardId==eligible.Key);
+            foreach(var id in ids.Order()){
+                ct.ThrowIfCancellationRequested();var product=SubmissionSupportingProducts.Read(science,this,mission.Id,id,ct);var data=new SubmissionEvidenceData(SupportingProduct:product);
+                items.Add(new(new($"supporting:{binding.CardId}:{id}",SubmissionEvidenceKind.SupportingProductReference,binding.CardId,Guid.Empty,mission.Id,id.ToString(),product.Sha256,PreflightReadiness.Hash(data),SubmissionEvidenceProtocol.Bytes(data),0,binding.StartUtc,binding.EndUtc,
+                    "Supporting product reference — "+product.EvidenceClass,"Selected historical source/project metadata and hash references may reveal the research region. No source files, cell/point coordinates or numerical arrays are included. Flight-wide association does not prove this card collected them."),data));
+            }
+        }
         var chosen=request.SelectedKeys is null?items:items.Where(i=>request.SelectedKeys.Contains(i.Reference.Key)||i.Reference.Kind==SubmissionEvidenceKind.Definition).ToList();
         if(request.SelectedKeys is not null&&request.SelectedKeys.Any(k=>!items.Any(i=>i.Reference.Key==k)))throw new IOException("A selected original evidence reference is missing. Nothing was substituted.");
-        var manifest=new SubmissionManifest(1,request.Id,request.Name.Trim(),source.Origin,source.OrganizationId,source.OrganizationName,source.CampaignId,source.CampaignName,source.PilotId,mission.Id,request.ResultIds.Order().ToArray(),bindings.OrderBy(b=>b.CardId).ToArray(),policies.OrderBy(p=>p.OpportunityId).ToArray(),chosen.Select(i=>i.Reference).OrderBy(i=>i.Key,StringComparer.Ordinal).ToArray(),SubmissionEvidenceProtocol.HistoryDisclosure,SubmissionEvidenceProtocol.PrivacyDisclosure,request.ReviewLink);
+        var version=chosen.Any(i=>i.Data.SupportingProduct is not null)?SubmissionSupportingProducts.DocumentVersion:1;
+        var manifest=new SubmissionManifest(version,request.Id,request.Name.Trim(),source.Origin,source.OrganizationId,source.OrganizationName,source.CampaignId,source.CampaignName,source.PilotId,mission.Id,request.ResultIds.Order().ToArray(),bindings.OrderBy(b=>b.CardId).ToArray(),policies.OrderBy(p=>p.OpportunityId).ToArray(),chosen.Select(i=>i.Reference).OrderBy(i=>i.Key,StringComparer.Ordinal).ToArray(),SubmissionEvidenceProtocol.HistoryDisclosure,SubmissionEvidenceProtocol.PrivacyDisclosure,request.ReviewLink);
         var document=new SubmissionDocument(manifest,chosen.OrderBy(i=>i.Reference.Key,StringComparer.Ordinal).ToArray());
         if(SubmissionEvidenceProtocol.Bytes(document)>SubmissionEvidenceProtocol.MaximumPayloadBytes)throw new NotSupportedException("The selected payload exceeds 2 MiB. Choose fewer optional items or a shorter evaluated interval.");
         return(document,unsupported.ToArray(),policies.All(p=>p.Revision>0));
@@ -100,7 +114,12 @@ public sealed partial class MissionStore
     public SubmissionPreview PreviewSubmission(SubmissionDraftRequest request,ScienceStore science,CancellationToken ct=default)
     {
         var built=MaterializeSubmission(request,science,ct);var d=built.Document;var assessment=built.PolicyVerified?SubmissionEvidenceProtocol.Assess(d,ct):new(false,false,new[]{"Submission policy is Unknown. Save the offline draft, then connect once to review this claim's actual policy before approving delivery."});
-        return new(d.Manifest,PreflightReadiness.Hash(d.Manifest),PreflightReadiness.Hash(d),SubmissionEvidenceProtocol.Bytes(d),assessment,built.Unsupported,built.PolicyVerified,built.PolicyVerified&&SubmissionEvidenceProtocol.RequiredPoliciesMet(d,ct));
+        var supporting=d.Manifest.Version==SubmissionSupportingProducts.DocumentVersion;
+        var capability=request.ConnectionId is {} connection?CachedSubmissionCapabilities(connection,d.Manifest.Origin):null;
+        var supported=!supporting||capability is {SupportingProductsVersion:SubmissionSupportingProducts.Version,Permission:OrganizationDesktopPermission.SubmitEvidence}
+            &&capability.OrganizationId==d.Manifest.OrganizationId&&capability.PilotId==d.Manifest.PilotId;
+        var warnings=supported?built.Unsupported:built.Unsupported.Append("Review the exact server's supporting-product capability with a Submit Evidence connection before approval. This reference-only extension cannot be downgraded to the original format or treated as attached source measurements.").ToArray();
+        return new(d.Manifest,PreflightReadiness.Hash(d.Manifest),PreflightReadiness.Hash(d),SubmissionEvidenceProtocol.Bytes(d),assessment,warnings,built.PolicyVerified,built.PolicyVerified&&supported&&SubmissionEvidenceProtocol.RequiredPoliciesMet(d,ct));
     }
 }
 

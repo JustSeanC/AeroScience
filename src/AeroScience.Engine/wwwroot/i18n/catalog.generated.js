@@ -2,7 +2,7 @@
 export const localeData = {
   "manifest": {
     "version": 1,
-    "catalogVersion": 14,
+    "catalogVersion": 15,
     "fallback": "en-US",
     "locales": [
       {
@@ -2578,12 +2578,143 @@ export const localeData = {
       "organizations.manageCampaigns": {
         "context": "P06 campaign manager navigation; does not grant administrator permissions.",
         "parameters": []
+      },
+      "submissions.journey": {
+        "context": "P06 explicit evidence sharing; source metadata and derived references never grant original science or approval.",
+        "parameters": []
+      },
+      "submissions.supportingTitle": {
+        "context": "P06 explicit evidence sharing; source metadata and derived references never grant original science or approval.",
+        "parameters": []
+      },
+      "submissions.referenceOnly": {
+        "context": "P06 explicit evidence sharing; source metadata and derived references never grant original science or approval.",
+        "parameters": []
+      },
+      "submissions.noSourceValues": {
+        "context": "P06 explicit evidence sharing; source metadata and derived references never grant original science or approval.",
+        "parameters": []
+      },
+      "submissions.field.product": {
+        "context": "P06 explicit evidence sharing; source metadata and derived references never grant original science or approval.",
+        "parameters": []
+      },
+      "submissions.field.processed": {
+        "context": "P06 explicit evidence sharing; source metadata and derived references never grant original science or approval.",
+        "parameters": []
+      },
+      "submissions.field.method": {
+        "context": "P06 explicit evidence sharing; source metadata and derived references never grant original science or approval.",
+        "parameters": []
+      },
+      "submissions.field.corridor": {
+        "context": "P06 explicit evidence sharing; source metadata and derived references never grant original science or approval.",
+        "parameters": []
+      },
+      "submissions.field.scope": {
+        "context": "P06 explicit evidence sharing; source metadata and derived references never grant original science or approval.",
+        "parameters": []
+      },
+      "submissions.referenceCounts": {
+        "context": "P06 explicit evidence sharing; source metadata and derived references never grant original science or approval.",
+        "parameters": [
+          "values",
+          "missing"
+        ]
+      },
+      "submissions.sourceDate": {
+        "context": "P06 explicit evidence sharing; source metadata and derived references never grant original science or approval.",
+        "parameters": [
+          "date"
+        ]
+      },
+      "submissions.sourceAttributes": {
+        "context": "P06 explicit evidence sharing; source metadata and derived references never grant original science or approval.",
+        "parameters": [
+          "attributes"
+        ]
+      },
+      "submissions.originalReferences": {
+        "context": "P06 explicit evidence sharing; source metadata and derived references never grant original science or approval.",
+        "parameters": []
+      },
+      "submissions.fileOrdinal": {
+        "context": "P06 explicit evidence sharing; source metadata and derived references never grant original science or approval.",
+        "parameters": []
+      },
+      "submissions.fileSize": {
+        "context": "P06 explicit evidence sharing; source metadata and derived references never grant original science or approval.",
+        "parameters": []
+      },
+      "submissions.exactReference": {
+        "context": "P06 explicit evidence sharing; source metadata and derived references never grant original science or approval.",
+        "parameters": []
+      },
+      "submissions.definitionIneligible": {
+        "context": "P06 explicit evidence sharing; source metadata and derived references never grant original science or approval.",
+        "parameters": []
+      },
+      "submissions.supportingBound": {
+        "context": "P06 explicit evidence sharing; source metadata and derived references never grant original science or approval.",
+        "parameters": []
+      },
+      "submissions.noSupportingProducts": {
+        "context": "P06 explicit evidence sharing; source metadata and derived references never grant original science or approval.",
+        "parameters": []
+      },
+      "submissions.supportingUnavailable": {
+        "context": "P06 explicit evidence sharing; source metadata and derived references never grant original science or approval.",
+        "parameters": []
+      },
+      "submissions.permissionUnknown": {
+        "context": "P06 explicit evidence sharing; source metadata and derived references never grant original science or approval.",
+        "parameters": []
+      },
+      "submissions.permissionExpired": {
+        "context": "P06 explicit evidence sharing; source metadata and derived references never grant original science or approval.",
+        "parameters": []
+      },
+      "submissions.permissionGranted": {
+        "context": "P06 explicit evidence sharing; source metadata and derived references never grant original science or approval.",
+        "parameters": [
+          "expiry"
+        ]
+      },
+      "submissions.permissionReadOnly": {
+        "context": "P06 explicit evidence sharing; source metadata and derived references never grant original science or approval.",
+        "parameters": []
+      },
+      "submissions.readyForReview": {
+        "context": "P06 explicit evidence sharing; source metadata and derived references never grant original science or approval.",
+        "parameters": []
+      },
+      "submissions.reviewNeeded": {
+        "context": "P06 explicit evidence sharing; source metadata and derived references never grant original science or approval.",
+        "parameters": []
+      },
+      "submissions.removeSupporting": {
+        "context": "Explicitly remove selected reference attachments only; never delete source data or downgrade an approved package silently.",
+        "parameters": []
+      },
+      "submissions.sourceFlight": {
+        "context": "Exact selected local result identity before explicit submission approval; never a server scientific decision.",
+        "parameters": [
+          "id"
+        ]
+      },
+      "submissions.selectedResult": {
+        "context": "Exact selected local result identity before explicit submission approval; never a server scientific decision.",
+        "parameters": [
+          "name",
+          "outcome",
+          "id"
+        ]
       }
     }
   },
   "catalogs": {
     "en-US": {
-      "version": 14,
+      "version": 15,
       "locale": "en-US",
       "messages": {
         "common.messageUnavailable": "Details are unavailable. Refresh to review the current information.",
@@ -3201,7 +3332,36 @@ export const localeData = {
         "organizations.requirement.quality": "Required conditions",
         "organizations.reviewPolicy": "Published review policy",
         "organizations.assignmentBoundary": "Claiming confirms participation only. Prepare Mission remains a separate step; recording, science collection, local evaluation and organization approval stay separate.",
-        "organizations.manageCampaigns": "Manage Campaigns"
+        "organizations.manageCampaigns": "Manage Campaigns",
+        "submissions.journey": "Choose completed research → review exact evidence → confirm recipient and permission → explicitly approve → track receipt and scientific review.",
+        "submissions.supportingTitle": "Terrain and historical LiDAR supporting references",
+        "submissions.referenceOnly": "Supporting reference — source values are not attached",
+        "submissions.noSourceValues": "Reference-only evidence. No original terrain cells, point coordinates or source files are included; this cannot replace required original observations.",
+        "submissions.field.product": "Referenced product",
+        "submissions.field.processed": "Product processing time (UTC)",
+        "submissions.field.method": "Processing method",
+        "submissions.field.corridor": "Modeled corridor association",
+        "submissions.field.scope": "Scope of the referenced product",
+        "submissions.referenceCounts": "The local product references {values} source values and {missing} missing values. These descriptive counts are not attached measurements or approved science.",
+        "submissions.sourceDate": "Historical source acquisition date: {date}. The processing and simulator flight dates do not establish a survey date.",
+        "submissions.sourceAttributes": "Attributes declared by the retained original: {attributes}. Their numerical records are not attached.",
+        "submissions.originalReferences": "Original source file hash references",
+        "submissions.fileOrdinal": "Original file ordinal",
+        "submissions.fileSize": "Original file size",
+        "submissions.exactReference": "Exact reference identity, source hashes and limitations",
+        "submissions.definitionIneligible": "These issued requirements do not support terrain/LiDAR reference attachments. Other local products remain available in Results.",
+        "submissions.supportingBound": "Choose at most three supporting products. No reference is silently truncated.",
+        "submissions.noSupportingProducts": "No retained modeled-corridor, DEM/DSM or historical point index is available for this completed flight.",
+        "submissions.supportingUnavailable": "Supporting references could not be verified. Nothing was attached or uploaded.",
+        "submissions.permissionUnknown": "Submit Evidence permission has not been confirmed for the selected recipient. Review browser authorization before approval.",
+        "submissions.permissionExpired": "This connection is expired or unavailable. Renew its browser authorization, then review this exact package again.",
+        "submissions.permissionGranted": "Browser-approved Submit Evidence scope expires {expiry}. The server rechecks the pilot, membership, publication, policy and grant at approval/delivery; offline metadata is not current server approval.",
+        "submissions.permissionReadOnly": "This connection cannot upload evidence. Read-only, claim management and live sharing do not grant Submit Evidence.",
+        "submissions.readyForReview": "Ready for your approval review under the selected policy. This is still a local draft, not an upload or scientific approval.",
+        "submissions.reviewNeeded": "Keep this draft while you review missing evidence, recipient capability or permission. No transmission is authorized.",
+        "submissions.removeSupporting": "Remove supporting references from this draft",
+        "submissions.sourceFlight": "Exact recorded flight: {id}. Original time intervals remain listed separately.",
+        "submissions.selectedResult": "Selected local result: {name} · {outcome} · {id}. Local evaluation is separate from organization approval."
       }
     }
   }
