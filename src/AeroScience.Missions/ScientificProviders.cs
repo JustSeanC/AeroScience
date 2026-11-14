@@ -43,43 +43,80 @@ public sealed class StacScientificProvider(ScientificHttp http,string id):IScien
         }
         var candidates=features.EnumerateArray().Take(60).Where(f=>Matches(f,kind,area,p));
         candidates=p.SelectionPolicy=="newest"?candidates.OrderByDescending(f=>Date(f.GetProperty("properties"))):candidates.OrderBy(f=>Cloud(f.GetProperty("properties"))).ThenByDescending(f=>Date(f.GetProperty("properties")));
+        IOException? incompatible=null;
         foreach(var feature in candidates)
         {
-            var result=Describe(feature,kind,area);if(result is not null)return result;
+            try{var result=Describe(feature,kind,area);if(result is not null)return result;incompatible=MetadataError("assets (required numeric bands)");}
+            catch(IOException error){incompatible=error;}
         }
+        if(incompatible is not null)throw incompatible;
         return null;
     }
     internal ScientificDiscovery? Describe(JsonElement feature,RemoteKind kind,GeographicBounds area)
     {
+        try{return DescribeItem(feature,kind,area);}
+        catch(Exception error)when(error is JsonException or KeyNotFoundException or InvalidOperationException or FormatException or ArgumentException or IndexOutOfRangeException)
+        {throw MetadataError("required item fields");}
+    }
+    private IOException MetadataError(string path)=>ScientificFailure.Create(ScientificFailureKind.UnsupportedFormat,
+        $"Unsupported provider metadata at {path} ({(id=="earth-search"?"earth-search.aws.element84.com":"planetarycomputer.microsoft.com")}). No scientific values were guessed. Retry failed regions after the provider recovers, or review source/date settings; retry may not resolve incompatible metadata.");
+    private JsonElement Required(JsonElement value,string name,JsonValueKind type,string path)
+    {
+        if(value.ValueKind!=JsonValueKind.Object||!value.TryGetProperty(name,out var result)||result.ValueKind!=type)throw MetadataError(path);
+        return result;
+    }
+    private double BandNumber(JsonElement value,string name,double fallback,string path)
+    {
+        if(value.ValueKind!=JsonValueKind.Object||!value.TryGetProperty(name,out var field))return fallback;
+        if(field.ValueKind!=JsonValueKind.Number||!field.TryGetDouble(out var number)||!double.IsFinite(number))throw MetadataError(path);
+        return number;
+    }
+    private ScientificDiscovery? DescribeItem(JsonElement feature,RemoteKind kind,GeographicBounds area)
+    {
         var root=id=="earth-search"?"https://earth-search.aws.element84.com/v1":"https://planetarycomputer.microsoft.com/api/stac/v1";
         var collection=kind switch{RemoteKind.Thermal=>"landsat-c2-l2",RemoteKind.Multispectral=>"sentinel-2-l2a",_=>"cop-dem-glo-30"};
-            var props=feature.GetProperty("properties");var assets=feature.GetProperty("assets");var scene=feature.GetProperty("id").GetString()!;
+            var props=Required(feature,"properties",JsonValueKind.Object,"properties");var assets=Required(feature,"assets",JsonValueKind.Object,"assets");
+            // v0.7.0 retained envelopes use scene + canonical band IDs, not raw STAC keys.
+            // Preserve that format and its revision hash so existing originals stay reusable.
+            var retained=!feature.TryGetProperty("id",out _)&&feature.TryGetProperty("scene",out _);
+            var scene=Required(feature,retained?"scene":"id",JsonValueKind.String,retained?"scene":"id").GetString()!;
+            if(string.IsNullOrWhiteSpace(scene)||scene.Length>300)throw MetadataError("id / scene");
+            if(feature.TryGetProperty("collection",out var product)&&(product.ValueKind!=JsonValueKind.String||product.GetString()!=collection))throw MetadataError("collection");
+            if(retained&&!feature.TryGetProperty("collection",out _))throw MetadataError("collection");
+            var geometry=Required(feature,"geometry",JsonValueKind.Object,"geometry");
+            try{_ = Contains(geometry,area.Center);}catch(Exception error)when(error is KeyNotFoundException or InvalidOperationException or FormatException or IndexOutOfRangeException){throw MetadataError("geometry.coordinates");}
             var wanted=kind switch{RemoteKind.Thermal=>new[]{("ST_B10","lwir11"),("QA_PIXEL","qa_pixel"),("QA_RADSAT","qa_radsat")},RemoteKind.Multispectral=>new[]{("B02","blue"),("B03","green"),("B04","red"),("B08","nir"),("SCL","scl")},_=>new[]{("elevation","data")}};
+            if(retained)wanted=wanted.Select(pair=>(pair.Item1,pair.Item1)).ToArray();
             if(wanted.Any(pair=>!assets.TryGetProperty(pair.Item2,out _)))return null;
             var bands=new List<ProviderAsset>();
             foreach(var (bandId,key) in wanted)
             {
-                var asset=assets.GetProperty(key);var href=asset.GetProperty("href").GetString()!;var uri=new Uri(href);ScientificHttp.ValidateUrl(uri);
+                var asset=Required(assets,key,JsonValueKind.Object,"assets."+key);var href=Required(asset,"href",JsonValueKind.String,"assets."+key+".href").GetString()!;
+                if(!Uri.TryCreate(href,UriKind.Absolute,out var uri))throw MetadataError("assets."+key+".href");ScientificHttp.ValidateUrl(uri);
                 if(kind==RemoteKind.Thermal&&uri.Host!="landsateuwest.blob.core.windows.net"||kind==RemoteKind.Multispectral&&uri.Host!="sentinel-cogs.s3.us-west-2.amazonaws.com"||kind==RemoteKind.Terrain&&uri.Host!="elevationeuwest.blob.core.windows.net")throw new IOException("Scientific catalog returned a different asset host; review the adapter before downloading.");
                 if(uri.Query.Length!=0)throw new IOException("Catalog assets must provide stable unsigned identifiers.");
-                if(!asset.TryGetProperty("type",out var type)||!type.GetString()!.Contains("image/tiff",StringComparison.OrdinalIgnoreCase))throw new IOException("A required scientific band is not a supported numeric GeoTIFF.");
-                var raster=asset.TryGetProperty("raster:bands",out var rs)&&rs.GetArrayLength()==1?rs[0]:default;
+                var type=Required(asset,"type",JsonValueKind.String,"assets."+key+".type");if(!type.GetString()!.Contains("image/tiff",StringComparison.OrdinalIgnoreCase))throw MetadataError("assets."+key+".type (numeric GeoTIFF required)");
+                var raster=default(JsonElement);
+                if(asset.TryGetProperty("raster:bands",out var rs)){
+                    if(rs.ValueKind!=JsonValueKind.Array||rs.GetArrayLength()!=1||rs[0].ValueKind!=JsonValueKind.Object)throw MetadataError("assets."+key+".raster:bands");raster=rs[0];
+                }
                 var quality=bandId is "QA_PIXEL" or "QA_RADSAT" or "SCL";
-                var scale=Number(raster,"scale",kind==RemoteKind.Terrain||quality?1:double.NaN);
-                var offset=Number(raster,"offset",0);var nodata=Number(raster,"nodata",double.NaN);
-                if(!double.IsFinite(scale)||!double.IsFinite(offset))throw new IOException("Provider omitted required band scaling. Scientific values were not guessed.");
+                var scale=BandNumber(raster,"scale",kind==RemoteKind.Terrain||quality?1:double.NaN,"assets."+key+".raster:bands[0].scale");
+                var offset=BandNumber(raster,"offset",0,"assets."+key+".raster:bands[0].offset");var nodata=BandNumber(raster,"nodata",double.NaN,"assets."+key+".raster:bands[0].nodata");
+                if(!double.IsFinite(scale)||!double.IsFinite(offset))throw MetadataError("assets."+key+".raster:bands[0].scale");
                 if(quality&&(scale!=1||offset!=0))throw new IOException("Provider changed quality-mask scaling; original integer flags are required.");
                 if(kind==RemoteKind.Thermal&&bandId=="ST_B10"&&(Math.Abs(scale-.00341802)>1e-10||offset!=149))throw new IOException("Provider temperature scale differs from the supported Landsat C2 product.");
                 var unit=quality?"1":kind==RemoteKind.Thermal?"K":kind==RemoteKind.Multispectral?"reflectance":"m";
                 bands.Add(new(new(bandId,bandId+".tif","geotiff",Unit:unit,Scale:scale,Offset:offset,NoData:double.IsFinite(nodata)?nodata:null,SceneId:scene),uri));
             }
-            var observation=kind==RemoteKind.Terrain?(DateTimeOffset?)null:Date(props);
+            DateTimeOffset date;try{date=Date(props);}catch(Exception error)when(error is KeyNotFoundException or InvalidOperationException or FormatException or ArgumentException){throw MetadataError("properties.datetime");}
+            var observation=kind==RemoteKind.Terrain?(DateTimeOffset?)null:date;
             var notes=kind==RemoteKind.Terrain?"Copernicus GLO-30 digital surface model (includes vegetation/buildings), EGM2008 geoid heights. Catalog publication time is not a per-pixel observation date.":
                 kind==RemoteKind.Thermal?"Landsat Collection 2 Level-2 Surface Temperature (L2SP), not brightness temperature or aircraft thermal imagery. 30 m product grid; Landsat 8/9 TIRS native thermal resolution 100 m. QA is applied at sampling.":
                 "Sentinel-2 Level-2A surface reflectance. Provider raster:bands scale/offset is retained, including product-specific radiometric offsets; SCL is sampled on its own native grid.";
             var license=kind==RemoteKind.Thermal?"USGS Landsat public domain; https://www.usgs.gov/landsat-missions/landsat-data-access":kind==RemoteKind.Multispectral?$"Contains modified Copernicus Sentinel data ({observation!.Value.Year}); https://sentinels.copernicus.eu/documents/247904/690755/Sentinel_Data_Legal_Notice.pdf":"Produced using Copernicus WorldDEM-30: © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved. GLO-30 license: https://spacedata.copernicus.eu/collections/copernicus-digital-elevation-model";
             var item=root+"/collections/"+collection+"/items/"+Uri.EscapeDataString(scene);
-            var manifest=new ScientificSourceManifest(1,collection+" / "+scene,kind,kind==RemoteKind.Multispectral?"Copernicus / Element 84 Earth Search":"Microsoft Planetary Computer / "+(kind==RemoteKind.Thermal?"USGS Landsat":"Copernicus DEM"),license,item,scene,observation,kind==RemoteKind.Terrain?"EGM2008 geoid (DSM, not bare-earth)":"not applicable",bands.Select(b=>b.Band).ToArray(),PublicationUtc:kind==RemoteKind.Terrain?Date(props):null,Notes:notes);
+            var manifest=new ScientificSourceManifest(1,collection+" / "+scene,kind,kind==RemoteKind.Multispectral?"Copernicus / Element 84 Earth Search":"Microsoft Planetary Computer / "+(kind==RemoteKind.Thermal?"USGS Landsat":"Copernicus DEM"),license,item,scene,observation,kind==RemoteKind.Terrain?"EGM2008 geoid (DSM, not bare-earth)":"not applicable",bands.Select(b=>b.Band).ToArray(),PublicationUtc:kind==RemoteKind.Terrain?date:null,Notes:notes);
             return new(manifest,bands.ToArray(),root,item,kind==RemoteKind.Terrain?"Numeric DSM; vertical reference differs from 3DEP and aircraft MSL":$"Scene cloud cover {Cloud(props):0.##}%; local QA/nodata still determines valid samples",kind==RemoteKind.Thermal?"30 m delivered grid / 100 m native TIRS":kind==RemoteKind.Multispectral?"10 m reflectance / 20 m SCL":"~30 m geographic DSM",area,
                 Limitations:["Discovery examines at most 60 ordered catalog candidates; no claim of exhaustive coverage.",notes],
                 ProviderMetadataJson:JsonSerializer.Serialize(new{collection,scene,properties=props,geometry=feature.GetProperty("geometry"),assets=wanted.ToDictionary(pair=>pair.Item1,pair=>assets.GetProperty(pair.Item2))}));
@@ -90,11 +127,11 @@ public sealed class StacScientificProvider(ScientificHttp http,string id):IScien
         try
         {
             var props=feature.GetProperty("properties");if(kind==RemoteKind.Thermal&&(props.GetProperty("landsat:correction").GetString()!="L2SP"||!feature.GetProperty("id").GetString()!.StartsWith("LC0",StringComparison.Ordinal)))return false;
-            if(kind!=RemoteKind.Terrain&&(Cloud(props)>p.MaximumCloudPercent||Date(props)> (p.PreferredDateUtc??DateTimeOffset.UtcNow)||Date(props)<(p.PreferredDateUtc??DateTimeOffset.UtcNow).AddDays(-p.LookbackDays)))return false;
+            if(kind!=RemoteKind.Terrain&&(!double.IsFinite(Cloud(props))||Cloud(props)<0||Cloud(props)>p.MaximumCloudPercent||Date(props)> (p.PreferredDateUtc??DateTimeOffset.UtcNow)||Date(props)<(p.PreferredDateUtc??DateTimeOffset.UtcNow).AddDays(-p.LookbackDays)))return false;
             var geometry=feature.GetProperty("geometry");
             return area.Corners.Append(area.Center).All(point=>Contains(geometry,point));
         }
-        catch(Exception e)when(e is JsonException or KeyNotFoundException or InvalidOperationException or FormatException){return false;}
+        catch(Exception e)when(e is JsonException or KeyNotFoundException or InvalidOperationException or FormatException or ArgumentException or IndexOutOfRangeException){return false;}
     }
     internal static bool Contains(JsonElement geometry,Coordinates point)
     {
@@ -112,8 +149,8 @@ public sealed class StacScientificProvider(ScientificHttp http,string id):IScien
         }
         return inside;
     }
-    internal static double Number(JsonElement value,string field,double fallback)=>value.ValueKind==JsonValueKind.Object&&value.TryGetProperty(field,out var n)&&n.TryGetDouble(out var d)?d:fallback;
-    private static double Cloud(JsonElement props)=>Number(props,"eo:cloud_cover",0);
+    internal static double Number(JsonElement value,string field,double fallback)=>value.ValueKind==JsonValueKind.Object&&value.TryGetProperty(field,out var n)&&n.ValueKind==JsonValueKind.Number&&n.TryGetDouble(out var d)?d:fallback;
+    private static double Cloud(JsonElement props)=>Number(props,"eo:cloud_cover",double.NaN);
     private static DateTimeOffset Date(JsonElement props)=>DateTimeOffset.Parse(props.GetProperty("datetime").GetString()!,CultureInfo.InvariantCulture).ToUniversalTime();
     internal static string Bounds(GeographicBounds b)=>string.Join(",",new[]{b.West,b.South,b.East,b.North}.Select(v=>v.ToString("R",CultureInfo.InvariantCulture)));
 }

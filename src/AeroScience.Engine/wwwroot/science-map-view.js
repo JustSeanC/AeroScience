@@ -11,7 +11,7 @@ import {terrainProfileView} from './terrain-profile.js';
 import {node as el,numeric as number,dateTime as local,button,link,select,disclosure,status,table,color,legend,errorMessage,readableName} from './workstation-ui.js';
 const remote=new Set(['terrain-scanner','thermal-imager','multispectral-imager','hyperspectral-imager']);
 const categorical=['#bba3f5','#f3bd83','#79d2a5','#80bdf2','#f0d17d','#79d8dd','#d6a9dd'];
-const support=localizedCopy("ui.scienceMapView.messageActualSampledNativeCellsOnlyTransparentGaps");
+const support=localizedCopy("map.acquisitionOverviewHelp");
 const categoryKey=item=>[item.instrumentId,item.measurement||'',item.unit||''].join('|');
 const savedViews=new Map();let mapPreferences={enabled:[],quantities:[],opacity:'.8'};
 const pause=()=>new Promise(resolve=>setTimeout(resolve,0));
@@ -124,12 +124,17 @@ export async function scienceMap(parent,api,params,ids,instrument,disposals,cata
       const options=atmospheric?categories.map(c=>[id+'|'+c.measurement,readableName(id,catalog)+' · '+readableName(c.measurement)]):[[id,readableName(id,catalog)+' acquisitions']];for(const [value,title] of options){const option=el('option',title);option.value=value;browseType.append(option);}
     }
   }
-  function renderOverview(snapshot){
+  function renderOverview(snapshot,zoom){
     layers.clearLayers();nativeLayers.clear();overviewLayers.clear();nativeEntries=[];detailWarnings=[];displayedCells=displayedAtmosphere=0;legendBox.replaceChildren(el('p',support));
+    holder.dataset.overviewZoom=zoom;
     const names=[...new Set(scope.categories.map(c=>c.instrumentId))];
     for(const bin of snapshot.bins){let group=overviewLayers.get(bin.instrumentId);if(!group){group=window.L.layerGroup();overviewLayers.set(bin.instrumentId,group);layers.addLayer(group);}
-      const marker=window.L.circleMarker([bin.center.latitude,bin.center.longitude],{radius:Math.min(19,6+Math.log2(bin.records+1)*2),color:categorical[names.indexOf(bin.instrumentId)%categorical.length],weight:2,fillOpacity:.2});
-      const tooltip=el('span',localizedCopy("ui.scienceMapView.messageLocationOverview",{value1:(String(readableName(bin.instrumentId,catalog))),value2:(String(number(bin.records))),value3:(String(bin.measurement?textForUI("ui.scienceMapView.messageRecordedValues"):'acquisitions'))}));marker.bindTooltip(tooltip);
+      const tint=categorical[names.indexOf(bin.instrumentId)%categorical.length],bounds=bin.bounds;
+      // Bounded overview bins describe acquisition extents, never valid-cell coverage.
+      if(!bin.measurement&&bounds&&bounds.east>=bounds.west&&bounds.east-bounds.west<180&&bounds.north>bounds.south&&bounds.east>bounds.west)
+        group.addLayer(window.L.rectangle([[bounds.south,bounds.west],[bounds.north,bounds.east]],{className:'science-acquisition-extent',color:tint,weight:2,dashArray:'5 4',fill:false,interactive:false}));
+      const marker=window.L.circleMarker([bin.center.latitude,bin.center.longitude],{className:'science-overview-location',radius:Math.min(19,6+Math.log2(bin.records+1)*2),color:tint,weight:2,fillOpacity:.2});
+      const tooltip=el('span',bin.measurement?localizedCopy("ui.scienceMapView.messageLocationOverview",{value1:readableName(bin.instrumentId,catalog),value2:number(bin.records),value3:textForUI("ui.scienceMapView.messageRecordedValues")}):localizedCopy("map.acquisitionLocation",{instrument:readableName(bin.instrumentId,catalog),records:number(bin.records),valid:number(bin.validRecords)}));marker.bindTooltip(tooltip);
       marker.on('click',()=>{if(map.map.terrainProfileDrawing)return;const bounds=expanded(bin.bounds);if(bounds)map.map.fitBounds([[bounds.south,bounds.west],[bounds.north,bounds.east]],{maxZoom:18,padding:[30,30]});browseType.value=bin.instrumentId+(bin.measurement?'|'+bin.measurement:'');onlyVisible.checked=true;pageNumber.value=1;loadBrowser().catch(error=>errorMessage(browse,error));});group.addLayer(marker);
     }
     updateCounts(snapshot);visibility();
@@ -183,8 +188,8 @@ export async function scienceMap(parent,api,params,ids,instrument,disposals,cata
   async function refreshVisible(force=false){
     controller?.abort();controller=new AbortController();const own=++version,current=()=>!stopped&&own===version;
     const request=(path,body)=>api(path,body,{signal:controller.signal});holder.setAttribute('aria-busy','true');setPresentationText(progress,localizedCopy("ui.scienceMapView.messageRenderingSavedGeographicScience"));evidenceRows.replaceChildren();
-    try{const query={...baseQuery(),area:area()},key=JSON.stringify(query),cached=viewCache.get(key);const snapshot=!force&&cached&&Date.now()-cached.at<15000?cached.value:await request('/api/science/workspace/overview',query);if(!current())return;
-      viewCache.set(key,{value:snapshot,at:Date.now()});while(viewCache.size>8)viewCache.delete(viewCache.keys().next().value);visibleScope=snapshot;renderOverview(snapshot);await nativeDetail(snapshot,request,current);if(!current())return;
+    try{const zoom=map.map.getZoom(),query={...baseQuery(),area:area()},key=JSON.stringify(query),cached=viewCache.get(key);const snapshot=!force&&cached&&Date.now()-cached.at<15000?cached.value:await request('/api/science/workspace/overview',query);if(!current())return;
+      viewCache.set(key,{value:snapshot,at:Date.now()});while(viewCache.size>8)viewCache.delete(viewCache.keys().next().value);visibleScope=snapshot;renderOverview(snapshot,zoom);await nativeDetail(snapshot,request,current);if(!current())return;
       setPresentationText(progress,localizedCopy("ui.scienceMapView.messageGeographicallyIndexedAcquisitionsReviewedInThe",{value1:(String(holder.dataset.detailRepresentation==='overview-and-selected-acquisitions'?textForUI("ui.scienceMapView.messageOverviewModeNativeDetailShowsOneSaved"):'')),value2:(String(scope.acquisitions)),value3:(String(scope.atmosphericValues)),value4:(String(snapshot.acquisitions)),value5:(String(snapshot.atmosphericValues)),value6:(String(snapshot.bins.length)),value7:(String(displayedCells)),value8:(String(displayedAtmosphere))}));
       if(detailWarnings.length)progress.textContent+=textForUI("ui.scienceMapView.messageSomeSavedLayersAreUnavailable",{value1:(String(detailWarnings.slice(0,3).join('; '))),value2:(String(detailWarnings.length>3?textForUI("ui.scienceMapView.messageFurtherWarningsInSources",{value1:(detailWarnings.length-3)}):''))});
       if(!scope.acquisitions&&!scope.atmosphericValues)setPresentationText(progress,localizedCopy("ui.scienceMapView.messageNoGeolocatedSavedScienceInThisScope"));
@@ -195,7 +200,10 @@ export async function scienceMap(parent,api,params,ids,instrument,disposals,cata
   async function loadScope(fit=true){
     rawCache.clear();viewCache.clear();imagery.clearLayers();clearDerivedLegends();setPresentationText(progress,localizedCopy("ui.scienceMapView.messageLoadingSavedScientificRecordsAndCountingThe"));scope=await api('/api/science/workspace/overview',baseQuery());if(stopped)return;controlsForScope();
     if(fit&&savedView){map.map.setView(savedView.center,savedView.zoom,{animate:false});}else if(fit&&scope.extent){const b=expanded(scope.extent);map.map.fitBounds([[b.south,b.west],[b.north,b.east]],{padding:[24,24],maxZoom:17});}
+    const view=()=>JSON.stringify([map.map.getZoom(),area()]),loadedView=view();
     await refreshVisible(true);await loadBrowser();initial=false;
+    // Honor a pilot viewport change suppressed during the initial native load.
+    if(!stopped&&loadedView!==view())await refreshVisible();
   }
   async function inspectProduct(product){
     selectedProduct=product;if(product.instrumentId==='hyperspectral-imager'&&!sources.some(s=>s.source.id===product.sourceId)){const data=await api('/api/science/products/'+product.id);sources.push({source:data.source,originalsRetained:false});}const measurement=quantities.get(product.instrumentId)||initialMeasurement(product.instrumentId,sources.find(item=>item.source.id===product.sourceId)?.source);if(!measurement)throw Error(textForUI("ui.scienceMapView.messageChooseAnAvailableWavelengthForThisInstrument"));

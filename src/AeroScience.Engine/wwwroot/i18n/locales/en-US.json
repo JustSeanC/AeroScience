@@ -1,5 +1,5 @@
 {
-  "version": 24,
+  "version": 25,
   "locale": "en-US",
   "messages": {
     "common.messageUnavailable": "Details are unavailable. Refresh to review the current information.",
@@ -7056,6 +7056,25 @@
     "windows.error.saveVault": "Windows could not save the AeroScience token. No plaintext fallback was used.",
     "windows.error.removeCredential": "Windows could not remove the AeroScience credential. Use Windows Credential Manager to review it.",
     "windows.error.unsupportedOrganizationCredential": "Unsupported organization credential.",
-    "windows.error.unsupportedOwnerKey": "Unsupported ownership key."
+    "windows.error.unsupportedOwnerKey": "Unsupported ownership key.",
+    "map.acquisitionOverviewHelp": "Actual sampled native cells only; transparent gaps remain missing. An acquisition footprint is modeled geometry, not valid-pixel coverage. Dashed acquisition extents and location markers remain visible at wide zoom, separate from the flight track. Outlines include missing or unknown support. Zoom in to inspect original collected cells.",
+    "map.acquisitionLocation": "{instrument} · {records} acquisitions · location overview. {valid} acquisitions have known valid sample support. Dashed extents are modeled, include missing or unknown areas, and are separate from the flight track.",
+    "network.title": "Live scientific network activity",
+    "network.summary": "{speed} · {activity} · {bytes} actually transferred this process.",
+    "network.rateUnknown": "Calculating / waiting for network bytes",
+    "network.basis": "HTTP payload from scientific catalogs, numeric rasters, NASA originals and public EPT LiDAR retrieval. Cache reuse and local verification, import and terrain/point-cloud processing are excluded. This is application payload throughput, not an internet benchmark.",
+    "network.sources": "Active preparation and sources: {sources}",
+    "network.unavailable": "Current network measurements are unavailable. Refresh to review activity; no current speed or transfer count is inferred.",
+    "preparation.pauseNamed": "Pause data preparation for {name}",
+    "preparation.resumeNamed": "Resume data preparation for {name}",
+    "preparation.continueNamed": "Continue preparation for a future flight: {name}",
+    "preparation.cancelNamed": "Cancel data preparation for {name}",
+    "preparation.retryNamed": "Retry failed regions for {name}",
+    "preparation.postFlightHold": "Flight completed. Additional scientific data preparation is paused until you approve continuing.",
+    "preparation.retryHold": "Retry queues only eligible selected failures. It does not resume a paused session or approve preparation for a future flight. Missing or incompatible sources may remain unavailable.",
+    "network.activeTransfers": {
+      "one": "{count} active network transfer",
+      "other": "{count} active network transfers"
+    }
   }
 }

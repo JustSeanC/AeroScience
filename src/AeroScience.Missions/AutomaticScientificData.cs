@@ -72,6 +72,7 @@ public sealed partial class AutomaticScientificData : IDisposable
     internal IScientificDataProvider Provider(string id)=>providers.Single(p=>p.Id==id);
     public string? AvailabilityError => science.AvailabilityError();
     public object NetworkDiagnostics()=>http.Diagnostics();
+    public ScientificNetworkActivity NetworkActivity()=>http.NetworkActivity();
     public double EstimatedPreparationSeconds {get{lock(gate)return preparationSeconds;}}
     public static string AreaKey(RemoteKind kind,GeographicBounds area)=>kind+":"+StacScientificProvider.Bounds(area);
     private void Wake(){if(wake.CurrentCount==0)try{wake.Release();}catch(SemaphoreFullException){}}
@@ -129,9 +130,10 @@ public sealed partial class AutomaticScientificData : IDisposable
                 string? reason=!p.OnlineEnabled||!p.PrivacyAccepted?"Scientific online access is disabled. Enable it separately from basemaps in Settings. Verified local sources still work.":background&&!p.BackgroundRetrieval?"Background retrieval is disabled. Prepare this area explicitly before flight.":p.UnmeteredOnly&&settings.IsUnmetered()!=true?"Waiting for a reliably detected unmetered connection. Change the unmetered-only control to proceed on this connection.":null;
                 // Local hyperspectral checks run without online consent and never trigger NASA downloading.
                 if(kind==RemoteKind.Hyperspectral)reason=null;
-                Set(new(key,kind,"Queued","Checking retained sources before any external request. "+reason,area,EstimatedDownloadBytes:kind==RemoteKind.Hyperspectral?0:null,EstimatedStorageBytes:StorageBound(kind),SamplePoint:samplePoint,Scope:scope));
+                var ticket=Guid.NewGuid();
+                Set(new(key,kind,"Queued","Checking retained sources before any external request. "+reason,area,EstimatedDownloadBytes:kind==RemoteKind.Hyperspectral?0:null,EstimatedStorageBytes:StorageBound(kind),SamplePoint:samplePoint,Scope:scope,AttemptId:ticket));
                 {
-                    var ticket=Guid.NewGuid();tickets[key]=ticket;scopes[key]=scope;
+                    tickets[key]=ticket;scopes[key]=scope;
                     if(queue.Count>=64)
                     {
                         var least=queue.Values.MaxBy(j=>j.Priority)!;
@@ -153,7 +155,7 @@ public sealed partial class AutomaticScientificData : IDisposable
         var candidate=cancellations.FirstOrDefault(p=>scopes.GetValueOrDefault(p.Key)?.StartsWith("plan:",StringComparison.Ordinal)==true&&!urgentFlightKeys.Contains(p.Key)&&!urgentFlightKeys.Any(key=>states.TryGetValue(key,out var wanted)&&states.TryGetValue(p.Key,out var current)&&wanted.Kind==current.Kind&&wanted.Area.West<current.Area.East&&wanted.Area.East>current.Area.West&&wanted.Area.South<current.Area.North&&wanted.Area.North>current.Area.South)&&!p.Value.IsCancellationRequested&&states.GetValueOrDefault(p.Key)?.Status=="Downloading");
         if(candidate.Value is null)return;lastPreemption=DateTimeOffset.UtcNow;preempted.Add(candidate.Key);candidate.Value.Cancel();
     }
-    public void RetryScope(string scope,IReadOnlySet<string>? explicitlyRequestedKeys=null){lock(gate)foreach(var key in states.Where(p=>(p.Value.Scope==scope||explicitlyRequestedKeys?.Contains(p.Key)==true)&&p.Value.Status is not("Ready" or "Dataset Ready" or "Downloading" or "Queued")).Select(p=>p.Key).ToArray()){states.Remove(key);tickets.Remove(key);retryAfter.Remove(key);}}
+    public void RetryScope(string scope,IReadOnlySet<string>? explicitlyRequestedKeys=null){lock(gate)foreach(var key in states.Where(p=>(explicitlyRequestedKeys is null?p.Value.Scope==scope:explicitlyRequestedKeys.Contains(p.Key))&&p.Value.Status is not("Ready" or "Dataset Ready" or "Downloading" or "Queued" or "Waiting for download allowance")).Select(p=>p.Key).ToArray()){states.Remove(key);tickets.Remove(key);retryAfter.Remove(key);}}
     public void ForgetDeletedSources(){http.ClearNumericCache();verified.Clear();RefreshLocalReadiness();}
     public void RefreshLocalReadiness()
     {Interlocked.Increment(ref configurationRevision);lock(gate)foreach(var key in states.Where(p=>p.Value.Status is not("Queued" or "Downloading" or "Waiting for download allowance")).Select(p=>p.Key).ToArray()){states.Remove(key);tickets.Remove(key);}}
@@ -191,7 +193,7 @@ public sealed partial class AutomaticScientificData : IDisposable
                 active.RemoveAll(t=>t.IsCompleted);
                 Job? job=null;
                 lock(gate)if(!paused&&active.Count<(flightActive?1:settings.Get().Preferences.ConcurrentDownloads)&&queue.Count>0)
-                {job=queue.Values.Where(j=>!pausedScopes.Contains(j.Scope)).Where(j=>!(flightActive&&(j.Scope.StartsWith("library:")||flightResourceHold is not null))).Where(j=>!retryAfter.TryGetValue(j.Key,out var after)||after<=DateTimeOffset.UtcNow).MinBy(j=>j.Priority);if(job is not null)queue.Remove(job.Key);}
+                {job=queue.Values.Where(j=>!cancellations.ContainsKey(j.Key)&&!pausedScopes.Contains(j.Scope)).Where(j=>!(flightActive&&(j.Scope.StartsWith("library:")||flightResourceHold is not null))).Where(j=>!retryAfter.TryGetValue(j.Key,out var after)||after<=DateTimeOffset.UtcNow).MinBy(j=>j.Priority);if(job is not null)queue.Remove(job.Key);}
                 if(job is not null){active.Add(Task.Run(()=>Execute(job),stopping.Token));continue;}
                 await wake.WaitAsync(TimeSpan.FromMilliseconds(200),stopping.Token);
             }
@@ -331,7 +333,7 @@ public sealed partial class AutomaticScientificData : IDisposable
         }
         catch(OperationCanceledException){bool yielded;lock(gate)yielded=preempted.Contains(job.Key);Set(state with{Status=yielded?"Superseded":"Unavailable",Message=yielded?"Preparation paused or preempted. Partial staging remains accounted; Resume can reuse verified originals and retry bounded work.":"Preparation cancelled or timed out. No partial source was advertised as ready. Retained staging is visible in Storage Management."});}
         catch(Exception e)when(e is IOException or HttpRequestException or JsonException or ArgumentException or InvalidOperationException or UnauthorizedAccessException or Microsoft.Data.Sqlite.SqliteException or KeyNotFoundException or FormatException or NotSupportedException)
-        {Set(state with{Status="Unavailable",Message=e is HttpRequestException?"Scientific provider is unreachable. Retry later or use verified offline sources.":e is JsonException or KeyNotFoundException?"Provider metadata is incompatible; no scientific values were guessed.":e.Message});}
+        {Set(state with{Status="Unavailable",Message=e is HttpRequestException?"Scientific provider is unreachable. Retry failed regions later or use verified offline sources.":e is JsonException or KeyNotFoundException?"Source metadata is unsupported or damaged, including possible retained metadata. No scientific values were guessed. Retry failed regions or review source settings; persistent metadata failures require a compatible source.":e.Message});}
         finally
         {
             if(transfer is not null)ScientificDiagnostics.Record("allowance-released",job.Key,job.Scope,job.Kind,bytes:transfer.HeldBytes,result:"Unused reservation released; actual transferred bytes remain charged.");

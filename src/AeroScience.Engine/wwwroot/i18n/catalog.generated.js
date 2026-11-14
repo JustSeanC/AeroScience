@@ -2,7 +2,7 @@
 export const localeData = {
   "manifest": {
     "version": 1,
-    "catalogVersion": 24,
+    "catalogVersion": 25,
     "fallback": "en-US",
     "locales": [
       {
@@ -37,8 +37,8 @@ export const localeData = {
       }
     ],
     "qualityContract": 1,
-    "catalogIdentity": "dd22b60677d9729e0816aec7b8c14487b0d7741ba174dedf255461992cfdb855",
-    "bundleIdentity": "bd208d571cdf0eee75c8b2b5a6cebe4e24cf1f86f94e4da4f821a05ae05c84fb"
+    "catalogIdentity": "22470c27a539c47d116032f26f29072ec90c780f21232e7cafc8ca9cc41db10c",
+    "bundleIdentity": "16a732d4a2426b4faccd8cc89083da5880eb5d9c11d723a9dd60227d24ad6ffa"
   },
   "schema": {
     "version": 1,
@@ -24868,14 +24868,85 @@ export const localeData = {
       },
       "windows.error.unsupportedOwnerKey": {
         "parameters": []
+      },
+      "map.acquisitionOverviewHelp": {
+        "parameters": []
+      },
+      "map.acquisitionLocation": {
+        "parameters": [
+          "instrument",
+          "records",
+          "valid"
+        ]
+      },
+      "network.title": {
+        "parameters": []
+      },
+      "network.summary": {
+        "parameters": [
+          "speed",
+          "activity",
+          "bytes"
+        ]
+      },
+      "network.rateUnknown": {
+        "parameters": []
+      },
+      "network.basis": {
+        "parameters": []
+      },
+      "network.sources": {
+        "parameters": [
+          "sources"
+        ]
+      },
+      "network.unavailable": {
+        "parameters": []
+      },
+      "preparation.pauseNamed": {
+        "parameters": [
+          "name"
+        ]
+      },
+      "preparation.resumeNamed": {
+        "parameters": [
+          "name"
+        ]
+      },
+      "preparation.continueNamed": {
+        "parameters": [
+          "name"
+        ]
+      },
+      "preparation.cancelNamed": {
+        "parameters": [
+          "name"
+        ]
+      },
+      "preparation.retryNamed": {
+        "parameters": [
+          "name"
+        ]
+      },
+      "preparation.postFlightHold": {
+        "parameters": []
+      },
+      "preparation.retryHold": {
+        "parameters": []
+      },
+      "network.activeTransfers": {
+        "parameters": [
+          "count"
+        ],
+        "plural": "count"
       }
     }
   },
   "catalogs": {
     "de-DE": {
-      "version": 24,
+      "version": 25,
       "locale": "de-DE",
-      "sourceHash": "dd22b60677d9729e0816aec7b8c14487b0d7741ba174dedf255461992cfdb855",
+      "sourceHash": "22470c27a539c47d116032f26f29072ec90c780f21232e7cafc8ca9cc41db10c",
       "pendingEnglishFallbackKeys": [
         "contextHelp.terrain.title",
         "flight.elapsed",
@@ -32215,11 +32286,30 @@ export const localeData = {
         "windows.error.saveVault": "Windows konnte das AeroScience Token nicht retten. Es wurde kein Klartextfallback verwendet.",
         "windows.error.removeCredential": "Windows konnte das AeroScience-Zertifikat nicht entfernen. Verwenden Sie Windows Credential Manager, um es zu überprüfen.",
         "windows.error.unsupportedOrganizationCredential": "Nicht unterstützter Organisations-Zugangsnachweis.",
-        "windows.error.unsupportedOwnerKey": "Nicht unterstützter Eigentümerschlüssel."
+        "windows.error.unsupportedOwnerKey": "Nicht unterstützter Eigentümerschlüssel.",
+        "map.acquisitionOverviewHelp": "Nur tatsächlich erfasste Zellen des ursprünglichen Rasters; transparente Lücken bleiben ohne Daten. Der Aufnahmebereich ist modellierte Geometrie und keine Abdeckung mit gültigen Rasterwerten. Gestrichelte Umrisse und Ortsmarkierungen bleiben auch beim Herauszoomen sichtbar, getrennt von der Flugspur. Die Umrisse schließen fehlende oder unbekannte Datenbereiche ein. Zum Prüfen der ursprünglichen Zellen hineinzoomen.",
+        "map.acquisitionLocation": "{instrument} · {records} Aufnahmen · Standortübersicht. {valid} Aufnahmen enthalten bekannte gültige Stichproben. Gestrichelte Umrisse sind modelliert, schließen fehlende oder unbekannte Bereiche ein und sind von der Flugspur getrennt.",
+        "network.title": "Aktuelle wissenschaftliche Netzwerkaktivität",
+        "network.summary": "{speed} · {activity} · {bytes} tatsächlich in diesem Prozess übertragen.",
+        "network.rateUnknown": "Berechnung / Warten auf Netzwerkdaten",
+        "network.basis": "HTTP-Nutzdaten aus wissenschaftlichen Katalogen, numerischen Rastern, NASA-Originalen und öffentlichen EPT-LiDAR-Abrufen. Cache-Wiederverwendung, lokale Prüfung, Import sowie Gelände- und Punktwolkenverarbeitung sind ausgeschlossen. Angezeigt wird der Nutzdatendurchsatz der Anwendung, kein Internet-Geschwindigkeitstest.",
+        "network.sources": "Aktive Vorbereitung und Quellen: {sources}",
+        "network.unavailable": "Aktuelle Netzwerkmessungen sind nicht verfügbar. Zum Prüfen der Aktivität aktualisieren; aktuelle Geschwindigkeit und Übertragungsanzahl werden nicht geschätzt.",
+        "preparation.pauseNamed": "Datenvorbereitung für {name} pausieren",
+        "preparation.resumeNamed": "Datenvorbereitung für {name} fortsetzen",
+        "preparation.continueNamed": "Vorbereitung für einen künftigen Flug fortsetzen: {name}",
+        "preparation.cancelNamed": "Datenvorbereitung für {name} abbrechen",
+        "preparation.retryNamed": "Fehlgeschlagene Regionen für {name} erneut versuchen",
+        "preparation.postFlightHold": "Flug abgeschlossen. Die weitere Vorbereitung wissenschaftlicher Daten ist pausiert, bis Sie das Fortsetzen genehmigen.",
+        "preparation.retryHold": "Erneut versuchen stellt nur geeignete ausgewählte Fehler erneut in die Warteschlange. Eine pausierte Sitzung wird dadurch nicht fortgesetzt und die Vorbereitung eines künftigen Flugs nicht genehmigt. Fehlende oder inkompatible Quellen können weiterhin nicht verfügbar sein.",
+        "network.activeTransfers": {
+          "one": "{count} aktive Netzwerkübertragung",
+          "other": "{count} aktive Netzwerkübertragungen"
+        }
       }
     },
     "en-US": {
-      "version": 24,
+      "version": 25,
       "locale": "en-US",
       "messages": {
         "common.messageUnavailable": "Details are unavailable. Refresh to review the current information.",
@@ -39276,13 +39366,32 @@ export const localeData = {
         "windows.error.saveVault": "Windows could not save the AeroScience token. No plaintext fallback was used.",
         "windows.error.removeCredential": "Windows could not remove the AeroScience credential. Use Windows Credential Manager to review it.",
         "windows.error.unsupportedOrganizationCredential": "Unsupported organization credential.",
-        "windows.error.unsupportedOwnerKey": "Unsupported ownership key."
+        "windows.error.unsupportedOwnerKey": "Unsupported ownership key.",
+        "map.acquisitionOverviewHelp": "Actual sampled native cells only; transparent gaps remain missing. An acquisition footprint is modeled geometry, not valid-pixel coverage. Dashed acquisition extents and location markers remain visible at wide zoom, separate from the flight track. Outlines include missing or unknown support. Zoom in to inspect original collected cells.",
+        "map.acquisitionLocation": "{instrument} · {records} acquisitions · location overview. {valid} acquisitions have known valid sample support. Dashed extents are modeled, include missing or unknown areas, and are separate from the flight track.",
+        "network.title": "Live scientific network activity",
+        "network.summary": "{speed} · {activity} · {bytes} actually transferred this process.",
+        "network.rateUnknown": "Calculating / waiting for network bytes",
+        "network.basis": "HTTP payload from scientific catalogs, numeric rasters, NASA originals and public EPT LiDAR retrieval. Cache reuse and local verification, import and terrain/point-cloud processing are excluded. This is application payload throughput, not an internet benchmark.",
+        "network.sources": "Active preparation and sources: {sources}",
+        "network.unavailable": "Current network measurements are unavailable. Refresh to review activity; no current speed or transfer count is inferred.",
+        "preparation.pauseNamed": "Pause data preparation for {name}",
+        "preparation.resumeNamed": "Resume data preparation for {name}",
+        "preparation.continueNamed": "Continue preparation for a future flight: {name}",
+        "preparation.cancelNamed": "Cancel data preparation for {name}",
+        "preparation.retryNamed": "Retry failed regions for {name}",
+        "preparation.postFlightHold": "Flight completed. Additional scientific data preparation is paused until you approve continuing.",
+        "preparation.retryHold": "Retry queues only eligible selected failures. It does not resume a paused session or approve preparation for a future flight. Missing or incompatible sources may remain unavailable.",
+        "network.activeTransfers": {
+          "one": "{count} active network transfer",
+          "other": "{count} active network transfers"
+        }
       }
     },
     "es-ES": {
-      "version": 24,
+      "version": 25,
       "locale": "es-ES",
-      "sourceHash": "dd22b60677d9729e0816aec7b8c14487b0d7741ba174dedf255461992cfdb855",
+      "sourceHash": "22470c27a539c47d116032f26f29072ec90c780f21232e7cafc8ca9cc41db10c",
       "pendingEnglishFallbackKeys": [
         "contextHelp.coverage.body",
         "contextHelp.lidar.body",
@@ -46493,13 +46602,33 @@ export const localeData = {
         "windows.error.saveVault": "Windows no pudo guardar el token de AeroScience. No se utilizó ningún texto de copia de seguridad.",
         "windows.error.removeCredential": "Windows no pudo eliminar la credencial de AeroScience. Utilice el Administrador de credenciales de Windows para revisarlo.",
         "windows.error.unsupportedOrganizationCredential": "Credencial de organización no compatible.",
-        "windows.error.unsupportedOwnerKey": "Clave de titularidad no compatible."
+        "windows.error.unsupportedOwnerKey": "Clave de titularidad no compatible.",
+        "map.acquisitionOverviewHelp": "Solo celdas originales realmente muestreadas; los huecos transparentes siguen sin datos. La huella de una adquisición es geometría modelada, no cobertura de píxeles válidos. Los contornos discontinuos y los marcadores siguen visibles al alejar el mapa, separados de la trayectoria del vuelo. Los contornos incluyen zonas sin datos o de validez desconocida. Acerque el mapa para inspeccionar las celdas originales.",
+        "map.acquisitionLocation": "{instrument} · {records} adquisiciones · vista general de ubicaciones. {valid} adquisiciones tienen muestras válidas conocidas. Los contornos discontinuos están modelados, incluyen zonas sin datos o desconocidas y están separados de la trayectoria del vuelo.",
+        "network.title": "Actividad de red científica en directo",
+        "network.summary": "{speed} · {activity} · {bytes} transferidos realmente por este proceso.",
+        "network.rateUnknown": "Calculando / esperando bytes de la red",
+        "network.basis": "Datos HTTP de catálogos científicos, rásteres numéricos, originales de NASA y descargas públicas EPT LiDAR. Se excluyen la reutilización de caché, la verificación e importación locales y el procesamiento de terreno o nubes de puntos. Es el caudal de datos de la aplicación, no una prueba de velocidad de Internet.",
+        "network.sources": "Preparación y fuentes activas: {sources}",
+        "network.unavailable": "Las mediciones actuales de red no están disponibles. Actualice para revisar la actividad; no se deduce ninguna velocidad ni cantidad de transferencias actual.",
+        "preparation.pauseNamed": "Pausar la preparación de datos de {name}",
+        "preparation.resumeNamed": "Reanudar la preparación de datos de {name}",
+        "preparation.continueNamed": "Continuar la preparación para un vuelo futuro: {name}",
+        "preparation.cancelNamed": "Cancelar la preparación de datos de {name}",
+        "preparation.retryNamed": "Reintentar las regiones fallidas de {name}",
+        "preparation.postFlightHold": "Vuelo finalizado. La preparación adicional de datos científicos está en pausa hasta que autorice continuar.",
+        "preparation.retryHold": "El reintento solo pone en cola los fallos seleccionados aptos. No reanuda una sesión en pausa ni autoriza la preparación de un vuelo futuro. Las fuentes ausentes o incompatibles pueden seguir sin estar disponibles.",
+        "network.activeTransfers": {
+          "one": "{count} transferencia de red activa",
+          "other": "{count} transferencias de red activas",
+          "many": "{count} transferencias de red activas"
+        }
       }
     },
     "fr-FR": {
-      "version": 24,
+      "version": 25,
       "locale": "fr-FR",
-      "sourceHash": "dd22b60677d9729e0816aec7b8c14487b0d7741ba174dedf255461992cfdb855",
+      "sourceHash": "22470c27a539c47d116032f26f29072ec90c780f21232e7cafc8ca9cc41db10c",
       "pendingEnglishFallbackKeys": [
         "contextHelp.coverage.body",
         "contextHelp.lidar.body",
@@ -53842,13 +53971,33 @@ export const localeData = {
         "windows.error.saveVault": "Windows n'a pas pu enregistrer le jeton AeroScience. Aucun retour en arrière n'a été utilisé.",
         "windows.error.removeCredential": "Windows ne pouvait pas supprimer la crédibilité AeroScience. Utilisez Windows Credential Manager pour la réviser.",
         "windows.error.unsupportedOrganizationCredential": "Informations d’authentification d’organisation non prises en charge.",
-        "windows.error.unsupportedOwnerKey": "Clé de propriétaire non prise en charge."
+        "windows.error.unsupportedOwnerKey": "Clé de propriétaire non prise en charge.",
+        "map.acquisitionOverviewHelp": "Uniquement les cellules natives réellement échantillonnées ; les zones transparentes restent sans données. L’emprise d’une acquisition est une géométrie modélisée, pas une couverture de pixels valides. Les contours en pointillés et les repères restent visibles à petite échelle, séparément de la trajectoire de vol. Les contours incluent des zones sans données ou de validité inconnue. Zoomez pour inspecter les cellules originales.",
+        "map.acquisitionLocation": "{instrument} · {records} acquisitions · aperçu des emplacements. {valid} acquisitions comportent des échantillons valides connus. Les contours en pointillés sont modélisés, incluent des zones sans données ou inconnues et sont distincts de la trajectoire de vol.",
+        "network.title": "Activité réseau scientifique en direct",
+        "network.summary": "{speed} · {activity} · {bytes} réellement transférés par ce processus.",
+        "network.rateUnknown": "Calcul en cours / attente de données réseau",
+        "network.basis": "Données HTTP des catalogues scientifiques, rasters numériques, originaux NASA et téléchargements publics EPT LiDAR. La réutilisation du cache, la vérification et l’importation locales ainsi que le traitement du terrain ou des nuages de points sont exclus. Il s’agit du débit utile de l’application, pas d’un test de débit Internet.",
+        "network.sources": "Préparation et sources actives : {sources}",
+        "network.unavailable": "Les mesures réseau actuelles sont indisponibles. Actualisez pour consulter l’activité ; aucun débit ni nombre de transferts actuel n’est déduit.",
+        "preparation.pauseNamed": "Suspendre la préparation des données pour {name}",
+        "preparation.resumeNamed": "Reprendre la préparation des données pour {name}",
+        "preparation.continueNamed": "Poursuivre la préparation pour un prochain vol : {name}",
+        "preparation.cancelNamed": "Annuler la préparation des données pour {name}",
+        "preparation.retryNamed": "Réessayer les régions en échec pour {name}",
+        "preparation.postFlightHold": "Vol terminé. La préparation de données scientifiques supplémentaires est suspendue jusqu’à votre autorisation de poursuivre.",
+        "preparation.retryHold": "La nouvelle tentative met en file uniquement les échecs sélectionnés admissibles. Elle ne reprend pas une session suspendue et n’autorise pas la préparation d’un prochain vol. Les sources absentes ou incompatibles peuvent rester indisponibles.",
+        "network.activeTransfers": {
+          "one": "{count} transfert réseau actif",
+          "other": "{count} transferts réseau actifs",
+          "many": "{count} transferts réseau actifs"
+        }
       }
     },
     "pt-BR": {
-      "version": 24,
+      "version": 25,
       "locale": "pt-BR",
-      "sourceHash": "dd22b60677d9729e0816aec7b8c14487b0d7741ba174dedf255461992cfdb855",
+      "sourceHash": "22470c27a539c47d116032f26f29072ec90c780f21232e7cafc8ca9cc41db10c",
       "pendingEnglishFallbackKeys": [
         "contextHelp.coverage.body",
         "contextHelp.lidar.body",
@@ -61039,7 +61188,27 @@ export const localeData = {
         "windows.error.saveVault": "O Windows não pôde salvar o token AeroScience. Nenhum texto simples foi usado.",
         "windows.error.removeCredential": "O Windows não pôde remover o AeroScienceCrential. Use o Windows Credential Manager para revisá-lo.",
         "windows.error.unsupportedOrganizationCredential": "Credencial da organização não compatível.",
-        "windows.error.unsupportedOwnerKey": "Chave de propriedade não compatível."
+        "windows.error.unsupportedOwnerKey": "Chave de propriedade não compatível.",
+        "map.acquisitionOverviewHelp": "Somente células da grade original realmente amostradas; lacunas transparentes continuam sem dados. A área de uma aquisição é uma geometria modelada, não uma cobertura de pixels válidos. Os contornos tracejados e os marcadores permanecem visíveis ao afastar o mapa, separados da trajetória do voo. Os contornos incluem áreas sem dados ou com validade desconhecida. Aproxime o mapa para inspecionar as células originais.",
+        "map.acquisitionLocation": "{instrument} · {records} aquisições · visão geral das posições. {valid} aquisições têm amostras válidas conhecidas. Os contornos tracejados são modelados, incluem áreas sem dados ou desconhecidas e são separados da trajetória do voo.",
+        "network.title": "Atividade de rede científica em tempo real",
+        "network.summary": "{speed} · {activity} · {bytes} realmente transferidos por este processo.",
+        "network.rateUnknown": "Calculando / aguardando dados da rede",
+        "network.basis": "Dados HTTP de catálogos científicos, rasters numéricos, originais da NASA e downloads públicos EPT LiDAR. Reutilização do cache, verificação e importação locais e processamento de terreno ou nuvens de pontos são excluídos. Este é o fluxo de dados da aplicação, não um teste de velocidade da internet.",
+        "network.sources": "Preparação e fontes ativas: {sources}",
+        "network.unavailable": "As medições atuais da rede estão indisponíveis. Atualize para consultar a atividade; nenhuma velocidade ou quantidade atual de transferências é presumida.",
+        "preparation.pauseNamed": "Pausar a preparação de dados de {name}",
+        "preparation.resumeNamed": "Retomar a preparação de dados de {name}",
+        "preparation.continueNamed": "Continuar a preparação para um voo futuro: {name}",
+        "preparation.cancelNamed": "Cancelar a preparação de dados de {name}",
+        "preparation.retryNamed": "Tentar novamente as regiões com falha de {name}",
+        "preparation.postFlightHold": "Voo concluído. A preparação adicional de dados científicos está pausada até você autorizar a continuação.",
+        "preparation.retryHold": "A nova tentativa coloca na fila somente as falhas selecionadas elegíveis. Ela não retoma uma sessão pausada nem autoriza a preparação de um voo futuro. Fontes ausentes ou incompatíveis podem continuar indisponíveis.",
+        "network.activeTransfers": {
+          "one": "{count} transferência de rede ativa",
+          "other": "{count} transferências de rede ativas",
+          "many": "{count} transferências de rede ativas"
+        }
       }
     }
   }

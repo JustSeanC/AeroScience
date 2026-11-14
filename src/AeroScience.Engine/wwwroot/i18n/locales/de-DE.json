@@ -1,8 +1,8 @@
 {
-  "version": 24,
+  "version": 25,
   "locale": "de-DE",
   "review": "candidate",
-  "sourceHash": "dd22b60677d9729e0816aec7b8c14487b0d7741ba174dedf255461992cfdb855",
+  "sourceHash": "22470c27a539c47d116032f26f29072ec90c780f21232e7cafc8ca9cc41db10c",
   "sourceMessages": {
     "common.messageUnavailable": "0caeb99c17c0da77d2c721ec2573d7ca21468b2587b27605c3e0a483a3976b51",
     "common.loading": "9e84d6d7b9885c4f88789ccd515f1c5d752cf53f88866d80d2814fd63c9630ec",
@@ -7043,7 +7043,23 @@
     "windows.error.saveVault": "658f2f9c4e84dba129ae2f8789fbd76206eb77cccd829e46bc9cfc9894e1035e",
     "windows.error.removeCredential": "ea730af2348a2bc750ecc889d1e8b2285494566a4d215cb95d8cb32d9fc5e56d",
     "windows.error.unsupportedOrganizationCredential": "a83aa52ab3c96158dfb09cd7b6c2a8a00a7a857c123c60d5b61528a4aaf8b8a3",
-    "windows.error.unsupportedOwnerKey": "fc73ded5872e05bb8916ced0ad0a0b7612810fcd106306dec8c7f677e3bc8abb"
+    "windows.error.unsupportedOwnerKey": "fc73ded5872e05bb8916ced0ad0a0b7612810fcd106306dec8c7f677e3bc8abb",
+    "map.acquisitionOverviewHelp": "cbd035750b5a915e20b8e55306fb552cf7a42bdda411b5cc5e93fbde0b5f9523",
+    "map.acquisitionLocation": "1c8b9b0c6d0dc8026f9d5c8b96ebf91434afa9680c3b1961a123dc94917395d8",
+    "network.title": "8a539f22da487a24de111a0e1a912b2adae5c6084311aaff7ab90c792bd3fc53",
+    "network.summary": "30f7912eea97fa3436bc22510249fb32308ee2c296c77921d7fe8e82f2593db9",
+    "network.rateUnknown": "a784501cdbdd994741f767d45ac10f9921453642ae59d1dd218bc97d00369cab",
+    "network.basis": "252d9e1cd1ea3af9d334ecf6844aeca04d3275b6ec73b8b95edc929b2fb376f5",
+    "network.sources": "47c57cbe0f2cba17af6c35128d49fc9c7ce39babe99341b1a938c2f43df8fb8a",
+    "network.unavailable": "1a5e16c234f84f6e64c9c8ce782fc62ee28f5a035c063f0e0d26fa65a61ccd63",
+    "preparation.pauseNamed": "238924ddda85e1c1135e416995705c00fe4d97c0dfc2797c281a747023e69bc8",
+    "preparation.resumeNamed": "69bbbcad0346c1d3ef89a5c763a13115d18027451b57162704d9f732b79bf410",
+    "preparation.continueNamed": "c83f7535c2302e234b338d3ff327bdf7f4b850d705309298f28d07dbb229e572",
+    "preparation.cancelNamed": "528e826d9b41e46ab7dbe47cdda4277bfef78aadfdb758f05ceb004dfaf94fb8",
+    "preparation.retryNamed": "4efddb04355087717c246b40c2d6cf3effc0f863f204a309664b5f1656404772",
+    "preparation.postFlightHold": "692574f90880b07b9ec72a098542967f9b98e841f8abc45a00ee3f80b0f24c77",
+    "preparation.retryHold": "a1b58dcb4d5b943474d8a070bc9159da82f53f26742061283bae0723bbe39e46",
+    "network.activeTransfers": "eb8e6ecff0b664f6f1b571cc4fcb74d8d4264b7a7e9f9d6443f9f14c76ed1504"
   },
   "pendingEnglishFallbackKeys": [
     "contextHelp.terrain.title",
@@ -14384,6 +14400,25 @@
     "windows.error.saveVault": "Windows konnte das AeroScience Token nicht retten. Es wurde kein Klartextfallback verwendet.",
     "windows.error.removeCredential": "Windows konnte das AeroScience-Zertifikat nicht entfernen. Verwenden Sie Windows Credential Manager, um es zu überprüfen.",
     "windows.error.unsupportedOrganizationCredential": "Nicht unterstützter Organisations-Zugangsnachweis.",
-    "windows.error.unsupportedOwnerKey": "Nicht unterstützter Eigentümerschlüssel."
+    "windows.error.unsupportedOwnerKey": "Nicht unterstützter Eigentümerschlüssel.",
+    "map.acquisitionOverviewHelp": "Nur tatsächlich erfasste Zellen des ursprünglichen Rasters; transparente Lücken bleiben ohne Daten. Der Aufnahmebereich ist modellierte Geometrie und keine Abdeckung mit gültigen Rasterwerten. Gestrichelte Umrisse und Ortsmarkierungen bleiben auch beim Herauszoomen sichtbar, getrennt von der Flugspur. Die Umrisse schließen fehlende oder unbekannte Datenbereiche ein. Zum Prüfen der ursprünglichen Zellen hineinzoomen.",
+    "map.acquisitionLocation": "{instrument} · {records} Aufnahmen · Standortübersicht. {valid} Aufnahmen enthalten bekannte gültige Stichproben. Gestrichelte Umrisse sind modelliert, schließen fehlende oder unbekannte Bereiche ein und sind von der Flugspur getrennt.",
+    "network.title": "Aktuelle wissenschaftliche Netzwerkaktivität",
+    "network.summary": "{speed} · {activity} · {bytes} tatsächlich in diesem Prozess übertragen.",
+    "network.rateUnknown": "Berechnung / Warten auf Netzwerkdaten",
+    "network.basis": "HTTP-Nutzdaten aus wissenschaftlichen Katalogen, numerischen Rastern, NASA-Originalen und öffentlichen EPT-LiDAR-Abrufen. Cache-Wiederverwendung, lokale Prüfung, Import sowie Gelände- und Punktwolkenverarbeitung sind ausgeschlossen. Angezeigt wird der Nutzdatendurchsatz der Anwendung, kein Internet-Geschwindigkeitstest.",
+    "network.sources": "Aktive Vorbereitung und Quellen: {sources}",
+    "network.unavailable": "Aktuelle Netzwerkmessungen sind nicht verfügbar. Zum Prüfen der Aktivität aktualisieren; aktuelle Geschwindigkeit und Übertragungsanzahl werden nicht geschätzt.",
+    "preparation.pauseNamed": "Datenvorbereitung für {name} pausieren",
+    "preparation.resumeNamed": "Datenvorbereitung für {name} fortsetzen",
+    "preparation.continueNamed": "Vorbereitung für einen künftigen Flug fortsetzen: {name}",
+    "preparation.cancelNamed": "Datenvorbereitung für {name} abbrechen",
+    "preparation.retryNamed": "Fehlgeschlagene Regionen für {name} erneut versuchen",
+    "preparation.postFlightHold": "Flug abgeschlossen. Die weitere Vorbereitung wissenschaftlicher Daten ist pausiert, bis Sie das Fortsetzen genehmigen.",
+    "preparation.retryHold": "Erneut versuchen stellt nur geeignete ausgewählte Fehler erneut in die Warteschlange. Eine pausierte Sitzung wird dadurch nicht fortgesetzt und die Vorbereitung eines künftigen Flugs nicht genehmigt. Fehlende oder inkompatible Quellen können weiterhin nicht verfügbar sein.",
+    "network.activeTransfers": {
+      "one": "{count} aktive Netzwerkübertragung",
+      "other": "{count} aktive Netzwerkübertragungen"
+    }
   }
 }

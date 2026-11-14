@@ -81283,6 +81283,161 @@
         "src/AeroScience.Desktop/WindowsOrganizationCredentials.cs"
       ],
       "preservedTokens": []
+    },
+    "map.acquisitionOverviewHelp": {
+      "context": "Scientific Map overview legend. An unfilled extent is modeled geometry and must not imply valid data in gaps.",
+      "parameters": [],
+      "maximumLength": 2048,
+      "critical": true,
+      "surface": "Scientific Results",
+      "preservedTokens": []
+    },
+    "map.acquisitionLocation": {
+      "context": "Scientific Map acquisition tooltip. Counts are original indexed acquisitions, not continuous coverage.",
+      "parameters": [
+        "instrument",
+        "records",
+        "valid"
+      ],
+      "maximumLength": 2048,
+      "critical": true,
+      "surface": "Scientific Results",
+      "preservedTokens": []
+    },
+    "network.title": {
+      "context": "Read-only shared source HTTP payload measurements; no benchmark or science readiness claim.",
+      "parameters": [],
+      "maximumLength": 2048,
+      "critical": false,
+      "surface": "Library & Downloads",
+      "preservedTokens": []
+    },
+    "network.summary": {
+      "context": "HTTP speed is measured over a bounded recent window. Bytes count actual payload this process, not source completeness.",
+      "parameters": [
+        "speed",
+        "activity",
+        "bytes"
+      ],
+      "maximumLength": 2048,
+      "critical": false,
+      "surface": "Library & Downloads",
+      "preservedTokens": []
+    },
+    "network.rateUnknown": {
+      "context": "No sustained fresh network rate is measurable; never infer rate from lifetime bytes or elapsed job duration.",
+      "parameters": [],
+      "maximumLength": 2048,
+      "critical": false,
+      "surface": "Library & Downloads",
+      "preservedTokens": []
+    },
+    "network.basis": {
+      "context": "Scope of shared HTTP body counters. Preserve NASA, EPT and LiDAR names. No network or consent action.",
+      "parameters": [],
+      "maximumLength": 2048,
+      "critical": true,
+      "surface": "Library & Downloads",
+      "preservedTokens": [
+        "NASA",
+        "LiDAR",
+        "EPT"
+      ]
+    },
+    "network.sources": {
+      "context": "Names describe actual active preparation/library jobs; original provider/product names remain unchanged parameters.",
+      "parameters": [
+        "sources"
+      ],
+      "maximumLength": 2048,
+      "critical": false,
+      "surface": "Library & Downloads",
+      "preservedTokens": []
+    },
+    "network.unavailable": {
+      "context": "Missing/stale compatible counter snapshot; do not invent zero bytes or active-reader counts.",
+      "parameters": [],
+      "maximumLength": 2048,
+      "critical": true,
+      "surface": "Library & Downloads",
+      "preservedTokens": []
+    },
+    "preparation.pauseNamed": {
+      "context": "Accessible explicit pause action for this mission preparation only. It does not pause flight recording or science collection.",
+      "parameters": [
+        "name"
+      ],
+      "maximumLength": 2048,
+      "critical": true,
+      "surface": "Library & Downloads",
+      "preservedTokens": []
+    },
+    "preparation.resumeNamed": {
+      "context": "Accessible explicit resume action for interrupted preparation; failed regions still require Retry.",
+      "parameters": [
+        "name"
+      ],
+      "maximumLength": 2048,
+      "critical": true,
+      "surface": "Library & Downloads",
+      "preservedTokens": []
+    },
+    "preparation.continueNamed": {
+      "context": "Explicit approval to continue future-flight preparation after End Flight. Must remain distinct from Retry.",
+      "parameters": [
+        "name"
+      ],
+      "maximumLength": 2048,
+      "critical": true,
+      "surface": "Library & Downloads",
+      "preservedTokens": []
+    },
+    "preparation.cancelNamed": {
+      "context": "Explicit cancel remaining preparation, retaining existing originals and accounting. Not permanent source deletion.",
+      "parameters": [
+        "name"
+      ],
+      "maximumLength": 2048,
+      "critical": true,
+      "surface": "Library & Downloads",
+      "preservedTokens": []
+    },
+    "preparation.retryNamed": {
+      "context": "Explicit retry of eligible selected failed regions, preserving independent pauses, approvals, budgets and consent.",
+      "parameters": [
+        "name"
+      ],
+      "maximumLength": 2048,
+      "critical": true,
+      "surface": "Library & Downloads",
+      "preservedTokens": []
+    },
+    "preparation.postFlightHold": {
+      "context": "Prominent future-flight approval hold. No retry, background action or completed flight silently grants approval.",
+      "parameters": [],
+      "maximumLength": 2048,
+      "critical": true,
+      "surface": "Library & Downloads",
+      "preservedTokens": []
+    },
+    "preparation.retryHold": {
+      "context": "Explain distinct Retry versus Resume/Continue without implying missing science will become available.",
+      "parameters": [],
+      "maximumLength": 2048,
+      "critical": true,
+      "surface": "Library & Downloads",
+      "preservedTokens": []
+    },
+    "network.activeTransfers": {
+      "context": "Actual active HTTP response-body readers, not queued jobs or scientific instruments. Nonnegative integer plural count.",
+      "parameters": [
+        "count"
+      ],
+      "plural": "count",
+      "maximumLength": 2048,
+      "critical": false,
+      "surface": "Library & Downloads",
+      "preservedTokens": []
     }
   }
 }

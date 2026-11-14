@@ -183,3 +183,4 @@ dialog.managed-popup{max-width:min(56rem,calc(100vw - 1.5rem));max-height:88dvh;
 .terrain-completion pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:22rem;overflow:auto}
 .terrain-completion input,.terrain-completion select{max-width:100%;min-width:0}
 .terrain-completion .action-row>label{min-width:0;max-width:100%}
+.task-workspace>.page-heading h1{min-width:0;max-width:100%;overflow-wrap:anywhere}

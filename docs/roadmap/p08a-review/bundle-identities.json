@@ -1,0 +1,20 @@
+{
+  "version": 25,
+  "messages": 7056,
+  "sourceIdentity": "22470c27a539c47d116032f26f29072ec90c780f21232e7cafc8ca9cc41db10c",
+  "bundleIdentity": "16a732d4a2426b4faccd8cc89083da5880eb5d9c11d723a9dd60227d24ad6ffa",
+  "nativeKeys": 370,
+  "nativeAssets": {
+    "AeroScience.LocaleData.js": {
+      "bytes": 178815,
+      "sha256": "ada385a2617398adc31d11ad7789fcd097a18af3dcb85a3d2c0f155b9596eb20"
+    },
+    "AeroScience.LocaleFormat.js": {
+      "bytes": 3860,
+      "sha256": "fe20e9e0a484d9fd54da9dbcb6aa7f389dad4e6f7eb1d916726e0c5dbf7c536d"
+    }
+  },
+  "qualifiedHumanReview": "PENDING for all four non-English candidates",
+  "installedWindows": "NOT TESTED",
+  "installedMSFS": "NOT TESTED"
+}

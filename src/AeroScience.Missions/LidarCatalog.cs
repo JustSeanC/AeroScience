@@ -121,7 +121,7 @@ public sealed partial class ScientificHttp
         budget.EnsureCapacity(1);using var response=await SendCore(uri,System.Net.Http.HttpMethod.Get,null,null,null,token,validate:LidarCatalog.ValidateUrl);
         if(!response.IsSuccessStatusCode||response.Content.Headers.ContentEncoding.Any(c=>c!="identity"))throw new IOException("Public LiDAR source is unavailable or returned an unsupported representation. No redirect/alternate survey was followed.");
         var length=response.Content.Headers.ContentLength;if(length>maximum)throw new IOException("EPT response exceeds this reviewed regional limit.");
-        using var input=await response.Content.ReadAsStreamAsync(token);using var output=new MemoryStream();var buffer=new byte[65536];
+        using var receiving=Receiving();using var input=await response.Content.ReadAsStreamAsync(token);using var output=new MemoryStream();var buffer=new byte[65536];
         while(true){var remaining=Math.Min(maximum-output.Length,budget.Maximum-budget.Bytes);var count=(int)Math.Min(buffer.Length,remaining);if(length is {} n){if(output.Length==n)break;count=(int)Math.Min(count,n-output.Length);}if(count<=0){budget.EnsureCapacity(1);count=1;}budget.EnsureCapacity(count);var read=await input.ReadAsync(buffer.AsMemory(0,count),token);if(read==0)break;budget.Charge(read);Received(uri,read,uri.AbsolutePath.EndsWith(".laz",StringComparison.Ordinal));if(output.Length+read>maximum)throw new IOException("EPT response exceeded its bounded size.");output.Write(buffer,0,read);}
         if(length is {} expected&&output.Length!=expected)throw new EndOfStreamException("EPT response ended early; transferred bytes remain charged.");return output.ToArray();
     }
