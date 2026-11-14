@@ -36,17 +36,17 @@ class Private080Tests(unittest.TestCase):
         package=root/'package';shutil.copytree(self.stage/'PackageSources',package)
         registration=package/'InGamePanels/aeroscience_validation_v080_panel.xml'
         registration.unlink();registration.with_suffix('.spb').write_bytes(b'SYNTHETIC-STRUCTURAL-ONLY\0'+bytes(64))
-        (package/'manifest.json').write_text(json.dumps(dict(title=v.TITLE,package_version='0.8.0',minimum_game_version='1.9.21',content_type='MISC',dependencies=[])))
+        (package/'manifest.json').write_text(json.dumps(dict(title=v.TITLE,package_version='0.8.0',minimum_game_version='1.9.21',content_type='MISC',dependencies=[])), encoding='utf-8')
         self.layout(package)
         return package
     def layout(self,package):
         rows=[dict(path=p.relative_to(package).as_posix(),size=p.stat().st_size,date=1) for p in package.rglob('*') if p.is_file() and p.name not in ['layout.json','manifest.json']]
-        (package/'layout.json').write_text(json.dumps({'content':rows}))
+        (package/'layout.json').write_text(json.dumps({'content':rows}), encoding='utf-8')
 
     def test_staging_changes_only_fresh_copy_and_preserves_bootstrap_protocol_identity(self):
         self.assertEqual(self.original,v.inventory(ROOT/'msfs-toolbar'))
         panel=self.stage/'PackageSources/html_ui/InGamePanels'/v.PANEL
-        script=(panel/'AeroScience.js').read_text()
+        script=(panel/'AeroScience.js').read_text(encoding='utf-8')
         for token in ['AeroScience.Validation.0_8_0.Command.v1','AeroScience.Validation.0_8_0.Reply.v1',COMMIT,INSTANCE,'validationSource','validationInstance']:
             self.assertIn(token,script)
         self.assertNotIn('AeroScience.Command.v1',script)
@@ -56,14 +56,28 @@ class Private080Tests(unittest.TestCase):
         descriptor=v.read(panel/'toolbar-compatibility.json');self.assertEqual(INSTANCE,descriptor['validationInstance']);self.assertEqual('0.8.0',descriptor['applicationVersion'])
         with self.assertRaisesRegex(ValueError,'earlier SDK stage'):v.stage_toolbar(self.stage,COMMIT,INSTANCE)
 
+    def test_staging_preserves_utf8_geography_with_windows_cp1252_default(self):
+        original_read=Path.read_text
+        def windows_default(path, encoding=None, errors=None):
+            return original_read(path,encoding='cp1252' if encoding is None else encoding,errors=errors)
+        with tempfile.TemporaryDirectory() as t:
+            stage=Path(t)/'stage'
+            with mock.patch.object(Path,'read_text',new=windows_default):
+                v.stage_toolbar(stage,COMMIT,INSTANCE)
+            geography=ROOT/'src/AeroScience.Engine/wwwroot/geography'
+            expected='\n'.join('window.AeroScience'+var+' = '+original_read(geography/(name+'.geojson'),encoding='utf-8')+';' for name,var in [('countries','Countries'),('places','Places'),('airports','Airports')])
+            actual=stage/'PackageSources/html_ui/InGamePanels'/v.PANEL/'AeroScience.Geography.js'
+            self.assertTrue(any(ord(character)>127 for character in expected),'Fixture must exercise genuine non-ASCII geography labels.')
+            self.assertEqual(expected.encode('utf-8'),actual.read_bytes())
+
     def test_structural_validator_rejects_foreign_channels_attempt_and_placeholder_or_missing_registration(self):
         with tempfile.TemporaryDirectory() as t:
             package=self.fixture(Path(t));v.validate_community(package,COMMIT,INSTANCE)
             with self.assertRaisesRegex(ValueError,'source/attempt'):v.validate_community(package,COMMIT,'2'*32)
-            js=package/'html_ui/InGamePanels'/v.PANEL/'AeroScience.js';original=js.read_text();js.write_text(original+'\n// AeroScience.Command.v1');self.layout(package)
+            js=package/'html_ui/InGamePanels'/v.PANEL/'AeroScience.js';original=js.read_text(encoding='utf-8');js.write_text(original+'\n// AeroScience.Command.v1', encoding='utf-8');self.layout(package)
             with self.assertRaisesRegex(ValueError,'CommBus'):v.validate_community(package,COMMIT,INSTANCE)
-            js.write_text(original)
-            spb=package/'InGamePanels/aeroscience_validation_v080_panel.spb';spb.write_text('<xml>'+('x'*64));self.layout(package)
+            js.write_text(original, encoding='utf-8')
+            spb=package/'InGamePanels/aeroscience_validation_v080_panel.spb';spb.write_text('<xml>'+('x'*64), encoding='utf-8');self.layout(package)
             with self.assertRaisesRegex(ValueError,'placeholder'):v.validate_community(package,COMMIT,INSTANCE)
             spb.unlink();self.layout(package)
             with self.assertRaisesRegex(ValueError,'registration'):v.validate_community(package,COMMIT,INSTANCE)
@@ -71,9 +85,9 @@ class Private080Tests(unittest.TestCase):
     def test_layout_traversal_size_missing_assets_and_stale_js_proof_refuse(self):
         with tempfile.TemporaryDirectory() as t:
             package=self.fixture(Path(t));layout=v.read(package/'layout.json');layout['content'][0]['path']='../escape'
-            (package/'layout.json').write_text(json.dumps(layout))
+            (package/'layout.json').write_text(json.dumps(layout), encoding='utf-8')
             with self.assertRaisesRegex(ValueError,'Unsafe'):v.validate_community(package,COMMIT,INSTANCE)
-            self.layout(package);layout=v.read(package/'layout.json');layout['content'][0]['size']+=1;(package/'layout.json').write_text(json.dumps(layout))
+            self.layout(package);layout=v.read(package/'layout.json');layout['content'][0]['size']+=1;(package/'layout.json').write_text(json.dumps(layout), encoding='utf-8')
             with self.assertRaisesRegex(ValueError,'size/date'):v.validate_community(package,COMMIT,INSTANCE)
             self.layout(package)
             from private_validation import validate_native_javascript
@@ -90,7 +104,7 @@ class Private080Tests(unittest.TestCase):
             v.catalogs_check(root/'App',package,embedded)
             bad=copy.deepcopy(embedded);bad['de-DE']='f'*64
             with self.assertRaisesRegex(ValueError,'embedded'):v.catalogs_check(root/'App',package,bad)
-            manifest=v.read(target/'locale-manifest.json');manifest['catalogVersion']-=1;(target/'locale-manifest.json').write_text(json.dumps(manifest))
+            manifest=v.read(target/'locale-manifest.json');manifest['catalogVersion']-=1;(target/'locale-manifest.json').write_text(json.dumps(manifest), encoding='utf-8')
             with self.assertRaisesRegex(ValueError,'Stale'):v.catalogs_check(root/'App',package,embedded)
 
     def test_output_blocks_existing_attempts_data_sdk_checkout_community_relative_and_links(self):
@@ -130,9 +144,9 @@ class Private080Tests(unittest.TestCase):
     def test_public_runtime_authorization_must_match_actual_bytes_and_export_report(self):
         with tempfile.TemporaryDirectory() as t:
             root=Path(t);(root/'SimConnect.dll').write_bytes(b'SYNTHETIC AUTHORIZATION-REFUSAL FIXTURE, NOT A DLL')
-            report=root/'report.json';approval=root/'approval.json';report.write_text(json.dumps({'architecture':'Windows x64','export_check':'not run'}));approval.write_text('{}')
+            report=root/'report.json';approval=root/'approval.json';report.write_text(json.dumps({'architecture':'Windows x64','export_check':'not run'}), encoding='utf-8');approval.write_text('{}', encoding='utf-8')
             with self.assertRaisesRegex(ValueError,'real Windows loading'):public.validate_runtime(root,report,approval)
-            report.write_text(json.dumps({'architecture':'Windows x64','export_check':'passed','exports':list(public.RUNTIME_EXPORTS),'sha256':v.sha(root/'SimConnect.dll')}))
+            report.write_text(json.dumps({'architecture':'Windows x64','export_check':'passed','exports':list(public.RUNTIME_EXPORTS),'sha256':v.sha(root/'SimConnect.dll')}), encoding='utf-8')
             with self.assertRaisesRegex(ValueError,'permission attestation'):public.validate_runtime(root,report,approval)
 
     def test_source_sha_dirty_branch_and_pinned_detached_worktree(self):
@@ -140,13 +154,13 @@ class Private080Tests(unittest.TestCase):
             root=Path(t)
             def git(*args):return v.command(['git','-C',root,*args])
             git('init','-b','develop/v0.8.0');git('config','user.name','Synthetic fixture');git('config','user.email','fixture@example.invalid');git('config','commit.gpgsign','false')
-            (root/'source.txt').write_text('original');git('add','.');git('commit','-m','synthetic fixture');commit=git('rev-parse','HEAD')
+            (root/'source.txt').write_text('original', encoding='utf-8');git('add','.');git('commit','-m','synthetic fixture');commit=git('rev-parse','HEAD')
             with mock.patch.object(v,'BASELINE',commit):
                 self.assertEqual(commit,v.source_check(root,commit))
                 with self.assertRaisesRegex(ValueError,'SHA mismatch'):v.source_check(root,'f'*40)
-                (root/'source.txt').write_text('owner work')
+                (root/'source.txt').write_text('owner work', encoding='utf-8')
                 with self.assertRaisesRegex(ValueError,'Dirty'):v.source_check(root,commit)
-                self.assertEqual('owner work',(root/'source.txt').read_text())
+                self.assertEqual('owner work',(root/'source.txt').read_text(encoding='utf-8'))
                 git('add','.');git('commit','-m','preserve fixture work');commit=git('rev-parse','HEAD');git('switch','-c','unrelated')
                 with self.assertRaisesRegex(ValueError,'develop/v0.8.0'):v.source_check(root,commit)
                 git('switch','--detach',commit);self.assertEqual(commit,v.source_check(root,commit))
@@ -163,9 +177,9 @@ class Private080Tests(unittest.TestCase):
 
     def test_unsigned_private_payload_cannot_authorize_public_packaging_or_synthetic_native_record(self):
         with tempfile.TemporaryDirectory() as t:
-            root=Path(t);(root/'build-info.json').write_text(json.dumps({'profile':'validation','version':'0.8.0'}))
+            root=Path(t);(root/'build-info.json').write_text(json.dumps({'profile':'validation','version':'0.8.0'}), encoding='utf-8')
             with self.assertRaisesRegex(ValueError,'not a production release'):public.validate_companion(root)
-            (root/v.RECEIPT).write_text('{}')
+            (root/v.RECEIPT).write_text('{}', encoding='utf-8')
             with self.assertRaisesRegex(ValueError,'cannot become public'):public.validate_companion(root)
             with mock.patch.object(v.os,'name','posix'),self.assertRaisesRegex(ValueError,'actual Windows'):v.record(root,COMMIT,INSTANCE)
             with mock.patch.object(v,'command',return_value='AS-LIDAR-1 unexpected'),self.assertRaisesRegex(ValueError,'identity'):v.decoder_probe(Path('not-a-verified-helper'))
@@ -174,7 +188,7 @@ class Private080Tests(unittest.TestCase):
         template=v.acceptance_template(COMMIT,INSTANCE)
         self.assertTrue(all(r['outcome']=='Not Tested' for r in template['tests'].values()))
         with tempfile.TemporaryDirectory() as t:
-            root=Path(t);app=root/'App';app.mkdir();(app/v.RECEIPT).write_text('SYNTHETIC-MOCK-ONLY')
+            root=Path(t);app=root/'App';app.mkdir();(app/v.RECEIPT).write_text('SYNTHETIC-MOCK-ONLY', encoding='utf-8')
             receipt={'instance':INSTANCE,'catalog':{'catalogVersion':25},'files':{'SimConnect.dll':'a'*64,'LidarRuntime/AeroScience.LidarReader.exe':'b'*64,'Toolbar/sdk-build.json':'c'*64}}
             with mock.patch.object(v,'verify',return_value=receipt):
                 with self.assertRaisesRegex(ValueError,'explicit observed'):v.observation(app,COMMIT,root/'Results','startup','Passed','no observed test',False)
@@ -190,7 +204,7 @@ class Private080Tests(unittest.TestCase):
             app=Path(t)
             with self.assertRaises(FileNotFoundError):v.verify(app,COMMIT)
             receipt={'format_version':1,'profile':'validation','version':'0.8.0','source_commit':COMMIT,'instance':INSTANCE,'public_release_approved':False,'installed_acceptance':'Not Tested','files':{}}
-            (app/v.RECEIPT).write_text(json.dumps(receipt));(app/'partial.exe').write_bytes(b'partial')
+            (app/v.RECEIPT).write_text(json.dumps(receipt), encoding='utf-8');(app/'partial.exe').write_bytes(b'partial')
             with self.assertRaisesRegex(ValueError,'bytes changed'):v.verify(app,COMMIT)
             with self.assertRaisesRegex(ValueError,'Stale/foreign'):v.verify(app,'b'*40)
             with self.assertRaisesRegex(ValueError,'Receipt hash'):v.verify(app,COMMIT,'f'*64)
@@ -201,7 +215,7 @@ class Private080Tests(unittest.TestCase):
             with mock.patch.object(v,'verify',return_value={'instance':INSTANCE}):
                 self.assertEqual(str(profile),v.prepare_profile(Path('synthetic'),COMMIT,local))
                 self.assertEqual(COMMIT,v.read(profile/'validation-profile.json')['source_commit'])
-                (profile/'settings.json').write_text(json.dumps({'MissionDirectory':str(local/'Originals'),'ScienceLibraryDirectory':str(profile/'Science')}))
+                (profile/'settings.json').write_text(json.dumps({'MissionDirectory':str(local/'Originals'),'ScienceLibraryDirectory':str(profile/'Science')}), encoding='utf-8')
                 with self.assertRaisesRegex(ValueError,'escaped'):v.prepare_profile(Path('synthetic'),COMMIT,local)
                 (profile/'settings.json').unlink();(profile/'validation-profile.json').unlink()
                 with self.assertRaises(FileNotFoundError):v.prepare_profile(Path('synthetic'),COMMIT,local)

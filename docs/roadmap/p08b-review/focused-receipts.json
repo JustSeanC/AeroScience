@@ -9,7 +9,7 @@
       "overlap": "Selections overlap; do not sum. All zero failed/skipped."
     },
     "python": {
-      "p08b": 15,
+      "p08b": 16,
       "legacyPrivateValidation": 10,
       "publicPackaging": 21,
       "failed": 0,
@@ -109,12 +109,57 @@
       "path": "artifacts/p08b/retained-genuine-laz-linux.json",
       "sha256": "852203479c95f343c00d3f867ce238ba2e4c877c3b6e98e1f3c508f6a3664edb",
       "bytes": 586
+    },
+    {
+      "path": "artifacts/p08b/utf8-windows-reproduction-red.log",
+      "sha256": "c01e48f991eed097346c4369237d2df67bad632242132f238caf9270453c14fe",
+      "bytes": 2798
+    },
+    {
+      "path": "artifacts/p08b/utf8-windows-regressions-green.log",
+      "sha256": "f5546ffc26c4ef29e6a5a3378825afe9228f114e3c9682f0f7f331451cf68177",
+      "bytes": 3413
+    },
+    {
+      "path": "artifacts/p08b/windows-43645458797.log",
+      "sha256": "71a6d04a37d756a0af4058518f6b3b0c7ba836b1a55c003ed229b17d8ed5d432",
+      "bytes": 1226608
+    },
+    {
+      "path": "artifacts/p08b/linux-preflight.json",
+      "sha256": "d810c7c1dd6ab6bf69646fb4a71c3834afcf4b0bbd16835265c827578fc75b42",
+      "bytes": 4918
     }
   ],
-  "fullCI": "Pending on the completed integrated source. No acceptance from a pending run.",
+  "fullCI": "Corrective exact-source Full CI required after reproduced Windows staging defect. Original Linux browser suite still running; no acceptance from pending work.",
   "installedWindows": "Not Tested",
   "installedMSFS": "Not Tested",
   "genuineOwnerSDKPackage": "Not Built",
   "qualifiedHumanTranslationReview": "Pending",
-  "publicInstallerOrRelease": false
+  "publicInstallerOrRelease": false,
+  "ciRemediation": {
+    "initialSource": "90c4f35eb10f54d33b6bbf7098f7cab1b4cf07ad",
+    "run": "https://github.com/JustSeanC/AeroScience/actions/runs/43645458797",
+    "windowsFailure": "Implicit Python geography read used the Windows cp1252 default; undefined byte 0x81 at position 51514 raised UnicodeDecodeError. Actual new private publication/retained-LAZ step passed before helper tests failed. Windows recovery steps were not reached.",
+    "reproduced": "The new regression fails on the unchanged staging code with the same error/byte/offset using real UTF-8 geography under a cp1252-default Path.read_text adapter.",
+    "fix": "Explicit UTF-8 source/policy and fixture reads/writes; deterministic LF native staging; byte-for-byte geography regression. No existing assertions or public/legacy gate changed.",
+    "targetedAfterFix": {
+      "passed": 16,
+      "failed": 0,
+      "skipped": 0
+    },
+    "windowsArtifact": {
+      "id": 14134890863,
+      "sha256": "d5a9096f77768391e60da7d383fc08def5cc712cf983667eac265d4e5ae5991b"
+    },
+    "windowsStructuralLaz": {
+      "platform": "Windows",
+      "source_sha256": "68c4b0ed247501a15d020d9a758d0345904f38785235732bd8e3386a3fca71c1",
+      "metadata_sha256": "c33bff450876950e5fdc2e3c80ba2383fbfa2ea7f888529cdbce87dcaefff4bc",
+      "reference_sha256": "2169c84ab1187c7b9124546e51492f6e90e3d1356cbc1cefb1949062da05cadd",
+      "points": 34923,
+      "raw_protocol_sha256": "bedf4986d31ef0874e7dd380532094f5dc2056a3b0d269afeadd621725ad9eef",
+      "source": "Retained IA_FullState public historical EPT root tile; sparse delivered subset. Dates/vertical datum unknown. No current-provider or in-flight acquisition acceptance."
+    }
+  }
 }

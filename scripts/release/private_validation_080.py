@@ -182,7 +182,7 @@ def lidar_source():
     policy = read(root/'source-policy.json')
     found = inventory(root/'laszip')
     require(found == policy['files'], 'Pinned LASzip source tree differs from its original source policy.')
-    source = hashlib.sha256(((root/'source-policy.json').read_text()+sha(root/'reader.cpp')+sha(ROOT/'scripts/build/lidar_runtime.py')).encode()).hexdigest()
+    source = hashlib.sha256(((root/'source-policy.json').read_text(encoding='utf-8')+sha(root/'reader.cpp')+sha(ROOT/'scripts/build/lidar_runtime.py')).encode()).hexdigest()
     return {'source': source, 'upstreamCommit': policy['commit'], 'policy_sha256': sha(root/'source-policy.json')}
 
 def pe_x64(path, dll=False):
@@ -281,7 +281,7 @@ def stage_toolbar(stage, commit, instance):
         (panel/name).unlink()
     shutil.copyfile(ROOT/'src/AeroScience.Engine/wwwroot/geographic-view.js', panel/'AeroScience.Map.js')
     geography = ROOT/'src/AeroScience.Engine/wwwroot/geography'
-    (panel/'AeroScience.Geography.js').write_text('\n'.join('window.AeroScience'+var+' = '+(geography/(name+'.geojson')).read_text()+';' for name, var in [('countries', 'Countries'), ('places', 'Places'), ('airports', 'Airports')]), encoding='utf-8')
+    (panel/'AeroScience.Geography.js').write_text('\n'.join('window.AeroScience'+var+' = '+(geography/(name+'.geojson')).read_text(encoding='utf-8')+';' for name, var in [('countries', 'Countries'), ('places', 'Places'), ('airports', 'Airports')]), encoding='utf-8', newline='\n')
     shutil.copyfile(geography/'provenance.json', panel/'geography-provenance.json')
     changes = [('AeroScience.Command.v1', 'AeroScience.Validation.0_8_0.Command.v1'), ('AeroScience.Reply.v1', 'AeroScience.Validation.0_8_0.Reply.v1'), ('PANEL_AEROSCIENCE', 'PANEL_AEROSCIENCE_VALIDATION_V080'), ('ICON_AEROSCIENCE', 'ICON_AEROSCIENCE_VALIDATION_V080'), ('ingamepanel-aeroscience', 'ingamepanel-aeroscience-validation-v080'), ('IngamePanelAeroScience', 'IngamePanelAeroScienceValidationV080'), ('aeroscience_panel', 'aeroscience_validation_v080_panel'), ('InGamePanels/AeroScience/', 'InGamePanels/'+PANEL+'/'), ('aeroscience-toolbar.xml', PACKAGE+'.xml'), ('<Title>AeroScience</Title>', '<Title>'+TITLE+'</Title>'), ('Name="AeroScience"', 'Name="'+TITLE+'"'), ('title="AeroScience"', 'title="'+TITLE+'"')]
     for path in stage.rglob('*'):
@@ -305,7 +305,7 @@ def stage_toolbar(stage, commit, instance):
                 text = text.replace('Toolbar build not initialized.', TITLE+' | '+commit+' | attempt '+instance+' | initialization pending.')
             if path.name == 'aeroscience-toolbar.xml':
                 text = text.replace('AssetPackage Version="0.7.0"', 'AssetPackage Version="0.8.0"')
-            path.write_text(text, encoding='utf-8')
+            path.write_text(text, encoding='utf-8', newline='\n')
     for old, new in [('PackageDefinitions/aeroscience-toolbar.xml', 'PackageDefinitions/'+PACKAGE+'.xml'), ('PackageSources/InGamePanels/aeroscience_panel.xml', 'PackageSources/InGamePanels/aeroscience_validation_v080_panel.xml'), ('PackageSources/html_ui/InGamePanels/AeroScience', 'PackageSources/html_ui/InGamePanels/'+PANEL), ('PackageSources/html_ui/icons/toolbar/ICON_AEROSCIENCE.svg', 'PackageSources/html_ui/icons/toolbar/ICON_AEROSCIENCE_VALIDATION_V080.svg')]:
         (stage/old).rename(stage/new)
 
