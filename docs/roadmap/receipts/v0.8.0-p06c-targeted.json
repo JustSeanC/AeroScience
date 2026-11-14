@@ -1,0 +1,77 @@
+{
+  "checkpoint": "P06c",
+  "base": "215d04f0f77b509aa6d4c528772731e0cf4c1172",
+  "dotnet": {
+    "passed": 94,
+    "failed": 0,
+    "skipped": 1,
+    "skipReason": "Existing Windows-only protected-identity certificate renewal case on Linux; installed Windows acceptance remains outstanding.",
+    "filter": "FullyQualifiedName~Live|FullyQualifiedName~Discord",
+    "actualPostgreSQL": true,
+    "controlledHttpsReceiver": true
+  },
+  "browser": {
+    "passed": 16,
+    "failed": 0,
+    "skipped": 0,
+    "actualServerLiveAndNotificationCases": 9,
+    "syntheticRoleProjectionCases": 1,
+    "syntheticGuidedPresentationCases": 5,
+    "syntheticSourceTimeCase": 1
+  },
+  "javascript": {
+    "nativePassed": 4,
+    "presentationPassed": 38,
+    "failed": 0,
+    "catalogVersion": 16,
+    "englishMessages": 656
+  },
+  "receipts": [
+    {
+      "path": "artifacts/p06c-dotnet.log",
+      "sha256": "d06f15aca582e50f27325577ee162f317e64d30b9962523eec22bb75c147abe0",
+      "bytes": 2037
+    },
+    {
+      "path": "artifacts/p06c-dotnet/p06c-live-discord.trx",
+      "sha256": "2add84273e48b0f325e5fb30f20406cb626e53276b1835f745f72114a2941ec4",
+      "bytes": 244282
+    },
+    {
+      "path": "artifacts/p06c-browser.log",
+      "sha256": "642eb548e119c27cd3e2ee932847731c756e26bf113b128b82bf4181fb9d7f0c",
+      "bytes": 2922
+    },
+    {
+      "path": "artifacts/p06c-browser-hosts.log",
+      "sha256": "15b11dc78342cbb6478f109545484972917a4969b1e184958c70a06eb0faaac4",
+      "bytes": 1808
+    },
+    {
+      "path": "artifacts/p06c-web-checks.log",
+      "sha256": "959e26484436d4bd1d9f072a14bbb49a2090eb419bc75a811050f73098e6a6fe",
+      "bytes": 4986
+    },
+    {
+      "path": "artifacts/p06c-browser-receipts/web-results.json",
+      "sha256": "966d2c335dbb09efaadc814a7d070bc7919e1eae55d61fbf7926a0428db0b1fe",
+      "bytes": 21422
+    },
+    {
+      "path": "artifacts/p06c-documentation-first.log",
+      "sha256": "cb3fdb509d8fb85ee761cd48dc32690dade1c322f08e6c7614c82929ae68cbf4",
+      "bytes": 1892
+    }
+  ],
+  "retainedDevelopmentFailure": "Documentation link validation ran before the receipt was written; the missing receipt now exists. Original security/scientific assertions unchanged.",
+  "liveContracts": {
+    "positionSeconds": 30,
+    "staleSeconds": 15,
+    "permanentSharedTrackAdded": false,
+    "duration": "source timestamp minus shared flight start, not collection/recording continuity",
+    "consent": "independent browser grant plus explicit per-flight start; no automatic restart",
+    "notifications": "Original three categories only; default OFF, independent exact disclosure, MFA and protected credential requirements unchanged."
+  },
+  "fullCI": "Reserved for completed P06d integration.",
+  "installedWindowsMSFS": "Not Tested"
+}

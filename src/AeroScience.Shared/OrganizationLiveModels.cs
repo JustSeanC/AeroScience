@@ -30,7 +30,8 @@ public sealed record LiveDashboard(int Version,DateTimeOffset CheckedUtc,Organiz
     int MaximumFlights,int StaleSeconds,int PositionLifetimeSeconds,string Notice);
 public sealed record LocalLiveConsent(Guid ConnectionId,Guid FlightId,int ExpectedPolicyRevision,string DisplayLabel,bool ConfirmAllActiveMembers);
 public sealed record LocalLiveStatus(Guid ConnectionId,Guid FlightId,string OrganizationName,string DisplayLabel,string Status,
-    Guid? SessionId,DateTimeOffset? LastSentUtc,string Message);
+    Guid? SessionId,DateTimeOffset? LastSentUtc,string Message,
+    [property:System.Text.Json.Serialization.JsonIgnore(Condition=System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] DateTimeOffset? ConsentExpiresUtc=null);
 
 // Durable event metadata is separate from ephemeral aircraft positions. No arbitrary event publisher.
 public enum OrganizationEventType { LiveSharingStarted, LiveSharingStopped, AttemptRecorded, PilotMarkedCompletion,

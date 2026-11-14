@@ -1,5 +1,5 @@
 .organization-task-navigation{display:flex;flex-wrap:wrap;gap:.5rem;margin:1rem 0;max-width:100%}
-.organization-task-navigation a{display:inline-flex;align-items:center;min-height:44px;padding:.55rem .8rem;border:1px solid var(--as-control-border);border-radius:.5rem;background:var(--as-secondary);color:var(--as-text);text-decoration:none;overflow-wrap:anywhere}
+.organization-task-navigation a{display:inline-flex;align-items:center;min-height:44px;padding:.55rem .8rem;border:1px solid var(--as-control-border,#697f92);border-radius:.5rem;background:var(--as-secondary,#20354a);color:var(--as-text,#e8f0f5);text-decoration:none;overflow-wrap:anywhere}
 .organization-task-navigation a[aria-current=page]{background:var(--as-accent);color:var(--as-accent-ink)}
 .organization-task-navigation a:focus-visible{outline:3px solid currentColor;outline-offset:3px}
 .assignment-requirements dl{display:grid;grid-template-columns:minmax(8rem,1fr) minmax(0,3fr);gap:.5rem 1rem}.assignment-requirements dt{font-weight:650}.assignment-requirements dd{margin:0;overflow-wrap:anywhere}

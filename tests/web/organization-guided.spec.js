@@ -56,3 +56,8 @@ test('authorized management, task navigation and long issued requirements reflow
   const link=panel(page).getByRole('link',{name:'My Assignments',exact:true});await link.focus();await expect(link).toBeFocused();await page.keyboard.press('Enter');await expect(panel(page).getByRole('heading',{name:'My Assignments',exact:true}).first()).toBeVisible();
  }
 });
+
+test('P06 read-only connection cannot silently enter desktop live location scope',async({page})=>{
+ const writes=await fixture(page,{permission:'readPublished'}),locations=[];page.on('request',r=>{if(new URL(r.url()).pathname===`/api/organizations/${connection.id}/live`)locations.push(r.url());});
+ await page.goto('/#organizations?orgView=live');await expect(panel(page)).toContainText('Read-only organization access does not grant access to locations');await expect(panel(page).getByRole('button',{name:'Authorize Live Sharing',exact:true})).toBeVisible();expect(locations).toEqual([]);expect(writes).toEqual([]);
+});

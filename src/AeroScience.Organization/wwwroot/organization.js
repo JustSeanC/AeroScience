@@ -1,4 +1,5 @@
 import {organizationNotifications} from './organization-notifications.js';
+import {organizationPortalNavigation} from './organization-portal-nav.js';
 import {organizationLiveUi} from './organization-live-ui.js';
 import {serverOperationsUi} from './server-operations.js';
 import {accountSecurityUi} from './account-security.js';
@@ -31,7 +32,7 @@ function openApproved(id){return progressView().results(id);}
 const accountSecurity=accountSecurityUi({api,root,field,heading,submit,navigate:()=>{epoch++;},load});
 const operationsUi=serverOperationsUi({api,root,heading,field,submit,draftCommand,navigate:()=>++epoch,isCurrent:value=>value===epoch,signIn:load,health:()=>setupUi.health()});
 const setupUi=organizationSetup({api,root,heading,navigate:()=>++epoch,isCurrent:value=>value===epoch,signIn:load,programs:showPrograms,createProgram:()=>editProgram(),members:()=>membership.members(),health:()=>setupUi.health(),security:()=>accountSecurity.view(),protection:()=>operationsUi.view()});
-function openLive(){const own=++epoch;const view=node('section');root.replaceChildren(view);organizationLiveUi({root:view,headingLevel:'h1',read:()=>api('/membership/live'),write:r=>api('/membership/live/policy',r),readCampaigns:async offset=>(await api('/membership/published?offset='+offset)).campaigns,back:load,active:()=>own===epoch,admin:admin()});}
+function openLive(){const own=++epoch;const view=node('section');root.replaceChildren(view);taskNavigation();organizationLiveUi({root:view,headingLevel:'h1',read:()=>api('/membership/live'),write:r=>api('/membership/live/policy',r),readCampaigns:async offset=>(await api('/membership/published?offset='+offset)).campaigns,back:load,active:()=>own===epoch,admin:admin()});}
 async function openEvents(after=0){const own=++epoch;heading('Organization Events','Auditable permitted transitions, not location history or scientific evidence.');try{const page=await api('/membership/events?after='+after);if(own!==epoch)return;for(const e of page.items){const row=node('article');row.append(node('h2',e.type.replace(/([a-z])([A-Z])/g,'$1 $2')),node('p',e.meaning),node('p',`${dateTime(e.timestampUtc)} · ${e.authority} · revision ${e.sourceRevision??'not supplied'}`));if(e.requirementKey)row.append(node('p','Requirement '+e.requirementKey));root.append(row);}if(!page.items.length)root.append(node('p','No permitted events on this page. Private review events remain restricted.'));if(page.nextAfter!==null)button(root,'More Organization Events',()=>openEvents(page.nextAfter));button(root,'Back',load);}catch(e){if(own===epoch)failure(root,e);}}
 const notifications=organizationNotifications({api,root,heading,field,submit,back:load,navigate:()=>++epoch});
 const admin=()=>session?.user?.roles.includes('Administrator');
@@ -46,7 +47,8 @@ async function api(path,body,method=body?'POST':'GET'){
 function failure(parent,error){let box=parent.querySelector(':scope > .action-error');if(!box){box=node('div',undefined,'action-error');box.setAttribute('role','alert');parent.prepend(box);}box.textContent=error.message||'The server could not be reached. Your saved research has not been removed.';}
 function field(parent,label,type='text',value='',maximum=120){const wrap=node('label',label),input=node(type==='textarea'?'textarea':'input');if(type!=='textarea')input.type=type;input.value=value;input.maxLength=maximum;input.setAttribute('aria-label',label);wrap.append(input);parent.append(wrap);return input;}
 function status(parent,message=''){const p=node('p',message,'workspace-status');p.setAttribute('role','status');parent.append(p);return p;}
-function heading(title,description){root.replaceChildren(node('h1',title));if(description)root.append(node('p',description,'lead'));}
+function taskNavigation(){organizationPortalNavigation(root,session,{research:()=>{epoch++;return membership.memberHome();},reviews:()=>{epoch++;return reviews.queue();},programs:showPrograms,live:openLive,events:openEvents,notifications:()=>notifications.settings()});}
+function heading(title,description){root.replaceChildren(node('h1',title));if(description)root.append(node('p',description,'lead'));taskNavigation();}
 function modal(title){returnFocus=document.activeElement;dialog.replaceChildren();const head=node('div',undefined,'dialog-head'),h=node('h2',title);h.id='dialog-title';head.append(h);const close=button(head,'×',()=>dialog.close());close.setAttribute('aria-label','Close dialog');dialog.append(head);dialog.showModal();return dialog;}
 dialog.addEventListener('close',()=>{if(returnFocus?.isConnected)returnFocus.focus();});
 function draftCommand(){let prior='',id;return data=>{const key=JSON.stringify(data);if(key!==prior){prior=key;id=crypto.randomUUID();}return {...data,requestId:id};};}

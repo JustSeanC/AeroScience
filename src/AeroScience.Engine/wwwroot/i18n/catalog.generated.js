@@ -2,7 +2,7 @@
 export const localeData = {
   "manifest": {
     "version": 1,
-    "catalogVersion": 15,
+    "catalogVersion": 16,
     "fallback": "en-US",
     "locales": [
       {
@@ -2709,12 +2709,86 @@ export const localeData = {
           "outcome",
           "id"
         ]
+      },
+      "collaboration.liveAudience": {
+        "context": "P06 existing organization live/notification presentation only; preserve separate consent, server approval, expiry and ephemeral positions.",
+        "parameters": []
+      },
+      "collaboration.duration": {
+        "context": "P06 existing organization live/notification presentation only; preserve separate consent, server approval, expiry and ephemeral positions.",
+        "parameters": [
+          "duration"
+        ]
+      },
+      "collaboration.durationMeaning": {
+        "context": "P06 existing organization live/notification presentation only; preserve separate consent, server approval, expiry and ephemeral positions.",
+        "parameters": []
+      },
+      "collaboration.sciencePaused": {
+        "context": "P06 existing organization live/notification presentation only; preserve separate consent, server approval, expiry and ephemeral positions.",
+        "parameters": []
+      },
+      "collaboration.aircraftUnavailable": {
+        "context": "P06 existing organization live/notification presentation only; preserve separate consent, server approval, expiry and ephemeral positions.",
+        "parameters": []
+      },
+      "collaboration.liveScope": {
+        "context": "P06 existing organization live/notification presentation only; preserve separate consent, server approval, expiry and ephemeral positions.",
+        "parameters": []
+      },
+      "collaboration.previewExpiry": {
+        "context": "P06 existing organization live/notification presentation only; preserve separate consent, server approval, expiry and ephemeral positions.",
+        "parameters": [
+          "expiry"
+        ]
+      },
+      "collaboration.livePrivacy": {
+        "context": "P06 existing organization live/notification presentation only; preserve separate consent, server approval, expiry and ephemeral positions.",
+        "parameters": []
+      },
+      "collaboration.consentExpiry": {
+        "context": "P06 existing organization live/notification presentation only; preserve separate consent, server approval, expiry and ephemeral positions.",
+        "parameters": [
+          "expiry"
+        ]
+      },
+      "collaboration.portalNavigation": {
+        "context": "P06 existing organization live/notification presentation only; preserve separate consent, server approval, expiry and ephemeral positions.",
+        "parameters": []
+      },
+      "collaboration.researchOverview": {
+        "context": "P06 existing organization live/notification presentation only; preserve separate consent, server approval, expiry and ephemeral positions.",
+        "parameters": []
+      },
+      "collaboration.reviewEvidence": {
+        "context": "P06 existing organization live/notification presentation only; preserve separate consent, server approval, expiry and ephemeral positions.",
+        "parameters": []
+      },
+      "collaboration.managePrograms": {
+        "context": "P06 existing organization live/notification presentation only; preserve separate consent, server approval, expiry and ephemeral positions.",
+        "parameters": []
+      },
+      "collaboration.liveMonitoring": {
+        "context": "P06 existing organization live/notification presentation only; preserve separate consent, server approval, expiry and ephemeral positions.",
+        "parameters": []
+      },
+      "collaboration.events": {
+        "context": "P06 existing organization live/notification presentation only; preserve separate consent, server approval, expiry and ephemeral positions.",
+        "parameters": []
+      },
+      "collaboration.notificationSettings": {
+        "context": "P06 existing organization live/notification presentation only; preserve separate consent, server approval, expiry and ephemeral positions.",
+        "parameters": []
+      },
+      "collaboration.notificationLimits": {
+        "context": "P06 existing organization live/notification presentation only; preserve separate consent, server approval, expiry and ephemeral positions.",
+        "parameters": []
       }
     }
   },
   "catalogs": {
     "en-US": {
-      "version": 15,
+      "version": 16,
       "locale": "en-US",
       "messages": {
         "common.messageUnavailable": "Details are unavailable. Refresh to review the current information.",
@@ -3361,7 +3435,24 @@ export const localeData = {
         "submissions.reviewNeeded": "Keep this draft while you review missing evidence, recipient capability or permission. No transmission is authorized.",
         "submissions.removeSupporting": "Remove supporting references from this draft",
         "submissions.sourceFlight": "Exact recorded flight: {id}. Original time intervals remain listed separately.",
-        "submissions.selectedResult": "Selected local result: {name} · {outcome} · {id}. Local evaluation is separate from organization approval."
+        "submissions.selectedResult": "Selected local result: {name} · {outcome} · {id}. Local evaluation is separate from organization approval.",
+        "collaboration.liveAudience": "Live monitoring shows only opted-in flights to active organization members. A live position is not scientific evidence or campaign approval.",
+        "collaboration.duration": "Flight duration at last source update: {duration}",
+        "collaboration.durationMeaning": "Duration uses the shared flight start and original source time. It does not establish recording continuity or science collection.",
+        "collaboration.sciencePaused": "Science collection is paused. Live sharing and flight recording have independent controls.",
+        "collaboration.aircraftUnavailable": "Aircraft unavailable",
+        "collaboration.liveScope": "Desktop live monitoring requires its own browser-approved Share Live Flight permission. Read-only organization access does not grant access to locations.",
+        "collaboration.previewExpiry": "Browser authorization expires {expiry}. Sharing consent lasts at most eight hours and cannot outlive that authorization. The confirmed sharing expiry appears after you start.",
+        "collaboration.livePrivacy": "Connecting, claiming research, recording, collecting science and submitting evidence do not start live sharing. Stop Sharing removes current visibility without ending recording. Shared positions are ephemeral; no shared track or replay is stored.",
+        "collaboration.consentExpiry": "Sharing consent expires {expiry}",
+        "collaboration.portalNavigation": "Research collaboration tasks",
+        "collaboration.researchOverview": "Research overview",
+        "collaboration.reviewEvidence": "Review received evidence",
+        "collaboration.managePrograms": "Manage programs",
+        "collaboration.liveMonitoring": "Live monitoring",
+        "collaboration.events": "Research event history",
+        "collaboration.notificationSettings": "Notification settings",
+        "collaboration.notificationLimits": "Discord supports opted-in flight sharing events, independently reviewer-approved research and accepted documented exceptions. Evidence receipts and local results do not become scientific success announcements. Internal organization events retain their original role restrictions; no source files or precise telemetry are sent."
       }
     }
   }

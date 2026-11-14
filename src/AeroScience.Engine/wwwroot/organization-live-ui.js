@@ -1,4 +1,5 @@
 import {node,button,readableName} from './workstation-ui.js';
+import {t} from './i18n.js';
 
 // Shared portal/desktop presentation. No tracks, tile provider calls, storage or simulator commands.
 export function organizationLiveUi({root,read,write,back,active=()=>true,admin=false,headingLevel='h2',readCampaigns=null}){
@@ -7,6 +8,7 @@ export function organizationLiveUi({root,read,write,back,active=()=>true,admin=f
  const current=()=>!disposed&&root.isConnected&&active();
  const title=node(headingLevel,'Live Flights'),notice=node('p','Checking current sharing…'),controls=node('div',undefined,'actions');notice.setAttribute('role','status');
  root.replaceChildren(title,notice,controls);button(controls,'Back',()=>{dispose();back();});button(controls,'Refresh Live Flights',refresh);
+ root.append(node('p',t('collaboration.liveAudience'),'lead'));
  const label=node('label','Filter aircraft, pilot label or campaign'),filter=node('input');filter.type='search';label.append(filter);root.append(label);
  const layout=node('div',undefined,'live-flight-layout'),mapBox=node('div',undefined,'live-flight-map'),side=node('section');
  mapBox.setAttribute('role','region');mapBox.setAttribute('aria-label','Current shared aircraft map');side.setAttribute('aria-label','Shared flight list');layout.append(mapBox,side);root.append(layout);
@@ -20,22 +22,24 @@ export function organizationLiveUi({root,read,write,back,active=()=>true,admin=f
  }else mapBox.append(node('p','Interactive map unavailable. The current locations and details remain available in the list.'));
  function age(v){return v.receivedUtc?Math.max(0,(Date.parse(data.checkedUtc)-Date.parse(v.receivedUtc))/1000+(performance.now()-receivedAt)/1000):Infinity;}
  function number(value,unit){return Number.isFinite(value)?`${value.toFixed(1)} ${unit}`:'Not available';}
+ function duration(v,current){const seconds=Math.floor((Date.parse(current?.sourceUtc)-Date.parse(v.flightStartedUtc))/1000);return Number.isFinite(seconds)&&seconds>=0?`${Math.floor(seconds/3600)}:${String(Math.floor(seconds/60)%60).padStart(2,'0')}:${String(seconds%60).padStart(2,'0')}`:t('common.unavailable');}
  function visible(){const search=filter.value.trim().toLocaleLowerCase();return(data?.flights||[]).filter(v=>[v.displayLabel,v.current?.aircraft,...v.cards.map(c=>c.campaignName)].filter(Boolean).join(' ').toLocaleLowerCase().includes(search));}
  function choose(id,focusMap=false){selected=id;renderDetail();const marker=markers.get(id);if(focusMap&&marker){map.setView(marker.getLatLng(),Math.max(map.getZoom(),6));marker.openTooltip();}}
  function renderDetail(){detail.replaceChildren();const v=(data?.flights||[]).find(v=>v.sessionId===selected);if(!v)return;
   const c=age(v)<30?v.current:null;detail.append(node(detailHeading,v.displayLabel),node('p',`Flight ${v.flightId}`),node('p',`Started ${new Date(v.flightStartedUtc).toLocaleString()} · consent expires ${new Date(v.consentExpiresUtc).toLocaleString()}`),node('p',c?.source==='simulated'?'Synthetic simulator fixture — not installed-MSFS acceptance':c?.source==='simulator'?'Simulator-reported current state':'Source unavailable'));
+  detail.append(node('p',t('collaboration.duration',{duration:duration(v,c)})),node('p',t('collaboration.durationMeaning'),'metadata'));
   detail.append(node('p',`Aircraft: ${c?.aircraft||'Not available'}`),node('p',`Source: ${readableName(c?.state||'unavailable')} · original UTC ${c?.sourceUtc||'Not available'}`),node('p',`Altitude: ${number(c?.altitudeMslFeet,'feet MSL')} · Airspeed: ${number(c?.indicatedAirspeedKnots,'knots IAS')}`),node('p',`Heading: ${number(c?.headingDegrees,'degrees true')}`));
   if(c?.latitude!==null&&c?.latitude!==undefined)detail.append(node('p',`Position: ${c.latitude.toFixed(5)}, ${c.longitude.toFixed(5)}`));else detail.append(node('p','No fresh position available. No previous track is retained.'));
   detail.append(node(sectionHeading,'Research and Science'));
   for(const card of c?v.cards:[]){const row=node('article');row.append(node(cardHeading,card.name),node('p',`${card.campaignName||'Published campaign'} · issued revision ${card.issuedRevision}`),node('p',`${readableName(card.progress)} · ${card.active?'Activated':'Not activated'}${card.pointName?' · '+card.pointName:''}`));if(card.outcome)row.append(node('p',`Original local point outcome: ${readableName(card.outcome)} (not organization approval)`));if(card.attemptId)row.append(node('p',`Local attempt ${card.attemptId}`));row.append(node('p',card.meaning));detail.append(row);}
   if(!c||!v.cards.length)detail.append(node('p','No current organizational card status shared. Personal card definitions and notes are not included.'));
-  if(c?.science){detail.append(node('p',`Science collection: ${readableName(c.science.phase||'unavailable')}${c.science.sessionId?' · session '+c.science.sessionId:''}`));for(const instrument of c.science.instruments)detail.append(node('p',`${readableName(instrument.instrumentId)}: ${readableName(instrument.state)} · source ${readableName(instrument.sourceState)}`));if(c.science.truncated)detail.append(node('p','Only the first eight instrument summaries are shared.'));}
+  if(c?.science){detail.append(node('p',`Science collection: ${readableName(c.science.phase||'unavailable')}${c.science.sessionId?' · session '+c.science.sessionId:''}`));if(c.science.phase==='paused')detail.append(node('p',t('collaboration.sciencePaused'),'notice'));for(const instrument of c.science.instruments)detail.append(node('p',`${readableName(instrument.instrumentId)}: ${readableName(instrument.state)} · source ${readableName(instrument.sourceState)}`));if(c.science.truncated)detail.append(node('p','Only the first eight instrument summaries are shared.'));}
   if(c?.cardsTruncated)detail.append(node('p','Card status is limited to eight selected organizational cards.'));
  }
  function render(){if(!current())return;for(const v of data?.flights||[])if(age(v)>=30){v.current=null;v.cards=[];}const focused=document.activeElement?.dataset?.liveSession,previousMarkers=[...markers.keys()];list.replaceChildren();layer?.clearLayers();markers.clear();
   for(const v of visible()){const seconds=age(v),fresh=seconds<30&&v.current?.latitude!==null&&v.current?.latitude!==undefined;
    const row=node('article');const pick=button(row,v.displayLabel,()=>choose(v.sessionId,true));pick.dataset.liveSession=v.sessionId;
-   row.append(node('p',seconds>=30?'Position expired / waiting for update':seconds>=15?'Stale update':v.current?readableName(v.current.state):'Waiting for first update'),node('p',v.receivedUtc?`Last received ${new Date(v.receivedUtc).toLocaleTimeString()}`:'No update received'));list.append(row);
+   row.append(node('p',seconds>=30?'Position expired / waiting for update':seconds>=15?'Stale update':v.current?readableName(v.current.state):'Waiting for first update'),node('p',v.receivedUtc?`Last received ${new Date(v.receivedUtc).toLocaleTimeString()}`:'No update received'),node('p',v.current?.aircraft||t('collaboration.aircraftUnavailable')));list.append(row);
    if(fresh&&map){const m=L.circleMarker([v.current.latitude,v.current.longitude],{radius:8,color:seconds>=15?'#ad7800':'#0b9d9c',fillOpacity:.8}).addTo(layer);m.bindTooltip(node('span',v.displayLabel));m.on('click',()=>choose(v.sessionId));markers.set(v.sessionId,m);}
   }
   if(!visible().length)list.append(node('p',data?.policy.enabled===false?'Live monitoring is disabled by the organization.':'Nobody is sharing a matching flight. Sharing is always a pilot’s choice.'));

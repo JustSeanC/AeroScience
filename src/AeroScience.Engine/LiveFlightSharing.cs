@@ -11,7 +11,7 @@ public sealed class LiveFlightSharing(OrganizationConnections connections,Missio
         public readonly OrganizationSavedConnection Connection=connection;public readonly LiveSharingSession Session=session;
         public readonly Guid[] Claims=claims;public readonly bool Truncated=truncated;public readonly SemaphoreSlim SendGate=new(1,1);public readonly CancellationTokenSource Cancel=new();
         public volatile bool Enabled=true;public long Sequence;public readonly Dictionary<Guid,Guid> PreviousAttempts=[];
-        public LocalLiveStatus Status=new(connection.Id,session.FlightId,connection.Name,label,"Sharing",session.Id,null,"Only current state is sent. ALL active members can view it. No scientific approval or evidence upload.");
+        public LocalLiveStatus Status=new(connection.Id,session.FlightId,connection.Name,label,"Sharing",session.Id,null,"Only current state is sent. ALL active members can view it. No scientific approval or evidence upload.",session.ExpiresUtc);
     }
     static double? Supported(double value,double minimum,double maximum)=>double.IsFinite(value)&&value>=minimum&&value<=maximum?value:null;
     readonly ConcurrentDictionary<Guid,Sharing> sessions=[];
@@ -23,7 +23,7 @@ public sealed class LiveFlightSharing(OrganizationConnections connections,Missio
     {
         var row=await connections.LiveConnection(connection,ct,true);var flight=coordinator.Snapshot().ActiveMission??throw new InvalidOperationException("Start normal flight recording before choosing Share Live Flight.");
         var dashboard=await connections.LiveDashboard(connection,ct);var cards=ScopedCards(row,flight.Id);
-        return new{version=1,connectionId=connection,organization=row.Name,origin=row.Origin,flightId=flight.Id,flightStartedUtc=flight.StartedUtc,policy=dashboard.Policy,
+        return new{version=1,connectionId=connection,organization=row.Name,origin=row.Origin,flightId=flight.Id,flightStartedUtc=flight.StartedUtc,authorizationExpiresUtc=row.ExpiresUtc,policy=dashboard.Policy,
             sharedCards=cards.Take(8).Select(c=>new{c.Card.Name,c.Card.OrganizationAssignment!.ClaimId}),cardsTruncated=cards.Length>8,
             includes="Current position, heading, feet MSL, knots IAS, aircraft type, original source UTC/freshness and bounded organization-card/science-session status. ALL active organization members may view it.",
             excludes="No private notes, raw science, flight tracks, source files, personal research archive, evidence submission or remote control.",

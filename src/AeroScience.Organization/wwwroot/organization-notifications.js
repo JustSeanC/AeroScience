@@ -1,4 +1,5 @@
 import {node,button,dateTime,errorMessage} from './workstation-ui.js';
+import {t} from './i18n.js';
 export function organizationNotifications({api,root,heading,field,submit,back,navigate}){
  const path='/organization/notifications';
  const render=async run=>{try{return await run();}catch(error){if(error.name!=='AbortError')errorMessage(root,error,()=>render(run));}};
@@ -8,7 +9,7 @@ export function organizationNotifications({api,root,heading,field,submit,back,na
  async function settingsView(){
   navigate();heading('Organization Settings → Notifications','Loading notification settings…');
   const d=await api(path);heading('Organization Settings → Notifications','Optional Discord announcements. OFF until you explicitly enable them. Account Security must show recent administrator MFA and saved recovery codes before a change or test.');
-  root.append(node('p',d.notice,'notice'));if(!d.authorizationCurrent)root.append(node('p','Delivery is held because administrator authorization changed. Verify Account Security, review these settings and save them to authorize a new destination revision.','notice'));button(root,'Back',back);
+  root.append(node('p',d.notice,'notice'),node('p',t('collaboration.notificationLimits')));if(!d.authorizationCurrent)root.append(node('p','Delivery is held because administrator authorization changed. Verify Account Security, review these settings and save them to authorize a new destination revision.','notice'));button(root,'Back',back);
   const form=node('form');root.append(form);const label=field(form,'Destination name','text',d.label||'',80),webhook=field(form,'New Discord webhook (leave blank to keep saved credential)','password','',512);webhook.autocomplete='off';webhook.spellcheck=false;
   root.append(node('p',d.maskedIdentifier?`Saved: ${d.label} · ${d.maskedIdentifier} · revision ${d.revision}`:'No webhook saved. Nothing will be sent.'));
   const enabled=check(form,'Enable Discord notifications',d.enabled),flights=check(form,'Flight sharing started / ended — requires separate pilot consent for each flight',!!(d.categories&1)),research=check(form,'Reviewer-approved research contributions — explicit external disclosure required for each announcement',!!(d.categories&2)),exceptions=check(form,'Accepted documented exceptions — explicit external disclosure required for each announcement',!!(d.categories&4));

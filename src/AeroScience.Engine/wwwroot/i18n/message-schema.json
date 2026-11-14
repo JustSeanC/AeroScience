@@ -2670,6 +2670,80 @@
         "outcome",
         "id"
       ]
+    },
+    "collaboration.liveAudience": {
+      "context": "P06 existing organization live/notification presentation only; preserve separate consent, server approval, expiry and ephemeral positions.",
+      "parameters": []
+    },
+    "collaboration.duration": {
+      "context": "P06 existing organization live/notification presentation only; preserve separate consent, server approval, expiry and ephemeral positions.",
+      "parameters": [
+        "duration"
+      ]
+    },
+    "collaboration.durationMeaning": {
+      "context": "P06 existing organization live/notification presentation only; preserve separate consent, server approval, expiry and ephemeral positions.",
+      "parameters": []
+    },
+    "collaboration.sciencePaused": {
+      "context": "P06 existing organization live/notification presentation only; preserve separate consent, server approval, expiry and ephemeral positions.",
+      "parameters": []
+    },
+    "collaboration.aircraftUnavailable": {
+      "context": "P06 existing organization live/notification presentation only; preserve separate consent, server approval, expiry and ephemeral positions.",
+      "parameters": []
+    },
+    "collaboration.liveScope": {
+      "context": "P06 existing organization live/notification presentation only; preserve separate consent, server approval, expiry and ephemeral positions.",
+      "parameters": []
+    },
+    "collaboration.previewExpiry": {
+      "context": "P06 existing organization live/notification presentation only; preserve separate consent, server approval, expiry and ephemeral positions.",
+      "parameters": [
+        "expiry"
+      ]
+    },
+    "collaboration.livePrivacy": {
+      "context": "P06 existing organization live/notification presentation only; preserve separate consent, server approval, expiry and ephemeral positions.",
+      "parameters": []
+    },
+    "collaboration.consentExpiry": {
+      "context": "P06 existing organization live/notification presentation only; preserve separate consent, server approval, expiry and ephemeral positions.",
+      "parameters": [
+        "expiry"
+      ]
+    },
+    "collaboration.portalNavigation": {
+      "context": "P06 existing organization live/notification presentation only; preserve separate consent, server approval, expiry and ephemeral positions.",
+      "parameters": []
+    },
+    "collaboration.researchOverview": {
+      "context": "P06 existing organization live/notification presentation only; preserve separate consent, server approval, expiry and ephemeral positions.",
+      "parameters": []
+    },
+    "collaboration.reviewEvidence": {
+      "context": "P06 existing organization live/notification presentation only; preserve separate consent, server approval, expiry and ephemeral positions.",
+      "parameters": []
+    },
+    "collaboration.managePrograms": {
+      "context": "P06 existing organization live/notification presentation only; preserve separate consent, server approval, expiry and ephemeral positions.",
+      "parameters": []
+    },
+    "collaboration.liveMonitoring": {
+      "context": "P06 existing organization live/notification presentation only; preserve separate consent, server approval, expiry and ephemeral positions.",
+      "parameters": []
+    },
+    "collaboration.events": {
+      "context": "P06 existing organization live/notification presentation only; preserve separate consent, server approval, expiry and ephemeral positions.",
+      "parameters": []
+    },
+    "collaboration.notificationSettings": {
+      "context": "P06 existing organization live/notification presentation only; preserve separate consent, server approval, expiry and ephemeral positions.",
+      "parameters": []
+    },
+    "collaboration.notificationLimits": {
+      "context": "P06 existing organization live/notification presentation only; preserve separate consent, server approval, expiry and ephemeral positions.",
+      "parameters": []
     }
   }
 }
