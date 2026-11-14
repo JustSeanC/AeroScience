@@ -41,6 +41,21 @@ test('missing or inconsistent staged catalog never removes the original critical
   assert.equal(c.AeroScienceI18n.use(null).fallback,true);assert.equal(c.AeroScienceI18n.text('science.unknown','Science status unavailable'),'Science status unavailable');
  }
 });
+test('uninitialized and missing native catalogs interpolate English fallback exactly once',()=>{
+ const fallback='Selected: {value1} | {value2} waypoints | {value3} patterns. Instruments: {value4}.';
+ const name='Zoë 東京 $& {value2}',values={value1:name,value2:3,value3:0,value4:'µm scanner'};
+ const expected='Selected: '+name+' | 3 waypoints | 0 patterns. Instruments: µm scanner.';
+ for(const setup of ['', 'var AeroScienceLocaleData={};','var AeroScienceLocaleData={manifest:{version:7}};']){
+  const c=vm.createContext({Intl:undefined});vm.runInContext(setup+compileNative(adapter),c);
+  assert.equal(c.AeroScienceI18n.text('native.selectedWaypointsPatternsInstruments',fallback,values),expected);
+  c.AeroScienceI18n.use(null);
+  assert.equal(c.AeroScienceI18n.text('native.selectedWaypointsPatternsInstruments',fallback,values),expected);
+  assert.equal(c.AeroScienceI18n.text('missing','Missing: {name}',{}),'Details are unavailable. Refresh to review the current information.');
+ }
+ const c=load();c.AeroScienceI18n.use({version:1,catalogVersion:catalogVersion-1,locale:'fr-FR'});
+ assert.equal(c.AeroScienceI18n.text('native.selectedWaypointsPatternsInstruments',fallback,values),expected);
+ assert.equal(c.AeroScienceI18n.text('missing','Original: {name}',{name}),'Original: '+name);
+});
 test('SDK staging ships and records canonical catalogs in both original and renamed validation panels',()=>{
  const temporary=mkdtempSync(join(tmpdir(),'aeroscience-p02b-stage-'));
  try{for(const name of ['AeroScience','AeroScienceValidationV070']){

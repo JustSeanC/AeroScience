@@ -1,9 +1,11 @@
 import {test,expect} from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import {localeBundle} from '../../scripts/build/build-locales.mjs';
+import {createTranslator} from '../../src/AeroScience.Engine/wwwroot/i18n-format.js';
 const origin='http://127.0.0.1:5080';
 async function post(request,path,data={}){const session=await(await request.post('/api/session',{headers:{Origin:origin},data:{}})).json();const r=await request.post(path,{data,headers:{Origin:origin,'X-AeroScience-CSRF':session.csrf}});expect(r.ok(),await r.text()).toBe(true);return r.json();}
 async function fixture(request){return post(request,'/api/testing/terrain-completion');}
-async function open(page,f){await page.goto(`/#workspace/results?missions=${f.missionId}`);const root=page.getByRole('region',{name:'Post-flight terrain completion',exact:true});await expect(root).toBeVisible();return root;}
+async function open(page,f,locale='en-US'){const t=createTranslator(localeBundle(),locale).text;await page.goto(`/#workspace/results?missions=${f.missionId}`);const root=page.getByRole('region',{name:t('terrain.title'),exact:true});await expect(root).toBeVisible();return root;}
 
 test('retained terrain processes through the real queue, survives navigation, and grants no original science',async({page,request})=>{
  const f=await fixture(request),root=await open(page,f),before=await(await request.get(`/api/missions/${f.missionId}/science-summary`)).json();
@@ -54,10 +56,10 @@ test('an unavailable terrain job store cannot hide original Results and exports'
  const root=await open(page,f);await expect(root.locator('..').getByRole('alert')).toContainText('unavailable terrain job store');await expect(page.getByRole('heading',{name:'Take your research with you',exact:true})).toBeVisible();await expect(page.getByText('Recorded instruments and source quality',{exact:true})).toBeVisible();
 });
 
-for(const theme of ['light','dark'])test(`terrain completion ${theme}: keyboard, narrow layout, safe locale fallback and labeled synthetic capture`,async({page,request},info)=>{
- const f=await fixture(request);await page.emulateMedia({colorScheme:theme,reducedMotion:'reduce'});await page.addInitScript(()=>localStorage.setItem('AeroScience.presentation.v1',JSON.stringify({version:1,theme:'auto',locale:'de-DE'})));
- const root=await open(page,f);await expect(page.locator('html')).toHaveAttribute('data-resolved-theme',theme);
- await root.getByLabel('Modeled corridor',{exact:true}).selectOption(f.geometryId);const review=root.getByRole('button',{name:'Review Coverage',exact:true});await review.focus();await review.press('Enter');await expect(root.getByRole('button',{name:'Verify sources and review processing',exact:true})).toBeVisible();
+for(const theme of ['light','dark'])test(`terrain completion ${theme}: keyboard, narrow layout, German candidate language and labeled synthetic capture`,async({page,request},info)=>{
+ const t=createTranslator(localeBundle(),'de-DE').text,f=await fixture(request);await page.emulateMedia({colorScheme:theme,reducedMotion:'reduce'});await page.addInitScript(()=>localStorage.setItem('AeroScience.presentation.v1',JSON.stringify({version:1,theme:'auto',locale:'de-DE'})));
+ const root=await open(page,f,'de-DE');await expect(page.locator('html')).toHaveAttribute('data-resolved-theme',theme);await expect(page.locator('html')).toHaveAttribute('lang','de-DE');
+ await root.getByLabel(t('terrain.geometry'),{exact:true}).selectOption(f.geometryId);const review=root.getByRole('button',{name:t('terrain.review'),exact:true});await review.focus();await review.press('Enter');await expect(root.getByRole('button',{name:t('terrain.createJob'),exact:true})).toBeVisible();
  await root.evaluate((e,theme)=>e.prepend(Object.assign(document.createElement('p'),{textContent:`P05b · ${theme.toUpperCase()} · SYNTHETIC CHROMIUM FIXTURE · Not genuine source or installed Windows/MSFS acceptance`})),theme);
  for(const width of [1440,390]){await page.setViewportSize({width,height:1000});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);expect((await new AxeBuilder({page}).include('.terrain-completion').withTags(['wcag2a','wcag2aa','wcag21aa','wcag22aa']).analyze()).violations).toEqual([]);await page.screenshot({path:info.outputPath(`synthetic-browser-terrain-completion-${theme}-${width}.png`),fullPage:true});}
  await root.evaluate(e=>{e.style.fontSize='200%';for(const b of e.querySelectorAll('button'))b.textContent+=' — extended preview label';});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);

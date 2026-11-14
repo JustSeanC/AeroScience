@@ -7,9 +7,24 @@ var AeroScienceI18n = (function () {
     node.setAttribute('data-native-bound-message', key);
     bindings.set(node, function () { copy.nodeValue = text(key, fallback, values); });
   }
+  function fallbackText(fallback, values) {
+    var unavailable = 'Details are unavailable. Refresh to review the current information.';
+    if (typeof fallback !== 'string' || !fallback.trim()) return unavailable;
+    var valid = true;
+    var result = fallback.replace(/\{([a-z][a-zA-Z0-9]*)\}/g, function (_match, name) {
+      var value = values && Object.prototype.hasOwnProperty.call(values, name) ? values[name] : undefined;
+      if (typeof value !== 'string' && (typeof value !== 'number' || !isFinite(value))) {
+        valid = false; return '';
+      }
+      // A single function replacement preserves names containing $&, braces or Unicode.
+      return String(value);
+    });
+    return valid ? result : unavailable;
+  }
   function text(key, fallback, values) {
-    if (!translator) return fallback;
-    return translator.text(key, values || {}, fallback);
+    var english = fallbackText(fallback, values);
+    if (!translator) return english;
+    return translator.text(key, values || {}, english);
   }
   function use(metadata) {
     var data = typeof AeroScienceLocaleData === 'undefined' ? null : AeroScienceLocaleData;

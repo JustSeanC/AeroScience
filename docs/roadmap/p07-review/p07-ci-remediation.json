@@ -274,5 +274,106 @@
     },
     "windowsCrossCompile": "0 warnings; 0 errors",
     "scientificOrPermissionChanges": false
+  },
+  "run43598444206": {
+    "url": "https://github.com/JustSeanC/AeroScience/actions/runs/43598444206",
+    "source": "b9fdd37833500e0d6c6bd6b6414e150258e340c9",
+    "conclusion": "failure",
+    "linuxDotnet": {
+      "passed": 1640,
+      "failed": 0,
+      "skipped": 0
+    },
+    "windowsDotnet": {
+      "passed": 1630,
+      "failed": 0,
+      "skipped": 10
+    },
+    "windowsJob": "success",
+    "organizationDeploymentContracts": "success; isolated contract fixtures only, no deployment",
+    "linuxBrowser": {
+      "passed": 499,
+      "failed": 7,
+      "total": 508
+    },
+    "diagnostics": {
+      "artifactId": 14117380606,
+      "zipSha256": "2f6d33c86ad9d8976d4bc3d4826f12281c8383f8f7150021d4df5d394c01e205",
+      "retained": "artifacts/p07-full-ci/linux-browser-43598444206",
+      "linuxLogSha256": "5e12a922b9fca36966e3756d27fec1850d3e26f7711bf1670ee5ccaa11844e3f"
+    },
+    "failures": [
+      {
+        "test": "geographic.spec.js: selected native saved plan is included in Start mission",
+        "cause": "The existing native adapter returned the parameterized English fallback verbatim before catalog initialization or when resources were unavailable. A partial legacy plan summary omitted waypoint/pattern/instrument fields; canonical validation rejected undefined parameters.",
+        "fix": "Interpolate the existing English fallback once, preserving literal Unicode, dollar replacements and braces in parameter values. Original Start plan ID/mode and protocol assertions remain unchanged. Known plan names stay visible; absent counts and instrument summaries explicitly display Unknown rather than inventing zero or no instruments. Existing geographic assertions remain and an exact partial-summary assertion is added."
+      },
+      {
+        "tests": [
+          "lidar-workflow.spec.js: light/dark candidate workflow",
+          "terrain-completion.spec.js: light/dark candidate workflow",
+          "organization-live.spec.js: portal language/help",
+          "supporting-product-evidence.spec.js: reference-only metadata"
+        ],
+        "cause": "Six tests retained P06 preview assumptions (selected French/German expected English); the candidate translations correctly render in P07. The supporting-evidence fixture also mounted into the hidden legacy pairing main.",
+        "fix": "Assert exact shared candidate translations and effective language, retain original science/consent/commands/keyboard/overflow/axe checks; mount the synthetic evidence fixture visibly and additionally assert unchanged full reference JSON."
+      }
+    ],
+    "status": "All 28 affected browser scenarios passed across focused reruns; 60 presentation tests and four original native checks pass. Exact-source corrective Full CI still required.",
+    "focusedValidation": {
+      "initialBrowser": {
+        "passed": 25,
+        "failed": 3,
+        "receipt": "artifacts/p07-full-ci/fallback-candidate-browser.log"
+      },
+      "partialPlanAndPortalCorrection": {
+        "passed": 2,
+        "failed": 1,
+        "receipt": "artifacts/p07-full-ci/fallback-final-browser.log"
+      },
+      "evidenceLocatorCorrection": {
+        "passed": 1,
+        "failed": 0,
+        "receipt": "artifacts/p07-full-ci/fallback-evidence-final-browser.log"
+      },
+      "distinctScenariosPassing": 28,
+      "presentation": {
+        "passed": 60,
+        "failed": 0,
+        "skipped": 0
+      },
+      "nativeOriginalChecks": {
+        "passed": 4,
+        "failed": 0
+      },
+      "receipts": [
+        {
+          "path": "artifacts/p07-full-ci/fallback-candidate-checks-final.log",
+          "sha256": "9443ac7c011509610876061077f9dc1d3c366aca226164faae3d5f0c0d8f6784"
+        },
+        {
+          "path": "artifacts/p07-full-ci/fallback-candidate-browser.log",
+          "sha256": "fcd852b34b58022c293f1b03e02782f28ca3ca43b1bbb04fe512bb3771b4ba2d"
+        },
+        {
+          "path": "artifacts/p07-full-ci/fallback-final-browser.log",
+          "sha256": "9c576a3358d443d9523706eb6f78fcd6db268dce8d1633cc271b6015715bbaca"
+        },
+        {
+          "path": "artifacts/p07-full-ci/fallback-evidence-final-browser.log",
+          "sha256": "90234b42434992d20c3a0841ecf7e055f73d3736ceaa030616a0e0ef3d4c86e0"
+        },
+        {
+          "path": "artifacts/p07-full-ci/native-fallback-reproduction.log",
+          "sha256": "1337f8b6f999a405281045f113dc288cfd51e2623ec387b352fcf52ff6fe8187"
+        }
+      ]
+    },
+    "additionalCorrections": [
+      "Partial native plan summaries display known names with explicit Unknown values for missing counts/instruments, preserving Start plan ID/mode checks.",
+      "Supporting evidence uses existing live message bindings for reference counts and unknown source date. The test changes browser language through the existing preference controller and verifies exact unchanged reference JSON.",
+      "The offline collaboration guide is itself localized; tests retain complete provenance disclosure assertions using the selected candidate language.",
+      "The evidence QA fixture sets its browser preference before initialization and locates original reference content independently of translated disclosure labels."
+    ]
   }
 }

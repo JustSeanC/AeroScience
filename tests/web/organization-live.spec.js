@@ -1,5 +1,7 @@
 import {test,expect,request} from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import {localeBundle} from '../../scripts/build/build-locales.mjs';
+import {createTranslator} from '../../src/AeroScience.Engine/wwwroot/i18n-format.js';
 import {spawn,execFile} from 'node:child_process';
 import {promisify} from 'node:util';
 import {mkdtempSync,writeFileSync,rmSync,mkdirSync} from 'node:fs';
@@ -80,7 +82,7 @@ test('P06 portal task links follow supported roles, inactive membership and keyb
  }
 });
 
-test('P06 portal shares Auto/manual appearance and preview language fallback, accessible help and zero settings writes',async({page})=>{
+test('P06 portal shares Auto/manual appearance and French candidate language, accessible help and zero settings writes',async({page})=>{
  const writes=[];page.on('request',r=>{if(r.method()!=='GET'&&new URL(r.url()).pathname.startsWith('/api/'))writes.push(new URL(r.url()).pathname);});
  await page.goto('/#control');await expect(page.getByRole('heading',{name:'Organization Overview',exact:true})).toBeVisible();const appearance=page.locator('#appearance');await appearance.locator('summary').click();const theme=appearance.getByLabel('Theme',{exact:true}),language=appearance.getByLabel('Language',{exact:true});
  await theme.selectOption('auto');
@@ -92,6 +94,6 @@ test('P06 portal shares Auto/manual appearance and preview language fallback, ac
    const original=await page.locator('html').evaluate(e=>parseFloat(getComputedStyle(e).fontSize));await page.locator('html').evaluate(e=>e.style.fontSize='200%');await expect(page.locator('html')).toHaveCSS('font-size',`${original*2}px`);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);expect((await new AxeBuilder({page}).include('#workspace').analyze()).violations).toEqual([]);
   }
  }
- await page.locator('html').evaluate(e=>e.style.fontSize='');await appearance.evaluate(e=>e.open=true);await theme.selectOption('light');await page.emulateMedia({colorScheme:'dark'});await expect(page.locator('html')).toHaveAttribute('data-resolved-theme','light');await language.selectOption('fr-FR');await expect(appearance).toContainText('preview');await expect(page.locator('html')).toHaveAttribute('lang','en-US');await page.reload();await expect(page.locator('html')).toHaveAttribute('data-theme','light');await expect(page.locator('html')).toHaveAttribute('data-requested-locale','fr-FR');
- const help=page.locator('#workspace [data-help-group="assignments"]');await help.locator('summary').focus();await page.keyboard.press('Enter');await expect(help).toHaveAttribute('open','');const popupPromise=page.waitForEvent('popup');await help.getByRole('link',{name:/Read the bundled collaboration guide/}).click();const popup=await popupPromise;await expect(popup.getByRole('heading',{name:'Research collaboration help',exact:true})).toBeVisible();await expect(popup.locator('main')).toContainText('A recipient can verify the received package');await popup.close();expect(writes).toEqual([]);
+ await page.locator('html').evaluate(e=>e.style.fontSize='');await appearance.evaluate(e=>e.open=true);await theme.selectOption('light');await page.emulateMedia({colorScheme:'dark'});await expect(page.locator('html')).toHaveAttribute('data-resolved-theme','light');await language.selectOption('fr-FR');const t=createTranslator(localeBundle(),'fr-FR').text;await expect(appearance).toContainText(t('localization.candidateNotice'));await expect(page.locator('html')).toHaveAttribute('lang','fr-FR');await page.reload();await expect(page.locator('html')).toHaveAttribute('data-theme','light');await expect(page.locator('html')).toHaveAttribute('data-requested-locale','fr-FR');
+ const help=page.locator('#workspace [data-help-group="assignments"]');await help.locator('summary').focus();await page.keyboard.press('Enter');await expect(help).toHaveAttribute('open','');const popupPromise=page.waitForEvent('popup');await help.getByRole('link',{name:t('contextHelp.guide'),exact:true}).click();const popup=await popupPromise;await expect(popup.getByRole('heading',{name:t('html.organizationhelp.textResearchCollaborationHelp'),exact:true})).toBeVisible();await expect(popup.locator('main')).toContainText(t('contextHelp.provenance.body'));await popup.close();expect(writes).toEqual([]);
 });

@@ -389,6 +389,9 @@ test("selected native saved plan is included in Start mission", async ({
   await expect(page.locator("#as-start-plan")).toContainText(
     "Saved native survey",
   );
+  await expect(page.locator("#as-start-plan")).toHaveText(
+    "Selected: Saved native survey | Unknown waypoints | Unknown patterns. Instruments: Unknown.",
+  );
   await expect(page.locator("#as-mode")).toHaveValue("realistic");
   await expect(page.locator("#as-start")).not.toHaveAttribute("disabled", "");
   await page.locator("#as-start").click();

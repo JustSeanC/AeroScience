@@ -37,6 +37,12 @@
         "flaky": 0,
         "scope": "All retained aviation/map/dashboard/experience failures, original map-name contracts and all-five-locale QA with no application errors."
       }
+    },
+    "latestCiBrowserRemediation": {
+      "distinctScenariosPassingAcrossFocusedReruns": 28,
+      "presentation": 60,
+      "nativeOriginalChecks": 4,
+      "note": "Individual initial failures and subsequent corrections are retained in p07-ci-remediation.json; the final Full CI determines whole-suite acceptance."
     }
   },
   "receipts": [
@@ -83,6 +89,26 @@
     {
       "path": "artifacts/p07-full-ci/browser-remediation.log",
       "sha256": "bf766becbb720510740edf9f2379287218832bdee681f9c26b4d1c51a6591f17"
+    },
+    {
+      "path": "artifacts/p07-full-ci/fallback-candidate-checks-final.log",
+      "sha256": "9443ac7c011509610876061077f9dc1d3c366aca226164faae3d5f0c0d8f6784"
+    },
+    {
+      "path": "artifacts/p07-full-ci/fallback-candidate-browser.log",
+      "sha256": "fcd852b34b58022c293f1b03e02782f28ca3ca43b1bbb04fe512bb3771b4ba2d"
+    },
+    {
+      "path": "artifacts/p07-full-ci/fallback-final-browser.log",
+      "sha256": "9c576a3358d443d9523706eb6f78fcd6db268dce8d1633cc271b6015715bbaca"
+    },
+    {
+      "path": "artifacts/p07-full-ci/fallback-evidence-final-browser.log",
+      "sha256": "90234b42434992d20c3a0841ecf7e055f73d3736ceaa030616a0e0ef3d4c86e0"
+    },
+    {
+      "path": "artifacts/p07-full-ci/native-fallback-reproduction.log",
+      "sha256": "1337f8b6f999a405281045f113dc288cfd51e2623ec387b352fcf52ff6fe8187"
     }
   ],
   "humanReview": "PENDING",
