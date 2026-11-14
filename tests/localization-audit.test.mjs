@@ -1,8 +1,28 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import{fileURLToPath}from'node:url';
+import{execFileSync}from'node:child_process';
 import {inventoryJavaScript} from '../scripts/build/audit-localization.mjs';
 import {strictJson,validUnicode,validateQuality,sourceFingerprint,messageFingerprint} from '../scripts/build/localization-quality.mjs';
 import {protectedTranslation} from '../scripts/build/audit-display-bindings.mjs';
+
+test('audit CLI creates diagnostics on a fresh checkout and still rejects protected translations',()=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'aeroscience-localization-audit-'));
+ const script=fileURLToPath(new URL('../scripts/build/audit-display-bindings.mjs',import.meta.url));
+ try{
+  for(const directory of ['src/AeroScience.Engine/wwwroot/i18n/locales','src/AeroScience.Organization/wwwroot','msfs-toolbar/PackageSources/html_ui/InGamePanels/AeroScience'])fs.mkdirSync(path.join(root,directory),{recursive:true});
+  fs.writeFileSync(path.join(root,'src/AeroScience.Engine/wwwroot/i18n/locales/en-US.json'),JSON.stringify({messages:{'test.method':'POST'}}));
+  assert.equal(fs.existsSync(path.join(root,'artifacts')),false);
+  const run=()=>execFileSync(process.execPath,[script],{cwd:root,encoding:'utf8',stdio:'pipe'});
+  assert.equal(JSON.parse(run()).protectedReferences,0);
+  const receipt=path.join(root,'artifacts/p07-protected-display-bindings.json');assert.deepEqual(JSON.parse(fs.readFileSync(receipt,'utf8')),[]);
+  fs.writeFileSync(path.join(root,'src/AeroScience.Engine/wwwroot/fixture.js'),"const command={method:textForUI('test.method')};");
+  assert.throws(run,error=>error.status===1);const rejected=JSON.parse(fs.readFileSync(receipt,'utf8'));assert.equal(rejected.length,1);assert.equal(rejected[0].key,'test.method');
+ }finally{fs.rmSync(root,{recursive:true,force:true});}
+});
 
 test('nested display prose is inventoried while original state comparisons remain identifiers',()=>{
  const rows=inventoryJavaScript(`localizedCopy('flight.status',{detail:state==='Armed'?'Waiting for the trigger.':'No collection is running.'});`,'src/AeroScience.Engine/wwwroot/nested-fixture.js');

@@ -191,5 +191,45 @@
         "id": 132430285270
       }
     ]
+  },
+  "run43594589991": {
+    "url": "https://github.com/JustSeanC/AeroScience/actions/runs/43594589991",
+    "source": "59bf0b45f6efad07596fd059a6ed65233c7526cb",
+    "windows": {
+      "job": 132446323888,
+      "dotnetPassed": 1630,
+      "dotnetSkipped": 10,
+      "dotnetFailed": 0,
+      "jobConclusion": "failure",
+      "failure": "Audit CLI wrote artifacts/p07-protected-display-bindings.json before creating artifacts on a fresh checkout.",
+      "logSha256": "7c8461c6ae792b5bdfbb54c504a92e3d96a08b635698521eb061d640fe17601b",
+      "artifact": {
+        "id": 14115025070,
+        "name": "windows-test-diagnostics",
+        "sha256": "16100a148a362dfd1bad53e3ce8251685d9cf283e6ab574d6ced42d8d26d50c7"
+      }
+    },
+    "linux": "Full .NET step passed; remaining stages pending at corrective commit",
+    "organizationDeployment": "success; isolated CI contracts only, no production deployment"
+  },
+  "freshCheckoutCorrection": {
+    "reproducedExitBefore": 1,
+    "confirmedError": "ENOENT for the missing diagnostics directory",
+    "change": "Create artifacts recursively before writing the existing audit receipt. Continue to reject protected translations with exit 1.",
+    "tests": {
+      "presentationPassed": 58,
+      "originalNativePassed": 4,
+      "skipped": 0
+    },
+    "receipts": [
+      {
+        "path": "artifacts/p07-full-ci/fresh-audit-before.log",
+        "sha256": "3380ea915ad75d754f4cb3a60b9e419a1aaeb7686c28e573d6d5703cccfe2594"
+      },
+      {
+        "path": "artifacts/p07-full-ci/fresh-audit-correction-checks.log",
+        "sha256": "31fc68bf3c77f62dec33a9b88651e8a9309d2b0ec1a6fa6fe77e9a1357580994"
+      }
+    ]
   }
 }
