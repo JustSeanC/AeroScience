@@ -16,12 +16,12 @@ function load(bundle=localeBundle()){
 }
 test('classic ES2017 native catalogs run without Intl or Object.hasOwn and preserve text parameters',()=>{
  const c=load();
- for(const locale of ['en-US','es-ES','fr-FR','de-DE','pt-BR']){
-  const result=c.AeroScienceI18n.use({version:1,catalogVersion,locale});assert.equal(result.effectiveLocale,'en-US');assert.equal(result.fallback,false);
-  if(locale!=='en-US')assert.match(result.message,/preview.*English/);
-  assert.equal(c.AeroScienceI18n.text('toolbar.mission','fallback'),'Mission');
+ for(const [locale,mission] of [['en-US','Mission'],['es-ES','Misión'],['fr-FR','Mission'],['de-DE','Mission'],['pt-BR','Missão']]){
+  const result=c.AeroScienceI18n.use({version:1,catalogVersion,locale});assert.equal(result.effectiveLocale,locale);assert.equal(result.fallback,false);
+  if(locale!=='en-US'){assert.ok(result.message.includes(localeBundle().manifest.locales.find(l=>l.id===locale).name));assert.ok(!result.message.includes('uses English'));}
+  assert.equal(c.AeroScienceI18n.text('toolbar.mission','fallback'),mission);
  }
- const name='Zoë 東京 <img> $& µm';assert.equal(c.AeroScienceI18n.text('common.closeNamed','Close',{name}),'Close '+name);
+ const name='Zoë 東京 <img> $& µm';assert.equal(c.AeroScienceI18n.text('common.closeNamed','Close',{name}),'Fechar '+name);
 });
 test('old companions, unknown locales and catalog/contract mismatches fall back to bundled English',()=>{
  const c=load();for(const metadata of [null,{}, {version:1,catalogVersion:catalogVersion-1,locale:'fr-FR'}, {version:2,catalogVersion,locale:'fr-FR'},{version:1,catalogVersion:999,locale:'fr-FR'},{version:1,catalogVersion,locale:'xx'}]){
@@ -45,6 +45,6 @@ test('SDK staging ships and records canonical catalogs in both original and rena
    assert.ok(receipt.files.some(f=>f.path.endsWith('/'+name+'/'+asset)));
   }
   const context=vm.createContext({Intl:undefined});for(const asset of ['AeroScience.LocaleData.js','AeroScience.LocaleFormat.js','AeroScience.I18n.js'])vm.runInContext(readFileSync(join(panels,name,asset),'utf8'),context);
-  assert.equal(context.AeroScienceI18n.use({version:1,catalogVersion,locale:'de-DE'}).effectiveLocale,'en-US');
+  assert.equal(context.AeroScienceI18n.use({version:1,catalogVersion,locale:'de-DE'}).effectiveLocale,'de-DE');
  }}finally{rmSync(temporary,{recursive:true,force:true});}
 });

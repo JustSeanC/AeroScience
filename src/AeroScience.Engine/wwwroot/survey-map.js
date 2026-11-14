@@ -1,3 +1,5 @@
+import {message as localizedCopy,setPresentationText} from './i18n.js';
+import {t as textForUI} from './i18n.js';
 // Bounded display of actual retained masks. No resampling, source retrieval or science writes.
 import {ResearchMap} from './map.js';
 import {node as el,button,color,numeric} from './workstation-ui.js';
@@ -9,7 +11,7 @@ export function contains(position,geometry){
 export function elevation(value,unit,reading){return ['m','ft'].includes(unit)?reading('elevation',value==null?null:value*(unit==='ft'?.3048:1)):{value,unit:unit||'unknown',decimals:3};}
 export function surveyMap(parent,onInspect){
  const L=window.L,base=new ResearchMap(parent,()=>{},{coverageOnly:true}),map=base.map;
- base.container.setAttribute('aria-label','Retained terrain survey map. Arrow keys pan; plus and minus zoom. Exact values are available in the evidence table.');
+ setPresentationText(base.container,localizedCopy("ui.surveyMap.messageRetainedTerrainSurveyMapArrowKeysPan"),"aria-label");
  const layers={corridor:L.layerGroup().addTo(map),track:L.layerGroup().addTo(map),originals:L.layerGroup().addTo(map),selection:L.layerGroup().addTo(map)};
  let values=[],options={},surface,frame,disposed=false,selected=null,intervals=[],renderedPoints=[],lineCallback=null,linePoints=[];
  const Layer=L.Layer.extend({onAdd(m){this.canvas=L.DomUtil.create('canvas','survey-canvas');this.canvas.setAttribute('aria-hidden','true');this.canvas.style.pointerEvents='none';m.getPane('overlayPane').append(this.canvas);m.on('moveend zoomend resize',redraw);redraw();},onRemove(m){m.off('moveend zoomend resize',redraw);cancelAnimationFrame(frame);this.canvas.remove();}});
@@ -29,14 +31,14 @@ export function surveyMap(parent,onInspect){
  }
  const analysis=L.layerGroup().addTo(map),cursor=L.layerGroup().addTo(map);
  const click=e=>{const p={latitude:e.latlng.lat,longitude:e.latlng.lng};if(lineCallback){linePoints.push(p);L.circleMarker(e.latlng,{radius:5,color:'#ad5b34',fill:false}).addTo(analysis);if(linePoints.length===2){L.polyline(linePoints.map(p=>[p.latitude,p.longitude]),{color:'#ad5b34',weight:2,dashArray:'6 4'}).addTo(analysis);const done=lineCallback;lineCallback=null;done(linePoints);}return;}let hit=values.find(v=>v.geometry&&contains(p,v.geometry));if(!hit){let distance=8;const position=map.latLngToContainerPoint(e.latlng);for(const v of renderedPoints){const d=Math.hypot(v.screen[0]-position.x,v.screen[1]-position.y);if(d<distance){hit=v.value;distance=d;}}}if(hit)onInspect(hit);};map.on('click',click);
- const tools=el('div',undefined,'action-row');parent.prepend(tools);button(tools,'Fit retained survey',()=>fit());
+ const tools=el('div',undefined,'action-row');parent.prepend(tools);button(tools,localizedCopy("ui.surveyMap.messageFitRetainedSurvey"),()=>fit());
  const bounds=[];
  function fit(){const b=bounds.length?bounds:values.map(v=>[v.position.latitude,v.position.longitude]);if(b.length)map.fitBounds(L.latLngBounds(b),{padding:[24,24],maxZoom:18,animate:false});}
  return {base,map,layers,
   update(next,preferences){values=next;options=preferences;redraw();},
   geometry(records,session){layers.corridor.clearLayers();bounds.length=0;intervals=records.filter(r=>r.chunk).map(r=>r.chunk);for(const r of records){const chunk=r.chunk;if(!chunk||session&&chunk.sessionId!==session)continue;const g=L.geoJSON({type:'Feature',geometry:chunk.geometry,properties:{}},{style:{color:'#9a73d8',weight:2,fill:false,dashArray:'6 4'}});g.eachLayer(l=>{for(const p of chunk.geometry.coordinates.flatMap(p=>p[0]))bounds.push([p[1],p[0]]);});g.addTo(layers.corridor);}fit();},
   track(points){layers.track.clearLayers();let segment=[],previousSession;const flush=()=>{if(segment.length>1)L.polyline(segment,{color:'#297aaf',weight:2,dashArray:'3 5'}).addTo(layers.track);segment=[];};for(const p of points){const session=intervals.find(c=>p.utc>=c.fromUtc&&p.utc<=c.toUtc)?.sessionId;if(p.breakBefore||p.paused||session!==previousSession)flush();if(!p.paused)segment.push([p.position.latitude,p.position.longitude]);previousSession=session;}flush();},
-  originals(products){layers.originals.clearLayers();for(const p of products){const ring=p.footprint?.boundary;if(ring?.length)L.polygon(ring.map(v=>[v.latitude,v.longitude]),{color:'#b07300',fill:false,weight:1}).addTo(layers.originals).bindTooltip(el('span',`${p.instrumentId} · ${p.flightPacketUtc} · modeled footprint of original acquisition ${p.id}`));}},
+  originals(products){layers.originals.clearLayers();for(const p of products){const ring=p.footprint?.boundary;if(ring?.length)L.polygon(ring.map(v=>[v.latitude,v.longitude]),{color:'#b07300',fill:false,weight:1}).addTo(layers.originals).bindTooltip(el('span',localizedCopy("ui.surveyMap.messageModeledFootprintOfOriginal",{value1:(String(p.instrumentId)),value2:(String(p.flightPacketUtc)),value3:(String(p.id))})));}},
   show(name,show){if(layers[name]){if(show)layers[name].addTo(map);else map.removeLayer(layers[name]);}redraw();},
   select(value){selected=value;layers.selection.clearLayers();if(value){L.circleMarker([value.position.latitude,value.position.longitude],{radius:7,color:'#d95825',fill:false,weight:3}).addTo(layers.selection);}},
   pickLine(callback){lineCallback=callback;linePoints=[];analysis.clearLayers();if(callback)base.container.focus();},

@@ -1,4 +1,5 @@
-const normalize = value => String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+import {t as textForUI} from './i18n.js';
+const normalize = value => String(value || "").normalize(textForUI("ui.locationSearch.messageNFD")).replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
 export function airportLocations(index) {
   return index.airports.map(r => ({kind:"airport", id:r[0], icao:r[1], iata:r[2], name:r[3], city:r[4], region:r[5], country:r[6], latitude:r[7], longitude:r[8], type:r[9], search:normalize(r.slice(0,7).join(" "))}));
 }

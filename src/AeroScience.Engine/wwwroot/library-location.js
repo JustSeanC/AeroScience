@@ -1,35 +1,37 @@
+import {message as localizedCopy,setPresentationText} from './i18n.js';
+import {t as textForUI} from './i18n.js';
 import {node as el, bytes, button, status,informationDetails,scientificNotice} from './workstation-ui.js';
 
 async function copyPath(path, feedback) {
   try {
     await navigator.clipboard.writeText(path);
-    feedback.textContent = 'Storage path copied. Opening it does not import, move or modify scientific data.';
+    setPresentationText(feedback,localizedCopy("ui.libraryLocation.messageStoragePathCopiedOpeningItDoesNot"));
   } catch {
-    feedback.textContent = 'Copy is unavailable in this browser. Select and copy the displayed storage path.';
+    setPresentationText(feedback,localizedCopy("ui.libraryLocation.messageCopyIsUnavailableInThisBrowserSelect"));
   }
 }
 
 export async function libraryLocation(parent, api, {sourceId, stopped=()=>false}={}) {
-  const panel=el('section',undefined,'library-location'), path=el('p'), info=status(panel,'Reading configured scientific storage…');
-  panel.setAttribute('aria-label',sourceId?'Retained source folder':'Scientific Library location');
-  info.setAttribute('role','note');info.setAttribute('aria-label','Configured scientific storage');
-  path.className='storage-path';const context=sourceId?panel:informationDetails(panel,'Storage location & accounting');context.prepend(path);parent.append(panel);
+  const panel=el('section',undefined,'library-location'), path=el('p'), info=status(panel,localizedCopy("ui.libraryLocation.messageReadingConfiguredScientificStorage"));
+  setPresentationText(panel,sourceId?localizedCopy("ui.libraryLocation.messageRetainedSourceFolder"):localizedCopy("ui.libraryLocation.messageScientificLibraryLocation"),"aria-label");
+  info.setAttribute('role','note');setPresentationText(info,localizedCopy("ui.libraryLocation.messageConfiguredScientificStorage"),"aria-label");
+  path.className='storage-path';const context=sourceId?panel:informationDetails(panel,localizedCopy("ui.libraryLocation.messageStorageLocationAccounting"));context.prepend(path);parent.append(panel);
   try {
     const data=await api('/api/science/library/location'+(sourceId?'?sourceId='+encodeURIComponent(sourceId):''));
     if(stopped()||!panel.isConnected)return;
-    path.textContent=data.path;path.style.overflowWrap='anywhere';path.tabIndex=0;
-    info.textContent=data.available?`${bytes(data.usedBytes)} total Scientific Library usage · ${data.freeBytes==null?'Unknown':bytes(data.freeBytes)} free on the physical drive. `:`Storage unavailable: ${data.error} No replacement folder was created.`;
-    if(data.available&&data.accounting)context.append(el('p',data.accounting));if(!data.available)scientificNotice(info,'critical',{problem:'Scientific Library storage is unavailable.',consequence:'Original sources cannot be read.',action:'Open Scientific Library → Storage and reconnect the configured location.'});
+    setPresentationText(path,data.path);path.style.overflowWrap='anywhere';path.tabIndex=0;
+    setPresentationText(info,data.available?localizedCopy("ui.libraryLocation.messageTotalScientificLibraryUsageFree",{value1:(String(bytes(data.usedBytes))),value2:(String(data.freeBytes==null?'Unknown':bytes(data.freeBytes)))}):localizedCopy("ui.libraryLocation.messageStorageUnavailableNoReplacementFolderWasCreated",{value1:(String(data.error))}));
+    if(data.available&&data.accounting)context.append(el('p',data.accounting));if(!data.available)scientificNotice(info,'critical',{problem:localizedCopy("ui.libraryLocation.messageScientificLibraryStorageIsUnavailable"),consequence:localizedCopy("ui.libraryLocation.messageOriginalSourcesCannotBeRead"),action:localizedCopy("ui.libraryLocation.messageOpenScientificLibraryStorageAndReconnect")});
     const actions=el('div',undefined,'action-row');context.append(actions);
-    const open=button(actions,sourceId?'Open Source Folder':'Open Data Folder',async()=>{
+    const open=button(actions,sourceId?localizedCopy("ui.libraryLocation.messageOpenSourceFolder"):localizedCopy("ui.libraryLocation.messageOpenDataFolder"),async()=>{
       open.disabled=true;
-      try { await api('/api/science/library/open-folder',{libraryId:data.libraryId,sourceId:sourceId||null});info.textContent='Requested Windows File Explorer at the verified configured location. No data was changed.'; }
-      catch(error){info.textContent=error.message;}
+      try { await api('/api/science/library/open-folder',{libraryId:data.libraryId,sourceId:sourceId||null});setPresentationText(info,localizedCopy("ui.libraryLocation.messageRequestedWindowsFileExplorerAtTheVerified")); }
+      catch(error){setPresentationText(info,error.message);}
       finally {open.disabled=!data.canOpen||!data.available;}
     },'secondary');
     open.disabled=!data.canOpen||!data.available;
-    button(actions,'Copy Path',()=>copyPath(data.path,info),'secondary');
-    if(!data.canOpen)context.append(el('p','Paired devices can copy this Windows path. They cannot open File Explorer on the companion PC.'));
-  } catch(error) {info.textContent=error.message+' No replacement folder was created.';}
+    button(actions,localizedCopy("ui.libraryLocation.messageCopyPath"),()=>copyPath(data.path,info),'secondary');
+    if(!data.canOpen)context.append(el('p',localizedCopy("ui.libraryLocation.messagePairedDevicesCanCopyThisWindowsPath")));
+  } catch(error) {setPresentationText(info,localizedCopy("ui.libraryLocation.messageNoReplacementFolderWasCreated",{value1:(String(error.message))}));}
   return ()=>panel.remove();
 }

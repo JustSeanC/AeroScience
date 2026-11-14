@@ -27,16 +27,16 @@
     <script src="/vendor/leaflet/leaflet.js"></script>
     <script src="/vendor/leaflet-draw/leaflet.draw.js"></script>
     <script src="/vendor/chart.js/chart.umd.min.js"></script>
-    <title>AeroScience · Mission Control</title>
+    <title data-i18n="html.index.textAeroscienceMissionControl">AeroScience · Mission Control</title>
     <script type="module" src="/app.js"></script>
   </head>
   <body>
     <div class="app-shell">
       <aside class="sidebar">
-        <a class="brand" href="#home" aria-label="AeroScience home"
+        <a class="brand" href="#home" aria-label="AeroScience home" data-i18n-aria-label="html.index.textAeroscienceHome"
           ><img src="/icon.svg" width="38" height="38" alt="" /><span
             >AERO<span class="brand-light">SCIENCE</span
-            ><small>AIRBORNE RESEARCH SYSTEMS</small></span
+            ><small data-i18n="html.index.textAirborneResearchSystems">AIRBORNE RESEARCH SYSTEMS</small></span
           ></a
         >
         <p class="nav-label" data-i18n="nav.workspace">WORKSPACE</p>
@@ -54,10 +54,10 @@
           <a class="nav-link" data-i18n="nav.help" href="#help">Help &amp; Support</a>
         </nav>
         <div class="sidebar-footer">
-          <span class="eyebrow">SCIENCE ENGINE</span>
+          <span class="eyebrow" data-i18n="html.index.textScienceEngine">SCIENCE ENGINE</span>
           <div>
             <i class="status-dot" id="engine-dot"></i
-            ><span id="engine-link">Connecting</span>
+            ><span id="engine-link" data-i18n="html.index.textConnecting">Connecting</span>
           </div>
           <small>v0.7.0</small>
         </div>
@@ -65,14 +65,14 @@
       <main>
         <header class="topbar">
           <span
-            >OPERATIONS / <strong id="breadcrumb">MISSION CONTROL</strong></span
-          ><span id="utc-clock" class="mono">— UTC</span>
+            >OPERATIONS / <strong id="breadcrumb" data-i18n="html.index.textMissionControl">MISSION CONTROL</strong></span
+          ><span id="utc-clock" class="mono" data-i18n="html.index.textUtc">— UTC</span>
         </header>
         <div id="notice" class="notice" role="status" hidden></div>
         <section id="pairing" class="pairing panel" hidden>
-          <p class="eyebrow">DEVICE CONNECTION</p>
-          <h1>Pair with the science engine</h1>
-          <p>
+          <p class="eyebrow" data-i18n="html.index.textDeviceConnection">DEVICE CONNECTION</p>
+          <h1 data-i18n="html.index.textPairWithTheScienceEngine">Pair with the science engine</h1>
+          <p data-i18n="html.index.textOnTheWindowsDashboardOpenSettingsAndCopyThePairingCodeUseThisConn">
             On the Windows dashboard, open Settings and copy the pairing code.
             Use this connection only on a trusted private network.
           </p>
@@ -84,20 +84,20 @@
               spellcheck="false"
               maxlength="40"
               required
-            /><button class="primary" type="submit">Connect device</button>
+            /><button class="primary" type="submit" data-i18n="html.index.textConnectDevice">Connect device</button>
           </form>
         </section>
         <div id="workspace" hidden>
           <section id="home" class="view" hidden></section>
-          <section id="operations" class="view" hidden aria-label="Mission Operations"></section>
-          <section id="my-research" class="view" hidden aria-label="My Research"></section>
+          <section id="operations" class="view" hidden aria-label="Mission Operations" data-i18n-aria-label="ui.app.messageMissionOperations"></section>
+          <section id="my-research" class="view" hidden aria-label="My Research" data-i18n-aria-label="nav.myResearch"></section>
           <section id="control" class="view">
             <div class="page-heading">
               <div>
-                <p class="eyebrow">AIRBORNE SCIENCE / OPERATIONS</p>
-                <h2>Flight Details &amp; Telemetry</h2>
-                <p class="subtitle">Record a flight, monitor live telemetry and operate the active mission.</p>
-                <a href="#operations" class="button primary">Back to Current Flight</a>
+                <p class="eyebrow" data-i18n="html.index.textAirborneScienceOperations">AIRBORNE SCIENCE / OPERATIONS</p>
+                <h2 data-i18n="html.index.textFlightDetailsTelemetry">Flight Details &amp; Telemetry</h2>
+                <p class="subtitle" data-i18n="html.index.textRecordAFlightMonitorLiveTelemetryAndOperateTheActiveMission">Record a flight, monitor live telemetry and operate the active mission.</p>
+                <a href="#operations" class="button primary" data-i18n="html.index.textBackToCurrentFlight">Back to Current Flight</a>
               </div>
               <span id="source-badge" class="badge amber"
                 >WAITING FOR DATA</span
@@ -107,9 +107,9 @@
               <div>
                 <i id="connection-dot" class="status-dot"></i
                 ><strong id="aircraft">Awaiting aircraft</strong
-                ><span id="connection-text">Waiting for telemetry</span>
+                ><span id="connection-text" data-i18n="html.index.textWaitingForTelemetry">Waiting for telemetry</span>
               </div>
-              <span class="mono" id="sample-time">NO DATA</span>
+              <span class="mono" id="sample-time" data-i18n="html.index.textNoData">NO DATA</span>
             </div>
             <div class="mission-grid">
               <section
@@ -117,35 +117,35 @@
                 aria-labelledby="mission-title"
               >
                 <div class="panel-title">
-                  <h2 id="mission-title">RESEARCH MISSION</h2>
-                  <span id="record-status" class="badge">STANDBY</span>
+                  <h2 id="mission-title" data-i18n="html.index.textResearchMission">RESEARCH MISSION</h2>
+                  <span id="record-status" class="badge" data-i18n="ui.app.messageSTANDBY">STANDBY</span>
                 </div>
                 <div id="mission-idle">
-                  <h3>Ready for your next mission.</h3>
+                  <h3 data-i18n="html.index.textReadyForYourNextMission">Ready for your next mission.</h3>
 
                   <form id="start-form">
-                    <details id="recording-options" class="science-information" data-science-level="information"><summary>Recording Options</summary>
+                    <details id="recording-options" class="science-information" data-science-level="information"><summary data-i18n="html.index.textRecordingOptions">Recording Options</summary>
                     <div class="mode-field">
                       <label for="mission-mode">SCIENCE OPERATING MODE</label
                       ><select id="mission-mode">
-                        <option value="universal" selected>
+                        <option value="universal" selected data-i18n="ui.research.messageUniversalFlyAnything">
                           Universal — Fly Anything
                         </option>
-                        <option value="realistic">
+                        <option value="realistic" data-i18n="ui.research.messageRealisticAuthenticResearch">
                           Realistic — Authentic Research
                         </option>
                       </select>
-                      <p id="mode-help">
+                      <p id="mode-help" data-i18n="html.index.textAnyCompatibleAircraftFlexibleScienceMissions">
                         Any compatible aircraft. Flexible science missions.
                       </p>
                     </div>
                     <label><input id="arm-science" type="checkbox" /> Arm science without starting collection (flight recording starts normally)</label>
                     </details>
-                    <label for="mission-name">MISSION NAME</label>
+                    <label for="mission-name" data-i18n="html.index.textMissionName">MISSION NAME</label>
                     <div class="input-row">
                       <input
                         id="mission-name"
-                        placeholder="e.g. Sierra atmospheric survey"
+                        placeholder="e.g. Sierra atmospheric survey" data-i18n-placeholder="html.index.textEGSierraAtmosphericSurvey"
                         maxlength="100"
                         required
                       /><button class="primary" id="start-button" type="submit">
@@ -182,14 +182,14 @@
                 aria-labelledby="flight-title"
               >
                 <div class="panel-title">
-                  <h2 id="flight-title">FLIGHT STATE</h2>
-                  <span class="muted">TRUE NORTH</span>
+                  <h2 id="flight-title" data-i18n="html.index.textFlightState">FLIGHT STATE</h2>
+                  <span class="muted" data-i18n="html.index.textTrueNorth">TRUE NORTH</span>
                 </div>
                 <div class="attitude">
                   <svg
                     viewBox="0 0 220 115"
                     role="img"
-                    aria-label="Aircraft attitude indicator"
+                    aria-label="Aircraft attitude indicator" data-i18n-aria-label="html.index.textAircraftAttitudeIndicator"
                   >
                     <defs>
                       <clipPath id="horizon-clip">
@@ -237,51 +237,51 @@
                       text-anchor="middle"
                       fill="#8ca0b2"
                       font-size="10"
-                    >
+                     data-i18n="html.index.textAttitudeDegrees">
                       ATTITUDE · DEGREES
                     </text>
                   </svg>
                   <div>
-                    <span>PITCH</span><strong id="pitch">—</strong
-                    ><span>BANK</span><strong id="bank">—</strong>
+                    <span data-i18n="html.index.textPitch">PITCH</span><strong id="pitch">—</strong
+                    ><span data-i18n="html.index.textBank">BANK</span><strong id="bank">—</strong>
                   </div>
                 </div>
               </section>
             </div>
             <div class="section-label">
-              <h2>LIVE TELEMETRY</h2>
-              <span id="sampling-label">Configured target: 1 Hz</span>
+              <h2 data-i18n="html.index.textLiveTelemetry">LIVE TELEMETRY</h2>
+              <span id="sampling-label" data-i18n="html.index.textConfiguredTarget1Hz">Configured target: 1 Hz</span>
             </div>
             <div class="metrics">
               <article class="panel metric">
-                <span>ALTITUDE MSL</span>
-                <div><strong id="altitude">—</strong><small>FT</small></div>
-                <p>Above mean sea level</p>
+                <span data-i18n="html.index.textAltitudeMsl">ALTITUDE MSL</span>
+                <div><strong id="altitude">—</strong><small data-i18n="html.index.textFt">FT</small></div>
+                <p data-i18n="html.index.textAboveMeanSeaLevel">Above mean sea level</p>
               </article>
               <article class="panel metric">
-                <span>INDICATED AIRSPEED</span>
+                <span data-i18n="html.index.textIndicatedAirspeed">INDICATED AIRSPEED</span>
                 <div><strong id="ias">—</strong><small>KTS</small></div>
-                <p id="mach">Mach —</p>
-                <p id="tas">True airspeed —</p>
+                <p id="mach" data-i18n="ui.app.messageMach">Mach —</p>
+                <p id="tas" data-i18n="ui.app.messageTrueAirspeed">True airspeed —</p>
               </article>
               <article class="panel metric">
-                <span>GROUND SPEED</span>
+                <span data-i18n="html.index.textGroundSpeed">GROUND SPEED</span>
                 <div><strong id="groundspeed">—</strong><small>KTS</small></div>
-                <p id="track">Track —</p>
+                <p id="track" data-i18n="ui.app.messageTrack">Track —</p>
               </article>
               <article class="panel metric">
-                <span>VERTICAL SPEED</span>
+                <span data-i18n="html.index.textVerticalSpeed">VERTICAL SPEED</span>
                 <div>
-                  <strong id="vertical-speed">—</strong><small>FT/MIN</small>
+                  <strong id="vertical-speed">—</strong><small data-i18n="html.index.textFtMin">FT/MIN</small>
                 </div>
-                <p id="agl">Above ground —</p>
+                <p id="agl" data-i18n="ui.app.messageAboveGround">Above ground —</p>
               </article>
             </div>
             <div class="lower-grid">
               <section class="panel profile-panel">
                 <div class="panel-title">
-                  <h2>ALTITUDE PROFILE</h2>
-                  <span>LAST 60 UPDATES · FT MSL</span>
+                  <h2 data-i18n="html.index.textAltitudeProfile">ALTITUDE PROFILE</h2>
+                  <span data-i18n="html.index.textLast60UpdatesFtMsl">LAST 60 UPDATES · FT MSL</span>
                 </div>
                 <div class="chart">
                   <div class="chart-range">
@@ -291,7 +291,7 @@
                     viewBox="0 0 600 130"
                     preserveAspectRatio="none"
                     role="img"
-                    aria-label="Recent altitude profile"
+                    aria-label="Recent altitude profile" data-i18n-aria-label="html.index.textRecentAltitudeProfile"
                   >
                     <path
                       d="M0 20H600M0 65H600M0 110H600"
@@ -309,31 +309,31 @@
                   </svg>
                 </div>
                 <div class="chart-footer">
-                  <span>RECENT RECEIVED UPDATES</span><span>LIVE</span>
+                  <span data-i18n="html.index.textRecentReceivedUpdates">RECENT RECEIVED UPDATES</span><span data-i18n="html.index.textLive">LIVE</span>
                 </div>
               </section>
               <section class="panel position-panel">
                 <div class="panel-title">
-                  <h2>AIRCRAFT POSITION</h2>
-                  <span>WGS 84</span>
+                  <h2 data-i18n="html.index.textAircraftPosition">AIRCRAFT POSITION</h2>
+                  <span data-i18n="html.index.textWgs84">WGS 84</span>
                 </div>
                 <dl>
                   <div>
-                    <dt>LATITUDE</dt>
+                    <dt data-i18n="html.index.textLatitude">LATITUDE</dt>
                     <dd id="latitude">—</dd>
                   </div>
                   <div>
-                    <dt>LONGITUDE</dt>
+                    <dt data-i18n="html.index.textLongitude">LONGITUDE</dt>
                     <dd id="longitude">—</dd>
                   </div>
                   <div>
-                    <dt>HEADING</dt>
+                    <dt data-i18n="html.index.textHeading">HEADING</dt>
                     <dd id="heading">—</dd>
                   </div>
                 </dl>
               </section>
             </div>
-            <p class="footnote" id="source-note">
+            <p class="footnote" id="source-note" data-i18n="html.index.textWaitingForATelemetryProviderScientificInstrumentsAndMappingArePla">
               Waiting for a telemetry provider. Scientific instruments and
               mapping are planned for future releases.
             </p>
@@ -341,10 +341,10 @@
           <section id="planner" class="view" hidden>
             <div class="page-heading">
               <div>
-                <p class="eyebrow">SCIENCE OPERATIONS</p>
-                <h1>Flight Planner</h1>
+                <p class="eyebrow" data-i18n="html.index.textScienceOperations">SCIENCE OPERATIONS</p>
+                <h1 data-i18n="nav.planner">Flight Planner</h1>
                 <p>
-                  Prepare routes, survey areas, patterns and planned instruments. Plans are optional; start recording from Mission Control at any time. <a href="#help?guide=mission-planner.md">First mission walkthrough</a>
+                  Prepare routes, survey areas, patterns and planned instruments. Plans are optional; start recording from Mission Control at any time. <a href="#help?guide=mission-planner.md" data-i18n="html.index.textFirstMissionWalkthrough">First mission walkthrough</a>
                 </p>
               </div>
             </div>
@@ -353,31 +353,31 @@
           <section id="history" class="view" hidden>
             <div class="page-heading">
               <div>
-                <p class="eyebrow">RESEARCH ARCHIVE</p>
-                <h2>Recorded Flights</h2>
-                <p class="subtitle">Available offline.</p>
+                <p class="eyebrow" data-i18n="html.index.textResearchArchive">RESEARCH ARCHIVE</p>
+                <h2 data-i18n="nav.recordedFlights">Recorded Flights</h2>
+                <p class="subtitle" data-i18n="html.index.textAvailableOffline">Available offline.</p>
               </div>
-              <button id="refresh-history" class="secondary">
+              <button id="refresh-history" class="secondary" data-i18n="html.index.textRefreshArchive">
                 Refresh archive
               </button>
             </div>
-            <form id="history-search-form" class="workspace-controls"><label>Search archive<input id="history-search" type="search" placeholder="Mission name or aircraft" /></label><label>Flight status<select id="history-status"><option value="">All statuses</option><option value="completed">Completed</option><option value="interrupted">Interrupted</option><option value="recording">Recording</option></select></label><label>Sort missions<select id="history-sort"><option value="newest">Newest first</option><option value="oldest">Oldest first</option><option value="name">Mission name (A–Z)</option></select></label><button class="secondary">Search Missions</button></form>
+            <form id="history-search-form" class="workspace-controls"><label>Search archive<input id="history-search" type="search" placeholder="Mission name or aircraft" data-i18n-placeholder="html.index.textMissionNameOrAircraft" /></label><label>Flight status<select id="history-status"><option value="" data-i18n="html.index.textAllStatuses">All statuses</option><option value="completed" data-i18n="ui.downloadActivity.messageCompleted">Completed</option><option value="interrupted" data-i18n="html.index.textInterrupted">Interrupted</option><option value="recording" data-i18n="html.index.textRecording">Recording</option></select></label><label>Sort missions<select id="history-sort"><option value="newest" data-i18n="html.index.textNewestFirst">Newest first</option><option value="oldest" data-i18n="ui.libraryDownload.messageOldestFirst">Oldest first</option><option value="name" data-i18n="html.index.textMissionNameAZ">Mission name (A–Z)</option></select></label><button class="secondary" data-i18n="html.index.textSearchMissions">Search Missions</button></form>
             <div id="history-list" class="history-list"></div>
             <div class="pagination">
               <button id="history-prev" class="secondary">← Newer</button
               ><span id="history-page"></span
-              ><button id="history-next" class="secondary">Older →</button>
+              ><button id="history-next" class="secondary" data-i18n="html.index.textOlder">Older →</button>
             </div>
           </section>
           <section id="instruments" class="view" hidden>
             <div class="page-heading">
               <div>
-                <p class="eyebrow">SCIENCE PAYLOAD</p>
-                <h2>Instrument Setup</h2>
+                <p class="eyebrow" data-i18n="html.index.textSciencePayload">SCIENCE PAYLOAD</p>
+                <h2 data-i18n="nav.instrumentSetup">Instrument Setup</h2>
               </div>
-              <span class="badge">SIMULATOR &amp; EXTERNAL DATA</span>
+              <span class="badge" data-i18n="html.index.textSimulatorExternalData">SIMULATOR &amp; EXTERNAL DATA</span>
             </div>
-          <details><summary>Related research tools</summary><p><a href="#workspace/map">Science Results &amp; Analysis</a> · <a href="#history">Mission History</a> · <a href="#library">External Data Manager</a></p></details></section>
+          <details><summary data-i18n="html.index.textRelatedResearchTools">Related research tools</summary><p><a href="#workspace/map" data-i18n="html.index.textScienceResultsAnalysis">Science Results &amp; Analysis</a> · <a href="#history" data-i18n="html.index.textMissionHistory">Mission History</a> · <a href="#library" data-i18n="ui.libraryDownload.messageExternalDataManager">External Data Manager</a></p></details></section>
           <section id="science-workspace" class="view" hidden></section>
           <section id="library" class="view" hidden></section>
           <section id="downloads" class="view" hidden></section>
@@ -385,9 +385,9 @@
           <section id="settings" class="view" hidden>
             <div class="page-heading">
               <div>
-                <p class="eyebrow">ENGINE CONFIGURATION</p>
-                <h1>Settings &amp; diagnostics</h1>
-                <p class="subtitle">
+                <p class="eyebrow" data-i18n="html.index.textEngineConfiguration">ENGINE CONFIGURATION</p>
+                <h1 data-i18n="html.index.textSettingsDiagnostics">Settings &amp; diagnostics</h1>
+                <p class="subtitle" data-i18n="html.index.textChooseACategoryMostPreferencesApplyImmediately">
                   Choose a category. Most preferences apply immediately.
                 </p>
               </div>
@@ -397,17 +397,17 @@
         </div>
         <footer class="app-footer">
           <span>AEROSCIENCE <b>/</b> AIRBORNE RESEARCH</span
-          ><span>LOCAL-FIRST · NO CLOUD REQUIRED</span>
+          ><span data-i18n="html.index.textLocalFirstNoCloudRequired">LOCAL-FIRST · NO CLOUD REQUIRED</span>
         </footer>
       </main>
     </div>
     <dialog id="mission-detail">
       <div class="dialog-heading">
-        <h2>Mission detail</h2>
+        <h2 data-i18n="html.index.textMissionDetail">Mission detail</h2>
         <button
           id="close-detail"
           class="secondary"
-          aria-label="Close mission detail"
+          aria-label="Close mission detail" data-i18n-aria-label="html.index.textCloseMissionDetail"
         >
           ✕
         </button>

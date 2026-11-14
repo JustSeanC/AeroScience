@@ -1,6 +1,8 @@
+import {message as localizedCopy,setPresentationText} from './i18n.js';
+import {t as textForUI} from './i18n.js';
 const e = (tag, text) => {
   const n = document.createElement(tag);
-  if (text !== undefined) n.textContent = text;
+  if (text !== undefined) setPresentationText(n,text);
   return n;
 };
 export async function updateSettings(parent, api) {
@@ -8,14 +10,14 @@ export async function updateSettings(parent, api) {
     data = await api("/api/updates");
   section.className = "panel research-panel";
   section.append(
-    e("h2", "Updates"),
+    e("h2", localizedCopy("ui.applicationUpdates.messageUpdates")),
     e(
       "p",
-      `Current application: ${data.currentVersion}. Toolbar updates remain separate under MSFS Toolbar settings.`,
+      localizedCopy("ui.applicationUpdates.messageCurrentApplicationToolbarUpdatesRemainSeparate",{value1:(String(data.currentVersion))}),
     ),
     e(
       "p",
-      "Optional checks contact the official public GitHub Releases API at most once per day automatically. GitHub receives the request IP and application identification; no flight data are submitted. Updates are never executed automatically.",
+      localizedCopy("ui.applicationUpdates.messageOptionalChecksContactTheOfficialPublicGitHub"),
     ),
   );
   parent.append(section);
@@ -34,10 +36,10 @@ export async function updateSettings(parent, api) {
   }
   const status = e(
       "p",
-      `${data.message || "Not checked yet"} Last checked: ${data.lastCheckedUtc || "Never"}`,
+      localizedCopy("ui.applicationUpdates.messageLastChecked",{value1:(String(data.message || "Not checked yet")),value2:(String(data.lastCheckedUtc || "Never"))}),
     ),
-    save = e("button", "Save update preferences"),
-    check = e("button", "Check for Updates");
+    save = e("button", localizedCopy("ui.applicationUpdates.messageSaveUpdatePreferences")),
+    check = e("button", localizedCopy("ui.applicationUpdates.messageCheckForUpdates"));
   save.className=check.className="secondary";
   save.onclick = async () => {
     try {
@@ -45,19 +47,19 @@ export async function updateSettings(parent, api) {
         automatic: automatic.checked,
         includePrereleases: pre.checked,
       });
-      status.textContent = "Update preferences saved.";
+      setPresentationText(status,localizedCopy("ui.applicationUpdates.messageUpdatePreferencesSaved"));
     } catch (e) {
-      status.textContent = e.message;
+      setPresentationText(status,e.message);
     }
   };
   check.onclick = async () => {
     check.disabled = true;
     try {
       const r = await api("/api/updates/check", {});
-      status.textContent = `${r.message} Last checked: ${r.lastCheckedUtc}`;
+      setPresentationText(status,localizedCopy("ui.applicationUpdates.messageLastChecked",{value1:(String(r.message)),value2:(String(r.lastCheckedUtc))}));
       await notifyUpdates(api);
     } catch (e) {
-      status.textContent = e.message;
+      setPresentationText(status,e.message);
     } finally {
       check.disabled = false;
     }
@@ -83,10 +85,10 @@ export async function notifyUpdates(api) {
     banner.append(
       e(
         "strong",
-        `AeroScience ${data.available.version} is available (current ${data.currentVersion})`,
+        localizedCopy("ui.applicationUpdates.messageAeroScienceIsAvailableCurrent",{value1:(data.available.version),value2:(data.currentVersion)}),
       ),
     );
-    for (const title of ["View Release", "Download Update"]) {
+    for (const title of [textForUI("ui.applicationUpdates.messageViewRelease"), textForUI("ui.applicationUpdates.messageDownloadUpdate")]) {
       const a = e("a", title);
       a.href = data.available.releaseUrl;
       a.target = "_blank";
@@ -96,10 +98,10 @@ export async function notifyUpdates(api) {
     banner.append(
       e(
         "p",
-        "Download manually from the official release page. AeroScience will not run an installer automatically.",
+        localizedCopy("ui.applicationUpdates.messageDownloadManuallyFromTheOfficialReleasePage"),
       ),
     );
-    const later = e("button", "Remind Me Later");
+    const later = e("button", localizedCopy("ui.applicationUpdates.messageRemindMeLater"));
     later.className="secondary";
     later.onclick = async () => {
       await api("/api/updates/remind", {});

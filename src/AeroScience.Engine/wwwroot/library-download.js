@@ -1,8 +1,9 @@
+import {message as localizedCopy,setPresentationText} from './i18n.js';
 import {contextualHelp} from './contextual-help.js';
 import {openEmitImport} from './emit-library.js';
 import {libraryLocation} from './library-location.js';
 import {openOnlineAccess} from './online-access.js';
-import {t} from './i18n.js';
+import {t as textForUI,t} from './i18n.js';
 import {renderTransferProgress} from './transfer-progress.js';
 import { openHyperspectralImport } from "./hyperspectral-import.js";
 import { ResearchMap } from "./map.js";
@@ -44,12 +45,12 @@ export async function libraryDownload(parent, api, isDisposed = () => false, opt
   let remembered;
   try { remembered = JSON.parse(localStorage.getItem(memoryKey)); } catch {}
   const scienceTypes = [
-    ["terrain", "Bare-earth elevation / LiDAR-derived terrain", "usgs-3dep", "USGS 3DEP supplies numeric bare-earth elevation, sometimes LiDAR-derived. Raw LAS/LAZ point-cloud download is not supported."],
-    ["thermal", "Thermal imaging / surface temperature", "landsat", "Landsat Collection 2 Level-2 Surface Temperature: historical satellite surface temperature, not live airborne thermal camera footage."],
-    ["surface", "Surface elevation / buildings / vegetation", "copernicus", "Copernicus GLO-30 is a digital surface model containing vegetation and buildings, not bare-earth terrain or LiDAR point clouds."],
-    ["multispectral", "Multispectral imagery", "sentinel-2", "Sentinel-2 Level-2A blue, green, red and near-infrared reflectance, with the required scene-classification quality mask. Historical observations; cloudy or missing pixels stay unavailable."],
-    ["hyperspectral", "Hyperspectral imagery · AVIRIS", "nasa-classic", "NASA AVIRIS-Classic / AVIRIS-NG cover historical flightlines, not the whole Earth. Supported original reflectance pairs use authorized Earthdata Download & Import; original full flightlines, not map subsets."],
-    ["emit", "EMIT · development validation", "nasa-emit", "EMIT RFL002, uncertainty002 and MASK003 original import and exploration are available for development validation. Genuine NASA numerical acceptance is pending."],
+    ["terrain", textForUI("ui.libraryDownload.messageBareEarthElevationLiDARDerivedTerrain"), "usgs-3dep", textForUI("ui.libraryDownload.messageUSGS3DEPSuppliesNumericBareEarthElevationSometimes")],
+    ["thermal", textForUI("ui.libraryDownload.messageThermalImagingSurfaceTemperature"), "landsat", textForUI("ui.libraryDownload.messageLandsatCollection2Level2SurfaceTemperatureHistorical")],
+    ["surface", textForUI("ui.libraryDownload.messageSurfaceElevationBuildingsVegetation"), "copernicus", textForUI("ui.libraryDownload.messageCopernicusGLO30IsADigitalSurfaceModel")],
+    ["multispectral", textForUI("ui.libraryDownload.messageMultispectralImagery"), "sentinel-2", textForUI("ui.libraryDownload.messageSentinel2Level2ABlueGreenRedAndNearInfrared")],
+    ["hyperspectral", textForUI("ui.libraryDownload.messageHyperspectralImageryAVIRIS"), "nasa-classic", textForUI("ui.libraryDownload.messageNASAAVIRISClassicAVIRISNGCoverHistoricalFlightlines")],
+    ["emit", textForUI("ui.libraryDownload.messageEMITDevelopmentValidation"), "nasa-emit", textForUI("ui.libraryDownload.messageEMITRFL002Uncertainty002AndMASK003OriginalImport")],
   ];
   const cleanup = () => {
     stopped = true;
@@ -59,60 +60,60 @@ export async function libraryDownload(parent, api, isDisposed = () => false, opt
   };
   const heading = el("div", undefined, "page-heading");
   heading.append(
-    el("p", "EXTERNAL DATA MANAGER", "eyebrow"),
-    el("h1", "External Data Manager"),
-    el("h2", "Find & Download Data"),
+    el("p", localizedCopy("ui.libraryDownload.messageEXTERNALDATAMANAGER"), "eyebrow"),
+    el("h1", localizedCopy("ui.libraryDownload.messageExternalDataManager")),
+    el("h2", localizedCopy("ui.libraryDownload.messageFindDownloadData")),
     el(
       "p",
-      "Quick Download: choose an area and the science you need, find available datasets, then review and approve Download & Import. These are historical external datasets for future missions, not flight recordings. Nothing downloads during discovery.",
+      localizedCopy("ui.libraryDownload.messageQuickDownloadChooseAnAreaAndThe"),
     ),
   );
   parent.append(heading);contextualHelp(parent,'sources');
   await libraryLocation(parent,api,{stopped:()=>stopped||isDisposed()});if(stopped||isDisposed())return cleanup;
-  link(heading, "Retained collections", "#library");
-  link(heading, "Scientific access & privacy", "#settings/science");
+  link(heading, localizedCopy("ui.libraryDownload.messageRetainedCollections"), "#library");
+  link(heading, localizedCopy("ui.libraryDownload.messageScientificAccessPrivacy"), "#settings/science");
   const feedback = status(
     parent,
-    "Not searched — select a provider and geographic region. Online science consent is separate from basemaps.",
+    localizedCopy("ui.libraryDownload.messageNotSearchedSelectAProviderAnd"),
   );
   const form = el("section", undefined, "panel");
-  form.setAttribute("aria-label", "Scientific catalog controls");
+  setPresentationText(form,localizedCopy("ui.libraryDownload.messageScientificCatalogControls"),"aria-label");
   parent.append(form);
   const providers = await api("/api/science/library/providers");
   if (stopped || isDisposed()) return cleanup;
   const requestedScience = options.science || new URLSearchParams(location.hash.split("?")[1] || "").get("science");
   const initialScience = scienceTypes.some(t => t[0] === requestedScience) ? requestedScience : scienceTypes.some(t => t[0] === remembered?.science) ? remembered.science : "terrain";
-  const scienceChoice = select(form, "What scientific data do you need?", scienceTypes.map(t => [t[0], t[1]]), initialScience);
+  const scienceChoice = select(form, localizedCopy("ui.libraryDownload.messageWhatScientificDataDoYouNeed"), scienceTypes.map(t => [t[0], t[1]]), initialScience);
   const scienceDescription = el("p");form.append(scienceDescription);
-  const providerDetails = disclosure(form, "Choose a specific provider");
-  const category = select(providerDetails, "Data family", [["all", "Terrain, thermal & multispectral"], ["hyperspectral", "Hyperspectral · NASA"]], "all");
+  const providerDetails = disclosure(form, localizedCopy("ui.libraryDownload.messageChooseASpecificProvider"));
+  const category = select(providerDetails, localizedCopy("ui.libraryDownload.messageDataFamily"), [["all", localizedCopy("ui.libraryDownload.messageTerrainThermalMultispectral")], ["hyperspectral", localizedCopy("ui.libraryDownload.messageHyperspectralNASA")]], "all");
   const provider = select(
     providerDetails,
-    "Scientific provider / product",
+    localizedCopy("ui.libraryDownload.messageScientificProviderProduct"),
     providers.map((p) => [p.id, `${p.name} · ${p.product}`]),
     "usgs-3dep",
   );
   const details = el("p");
   providerDetails.append(details);
-  const ordering = select(form, "Find data ordered by", [["latest", "Latest suitable"], ["oldest", "Oldest first"], ["cloud", "Lowest cloud cover"], ["browse", "Browse all matching results"]], "latest");
-  const dateScope = select(form, "Observation dates", [["recent", "Recent 12 months"], ["previous", "Previous 12 months"], ["archive", "All observation dates · NASA archive"], ["custom", "Custom dates (advanced)"]], "recent");
+  const ordering = select(form, localizedCopy("ui.libraryDownload.messageFindDataOrderedBy"), [["latest", localizedCopy("ui.libraryDownload.messageLatestSuitable")], ["oldest", localizedCopy("ui.libraryDownload.messageOldestFirst")], ["cloud", localizedCopy("ui.libraryDownload.messageLowestCloudCover")], ["browse", localizedCopy("ui.libraryDownload.messageBrowseAllMatchingResults")]], "latest");
+  const dateScope = select(form, localizedCopy("ui.libraryDownload.messageObservationDates"), [["recent", localizedCopy("ui.libraryDownload.messageRecent12Months")], ["previous", localizedCopy("ui.libraryDownload.messagePrevious12Months")], ["archive", localizedCopy("ui.libraryDownload.messageAllObservationDatesNASAArchive")], ["custom", localizedCopy("ui.libraryDownload.messageCustomDatesAdvanced")]], "recent");
   const dateSummary = el("p");form.append(dateSummary);
   const earthdataBox = el("section");
-  earthdataBox.setAttribute("aria-label", "NASA Earthdata connection");
+  setPresentationText(earthdataBox,localizedCopy("ui.libraryDownload.messageNASAEarthdataConnection"),"aria-label");
   const earthdataText = el("p");
-  earthdataBox.append(el("h2", "NASA Earthdata"), earthdataText);
+  earthdataBox.append(el("h2", localizedCopy("ui.libraryDownload.messageNASAEarthdata")), earthdataText);
   form.append(earthdataBox);
-  const connectEarthdata = button(earthdataBox, "Connect Earthdata on this PC", () => api("/api/desktop/earthdata-connect", {}));
-  const earthdataManagement = disclosure(earthdataBox, "Manage Earthdata connection");
-  button(earthdataManagement, "Refresh Earthdata connection", refreshEarthdata);
-  const disconnectEarthdata = button(earthdataManagement, "Disconnect Earthdata on this PC", async () => { await api("/api/science/earthdata/disconnect", {}); await refreshEarthdata(); });
+  const connectEarthdata = button(earthdataBox, localizedCopy("ui.libraryDownload.messageConnectEarthdataOnThisPC"), () => api("/api/desktop/earthdata-connect", {}));
+  const earthdataManagement = disclosure(earthdataBox, localizedCopy("ui.libraryDownload.messageManageEarthdataConnection"));
+  button(earthdataManagement, localizedCopy("ui.libraryDownload.messageRefreshEarthdataConnection"), refreshEarthdata);
+  const disconnectEarthdata = button(earthdataManagement, localizedCopy("ui.libraryDownload.messageDisconnectEarthdataOnThisPC"), async () => { await api("/api/science/earthdata/disconnect", {}); await refreshEarthdata(); });
   async function refreshEarthdata() {
     const connection = await api("/api/science/earthdata");
     if (stopped || isDisposed()) return;
-    earthdataText.textContent = `${connection.connected ? "Credential saved" : "Not connected"}. ${connection.message} On paired devices, complete connection management on the companion PC. NASA originals can require gigabytes; review the exact full-file scope before approval.`;
+    setPresentationText(earthdataText,localizedCopy("ui.libraryDownload.messageOnPairedDevicesCompleteConnection",{value1:(String(connection.connected ? "Credential saved" : "Not connected")),value2:(String(connection.message))}));
     connectEarthdata.hidden=connection.connected;disconnectEarthdata.hidden=!connection.connected;
   }
-  const advancedFilters = disclosure(form, "Advanced discovery filters");
+  const advancedFilters = disclosure(form, localizedCopy("ui.libraryDownload.messageAdvancedDiscoveryFilters"));
   const filters = el("div", undefined, "workspace-controls");
   advancedFilters.append(filters);
   function input(parent, label, value, type = "text") {
@@ -120,21 +121,21 @@ export async function libraryDownload(parent, api, isDisposed = () => false, opt
       i = el("input");
     i.type = type;
     i.value = value;
-    i.setAttribute("aria-label", label);
+    setPresentationText(i,label,"aria-label");
     wrap.append(i);
     parent.append(wrap);
     return i;
   }
-  const from = input(filters, "Scene date from (UTC)", "2024-01-01", "date"),
+  const from = input(filters, localizedCopy("ui.libraryDownload.messageSceneDateFromUTC"), "2024-01-01", "date"),
     to = input(
       filters,
-      "Scene date to (UTC)",
+      localizedCopy("ui.libraryDownload.messageSceneDateToUTC"),
       new Date().toISOString().slice(0, 10),
       "date",
     ),
-    cloud = input(filters, "Maximum scene cloud (%)", "30", "number");
-  const sceneFilter = input(filters, "Scene / flightline identifier contains", "");
-  const dateHint = el("p", "NASA defaults to all observation dates. Leave both dates empty for the full archive, or enter both to search a range of at most ten years.");
+    cloud = input(filters, localizedCopy("ui.libraryDownload.messageMaximumSceneCloud"), "30", "number");
+  const sceneFilter = input(filters, localizedCopy("ui.libraryDownload.messageSceneFlightlineIdentifierContains"), "");
+  const dateHint = el("p", localizedCopy("ui.libraryDownload.messageNASADefaultsToAllObservationDatesLeave"));
   advancedFilters.append(dateHint);
   // Once edited, dates belong to the pilot, including an explicitly cleared range.
   from.oninput = to.oninput = () => { userDates = true; };
@@ -142,7 +143,7 @@ export async function libraryDownload(parent, api, isDisposed = () => false, opt
   cloud.max = 100;
   const cached = input(
     filters,
-    "Use cached catalog / boundaries only",
+    localizedCopy("ui.libraryDownload.messageUseCachedCatalogBoundariesOnly"),
     "",
     "checkbox",
   );
@@ -150,17 +151,17 @@ export async function libraryDownload(parent, api, isDisposed = () => false, opt
   const measurements = el("p");
   form.append(measurements);
   const selection = el("section", undefined, "panel");
-  selection.setAttribute("aria-label", "Geographic selection");
-  selection.append(el("h2", "Select a geographic area"));
+  setPresentationText(selection,localizedCopy("ui.libraryDownload.messageGeographicSelection"),"aria-label");
+  selection.append(el("h2", localizedCopy("ui.libraryDownload.messageSelectAGeographicArea")));
   parent.append(selection);
-  selection.append(el("p", "Choose the area you want to study. Search a city or airport on the map, draw a rectangle, select a small area around a map click, or choose an official named boundary. Selected outlines appear in gold; they are not proof of data availability."));
-  const advancedArea = disclosure(selection, "Advanced area selection");
+  selection.append(el("p", localizedCopy("ui.libraryDownload.messageChooseTheAreaYouWantToStudy")));
+  const advancedArea = disclosure(selection, localizedCopy("ui.libraryDownload.messageAdvancedAreaSelection"));
   const coords = el("div", undefined, "workspace-controls");
   advancedArea.append(coords);
-  const west = input(coords, "West longitude", "-75.01", "number"),
-    south = input(coords, "South latitude", "39.99", "number"),
-    east = input(coords, "East longitude", "-74.99", "number"),
-    north = input(coords, "North latitude", "40.01", "number");
+  const west = input(coords, localizedCopy("ui.libraryDownload.messageWestLongitude"), "-75.01", "number"),
+    south = input(coords, localizedCopy("ui.libraryDownload.messageSouthLatitude"), "39.99", "number"),
+    east = input(coords, localizedCopy("ui.libraryDownload.messageEastLongitude"), "-74.99", "number"),
+    north = input(coords, localizedCopy("ui.libraryDownload.messageNorthLatitude"), "40.01", "number");
   for (const i of [west, south, east, north]) i.step = "any";
   function bounds() {
     const a = {
@@ -180,7 +181,7 @@ export async function libraryDownload(parent, api, isDisposed = () => false, opt
       a.north > 84
     )
       throw Error(
-        "Enter ordered WGS84 bounds within 180°W–180°E and 80°S–84°N. Split dateline-crossing selections.",
+        textForUI("ui.libraryDownload.messageEnterOrderedWGS84BoundsWithin180W180EAnd"),
       );
     return a;
   }
@@ -190,24 +191,24 @@ export async function libraryDownload(parent, api, isDisposed = () => false, opt
     east.value = a.east;
     north.value = a.north;
   }
-  const selectionText = status(selection, "No download area selected.");
+  const selectionText = status(selection, localizedCopy("ui.libraryDownload.messageNoDownloadAreaSelected"));
   const actions = el("div", undefined, "action-row");
   selection.append(actions);
-  button(advancedArea, "Use bounding box", () => {
+  button(advancedArea, localizedCopy("ui.libraryDownload.messageUseBoundingBox"), () => {
     polygon = regionGeometry = null;
     areas = [bounds()];
     changed();
     fitSelection();
   });
-  button(advancedArea, "Add bounding box", () => {
+  button(advancedArea, localizedCopy("ui.libraryDownload.messageAddBoundingBox"), () => {
     polygon = regionGeometry = null;
     if (areas.length >= 256)
-      throw Error("Use no more than 256 explicitly selected boxes.");
+      throw Error(textForUI("ui.libraryDownload.messageUseNoMoreThan256ExplicitlySelected"));
     areas.push(bounds());
     changed();
     fitSelection();
   });
-  button(actions, "Search this map area", () => {
+  button(actions, localizedCopy("ui.libraryDownload.messageSearchThisMapArea"), () => {
     const b = map.map.getBounds();
     setBounds({
       west: b.getWest(),
@@ -220,19 +221,19 @@ export async function libraryDownload(parent, api, isDisposed = () => false, opt
     changed();
     return search();
   });
-  button(actions, "Clear selection", () => {
+  button(actions, localizedCopy("ui.libraryDownload.messageClearSelection"), () => {
     areas = [];
     polygon = regionGeometry = null;
     changed();
   });
   const mode = select(
     advancedArea,
-    "Map selection tool",
+    localizedCopy("ui.libraryDownload.messageMapSelectionTool"),
     [
-      ["pan", "Pan / inspect"],
-      ["cell", "Select one small area around a map click"],
-      ["cells", "Add individual source cells"],
-      ["polygon", "Draw polygon vertices"],
+      ["pan", localizedCopy("ui.libraryDownload.messagePanInspect")],
+      ["cell", localizedCopy("ui.libraryDownload.messageSelectOneSmallAreaAroundAMap")],
+      ["cells", localizedCopy("ui.libraryDownload.messageAddIndividualSourceCells")],
+      ["polygon", localizedCopy("ui.libraryDownload.messageDrawPolygonVertices")],
     ],
     "pan",
   );
@@ -245,7 +246,7 @@ export async function libraryDownload(parent, api, isDisposed = () => false, opt
       regionGeometry = null;
       map.draft(polygon, true);
       preview = null;
-      selectionText.textContent = `${polygon.length} polygon vertices; choose Finish polygon to validate.`;
+      setPresentationText(selectionText,localizedCopy("ui.libraryDownload.messagePolygonVerticesChooseFinishPolygonTo",{value1:(String(polygon.length))}));
       return;
     }
     const a = {
@@ -262,40 +263,40 @@ export async function libraryDownload(parent, api, isDisposed = () => false, opt
   map.map.setView([40, -75], 10);
   mode.onchange = () =>
     map.interaction(mode.value === "pan" ? null : mode.value);
-  button(actions, "Select a small area", () => {mode.value="cell";mode.onchange();selectionText.textContent="Click the map to select one small area. This does not search or download.";});
+  button(actions, localizedCopy("ui.libraryDownload.messageSelectASmallArea"), () => {mode.value="cell";mode.onchange();setPresentationText(selectionText,localizedCopy("ui.libraryDownload.messageClickTheMapToSelectOneSmall"));});
   const L = map.L,
     layers = {};
   for (const name of ["retained", "remote", "selected", "jobs", "parts"])
     layers[name] = L.layerGroup().addTo(map.map);
   for(const [key,name,description] of [
-    ['retained','Library retained sources','Verified retained-source outlines. Original acquisition dates and per-pixel quality remain separate; these are not in-flight observations.'],
-    ['remote','Library provider catalog','Actually discovered provider footprints, with search as-of dates in the catalog. Outlines do not guarantee valid scientific pixels.'],
-    ['selected','Library geographic selection','Requested source/preparation windows; hiding these does not change the approved selection.'],
-    ['jobs','Library approved jobs','Persisted queued/download work. Incomplete staging is not usable source data.'],
-    ['parts','Library bounded subdivisions','Reviewable geographic work subdivisions, not satellite pixels or verified coverage.']
-  ]) map.layers.addOverlay({id:'library-'+key,name,layer:layers[key],group:'Science',description});
+    ['retained',textForUI("ui.libraryDownload.messageLibraryRetainedSources"),textForUI("ui.libraryDownload.messageVerifiedRetainedSourceOutlinesOriginalAcquisitionDatesAnd")],
+    ['remote',textForUI("ui.libraryDownload.messageLibraryProviderCatalog"),textForUI("ui.libraryDownload.messageActuallyDiscoveredProviderFootprintsWithSearchAsOf")],
+    ['selected',textForUI("ui.libraryDownload.messageLibraryGeographicSelection"),textForUI("ui.libraryDownload.messageRequestedSourcePreparationWindowsHidingTheseDoesNot")],
+    ['jobs',textForUI("ui.libraryDownload.messageLibraryApprovedJobs"),textForUI("ui.libraryDownload.messagePersistedQueuedDownloadWorkIncompleteStagingIsNot")],
+    ['parts',textForUI("ui.libraryDownload.messageLibraryBoundedSubdivisions"),textForUI("ui.libraryDownload.messageReviewableGeographicWorkSubdivisionsNotSatellitePixels")]
+  ]) map.layers.addOverlay({id:'library-'+key,name,layer:layers[key],group:"Science",description});
   const legend = el("ul", undefined, "library-legend");
-  legend.setAttribute("aria-label", "Scientific coverage legend");
+  setPresentationText(legend,localizedCopy("ui.libraryDownload.messageScientificCoverageLegend"),"aria-label");
   for (const [name, text, color] of [
     [
       "retained",
-      "Downloaded locally: verified retained numeric footprint",
+      textForUI("ui.libraryDownload.messageDownloadedLocallyVerifiedRetainedNumericFootprint"),
       "#45d6bf",
     ],
     [
       "remote",
-      "Available from provider: catalog outline, QA not guaranteed",
+      textForUI("ui.libraryDownload.messageAvailableFromProviderCatalogOutlineQANot"),
       "#72aaff",
     ],
-    ["selected", "Selected: requested numeric windows", "#ffd166"],
+    ["selected", textForUI("ui.libraryDownload.messageSelectedRequestedNumericWindows"), "#ffd166"],
     [
       "jobs",
-      "Queued / downloading: approved work; failed work shown red",
+      textForUI("ui.libraryDownload.messageQueuedDownloadingApprovedWorkFailedWork"),
       "#c09bff",
     ],
     [
       "unsearched",
-      "Not searched: no provider availability established",
+      textForUI("ui.libraryDownload.messageNotSearchedNoProviderAvailabilityEstablished"),
       "#8899aa",
     ],
   ]) {
@@ -307,18 +308,15 @@ export async function libraryDownload(parent, api, isDisposed = () => false, opt
   parent.append(legend);
   const polygonDetails = disclosure(
     advancedArea,
-    "Accessible polygon coordinates",
+    localizedCopy("ui.libraryDownload.messageAccessiblePolygonCoordinates"),
   );
   const vertices = el("textarea");
-  vertices.setAttribute(
-    "aria-label",
-    "Polygon vertices (latitude, longitude per line)",
-  );
+  setPresentationText(vertices,localizedCopy("ui.libraryDownload.messagePolygonVerticesLatitudeLongitudePerLine"),"aria-label");
   vertices.rows = 5;
   polygonDetails.append(vertices);
   function finishPolygon() {
     if (!polygon || polygon.length < 3)
-      throw Error("Add at least three polygon vertices.");
+      throw Error(textForUI("ui.libraryDownload.messageAddAtLeastThreePolygonVertices"));
     const a = {
       west: Math.min(...polygon.map((p) => p.longitude)),
       south: Math.min(...polygon.map((p) => p.latitude)),
@@ -333,24 +331,24 @@ export async function libraryDownload(parent, api, isDisposed = () => false, opt
     changed();
     fitSelection();
   }
-  button(polygonDetails, "Apply polygon coordinates", () => {
+  button(polygonDetails, localizedCopy("ui.libraryDownload.messageApplyPolygonCoordinates"), () => {
     polygon = vertices.value
       .trim()
       .split("\n")
       .map((line) => {
         const v = line.split(",").map(Number);
         if (v.length !== 2 || v.some((n) => !Number.isFinite(n)))
-          throw Error("Use one finite latitude, longitude pair per line.");
+          throw Error(textForUI("ui.libraryDownload.messageUseOneFiniteLatitudeLongitudePairPer"));
         return { latitude: v[0], longitude: v[1] };
       });
     regionGeometry = null;
     finishPolygon();
   });
-  button(actions, "Finish polygon", finishPolygon);
-  button(actions, "Draw rectangle", () => {
+  button(actions, localizedCopy("ui.libraryDownload.messageFinishPolygon"), finishPolygon);
+  button(actions, localizedCopy("ui.libraryDownload.messageDrawRectangle"), () => {
     const draw = new L.Draw.Rectangle(map.map);
     draw.enable();
-    selectionText.textContent="Draw a rectangle — drag across the map to choose an area. Discovery and downloading remain separate actions.";
+    setPresentationText(selectionText,localizedCopy("ui.libraryDownload.messageDrawARectangleDragAcrossThe"));
   });
   map.map.on("draw:created", (event) => {
     const b = event.layer.getBounds();
@@ -364,36 +362,36 @@ export async function libraryDownload(parent, api, isDisposed = () => false, opt
     polygon = regionGeometry = null;
     changed();
   });
-  const regional = disclosure(selection, "Choose a state or county");
+  const regional = disclosure(selection, localizedCopy("ui.libraryDownload.messageChooseAStateOrCounty"));
   regional.append(
     el(
       "p",
-      "Choose official Census names; county options depend on the selected state. Generalized ACS2024 1:20M cartographic outlines are not legal survey boundaries and do not guarantee provider coverage.",
+      localizedCopy("ui.libraryDownload.messageChooseOfficialCensusNamesCountyOptionsDepend"),
     ),
   );
-  const namesStatus = status(regional, "Load official names with scientific online consent, or use previously cached names offline.");
-  const namedState = select(regional, "State name", [["", "Select a state"]], "");
-  const namedCounty = select(regional, "County name", [["", "Entire selected state"]], "");
-  button(regional, "Load state names", async () => {
+  const namesStatus = status(regional, localizedCopy("ui.libraryDownload.messageLoadOfficialNamesWithScientificOnlineConsent"));
+  const namedState = select(regional, localizedCopy("ui.libraryDownload.messageStateName"), [["", localizedCopy("ui.libraryDownload.messageSelectAState")]], "");
+  const namedCounty = select(regional, localizedCopy("ui.libraryDownload.messageCountyName"), [["", localizedCopy("ui.libraryDownload.messageEntireSelectedState")]], "");
+  button(regional, localizedCopy("ui.libraryDownload.messageLoadStateNames"), async () => {
     const own=++regionEpoch;const r=await api("/api/science/library/regions/names",{cachedOnly:cached.checked});
     if(stopped||isDisposed()||own!==regionEpoch)return;
-    namedState.replaceChildren(new Option("Select a state", ""),...r.items.map(i=>new Option(i.name,i.code)));
-    namesStatus.textContent=`Official Census states · ${r.cached?"Cached":"Retrieved"} ${dateTime(r.asOfUtc)}. Select a state to load its counties.`;
+    namedState.replaceChildren(new Option(textForUI("ui.libraryDownload.messageSelectAState"), ""),...r.items.map(i=>new Option(i.name,i.code)));
+    setPresentationText(namesStatus,localizedCopy("ui.libraryDownload.messageOfficialCensusStatesSelectA",{value1:(String(r.cached?"Cached":"Retrieved")),value2:(String(dateTime(r.asOfUtc)))}));
   });
   namedState.onchange=async()=>{
-    const own=++regionEpoch;state.value=namedState.value;county.value="";namedCounty.replaceChildren(new Option("Entire selected state", ""));
+    const own=++regionEpoch;state.value=namedState.value;county.value="";namedCounty.replaceChildren(new Option(textForUI("ui.libraryDownload.messageEntireSelectedState"), ""));
     if(!state.value)return;
     try{const r=await api("/api/science/library/regions/names",{stateFips:state.value,cachedOnly:cached.checked});
       if(stopped||isDisposed()||own!==regionEpoch)return;
       namedCounty.append(...r.items.map(i=>new Option(i.name,i.code)));
-      namesStatus.textContent=`${namedState.selectedOptions[0].textContent} · ${r.items.length} counties · ${r.cached?"Cached":"Retrieved"} ${dateTime(r.asOfUtc)}. Review the name, then apply its boundary.`;
-    }catch(error){if(own===regionEpoch)namesStatus.textContent=error.message;}
+      setPresentationText(namesStatus,localizedCopy("ui.libraryDownload.messageCountiesReviewThe",{value1:(String(namedState.selectedOptions[0].textContent)),value2:(String(r.items.length)),value3:(String(r.cached?"Cached":"Retrieved")),value4:(String(dateTime(r.asOfUtc)))}));
+    }catch(error){if(own===regionEpoch)setPresentationText(namesStatus,error.message);}
   };
   namedCounty.onchange=()=>{county.value=namedCounty.value;};
-  const fips = disclosure(regional, "Advanced Census identifiers");
-  const state = input(fips, "State FIPS (2 digits)", ""),
-    county = input(fips, "County FIPS (optional, 3 digits)", "");
-  button(regional, "Load authoritative boundary", async () => {
+  const fips = disclosure(regional, localizedCopy("ui.libraryDownload.messageAdvancedCensusIdentifiers"));
+  const state = input(fips, localizedCopy("ui.libraryDownload.messageStateFIPS2Digits"), ""),
+    county = input(fips, localizedCopy("ui.libraryDownload.messageCountyFIPSOptional3Digits"), "");
+  button(regional, localizedCopy("ui.libraryDownload.messageLoadAuthoritativeBoundary"), async () => {
     const r = await api("/api/science/library/regions", {
       stateFips: state.value.trim(),
       countyFips: county.value.trim() || null,
@@ -410,18 +408,18 @@ export async function libraryDownload(parent, api, isDisposed = () => false, opt
       style: { color: "#ffd166", fillOpacity: 0.12 },
     }).addTo(layers.selected);
     fitSelection();
-    selectionText.textContent = `${r.name} · ${r.resolution} · ${r.cached ? "Cached" : "Retrieved"} ${dateTime(r.asOfUtc)}. Preview assesses the actual bounded workload.`;
+    setPresentationText(selectionText,localizedCopy("ui.libraryDownload.messagePreviewAssessesThe",{value1:(String(r.name)),value2:(String(r.resolution)),value3:(String(r.cached ? "Cached" : "Retrieved")),value4:(String(dateTime(r.asOfUtc)))}));
   });
   const chunks = el("div", undefined, "library-chunks");
   selection.append(chunks);
-  button(actions, "Divide into bounded regions", () => {
+  button(actions, localizedCopy("ui.libraryDownload.messageDivideIntoBoundedRegions"), () => {
     const a = bounds();
     const count=Math.ceil(a.east-a.west)*Math.ceil(a.north-a.south);
-    if(count>256)throw Error("This selection is too large to divide safely here. Draw a smaller study area; no work has been approved.");
+    if(count>256)throw Error(textForUI("ui.libraryDownload.messageThisSelectionIsTooLargeToDivide"));
     chunks.replaceChildren(
       el(
         "p",
-        `${count} proposed parts, at most 1° per side and up to 2,601 bounded work windows per scene. Transfer size is Unknown until exact source preview. Choose and inspect one part; nothing is approved or queued automatically.`,
+        localizedCopy("ui.libraryDownload.messageProposedPartsAtMost1Per",{value1:(String(count))}),
       ),
     );
     const parts=[];
@@ -435,40 +433,40 @@ export async function libraryDownload(parent, api, isDisposed = () => false, opt
         };
         parts.push(part);
       }
-    const pick=select(chunks,"Proposed region part",parts.map((_,i)=>[String(i),`Part ${i+1} of ${parts.length}`]),"0");
+    const pick=select(chunks,localizedCopy("ui.libraryDownload.messageProposedRegionPart"),parts.map((_,i)=>[String(i),textForUI("ui.libraryDownload.messagePartOf",{value1:(String(i+1)),value2:(String(parts.length))})]),"0");
     const inspect=status(chunks);
-    pick.onchange=()=>{const part=parts[Number(pick.value)];layers.parts.clearLayers();shape(part,"#ffffff",layers.parts,"Proposed part — not approved");inspect.textContent=`Proposed part ${Number(pick.value)+1}: ${part.south.toFixed(3)}–${part.north.toFixed(3)}° latitude, ${part.west.toFixed(3)}–${part.east.toFixed(3)}° longitude. Search and review exact work before approval.`;};
+    pick.onchange=()=>{const part=parts[Number(pick.value)];layers.parts.clearLayers();shape(part,"#ffffff",layers.parts,localizedCopy("ui.libraryDownload.messageProposedPartNotApproved"));setPresentationText(inspect,localizedCopy("ui.libraryDownload.messageProposedPartLatitude",{value1:(String(Number(pick.value)+1)),value2:(String(part.south.toFixed(3))),value3:(String(part.north.toFixed(3))),value4:(String(part.west.toFixed(3))),value5:(String(part.east.toFixed(3)))}));};
     pick.onchange();
-    button(chunks,"Use selected part",()=>{const part=parts[Number(pick.value)];areas=[part];setBounds(part);polygon=regionGeometry=null;layers.parts.clearLayers();changed();fitSelection();});
+    button(chunks,localizedCopy("ui.libraryDownload.messageUseSelectedPart"),()=>{const part=parts[Number(pick.value)];areas=[part];setBounds(part);polygon=regionGeometry=null;layers.parts.clearLayers();changed();fitSelection();});
   });
   const searchTools = el("div", undefined, "action-row");
   form.append(searchTools);
   const catalogList = el("section", undefined, "panel library-catalog-results");
-  catalogList.setAttribute("aria-label", "Provider catalog results");
-  catalogList.append(el("h2", "Provider catalog — not searched"));
+  setPresentationText(catalogList,localizedCopy("ui.libraryDownload.messageProviderCatalogResults"),"aria-label");
+  catalogList.append(el("h2", localizedCopy("ui.libraryDownload.messageProviderCatalogNotSearched")));
   parent.append(catalogList);
-  const retainedPanel=el("section",undefined,"panel");retainedPanel.setAttribute("aria-label","Retained coverage inventory");
-  retainedPanel.append(el("h2","Existing data in your selected area"));const localStatus=status(retainedPanel,"Select an area to inspect retained candidates.");
+  const retainedPanel=el("section",undefined,"panel");setPresentationText(retainedPanel,localizedCopy("ui.libraryDownload.messageRetainedCoverageInventory"),"aria-label");
+  retainedPanel.append(el("h2",localizedCopy("ui.libraryDownload.messageExistingDataInYourSelectedArea")));const localStatus=status(retainedPanel,localizedCopy("ui.libraryDownload.messageSelectAnAreaToInspectRetainedCandidates"));
   const localNavigation=el("div",undefined,"action-row");retainedPanel.append(localNavigation);parent.append(retainedPanel);
-  button(localNavigation,"Refresh retained coverage",()=>loadLocal(0,null));
-  const firstLocal=button(localNavigation,"First retained page",()=>loadLocal(0,null));
-  const nextLocal=button(localNavigation,"More retained coverage",()=>loadLocal(Number(nextLocal.dataset.next),localThrough));firstLocal.disabled=nextLocal.disabled=true;
+  button(localNavigation,localizedCopy("ui.libraryDownload.messageRefreshRetainedCoverage"),()=>loadLocal(0,null));
+  const firstLocal=button(localNavigation,localizedCopy("ui.libraryDownload.messageFirstRetainedPage"),()=>loadLocal(0,null));
+  const nextLocal=button(localNavigation,localizedCopy("ui.libraryDownload.messageMoreRetainedCoverage"),()=>loadLocal(Number(nextLocal.dataset.next),localThrough));firstLocal.disabled=nextLocal.disabled=true;
   async function loadLocal(after=localAfter,through=after?localThrough:null){
     const own=++localEpoch;localAfter=after;localThrough=through;
-    if(!areas.length){localSources=[];layers.retained.clearLayers();localStatus.textContent="Select an area to inspect retained candidates; the complete inventory remains available in Manage Downloaded Data.";firstLocal.disabled=nextLocal.disabled=true;return;}
-    let area;try{area=selectedBounds();}catch(error){localStatus.textContent=error.message;return;}
+    if(!areas.length){localSources=[];layers.retained.clearLayers();setPresentationText(localStatus,localizedCopy("ui.libraryDownload.messageSelectAnAreaToInspectRetainedCandidatesdd15c8de"));firstLocal.disabled=nextLocal.disabled=true;return;}
+    let area;try{area=selectedBounds();}catch(error){setPresentationText(localStatus,error.message);return;}
     const params=new URLSearchParams({...area,after,limit:50});if(through!=null)params.set('through',through);
     const page=await api('/api/science/library/local/page?'+params);
     if(stopped||isDisposed()||own!==localEpoch)return;
     localThrough=page.through;localSources=page.items;
     firstLocal.disabled=after===0;nextLocal.disabled=page.next==null;nextLocal.dataset.next=page.next??'';
-    localStatus.textContent=`${page.items.length} retained candidates on this page · ${page.total} intersect the search bounds. Page size is not a Library capacity limit. ${polygon||regionGeometry?'Search bounds enclose the selected shape; some candidates lie outside it. ':''}Originals, compatibility and actual valid pixels are checked at preview/sampling, not established by these outlines.`;
+    setPresentationText(localStatus,localizedCopy("ui.libraryDownload.messageRetainedCandidatesOnThisPage",{value1:(String(page.items.length)),value2:(String(page.total)),value3:(String(polygon||regionGeometry?'Search bounds enclose the selected shape; some candidates lie outside it. ':''))}));
     const key=JSON.stringify([area,page.items]);if(key===localSignature)return;localSignature=key;layers.retained.clearLayers();
-    for(const source of page.items)for(const ring of source.bounds||[])L.polygon(ring.map(p=>[p.latitude,p.longitude]),{color:source.filesAvailable?'#45d6bf':'#ff8899',fillOpacity:.08}).bindTooltip(el('span',`${source.filesAvailable?'Retained candidate':'Unavailable'} · ${source.manifest.sceneId} · integrity, compatibility and pixel QA remain to be checked`)).addTo(layers.retained);
+    for(const source of page.items)for(const ring of source.bounds||[])L.polygon(ring.map(p=>[p.latitude,p.longitude]),{color:source.filesAvailable?'#45d6bf':'#ff8899',fillOpacity:.08}).bindTooltip(el('span',localizedCopy("ui.libraryDownload.messageIntegrityCompatibilityAndPixel",{value1:(String(source.filesAvailable?'Retained candidate':'Unavailable')),value2:(String(source.manifest.sceneId))}))).addTo(layers.retained);
   }
 
   const previewBox = el("section", undefined, "panel");
-  previewBox.setAttribute("aria-label", "Download preview");
+  setPresentationText(previewBox,localizedCopy("ui.libraryDownload.messageDownloadPreview"),"aria-label");
   parent.append(previewBox);
   function shape(area, color, group, text) {
     return L.rectangle(
@@ -484,25 +482,25 @@ export async function libraryDownload(parent, api, isDisposed = () => false, opt
   function changed() {
     epoch++;
     results=[];chosen.clear();layers.remote.clearLayers();
-    catalogList.replaceChildren(el("h2", "Provider catalog — not searched"), el("p", "Area changed. Find available data for this selection."));
-    feedback.textContent="Not searched — the selected outline is a request area, not scientific data availability.";
+    catalogList.replaceChildren(el("h2", localizedCopy("ui.libraryDownload.messageProviderCatalogNotSearched")), el("p", localizedCopy("ui.libraryDownload.messageAreaChangedFindAvailableDataForThis")));
+    setPresentationText(feedback,localizedCopy("ui.libraryDownload.messageNotSearchedTheSelectedOutlineIs"));
     preview = null;
     previewBox.replaceChildren(
-      el("h2", "Download preview"),
+      el("h2", localizedCopy("ui.libraryDownload.messageDownloadPreview")),
       el(
         "p",
-        "Selection changed. Preview and explicit approval are required before downloading.",
+        localizedCopy("ui.libraryDownload.messageSelectionChangedPreviewAndExplicitApprovalAre"),
       ),
     );
-    selectionText.textContent = `${areas.length} selected ${areas.length===1?'area':'areas'}${polygon ? " · polygon clipping" : ""}${regionGeometry ? " · authoritative region" : ""}. Numeric source cells are bounded geographic windows, not native pixels.${polygon||regionGeometry?" The provider search uses enclosing bounds; edge windows may include pixels outside the selected shape. Review the exact work windows before approval.":""}`;
+    setPresentationText(selectionText,localizedCopy("ui.libraryDownload.messageSelectedNumericSourceCellsAre",{value1:(String(areas.length)),value2:(String(areas.length===1?'area':'areas')),value3:(String(polygon ? " · polygon clipping" : "")),value4:(String(regionGeometry ? " · authoritative region" : "")),value5:(String(polygon||regionGeometry?" The provider search uses enclosing bounds; edge windows may include pixels outside the selected shape. Review the exact work windows before approval.":""))}));
     layers.selected.clearLayers();
     for (const a of areas)
-      shape(a, "#ffd166", layers.selected, "Selected numeric window");
+      shape(a, "#ffd166", layers.selected, localizedCopy("ui.libraryDownload.messageSelectedNumericWindow"));
     if (polygon) map.draft(polygon, true);
     else map.draft([]);
     selection.dataset.bounds=JSON.stringify(areas);
     remember();
-    loadLocal(0,null).catch(error=>{if(!stopped)localStatus.textContent="Retained coverage unavailable: "+error.message;});
+    loadLocal(0,null).catch(error=>{if(!stopped)setPresentationText(localStatus,localizedCopy("ui.libraryDownload.messageRetainedCoverageUnavailable",{value1:(String(error.message))}));});
   }
   function remember() {
     // Store one explicit rectangle only. Never restore a polygon as its broader box,
@@ -510,9 +508,9 @@ export async function libraryDownload(parent, api, isDisposed = () => false, opt
     try {localStorage.setItem(memoryKey,JSON.stringify({science:scienceChoice.value,area:!polygon&&!regionGeometry&&areas.length===1?areas[0]:null}));}catch{}
   }
   function selectedBounds() {
-    if(!areas.length)throw Error("Choose an area first: draw a rectangle, select a small map area, choose a named boundary, or apply coordinates in Advanced area selection.");
+    if(!areas.length)throw Error(textForUI("ui.libraryDownload.messageChooseAnAreaFirstDrawARectangle"));
     const a={west:Math.min(...areas.map(a=>a.west)),south:Math.min(...areas.map(a=>a.south)),east:Math.max(...areas.map(a=>a.east)),north:Math.max(...areas.map(a=>a.north))};
-    if(a.east-a.west>15||a.north-a.south>15)throw Error("This area is too large for one safe catalog search. Divide it into bounded regions and choose one part; nothing is downloaded automatically.");
+    if(a.east-a.west>15||a.north-a.south>15)throw Error(textForUI("ui.libraryDownload.messageThisAreaIsTooLargeForOne"));
     return a;
   }
   function fitSelection() {
@@ -532,14 +530,14 @@ export async function libraryDownload(parent, api, isDisposed = () => false, opt
     preview = null;
     layers.remote.clearLayers();
     catalogList.replaceChildren(
-      el("h2", "Provider catalog — not searched"),
-      el("p", "Filters changed; search again."),
+      el("h2", localizedCopy("ui.libraryDownload.messageProviderCatalogNotSearched")),
+      el("p", localizedCopy("ui.libraryDownload.messageFiltersChangedSearchAgain")),
     );
     previewBox.replaceChildren();
     const p = providers.find((p) => p.id === provider.value);
     const nasa = p.id.startsWith("nasa-");
     const type = scienceTypes.find(t=>t[2]===p.id)||(p.id==="nasa-ng"?scienceTypes.find(t=>t[0]==="hyperspectral"):null);
-    if(type){scienceChoice.value=type[0];scienceDescription.textContent=type[3];}
+    if(type){scienceChoice.value=type[0];setPresentationText(scienceDescription,type[3]);}
     if (!userDates) {
       // CMR supports no temporal filter. A recent default hides historical AVIRIS
       // flightlines; inventing a long dated range would exceed the API's range cap.
@@ -549,30 +547,27 @@ export async function libraryDownload(parent, api, isDisposed = () => false, opt
     dateHint.hidden = !nasa;
     dateScope.parentElement.hidden=!p.sceneDates;
     dateScope.value=nasa&&!from.value&&!to.value?"archive":userDates?"custom":"recent";
-    dateSummary.textContent=!p.sceneDates?"Composite / undated source: original observation date is unknown, not inferred from a publication or update.":from.value&&to.value?`Searching observations ${from.value} through ${to.value}. Earlier years remain available below.`:"All original observation dates in the selected area; bounded pages, not a coverage guarantee.";
+    setPresentationText(dateSummary,!p.sceneDates?localizedCopy("ui.libraryDownload.messageCompositeUndatedSourceOriginalObservationDate"):from.value&&to.value?localizedCopy("ui.libraryDownload.messageSearchingObservationsThroughEarlierYearsRemain",{value1:(String(from.value)),value2:(String(to.value))}):localizedCopy("ui.libraryDownload.messageAllOriginalObservationDatesInTheSelected"));
     for(const option of dateScope.options)if(option.value==="archive")option.hidden=!nasa;
     ordering.disabled=!p.sceneDates;
     ordering.querySelector('[value="cloud"]').hidden=p.id!=="landsat"&&p.id!=="sentinel-2";
     if(ordering.value==="cloud"&&ordering.querySelector('[value="cloud"]').hidden)ordering.value="latest";
     remember();
     earthdataBox.hidden = !p.id.startsWith("nasa-");
-    if (!earthdataBox.hidden) refreshEarthdata().catch(error => { earthdataText.textContent = error.message; });
+    if (!earthdataBox.hidden) refreshEarthdata().catch(error => { setPresentationText(earthdataText,error.message); });
     if (budgetInput && p.id.startsWith("nasa-") && !userBudget) {
       const revision = epoch;
       api("/api/science/access").then(({ configuration }) => {
         if (stopped || isDisposed() || revision !== epoch || userBudget) return;
         budgetInput.value = Math.min(configuration.preferences.nasaOriginalMaximumBytes ?? 1073741824, configuration.preferences.preflightTransferBytes ?? 21474836480) / 1048576;
-      }).catch(error => { feedback.textContent = error.message; });
+      }).catch(error => { setPresentationText(feedback,error.message); });
     }
-    details.textContent = p.description;
-    measurements.textContent =
-      "Supported compatible numeric recipe: " +
-      p.requiredBands.join(", ") +
-      ". Required quality masks are always retained.";
+    setPresentationText(details,p.description);
+    setPresentationText(measurements,localizedCopy("ui.libraryDownload.messageSupportedCompatibleNumericRecipeRequiredQuality",{value1:(String(p.requiredBands.join(", ")))}));
     from.disabled = to.disabled = !p.sceneDates;
     cloud.disabled = !p.sceneDates || !!p.id.startsWith("nasa-");
     sceneFilter.disabled = !p.id.startsWith("nasa-");
-    measurements.textContent = p.kind === "hyperspectral" ? p.description : measurements.textContent;
+    setPresentationText(measurements,p.kind === "hyperspectral" ? p.description : measurements.textContent);
   }
   category.onchange = () => {
     for (const option of provider.options) option.hidden = (option.value.startsWith("nasa-")) !== (category.value === "hyperspectral");
@@ -606,12 +601,12 @@ export async function libraryDownload(parent, api, isDisposed = () => false, opt
   async function search(cursor = null) {
     consentWarning?.remove();consentWarning=null;
     if (!from.disabled && !!from.value !== !!to.value)
-      throw new Error("Enter both scene dates, or clear both dates to use the provider's default date scope.");
+      throw new Error(textForUI("ui.libraryDownload.messageEnterBothSceneDatesOrClearBoth"));
     preview = null;
     const own = ++epoch;
-    feedback.textContent = cached.checked
-      ? "Reading previously cached catalog metadata…"
-      : "Searching the actual provider catalog…";
+    setPresentationText(feedback,cached.checked
+      ? localizedCopy("ui.libraryDownload.messageReadingPreviouslyCachedCatalogMetadata")
+      : localizedCopy("ui.libraryDownload.messageSearchingTheActualProviderCatalog"));
     query = cursor
       ? { ...query, cursor }
       : {
@@ -642,18 +637,18 @@ export async function libraryDownload(parent, api, isDisposed = () => false, opt
         if(p&&(!p.onlineEnabled||!p.privacyAccepted)){
           consentWarning=errorMessage(searchTools,error);
           const warning=consentWarning;
-          consentWarning.firstElementChild.textContent='Review scientific data privacy before searching online';
-          const review=button(consentWarning,'Review Privacy Consent',()=>{
+          setPresentationText(consentWarning.firstElementChild,localizedCopy("ui.libraryDownload.messageReviewScientificDataPrivacyBeforeSearchingOnline"));
+          const review=button(consentWarning,localizedCopy("ui.libraryDownload.messageReviewPrivacyConsent"),()=>{
             privacyDialog=openOnlineAccess(api,{opener:review,onAllowed:state=>{
               const preferences=state.science.configuration.preferences;
               if(stopped||isDisposed()||own!==epoch||consentWarning!==warning||!consentWarning?.isConnected)return;
               consentWarning.classList.remove('action-error');consentWarning.classList.add('panel');consentWarning.setAttribute('role','status');
-              consentWarning.firstElementChild.textContent='Scientific access choices saved';
-              consentWarning.querySelector('p').textContent=preferences.onlineEnabled&&preferences.privacyAccepted?'Select Find Available Data to search with your existing area and filters.':'Online searches remain disabled. Cached results and retained sources remain available.';
-              feedback.textContent=consentWarning.querySelector('p').textContent;
+              setPresentationText(consentWarning.firstElementChild,localizedCopy("ui.libraryDownload.messageScientificAccessChoicesSaved"));
+              setPresentationText(consentWarning.querySelector('p'),preferences.onlineEnabled&&preferences.privacyAccepted?localizedCopy("ui.libraryDownload.messageSelectFindAvailableDataToSearchWith"):localizedCopy("ui.libraryDownload.messageOnlineSearchesRemainDisabledCachedResultsAnd"));
+              setPresentationText(feedback,consentWarning.querySelector('p').textContent);
             }});
           });
-          feedback.textContent='Online scientific discovery needs your explicit access and privacy choices. Your search area and filters are unchanged.';
+          setPresentationText(feedback,localizedCopy("ui.libraryDownload.messageOnlineScientificDiscoveryNeedsYourExplicitAccess"));
           return;
         }
       }
@@ -666,16 +661,16 @@ export async function libraryDownload(parent, api, isDisposed = () => false, opt
       layers.remote.clearLayers();
     }
     results.push(...page.items.filter(item=>!results.some(old=>old.provider===item.provider&&old.scene===item.scene)));
-    feedback.textContent = `${page.status==="Available"?"Matching catalog scenes found":page.status==="No match"?"No matching scenes in this searched scope":page.status==="Unavailable"?"Provider unavailable — availability was not established":page.status}${page.cached ? " · cached, not a new live search" : ""} · as of ${dateTime(page.asOfUtc)}; expires ${dateTime(page.expiresUtc)}. ${page.error || ""}`;
-    catalogList.replaceChildren(el("h2", "Provider catalog results"));
-    catalogList.append(el("p", `${results.length} matching catalog entries in the loaded search pages. ${page.ordering||"Provider ordering not established."}`));
+    setPresentationText(feedback,localizedCopy("ui.libraryDownload.messageAsOfExpires",{value1:(String(page.status==="Available"?"Matching catalog scenes found":page.status==="No match"?"No matching scenes in this searched scope":page.status==="Unavailable"?"Provider unavailable — availability was not established":page.status)),value2:(String(page.cached ? " · cached, not a new live search" : "")),value3:(String(dateTime(page.asOfUtc))),value4:(String(dateTime(page.expiresUtc))),value5:(String(page.error || ""))}));
+    catalogList.replaceChildren(el("h2", localizedCopy("ui.libraryDownload.messageProviderCatalogResults")));
+    catalogList.append(el("p", localizedCopy("ui.libraryDownload.messageMatchingCatalogEntriesInTheLoaded",{value1:(String(results.length)),value2:(String(page.ordering||"Provider ordering not established."))})));
     const dates=results.map(i=>i.observationUtc?.slice(0,10)).filter(Boolean).sort();
-    if(dates.length){catalogList.append(el("p",`Matching scenes found from ${dates[0]} to ${dates.at(-1)} in this search; not the entire archive.`));
+    if(dates.length){catalogList.append(el("p",localizedCopy("ui.libraryDownload.messageMatchingScenesFoundFromToInThis",{value1:(String(dates[0])),value2:(String(dates.at(-1)))})));
       for(const option of [...dateScope.options])if(option.value.startsWith("year-"))option.remove();
-      for(const year of [...new Set(dates.map(d=>d.slice(0,4)))].sort().reverse())dateScope.append(new Option(`Discovered observations in ${year}`,`year-${year}`));
+      for(const year of [...new Set(dates.map(d=>d.slice(0,4)))].sort().reverse())dateScope.append(new Option(textForUI("ui.libraryDownload.messageDiscoveredObservationsIn",{value1:(String(year))}),`year-${year}`));
     }
-    if(!results.length){catalogList.append(el("p",`Applied area: ${query.area.south}–${query.area.north}° latitude, ${query.area.west}–${query.area.east}° longitude. Dates: ${query.fromUtc?.slice(0,10)||"unrestricted"} to ${query.toUtc?.slice(0,10)||"unrestricted"}. Maximum reported scene cloud: ${cloud.disabled?"not applicable":query.maximumCloudPercent+"%"}. ${page.status==="Unavailable"?"This is a provider failure, not evidence that no data exists.":"Try earlier years, adjust the cloud filter, or explicitly choose a nearby supported area. No filters or products are widened automatically."}`));}
-    if(provider.value==="landsat"||provider.value==="sentinel-2")button(catalogList,"Search earlier years",async()=>{
+    if(!results.length){catalogList.append(el("p",localizedCopy("ui.libraryDownload.messageAppliedAreaLatitude",{value1:(String(query.area.south)),value2:(String(query.area.north)),value3:(String(query.area.west)),value4:(String(query.area.east)),value5:(String(query.fromUtc?.slice(0,10)||"unrestricted")),value6:(String(query.toUtc?.slice(0,10)||"unrestricted")),value7:(String(cloud.disabled?"not applicable":query.maximumCloudPercent+"%")),value8:(String(page.status==="Unavailable"?"This is a provider failure, not evidence that no data exists.":"Try earlier years, adjust the cloud filter, or explicitly choose a nearby supported area. No filters or products are widened automatically."))})));}
+    if(provider.value==="landsat"||provider.value==="sentinel-2")button(catalogList,localizedCopy("ui.libraryDownload.messageSearchEarlierYears"),async()=>{
       const end=from.value?new Date(from.value+"T00:00:00Z").getTime()-86400000:Date.now()-365*86400000;userDates=true;
       from.value=new Date(end-364*86400000).toISOString().slice(0,10);to.value=new Date(end).toISOString().slice(0,10);filtersChanged();return search();
     });
@@ -684,13 +679,13 @@ export async function libraryDownload(parent, api, isDisposed = () => false, opt
         label = el("label"),
         check = el("input");
       check.type = "checkbox";
-      check.setAttribute("aria-label", `Select scene ${item.scene}`);
+      setPresentationText(check,localizedCopy("ui.libraryDownload.messageSelectScene",{value1:(String(item.scene))}),"aria-label");
       check.checked = chosen.has(item.provider + "/" + item.scene);
       check.disabled = !!item.nasa;
       label.append(check, el("strong", item.nasa?.flightline||item.product));
       const retained=localSources.some(s=>s.filesAvailable&&(s.manifest.sceneId===item.scene||s.manifest.acquisition?.sceneId===item.scene));
       row.append(el("h3", `${scienceTypes.find(t=>t[2]===item.provider)?.[1]||scienceChoice.selectedOptions[0].textContent} · ${providers.find(p=>p.id===item.provider)?.name||item.provider}`));
-      if(index===0&&page.serverOrdered&&query.sort==="latest"&&item.observationUtc){row.append(el("p","Newest suitable match in this search — first compatible numeric catalog result in provider observation-date order; source masks and pixel validity still require verification.","library-recommendation"));}
+      if(index===0&&page.serverOrdered&&query.sort==="latest"&&item.observationUtc){row.append(el("p",localizedCopy("ui.libraryDownload.messageNewestSuitableMatchInThisSearch"),"library-recommendation"));}
       row.append(
         label,
         el(
@@ -699,41 +694,41 @@ export async function libraryDownload(parent, api, isDisposed = () => false, opt
         ),
         el("p", item.quality),
         el("p",`${retained?"Retained candidate on the loaded inventory page — integrity and exact reuse checked at preview":"Discovered — not confirmed in the loaded local page; full indexed reuse is checked at preview"} · ${item.cloudPercent==null?"Scene cloud information unknown / not applicable":`Reported scene cloud ${item.cloudPercent}% (not a valid-pixel percentage)`}`),
-        el("p",`Catalog footprint intersects the selected search bounds: ${Math.max(item.bounds.west,query.area.west).toFixed(3)}–${Math.min(item.bounds.east,query.area.east).toFixed(3)}° longitude, ${Math.max(item.bounds.south,query.area.south).toFixed(3)}–${Math.min(item.bounds.north,query.area.north).toFixed(3)}° latitude. The map shows original outlines; intersections do not establish full-area or QA-valid coverage.`),
+        el("p",localizedCopy("ui.libraryDownload.messageCatalogFootprintIntersectsTheSelectedSearchBounds",{value1:(String(Math.max(item.bounds.west,query.area.west).toFixed(3))),value2:(String(Math.min(item.bounds.east,query.area.east).toFixed(3))),value3:(String(Math.max(item.bounds.south,query.area.south).toFixed(3))),value4:(String(Math.min(item.bounds.north,query.area.north).toFixed(3)))})),
       );
-      if(!item.nasa)button(row,"Select this dataset",()=>{check.checked=true;check.onchange();});
-      const more = disclosure(row, "Technical details");
-      more.append(el("p",`Bands: ${item.bands.map(b=>`${b.id} (${b.units}, ×${b.scale} + ${b.offset})`).join("; ")} · ${item.verticalDatum}`));
+      if(!item.nasa)button(row,localizedCopy("ui.libraryDownload.messageSelectThisDataset"),()=>{check.checked=true;check.onchange();});
+      const more = disclosure(row, localizedCopy("ui.libraryDownload.messageTechnicalDetails"));
+      more.append(el("p",localizedCopy("ui.libraryDownload.messageBands",{value1:(String(item.bands.map(b=>`${b.id} (${b.units}, ×${b.scale} + ${b.offset})`).join("; "))),value2:(String(item.verticalDatum))})));
       more.append(
         el(
           "p",
-          `CRS: ${item.crs || "Unknown"} · vertical datum: ${item.verticalDatum} · source revision: ${item.revision}`,
+          localizedCopy("ui.libraryDownload.messageCRSVerticalDatumSourceRevision",{value1:(String(item.crs || "Unknown")),value2:(String(item.verticalDatum)),value3:(String(item.revision))}),
         ),
         el(
           "p",
-          `Original asset bytes: ${item.bands.map((b) => b.id + " " + bytes(b.originalAssetBytes)).join("; ")}. Subset transfer sizes may differ.`,
+          localizedCopy("ui.libraryDownload.messageOriginalAssetBytesSubsetTransferSizes",{value1:(String(item.bands.map((b) => b.id + " " + bytes(b.originalAssetBytes)).join("; ")))}),
         ),
         el("p", item.license),
         el("p", item.limitations.join(" ")),
       );
       if (item.nasa) {
         const n = item.nasa;
-        row.append(el("p", `${n.family} · ${n.capability}`), el("p", `Flightline: ${n.flightline} · collection ${n.collectionId} / ${n.collectionVersion} · ${n.processingLevel} reflectance · ${n.format}`), el("p", `${n.authorization}. Original distribution: ${bytes(n.originalBytes)}. Wavelengths / band count / units: ${n.bandCount ?? "Unknown until original-file verification"}.`));
-        more.append(el("p", `NASA metadata updated: ${dateTime(n.updatedUtc)} (not the observation or publication time). Collection revision: ${n.collectionRevision}. Granule metadata: ${n.metadataUrl}`));
+        row.append(el("p", `${n.family} · ${n.capability}`), el("p", localizedCopy("ui.libraryDownload.messageFlightlineCollectionReflectance",{value1:(String(n.flightline)),value2:(String(n.collectionId)),value3:(String(n.collectionVersion)),value4:(String(n.processingLevel)),value5:(String(n.format))})), el("p", localizedCopy("ui.libraryDownload.messageOriginalDistributionWavelengths",{value1:(String(n.authorization)),value2:(String(bytes(n.originalBytes))),value3:(String(n.bandCount ?? "Unknown until original-file verification"))})));
+        more.append(el("p", localizedCopy("ui.libraryDownload.messageNASAMetadataUpdatedNotTheObservationOr",{value1:(String(dateTime(n.updatedUtc))),value2:(String(n.collectionRevision)),value3:(String(n.metadataUrl))})));
         for (const asset of n.assets) { const a = link(more, `${asset.role}: ${asset.name}`, asset.url); a.target="_blank"; a.rel="noopener noreferrer"; }
-        const official = link(row, "Open official NASA access / Earthdata", item.reference); official.target="_blank"; official.rel="noopener noreferrer";
-        if(item.provider === "nasa-ng") button(row,"Find matching header / binary granules",async()=>{
+        const official = link(row, localizedCopy("ui.libraryDownload.messageOpenOfficialNASAAccessEarthdata"), item.reference); official.target="_blank"; official.rel="noopener noreferrer";
+        if(item.provider === "nasa-ng") button(row,localizedCopy("ui.libraryDownload.messageFindMatchingHeaderBinaryGranules"),async()=>{
           const original = n.assets.find(a=>a.role === "Original numeric binary" || a.role === "ENVI header");
-          if(!original) throw Error("No verified original companion name is available. Inspect the official product.");
+          if(!original) throw Error(textForUI("ui.libraryDownload.messageNoVerifiedOriginalCompanionNameIsAvailable"));
           sceneFilter.value = original.name.replace(/\.(bin|hdr)$/i, ""); filtersChanged(); await search();
         });
-        more.append(el("p", "Manual/browser fallback: NASA handles login, terms and browser downloading. Keep the original reflectance header and matching binary together, then verify and import on the companion PC. Browser progress is external; canceling login/download leaves the Library unchanged."));
-        if (item.nasa.capability.startsWith("Guided import")) button(row, "Verify downloaded AVIRIS files on this PC", async () => {
+        more.append(el("p", localizedCopy("ui.libraryDownload.messageManualBrowserFallbackNASAHandlesLoginTermsAnd")));
+        if (item.nasa.capability.startsWith("Guided import")) button(row, localizedCopy("ui.libraryDownload.messageVerifyDownloadedAVIRISFilesOnThisPC"), async () => {
           await api("/api/science/hyperspectral/nasa", {provider:item.provider, granuleId:item.scene, revision:item.revision});
           openHyperspectralImport(api);
         });
-        if (item.provider === "nasa-emit") button(row,"Import EMIT Originals on This PC",()=>openEmitImport(api));
-        if (item.provider === "nasa-emit" || item.nasa.capability.startsWith("Guided import")) button(row, "Preview NASA Download & Import", async () => {
+        if (item.provider === "nasa-emit") button(row,localizedCopy("ui.libraryDownload.messageImportEMITOriginalsOnThisPC"),()=>openEmitImport(api));
+        if (item.provider === "nasa-emit" || item.nasa.capability.startsWith("Guided import")) button(row, localizedCopy("ui.libraryDownload.messagePreviewNASADownloadImport"), async () => {
           let acknowledged=false;
           if(item.provider==="nasa-emit"){
             const {acknowledgeEmit}=await import('./emit-review.js');acknowledged=await acknowledgeEmit();if(!acknowledged)return;
@@ -743,7 +738,7 @@ export async function libraryDownload(parent, api, isDisposed = () => false, opt
           await displayPreview(job, own);
         });
       }
-      const reference = link(more, "Authoritative source", item.reference);
+      const reference = link(more, localizedCopy("ui.libraryDownload.messageAuthoritativeSource"), item.reference);
       reference.target = "_blank";
       reference.rel = "noopener noreferrer";
       check.onchange = () => {
@@ -753,7 +748,7 @@ export async function libraryDownload(parent, api, isDisposed = () => false, opt
         else chosen.delete(key);
         preview = null;
         previewBox.replaceChildren(
-          el("p", "Exact scene selection changed; preview again."),
+          el("p", localizedCopy("ui.libraryDownload.messageExactSceneSelectionChangedPreviewAgain")),
         );
       };
       catalogList.append(row);
@@ -762,7 +757,7 @@ export async function libraryDownload(parent, api, isDisposed = () => false, opt
           style: { color: "#72aaff", fillOpacity: 0.02 },
         })
           .bindTooltip(
-            el("span", item.scene + " · provider outline, not QA-valid pixels"),
+            el("span", localizedCopy("ui.libraryDownload.messageProviderOutlineNotQAValidPixels",{value1:(String(item.scene))})),
           )
           .addTo(layers.remote);
       else
@@ -770,20 +765,20 @@ export async function libraryDownload(parent, api, isDisposed = () => false, opt
           item.bounds,
           "#72aaff",
           layers.remote,
-          "Composite service capability, pixel availability unverified",
+          localizedCopy("ui.libraryDownload.messageCompositeServiceCapabilityPixelAvailabilityUnverified"),
         );
     }
     for (const text of page.limitations)
       catalogList.append(el("p", text, "footnote"));
     if (page.nextCursor)
-      button(catalogList, "More provider scenes", () =>
+      button(catalogList, localizedCopy("ui.libraryDownload.messageMoreProviderScenes"), () =>
         search(page.nextCursor),
       );
   }
-  button(searchTools, "Find Available Data", () => search());
+  button(searchTools, localizedCopy("ui.libraryDownload.messageFindAvailableData"), () => search());
   const budget = input(
     previewBox,
-    "Maximum job transfer (MiB)",
+    localizedCopy("ui.libraryDownload.messageMaximumJobTransferMiB"),
     "64",
     "number",
   );
@@ -799,10 +794,10 @@ export async function libraryDownload(parent, api, isDisposed = () => false, opt
   };
   filtersChanged(); // Apply the correct NASA allowance after its control exists.
   const requestSelection = () => {
-    if (!areas.length) throw Error("Select a geographic area first.");
-    if (provider.value.startsWith("nasa-")) throw Error("Choose the exact NASA scene's Preview NASA Download & Import action. Browser/manual fallback remains available; EMIT requires acknowledgement of pending genuine-original acceptance.");
+    if (!areas.length) throw Error(textForUI("ui.libraryDownload.messageSelectAGeographicAreaFirst"));
+    if (provider.value.startsWith("nasa-")) throw Error(textForUI("ui.libraryDownload.messageChooseTheExactNASASceneSPreviewNASA"));
     if (!chosen.size)
-      throw Error("Choose at least one exact provider scene/product first.");
+      throw Error(textForUI("ui.libraryDownload.messageChooseAtLeastOneExactProviderSceneProduct"));
     return {
       version: 1,
       areas,
@@ -817,7 +812,7 @@ export async function libraryDownload(parent, api, isDisposed = () => false, opt
       maximumTransferBytes: Number(budgetInput.value) * 1048576,
     };
   };
-  button(searchTools, "Review & Download", async () => {
+  button(searchTools, localizedCopy("ui.libraryDownload.messageReviewDownload"), async () => {
     const own = ++epoch;
     const job = await api("/api/science/library/preview", requestSelection());
     await displayPreview(job, own);
@@ -827,26 +822,26 @@ export async function libraryDownload(parent, api, isDisposed = () => false, opt
     preview = job;
     const p = job.preview;
     previewBox.replaceChildren(
-      el("h2", "Review & approve download"),
+      el("h2", localizedCopy("ui.libraryDownload.messageReviewApproveDownload")),
       el(
         "p",
-        `${p.work.length} bounded source work window(s) · ${p.uncoveredCells} uncovered planning cells · ${p.work.filter((w) => w.reuseSourceId).length} reusable window(s). A planning cell may use several retained sources; mission instrument-region totals are unchanged.`,
+        localizedCopy("ui.libraryDownload.messageBoundedSourceWorkWindowSUncovered",{value1:(String(p.work.length)),value2:(String(p.uncoveredCells)),value3:(String(p.work.filter((w) => w.reuseSourceId).length))}),
       ),
       el(
         "p",
-        `Estimated transfer: ${bytes(p.estimatedTransferBytes)} · retained size: ${bytes(p.estimatedRetainedBytes)} · retained originals reused: ${bytes(p.reusableBytes)} (counted once per source; not a claim that this many network bytes were avoided).`,
+        localizedCopy("ui.libraryDownload.messageEstimatedTransferRetainedSizeRetained",{value1:(String(bytes(p.estimatedTransferBytes))),value2:(String(bytes(p.estimatedRetainedBytes))),value3:(String(bytes(p.reusableBytes)))}),
       ),
       el(
         "p",
-        `Approved transfer cap: ${bytes(p.maximumTransferBytes)} across retries/restarts. Per-item limit: ${bytes(p.perItemTransferLimit)}. Temporary disk allowance: ${bytes(p.temporaryStorageAllowanceBytes)} (bound, not estimate).`,
+        localizedCopy("ui.libraryDownload.messageApprovedTransferCapAcrossRetriesRestartsPerItemLimit",{value1:(String(bytes(p.maximumTransferBytes))),value2:(String(bytes(p.perItemTransferLimit))),value3:(String(bytes(p.temporaryStorageAllowanceBytes)))}),
       ),
       el(
         "p",
-        `Drive free: ${bytes(p.availableDriveBytes)} · Library used: ${bytes(p.scientificStorageUsedBytes)} / limit ${p.scientificStorageLimitBytes==null?(p.availableDriveBytes==null?"Unknown":"Unlimited"):bytes(p.scientificStorageLimitBytes)} · preparation allowance currently remaining: ${bytes(p.preparationBudgetRemainingBytes)}. Storage is rechecked during work.`,
+        localizedCopy("ui.libraryDownload.messageDriveFreeLibraryUsedLimit",{value1:(String(bytes(p.availableDriveBytes))),value2:(String(bytes(p.scientificStorageUsedBytes))),value3:(String(p.scientificStorageLimitBytes==null?(p.availableDriveBytes==null?"Unknown":"Unlimited"):bytes(p.scientificStorageLimitBytes))),value4:(String(bytes(p.preparationBudgetRemainingBytes)))}),
       ),
       el(
         "p",
-        `Preview expires ${dateTime(p.expiresUtc)}. Selection ${p.selectionHash.slice(0, 16)}…`,
+        localizedCopy("ui.libraryDownload.messagePreviewExpiresSelection",{value1:(String(dateTime(p.expiresUtc))),value2:(String(p.selectionHash.slice(0, 16)))}),
       ),
     );
     for (const i of p.products)
@@ -858,32 +853,31 @@ export async function libraryDownload(parent, api, isDisposed = () => false, opt
       );
     renderTransferProgress(previewBox,job.progress,job.state);
     for (const text of p.warnings) previewBox.append(el("p", text, "footnote"));
-    if (p.nasa) table(previewBox, "Exact original NASA files", ["Original file", "Role", "Verified header length (bytes)", "Safe range resume"], p.nasa.files.map(file => [file.name, file.role, file.bytes, file.etag && file.ranges ? "Supported with identity verification" : "Restart safely if interrupted"]));
+    if (p.nasa) table(previewBox, localizedCopy("ui.libraryDownload.messageExactOriginalNASAFiles"), [localizedCopy("ui.emitLibrary.messageOriginalFile"), localizedCopy("ui.emitLibrary.messageRole"), localizedCopy("ui.libraryDownload.messageVerifiedHeaderLengthBytes"), localizedCopy("ui.libraryDownload.messageSafeRangeResume")], p.nasa.files.map(file => [file.name, file.role, file.bytes, file.etag && file.ranges ? textForUI("ui.libraryDownload.messageSupportedWithIdentityVerification") : textForUI("ui.libraryDownload.messageRestartSafelyIfInterrupted")]));
     const units = disclosure(
       previewBox,
-      "Exact work windows & retained-source reuse",
+      localizedCopy("ui.libraryDownload.messageExactWorkWindowsRetainedSourceReuse"),
     );
     table(
       units,
-      "Approved geographic work windows",
-      ["Unit", "Exact source", "South, West → North, East", "Required work"],
+      localizedCopy("ui.libraryDownload.messageApprovedGeographicWorkWindows"),
+      [localizedCopy("ui.libraryDownload.messageUnit"), localizedCopy("ui.libraryDownload.messageExactSource"), localizedCopy("ui.libraryDownload.messageSouthWestNorthEast"), localizedCopy("ui.libraryDownload.messageRequiredWork")],
       p.work.map((w) => [
         w.index + 1,
         w.scene.scene,
         `${w.area.south}, ${w.area.west} → ${w.area.north}, ${w.area.east}`,
-        w.reuseSourceId ? "Verified local reuse" : "Network subset required",
+        w.reuseSourceId ? textForUI("ui.libraryDownload.messageVerifiedLocalReuse") : textForUI("ui.libraryDownload.messageNetworkSubsetRequired"),
       ]),
       { pageSize: 50 },
     );
-    const approve = button(previewBox, "Download & Import", async () => {
-      if (preview !== job) throw Error("Selection changed. Preview again.");
+    const approve = button(previewBox, localizedCopy("ui.libraryDownload.messageDownloadImport"), async () => {
+      if (preview !== job) throw Error(textForUI("ui.libraryDownload.messageSelectionChangedPreviewAgain"));
       await api(`/api/science/library/jobs/${job.id}/approve`, {
         selectionHash: p.selectionHash,
       });
       preview = null;
       approve.disabled = true;
-      feedback.textContent =
-        "Approved work queued. The Download Manager below shows durable progress; active flights take priority.";
+      setPresentationText(feedback,localizedCopy("ui.libraryDownload.messageApprovedWorkQueuedTheDownloadManagerBelow"));
       await refresh();
     });
     approve.disabled = p.uncoveredCells > 0;
@@ -891,20 +885,20 @@ export async function libraryDownload(parent, api, isDisposed = () => false, opt
       previewBox.append(
         el(
           "p",
-          "Remove uncovered cells or choose a covering scene before approval. No subset was silently substituted.",
+          localizedCopy("ui.libraryDownload.messageRemoveUncoveredCellsOrChooseACovering"),
         ),
       );
   }
   const manager = el("section", undefined, "panel library-job-manager");
-  manager.setAttribute("aria-label", "Library Download Manager");
-  manager.append(el("h2", "Download Manager"));
+  setPresentationText(manager,localizedCopy("ui.libraryDownload.messageLibraryDownloadManager"),"aria-label");
+  manager.append(el("h2", localizedCopy("ui.libraryDownload.messageDownloadManager")));
   parent.append(manager);
   const history = select(
     parent,
-    "Download Manager view",
+    localizedCopy("ui.libraryDownload.messageDownloadManagerView"),
     [
-      ["current", "Current + completed jobs"],
-      ["all", "All jobs, including cancelled"],
+      ["current", localizedCopy("ui.libraryDownload.messageCurrentCompletedJobs")],
+      ["all", localizedCopy("ui.libraryDownload.messageAllJobsIncludingCancelled")],
     ],
     "current",
   );
@@ -938,11 +932,11 @@ export async function libraryDownload(parent, api, isDisposed = () => false, opt
       const signature = JSON.stringify(response);
       if (signature !== jobsSignature) {
         jobsSignature = signature;
-        manager.replaceChildren(el("h2", "Download Manager"));
+        manager.replaceChildren(el("h2", localizedCopy("ui.libraryDownload.messageDownloadManager")));
         if (response.warning)
           manager.append(el("p", response.warning, "warning"));
         if (!response.jobs.length)
-          manager.append(el("p", "No saved Library jobs."));
+          manager.append(el("p", localizedCopy("ui.libraryDownload.messageNoSavedLibraryJobs")));
         layers.jobs.clearLayers();
         for (const job of response.jobs.filter(
           (j) => history.value === "all" || j.state !== "Cancelled",
@@ -957,15 +951,15 @@ export async function libraryDownload(parent, api, isDisposed = () => false, opt
           );
           const live = status(
             box,
-            `${job.completedItems}/${job.items.length} work units verified · measured transfer ${bytes(job.downloadedBytes)} · interrupted-read allowance ${bytes(job.uncertainBytes)} · verified retained ${bytes(job.items.reduce((n, i) => n + i.verifiedBytes, 0))}.`,
+            localizedCopy("ui.libraryDownload.messageWorkUnitsVerifiedMeasured",{value1:(String(job.completedItems)),value2:(String(job.items.length)),value3:(String(bytes(job.downloadedBytes))),value4:(String(bytes(job.uncertainBytes))),value5:(String(bytes(job.items.reduce((n, i) => n + i.verifiedBytes, 0))))}),
           );
-          live.setAttribute("aria-label", "Download progress");renderTransferProgress(box,job.progress,job.state);
+          setPresentationText(live,localizedCopy("ui.libraryDownload.messageDownloadProgress"),"aria-label");renderTransferProgress(box,job.progress,job.state);
           box.append(
             el(
               "p",
               job.preview.products
                 .map(
-                  (p) => `${p.scene} · observed ${dateTime(p.observationUtc)}`,
+                  (p) => textForUI("ui.libraryDownload.messageObserved",{value1:(String(p.scene)),value2:(String(dateTime(p.observationUtc)))}),
                 )
                 .join(" | "),
             ),
@@ -984,33 +978,33 @@ export async function libraryDownload(parent, api, isDisposed = () => false, opt
               job.state,
             )
           )
-            button(controls, "Pause job", control("pause"));
+            button(controls, localizedCopy("ui.libraryDownload.messagePauseJob"), control("pause"));
           if (["Paused", "Interrupted"].includes(job.state))
-            button(controls, "Resume job", control("resume"));
+            button(controls, localizedCopy("ui.libraryDownload.messageResumeJob"), control("resume"));
           if (job.state === "Failed")
-            button(controls, "Retry failed work", control("retry"));
+            button(controls, localizedCopy("ui.libraryDownload.messageRetryFailedWork"), control("retry"));
           if (!["Cancelled", "Completed"].includes(job.state))
-            button(controls, "Cancel job", control("cancel"));
+            button(controls, localizedCopy("ui.libraryDownload.messageCancelJob"), control("cancel"));
           if (job.state === "Awaiting Approval")
             box.append(
               el(
                 "p",
-                "Awaiting explicit approval; create a current preview to approve changed selections.",
+                localizedCopy("ui.libraryDownload.messageAwaitingExplicitApprovalCreateACurrentPreview"),
               ),
             );
-          const items = disclosure(box, "Per-item progress & verification");
+          const items = disclosure(box, localizedCopy("ui.libraryDownload.messagePerItemProgressVerification"));
           items.addEventListener("toggle", () => {
             if (items.open && items.children.length === 1)
               table(
                 items,
-                "Stored download items",
+                localizedCopy("ui.libraryDownload.messageStoredDownloadItems"),
                 [
-                  "Unit",
-                  "State",
-                  "Measured transfer",
-                  "Verified retained",
-                  "Attempts",
-                  "Error",
+                  localizedCopy("ui.libraryDownload.messageUnit"),
+                  localizedCopy("ui.emitLibrary.messageState"),
+                  localizedCopy("ui.libraryDownload.messageMeasuredTransfer"),
+                  localizedCopy("ui.libraryDownload.messageVerifiedRetained"),
+                  localizedCopy("ui.libraryDownload.messageAttempts"),
+                  localizedCopy("ui.libraryDownload.messageError"),
                 ],
                 job.items.map((i) => [
                   i.index + 1,
@@ -1023,7 +1017,7 @@ export async function libraryDownload(parent, api, isDisposed = () => false, opt
                 { pageSize: 25 },
               );
           });
-          if(job.preview.work.length>500)box.append(el("p",`Map displays the first 500 of ${job.preview.work.length} work windows for responsiveness. The approved job and paged work tables retain the complete selection.`));
+          if(job.preview.work.length>500)box.append(el("p",localizedCopy("ui.libraryDownload.messageMapDisplaysTheFirst500OfWork",{value1:(String(job.preview.work.length))})));
           manager.append(box);
           if (job.approvalId && !["Completed", "Cancelled"].includes(job.state))
             for (const work of job.preview.work.slice(0, 500))
@@ -1036,13 +1030,13 @@ export async function libraryDownload(parent, api, isDisposed = () => false, opt
         }
         const navigation = el("div", undefined, "action-row");
         manager.append(navigation);
-        const recent = button(navigation, "More recent jobs", () => {
+        const recent = button(navigation, localizedCopy("ui.libraryDownload.messageMoreRecentJobs"), () => {
           jobOffset = Math.max(0, jobOffset - 64);
           jobsSignature = null;
           refresh();
         });
         recent.disabled = jobOffset === 0;
-        const older = button(navigation, "Older saved jobs", () => {
+        const older = button(navigation, localizedCopy("ui.libraryDownload.messageOlderSavedJobs"), () => {
           jobOffset += 64;
           jobsSignature = null;
           refresh();
@@ -1065,8 +1059,7 @@ export async function libraryDownload(parent, api, isDisposed = () => false, opt
       await loadLocal();
     } catch (error) {
       if (!stopped)
-        feedback.textContent =
-          "Companion / Library unavailable: " + error.message;
+        setPresentationText(feedback,localizedCopy("ui.libraryDownload.messageCompanionLibraryUnavailable",{value1:(String(error.message))}));
     } finally {
       running = false;
       if (!stopped && !isDisposed()) {
@@ -1077,8 +1070,7 @@ export async function libraryDownload(parent, api, isDisposed = () => false, opt
   }
   const online = () => {
     if (!navigator.onLine)
-      feedback.textContent =
-        "Offline — retained coverage and saved jobs remain accessible through the companion. Select cached catalog to inspect earlier searches.";
+      setPresentationText(feedback,localizedCopy("ui.libraryDownload.messageOfflineRetainedCoverageAndSavedJobs"));
   };
   window.addEventListener("offline", online);
   const release = cleanup;

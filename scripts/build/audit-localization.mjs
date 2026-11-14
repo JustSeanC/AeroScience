@@ -3,6 +3,7 @@ import {resolve,relative,dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {parse} from 'acorn';
 import {createHash} from 'node:crypto';
+import {presentationContracts,argumentPosition} from './presentation-contracts.mjs';
 
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'../..');
 const roots=['src/AeroScience.Engine/wwwroot','src/AeroScience.Organization/wwwroot','src/AeroScience.Desktop','msfs-toolbar/PackageSources/html_ui/InGamePanels/AeroScience'];
@@ -21,17 +22,19 @@ function surface(file){
  if(/flight|intelligence|sensor|instrument|operating/.test(file))return 'currentFlight';
  return 'dashboard';
 }
-const human=text=>typeof text==='string'&&/[A-Za-z]/.test(text)&&(/\s/.test(text)||/^[A-Z][a-z]+/.test(text))&&!/^\s*(?:https?:|\/|#|\.\/|\.\.\/|[A-Za-z]:\\|<|\^)/.test(text);
+const human=text=>typeof text==='string'&&/[A-Za-z]/.test(text)&&(/\s/.test(text)||/^[A-Z][a-z]+/.test(text)||/^[A-Z]{3,}$/.test(text))&&!/^\s*(?:https?:|\/|#|\.\/|\.\.\/|[A-Za-z]:\\|<|\^)/.test(text);
 const critical=text=>/consent|authoriz|permanent|delet|upload|shar(?:e|ing)|recording|collect(?:ing|ion)|expired|stale|unavailable|missing|invalid|recovery|recover|password|credential|cannot be undone|end (?:flight|mission|science)|pause|resume/i.test(text);
 const property=n=>n?.type==='Identifier'?n.name:n?.type==='Literal'?String(n.value):n?.type==='MemberExpression'?property(n.property):'';
 const sinks=new Set(['node','el','element','button','link','disclosure','informationDetails','scientificNotice','status','metric','table','chart','legend','field','formField','label','option','select','heading','modal','submit','toast','notice','failure','errorMessage','confirm','alert','dialogHeader','text','textContent','innerText','title','placeholder','aria-label','aria-description','aria-describedby','aria-valuetext','alt','caption','description','message','explanation','problem','consequence','action','xLabel','yLabel','label','help','name']);
 const protectedProperty=new Set(['href','src','id','className','value','type','role','method','headers','path','url','origin','key','unit','kind','instrumentId','sourceId','scope','policy','code','op','templateId','query','fingerprint','sha256']);
-function disposition(node,ancestors,source){
- const parent=ancestors.at(-1),chain=[...ancestors].reverse();
+function disposition(node,ancestors,source,contracts){
+ const parent=ancestors.at(-1),fullChain=[...ancestors].reverse(),boundary=fullChain.findIndex(n=>/Function/.test(n.type)),chain=boundary<0?fullChain:fullChain.slice(0,boundary);
  const call=chain.find(n=>n.type==='CallExpression'),callName=property(call?.callee);
  if(chain.some(n=>n.type==='ImportDeclaration'||n.type==='ExportNamedDeclaration'&&n.source))return ['protected-identifier','module identity'];
- if(callName==='t'||callName==='text'&&source.slice(call.callee.start,call.callee.end).includes('i18n'))return ['catalog-reference','existing translation call'];
+ if(['t','textForUI','localizedCopy','message'].includes(callName)||callName==='text'&&source.slice(call.callee.start,call.callee.end).includes('i18n'))return ['catalog-reference','existing translation call'];
  if(parent?.type==='MemberExpression'||parent?.type==='BinaryExpression'&&['===','!==','==','!='].includes(parent.operator)||parent?.type==='SwitchCase')return ['protected-identifier','state/API/selector comparison'];
+ if(parent?.type==='Property'&&parent.key===node&&!parent.computed)return ['protected-identifier','object/wire property identity'];
+ if(chain.some(n=>n.type==='AssignmentExpression'&&['className','id','font','fontFamily','cssText','href','src','value','type','role','name'].includes(property(n.left))))return ['protected-value','style, identifier, input value or source name assignment'];
  const prop=chain.find(n=>n.type==='Property');
  if(prop&&protectedProperty.has(property(prop.key)))return ['protected-value','identifier, unit, command or data value'];
  if(callName==='setAttribute'){
@@ -41,12 +44,12 @@ function disposition(node,ancestors,source){
  if(['getElementById','querySelector','querySelectorAll','byId','closest','matches','classList','contains','getAttribute','includes','startsWith','endsWith','split','join','replace','replaceAll','padStart','addEventListener','removeEventListener','dispatchEvent','fetch','api','safeApi','read','write','post','get','put','newIdentity','readableName'].includes(callName))return ['protected-value','selector, wire value, data parsing or method argument'];
  if(chain.some(n=>n.type==='AssignmentExpression'&&['textContent','innerText','placeholder','title','ariaLabel','alt'].includes(property(n.left))))return ['presentation','display property assignment'];
  if(prop&&sinks.has(property(prop.key)))return ['review-presentation','label/description object; exclude source definitions and original values before binding'];
- if(call&&sinks.has(callName)){
+ if(call&&(sinks.has(callName)||contracts(callName,call))){
   const position=call.arguments.findIndex(arg=>arg.start<=node.start&&arg.end>=node.end);
   if(['node','el','element'].includes(callName)&&position!==1)return ['protected-identifier','element tag/style'];
-  const positions={button:[1],link:[1],field:[1],formField:[1],select:[1,2],table:[1,2],chart:[1,3],legend:[1,6],heading:[0,1],modal:[0],submit:[1],status:[1],notice:[0],confirm:[0],alert:[0],dialogHeader:[1]};
-  if(positions[callName]&&!positions[callName].includes(position))return ['protected-value','non-presentation helper value, path, style, original rows or callback'];
-  if(['button','link','field','formField','select','disclosure','informationDetails','metric','table','chart','legend'].includes(callName)&&position===0)return ['protected-value','target node'];
+  const contract=contracts(callName,call);
+  if(contract&&!contract.display.includes(position))return ['protected-value','non-presentation helper value, path, style, original rows or callback'];
+  if(contract?.options===position){const tuple=chain.find(n=>n.type==='ArrayExpression');if(tuple?.elements.length===2&&tuple.elements[0]?.type!=='ArrayExpression'&&tuple.elements[0]?.start<=node.start&&tuple.elements[0]?.end>=node.end)return ['protected-value','stable option value; only the second tuple member is a label'];}
   return ['presentation','presentation helper argument'];
  }
  if(parent?.type==='ArrayExpression'&&parent.elements.length===2&&parent.elements[1]===node)return ['review-presentation','option/action label tuple; first element is a stable value'];
@@ -54,13 +57,13 @@ function disposition(node,ancestors,source){
  return ['review','manual classification required; never rewrite unclassified source data'];
 }
 export function inventoryJavaScript(source,file){
- const ast=parse(source,{ecmaVersion:'latest',sourceType:'module',locations:true,allowReturnOutsideFunction:true}),rows=[];
+ const ast=parse(source,{ecmaVersion:'latest',sourceType:'module',locations:true,allowReturnOutsideFunction:true}),rows=[],contracts=presentationContracts(ast,source);
  function walk(node,parents){
   if(!node||typeof node!=='object')return;
   const literal=node.type==='Literal'&&typeof node.value==='string',template=node.type==='TemplateLiteral';
   const text=literal?node.value:template?node.quasis.map((q,i)=>q.value.cooked+(i<node.expressions.length?'{value'+(i+1)+'}':'')).join(''):null;
   if(human(text)){
-   const [decision,reason]=disposition(node,parents,source),fn=[...parents].reverse().find(n=>/Function/.test(n.type)),functionName=fn?.id?.name||property(parents.findLast(n=>n.type==='MethodDefinition')?.key)||'view';
+   const [decision,reason]=disposition(node,parents,source,contracts),fn=[...parents].reverse().find(n=>/Function/.test(n.type)),functionName=fn?.id?.name||property(parents.findLast(n=>n.type==='MethodDefinition')?.key)||'view';
    rows.push({file,line:node.loc.start.line,column:node.loc.start.column,start:node.start,end:node.end,surface:surface(file),kind:template?'template':'literal',text,parameters:template?node.expressions.map((e,i)=>({name:'value'+(i+1),expression:source.slice(e.start,e.end)})):[],decision,reason,critical:critical(text),semanticScope:camel(file.split('/').at(-1).replace(/\.[^.]+$/,''))+'.'+camel(functionName)});
   }
   for(const [key,value]of Object.entries(node)){if(['loc','start','end','raw','quasis'].includes(key))continue;if(Array.isArray(value))value.forEach(v=>walk(v,[...parents,node]));else if(value&&typeof value==='object')walk(value,[...parents,node]);}

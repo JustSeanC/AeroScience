@@ -1,7 +1,9 @@
+import {message as localizedCopy,setPresentationText} from './i18n.js';
+import {t as textForUI} from './i18n.js';
 import { planningField, planningDistance } from "./science-display.js";
 const e = (tag, text) => {
   const n = document.createElement(tag);
-  if (text) n.textContent = text;
+  if (text) setPresentationText(n,text);
   return n;
 };
 export function sensorPlanning(
@@ -10,18 +12,18 @@ export function sensorPlanning(
 ) {
   const box = e("details");
   box.className = "sensor-planning";
-  box.append(e("summary", "Plan spacing from sensor geometry"));
+  box.append(e("summary", localizedCopy("ui.sensorPlanning.messagePlanSpacingFromSensorGeometry")));
   parent.append(box);
-  const label = e("label", "Instrument"),
+  const label = e("label", localizedCopy("ui.missionOperations.messageInstrument")),
     instrument = e("select");
-  instrument.setAttribute("aria-label", "Planning instrument");
+  setPresentationText(instrument,localizedCopy("ui.sensorPlanning.messagePlanningInstrument"),"aria-label");
   label.append(instrument);
   box.append(label);
   for (const [id, name] of [
-    ["multispectral-imager", "Multispectral camera"],
-    ["thermal-imager", "Thermal camera"],
-    ["hyperspectral-imager", "Hyperspectral"],
-    ["terrain-scanner", "Terrain scanner"],
+    ["multispectral-imager", textForUI("ui.sensorPlanning.messageMultispectralCamera")],
+    ["thermal-imager", textForUI("ui.sensorPlanning.messageThermalCamera")],
+    ["hyperspectral-imager", textForUI("ui.missionWorkspace.messageHyperspectral")],
+    ["terrain-scanner", textForUI("ui.sensorPlanning.messageTerrainScanner")],
   ]) {
     const o = e("option", name);
     o.value = id;
@@ -37,18 +39,18 @@ export function sensorPlanning(
     l.append(i);
     box.append(l);
     if (quantity) planningField(i, quantity, value, name, suffix);
-    else i.setAttribute("aria-label", name);
+    else setPresentationText(i,name,"aria-label");
     return i;
   };
   const altitude = field(
-      "Survey altitude above ground",
+      localizedCopy("ui.sensorPlanning.messageSurveyAltitudeAboveGround"),
       (savedSettings?.altitudeAglMetres??304.8)/.3048,
       "altitude",
       "AGL",
     ),
-    speed = field("Groundspeed", (savedSettings?.groundspeedMetresPerSecond??100*1852/3600)*3600/1852, "speed"),
-    side = field("Side overlap (%)", (savedSettings?.sideOverlap??.3)*100),
-    forward = field("Forward overlap (%)", (savedSettings?.forwardOverlap??.6)*100);
+    speed = field(localizedCopy("ui.missionWorkspace.messageGroundspeed"), (savedSettings?.groundspeedMetresPerSecond??100*1852/3600)*3600/1852, "speed"),
+    side = field(localizedCopy("ui.sensorPlanning.messageSideOverlap"), (savedSettings?.sideOverlap??.3)*100),
+    forward = field(localizedCopy("ui.sensorPlanning.messageForwardOverlap"), (savedSettings?.forwardOverlap??.6)*100);
   side.min = forward.min = 0;
   side.max = forward.max = 98;
   let canonicalAgl=savedSettings?.altitudeAglMetres??304.8,canonicalSpeed=savedSettings?.groundspeedMetresPerSecond??100*1852/3600;
@@ -57,18 +59,18 @@ export function sensorPlanning(
   const readSpeed=()=>{const knots=speed.planningUnits.read();if(knots!==lastKnots){canonicalSpeed=knots*1852/3600;lastKnots=knots;}return canonicalSpeed;};
   const report = e(
     "p",
-    "Select a payload profile under Scientific instruments, then review the geometry here. AGL and MSL are independent values.",
+    localizedCopy("ui.sensorPlanning.messageSelectAPayloadProfileUnderScientificInstruments"),
   );
   report.setAttribute("role", "status");
   box.append(report);
-  const use = e("button", "Use recommended track spacing");
+  const use = e("button", localizedCopy("ui.sensorPlanning.messageUseRecommendedTrackSpacing"));
   use.type = "button";
   use.disabled = true;
   box.append(use);
-  const terrainLabel = e("label", "Terrain-aware centre preview (optional)"),
+  const terrainLabel = e("label", localizedCopy("ui.sensorPlanning.messageTerrainAwareCentrePreviewOptional")),
     terrain = e("select");
-  terrain.setAttribute("aria-label", "Terrain-aware planning source");
-  const flat = e("option", "Flat-ground baseline");
+  setPresentationText(terrain,localizedCopy("ui.sensorPlanning.messageTerrainAwarePlanningSource"),"aria-label");
+  const flat = e("option", localizedCopy("ui.sensorPlanning.messageFlatGroundBaseline"));
   flat.value = "";
   terrain.append(flat);
   terrainLabel.append(terrain);
@@ -82,11 +84,11 @@ export function sensorPlanning(
         o.value = item.source.id;
         terrain.append(o);
       }
-    if(savedSettings?.terrainSourceId){if(![...terrain.options].some(o=>o.value===savedSettings.terrainSourceId)){const o=e('option','Previously selected terrain source (currently unavailable)');o.value=savedSettings.terrainSourceId;terrain.append(o);}terrain.value=savedSettings.terrainSourceId;}
+    if(savedSettings?.terrainSourceId){if(![...terrain.options].some(o=>o.value===savedSettings.terrainSourceId)){const o=e('option',localizedCopy("ui.sensorPlanning.messagePreviouslySelectedTerrainSourceCurrentlyUnavailable"));o.value=savedSettings.terrainSourceId;terrain.append(o);}terrain.value=savedSettings.terrainSourceId;}
     })
     .catch(() => {});
   const methods = e("details");
-  methods.append(e("summary", "Assumptions and source limits"));
+  methods.append(e("summary", localizedCopy("ui.sensorPlanning.messageAssumptionsAndSourceLimits")));
   const detail = e("p");
   methods.append(detail);
   box.append(methods);
@@ -106,7 +108,7 @@ export function sensorPlanning(
       const config = instruments().find(
         (c) => c.instrumentId === instrument.value,
       );
-      if (!config) throw Error("Choose a supported instrument.");
+      if (!config) throw Error(textForUI("ui.sensorPlanning.messageChooseASupportedInstrument"));
       const result = await api("/api/sensor-planning", {
         instrument: config,
         altitudeAglMetres: readAgl(),
@@ -119,13 +121,13 @@ export function sensorPlanning(
       if (own !== generation || !box.isConnected) return;
       latest = result;
       use.disabled = false;
-      report.textContent = `${result.payload.profile.name} · Modeled swath ${planningDistance(result.swathMetres)} · Recommended spacing ${planningDistance(result.trackSpacingMetres)} · Nominal cross-track GSD ${result.nominalCrossTrackGsdMetres?.toPrecision(4) ?? "unspecified"} m · ${result.pattern ? `${Math.ceil(result.pattern.waypoints.length / 2)} scan/transition segments · ${planningDistance(result.pattern.distanceMetres)} · ${(result.durationSeconds / 60).toFixed(1)} min at stated groundspeed` : "Choose a pattern center for route estimates."}${result.recommendedIntervalSeconds != null ? ` · Frame interval ≤${result.recommendedIntervalSeconds.toFixed(2)} s` : ""}${result.theoreticalPointDensityPerSquareMetre != null ? ` · Ideal modeled density ${result.theoreticalPointDensityPerSquareMetre.toFixed(2)} points/m² (not recorded returns)` : ""}`;
+      setPresentationText(report,localizedCopy("ui.sensorPlanning.messageModeledSwathRecommendedSpacing",{value1:(String(result.payload.profile.name)),value2:(String(planningDistance(result.swathMetres))),value3:(String(planningDistance(result.trackSpacingMetres))),value4:(String(result.nominalCrossTrackGsdMetres?.toPrecision(4) ?? "unspecified")),value5:(String(result.pattern ? `${Math.ceil(result.pattern.waypoints.length / 2)} scan/transition segments · ${planningDistance(result.pattern.distanceMetres)} · ${(result.durationSeconds / 60).toFixed(1)} min at stated groundspeed` : "Choose a pattern center for route estimates.")),value6:(String(result.recommendedIntervalSeconds != null ? ` · Frame interval ≤${result.recommendedIntervalSeconds.toFixed(2)} s` : "")),value7:(String(result.theoreticalPointDensityPerSquareMetre != null ? ` · Ideal modeled density ${result.theoreticalPointDensityPerSquareMetre.toFixed(2)} points/m² (not recorded returns)` : ""))}));
       if (result.terrainStatus)
         report.textContent += " · " + result.terrainStatus;
-      detail.textContent = result.advisories.join(" ");
+      setPresentationText(detail,result.advisories.join(" "));
       preview?.(result);
     } catch (error) {
-      if (own === generation) report.textContent = error.message;
+      if (own === generation) setPresentationText(report,error.message);
     }
   }
   const schedule = () => {

@@ -1,12 +1,14 @@
+import {message as localizedCopy,setPresentationText} from './i18n.js';
+import {t as textForUI} from './i18n.js';
 const e = (tag, text) => {
   const n = document.createElement(tag);
-  if (text !== undefined) n.textContent = text;
+  if (text !== undefined) setPresentationText(n,text);
   return n;
 };
 const gb = (n) =>
   n == null
-    ? "Unlimited"
-    : `${(n / 1e9).toLocaleString(undefined, { maximumFractionDigits: 4 })} GB`;
+    ? textForUI("ui.downloadActivity.messageUnlimited")
+    : textForUI("ui.storageManagement.messageGB",{value1:(String((n / 1e9).toLocaleString(undefined, { maximumFractionDigits: 4 })))});
 const button = (text, run) => {
   const b = e("button", text);
   b.type = "button";
@@ -28,10 +30,10 @@ export async function storageManagement(parent, api) {
   section.id = "storage-management";
   section.className = "panel research-panel";
   section.append(
-    e("h2", "Storage & Data · Storage Management"),
+    e("h2", localizedCopy("ui.storageManagement.messageStorageDataStorageManagement")),
     e(
       "p",
-      "1 GB = 1,000,000,000 bytes. Limits suspend new writes safely; they never automatically erase completed flights, observations, scientific products, original imported sources, plans, presets or backups.",
+      localizedCopy("ui.storageManagement.message1GB1000000000BytesLimitsSuspend"),
     ),
   );
   parent.append(section);
@@ -52,8 +54,8 @@ export async function storageManagement(parent, api) {
     );
     overview.replaceChildren();
     for (const [key, title] of [
-      ["flight", "Flight & Mission Storage"],
-      ["science", "Scientific Data Library"],
+      ["flight", textForUI("ui.storageManagement.messageFlightMissionStorage")],
+      ["science", textForUI("ui.app.messageScientificDataLibrary")],
     ]) {
       const s = snapshot[key],
         card = e("article");
@@ -63,36 +65,36 @@ export async function storageManagement(parent, api) {
         e("strong", s.status),
         e(
           "p",
-          `${gb(s.usedBytes)} used / ${gb(s.limitBytes)} · ${s.percentage == null ? "No cap" : s.percentage.toFixed(1) + "%"} · Free disk ${gb(s.freeBytes)}`,
+          localizedCopy("ui.storageManagement.messageUsedFreeDisk",{value1:(String(gb(s.usedBytes))),value2:(String(gb(s.limitBytes))),value3:(String(s.percentage == null ? "No cap" : s.percentage.toFixed(1) + "%")),value4:(String(gb(s.freeBytes)))}),
         ),
       );
       const progress = e("progress");
       progress.max = 100;
       progress.value = Math.min(100, s.percentage || 0);
       progress.hidden=s.percentage==null;
-      progress.setAttribute("aria-label", title + " capacity");
+      setPresentationText(progress,localizedCopy("ui.storageManagement.messageCapacity",{value1:(title)}),"aria-label");
       card.append(
         progress,
         e(
           "p",
-          `Database/WAL/SHM footprint: ${gb(s.databaseBytes)}. Clearing rows may retain physical SQLite allocation.`,
+          localizedCopy("ui.storageManagement.messageDatabaseWALSHMFootprintClearingRowsMayRetain",{value1:(String(gb(s.databaseBytes)))}),
         ),
       );
       card.append(
         e(
           "p",
           key === "flight"
-            ? `${s.missions} recorded missions`
-            : `${s.datasets} datasets · ${s.products} completed products · original sources ${gb(s.sourceBytes)} · registered caches ${gb(s.cacheBytes)}`,
+            ? localizedCopy("ui.storageManagement.messageRecordedMissions",{value1:(String(s.missions))})
+            : localizedCopy("ui.storageManagement.messageDatasetsCompletedProductsOriginal",{value1:(String(s.datasets)),value2:(String(s.products)),value3:(String(gb(s.sourceBytes))),value4:(String(gb(s.cacheBytes)))}),
         ),
       );
       const details = e("details");
       details.append(
-        e("summary", "View Storage Details"),
+        e("summary", localizedCopy("ui.storageManagement.messageViewStorageDetails")),
         e("p", s.accounting),
         e(
           "p",
-          `Protected backups (excluded from cap): ${gb(s.backupBytes)}. Retained processing files: ${gb(s.pendingBytes || 0)} in ${s.pendingOperations || 0} work records; retained for review, never automatic cleanup. In-progress budget reservations: ${gb(s.reservedBytes||0)} (not a claim of actual used bytes). Unrelated files are not classified as deletable content. Usage checked ${snapshot.checkedUtc}.`,
+          localizedCopy("ui.storageManagement.messageProtectedBackupsExcludedFromCapRetained",{value1:(String(gb(s.backupBytes))),value2:(String(gb(s.pendingBytes || 0))),value3:(String(s.pendingOperations || 0)),value4:(String(gb(s.reservedBytes||0))),value5:(String(snapshot.checkedUtc))}),
         ),
       );
       if (s.error) details.append(e("p", s.error));
@@ -102,7 +104,7 @@ export async function storageManagement(parent, api) {
   }
   await load();
   for (const [key, label] of [
-    ["missionLimitBytes", "Flight/Mission maximum"],
+    ["missionLimitBytes", textForUI("ui.storageManagement.messageFlightMissionMaximum")],
   ]) {
     const row = e("label", label + " "),
       select = e("select"),
@@ -110,15 +112,15 @@ export async function storageManagement(parent, api) {
     custom.type = "number";
     custom.min = 0.001;
     custom.step = 0.001;
-    custom.setAttribute("aria-label", label + " custom GB");
-    select.setAttribute("aria-label", label + " preset");
+    setPresentationText(custom,localizedCopy("ui.storageManagement.messageCustomGBd2c1ee6f",{value1:(label)}),"aria-label");
+    setPresentationText(select,localizedCopy("ui.storageManagement.messagePreset",{value1:(label)}),"aria-label");
     for (const [id, text] of [
       ["25", "25 GB"],
       ["50", "50 GB"],
       ["100", "100 GB"],
       ["250", "250 GB"],
-      ["unlimited", "Unlimited"],
-      ["custom", "Custom GB"],
+      ["unlimited", textForUI("ui.downloadActivity.messageUnlimited")],
+      ["custom", textForUI("ui.storageManagement.messageCustomGB")],
     ]) {
       const o = e("option", text);
       o.value = id;
@@ -145,20 +147,20 @@ export async function storageManagement(parent, api) {
               1e9,
           );
   }
-  settings.append(e("p","Scientific Library capacity: available physical storage only. Per-download allowances, concurrent reservations and the recovery safety reserve still apply; there is no total source-count or Library-size quota."));
+  settings.append(e("p",localizedCopy("ui.storageManagement.messageScientificLibraryCapacityAvailablePhysicalStorageOnly")));
   const automatic = e("input");
   automatic.type = "checkbox";
   automatic.checked = snapshot.preferences.automaticCacheCleanup;
   const autoLabel = e(
     "label",
-    " Automatically clean verified regenerable caches only",
+    localizedCopy("ui.storageManagement.messageAutomaticallyCleanVerifiedRegenerableCachesOnly"),
   );
   autoLabel.prepend(automatic);
   settings.append(
     autoLabel,
     e(
       "p",
-      "Pinned missions/datasets: protected. Automatic deletion of completed flights and original scientific data: disabled.",
+      localizedCopy("ui.storageManagement.messagePinnedMissionsDatasetsProtectedAutomaticDeletionOfCompleted"),
     ),
     button("Save storage limits", async () => {
       await api("/api/storage/preferences", {
@@ -179,24 +181,24 @@ export async function storageManagement(parent, api) {
   const filter = e("input"),
     sort = e("select"),
     status = e("select");
-  filter.placeholder = "Filter mission, dataset, category or filename";
-  filter.setAttribute("aria-label", "Cleanup filter");
-  sort.setAttribute("aria-label", "Cleanup sort");
-  status.setAttribute("aria-label", "Cleanup status");
+  setPresentationText(filter,localizedCopy("ui.storageManagement.messageFilterMissionDatasetCategoryOrFilename"),"placeholder",true);
+  setPresentationText(filter,localizedCopy("ui.storageManagement.messageCleanupFilter"),"aria-label");
+  setPresentationText(sort,localizedCopy("ui.storageManagement.messageCleanupSort"),"aria-label");
+  setPresentationText(status,localizedCopy("ui.storageManagement.messageCleanupStatus"),"aria-label");
   for (const [id, text] of [
-    ["created", "Created date"],
-    ["age", "Age"],
-    ["size", "Size (largest first)"],
-    ["mission", "Mission grouping"],
-    ["dataset", "Dataset grouping"],
-    ["category", "Category"],
+    ["created", textForUI("ui.storageManagement.messageCreatedDate")],
+    ["age", textForUI("ui.storageManagement.messageAge")],
+    ["size", textForUI("ui.storageManagement.messageSizeLargestFirst")],
+    ["mission", textForUI("ui.storageManagement.messageMissionGrouping")],
+    ["dataset", textForUI("ui.storageManagement.messageDatasetGrouping")],
+    ["category", textForUI("ui.missionTimeline.messageCategory")],
   ]) {
     const o = e("option", text);
     o.value = id;
     sort.append(o);
   }
-  for (const value of ["", "Eligible", "Protected", "In Use", "Excluded"]) {
-    const o = e("option", value || "All statuses");
+  for (const value of ["", textForUI("ui.storageManagement.messageEligible"), textForUI("ui.storageManagement.messageProtected"), textForUI("ui.storageManagement.messageInUse"), textForUI("ui.atmosphericResearch.messageExcluded")]) {
+    const o = e("option", value || localizedCopy("html.index.textAllStatuses"));
     o.value = value;
     status.append(o);
   }
@@ -205,10 +207,10 @@ export async function storageManagement(parent, api) {
     result = e("p");
   tableWrap.className = "cleanup-table-wrap";
   cleanup.append(
-    e("h3", "Preview Cleanup"),
+    e("h3", localizedCopy("ui.storageManagement.messagePreviewCleanup")),
     e(
       "p",
-      "Only positively registered, reproducible scientific thumbnails qualify. Mission recordings, original imagery, measurements and completed research products are retained. Unregistered temporary/orphan files are excluded for recovery review.",
+      localizedCopy("ui.storageManagement.messageOnlyPositivelyRegisteredReproducibleScientificThumbnailsQualify"),
     ),
     button("Preview Cleanup", preview),
     button("Refresh Preview", preview),
@@ -229,19 +231,19 @@ export async function storageManagement(parent, api) {
     const p = await api(
       `/api/storage/cleanup/${previewId}?offset=${offset}&sort=${encodeURIComponent(sort.value)}&filter=${encodeURIComponent(filter.value)}&status=${encodeURIComponent(status.value)}`,
     );
-    summary.textContent = `Regenerable caches only · ${p.eligibleFiles} eligible files · estimated ${gb(p.estimatedBytes)} · oldest created ${p.oldestUtc || "None"} · newest ${p.newestUtc || "None"} · current science usage ${gb(p.currentUsage)} → expected ${gb(p.expectedUsageAfter)}. Preview ${p.createdUtc}. ${p.total} matching items; showing up to 100.`;
+    setPresentationText(summary,localizedCopy("ui.storageManagement.messageRegenerableCachesOnlyEligibleFiles",{value1:(String(p.eligibleFiles)),value2:(String(gb(p.estimatedBytes))),value3:(String(p.oldestUtc || "None")),value4:(String(p.newestUtc || "None")),value5:(String(gb(p.currentUsage))),value6:(String(gb(p.expectedUsageAfter))),value7:(String(p.createdUtc)),value8:(String(p.total))}));
     const table = e("table"),
       head = e("thead"),
       tr = e("tr");
     for (const name of [
-      "File / Item",
-      "Category",
-      "Mission",
-      "Dataset / Product",
-      "Created UTC / Age",
-      "Size",
-      "Cleanup Reason",
-      "Status",
+      textForUI("ui.storageManagement.messageFileItem"),
+      textForUI("ui.missionTimeline.messageCategory"),
+      textForUI("toolbar.mission"),
+      textForUI("ui.storageManagement.messageDatasetProduct"),
+      textForUI("ui.storageManagement.messageCreatedUTCAge"),
+      textForUI("ui.storageManagement.messageSize"),
+      textForUI("ui.storageManagement.messageCleanupReason"),
+      textForUI("ui.receivedEvidenceUi.messageStatus"),
     ])
       tr.append(e("th", name));
     head.append(tr);
@@ -256,7 +258,7 @@ export async function storageManagement(parent, api) {
         e("p", row.cache.relativePath),
         e(
           "p",
-          `Depends on retained product ${row.cache.productId}. Recipe: ${row.cache.recipe}. Last-used ${row.cache.lastUsedUtc}. SHA-256 ${row.cache.sha256}`,
+          localizedCopy("ui.storageManagement.messageDependsOnRetainedProductRecipe",{value1:(String(row.cache.productId)),value2:(String(row.cache.recipe)),value3:(String(row.cache.lastUsedUtc)),value4:(String(row.cache.sha256))}),
         ),
       );
       file.append(detail);
@@ -265,7 +267,7 @@ export async function storageManagement(parent, api) {
         row.category,
         row.missionName,
         `${row.cache.datasetId} / ${row.cache.productId}`,
-        `${row.cache.createdUtc} / ${row.ageDays.toFixed(1)} days`,
+        textForUI("ui.storageManagement.messageDays",{value1:(String(row.cache.createdUtc)),value2:(String(row.ageDays.toFixed(1)))}),
         gb(row.cache.bytes),
         row.reason,
         row.status,
@@ -298,15 +300,15 @@ export async function storageManagement(parent, api) {
       await page();
     }),
     button("Clean Eligible Files", async () => {
-      if (!previewId) throw Error("Preview cleanup first.");
+      if (!previewId) throw Error(textForUI("ui.storageManagement.messagePreviewCleanupFirst"));
       const p = await api(`/api/storage/cleanup/${previewId}`);
       if (!p.eligibleFiles) {
-        result.textContent = "No eligible cache files.";
+        setPresentationText(result,localizedCopy("ui.storageManagement.messageNoEligibleCacheFiles"));
         return;
       }
       if (
         !confirm(
-          `Remove all ${p.eligibleFiles} eligible regenerable cache files from this preview (including any hidden by your filter)? Estimated ${gb(p.estimatedBytes)}. Original research, completed products, protected/in-use files and backups will remain. Each candidate is revalidated.`,
+          localizedCopy("ui.storageManagement.messageRemoveAllEligibleRegenerableCacheFilesFrom",{value1:(String(p.eligibleFiles)),value2:(String(gb(p.estimatedBytes)))}),
         )
       )
         return;
@@ -314,7 +316,7 @@ export async function storageManagement(parent, api) {
         previewId,
         confirmed: true,
       });
-      result.textContent = `Removed ${r.removed}; skipped ${r.skipped}; failed ${r.failed}. Actual bytes removed: ${r.actualBytesRemoved}. Measured free-space change: ${r.diskSpaceReclaimed ?? "unavailable"} bytes (other disk activity may affect this).`;
+      setPresentationText(result,localizedCopy("ui.storageManagement.messageRemovedSkippedFailedActual",{value1:(String(r.removed)),value2:(String(r.skipped)),value3:(String(r.failed)),value4:(String(r.actualBytesRemoved)),value5:(String(r.diskSpaceReclaimed ?? "unavailable"))}));
       previewId = null;
       tableWrap.replaceChildren();
       await load(true);
@@ -323,19 +325,19 @@ export async function storageManagement(parent, api) {
     button("Cancel", async () => {
       previewId = null;
       tableWrap.replaceChildren();
-      summary.textContent = "Cleanup cancelled; no files were removed.";
+      setPresentationText(summary,localizedCopy("ui.storageManagement.messageCleanupCancelledNoFilesWereRemoved"));
     }),
     result,
   );
   async function historyRows() {
     const rows = await api("/api/storage/cleanup/history");
-    history.replaceChildren(e("h3", "Local cleanup history"));
+    history.replaceChildren(e("h3", localizedCopy("ui.storageManagement.messageLocalCleanupHistory")));
     for (const row of rows) {
       const d = e("details");
       d.append(
         e(
           "summary",
-          `${row.completedUtc}: ${row.removed} removed, ${row.skipped} skipped, ${row.failed} failed; ${row.actualBytesRemoved} actual bytes removed`,
+          localizedCopy("ui.storageManagement.messageRemovedSkippedFailedActualBytes",{value1:(String(row.completedUtc)),value2:(String(row.removed)),value3:(String(row.skipped)),value4:(String(row.failed)),value5:(String(row.actualBytesRemoved))}),
         ),
       );
       for (const note of row.messages) d.append(e("p", note));

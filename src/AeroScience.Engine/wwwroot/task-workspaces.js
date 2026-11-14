@@ -1,3 +1,4 @@
+import {message as localizedCopy,setPresentationText} from './i18n.js';
 import {node,link} from './workstation-ui.js';
 import {workspaceDefinitions,workspaceKey,resolveRoute} from './navigation-routes.js';
 import {t} from './i18n.js';
@@ -8,10 +9,10 @@ export function taskWorkspaces(){
   for(const group of workspaceDefinitions){
     if(document.getElementById(group.id))continue;
     const section=node('section',undefined,'task-workspace');section.id=group.id;section.hidden=true;
-    const heading=node('header',undefined,'page-heading'),title=node('h1',t(group.titleKey));
+    const heading=node('header',undefined,'page-heading'),title=node('h1',localizedCopy(group.titleKey));
     title.dataset.i18n=group.titleKey;heading.append(title);
-    const nav=node('nav',undefined,'workspace-subnav');nav.setAttribute('aria-label',t('nav.sections',{name:t(group.titleKey)}));
-    for(const [key,href] of group.links){const entry=link(nav,t(key),href);entry.dataset.i18n=key;}
+    const nav=node('nav',undefined,'workspace-subnav');setPresentationText(nav,localizedCopy('nav.sections',{name:t(group.titleKey)}),"aria-label");
+    for(const [key,href] of group.links){const entry=link(nav,localizedCopy(key),href);entry.dataset.i18n=key;}
     // Keep the original planner after the flight tools. Their existing map/search
     // helpers rely on this document order; moving live nodes must preserve it.
     section.append(heading,nav);document.getElementById('workspace').insertBefore(section,document.getElementById(group.mountBefore||group.pages[0]));

@@ -1,0 +1,908 @@
+{
+  "Home": [
+    "Inicio",
+    "Accueil",
+    "Start",
+    "Início"
+  ],
+  "Missions": [
+    "Misiones",
+    "Missions",
+    "Missionen",
+    "Missões"
+  ],
+  "Organizations": [
+    "Organizaciones",
+    "Organisations",
+    "Organisationen",
+    "Organizações"
+  ],
+  "Settings": [
+    "Ajustes",
+    "Paramètres",
+    "Einstellungen",
+    "Configurações"
+  ],
+  "Help & Support": [
+    "Ayuda y asistencia",
+    "Aide et assistance",
+    "Hilfe und Support",
+    "Ajuda e suporte"
+  ],
+  "My Research": [
+    "Mi investigación",
+    "Mes recherches",
+    "Meine Forschung",
+    "Minha pesquisa"
+  ],
+  "Flight Planner": [
+    "Planificador de vuelo",
+    "Planificateur de vol",
+    "Flugplaner",
+    "Planejador de voo"
+  ],
+  "Current Flight": [
+    "Vuelo actual",
+    "Vol en cours",
+    "Aktueller Flug",
+    "Voo atual"
+  ],
+  "Flight Operations": [
+    "Operaciones de vuelo",
+    "Opérations de vol",
+    "Flugbetrieb",
+    "Operações de voo"
+  ],
+  "Results & History": [
+    "Resultados e historial",
+    "Résultats et historique",
+    "Ergebnisse und Verlauf",
+    "Resultados e histórico"
+  ],
+  "Scientific Library": [
+    "Biblioteca científica",
+    "Bibliothèque scientifique",
+    "Wissenschaftliche Bibliothek",
+    "Biblioteca científica"
+  ],
+  "Sources": [
+    "Fuentes",
+    "Sources",
+    "Quellen",
+    "Fontes"
+  ],
+  "Downloads": [
+    "Descargas",
+    "Téléchargements",
+    "Downloads",
+    "Downloads"
+  ],
+  "Storage": [
+    "Almacenamiento",
+    "Stockage",
+    "Speicher",
+    "Armazenamento"
+  ],
+  "Appearance & Language": [
+    "Apariencia e idioma",
+    "Apparence et langue",
+    "Darstellung und Sprache",
+    "Aparência e idioma"
+  ],
+  "Theme": [
+    "Tema",
+    "Thème",
+    "Design",
+    "Tema"
+  ],
+  "Auto (follow system)": [
+    "Automático (según el sistema)",
+    "Automatique (selon le système)",
+    "Automatisch (Systemeinstellung)",
+    "Automático (seguir o sistema)"
+  ],
+  "Light": [
+    "Claro",
+    "Clair",
+    "Hell",
+    "Claro"
+  ],
+  "Dark": [
+    "Oscuro",
+    "Sombre",
+    "Dunkel",
+    "Escuro"
+  ],
+  "Language": [
+    "Idioma",
+    "Langue",
+    "Sprache",
+    "Idioma"
+  ],
+  "Unknown": [
+    "Desconocido",
+    "Inconnu",
+    "Unbekannt",
+    "Desconhecido"
+  ],
+  "Unavailable": [
+    "No disponible",
+    "Indisponible",
+    "Nicht verfügbar",
+    "Indisponível"
+  ],
+  "Try again": [
+    "Reintentar",
+    "Réessayer",
+    "Erneut versuchen",
+    "Tentar novamente"
+  ],
+  "Loading…": [
+    "Cargando…",
+    "Chargement…",
+    "Wird geladen…",
+    "Carregando…"
+  ],
+  "Loading saved results…": [
+    "Cargando los resultados guardados…",
+    "Chargement des résultats enregistrés…",
+    "Gespeicherte Ergebnisse werden geladen…",
+    "Carregando os resultados salvos…"
+  ],
+  "Details are unavailable. Refresh to review the current information.": [
+    "Los detalles no están disponibles. Actualiza la vista para consultar la información actual.",
+    "Les détails sont indisponibles. Actualisez la vue pour consulter les informations actuelles.",
+    "Details sind nicht verfügbar. Aktualisieren Sie die Ansicht, um die aktuellen Informationen zu prüfen.",
+    "Os detalhes estão indisponíveis. Atualize a visualização para consultar as informações atuais."
+  ],
+  "The operation was not confirmed. Your saved records remain available.": [
+    "La operación no se ha confirmado. Tus registros guardados siguen disponibles.",
+    "L’opération n’a pas été confirmée. Vos enregistrements sauvegardés restent disponibles.",
+    "Der Vorgang wurde nicht bestätigt. Ihre gespeicherten Aufzeichnungen bleiben verfügbar.",
+    "A operação não foi confirmada. Seus registros salvos continuam disponíveis."
+  ],
+  "The companion connection was lost. Your saved data has not been deleted. Reconnect to the companion and try again.": [
+    "Se ha perdido la conexión con la aplicación complementaria. Tus datos guardados no se han eliminado. Vuelve a conectarte y reinténtalo.",
+    "La connexion à l’application compagnon a été perdue. Vos données enregistrées n’ont pas été supprimées. Reconnectez-vous à l’application compagnon et réessayez.",
+    "Die Verbindung zur Begleit-App wurde unterbrochen. Ihre gespeicherten Daten wurden nicht gelöscht. Stellen Sie die Verbindung wieder her und versuchen Sie es erneut.",
+    "A conexão com o aplicativo complementar foi perdida. Seus dados salvos não foram excluídos. Reconecte-se ao aplicativo e tente novamente."
+  ],
+  "Close {name}": [
+    "Cerrar {name}",
+    "Fermer {name}",
+    "{name} schließen",
+    "Fechar {name}"
+  ],
+  "Unsaved changes": [
+    "Cambios sin guardar",
+    "Modifications non enregistrées",
+    "Ungespeicherte Änderungen",
+    "Alterações não salvas"
+  ],
+  "Closing will discard the unsaved edits in this window. Saved data and ongoing operations will be preserved.": [
+    "Al cerrar se descartarán los cambios sin guardar de esta ventana. Se conservarán los datos guardados y las operaciones en curso.",
+    "La fermeture abandonnera les modifications non enregistrées de cette fenêtre. Les données enregistrées et les opérations en cours seront conservées.",
+    "Beim Schließen werden die ungespeicherten Änderungen in diesem Fenster verworfen. Gespeicherte Daten und laufende Vorgänge bleiben erhalten.",
+    "Fechar descartará as alterações não salvas nesta janela. Os dados salvos e as operações em andamento serão preservados."
+  ],
+  "Keep editing": [
+    "Seguir editando",
+    "Continuer la modification",
+    "Weiter bearbeiten",
+    "Continuar editando"
+  ],
+  "Discard unsaved changes": [
+    "Descartar los cambios sin guardar",
+    "Abandonner les modifications non enregistrées",
+    "Ungespeicherte Änderungen verwerfen",
+    "Descartar alterações não salvas"
+  ],
+  "Cancel": [
+    "Cancelar",
+    "Annuler",
+    "Abbrechen",
+    "Cancelar"
+  ],
+  "Save": [
+    "Guardar",
+    "Enregistrer",
+    "Speichern",
+    "Salvar"
+  ],
+  "Save Changes": [
+    "Guardar cambios",
+    "Enregistrer les modifications",
+    "Änderungen speichern",
+    "Salvar alterações"
+  ],
+  "Save as New Plan": [
+    "Guardar como plan nuevo",
+    "Enregistrer comme nouveau plan",
+    "Als neuen Plan speichern",
+    "Salvar como novo plano"
+  ],
+  "Flight recording active": [
+    "Grabación del vuelo activa",
+    "Enregistrement du vol actif",
+    "Flugaufzeichnung aktiv",
+    "Gravação do voo ativa"
+  ],
+  "Flight recording inactive": [
+    "Grabación del vuelo inactiva",
+    "Enregistrement du vol inactif",
+    "Flugaufzeichnung inaktiv",
+    "Gravação do voo inativa"
+  ],
+  "Flight recording unavailable": [
+    "Estado de grabación del vuelo no disponible",
+    "État de l’enregistrement du vol indisponible",
+    "Status der Flugaufzeichnung nicht verfügbar",
+    "Estado da gravação do voo indisponível"
+  ],
+  "Science armed / not started": [
+    "Adquisición científica preparada; aún no iniciada",
+    "Collecte scientifique prête, non démarrée",
+    "Wissenschaftliche Datenerfassung bereit, noch nicht gestartet",
+    "Coleta científica preparada; ainda não iniciada"
+  ],
+  "Science collecting": [
+    "Adquisición de datos científicos en curso",
+    "Collecte scientifique en cours",
+    "Wissenschaftliche Datenerfassung läuft",
+    "Coleta de dados científicos em andamento"
+  ],
+  "Science paused": [
+    "Adquisición científica en pausa",
+    "Collecte scientifique en pause",
+    "Wissenschaftliche Datenerfassung pausiert",
+    "Coleta científica pausada"
+  ],
+  "Science session ended": [
+    "Sesión científica finalizada",
+    "Session scientifique terminée",
+    "Wissenschaftliche Sitzung beendet",
+    "Sessão científica encerrada"
+  ],
+  "Science ended": [
+    "Adquisición científica finalizada",
+    "Collecte scientifique terminée",
+    "Wissenschaftliche Datenerfassung beendet",
+    "Coleta científica encerrada"
+  ],
+  "Science not started": [
+    "Adquisición científica no iniciada",
+    "Collecte scientifique non démarrée",
+    "Wissenschaftliche Datenerfassung nicht gestartet",
+    "Coleta científica não iniciada"
+  ],
+  "Science status unavailable": [
+    "Estado de la adquisición científica no disponible",
+    "État de la collecte scientifique indisponible",
+    "Status der wissenschaftlichen Datenerfassung nicht verfügbar",
+    "Estado da coleta científica indisponível"
+  ],
+  "Science unavailable": [
+    "Adquisición científica no disponible",
+    "Collecte scientifique indisponible",
+    "Wissenschaftliche Datenerfassung nicht verfügbar",
+    "Coleta científica indisponível"
+  ],
+  "Start Recording": [
+    "Iniciar grabación del vuelo",
+    "Démarrer l’enregistrement du vol",
+    "Flugaufzeichnung starten",
+    "Iniciar gravação do voo"
+  ],
+  "Start Science Collection": [
+    "Iniciar adquisición científica",
+    "Démarrer la collecte scientifique",
+    "Wissenschaftliche Datenerfassung starten",
+    "Iniciar coleta científica"
+  ],
+  "Arm Automatic Collection": [
+    "Preparar adquisición automática",
+    "Préparer la collecte automatique",
+    "Automatische Datenerfassung bereitstellen",
+    "Preparar coleta automática"
+  ],
+  "Pause Science Collection": [
+    "Pausar adquisición científica",
+    "Mettre la collecte scientifique en pause",
+    "Wissenschaftliche Datenerfassung pausieren",
+    "Pausar coleta científica"
+  ],
+  "Resume Science Collection": [
+    "Reanudar adquisición científica",
+    "Reprendre la collecte scientifique",
+    "Wissenschaftliche Datenerfassung fortsetzen",
+    "Retomar coleta científica"
+  ],
+  "End Science": [
+    "Finalizar adquisición científica",
+    "Terminer la collecte scientifique",
+    "Wissenschaftliche Datenerfassung beenden",
+    "Encerrar coleta científica"
+  ],
+  "End Flight": [
+    "Finalizar vuelo",
+    "Terminer le vol",
+    "Flug beenden",
+    "Encerrar voo"
+  ],
+  "Recording continues while scientific collection is paused.": [
+    "La grabación del vuelo continúa mientras la adquisición de datos científicos está en pausa.",
+    "L’enregistrement du vol continue pendant que la collecte scientifique est en pause.",
+    "Die Flugaufzeichnung läuft weiter, während die wissenschaftliche Datenerfassung pausiert ist.",
+    "A gravação do voo continua enquanto a coleta de dados científicos está pausada."
+  ],
+  "Connected": [
+    "Conectado",
+    "Connecté",
+    "Verbunden",
+    "Conectado"
+  ],
+  "Disconnected": [
+    "Desconectado",
+    "Déconnecté",
+    "Getrennt",
+    "Desconectado"
+  ],
+  "Reconnecting": [
+    "Reconectando",
+    "Reconnexion",
+    "Verbindung wird wiederhergestellt",
+    "Reconectando"
+  ],
+  "No active mission": [
+    "Ninguna misión activa",
+    "Aucune mission active",
+    "Keine aktive Mission",
+    "Nenhuma missão ativa"
+  ],
+  "Simulator-reported": [
+    "Comunicado por el simulador",
+    "Rapporté par le simulateur",
+    "Vom Simulator gemeldet",
+    "Informado pelo simulador"
+  ],
+  "Historical dataset": [
+    "Conjunto de datos históricos",
+    "Jeu de données historiques",
+    "Historischer Datensatz",
+    "Conjunto de dados históricos"
+  ],
+  "Modeled / derived": [
+    "Modelado / derivado",
+    "Modélisé / dérivé",
+    "Modelliert / abgeleitet",
+    "Modelado / derivado"
+  ],
+  "Pilot-entered": [
+    "Introducido por el piloto",
+    "Saisi par le pilote",
+    "Vom Piloten eingegeben",
+    "Inserido pelo piloto"
+  ],
+  "Unavailable / unsupported": [
+    "No disponible / no compatible",
+    "Indisponible / non pris en charge",
+    "Nicht verfügbar / nicht unterstützt",
+    "Indisponível / não compatível"
+  ],
+  "Synthetic test fixture": [
+    "Datos sintéticos de prueba",
+    "Données synthétiques de test",
+    "Synthetische Testdaten",
+    "Dados sintéticos de teste"
+  ],
+  "Valid": [
+    "Válido",
+    "Valide",
+    "Gültig",
+    "Válido"
+  ],
+  "Invalid": [
+    "No válido",
+    "Non valide",
+    "Ungültig",
+    "Inválido"
+  ],
+  "Partial": [
+    "Parcial",
+    "Partiel",
+    "Teilweise",
+    "Parcial"
+  ],
+  "Pending": [
+    "Pendiente",
+    "En attente",
+    "Ausstehend",
+    "Pendente"
+  ],
+  "Unassessed": [
+    "Sin evaluar",
+    "Non évalué",
+    "Nicht bewertet",
+    "Não avaliado"
+  ],
+  "Draft": [
+    "Borrador",
+    "Brouillon",
+    "Entwurf",
+    "Rascunho"
+  ],
+  "Approved": [
+    "Aprobado",
+    "Approuvé",
+    "Genehmigt",
+    "Aprovado"
+  ],
+  "Rejected": [
+    "Rechazado",
+    "Rejeté",
+    "Abgelehnt",
+    "Rejeitado"
+  ],
+  "Map": [
+    "Mapa",
+    "Carte",
+    "Karte",
+    "Mapa"
+  ],
+  "Flight": [
+    "Vuelo",
+    "Vol",
+    "Flug",
+    "Voo"
+  ],
+  "Science": [
+    "Ciencia",
+    "Science",
+    "Wissenschaft",
+    "Ciência"
+  ],
+  "Cards": [
+    "Fichas",
+    "Fiches",
+    "Karten",
+    "Fichas"
+  ],
+  "Inspect": [
+    "Inspeccionar",
+    "Inspecter",
+    "Prüfen",
+    "Inspecionar"
+  ],
+  "Previous values": [
+    "Valores anteriores",
+    "Valeurs précédentes",
+    "Vorherige Werte",
+    "Valores anteriores"
+  ],
+  "Next values": [
+    "Valores siguientes",
+    "Valeurs suivantes",
+    "Nächste Werte",
+    "Próximos valores"
+  ],
+  "No recorded values": [
+    "No hay valores registrados",
+    "Aucune valeur enregistrée",
+    "Keine aufgezeichneten Werte",
+    "Nenhum valor registrado"
+  ],
+  "No valid recorded values in this selection.": [
+    "No hay valores registrados válidos en esta selección.",
+    "Aucune valeur enregistrée valide dans cette sélection.",
+    "Keine gültigen aufgezeichneten Werte in dieser Auswahl.",
+    "Não há valores registrados válidos nesta seleção."
+  ],
+  "{name} — candidate translation": [
+    "{name} — traducción candidata",
+    "{name} — traduction candidate",
+    "{name} — Übersetzungsentwurf",
+    "{name} — tradução candidata"
+  ],
+  "Candidate translation. Fluent human review is pending; report unclear operational, scientific or consent wording.": [
+    "Traducción candidata pendiente de revisión humana por una persona con dominio del idioma. Informa de cualquier texto operativo, científico o de consentimiento que resulte poco claro.",
+    "Traduction candidate en attente d’une révision humaine par une personne maîtrisant la langue. Signalez toute formulation opérationnelle, scientifique ou de consentement peu claire.",
+    "Übersetzungsentwurf. Die Prüfung durch sprachkundige Menschen steht aus. Melden Sie unklare Betriebs-, Wissenschafts- oder Einwilligungstexte.",
+    "Tradução candidata. A revisão humana por alguém fluente está pendente; informe textos operacionais, científicos ou de consentimento que não estejam claros."
+  ],
+  "English is the canonical source language. Original scientific evidence, identifiers, units, hashes and UTC timestamps are never translated.": [
+    "El inglés es el idioma de referencia. Las pruebas científicas originales, los identificadores, las unidades, los hashes y las marcas de tiempo UTC nunca se traducen.",
+    "L’anglais est la langue source de référence. Les preuves scientifiques originales, identifiants, unités, empreintes et horodatages UTC ne sont jamais traduits.",
+    "Englisch ist die maßgebliche Ausgangssprache. Originale wissenschaftliche Nachweise, Kennungen, Einheiten, Hashwerte und UTC-Zeitstempel werden nie übersetzt.",
+    "O inglês é o idioma de referência. Evidências científicas originais, identificadores, unidades, hashes e registros de data e hora UTC nunca são traduzidos."
+  ],
+  "This message uses English because a compatible translation is unavailable.": [
+    "Este mensaje está en inglés porque no hay una traducción compatible disponible.",
+    "Ce message est en anglais car aucune traduction compatible n’est disponible.",
+    "Diese Meldung erscheint auf Englisch, da keine kompatible Übersetzung verfügbar ist.",
+    "Esta mensagem usa inglês porque uma tradução compatível não está disponível."
+  ],
+  "Reopen this window to apply the selected language. Recording, scientific collection and saved data continue unchanged.": [
+    "Vuelve a abrir esta ventana para aplicar el idioma seleccionado. La grabación, la adquisición científica y los datos guardados no cambian.",
+    "Rouvrez cette fenêtre pour appliquer la langue choisie. L’enregistrement, la collecte scientifique et les données enregistrées restent inchangés.",
+    "Öffnen Sie dieses Fenster erneut, um die gewählte Sprache anzuwenden. Aufzeichnung, wissenschaftliche Datenerfassung und gespeicherte Daten bleiben unverändert.",
+    "Reabra esta janela para aplicar o idioma selecionado. A gravação, a coleta científica e os dados salvos continuam sem alterações."
+  ],
+  "Language resources do not match this application build. English fallback is active. Reopen the matching toolbar or companion build.": [
+    "Los recursos de idioma no coinciden con esta compilación. Se utiliza el inglés como alternativa. Vuelve a abrir la barra de herramientas o la aplicación complementaria de la misma compilación.",
+    "Les ressources linguistiques ne correspondent pas à cette compilation. L’anglais de secours est actif. Rouvrez la barre d’outils ou l’application compagnon correspondante.",
+    "Die Sprachressourcen passen nicht zu diesem Programmstand. Die englische Ersatzanzeige ist aktiv. Öffnen Sie die passende Version der Symbolleiste oder Begleit-App erneut.",
+    "Os recursos de idioma não correspondem a esta compilação. O inglês de fallback está ativo. Reabra a barra de ferramentas ou o aplicativo complementar da compilação correspondente."
+  ],
+  "Use this browser’s language": [
+    "Usar el idioma de este navegador",
+    "Utiliser la langue de ce navigateur",
+    "Sprache dieses Browsers verwenden",
+    "Usar o idioma deste navegador"
+  ],
+  "My organization portal language": [
+    "Mi idioma del portal de la organización",
+    "Ma langue du portail de l’organisation",
+    "Meine Sprache im Organisationsportal",
+    "Meu idioma no portal da organização"
+  ],
+  "This language preference belongs to your signed-in organization account. It does not change your companion, scientific units or permissions.": [
+    "Esta preferencia de idioma pertenece a la cuenta de la organización con la que has iniciado sesión. No cambia la aplicación complementaria, las unidades científicas ni los permisos.",
+    "Cette préférence linguistique appartient à votre compte d’organisation connecté. Elle ne modifie ni l’application compagnon, ni les unités scientifiques, ni les autorisations.",
+    "Diese Spracheinstellung gehört zu Ihrem angemeldeten Organisationskonto. Sie ändert weder die Begleit-App noch wissenschaftliche Einheiten oder Berechtigungen.",
+    "Esta preferência de idioma pertence à sua conta conectada da organização. Ela não altera o aplicativo complementar, as unidades científicas nem as permissões."
+  ],
+  "Organization portal language saved.": [
+    "Idioma del portal de la organización guardado.",
+    "Langue du portail de l’organisation enregistrée.",
+    "Sprache des Organisationsportals gespeichert.",
+    "Idioma do portal da organização salvo."
+  ],
+  "Changing language does not authorize downloads, live sharing or evidence delivery.": [
+    "Cambiar de idioma no autoriza descargas, uso compartido en directo ni envío de pruebas.",
+    "Changer de langue n’autorise ni les téléchargements, ni le partage en direct, ni l’envoi de preuves.",
+    "Ein Sprachwechsel autorisiert keine Downloads, Live-Freigaben oder Nachweisübermittlungen.",
+    "Alterar o idioma não autoriza downloads, compartilhamento ao vivo nem envio de evidências."
+  ],
+  "Fluent human review pending": [
+    "Revisión humana del idioma pendiente",
+    "Révision humaine linguistique en attente",
+    "Sprachkundige menschliche Prüfung ausstehend",
+    "Revisão humana por pessoa fluente pendente"
+  ],
+  "{title} — scrollable table": [
+    "{title} — tabla desplazable",
+    "{title} — tableau défilant",
+    "{title} — scrollbare Tabelle",
+    "{title} — tabela rolável"
+  ],
+  "Inspect sample {count}": [
+    "Inspeccionar muestra {count}",
+    "Inspecter l’échantillon {count}",
+    "Probe {count} prüfen",
+    "Inspecionar amostra {count}"
+  ],
+  "{start}–{end} of {count} displayed values": [
+    "{start}–{end} de {count} valores mostrados",
+    "{start}–{end} sur {count} valeurs affichées",
+    "{start}–{end} von {count} angezeigten Werten",
+    "{start}–{end} de {count} valores exibidos"
+  ],
+  "3D rendering is unavailable. Use the 2D view and original-value table to inspect the same scientific evidence.": [
+    "La visualización 3D no está disponible. Usa la vista 2D y la tabla de valores originales para inspeccionar las mismas pruebas científicas.",
+    "Le rendu 3D est indisponible. Utilisez la vue 2D et le tableau des valeurs originales pour examiner les mêmes preuves scientifiques.",
+    "Die 3D-Darstellung ist nicht verfügbar. Prüfen Sie dieselben wissenschaftlichen Nachweise in der 2D-Ansicht und der Originalwerttabelle.",
+    "A renderização 3D está indisponível. Use a visualização 2D e a tabela de valores originais para inspecionar as mesmas evidências científicas."
+  ],
+  "Original scientific values": [
+    "Valores científicos originales",
+    "Valeurs scientifiques originales",
+    "Wissenschaftliche Originalwerte",
+    "Valores científicos originais"
+  ],
+  "Source acquisition date unknown; the simulated flight date does not establish when this source was measured.": [
+    "Fecha de adquisición de la fuente desconocida; la fecha del vuelo simulado no indica cuándo se midió esta fuente.",
+    "Date d’acquisition de la source inconnue ; la date du vol simulé ne détermine pas quand cette source a été mesurée.",
+    "Erfassungsdatum der Quelle unbekannt. Das Datum des simulierten Flugs belegt nicht, wann diese Quelldaten gemessen wurden.",
+    "Data de aquisição da fonte desconhecida; a data do voo simulado não determina quando esta fonte foi medida."
+  ],
+  "Vertical datum unknown. Do not interpret these heights as a verified common elevation reference.": [
+    "Datum vertical desconocido. No interpretes estas alturas como si compartieran una referencia de elevación verificada.",
+    "Référentiel vertical inconnu. N’interprétez pas ces hauteurs comme reposant sur une référence altimétrique commune vérifiée.",
+    "Vertikales Datum unbekannt. Diese Höhen dürfen nicht als Werte mit verifiziertem gemeinsamem Höhenbezug interpretiert werden.",
+    "Datum vertical desconhecido. Não interprete estas alturas como se tivessem uma referência comum de elevação verificada."
+  ],
+  "Permanently delete the selected local source and its source-owned derived products? This cannot be undone. Original independent flight observations are not deleted by this action.": [
+    "¿Eliminar permanentemente la fuente local seleccionada y los productos derivados que dependen de ella? Esta acción no se puede deshacer. No elimina las observaciones de vuelo originales independientes.",
+    "Supprimer définitivement la source locale sélectionnée et ses produits dérivés dépendants ? Cette action est irréversible. Elle ne supprime pas les observations de vol originales indépendantes.",
+    "Die ausgewählte lokale Quelle und die ihr zugeordneten abgeleiteten Produkte dauerhaft löschen? Dies kann nicht rückgängig gemacht werden. Unabhängige originale Flugbeobachtungen werden dadurch nicht gelöscht.",
+    "Excluir permanentemente a fonte local selecionada e os produtos derivados pertencentes a ela? Isso não pode ser desfeito. Esta ação não exclui observações de voo originais independentes."
+  ],
+  "Connecting, claiming research, recording a flight and collecting science do not authorize live-location sharing or evidence uploads.": [
+    "Conectarse, reclamar una asignación, grabar un vuelo y adquirir datos científicos no autorizan compartir la ubicación en directo ni subir pruebas.",
+    "Se connecter, réclamer une affectation, enregistrer un vol et collecter des données scientifiques n’autorisent ni le partage de position en direct ni l’envoi de preuves.",
+    "Verbindung, Übernahme eines Forschungsauftrags, Flugaufzeichnung und wissenschaftliche Datenerfassung autorisieren weder die Live-Standortfreigabe noch das Hochladen von Nachweisen.",
+    "Conectar-se, reivindicar uma atribuição, gravar um voo e coletar dados científicos não autorizam compartilhar a localização ao vivo nem enviar evidências."
+  ],
+  "Local evaluation is not organization approval. Only the organization server can approve a contribution.": [
+    "La evaluación local no equivale a la aprobación de la organización. Solo su servidor puede aprobar una contribución.",
+    "L’évaluation locale ne vaut pas approbation de l’organisation. Seul le serveur de l’organisation peut approuver une contribution.",
+    "Eine lokale Bewertung ist keine Organisationsgenehmigung. Nur der Organisationsserver kann einen Beitrag genehmigen.",
+    "A avaliação local não equivale à aprovação da organização. Somente o servidor da organização pode aprovar uma contribuição."
+  ],
+  "Historical LiDAR returns were measured by the original source project, not by the MSFS aircraft.": [
+    "Los retornos LiDAR históricos fueron medidos por el proyecto de origen, no por la aeronave de MSFS.",
+    "Les retours LiDAR historiques ont été mesurés par le projet source d’origine, pas par l’aéronef MSFS.",
+    "Historische LiDAR-Echos wurden im ursprünglichen Quellenprojekt gemessen, nicht vom MSFS-Flugzeug.",
+    "Os retornos históricos de LiDAR foram medidos pelo projeto de origem, não pela aeronave do MSFS."
+  ],
+  "The scanner corridor is modeled geometry. It does not establish measured terrain coverage or valid acquisitions.": [
+    "El corredor del escáner es geometría modelada. No demuestra cobertura de terreno medida ni adquisiciones válidas.",
+    "Le corridor du scanner est une géométrie modélisée. Il n’établit ni une couverture de terrain mesurée ni des acquisitions valides.",
+    "Der Scannerkorridor ist modellierte Geometrie. Er belegt weder eine gemessene Geländeabdeckung noch gültige Erfassungen.",
+    "O corredor do scanner é uma geometria modelada. Ele não comprova cobertura medida do terreno nem aquisições válidas."
+  ],
+  "Selected language: {name}": [
+    "Idioma seleccionado: {name}",
+    "Langue choisie : {name}",
+    "Gewählte Sprache: {name}",
+    "Idioma selecionado: {name}"
+  ],
+  "Deletion is permanent. Saved Pilot Observations, associated research notes, scientific measurements, acquired products, generated analysis, dependent grades, and their managed cached or backup representations will be removed. No new recovery backup is created.": [
+    "La eliminación es permanente. Se eliminarán las observaciones del piloto guardadas, las notas de investigación asociadas, las mediciones científicas, los productos adquiridos, los análisis generados, las calificaciones dependientes y sus copias gestionadas en caché o de seguridad. No se creará una nueva copia de recuperación.",
+    "La suppression est définitive. Les observations du pilote enregistrées, notes de recherche associées, mesures scientifiques, produits acquis, analyses générées, évaluations dépendantes et leurs représentations gérées en cache ou sauvegarde seront supprimés. Aucune nouvelle sauvegarde de récupération ne sera créée.",
+    "Die Löschung ist dauerhaft. Gespeicherte Pilotenbeobachtungen, zugehörige Forschungsnotizen, wissenschaftliche Messwerte, erfasste Produkte, erzeugte Analysen, abhängige Bewertungen und ihre verwalteten Cache- oder Sicherungskopien werden entfernt. Es wird keine neue Wiederherstellungssicherung erstellt.",
+    "A exclusão é permanente. As observações do piloto salvas, notas de pesquisa associadas, medições científicas, produtos adquiridos, análises geradas, avaliações dependentes e suas representações gerenciadas em cache ou backup serão removidos. Nenhum novo backup de recuperação será criado."
+  ],
+  "Every eligible external source in this exact approved selection will be permanently removed. This cannot be undone.": [
+    "Se eliminarán permanentemente todas las fuentes externas elegibles de esta selección exacta aprobada. Esta acción no se puede deshacer.",
+    "Toutes les sources externes admissibles de cette sélection exacte approuvée seront supprimées définitivement. Cette action est irréversible.",
+    "Alle geeigneten externen Quellen in dieser genau genehmigten Auswahl werden dauerhaft entfernt. Dies kann nicht rückgängig gemacht werden.",
+    "Todas as fontes externas elegíveis desta seleção exata aprovada serão removidas permanentemente. Isso não pode ser desfeito."
+  ],
+  "The reviewed external datasets will be permanently removed. This cannot be undone.": [
+    "Se eliminarán permanentemente los conjuntos de datos externos revisados. Esta acción no se puede deshacer.",
+    "Les jeux de données externes examinés seront supprimés définitivement. Cette action est irréversible.",
+    "Die geprüften externen Datensätze werden dauerhaft entfernt. Dies kann nicht rückgängig gemacht werden.",
+    "Os conjuntos de dados externos revisados serão removidos permanentemente. Isso não pode ser desfeito."
+  ],
+  "Delete Collected Mission Science": [
+    "Eliminar los datos científicos adquiridos de la misión",
+    "Supprimer les données scientifiques collectées de la mission",
+    "Erfasste wissenschaftliche Missionsdaten löschen",
+    "Excluir os dados científicos coletados da missão"
+  ],
+  "Stop Sharing": [
+    "Dejar de compartir",
+    "Arrêter le partage",
+    "Freigabe beenden",
+    "Parar compartilhamento"
+  ],
+  "Start Sharing": [
+    "Empezar a compartir",
+    "Démarrer le partage",
+    "Freigabe starten",
+    "Iniciar compartilhamento"
+  ],
+  "Sign in, compare the code, and explicitly authorize Live Flight Sharing. This does not start sharing. Each exact flight and organization needs another explicit Start Sharing action. All active members may view it; there is no permission for Discord, evidence upload or simulator control.": [
+    "Inicia sesión, compara el código y autoriza expresamente compartir el vuelo en directo. Esto no inicia el uso compartido. Cada vuelo y organización concretos requieren otra acción explícita de Empezar a compartir. Todos los miembros activos podrán verlo; no se autoriza Discord, la subida de pruebas ni el control del simulador.",
+    "Connectez-vous, comparez le code et autorisez explicitement le partage du vol en direct. Cela ne démarre pas le partage. Chaque vol et organisation précis nécessitent une autre action explicite de démarrage du partage. Tous les membres actifs peuvent le voir ; cela n’autorise ni Discord, ni l’envoi de preuves, ni le contrôle du simulateur.",
+    "Melden Sie sich an, vergleichen Sie den Code und autorisieren Sie ausdrücklich die Live-Flugfreigabe. Dies startet die Freigabe noch nicht. Für jeden konkreten Flug und jede Organisation ist eine weitere ausdrückliche Startaktion erforderlich. Alle aktiven Mitglieder dürfen den Flug sehen. Discord, das Hochladen von Nachweisen und die Simulatorsteuerung werden nicht autorisiert.",
+    "Entre, compare o código e autorize explicitamente o compartilhamento do voo ao vivo. Isso não inicia o compartilhamento. Cada voo e organização específicos exigem outra ação explícita para iniciar o compartilhamento. Todos os membros ativos podem visualizá-lo; isso não autoriza Discord, envio de evidências nem controle do simulador."
+  ],
+  "Permanently delete this saved webhook credential and cancel pending notifications? Posted Discord messages remain in Discord.": [
+    "¿Eliminar permanentemente esta credencial de webhook guardada y cancelar las notificaciones pendientes? Los mensajes ya publicados en Discord seguirán en Discord.",
+    "Supprimer définitivement cet identifiant secret de webhook enregistré et annuler les notifications en attente ? Les messages déjà publiés sur Discord y resteront.",
+    "Diese gespeicherten Webhook-Zugangsdaten dauerhaft löschen und ausstehende Benachrichtigungen abbrechen? Bereits veröffentlichte Discord-Nachrichten bleiben in Discord.",
+    "Excluir permanentemente esta credencial de webhook salva e cancelar as notificações pendentes? As mensagens já publicadas no Discord permanecem no Discord."
+  ],
+  "Connecting, claiming research, recording, collecting science and submitting evidence do not start live sharing. Stop Sharing removes current visibility without ending recording. Shared positions are ephemeral; no shared track or replay is stored.": [
+    "Conectarse, reclamar una asignación, grabar, adquirir datos científicos y enviar pruebas no inician el uso compartido en directo. Dejar de compartir elimina la visibilidad actual sin finalizar la grabación. Las posiciones compartidas son efímeras; no se guarda ningún recorrido compartido ni reproducción.",
+    "Se connecter, réclamer une affectation, enregistrer, collecter des données scientifiques et envoyer des preuves ne démarrent pas le partage en direct. Arrêter le partage supprime la visibilité actuelle sans arrêter l’enregistrement. Les positions partagées sont éphémères ; aucune trace partagée ni relecture n’est enregistrée.",
+    "Verbindung, Übernahme von Forschungsaufträgen, Aufzeichnung, wissenschaftliche Datenerfassung und Nachweisübermittlung starten keine Live-Freigabe. Das Beenden der Freigabe entfernt die aktuelle Sichtbarkeit, ohne die Aufzeichnung zu beenden. Geteilte Positionen sind flüchtig; es werden weder geteilte Flugspuren noch Wiedergaben gespeichert.",
+    "Conectar-se, reivindicar uma atribuição, gravar, coletar dados científicos e enviar evidências não iniciam o compartilhamento ao vivo. Parar o compartilhamento remove a visibilidade atual sem encerrar a gravação. As posições compartilhadas são efêmeras; nenhuma trajetória compartilhada nem reprodução é armazenada."
+  ],
+  "Connecting, claiming, recording, collecting and submitting do not start sharing. Explicitly opted-in current flights are visible to permitted active organization members until consent ends. Shared stale positions clear; no shared track or replay is stored. Stop Sharing leaves personal research and recording intact. External Discord announcements require a further independent authorization.": [
+    "Conectarse, reclamar, grabar, adquirir datos y enviar pruebas no inician el uso compartido. Los vuelos actuales autorizados expresamente son visibles para los miembros activos de la organización con permiso hasta que termine el consentimiento. Las posiciones compartidas obsoletas se borran; no se guarda ningún recorrido compartido ni reproducción. Dejar de compartir conserva la investigación personal y la grabación. Los anuncios externos de Discord requieren otra autorización independiente.",
+    "Se connecter, réclamer, enregistrer, collecter et envoyer ne démarrent pas le partage. Les vols en cours explicitement partagés sont visibles par les membres actifs autorisés de l’organisation jusqu’à la fin du consentement. Les positions partagées périmées sont effacées ; aucune trace partagée ni relecture n’est conservée. Arrêter le partage préserve les recherches personnelles et l’enregistrement. Les annonces externes sur Discord exigent une autorisation indépendante supplémentaire.",
+    "Verbindung, Übernahme, Aufzeichnung, Datenerfassung und Übermittlung starten keine Freigabe. Ausdrücklich freigegebene aktuelle Flüge sind bis zum Ende der Einwilligung für berechtigte aktive Organisationsmitglieder sichtbar. Veraltete geteilte Positionen werden gelöscht; es werden weder geteilte Flugspuren noch Wiedergaben gespeichert. Das Beenden der Freigabe lässt persönliche Forschung und Aufzeichnung unberührt. Externe Discord-Ankündigungen erfordern eine weitere unabhängige Autorisierung.",
+    "Conectar-se, reivindicar, gravar, coletar e enviar não iniciam o compartilhamento. Voos atuais compartilhados com autorização explícita ficam visíveis para membros ativos autorizados da organização até o consentimento terminar. Posições compartilhadas desatualizadas são removidas; nenhuma trajetória compartilhada nem reprodução é armazenada. Parar o compartilhamento preserva a pesquisa pessoal e a gravação. Anúncios externos no Discord exigem outra autorização independente."
+  ],
+  " I understand the privacy disclosure and provider billing/usage conditions.": [
+    " Entiendo la información de privacidad y las condiciones de facturación y uso del proveedor.",
+    " Je comprends les informations de confidentialité et les conditions de facturation et d’utilisation du fournisseur.",
+    " Ich verstehe die Datenschutzhinweise sowie die Abrechnungs- und Nutzungsbedingungen des Anbieters.",
+    " Entendo a divulgação de privacidade e as condições de cobrança e uso do provedor."
+  ],
+  "{count} saved observation": [
+    "{count} observación guardada",
+    "{count} observation enregistrée",
+    "{count} gespeicherte Beobachtung",
+    "{count} observação salva"
+  ],
+  "{count} saved observations": [
+    "{count} observaciones guardadas",
+    "{count} observations enregistrées",
+    "{count} gespeicherte Beobachtungen",
+    "{count} observações salvas"
+  ],
+  "{name} candidate catalog active. Fluent human review and installed native acceptance are pending.": [
+    "Catálogo candidato de {name} activo. La revisión humana del idioma y la aceptación en el entorno nativo instalado están pendientes.",
+    "Catalogue candidat {name} actif. La révision humaine linguistique et l’acceptation dans l’environnement natif installé restent en attente.",
+    "Übersetzungsentwurf für {name} aktiv. Die sprachkundige menschliche Prüfung und die Abnahme in der installierten nativen Umgebung stehen aus.",
+    "Catálogo candidato de {name} ativo. A revisão humana por pessoa fluente e a aceitação no ambiente nativo instalado estão pendentes."
+  ],
+  "Mission": [
+    "Misión",
+    "Mission",
+    "Mission",
+    "Missão"
+  ],
+  "Not Prepared": [
+    "Sin preparar",
+    "Non préparé",
+    "Nicht vorbereitet",
+    "Não preparado"
+  ],
+  "Downloading": [
+    "Descargando",
+    "Téléchargement en cours",
+    "Download läuft",
+    "Baixando"
+  ],
+  "Partially Ready": [
+    "Preparación parcial",
+    "Partiellement prêt",
+    "Teilweise bereit",
+    "Parcialmente pronto"
+  ],
+  "End mission": [
+    "Finalizar misión",
+    "Terminer la mission",
+    "Mission beenden",
+    "Encerrar missão"
+  ],
+  "End current science session": [
+    "Finalizar la sesión científica actual",
+    "Terminer la session scientifique en cours",
+    "Aktuelle wissenschaftliche Sitzung beenden",
+    "Encerrar a sessão científica atual"
+  ],
+  "Record a pilot observation": [
+    "Registrar una observación del piloto",
+    "Consigner une observation du pilote",
+    "Pilotenbeobachtung erfassen",
+    "Registrar uma observação do piloto"
+  ],
+  "{title} ({unit}{reference})": [
+    "{title} ({unit}{reference})",
+    "{title} ({unit}{reference})",
+    "{title} ({unit}{reference})",
+    "{title} ({unit}{reference})"
+  ],
+  "Native Windows/MSFS localization requires matching bundled catalogs. Fluent human review and installed acceptance are pending.": [
+    "La localización nativa de Windows/MSFS requiere catálogos incluidos compatibles. La revisión humana del idioma y la aceptación en el entorno instalado están pendientes.",
+    "La localisation native Windows/MSFS nécessite des catalogues intégrés compatibles. La révision humaine linguistique et l’acceptation dans l’environnement installé sont en attente.",
+    "Die native Windows/MSFS-Lokalisierung erfordert passende gebündelte Kataloge. Die sprachkundige menschliche Prüfung und die Abnahme in der installierten Umgebung stehen aus.",
+    "A localização nativa do Windows/MSFS requer catálogos compatíveis incluídos. A revisão humana por pessoa fluente e a aceitação no ambiente instalado estão pendentes."
+  ],
+  "Your first research flight": [
+    "Tu primer vuelo de investigación",
+    "Votre premier vol de recherche",
+    "Ihr erster Forschungsflug",
+    "Seu primeiro voo de pesquisa"
+  ],
+  "Open the companion and connect MSFS. Check the actual connection and freshness indicators before relying on aircraft telemetry.": [
+    "Abre la aplicación complementaria y conecta MSFS. Comprueba los indicadores de conexión y actualización antes de confiar en la telemetría de la aeronave.",
+    "Ouvrez l’application compagnon et connectez MSFS. Vérifiez les indicateurs réels de connexion et de fraîcheur avant de vous fier à la télémétrie de l’aéronef.",
+    "Öffnen Sie die Begleit-App und verbinden Sie MSFS. Prüfen Sie die tatsächlichen Verbindungs- und Aktualitätsanzeigen, bevor Sie sich auf Flugzeugtelemetrie verlassen.",
+    "Abra o aplicativo complementar e conecte o MSFS. Confira os indicadores reais de conexão e atualização antes de confiar na telemetria da aeronave."
+  ],
+  "In Missions, choose an experiment and review its aircraft, instrument and source requirements. Fly Now prepares and selects a plan; it does not record a flight or collect science.": [
+    "En Misiones, elige un experimento y revisa sus requisitos de aeronave, instrumentos y fuentes. Volar ahora prepara y selecciona un plan; no graba un vuelo ni adquiere datos científicos.",
+    "Dans Missions, choisissez une expérience et examinez ses exigences d’aéronef, d’instruments et de sources. Voler maintenant prépare et sélectionne un plan ; cette action n’enregistre pas de vol et ne collecte pas de données scientifiques.",
+    "Wählen Sie unter Missionen ein Experiment und prüfen Sie die Anforderungen an Flugzeug, Instrumente und Quellen. Jetzt fliegen bereitet einen Plan vor und wählt ihn aus. Es startet weder eine Flugaufzeichnung noch eine wissenschaftliche Datenerfassung.",
+    "Em Missões, escolha um experimento e confira os requisitos de aeronave, instrumentos e fontes. Voar agora prepara e seleciona um plano; isso não grava um voo nem coleta dados científicos."
+  ],
+  "Use Start Recording explicitly in Current Flight. Recording preserves the flight record; its active indicator alone does not mean scientific collection has started.": [
+    "Usa expresamente Iniciar grabación del vuelo en Vuelo actual. La grabación conserva el registro del vuelo; su indicador activo no significa por sí solo que haya empezado la adquisición científica.",
+    "Utilisez explicitement Démarrer l’enregistrement du vol dans Vol en cours. L’enregistrement conserve le vol ; son indicateur actif ne signifie pas à lui seul que la collecte scientifique a commencé.",
+    "Starten Sie die Flugaufzeichnung ausdrücklich unter Aktueller Flug. Die Aufzeichnung sichert den Flugverlauf. Eine aktive Aufzeichnung bedeutet allein noch nicht, dass wissenschaftliche Daten erfasst werden.",
+    "Use explicitamente Iniciar gravação do voo em Voo atual. A gravação preserva o registro do voo; o indicador ativo, por si só, não significa que a coleta científica começou."
+  ],
+  "Review readiness, then explicitly start scientific collection or arm an automatic trigger. Armed means waiting, not collecting. Trust confirmed collection state and retained observations, not an optimistic button click.": [
+    "Revisa la preparación y, después, inicia expresamente la adquisición científica o prepara un desencadenante automático. Preparada significa en espera, no adquiriendo datos. Confía en el estado confirmado y las observaciones guardadas, no en un clic aún sin confirmar.",
+    "Vérifiez la préparation, puis démarrez explicitement la collecte scientifique ou préparez un déclencheur automatique. Prête signifie en attente, sans collecte. Fiez-vous à l’état confirmé et aux observations conservées, pas à un clic encore non confirmé.",
+    "Prüfen Sie die Bereitschaft und starten Sie anschließend ausdrücklich die wissenschaftliche Datenerfassung oder stellen Sie einen automatischen Auslöser bereit. Bereit bedeutet Warten, nicht Datenerfassung. Maßgeblich sind der bestätigte Zustand und gespeicherte Beobachtungen, nicht ein noch unbestätigter Klick.",
+    "Confira a preparação e, então, inicie explicitamente a coleta científica ou prepare um acionamento automático. Preparada significa aguardando, não coletando. Confie no estado confirmado e nas observações retidas, não em um clique ainda não confirmado."
+  ],
+  "Pausing science leaves flight recording running. Resume science when permitted, and end a scientific session or the flight using its separate explicit control.": [
+    "Pausar la adquisición científica no detiene la grabación del vuelo. Reanúdala cuando esté permitido y finaliza la sesión científica o el vuelo con su control explícito independiente.",
+    "Mettre la collecte scientifique en pause laisse l’enregistrement du vol actif. Reprenez la collecte lorsque cela est autorisé et terminez une session scientifique ou le vol avec sa commande explicite distincte.",
+    "Beim Pausieren der wissenschaftlichen Datenerfassung läuft die Flugaufzeichnung weiter. Setzen Sie die Erfassung fort, wenn dies zulässig ist. Beenden Sie eine wissenschaftliche Sitzung oder den Flug jeweils mit der eigenen ausdrücklichen Steuerung.",
+    "Pausar a coleta científica mantém a gravação do voo em andamento. Retome a coleta quando permitido e encerre uma sessão científica ou o voo usando o respectivo controle explícito separado."
+  ],
+  "In Results, inspect Overview, Explore and Evidence. Original observations, modeled corridors, genuine DEM/DSM products and historical LiDAR returns remain different evidence. Missing coverage and unknown dates or height references remain unknown.": [
+    "En Resultados, consulta Resumen, Explorar y Pruebas. Las observaciones originales, los corredores modelados, los productos DEM/DSM genuinos y los retornos LiDAR históricos siguen siendo pruebas distintas. La cobertura ausente y las fechas o referencias de altura desconocidas siguen sin conocerse.",
+    "Dans Résultats, consultez Vue d’ensemble, Explorer et Preuves. Les observations originales, corridors modélisés, produits DEM/DSM authentiques et retours LiDAR historiques restent des preuves distinctes. Une couverture manquante, une date inconnue ou une référence de hauteur inconnue restent indéterminées.",
+    "Prüfen Sie unter Ergebnisse die Übersicht, Erkundung und Nachweise. Originale Beobachtungen, modellierte Korridore, echte DEM/DSM-Produkte und historische LiDAR-Echos bleiben verschiedene Nachweisarten. Fehlende Abdeckung sowie unbekannte Daten oder Höhenbezüge bleiben unbekannt.",
+    "Em Resultados, confira Visão geral, Explorar e Evidências. Observações originais, corredores modelados, produtos DEM/DSM genuínos e retornos históricos de LiDAR continuam sendo evidências distintas. Cobertura ausente e datas ou referências de altura desconhecidas permanecem desconhecidas."
+  ],
+  "Use Scientific Library to review exact sources, download permissions, storage and dependencies. Downloading needs its existing authorization. Read the exact permanent-deletion preview before approving it; language selection never authorizes either action.": [
+    "Usa la Biblioteca científica para revisar las fuentes exactas, los permisos de descarga, el almacenamiento y las dependencias. La descarga requiere su autorización existente. Lee la vista previa exacta de eliminación permanente antes de aprobarla; elegir un idioma nunca autoriza ninguna de estas acciones.",
+    "Utilisez la Bibliothèque scientifique pour examiner les sources exactes, autorisations de téléchargement, stockage et dépendances. Un téléchargement nécessite son autorisation existante. Lisez l’aperçu exact de suppression définitive avant de l’approuver ; choisir une langue n’autorise aucune de ces actions.",
+    "Prüfen Sie in der Wissenschaftlichen Bibliothek die genauen Quellen, Downloadberechtigungen, Speicherorte und Abhängigkeiten. Downloads benötigen die bestehende Autorisierung. Lesen Sie vor einer Genehmigung die genaue Vorschau zur dauerhaften Löschung. Eine Sprachwahl autorisiert keinen dieser Vorgänge.",
+    "Use a Biblioteca científica para revisar as fontes exatas, permissões de download, armazenamento e dependências. O download exige a autorização existente. Leia a prévia exata da exclusão permanente antes de aprová-la; escolher um idioma nunca autoriza nenhuma dessas ações."
+  ],
+  "An organization connection or assignment claim does not share your flight or upload evidence. Review the exact recipient and package, then authorize submission separately. Local evaluation is not server approval; live-location sharing requires separate consent.": [
+    "Conectarse a una organización o reclamar una asignación no comparte tu vuelo ni sube pruebas. Revisa el destinatario y el paquete exactos y autoriza el envío por separado. La evaluación local no es una aprobación del servidor; compartir la ubicación en directo requiere otro consentimiento.",
+    "Se connecter à une organisation ou réclamer une affectation ne partage pas votre vol et n’envoie pas de preuves. Vérifiez le destinataire et le paquet exacts, puis autorisez séparément l’envoi. L’évaluation locale n’est pas une approbation du serveur ; le partage de position en direct exige un consentement distinct.",
+    "Eine Organisationsverbindung oder die Übernahme eines Auftrags gibt Ihren Flug nicht frei und lädt keine Nachweise hoch. Prüfen Sie den genauen Empfänger und Paketinhalt und autorisieren Sie die Übermittlung gesondert. Eine lokale Bewertung ist keine Servergenehmigung. Die Live-Standortfreigabe benötigt eine separate Einwilligung.",
+    "Conectar-se a uma organização ou reivindicar uma atribuição não compartilha seu voo nem envia evidências. Confira o destinatário e o pacote exatos e autorize o envio separadamente. A avaliação local não é aprovação do servidor; compartilhar a localização ao vivo exige consentimento separado."
+  ],
+  "The detailed scientific reference below is in English. Guided steps and contextual explanations use your selected candidate language.": [
+    "La referencia científica detallada que aparece a continuación está en inglés. Los pasos guiados y las explicaciones contextuales usan el idioma candidato seleccionado.",
+    "La référence scientifique détaillée ci-dessous est en anglais. Les étapes guidées et explications contextuelles utilisent la langue candidate choisie.",
+    "Die ausführliche wissenschaftliche Referenz unten ist auf Englisch. Die geführten Schritte und kontextbezogenen Erklärungen verwenden Ihren gewählten Übersetzungsentwurf.",
+    "A referência científica detalhada abaixo está em inglês. As etapas guiadas e explicações contextuais usam o idioma candidato selecionado."
+  ],
+  "{kind} {number}: {name}": [
+    "{kind} {number}: {name}",
+    "{kind} {number}: {name}",
+    "{kind} {number}: {name}",
+    "{kind} {number}: {name}"
+  ],
+  "{kind} {number} {name}": [
+    "{kind} {number} {name}",
+    "{kind} {number} {name}",
+    "{kind} {number} {name}",
+    "{kind} {number} {name}"
+  ],
+  "{group} overlays": [
+    "Capas: {group}",
+    "Couches : {group}",
+    "Ebenen: {group}",
+    "Camadas: {group}"
+  ],
+  "Show mission overlays": [
+    "Mostrar capas de la misión",
+    "Afficher les couches de la mission",
+    "Missionsebenen anzeigen",
+    "Mostrar camadas da missão"
+  ],
+  "Show science overlays": [
+    "Mostrar capas científicas",
+    "Afficher les couches scientifiques",
+    "Wissenschaftliche Ebenen anzeigen",
+    "Mostrar camadas científicas"
+  ],
+  "Show FAA overlays": [
+    "Mostrar capas de la FAA",
+    "Afficher les couches FAA",
+    "FAA-Ebenen anzeigen",
+    "Mostrar camadas da FAA"
+  ],
+  "Pilot": [
+    "Piloto",
+    "Pilote",
+    "Pilot",
+    "Piloto"
+  ],
+  "Reviewer": [
+    "Revisor científico",
+    "Évaluateur scientifique",
+    "Wissenschaftlicher Prüfer",
+    "Revisor científico"
+  ],
+  "Manager": [
+    "Responsable",
+    "Gestionnaire",
+    "Manager",
+    "Gestor"
+  ],
+  "Administrator": [
+    "Administrador",
+    "Administrateur",
+    "Administrator",
+    "Administrador"
+  ]
+}

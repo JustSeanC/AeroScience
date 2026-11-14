@@ -17,7 +17,8 @@ const bundle=localeBundle();
 test('the approved locale manifest and canonical generated bundle are complete and deterministic',()=>{
   const report=validateCatalogs(bundle);
   assert.deepEqual(bundle.manifest.locales.map(locale=>locale.id),['en-US','es-ES','fr-FR','de-DE','pt-BR']);
-  assert.deepEqual(report.bundled,['en-US']);assert.ok(report.messages>=70);
+  assert.deepEqual(report.bundled,['de-DE','en-US','es-ES','fr-FR','pt-BR']);assert.ok(report.messages>=6000);
+  for(const locale of bundle.manifest.locales){assert.deepEqual(Object.keys(bundle.catalogs[locale.id].messages).sort(),Object.keys(bundle.schema.messages).sort());if(locale.id!=='en-US')assert.equal(locale.review,'candidate');}
   assert.equal(readFileSync('src/AeroScience.Engine/wwwroot/i18n/catalog.generated.js','utf8').replace(/\r\n/g,'\n'),generatedModule(bundle));
 });
 test('literal template, helper and navigation message references cannot silently drift from the catalog',()=>{
@@ -43,7 +44,8 @@ for(const [name,mutate] of malformed)test('catalog validation rejects '+name,()=
 });
 test('preview, unsupported and stale catalogs fall back to readable English with English plural rules',()=>{
   for(const locale of ['es-ES','fr-FR','de-DE','pt-BR','zz-ZZ']){
-    const translator=createTranslator(bundle,locale);assert.equal(translator.effectiveLocale,'en-US');
+    const missing=copy(bundle);delete missing.catalogs[locale];
+    const translator=createTranslator(missing,locale);assert.equal(translator.effectiveLocale,'en-US');
     assert.equal(translator.text('science.savedObservations',{count:0}),'0 saved observations');
     assert.equal(translator.text('science.savedObservations',{count:1}),'1 saved observation');
     assert.equal(translator.text('science.savedObservations',{count:2}),'2 saved observations');
@@ -58,7 +60,7 @@ test('preview, unsupported and stale catalogs fall back to readable English with
 });
 test('parameter substitution preserves proper names, scientific units, UTC, hashes and literal replacement syntax',()=>{
   const value='Zoë 東京 $& <img src=x> · µm ³ 2026-11-10T12:34:56.789Z sha256:abcdef';
-  assert.equal(createTranslator(bundle,'de-DE').text('common.closeNamed',{name:value}),'Close '+value);
+  assert.equal(createTranslator(bundle,'de-DE').text('common.closeNamed',{name:value}),value+' schließen');
   assert.equal(createTranslator(bundle).text('science.savedObservations',{count:NaN}),bundle.catalogs['en-US'].messages['common.messageUnavailable']);
   for(const count of [-1,1.5,'0'])assert.equal(createTranslator(bundle).text('science.savedObservations',{count}),bundle.catalogs['en-US'].messages['common.messageUnavailable']);
   const pseudo=pseudoCatalog(bundle.catalogs['en-US']);
@@ -72,8 +74,8 @@ test('generated native formatter parses as ES2017 and works without Intl or mode
     execFileSync(process.execPath,['scripts/build/build-locales.mjs','--check','--output-directory',output]);
     const source=readFileSync(join(output,'AeroScience.I18n.js'),'utf8'),data=readFileSync(join(output,'AeroScience.LocaleData.js'),'utf8');
     parse(source,{ecmaVersion:2017});parse(data,{ecmaVersion:2017});
-    const context=vm.createContext({});vm.runInContext('Intl=undefined;Object.hasOwn=undefined;'+data+source,context);
-    assert.equal(vm.runInContext('AeroScienceI18n.createTranslator(AeroScienceLocaleData,"fr-FR").text("science.savedObservations",{count:0})',context),'0 saved observations');
+    const context=vm.createContext({});vm.runInContext('Intl=undefined;Object.hasOwn=undefined;String.prototype.matchAll=undefined;'+data+source,context);
+    assert.equal(vm.runInContext('AeroScienceI18n.createTranslator(AeroScienceLocaleData,"fr-FR").text("science.savedObservations",{count:0})',context),'0 observation enregistrée');
     assert.deepEqual(JSON.parse(readFileSync(join(output,'catalog-bundle.json'),'utf8')),bundle);
   }finally{rmSync(output,{recursive:true,force:true});}
 });

@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {inventoryJavaScript} from '../scripts/build/audit-localization.mjs';
 import {strictJson,validUnicode,validateQuality,sourceFingerprint,messageFingerprint} from '../scripts/build/localization-quality.mjs';
+import {protectedTranslation} from '../scripts/build/audit-display-bindings.mjs';
 
 test('inventory distinguishes presentation from command IDs, style, original rows and user field values',()=>{
  const src=`node('p','No valid source is available.'); button(root,'Pause Science',run,'button primary'); field(root,'Mission name','text','Pilot original name'); table(root,'Original readings',['Recorded UTC','Value'],[['Original evidence text','12.345 m']]); api('/api/mission/control',{action:'startData',id:'Original.Source.v1'}); node('p',user.name);`;
@@ -15,6 +16,18 @@ test('strict catalog parsing rejects duplicate message keys and malformed Unicod
  assert.equal(strictJson('{"value":"Zoë 東京 µm $&"}').value,'Zoë 東京 µm $&');
  for(const value of ['\uD800','\uDC00','bad\u0000value','\u202Ehidden'])assert.equal(validUnicode(value),false);
  assert.equal(validUnicode('Français\nPortuguês — ³ \u{1F6E9}'),true);
+});
+test('translation bindings reject HTTP verbs, typed fields, option identities and CSS while allowing actual option labels',()=>{
+ const messages={'test.verb':'POST','test.role':'Reviewer','test.label':'Scientific reviewer','test.css':'finding-card payload-recommendation','test.state':'Ready'};
+ const source=`const method=textForUI('test.verb');const body={status:textForUI('test.state')};select(parent,'Role',[[textForUI('test.role'),localizedCopy('test.label')]],role);text('article',undefined,textForUI('test.css'));`;
+ const rows=protectedTranslation(source,messages);assert.deepEqual(rows.map(r=>r.key).sort(),['test.css','test.role','test.state','test.verb']);assert.ok(!rows.some(r=>r.key==='test.label'));
+ assert.equal(protectedTranslation(`select(parent,'Role',[['Reviewer',localizedCopy('test.label')],['Pilot',localizedCopy('test.label')]],role);`,messages).length,0);
+});
+test('inventory resolves scoped helper signatures without translating selected values or form input data',()=>{
+ const source=`select(root,'Shared caption',[['Ready','Ready label']],'Ready');function editor(){function select(label,options,value){const control=document.createElement('select');return control;}select('Local caption',[['Ready','Local ready label']],'Ready');}`;
+ const rows=inventoryJavaScript(source,'src/AeroScience.Engine/wwwroot/scoped-fixture.js');
+ for(const text of ['Shared caption','Ready label','Local caption','Local ready label'])assert.equal(rows.find(row=>row.text===text)?.decision,'presentation',text);
+ assert.ok(rows.filter(row=>row.text==='Ready').every(row=>row.decision.startsWith('protected')));
 });
 test('source tracking rejects copied critical English, stale translations and fabricated review',()=>{
  const english={'warning.delete':'Permanently delete {count} files?'},hash=sourceFingerprint(english);

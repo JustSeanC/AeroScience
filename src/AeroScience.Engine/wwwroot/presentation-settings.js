@@ -1,3 +1,4 @@
+import {message as localizedCopy,setPresentationText} from './i18n.js';
 import {localeManifest,supportedLocale,useLocale,t,localizeTree} from './i18n.js';
 import {node,formField,status} from './workstation-ui.js';
 
@@ -39,6 +40,7 @@ function apply() {
   root.dataset.theme=settings.theme;
   root.dataset.resolvedTheme=settings.theme==='auto'?(media?.matches?'dark':'light'):settings.theme;
   root.dataset.requestedLocale=settings.locale;root.lang=translated.effectiveLocale;
+  root.dataset.localeReview=localeManifest.locales.find(item=>item.id===settings.locale).review;
   root.dir=localeManifest.locales.find(item=>item.id===translated.effectiveLocale).direction;
   const color=document.querySelector('meta[name="theme-color"]');
   if(color)color.content=root.dataset.resolvedTheme==='dark'?'#0b1118':'#f1f5f9';
@@ -57,50 +59,52 @@ export function updatePresentation(change) {
   apply();return presentationPreferences();
 }
 export function presentationControls(parent,{includeHost=true}={}) {
-  const section=node('section',undefined,'presentation-settings');section.setAttribute('aria-label',t('settings.presentation'));
-  const title=node('h2',t('settings.presentation'));title.dataset.i18n='settings.presentation';
-  const scope=node('p',t('settings.browserOnly'));scope.dataset.i18n='settings.browserOnly';
+  const section=node('section',undefined,'presentation-settings');setPresentationText(section,localizedCopy('settings.presentation'),"aria-label");
+  const title=node('h2',localizedCopy('settings.presentation'));title.dataset.i18n='settings.presentation';
+  const scope=node('p',localizedCopy('settings.browserOnly'));scope.dataset.i18n='settings.browserOnly';
   const fields=node('div',undefined,'presentation-fields');section.append(title,scope,fields);parent.append(section);
   const theme=document.createElement('select');
+  theme.id='presentation-theme';
   for(const [value,key] of [['auto','settings.themeAuto'],['light','settings.themeLight'],['dark','settings.themeDark']]){
-    const option=node('option',t(key));option.value=value;option.dataset.i18n=key;theme.append(option);
+    const option=node('option',localizedCopy(key));option.value=value;option.dataset.i18n=key;theme.append(option);
   }
-  const themeField=formField(fields,t('settings.theme'),theme);themeField.label.dataset.i18n='settings.theme';
+  const themeField=formField(fields,localizedCopy('settings.theme'),theme);themeField.label.dataset.i18n='settings.theme';
   const language=document.createElement('select');
-  for(const locale of localeManifest.locales){const option=node('option',locale.review==='preview'?t('settings.previewOption',{name:locale.name}):locale.name);option.value=locale.id;option.lang=locale.id;language.append(option);}
-  const languageField=formField(fields,t('settings.language'),language);languageField.label.dataset.i18n='settings.language';
+  language.id='presentation-language';
+  for(const locale of localeManifest.locales){const option=node('option',locale.review==='preview'?localizedCopy('settings.previewOption',{name:locale.name}):locale.review==='candidate'?localizedCopy('localization.candidateOption',{name:locale.name}):locale.name);option.value=locale.id;option.lang=locale.id;language.append(option);}
+  const languageField=formField(fields,localizedCopy('settings.language'),language);languageField.label.dataset.i18n='settings.language';
   const feedback=status(section,'');
   function refresh(value){
     theme.value=value.theme;language.value=value.locale;
     const locale=localeManifest.locales.find(item=>item.id===value.locale);
-    feedback.textContent=!value.persistent?t('settings.notSaved'):locale.review==='preview'?t('settings.previewNotice',{name:locale.name}):t('settings.englishNotice');
+    setPresentationText(feedback,!value.persistent?localizedCopy('settings.notSaved'):locale.review==='preview'?localizedCopy('settings.previewNotice',{name:locale.name}):locale.review==='candidate'?localizedCopy('localization.candidateNotice'):localizedCopy('localization.sourceNotice'));
   }
   theme.onchange=()=>updatePresentation({theme:theme.value});language.onchange=()=>updatePresentation({locale:language.value});
   subscribers.add(refresh);refresh(presentationPreferences());
   if(!includeHost)return {element:section,dispose:()=>subscribers.delete(refresh)};
   const hostSection=node('section',undefined,'host-presentation-settings');parent.append(hostSection);
-  const hostTitle=node('h2',t('settings.hostTitle')),hostScope=node('p',t('settings.hostScope'));
+  const hostTitle=node('h2',localizedCopy('settings.hostTitle')),hostScope=node('p',localizedCopy('settings.hostScope'));
   const hostFields=node('div',undefined,'presentation-fields');hostSection.append(hostTitle,hostScope,hostFields);
   const hostTheme=theme.cloneNode(true),hostLanguage=language.cloneNode(true);
   for(const control of [hostTheme,hostLanguage]){control.removeAttribute('id');control.removeAttribute('aria-describedby');}
-  formField(hostFields,t('settings.hostTheme'),hostTheme);formField(hostFields,t('settings.hostLanguage'),hostLanguage);
-  const save=node('button',t('settings.hostSave')),reload=node('button',t('settings.hostReload')),follow=node('button',t('settings.hostFollow'));
+  formField(hostFields,localizedCopy('settings.hostTheme'),hostTheme);formField(hostFields,localizedCopy('settings.hostLanguage'),hostLanguage);
+  const save=node('button',localizedCopy('settings.hostSave')),reload=node('button',localizedCopy('settings.hostReload')),follow=node('button',localizedCopy('settings.hostFollow'));
   save.type=reload.type=follow.type='button';hostSection.append(save,reload,follow);
-  const hostFeedback=status(hostSection,''),nativeNotice=node('p',t('settings.hostNativeNotice'));hostSection.append(nativeNotice);
+  const hostFeedback=status(hostSection,''),nativeNotice=node('p',localizedCopy('settings.hostNativeNotice'));hostSection.append(nativeNotice);
   let draft=false,saving=false,revision=null;
   hostTheme.onchange=hostLanguage.onchange=()=>{draft=true;};
   function refreshHost(){
     if(host&&!draft){hostTheme.value=host.preferences.theme;hostLanguage.value=host.preferences.locale;revision=host.preferences.revision;}
     hostTheme.disabled=hostLanguage.disabled=save.disabled=saving||!host?.canWrite||!!hostError;
-    hostFeedback.textContent=hostError||(!host?t('settings.hostUnavailable'):!host.canWrite?t('settings.hostReadOnly'):t('settings.hostScope'));
+    setPresentationText(hostFeedback,hostError||(!host?localizedCopy('settings.hostUnavailable'):!host.canWrite?localizedCopy('settings.hostReadOnly'):localizedCopy('settings.hostScope')));
   }
   save.onclick=async()=>{
     const ownGeneration=++hostGeneration;
     saving=true;refreshHost();
     try{const result=await hostApi('/api/settings/presentation',{expectedRevision:revision,theme:hostTheme.value,locale:hostLanguage.value});if(ownGeneration!==hostGeneration)return;
       hostGeneration++;host=result;draft=false;hostError='';
-      if(!hasOverride()){settings={theme:host.preferences.theme,locale:host.preferences.locale};apply();}refreshHost();hostFeedback.textContent=t('settings.hostSaved');
-    }catch(error){hostFeedback.textContent=error.message;hostFeedback.setAttribute('role','alert');}
+      if(!hasOverride()){settings={theme:host.preferences.theme,locale:host.preferences.locale};apply();}refreshHost();setPresentationText(hostFeedback,localizedCopy('settings.hostSaved'));
+    }catch(error){setPresentationText(hostFeedback,error.message);hostFeedback.setAttribute('role','alert');}
     finally{saving=false;save.disabled=!host?.canWrite;hostTheme.disabled=hostLanguage.disabled=!host?.canWrite;}
   };
   reload.onclick=async()=>{draft=false;await refreshPresentationHost();};

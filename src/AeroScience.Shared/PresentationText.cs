@@ -20,7 +20,7 @@ public static class PresentationText
     public const int ContractVersion = 1;
     public static int CatalogVersion => Manifest.GetProperty("catalogVersion").GetInt32();
     public static IReadOnlyList<PresentationLocale> Locales { get; } = Manifest.GetProperty("locales").EnumerateArray()
-        .Select(l => new PresentationLocale(l.GetProperty("id").GetString()!, l.GetProperty("name").GetString()!, l.GetProperty("review").GetString() == "preview")).ToArray();
+        .Select(l => new PresentationLocale(l.GetProperty("id").GetString()!, l.GetProperty("name").GetString()!, l.GetProperty("review").GetString() is "preview" or "candidate")).ToArray();
     public static string Locale(string? requested) => Locales.FirstOrDefault(l => l.Id.Equals(requested, StringComparison.OrdinalIgnoreCase))?.Id ?? "en-US";
     // P02 ships only English. A locale identity/preview is not a translated catalog.
     public static string EffectiveLocale(string? requested) => "en-US";

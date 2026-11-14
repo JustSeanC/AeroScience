@@ -1,12 +1,13 @@
+import {message as localizedCopy,setPresentationText} from './i18n.js';
 import {node} from './workstation-ui.js';
-import {t} from './i18n.js';
+import {t as textForUI,t} from './i18n.js';
 
 export function initializeWorkstationShell(){
   const sidebar=document.querySelector('.sidebar'),main=document.querySelector('main'),header=document.querySelector('.topbar');
-  main.id='main-content';main.tabIndex=-1;sidebar.id='app-navigation';sidebar.setAttribute('aria-label',t('shell.applicationNavigation'));sidebar.dataset.i18nAriaLabel='shell.applicationNavigation';
-  const skip=node('a',t('shell.skip'),'skip-link');skip.dataset.i18n='shell.skip';skip.href='#main-content';skip.onclick=event=>{event.preventDefault();main.focus();};document.body.prepend(skip);
-  const toggle=node('button',t('shell.menu'),'navigation-toggle secondary');toggle.dataset.i18n='shell.menu';toggle.type='button';toggle.setAttribute('aria-controls',sidebar.id);toggle.setAttribute('aria-expanded','false');header.prepend(toggle);
-  const close=node('button','×','navigation-close popup-close secondary');close.type='button';close.setAttribute('aria-label',t('shell.closeNavigation'));close.dataset.i18nAriaLabel='shell.closeNavigation';sidebar.prepend(close);
+  main.id='main-content';main.tabIndex=-1;sidebar.id='app-navigation';setPresentationText(sidebar,localizedCopy('shell.applicationNavigation'),"aria-label");sidebar.dataset.i18nAriaLabel='shell.applicationNavigation';
+  const skip=node('a',localizedCopy('shell.skip'),'skip-link');skip.dataset.i18n='shell.skip';skip.href='#main-content';skip.onclick=event=>{event.preventDefault();main.focus();};document.body.prepend(skip);
+  const toggle=node('button',localizedCopy('shell.menu'),'navigation-toggle secondary');toggle.dataset.i18n='shell.menu';toggle.type='button';toggle.setAttribute('aria-controls',sidebar.id);toggle.setAttribute('aria-expanded','false');header.prepend(toggle);
+  const close=node('button','×','navigation-close popup-close secondary');close.type='button';setPresentationText(close,localizedCopy('shell.closeNavigation'),"aria-label");close.dataset.i18nAriaLabel='shell.closeNavigation';sidebar.prepend(close);
   const backdrop=node('div',undefined,'navigation-backdrop');backdrop.hidden=true;document.body.append(backdrop);
   const compact=matchMedia('(max-width:1100px)');let open=false;
   function setOpen(value,restore=true){
@@ -24,16 +25,16 @@ export function initializeWorkstationShell(){
   });
   window.addEventListener('hashchange',()=>setOpen(false,false));
   compact.addEventListener('change',()=>setOpen(false,false));setOpen(false,false);
-  const links=document.querySelectorAll('.nav-link');for(const link of links){link.title=link.textContent.trim();}
+  const links=document.querySelectorAll('.nav-link');for(const link of links){setPresentationText(link,link.textContent.trim(),"title",true);}
   return {afterNavigation(parent){if(open||document.activeElement===toggle||parent?.contains(document.activeElement)){window.dispatchEvent(new Event('resize'));return;}setOpen(false,false);const heading=parent?.querySelector('h1,h2');if(heading){heading.tabIndex=-1;heading.focus({preventScroll:true});}window.dispatchEvent(new Event('resize'));}};
 }
 
 export function streamlineMissionControl(){
   const control=document.getElementById('control'),map=document.getElementById('mission-map');
-  const details=node('details',undefined,'control-secondary panel');details.id='flight-details';details.append(node('summary','Flight details — attitude, altitude profile and position'));
+  const details=node('details',undefined,'control-secondary panel');details.id='flight-details';details.append(node('summary',localizedCopy("ui.workstationShell.messageFlightDetailsAttitudeAltitudeProfileAnd")));
   for(const child of [control.querySelector('.flight-panel'),control.querySelector('.lower-grid')])if(child)details.append(child);
   control.append(details);
-  const tools=node('details',undefined,'control-secondary panel');tools.id='flight-tools';tools.append(node('summary','Flight tools — Pilot Observations, guidance and environment'));
+  const tools=node('details',undefined,'control-secondary panel');tools.id='flight-tools';tools.append(node('summary',localizedCopy("ui.workstationShell.messageFlightToolsPilotObservationsGuidanceAnd")));
   for(const id of ['flight-guidance','environment-readings','observation-notes']){const child=document.getElementById(id);if(child)tools.append(child);}control.append(tools);
   const telemetry=control.querySelector('.metrics'),label=telemetry?.previousElementSibling;
   if(map&&telemetry){if(label?.classList.contains('section-label'))map.before(label);map.before(telemetry);}

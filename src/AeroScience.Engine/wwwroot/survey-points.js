@@ -1,7 +1,8 @@
+import {t as textForUI} from './i18n.js';
 // Rendering only: choose actual records, never average or manufacture returns.
 import {color} from './workstation-ui.js';
 export const pointModes=['elevation','classification','intensity','return','rgb','heightAboveGround'];
-export function modeAvailable(mode,source){const d=source?.dimensions||[];return mode==='elevation'?d.includes('Z'):mode==='classification'?d.includes('Classification'):mode==='intensity'?d.includes('Intensity'):mode==='return'?d.includes('ReturnNumber'):mode==='rgb'?['Red','Green','Blue'].every(v=>d.includes(v)):false;}
+export function modeAvailable(mode,source){const d=source?.dimensions||[];return mode==='elevation'?d.includes('Z'):mode==='classification'?d.includes('Classification'):mode==='intensity'?d.includes('Intensity'):mode==='return'?d.includes('ReturnNumber'):mode==='rgb'?[textForUI("ui.surveyPoints.messageRed"),textForUI("ui.surveyPoints.messageGreen"),textForUI("ui.surveyPoints.messageBlue")].every(v=>d.includes(v)):false;}
 export function pointValue(v,mode){const p=v.point?.original;return mode==='classification'?p?.classification:mode==='intensity'?p?.intensity:mode==='return'?p?.returnNumber:p?.z;}
 const classes=['#806aaf','#377f91','#8c7022','#4f834b','#22784e','#397b4d','#a64b53','#777777','#62778d'];
 export function pointColor(v,mode,low,high){const p=v.point?.original;if(!p)return '#777777';if(mode==='rgb')return p.rgb?.length===3?'rgb('+p.rgb.map(v=>Math.round(v/65535*255)).join(',')+')':'#777777';if(mode==='classification')return classes[p.classification%classes.length];return color(pointValue(v,mode),low,high);}

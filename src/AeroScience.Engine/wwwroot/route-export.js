@@ -1,12 +1,14 @@
+import {message as localizedCopy,setPresentationText} from './i18n.js';
+import {t as textForUI} from './i18n.js';
 import {dialogHeader,requestDialogClose,markDialogSaved} from './dialog-ui.js';
 import { planningDistance, planningText } from "./science-display.js";
 const el = (tag, text) => {
   const e = document.createElement(tag);
-  if (text !== undefined) e.textContent = text;
+  if (text !== undefined) setPresentationText(e,text);
   return e;
 };
 export function routeExportButton(parent, getPlan, api) {
-  const open = el("button", "Export / Share Route");
+  const open = el("button", localizedCopy("ui.routeExport.messageExportShareRoute"));
   open.type = "button";
   open.className = "secondary";
   parent.append(open);
@@ -16,16 +18,16 @@ export function routeExportButton(parent, getPlan, api) {
     content.className = "route-export";
     dialog.append(content);
     document.body.append(dialog);
-    content.append(el("h2", "Export / Share Planned Route"));
+    content.append(el("h2", localizedCopy("ui.routeExport.messageExportSharePlannedRoute")));
     const format = el("select");
-    format.setAttribute("aria-label", "Export format");
+    setPresentationText(format,localizedCopy("ui.routeExport.messageExportFormat"),"aria-label");
     for (const [id, name] of [
-      ["pln", "Download MSFS 2024 EFB Flight Plan (.pln)"],
-      ["route", "Copy Route String"],
-      ["coordinates", "Copy Waypoint Coordinates"],
-      ["gpx", "Download Planned Route GPX"],
-      ["kml", "Download Planned Route KML"],
-      ["csv", "Download Waypoint List CSV"],
+      ["pln", textForUI("ui.routeExport.messageDownloadMSFS2024EFBFlightPlanPln")],
+      ["route", textForUI("ui.routeExport.messageCopyRouteString")],
+      ["coordinates", textForUI("ui.routeExport.messageCopyWaypointCoordinates")],
+      ["gpx", textForUI("ui.routeExport.messageDownloadPlannedRouteGPX")],
+      ["kml", textForUI("ui.routeExport.messageDownloadPlannedRouteKML")],
+      ["csv", textForUI("ui.routeExport.messageDownloadWaypointListCSV")],
     ]) {
       const o = el("option", name);
       o.value = id;
@@ -33,15 +35,15 @@ export function routeExportButton(parent, getPlan, api) {
     }
     const plan = getPlan();
     const orbitCount=(plan.patterns||[]).filter(d=>d.kind==="orbit").length;
-    content.append(el("p",`${plan.waypoints?.length||0} navigation waypoints will be exported unchanged.${orbitCount?` ${orbitCount} orbit(s) use a 5° point-to-point approximation; one revolution normally has 73 points. This is not a native EFB orbit command. Check target route limits.`:""}`));
+    content.append(el("p",localizedCopy("ui.routeExport.messageNavigationWaypointsWillBeExportedUnchanged",{value1:(String(plan.waypoints?.length||0)),value2:(String(orbitCount?` ${orbitCount} orbit(s) use a 5° point-to-point approximation; one revolution normally has 73 points. This is not a native EFB orbit command. Check target route limits.`:""))})));
     content.append(format);
     const coordinate = el("select");
-    coordinate.setAttribute("aria-label", "Coordinate format");
+    setPresentationText(coordinate,localizedCopy("ui.routeExport.messageCoordinateFormat"),"aria-label");
     for (const [id, name] of [
-      ["decimal", "Decimal degrees — 8 decimals"],
-      ["ddm", "Degrees and decimal minutes"],
-      ["dms", "Degrees, minutes and seconds"],
-      ["icao", "ICAO Item 15 degrees/minutes — rounded"],
+      ["decimal", textForUI("ui.routeExport.messageDecimalDegrees8Decimals")],
+      ["ddm", textForUI("ui.routeExport.messageDegreesAndDecimalMinutes")],
+      ["dms", textForUI("ui.routeExport.messageDegreesMinutesAndSeconds")],
+      ["icao", textForUI("ui.routeExport.messageICAOItem15DegreesMinutesRounded")],
       ["simbrief", "SimBrief documented degrees/minutes/seconds"],
     ]) {
       const o = el("option", name);
@@ -50,11 +52,11 @@ export function routeExportButton(parent, getPlan, api) {
     }
     content.append(coordinate);
     const style = el("select");
-    style.setAttribute("aria-label", "Route string style");
+    setPresentationText(style,localizedCopy("ui.routeExport.messageRouteStringStyle"),"aria-label");
     for (const [id, name] of [
-      ["coordinates", "Coordinate waypoint sequence"],
-      ["named", "Published navigation identifiers"],
-      ["detailed", "Human-readable full science route"],
+      ["coordinates", textForUI("ui.routeExport.messageCoordinateWaypointSequence")],
+      ["named", textForUI("ui.routeExport.messagePublishedNavigationIdentifiers")],
+      ["detailed", textForUI("ui.routeExport.messageHumanReadableFullScienceRoute")],
     ]) {
       const o = el("option", name);
       o.value = id;
@@ -65,23 +67,23 @@ export function routeExportButton(parent, getPlan, api) {
     ack.type = "checkbox";
     const ackLabel = el(
       "label",
-      " Export every waypoint unchanged. I understand long-route compatibility is unverified.",
+      localizedCopy("ui.routeExport.messageExportEveryWaypointUnchangedIUnderstand"),
     );
     ackLabel.prepend(ack);
     content.append(ackLabel);
     const note = el(
         "p",
-        "MSFS EFB export requires a cruising altitude in the plan. Airports are optional. Named routes require explicitly entered published identifiers; science names are not assumed to be navigation fixes. No flight plan is uploaded or filed.",
+        localizedCopy("ui.routeExport.messageMSFSEFBExportRequiresACruisingAltitude"),
       ),
-      preview = el("button", "Preview export"),
+      preview = el("button", localizedCopy("ui.routeExport.messagePreviewExport")),
       summary = el("p"),
       warnings = el("p"),
       output = el("textarea"),
-      action = el("button", "Download"),
-      close = el("button", "Close");
+      action = el("button", localizedCopy("ui.routeExport.messageDownload")),
+      close = el("button", localizedCopy("ui.aviationReference.messageClose"));
     output.readOnly = true;
     output.rows = 10;
-    output.setAttribute("aria-label", "Export text preview");
+    setPresentationText(output,localizedCopy("ui.routeExport.messageExportTextPreview"),"aria-label");
     action.disabled = true;
     preview.type = action.type = close.type = "button";
     let result = null;
@@ -89,7 +91,7 @@ export function routeExportButton(parent, getPlan, api) {
       result = null;
       action.disabled = true;
       output.value = "";
-      summary.textContent = "Preview again after changing export options.";
+      setPresentationText(summary,localizedCopy("ui.routeExport.messagePreviewAgainAfterChangingExportOptions"));
     };
     for (const c of [format, coordinate, style, ack])
       c.onchange = () => {
@@ -112,15 +114,15 @@ export function routeExportButton(parent, getPlan, api) {
           acknowledgeLongRoute: ack.checked,
         });
         const p = result.preview;
-        planningText(summary,()=>`${p.name} · ${p.departure || "First en-route waypoint"} → ${p.destination || "Last en-route waypoint"} · ${p.waypoints} waypoints · ${planningDistance(p.distanceMetres)} · ${p.patterns.join(", ") || "Custom route"} · ${p.format}`);
-        warnings.textContent = p.warnings.join(" ");
+        planningText(summary,()=>textForUI("ui.routeExport.messageWaypoints",{value1:(String(p.name)),value2:(String(p.departure || "First en-route waypoint")),value3:(String(p.destination || "Last en-route waypoint")),value4:(String(p.waypoints)),value5:(String(planningDistance(p.distanceMetres))),value6:(String(p.patterns.join(", ") || "Custom route")),value7:(String(p.format))}));
+        setPresentationText(warnings,p.warnings.join(" "));
         output.value = result.content;
-        action.textContent = ["route", "coordinates"].includes(format.value)
-          ? "Copy"
-          : "Download";
+        setPresentationText(action,["route", "coordinates"].includes(format.value)
+          ? localizedCopy("ui.routeExport.messageCopy")
+          : localizedCopy("ui.routeExport.messageDownload"));
         action.disabled = false;
       } catch (e) {
-        warnings.textContent = e.message;
+        setPresentationText(warnings,e.message);
         result = null;
         action.disabled = true;
       } finally {
@@ -137,10 +139,9 @@ export function routeExportButton(parent, getPlan, api) {
             output.focus();
             output.select();
             if (!document.execCommand("copy"))
-              throw Error("Select the preview text and copy it manually.");
+              throw Error(textForUI("ui.routeExport.messageSelectThePreviewTextAndCopyIt"));
           }
-          warnings.textContent =
-            "Copied the complete preview. Target application input limits and compatibility still apply.";
+          setPresentationText(warnings,localizedCopy("ui.routeExport.messageCopiedTheCompletePreviewTargetApplicationInput"));
         } else {
           const url = URL.createObjectURL(
               new Blob([result.content], { type: result.contentType }),
@@ -154,12 +155,12 @@ export function routeExportButton(parent, getPlan, api) {
           setTimeout(() => URL.revokeObjectURL(url), 1000);
         }
       } catch (e) {
-        warnings.textContent = e.message;
+        setPresentationText(warnings,e.message);
       }
     };
     close.onclick = () => requestDialogClose(dialog);
     dialog.onclose = () => dialog.remove();
     content.append(note, preview, summary, warnings, output, action, close);
-    dialogHeader(dialog,{title:"Export / Share Planned Route"});dialog.showModal();
+    dialogHeader(dialog,{title:localizedCopy("ui.routeExport.messageExportSharePlannedRoute")});dialog.showModal();
   };
 }

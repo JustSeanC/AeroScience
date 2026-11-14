@@ -1,3 +1,5 @@
+import {message as localizedCopy,setPresentationText} from './i18n.js';
+import {t as textForUI} from './i18n.js';
 import {renderResearchContext} from './scientific-context.js';
 import {reviewCollectedScienceDeletion} from "./collected-science-deletion.js";
 import { newIdentity,informationDetails } from "./workstation-ui.js";
@@ -55,10 +57,10 @@ const samplePositions = (rows) =>
 const n = (v, d = 2) =>
   Number.isFinite(v)
     ? v.toLocaleString(undefined, { maximumFractionDigits: d })
-    : "Unavailable";
+    : textForUI("localization.unavailableValue");
 const text = (tag, value, cls) => {
   const e = document.createElement(tag);
-  e.textContent = value;
+  setPresentationText(e,value);
   if (cls) e.className = cls;
   return e;
 };
@@ -115,7 +117,7 @@ function select(parent, label, options, value) {
     e.append(o);
   }
   e.value = value;
-  e.setAttribute("aria-label", label);
+  setPresentationText(e,label,"aria-label");
   wrap.append(e);
   parent.append(wrap);
   return e;
@@ -130,9 +132,9 @@ function configs(parent, selected = []) {
     enabled.dataset.instrument = d.id;
     const label = text("label", d.name);
     label.prepend(enabled);
-    const settings=informationDetails(row,"Instrument Settings"),interval = input(
+    const settings=informationDetails(row,localizedCopy("ui.research.messageInstrumentSettings")),interval = input(
       settings,
-      "Interval (seconds)",
+      localizedCopy("ui.research.messageIntervalSeconds"),
       (selected.find((c) => c.instrumentId === d.id)?.intervalMs ?? 1000) /
         1000,
       "number",
@@ -141,7 +143,7 @@ function configs(parent, selected = []) {
     interval.max = 60;
     interval.step = 1;
     interval.dataset.interval = d.id;
-    const cadenceHelp=text("small","Saved scientific acquisition interval: 1–60 seconds. Controls how often AeroScience attempts a recorded observation; separate from telemetry, physical line/pulse rates and spatial source resolution. No valid data is fabricated when coverage or quality is unavailable.");settings.append(cadenceHelp);
+    const cadenceHelp=text("small",localizedCopy("ui.research.messageSavedScientificAcquisitionInterval160SecondsControls"));settings.append(cadenceHelp);
     row.prepend(label);
     const config=selected.find(c=>c.instrumentId===d.id)??{instrumentId:d.id};
     row.readPayload=payloadSettings(settings,config,payloadCatalog,ctx.api);
@@ -169,18 +171,18 @@ export function initializeResearch(context) {
     guidance = text("article", undefined, "panel research-panel");
   guidance.id = "flight-guidance";
   control.append(guidance);
-  const environment=text('article',undefined,'panel research-panel');environment.id='environment-readings';control.append(environment);
+  const environment=text('article',undefined,"panel research-panel");environment.id='environment-readings';control.append(environment);
   const mapPanel = text("article", undefined, "panel research-panel");
   mapPanel.id = "mission-map";
-  mapPanel.append(text("h2", "Mission map"));
+  mapPanel.append(text("h2", localizedCopy("ui.research.messageMissionMap")));
   liveMap = new ResearchMap(mapPanel);
   control.querySelector(".mission-grid").after(mapPanel);
   const markerPanel = text("article", undefined, "panel research-panel");
   markerPanel.id = "observation-notes";
-  markerPanel.append(text("h2", "Pilot Observations"),text("p","Choose a Category and write what you observed in Notes. Pilot Observation is a written account, not a sensor reading. A marker without a note does not meet a documentation goal. Recorded location is attached only when available; optional measurements require normal science collection."));
+  markerPanel.append(text("h2", localizedCopy("ui.research.messagePilotObservations")),text("p",localizedCopy("ui.research.messageChooseACategoryAndWriteWhatYou")));
   const category = select(
     markerPanel,
-    "Category",
+    localizedCopy("ui.missionTimeline.messageCategory"),
     [
       "observation",
       "start-survey",
@@ -193,23 +195,23 @@ export function initializeResearch(context) {
     "observation",
   );
   category.id = "marker-category";
-  const note = input(markerPanel, "Notes", "", "textarea");
+  const note = input(markerPanel, localizedCopy("ui.research.messageNotes"), "", "textarea");
   note.id = "marker-note";
   note.maxLength = 4000;
   let observationRequest=null,noteRequest=null;const savedObservation=text("p");savedObservation.setAttribute("role","status");markerPanel.append(savedObservation);
   markerPanel.append(
     button("Add observation marker", async () => {
-      if (!state?.activeMission) throw Error("Start a mission first.");
+      if (!state?.activeMission) throw Error(textForUI("ui.research.messageStartAMissionFirst"));
       const id=state.activeMission.id,content={category:category.value,notes:note.value},key=JSON.stringify([id,content]);if(observationRequest?.key!==key)observationRequest={key,requestId:newIdentity()};
-      savedObservation.textContent='Saving Pilot Observation…';const saved=await ctx.api(`/api/missions/${id}/markers`,{...content,requestId:observationRequest.requestId}).catch(error=>{savedObservation.textContent="Pilot Observation could not be confirmed. Your text is preserved; retry keeps the same observation identity.";throw error;});
-      if(state?.activeMission?.id===id&&note.value===content.notes)note.value="";observationRequest=null;savedObservation.textContent=`Pilot Observation saved · ${saved.timestampUtc} · ${saved.latitude===null?'Location unavailable; no position was invented':'Recorded location attached'}. Flight and science controls are unchanged.`;
+      setPresentationText(savedObservation,localizedCopy("ui.research.messageSavingPilotObservation"));const saved=await ctx.api(`/api/missions/${id}/markers`,{...content,requestId:observationRequest.requestId}).catch(error=>{setPresentationText(savedObservation,localizedCopy("ui.research.messagePilotObservationCouldNotBeConfirmedYour"));throw error;});
+      if(state?.activeMission?.id===id&&note.value===content.notes)note.value="";observationRequest=null;setPresentationText(savedObservation,localizedCopy("ui.research.messagePilotObservationSavedFlight",{value1:(String(saved.timestampUtc)),value2:(String(saved.latitude===null?'Location unavailable; no position was invented':'Recorded location attached'))}));
       lastFetch = 0;
     }),
     button("Save in-flight note", async () => {
-      if (!state?.activeMission) throw Error("Start a mission first.");
-      const id=state.activeMission.id,content=note.value,key=JSON.stringify([id,content]);if(noteRequest?.key!==key)noteRequest={key,requestId:newIdentity()};savedObservation.textContent="Saving pilot in-flight note…";
-      await ctx.api(`/api/missions/${id}/notes`,{phase:"in-flight",text:content,requestId:noteRequest.requestId}).catch(error=>{savedObservation.textContent="The pilot note could not be confirmed. Your text is preserved; retry keeps the same note identity.";throw error;});
-      if(state?.activeMission?.id===id&&note.value===content)note.value="";noteRequest=null;savedObservation.textContent="Pilot in-flight note saved. Its location is unavailable; use Add observation marker when a recorded location is needed.";
+      if (!state?.activeMission) throw Error(textForUI("ui.research.messageStartAMissionFirst"));
+      const id=state.activeMission.id,content=note.value,key=JSON.stringify([id,content]);if(noteRequest?.key!==key)noteRequest={key,requestId:newIdentity()};setPresentationText(savedObservation,localizedCopy("ui.research.messageSavingPilotInFlightNote"));
+      await ctx.api(`/api/missions/${id}/notes`,{phase:"in-flight",text:content,requestId:noteRequest.requestId}).catch(error=>{setPresentationText(savedObservation,localizedCopy("ui.research.messageThePilotNoteCouldNotBeConfirmed"));throw error;});
+      if(state?.activeMission?.id===id&&note.value===content)note.value="";noteRequest=null;setPresentationText(savedObservation,localizedCopy("ui.research.messagePilotInFlightNoteSavedItsLocationIs"));
     }),
   );
   control.append(markerPanel);
@@ -238,7 +240,7 @@ export async function loadResearch(page) {
       const plan=editing?.id===cardPlanId?editing:await ctx.api(`/api/plans/${encodeURIComponent(cardPlanId)}`);
       if (location.hash.includes(`researchPlan=${cardPlanId}`)) {
         if(editing?.id===cardPlanId||editPlan(plan))window.dispatchEvent(new CustomEvent('aeroscience-research-plan-opened',{detail:{planId:cardPlanId}}));
-        else{history.replaceState(null,'','#planner');ctx.notice('Your existing mission draft was kept. Choose Customize again when you are ready.');}
+        else{history.replaceState(null,'','#planner');ctx.notice(localizedCopy("ui.research.messageYourExistingMissionDraftWasKeptChoose"));}
       }
     }
   }
@@ -255,17 +257,17 @@ async function planner() {
   if((plannerDirty||pendingGeometry)&&$("plan-form"))return;
   plans = await ctx.api(`/api/plans?limit=50&offset=${planOffset}`);
   const p = $("planner-content");
-  p.replaceChildren(text("h2", "Saved mission plans"));
+  p.replaceChildren(text("h2", localizedCopy("missions.savedPlans")));
   await planningUnitControls(p,ctx.api);
   await scientificReadiness(p, ctx.api);
   for (const plan of plans) {
     const row = text("div", undefined, "plan-row");
-    const scopeLabel=text("label","Preflight preparation scope "),scopeChoice=text("select");scopeChoice.setAttribute("aria-label","Preflight preparation scope for "+plan.name);for(const [value,title] of [["entire","Entire Mission"],["first-half","First Half of Mission (when route order supports it)"],["areas","Choose Research Areas"]]){const o=text("option",title);o.value=value;scopeChoice.append(o);}scopeLabel.append(scopeChoice);row.append(scopeLabel);
+    const scopeLabel=text("label",localizedCopy("ui.research.messagePreflightPreparationScope")),scopeChoice=text("select");setPresentationText(scopeChoice,localizedCopy("ui.research.messagePreflightPreparationScopeFor",{value1:(plan.name)}),"aria-label");for(const [value,title] of [["entire",textForUI("ui.downloadActivity.messageEntireMission")],["first-half",textForUI("ui.research.messageFirstHalfOfMissionWhenRouteOrder")],["areas",textForUI("ui.downloadActivity.messageChooseResearchAreas")]]){const o=text("option",title);o.value=value;scopeChoice.append(o);}scopeLabel.append(scopeChoice);row.append(scopeLabel);
     row.append(
       text("strong", plan.name),
       text("span", `${plan.template} · ${plan.mode}`),
       button("Edit", () => editPlan(plan)),
-      button("Review TFRs", opener => {openTfrReferences(ctx.api,planMap?.map,{planId:plan.id,opener}).catch(()=>ctx.notice("TFR review is unavailable. Mission controls remain available."));}),
+      button("Review TFRs", opener => {openTfrReferences(ctx.api,planMap?.map,{planId:plan.id,opener}).catch(()=>ctx.notice(localizedCopy("ui.research.messageTFRReviewIsUnavailableMissionControlsRemain")));}),
       button("Prepare scientific data", async (opener) => {
         await reviewPreflight(ctx.api,plan.id,scopeChoice.value,opener);
       }),
@@ -277,7 +279,7 @@ async function planner() {
       button("Delete plan", async () => {
         if (
           confirm(
-            "Delete this saved plan? Recording snapshots remain unchanged.",
+            localizedCopy("ui.research.messageDeleteThisSavedPlanRecordingSnapshotsRemain"),
           )
         ) {
           await ctx.api(`/api/plans/${plan.id}/delete`, {});
@@ -294,7 +296,7 @@ async function planner() {
       planOffset = Math.max(0, planOffset - 50);
       await planner();
     }),
-    text("span", `Plan page ${planOffset / 50 + 1}`),
+    text("span", localizedCopy("ui.research.messagePlanPage",{value1:(String(planOffset / 50 + 1))})),
     button("Older plans", async () => {
       if (plans.length === 50) {
         planOffset += 50;
@@ -308,7 +310,7 @@ async function planner() {
   editPlan(editing);
 }
 function editPlan(plan) {
-  if((plannerDirty||pendingGeometry)&&!confirm("Discard unsaved mission and geometry edits? Cancel keeps the current draft."))return false;
+  if((plannerDirty||pendingGeometry)&&!confirm(localizedCopy("ui.research.messageDiscardUnsavedMissionAndGeometryEditsCancel")))return false;
   plannerDirty=false;pendingGeometry=false;
   editing = plan;
   const draftPlanId=plan?.id||newIdentity();
@@ -316,166 +318,166 @@ function editPlan(plan) {
   areas = structuredClone(plan?.surveyAreas || []);
   const e = $("plan-editor");
   e.replaceChildren(
-    text("h2", plan ? "Edit mission plan" : "New mission plan"),
+    text("h2", plan ? localizedCopy("ui.research.messageEditMissionPlan") : localizedCopy("ui.research.messageNewMissionPlan")),
   );
   const form = document.createElement("form");
   form.id = "plan-form";
   e.append(form);
   if (plan?.researchCard) {
-    const linked = text("p", `Personal Research test card · Revision ${plan.researchCard.revision}. Recording freezes this association; editing the route does not change its test rules.`);
-    const back = text("a", plan.researchStarter?"Back to My Research":"My Research"); back.href = "#my-research";
+    const linked = text("p", localizedCopy("ui.research.messagePersonalResearchTestCardRevision",{value1:(String(plan.researchCard.revision))}));
+    const back = text("a", plan.researchStarter?localizedCopy("ui.personalResearchStart.messageBackToMyResearch"):localizedCopy("nav.myResearch")); back.href = "#my-research";
     form.append(linked, back);
   }
-  const draftStatus=text("p","Mission plan draft · Changes are not saved until Save mission plan.","planner-status");draftStatus.setAttribute("role","status");form.append(draftStatus);
+  const draftStatus=text("p",localizedCopy("ui.research.messageMissionPlanDraftChangesAreNot"),"planner-status");draftStatus.setAttribute("role","status");form.append(draftStatus);
   let readinessView;
-  const dirty=message=>{if(!form.isConnected)return;plannerDirty=true;readinessView?.invalidate();draftStatus.textContent=message||"Unsaved changes · Save mission plan when ready. Your draft stays here when you switch sections.";};
+  const dirty=message=>{if(!form.isConnected)return;plannerDirty=true;readinessView?.invalidate();setPresentationText(draftStatus,message||localizedCopy("ui.research.messageUnsavedChangesSaveMissionPlanWhen"));};
   form.addEventListener("input",event=>{if(!event.target.closest(".pattern-editor")&&!event.target.closest(".draft-geometry-editor"))dirty();});
   let starterSection,starterCard,starterFields,starterName,starterFeedback,loadStarter=Promise.resolve();
   const references=plan?.researchCards??(plan?.researchCard?[plan.researchCard]:[]);
   const readCards=researchCardSelection(form,ctx.api,references,()=>{dirty();if(starterSection){starterSection.hidden=!readCards().some(r=>r.id===plan.researchStarter.requestId);save.disabled=!starterSection.hidden&&!starterFields;}});
   if(plan?.researchStarter&&(plan.researchStarter.intent==='customize'||!plan.researchStarter.originalCard)&&references.some(r=>r.id===plan.researchStarter.requestId)){
-    starterSection=text('section',undefined,'research-panel');starterSection.id='research-starter-targets';starterSection.append(text('h3','Your Experiment Targets'),text('p','This is your own prepared card. Editing targets saves a new revision for this plan; original experiments and past flight results stay unchanged. These are pilot-reviewed simulator targets, not safe aircraft limits.'));
-    const feedback=text('p','Loading your prepared targets…');starterFeedback=feedback;feedback.setAttribute('role','status');starterSection.append(feedback);const fields=text('div',undefined,'research-grid');starterSection.append(fields);form.append(starterSection);
-    const load=()=>{loadStarter=ctx.api(`/api/research/cards/${plan.researchStarter.requestId}?revision=${readCards().find(r=>r.id===plan.researchStarter.requestId)?.revision||references[0].revision}`).then(card=>{if(!form.isConnected)return;starterCard=card;fields.replaceChildren();renderResearchContext(fields,card,{plan});starterName=input(fields,'Experiment name',card.name);starterName.required=true;starterName.maxLength=100;starterFields=researchFields(fields,card,{prefix:'Experiment: ',api:ctx.api});fields.onchange=event=>{if(starterCard.observationFlight&&event.target.type==='checkbox'){const id=event.target.dataset.observationInstrument;if(!id)return;const control=configuration.querySelector(`[data-instrument="${id}"]`);if(control)control.checked=event.target.checked;payloadTouched=true;showRecommended();dirty('Optional supporting instruments updated. Pilot observations stay separate from science collection.');return;}if(!starterCard.survey||event.target.type!=='checkbox')return;const selected=new Set(starterFields.read().measurements.map(m=>({airTemperature:'ambient-temperature',terrainElevation:'terrain-scanner',landSurfaceTemperature:'thermal-imager'})[m]));for(const id of ['ambient-temperature','terrain-scanner','thermal-imager']){const control=configuration.querySelector(`[data-instrument="${id}"]`);if(control)control.checked=selected.has(id);}payloadTouched=true;showRecommended();dirty('Selected survey measurements updated their matching instruments. You can still edit the payload below; unavailable objectives remain incomplete.');};feedback.textContent=`Revision ${card.revision} · ${researchCardTargets(card)}. Free flight is supported; route, patterns and science instruments remain editable below.`;save.disabled=false;retry.hidden=true;}).catch(error=>{if(form.isConnected){feedback.textContent='Experiment targets could not load: '+error.message;save.disabled=!starterSection.hidden;retry.hidden=false;}throw error;});return loadStarter;};
+    starterSection=text('section',undefined,'research-panel');starterSection.id='research-starter-targets';starterSection.append(text('h3',localizedCopy("ui.research.messageYourExperimentTargets")),text('p',localizedCopy("ui.research.messageThisIsYourOwnPreparedCardEditing")));
+    const feedback=text('p',localizedCopy("ui.research.messageLoadingYourPreparedTargets"));starterFeedback=feedback;feedback.setAttribute('role','status');starterSection.append(feedback);const fields=text('div',undefined,'research-grid');starterSection.append(fields);form.append(starterSection);
+    const load=()=>{loadStarter=ctx.api(`/api/research/cards/${plan.researchStarter.requestId}?revision=${readCards().find(r=>r.id===plan.researchStarter.requestId)?.revision||references[0].revision}`).then(card=>{if(!form.isConnected)return;starterCard=card;fields.replaceChildren();renderResearchContext(fields,card,{plan});starterName=input(fields,localizedCopy("ui.research.messageExperimentName"),card.name);starterName.required=true;starterName.maxLength=100;starterFields=researchFields(fields,card,{prefix:"Experiment: ",api:ctx.api});fields.onchange=event=>{if(starterCard.observationFlight&&event.target.type==='checkbox'){const id=event.target.dataset.observationInstrument;if(!id)return;const control=configuration.querySelector(`[data-instrument="${id}"]`);if(control)control.checked=event.target.checked;payloadTouched=true;showRecommended();dirty(localizedCopy("ui.research.messageOptionalSupportingInstrumentsUpdatedPilotObservationsStay"));return;}if(!starterCard.survey||event.target.type!=='checkbox')return;const selected=new Set(starterFields.read().measurements.map(m=>({airTemperature:'ambient-temperature',terrainElevation:'terrain-scanner',landSurfaceTemperature:'thermal-imager'})[m]));for(const id of ['ambient-temperature','terrain-scanner','thermal-imager']){const control=configuration.querySelector(`[data-instrument="${id}"]`);if(control)control.checked=selected.has(id);}payloadTouched=true;showRecommended();dirty(localizedCopy("ui.research.messageSelectedSurveyMeasurementsUpdatedTheirMatchingInstruments"));};setPresentationText(feedback,localizedCopy("ui.research.messageRevisionFreeFlightIsSupported",{value1:(String(card.revision)),value2:(String(researchCardTargets(card)))}));save.disabled=false;retry.hidden=true;}).catch(error=>{if(form.isConnected){setPresentationText(feedback,localizedCopy("ui.research.messageExperimentTargetsCouldNotLoad",{value1:(String(error.message))}));save.disabled=!starterSection.hidden;retry.hidden=false;}throw error;});return loadStarter;};
     const retry=button('Reload Experiment Targets',()=>load());retry.hidden=true;starterSection.append(retry);load().catch(()=>{});
-  }else if(plan?.researchStarter)form.append(text('p','This plan reuses a saved experiment revision. Routes, patterns and instruments remain editable. To change experiment targets in an independent copy, return to My Research and choose Customize.'));
-  form.append(text("h3","1. Mission details"));
+  }else if(plan?.researchStarter)form.append(text('p',localizedCopy("ui.research.messageThisPlanReusesASavedExperimentRevision")));
+  form.append(text("h3",localizedCopy("ui.research.message1MissionDetails")));
   const grid = text("div", undefined, "research-grid mission-details-grid");
   form.append(grid);
-  const name = input(grid, "Plan name", plan?.name);
+  const name = input(grid, localizedCopy("ui.research.messagePlanName"), plan?.name);
   name.required = true;
   name.maxLength = 100;
   name.id = "plan-name";
   const template = select(
     grid,
-    "Template",
+    localizedCopy("ui.research.messageTemplate"),
     templates.map((t) => [t.id, t.name]),
     plan?.template || "generalResearch",
   );
   const mode = select(
     grid,
-    "Science mode",
+    localizedCopy("ui.research.messageScienceMode"),
     [
-      ["universal", "Universal — Fly Anything"],
-      ["realistic", "Realistic — Authentic Research"],
+      ["universal", localizedCopy("ui.research.messageUniversalFlyAnything")],
+      ["realistic", localizedCopy("ui.research.messageRealisticAuthenticResearch")],
     ],
     plan?.mode || "universal",
   );
-  const objective = input(grid, "Objective", plan?.objective, "textarea"),
-    description = input(grid, "Description", plan?.description, "textarea"),
+  const objective = input(grid, localizedCopy("ui.research.messageObjective"), plan?.objective, "textarea"),
+    description = input(grid, localizedCopy("ui.research.messageDescription"), plan?.description, "textarea"),
     aircraft = input(
       grid,
-      "Intended aircraft (descriptive only)",
+      localizedCopy("ui.research.messageIntendedAircraftDescriptiveOnly"),
       plan?.intendedAircraft,
     ),
-    departure = input(grid, "Departure", plan?.departure),
-    destination = input(grid, "Destination", plan?.destination);
+    departure = input(grid, localizedCopy("ui.research.messageDeparture"), plan?.departure),
+    destination = input(grid, localizedCopy("ui.research.messageDestination"), plan?.destination);
   objective.closest("label").classList.add("mission-objective-field");
   const flightRules = select(
     grid,
-    "Flight plan rules",
+    localizedCopy("ui.research.messageFlightPlanRules"),
     [
-      ["VFR", "VFR"],
-      ["IFR", "IFR"],
+      ["VFR", localizedCopy("ui.research.messageVFR")],
+      ["IFR", localizedCopy("ui.research.messageIFR")],
     ],
     plan?.flightRules || "VFR",
   );
   const cruise = input(
     grid,
-    "Flight plan cruising altitude (ft MSL; required for PLN)",
+    localizedCopy("ui.research.messageFlightPlanCruisingAltitudeFtMSLRequired"),
     plan?.cruisingAltitudeFeet,
     "number",
   );
   const low = input(
       grid,
-      "Minimum planned altitude (ft MSL)",
+      localizedCopy("ui.research.messageMinimumPlannedAltitudeFtMSL"),
       plan?.minimumAltitudeFeet,
       "number",
     ),
     high = input(
       grid,
-      "Maximum planned altitude (ft MSL)",
+      localizedCopy("ui.research.messageMaximumPlannedAltitudeFtMSL"),
       plan?.maximumAltitudeFeet,
       "number",
     ),
     duration = input(
       grid,
-      "Estimated duration (minutes)",
+      localizedCopy("ui.research.messageEstimatedDurationMinutes"),
       plan?.estimatedDurationMinutes,
       "number",
     );
-  for(const [field,title,suffix] of [[cruise,"Flight plan cruising altitude","required for PLN"],[low,"Minimum planned altitude",""],[high,"Maximum planned altitude",""]])planningField(field,"altitude",field.value===""?null:Number(field.value),title,suffix);
+  for(const [field,title,suffix] of [[cruise,textForUI("ui.research.messageFlightPlanCruisingAltitude"),"required for PLN"],[low,textForUI("ui.research.messageMinimumPlannedAltitude"),""],[high,textForUI("ui.research.messageMaximumPlannedAltitude"),""]])planningField(field,"altitude",field.value===""?null:Number(field.value),title,suffix);
   duration.min = 1;
   duration.max = 43200;
   const notes = input(
     form,
-    "Preflight notes",
+    localizedCopy("ui.research.messagePreflightNotes"),
     plan?.preflightNotes,
     "textarea",
   );
   notes.maxLength = 4000;
-  informationDetails(form,"Science modes explained",text("p","Realistic Mode supports documented sensor geometry, calibration provenance and operating assessments with any compatible aircraft. Unknown operating limits remain unknown; no physical hardware or sensor failures are simulated."));
-  const advanced=text("details");advanced.append(text("summary","Advanced mission details & export settings"));
+  informationDetails(form,localizedCopy("ui.research.messageScienceModesExplained"),text("p",localizedCopy("ui.research.messageRealisticModeSupportsDocumentedSensorGeometryCalibration")));
+  const advanced=text("details");advanced.append(text("summary",localizedCopy("ui.research.messageAdvancedMissionDetailsExportSettings")));
   for(const field of [description,aircraft,departure,destination,flightRules,cruise,low,high,duration,notes])advanced.append(field.closest("label"));
   form.append(advanced);
   const configuration = text("div"),selectedPayload=text("p");
   form.append(configuration);
   configs(configuration, plan?.instruments || []);
-  const recommended=text("section",undefined,"panel recommended-payload");recommended.setAttribute("aria-label","Recommended instrument payload");
+  const recommended=text("section",undefined,"panel recommended-payload");setPresentationText(recommended,localizedCopy("ui.research.messageRecommendedInstrumentPayload"),"aria-label");
   const recommendations=text("div"),payloadActions=text("div",undefined,"action-row");recommended.append(recommendations,payloadActions);grid.after(recommended);
   let localSourceCandidates=null,priorTemplate=template.value,payloadTouched=!!plan;
   const externalKinds={"terrain-scanner":"terrain","thermal-imager":"thermal","multispectral-imager":"multispectral","hyperspectral-imager":"hyperspectral"};
   const payloadPurpose={
-    "terrain-scanner":"Study terrain elevations along the planned survey.",
-    "multispectral-imager":"Study surface reflectance and vegetation patterns.",
-    "thermal-imager":"Study historical land-surface temperature.",
-    "hyperspectral-imager":"Examine spectra from compatible original ENVI observations.",
-    "ambient-temperature":"Record simulator-reported ambient air temperature.",
-    "ambient-wind":"Record simulator-reported wind speed and direction.",
-    "ambient-pressure":"Record simulator-reported ambient pressure.",
-    "ambient-density":"Record simulator-reported ambient air density."
+    "terrain-scanner":textForUI("ui.research.messageStudyTerrainElevationsAlongThePlannedSurvey"),
+    "multispectral-imager":textForUI("ui.research.messageStudySurfaceReflectanceAndVegetationPatterns"),
+    "thermal-imager":textForUI("ui.research.messageStudyHistoricalLandSurfaceTemperature"),
+    "hyperspectral-imager":textForUI("ui.research.messageExamineSpectraFromCompatibleOriginalENVIObservations"),
+    "ambient-temperature":textForUI("ui.research.messageRecordSimulatorReportedAmbientAirTemperature"),
+    "ambient-wind":textForUI("ui.research.messageRecordSimulatorReportedWindSpeedAndDirection"),
+    "ambient-pressure":textForUI("ui.research.messageRecordSimulatorReportedAmbientPressure"),
+    "ambient-density":textForUI("ui.research.messageRecordSimulatorReportedAmbientAirDensity")
   };
   const sourceRequirement={
-    "terrain-scanner":"External data: supported 3DEP bare-earth DEM or Copernicus surface DSM.",
-    "multispectral-imager":"External data: compatible Sentinel-2 Level-2A observations.",
-    "thermal-imager":"External data: Landsat Collection 2 Level-2 surface temperature.",
-    "hyperspectral-imager":"External data: compatible original ENVI reflectance/radiance collections."
+    "terrain-scanner":textForUI("ui.research.messageExternalDataSupported3DEPBareEarthDEMOr"),
+    "multispectral-imager":textForUI("ui.research.messageExternalDataCompatibleSentinel2Level2AObservations"),
+    "thermal-imager":textForUI("ui.research.messageExternalDataLandsatCollection2Level2Surface"),
+    "hyperspectral-imager":textForUI("ui.research.messageExternalDataCompatibleOriginalENVIReflectanceRadianceCollections")
   };
   let recommendationTemplate=null,recommendationCards=[];
   function recommendationCard(c,role,parent){
     const definition=definitions.find(d=>d.id===c.instrumentId),kind=externalKinds[c.instrumentId],row=text("article",undefined,"finding-card payload-recommendation");
     row.dataset.recommendation=role;row.dataset.instrumentId=c.instrumentId;
     const included=text("p",undefined,"payload-inclusion"),profile=text("p",undefined,"payload-reference"),details=text("details"),cadence=text("p"),sources=text("p"),limits=text("p"),calibration=text("p"),reference=text("p");
-    row.append(text("span",role==="primary"?"Primary recommendation":"Optional addition","payload-role"),text("h4",definition?.name||c.instrumentId),text("p",payloadPurpose[c.instrumentId]||definition?.description||"Review this instrument's supported measurements."),included);
-    row.append(text("p",sourceRequirement[c.instrumentId]||"Simulator-derived observations; no external satellite data required.","payload-source"));
+    row.append(text("span",role==="primary"?localizedCopy("ui.research.messagePrimaryRecommendation"):localizedCopy("ui.research.messageOptionalAddition"),"payload-role"),text("h4",definition?.name||c.instrumentId),text("p",payloadPurpose[c.instrumentId]||definition?.description||localizedCopy("ui.research.messageReviewThisInstrumentSSupportedMeasurements")),included);
+    row.append(text("p",sourceRequirement[c.instrumentId]||localizedCopy("ui.research.messageSimulatorDerivedObservationsNoExternalSatelliteDataRequired"),"payload-source"));
     if(kind)row.append(profile);
-    details.append(text("summary","View instrument details"),text("p",definition?.description||"Unknown instrument — review configuration."),cadence,calibration);
+    details.append(text("summary",localizedCopy("ui.research.messageViewInstrumentDetails")),text("p",definition?.description||localizedCopy("ui.research.messageUnknownInstrumentReviewConfiguration")),cadence,calibration);
     if(kind){
-      details.append(reference,sources,text("p",kind==="hyperspectral"?"Use the Library's supported authorized AVIRIS download/import or guided original ENVI workflow. Generic geographic preflight downloading cannot prepare arbitrary hyperspectral coverage.":"Retained source files and provider footprints do not prove mission-area coverage or QA-valid pixels. Prepare and assess the actual saved mission separately."),text("p","Original external observation dates remain separate from simulator flight time. Historical Landsat imagery is not a live aircraft camera; DEM/DSM elevations are not airborne LiDAR returns."));
-      const a=text("a","Find Compatible External Data","button secondary");a.href="#library/download?science="+kind;details.append(a);
+      details.append(reference,sources,text("p",kind==="hyperspectral"?localizedCopy("ui.research.messageUseTheLibrarySSupportedAuthorizedAVIRISDownloadImport"):localizedCopy("ui.research.messageRetainedSourceFilesAndProviderFootprintsDo")),text("p",localizedCopy("ui.research.messageOriginalExternalObservationDatesRemainSeparateFrom")));
+      const a=text("a",localizedCopy("ui.research.messageFindCompatibleExternalData"),"button secondary");a.href="#library/download?science="+kind;details.append(a);
     }
     details.append(limits);row.append(details);
     let add;
     if(role==="optional"){
-      add=text("button","Add "+(definition?.name||c.instrumentId),"secondary");add.type="button";
+      add=text("button",localizedCopy("ui.research.messageAdd",{value1:(String(definition?.name||c.instrumentId))}),"secondary");add.type="button";
       add.onclick=()=>{
         const enabled=configuration.querySelector(`[data-instrument="${c.instrumentId}"]`);
         if(!enabled)return;
-        enabled.checked=true;payloadTouched=true;showRecommended();dirty("Optional instrument enabled in this draft. Its existing cadence, profile, geometry and calibration are preserved. Save separately.");
+        enabled.checked=true;payloadTouched=true;showRecommended();dirty(localizedCopy("ui.research.messageOptionalInstrumentEnabledInThisDraftIts"));
       };row.append(add);
     }
     parent.append(row);
     return current=>{
       const effective=current.find(v=>v.instrumentId===c.instrumentId);
-      included.textContent=effective?.enabled?"Enabled in draft":"Not enabled in draft";
+      setPresentationText(included,effective?.enabled?localizedCopy("ui.research.messageEnabledInDraft"):localizedCopy("ui.research.messageNotEnabledInDraft"));
       row.dataset.enabled=String(!!effective?.enabled);
-      profile.textContent="Reference: "+(effective?.payload?.profile?.name||"No reference selected");
-      reference.textContent=`Reference identity: ${effective?.payload?.profile?.id||"Unknown"}; version ${effective?.payload?.profile?.version??"Unknown"}. ${effective?.payload?.custom?"Custom modeled geometry":"Selected reference geometry"}; no physical installation or accuracy certification is implied.`;
-      cadence.textContent=`Recommended acquisition interval ${c.intervalMs/1000} s; current configured interval ${effective?.intervalMs/1000??"Unknown"} s. Saved acquisition cadence is separate from sensor line/pulse rates and native source resolution.`;
-      calibration.textContent="Calibration provenance: "+(effective?.calibration?.name||effective?.calibration?.id||"Not supplied; no accuracy certification is implied.");
+      setPresentationText(profile,localizedCopy("ui.research.messageReference",{value1:(String(effective?.payload?.profile?.name||"No reference selected"))}));
+      setPresentationText(reference,localizedCopy("ui.research.messageReferenceIdentityVersionNo",{value1:(String(effective?.payload?.profile?.id||"Unknown")),value2:(String(effective?.payload?.profile?.version??"Unknown")),value3:(String(effective?.payload?.custom?"Custom modeled geometry":"Selected reference geometry"))}));
+      setPresentationText(cadence,localizedCopy("ui.research.messageRecommendedAcquisitionIntervalSCurrentConfiguredInterval",{value1:(String(c.intervalMs/1000)),value2:(String(effective?.intervalMs/1000??"Unknown"))}));
+      setPresentationText(calibration,localizedCopy("ui.research.messageCalibrationProvenance",{value1:(String(effective?.calibration?.name||effective?.calibration?.id||"Not supplied; no accuracy certification is implied."))}));
       const retained=localSourceCandidates?.filter(s=>s.filesAvailable&&s.source.manifest.kind===kind);
-      sources.textContent=localSourceCandidates===null?"Local source presence not yet assessed.":retained?.length?`${retained.length} retained candidate(s); mission-area suitability and valid pixels not yet assessed.`:"No verified retained candidate of this scientific type is present.";
-      limits.textContent=(effective?.payload?.profile?.limitations||[]).join(" ")||"Operating limits are assessed only where documented evidence exists; unknown constraints stay unknown.";
+      setPresentationText(sources,localSourceCandidates===null?localizedCopy("ui.research.messageLocalSourcePresenceNotYetAssessed"):retained?.length?localizedCopy("ui.research.messageRetainedCandidateSMissionAreaSuitabilityAndValid",{value1:(String(retained.length))}):localizedCopy("ui.research.messageNoVerifiedRetainedCandidateOfThisScientific"));
+      setPresentationText(limits,(effective?.payload?.profile?.limitations||[]).join(" ")||localizedCopy("ui.research.messageOperatingLimitsAreAssessedOnlyWhereDocumented"));
       if(add)add.disabled=!!effective?.enabled;
     };
   }
@@ -483,39 +485,39 @@ function editPlan(plan) {
     const t=templates.find(t=>t.id===template.value),current=readConfigs(configuration),recommendedIds=new Set((t?.instruments||[]).filter(c=>c.enabled).map(c=>c.instrumentId));
     if(recommendationTemplate!==t){
       recommendationTemplate=t;recommendationCards=[];
-      recommendations.replaceChildren(text("h3","Recommended Science Payload"),text("p",`${t?.name||"No template"}: ${t?.objective||"No objective supplied"}`));
+      recommendations.replaceChildren(text("h3",localizedCopy("ui.research.messageRecommendedSciencePayload")),text("p",`${t?.name||"No template"}: ${t?.objective||"No objective supplied"}`));
       const primary=text("div",undefined,"recommended-payload-grid");recommendations.append(primary);
       for(const c of(t?.instruments||[]).filter(c=>c.enabled))recommendationCards.push(recommendationCard(c,"primary",primary));
-      if(!primary.childElementCount)primary.append(text("p","No fixed primary payload. Choose instruments for your research objective, or keep an observation/marker-focused mission."));
+      if(!primary.childElementCount)primary.append(text("p",localizedCopy("ui.research.messageNoFixedPrimaryPayloadChooseInstrumentsFor")));
       const optional=(t?.optionalInstruments||[]).filter(c=>!recommendedIds.has(c.instrumentId));
       if(optional.length){
         const more=text("details",undefined,"recommended-optional"),list=text("div",undefined,"recommended-payload-grid");
-        more.append(text("summary",`Optional scientific instruments (${optional.length}) — add individually`),text("p","Optional additions are not enabled automatically. Atmospheric instruments provide context for geographic surveys."),list);
+        more.append(text("summary",localizedCopy("ui.research.messageOptionalScientificInstrumentsAdd",{value1:(String(optional.length))})),text("p",localizedCopy("ui.research.messageOptionalAdditionsAreNotEnabledAutomaticallyAtmospheric")),list);
         for(const c of optional)recommendationCards.push(recommendationCard(c,"optional",list));
         recommendations.append(more);
       }
-      const caveats=text("details",undefined,"recommended-explanation");caveats.append(text("summary","How recommendations work & scientific limitations"),text("p","Primary instruments match the template's research objective. Apply replaces the draft payload after confirmation; Merge only enables missing primary instruments and keeps current settings. Keep retains your current payload. Add enables one optional instrument without changing its settings."),text("p","Recommendations do not install hardware or confirm source readiness. Historical scientific datasets remain external observations. Save and reassess your actual plan; no download, science session or flight starts from this panel."));recommendations.append(caveats);
+      const caveats=text("details",undefined,"recommended-explanation");caveats.append(text("summary",localizedCopy("ui.research.messageHowRecommendationsWorkScientificLimitations")),text("p",localizedCopy("ui.research.messagePrimaryInstrumentsMatchTheTemplateSResearchObjective")),text("p",localizedCopy("ui.research.messageRecommendationsDoNotInstallHardwareOrConfirm")));recommendations.append(caveats);
       recommendations.append(text("p",undefined,"payload-additional"));
     }
-    selectedPayload.textContent="Enabled instruments: "+(current.filter(c=>c.enabled).map(c=>definitions.find(d=>d.id===c.instrumentId)?.name||c.instrumentId).join(", ")||"None selected");
+    setPresentationText(selectedPayload,localizedCopy("ui.research.messageEnabledInstruments",{value1:(String(current.filter(c=>c.enabled).map(c=>definitions.find(d=>d.id===c.instrumentId)?.name||c.instrumentId).join(", ")||"None selected"))}));
     for(const update of recommendationCards)update(current);
     const extra=current.filter(c=>c.enabled&&!recommendedIds.has(c.instrumentId)),additional=recommendations.querySelector(".payload-additional");
-    additional.textContent=extra.length?"Additional/custom instruments enabled: "+extra.map(c=>definitions.find(d=>d.id===c.instrumentId)?.name||c.instrumentId).join(", "):"";
+    setPresentationText(additional,extra.length?localizedCopy("ui.research.messageAdditionalCustomInstrumentsEnabled",{value1:(String(extra.map(c=>definitions.find(d=>d.id===c.instrumentId)?.name||c.instrumentId).join(", ")))}):"");
     additional.hidden=!extra.length;
   }
   payloadActions.append(button("Apply Recommended Payload",()=>{
     const t=templates.find(t=>t.id===template.value),current=readConfigs(configuration);
-    if((plan||payloadTouched||current.some(c=>c.enabled||c.payload?.custom))&&!confirm("Replace this draft's instrument settings, cadence, profiles and calibration references with the selected template recommendations? Current included instruments: "+current.filter(c=>c.enabled).map(c=>definitions.find(d=>d.id===c.instrumentId)?.name||c.instrumentId).join(", ")+". Your saved plan and active flight remain unchanged until separately saved/applied."))return;
-    payloadTouched=true;configs(configuration,t.instruments);showRecommended();dirty("Recommended payload applied to draft. Review and Save mission plan separately.");
+    if((plan||payloadTouched||current.some(c=>c.enabled||c.payload?.custom))&&!confirm(localizedCopy("ui.research.messageReplaceThisDraftSInstrumentSettingsCadenceProfiles",{value1:(String(current.filter(c=>c.enabled).map(c=>definitions.find(d=>d.id===c.instrumentId)?.name||c.instrumentId).join(", ")))})))return;
+    payloadTouched=true;configs(configuration,t.instruments);showRecommended();dirty(localizedCopy("ui.research.messageRecommendedPayloadAppliedToDraftReviewAnd"));
   }),button("Merge Recommended Instruments",()=>{
     const ids=new Set(templates.find(t=>t.id===template.value).instruments.filter(c=>c.enabled).map(c=>c.instrumentId));
     for(const id of ids){const enabled=configuration.querySelector(`[data-instrument="${id}"]`);if(enabled)enabled.checked=true;}
-    payloadTouched=true;showRecommended();dirty("Recommended instruments enabled in the draft; existing settings preserved. Review before saving.");
-  }),button("Keep Current Payload",()=>{payloadTouched=true;showRecommended();draftStatus.textContent="Current payload retained. Template choice and recommendations do not overwrite custom settings. Save remains separate.";}));
+    payloadTouched=true;showRecommended();dirty(localizedCopy("ui.research.messageRecommendedInstrumentsEnabledInTheDraftExisting"));
+  }),button("Keep Current Payload",()=>{payloadTouched=true;showRecommended();setPresentationText(draftStatus,localizedCopy("ui.research.messageCurrentPayloadRetainedTemplateChoiceAndRecommendations"));}));
   configuration.addEventListener("input",()=>{payloadTouched=true;showRecommended();});configuration.addEventListener("change",()=>{payloadTouched=true;showRecommended();});showRecommended();
   ctx.api('/api/science/sources').then(s=>{if(form.isConnected){localSourceCandidates=s;showRecommended();}}).catch(()=>{if(form.isConnected){localSourceCandidates=null;showRecommended();}});
   const presetSection = text("details");
-  presetSection.append(text("summary", "Apply an instrument preset"));
+  presetSection.append(text("summary", localizedCopy("ui.research.messageApplyAnInstrumentPreset")));
   configuration.after(presetSection);
   ctx
     .api("/api/presets")
@@ -527,8 +529,7 @@ function editPlan(plan) {
             if (
               resolved.warnings.length &&
               !confirm(
-                resolved.warnings.join("\n") +
-                  "\nApply supported instruments only?",
+                localizedCopy("ui.research.messageApplySupportedInstrumentsOnly",{value1:(String(resolved.warnings.join("\n")))}),
               )
             )
               return;
@@ -537,7 +538,7 @@ function editPlan(plan) {
         );
       if (!rows.length)
         presetSection.append(
-          text("p", "Save a reusable configuration from Science Collection."),
+          text("p", localizedCopy("ui.research.messageSaveAReusableConfigurationFromScienceCollection")),
         );
     })
     .catch((e) => ctx.notice(e.message));
@@ -545,8 +546,8 @@ function editPlan(plan) {
     const t = templates.find((t) => t.id === template.value);
     if(!objective.value||objective.value===templates.find(t=>t.id===priorTemplate)?.objective)objective.value = t.objective;
     priorTemplate=template.value;
-    if(!plan&&!payloadTouched){configs(configuration,t.instruments);showRecommended();dirty("Recommended payload visibly prefilled for this untouched new draft. Review the payload and Save mission plan separately.");}
-    else{showRecommended();dirty("Template recommendations updated. Current instrument configuration is preserved; apply, merge or keep it explicitly.");}
+    if(!plan&&!payloadTouched){configs(configuration,t.instruments);showRecommended();dirty(localizedCopy("ui.research.messageRecommendedPayloadVisiblyPrefilledForThisUntouched"));}
+    else{showRecommended();dirty(localizedCopy("ui.research.messageTemplateRecommendationsUpdatedCurrentInstrumentConfigurationIs"));}
   };
   const estimate = text("p", undefined, "footnote");
   form.append(
@@ -555,12 +556,12 @@ function editPlan(plan) {
         instruments: readConfigs(configuration),
         durationMinutes: duration.value ? Number(duration.value) : null,
       });
-      estimate.textContent = `Estimated science storage: ${v.estimatedBytes === null ? "Supply duration" : n(v.estimatedBytes / 1048576) + " MiB"} · Available: ${v.availableBytes === null ? "Unknown" : n(v.availableBytes / 1073741824) + " GiB"}${v.capacityWarning ? " · CAPACITY WARNING" : ""}. ${v.basis} ${v.limitations.join(" ")}`;
+      setPresentationText(estimate,localizedCopy("ui.research.messageEstimatedScienceStorageAvailable",{value1:(String(v.estimatedBytes === null ? "Supply duration" : n(v.estimatedBytes / 1048576) + " MiB")),value2:(String(v.availableBytes === null ? "Unknown" : n(v.availableBytes / 1073741824) + " GiB")),value3:(String(v.capacityWarning ? " · CAPACITY WARNING" : "")),value4:(String(v.basis)),value5:(String(v.limitations.join(" ")))}));
     }),
     estimate,
   );
   const locationSection=text("section");form.append(locationSection);
-  locationSection.append(text("h3", "2. Location, waypoints and survey areas"));
+  locationSection.append(text("h3", localizedCopy("ui.research.message2LocationWaypointsAndSurveyAreas")));
   const list = text("div");
   locationSection.append(list);
   const drawList = () => {
@@ -597,7 +598,7 @@ function editPlan(plan) {
       const definition=patternValues?.find(d=>d.id===w.patternId);
       if(definition?.kind==="orbit") {
         let group=list.querySelector(`[data-orbit="${w.patternId}"]`);
-        if(!group){group=text("details");group.dataset.orbit=w.patternId;const count=waypoints.filter(p=>p.patternId===w.patternId).length;const description=text("summary");group.append(description);planningText(description,()=>`Orbit · ${planningDistance(definition.radiusMetres)} radius · ${definition.clockwise?"clockwise":"counterclockwise"} · ${definition.orbits} revolution(s) · ${count} navigation points (advanced)`);list.append(group);}
+        if(!group){group=text("details");group.dataset.orbit=w.patternId;const count=waypoints.filter(p=>p.patternId===w.patternId).length;const description=text("summary");group.append(description);planningText(description,()=>textForUI("ui.research.messageOrbitRadiusRevolutionS",{value1:(String(planningDistance(definition.radiusMetres))),value2:(String(definition.clockwise?"clockwise":"counterclockwise")),value3:(String(definition.orbits)),value4:(String(count))}));list.append(group);}
         group.append(row);
       }else list.append(row);
     });
@@ -605,7 +606,7 @@ function editPlan(plan) {
       const area = areas[i];
       const row = text("div");
       row.append(
-        text("span", `${area.name}: ${area.vertices.length} vertices`),
+        text("span", localizedCopy("ui.research.messageVertices",{value1:(String(area.name)),value2:(String(area.vertices.length))})),
         button("Edit area", () => areaEditor(i)),
         button("Remove area", () => {
           pattern.remember();
@@ -624,40 +625,40 @@ function editPlan(plan) {
   locationSection.append(editor);
   let clickMode=null, areaVertices=[], selectedArea=null, selectPatternCenter=null, waypointIndex=-1;
   let patternValues = structuredClone(plan?.patterns || []);
-  function canReplaceGeometry(){return !pendingGeometry||confirm("Discard the current unsaved waypoint or survey area? Cancel keeps editing it.");}
-  function cancelGeometry(){pendingGeometry=false;clickMode=null;areaVertices=[];planMap.interaction(null);planMap.draft();editor.replaceChildren();draftStatus.textContent=plannerDirty?"Unsaved mission draft changes remain.":"Geometry edit cancelled; saved route unchanged.";}
+  function canReplaceGeometry(){return !pendingGeometry||confirm(localizedCopy("ui.research.messageDiscardTheCurrentUnsavedWaypointOrSurvey"));}
+  function cancelGeometry(){pendingGeometry=false;clickMode=null;areaVertices=[];planMap.interaction(null);planMap.draft();editor.replaceChildren();setPresentationText(draftStatus,plannerDirty?localizedCopy("ui.research.messageUnsavedMissionDraftChangesRemain"):localizedCopy("ui.research.messageGeometryEditCancelledSavedRouteUnchanged"));}
   function beginWaypoint(){waypointEditor(-1);}
 
   function waypointEditor(index, position = {}) {
     if(pendingGeometry&&!position.fromMap&&!canReplaceGeometry())return;
     waypointIndex=index;pendingGeometry=true;clickMode="waypoint";planMap?.interaction("waypoint");
-    editor.replaceChildren(text("h4",index>=0?"Edit selected waypoint":"Draft waypoint — click the map to place it, or enter coordinates"));
-    draftStatus.textContent="Draft waypoint only · Save Waypoint commits it to this plan draft; Save mission plan writes the plan.";
+    editor.replaceChildren(text("h4",index>=0?localizedCopy("ui.research.messageEditSelectedWaypoint"):localizedCopy("ui.research.messageDraftWaypointClickTheMapTo")));
+    setPresentationText(draftStatus,localizedCopy("ui.research.messageDraftWaypointOnlySaveWaypointCommits"));
     const w = {...(waypoints[index] || {}),...position};
     const airport=position.airport;
     const title = input(
         editor,
-        "Waypoint name",
+        localizedCopy("ui.research.messageWaypointName"),
         w.name || `Point ${waypoints.length + 1}`,
       ),
-      lat = input(editor, "Latitude (degrees north)", w.latitude, "number"),
-      lon = input(editor, "Longitude (degrees east)", w.longitude, "number"),
+      lat = input(editor, localizedCopy("ui.map.messageLatitudeDegreesNorth"), w.latitude, "number"),
+      lon = input(editor, localizedCopy("ui.map.messageLongitudeDegreesEast"), w.longitude, "number"),
       alt = input(
         editor,
-        "Target altitude (ft MSL, optional)",
+        localizedCopy("ui.research.messageTargetAltitudeFtMSLOptional"),
         w.targetAltitudeFeet,
         "number",
       ),
-      instruction = input(editor, "Instructions", w.instructions),
-      purpose = input(editor, "Waypoint objective", w.objective),
+      instruction = input(editor, localizedCopy("ui.research.messageInstructions"), w.instructions),
+      purpose = input(editor, localizedCopy("ui.research.messageWaypointObjective"), w.objective),
       navigationIdentifier = input(
         editor,
-        "Published navigation identifier (optional; not the science name)",
+        localizedCopy("ui.research.messagePublishedNavigationIdentifierOptionalNotTheScience"),
         w.navigationIdentifier,
       );
-    const airportRole=airport?select(editor,'Airport role',[['waypoint','Intermediate waypoint'],['departure','Departure'],['destination','Destination']],'waypoint'):null;
-    if(airport)editor.append(text('p','Airport reference point · OurAirports snapshot. This is not a runway threshold or navigation clearance.'));
-    planningField(alt,"altitude",w.targetAltitudeFeet??null,"Target altitude","optional");
+    const airportRole=airport?select(editor,localizedCopy("ui.research.messageAirportRole"),[['waypoint',localizedCopy("ui.research.messageIntermediateWaypoint")],['departure',localizedCopy("ui.research.messageDeparture")],['destination',localizedCopy("ui.research.messageDestination")]],'waypoint'):null;
+    if(airport)editor.append(text('p',localizedCopy("ui.research.messageAirportReferencePointOurAirportsSnapshotThis")));
+    planningField(alt,"altitude",w.targetAltitudeFeet??null,localizedCopy("ui.research.messageTargetAltitude"),"optional");
     lat.step = lon.step = "any";lat.min=-90;lat.max=90;lon.min=-180;lon.max=180;
     const updateMarker=()=>{if(lat.value!==""&&lon.value!==""&&lat.checkValidity()&&lon.checkValidity())planMap.draft([{latitude:Number(lat.value),longitude:Number(lon.value)}]);};
     lat.addEventListener("input",updateMarker);lon.addEventListener("input",updateMarker);updateMarker();
@@ -680,26 +681,26 @@ function editPlan(plan) {
           Math.abs(value.latitude) > 90 ||
           Math.abs(value.longitude) > 180
         )
-          throw Error("Enter valid latitude and longitude.");
+          throw Error(textForUI("ui.research.messageEnterValidLatitudeAndLongitude"));
         pattern.remember();
         // The definition keeps its existing waypoint/identifier contract.
         delete value.airport;delete value.fromMap;
         if (index >= 0) waypoints[index] = value;
         else if(airportRole?.value==='departure'){waypoints.unshift(value);departure.value=value.navigationIdentifier;}
         else {waypoints.push(value);if(airportRole?.value==='destination')destination.value=value.navigationIdentifier;}
-        cancelGeometry();drawList();dirty("Waypoint saved to draft · Save mission plan to keep this route.");
+        cancelGeometry();drawList();dirty(localizedCopy("ui.research.messageWaypointSavedToDraftSaveMission"));
       }),
       button("Cancel Waypoint",cancelGeometry),
     );
   }
   function areaEditor(index = -1) {
     if(!canReplaceGeometry())return;pendingGeometry=true;clickMode=null;planMap.interaction(null);
-    editor.replaceChildren(text("h4","Advanced survey vertex editor"));
+    editor.replaceChildren(text("h4",localizedCopy("ui.research.messageAdvancedSurveyVertexEditor")));
     const area = areas[index];
-    const title = input(editor, "Area name", area?.name),
+    const title = input(editor, localizedCopy("ui.research.messageAreaName"), area?.name),
       vertices = input(
         editor,
-        "Vertices, one latitude,longitude per line",
+        localizedCopy("ui.research.messageVerticesOneLatitudeLongitudePerLine"),
         (area?.vertices || [])
           .map((p) => `${p.latitude},${p.longitude}`)
           .join("\n"),
@@ -730,22 +731,22 @@ function editPlan(plan) {
         pattern.remember();
         if (index >= 0) areas[index] = value;
         else areas.push(value);
-        cancelGeometry();drawList();dirty("Survey area saved to draft.");
+        cancelGeometry();drawList();dirty(localizedCopy("ui.research.messageSurveyAreaSavedToDraft"));
       }),button("Cancel area edit",cancelGeometry),
     );
   }
   function startSurvey(){
     if(!canReplaceGeometry())return;pendingGeometry=true;clickMode="survey";areaVertices=[];planMap.interaction("survey");planMap.draft();
-    editor.replaceChildren(text("h4","Draw Survey Area"),text("p","Click at least three points around the survey boundary. Undo removes the last vertex; Finish Area closes it."));
-    const progress=text("p","0 vertices");progress.id="survey-draft-progress";
-    editor.append(progress,button("Undo Last Vertex",()=>{areaVertices.pop();planMap.draft(areaVertices);progress.textContent=`${areaVertices.length} vertices`; }),button("Finish Area",()=>{
-      const result=areaSummary(areaVertices);if(result.error){progress.textContent=result.error;return;}
+    editor.replaceChildren(text("h4",localizedCopy("ui.research.messageDrawSurveyArea")),text("p",localizedCopy("ui.research.messageClickAtLeastThreePointsAroundThe")));
+    const progress=text("p",localizedCopy("ui.research.message0Vertices"));progress.id="survey-draft-progress";
+    editor.append(progress,button("Undo Last Vertex",()=>{areaVertices.pop();planMap.draft(areaVertices);setPresentationText(progress,localizedCopy("ui.research.messageVerticesfa6bc834",{value1:(String(areaVertices.length))})); }),button("Finish Area",()=>{
+      const result=areaSummary(areaVertices);if(result.error){setPresentationText(progress,result.error);return;}
       clickMode=null;planMap.interaction(null);planMap.draft(areaVertices,true);
-      const dimensions=text("p");editor.replaceChildren(text("h4","Survey polygon preview — not yet in the plan"),dimensions);planningText(dimensions,()=>planningSurvey(result));
-      const name=input(editor,"Survey area name",`Survey area ${areas.length+1}`);
-      editor.append(button("Save Survey Area",()=>{if(!name.value.trim())throw Error("Give this survey area a name.");pattern.remember();areas.push({name:name.value.trim(),vertices:structuredClone(areaVertices)});selectedArea=areas.length-1;cancelGeometry();drawList();pattern.refreshAreas?.();dirty("Survey area saved to draft · Generate a pattern below, or save the mission plan.");}),button("Cancel Survey Area",cancelGeometry));
+      const dimensions=text("p");editor.replaceChildren(text("h4",localizedCopy("ui.research.messageSurveyPolygonPreviewNotYetIn")),dimensions);planningText(dimensions,()=>planningSurvey(result));
+      const name=input(editor,localizedCopy("ui.research.messageSurveyAreaName"),`Survey area ${areas.length+1}`);
+      editor.append(button("Save Survey Area",()=>{if(!name.value.trim())throw Error(textForUI("ui.research.messageGiveThisSurveyAreaAName"));pattern.remember();areas.push({name:name.value.trim(),vertices:structuredClone(areaVertices)});selectedArea=areas.length-1;cancelGeometry();drawList();pattern.refreshAreas?.();dirty(localizedCopy("ui.research.messageSurveyAreaSavedToDraftGenerate"));}),button("Cancel Survey Area",cancelGeometry));
     }),button("Cancel Drawing",cancelGeometry));
-    draftStatus.textContent="Drawing survey area · Click the map to add vertices; the route has not changed.";
+    setPresentationText(draftStatus,localizedCopy("ui.research.messageDrawingSurveyAreaClickTheMap"));
   }
   locationSection.append(
     button("Add waypoint", beginWaypoint),
@@ -761,54 +762,54 @@ function editPlan(plan) {
       const fields=editor.querySelectorAll("input");const draft=fields.length?{name:fields[0].value,targetAltitudeFeet:fields[3].planningUnits.read(),instructions:fields[4].value,objective:fields[5].value,navigationIdentifier:fields[6].value}:{};
       waypointEditor(waypointIndex,{...draft,...p,fromMap:true});planMap.draft([p]);
     }
-    else if(clickMode==="survey"){areaVertices.push(p);planMap.draft(areaVertices);$("survey-draft-progress").textContent=`${areaVertices.length} vertices · Finish Area when ready`;}
+    else if(clickMode==="survey"){areaVertices.push(p);planMap.draft(areaVertices);setPresentationText($("survey-draft-progress"),localizedCopy("ui.research.messageVerticesFinishAreaWhenReady",{value1:(String(areaVertices.length))}));}
     else if(clickMode==="pattern"){planMap.interaction(null);clickMode=null;selectPatternCenter?.(p);}
   }, {
     onAirportSelect:airport=>{if(!canReplaceGeometry())return;cancelGeometry();waypointEditor(-1,{name:airport.name,navigationIdentifier:airport.icao||airport.id||airport.iata,latitude:airport.latitude,longitude:airport.longitude,airport});},
     onWaypointSelect:index=>waypointEditor(index),
     onWaypointsChange: (value) => {
       pattern.remember();
-      waypoints = value;dirty("Waypoint moved in the plan draft.");
+      waypoints = value;dirty(localizedCopy("ui.research.messageWaypointMovedInThePlanDraft"));
       drawList();
     },
     onAreasChange: (value) => {
       pattern.remember();
-      areas = value;dirty("Survey geometry changed in the plan draft.");
+      areas = value;dirty(localizedCopy("ui.research.messageSurveyGeometryChangedInThePlanDraft"));
       drawList();
     },
   });
-  const patternSection=text("section");patternSection.append(text("h3","3. Flight patterns"));form.append(patternSection);
+  const patternSection=text("section");patternSection.append(text("h3",localizedCopy("ui.research.message3FlightPatterns")));form.append(patternSection);
   const pattern = patternEditor(patternSection, {
     instruments:()=>readConfigs(configuration),
     sensorSettings:plan?.sensorPlanning,
     changed:()=>dirty(),
-    pickCenter:callback=>{if(!canReplaceGeometry())return;cancelGeometry();dirty();selectPatternCenter=callback;clickMode="pattern";planMap.interaction("pattern");draftStatus.textContent="Click the map to choose the pattern center; this does not add a waypoint.";},
+    pickCenter:callback=>{if(!canReplaceGeometry())return;cancelGeometry();dirty();selectPatternCenter=callback;clickMode="pattern";planMap.interaction("pattern");setPresentationText(draftStatus,localizedCopy("ui.research.messageClickTheMapToChooseThePattern"));},
     fitPreview:points=>planMap.fit(points),
     api: ctx.api,
     notice: ctx.notice,
     aircraft: () => aircraftFor(state),
     get: () => ({ waypoints, surveyAreas: areas, patterns: patternValues }),
     set: (value) => {
-      if(value.previewOnly){planMap.preview(value.preview);draftStatus.textContent="Pattern preview only · Add Pattern to Mission commits it; Fit Preview changes the view deliberately.";return;}
+      if(value.previewOnly){planMap.preview(value.preview);setPresentationText(draftStatus,localizedCopy("ui.research.messagePatternPreviewOnlyAddPatternTo"));return;}
       waypoints = value.waypoints;areas = value.surveyAreas;patternValues=value.patterns||patternValues;
-      planMap.preview(null);drawList();dirty("Pattern added/changed in the plan draft · Save mission plan to keep it.");
+      planMap.preview(null);drawList();dirty(localizedCopy("ui.research.messagePatternAddedChangedInThePlanDraft"));
     },
   });
-  const advancedCoordinates=text("details");advancedCoordinates.append(text("summary","Advanced: enter survey vertices manually"),button("Manual survey coordinates",()=>areaEditor()));locationSection.append(advancedCoordinates);
-  const scienceSection=text("section");scienceSection.append(text("h3","4. Scientific instruments and data readiness"),selectedPayload);informationDetails(scienceSection,"Choose instruments & acquisition settings",configuration);scienceSection.append(presetSection);form.append(scienceSection);scientificReadiness(scienceSection,ctx.api).catch(()=>{});
-  const waitLabel=text('label','Wait for me to start science collection'),waitForScience=document.createElement('input');waitForScience.type='checkbox';waitForScience.checked=plan?.startScienceArmed===true;waitLabel.prepend(waitForScience);scienceSection.append(waitLabel);informationDetails(scienceSection,'Recording and science session behavior',text('p','When selected, Start Recording leaves science armed. Use Start Science Collection when ready. Card activation remains separate.'));
-  const atmosphericSection=text('details');atmosphericSection.append(text('summary','Atmospheric research settings'));
-  const profileDirection=select(atmosphericSection,'Profile direction',[['both','Ascent and descent'],['ascent','Ascent'],['descent','Descent']],plan?.atmosphericSettings?.direction??'both');
-  const profileInterval=input(atmosphericSection,'Altitude interval', (plan?.atmosphericSettings?.altitudeIntervalMetres??100)/.3048,'number');planningField(profileInterval,'altitude',(plan?.atmosphericSettings?.altitudeIntervalMetres??100)/.3048,'Altitude interval','interval');
-  const profileGap=input(atmosphericSection,'Maximum contiguous gap (seconds)',plan?.atmosphericSettings?.maximumGapSeconds??5,'number');
-  atmosphericSection.append(text('p','Profiles preserve actual observation times. Clouds are sampled only along your aircraft path; gaps never become inferred cloud boundaries.'));
+  const advancedCoordinates=text("details");advancedCoordinates.append(text("summary",localizedCopy("ui.research.messageAdvancedEnterSurveyVerticesManually")),button("Manual survey coordinates",()=>areaEditor()));locationSection.append(advancedCoordinates);
+  const scienceSection=text("section");scienceSection.append(text("h3",localizedCopy("ui.research.message4ScientificInstrumentsAndDataReadiness")),selectedPayload);informationDetails(scienceSection,localizedCopy("ui.research.messageChooseInstrumentsAcquisitionSettings"),configuration);scienceSection.append(presetSection);form.append(scienceSection);scientificReadiness(scienceSection,ctx.api).catch(()=>{});
+  const waitLabel=text('label',localizedCopy("ui.research.messageWaitForMeToStartScienceCollection")),waitForScience=document.createElement('input');waitForScience.type='checkbox';waitForScience.checked=plan?.startScienceArmed===true;waitLabel.prepend(waitForScience);scienceSection.append(waitLabel);informationDetails(scienceSection,localizedCopy("ui.research.messageRecordingAndScienceSessionBehavior"),text('p',localizedCopy("ui.research.messageWhenSelectedStartRecordingLeavesScienceArmed")));
+  const atmosphericSection=text('details');atmosphericSection.append(text('summary',localizedCopy("ui.research.messageAtmosphericResearchSettings")));
+  const profileDirection=select(atmosphericSection,localizedCopy("ui.research.messageProfileDirection"),[['both',localizedCopy("ui.research.messageAscentAndDescent")],['ascent',localizedCopy("ui.research.messageAscent")],['descent',localizedCopy("ui.research.messageDescent")]],plan?.atmosphericSettings?.direction??'both');
+  const profileInterval=input(atmosphericSection,localizedCopy("ui.research.messageAltitudeInterval"), (plan?.atmosphericSettings?.altitudeIntervalMetres??100)/.3048,'number');planningField(profileInterval,'altitude',(plan?.atmosphericSettings?.altitudeIntervalMetres??100)/.3048,localizedCopy("ui.research.messageAltitudeInterval"),'interval');
+  const profileGap=input(atmosphericSection,localizedCopy("ui.research.messageMaximumContiguousGapSeconds"),plan?.atmosphericSettings?.maximumGapSeconds??5,'number');
+  atmosphericSection.append(text('p',localizedCopy("ui.research.messageProfilesPreserveActualObservationTimesCloudsAre")));
   scienceSection.prepend(atmosphericSection);
   const atmosphericVisibility=()=>{atmosphericSection.hidden=!['atmosphericProfile','cloudStructureSurvey','atmosphericTransect'].includes(template.value);};template.addEventListener('change',atmosphericVisibility);atmosphericVisibility();
   const automation=collectionPlanner(form,plan?.collection,()=>({id:draftPlanId,name:name.value,waypoints,surveyAreas:areas}),ctx.api,dirty);
-  form.append(text("h3","5. Review and save"),text("p","Save waypoints and areas to this draft first. A saved mission plan keeps the route, survey geometry, pattern definitions and science configuration together."));
+  form.append(text("h3",localizedCopy("ui.research.message5ReviewAndSave")),text("p",localizedCopy("ui.research.messageSaveWaypointsAndAreasToThisDraft")));
   departure.onchange = drawList;
   drawList();
-  const save = text("button", "Save mission plan", "primary");
+  const save = text("button", localizedCopy("ui.research.messageSaveMissionPlan"), "primary");
   save.disabled=!!starterSection&&!starterFields;
   save.type = "submit";
   form.append(save);
@@ -864,8 +865,8 @@ function editPlan(plan) {
   readinessView = preflightReadiness(form,readDraft,ctx.api);
   form.onsubmit = (event) => {
     event.preventDefault();
-    if(pendingGeometry){draftStatus.textContent="Save or cancel the draft waypoint/survey area before saving the mission plan.";editor.scrollIntoView({block:"center"});return;}
-    if(pattern.hasPreview?.()){draftStatus.textContent="Pattern preview only. Add Pattern to Mission or Discard Preview before saving.";return;}
+    if(pendingGeometry){setPresentationText(draftStatus,localizedCopy("ui.research.messageSaveOrCancelTheDraftWaypointSurveyArea"));editor.scrollIntoView({block:"center"});return;}
+    if(pattern.hasPreview?.()){setPresentationText(draftStatus,localizedCopy("ui.research.messagePatternPreviewOnlyAddPatternToMission"));return;}
     ctx.command(save, async () => {
       form.inert=true;
       try{
@@ -873,10 +874,10 @@ function editPlan(plan) {
         const draft=readDraft();
         if(starterCard&&draft.researchCards.some(r=>r.id===starterCard.id)&&(starterName.value.trim()!==starterCard.name||JSON.stringify(starterFields.read())!==JSON.stringify(researchDefinition(starterCard)))){
           starterCard=await ctx.api('/api/research/cards',{id:starterCard.id,expectedRevision:starterCard.revision,name:starterName.value,procedure:starterCard.procedure?starterFields.read():null,flightRegime:isScienceResearch(starterCard)||starterCard.procedure?null:starterFields.read(),atmosphericProfile:starterCard.atmosphericProfile?starterFields.read():null,atmosphericTransect:starterCard.atmosphericTransect?starterFields.read():null,survey:starterCard.survey?starterFields.read():null,observationFlight:starterCard.observationFlight?starterFields.read():null,experimentalSensor:starterCard.experimentalSensor?starterFields.read():null});
-          if(!form.isConnected)return;readCards.replaceReference(starterCard);draft.researchCards=readCards();draft.researchCard=draft.researchCards[0]||null;starterFeedback.textContent=`Your card revision ${starterCard.revision} is saved locally. Save mission plan to keep this plan linked to those targets.`;
+          if(!form.isConnected)return;readCards.replaceReference(starterCard);draft.researchCards=readCards();draft.researchCard=draft.researchCards[0]||null;setPresentationText(starterFeedback,localizedCopy("ui.research.messageYourCardRevisionIsSavedLocallySave",{value1:(String(starterCard.revision))}));
         }
         const savedPlan=await ctx.api('/api/plans',draft);
-        if(!form.isConnected)return;editing=savedPlan;plannerDirty=false;pendingGeometry=false;await planner();document.querySelector('#plan-editor .planner-status').textContent='Mission plan saved · Ready to start mission from Mission Control or the saved plan row.';
+        if(!form.isConnected)return;editing=savedPlan;plannerDirty=false;pendingGeometry=false;await planner();setPresentationText(document.querySelector('#plan-editor .planner-status'),localizedCopy("ui.research.messageMissionPlanSavedReadyToStart"));
       }finally{if(form.isConnected)form.inert=false;}
     });
   };
@@ -886,18 +887,18 @@ async function instruments() {
   await initializeUnits(ctx.api);
   const p = $("instrument-content");
   p.replaceChildren();
-  informationDetails(p,'Collection methods & source types',text('p','Atmospheric instruments use simulator-reported values at the aircraft. Remote instruments sample compatible retained historical sources with their original observation dates. Acquisition requires a recording mission. Telemetry arrives at 1 Hz; this does not establish independent hardware calibration or live-camera measurements.'));
+  informationDetails(p,localizedCopy("ui.research.messageCollectionMethodsSourceTypes"),text('p',localizedCopy("ui.research.messageAtmosphericInstrumentsUseSimulatorReportedValuesAtThe")));
   const sourceLabel = text(
     "p",
     state?.connection?.source === "simulated"
-      ? "SIMULATED TEST FIXTURE — no simulator connection. Development tests only."
-      : "Source: MSFS 2024 standard SimConnect atmosphere",
+      ? localizedCopy("ui.research.messageSIMULATEDTESTFIXTURENoSimulatorConnection")
+      : localizedCopy("ui.research.messageSourceMSFS2024StandardSimConnectAtmosphere"),
     "source-notice",
   );
   p.append(sourceLabel);
   const operating=text('section');operating.id='operating-reports';p.append(operating);await operatingAssessments(operating,ctx.api);
   await scientificReadiness(p, ctx.api);
-  const hyperspectral=informationDetails(p,'Hyperspectral source preparation');
+  const hyperspectral=informationDetails(p,localizedCopy("ui.research.messageHyperspectralSourcePreparation"));
   await hyperspectralCard(hyperspectral,ctx.api,state?.telemetry);
   await unitControls(p, ctx.api, () => instruments());
   const collection = text("div");
@@ -906,12 +907,12 @@ async function instruments() {
   const scienceStatus=initializeScienceSessions(ctx,collection,{sensorParent:operating});
   missionPerformance(p,ctx.api,()=>state?.activeMission?.id,{live:true});
   const presets = text("details");
-  presets.append(text("summary", "Reusable instrument presets"));
+  presets.append(text("summary", localizedCopy("ui.research.messageReusableInstrumentPresets")));
   p.append(presets);
   const presetList = text("div");
   presets.append(presetList);
-  const presetName = input(presets, "Preset name", ""),
-    presetDescription = input(presets, "Preset description", "");
+  const presetName = input(presets, localizedCopy("ui.research.messagePresetName"), ""),
+    presetDescription = input(presets, localizedCopy("ui.research.messagePresetDescription"), "");
   async function presetRows() {
     presetList.replaceChildren();
     const rows = await ctx.api("/api/presets");
@@ -927,8 +928,7 @@ async function instruments() {
           if (
             resolved.warnings.length &&
             !confirm(
-              resolved.warnings.join("\n") +
-                "\nApply supported instruments only?",
+              localizedCopy("ui.research.messageApplySupportedInstrumentsOnly",{value1:(String(resolved.warnings.join("\n")))}),
             )
           )
             return;
@@ -952,7 +952,7 @@ async function instruments() {
         button("Delete preset", async () => {
           if (
             confirm(
-              "Delete this reusable preset? Saved mission snapshots remain unchanged.",
+              localizedCopy("ui.research.messageDeleteThisReusablePresetSavedMissionSnapshots"),
             )
           ) {
             await ctx.api(`/api/presets/${item.id}/delete`, {});
@@ -974,7 +974,7 @@ async function instruments() {
       await presetRows();
     });
   savePreset.disabled=true;
-  const presetLoading=text('p','Loading current instrument configuration…','footnote');presetLoading.setAttribute('role','status');
+  const presetLoading=text('p',localizedCopy("ui.research.messageLoadingCurrentInstrumentConfiguration"),'footnote');presetLoading.setAttribute('role','status');
   presets.append(savePreset,presetLoading);
   for (const recommendation of templates.filter((t) => t.instruments.length))
     presets.append(
@@ -987,7 +987,7 @@ async function instruments() {
   configuration.id = "live-instrument-config";
   p.append(configuration);
   configs(configuration, await ctx.api('/api/instruments/configuration'));
-  savePreset.disabled=false;presetLoading.textContent='';
+  savePreset.disabled=false;setPresentationText(presetLoading,'');
   p.append(
     button("Apply instrument configuration", async () => {
       await ctx.api("/api/instruments", readConfigs(configuration));
@@ -998,8 +998,8 @@ async function instruments() {
   values.id = "instrument-values";
   p.append(values);
   const scienceMapPanel = text("details", undefined, "panel research-panel");
-  scienceMapPanel.append(text("summary","Scientific sample locations · expand map and layers"));
-  scienceMapPanel.append(text("h2", "Scientific sample locations"),text("p","Blue dots show successful atmospheric sample positions. Outlined remote-sensing footprints identify saved external-data acquisitions; their full boundary does not guarantee every pixel is valid. Missing coverage and acquisition gaps are reported in collection status; a dot is not a camera image or a continuous swath. Use the map layers to compare samples, footprints, route and recorded track."));
+  scienceMapPanel.append(text("summary",localizedCopy("ui.research.messageScientificSampleLocationsExpandMapAnd")));
+  scienceMapPanel.append(text("h2", localizedCopy("ui.research.messageScientificSampleLocations")),text("p",localizedCopy("ui.research.messageBlueDotsShowSuccessfulAtmosphericSamplePositions")));
   p.append(scienceMapPanel);
   scienceMap?.destroy();
   scienceMap = new ResearchMap(scienceMapPanel);
@@ -1014,7 +1014,7 @@ async function instruments() {
   const chart = text("div");
   chart.id = "science-charts";
   p.append(chart);
-  const advancedDatasets=text("details");advancedDatasets.append(text("summary","Advanced: Saved Datasets"));p.append(advancedDatasets);
+  const advancedDatasets=text("details");advancedDatasets.append(text("summary",localizedCopy("ui.research.messageAdvancedSavedDatasets")));p.append(advancedDatasets);
   const datasetList = text("div");
   advancedDatasets.append(datasetList);
   let offset = 0;
@@ -1029,7 +1029,7 @@ async function instruments() {
       const row = text("article", undefined, "panel research-panel");
       row.append(
         text("h3", `${d.missionName} · ${d.instrumentId}`),
-        text("p", `${d.observationCount} observations · ${d.createdUtc}`),
+        text("p", localizedCopy("ui.research.messageObservations",{value1:(String(d.observationCount)),value2:(String(d.createdUtc))})),
         button("View dataset observations", async () => {
           const result = await ctx.api(
             `/api/science/datasets/${d.id}/observations?limit=1000`,
@@ -1039,7 +1039,7 @@ async function instruments() {
           showScience(
             holder,
             result.observations,
-            "First 1,000 observations; continue through pages for all saved values.",
+            textForUI("ui.research.messageFirst1000ObservationsContinueThroughPagesFor"),
           );
           let after = result.next;
           const more = button("View More Measurements", async () => {
@@ -1050,7 +1050,7 @@ async function instruments() {
             showScience(
               holder,
               next.observations,
-              "Next page · full saved values",
+              textForUI("ui.research.messageNextPageFullSavedValues"),
             );
           });
           more.disabled=!result.hasMore;row.append(more);
@@ -1078,17 +1078,17 @@ async function instruments() {
   renderResearch(state);
 }
 function guidance(parent, g) {
-  parent.replaceChildren(text("h2", "Flight Guidance · read only"));
+  parent.replaceChildren(text("h2", localizedCopy("ui.research.messageFlightGuidanceReadOnly")));
   if (!g || g.quality !== "valid") {
-    parent.append(text("p", `Unavailable${g ? " · " + g.quality : ""}`));
+    parent.append(text("p", localizedCopy("ui.research.messageUnavailable",{value1:(String(g ? " · " + g.quality : ""))})));
     return;
   }
-  parent.append(text("p", `Autopilot: ${g.autopilot}`));
+  parent.append(text("p", localizedCopy("ui.research.messageAutopilot",{value1:(String(g.autopilot))})));
   const grid = text("div", undefined, "research-grid");
   for (const [label, m] of [
-    ["Lateral", g.lateral],
-    ["Vertical", g.vertical],
-    ["Speed", g.speed],
+    [textForUI("ui.research.messageLateral"), g.lateral],
+    [textForUI("ui.research.messageVertical"), g.vertical],
+    [textForUI("ui.research.messageSpeed"), g.speed],
   ])
     grid.append(
       text(
@@ -1106,10 +1106,10 @@ export function renderResearch(next) {
   syncUnits(next.research?.units);
   guidance($("flight-guidance"), next.research?.guidance);
   const environment=$('environment-readings');
-  if(environment){environment.replaceChildren(text('h2','Terrain & local environment'));
+  if(environment){environment.replaceChildren(text('h2',localizedCopy("ui.research.messageTerrainLocalEnvironment")));
     for(const r of next.telemetry?.environment?.readings??[])environment.append(text('p',`${r.simulatorVariable}: ${n(r.value,3)} ${r.unit} · ${r.quality}`));
-    if(!next.telemetry?.environment)environment.append(text('p','Awaiting optional simulator ground/weather observations. Flight recording remains independent.'));
-    const details=text('details');details.append(text('summary','Timing and reference information'),text('p','Optional fields retain independent packet receipt times. Surface altitude has no declared geodetic datum. Precipitation is not labeled mm/h; local cloud/visibility are not regional volumes or historical satellite QA.'));environment.append(details);
+    if(!next.telemetry?.environment)environment.append(text('p',localizedCopy("ui.research.messageAwaitingOptionalSimulatorGroundWeatherObservationsFlightRecording")));
+    const details=text('details');details.append(text('summary',localizedCopy("ui.research.messageTimingAndReferenceInformation")),text('p',localizedCopy("ui.research.messageOptionalFieldsRetainIndependentPacketReceiptTimes")));environment.append(details);
   }
   const p = $("instrument-values");
   if (p) {
@@ -1123,11 +1123,11 @@ export function renderResearch(next) {
       const card = text("article", undefined, "panel science-card");
       const d = definitions.find((d) => d.id === i.instrumentId);
       const isRemote = d?.measurements.length === 0;
-      const group=isRemote?"Remote-Sensing Instruments":"Atmospheric Instruments";
+      const group=isRemote?textForUI("ui.research.messageRemoteSensingInstruments"):textForUI("ui.research.messageAtmosphericInstruments");
       if(group!==previousGroup){p.append(text("h2",group));previousGroup=group;}
       card.append(
         text("h3", d?.name || i.instrumentId),
-        text("span", i.enabled ? i.quality : "Disabled", "science-state"),
+        text("span", i.enabled ? i.quality : localizedCopy("ui.research.messageDisabled"), "science-state"),
       );
       if(i.payloadProfileName)card.append(text('p',i.payloadProfileName));
       for (const v of i.measurements) {
@@ -1141,7 +1141,7 @@ export function renderResearch(next) {
             "div",
             i.quality === "valid" && v.quality === "valid"
               ? `${n(reading.value, reading.decimals)} ${reading.unit}`
-              : "Unavailable",
+              : localizedCopy("localization.unavailableValue"),
             "science-value",
           ),
         );
@@ -1149,22 +1149,22 @@ export function renderResearch(next) {
       card.append(
         text(
           "p",
-          `Every ${i.intervalMs / 1000} s · ${i.acquisitionSets} acquisition sets · ${i.observationCount} ${isRemote ? "saved products" : "measurement values"}`,
+          localizedCopy("ui.research.messageEverySAcquisitionSets",{value1:(String(i.intervalMs / 1000)),value2:(String(i.acquisitionSets)),value3:(String(i.observationCount)),value4:(String(isRemote ? "saved products" : "measurement values"))}),
         ),
       );
       const details = text("details");
       details.dataset.instrument = i.instrumentId;
       details.open = opened.has(i.instrumentId);
       details.append(
-        text("summary", "Acquisition diagnostics"),
+        text("summary", localizedCopy("ui.research.messageAcquisitionDiagnostics")),
         text(
           "p",
-          `Last successful: ${i.lastSuccessfulUtc || "None"} · Actual interval: ${n(i.actualAverageIntervalSeconds)} s · Rejected: ${i.rejectedObservations} · Unexpected missing: ${i.missingIntervals}`,
+          localizedCopy("ui.research.messageLastSuccessfulActualIntervalS",{value1:(String(i.lastSuccessfulUtc || "None")),value2:(String(n(i.actualAverageIntervalSeconds))),value3:(String(i.rejectedObservations)),value4:(String(i.missingIntervals))}),
         ),
         text(
           "p",
           i.message ||
-            "Simulator-reported values; no independent calibrated measurements.",
+            localizedCopy("ui.research.messageSimulatorReportedValuesNoIndependentCalibratedMeasurements"),
         ),
       );
       card.append(details);
@@ -1172,7 +1172,7 @@ export function renderResearch(next) {
         card.append(
           text(
             "p",
-            i.message || "Import supported real geographic data to collect.",
+            i.message || localizedCopy("ui.research.messageImportSupportedRealGeographicDataToCollect"),
           ),
           button("View Data", async () => {
             const selector=$("remote-product-browser")?.querySelector('select[aria-label="Product instrument"]');
@@ -1193,7 +1193,7 @@ export function renderResearch(next) {
     collection.replaceChildren(
       text(
         "strong",
-        `Source availability: ${next.research?.collectionStatus || "stopped"}`,
+        localizedCopy("ui.research.messageSourceAvailability",{value1:(String(next.research?.collectionStatus || "stopped"))}),
       ),
     );
   }
@@ -1205,24 +1205,24 @@ export function renderResearch(next) {
   }
   const instruments = next.research?.instruments || [];
   summary.replaceChildren(
-    text("h2", "Science Collection"),
+    text("h2", localizedCopy("ui.research.messageScienceCollection")),
     text(
       "p",
-      `${next.research?.collectionStatus || "stopped"} · ${instruments.filter((i) => i.enabled).length} instruments enabled · ${instruments.reduce((n, i) => n + i.acquisitionSets, 0)} acquisition sets · ${instruments.reduce((n, i) => n + i.observationCount, 0)} measurement values`,
+      localizedCopy("ui.research.messageInstrumentsEnabledAcquisitionSets",{value1:(String(next.research?.collectionStatus || "stopped")),value2:(String(instruments.filter((i) => i.enabled).length)),value3:(String(instruments.reduce((n, i) => n + i.acquisitionSets, 0))),value4:(String(instruments.reduce((n, i) => n + i.observationCount, 0)))}),
     ),
   );
-  const link = text("a", "View Science");
+  const link = text("a", localizedCopy("ui.research.messageViewScience"));
   link.href = "#science";
   summary.append(link);
   if (next.activeMission && livePlan) {
     summary.append(
-      text("h3", "Active Research Route"),
+      text("h3", localizedCopy("ui.research.messageActiveResearchRoute")),
       text(
         "p",
-        `${livePlan.patterns?.map((p) => p.kind).join(", ") || "Custom route"} · ${livePlan.waypoints?.length || 0} planned waypoints · Current position: ${next.telemetry ? "available" : "unavailable"}`,
+        localizedCopy("ui.research.messagePlannedWaypointsCurrentPosition",{value1:(String(livePlan.patterns?.map((p) => p.kind).join(", ") || "Custom route")),value2:(String(livePlan.waypoints?.length || 0)),value3:(String(next.telemetry ? "available" : "unavailable"))}),
       ),
     );
-    const mapLink = text("a", "View Mission Map");
+    const mapLink = text("a", localizedCopy("ui.research.messageViewMissionMap"));
     mapLink.href = "#control";
     mapLink.onclick = () => {
       liveMap?.fit();
@@ -1233,7 +1233,7 @@ export function renderResearch(next) {
       summary.append(
         text(
           "p",
-          `Next observed waypoint: ${livePlan.waypoints?.[activeRouteState.nextWaypoint]?.name || "End of route"} · observed in order within ${planningDistance(1000)}; review full analysis after flight.`,
+          localizedCopy("ui.research.messageNextObservedWaypointObservedInOrder",{value1:(String(livePlan.waypoints?.[activeRouteState.nextWaypoint]?.name || "End of route")),value2:(String(planningDistance(1000)))}),
         ),
       );
   }
@@ -1305,7 +1305,7 @@ async function refreshLive(id) {
   markers = marks;
   livePlan = research.planSnapshot;
   activeRouteState = navigation;
-  remoteFootprints=products.filter(p=>p.footprint?.boundary?.length>=3).map(p=>({vertices:p.footprint.boundary,label:`${p.instrumentId} derived footprint · flight ${p.flightPacketUtc} · external source ${p.sourceObservationUtc||"unknown date"}. Coverage may contain excluded cells.`}));
+  remoteFootprints=products.filter(p=>p.footprint?.boundary?.length>=3).map(p=>({vertices:p.footprint.boundary,label:textForUI("ui.research.messageDerivedFootprintFlightExternal",{value1:(String(p.instrumentId)),value2:(String(p.flightPacketUtc)),value3:(String(p.sourceObservationUtc||"unknown date"))})}));
   scienceRows = [...scienceRows, ...science.observations].slice(-3000);
   cursor = science.next;
   setLiveMap({
@@ -1325,7 +1325,7 @@ function showScience(parent, rows, label) {
   parent.replaceChildren(text("p", label));
   scienceCharts(parent, rows);
   const raw = text("details");
-  raw.append(text("summary", "Original canonical observation rows"));
+  raw.append(text("summary", localizedCopy("ui.research.messageOriginalCanonicalObservationRows")));
   parent.append(raw);
   const list = text("div", undefined, "observation-table");
   for (const r of rows)
@@ -1341,26 +1341,26 @@ export async function researchDetail(body, id, mission) {
   const host=body,access=await ctx.api('/api/science/access');
   if(access.canConfigure&&mission.status!=='recording'){const removeScience=button('Delete Collected Science',()=>reviewCollectedScienceDeletion(ctx.api,{missionIds:[id]},async()=>{host.replaceChildren();await researchDetail(host,id,mission);}));removeScience.className='danger';body.append(removeScience);}
   missionPerformance(body,ctx.api,id);
-  const sessions=text('details');sessions.append(text('summary','Science sessions and retained measurements'));body.append(sessions);
+  const sessions=text('details');sessions.append(text('summary',localizedCopy("ui.research.messageScienceSessionsAndRetainedMeasurements")));body.append(sessions);
   sessions.addEventListener('toggle',async()=>{if(!sessions.open||sessions.dataset.loaded)return;sessions.dataset.loaded='true';
     try{const [record,counts]=await Promise.all([ctx.api(`/api/missions/${id}/collection`),ctx.api(`/api/missions/${id}/collection/counts`)]);
-      if(!record.state){sessions.append(text('p','Legacy archive: no science sessions were recorded or inferred.'));return;}
-      for(const session of record.sessions){const count=counts.find(c=>c.sessionId===session.id);sessions.append(text('p',`Session ${session.sequence} · ${session.id} · ${session.status} · ${session.startedUtc} → ${session.endedUtc||'unknown end time'} · ${count?.originalAtmosphericValues||0} original values · ${count?.derivedAtmosphericValues||0} derived values · ${count?.remoteProducts||0} remote products`));}
-      sessions.append(text('p','Retained counts do not establish measurement accuracy, valid survey coverage or a grade.'));
-    }catch(e){sessions.append(text('p','Session evidence / Scientific Library unavailable: '+e.message));}
+      if(!record.state){sessions.append(text('p',localizedCopy("ui.research.messageLegacyArchiveNoScienceSessionsWereRecorded")));return;}
+      for(const session of record.sessions){const count=counts.find(c=>c.sessionId===session.id);sessions.append(text('p',localizedCopy("ui.research.messageSessionOriginal",{value1:(String(session.sequence)),value2:(String(session.id)),value3:(String(session.status)),value4:(String(session.startedUtc)),value5:(String(session.endedUtc||'unknown end time')),value6:(String(count?.originalAtmosphericValues||0)),value7:(String(count?.derivedAtmosphericValues||0)),value8:(String(count?.remoteProducts||0))})));}
+      sessions.append(text('p',localizedCopy("ui.research.messageRetainedCountsDoNotEstablishMeasurementAccuracy")));
+    }catch(e){sessions.append(text('p',localizedCopy("ui.research.messageSessionEvidenceScientificLibraryUnavailable",{value1:(String(e.message))})));}
   });
   const operating=document.createElement('section');body.append(operating);await operatingAssessments(operating,ctx.api,id);
   await initializeUnits(ctx.api);
   const review = await ctx.api(`/api/missions/${id}/review`);
   if (review.research.planSnapshot?.researchCards?.length || review.research.planSnapshot?.researchCard) {
-    const link = text("a", "Review Personal Research"); link.href = `#my-research?flight=${id}`; body.append(link);
+    const link = text("a", localizedCopy("ui.research.messageReviewPersonalResearch")); link.href = `#my-research?flight=${id}`; body.append(link);
   }
   const workspace=missionWorkspace(body,id,mission,ctx.api,review);body=workspace.overview;
   researchFlightTimeline(body,ctx.api,id).catch(error=>body.append(text('p',error.message)));
   const protection = await ctx.api(`/api/missions/${id}/protection`);
   const protectedLabel = text(
     "strong",
-    protection.isProtected ? "Protected mission" : "Mission is not pinned",
+    protection.isProtected ? localizedCopy("ui.research.messageProtectedMission") : localizedCopy("ui.research.messageMissionIsNotPinned"),
   );
   const protectMissionButton=button(
       protection.isProtected ? "Remove Protection" : "Protect Mission",
@@ -1369,10 +1369,10 @@ export async function researchDetail(body, id, mission) {
           protected: !protection.isProtected,
         });
         protection.isProtected = result.isProtected;
-        protectedLabel.textContent = result.isProtected
-          ? "Protected mission"
-          : "Mission is not pinned";
-        protectMissionButton.textContent=result.isProtected?"Remove Protection":"Protect Mission";
+        setPresentationText(protectedLabel,result.isProtected
+          ? localizedCopy("ui.research.messageProtectedMission")
+          : localizedCopy("ui.research.messageMissionIsNotPinned"));
+        setPresentationText(protectMissionButton,result.isProtected?localizedCopy("ui.research.messageRemoveProtection"):localizedCopy("ui.research.messageProtectMission"));
       },
     );
   body.append(protectedLabel,protectMissionButton);
@@ -1380,22 +1380,22 @@ export async function researchDetail(body, id, mission) {
     try {
       await remoteProducts(workspace.overview, ctx.api, id);
     } catch (error) {
-      body.append(text("p", "Remote products unavailable: " + error.message));
+      body.append(text("p", localizedCopy("ui.research.messageRemoteProductsUnavailable",{value1:(String(error.message))})));
     }
   if (review.research.planSnapshot) {
-    body.append(text("h3", "Planned Route — immutable recording snapshot"));
+    body.append(text("h3", localizedCopy("ui.research.messagePlannedRouteImmutableRecordingSnapshot")));
     routeExportButton(body, () => review.research.planSnapshot, ctx.api);
     body.append(
       text(
         "p",
-        "Recorded Flight exports below contain actual saved telemetry; planned-route exports preserve the original mission geometry.",
+        localizedCopy("ui.research.messageRecordedFlightExportsBelowContainActualSaved"),
       ),
     );
   }
   await renderAnalysis(workspace.analysis, id, review.research.planSnapshot, ctx.api);
   body.append(
-    text("h3", "Research review"),
-    text("p", "Recording source: " + (mission.source || "Unavailable")),
+    text("h3", localizedCopy("ui.research.messageResearchReview")),
+    text("p", localizedCopy("ui.research.messageRecordingSource",{value1:(String(mission.source || "Unavailable"))})),
     text(
       "p",
       `${review.research.template} · ${review.research.objective || "No objective supplied"}`,
@@ -1405,21 +1405,21 @@ export async function researchDetail(body, id, mission) {
     body.append(
       text(
         "p",
-        `Science Collection deliberately paused: ${pause.startedUtc} to ${pause.endedUtc || "unknown end"} · ${pause.seconds == null ? "duration unknown" : n(pause.seconds) + " s"}${pause.interrupted ? " · recording interrupted" : ""}. Flight recording remained independent.`,
+        localizedCopy("ui.research.messageScienceCollectionDeliberatelyPausedTo",{value1:(String(pause.startedUtc)),value2:(String(pause.endedUtc || "unknown end")),value3:(String(pause.seconds == null ? "duration unknown" : n(pause.seconds) + " s")),value4:(String(pause.interrupted ? " · recording interrupted" : ""))}),
       ),
     );
   const f = review.flight;
   body.append(
     text(
       "p",
-      `Mach ${n(f.minimumMach, 3)} – ${n(f.maximumMach, 3)} · Mean ${n(f.meanMach, 3)} · ${f.machSamples} values · IAS ${n(f.minimumIasKnots)} – ${n(f.maximumIasKnots)} kt · Actual average interval ${n(f.actualAverageIntervalSeconds, 3)}s · ${f.gapEvents} recorded gap events`,
+      localizedCopy("ui.research.messageMachMeanValues",{value1:(String(n(f.minimumMach, 3))),value2:(String(n(f.maximumMach, 3))),value3:(String(n(f.meanMach, 3))),value4:(String(f.machSamples)),value5:(String(n(f.minimumIasKnots))),value6:(String(n(f.maximumIasKnots))),value7:(String(n(f.actualAverageIntervalSeconds, 3))),value8:(String(f.gapEvents))}),
     ),
   );
   if (review.research.planSnapshot)
     body.append(
       text(
         "p",
-        `Plan snapshot: ${review.research.planSnapshot.name} · Preflight notes: ${review.research.planSnapshot.preflightNotes || "None"}`,
+        localizedCopy("ui.research.messagePlanSnapshotPreflightNotes",{value1:(String(review.research.planSnapshot.name)),value2:(String(review.research.planSnapshot.preflightNotes || "None"))}),
       ),
     );
   for (const c of review.research.instruments)
@@ -1433,28 +1433,28 @@ export async function researchDetail(body, id, mission) {
     body.append(
       text(
         "p",
-        `${d.instrumentId}: ${d.observationCount} saved, ${d.rejectedObservations} rejected, ${d.missingIntervals} missing intervals, actual interval ${n(d.actualAverageIntervalSeconds)}s`,
+        localizedCopy("ui.research.messageSavedRejectedMissingIntervalsActual",{value1:(String(d.instrumentId)),value2:(String(d.observationCount)),value3:(String(d.rejectedObservations)),value4:(String(d.missingIntervals)),value5:(String(n(d.actualAverageIntervalSeconds)))}),
       ),
     );
   for (const d of review.datasets)
     body.append(
       text(
         "p",
-        `Dataset ${d.datasetId}: ${d.available ? "Available" : "Unavailable / cleared"} · Library ${d.libraryId}`,
+        localizedCopy("ui.research.messageDatasetLibrary",{value1:(String(d.datasetId)),value2:(String(d.available ? "Available" : "Unavailable / cleared")),value3:(String(d.libraryId))}),
       ),
     );
   if (!review.scienceAvailable)
     body.append(
       text(
         "p",
-        `Science Library unavailable: ${review.scienceError}. Flight history remains accessible.`,
+        localizedCopy("ui.research.messageScienceLibraryUnavailableFlightHistoryRemains",{value1:(String(review.scienceError))}),
       ),
     );
   for (const s of review.measurements)
     body.append(
       text(
         "p",
-        `${s.measurementId}: ${s.count} measurement values · min ${n(displayReading(s.measurementId, s.minimum, s.unit).value, 3)} · max ${n(displayReading(s.measurementId, s.maximum, s.unit).value, 3)} · mean ${n(displayReading(s.measurementId, s.mean, s.unit).value, 3)} ${displayReading(s.measurementId, 0, s.unit).unit}`,
+        localizedCopy("ui.research.messageMeasurementValuesMin",{value1:(String(s.measurementId)),value2:(String(s.count)),value3:(String(n(displayReading(s.measurementId, s.minimum, s.unit).value, 3))),value4:(String(n(displayReading(s.measurementId, s.maximum, s.unit).value, 3))),value5:(String(n(displayReading(s.measurementId, s.mean, s.unit).value, 3))),value6:(String(displayReading(s.measurementId, 0, s.unit).unit))}),
       ),
     );
   const [path, marks] = await Promise.all([
@@ -1472,7 +1472,7 @@ export async function researchDetail(body, id, mission) {
   body.append(
     text(
       "p",
-      `Map: ${path.points.length} display points from ${path.totalSamples} saved samples${path.downsampled ? " (display reduced)" : ""}. Full coordinates remain in exports.`,
+      localizedCopy("ui.research.messageMapDisplayPointsFromSavedSamples",{value1:(String(path.points.length)),value2:(String(path.totalSamples)),value3:(String(path.downsampled ? " (display reduced)" : ""))}),
       "footnote",
     ),
   );
@@ -1522,7 +1522,7 @@ export async function researchDetail(body, id, mission) {
       await loadNotes();
     }),
   );
-  const note = input(body, "Postflight note", "", "textarea");
+  const note = input(body, localizedCopy("ui.research.messagePostflightNote"), "", "textarea");
   body.append(
     button("Save postflight note", async () => {
       await ctx.api(`/api/missions/${id}/notes`, {
@@ -1542,7 +1542,7 @@ export async function researchDetail(body, id, mission) {
     showScience(
       holder,
       first.observations,
-      "First 1,000 observations. Complete exports include every saved row.",
+      textForUI("ui.research.messageFirst1000ObservationsCompleteExportsIncludeEvery"),
     );
     mapped.set({
       track: path.points,
@@ -1556,18 +1556,18 @@ export async function researchDetail(body, id, mission) {
           `/api/missions/${id}/science?after=${after}&limit=1000`,
         );
         after = next.next;
-        showScience(holder, next.observations, "Next observation page");
+        showScience(holder, next.observations, textForUI("ui.research.messageNextObservationPage"));
       }),
     );
   }
   if (mission.status !== "recording")
     for (const [format, label] of [
-      ["flight.csv", "Flight telemetry CSV"],
-      ["science.csv", "Scientific observations CSV"],
-      ["events.csv", "Events CSV"],
-      ["gpx", "Actual track GPX"],
-      ["kml", "Planned / actual KML"],
-      ["report.txt", "Research summary"],
+      ["flight.csv", textForUI("ui.research.messageFlightTelemetryCSV")],
+      ["science.csv", textForUI("ui.research.messageScientificObservationsCSV")],
+      ["events.csv", textForUI("ui.research.messageEventsCSV")],
+      ["gpx", textForUI("ui.research.messageActualTrackGPX")],
+      ["kml", textForUI("ui.research.messagePlannedActualKML")],
+      ["report.txt", textForUI("ui.research.messageResearchSummary")],
     ]) {
       const a = text("a", label, "secondary");
       a.href = `/api/missions/${id}/export/${format}`;
@@ -1582,7 +1582,7 @@ export function invalidateResearch() {
     $("instrument-values").replaceChildren(
       text(
         "p",
-        "Live measurements unavailable. Recorded science and flight history are preserved.",
+        localizedCopy("ui.research.messageLiveMeasurementsUnavailableRecordedScienceAndFlight"),
       ),
     );
   setLiveMap({ track, markers, plan: livePlan || {}, aircraft: null });

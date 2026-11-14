@@ -1,3 +1,5 @@
+import {message as localizedCopy,setPresentationText} from './i18n.js';
+import {t as textForUI} from './i18n.js';
 import {dialogHeader} from './dialog-ui.js';
 import {node as el,button} from './workstation-ui.js';
 
@@ -9,36 +11,36 @@ async function read(api){
 }
 const ready=s=>s.maps.configuration.preferences.onlineEnabled&&!s.maps.configuration.requiresPrivacyChoice&&s.science.configuration.preferences.onlineEnabled&&s.science.configuration.preferences.privacyAccepted&&s.aviation.configuration.onlineEnabled&&s.tfr.tfrMonitoringEnabled;
 export function openOnlineAccess(api,{opener=document.activeElement,onAllowed=()=>{},onClosed=()=>{},onOffline=null}={}){
- const dialog=el('dialog');dialog.className='download-activity online-access-dialog';dialog.setAttribute('aria-label','Online Access & Privacy');
+ const dialog=el('dialog');dialog.className='download-activity online-access-dialog';setPresentationText(dialog,localizedCopy("ui.onlineAccess.messageOnlineAccessPrivacy"),"aria-label");
  const content=el('div',undefined,'online-access-content');
- dialog.append(el('h2','Online Access & Privacy'),content);content.append(el('p','Allow AeroScience to use online maps, discover and acquire scientific data, and automatically update FAA/TFR notices and published boundaries.'));
+ dialog.append(el('h2',localizedCopy("ui.onlineAccess.messageOnlineAccessPrivacy")),content);content.append(el('p',localizedCopy("ui.onlineAccess.messageAllowAeroScienceToUseOnlineMapsDiscover")));
  const disclosure=el('ul');
  for(const text of [
-  'Map providers receive your IP address and viewed map areas. Optional Esri imagery uses your own public key and may incur provider charges.',
-  'Scientific providers, including NASA, receive requested areas, dates and products. FAA services receive reference and TFR requests. AeroScience does not upload your mission recordings, observations or private notes to these providers.',
-  'Your existing download limits, storage protections, background settings and network preferences stay in place. Individual Library downloads still require review and approval. NASA Earthdata authorization remains a separate connection.',
-  'Online access does not guarantee data availability, current chart editions, valid scientific coverage or live restriction activation. Offline data remains available.'
+  textForUI("ui.onlineAccess.messageMapProvidersReceiveYourIPAddressAnd"),
+  textForUI("ui.onlineAccess.messageScientificProvidersIncludingNASAReceiveRequestedAreas"),
+  textForUI("ui.onlineAccess.messageYourExistingDownloadLimitsStorageProtectionsBackground"),
+  textForUI("ui.onlineAccess.messageOnlineAccessDoesNotGuaranteeDataAvailability")
  ])disclosure.append(el('li',text));content.append(disclosure);
- const status=el('p','Reading current online permissions…');status.setAttribute('role','status');status.setAttribute('aria-live','polite');
- const details=el('details');details.append(el('summary','Current permissions and full provider disclosures'));const states=el('div');details.append(states);content.append(status,details);
+ const status=el('p',localizedCopy("ui.onlineAccess.messageReadingCurrentOnlinePermissions"));status.setAttribute('role','status');status.setAttribute('aria-live','polite');
+ const details=el('details');details.append(el('summary',localizedCopy("ui.onlineAccess.messageCurrentPermissionsAndFullProviderDisclosures")));const states=el('div');details.append(states);content.append(status,details);
  const actions=el('div',undefined,'action-row');dialog.append(actions);document.body.append(dialog);
  let closed=false,busy=false;
  const header=dialogHeader(dialog,{opener});
  function show(s){
   states.replaceChildren();
   for(const [title,enabled,text] of [
-   ['Online maps',s.maps.configuration.preferences.onlineEnabled&&!s.maps.configuration.requiresPrivacyChoice,s.maps.privacy],
-   ['Scientific discovery and downloads',s.science.configuration.preferences.onlineEnabled&&s.science.configuration.preferences.privacyAccepted,s.science.configuration.privacy],
-   ['FAA references',s.aviation.configuration.onlineEnabled,s.aviation.configuration.privacy],
-   ['Automatic TFR notices and boundaries',s.aviation.configuration.onlineEnabled&&s.tfr.tfrMonitoringEnabled,s.tfr.privacy]
+   [textForUI("ui.onlineAccess.messageOnlineMaps"),s.maps.configuration.preferences.onlineEnabled&&!s.maps.configuration.requiresPrivacyChoice,s.maps.privacy],
+   [textForUI("ui.onlineAccess.messageScientificDiscoveryAndDownloads"),s.science.configuration.preferences.onlineEnabled&&s.science.configuration.preferences.privacyAccepted,s.science.configuration.privacy],
+   [textForUI("ui.onlineAccess.messageFAAReferences"),s.aviation.configuration.onlineEnabled,s.aviation.configuration.privacy],
+   [textForUI("ui.onlineAccess.messageAutomaticTFRNoticesAndBoundaries"),s.aviation.configuration.onlineEnabled&&s.tfr.tfrMonitoringEnabled,s.tfr.privacy]
   ])states.append(el('h3',`${title}: ${enabled?'Allowed':'Not allowed'}`),el('p',text));
-  states.append(el('p','You can change these permissions individually later in Settings.'));
+  states.append(el('p',localizedCopy("ui.onlineAccess.messageYouCanChangeThesePermissionsIndividuallyLater")));
  }
- const allow=button(actions,'Allow Online Access',async()=>{
-  if(busy)return;busy=true;later.disabled=true;status.textContent='Saving your online access choices…';
+ const allow=button(actions,localizedCopy("ui.onlineAccess.messageAllowOnlineAccess"),async()=>{
+  if(busy)return;busy=true;later.disabled=true;setPresentationText(status,localizedCopy("ui.onlineAccess.messageSavingYourOnlineAccessChoices"));
   try{
    let s=await read(api);
-   if(!s.maps.canConfigure||!s.science.canConfigure||!s.aviation.canConfigure)throw Error('Enable host online permissions on the companion PC’s local dashboard.');
+   if(!s.maps.canConfigure||!s.science.canConfigure||!s.aviation.canConfigure)throw Error(textForUI("ui.onlineAccess.messageEnableHostOnlinePermissionsOnTheCompanion"));
    // Fetch each complete current preference immediately before its narrow mutation.
    // Already-allowed settings are not resaved, avoiding needless preparation resets.
    const maps=await api('/api/maps/settings');
@@ -52,18 +54,18 @@ export function openOnlineAccess(api,{opener=document.activeElement,onAllowed=()
    s=await read(api);if(!ready(s))throw Error('A permission changed during saving. Review current settings and try again.');
    await onAllowed(s);if(!closed)dialog.close();
   }catch(error){
-   if(!closed){status.textContent='Online access was not fully confirmed. Some settings may have saved. '+error.message;status.setAttribute('role','alert');
+   if(!closed){setPresentationText(status,localizedCopy("ui.onlineAccess.messageOnlineAccessWasNotFullyConfirmedSome",{value1:(String(error.message))}));status.setAttribute('role','alert');
     try{const current=await read(api);if(!closed)show(current);}catch{/* Retain the actual failure; no successful state is invented. */}}
   }finally{busy=false;if(!closed)later.disabled=false;}
  },'primary');allow.disabled=true;
- const later=button(actions,onOffline?'Use Offline Maps':'Not Now',async()=>{if(onOffline)await onOffline();header.requestClose();});
+ const later=button(actions,onOffline?localizedCopy("ui.onlineAccess.messageUseOfflineMaps"):localizedCopy("ui.onlineAccess.messageNotNow"),async()=>{if(onOffline)await onOffline();header.requestClose();});
  dialog.addEventListener('close',()=>{closed=true;dialog.remove();onClosed();});dialog.showModal();
  read(api).then(s=>{
   if(closed)return;show(s);
   const canConfigure=s.maps.canConfigure&&s.science.canConfigure&&s.aviation.canConfigure;
   allow.disabled=!canConfigure;
-  if(canConfigure){status.textContent='Choose Allow Online Access to grant all listed permissions. Nothing is enabled by opening or dismissing this window.';allow.focus();}
-  else{status.textContent='Enable these choices on the companion PC’s local dashboard. Paired devices can review this disclosure but cannot grant host consent.';status.tabIndex=-1;status.focus();}
- }).catch(error=>{if(!closed){status.setAttribute('role','alert');status.textContent='Current online permissions could not be read. '+error.message;}});
+  if(canConfigure){setPresentationText(status,localizedCopy("ui.onlineAccess.messageChooseAllowOnlineAccessToGrantAll"));allow.focus();}
+  else{setPresentationText(status,localizedCopy("ui.onlineAccess.messageEnableTheseChoicesOnTheCompanionPCS"));status.tabIndex=-1;status.focus();}
+ }).catch(error=>{if(!closed){status.setAttribute('role','alert');setPresentationText(status,localizedCopy("ui.onlineAccess.messageCurrentOnlinePermissionsCouldNotBeRead",{value1:(String(error.message))}));}});
  return dialog;
 }

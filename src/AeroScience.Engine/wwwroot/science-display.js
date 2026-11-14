@@ -1,3 +1,6 @@
+import {message as localizedCopy,setPresentationText} from './i18n.js';
+import {t as textForUI} from './i18n.js';
+import {effectiveLocale,onLocaleChange} from './i18n.js';
 import {dialogHeader,requestDialogClose,markDialogSaved} from './dialog-ui.js';
 import {table as scientificTable,numeric} from './workstation-ui.js';
 let settings = null;
@@ -15,7 +18,7 @@ const categories = {
 };
 const e = (tag, value) => {
   const n = document.createElement(tag);
-  if (value !== undefined) n.textContent = value;
+  if (value !== undefined) setPresentationText(n,value);
   return n;
 };
 export async function initializeUnits(api) {
@@ -50,7 +53,7 @@ export async function unitControls(parent, api, changed = () => {}) {
   await initializeUnits(api);
   const details = e("details");
   details.className = "unit-settings";
-  details.append(e("summary", "Science display units"));
+  details.append(e("summary", localizedCopy("ui.scienceDisplay.messageScienceDisplayUnits")));
   parent.append(details);
   await planningUnitControls(details,api);
   const grid = e("div");
@@ -58,7 +61,7 @@ export async function unitControls(parent, api, changed = () => {}) {
   details.append(
     e(
       "p",
-      "Display preferences apply across Science, charts, history and the toolbar. Canonical recordings and default exports remain unchanged.",
+      localizedCopy("ui.scienceDisplay.messageDisplayPreferencesApplyAcrossScienceChartsHistory"),
     ),
     grid,
   );
@@ -87,10 +90,10 @@ export async function unitControls(parent, api, changed = () => {}) {
     grid.append(label);
   }
   for (const [name, key] of [
-    ["Aviation", "aviation"],
-    ["Scientific", "scientific"],
+    [textForUI("ui.scienceDisplay.messageAviation"), "aviation"],
+    [textForUI("ui.scienceDisplay.messageScientific"), "scientific"],
   ]) {
-    const b = e("button", name + " units");
+    const b = e("button", localizedCopy("ui.scienceDisplay.messageUnits",{value1:(name)}));
     b.type = "button";
     b.className = "secondary";
     b.onclick = async () => {
@@ -116,10 +119,10 @@ export function reduceExtrema(points, maximum = 1200) {
 }
 export function scienceCharts(parent, rows) {
   for (const [id, xkey, title] of [
-    ["temperature", "altitudeMslFeet", "Temperature vs altitude"],
-    ["pressure", "altitudeMslFeet", "Pressure vs altitude"],
-    ["wind-speed", "altitudeMslFeet", "Wind speed vs altitude"],
-    ["temperature", "timestampUtc", "Temperature over time"],
+    ["temperature", "altitudeMslFeet", textForUI("ui.scienceDisplay.messageTemperatureVsAltitude")],
+    ["pressure", "altitudeMslFeet", textForUI("ui.scienceDisplay.messagePressureVsAltitude")],
+    ["wind-speed", "altitudeMslFeet", textForUI("ui.scienceDisplay.messageWindSpeedVsAltitude")],
+    ["temperature", "timestampUtc", textForUI("ui.scienceDisplay.messageTemperatureOverTime")],
   ]) {
     const card = e("article");
     card.className = "panel science-chart";
@@ -143,7 +146,7 @@ export function scienceCharts(parent, rows) {
       .filter((p) => Number.isFinite(p.x) && Number.isFinite(p.y));
     if (!points.length) {
       card.append(
-        e("p", "No valid saved observations in this display window."),
+        e("p", localizedCopy("ui.scienceDisplay.messageNoValidSavedObservationsInThisDisplay")),
       );
       continue;
     }
@@ -156,11 +159,11 @@ export function scienceCharts(parent, rows) {
     tools.className = "map-tools";
     card.append(tools);
     const select = e("select");
-    select.setAttribute("aria-label", title + " time range");
+    setPresentationText(select,localizedCopy("ui.scienceDisplay.messageTimeRange",{value1:(title)}),"aria-label");
     for (const [value, label] of [
-      ["all", "All loaded observations"],
-      ["600", "Last 10 minutes"],
-      ["60", "Last minute"],
+      ["all", textForUI("ui.scienceDisplay.messageAllLoadedObservations")],
+      ["600", textForUI("ui.scienceDisplay.messageLast10Minutes")],
+      ["60", textForUI("ui.scienceDisplay.messageLastMinute")],
     ]) {
       const o = e("option", label);
       o.value = value;
@@ -173,7 +176,7 @@ export function scienceCharts(parent, rows) {
     };
     select.value = preferences.range;
     tools.append(select);
-    const mark = e("label", " Show observation points"),
+    const mark = e("label", localizedCopy("ui.scienceDisplay.messageShowObservationPoints")),
       check = e("input");
     check.type = "checkbox";
     check.checked = preferences.points;
@@ -182,14 +185,14 @@ export function scienceCharts(parent, rows) {
     const viewport = e("div");
     viewport.className = "chart-viewport";
     const canvas = e("canvas");
-    canvas.setAttribute("aria-label", title);
+    setPresentationText(canvas,title,"aria-label");
     canvas.setAttribute("role", "img");
     viewport.append(canvas);
     card.append(viewport);
     const summary = e("p");
     summary.className = "chart-summary";
     card.append(summary);
-    const values=e('details');values.className='chart-values advanced-details';values.append(e('summary','Inspect recorded chart values'));const valueRows=e('div');values.append(valueRows);card.append(values);let displayed=points;
+    const values=e('details');values.className='chart-values advanced-details';values.append(e('summary',localizedCopy("ui.scienceDisplay.messageInspectRecordedChartValues")));const valueRows=e('div');values.append(valueRows);card.append(values);let displayed=points;
     let chart;
     const render = () => {
       let selected =
@@ -201,11 +204,11 @@ export function scienceCharts(parent, rows) {
                 Date.parse(points.at(-1).row.timestampUtc) -
                   Number(select.value) * 1000,
             );
-      displayed=selected;valueRows.replaceChildren();scientificTable(valueRows,title+' recorded values',[xunit,unit,'Observation UTC','Quality','Provenance'],selected.map(p=>[xkey==='timestampUtc'?p.row.timestampUtc:numeric(p.x),numeric(p.y),p.row.timestampUtc,p.row.quality,p.row.provenance]));
+      displayed=selected;valueRows.replaceChildren();scientificTable(valueRows,title+' recorded values',[xunit,unit,textForUI("ui.scienceDisplay.messageObservationUTC"),textForUI("ui.atmosphericResearch.messageQuality"),textForUI("ui.surveyResearch.messageProvenance")],selected.map(p=>[xkey==='timestampUtc'?p.row.timestampUtc:numeric(p.x),numeric(p.y),p.row.timestampUtc,p.row.quality,p.row.provenance]));
       const reduced = reduceExtrema(selected);
       const min = Math.min(...selected.map((p) => p.y)),
         max = Math.max(...selected.map((p) => p.y));
-      summary.textContent = `${selected.length} actual measurement values · Min ${min.toFixed(2)} ${unit} · Max ${max.toFixed(2)} ${unit}. ${reduced.length < selected.length ? "Display reduction preserves each time bucket’s minima and maxima. " : ""}No interpolation or smoothing. Observation markers leave recording gaps empty; repeated altitudes retain time order in tooltips.`;
+      setPresentationText(summary,`${selected.length} actual measurement values · Min ${min.toFixed(2)} ${unit} · Max ${max.toFixed(2)} ${unit}. ${reduced.length < selected.length ? localizedCopy("ui.scienceDisplay.messageDisplayReductionPreservesEachTimeBucketSMinima") : ""}No interpolation or smoothing. Observation markers leave recording gaps empty; repeated altitudes retain time order in tooltips.`);
       const datasets = [];
       if (xkey === "timestampUtc") {
         let segment = [],
@@ -283,8 +286,8 @@ export function scienceCharts(parent, rows) {
                   return [
                     `${p.y.toFixed(3)} ${unit}`,
                     `${p.row.timestampUtc}`,
-                    `Altitude ${displayReading("altitude", p.row.altitudeMslFeet, "ft MSL").value?.toFixed(0) ?? "Unavailable"} ${displayReading("altitude", 0, "ft MSL").unit}`,
-                    `Quality: ${p.row.quality} · ${p.row.provenance}`,
+                    textForUI("ui.scienceDisplay.messageAltitude",{value1:(String(displayReading("altitude", p.row.altitudeMslFeet, "ft MSL").value?.toFixed(0) ?? "Unavailable")),value2:(String(displayReading("altitude", 0, "ft MSL").unit))}),
+                    textForUI("ui.scienceDisplay.messageQuality",{value1:(String(p.row.quality)),value2:(String(p.row.provenance))}),
                   ];
                 },
               },
@@ -315,17 +318,17 @@ export function scienceCharts(parent, rows) {
       b.onclick = fn;
       tools.append(b);
     };
-    action("Expand", () => {
+    action(localizedCopy("ui.scienceDisplay.messageExpand"), () => {
       const launch=document.activeElement;const dialog = e("dialog");
       dialog.className = "expanded-chart";
-      const close = e("button", "Close expanded chart");
+      const close = e("button", localizedCopy("ui.scienceDisplay.messageCloseExpandedChart"));
       close.type = "button";
       dialog.append(close);
       document.body.append(dialog);
       const original = card.parentNode,
         next = card.nextSibling;
       dialog.append(card);
-      dialogHeader(dialog,{title:"Expanded scientific chart",opener:launch,reuseHeading:false});dialog.showModal();
+      dialogHeader(dialog,{title:localizedCopy("ui.scienceDisplay.messageExpandedScientificChart"),opener:launch,reuseHeading:false});dialog.showModal();
       chart.resize();
       close.onclick = () => requestDialogClose(dialog);
       dialog.onclose = () => {
@@ -335,13 +338,13 @@ export function scienceCharts(parent, rows) {
         launch?.focus({preventScroll:true});
       };
     });
-    action("Save PNG", () => {
+    action(localizedCopy("ui.scienceDisplay.messageSavePNG"), () => {
       const a = e("a");
       a.download = title.replaceAll(" ", "-") + ".png";
       a.href = chart.toBase64Image();
       a.click();
     });
-    action("Export displayed CSV", () => {
+    action(localizedCopy("ui.scienceDisplay.messageExportDisplayedCSV"), () => {
       const csv = [
         "timestamp_utc,value,unit,altitude_msl_ft,quality,provenance",
         ...displayed.map((p) =>
@@ -383,24 +386,25 @@ export function planningMeasure(category, canonical, adaptive = true) {
     conversion=Math.abs(canonical||0)>=1000?{scale:.001,label:"km"}:{scale:1,label:"m"};
   return {value:canonical==null?null:canonical*conversion.scale,scale:conversion.scale,unit:conversion.label};
 }
-const planningNumber=value=>Number.isFinite(value)?value.toLocaleString(undefined,{maximumFractionDigits:Math.abs(value)<1?6:3}):"Unavailable";
+const planningNumber=value=>Number.isFinite(value)?value.toLocaleString(effectiveLocale(),{maximumFractionDigits:Math.abs(value)<1?6:3}):textForUI("localization.unavailableValue");
 export function planningDistance(metres) {const d=planningMeasure("distance",metres);return `${planningNumber(d.value)} ${d.unit}`;}
 export function planningArea(squareMetres) {
-  if(!Number.isFinite(squareMetres))return "Unavailable";
+  if(!Number.isFinite(squareMetres))return textForUI("localization.unavailableValue");
   const distance=(settings?.preferences?.planningProfile||(["kilometres","metres"].includes(settings?.preferences?.distance)?"metric":"aviation"))==="metric"?"kilometres":"nauticalMiles";
   const [scale,unit]=distance==="nauticalMiles"?[1/(1852*1852),"NM²"]:distance==="miles"?[1/(1609.344*1609.344),"mi²"]:Math.abs(squareMetres)>=1e6?[1e-6,"km²"]:[1,"m²"];
   return `${planningNumber(squareMetres*scale)} ${unit}`;
 }
-export function planningSurvey(summary) {return `Approximate area ${planningArea(summary.squareMetres)} · E–W ${planningDistance(summary.widthMetres)} × N–S ${planningDistance(summary.lengthMetres)} (spherical geographic estimate)`;}
-const planningBindings=new Map();
+export function planningSurvey(summary) {return textForUI("ui.scienceDisplay.messageApproximateAreaEWNSSpherical",{value1:(String(planningArea(summary.squareMetres))),value2:(String(planningDistance(summary.widthMetres))),value3:(String(planningDistance(summary.lengthMetres)))});}
+const planningBindings=new WeakMap();
 export function planningText(node, render) {
   planningBindings.get(node)?.();
   let last;
   const refresh=()=>{
     if(last!==undefined&&node.textContent!==last){planningBindings.get(node)?.();planningBindings.delete(node);return;}
-    node.textContent=render();last=node.textContent;
+    setPresentationText(node,render());last=node.textContent;
   };refresh();
-  const unsubscribe=onUnitsChanged(refresh);planningBindings.set(node,unsubscribe);
+  const unitsUnsubscribe=onUnitsChanged(refresh),localeUnsubscribe=onLocaleChange(refresh,{owner:node});
+  const unsubscribe=()=>{unitsUnsubscribe();localeUnsubscribe();};planningBindings.set(node,unsubscribe);
 }
 export function planningField(input,category,canonical,title,suffix="") {
   let value=canonical,scale=1,rendered=input.value;
@@ -409,8 +413,9 @@ export function planningField(input,category,canonical,title,suffix="") {
     read();const d=planningMeasure(category,value);scale=d.scale;
     const label=input.closest("label");
     const units=suffix==="AGL"?d.unit.replace('MSL','AGL'):suffix==='interval'?d.unit.replace(' MSL',''):d.unit,reference=suffix&&!['AGL','interval'].includes(suffix)?", "+suffix:"";
-    if(label?.firstChild?.nodeType===Node.TEXT_NODE)label.firstChild.textContent=`${title} (${units}${reference})`;
-    input.setAttribute("aria-label",`${title} (${units}${reference})`);
+    const fieldLabel=localizedCopy('components.fieldWithUnit',{title,unit:units,reference});
+    if(label?.firstChild?.nodeType===Node.TEXT_NODE)setPresentationText(label.firstChild,fieldLabel);
+    setPresentationText(input,fieldLabel,"aria-label");
     input.value=value==null?"":String(Number((value*scale).toFixed(category==="altitude"?3:6)));rendered=input.value;
   };
   const set=canonical=>{value=canonical;rendered=input.value;refresh();};
@@ -421,17 +426,17 @@ export function planningField(input,category,canonical,title,suffix="") {
 }
 export async function planningUnitControls(parent,api) {
   await initializeUnits(api);
-  const label=e("label","Planning units"),select=e("select"),status=e("span");
-  select.setAttribute("aria-label","Planning units");
-  for(const [id,name] of [["aviation","Aviation — NM / feet / knots"],["metric","Metric — m or km / meters / km/h"]]){const option=e("option",name);option.value=id;select.append(option);}
+  const label=e("label",localizedCopy("ui.scienceDisplay.messagePlanningUnits")),select=e("select"),status=e("span");
+  setPresentationText(select,localizedCopy("ui.scienceDisplay.messagePlanningUnits"),"aria-label");
+  for(const [id,name] of [["aviation",textForUI("ui.scienceDisplay.messageAviationNMFeetKnots")],["metric",textForUI("ui.scienceDisplay.messageMetricMOrKmMeters")]]){const option=e("option",name);option.value=id;select.append(option);}
   const refresh=()=>{const p=settings.preferences;select.value=p.planningProfile||(["kilometres","metres"].includes(p.distance)?"metric":"aviation");};
   select.onchange=async()=>{
     select.disabled=true;
     try{
       const metric=select.value==="metric";
       const next=await api("/api/display/units",{...settings.preferences,planningProfile:metric?"metric":"aviation"});
-      syncUnits(next);status.textContent="Display converted; geographic geometry and stored units are unchanged.";
-    }catch(error){status.textContent=error.message;refresh();}finally{select.disabled=false;}
+      syncUnits(next);setPresentationText(status,localizedCopy("ui.scienceDisplay.messageDisplayConvertedGeographicGeometryAndStoredUnits"));
+    }catch(error){setPresentationText(status,error.message);refresh();}finally{select.disabled=false;}
   };
   label.append(select,status);parent.append(label);refresh();const unsubscribe=onUnitsChanged(refresh);planningBindings.set(select,unsubscribe);
 }

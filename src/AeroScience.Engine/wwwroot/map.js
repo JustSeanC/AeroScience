@@ -1,3 +1,6 @@
+import {presentationTooltip} from './workstation-ui.js';
+import {message as localizedCopy,setPresentationText} from './i18n.js';
+import {t as textForUI} from './i18n.js';
 import {mapLayerManager} from './map-layer-manager.js';
 import { planningDistance, onUnitsChanged } from "./science-display.js";
 import { airportLocations, searchLocations, locationLabel } from "./location-search.js";
@@ -15,14 +18,14 @@ const loadGeography = () =>
   (geography ??= Promise.all(
     ["countries", "places", "airports", "airport-search"].map(async (name) => {
       const response = await fetch(`/geography/${name}.${name === "airport-search" ? "json" : "geojson"}`);
-      if (!response.ok) throw Error("Bundled geography unavailable");
+      if (!response.ok) throw Error(textForUI("ui.map.messageBundledGeographyUnavailable"));
       const value = await response.json();
       return name === "airport-search" ? airportLocations(value) : value;
     }),
   ));
 const label = (value) => {
   const node = document.createElement("span");
-  node.textContent = value;
+  setPresentationText(node,value);
   return node;
 };
 const activeMaps = new Set();
@@ -40,14 +43,11 @@ export class ResearchMap {
     tools.className = "map-tools";tools.hidden=Boolean(options.coverageOnly);
     this.container = document.createElement("div");
     this.container.className = "geographic-map";
-    this.container.setAttribute(
-      "aria-label",
-      "Geographic mission map. Pan by dragging; wheel or pinch to zoom.",
-    );
+    setPresentationText(this.container,localizedCopy("ui.map.messageGeographicMissionMapPanByDraggingWheel"),"aria-label");
     this.coordinate = document.createElement("p");
     this.coordinate.className = "footnote";
     parent.append(tools, this.container, this.coordinate);
-    this.routeValues=document.createElement('details');this.routeValues.className='advanced-details';this.routeValues.hidden=true;this.routeValues.append(document.createElement('summary'));this.routeValues.firstChild.textContent='Route waypoints — accessible values and selection';this.routeRows=document.createElement('div');this.routeValues.append(this.routeRows);parent.append(this.routeValues);
+    this.routeValues=document.createElement('details');this.routeValues.className='advanced-details';this.routeValues.hidden=true;this.routeValues.append(document.createElement('summary'));setPresentationText(this.routeValues.firstChild,localizedCopy("ui.map.messageRouteWaypointsAccessibleValuesAndSelection"));this.routeRows=document.createElement('div');this.routeValues.append(this.routeRows);parent.append(this.routeValues);
     this.routeValues.addEventListener('toggle',()=>{if(this.routeValues.open)this.showRouteValues();});
     const L = window.L;
     this.L = L;
@@ -74,7 +74,7 @@ export class ResearchMap {
     this.map.on("moveend",()=>{if(this.destroyed)return;const center=this.map.getCenter();this.container.dataset.center=JSON.stringify([center.lat,center.lng,this.map.getZoom()]);});
     this.container.dataset.center=JSON.stringify([38,-97,4]);
     this.map.attributionControl.addAttribution(
-      "Leaflet · Natural Earth (public domain) · Geographic reference, not navigation",
+      textForUI("ui.map.messageLeafletNaturalEarthPublicDomain"),
     );
     this.route = L.polyline([], { color: "#f5cd79", dashArray: "8 6" }).addTo(
       this.map,
@@ -91,72 +91,72 @@ export class ResearchMap {
     this.draftLayer=L.layerGroup().addTo(this.map);
     this.previewLayer=L.layerGroup().addTo(this.map);
     const overlays=[
-      ['planned-route','Planned route',this.route,'Mission'],['patterns','Semantic pattern outlines',this.patterns,'Mission'],
-      ['waypoints','Waypoint markers',this.points,'Mission'],['recorded-track','Recorded track',this.track,'Mission'],
-      ['survey-areas','Survey areas',this.areas,'Mission'],['aircraft','Aircraft',this.aircraft,'Mission'],
-      ['mission-draft','Draft route and survey geometry',this.draftLayer,'Mission'],['mission-preview','Pattern preview and modeled geometry',this.previewLayer,'Mission'],
-      ['observations','Observation markers',this.markers,'Science'],['sample-locations','Scientific sample locations',this.samples,'Science'],
-      ['science-readiness','Scientific data readiness',this.readiness,'Science'],['science-footprints','Science footprints',this.footprints,'Science']
+      ['planned-route',textForUI("ui.map.messagePlannedRoute"),this.route,textForUI("toolbar.mission")],['patterns',textForUI("ui.map.messageSemanticPatternOutlines"),this.patterns,textForUI("toolbar.mission")],
+      ['waypoints',textForUI("ui.map.messageWaypointMarkers"),this.points,textForUI("toolbar.mission")],['recorded-track',textForUI("ui.map.messageRecordedTrack"),this.track,textForUI("toolbar.mission")],
+      ['survey-areas',textForUI("ui.map.messageSurveyAreas"),this.areas,textForUI("toolbar.mission")],['aircraft',textForUI("ui.personalResearchReview.messageAircraft"),this.aircraft,textForUI("toolbar.mission")],
+      ['mission-draft',textForUI("ui.map.messageDraftRouteAndSurveyGeometry"),this.draftLayer,textForUI("toolbar.mission")],['mission-preview',textForUI("ui.map.messagePatternPreviewAndModeledGeometry"),this.previewLayer,textForUI("toolbar.mission")],
+      ['observations',textForUI("ui.map.messageObservationMarkers"),this.markers,textForUI("toolbar.science")],['sample-locations',textForUI("ui.research.messageScientificSampleLocations"),this.samples,textForUI("toolbar.science")],
+      ['science-readiness',textForUI("ui.map.messageScientificDataReadiness"),this.readiness,textForUI("toolbar.science")],['science-footprints',textForUI("ui.map.messageScienceFootprints"),this.footprints,textForUI("toolbar.science")]
     ].map(([id,name,layer,group])=>({id,name,layer,group,description:{
-      observations:'Pilot Observation: original notes and marked locations, where recorded. Human documentation is separate from sensor readings; missing positions are not invented.',
-      'sample-locations':'Actual saved scientific sample locations, not continuous sensor coverage. Inspect original values, units, times and provenance in Science Map or the synchronized evidence timeline.',
-      'science-readiness':'Scientific source availability and preparation context. Downloaded or geographically available data is not proof of compatible, QA-valid collected evidence. Review the mission’s original readiness warnings.',
-      'science-footprints':'Modeled Scientific Output: acquisition geometry from recorded aircraft position and configured instrument assumptions. These outlines are not validated sensor swaths or QA-valid pixel coverage. Historical source sampling does not acquire a new satellite image.'
+      observations:textForUI("ui.map.messagePilotObservationOriginalNotesAndMarkedLocations"),
+      'sample-locations':textForUI("ui.map.messageActualSavedScientificSampleLocationsNotContinuous"),
+      'science-readiness':textForUI("ui.map.messageScientificSourceAvailabilityAndPreparationContextDownloaded"),
+      'science-footprints':textForUI("ui.map.messageModeledScientificOutputAcquisitionGeometryFromRecorded")
     }[id]}));
     const action = (name, fn) => {
       const b = document.createElement("button");
       b.type = "button";
       b.className = "secondary";
-      b.textContent = name;
+      setPresentationText(b,name);
       b.onclick = fn;
       tools.append(b);
       return b;
     };
-    action("Fit route & track", () => this.fit());
-    action("Center aircraft", () => {
+    action(localizedCopy("ui.map.messageFitRouteTrack"), () => this.fit());
+    action(localizedCopy("ui.map.messageCenterAircraft"), () => {
       if (valid(this.data.aircraft))
         this.map.setView(
           ll(this.data.aircraft),
           Math.max(this.map.getZoom(), 9),
         );
-      else this.coordinate.textContent = "No live aircraft position available.";
+      else setPresentationText(this.coordinate,localizedCopy("ui.map.messageNoLiveAircraftPositionAvailable"));
     });
     const search = document.createElement("input");
     search.type = "search";
-    search.placeholder = "City, airport, ICAO/IATA or lat, lon";
-    search.setAttribute("aria-label", "Offline geographic location search");
+    setPresentationText(search,localizedCopy("ui.map.messageCityAirportICAOIATAOrLatLon"),"placeholder",true);
+    setPresentationText(search,localizedCopy("ui.map.messageOfflineGeographicLocationSearch"),"aria-label");
     tools.append(search);
     const results = document.createElement("select");
-    results.setAttribute("aria-label", "Search results");results.hidden=true;results.size=5;tools.append(results);
+    setPresentationText(results,localizedCopy("ui.map.messageSearchResults"),"aria-label");results.hidden=true;results.size=5;tools.append(results);
     const searchStatus=document.createElement("p");searchStatus.setAttribute("role","status");tools.append(searchStatus);
-    const useAirport=this.options.onAirportSelect?action('Use Airport as Waypoint',()=>this.options.onAirportSelect(this.selectedAirport)):null;
+    const useAirport=this.options.onAirportSelect?action(localizedCopy("ui.map.messageUseAirportAsWaypoint"),()=>this.options.onAirportSelect(this.selectedAirport)):null;
     if(useAirport)useAirport.hidden=true;
-    this.focusAirportSearch=()=>{search.scrollIntoView({block:'center'});search.focus();searchStatus.textContent='Find an airport, select it, then use it as a waypoint.';};
+    this.focusAirportSearch=()=>{search.scrollIntoView({block:'center'});search.focus();setPresentationText(searchStatus,localizedCopy("ui.map.messageFindAnAirportSelectItThenUse"));};
     const choose = p => {
       if(this.destroyed||!p)return;
       this.selectedAirport=p.kind==='airport'?p:null;if(useAirport)useAirport.hidden=!this.selectedAirport;
       this.center(p);this.initialized=true;
       if(this.searchMarker)this.map.removeLayer(this.searchMarker);
       this.searchMarker=L.circleMarker(ll(p),{radius:8,color:"#ffffff"}).bindTooltip(label(locationLabel(p))).addTo(this.map);
-      if(this.selectedAirport&&useAirport)this.searchMarker.on('click',()=>{if(this.interactionMode||this.drawing)return;searchStatus.textContent='Selected: '+locationLabel(p);useAirport.focus();});
-      searchStatus.textContent="Selected: "+locationLabel(p);
+      if(this.selectedAirport&&useAirport)this.searchMarker.on('click',()=>{if(this.interactionMode||this.drawing)return;setPresentationText(searchStatus,localizedCopy("ui.map.messageSelected",{value1:(String(locationLabel(p)))}));useAirport.focus();});
+      setPresentationText(searchStatus,localizedCopy("ui.map.messageSelected",{value1:(String(locationLabel(p)))}));
     };
     // Reference selection is idle-only. During geometry placement its click must
     // bubble to the map's existing placement handler instead of recentering.
     const chooseAirportReference=p=>{if(!this.interactionMode&&!this.drawing)choose(p);};
     const find = async () => {
       const q=search.value.trim();results.replaceChildren();results.hidden=true;
-      if(!q){searchStatus.textContent="Enter an airport code, name, city or latitude, longitude. Your map position has not changed.";return;}
+      if(!q){setPresentationText(searchStatus,localizedCopy("ui.map.messageEnterAnAirportCodeNameCityOr"));return;}
       await this.ready;
       if(this.destroyed)return;
       const matches=searchLocations(q,this.airportSearch||[],this.places||[]);
-      const placeholder=document.createElement("option");placeholder.textContent="Select a result to center the map";placeholder.value="";results.append(placeholder);
-      for(const [i,p] of matches.entries()){const option=document.createElement("option");option.value=String(i);option.textContent=locationLabel(p);results.append(option);}
+      const placeholder=document.createElement("option");setPresentationText(placeholder,localizedCopy("ui.map.messageSelectAResultToCenterTheMap"));placeholder.value="";results.append(placeholder);
+      for(const [i,p] of matches.entries()){const option=document.createElement("option");option.value=String(i);setPresentationText(option,locationLabel(p));results.append(option);}
       results.value="";results.hidden=!matches.length;
       results.onchange=()=>{if(results.value!=="")choose(matches[Number(results.value)]);};
-      searchStatus.textContent=matches.length?`${matches.length} results. Select one to center the map. Search alone does not move it.`:"No results. Try an ICAO/IATA code, airport name, city or explicit latitude, longitude. Map position unchanged.";
+      setPresentationText(searchStatus,matches.length?localizedCopy("ui.map.messageResultsSelectOneToCenterThe",{value1:(String(matches.length))}):localizedCopy("ui.map.messageNoResultsTryAnICAOIATACodeAirport"));
     };
-    const findButton=action("Find", find);
+    const findButton=action(localizedCopy("ui.map.messageFind"), find);
     const searchGroup=document.createElement("div");searchGroup.className="map-search";
     searchGroup.append(search,findButton);tools.append(searchGroup);
     search.onkeydown = (e) => {
@@ -192,7 +192,7 @@ export class ResearchMap {
         if (client.layer === "streets") {
           const link = document.createElement("a");
           link.href = "https://www.openstreetmap.org/copyright";
-          link.textContent = "© OpenStreetMap contributors";
+          setPresentationText(link,localizedCopy("ui.map.messageOpenStreetMapContributors"));
           link.target = "_blank";
           link.rel = "noopener noreferrer";
           attribution.replaceChildren(link);
@@ -215,8 +215,8 @@ export class ResearchMap {
           }
           this.countries?.setStyle({ opacity: 1, fillOpacity: 0.65 });
           this.layerError =
-            "Online provider unavailable or quota/authentication failed. Offline geography remains available; route and recording are unchanged. Select another layer or retry in Settings.";
-          this.coordinate.textContent = this.layerError;
+            textForUI("ui.map.messageOnlineProviderUnavailableOrQuotaAuthenticationFailedOffline");
+          setPresentationText(this.coordinate,this.layerError);
         });
         this.onlineTiles.push(tile);
       }
@@ -229,7 +229,7 @@ export class ResearchMap {
             a.rel = "noopener noreferrer";
             const img = document.createElement("img");
             img.src = "https://js.arcgis.com/3.46/esri/images/map/logo-med.png";
-            img.alt = "Powered by Esri";
+            setPresentationText(img,localizedCopy("ui.map.messagePoweredByEsri"),"alt",true);
             img.width = 65;
             img.style.height = "auto";
             a.append(img);
@@ -270,7 +270,7 @@ export class ResearchMap {
         setTimeout(() => {this.drawing=false;this.updateAirportActions();}, 0),
       );
       this.map.on("draw:created", (e) => {
-        e.layer.areaName = `Survey area ${this.areas.getLayers().length + 1}`;
+        e.layer.areaName = textForUI("ui.map.messageSurveyArea",{value1:(String(this.areas.getLayers().length + 1))});
         this.areas.addLayer(e.layer);
         this.areaChanges();
       });
@@ -325,7 +325,7 @@ export class ResearchMap {
             for(const airport of this.airportSearch){if(!bounds.contains([airport.latitude,airport.longitude]))continue;
               const marker=L.circleMarker([airport.latitude,airport.longitude],{radius:5,color:'#acc7ee',bubblingMouseEvents:true,renderer:airportRenderer,className:'airport-reference'});
               marker.bindTooltip(label(locationLabel(airport)));marker.on('click',()=>chooseAirportReference(airport));
-              marker.on('add',()=>{const target=marker.getElement();if(!target)return;const disabled=Boolean(this.interactionMode||this.drawing);target.setAttribute('role','button');target.setAttribute('tabindex',disabled?'-1':'0');target.setAttribute('aria-disabled',String(disabled));target.setAttribute('aria-label','Select airport '+locationLabel(airport));target.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();chooseAirportReference(airport);}});});
+              marker.on('add',()=>{const target=marker.getElement();if(!target)return;const disabled=Boolean(this.interactionMode||this.drawing);target.setAttribute('role','button');target.setAttribute('tabindex',disabled?'-1':'0');target.setAttribute('aria-disabled',String(disabled));setPresentationText(target,localizedCopy("ui.map.messageSelectAirport",{value1:(locationLabel(airport))}),"aria-label");target.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();chooseAirportReference(airport);}});});
               nearby.addLayer(marker);if(++shown>=150)break;
             }
           };this.map.on('moveend',updateAirports);updateAirports();
@@ -341,7 +341,7 @@ export class ResearchMap {
           });
           m.bindTooltip(
             label(
-              (airport ? "Airport: " : "") +
+              (airport ? localizedCopy("ui.map.messageAirport") : "") +
                 (f.properties.NAME || f.properties.name) +
                 (f.properties.gps_code ? " · " + f.properties.gps_code : ""),
             ),
@@ -363,8 +363,7 @@ export class ResearchMap {
       })
       .catch(() => {
         if(this.destroyed)return;
-        this.coordinate.textContent =
-          "Bundled geography could not load. Coordinate editing remains available; check installation files.";
+        setPresentationText(this.coordinate,localizedCopy("ui.map.messageBundledGeographyCouldNotLoadCoordinateEditing"));
         this.locations = [];
       });
     this.map.whenReady(() => this.draw());
@@ -382,7 +381,7 @@ export class ResearchMap {
     if(this.destroyed)return;
     this.options.onAreasChange(
       this.areas.getLayers().map((l) => ({
-        name: l.areaName || "Survey area",
+        name: l.areaName || textForUI("ui.downloadActivity.messageSurveyArea"),
         vertices: l
           .getLatLngs()[0]
           .map((p) => ({ latitude: p.lat, longitude: longitude(p.lng) })),
@@ -393,7 +392,7 @@ export class ResearchMap {
     if(this.destroyed)return;
     const key=JSON.stringify(states.map(s=>[s.key,s.status,s.area,s.sourceCoverage]));if(key===this.readinessKey)return;this.readinessKey=key;this.readiness.clearLayers();
     const colors={Ready:"#3adbb0","Dataset Ready":"#3adbb0",Downloading:"#62bbff",Queued:"#e9ce70","Partially usable":"#e6a453","Limited Coverage":"#e6a453",Unavailable:"#df6975","Dataset Required":"#df6975","Dataset Outside Coverage":"#a08ab8",Offline:"#a0aab8"};
-    for(const s of states.slice(0,Math.min(4096,limit))){const a=s.area;if(!a||s.status==="Superseded")continue;(s.sourceCoverage?.length?this.L.polygon(s.sourceCoverage.map(p=>[p.latitude,p.longitude]),{color:colors[s.status]||"#a0aab8",weight:1,fillOpacity:.08}):this.L.rectangle([[a.south,a.west],[a.north,a.east]],{color:colors[s.status]||"#a0aab8",weight:1,fillOpacity:.08})).bindTooltip(label(`${s.kind}: ${s.status} · Requested preparation envelope; per-pixel masks and actual source coverage still apply`)).addTo(this.readiness);}
+    for(const s of states.slice(0,Math.min(4096,limit))){const a=s.area;if(!a||s.status==="Superseded")continue;(s.sourceCoverage?.length?this.L.polygon(s.sourceCoverage.map(p=>[p.latitude,p.longitude]),{color:colors[s.status]||"#a0aab8",weight:1,fillOpacity:.08}):this.L.rectangle([[a.south,a.west],[a.north,a.east]],{color:colors[s.status]||"#a0aab8",weight:1,fillOpacity:.08})).bindTooltip(label(localizedCopy("ui.map.messageRequestedPreparationEnvelopePerPixel",{value1:(String(s.kind)),value2:(String(s.status))}))).addTo(this.readiness);}
   }
   set(data) {
     if(this.destroyed)return;
@@ -471,22 +470,22 @@ export class ResearchMap {
     this.previewLayer.clearLayers();this.previewResult=result;
     this.container.dataset.previewPoints=String(result?.waypoints?.length||0);
     if(!result)return;
-    for(const vertices of result.modeledSwaths||[])this.L.polygon(vertices.map(p=>ll(p)),{color:'#6ce4b9',weight:1,fillOpacity:.08}).bindTooltip('Modeled nadir flat-ground swath; source validity, relief and continuous acquisition are unverified.').addTo(this.previewLayer);
-    if(result.terrainPlanningFootprint)this.L.polygon(result.terrainPlanningFootprint.boundary.map(p=>ll(p)),{color:'#efb96b',weight:2,fillOpacity:.15}).bindTooltip('Relative-AGL terrain-aware centre footprint; no simulator vertical-datum correction.').addTo(this.previewLayer);
+    for(const vertices of result.modeledSwaths||[])this.L.polygon(vertices.map(p=>ll(p)),{color:'#6ce4b9',weight:1,fillOpacity:.08}).bindTooltip(()=>presentationTooltip(textForUI("ui.map.messageModeledNadirFlatGroundSwathSourceValidityRelief"))).addTo(this.previewLayer);
+    if(result.terrainPlanningFootprint)this.L.polygon(result.terrainPlanningFootprint.boundary.map(p=>ll(p)),{color:'#efb96b',weight:2,fillOpacity:.15}).bindTooltip(()=>presentationTooltip(textForUI("ui.map.messageRelativeAGLTerrainAwareCentreFootprintNoSimulatorVerticalDatum"))).addTo(this.previewLayer);
     const points=result.waypoints||[];const d=result.definition;
-    if(result.segments?.length){for(const segment of result.segments)this.L.polyline(points.slice(segment.start,segment.end+1).map(p=>ll(p,points[0]?.longitude)),{color:segment.role==="scan"?"#50dcc7":"#f0ad70",dashArray:segment.role==="scan"?null:"6 6",weight:3}).bindTooltip(segment.role==="scan"?"In-area scan leg":"Transition: may leave survey polygon; turning feasibility unvalidated").addTo(this.previewLayer);}
+    if(result.segments?.length){for(const segment of result.segments)this.L.polyline(points.slice(segment.start,segment.end+1).map(p=>ll(p,points[0]?.longitude)),{color:segment.role==="scan"?"#50dcc7":"#f0ad70",dashArray:segment.role==="scan"?null:"6 6",weight:3}).bindTooltip(()=>presentationTooltip(segment.role==="scan"?textForUI("ui.map.messageInAreaScanLeg"):textForUI("ui.map.messageTransitionMayLeaveSurveyPolygonTurningFeasibility"))).addTo(this.previewLayer);}
     else this.L.polyline(points.map(p=>ll(p,points[0]?.longitude)),{color:"#ffffff",dashArray:"3 7",weight:3}).addTo(this.previewLayer);
     if(d&&d.fitMode!=="polygon"&&["lawnmower","creepingLine"].includes(d.kind)&&points.length>=4){
       const bearing=d.headingDegrees*Math.PI/180,distance=Math.min(d.lengthMetres/3,20000),R=6371008.8;
       const start=ll(d.center),end=[start[0]+distance*Math.cos(bearing)/R*180/Math.PI,start[1]+distance*Math.sin(bearing)/(R*Math.max(.02,Math.cos(start[0]*Math.PI/180)))*180/Math.PI];
-      this.L.polyline([start,end],{color:"#72b8f1",weight:4}).bindTooltip(`Reference heading ${d.headingDegrees}° true (approximate display arrow)`).addTo(this.previewLayer);
-      const arrow=document.createElement("span");arrow.textContent="➤";arrow.style.display="block";arrow.style.transform=`rotate(${d.headingDegrees-90}deg)`;
+      this.L.polyline([start,end],{color:"#72b8f1",weight:4}).bindTooltip(()=>presentationTooltip(textForUI("ui.map.messageReferenceHeadingTrueApproximateDisplayArrow",{value1:(String(d.headingDegrees))}))).addTo(this.previewLayer);
+      const arrow=document.createElement("span");setPresentationText(arrow,"➤");arrow.style.display="block";arrow.style.transform=`rotate(${d.headingDegrees-90}deg)`;
       this.L.marker(end,{interactive:false,icon:this.L.divIcon({className:"pattern-arrow",html:arrow,iconSize:[20,20]})}).addTo(this.previewLayer);
-      this.L.polyline([ll(points[1]),ll(points[2])],{color:"#eb9bbd",weight:5}).bindTooltip("Step direction between long scan legs").addTo(this.previewLayer);
-      this.L.rectangle(this.L.latLngBounds(points.map(p=>ll(p,points[0]?.longitude))),{color:"#8aa1b0",weight:1,dashArray:"2 8",fill:false}).bindTooltip("Pattern extent; not guaranteed sensor coverage or polygon clipping").addTo(this.previewLayer);
+      this.L.polyline([ll(points[1]),ll(points[2])],{color:"#eb9bbd",weight:5}).bindTooltip(()=>presentationTooltip(textForUI("ui.map.messageStepDirectionBetweenLongScanLegs"))).addTo(this.previewLayer);
+      this.L.rectangle(this.L.latLngBounds(points.map(p=>ll(p,points[0]?.longitude))),{color:"#8aa1b0",weight:1,dashArray:"2 8",fill:false}).bindTooltip(()=>presentationTooltip(textForUI("ui.map.messagePatternExtentNotGuaranteedSensorCoverageOr"))).addTo(this.previewLayer);
     }
     if(d?.kind==="orbit")this.L.circle(ll(d.center),{radius:d.radiusMetres,color:"#ffffff",fill:false}).addTo(this.previewLayer);
-    for(const [p,name] of [[points[0],"Preview entry"],[points.at(-1),"Preview exit"]])if(p)this.L.circleMarker(ll(p),{radius:6,color:name.includes("entry")?"#50dcc7":"#eb9bbd"}).bindTooltip(name).addTo(this.previewLayer);
+    for(const [p,key,ink] of [[points[0],"ui.map.messagePreviewEntry","#50dcc7"],[points.at(-1),"ui.map.messagePreviewExit","#eb9bbd"]])if(p)this.L.circleMarker(ll(p),{radius:6,color:ink}).bindTooltip(label(localizedCopy(key))).addTo(this.previewLayer);
   }
   center(point) {
     if (!this.destroyed && valid(point))
@@ -507,7 +506,7 @@ export class ResearchMap {
   }
   showRouteValues(){
     if(this.destroyed||!this.routeValues.open)return;const waypoints=this.data.plan?.waypoints||[];this.routeRows.replaceChildren();
-    geographicTable(this.routeRows,'Planned waypoint coordinates',['Waypoint','Latitude (degrees north)','Longitude (degrees east)'],waypoints.map((point,index)=>[point.name||`Waypoint ${index+1}`,point.latitude,point.longitude]),{onSelect:index=>{this.center(waypoints[index]);this.options.onWaypointSelect?.(index);}});
+    geographicTable(this.routeRows,textForUI("ui.map.messagePlannedWaypointCoordinates"),[textForUI("ui.analysis.messageWaypoint"),textForUI("ui.map.messageLatitudeDegreesNorth"),textForUI("ui.map.messageLongitudeDegreesEast")],waypoints.map((point,index)=>[point.name||textForUI("ui.map.messageWaypoint",{value1:(String(index+1))}),point.latitude,point.longitude]),{onSelect:index=>{this.center(waypoints[index]);this.options.onWaypointSelect?.(index);}});
   }
   draw() {
     if (this.destroyed || !this.map) return;
@@ -556,22 +555,22 @@ export class ResearchMap {
     flush();
     if (staticChanged) {
       this.points.clearLayers();this.markers.clearLayers();this.samples.clearLayers();this.footprints.clearLayers();this.patterns.clearLayers();
-      for(const d of plan.patterns||[])if(d.kind==="orbit"&&valid(d.center))L.circle(ll(d.center),{radius:d.radiusMetres,color:"#f5cd79",fill:false,weight:2}).bindTooltip(label(`Orbit: ${planningDistance(d.radiusMetres)} · ${d.clockwise?"clockwise":"counterclockwise"} · ${d.orbits} revolution(s); exports use 5° navigation points`)).addTo(this.patterns);
+      for(const d of plan.patterns||[])if(d.kind==="orbit"&&valid(d.center))L.circle(ll(d.center),{radius:d.radiusMetres,color:"#f5cd79",fill:false,weight:2}).bindTooltip(label(localizedCopy("ui.map.messageOrbitRevolutionSExportsUse5",{value1:(String(planningDistance(d.radiusMetres))),value2:(String(d.clockwise?"clockwise":"counterclockwise")),value3:(String(d.orbits))}))).addTo(this.patterns);
       for (const [i, p] of (plan.waypoints || []).entries()) {
         if (!valid(p)) continue;
         if(p.patternId&&(plan.patterns||[]).some(d=>d.id===p.patternId&&d.kind==="orbit")&&i>0&&i<plan.waypoints.length-1&&plan.waypoints[i-1]?.patternId===p.patternId&&plan.waypoints[i+1]?.patternId===p.patternId)continue;
         const m = L.marker(ll(p, base), {
           draggable: !!this.options.onWaypointsChange,
           keyboard:false, // Equivalent, non-overlapping selection is in the route table.
-          title:p.name||`Waypoint ${i+1}`,
-          alt:p.name||`Waypoint ${i+1}`,
+          title:p.name||textForUI("ui.map.messageWaypoint",{value1:(String(i+1))}),
+          alt:p.name||textForUI("ui.map.messageWaypoint",{value1:(String(i+1))}),
           icon: L.divIcon({
             className: "waypoint-pin",
             html: String(i + 1),
             iconSize: [28, 28],
           }),
         }).addTo(this.points);
-        m.bindTooltip(label(p.name || `Waypoint ${i + 1}`));
+        m.bindTooltip(label(p.name || localizedCopy("ui.map.messageWaypoint",{value1:(String(i + 1))})));
         m.on("click",e=>{this.L.DomEvent.stopPropagation(e);this.options.onWaypointSelect?.(i);});
         m.on("dragend", () => {
           const q = m.getLatLng();
@@ -587,10 +586,10 @@ export class ResearchMap {
           )
           .addTo(this.markers);
       for (const p of (d.samples || []).filter(valid))
-        L.circleMarker(ll(p, base), { radius: 2, color: "#a4bdf3" }).bindTooltip(label(`${p.instrumentId||"Scientific"} successful sample · ${p.timestampUtc||""}`)).addTo(
+        L.circleMarker(ll(p, base), { radius: 2, color: "#a4bdf3" }).bindTooltip(label(localizedCopy("ui.map.messageSuccessfulSample",{value1:(String(p.instrumentId||"Scientific")),value2:(String(p.timestampUtc||""))}))).addTo(
           this.samples,
         );
-      for(const f of d.footprints||[])if(f.vertices?.length>=3&&f.vertices.every(valid))L.polygon(f.vertices.map(p=>ll(p,base)),{color:"#a4bdf3",weight:1,fillOpacity:.07}).bindTooltip(label(f.label||"Derived scientific sampling footprint")).addTo(this.footprints);
+      for(const f of d.footprints||[])if(f.vertices?.length>=3&&f.vertices.every(valid))L.polygon(f.vertices.map(p=>ll(p,base)),{color:"#a4bdf3",weight:1,fillOpacity:.07}).bindTooltip(label(f.label||localizedCopy("ui.map.messageDerivedScientificSamplingFootprint"))).addTo(this.footprints);
     }
     if (valid(d.aircraft)) {
       if (!this.aircraftMarker)
@@ -601,7 +600,7 @@ export class ResearchMap {
             iconSize: [24, 24],
           }),
         })
-          .bindTooltip(this.options.aircraftLabel||"Live aircraft")
+          .bindTooltip(()=>presentationTooltip(this.options.aircraftLabel||textForUI("ui.map.messageLiveAircraft")))
           .addTo(this.aircraft);
       else this.aircraftMarker.setLatLng(ll(d.aircraft, base));
     } else if (this.aircraftMarker) {
@@ -620,16 +619,11 @@ export class ResearchMap {
         this.areas.addLayer(poly);
       }
     }
-    this.coordinate.textContent =
-      (this.layerError ? this.layerError + " " : "") +
+    setPresentationText(this.coordinate,localizedCopy("ui.map.messageGoldPlannedTurquoiseRecorded",{value1:(String((this.layerError ? this.layerError + " " : "") +
       (this.onlineTiles.length
         ? "Online basemap with bundled geographic reference"
-        : "Offline Natural Earth geography") +
-      " · Gold: planned · Turquoise: recorded · Pink: markers · Wheel/pinch to zoom. " +
-      (this.initialized ? "" : "No location selected: regional default USA. ") +
-      (this.onPoint
+        : "Offline Natural Earth geography"))),value2:(String(this.initialized ? "" : "No location selected: regional default USA. ")),value3:(String(this.onPoint
         ? "Choose Add Waypoint or Draw Survey Area to edit; pan normally otherwise. "
-        : "") +
-      "Mercator display ends at ±85.0511°; WGS84 coordinates and exports retain polar positions. Offline geography is coarse. Airport search: OurAirports (public domain), a non-authoritative snapshot; verify current operational information.";
+        : ""))}));
   }
 }

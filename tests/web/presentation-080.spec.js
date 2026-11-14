@@ -17,14 +17,15 @@ test('Auto follows system changes, explicit theme persists, and presentation cho
   await theme.selectOption('auto');await expect(page.locator('html')).toHaveAttribute('data-resolved-theme','light');
   expect(writes).toEqual([]);
 });
-test('five named language previews use English safely, survive reload and recover from invalid browser preferences',async({page})=>{
+test('five named candidate languages translate safely, survive reload and recover from invalid browser preferences',async({page})=>{
   await page.goto('/#settings');await page.evaluate(()=>localStorage.setItem('unrelated-fixture','retain me'));
-  const language=page.getByLabel('Language',{exact:true});
+  const language=page.locator('#presentation-language');
   await expect(language.locator('option')).toHaveCount(5);
-  for(const [locale,name] of [['es-ES','Español'],['fr-FR','Français'],['de-DE','Deutsch'],['pt-BR','Português (Brasil)']]){
-    await language.selectOption(locale);await expect(page.locator('html')).toHaveAttribute('lang','en-US');
-    await expect(page.locator('.presentation-settings [role=status]')).toContainText(name+' preview uses English');
-    await expect(page.getByRole('link',{name:'Missions',exact:true})).toBeVisible();await expect(page.locator('#missions-workspace').getByRole('link',{name:'My Research',exact:true,includeHidden:true})).toBeAttached();
+  for(const [locale,name,missions] of [['es-ES','Español','Misiones'],['fr-FR','Français','Missions'],['de-DE','Deutsch','Missionen'],['pt-BR','Português (Brasil)','Missões']]){
+    await language.focus();await language.selectOption(locale);await expect(page.locator('html')).toHaveAttribute('lang',locale);await expect(page.locator('html')).toHaveAttribute('data-locale-review','candidate');
+    await expect(language.locator('option:checked')).toContainText(name);await expect(page.locator('.presentation-settings [role=status]')).not.toHaveText('');
+    await expect(page.getByRole('link',{name:missions,exact:true})).toBeVisible();await expect(language).toBeFocused();
+    await expect(page.locator('#missions-workspace a[href="#my-research"]')).toBeAttached();
   }
   await page.reload();await expect(language).toHaveValue('pt-BR');
   expect(await page.evaluate(()=>localStorage.getItem('unrelated-fixture'))).toBe('retain me');

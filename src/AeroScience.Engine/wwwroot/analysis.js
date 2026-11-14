@@ -1,19 +1,21 @@
+import {message as localizedCopy,setPresentationText} from './i18n.js';
+import {t as textForUI} from './i18n.js';
 import { displayReading, planningField, planningDistance } from "./science-display.js";
 const el = (tag, value) => {
   const e = document.createElement(tag);
-  if (value !== undefined) e.textContent = value;
+  if (value !== undefined) setPresentationText(e,value);
   return e;
 };
 export async function renderAnalysis(parent, id, plan, api) {
   const panel = el("details");
   panel.className = "panel research-panel";
-  panel.append(el("summary", "Mission Analysis · Planned vs recorded flight"));
+  panel.append(el("summary", localizedCopy("ui.analysis.messageMissionAnalysisPlannedVsRecordedFlight")));
   parent.append(panel);
   if (!plan) {
     panel.append(
       el(
         "p",
-        "This mission has no saved plan snapshot. Its original track and science observations remain available below.",
+        localizedCopy("ui.analysis.messageThisMissionHasNoSavedPlanSnapshot"),
       ),
     );
     return;
@@ -32,16 +34,16 @@ export async function renderAnalysis(parent, id, plan, api) {
     return e;
   };
   const tolerance = input(
-      "Waypoint tolerance (m)",
+      localizedCopy("ui.analysis.messageWaypointToleranceM"),
       data.settings.waypointToleranceMetres,
     ),
     gap = input(
-      "Maximum connected telemetry gap (s)",
+      localizedCopy("ui.analysis.messageMaximumConnectedTelemetryGapS"),
       data.settings.maximumGapSeconds,
     );
-  planningField(tolerance,"distance",data.settings.waypointToleranceMetres,"Waypoint tolerance");
+  planningField(tolerance,"distance",data.settings.waypointToleranceMetres,localizedCopy("ui.analysis.messageWaypointTolerance"));
   gap.min = 1;
-  const refresh = el("button", "Recompute comparison");
+  const refresh = el("button", localizedCopy("ui.analysis.messageRecomputeComparison"));
   refresh.className = "secondary";
   refresh.type = "button";
   grid.append(refresh);
@@ -65,7 +67,7 @@ export async function renderAnalysis(parent, id, plan, api) {
   panel.append(
     el(
       "p",
-      `Planned route: ${distance(data.plannedDistanceMetres)} · Recorded connected track: ${distance(data.recordedDistanceMetres)} · Excluded gaps: ${data.excludedGaps}`,
+      localizedCopy("ui.analysis.messagePlannedRouteRecordedConnectedTrack",{value1:(String(distance(data.plannedDistanceMetres))),value2:(String(distance(data.recordedDistanceMetres))),value3:(String(data.excludedGaps))}),
     ),
   );
   const stats = data.deviationStatistics;
@@ -73,24 +75,24 @@ export async function renderAnalysis(parent, id, plan, api) {
     panel.append(
       el(
         "p",
-        `Lateral route deviation: mean ${stats.meanMetres == null ? "Unavailable" : distance(stats.meanMetres)} · maximum ${stats.maximumMetres == null ? "Unavailable" : distance(stats.maximumMetres)} · ${stats.samples} observed positions.`,
+        localizedCopy("ui.analysis.messageLateralRouteDeviationMeanMaximum",{value1:(String(stats.meanMetres == null ? "Unavailable" : distance(stats.meanMetres))),value2:(String(stats.maximumMetres == null ? "Unavailable" : distance(stats.maximumMetres))),value3:(String(stats.samples))}),
       ),
     );
   for (const segment of data.segments || [])
     panel.append(
       el(
         "p",
-        `Segment ${segment.index + 1}: ${segment.from} → ${segment.to} · ${segment.observedWithinTolerance ? "Recorded path observed within tolerance" : "Completion not established"} · ${segment.samples} positions · ${segment.excludedGaps} excluded gaps${segment.maximumDeviationMetres == null ? "" : " · max deviation " + distance(segment.maximumDeviationMetres)}`,
+        localizedCopy("ui.analysis.messageSegmentPositions",{value1:(String(segment.index + 1)),value2:(String(segment.from)),value3:(String(segment.to)),value4:(String(segment.observedWithinTolerance ? "Recorded path observed within tolerance" : "Completion not established")),value5:(String(segment.samples)),value6:(String(segment.excludedGaps)),value7:(String(segment.maximumDeviationMetres == null ? "" : " · max deviation " + distance(segment.maximumDeviationMetres)))}),
       ),
     );
   const table = el("table"),
     head = el("tr");
   for (const h of [
-    "Waypoint",
-    "Ordered visit",
-    "Closest observed proximity",
-    "Reached UTC",
-    "Altitude error",
+    textForUI("ui.analysis.messageWaypoint"),
+    textForUI("ui.analysis.messageOrderedVisit"),
+    textForUI("ui.analysis.messageClosestObservedProximity"),
+    textForUI("ui.analysis.messageReachedUTC"),
+    textForUI("ui.analysis.messageAltitudeError"),
   ])
     head.append(el("th", h));
   table.append(head);
@@ -98,9 +100,9 @@ export async function renderAnalysis(parent, id, plan, api) {
     const row = el("tr");
     for (const value of [
       w.name,
-      w.reached ? "Observed in sequence" : "Not observed in sequence",
+      w.reached ? textForUI("ui.analysis.messageObservedInSequence") : textForUI("ui.analysis.messageNotObservedInSequence"),
       w.closestDistanceMetres == null
-        ? "Unavailable"
+        ? textForUI("localization.unavailableValue")
         : distance(w.closestDistanceMetres),
       w.reachedUtc || "—",
       w.altitudeErrorFeet == null
@@ -122,12 +124,12 @@ export async function renderAnalysis(parent, id, plan, api) {
     panel.append(
       el(
         "p",
-        `${area.name}: ${area.samplesInside} observed positions inside · ${distance(area.traversedMetres)} recorded path inside. ${area.coverageExplanation}`,
+        localizedCopy("ui.analysis.messageObservedPositionsInsideRecorded",{value1:(String(area.name)),value2:(String(area.samplesInside)),value3:(String(distance(area.traversedMetres))),value4:(String(area.coverageExplanation))}),
       ),
     );
   const diagnostic = el("details");
   diagnostic.append(
-    el("summary", "Methods, limitations and deviation observations"),
+    el("summary", localizedCopy("ui.analysis.messageMethodsLimitationsAndDeviationObservations")),
   );
   for (const text of data.limitations) diagnostic.append(el("p", text));
   for (const row of data.deviations.filter(
@@ -136,11 +138,11 @@ export async function renderAnalysis(parent, id, plan, api) {
     diagnostic.append(
       el(
         "p",
-        `${row.timestampUtc} · segment ${row.segment + 1} · ${distance(row.distanceMetres)} route deviation`,
+        localizedCopy("ui.analysis.messageSegmentRouteDeviation",{value1:(String(row.timestampUtc)),value2:(String(row.segment + 1)),value3:(String(distance(row.distanceMetres)))}),
       ),
     );
   panel.append(diagnostic);
-  const download = el("button", "Export comparison JSON");
+  const download = el("button", localizedCopy("ui.analysis.messageExportComparisonJSON"));
   download.type = "button";
   download.className = "secondary";
   download.onclick = () => {

@@ -1,6 +1,7 @@
+import {message as localizedCopy,setPresentationText} from './i18n.js';
 import {node,link,button,status} from './workstation-ui.js';
 import {homePresentation} from './home-state.js';
-import {t} from './i18n.js';
+import {t as textForUI,t} from './i18n.js';
 
 // Owns only bounded GETs while visible. Recording/science/selection controllers
 // remain in their original views. The application's single SSE supplies identity.
@@ -8,8 +9,8 @@ export function homeDashboard(root,api,{snapshot,draft}) {
   let disposed=false, busy=false, controller, planController, generation=0, selectionId, planGeneration=0;
   let data={archive:[],archiveStatus:'loading',planStatus:'loading'}, historyAt=0, historyKey='', pollAt=0;
   root.replaceChildren();
-  const label=(tag,key,className)=>{const value=node(tag,t(key),className);value.dataset.i18n=key;return value;};
-  const heading=node('header',undefined,'page-heading'), title=node('h1',t('nav.home'));
+  const label=(tag,key,className)=>{const value=node(tag,localizedCopy(key),className);value.dataset.i18n=key;return value;};
+  const heading=node('header',undefined,'page-heading'), title=node('h1',localizedCopy('nav.home'));
   title.dataset.i18n='nav.home';heading.append(title,label('p','home.intro','subtitle'));root.append(heading);
   const grid=node('div',undefined,'home-grid');root.append(grid);
   const hero=node('section',undefined,'panel home-next');hero.setAttribute('aria-labelledby','home-next-title');
@@ -25,50 +26,50 @@ export function homeDashboard(root,api,{snapshot,draft}) {
   const saved=node('p');health.append(saved);grid.append(health);
   const warning=status(root);warning.classList.add('home-warning');root.insertBefore(warning,grid);
   const preparation=node('section',undefined,'panel home-preparation');preparation.append(label('h2','home.preparation'));
-  const prepared=node('p'),draftText=node('p');preparation.append(prepared,draftText);link(preparation,t('home.choose'),'#missions').dataset.i18n='home.choose';root.append(preparation);
+  const prepared=node('p'),draftText=node('p');preparation.append(prepared,draftText);link(preparation,localizedCopy('home.choose'),'#missions').dataset.i18n='home.choose';root.append(preparation);
   const results=node('section',undefined,'panel home-results');results.setAttribute('aria-labelledby','home-results-title');
   const recentTitle=label('h2','home.recent');recentTitle.id='home-results-title';results.append(recentTitle,label('p','home.resultsMeaning'));
-  const archiveStatus=status(results),list=node('ul',undefined,'home-recent');results.append(list);link(results,t('home.allResults'),'#results').dataset.i18n='home.allResults';root.append(results);
-  const tools=node('nav',undefined,'home-tools');tools.setAttribute('aria-label',t('home.tools'));
+  const archiveStatus=status(results),list=node('ul',undefined,'home-recent');results.append(list);link(results,localizedCopy('home.allResults'),'#results').dataset.i18n='home.allResults';root.append(results);
+  const tools=node('nav',undefined,'home-tools');setPresentationText(tools,localizedCopy('home.tools'),"aria-label");
   tools.dataset.i18nAriaLabel='home.tools';
-  link(tools,t('home.organizations'),'#organizations','button tertiary').dataset.i18n='home.organizations';link(tools,t('nav.library'),'#library','button tertiary').dataset.i18n='nav.library';
-  const refreshButton=button(tools,t('home.refresh'),()=>refresh(true),'tertiary');refreshButton.dataset.i18n='home.refresh';root.append(tools);
+  link(tools,localizedCopy('home.organizations'),'#organizations','button tertiary').dataset.i18n='home.organizations';link(tools,localizedCopy('nav.library'),'#library','button tertiary').dataset.i18n='nav.library';
+  const refreshButton=button(tools,localizedCopy('home.refresh'),()=>refresh(true),'tertiary');refreshButton.dataset.i18n='home.refresh';root.append(tools);
   const active=()=>!disposed && !!root.offsetParent && !document.hidden;
   function paint(){
     if(!active())return;
     const model=homePresentation({...data,archiveStatus:data.archiveStatus==='available' && Date.now()-historyAt>12000 ? 'unavailable' : data.archiveStatus,snapshot:snapshot(),draft:draft()});
     root.dataset.homeState=model.next;
-    nextTitle.textContent=t('home.nextTitle.'+model.next);detail.textContent=t('home.nextDetail.'+model.next);
-    primary.textContent=t('home.action.'+model.next);
+    setPresentationText(nextTitle,localizedCopy('home.nextTitle.'+model.next));setPresentationText(detail,localizedCopy('home.nextDetail.'+model.next));
+    setPresentationText(primary,localizedCopy('home.action.'+model.next));
     primary.href={active:'#flight',draft:'#planner',plan:'#operations',idle:'#missions',connect:'#help?guide=v0.4.1-windows-testing.md',unavailable:'#help?guide=v0.4.1-windows-testing.md'}[model.next];
     if(model.next==='plan')primary.href='#missions/prepare?researchPlan='+encodeURIComponent(model.selectionId);
-    connection.textContent=t('home.connection.'+model.connection);
-    source.textContent=t(model.source==='simulated' ? 'home.synthetic' : model.source==='simulator' ? 'home.simulator' : 'home.sourceUnknown');
-    identity.textContent=model.activeFlight ? t('home.activeName',{name:model.activeFlight.name}) : model.aircraft || '';
-    recording.textContent=t('recording.'+model.recording);
-    science.textContent=t('home.science.'+model.science);
-    saved.textContent=model.counts ? t('home.retained',{original:model.counts.originalObservations,derived:model.counts.derivedObservations,products:model.counts.remoteProducts})
-      : t(model.recording==='inactive' ? 'home.noActiveCounts' : 'home.countsUnknown');
+    setPresentationText(connection,localizedCopy('home.connection.'+model.connection));
+    setPresentationText(source,localizedCopy(model.source==='simulated' ? 'home.synthetic' : model.source==='simulator' ? 'home.simulator' : 'home.sourceUnknown'));
+    setPresentationText(identity,model.activeFlight ? localizedCopy('home.activeName',{name:model.activeFlight.name}) : model.aircraft || '');
+    setPresentationText(recording,localizedCopy('recording.'+model.recording));
+    setPresentationText(science,localizedCopy('home.science.'+model.science));
+    setPresentationText(saved,model.counts ? localizedCopy('home.retained',{original:model.counts.originalObservations,derived:model.counts.derivedObservations,products:model.counts.remoteProducts})
+      : localizedCopy(model.recording==='inactive' ? 'home.noActiveCounts' : 'home.countsUnknown'));
     const warnings=[];
     if(model.recordingStop)warnings.push(t('home.recordingStopped',{code:model.recordingStop.code,message:model.recordingStop.message}));
     if(!model.fresh)warnings.push(t('home.stale'));
     else if(model.activeFlight && model.connection!=='connected')warnings.push(t('home.telemetryWarning'));
     if(model.collectionIssue)warnings.push(t('home.collectionWarning'));
     if(model.planUnavailable)warnings.push(t('home.planUnavailable'));
-    warning.textContent=warnings.join(' ');warning.hidden=!warnings.length;
-    prepared.textContent=model.selectedPlan ? t('home.selectedName',{name:model.selectedPlan.name})
-      : model.selectionId ? t(model.planUnavailable ? 'home.planUnavailable' : 'home.planLoading') : t('home.noPlan');
-    draftText.textContent=model.draft ? t('home.draftName',{name:model.draft.name || t('home.unnamedDraft')}) : '';
+    setPresentationText(warning,warnings.join(' '));warning.hidden=!warnings.length;
+    setPresentationText(prepared,model.selectedPlan ? localizedCopy('home.selectedName',{name:model.selectedPlan.name})
+      : model.selectionId ? localizedCopy(model.planUnavailable ? 'home.planUnavailable' : 'home.planLoading') : localizedCopy('home.noPlan'));
+    setPresentationText(draftText,model.draft ? localizedCopy('home.draftName',{name:model.draft.name || t('home.unnamedDraft')}) : '');
     draftText.hidden=!model.draft;
-    archiveStatus.textContent=t(model.archiveStatus==='available' ? model.results.length ? 'home.archiveAvailable' : 'home.archiveEmpty'
-      : model.archiveStatus==='loading' ? 'common.loadingSavedResults' : 'home.archiveUnavailable');
+    setPresentationText(archiveStatus,localizedCopy(model.archiveStatus==='available' ? model.results.length ? 'home.archiveAvailable' : 'home.archiveEmpty'
+      : model.archiveStatus==='loading' ? 'common.loadingSavedResults' : 'home.archiveUnavailable'));
     const key=JSON.stringify(model.results);
     if(key!==historyKey){
       historyKey=key;list.replaceChildren();
       for(const row of model.results.slice(0,3)){
-        const item=node('li'),info=node('div');info.append(node('h3',row.name),node('p',t('home.resultStatus.'+row.status)));
-        const date=node('time');date.dateTime=row.startedUtc || '';date.textContent=Number.isFinite(Date.parse(row.startedUtc)) ? new Date(row.startedUtc).toLocaleString() : t('common.unknown');info.append(date);item.append(info);
-        link(item,t('home.reviewNamed',{name:row.name}),'#operations?flight='+encodeURIComponent(row.id));list.append(item);
+        const item=node('li'),info=node('div');info.append(node('h3',row.name),node('p',localizedCopy('home.resultStatus.'+row.status)));
+        const date=node('time');date.dateTime=row.startedUtc || '';setPresentationText(date,Number.isFinite(Date.parse(row.startedUtc)) ? new Date(row.startedUtc).toLocaleString() : localizedCopy('common.unknown'));info.append(date);item.append(info);
+        link(item,localizedCopy('home.reviewNamed',{name:row.name}),'#operations?flight='+encodeURIComponent(row.id));list.append(item);
       }
     }
   }
@@ -80,7 +81,7 @@ export function homeDashboard(root,api,{snapshot,draft}) {
     const readController=planController,timeout=setTimeout(()=>readController.abort(),6000),signal=readController.signal;
     try{const plan=await api('/api/plans/'+encodeURIComponent(id),undefined,{signal});
       if(disposed || own!==planGeneration)return;
-      if(plan?.id!==id)throw Error('Mismatched plan.');data.plan=plan;data.planStatus='available';
+      if(plan?.id!==id)throw Error(textForUI("ui.home.messageMismatchedPlan"));data.plan=plan;data.planStatus='available';
     }catch{if(!disposed && own===planGeneration)data.planStatus='unavailable';}
     finally{clearTimeout(timeout);}
     paint();
@@ -96,7 +97,7 @@ export function homeDashboard(root,api,{snapshot,draft}) {
       if(valid()){data.intelligence=value;data.failed=false;loadPlan();paint();}
     }).catch(()=>{if(valid()){data.failed=true;paint();}});
     const history=force || Date.now()-historyAt>10000 ? api('/api/missions?limit=4&offset=0&sort=newest',undefined,{signal:controller.signal}).then(value=>{
-      if(!Array.isArray(value))throw Error('Invalid archive response.');
+      if(!Array.isArray(value))throw Error(textForUI("ui.home.messageInvalidArchiveResponse"));
       if(valid()){data.archive=value;data.archiveStatus='available';historyAt=Date.now();paint();}
     }).catch(()=>{if(valid()){data.archiveStatus='unavailable';data.archive=[];paint();}}) : Promise.resolve();
     await Promise.allSettled([intelligence,history]);

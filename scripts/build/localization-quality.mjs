@@ -3,6 +3,10 @@ import {createHash} from 'node:crypto';
 
 export const sourceFingerprint=messages=>createHash('sha256').update(JSON.stringify(Object.fromEntries(Object.keys(messages).sort().map(key=>[key,messages[key]])))).digest('hex');
 export const messageFingerprint=message=>createHash('sha256').update(JSON.stringify(message)).digest('hex');
+export function preservedTokens(text){
+ const tokens=['AeroScience','MSFS','NASA','AVIRIS','EMIT','DEM','DSM','LiDAR','LAS','LAZ','COPC','EPT','GeoTIFF','SHA-256','UTC','ICAO','IATA','NoData','NDVI','NDWI','NDMI','NIR','CRS','EPSG','GDAL','MSL','AGL','IAS','TAS','Hz','kHz','MHz','KiB','MiB','GiB','TiB','°C','°F','µm','μm','m²','m³','m/s','ft/min','kts','ft','km'];
+ return tokens.filter(token=>new RegExp('(^|[^A-Za-z0-9])'+token.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'(?=$|[^A-Za-z0-9])').test(text));
+}
 export function strictJson(source,name='catalog'){
  const value=JSON.parse(source),ast=parse('('+source+')',{ecmaVersion:2022});
  function visit(n){if(!n||typeof n!=='object')return;if(n.type==='ObjectExpression'){const keys=new Set();for(const p of n.properties){const key=p.key.value??p.key.name;if(keys.has(key))throw Error('Duplicate JSON key in '+name+': '+key);keys.add(key);}}
@@ -29,6 +33,7 @@ export function validateQuality({manifest,schema,catalogs}){
    for(const text of typeof message==='string'?[message]:Object.values(message||{})){
     require(typeof text==='string'&&validUnicode(text),'Malformed Unicode/control character: '+locale+'/'+key);
     require(typeof text==='string'&&[...text].length<=(rule.maximumLength||4096),'Message exceeds declared text limit: '+locale+'/'+key);
+    if(typeof text==='string'&&locale!=='en-US')for(const token of rule.preservedTokens||[])require(text.includes(token),'Changed scientific identifier/unit: '+locale+'/'+key+'/'+token);
    }
    if(locale!=='en-US'){
     const identical=JSON.stringify(message)===JSON.stringify(english.messages[key]),allowed=typeof rule.sameTextAllowed?.[locale]==='string'&&rule.sameTextAllowed[locale].trim().length>10;
