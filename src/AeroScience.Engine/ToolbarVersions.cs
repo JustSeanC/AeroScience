@@ -71,6 +71,7 @@ public static class ToolbarVersions
         try
         {
             using var data=JsonDocument.Parse(File.ReadAllText(Path.Combine(folder,"html_ui","InGamePanels",profile.ToolbarFolder,"toolbar-compatibility.json")));
+            if(profile.Native080&&(!data.RootElement.TryGetProperty("validationInstance",out var instance)||instance.GetString()!=profile.Instance))return null;
             return data.RootElement.GetProperty("profile").GetString()=="validation"?data.RootElement.GetProperty("sourceCommit").GetString():null;
         }
         catch(Exception error)when(error is IOException or UnauthorizedAccessException or JsonException or InvalidOperationException or KeyNotFoundException){return null;}

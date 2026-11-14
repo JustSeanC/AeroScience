@@ -213,6 +213,8 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
       - uses: actions/setup-dotnet@v6
         with:
           global-json-file: global.json
@@ -256,6 +258,10 @@ jobs:
         run: |
           dotnet run --project tests/AeroScience.TestHost -c Release --no-restore -- --earthdata-vault-probe
           if ($LASTEXITCODE -ne 0) { throw 'Windows Earthdata credential protection/isolation failed.' }
+      - name: Compile separate 0.8 private profile and check retained genuine LAZ (no SDK or installed acceptance)
+        shell: pwsh
+        run: |
+          ./scripts/build/Publish-080ValidationCompanion.ps1 -ExpectedSourceCommit $env:GITHUB_SHA -Instance ([Guid]::NewGuid().ToString('N')) -ArtifactsPath (Join-Path $PWD 'artifacts/native080-structural/intermediate') -OutputDirectory (Join-Path $PWD 'artifacts/native080-structural/app')
       - name: Verify dependency locks remain unchanged
         if: always()
         shell: pwsh
@@ -270,6 +276,9 @@ jobs:
           path: |
             tests/AeroScience.Tests/TestResults/**/*.trx
             tests/AeroScience.Tests/TestResults/**/Sequence_*.xml
+            artifacts/native080-structural/app/compiled-profile.json
+            artifacts/native080-structural/app/lidar-check.json
+            artifacts/native080-structural/app/LidarRuntime/build.json
             src/AeroScience.Missions/obj/native-lidar/**/build.json
           if-no-files-found: ignore
           retention-days: 7

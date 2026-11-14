@@ -51,6 +51,8 @@ if (args.Length > 0 && args[0] == "--earthdata-vault-probe")
     }finally{first.Clear();isolated.Clear();organizations.Remove(firstOrganization);organizations.Remove(secondOrganization);organizationProfile.Remove(firstOrganization);organizations.RemoveOwnerKey(firstOrganization);organizationProfile.RemoveOwnerKey(firstOrganization);}
     return;
 }
+if(args.Length==4&&args[0]=="--profile-probe-080")
+{ Native080ProfileProbe.Run(args[1],args[2],args[3]);return; }
 if (args.Length > 0 && args[0] == "--profile-probe")
 {
     var profile=ApplicationProfile.Current;

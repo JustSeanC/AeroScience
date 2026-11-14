@@ -1,0 +1,120 @@
+{
+  "baseline": "d50b3ea9c50e5e6e561aa77b2daaac4ad0864e5f",
+  "platform": "Linux x64",
+  "targeted": {
+    "dotnet": {
+      "initial": 13,
+      "expandedNativeLidarToolbar": 49,
+      "finalProfilePresentationToolbar": 45,
+      "overlap": "Selections overlap; do not sum. All zero failed/skipped."
+    },
+    "python": {
+      "p08b": 15,
+      "legacyPrivateValidation": 10,
+      "publicPackaging": 21,
+      "failed": 0,
+      "skipped": 0
+    },
+    "javascript": {
+      "presentation": 66,
+      "nativeClassicES2017": 4
+    },
+    "browser": {
+      "first": {
+        "passed": 17,
+        "failed": 1,
+        "reason": "Playwright toBeDisabled does not recognize the SDK custom new-push-button; disabled attribute already present."
+      },
+      "followup": {
+        "passed": 1,
+        "failed": 0,
+        "assertions": "SDK disabled attribute and actual forced-click no-command guard, source/attempt/1024-byte channels/reopen; existing assertions unchanged."
+      },
+      "distinctValidated": 18
+    },
+    "compiledPrivateGraph": "Locked restore and actual isolated 0.8 assembly metadata/embedded seven-resource probe passed on Linux; explicitly not Windows acceptance. Injected fixture source metadata at uncommitted development time is not a package receipt.",
+    "genuineRetainedLaz": {
+      "platform": "Linux",
+      "source_sha256": "68c4b0ed247501a15d020d9a758d0345904f38785235732bd8e3386a3fca71c1",
+      "metadata_sha256": "c33bff450876950e5fdc2e3c80ba2383fbfa2ea7f888529cdbce87dcaefff4bc",
+      "reference_sha256": "2169c84ab1187c7b9124546e51492f6e90e3d1356cbc1cefb1949062da05cadd",
+      "points": 34923,
+      "raw_protocol_sha256": "bedf4986d31ef0874e7dd380532094f5dc2056a3b0d269afeadd621725ad9eef",
+      "source": "Retained IA_FullState public historical EPT root tile; sparse delivered subset. Dates/vertical datum unknown. No current-provider or in-flight acquisition acceptance."
+    }
+  },
+  "preservedDiagnostics": "artifacts/p08b/focused-browser-first",
+  "files": [
+    {
+      "path": "artifacts/p08b/profile-tests.log",
+      "sha256": "4042fb23a7e1d70084065027af597a7bd799f351a734a2b65bacf08547d935ae",
+      "bytes": 1668
+    },
+    {
+      "path": "artifacts/p08b/native-targeted.log",
+      "sha256": "37e8add50f19a53babd00da3b1a5afebaad53a0d6168f2f14a6e7688d267525b",
+      "bytes": 1673
+    },
+    {
+      "path": "artifacts/p08b/final-profile-tests.log",
+      "sha256": "b90e1cae7f78a7072d96cba5ac137718fbdf54a2a0da4b2a8af3bee316b03daf",
+      "bytes": 1671
+    },
+    {
+      "path": "artifacts/p08b/tooling-verified.log",
+      "sha256": "c1d002a91a3ccabe0070d0dc5da34705c789aaa6d6a2dd1e26d94aedc37f2898",
+      "bytes": 3132
+    },
+    {
+      "path": "artifacts/p08b/legacy-validation.log",
+      "sha256": "3c0d0cf550c1e7248267c8c1db20b4fe52c3350aa4e0de1690e953901b8f38ab",
+      "bytes": 1993
+    },
+    {
+      "path": "artifacts/p08b/public-packaging.log",
+      "sha256": "79e4505a57806c8ae40605807300bfc406f466550a7dbf5b3f9339f8296b6aa7",
+      "bytes": 3538
+    },
+    {
+      "path": "artifacts/p08b/web-checks.log",
+      "sha256": "42da6fe7d4cb7f57c153d7cb988d14321a691f7b8ec3e97563a4872a8f8f8390",
+      "bytes": 48608
+    },
+    {
+      "path": "artifacts/p08b/browser-targeted.log",
+      "sha256": "7c21985c8eae46a79f1ffcf2e99fecd9e596986f3506128a938c3c287830279c",
+      "bytes": 6201
+    },
+    {
+      "path": "artifacts/p08b/browser-080-followup.log",
+      "sha256": "b8c8e3621271cd9704b3006e77bae6f75b214b72634093dea056b91ec081fbd9",
+      "bytes": 392
+    },
+    {
+      "path": "artifacts/p08b/locked-private-restore.log",
+      "sha256": "5e9363b3fc026f2f7e150ffdce05ba963ba78de80dc6842a0058f241d4bfed75",
+      "bytes": 916
+    },
+    {
+      "path": "artifacts/p08b/compiled-probe-build.log",
+      "sha256": "c7246ce6a47027f8c461e1fab09bf1d94bd340c89608b6967876f3c1e2dcae2e",
+      "bytes": 1491
+    },
+    {
+      "path": "artifacts/p08b/compiled-profile-linux-structural.json",
+      "sha256": "db0d8849d5573a89372a46b95acee194a6fa6b40b5f67638c984106ffb73137b",
+      "bytes": 1438
+    },
+    {
+      "path": "artifacts/p08b/retained-genuine-laz-linux.json",
+      "sha256": "852203479c95f343c00d3f867ce238ba2e4c877c3b6e98e1f3c508f6a3664edb",
+      "bytes": 586
+    }
+  ],
+  "fullCI": "Pending on the completed integrated source. No acceptance from a pending run.",
+  "installedWindows": "Not Tested",
+  "installedMSFS": "Not Tested",
+  "genuineOwnerSDKPackage": "Not Built",
+  "qualifiedHumanTranslationReview": "Pending",
+  "publicInstallerOrRelease": false
+}
