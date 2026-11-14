@@ -183,8 +183,13 @@ public sealed partial class OrganizationRecoveryEngine(OrganizationDatabase db,O
                 using var scope=validation.CreateScope();var context=scope.ServiceProvider.GetRequiredService<OrganizationDatabase>();var manager=scope.ServiceProvider.GetRequiredService<Microsoft.AspNetCore.Identity.UserManager<OrganizationUser>>();
                 if(!(await context.Database.GetAppliedMigrationsAsync(ct)).SequenceEqual(manifest.Migrations))throw new InvalidOperationException("The restored schema does not match its original manifest.");
                 for(var offset=0;;offset+=100){
-                    var administrators=await context.Users.Where(u=>u.TwoFactorEnabled).OrderBy(u=>u.Id).Skip(offset).Take(100).ToArrayAsync(ct);
-                    foreach(var admin in administrators)if(await manager.GetAuthenticatorKeyAsync(admin) is null)throw new InvalidOperationException("Restored MFA could not be decrypted with the paired identity.");
+                    // Verification must not materialize today's user entity against
+                    // an accepted older schema. ID and TwoFactorEnabled predate all
+                    // supported prefixes; preference columns may not exist yet.
+                    // The same protected token store still decrypts every enabled
+                    // user's real secret with the original paired key ring.
+                    var administrators=await context.Users.AsNoTracking().Where(u=>u.TwoFactorEnabled).OrderBy(u=>u.Id).Select(u=>u.Id).Skip(offset).Take(100).ToArrayAsync(ct);
+                    foreach(var id in administrators)if(await manager.GetAuthenticatorKeyAsync(new OrganizationUser{Id=id}) is null)throw new InvalidOperationException("Restored MFA could not be decrypted with the paired identity.");
                     if(administrators.Length<100)break;
                 }
                 // Older supported schema prefixes predate P27. Never invent or migrate their

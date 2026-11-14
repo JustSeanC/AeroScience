@@ -1,0 +1,157 @@
+{
+  "format": "aeroscience-p07-ci-remediation",
+  "version": 1,
+  "firstRun": {
+    "url": "https://github.com/JustSeanC/AeroScience/actions/runs/43586421201",
+    "source": "af3113247e513ca80fd616b1c225083f67200bd2",
+    "conclusion": "failure",
+    "jobResults": [
+      {
+        "name": "validation-scope",
+        "conclusion": "success",
+        "id": 132421788225
+      },
+      {
+        "name": "windows-companion",
+        "conclusion": "failure",
+        "id": 132421839886
+      },
+      {
+        "name": "organization-deployment",
+        "conclusion": "success",
+        "id": 132421839909
+      },
+      {
+        "name": "linux",
+        "conclusion": "failure",
+        "id": 132421840039
+      },
+      {
+        "name": "development",
+        "conclusion": "skipped",
+        "id": 132421840972
+      },
+      {
+        "name": "windows-profile",
+        "conclusion": "skipped",
+        "id": 132421841242
+      }
+    ],
+    "tests": [
+      {
+        "path": "artifacts/p07-full-ci/linux-diagnostics/tests/AeroScience.Tests/TestResults/_ip-10-0-141-119_2026-11-14_10_44_04_net10.0.trx",
+        "sha256": "ea3560e9040e6ffaaf1d85375c1c6d9bbaf89220f96f7f5398d37b359401c6ff",
+        "total": 1640,
+        "passed": 1638,
+        "failed": 2,
+        "skipped": 0,
+        "failedTests": [
+          "AeroScience.Tests.OrganizationConnectionIntegrationTests.ActualOldAndNewProcessesRefuseStaleCheckpointRollbackFailedUpgradeAndApplyExactApprovedPair",
+          "AeroScience.Tests.OrganizationConnectionIntegrationTests.FailedCompiledMigrationRollsBackSchemaWithoutLosingReceivedEvidenceIdentityAuditOrMfa"
+        ]
+      },
+      {
+        "path": "artifacts/p07-full-ci/windows-diagnostics/tests/AeroScience.Tests/TestResults/windows.trx",
+        "sha256": "61e4ae7d173cf54726a722fc98a3995d6642f9c5a2169197ff74b722d1d2f64d",
+        "total": 1640,
+        "passed": 1629,
+        "failed": 1,
+        "skipped": 10,
+        "failedTests": [
+          "AeroScience.Tests.OrganizationConnectionIntegrationTests.FailedCompiledMigrationRollsBackSchemaWithoutLosingReceivedEvidenceIdentityAuditOrMfa"
+        ]
+      }
+    ],
+    "retainedArtifacts": [
+      {
+        "id": 14110967193,
+        "name": "linux-test-diagnostics",
+        "sha256": "f9a97fb152fd6f3a49afd49a8a189b8d791d706a9530855534a8a14cb6fee76c"
+      },
+      {
+        "id": 14111121666,
+        "name": "windows-test-diagnostics",
+        "sha256": "18b0eff22cb3a538785ec6c3a221a44261f1a5324512efa02b47b1a16c413282"
+      }
+    ]
+  },
+  "unchangedP07dReproduction": {
+    "path": "artifacts/p07-full-ci/repro/p07-upgrade-repro.trx",
+    "sha256": "29d2b0d8bf7e758f160fdb96d83593728e30c99ba6a0188edb96275444c1eb93",
+    "total": 2,
+    "passed": 0,
+    "failed": 2,
+    "skipped": 0,
+    "failedTests": [
+      "AeroScience.Tests.OrganizationConnectionIntegrationTests.FailedCompiledMigrationRollsBackSchemaWithoutLosingReceivedEvidenceIdentityAuditOrMfa",
+      "AeroScience.Tests.OrganizationConnectionIntegrationTests.ActualOldAndNewProcessesRefuseStaleCheckpointRollbackFailedUpgradeAndApplyExactApprovedPair"
+    ]
+  },
+  "correction": "Stable ID projection for old-schema restore MFA verification; stable persisted identity-field projections in deliberate migration-rollback assertions. No backup migration, removed assertions, security bypass or timeout extension.",
+  "preservedChecks": [
+    "Original MFA secret decryption with paired key ring",
+    "Password and security stamp preservation",
+    "MFA remains enabled",
+    "Evidence and audit digests",
+    "Failed migration transaction rollback",
+    "Signed exact-source update identity",
+    "Stale checkpoint refusal",
+    "Idempotent exact-pair application"
+  ],
+  "correctedFixture": {
+    "format": "aeroscience-isolated-update-fixture",
+    "version": 1,
+    "oldSource": "2b4c9abc82862fd7040cdd0f9e1a6f0b75a6dd49",
+    "newSource": "af3113247e513ca80fd616b1c225083f67200bd2",
+    "copiedSourceSha256": "3ab9af13eaa7f8b5bb19f2e9cd2b1a7ad3cd5b1616df61353d59c22f41472c87",
+    "workingTreeDirty": true,
+    "newVersion": "0.7.1",
+    "syntheticFutureVersion": true,
+    "productionDistribution": false,
+    "registryIdentityVerified": false,
+    "cloudCalls": 0
+  },
+  "focusedCorrection": {
+    "path": "artifacts/p07-full-ci/correction/p07-upgrade-correction.trx",
+    "sha256": "8bd465fb0555b860cad1186df66a6b000b33dc4d8cf6f499b7947f68714c6d51",
+    "passed": 3,
+    "failed": 0,
+    "skipped": 0,
+    "tests": [
+      "AeroScience.Tests.OrganizationConnectionIntegrationTests.EncryptedOffProcessBackupRestoresAuthorizedEvidenceAuditAndProtectedMfaAfterSourceLoss",
+      "AeroScience.Tests.OrganizationConnectionIntegrationTests.ActualOldAndNewProcessesRefuseStaleCheckpointRollbackFailedUpgradeAndApplyExactApprovedPair",
+      "AeroScience.Tests.OrganizationConnectionIntegrationTests.FailedCompiledMigrationRollsBackSchemaWithoutLosingReceivedEvidenceIdentityAuditOrMfa"
+    ],
+    "filter": "FullyQualifiedName~FailedCompiledMigrationRollsBackSchema|FullyQualifiedName~ActualOldAndNewProcessesRefuse|FullyQualifiedName~EncryptedOffProcessBackupRestoresAuthorizedEvidenceAuditAndProtectedMfaAfterSourceLoss",
+    "receipt": {
+      "path": "artifacts/p07-full-ci/upgrade-correction.log",
+      "sha256": "34ecf7aa24046fc56d555719d39f6cbb759f8eec12b7ecbb17516611469cf562"
+    }
+  },
+  "localReceipts": [
+    {
+      "path": "artifacts/p07-full-ci/linux-43586421201.log",
+      "sha256": "30037eca2e54e0f381900dada9a494e165f7169d8feff5410d0dc42baf020079"
+    },
+    {
+      "path": "artifacts/p07-full-ci/windows-43586421201.log",
+      "sha256": "b1b370073e017c8df9d36cef3c886be7902ffac72281daacdda37b11a0a9fad2"
+    },
+    {
+      "path": "artifacts/p07-full-ci/upgrade-repro.log",
+      "sha256": "fc4a67c41f3f8656a69687a70148124eec89ab1494bf6d6b77f8aa417da362f8"
+    },
+    {
+      "path": "artifacts/p07-full-ci/update-fixture-prepare.log",
+      "sha256": "b4c9c78e8e69643131ef91bada4fc48509a07a5abbf21768f1403f3e3110425e"
+    },
+    {
+      "path": "artifacts/p07-full-ci/update-fixture-correction.log",
+      "sha256": "9d51658203a6d73e8e95d1a93b3c8c8dac7faea4614d001742311af9e805c456"
+    }
+  ],
+  "humanReview": "PENDING",
+  "installedWindows": "NOT TESTED",
+  "installedMSFS": "NOT TESTED",
+  "correctiveFullCI": "Pending exact-source run after corrective commit"
+}

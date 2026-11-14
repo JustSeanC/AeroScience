@@ -54,3 +54,9 @@ Keep **DEM** and **DSM** as distinct scientific abbreviations. Explain bare-eart
 - Review date and status (partial / complete for named scope):
 
 Human-review receipts are pending. Native Windows and installed MSFS receipts are separately Not Tested in this environment.
+
+## Remaining fluent-review attention
+
+Candidate catalogs still need sentence-level fluency review. Check geospatial *survey* wording in particular: German should use *Vermessung* for spatial acquisition, rather than the opinion-poll sense *Umfrage*. Check collection-process compounds versus retained dataset collections, instrument names, long consent disclosures and parameter placement in narrow controls. Automated placeholder, negation and identifier checks do not establish semantic fluency. These are release-review items, not evidence of approval.
+
+The current bundle identity covers all five candidate resources and fallback lists; record it as well as the canonical source identity in each reviewer receipt. Sampled bound-key counts include shared and cached DOM views and must not be interpreted as visible-UI coverage percentages.
