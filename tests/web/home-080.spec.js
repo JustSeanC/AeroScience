@@ -94,12 +94,12 @@ test('late replies after navigation cannot overwrite Home or archived flight con
   await expect(page).toHaveURL(/#results\?future=retain$/);await expect(home(page)).toBeHidden();await page.unroute('**/api/mission-intelligence');
   await page.goBack();await expect(home(page)).toBeVisible();await expect(home(page)).toHaveAttribute('data-home-state','idle');await expect(home(page).getByRole('heading',{name:'Home',exact:true})).toBeFocused();
 });
-test('Organizations is conditional and always discoverable without granting permission on navigation',async({page})=>{
+test('Organizations is always discoverable before connection without granting permission on navigation',async({page})=>{
   await page.route('**/api/organizations',r=>r.fulfill({json:{connections:[],vaultAvailable:false}}));await page.goto('/#home');
-  const nav=page.getByRole('navigation',{name:'Main navigation',exact:true});await expect(nav.getByRole('link',{name:'Organizations',exact:true})).toHaveCount(0);
+  const nav=page.getByRole('navigation',{name:'Main navigation',exact:true});await expect(nav.getByRole('link',{name:'Organizations',exact:true})).toBeVisible();expect(await nav.locator('a:not([hidden])').allTextContents()).toEqual(['Home','Missions','Current Flight','Results & History','Organizations']);
   const writes=[];page.on('request',r=>{if(r.method()!=='GET'&&r.url().includes('/api/organizations'))writes.push(r.url());});
   await home(page).getByRole('link',{name:'Connect or view organizations',exact:true}).click();await expect(page.locator('#research-organizations')).toBeVisible();await expect(page.locator('#research-organizations h2')).toBeFocused();
-  await expect(nav.getByRole('link',{name:'Missions',exact:true})).toHaveAttribute('aria-current','page');
+  await expect(nav.getByRole('link',{name:'Organizations',exact:true})).toHaveAttribute('aria-current','page');await expect(nav.getByRole('link',{name:'Missions',exact:true})).not.toHaveAttribute('aria-current','page');await expect(nav.locator('[aria-current=page]')).toHaveCount(1);
   await page.route('**/api/organizations',r=>r.fulfill({json:{connections:[{id:'synthetic',name:'Synthetic configured connection',origin:'https://example.invalid',expiresUtc:'2030-01-01T00:00:00Z',permission:'submitEvidence'}],vaultAvailable:false}}));
   await go(page,'#home');await go(page,'#organizations?future=keep');await expect(nav.getByRole('link',{name:'Organizations',exact:true})).toBeVisible();await expect(nav.getByRole('link',{name:'Organizations',exact:true})).toHaveAttribute('aria-current','page');await expect(page).toHaveURL(/future=keep&section=organizations$/);expect(writes).toEqual([]);
 });

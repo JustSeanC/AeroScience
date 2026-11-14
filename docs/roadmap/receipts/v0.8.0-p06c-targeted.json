@@ -5,7 +5,7 @@
     "passed": 94,
     "failed": 0,
     "skipped": 1,
-    "skipReason": "Existing Windows-only protected-identity certificate renewal case on Linux; installed Windows acceptance remains outstanding.",
+    "skipReason": "Existing RecoveryFact prerequisite guard: actual PostgreSQL/restic/pg_dump/pg_restore tools were not all configured for this focused local run. Not a Windows-only restriction. Full Linux milestone CI subsequently executed this case with zero skips.",
     "filter": "FullyQualifiedName~Live|FullyQualifiedName~Discord",
     "actualPostgreSQL": true,
     "controlledHttpsReceiver": true

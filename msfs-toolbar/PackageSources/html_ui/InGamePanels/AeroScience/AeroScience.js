@@ -781,7 +781,9 @@ class IngamePanelAeroScience extends TemplateElement {
     const selected=state?.cards.find(c=>c.card.id===this.researchFocusedCard);
     if(selected)this.focusedResearchSummary=selected.card.name+' | '+(selected.openAttempt?'Attempt recording':selected.active?'Active':'Inactive')+(selected.procedure?.nextPointId?' | Next point '+(selected.card.procedure?.points.find(p=>p.id===selected.procedure.nextPointId)?.conditions.testPoint.name||'on dashboard'):'');
     summary.textContent=!valid?this.state?.activeMission?'Research status unavailable.':'Personal research cards: prepare in the desktop Flight Planner.':(this.focusedResearchSummary?'Focused: '+this.focusedResearchSummary+'. ':'Research: ')+(state.activeCardCount??state.cards.filter(c=>c.active).length)+' active card(s)'+(state.activeCardNames?.length?' | '+state.activeCardNames.join('; '):'')+'.';
-    const signature=JSON.stringify([state?.flightId,state?.revision,this.researchOffset,valid,state?.canBeginAttempt,pending,this.researchFocusedCard]);
+    // A telemetry render can run after offset changes but before that page reply.
+    // Same-revision pages still carry distinct authoritative card identities.
+    const signature=JSON.stringify([state?.flightId,state?.revision,this.researchOffset,state?.cards?.map(item=>[item.card.id,item.card.revision]),state?.nextOffset,state?.pageSize,valid,state?.canBeginAttempt,pending,this.researchFocusedCard]);
     if(this.researchView===signature)return;this.researchView=signature;
     const focusCard=document.activeElement?.dataset?.researchCard,focusAction=document.activeElement?.dataset?.researchAction;
     host.textContent='';this.byId('as-research-previous').disabled=!valid||this.researchOffset===0;this.byId('as-research-next').disabled=!valid||state?.nextOffset==null;

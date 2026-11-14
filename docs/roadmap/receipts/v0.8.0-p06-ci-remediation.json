@@ -1,0 +1,132 @@
+{
+  "checkpoint": "P06 confirmed CI remediation",
+  "base": "11d3706ab340062753ef2b871b2f0c431b381268",
+  "firstFull": {
+    "url": "https://github.com/JustSeanC/AeroScience/actions/runs/43547941024",
+    "conclusion": "failure",
+    "linuxBackendPassed": 1636,
+    "linuxBackendSkipped": 0,
+    "windowsBackendPassed": 1626,
+    "windowsBackendSkipped": 10,
+    "browser": {
+      "passed": 485,
+      "failed": 3,
+      "skipped": 2,
+      "flaky": 0
+    },
+    "existingBrowserSkipNames": [
+      "approved originals provide local chart overlays, independent science, offline tiles and exact edition selection",
+      "unknown runtime is honest and chart inventory remains accessible at tablet width without altering saved data"
+    ],
+    "remainingLinuxHelpers": "Not run after browser failure"
+  },
+  "reproduction": {
+    "unchangedSourceThreeCases": {
+      "passed": 1,
+      "failed": 2
+    },
+    "controlledInterleavedActualPageReplyBeforeFix": {
+      "passed": 0,
+      "failed": 1
+    },
+    "sameControlledCaseAndOriginalMixedCaseAfterFix": {
+      "passed": 2,
+      "failed": 0
+    }
+  },
+  "fixes": [
+    "Initial HTML exposes the existing Organizations entry before connection-list responses; exact five-entry navigation, exclusive current destination, focus, retained parameters and no permission writes remain asserted.",
+    "Native render-cache signature includes authoritative card IDs/revisions and returned page bounds, so an intervening old-page telemetry redraw cannot suppress a same-revision confirmed page.",
+    "Original mixed-card labels/attempts, recording/science assertions, all protocol identity/revision/stale-response/byte limits remain unchanged. No tests disabled, no assertion removed, no timeouts increased."
+  ],
+  "targeted": {
+    "browserPassed": 70,
+    "browserFailed": 0,
+    "browserSkipped": 0,
+    "dotnetPassed": 9,
+    "dotnetFailed": 0,
+    "dotnetSkipped": 0,
+    "nativePassed": 4,
+    "presentationPassed": 38,
+    "originalWorkspaceNavigationAdditionalPassed": 2
+  },
+  "receipts": [
+    {
+      "path": "artifacts/p06-ci/linux-first.log",
+      "sha256": "12ed06378612d8f97b4c1f61db073a24efdede051e9b145de59323fcb3320389",
+      "bytes": 1584377
+    },
+    {
+      "path": "artifacts/p06-ci/p06-first-linux-browser-diagnostics.zip",
+      "sha256": "3a5009c4c12d96f770a0a8537024270b949f9684772a420cf48f4777c47c275a",
+      "bytes": 13305149
+    },
+    {
+      "path": "artifacts/p06-ci/first-browser/web-results.json",
+      "sha256": "0b2b5eae90b31edc2995378611fe5737a8f374e1265c0430cd274e37d4573d3c",
+      "bytes": 781450
+    },
+    {
+      "path": "artifacts/p06-ci/reproduce-first.log",
+      "sha256": "d91b9704ab7496fb509fc2a5138c488e32bcfaa982ada9faba5fc9cf4914ff23",
+      "bytes": 7451
+    },
+    {
+      "path": "artifacts/p06-ci/paging-regression-before.log",
+      "sha256": "70ebccc0812be29037543073c00dab096b432ecd6897aaf9045aab0a1d4d8b4b",
+      "bytes": 3510
+    },
+    {
+      "path": "artifacts/p06-ci/paging-before/web-results.json",
+      "sha256": "609aab4f7e1a85a20c5c7ec5fd13d393928e76062dedc770a6b332166236b7d3",
+      "bytes": 196313
+    },
+    {
+      "path": "artifacts/p06-ci/paging-after.log",
+      "sha256": "45824312c6cb5c95975617bc9adc0b58727d1658c7879b5adb305448bf6ba379",
+      "bytes": 563
+    },
+    {
+      "path": "artifacts/p06-ci/remediation-browser.log",
+      "sha256": "d28a179a913705ebd4228b1f5fc800bdf264610cc91797586705ca0dcf66b503",
+      "bytes": 10890
+    },
+    {
+      "path": "artifacts/p06-ci/remediation-web-results.json",
+      "sha256": "30508749fb030f981df992b0ce682480fac41515922adf3a87c8a996a8182008",
+      "bytes": 79894
+    },
+    {
+      "path": "artifacts/p06-ci/remediation-dotnet.log",
+      "sha256": "363244aecc7f1eb219be824af58df7e1fd009b1c8979ceaab9abda74669e5cff",
+      "bytes": 426
+    },
+    {
+      "path": "artifacts/p06-ci/remediation-dotnet/p06-remediation-toolbar.trx",
+      "sha256": "4af90b9febad4cdd9da674673f413ad3f4326dd4affacbe6130c05224d1a0428",
+      "bytes": 14067
+    },
+    {
+      "path": "artifacts/p06-ci/remediation-web-checks.log",
+      "sha256": "eb5add44210809fb11e1b4685054e07f056f0286e8714babacf3411cdaa43c04",
+      "bytes": 4982
+    },
+    {
+      "path": "artifacts/p06-ci/remediation-hosts.log",
+      "sha256": "a1c3f5476ff7b4f8e889607dab3ce4ba4db87301b41a523248a63357f9dff97d",
+      "bytes": 1808
+    },
+    {
+      "path": "artifacts/p06-ci/remediation-task-workspaces.log",
+      "sha256": "82c549da2616a45583b49a73696e9f8fec020f5f0b2ab3c1854137777566747e",
+      "bytes": 508
+    },
+    {
+      "path": "artifacts/p06-ci/remediation-docs-final.log",
+      "sha256": "0662f939e3afcaa9f800fa014d34342fead23d01838fac661be74a4bef4e0d4b",
+      "bytes": 1009
+    }
+  ],
+  "correctiveFull": "Pending the exact committed remediation source; close after workflow completion.",
+  "installedWindowsMSFS": "Not Tested"
+}

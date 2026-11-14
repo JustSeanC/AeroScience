@@ -65,3 +65,20 @@ test('native toolbar handles mixed transect, vertical and performance cards with
  }
  expect((await get(request,'/api/state')).activeMission.id).toBe(flight.id);expect((await get(request,`/api/missions/${flight.id}/collection`)).state.phase).toBe('collecting');
 });
+
+test('native same-revision card page replaces an old page rendered by intervening telemetry without issuing a mutation',async({page,request})=>{
+ const cards=[];for(const starterId of ['atmospheric-transect','vertical-atmospheric-profile'])cards.push(await post(request,'/api/research/starters/prepare',{version:1,requestId:crypto.randomUUID(),starterId,intent:'flyNow',starterVersion:1}));
+ const plan=await post(request,'/api/plans',{id:crypto.randomUUID(),name:'Synthetic controlled native paging',template:'atmosphericTransect',instruments:cards[0].plan.instruments,researchCards:cards.map(c=>({id:c.card.id,revision:c.card.revision}))});const flight=await post(request,'/api/missions',{name:'Synthetic paging interleave',planId:plan.id});const before=(await get(request,`/api/missions/${flight.id}/collection`)).state.phase;
+ await page.route('**/__native_paging',r=>r.fulfill({contentType:'text/html',body:'<!doctype html><html><head></head><body></body></html>'}));await page.goto('/__native_paging');await mountToolbar(page);await page.evaluate(async()=>{
+  const s=await(await fetch('/api/session',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'})).json();window.holdNextResearch=false;window.heldResearch=null;
+  window.bus.callSimConnect=async function(event,payload){const command=JSON.parse(payload);this.sent.push({event,command});const reply=await(await fetch('/api/testing/toolbar',{method:'POST',headers:{'Content-Type':'application/json','X-AeroScience-CSRF':s.csrf},body:payload})).text();if(command.op==='research-state'&&command.offset===1&&window.holdNextResearch){window.heldResearch={reply,command};return;}this.handlers['AeroScience.Reply.v1']?.(reply);};document.querySelector('ingamepanel-aeroscience').tick();
+ });
+ const expected=(await get(request,`/api/missions/${flight.id}/research-operations`)).cards;expect(expected).toHaveLength(2);await page.locator('#as-research-page').click();const native=page.locator('#as-research-cards');await expect(native.getByRole('heading',{name:expected[0].card.name+' | revision 1',exact:true})).toBeVisible();
+ const revision=await page.evaluate(()=>document.querySelector('ingamepanel-aeroscience').researchState.revision);await page.evaluate(()=>window.holdNextResearch=true);await page.locator('#as-research-next').click();await expect.poll(()=>page.evaluate(()=>window.heldResearch!==null)).toBe(true);
+ expect(await page.evaluate(()=>JSON.parse(window.heldResearch.reply).research.revision)).toBe(revision);
+ // Force the precise ordering from the retained failure: ordinary telemetry
+ // renders the old authoritative card while the requested page is in flight.
+ await page.evaluate(()=>document.querySelector('ingamepanel-aeroscience').renderPersonalResearch(true));await expect(native.getByRole('heading',{name:expected[0].card.name+' | revision 1',exact:true})).toBeVisible();
+ await page.evaluate(()=>{window.holdNextResearch=false;window.bus.handlers['AeroScience.Reply.v1'](window.heldResearch.reply);});await expect(native.getByRole('heading',{name:expected[1].card.name+' | revision 1',exact:true})).toBeVisible();await expect(native.getByRole('heading',{name:expected[0].card.name+' | revision 1',exact:true})).toHaveCount(0);
+ expect(await page.evaluate(()=>window.bus.sent.filter(v=>['research-control','science-control','start','end'].includes(v.command.op)))).toEqual([]);expect((await get(request,'/api/state')).activeMission.id).toBe(flight.id);expect((await get(request,`/api/missions/${flight.id}/collection`)).state.phase).toBe(before);
+});
