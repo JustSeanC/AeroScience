@@ -36,7 +36,7 @@ function rewrite(file){
    &&!/\b(?:Content-Type|Content-Disposition|Authorization|Bearer|X-CSRF|AeroScience\.[A-Za-z]+\.v\d)/.test(row.text);
   if(row.decision!=='presentation'&&!reviewed)continue;
   if(row.kind==='template'&&!/[A-Za-z]{2}/.test(row.text.replace(/\{value\d+\}/g,'')))continue;
-  if(/^(?:DEM|DSM|MSL|AGL|UTC|WGS84|ICAO|IATA|SHA-256|NoData|NDVI|NM|FAA)$/.test(row.text))continue;
+  if(/^(?:DEM|DSM|MSL|AGL|UTC|WGS84|ICAO|IATA|SHA-256|NoData|NDVI|NM|FAA|ft|kt|kts|nm|mi|km|ms|deg|rad|mph|hPa|inHg|MiB|GiB|GB|MB)$/.test(row.text))continue;
   let n=nodes.get(row.start+':'+row.end);if(!n)continue;
   if(reviewed){const parent=parents.get(n);if(parent?.type==='Property'&&['name','provider','product','source','sourceClass','state','status','value','id','kind','unit','code','version','type','category','namespace'].includes(parent.key.name??parent.key.value))continue;}
   function prose(e){return e.type==='Literal'&&typeof e.value==='string'?e.value:e.type==='TemplateLiteral'?e.quasis.map(q=>q.value.cooked).join(''):e.type==='BinaryExpression'&&e.operator==='+'?prose(e.left)+prose(e.right):'';}

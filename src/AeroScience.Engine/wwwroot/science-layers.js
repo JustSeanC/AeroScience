@@ -1,6 +1,6 @@
 import {message as localizedCopy} from './i18n.js';
 import {t as textForUI} from './i18n.js';
-export const measurements = [['elevation','DEM-derived terrain elevation'],['temperature',localizedCopy("ui.scienceLayers.messageHistoricalSurfaceTemperatureK")],['temperature-celsius',localizedCopy("ui.scienceLayers.messageHistoricalSurfaceTemperatureC")],
+export const measurements = [['elevation',localizedCopy("map.demElevation")],['temperature',localizedCopy("ui.scienceLayers.messageHistoricalSurfaceTemperatureK")],['temperature-celsius',localizedCopy("ui.scienceLayers.messageHistoricalSurfaceTemperatureC")],
   ['natural-color',localizedCopy("ui.scienceLayers.messageNaturalColorReflectance")],['false-color',localizedCopy("ui.scienceLayers.messageFalseColorNIRRed")],['ndvi',localizedCopy("ui.scienceLayers.messageVegetationIndexNDVI")],['B04',localizedCopy("ui.scienceLayers.messageRedReflectance")],['B08',localizedCopy("ui.scienceLayers.messageNearInfraredReflectance")]];
 export const initialMeasurement = (instrument, source) => instrument === 'thermal-imager' ? 'temperature-celsius'
   : instrument === 'multispectral-imager' ? 'ndvi' : instrument === 'hyperspectral-imager'

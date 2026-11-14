@@ -65,7 +65,7 @@ export async function storageManagement(parent, api) {
         e("strong", s.status),
         e(
           "p",
-          localizedCopy("ui.storageManagement.messageUsedFreeDisk",{value1:(String(gb(s.usedBytes))),value2:(String(gb(s.limitBytes))),value3:(String(s.percentage == null ? "No cap" : s.percentage.toFixed(1) + "%")),value4:(String(gb(s.freeBytes)))}),
+          localizedCopy("ui.storageManagement.messageUsedFreeDisk",{value1:(String(gb(s.usedBytes))),value2:(String(gb(s.limitBytes))),value3:(String(s.percentage == null ? textForUI("ui.storageManagement.messageNoCap") : s.percentage.toFixed(1) + "%")),value4:(String(gb(s.freeBytes)))}),
         ),
       );
       const progress = e("progress");
@@ -231,7 +231,7 @@ export async function storageManagement(parent, api) {
     const p = await api(
       `/api/storage/cleanup/${previewId}?offset=${offset}&sort=${encodeURIComponent(sort.value)}&filter=${encodeURIComponent(filter.value)}&status=${encodeURIComponent(status.value)}`,
     );
-    setPresentationText(summary,localizedCopy("ui.storageManagement.messageRegenerableCachesOnlyEligibleFiles",{value1:(String(p.eligibleFiles)),value2:(String(gb(p.estimatedBytes))),value3:(String(p.oldestUtc || "None")),value4:(String(p.newestUtc || "None")),value5:(String(gb(p.currentUsage))),value6:(String(gb(p.expectedUsageAfter))),value7:(String(p.createdUtc)),value8:(String(p.total))}));
+    setPresentationText(summary,localizedCopy("ui.storageManagement.messageRegenerableCachesOnlyEligibleFiles",{value1:(String(p.eligibleFiles)),value2:(String(gb(p.estimatedBytes))),value3:(String(p.oldestUtc || textForUI("ui.research.messageNone"))),value4:(String(p.newestUtc || textForUI("ui.research.messageNone"))),value5:(String(gb(p.currentUsage))),value6:(String(gb(p.expectedUsageAfter))),value7:(String(p.createdUtc)),value8:(String(p.total))}));
     const table = e("table"),
       head = e("thead"),
       tr = e("tr");

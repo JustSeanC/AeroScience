@@ -1,0 +1,667 @@
+{
+  "catalogVersion": 23,
+  "sourceIdentity": "2e497b5e380eefe0acc09c924121b57ad145e56c8e85d78639b27b338adbc3dc",
+  "bundleIdentity": "82535d4cf1ffb6e0d75516066084bc6a44c667ed19b0bc344bc05380c0202f1d",
+  "humanReview": "PENDING — every candidate, including non-fallback messages, needs qualified review",
+  "priority": "Review explicit critical English fallbacks first, then all critical candidates in their actual authoritative state and surface.",
+  "locales": {
+    "es-ES": {
+      "criticalMessages": 1023,
+      "criticalEnglishFallbacks": [
+        {
+          "key": "ui.collectedScienceDeletion.messageFlightRecordingsTelemetryMissionPlansAndExternal",
+          "surface": "dashboard",
+          "reason": "Critical negation requires fluent review; English retained"
+        },
+        {
+          "key": "ui.collectionPlanner.messageExplicitCollectionActionSManualOverride",
+          "surface": "missions",
+          "reason": "Unicode, repetition, layout or placeholder QA requires review"
+        },
+        {
+          "key": "ui.missionIntelligence.messageFlight",
+          "surface": "missions",
+          "reason": "Unicode, repetition, layout or placeholder QA requires review"
+        },
+        {
+          "key": "ui.personalResearchReview.messageFlightRegimeResultsUseAircraftTelemetryModeledScience",
+          "surface": "missions",
+          "reason": "Critical negation requires fluent review; English retained"
+        },
+        {
+          "key": "ui.programWorkflowUi.messageAuthorizeAWaiverFromAPhaseObjective",
+          "surface": "organizations",
+          "reason": "Unicode, repetition, layout or placeholder QA requires review"
+        },
+        {
+          "key": "ui.scienceWorkspace.messagePauseDownlink",
+          "surface": "scientificResults",
+          "reason": "Unchanged English requires translation or a documented terminology decision"
+        },
+        {
+          "key": "ui.sourceDeletion.messageRecheckingTheExactSelectionAndProtectedResearch",
+          "surface": "libraryDownloads",
+          "reason": "Unicode, repetition, layout or placeholder QA requires review"
+        },
+        {
+          "key": "ui.receivedEvidenceUi.messageIASUnavailableUnsupported",
+          "surface": "dashboard",
+          "reason": "Scientific identifier or unit changed in draft; English retained"
+        },
+        {
+          "key": "native.evidenceBasedAssessmentsDependOnTheCompanionSCapabilities",
+          "surface": "nativeToolbar",
+          "reason": "Placeholder/length preservation failed; explicit English fallback"
+        },
+        {
+          "key": "native.activeRecordingItsSavedPlanSnapshotIsFixedPlan",
+          "surface": "nativeToolbar",
+          "reason": "Unicode, repetition, layout or placeholder QA requires review"
+        }
+      ],
+      "completeContextAndText": "messages.es-ES.tsv",
+      "reviewed": 0
+    },
+    "fr-FR": {
+      "criticalMessages": 1023,
+      "criticalEnglishFallbacks": [
+        {
+          "key": "ui.aviationReference.messageWithFAAAccessEnabledAutomaticUpdatesRun",
+          "surface": "dashboard",
+          "reason": "Critical negation requires fluent review; English retained"
+        },
+        {
+          "key": "ui.basemaps.messageEsriImageryOutdoorAndNavigationUseYour",
+          "surface": "dashboard",
+          "reason": "Critical negation requires fluent review; English retained"
+        },
+        {
+          "key": "ui.campaignProgressUi.messageActiveClaimsAndReservationsShareCapacity",
+          "surface": "organizations",
+          "reason": "Placeholder/length preservation failed; explicit English fallback"
+        },
+        {
+          "key": "ui.collectionPlanner.messageReviewedActionsExplicitEndOnlyNo",
+          "surface": "missions",
+          "reason": "Placeholder/length preservation failed; explicit English fallback"
+        },
+        {
+          "key": "ui.collectionPlanner.messageExplicitCollectionActionSManualOverride",
+          "surface": "missions",
+          "reason": "Placeholder/length preservation failed; explicit English fallback"
+        },
+        {
+          "key": "ui.downloadWorkspace.messageReadyAwaiting",
+          "surface": "libraryDownloads",
+          "reason": "Placeholder/length preservation failed; explicit English fallback"
+        },
+        {
+          "key": "ui.libraryDownload.messageNASAMetadataUpdatedNotTheObservationOr",
+          "surface": "libraryDownloads",
+          "reason": "Placeholder/length preservation failed; explicit English fallback"
+        },
+        {
+          "key": "ui.missionIntelligence.messageFlight",
+          "surface": "missions",
+          "reason": "Unicode, repetition, layout or placeholder QA requires review"
+        },
+        {
+          "key": "ui.missionStartAdvisory.messageStartMissionAnywayStartsFlightRecordingSubject",
+          "surface": "missions",
+          "reason": "Critical negation requires fluent review; English retained"
+        },
+        {
+          "key": "ui.missionStartAdvisory.messageAeroScienceWillAttemptToPrepareDataFor",
+          "surface": "missions",
+          "reason": "Critical negation requires fluent review; English retained"
+        },
+        {
+          "key": "ui.missionStartAdvisory.messageEntireMissionReadyPlannedInstrumentRegionUnits",
+          "surface": "missions",
+          "reason": "Placeholder/length preservation failed; explicit English fallback"
+        },
+        {
+          "key": "ui.missionTimeline.messageOriginalFlightCardSessionMeasurementAndPilotObservation",
+          "surface": "missions",
+          "reason": "Scientific identifier or unit changed in draft; English retained"
+        },
+        {
+          "key": "ui.observationResearch.messageDocumentedLocationsDisplayedMissingLocationsAnd",
+          "surface": "missions",
+          "reason": "Placeholder/length preservation failed; explicit English fallback"
+        },
+        {
+          "key": "ui.organizationLiveUi.messageScienceCollection",
+          "surface": "organizations",
+          "reason": "Placeholder/length preservation failed; explicit English fallback"
+        },
+        {
+          "key": "ui.personalResearchReview.messageFlightRegimeResultsUseAircraftTelemetryModeledScience",
+          "surface": "missions",
+          "reason": "Critical negation requires fluent review; English retained"
+        },
+        {
+          "key": "ui.personalResearchStart.message1UseStartRecordingThenStartScience",
+          "surface": "missions",
+          "reason": "Critical negation requires fluent review; English retained"
+        },
+        {
+          "key": "ui.personalResearchStart.message1ReviewYourSamplingGoals2Use",
+          "surface": "missions",
+          "reason": "Critical negation requires fluent review; English retained"
+        },
+        {
+          "key": "ui.personalResearchStart.message1ReviewTheSamplingBandsForYour",
+          "surface": "missions",
+          "reason": "Critical negation requires fluent review; English retained"
+        },
+        {
+          "key": "ui.personalResearchStart.messageUsesActualSimulatorReportedAirTemperaturePressureWind",
+          "surface": "missions",
+          "reason": "Critical negation requires fluent review; English retained"
+        },
+        {
+          "key": "ui.programWorkflowUi.messageAuthorizeAWaiverFromAPhaseObjective",
+          "surface": "organizations",
+          "reason": "Critical negation requires fluent review; English retained"
+        },
+        {
+          "key": "ui.routeExport.messageMSFSEFBExportRequiresACruisingAltitude",
+          "surface": "dashboard",
+          "reason": "Scientific identifier or unit changed in draft; English retained"
+        },
+        {
+          "key": "ui.scienceMapView.messageOriginalEnvironmentalReadingsRetainUTCUnitsProvenance",
+          "surface": "scientificResults",
+          "reason": "Scientific identifier or unit changed in draft; English retained"
+        },
+        {
+          "key": "ui.scienceMapView.messageGeographicallyIndexedAcquisitionsReviewedInThe",
+          "surface": "scientificResults",
+          "reason": "Placeholder/length preservation failed; explicit English fallback"
+        },
+        {
+          "key": "ui.scientificAccess.messageOneDisclosureCanAllowMapsScientificAccess",
+          "surface": "dashboard",
+          "reason": "Scientific identifier or unit changed in draft; English retained"
+        },
+        {
+          "key": "ui.sensorOperatingStatus.messageCollection",
+          "surface": "currentFlight",
+          "reason": "Placeholder/length preservation failed; explicit English fallback"
+        },
+        {
+          "key": "ui.sourceInspection.messageValidNativeSamplesMissingQualityExcluded",
+          "surface": "libraryDownloads",
+          "reason": "Placeholder/length preservation failed; explicit English fallback"
+        },
+        {
+          "key": "ui.submissionReview.messageOrganizationConfirmedYourResponseNoScientificEvidence",
+          "surface": "organizations",
+          "reason": "Critical negation requires fluent review; English retained"
+        },
+        {
+          "key": "ui.organizationMembers.messageApproveApplicationsInvitePilotsAndManageAccess",
+          "surface": "organizations",
+          "reason": "Critical negation requires fluent review; English retained"
+        },
+        {
+          "key": "ui.organizationMembers.messageAccessRemovedThisPersonSOrganizationConnectionIs",
+          "surface": "organizations",
+          "reason": "Critical negation requires fluent review; English retained"
+        },
+        {
+          "key": "ui.organizationSetup.messageChooseCreateInvitationInMembersCopyThe",
+          "surface": "organizations",
+          "reason": "Critical negation requires fluent review; English retained"
+        },
+        {
+          "key": "ui.organizationSetup.messageAPilotOpensMyResearchOrganizations",
+          "surface": "organizations",
+          "reason": "Critical negation requires fluent review; English retained"
+        },
+        {
+          "key": "ui.organizationSubmissions.messageExpresslySharedPilotEvidenceReceivedAwaiting",
+          "surface": "organizations",
+          "reason": "Critical negation requires fluent review; English retained"
+        },
+        {
+          "key": "ui.researchTemplateUi.messageNoP24PublicationAuthorizationRecordsOnThis",
+          "surface": "organizations",
+          "reason": "Critical negation requires fluent review; English retained"
+        },
+        {
+          "key": "ui.serverOperations.messageAutomaticDeletionIsHeldUntilASeparate",
+          "surface": "organizations",
+          "reason": "Critical negation requires fluent review; English retained"
+        },
+        {
+          "key": "ui.serverOperations.messageYourAccountRecoveryCodesRestoreSignInThe",
+          "surface": "organizations",
+          "reason": "Critical negation requires fluent review; English retained"
+        },
+        {
+          "key": "html.organizationhosting.textThisIsTheTargetJourneyItHasNotYetPassedFreshAccountNoviceDeployme",
+          "surface": "dashboard",
+          "reason": "Scientific identifier or unit changed in draft; English retained"
+        },
+        {
+          "key": "ui.onlineAccess.messageYourExistingDownloadLimitsStorageProtectionsBackground",
+          "surface": "dashboard",
+          "reason": "Scientific identifier or unit changed in draft; English retained"
+        },
+        {
+          "key": "ui.organizationHosting.messagePrimaryCandidateTheFiveStageJourneyIsNot",
+          "surface": "organizations",
+          "reason": "Critical negation requires fluent review; English retained"
+        },
+        {
+          "key": "ui.payloadSettings.messagePhysicalNominalLinesPerSecondWhenDocumented",
+          "surface": "dashboard",
+          "reason": "Critical negation requires fluent review; English retained"
+        },
+        {
+          "key": "ui.scienceJourney.messageMissionPreparedUnpauseMSFSBeforeStart",
+          "surface": "dashboard",
+          "reason": "Scientific identifier or unit changed in draft; English retained"
+        },
+        {
+          "key": "ui.scientificContext.messageEachObjectiveNeedsValidSamplesAndLocations",
+          "surface": "contextualHelp",
+          "reason": "Placeholder/length preservation failed; explicit English fallback"
+        },
+        {
+          "key": "ui.scientificContext.messageChooseSupportedOriginalEvidenceInBothDatasets",
+          "surface": "contextualHelp",
+          "reason": "Critical negation requires fluent review; English retained"
+        },
+        {
+          "key": "ui.storageManagement.messageProtectedBackupsExcludedFromCapRetained",
+          "surface": "dashboard",
+          "reason": "Placeholder/length preservation failed; explicit English fallback"
+        },
+        {
+          "key": "windows.mainForm.importSourceObservationCopyMibIntoAvailableGibOriginal",
+          "surface": "windowsCompanion",
+          "reason": "Placeholder/length preservation failed; explicit English fallback"
+        },
+        {
+          "key": "windows.mainForm.theBundleIncludesGeographicPreparationAreasInstrumentProviderTiming",
+          "surface": "windowsCompanion",
+          "reason": "Critical negation requires fluent review; English retained"
+        },
+        {
+          "key": "windows.program.closeMsfsBeforeRemovingTheAeroscienceToolbarThenChoose",
+          "surface": "windowsCompanion",
+          "reason": "Scientific identifier or unit changed in draft; English retained"
+        },
+        {
+          "key": "windows.dataManagementForm.missionsDatasetsObservationsGeneratedProductsEstimatedManagedFileSpace",
+          "surface": "windowsCompanion",
+          "reason": "Placeholder/length preservation failed; explicit English fallback"
+        },
+        {
+          "key": "windows.science.category11Description",
+          "surface": "windowsCompanion",
+          "reason": "Scientific identifier or unit changed in draft; English retained"
+        },
+        {
+          "key": "windows.science.category14Description",
+          "surface": "windowsCompanion",
+          "reason": "Scientific identifier or unit changed in draft; English retained"
+        },
+        {
+          "key": "native.noCommandConfirmationCheckMissionStateBeforeRetrying",
+          "surface": "nativeToolbar",
+          "reason": "Critical negation requires fluent review; English retained"
+        },
+        {
+          "key": "native.msfsDisconnected",
+          "surface": "nativeToolbar",
+          "reason": "Scientific identifier or unit changed in draft; English retained"
+        },
+        {
+          "key": "native.recordingStopped",
+          "surface": "nativeToolbar",
+          "reason": "Placeholder/length preservation failed; explicit English fallback"
+        },
+        {
+          "key": "native.collectionControl",
+          "surface": "nativeToolbar",
+          "reason": "Placeholder/length preservation failed; explicit English fallback"
+        },
+        {
+          "key": "native.static.simulatorReportedAtmosphericObservationsAnActiveMissionIsRequiredTo",
+          "surface": "nativeToolbar",
+          "reason": "Critical negation requires fluent review; English retained"
+        },
+        {
+          "key": "native.static.aerosciencePages",
+          "surface": "nativeToolbar",
+          "reason": "Scientific identifier or unit changed in draft; English retained"
+        },
+        {
+          "key": "windows.deletion.confirmation",
+          "surface": "consentSafety",
+          "reason": "Unchanged English requires translation or a documented terminology decision"
+        },
+        {
+          "key": "windows.deletion.typePhrase",
+          "surface": "consentSafety",
+          "reason": "Unchanged English requires translation or a documented terminology decision"
+        },
+        {
+          "key": "native.phase.session",
+          "surface": "nativeToolbar",
+          "reason": "Unchanged English requires translation or a documented terminology decision"
+        },
+        {
+          "key": "windows.error.closeSimulator",
+          "surface": "windowsCompanion",
+          "reason": "Scientific identifier or unit changed in draft; English retained"
+        }
+      ],
+      "completeContextAndText": "messages.fr-FR.tsv",
+      "reviewed": 0
+    },
+    "de-DE": {
+      "criticalMessages": 1023,
+      "criticalEnglishFallbacks": [
+        {
+          "key": "terrain.gridWarning",
+          "surface": "terrain",
+          "reason": "Scientific identifier or unit changed in draft; English retained"
+        },
+        {
+          "key": "ui.collectionPlanner.messageWhenTheAircraftOnQualifying",
+          "surface": "missions",
+          "reason": "Placeholder/length preservation failed; explicit English fallback"
+        },
+        {
+          "key": "ui.collectionPlanner.messageExplicitCollectionActionSManualOverride",
+          "surface": "missions",
+          "reason": "Placeholder/length preservation failed; explicit English fallback"
+        },
+        {
+          "key": "ui.missionIntelligence.messageFlight",
+          "surface": "missions",
+          "reason": "Unicode, repetition, layout or placeholder QA requires review"
+        },
+        {
+          "key": "ui.personalResearchStart.message1ReviewTheSamplingBandsForYour",
+          "surface": "missions",
+          "reason": "Unicode, repetition, layout or placeholder QA requires review"
+        },
+        {
+          "key": "ui.preparationSummary.messageInstrumentRegionsReadyAwaiting",
+          "surface": "dashboard",
+          "reason": "Placeholder/length preservation failed; explicit English fallback"
+        },
+        {
+          "key": "ui.researchOrganizations.messageSignInThereConfirmTheMatchingCode",
+          "surface": "organizations",
+          "reason": "Scientific identifier or unit changed in draft; English retained"
+        },
+        {
+          "key": "ui.research.messageUseTheLibrarySSupportedAuthorizedAVIRISDownloadImport",
+          "surface": "missions",
+          "reason": "Scientific identifier or unit changed in draft; English retained"
+        },
+        {
+          "key": "ui.research.messageBlueDotsShowSuccessfulAtmosphericSamplePositions",
+          "surface": "missions",
+          "reason": "Unicode, repetition, layout or placeholder QA requires review"
+        },
+        {
+          "key": "ui.research.messageScienceLibraryUnavailableFlightHistoryRemains",
+          "surface": "missions",
+          "reason": "Placeholder/length preservation failed; explicit English fallback"
+        },
+        {
+          "key": "ui.routeExport.messageExportSharePlannedRoute",
+          "surface": "dashboard",
+          "reason": "Unchanged English requires translation or a documented terminology decision"
+        },
+        {
+          "key": "ui.scienceMapView.messageGeographicallyIndexedAcquisitionsReviewedInThe",
+          "surface": "scientificResults",
+          "reason": "Placeholder/length preservation failed; explicit English fallback"
+        },
+        {
+          "key": "ui.scientificLibrary.messageIncludesSourceIdentifiersAndManagedRelativePaths",
+          "surface": "libraryDownloads",
+          "reason": "Unicode, repetition, layout or placeholder QA requires review"
+        },
+        {
+          "key": "ui.sensorOperatingStatus.messageCollection",
+          "surface": "currentFlight",
+          "reason": "Placeholder/length preservation failed; explicit English fallback"
+        },
+        {
+          "key": "ui.terrainProfile.messageNoValidDEMSupportOnThisPath",
+          "surface": "scientificResults",
+          "reason": "Scientific identifier or unit changed in draft; English retained"
+        },
+        {
+          "key": "ui.organizationMembers.messageAccessRemovedThisPersonSOrganizationConnectionIs",
+          "surface": "organizations",
+          "reason": "Placeholder/length preservation failed; explicit English fallback"
+        },
+        {
+          "key": "ui.organizationReviews.messageNoAuthorizedReceivedSubmissionsMatchThisPage",
+          "surface": "organizations",
+          "reason": "Unicode, repetition, layout or placeholder QA requires review"
+        },
+        {
+          "key": "ui.organizationSetup.messageAPilotOpensMyResearchOrganizations",
+          "surface": "organizations",
+          "reason": "Critical negation requires fluent review; English retained"
+        },
+        {
+          "key": "ui.researchTemplateUi.messageAProposalIsPrivateToItsAuthor",
+          "surface": "organizations",
+          "reason": "Unicode, repetition, layout or placeholder QA requires review"
+        },
+        {
+          "key": "ui.researchTemplateUi.messageDecisionForExactRevisionHash",
+          "surface": "organizations",
+          "reason": "Placeholder/length preservation failed; explicit English fallback"
+        },
+        {
+          "key": "ui.serverOperations.messageDownloadRecoveryKey",
+          "surface": "organizations",
+          "reason": "Unchanged English requires translation or a documented terminology decision"
+        },
+        {
+          "key": "ui.missionIntelligence.messageCollectionIsHeldForMissingContinuityEvidence",
+          "surface": "missions",
+          "reason": "Unicode, repetition, layout or placeholder QA requires review"
+        },
+        {
+          "key": "ui.missionIntelligence.messageCollectionOrConfigurationChangedWaitingForCurrent",
+          "surface": "missions",
+          "reason": "Unicode, repetition, layout or placeholder QA requires review"
+        },
+        {
+          "key": "ui.organizationHosting.messageHobbyHasA5MonthMinimumCreditedToward",
+          "surface": "organizations",
+          "reason": "Unicode, repetition, layout or placeholder QA requires review"
+        },
+        {
+          "key": "ui.organizationHosting.messagePrimaryCandidateTheFiveStageJourneyIsNot",
+          "surface": "organizations",
+          "reason": "Unicode, repetition, layout or placeholder QA requires review"
+        },
+        {
+          "key": "ui.submissionBuilder.messageCheckTheExplicitSharingApprovalAfterReviewing",
+          "surface": "organizations",
+          "reason": "Unicode, repetition, layout or placeholder QA requires review"
+        },
+        {
+          "key": "ui.terrainProfile.messageDEMUnavailable",
+          "surface": "scientificResults",
+          "reason": "Scientific identifier or unit changed in draft; English retained"
+        },
+        {
+          "key": "ui.serverOperations.messageIAuthorizeThisServerToReadThe",
+          "surface": "organizations",
+          "reason": "Critical negation requires fluent review; English retained"
+        },
+        {
+          "key": "ui.submissionBuilder.messageIApproveSharingExactlyTheseSelectedItems",
+          "surface": "organizations",
+          "reason": "Placeholder/length preservation failed; explicit English fallback"
+        },
+        {
+          "key": "windows.mainForm.endRecordingAndWaitForActiveSetupStorageWork",
+          "surface": "windowsCompanion",
+          "reason": "Unicode, repetition, layout or placeholder QA requires review"
+        },
+        {
+          "key": "windows.mainForm.importSourceObservationCopyMibIntoAvailableGibOriginal",
+          "surface": "windowsCompanion",
+          "reason": "Placeholder/length preservation failed; explicit English fallback"
+        },
+        {
+          "key": "windows.program.removeTheAeroscienceMsfsToolbarTooOnlyAeroscienceWill",
+          "surface": "windowsCompanion",
+          "reason": "Critical negation requires fluent review; English retained"
+        },
+        {
+          "key": "windows.science.category11Description",
+          "surface": "windowsCompanion",
+          "reason": "Scientific identifier or unit changed in draft; English retained"
+        },
+        {
+          "key": "native.commandDeliveryFailedTheIntervalIsNotConfirmed",
+          "surface": "nativeToolbar",
+          "reason": "Critical negation requires fluent review; English retained"
+        },
+        {
+          "key": "native.collectionControl",
+          "surface": "nativeToolbar",
+          "reason": "Placeholder/length preservation failed; explicit English fallback"
+        },
+        {
+          "key": "native.neighboringFootMslBandsCollectValidTemperatureReadings",
+          "surface": "nativeToolbar",
+          "reason": "Placeholder/length preservation failed; explicit English fallback"
+        },
+        {
+          "key": "native.static.northUpGoldPlannedTurquoiseRecordedPinkMarkersRecentTrack",
+          "surface": "nativeToolbar",
+          "reason": "Critical negation requires fluent review; English retained"
+        },
+        {
+          "key": "windows.storage.openExisting",
+          "surface": "consentSafety",
+          "reason": "Critical negation requires fluent review; English retained"
+        },
+        {
+          "key": "ui.experimentalSensor.messageInputTelemetrySourceUnavailableNoSimulator",
+          "surface": "currentFlight",
+          "reason": "Placeholder/length preservation failed; explicit English fallback"
+        },
+        {
+          "key": "ui.missionIntelligence.messageStaleEvidenceCutoffNotCurrent",
+          "surface": "missions",
+          "reason": "Placeholder/length preservation failed; explicit English fallback"
+        },
+        {
+          "key": "ui.scienceJourney.messageUnavailableCheckTheConnectionSessionOr",
+          "surface": "dashboard",
+          "reason": "Placeholder/length preservation failed; explicit English fallback"
+        }
+      ],
+      "completeContextAndText": "messages.de-DE.tsv",
+      "reviewed": 0
+    },
+    "pt-BR": {
+      "criticalMessages": 1023,
+      "criticalEnglishFallbacks": [
+        {
+          "key": "ui.app.messageRECORDINGSTOPPED",
+          "surface": "dashboard",
+          "reason": "Placeholder/length preservation failed; explicit English fallback"
+        },
+        {
+          "key": "ui.collectedScienceDeletion.messageDeletingReviewedScientificDataClosingThisWindow",
+          "surface": "dashboard",
+          "reason": "Critical negation requires fluent review; English retained"
+        },
+        {
+          "key": "ui.collectionPlanner.messageExplicitCollectionActionSManualOverride",
+          "surface": "missions",
+          "reason": "Unicode, repetition, layout or placeholder QA requires review"
+        },
+        {
+          "key": "ui.missionIntelligence.messageEndCurrentScienceSessionPreservesItsResults",
+          "surface": "missions",
+          "reason": "Critical negation requires fluent review; English retained"
+        },
+        {
+          "key": "ui.missionIntelligence.messageFlight",
+          "surface": "missions",
+          "reason": "Unicode, repetition, layout or placeholder QA requires review"
+        },
+        {
+          "key": "ui.missionStartAdvisory.messageEntireMissionReadyPlannedInstrumentRegionUnits",
+          "surface": "missions",
+          "reason": "Placeholder/length preservation failed; explicit English fallback"
+        },
+        {
+          "key": "ui.personalResearchReview.messageReviewEachSelectedMeasurementItsIndependentSource",
+          "surface": "missions",
+          "reason": "Critical negation requires fluent review; English retained"
+        },
+        {
+          "key": "ui.personalResearchStart.message1UseStartRecordingThenStartScience",
+          "surface": "missions",
+          "reason": "Critical negation requires fluent review; English retained"
+        },
+        {
+          "key": "ui.programWorkflowUi.messageWaiversMayOmitEvidenceAndNeverAdd",
+          "surface": "organizations",
+          "reason": "Critical negation requires fluent review; English retained"
+        },
+        {
+          "key": "ui.researchOrganizations.messageManageOnlyYourOwnAssignmentsNoEvidence",
+          "surface": "organizations",
+          "reason": "Critical negation requires fluent review; English retained"
+        },
+        {
+          "key": "ui.organization.messagePublishThisSavedDefinitionForYourOrganization",
+          "surface": "organizations",
+          "reason": "Critical negation requires fluent review; English retained"
+        },
+        {
+          "key": "ui.researchTemplateUi.messageAProposalIsPrivateToItsAuthor",
+          "surface": "organizations",
+          "reason": "Critical negation requires fluent review; English retained"
+        },
+        {
+          "key": "ui.scientificContext.messageChooseSupportedOriginalEvidenceInBothDatasets",
+          "surface": "contextualHelp",
+          "reason": "Critical negation requires fluent review; English retained"
+        },
+        {
+          "key": "windows.scientificSourcesPanel.historicalExternalDataRetainTheirOriginalObservationDatesAnd",
+          "surface": "windowsCompanion",
+          "reason": "Placeholder/length preservation failed; explicit English fallback"
+        },
+        {
+          "key": "windows.science.category14Description",
+          "surface": "windowsCompanion",
+          "reason": "Scientific identifier or unit changed in draft; English retained"
+        },
+        {
+          "key": "native.cardCommandNotConfirmedSynchronizeBeforeRetrying",
+          "surface": "nativeToolbar",
+          "reason": "Critical negation requires fluent review; English retained"
+        }
+      ],
+      "completeContextAndText": "messages.pt-BR.tsv",
+      "reviewed": 0
+    }
+  }
+}

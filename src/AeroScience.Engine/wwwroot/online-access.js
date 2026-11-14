@@ -51,7 +51,7 @@ export function openOnlineAccess(api,{opener=document.activeElement,onAllowed=()
    if(!aviation.configuration.onlineEnabled)await api('/api/aviation/configuration',{onlineEnabled:true});
    const tfr=await api('/api/aviation/tfr/configuration');
    if(!tfr.tfrMonitoringEnabled)await api('/api/aviation/tfr/configuration',{onlineEnabled:true});
-   s=await read(api);if(!ready(s))throw Error('A permission changed during saving. Review current settings and try again.');
+   s=await read(api);if(!ready(s))throw Error(textForUI("consent.permissionChangedError"));
    await onAllowed(s);if(!closed)dialog.close();
   }catch(error){
    if(!closed){setPresentationText(status,localizedCopy("ui.onlineAccess.messageOnlineAccessWasNotFullyConfirmedSome",{value1:(String(error.message))}));status.setAttribute('role','alert');

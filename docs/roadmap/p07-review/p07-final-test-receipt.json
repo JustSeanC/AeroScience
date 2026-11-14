@@ -1,0 +1,90 @@
+{
+  "stage": "P07 final coverage/export correction",
+  "catalogVersion": 23,
+  "sourceIdentity": "2e497b5e380eefe0acc09c924121b57ad145e56c8e85d78639b27b338adbc3dc",
+  "bundleIdentity": "82535d4cf1ffb6e0d75516066084bc6a44c667ed19b0bc344bc05380c0202f1d",
+  "tests": {
+    "presentationPassed": 57,
+    "originalNativePassed": 4,
+    "dotnetPassed": 12,
+    "dotnetSkipped": 0,
+    "windowsCrossCompile": "passed; 0 warnings; 0 errors",
+    "browser": {
+      "expandedRegression": {
+        "passed": 73,
+        "failed": 1,
+        "total": 74,
+        "cause": "Chart.js canvas received a branded message object; fixed at the primitive display boundary."
+      },
+      "correctiveRun": {
+        "passed": 15,
+        "failed": 1,
+        "total": 16,
+        "remainingFailure": "New chart fixture selected hidden legacy pairing main; corrected to visible Home and document body, retaining every focus/data assertion."
+      },
+      "chartFollowup": {
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0
+      },
+      "combinedCorrectedUniqueScenarios": 16,
+      "skipped": 0,
+      "flaky": 0
+    }
+  },
+  "receipts": [
+    {
+      "path": "artifacts/p07-final-web-checks.log",
+      "sha256": "952a102ecf529858988b3c3170f117c610a430bfaef46d4eafc0fab104363cb0"
+    },
+    {
+      "path": "artifacts/p07-final-audit-dotnet.log",
+      "sha256": "2bd1b71fc23a28a6c8fbf5b90c00c85373a34fbf1f2095f42fb89886eaa47cf6"
+    },
+    {
+      "path": "artifacts/p07-final-audit-desktop-build.log",
+      "sha256": "434894d8c9f3558a4ec12301025b83cc87b6d18f141f398e294d169268088409"
+    },
+    {
+      "path": "artifacts/p07-final-audit-browser-tests.log",
+      "sha256": "90d8bc7d6aac3cd2f63da7e961b69206a58f6aae69ac72bb67e090e163aa87ae"
+    },
+    {
+      "path": "artifacts/p07-final-browser-tests.log",
+      "sha256": "8cf7181581fa6b61dba5b5d5a8ae7710fbac337bbdaddcaa290496f086375657"
+    },
+    {
+      "path": "artifacts/p07-final-chart-focus.log",
+      "sha256": "cd7cbd526621a93c4bb25d1e4ce1b1acbb1a30428a766676697cf8f8be8317e0"
+    },
+    {
+      "path": "artifacts/p07-final-audit-review-debug-promises.log",
+      "sha256": "0a98c0665d35dc76a3ff2a0062c7bccbb5a61e62671a90070e9e659e7ce2f820"
+    }
+  ],
+  "humanReview": "PENDING",
+  "installedWindows": "NOT TESTED",
+  "installedMSFS": "NOT TESTED",
+  "fullCI": "Pending final exact-source milestone run",
+  "coverage": {
+    "messagesPerLocale": 7040,
+    "nativeProjectedKeys": 370,
+    "nativeDataBytes": 178815,
+    "sampledBrowserSets": 10,
+    "manualClassificationQueue": 490,
+    "computedOrUnreferencedKeysForReview": 267,
+    "criticalMessagesPerLocale": 1023,
+    "criticalExplicitEnglishFallbacks": {
+      "es-ES": 10,
+      "fr-FR": 59,
+      "de-DE": 41,
+      "pt-BR": 16
+    }
+  },
+  "screenshots": {
+    "index": "screenshots/index.json",
+    "count": 41,
+    "indexSha256": "7075180c81847305ccddcdb1023ca4a0f3a38b3272fb917956276d36246045de",
+    "category": "Synthetic Chromium only; not installed Windows/MSFS"
+  }
+}

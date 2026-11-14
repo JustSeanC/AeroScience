@@ -20,7 +20,7 @@ export async function libraryLocation(parent, api, {sourceId, stopped=()=>false}
     const data=await api('/api/science/library/location'+(sourceId?'?sourceId='+encodeURIComponent(sourceId):''));
     if(stopped()||!panel.isConnected)return;
     setPresentationText(path,data.path);path.style.overflowWrap='anywhere';path.tabIndex=0;
-    setPresentationText(info,data.available?localizedCopy("ui.libraryLocation.messageTotalScientificLibraryUsageFree",{value1:(String(bytes(data.usedBytes))),value2:(String(data.freeBytes==null?'Unknown':bytes(data.freeBytes)))}):localizedCopy("ui.libraryLocation.messageStorageUnavailableNoReplacementFolderWasCreated",{value1:(String(data.error))}));
+    setPresentationText(info,data.available?localizedCopy("ui.libraryLocation.messageTotalScientificLibraryUsageFree",{value1:(String(bytes(data.usedBytes))),value2:(String(data.freeBytes==null?textForUI("localization.unknownValue"):bytes(data.freeBytes)))}):localizedCopy("ui.libraryLocation.messageStorageUnavailableNoReplacementFolderWasCreated",{value1:(String(data.error))}));
     if(data.available&&data.accounting)context.append(el('p',data.accounting));if(!data.available)scientificNotice(info,'critical',{problem:localizedCopy("ui.libraryLocation.messageScientificLibraryStorageIsUnavailable"),consequence:localizedCopy("ui.libraryLocation.messageOriginalSourcesCannotBeRead"),action:localizedCopy("ui.libraryLocation.messageOpenScientificLibraryStorageAndReconnect")});
     const actions=el('div',undefined,'action-row');context.append(actions);
     const open=button(actions,sourceId?localizedCopy("ui.libraryLocation.messageOpenSourceFolder"):localizedCopy("ui.libraryLocation.messageOpenDataFolder"),async()=>{

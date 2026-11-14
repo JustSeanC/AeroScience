@@ -12,7 +12,7 @@ export async function startMissionWithReadiness(api, launch, {readLaunch, opener
   async function context() {
     if (readLaunch && !sameLaunch(launch,readLaunch())) throw new Error(textForUI("ui.missionStartAdvisory.messageMissionLaunchInformationChangedContinueSetupAnd"));
     const state=await api('/api/state');
-    if (state.activeMission) throw new Error('A mission is already recording. This advisory cannot start another flight.');
+    if (state.activeMission) throw new Error(textForUI("mission.alreadyRecordingError"));
     if ((state.selectedPlanId || null)!==launch.planId) throw new Error(textForUI("ui.missionStartAdvisory.messageTheSelectedMissionPlanChangedContinueSetup"));
     if (!launch.planId) return null;
     try {
@@ -51,12 +51,12 @@ export async function startMissionWithReadiness(api, launch, {readLaunch, opener
   function show(value) {
     summary.replaceChildren(el('p',value.message),el('p',localizedCopy("ui.missionStartAdvisory.messageReadinessCheckedPreparationCanChangeConfirmation",{value1:(String(new Date(value.checkedUtc).toLocaleTimeString()))})));
     const p=value.preparation;
-    if (!p) {summary.append(el('p',localizedCopy("ui.missionStartAdvisory.messageExternalDataTotalReadyAwaitingAnd",{value1:(String(value.status==='Stale'?'Stale assessment':value.status==='NotAssessed'?'Not Yet Assessed':'Unavailable'))})));return;}
+    if (!p) {summary.append(el('p',localizedCopy("ui.missionStartAdvisory.messageExternalDataTotalReadyAwaitingAnd",{value1:(String(value.status==='Stale'?textForUI("ui.missionStartAdvisory.messageStaleAssessment"):value.status==='NotAssessed'?textForUI("ui.preflightReadiness.messageNotYetAssessed"):textForUI("map.native.unavailable")))})));return;}
     const total=p.ready+p.awaiting+p.unavailable;
     summary.append(el('p',localizedCopy("ui.missionStartAdvisory.messageEntireMissionReadyPlannedInstrumentRegionUnits",{value1:(String(p.ready)),value2:(String(total)),value3:(String(p.awaiting)),value4:(String(p.unavailable)),value5:(String(value.status==='Ready'?'complete':'incomplete'))})));
     summary.append(el('p',localizedCopy("ui.missionStartAdvisory.messagePreflightScopeSelectedUnitsReady",{value1:(String(scopeName(p.scope))),value2:(String(p.selectedReady)),value3:(String(p.selectedUnits)),value4:(String(p.selectedAwaiting)),value5:(String(p.selectedUnavailable)),value6:(String(p.selectedUnits>0&&p.selectedAwaiting===0&&p.selectedUnavailable===0?'complete':'incomplete'))})));
     if (p.scope!=='entire') summary.append(el('p',localizedCopy("ui.missionStartAdvisory.messagePreparationOutsideYourPreflightSelectionMayStill")));
-    const list=el('ul');for (const i of value.instruments||[]) list.append(el('li',localizedCopy("ui.missionStartAdvisory.messageReadyAwaiting",{value1:(String(i.name)),value2:(String(i.ready)),value3:(String(i.total)),value4:(String(i.awaiting)),value5:(String(i.unavailable)),value6:(String(i.awaiting||i.unavailable?' — affected instrument':''))})));summary.append(list);
+    const list=el('ul');for (const i of value.instruments||[]) list.append(el('li',localizedCopy("ui.missionStartAdvisory.messageReadyAwaiting",{value1:(String(i.name)),value2:(String(i.ready)),value3:(String(i.total)),value4:(String(i.awaiting)),value5:(String(i.unavailable)),value6:(String(i.awaiting||i.unavailable?textForUI("ui.missionStartAdvisory.messageAffectedInstrument"):''))})));summary.append(list);
     if (value.status==='Ready') summary.append(el('p',localizedCopy("ui.missionStartAdvisory.messagePreparationCompletedWhileThisAdvisoryWasOpen")));
   }
   show(initial);

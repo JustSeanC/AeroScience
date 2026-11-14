@@ -30,14 +30,28 @@ const protectedProperty=new Set(['href','src','id','className','value','type','r
 function disposition(node,ancestors,source,contracts){
  const parent=ancestors.at(-1),fullChain=[...ancestors].reverse(),boundary=fullChain.findIndex(n=>/Function/.test(n.type)),chain=boundary<0?fullChain:fullChain.slice(0,boundary);
  const call=chain.find(n=>n.type==='CallExpression'),callName=property(call?.callee);
+ if(callName==='normalize')return ['protected-identifier','Unicode normalization algorithm identity'];
  if(chain.some(n=>n.type==='ImportDeclaration'||n.type==='ExportNamedDeclaration'&&n.source))return ['protected-identifier','module identity'];
- if(['t','textForUI','localizedCopy','message'].includes(callName)||callName==='text'&&source.slice(call.callee.start,call.callee.end).includes('i18n'))return ['catalog-reference','existing translation call'];
+ if(parent?.type==='MemberExpression'||parent?.type==='BinaryExpression'&&['===','!==','==','!='].includes(parent.operator)||parent?.type==='SwitchCase')return ['protected-identifier','state/API/selector comparison'];
+ if(['t','textForUI','localizedCopy','message'].includes(callName)||callName==='text'&&source.slice(call.callee.start,call.callee.end).includes('i18n')){
+  if(argumentPosition(call,node)===0)return ['catalog-reference','existing translation key'];
+  if(argumentPosition(call,node)===2)return ['protected-value','intentional canonical English fallback'];
+ }
  if(['nativeText','nativeBind'].includes(callName)||callName==='text'&&/\b(?:AeroScienceI18n|this)\.text$/.test(source.slice(call.callee.start,call.callee.end)))return ['catalog-reference','explicit native catalog reference with intentional English fallback'];
  if(parent?.type==='MemberExpression'||parent?.type==='BinaryExpression'&&['===','!==','==','!='].includes(parent.operator)||parent?.type==='SwitchCase')return ['protected-identifier','state/API/selector comparison'];
  if(parent?.type==='Property'&&parent.key===node&&!parent.computed)return ['protected-identifier','object/wire property identity'];
  if(chain.some(n=>n.type==='AssignmentExpression'&&['className','id','font','fontFamily','cssText','href','src','value','type','role','name'].includes(property(n.left))))return ['protected-value','style, identifier, input value or source name assignment'];
  const prop=chain.find(n=>n.type==='Property');
+ if(prop&&property(prop.key)==='evidenceClass')return ['protected-value','original scientific export evidence class'];
+ const exportRows=fullChain.findIndex(n=>n.type==='VariableDeclarator'&&n.id?.name==='rows'||n.type==='CallExpression'&&n.callee.type==='MemberExpression'&&n.callee.object.name==='rows'&&property(n.callee)==='push');
+ const exportFunction=exportRows<0?null:fullChain.slice(exportRows+1).find(n=>/Function/.test(n.type));
+ if(exportFunction&&/downloadAnalysis\(|new Blob\(/.test(source.slice(exportFunction.start,exportFunction.end)))return ['protected-value','original scientific export row/header'];
+ if(chain.some(n=>n.type==='NewExpression'&&n.callee.name==='Blob'))return ['protected-value','original exported bytes'];
+ if(chain.some(n=>n.type==='CallExpression'&&property(n.callee)==='downloadAnalysis'&&argumentPosition(n,node)===0))return ['protected-value','original scientific export data'];
  if(prop&&protectedProperty.has(property(prop.key)))return ['protected-value','identifier, unit, command or data value'];
+ // Nested conditional prose in an existing display message remains display
+ // text. Preserve raw enum comparisons and scientific export rows above.
+ if(chain.some(n=>n.type==='CallExpression'&&['t','textForUI','localizedCopy','message'].includes(property(n.callee))&&argumentPosition(n,node)===1))return ['presentation','nested presentation parameter; original runtime values remain parameters'];
  if(callName==='setAttribute'){
   const attr=call.arguments[0]?.value;
   return ['aria-label','aria-description','aria-valuetext','title','placeholder','alt'].includes(attr)&&call.arguments[1]===node?['presentation','accessible/display attribute']:['protected-identifier','DOM attribute or selector'];

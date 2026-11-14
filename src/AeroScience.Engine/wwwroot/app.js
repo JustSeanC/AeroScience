@@ -482,7 +482,7 @@ async function loadHistory() {
     const replayLink=el("a",localizedCopy("ui.app.messageReplayFlight"),"button secondary");replayLink.href=`#workspace/replay?missions=${m.id}`;
     science.className="button primary";open.className="tertiary";
     const researchStatus=el("p",localizedCopy("ui.app.messageScientificReviewStatusLoading"),"history-science-status");info.append(researchStatus);
-    api(`/api/missions/${m.id}/archive-summary`).then(summary=>{if(request!==historyRequest)return;setPresentationText(researchStatus,localizedCopy("ui.app.messageScience",{value1:(String(summary.review.status)),value2:(String(summary.instruments.map(id=>readableName(id)).join(", ")||"No enabled instruments in archived configuration"))}));}).catch(()=>{if(request===historyRequest)setPresentationText(researchStatus,localizedCopy("ui.app.messageScientificStatusUnavailableRecordedFlightDetailsRemain"));});
+    api(`/api/missions/${m.id}/archive-summary`).then(summary=>{if(request!==historyRequest)return;setPresentationText(researchStatus,localizedCopy("ui.app.messageScience",{value1:(String(summary.review.status)),value2:(String(summary.instruments.map(id=>readableName(id)).join(", ")||textForUI("ui.app.messageNoEnabledInstrumentsInArchivedConfiguration")))}));}).catch(()=>{if(request===historyRequest)setPresentationText(researchStatus,localizedCopy("ui.app.messageScientificStatusUnavailableRecordedFlightDetailsRemain"));});
     const operationsLink=el("a",localizedCopy("ui.app.messageMissionOperations"),"button secondary");operationsLink.href=`#operations?flight=${m.id}`;meta.append(science,operationsLink,replayLink,open);
     card.append(info, meta);
     list.append(card);
@@ -577,7 +577,7 @@ async function loadSettings() {
   if(settingsLocation().category==="storage")await attachStorage();
   await updateSettings(panels.get("updates"),api);
   try{await sourceSettings(panels.get("science"),api);}catch(error){paragraph("science",textForUI("ui.app.messageScientificSourcesUnavailable",{value1:(String(error.message))}));}
-  if(s.toolbarStatus){paragraph("toolbar",textForUI("ui.app.messageInstalledBundled",{value1:(String(s.toolbarStatus.installedVersion||"Missing / unknown")),value2:(String(s.toolbarStatus.bundledVersion||"Unknown")),value3:(String(s.toolbarStatus.status))}));paragraph("toolbar",s.toolbarStatus.message);}
+  if(s.toolbarStatus){paragraph("toolbar",textForUI("ui.app.messageInstalledBundled",{value1:(String(s.toolbarStatus.installedVersion||textForUI("ui.app.messageMissingUnknown"))),value2:(String(s.toolbarStatus.bundledVersion||textForUI("localization.unknownValue"))),value3:(String(s.toolbarStatus.status))}));paragraph("toolbar",s.toolbarStatus.message);}
   const bridgeStatus=el("p");panels.get("toolbar").append(bridgeStatus);
   async function refreshBridge(){const status=await api("/api/toolbar/bridge");setPresentationText(bridgeStatus,localizedCopy("ui.app.messageCommBusEngineProtocolRequests",{value1:(String(status.state)),value2:(String(status.engineVersion)),value3:(String(status.protocol)),value4:(String(status.requests)),value5:(String(status.replies)),value6:(String(status.lastOperation||"none")),value7:(String(status.message))}));}
   const refreshBridgeButton=el("button",localizedCopy("ui.app.messageRefreshBridgeDiagnostics"),"secondary");refreshBridgeButton.onclick=()=>command(refreshBridgeButton,refreshBridge);panels.get("toolbar").append(refreshBridgeButton);await refreshBridge();

@@ -27,8 +27,8 @@ export async function updateSettings(parent, api) {
   automatic.checked = data.preferences.automatic;
   pre.checked = data.preferences.includePrereleases;
   for (const [node, text] of [
-    [automatic, " Automatic update notifications"],
-    [pre, " Include alpha / prerelease versions"],
+    [automatic, localizedCopy("updates.automaticNotifications")],
+    [pre, localizedCopy("updates.includePrereleases")],
   ]) {
     const label = e("label", text);
     label.prepend(node);
@@ -36,7 +36,7 @@ export async function updateSettings(parent, api) {
   }
   const status = e(
       "p",
-      localizedCopy("ui.applicationUpdates.messageLastChecked",{value1:(String(data.message || "Not checked yet")),value2:(String(data.lastCheckedUtc || "Never"))}),
+      localizedCopy("ui.applicationUpdates.messageLastChecked",{value1:(String(data.message || textForUI("ui.applicationUpdates.messageNotCheckedYet"))),value2:(String(data.lastCheckedUtc || textForUI("ui.applicationUpdates.messageNever")))}),
     ),
     save = e("button", localizedCopy("ui.applicationUpdates.messageSaveUpdatePreferences")),
     check = e("button", localizedCopy("ui.applicationUpdates.messageCheckForUpdates"));

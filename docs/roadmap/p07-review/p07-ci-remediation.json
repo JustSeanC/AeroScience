@@ -153,5 +153,43 @@
   "humanReview": "PENDING",
   "installedWindows": "NOT TESTED",
   "installedMSFS": "NOT TESTED",
-  "correctiveFullCI": "Pending exact-source run after corrective commit"
+  "correctiveFullCI": "Pending final integrated exact-source run after export/coverage correction",
+  "intermediateRun": {
+    "url": "https://github.com/JustSeanC/AeroScience/actions/runs/43589237836",
+    "source": "e2feb43d16ea7a81c9e037d0757416fe1f2f9490",
+    "conclusion": "cancelled",
+    "reason": "Stopped before completion after final coverage review confirmed English display labels/nested prose and locale-sensitive scientific export headers/metadata. Complete and test those corrections before exact-source final Full CI. This run is not acceptance.",
+    "jobResults": [
+      {
+        "name": "validation-scope",
+        "conclusion": "success",
+        "id": 132430245072
+      },
+      {
+        "name": "linux",
+        "conclusion": "cancelled",
+        "id": 132430284014
+      },
+      {
+        "name": "windows-companion",
+        "conclusion": "cancelled",
+        "id": 132430284035
+      },
+      {
+        "name": "organization-deployment",
+        "conclusion": "success",
+        "id": 132430284048
+      },
+      {
+        "name": "development",
+        "conclusion": "skipped",
+        "id": 132430285170
+      },
+      {
+        "name": "windows-profile",
+        "conclusion": "skipped",
+        "id": 132430285270
+      }
+    ]
+  }
 }

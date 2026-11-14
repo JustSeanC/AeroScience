@@ -304,5 +304,185 @@
     "Preuves du profil des cellules de la grille d’origine",
     "Nachweise des Profils aus ursprünglichen Rasterzellen",
     "Evidências do perfil de células da grade original"
+  ],
+  "Automatic update notifications": [
+    "Avisos automáticos de actualizaciones",
+    "Notifications automatiques de mise à jour",
+    "Automatische Update-Benachrichtigungen",
+    "Notificações automáticas de atualização"
+  ],
+  "Include alpha / prerelease versions": [
+    "Incluir versiones alfa y preliminares",
+    "Inclure les versions alpha et préliminaires",
+    "Alpha- und Vorabversionen einbeziehen",
+    "Incluir versões alfa e de pré-lançamento"
+  ],
+  "Actual atmospheric sample points": [
+    "Puntos de muestreo atmosférico reales",
+    "Points d’échantillonnage atmosphérique réels",
+    "Tatsächliche atmosphärische Probenpunkte",
+    "Pontos reais de amostragem atmosférica"
+  ],
+  "Supported sampled path links": [
+    "Enlaces de trayectoria respaldados por muestras",
+    "Liaisons de trajectoire étayées par les échantillons",
+    "Durch Proben belegte Verbindungen der Flugstrecke",
+    "Ligações de trajetória respaldadas pelas amostras"
+  ],
+  "OpenStreetMap / Streets": [
+    "OpenStreetMap / Calles",
+    "OpenStreetMap / Rues",
+    "OpenStreetMap / Straßen",
+    "OpenStreetMap / Ruas"
+  ],
+  "Original source-grid values for analysis": [
+    "Valores de la cuadrícula original para el análisis",
+    "Valeurs de la grille source d’origine pour l’analyse",
+    "Werte des ursprünglichen Quellrasters für die Analyse",
+    "Valores da grade original da fonte para análise"
+  ],
+  "Original source-grid values for comparison": [
+    "Valores de la cuadrícula original para la comparación",
+    "Valeurs de la grille source d’origine pour la comparaison",
+    "Werte des ursprünglichen Quellrasters für den Vergleich",
+    "Valores da grade original da fonte para comparação"
+  ],
+  "Scientific comparison differences": [
+    "Diferencias de la comparación científica",
+    "Écarts de la comparaison scientifique",
+    "Differenzen des wissenschaftlichen Vergleichs",
+    "Diferenças da comparação científica"
+  ],
+  "Retained scientific artifact": [
+    "Producto científico conservado",
+    "Artefact scientifique conservé",
+    "Aufbewahrtes wissenschaftliches Artefakt",
+    "Artefato científico retido"
+  ],
+  "Saved scientific observations": [
+    "Observaciones científicas guardadas",
+    "Observations scientifiques enregistrées",
+    "Gespeicherte wissenschaftliche Beobachtungen",
+    "Observações científicas salvas"
+  ],
+  "Verified scientific raster views": [
+    "Vistas ráster científicas verificadas",
+    "Vues raster scientifiques vérifiées",
+    "Verifizierte wissenschaftliche Rasteransichten",
+    "Visualizações raster científicas verificadas"
+  ],
+  "DEM-derived terrain elevation": [
+    "Elevación del terreno derivada del DEM",
+    "Élévation du terrain dérivée du DEM",
+    "Aus dem DEM abgeleitete Geländehöhe",
+    "Elevação do terreno derivada do DEM"
+  ],
+  "Inspected source values": [
+    "Valores de la fuente inspeccionados",
+    "Valeurs de la source examinées",
+    "Geprüfte Quellwerte",
+    "Valores inspecionados da fonte"
+  ],
+  "Quality-checked original source-grid cells in the selected window; these are not flight observations or sensor coverage.": [
+    "Celdas de la cuadrícula original con control de calidad en la ventana seleccionada; no son observaciones de vuelo ni cobertura del sensor.",
+    "Cellules de la grille source d’origine contrôlées dans la fenêtre sélectionnée ; ce ne sont ni des observations de vol ni une couverture du capteur.",
+    "Qualitätsgeprüfte Zellen des ursprünglichen Quellrasters im ausgewählten Fenster; dies sind keine Flugbeobachtungen und keine Sensorabdeckung.",
+    "Células da grade original da fonte com qualidade verificada na janela selecionada; não são observações de voo nem cobertura do sensor."
+  ],
+  "Original footprint; not quality-checked coverage": [
+    "Huella original; no es cobertura con calidad verificada",
+    "Emprise d’origine ; ce n’est pas une couverture dont la qualité a été vérifiée",
+    "Ursprünglicher Erfassungsbereich; keine qualitätsgeprüfte Abdeckung",
+    "Área original; não representa cobertura com qualidade verificada"
+  ],
+  "Pilot observations — recorded points only": [
+    "Observaciones del piloto: solo puntos registrados",
+    "Observations du pilote — points enregistrés uniquement",
+    "Pilotenbeobachtungen — nur aufgezeichnete Punkte",
+    "Observações do piloto — somente pontos registrados"
+  ],
+  "Flight path context — not scientific coverage": [
+    "Trayectoria de vuelo como contexto; no es cobertura científica",
+    "Trajectoire du vol à titre de contexte — aucune couverture scientifique",
+    "Flugstrecke als Kontext — keine wissenschaftliche Abdeckung",
+    "Trajetória do voo como contexto — não é cobertura científica"
+  ],
+  "SimBrief documented degrees/minutes/seconds": [
+    "Grados/minutos/segundos según la documentación de SimBrief",
+    "Degrés/minutes/secondes selon la documentation de SimBrief",
+    "Grad/Minuten/Sekunden gemäß SimBrief-Dokumentation",
+    "Graus/minutos/segundos conforme a documentação do SimBrief"
+  ],
+  "FAA TFR boundaries · activation unknown": [
+    "Límites TFR de la FAA · activación desconocida",
+    "Limites TFR de la FAA · activation inconnue",
+    "FAA-TFR-Grenzen · Aktivierung unbekannt",
+    "Limites TFR da FAA · ativação desconhecida"
+  ],
+  "Live simulator telemetry required; no remote preparation": [
+    "Requiere telemetría en directo del simulador; sin preparación remota",
+    "Télémétrie du simulateur en direct requise ; aucune préparation à distance",
+    "Live-Telemetrie des Simulators erforderlich; keine Fernvorbereitung",
+    "Requer telemetria ao vivo do simulador; sem preparação remota"
+  ],
+  "{measurement} — actual qualified samples": [
+    "{measurement}: muestras reales que cumplen los requisitos",
+    "{measurement} — échantillons réels répondant aux critères",
+    "{measurement} — tatsächliche Proben, die die Kriterien erfüllen",
+    "{measurement} — amostras reais que atendem aos critérios"
+  ],
+  "Unsupported organization credential.": [
+    "Credencial de organización no compatible.",
+    "Informations d’authentification d’organisation non prises en charge.",
+    "Nicht unterstützter Organisations-Zugangsnachweis.",
+    "Credencial da organização não compatível."
+  ],
+  "Unsupported ownership key.": [
+    "Clave de titularidad no compatible.",
+    "Clé de propriétaire non prise en charge.",
+    "Nicht unterstützter Eigentümerschlüssel.",
+    "Chave de propriedade não compatível."
+  ],
+  "Choose a database folder using Browse; the database filename must remain missions.db.": [
+    "Elige una carpeta de base de datos con Examinar; el nombre del archivo debe seguir siendo missions.db.",
+    "Choisissez un dossier de base de données avec Parcourir ; le nom du fichier doit rester missions.db.",
+    "Wählen Sie mit Durchsuchen einen Datenbankordner; der Dateiname muss missions.db bleiben.",
+    "Escolha uma pasta de banco de dados usando Procurar; o nome do arquivo deve continuar sendo missions.db."
+  ],
+  "Type the exact confirmation phrase shown for this archive.": [
+    "Escribe exactamente la frase de confirmación que se muestra para este archivo.",
+    "Saisissez exactement la phrase de confirmation affichée pour cette archive.",
+    "Geben Sie die für dieses Archiv angezeigte Bestätigungsphrase exakt ein.",
+    "Digite exatamente a frase de confirmação exibida para este arquivo."
+  ],
+  "A mission is already recording. This advisory cannot start another flight.": [
+    "Ya se está grabando una misión. Este aviso no puede iniciar otro vuelo.",
+    "Une mission est déjà en cours d’enregistrement. Cet avis ne peut pas démarrer un autre vol.",
+    "Eine Mission wird bereits aufgezeichnet. Dieser Hinweis kann keinen weiteren Flug starten.",
+    "Uma missão já está sendo gravada. Este aviso não pode iniciar outro voo."
+  ],
+  "A permission changed during saving. Review current settings and try again.": [
+    "Un permiso ha cambiado durante el guardado. Revisa los ajustes actuales y vuelve a intentarlo.",
+    "Une autorisation a changé pendant l’enregistrement. Vérifiez les paramètres actuels, puis réessayez.",
+    "Eine Berechtigung wurde während des Speicherns geändert. Prüfen Sie die aktuellen Einstellungen und versuchen Sie es erneut.",
+    "Uma permissão mudou durante o salvamento. Revise as configurações atuais e tente novamente."
+  ],
+  "A requirement waiver cannot add a pilot. Clear partial contributor credit.": [
+    "Una exención de requisitos no puede añadir un piloto. Borra el crédito parcial de contribución.",
+    "Une dérogation ne peut pas ajouter de pilote. Effacez le crédit partiel de contribution.",
+    "Eine Anforderungsbefreiung kann keinen Piloten hinzufügen. Entfernen Sie die teilweise Beitragsanrechnung.",
+    "Uma dispensa de requisito não pode adicionar um piloto. Remova o crédito parcial de contribuição."
+  ],
+  "A polygon needs at least three valid coordinate pairs.": [
+    "Un polígono necesita al menos tres pares de coordenadas válidos.",
+    "Un polygone nécessite au moins trois paires de coordonnées valides.",
+    "Ein Polygon benötigt mindestens drei gültige Koordinatenpaare.",
+    "Um polígono precisa de pelo menos três pares de coordenadas válidos."
+  ],
+  "OR — one selected condition for its whole hold": [
+    "O: una condición seleccionada durante todo el intervalo de mantenimiento",
+    "OU — une condition sélectionnée pendant toute sa durée de maintien",
+    "ODER — eine ausgewählte Bedingung während ihrer gesamten Haltezeit",
+    "OU — uma condição selecionada durante todo o período de manutenção"
   ]
 }

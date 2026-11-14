@@ -119,22 +119,22 @@ public sealed class SetupWizardForm : BrandedForm
         {
             if (page == 1)
             {
-                if (!Path.GetFileName(mission.Text).Equals("missions.db", StringComparison.OrdinalIgnoreCase)) throw new IOException("Choose a database folder using Browse; the database filename must remain missions.db.");
+                if (!Path.GetFileName(mission.Text).Equals("missions.db", StringComparison.OrdinalIgnoreCase)) throw new IOException(WindowsPresentation.Text("windows.error.databaseFilename"));
                 var settings = app.Preferences.Load();
                 var folders = new[] { Path.GetDirectoryName(mission.Text)!, library.Text };
                 for (var index = 0; index < folders.Length; index++)
                 {
                     var unchanged = settings.Initialized && SamePath(folders[index], index == 0 ? settings.MissionDirectory : settings.ScienceLibraryDirectory);
                     SetupCoordinator.ValidateDataLocation(folders[index], AppContext.BaseDirectory, requireAvailable: index == 0 || !unchanged);
-                    if (!unchanged && new LocalStorageCapacity().FreeBytes(folders[index]) < StorageManager.MinimumFreeBytes) throw new IOException("There is insufficient free space on a selected storage drive.");
+                    if (!unchanged && new LocalStorageCapacity().FreeBytes(folders[index]) < StorageManager.MinimumFreeBytes) throw new IOException(WindowsPresentation.Text("windows.error.insufficientSpace"));
                 }
                 if (!(settings.Initialized && SamePath(library.Text, settings.ScienceLibraryDirectory)) && new LocalStorageCapacity().FreeBytes(library.Text) < StorageManager.LibraryLowSpaceWarningBytes
                     && MessageBox.Show(this, WindowsPresentation.Text("windows.setupWizardForm.theScienceLibraryDriveHasLimitedFreeSpaceFuture"), WindowsPresentation.Text("windows.setupWizardForm.storageCapacity"), MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes) return;
             }
             if (page == 2 && install.Checked)
             {
-                if (ToolbarInstaller.SimulatorRunning()) throw new IOException("Close MSFS before installing the toolbar, or choose Skip for Now.");
-                if (!Directory.Exists(community.Text)) throw new IOException("Choose an existing Community folder, or choose Skip for Now.");
+                if (ToolbarInstaller.SimulatorRunning()) throw new IOException(WindowsPresentation.Text("windows.error.closeSimulator"));
+                if (!Directory.Exists(community.Text)) throw new IOException(WindowsPresentation.Text("windows.error.communityFolder"));
             }
             if (page < 3) { page++; Render(); return; }
             working = true; back.Enabled = next.Enabled = cancel.Enabled = false;

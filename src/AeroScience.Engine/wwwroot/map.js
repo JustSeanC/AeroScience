@@ -586,7 +586,7 @@ export class ResearchMap {
           )
           .addTo(this.markers);
       for (const p of (d.samples || []).filter(valid))
-        L.circleMarker(ll(p, base), { radius: 2, color: "#a4bdf3" }).bindTooltip(label(localizedCopy("ui.map.messageSuccessfulSample",{value1:(String(p.instrumentId||"Scientific")),value2:(String(p.timestampUtc||""))}))).addTo(
+        L.circleMarker(ll(p, base), { radius: 2, color: "#a4bdf3" }).bindTooltip(label(localizedCopy("ui.map.messageSuccessfulSample",{value1:(String(p.instrumentId||textForUI("ui.scienceDisplay.messageScientific"))),value2:(String(p.timestampUtc||""))}))).addTo(
           this.samples,
         );
       for(const f of d.footprints||[])if(f.vertices?.length>=3&&f.vertices.every(valid))L.polygon(f.vertices.map(p=>ll(p,base)),{color:"#a4bdf3",weight:1,fillOpacity:.07}).bindTooltip(label(f.label||localizedCopy("ui.map.messageDerivedScientificSamplingFootprint"))).addTo(this.footprints);
@@ -621,9 +621,9 @@ export class ResearchMap {
     }
     setPresentationText(this.coordinate,localizedCopy("ui.map.messageGoldPlannedTurquoiseRecorded",{value1:(String((this.layerError ? this.layerError + " " : "") +
       (this.onlineTiles.length
-        ? "Online basemap with bundled geographic reference"
-        : "Offline Natural Earth geography"))),value2:(String(this.initialized ? "" : "No location selected: regional default USA. ")),value3:(String(this.onPoint
-        ? "Choose Add Waypoint or Draw Survey Area to edit; pan normally otherwise. "
+        ? textForUI("ui.map.messageOnlineBasemapWithBundledGeographicReference")
+        : textForUI("ui.map.messageOfflineNaturalEarthGeography")))),value2:(String(this.initialized ? "" : textForUI("ui.map.messageNoLocationSelectedRegionalDefaultUSA"))),value3:(String(this.onPoint
+        ? textForUI("ui.map.messageChooseAddWaypointOrDrawSurveyArea")
         : ""))}));
   }
 }

@@ -110,7 +110,7 @@ export async function libraryDownload(parent, api, isDisposed = () => false, opt
   async function refreshEarthdata() {
     const connection = await api("/api/science/earthdata");
     if (stopped || isDisposed()) return;
-    setPresentationText(earthdataText,localizedCopy("ui.libraryDownload.messageOnPairedDevicesCompleteConnection",{value1:(String(connection.connected ? "Credential saved" : "Not connected")),value2:(String(connection.message))}));
+    setPresentationText(earthdataText,localizedCopy("ui.libraryDownload.messageOnPairedDevicesCompleteConnection",{value1:(String(connection.connected ? textForUI("ui.libraryDownload.messageCredentialSaved") : textForUI("ui.libraryDownload.messageNotConnected"))),value2:(String(connection.message))}));
     connectEarthdata.hidden=connection.connected;disconnectEarthdata.hidden=!connection.connected;
   }
   const advancedFilters = disclosure(form, localizedCopy("ui.libraryDownload.messageAdvancedDiscoveryFilters"));
@@ -376,7 +376,7 @@ export async function libraryDownload(parent, api, isDisposed = () => false, opt
     const own=++regionEpoch;const r=await api("/api/science/library/regions/names",{cachedOnly:cached.checked});
     if(stopped||isDisposed()||own!==regionEpoch)return;
     namedState.replaceChildren(new Option(textForUI("ui.libraryDownload.messageSelectAState"), ""),...r.items.map(i=>new Option(i.name,i.code)));
-    setPresentationText(namesStatus,localizedCopy("ui.libraryDownload.messageOfficialCensusStatesSelectA",{value1:(String(r.cached?"Cached":"Retrieved")),value2:(String(dateTime(r.asOfUtc)))}));
+    setPresentationText(namesStatus,localizedCopy("ui.libraryDownload.messageOfficialCensusStatesSelectA",{value1:(String(r.cached?textForUI("ui.libraryDownload.messageCached"):textForUI("ui.libraryDownload.messageRetrieved"))),value2:(String(dateTime(r.asOfUtc)))}));
   });
   namedState.onchange=async()=>{
     const own=++regionEpoch;state.value=namedState.value;county.value="";namedCounty.replaceChildren(new Option(textForUI("ui.libraryDownload.messageEntireSelectedState"), ""));
@@ -384,7 +384,7 @@ export async function libraryDownload(parent, api, isDisposed = () => false, opt
     try{const r=await api("/api/science/library/regions/names",{stateFips:state.value,cachedOnly:cached.checked});
       if(stopped||isDisposed()||own!==regionEpoch)return;
       namedCounty.append(...r.items.map(i=>new Option(i.name,i.code)));
-      setPresentationText(namesStatus,localizedCopy("ui.libraryDownload.messageCountiesReviewThe",{value1:(String(namedState.selectedOptions[0].textContent)),value2:(String(r.items.length)),value3:(String(r.cached?"Cached":"Retrieved")),value4:(String(dateTime(r.asOfUtc)))}));
+      setPresentationText(namesStatus,localizedCopy("ui.libraryDownload.messageCountiesReviewThe",{value1:(String(namedState.selectedOptions[0].textContent)),value2:(String(r.items.length)),value3:(String(r.cached?textForUI("ui.libraryDownload.messageCached"):textForUI("ui.libraryDownload.messageRetrieved"))),value4:(String(dateTime(r.asOfUtc)))}));
     }catch(error){if(own===regionEpoch)setPresentationText(namesStatus,error.message);}
   };
   namedCounty.onchange=()=>{county.value=namedCounty.value;};
@@ -408,7 +408,7 @@ export async function libraryDownload(parent, api, isDisposed = () => false, opt
       style: { color: "#ffd166", fillOpacity: 0.12 },
     }).addTo(layers.selected);
     fitSelection();
-    setPresentationText(selectionText,localizedCopy("ui.libraryDownload.messagePreviewAssessesThe",{value1:(String(r.name)),value2:(String(r.resolution)),value3:(String(r.cached ? "Cached" : "Retrieved")),value4:(String(dateTime(r.asOfUtc)))}));
+    setPresentationText(selectionText,localizedCopy("ui.libraryDownload.messagePreviewAssessesThe",{value1:(String(r.name)),value2:(String(r.resolution)),value3:(String(r.cached ? textForUI("ui.libraryDownload.messageCached") : textForUI("ui.libraryDownload.messageRetrieved"))),value4:(String(dateTime(r.asOfUtc)))}));
   });
   const chunks = el("div", undefined, "library-chunks");
   selection.append(chunks);
@@ -460,9 +460,9 @@ export async function libraryDownload(parent, api, isDisposed = () => false, opt
     if(stopped||isDisposed()||own!==localEpoch)return;
     localThrough=page.through;localSources=page.items;
     firstLocal.disabled=after===0;nextLocal.disabled=page.next==null;nextLocal.dataset.next=page.next??'';
-    setPresentationText(localStatus,localizedCopy("ui.libraryDownload.messageRetainedCandidatesOnThisPage",{value1:(String(page.items.length)),value2:(String(page.total)),value3:(String(polygon||regionGeometry?'Search bounds enclose the selected shape; some candidates lie outside it. ':''))}));
+    setPresentationText(localStatus,localizedCopy("ui.libraryDownload.messageRetainedCandidatesOnThisPage",{value1:(String(page.items.length)),value2:(String(page.total)),value3:(String(polygon||regionGeometry?textForUI("ui.libraryDownload.messageSearchBoundsEncloseTheSelectedShapeSome"):''))}));
     const key=JSON.stringify([area,page.items]);if(key===localSignature)return;localSignature=key;layers.retained.clearLayers();
-    for(const source of page.items)for(const ring of source.bounds||[])L.polygon(ring.map(p=>[p.latitude,p.longitude]),{color:source.filesAvailable?'#45d6bf':'#ff8899',fillOpacity:.08}).bindTooltip(el('span',localizedCopy("ui.libraryDownload.messageIntegrityCompatibilityAndPixel",{value1:(String(source.filesAvailable?'Retained candidate':'Unavailable')),value2:(String(source.manifest.sceneId))}))).addTo(layers.retained);
+    for(const source of page.items)for(const ring of source.bounds||[])L.polygon(ring.map(p=>[p.latitude,p.longitude]),{color:source.filesAvailable?'#45d6bf':'#ff8899',fillOpacity:.08}).bindTooltip(el('span',localizedCopy("ui.libraryDownload.messageIntegrityCompatibilityAndPixel",{value1:(String(source.filesAvailable?textForUI("ui.libraryDownload.messageRetainedCandidate"):textForUI("map.native.unavailable"))),value2:(String(source.manifest.sceneId))}))).addTo(layers.retained);
   }
 
   const previewBox = el("section", undefined, "panel");
@@ -492,7 +492,7 @@ export async function libraryDownload(parent, api, isDisposed = () => false, opt
         localizedCopy("ui.libraryDownload.messageSelectionChangedPreviewAndExplicitApprovalAre"),
       ),
     );
-    setPresentationText(selectionText,localizedCopy("ui.libraryDownload.messageSelectedNumericSourceCellsAre",{value1:(String(areas.length)),value2:(String(areas.length===1?'area':'areas')),value3:(String(polygon ? " · polygon clipping" : "")),value4:(String(regionGeometry ? " · authoritative region" : "")),value5:(String(polygon||regionGeometry?" The provider search uses enclosing bounds; edge windows may include pixels outside the selected shape. Review the exact work windows before approval.":""))}));
+    setPresentationText(selectionText,localizedCopy("ui.libraryDownload.messageSelectedNumericSourceCellsAre",{value1:(String(areas.length)),value2:(String(areas.length===1?'area':'areas')),value3:(String(polygon ? textForUI("ui.libraryDownload.messagePolygonClipping") : "")),value4:(String(regionGeometry ? textForUI("ui.libraryDownload.messageAuthoritativeRegion") : "")),value5:(String(polygon||regionGeometry?textForUI("ui.libraryDownload.messageTheProviderSearchUsesEnclosingBounds"):""))}));
     layers.selected.clearLayers();
     for (const a of areas)
       shape(a, "#ffd166", layers.selected, localizedCopy("ui.libraryDownload.messageSelectedNumericWindow"));
@@ -661,15 +661,15 @@ export async function libraryDownload(parent, api, isDisposed = () => false, opt
       layers.remote.clearLayers();
     }
     results.push(...page.items.filter(item=>!results.some(old=>old.provider===item.provider&&old.scene===item.scene)));
-    setPresentationText(feedback,localizedCopy("ui.libraryDownload.messageAsOfExpires",{value1:(String(page.status==="Available"?"Matching catalog scenes found":page.status==="No match"?"No matching scenes in this searched scope":page.status==="Unavailable"?"Provider unavailable — availability was not established":page.status)),value2:(String(page.cached ? " · cached, not a new live search" : "")),value3:(String(dateTime(page.asOfUtc))),value4:(String(dateTime(page.expiresUtc))),value5:(String(page.error || ""))}));
+    setPresentationText(feedback,localizedCopy("ui.libraryDownload.messageAsOfExpires",{value1:(String(page.status==="Available"?textForUI("ui.libraryDownload.messageMatchingCatalogScenesFound"):page.status==="No match"?textForUI("ui.libraryDownload.messageNoMatchingScenesInThisSearchedScope"):page.status==="Unavailable"?textForUI("ui.libraryDownload.messageProviderUnavailableAvailabilityWasNotEstablished"):page.status)),value2:(String(page.cached ? textForUI("ui.libraryDownload.messageCachedNotANewLive") : "")),value3:(String(dateTime(page.asOfUtc))),value4:(String(dateTime(page.expiresUtc))),value5:(String(page.error || ""))}));
     catalogList.replaceChildren(el("h2", localizedCopy("ui.libraryDownload.messageProviderCatalogResults")));
-    catalogList.append(el("p", localizedCopy("ui.libraryDownload.messageMatchingCatalogEntriesInTheLoaded",{value1:(String(results.length)),value2:(String(page.ordering||"Provider ordering not established."))})));
+    catalogList.append(el("p", localizedCopy("ui.libraryDownload.messageMatchingCatalogEntriesInTheLoaded",{value1:(String(results.length)),value2:(String(page.ordering||textForUI("ui.libraryDownload.messageProviderOrderingNotEstablished")))})));
     const dates=results.map(i=>i.observationUtc?.slice(0,10)).filter(Boolean).sort();
     if(dates.length){catalogList.append(el("p",localizedCopy("ui.libraryDownload.messageMatchingScenesFoundFromToInThis",{value1:(String(dates[0])),value2:(String(dates.at(-1)))})));
       for(const option of [...dateScope.options])if(option.value.startsWith("year-"))option.remove();
       for(const year of [...new Set(dates.map(d=>d.slice(0,4)))].sort().reverse())dateScope.append(new Option(textForUI("ui.libraryDownload.messageDiscoveredObservationsIn",{value1:(String(year))}),`year-${year}`));
     }
-    if(!results.length){catalogList.append(el("p",localizedCopy("ui.libraryDownload.messageAppliedAreaLatitude",{value1:(String(query.area.south)),value2:(String(query.area.north)),value3:(String(query.area.west)),value4:(String(query.area.east)),value5:(String(query.fromUtc?.slice(0,10)||"unrestricted")),value6:(String(query.toUtc?.slice(0,10)||"unrestricted")),value7:(String(cloud.disabled?"not applicable":query.maximumCloudPercent+"%")),value8:(String(page.status==="Unavailable"?"This is a provider failure, not evidence that no data exists.":"Try earlier years, adjust the cloud filter, or explicitly choose a nearby supported area. No filters or products are widened automatically."))})));}
+    if(!results.length){catalogList.append(el("p",localizedCopy("ui.libraryDownload.messageAppliedAreaLatitude",{value1:(String(query.area.south)),value2:(String(query.area.north)),value3:(String(query.area.west)),value4:(String(query.area.east)),value5:(String(query.fromUtc?.slice(0,10)||"unrestricted")),value6:(String(query.toUtc?.slice(0,10)||"unrestricted")),value7:(String(cloud.disabled?textForUI("ui.libraryDownload.messageNotApplicable"):query.maximumCloudPercent+"%")),value8:(String(page.status==="Unavailable"?textForUI("ui.libraryDownload.messageThisIsAProviderFailureNotEvidence"):textForUI("ui.libraryDownload.messageTryEarlierYearsAdjustTheCloudFilter")))})));}
     if(provider.value==="landsat"||provider.value==="sentinel-2")button(catalogList,localizedCopy("ui.libraryDownload.messageSearchEarlierYears"),async()=>{
       const end=from.value?new Date(from.value+"T00:00:00Z").getTime()-86400000:Date.now()-365*86400000;userDates=true;
       from.value=new Date(end-364*86400000).toISOString().slice(0,10);to.value=new Date(end).toISOString().slice(0,10);filtersChanged();return search();
@@ -702,7 +702,7 @@ export async function libraryDownload(parent, api, isDisposed = () => false, opt
       more.append(
         el(
           "p",
-          localizedCopy("ui.libraryDownload.messageCRSVerticalDatumSourceRevision",{value1:(String(item.crs || "Unknown")),value2:(String(item.verticalDatum)),value3:(String(item.revision))}),
+          localizedCopy("ui.libraryDownload.messageCRSVerticalDatumSourceRevision",{value1:(String(item.crs || textForUI("localization.unknownValue"))),value2:(String(item.verticalDatum)),value3:(String(item.revision))}),
         ),
         el(
           "p",
@@ -713,7 +713,7 @@ export async function libraryDownload(parent, api, isDisposed = () => false, opt
       );
       if (item.nasa) {
         const n = item.nasa;
-        row.append(el("p", `${n.family} · ${n.capability}`), el("p", localizedCopy("ui.libraryDownload.messageFlightlineCollectionReflectance",{value1:(String(n.flightline)),value2:(String(n.collectionId)),value3:(String(n.collectionVersion)),value4:(String(n.processingLevel)),value5:(String(n.format))})), el("p", localizedCopy("ui.libraryDownload.messageOriginalDistributionWavelengths",{value1:(String(n.authorization)),value2:(String(bytes(n.originalBytes))),value3:(String(n.bandCount ?? "Unknown until original-file verification"))})));
+        row.append(el("p", `${n.family} · ${n.capability}`), el("p", localizedCopy("ui.libraryDownload.messageFlightlineCollectionReflectance",{value1:(String(n.flightline)),value2:(String(n.collectionId)),value3:(String(n.collectionVersion)),value4:(String(n.processingLevel)),value5:(String(n.format))})), el("p", localizedCopy("ui.libraryDownload.messageOriginalDistributionWavelengths",{value1:(String(n.authorization)),value2:(String(bytes(n.originalBytes))),value3:(String(n.bandCount ?? textForUI("ui.libraryDownload.messageUnknownUntilOriginalFileVerification")))})));
         more.append(el("p", localizedCopy("ui.libraryDownload.messageNASAMetadataUpdatedNotTheObservationOr",{value1:(String(dateTime(n.updatedUtc))),value2:(String(n.collectionRevision)),value3:(String(n.metadataUrl))})));
         for (const asset of n.assets) { const a = link(more, `${asset.role}: ${asset.name}`, asset.url); a.target="_blank"; a.rel="noopener noreferrer"; }
         const official = link(row, localizedCopy("ui.libraryDownload.messageOpenOfficialNASAAccessEarthdata"), item.reference); official.target="_blank"; official.rel="noopener noreferrer";
@@ -837,7 +837,7 @@ export async function libraryDownload(parent, api, isDisposed = () => false, opt
       ),
       el(
         "p",
-        localizedCopy("ui.libraryDownload.messageDriveFreeLibraryUsedLimit",{value1:(String(bytes(p.availableDriveBytes))),value2:(String(bytes(p.scientificStorageUsedBytes))),value3:(String(p.scientificStorageLimitBytes==null?(p.availableDriveBytes==null?"Unknown":"Unlimited"):bytes(p.scientificStorageLimitBytes))),value4:(String(bytes(p.preparationBudgetRemainingBytes)))}),
+        localizedCopy("ui.libraryDownload.messageDriveFreeLibraryUsedLimit",{value1:(String(bytes(p.availableDriveBytes))),value2:(String(bytes(p.scientificStorageUsedBytes))),value3:(String(p.scientificStorageLimitBytes==null?(p.availableDriveBytes==null?textForUI("localization.unknownValue"):textForUI("ui.downloadActivity.messageUnlimited")):bytes(p.scientificStorageLimitBytes))),value4:(String(bytes(p.preparationBudgetRemainingBytes)))}),
       ),
       el(
         "p",

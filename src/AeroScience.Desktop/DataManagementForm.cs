@@ -89,7 +89,7 @@ public sealed class DataManagementForm : BrandedForm
         try
         {
             var preview = Preview(science);
-            if (typed != preview.ConfirmationPhrase) throw new InvalidOperationException("Type the exact confirmation phrase shown for this archive.");
+            if (typed != preview.ConfirmationPhrase) throw new InvalidOperationException(WindowsPresentation.Text("windows.error.exactConfirmationPhrase"));
             if(preview.ProtectedItems>0&&MessageBox.Show(this,WindowsPresentation.Text("windows.dataManagementForm.thisDeliberateArchiveClearIncludesProtectedMissionSDataset", new Dictionary<string, object> { ["value1"] = WindowsPresentation.Format($"{preview.ProtectedItems}") }),WindowsPresentation.Text("windows.dataManagementForm.protectedResearchData"),MessageBoxButtons.YesNo,MessageBoxIcon.Warning,MessageBoxDefaultButton.Button2)!=DialogResult.Yes)return;
             var selection = ArchiveClearPolicy.ChooseBackup(backupRequested, () =>
             {
@@ -117,7 +117,7 @@ public sealed class DataManagementForm : BrandedForm
             {
                 var settings = app.Preferences.Load(); using var missionLease = StorageManager.Acquire(settings.MissionDirectory);
                 var missions = new MissionStore(Path.Combine(settings.MissionDirectory, "missions.db"));
-                if (missions.List(1000, 0).Any(m => m.Status == MissionStatus.Recording)) throw new InvalidOperationException("A recording remains active; no data was cleared.");
+                if (missions.List(1000, 0).Any(m => m.Status == MissionStatus.Recording)) throw new InvalidOperationException(WindowsPresentation.Text("windows.error.recordingStillActive"));
                 using var library = new ScienceStore(settings.ScienceLibraryDirectory);
                 if (backupFolder is not null) result = DataBackup.Create(missions.DatabasePath, backupFolder, false);
                 missions.ClearFlightData(typed, includePlans);

@@ -286,7 +286,7 @@ export function scienceCharts(parent, rows) {
                   return [
                     `${p.y.toFixed(3)} ${unit}`,
                     `${p.row.timestampUtc}`,
-                    textForUI("ui.scienceDisplay.messageAltitude",{value1:(String(displayReading("altitude", p.row.altitudeMslFeet, "ft MSL").value?.toFixed(0) ?? "Unavailable")),value2:(String(displayReading("altitude", 0, "ft MSL").unit))}),
+                    textForUI("ui.scienceDisplay.messageAltitude",{value1:(String(displayReading("altitude", p.row.altitudeMslFeet, textForUI("ui.scienceDisplay.messageFtMSL")).value?.toFixed(0) ?? textForUI("map.native.unavailable"))),value2:(String(displayReading("altitude", 0, textForUI("ui.scienceDisplay.messageFtMSL")).unit))}),
                     textForUI("ui.scienceDisplay.messageQuality",{value1:(String(p.row.quality)),value2:(String(p.row.provenance))}),
                   ];
                 },

@@ -20,9 +20,16 @@ export function protectedTranslation(source,messages=en){const rows=[],compariso
   const getterVariable=ancestors.find(p=>p.type==='VariableDeclarator')?.id?.name||'',displayDictionary=/(?:Names|Labels|Titles|Texts|Copy|^names)$/i.test(getterVariable);
   const property=chain.find(p=>p.type==='Property'&&!parameterProperty(p));if(property&&protectedFields.has(prop(property.key))&&!displayDictionary)reason='Protected object field '+prop(property.key);
   if(property&&prop(property.key)==='action'&&typeof text==='string'&&!/\s/.test(text))reason='Protected command action identity';
+  if(property&&prop(property.key)==='evidenceClass')reason='Original scientific export evidence class';
+  const exportRows=ancestors.findIndex(p=>p.type==='VariableDeclarator'&&p.id?.name==='rows'||p.type==='CallExpression'&&p.callee.type==='MemberExpression'&&p.callee.object.name==='rows'&&prop(p.callee)==='push');
+  const exportFunction=exportRows<0?null:ancestors.slice(exportRows+1).find(p=>/Function/.test(p.type));
+  if(exportFunction&&/downloadAnalysis\(|new Blob\(/.test(source.slice(exportFunction.start,exportFunction.end)))reason='Original scientific export row/header';
+  if(chain.some(p=>p.type==='NewExpression'&&p.callee.name==='Blob'))reason='Original exported bytes';
   const getter=ancestors.find(p=>p.type==='Property'&&p.kind==='get');if(getter&&protectedFields.has(prop(getter.key))&&!displayDictionary)reason='Protected getter field '+prop(getter.key);
   const assignment=chain.find(p=>p.type==='AssignmentExpression');if(assignment?.left.type==='MemberExpression'&&protectedFields.has(prop(assignment.left)))reason='Protected assignment '+prop(assignment.left);
   for(const call of chain.filter(p=>p.type==='CallExpression')){
+   if(prop(call.callee)==='normalize'&&argumentPosition(call,n)===0)reason='Unicode normalization algorithm identity';
+   if(prop(call.callee)==='downloadAnalysis'&&argumentPosition(call,n)===0)reason='Original scientific export data';
    if(['includes','indexOf','startsWith','endsWith'].includes(prop(call.callee))&&call.callee.type==='MemberExpression'&&call.callee.object.start<=n.start&&call.callee.object.end>=n.end)reason='Stable identity search receiver';
    if(call.arguments[0]?.type==='Literal'&&tag.test(call.arguments[0].value)&&!['fetch','api','querySelector','getElementById'].includes(prop(call.callee))){const pos=call.arguments.findIndex(a=>a.start<=n.start&&a.end>=n.end);if(pos===0||pos>=2)reason='DOM tag/style/helper identity';break;}
    const contract=contracts(prop(call.callee),call);

@@ -6,7 +6,7 @@ import {openAviationReference} from './aviation-reference.js';
 import {dialogHeader,requestDialogClose,markDialogSaved} from './dialog-ui.js';
 const layers = [
   ["offline", localizedCopy("ui.basemaps.messageOfflineGeographicMap")],
-  ["streets", "OpenStreetMap / Streets"],
+  ["streets", localizedCopy("map.openStreetMapStreets")],
   ["satellite", localizedCopy("ui.basemaps.messageSatelliteImagery")],
   ["satellite-labels", localizedCopy("ui.basemaps.messageSatelliteLabels")],
   ["esri-outdoor", localizedCopy("ui.basemaps.messageEsriOutdoorTopographicContext")],

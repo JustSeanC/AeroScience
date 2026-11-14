@@ -535,7 +535,8 @@
       "surface": "evidence",
       "locations": [
         "src/AeroScience.Engine/wwwroot/mission-operations.js:68",
-        "src/AeroScience.Engine/wwwroot/sensor-operating-status.js:4"
+        "src/AeroScience.Engine/wwwroot/sensor-operating-status.js:4",
+        "src/AeroScience.Organization/wwwroot/research-template-ui.js:67"
       ],
       "preservedTokens": []
     },
@@ -749,7 +750,8 @@
         "src/AeroScience.Engine/wwwroot/map.js:96",
         "src/AeroScience.Engine/wwwroot/map.js:97",
         "src/AeroScience.Engine/wwwroot/storage-management.js:239",
-        "src/AeroScience.Engine/wwwroot/survey-research.js:42"
+        "src/AeroScience.Engine/wwwroot/survey-research.js:42",
+        "src/AeroScience.Engine/wwwroot/mission-intelligence.js:73"
       ],
       "preservedTokens": []
     },
@@ -1159,7 +1161,10 @@
       "maximumLength": 4096,
       "critical": false,
       "surface": "home",
-      "preservedTokens": []
+      "preservedTokens": [],
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/science-journey.js:42"
+      ]
     },
     "home.science.armed": {
       "context": "P03a read-only Home/navigation text; preserve recording/science separation and do not imply readiness, quality, permission or completion. Names and source messages are original data, never translated.",
@@ -2498,7 +2503,10 @@
       "maximumLength": 4096,
       "critical": false,
       "surface": "flight",
-      "preservedTokens": []
+      "preservedTokens": [],
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/download-activity.js:51"
+      ]
     },
     "flight.retainedProducts": {
       "context": "P04 flight presentation; enabled is separate from operating or scientifically valid. flight.retainedProducts",
@@ -3966,7 +3974,9 @@
       "critical": false,
       "surface": "results",
       "locations": [
-        "src/AeroScience.Engine/wwwroot/campaign-progress-ui.js:5"
+        "src/AeroScience.Engine/wwwroot/campaign-progress-ui.js:5",
+        "src/AeroScience.Engine/wwwroot/research.js:1443",
+        "src/AeroScience.Engine/wwwroot/scientific-sources.js:35"
       ],
       "preservedTokens": []
     },
@@ -5624,7 +5634,8 @@
       "surface": "collaboration",
       "preservedTokens": [],
       "locations": [
-        "src/AeroScience.Engine/wwwroot/mission-operations.js:74"
+        "src/AeroScience.Engine/wwwroot/mission-operations.js:74",
+        "src/AeroScience.Engine/wwwroot/flight-test-procedure.js:44"
       ]
     },
     "collaboration.liveScope": {
@@ -6228,7 +6239,49 @@
         "src/AeroScience.Engine/wwwroot/workstation-ui.js:11",
         "src/AeroScience.Engine/wwwroot/workstation-ui.js:13",
         "src/AeroScience.Engine/wwwroot/mission-operations.js:74",
-        "src/AeroScience.Engine/wwwroot/submission-builder.js:89"
+        "src/AeroScience.Engine/wwwroot/submission-builder.js:89",
+        "src/AeroScience.Engine/wwwroot/app.js:580",
+        "src/AeroScience.Engine/wwwroot/aviation-charts.js:45",
+        "src/AeroScience.Engine/wwwroot/aviation-map-layers.js:23",
+        "src/AeroScience.Engine/wwwroot/aviation-map-layers.js:28",
+        "src/AeroScience.Engine/wwwroot/calibration-settings.js:26",
+        "src/AeroScience.Engine/wwwroot/collected-science-deletion.js:15",
+        "src/AeroScience.Engine/wwwroot/hyperspectral-import.js:46",
+        "src/AeroScience.Engine/wwwroot/library-download.js:705",
+        "src/AeroScience.Engine/wwwroot/library-download.js:840",
+        "src/AeroScience.Engine/wwwroot/library-location.js:23",
+        "src/AeroScience.Engine/wwwroot/mission-intelligence.js:58",
+        "src/AeroScience.Engine/wwwroot/mission-intelligence.js:59",
+        "src/AeroScience.Engine/wwwroot/mission-intelligence.js:64",
+        "src/AeroScience.Engine/wwwroot/mission-intelligence.js:73",
+        "src/AeroScience.Engine/wwwroot/mission-performance.js:19",
+        "src/AeroScience.Engine/wwwroot/mission-performance.js:24",
+        "src/AeroScience.Engine/wwwroot/mission-timeline.js:72",
+        "src/AeroScience.Engine/wwwroot/payload-settings.js:16",
+        "src/AeroScience.Engine/wwwroot/payload-settings.js:19",
+        "src/AeroScience.Engine/wwwroot/payload-settings.js:20",
+        "src/AeroScience.Engine/wwwroot/personal-research-review.js:12",
+        "src/AeroScience.Engine/wwwroot/remote-science.js:97",
+        "src/AeroScience.Engine/wwwroot/remote-science.js:361",
+        "src/AeroScience.Engine/wwwroot/research.js:475",
+        "src/AeroScience.Engine/wwwroot/research.js:476",
+        "src/AeroScience.Engine/wwwroot/research.js:559",
+        "src/AeroScience.Engine/wwwroot/scientific-library.js:52",
+        "src/AeroScience.Engine/wwwroot/sensor-operating-status.js:55",
+        "src/AeroScience.Engine/wwwroot/sensor-operating-status.js:63",
+        "src/AeroScience.Engine/wwwroot/sensor-operating-status.js:64",
+        "src/AeroScience.Engine/wwwroot/sensor-operating-status.js:67",
+        "src/AeroScience.Engine/wwwroot/sensor-operating-status.js:68",
+        "src/AeroScience.Engine/wwwroot/source-deletion.js:17",
+        "src/AeroScience.Engine/wwwroot/storage-summary.js:11",
+        "src/AeroScience.Engine/wwwroot/storage-summary.js:13",
+        "src/AeroScience.Engine/wwwroot/storage-summary.js:14",
+        "src/AeroScience.Engine/wwwroot/terrain-profile.js:56",
+        "src/AeroScience.Engine/wwwroot/terrain-profile.js:63",
+        "src/AeroScience.Engine/wwwroot/tfr-layers.js:26",
+        "src/AeroScience.Engine/wwwroot/tfr-layers.js:84",
+        "src/AeroScience.Engine/wwwroot/tfr-layers.js:90",
+        "src/AeroScience.Engine/wwwroot/transfer-progress.js:28"
       ],
       "preservedTokens": []
     },
@@ -15774,7 +15827,8 @@
       "critical": false,
       "maximumLength": 4096,
       "locations": [
-        "src/AeroScience.Engine/wwwroot/flight-test-procedure.js:42"
+        "src/AeroScience.Engine/wwwroot/flight-test-procedure.js:42",
+        "src/AeroScience.Engine/wwwroot/personal-research-flight.js:76"
       ],
       "preservedTokens": []
     },
@@ -23009,7 +23063,8 @@
       "critical": false,
       "maximumLength": 4096,
       "locations": [
-        "src/AeroScience.Engine/wwwroot/mission-workspace.js:594"
+        "src/AeroScience.Engine/wwwroot/mission-workspace.js:594",
+        "src/AeroScience.Engine/wwwroot/remote-science.js:152"
       ],
       "preservedTokens": []
     },
@@ -24682,7 +24737,8 @@
       "critical": true,
       "maximumLength": 4096,
       "locations": [
-        "src/AeroScience.Engine/wwwroot/organization-live-ui.js:30"
+        "src/AeroScience.Engine/wwwroot/organization-live-ui.js:30",
+        "src/AeroScience.Engine/wwwroot/flight-test-procedure.js:44"
       ],
       "preservedTokens": []
     },
@@ -29921,7 +29977,8 @@
       "critical": false,
       "maximumLength": 4096,
       "locations": [
-        "src/AeroScience.Engine/wwwroot/program-workflow-ui.js:39"
+        "src/AeroScience.Engine/wwwroot/program-workflow-ui.js:39",
+        "src/AeroScience.Engine/wwwroot/organization-live-ui.js:37"
       ],
       "preservedTokens": []
     },
@@ -48861,7 +48918,10 @@
       "maximumLength": 4096,
       "locations": [
         "src/AeroScience.Organization/wwwroot/organization.js:96",
-        "src/AeroScience.Organization/wwwroot/research-template-ui.js:4"
+        "src/AeroScience.Organization/wwwroot/research-template-ui.js:4",
+        "src/AeroScience.Engine/wwwroot/aviation-map-layers.js:28",
+        "src/AeroScience.Organization/wwwroot/organization-opportunities.js:13",
+        "src/AeroScience.Organization/wwwroot/organization.js:121"
       ],
       "preservedTokens": []
     },
@@ -48873,7 +48933,9 @@
       "maximumLength": 4096,
       "locations": [
         "src/AeroScience.Organization/wwwroot/organization.js:96",
-        "src/AeroScience.Engine/wwwroot/submission-builder.js:8"
+        "src/AeroScience.Engine/wwwroot/submission-builder.js:8",
+        "src/AeroScience.Organization/wwwroot/organization-opportunities.js:13",
+        "src/AeroScience.Organization/wwwroot/organization.js:121"
       ],
       "preservedTokens": []
     },
@@ -52340,7 +52402,8 @@
       "maximumLength": 4096,
       "locations": [
         "src/AeroScience.Engine/wwwroot/app.js:510",
-        "src/AeroScience.Engine/wwwroot/organization-live-ui.js:25"
+        "src/AeroScience.Engine/wwwroot/organization-live-ui.js:25",
+        "src/AeroScience.Engine/wwwroot/organization-live-ui.js:34"
       ],
       "preservedTokens": []
     },
@@ -53888,7 +53951,8 @@
       "locations": [
         "src/AeroScience.Engine/wwwroot/campaign-coverage-ui.js:9",
         "src/AeroScience.Engine/wwwroot/campaign-coverage-ui.js:32",
-        "src/AeroScience.Engine/wwwroot/mission-timeline.js:5"
+        "src/AeroScience.Engine/wwwroot/mission-timeline.js:5",
+        "src/AeroScience.Engine/wwwroot/sensor-operating-status.js:42"
       ],
       "preservedTokens": []
     },
@@ -54036,7 +54100,8 @@
       "maximumLength": 4096,
       "locations": [
         "src/AeroScience.Engine/wwwroot/campaign-coverage-ui.js:32",
-        "src/AeroScience.Engine/wwwroot/custom-flight-test.js:53"
+        "src/AeroScience.Engine/wwwroot/custom-flight-test.js:53",
+        "src/AeroScience.Engine/wwwroot/atmospheric-research.js:30"
       ],
       "sameTextAllowed": {
         "fr-FR": "Established scientific identifier, product name, aviation notation, loanword or identical target-language term; retained intentionally."
@@ -55251,7 +55316,10 @@
       "locations": [
         "src/AeroScience.Engine/wwwroot/download-activity.js:8",
         "src/AeroScience.Engine/wwwroot/storage-management.js:8",
-        "src/AeroScience.Engine/wwwroot/storage-management.js:120"
+        "src/AeroScience.Engine/wwwroot/storage-management.js:120",
+        "src/AeroScience.Engine/wwwroot/library-download.js:840",
+        "src/AeroScience.Engine/wwwroot/storage-summary.js:11",
+        "src/AeroScience.Engine/wwwroot/storage-summary.js:13"
       ],
       "preservedTokens": []
     },
@@ -56095,7 +56163,8 @@
       "critical": false,
       "maximumLength": 4096,
       "locations": [
-        "src/AeroScience.Engine/wwwroot/flight-test-procedure.js:49"
+        "src/AeroScience.Engine/wwwroot/flight-test-procedure.js:49",
+        "src/AeroScience.Engine/wwwroot/aviation-reference.js:65"
       ],
       "preservedTokens": []
     },
@@ -56488,7 +56557,8 @@
       "maximumLength": 4096,
       "locations": [
         "src/AeroScience.Engine/wwwroot/hyperspectral-import.js:7",
-        "src/AeroScience.Engine/wwwroot/scientific-access.js:8"
+        "src/AeroScience.Engine/wwwroot/scientific-access.js:8",
+        "src/AeroScience.Engine/wwwroot/research.js:559"
       ],
       "preservedTokens": [
         "MiB"
@@ -56648,7 +56718,8 @@
       "critical": true,
       "maximumLength": 4096,
       "locations": [
-        "src/AeroScience.Engine/wwwroot/hyperspectral-import.js:65"
+        "src/AeroScience.Engine/wwwroot/hyperspectral-import.js:65",
+        "src/AeroScience.Engine/wwwroot/scientific-sources.js:35"
       ],
       "preservedTokens": []
     },
@@ -58231,7 +58302,8 @@
       "maximumLength": 4096,
       "locations": [
         "src/AeroScience.Engine/wwwroot/mission-operations.js:68",
-        "src/AeroScience.Engine/wwwroot/sensor-operating-status.js:3"
+        "src/AeroScience.Engine/wwwroot/sensor-operating-status.js:3",
+        "src/AeroScience.Engine/wwwroot/sensor-operating-status.js:45"
       ],
       "preservedTokens": []
     },
@@ -58294,7 +58366,8 @@
       "critical": false,
       "maximumLength": 4096,
       "locations": [
-        "src/AeroScience.Engine/wwwroot/mission-operations.js:75"
+        "src/AeroScience.Engine/wwwroot/mission-operations.js:75",
+        "src/AeroScience.Engine/wwwroot/scientific-sources.js:21"
       ],
       "preservedTokens": []
     },
@@ -58509,7 +58582,8 @@
       "critical": false,
       "maximumLength": 4096,
       "locations": [
-        "src/AeroScience.Engine/wwwroot/mission-timeline.js:6"
+        "src/AeroScience.Engine/wwwroot/mission-timeline.js:6",
+        "src/AeroScience.Engine/wwwroot/experimental-sensor.js:47"
       ],
       "preservedTokens": []
     },
@@ -60898,7 +60972,8 @@
       "critical": false,
       "maximumLength": 4096,
       "locations": [
-        "src/AeroScience.Engine/wwwroot/preflight-readiness.js:26"
+        "src/AeroScience.Engine/wwwroot/preflight-readiness.js:26",
+        "src/AeroScience.Engine/wwwroot/mission-start-advisory.js:54"
       ],
       "preservedTokens": []
     },
@@ -63184,7 +63259,8 @@
       "critical": false,
       "maximumLength": 4096,
       "locations": [
-        "src/AeroScience.Engine/wwwroot/science-display.js:91"
+        "src/AeroScience.Engine/wwwroot/science-display.js:91",
+        "src/AeroScience.Engine/wwwroot/map.js:589"
       ],
       "preservedTokens": []
     },
@@ -64579,7 +64655,9 @@
       "maximumLength": 4096,
       "locations": [
         "src/AeroScience.Engine/wwwroot/scientific-context.js:28",
-        "src/AeroScience.Engine/wwwroot/submission-builder.js:75"
+        "src/AeroScience.Engine/wwwroot/submission-builder.js:75",
+        "src/AeroScience.Engine/wwwroot/custom-flight-test.js:9",
+        "src/AeroScience.Engine/wwwroot/flight-test-procedure.js:11"
       ],
       "preservedTokens": [
         "IAS"
@@ -64596,7 +64674,9 @@
       "maximumLength": 4096,
       "locations": [
         "src/AeroScience.Engine/wwwroot/scientific-context.js:28",
-        "src/AeroScience.Engine/wwwroot/submission-builder.js:75"
+        "src/AeroScience.Engine/wwwroot/submission-builder.js:75",
+        "src/AeroScience.Engine/wwwroot/custom-flight-test.js:9",
+        "src/AeroScience.Engine/wwwroot/flight-test-procedure.js:11"
       ],
       "preservedTokens": [
         "MSL"
@@ -73627,7 +73707,13 @@
       "surface": "windowsCompanion",
       "critical": false,
       "maximumLength": 4096,
-      "locations": [],
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/mission-operations.js:44",
+        "src/AeroScience.Engine/wwwroot/mission-timeline.js:59",
+        "src/AeroScience.Engine/wwwroot/personal-research-flight.js:75",
+        "src/AeroScience.Engine/wwwroot/received-evidence-ui.js:13",
+        "src/AeroScience.Organization/wwwroot/organization-reviews.js:19"
+      ],
       "preservedTokens": []
     },
     "windows.science.modeLocal": {
@@ -74189,7 +74275,8 @@
       "maximumLength": 4096,
       "locations": [
         "msfs-toolbar/PackageSources/html_ui/InGamePanels/AeroScience/AeroScience.js:420",
-        "src/AeroScience.Engine/wwwroot/personal-research-flight.js:56"
+        "src/AeroScience.Engine/wwwroot/personal-research-flight.js:56",
+        "src/AeroScience.Engine/wwwroot/mission-operations.js:41"
       ],
       "preservedTokens": []
     },
@@ -74832,7 +74919,12 @@
       "critical": false,
       "maximumLength": 4096,
       "locations": [
-        "msfs-toolbar/PackageSources/html_ui/InGamePanels/AeroScience/AeroScience.js:736"
+        "msfs-toolbar/PackageSources/html_ui/InGamePanels/AeroScience/AeroScience.js:736",
+        "src/AeroScience.Engine/wwwroot/mission-operations.js:44",
+        "src/AeroScience.Engine/wwwroot/mission-timeline.js:59",
+        "src/AeroScience.Engine/wwwroot/personal-research-flight.js:75",
+        "src/AeroScience.Engine/wwwroot/received-evidence-ui.js:13",
+        "src/AeroScience.Organization/wwwroot/organization-reviews.js:19"
       ],
       "preservedTokens": []
     },
@@ -75233,7 +75325,8 @@
       "critical": false,
       "maximumLength": 4096,
       "locations": [
-        "msfs-toolbar/PackageSources/html_ui/InGamePanels/AeroScience/AeroScience.js:801"
+        "msfs-toolbar/PackageSources/html_ui/InGamePanels/AeroScience/AeroScience.js:801",
+        "src/AeroScience.Engine/wwwroot/flight-test-procedure.js:12"
       ],
       "preservedTokens": []
     },
@@ -75244,7 +75337,9 @@
       "critical": false,
       "maximumLength": 4096,
       "locations": [
-        "msfs-toolbar/PackageSources/html_ui/InGamePanels/AeroScience/AeroScience.js:801"
+        "msfs-toolbar/PackageSources/html_ui/InGamePanels/AeroScience/AeroScience.js:801",
+        "src/AeroScience.Engine/wwwroot/flight-test-procedure.js:12",
+        "src/AeroScience.Engine/wwwroot/science-compare.js:38"
       ],
       "preservedTokens": []
     },
@@ -76216,7 +76311,18 @@
       "critical": true,
       "maximumLength": 4096,
       "locations": [
-        "src/AeroScience.Engine/wwwroot/research.js:1096"
+        "src/AeroScience.Engine/wwwroot/research.js:1096",
+        "src/AeroScience.Engine/wwwroot/analysis.js:78",
+        "src/AeroScience.Engine/wwwroot/atmospheric-research.js:16",
+        "src/AeroScience.Engine/wwwroot/emit-library.js:67",
+        "src/AeroScience.Engine/wwwroot/flight-test-procedure.js:44",
+        "src/AeroScience.Engine/wwwroot/library-download.js:465",
+        "src/AeroScience.Engine/wwwroot/mission-start-advisory.js:54",
+        "src/AeroScience.Engine/wwwroot/research.js:1398",
+        "src/AeroScience.Engine/wwwroot/science-display.js:289",
+        "src/AeroScience.Engine/wwwroot/science-journey.js:42",
+        "src/AeroScience.Engine/wwwroot/science-journey.js:46",
+        "src/AeroScience.Engine/wwwroot/sensor-operating-status.js:42"
       ],
       "preservedTokens": []
     },
@@ -76332,7 +76438,9 @@
       "surface": "nativeToolbar",
       "critical": false,
       "maximumLength": 4096,
-      "locations": [],
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/atmospheric-research.js:62"
+      ],
       "preservedTokens": []
     },
     "native.instrument.ambientDensity": {
@@ -76628,7 +76736,8 @@
       "critical": true,
       "maximumLength": 4096,
       "locations": [
-        "src/AeroScience.Engine/wwwroot/mission-timeline.js:59"
+        "src/AeroScience.Engine/wwwroot/mission-timeline.js:59",
+        "src/AeroScience.Engine/wwwroot/personal-research-review.js:65"
       ],
       "preservedTokens": []
     },
@@ -76650,7 +76759,8 @@
       "critical": false,
       "maximumLength": 4096,
       "locations": [
-        "src/AeroScience.Engine/wwwroot/mission-workspace.js:557"
+        "src/AeroScience.Engine/wwwroot/mission-workspace.js:557",
+        "src/AeroScience.Engine/wwwroot/mission-workspace.js:258"
       ],
       "preservedTokens": []
     },
@@ -77416,6 +77526,3762 @@
       "critical": true,
       "maximumLength": 4096,
       "locations": [],
+      "preservedTokens": []
+    },
+    "updates.automaticNotifications": {
+      "context": "Display label/explanation in application-updates.js. Read-only presentation; never alter original source names, overlay IDs, source data, API fields or export metadata.",
+      "parameters": [],
+      "surface": "dashboard",
+      "critical": true,
+      "maximumLength": 1024,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/application-updates.js"
+      ],
+      "preservedTokens": []
+    },
+    "updates.includePrereleases": {
+      "context": "Display label/explanation in application-updates.js. Read-only presentation; never alter original source names, overlay IDs, source data, API fields or export metadata.",
+      "parameters": [],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 1024,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/application-updates.js"
+      ],
+      "preservedTokens": []
+    },
+    "map.atmosphericSamples": {
+      "context": "Display label/explanation in atmospheric-research.js. Read-only presentation; never alter original source names, overlay IDs, source data, API fields or export metadata.",
+      "parameters": [],
+      "surface": "scientificResults",
+      "critical": false,
+      "maximumLength": 1024,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/atmospheric-research.js"
+      ],
+      "preservedTokens": []
+    },
+    "map.sampledPathLinks": {
+      "context": "Display label/explanation in atmospheric-research.js. Read-only presentation; never alter original source names, overlay IDs, source data, API fields or export metadata.",
+      "parameters": [],
+      "surface": "scientificResults",
+      "critical": false,
+      "maximumLength": 1024,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/atmospheric-research.js"
+      ],
+      "preservedTokens": []
+    },
+    "map.openStreetMapStreets": {
+      "context": "Display label/explanation in basemaps.js. Read-only presentation; never alter original source names, overlay IDs, source data, API fields or export metadata.",
+      "parameters": [],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 1024,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/basemaps.js"
+      ],
+      "preservedTokens": []
+    },
+    "map.analysisSourceValues": {
+      "context": "Display label/explanation in science-analysis.js. Read-only presentation; never alter original source names, overlay IDs, source data, API fields or export metadata.",
+      "parameters": [],
+      "surface": "scientificResults",
+      "critical": false,
+      "maximumLength": 1024,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/science-analysis.js"
+      ],
+      "preservedTokens": []
+    },
+    "map.comparisonSourceValues": {
+      "context": "Display label/explanation in science-compare.js. Read-only presentation; never alter original source names, overlay IDs, source data, API fields or export metadata.",
+      "parameters": [],
+      "surface": "scientificResults",
+      "critical": false,
+      "maximumLength": 1024,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/science-compare.js"
+      ],
+      "preservedTokens": []
+    },
+    "map.scientificDifferences": {
+      "context": "Display label/explanation in science-compare.js. Read-only presentation; never alter original source names, overlay IDs, source data, API fields or export metadata.",
+      "parameters": [],
+      "surface": "scientificResults",
+      "critical": false,
+      "maximumLength": 1024,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/science-compare.js"
+      ],
+      "preservedTokens": []
+    },
+    "map.retainedArtifact": {
+      "context": "Display label/explanation in mission-workspace.js. Read-only presentation; never alter original source names, overlay IDs, source data, API fields or export metadata.",
+      "parameters": [],
+      "surface": "scientificResults",
+      "critical": false,
+      "maximumLength": 1024,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/mission-workspace.js"
+      ],
+      "preservedTokens": []
+    },
+    "map.savedObservations": {
+      "context": "Display label/explanation in science-map-view.js. Read-only presentation; never alter original source names, overlay IDs, source data, API fields or export metadata.",
+      "parameters": [],
+      "surface": "scientificResults",
+      "critical": true,
+      "maximumLength": 1024,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/science-map-view.js"
+      ],
+      "preservedTokens": []
+    },
+    "map.verifiedRasters": {
+      "context": "Display label/explanation in science-map-view.js. Read-only presentation; never alter original source names, overlay IDs, source data, API fields or export metadata.",
+      "parameters": [],
+      "surface": "scientificResults",
+      "critical": false,
+      "maximumLength": 1024,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/science-map-view.js"
+      ],
+      "preservedTokens": []
+    },
+    "map.demElevation": {
+      "context": "Display label/explanation in science-layers.js. Read-only presentation; never alter original source names, overlay IDs, source data, API fields or export metadata.",
+      "parameters": [],
+      "surface": "scientificResults",
+      "critical": false,
+      "maximumLength": 1024,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/science-layers.js"
+      ],
+      "preservedTokens": [
+        "DEM"
+      ]
+    },
+    "map.inspectedSourceValues": {
+      "context": "Display label/explanation in source-inspection.js. Read-only presentation; never alter original source names, overlay IDs, source data, API fields or export metadata.",
+      "parameters": [],
+      "surface": "libraryDownloads",
+      "critical": false,
+      "maximumLength": 1024,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/source-inspection.js"
+      ],
+      "preservedTokens": []
+    },
+    "map.inspectedSourceLimit": {
+      "context": "Display label/explanation in source-inspection.js. Read-only presentation; never alter original source names, overlay IDs, source data, API fields or export metadata.",
+      "parameters": [],
+      "surface": "libraryDownloads",
+      "critical": true,
+      "maximumLength": 1024,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/source-inspection.js"
+      ],
+      "preservedTokens": []
+    },
+    "map.originalFootprintLimit": {
+      "context": "Display label/explanation in source-inspection.js. Read-only presentation; never alter original source names, overlay IDs, source data, API fields or export metadata.",
+      "parameters": [],
+      "surface": "libraryDownloads",
+      "critical": true,
+      "maximumLength": 1024,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/source-inspection.js"
+      ],
+      "preservedTokens": []
+    },
+    "map.pilotRecordedPoints": {
+      "context": "Display label/explanation in observation-research.js. Read-only presentation; never alter original source names, overlay IDs, source data, API fields or export metadata.",
+      "parameters": [],
+      "surface": "scientificResults",
+      "critical": true,
+      "maximumLength": 1024,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/observation-research.js"
+      ],
+      "preservedTokens": []
+    },
+    "map.flightPathContext": {
+      "context": "Display label/explanation in survey-research.js. Read-only presentation; never alter original source names, overlay IDs, source data, API fields or export metadata.",
+      "parameters": [],
+      "surface": "scientificResults",
+      "critical": true,
+      "maximumLength": 1024,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/survey-research.js"
+      ],
+      "preservedTokens": []
+    },
+    "route.simbriefCoordinates": {
+      "context": "Display label/explanation in route-export.js. Read-only presentation; never alter original source names, overlay IDs, source data, API fields or export metadata.",
+      "parameters": [],
+      "surface": "scientificResults",
+      "critical": false,
+      "maximumLength": 1024,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/route-export.js"
+      ],
+      "preservedTokens": []
+    },
+    "map.faaTfrUnknown": {
+      "context": "Display label/explanation in tfr-layers.js. Read-only presentation; never alter original source names, overlay IDs, source data, API fields or export metadata.",
+      "parameters": [],
+      "surface": "scientificResults",
+      "critical": false,
+      "maximumLength": 1024,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/tfr-layers.js"
+      ],
+      "preservedTokens": []
+    },
+    "preparation.liveTelemetryRequirement": {
+      "context": "Display explanation for an instrument that requires live simulator telemetry. Does not change the authoritative preparation status or initiate remote access.",
+      "parameters": [],
+      "surface": "libraryDownloads",
+      "critical": true,
+      "maximumLength": 512,
+      "preservedTokens": []
+    },
+    "map.qualifiedSamples": {
+      "context": "Read-only overlay label for actual qualified saved samples. Measurement parameter remains the original scientific measurement identity/display name. Not predicted coverage.",
+      "parameters": [
+        "measurement"
+      ],
+      "surface": "scientificResults",
+      "critical": true,
+      "maximumLength": 1024,
+      "preservedTokens": []
+    },
+    "ui.analysis.messageRecordedPathObservedWithinTolerance": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/analysis.js:85. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/analysis.js:85"
+      ],
+      "preservedTokens": []
+    },
+    "ui.analysis.messageCompletionNotEstablished": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/analysis.js:85. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/analysis.js:85"
+      ],
+      "preservedTokens": []
+    },
+    "ui.analysis.messageMaxDeviation": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/analysis.js:85. Whole display message; parameters retain original runtime values.",
+      "parameters": [
+        "value1"
+      ],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/analysis.js:85"
+      ],
+      "preservedTokens": []
+    },
+    "ui.app.messageNoEnabledInstrumentsInArchivedConfiguration": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/app.js:485. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/app.js:485"
+      ],
+      "preservedTokens": []
+    },
+    "ui.app.messageMissingUnknown": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/app.js:580. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "dashboard",
+      "critical": true,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/app.js:580"
+      ],
+      "preservedTokens": []
+    },
+    "ui.applicationUpdates.messageNotCheckedYet": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/application-updates.js:39. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/application-updates.js:39"
+      ],
+      "preservedTokens": []
+    },
+    "ui.applicationUpdates.messageNever": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/application-updates.js:39. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/application-updates.js:39"
+      ],
+      "preservedTokens": []
+    },
+    "ui.atmosphericResearch.messageSampledLocationsDoNotEstablishTheConditions": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/atmospheric-research.js:14. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/atmospheric-research.js:14"
+      ],
+      "preservedTokens": []
+    },
+    "ui.atmosphericResearch.messageBandValuesBelowShowWhereReadingsWere": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/atmospheric-research.js:14. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/atmospheric-research.js:14"
+      ],
+      "preservedTokens": []
+    },
+    "ui.atmosphericResearch.messageFeetMSL8667c4ea": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/atmospheric-research.js:16. Whole display message; parameters retain original runtime values.",
+      "parameters": [
+        "value1",
+        "value2"
+      ],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/atmospheric-research.js:16"
+      ],
+      "preservedTokens": [
+        "MSL"
+      ]
+    },
+    "ui.atmosphericResearch.messageRecordedSimulatorObservations": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/atmospheric-research.js:16. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/atmospheric-research.js:16"
+      ],
+      "preservedTokens": []
+    },
+    "ui.atmosphericResearch.messageSyntheticDemoObservationsNotAnInstalledMSFS": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/atmospheric-research.js:16. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/atmospheric-research.js:16"
+      ],
+      "preservedTokens": [
+        "MSFS"
+      ]
+    },
+    "ui.atmosphericResearch.messageUnknownNoSimulatorProvenanceInferred": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/atmospheric-research.js:16. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/atmospheric-research.js:16"
+      ],
+      "preservedTokens": []
+    },
+    "ui.atmosphericResearch.messageSampledDistance": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/atmospheric-research.js:30. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/atmospheric-research.js:30"
+      ],
+      "preservedTokens": []
+    },
+    "ui.atmosphericResearch.messagePolarSamplesOutsideTheMercatorMapRemain": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/atmospheric-research.js:82. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/atmospheric-research.js:82"
+      ],
+      "preservedTokens": []
+    },
+    "ui.aviationMapLayers.messageSource": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/aviation-map-layers.js:19. Whole display message; parameters retain original runtime values.",
+      "parameters": [
+        "value1",
+        "value2",
+        "value3"
+      ],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/aviation-map-layers.js:19"
+      ],
+      "preservedTokens": []
+    },
+    "ui.aviationMapLayers.messageBaseVolume": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/aviation-map-layers.js:28. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/aviation-map-layers.js:28"
+      ],
+      "preservedTokens": []
+    },
+    "ui.aviationMapLayers.messageAddVolume": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/aviation-map-layers.js:28. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/aviation-map-layers.js:28"
+      ],
+      "preservedTokens": []
+    },
+    "ui.aviationMapLayers.messageSubtractVolume": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/aviation-map-layers.js:28. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/aviation-map-layers.js:28"
+      ],
+      "preservedTokens": []
+    },
+    "ui.aviationMapLayers.messageBoundingCandidatesNotActiveRestrictions": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/aviation-map-layers.js:44. Whole display message; parameters retain original runtime values.",
+      "parameters": [
+        "value1"
+      ],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/aviation-map-layers.js:44"
+      ],
+      "preservedTokens": []
+    },
+    "ui.aviationMapLayers.messageRetainedReferencesInViewport": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/aviation-map-layers.js:44. Whole display message; parameters retain original runtime values.",
+      "parameters": [
+        "value1"
+      ],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/aviation-map-layers.js:44"
+      ],
+      "preservedTokens": []
+    },
+    "ui.aviationReference.messageOn": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/aviation-reference.js:50. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/aviation-reference.js:50"
+      ],
+      "preservedTokens": []
+    },
+    "ui.aviationReference.messageOff": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/aviation-reference.js:50. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/aviation-reference.js:50"
+      ],
+      "preservedTokens": []
+    },
+    "ui.aviationReference.messageUpdatesRefreshTheHostInventoryAndPublished": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/aviation-reference.js:63. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/aviation-reference.js:63"
+      ],
+      "preservedTokens": []
+    },
+    "ui.aviationReference.messageOriginalChartTransferSizeUnknownUntilPublished": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/aviation-reference.js:63. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/aviation-reference.js:63"
+      ],
+      "preservedTokens": []
+    },
+    "ui.calibrationSettings.messageSeparateUserAdjustedScalarChannelOriginalValuesRemain": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/calibration-settings.js:23. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/calibration-settings.js:23"
+      ],
+      "preservedTokens": []
+    },
+    "ui.calibrationSettings.messageMetadataOnlyNoNumericAdjustment": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/calibration-settings.js:23. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/calibration-settings.js:23"
+      ],
+      "preservedTokens": []
+    },
+    "ui.campaignCoverageUi.messageEarlierCardPublication": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/campaign-coverage-ui.js:33. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "organizations",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/campaign-coverage-ui.js:33"
+      ],
+      "preservedTokens": []
+    },
+    "ui.campaignCoverageUi.messageUsablePilotDocumentationNotSensorQA": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/campaign-coverage-ui.js:45. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "organizations",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/campaign-coverage-ui.js:45"
+      ],
+      "preservedTokens": []
+    },
+    "ui.campaignCoverageUi.messageValidSupportedOriginalReadings": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/campaign-coverage-ui.js:45. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "organizations",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/campaign-coverage-ui.js:45"
+      ],
+      "preservedTokens": []
+    },
+    "ui.campaignCoverageUi.messageCurrentGoal": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/campaign-coverage-ui.js:63. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "organizations",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/campaign-coverage-ui.js:63"
+      ],
+      "preservedTokens": []
+    },
+    "ui.campaignCoverageUi.messageHistoricGoalPreserved": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/campaign-coverage-ui.js:63. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "organizations",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/campaign-coverage-ui.js:63"
+      ],
+      "preservedTokens": []
+    },
+    "ui.campaignCoverageUi.messageCountsMet": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/campaign-coverage-ui.js:82. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "organizations",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/campaign-coverage-ui.js:82"
+      ],
+      "preservedTokens": []
+    },
+    "ui.campaignCoverageUi.messageMoreSamplingNeeded": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/campaign-coverage-ui.js:82. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "organizations",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/campaign-coverage-ui.js:82"
+      ],
+      "preservedTokens": []
+    },
+    "ui.campaignProgressUi.messageYourContribution": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/campaign-progress-ui.js:25. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "organizations",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/campaign-progress-ui.js:25"
+      ],
+      "preservedTokens": []
+    },
+    "ui.campaignProgressUi.messageNewClaimsUnavailable": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/campaign-progress-ui.js:36. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "organizations",
+      "critical": true,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/campaign-progress-ui.js:36"
+      ],
+      "preservedTokens": []
+    },
+    "ui.campaignProgressUi.messageCurrent": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/campaign-progress-ui.js:46. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "organizations",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/campaign-progress-ui.js:46"
+      ],
+      "preservedTokens": []
+    },
+    "ui.collectedScienceDeletion.messageDatabaseBackupCleanupIsIncomplete": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/collected-science-deletion.js:15. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/collected-science-deletion.js:15"
+      ],
+      "preservedTokens": []
+    },
+    "ui.collectionPlanner.messageSession": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/collection-planner.js:38. Whole display message; parameters retain original runtime values.",
+      "parameters": [
+        "value1"
+      ],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/collection-planner.js:38",
+        "src/AeroScience.Engine/wwwroot/organization-live-ui.js:39"
+      ],
+      "preservedTokens": []
+    },
+    "ui.collectionPlanner.messageBoundaryPauseResumeEnabled": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/collection-planner.js:47. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": true,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/collection-planner.js:47"
+      ],
+      "preservedTokens": []
+    },
+    "ui.collectionPlanner.messageBoundaryAutomationOff": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/collection-planner.js:47. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/collection-planner.js:47"
+      ],
+      "preservedTokens": []
+    },
+    "ui.collectionPlanner.messageAutomaticCollectionIsConfiguredInThisDraft": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/collection-planner.js:80. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": true,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/collection-planner.js:80"
+      ],
+      "preservedTokens": []
+    },
+    "ui.collectionPlanner.messageAutomaticCollectionIsOff": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/collection-planner.js:80. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": true,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/collection-planner.js:80"
+      ],
+      "preservedTokens": []
+    },
+    "ui.collectionPlanner.messagePausesOutsideTheSelectedBoundaryUnionReEntry": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/collection-planner.js:80. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": true,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/collection-planner.js:80"
+      ],
+      "preservedTokens": []
+    },
+    "ui.collectionPlanner.messageBoundaryPauseResumeIsOff": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/collection-planner.js:80. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": true,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/collection-planner.js:80"
+      ],
+      "preservedTokens": []
+    },
+    "ui.collectionPlanner.messageNoStartRuleUseManualStartOr": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/collection-planner.js:80. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/collection-planner.js:80"
+      ],
+      "preservedTokens": []
+    },
+    "ui.collectionPlanner.messageAReferencedGeographicTargetIsMissing": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/collection-planner.js:80. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": true,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/collection-planner.js:80"
+      ],
+      "preservedTokens": []
+    },
+    "ui.collectionPlanner.messageNoBoundaryRegionsSelected": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/collection-planner.js:80. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/collection-planner.js:80"
+      ],
+      "preservedTokens": []
+    },
+    "ui.collectionPlanner.messageRulesReviewedForThisDraft": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/collection-planner.js:80. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/collection-planner.js:80"
+      ],
+      "preservedTokens": []
+    },
+    "ui.collectionPlanner.messageRulesAreNotYetReviewedForThe": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/collection-planner.js:80. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/collection-planner.js:80"
+      ],
+      "preservedTokens": []
+    },
+    "ui.customFlightTest.messageAND": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/custom-flight-test.js:9. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "currentFlight",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/custom-flight-test.js:9",
+        "src/AeroScience.Engine/wwwroot/flight-test-procedure.js:11",
+        "src/AeroScience.Engine/wwwroot/scientific-context.js:30",
+        "src/AeroScience.Engine/wwwroot/submission-builder.js:77"
+      ],
+      "preservedTokens": []
+    },
+    "ui.downloadActivity.messageSourceNotSelected": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/download-activity.js:31. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "libraryDownloads",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/download-activity.js:31",
+        "src/AeroScience.Engine/wwwroot/download-workspace.js:52"
+      ],
+      "preservedTokens": []
+    },
+    "ui.downloadActivity.messageSizeUnknown": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/download-activity.js:31. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "libraryDownloads",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/download-activity.js:31"
+      ],
+      "preservedTokens": []
+    },
+    "ui.downloadActivity.messageRateNotEstablished": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/download-activity.js:31. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "libraryDownloads",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/download-activity.js:31"
+      ],
+      "preservedTokens": []
+    },
+    "ui.downloadActivity.messageUnknownComposite": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/download-activity.js:31. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "libraryDownloads",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/download-activity.js:31",
+        "src/AeroScience.Engine/wwwroot/download-workspace.js:52",
+        "src/AeroScience.Engine/wwwroot/remote-science.js:85",
+        "src/AeroScience.Engine/wwwroot/scientific-sources.js:35"
+      ],
+      "preservedTokens": []
+    },
+    "ui.downloadWorkspace.messageNotEstablished": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/download-workspace.js:52. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "libraryDownloads",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/download-workspace.js:52",
+        "src/AeroScience.Engine/wwwroot/transfer-progress.js:30"
+      ],
+      "preservedTokens": []
+    },
+    "ui.downloadWorkspace.messageDownloadSizeUnknown": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/download-workspace.js:52. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "libraryDownloads",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/download-workspace.js:52"
+      ],
+      "preservedTokens": []
+    },
+    "ui.emitLibrary.messageUnlocated": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/emit-library.js:49. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "libraryDownloads",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/emit-library.js:49"
+      ],
+      "preservedTokens": []
+    },
+    "ui.experimentalSensor.messageSyntheticDemoOriginalInputsNotInstalledMSFS": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/experimental-sensor.js:35. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "currentFlight",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/experimental-sensor.js:35"
+      ],
+      "preservedTokens": [
+        "MSFS"
+      ]
+    },
+    "ui.experimentalSensor.messageRecordedSimulatorInputsFictionalModelDerivedOutputs": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/experimental-sensor.js:35. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "currentFlight",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/experimental-sensor.js:35"
+      ],
+      "preservedTokens": []
+    },
+    "ui.experimentalSensor.messageInputTelemetrySourceUnavailableNoSimulator": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/experimental-sensor.js:35. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "currentFlight",
+      "critical": true,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/experimental-sensor.js:35"
+      ],
+      "preservedTokens": []
+    },
+    "ui.flightTestProcedure.messageOR": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/flight-test-procedure.js:11. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "currentFlight",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/flight-test-procedure.js:11",
+        "src/AeroScience.Engine/wwwroot/scientific-context.js:30",
+        "src/AeroScience.Engine/wwwroot/submission-builder.js:77"
+      ],
+      "preservedTokens": []
+    },
+    "ui.hyperspectralImport.messageSelectTheMatchingBinaryBelow": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/hyperspectral-import.js:32. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "libraryDownloads",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/hyperspectral-import.js:32"
+      ],
+      "preservedTokens": []
+    },
+    "ui.hyperspectralImport.messageNm": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/hyperspectral-import.js:34. Whole display message; parameters retain original runtime values.",
+      "parameters": [
+        "value1",
+        "value2"
+      ],
+      "surface": "libraryDownloads",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/hyperspectral-import.js:34"
+      ],
+      "preservedTokens": []
+    },
+    "ui.hyperspectralImport.messageOriginalScientificUnitsNeeded": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/hyperspectral-import.js:34. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "libraryDownloads",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/hyperspectral-import.js:34"
+      ],
+      "preservedTokens": []
+    },
+    "ui.hyperspectralImport.messageUnknownNotGuessed": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/hyperspectral-import.js:34. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "libraryDownloads",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/hyperspectral-import.js:34"
+      ],
+      "preservedTokens": []
+    },
+    "ui.hyperspectralImport.messageNotReported": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/hyperspectral-import.js:34. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "libraryDownloads",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/hyperspectral-import.js:34"
+      ],
+      "preservedTokens": []
+    },
+    "ui.libraryDownload.messageCredentialSaved": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/library-download.js:113. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "libraryDownloads",
+      "critical": true,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/library-download.js:113"
+      ],
+      "preservedTokens": []
+    },
+    "ui.libraryDownload.messageNotConnected": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/library-download.js:113. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "libraryDownloads",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/library-download.js:113"
+      ],
+      "preservedTokens": []
+    },
+    "ui.libraryDownload.messageCached": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/library-download.js:379. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "libraryDownloads",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/library-download.js:379",
+        "src/AeroScience.Engine/wwwroot/library-download.js:387",
+        "src/AeroScience.Engine/wwwroot/library-download.js:411"
+      ],
+      "preservedTokens": []
+    },
+    "ui.libraryDownload.messageRetrieved": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/library-download.js:379. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "libraryDownloads",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/library-download.js:379",
+        "src/AeroScience.Engine/wwwroot/library-download.js:387",
+        "src/AeroScience.Engine/wwwroot/library-download.js:411"
+      ],
+      "preservedTokens": []
+    },
+    "ui.libraryDownload.messageSearchBoundsEncloseTheSelectedShapeSome": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/library-download.js:463. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "libraryDownloads",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/library-download.js:463"
+      ],
+      "preservedTokens": []
+    },
+    "ui.libraryDownload.messageRetainedCandidate": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/library-download.js:465. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "libraryDownloads",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/library-download.js:465"
+      ],
+      "preservedTokens": []
+    },
+    "ui.libraryDownload.messagePolygonClipping": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/library-download.js:495. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "libraryDownloads",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/library-download.js:495"
+      ],
+      "preservedTokens": []
+    },
+    "ui.libraryDownload.messageAuthoritativeRegion": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/library-download.js:495. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "libraryDownloads",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/library-download.js:495"
+      ],
+      "preservedTokens": []
+    },
+    "ui.libraryDownload.messageTheProviderSearchUsesEnclosingBounds": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/library-download.js:495. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "libraryDownloads",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/library-download.js:495"
+      ],
+      "preservedTokens": []
+    },
+    "ui.libraryDownload.messageMatchingCatalogScenesFound": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/library-download.js:664. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "libraryDownloads",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/library-download.js:664"
+      ],
+      "preservedTokens": []
+    },
+    "ui.libraryDownload.messageNoMatchingScenesInThisSearchedScope": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/library-download.js:664. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "libraryDownloads",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/library-download.js:664"
+      ],
+      "preservedTokens": []
+    },
+    "ui.libraryDownload.messageProviderUnavailableAvailabilityWasNotEstablished": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/library-download.js:664. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "libraryDownloads",
+      "critical": true,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/library-download.js:664"
+      ],
+      "preservedTokens": []
+    },
+    "ui.libraryDownload.messageCachedNotANewLive": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/library-download.js:664. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "libraryDownloads",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/library-download.js:664"
+      ],
+      "preservedTokens": []
+    },
+    "ui.libraryDownload.messageProviderOrderingNotEstablished": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/library-download.js:666. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "libraryDownloads",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/library-download.js:666"
+      ],
+      "preservedTokens": []
+    },
+    "ui.libraryDownload.messageNotApplicable": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/library-download.js:672. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "libraryDownloads",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/library-download.js:672"
+      ],
+      "preservedTokens": []
+    },
+    "ui.libraryDownload.messageThisIsAProviderFailureNotEvidence": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/library-download.js:672. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "libraryDownloads",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/library-download.js:672"
+      ],
+      "preservedTokens": []
+    },
+    "ui.libraryDownload.messageTryEarlierYearsAdjustTheCloudFilter": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/library-download.js:672. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "libraryDownloads",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/library-download.js:672"
+      ],
+      "preservedTokens": []
+    },
+    "ui.libraryDownload.messageUnknownUntilOriginalFileVerification": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/library-download.js:716. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "libraryDownloads",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/library-download.js:716"
+      ],
+      "preservedTokens": []
+    },
+    "ui.map.messageOnlineBasemapWithBundledGeographicReference": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/map.js:624. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/map.js:624"
+      ],
+      "preservedTokens": []
+    },
+    "ui.map.messageOfflineNaturalEarthGeography": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/map.js:625. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/map.js:625"
+      ],
+      "preservedTokens": []
+    },
+    "ui.map.messageNoLocationSelectedRegionalDefaultUSA": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/map.js:625. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/map.js:625"
+      ],
+      "preservedTokens": []
+    },
+    "ui.map.messageChooseAddWaypointOrDrawSurveyArea": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/map.js:626. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/map.js:626"
+      ],
+      "preservedTokens": []
+    },
+    "ui.missionIntelligence.messageObjectiveNotDeclared": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/mission-intelligence.js:44. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/mission-intelligence.js:44"
+      ],
+      "preservedTokens": []
+    },
+    "ui.missionIntelligence.messageGeneralResearch": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/mission-intelligence.js:44. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/mission-intelligence.js:44"
+      ],
+      "preservedTokens": []
+    },
+    "ui.missionIntelligence.messageAircraftUnknown": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/mission-intelligence.js:44. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/mission-intelligence.js:44"
+      ],
+      "preservedTokens": []
+    },
+    "ui.missionIntelligence.messageSession9e78f797": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/mission-intelligence.js:46. Whole display message; parameters retain original runtime values.",
+      "parameters": [
+        "value1"
+      ],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/mission-intelligence.js:46"
+      ],
+      "preservedTokens": []
+    },
+    "ui.missionIntelligence.messagePilotOverrideRearmRequired": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/mission-intelligence.js:47. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/mission-intelligence.js:47"
+      ],
+      "preservedTokens": []
+    },
+    "ui.missionIntelligence.messageContinuityHold": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/mission-intelligence.js:47. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/mission-intelligence.js:47"
+      ],
+      "preservedTokens": []
+    },
+    "ui.missionIntelligence.messageStorageHoldResolveStorageBefore": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/mission-intelligence.js:47. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/mission-intelligence.js:47"
+      ],
+      "preservedTokens": []
+    },
+    "ui.missionIntelligence.messageNotEnded": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/mission-intelligence.js:54. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/mission-intelligence.js:54"
+      ],
+      "preservedTokens": []
+    },
+    "ui.missionIntelligence.messageNotYetAssessed": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/mission-intelligence.js:58. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/mission-intelligence.js:58"
+      ],
+      "preservedTokens": []
+    },
+    "ui.missionIntelligence.messagePolicyGrade": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/mission-intelligence.js:64. Whole display message; parameters retain original runtime values.",
+      "parameters": [
+        "value1"
+      ],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/mission-intelligence.js:64"
+      ],
+      "preservedTokens": []
+    },
+    "ui.missionIntelligence.messageNoFinalLetterGrade": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/mission-intelligence.js:64. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/mission-intelligence.js:64",
+        "src/AeroScience.Engine/wwwroot/mission-performance.js:11"
+      ],
+      "preservedTokens": []
+    },
+    "ui.missionIntelligence.messageStaleEvidenceCutoffNotCurrent": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/mission-intelligence.js:64. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": true,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/mission-intelligence.js:64"
+      ],
+      "preservedTokens": []
+    },
+    "ui.missionIntelligence.messageInapplicable": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/mission-intelligence.js:65. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/mission-intelligence.js:65"
+      ],
+      "preservedTokens": []
+    },
+    "ui.missionIntelligence.messageNotSpecified": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/mission-intelligence.js:73. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/mission-intelligence.js:73"
+      ],
+      "preservedTokens": []
+    },
+    "ui.missionIntelligence.messageEvidencePending": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/mission-intelligence.js:73. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/mission-intelligence.js:73"
+      ],
+      "preservedTokens": []
+    },
+    "ui.missionIntelligence.messageAreaMembershipUnknown": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/mission-intelligence.js:77. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/mission-intelligence.js:77"
+      ],
+      "preservedTokens": []
+    },
+    "ui.missionIntelligence.messageInsideResearchArea": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/mission-intelligence.js:77. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/mission-intelligence.js:77"
+      ],
+      "preservedTokens": []
+    },
+    "ui.missionIntelligence.messageOutsideResearchArea": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/mission-intelligence.js:77. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/mission-intelligence.js:77"
+      ],
+      "preservedTokens": []
+    },
+    "ui.missionIntelligence.messageScienceSessionOrCollectionAuthorityChanged": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/mission-intelligence.js:88. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": true,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/mission-intelligence.js:88"
+      ],
+      "preservedTokens": []
+    },
+    "ui.missionOperations.messageActiveForLocalMonitoring": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/mission-operations.js:41. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/mission-operations.js:41"
+      ],
+      "preservedTokens": []
+    },
+    "ui.missionOperations.messageRecordedPointOnlyNoFootprintInferred": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/mission-operations.js:66. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/mission-operations.js:66"
+      ],
+      "preservedTokens": []
+    },
+    "ui.missionOperations.messageOriginalLocationSeparateFromScientificSampling": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/mission-operations.js:66. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/mission-operations.js:66"
+      ],
+      "preservedTokens": []
+    },
+    "ui.missionPerformance.messageGrade": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/mission-performance.js:11. Whole display message; parameters retain original runtime values.",
+      "parameters": [
+        "value1"
+      ],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/mission-performance.js:11"
+      ],
+      "preservedTokens": []
+    },
+    "ui.missionPerformance.messageUseTheHostSRecalculationActionIfA": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/mission-performance.js:11. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/mission-performance.js:11"
+      ],
+      "preservedTokens": []
+    },
+    "ui.missionPerformance.messageProvisionalWithUnassessedWorkRetained": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/mission-performance.js:14. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/mission-performance.js:14"
+      ],
+      "preservedTokens": []
+    },
+    "ui.missionPerformance.messageOverallFlightObligationsNeverAveragedFromSession": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/mission-performance.js:14. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/mission-performance.js:14"
+      ],
+      "preservedTokens": []
+    },
+    "ui.missionStartAdvisory.messageStaleAssessment": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/mission-start-advisory.js:54. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": true,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/mission-start-advisory.js:54"
+      ],
+      "preservedTokens": []
+    },
+    "ui.missionStartAdvisory.messageAffectedInstrument": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/mission-start-advisory.js:59. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/mission-start-advisory.js:59"
+      ],
+      "preservedTokens": []
+    },
+    "ui.missionTimeline.messageLiveProvisionalRecentEvidence": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/mission-timeline.js:40. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/mission-timeline.js:40"
+      ],
+      "preservedTokens": []
+    },
+    "ui.missionTimeline.messageRecordedEvidence": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/mission-timeline.js:40. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/mission-timeline.js:40"
+      ],
+      "preservedTokens": []
+    },
+    "ui.missionTimeline.messageCollectedSciencePermanentlyDeleted": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/mission-timeline.js:40. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": true,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/mission-timeline.js:40"
+      ],
+      "preservedTokens": []
+    },
+    "ui.missionWorkspace.messageRecordingGapBeforeThisSample": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/mission-workspace.js:186. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "scientificResults",
+      "critical": true,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/mission-workspace.js:186"
+      ],
+      "preservedTokens": []
+    },
+    "ui.missionWorkspace.messageNotArchived": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/mission-workspace.js:241. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "scientificResults",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/mission-workspace.js:241"
+      ],
+      "preservedTokens": []
+    },
+    "ui.missionWorkspace.messageUnknownDate": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/mission-workspace.js:252. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "scientificResults",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/mission-workspace.js:252",
+        "src/AeroScience.Engine/wwwroot/research.js:1308"
+      ],
+      "preservedTokens": []
+    },
+    "ui.missionWorkspace.messageUnavailableNoSurveyPolygon": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/mission-workspace.js:491. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "scientificResults",
+      "critical": true,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/mission-workspace.js:491"
+      ],
+      "preservedTokens": []
+    },
+    "ui.missionWorkspace.messageChartPointsThinnedForBounded": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/mission-workspace.js:695. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "scientificResults",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/mission-workspace.js:695"
+      ],
+      "preservedTokens": []
+    },
+    "ui.observationResearch.messageRecordedLocationsRequired": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/observation-research.js:11. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/observation-research.js:11"
+      ],
+      "preservedTokens": []
+    },
+    "ui.observationResearch.messageMissingLocationsRemainExplicit": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/observation-research.js:11. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": true,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/observation-research.js:11"
+      ],
+      "preservedTokens": []
+    },
+    "ui.observationResearch.messageEverySelectedCategoryRequired": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/observation-research.js:11. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/observation-research.js:11"
+      ],
+      "preservedTokens": []
+    },
+    "ui.organizationHosting.messageRailwayHandlesSignInBillingSetupAndCharge": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/organization-hosting.js:15. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "organizations",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/organization-hosting.js:15"
+      ],
+      "preservedTokens": [
+        "AeroScience"
+      ]
+    },
+    "ui.organizationHosting.messageYourProviderHandlesItsOwnAccountAnd": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/organization-hosting.js:15. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "organizations",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/organization-hosting.js:15"
+      ],
+      "preservedTokens": []
+    },
+    "ui.organizationLiveUi.messageFeetMSL": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/organization-live-ui.js:34. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "organizations",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/organization-live-ui.js:34"
+      ],
+      "preservedTokens": [
+        "MSL"
+      ]
+    },
+    "ui.organizationLiveUi.messageKnotsIAS": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/organization-live-ui.js:34. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "organizations",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/organization-live-ui.js:34"
+      ],
+      "preservedTokens": [
+        "IAS"
+      ]
+    },
+    "ui.organizationLiveUi.messageDegreesTrue": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/organization-live-ui.js:34. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "organizations",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/organization-live-ui.js:34"
+      ],
+      "preservedTokens": []
+    },
+    "ui.organizationLiveUi.messageSignInOrTryAgain": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/organization-live-ui.js:53. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "organizations",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/organization-live-ui.js:53"
+      ],
+      "preservedTokens": []
+    },
+    "ui.organizationMissionPreparation.messageRecordedIASMSLTelemetryNoAdditionalScientificInstruments": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/organization-mission-preparation.js:14. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "organizations",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/organization-mission-preparation.js:14"
+      ],
+      "preservedTokens": [
+        "MSL",
+        "IAS"
+      ]
+    },
+    "ui.organizationResearch.messageExclusive": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/organization-research.js:18. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "organizations",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/organization-research.js:18",
+        "src/AeroScience.Organization/wwwroot/organization-opportunities.js:43"
+      ],
+      "preservedTokens": []
+    },
+    "ui.organizationResearch.messageMultiPilot": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/organization-research.js:18. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "organizations",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/organization-research.js:18",
+        "src/AeroScience.Organization/wwwroot/organization-opportunities.js:43"
+      ],
+      "preservedTokens": []
+    },
+    "ui.organizationResearch.messageReservedAssigned": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/organization-research.js:19. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "organizations",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/organization-research.js:19",
+        "src/AeroScience.Organization/wwwroot/organization-opportunities.js:37"
+      ],
+      "preservedTokens": []
+    },
+    "ui.organizationResearch.messageClaimed": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/organization-research.js:19. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "organizations",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/organization-research.js:19",
+        "src/AeroScience.Organization/wwwroot/organization-opportunities.js:37"
+      ],
+      "preservedTokens": []
+    },
+    "ui.organizationResearch.messageReleased": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/organization-research.js:19. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "organizations",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/organization-research.js:19",
+        "src/AeroScience.Organization/wwwroot/organization-opportunities.js:37"
+      ],
+      "preservedTokens": []
+    },
+    "ui.organizationResearch.messageReleaseOnlyThisAssignmentYourPersonalScience": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/organization-research.js:32. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "organizations",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/organization-research.js:32"
+      ],
+      "preservedTokens": []
+    },
+    "ui.organizationResearch.messageThisConfirmsParticipationOnlyItDoesNot": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/organization-research.js:32. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "organizations",
+      "critical": true,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/organization-research.js:32"
+      ],
+      "preservedTokens": []
+    },
+    "ui.patterns.messageInAreaScanSegmentsTransitions": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/patterns.js:164. Whole display message; parameters retain original runtime values.",
+      "parameters": [
+        "value1",
+        "value2",
+        "value3",
+        "value4"
+      ],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/patterns.js:164"
+      ],
+      "preservedTokens": []
+    },
+    "ui.patterns.messageSurveyPassesTrackSpacing": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/patterns.js:164. Whole display message; parameters retain original runtime values.",
+      "parameters": [
+        "value1",
+        "value2",
+        "value3"
+      ],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/patterns.js:164"
+      ],
+      "preservedTokens": []
+    },
+    "ui.patterns.messageExactSameLinePassesPilotManagedTurnaround": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/patterns.js:164. Whole display message; parameters retain original runtime values.",
+      "parameters": [
+        "value1"
+      ],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/patterns.js:164"
+      ],
+      "preservedTokens": []
+    },
+    "ui.patterns.messageOrbitExportUsesA5PointToPointApproximation": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/patterns.js:164. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/patterns.js:164"
+      ],
+      "preservedTokens": []
+    },
+    "ui.payloadSettings.messageCustomized": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/payload-settings.js:19. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/payload-settings.js:19"
+      ],
+      "preservedTokens": []
+    },
+    "ui.payloadSettings.messageGenericModel": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/payload-settings.js:19. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/payload-settings.js:19"
+      ],
+      "preservedTokens": []
+    },
+    "ui.payloadSettings.messageDocumentedReference": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/payload-settings.js:19. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/payload-settings.js:19"
+      ],
+      "preservedTokens": []
+    },
+    "ui.personalResearchFlight.messageSavedTestCard": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/personal-research-flight.js:18. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/personal-research-flight.js:18"
+      ],
+      "preservedTokens": []
+    },
+    "ui.personalResearchFlight.messagePersonalTestCard": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/personal-research-flight.js:75. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/personal-research-flight.js:75"
+      ],
+      "preservedTokens": []
+    },
+    "ui.personalResearchFlight.messageAttemptStillRecording": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/personal-research-flight.js:75. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": true,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/personal-research-flight.js:75"
+      ],
+      "preservedTokens": []
+    },
+    "ui.personalResearchFlight.messageExplicitAttemptBoundaries": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/personal-research-flight.js:75. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/personal-research-flight.js:75"
+      ],
+      "preservedTokens": []
+    },
+    "ui.personalResearchFlight.messageReviewMultiPointFlightVerifiesOriginalsAndThe": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/personal-research-flight.js:76. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/personal-research-flight.js:76"
+      ],
+      "preservedTokens": []
+    },
+    "ui.personalResearchFlight.messageInspectCustomTestEvidenceVerifiesThisOriginal": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/personal-research-flight.js:76. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/personal-research-flight.js:76"
+      ],
+      "preservedTokens": []
+    },
+    "ui.personalResearchReview.messageMatchesSavedEvidence": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/personal-research-review.js:41. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/personal-research-review.js:41"
+      ],
+      "preservedTokens": []
+    },
+    "ui.personalResearchReview.messageEvidenceMismatch": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/personal-research-review.js:41. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/personal-research-review.js:41"
+      ],
+      "preservedTokens": []
+    },
+    "ui.personalResearchReview.messageRetainedSampleAndPlanHashesMatchThe": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/personal-research-review.js:59. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/personal-research-review.js:59"
+      ],
+      "preservedTokens": []
+    },
+    "ui.personalResearchReview.messageEvidenceIsMissingOrChangedTheSaved": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/personal-research-review.js:59. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": true,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/personal-research-review.js:59"
+      ],
+      "preservedTokens": []
+    },
+    "ui.personalResearchReview.messageNoRetainedTelemetry": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/personal-research-review.js:59. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/personal-research-review.js:59"
+      ],
+      "preservedTokens": []
+    },
+    "ui.personalResearchReview.messageOnlyTheFirst20IssuesAre": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/personal-research-review.js:62. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/personal-research-review.js:62"
+      ],
+      "preservedTokens": []
+    },
+    "ui.personalResearch.messageRecordedSimulatorTelemetry": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/personal-research.js:168. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/personal-research.js:168"
+      ],
+      "preservedTokens": []
+    },
+    "ui.personalResearch.messageSyntheticDemoTelemetryNotAnInstalledMSFSTest": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/personal-research.js:168. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/personal-research.js:168"
+      ],
+      "preservedTokens": [
+        "MSFS"
+      ]
+    },
+    "ui.personalResearch.messageSourceUnavailableNoTelemetrySourceTypeInferred": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/personal-research.js:168. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": true,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/personal-research.js:168"
+      ],
+      "preservedTokens": []
+    },
+    "ui.preparationSummary.messageReusedLocally": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/preparation-summary.js:29. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/preparation-summary.js:29"
+      ],
+      "preservedTokens": []
+    },
+    "ui.programWorkflowUi.messageEarlierPublication": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/program-workflow-ui.js:20. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "organizations",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/program-workflow-ui.js:20"
+      ],
+      "preservedTokens": []
+    },
+    "ui.programWorkflowUi.messageProgramOnAdministrativeHold": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/program-workflow-ui.js:22. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "organizations",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/program-workflow-ui.js:22"
+      ],
+      "preservedTokens": []
+    },
+    "ui.programWorkflowUi.messagePhaseGatesEnabledForNewAssignmentsClaims": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/program-workflow-ui.js:22. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "organizations",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/program-workflow-ui.js:22"
+      ],
+      "preservedTokens": []
+    },
+    "ui.programWorkflowUi.messageOrdinaryResearchNoPhaseGatesRequired": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/program-workflow-ui.js:22. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "organizations",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/program-workflow-ui.js:22"
+      ],
+      "preservedTokens": []
+    },
+    "ui.programWorkflowUi.messageEntireCard": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/program-workflow-ui.js:51. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "organizations",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/program-workflow-ui.js:51"
+      ],
+      "preservedTokens": []
+    },
+    "ui.programWorkflowUi.messageAuthorizedPartialContribution": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/program-workflow-ui.js:51. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "organizations",
+      "critical": true,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/program-workflow-ui.js:51"
+      ],
+      "preservedTokens": []
+    },
+    "ui.programWorkflowUi.messageOriginalReviewerApproval": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/program-workflow-ui.js:51. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "organizations",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/program-workflow-ui.js:51"
+      ],
+      "preservedTokens": []
+    },
+    "ui.programWorkflowUi.messageExactPhasePurpose": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/program-workflow-ui.js:53. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "organizations",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/program-workflow-ui.js:53"
+      ],
+      "preservedTokens": []
+    },
+    "ui.programWorkflowUi.messageCampaignFulfillment": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/program-workflow-ui.js:53. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "organizations",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/program-workflow-ui.js:53"
+      ],
+      "preservedTokens": []
+    },
+    "ui.programWorkflowUi.messageYourWork": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/program-workflow-ui.js:53. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "organizations",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/program-workflow-ui.js:53"
+      ],
+      "preservedTokens": []
+    },
+    "ui.receivedEvidenceUi.messageResearchDefinition": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/received-evidence-ui.js:11. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/received-evidence-ui.js:11"
+      ],
+      "preservedTokens": []
+    },
+    "ui.receivedEvidenceUi.messageAttempta4474be8": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/received-evidence-ui.js:25. Whole display message; parameters retain original runtime values.",
+      "parameters": [
+        "value1"
+      ],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/received-evidence-ui.js:25"
+      ],
+      "preservedTokens": []
+    },
+    "ui.remoteScience.messageMapMemoryBoundReachedFilterBy": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/remote-science.js:66. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/remote-science.js:66"
+      ],
+      "preservedTokens": []
+    },
+    "ui.remoteScience.messageHistoricalValidSampleCountNotIndexed": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/remote-science.js:85. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/remote-science.js:85"
+      ],
+      "preservedTokens": []
+    },
+    "ui.remoteScience.messageValidSamplePositions": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/remote-science.js:85. Whole display message; parameters retain original runtime values.",
+      "parameters": [
+        "value1"
+      ],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/remote-science.js:85"
+      ],
+      "preservedTokens": []
+    },
+    "ui.remoteScience.messageValidRangeToValid": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/remote-science.js:330. Whole display message; parameters retain original runtime values.",
+      "parameters": [
+        "value1",
+        "value2",
+        "value3",
+        "value4"
+      ],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/remote-science.js:330"
+      ],
+      "preservedTokens": []
+    },
+    "ui.researchTemplates.messageNotSupplied": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/research-templates.js:8. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "organizations",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/research-templates.js:8",
+        "src/AeroScience.Organization/wwwroot/research-template-ui.js:18"
+      ],
+      "preservedTokens": []
+    },
+    "ui.researchTemplates.messageAttributionNotSupplied": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/research-templates.js:16. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "organizations",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/research-templates.js:16"
+      ],
+      "preservedTokens": []
+    },
+    "ui.research.messageLocationUnavailableNoPositionWasInvented": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/research.js:207. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": true,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/research.js:207"
+      ],
+      "preservedTokens": []
+    },
+    "ui.research.messageRecordedLocationAttached": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/research.js:207. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/research.js:207"
+      ],
+      "preservedTokens": []
+    },
+    "ui.research.messageNoReferenceSelected": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/research.js:474. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/research.js:474"
+      ],
+      "preservedTokens": []
+    },
+    "ui.research.messageCustomModeledGeometry": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/research.js:475. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/research.js:475"
+      ],
+      "preservedTokens": []
+    },
+    "ui.research.messageSelectedReferenceGeometry": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/research.js:475. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/research.js:475"
+      ],
+      "preservedTokens": []
+    },
+    "ui.research.messageNotSuppliedNoAccuracyCertificationIsImplied": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/research.js:477. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/research.js:477"
+      ],
+      "preservedTokens": []
+    },
+    "ui.research.messageNoneSelected": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/research.js:502. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/research.js:502"
+      ],
+      "preservedTokens": []
+    },
+    "ui.research.messageSupplyDuration": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/research.js:559. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/research.js:559"
+      ],
+      "preservedTokens": []
+    },
+    "ui.research.messageGiB": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/research.js:559. Whole display message; parameters retain original runtime values.",
+      "parameters": [
+        "value1"
+      ],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/research.js:559"
+      ],
+      "preservedTokens": [
+        "GiB"
+      ]
+    },
+    "ui.research.messageCAPACITYWARNING": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/research.js:559. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/research.js:559"
+      ],
+      "preservedTokens": []
+    },
+    "ui.research.messageSavedProducts": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/research.js:1152. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/research.js:1152"
+      ],
+      "preservedTokens": []
+    },
+    "ui.research.messageMeasurementValues": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/research.js:1152. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/research.js:1152"
+      ],
+      "preservedTokens": []
+    },
+    "ui.research.messageNone": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/research.js:1162. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/research.js:1162",
+        "src/AeroScience.Engine/wwwroot/research.js:1422",
+        "src/AeroScience.Engine/wwwroot/storage-management.js:234"
+      ],
+      "preservedTokens": []
+    },
+    "ui.research.messageCustomRoute": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/research.js:1222. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/research.js:1222",
+        "src/AeroScience.Engine/wwwroot/route-export.js:117"
+      ],
+      "preservedTokens": []
+    },
+    "ui.research.messageEndOfRoute": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/research.js:1236. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/research.js:1236"
+      ],
+      "preservedTokens": []
+    },
+    "ui.research.messageUnknownEndTime": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/research.js:1348. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/research.js:1348"
+      ],
+      "preservedTokens": []
+    },
+    "ui.research.messageUnknownEnd": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/research.js:1408. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/research.js:1408"
+      ],
+      "preservedTokens": []
+    },
+    "ui.research.messageDurationUnknown": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/research.js:1408. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/research.js:1408"
+      ],
+      "preservedTokens": []
+    },
+    "ui.research.messageRecordingInterrupted": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/research.js:1408. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": true,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/research.js:1408"
+      ],
+      "preservedTokens": []
+    },
+    "ui.research.messageUnavailableCleared": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/research.js:1443. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": true,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/research.js:1443"
+      ],
+      "preservedTokens": []
+    },
+    "ui.research.messageDisplayReduced": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/research.js:1475. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/research.js:1475"
+      ],
+      "preservedTokens": []
+    },
+    "ui.routeExport.messageOrbitSUseA5PointToPointApproximation": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/route-export.js:38. Whole display message; parameters retain original runtime values.",
+      "parameters": [
+        "value1"
+      ],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/route-export.js:38"
+      ],
+      "preservedTokens": []
+    },
+    "ui.routeExport.messageFirstEnRouteWaypoint": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/route-export.js:117. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/route-export.js:117"
+      ],
+      "preservedTokens": []
+    },
+    "ui.routeExport.messageLastEnRouteWaypoint": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/route-export.js:117. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/route-export.js:117"
+      ],
+      "preservedTokens": []
+    },
+    "ui.scienceAnalysis.messageSourceProviderUnavailable": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/science-analysis.js:37. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "scientificResults",
+      "critical": true,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/science-analysis.js:37"
+      ],
+      "preservedTokens": []
+    },
+    "ui.scienceAnalysis.messageVerticalReferenceUnavailable": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/science-analysis.js:37. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "scientificResults",
+      "critical": true,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/science-analysis.js:37"
+      ],
+      "preservedTokens": []
+    },
+    "ui.scienceCompare.messageShared": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/science-compare.js:38. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "scientificResults",
+      "critical": true,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/science-compare.js:38"
+      ],
+      "preservedTokens": []
+    },
+    "ui.scienceCompare.messageSavedQualityUnavailable": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/science-compare.js:77. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "scientificResults",
+      "critical": true,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/science-compare.js:77"
+      ],
+      "preservedTokens": []
+    },
+    "ui.scienceDisplay.messageFtMSL": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/science-display.js:289. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/science-display.js:289"
+      ],
+      "preservedTokens": [
+        "MSL",
+        "ft"
+      ]
+    },
+    "ui.scienceJourney.messageUnavailableCheckTheConnectionSessionOr": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/science-journey.js:42. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "dashboard",
+      "critical": true,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/science-journey.js:42"
+      ],
+      "preservedTokens": []
+    },
+    "ui.scienceJourney.messageLastCheckedCount": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/science-journey.js:44. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/science-journey.js:44"
+      ],
+      "preservedTokens": []
+    },
+    "ui.scienceJourney.messageLastCheckedCountConnectionIsStale": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/science-journey.js:46. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "dashboard",
+      "critical": true,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/science-journey.js:46"
+      ],
+      "preservedTokens": []
+    },
+    "ui.scienceJourney.messageOnboardAtmosphericObservationsNeedNoNASADownload": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/science-journey.js:57. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/science-journey.js:57"
+      ],
+      "preservedTokens": [
+        "NASA"
+      ]
+    },
+    "ui.scienceJourney.messageReviewTheSavedInstrumentAndSourceRequirements": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/science-journey.js:57. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/science-journey.js:57"
+      ],
+      "preservedTokens": []
+    },
+    "ui.scienceMapView.messageRecordedValues": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/science-map-view.js:131. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "scientificResults",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/science-map-view.js:131"
+      ],
+      "preservedTokens": []
+    },
+    "ui.scienceMapView.messageOverviewModeNativeDetailShowsOneSaved": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/science-map-view.js:187. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "scientificResults",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/science-map-view.js:187"
+      ],
+      "preservedTokens": []
+    },
+    "ui.scienceMapView.messageEnvironmentalValues": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/science-map-view.js:211. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "scientificResults",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/science-map-view.js:211"
+      ],
+      "preservedTokens": []
+    },
+    "ui.scienceMapView.messageTheVisible": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/science-map-view.js:211. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "scientificResults",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/science-map-view.js:211"
+      ],
+      "preservedTokens": []
+    },
+    "ui.scienceMapView.messageTheSelected": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/science-map-view.js:211. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "scientificResults",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/science-map-view.js:211"
+      ],
+      "preservedTokens": []
+    },
+    "ui.scientificContext.messageOrderedSequence": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/scientific-context.js:28. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "contextualHelp",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/scientific-context.js:28"
+      ],
+      "preservedTokens": []
+    },
+    "ui.scientificContext.messageIndependentPoints": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/scientific-context.js:28. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "contextualHelp",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/scientific-context.js:28"
+      ],
+      "preservedTokens": []
+    },
+    "ui.scientificContext.messageFlightRegimeValidation": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/scientific-context.js:30. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "contextualHelp",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/scientific-context.js:30",
+        "src/AeroScience.Engine/wwwroot/submission-builder.js:77"
+      ],
+      "preservedTokens": []
+    },
+    "ui.scientificContext.messageNoMaximumSourceAgeIsSpecifiedBy": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/scientific-context.js:37. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "contextualHelp",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/scientific-context.js:37"
+      ],
+      "preservedTokens": []
+    },
+    "ui.scientificContext.messageMaximumSourceAgeDays": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/scientific-context.js:37. Whole display message; parameters retain original runtime values.",
+      "parameters": [
+        "value1"
+      ],
+      "surface": "contextualHelp",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/scientific-context.js:37"
+      ],
+      "preservedTokens": []
+    },
+    "ui.scientificContext.messageWithEverySelectedCategoryRepresented": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/scientific-context.js:39. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "contextualHelp",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/scientific-context.js:39"
+      ],
+      "preservedTokens": []
+    },
+    "ui.scientificContext.messageValidRecordedPositionRequired": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/scientific-context.js:39. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "contextualHelp",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/scientific-context.js:39"
+      ],
+      "preservedTokens": []
+    },
+    "ui.scientificContext.messageMissingPositionsStayUnavailable": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/scientific-context.js:39. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "contextualHelp",
+      "critical": true,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/scientific-context.js:39"
+      ],
+      "preservedTokens": []
+    },
+    "ui.scientificContext.messageNoneRequired": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/scientific-context.js:39. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "contextualHelp",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/scientific-context.js:39"
+      ],
+      "preservedTokens": []
+    },
+    "ui.scientificContext.messageDifferent": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/scientific-context.js:74. Whole display message; parameters retain original runtime values.",
+      "parameters": [
+        "value1"
+      ],
+      "surface": "contextualHelp",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/scientific-context.js:74"
+      ],
+      "preservedTokens": []
+    },
+    "ui.scientificLibrary.messageNewestSourceObservationc8d6cfa6": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/scientific-library.js:38. Whole display message; parameters retain original runtime values.",
+      "parameters": [
+        "value1"
+      ],
+      "surface": "libraryDownloads",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/scientific-library.js:38"
+      ],
+      "preservedTokens": []
+    },
+    "ui.scientificLibrary.messageOriginalObservationDatesUnknownComposite": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/scientific-library.js:38. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "libraryDownloads",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/scientific-library.js:38"
+      ],
+      "preservedTokens": []
+    },
+    "ui.scientificLibrary.messageExcludedOriginalsRetained": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/scientific-library.js:57. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "libraryDownloads",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/scientific-library.js:57"
+      ],
+      "preservedTokens": []
+    },
+    "ui.scientificLibrary.messageEligibleSubjectToCoverageAndQA": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/scientific-library.js:57. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "libraryDownloads",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/scientific-library.js:57"
+      ],
+      "preservedTokens": []
+    },
+    "ui.scientificSources.messageDisabledLocalDatasetsRemainAvailable": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/scientific-sources.js:21. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/scientific-sources.js:21"
+      ],
+      "preservedTokens": []
+    },
+    "ui.scientificSources.messageMissionAreaSuitabilityUseViewCoverageOrCurrent": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/scientific-sources.js:35. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/scientific-sources.js:35"
+      ],
+      "preservedTokens": []
+    },
+    "ui.sensorOperatingStatus.messageSavedProducts": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/sensor-operating-status.js:42. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "currentFlight",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/sensor-operating-status.js:42"
+      ],
+      "preservedTokens": []
+    },
+    "ui.sensorOperatingStatus.messageVersion": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/sensor-operating-status.js:43. Whole display message; parameters retain original runtime values.",
+      "parameters": [
+        "value1"
+      ],
+      "surface": "currentFlight",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/sensor-operating-status.js:43"
+      ],
+      "preservedTokens": []
+    },
+    "ui.sensorOperatingStatus.messageLastKnown": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/sensor-operating-status.js:44. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "currentFlight",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/sensor-operating-status.js:44"
+      ],
+      "preservedTokens": []
+    },
+    "ui.sensorOperatingStatus.messageCurrentScienceSession": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/sensor-operating-status.js:44. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "currentFlight",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/sensor-operating-status.js:44"
+      ],
+      "preservedTokens": []
+    },
+    "ui.sensorOperatingStatus.messageMissingStaleOrFromBeforeACollection": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/sensor-operating-status.js:58. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "currentFlight",
+      "critical": true,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/sensor-operating-status.js:58"
+      ],
+      "preservedTokens": []
+    },
+    "ui.sensorOperatingStatus.messageNotCurrent": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/sensor-operating-status.js:63. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "currentFlight",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/sensor-operating-status.js:63"
+      ],
+      "preservedTokens": []
+    },
+    "ui.sensorOperatingStatus.messageNoHardwareProfile": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/sensor-operating-status.js:64. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "currentFlight",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/sensor-operating-status.js:64"
+      ],
+      "preservedTokens": []
+    },
+    "ui.sensorOperatingStatus.messageNoDefinition": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/sensor-operating-status.js:64. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "currentFlight",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/sensor-operating-status.js:64"
+      ],
+      "preservedTokens": []
+    },
+    "ui.sensorOperatingStatus.messageNotSupplied": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/sensor-operating-status.js:64. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "currentFlight",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/sensor-operating-status.js:64",
+        "src/AeroScience.Organization/wwwroot/organization.js:40"
+      ],
+      "preservedTokens": []
+    },
+    "ui.sensorPlanning.messageScanTransitionSegmentsMinAt": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/sensor-planning.js:124. Whole display message; parameters retain original runtime values.",
+      "parameters": [
+        "value1",
+        "value2",
+        "value3"
+      ],
+      "surface": "currentFlight",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/sensor-planning.js:124"
+      ],
+      "preservedTokens": []
+    },
+    "ui.sensorPlanning.messageChooseAPatternCenterForRouteEstimates": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/sensor-planning.js:124. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "currentFlight",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/sensor-planning.js:124"
+      ],
+      "preservedTokens": []
+    },
+    "ui.sensorPlanning.messageFrameIntervalS": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/sensor-planning.js:124. Whole display message; parameters retain original runtime values.",
+      "parameters": [
+        "value1"
+      ],
+      "surface": "currentFlight",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/sensor-planning.js:124"
+      ],
+      "preservedTokens": []
+    },
+    "ui.sensorPlanning.messageIdealModeledDensityPointsMNot": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/sensor-planning.js:124. Whole display message; parameters retain original runtime values.",
+      "parameters": [
+        "value1"
+      ],
+      "surface": "currentFlight",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/sensor-planning.js:124"
+      ],
+      "preservedTokens": [
+        "m²"
+      ]
+    },
+    "ui.sourceDeletion.messageDatabaseBackupCleanupIsAlsoIncomplete": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/source-deletion.js:17. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "libraryDownloads",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/source-deletion.js:17"
+      ],
+      "preservedTokens": []
+    },
+    "ui.storageManagement.messageNoCap": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/storage-management.js:68. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/storage-management.js:68"
+      ],
+      "preservedTokens": []
+    },
+    "ui.submissionBuilder.messageClaimedResearchCard": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/submission-builder.js:71. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "organizations",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/submission-builder.js:71"
+      ],
+      "preservedTokens": []
+    },
+    "ui.submissionReview.messageVerifiedNow": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/submission-review.js:17. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "organizations",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/submission-review.js:17"
+      ],
+      "preservedTokens": []
+    },
+    "ui.submissionReview.messagePreviouslyCheckedNotCurrentlyVerified": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/submission-review.js:17. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "organizations",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/submission-review.js:17"
+      ],
+      "preservedTokens": []
+    },
+    "ui.tfrLayers.messageSavedGeometry": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/tfr-layers.js:84. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/tfr-layers.js:84"
+      ],
+      "preservedTokens": []
+    },
+    "ui.tfrLayers.messageWholeMissionUTCIntervalTo": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/tfr-layers.js:84. Whole display message; parameters retain original runtime values.",
+      "parameters": [
+        "value1",
+        "value2"
+      ],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/tfr-layers.js:84"
+      ],
+      "preservedTokens": [
+        "UTC"
+      ]
+    },
+    "ui.tfrLayers.messageNoComparableRealWorldIntervalAssessed": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/tfr-layers.js:84. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/tfr-layers.js:84"
+      ],
+      "preservedTokens": []
+    },
+    "ui.tfrLayers.messageYourSavedGeographyTouchesAPublishedBoundary": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/tfr-layers.js:103. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "dashboard",
+      "critical": true,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/tfr-layers.js:103"
+      ],
+      "preservedTokens": []
+    },
+    "ui.tfrLayers.messageTheAvailableEvidenceCannotEstablishAComplete": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/tfr-layers.js:103. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/tfr-layers.js:103"
+      ],
+      "preservedTokens": []
+    },
+    "ui.tfrLayers.messageRefreshDidNotVerifyCurrentData": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/tfr-layers.js:120. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/tfr-layers.js:120"
+      ],
+      "preservedTokens": []
+    },
+    "ui.tfrLayers.messageNoRecordedInventoryRefreshError": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/tfr-layers.js:120. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/tfr-layers.js:120"
+      ],
+      "preservedTokens": []
+    },
+    "ui.tfrLayers.messageSelected": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/tfr-layers.js:145. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/tfr-layers.js:145"
+      ],
+      "preservedTokens": []
+    },
+    "ui.transferProgress.messageCalculatingNotTransferring": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/transfer-progress.js:30. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/transfer-progress.js:30"
+      ],
+      "preservedTokens": []
+    },
+    "ui.transferProgress.messageCurrentFile": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/transfer-progress.js:30. Whole display message; parameters retain original runtime values.",
+      "parameters": [
+        "value1"
+      ],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/transfer-progress.js:30"
+      ],
+      "preservedTokens": []
+    },
+    "ui.transferProgress.messageCombinedSpeedNotEstablished": {
+      "context": "Presentation in src/AeroScience.Engine/wwwroot/transfer-progress.js:36. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "dashboard",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/transfer-progress.js:36"
+      ],
+      "preservedTokens": []
+    },
+    "ui.organizationNotifications.messageExternalConsentGranted": {
+      "context": "Presentation in src/AeroScience.Organization/wwwroot/organization-notifications.js:43. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "organizations",
+      "critical": true,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Organization/wwwroot/organization-notifications.js:43"
+      ],
+      "preservedTokens": []
+    },
+    "ui.organizationNotifications.messageExternalConsentOFF": {
+      "context": "Presentation in src/AeroScience.Organization/wwwroot/organization-notifications.js:43. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "organizations",
+      "critical": true,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Organization/wwwroot/organization-notifications.js:43"
+      ],
+      "preservedTokens": []
+    },
+    "ui.organizationOpportunities.messageIssuedPublication": {
+      "context": "Presentation in src/AeroScience.Organization/wwwroot/organization-opportunities.js:13. Whole display message; parameters retain original runtime values.",
+      "parameters": [
+        "value1"
+      ],
+      "surface": "organizations",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Organization/wwwroot/organization-opportunities.js:13"
+      ],
+      "preservedTokens": []
+    },
+    "ui.organizationOpportunities.messageVolunteersWelcome": {
+      "context": "Presentation in src/AeroScience.Organization/wwwroot/organization-opportunities.js:43. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "organizations",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Organization/wwwroot/organization-opportunities.js:43"
+      ],
+      "preservedTokens": []
+    },
+    "ui.organizationOpportunities.messageManagerAssignmentOnly": {
+      "context": "Presentation in src/AeroScience.Organization/wwwroot/organization-opportunities.js:43. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "organizations",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Organization/wwwroot/organization-opportunities.js:43"
+      ],
+      "preservedTokens": []
+    },
+    "ui.organizationReviews.messageNoSubmittedClientEvaluation": {
+      "context": "Presentation in src/AeroScience.Organization/wwwroot/organization-reviews.js:17. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "organizations",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Organization/wwwroot/organization-reviews.js:17"
+      ],
+      "preservedTokens": []
+    },
+    "ui.organizationReviews.messageSupplemental": {
+      "context": "Presentation in src/AeroScience.Organization/wwwroot/organization-reviews.js:24. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "organizations",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Organization/wwwroot/organization-reviews.js:24"
+      ],
+      "preservedTokens": []
+    },
+    "ui.organizationReviews.messageOriginal": {
+      "context": "Presentation in src/AeroScience.Organization/wwwroot/organization-reviews.js:24. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "organizations",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Organization/wwwroot/organization-reviews.js:24"
+      ],
+      "preservedTokens": []
+    },
+    "ui.organization.messageSavedResearchApproach": {
+      "context": "Presentation in src/AeroScience.Organization/wwwroot/organization.js:98. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "organizations",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Organization/wwwroot/organization.js:98"
+      ],
+      "preservedTokens": []
+    },
+    "ui.organization.messageRetainedPublishedRevision": {
+      "context": "Presentation in src/AeroScience.Organization/wwwroot/organization.js:98. Whole display message; parameters retain original runtime values.",
+      "parameters": [
+        "value1"
+      ],
+      "surface": "organizations",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Organization/wwwroot/organization.js:98"
+      ],
+      "preservedTokens": []
+    },
+    "ui.researchTemplateUi.messageNotRequired": {
+      "context": "Presentation in src/AeroScience.Organization/wwwroot/research-template-ui.js:35. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "organizations",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Organization/wwwroot/research-template-ui.js:35"
+      ],
+      "preservedTokens": []
+    },
+    "ui.researchTemplateUi.messagePublishedEditToCreateANew": {
+      "context": "Presentation in src/AeroScience.Organization/wwwroot/research-template-ui.js:40. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "organizations",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Organization/wwwroot/research-template-ui.js:40"
+      ],
+      "preservedTokens": []
+    },
+    "ui.researchTemplateUi.messageOrganizationalDraft": {
+      "context": "Presentation in src/AeroScience.Organization/wwwroot/research-template-ui.js:40. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "organizations",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Organization/wwwroot/research-template-ui.js:40"
+      ],
+      "preservedTokens": []
+    },
+    "ui.researchTemplateUi.messageCurrentDraft": {
+      "context": "Presentation in src/AeroScience.Organization/wwwroot/research-template-ui.js:67. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "organizations",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Organization/wwwroot/research-template-ui.js:67"
+      ],
+      "preservedTokens": []
+    },
+    "ui.researchTemplateUi.messageSupersededDraftOrPolicy": {
+      "context": "Presentation in src/AeroScience.Organization/wwwroot/research-template-ui.js:67. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "organizations",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Organization/wwwroot/research-template-ui.js:67"
+      ],
+      "preservedTokens": []
+    },
+    "ui.researchTemplateUi.messageNotRequiredBySelectedPolicy": {
+      "context": "Presentation in src/AeroScience.Organization/wwwroot/research-template-ui.js:68. Whole display message; parameters retain original runtime values.",
+      "parameters": [],
+      "surface": "organizations",
+      "critical": false,
+      "maximumLength": 4096,
+      "locations": [
+        "src/AeroScience.Organization/wwwroot/research-template-ui.js:68"
+      ],
+      "preservedTokens": []
+    },
+    "mission.alreadyRecordingError": {
+      "context": "Presentation-only error/control in src/AeroScience.Engine/wwwroot/mission-start-advisory.js. Preserve the original restriction, error type, identity comparisons and original evidence. No authorization or action is implied.",
+      "parameters": [],
+      "surface": "consentSafety",
+      "critical": true,
+      "maximumLength": 2048,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/mission-start-advisory.js"
+      ],
+      "preservedTokens": []
+    },
+    "consent.permissionChangedError": {
+      "context": "Presentation-only error/control in src/AeroScience.Engine/wwwroot/online-access.js. Preserve the original restriction, error type, identity comparisons and original evidence. No authorization or action is implied.",
+      "parameters": [],
+      "surface": "consentSafety",
+      "critical": true,
+      "maximumLength": 2048,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/online-access.js"
+      ],
+      "preservedTokens": []
+    },
+    "organization.waiverPilotError": {
+      "context": "Presentation-only error/control in src/AeroScience.Engine/wwwroot/program-workflow-ui.js. Preserve the original restriction, error type, identity comparisons and original evidence. No authorization or action is implied.",
+      "parameters": [],
+      "surface": "consentSafety",
+      "critical": true,
+      "maximumLength": 2048,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/program-workflow-ui.js"
+      ],
+      "preservedTokens": []
+    },
+    "planning.polygonCoordinatesError": {
+      "context": "Presentation-only error/control in src/AeroScience.Engine/wwwroot/research.js. Preserve the original restriction, error type, identity comparisons and original evidence. No authorization or action is implied.",
+      "parameters": [],
+      "surface": "consentSafety",
+      "critical": true,
+      "maximumLength": 2048,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/research.js"
+      ],
+      "preservedTokens": []
+    },
+    "cards.anyConditionFullHold": {
+      "context": "Presentation-only error/control in src/AeroScience.Engine/wwwroot/flight-test-procedure.js. Preserve the original restriction, error type, identity comparisons and original evidence. No authorization or action is implied.",
+      "parameters": [],
+      "surface": "missions",
+      "critical": true,
+      "maximumLength": 2048,
+      "locations": [
+        "src/AeroScience.Engine/wwwroot/flight-test-procedure.js"
+      ],
+      "preservedTokens": []
+    },
+    "windows.error.exactConfirmationPhrase": {
+      "context": "Presentation-only error/control in src/AeroScience.Desktop/DataManagementForm.cs. Preserve the original restriction, error type, identity comparisons and original evidence. No authorization or action is implied.",
+      "parameters": [],
+      "surface": "windowsCompanion",
+      "critical": true,
+      "maximumLength": 2048,
+      "locations": [
+        "src/AeroScience.Desktop/DataManagementForm.cs"
+      ],
+      "preservedTokens": []
+    },
+    "windows.error.recordingStillActive": {
+      "context": "Presentation-only error/control in src/AeroScience.Desktop/DataManagementForm.cs. Preserve the original restriction, error type, identity comparisons and original evidence. No authorization or action is implied.",
+      "parameters": [],
+      "surface": "windowsCompanion",
+      "critical": true,
+      "maximumLength": 2048,
+      "locations": [
+        "src/AeroScience.Desktop/DataManagementForm.cs"
+      ],
+      "preservedTokens": []
+    },
+    "windows.error.storageBeforeDeletion": {
+      "context": "Presentation-only error/control in src/AeroScience.Desktop/MainForm.cs. Preserve the original restriction, error type, identity comparisons and original evidence. No authorization or action is implied.",
+      "parameters": [],
+      "surface": "windowsCompanion",
+      "critical": true,
+      "maximumLength": 2048,
+      "locations": [
+        "src/AeroScience.Desktop/MainForm.cs"
+      ],
+      "preservedTokens": []
+    },
+    "windows.error.resumeDeletion": {
+      "context": "Presentation-only error/control in src/AeroScience.Desktop/MainForm.cs. Preserve the original restriction, error type, identity comparisons and original evidence. No authorization or action is implied.",
+      "parameters": [],
+      "surface": "windowsCompanion",
+      "critical": true,
+      "maximumLength": 2048,
+      "locations": [
+        "src/AeroScience.Desktop/MainForm.cs"
+      ],
+      "preservedTokens": []
+    },
+    "windows.error.operationRunning": {
+      "context": "Presentation-only error/control in src/AeroScience.Desktop/MainForm.cs. Preserve the original restriction, error type, identity comparisons and original evidence. No authorization or action is implied.",
+      "parameters": [],
+      "surface": "windowsCompanion",
+      "critical": true,
+      "maximumLength": 2048,
+      "locations": [
+        "src/AeroScience.Desktop/MainForm.cs"
+      ],
+      "preservedTokens": []
+    },
+    "windows.error.stoppedFolder": {
+      "context": "Presentation-only error/control in src/AeroScience.Desktop/MainForm.cs. Preserve the original restriction, error type, identity comparisons and original evidence. No authorization or action is implied.",
+      "parameters": [],
+      "surface": "windowsCompanion",
+      "critical": true,
+      "maximumLength": 2048,
+      "locations": [
+        "src/AeroScience.Desktop/MainForm.cs"
+      ],
+      "preservedTokens": []
+    },
+    "windows.error.sourceStorageStopped": {
+      "context": "Presentation-only error/control in src/AeroScience.Desktop/MainForm.cs. Preserve the original restriction, error type, identity comparisons and original evidence. No authorization or action is implied.",
+      "parameters": [],
+      "surface": "windowsCompanion",
+      "critical": true,
+      "maximumLength": 2048,
+      "locations": [
+        "src/AeroScience.Desktop/MainForm.cs"
+      ],
+      "preservedTokens": []
+    },
+    "windows.error.startCompanion": {
+      "context": "Presentation-only error/control in src/AeroScience.Desktop/MainForm.cs. Preserve the original restriction, error type, identity comparisons and original evidence. No authorization or action is implied.",
+      "parameters": [],
+      "surface": "windowsCompanion",
+      "critical": true,
+      "maximumLength": 2048,
+      "locations": [
+        "src/AeroScience.Desktop/MainForm.cs"
+      ],
+      "preservedTokens": []
+    },
+    "windows.error.databaseFilename": {
+      "context": "Presentation-only error/control in src/AeroScience.Desktop/SetupWizardForm.cs. Preserve the original restriction, error type, identity comparisons and original evidence. No authorization or action is implied.",
+      "parameters": [],
+      "surface": "windowsCompanion",
+      "critical": true,
+      "maximumLength": 2048,
+      "locations": [
+        "src/AeroScience.Desktop/SetupWizardForm.cs"
+      ],
+      "preservedTokens": []
+    },
+    "windows.error.insufficientSpace": {
+      "context": "Presentation-only error/control in src/AeroScience.Desktop/SetupWizardForm.cs. Preserve the original restriction, error type, identity comparisons and original evidence. No authorization or action is implied.",
+      "parameters": [],
+      "surface": "windowsCompanion",
+      "critical": true,
+      "maximumLength": 2048,
+      "locations": [
+        "src/AeroScience.Desktop/SetupWizardForm.cs"
+      ],
+      "preservedTokens": []
+    },
+    "windows.error.closeSimulator": {
+      "context": "Presentation-only error/control in src/AeroScience.Desktop/SetupWizardForm.cs. Preserve the original restriction, error type, identity comparisons and original evidence. No authorization or action is implied.",
+      "parameters": [],
+      "surface": "windowsCompanion",
+      "critical": true,
+      "maximumLength": 2048,
+      "locations": [
+        "src/AeroScience.Desktop/SetupWizardForm.cs"
+      ],
+      "preservedTokens": [
+        "MSFS"
+      ]
+    },
+    "windows.error.communityFolder": {
+      "context": "Presentation-only error/control in src/AeroScience.Desktop/SetupWizardForm.cs. Preserve the original restriction, error type, identity comparisons and original evidence. No authorization or action is implied.",
+      "parameters": [],
+      "surface": "windowsCompanion",
+      "critical": true,
+      "maximumLength": 2048,
+      "locations": [
+        "src/AeroScience.Desktop/SetupWizardForm.cs"
+      ],
+      "preservedTokens": []
+    },
+    "windows.error.folderUnavailable": {
+      "context": "Presentation-only error/control in src/AeroScience.Desktop/NativeFolder.cs. Preserve the original restriction, error type, identity comparisons and original evidence. No authorization or action is implied.",
+      "parameters": [],
+      "surface": "windowsCompanion",
+      "critical": true,
+      "maximumLength": 2048,
+      "locations": [
+        "src/AeroScience.Desktop/NativeFolder.cs"
+      ],
+      "preservedTokens": []
+    },
+    "windows.error.openVault": {
+      "context": "Presentation-only error/control in src/AeroScience.Desktop/WindowsEarthdataCredentials.cs. Preserve the original restriction, error type, identity comparisons and original evidence. No authorization or action is implied.",
+      "parameters": [],
+      "surface": "windowsCompanion",
+      "critical": true,
+      "maximumLength": 2048,
+      "locations": [
+        "src/AeroScience.Desktop/WindowsEarthdataCredentials.cs"
+      ],
+      "preservedTokens": [
+        "AeroScience"
+      ]
+    },
+    "windows.error.invalidCredential": {
+      "context": "Presentation-only error/control in src/AeroScience.Desktop/WindowsEarthdataCredentials.cs. Preserve the original restriction, error type, identity comparisons and original evidence. No authorization or action is implied.",
+      "parameters": [],
+      "surface": "windowsCompanion",
+      "critical": true,
+      "maximumLength": 2048,
+      "locations": [
+        "src/AeroScience.Desktop/WindowsEarthdataCredentials.cs"
+      ],
+      "preservedTokens": [
+        "AeroScience"
+      ]
+    },
+    "windows.error.credentialBounds": {
+      "context": "Presentation-only error/control in src/AeroScience.Desktop/WindowsEarthdataCredentials.cs. Preserve the original restriction, error type, identity comparisons and original evidence. No authorization or action is implied.",
+      "parameters": [],
+      "surface": "windowsCompanion",
+      "critical": true,
+      "maximumLength": 2048,
+      "locations": [
+        "src/AeroScience.Desktop/WindowsEarthdataCredentials.cs"
+      ],
+      "preservedTokens": []
+    },
+    "windows.error.saveVault": {
+      "context": "Presentation-only error/control in src/AeroScience.Desktop/WindowsEarthdataCredentials.cs. Preserve the original restriction, error type, identity comparisons and original evidence. No authorization or action is implied.",
+      "parameters": [],
+      "surface": "windowsCompanion",
+      "critical": true,
+      "maximumLength": 2048,
+      "locations": [
+        "src/AeroScience.Desktop/WindowsEarthdataCredentials.cs"
+      ],
+      "preservedTokens": [
+        "AeroScience"
+      ]
+    },
+    "windows.error.removeCredential": {
+      "context": "Presentation-only error/control in src/AeroScience.Desktop/WindowsEarthdataCredentials.cs. Preserve the original restriction, error type, identity comparisons and original evidence. No authorization or action is implied.",
+      "parameters": [],
+      "surface": "windowsCompanion",
+      "critical": true,
+      "maximumLength": 2048,
+      "locations": [
+        "src/AeroScience.Desktop/WindowsEarthdataCredentials.cs"
+      ],
+      "preservedTokens": [
+        "AeroScience"
+      ]
+    },
+    "windows.error.unsupportedOrganizationCredential": {
+      "context": "Native Windows vault validation error. Presentation only; keep original account/owner-key validation, identity, format, cryptography and storage unchanged.",
+      "parameters": [],
+      "surface": "windowsCompanion",
+      "critical": true,
+      "maximumLength": 512,
+      "locations": [
+        "src/AeroScience.Desktop/WindowsOrganizationCredentials.cs"
+      ],
+      "preservedTokens": []
+    },
+    "windows.error.unsupportedOwnerKey": {
+      "context": "Native Windows vault validation error. Presentation only; keep original account/owner-key validation, identity, format, cryptography and storage unchanged.",
+      "parameters": [],
+      "surface": "windowsCompanion",
+      "critical": true,
+      "maximumLength": 512,
+      "locations": [
+        "src/AeroScience.Desktop/WindowsOrganizationCredentials.cs"
+      ],
       "preservedTokens": []
     }
   }

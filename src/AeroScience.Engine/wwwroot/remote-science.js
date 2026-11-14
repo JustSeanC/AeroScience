@@ -63,7 +63,7 @@ export async function remoteProducts(parent,api,missionId=null,instrumentId=null
   const own=missionId+"|"+filter.value;if(!map||!missionId)return;let more=false;
   if(!filter.value||names[filter.value]){const page=await api(`/api/missions/${missionId}/scientific-locations?offset=${mapOffset}${filter.value?'&instrumentId='+encodeURIComponent(filter.value):''}`);if(own!==missionId+"|"+filter.value||!section.isConnected)return;for(const item of page.items){mapAreas.push({vertices:item.footprint.boundary,label:textForUI("ui.remoteScience.messageFlightSourceFootprint",{value1:(String(item.instrumentId)),value2:(String(item.flightPacketUtc)),value3:(String(item.sourceObservationUtc||'unknown'))})});mapSamples.push(...item.locations.map(p=>({...p,instrumentId:item.instrumentId,timestampUtc:item.flightPacketUtc})));}mapOffset+=page.items.length;more=page.hasMore;}
   if(!filter.value||!names[filter.value]){const page=await api(`/api/missions/${missionId}/scientific-atmosphere-locations?after=${atmosAfter}${filter.value?'&instrumentId='+encodeURIComponent(filter.value):''}`);if(own!==missionId+"|"+filter.value||!section.isConnected)return;mapSamples.push(...page.items.filter(p=>Number.isFinite(p.latitude)&&Number.isFinite(p.longitude)));atmosAfter=page.next;atmosShown+=page.items.length;more||=page.hasMore;}
-  map.set({footprints:mapAreas,samples:mapSamples});if(!mapHolder.dataset.fitted){map.fit();mapHolder.dataset.fitted='true';}mapMore.hidden=!more||mapSamples.length>=60000;setPresentationText(range,localizedCopy("ui.remoteScience.messageMapShowsExternalAcquisitionsAtmosphericValues",{value1:(String(mapOffset)),value2:(String(atmosShown)),value3:(String(mapSamples.length)),value4:(String(mapSamples.length>=60000?' Map memory bound reached; filter by instrument or browse individual acquisitions.':''))}));
+  map.set({footprints:mapAreas,samples:mapSamples});if(!mapHolder.dataset.fitted){map.fit();mapHolder.dataset.fitted='true';}mapMore.hidden=!more||mapSamples.length>=60000;setPresentationText(range,localizedCopy("ui.remoteScience.messageMapShowsExternalAcquisitionsAtmosphericValues",{value1:(String(mapOffset)),value2:(String(atmosShown)),value3:(String(mapSamples.length)),value4:(String(mapSamples.length>=60000?textForUI("ui.remoteScience.messageMapMemoryBoundReachedFilterBy"):''))}));
  }
 
  async function load(){const own=++requestGeneration;const query=`${missionId?'&missionId='+missionId:''}${filter.value?'&instrumentId='+encodeURIComponent(filter.value):''}`;
@@ -82,7 +82,7 @@ export async function remoteProducts(parent,api,missionId=null,instrumentId=null
   }
 
   const key=JSON.stringify(page.items.map(p=>[p.id,p.bytes]));if(key===signature)return;signature=key;list.replaceChildren();
-  for(const p of page.items){const row=e('article');row.className='plan-row';row.append(e('strong',names[p.instrumentId]||p.instrumentId),e('span',localizedCopy("ui.remoteScience.messageFlightSourceMiB",{value1:(String(p.flightPacketUtc)),value2:(String(p.sourceObservationUtc||'Unknown / composite')),value3:(String(p.validSampleCount==null?'Historical valid sample count not indexed':p.validSampleCount+' valid sample positions')),value4:(String(number(p.bytes/1048576)))})),action(localizedCopy("ui.remoteScience.messageViewData"),async()=>{const current=++viewGeneration;const data=await api(`/api/science/products/${p.id}`);if(current!==viewGeneration||!viewer.isConnected)return;viewer.replaceChildren();await viewProduct(viewer,data,api);}));list.append(row);}
+  for(const p of page.items){const row=e('article');row.className='plan-row';row.append(e('strong',names[p.instrumentId]||p.instrumentId),e('span',localizedCopy("ui.remoteScience.messageFlightSourceMiB",{value1:(String(p.flightPacketUtc)),value2:(String(p.sourceObservationUtc||textForUI("ui.downloadActivity.messageUnknownComposite"))),value3:(String(p.validSampleCount==null?textForUI("ui.remoteScience.messageHistoricalValidSampleCountNotIndexed"):textForUI("ui.remoteScience.messageValidSamplePositions",{value1:(p.validSampleCount)}))),value4:(String(number(p.bytes/1048576)))})),action(localizedCopy("ui.remoteScience.messageViewData"),async()=>{const current=++viewGeneration;const data=await api(`/api/science/products/${p.id}`);if(current!==viewGeneration||!viewer.isConnected)return;viewer.replaceChildren();await viewProduct(viewer,data,api);}));list.append(row);}
  }
  async function poll(){if(!section.isConnected)return;if(!document.hidden&&!section.closest('[hidden]'))try{await load();}catch(error){setPresentationText(summary,error.message);}timer=setTimeout(poll,5000);}
  await load();timer=setTimeout(poll,5000);return section;
@@ -94,7 +94,7 @@ export async function viewProduct(parent, data, api = null) {
     e("h3", `${names[p.instrumentId] || p.instrumentId} · ${s.name}`),
     e(
       "p",
-      localizedCopy("ui.remoteScience.messageSourceObservationFlightPacket",{value1:(String(p.sourceObservationUtc || "Unknown")),value2:(String(p.flightPacketUtc))}),
+      localizedCopy("ui.remoteScience.messageSourceObservationFlightPacket",{value1:(String(p.sourceObservationUtc || textForUI("localization.unknownValue"))),value2:(String(p.flightPacketUtc))}),
     ),
     e(
       "p",
@@ -149,7 +149,7 @@ export async function viewProduct(parent, data, api = null) {
     details.append(
       e(
         "p",
-        localizedCopy("ui.remoteScience.messageNativePixel",{value1:(String(b.id)),value2:(String(b.unit)),value3:(String(b.wavelengthNm ? ` · ${b.wavelengthNm} nm` : "")),value4:(String(b.originalGrid.crs)),value5:(String(Math.abs(b.originalGrid.pixelWidth))),value6:(String(Math.abs(b.originalGrid.pixelHeight))),value7:(String(b.originalGrid.crs === "EPSG:4326" ? "degrees" : "m")),value8:(String(b.samplingMethod))}),
+        localizedCopy("ui.remoteScience.messageNativePixel",{value1:(String(b.id)),value2:(String(b.unit)),value3:(String(b.wavelengthNm ? textForUI("ui.missionWorkspace.messageNm",{value1:(b.wavelengthNm)}) : "")),value4:(String(b.originalGrid.crs)),value5:(String(Math.abs(b.originalGrid.pixelWidth))),value6:(String(Math.abs(b.originalGrid.pixelHeight))),value7:(String(b.originalGrid.crs === "EPSG:4326" ? "degrees" : "m")),value8:(String(b.samplingMethod))}),
       ),
     );
   parent.append(details);
@@ -327,7 +327,7 @@ export async function viewProduct(parent, data, api = null) {
     output.append(
       e(
         "p",
-        localizedCopy("ui.remoteScience.messageTransparentCellsAreNodataQualityMasked",{value1:(String(unit)),value2:(String(values ? " · Valid range " + number(min) + " to " + number(max) + " · " + finite.length + " valid / " + values.length + " samples" : ""))}),
+        localizedCopy("ui.remoteScience.messageTransparentCellsAreNodataQualityMasked",{value1:(String(unit)),value2:(String(values ? textForUI("ui.remoteScience.messageValidRangeToValid",{value1:(number(min)),value2:(number(max)),value3:(finite.length),value4:(values.length)}) : ""))}),
       ),
       canvas,
     );
@@ -358,7 +358,7 @@ export async function viewProduct(parent, data, api = null) {
         const drawing=image.getContext("2d");drawing.fillStyle="#0d1b26";drawing.fillRect(0,0,image.width,image.height);
         drawing.imageSmoothingEnabled=false;drawing.drawImage(canvas,16,16,288,288);
         drawing.fillStyle="#ecf5f5";drawing.font="14px sans-serif";
-        const lines=[textForUI("ui.remoteScience.messageColorPreviewNotA",{value1:(String(names[p.instrumentId])),value2:(String(view))}),`${unit}${values?` · range ${number(min)} to ${number(max)}`:""}`,textForUI("ui.remoteScience.messageSourceObserved",{value1:(String(p.sourceObservationUtc||"Unknown"))}),textForUI("ui.remoteScience.messageFlightPacket",{value1:(String(p.flightPacketUtc))}),textForUI("ui.remoteScience.messageProcessed",{value1:(String(p.processedUtc))}),textForUI("ui.remoteScience.messageSourceIDOriginalGridsRetainedIn",{value1:(String(p.sourceId))}),textForUI("ui.remoteScience.messageTransparentCellsMissingQualityExcludedSensorOrientedFootprintGrid")];
+        const lines=[textForUI("ui.remoteScience.messageColorPreviewNotA",{value1:(String(names[p.instrumentId])),value2:(String(view))}),`${unit}${values?` · range ${number(min)} to ${number(max)}`:""}`,textForUI("ui.remoteScience.messageSourceObserved",{value1:(String(p.sourceObservationUtc||textForUI("localization.unknownValue")))}),textForUI("ui.remoteScience.messageFlightPacket",{value1:(String(p.flightPacketUtc))}),textForUI("ui.remoteScience.messageProcessed",{value1:(String(p.processedUtc))}),textForUI("ui.remoteScience.messageSourceIDOriginalGridsRetainedIn",{value1:(String(p.sourceId))}),textForUI("ui.remoteScience.messageTransparentCellsMissingQualityExcludedSensorOrientedFootprintGrid")];
         lines.forEach((line,i)=>drawing.fillText(line,16,326+i*19,688));
         const blob = await new Promise((resolve) =>
           image.toBlob(resolve, "image/png"),
@@ -373,7 +373,7 @@ export async function viewProduct(parent, data, api = null) {
     );
     if (view === "elevation") {
       output.append(action(localizedCopy("ui.remoteScience.messageDownloadElevationDisplayCSV"),async()=>{
-        const rows=[[textForUI("ui.atmosphericResearch.messageLatitude"),textForUI("ui.atmosphericResearch.messageLongitude"),textForUI("ui.remoteScience.messageDisplayElevation"),textForUI("ui.remoteScience.messageDisplayUnits"),textForUI("ui.scienceMapView.messageVerticalReference"),textForUI("ui.remoteScience.messageOriginalElevationM")],...data.sampleLocations.map((location,index)=>[location.latitude,location.longitude,values[index],displayReading('elevation',0,'m').unit,s.verticalDatum,data.derived.elevation[index]])];
+        const rows=[["Latitude","Longitude","Display elevation","Display units","Vertical reference","Original elevation (m)"],...data.sampleLocations.map((location,index)=>[location.latitude,location.longitude,values[index],displayReading('elevation',0,'m').unit,s.verticalDatum,data.derived.elevation[index]])];
         const csv=rows.map(row=>row.map(value=>'"'+String(typeof value==='string'&&/^[=+@-]/.test(value)?"'"+value:value??'').replaceAll('"','""')+'"').join(',')).join('\r\n');const a=e('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='AeroScience-terrain-display.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
       }));
       link(output,localizedCopy("ui.remoteScience.messageOpenElevationProfileAlongAFlightRoute"),`#workspace/map?missions=${p.missionId}&instrument=terrain-scanner&source=${p.sourceId}`);

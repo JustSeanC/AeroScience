@@ -75,14 +75,14 @@ export async function renderAnalysis(parent, id, plan, api) {
     panel.append(
       el(
         "p",
-        localizedCopy("ui.analysis.messageLateralRouteDeviationMeanMaximum",{value1:(String(stats.meanMetres == null ? "Unavailable" : distance(stats.meanMetres))),value2:(String(stats.maximumMetres == null ? "Unavailable" : distance(stats.maximumMetres))),value3:(String(stats.samples))}),
+        localizedCopy("ui.analysis.messageLateralRouteDeviationMeanMaximum",{value1:(String(stats.meanMetres == null ? textForUI("map.native.unavailable") : distance(stats.meanMetres))),value2:(String(stats.maximumMetres == null ? textForUI("map.native.unavailable") : distance(stats.maximumMetres))),value3:(String(stats.samples))}),
       ),
     );
   for (const segment of data.segments || [])
     panel.append(
       el(
         "p",
-        localizedCopy("ui.analysis.messageSegmentPositions",{value1:(String(segment.index + 1)),value2:(String(segment.from)),value3:(String(segment.to)),value4:(String(segment.observedWithinTolerance ? "Recorded path observed within tolerance" : "Completion not established")),value5:(String(segment.samples)),value6:(String(segment.excludedGaps)),value7:(String(segment.maximumDeviationMetres == null ? "" : " · max deviation " + distance(segment.maximumDeviationMetres)))}),
+        localizedCopy("ui.analysis.messageSegmentPositions",{value1:(String(segment.index + 1)),value2:(String(segment.from)),value3:(String(segment.to)),value4:(String(segment.observedWithinTolerance ? textForUI("ui.analysis.messageRecordedPathObservedWithinTolerance") : textForUI("ui.analysis.messageCompletionNotEstablished"))),value5:(String(segment.samples)),value6:(String(segment.excludedGaps)),value7:(String(segment.maximumDeviationMetres == null ? "" : textForUI("ui.analysis.messageMaxDeviation",{value1:(distance(segment.maximumDeviationMetres))})))}),
       ),
     );
   const table = el("table"),

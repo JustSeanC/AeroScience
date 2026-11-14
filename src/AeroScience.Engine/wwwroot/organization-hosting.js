@@ -12,7 +12,7 @@ const estimates={get railway(){return textForUI("ui.organizationHosting.messageE
 const details=document.querySelector('#details');
 function showProvider(provider,focus=false){
  details.replaceChildren(el('h2',provider.name+' · '+provider.state),el('p',provider.storage),el('p',provider.limitation));
- details.append(el('p',localizedCopy("ui.organizationHosting.messageNoAccountPaymentOrDeploymentIsStarted",{value1:(String(provider.id==='railway'?'Railway handles sign-in, billing setup and charge approval on Railway’s own pages. AeroScience never asks for payment details.':'Your provider handles its own account and charge approval.'))})));
+ details.append(el('p',localizedCopy("ui.organizationHosting.messageNoAccountPaymentOrDeploymentIsStarted",{value1:(String(provider.id==='railway'?textForUI("ui.organizationHosting.messageRailwayHandlesSignInBillingSetupAndCharge"):textForUI("ui.organizationHosting.messageYourProviderHandlesItsOwnAccountAnd")))})));
  const costs=el('details');costs.append(el('summary',localizedCopy("ui.organizationHosting.messageCostDetails")),el('p',provider.cost),el('p',localizedCopy("ui.organizationHosting.messageEstimatesAreNotAPricePromiseCheck")));details.append(costs);
  const status=el('p',localizedCopy("ui.organizationHosting.messagePreparationCanBeReviewedNowLiveDeployment"));status.className='notice';details.append(status);
  const list=el('ul');for(const url of provider.docs){const item=el('li'),a=el('a',new URL(url).hostname+' — '+new URL(url).pathname);a.href=url;a.rel='noreferrer';item.append(a);list.append(item);}details.append(el('h3',localizedCopy("ui.organizationHosting.messageOfficialInformation")),list);

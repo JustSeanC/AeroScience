@@ -204,7 +204,7 @@ export function initializeResearch(context) {
       if (!state?.activeMission) throw Error(textForUI("ui.research.messageStartAMissionFirst"));
       const id=state.activeMission.id,content={category:category.value,notes:note.value},key=JSON.stringify([id,content]);if(observationRequest?.key!==key)observationRequest={key,requestId:newIdentity()};
       setPresentationText(savedObservation,localizedCopy("ui.research.messageSavingPilotObservation"));const saved=await ctx.api(`/api/missions/${id}/markers`,{...content,requestId:observationRequest.requestId}).catch(error=>{setPresentationText(savedObservation,localizedCopy("ui.research.messagePilotObservationCouldNotBeConfirmedYour"));throw error;});
-      if(state?.activeMission?.id===id&&note.value===content.notes)note.value="";observationRequest=null;setPresentationText(savedObservation,localizedCopy("ui.research.messagePilotObservationSavedFlight",{value1:(String(saved.timestampUtc)),value2:(String(saved.latitude===null?'Location unavailable; no position was invented':'Recorded location attached'))}));
+      if(state?.activeMission?.id===id&&note.value===content.notes)note.value="";observationRequest=null;setPresentationText(savedObservation,localizedCopy("ui.research.messagePilotObservationSavedFlight",{value1:(String(saved.timestampUtc)),value2:(String(saved.latitude===null?textForUI("ui.research.messageLocationUnavailableNoPositionWasInvented"):textForUI("ui.research.messageRecordedLocationAttached")))}));
       lastFetch = 0;
     }),
     button("Save in-flight note", async () => {
@@ -471,10 +471,10 @@ function editPlan(plan) {
       const effective=current.find(v=>v.instrumentId===c.instrumentId);
       setPresentationText(included,effective?.enabled?localizedCopy("ui.research.messageEnabledInDraft"):localizedCopy("ui.research.messageNotEnabledInDraft"));
       row.dataset.enabled=String(!!effective?.enabled);
-      setPresentationText(profile,localizedCopy("ui.research.messageReference",{value1:(String(effective?.payload?.profile?.name||"No reference selected"))}));
-      setPresentationText(reference,localizedCopy("ui.research.messageReferenceIdentityVersionNo",{value1:(String(effective?.payload?.profile?.id||"Unknown")),value2:(String(effective?.payload?.profile?.version??"Unknown")),value3:(String(effective?.payload?.custom?"Custom modeled geometry":"Selected reference geometry"))}));
-      setPresentationText(cadence,localizedCopy("ui.research.messageRecommendedAcquisitionIntervalSCurrentConfiguredInterval",{value1:(String(c.intervalMs/1000)),value2:(String(effective?.intervalMs/1000??"Unknown"))}));
-      setPresentationText(calibration,localizedCopy("ui.research.messageCalibrationProvenance",{value1:(String(effective?.calibration?.name||effective?.calibration?.id||"Not supplied; no accuracy certification is implied."))}));
+      setPresentationText(profile,localizedCopy("ui.research.messageReference",{value1:(String(effective?.payload?.profile?.name||textForUI("ui.research.messageNoReferenceSelected")))}));
+      setPresentationText(reference,localizedCopy("ui.research.messageReferenceIdentityVersionNo",{value1:(String(effective?.payload?.profile?.id||textForUI("localization.unknownValue"))),value2:(String(effective?.payload?.profile?.version??textForUI("localization.unknownValue"))),value3:(String(effective?.payload?.custom?textForUI("ui.research.messageCustomModeledGeometry"):textForUI("ui.research.messageSelectedReferenceGeometry")))}));
+      setPresentationText(cadence,localizedCopy("ui.research.messageRecommendedAcquisitionIntervalSCurrentConfiguredInterval",{value1:(String(c.intervalMs/1000)),value2:(String(effective?.intervalMs/1000??textForUI("localization.unknownValue")))}));
+      setPresentationText(calibration,localizedCopy("ui.research.messageCalibrationProvenance",{value1:(String(effective?.calibration?.name||effective?.calibration?.id||textForUI("ui.research.messageNotSuppliedNoAccuracyCertificationIsImplied")))}));
       const retained=localSourceCandidates?.filter(s=>s.filesAvailable&&s.source.manifest.kind===kind);
       setPresentationText(sources,localSourceCandidates===null?localizedCopy("ui.research.messageLocalSourcePresenceNotYetAssessed"):retained?.length?localizedCopy("ui.research.messageRetainedCandidateSMissionAreaSuitabilityAndValid",{value1:(String(retained.length))}):localizedCopy("ui.research.messageNoVerifiedRetainedCandidateOfThisScientific"));
       setPresentationText(limits,(effective?.payload?.profile?.limitations||[]).join(" ")||localizedCopy("ui.research.messageOperatingLimitsAreAssessedOnlyWhereDocumented"));
@@ -499,7 +499,7 @@ function editPlan(plan) {
       const caveats=text("details",undefined,"recommended-explanation");caveats.append(text("summary",localizedCopy("ui.research.messageHowRecommendationsWorkScientificLimitations")),text("p",localizedCopy("ui.research.messagePrimaryInstrumentsMatchTheTemplateSResearchObjective")),text("p",localizedCopy("ui.research.messageRecommendationsDoNotInstallHardwareOrConfirm")));recommendations.append(caveats);
       recommendations.append(text("p",undefined,"payload-additional"));
     }
-    setPresentationText(selectedPayload,localizedCopy("ui.research.messageEnabledInstruments",{value1:(String(current.filter(c=>c.enabled).map(c=>definitions.find(d=>d.id===c.instrumentId)?.name||c.instrumentId).join(", ")||"None selected"))}));
+    setPresentationText(selectedPayload,localizedCopy("ui.research.messageEnabledInstruments",{value1:(String(current.filter(c=>c.enabled).map(c=>definitions.find(d=>d.id===c.instrumentId)?.name||c.instrumentId).join(", ")||textForUI("ui.research.messageNoneSelected")))}));
     for(const update of recommendationCards)update(current);
     const extra=current.filter(c=>c.enabled&&!recommendedIds.has(c.instrumentId)),additional=recommendations.querySelector(".payload-additional");
     setPresentationText(additional,extra.length?localizedCopy("ui.research.messageAdditionalCustomInstrumentsEnabled",{value1:(String(extra.map(c=>definitions.find(d=>d.id===c.instrumentId)?.name||c.instrumentId).join(", ")))}):"");
@@ -556,7 +556,7 @@ function editPlan(plan) {
         instruments: readConfigs(configuration),
         durationMinutes: duration.value ? Number(duration.value) : null,
       });
-      setPresentationText(estimate,localizedCopy("ui.research.messageEstimatedScienceStorageAvailable",{value1:(String(v.estimatedBytes === null ? "Supply duration" : n(v.estimatedBytes / 1048576) + " MiB")),value2:(String(v.availableBytes === null ? "Unknown" : n(v.availableBytes / 1073741824) + " GiB")),value3:(String(v.capacityWarning ? " · CAPACITY WARNING" : "")),value4:(String(v.basis)),value5:(String(v.limitations.join(" ")))}));
+      setPresentationText(estimate,localizedCopy("ui.research.messageEstimatedScienceStorageAvailable",{value1:(String(v.estimatedBytes === null ? textForUI("ui.research.messageSupplyDuration") : textForUI("ui.hyperspectralImport.messageMiB",{value1:(n(v.estimatedBytes / 1048576))}))),value2:(String(v.availableBytes === null ? textForUI("localization.unknownValue") : textForUI("ui.research.messageGiB",{value1:(n(v.availableBytes / 1073741824))}))),value3:(String(v.capacityWarning ? textForUI("ui.research.messageCAPACITYWARNING") : "")),value4:(String(v.basis)),value5:(String(v.limitations.join(" ")))}));
     }),
     estimate,
   );
@@ -725,7 +725,7 @@ function editPlan(plan) {
               Math.abs(p.longitude) > 180,
           )
         )
-          throw Error("A polygon needs at least three valid coordinate pairs.");
+          throw Error(textForUI("planning.polygonCoordinatesError"));
         const summary=areaSummary(points);if(summary.error)throw Error(summary.error);
         const value = { name: title.value, vertices: points };
         pattern.remember();
@@ -1149,7 +1149,7 @@ export function renderResearch(next) {
       card.append(
         text(
           "p",
-          localizedCopy("ui.research.messageEverySAcquisitionSets",{value1:(String(i.intervalMs / 1000)),value2:(String(i.acquisitionSets)),value3:(String(i.observationCount)),value4:(String(isRemote ? "saved products" : "measurement values"))}),
+          localizedCopy("ui.research.messageEverySAcquisitionSets",{value1:(String(i.intervalMs / 1000)),value2:(String(i.acquisitionSets)),value3:(String(i.observationCount)),value4:(String(isRemote ? textForUI("ui.research.messageSavedProducts") : textForUI("ui.research.messageMeasurementValues")))}),
         ),
       );
       const details = text("details");
@@ -1159,7 +1159,7 @@ export function renderResearch(next) {
         text("summary", localizedCopy("ui.research.messageAcquisitionDiagnostics")),
         text(
           "p",
-          localizedCopy("ui.research.messageLastSuccessfulActualIntervalS",{value1:(String(i.lastSuccessfulUtc || "None")),value2:(String(n(i.actualAverageIntervalSeconds))),value3:(String(i.rejectedObservations)),value4:(String(i.missingIntervals))}),
+          localizedCopy("ui.research.messageLastSuccessfulActualIntervalS",{value1:(String(i.lastSuccessfulUtc || textForUI("ui.research.messageNone"))),value2:(String(n(i.actualAverageIntervalSeconds))),value3:(String(i.rejectedObservations)),value4:(String(i.missingIntervals))}),
         ),
         text(
           "p",
@@ -1219,7 +1219,7 @@ export function renderResearch(next) {
       text("h3", localizedCopy("ui.research.messageActiveResearchRoute")),
       text(
         "p",
-        localizedCopy("ui.research.messagePlannedWaypointsCurrentPosition",{value1:(String(livePlan.patterns?.map((p) => p.kind).join(", ") || "Custom route")),value2:(String(livePlan.waypoints?.length || 0)),value3:(String(next.telemetry ? "available" : "unavailable"))}),
+        localizedCopy("ui.research.messagePlannedWaypointsCurrentPosition",{value1:(String(livePlan.patterns?.map((p) => p.kind).join(", ") || textForUI("ui.research.messageCustomRoute"))),value2:(String(livePlan.waypoints?.length || 0)),value3:(String(next.telemetry ? "available" : "unavailable"))}),
       ),
     );
     const mapLink = text("a", localizedCopy("ui.research.messageViewMissionMap"));
@@ -1233,7 +1233,7 @@ export function renderResearch(next) {
       summary.append(
         text(
           "p",
-          localizedCopy("ui.research.messageNextObservedWaypointObservedInOrder",{value1:(String(livePlan.waypoints?.[activeRouteState.nextWaypoint]?.name || "End of route")),value2:(String(planningDistance(1000)))}),
+          localizedCopy("ui.research.messageNextObservedWaypointObservedInOrder",{value1:(String(livePlan.waypoints?.[activeRouteState.nextWaypoint]?.name || textForUI("ui.research.messageEndOfRoute"))),value2:(String(planningDistance(1000)))}),
         ),
       );
   }
@@ -1305,7 +1305,7 @@ async function refreshLive(id) {
   markers = marks;
   livePlan = research.planSnapshot;
   activeRouteState = navigation;
-  remoteFootprints=products.filter(p=>p.footprint?.boundary?.length>=3).map(p=>({vertices:p.footprint.boundary,label:textForUI("ui.research.messageDerivedFootprintFlightExternal",{value1:(String(p.instrumentId)),value2:(String(p.flightPacketUtc)),value3:(String(p.sourceObservationUtc||"unknown date"))})}));
+  remoteFootprints=products.filter(p=>p.footprint?.boundary?.length>=3).map(p=>({vertices:p.footprint.boundary,label:textForUI("ui.research.messageDerivedFootprintFlightExternal",{value1:(String(p.instrumentId)),value2:(String(p.flightPacketUtc)),value3:(String(p.sourceObservationUtc||textForUI("ui.missionWorkspace.messageUnknownDate")))})}));
   scienceRows = [...scienceRows, ...science.observations].slice(-3000);
   cursor = science.next;
   setLiveMap({
@@ -1345,7 +1345,7 @@ export async function researchDetail(body, id, mission) {
   sessions.addEventListener('toggle',async()=>{if(!sessions.open||sessions.dataset.loaded)return;sessions.dataset.loaded='true';
     try{const [record,counts]=await Promise.all([ctx.api(`/api/missions/${id}/collection`),ctx.api(`/api/missions/${id}/collection/counts`)]);
       if(!record.state){sessions.append(text('p',localizedCopy("ui.research.messageLegacyArchiveNoScienceSessionsWereRecorded")));return;}
-      for(const session of record.sessions){const count=counts.find(c=>c.sessionId===session.id);sessions.append(text('p',localizedCopy("ui.research.messageSessionOriginal",{value1:(String(session.sequence)),value2:(String(session.id)),value3:(String(session.status)),value4:(String(session.startedUtc)),value5:(String(session.endedUtc||'unknown end time')),value6:(String(count?.originalAtmosphericValues||0)),value7:(String(count?.derivedAtmosphericValues||0)),value8:(String(count?.remoteProducts||0))})));}
+      for(const session of record.sessions){const count=counts.find(c=>c.sessionId===session.id);sessions.append(text('p',localizedCopy("ui.research.messageSessionOriginal",{value1:(String(session.sequence)),value2:(String(session.id)),value3:(String(session.status)),value4:(String(session.startedUtc)),value5:(String(session.endedUtc||textForUI("ui.research.messageUnknownEndTime"))),value6:(String(count?.originalAtmosphericValues||0)),value7:(String(count?.derivedAtmosphericValues||0)),value8:(String(count?.remoteProducts||0))})));}
       sessions.append(text('p',localizedCopy("ui.research.messageRetainedCountsDoNotEstablishMeasurementAccuracy")));
     }catch(e){sessions.append(text('p',localizedCopy("ui.research.messageSessionEvidenceScientificLibraryUnavailable",{value1:(String(e.message))})));}
   });
@@ -1395,7 +1395,7 @@ export async function researchDetail(body, id, mission) {
   await renderAnalysis(workspace.analysis, id, review.research.planSnapshot, ctx.api);
   body.append(
     text("h3", localizedCopy("ui.research.messageResearchReview")),
-    text("p", localizedCopy("ui.research.messageRecordingSource",{value1:(String(mission.source || "Unavailable"))})),
+    text("p", localizedCopy("ui.research.messageRecordingSource",{value1:(String(mission.source || textForUI("map.native.unavailable")))})),
     text(
       "p",
       `${review.research.template} · ${review.research.objective || textForUI("ui.research.messageNoObjectiveSupplied")}`,
@@ -1405,7 +1405,7 @@ export async function researchDetail(body, id, mission) {
     body.append(
       text(
         "p",
-        localizedCopy("ui.research.messageScienceCollectionDeliberatelyPausedTo",{value1:(String(pause.startedUtc)),value2:(String(pause.endedUtc || "unknown end")),value3:(String(pause.seconds == null ? "duration unknown" : n(pause.seconds) + " s")),value4:(String(pause.interrupted ? " · recording interrupted" : ""))}),
+        localizedCopy("ui.research.messageScienceCollectionDeliberatelyPausedTo",{value1:(String(pause.startedUtc)),value2:(String(pause.endedUtc || textForUI("ui.research.messageUnknownEnd"))),value3:(String(pause.seconds == null ? textForUI("ui.research.messageDurationUnknown") : n(pause.seconds) + " s")),value4:(String(pause.interrupted ? textForUI("ui.research.messageRecordingInterrupted") : ""))}),
       ),
     );
   const f = review.flight;
@@ -1419,7 +1419,7 @@ export async function researchDetail(body, id, mission) {
     body.append(
       text(
         "p",
-        localizedCopy("ui.research.messagePlanSnapshotPreflightNotes",{value1:(String(review.research.planSnapshot.name)),value2:(String(review.research.planSnapshot.preflightNotes || "None"))}),
+        localizedCopy("ui.research.messagePlanSnapshotPreflightNotes",{value1:(String(review.research.planSnapshot.name)),value2:(String(review.research.planSnapshot.preflightNotes || textForUI("ui.research.messageNone")))}),
       ),
     );
   for (const c of review.research.instruments)
@@ -1440,7 +1440,7 @@ export async function researchDetail(body, id, mission) {
     body.append(
       text(
         "p",
-        localizedCopy("ui.research.messageDatasetLibrary",{value1:(String(d.datasetId)),value2:(String(d.available ? "Available" : "Unavailable / cleared")),value3:(String(d.libraryId))}),
+        localizedCopy("ui.research.messageDatasetLibrary",{value1:(String(d.datasetId)),value2:(String(d.available ? textForUI("results.available") : textForUI("ui.research.messageUnavailableCleared"))),value3:(String(d.libraryId))}),
       ),
     );
   if (!review.scienceAvailable)
@@ -1472,7 +1472,7 @@ export async function researchDetail(body, id, mission) {
   body.append(
     text(
       "p",
-      localizedCopy("ui.research.messageMapDisplayPointsFromSavedSamples",{value1:(String(path.points.length)),value2:(String(path.totalSamples)),value3:(String(path.downsampled ? " (display reduced)" : ""))}),
+      localizedCopy("ui.research.messageMapDisplayPointsFromSavedSamples",{value1:(String(path.points.length)),value2:(String(path.totalSamples)),value3:(String(path.downsampled ? textForUI("ui.research.messageDisplayReduced") : ""))}),
       "footnote",
     ),
   );

@@ -2,7 +2,7 @@
 export const localeData = {
   "manifest": {
     "version": 1,
-    "catalogVersion": 22,
+    "catalogVersion": 23,
     "fallback": "en-US",
     "locales": [
       {
@@ -37,8 +37,8 @@ export const localeData = {
       }
     ],
     "qualityContract": 1,
-    "catalogIdentity": "c871f36c92c40f3e195f35c762e9b9d6d415c522c475027296fb3dd87dba839c",
-    "bundleIdentity": "7000359050b2f809d94178ad889605d43aa458ba777b2c4b0795634fe4058761"
+    "catalogIdentity": "2e497b5e380eefe0acc09c924121b57ad145e56c8e85d78639b27b338adbc3dc",
+    "bundleIdentity": "82535d4cf1ffb6e0d75516066084bc6a44c667ed19b0bc344bc05380c0202f1d"
   },
   "schema": {
     "version": 1,
@@ -23806,14 +23806,1076 @@ export const localeData = {
         "parameters": [
           "phase"
         ]
+      },
+      "updates.automaticNotifications": {
+        "parameters": []
+      },
+      "updates.includePrereleases": {
+        "parameters": []
+      },
+      "map.atmosphericSamples": {
+        "parameters": []
+      },
+      "map.sampledPathLinks": {
+        "parameters": []
+      },
+      "map.openStreetMapStreets": {
+        "parameters": []
+      },
+      "map.analysisSourceValues": {
+        "parameters": []
+      },
+      "map.comparisonSourceValues": {
+        "parameters": []
+      },
+      "map.scientificDifferences": {
+        "parameters": []
+      },
+      "map.retainedArtifact": {
+        "parameters": []
+      },
+      "map.savedObservations": {
+        "parameters": []
+      },
+      "map.verifiedRasters": {
+        "parameters": []
+      },
+      "map.demElevation": {
+        "parameters": []
+      },
+      "map.inspectedSourceValues": {
+        "parameters": []
+      },
+      "map.inspectedSourceLimit": {
+        "parameters": []
+      },
+      "map.originalFootprintLimit": {
+        "parameters": []
+      },
+      "map.pilotRecordedPoints": {
+        "parameters": []
+      },
+      "map.flightPathContext": {
+        "parameters": []
+      },
+      "route.simbriefCoordinates": {
+        "parameters": []
+      },
+      "map.faaTfrUnknown": {
+        "parameters": []
+      },
+      "preparation.liveTelemetryRequirement": {
+        "parameters": []
+      },
+      "map.qualifiedSamples": {
+        "parameters": [
+          "measurement"
+        ]
+      },
+      "ui.analysis.messageRecordedPathObservedWithinTolerance": {
+        "parameters": []
+      },
+      "ui.analysis.messageCompletionNotEstablished": {
+        "parameters": []
+      },
+      "ui.analysis.messageMaxDeviation": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "ui.app.messageNoEnabledInstrumentsInArchivedConfiguration": {
+        "parameters": []
+      },
+      "ui.app.messageMissingUnknown": {
+        "parameters": []
+      },
+      "ui.applicationUpdates.messageNotCheckedYet": {
+        "parameters": []
+      },
+      "ui.applicationUpdates.messageNever": {
+        "parameters": []
+      },
+      "ui.atmosphericResearch.messageSampledLocationsDoNotEstablishTheConditions": {
+        "parameters": []
+      },
+      "ui.atmosphericResearch.messageBandValuesBelowShowWhereReadingsWere": {
+        "parameters": []
+      },
+      "ui.atmosphericResearch.messageFeetMSL8667c4ea": {
+        "parameters": [
+          "value1",
+          "value2"
+        ]
+      },
+      "ui.atmosphericResearch.messageRecordedSimulatorObservations": {
+        "parameters": []
+      },
+      "ui.atmosphericResearch.messageSyntheticDemoObservationsNotAnInstalledMSFS": {
+        "parameters": []
+      },
+      "ui.atmosphericResearch.messageUnknownNoSimulatorProvenanceInferred": {
+        "parameters": []
+      },
+      "ui.atmosphericResearch.messageSampledDistance": {
+        "parameters": []
+      },
+      "ui.atmosphericResearch.messagePolarSamplesOutsideTheMercatorMapRemain": {
+        "parameters": []
+      },
+      "ui.aviationMapLayers.messageSource": {
+        "parameters": [
+          "value1",
+          "value2",
+          "value3"
+        ]
+      },
+      "ui.aviationMapLayers.messageBaseVolume": {
+        "parameters": []
+      },
+      "ui.aviationMapLayers.messageAddVolume": {
+        "parameters": []
+      },
+      "ui.aviationMapLayers.messageSubtractVolume": {
+        "parameters": []
+      },
+      "ui.aviationMapLayers.messageBoundingCandidatesNotActiveRestrictions": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "ui.aviationMapLayers.messageRetainedReferencesInViewport": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "ui.aviationReference.messageOn": {
+        "parameters": []
+      },
+      "ui.aviationReference.messageOff": {
+        "parameters": []
+      },
+      "ui.aviationReference.messageUpdatesRefreshTheHostInventoryAndPublished": {
+        "parameters": []
+      },
+      "ui.aviationReference.messageOriginalChartTransferSizeUnknownUntilPublished": {
+        "parameters": []
+      },
+      "ui.calibrationSettings.messageSeparateUserAdjustedScalarChannelOriginalValuesRemain": {
+        "parameters": []
+      },
+      "ui.calibrationSettings.messageMetadataOnlyNoNumericAdjustment": {
+        "parameters": []
+      },
+      "ui.campaignCoverageUi.messageEarlierCardPublication": {
+        "parameters": []
+      },
+      "ui.campaignCoverageUi.messageUsablePilotDocumentationNotSensorQA": {
+        "parameters": []
+      },
+      "ui.campaignCoverageUi.messageValidSupportedOriginalReadings": {
+        "parameters": []
+      },
+      "ui.campaignCoverageUi.messageCurrentGoal": {
+        "parameters": []
+      },
+      "ui.campaignCoverageUi.messageHistoricGoalPreserved": {
+        "parameters": []
+      },
+      "ui.campaignCoverageUi.messageCountsMet": {
+        "parameters": []
+      },
+      "ui.campaignCoverageUi.messageMoreSamplingNeeded": {
+        "parameters": []
+      },
+      "ui.campaignProgressUi.messageYourContribution": {
+        "parameters": []
+      },
+      "ui.campaignProgressUi.messageNewClaimsUnavailable": {
+        "parameters": []
+      },
+      "ui.campaignProgressUi.messageCurrent": {
+        "parameters": []
+      },
+      "ui.collectedScienceDeletion.messageDatabaseBackupCleanupIsIncomplete": {
+        "parameters": []
+      },
+      "ui.collectionPlanner.messageSession": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "ui.collectionPlanner.messageBoundaryPauseResumeEnabled": {
+        "parameters": []
+      },
+      "ui.collectionPlanner.messageBoundaryAutomationOff": {
+        "parameters": []
+      },
+      "ui.collectionPlanner.messageAutomaticCollectionIsConfiguredInThisDraft": {
+        "parameters": []
+      },
+      "ui.collectionPlanner.messageAutomaticCollectionIsOff": {
+        "parameters": []
+      },
+      "ui.collectionPlanner.messagePausesOutsideTheSelectedBoundaryUnionReEntry": {
+        "parameters": []
+      },
+      "ui.collectionPlanner.messageBoundaryPauseResumeIsOff": {
+        "parameters": []
+      },
+      "ui.collectionPlanner.messageNoStartRuleUseManualStartOr": {
+        "parameters": []
+      },
+      "ui.collectionPlanner.messageAReferencedGeographicTargetIsMissing": {
+        "parameters": []
+      },
+      "ui.collectionPlanner.messageNoBoundaryRegionsSelected": {
+        "parameters": []
+      },
+      "ui.collectionPlanner.messageRulesReviewedForThisDraft": {
+        "parameters": []
+      },
+      "ui.collectionPlanner.messageRulesAreNotYetReviewedForThe": {
+        "parameters": []
+      },
+      "ui.customFlightTest.messageAND": {
+        "parameters": []
+      },
+      "ui.downloadActivity.messageSourceNotSelected": {
+        "parameters": []
+      },
+      "ui.downloadActivity.messageSizeUnknown": {
+        "parameters": []
+      },
+      "ui.downloadActivity.messageRateNotEstablished": {
+        "parameters": []
+      },
+      "ui.downloadActivity.messageUnknownComposite": {
+        "parameters": []
+      },
+      "ui.downloadWorkspace.messageNotEstablished": {
+        "parameters": []
+      },
+      "ui.downloadWorkspace.messageDownloadSizeUnknown": {
+        "parameters": []
+      },
+      "ui.emitLibrary.messageUnlocated": {
+        "parameters": []
+      },
+      "ui.experimentalSensor.messageSyntheticDemoOriginalInputsNotInstalledMSFS": {
+        "parameters": []
+      },
+      "ui.experimentalSensor.messageRecordedSimulatorInputsFictionalModelDerivedOutputs": {
+        "parameters": []
+      },
+      "ui.experimentalSensor.messageInputTelemetrySourceUnavailableNoSimulator": {
+        "parameters": []
+      },
+      "ui.flightTestProcedure.messageOR": {
+        "parameters": []
+      },
+      "ui.hyperspectralImport.messageSelectTheMatchingBinaryBelow": {
+        "parameters": []
+      },
+      "ui.hyperspectralImport.messageNm": {
+        "parameters": [
+          "value1",
+          "value2"
+        ]
+      },
+      "ui.hyperspectralImport.messageOriginalScientificUnitsNeeded": {
+        "parameters": []
+      },
+      "ui.hyperspectralImport.messageUnknownNotGuessed": {
+        "parameters": []
+      },
+      "ui.hyperspectralImport.messageNotReported": {
+        "parameters": []
+      },
+      "ui.libraryDownload.messageCredentialSaved": {
+        "parameters": []
+      },
+      "ui.libraryDownload.messageNotConnected": {
+        "parameters": []
+      },
+      "ui.libraryDownload.messageCached": {
+        "parameters": []
+      },
+      "ui.libraryDownload.messageRetrieved": {
+        "parameters": []
+      },
+      "ui.libraryDownload.messageSearchBoundsEncloseTheSelectedShapeSome": {
+        "parameters": []
+      },
+      "ui.libraryDownload.messageRetainedCandidate": {
+        "parameters": []
+      },
+      "ui.libraryDownload.messagePolygonClipping": {
+        "parameters": []
+      },
+      "ui.libraryDownload.messageAuthoritativeRegion": {
+        "parameters": []
+      },
+      "ui.libraryDownload.messageTheProviderSearchUsesEnclosingBounds": {
+        "parameters": []
+      },
+      "ui.libraryDownload.messageMatchingCatalogScenesFound": {
+        "parameters": []
+      },
+      "ui.libraryDownload.messageNoMatchingScenesInThisSearchedScope": {
+        "parameters": []
+      },
+      "ui.libraryDownload.messageProviderUnavailableAvailabilityWasNotEstablished": {
+        "parameters": []
+      },
+      "ui.libraryDownload.messageCachedNotANewLive": {
+        "parameters": []
+      },
+      "ui.libraryDownload.messageProviderOrderingNotEstablished": {
+        "parameters": []
+      },
+      "ui.libraryDownload.messageNotApplicable": {
+        "parameters": []
+      },
+      "ui.libraryDownload.messageThisIsAProviderFailureNotEvidence": {
+        "parameters": []
+      },
+      "ui.libraryDownload.messageTryEarlierYearsAdjustTheCloudFilter": {
+        "parameters": []
+      },
+      "ui.libraryDownload.messageUnknownUntilOriginalFileVerification": {
+        "parameters": []
+      },
+      "ui.map.messageOnlineBasemapWithBundledGeographicReference": {
+        "parameters": []
+      },
+      "ui.map.messageOfflineNaturalEarthGeography": {
+        "parameters": []
+      },
+      "ui.map.messageNoLocationSelectedRegionalDefaultUSA": {
+        "parameters": []
+      },
+      "ui.map.messageChooseAddWaypointOrDrawSurveyArea": {
+        "parameters": []
+      },
+      "ui.missionIntelligence.messageObjectiveNotDeclared": {
+        "parameters": []
+      },
+      "ui.missionIntelligence.messageGeneralResearch": {
+        "parameters": []
+      },
+      "ui.missionIntelligence.messageAircraftUnknown": {
+        "parameters": []
+      },
+      "ui.missionIntelligence.messageSession9e78f797": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "ui.missionIntelligence.messagePilotOverrideRearmRequired": {
+        "parameters": []
+      },
+      "ui.missionIntelligence.messageContinuityHold": {
+        "parameters": []
+      },
+      "ui.missionIntelligence.messageStorageHoldResolveStorageBefore": {
+        "parameters": []
+      },
+      "ui.missionIntelligence.messageNotEnded": {
+        "parameters": []
+      },
+      "ui.missionIntelligence.messageNotYetAssessed": {
+        "parameters": []
+      },
+      "ui.missionIntelligence.messagePolicyGrade": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "ui.missionIntelligence.messageNoFinalLetterGrade": {
+        "parameters": []
+      },
+      "ui.missionIntelligence.messageStaleEvidenceCutoffNotCurrent": {
+        "parameters": []
+      },
+      "ui.missionIntelligence.messageInapplicable": {
+        "parameters": []
+      },
+      "ui.missionIntelligence.messageNotSpecified": {
+        "parameters": []
+      },
+      "ui.missionIntelligence.messageEvidencePending": {
+        "parameters": []
+      },
+      "ui.missionIntelligence.messageAreaMembershipUnknown": {
+        "parameters": []
+      },
+      "ui.missionIntelligence.messageInsideResearchArea": {
+        "parameters": []
+      },
+      "ui.missionIntelligence.messageOutsideResearchArea": {
+        "parameters": []
+      },
+      "ui.missionIntelligence.messageScienceSessionOrCollectionAuthorityChanged": {
+        "parameters": []
+      },
+      "ui.missionOperations.messageActiveForLocalMonitoring": {
+        "parameters": []
+      },
+      "ui.missionOperations.messageRecordedPointOnlyNoFootprintInferred": {
+        "parameters": []
+      },
+      "ui.missionOperations.messageOriginalLocationSeparateFromScientificSampling": {
+        "parameters": []
+      },
+      "ui.missionPerformance.messageGrade": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "ui.missionPerformance.messageUseTheHostSRecalculationActionIfA": {
+        "parameters": []
+      },
+      "ui.missionPerformance.messageProvisionalWithUnassessedWorkRetained": {
+        "parameters": []
+      },
+      "ui.missionPerformance.messageOverallFlightObligationsNeverAveragedFromSession": {
+        "parameters": []
+      },
+      "ui.missionStartAdvisory.messageStaleAssessment": {
+        "parameters": []
+      },
+      "ui.missionStartAdvisory.messageAffectedInstrument": {
+        "parameters": []
+      },
+      "ui.missionTimeline.messageLiveProvisionalRecentEvidence": {
+        "parameters": []
+      },
+      "ui.missionTimeline.messageRecordedEvidence": {
+        "parameters": []
+      },
+      "ui.missionTimeline.messageCollectedSciencePermanentlyDeleted": {
+        "parameters": []
+      },
+      "ui.missionWorkspace.messageRecordingGapBeforeThisSample": {
+        "parameters": []
+      },
+      "ui.missionWorkspace.messageNotArchived": {
+        "parameters": []
+      },
+      "ui.missionWorkspace.messageUnknownDate": {
+        "parameters": []
+      },
+      "ui.missionWorkspace.messageUnavailableNoSurveyPolygon": {
+        "parameters": []
+      },
+      "ui.missionWorkspace.messageChartPointsThinnedForBounded": {
+        "parameters": []
+      },
+      "ui.observationResearch.messageRecordedLocationsRequired": {
+        "parameters": []
+      },
+      "ui.observationResearch.messageMissingLocationsRemainExplicit": {
+        "parameters": []
+      },
+      "ui.observationResearch.messageEverySelectedCategoryRequired": {
+        "parameters": []
+      },
+      "ui.organizationHosting.messageRailwayHandlesSignInBillingSetupAndCharge": {
+        "parameters": []
+      },
+      "ui.organizationHosting.messageYourProviderHandlesItsOwnAccountAnd": {
+        "parameters": []
+      },
+      "ui.organizationLiveUi.messageFeetMSL": {
+        "parameters": []
+      },
+      "ui.organizationLiveUi.messageKnotsIAS": {
+        "parameters": []
+      },
+      "ui.organizationLiveUi.messageDegreesTrue": {
+        "parameters": []
+      },
+      "ui.organizationLiveUi.messageSignInOrTryAgain": {
+        "parameters": []
+      },
+      "ui.organizationMissionPreparation.messageRecordedIASMSLTelemetryNoAdditionalScientificInstruments": {
+        "parameters": []
+      },
+      "ui.organizationResearch.messageExclusive": {
+        "parameters": []
+      },
+      "ui.organizationResearch.messageMultiPilot": {
+        "parameters": []
+      },
+      "ui.organizationResearch.messageReservedAssigned": {
+        "parameters": []
+      },
+      "ui.organizationResearch.messageClaimed": {
+        "parameters": []
+      },
+      "ui.organizationResearch.messageReleased": {
+        "parameters": []
+      },
+      "ui.organizationResearch.messageReleaseOnlyThisAssignmentYourPersonalScience": {
+        "parameters": []
+      },
+      "ui.organizationResearch.messageThisConfirmsParticipationOnlyItDoesNot": {
+        "parameters": []
+      },
+      "ui.patterns.messageInAreaScanSegmentsTransitions": {
+        "parameters": [
+          "value1",
+          "value2",
+          "value3",
+          "value4"
+        ]
+      },
+      "ui.patterns.messageSurveyPassesTrackSpacing": {
+        "parameters": [
+          "value1",
+          "value2",
+          "value3"
+        ]
+      },
+      "ui.patterns.messageExactSameLinePassesPilotManagedTurnaround": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "ui.patterns.messageOrbitExportUsesA5PointToPointApproximation": {
+        "parameters": []
+      },
+      "ui.payloadSettings.messageCustomized": {
+        "parameters": []
+      },
+      "ui.payloadSettings.messageGenericModel": {
+        "parameters": []
+      },
+      "ui.payloadSettings.messageDocumentedReference": {
+        "parameters": []
+      },
+      "ui.personalResearchFlight.messageSavedTestCard": {
+        "parameters": []
+      },
+      "ui.personalResearchFlight.messagePersonalTestCard": {
+        "parameters": []
+      },
+      "ui.personalResearchFlight.messageAttemptStillRecording": {
+        "parameters": []
+      },
+      "ui.personalResearchFlight.messageExplicitAttemptBoundaries": {
+        "parameters": []
+      },
+      "ui.personalResearchFlight.messageReviewMultiPointFlightVerifiesOriginalsAndThe": {
+        "parameters": []
+      },
+      "ui.personalResearchFlight.messageInspectCustomTestEvidenceVerifiesThisOriginal": {
+        "parameters": []
+      },
+      "ui.personalResearchReview.messageMatchesSavedEvidence": {
+        "parameters": []
+      },
+      "ui.personalResearchReview.messageEvidenceMismatch": {
+        "parameters": []
+      },
+      "ui.personalResearchReview.messageRetainedSampleAndPlanHashesMatchThe": {
+        "parameters": []
+      },
+      "ui.personalResearchReview.messageEvidenceIsMissingOrChangedTheSaved": {
+        "parameters": []
+      },
+      "ui.personalResearchReview.messageNoRetainedTelemetry": {
+        "parameters": []
+      },
+      "ui.personalResearchReview.messageOnlyTheFirst20IssuesAre": {
+        "parameters": []
+      },
+      "ui.personalResearch.messageRecordedSimulatorTelemetry": {
+        "parameters": []
+      },
+      "ui.personalResearch.messageSyntheticDemoTelemetryNotAnInstalledMSFSTest": {
+        "parameters": []
+      },
+      "ui.personalResearch.messageSourceUnavailableNoTelemetrySourceTypeInferred": {
+        "parameters": []
+      },
+      "ui.preparationSummary.messageReusedLocally": {
+        "parameters": []
+      },
+      "ui.programWorkflowUi.messageEarlierPublication": {
+        "parameters": []
+      },
+      "ui.programWorkflowUi.messageProgramOnAdministrativeHold": {
+        "parameters": []
+      },
+      "ui.programWorkflowUi.messagePhaseGatesEnabledForNewAssignmentsClaims": {
+        "parameters": []
+      },
+      "ui.programWorkflowUi.messageOrdinaryResearchNoPhaseGatesRequired": {
+        "parameters": []
+      },
+      "ui.programWorkflowUi.messageEntireCard": {
+        "parameters": []
+      },
+      "ui.programWorkflowUi.messageAuthorizedPartialContribution": {
+        "parameters": []
+      },
+      "ui.programWorkflowUi.messageOriginalReviewerApproval": {
+        "parameters": []
+      },
+      "ui.programWorkflowUi.messageExactPhasePurpose": {
+        "parameters": []
+      },
+      "ui.programWorkflowUi.messageCampaignFulfillment": {
+        "parameters": []
+      },
+      "ui.programWorkflowUi.messageYourWork": {
+        "parameters": []
+      },
+      "ui.receivedEvidenceUi.messageResearchDefinition": {
+        "parameters": []
+      },
+      "ui.receivedEvidenceUi.messageAttempta4474be8": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "ui.remoteScience.messageMapMemoryBoundReachedFilterBy": {
+        "parameters": []
+      },
+      "ui.remoteScience.messageHistoricalValidSampleCountNotIndexed": {
+        "parameters": []
+      },
+      "ui.remoteScience.messageValidSamplePositions": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "ui.remoteScience.messageValidRangeToValid": {
+        "parameters": [
+          "value1",
+          "value2",
+          "value3",
+          "value4"
+        ]
+      },
+      "ui.researchTemplates.messageNotSupplied": {
+        "parameters": []
+      },
+      "ui.researchTemplates.messageAttributionNotSupplied": {
+        "parameters": []
+      },
+      "ui.research.messageLocationUnavailableNoPositionWasInvented": {
+        "parameters": []
+      },
+      "ui.research.messageRecordedLocationAttached": {
+        "parameters": []
+      },
+      "ui.research.messageNoReferenceSelected": {
+        "parameters": []
+      },
+      "ui.research.messageCustomModeledGeometry": {
+        "parameters": []
+      },
+      "ui.research.messageSelectedReferenceGeometry": {
+        "parameters": []
+      },
+      "ui.research.messageNotSuppliedNoAccuracyCertificationIsImplied": {
+        "parameters": []
+      },
+      "ui.research.messageNoneSelected": {
+        "parameters": []
+      },
+      "ui.research.messageSupplyDuration": {
+        "parameters": []
+      },
+      "ui.research.messageGiB": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "ui.research.messageCAPACITYWARNING": {
+        "parameters": []
+      },
+      "ui.research.messageSavedProducts": {
+        "parameters": []
+      },
+      "ui.research.messageMeasurementValues": {
+        "parameters": []
+      },
+      "ui.research.messageNone": {
+        "parameters": []
+      },
+      "ui.research.messageCustomRoute": {
+        "parameters": []
+      },
+      "ui.research.messageEndOfRoute": {
+        "parameters": []
+      },
+      "ui.research.messageUnknownEndTime": {
+        "parameters": []
+      },
+      "ui.research.messageUnknownEnd": {
+        "parameters": []
+      },
+      "ui.research.messageDurationUnknown": {
+        "parameters": []
+      },
+      "ui.research.messageRecordingInterrupted": {
+        "parameters": []
+      },
+      "ui.research.messageUnavailableCleared": {
+        "parameters": []
+      },
+      "ui.research.messageDisplayReduced": {
+        "parameters": []
+      },
+      "ui.routeExport.messageOrbitSUseA5PointToPointApproximation": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "ui.routeExport.messageFirstEnRouteWaypoint": {
+        "parameters": []
+      },
+      "ui.routeExport.messageLastEnRouteWaypoint": {
+        "parameters": []
+      },
+      "ui.scienceAnalysis.messageSourceProviderUnavailable": {
+        "parameters": []
+      },
+      "ui.scienceAnalysis.messageVerticalReferenceUnavailable": {
+        "parameters": []
+      },
+      "ui.scienceCompare.messageShared": {
+        "parameters": []
+      },
+      "ui.scienceCompare.messageSavedQualityUnavailable": {
+        "parameters": []
+      },
+      "ui.scienceDisplay.messageFtMSL": {
+        "parameters": []
+      },
+      "ui.scienceJourney.messageUnavailableCheckTheConnectionSessionOr": {
+        "parameters": []
+      },
+      "ui.scienceJourney.messageLastCheckedCount": {
+        "parameters": []
+      },
+      "ui.scienceJourney.messageLastCheckedCountConnectionIsStale": {
+        "parameters": []
+      },
+      "ui.scienceJourney.messageOnboardAtmosphericObservationsNeedNoNASADownload": {
+        "parameters": []
+      },
+      "ui.scienceJourney.messageReviewTheSavedInstrumentAndSourceRequirements": {
+        "parameters": []
+      },
+      "ui.scienceMapView.messageRecordedValues": {
+        "parameters": []
+      },
+      "ui.scienceMapView.messageOverviewModeNativeDetailShowsOneSaved": {
+        "parameters": []
+      },
+      "ui.scienceMapView.messageEnvironmentalValues": {
+        "parameters": []
+      },
+      "ui.scienceMapView.messageTheVisible": {
+        "parameters": []
+      },
+      "ui.scienceMapView.messageTheSelected": {
+        "parameters": []
+      },
+      "ui.scientificContext.messageOrderedSequence": {
+        "parameters": []
+      },
+      "ui.scientificContext.messageIndependentPoints": {
+        "parameters": []
+      },
+      "ui.scientificContext.messageFlightRegimeValidation": {
+        "parameters": []
+      },
+      "ui.scientificContext.messageNoMaximumSourceAgeIsSpecifiedBy": {
+        "parameters": []
+      },
+      "ui.scientificContext.messageMaximumSourceAgeDays": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "ui.scientificContext.messageWithEverySelectedCategoryRepresented": {
+        "parameters": []
+      },
+      "ui.scientificContext.messageValidRecordedPositionRequired": {
+        "parameters": []
+      },
+      "ui.scientificContext.messageMissingPositionsStayUnavailable": {
+        "parameters": []
+      },
+      "ui.scientificContext.messageNoneRequired": {
+        "parameters": []
+      },
+      "ui.scientificContext.messageDifferent": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "ui.scientificLibrary.messageNewestSourceObservationc8d6cfa6": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "ui.scientificLibrary.messageOriginalObservationDatesUnknownComposite": {
+        "parameters": []
+      },
+      "ui.scientificLibrary.messageExcludedOriginalsRetained": {
+        "parameters": []
+      },
+      "ui.scientificLibrary.messageEligibleSubjectToCoverageAndQA": {
+        "parameters": []
+      },
+      "ui.scientificSources.messageDisabledLocalDatasetsRemainAvailable": {
+        "parameters": []
+      },
+      "ui.scientificSources.messageMissionAreaSuitabilityUseViewCoverageOrCurrent": {
+        "parameters": []
+      },
+      "ui.sensorOperatingStatus.messageSavedProducts": {
+        "parameters": []
+      },
+      "ui.sensorOperatingStatus.messageVersion": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "ui.sensorOperatingStatus.messageLastKnown": {
+        "parameters": []
+      },
+      "ui.sensorOperatingStatus.messageCurrentScienceSession": {
+        "parameters": []
+      },
+      "ui.sensorOperatingStatus.messageMissingStaleOrFromBeforeACollection": {
+        "parameters": []
+      },
+      "ui.sensorOperatingStatus.messageNotCurrent": {
+        "parameters": []
+      },
+      "ui.sensorOperatingStatus.messageNoHardwareProfile": {
+        "parameters": []
+      },
+      "ui.sensorOperatingStatus.messageNoDefinition": {
+        "parameters": []
+      },
+      "ui.sensorOperatingStatus.messageNotSupplied": {
+        "parameters": []
+      },
+      "ui.sensorPlanning.messageScanTransitionSegmentsMinAt": {
+        "parameters": [
+          "value1",
+          "value2",
+          "value3"
+        ]
+      },
+      "ui.sensorPlanning.messageChooseAPatternCenterForRouteEstimates": {
+        "parameters": []
+      },
+      "ui.sensorPlanning.messageFrameIntervalS": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "ui.sensorPlanning.messageIdealModeledDensityPointsMNot": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "ui.sourceDeletion.messageDatabaseBackupCleanupIsAlsoIncomplete": {
+        "parameters": []
+      },
+      "ui.storageManagement.messageNoCap": {
+        "parameters": []
+      },
+      "ui.submissionBuilder.messageClaimedResearchCard": {
+        "parameters": []
+      },
+      "ui.submissionReview.messageVerifiedNow": {
+        "parameters": []
+      },
+      "ui.submissionReview.messagePreviouslyCheckedNotCurrentlyVerified": {
+        "parameters": []
+      },
+      "ui.tfrLayers.messageSavedGeometry": {
+        "parameters": []
+      },
+      "ui.tfrLayers.messageWholeMissionUTCIntervalTo": {
+        "parameters": [
+          "value1",
+          "value2"
+        ]
+      },
+      "ui.tfrLayers.messageNoComparableRealWorldIntervalAssessed": {
+        "parameters": []
+      },
+      "ui.tfrLayers.messageYourSavedGeographyTouchesAPublishedBoundary": {
+        "parameters": []
+      },
+      "ui.tfrLayers.messageTheAvailableEvidenceCannotEstablishAComplete": {
+        "parameters": []
+      },
+      "ui.tfrLayers.messageRefreshDidNotVerifyCurrentData": {
+        "parameters": []
+      },
+      "ui.tfrLayers.messageNoRecordedInventoryRefreshError": {
+        "parameters": []
+      },
+      "ui.tfrLayers.messageSelected": {
+        "parameters": []
+      },
+      "ui.transferProgress.messageCalculatingNotTransferring": {
+        "parameters": []
+      },
+      "ui.transferProgress.messageCurrentFile": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "ui.transferProgress.messageCombinedSpeedNotEstablished": {
+        "parameters": []
+      },
+      "ui.organizationNotifications.messageExternalConsentGranted": {
+        "parameters": []
+      },
+      "ui.organizationNotifications.messageExternalConsentOFF": {
+        "parameters": []
+      },
+      "ui.organizationOpportunities.messageIssuedPublication": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "ui.organizationOpportunities.messageVolunteersWelcome": {
+        "parameters": []
+      },
+      "ui.organizationOpportunities.messageManagerAssignmentOnly": {
+        "parameters": []
+      },
+      "ui.organizationReviews.messageNoSubmittedClientEvaluation": {
+        "parameters": []
+      },
+      "ui.organizationReviews.messageSupplemental": {
+        "parameters": []
+      },
+      "ui.organizationReviews.messageOriginal": {
+        "parameters": []
+      },
+      "ui.organization.messageSavedResearchApproach": {
+        "parameters": []
+      },
+      "ui.organization.messageRetainedPublishedRevision": {
+        "parameters": [
+          "value1"
+        ]
+      },
+      "ui.researchTemplateUi.messageNotRequired": {
+        "parameters": []
+      },
+      "ui.researchTemplateUi.messagePublishedEditToCreateANew": {
+        "parameters": []
+      },
+      "ui.researchTemplateUi.messageOrganizationalDraft": {
+        "parameters": []
+      },
+      "ui.researchTemplateUi.messageCurrentDraft": {
+        "parameters": []
+      },
+      "ui.researchTemplateUi.messageSupersededDraftOrPolicy": {
+        "parameters": []
+      },
+      "ui.researchTemplateUi.messageNotRequiredBySelectedPolicy": {
+        "parameters": []
+      },
+      "mission.alreadyRecordingError": {
+        "parameters": []
+      },
+      "consent.permissionChangedError": {
+        "parameters": []
+      },
+      "organization.waiverPilotError": {
+        "parameters": []
+      },
+      "planning.polygonCoordinatesError": {
+        "parameters": []
+      },
+      "cards.anyConditionFullHold": {
+        "parameters": []
+      },
+      "windows.error.exactConfirmationPhrase": {
+        "parameters": []
+      },
+      "windows.error.recordingStillActive": {
+        "parameters": []
+      },
+      "windows.error.storageBeforeDeletion": {
+        "parameters": []
+      },
+      "windows.error.resumeDeletion": {
+        "parameters": []
+      },
+      "windows.error.operationRunning": {
+        "parameters": []
+      },
+      "windows.error.stoppedFolder": {
+        "parameters": []
+      },
+      "windows.error.sourceStorageStopped": {
+        "parameters": []
+      },
+      "windows.error.startCompanion": {
+        "parameters": []
+      },
+      "windows.error.databaseFilename": {
+        "parameters": []
+      },
+      "windows.error.insufficientSpace": {
+        "parameters": []
+      },
+      "windows.error.closeSimulator": {
+        "parameters": []
+      },
+      "windows.error.communityFolder": {
+        "parameters": []
+      },
+      "windows.error.folderUnavailable": {
+        "parameters": []
+      },
+      "windows.error.openVault": {
+        "parameters": []
+      },
+      "windows.error.invalidCredential": {
+        "parameters": []
+      },
+      "windows.error.credentialBounds": {
+        "parameters": []
+      },
+      "windows.error.saveVault": {
+        "parameters": []
+      },
+      "windows.error.removeCredential": {
+        "parameters": []
+      },
+      "windows.error.unsupportedOrganizationCredential": {
+        "parameters": []
+      },
+      "windows.error.unsupportedOwnerKey": {
+        "parameters": []
       }
     }
   },
   "catalogs": {
     "de-DE": {
-      "version": 22,
+      "version": 23,
       "locale": "de-DE",
-      "sourceHash": "c871f36c92c40f3e195f35c762e9b9d6d415c522c475027296fb3dd87dba839c",
+      "sourceHash": "2e497b5e380eefe0acc09c924121b57ad145e56c8e85d78639b27b338adbc3dc",
       "pendingEnglishFallbackKeys": [
         "contextHelp.terrain.title",
         "flight.elapsed",
@@ -23848,6 +24910,7 @@ export const localeData = {
         "ui.app.messageSTANDBY",
         "ui.app.messageUTC",
         "ui.applicationUpdates.messageDownloadManuallyFromTheOfficialReleasePage",
+        "ui.atmosphericResearch.messageFeetMSL8667c4ea",
         "ui.atmosphericResearch.messageMs",
         "ui.aviationCharts.messageFAA",
         "ui.aviationCharts.messagePublisherUTCEffectiveExpiryEdition",
@@ -23871,10 +24934,14 @@ export const localeData = {
         "ui.emitLibrary.messageFWHMNm",
         "ui.emitLibrary.messageImportNASAEMITOriginals",
         "ui.emitLibrary.messageNative",
+        "ui.experimentalSensor.messageInputTelemetrySourceUnavailableNoSimulator",
+        "ui.experimentalSensor.messageRecordedSimulatorInputsFictionalModelDerivedOutputs",
         "ui.experimentalSensor.messageRevision",
+        "ui.experimentalSensor.messageSyntheticDemoOriginalInputsNotInstalledMSFS",
         "ui.flightTestProcedure.messageName",
         "ui.flightTestProcedure.messagePoint",
         "ui.hyperspectralImport.messageMiB",
+        "ui.hyperspectralImport.messageNm",
         "ui.hyperspectralImport.messageOriginalSourceLinkOrIdentifier",
         "ui.libraryDownload.messageAsOfExpires",
         "ui.libraryDownload.messageDownloadManager",
@@ -23882,9 +24949,11 @@ export const localeData = {
         "ui.libraryDownload.messageReportedSceneCloudNotAValidPixel",
         "ui.libraryDownload.messageSearchingObservationsThroughEarlierYearsRemain",
         "ui.libraryDownload.messageSelectedNumericSourceCellsAre",
+        "ui.libraryDownload.messageThisIsAProviderFailureNotEvidence",
         "ui.locationSearch.messageNFD",
         "ui.map.messageGoldPlannedTurquoiseRecorded",
         "ui.map.messageLeafletNaturalEarthPublicDomain",
+        "ui.map.messageOfflineNaturalEarthGeography",
         "ui.map.messagePatternPreviewAndModeledGeometry",
         "ui.map.messagePoweredByEsri",
         "ui.mapLayerManager.messageOpacity",
@@ -23894,6 +24963,7 @@ export const localeData = {
         "ui.missionIntelligence.messageFlight",
         "ui.missionIntelligence.messageNASAAVIRISDownloadImport",
         "ui.missionIntelligence.messageSession8cd65dd8",
+        "ui.missionIntelligence.messageStaleEvidenceCutoffNotCurrent",
         "ui.missionIntelligence.messageWeightFrozen",
         "ui.missionOperations.messageExistingMissionControlComponent",
         "ui.missionOperations.messageFeetMSL",
@@ -23902,6 +24972,7 @@ export const localeData = {
         "ui.missionOperations.messageSelectedOriginalEvidence",
         "ui.missionPerformance.messageEvidence",
         "ui.missionPerformance.messageFrozen",
+        "ui.missionPerformance.messageOverallFlightObligationsNeverAveragedFromSession",
         "ui.missionPerformance.messageRevision",
         "ui.missionPerformance.messageScaleOffset",
         "ui.missionPerformance.messageSupportedEvidenceReferences",
@@ -23951,6 +25022,7 @@ export const localeData = {
         "ui.payloadSettings.messageHorizontalFieldOfViewDegrees",
         "ui.personalResearch.messageCreateOrEditAPersonalTestCard",
         "ui.personalResearch.messageReviewTerrainTemperatureSurvey",
+        "ui.personalResearchFlight.messageInspectCustomTestEvidenceVerifiesThisOriginal",
         "ui.personalResearchReview.messageRevision",
         "ui.personalResearchStart.message1ReviewTheSamplingBandsForYour",
         "ui.personalResearchStart.messageDEMDSMElevationsAreNotLiDARReturnsLandsat",
@@ -23970,6 +25042,7 @@ export const localeData = {
         "ui.research.messageAutopilot",
         "ui.research.messageBlueDotsShowSuccessfulAtmosphericSamplePositions",
         "ui.research.messageExternalDataSupported3DEPBareEarthDEMOr",
+        "ui.research.messageGiB",
         "ui.research.messageIFR",
         "ui.research.messageIntendedAircraftDescriptiveOnly",
         "ui.research.messageOriginalCanonicalObservationRows",
@@ -23997,9 +25070,11 @@ export const localeData = {
         "ui.scienceCompare.message003ReflectanceDisplayStretchNoScalarSubtraction",
         "ui.scienceCompare.messageChooseRecordedGeographicScienceInBothDatasets",
         "ui.scienceCompare.messageNoSupportedSourceLayerSelected",
+        "ui.scienceDisplay.messageFtMSL",
         "ui.scienceDisplay.messageObservationUTC",
         "ui.scienceJourney.messageInstrumentSEnabled",
         "ui.scienceJourney.messageMissionPreparedOfflineConnectMSFSAnd",
+        "ui.scienceJourney.messageUnavailableCheckTheConnectionSessionOr",
         "ui.scienceLayers.messageNm",
         "ui.scienceMapView.messageGeographicallyIndexedAcquisitionsReviewedInThe",
         "ui.scienceMapView.messageNativeCellRecordsCurrentlyLoaded",
@@ -24021,6 +25096,7 @@ export const localeData = {
         "ui.scientificSources.messageUSGS3DEPCopernicusGLO30",
         "ui.sensorOperatingStatus.messageCollection",
         "ui.sensorOperatingStatus.messageOriginalAircraftInputFtAGLFt",
+        "ui.sensorPlanning.messageIdealModeledDensityPointsMNot",
         "ui.serverOperations.messageDownloadRecoveryKey",
         "ui.serverOperations.messageIAuthorizeThisServerToReadThe",
         "ui.serverOperations.messageMiB",
@@ -24069,6 +25145,7 @@ export const localeData = {
         "ui.tfrLayers.messageThisRefreshDidNotEstablishCurrentInformation",
         "ui.tfrLayers.messageUTCSubmittedToLocalDisplayOnly",
         "ui.tfrLayers.messageUnableToDetermineGeographic",
+        "ui.tfrLayers.messageWholeMissionUTCIntervalTo",
         "ui.tfrLayers.messageXMLSHA256AIXMSHA256",
         "ui.transferProgress.messageAbout",
         "ui.transferProgress.messageOriginalBytesPresent",
@@ -30809,11 +31886,340 @@ export const localeData = {
         "native.phase.stale": "{status} | Status veraltet",
         "native.banner.recordingActive": "Flugaufzeichnung: aktiv | Datenerfassung: {phase}",
         "native.banner.recordingInactive": "Flugaufzeichnung: inaktiv | Datenerfassung: {phase}",
-        "native.banner.recordingUnknown": "Flugaufzeichnung: nicht verfügbar | Datenerfassung: {phase}"
+        "native.banner.recordingUnknown": "Flugaufzeichnung: nicht verfügbar | Datenerfassung: {phase}",
+        "updates.automaticNotifications": "Automatische Update-Benachrichtigungen",
+        "updates.includePrereleases": "Alpha- und Vorabversionen einbeziehen",
+        "map.atmosphericSamples": "Tatsächliche atmosphärische Probenpunkte",
+        "map.sampledPathLinks": "Durch Proben belegte Verbindungen der Flugstrecke",
+        "map.openStreetMapStreets": "OpenStreetMap / Straßen",
+        "map.analysisSourceValues": "Werte des ursprünglichen Quellrasters für die Analyse",
+        "map.comparisonSourceValues": "Werte des ursprünglichen Quellrasters für den Vergleich",
+        "map.scientificDifferences": "Differenzen des wissenschaftlichen Vergleichs",
+        "map.retainedArtifact": "Aufbewahrtes wissenschaftliches Artefakt",
+        "map.savedObservations": "Gespeicherte wissenschaftliche Beobachtungen",
+        "map.verifiedRasters": "Verifizierte wissenschaftliche Rasteransichten",
+        "map.demElevation": "Aus dem DEM abgeleitete Geländehöhe",
+        "map.inspectedSourceValues": "Geprüfte Quellwerte",
+        "map.inspectedSourceLimit": "Qualitätsgeprüfte Zellen des ursprünglichen Quellrasters im ausgewählten Fenster; dies sind keine Flugbeobachtungen und keine Sensorabdeckung.",
+        "map.originalFootprintLimit": "Ursprünglicher Erfassungsbereich; keine qualitätsgeprüfte Abdeckung",
+        "map.pilotRecordedPoints": "Pilotenbeobachtungen — nur aufgezeichnete Punkte",
+        "map.flightPathContext": "Flugstrecke als Kontext — keine wissenschaftliche Abdeckung",
+        "route.simbriefCoordinates": "Grad/Minuten/Sekunden gemäß SimBrief-Dokumentation",
+        "map.faaTfrUnknown": "FAA-TFR-Grenzen · Aktivierung unbekannt",
+        "preparation.liveTelemetryRequirement": "Live-Telemetrie des Simulators erforderlich; keine Fernvorbereitung",
+        "map.qualifiedSamples": "{measurement} — tatsächliche Proben, die die Kriterien erfüllen",
+        "ui.analysis.messageRecordedPathObservedWithinTolerance": "In Toleranz beobachteter Pfad",
+        "ui.analysis.messageCompletionNotEstablished": "Nicht festgestellte Fertigstellung",
+        "ui.analysis.messageMaxDeviation": "· Maximale Abweichung {value1}",
+        "ui.app.messageNoEnabledInstrumentsInArchivedConfiguration": "Keine aktivierten Instrumente in archivierter Konfiguration",
+        "ui.app.messageMissingUnknown": "Fehlend / unbekannt",
+        "ui.applicationUpdates.messageNotCheckedYet": "Noch nicht geprüft",
+        "ui.applicationUpdates.messageNever": "Niemals",
+        "ui.atmosphericResearch.messageSampledLocationsDoNotEstablishTheConditions": "Die untersuchten Standorte legen weder die Bedingungen zwischen ihnen noch in den umliegenden Gebieten fest.",
+        "ui.atmosphericResearch.messageBandValuesBelowShowWhereReadingsWere": "Die unteren Bandwerte zeigen, wo die Messwerte tatsächlich beibehalten wurden; sie stellen keine Bedingungen zwischen den untersuchten Höhen fest.",
+        "ui.atmosphericResearch.messageFeetMSL8667c4ea": "{value1}–{value2} feet MSL",
+        "ui.atmosphericResearch.messageRecordedSimulatorObservations": "Aufzeichnung der Simulatorbeobachtungen",
+        "ui.atmosphericResearch.messageSyntheticDemoObservationsNotAnInstalledMSFS": "Synthetische/Demo-Beobachtungen — keine installierte MSFS-Prüfung",
+        "ui.atmosphericResearch.messageUnknownNoSimulatorProvenanceInferred": "Unbekannt; keine abgeleitete Simulatorprovenanz",
+        "ui.atmosphericResearch.messageSampledDistance": "Entfernung",
+        "ui.atmosphericResearch.messagePolarSamplesOutsideTheMercatorMapRemain": "Polarproben außerhalb der Mercator-Karte sind an ihren genauen Koordinaten in der Tabelle verfügbar.",
+        "ui.aviationMapLayers.messageSource": "· Quelle: {value1} {value2} {value3}",
+        "ui.aviationMapLayers.messageBaseVolume": "Grundvolumen",
+        "ui.aviationMapLayers.messageAddVolume": "Volumen hinzufügen",
+        "ui.aviationMapLayers.messageSubtractVolume": "Subtrahierendes Volumen",
+        "ui.aviationMapLayers.messageBoundingCandidatesNotActiveRestrictions": "{value1} Grenzkandidaten (keine aktiven Einschränkungen)",
+        "ui.aviationMapLayers.messageRetainedReferencesInViewport": "{value1} beibehaltene Referenzen im Viewport",
+        "ui.aviationReference.messageOn": "An.",
+        "ui.aviationReference.messageOff": "Aus.",
+        "ui.aviationReference.messageUpdatesRefreshTheHostInventoryAndPublished": "Die Aktualisierung des Host-Inventars und der veröffentlichten Geometrie; genaue Aktivierung und Vollständigkeit bleiben verifiziert.",
+        "ui.aviationReference.messageOriginalChartTransferSizeUnknownUntilPublished": "Original Chart Transfer Größe: Unbekannt bis veröffentlicht. Öffnen dieses Katalogs nicht Originale herunterladen.",
+        "ui.calibrationSettings.messageSeparateUserAdjustedScalarChannelOriginalValuesRemain": "Separate benutzerbereinigte Skalarkanal; Originalwerte bleiben aufgezeichnet.",
+        "ui.calibrationSettings.messageMetadataOnlyNoNumericAdjustment": "Nur Metadaten; keine numerische Anpassung.",
+        "ui.campaignCoverageUi.messageEarlierCardPublication": "· frühere Kartenveröffentlichung",
+        "ui.campaignCoverageUi.messageUsablePilotDocumentationNotSensorQA": "Verwendbare Pilotdokumentation; nicht Sensor QA",
+        "ui.campaignCoverageUi.messageValidSupportedOriginalReadings": "Gültige unterstützte Originalwerte",
+        "ui.campaignCoverageUi.messageCurrentGoal": "Laufendes Ziel",
+        "ui.campaignCoverageUi.messageHistoricGoalPreserved": "Historisches Ziel erhalten",
+        "ui.campaignCoverageUi.messageCountsMet": "Anzahl erfüllt",
+        "ui.campaignCoverageUi.messageMoreSamplingNeeded": "Mehr Probenahme erforderlich",
+        "ui.campaignProgressUi.messageYourContribution": "(Ihr Beitrag)",
+        "ui.campaignProgressUi.messageNewClaimsUnavailable": "· Neue Forderungen nicht verfügbar",
+        "ui.campaignProgressUi.messageCurrent": "(aktuell)",
+        "ui.collectedScienceDeletion.messageDatabaseBackupCleanupIsIncomplete": "; Datenbank/Backup-Aufräumung ist unvollständig",
+        "ui.collectionPlanner.messageSession": "Sitzungsperiode {value1}",
+        "ui.collectionPlanner.messageBoundaryPauseResumeEnabled": "Grenzpause/-wiederholung aktiviert",
+        "ui.collectionPlanner.messageBoundaryAutomationOff": "Grenzautomatisierung ausgeschaltet",
+        "ui.collectionPlanner.messageAutomaticCollectionIsConfiguredInThisDraft": "Automatische Sammlung ist in diesem Entwurf konfiguriert",
+        "ui.collectionPlanner.messageAutomaticCollectionIsOff": "Automatische Sammlung ist ausgeschaltet",
+        "ui.collectionPlanner.messagePausesOutsideTheSelectedBoundaryUnionReEntry": "Die Sitzung kann auch außerhalb der gewählten Grenzunion wieder aufgenommen werden.",
+        "ui.collectionPlanner.messageBoundaryPauseResumeIsOff": "Die boundary Pause/das Resume ist aus.",
+        "ui.collectionPlanner.messageNoStartRuleUseManualStartOr": "Nein Startregel: Manuelles Starten oder Konfigurieren verwenden.",
+        "ui.collectionPlanner.messageAReferencedGeographicTargetIsMissing": "Ein referenziertes geografisches Ziel fehlt.",
+        "ui.collectionPlanner.messageNoBoundaryRegionsSelected": "Keine Grenzregionen ausgewählt.",
+        "ui.collectionPlanner.messageRulesReviewedForThisDraft": "Die Geschäftsordnung wurde für diesen Entwurf überarbeitet.",
+        "ui.collectionPlanner.messageRulesAreNotYetReviewedForThe": "Die Regeln für den aktuellen Entwurf sind noch nicht überarbeitet.",
+        "ui.customFlightTest.messageAND": "UND",
+        "ui.downloadActivity.messageSourceNotSelected": "Quelle nicht ausgewählt",
+        "ui.downloadActivity.messageSizeUnknown": "Größe unbekannt",
+        "ui.downloadActivity.messageRateNotEstablished": "Nicht festgelegter Satz",
+        "ui.downloadActivity.messageUnknownComposite": "Unbekannt / zusammengesetzt",
+        "ui.downloadWorkspace.messageNotEstablished": "Nicht festgestellt",
+        "ui.downloadWorkspace.messageDownloadSizeUnknown": "Downloadgröße unbekannt",
+        "ui.emitLibrary.messageUnlocated": "Nicht zugewiesen",
+        "ui.experimentalSensor.messageSyntheticDemoOriginalInputsNotInstalledMSFS": "Synthetic/demo original inputs — not installed MSFS acceptance",
+        "ui.experimentalSensor.messageRecordedSimulatorInputsFictionalModelDerivedOutputs": "Recorded simulator inputs — fictional model-derived outputs",
+        "ui.experimentalSensor.messageInputTelemetrySourceUnavailableNoSimulator": "Input telemetry source unavailable — no simulator origin inferred",
+        "ui.flightTestProcedure.messageOR": "ODER",
+        "ui.hyperspectralImport.messageSelectTheMatchingBinaryBelow": "Wählen Sie die passende Binärdatei unten",
+        "ui.hyperspectralImport.messageNm": " · {value1}–{value2} nm",
+        "ui.hyperspectralImport.messageOriginalScientificUnitsNeeded": "Ursprüngliche wissenschaftliche Einheiten erforderlich",
+        "ui.hyperspectralImport.messageUnknownNotGuessed": "Unbekannt; nicht erraten",
+        "ui.hyperspectralImport.messageNotReported": "Nicht berichtet",
+        "ui.libraryDownload.messageCredentialSaved": "Einholung der Berechtigung",
+        "ui.libraryDownload.messageNotConnected": "Nicht verbunden",
+        "ui.libraryDownload.messageCached": "mit einer Breite von mehr als 30 mm",
+        "ui.libraryDownload.messageRetrieved": "Zurückgenommen",
+        "ui.libraryDownload.messageSearchBoundsEncloseTheSelectedShapeSome": "Suchgrenzen schließen die ausgewählte Form ein; einige Kandidaten liegen außerhalb davon.",
+        "ui.libraryDownload.messageRetainedCandidate": "Anwärterin",
+        "ui.libraryDownload.messagePolygonClipping": "· Polygon-Kippen",
+        "ui.libraryDownload.messageAuthoritativeRegion": "· Region mit Zuständigkeit",
+        "ui.libraryDownload.messageTheProviderSearchUsesEnclosingBounds": "Die Anbietersuche verwendet Grenzen schließend; Randfenster können Pixel außerhalb des ausgewählten Form enthalten. Überprüfen Sie die genauen Arbeitsfenster vor der Genehmigung.",
+        "ui.libraryDownload.messageMatchingCatalogScenesFound": "Passende Katalogszenen gefunden",
+        "ui.libraryDownload.messageNoMatchingScenesInThisSearchedScope": "Keine passenden Szenen in diesem Suchumfang",
+        "ui.libraryDownload.messageProviderUnavailableAvailabilityWasNotEstablished": "Anbieter nicht verfügbar — Verfügbarkeit wurde nicht festgestellt",
+        "ui.libraryDownload.messageCachedNotANewLive": "· Zwischengespeichert, keine neue Live-Suche",
+        "ui.libraryDownload.messageProviderOrderingNotEstablished": "Anbieter Bestellung nicht festgestellt.",
+        "ui.libraryDownload.messageNotApplicable": "Nicht zutreffend",
+        "ui.libraryDownload.messageThisIsAProviderFailureNotEvidence": "This is a provider failure, not evidence that no data exists.",
+        "ui.libraryDownload.messageTryEarlierYearsAdjustTheCloudFilter": "Versuchen Sie es früher, passen Sie den Cloud-Filter an oder wählen Sie explizit einen in der Nähe unterstützten Bereich. Keine Filter oder Produkte werden automatisch erweitert.",
+        "ui.libraryDownload.messageUnknownUntilOriginalFileVerification": "Unbekannt bis zur Original-Datei-Verifizierung",
+        "ui.map.messageOnlineBasemapWithBundledGeographicReference": "Online-Basiskarte mit gebündelter geografischer Referenz",
+        "ui.map.messageOfflineNaturalEarthGeography": "Offline Natural Earth geography",
+        "ui.map.messageNoLocationSelectedRegionalDefaultUSA": "Kein Standort ausgewählt: Regional Default USA.",
+        "ui.map.messageChooseAddWaypointOrDrawSurveyArea": "Wählen Sie Hinzufügen von Wegpunkt oder Zeichnung Umfragebereich zu bearbeiten; pan normalerweise anders.",
+        "ui.missionIntelligence.messageObjectiveNotDeclared": "Ziel nicht angegeben",
+        "ui.missionIntelligence.messageGeneralResearch": "Allgemeine Forschung",
+        "ui.missionIntelligence.messageAircraftUnknown": "Luftfahrzeug unbekannt",
+        "ui.missionIntelligence.messageSession9e78f797": "· Sitzungssitzung {value1}",
+        "ui.missionIntelligence.messagePilotOverrideRearmRequired": "· Pilotüberschreibung — Auffahrsperre erforderlich",
+        "ui.missionIntelligence.messageContinuityHold": "· Kontinuität",
+        "ui.missionIntelligence.messageStorageHoldResolveStorageBefore": "· Lagerhalter; Lagerung vor Auffahrung auflösen",
+        "ui.missionIntelligence.messageNotEnded": "nicht beendet",
+        "ui.missionIntelligence.messageNotYetAssessed": "Noch nicht bewertet",
+        "ui.missionIntelligence.messagePolicyGrade": "Politischer Grad {value1}",
+        "ui.missionIntelligence.messageNoFinalLetterGrade": "Keine letzte Briefnote",
+        "ui.missionIntelligence.messageStaleEvidenceCutoffNotCurrent": " · Stale evidence cutoff; not current real-time performance.",
+        "ui.missionIntelligence.messageInapplicable": "Nicht anwendbar",
+        "ui.missionIntelligence.messageNotSpecified": "nicht spezifiziert",
+        "ui.missionIntelligence.messageEvidencePending": "Noch nicht vorgelegte Beweise",
+        "ui.missionIntelligence.messageAreaMembershipUnknown": "Gebietszugehörigkeit unbekannt",
+        "ui.missionIntelligence.messageInsideResearchArea": "Innerhalb des Forschungsbereichs",
+        "ui.missionIntelligence.messageOutsideResearchArea": "Außerhalb des Forschungsbereichs",
+        "ui.missionIntelligence.messageScienceSessionOrCollectionAuthorityChanged": "Wissenschaft Sitzung oder Sammlung Behörde geändert.",
+        "ui.missionOperations.messageActiveForLocalMonitoring": "Aktiv für die lokale Überwachung",
+        "ui.missionOperations.messageRecordedPointOnlyNoFootprintInferred": "Nur Punkt aufgezeichnet; kein Fußabdruck angegeben.",
+        "ui.missionOperations.messageOriginalLocationSeparateFromScientificSampling": "Ursprünglicher Standort, getrennt von wissenschaftlichen Stichproben.",
+        "ui.missionPerformance.messageGrade": "Grad {value1}",
+        "ui.missionPerformance.messageUseTheHostSRecalculationActionIfA": "Verwenden Sie die host,s-Umrechnungsaktion, wenn ein früherer Auftrag fehlgeschlagen ist.",
+        "ui.missionPerformance.messageProvisionalWithUnassessedWorkRetained": "Vorläufig, ohne Bewertung der Arbeit beibehalten.",
+        "ui.missionPerformance.messageOverallFlightObligationsNeverAveragedFromSession": "Overall flight obligations; never averaged from session grades.",
+        "ui.missionStartAdvisory.messageStaleAssessment": "Bewertung der Sachlage",
+        "ui.missionStartAdvisory.messageAffectedInstrument": "— betroffenes Instrument",
+        "ui.missionTimeline.messageLiveProvisionalRecentEvidence": "Lebend — vorläufiger neuerer Nachweis",
+        "ui.missionTimeline.messageRecordedEvidence": "Nachweise",
+        "ui.missionTimeline.messageCollectedSciencePermanentlyDeleted": "· Gesammelte Wissenschaft dauerhaft gelöscht",
+        "ui.missionWorkspace.messageRecordingGapBeforeThisSample": "· Aufnahmelücke vor dieser Probe",
+        "ui.missionWorkspace.messageNotArchived": "nicht archiviert",
+        "ui.missionWorkspace.messageUnknownDate": "Unbekanntes Datum",
+        "ui.missionWorkspace.messageUnavailableNoSurveyPolygon": "nicht verfügbar (kein Erhebungspolygon)",
+        "ui.missionWorkspace.messageChartPointsThinnedForBounded": "· für gedämpfte Anzeige verdünnte Diagrammpunkte",
+        "ui.observationResearch.messageRecordedLocationsRequired": "erfasste Orte erforderlich",
+        "ui.observationResearch.messageMissingLocationsRemainExplicit": "Fehlende Standorte bleiben explizit",
+        "ui.observationResearch.messageEverySelectedCategoryRequired": "· jede ausgewählte Kategorie erforderlich",
+        "ui.organizationHosting.messageRailwayHandlesSignInBillingSetupAndCharge": "Die Eisenbahn übernimmt die Anmeldung, Abrechnung und Gebührengenehmigung auf den eigenen Seiten der Bahn. AeroScience verlangt nie nach Zahlungsdetails.",
+        "ui.organizationHosting.messageYourProviderHandlesItsOwnAccountAnd": "Ihr Anbieter übernimmt sein eigenes Konto und die Gebührengenehmigung.",
+        "ui.organizationLiveUi.messageFeetMSL": "Fuß MSL",
+        "ui.organizationLiveUi.messageKnotsIAS": "IAS-Knoten",
+        "ui.organizationLiveUi.messageDegreesTrue": "Grad wahr",
+        "ui.organizationLiveUi.messageSignInOrTryAgain": "Melden Sie sich an oder versuchen Sie es erneut.",
+        "ui.organizationMissionPreparation.messageRecordedIASMSLTelemetryNoAdditionalScientificInstruments": "Aufgenommene IAS/MSL-Telemetrie; keine zusätzlichen wissenschaftlichen Instrumente erforderlich",
+        "ui.organizationResearch.messageExclusive": "Ausschließlich",
+        "ui.organizationResearch.messageMultiPilot": "Mehrfach-Tick",
+        "ui.organizationResearch.messageReservedAssigned": "Zurückgestellt / zugewiesen",
+        "ui.organizationResearch.messageClaimed": "Gefordert",
+        "ui.organizationResearch.messageReleased": "Freigegeben",
+        "ui.organizationResearch.messageReleaseOnlyThisAssignmentYourPersonalScience": "Lassen Sie nur diese Aufgabe frei. Ihre persönliche Wissenschaft und Fluggeschichte bleiben unverändert.",
+        "ui.organizationResearch.messageThisConfirmsParticipationOnlyItDoesNot": "Dies bestätigt die Teilnahme nur; es bereitet keine Mission vor oder startet sie, sammelt Wissenschaft oder lädt Beweise hoch.",
+        "ui.patterns.messageInAreaScanSegmentsTransitions": "{value1} Bereichsscansegmente / {value2} Übergänge · {value3} Bereichsscan / {value4} Übergangsabstand (kann Bereich verlassen; Drehbarkeit nicht validiert) ·",
+        "ui.patterns.messageSurveyPassesTrackSpacing": "{value1} Umfragedurchgänge · Gleisabstand {value2} · Ungefähre Erhebungsumschlag {value3} (Sensorabdeckung nicht validiert) ·",
+        "ui.patterns.messageExactSameLinePassesPilotManagedTurnaround": "{value1} exakte Gleichleitungs-Pässe · pilotgesteuerte Wendestrecke/Zeit unbekannt ·",
+        "ui.patterns.messageOrbitExportUsesA5PointToPointApproximation": "Der Orbit-Export verwendet eine 5°-Punkt-zu-Punkt-Annäherung; die native EFB-Orbit-Unterstützung wird nicht beansprucht.",
+        "ui.payloadSettings.messageCustomized": "Maßgeschneidert",
+        "ui.payloadSettings.messageGenericModel": "Allgemeines Modell",
+        "ui.payloadSettings.messageDocumentedReference": "Dokumentierte Referenz",
+        "ui.personalResearchFlight.messageSavedTestCard": "Gespeicherte Testkarte",
+        "ui.personalResearchFlight.messagePersonalTestCard": "Persönliche Prüfkarte",
+        "ui.personalResearchFlight.messageAttemptStillRecording": "Versuch noch aufzuzeichnen",
+        "ui.personalResearchFlight.messageExplicitAttemptBoundaries": "Explizite Versuchsgrenzen",
+        "ui.personalResearchFlight.messageReviewMultiPointFlightVerifiesOriginalsAndThe": "Überprüfung Multi-Point Flight überprüft Originale und das komplette Verfahren.",
+        "ui.personalResearchFlight.messageInspectCustomTestEvidenceVerifiesThisOriginal": "Inspect Custom Test Evidence verifies this original interval.",
+        "ui.personalResearchReview.messageMatchesSavedEvidence": "Treffer gespeicherte Beweise",
+        "ui.personalResearchReview.messageEvidenceMismatch": "Ungleichbehandlung der Beweise",
+        "ui.personalResearchReview.messageRetainedSampleAndPlanHashesMatchThe": "Die gespeicherten Proben und Plan-Hasche entsprechen dem gespeicherten Ergebnis.",
+        "ui.personalResearchReview.messageEvidenceIsMissingOrChangedTheSaved": "Der gespeicherte Ausgang ist historisch und wurde nicht neu geschrieben.",
+        "ui.personalResearchReview.messageNoRetainedTelemetry": "Keine beibehaltene Telemetrie",
+        "ui.personalResearchReview.messageOnlyTheFirst20IssuesAre": "Nur die ersten 20 Ausgaben sind aufgeführt.",
+        "ui.personalResearch.messageRecordedSimulatorTelemetry": "Aufzeichnung der Telemetrie des Simulators",
+        "ui.personalResearch.messageSyntheticDemoTelemetryNotAnInstalledMSFSTest": "Synthetische/Demo-Telemetrie; keine installierte MSFS-Prüfung",
+        "ui.personalResearch.messageSourceUnavailableNoTelemetrySourceTypeInferred": "Quelle nicht verfügbar; kein Telemetrie-Quellentyp abgeleitet",
+        "ui.preparationSummary.messageReusedLocally": "· Lokal wiederverwendet",
+        "ui.programWorkflowUi.messageEarlierPublication": "(frühere Veröffentlichung)",
+        "ui.programWorkflowUi.messageProgramOnAdministrativeHold": "Programm über Verwaltungsaufwand",
+        "ui.programWorkflowUi.messagePhaseGatesEnabledForNewAssignmentsClaims": "Phasentore für neue Zuweisungen/Ansprüche aktiviert",
+        "ui.programWorkflowUi.messageOrdinaryResearchNoPhaseGatesRequired": "Normale Forschung — keine Phasentore erforderlich",
+        "ui.programWorkflowUi.messageEntireCard": "gesamte Karte",
+        "ui.programWorkflowUi.messageAuthorizedPartialContribution": "Zulässiger Teilbeitrag",
+        "ui.programWorkflowUi.messageOriginalReviewerApproval": "Original-Begutachtung",
+        "ui.programWorkflowUi.messageExactPhasePurpose": "exakte Phasenbestimmung",
+        "ui.programWorkflowUi.messageCampaignFulfillment": "Kampagne Erfüllung",
+        "ui.programWorkflowUi.messageYourWork": "(Ihre Arbeit)",
+        "ui.receivedEvidenceUi.messageResearchDefinition": "Forschungsdefinition",
+        "ui.receivedEvidenceUi.messageAttempta4474be8": "· Angriff {value1}",
+        "ui.remoteScience.messageMapMemoryBoundReachedFilterBy": "Kartenspeicher gebunden erreicht; Filtern Sie durch Instrument oder durchsuchen Sie einzelne Akquisitionen.",
+        "ui.remoteScience.messageHistoricalValidSampleCountNotIndexed": "Historische gültige Stichprobenzahl nicht indexiert",
+        "ui.remoteScience.messageValidSamplePositions": "{value1} gültige Probenpositionen",
+        "ui.remoteScience.messageValidRangeToValid": "· Gültiger Bereich {value1} bis {value2} · {value3} gültige / {value4} Proben",
+        "ui.researchTemplates.messageNotSupplied": "Nicht geliefert",
+        "ui.researchTemplates.messageAttributionNotSupplied": "Nicht gelieferte Beschneidung",
+        "ui.research.messageLocationUnavailableNoPositionWasInvented": "Ort nicht verfügbar; keine Position wurde erfunden",
+        "ui.research.messageRecordedLocationAttached": "Aufgezeichneter Ort",
+        "ui.research.messageNoReferenceSelected": "Keine Angabe ausgewählt",
+        "ui.research.messageCustomModeledGeometry": "Benutzerdefinierte modellierte Geometrie",
+        "ui.research.messageSelectedReferenceGeometry": "Ausgewählte Referenzgeometrie",
+        "ui.research.messageNotSuppliedNoAccuracyCertificationIsImplied": "Nicht geliefert; keine Genauigkeitsbescheinigung ist impliziert.",
+        "ui.research.messageNoneSelected": "Keine ausgewählt",
+        "ui.research.messageSupplyDuration": "Lieferdauer",
+        "ui.research.messageGiB": "{value1} GiB",
+        "ui.research.messageCAPACITYWARNING": "· KAPAZITÄTSWARNUNG",
+        "ui.research.messageSavedProducts": "gespeicherte Produkte",
+        "ui.research.messageMeasurementValues": "Messwerte",
+        "ui.research.messageNone": "Keine",
+        "ui.research.messageCustomRoute": "Benutzerdefinierte Route",
+        "ui.research.messageEndOfRoute": "Ende der Route",
+        "ui.research.messageUnknownEndTime": "Unbekannte Endzeit",
+        "ui.research.messageUnknownEnd": "Unbekanntes Ende",
+        "ui.research.messageDurationUnknown": "Dauer unbekannt",
+        "ui.research.messageRecordingInterrupted": "· Aufzeichnung unterbrochen",
+        "ui.research.messageUnavailableCleared": "Nicht verfügbar / gelöscht",
+        "ui.research.messageDisplayReduced": "(Ermäßigung der Scorer)",
+        "ui.routeExport.messageOrbitSUseA5PointToPointApproximation": "{value1} Orbit(s) verwenden eine 5° Punkt-zu-Punkt-Annäherung; eine Revolution hat normalerweise 73 Punkte. Dies ist kein nativer EFB Orbit Befehl. Überprüfe die Zielroute Grenzen.",
+        "ui.routeExport.messageFirstEnRouteWaypoint": "Erster Wegpunkt auf der Strecke",
+        "ui.routeExport.messageLastEnRouteWaypoint": "Letzter Wegpunkt der Strecke",
+        "ui.scienceAnalysis.messageSourceProviderUnavailable": "Quelle Anbieter nicht verfügbar",
+        "ui.scienceAnalysis.messageVerticalReferenceUnavailable": "Vertikale Referenz nicht verfügbar",
+        "ui.scienceCompare.messageShared": "Gemeinsam",
+        "ui.scienceCompare.messageSavedQualityUnavailable": "Nicht verfügbar gespeicherte Qualität",
+        "ui.scienceDisplay.messageFtMSL": "ft MSL",
+        "ui.scienceJourney.messageUnavailableCheckTheConnectionSessionOr": "Unavailable — check the connection, session or storage hold",
+        "ui.scienceJourney.messageLastCheckedCount": "· letzte Überprüfung",
+        "ui.scienceJourney.messageLastCheckedCountConnectionIsStale": "Letzte Überprüfung; die Verbindung ist vertagt.",
+        "ui.scienceJourney.messageOnboardAtmosphericObservationsNeedNoNASADownload": "An Bord atmosphärische Beobachtungen brauchen keinen NASA-Download, Organisation oder Cloud-Account.",
+        "ui.scienceJourney.messageReviewTheSavedInstrumentAndSourceRequirements": "Prüfen Sie die gespeicherten Geräte- und Quellanforderungen.",
+        "ui.scienceMapView.messageRecordedValues": "aufgezeichnete Werte",
+        "ui.scienceMapView.messageOverviewModeNativeDetailShowsOneSaved": "Überblicksmodus: native Details zeigen eine gespeicherte Erfassung pro Instrument; inspizieren Sie einen anderen Datensatz unten.",
+        "ui.scienceMapView.messageEnvironmentalValues": "Umweltwerte",
+        "ui.scienceMapView.messageTheVisible": "die sichtbare",
+        "ui.scienceMapView.messageTheSelected": "die ausgewählte",
+        "ui.scientificContext.messageOrderedSequence": "Reihenfolge",
+        "ui.scientificContext.messageIndependentPoints": "Unabhängige Punkte",
+        "ui.scientificContext.messageFlightRegimeValidation": "Flug-1982 Validierung",
+        "ui.scientificContext.messageNoMaximumSourceAgeIsSpecifiedBy": "Von dieser Karte wird kein maximales Quellalter angegeben.",
+        "ui.scientificContext.messageMaximumSourceAgeDays": "Höchstalter der Quelle: {value1} Tage.",
+        "ui.scientificContext.messageWithEverySelectedCategoryRepresented": "mit jeder ausgewählten Kategorie vertreten",
+        "ui.scientificContext.messageValidRecordedPositionRequired": "; gültige aufgezeichnete Position erforderlich",
+        "ui.scientificContext.messageMissingPositionsStayUnavailable": "; fehlende Positionen bleiben nicht verfügbar",
+        "ui.scientificContext.messageNoneRequired": "Keine",
+        "ui.scientificContext.messageDifferent": "Unterschiedlich {value1}.",
+        "ui.scientificLibrary.messageNewestSourceObservationc8d6cfa6": "Neueste Quellenbeobachtung {value1}",
+        "ui.scientificLibrary.messageOriginalObservationDatesUnknownComposite": "Ursprüngliche Beobachtungsdaten unbekannt / zusammengesetzt",
+        "ui.scientificLibrary.messageExcludedOriginalsRetained": "Ausgenommen (einbehaltene Originale)",
+        "ui.scientificLibrary.messageEligibleSubjectToCoverageAndQA": "Förderfähig, vorbehaltlich Deckung und QA",
+        "ui.scientificSources.messageDisabledLocalDatasetsRemainAvailable": "Deaktiviert (lokale Datensätze bleiben verfügbar)",
+        "ui.scientificSources.messageMissionAreaSuitabilityUseViewCoverageOrCurrent": "Missions-Bereichstauglichkeit: Nutzung Ansichtsabdeckung oder aktuelle Planer-Zubereitung",
+        "ui.sensorOperatingStatus.messageSavedProducts": "Gespeicherte Produkte",
+        "ui.sensorOperatingStatus.messageVersion": "· Fassung {value1}",
+        "ui.sensorOperatingStatus.messageLastKnown": "Zuletzt bekannt —",
+        "ui.sensorOperatingStatus.messageCurrentScienceSession": "· Aktuelle Wissenschaftssitzung",
+        "ui.sensorOperatingStatus.messageMissingStaleOrFromBeforeACollection": "fehlende, alte oder vor einer Sammlungsänderung",
+        "ui.sensorOperatingStatus.messageNotCurrent": "nicht aktuell",
+        "ui.sensorOperatingStatus.messageNoHardwareProfile": "kein Hardware-Profil",
+        "ui.sensorOperatingStatus.messageNoDefinition": "keine Definition",
+        "ui.sensorOperatingStatus.messageNotSupplied": "nicht geliefert",
+        "ui.sensorPlanning.messageScanTransitionSegmentsMinAt": "{value1} Scan/Transition Segmente · {value2} · {value3} min bei angegebener Bodengeschwindigkeit",
+        "ui.sensorPlanning.messageChooseAPatternCenterForRouteEstimates": "Wählen Sie ein Musterzentrum für Routenschätzungen.",
+        "ui.sensorPlanning.messageFrameIntervalS": "· Rahmenintervall ≤ {value1} s",
+        "ui.sensorPlanning.messageIdealModeledDensityPointsMNot": " · Ideal modeled density {value1} points/m² (not recorded returns)",
+        "ui.sourceDeletion.messageDatabaseBackupCleanupIsAlsoIncomplete": "; Datenbank/Backup-Aufräumung ist ebenfalls unvollständig",
+        "ui.storageManagement.messageNoCap": "Keine Kappe",
+        "ui.submissionBuilder.messageClaimedResearchCard": "Geforderte Forschungskarte",
+        "ui.submissionReview.messageVerifiedNow": "Jetzt verifiziert",
+        "ui.submissionReview.messagePreviouslyCheckedNotCurrentlyVerified": "Bisher geprüft / Nicht aktuell geprüft",
+        "ui.tfrLayers.messageSavedGeometry": "Gespeicherte Geometrie",
+        "ui.tfrLayers.messageWholeMissionUTCIntervalTo": "Whole-mission UTC interval {value1} to {value2}.",
+        "ui.tfrLayers.messageNoComparableRealWorldIntervalAssessed": "Kein vergleichbares real-weltliches Intervall.",
+        "ui.tfrLayers.messageYourSavedGeographyTouchesAPublishedBoundary": "Ihre gespeicherte Geographie berührt eine veröffentlichte Grenze; überprüfen Sie die überprüfte Zeit, Höhe und fehlende Beweise.",
+        "ui.tfrLayers.messageTheAvailableEvidenceCannotEstablishAComplete": "Die verfügbaren Beweise können keine vollständige Beschränkungsbeurteilung aufstellen, auch wenn sich einige geprüfte Abmessungen nicht überschneiden.",
+        "ui.tfrLayers.messageRefreshDidNotVerifyCurrentData": "Refresh hat die aktuellen Daten nicht überprüft.",
+        "ui.tfrLayers.messageNoRecordedInventoryRefreshError": "Kein aufgezeichneter Inventarwiederholfehler.",
+        "ui.tfrLayers.messageSelected": "ausgewählt ·",
+        "ui.transferProgress.messageCalculatingNotTransferring": "Berechnung / Nicht-Übertragung",
+        "ui.transferProgress.messageCurrentFile": "· aktuelle Datei {value1}",
+        "ui.transferProgress.messageCombinedSpeedNotEstablished": "Kombinierte Geschwindigkeit nicht ermittelt",
+        "ui.organizationNotifications.messageExternalConsentGranted": "Externe Zustimmung erteilt",
+        "ui.organizationNotifications.messageExternalConsentOFF": "Externe Zustimmung",
+        "ui.organizationOpportunities.messageIssuedPublication": "· Herausgegebene Veröffentlichung {value1}",
+        "ui.organizationOpportunities.messageVolunteersWelcome": "Freiwillige willkommen",
+        "ui.organizationOpportunities.messageManagerAssignmentOnly": "Nur Manager-Zuweisung",
+        "ui.organizationReviews.messageNoSubmittedClientEvaluation": "Keine eingereichte Kundenbewertung",
+        "ui.organizationReviews.messageSupplemental": "Ergänzung",
+        "ui.organizationReviews.messageOriginal": "Ursprünglich",
+        "ui.organization.messageSavedResearchApproach": "Gespeicherter Forschungsansatz",
+        "ui.organization.messageRetainedPublishedRevision": "· Veröffentlichte Revision {value1} beibehalten",
+        "ui.researchTemplateUi.messageNotRequired": "Nicht erforderlich",
+        "ui.researchTemplateUi.messagePublishedEditToCreateANew": "Veröffentlicht — Bearbeiten, um einen neuen Entwurf zu erstellen",
+        "ui.researchTemplateUi.messageOrganizationalDraft": "Organisations entwurf",
+        "ui.researchTemplateUi.messageCurrentDraft": "Laufender Entwurf",
+        "ui.researchTemplateUi.messageSupersededDraftOrPolicy": "Übersetzter Entwurf oder Politik",
+        "ui.researchTemplateUi.messageNotRequiredBySelectedPolicy": "Nicht erforderlich durch ausgewählte Richtlinie",
+        "mission.alreadyRecordingError": "Eine Mission wird bereits aufgezeichnet. Dieser Hinweis kann keinen weiteren Flug starten.",
+        "consent.permissionChangedError": "Eine Berechtigung wurde während des Speicherns geändert. Prüfen Sie die aktuellen Einstellungen und versuchen Sie es erneut.",
+        "organization.waiverPilotError": "Eine Anforderungsbefreiung kann keinen Piloten hinzufügen. Entfernen Sie die teilweise Beitragsanrechnung.",
+        "planning.polygonCoordinatesError": "Ein Polygon benötigt mindestens drei gültige Koordinatenpaare.",
+        "cards.anyConditionFullHold": "ODER — eine ausgewählte Bedingung während ihrer gesamten Haltezeit",
+        "windows.error.exactConfirmationPhrase": "Geben Sie die für dieses Archiv angezeigte Bestätigungsphrase exakt ein.",
+        "windows.error.recordingStillActive": "Eine Aufzeichnung bleibt aktiv; keine Daten wurden gelöscht.",
+        "windows.error.storageBeforeDeletion": "Starten Sie den Begleiter und verbinden Sie den konfigurierten Speicher, bevor Sie wissenschaftliche Löschung überprüfen.",
+        "windows.error.resumeDeletion": "Der Begleiter hörte auf; die Überprüfung nach dem Neustart wieder aufnehmen.",
+        "windows.error.operationRunning": "Eine weitere Einrichtungs-/Lageroperation läuft.",
+        "windows.error.stoppedFolder": "Der Begleiter wird gestoppt; kein Ordner wurde geöffnet.",
+        "windows.error.sourceStorageStopped": "Die lokale Engine wird gestoppt; Quellspeicher wurde nicht gelesen. Starten Sie es oder überprüfen Sie Speichereinstellungen. Bestehende Daten wurden nicht ersetzt.",
+        "windows.error.startCompanion": "Fangen Sie zuerst mit dem Begleiter an.",
+        "windows.error.databaseFilename": "Wählen Sie mit Durchsuchen einen Datenbankordner; der Dateiname muss missions.db bleiben.",
+        "windows.error.insufficientSpace": "Es gibt nicht genügend freien Speicherplatz auf einem ausgewählten Speicherlaufwerk.",
+        "windows.error.closeSimulator": "Schließen Sie MSFS vor der Installation der Symbolleiste oder wählen Sie \"Springe für Jetzt\".",
+        "windows.error.communityFolder": "Wählen Sie einen vorhandenen Gemeinschaftsordner oder wählen Sie Skip for Now.",
+        "windows.error.folderUnavailable": "Das ausgewählte Laufwerk/Ordner ist nicht verfügbar. Es wird wieder verbunden; es wurde kein Ersatz erzeugt.",
+        "windows.error.openVault": "Windows konnte die AeroScience-Know-how-Know-how-Würfe nicht öffnen.",
+        "windows.error.invalidCredential": "Gespeicherte AeroScience-Zulassung ist ungültig; reconnect.",
+        "windows.error.credentialBounds": "Die Beglaubigung ist außerhalb der Tresorgrenzen.",
+        "windows.error.saveVault": "Windows konnte das AeroScience Token nicht retten. Es wurde kein Klartextfallback verwendet.",
+        "windows.error.removeCredential": "Windows konnte das AeroScience-Zertifikat nicht entfernen. Verwenden Sie Windows Credential Manager, um es zu überprüfen.",
+        "windows.error.unsupportedOrganizationCredential": "Nicht unterstützter Organisations-Zugangsnachweis.",
+        "windows.error.unsupportedOwnerKey": "Nicht unterstützter Eigentümerschlüssel."
       }
     },
     "en-US": {
-      "version": 22,
+      "version": 23,
       "locale": "en-US",
       "messages": {
         "common.messageUnavailable": "Details are unavailable. Refresh to review the current information.",
@@ -37541,13 +38947,342 @@ export const localeData = {
         "native.phase.stale": "{status} | Status is stale",
         "native.banner.recordingActive": "Flight recording: Active | Science: {phase}",
         "native.banner.recordingInactive": "Flight recording: Inactive | Science: {phase}",
-        "native.banner.recordingUnknown": "Flight recording: Unavailable | Science: {phase}"
+        "native.banner.recordingUnknown": "Flight recording: Unavailable | Science: {phase}",
+        "updates.automaticNotifications": "Automatic update notifications",
+        "updates.includePrereleases": "Include alpha / prerelease versions",
+        "map.atmosphericSamples": "Actual atmospheric sample points",
+        "map.sampledPathLinks": "Supported sampled path links",
+        "map.openStreetMapStreets": "OpenStreetMap / Streets",
+        "map.analysisSourceValues": "Original source-grid values for analysis",
+        "map.comparisonSourceValues": "Original source-grid values for comparison",
+        "map.scientificDifferences": "Scientific comparison differences",
+        "map.retainedArtifact": "Retained scientific artifact",
+        "map.savedObservations": "Saved scientific observations",
+        "map.verifiedRasters": "Verified scientific raster views",
+        "map.demElevation": "DEM-derived terrain elevation",
+        "map.inspectedSourceValues": "Inspected source values",
+        "map.inspectedSourceLimit": "Quality-checked original source-grid cells in the selected window; these are not flight observations or sensor coverage.",
+        "map.originalFootprintLimit": "Original footprint; not quality-checked coverage",
+        "map.pilotRecordedPoints": "Pilot observations — recorded points only",
+        "map.flightPathContext": "Flight path context — not scientific coverage",
+        "route.simbriefCoordinates": "SimBrief documented degrees/minutes/seconds",
+        "map.faaTfrUnknown": "FAA TFR boundaries · activation unknown",
+        "preparation.liveTelemetryRequirement": "Live simulator telemetry required; no remote preparation",
+        "map.qualifiedSamples": "{measurement} — actual qualified samples",
+        "ui.analysis.messageRecordedPathObservedWithinTolerance": "Recorded path observed within tolerance",
+        "ui.analysis.messageCompletionNotEstablished": "Completion not established",
+        "ui.analysis.messageMaxDeviation": " · max deviation {value1}",
+        "ui.app.messageNoEnabledInstrumentsInArchivedConfiguration": "No enabled instruments in archived configuration",
+        "ui.app.messageMissingUnknown": "Missing / unknown",
+        "ui.applicationUpdates.messageNotCheckedYet": "Not checked yet",
+        "ui.applicationUpdates.messageNever": "Never",
+        "ui.atmosphericResearch.messageSampledLocationsDoNotEstablishTheConditions": "Sampled locations do not establish the conditions between them or in surrounding areas.",
+        "ui.atmosphericResearch.messageBandValuesBelowShowWhereReadingsWere": "Band values below show where readings were actually retained; they do not establish conditions between sampled altitudes.",
+        "ui.atmosphericResearch.messageFeetMSL8667c4ea": "{value1}–{value2} feet MSL",
+        "ui.atmosphericResearch.messageRecordedSimulatorObservations": "Recorded simulator observations",
+        "ui.atmosphericResearch.messageSyntheticDemoObservationsNotAnInstalledMSFS": "Synthetic/demo observations — not an installed MSFS test",
+        "ui.atmosphericResearch.messageUnknownNoSimulatorProvenanceInferred": "Unknown; no simulator provenance inferred",
+        "ui.atmosphericResearch.messageSampledDistance": "Sampled Distance",
+        "ui.atmosphericResearch.messagePolarSamplesOutsideTheMercatorMapRemain": "Polar samples outside the Mercator map remain available at their exact coordinates in the table.",
+        "ui.aviationMapLayers.messageSource": " · source {value1} {value2} {value3}",
+        "ui.aviationMapLayers.messageBaseVolume": "Base volume",
+        "ui.aviationMapLayers.messageAddVolume": "Add volume",
+        "ui.aviationMapLayers.messageSubtractVolume": "Subtract volume",
+        "ui.aviationMapLayers.messageBoundingCandidatesNotActiveRestrictions": "{value1} bounding candidates (not active restrictions)",
+        "ui.aviationMapLayers.messageRetainedReferencesInViewport": "{value1} retained references in viewport",
+        "ui.aviationReference.messageOn": "On.",
+        "ui.aviationReference.messageOff": "Off.",
+        "ui.aviationReference.messageUpdatesRefreshTheHostInventoryAndPublished": "Updates refresh the host inventory and published geometry; exact activation and completeness remain unverified.",
+        "ui.aviationReference.messageOriginalChartTransferSizeUnknownUntilPublished": "Original chart transfer size: Unknown until published. Opening this catalog does not download originals.",
+        "ui.calibrationSettings.messageSeparateUserAdjustedScalarChannelOriginalValuesRemain": "Separate user-adjusted scalar channel; original values remain recorded.",
+        "ui.calibrationSettings.messageMetadataOnlyNoNumericAdjustment": "Metadata only; no numeric adjustment.",
+        "ui.campaignCoverageUi.messageEarlierCardPublication": " · earlier card publication",
+        "ui.campaignCoverageUi.messageUsablePilotDocumentationNotSensorQA": "Usable pilot documentation; not sensor QA",
+        "ui.campaignCoverageUi.messageValidSupportedOriginalReadings": "Valid supported original readings",
+        "ui.campaignCoverageUi.messageCurrentGoal": "Current goal",
+        "ui.campaignCoverageUi.messageHistoricGoalPreserved": "Historic goal preserved",
+        "ui.campaignCoverageUi.messageCountsMet": "counts met",
+        "ui.campaignCoverageUi.messageMoreSamplingNeeded": "more sampling needed",
+        "ui.campaignProgressUi.messageYourContribution": " (your contribution)",
+        "ui.campaignProgressUi.messageNewClaimsUnavailable": " · New claims unavailable",
+        "ui.campaignProgressUi.messageCurrent": " (current)",
+        "ui.collectedScienceDeletion.messageDatabaseBackupCleanupIsIncomplete": "; database/backup cleanup is incomplete",
+        "ui.collectionPlanner.messageSession": " · session {value1}",
+        "ui.collectionPlanner.messageBoundaryPauseResumeEnabled": "boundary pause/resume enabled",
+        "ui.collectionPlanner.messageBoundaryAutomationOff": "boundary automation off",
+        "ui.collectionPlanner.messageAutomaticCollectionIsConfiguredInThisDraft": "Automatic collection is configured in this draft",
+        "ui.collectionPlanner.messageAutomaticCollectionIsOff": "Automatic collection is off",
+        "ui.collectionPlanner.messagePausesOutsideTheSelectedBoundaryUnionReEntry": "Pauses outside the selected boundary union; re-entry may resume the same session.",
+        "ui.collectionPlanner.messageBoundaryPauseResumeIsOff": "Boundary pause/resume is off.",
+        "ui.collectionPlanner.messageNoStartRuleUseManualStartOr": "No Start rule: use manual Start or configure one. ",
+        "ui.collectionPlanner.messageAReferencedGeographicTargetIsMissing": "A referenced geographic target is missing. ",
+        "ui.collectionPlanner.messageNoBoundaryRegionsSelected": "No boundary regions selected. ",
+        "ui.collectionPlanner.messageRulesReviewedForThisDraft": "Rules reviewed for this draft.",
+        "ui.collectionPlanner.messageRulesAreNotYetReviewedForThe": "Rules are not yet reviewed for the current draft.",
+        "ui.customFlightTest.messageAND": " AND ",
+        "ui.downloadActivity.messageSourceNotSelected": "Source not selected",
+        "ui.downloadActivity.messageSizeUnknown": "Size unknown",
+        "ui.downloadActivity.messageRateNotEstablished": "Rate not established",
+        "ui.downloadActivity.messageUnknownComposite": "Unknown / composite",
+        "ui.downloadWorkspace.messageNotEstablished": "Not established",
+        "ui.downloadWorkspace.messageDownloadSizeUnknown": "Download size unknown",
+        "ui.emitLibrary.messageUnlocated": "Unlocated",
+        "ui.experimentalSensor.messageSyntheticDemoOriginalInputsNotInstalledMSFS": "Synthetic/demo original inputs — not installed MSFS acceptance",
+        "ui.experimentalSensor.messageRecordedSimulatorInputsFictionalModelDerivedOutputs": "Recorded simulator inputs — fictional model-derived outputs",
+        "ui.experimentalSensor.messageInputTelemetrySourceUnavailableNoSimulator": "Input telemetry source unavailable — no simulator origin inferred",
+        "ui.flightTestProcedure.messageOR": " OR ",
+        "ui.hyperspectralImport.messageSelectTheMatchingBinaryBelow": "Select the matching binary below",
+        "ui.hyperspectralImport.messageNm": " · {value1}–{value2} nm",
+        "ui.hyperspectralImport.messageOriginalScientificUnitsNeeded": "Original scientific units needed",
+        "ui.hyperspectralImport.messageUnknownNotGuessed": "Unknown; not guessed",
+        "ui.hyperspectralImport.messageNotReported": "Not reported",
+        "ui.libraryDownload.messageCredentialSaved": "Credential saved",
+        "ui.libraryDownload.messageNotConnected": "Not connected",
+        "ui.libraryDownload.messageCached": "Cached",
+        "ui.libraryDownload.messageRetrieved": "Retrieved",
+        "ui.libraryDownload.messageSearchBoundsEncloseTheSelectedShapeSome": "Search bounds enclose the selected shape; some candidates lie outside it. ",
+        "ui.libraryDownload.messageRetainedCandidate": "Retained candidate",
+        "ui.libraryDownload.messagePolygonClipping": " · polygon clipping",
+        "ui.libraryDownload.messageAuthoritativeRegion": " · authoritative region",
+        "ui.libraryDownload.messageTheProviderSearchUsesEnclosingBounds": " The provider search uses enclosing bounds; edge windows may include pixels outside the selected shape. Review the exact work windows before approval.",
+        "ui.libraryDownload.messageMatchingCatalogScenesFound": "Matching catalog scenes found",
+        "ui.libraryDownload.messageNoMatchingScenesInThisSearchedScope": "No matching scenes in this searched scope",
+        "ui.libraryDownload.messageProviderUnavailableAvailabilityWasNotEstablished": "Provider unavailable — availability was not established",
+        "ui.libraryDownload.messageCachedNotANewLive": " · cached, not a new live search",
+        "ui.libraryDownload.messageProviderOrderingNotEstablished": "Provider ordering not established.",
+        "ui.libraryDownload.messageNotApplicable": "not applicable",
+        "ui.libraryDownload.messageThisIsAProviderFailureNotEvidence": "This is a provider failure, not evidence that no data exists.",
+        "ui.libraryDownload.messageTryEarlierYearsAdjustTheCloudFilter": "Try earlier years, adjust the cloud filter, or explicitly choose a nearby supported area. No filters or products are widened automatically.",
+        "ui.libraryDownload.messageUnknownUntilOriginalFileVerification": "Unknown until original-file verification",
+        "ui.map.messageOnlineBasemapWithBundledGeographicReference": "Online basemap with bundled geographic reference",
+        "ui.map.messageOfflineNaturalEarthGeography": "Offline Natural Earth geography",
+        "ui.map.messageNoLocationSelectedRegionalDefaultUSA": "No location selected: regional default USA. ",
+        "ui.map.messageChooseAddWaypointOrDrawSurveyArea": "Choose Add Waypoint or Draw Survey Area to edit; pan normally otherwise. ",
+        "ui.missionIntelligence.messageObjectiveNotDeclared": "Objective not declared",
+        "ui.missionIntelligence.messageGeneralResearch": "General research",
+        "ui.missionIntelligence.messageAircraftUnknown": "Aircraft unknown",
+        "ui.missionIntelligence.messageSession9e78f797": " · Session {value1}",
+        "ui.missionIntelligence.messagePilotOverrideRearmRequired": " · pilot override — rearm required",
+        "ui.missionIntelligence.messageContinuityHold": " · continuity hold",
+        "ui.missionIntelligence.messageStorageHoldResolveStorageBefore": " · storage hold; resolve storage before rearm",
+        "ui.missionIntelligence.messageNotEnded": "not ended",
+        "ui.missionIntelligence.messageNotYetAssessed": "Not yet assessed",
+        "ui.missionIntelligence.messagePolicyGrade": "Policy grade {value1}",
+        "ui.missionIntelligence.messageNoFinalLetterGrade": "No final letter grade",
+        "ui.missionIntelligence.messageStaleEvidenceCutoffNotCurrent": " · Stale evidence cutoff; not current real-time performance.",
+        "ui.missionIntelligence.messageInapplicable": "Inapplicable",
+        "ui.missionIntelligence.messageNotSpecified": "not specified",
+        "ui.missionIntelligence.messageEvidencePending": "Evidence pending",
+        "ui.missionIntelligence.messageAreaMembershipUnknown": "Area membership unknown",
+        "ui.missionIntelligence.messageInsideResearchArea": "Inside research area",
+        "ui.missionIntelligence.messageOutsideResearchArea": "Outside research area",
+        "ui.missionIntelligence.messageScienceSessionOrCollectionAuthorityChanged": "Science session or collection authority changed.",
+        "ui.missionOperations.messageActiveForLocalMonitoring": "Active for local monitoring",
+        "ui.missionOperations.messageRecordedPointOnlyNoFootprintInferred": "Recorded point only; no footprint inferred.",
+        "ui.missionOperations.messageOriginalLocationSeparateFromScientificSampling": "Original location, separate from scientific sampling.",
+        "ui.missionPerformance.messageGrade": "Grade {value1}",
+        "ui.missionPerformance.messageUseTheHostSRecalculationActionIfA": "Use the host’s recalculation action if a prior job failed.",
+        "ui.missionPerformance.messageProvisionalWithUnassessedWorkRetained": "Provisional, with unassessed work retained.",
+        "ui.missionPerformance.messageOverallFlightObligationsNeverAveragedFromSession": "Overall flight obligations; never averaged from session grades.",
+        "ui.missionStartAdvisory.messageStaleAssessment": "Stale assessment",
+        "ui.missionStartAdvisory.messageAffectedInstrument": " — affected instrument",
+        "ui.missionTimeline.messageLiveProvisionalRecentEvidence": "Live — provisional recent evidence",
+        "ui.missionTimeline.messageRecordedEvidence": "Recorded evidence",
+        "ui.missionTimeline.messageCollectedSciencePermanentlyDeleted": " · Collected science permanently deleted",
+        "ui.missionWorkspace.messageRecordingGapBeforeThisSample": " · recording gap before this sample",
+        "ui.missionWorkspace.messageNotArchived": "not archived",
+        "ui.missionWorkspace.messageUnknownDate": "unknown date",
+        "ui.missionWorkspace.messageUnavailableNoSurveyPolygon": "unavailable (no survey polygon)",
+        "ui.missionWorkspace.messageChartPointsThinnedForBounded": " · chart points thinned for bounded display",
+        "ui.observationResearch.messageRecordedLocationsRequired": "recorded locations required",
+        "ui.observationResearch.messageMissingLocationsRemainExplicit": "missing locations remain explicit",
+        "ui.observationResearch.messageEverySelectedCategoryRequired": " · every selected category required",
+        "ui.organizationHosting.messageRailwayHandlesSignInBillingSetupAndCharge": "Railway handles sign-in, billing setup and charge approval on Railway’s own pages. AeroScience never asks for payment details.",
+        "ui.organizationHosting.messageYourProviderHandlesItsOwnAccountAnd": "Your provider handles its own account and charge approval.",
+        "ui.organizationLiveUi.messageFeetMSL": "feet MSL",
+        "ui.organizationLiveUi.messageKnotsIAS": "knots IAS",
+        "ui.organizationLiveUi.messageDegreesTrue": "degrees true",
+        "ui.organizationLiveUi.messageSignInOrTryAgain": "Sign in or try again.",
+        "ui.organizationMissionPreparation.messageRecordedIASMSLTelemetryNoAdditionalScientificInstruments": "Recorded IAS/MSL telemetry; no additional scientific instruments required",
+        "ui.organizationResearch.messageExclusive": "Exclusive",
+        "ui.organizationResearch.messageMultiPilot": "Multi-Pilot",
+        "ui.organizationResearch.messageReservedAssigned": "Reserved / Assigned",
+        "ui.organizationResearch.messageClaimed": "Claimed",
+        "ui.organizationResearch.messageReleased": "Released",
+        "ui.organizationResearch.messageReleaseOnlyThisAssignmentYourPersonalScience": "Release only this assignment. Your personal science and flight history remain unchanged.",
+        "ui.organizationResearch.messageThisConfirmsParticipationOnlyItDoesNot": "This confirms participation only; it does not prepare or start a mission, collect science or upload evidence.",
+        "ui.patterns.messageInAreaScanSegmentsTransitions": "{value1} in-area scan segments / {value2} transitions · {value3} in-area scan / {value4} transition distance (may leave area; turning feasibility unvalidated) · ",
+        "ui.patterns.messageSurveyPassesTrackSpacing": "{value1} survey passes · Track spacing {value2} · Approximate survey envelope {value3} (sensor coverage unvalidated) · ",
+        "ui.patterns.messageExactSameLinePassesPilotManagedTurnaround": "{value1} exact same-line passes · pilot-managed turnaround distance/time unknown · ",
+        "ui.patterns.messageOrbitExportUsesA5PointToPointApproximation": "Orbit export uses a 5° point-to-point approximation; native EFB orbit support is not claimed.",
+        "ui.payloadSettings.messageCustomized": "Customized",
+        "ui.payloadSettings.messageGenericModel": "Generic model",
+        "ui.payloadSettings.messageDocumentedReference": "Documented reference",
+        "ui.personalResearchFlight.messageSavedTestCard": "Saved test card",
+        "ui.personalResearchFlight.messagePersonalTestCard": "Personal test card",
+        "ui.personalResearchFlight.messageAttemptStillRecording": "Attempt still recording",
+        "ui.personalResearchFlight.messageExplicitAttemptBoundaries": "Explicit attempt boundaries",
+        "ui.personalResearchFlight.messageReviewMultiPointFlightVerifiesOriginalsAndThe": "Review Multi-Point Flight verifies originals and the complete procedure.",
+        "ui.personalResearchFlight.messageInspectCustomTestEvidenceVerifiesThisOriginal": "Inspect Custom Test Evidence verifies this original interval.",
+        "ui.personalResearchReview.messageMatchesSavedEvidence": "Matches saved evidence",
+        "ui.personalResearchReview.messageEvidenceMismatch": "Evidence mismatch",
+        "ui.personalResearchReview.messageRetainedSampleAndPlanHashesMatchThe": "Retained sample and plan hashes match the saved result.",
+        "ui.personalResearchReview.messageEvidenceIsMissingOrChangedTheSaved": "Evidence is missing or changed. The saved outcome is historical and has not been rewritten.",
+        "ui.personalResearchReview.messageNoRetainedTelemetry": "No retained telemetry",
+        "ui.personalResearchReview.messageOnlyTheFirst20IssuesAre": " Only the first 20 issues are listed.",
+        "ui.personalResearch.messageRecordedSimulatorTelemetry": "Recorded simulator telemetry",
+        "ui.personalResearch.messageSyntheticDemoTelemetryNotAnInstalledMSFSTest": "Synthetic/demo telemetry; not an installed MSFS test",
+        "ui.personalResearch.messageSourceUnavailableNoTelemetrySourceTypeInferred": "Source unavailable; no telemetry source type inferred",
+        "ui.preparationSummary.messageReusedLocally": " · Reused Locally",
+        "ui.programWorkflowUi.messageEarlierPublication": " (earlier publication)",
+        "ui.programWorkflowUi.messageProgramOnAdministrativeHold": "Program on administrative hold",
+        "ui.programWorkflowUi.messagePhaseGatesEnabledForNewAssignmentsClaims": "Phase gates enabled for new assignments/claims",
+        "ui.programWorkflowUi.messageOrdinaryResearchNoPhaseGatesRequired": "Ordinary research — no phase gates required",
+        "ui.programWorkflowUi.messageEntireCard": "entire card",
+        "ui.programWorkflowUi.messageAuthorizedPartialContribution": "authorized partial contribution",
+        "ui.programWorkflowUi.messageOriginalReviewerApproval": "original reviewer approval",
+        "ui.programWorkflowUi.messageExactPhasePurpose": "exact phase purpose",
+        "ui.programWorkflowUi.messageCampaignFulfillment": "campaign fulfillment",
+        "ui.programWorkflowUi.messageYourWork": " (your work)",
+        "ui.receivedEvidenceUi.messageResearchDefinition": "Research definition",
+        "ui.receivedEvidenceUi.messageAttempta4474be8": " · Attempt {value1}",
+        "ui.remoteScience.messageMapMemoryBoundReachedFilterBy": " Map memory bound reached; filter by instrument or browse individual acquisitions.",
+        "ui.remoteScience.messageHistoricalValidSampleCountNotIndexed": "Historical valid sample count not indexed",
+        "ui.remoteScience.messageValidSamplePositions": "{value1} valid sample positions",
+        "ui.remoteScience.messageValidRangeToValid": " · Valid range {value1} to {value2} · {value3} valid / {value4} samples",
+        "ui.researchTemplates.messageNotSupplied": "Not supplied",
+        "ui.researchTemplates.messageAttributionNotSupplied": "Attribution not supplied",
+        "ui.research.messageLocationUnavailableNoPositionWasInvented": "Location unavailable; no position was invented",
+        "ui.research.messageRecordedLocationAttached": "Recorded location attached",
+        "ui.research.messageNoReferenceSelected": "No reference selected",
+        "ui.research.messageCustomModeledGeometry": "Custom modeled geometry",
+        "ui.research.messageSelectedReferenceGeometry": "Selected reference geometry",
+        "ui.research.messageNotSuppliedNoAccuracyCertificationIsImplied": "Not supplied; no accuracy certification is implied.",
+        "ui.research.messageNoneSelected": "None selected",
+        "ui.research.messageSupplyDuration": "Supply duration",
+        "ui.research.messageGiB": "{value1} GiB",
+        "ui.research.messageCAPACITYWARNING": " · CAPACITY WARNING",
+        "ui.research.messageSavedProducts": "saved products",
+        "ui.research.messageMeasurementValues": "measurement values",
+        "ui.research.messageNone": "None",
+        "ui.research.messageCustomRoute": "Custom route",
+        "ui.research.messageEndOfRoute": "End of route",
+        "ui.research.messageUnknownEndTime": "unknown end time",
+        "ui.research.messageUnknownEnd": "unknown end",
+        "ui.research.messageDurationUnknown": "duration unknown",
+        "ui.research.messageRecordingInterrupted": " · recording interrupted",
+        "ui.research.messageUnavailableCleared": "Unavailable / cleared",
+        "ui.research.messageDisplayReduced": " (display reduced)",
+        "ui.routeExport.messageOrbitSUseA5PointToPointApproximation": " {value1} orbit(s) use a 5° point-to-point approximation; one revolution normally has 73 points. This is not a native EFB orbit command. Check target route limits.",
+        "ui.routeExport.messageFirstEnRouteWaypoint": "First en-route waypoint",
+        "ui.routeExport.messageLastEnRouteWaypoint": "Last en-route waypoint",
+        "ui.scienceAnalysis.messageSourceProviderUnavailable": "Source provider unavailable",
+        "ui.scienceAnalysis.messageVerticalReferenceUnavailable": "Vertical reference unavailable",
+        "ui.scienceCompare.messageShared": "Shared",
+        "ui.scienceCompare.messageSavedQualityUnavailable": "Saved quality unavailable",
+        "ui.scienceDisplay.messageFtMSL": "ft MSL",
+        "ui.scienceJourney.messageUnavailableCheckTheConnectionSessionOr": "Unavailable — check the connection, session or storage hold",
+        "ui.scienceJourney.messageLastCheckedCount": " · last checked count",
+        "ui.scienceJourney.messageLastCheckedCountConnectionIsStale": "Last checked count; connection is stale.",
+        "ui.scienceJourney.messageOnboardAtmosphericObservationsNeedNoNASADownload": "Onboard atmospheric observations need no NASA download, organization or cloud account.",
+        "ui.scienceJourney.messageReviewTheSavedInstrumentAndSourceRequirements": "Review the saved instrument and source requirements.",
+        "ui.scienceMapView.messageRecordedValues": "recorded values",
+        "ui.scienceMapView.messageOverviewModeNativeDetailShowsOneSaved": "Overview mode: native detail shows one saved acquisition per instrument; inspect any other record below. ",
+        "ui.scienceMapView.messageEnvironmentalValues": "environmental values",
+        "ui.scienceMapView.messageTheVisible": "the visible",
+        "ui.scienceMapView.messageTheSelected": "the selected",
+        "ui.scientificContext.messageOrderedSequence": "Ordered sequence",
+        "ui.scientificContext.messageIndependentPoints": "Independent points",
+        "ui.scientificContext.messageFlightRegimeValidation": "Flight-Regime Validation",
+        "ui.scientificContext.messageNoMaximumSourceAgeIsSpecifiedBy": "No maximum source age is specified by this card.",
+        "ui.scientificContext.messageMaximumSourceAgeDays": "Maximum source age: {value1} days.",
+        "ui.scientificContext.messageWithEverySelectedCategoryRepresented": " with every selected category represented",
+        "ui.scientificContext.messageValidRecordedPositionRequired": "; valid recorded position required",
+        "ui.scientificContext.messageMissingPositionsStayUnavailable": "; missing positions stay unavailable",
+        "ui.scientificContext.messageNoneRequired": "None required",
+        "ui.scientificContext.messageDifferent": "Different {value1}. ",
+        "ui.scientificLibrary.messageNewestSourceObservationc8d6cfa6": "Newest source observation {value1}",
+        "ui.scientificLibrary.messageOriginalObservationDatesUnknownComposite": "Original observation dates unknown / composite",
+        "ui.scientificLibrary.messageExcludedOriginalsRetained": "Excluded (originals retained)",
+        "ui.scientificLibrary.messageEligibleSubjectToCoverageAndQA": "Eligible, subject to coverage and QA",
+        "ui.scientificSources.messageDisabledLocalDatasetsRemainAvailable": "Disabled (local datasets remain available)",
+        "ui.scientificSources.messageMissionAreaSuitabilityUseViewCoverageOrCurrent": "Mission-area suitability: use View Coverage or current Planner readiness",
+        "ui.sensorOperatingStatus.messageSavedProducts": "Saved products",
+        "ui.sensorOperatingStatus.messageVersion": " · version {value1}",
+        "ui.sensorOperatingStatus.messageLastKnown": "Last known — ",
+        "ui.sensorOperatingStatus.messageCurrentScienceSession": " · Current science session",
+        "ui.sensorOperatingStatus.messageMissingStaleOrFromBeforeACollection": "missing, stale or from before a collection change",
+        "ui.sensorOperatingStatus.messageNotCurrent": "not current",
+        "ui.sensorOperatingStatus.messageNoHardwareProfile": "no hardware profile",
+        "ui.sensorOperatingStatus.messageNoDefinition": "no definition",
+        "ui.sensorOperatingStatus.messageNotSupplied": "not supplied",
+        "ui.sensorPlanning.messageScanTransitionSegmentsMinAt": "{value1} scan/transition segments · {value2} · {value3} min at stated groundspeed",
+        "ui.sensorPlanning.messageChooseAPatternCenterForRouteEstimates": "Choose a pattern center for route estimates.",
+        "ui.sensorPlanning.messageFrameIntervalS": " · Frame interval ≤{value1} s",
+        "ui.sensorPlanning.messageIdealModeledDensityPointsMNot": " · Ideal modeled density {value1} points/m² (not recorded returns)",
+        "ui.sourceDeletion.messageDatabaseBackupCleanupIsAlsoIncomplete": "; database/backup cleanup is also incomplete",
+        "ui.storageManagement.messageNoCap": "No cap",
+        "ui.submissionBuilder.messageClaimedResearchCard": "Claimed research card",
+        "ui.submissionReview.messageVerifiedNow": "Verified now",
+        "ui.submissionReview.messagePreviouslyCheckedNotCurrentlyVerified": "Previously checked / Not Currently Verified",
+        "ui.tfrLayers.messageSavedGeometry": "Saved geometry",
+        "ui.tfrLayers.messageWholeMissionUTCIntervalTo": "Whole-mission UTC interval {value1} to {value2}.",
+        "ui.tfrLayers.messageNoComparableRealWorldIntervalAssessed": "No comparable real-world interval assessed.",
+        "ui.tfrLayers.messageYourSavedGeographyTouchesAPublishedBoundary": "Your saved geography touches a published boundary; inspect the checked time, altitude and missing evidence.",
+        "ui.tfrLayers.messageTheAvailableEvidenceCannotEstablishAComplete": "The available evidence cannot establish a complete restriction assessment, even when some checked dimensions do not overlap.",
+        "ui.tfrLayers.messageRefreshDidNotVerifyCurrentData": "Refresh did not verify current data.",
+        "ui.tfrLayers.messageNoRecordedInventoryRefreshError": "No recorded inventory refresh error.",
+        "ui.tfrLayers.messageSelected": "selected · ",
+        "ui.transferProgress.messageCalculatingNotTransferring": "Calculating / not transferring",
+        "ui.transferProgress.messageCurrentFile": " · current file {value1}",
+        "ui.transferProgress.messageCombinedSpeedNotEstablished": "Combined speed not established",
+        "ui.organizationNotifications.messageExternalConsentGranted": "External consent granted",
+        "ui.organizationNotifications.messageExternalConsentOFF": "External consent OFF",
+        "ui.organizationOpportunities.messageIssuedPublication": " · Issued publication {value1}",
+        "ui.organizationOpportunities.messageVolunteersWelcome": "Volunteers welcome",
+        "ui.organizationOpportunities.messageManagerAssignmentOnly": "Manager assignment only",
+        "ui.organizationReviews.messageNoSubmittedClientEvaluation": "No submitted client evaluation",
+        "ui.organizationReviews.messageSupplemental": "Supplemental",
+        "ui.organizationReviews.messageOriginal": "Original",
+        "ui.organization.messageSavedResearchApproach": "Saved research approach",
+        "ui.organization.messageRetainedPublishedRevision": " · Retained published revision {value1}",
+        "ui.researchTemplateUi.messageNotRequired": "Not required",
+        "ui.researchTemplateUi.messagePublishedEditToCreateANew": "Published — edit to create a new draft",
+        "ui.researchTemplateUi.messageOrganizationalDraft": "Organizational Draft",
+        "ui.researchTemplateUi.messageCurrentDraft": "Current draft",
+        "ui.researchTemplateUi.messageSupersededDraftOrPolicy": "Superseded draft or policy",
+        "ui.researchTemplateUi.messageNotRequiredBySelectedPolicy": "Not required by selected policy",
+        "mission.alreadyRecordingError": "A mission is already recording. This advisory cannot start another flight.",
+        "consent.permissionChangedError": "A permission changed during saving. Review current settings and try again.",
+        "organization.waiverPilotError": "A requirement waiver cannot add a pilot. Clear partial contributor credit.",
+        "planning.polygonCoordinatesError": "A polygon needs at least three valid coordinate pairs.",
+        "cards.anyConditionFullHold": "OR — one selected condition for its whole hold",
+        "windows.error.exactConfirmationPhrase": "Type the exact confirmation phrase shown for this archive.",
+        "windows.error.recordingStillActive": "A recording remains active; no data was cleared.",
+        "windows.error.storageBeforeDeletion": "Start the companion and reconnect its configured storage before reviewing scientific deletion.",
+        "windows.error.resumeDeletion": "The companion stopped; resume the reviewed deletion after restart.",
+        "windows.error.operationRunning": "Another setup/storage operation is running.",
+        "windows.error.stoppedFolder": "The companion is stopped; no folder was opened.",
+        "windows.error.sourceStorageStopped": "The local engine is stopped; source storage has not been read. Start it or review Storage Settings. Existing data was not replaced.",
+        "windows.error.startCompanion": "Start the companion first.",
+        "windows.error.databaseFilename": "Choose a database folder using Browse; the database filename must remain missions.db.",
+        "windows.error.insufficientSpace": "There is insufficient free space on a selected storage drive.",
+        "windows.error.closeSimulator": "Close MSFS before installing the toolbar, or choose Skip for Now.",
+        "windows.error.communityFolder": "Choose an existing Community folder, or choose Skip for Now.",
+        "windows.error.folderUnavailable": "The selected drive/folder is unavailable. Reconnect it; no replacement was created.",
+        "windows.error.openVault": "Windows could not open the AeroScience credential vault. Reconnect on this PC.",
+        "windows.error.invalidCredential": "Saved AeroScience credential is invalid; reconnect.",
+        "windows.error.credentialBounds": "Credential is outside vault bounds.",
+        "windows.error.saveVault": "Windows could not save the AeroScience token. No plaintext fallback was used.",
+        "windows.error.removeCredential": "Windows could not remove the AeroScience credential. Use Windows Credential Manager to review it.",
+        "windows.error.unsupportedOrganizationCredential": "Unsupported organization credential.",
+        "windows.error.unsupportedOwnerKey": "Unsupported ownership key."
       }
     },
     "es-ES": {
-      "version": 22,
+      "version": 23,
       "locale": "es-ES",
-      "sourceHash": "c871f36c92c40f3e195f35c762e9b9d6d415c522c475027296fb3dd87dba839c",
+      "sourceHash": "2e497b5e380eefe0acc09c924121b57ad145e56c8e85d78639b27b338adbc3dc",
       "pendingEnglishFallbackKeys": [
         "contextHelp.coverage.body",
         "contextHelp.lidar.body",
@@ -37598,6 +39333,7 @@ export const localeData = {
         "ui.aviationReference.messageIFRHighEnroute",
         "ui.collectedScienceDeletion.messageFlightRecordingsTelemetryMissionPlansAndExternal",
         "ui.collectionPlanner.messageExplicitCollectionActionSManualOverride",
+        "ui.customFlightTest.messageAND",
         "ui.customFlightTest.messageAllowedDifferenceFromTheIASTargetMust",
         "ui.customFlightTest.messageIndicatedAirspeedTargetKnotsIAS",
         "ui.downloadWorkspace.messageRecentSpeed",
@@ -37607,6 +39343,7 @@ export const localeData = {
         "ui.emitLibrary.messageRenderScientificWindow",
         "ui.flightTestProcedure.messageAltitudeTargetFeetMSL",
         "ui.flightTestProcedure.messageName",
+        "ui.flightTestProcedure.messageOR",
         "ui.hyperspectralImport.messageBinary",
         "ui.hyperspectralImport.messageMiB",
         "ui.libraryDownload.messageUSGS3DEPSuppliesNumericBareEarthElevationSometimes",
@@ -37627,8 +39364,10 @@ export const localeData = {
         "ui.missionWorkspace.messageMiB",
         "ui.observationResearch.messageMet",
         "ui.organizationMembers.messageSuspended",
+        "ui.organizationMissionPreparation.messageRecordedIASMSLTelemetryNoAdditionalScientificInstruments",
         "ui.organizationOpportunities.messageActiveSlotSDistinctPilot",
         "ui.organizationOwnerSetup.messageCompareThisRequestWithTheOneIn",
+        "ui.organizationReviews.messageOriginal",
         "ui.organizationReviews.messageRevoke",
         "ui.organizationReviews.messageWhyIsThisRequirementRejected",
         "ui.patterns.messageRegenerate",
@@ -37643,6 +39382,7 @@ export const localeData = {
         "ui.receivedEvidenceUi.messageOnlyReceivedSampleLocationsAreAvailableHere",
         "ui.receivedEvidenceUi.messageRecordedIAS",
         "ui.research.messageAirportReferencePointOurAirportsSnapshotThis",
+        "ui.research.messageGiB",
         "ui.research.messageIFR",
         "ui.research.messageLateral",
         "ui.research.messageSessionOriginal",
@@ -37653,6 +39393,7 @@ export const localeData = {
         "ui.routeExport.messageICAOItem15DegreesMinutesRounded",
         "ui.routeExport.messageWaypoints",
         "ui.scienceCompare.messageDataset",
+        "ui.scienceDisplay.messageFtMSL",
         "ui.scienceLayers.messageNm",
         "ui.scienceMapView.messageNm",
         "ui.scienceMapView.messageNm4835a69c",
@@ -37666,6 +39407,7 @@ export const localeData = {
         "ui.scientificSources.messageSingleBandNumericElevationDEMGeoTIFF",
         "ui.scientificSources.messageUSGS3DEPCopernicusGLO30",
         "ui.sensorOperatingStatus.messageOriginalAircraftInputFtAGLFt",
+        "ui.sensorPlanning.messageIdealModeledDensityPointsMNot",
         "ui.serverOperations.messageMiB",
         "ui.sourceDeletion.messageRecheckingTheExactSelectionAndProtectedResearch",
         "ui.storageManagement.messageGB",
@@ -44422,13 +46164,342 @@ export const localeData = {
         "native.phase.stale": "{status} | Estado desactualizado",
         "native.banner.recordingActive": "Grabación del vuelo: activa | Adquisición científica: {phase}",
         "native.banner.recordingInactive": "Grabación del vuelo: inactiva | Adquisición científica: {phase}",
-        "native.banner.recordingUnknown": "Grabación del vuelo: no disponible | Adquisición científica: {phase}"
+        "native.banner.recordingUnknown": "Grabación del vuelo: no disponible | Adquisición científica: {phase}",
+        "updates.automaticNotifications": "Avisos automáticos de actualizaciones",
+        "updates.includePrereleases": "Incluir versiones alfa y preliminares",
+        "map.atmosphericSamples": "Puntos de muestreo atmosférico reales",
+        "map.sampledPathLinks": "Enlaces de trayectoria respaldados por muestras",
+        "map.openStreetMapStreets": "OpenStreetMap / Calles",
+        "map.analysisSourceValues": "Valores de la cuadrícula original para el análisis",
+        "map.comparisonSourceValues": "Valores de la cuadrícula original para la comparación",
+        "map.scientificDifferences": "Diferencias de la comparación científica",
+        "map.retainedArtifact": "Producto científico conservado",
+        "map.savedObservations": "Observaciones científicas guardadas",
+        "map.verifiedRasters": "Vistas ráster científicas verificadas",
+        "map.demElevation": "Elevación del terreno derivada del DEM",
+        "map.inspectedSourceValues": "Valores de la fuente inspeccionados",
+        "map.inspectedSourceLimit": "Celdas de la cuadrícula original con control de calidad en la ventana seleccionada; no son observaciones de vuelo ni cobertura del sensor.",
+        "map.originalFootprintLimit": "Huella original; no es cobertura con calidad verificada",
+        "map.pilotRecordedPoints": "Observaciones del piloto: solo puntos registrados",
+        "map.flightPathContext": "Trayectoria de vuelo como contexto; no es cobertura científica",
+        "route.simbriefCoordinates": "Grados/minutos/segundos según la documentación de SimBrief",
+        "map.faaTfrUnknown": "Límites TFR de la FAA · activación desconocida",
+        "preparation.liveTelemetryRequirement": "Requiere telemetría en directo del simulador; sin preparación remota",
+        "map.qualifiedSamples": "{measurement}: muestras reales que cumplen los requisitos",
+        "ui.analysis.messageRecordedPathObservedWithinTolerance": "Vía registrada observada en tolerancia",
+        "ui.analysis.messageCompletionNotEstablished": "Finalización no establecida",
+        "ui.analysis.messageMaxDeviation": "· Desviación máxima {value1}",
+        "ui.app.messageNoEnabledInstrumentsInArchivedConfiguration": "No hay instrumentos habilitados en la configuración archivada",
+        "ui.app.messageMissingUnknown": "Falta / desconocido",
+        "ui.applicationUpdates.messageNotCheckedYet": "No se ha comprobado aún",
+        "ui.applicationUpdates.messageNever": "Nunca",
+        "ui.atmosphericResearch.messageSampledLocationsDoNotEstablishTheConditions": "Las ubicaciones de muestreo no establecen las condiciones entre ellas ni en las zonas circundantes.",
+        "ui.atmosphericResearch.messageBandValuesBelowShowWhereReadingsWere": "Los valores de banda que se indican a continuación muestran dónde se retuvieron las lecturas; no establecen condiciones entre las altitudes de muestreo.",
+        "ui.atmosphericResearch.messageFeetMSL8667c4ea": "{value1}–{value2} pies MSL",
+        "ui.atmosphericResearch.messageRecordedSimulatorObservations": "Observaciones grabadas del simulador",
+        "ui.atmosphericResearch.messageSyntheticDemoObservationsNotAnInstalledMSFS": "Observaciones sintéticas/demo: no es un ensayo MSFS instalado",
+        "ui.atmosphericResearch.messageUnknownNoSimulatorProvenanceInferred": "Desconocido; no se infiere procedencia del simulador",
+        "ui.atmosphericResearch.messageSampledDistance": "Distancia de muestreo",
+        "ui.atmosphericResearch.messagePolarSamplesOutsideTheMercatorMapRemain": "Las muestras polares fuera del mapa de Mercator permanecen disponibles en sus coordenadas exactas en la tabla.",
+        "ui.aviationMapLayers.messageSource": "· fuente {value1} {value2} {value3}",
+        "ui.aviationMapLayers.messageBaseVolume": "Volumen de base",
+        "ui.aviationMapLayers.messageAddVolume": "Añadir volumen",
+        "ui.aviationMapLayers.messageSubtractVolume": "Volumen de resta",
+        "ui.aviationMapLayers.messageBoundingCandidatesNotActiveRestrictions": "{value1} candidatos delimitadores (no restricciones activas)",
+        "ui.aviationMapLayers.messageRetainedReferencesInViewport": "{value1} conserva las referencias en viewport",
+        "ui.aviationReference.messageOn": "Adelante..",
+        "ui.aviationReference.messageOff": "Fuera..",
+        "ui.aviationReference.messageUpdatesRefreshTheHostInventoryAndPublished": "Actualizaciones actualizar el inventario del host y la geometría publicada; activación exacta y la integridad siguen sin verificarse.",
+        "ui.aviationReference.messageOriginalChartTransferSizeUnknownUntilPublished": "Tamaño original de la transferencia de la carta: Desconocido hasta que se publicó. Abrir este catálogo no descarga originales.",
+        "ui.calibrationSettings.messageSeparateUserAdjustedScalarChannelOriginalValuesRemain": "Canal separado ajustado al usuario de scalar; los valores originales permanecen registrados.",
+        "ui.calibrationSettings.messageMetadataOnlyNoNumericAdjustment": "Solo metadatos; no hay ajuste de la moneda.",
+        "ui.campaignCoverageUi.messageEarlierCardPublication": "· Publicación de tarjetas anteriores",
+        "ui.campaignCoverageUi.messageUsablePilotDocumentationNotSensorQA": "Documentación de piloto utilizable; no sensor QA",
+        "ui.campaignCoverageUi.messageValidSupportedOriginalReadings": "Lecturas originales válidas compatibles",
+        "ui.campaignCoverageUi.messageCurrentGoal": "Objetivo actual",
+        "ui.campaignCoverageUi.messageHistoricGoalPreserved": "Objetivo histórico preservado",
+        "ui.campaignCoverageUi.messageCountsMet": "Conteos cumplidos",
+        "ui.campaignCoverageUi.messageMoreSamplingNeeded": "Se necesita más muestreo",
+        "ui.campaignProgressUi.messageYourContribution": "(su contribución)",
+        "ui.campaignProgressUi.messageNewClaimsUnavailable": "· Nuevas reclamaciones no disponibles",
+        "ui.campaignProgressUi.messageCurrent": "(corrientes)",
+        "ui.collectedScienceDeletion.messageDatabaseBackupCleanupIsIncomplete": "; la limpieza de la base de datos/de respaldo es incompleta",
+        "ui.collectionPlanner.messageSession": "Sesión {value1}",
+        "ui.collectionPlanner.messageBoundaryPauseResumeEnabled": "pausa de límite/retoma activada",
+        "ui.collectionPlanner.messageBoundaryAutomationOff": "automatización de límites apagado",
+        "ui.collectionPlanner.messageAutomaticCollectionIsConfiguredInThisDraft": "La colección automática está configurada en este borrador",
+        "ui.collectionPlanner.messageAutomaticCollectionIsOff": "La colección automática está desactivada",
+        "ui.collectionPlanner.messagePausesOutsideTheSelectedBoundaryUnionReEntry": "Pauses fuera de la unión de fronteras seleccionada; reingreso puede reanudar la misma sesión.",
+        "ui.collectionPlanner.messageBoundaryPauseResumeIsOff": "La pausa/retoma de frontera está cancelada.",
+        "ui.collectionPlanner.messageNoStartRuleUseManualStartOr": "No hay regla de inicio: use manual Inicie o configure una.",
+        "ui.collectionPlanner.messageAReferencedGeographicTargetIsMissing": "Falta un objetivo geográfico de referencia.",
+        "ui.collectionPlanner.messageNoBoundaryRegionsSelected": "No se han seleccionado regiones fronterizas.",
+        "ui.collectionPlanner.messageRulesReviewedForThisDraft": "Se han revisado las normas para este proyecto.",
+        "ui.collectionPlanner.messageRulesAreNotYetReviewedForThe": "Las normas aún no se han revisado para el proyecto actual.",
+        "ui.customFlightTest.messageAND": " AND ",
+        "ui.downloadActivity.messageSourceNotSelected": "Fuente no seleccionada",
+        "ui.downloadActivity.messageSizeUnknown": "Tamaño desconocido",
+        "ui.downloadActivity.messageRateNotEstablished": "Tasa no establecida",
+        "ui.downloadActivity.messageUnknownComposite": "Desconocido / compuesto",
+        "ui.downloadWorkspace.messageNotEstablished": "No establecido",
+        "ui.downloadWorkspace.messageDownloadSizeUnknown": "Tamaño de descarga desconocido",
+        "ui.emitLibrary.messageUnlocated": "Sin asignar",
+        "ui.experimentalSensor.messageSyntheticDemoOriginalInputsNotInstalledMSFS": "Inputs originales sintéticos/demo: no se ha instalado la aceptación MSFS",
+        "ui.experimentalSensor.messageRecordedSimulatorInputsFictionalModelDerivedOutputs": "Entradas de simulador grabadas — salidas derivadas de modelos de ficción",
+        "ui.experimentalSensor.messageInputTelemetrySourceUnavailableNoSimulator": "Fuente de telemetría de entrada no disponible — no se infiere origen del simulador",
+        "ui.flightTestProcedure.messageOR": " OR ",
+        "ui.hyperspectralImport.messageSelectTheMatchingBinaryBelow": "Seleccione el binario que coincida a continuación",
+        "ui.hyperspectralImport.messageNm": "· {value1}–{value2} nm",
+        "ui.hyperspectralImport.messageOriginalScientificUnitsNeeded": "Unidades científicas originales necesarias",
+        "ui.hyperspectralImport.messageUnknownNotGuessed": "Desconocido; no adivinado",
+        "ui.hyperspectralImport.messageNotReported": "No se ha informado",
+        "ui.libraryDownload.messageCredentialSaved": "Credenciales guardadas",
+        "ui.libraryDownload.messageNotConnected": "Desconectado",
+        "ui.libraryDownload.messageCached": "En cacheado",
+        "ui.libraryDownload.messageRetrieved": "Consultado",
+        "ui.libraryDownload.messageSearchBoundsEncloseTheSelectedShapeSome": "Los límites de búsqueda encierran la forma seleccionada; algunos candidatos se encuentran fuera de ella.",
+        "ui.libraryDownload.messageRetainedCandidate": "Candidato retenido",
+        "ui.libraryDownload.messagePolygonClipping": "· recorte de polígonos",
+        "ui.libraryDownload.messageAuthoritativeRegion": "· Región autorizada",
+        "ui.libraryDownload.messageTheProviderSearchUsesEnclosingBounds": "La búsqueda del proveedor utiliza límites de acople; las ventanas de borde pueden incluir píxeles fuera de la forma seleccionada. Revise las ventanas de trabajo exactas antes de la aprobación.",
+        "ui.libraryDownload.messageMatchingCatalogScenesFound": "Se encontraron escenas de catálogos que coinciden",
+        "ui.libraryDownload.messageNoMatchingScenesInThisSearchedScope": "No hay escenas coincidentes en este ámbito de búsqueda",
+        "ui.libraryDownload.messageProviderUnavailableAvailabilityWasNotEstablished": "No se dispone de un proveedor, no se estableció la disponibilidad",
+        "ui.libraryDownload.messageCachedNotANewLive": "· caché, no una nueva búsqueda en vivo",
+        "ui.libraryDownload.messageProviderOrderingNotEstablished": "El pedido del proveedor no está establecido.",
+        "ui.libraryDownload.messageNotApplicable": "no se aplica",
+        "ui.libraryDownload.messageThisIsAProviderFailureNotEvidence": "Este es un fallo del proveedor, no evidencia de que no exista ningún dato.",
+        "ui.libraryDownload.messageTryEarlierYearsAdjustTheCloudFilter": "Pruebe años anteriores, ajuste el filtro de nube o elija explícitamente un área cercana. No se amplían los filtros ni los productos automáticamente.",
+        "ui.libraryDownload.messageUnknownUntilOriginalFileVerification": "Desconocido hasta la verificación del archivo original",
+        "ui.map.messageOnlineBasemapWithBundledGeographicReference": "Mapa base en línea con referencia geográfica agrupada",
+        "ui.map.messageOfflineNaturalEarthGeography": "Geografia natural de la Tierra",
+        "ui.map.messageNoLocationSelectedRegionalDefaultUSA": "No se ha seleccionado ninguna ubicación: regional default USA.",
+        "ui.map.messageChooseAddWaypointOrDrawSurveyArea": "Elija Agregar Waypoint o dibujar área de encuesta para editar; oprima normalmente de lo contrario.",
+        "ui.missionIntelligence.messageObjectiveNotDeclared": "Objetivo no declarado",
+        "ui.missionIntelligence.messageGeneralResearch": "Investigación general",
+        "ui.missionIntelligence.messageAircraftUnknown": "Aeronaves desconocidas",
+        "ui.missionIntelligence.messageSession9e78f797": "Sesión {value1}",
+        "ui.missionIntelligence.messagePilotOverrideRearmRequired": "· anulación del piloto — rearme requerido",
+        "ui.missionIntelligence.messageContinuityHold": "· continuidad",
+        "ui.missionIntelligence.messageStorageHoldResolveStorageBefore": "· almacenamiento; resolver el almacenamiento antes del rearme",
+        "ui.missionIntelligence.messageNotEnded": "no terminado",
+        "ui.missionIntelligence.messageNotYetAssessed": "No se ha evaluado aún",
+        "ui.missionIntelligence.messagePolicyGrade": "Grado de política {value1}",
+        "ui.missionIntelligence.messageNoFinalLetterGrade": "No hay calificación de carta final",
+        "ui.missionIntelligence.messageStaleEvidenceCutoffNotCurrent": "· Corte de evidencia de estabulación; no desempeño actual en tiempo real.",
+        "ui.missionIntelligence.messageInapplicable": "inaplicable",
+        "ui.missionIntelligence.messageNotSpecified": "no especificado",
+        "ui.missionIntelligence.messageEvidencePending": "Pruebas pendientes",
+        "ui.missionIntelligence.messageAreaMembershipUnknown": "Miembros de zona desconocidos",
+        "ui.missionIntelligence.messageInsideResearchArea": "Ámbito de investigación interior",
+        "ui.missionIntelligence.messageOutsideResearchArea": "Fuera del ámbito de investigación",
+        "ui.missionIntelligence.messageScienceSessionOrCollectionAuthorityChanged": "La sesión científica o la autoridad de recolección cambiaron.",
+        "ui.missionOperations.messageActiveForLocalMonitoring": "Activa para el monitoreo local",
+        "ui.missionOperations.messageRecordedPointOnlyNoFootprintInferred": "Punto grabado solamente; no hay huella inferida.",
+        "ui.missionOperations.messageOriginalLocationSeparateFromScientificSampling": "Lugar original, separado del muestreo científico.",
+        "ui.missionPerformance.messageGrade": "Grado {value1}",
+        "ui.missionPerformance.messageUseTheHostSRecalculationActionIfA": "Utilice la acción de nuevo cálculo del anfitrión si un trabajo anterior falló.",
+        "ui.missionPerformance.messageProvisionalWithUnassessedWorkRetained": "Provisional, con trabajos no realizados.",
+        "ui.missionPerformance.messageOverallFlightObligationsNeverAveragedFromSession": "Obligaciones generales de vuelo; nunca promediaron desde las calificaciones de las sesiones.",
+        "ui.missionStartAdvisory.messageStaleAssessment": "Evaluación de la estatuilla",
+        "ui.missionStartAdvisory.messageAffectedInstrument": "— instrumento afectado",
+        "ui.missionTimeline.messageLiveProvisionalRecentEvidence": "Live: pruebas provisionales recientes",
+        "ui.missionTimeline.messageRecordedEvidence": "Pruebas registradas",
+        "ui.missionTimeline.messageCollectedSciencePermanentlyDeleted": "· La ciencia recopilada se elimina permanentemente",
+        "ui.missionWorkspace.messageRecordingGapBeforeThisSample": "· brecha de registro antes de esta muestra",
+        "ui.missionWorkspace.messageNotArchived": "no archivado",
+        "ui.missionWorkspace.messageUnknownDate": "fecha desconocida",
+        "ui.missionWorkspace.messageUnavailableNoSurveyPolygon": "no disponible (sin polígono de encuesta)",
+        "ui.missionWorkspace.messageChartPointsThinnedForBounded": "· puntos de la carta adelgazados para la visualización limitada",
+        "ui.observationResearch.messageRecordedLocationsRequired": "lugares registrados necesarios",
+        "ui.observationResearch.messageMissingLocationsRemainExplicit": "Los lugares desaparecidos siguen siendo explícitos",
+        "ui.observationResearch.messageEverySelectedCategoryRequired": "· todas las categorías seleccionadas requeridas",
+        "ui.organizationHosting.messageRailwayHandlesSignInBillingSetupAndCharge": "El ferrocarril maneja la entrada, la configuración de la facturación y la aprobación de la carga en las propias páginas del ferrocarril. AeroScience nunca pide detalles de pago.",
+        "ui.organizationHosting.messageYourProviderHandlesItsOwnAccountAnd": "Su proveedor maneja su propia cuenta y aprobación de cargos.",
+        "ui.organizationLiveUi.messageFeetMSL": "pies MSL",
+        "ui.organizationLiveUi.messageKnotsIAS": "nudos IAS",
+        "ui.organizationLiveUi.messageDegreesTrue": "grados verdaderos",
+        "ui.organizationLiveUi.messageSignInOrTryAgain": "Inicie sesión o vuelva a intentarlo.",
+        "ui.organizationMissionPreparation.messageRecordedIASMSLTelemetryNoAdditionalScientificInstruments": "Recorded IAS/MSL telemetry; no additional scientific instruments required",
+        "ui.organizationResearch.messageExclusive": "Exclusivo",
+        "ui.organizationResearch.messageMultiPilot": "Multi-piloto",
+        "ui.organizationResearch.messageReservedAssigned": "Reservado/asignado",
+        "ui.organizationResearch.messageClaimed": "Reclamado",
+        "ui.organizationResearch.messageReleased": "Liberado",
+        "ui.organizationResearch.messageReleaseOnlyThisAssignmentYourPersonalScience": "Su ciencia personal y su historial de vuelo permanecen sin cambios.",
+        "ui.organizationResearch.messageThisConfirmsParticipationOnlyItDoesNot": "Esto confirma la participación solamente; no prepara ni inicia una misión, no recopila ciencia ni sube evidencia.",
+        "ui.patterns.messageInAreaScanSegmentsTransitions": "{value1} segmentos de exploración en área / {value2} transiciones · {value3} exploración en área / {value4} distancia de transición (puede dejar el área; viabilidad de giro sin fechar) ·",
+        "ui.patterns.messageSurveyPassesTrackSpacing": "{value1} pases de encuesta · Espaciado de la vía {value2} · Envoltorio aproximado {value3} (cobertura del sensor sin fechar) ·",
+        "ui.patterns.messageExactSameLinePassesPilotManagedTurnaround": "{value1} pases exactos de la misma línea · distancia/tiempo desconocido gestionado por piloto ·",
+        "ui.patterns.messageOrbitExportUsesA5PointToPointApproximation": "La exportación de órbitas utiliza una aproximación de 5° punto a punto; no se reclama apoyo orbital nativo de EFB.",
+        "ui.payloadSettings.messageCustomized": "Personalizado",
+        "ui.payloadSettings.messageGenericModel": "Modelo genérico",
+        "ui.payloadSettings.messageDocumentedReference": "Referencia documentada",
+        "ui.personalResearchFlight.messageSavedTestCard": "Tarjeta de prueba guardada",
+        "ui.personalResearchFlight.messagePersonalTestCard": "Tarjeta de prueba personal",
+        "ui.personalResearchFlight.messageAttemptStillRecording": "Intento de grabación",
+        "ui.personalResearchFlight.messageExplicitAttemptBoundaries": "Límites de intento explícito",
+        "ui.personalResearchFlight.messageReviewMultiPointFlightVerifiesOriginalsAndThe": "Revisión Multi-Point Flight verifica originales y el procedimiento completo.",
+        "ui.personalResearchFlight.messageInspectCustomTestEvidenceVerifiesThisOriginal": "Inspeccione Prueba personalizada La evidencia verifica este intervalo original.",
+        "ui.personalResearchReview.messageMatchesSavedEvidence": "Coincidencias con pruebas guardadas",
+        "ui.personalResearchReview.messageEvidenceMismatch": "Desajuste de pruebas",
+        "ui.personalResearchReview.messageRetainedSampleAndPlanHashesMatchThe": "Muestra retenida y hashes plan coinciden con el resultado guardado.",
+        "ui.personalResearchReview.messageEvidenceIsMissingOrChangedTheSaved": "Faltan pruebas o se han cambiado. El resultado guardado es histórico y no ha sido reescrito.",
+        "ui.personalResearchReview.messageNoRetainedTelemetry": "No se retiene la telemetría",
+        "ui.personalResearchReview.messageOnlyTheFirst20IssuesAre": "Sólo se enumeran los primeros 20 números.",
+        "ui.personalResearch.messageRecordedSimulatorTelemetry": "Telemetría de simulador grabado",
+        "ui.personalResearch.messageSyntheticDemoTelemetryNotAnInstalledMSFSTest": "Telemetría sintética/demo; no es un ensayo MSFS instalado",
+        "ui.personalResearch.messageSourceUnavailableNoTelemetrySourceTypeInferred": "Fuente no disponible; no se infiere ningún tipo de fuente de telemetría",
+        "ui.preparationSummary.messageReusedLocally": "· Reutilizado localmente",
+        "ui.programWorkflowUi.messageEarlierPublication": "(publicación anterior)",
+        "ui.programWorkflowUi.messageProgramOnAdministrativeHold": "Programa de retención administrativa",
+        "ui.programWorkflowUi.messagePhaseGatesEnabledForNewAssignmentsClaims": "Puertas de fase habilitadas para nuevas asignaciones/reclamaciones",
+        "ui.programWorkflowUi.messageOrdinaryResearchNoPhaseGatesRequired": "Investigación ordinaria: no se requieren puertas de fase",
+        "ui.programWorkflowUi.messageEntireCard": "tarjeta completa",
+        "ui.programWorkflowUi.messageAuthorizedPartialContribution": "Contribución parcial autorizada",
+        "ui.programWorkflowUi.messageOriginalReviewerApproval": "Aprobación original del revisor",
+        "ui.programWorkflowUi.messageExactPhasePurpose": "propósito de la fase exacta",
+        "ui.programWorkflowUi.messageCampaignFulfillment": "realización de la campaña",
+        "ui.programWorkflowUi.messageYourWork": "(su trabajo)",
+        "ui.receivedEvidenceUi.messageResearchDefinition": "Definición de investigación",
+        "ui.receivedEvidenceUi.messageAttempta4474be8": "· Intento {value1}",
+        "ui.remoteScience.messageMapMemoryBoundReachedFilterBy": "Mapa de memoria limitada alcanzado; filtrar por instrumento o navegar por adquisiciones individuales.",
+        "ui.remoteScience.messageHistoricalValidSampleCountNotIndexed": "Conteo de muestras válidas históricas no indexadas",
+        "ui.remoteScience.messageValidSamplePositions": "{value1} posiciones válidas de la muestra",
+        "ui.remoteScience.messageValidRangeToValid": "· Variante válido {value1} a {value2} · {value3} válida / {value4} muestras",
+        "ui.researchTemplates.messageNotSupplied": "No se suministra",
+        "ui.researchTemplates.messageAttributionNotSupplied": "Atribución no suministrada",
+        "ui.research.messageLocationUnavailableNoPositionWasInvented": "Ubicación no disponible; no se inventó ninguna posición",
+        "ui.research.messageRecordedLocationAttached": "Lugar registrado adjunto",
+        "ui.research.messageNoReferenceSelected": "No hay referencia seleccionada",
+        "ui.research.messageCustomModeledGeometry": "Geometría modelada personalizada",
+        "ui.research.messageSelectedReferenceGeometry": "Geometría de referencia seleccionada",
+        "ui.research.messageNotSuppliedNoAccuracyCertificationIsImplied": "No se suministra; no se implica ninguna certificación de precisión.",
+        "ui.research.messageNoneSelected": "Ninguno seleccionado",
+        "ui.research.messageSupplyDuration": "Duración de la oferta",
+        "ui.research.messageGiB": "{value1} GiB",
+        "ui.research.messageCAPACITYWARNING": "· ADVERTENCIA DE CAPACIDAD",
+        "ui.research.messageSavedProducts": "Productos guardados",
+        "ui.research.messageMeasurementValues": "valores de medición",
+        "ui.research.messageNone": "Ninguno",
+        "ui.research.messageCustomRoute": "Ruta personalizada",
+        "ui.research.messageEndOfRoute": "Fin de la ruta",
+        "ui.research.messageUnknownEndTime": "hora de finalización desconocida",
+        "ui.research.messageUnknownEnd": "fin desconocido",
+        "ui.research.messageDurationUnknown": "duración desconocida",
+        "ui.research.messageRecordingInterrupted": "· grabación interrumpida",
+        "ui.research.messageUnavailableCleared": "No disponible / limpiado",
+        "ui.research.messageDisplayReduced": "(reducción de la visualización)",
+        "ui.routeExport.messageOrbitSUseA5PointToPointApproximation": "{value1} órbita(s) utilizar una aproximación de 5° punto a punto; una revolución normalmente tiene 73 puntos. Esto no es un comando nativo de la EFB órbita. Compruebe los límites de la ruta del objetivo.",
+        "ui.routeExport.messageFirstEnRouteWaypoint": "Primer punto de ruta en ruta",
+        "ui.routeExport.messageLastEnRouteWaypoint": "Último punto de ruta en ruta",
+        "ui.scienceAnalysis.messageSourceProviderUnavailable": "Fuente no disponible",
+        "ui.scienceAnalysis.messageVerticalReferenceUnavailable": "Referencia vertical no disponible",
+        "ui.scienceCompare.messageShared": "Compartido",
+        "ui.scienceCompare.messageSavedQualityUnavailable": "Calidad guardada no disponible",
+        "ui.scienceDisplay.messageFtMSL": "ft MSL",
+        "ui.scienceJourney.messageUnavailableCheckTheConnectionSessionOr": "No disponible: comprobar la conexión, sesión o almacenamiento",
+        "ui.scienceJourney.messageLastCheckedCount": "· último recuento controlado",
+        "ui.scienceJourney.messageLastCheckedCountConnectionIsStale": "Último recuento controlado; la conexión está rancio.",
+        "ui.scienceJourney.messageOnboardAtmosphericObservationsNeedNoNASADownload": "Las observaciones atmosféricas a bordo no necesitan descargar, organizar o tener una cuenta en la nube de la NASA.",
+        "ui.scienceJourney.messageReviewTheSavedInstrumentAndSourceRequirements": "Revise los requisitos de fuente y de instrumento guardados.",
+        "ui.scienceMapView.messageRecordedValues": "valores registrados",
+        "ui.scienceMapView.messageOverviewModeNativeDetailShowsOneSaved": "Modo resumen: el detalle nativo muestra una adquisición guardada por instrumento; inspeccione cualquier otro registro abajo.",
+        "ui.scienceMapView.messageEnvironmentalValues": "valores ambientales",
+        "ui.scienceMapView.messageTheVisible": "visible",
+        "ui.scienceMapView.messageTheSelected": "el seleccionado",
+        "ui.scientificContext.messageOrderedSequence": "Ordenado secuencia",
+        "ui.scientificContext.messageIndependentPoints": "Puntos independientes",
+        "ui.scientificContext.messageFlightRegimeValidation": "Validación del régimen de vuelo",
+        "ui.scientificContext.messageNoMaximumSourceAgeIsSpecifiedBy": "Esta tarjeta no especifica ninguna edad máxima de origen.",
+        "ui.scientificContext.messageMaximumSourceAgeDays": "Edad máxima de la fuente: {value1} días.",
+        "ui.scientificContext.messageWithEverySelectedCategoryRepresented": "con cada categoría seleccionada representada",
+        "ui.scientificContext.messageValidRecordedPositionRequired": "; se requiere una posición registrada válida",
+        "ui.scientificContext.messageMissingPositionsStayUnavailable": "; las posiciones perdidas no están disponibles",
+        "ui.scientificContext.messageNoneRequired": "No se requiere",
+        "ui.scientificContext.messageDifferent": "Diferentes {value1}.",
+        "ui.scientificLibrary.messageNewestSourceObservationc8d6cfa6": "Observación de la fuente más reciente {value1}",
+        "ui.scientificLibrary.messageOriginalObservationDatesUnknownComposite": "Fechas de observación originales desconocidas / compuestas",
+        "ui.scientificLibrary.messageExcludedOriginalsRetained": "Excluidos (originales retenidos)",
+        "ui.scientificLibrary.messageEligibleSubjectToCoverageAndQA": "Subsiguiente, sujeto a cobertura y QA",
+        "ui.scientificSources.messageDisabledLocalDatasetsRemainAvailable": "Desactivado (siguen disponibles conjuntos de datos locales)",
+        "ui.scientificSources.messageMissionAreaSuitabilityUseViewCoverageOrCurrent": "Adecuación de la misión-área: uso Ver Cobertura o preparación actual del planificador",
+        "ui.sensorOperatingStatus.messageSavedProducts": "Productos guardados",
+        "ui.sensorOperatingStatus.messageVersion": "· versión {value1}",
+        "ui.sensorOperatingStatus.messageLastKnown": "Última vez que se conoce —",
+        "ui.sensorOperatingStatus.messageCurrentScienceSession": "· Sesión actual de ciencias",
+        "ui.sensorOperatingStatus.messageMissingStaleOrFromBeforeACollection": "falta, rancio o de antes de un cambio de colección",
+        "ui.sensorOperatingStatus.messageNotCurrent": "no actual",
+        "ui.sensorOperatingStatus.messageNoHardwareProfile": "sin perfil de hardware",
+        "ui.sensorOperatingStatus.messageNoDefinition": "sin definición",
+        "ui.sensorOperatingStatus.messageNotSupplied": "no se suministra",
+        "ui.sensorPlanning.messageScanTransitionSegmentsMinAt": "{value1} segmentos de exploración/transición · {value2} · {value3} min a velocidad de tierra indicada",
+        "ui.sensorPlanning.messageChooseAPatternCenterForRouteEstimates": "Elija un centro de patrón para estimar la ruta.",
+        "ui.sensorPlanning.messageFrameIntervalS": "· Intervalo del marco ≤{value1} s",
+        "ui.sensorPlanning.messageIdealModeledDensityPointsMNot": " · Ideal modeled density {value1} points/m² (not recorded returns)",
+        "ui.sourceDeletion.messageDatabaseBackupCleanupIsAlsoIncomplete": "; la limpieza de la base de datos/de respaldo también está incompleta",
+        "ui.storageManagement.messageNoCap": "Sin tapa",
+        "ui.submissionBuilder.messageClaimedResearchCard": "Tarjeta de investigación reclamada",
+        "ui.submissionReview.messageVerifiedNow": "Verificado ahora",
+        "ui.submissionReview.messagePreviouslyCheckedNotCurrentlyVerified": "Verificados previamente / No actualmente verificados",
+        "ui.tfrLayers.messageSavedGeometry": "Geometría guardada",
+        "ui.tfrLayers.messageWholeMissionUTCIntervalTo": "Intervalo UTC completo de la misión {value1} a {value2}.",
+        "ui.tfrLayers.messageNoComparableRealWorldIntervalAssessed": "No se evaluó ningún intervalo comparable en el mundo real.",
+        "ui.tfrLayers.messageYourSavedGeographyTouchesAPublishedBoundary": "Su geografía guardada toca un límite publicado; inspeccione la hora, altitud y evidencia perdida comprobada.",
+        "ui.tfrLayers.messageTheAvailableEvidenceCannotEstablishAComplete": "Las pruebas disponibles no pueden establecer una evaluación completa de las restricciones, incluso cuando algunas dimensiones controladas no se superponen.",
+        "ui.tfrLayers.messageRefreshDidNotVerifyCurrentData": "Refresh no verificó los datos actuales.",
+        "ui.tfrLayers.messageNoRecordedInventoryRefreshError": "No hay error de actualización de inventario registrado.",
+        "ui.tfrLayers.messageSelected": "seleccionado ·",
+        "ui.transferProgress.messageCalculatingNotTransferring": "Cálculo/no transferencia",
+        "ui.transferProgress.messageCurrentFile": "· archivo actual {value1}",
+        "ui.transferProgress.messageCombinedSpeedNotEstablished": "Velocidad combinada no establecida",
+        "ui.organizationNotifications.messageExternalConsentGranted": "Consentimiento externo concedido",
+        "ui.organizationNotifications.messageExternalConsentOFF": "Consentimiento externo OFF",
+        "ui.organizationOpportunities.messageIssuedPublication": "· Publicación {value1}",
+        "ui.organizationOpportunities.messageVolunteersWelcome": "Voluntarios bienvenidos",
+        "ui.organizationOpportunities.messageManagerAssignmentOnly": "Sólo asignación del gerente",
+        "ui.organizationReviews.messageNoSubmittedClientEvaluation": "No se ha presentado una evaluación de los clientes",
+        "ui.organizationReviews.messageSupplemental": "Suplemento",
+        "ui.organizationReviews.messageOriginal": "Original",
+        "ui.organization.messageSavedResearchApproach": "Enfoque de investigación ahorrada",
+        "ui.organization.messageRetainedPublishedRevision": "· Retenido la revisión publicada {value1}",
+        "ui.researchTemplateUi.messageNotRequired": "No se requiere",
+        "ui.researchTemplateUi.messagePublishedEditToCreateANew": "Publicado — editar para crear un nuevo borrador",
+        "ui.researchTemplateUi.messageOrganizationalDraft": "Proyecto de organización",
+        "ui.researchTemplateUi.messageCurrentDraft": "Proyecto actual",
+        "ui.researchTemplateUi.messageSupersededDraftOrPolicy": "Proyecto o política de sustitución",
+        "ui.researchTemplateUi.messageNotRequiredBySelectedPolicy": "No se requiere por la política seleccionada",
+        "mission.alreadyRecordingError": "Ya se está grabando una misión. Este aviso no puede iniciar otro vuelo.",
+        "consent.permissionChangedError": "Un permiso ha cambiado durante el guardado. Revisa los ajustes actuales y vuelve a intentarlo.",
+        "organization.waiverPilotError": "Una exención de requisitos no puede añadir un piloto. Borra el crédito parcial de contribución.",
+        "planning.polygonCoordinatesError": "Un polígono necesita al menos tres pares de coordenadas válidos.",
+        "cards.anyConditionFullHold": "O: una condición seleccionada durante todo el intervalo de mantenimiento",
+        "windows.error.exactConfirmationPhrase": "Escribe exactamente la frase de confirmación que se muestra para este archivo.",
+        "windows.error.recordingStillActive": "Un registro sigue activo; no se han despejado los datos.",
+        "windows.error.storageBeforeDeletion": "Inicie el acompañante y vuelva a conectar su almacenamiento configurado antes de revisar la eliminación científica.",
+        "windows.error.resumeDeletion": "El compañero se detuvo; reanudar la eliminación revisada después de reiniciar.",
+        "windows.error.operationRunning": "Se está ejecutando otra operación de configuración/tormenta.",
+        "windows.error.stoppedFolder": "El compañero se detiene; no se abrió ninguna carpeta.",
+        "windows.error.sourceStorageStopped": "El motor local se detiene; el almacenamiento de origen no ha sido leído. Inicielo o revise Configuración de almacenamiento. Los datos existentes no fueron reemplazados.",
+        "windows.error.startCompanion": "Primero empieza con el compañero.",
+        "windows.error.databaseFilename": "Elige una carpeta de base de datos con Examinar; el nombre del archivo debe seguir siendo missions.db.",
+        "windows.error.insufficientSpace": "No hay suficiente espacio libre en una unidad de almacenamiento seleccionada.",
+        "windows.error.closeSimulator": "Cierre MSFS antes de instalar la barra de herramientas, o seleccione Saltar por Ahora.",
+        "windows.error.communityFolder": "Elija una carpeta Comunidad existente o elija Saltar por Ahora.",
+        "windows.error.folderUnavailable": "La unidad/carpeta seleccionada no está disponible. Conéctela de nuevo; no se creó ningún reemplazo.",
+        "windows.error.openVault": "Windows no pudo abrir la bóveda de credencial de AeroScience. Reconéctese en este PC.",
+        "windows.error.invalidCredential": "La credencial de AeroScience guardada no es válida; reconectar.",
+        "windows.error.credentialBounds": "La credenciales está fuera de los límites de la bóveda..",
+        "windows.error.saveVault": "Windows no pudo guardar el token de AeroScience. No se utilizó ningún texto de copia de seguridad.",
+        "windows.error.removeCredential": "Windows no pudo eliminar la credencial de AeroScience. Utilice el Administrador de credenciales de Windows para revisarlo.",
+        "windows.error.unsupportedOrganizationCredential": "Credencial de organización no compatible.",
+        "windows.error.unsupportedOwnerKey": "Clave de titularidad no compatible."
       }
     },
     "fr-FR": {
-      "version": 22,
+      "version": 23,
       "locale": "fr-FR",
-      "sourceHash": "c871f36c92c40f3e195f35c762e9b9d6d415c522c475027296fb3dd87dba839c",
+      "sourceHash": "2e497b5e380eefe0acc09c924121b57ad145e56c8e85d78639b27b338adbc3dc",
       "pendingEnglishFallbackKeys": [
         "contextHelp.coverage.body",
         "contextHelp.lidar.body",
@@ -44516,6 +46587,7 @@ export const localeData = {
         "ui.emitLibrary.messageNativec13290de",
         "ui.emitLibrary.messageReflectance",
         "ui.experimentalSensor.messageGain",
+        "ui.experimentalSensor.messageSyntheticDemoOriginalInputsNotInstalledMSFS",
         "ui.flightTestProcedure.messageIASToleranceKnots",
         "ui.hyperspectralImport.message1ChooseFiles2Verify",
         "ui.hyperspectralImport.messageChooseElevationGeoTIFF",
@@ -44531,12 +46603,14 @@ export const localeData = {
         "ui.map.messageNoResultsTryAnICAOIATACodeAirport",
         "ui.missionIntelligence.messageAutomation",
         "ui.missionIntelligence.messageFlight",
+        "ui.missionIntelligence.messageInapplicable",
         "ui.missionIntelligence.messageScience",
         "ui.missionIntelligence.messageSession",
         "ui.missionIntelligence.messageSession8cd65dd8",
         "ui.missionOperations.messageInstrument",
         "ui.missionOperations.messageSelectedOriginalEvidence",
         "ui.missionPerformance.messageFrozen",
+        "ui.missionPerformance.messageGrade",
         "ui.missionStartAdvisory.messageAeroScienceWillAttemptToPrepareDataFor",
         "ui.missionStartAdvisory.messageEntireMissionReadyPlannedInstrumentRegionUnits",
         "ui.missionStartAdvisory.messageReadinessCheckedPreparationCanChangeConfirmation",
@@ -44562,6 +46636,7 @@ export const localeData = {
         "ui.onlineAccess.messageYourExistingDownloadLimitsStorageProtectionsBackground",
         "ui.organization.messageRevisionUpdated7bcb2e67",
         "ui.organizationHosting.messagePrimaryCandidateTheFiveStageJourneyIsNot",
+        "ui.organizationLiveUi.messageKnotsIAS",
         "ui.organizationLiveUi.messageScienceCollection",
         "ui.organizationLiveUi.messageSource",
         "ui.organizationLiveUi.messageSourceOriginalUTC",
@@ -44599,6 +46674,7 @@ export const localeData = {
         "ui.research.messageDescent",
         "ui.research.messageDestination",
         "ui.research.messageFlightPlanCruisingAltitudeFtMSLRequired",
+        "ui.research.messageGiB",
         "ui.research.messageIFR",
         "ui.research.messageInstructions",
         "ui.research.messageMaximumPlannedAltitudeFtMSL",
@@ -44622,6 +46698,7 @@ export const localeData = {
         "ui.scienceAnalysis.messageRecordedStatistics",
         "ui.scienceCompare.messageAcquisition",
         "ui.scienceDisplay.messageAviation",
+        "ui.scienceDisplay.messageFtMSL",
         "ui.scienceDisplay.messageObservationUTC",
         "ui.scienceJourney.messageInstrumentSEnabled",
         "ui.scienceJourney.messageMissionPreparedOfflineConnectMSFSAnd",
@@ -44653,6 +46730,7 @@ export const localeData = {
         "ui.scientificSources.messageUSGS3DEPCopernicusGLO30",
         "ui.sensorOperatingStatus.messageCollection",
         "ui.sensorOperatingStatus.messageReferenceProfile",
+        "ui.sensorPlanning.messageIdealModeledDensityPointsMNot",
         "ui.serverOperations.messageAutomaticDeletionIsHeldUntilASeparate",
         "ui.serverOperations.messageDatabaseMiBReceivedEvidenceOfMiB",
         "ui.serverOperations.messageMiB",
@@ -44690,6 +46768,7 @@ export const localeData = {
         "windows.dataManagementForm.missionsDatasetsObservationsGeneratedProductsEstimatedManagedFileSpace",
         "windows.deletion.confirmation",
         "windows.deletion.typePhrase",
+        "windows.error.closeSimulator",
         "windows.mainForm.chooseANumericElevationDemGeotiff",
         "windows.mainForm.closeMsfsBeforeInstallingOrUpdatingAeroscienceSToolbar",
         "windows.mainForm.importSourceObservationCopyMibIntoAvailableGibOriginal",
@@ -51434,13 +53513,342 @@ export const localeData = {
         "native.phase.stale": "{status} | État périmé",
         "native.banner.recordingActive": "Enregistrement du vol : actif | Collecte scientifique : {phase}",
         "native.banner.recordingInactive": "Enregistrement du vol : inactif | Collecte scientifique : {phase}",
-        "native.banner.recordingUnknown": "Enregistrement du vol : indisponible | Collecte scientifique : {phase}"
+        "native.banner.recordingUnknown": "Enregistrement du vol : indisponible | Collecte scientifique : {phase}",
+        "updates.automaticNotifications": "Notifications automatiques de mise à jour",
+        "updates.includePrereleases": "Inclure les versions alpha et préliminaires",
+        "map.atmosphericSamples": "Points d’échantillonnage atmosphérique réels",
+        "map.sampledPathLinks": "Liaisons de trajectoire étayées par les échantillons",
+        "map.openStreetMapStreets": "OpenStreetMap / Rues",
+        "map.analysisSourceValues": "Valeurs de la grille source d’origine pour l’analyse",
+        "map.comparisonSourceValues": "Valeurs de la grille source d’origine pour la comparaison",
+        "map.scientificDifferences": "Écarts de la comparaison scientifique",
+        "map.retainedArtifact": "Artefact scientifique conservé",
+        "map.savedObservations": "Observations scientifiques enregistrées",
+        "map.verifiedRasters": "Vues raster scientifiques vérifiées",
+        "map.demElevation": "Élévation du terrain dérivée du DEM",
+        "map.inspectedSourceValues": "Valeurs de la source examinées",
+        "map.inspectedSourceLimit": "Cellules de la grille source d’origine contrôlées dans la fenêtre sélectionnée ; ce ne sont ni des observations de vol ni une couverture du capteur.",
+        "map.originalFootprintLimit": "Emprise d’origine ; ce n’est pas une couverture dont la qualité a été vérifiée",
+        "map.pilotRecordedPoints": "Observations du pilote — points enregistrés uniquement",
+        "map.flightPathContext": "Trajectoire du vol à titre de contexte — aucune couverture scientifique",
+        "route.simbriefCoordinates": "Degrés/minutes/secondes selon la documentation de SimBrief",
+        "map.faaTfrUnknown": "Limites TFR de la FAA · activation inconnue",
+        "preparation.liveTelemetryRequirement": "Télémétrie du simulateur en direct requise ; aucune préparation à distance",
+        "map.qualifiedSamples": "{measurement} — échantillons réels répondant aux critères",
+        "ui.analysis.messageRecordedPathObservedWithinTolerance": "Voie enregistrée observée dans la tolérance",
+        "ui.analysis.messageCompletionNotEstablished": "Fin de la procédure non établie",
+        "ui.analysis.messageMaxDeviation": "· écart maximal {value1}",
+        "ui.app.messageNoEnabledInstrumentsInArchivedConfiguration": "Aucun instrument activé dans la configuration archivée",
+        "ui.app.messageMissingUnknown": "Manque/inconnu",
+        "ui.applicationUpdates.messageNotCheckedYet": "Non encore vérifié",
+        "ui.applicationUpdates.messageNever": "Jamais",
+        "ui.atmosphericResearch.messageSampledLocationsDoNotEstablishTheConditions": "Les endroits échantillonnés n'établissent pas les conditions entre eux ou dans les régions avoisinantes.",
+        "ui.atmosphericResearch.messageBandValuesBelowShowWhereReadingsWere": "Les valeurs de bande ci-dessous montrent où les relevés ont été effectivement conservés; elles n'établissent pas de conditions entre les altitudes échantillonnées.",
+        "ui.atmosphericResearch.messageFeetMSL8667c4ea": "{value1}–{value2} pieds MSL",
+        "ui.atmosphericResearch.messageRecordedSimulatorObservations": "Observations enregistrées sur simulateur",
+        "ui.atmosphericResearch.messageSyntheticDemoObservationsNotAnInstalledMSFS": "Observations synthétiques/démotiques — non pas un test MSFS installé",
+        "ui.atmosphericResearch.messageUnknownNoSimulatorProvenanceInferred": "Inconnu; aucune source de simulateur n'a été déduite",
+        "ui.atmosphericResearch.messageSampledDistance": "Distance échantillonnée",
+        "ui.atmosphericResearch.messagePolarSamplesOutsideTheMercatorMapRemain": "Des échantillons polaires en dehors de la carte Mercator restent disponibles aux coordonnées exactes dans le tableau.",
+        "ui.aviationMapLayers.messageSource": "· source {value1} {value2} {value3}",
+        "ui.aviationMapLayers.messageBaseVolume": "Volume de base",
+        "ui.aviationMapLayers.messageAddVolume": "Ajouter le volume",
+        "ui.aviationMapLayers.messageSubtractVolume": "Volume de sous-traction",
+        "ui.aviationMapLayers.messageBoundingCandidatesNotActiveRestrictions": "{value1} candidats limitatifs (non-restrictions actives)",
+        "ui.aviationMapLayers.messageRetainedReferencesInViewport": "{value1} références conservées en vueport",
+        "ui.aviationReference.messageOn": "Allez.",
+        "ui.aviationReference.messageOff": "Dégage.",
+        "ui.aviationReference.messageUpdatesRefreshTheHostInventoryAndPublished": "Mises à jour rafraîchir l'inventaire hôte et la géométrie publiée; l'activation exacte et l'exhaustivité restent non vérifiées.",
+        "ui.aviationReference.messageOriginalChartTransferSizeUnknownUntilPublished": "Taille du transfert de graphique original : Inconnue jusqu'à publication. L'ouverture de ce catalogue ne télécharge pas les originaux.",
+        "ui.calibrationSettings.messageSeparateUserAdjustedScalarChannelOriginalValuesRemain": "Canal scalaire séparé ajusté par l'utilisateur; les valeurs originales restent enregistrées.",
+        "ui.calibrationSettings.messageMetadataOnlyNoNumericAdjustment": "Métadonnées seulement; aucun ajustement numérique.",
+        "ui.campaignCoverageUi.messageEarlierCardPublication": "· publication antérieure de la carte",
+        "ui.campaignCoverageUi.messageUsablePilotDocumentationNotSensorQA": "Documentation utile du pilote; pas de capteur QA",
+        "ui.campaignCoverageUi.messageValidSupportedOriginalReadings": "Lectures originales compatibles",
+        "ui.campaignCoverageUi.messageCurrentGoal": "Objectif actuel",
+        "ui.campaignCoverageUi.messageHistoricGoalPreserved": "Objectif historique conservé",
+        "ui.campaignCoverageUi.messageCountsMet": "Nombres atteints",
+        "ui.campaignCoverageUi.messageMoreSamplingNeeded": "besoin d'un échantillonnage plus important",
+        "ui.campaignProgressUi.messageYourContribution": "(votre contribution)",
+        "ui.campaignProgressUi.messageNewClaimsUnavailable": "· Nouvelles demandes non disponibles",
+        "ui.campaignProgressUi.messageCurrent": "(en cours)",
+        "ui.collectedScienceDeletion.messageDatabaseBackupCleanupIsIncomplete": "; le nettoyage de la base de données/backup est incomplet",
+        "ui.collectionPlanner.messageSession": "· session {value1}",
+        "ui.collectionPlanner.messageBoundaryPauseResumeEnabled": "pause/résumé de la limite activée",
+        "ui.collectionPlanner.messageBoundaryAutomationOff": "automatisation des frontières",
+        "ui.collectionPlanner.messageAutomaticCollectionIsConfiguredInThisDraft": "La collection automatique est configurée dans ce brouillon",
+        "ui.collectionPlanner.messageAutomaticCollectionIsOff": "La collecte automatique est désactivée",
+        "ui.collectionPlanner.messagePausesOutsideTheSelectedBoundaryUnionReEntry": "Pauses en dehors de l'union de limites sélectionnée; la rentrée peut reprendre la même session.",
+        "ui.collectionPlanner.messageBoundaryPauseResumeIsOff": "La pause/le souvenir de la frontière est éteinte.",
+        "ui.collectionPlanner.messageNoStartRuleUseManualStartOr": "Aucune règle de démarrage : utilisez le manuel Démarrer ou en configurer une.",
+        "ui.collectionPlanner.messageAReferencedGeographicTargetIsMissing": "Une cible géographique référencée est manquante.",
+        "ui.collectionPlanner.messageNoBoundaryRegionsSelected": "Aucune région limitrophe n'a été sélectionnée.",
+        "ui.collectionPlanner.messageRulesReviewedForThisDraft": "Les règles examinées pour ce projet.",
+        "ui.collectionPlanner.messageRulesAreNotYetReviewedForThe": "Les règles ne sont pas encore revues pour le projet actuel.",
+        "ui.customFlightTest.messageAND": "PAYS",
+        "ui.downloadActivity.messageSourceNotSelected": "Source non sélectionnée",
+        "ui.downloadActivity.messageSizeUnknown": "Taille inconnue",
+        "ui.downloadActivity.messageRateNotEstablished": "Taux non fixé",
+        "ui.downloadActivity.messageUnknownComposite": "Inconnu / composite",
+        "ui.downloadWorkspace.messageNotEstablished": "Non établie",
+        "ui.downloadWorkspace.messageDownloadSizeUnknown": "Télécharger la taille inconnue",
+        "ui.emitLibrary.messageUnlocated": "Non localisé",
+        "ui.experimentalSensor.messageSyntheticDemoOriginalInputsNotInstalledMSFS": "Synthetic/demo original inputs — not installed MSFS acceptance",
+        "ui.experimentalSensor.messageRecordedSimulatorInputsFictionalModelDerivedOutputs": "Entrées enregistrées de simulateur — sorties dérivées de modèles fictifs",
+        "ui.experimentalSensor.messageInputTelemetrySourceUnavailableNoSimulator": "Source de télémétrie d'entrée non disponible — aucune origine du simulateur inféré",
+        "ui.flightTestProcedure.messageOR": "OU",
+        "ui.hyperspectralImport.messageSelectTheMatchingBinaryBelow": "Sélectionnez le binaire correspondant ci-dessous",
+        "ui.hyperspectralImport.messageNm": "· {value1}–{value2} nm",
+        "ui.hyperspectralImport.messageOriginalScientificUnitsNeeded": "Unités scientifiques originales nécessaires",
+        "ui.hyperspectralImport.messageUnknownNotGuessed": "Inconnu; non deviné",
+        "ui.hyperspectralImport.messageNotReported": "Non signalé",
+        "ui.libraryDownload.messageCredentialSaved": "Crédence sauvée",
+        "ui.libraryDownload.messageNotConnected": "Non connecté",
+        "ui.libraryDownload.messageCached": "Cuché",
+        "ui.libraryDownload.messageRetrieved": "Reprise",
+        "ui.libraryDownload.messageSearchBoundsEncloseTheSelectedShapeSome": "Les limites de recherche contiennent la forme sélectionnée; certains candidats se trouvent en dehors de celle-ci.",
+        "ui.libraryDownload.messageRetainedCandidate": "Candidat retenu",
+        "ui.libraryDownload.messagePolygonClipping": "· coupe en polygone",
+        "ui.libraryDownload.messageAuthoritativeRegion": "· région faisant autorité",
+        "ui.libraryDownload.messageTheProviderSearchUsesEnclosingBounds": "La recherche du fournisseur utilise des limites encaissées; les fenêtres de bord peuvent inclure des pixels en dehors de la forme sélectionnée.",
+        "ui.libraryDownload.messageMatchingCatalogScenesFound": "Scènes de catalogue correspondantes trouvées",
+        "ui.libraryDownload.messageNoMatchingScenesInThisSearchedScope": "Aucune scène correspondante dans cette recherche",
+        "ui.libraryDownload.messageProviderUnavailableAvailabilityWasNotEstablished": "Fournisseur indisponible — la disponibilité n'a pas été établie",
+        "ui.libraryDownload.messageCachedNotANewLive": "· mis en cache, pas une nouvelle recherche en direct",
+        "ui.libraryDownload.messageProviderOrderingNotEstablished": "Commande par un fournisseur non établie.",
+        "ui.libraryDownload.messageNotApplicable": "Sans objet",
+        "ui.libraryDownload.messageThisIsAProviderFailureNotEvidence": "Il s'agit d'une défaillance du fournisseur, et non d'une preuve qu'il n'existe aucune donnée.",
+        "ui.libraryDownload.messageTryEarlierYearsAdjustTheCloudFilter": "Essayez les années précédentes, ajustez le filtre cloud ou choisissez explicitement une zone prise en charge à proximité. Aucun filtre ou produit n'est élargi automatiquement.",
+        "ui.libraryDownload.messageUnknownUntilOriginalFileVerification": "Inconnue jusqu'à la vérification du fichier original",
+        "ui.map.messageOnlineBasemapWithBundledGeographicReference": "Carte de base en ligne avec référence géographique groupée",
+        "ui.map.messageOfflineNaturalEarthGeography": "Géographie de la Terre naturelle hors ligne",
+        "ui.map.messageNoLocationSelectedRegionalDefaultUSA": "Aucun emplacement sélectionné: régional par défaut USA.",
+        "ui.map.messageChooseAddWaypointOrDrawSurveyArea": "Choisissez Ajouter Waypoint ou Dessiner la zone de sondage à modifier; panoramique normalement autrement.",
+        "ui.missionIntelligence.messageObjectiveNotDeclared": "Objectif non déclaré",
+        "ui.missionIntelligence.messageGeneralResearch": "Recherche générale",
+        "ui.missionIntelligence.messageAircraftUnknown": "Aéronef inconnu",
+        "ui.missionIntelligence.messageSession9e78f797": "· Séance {value1}",
+        "ui.missionIntelligence.messagePilotOverrideRearmRequired": "· Surpassement du pilote — réarmement requis",
+        "ui.missionIntelligence.messageContinuityHold": "· maintien de la continuité",
+        "ui.missionIntelligence.messageStorageHoldResolveStorageBefore": "· cale de stockage; résoudre le stockage avant réarmement",
+        "ui.missionIntelligence.messageNotEnded": "non terminé",
+        "ui.missionIntelligence.messageNotYetAssessed": "Non encore évalué",
+        "ui.missionIntelligence.messagePolicyGrade": "Politique de niveau {value1}",
+        "ui.missionIntelligence.messageNoFinalLetterGrade": "Pas de note finale",
+        "ui.missionIntelligence.messageStaleEvidenceCutoffNotCurrent": "· Limite de preuve de l'état; pas de performance actuelle en temps réel.",
+        "ui.missionIntelligence.messageInapplicable": "Inapplicable",
+        "ui.missionIntelligence.messageNotSpecified": "non spécifié",
+        "ui.missionIntelligence.messageEvidencePending": "Preuves en attente",
+        "ui.missionIntelligence.messageAreaMembershipUnknown": "Membres de la zone inconnue",
+        "ui.missionIntelligence.messageInsideResearchArea": "Domaine de recherche",
+        "ui.missionIntelligence.messageOutsideResearchArea": "Domaine de recherche extérieur",
+        "ui.missionIntelligence.messageScienceSessionOrCollectionAuthorityChanged": "La session scientifique ou l'autorité de recouvrement a changé.",
+        "ui.missionOperations.messageActiveForLocalMonitoring": "Active pour la surveillance locale",
+        "ui.missionOperations.messageRecordedPointOnlyNoFootprintInferred": "Point enregistré seulement; aucune empreinte n'a été déduite.",
+        "ui.missionOperations.messageOriginalLocationSeparateFromScientificSampling": "Emplacement original, séparé de l'échantillonnage scientifique.",
+        "ui.missionPerformance.messageGrade": "Grade {value1}",
+        "ui.missionPerformance.messageUseTheHostSRecalculationActionIfA": "Utilisez l'hôte, l'action de recalcul si un emploi antérieur a échoué.",
+        "ui.missionPerformance.messageProvisionalWithUnassessedWorkRetained": "Travaux provisoires, sans évaluation, conservés.",
+        "ui.missionPerformance.messageOverallFlightObligationsNeverAveragedFromSession": "Obligations globales en matière de vol; jamais moyen par rapport aux notes de session.",
+        "ui.missionStartAdvisory.messageStaleAssessment": "Évaluation des stocks",
+        "ui.missionStartAdvisory.messageAffectedInstrument": "— instrument affecté",
+        "ui.missionTimeline.messageLiveProvisionalRecentEvidence": "En direct — preuves récentes provisoires",
+        "ui.missionTimeline.messageRecordedEvidence": "Preuves enregistrées",
+        "ui.missionTimeline.messageCollectedSciencePermanentlyDeleted": "· La science collectée est définitivement supprimée",
+        "ui.missionWorkspace.messageRecordingGapBeforeThisSample": "· enregistrement de l'écart avant cet échantillon",
+        "ui.missionWorkspace.messageNotArchived": "non archivé",
+        "ui.missionWorkspace.messageUnknownDate": "date inconnue",
+        "ui.missionWorkspace.messageUnavailableNoSurveyPolygon": "non disponible (pas de polygone d'enquête)",
+        "ui.missionWorkspace.messageChartPointsThinnedForBounded": "· points de carte éclaircis pour l'affichage limité",
+        "ui.observationResearch.messageRecordedLocationsRequired": "lieu de résidence requis",
+        "ui.observationResearch.messageMissingLocationsRemainExplicit": "Les emplacements manquants restent explicites",
+        "ui.observationResearch.messageEverySelectedCategoryRequired": "· chaque catégorie sélectionnée doit être choisie",
+        "ui.organizationHosting.messageRailwayHandlesSignInBillingSetupAndCharge": "Le chemin de fer gère l'inscription, la facturation et l'approbation des frais sur les pages du chemin de fer. AeroScience ne demande jamais de détails de paiement.",
+        "ui.organizationHosting.messageYourProviderHandlesItsOwnAccountAnd": "Votre fournisseur gère son propre compte et facture l'approbation.",
+        "ui.organizationLiveUi.messageFeetMSL": "pieds MSL",
+        "ui.organizationLiveUi.messageKnotsIAS": "knots IAS",
+        "ui.organizationLiveUi.messageDegreesTrue": "degrés vrai",
+        "ui.organizationLiveUi.messageSignInOrTryAgain": "Connectez-vous ou essayez encore.",
+        "ui.organizationMissionPreparation.messageRecordedIASMSLTelemetryNoAdditionalScientificInstruments": "Télémétrie IAS/MSL enregistrée; aucun instrument scientifique supplémentaire n'est requis",
+        "ui.organizationResearch.messageExclusive": "Exclusivité",
+        "ui.organizationResearch.messageMultiPilot": "Multi-pilot",
+        "ui.organizationResearch.messageReservedAssigned": "Réservé / Affecté",
+        "ui.organizationResearch.messageClaimed": "Réclamation",
+        "ui.organizationResearch.messageReleased": "Libéré",
+        "ui.organizationResearch.messageReleaseOnlyThisAssignmentYourPersonalScience": "Relâchez seulement cette mission. Vos données personnelles et votre historique de vol demeurent inchangés.",
+        "ui.organizationResearch.messageThisConfirmsParticipationOnlyItDoesNot": "Cela confirme seulement la participation; il ne prépare ni ne démarre une mission, ne recueille pas de données scientifiques ou ne télécharge pas de données probantes.",
+        "ui.patterns.messageInAreaScanSegmentsTransitions": "{value1} segments de balayage dans la zone / {value2} transitions · {value3} balayage dans la zone / {value4} distance de transition (peut laisser la zone; tourner la faisabilité non validée) ·",
+        "ui.patterns.messageSurveyPassesTrackSpacing": "{value1} cartes d'accès · Espacement des voies {value2} · enveloppe approximative de l'enquête {value3} (couverture de l'insigne non validée) ·",
+        "ui.patterns.messageExactSameLinePassesPilotManagedTurnaround": "{value1} passes exactement de même ligne · distance/temps de virage géré par le pilote inconnu ·",
+        "ui.patterns.messageOrbitExportUsesA5PointToPointApproximation": "L'exportation d'orbites utilise une approximation de 5° point à point; le support d'orbite natif de la BEF n'est pas revendiqué.",
+        "ui.payloadSettings.messageCustomized": "Personnalisé",
+        "ui.payloadSettings.messageGenericModel": "Modèle générique",
+        "ui.payloadSettings.messageDocumentedReference": "Référence documentée",
+        "ui.personalResearchFlight.messageSavedTestCard": "Carte de test enregistrée",
+        "ui.personalResearchFlight.messagePersonalTestCard": "Carte d'essai personnelle",
+        "ui.personalResearchFlight.messageAttemptStillRecording": "Tentative d'enregistrement",
+        "ui.personalResearchFlight.messageExplicitAttemptBoundaries": "Limites de tentative explicites",
+        "ui.personalResearchFlight.messageReviewMultiPointFlightVerifiesOriginalsAndThe": "Examiner le vol multipoints vérifie les originaux et la procédure complète.",
+        "ui.personalResearchFlight.messageInspectCustomTestEvidenceVerifiesThisOriginal": "Inspect Custom Test Evidence vérifie cet intervalle original.",
+        "ui.personalResearchReview.messageMatchesSavedEvidence": "Correspondance des preuves enregistrées",
+        "ui.personalResearchReview.messageEvidenceMismatch": "Inconvénients de preuve",
+        "ui.personalResearchReview.messageRetainedSampleAndPlanHashesMatchThe": "Échantillon et plan de plan maintenus des hachages correspondent au résultat enregistré.",
+        "ui.personalResearchReview.messageEvidenceIsMissingOrChangedTheSaved": "Les preuves sont manquantes ou modifiées. Le résultat sauvé est historique et n'a pas été réécrit.",
+        "ui.personalResearchReview.messageNoRetainedTelemetry": "Pas de télémétrie retenue",
+        "ui.personalResearchReview.messageOnlyTheFirst20IssuesAre": "Seuls les 20 premiers numéros sont énumérés.",
+        "ui.personalResearch.messageRecordedSimulatorTelemetry": "Télémétrie enregistrée pour simulateur",
+        "ui.personalResearch.messageSyntheticDemoTelemetryNotAnInstalledMSFSTest": "Télémétrie synthétique/démo; pas un test MSFS installé",
+        "ui.personalResearch.messageSourceUnavailableNoTelemetrySourceTypeInferred": "Source non disponible; aucun type de source de télémétrie n'a été inféré",
+        "ui.preparationSummary.messageReusedLocally": "· Réutilisé localement",
+        "ui.programWorkflowUi.messageEarlierPublication": "(publication antérieure)",
+        "ui.programWorkflowUi.messageProgramOnAdministrativeHold": "Programme en attente administrative",
+        "ui.programWorkflowUi.messagePhaseGatesEnabledForNewAssignmentsClaims": "Portails de phase activés pour les nouvelles cessions/demandes",
+        "ui.programWorkflowUi.messageOrdinaryResearchNoPhaseGatesRequired": "Recherche ordinaire — pas de portes de phase requises",
+        "ui.programWorkflowUi.messageEntireCard": "carte entière",
+        "ui.programWorkflowUi.messageAuthorizedPartialContribution": "Contribution partielle autorisée",
+        "ui.programWorkflowUi.messageOriginalReviewerApproval": "approbation initiale de l'examinateur",
+        "ui.programWorkflowUi.messageExactPhasePurpose": "objectif de phase exact",
+        "ui.programWorkflowUi.messageCampaignFulfillment": "Réalisation de la campagne",
+        "ui.programWorkflowUi.messageYourWork": "(votre travail)",
+        "ui.receivedEvidenceUi.messageResearchDefinition": "Définition de la recherche",
+        "ui.receivedEvidenceUi.messageAttempta4474be8": "· Tentative {value1}",
+        "ui.remoteScience.messageMapMemoryBoundReachedFilterBy": "Carte de mémoire liée atteinte; filtrer par instrument ou parcourir la peinture individuelle.",
+        "ui.remoteScience.messageHistoricalValidSampleCountNotIndexed": "Nombre d'échantillons valides historiques non indexé",
+        "ui.remoteScience.messageValidSamplePositions": "{value1} positions d'échantillonnage valides",
+        "ui.remoteScience.messageValidRangeToValid": "· Gamme de {value1} à {value2} · {value3} valide / {value4} échantillons",
+        "ui.researchTemplates.messageNotSupplied": "Non fourni",
+        "ui.researchTemplates.messageAttributionNotSupplied": "Contribution non fournie",
+        "ui.research.messageLocationUnavailableNoPositionWasInvented": "Emplacement non disponible; aucune position n'a été inventée",
+        "ui.research.messageRecordedLocationAttached": "Lieu enregistré ci-joint",
+        "ui.research.messageNoReferenceSelected": "Aucune référence sélectionnée",
+        "ui.research.messageCustomModeledGeometry": "Géométrie modélisée personnalisée",
+        "ui.research.messageSelectedReferenceGeometry": "Géométrie de référence choisie",
+        "ui.research.messageNotSuppliedNoAccuracyCertificationIsImplied": "Non fourni; aucune certification de précision n'est implicite.",
+        "ui.research.messageNoneSelected": "Aucune sélection",
+        "ui.research.messageSupplyDuration": "Durée de l'offre",
+        "ui.research.messageGiB": "{value1} GiB",
+        "ui.research.messageCAPACITYWARNING": "· MISE EN GARDE DES CAPACITÉS",
+        "ui.research.messageSavedProducts": "produits enregistrés",
+        "ui.research.messageMeasurementValues": "valeurs mesurées",
+        "ui.research.messageNone": "Aucune",
+        "ui.research.messageCustomRoute": "Itinéraire personnalisé",
+        "ui.research.messageEndOfRoute": "Fin de l'itinéraire",
+        "ui.research.messageUnknownEndTime": "heure de fin inconnue",
+        "ui.research.messageUnknownEnd": "fin inconnue",
+        "ui.research.messageDurationUnknown": "durée inconnue",
+        "ui.research.messageRecordingInterrupted": "· enregistrement interrompu",
+        "ui.research.messageUnavailableCleared": "Indisponible / effacé",
+        "ui.research.messageDisplayReduced": "(affichage réduit)",
+        "ui.routeExport.messageOrbitSUseA5PointToPointApproximation": "{value1} orbite(s) utilise une approximation point-point de 5°; une révolution a normalement 73 points. Ce n'est pas une commande d'orbite EFB native. Vérifiez les limites de la route cible.",
+        "ui.routeExport.messageFirstEnRouteWaypoint": "Premier point de départ en route",
+        "ui.routeExport.messageLastEnRouteWaypoint": "Dernier point de départ en route",
+        "ui.scienceAnalysis.messageSourceProviderUnavailable": "Fournisseur de source non disponible",
+        "ui.scienceAnalysis.messageVerticalReferenceUnavailable": "Référence verticale non disponible",
+        "ui.scienceCompare.messageShared": "Partage",
+        "ui.scienceCompare.messageSavedQualityUnavailable": "Qualité enregistrée non disponible",
+        "ui.scienceDisplay.messageFtMSL": "ft MSL",
+        "ui.scienceJourney.messageUnavailableCheckTheConnectionSessionOr": "Indisponible — vérifier la connexion, la session ou la tenue de stockage",
+        "ui.scienceJourney.messageLastCheckedCount": "· dernier décompte vérifié",
+        "ui.scienceJourney.messageLastCheckedCountConnectionIsStale": "Dernier compte vérifié; la connexion est bloquée.",
+        "ui.scienceJourney.messageOnboardAtmosphericObservationsNeedNoNASADownload": "Les observations atmosphériques à bord n'ont pas besoin de télécharger, d'organiser ou de tenir un compte cloud de la NASA.",
+        "ui.scienceJourney.messageReviewTheSavedInstrumentAndSourceRequirements": "Examiner les exigences de l'instrument et de la source enregistrés.",
+        "ui.scienceMapView.messageRecordedValues": "valeurs enregistrées",
+        "ui.scienceMapView.messageOverviewModeNativeDetailShowsOneSaved": "Mode Aperçu : le détail natif montre une acquisition enregistrée par instrument; inspecter tout autre enregistrement ci-dessous.",
+        "ui.scienceMapView.messageEnvironmentalValues": "Valeurs environnementales",
+        "ui.scienceMapView.messageTheVisible": "visibles",
+        "ui.scienceMapView.messageTheSelected": "la sélection",
+        "ui.scientificContext.messageOrderedSequence": "Séquence ordonnée",
+        "ui.scientificContext.messageIndependentPoints": "Points indépendants",
+        "ui.scientificContext.messageFlightRegimeValidation": "Validation du régime de vol",
+        "ui.scientificContext.messageNoMaximumSourceAgeIsSpecifiedBy": "Cette carte ne précise pas l'âge maximal de la source.",
+        "ui.scientificContext.messageMaximumSourceAgeDays": "Âge maximal de la source: {value1} jours.",
+        "ui.scientificContext.messageWithEverySelectedCategoryRepresented": "chaque catégorie sélectionnée représentée",
+        "ui.scientificContext.messageValidRecordedPositionRequired": "; position enregistrée valide requise",
+        "ui.scientificContext.messageMissingPositionsStayUnavailable": "; les positions manquantes restent indisponibles",
+        "ui.scientificContext.messageNoneRequired": "Aucun n'est requis",
+        "ui.scientificContext.messageDifferent": "Différent {value1}.",
+        "ui.scientificLibrary.messageNewestSourceObservationc8d6cfa6": "Observation de la source la plus récente {value1}",
+        "ui.scientificLibrary.messageOriginalObservationDatesUnknownComposite": "Dates d'observation originales inconnues / composites",
+        "ui.scientificLibrary.messageExcludedOriginalsRetained": "Exclusion (originals conservés)",
+        "ui.scientificLibrary.messageEligibleSubjectToCoverageAndQA": "Admissibilité, sous réserve de la couverture et de l'AQ",
+        "ui.scientificSources.messageDisabledLocalDatasetsRemainAvailable": "Handicapés (des ensembles de données locaux restent disponibles)",
+        "ui.scientificSources.messageMissionAreaSuitabilityUseViewCoverageOrCurrent": "Capacité de la mission : utiliser la couverture de vision ou la disponibilité actuelle des planificateurs",
+        "ui.sensorOperatingStatus.messageSavedProducts": "Produits enregistrés",
+        "ui.sensorOperatingStatus.messageVersion": "· version {value1}",
+        "ui.sensorOperatingStatus.messageLastKnown": "Dernier connu —",
+        "ui.sensorOperatingStatus.messageCurrentScienceSession": "· Séance scientifique actuelle",
+        "ui.sensorOperatingStatus.messageMissingStaleOrFromBeforeACollection": "manquant, absent ou avant un changement de collecte",
+        "ui.sensorOperatingStatus.messageNotCurrent": "pas en cours",
+        "ui.sensorOperatingStatus.messageNoHardwareProfile": "pas de profil matériel",
+        "ui.sensorOperatingStatus.messageNoDefinition": "Pas de définition",
+        "ui.sensorOperatingStatus.messageNotSupplied": "non fournie",
+        "ui.sensorPlanning.messageScanTransitionSegmentsMinAt": "{value1} segments de balayage/transition · {value2} · {value3} min à vitesse au sol indiquée",
+        "ui.sensorPlanning.messageChooseAPatternCenterForRouteEstimates": "Choisissez un centre de configuration pour les estimations de route.",
+        "ui.sensorPlanning.messageFrameIntervalS": "· Intervalle de la trame ≤{value1} s",
+        "ui.sensorPlanning.messageIdealModeledDensityPointsMNot": " · Ideal modeled density {value1} points/m² (not recorded returns)",
+        "ui.sourceDeletion.messageDatabaseBackupCleanupIsAlsoIncomplete": "; le nettoyage de la base de données/backup est également incomplet",
+        "ui.storageManagement.messageNoCap": "Pas de bouchon",
+        "ui.submissionBuilder.messageClaimedResearchCard": "Carte de recherche réclamée",
+        "ui.submissionReview.messageVerifiedNow": "Vérifié maintenant",
+        "ui.submissionReview.messagePreviouslyCheckedNotCurrentlyVerified": "Coché précédemment / Non actuellement vérifié",
+        "ui.tfrLayers.messageSavedGeometry": "Géométrie enregistrée",
+        "ui.tfrLayers.messageWholeMissionUTCIntervalTo": "Intervalle de la mission totale de la zone de référence (UTC) {value1} à {value2}.",
+        "ui.tfrLayers.messageNoComparableRealWorldIntervalAssessed": "Aucun intervalle comparable dans le monde réel n'a été évalué.",
+        "ui.tfrLayers.messageYourSavedGeographyTouchesAPublishedBoundary": "Votre géographie sauvée touche une limite publiée; inspectez le temps, l'altitude et les preuves manquantes.",
+        "ui.tfrLayers.messageTheAvailableEvidenceCannotEstablishAComplete": "Les preuves disponibles ne peuvent établir une évaluation complète des restrictions, même lorsque certaines dimensions vérifiées ne se chevauchent pas.",
+        "ui.tfrLayers.messageRefreshDidNotVerifyCurrentData": "Refresh n'a pas vérifié les données actuelles.",
+        "ui.tfrLayers.messageNoRecordedInventoryRefreshError": "Aucune erreur de rafraîchissement de l'inventaire enregistrée.",
+        "ui.tfrLayers.messageSelected": "sélectionné ·",
+        "ui.transferProgress.messageCalculatingNotTransferring": "Calcul / non transfert",
+        "ui.transferProgress.messageCurrentFile": "· dossier actuel {value1}",
+        "ui.transferProgress.messageCombinedSpeedNotEstablished": "Vitesse combinée non établie",
+        "ui.organizationNotifications.messageExternalConsentGranted": "Consentement extérieur accordé",
+        "ui.organizationNotifications.messageExternalConsentOFF": "Consentement extérieur OFF",
+        "ui.organizationOpportunities.messageIssuedPublication": "· Publication {value1}",
+        "ui.organizationOpportunities.messageVolunteersWelcome": "Les volontaires sont les bienvenus",
+        "ui.organizationOpportunities.messageManagerAssignmentOnly": "Fonction de gestionnaire seulement",
+        "ui.organizationReviews.messageNoSubmittedClientEvaluation": "Aucune évaluation du client soumise",
+        "ui.organizationReviews.messageSupplemental": "Complémentaire",
+        "ui.organizationReviews.messageOriginal": "Original: ANGLAIS",
+        "ui.organization.messageSavedResearchApproach": "Approche de recherche sauvée",
+        "ui.organization.messageRetainedPublishedRevision": "· Révision publiée en suspens {value1}",
+        "ui.researchTemplateUi.messageNotRequired": "Pas requis",
+        "ui.researchTemplateUi.messagePublishedEditToCreateANew": "Publié — modifier pour créer un nouveau projet",
+        "ui.researchTemplateUi.messageOrganizationalDraft": "Projet d'organisation",
+        "ui.researchTemplateUi.messageCurrentDraft": "Projet actuel",
+        "ui.researchTemplateUi.messageSupersededDraftOrPolicy": "Supprimé le projet ou la politique",
+        "ui.researchTemplateUi.messageNotRequiredBySelectedPolicy": "Non requis par la politique choisie",
+        "mission.alreadyRecordingError": "Une mission est déjà en cours d’enregistrement. Cet avis ne peut pas démarrer un autre vol.",
+        "consent.permissionChangedError": "Une autorisation a changé pendant l’enregistrement. Vérifiez les paramètres actuels, puis réessayez.",
+        "organization.waiverPilotError": "Une dérogation ne peut pas ajouter de pilote. Effacez le crédit partiel de contribution.",
+        "planning.polygonCoordinatesError": "Un polygone nécessite au moins trois paires de coordonnées valides.",
+        "cards.anyConditionFullHold": "OU — une condition sélectionnée pendant toute sa durée de maintien",
+        "windows.error.exactConfirmationPhrase": "Saisissez exactement la phrase de confirmation affichée pour cette archive.",
+        "windows.error.recordingStillActive": "Un enregistrement reste actif; aucune donnée n'a été effacée.",
+        "windows.error.storageBeforeDeletion": "Démarrer le compagnon et reconnecter son stockage configuré avant de passer en revue la suppression scientifique.",
+        "windows.error.resumeDeletion": "Le compagnon s'est arrêté; reprendre la suppression revue après redémarrage.",
+        "windows.error.operationRunning": "Une autre opération de configuration/storage est en cours.",
+        "windows.error.stoppedFolder": "Le compagnon est arrêté; aucun dossier n'a été ouvert.",
+        "windows.error.sourceStorageStopped": "Le moteur local est arrêté; le stockage source n'a pas été lu. Démarrer ou revoir Paramètres de stockage. Les données existantes n'ont pas été remplacées.",
+        "windows.error.startCompanion": "Commencez par le compagnon.",
+        "windows.error.databaseFilename": "Choisissez un dossier de base de données avec Parcourir ; le nom du fichier doit rester missions.db.",
+        "windows.error.insufficientSpace": "Il n'y a pas suffisamment d'espace libre sur un lecteur de stockage sélectionné.",
+        "windows.error.closeSimulator": "Close MSFS before installing the toolbar, or choose Skip for Now.",
+        "windows.error.communityFolder": "Choisissez un dossier communautaire existant ou choisissez Passer à l'instant.",
+        "windows.error.folderUnavailable": "Le lecteur/dossier sélectionné n'est pas disponible. Reconnectez-le; aucun remplacement n'a été créé.",
+        "windows.error.openVault": "Windows n'a pas pu ouvrir la voûte de la couronne AeroScience. Reconnecter sur ce PC.",
+        "windows.error.invalidCredential": "Enregistrer la créance AeroScience est invalide; se reconnecter.",
+        "windows.error.credentialBounds": "Le justificatif est hors des limites de la voûte.",
+        "windows.error.saveVault": "Windows n'a pas pu enregistrer le jeton AeroScience. Aucun retour en arrière n'a été utilisé.",
+        "windows.error.removeCredential": "Windows ne pouvait pas supprimer la crédibilité AeroScience. Utilisez Windows Credential Manager pour la réviser.",
+        "windows.error.unsupportedOrganizationCredential": "Informations d’authentification d’organisation non prises en charge.",
+        "windows.error.unsupportedOwnerKey": "Clé de propriétaire non prise en charge."
       }
     },
     "pt-BR": {
-      "version": 22,
+      "version": 23,
       "locale": "pt-BR",
-      "sourceHash": "c871f36c92c40f3e195f35c762e9b9d6d415c522c475027296fb3dd87dba839c",
+      "sourceHash": "2e497b5e380eefe0acc09c924121b57ad145e56c8e85d78639b27b338adbc3dc",
       "pendingEnglishFallbackKeys": [
         "contextHelp.coverage.body",
         "contextHelp.lidar.body",
@@ -51514,6 +53922,7 @@ export const localeData = {
         "ui.organizationLiveUi.messageSyntheticSimulatorFixtureNotInstalledMSFSAcceptance",
         "ui.organizationMissionPreparation.messagePilot",
         "ui.organizationResearch.messagePublicationIsAvailableYourRevisionIsFrozen",
+        "ui.organizationReviews.messageOriginal",
         "ui.personalResearchFlight.messageActualHostUTCEventsAndOriginalEvidence",
         "ui.personalResearchFlight.messageUTCContextSuppliedSelectAnOriginalEvent",
         "ui.personalResearchReview.messageReviewEachSelectedMeasurementItsIndependentSource",
@@ -51523,6 +53932,7 @@ export const localeData = {
         "ui.programWorkflowUi.messageWaiversMayOmitEvidenceAndNeverAdd",
         "ui.receivedEvidenceUi.messageRecordedIAS",
         "ui.research.message0Vertices",
+        "ui.research.messageGiB",
         "ui.research.messageIFR",
         "ui.research.messageSessionOriginal",
         "ui.research.messageVFR",
@@ -51537,6 +53947,7 @@ export const localeData = {
         "ui.routeExport.messageICAOItem15DegreesMinutesRounded",
         "ui.scienceAnalysis.messageCompare",
         "ui.scienceDisplay.messageAltitude",
+        "ui.scienceDisplay.messageFtMSL",
         "ui.scienceLayers.messageFalseColorNIRRed",
         "ui.scienceLayers.messageNm",
         "ui.scienceMapView.messageNm",
@@ -51547,6 +53958,7 @@ export const localeData = {
         "ui.scientificContext.messageProcessingProvenance",
         "ui.scientificSources.messageNative",
         "ui.scientificSources.messageUSGS3DEPCopernicusGLO30",
+        "ui.sensorPlanning.messageIdealModeledDensityPointsMNot",
         "ui.serverOperations.messageMiB",
         "ui.storageManagement.messageGB",
         "ui.storageManagement.messagePreset",
@@ -58298,7 +60710,336 @@ export const localeData = {
         "native.phase.stale": "{status} | Estado desatualizado",
         "native.banner.recordingActive": "Gravação do voo: ativa | Coleta científica: {phase}",
         "native.banner.recordingInactive": "Gravação do voo: inativa | Coleta científica: {phase}",
-        "native.banner.recordingUnknown": "Gravação do voo: indisponível | Coleta científica: {phase}"
+        "native.banner.recordingUnknown": "Gravação do voo: indisponível | Coleta científica: {phase}",
+        "updates.automaticNotifications": "Notificações automáticas de atualização",
+        "updates.includePrereleases": "Incluir versões alfa e de pré-lançamento",
+        "map.atmosphericSamples": "Pontos reais de amostragem atmosférica",
+        "map.sampledPathLinks": "Ligações de trajetória respaldadas pelas amostras",
+        "map.openStreetMapStreets": "OpenStreetMap / Ruas",
+        "map.analysisSourceValues": "Valores da grade original da fonte para análise",
+        "map.comparisonSourceValues": "Valores da grade original da fonte para comparação",
+        "map.scientificDifferences": "Diferenças da comparação científica",
+        "map.retainedArtifact": "Artefato científico retido",
+        "map.savedObservations": "Observações científicas salvas",
+        "map.verifiedRasters": "Visualizações raster científicas verificadas",
+        "map.demElevation": "Elevação do terreno derivada do DEM",
+        "map.inspectedSourceValues": "Valores inspecionados da fonte",
+        "map.inspectedSourceLimit": "Células da grade original da fonte com qualidade verificada na janela selecionada; não são observações de voo nem cobertura do sensor.",
+        "map.originalFootprintLimit": "Área original; não representa cobertura com qualidade verificada",
+        "map.pilotRecordedPoints": "Observações do piloto — somente pontos registrados",
+        "map.flightPathContext": "Trajetória do voo como contexto — não é cobertura científica",
+        "route.simbriefCoordinates": "Graus/minutos/segundos conforme a documentação do SimBrief",
+        "map.faaTfrUnknown": "Limites TFR da FAA · ativação desconhecida",
+        "preparation.liveTelemetryRequirement": "Requer telemetria ao vivo do simulador; sem preparação remota",
+        "map.qualifiedSamples": "{measurement} — amostras reais que atendem aos critérios",
+        "ui.analysis.messageRecordedPathObservedWithinTolerance": "Percurso registrado observado dentro da tolerância",
+        "ui.analysis.messageCompletionNotEstablished": "Conclusão não estabelecida",
+        "ui.analysis.messageMaxDeviation": "· Desvio máximo {value1}",
+        "ui.app.messageNoEnabledInstrumentsInArchivedConfiguration": "Nenhum instrumento habilitado na configuração arquivada",
+        "ui.app.messageMissingUnknown": "Desaparecido / desconhecido",
+        "ui.applicationUpdates.messageNotCheckedYet": "Ainda não verificado",
+        "ui.applicationUpdates.messageNever": "Nunca. Nunca.",
+        "ui.atmosphericResearch.messageSampledLocationsDoNotEstablishTheConditions": "Os locais amostrados não estabelecem as condições entre eles ou em áreas circundantes.",
+        "ui.atmosphericResearch.messageBandValuesBelowShowWhereReadingsWere": "Os valores da banda abaixo mostram onde as leituras foram realmente retidas; não estabelecem condições entre as altitudes amostradas.",
+        "ui.atmosphericResearch.messageFeetMSL8667c4ea": "{value1}–{value2} pés MSL",
+        "ui.atmosphericResearch.messageRecordedSimulatorObservations": "Observações do simulador gravadas",
+        "ui.atmosphericResearch.messageSyntheticDemoObservationsNotAnInstalledMSFS": "Observações sintéticas/demográficos — não um ensaio MSFS instalado",
+        "ui.atmosphericResearch.messageUnknownNoSimulatorProvenanceInferred": "Desconhecido; nenhum simulador inferido",
+        "ui.atmosphericResearch.messageSampledDistance": "Distância amostrada",
+        "ui.atmosphericResearch.messagePolarSamplesOutsideTheMercatorMapRemain": "As amostras polares fora do mapa do Mercator permanecem disponíveis nas coordenadas exatas da mesa.",
+        "ui.aviationMapLayers.messageSource": "· fonte {value1} {value2} {value3}",
+        "ui.aviationMapLayers.messageBaseVolume": "Volume de base",
+        "ui.aviationMapLayers.messageAddVolume": "Adicionar volume",
+        "ui.aviationMapLayers.messageSubtractVolume": "Volume sublinhado",
+        "ui.aviationMapLayers.messageBoundingCandidatesNotActiveRestrictions": "{value1} candidatos com destino a candidatos (restrições não activas)",
+        "ui.aviationMapLayers.messageRetainedReferencesInViewport": "{value1} remissões conservadas em vista",
+        "ui.aviationReference.messageOn": "- Está bem.",
+        "ui.aviationReference.messageOff": "Fora.",
+        "ui.aviationReference.messageUpdatesRefreshTheHostInventoryAndPublished": "Atualizações atualizar o inventário do hospedeiro e a geometria publicada; a ativação exata e a completude permanecem não verificadas.",
+        "ui.aviationReference.messageOriginalChartTransferSizeUnknownUntilPublished": "Tamanho de transferência de gráficos original: Desconhecido até publicado. Abrir este catálogo não baixa originais.",
+        "ui.calibrationSettings.messageSeparateUserAdjustedScalarChannelOriginalValuesRemain": "Canal de ASE adaptado ao usuário separado; os valores originais permanecem registrados.",
+        "ui.calibrationSettings.messageMetadataOnlyNoNumericAdjustment": "Apenas metadados; sem ajustes.",
+        "ui.campaignCoverageUi.messageEarlierCardPublication": "· publicação anterior do cartão",
+        "ui.campaignCoverageUi.messageUsablePilotDocumentationNotSensorQA": "Documentação piloto utilizável; não QA sensor",
+        "ui.campaignCoverageUi.messageValidSupportedOriginalReadings": "Lecturas originais válidas suporte",
+        "ui.campaignCoverageUi.messageCurrentGoal": "Objetivo atual",
+        "ui.campaignCoverageUi.messageHistoricGoalPreserved": "Alvo histórico preservado",
+        "ui.campaignCoverageUi.messageCountsMet": "Contagem cumprida Contagem cumprida Contagem cumprida Conta",
+        "ui.campaignCoverageUi.messageMoreSamplingNeeded": "mais amostragem necessária",
+        "ui.campaignProgressUi.messageYourContribution": "(Sua contribuição)",
+        "ui.campaignProgressUi.messageNewClaimsUnavailable": "· Novas reivindicações não disponíveis",
+        "ui.campaignProgressUi.messageCurrent": "(atuais)",
+        "ui.collectedScienceDeletion.messageDatabaseBackupCleanupIsIncomplete": "; a limpeza da base de dados/coordenação é incompleta",
+        "ui.collectionPlanner.messageSession": "· sessão {value1}",
+        "ui.collectionPlanner.messageBoundaryPauseResumeEnabled": "limite pausa/resumo habilitado",
+        "ui.collectionPlanner.messageBoundaryAutomationOff": "Automação da fronteira desligada",
+        "ui.collectionPlanner.messageAutomaticCollectionIsConfiguredInThisDraft": "A coleção automática é configurada neste esboço",
+        "ui.collectionPlanner.messageAutomaticCollectionIsOff": "A coleta automática está desativada.",
+        "ui.collectionPlanner.messagePausesOutsideTheSelectedBoundaryUnionReEntry": "Pausas fora da união de fronteira selecionada; a reentrada pode retomar a mesma sessão.",
+        "ui.collectionPlanner.messageBoundaryPauseResumeIsOff": "A pausa/resumo da fronteira está desligada.",
+        "ui.collectionPlanner.messageNoStartRuleUseManualStartOr": "Regra sem início: use manual Iniciar ou configure um.",
+        "ui.collectionPlanner.messageAReferencedGeographicTargetIsMissing": "Falta um alvo geográfico referenciado.O quê?O quê?O quê?",
+        "ui.collectionPlanner.messageNoBoundaryRegionsSelected": "Nenhuma área de fronteira selecionada.",
+        "ui.collectionPlanner.messageRulesReviewedForThisDraft": "Regras revisadas para este projecto.",
+        "ui.collectionPlanner.messageRulesAreNotYetReviewedForThe": "As regras ainda não foram revistas para o projecto atual.",
+        "ui.customFlightTest.messageAND": "E E a",
+        "ui.downloadActivity.messageSourceNotSelected": "Fonte não selecionada",
+        "ui.downloadActivity.messageSizeUnknown": "Tamanho desconhecido",
+        "ui.downloadActivity.messageRateNotEstablished": "Taxa não estabelecida",
+        "ui.downloadActivity.messageUnknownComposite": "Desconhecido / composto",
+        "ui.downloadWorkspace.messageNotEstablished": "Não estabelecido",
+        "ui.downloadWorkspace.messageDownloadSizeUnknown": "Descarregue tamanho desconhecido",
+        "ui.emitLibrary.messageUnlocated": "Não localizado",
+        "ui.experimentalSensor.messageSyntheticDemoOriginalInputsNotInstalledMSFS": "Indumentos originais sintéticos/demo — não são aceites pelos MSFS instalados",
+        "ui.experimentalSensor.messageRecordedSimulatorInputsFictionalModelDerivedOutputs": "Entradas do simulador gravadas — saídas derivadas de modelos ficcionais",
+        "ui.experimentalSensor.messageInputTelemetrySourceUnavailableNoSimulator": "Fonte de telemetria de entrada não disponível — nenhuma origem do simulador inferida",
+        "ui.flightTestProcedure.messageOR": "OU",
+        "ui.hyperspectralImport.messageSelectTheMatchingBinaryBelow": "Selecione o binário correspondente abaixo",
+        "ui.hyperspectralImport.messageNm": "· {value1}–{value2} nm",
+        "ui.hyperspectralImport.messageOriginalScientificUnitsNeeded": "Unidades científicas originais necessárias",
+        "ui.hyperspectralImport.messageUnknownNotGuessed": "Desconhecido; não adivinhado",
+        "ui.hyperspectralImport.messageNotReported": "Não reportado",
+        "ui.libraryDownload.messageCredentialSaved": "Acredito salvado",
+        "ui.libraryDownload.messageNotConnected": "Não conectado",
+        "ui.libraryDownload.messageCached": "Cacheado",
+        "ui.libraryDownload.messageRetrieved": "Recolhido",
+        "ui.libraryDownload.messageSearchBoundsEncloseTheSelectedShapeSome": "Os limites da busca envolvem a forma selecionada; alguns candidatos estão fora dela.",
+        "ui.libraryDownload.messageRetainedCandidate": "Candidato retenido",
+        "ui.libraryDownload.messagePolygonClipping": "· recorte de polígonos",
+        "ui.libraryDownload.messageAuthoritativeRegion": "· Região autoritária",
+        "ui.libraryDownload.messageTheProviderSearchUsesEnclosingBounds": "A busca por provedor usa limites de encerramento; as janelas de borda podem incluir pixels fora da forma selecionada. Revise as janelas de trabalho exatas antes da aprovação.",
+        "ui.libraryDownload.messageMatchingCatalogScenesFound": "Correspondendo às cenas do catálogo encontradas",
+        "ui.libraryDownload.messageNoMatchingScenesInThisSearchedScope": "Nenhuma cena combinando neste escopo procurado",
+        "ui.libraryDownload.messageProviderUnavailableAvailabilityWasNotEstablished": "Fornecedor não disponível — a disponibilidade não foi estabelecida",
+        "ui.libraryDownload.messageCachedNotANewLive": "· Cached, não uma nova busca ao vivo",
+        "ui.libraryDownload.messageProviderOrderingNotEstablished": "O fornecedor não ordenou. Não.",
+        "ui.libraryDownload.messageNotApplicable": "Não aplicável",
+        "ui.libraryDownload.messageThisIsAProviderFailureNotEvidence": "É um fracasso do fornecedor, não evidências de que não existem dados.",
+        "ui.libraryDownload.messageTryEarlierYearsAdjustTheCloudFilter": "Tente anos anteriores, ajuste o filtro da nuvem ou escolhia explicitamente uma área apoiada nas proximidades. Nenhum filtro ou produto é ampliado automaticamente.",
+        "ui.libraryDownload.messageUnknownUntilOriginalFileVerification": "Desconhecido até a verificação do arquivo original",
+        "ui.map.messageOnlineBasemapWithBundledGeographicReference": "Mapa de base online com referência geográfica combinada",
+        "ui.map.messageOfflineNaturalEarthGeography": "Geografia da Terra Natural Offline",
+        "ui.map.messageNoLocationSelectedRegionalDefaultUSA": "Nenhum local selecionado: regional padrão EUA.",
+        "ui.map.messageChooseAddWaypointOrDrawSurveyArea": "Escolha Adicionar Waypoint ou Desenha área de pesquisa para editar; como normalmente.",
+        "ui.missionIntelligence.messageObjectiveNotDeclared": "Objectivo não declarado",
+        "ui.missionIntelligence.messageGeneralResearch": "Pesquisa geral",
+        "ui.missionIntelligence.messageAircraftUnknown": "Aviões desconhecidas",
+        "ui.missionIntelligence.messageSession9e78f797": "· Sessão {value1}",
+        "ui.missionIntelligence.messagePilotOverrideRearmRequired": "· abertura do piloto — rearme necessário",
+        "ui.missionIntelligence.messageContinuityHold": "· aguarda a continuidade",
+        "ui.missionIntelligence.messageStorageHoldResolveStorageBefore": "· suspensão de armazenamento; resolver a armazenagem antes do rearme",
+        "ui.missionIntelligence.messageNotEnded": "Não terminada",
+        "ui.missionIntelligence.messageNotYetAssessed": "Ainda não avaliada",
+        "ui.missionIntelligence.messagePolicyGrade": "Nota de política {value1}",
+        "ui.missionIntelligence.messageNoFinalLetterGrade": "Nenhuma nota final de letra",
+        "ui.missionIntelligence.messageStaleEvidenceCutoffNotCurrent": "· Corte de evidências de filo; não desempenho atual em tempo real.",
+        "ui.missionIntelligence.messageInapplicable": "Inaplicável",
+        "ui.missionIntelligence.messageNotSpecified": "não especificado",
+        "ui.missionIntelligence.messageEvidencePending": "Provas pendentes",
+        "ui.missionIntelligence.messageAreaMembershipUnknown": "A área é um membro desconhecido",
+        "ui.missionIntelligence.messageInsideResearchArea": "Dentro da área de pesquisa",
+        "ui.missionIntelligence.messageOutsideResearchArea": "Área de pesquisa externa",
+        "ui.missionIntelligence.messageScienceSessionOrCollectionAuthorityChanged": "A autoridade de coleta ou sessão de ciência mudou.O quê?",
+        "ui.missionOperations.messageActiveForLocalMonitoring": "Ativo para monitoramento local",
+        "ui.missionOperations.messageRecordedPointOnlyNoFootprintInferred": "Apenas um ponto registrado; nenhuma pegada inferida. Não.",
+        "ui.missionOperations.messageOriginalLocationSeparateFromScientificSampling": "Localização original, separada da amostragem científica.",
+        "ui.missionPerformance.messageGrade": "Grau {value1}",
+        "ui.missionPerformance.messageUseTheHostSRecalculationActionIfA": "Use o anfitrião, ação de recalculação se um trabalho anterior falhou.",
+        "ui.missionPerformance.messageProvisionalWithUnassessedWorkRetained": "Provisório, com trabalho undessessessed conservado.",
+        "ui.missionPerformance.messageOverallFlightObligationsNeverAveragedFromSession": "Obrigações globais de voo; nunca foi promediada das notas da sessão.",
+        "ui.missionStartAdvisory.messageStaleAssessment": "Avaliação da estatura",
+        "ui.missionStartAdvisory.messageAffectedInstrument": "— instrumento afectado instrumento afectado",
+        "ui.missionTimeline.messageLiveProvisionalRecentEvidence": "Live — provas recentes provisórias",
+        "ui.missionTimeline.messageRecordedEvidence": "Provas registradas",
+        "ui.missionTimeline.messageCollectedSciencePermanentlyDeleted": "· A coleta de ciência permanentemente excluída",
+        "ui.missionWorkspace.messageRecordingGapBeforeThisSample": "· gravar a lacuna antes desta amostra",
+        "ui.missionWorkspace.messageNotArchived": "não arquivado",
+        "ui.missionWorkspace.messageUnknownDate": "data desconhecida",
+        "ui.missionWorkspace.messageUnavailableNoSurveyPolygon": "Não está disponível (sem polígono de pesquisa)",
+        "ui.missionWorkspace.messageChartPointsThinnedForBounded": "· pontos do gráfico diluidos para exibição limitada",
+        "ui.observationResearch.messageRecordedLocationsRequired": "locais registrados requeridos",
+        "ui.observationResearch.messageMissingLocationsRemainExplicit": "locais desaparecidos permanecem explícitos",
+        "ui.observationResearch.messageEverySelectedCategoryRequired": "· cada categoria selecionada necessária",
+        "ui.organizationHosting.messageRailwayHandlesSignInBillingSetupAndCharge": "AeroScience nunca pede detalhes de pagamento.",
+        "ui.organizationHosting.messageYourProviderHandlesItsOwnAccountAnd": "Seu fornecedor lida com a sua conta e cobra a aprovação.",
+        "ui.organizationLiveUi.messageFeetMSL": "pés MSL",
+        "ui.organizationLiveUi.messageKnotsIAS": "nódos IAS",
+        "ui.organizationLiveUi.messageDegreesTrue": "graus verdadeiros",
+        "ui.organizationLiveUi.messageSignInOrTryAgain": "Acesse ou tente de novo.",
+        "ui.organizationMissionPreparation.messageRecordedIASMSLTelemetryNoAdditionalScientificInstruments": "Telemetria IAS/MSL gravada; não são necessários instrumentos científicos adicionais",
+        "ui.organizationResearch.messageExclusive": "Exclusivo",
+        "ui.organizationResearch.messageMultiPilot": "Multi-Pilote",
+        "ui.organizationResearch.messageReservedAssigned": "Reservado/Atribuído",
+        "ui.organizationResearch.messageClaimed": "Reclamado",
+        "ui.organizationResearch.messageReleased": "Libertado",
+        "ui.organizationResearch.messageReleaseOnlyThisAssignmentYourPersonalScience": "Sua ciência pessoal e história do voo permanecem inalteradas.",
+        "ui.organizationResearch.messageThisConfirmsParticipationOnlyItDoesNot": "Isso confirma apenas a participação; não prepara ou inicia uma missão, coleta a ciência ou carrega evidências.",
+        "ui.patterns.messageInAreaScanSegmentsTransitions": "{value1} segmentos de varredura da área / {value2} transições · {value3} varredura da área / {value4} distância de transição (pode deixar a área; rotação da viabilidade não valiada) ·",
+        "ui.patterns.messageSurveyPassesTrackSpacing": "{value1} Pass de pesquisa · Espaço de trilha {value2} · Envelope de pesquisa aproximada {value3} (cobertura de sensor não vaciado) ·",
+        "ui.patterns.messageExactSameLinePassesPilotManagedTurnaround": "{value1} passas exactas da mesma linha · distância/tempo de retorno gerenciado pelo piloto ·",
+        "ui.patterns.messageOrbitExportUsesA5PointToPointApproximation": "A exportação de orbitas usa uma aproximação de 5° ponto a ponto; o suporte da órbita nativa EFB não é reivindicado.",
+        "ui.payloadSettings.messageCustomized": "Personalizado",
+        "ui.payloadSettings.messageGenericModel": "Modelo genérico",
+        "ui.payloadSettings.messageDocumentedReference": "Referência documentada",
+        "ui.personalResearchFlight.messageSavedTestCard": "Cartão de teste guardado",
+        "ui.personalResearchFlight.messagePersonalTestCard": "Cartão de teste pessoal",
+        "ui.personalResearchFlight.messageAttemptStillRecording": "A tentativa ainda está gravando. Não.",
+        "ui.personalResearchFlight.messageExplicitAttemptBoundaries": "Limites de tentativas de explicit",
+        "ui.personalResearchFlight.messageReviewMultiPointFlightVerifiesOriginalsAndThe": "Revisar o vôo multi-ponto verifica originais e o procedimento completo.",
+        "ui.personalResearchFlight.messageInspectCustomTestEvidenceVerifiesThisOriginal": "Inspeccione a evidência de teste personalizado verifica este intervalo original.",
+        "ui.personalResearchReview.messageMatchesSavedEvidence": "Corresponde a evidência salva",
+        "ui.personalResearchReview.messageEvidenceMismatch": "Evidência",
+        "ui.personalResearchReview.messageRetainedSampleAndPlanHashesMatchThe": "A amostra retenida e o plano da hache correspondem ao resultado salvo.",
+        "ui.personalResearchReview.messageEvidenceIsMissingOrChangedTheSaved": "As provas estão perdidas ou alteradas. O resultado salvo é histórico e não foi reescrito. O resultado é histórico. O resultado é o que você quer. O resultado é o que você quer dizer. O resultado é",
+        "ui.personalResearchReview.messageNoRetainedTelemetry": "Não há telemetria retenida.",
+        "ui.personalResearchReview.messageOnlyTheFirst20IssuesAre": "Só os 20 primeiros números estão listados.Os números são os 20.Os números são os primeiros.Os números",
+        "ui.personalResearch.messageRecordedSimulatorTelemetry": "Telemetria do simulador gravada",
+        "ui.personalResearch.messageSyntheticDemoTelemetryNotAnInstalledMSFSTest": "Telemetria sintética/demométrica; não um teste MSFS instalado",
+        "ui.personalResearch.messageSourceUnavailableNoTelemetrySourceTypeInferred": "Fonte indisponível; nenhum tipo de fonte de telemetria inferido",
+        "ui.preparationSummary.messageReusedLocally": "· Reutilizado Localmente",
+        "ui.programWorkflowUi.messageEarlierPublication": "(publicação antecipada)",
+        "ui.programWorkflowUi.messageProgramOnAdministrativeHold": "Programa de suspensão administrativa",
+        "ui.programWorkflowUi.messagePhaseGatesEnabledForNewAssignmentsClaims": "Portas de fase habilitadas para novas atribuições/reclamações",
+        "ui.programWorkflowUi.messageOrdinaryResearchNoPhaseGatesRequired": "Investigação ordinaria — não é necessário um porta de fase",
+        "ui.programWorkflowUi.messageEntireCard": "cartão inteiro",
+        "ui.programWorkflowUi.messageAuthorizedPartialContribution": "Contribuição parcial autorizada",
+        "ui.programWorkflowUi.messageOriginalReviewerApproval": "Aprovação original do revisor",
+        "ui.programWorkflowUi.messageExactPhasePurpose": "finalidade exacta da fase",
+        "ui.programWorkflowUi.messageCampaignFulfillment": "Cumprimento da campanha",
+        "ui.programWorkflowUi.messageYourWork": "(Seu trabalho)",
+        "ui.receivedEvidenceUi.messageResearchDefinition": "Definição da pesquisa",
+        "ui.receivedEvidenceUi.messageAttempta4474be8": "· Tentativa {value1}",
+        "ui.remoteScience.messageMapMemoryBoundReachedFilterBy": "A memória do mapa foi alcançada; filtrar por instrumento ou navegar por aquisiçãos individuais.",
+        "ui.remoteScience.messageHistoricalValidSampleCountNotIndexed": "Contagem histórica de amostras válidas não indexada",
+        "ui.remoteScience.messageValidSamplePositions": "{value1} posições válidas da amostra",
+        "ui.remoteScience.messageValidRangeToValid": "· Válido intervalo {value1} a {value2} · {value3} válido / {value4} amostras",
+        "ui.researchTemplates.messageNotSupplied": "Não fornecido",
+        "ui.researchTemplates.messageAttributionNotSupplied": "Atribuição não fornecida",
+        "ui.research.messageLocationUnavailableNoPositionWasInvented": "Localização não disponível; nenhuma posição foi inventada",
+        "ui.research.messageRecordedLocationAttached": "Localização registrada anexa",
+        "ui.research.messageNoReferenceSelected": "Nenhuma referência selecionada",
+        "ui.research.messageCustomModeledGeometry": "Geografia modelada personalizada",
+        "ui.research.messageSelectedReferenceGeometry": "Geografia de referência selecionada",
+        "ui.research.messageNotSuppliedNoAccuracyCertificationIsImplied": "Não fornecido; nenhuma certificação de precisão é implícita.",
+        "ui.research.messageNoneSelected": "Nenhuma selecionada",
+        "ui.research.messageSupplyDuration": "Duração da oferta",
+        "ui.research.messageGiB": "{value1} GiB",
+        "ui.research.messageCAPACITYWARNING": "· ADVERTÊNCIA DE CAPACIDADE",
+        "ui.research.messageSavedProducts": "produtos salvados",
+        "ui.research.messageMeasurementValues": "valores de medição",
+        "ui.research.messageNone": "Nenhuma",
+        "ui.research.messageCustomRoute": "Ruta personalizada",
+        "ui.research.messageEndOfRoute": "Fim da rota",
+        "ui.research.messageUnknownEndTime": "tempo de fim desconhecido",
+        "ui.research.messageUnknownEnd": "fim desconhecido",
+        "ui.research.messageDurationUnknown": "duração desconhecida",
+        "ui.research.messageRecordingInterrupted": "· gravação interrompida",
+        "ui.research.messageUnavailableCleared": "Não disponível / liberado",
+        "ui.research.messageDisplayReduced": "(Exibir reduzido)",
+        "ui.routeExport.messageOrbitSUseA5PointToPointApproximation": "{value1} órbita(s) usam uma aproximação de 5° ponto a ponto; uma revolução normalmente tem 73 pontos. Este não é um comando de órbita EFB nativo. Verifique limites de rota alvo.",
+        "ui.routeExport.messageFirstEnRouteWaypoint": "Primeiro ponto de entrada em rota",
+        "ui.routeExport.messageLastEnRouteWaypoint": "Última rota em caminho",
+        "ui.scienceAnalysis.messageSourceProviderUnavailable": "Provedor de fonte não disponível",
+        "ui.scienceAnalysis.messageVerticalReferenceUnavailable": "Referência vertical não disponível",
+        "ui.scienceCompare.messageShared": "Compartilhado",
+        "ui.scienceCompare.messageSavedQualityUnavailable": "Qualidade salva não disponível",
+        "ui.scienceDisplay.messageFtMSL": "ft MSL",
+        "ui.scienceJourney.messageUnavailableCheckTheConnectionSessionOr": "Não disponível — verifique a conexão, sessão ou armazenamento",
+        "ui.scienceJourney.messageLastCheckedCount": "· última contagem verificada",
+        "ui.scienceJourney.messageLastCheckedCountConnectionIsStale": "Última contagem verificada; ligação é estale.",
+        "ui.scienceJourney.messageOnboardAtmosphericObservationsNeedNoNASADownload": "Observações atmosféricas a bordo não precisam de download da NASA, organização ou conta de nuvem.",
+        "ui.scienceJourney.messageReviewTheSavedInstrumentAndSourceRequirements": "Revise o instrumento salvo e os requisitos de fonte.",
+        "ui.scienceMapView.messageRecordedValues": "valores registrados",
+        "ui.scienceMapView.messageOverviewModeNativeDetailShowsOneSaved": "Modo de visão geral: detalhes nativos mostra uma aquisição salva por instrumento; inspecione qualquer outro registro abaixo.",
+        "ui.scienceMapView.messageEnvironmentalValues": "valores ambientais",
+        "ui.scienceMapView.messageTheVisible": "a visível",
+        "ui.scienceMapView.messageTheSelected": "a selecionada",
+        "ui.scientificContext.messageOrderedSequence": "Seqüência ordenada",
+        "ui.scientificContext.messageIndependentPoints": "Pontos independentes",
+        "ui.scientificContext.messageFlightRegimeValidation": "Validação do regime de voo",
+        "ui.scientificContext.messageNoMaximumSourceAgeIsSpecifiedBy": "Não é especificada a idade máxima da fonte por este cartão.",
+        "ui.scientificContext.messageMaximumSourceAgeDays": "Idade máxima de origem: {value1} dias.",
+        "ui.scientificContext.messageWithEverySelectedCategoryRepresented": "com cada categoria selecionada representada",
+        "ui.scientificContext.messageValidRecordedPositionRequired": "; posição registrada válida necessária",
+        "ui.scientificContext.messageMissingPositionsStayUnavailable": "; posições perdidas permanecem indisponíveis",
+        "ui.scientificContext.messageNoneRequired": "Não é necessário",
+        "ui.scientificContext.messageDifferent": "Diferente {value1}.",
+        "ui.scientificLibrary.messageNewestSourceObservationc8d6cfa6": "Observação mais recente da fonte {value1}",
+        "ui.scientificLibrary.messageOriginalObservationDatesUnknownComposite": "Datas de observação originais desconhecidas / compostas",
+        "ui.scientificLibrary.messageExcludedOriginalsRetained": "Excluídos (originales conservados)",
+        "ui.scientificLibrary.messageEligibleSubjectToCoverageAndQA": "Elegível, sujeito a cobertura e QA",
+        "ui.scientificSources.messageDisabledLocalDatasetsRemainAvailable": "Disabilitados (continuam disponíveis as bases de dados locais)",
+        "ui.scientificSources.messageMissionAreaSuitabilityUseViewCoverageOrCurrent": "Adequação da área da missão: use View Cobertura ou atual preparação do planejador",
+        "ui.sensorOperatingStatus.messageSavedProducts": "Produtos salvos",
+        "ui.sensorOperatingStatus.messageVersion": "· versão {value1}",
+        "ui.sensorOperatingStatus.messageLastKnown": "Última vez conhecida.",
+        "ui.sensorOperatingStatus.messageCurrentScienceSession": "· Sessão científica atual",
+        "ui.sensorOperatingStatus.messageMissingStaleOrFromBeforeACollection": "faltando, o estalo ou de antes de uma mudança de coleção",
+        "ui.sensorOperatingStatus.messageNotCurrent": "não atual",
+        "ui.sensorOperatingStatus.messageNoHardwareProfile": "sem perfil de hardware",
+        "ui.sensorOperatingStatus.messageNoDefinition": "sem definição",
+        "ui.sensorOperatingStatus.messageNotSupplied": "não fornecido",
+        "ui.sensorPlanning.messageScanTransitionSegmentsMinAt": "{value1} segmentos de varredura/transição · {value2} · {value3} min na velocidade do solo indicada",
+        "ui.sensorPlanning.messageChooseAPatternCenterForRouteEstimates": "Escolha um padrão de centro para estimativas de rota.",
+        "ui.sensorPlanning.messageFrameIntervalS": "· Intervalo de estrutura ≤{value1} s",
+        "ui.sensorPlanning.messageIdealModeledDensityPointsMNot": " · Ideal modeled density {value1} points/m² (not recorded returns)",
+        "ui.sourceDeletion.messageDatabaseBackupCleanupIsAlsoIncomplete": "; a limpeza da base de dados/backup é também incompleta",
+        "ui.storageManagement.messageNoCap": "Sem tampa",
+        "ui.submissionBuilder.messageClaimedResearchCard": "Cartão de pesquisa reclamado",
+        "ui.submissionReview.messageVerifiedNow": "Verificado agora",
+        "ui.submissionReview.messagePreviouslyCheckedNotCurrentlyVerified": "Anteriormente verificado / Não verificado atualmente",
+        "ui.tfrLayers.messageSavedGeometry": "Geometria salva",
+        "ui.tfrLayers.messageWholeMissionUTCIntervalTo": "Intervalo de missão completa UTC {value1} a {value2}.",
+        "ui.tfrLayers.messageNoComparableRealWorldIntervalAssessed": "Não foi analisado nenhum intervalo comparável ao mundo real. Não. Não. Não.",
+        "ui.tfrLayers.messageYourSavedGeographyTouchesAPublishedBoundary": "Sua geografia salva toca um limite publicado; inspecione a hora checada, altitude e evidências faltando.",
+        "ui.tfrLayers.messageTheAvailableEvidenceCannotEstablishAComplete": "As provas disponíveis não podem estabelecer uma avaliação completa da restrição, mesmo quando algumas dimensões verificadas não se superpõem.",
+        "ui.tfrLayers.messageRefreshDidNotVerifyCurrentData": "A atualização não verificou dados atuais.",
+        "ui.tfrLayers.messageNoRecordedInventoryRefreshError": "Nenhum erro de atualização de inventário registrado.",
+        "ui.tfrLayers.messageSelected": "selecionado",
+        "ui.transferProgress.messageCalculatingNotTransferring": "Calculando/não transferindo",
+        "ui.transferProgress.messageCurrentFile": "· arquivo atual {value1}",
+        "ui.transferProgress.messageCombinedSpeedNotEstablished": "Velocidade combinada não estabelecida",
+        "ui.organizationNotifications.messageExternalConsentGranted": "Consentimento externo concedido",
+        "ui.organizationNotifications.messageExternalConsentOFF": "Consentimento externo OFF",
+        "ui.organizationOpportunities.messageIssuedPublication": "· Publicação {value1}",
+        "ui.organizationOpportunities.messageVolunteersWelcome": "Voluntários bem-vindos",
+        "ui.organizationOpportunities.messageManagerAssignmentOnly": "Atribuição de gerente apenas",
+        "ui.organizationReviews.messageNoSubmittedClientEvaluation": "Nenhuma avaliação apresentada do cliente",
+        "ui.organizationReviews.messageSupplemental": "Suplemento",
+        "ui.organizationReviews.messageOriginal": "Original",
+        "ui.organization.messageSavedResearchApproach": "Abordagem salva de pesquisa",
+        "ui.organization.messageRetainedPublishedRevision": "· Revisão publicada {value1} Retenção Revisão {value1} Revisão {value1} Revisão 98",
+        "ui.researchTemplateUi.messageNotRequired": "Não requerido",
+        "ui.researchTemplateUi.messagePublishedEditToCreateANew": "Publicado — editar para criar um novo projeto",
+        "ui.researchTemplateUi.messageOrganizationalDraft": "Projeto de Organização",
+        "ui.researchTemplateUi.messageCurrentDraft": "Projeto atual",
+        "ui.researchTemplateUi.messageSupersededDraftOrPolicy": "Receita ou política substituída",
+        "ui.researchTemplateUi.messageNotRequiredBySelectedPolicy": "Não é exigido por uma política selecionada",
+        "mission.alreadyRecordingError": "Uma missão já está sendo gravada. Este aviso não pode iniciar outro voo.",
+        "consent.permissionChangedError": "Uma permissão mudou durante o salvamento. Revise as configurações atuais e tente novamente.",
+        "organization.waiverPilotError": "Uma dispensa de requisito não pode adicionar um piloto. Remova o crédito parcial de contribuição.",
+        "planning.polygonCoordinatesError": "Um polígono precisa de pelo menos três pares de coordenadas válidos.",
+        "cards.anyConditionFullHold": "OU — uma condição selecionada durante todo o período de manutenção",
+        "windows.error.exactConfirmationPhrase": "Digite exatamente a frase de confirmação exibida para este arquivo.",
+        "windows.error.recordingStillActive": "A gravação permanece ativa, nenhum dado foi apagado.",
+        "windows.error.storageBeforeDeletion": "Comece o companheira e reconecte seu armazenamento configurado antes de rever a exclusão científica.",
+        "windows.error.resumeDeletion": "O companheiro parou; retome a eliminação revisada após reiniciar.",
+        "windows.error.operationRunning": "Outra operação de arranjo/estocagem está funcionando.",
+        "windows.error.stoppedFolder": "O companheiro foi parado; nenhum pasta foi aberta. Não. Não.",
+        "windows.error.sourceStorageStopped": "O motor local está parado; o armazenamento da fonte não foi lido. Inicie ou revise Configurações de Armazenamento. Os dados existentes não foram substituídos. O motor local está parado; o armazenamento da fonte não foi lido. Inicie ou revise a configuração do",
+        "windows.error.startCompanion": "Comece o companheiro primeiro. O que é isso? O quê? O quê? O quê?",
+        "windows.error.databaseFilename": "Escolha uma pasta de banco de dados usando Procurar; o nome do arquivo deve continuar sendo missions.db.",
+        "windows.error.insufficientSpace": "Não há espaço livre suficiente em uma unidade de armazenamento selecionada.",
+        "windows.error.closeSimulator": "Fechar MSFS antes de instalar a barra de ferramentas ou escolher Saltar para agora.",
+        "windows.error.communityFolder": "Escolha um pasta existente da Comunidade ou escolha Skip for Now.",
+        "windows.error.folderUnavailable": "A unidade/palavra selecionada não está disponível. Reconecte- a; nenhuma substituição foi criada.",
+        "windows.error.openVault": "O Windows não pôde abrir o cofre AeroScienceC. Reconecte-se neste PC.",
+        "windows.error.invalidCredential": "AeroScienceCrential salva é inválida; reconecte. É inválida. É inválida. É inváli",
+        "windows.error.credentialBounds": "O crédito está fora da área do cofre.",
+        "windows.error.saveVault": "O Windows não pôde salvar o token AeroScience. Nenhum texto simples foi usado.",
+        "windows.error.removeCredential": "O Windows não pôde remover o AeroScienceCrential. Use o Windows Credential Manager para revisá-lo.",
+        "windows.error.unsupportedOrganizationCredential": "Credencial da organização não compatível.",
+        "windows.error.unsupportedOwnerKey": "Chave de propriedade não compatível."
       }
     }
   }

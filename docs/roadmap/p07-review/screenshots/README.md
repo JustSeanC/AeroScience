@@ -1,6 +1,6 @@
 # P07 candidate screenshot review
 
-All captures use synthetic browser fixtures. They are not genuine MSFS or Windows-form screenshots, and do not establish human language approval. Catalog 22 and bundle identity are recorded in `index.json`. Source names, fixture data, file names and original evidence remain original text.
+All captures use synthetic browser fixtures. They are not genuine MSFS or Windows-form screenshots, and do not establish human language approval. Catalog 23 and bundle identity are recorded in `index.json`. Source names, fixture data, file names and original evidence remain original text.
 
 | Locale | Results light desktop | Results dark narrow | Native light 640px | Native dark 320×360 |
 | --- | --- | --- | --- | --- |

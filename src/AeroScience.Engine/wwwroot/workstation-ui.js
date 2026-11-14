@@ -110,11 +110,17 @@ export function chart(parent, title, datasets, {xLabel = textForUI("ui.workstati
   const holder = node('figure', undefined, 'scientific-chart'), caption = node('figcaption', title), canvas = node('canvas');
   canvas.setAttribute('role', 'img'); setPresentationText(canvas,title,"aria-label"); holder.append(caption, canvas); parent.append(holder);
   let instance;const ink=getComputedStyle(parent).getPropertyValue('--text').trim()||'#c9d6e4',muted=getComputedStyle(parent).getPropertyValue('--muted').trim()||'#a6bbce';
-  if (window.Chart) instance = new window.Chart(canvas, {type, data:{datasets,labels:categories}, options:{animation:false,maintainAspectRatio:false,parsing:false,
+  // Chart.js resolves option objects internally. Give its canvas boundary
+  // primitive display strings, while keeping the original numerical data.
+  const shownDatasets=()=>datasets.map(dataset=>({...dataset,label:String(dataset.label??'')}));
+  if (window.Chart) instance = new window.Chart(canvas, {type, data:{datasets:shownDatasets(),labels:categories?.map(String)}, options:{locale:effectiveLocale(),animation:false,maintainAspectRatio:false,parsing:false,
     onClick:onSelect?(_event,elements)=>{const hit=elements[0];if(hit)onSelect(datasets[hit.datasetIndex].data[hit.index]);}:undefined,
-    spanGaps:false,plugins:{legend:{labels:{color:ink}}},scales:{x:{type:categories?'category':'linear',title:{display:true,text:xLabel,color:ink},ticks:{color:muted,callback:xTick}},y:{title:{display:true,text:yLabel,color:ink},ticks:{color:muted}}}}});
-  const observer = new MutationObserver(() => { if (!holder.isConnected) { instance?.destroy(); observer.disconnect(); } });
-  observer.observe(document.body, {childList:true,subtree:true});holder.disposeChart=()=>{instance?.destroy();observer.disconnect();};return holder;
+    spanGaps:false,plugins:{legend:{labels:{color:ink}}},scales:{x:{type:categories?'category':'linear',title:{display:true,text:String(xLabel),color:ink},ticks:{color:muted,callback:xTick}},y:{title:{display:true,text:String(yLabel),color:ink},ticks:{color:muted}}}}});
+  holder.refreshChartLocale=()=>{if(!instance)return;instance.options.locale=effectiveLocale();instance.options.scales.x.title.text=String(xLabel);instance.options.scales.y.title.text=String(yLabel);instance.data.datasets.forEach((dataset,index)=>dataset.label=String(datasets[index].label??''));if(categories)instance.data.labels=categories.map(String);instance.update('none');};
+  const stopLocale=onLocaleChange(()=>holder.refreshChartLocale?.(),{owner:holder});
+  let disposed=false;const dispose=()=>{if(disposed)return;disposed=true;stopLocale();instance?.destroy();holder.refreshChartLocale=undefined;observer.disconnect();};
+  const observer = new MutationObserver(() => { if (!holder.isConnected) dispose(); });
+  observer.observe(document.body, {childList:true,subtree:true});holder.disposeChart=dispose;return holder;
 }
 
 // randomUUID is limited to secure contexts; paired LAN HTTP clients still expose

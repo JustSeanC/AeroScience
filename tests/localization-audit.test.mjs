@@ -4,6 +4,26 @@ import {inventoryJavaScript} from '../scripts/build/audit-localization.mjs';
 import {strictJson,validUnicode,validateQuality,sourceFingerprint,messageFingerprint} from '../scripts/build/localization-quality.mjs';
 import {protectedTranslation} from '../scripts/build/audit-display-bindings.mjs';
 
+test('nested display prose is inventoried while original state comparisons remain identifiers',()=>{
+ const rows=inventoryJavaScript(`localizedCopy('flight.status',{detail:state==='Armed'?'Waiting for the trigger.':'No collection is running.'});`,'src/AeroScience.Engine/wwwroot/nested-fixture.js');
+ for(const text of ['Waiting for the trigger.','No collection is running.'])assert.equal(rows.find(r=>r.text===text)?.decision,'presentation');
+ assert.equal(rows.find(r=>r.text==='Armed')?.decision,'protected-identifier');
+ assert.equal(inventoryJavaScript(`value.normalize('NFD');`,'source.js').find(r=>r.text==='NFD').decision,'protected-identifier');
+ assert.equal(protectedTranslation(`value.normalize(textForUI('test.normalization'));`,{'test.normalization':'NFD'}).length,1);
+});
+
+test('scientific export headers, nested unknown values and evidence classes never acquire translations',()=>{
+ const messages={header:'Original value',unknown:'Unknown',kind:'Modeled scanner support, not observed coverage',label:'Download analysis'};
+ const source=`button(root,localizedCopy('label'),()=>{const rows=[[textForUI('header')],...samples.map(s=>[s.utc??textForUI('unknown')])];rows.push([textForUI('kind')]);downloadAnalysis({evidenceClass:textForUI('kind')});downloadAnalysis(rows);});`;
+ const rows=protectedTranslation(source,messages);
+ assert.deepEqual(rows.map(r=>r.key).sort(),['header','kind','kind','unknown']);
+ assert.ok(!rows.some(r=>r.key==='label'));
+ const raw=`button(root,'Download analysis',()=>{const rows=[['Original value'],...samples.map(s=>[s.utc??'Unknown'])];rows.push(['Modeled scanner support, not observed coverage']);downloadAnalysis(rows);});`;
+ const inventory=inventoryJavaScript(raw,'src/AeroScience.Engine/wwwroot/export-fixture.js');
+ for(const text of ['Original value','Unknown','Modeled scanner support, not observed coverage'])assert.equal(inventory.find(r=>r.text===text)?.decision,'protected-value',text);
+ assert.equal(inventory.find(r=>r.text==='Download analysis')?.decision,'presentation');
+});
+
 test('inventory distinguishes presentation from command IDs, style, original rows and user field values',()=>{
  const src=`node('p','No valid source is available.'); button(root,'Pause Science',run,'button primary'); field(root,'Mission name','text','Pilot original name'); table(root,'Original readings',['Recorded UTC','Value'],[['Original evidence text','12.345 m']]); api('/api/mission/control',{action:'startData',id:'Original.Source.v1'}); node('p',user.name);`;
  const rows=inventoryJavaScript(src,'src/AeroScience.Engine/wwwroot/example.js');

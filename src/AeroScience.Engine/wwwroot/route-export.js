@@ -35,7 +35,7 @@ export function routeExportButton(parent, getPlan, api) {
     }
     const plan = getPlan();
     const orbitCount=(plan.patterns||[]).filter(d=>d.kind==="orbit").length;
-    content.append(el("p",localizedCopy("ui.routeExport.messageNavigationWaypointsWillBeExportedUnchanged",{value1:(String(plan.waypoints?.length||0)),value2:(String(orbitCount?` ${orbitCount} orbit(s) use a 5° point-to-point approximation; one revolution normally has 73 points. This is not a native EFB orbit command. Check target route limits.`:""))})));
+    content.append(el("p",localizedCopy("ui.routeExport.messageNavigationWaypointsWillBeExportedUnchanged",{value1:(String(plan.waypoints?.length||0)),value2:(String(orbitCount?textForUI("ui.routeExport.messageOrbitSUseA5PointToPointApproximation",{value1:(orbitCount)}):""))})));
     content.append(format);
     const coordinate = el("select");
     setPresentationText(coordinate,localizedCopy("ui.routeExport.messageCoordinateFormat"),"aria-label");
@@ -44,7 +44,7 @@ export function routeExportButton(parent, getPlan, api) {
       ["ddm", textForUI("ui.routeExport.messageDegreesAndDecimalMinutes")],
       ["dms", textForUI("ui.routeExport.messageDegreesMinutesAndSeconds")],
       ["icao", textForUI("ui.routeExport.messageICAOItem15DegreesMinutesRounded")],
-      ["simbrief", "SimBrief documented degrees/minutes/seconds"],
+      ["simbrief", localizedCopy("route.simbriefCoordinates")],
     ]) {
       const o = el("option", name);
       o.value = id;
@@ -114,7 +114,7 @@ export function routeExportButton(parent, getPlan, api) {
           acknowledgeLongRoute: ack.checked,
         });
         const p = result.preview;
-        planningText(summary,()=>textForUI("ui.routeExport.messageWaypoints",{value1:(String(p.name)),value2:(String(p.departure || "First en-route waypoint")),value3:(String(p.destination || "Last en-route waypoint")),value4:(String(p.waypoints)),value5:(String(planningDistance(p.distanceMetres))),value6:(String(p.patterns.join(", ") || "Custom route")),value7:(String(p.format))}));
+        planningText(summary,()=>textForUI("ui.routeExport.messageWaypoints",{value1:(String(p.name)),value2:(String(p.departure || textForUI("ui.routeExport.messageFirstEnRouteWaypoint"))),value3:(String(p.destination || textForUI("ui.routeExport.messageLastEnRouteWaypoint"))),value4:(String(p.waypoints)),value5:(String(planningDistance(p.distanceMetres))),value6:(String(p.patterns.join(", ") || textForUI("ui.research.messageCustomRoute"))),value7:(String(p.format))}));
         setPresentationText(warnings,p.warnings.join(" "));
         output.value = result.content;
         setPresentationText(action,["route", "coordinates"].includes(format.value)

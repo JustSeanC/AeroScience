@@ -3,7 +3,12 @@ import {localeBundle}from'../scripts/build/build-locales.mjs';
 import{createTranslator,pluralCategory}from'../src/AeroScience.Engine/wwwroot/i18n-format.js';
 import{message,setPresentationText,useLocale,t}from'../src/AeroScience.Engine/wwwroot/i18n.js';
 import {instrumentSummaries,preparationPhase}from'../src/AeroScience.Engine/wwwroot/preparation-summary.js';
+import{airportLocations,searchLocations}from'../src/AeroScience.Engine/wwwroot/location-search.js';
 const data=localeBundle();
+test('Unicode normalization and original airport identities remain stable in every language',()=>{
+ const source={airports:[['fixed-id','LFPB','LBG','Aéroport de Paris','Paris','Île-de-France','FR',48.9694,2.4414,'airport']]},before=JSON.stringify(source);
+ for(const locale of data.manifest.locales){useLocale(locale.id);const airports=airportLocations(source);for(const query of ['aeroport','AÉROPORT','LFPB','LBG']){const results=searchLocations(query,airports,[]);assert.equal(results[0].id,'fixed-id');assert.equal(results[0].icao,'LFPB');assert.equal(results[0].name,'Aéroport de Paris');}assert.equal(JSON.stringify(source),before);}useLocale('en-US');
+});
 test('five candidate catalogs retain exact parameters and immutable original evidence in every locale',()=>{
  const original=Object.freeze({name:'Zoë 東京 <img> $&',utc:'2026-11-14T06:01:02.1234567Z',sha:'a'.repeat(64),value:'-1234.567890123 m',id:'NASA.Original.v1'}),before=JSON.stringify(original);
  for(const locale of data.manifest.locales){const tr=createTranslator(data,locale.id);assert.equal(tr.effectiveLocale,locale.id);for(const value of Object.values(original))assert.ok(tr.text('common.closeNamed',{name:value}).includes(value));}

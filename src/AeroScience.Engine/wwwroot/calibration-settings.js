@@ -20,10 +20,10 @@ export function calibrationSettings(parent,config,catalog,api){
   if(selected&&!definitions.some(d=>d.id===selected.id&&d.revision===selected.revision))definitions.push(selected);
   for(const d of definitions){const option=node('option',`${d.id} · r${d.revision} · ${d.status}`);option.value=`${d.id}:${d.revision}`;choice.append(option);}
   choice.value=selected?`${selected.id}:${selected.revision}`:'';
-  setPresentationText(status,selected?localizedCopy("ui.calibrationSettings.messageRevision",{value1:(String(selected.status)),value2:(String(selected.revision)),value3:(String(selected.adjustment?'Separate user-adjusted scalar channel; original values remain recorded.':'Metadata only; no numeric adjustment.'))}):localizedCopy("ui.calibrationSettings.messageCalibrationAccuracyIsUnknownOriginalValuesRemain"));
+  setPresentationText(status,selected?localizedCopy("ui.calibrationSettings.messageRevision",{value1:(String(selected.status)),value2:(String(selected.revision)),value3:(String(selected.adjustment?textForUI("ui.calibrationSettings.messageSeparateUserAdjustedScalarChannelOriginalValuesRemain"):textForUI("ui.calibrationSettings.messageMetadataOnlyNoNumericAdjustment")))}):localizedCopy("ui.calibrationSettings.messageCalibrationAccuracyIsUnknownOriginalValuesRemain"));
   provenance.replaceChildren();
   if(selected){
-   provenance.append(node('p',localizedCopy("ui.calibrationSettings.messageAuthorDefined",{value1:(String(selected.author??'Unknown')),value2:(String(selected.definedUtc??'Unknown'))})));
+   provenance.append(node('p',localizedCopy("ui.calibrationSettings.messageAuthorDefined",{value1:(String(selected.author??textForUI("localization.unknownValue"))),value2:(String(selected.definedUtc??textForUI("localization.unknownValue")))})));
    for(const p of selected.parameters??[])provenance.append(node('p',`${p.id}: ${p.value} ${p.unit} · ${p.basis}`));
    provenance.append(node('p',(selected.limitations??[]).join(' ')));
   }

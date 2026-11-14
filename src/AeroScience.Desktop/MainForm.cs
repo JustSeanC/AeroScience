@@ -149,7 +149,7 @@ public sealed class MainForm : BrandedForm, IDesktopActions, IScientificFolderOp
             "--AeroScience:EnableLan=" + preferences.EnableLan,
             "--AeroScience:LanAddress=" + preferences.LanAddress
         };
-        var app = EngineApplication.Create(args, services => {services.AddSingleton<IDesktopActions>(this);services.AddSingleton<IScientificFolderOpener>(this);services.AddSingleton<IEarthdataCredentials>(new WindowsEarthdataCredentials(Preferences.DirectoryPath));services.AddSingleton<IOrganizationCredentials>(new WindowsOrganizationCredentials(Preferences.DirectoryPath));});
+        var app = EngineApplication.Create(args, services => {services.AddSingleton<IDesktopActions>(this);services.AddSingleton<IScientificFolderOpener>(this);services.AddSingleton<IEarthdataCredentials>(new WindowsEarthdataCredentials(Preferences.DirectoryPath, () => WindowsPresentation.Locale));services.AddSingleton<IOrganizationCredentials>(new WindowsOrganizationCredentials(Preferences.DirectoryPath, () => WindowsPresentation.Locale));});
         try { await app.StartAsync(); engine = app; }
         catch { await app.DisposeAsync(); throw; }
         dashboard.Enabled = true;
@@ -163,17 +163,17 @@ public sealed class MainForm : BrandedForm, IDesktopActions, IScientificFolderOp
     }
     internal CollectedScienceDeletionPreview PreviewCollectedScience()
     {
-        var services=engine?.Services??throw new InvalidOperationException("Start the companion and reconnect its configured storage before reviewing scientific deletion.");
+        var services=engine?.Services??throw new InvalidOperationException(WindowsPresentation.Text("windows.error.storageBeforeDeletion"));
         return services.GetRequiredService<ScienceStore>().PreviewCollectedDeletion(new(All:true),services.GetRequiredService<MissionStore>());
     }
     internal CollectedScienceDeletionResult DeleteCollectedScience(SourceDeletionExecution request)
     {
-        var services=engine?.Services??throw new InvalidOperationException("The companion stopped; resume the reviewed deletion after restart.");var science=services.GetRequiredService<ScienceStore>();
+        var services=engine?.Services??throw new InvalidOperationException(WindowsPresentation.Text("windows.error.resumeDeletion"));var science=services.GetRequiredService<ScienceStore>();
         var result=science.DeleteCollectedScience(request,services.GetRequiredService<MissionStore>(),services.GetRequiredService<MissionCoordinator>().EnterMaintenance);science.Management?.RefreshScience();return result;
     }
     public async Task RunStoppedAsync(Func<Task> action)
     {
-        if (Busy) throw new InvalidOperationException("Another setup/storage operation is running.");
+        if (Busy) throw new InvalidOperationException(WindowsPresentation.Text("windows.error.operationRunning"));
         // Atomically reject recording and block new toolbar/browser starts before shutdown.
         using var maintenance = engine?.Services.GetRequiredService<MissionCoordinator>().EnterMaintenance();
         Busy = true;
@@ -276,7 +276,7 @@ public sealed class MainForm : BrandedForm, IDesktopActions, IScientificFolderOp
     }
     void IScientificFolderOpener.OpenScientificFolder(Guid libraryId,Guid? sourceId)=>Dispatch(()=>
     {
-        var science=engine?.Services.GetRequiredService<ScienceStore>()??throw new InvalidOperationException("The companion is stopped; no folder was opened.");
+        var science=engine?.Services.GetRequiredService<ScienceStore>()??throw new InvalidOperationException(WindowsPresentation.Text("windows.error.stoppedFolder"));
         NativeFolder.Open(science.ScientificFolder(libraryId,sourceId));
     });
     void IDesktopActions.OpenToolbar() => Dispatch(() => { using var form = new SettingsForm(this, false, toolbar: true); ShowAuxiliary(form); });
@@ -286,10 +286,10 @@ public sealed class MainForm : BrandedForm, IDesktopActions, IScientificFolderOp
     public void ShowDataManagement(IWin32Window? owner = null) { if (!Busy) { using var form = new DataManagementForm(this); ShowAuxiliary(form, owner); } }
     void IDesktopActions.CollectFeedback() => Dispatch(ShowFeedback);
     public ScientificAccessConfiguration ScientificAccess => engine?.Services.GetRequiredService<ScientificAccessSettings>().Get()??new(new(),ScientificAccessSettings.Privacy);
-    public SourceAvailability[] ScientificSources() => (engine??throw new InvalidOperationException("The local engine is stopped; source storage has not been read. Start it or review Storage Settings. Existing data was not replaced.")).Services.GetRequiredService<ScienceStore>().Availability().ToArray();
+    public SourceAvailability[] ScientificSources() => (engine??throw new InvalidOperationException(WindowsPresentation.Text("windows.error.sourceStorageStopped"))).Services.GetRequiredService<ScienceStore>().Availability().ToArray();
     public void SetScientificSourceMode(RemoteKind kind,string mode)
     {
-        var automatic=engine?.Services.GetRequiredService<AutomaticScientificData>()??throw new InvalidOperationException("Start the companion first.");
+        var automatic=engine?.Services.GetRequiredService<AutomaticScientificData>()??throw new InvalidOperationException(WindowsPresentation.Text("windows.error.startCompanion"));
         var p=ScientificAccess.Preferences;var modes=new Dictionary<RemoteKind,string>(p.SourceModes??[]){[kind]=mode};automatic.Configure(p with{SourceModes=modes});
     }
     public void OpenScientificSources(string kind,bool import=false,Guid? dataset=null)

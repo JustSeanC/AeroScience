@@ -1,47 +1,47 @@
 {
-  "catalogVersion": 22,
-  "catalogIdentity": "c871f36c92c40f3e195f35c762e9b9d6d415c522c475027296fb3dd87dba839c",
-  "bundleIdentity": "7000359050b2f809d94178ad889605d43aa458ba777b2c4b0795634fe4058761",
+  "catalogVersion": 23,
+  "catalogIdentity": "2e497b5e380eefe0acc09c924121b57ad145e56c8e85d78639b27b338adbc3dc",
+  "bundleIdentity": "82535d4cf1ffb6e0d75516066084bc6a44c667ed19b0bc344bc05380c0202f1d",
   "keyCoverage": {
-    "en-US": 6711,
-    "es-ES": 6711,
-    "fr-FR": 6711,
-    "de-DE": 6711,
-    "pt-BR": 6711
+    "en-US": 7040,
+    "es-ES": 7040,
+    "fr-FR": 7040,
+    "de-DE": 7040,
+    "pt-BR": 7040
   },
   "candidateReceipts": {
     "es-ES": {
-      "keys": 6711,
-      "explicitCandidateForms": 213,
-      "machineDraftForms": 6430,
-      "englishFallbackKeys": 141,
+      "keys": 7040,
+      "explicitCandidateForms": 243,
+      "machineDraftForms": 6725,
+      "englishFallbackKeys": 148,
       "humanReview": "PENDING — no qualified human review supplied",
       "installedWindows": "NOT TESTED",
       "installedMSFS": "NOT TESTED"
     },
     "fr-FR": {
-      "keys": 6711,
-      "explicitCandidateForms": 213,
-      "machineDraftForms": 6320,
-      "englishFallbackKeys": 272,
+      "keys": 7040,
+      "explicitCandidateForms": 243,
+      "machineDraftForms": 6615,
+      "englishFallbackKeys": 280,
       "humanReview": "PENDING — no qualified human review supplied",
       "installedWindows": "NOT TESTED",
       "installedMSFS": "NOT TESTED"
     },
     "de-DE": {
-      "keys": 6711,
-      "explicitCandidateForms": 213,
-      "machineDraftForms": 6303,
-      "englishFallbackKeys": 267,
+      "keys": 7040,
+      "explicitCandidateForms": 243,
+      "machineDraftForms": 6588,
+      "englishFallbackKeys": 282,
       "humanReview": "PENDING — no qualified human review supplied",
       "installedWindows": "NOT TESTED",
       "installedMSFS": "NOT TESTED"
     },
     "pt-BR": {
-      "keys": 6711,
-      "explicitCandidateForms": 213,
-      "machineDraftForms": 6431,
-      "englishFallbackKeys": 124,
+      "keys": 7040,
+      "explicitCandidateForms": 243,
+      "machineDraftForms": 6728,
+      "englishFallbackKeys": 128,
       "humanReview": "PENDING — no qualified human review supplied",
       "installedWindows": "NOT TESTED",
       "installedMSFS": "NOT TESTED"
@@ -189,7 +189,14 @@
       "native.knotsIasFeetMsl": "Scientific identifier or unit changed in draft; English retained",
       "native.static.mslFt": "Unchanged English requires translation or a documented terminology decision",
       "native.static.iasKts": "Unchanged English requires translation or a documented terminology decision",
-      "native.static.vsFtMin": "Unchanged English requires translation or a documented terminology decision"
+      "native.static.vsFtMin": "Unchanged English requires translation or a documented terminology decision",
+      "ui.customFlightTest.messageAND": "Placeholder/length preservation failed; explicit English fallback",
+      "ui.flightTestProcedure.messageOR": "Placeholder/length preservation failed; explicit English fallback",
+      "ui.organizationMissionPreparation.messageRecordedIASMSLTelemetryNoAdditionalScientificInstruments": "Scientific identifier or unit changed in draft; English retained",
+      "ui.research.messageGiB": "Unchanged English requires translation or a documented terminology decision",
+      "ui.scienceDisplay.messageFtMSL": "Unchanged English requires translation or a documented terminology decision",
+      "ui.sensorPlanning.messageIdealModeledDensityPointsMNot": "Scientific identifier or unit changed in draft; English retained",
+      "ui.organizationReviews.messageOriginal": "Unchanged English requires translation or a documented terminology decision"
     },
     "fr-FR": {
       "nav.sections": "Unchanged English requires translation or a documented terminology decision",
@@ -463,7 +470,15 @@
       "windows.deletion.confirmation": "Unchanged English requires translation or a documented terminology decision",
       "windows.deletion.typePhrase": "Unchanged English requires translation or a documented terminology decision",
       "ui.surveyResearch.messageHistoricalSource": "Placeholder/length preservation failed; explicit English fallback",
-      "native.phase.session": "Unchanged English requires translation or a documented terminology decision"
+      "native.phase.session": "Unchanged English requires translation or a documented terminology decision",
+      "ui.experimentalSensor.messageSyntheticDemoOriginalInputsNotInstalledMSFS": "Scientific identifier or unit changed in draft; English retained",
+      "ui.missionIntelligence.messageInapplicable": "Unchanged English requires translation or a documented terminology decision",
+      "ui.missionPerformance.messageGrade": "Unchanged English requires translation or a documented terminology decision",
+      "ui.organizationLiveUi.messageKnotsIAS": "Scientific identifier or unit changed in draft; English retained",
+      "ui.research.messageGiB": "Unchanged English requires translation or a documented terminology decision",
+      "ui.scienceDisplay.messageFtMSL": "Unchanged English requires translation or a documented terminology decision",
+      "ui.sensorPlanning.messageIdealModeledDensityPointsMNot": "Scientific identifier or unit changed in draft; English retained",
+      "windows.error.closeSimulator": "Scientific identifier or unit changed in draft; English retained"
     },
     "de-DE": {
       "toolbar.mission": "Unchanged English requires translation or a documented terminology decision",
@@ -732,7 +747,22 @@
       "ui.libraryDownload.messageReportedSceneCloudNotAValidPixel": "Placeholder/length preservation failed; explicit English fallback",
       "ui.missionWorkspace.messageAGL": "Scientific identifier or unit changed in draft; English retained",
       "ui.surveyResearch.messageSimulatorObservation": "Placeholder/length preservation failed; explicit English fallback",
-      "windows.storage.openExisting": "Critical negation requires fluent review; English retained"
+      "windows.storage.openExisting": "Critical negation requires fluent review; English retained",
+      "ui.atmosphericResearch.messageFeetMSL8667c4ea": "Placeholder/length preservation failed; explicit English fallback",
+      "ui.experimentalSensor.messageSyntheticDemoOriginalInputsNotInstalledMSFS": "Placeholder/length preservation failed; explicit English fallback",
+      "ui.experimentalSensor.messageRecordedSimulatorInputsFictionalModelDerivedOutputs": "Placeholder/length preservation failed; explicit English fallback",
+      "ui.experimentalSensor.messageInputTelemetrySourceUnavailableNoSimulator": "Placeholder/length preservation failed; explicit English fallback",
+      "ui.hyperspectralImport.messageNm": "Placeholder/length preservation failed; explicit English fallback",
+      "ui.libraryDownload.messageThisIsAProviderFailureNotEvidence": "Placeholder/length preservation failed; explicit English fallback",
+      "ui.map.messageOfflineNaturalEarthGeography": "Placeholder/length preservation failed; explicit English fallback",
+      "ui.missionIntelligence.messageStaleEvidenceCutoffNotCurrent": "Placeholder/length preservation failed; explicit English fallback",
+      "ui.missionPerformance.messageOverallFlightObligationsNeverAveragedFromSession": "Placeholder/length preservation failed; explicit English fallback",
+      "ui.personalResearchFlight.messageInspectCustomTestEvidenceVerifiesThisOriginal": "Placeholder/length preservation failed; explicit English fallback",
+      "ui.research.messageGiB": "Scientific identifier or unit changed in draft; English retained",
+      "ui.scienceDisplay.messageFtMSL": "Unchanged English requires translation or a documented terminology decision",
+      "ui.scienceJourney.messageUnavailableCheckTheConnectionSessionOr": "Placeholder/length preservation failed; explicit English fallback",
+      "ui.sensorPlanning.messageIdealModeledDensityPointsMNot": "Scientific identifier or unit changed in draft; English retained",
+      "ui.tfrLayers.messageWholeMissionUTCIntervalTo": "Placeholder/length preservation failed; explicit English fallback"
     },
     "pt-BR": {
       "flight.elapsed": "Unchanged English requires translation or a documented terminology decision",
@@ -858,7 +888,11 @@
       "native.final": "Unchanged English requires translation or a documented terminology decision",
       "native.static.mslFt": "Unchanged English requires translation or a documented terminology decision",
       "native.static.iasKts": "Unchanged English requires translation or a documented terminology decision",
-      "ui.missionWorkspace.messageAGL": "Scientific identifier or unit changed in draft; English retained"
+      "ui.missionWorkspace.messageAGL": "Scientific identifier or unit changed in draft; English retained",
+      "ui.research.messageGiB": "Unchanged English requires translation or a documented terminology decision",
+      "ui.scienceDisplay.messageFtMSL": "Scientific identifier or unit changed in draft; English retained",
+      "ui.sensorPlanning.messageIdealModeledDensityPointsMNot": "Scientific identifier or unit changed in draft; English retained",
+      "ui.organizationReviews.messageOriginal": "Unchanged English requires translation or a documented terminology decision"
     }
   },
   "renderedCoverage": "Sampled browser receipts are separate; a complete catalog does not prove all rendered views.",

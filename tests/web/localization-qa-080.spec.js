@@ -3,6 +3,7 @@ import AxeBuilder from'@axe-core/playwright';
 import{mountRealEngine}from'./helpers/toolbar.mjs';
 import{createTranslator}from'../../src/AeroScience.Engine/wwwroot/i18n-format.js';
 import{localeBundle}from'../../scripts/build/build-locales.mjs';
+import{readFile}from'node:fs/promises';
 const bundle=localeBundle(),origin='http://127.0.0.1:5080';
 async function get(request,path){const response=await request.get(path);expect(response.ok(),await response.text()).toBe(true);return response.json();}
 async function post(request,path,data={}){const {csrf}=await(await request.post('/api/session',{headers:{Origin:origin},data:{}})).json();const response=await request.post(path,{headers:{Origin:origin,'X-AeroScience-CSRF':csrf},data});expect(response.ok(),await response.text()).toBe(true);return response.json();}
@@ -13,6 +14,60 @@ async function noOverflow(page){expect(await page.evaluate(()=>document.document
 async function accessible(page,include){const builder=new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa','wcag22aa']);if(include)builder.include(include);const report=await builder.analyze();expect(report.violations.map(v=>({id:v.id,nodes:v.nodes.map(n=>({target:n.target,summary:n.failureSummary}))}))).toEqual([]);}
 
 test.afterEach(async({request})=>{const state=await get(request,'/api/state');if(state.activeMission)await post(request,`/api/missions/${state.activeMission.id}/end`);await post(request,'/api/instruments',[]);await host(request,'en-US');});
+test('real Chart.js receives primitive localized labels and refreshes without changing points or canvas identity',async({page})=>{
+ await page.goto('/#home');await expect(page.getByRole('heading',{name:'Home',exact:true})).toBeVisible();
+ await page.evaluate(async()=>{const{chart}=await import('/workstation-ui.js'),{message}=await import('/i18n.js');const points=[{x:1,y:123.25},{x:2,y:124.125}],figure=chart(document.body,message('ui.receivedEvidenceUi.messageReceivedIASSamplesNoInterpolation'),[{label:message('ui.receivedEvidenceUi.messageRecordedIAS'),data:points}],{type:'scatter',xLabel:message('ui.missionTimeline.messageOriginalSequence'),yLabel:message('ui.receivedEvidenceUi.messageRecordedIAS')});figure.id='p07-chart-boundary';figure.originalPoints=JSON.stringify(points);figure.originalCanvas=figure.querySelector('canvas');figure.originalChart=Chart.getChart(figure.originalCanvas);figure.originalCanvas.tabIndex=0;figure.originalCanvas.focus();});await expect(page.locator('#p07-chart-boundary canvas')).toBeVisible();await page.locator('#p07-chart-boundary canvas').focus();await expect(page.locator('#p07-chart-boundary canvas')).toBeFocused();
+ for(const locale of ['en-US','es-ES','fr-FR','de-DE','pt-BR']){
+  await page.evaluate(async locale=>{const{updatePresentation}=await import('/presentation-settings.js');updatePresentation({locale});},locale);
+  const value=await page.locator('#p07-chart-boundary').evaluate(figure=>{const chart=Chart.getChart(figure.querySelector('canvas'));return{locale:chart.options.locale,x:chart.options.scales.x.title.text,y:chart.options.scales.y.title.text,label:chart.data.datasets[0].label,sameChart:chart===figure.originalChart,sameCanvas:figure.querySelector('canvas')===figure.originalCanvas,focused:document.activeElement===figure.originalCanvas,samePoints:JSON.stringify(chart.data.datasets[0].data)===figure.originalPoints};}),translate=createTranslator(bundle,locale).text;
+  expect(value).toEqual({locale,x:translate('ui.missionTimeline.messageOriginalSequence'),y:translate('ui.receivedEvidenceUi.messageRecordedIAS'),label:translate('ui.receivedEvidenceUi.messageRecordedIAS'),sameChart:true,sameCanvas:true,focused:true,samePoints:true});
+ }
+ const canvas=await page.locator('#p07-chart-boundary canvas').elementHandle();await page.locator('#p07-chart-boundary').evaluate(figure=>figure.remove());await expect.poll(()=>canvas.evaluate(node=>Chart.getChart(node)===undefined)).toBe(true);
+});
+test('all five languages preserve exact original CSV, GeoJSON and provenance export bytes',async({page,request})=>{
+ test.setTimeout(90000); // Five complete views; each download still has its own short response bound.
+ const fixture=await post(request,'/api/testing/terrain-completion'),job=await get(request,`/api/terrain-elevation/jobs/${fixture.jobId}`);
+ await post(request,`/api/terrain-elevation/jobs/${fixture.jobId}/control`,{requestId:crypto.randomUUID(),expectedRevision:job.revision,action:'start'});
+ await expect.poll(async()=>(await get(request,`/api/terrain-elevation/jobs/${fixture.jobId}`)).state).toBe('PartiallyComplete');
+ const original=await get(request,`/api/missions/${fixture.missionId}/science-summary`);
+ const expected=new Map();
+ for(const locale of ['en-US','es-ES','fr-FR','de-DE','pt-BR']){
+  // Chromium limits repeated downloads from one document. Use the ordinary
+  // fresh-view journey for each language, without changing browser policy.
+  const view=locale==='en-US'?page:await page.context().newPage();
+  await view.goto(`/#workspace/results?missions=${fixture.missionId}&view=explore`);await expect(view.locator('[data-displayed-cells]')).toHaveAttribute('data-displayed-cells',/^[1-9]/);
+  await view.evaluate(async locale=>{const{updatePresentation}=await import('/presentation-settings.js');updatePresentation({locale});},locale);
+  const translate=createTranslator(bundle,locale).text;
+  for(const key of ['results.exportTable','results.exportGeo','results.exportProvenance']){
+   const pending=view.waitForEvent('download',{timeout:5000});await view.locator('.survey-results').getByRole('button',{name:translate(key),exact:true}).click();const download=await pending,bytes=await readFile(await download.path());
+   if(locale==='en-US')expected.set(key,bytes);else expect(bytes,`${locale} ${key}: original export bytes`).toEqual(expected.get(key));
+   if(key==='results.exportTable')expect(bytes.toString()).toMatch(/^"Evidence class","Artifact ID","Artifact SHA256"/);
+   if(key==='results.exportProvenance')expect(JSON.parse(bytes).evidenceClass).toBe('Derived viewer analysis subset, not an original LAS/LAZ or complete research package');
+  }
+  if(view!==page)await view.close();
+ }
+ expect(await get(request,`/api/missions/${fixture.missionId}/science-summary`)).toEqual(original);
+});
+test('settings and scientific overlay labels follow all five languages without replacing focused controls',async({page,request})=>{
+ const fixture=await post(request,'/api/testing/terrain-completion'),original=await get(request,`/api/missions/${fixture.missionId}/science-summary`);
+ await page.goto('/#settings/updates');
+ for(const locale of ['en-US','es-ES','fr-FR','de-DE','pt-BR']){
+  await page.evaluate(async locale=>{const{updatePresentation}=await import('/presentation-settings.js');updatePresentation({locale});},locale);
+  const translate=createTranslator(bundle,locale).text;
+  await expect(page.getByLabel(translate('updates.automaticNotifications'),{exact:true})).toBeVisible();
+  await expect(page.getByLabel(translate('updates.includePrereleases'),{exact:true})).toBeVisible();
+ }
+ await page.goto(`/#workspace/map?missions=${fixture.missionId}`);
+ await page.getByRole('button',{name:createTranslator(bundle,'pt-BR').text('ui.mapLayerManager.messageOverlaysLegend'),exact:true}).click();
+ const originalControl=await page.locator('.map-overlays-dialog input').first().elementHandle();await originalControl.focus();
+ for(const locale of ['en-US','es-ES','fr-FR','de-DE','pt-BR']){
+  await page.evaluate(async locale=>{const{updatePresentation}=await import('/presentation-settings.js');updatePresentation({locale});},locale);
+  const translate=createTranslator(bundle,locale).text,dialog=page.locator('.map-overlays-dialog');
+  for(const key of ['map.savedObservations','map.verifiedRasters'])await expect(dialog.getByLabel(translate(key),{exact:true})).toBeVisible();
+  expect(await originalControl.evaluate(n=>n===document.activeElement&&n.isConnected)).toBe(true);
+ }
+ expect(await get(request,`/api/missions/${fixture.missionId}/science-summary`)).toEqual(original);
+});
 for(const locale of bundle.manifest.locales)for(const theme of ['light','dark'])test(`${locale.id} ${theme}: real Results and native controls, expanded layouts and labeled browser captures`,async({page,request},info)=>{
  test.setTimeout(150000);const samples=[];
  await page.emulateMedia({colorScheme:theme,reducedMotion:'reduce'});

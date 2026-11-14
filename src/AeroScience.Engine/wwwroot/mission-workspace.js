@@ -183,7 +183,7 @@ export async function replay(parent, id, mission, api, review, setStop) {
       broken =
         previous &&
         Date.parse(f.timestampUtc) - Date.parse(previous.timestampUtc) > 5000;
-    setPresentationText(status,localizedCopy("ui.missionWorkspace.messageSavedSampleCursor",{value1:(String(f.timestampUtc)),value2:(String(f.aircraft)),value3:(String(broken ? " · recording gap before this sample" : "")),value4:(String(new Date(clock).toISOString()))}));
+    setPresentationText(status,localizedCopy("ui.missionWorkspace.messageSavedSampleCursor",{value1:(String(f.timestampUtc)),value2:(String(f.aircraft)),value3:(String(broken ? textForUI("ui.missionWorkspace.messageRecordingGapBeforeThisSample") : "")),value4:(String(new Date(clock).toISOString()))}));
     const recent = page.samples
       .slice(Math.max(0, index - 499), index + 1)
       .map((s, i, a) => ({
@@ -238,7 +238,7 @@ export async function replay(parent, id, mission, api, review, setStop) {
         acquisitions.replaceChildren(
           el("h4", localizedCopy("ui.missionWorkspace.messageSavedAcquisitionsWithin3Seconds")),
         );
-        acquisitions.append(el('p',localizedCopy("ui.missionWorkspace.messageInstrumentStateConfigurationTime",{value1:(String(context.instruments.scienceState)),value2:(String(context.instruments.configurationUtc??'not archived'))})));
+        acquisitions.append(el('p',localizedCopy("ui.missionWorkspace.messageInstrumentStateConfigurationTime",{value1:(String(context.instruments.scienceState)),value2:(String(context.instruments.configurationUtc??textForUI("ui.missionWorkspace.messageNotArchived")))})));
         for(const c of context.instruments.instruments??[])if(c.enabled)acquisitions.append(el('p',`${c.instrumentId} · ${c.intervalMs/1000}s · ${c.payload?.profile.name??textForUI("ui.missionWorkspace.messageProfileNotArchived")}`));
         if(context.error||available.error)acquisitions.append(el('p',localizedCopy("ui.missionWorkspace.messageScientificLibraryUnavailable",{value1:(String(context.error??available.error))})));
         for(const row of (context.observations??[]).slice(0,200))acquisitions.append(el('p',`${row.measurementId}: ${format(row.value,5)} ${row.unit} · ${row.timestampUtc} · ${row.quality}`));
@@ -249,13 +249,13 @@ export async function replay(parent, id, mission, api, review, setStop) {
             .slice(0, 100)
             .map((p) => ({
               vertices: p.footprint.boundary,
-              label: textForUI("ui.missionWorkspace.messageActualPacketSource",{value1:(String(p.instrumentId)),value2:(String(p.flightPacketUtc)),value3:(String(p.sourceObservationUtc ?? "unknown date"))}),
+              label: textForUI("ui.missionWorkspace.messageActualPacketSource",{value1:(String(p.instrumentId)),value2:(String(p.flightPacketUtc)),value3:(String(p.sourceObservationUtc ?? textForUI("ui.missionWorkspace.messageUnknownDate")))}),
             })),
         });
         for (const p of products.slice(0, 100))
           link(
             acquisitions,
-            localizedCopy("ui.missionWorkspace.messageOriginalSource",{value1:(String(p.instrumentId)),value2:(String(p.flightPacketUtc)),value3:(String(p.sourceObservationUtc ?? "date unknown"))}),
+            localizedCopy("ui.missionWorkspace.messageOriginalSource",{value1:(String(p.instrumentId)),value2:(String(p.flightPacketUtc)),value3:(String(p.sourceObservationUtc ?? textForUI("ui.missionWorkspace.messageDateUnknown")))}),
             `/api/science/products/${p.id}/export/json`,
           );
       } catch (error) {
@@ -488,7 +488,7 @@ export async function coverage(parent, id, api, review) {
         results.append(
           el(
             "p",
-            localizedCopy("ui.missionWorkspace.messageModeledGeometrySurveyDenominatorGeometric",{value1:(String(planningArea(data.geometricSquareMetres))),value2:(String(data.surveySquareMetres == null ? "unavailable (no survey polygon)" : planningArea(data.surveySquareMetres))),value3:(String(format(data.geometricSurveyPercent)))}),
+            localizedCopy("ui.missionWorkspace.messageModeledGeometrySurveyDenominatorGeometric",{value1:(String(planningArea(data.geometricSquareMetres))),value2:(String(data.surveySquareMetres == null ? textForUI("ui.missionWorkspace.messageUnavailableNoSurveyPolygon") : planningArea(data.surveySquareMetres))),value3:(String(format(data.geometricSurveyPercent)))}),
           ),
         );
         const mapPanel = el("div");
@@ -650,7 +650,7 @@ export async function imagery(parent, id, api) {
         if (!map) {
           map = new ResearchMap(display);
           map.artifactGroup=window.L.layerGroup().addTo(map.map);
-          map.layers.addOverlay({id:'scientific-artifact',name:'Retained scientific artifact',layer:map.artifactGroup,group:"Science",description:textForUI("ui.missionWorkspace.messageDerivedProductFromRetainedScientificEvidenceSource")});
+          map.layers.addOverlay({id:'scientific-artifact',name:localizedCopy("map.retainedArtifact"),layer:map.artifactGroup,group:"Science",description:textForUI("ui.missionWorkspace.messageDerivedProductFromRetainedScientificEvidenceSource")});
         }
         map.artifactGroup.clearLayers();
         overlay = window.L.imageOverlay(
@@ -692,7 +692,7 @@ export async function atmosphere(parent, id, api) {
   parent.append(
     el(
       "p",
-      localizedCopy("ui.missionWorkspace.messageRecordedSamplesGaps",{value1:(String(result.totalSamples)),value2:(String(result.gaps)),value3:(String(result.downsampled ? " · chart points thinned for bounded display" : ""))}),
+      localizedCopy("ui.missionWorkspace.messageRecordedSamplesGaps",{value1:(String(result.totalSamples)),value2:(String(result.gaps)),value3:(String(result.downsampled ? textForUI("ui.missionWorkspace.messageChartPointsThinnedForBounded") : ""))}),
     ),
   );
   const controls = el("div"),
