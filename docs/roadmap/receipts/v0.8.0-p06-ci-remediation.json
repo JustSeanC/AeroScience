@@ -127,6 +127,12 @@
       "bytes": 1009
     }
   ],
-  "correctiveFull": "Pending the exact committed remediation source; close after workflow completion.",
+  "correctiveFull": {
+    "runId": 43554467844,
+    "url": "https://github.com/JustSeanC/AeroScience/actions/runs/43554467844",
+    "source": "00402f82e3783035116c0dbc2d41fb825aca1cdd",
+    "conclusion": "success",
+    "fullReceipt": "v0.8.0-p06-ci.json"
+  },
   "installedWindowsMSFS": "Not Tested"
 }
