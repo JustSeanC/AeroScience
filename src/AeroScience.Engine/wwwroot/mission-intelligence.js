@@ -1,3 +1,4 @@
+import {contextualHelp} from './contextual-help.js';
 import {node, numeric, dateTime, link, newIdentity,informationDetails,scientificNotice} from './workstation-ui.js';
 import {renderSensorOperating,markSensorOperatingStale} from './sensor-operating-status.js';
 import {t} from './i18n.js';
@@ -14,7 +15,7 @@ const elapsed=(from,to)=>from?`${Math.max(0,Math.floor(((to?Date.parse(to):Date.
 // Shared desktop/paired-browser presentation. Backend services own all decisions.
 export function missionIntelligence(parent,api,{id='mission-intelligence',after=false,sensorParent=null,onState=()=>{},onStale=()=>{},acceptState=()=>true}={}){
  const panel=node('article',undefined,'panel research-panel mission-intelligence');panel.id=id;
- if(after)parent.after(panel);else parent.append(panel);panel.append(node('h2','Science Controls'));
+ if(after)parent.after(panel);else parent.append(panel);panel.append(node('h2','Science Controls'));contextualHelp(panel,'flight');
  const status=node('p','Loading authoritative mission state…');status.setAttribute('role','status');
  const summary=node('p'),sessionLine=node('p'),authority=node('p'),warning=node('p'),message=node('p');message.setAttribute('role','status');
  const actions=node('div',undefined,'mission-actions'),reasonLabel=node('label','Pause rationale '),reason=node('select');reason.setAttribute('aria-label','Science pause rationale');

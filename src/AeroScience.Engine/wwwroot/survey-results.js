@@ -1,3 +1,4 @@
+import {contextualHelp} from './contextual-help.js';
 import {node as el,button,select,link,disclosure,metric,status,errorMessage,numeric,table,legend,dateTime} from './workstation-ui.js';
 import {t} from './i18n.js';
 import {displayReading,onUnitsChanged} from './science-display.js';
@@ -14,7 +15,7 @@ export async function surveyResults(parent,api,{id,summary,params,disposals}){
  const root=el('section',undefined,'survey-results');root.setAttribute('aria-label',text('title'));parent.append(root);
  disposals.push(()=>root.remove());
  const requested=params.get('view'),view=['overview','explore','evidence'].includes(requested)?requested:'overview';
- const nav=el('nav',undefined,'workspace-subnav');nav.setAttribute('aria-label',text('views'));for(const key of ['overview','explore','evidence']){const a=link(nav,text(key),resultsHref(params,key));if(key===view)a.setAttribute('aria-current','page');}root.append(nav);
+ const nav=el('nav',undefined,'workspace-subnav');nav.setAttribute('aria-label',text('views'));for(const key of ['overview','explore','evidence']){const a=link(nav,text(key),resultsHref(params,key));if(key===view)a.setAttribute('aria-current','page');}root.append(nav);contextualHelp(root,'evidence');
  const products=await api(`/api/missions/${id}/survey-results`),manifests=[],issues=[];
  // The latest retained artifact of each scientific kind, not summed revisions.
  for(const kind of ['continuous-terrain-survey',terrainKind,lidarKind]){const a=products.find(p=>p.kind===kind&&p.state==='Retained');if(a){try{manifests.push(await api(`/api/science/artifacts/${a.id}/survey-manifest`));}catch(e){if(e.name==='AbortError'||e.message==='View changed.')throw e;issues.push(e.message);}}}

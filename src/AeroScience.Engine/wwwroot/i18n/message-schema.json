@@ -2744,6 +2744,158 @@
     "collaboration.notificationLimits": {
       "context": "P06 existing organization live/notification presentation only; preserve separate consent, server approval, expiry and ephemeral positions.",
       "parameters": []
+    },
+    "contextHelp.group.flight": {
+      "context": "P06 offline contextual guidance. Preserve original versus derived/historical distinctions and explicit server-authorized actions; never translate names or original data.",
+      "parameters": []
+    },
+    "contextHelp.group.assignments": {
+      "context": "P06 offline contextual guidance. Preserve original versus derived/historical distinctions and explicit server-authorized actions; never translate names or original data.",
+      "parameters": []
+    },
+    "contextHelp.group.evidence": {
+      "context": "P06 offline contextual guidance. Preserve original versus derived/historical distinctions and explicit server-authorized actions; never translate names or original data.",
+      "parameters": []
+    },
+    "contextHelp.group.sources": {
+      "context": "P06 offline contextual guidance. Preserve original versus derived/historical distinctions and explicit server-authorized actions; never translate names or original data.",
+      "parameters": []
+    },
+    "contextHelp.group.live": {
+      "context": "P06 offline contextual guidance. Preserve original versus derived/historical distinctions and explicit server-authorized actions; never translate names or original data.",
+      "parameters": []
+    },
+    "contextHelp.guide": {
+      "context": "P06 offline contextual guidance. Preserve original versus derived/historical distinctions and explicit server-authorized actions; never translate names or original data.",
+      "parameters": []
+    },
+    "contextHelp.recording.title": {
+      "context": "P06 offline contextual guidance. Preserve original versus derived/historical distinctions and explicit server-authorized actions; never translate names or original data.",
+      "parameters": []
+    },
+    "contextHelp.recording.body": {
+      "context": "P06 offline contextual guidance. Preserve original versus derived/historical distinctions and explicit server-authorized actions; never translate names or original data.",
+      "parameters": []
+    },
+    "contextHelp.quality.title": {
+      "context": "P06 offline contextual guidance. Preserve original versus derived/historical distinctions and explicit server-authorized actions; never translate names or original data.",
+      "parameters": []
+    },
+    "contextHelp.quality.body": {
+      "context": "P06 offline contextual guidance. Preserve original versus derived/historical distinctions and explicit server-authorized actions; never translate names or original data.",
+      "parameters": []
+    },
+    "contextHelp.assignments.title": {
+      "context": "P06 offline contextual guidance. Preserve original versus derived/historical distinctions and explicit server-authorized actions; never translate names or original data.",
+      "parameters": []
+    },
+    "contextHelp.assignments.body": {
+      "context": "P06 offline contextual guidance. Preserve original versus derived/historical distinctions and explicit server-authorized actions; never translate names or original data.",
+      "parameters": []
+    },
+    "contextHelp.evaluation.title": {
+      "context": "P06 offline contextual guidance. Preserve original versus derived/historical distinctions and explicit server-authorized actions; never translate names or original data.",
+      "parameters": []
+    },
+    "contextHelp.evaluation.body": {
+      "context": "P06 offline contextual guidance. Preserve original versus derived/historical distinctions and explicit server-authorized actions; never translate names or original data.",
+      "parameters": []
+    },
+    "contextHelp.roles.title": {
+      "context": "P06 offline contextual guidance. Preserve original versus derived/historical distinctions and explicit server-authorized actions; never translate names or original data.",
+      "parameters": []
+    },
+    "contextHelp.roles.body": {
+      "context": "P06 offline contextual guidance. Preserve original versus derived/historical distinctions and explicit server-authorized actions; never translate names or original data.",
+      "parameters": []
+    },
+    "contextHelp.originals.title": {
+      "context": "P06 offline contextual guidance. Preserve original versus derived/historical distinctions and explicit server-authorized actions; never translate names or original data.",
+      "parameters": []
+    },
+    "contextHelp.originals.body": {
+      "context": "P06 offline contextual guidance. Preserve original versus derived/historical distinctions and explicit server-authorized actions; never translate names or original data.",
+      "parameters": []
+    },
+    "contextHelp.corridor.title": {
+      "context": "P06 offline contextual guidance. Preserve original versus derived/historical distinctions and explicit server-authorized actions; never translate names or original data.",
+      "parameters": []
+    },
+    "contextHelp.corridor.body": {
+      "context": "P06 offline contextual guidance. Preserve original versus derived/historical distinctions and explicit server-authorized actions; never translate names or original data.",
+      "parameters": []
+    },
+    "contextHelp.terrain.title": {
+      "context": "P06 offline contextual guidance. Preserve original versus derived/historical distinctions and explicit server-authorized actions; never translate names or original data.",
+      "parameters": []
+    },
+    "contextHelp.terrain.body": {
+      "context": "P06 offline contextual guidance. Preserve original versus derived/historical distinctions and explicit server-authorized actions; never translate names or original data.",
+      "parameters": []
+    },
+    "contextHelp.lidar.title": {
+      "context": "P06 offline contextual guidance. Preserve original versus derived/historical distinctions and explicit server-authorized actions; never translate names or original data.",
+      "parameters": []
+    },
+    "contextHelp.lidar.body": {
+      "context": "P06 offline contextual guidance. Preserve original versus derived/historical distinctions and explicit server-authorized actions; never translate names or original data.",
+      "parameters": []
+    },
+    "contextHelp.dates.title": {
+      "context": "P06 offline contextual guidance. Preserve original versus derived/historical distinctions and explicit server-authorized actions; never translate names or original data.",
+      "parameters": []
+    },
+    "contextHelp.dates.body": {
+      "context": "P06 offline contextual guidance. Preserve original versus derived/historical distinctions and explicit server-authorized actions; never translate names or original data.",
+      "parameters": []
+    },
+    "contextHelp.datum.title": {
+      "context": "P06 offline contextual guidance. Preserve original versus derived/historical distinctions and explicit server-authorized actions; never translate names or original data.",
+      "parameters": []
+    },
+    "contextHelp.datum.body": {
+      "context": "P06 offline contextual guidance. Preserve original versus derived/historical distinctions and explicit server-authorized actions; never translate names or original data.",
+      "parameters": []
+    },
+    "contextHelp.coverage.title": {
+      "context": "P06 offline contextual guidance. Preserve original versus derived/historical distinctions and explicit server-authorized actions; never translate names or original data.",
+      "parameters": []
+    },
+    "contextHelp.coverage.body": {
+      "context": "P06 offline contextual guidance. Preserve original versus derived/historical distinctions and explicit server-authorized actions; never translate names or original data.",
+      "parameters": []
+    },
+    "contextHelp.provenance.title": {
+      "context": "P06 offline contextual guidance. Preserve original versus derived/historical distinctions and explicit server-authorized actions; never translate names or original data.",
+      "parameters": []
+    },
+    "contextHelp.provenance.body": {
+      "context": "P06 offline contextual guidance. Preserve original versus derived/historical distinctions and explicit server-authorized actions; never translate names or original data.",
+      "parameters": []
+    },
+    "contextHelp.downloads.title": {
+      "context": "P06 offline contextual guidance. Preserve original versus derived/historical distinctions and explicit server-authorized actions; never translate names or original data.",
+      "parameters": []
+    },
+    "contextHelp.downloads.body": {
+      "context": "P06 offline contextual guidance. Preserve original versus derived/historical distinctions and explicit server-authorized actions; never translate names or original data.",
+      "parameters": []
+    },
+    "contextHelp.submission.title": {
+      "context": "P06 offline contextual guidance. Preserve original versus derived/historical distinctions and explicit server-authorized actions; never translate names or original data.",
+      "parameters": []
+    },
+    "contextHelp.submission.body": {
+      "context": "P06 offline contextual guidance. Preserve original versus derived/historical distinctions and explicit server-authorized actions; never translate names or original data.",
+      "parameters": []
+    },
+    "contextHelp.privacy.title": {
+      "context": "P06 offline contextual guidance. Preserve original versus derived/historical distinctions and explicit server-authorized actions; never translate names or original data.",
+      "parameters": []
+    },
+    "contextHelp.privacy.body": {
+      "context": "P06 offline contextual guidance. Preserve original versus derived/historical distinctions and explicit server-authorized actions; never translate names or original data.",
+      "parameters": []
     }
   }
 }

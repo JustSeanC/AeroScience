@@ -1,3 +1,4 @@
+import {contextualHelp} from './contextual-help.js';
 import {submissionReview} from './submission-review.js';
 import {node,button,link,disclosure,table,informationDetails,scientificNotice} from './workstation-ui.js';
 import {dialogHeader,markDialogSaved,requestDialogClose} from './dialog-ui.js';
@@ -12,7 +13,7 @@ export function openSubmissionBuilder(api,entry={}){
  const box=node('dialog');box.setAttribute('aria-label','Submit Evidence');box.append(node('h2','Submit Evidence'));document.body.append(box);dialogHeader(box,{title:'Submit Evidence',protectEdits:true});
  const status=node('p','Loading retained research…');status.setAttribute('role','status');const body=node('section');box.append(status,body);
  let alive=true,busy=false,epoch=0,timer,row=null,preview=null,options=[],selected=new Set(),choices=[],resultIds=[],connectionId=entry.connectionId||null,page=0,nextChoiceOffset=null,supportingIds=new Set(),connectionInfo=null;
- box.append(node('p',t('submissions.journey'),'lead'));
+ box.append(node('p',t('submissions.journey'),'lead'));contextualHelp(box,'evidence');
  const run=fn=>async()=>{if(busy)return;busy=true;clearTimeout(timer);const controls=[...box.querySelectorAll('button:not(.popup-close),input,select')].map(c=>[c,c.disabled]);for(const [c]of controls)c.disabled=true;try{await fn();}catch(e){if(alive)status.textContent=e.message||'This action could not be confirmed. Original research is unchanged.';}finally{busy=false;for(const [c,disabled]of controls)c.disabled=disabled;}};
  box.addEventListener('close',()=>{alive=false;epoch++;clearTimeout(timer);box.remove();},{once:true});box.showModal();
  const name=node('input');name.type='text';name.maxLength=120;name.setAttribute('aria-label','Submission name');

@@ -5,6 +5,7 @@ guides.push(['scientific-library.md','Browse & download scientific data']);
 guides.push(['remote-sensing/hyperspectral.md','NASA hyperspectral assistant']);
 guides.push(['v0.6.0-aviation-reference.md','Aviation maps & FAA references']);
 guides.push(['v0.7.0-personal-research.md','Personal Research & Flight-Regime Validation']);
+guides.push(['v0.8.0-research-collaboration.md','Research collaboration & scientific evidence']);
 guides.push(['README.md','Documentation index']);
 guides.push(['instrument-calibration.md','Calibration & provenance (development)']);
 export function documentationUrl(target,guide){
@@ -38,6 +39,7 @@ export function markdown(parent,source,guide){
 let generation=0,controller;
 export function disposeHelpCenter(){generation++;controller?.abort();}
 const tasks=[
+ ['How do I join research and submit evidence?','v0.8.0-research-collaboration.md','organization campaign assignment claim review original derived DEM DSM historical LiDAR datum source privacy sharing permission'],
  ['How do I find and import NASA AVIRIS data?','remote-sensing/hyperspectral.md','nasa aviris classic ng emit earthdata authorization hyperspectral header binary checksum official browser guided import'],
  ['How do I use External Data Manager without a flight?','scientific-library.md','library catalog scenes source date bands polygon region download approval queue offline reuse'],
  ['How do I create my first mission?','v0.4.2-pilot-guide.md','plan select start first flight'],

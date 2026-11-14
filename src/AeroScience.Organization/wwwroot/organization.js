@@ -1,3 +1,5 @@
+import './organization-appearance.js';
+import {contextualHelp} from './contextual-help.js';
 import {organizationNotifications} from './organization-notifications.js';
 import {organizationPortalNavigation} from './organization-portal-nav.js';
 import {organizationLiveUi} from './organization-live-ui.js';
@@ -48,7 +50,7 @@ function failure(parent,error){let box=parent.querySelector(':scope > .action-er
 function field(parent,label,type='text',value='',maximum=120){const wrap=node('label',label),input=node(type==='textarea'?'textarea':'input');if(type!=='textarea')input.type=type;input.value=value;input.maxLength=maximum;input.setAttribute('aria-label',label);wrap.append(input);parent.append(wrap);return input;}
 function status(parent,message=''){const p=node('p',message,'workspace-status');p.setAttribute('role','status');parent.append(p);return p;}
 function taskNavigation(){organizationPortalNavigation(root,session,{research:()=>{epoch++;return membership.memberHome();},reviews:()=>{epoch++;return reviews.queue();},programs:showPrograms,live:openLive,events:openEvents,notifications:()=>notifications.settings()});}
-function heading(title,description){root.replaceChildren(node('h1',title));if(description)root.append(node('p',description,'lead'));taskNavigation();}
+function heading(title,description){root.replaceChildren(node('h1',title));if(description)root.append(node('p',description,'lead'));taskNavigation();contextualHelp(root,/evidence|review/i.test(title)?'evidence':'assignments',{guideHref:'/organization-help.html'});}
 function modal(title){returnFocus=document.activeElement;dialog.replaceChildren();const head=node('div',undefined,'dialog-head'),h=node('h2',title);h.id='dialog-title';head.append(h);const close=button(head,'×',()=>dialog.close());close.setAttribute('aria-label','Close dialog');dialog.append(head);dialog.showModal();return dialog;}
 dialog.addEventListener('close',()=>{if(returnFocus?.isConnected)returnFocus.focus();});
 function draftCommand(){let prior='',id;return data=>{const key=JSON.stringify(data);if(key!==prior){prior=key;id=crypto.randomUUID();}return {...data,requestId:id};};}

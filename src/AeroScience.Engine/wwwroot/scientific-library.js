@@ -1,3 +1,4 @@
+import {contextualHelp} from './contextual-help.js';
 import {inspectSource} from './source-inspection.js';
 import {openEmitSource,openEmitImport} from './emit-library.js';
 import {libraryLocation} from './library-location.js';
@@ -14,7 +15,7 @@ export async function scientificLibrary(parent,api){
  dispose=()=>{stopped=true;clearTimeout(timer);popups.splice(0).forEach(close=>close());maps.splice(0).forEach(map=>map.destroy());};
  parent.replaceChildren();if(location.hash.startsWith('#library/download')){const close=await libraryDownload(parent,api,()=>stopped);if(stopped)close();else dispose=()=>{stopped=true;close();};return;}
  const heading=el('div',undefined,'page-heading');heading.append(el('p','REUSABLE HISTORICAL SOURCES','eyebrow'),el('h2','Data Sources'),el('p','Retained historical datasets'));parent.append(heading);link(heading,'Find & Download Data','#library/download');
- heading.append(el('p',t('results.libraryMeaning')));
+ heading.append(el('p',t('results.libraryMeaning')));contextualHelp(parent,'sources');
  await libraryLocation(parent,api,{stopped:()=>stopped});if(stopped)return;
  const management=disclosure(parent,'Manage Downloaded Data'),deleteTools=el('div',undefined,'action-row');management.append(deleteTools);
  async function changed(){window.dispatchEvent(new CustomEvent('aeroscience-sources-changed'));if(!stopped&&location.hash.startsWith('#library')&&parent.isConnected)await scientificLibrary(parent,api);}

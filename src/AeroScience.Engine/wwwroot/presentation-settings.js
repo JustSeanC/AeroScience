@@ -56,7 +56,7 @@ export function updatePresentation(change) {
   try {localStorage.setItem(preferenceKey,JSON.stringify({version:1,...settings}));persistent=true;}catch {persistent=false;}
   apply();return presentationPreferences();
 }
-export function presentationControls(parent) {
+export function presentationControls(parent,{includeHost=true}={}) {
   const section=node('section',undefined,'presentation-settings');section.setAttribute('aria-label',t('settings.presentation'));
   const title=node('h2',t('settings.presentation'));title.dataset.i18n='settings.presentation';
   const scope=node('p',t('settings.browserOnly'));scope.dataset.i18n='settings.browserOnly';
@@ -77,6 +77,7 @@ export function presentationControls(parent) {
   }
   theme.onchange=()=>updatePresentation({theme:theme.value});language.onchange=()=>updatePresentation({locale:language.value});
   subscribers.add(refresh);refresh(presentationPreferences());
+  if(!includeHost)return {element:section,dispose:()=>subscribers.delete(refresh)};
   const hostSection=node('section',undefined,'host-presentation-settings');parent.append(hostSection);
   const hostTitle=node('h2',t('settings.hostTitle')),hostScope=node('p',t('settings.hostScope'));
   const hostFields=node('div',undefined,'presentation-fields');hostSection.append(hostTitle,hostScope,hostFields);

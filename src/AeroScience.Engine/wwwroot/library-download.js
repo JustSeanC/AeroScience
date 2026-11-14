@@ -1,3 +1,4 @@
+import {contextualHelp} from './contextual-help.js';
 import {openEmitImport} from './emit-library.js';
 import {libraryLocation} from './library-location.js';
 import {openOnlineAccess} from './online-access.js';
@@ -66,7 +67,7 @@ export async function libraryDownload(parent, api, isDisposed = () => false, opt
       "Quick Download: choose an area and the science you need, find available datasets, then review and approve Download & Import. These are historical external datasets for future missions, not flight recordings. Nothing downloads during discovery.",
     ),
   );
-  parent.append(heading);
+  parent.append(heading);contextualHelp(parent,'sources');
   await libraryLocation(parent,api,{stopped:()=>stopped||isDisposed()});if(stopped||isDisposed())return cleanup;
   link(heading, "Retained collections", "#library");
   link(heading, "Scientific access & privacy", "#settings/science");

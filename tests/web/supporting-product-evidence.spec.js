@@ -1,4 +1,5 @@
 import {test,expect} from '@playwright/test';
+import {mkdirSync} from 'node:fs';
 import AxeBuilder from '@axe-core/playwright';
 
 test('supporting metadata keeps unknown source dates/height, no values, English fallback and keyboard-readable hashes at high text scale',async({page})=>{
@@ -10,7 +11,7 @@ test('supporting metadata keeps unknown source dates/height, no values, English 
   await expect(page.locator('#supporting-fixture')).toHaveCount(1);
   const root=page.locator('#supporting-fixture');await expect(root).toContainText('No original terrain cells, point coordinates or source files are included');await expect(root).toContainText('These descriptive counts are not attached measurements or approved science');
   const summary=root.getByText(product.sources[0].name,{exact:true});await summary.focus();await page.keyboard.press('Enter');await expect(root.getByRole('table',{name:'Original source file hash references'})).toBeVisible();await expect(root).toContainText('Historical source acquisition date: Unknown');await expect(root).toContainText('Unknown — source did not establish a vertical datum');await expect(root).toContainText('e'.repeat(64));
-  for(const width of [1440,390]){await page.setViewportSize({width,height:1000});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);expect((await new AxeBuilder({page}).include('#supporting-fixture').withTags(['wcag2a','wcag2aa','wcag21aa','wcag22aa']).analyze()).violations).toEqual([]);}
+  for(const width of [1440,390]){await page.setViewportSize({width,height:1000});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);expect((await new AxeBuilder({page}).include('#supporting-fixture').withTags(['wcag2a','wcag2aa','wcag21aa','wcag22aa']).analyze()).violations).toEqual([]);if(process.env.AEROSCIENCE_P06_SCREENSHOTS==='1'){mkdirSync('docs/roadmap/images/v080-p06',{recursive:true});await root.screenshot({path:`docs/roadmap/images/v080-p06/evidence-browser-synthetic-${theme}-${width}.png`});}}
   await root.evaluate(e=>e.style.fontSize='200%');expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);expect(await page.evaluate(id=>Object.values(localStorage).some(v=>v.includes(id)),product.id)).toBe(false);
  }
  expect(external).toEqual([]);

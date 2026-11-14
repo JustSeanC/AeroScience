@@ -1,0 +1,193 @@
+{
+  "checkpoint": "P06d",
+  "base": "36c74485fcc2cddd58a2e1962667776002d402ab",
+  "dotnet": {
+    "passed": 101,
+    "failed": 0,
+    "skipped": 0,
+    "scope": "P05 genuine LiDAR, DEM/terrain/results/provenance/deletion; P06 supporting metadata; original roles/grants/isolation/offline evidence enforcement"
+  },
+  "browser": {
+    "newWorkflowSetDistinct": 8,
+    "initialWorkflowSet": {
+      "passed": 7,
+      "failed": 1
+    },
+    "correctedPortalCase": {
+      "passed": 1,
+      "failed": 0
+    },
+    "regressionSet": {
+      "passed": 32,
+      "failed": 0,
+      "skipped": 0
+    },
+    "distinctAcrossFocusedSets": 38,
+    "coverage": [
+      "Auto/manual themes and persistent browser-only preferences",
+      "five locale identities and preview fallback",
+      "1440px, 768px and 390px layouts",
+      "verified computed double font and no horizontal overflow",
+      "zero axe violations",
+      "keyboard/focus retention and draft-help behavior",
+      "offline bundled guidance and safe links",
+      "zero unexpected organization/settings/sharing/evidence writes",
+      "real claim/preparation and versioned supporting reference receipt without science credit",
+      "original flight/science sessions, late/repeated command identity, legacy route and dirty dialog regression",
+      "original live revocation/freshness and controlled HTTPS notification idempotency"
+    ]
+  },
+  "javascript": {
+    "nativePassed": 4,
+    "presentationPassed": 38,
+    "failed": 0,
+    "catalogVersion": 17,
+    "englishMessages": 694
+  },
+  "documentation": {
+    "passed": 5,
+    "failed": 0,
+    "protectedEvidenceUnchanged": true
+  },
+  "assets": {
+    "verifiedBundledGeographyLibraryLicenseFiles": 28
+  },
+  "developmentFailure": "Portal root-font checks initially read an unsettled computed size between viewport changes. Web-first exact computed baseline/double-size assertions pass without changing CSP or relaxing scale/overflow/axe requirements. Independent diagnostic probes retained, including an unsupported isolated axe context invocation.",
+  "receipts": [
+    {
+      "path": "artifacts/p06d-dotnet.log",
+      "sha256": "c93783bf71a55f9dc4a56d6fd4a26d76d17d879ac0c6ab1cbf2c74c8decd083c",
+      "bytes": 415
+    },
+    {
+      "path": "artifacts/p06d-dotnet/p06d-science-security.trx",
+      "sha256": "84ac77bce486454fd6da6592a62572dd14c968ff7af373b46367cfa064aa3df6",
+      "bytes": 185783
+    },
+    {
+      "path": "artifacts/p06d-browser-first.log",
+      "sha256": "6d8a900bf650d52a465aa3cd178b6722a76fc67a9c13d11181a5c7b99c35f69b",
+      "bytes": 5940
+    },
+    {
+      "path": "artifacts/p06d-font-actual.log",
+      "sha256": "b47ade181c8e09cdd7778dea40224087a478c068f392363b9155c33a714eb19e",
+      "bytes": 6629
+    },
+    {
+      "path": "artifacts/p06d-font-scale-diagnostic.log",
+      "sha256": "41ef75517920f8025af5239ab5c97b44737c5a5806f262a6857d5ac8ab5dd641",
+      "bytes": 416
+    },
+    {
+      "path": "artifacts/p06d-font-scale-axe-diagnostic.log",
+      "sha256": "d0a8d394ad4edca380be727d9188178806133260a01a6a9f44144d975951e741",
+      "bytes": 5534
+    },
+    {
+      "path": "artifacts/p06d-portal-font-final.log",
+      "sha256": "54cf18c90c79cfc15ad5fe59c5e804c638599de19de4055322de9d3c950f1932",
+      "bytes": 391
+    },
+    {
+      "path": "artifacts/p06d-browser-regressions.log",
+      "sha256": "27860e96715f96d352f86af4ac308e454297bf3053456d1c8754f1d3bb13edf5",
+      "bytes": 5332
+    },
+    {
+      "path": "artifacts/p06d-browser-hosts-first.log",
+      "sha256": "9cc23fe406ee3f1239f81be909ff5a07291cedd005b840ae327971ffdb1bc522",
+      "bytes": 1808
+    },
+    {
+      "path": "artifacts/p06d-web-checks-final.log",
+      "sha256": "76f28ef9e0157eafc09c49e7f10365b137cacc4d0615ae28f719cd889a37ec37",
+      "bytes": 4982
+    },
+    {
+      "path": "artifacts/p06d-assets.log",
+      "sha256": "cb1c0cbc5f7f04637d29323aa0629814e6bc7dd16a51c1885e84056023ffb27f",
+      "bytes": 87
+    },
+    {
+      "path": "artifacts/p06d-documentation-handoff.log",
+      "sha256": "b144b4d39dfb7061650338954026ca22abda8073582207f614ee60c7e4d9c5d4",
+      "bytes": 1009
+    },
+    {
+      "path": "artifacts/p06d-failed-browser/web-results.json",
+      "sha256": "2ab77b2293b81efab88e96881d8360716d310029e9afcee31eb05e493666e9e3",
+      "bytes": 22088
+    },
+    {
+      "path": "artifacts/p06d-browser-receipts/regressions.json",
+      "sha256": "4d2933dfcf3d55a4ac0d3215619cf3ee8d19043981d43156f8a93a1cf00c48d6",
+      "bytes": 39261
+    }
+  ],
+  "screenshots": [
+    {
+      "path": "docs/roadmap/images/v080-p06/evidence-browser-synthetic-dark-1440.png",
+      "sha256": "596c20e0d603b94a4893a4fec637d9bcb01b50316f688d29589af953836fad83",
+      "bytes": 132032
+    },
+    {
+      "path": "docs/roadmap/images/v080-p06/evidence-browser-synthetic-dark-390.png",
+      "sha256": "286723c3deda83ae557e730a09382a06ca1fcaaa6dbd5e2dc482a26113625f9d",
+      "bytes": 123849
+    },
+    {
+      "path": "docs/roadmap/images/v080-p06/evidence-browser-synthetic-light-1440.png",
+      "sha256": "bdec029b5fbaefdd0a7a6fdd6dc68e235de57bb531182cdf7cc9c18e22e07ec0",
+      "bytes": 131483
+    },
+    {
+      "path": "docs/roadmap/images/v080-p06/evidence-browser-synthetic-light-390.png",
+      "sha256": "e602db35f939f3d3b6d3c19e1d6de1bdbc3e68ae2fba28e567707bfd1664268f",
+      "bytes": 124523
+    },
+    {
+      "path": "docs/roadmap/images/v080-p06/organizations-browser-synthetic-dark-1440.png",
+      "sha256": "386ce82471ff13582c105ef6b911002d76b01dd66113f51a494e546d8ca2012e",
+      "bytes": 369556
+    },
+    {
+      "path": "docs/roadmap/images/v080-p06/organizations-browser-synthetic-dark-390.png",
+      "sha256": "b4329130e765443f1d7f54904777a387794643be663fde00d79977938414132f",
+      "bytes": 391474
+    },
+    {
+      "path": "docs/roadmap/images/v080-p06/organizations-browser-synthetic-light-1440.png",
+      "sha256": "e947b29ccf3cc0a86c76272e08793e9ebaee699199542f71e5d19e668f1a4b60",
+      "bytes": 364591
+    },
+    {
+      "path": "docs/roadmap/images/v080-p06/organizations-browser-synthetic-light-390.png",
+      "sha256": "d2127e6040448c09e5c5e173a207b06ae1e354b855dea4825a1cbcd95a2bd8fd",
+      "bytes": 380929
+    },
+    {
+      "path": "docs/roadmap/images/v080-p06/portal-browser-synthetic-dark-1440.png",
+      "sha256": "0f3f06626284bb18246056c6fa540fcaf6845337e8ea7884a6f0d7ebc9c5ed79",
+      "bytes": 126844
+    },
+    {
+      "path": "docs/roadmap/images/v080-p06/portal-browser-synthetic-dark-390.png",
+      "sha256": "6e03e8ec03496a0d2ff3f0b14d99b69bcd9fce6852959991c5b6cf6d7e94f394",
+      "bytes": 134039
+    },
+    {
+      "path": "docs/roadmap/images/v080-p06/portal-browser-synthetic-light-1440.png",
+      "sha256": "2beff46e1631788fbc188a5a7cc82b3917974777303194e3a287fa33ebc2bcaf",
+      "bytes": 126682
+    },
+    {
+      "path": "docs/roadmap/images/v080-p06/portal-browser-synthetic-light-390.png",
+      "sha256": "2547dd470e0ed3f2361b7c4e54fb931da0742efa5434856b2c8dcbfa7b8a2409",
+      "bytes": 133773
+    }
+  ],
+  "screenshotsAcceptance": "Synthetic browser fixtures only; not installed Windows/MSFS acceptance. Representative light/dark desktop/narrow captures visually inspected.",
+  "fullCI": "Pending exact-source completed P06 milestone workflow; receipt is closed after CI.",
+  "installedWindowsMSFS": "Not Tested"
+}

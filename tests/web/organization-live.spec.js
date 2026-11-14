@@ -2,7 +2,7 @@ import {test,expect,request} from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import {spawn,execFile} from 'node:child_process';
 import {promisify} from 'node:util';
-import {mkdtempSync,writeFileSync,rmSync} from 'node:fs';
+import {mkdtempSync,writeFileSync,rmSync,mkdirSync} from 'node:fs';
 import {randomBytes,randomUUID} from 'node:crypto';
 import {join,resolve} from 'node:path';
 import {tmpdir} from 'node:os';
@@ -78,4 +78,20 @@ test('P06 portal task links follow supported roles, inactive membership and keyb
  for(const session of [null,{user:{roles:['Administrator']},membershipState:'suspended'},{user:{roles:['Administrator']},membershipState:'active',accountSecurityRequired:true}]){
   await page.evaluate(async session=>{const root=document.getElementById('role-fixture');root.replaceChildren();(await import('/organization-portal-nav.js')).organizationPortalNavigation(root,session,{});},session);await expect(page.locator('#role-fixture').getByRole('navigation')).toHaveCount(0);
  }
+});
+
+test('P06 portal shares Auto/manual appearance and preview language fallback, accessible help and zero settings writes',async({page})=>{
+ const writes=[];page.on('request',r=>{if(r.method()!=='GET'&&new URL(r.url()).pathname.startsWith('/api/'))writes.push(new URL(r.url()).pathname);});
+ await page.goto('/#control');await expect(page.getByRole('heading',{name:'Organization Overview',exact:true})).toBeVisible();const appearance=page.locator('#appearance');await appearance.locator('summary').click();const theme=appearance.getByLabel('Theme',{exact:true}),language=appearance.getByLabel('Language',{exact:true});
+ await theme.selectOption('auto');
+ for(const mode of ['light','dark']){
+  await page.emulateMedia({colorScheme:mode,reducedMotion:'reduce'});await expect(page.locator('html')).toHaveAttribute('data-resolved-theme',mode);await appearance.evaluate(e=>e.open=false);
+  for(const width of [1440,768,390]){
+   await page.setViewportSize({width,height:1000});await page.locator('html').evaluate(e=>e.style.fontSize='');await expect(page.locator('html')).toHaveCSS('font-size','16px');
+   if(process.env.AEROSCIENCE_P06_SCREENSHOTS==='1'&&width!==768){mkdirSync('docs/roadmap/images/v080-p06',{recursive:true});await page.evaluate(()=>{document.getElementById('p06-capture-label')?.remove();const p=document.createElement('p');p.id='p06-capture-label';p.textContent='P06 browser validation — isolated synthetic organization; not installed Windows/MSFS acceptance.';document.getElementById('workspace').prepend(p);});await page.screenshot({path:`docs/roadmap/images/v080-p06/portal-browser-synthetic-${mode}-${width}.png`,fullPage:true});}
+   const original=await page.locator('html').evaluate(e=>parseFloat(getComputedStyle(e).fontSize));await page.locator('html').evaluate(e=>e.style.fontSize='200%');await expect(page.locator('html')).toHaveCSS('font-size',`${original*2}px`);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);expect((await new AxeBuilder({page}).include('#workspace').analyze()).violations).toEqual([]);
+  }
+ }
+ await page.locator('html').evaluate(e=>e.style.fontSize='');await appearance.evaluate(e=>e.open=true);await theme.selectOption('light');await page.emulateMedia({colorScheme:'dark'});await expect(page.locator('html')).toHaveAttribute('data-resolved-theme','light');await language.selectOption('fr-FR');await expect(appearance).toContainText('preview');await expect(page.locator('html')).toHaveAttribute('lang','en-US');await page.reload();await expect(page.locator('html')).toHaveAttribute('data-theme','light');await expect(page.locator('html')).toHaveAttribute('data-requested-locale','fr-FR');
+ const help=page.locator('#workspace [data-help-group="assignments"]');await help.locator('summary').focus();await page.keyboard.press('Enter');await expect(help).toHaveAttribute('open','');const popupPromise=page.waitForEvent('popup');await help.getByRole('link',{name:/Read the bundled collaboration guide/}).click();const popup=await popupPromise;await expect(popup.getByRole('heading',{name:'Research collaboration help',exact:true})).toBeVisible();await expect(popup.locator('main')).toContainText('A recipient can verify the received package');await popup.close();expect(writes).toEqual([]);
 });

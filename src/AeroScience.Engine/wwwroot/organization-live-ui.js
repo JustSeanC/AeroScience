@@ -1,3 +1,4 @@
+import {contextualHelp} from './contextual-help.js';
 import {node,button,readableName} from './workstation-ui.js';
 import {t} from './i18n.js';
 
@@ -8,7 +9,7 @@ export function organizationLiveUi({root,read,write,back,active=()=>true,admin=f
  const current=()=>!disposed&&root.isConnected&&active();
  const title=node(headingLevel,'Live Flights'),notice=node('p','Checking current sharing…'),controls=node('div',undefined,'actions');notice.setAttribute('role','status');
  root.replaceChildren(title,notice,controls);button(controls,'Back',()=>{dispose();back();});button(controls,'Refresh Live Flights',refresh);
- root.append(node('p',t('collaboration.liveAudience'),'lead'));
+ root.append(node('p',t('collaboration.liveAudience'),'lead'));contextualHelp(root,'live',{guideHref:headingLevel==='h1'?'/organization-help.html':'#help?guide=v0.8.0-research-collaboration.md'});
  const label=node('label','Filter aircraft, pilot label or campaign'),filter=node('input');filter.type='search';label.append(filter);root.append(label);
  const layout=node('div',undefined,'live-flight-layout'),mapBox=node('div',undefined,'live-flight-map'),side=node('section');
  mapBox.setAttribute('role','region');mapBox.setAttribute('aria-label','Current shared aircraft map');side.setAttribute('aria-label','Shared flight list');layout.append(mapBox,side);root.append(layout);

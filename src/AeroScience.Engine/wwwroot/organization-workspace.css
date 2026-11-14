@@ -5,3 +5,4 @@
 .assignment-requirements dl{display:grid;grid-template-columns:minmax(8rem,1fr) minmax(0,3fr);gap:.5rem 1rem}.assignment-requirements dt{font-weight:650}.assignment-requirements dd{margin:0;overflow-wrap:anywhere}
 @media(max-width:600px){.assignment-requirements dl{display:block}.assignment-requirements dd{margin:.25rem 0 .8rem}.organization-task-navigation a{max-width:100%}}
 .supporting-product-evidence{min-width:0;max-width:100%}.supporting-product-evidence dd,.supporting-product-evidence p{overflow-wrap:anywhere}.supporting-product-evidence pre{white-space:pre-wrap;overflow-wrap:anywhere}
+.contextual-help{max-width:78ch;min-width:0;margin-block:.75rem}.contextual-help dt{font-weight:650;margin-top:.8rem}.contextual-help dd{margin:.25rem 0 .75rem;overflow-wrap:anywhere}.contextual-help summary{min-height:44px;padding:.65rem 0;cursor:pointer}.contextual-help a:focus-visible{outline:3px solid currentColor;outline-offset:3px}
