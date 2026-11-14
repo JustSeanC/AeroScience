@@ -129,9 +129,44 @@
       "path": "artifacts/p08b/linux-preflight.json",
       "sha256": "d810c7c1dd6ab6bf69646fb4a71c3834afcf4b0bbd16835265c827578fc75b42",
       "bytes": 4918
+    },
+    {
+      "path": "artifacts/p08b/shallow-baseline-red.log",
+      "sha256": "c8b5e7816fe30c104b25df3389bfc5ac7abab55a3997e63e12d99560d3775c87",
+      "bytes": 1144
+    },
+    {
+      "path": "artifacts/p08b/full-history-baseline-green.log",
+      "sha256": "b187167513eab885d95e9339680eaf41730688952e5fba5c29e46d9ccfbe0eae",
+      "bytes": 105
+    },
+    {
+      "path": "artifacts/p08b/history-and-native-targeted.log",
+      "sha256": "3b8af2b37e9a30b1f01b49eda7fc243f235d5899b04d16b12b4875fff82a3208",
+      "bytes": 4826
+    },
+    {
+      "path": "artifacts/p08b/linux-43645458797.log",
+      "sha256": "571f3a119bbdea57b35775e1cc2d670fb09e4729b6dbe2066375ab8b90250f07",
+      "bytes": 1694341
+    },
+    {
+      "path": "artifacts/p08b/browser-43645458797-inventory.json",
+      "sha256": "befa744ab8fb3827de7835cb0f5b1779d8259849500a69582c312976e50c8900",
+      "bytes": 24740
+    },
+    {
+      "path": "artifacts/p08b/linux-preflight-b2d1f53.json",
+      "sha256": "a05225c8ea4e420a867a6620f8b40a0e565bea20b72c0ecce8a2aa4b06df1123",
+      "bytes": 4920
+    },
+    {
+      "path": "artifacts/p08b/unchanged-contracts.json",
+      "sha256": "b87d4076e92d5b5299099600b85e7dbbed42825a3aff874a9a8b84ca27b0bebd",
+      "bytes": 1303
     }
   ],
-  "fullCI": "Corrective exact-source Full CI required after reproduced Windows staging defect. Original Linux browser suite still running; no acceptance from pending work.",
+  "fullCI": "Final corrected-source Full CI pending after both reproduced Windows encoding and Linux history defects. Cancelled intermediate run receives no acceptance credit.",
   "installedWindows": "Not Tested",
   "installedMSFS": "Not Tested",
   "genuineOwnerSDKPackage": "Not Built",
@@ -160,6 +195,30 @@
       "points": 34923,
       "raw_protocol_sha256": "bedf4986d31ef0874e7dd380532094f5dc2056a3b0d269afeadd621725ad9eef",
       "source": "Retained IA_FullState public historical EPT root tile; sparse delivered subset. Dates/vertical datum unknown. No current-provider or in-flight acquisition acceptance."
+    },
+    "linuxFailure": "Linux checkout had insufficient baseline history: git show d50b3ea9:... failed in the mandatory unchanged-legacy-recipe guard after the complete browser suite passed. Linux .NET1668 passed; Python203 ran with one history error and two existing skips; recovery step not reached.",
+    "historyReproduction": "The actual unchanged guard fails against a depth-1 local clone with git show exit128. After git fetch --unshallow it passes all six exact baseline comparisons. No guard or assertion changed.",
+    "historyFix": "Full Linux job checkout now fetches history (fetch-depth:0), matching the Windows native publication prerequisite.",
+    "focusedHistoryAndNative": {
+      "passed": 23,
+      "failed": 0,
+      "skipped": 0,
+      "includes": "16 P08b cases plus7 CI Ubuntu mirror cases; unchanged baseline guard additionally reproduced red/green against an actual shallow/full clone."
+    },
+    "initialBrowser": {
+      "artifact_id": 14135673818,
+      "sha256": "acd1003b72c982735a76813f388d90290190f4eed29404d9c65a6471b0ca3abe",
+      "passed": 519,
+      "skipped": 2,
+      "failed": 0,
+      "flaky": 0,
+      "skipReason": "Existing owner-deferred ordinary chart viewer; retained research renderer/active deferral tests remain."
+    },
+    "supersededRun": {
+      "source": "b2d1f532a7e5bb784a39782425941edc1be8c202",
+      "url": "https://github.com/JustSeanC/AeroScience/actions/runs/43648632945",
+      "conclusion": "cancelled",
+      "reason": "Stopped early after original completed Linux diagnostics exposed the independent history prerequisite. No acceptance credit."
     }
   }
 }

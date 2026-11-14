@@ -146,6 +146,8 @@ jobs:
       AEROSCIENCE_ORG_TEST_DATABASE: Host=127.0.0.1;Port=55437;Database=aeroscience_org_tests;Username=aeroscience_test;Password=p13_disposable_loopback_only
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # Preserve the accepted baseline for native validation ancestry/recipe checks.
       - uses: actions/setup-dotnet@v6
         with:
           global-json-file: global.json
