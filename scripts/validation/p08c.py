@@ -26,6 +26,7 @@ TOLERANCES = {
                 'nativeCellFractionAbsolute': 1e-7, 'maskSymmetricDifferencePixelArea': 1e-7},
     'lidar': {'rawCoordinatesAndAttributes': 0, 'geographicDegrees': 1e-10,
               'scanAngleDegrees': 1e-12, 'recordMembershipAndSupport': 0},
+    'retained-raster': {'nativeValueAbsolute': 0, 'affineSourceUnits': 1e-12, 'pixelCenterDegrees': 1e-10},
 }
 
 
@@ -108,7 +109,7 @@ def inventory(manifest):
         for key in ['id', 'path', 'kind', 'provider_project', 'source_date_utc', 'horizontal_crs',
                     'vertical_datum', 'units', 'native_shape_or_count', 'attributes', 'license_access', 'retained_authorization']:
             require(key in item, 'Inventory needs ' + key + ' (use null for genuinely unknown metadata).')
-        require(item['kind'] in ['dem', 'dsm', 'las', 'laz', 'ept-node', 'satellite'], 'Unsupported source kind.')
+        require(item['kind'] in ['dem', 'dsm', 'raster', 'las', 'laz', 'ept-node', 'satellite'], 'Unsupported source kind.')
         require(item['retained_authorization'] and item['license_access'], 'Retained access/license context is required.')
         path = safe_path(item['path'])
         require(0 < path.stat().st_size <= 2 * 1024**3, 'Each selected original must be nonempty and at most 2 GiB.')
@@ -152,16 +153,26 @@ def numerical(args):
         'historical_sources': True, 'installed_acceptance': 'Not Tested',
         'network_transfer_bytes': 0, 'network_scope': 'Offline probe mode; not an OS network capture',
         'started_utc': dt.datetime.now(dt.timezone.utc).isoformat()}
+    if getattr(args, 'measure', False):
+        import p08c_resources
+        plan['measurement_budgets'] = p08c_resources.BUDGETS
+        plan['measurement_harness_sha256'] = digest(p08c_resources.__file__)
     write_new(output/'plan.json', plan)
     receipt = {**plan, 'outcome': 'Failed'}
     try:
+        def invoke(command, label):
+            if getattr(args, 'measure', False):
+                from p08c_resources import measure
+                receipt[label.replace('-', '_') + '_metrics'] = measure(command, output, label)
+            else:
+                execute(command, output, label)
         flag = '--terrain-elevation-probe' if args.kind == 'terrain' else '--lidar-probe'
         command = [args.dotnet, args.host, flag]
         if args.kind == 'lidar':
             command.append('--offline-local')
-        execute([*command, selected['path'], output/'probe'], output, 'application')
+        invoke([*command, selected['path'], output/'probe'], 'application')
         oracle = ROOT/'scripts/validation'/('verify-terrain-elevation.py' if args.kind == 'terrain' else 'verify-lidar-points.py')
-        execute([args.reference_python, '-I', oracle, output/'probe'], output, 'independent-reference')
+        invoke([args.reference_python, '-I', oracle, output/'probe'], 'independent-reference')
         reference = read(output/'probe/independent-comparison.json')
         require(reference.get('state') == 'Passed', 'Independent reference did not pass.')
         require(all(digest(v['path']) == v['sha256'] for v in original), 'An original changed during verification.')
@@ -181,13 +192,15 @@ def verify_receipt(path, runtime_source=None):
     path = safe_path(path)
     value = read(path)
     require(value.get('schema') == SCHEMA and value.get('outcome') == 'Passed', 'A successful versioned P08c measured receipt is required.')
-    require(value.get('evidence_kind') == 'independent-numerical', 'This is not independent numerical evidence.')
+    require(value.get('evidence_kind') in ['independent-numerical', 'resource-benchmark'], 'This is not measured numerical/resource evidence.')
     runtime = value.get('runtime', {})
     require(runtime.get('source_commit') == runtime_source if runtime_source else bool(runtime.get('source_commit')),
             'Evidence belongs to another source/build. Do not transfer acceptance.')
     require(bool(runtime.get('build_files_sha256')), 'Exact tested build hashes are required.')
-    require(value.get('independent_reference', {}).get('state') == 'Passed', 'An independent reference is required.')
-    require(value.get('tolerances') == TOLERANCES.get(value.get('operation')), 'Tolerance plan changed or is missing.')
+    reference = value.get('independent_reference', {})
+    require(reference.get('state', reference.get('outcome')) == 'Passed', 'An independent reference is required.')
+    operation = 'lidar' if value.get('operation') == 'retained-lidar' else value.get('operation')
+    require(operation in TOLERANCES and value.get('tolerances') == TOLERANCES[operation], 'Tolerance plan changed or is missing.')
     require(value.get('historical_sources') is True and bool(value.get('inputs')), 'Identify the genuine retained inputs.')
     artifacts = value.get('artifacts')
     require(isinstance(artifacts, list) and 1 <= len(artifacts) <= 10000, 'Measured artifacts are required.')
@@ -204,7 +217,57 @@ def verify_receipt(path, runtime_source=None):
     plan = read(path.parent/'plan.json')
     require(all(value.get(k) == plan.get(k) for k in plan), 'Receipt differs from its pre-execution plan.')
     require(value['independent_reference'] == read(path.parent/'probe/independent-comparison.json'), 'Reference summary changed.')
+    if value['evidence_kind'] == 'resource-benchmark':
+        for field, artifact in [('application_metrics', 'application-metrics.json'), ('reference_metrics', 'independent-reference-metrics.json')]:
+            metrics = value.get(field, {})
+            require(artifact in seen and metrics == read(path.parent/artifact), 'Measured resource artifact is missing or changed.')
+            require(metrics.get('exit_code') == 0 and metrics.get('stop_reason') is None and metrics.get('sample_count', 0) > 0,
+                    'Failed or unsampled work cannot pass a resource budget.')
+            require(0 < metrics['wall_seconds'] <= value['budgets']['wall_seconds']
+                    and 0 < metrics['sampled_process_tree_peak_rss_bytes'] <= value['budgets']['sampled_tree_rss_bytes']
+                    and 0 <= metrics['final_output_growth_bytes'] <= value['budgets']['output_bytes'], 'Measured resource budget failed.')
     return value
+
+
+def retained_raster(args):
+    from p08c_resources import canonical
+    source = safe_path(args.source_folder)
+    metadata = canonical(read(source/'source.json')); manifest = metadata['manifest']
+    kind = ('dsm' if 'Copernicus DEM' in manifest['provider'] else 'dem' if 'USGS 3DEP' in manifest['provider']
+            else 'raster') if manifest['kind'] == 3 else 'satellite'
+    selected = inventory({'schema': 'aeroscience-p08c-inputs-1', 'inputs': [
+        {'id': f['relativePath'], 'path': str(source/f['relativePath']), 'kind': kind,
+         'provider_project': manifest['provider']+' / '+manifest['sceneId'],
+         'source_date_utc': manifest['observationUtc'], 'horizontal_crs': metadata['grids'],
+         'vertical_datum': manifest['verticalDatum'], 'units': [b['unit'] for b in manifest['bands']],
+         'native_shape_or_count': metadata['grids'], 'attributes': manifest['bands'],
+         'license_access': manifest['license'], 'retained_authorization': 'Explicit read-only retained source selection; no new license acceptance',
+         'expected_sha256': f['sha256']} for f in metadata['files']]})
+    require(all(Path(v['path']).is_relative_to(source) for v in selected), 'Original escapes retained source folder.')
+    build = identity(args.host)
+    require(not safe_path(args.output).is_relative_to(source), 'Keep evidence outside the original source folder.')
+    output = fresh(args.output)
+    plan = {'schema': SCHEMA, 'evidence_kind': 'independent-numerical', 'operation': 'retained-raster',
+            'runtime': build, 'inputs': selected, 'historical_sources': True,
+            'source_origin': 'Retained metadata and hashes; provenance reviewed separately, never inferred from filenames',
+            'tolerances': TOLERANCES['retained-raster'], 'network_transfer_bytes': 0,
+            'installed_acceptance': 'Not Tested', 'sample_rule': 'At most 256 evenly indexed original cells per band, including edges',
+            'started_utc': dt.datetime.now(dt.timezone.utc).isoformat()}
+    write_new(output/'plan.json', plan); receipt = {**plan, 'outcome': 'Failed'}
+    try:
+        execute([args.dotnet,args.host,'--retained-raster-probe',source,output/'probe'],output,'application')
+        oracle = ROOT/'scripts/validation/verify-retained-raster.py'
+        execute([args.reference_python,'-I',oracle,source,output/'probe'],output,'independent-reference')
+        reference = read(output/'probe/independent-comparison.json')
+        require(reference['outcome'] == 'Passed', 'Retained raster comparison failed.')
+        require(all(digest(i['path']) == i['sha256'] for i in selected), 'An original changed.')
+        receipt.update(outcome='Passed',independent_reference=reference,oracle_sha256=digest(oracle))
+    except Exception as exc:
+        receipt['error'] = str(exc); raise
+    finally:
+        receipt['artifacts'] = artifact_records(output); receipt['finished_utc'] = dt.datetime.now(dt.timezone.utc).isoformat()
+        write_new(output/'receipt.json',receipt)
+    return output/'receipt.json'
 
 
 def main():
@@ -216,6 +279,11 @@ def main():
     run.add_argument('--inventory', type=Path, required=True); run.add_argument('--input-id', required=True)
     run.add_argument('--host', type=Path, required=True); run.add_argument('--dotnet', default=os.environ.get('DOTNET', 'dotnet'))
     run.add_argument('--reference-python', type=Path, required=True); run.add_argument('--output', type=Path, required=True)
+    run.add_argument('--measure', action='store_true', help='Measure owned process trees using already installed psutil; no installation.')
+    raster = sub.add_parser('retained-raster')
+    raster.add_argument('--source-folder',type=Path,required=True); raster.add_argument('--host',type=Path,required=True)
+    raster.add_argument('--reference-python',type=Path,required=True); raster.add_argument('--output',type=Path,required=True)
+    raster.add_argument('--dotnet',default=os.environ.get('DOTNET','dotnet'))
     verify = sub.add_parser('verify'); verify.add_argument('receipt', type=Path)
     args = parser.parse_args()
     try:
@@ -224,6 +292,8 @@ def main():
             print(args.output)
         elif args.action == 'numerical':
             print(numerical(args))
+        elif args.action == 'retained-raster':
+            print(retained_raster(args))
         else:
             verify_receipt(args.receipt); print('Measured evidence bytes verified; no installed/release approval.')
     except (ValueError, OSError, subprocess.SubprocessError, KeyError) as exc:

@@ -1,0 +1,1630 @@
+{
+  "schema": "aeroscience-p08c-resources-summary-1",
+  "runtime_source_commit": "cff800d5a16343a6c532714d8bdbdddd59f3f5d1",
+  "hardware": {
+    "cgroup_cpu_quota": 2,
+    "cgroup_memory_bytes": 8589934592
+  },
+  "receipts": [
+    {
+      "file": "artifacts/p08c/small-terrain-measured-1/receipt.json",
+      "sha256": "e458be785eca3c6346533a8a491709e795138410cbb794f8b40cfe1a52774064",
+      "runtime": {
+        "source_commit": "cff800d5a16343a6c532714d8bdbdddd59f3f5d1",
+        "branch": "develop/v0.8.0",
+        "build_files_sha256": {
+          "AeroScience.Engine.dll": "74bc40ea5f4fd21cc3f4da0bbfeeed3d91efed42854035bcac1d8555b21ee6f3",
+          "AeroScience.Hdf.SafeRead.dll": "6a29585772155c723cb1c83584472bd93489a907a01ead22def6fc29cfb191b7",
+          "AeroScience.Missions.dll": "5c983a6928738b25c8e773cbcc229c27484c05b0c46a27611d66590f1c865258",
+          "AeroScience.Organization.dll": "e9d0227bbf8191ade225502885374feba8341a8d1b69156fc0fbb547bcaf4dd1",
+          "AeroScience.Shared.dll": "14194bd62b7a699beb08ce8b3fca64c7c11435e4d4ae9bd45a5e056c17b34fb0",
+          "AeroScience.SimConnect.dll": "750a132e30e88198b974767f246e0772f04c8ed6e328d971fe95cd8ebc7011fa",
+          "AeroScience.Telemetry.dll": "69b3e94426c19ed9c3bd178087841946fc7072d5e26b7f6daebcb0cb59ce3e20",
+          "AeroScience.TestHost.dll": "47678b33f0747939e0ba2caf8246e134d23b0fbf17a26ba6603ec458a3d7613f",
+          "BitMiracle.LibTiff.NET.dll": "0cfdba77f76af11c4dfa0a465a9155f7e8aac5632b54118b9b20ba185c58cd50",
+          "GeographicLib.dll": "03dec3d0d891bba5b7ca8f91efd5c62225f836263a276116334af9babad4097f",
+          "Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.dll": "96be7f72fffb51d26ee515e700d49ec98edfa482536eb0ec24cf94bd6fe7eb46",
+          "Microsoft.AspNetCore.Identity.EntityFrameworkCore.dll": "7c4d1a714aa878935a99c33a5df24dd1854a5577e55d4632e63e1f15d7e55fbf",
+          "Microsoft.Data.Sqlite.dll": "9f1fe804321767b6cc8db751ecedd56ab308e5f15492a7f40d7093bb61ab7638",
+          "Microsoft.EntityFrameworkCore.Abstractions.dll": "24596b62ac0546c641e308a06bb9ea4bb153e9a776ed2311e730832465f34f5d",
+          "Microsoft.EntityFrameworkCore.Relational.dll": "078ad42527c893d858e1c48b7edc5a0ec755c60b28395e996bc438ede3555cf0",
+          "Microsoft.EntityFrameworkCore.dll": "87faf0bf54de5f62c7d30eb686018b11c53d4acf6c280adb39965b303c5b2b59",
+          "NetTopologySuite.dll": "98fa6bae8b75b5f9445236679883fa27750d990aec11e985b85b57a30c37a858",
+          "Npgsql.EntityFrameworkCore.PostgreSQL.dll": "94fcf66e8e953fdb02c40c72ca89821dd5eed5324d4c0f12a7219ea8cd3d5a5e",
+          "Npgsql.dll": "e2bcafe1660fe4543fe9dfcabed972ec8d32259e5ea8009462ce1de23c7034c2",
+          "SQLitePCLRaw.batteries_v2.dll": "1ee3c6ff4d39171690d6ff6f84b4d876ed038ca28e39bb6e74995f52d2aacf8b",
+          "SQLitePCLRaw.core.dll": "b72c9dfe1479a568d6b84e249eaf949e76c757888f8056fb6ddb9c0480e0dd25",
+          "SQLitePCLRaw.provider.e_sqlite3.dll": "1d4cb69b3aaf6a9cf40dfe179cc16dd678f12bc024b212d4297654e0a29e220d",
+          "LidarRuntime/AeroScience.LidarReader": "8accaf384a16e85a2a98315f9a76b4b7e7b17524af9266766b57db49622d2b7c",
+          "LidarRuntime/LASzip.txt": "959f77033ba56a3b146faf5c02f9162071f2d0bff4b8b6f1c2193a4b41127d39",
+          "LidarRuntime/NOTICE.md": "9ee8a7c25b3dffdf8fd54b42b90d3aeef240989d92eb8c4d3f6e214bc975b1ee"
+        },
+        "scope": "Development TestHost build; not the sealed owner Windows package",
+        "harness_sha256": "e96928ba15315e466af1bd9a6637655348cad0bb907165b3950c073bff0d18c0"
+      },
+      "outcome": "Passed",
+      "candidate_points": null,
+      "original_bytes": null,
+      "application_metrics": {
+        "exit_code": 0,
+        "stop_reason": null,
+        "wall_seconds": 1.8365717670003505,
+        "sample_count": 34,
+        "sampled_process_tree_peak_rss_bytes": 92880896,
+        "sampled_process_tree_cpu_seconds": 1.59,
+        "sampled_process_read_bytes": 4096,
+        "sampled_process_write_bytes": 24104960,
+        "final_output_growth_bytes": 2507532,
+        "sampled_peak_output_growth_bytes": 2123056,
+        "psutil_version": "7.2.2",
+        "os": "Linux-6.18.57-x86_64-with-glibc2.41",
+        "logical_cpus": 3,
+        "physical_memory_bytes": 10452459520,
+        "sampling_interval_seconds": 0.05,
+        "budgets": {
+          "wall_seconds": 300,
+          "sampled_tree_rss_bytes": 536870912,
+          "output_bytes": 268435456,
+          "minimum_free_bytes": 268435456
+        },
+        "limitations": [
+          "Sampled RSS/CPU/IO can miss short-lived children and spikes; not an OS hard limit.",
+          "IO counters are OS process disk counters, not HTTP payload or network bytes.",
+          "No native GPU/frame-rate measurement; no installed Windows/MSFS acceptance."
+        ]
+      },
+      "reference_metrics": {
+        "exit_code": 0,
+        "stop_reason": null,
+        "wall_seconds": 0.24237527299919748,
+        "sample_count": 4,
+        "sampled_process_tree_peak_rss_bytes": 58687488,
+        "sampled_process_tree_cpu_seconds": 0.16999999999999998,
+        "sampled_process_read_bytes": 0,
+        "sampled_process_write_bytes": 8192,
+        "final_output_growth_bytes": 1962,
+        "sampled_peak_output_growth_bytes": 1962,
+        "psutil_version": "7.2.2",
+        "os": "Linux-6.18.57-x86_64-with-glibc2.41",
+        "logical_cpus": 3,
+        "physical_memory_bytes": 10452459520,
+        "sampling_interval_seconds": 0.05,
+        "budgets": {
+          "wall_seconds": 300,
+          "sampled_tree_rss_bytes": 536870912,
+          "output_bytes": 268435456,
+          "minimum_free_bytes": 268435456
+        },
+        "limitations": [
+          "Sampled RSS/CPU/IO can miss short-lived children and spikes; not an OS hard limit.",
+          "IO counters are OS process disk counters, not HTTP payload or network bytes.",
+          "No native GPU/frame-rate measurement; no installed Windows/MSFS acceptance."
+        ]
+      },
+      "reference": {
+        "state": "Passed",
+        "verifiedUtc": "2026-11-15T17:46:00.608631+00:00",
+        "scope": "Genuine bounded USGS composite delivered values/grid; synthetic archived flight corridor; fully offline application processing",
+        "reference": "GDAL 3.10.3 / OGR GEOS overlays",
+        "originalSha256": "4c043d10024c8af4077c45d9ed6778141ccaf0837298ea8a521c9f832ce9a7f0",
+        "sourceManifestSha256": "6cda61df0cde7f96e4f27fbee60eb4fe6d26be5a71e893ce2ceaf26a1bc15445",
+        "algorithm": "terrain-native-cells-1/pixel-clip-1",
+        "nativeCellsCompared": 1024,
+        "clippedCellsCompared": 576,
+        "partialCells": 66,
+        "maximumCellFractionDifference": 1.9593626721103874e-10,
+        "derivedIndexSha256": "7b60325085952d329f8e7158596fc0d8dcb4a0950aa03f54709c28338fa6065e",
+        "unknowns": [
+          "historical survey date",
+          "native per-pixel resolution",
+          "vertical datum / transformations"
+        ],
+        "notTested": [
+          "genuine Copernicus DSM",
+          "genuine UTM provider source",
+          "installed Windows/MSFS",
+          "provider-wide availability"
+        ]
+      },
+      "inputs": [
+        {
+          "id": "usgs-composite-32",
+          "kind": "dem",
+          "provider_project": "USGS 3DEP delivered numeric composite export",
+          "source_date_utc": null,
+          "horizontal_crs": "EPSG:4326",
+          "vertical_datum": null,
+          "units": "m (delivered service)",
+          "native_shape_or_count": [
+            32,
+            32
+          ],
+          "license_access": "US Government public data; retained request/service metadata",
+          "bytes": 66342,
+          "sha256": "4c043d10024c8af4077c45d9ed6778141ccaf0837298ea8a521c9f832ce9a7f0"
+        },
+        {
+          "id": "ia-root",
+          "kind": "ept-node",
+          "provider_project": "USGS IA_FullState delivered EPT 0-0-0-0",
+          "source_date_utc": null,
+          "horizontal_crs": "EPSG:3857",
+          "vertical_datum": null,
+          "units": null,
+          "native_shape_or_count": 34923,
+          "license_access": "US Government Public Domain; registry.opendata.aws/usgs-lidar",
+          "bytes": 603312,
+          "sha256": "68c4b0ed247501a15d020d9a758d0345904f38785235732bd8e3386a3fca71c1"
+        }
+      ]
+    },
+    {
+      "file": "artifacts/p08c/small-lidar-measured-3/receipt.json",
+      "sha256": "c20864e1b92e47ebc0903150edc940fda82410bedc898958ddc4fea0b9eb1ae7",
+      "runtime": {
+        "source_commit": "cff800d5a16343a6c532714d8bdbdddd59f3f5d1",
+        "branch": "develop/v0.8.0",
+        "build_files_sha256": {
+          "AeroScience.Engine.dll": "74bc40ea5f4fd21cc3f4da0bbfeeed3d91efed42854035bcac1d8555b21ee6f3",
+          "AeroScience.Hdf.SafeRead.dll": "6a29585772155c723cb1c83584472bd93489a907a01ead22def6fc29cfb191b7",
+          "AeroScience.Missions.dll": "5c983a6928738b25c8e773cbcc229c27484c05b0c46a27611d66590f1c865258",
+          "AeroScience.Organization.dll": "e9d0227bbf8191ade225502885374feba8341a8d1b69156fc0fbb547bcaf4dd1",
+          "AeroScience.Shared.dll": "14194bd62b7a699beb08ce8b3fca64c7c11435e4d4ae9bd45a5e056c17b34fb0",
+          "AeroScience.SimConnect.dll": "750a132e30e88198b974767f246e0772f04c8ed6e328d971fe95cd8ebc7011fa",
+          "AeroScience.Telemetry.dll": "69b3e94426c19ed9c3bd178087841946fc7072d5e26b7f6daebcb0cb59ce3e20",
+          "AeroScience.TestHost.dll": "47678b33f0747939e0ba2caf8246e134d23b0fbf17a26ba6603ec458a3d7613f",
+          "BitMiracle.LibTiff.NET.dll": "0cfdba77f76af11c4dfa0a465a9155f7e8aac5632b54118b9b20ba185c58cd50",
+          "GeographicLib.dll": "03dec3d0d891bba5b7ca8f91efd5c62225f836263a276116334af9babad4097f",
+          "Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.dll": "96be7f72fffb51d26ee515e700d49ec98edfa482536eb0ec24cf94bd6fe7eb46",
+          "Microsoft.AspNetCore.Identity.EntityFrameworkCore.dll": "7c4d1a714aa878935a99c33a5df24dd1854a5577e55d4632e63e1f15d7e55fbf",
+          "Microsoft.Data.Sqlite.dll": "9f1fe804321767b6cc8db751ecedd56ab308e5f15492a7f40d7093bb61ab7638",
+          "Microsoft.EntityFrameworkCore.Abstractions.dll": "24596b62ac0546c641e308a06bb9ea4bb153e9a776ed2311e730832465f34f5d",
+          "Microsoft.EntityFrameworkCore.Relational.dll": "078ad42527c893d858e1c48b7edc5a0ec755c60b28395e996bc438ede3555cf0",
+          "Microsoft.EntityFrameworkCore.dll": "87faf0bf54de5f62c7d30eb686018b11c53d4acf6c280adb39965b303c5b2b59",
+          "NetTopologySuite.dll": "98fa6bae8b75b5f9445236679883fa27750d990aec11e985b85b57a30c37a858",
+          "Npgsql.EntityFrameworkCore.PostgreSQL.dll": "94fcf66e8e953fdb02c40c72ca89821dd5eed5324d4c0f12a7219ea8cd3d5a5e",
+          "Npgsql.dll": "e2bcafe1660fe4543fe9dfcabed972ec8d32259e5ea8009462ce1de23c7034c2",
+          "SQLitePCLRaw.batteries_v2.dll": "1ee3c6ff4d39171690d6ff6f84b4d876ed038ca28e39bb6e74995f52d2aacf8b",
+          "SQLitePCLRaw.core.dll": "b72c9dfe1479a568d6b84e249eaf949e76c757888f8056fb6ddb9c0480e0dd25",
+          "SQLitePCLRaw.provider.e_sqlite3.dll": "1d4cb69b3aaf6a9cf40dfe179cc16dd678f12bc024b212d4297654e0a29e220d",
+          "LidarRuntime/AeroScience.LidarReader": "8accaf384a16e85a2a98315f9a76b4b7e7b17524af9266766b57db49622d2b7c",
+          "LidarRuntime/LASzip.txt": "959f77033ba56a3b146faf5c02f9162071f2d0bff4b8b6f1c2193a4b41127d39",
+          "LidarRuntime/NOTICE.md": "9ee8a7c25b3dffdf8fd54b42b90d3aeef240989d92eb8c4d3f6e214bc975b1ee"
+        },
+        "scope": "Development TestHost build; not the sealed owner Windows package",
+        "harness_sha256": "e96928ba15315e466af1bd9a6637655348cad0bb907165b3950c073bff0d18c0"
+      },
+      "outcome": "Passed",
+      "candidate_points": null,
+      "original_bytes": null,
+      "application_metrics": {
+        "exit_code": 0,
+        "stop_reason": null,
+        "wall_seconds": 2.980581059000542,
+        "sample_count": 55,
+        "sampled_process_tree_peak_rss_bytes": 130416640,
+        "sampled_process_tree_cpu_seconds": 2.72,
+        "sampled_process_read_bytes": 0,
+        "sampled_process_write_bytes": 14565376,
+        "disk_counter_status": "Sampled OS process counters",
+        "final_output_growth_bytes": 2269554,
+        "sampled_peak_output_growth_bytes": 2142521,
+        "psutil_version": "7.2.2",
+        "os": "Linux-6.18.57-x86_64-with-glibc2.41",
+        "logical_cpus": 3,
+        "physical_memory_bytes": 10452459520,
+        "nominal_sampling_sleep_seconds": 0.05,
+        "largest_observed_sampling_interval_seconds": 0.059485502999450546,
+        "budgets": {
+          "wall_seconds": 300,
+          "sampled_tree_rss_bytes": 536870912,
+          "output_bytes": 268435456,
+          "minimum_free_bytes": 268435456
+        },
+        "kernel_reaped_child_metrics": null,
+        "limitations": [
+          "Sampled RSS/CPU/IO can miss short-lived children and spikes; not an OS hard limit.",
+          "IO counters are OS process disk counters, not HTTP payload or network bytes.",
+          "No native GPU/frame-rate measurement; no installed Windows/MSFS acceptance."
+        ]
+      },
+      "reference_metrics": {
+        "exit_code": 0,
+        "stop_reason": null,
+        "wall_seconds": 0.23300610200021765,
+        "sample_count": 4,
+        "sampled_process_tree_peak_rss_bytes": 49496064,
+        "sampled_process_tree_cpu_seconds": 0.35,
+        "sampled_process_read_bytes": 0,
+        "sampled_process_write_bytes": 0,
+        "disk_counter_status": "Sampled OS process counters",
+        "final_output_growth_bytes": 1523,
+        "sampled_peak_output_growth_bytes": 0,
+        "psutil_version": "7.2.2",
+        "os": "Linux-6.18.57-x86_64-with-glibc2.41",
+        "logical_cpus": 3,
+        "physical_memory_bytes": 10452459520,
+        "nominal_sampling_sleep_seconds": 0.05,
+        "largest_observed_sampling_interval_seconds": 0.05836537300092459,
+        "budgets": {
+          "wall_seconds": 300,
+          "sampled_tree_rss_bytes": 536870912,
+          "output_bytes": 268435456,
+          "minimum_free_bytes": 268435456
+        },
+        "kernel_reaped_child_metrics": null,
+        "limitations": [
+          "Sampled RSS/CPU/IO can miss short-lived children and spikes; not an OS hard limit.",
+          "IO counters are OS process disk counters, not HTTP payload or network bytes.",
+          "No native GPU/frame-rate measurement; no installed Windows/MSFS acceptance."
+        ]
+      },
+      "reference": {
+        "state": "Passed",
+        "verifiedUtc": "2026-11-15T17:48:16.599684+00:00",
+        "reference": {
+          "laspy": "2.6.1",
+          "lazrs": "0.7.0",
+          "pyproj": "3.7.2",
+          "proj": "9.5.1",
+          "shapely": "2.1.2",
+          "geos": "3.13.1"
+        },
+        "scope": "Genuine historical source points; synthetic archived flight geometry; independent original record/attribute/PROJ/GEOS corridor comparison",
+        "scannedOriginalPoints": 34923,
+        "retainedOriginalPoints": 1,
+        "maximumGeographicDifferenceDegrees": 7.105427357601002e-15,
+        "sources": [
+          {
+            "id": "eaf901b3-24cf-4e73-a8ff-b4d8472327e2",
+            "project": "IA_FullState/0-0-0-0",
+            "fileSha256": "68c4b0ed247501a15d020d9a758d0345904f38785235732bd8e3386a3fca71c1",
+            "originalPointCount": 34923,
+            "retainedPoints": 1,
+            "horizontalCrs": "EPSG:3857",
+            "verticalReference": "Unknown (not established by delivered original metadata)",
+            "verticalUnit": "unknown",
+            "acquisitionUtc": null
+          }
+        ],
+        "approvedNetwork": null,
+        "unknowns": [
+          "Original survey date and vertical datum/unit where not established by actual retained metadata",
+          "Original contractor coordinates before Entwine reprojection"
+        ],
+        "notTested": [
+          "Installed Windows/MSFS",
+          "Native COPC spatial index",
+          "Provider-wide coverage or density"
+        ],
+        "originalScienceObservations": 0,
+        "originalScienceProducts": 0
+      },
+      "inputs": [
+        {
+          "id": "usgs-composite-32",
+          "kind": "dem",
+          "provider_project": "USGS 3DEP delivered numeric composite export",
+          "source_date_utc": null,
+          "horizontal_crs": "EPSG:4326",
+          "vertical_datum": null,
+          "units": "m (delivered service)",
+          "native_shape_or_count": [
+            32,
+            32
+          ],
+          "license_access": "US Government public data; retained request/service metadata",
+          "bytes": 66342,
+          "sha256": "4c043d10024c8af4077c45d9ed6778141ccaf0837298ea8a521c9f832ce9a7f0"
+        },
+        {
+          "id": "ia-root",
+          "kind": "ept-node",
+          "provider_project": "USGS IA_FullState delivered EPT 0-0-0-0",
+          "source_date_utc": null,
+          "horizontal_crs": "EPSG:3857",
+          "vertical_datum": null,
+          "units": null,
+          "native_shape_or_count": 34923,
+          "license_access": "US Government Public Domain; registry.opendata.aws/usgs-lidar",
+          "bytes": 603312,
+          "sha256": "68c4b0ed247501a15d020d9a758d0345904f38785235732bd8e3386a3fca71c1"
+        }
+      ]
+    },
+    {
+      "file": "artifacts/p08c/medium-ept-1/receipt.json",
+      "sha256": "3914e3e0507d75ac803bb7efd450f2439af2e7ca5db550fdeda738327c347c4e",
+      "runtime": {
+        "source_commit": "cff800d5a16343a6c532714d8bdbdddd59f3f5d1",
+        "branch": "develop/v0.8.0",
+        "build_files_sha256": {
+          "AeroScience.Engine.dll": "74bc40ea5f4fd21cc3f4da0bbfeeed3d91efed42854035bcac1d8555b21ee6f3",
+          "AeroScience.Hdf.SafeRead.dll": "6a29585772155c723cb1c83584472bd93489a907a01ead22def6fc29cfb191b7",
+          "AeroScience.Missions.dll": "5c983a6928738b25c8e773cbcc229c27484c05b0c46a27611d66590f1c865258",
+          "AeroScience.Organization.dll": "e9d0227bbf8191ade225502885374feba8341a8d1b69156fc0fbb547bcaf4dd1",
+          "AeroScience.Shared.dll": "14194bd62b7a699beb08ce8b3fca64c7c11435e4d4ae9bd45a5e056c17b34fb0",
+          "AeroScience.SimConnect.dll": "750a132e30e88198b974767f246e0772f04c8ed6e328d971fe95cd8ebc7011fa",
+          "AeroScience.Telemetry.dll": "69b3e94426c19ed9c3bd178087841946fc7072d5e26b7f6daebcb0cb59ce3e20",
+          "AeroScience.TestHost.dll": "47678b33f0747939e0ba2caf8246e134d23b0fbf17a26ba6603ec458a3d7613f",
+          "BitMiracle.LibTiff.NET.dll": "0cfdba77f76af11c4dfa0a465a9155f7e8aac5632b54118b9b20ba185c58cd50",
+          "GeographicLib.dll": "03dec3d0d891bba5b7ca8f91efd5c62225f836263a276116334af9babad4097f",
+          "Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.dll": "96be7f72fffb51d26ee515e700d49ec98edfa482536eb0ec24cf94bd6fe7eb46",
+          "Microsoft.AspNetCore.Identity.EntityFrameworkCore.dll": "7c4d1a714aa878935a99c33a5df24dd1854a5577e55d4632e63e1f15d7e55fbf",
+          "Microsoft.Data.Sqlite.dll": "9f1fe804321767b6cc8db751ecedd56ab308e5f15492a7f40d7093bb61ab7638",
+          "Microsoft.EntityFrameworkCore.Abstractions.dll": "24596b62ac0546c641e308a06bb9ea4bb153e9a776ed2311e730832465f34f5d",
+          "Microsoft.EntityFrameworkCore.Relational.dll": "078ad42527c893d858e1c48b7edc5a0ec755c60b28395e996bc438ede3555cf0",
+          "Microsoft.EntityFrameworkCore.dll": "87faf0bf54de5f62c7d30eb686018b11c53d4acf6c280adb39965b303c5b2b59",
+          "NetTopologySuite.dll": "98fa6bae8b75b5f9445236679883fa27750d990aec11e985b85b57a30c37a858",
+          "Npgsql.EntityFrameworkCore.PostgreSQL.dll": "94fcf66e8e953fdb02c40c72ca89821dd5eed5324d4c0f12a7219ea8cd3d5a5e",
+          "Npgsql.dll": "e2bcafe1660fe4543fe9dfcabed972ec8d32259e5ea8009462ce1de23c7034c2",
+          "SQLitePCLRaw.batteries_v2.dll": "1ee3c6ff4d39171690d6ff6f84b4d876ed038ca28e39bb6e74995f52d2aacf8b",
+          "SQLitePCLRaw.core.dll": "b72c9dfe1479a568d6b84e249eaf949e76c757888f8056fb6ddb9c0480e0dd25",
+          "SQLitePCLRaw.provider.e_sqlite3.dll": "1d4cb69b3aaf6a9cf40dfe179cc16dd678f12bc024b212d4297654e0a29e220d",
+          "LidarRuntime/AeroScience.LidarReader": "8accaf384a16e85a2a98315f9a76b4b7e7b17524af9266766b57db49622d2b7c",
+          "LidarRuntime/LASzip.txt": "959f77033ba56a3b146faf5c02f9162071f2d0bff4b8b6f1c2193a4b41127d39",
+          "LidarRuntime/NOTICE.md": "9ee8a7c25b3dffdf8fd54b42b90d3aeef240989d92eb8c4d3f6e214bc975b1ee"
+        },
+        "scope": "Development TestHost build; not the sealed owner Windows package",
+        "harness_sha256": "e96928ba15315e466af1bd9a6637655348cad0bb907165b3950c073bff0d18c0"
+      },
+      "outcome": "Passed",
+      "candidate_points": 447556,
+      "original_bytes": 4640546,
+      "application_metrics": {
+        "exit_code": 0,
+        "stop_reason": null,
+        "wall_seconds": 17.34465494899996,
+        "sample_count": 105,
+        "sampled_process_tree_peak_rss_bytes": 84504576,
+        "sampled_process_tree_cpu_seconds": 17.78,
+        "sampled_process_read_bytes": 57344,
+        "sampled_process_write_bytes": 161923072,
+        "final_output_growth_bytes": 5254698,
+        "psutil_version": "7.2.2",
+        "os": "Linux-6.18.57-x86_64-with-glibc2.41",
+        "logical_cpus": 3,
+        "physical_memory_bytes": 10452459520,
+        "sampling_interval_seconds": 0.05,
+        "budgets": {
+          "wall_seconds": 300,
+          "sampled_tree_rss_bytes": 536870912,
+          "output_bytes": 268435456,
+          "minimum_free_bytes": 268435456
+        },
+        "limitations": [
+          "Sampled RSS/CPU/IO can miss short-lived children and spikes; not an OS hard limit.",
+          "IO counters are OS process disk counters, not HTTP payload or network bytes.",
+          "No native GPU/frame-rate measurement; no installed Windows/MSFS acceptance."
+        ]
+      },
+      "reference_metrics": {
+        "exit_code": 0,
+        "stop_reason": null,
+        "wall_seconds": 0.8488618829996994,
+        "sample_count": 5,
+        "sampled_process_tree_peak_rss_bytes": 51032064,
+        "sampled_process_tree_cpu_seconds": 0.76,
+        "sampled_process_read_bytes": 0,
+        "sampled_process_write_bytes": 16384,
+        "final_output_growth_bytes": 8610,
+        "psutil_version": "7.2.2",
+        "os": "Linux-6.18.57-x86_64-with-glibc2.41",
+        "logical_cpus": 3,
+        "physical_memory_bytes": 10452459520,
+        "sampling_interval_seconds": 0.05,
+        "budgets": {
+          "wall_seconds": 300,
+          "sampled_tree_rss_bytes": 536870912,
+          "output_bytes": 268435456,
+          "minimum_free_bytes": 268435456
+        },
+        "limitations": [
+          "Sampled RSS/CPU/IO can miss short-lived children and spikes; not an OS hard limit.",
+          "IO counters are OS process disk counters, not HTTP payload or network bytes.",
+          "No native GPU/frame-rate measurement; no installed Windows/MSFS acceptance."
+        ]
+      },
+      "reference": {
+        "state": "Passed",
+        "verifiedUtc": "2026-11-15T17:44:44.378183+00:00",
+        "reference": {
+          "laspy": "2.6.1",
+          "lazrs": "0.7.0",
+          "pyproj": "3.7.2",
+          "proj": "9.5.1",
+          "shapely": "2.1.2",
+          "geos": "3.13.1"
+        },
+        "scope": "Genuine historical source points; synthetic archived flight geometry; independent original record/attribute/PROJ/GEOS corridor comparison",
+        "scannedOriginalPoints": 447556,
+        "retainedOriginalPoints": 109,
+        "maximumGeographicDifferenceDegrees": 2.842170943040401e-14,
+        "sources": [
+          {
+            "id": "b6806eff-3b3d-40b7-a247-1b15e303c70f",
+            "project": "IA_FullState/0-0-0-0",
+            "fileSha256": "68c4b0ed247501a15d020d9a758d0345904f38785235732bd8e3386a3fca71c1",
+            "originalPointCount": 34923,
+            "retainedPoints": 1,
+            "horizontalCrs": "EPSG:3857",
+            "verticalReference": "Unknown (not established by delivered original metadata)",
+            "verticalUnit": "unknown",
+            "acquisitionUtc": null
+          },
+          {
+            "id": "72e26b5b-f43e-4428-9ceb-89f4b153033c",
+            "project": "IA_FullState/1-0-0-0",
+            "fileSha256": "ef55350db7631f72c22305216449d944b12657be717e596bbf5ce8c96d4ebd5b",
+            "originalPointCount": 35,
+            "retainedPoints": 0,
+            "horizontalCrs": "EPSG:3857",
+            "verticalReference": "Unknown (not established by delivered original metadata)",
+            "verticalUnit": "unknown",
+            "acquisitionUtc": null
+          },
+          {
+            "id": "9b683390-3eed-4323-9fca-f5bbf5cc1099",
+            "project": "IA_FullState/1-0-0-1",
+            "fileSha256": "5f5145f199211f1ae4017035b0a3662aa3396687ce1fd0223587103a79101ba7",
+            "originalPointCount": 30122,
+            "retainedPoints": 0,
+            "horizontalCrs": "EPSG:3857",
+            "verticalReference": "Unknown (not established by delivered original metadata)",
+            "verticalUnit": "unknown",
+            "acquisitionUtc": null
+          },
+          {
+            "id": "408aba3a-f99a-40d9-8d7d-7e491d37976a",
+            "project": "IA_FullState/10-239-338-512",
+            "fileSha256": "0e31423010d513ad924cc32fec2d621e0b6e50b3192d12aefa4444c5c7f999b9",
+            "originalPointCount": 38260,
+            "retainedPoints": 43,
+            "horizontalCrs": "EPSG:3857",
+            "verticalReference": "Unknown (not established by delivered original metadata)",
+            "verticalUnit": "unknown",
+            "acquisitionUtc": null
+          },
+          {
+            "id": "316cb8ac-76ad-4250-a900-a58470c01718",
+            "project": "IA_FullState/11-478-676-1024",
+            "fileSha256": "b973af6d27a5fdedf66d3dfb00e5b7c36e8453625480eed32062796e6ac996aa",
+            "originalPointCount": 3253,
+            "retainedPoints": 19,
+            "horizontalCrs": "EPSG:3857",
+            "verticalReference": "Unknown (not established by delivered original metadata)",
+            "verticalUnit": "unknown",
+            "acquisitionUtc": null
+          },
+          {
+            "id": "5f43d778-6d65-4de6-9f6c-581dfc144444",
+            "project": "IA_FullState/2-0-1-1",
+            "fileSha256": "b91540452a41245ce302d24920604fb400da9164696bbac14ab5363841e324c6",
+            "originalPointCount": 47,
+            "retainedPoints": 0,
+            "horizontalCrs": "EPSG:3857",
+            "verticalReference": "Unknown (not established by delivered original metadata)",
+            "verticalUnit": "unknown",
+            "acquisitionUtc": null
+          },
+          {
+            "id": "e469bda0-06fb-4a7b-be97-bbc1074a83c7",
+            "project": "IA_FullState/2-0-1-2",
+            "fileSha256": "b46d451ddf9491fa7fdcacfa74cf7a5fe2b0b7d108f18927aa6f5259844d1c23",
+            "originalPointCount": 39257,
+            "retainedPoints": 0,
+            "horizontalCrs": "EPSG:3857",
+            "verticalReference": "Unknown (not established by delivered original metadata)",
+            "verticalUnit": "unknown",
+            "acquisitionUtc": null
+          },
+          {
+            "id": "f732e906-e2ac-441f-9af0-3733ee6012d0",
+            "project": "IA_FullState/3-1-2-3",
+            "fileSha256": "21b1cc0ae7ea3d2153dbc5f24e65689ea2c6a00030a0c1a5b7165b75d877b1d6",
+            "originalPointCount": 84,
+            "retainedPoints": 0,
+            "horizontalCrs": "EPSG:3857",
+            "verticalReference": "Unknown (not established by delivered original metadata)",
+            "verticalUnit": "unknown",
+            "acquisitionUtc": null
+          },
+          {
+            "id": "074caaad-2f56-4ac7-9f7c-5f849489bfaf",
+            "project": "IA_FullState/3-1-2-4",
+            "fileSha256": "894fd2af5dc083dedb530485e0aea37b7fb24fde67ec63f4ea16ca8da3a8d67f",
+            "originalPointCount": 65561,
+            "retainedPoints": 1,
+            "horizontalCrs": "EPSG:3857",
+            "verticalReference": "Unknown (not established by delivered original metadata)",
+            "verticalUnit": "unknown",
+            "acquisitionUtc": null
+          },
+          {
+            "id": "e2225005-fc70-40d0-8b15-0e975316db55",
+            "project": "IA_FullState/4-3-5-7",
+            "fileSha256": "ce42574e59946eaa57a6fa2e19cc7499fe467d916ce04585e9f4828d5d715db5",
+            "originalPointCount": 37,
+            "retainedPoints": 0,
+            "horizontalCrs": "EPSG:3857",
+            "verticalReference": "Unknown (not established by delivered original metadata)",
+            "verticalUnit": "unknown",
+            "acquisitionUtc": null
+          },
+          {
+            "id": "94710804-8355-4106-a4f7-75f3212e1c7b",
+            "project": "IA_FullState/4-3-5-8",
+            "fileSha256": "58853378459b6619f8175ae7a72dcb5523ec9c2a49a42233820f0ab1192355f5",
+            "originalPointCount": 62800,
+            "retainedPoints": 1,
+            "horizontalCrs": "EPSG:3857",
+            "verticalReference": "Unknown (not established by delivered original metadata)",
+            "verticalUnit": "unknown",
+            "acquisitionUtc": null
+          },
+          {
+            "id": "24549c9e-54fe-442e-8923-d5294758c5ed",
+            "project": "IA_FullState/5-7-10-15",
+            "fileSha256": "e2fcc3595271e06924fb22115de40f29526197bfe9072a8c07ed80c8c1b1bbd2",
+            "originalPointCount": 3307,
+            "retainedPoints": 0,
+            "horizontalCrs": "EPSG:3857",
+            "verticalReference": "Unknown (not established by delivered original metadata)",
+            "verticalUnit": "unknown",
+            "acquisitionUtc": null
+          },
+          {
+            "id": "5e9097c9-bd02-4ec6-b657-92c181010dc5",
+            "project": "IA_FullState/5-7-10-16",
+            "fileSha256": "157ed139eaa7b391141f34a658bea45f3a840c597e48f80021eaa026484f0ca1",
+            "originalPointCount": 59029,
+            "retainedPoints": 1,
+            "horizontalCrs": "EPSG:3857",
+            "verticalReference": "Unknown (not established by delivered original metadata)",
+            "verticalUnit": "unknown",
+            "acquisitionUtc": null
+          },
+          {
+            "id": "ae4d6573-5c48-4d88-a9b6-571ca3ed2b34",
+            "project": "IA_FullState/6-14-21-32",
+            "fileSha256": "737ced93c8ff1dd70e96990aab9fbb017190d404b2b2497110401b8cb5e0bcf8",
+            "originalPointCount": 47336,
+            "retainedPoints": 3,
+            "horizontalCrs": "EPSG:3857",
+            "verticalReference": "Unknown (not established by delivered original metadata)",
+            "verticalUnit": "unknown",
+            "acquisitionUtc": null
+          },
+          {
+            "id": "15d82e33-dd2b-430c-8e76-8da1c613bdb6",
+            "project": "IA_FullState/7-29-42-64",
+            "fileSha256": "0467591d749a42d5cbbff45743513c0702636a26fbdc0b687e876c61c2ba88ef",
+            "originalPointCount": 32348,
+            "retainedPoints": 6,
+            "horizontalCrs": "EPSG:3857",
+            "verticalReference": "Unknown (not established by delivered original metadata)",
+            "verticalUnit": "unknown",
+            "acquisitionUtc": null
+          },
+          {
+            "id": "bee52174-5652-4403-aaef-b09ec50c3ee0",
+            "project": "IA_FullState/8-59-84-128",
+            "fileSha256": "04b3253e6e153076dca3a2570e9ec2b53db2c27998baa40e1f951738e51c8c0c",
+            "originalPointCount": 10429,
+            "retainedPoints": 11,
+            "horizontalCrs": "EPSG:3857",
+            "verticalReference": "Unknown (not established by delivered original metadata)",
+            "verticalUnit": "unknown",
+            "acquisitionUtc": null
+          },
+          {
+            "id": "9df7acfe-350a-45b1-be09-1ef655c73375",
+            "project": "IA_FullState/9-119-169-256",
+            "fileSha256": "7df5439ef9f3af2fee7cf4574afb9c0dfda6e500903f8e12198ab480fd1e6d29",
+            "originalPointCount": 20728,
+            "retainedPoints": 23,
+            "horizontalCrs": "EPSG:3857",
+            "verticalReference": "Unknown (not established by delivered original metadata)",
+            "verticalUnit": "unknown",
+            "acquisitionUtc": null
+          }
+        ],
+        "approvedNetwork": null,
+        "unknowns": [
+          "Original survey date and vertical datum/unit where not established by actual retained metadata",
+          "Original contractor coordinates before Entwine reprojection"
+        ],
+        "notTested": [
+          "Installed Windows/MSFS",
+          "Native COPC spatial index",
+          "Provider-wide coverage or density"
+        ],
+        "originalScienceObservations": 0,
+        "originalScienceProducts": 0
+      },
+      "inputs": [
+        {
+          "id": "b6806eff-3b3d-40b7-a247-1b15e303c70f",
+          "kind": "ept-node",
+          "provider_project": "IA_FullState/0-0-0-0",
+          "source_date_utc": null,
+          "horizontal_crs": "EPSG:3857",
+          "vertical_datum": "Unknown (not established by delivered original metadata)",
+          "units": "unknown",
+          "native_shape_or_count": 34923,
+          "license_access": "US Government Public Domain",
+          "bytes": 603312,
+          "sha256": "68c4b0ed247501a15d020d9a758d0345904f38785235732bd8e3386a3fca71c1"
+        },
+        {
+          "id": "72e26b5b-f43e-4428-9ceb-89f4b153033c",
+          "kind": "ept-node",
+          "provider_project": "IA_FullState/1-0-0-0",
+          "source_date_utc": null,
+          "horizontal_crs": "EPSG:3857",
+          "vertical_datum": "Unknown (not established by delivered original metadata)",
+          "units": "unknown",
+          "native_shape_or_count": 35,
+          "license_access": "US Government Public Domain",
+          "bytes": 1493,
+          "sha256": "ef55350db7631f72c22305216449d944b12657be717e596bbf5ce8c96d4ebd5b"
+        },
+        {
+          "id": "9b683390-3eed-4323-9fca-f5bbf5cc1099",
+          "kind": "ept-node",
+          "provider_project": "IA_FullState/1-0-0-1",
+          "source_date_utc": null,
+          "horizontal_crs": "EPSG:3857",
+          "vertical_datum": "Unknown (not established by delivered original metadata)",
+          "units": "unknown",
+          "native_shape_or_count": 30122,
+          "license_access": "US Government Public Domain",
+          "bytes": 467734,
+          "sha256": "5f5145f199211f1ae4017035b0a3662aa3396687ce1fd0223587103a79101ba7"
+        },
+        {
+          "id": "408aba3a-f99a-40d9-8d7d-7e491d37976a",
+          "kind": "ept-node",
+          "provider_project": "IA_FullState/10-239-338-512",
+          "source_date_utc": null,
+          "horizontal_crs": "EPSG:3857",
+          "vertical_datum": "Unknown (not established by delivered original metadata)",
+          "units": "unknown",
+          "native_shape_or_count": 38260,
+          "license_access": "US Government Public Domain",
+          "bytes": 133076,
+          "sha256": "0e31423010d513ad924cc32fec2d621e0b6e50b3192d12aefa4444c5c7f999b9"
+        },
+        {
+          "id": "316cb8ac-76ad-4250-a900-a58470c01718",
+          "kind": "ept-node",
+          "provider_project": "IA_FullState/11-478-676-1024",
+          "source_date_utc": null,
+          "horizontal_crs": "EPSG:3857",
+          "vertical_datum": "Unknown (not established by delivered original metadata)",
+          "units": "unknown",
+          "native_shape_or_count": 3253,
+          "license_access": "US Government Public Domain",
+          "bytes": 14190,
+          "sha256": "b973af6d27a5fdedf66d3dfb00e5b7c36e8453625480eed32062796e6ac996aa"
+        },
+        {
+          "id": "5f43d778-6d65-4de6-9f6c-581dfc144444",
+          "kind": "ept-node",
+          "provider_project": "IA_FullState/2-0-1-1",
+          "source_date_utc": null,
+          "horizontal_crs": "EPSG:3857",
+          "vertical_datum": "Unknown (not established by delivered original metadata)",
+          "units": "unknown",
+          "native_shape_or_count": 47,
+          "license_access": "US Government Public Domain",
+          "bytes": 1638,
+          "sha256": "b91540452a41245ce302d24920604fb400da9164696bbac14ab5363841e324c6"
+        },
+        {
+          "id": "e469bda0-06fb-4a7b-be97-bbc1074a83c7",
+          "kind": "ept-node",
+          "provider_project": "IA_FullState/2-0-1-2",
+          "source_date_utc": null,
+          "horizontal_crs": "EPSG:3857",
+          "vertical_datum": "Unknown (not established by delivered original metadata)",
+          "units": "unknown",
+          "native_shape_or_count": 39257,
+          "license_access": "US Government Public Domain",
+          "bytes": 526603,
+          "sha256": "b46d451ddf9491fa7fdcacfa74cf7a5fe2b0b7d108f18927aa6f5259844d1c23"
+        },
+        {
+          "id": "f732e906-e2ac-441f-9af0-3733ee6012d0",
+          "kind": "ept-node",
+          "provider_project": "IA_FullState/3-1-2-3",
+          "source_date_utc": null,
+          "horizontal_crs": "EPSG:3857",
+          "vertical_datum": "Unknown (not established by delivered original metadata)",
+          "units": "unknown",
+          "native_shape_or_count": 84,
+          "license_access": "US Government Public Domain",
+          "bytes": 2216,
+          "sha256": "21b1cc0ae7ea3d2153dbc5f24e65689ea2c6a00030a0c1a5b7165b75d877b1d6"
+        },
+        {
+          "id": "074caaad-2f56-4ac7-9f7c-5f849489bfaf",
+          "kind": "ept-node",
+          "provider_project": "IA_FullState/3-1-2-4",
+          "source_date_utc": null,
+          "horizontal_crs": "EPSG:3857",
+          "vertical_datum": "Unknown (not established by delivered original metadata)",
+          "units": "unknown",
+          "native_shape_or_count": 65561,
+          "license_access": "US Government Public Domain",
+          "bytes": 778789,
+          "sha256": "894fd2af5dc083dedb530485e0aea37b7fb24fde67ec63f4ea16ca8da3a8d67f"
+        },
+        {
+          "id": "e2225005-fc70-40d0-8b15-0e975316db55",
+          "kind": "ept-node",
+          "provider_project": "IA_FullState/4-3-5-7",
+          "source_date_utc": null,
+          "horizontal_crs": "EPSG:3857",
+          "vertical_datum": "Unknown (not established by delivered original metadata)",
+          "units": "unknown",
+          "native_shape_or_count": 37,
+          "license_access": "US Government Public Domain",
+          "bytes": 1465,
+          "sha256": "ce42574e59946eaa57a6fa2e19cc7499fe467d916ce04585e9f4828d5d715db5"
+        },
+        {
+          "id": "94710804-8355-4106-a4f7-75f3212e1c7b",
+          "kind": "ept-node",
+          "provider_project": "IA_FullState/4-3-5-8",
+          "source_date_utc": null,
+          "horizontal_crs": "EPSG:3857",
+          "vertical_datum": "Unknown (not established by delivered original metadata)",
+          "units": "unknown",
+          "native_shape_or_count": 62800,
+          "license_access": "US Government Public Domain",
+          "bytes": 651571,
+          "sha256": "58853378459b6619f8175ae7a72dcb5523ec9c2a49a42233820f0ab1192355f5"
+        },
+        {
+          "id": "24549c9e-54fe-442e-8923-d5294758c5ed",
+          "kind": "ept-node",
+          "provider_project": "IA_FullState/5-7-10-15",
+          "source_date_utc": null,
+          "horizontal_crs": "EPSG:3857",
+          "vertical_datum": "Unknown (not established by delivered original metadata)",
+          "units": "unknown",
+          "native_shape_or_count": 3307,
+          "license_access": "US Government Public Domain",
+          "bytes": 27608,
+          "sha256": "e2fcc3595271e06924fb22115de40f29526197bfe9072a8c07ed80c8c1b1bbd2"
+        },
+        {
+          "id": "5e9097c9-bd02-4ec6-b657-92c181010dc5",
+          "kind": "ept-node",
+          "provider_project": "IA_FullState/5-7-10-16",
+          "source_date_utc": null,
+          "horizontal_crs": "EPSG:3857",
+          "vertical_datum": "Unknown (not established by delivered original metadata)",
+          "units": "unknown",
+          "native_shape_or_count": 59029,
+          "license_access": "US Government Public Domain",
+          "bytes": 566562,
+          "sha256": "157ed139eaa7b391141f34a658bea45f3a840c597e48f80021eaa026484f0ca1"
+        },
+        {
+          "id": "ae4d6573-5c48-4d88-a9b6-571ca3ed2b34",
+          "kind": "ept-node",
+          "provider_project": "IA_FullState/6-14-21-32",
+          "source_date_utc": null,
+          "horizontal_crs": "EPSG:3857",
+          "vertical_datum": "Unknown (not established by delivered original metadata)",
+          "units": "unknown",
+          "native_shape_or_count": 47336,
+          "license_access": "US Government Public Domain",
+          "bytes": 426156,
+          "sha256": "737ced93c8ff1dd70e96990aab9fbb017190d404b2b2497110401b8cb5e0bcf8"
+        },
+        {
+          "id": "15d82e33-dd2b-430c-8e76-8da1c613bdb6",
+          "kind": "ept-node",
+          "provider_project": "IA_FullState/7-29-42-64",
+          "source_date_utc": null,
+          "horizontal_crs": "EPSG:3857",
+          "vertical_datum": "Unknown (not established by delivered original metadata)",
+          "units": "unknown",
+          "native_shape_or_count": 32348,
+          "license_access": "US Government Public Domain",
+          "bytes": 257369,
+          "sha256": "0467591d749a42d5cbbff45743513c0702636a26fbdc0b687e876c61c2ba88ef"
+        },
+        {
+          "id": "bee52174-5652-4403-aaef-b09ec50c3ee0",
+          "kind": "ept-node",
+          "provider_project": "IA_FullState/8-59-84-128",
+          "source_date_utc": null,
+          "horizontal_crs": "EPSG:3857",
+          "vertical_datum": "Unknown (not established by delivered original metadata)",
+          "units": "unknown",
+          "native_shape_or_count": 10429,
+          "license_access": "US Government Public Domain",
+          "bytes": 72464,
+          "sha256": "04b3253e6e153076dca3a2570e9ec2b53db2c27998baa40e1f951738e51c8c0c"
+        },
+        {
+          "id": "9df7acfe-350a-45b1-be09-1ef655c73375",
+          "kind": "ept-node",
+          "provider_project": "IA_FullState/9-119-169-256",
+          "source_date_utc": null,
+          "horizontal_crs": "EPSG:3857",
+          "vertical_datum": "Unknown (not established by delivered original metadata)",
+          "units": "unknown",
+          "native_shape_or_count": 20728,
+          "license_access": "US Government Public Domain",
+          "bytes": 108300,
+          "sha256": "7df5439ef9f3af2fee7cf4574afb9c0dfda6e500903f8e12198ab480fd1e6d29"
+        }
+      ]
+    },
+    {
+      "file": "artifacts/p08c/medium-ept-2/receipt.json",
+      "sha256": "a742a4937b314fcc26475c40213bf659c1afb204fbbab073076211b9ca30a803",
+      "runtime": {
+        "source_commit": "cff800d5a16343a6c532714d8bdbdddd59f3f5d1",
+        "branch": "develop/v0.8.0",
+        "build_files_sha256": {
+          "AeroScience.Engine.dll": "74bc40ea5f4fd21cc3f4da0bbfeeed3d91efed42854035bcac1d8555b21ee6f3",
+          "AeroScience.Hdf.SafeRead.dll": "6a29585772155c723cb1c83584472bd93489a907a01ead22def6fc29cfb191b7",
+          "AeroScience.Missions.dll": "5c983a6928738b25c8e773cbcc229c27484c05b0c46a27611d66590f1c865258",
+          "AeroScience.Organization.dll": "e9d0227bbf8191ade225502885374feba8341a8d1b69156fc0fbb547bcaf4dd1",
+          "AeroScience.Shared.dll": "14194bd62b7a699beb08ce8b3fca64c7c11435e4d4ae9bd45a5e056c17b34fb0",
+          "AeroScience.SimConnect.dll": "750a132e30e88198b974767f246e0772f04c8ed6e328d971fe95cd8ebc7011fa",
+          "AeroScience.Telemetry.dll": "69b3e94426c19ed9c3bd178087841946fc7072d5e26b7f6daebcb0cb59ce3e20",
+          "AeroScience.TestHost.dll": "47678b33f0747939e0ba2caf8246e134d23b0fbf17a26ba6603ec458a3d7613f",
+          "BitMiracle.LibTiff.NET.dll": "0cfdba77f76af11c4dfa0a465a9155f7e8aac5632b54118b9b20ba185c58cd50",
+          "GeographicLib.dll": "03dec3d0d891bba5b7ca8f91efd5c62225f836263a276116334af9babad4097f",
+          "Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.dll": "96be7f72fffb51d26ee515e700d49ec98edfa482536eb0ec24cf94bd6fe7eb46",
+          "Microsoft.AspNetCore.Identity.EntityFrameworkCore.dll": "7c4d1a714aa878935a99c33a5df24dd1854a5577e55d4632e63e1f15d7e55fbf",
+          "Microsoft.Data.Sqlite.dll": "9f1fe804321767b6cc8db751ecedd56ab308e5f15492a7f40d7093bb61ab7638",
+          "Microsoft.EntityFrameworkCore.Abstractions.dll": "24596b62ac0546c641e308a06bb9ea4bb153e9a776ed2311e730832465f34f5d",
+          "Microsoft.EntityFrameworkCore.Relational.dll": "078ad42527c893d858e1c48b7edc5a0ec755c60b28395e996bc438ede3555cf0",
+          "Microsoft.EntityFrameworkCore.dll": "87faf0bf54de5f62c7d30eb686018b11c53d4acf6c280adb39965b303c5b2b59",
+          "NetTopologySuite.dll": "98fa6bae8b75b5f9445236679883fa27750d990aec11e985b85b57a30c37a858",
+          "Npgsql.EntityFrameworkCore.PostgreSQL.dll": "94fcf66e8e953fdb02c40c72ca89821dd5eed5324d4c0f12a7219ea8cd3d5a5e",
+          "Npgsql.dll": "e2bcafe1660fe4543fe9dfcabed972ec8d32259e5ea8009462ce1de23c7034c2",
+          "SQLitePCLRaw.batteries_v2.dll": "1ee3c6ff4d39171690d6ff6f84b4d876ed038ca28e39bb6e74995f52d2aacf8b",
+          "SQLitePCLRaw.core.dll": "b72c9dfe1479a568d6b84e249eaf949e76c757888f8056fb6ddb9c0480e0dd25",
+          "SQLitePCLRaw.provider.e_sqlite3.dll": "1d4cb69b3aaf6a9cf40dfe179cc16dd678f12bc024b212d4297654e0a29e220d",
+          "LidarRuntime/AeroScience.LidarReader": "8accaf384a16e85a2a98315f9a76b4b7e7b17524af9266766b57db49622d2b7c",
+          "LidarRuntime/LASzip.txt": "959f77033ba56a3b146faf5c02f9162071f2d0bff4b8b6f1c2193a4b41127d39",
+          "LidarRuntime/NOTICE.md": "9ee8a7c25b3dffdf8fd54b42b90d3aeef240989d92eb8c4d3f6e214bc975b1ee"
+        },
+        "scope": "Development TestHost build; not the sealed owner Windows package",
+        "harness_sha256": "e96928ba15315e466af1bd9a6637655348cad0bb907165b3950c073bff0d18c0"
+      },
+      "outcome": "Passed",
+      "candidate_points": 447556,
+      "original_bytes": 4640546,
+      "application_metrics": {
+        "exit_code": 0,
+        "stop_reason": null,
+        "wall_seconds": 18.83754382599909,
+        "sample_count": 111,
+        "sampled_process_tree_peak_rss_bytes": 84013056,
+        "sampled_process_tree_cpu_seconds": 19.06,
+        "sampled_process_read_bytes": 0,
+        "sampled_process_write_bytes": 160772096,
+        "final_output_growth_bytes": 5254698,
+        "sampled_peak_output_growth_bytes": 5055830,
+        "psutil_version": "7.2.2",
+        "os": "Linux-6.18.57-x86_64-with-glibc2.41",
+        "logical_cpus": 3,
+        "physical_memory_bytes": 10452459520,
+        "sampling_interval_seconds": 0.05,
+        "budgets": {
+          "wall_seconds": 300,
+          "sampled_tree_rss_bytes": 536870912,
+          "output_bytes": 268435456,
+          "minimum_free_bytes": 268435456
+        },
+        "limitations": [
+          "Sampled RSS/CPU/IO can miss short-lived children and spikes; not an OS hard limit.",
+          "IO counters are OS process disk counters, not HTTP payload or network bytes.",
+          "No native GPU/frame-rate measurement; no installed Windows/MSFS acceptance."
+        ]
+      },
+      "reference_metrics": {
+        "exit_code": 0,
+        "stop_reason": null,
+        "wall_seconds": 0.6929595319998043,
+        "sample_count": 4,
+        "sampled_process_tree_peak_rss_bytes": 51347456,
+        "sampled_process_tree_cpu_seconds": 0.5700000000000001,
+        "sampled_process_read_bytes": 0,
+        "sampled_process_write_bytes": 0,
+        "final_output_growth_bytes": 8610,
+        "sampled_peak_output_growth_bytes": 0,
+        "psutil_version": "7.2.2",
+        "os": "Linux-6.18.57-x86_64-with-glibc2.41",
+        "logical_cpus": 3,
+        "physical_memory_bytes": 10452459520,
+        "sampling_interval_seconds": 0.05,
+        "budgets": {
+          "wall_seconds": 300,
+          "sampled_tree_rss_bytes": 536870912,
+          "output_bytes": 268435456,
+          "minimum_free_bytes": 268435456
+        },
+        "limitations": [
+          "Sampled RSS/CPU/IO can miss short-lived children and spikes; not an OS hard limit.",
+          "IO counters are OS process disk counters, not HTTP payload or network bytes.",
+          "No native GPU/frame-rate measurement; no installed Windows/MSFS acceptance."
+        ]
+      },
+      "reference": {
+        "state": "Passed",
+        "verifiedUtc": "2026-11-15T17:45:54.251499+00:00",
+        "reference": {
+          "laspy": "2.6.1",
+          "lazrs": "0.7.0",
+          "pyproj": "3.7.2",
+          "proj": "9.5.1",
+          "shapely": "2.1.2",
+          "geos": "3.13.1"
+        },
+        "scope": "Genuine historical source points; synthetic archived flight geometry; independent original record/attribute/PROJ/GEOS corridor comparison",
+        "scannedOriginalPoints": 447556,
+        "retainedOriginalPoints": 109,
+        "maximumGeographicDifferenceDegrees": 2.842170943040401e-14,
+        "sources": [
+          {
+            "id": "b6806eff-3b3d-40b7-a247-1b15e303c70f",
+            "project": "IA_FullState/0-0-0-0",
+            "fileSha256": "68c4b0ed247501a15d020d9a758d0345904f38785235732bd8e3386a3fca71c1",
+            "originalPointCount": 34923,
+            "retainedPoints": 1,
+            "horizontalCrs": "EPSG:3857",
+            "verticalReference": "Unknown (not established by delivered original metadata)",
+            "verticalUnit": "unknown",
+            "acquisitionUtc": null
+          },
+          {
+            "id": "72e26b5b-f43e-4428-9ceb-89f4b153033c",
+            "project": "IA_FullState/1-0-0-0",
+            "fileSha256": "ef55350db7631f72c22305216449d944b12657be717e596bbf5ce8c96d4ebd5b",
+            "originalPointCount": 35,
+            "retainedPoints": 0,
+            "horizontalCrs": "EPSG:3857",
+            "verticalReference": "Unknown (not established by delivered original metadata)",
+            "verticalUnit": "unknown",
+            "acquisitionUtc": null
+          },
+          {
+            "id": "9b683390-3eed-4323-9fca-f5bbf5cc1099",
+            "project": "IA_FullState/1-0-0-1",
+            "fileSha256": "5f5145f199211f1ae4017035b0a3662aa3396687ce1fd0223587103a79101ba7",
+            "originalPointCount": 30122,
+            "retainedPoints": 0,
+            "horizontalCrs": "EPSG:3857",
+            "verticalReference": "Unknown (not established by delivered original metadata)",
+            "verticalUnit": "unknown",
+            "acquisitionUtc": null
+          },
+          {
+            "id": "408aba3a-f99a-40d9-8d7d-7e491d37976a",
+            "project": "IA_FullState/10-239-338-512",
+            "fileSha256": "0e31423010d513ad924cc32fec2d621e0b6e50b3192d12aefa4444c5c7f999b9",
+            "originalPointCount": 38260,
+            "retainedPoints": 43,
+            "horizontalCrs": "EPSG:3857",
+            "verticalReference": "Unknown (not established by delivered original metadata)",
+            "verticalUnit": "unknown",
+            "acquisitionUtc": null
+          },
+          {
+            "id": "316cb8ac-76ad-4250-a900-a58470c01718",
+            "project": "IA_FullState/11-478-676-1024",
+            "fileSha256": "b973af6d27a5fdedf66d3dfb00e5b7c36e8453625480eed32062796e6ac996aa",
+            "originalPointCount": 3253,
+            "retainedPoints": 19,
+            "horizontalCrs": "EPSG:3857",
+            "verticalReference": "Unknown (not established by delivered original metadata)",
+            "verticalUnit": "unknown",
+            "acquisitionUtc": null
+          },
+          {
+            "id": "5f43d778-6d65-4de6-9f6c-581dfc144444",
+            "project": "IA_FullState/2-0-1-1",
+            "fileSha256": "b91540452a41245ce302d24920604fb400da9164696bbac14ab5363841e324c6",
+            "originalPointCount": 47,
+            "retainedPoints": 0,
+            "horizontalCrs": "EPSG:3857",
+            "verticalReference": "Unknown (not established by delivered original metadata)",
+            "verticalUnit": "unknown",
+            "acquisitionUtc": null
+          },
+          {
+            "id": "e469bda0-06fb-4a7b-be97-bbc1074a83c7",
+            "project": "IA_FullState/2-0-1-2",
+            "fileSha256": "b46d451ddf9491fa7fdcacfa74cf7a5fe2b0b7d108f18927aa6f5259844d1c23",
+            "originalPointCount": 39257,
+            "retainedPoints": 0,
+            "horizontalCrs": "EPSG:3857",
+            "verticalReference": "Unknown (not established by delivered original metadata)",
+            "verticalUnit": "unknown",
+            "acquisitionUtc": null
+          },
+          {
+            "id": "f732e906-e2ac-441f-9af0-3733ee6012d0",
+            "project": "IA_FullState/3-1-2-3",
+            "fileSha256": "21b1cc0ae7ea3d2153dbc5f24e65689ea2c6a00030a0c1a5b7165b75d877b1d6",
+            "originalPointCount": 84,
+            "retainedPoints": 0,
+            "horizontalCrs": "EPSG:3857",
+            "verticalReference": "Unknown (not established by delivered original metadata)",
+            "verticalUnit": "unknown",
+            "acquisitionUtc": null
+          },
+          {
+            "id": "074caaad-2f56-4ac7-9f7c-5f849489bfaf",
+            "project": "IA_FullState/3-1-2-4",
+            "fileSha256": "894fd2af5dc083dedb530485e0aea37b7fb24fde67ec63f4ea16ca8da3a8d67f",
+            "originalPointCount": 65561,
+            "retainedPoints": 1,
+            "horizontalCrs": "EPSG:3857",
+            "verticalReference": "Unknown (not established by delivered original metadata)",
+            "verticalUnit": "unknown",
+            "acquisitionUtc": null
+          },
+          {
+            "id": "e2225005-fc70-40d0-8b15-0e975316db55",
+            "project": "IA_FullState/4-3-5-7",
+            "fileSha256": "ce42574e59946eaa57a6fa2e19cc7499fe467d916ce04585e9f4828d5d715db5",
+            "originalPointCount": 37,
+            "retainedPoints": 0,
+            "horizontalCrs": "EPSG:3857",
+            "verticalReference": "Unknown (not established by delivered original metadata)",
+            "verticalUnit": "unknown",
+            "acquisitionUtc": null
+          },
+          {
+            "id": "94710804-8355-4106-a4f7-75f3212e1c7b",
+            "project": "IA_FullState/4-3-5-8",
+            "fileSha256": "58853378459b6619f8175ae7a72dcb5523ec9c2a49a42233820f0ab1192355f5",
+            "originalPointCount": 62800,
+            "retainedPoints": 1,
+            "horizontalCrs": "EPSG:3857",
+            "verticalReference": "Unknown (not established by delivered original metadata)",
+            "verticalUnit": "unknown",
+            "acquisitionUtc": null
+          },
+          {
+            "id": "24549c9e-54fe-442e-8923-d5294758c5ed",
+            "project": "IA_FullState/5-7-10-15",
+            "fileSha256": "e2fcc3595271e06924fb22115de40f29526197bfe9072a8c07ed80c8c1b1bbd2",
+            "originalPointCount": 3307,
+            "retainedPoints": 0,
+            "horizontalCrs": "EPSG:3857",
+            "verticalReference": "Unknown (not established by delivered original metadata)",
+            "verticalUnit": "unknown",
+            "acquisitionUtc": null
+          },
+          {
+            "id": "5e9097c9-bd02-4ec6-b657-92c181010dc5",
+            "project": "IA_FullState/5-7-10-16",
+            "fileSha256": "157ed139eaa7b391141f34a658bea45f3a840c597e48f80021eaa026484f0ca1",
+            "originalPointCount": 59029,
+            "retainedPoints": 1,
+            "horizontalCrs": "EPSG:3857",
+            "verticalReference": "Unknown (not established by delivered original metadata)",
+            "verticalUnit": "unknown",
+            "acquisitionUtc": null
+          },
+          {
+            "id": "ae4d6573-5c48-4d88-a9b6-571ca3ed2b34",
+            "project": "IA_FullState/6-14-21-32",
+            "fileSha256": "737ced93c8ff1dd70e96990aab9fbb017190d404b2b2497110401b8cb5e0bcf8",
+            "originalPointCount": 47336,
+            "retainedPoints": 3,
+            "horizontalCrs": "EPSG:3857",
+            "verticalReference": "Unknown (not established by delivered original metadata)",
+            "verticalUnit": "unknown",
+            "acquisitionUtc": null
+          },
+          {
+            "id": "15d82e33-dd2b-430c-8e76-8da1c613bdb6",
+            "project": "IA_FullState/7-29-42-64",
+            "fileSha256": "0467591d749a42d5cbbff45743513c0702636a26fbdc0b687e876c61c2ba88ef",
+            "originalPointCount": 32348,
+            "retainedPoints": 6,
+            "horizontalCrs": "EPSG:3857",
+            "verticalReference": "Unknown (not established by delivered original metadata)",
+            "verticalUnit": "unknown",
+            "acquisitionUtc": null
+          },
+          {
+            "id": "bee52174-5652-4403-aaef-b09ec50c3ee0",
+            "project": "IA_FullState/8-59-84-128",
+            "fileSha256": "04b3253e6e153076dca3a2570e9ec2b53db2c27998baa40e1f951738e51c8c0c",
+            "originalPointCount": 10429,
+            "retainedPoints": 11,
+            "horizontalCrs": "EPSG:3857",
+            "verticalReference": "Unknown (not established by delivered original metadata)",
+            "verticalUnit": "unknown",
+            "acquisitionUtc": null
+          },
+          {
+            "id": "9df7acfe-350a-45b1-be09-1ef655c73375",
+            "project": "IA_FullState/9-119-169-256",
+            "fileSha256": "7df5439ef9f3af2fee7cf4574afb9c0dfda6e500903f8e12198ab480fd1e6d29",
+            "originalPointCount": 20728,
+            "retainedPoints": 23,
+            "horizontalCrs": "EPSG:3857",
+            "verticalReference": "Unknown (not established by delivered original metadata)",
+            "verticalUnit": "unknown",
+            "acquisitionUtc": null
+          }
+        ],
+        "approvedNetwork": null,
+        "unknowns": [
+          "Original survey date and vertical datum/unit where not established by actual retained metadata",
+          "Original contractor coordinates before Entwine reprojection"
+        ],
+        "notTested": [
+          "Installed Windows/MSFS",
+          "Native COPC spatial index",
+          "Provider-wide coverage or density"
+        ],
+        "originalScienceObservations": 0,
+        "originalScienceProducts": 0
+      },
+      "inputs": [
+        {
+          "id": "b6806eff-3b3d-40b7-a247-1b15e303c70f",
+          "kind": "ept-node",
+          "provider_project": "IA_FullState/0-0-0-0",
+          "source_date_utc": null,
+          "horizontal_crs": "EPSG:3857",
+          "vertical_datum": "Unknown (not established by delivered original metadata)",
+          "units": "unknown",
+          "native_shape_or_count": 34923,
+          "license_access": "US Government Public Domain",
+          "bytes": 603312,
+          "sha256": "68c4b0ed247501a15d020d9a758d0345904f38785235732bd8e3386a3fca71c1"
+        },
+        {
+          "id": "72e26b5b-f43e-4428-9ceb-89f4b153033c",
+          "kind": "ept-node",
+          "provider_project": "IA_FullState/1-0-0-0",
+          "source_date_utc": null,
+          "horizontal_crs": "EPSG:3857",
+          "vertical_datum": "Unknown (not established by delivered original metadata)",
+          "units": "unknown",
+          "native_shape_or_count": 35,
+          "license_access": "US Government Public Domain",
+          "bytes": 1493,
+          "sha256": "ef55350db7631f72c22305216449d944b12657be717e596bbf5ce8c96d4ebd5b"
+        },
+        {
+          "id": "9b683390-3eed-4323-9fca-f5bbf5cc1099",
+          "kind": "ept-node",
+          "provider_project": "IA_FullState/1-0-0-1",
+          "source_date_utc": null,
+          "horizontal_crs": "EPSG:3857",
+          "vertical_datum": "Unknown (not established by delivered original metadata)",
+          "units": "unknown",
+          "native_shape_or_count": 30122,
+          "license_access": "US Government Public Domain",
+          "bytes": 467734,
+          "sha256": "5f5145f199211f1ae4017035b0a3662aa3396687ce1fd0223587103a79101ba7"
+        },
+        {
+          "id": "408aba3a-f99a-40d9-8d7d-7e491d37976a",
+          "kind": "ept-node",
+          "provider_project": "IA_FullState/10-239-338-512",
+          "source_date_utc": null,
+          "horizontal_crs": "EPSG:3857",
+          "vertical_datum": "Unknown (not established by delivered original metadata)",
+          "units": "unknown",
+          "native_shape_or_count": 38260,
+          "license_access": "US Government Public Domain",
+          "bytes": 133076,
+          "sha256": "0e31423010d513ad924cc32fec2d621e0b6e50b3192d12aefa4444c5c7f999b9"
+        },
+        {
+          "id": "316cb8ac-76ad-4250-a900-a58470c01718",
+          "kind": "ept-node",
+          "provider_project": "IA_FullState/11-478-676-1024",
+          "source_date_utc": null,
+          "horizontal_crs": "EPSG:3857",
+          "vertical_datum": "Unknown (not established by delivered original metadata)",
+          "units": "unknown",
+          "native_shape_or_count": 3253,
+          "license_access": "US Government Public Domain",
+          "bytes": 14190,
+          "sha256": "b973af6d27a5fdedf66d3dfb00e5b7c36e8453625480eed32062796e6ac996aa"
+        },
+        {
+          "id": "5f43d778-6d65-4de6-9f6c-581dfc144444",
+          "kind": "ept-node",
+          "provider_project": "IA_FullState/2-0-1-1",
+          "source_date_utc": null,
+          "horizontal_crs": "EPSG:3857",
+          "vertical_datum": "Unknown (not established by delivered original metadata)",
+          "units": "unknown",
+          "native_shape_or_count": 47,
+          "license_access": "US Government Public Domain",
+          "bytes": 1638,
+          "sha256": "b91540452a41245ce302d24920604fb400da9164696bbac14ab5363841e324c6"
+        },
+        {
+          "id": "e469bda0-06fb-4a7b-be97-bbc1074a83c7",
+          "kind": "ept-node",
+          "provider_project": "IA_FullState/2-0-1-2",
+          "source_date_utc": null,
+          "horizontal_crs": "EPSG:3857",
+          "vertical_datum": "Unknown (not established by delivered original metadata)",
+          "units": "unknown",
+          "native_shape_or_count": 39257,
+          "license_access": "US Government Public Domain",
+          "bytes": 526603,
+          "sha256": "b46d451ddf9491fa7fdcacfa74cf7a5fe2b0b7d108f18927aa6f5259844d1c23"
+        },
+        {
+          "id": "f732e906-e2ac-441f-9af0-3733ee6012d0",
+          "kind": "ept-node",
+          "provider_project": "IA_FullState/3-1-2-3",
+          "source_date_utc": null,
+          "horizontal_crs": "EPSG:3857",
+          "vertical_datum": "Unknown (not established by delivered original metadata)",
+          "units": "unknown",
+          "native_shape_or_count": 84,
+          "license_access": "US Government Public Domain",
+          "bytes": 2216,
+          "sha256": "21b1cc0ae7ea3d2153dbc5f24e65689ea2c6a00030a0c1a5b7165b75d877b1d6"
+        },
+        {
+          "id": "074caaad-2f56-4ac7-9f7c-5f849489bfaf",
+          "kind": "ept-node",
+          "provider_project": "IA_FullState/3-1-2-4",
+          "source_date_utc": null,
+          "horizontal_crs": "EPSG:3857",
+          "vertical_datum": "Unknown (not established by delivered original metadata)",
+          "units": "unknown",
+          "native_shape_or_count": 65561,
+          "license_access": "US Government Public Domain",
+          "bytes": 778789,
+          "sha256": "894fd2af5dc083dedb530485e0aea37b7fb24fde67ec63f4ea16ca8da3a8d67f"
+        },
+        {
+          "id": "e2225005-fc70-40d0-8b15-0e975316db55",
+          "kind": "ept-node",
+          "provider_project": "IA_FullState/4-3-5-7",
+          "source_date_utc": null,
+          "horizontal_crs": "EPSG:3857",
+          "vertical_datum": "Unknown (not established by delivered original metadata)",
+          "units": "unknown",
+          "native_shape_or_count": 37,
+          "license_access": "US Government Public Domain",
+          "bytes": 1465,
+          "sha256": "ce42574e59946eaa57a6fa2e19cc7499fe467d916ce04585e9f4828d5d715db5"
+        },
+        {
+          "id": "94710804-8355-4106-a4f7-75f3212e1c7b",
+          "kind": "ept-node",
+          "provider_project": "IA_FullState/4-3-5-8",
+          "source_date_utc": null,
+          "horizontal_crs": "EPSG:3857",
+          "vertical_datum": "Unknown (not established by delivered original metadata)",
+          "units": "unknown",
+          "native_shape_or_count": 62800,
+          "license_access": "US Government Public Domain",
+          "bytes": 651571,
+          "sha256": "58853378459b6619f8175ae7a72dcb5523ec9c2a49a42233820f0ab1192355f5"
+        },
+        {
+          "id": "24549c9e-54fe-442e-8923-d5294758c5ed",
+          "kind": "ept-node",
+          "provider_project": "IA_FullState/5-7-10-15",
+          "source_date_utc": null,
+          "horizontal_crs": "EPSG:3857",
+          "vertical_datum": "Unknown (not established by delivered original metadata)",
+          "units": "unknown",
+          "native_shape_or_count": 3307,
+          "license_access": "US Government Public Domain",
+          "bytes": 27608,
+          "sha256": "e2fcc3595271e06924fb22115de40f29526197bfe9072a8c07ed80c8c1b1bbd2"
+        },
+        {
+          "id": "5e9097c9-bd02-4ec6-b657-92c181010dc5",
+          "kind": "ept-node",
+          "provider_project": "IA_FullState/5-7-10-16",
+          "source_date_utc": null,
+          "horizontal_crs": "EPSG:3857",
+          "vertical_datum": "Unknown (not established by delivered original metadata)",
+          "units": "unknown",
+          "native_shape_or_count": 59029,
+          "license_access": "US Government Public Domain",
+          "bytes": 566562,
+          "sha256": "157ed139eaa7b391141f34a658bea45f3a840c597e48f80021eaa026484f0ca1"
+        },
+        {
+          "id": "ae4d6573-5c48-4d88-a9b6-571ca3ed2b34",
+          "kind": "ept-node",
+          "provider_project": "IA_FullState/6-14-21-32",
+          "source_date_utc": null,
+          "horizontal_crs": "EPSG:3857",
+          "vertical_datum": "Unknown (not established by delivered original metadata)",
+          "units": "unknown",
+          "native_shape_or_count": 47336,
+          "license_access": "US Government Public Domain",
+          "bytes": 426156,
+          "sha256": "737ced93c8ff1dd70e96990aab9fbb017190d404b2b2497110401b8cb5e0bcf8"
+        },
+        {
+          "id": "15d82e33-dd2b-430c-8e76-8da1c613bdb6",
+          "kind": "ept-node",
+          "provider_project": "IA_FullState/7-29-42-64",
+          "source_date_utc": null,
+          "horizontal_crs": "EPSG:3857",
+          "vertical_datum": "Unknown (not established by delivered original metadata)",
+          "units": "unknown",
+          "native_shape_or_count": 32348,
+          "license_access": "US Government Public Domain",
+          "bytes": 257369,
+          "sha256": "0467591d749a42d5cbbff45743513c0702636a26fbdc0b687e876c61c2ba88ef"
+        },
+        {
+          "id": "bee52174-5652-4403-aaef-b09ec50c3ee0",
+          "kind": "ept-node",
+          "provider_project": "IA_FullState/8-59-84-128",
+          "source_date_utc": null,
+          "horizontal_crs": "EPSG:3857",
+          "vertical_datum": "Unknown (not established by delivered original metadata)",
+          "units": "unknown",
+          "native_shape_or_count": 10429,
+          "license_access": "US Government Public Domain",
+          "bytes": 72464,
+          "sha256": "04b3253e6e153076dca3a2570e9ec2b53db2c27998baa40e1f951738e51c8c0c"
+        },
+        {
+          "id": "9df7acfe-350a-45b1-be09-1ef655c73375",
+          "kind": "ept-node",
+          "provider_project": "IA_FullState/9-119-169-256",
+          "source_date_utc": null,
+          "horizontal_crs": "EPSG:3857",
+          "vertical_datum": "Unknown (not established by delivered original metadata)",
+          "units": "unknown",
+          "native_shape_or_count": 20728,
+          "license_access": "US Government Public Domain",
+          "bytes": 108300,
+          "sha256": "7df5439ef9f3af2fee7cf4574afb9c0dfda6e500903f8e12198ab480fd1e6d29"
+        }
+      ]
+    }
+  ],
+  "failed_attempts": [
+    {
+      "receipt": "artifacts/p08c/small-lidar-measured-1/receipt.json",
+      "sha256": "8566c8970b5e58a81f6adb94827d5abafcd33abc958b07af0a54cfdbef5a1579",
+      "outcome": "Failed",
+      "error": "(pid=17592)",
+      "diagnosis": "psutil.AccessDenied reading child /proc IO; informational counter now explicitly unknown when denied"
+    },
+    {
+      "receipt": "artifacts/p08c/small-lidar-measured-2/receipt.json",
+      "sha256": "f9114206cbf0cc8eb7ee049493aba605521c39832bfa774692be727b2de2f2aa",
+      "outcome": "Failed",
+      "error": "(pid=17925)",
+      "diagnosis": "psutil.AccessDenied reading child /proc IO; informational counter now explicitly unknown when denied"
+    }
+  ],
+  "browser": {
+    "receipt_sha256": "7ac481dd37ad91c9f298279452704bbfbdae0bf1aa49cb6c1a319ab831f3bec6",
+    "result": {
+      "scope": "Explicit isolated fixture; no owner Library or network retrieval",
+      "performance": {
+        "scope": "Genuine IA_FullState delivered historical node; synthetic archived flight. Headless Chromium software GPU, not installed Windows/MSFS.",
+        "renderOrigin": {
+          "x": -10588403.19,
+          "y": 5032159.58,
+          "z": 381.14,
+          "geographic": {
+            "latitude": 41.13422198748264,
+            "longitude": -95.11724419996898
+          },
+          "crs": "EPSG:3857",
+          "zUnit": "unknown",
+          "verticalReference": "Unknown (not established by delivered original metadata)"
+        },
+        "originalPointRecords": 38260,
+        "loadedRecords": 12084,
+        "encodedNumericalBytes": 16776250,
+        "initialExploreMs": 1545.1021190000001,
+        "pageLatenciesMs": [
+          326.93618600000036,
+          359.3220959999999,
+          358.6097440000003,
+          342.12170799999967,
+          433.7516679999999,
+          499.35979899999984,
+          468.1606590000001,
+          484.4995509999999,
+          558.7407149999999,
+          559.2099709999993,
+          567.0228310000002
+        ],
+        "webglReadyMs": 300.4042270000009,
+        "orbitInteractionMs": [
+          66.08445699999902,
+          74.46788899999956,
+          62.18188300000111,
+          67.87225799999942,
+          67.16922899999918,
+          67.13311500000054,
+          65.12371100000018,
+          66.27228900000046
+        ],
+        "heapUsedBytes": 56054732,
+        "heapTotalBytes": 57925632,
+        "gpuBytes": 119496,
+        "canvasPixels": 541000,
+        "renderedRepresentatives": 4979,
+        "budgets": {
+          "records": 32768,
+          "encodedBytes": 16777216,
+          "gpuBytes": 1572864,
+          "canvasPixels": 2097152,
+          "heapUsedBytes": 268435456,
+          "initialExploreMs": 10000,
+          "interactionMs": 1000
+        }
+      },
+      "screenshots": [
+        {
+          "file": "genuine-browser-terrain-light-1440.png",
+          "theme": "light",
+          "width": 1440,
+          "kind": "terrain",
+          "sourceEvidence": "Genuine retained USGS originals; synthetic archived flight; browser rendering only"
+        },
+        {
+          "file": "genuine-browser-lidar2d-light-1440.png",
+          "theme": "light",
+          "width": 1440,
+          "kind": "lidar2d",
+          "sourceEvidence": "Genuine retained USGS originals; synthetic archived flight; browser rendering only"
+        },
+        {
+          "file": "genuine-browser-lidar3d-light-1440.png",
+          "theme": "light",
+          "width": 1440,
+          "kind": "lidar3d",
+          "sourceEvidence": "Genuine retained USGS originals; synthetic archived flight; browser rendering only"
+        },
+        {
+          "file": "genuine-browser-terrain-light-390.png",
+          "theme": "light",
+          "width": 390,
+          "kind": "terrain",
+          "sourceEvidence": "Genuine retained USGS originals; synthetic archived flight; browser rendering only"
+        },
+        {
+          "file": "genuine-browser-lidar2d-light-390.png",
+          "theme": "light",
+          "width": 390,
+          "kind": "lidar2d",
+          "sourceEvidence": "Genuine retained USGS originals; synthetic archived flight; browser rendering only"
+        },
+        {
+          "file": "genuine-browser-lidar3d-light-390.png",
+          "theme": "light",
+          "width": 390,
+          "kind": "lidar3d",
+          "sourceEvidence": "Genuine retained USGS originals; synthetic archived flight; browser rendering only"
+        },
+        {
+          "file": "genuine-browser-terrain-dark-1440.png",
+          "theme": "dark",
+          "width": 1440,
+          "kind": "terrain",
+          "sourceEvidence": "Genuine retained USGS originals; synthetic archived flight; browser rendering only"
+        },
+        {
+          "file": "genuine-browser-lidar2d-dark-1440.png",
+          "theme": "dark",
+          "width": 1440,
+          "kind": "lidar2d",
+          "sourceEvidence": "Genuine retained USGS originals; synthetic archived flight; browser rendering only"
+        },
+        {
+          "file": "genuine-browser-lidar3d-dark-1440.png",
+          "theme": "dark",
+          "width": 1440,
+          "kind": "lidar3d",
+          "sourceEvidence": "Genuine retained USGS originals; synthetic archived flight; browser rendering only"
+        },
+        {
+          "file": "genuine-browser-terrain-dark-390.png",
+          "theme": "dark",
+          "width": 390,
+          "kind": "terrain",
+          "sourceEvidence": "Genuine retained USGS originals; synthetic archived flight; browser rendering only"
+        },
+        {
+          "file": "genuine-browser-lidar2d-dark-390.png",
+          "theme": "dark",
+          "width": 390,
+          "kind": "lidar2d",
+          "sourceEvidence": "Genuine retained USGS originals; synthetic archived flight; browser rendering only"
+        },
+        {
+          "file": "genuine-browser-lidar3d-dark-390.png",
+          "theme": "dark",
+          "width": 390,
+          "kind": "lidar3d",
+          "sourceEvidence": "Genuine retained USGS originals; synthetic archived flight; browser rendering only"
+        }
+      ],
+      "sourceDeletion": {
+        "id": "2a800f02-254d-43cb-97f0-c119a37c46ed",
+        "removedSources": 1,
+        "removedManagedBytes": 29697721,
+        "pendingManagedBytes": 0,
+        "physicalFreeSpaceChangeBytes": 29487104,
+        "state": "Completed",
+        "warning": null,
+        "removedSourceIds": null,
+        "metadataCleanupPending": false
+      },
+      "loadedRecordComparisons": [
+        12084
+      ],
+      "installedWindowsMsfs": "Not Tested"
+    }
+  },
+  "view_comparisons": [
+    {
+      "sha256": "219d0fcf3dc445218da9d261ee7e7f40de18125956026d883b532a775c58a4dd",
+      "result": {
+        "state": "Passed",
+        "utc": "2026-11-15T17:49:03.635280+00:00",
+        "scope": "Genuine historical originals; synthetic archived flight and browser analysis, not MSFS acceptance",
+        "reference": "GDAL 3.10.3",
+        "nativeCells": 1024,
+        "apiNativeCells": 576,
+        "profileValid": 143,
+        "profileGaps": 114,
+        "csvSamples": 513,
+        "maximumCenterDifferenceDegrees": 0,
+        "originalSha256": "4c043d10024c8af4077c45d9ed6778141ccaf0837298ea8a521c9f832ce9a7f0",
+        "datum": "Unknown, unchanged; no MSL/HAG inference"
+      }
+    },
+    {
+      "sha256": "23fb21acab655797076f04cd59a2f8ee8587f34e843340d55caaf3000ef833de",
+      "result": {
+        "state": "Passed",
+        "utc": "2026-11-15T17:49:05.154793+00:00",
+        "scope": "Genuine historical originals; synthetic archived flight and browser analysis, not MSFS acceptance",
+        "reference": "laspy 2.6.1 / PROJ 9.5.1",
+        "nativePointRecords": 38260,
+        "loadedApiRecords": 12084,
+        "csvRecords": 12084,
+        "maximumGeographicDifferenceDegrees": 2.842170943040401e-14,
+        "maximumGroundDistanceErrorMetres": 1.5443646361745778e-09,
+        "originalSha256": "0e31423010d513ad924cc32fec2d621e0b6e50b3192d12aefa4444c5c7f999b9",
+        "sourceDatumAndZUnits": "Unknown, unchanged; illustrative aspect only"
+      }
+    }
+  ],
+  "browser_targeted": {
+    "passed": 20,
+    "log_sha256": "6d08faa4b7b921bfc2dc5f9aa88763f17c2f16af17c8b3125eed6aec396d7e17"
+  },
+  "tool_tests_passed": 18,
+  "large_inputs": "Blocked: selected large original/independent reference not available",
+  "native_gpu": "Not Tested",
+  "installed_endurance": "Not Tested",
+  "owner_originals_or_installed_app_modified": false
+}

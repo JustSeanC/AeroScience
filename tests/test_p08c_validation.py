@@ -2,6 +2,7 @@
 import copy
 import importlib.util
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -101,6 +102,21 @@ class EvidenceTests(unittest.TestCase):
         with self.assertRaises(ValueError): p.verify_receipt(self.root/'receipt.json', '3'*40)
         self.original.write_bytes(b'changed artifact')
         with self.assertRaises(ValueError): p.verify_receipt(self.root/'receipt.json', '1'*40)
+
+    @unittest.skipUnless((ROOT/'tests/AeroScience.TestHost/bin/Release/net10.0/AeroScience.TestHost.dll').exists(), 'Build existing TestHost for actual probe refusal checks')
+    def test_actual_retained_probe_refuses_changed_source_and_existing_output(self):
+        source = self.root/'originals'; source.mkdir(); (source/'sample.tif').write_bytes(b'SYNTHETIC not a TIFF')
+        descriptor = {'Id': '11111111-1111-1111-1111-111111111111', 'Manifest': {'Bands': [{'Id':'elevation','File':'sample.tif','Format':'geotiff'}]},
+                      'Files':[{'RelativePath':'sample.tif','Bytes':20,'Sha256':'0'*64}], 'Grids':{}}
+        (source/'source.json').write_text(json.dumps(descriptor))
+        dotnet = os.environ.get('DOTNET','dotnet'); host=ROOT/'tests/AeroScience.TestHost/bin/Release/net10.0/AeroScience.TestHost.dll'
+        result = subprocess.run([dotnet,str(host),'--retained-raster-probe',str(source),str(self.root/'new')],capture_output=True,text=True)
+        self.assertNotEqual(0,result.returncode)
+        self.assertIn('Original',result.stderr)
+        self.assertEqual(b'SYNTHETIC not a TIFF',(source/'sample.tif').read_bytes())
+        self.assertFalse((self.root/'new').exists())
+        result = subprocess.run([dotnet,str(host),'--retained-raster-probe',str(source),str(self.root)],capture_output=True,text=True)
+        self.assertNotEqual(0,result.returncode); self.assertIn('fresh output',result.stderr)
 
 
 if __name__ == '__main__':
