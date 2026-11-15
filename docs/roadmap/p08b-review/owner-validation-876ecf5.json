@@ -1,0 +1,323 @@
+{
+  "format_version": 1,
+  "status": "owner_reported_pass",
+  "scope": "P08b installed Windows/MSFS functional and real-data smoke observations reported by the owner; structural/identity consistency reviewed here. Not independent numerical, endurance, translation-release or public-release acceptance.",
+  "tested_source_commit": "876ecf594956b7a40c7df0d4968dac1ce69ac971",
+  "instance": "2399eea85750442cb9065d6f6045d759",
+  "receipt_sha256": "52660521d3a3f04aa62eae266989a6c55467cdeafbec0fd66531fded42bf1447",
+  "archive_sha256_from_owner_build_console": "4d9ad97139017035e84310641933d61c9fe472ffb1ff42dec2eeab920767409c",
+  "profile": {
+    "version": "0.8.0",
+    "namespace": "AeroScience-Validation-v0.8.0/2399eea85750442cb9065d6f6045d759",
+    "port": 5088
+  },
+  "results": {
+    "uploaded": 26,
+    "expected": 26,
+    "passed": 26,
+    "failed": 0,
+    "blocked": 0,
+    "not_tested": 0,
+    "missing": [],
+    "duplicates": [],
+    "schema_identity_errors": []
+  },
+  "owner_followup": {
+    "question": "Did you also open and check real satellite, elevation or LiDAR data files, or mainly test the app and MSFS toolbar?",
+    "answer": "I checked real data files too",
+    "classification": "Owner attestation of real-data smoke testing; no new dataset-specific filenames or independent numerical evidence supplied."
+  },
+  "shared_reported_binary_hashes": {
+    "runtime_sha256": "b10de7adf4c62e5f66c89dd6d01b64091bbbcec83411cfe191d6b85fbee61d15",
+    "native_lidar_sha256": "59615b9ce724e292a8b63f59acfaff56f78add014acab916a47a23063c568727",
+    "toolbar_sdk_receipt_sha256": "af987a1dfd3f316bcef6ae0adbec91a337336d6cd250ca920a0170e48d686bf9"
+  },
+  "catalog_version": 25,
+  "catalog_identity": "22470c27a539c47d116032f26f29072ec90c780f21232e7cafc8ca9cc41db10c",
+  "saved_time_new_york": {
+    "first": "2026-11-15T12:04:24.308392-05:00",
+    "last": "2026-11-15T12:04:55.074497-05:00",
+    "meaning": "Time these events were saved, not the duration or timing of individual tests."
+  },
+  "evidence_limits": {
+    "notes": "26 brief affirmations (yes, including two apparent typing variants); original notes and outcomes left unchanged.",
+    "referenced_artifacts": 0,
+    "raw_json": "Reviewed unchanged in uploaded files; this summary retains each filename and original SHA-256, not original datasets.",
+    "payload_bytes_independently_rehashed_here": false,
+    "dataset_names_original_file_hashes_datum_numeric_comparisons": "Not supplied in these events.",
+    "screen_reader_device_qualified_linguistic_details": "Not supplied in these events; no qualified-language approval inferred."
+  },
+  "remaining": [
+    "P08c independently reproducible scientific/numerical, larger-data, performance and endurance validation, with separate authorization.",
+    "Qualified fluent review of four non-English candidate locales.",
+    "Public native LiDAR payload/license/NOTICE/signing and later installer/release acceptance.",
+    "Indexed COPC and unsupported/unvalidated CRS or vertical-datum transformations remain unsupported."
+  ],
+  "individual_records": [
+    {
+      "file": "20261115T170424-7098c52d614b4097b5c28bbfa17f193d.json",
+      "sha256": "8c7d09d03dc498e348499086f5f86123ce75da4697bc7bc95af138acf9b47c10",
+      "bytes": 2234,
+      "test_id": "isolation",
+      "outcome": "Passed",
+      "observed_utc": "2026-11-15T17:04:24.308392+00:00",
+      "schema_and_identity_checks": "Passed",
+      "evidence_references": 0
+    },
+    {
+      "file": "20261115T170425-c713b5bdf1464c5ab21a092bce1db2f3.json",
+      "sha256": "a7eac526c217a22296e422d4afb003c7aca4b5014a7516ac899915b4774d3ade",
+      "bytes": 2226,
+      "test_id": "startup",
+      "outcome": "Passed",
+      "observed_utc": "2026-11-15T17:04:25.538546+00:00",
+      "schema_and_identity_checks": "Passed",
+      "evidence_references": 0
+    },
+    {
+      "file": "20261115T170426-e7d817b2a6704f88b400fe902cb77db9.json",
+      "sha256": "f32e65887bb5c7dd9b2a801e747a6b170bf2d5afde877860564669acbf7985a6",
+      "bytes": 2225,
+      "test_id": "sdk-toolbar",
+      "outcome": "Passed",
+      "observed_utc": "2026-11-15T17:04:26.761505+00:00",
+      "schema_and_identity_checks": "Passed",
+      "evidence_references": 0
+    },
+    {
+      "file": "20261115T170427-4e64bf41f04043169d84a7b1a742f80b.json",
+      "sha256": "56a71a76397deb050571f99b143557366f702d4425749265bc2695e7242d0864",
+      "bytes": 2227,
+      "test_id": "panel-lifecycle",
+      "outcome": "Passed",
+      "observed_utc": "2026-11-15T17:04:27.991304+00:00",
+      "schema_and_identity_checks": "Passed",
+      "evidence_references": 0
+    },
+    {
+      "file": "20261115T170429-148a5b9133c8425285a1afa1eb63db2e.json",
+      "sha256": "b30466024ceedc4f39170e3ca294e31bd3b1b9ee5246e7d602a3a0b394c0c3d3",
+      "bytes": 2213,
+      "test_id": "recording-only",
+      "outcome": "Passed",
+      "observed_utc": "2026-11-15T17:04:29.218797+00:00",
+      "schema_and_identity_checks": "Passed",
+      "evidence_references": 0
+    },
+    {
+      "file": "20261115T170430-d89d459a731c45e89300cc8047c68b04.json",
+      "sha256": "704bd02a04dc35224f87ce4c0fc22d450f137f03cacbeca2a056b232b55c5a4a",
+      "bytes": 2223,
+      "test_id": "science-lifecycle",
+      "outcome": "Passed",
+      "observed_utc": "2026-11-15T17:04:30.446191+00:00",
+      "schema_and_identity_checks": "Passed",
+      "evidence_references": 0
+    },
+    {
+      "file": "20261115T170431-4d5d21c4d66347279ee933c2fface1e5.json",
+      "sha256": "ba195dbdd5923ad41b90d7fb55ca0eceec7879bb7d3bb899fba4a7f0e926b10c",
+      "bytes": 2272,
+      "test_id": "configuration-timing",
+      "outcome": "Passed",
+      "observed_utc": "2026-11-15T17:04:31.666623+00:00",
+      "schema_and_identity_checks": "Passed",
+      "evidence_references": 0
+    },
+    {
+      "file": "20261115T170432-f237ade01b1e4f338bbe4e0b27e4df9e.json",
+      "sha256": "6443a91f503ceff302819467557306c6420bcaeec06d8313840d88b8ecd8b4b6",
+      "bytes": 2230,
+      "test_id": "research-cards",
+      "outcome": "Passed",
+      "observed_utc": "2026-11-15T17:04:32.893627+00:00",
+      "schema_and_identity_checks": "Passed",
+      "evidence_references": 0
+    },
+    {
+      "file": "20261115T170434-64197d231d914737b225931cbdd44d51.json",
+      "sha256": "dc529b9bcd0ba0618c761c5669ecc355ad3564ba68af3869aa9d285b3986a026",
+      "bytes": 2227,
+      "test_id": "stale-foreign",
+      "outcome": "Passed",
+      "observed_utc": "2026-11-15T17:04:34.122999+00:00",
+      "schema_and_identity_checks": "Passed",
+      "evidence_references": 0
+    },
+    {
+      "file": "20261115T170435-345c271663524392a4c588ff5e8e89f5.json",
+      "sha256": "49300e1481d838a29a6a4da4ee4d3cec6523437551fb6e8956c2974e250572d0",
+      "bytes": 2265,
+      "test_id": "language-en-US",
+      "outcome": "Passed",
+      "observed_utc": "2026-11-15T17:04:35.343131+00:00",
+      "schema_and_identity_checks": "Passed",
+      "evidence_references": 0
+    },
+    {
+      "file": "20261115T170436-b43e523f5a5d41f6b7bd0de0dc7ab618.json",
+      "sha256": "e71dc7ac79b1039e1e06e2142be4d48ebbd60f15216ad9bb68409b8557a65518",
+      "bytes": 2265,
+      "test_id": "language-es-ES",
+      "outcome": "Passed",
+      "observed_utc": "2026-11-15T17:04:36.582491+00:00",
+      "schema_and_identity_checks": "Passed",
+      "evidence_references": 0
+    },
+    {
+      "file": "20261115T170437-be0bf3d1cfc84855b1be9253af51a67d.json",
+      "sha256": "bb28be88ecee47a6b429729db16953d5a98e778fae81962284c03aa5a67360b3",
+      "bytes": 2265,
+      "test_id": "language-fr-FR",
+      "outcome": "Passed",
+      "observed_utc": "2026-11-15T17:04:37.811237+00:00",
+      "schema_and_identity_checks": "Passed",
+      "evidence_references": 0
+    },
+    {
+      "file": "20261115T170439-96f50a58f027411ab80d54cd46aaba92.json",
+      "sha256": "bab5383f87941cb3160a7c6169bf982d10e0e1060545188322ccdd9dbf1f6f07",
+      "bytes": 2265,
+      "test_id": "language-de-DE",
+      "outcome": "Passed",
+      "observed_utc": "2026-11-15T17:04:39.042415+00:00",
+      "schema_and_identity_checks": "Passed",
+      "evidence_references": 0
+    },
+    {
+      "file": "20261115T170440-3cb2eeb01b234a2d8cfe5b8b669520b4.json",
+      "sha256": "7612fd4652025490af0f1cd220576b32e90f52ca054e67eb4167d0bd7374146c",
+      "bytes": 2265,
+      "test_id": "language-pt-BR",
+      "outcome": "Passed",
+      "observed_utc": "2026-11-15T17:04:40.259698+00:00",
+      "schema_and_identity_checks": "Passed",
+      "evidence_references": 0
+    },
+    {
+      "file": "20261115T170441-c2da12aa025d4643b0fd0273aea25216.json",
+      "sha256": "8d0f86fae30ab0f274be523e9e3497532e5b23a8ad5fc987255f9fb9d9597e22",
+      "bytes": 2235,
+      "test_id": "preferences",
+      "outcome": "Passed",
+      "observed_utc": "2026-11-15T17:04:41.484527+00:00",
+      "schema_and_identity_checks": "Passed",
+      "evidence_references": 0
+    },
+    {
+      "file": "20261115T170442-99bf0a5cdf9b4a50887b0309ae297d12.json",
+      "sha256": "320567b6ff51538da597d8189c4cfe131d08cead7ca9ef9e6b412362343b284c",
+      "bytes": 2229,
+      "test_id": "accessibility",
+      "outcome": "Passed",
+      "observed_utc": "2026-11-15T17:04:42.711860+00:00",
+      "schema_and_identity_checks": "Passed",
+      "evidence_references": 0
+    },
+    {
+      "file": "20261115T170443-b518a68e4fd644c3899aed16032725f4.json",
+      "sha256": "bb2ee11c6e4675c73e9ac5c4744b42f948f1e8cfcbad53e06f964f29a564d062",
+      "bytes": 2224,
+      "test_id": "restart-recovery",
+      "outcome": "Passed",
+      "observed_utc": "2026-11-15T17:04:43.937279+00:00",
+      "schema_and_identity_checks": "Passed",
+      "evidence_references": 0
+    },
+    {
+      "file": "20261115T170445-b6746a8f94234ba6b637ce3a53294658.json",
+      "sha256": "a08c7bc786d539249396f8f6254ac3cd9aea7e8f1f4bab3fa66ed92f1ce599c2",
+      "bytes": 2236,
+      "test_id": "source-consent",
+      "outcome": "Passed",
+      "observed_utc": "2026-11-15T17:04:45.167210+00:00",
+      "schema_and_identity_checks": "Passed",
+      "evidence_references": 0
+    },
+    {
+      "file": "20261115T170446-ba6916fb890e460f86191d7e36707925.json",
+      "sha256": "0b1da314cfbd7d35262a773a42d5208456e83ad44ab84e13b59f2caae9a67a01",
+      "bytes": 2221,
+      "test_id": "sentinel-retained",
+      "outcome": "Passed",
+      "observed_utc": "2026-11-15T17:04:46.393797+00:00",
+      "schema_and_identity_checks": "Passed",
+      "evidence_references": 0
+    },
+    {
+      "file": "20261115T170447-c01aa655770841b1ba5d4be5ec2ef284.json",
+      "sha256": "f6512e7819dd09fd118e9cdffc1b49dadfa250ee0c5c357008270490fdbbfb79",
+      "bytes": 2211,
+      "test_id": "landsat",
+      "outcome": "Passed",
+      "observed_utc": "2026-11-15T17:04:47.626187+00:00",
+      "schema_and_identity_checks": "Passed",
+      "evidence_references": 0
+    },
+    {
+      "file": "20261115T170448-8b1b4bfc51d24ab391335efc42000449.json",
+      "sha256": "6e770a5e301ff98b4cbe7e8df717c8288b539bbdca2023d2bbbcde478c6e4357",
+      "bytes": 2211,
+      "test_id": "dem",
+      "outcome": "Passed",
+      "observed_utc": "2026-11-15T17:04:48.851435+00:00",
+      "schema_and_identity_checks": "Passed",
+      "evidence_references": 0
+    },
+    {
+      "file": "20261115T170450-a1f9720ea2784fddbda7410180e16a26.json",
+      "sha256": "efa6b41c3b445ef9a7dee16b67c6c03f395dff5ddbfba44806081a449e27d520",
+      "bytes": 2220,
+      "test_id": "ept",
+      "outcome": "Passed",
+      "observed_utc": "2026-11-15T17:04:50.081511+00:00",
+      "schema_and_identity_checks": "Passed",
+      "evidence_references": 0
+    },
+    {
+      "file": "20261115T170451-24bbcd5196874b5097ba3938d61e7e68.json",
+      "sha256": "da26489985ea0aea2853fe5b5b12948149317cf150575eaa15046fd941306033",
+      "bytes": 2234,
+      "test_id": "local-las-laz",
+      "outcome": "Passed",
+      "observed_utc": "2026-11-15T17:04:51.330041+00:00",
+      "schema_and_identity_checks": "Passed",
+      "evidence_references": 0
+    },
+    {
+      "file": "20261115T170452-2605971e7ad34810ae90c4c38cfce707.json",
+      "sha256": "d7e1f4e459c0d0fd421313b78ef51c20f5f2e68e1c088bb7218fa5a87344ce7f",
+      "bytes": 2222,
+      "test_id": "results",
+      "outcome": "Passed",
+      "observed_utc": "2026-11-15T17:04:52.563624+00:00",
+      "schema_and_identity_checks": "Passed",
+      "evidence_references": 0
+    },
+    {
+      "file": "20261115T170453-4e6fc0d53af94003881683284beaef86.json",
+      "sha256": "4ab1af084823906a936e2593f2d192c7990e9b1d75c2890ba774f9fb5f923f05",
+      "bytes": 2239,
+      "test_id": "privacy-storage",
+      "outcome": "Passed",
+      "observed_utc": "2026-11-15T17:04:53.819363+00:00",
+      "schema_and_identity_checks": "Passed",
+      "evidence_references": 0
+    },
+    {
+      "file": "20261115T170455-9e9d727f78c34c2fbdbc1bfb8c02e44f.json",
+      "sha256": "7310bfd7399574a62679e8e756296be5a10357361e22d0dceb1c8a612c5407a6",
+      "bytes": 2241,
+      "test_id": "leave-validation",
+      "outcome": "Passed",
+      "observed_utc": "2026-11-15T17:04:55.074497+00:00",
+      "schema_and_identity_checks": "Passed",
+      "evidence_references": 0
+    }
+  ],
+  "original_records_modified": false,
+  "independent_native_test_rerun_performed_here": false,
+  "public_release_approved": false,
+  "p08c_started": false,
+  "review_recorded_utc": "2026-11-15T17:15:52.264621+00:00"
+}
