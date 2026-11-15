@@ -29,13 +29,249 @@
       "path": "artifacts/p08b-license-repair/targeted-green.log",
       "sha256": "7e26d09103a7915e01f6efda8c84999ff731e5915ecdabc5cc083519df8faf88",
       "bytes": 6924
+    },
+    {
+      "path": "artifacts/p08b-license-repair/windows.log",
+      "sha256": "1a0a32a4fb9d6aee2168396aee551957374de8a582ba7bbf5ab2a8fa3316c5e2",
+      "bytes": 33744
+    },
+    {
+      "path": "artifacts/p08b-license-repair/windows-inventory.json",
+      "sha256": "3cfc9f6e0097d41aa89cc1e3033f76332b28e15acdfead25b068d4cb80706952",
+      "bytes": 1286
+    },
+    {
+      "path": "artifacts/p08b-license-repair/windows-summary.json",
+      "sha256": "d75c0e46f14a9d2c3659c8f89d411035cd9ef7d5cf19f927e33b017781c0ce0e",
+      "bytes": 683
+    },
+    {
+      "path": "artifacts/p08b-license-repair/run.json",
+      "sha256": "38da5f4d812aae0b16090c8389f3fc9965d3cba17f1fa38214f582ca8259c0a5",
+      "bytes": 326
+    },
+    {
+      "path": "artifacts/p08b-license-repair/jobs.json",
+      "sha256": "bcfff9ee0b32770e390bf1df2e95f7f4403a3f7a3fc49eac7b2f30370150e7a0",
+      "bytes": 2588
     }
   ],
-  "windows_focused_ci": "Pending on exact repair source.",
+  "windows_focused_ci": {
+    "run": {
+      "conclusion": "success",
+      "createdAt": "2026-11-15T14:43:41Z",
+      "databaseId": 43725925060,
+      "event": "workflow_dispatch",
+      "headBranch": "develop/v0.8.0",
+      "headSha": "876ecf594956b7a40c7df0d4968dac1ce69ac971",
+      "status": "completed",
+      "updatedAt": "2026-11-15T14:48:37Z",
+      "url": "https://github.com/JustSeanC/AeroScience/actions/runs/43725925060"
+    },
+    "scope": "Explicit windows-profile diagnostic scope; not a new Full CI milestone or installed owner acceptance.",
+    "dotnet": [
+      {
+        "path": "tests/AeroScience.Tests/TestResults/windows-profile.trx",
+        "counters": {
+          "total": "142",
+          "executed": "142",
+          "passed": "142",
+          "failed": "0",
+          "error": "0",
+          "timeout": "0",
+          "aborted": "0",
+          "inconclusive": "0",
+          "passedButRunAborted": "0",
+          "notRunnable": "0",
+          "notExecuted": "0",
+          "disconnected": "0",
+          "warning": "0",
+          "completed": "0",
+          "inProgress": "0",
+          "pending": "0"
+        },
+        "otherOutcomes": []
+      }
+    ],
+    "license_copy": "Passed actual PowerShell command in both absent/existing directory subcases.",
+    "native_compiler_bootstrap": {
+      "passed": 2,
+      "failed": 0,
+      "skipped": 0
+    },
+    "publication": "Existing production and legacy validation graphs passed; no distributable/native SDK receipt or installer produced.",
+    "jobs": [
+      {
+        "id": 132847724466,
+        "name": "validation-scope",
+        "status": "completed",
+        "conclusion": "success",
+        "run_id": 43725925060,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@v7",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run python3 scripts/build/development_validation.py tier",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Post Run actions/checkout@v7",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          }
+        ]
+      },
+      {
+        "id": 132847764690,
+        "name": "windows-profile",
+        "status": "completed",
+        "conclusion": "success",
+        "run_id": 43725925060,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@v7",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run actions/setup-dotnet@v6",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Execute native compiler bootstrap regression on Windows",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Verify private 0.8 license merging against existing publish output",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Test profile isolation, toolbar installation, HDF and genuine LiDAR decoder contracts",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Publish production and isolated validation graphs (not distributable)",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Verify dependency locks remain unchanged",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Retain focused Windows diagnostics",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          },
+          {
+            "name": "Post Run actions/setup-dotnet@v6",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 17
+          },
+          {
+            "name": "Post Run actions/checkout@v7",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 18
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 19
+          }
+        ]
+      },
+      {
+        "id": 132847765915,
+        "name": "organization-deployment",
+        "status": "completed",
+        "conclusion": "skipped",
+        "run_id": 43725925060,
+        "logs_url": null,
+        "steps": null
+      },
+      {
+        "id": 132847766171,
+        "name": "linux",
+        "status": "completed",
+        "conclusion": "skipped",
+        "run_id": 43725925060,
+        "logs_url": null,
+        "steps": null
+      },
+      {
+        "id": 132847766204,
+        "name": "development",
+        "status": "completed",
+        "conclusion": "skipped",
+        "run_id": 43725925060,
+        "logs_url": null,
+        "steps": null
+      },
+      {
+        "id": 132847766383,
+        "name": "windows-companion",
+        "status": "completed",
+        "conclusion": "skipped",
+        "run_id": 43725925060,
+        "logs_url": null,
+        "steps": null
+      }
+    ],
+    "artifact": {
+      "id": 14166387232,
+      "name": "windows-profile-diagnostics",
+      "bytes": 34939,
+      "sha256": "fc76c2d61681056ec14010fcae926dc257fc38af0c977574684bb3add9b4b265"
+    }
+  },
   "original_full_ci": "https://github.com/JustSeanC/AeroScience/actions/runs/43650825716",
   "full_ci_repeated": false,
   "scientific_runtime_changed": false,
   "existing_owner_data_modified": false,
   "public_release_approved": false,
-  "recorded_utc": "2026-11-15T14:43:13.408657+00:00"
+  "recorded_utc": "2026-11-15T14:51:06.595993+00:00",
+  "source_commit": "876ecf594956b7a40c7df0d4968dac1ce69ac971"
 }
