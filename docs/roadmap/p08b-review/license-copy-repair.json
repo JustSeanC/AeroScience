@@ -1,0 +1,41 @@
+{
+  "format_version": 1,
+  "baseline": "19e0b9e61734dc0261b230648e95347ae8d31fed",
+  "reported_build_source": "2c6b5454732f06cd60cebb6030605e9c5bc1c9b7",
+  "owner_report": {
+    "failed_attempt": "C:\\AeroScience-Builds\\Validation080-20261115-093041",
+    "sdk_builder": "Owner reports PackageBuilder finished with0failed; resulting package bytes have not been independently reviewed here.",
+    "failure": "Copy-Item: licenses directory already exists at published application root.",
+    "completed_archive": "Not Built",
+    "installed_acceptance": "Not Tested"
+  },
+  "cause": "Windows publishing already creates the root licenses directory for engine dependency notices. The later directory Copy-Item lacked -Force and raised a collision instead of merging.",
+  "fix": "Merge canonical source notices using Copy-Item -LiteralPath ... -Recurse -Force only inside the already-validated fresh application build output. Original SDK/runtime/signature/receipt/source and output-reuse guards remain unchanged.",
+  "regression": "Execute the actual builder Copy-Item command extracted via PowerShell AST in disposable fixture directories, for absent and existing publish-license directories. Check every source notice hash, preservation of all preexisting published files/source files, nested/Unicode/bracketed paths and refusal of an extra licenses/licenses level.",
+  "local_targeted": {
+    "run": 33,
+    "passed": 33,
+    "failed": 0,
+    "skipped": 0,
+    "includes": "17 private-validation tests including actual PowerShell license copy;16 development/CI-scope checks."
+  },
+  "red_green_files": [
+    {
+      "path": "artifacts/p08b-license-repair/copy-collision-red.log",
+      "sha256": "aeafb494630d87a1c305566f651dbb5f0e032d79316e536ea2e630f81117c28a",
+      "bytes": 1420
+    },
+    {
+      "path": "artifacts/p08b-license-repair/targeted-green.log",
+      "sha256": "7e26d09103a7915e01f6efda8c84999ff731e5915ecdabc5cc083519df8faf88",
+      "bytes": 6924
+    }
+  ],
+  "windows_focused_ci": "Pending on exact repair source.",
+  "original_full_ci": "https://github.com/JustSeanC/AeroScience/actions/runs/43650825716",
+  "full_ci_repeated": false,
+  "scientific_runtime_changed": false,
+  "existing_owner_data_modified": false,
+  "public_release_approved": false,
+  "recorded_utc": "2026-11-15T14:43:13.408657+00:00"
+}

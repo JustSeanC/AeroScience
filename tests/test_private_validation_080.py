@@ -242,4 +242,48 @@ class Private080Tests(unittest.TestCase):
                 result=subprocess.run([pwsh,'-NoProfile','-File',str(ROOT/'scripts/release/Build-080PrivateValidation.ps1'),'-ExpectedSourceCommit',COMMIT,'-OutputDirectory',str(output)],capture_output=True,text=True,timeout=20)
                 self.assertNotEqual(0,result.returncode);self.assertFalse(output.exists());self.assertIn('Windows x64',result.stderr)
 
+class LicensePackagingTests(unittest.TestCase):
+    def test_license_copy_preserves_publish_output_with_existing_or_absent_license_directory(self):
+        pwsh=shutil.which('pwsh')
+        self.assertIsNotNone(pwsh,'PowerShell 7 is required to exercise the actual packaging copy operation.')
+        script=r"""
+$ErrorActionPreference='Stop'
+$errors=$null;$tokens=$null
+$ast=[Management.Automation.Language.Parser]::ParseFile($env:P08B_COPY_SCRIPT,[ref]$tokens,[ref]$errors)
+if($errors){throw ($errors|Out-String)}
+$copies=@($ast.FindAll({param($node)
+    $node -is [Management.Automation.Language.CommandAst] -and
+    $node.GetCommandName() -eq 'Copy-Item' -and $node.Extent.Text.Contains("'licenses'")
+},$true))
+if($copies.Count -ne 1){throw 'Expected one actual root-license copy operation in the private builder.'}
+$repo=$env:P08B_COPY_REPO
+$app=$env:P08B_COPY_APP
+& ([ScriptBlock]::Create($copies[0].Extent.Text))
+"""
+        for already_published in [False,True]:
+            with self.subTest(already_published=already_published),tempfile.TemporaryDirectory(prefix='P08b copy [publish] ') as t:
+                root=Path(t);repo=root/'source';app=root/'published'
+                shutil.copytree(ROOT/'licenses',repo/'licenses')
+                extra=repo/'licenses'/'nested [notices]'/'Aviso português.txt'
+                extra.parent.mkdir();extra.write_text('Source notice: ciência; unchanged UTF-8 bytes.\n',encoding='utf-8')
+                expected=v.inventory(repo/'licenses')
+                app.mkdir();(app/'AeroScience.exe').write_bytes(b'PUBLISHED APP SENTINEL, NOT AN EXECUTABLE')
+                (app/'LidarRuntime').mkdir();(app/'LidarRuntime/NOTICE.md').write_bytes(b'Published helper notice sentinel')
+                if already_published:
+                    (app/'licenses').mkdir()
+                    first=next(p for p in sorted((repo/'licenses').iterdir()) if p.is_file())
+                    shutil.copyfile(first,app/'licenses'/first.name)
+                    (app/'licenses/published-only.txt').write_bytes(b'Additional published dependency notice')
+                published=v.inventory(app)
+                source=v.inventory(repo)
+                result=subprocess.run([pwsh,'-NoProfile','-Command',script],env={**os.environ,
+                    'P08B_COPY_SCRIPT':str(ROOT/'scripts/release/Build-080PrivateValidation.ps1'),
+                    'P08B_COPY_REPO':str(repo),'P08B_COPY_APP':str(app)},capture_output=True,text=True,encoding='utf-8',timeout=30)
+                self.assertEqual(0,result.returncode,result.stderr)
+                actual=v.inventory(app)
+                self.assertTrue(all(actual.get('licenses/'+name)==digest for name,digest in expected.items()),'Every canonical source notice must reach the single root licenses directory unchanged.')
+                self.assertTrue(all(actual.get(name)==digest for name,digest in published.items()),'Published files and existing notices must be preserved.')
+                self.assertFalse((app/'licenses/licenses').exists(),'The directory must be merged rather than nested.')
+                self.assertEqual(source,v.inventory(repo),'Packaging must not edit original source notices.')
+
 if __name__=='__main__':unittest.main()

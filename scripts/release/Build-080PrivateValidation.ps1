@@ -89,7 +89,9 @@ try {
     }
     @{format_version=1; files=$dependencies; public_signing_approval=$false} | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $app 'native-dependencies.json') -Encoding utf8
     foreach ($name in @('LICENSE', 'THIRD-PARTY-NOTICES.md')) { Copy-Item -LiteralPath (Join-Path $repo $name) -Destination $app }
-    Copy-Item -LiteralPath (Join-Path $repo 'licenses') -Destination $app -Recurse
+    # Publishing already creates licenses/ for engine dependencies. Merge the
+    # canonical notices into this fresh build output instead of recreating it.
+    Copy-Item -LiteralPath (Join-Path $repo 'licenses') -Destination $app -Recurse -Force
     Copy-Item -LiteralPath (Join-Path $repo 'docs/roadmap/v0.8.0-p08b-owner-checklist.md') -Destination (Join-Path $app 'START-HERE.md')
     @{profile='validation'; version='0.8.0'; source_commit=$ExpectedSourceCommit; source_dirty=$false; instance=$instance; target='win-x64'; public_release_approved=$false; installed_acceptance='Not Tested'; built_utc=[DateTime]::UtcNow.ToString('o')} | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $app 'build-info.json') -Encoding utf8
     & python $policy template --source $ExpectedSourceCommit --instance $instance | Set-Content -LiteralPath (Join-Path $app 'ACCEPTANCE-TEMPLATE.json') -Encoding utf8
