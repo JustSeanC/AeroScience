@@ -1,0 +1,1217 @@
+{
+  "schema": "aeroscience-p08c-scientific-summary-1",
+  "runtime_source_commit": "527c5d7a6534527b0bfb21bd9c1906d7b9c1672e",
+  "scope": "Linux development TestHost; real retained USGS originals; synthetic archived flight; no owner package operation",
+  "receipts": [
+    {
+      "receipt": "artifacts/p08c/numerical-terrain-2/receipt.json",
+      "sha256": "f7ffa8cfad7567538edb44013a0b158ff5ad472f58d1208ddfdc1255c04f38d2",
+      "runtime": {
+        "source_commit": "527c5d7a6534527b0bfb21bd9c1906d7b9c1672e",
+        "branch": "develop/v0.8.0",
+        "build_files_sha256": {
+          "AeroScience.Engine.dll": "74bc40ea5f4fd21cc3f4da0bbfeeed3d91efed42854035bcac1d8555b21ee6f3",
+          "AeroScience.Hdf.SafeRead.dll": "6a29585772155c723cb1c83584472bd93489a907a01ead22def6fc29cfb191b7",
+          "AeroScience.Missions.dll": "5c983a6928738b25c8e773cbcc229c27484c05b0c46a27611d66590f1c865258",
+          "AeroScience.Organization.dll": "e9d0227bbf8191ade225502885374feba8341a8d1b69156fc0fbb547bcaf4dd1",
+          "AeroScience.Shared.dll": "14194bd62b7a699beb08ce8b3fca64c7c11435e4d4ae9bd45a5e056c17b34fb0",
+          "AeroScience.SimConnect.dll": "750a132e30e88198b974767f246e0772f04c8ed6e328d971fe95cd8ebc7011fa",
+          "AeroScience.Telemetry.dll": "69b3e94426c19ed9c3bd178087841946fc7072d5e26b7f6daebcb0cb59ce3e20",
+          "AeroScience.TestHost.dll": "47678b33f0747939e0ba2caf8246e134d23b0fbf17a26ba6603ec458a3d7613f",
+          "BitMiracle.LibTiff.NET.dll": "0cfdba77f76af11c4dfa0a465a9155f7e8aac5632b54118b9b20ba185c58cd50",
+          "GeographicLib.dll": "03dec3d0d891bba5b7ca8f91efd5c62225f836263a276116334af9babad4097f",
+          "Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.dll": "96be7f72fffb51d26ee515e700d49ec98edfa482536eb0ec24cf94bd6fe7eb46",
+          "Microsoft.AspNetCore.Identity.EntityFrameworkCore.dll": "7c4d1a714aa878935a99c33a5df24dd1854a5577e55d4632e63e1f15d7e55fbf",
+          "Microsoft.Data.Sqlite.dll": "9f1fe804321767b6cc8db751ecedd56ab308e5f15492a7f40d7093bb61ab7638",
+          "Microsoft.EntityFrameworkCore.Abstractions.dll": "24596b62ac0546c641e308a06bb9ea4bb153e9a776ed2311e730832465f34f5d",
+          "Microsoft.EntityFrameworkCore.Relational.dll": "078ad42527c893d858e1c48b7edc5a0ec755c60b28395e996bc438ede3555cf0",
+          "Microsoft.EntityFrameworkCore.dll": "87faf0bf54de5f62c7d30eb686018b11c53d4acf6c280adb39965b303c5b2b59",
+          "NetTopologySuite.dll": "98fa6bae8b75b5f9445236679883fa27750d990aec11e985b85b57a30c37a858",
+          "Npgsql.EntityFrameworkCore.PostgreSQL.dll": "94fcf66e8e953fdb02c40c72ca89821dd5eed5324d4c0f12a7219ea8cd3d5a5e",
+          "Npgsql.dll": "e2bcafe1660fe4543fe9dfcabed972ec8d32259e5ea8009462ce1de23c7034c2",
+          "SQLitePCLRaw.batteries_v2.dll": "1ee3c6ff4d39171690d6ff6f84b4d876ed038ca28e39bb6e74995f52d2aacf8b",
+          "SQLitePCLRaw.core.dll": "b72c9dfe1479a568d6b84e249eaf949e76c757888f8056fb6ddb9c0480e0dd25",
+          "SQLitePCLRaw.provider.e_sqlite3.dll": "1d4cb69b3aaf6a9cf40dfe179cc16dd678f12bc024b212d4297654e0a29e220d",
+          "LidarRuntime/AeroScience.LidarReader": "8accaf384a16e85a2a98315f9a76b4b7e7b17524af9266766b57db49622d2b7c",
+          "LidarRuntime/LASzip.txt": "959f77033ba56a3b146faf5c02f9162071f2d0bff4b8b6f1c2193a4b41127d39",
+          "LidarRuntime/NOTICE.md": "9ee8a7c25b3dffdf8fd54b42b90d3aeef240989d92eb8c4d3f6e214bc975b1ee"
+        },
+        "scope": "Development TestHost build; not the sealed owner Windows package",
+        "harness_sha256": "6e38395029da9097b47fa9e6c786f1ff6f73cecac955c6a465ad59a4cf76954c"
+      },
+      "inputs": [
+        {
+          "id": "usgs-composite-32",
+          "kind": "dem",
+          "provider_project": "USGS 3DEP delivered numeric composite export",
+          "source_date_utc": null,
+          "horizontal_crs": "EPSG:4326",
+          "vertical_datum": null,
+          "units": "m (delivered service)",
+          "native_shape_or_count": [
+            32,
+            32
+          ],
+          "attributes": [
+            "elevation Float32",
+            "no guessed source survey date or native resolution"
+          ],
+          "license_access": "US Government public data; retained request/service metadata",
+          "retained_authorization": "Retained by approved P05b; offline reuse only",
+          "expected_sha256": "4c043d10024c8af4077c45d9ed6778141ccaf0837298ea8a521c9f832ce9a7f0",
+          "bytes": 66342,
+          "sha256": "4c043d10024c8af4077c45d9ed6778141ccaf0837298ea8a521c9f832ce9a7f0"
+        },
+        {
+          "id": "ia-root",
+          "kind": "ept-node",
+          "provider_project": "USGS IA_FullState delivered EPT 0-0-0-0",
+          "source_date_utc": null,
+          "horizontal_crs": "EPSG:3857",
+          "vertical_datum": null,
+          "units": null,
+          "native_shape_or_count": 34923,
+          "attributes": [
+            "raw XYZ",
+            "scale/offset",
+            "intensity",
+            "classification",
+            "returns",
+            "flags",
+            "raw GPS bits",
+            "OriginId extra bytes"
+          ],
+          "license_access": "US Government Public Domain; registry.opendata.aws/usgs-lidar",
+          "retained_authorization": "Retained by approved P05c; offline reuse only",
+          "expected_sha256": "68c4b0ed247501a15d020d9a758d0345904f38785235732bd8e3386a3fca71c1",
+          "bytes": 603312,
+          "sha256": "68c4b0ed247501a15d020d9a758d0345904f38785235732bd8e3386a3fca71c1"
+        }
+      ],
+      "selected_input": "usgs-composite-32",
+      "outcome": "Passed",
+      "tolerances": {
+        "nativeValueAbsolute": 0,
+        "pixelCenterDegrees": 1e-12,
+        "nativeCellFractionAbsolute": 1e-07,
+        "maskSymmetricDifferencePixelArea": 1e-07
+      },
+      "reference": {
+        "state": "Passed",
+        "verifiedUtc": "2026-11-15T17:40:23.342505+00:00",
+        "scope": "Genuine bounded USGS composite delivered values/grid; synthetic archived flight corridor; fully offline application processing",
+        "reference": "GDAL 3.10.3 / OGR GEOS overlays",
+        "originalSha256": "4c043d10024c8af4077c45d9ed6778141ccaf0837298ea8a521c9f832ce9a7f0",
+        "sourceManifestSha256": "6cda61df0cde7f96e4f27fbee60eb4fe6d26be5a71e893ce2ceaf26a1bc15445",
+        "algorithm": "terrain-native-cells-1/pixel-clip-1",
+        "nativeCellsCompared": 1024,
+        "clippedCellsCompared": 576,
+        "partialCells": 66,
+        "maximumCellFractionDifference": 1.9593626721103874e-10,
+        "derivedIndexSha256": "f5b0d4b0994005f3e7d73d37efa24b0f989ffefdcdc68b3e3c6928b29bb53dd6",
+        "unknowns": [
+          "historical survey date",
+          "native per-pixel resolution",
+          "vertical datum / transformations"
+        ],
+        "notTested": [
+          "genuine Copernicus DSM",
+          "genuine UTM provider source",
+          "installed Windows/MSFS",
+          "provider-wide availability"
+        ]
+      },
+      "artifacts": [
+        {
+          "file": "application.log",
+          "bytes": 144,
+          "sha256": "5cb3a518b53cfc4a01358fc6fa09bf5c07e0ad3c0cb2dba1385884922f4e3584"
+        },
+        {
+          "file": "independent-reference.log",
+          "bytes": 948,
+          "sha256": "9e48ce03005b5df81ba6f5346a996032e24c100b69ff83d4c56883da89f44102"
+        },
+        {
+          "file": "plan.json",
+          "bytes": 5521,
+          "sha256": "8223faf62bd97a70e79212c43e3c5c89f924345d4c0f0025341aac4de805dba3"
+        },
+        {
+          "file": "probe/ScienceLibrary/.science-storage.json",
+          "bytes": 111,
+          "sha256": "a62a289b2b419b31ec1c5f87e5c3820d8f61bdafac14f6ba974d21059ab2f359"
+        },
+        {
+          "file": "probe/ScienceLibrary/Metadata/Backups/AeroScience-science-20261115-174018-7663bd6b20d64316bfa25ed6b97bb8ca.sqlite",
+          "bytes": 45056,
+          "sha256": "71e3c4bb8d2be6580af747228ab5ea3c54913f98fc867e280a2f6c19ca9c6cee"
+        },
+        {
+          "file": "probe/ScienceLibrary/Metadata/Backups/AeroScience-science-20261115-174018-7663bd6b20d64316bfa25ed6b97bb8ca.sqlite.partial-shm",
+          "bytes": 32768,
+          "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb"
+        },
+        {
+          "file": "probe/ScienceLibrary/Metadata/Backups/AeroScience-science-20261115-174018-7663bd6b20d64316bfa25ed6b97bb8ca.sqlite.partial-wal",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "file": "probe/ScienceLibrary/Metadata/Backups/AeroScience-science-20261115-174018-b9e73c6c86bc4e7288f8e596fa4819ff.sqlite",
+          "bytes": 86016,
+          "sha256": "c869046f8b1a598c3d61bdfc365a8d3fdd59fc8b25852ca7ee71839d46a26ead"
+        },
+        {
+          "file": "probe/ScienceLibrary/Metadata/Backups/AeroScience-science-20261115-174018-b9e73c6c86bc4e7288f8e596fa4819ff.sqlite.partial-shm",
+          "bytes": 32768,
+          "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb"
+        },
+        {
+          "file": "probe/ScienceLibrary/Metadata/Backups/AeroScience-science-20261115-174018-b9e73c6c86bc4e7288f8e596fa4819ff.sqlite.partial-wal",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "file": "probe/ScienceLibrary/Metadata/Backups/AeroScience-science-20261115-174020-ef659d70751443d18421cd7421ea1643.sqlite",
+          "bytes": 290816,
+          "sha256": "40567289f965f50913481746f72f319276820c04002d578fbfdab34a600c1cbb"
+        },
+        {
+          "file": "probe/ScienceLibrary/Metadata/Backups/AeroScience-science-20261115-174020-ef659d70751443d18421cd7421ea1643.sqlite.partial-shm",
+          "bytes": 32768,
+          "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb"
+        },
+        {
+          "file": "probe/ScienceLibrary/Metadata/Backups/AeroScience-science-20261115-174020-ef659d70751443d18421cd7421ea1643.sqlite.partial-wal",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "file": "probe/ScienceLibrary/Observations/science.sqlite",
+          "bytes": 425984,
+          "sha256": "01a1db75643e22476ee59e54bf69e01960d8a6a6b74d96a03c1bff3f42ef9278"
+        },
+        {
+          "file": "probe/ScienceLibrary/Observations/science.sqlite-shm",
+          "bytes": 32768,
+          "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb"
+        },
+        {
+          "file": "probe/ScienceLibrary/Observations/science.sqlite-wal",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/efdaaafcc229479f93bfa798f2bab497/Derived/035f88e94aba46c7b75d59af5091c38f.json",
+          "bytes": 10495,
+          "sha256": "bf4f706a6bfda2a8169f4ba8ba23c593990a4324187c7bc656913917a4cfccc6"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/efdaaafcc229479f93bfa798f2bab497/Derived/0a03544dd11f445c8b479347dbc538cd.json",
+          "bytes": 10644,
+          "sha256": "04ddbcaba988c5e7d663b56921f1797da21280b5992041f4d68d0f0f212db742"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/efdaaafcc229479f93bfa798f2bab497/Derived/0cad964c7a284c82a77c642859842e9b.json",
+          "bytes": 10411,
+          "sha256": "24d24b9ea3b77228348feede0293a27d064c4df4f34cf0a64a04518522ac9880"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/efdaaafcc229479f93bfa798f2bab497/Derived/1cc652012aa047b7987b2ca1c61781f5.json",
+          "bytes": 10407,
+          "sha256": "1b97708a1b004451f4028700750a9daefb07c8812fcb7d36c4b063915497bcd4"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/efdaaafcc229479f93bfa798f2bab497/Derived/1d1f0441a92b479baf5e06c8ceae9203.json",
+          "bytes": 10459,
+          "sha256": "3f76514b3e558799ba950cb8063a5a61e6aed56ddd0f81b4f239ef147f5c8695"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/efdaaafcc229479f93bfa798f2bab497/Derived/1e4e93f17ae042db9e32fccd0c6289c6.json",
+          "bytes": 7317,
+          "sha256": "27b57bb6d00ccc4e6dadebb8f74bd1fbfe94e02880e53d0f27e8707064671c82"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/efdaaafcc229479f93bfa798f2bab497/Derived/2f77ad4448454d4ba5968282fd84ce08.json",
+          "bytes": 10738,
+          "sha256": "f68490e9b4cc721ff53f87a18b9f866e2a0e3cf8ff773d9eded7ab9224f64b9a"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/efdaaafcc229479f93bfa798f2bab497/Derived/3a39c49c73444d7ebe2afbffd9695665.json",
+          "bytes": 10425,
+          "sha256": "5ed8eaacbb2bb78cc9e35288a7d4bca7f0af74858d3b9527655467ea34623ddc"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/efdaaafcc229479f93bfa798f2bab497/Derived/3b18a97cb7ea46a78178f72fc16da3de.json",
+          "bytes": 10422,
+          "sha256": "3827c3c04cc38fee6a79ec6f31f3a2536a9a4f09d9e8523749cb170da3c5097a"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/efdaaafcc229479f93bfa798f2bab497/Derived/413e7dec2068427485842c5a398bb05b.json",
+          "bytes": 10467,
+          "sha256": "e1fc3377819bb2f3a3cf4596f562719ddbfb4cadaaeb53ac45867ed1871462d3"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/efdaaafcc229479f93bfa798f2bab497/Derived/41440c6ff2a046fbae592e7d2d394b3d.json",
+          "bytes": 10403,
+          "sha256": "5efa999d3a9a241f493d494c53d1149593b48eeb710edcf1b837173c7d4b6b6d"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/efdaaafcc229479f93bfa798f2bab497/Derived/4367476bf7ec4b7aa76052274a7be1a1.json",
+          "bytes": 7289,
+          "sha256": "35b5f728a853a1825217484769373a5ba57189ce311cb7057e97d5344ffe13eb"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/efdaaafcc229479f93bfa798f2bab497/Derived/436e9171fb1a4c51bcadb436e53a3f77.json",
+          "bytes": 15462,
+          "sha256": "f5b0d4b0994005f3e7d73d37efa24b0f989ffefdcdc68b3e3c6928b29bb53dd6"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/efdaaafcc229479f93bfa798f2bab497/Derived/4b3e500ec50b40b895e55b873f002cef.json",
+          "bytes": 7341,
+          "sha256": "8cd1cb365c1583a7c850540aebbf8d68e59f0af3e9d12be1b03b88edc9632270"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/efdaaafcc229479f93bfa798f2bab497/Derived/60f926260c934159bf07dd53a30befd1.json",
+          "bytes": 7339,
+          "sha256": "8cdad73b5b178d3690ad243d995a790988871bb2e3c49796bd46042ee3ddfcc7"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/efdaaafcc229479f93bfa798f2bab497/Derived/65b7210a65674558a57a5aa0895751d6.json",
+          "bytes": 10600,
+          "sha256": "ffd7f9cddd2c8275eb8c1f299c5d4e35c0e7d3774fd29111d66eee02e6e513a1"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/efdaaafcc229479f93bfa798f2bab497/Derived/66cda155a55b4f6cb72232759fe2eb17.json",
+          "bytes": 10315,
+          "sha256": "8ed9e7064dce9c7694101d041a6e98c3c3a74cf54ea3b3ba12f43b2cfa165dd3"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/efdaaafcc229479f93bfa798f2bab497/Derived/6d12a19f8c7549a9a30010c2288fe0d9.json",
+          "bytes": 10720,
+          "sha256": "ec4d46b563c042bc0e82c698421324147f4aef5cc05393c4b1e24dd4fd1fecff"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/efdaaafcc229479f93bfa798f2bab497/Derived/8fde7d7f1c3e448b8a793d53b5f6e9de.json",
+          "bytes": 10407,
+          "sha256": "362be86181db93bf052aa14b4c698f95afef7881eac997eca34e9f4d617a796e"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/efdaaafcc229479f93bfa798f2bab497/Derived/9268e2dca70e41fdb89804a0293b8774.json",
+          "bytes": 10723,
+          "sha256": "5eba9f01e43ae260ca4d5473c568c7ad57e89c6693f036ebdcc06a1f6f954bba"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/efdaaafcc229479f93bfa798f2bab497/Derived/9779f2dee60447c8b272469ece908fd7.json",
+          "bytes": 10461,
+          "sha256": "221f18efdcdb9fefbd2518ba627a03355c73ab39ab53635db4b086f86370de05"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/efdaaafcc229479f93bfa798f2bab497/Derived/9f8ba48d026a4e3ebfdd6dac2637521f.json",
+          "bytes": 10461,
+          "sha256": "e72bf3e49d2d613de0d1b5e874e951ca66a7641ff45c8eff3e66674f32ea99aa"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/efdaaafcc229479f93bfa798f2bab497/Derived/9fb64694278a46bc9cf00988536afe95.json",
+          "bytes": 10409,
+          "sha256": "749ab590bc0f937aca8dffcbe3f324677e4925d8fb74cb9c175b55fe51b6f0f0"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/efdaaafcc229479f93bfa798f2bab497/Derived/a1d769f0504f4f0487b61002e8490edd.json",
+          "bytes": 10299,
+          "sha256": "dbcd98fc27802467c4b80db164a204bfcce6419713a4a59ca8ac71c00196f729"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/efdaaafcc229479f93bfa798f2bab497/Derived/a3bc34369b9144b0abcb8df4a6b2d9ae.json",
+          "bytes": 10405,
+          "sha256": "7a8ff1577dbdd2b7d1f2f63d6c3e797e2837030203b96feab576ce23acb1aa8a"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/efdaaafcc229479f93bfa798f2bab497/Derived/a61e75fd39ed48d49fecc866539ffe8a.json",
+          "bytes": 7414,
+          "sha256": "1d6757bb642f4a04d0d2c5bfe1e8184daee0995aeb1d7ccfec0ad684b10d7470"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/efdaaafcc229479f93bfa798f2bab497/Derived/a70d3b0aadc34b20ac3f21ea5ede8a49.json",
+          "bytes": 10501,
+          "sha256": "1cefef9fa0613fead41ab203e13de91c261d97b7dbc1800b811e1c8735a86fdc"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/efdaaafcc229479f93bfa798f2bab497/Derived/a95e1c45e849413790bde02caaefd595.json",
+          "bytes": 7341,
+          "sha256": "0e8d0ddcb1f0358508dd7a100e8dcdde0c92165a005adc39d9408ff60de56d96"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/efdaaafcc229479f93bfa798f2bab497/Derived/aa1290eb64da454cbb9e53f787d3e9d7.json",
+          "bytes": 10367,
+          "sha256": "decf978b9e8adfc6fc4bcd3e0e57e9e4ad9ad98f539b3adb5d3f6e7c6a597f08"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/efdaaafcc229479f93bfa798f2bab497/Derived/ae444669583c4c418b51c098f155ea47.json",
+          "bytes": 10401,
+          "sha256": "44c85e9b8aefbff9e78d3767a1448badf7a957302bc39a0f264b95c92e88998c"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/efdaaafcc229479f93bfa798f2bab497/Derived/b1cb5f8c4c374350b75bd8550aba9b19.json",
+          "bytes": 7337,
+          "sha256": "b3c762842703d5e1f970102bac28b32468ef46d48209cc22af8e417b981dd459"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/efdaaafcc229479f93bfa798f2bab497/Derived/b29578ef30924aa5a9173c6b10a19003.json",
+          "bytes": 10391,
+          "sha256": "ef8a79c9daeaa1996bb93b8a64e42359e0594e3b39907ab0ff5f6e698f13b23d"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/efdaaafcc229479f93bfa798f2bab497/Derived/b355b01a63bc4f03a55c1461a720742d.json",
+          "bytes": 10411,
+          "sha256": "d9d0c64820ada89d9f30c486c22d84a87517178aa062c501632eaceaac41e548"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/efdaaafcc229479f93bfa798f2bab497/Derived/bd04c85162a343adaf34ce9bb2ac206e.json",
+          "bytes": 10369,
+          "sha256": "a5aee8ce0cb348af176465f2b8463e6aac56cc16b746344325503a5811e221aa"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/efdaaafcc229479f93bfa798f2bab497/Derived/bf434889b5794e5f9d491ab1ac5c1393.json",
+          "bytes": 10465,
+          "sha256": "37ee39a8871e723d753a47c4368fa770a04abeb9b984bd361f7562af487c8248"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/efdaaafcc229479f93bfa798f2bab497/Derived/d1453cc1d391453cb0c87a6bae70fc88.json",
+          "bytes": 10371,
+          "sha256": "6b8862d4f1738dfe318c772efbcf2f8d5e01a81d30cb758270ab38b32de03699"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/efdaaafcc229479f93bfa798f2bab497/Derived/ddfac1c06f514cda9187e9edade32b9f.json",
+          "bytes": 10505,
+          "sha256": "e35cf9aaf4bd3c31aa759063c34e42d632a7d01ef669f0b8a28d877cf9884e6d"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/efdaaafcc229479f93bfa798f2bab497/Derived/e0804e8d995f44098df9db2243f0f59d.json",
+          "bytes": 10773,
+          "sha256": "6ba11dcd58ed4176ec8486ef93f468eb6295ce4c8c49c1913bf55cd4ef7985f3"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/efdaaafcc229479f93bfa798f2bab497/Derived/ed043fdb75aa412598395a38e912e09e.json",
+          "bytes": 10503,
+          "sha256": "e986b5a6b1ed965a12182f64643cd7d82b9c9c17560f99a894c0b6f1d0112bbe"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/efdaaafcc229479f93bfa798f2bab497/Derived/f032e1c386de4c99bc9bf1164686e24a.json",
+          "bytes": 10586,
+          "sha256": "7ed45272cb4bdef594a55cec092920496132f96eb870c13734d5fef929058253"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/efdaaafcc229479f93bfa798f2bab497/Derived/f8ef24bf6a6545d98a7a5cf83c967383.json",
+          "bytes": 7409,
+          "sha256": "947860641ea43c66d17b26203d20a04b616d87140576901bfdc851945d639ffb"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/efdaaafcc229479f93bfa798f2bab497/Derived/fa9c015ed21b4f67a4f998161694ecbe.json",
+          "bytes": 10616,
+          "sha256": "e022d7cca2d213e644b923cfd6d50e7ea76c7f14ff0559a963a0ce64674d57fc"
+        },
+        {
+          "file": "probe/ScienceLibrary/Sources/504ef7aa189d45ceb107b02a643fe836/request.json",
+          "bytes": 441,
+          "sha256": "7cee45990acd62a73669602695a210262ce9c809374a6ff15817bbd6d5e80510"
+        },
+        {
+          "file": "probe/ScienceLibrary/Sources/504ef7aa189d45ceb107b02a643fe836/service-metadata.json",
+          "bytes": 11123,
+          "sha256": "12c568383e1f38192bcdd852d4e9e1a6c89c811e4461478efec7bad23be3c2b9"
+        },
+        {
+          "file": "probe/ScienceLibrary/Sources/504ef7aa189d45ceb107b02a643fe836/source.json",
+          "bytes": 1872,
+          "sha256": "cefdb833f1291edd47f25a67e7f554278ee5811b6999b79dca726f3b5a714c9d"
+        },
+        {
+          "file": "probe/ScienceLibrary/Sources/504ef7aa189d45ceb107b02a643fe836/usgs-composite-original.tif",
+          "bytes": 66342,
+          "sha256": "4c043d10024c8af4077c45d9ed6778141ccaf0837298ea8a521c9f832ce9a7f0"
+        },
+        {
+          "file": "probe/ScienceLibrary/engine.lock",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "file": "probe/ScienceLibrary/library.json",
+          "bytes": 70,
+          "sha256": "a3bae03bdc13b59dfaaa999f65643de483970bc321ba857679b0e8cc07541a91"
+        },
+        {
+          "file": "probe/engine.lock",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "file": "probe/geometry.json",
+          "bytes": 10422,
+          "sha256": "3827c3c04cc38fee6a79ec6f31f3a2536a9a4f09d9e8523749cb170da3c5097a"
+        },
+        {
+          "file": "probe/independent-comparison.json",
+          "bytes": 1014,
+          "sha256": "cbd53db5e9dde6a69f3d23fc7fef9251aff9119b2c8ebd04726211172100f59c"
+        },
+        {
+          "file": "probe/index.json",
+          "bytes": 15462,
+          "sha256": "f5b0d4b0994005f3e7d73d37efa24b0f989ffefdcdc68b3e3c6928b29bb53dd6"
+        },
+        {
+          "file": "probe/missions.db",
+          "bytes": 434176,
+          "sha256": "eb485df580e0109238082d09e8f277e5d1532ff671f80feb1beb2324b9f49863"
+        },
+        {
+          "file": "probe/missions.db-shm",
+          "bytes": 32768,
+          "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb"
+        },
+        {
+          "file": "probe/missions.db-wal",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "file": "probe/native-grid.json",
+          "bytes": 138285,
+          "sha256": "657669f035fb8a9421b78db3b42e19bc194043cc0ce997d1a71527609b4675f1"
+        },
+        {
+          "file": "probe/probe.json",
+          "bytes": 653,
+          "sha256": "ee84b825582138f4ebbf8641ad0e4c1e60228d042e0f221da8e414aaedc2d65e"
+        },
+        {
+          "file": "probe/settings.json",
+          "bytes": 363,
+          "sha256": "bde17625586d5bf5649407c147ea4180ded648656e7c93af22e0033fb136cb7e"
+        },
+        {
+          "file": "probe/source.json",
+          "bytes": 1872,
+          "sha256": "cefdb833f1291edd47f25a67e7f554278ee5811b6999b79dca726f3b5a714c9d"
+        },
+        {
+          "file": "probe/tiles/035f88e94aba46c7b75d59af5091c38f.json",
+          "bytes": 10495,
+          "sha256": "bf4f706a6bfda2a8169f4ba8ba23c593990a4324187c7bc656913917a4cfccc6"
+        },
+        {
+          "file": "probe/tiles/0a03544dd11f445c8b479347dbc538cd.json",
+          "bytes": 10644,
+          "sha256": "04ddbcaba988c5e7d663b56921f1797da21280b5992041f4d68d0f0f212db742"
+        },
+        {
+          "file": "probe/tiles/0cad964c7a284c82a77c642859842e9b.json",
+          "bytes": 10411,
+          "sha256": "24d24b9ea3b77228348feede0293a27d064c4df4f34cf0a64a04518522ac9880"
+        },
+        {
+          "file": "probe/tiles/1cc652012aa047b7987b2ca1c61781f5.json",
+          "bytes": 10407,
+          "sha256": "1b97708a1b004451f4028700750a9daefb07c8812fcb7d36c4b063915497bcd4"
+        },
+        {
+          "file": "probe/tiles/1d1f0441a92b479baf5e06c8ceae9203.json",
+          "bytes": 10459,
+          "sha256": "3f76514b3e558799ba950cb8063a5a61e6aed56ddd0f81b4f239ef147f5c8695"
+        },
+        {
+          "file": "probe/tiles/1e4e93f17ae042db9e32fccd0c6289c6.json",
+          "bytes": 7317,
+          "sha256": "27b57bb6d00ccc4e6dadebb8f74bd1fbfe94e02880e53d0f27e8707064671c82"
+        },
+        {
+          "file": "probe/tiles/2f77ad4448454d4ba5968282fd84ce08.json",
+          "bytes": 10738,
+          "sha256": "f68490e9b4cc721ff53f87a18b9f866e2a0e3cf8ff773d9eded7ab9224f64b9a"
+        },
+        {
+          "file": "probe/tiles/3a39c49c73444d7ebe2afbffd9695665.json",
+          "bytes": 10425,
+          "sha256": "5ed8eaacbb2bb78cc9e35288a7d4bca7f0af74858d3b9527655467ea34623ddc"
+        },
+        {
+          "file": "probe/tiles/413e7dec2068427485842c5a398bb05b.json",
+          "bytes": 10467,
+          "sha256": "e1fc3377819bb2f3a3cf4596f562719ddbfb4cadaaeb53ac45867ed1871462d3"
+        },
+        {
+          "file": "probe/tiles/41440c6ff2a046fbae592e7d2d394b3d.json",
+          "bytes": 10403,
+          "sha256": "5efa999d3a9a241f493d494c53d1149593b48eeb710edcf1b837173c7d4b6b6d"
+        },
+        {
+          "file": "probe/tiles/4367476bf7ec4b7aa76052274a7be1a1.json",
+          "bytes": 7289,
+          "sha256": "35b5f728a853a1825217484769373a5ba57189ce311cb7057e97d5344ffe13eb"
+        },
+        {
+          "file": "probe/tiles/4b3e500ec50b40b895e55b873f002cef.json",
+          "bytes": 7341,
+          "sha256": "8cd1cb365c1583a7c850540aebbf8d68e59f0af3e9d12be1b03b88edc9632270"
+        },
+        {
+          "file": "probe/tiles/60f926260c934159bf07dd53a30befd1.json",
+          "bytes": 7339,
+          "sha256": "8cdad73b5b178d3690ad243d995a790988871bb2e3c49796bd46042ee3ddfcc7"
+        },
+        {
+          "file": "probe/tiles/65b7210a65674558a57a5aa0895751d6.json",
+          "bytes": 10600,
+          "sha256": "ffd7f9cddd2c8275eb8c1f299c5d4e35c0e7d3774fd29111d66eee02e6e513a1"
+        },
+        {
+          "file": "probe/tiles/66cda155a55b4f6cb72232759fe2eb17.json",
+          "bytes": 10315,
+          "sha256": "8ed9e7064dce9c7694101d041a6e98c3c3a74cf54ea3b3ba12f43b2cfa165dd3"
+        },
+        {
+          "file": "probe/tiles/6d12a19f8c7549a9a30010c2288fe0d9.json",
+          "bytes": 10720,
+          "sha256": "ec4d46b563c042bc0e82c698421324147f4aef5cc05393c4b1e24dd4fd1fecff"
+        },
+        {
+          "file": "probe/tiles/8fde7d7f1c3e448b8a793d53b5f6e9de.json",
+          "bytes": 10407,
+          "sha256": "362be86181db93bf052aa14b4c698f95afef7881eac997eca34e9f4d617a796e"
+        },
+        {
+          "file": "probe/tiles/9268e2dca70e41fdb89804a0293b8774.json",
+          "bytes": 10723,
+          "sha256": "5eba9f01e43ae260ca4d5473c568c7ad57e89c6693f036ebdcc06a1f6f954bba"
+        },
+        {
+          "file": "probe/tiles/9779f2dee60447c8b272469ece908fd7.json",
+          "bytes": 10461,
+          "sha256": "221f18efdcdb9fefbd2518ba627a03355c73ab39ab53635db4b086f86370de05"
+        },
+        {
+          "file": "probe/tiles/9f8ba48d026a4e3ebfdd6dac2637521f.json",
+          "bytes": 10461,
+          "sha256": "e72bf3e49d2d613de0d1b5e874e951ca66a7641ff45c8eff3e66674f32ea99aa"
+        },
+        {
+          "file": "probe/tiles/9fb64694278a46bc9cf00988536afe95.json",
+          "bytes": 10409,
+          "sha256": "749ab590bc0f937aca8dffcbe3f324677e4925d8fb74cb9c175b55fe51b6f0f0"
+        },
+        {
+          "file": "probe/tiles/a1d769f0504f4f0487b61002e8490edd.json",
+          "bytes": 10299,
+          "sha256": "dbcd98fc27802467c4b80db164a204bfcce6419713a4a59ca8ac71c00196f729"
+        },
+        {
+          "file": "probe/tiles/a3bc34369b9144b0abcb8df4a6b2d9ae.json",
+          "bytes": 10405,
+          "sha256": "7a8ff1577dbdd2b7d1f2f63d6c3e797e2837030203b96feab576ce23acb1aa8a"
+        },
+        {
+          "file": "probe/tiles/a61e75fd39ed48d49fecc866539ffe8a.json",
+          "bytes": 7414,
+          "sha256": "1d6757bb642f4a04d0d2c5bfe1e8184daee0995aeb1d7ccfec0ad684b10d7470"
+        },
+        {
+          "file": "probe/tiles/a70d3b0aadc34b20ac3f21ea5ede8a49.json",
+          "bytes": 10501,
+          "sha256": "1cefef9fa0613fead41ab203e13de91c261d97b7dbc1800b811e1c8735a86fdc"
+        },
+        {
+          "file": "probe/tiles/a95e1c45e849413790bde02caaefd595.json",
+          "bytes": 7341,
+          "sha256": "0e8d0ddcb1f0358508dd7a100e8dcdde0c92165a005adc39d9408ff60de56d96"
+        },
+        {
+          "file": "probe/tiles/aa1290eb64da454cbb9e53f787d3e9d7.json",
+          "bytes": 10367,
+          "sha256": "decf978b9e8adfc6fc4bcd3e0e57e9e4ad9ad98f539b3adb5d3f6e7c6a597f08"
+        },
+        {
+          "file": "probe/tiles/ae444669583c4c418b51c098f155ea47.json",
+          "bytes": 10401,
+          "sha256": "44c85e9b8aefbff9e78d3767a1448badf7a957302bc39a0f264b95c92e88998c"
+        },
+        {
+          "file": "probe/tiles/b1cb5f8c4c374350b75bd8550aba9b19.json",
+          "bytes": 7337,
+          "sha256": "b3c762842703d5e1f970102bac28b32468ef46d48209cc22af8e417b981dd459"
+        },
+        {
+          "file": "probe/tiles/b29578ef30924aa5a9173c6b10a19003.json",
+          "bytes": 10391,
+          "sha256": "ef8a79c9daeaa1996bb93b8a64e42359e0594e3b39907ab0ff5f6e698f13b23d"
+        },
+        {
+          "file": "probe/tiles/b355b01a63bc4f03a55c1461a720742d.json",
+          "bytes": 10411,
+          "sha256": "d9d0c64820ada89d9f30c486c22d84a87517178aa062c501632eaceaac41e548"
+        },
+        {
+          "file": "probe/tiles/bd04c85162a343adaf34ce9bb2ac206e.json",
+          "bytes": 10369,
+          "sha256": "a5aee8ce0cb348af176465f2b8463e6aac56cc16b746344325503a5811e221aa"
+        },
+        {
+          "file": "probe/tiles/bf434889b5794e5f9d491ab1ac5c1393.json",
+          "bytes": 10465,
+          "sha256": "37ee39a8871e723d753a47c4368fa770a04abeb9b984bd361f7562af487c8248"
+        },
+        {
+          "file": "probe/tiles/d1453cc1d391453cb0c87a6bae70fc88.json",
+          "bytes": 10371,
+          "sha256": "6b8862d4f1738dfe318c772efbcf2f8d5e01a81d30cb758270ab38b32de03699"
+        },
+        {
+          "file": "probe/tiles/ddfac1c06f514cda9187e9edade32b9f.json",
+          "bytes": 10505,
+          "sha256": "e35cf9aaf4bd3c31aa759063c34e42d632a7d01ef669f0b8a28d877cf9884e6d"
+        },
+        {
+          "file": "probe/tiles/e0804e8d995f44098df9db2243f0f59d.json",
+          "bytes": 10773,
+          "sha256": "6ba11dcd58ed4176ec8486ef93f468eb6295ce4c8c49c1913bf55cd4ef7985f3"
+        },
+        {
+          "file": "probe/tiles/ed043fdb75aa412598395a38e912e09e.json",
+          "bytes": 10503,
+          "sha256": "e986b5a6b1ed965a12182f64643cd7d82b9c9c17560f99a894c0b6f1d0112bbe"
+        },
+        {
+          "file": "probe/tiles/f032e1c386de4c99bc9bf1164686e24a.json",
+          "bytes": 10586,
+          "sha256": "7ed45272cb4bdef594a55cec092920496132f96eb870c13734d5fef929058253"
+        },
+        {
+          "file": "probe/tiles/f8ef24bf6a6545d98a7a5cf83c967383.json",
+          "bytes": 7409,
+          "sha256": "947860641ea43c66d17b26203d20a04b616d87140576901bfdc851945d639ffb"
+        },
+        {
+          "file": "probe/tiles/fa9c015ed21b4f67a4f998161694ecbe.json",
+          "bytes": 10616,
+          "sha256": "e022d7cca2d213e644b923cfd6d50e7ea76c7f14ff0559a963a0ce64674d57fc"
+        }
+      ]
+    },
+    {
+      "receipt": "artifacts/p08c/numerical-lidar-2/receipt.json",
+      "sha256": "9a28523b3133b647642389995820e5d5f2b1b5c4f551eca512bd1e1ff312db24",
+      "runtime": {
+        "source_commit": "527c5d7a6534527b0bfb21bd9c1906d7b9c1672e",
+        "branch": "develop/v0.8.0",
+        "build_files_sha256": {
+          "AeroScience.Engine.dll": "74bc40ea5f4fd21cc3f4da0bbfeeed3d91efed42854035bcac1d8555b21ee6f3",
+          "AeroScience.Hdf.SafeRead.dll": "6a29585772155c723cb1c83584472bd93489a907a01ead22def6fc29cfb191b7",
+          "AeroScience.Missions.dll": "5c983a6928738b25c8e773cbcc229c27484c05b0c46a27611d66590f1c865258",
+          "AeroScience.Organization.dll": "e9d0227bbf8191ade225502885374feba8341a8d1b69156fc0fbb547bcaf4dd1",
+          "AeroScience.Shared.dll": "14194bd62b7a699beb08ce8b3fca64c7c11435e4d4ae9bd45a5e056c17b34fb0",
+          "AeroScience.SimConnect.dll": "750a132e30e88198b974767f246e0772f04c8ed6e328d971fe95cd8ebc7011fa",
+          "AeroScience.Telemetry.dll": "69b3e94426c19ed9c3bd178087841946fc7072d5e26b7f6daebcb0cb59ce3e20",
+          "AeroScience.TestHost.dll": "47678b33f0747939e0ba2caf8246e134d23b0fbf17a26ba6603ec458a3d7613f",
+          "BitMiracle.LibTiff.NET.dll": "0cfdba77f76af11c4dfa0a465a9155f7e8aac5632b54118b9b20ba185c58cd50",
+          "GeographicLib.dll": "03dec3d0d891bba5b7ca8f91efd5c62225f836263a276116334af9babad4097f",
+          "Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.dll": "96be7f72fffb51d26ee515e700d49ec98edfa482536eb0ec24cf94bd6fe7eb46",
+          "Microsoft.AspNetCore.Identity.EntityFrameworkCore.dll": "7c4d1a714aa878935a99c33a5df24dd1854a5577e55d4632e63e1f15d7e55fbf",
+          "Microsoft.Data.Sqlite.dll": "9f1fe804321767b6cc8db751ecedd56ab308e5f15492a7f40d7093bb61ab7638",
+          "Microsoft.EntityFrameworkCore.Abstractions.dll": "24596b62ac0546c641e308a06bb9ea4bb153e9a776ed2311e730832465f34f5d",
+          "Microsoft.EntityFrameworkCore.Relational.dll": "078ad42527c893d858e1c48b7edc5a0ec755c60b28395e996bc438ede3555cf0",
+          "Microsoft.EntityFrameworkCore.dll": "87faf0bf54de5f62c7d30eb686018b11c53d4acf6c280adb39965b303c5b2b59",
+          "NetTopologySuite.dll": "98fa6bae8b75b5f9445236679883fa27750d990aec11e985b85b57a30c37a858",
+          "Npgsql.EntityFrameworkCore.PostgreSQL.dll": "94fcf66e8e953fdb02c40c72ca89821dd5eed5324d4c0f12a7219ea8cd3d5a5e",
+          "Npgsql.dll": "e2bcafe1660fe4543fe9dfcabed972ec8d32259e5ea8009462ce1de23c7034c2",
+          "SQLitePCLRaw.batteries_v2.dll": "1ee3c6ff4d39171690d6ff6f84b4d876ed038ca28e39bb6e74995f52d2aacf8b",
+          "SQLitePCLRaw.core.dll": "b72c9dfe1479a568d6b84e249eaf949e76c757888f8056fb6ddb9c0480e0dd25",
+          "SQLitePCLRaw.provider.e_sqlite3.dll": "1d4cb69b3aaf6a9cf40dfe179cc16dd678f12bc024b212d4297654e0a29e220d",
+          "LidarRuntime/AeroScience.LidarReader": "8accaf384a16e85a2a98315f9a76b4b7e7b17524af9266766b57db49622d2b7c",
+          "LidarRuntime/LASzip.txt": "959f77033ba56a3b146faf5c02f9162071f2d0bff4b8b6f1c2193a4b41127d39",
+          "LidarRuntime/NOTICE.md": "9ee8a7c25b3dffdf8fd54b42b90d3aeef240989d92eb8c4d3f6e214bc975b1ee"
+        },
+        "scope": "Development TestHost build; not the sealed owner Windows package",
+        "harness_sha256": "6e38395029da9097b47fa9e6c786f1ff6f73cecac955c6a465ad59a4cf76954c"
+      },
+      "inputs": [
+        {
+          "id": "usgs-composite-32",
+          "kind": "dem",
+          "provider_project": "USGS 3DEP delivered numeric composite export",
+          "source_date_utc": null,
+          "horizontal_crs": "EPSG:4326",
+          "vertical_datum": null,
+          "units": "m (delivered service)",
+          "native_shape_or_count": [
+            32,
+            32
+          ],
+          "attributes": [
+            "elevation Float32",
+            "no guessed source survey date or native resolution"
+          ],
+          "license_access": "US Government public data; retained request/service metadata",
+          "retained_authorization": "Retained by approved P05b; offline reuse only",
+          "expected_sha256": "4c043d10024c8af4077c45d9ed6778141ccaf0837298ea8a521c9f832ce9a7f0",
+          "bytes": 66342,
+          "sha256": "4c043d10024c8af4077c45d9ed6778141ccaf0837298ea8a521c9f832ce9a7f0"
+        },
+        {
+          "id": "ia-root",
+          "kind": "ept-node",
+          "provider_project": "USGS IA_FullState delivered EPT 0-0-0-0",
+          "source_date_utc": null,
+          "horizontal_crs": "EPSG:3857",
+          "vertical_datum": null,
+          "units": null,
+          "native_shape_or_count": 34923,
+          "attributes": [
+            "raw XYZ",
+            "scale/offset",
+            "intensity",
+            "classification",
+            "returns",
+            "flags",
+            "raw GPS bits",
+            "OriginId extra bytes"
+          ],
+          "license_access": "US Government Public Domain; registry.opendata.aws/usgs-lidar",
+          "retained_authorization": "Retained by approved P05c; offline reuse only",
+          "expected_sha256": "68c4b0ed247501a15d020d9a758d0345904f38785235732bd8e3386a3fca71c1",
+          "bytes": 603312,
+          "sha256": "68c4b0ed247501a15d020d9a758d0345904f38785235732bd8e3386a3fca71c1"
+        }
+      ],
+      "selected_input": "ia-root",
+      "outcome": "Passed",
+      "tolerances": {
+        "rawCoordinatesAndAttributes": 0,
+        "geographicDegrees": 1e-10,
+        "scanAngleDegrees": 1e-12,
+        "recordMembershipAndSupport": 0
+      },
+      "reference": {
+        "state": "Passed",
+        "verifiedUtc": "2026-11-15T17:40:27.898503+00:00",
+        "reference": {
+          "laspy": "2.6.1",
+          "lazrs": "0.7.0",
+          "pyproj": "3.7.2",
+          "proj": "9.5.1",
+          "shapely": "2.1.2",
+          "geos": "3.13.1"
+        },
+        "scope": "Genuine historical source points; synthetic archived flight geometry; independent original record/attribute/PROJ/GEOS corridor comparison",
+        "scannedOriginalPoints": 34923,
+        "retainedOriginalPoints": 1,
+        "maximumGeographicDifferenceDegrees": 7.105427357601002e-15,
+        "sources": [
+          {
+            "id": "98fdff8c-8cf9-43ab-a0f3-f6b60f1090ed",
+            "project": "IA_FullState/0-0-0-0",
+            "fileSha256": "68c4b0ed247501a15d020d9a758d0345904f38785235732bd8e3386a3fca71c1",
+            "originalPointCount": 34923,
+            "retainedPoints": 1,
+            "horizontalCrs": "EPSG:3857",
+            "verticalReference": "Unknown (not established by delivered original metadata)",
+            "verticalUnit": "unknown",
+            "acquisitionUtc": null
+          }
+        ],
+        "approvedNetwork": null,
+        "unknowns": [
+          "Original survey date and vertical datum/unit where not established by actual retained metadata",
+          "Original contractor coordinates before Entwine reprojection"
+        ],
+        "notTested": [
+          "Installed Windows/MSFS",
+          "Native COPC spatial index",
+          "Provider-wide coverage or density"
+        ],
+        "originalScienceObservations": 0,
+        "originalScienceProducts": 0
+      },
+      "artifacts": [
+        {
+          "file": "application.log",
+          "bytes": 132,
+          "sha256": "38191583ece4c3467db285cbad3fd859bfc35641d9b77e46824738f80d5b55b5"
+        },
+        {
+          "file": "independent-reference.log",
+          "bytes": 142,
+          "sha256": "d889244c47fea4bc5309c2e52e5bbdb5a62bed9ed14780023d35bf23c3ad79c3"
+        },
+        {
+          "file": "plan.json",
+          "bytes": 5496,
+          "sha256": "e0fba9eedb1f835c46375756318feffa1ba32c4d182fd588a7611238e03d1e8e"
+        },
+        {
+          "file": "probe/ScienceLibrary/.science-storage.json",
+          "bytes": 111,
+          "sha256": "39831a572f59098da8e21999d31dfae58cd5de3cbcd6a13f2c58f18af5a1dccf"
+        },
+        {
+          "file": "probe/ScienceLibrary/Metadata/Backups/AeroScience-science-20261115-174023-4d69691201b749b99efd7b429bf39822.sqlite",
+          "bytes": 45056,
+          "sha256": "c328f22a97748d77c1d38be49564b44f0b1eec4542aa1beba5d7f87f2a6a73ca"
+        },
+        {
+          "file": "probe/ScienceLibrary/Metadata/Backups/AeroScience-science-20261115-174023-4d69691201b749b99efd7b429bf39822.sqlite.partial-shm",
+          "bytes": 32768,
+          "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb"
+        },
+        {
+          "file": "probe/ScienceLibrary/Metadata/Backups/AeroScience-science-20261115-174023-4d69691201b749b99efd7b429bf39822.sqlite.partial-wal",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "file": "probe/ScienceLibrary/Metadata/Backups/AeroScience-science-20261115-174023-8e9b8f7db6024f548a9f10e095559fa6.sqlite",
+          "bytes": 86016,
+          "sha256": "2f1a46352f94c13ae8c60ba06473698ea53859ec84251affe53b0277c610d711"
+        },
+        {
+          "file": "probe/ScienceLibrary/Metadata/Backups/AeroScience-science-20261115-174023-8e9b8f7db6024f548a9f10e095559fa6.sqlite.partial-shm",
+          "bytes": 32768,
+          "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb"
+        },
+        {
+          "file": "probe/ScienceLibrary/Metadata/Backups/AeroScience-science-20261115-174023-8e9b8f7db6024f548a9f10e095559fa6.sqlite.partial-wal",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "file": "probe/ScienceLibrary/Metadata/Backups/AeroScience-science-20261115-174025-dbd5ef6ee8b74001bd517781aa9084b9.sqlite",
+          "bytes": 294912,
+          "sha256": "05dac2d3e6295a9245a98f1d1b19a172742785c9ac6a354d43fbd6fc8cabcf5a"
+        },
+        {
+          "file": "probe/ScienceLibrary/Metadata/Backups/AeroScience-science-20261115-174025-dbd5ef6ee8b74001bd517781aa9084b9.sqlite.partial-shm",
+          "bytes": 32768,
+          "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb"
+        },
+        {
+          "file": "probe/ScienceLibrary/Metadata/Backups/AeroScience-science-20261115-174025-dbd5ef6ee8b74001bd517781aa9084b9.sqlite.partial-wal",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "file": "probe/ScienceLibrary/Observations/science.sqlite",
+          "bytes": 376832,
+          "sha256": "e3368c46a272d9790840ef4a6530f9fe29956d1c02da8dde59d1155db92cf50e"
+        },
+        {
+          "file": "probe/ScienceLibrary/Observations/science.sqlite-shm",
+          "bytes": 32768,
+          "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb"
+        },
+        {
+          "file": "probe/ScienceLibrary/Observations/science.sqlite-wal",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/9b4bee0599734c74aa18d6f8e47064e7/Derived/06d6585e742e4f4aba2f5aa2c38f2763.json",
+          "bytes": 5929,
+          "sha256": "038c0c431f995b12fcd5c457ecb42bba9f8385d78f82d15a7eba74f427fd0bc7"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/9b4bee0599734c74aa18d6f8e47064e7/Derived/0fe550d7a8eb4ded85aba358a69cec8e.json",
+          "bytes": 5930,
+          "sha256": "0bb80893aca4842d034b6802294c9dd41b5a4750a2ca9760e328cc174ce7d95d"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/9b4bee0599734c74aa18d6f8e47064e7/Derived/1a7608b74d454238946126796b4283d7.json",
+          "bytes": 5930,
+          "sha256": "a0c99fc83a6fd003007da087c6a9e552db71d10d21387985f2cfa8fbc2aa1aef"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/9b4bee0599734c74aa18d6f8e47064e7/Derived/24eb12c9919047b789592a9218b24c29.json",
+          "bytes": 5929,
+          "sha256": "c37b3b9004e3688a63812ac568f28c1a1fa24c665df8ae554a378fcd5a644c46"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/9b4bee0599734c74aa18d6f8e47064e7/Derived/36a2f6046dea4a4d8e72c1e98c362fb8.json",
+          "bytes": 8369,
+          "sha256": "9a27759b5d3fd694a138e68568fe764fdbb66e96a55f4f9273aca462382a639c"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/9b4bee0599734c74aa18d6f8e47064e7/Derived/3eb6211780174c33bd4d3a5f316985b7.json",
+          "bytes": 5930,
+          "sha256": "e6bf0d17a8bacf809f9e58051a083fd9f1c89846d9d5ab7e80d9ca52bfc933f4"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/9b4bee0599734c74aa18d6f8e47064e7/Derived/44ec01bd949a4985b434ff3435ff5c6d.json",
+          "bytes": 5930,
+          "sha256": "867b94b765451a78c4177ef4ba2d7eafb32fc52bc0432ab2576739c3bfd02dda"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/9b4bee0599734c74aa18d6f8e47064e7/Derived/4ab810b55de744ac88a09767a833b381.json",
+          "bytes": 5929,
+          "sha256": "b1d176a9659fa78b05b565d77991466c4b144665fdd60def42266025109d05d4"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/9b4bee0599734c74aa18d6f8e47064e7/Derived/5ea9b94009ce49c7a15d1da96b348b58.json",
+          "bytes": 5930,
+          "sha256": "368c4d9869d3129dc225fa7ffce46d8fa5eba483be41647c890da9d4e1328bab"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/9b4bee0599734c74aa18d6f8e47064e7/Derived/60ecae3ab236466086668f4777234bfb.json",
+          "bytes": 6704,
+          "sha256": "3cac18a1ff3229c0f9d664731743abca5fd39022167d89f0b1a6c13016cf4261"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/9b4bee0599734c74aa18d6f8e47064e7/Derived/6ad542aa5b1f490e948bd0072d92e8ee.json",
+          "bytes": 5929,
+          "sha256": "889aae11c861c68084b011d71f49763dbe66254423106aab3bca5f407c9f37b8"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/9b4bee0599734c74aa18d6f8e47064e7/Derived/6faaf5d9ebd24eef82ce049b18c53598.json",
+          "bytes": 5930,
+          "sha256": "f30548b3b60455216a932754fe532158a2d7e3812ae02eda016433c7482debdc"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/9b4bee0599734c74aa18d6f8e47064e7/Derived/7ee8ae869ba046b7893b0af6e111003b.json",
+          "bytes": 5930,
+          "sha256": "36539367b1ffa0e4b1242670a8d4bcc0ae7cd13dc210445aba39c7dcdf14cc3d"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/9b4bee0599734c74aa18d6f8e47064e7/Derived/8fe984915efe4292983a33e2f81ebad2.json",
+          "bytes": 5930,
+          "sha256": "e472faae016933a8a08378bb668745c055ac8786aa0ad44b293435858ccb77df"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/9b4bee0599734c74aa18d6f8e47064e7/Derived/9a6af74ec8294ed089c8112b99311784.json",
+          "bytes": 5929,
+          "sha256": "a4388c8b6e26ee1292842e7f173a4b28c79c4ec10823e155f4b5f6da6b1857a6"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/9b4bee0599734c74aa18d6f8e47064e7/Derived/af9f670d7afd45c888ee30c089e243fc.json",
+          "bytes": 5930,
+          "sha256": "c0bffc6cc66a15c28c074fca4eaeb02b0ac3a6d8f6623b12c5a9afdac5726ea5"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/9b4bee0599734c74aa18d6f8e47064e7/Derived/ba923de01f594cf68a314cf92f088070.json",
+          "bytes": 10238,
+          "sha256": "1783c8aa869ca33ff5d454286893ce16ae6f5ab826bd2b9a6fbd298c417cc99a"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/9b4bee0599734c74aa18d6f8e47064e7/Derived/baf6a15906e9491d99737eeed2d5ca2d.json",
+          "bytes": 5930,
+          "sha256": "36504042e904eba55fcbf47c04b6777c08adca168c4d3725b38d2de5aa644475"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/9b4bee0599734c74aa18d6f8e47064e7/Derived/bf00924d51d947149e60839a0315e087.json",
+          "bytes": 5930,
+          "sha256": "2f6bb9cc0d32a4a8b72f250f9f900c65a8bc055d45d062fda3470643a6e83476"
+        },
+        {
+          "file": "probe/ScienceLibrary/Products/9b4bee0599734c74aa18d6f8e47064e7/Derived/e2d38b1a482940f0a0aa84434c295d2c.json",
+          "bytes": 5930,
+          "sha256": "a2b48d8ce87a7b21d3e0f1ded9e1c6eb230b4161d4d56eb96a21a5e273f664db"
+        },
+        {
+          "file": "probe/ScienceLibrary/Sources/98fdff8c8cf943aba0f3f6b60f1090ed/ia-fullstate-root.laz",
+          "bytes": 603312,
+          "sha256": "68c4b0ed247501a15d020d9a758d0345904f38785235732bd8e3386a3fca71c1"
+        },
+        {
+          "file": "probe/ScienceLibrary/Sources/98fdff8c8cf943aba0f3f6b60f1090ed/source.json",
+          "bytes": 5094,
+          "sha256": "58243ecb89ab415bbb5dd9b6dd26c4f273e618f7fb64be3432b4a3aa455d3784"
+        },
+        {
+          "file": "probe/ScienceLibrary/engine.lock",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "file": "probe/ScienceLibrary/library.json",
+          "bytes": 70,
+          "sha256": "12ddb50f0e48ce2ec956b030de7a7148aa3039961bd2c8aa5c77d3e95c37dad8"
+        },
+        {
+          "file": "probe/engine.lock",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "file": "probe/geometry.json",
+          "bytes": 10238,
+          "sha256": "1783c8aa869ca33ff5d454286893ce16ae6f5ab826bd2b9a6fbd298c417cc99a"
+        },
+        {
+          "file": "probe/independent-comparison.json",
+          "bytes": 1381,
+          "sha256": "572e49f359cc08d0decb85a086e7e3dd2c77b4987d913aeb10e7b3aeba79beba"
+        },
+        {
+          "file": "probe/index-cc7a0ce4205e47f780f0c91ac69cf8bc.json",
+          "bytes": 8369,
+          "sha256": "9a27759b5d3fd694a138e68568fe764fdbb66e96a55f4f9273aca462382a639c"
+        },
+        {
+          "file": "probe/missions.db",
+          "bytes": 434176,
+          "sha256": "a63e0bbfdee1df02f8ddcdccaff8c4a9a3b45795d669c9636659819a8200da41"
+        },
+        {
+          "file": "probe/missions.db-shm",
+          "bytes": 32768,
+          "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb"
+        },
+        {
+          "file": "probe/missions.db-wal",
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "file": "probe/probe.json",
+          "bytes": 2306,
+          "sha256": "f1b71c737d452ab1a7c5fee372ed854371999950bf4fa1f08095e231490799ab"
+        },
+        {
+          "file": "probe/settings.json",
+          "bytes": 359,
+          "sha256": "26bcf9603729797dad47aedd097a9384b31291f6a88776ee3b7eea86b1dc10c2"
+        },
+        {
+          "file": "probe/sources.json",
+          "bytes": 5096,
+          "sha256": "f84dd8f5f89ffdcd5d01f453e0c2099e43016b96518983c5a21022db9a081aa8"
+        },
+        {
+          "file": "probe/tiles/06d6585e742e4f4aba2f5aa2c38f2763.json",
+          "bytes": 5929,
+          "sha256": "038c0c431f995b12fcd5c457ecb42bba9f8385d78f82d15a7eba74f427fd0bc7"
+        },
+        {
+          "file": "probe/tiles/0fe550d7a8eb4ded85aba358a69cec8e.json",
+          "bytes": 5930,
+          "sha256": "0bb80893aca4842d034b6802294c9dd41b5a4750a2ca9760e328cc174ce7d95d"
+        },
+        {
+          "file": "probe/tiles/1a7608b74d454238946126796b4283d7.json",
+          "bytes": 5930,
+          "sha256": "a0c99fc83a6fd003007da087c6a9e552db71d10d21387985f2cfa8fbc2aa1aef"
+        },
+        {
+          "file": "probe/tiles/24eb12c9919047b789592a9218b24c29.json",
+          "bytes": 5929,
+          "sha256": "c37b3b9004e3688a63812ac568f28c1a1fa24c665df8ae554a378fcd5a644c46"
+        },
+        {
+          "file": "probe/tiles/3eb6211780174c33bd4d3a5f316985b7.json",
+          "bytes": 5930,
+          "sha256": "e6bf0d17a8bacf809f9e58051a083fd9f1c89846d9d5ab7e80d9ca52bfc933f4"
+        },
+        {
+          "file": "probe/tiles/44ec01bd949a4985b434ff3435ff5c6d.json",
+          "bytes": 5930,
+          "sha256": "867b94b765451a78c4177ef4ba2d7eafb32fc52bc0432ab2576739c3bfd02dda"
+        },
+        {
+          "file": "probe/tiles/4ab810b55de744ac88a09767a833b381.json",
+          "bytes": 5929,
+          "sha256": "b1d176a9659fa78b05b565d77991466c4b144665fdd60def42266025109d05d4"
+        },
+        {
+          "file": "probe/tiles/5ea9b94009ce49c7a15d1da96b348b58.json",
+          "bytes": 5930,
+          "sha256": "368c4d9869d3129dc225fa7ffce46d8fa5eba483be41647c890da9d4e1328bab"
+        },
+        {
+          "file": "probe/tiles/60ecae3ab236466086668f4777234bfb.json",
+          "bytes": 6704,
+          "sha256": "3cac18a1ff3229c0f9d664731743abca5fd39022167d89f0b1a6c13016cf4261"
+        },
+        {
+          "file": "probe/tiles/6ad542aa5b1f490e948bd0072d92e8ee.json",
+          "bytes": 5929,
+          "sha256": "889aae11c861c68084b011d71f49763dbe66254423106aab3bca5f407c9f37b8"
+        },
+        {
+          "file": "probe/tiles/6faaf5d9ebd24eef82ce049b18c53598.json",
+          "bytes": 5930,
+          "sha256": "f30548b3b60455216a932754fe532158a2d7e3812ae02eda016433c7482debdc"
+        },
+        {
+          "file": "probe/tiles/7ee8ae869ba046b7893b0af6e111003b.json",
+          "bytes": 5930,
+          "sha256": "36539367b1ffa0e4b1242670a8d4bcc0ae7cd13dc210445aba39c7dcdf14cc3d"
+        },
+        {
+          "file": "probe/tiles/8fe984915efe4292983a33e2f81ebad2.json",
+          "bytes": 5930,
+          "sha256": "e472faae016933a8a08378bb668745c055ac8786aa0ad44b293435858ccb77df"
+        },
+        {
+          "file": "probe/tiles/9a6af74ec8294ed089c8112b99311784.json",
+          "bytes": 5929,
+          "sha256": "a4388c8b6e26ee1292842e7f173a4b28c79c4ec10823e155f4b5f6da6b1857a6"
+        },
+        {
+          "file": "probe/tiles/af9f670d7afd45c888ee30c089e243fc.json",
+          "bytes": 5930,
+          "sha256": "c0bffc6cc66a15c28c074fca4eaeb02b0ac3a6d8f6623b12c5a9afdac5726ea5"
+        },
+        {
+          "file": "probe/tiles/baf6a15906e9491d99737eeed2d5ca2d.json",
+          "bytes": 5930,
+          "sha256": "36504042e904eba55fcbf47c04b6777c08adca168c4d3725b38d2de5aa644475"
+        },
+        {
+          "file": "probe/tiles/bf00924d51d947149e60839a0315e087.json",
+          "bytes": 5930,
+          "sha256": "2f6bb9cc0d32a4a8b72f250f9f900c65a8bc055d45d062fda3470643a6e83476"
+        },
+        {
+          "file": "probe/tiles/e2d38b1a482940f0a0aa84434c295d2c.json",
+          "bytes": 5930,
+          "sha256": "a2b48d8ce87a7b21d3e0f1ded9e1c6eb230b4161d4d56eb96a21a5e273f664db"
+        }
+      ]
+    }
+  ],
+  "targeted_dotnet": {
+    "counters": {
+      "total": "127",
+      "executed": "127",
+      "passed": "127",
+      "failed": "0",
+      "error": "0",
+      "timeout": "0",
+      "aborted": "0",
+      "inconclusive": "0",
+      "passedButRunAborted": "0",
+      "notRunnable": "0",
+      "notExecuted": "0",
+      "disconnected": "0",
+      "warning": "0",
+      "completed": "0",
+      "inProgress": "0",
+      "pending": "0"
+    },
+    "trx_sha256": "8144589754d97c6a9357923a0ef356672df77a7acfad9789af416f151d0f1bb5"
+  },
+  "python_tool_tests": {
+    "passed": 11,
+    "synthetic_unit_records_not_scientific_acceptance": true
+  },
+  "failed_attempts": [
+    {
+      "log": "artifacts/p08c/dotnet-scientific.log",
+      "sha256": "57d67d21b201f9b4849c927492a03611c04c2f28b6b27f33cc7a7324f0fd1ebc",
+      "reason": "MSBuild parallel worker named-pipe permission denied; successful single-node permitted-network retry retained original assertions"
+    }
+  ],
+  "installed_endurance": "Not Tested",
+  "large_workloads": "Blocked: no selected genuine large inputs",
+  "genuine_copernicus_dsm": "Not Tested",
+  "satellite_nasa_acceptance": "Not Tested in P08c",
+  "owner_p08b_events": "Unchanged"
+}
