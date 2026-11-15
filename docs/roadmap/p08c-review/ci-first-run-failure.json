@@ -40,5 +40,37 @@
     "original_unregistered_workflow_source": "0f5d6a52923390bc4542469d33d8aecb191da296",
     "error": "GitHub HTTP 404 for newly added branch-only workflow; no run/jobs created",
     "resolution": "Reuse existing registered ci.yml manual windows-profile entry, with conditional P08c jobs; protected main untouched"
-  }
+  },
+  "artifacts": [
+    {
+      "id": 14174323074,
+      "name": "p08c-organization-integrity",
+      "digest": "sha256:f36622194297d479d6b8542e2ad4e439e446b502835429f99652ad0f50fce19f",
+      "size": 5886,
+      "source_commit": "e89b6aa6cafbc76dde0070a87f47bb5dedbe6c50"
+    },
+    {
+      "id": 14174273101,
+      "name": "p08c-tools-windows-latest",
+      "digest": "sha256:8fe1e3da2cdee50e82dcd9dd12a35cc08176cea282b63ec6b243a9b5e8e3c44c",
+      "size": 1795,
+      "source_commit": "e89b6aa6cafbc76dde0070a87f47bb5dedbe6c50"
+    },
+    {
+      "id": 14174088872,
+      "name": "windows-profile-diagnostics",
+      "digest": "sha256:d4009f02cbc7117a7a37cc0a1cbfbdb9054f3ad9710ed8d53cf6f2fb257ebb77",
+      "size": 35761,
+      "source_commit": "e89b6aa6cafbc76dde0070a87f47bb5dedbe6c50"
+    },
+    {
+      "id": 14174007282,
+      "name": "p08c-tools-ubuntu-24.04",
+      "digest": "sha256:ba6b53ee5ffe29e76a1b02a1ea01fc81938600471816938baf8fe629ad00b72a",
+      "size": 3024,
+      "source_commit": "e89b6aa6cafbc76dde0070a87f47bb5dedbe6c50"
+    }
+  ],
+  "run_conclusion": "failure",
+  "original_windows_profile": "Passed: 142 tests, both publication graphs and original checklist/native compiler checks"
 }

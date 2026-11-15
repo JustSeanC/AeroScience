@@ -1,0 +1,252 @@
+{
+  "schema": "aeroscience-p08c-focused-ci-1",
+  "source_commit": "bfedcbb8b739c8af7774c463d11ff0f9298ae371",
+  "run_id": 43746786812,
+  "url": "https://github.com/JustSeanC/AeroScience/actions/runs/43746786812",
+  "scope": "Manual windows-profile with P08c Linux/Windows tools and isolated PostgreSQL integrity; not Full CI",
+  "conclusion": "success",
+  "jobs": {
+    "validation-scope": 132911741977,
+    "windows-profile": 132911793506,
+    "p08c-tools-linux": 132911793511,
+    "p08c-tools-windows": 132911793484,
+    "p08c-organization-integrity": 132911793479
+  },
+  "artifacts": [
+    {
+      "id": 14174897236,
+      "name": "p08c-tools-ubuntu-24.04",
+      "digest": "sha256:99fd47f527b75e5444cd5c1aba3c1e3511d525ae8daea88d085a8f4272800390",
+      "source_commit": "bfedcbb8b739c8af7774c463d11ff0f9298ae371",
+      "local_archive": "artifacts/p08c/ci-downloads/p08c-ci2-14174897236.zip",
+      "entries": [
+        {
+          "file": "artifacts/p08c-ci/p08b-checklist.log",
+          "sha256": "2413e9fd22dc71410be7dcfecff740a224c78912ca3834d4e82cbece07fca147",
+          "bytes": 2692,
+          "test_summary": [
+            "test_actual_windows_form_has_named_checks_dropdowns_notes_and_explicit_pass_confirmation (test_checklist_080.ChecklistTests.test_actual_windows_form_has_named_checks_dropdowns_notes_and_explicit_pass_confirmation) ... skipped 'Native WinForms control smoke runs on Windows CI; installed visual/MSFS acceptance remains separate.'",
+            "Ran 15 tests in 0.256s",
+            "OK (skipped=1)"
+          ]
+        },
+        {
+          "file": "artifacts/p08c-ci/tools.log",
+          "sha256": "b3c6f57e791166be173c813bb37acc2ec7f1d662a4be1bd019db5fba59a5d447",
+          "bytes": 5963,
+          "test_summary": [
+            "test_actual_windows_controls_reuse_existing_layout_and_separate_evidence (test_p08c_checklist.ChecklistTests.test_actual_windows_controls_reuse_existing_layout_and_separate_evidence) ... skipped 'Actual native controls require Windows; installed acceptance remains separate'",
+            "test_output_budget_failure_does_not_claim_success (test_p08c_resources.ResourceTests.test_output_budget_failure_does_not_claim_success) ... skipped 'Actual sampler requires already installed psutil; no installation authorized'",
+            "test_real_owned_process_measurement_and_explicit_timeout_keep_metrics (test_p08c_resources.ResourceTests.test_real_owned_process_measurement_and_explicit_timeout_keep_metrics) ... skipped 'Actual sampler requires already installed psutil; no installation authorized'",
+            "test_unavailable_disk_counters_remain_unknown_not_zero (test_p08c_resources.ResourceTests.test_unavailable_disk_counters_remain_unknown_not_zero) ... skipped 'Requires already installed sampler'",
+            "Ran 33 tests in 1.718s",
+            "OK (skipped=4)"
+          ]
+        },
+        {
+          "file": "artifacts/p08c-ci/p08b-verifier.log",
+          "sha256": "71ef191407ade204a590ba1fa03404919a296884e1795fa928c1e5d547ee6dd2",
+          "bytes": 3546,
+          "test_summary": [
+            "Ran 17 tests in 5.954s",
+            "OK"
+          ]
+        },
+        {
+          "file": "tests/AeroScience.Tests/TestResults/p08c-integrity.trx",
+          "sha256": "79d478dc2f6731f4b978193556ffd4a7f0bf2eb8a87e1e47ba82b8db8dbe6386",
+          "bytes": 278350,
+          "counters": {
+            "total": "186",
+            "executed": "186",
+            "passed": "186",
+            "failed": "0",
+            "error": "0",
+            "timeout": "0",
+            "aborted": "0",
+            "inconclusive": "0",
+            "passedButRunAborted": "0",
+            "notRunnable": "0",
+            "notExecuted": "0",
+            "disconnected": "0",
+            "warning": "0",
+            "completed": "0",
+            "inProgress": "0",
+            "pending": "0"
+          }
+        }
+      ]
+    },
+    {
+      "id": 14174692694,
+      "name": "p08c-tools-windows-latest",
+      "digest": "sha256:c3af1c62dd66b21bc8f8c4e532ef8e1253ef8e43bf4864243ecf4ef97ef4b235",
+      "source_commit": "bfedcbb8b739c8af7774c463d11ff0f9298ae371",
+      "local_archive": "artifacts/p08c/ci-downloads/p08c-ci2-14174692694.zip",
+      "entries": [
+        {
+          "file": "artifacts/p08c-ci/p08b-checklist.log",
+          "sha256": "d49955d3607b2f1a1ef66acd47fa3d344eee3c0ec7c7487044580874de7975a0",
+          "bytes": 2592,
+          "test_summary": [
+            "Ran 15 tests in 1.417s",
+            "OK"
+          ]
+        },
+        {
+          "file": "artifacts/p08c-ci/tools.log",
+          "sha256": "a1e2ebe638a78438161756431b9a96061414556a88ab038859e8296e7821620b",
+          "bytes": 6010,
+          "test_summary": [
+            "test_output_budget_failure_does_not_claim_success (test_p08c_resources.ResourceTests.test_output_budget_failure_does_not_claim_success) ... skipped 'Actual sampler requires already installed psutil; no installation authorized'",
+            "test_real_owned_process_measurement_and_explicit_timeout_keep_metrics (test_p08c_resources.ResourceTests.test_real_owned_process_measurement_and_explicit_timeout_keep_metrics) ... skipped 'Actual sampler requires already installed psutil; no installation authorized'",
+            "test_unavailable_disk_counters_remain_unknown_not_zero (test_p08c_resources.ResourceTests.test_unavailable_disk_counters_remain_unknown_not_zero) ... skipped 'Requires already installed sampler'",
+            "test_evidence_symlinks_are_refused (test_p08c_validation.EvidenceTests.test_evidence_symlinks_are_refused) ... skipped 'Symlink creation requires a separate Windows privilege'",
+            "Ran 33 tests in 3.789s",
+            "OK (skipped=4)"
+          ]
+        },
+        {
+          "file": "artifacts/p08c-ci/p08b-verifier.log",
+          "sha256": "7035fcff5e5e36f6294f1857ea749cab7bbe79c5273047c8b6d53e6b48cebd16",
+          "bytes": 3568,
+          "test_summary": [
+            "Ran 17 tests in 8.396s",
+            "OK"
+          ]
+        },
+        {
+          "file": "tests/AeroScience.Tests/TestResults/p08c-integrity.trx",
+          "sha256": "b8854514503967139d8bc0572b893bc679b3a01c3d6563c428b957473ef1bd55",
+          "bytes": 275549,
+          "counters": {
+            "total": "186",
+            "executed": "186",
+            "passed": "186",
+            "failed": "0",
+            "error": "0",
+            "timeout": "0",
+            "aborted": "0",
+            "inconclusive": "0",
+            "passedButRunAborted": "0",
+            "notRunnable": "0",
+            "notExecuted": "0",
+            "disconnected": "0",
+            "warning": "0",
+            "completed": "0",
+            "inProgress": "0",
+            "pending": "0"
+          }
+        }
+      ]
+    },
+    {
+      "id": 14174587239,
+      "name": "p08c-organization-integrity",
+      "digest": "sha256:0825a844fb889253b1a95a29f2c87f544e6fb8f1d362af5c91188b8a335e91e6",
+      "source_commit": "bfedcbb8b739c8af7774c463d11ff0f9298ae371",
+      "local_archive": "artifacts/p08c/ci-downloads/p08c-ci2-14174587239.zip",
+      "entries": [
+        {
+          "file": "p08c-organization.trx",
+          "sha256": "d1d8d6410fbbedc59bc77353fa35a88c8ab16e6883c3053546a9fab0dcd6bd48",
+          "bytes": 84468,
+          "counters": {
+            "total": "18",
+            "executed": "18",
+            "passed": "18",
+            "failed": "0",
+            "error": "0",
+            "timeout": "0",
+            "aborted": "0",
+            "inconclusive": "0",
+            "passedButRunAborted": "0",
+            "notRunnable": "0",
+            "notExecuted": "0",
+            "disconnected": "0",
+            "warning": "0",
+            "completed": "0",
+            "inProgress": "0",
+            "pending": "0"
+          }
+        }
+      ]
+    },
+    {
+      "id": 14174228084,
+      "name": "windows-profile-diagnostics",
+      "digest": "sha256:56906f29c6e07023165dcc0ad8ee19dc70e1adba62283a264665c120f1521eea",
+      "source_commit": "bfedcbb8b739c8af7774c463d11ff0f9298ae371",
+      "local_archive": "artifacts/p08c/ci-downloads/p08c-ci2-14174228084.zip",
+      "entries": [
+        {
+          "file": "tests/AeroScience.Tests/TestResults/windows-profile.trx",
+          "sha256": "bf291f0bec4a258dd3630b2f1dfbee5c4e0310a81379693c292e0571dfc64c3f",
+          "bytes": 204913,
+          "counters": {
+            "total": "142",
+            "executed": "142",
+            "passed": "142",
+            "failed": "0",
+            "error": "0",
+            "timeout": "0",
+            "aborted": "0",
+            "inconclusive": "0",
+            "passedButRunAborted": "0",
+            "notRunnable": "0",
+            "notExecuted": "0",
+            "disconnected": "0",
+            "warning": "0",
+            "completed": "0",
+            "inProgress": "0",
+            "pending": "0"
+          }
+        },
+        {
+          "file": "src/AeroScience.Missions/obj/native-lidar/Release/build.json",
+          "sha256": "a7d91311351ffcaf4aa362eb0a5031e71e97bff79c0eebfcf8478c5d71b93243",
+          "bytes": 218
+        },
+        {
+          "file": "artifacts/private080-license-copy.log",
+          "sha256": "64749043bfaa6bac8477855417dc2850eaca166a96aa91510019e0c773a5c2d3",
+          "bytes": 332,
+          "test_summary": [
+            "OK"
+          ]
+        },
+        {
+          "file": "artifacts/private080-checklist.log",
+          "sha256": "ed1004d0d650e9c854901008141d45d0a607d31b8373b39f2e775399cbd5a165",
+          "bytes": 2592,
+          "test_summary": [
+            "Ran 15 tests in 2.856s",
+            "OK"
+          ]
+        }
+      ]
+    }
+  ],
+  "full_ci": {
+    "source_commit": "2c6b5454732f06cd60cebb6030605e9c5bc1c9b7",
+    "run_id": 43650825716,
+    "new_full_cycle": false,
+    "reason": "Only development probes/helpers/CI/docs changed; src/native/original recording/science/security implementation unchanged"
+  },
+  "genuine_comparison_source": "e89b6aa6cafbc76dde0070a87f47bb5dedbe6c50",
+  "genuine_source_runtime_and_probe_tree_identical_to_ci_source": true,
+  "native_installed_endurance": "Not Tested",
+  "fluent_human_review": "Pending",
+  "release_approved": false,
+  "preservation": {
+    "baseline": "527c5d7a6534527b0bfb21bd9c1906d7b9c1672e",
+    "main": "9dd2d8cda7ddb6d73414808f75010726871205c2",
+    "develop/v0.7.0": "695a385ec40b177c763ffc0945234a1e2b54b77e",
+    "develop/v0.7.1": "8e972d8e402f165ab9ad7c41dc9e744250f8f52e",
+    "notices": {
+      "THIRD-PARTY-NOTICES.md": "ae01ce20f49b8fffa428c94dc3968a987b1be554ada04d205deaf4af7ec8453e",
+      "licenses/AeroScience.LidarReader.NOTICE.md": "9ee8a7c25b3dffdf8fd54b42b90d3aeef240989d92eb8c4d3f6e214bc975b1ee"
+    },
+    "runtime_toolbar_and_original_p08b_tools_unchanged": true
+  }
+}
