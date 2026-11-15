@@ -379,3 +379,98 @@ jobs:
           path: artifacts/organization-deployment/**
           if-no-files-found: ignore
           retention-days: 7
+  p08c-tools:
+    needs: validation-scope
+    if: needs.validation-scope.outputs.tier == 'windows-profile' && github.ref == 'refs/heads/develop/v0.8.0'
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # Original P08b recipe-preservation tests read their accepted baseline.
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+      - name: Build existing scientific test host from locked dependencies
+        shell: pwsh
+        run: |
+          New-Item artifacts/p08c-ci -ItemType Directory -Force | Out-Null
+          dotnet restore AeroScience.sln --locked-mode
+          if ($LASTEXITCODE -ne 0) { throw 'Locked restore failed.' }
+          dotnet build tests/AeroScience.TestHost -c Release --no-restore --nologo -m:1
+          if ($LASTEXITCODE -ne 0) { throw 'Scientific test-host build failed.' }
+      - name: Test independent evidence guards and both checklist contracts
+        shell: pwsh
+        run: |
+          python -m unittest discover -s tests -p 'test_p08c*.py' -v *> artifacts/p08c-ci/tools.log
+          if ($LASTEXITCODE -ne 0) { Get-Content artifacts/p08c-ci/tools.log; throw 'P08c tool checks failed.' }
+          Get-Content artifacts/p08c-ci/tools.log
+          python -m unittest discover -s tests -p test_checklist_080.py -v *> artifacts/p08c-ci/p08b-checklist.log
+          if ($LASTEXITCODE -ne 0) { Get-Content artifacts/p08c-ci/p08b-checklist.log; throw 'P08b compatibility failed.' }
+          python -m unittest discover -s tests -p test_private_validation_080.py -v *> artifacts/p08c-ci/p08b-verifier.log
+          if ($LASTEXITCODE -ne 0) { Get-Content artifacts/p08c-ci/p08b-verifier.log; throw 'P08b verifier failed.' }
+      - name: Test scientific integrity, source ownership and organization boundaries
+        shell: pwsh
+        run: |
+          dotnet test tests/AeroScience.Tests -c Release --no-restore --nologo -m:1 --filter 'FullyQualifiedName~Lidar|FullyQualifiedName~TerrainElevation|FullyQualifiedName~TerrainSurvey|FullyQualifiedName~SurveyResults|FullyQualifiedName~SourceDeletion|FullyQualifiedName~Collection|FullyQualifiedName~OrganizationIngressTests|FullyQualifiedName~OrganizationLiveContractTests' --logger 'trx;LogFileName=p08c-integrity.trx' --blame-hang-timeout 2m --blame-hang-dump-type none
+          if ($LASTEXITCODE -ne 0) { throw 'Original scientific/security assertions failed.' }
+      - name: Verify locked graphs remain unchanged
+        shell: pwsh
+        run: |
+          git diff --exit-code -- '**/packages.lock.json'
+          if ($LASTEXITCODE -ne 0) { throw 'Locked dependency graph changed.' }
+      - name: Retain focused diagnostics
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: p08c-tools-${{ matrix.os }}
+          path: |
+            artifacts/p08c-ci/**
+            tests/AeroScience.Tests/TestResults/**/*.trx
+          retention-days: 14
+          if-no-files-found: error
+  p08c-organization-integrity:
+    needs: validation-scope
+    if: needs.validation-scope.outputs.tier == 'windows-profile' && github.ref == 'refs/heads/develop/v0.8.0'
+    runs-on: ubuntu-24.04
+    services:
+      organization-postgres:
+        image: postgres:17.6-bookworm@sha256:f3bd19c606e442c3d7bdfa8002e03fe260a1023351e0ea4598032022b68dd6e3
+        env:
+          POSTGRES_USER: aeroscience_test
+          POSTGRES_PASSWORD: p13_disposable_loopback_only
+          POSTGRES_DB: aeroscience_org_tests
+        ports:
+          - 55437:5432
+        options: --health-cmd "pg_isready -U aeroscience_test -d aeroscience_org_tests" --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      AEROSCIENCE_ORG_TEST_DATABASE: Host=127.0.0.1;Port=55437;Database=aeroscience_org_tests;Username=aeroscience_test;Password=p13_disposable_loopback_only
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+      - run: dotnet restore AeroScience.sln --locked-mode
+      - name: Exercise real roles, revocation, evidence and ephemeral live positions
+        run: >-
+          dotnet test tests/AeroScience.Tests -c Release --no-restore --nologo -m:1
+          --filter 'FullyQualifiedName~ManagersCannotPromote|FullyQualifiedName~DeviceApprovalRequiresMatching|FullyQualifiedName~DeviceGrantsRejectAltered|FullyQualifiedName~RoleSuspensionRemoval|FullyQualifiedName~IssuedCredentialsExpire|FullyQualifiedName~LiveSharingIsOffByDefault|FullyQualifiedName~LivePositionsExpire|FullyQualifiedName~LiveStopIsImmediate|FullyQualifiedName~LiveMembershipAndGrantRevocation|FullyQualifiedName~LiveCardIdentity|FullyQualifiedName~LiveConcurrentRetries|FullyQualifiedName~LiveDisconnectedAndExpired|FullyQualifiedName~P06SupportingReferences|FullyQualifiedName~P06LegacyCapability|FullyQualifiedName~P06DeletedSupportingSource|FullyQualifiedName~ReviewerNeedsExplicitCampaignAccess|FullyQualifiedName~PasswordAloneNeverGrantsMfaSession|FullyQualifiedName~ServerProtectionNeverGrantsPasswordOnly'
+          --logger 'trx;LogFileName=p08c-organization.trx' --blame-hang-timeout 2m --blame-hang-dump-type none
+      - name: Require actual PostgreSQL execution, not skipped authorization checks
+        run: |
+          python3 - <<'PY'
+          import xml.etree.ElementTree as E
+          root=E.parse('tests/AeroScience.Tests/TestResults/p08c-organization.trx')
+          counters=root.find('.//{http://microsoft.com/schemas/VisualStudio/TeamTest/2010}Counters').attrib
+          assert int(counters['passed']) >= 18 and int(counters['failed']) == 0 and int(counters['notExecuted']) == 0, counters
+          print(counters)
+          PY
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: p08c-organization-integrity
+          path: tests/AeroScience.Tests/TestResults/**
+          retention-days: 14
