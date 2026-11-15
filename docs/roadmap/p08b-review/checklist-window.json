@@ -22,13 +22,255 @@
       "path": "artifacts/p08b-checklist/targeted-combined.log",
       "bytes": 9607,
       "sha256": "20b4a8b8dba5a814e2af068ad668d690b12309d4e2bec75b6b6d48dcc4f0e50c"
+    },
+    {
+      "path": "artifacts/p08b-checklist/windows.log",
+      "bytes": 38868,
+      "sha256": "eb6d6ad69d4988680c51f5f62435e6e94b477df9a503170d84602cdb3914a1e9"
+    },
+    {
+      "path": "artifacts/p08b-checklist/windows-inventory.json",
+      "bytes": 1455,
+      "sha256": "b9b9cc4195bc7c8e4c37935898be49d5b8090661e313d9f86a22599bc9fe51d9"
+    },
+    {
+      "path": "artifacts/p08b-checklist/windows-summary.json",
+      "bytes": 678,
+      "sha256": "019014fe9bae3e4fcdf0a781021096bd5a7ad3c2f7d8bd61f334ce95ceb0b91b"
+    },
+    {
+      "path": "artifacts/p08b-checklist/run.json",
+      "bytes": 326,
+      "sha256": "aff6e0b932e05aa8a56f4482fd1463b95948546d72409cd8d37b3a982eee3c44"
+    },
+    {
+      "path": "artifacts/p08b-checklist/jobs.json",
+      "bytes": 2715,
+      "sha256": "79c855c7f7d576ba2e80fed5baf48fd524cfa4c10c124e6a192de0032e0bd9df"
     }
   ],
-  "windows_focused_ci": "Pending on exact checklist tool source.",
+  "windows_focused_ci": {
+    "run": {
+      "conclusion": "success",
+      "createdAt": "2026-11-15T15:25:36Z",
+      "databaseId": 43729810625,
+      "event": "workflow_dispatch",
+      "headBranch": "develop/v0.8.0",
+      "headSha": "aead10258e0a757b563b4d4dc9dfd17b7e61d72b",
+      "status": "completed",
+      "updatedAt": "2026-11-15T15:30:44Z",
+      "url": "https://github.com/JustSeanC/AeroScience/actions/runs/43729810625"
+    },
+    "scope": "Focused Windows diagnostic scope; standalone checklist controls/data flow and existing native/profile/publication regressions, not new Full CI or installed owner visual acceptance.",
+    "checklist": {
+      "run": 15,
+      "passed": 15,
+      "failed": 0,
+      "skipped": 0,
+      "native_control_smoke": true
+    },
+    "native_profile_dotnet": [
+      {
+        "path": "tests/AeroScience.Tests/TestResults/windows-profile.trx",
+        "counters": {
+          "total": "142",
+          "executed": "142",
+          "passed": "142",
+          "failed": "0",
+          "error": "0",
+          "timeout": "0",
+          "aborted": "0",
+          "inconclusive": "0",
+          "passedButRunAborted": "0",
+          "notRunnable": "0",
+          "notExecuted": "0",
+          "disconnected": "0",
+          "warning": "0",
+          "completed": "0",
+          "inProgress": "0",
+          "pending": "0"
+        },
+        "otherOutcomes": []
+      }
+    ],
+    "existing_compiler_license_publication_checks": "Passed",
+    "artifact": {
+      "id": 14167659114,
+      "bytes": 35590,
+      "sha256": "ff3403a25d3c59712d26067fb47a39a860723e3f6f6c381d3d15444f6281a2b7"
+    },
+    "jobs": [
+      {
+        "id": 132859555480,
+        "name": "validation-scope",
+        "status": "completed",
+        "conclusion": "success",
+        "run_id": 43729810625,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@v7",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run python3 scripts/build/development_validation.py tier",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Post Run actions/checkout@v7",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          }
+        ]
+      },
+      {
+        "id": 132859610567,
+        "name": "windows-profile",
+        "status": "completed",
+        "conclusion": "success",
+        "run_id": 43729810625,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@v7",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run actions/setup-dotnet@v6",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Execute native compiler bootstrap regression on Windows",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Verify private 0.8 license merging against existing publish output",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Verify guided private checklist and actual Windows controls",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Test profile isolation, toolbar installation, HDF and genuine LiDAR decoder contracts",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Publish production and isolated validation graphs (not distributable)",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Verify dependency locks remain unchanged",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          },
+          {
+            "name": "Retain focused Windows diagnostics",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10
+          },
+          {
+            "name": "Post Run actions/setup-dotnet@v6",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 19
+          },
+          {
+            "name": "Post Run actions/checkout@v7",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 20
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 21
+          }
+        ]
+      },
+      {
+        "id": 132859611907,
+        "name": "linux",
+        "status": "completed",
+        "conclusion": "skipped",
+        "run_id": 43729810625,
+        "logs_url": null,
+        "steps": null
+      },
+      {
+        "id": 132859612007,
+        "name": "organization-deployment",
+        "status": "completed",
+        "conclusion": "skipped",
+        "run_id": 43729810625,
+        "logs_url": null,
+        "steps": null
+      },
+      {
+        "id": 132859612020,
+        "name": "development",
+        "status": "completed",
+        "conclusion": "skipped",
+        "run_id": 43729810625,
+        "logs_url": null,
+        "steps": null
+      },
+      {
+        "id": 132859612038,
+        "name": "windows-companion",
+        "status": "completed",
+        "conclusion": "skipped",
+        "run_id": 43729810625,
+        "logs_url": null,
+        "steps": null
+      }
+    ]
+  },
   "installed_owner_gui_visual_acceptance": "Not Tested",
   "installed_msfs_acceptance": "Owner reported working; detailed individual observations remain required.",
   "qualified_translation_review": "Pending",
   "public_release_approved": false,
   "p08c_started": false,
-  "recorded_utc": "2026-11-15T15:25:09.452120+00:00"
+  "recorded_utc": "2026-11-15T15:34:34.998958+00:00",
+  "tools_source_commit": "aead10258e0a757b563b4d4dc9dfd17b7e61d72b"
 }
